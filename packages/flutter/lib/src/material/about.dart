@@ -304,6 +304,9 @@ void showLicensePage({
   ));
 }
 
+/// The amount of vertical space to separate chunks of text.
+const double _textVerticalSeparation = 18;
+
 /// An about box. This is a dialog box with the application's icon, name,
 /// version number, and copyright, plus a button to show licenses for software
 /// used by the application.
@@ -389,7 +392,7 @@ class AboutDialog extends StatelessWidget {
                     children: <Widget>[
                       Text(name, style: Theme.of(context).textTheme.headline5),
                       Text(version, style: Theme.of(context).textTheme.bodyText2),
-                      Container(height: 18.0),
+                      const SizedBox(height: _textVerticalSeparation),
                       Text(applicationLegalese ?? '', style: Theme.of(context).textTheme.caption),
                     ],
                   ),
@@ -558,13 +561,13 @@ class _AboutProgram extends StatelessWidget {
             style: Theme.of(context).textTheme.bodyText2,
             textAlign: TextAlign.center,
           ),
-          Container(height: 18.0),
+          const SizedBox(height: _textVerticalSeparation),
           Text(
             legalese ?? '',
             style: Theme.of(context).textTheme.caption,
             textAlign: TextAlign.center,
           ),
-          Container(height: 18.0),
+          const SizedBox(height: _textVerticalSeparation),
           Text(
             'Powered by Flutter',
             style: Theme.of(context).textTheme.bodyText2,
