@@ -14,8 +14,8 @@ import 'exceptions.dart';
 import 'common.dart';
 import 'utils.dart';
 
-const String _unsupportedConfigurationWarning = 'WARNING: integration '
-    'tests are only supported on Chrome or on Safari (running on MacOS)';
+const String _unsupportedConfigurationWarning = 'WARNING: integration tests '
+    'are only supported on Chrome, Firefox and on Safari (running on macOS)';
 
 class IntegrationTestsManager {
   final String _browser;
@@ -285,9 +285,12 @@ class IntegrationTestsManager {
   /// Validate the given `browser`, `platform` combination is suitable for
   /// integration tests to run.
   bool validateIfTestsShouldRun() {
-    // Chrome tests should run at all Platforms (Linux, MacOS, Windows).
+    // Chrome tests should run at all Platforms (Linux, macOS, Windows).
     // They can also run successfully on CI and local.
     if (_browser == 'chrome') {
+      return true;
+    } else if (_browser == 'firefox' &&
+        (io.Platform.isLinux || io.Platform.isMacOS)) {
       return true;
     } else if (_browser == 'safari' && io.Platform.isMacOS && !isLuci) {
       return true;
@@ -306,6 +309,8 @@ abstract class IntegrationArguments {
   factory IntegrationArguments.fromBrowser(String browser) {
     if (browser == 'chrome') {
       return ChromeIntegrationArguments();
+    } else if (browser == 'firefox') {
+      return FirefoxIntegrationArguments();
     } else if (browser == 'safari' && io.Platform.isMacOS) {
       return SafariIntegrationArguments();
     } else {
@@ -344,6 +349,25 @@ class ChromeIntegrationArguments extends IntegrationArguments {
     }
     return statementToRun;
   }
+}
+
+/// Arguments to give `flutter drive` to run the integration tests on Firefox.
+class FirefoxIntegrationArguments extends IntegrationArguments {
+  List<String> getTestArguments(String testName, String mode) {
+    return <String>[
+      'drive',
+      '--target=test_driver/${testName}',
+      '-d',
+      'web-server',
+      '--$mode',
+      '--browser-name=firefox',
+      '--headless',
+      '--local-engine=host_debug_unopt',
+    ];
+  }
+
+  String getCommandToRun(String testName, String mode) =>
+      'flutter ${getTestArguments(testName, mode).join(' ')}';
 }
 
 /// Arguments to give `flutter drive` to run the integration tests on Safari.
@@ -396,5 +420,13 @@ const Map<String, List<String>> blockedTestsListsMap = <String, List<String>>{
     'target_platform_ios_e2e.dart',
     'target_platform_android_e2e.dart',
     'image_loading_e2e.dart',
+  ],
+  'firefox-linux': [
+    'target_platform_ios_e2e.dart',
+    'target_platform_macos_e2e.dart',
+  ],
+  'firefox-macos': [
+    'target_platform_android_e2e.dart',
+    'target_platform_ios_e2e.dart',
   ],
 };
