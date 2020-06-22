@@ -584,7 +584,8 @@ class IosDeviceDiscovery implements DeviceDiscovery {
       final Map<String, dynamic> device = result as Map<String, dynamic>;
       if (device['targetPlatform'] == 'ios' &&
           device['id'] != null &&
-          device['emulator'] != true) {
+          device['emulator'] != true &&
+          device['isSupported'] == true) {
         deviceIds.add(device['id'] as String);
       }
     }
