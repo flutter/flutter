@@ -253,16 +253,18 @@ class _HourMinuteControl extends StatelessWidget {
     final ThemeData themeData = Theme.of(context);
     final TimePickerThemeData timePickerTheme = TimePickerTheme.of(context);
     final bool isDark = themeData.colorScheme.brightness == Brightness.dark;
-    final Color defaultTextColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
-      return states.contains(MaterialState.selected) ? themeData.colorScheme.primary : themeData.colorScheme.onSurface;
-    });
-    final Color textColor = timePickerTheme.hourMinuteTextColor ?? defaultTextColor;
-    final Color defaultBackgroundColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
-      return states.contains(MaterialState.selected)
-          ? themeData.colorScheme.primary.withOpacity(isDark ? 0.24 : 0.12)
-          : themeData.colorScheme.onSurface.withOpacity(0.12);
-    });
-    final Color backgroundColor = timePickerTheme.hourMinuteColor ?? defaultBackgroundColor;
+    final Color textColor = timePickerTheme.hourMinuteTextColor
+        ?? MaterialStateColor.resolveWith((Set<MaterialState> states) {
+          return states.contains(MaterialState.selected)
+              ? themeData.colorScheme.primary
+              : themeData.colorScheme.onSurface;
+        });
+    final Color backgroundColor = timePickerTheme.hourMinuteColor
+        ?? MaterialStateColor.resolveWith((Set<MaterialState> states) {
+          return states.contains(MaterialState.selected)
+              ? themeData.colorScheme.primary.withOpacity(isDark ? 0.24 : 0.12)
+              : themeData.colorScheme.onSurface.withOpacity(0.12);
+        });
     final TextStyle style = timePickerTheme.hourMinuteTextStyle ?? themeData.textTheme.headline2;
     final ShapeBorder shape = timePickerTheme.hourMinuteShape ?? _kDefaultShape;
 
@@ -506,19 +508,22 @@ class _DayPeriodControl extends StatelessWidget {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final TimePickerThemeData timePickerTheme = TimePickerTheme.of(context);
     final bool isDark = colorScheme.brightness == Brightness.dark;
-    final Color defaultTextColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
-      return states.contains(MaterialState.selected) ? colorScheme.primary : colorScheme.onSurface.withOpacity(0.60);
-    });
-    final Color textColor = timePickerTheme.dayPeriodTextColor ?? defaultTextColor;
-    final Color defaultBackgroundColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
-      // The unselected day period should match the overall picker dialog color.
-      // Making it transparent enables that without being redundant and allows
-      // the optional elevation overlay for dark mode to be visible.
-      return states.contains(MaterialState.selected)
-          ? colorScheme.primary.withOpacity(isDark ? 0.24 : 0.12)
-          : Colors.transparent;
-    });
-    final Color backgroundColor = timePickerTheme.dayPeriodColor ?? defaultBackgroundColor;
+    final Color textColor = timePickerTheme.dayPeriodTextColor
+        ?? MaterialStateColor.resolveWith((Set<MaterialState> states) {
+          return states.contains(MaterialState.selected)
+              ? colorScheme.primary
+              : colorScheme.onSurface.withOpacity(0.60);
+        });
+    final Color backgroundColor = timePickerTheme.dayPeriodColor
+        ?? MaterialStateColor.resolveWith((Set<MaterialState> states) {
+          // The unselected day period should match the overall picker dialog
+          // color. Making it transparent enables that without being redundant
+          // and allows the optional elevation overlay for dark mode to be
+          // visible.
+          return states.contains(MaterialState.selected)
+              ? colorScheme.primary.withOpacity(isDark ? 0.24 : 0.12)
+              : Colors.transparent;
+        });
     final bool amSelected = selectedTime.period == DayPeriod.am;
     final Set<MaterialState> amStates = amSelected ? <MaterialState>{MaterialState.selected} : {};
     final bool pmSelected = !amSelected;
