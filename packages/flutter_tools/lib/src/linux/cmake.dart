@@ -21,6 +21,10 @@ String getCmakeExecutableName(LinuxProject project) {
   return null;
 }
 
+String _escapeBackslashes(String s) {
+  return s.replaceAll(r'\', r'\\');
+}
+
 /// Writes a generated CMake configuration file for [project], including
 /// variables expected by the build template and an environment variable list
 /// for calling back into Flutter.
@@ -29,8 +33,8 @@ void writeGeneratedCmakeConfig(String flutterRoot, CmakeBasedProject project, Ma
   // the rest are put into a list to pass to the re-entrant build step.
   final StringBuffer buffer = StringBuffer('''
 # Generated code do not commit.
-set(FLUTTER_ROOT "$flutterRoot")
-set(PROJECT_DIR "${project.parent.directory.path}")
+set(FLUTTER_ROOT "${_escapeBackslashes(flutterRoot)}")
+set(PROJECT_DIR "${_escapeBackslashes(project.parent.directory.path)}")
 
 # Environment variables to pass to tool_backend.sh
 list(APPEND FLUTTER_TOOL_ENVIRONMENT
@@ -38,7 +42,7 @@ list(APPEND FLUTTER_TOOL_ENVIRONMENT
   "PROJECT_DIR=\\"\${PROJECT_DIR}\\""
 ''');
   for (final String key in environment.keys) {
-    final String value = environment[key];
+    final String value = _escapeBackslashes(environment[key]);
     buffer.writeln('  "$key=\\"$value\\""');
   }
   buffer.writeln(')');

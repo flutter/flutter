@@ -980,7 +980,7 @@ Future<void> _writeWindowsPluginFiles(FlutterProject project, List<Plugin> plugi
   };
   await _writeCppPluginRegistrant(project.windows.managedDirectory, context);
   await _writeWindowsPluginProperties(project.windows, windowsPlugins);
-  await _writePluginCmakefile(project.linux.generatedPluginCmakeFile, context);
+  await _writePluginCmakefile(project.windows.generatedPluginCmakeFile, context);
 }
 
 Future<void> _writeCppPluginRegistrant(Directory destination, Map<String, dynamic> templateContext) async {

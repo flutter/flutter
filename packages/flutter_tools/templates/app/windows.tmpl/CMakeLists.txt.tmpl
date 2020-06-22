@@ -15,6 +15,9 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     "Debug" "Profile" "Release")
 endif()
 
+# Use Unicode for all projects.
+add_definitions(-DUNICODE -D_UNICODE)
+
 # Compilation settings that should be applied to most targets.
 # XXX Needs a final pass to align settings with previous values.
 function(APPLY_STANDARD_SETTINGS TARGET)
@@ -22,6 +25,7 @@ function(APPLY_STANDARD_SETTINGS TARGET)
   target_compile_options(${TARGET} PRIVATE /W4 /WX /wd"4100")
   target_compile_options(${TARGET} PRIVATE /EHsc)
   target_compile_options(${TARGET} PRIVATE "$<$<NOT:$<CONFIG:Debug>>:/O3>")
+  target_compile_definitions(${TARGET} PRIVATE "_HAS_EXCEPTIONS=0")
   target_compile_definitions(${TARGET} PRIVATE "$<$<NOT:$<CONFIG:Debug>>:NDEBUG>")
 endfunction()
 

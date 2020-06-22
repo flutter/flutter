@@ -24,7 +24,7 @@ list(APPEND FLUTTER_LIBRARY_HEADERS
   "flutter_messenger.h"
   "flutter_plugin_registrar.h"
 )
-list(TRANSFORM FLUTER_LIBRARY_HEADERS PREPEND "${EPHEMERAL_DIR}/")
+list(TRANSFORM FLUTTER_LIBRARY_HEADERS PREPEND "${EPHEMERAL_DIR}/")
 add_library(flutter INTERFACE)
 target_include_directories(flutter INTERFACE
   "${EPHEMERAL_DIR}"
@@ -43,8 +43,7 @@ list(APPEND CPP_WRAPPER_SOURCES_PLUGIN
 )
 list(TRANSFORM CPP_WRAPPER_SOURCES_PLUGIN PREPEND "${WRAPPER_ROOT}/")
 list(APPEND CPP_WRAPPER_SOURCES_APP
-  "flutter_engine.cc"
-  "flutter_window_controller.cc"
+  "flutter_view_controller.cc"
 )
 list(TRANSFORM CPP_WRAPPER_SOURCES_APP PREPEND "${WRAPPER_ROOT}/")
 
@@ -87,7 +86,7 @@ add_custom_command(
     ${CMAKE_CURRENT_BINARY_DIR}/_phony_
   COMMAND ${CMAKE_COMMAND} -E env
     ${FLUTTER_TOOL_ENVIRONMENT}
-    "${FLUTTER_ROOT}/packages/flutter_tools/bin/tool_backend.sh"
+    "${FLUTTER_ROOT}/packages/flutter_tools/bin/tool_backend.bat"
       windows-x64 ${CMAKE_BUILD_TYPE}
 )
 add_custom_target(flutter_assemble DEPENDS
