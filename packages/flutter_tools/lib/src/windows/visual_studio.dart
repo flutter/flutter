@@ -283,7 +283,7 @@ class VisualStudio {
         ...defaultArguments,
         ...?additionalArguments,
         ...?requirementArguments,
-      ]);
+      ], encoding: utf8);
       if (whereResult.exitCode == 0) {
         final List<Map<String, dynamic>> installations =
             (json.decode(whereResult.stdout) as List<dynamic>).cast<Map<String, dynamic>>();

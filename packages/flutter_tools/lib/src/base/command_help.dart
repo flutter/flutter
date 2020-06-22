@@ -76,6 +76,13 @@ class CommandHelp {
     'debugProfileWidgetBuilds',
   );
 
+  CommandHelpOption _b;
+  CommandHelpOption get b => _b ??= _makeOption(
+    'b',
+    'Toggle the platform brightness setting (dark and light mode).',
+    'debugBrightnessOverride',
+  );
+
   CommandHelpOption _c;
   CommandHelpOption get c => _c ??= _makeOption(
     'c',
