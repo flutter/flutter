@@ -31,15 +31,17 @@ String _escapeBackslashes(String s) {
 void writeGeneratedCmakeConfig(String flutterRoot, CmakeBasedProject project, Map<String, String> environment) {
   // Only a limited set of variables are needed by the CMake files themselves,
   // the rest are put into a list to pass to the re-entrant build step.
+  final String escapedFlutterRoot = _escapeBackslashes(flutterRoot);
+  final String escapedProjectDir = _escapeBackslashes(project.parent.directory.path);
   final StringBuffer buffer = StringBuffer('''
 # Generated code do not commit.
-set(FLUTTER_ROOT "${_escapeBackslashes(flutterRoot)}")
-set(PROJECT_DIR "${_escapeBackslashes(project.parent.directory.path)}")
+file(TO_CMAKE_PATH "$escapedFlutterRoot" FLUTTER_ROOT)
+file(TO_CMAKE_PATH "$escapedProjectDir" PROJECT_DIR)
 
 # Environment variables to pass to tool_backend.sh
 list(APPEND FLUTTER_TOOL_ENVIRONMENT
-  "FLUTTER_ROOT=\\"\${FLUTTER_ROOT}\\""
-  "PROJECT_DIR=\\"\${PROJECT_DIR}\\""
+  "FLUTTER_ROOT=\\"$escapedFlutterRoot\\""
+  "PROJECT_DIR=\\"$escapedProjectDir\\""
 ''');
   for (final String key in environment.keys) {
     final String value = _escapeBackslashes(environment[key]);

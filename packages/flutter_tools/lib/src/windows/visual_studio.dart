@@ -163,6 +163,26 @@ class VisualStudio {
     );
   }
 
+  /// The path to CMake, or null if no Visual Studio installation has
+  /// the components necessary to build.
+  String get cmakePath {
+    final Map<String, dynamic> details = _usableVisualStudioDetails;
+    if (details.isEmpty) {
+      return null;
+    }
+    return _fileSystem.path.joinAll(<String>[
+      _usableVisualStudioDetails[_installationPathKey] as String,
+      'Common7',
+      'IDE',
+      'CommonExtensions',
+      'Microsoft',
+      'CMake',
+      'CMake',
+      'bin',
+      'cmake.exe',
+    ]);
+  }
+
   /// The major version of the Visual Studio install, as an integer.
   int get _majorVersion => fullVersion != null ? int.tryParse(fullVersion.split('.')[0]) : null;
 

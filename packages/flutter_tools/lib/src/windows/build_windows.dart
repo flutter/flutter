@@ -67,8 +67,11 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
     'vs_build.bat',
   );
 
+  final String buildModeName = getNameForBuildMode(buildInfo.mode ?? BuildMode.release);
   final String configuration = toTitleCase(getNameForBuildMode(buildInfo.mode ?? BuildMode.release));
-  final String solutionPath = windowsProject.solutionFile.path;
+  final Directory buildDirectory = globals.fs.directory(getWindowsBuildDirectory()).childDirectory('cmakeXXX').childDirectory(buildModeName); // XXX
+  //final String solutionPath = windowsProject.solutionFile.path;
+  final String solutionPath = buildDirectory.childFile('cmaketest.sln').path; // XXX Read from cmake.
   final Stopwatch sw = Stopwatch()..start();
   final Status status = globals.logger.startProgress(
     'Building Windows application...',
@@ -76,6 +79,8 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   );
   int result;
   try {
+    await _runCmake(visualStudio.cmakePath, buildModeName, windowsProject.cmakeFile.parent, buildDirectory);
+    // XXX Use cmake --build <dir> instead?
     // Run the script with a relative path to the project using the enclosing
     // directory as the workingDirectory, to avoid hitting the limit on command
     // lengths in batch scripts if the absolute path to the project is long.
@@ -99,7 +104,30 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   if (result != 0) {
     throwToolExit('Build process failed. To view the stack trace, please run `flutter run -d windows -v`.');
   }
+  await _runInstall(visualStudio.cmakePath, buildDirectory);
   globals.flutterUsage.sendTiming('build', 'vs_build', Duration(milliseconds: sw.elapsedMilliseconds));
+}
+
+Future<void> _runInstall(String cmakePath, Directory buildDir) async {
+  final Stopwatch sw = Stopwatch()..start();
+
+  int result;
+  try {
+    result = await processUtils.stream(
+      <String>[
+        cmakePath,
+        '--install',
+        buildDir.path,
+      ],
+      trace: true,
+    );
+  } on ArgumentError {
+    throwToolExit("cmake not found. Run 'flutter doctor' for more information.");
+  }
+  if (result != 0) {
+    throwToolExit('Build process failed');
+  }
+  globals.flutterUsage.sendTiming('build', 'windows-cmake-install', Duration(milliseconds: sw.elapsedMilliseconds));
 }
 
 /// Writes the generatedPropertySheetFile with the configuration for the given build.
@@ -127,6 +155,39 @@ void _writeGeneratedFlutterProperties(
   propsFile.createSync(recursive: true);
   propsFile.writeAsStringSync(PropertySheet(environmentVariables: environment).toString());
   writeGeneratedCmakeConfig(Cache.flutterRoot, windowsProject, environment);
+}
+
+Future<void> _runCmake(String cmakePath, String buildModeName, Directory sourceDir, Directory buildDir) async {
+  final Stopwatch sw = Stopwatch()..start();
+
+  await buildDir.create(recursive: true);
+  final String buildFlag = toTitleCase(buildModeName);
+  int result;
+  try {
+    result = await processUtils.stream(
+      <String>[
+        cmakePath,
+        '-S',
+        sourceDir.path,
+        '-B',
+        buildDir.path,
+        '-G',
+        'Visual Studio 16 2019',
+        '-DCMAKE_BUILD_TYPE=$buildFlag',
+      ],
+      environment: <String, String>{
+        'CC': 'clang',
+        'CXX': 'clang++'
+      },
+      trace: true,
+    );
+  } on ArgumentError {
+    throwToolExit("cmake not found. Run 'flutter doctor' for more information.");
+  }
+  if (result != 0) {
+    throwToolExit('Unable to generate build files');
+  }
+  globals.flutterUsage.sendTiming('build', 'cmake-windows', Duration(milliseconds: sw.elapsedMilliseconds));
 }
 
 // Checks the template version of [project] against the current template
