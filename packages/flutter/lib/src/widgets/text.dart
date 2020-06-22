@@ -393,7 +393,7 @@ class Text extends StatelessWidget {
       'This parameter is a temporary flag to migrate the internal tests and '
       'should not be used in other context. For more details, please check '
       'https://github.com/flutter/flutter/issues/59316.'
-      'This feature was deprecated after v1.19.0'
+      'This feature was deprecated after v1.19.0.'
     )
     bool applyTextScaleFactorToWidgetSpan = false,
   }) : assert(
