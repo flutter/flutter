@@ -563,6 +563,9 @@ class TextPainter {
     }
     _lastMinWidth = minWidth;
     _lastMaxWidth = maxWidth;
+    // A change in layout invalidates the cached caret metrics as well.
+    _previousCaretPosition = null;
+    _previousCaretPrototype = null;
     _paragraph.layout(ui.ParagraphConstraints(width: maxWidth));
     if (minWidth != maxWidth) {
       final double newWidth = maxIntrinsicWidth.clamp(minWidth, maxWidth) as double;
@@ -784,20 +787,18 @@ class TextPainter {
   // get rect calls to the paragraph.
   _CaretMetrics _caretMetrics;
 
-  // Holds the TextPosition and caretPrototype and width of the TextPainter that
-  // the last caret metrics were computed with. When new values are passed in,
-  // we recompute the caret metrics only as necessary.
+  // Holds the TextPosition and caretPrototype the last caret metrics were
+  // computed with. When new values are passed in, we recompute the caret metrics.
+  // only as necessary.
   TextPosition _previousCaretPosition;
   Rect _previousCaretPrototype;
-  double _previousWidth;
 
   // Checks if the [position] and [caretPrototype] have changed from the cached
   // version and recomputes the metrics required to position the caret.
   void _computeCaretMetrics(TextPosition position, Rect caretPrototype) {
     assert(!_needsLayout);
-    if (position == _previousCaretPosition && caretPrototype == _previousCaretPrototype && width == _previousWidth) {
+    if (position == _previousCaretPosition && caretPrototype == _previousCaretPrototype)
       return;
-    }
     final int offset = position.offset;
     assert(position.affinity != null);
     Rect rect;
@@ -819,7 +820,6 @@ class TextPainter {
     // Cache the input parameters to prevent repeat work later.
     _previousCaretPosition = position;
     _previousCaretPrototype = caretPrototype;
-    _previousWidth = width;
   }
 
   /// Returns a list of rects that bound the given selection.
