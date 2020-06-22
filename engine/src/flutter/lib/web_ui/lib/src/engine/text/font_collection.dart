@@ -98,7 +98,7 @@ class FontCollection {
   void clear() {
     _assetFontManager = null;
     _testFontManager = null;
-    if (supportsFontLoadingApi) {
+    if (supportsFontsClearApi) {
       html.document.fonts.clear();
     }
   }
@@ -313,4 +313,5 @@ class _PolyfillFontManager extends FontManager {
   }
 }
 
-final bool supportsFontLoadingApi = html.document.fonts != null;
+final bool supportsFontLoadingApi = js_util.hasProperty(html.window, 'FontFace');
+final bool supportsFontsClearApi = html.document.fonts != null && js_util.hasProperty(html.document.fonts, 'clear');
