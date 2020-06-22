@@ -448,7 +448,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
 
   /// The "zero" form of [licensesPackageDetailText].
   ///
-  /// This form is required.
+  /// This form is optional.
   ///
   /// See also:
   ///
