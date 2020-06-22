@@ -27,7 +27,7 @@ void main() {
   FileSystem fileSystem;
 
   setUp(() async {
-    fileSystem = MemoryFileSystem();
+    fileSystem = MemoryFileSystem.test();
   });
 
   group('AssetBundle.build', () {
