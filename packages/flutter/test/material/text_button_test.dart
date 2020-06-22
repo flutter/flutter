@@ -98,29 +98,6 @@ void main() {
     expect(material.type, MaterialType.button);
   });
 
-  /*
-  testWidgets('TextButton implements debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    TextButton(
-      onPressed: () { },
-      style: TextButton.styleFrom(
-        primary: const Color(0xFF00FF00),
-      ),
-      child: const Text('Hello'),
-    ).debugFillProperties(builder);
-    final List<String> description = builder.properties
-      .where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode n) => n.toString()).toList();
-    expect(description, <String>[
-      'textColor: Color(0xff00ff00)',
-      'disabledTextColor: Color(0xffff0000)',
-      'color: Color(0xff000000)',
-      'highlightColor: Color(0xff1565c0)',
-      'splashColor: Color(0xff9e9e9e)',
-    ]);
-  });
-  */
-
   testWidgets('Default TextButton meets a11y contrast guidelines', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
@@ -542,9 +519,10 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.byType(TextButton)), equals(const Size(71.0, 48.0)));
     // Scaled text rendering is different on Linux and Mac by one pixel.
     // TODO(gspencergoog): Figure out why this is, and fix it. https://github.com/flutter/flutter/issues/12357
+    expect(tester.getSize(find.byType(TextButton)).width, isIn(<double>[70.0, 71.0]));
+    expect(tester.getSize(find.byType(TextButton)).height, isIn(<double>[47.0, 48.0]));
     expect(tester.getSize(find.byType(Text)).width, isIn(<double>[54.0, 55.0]));
     expect(tester.getSize(find.byType(Text)).height, isIn(<double>[18.0, 19.0]));
 
