@@ -503,15 +503,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
     }
     return FlutterCommandResult.success();
   }
-
-  /// Adds a `platform` argument to the command.
-  ///
-  /// The type of the argument is [List]. The valid options are: `ios`, `android`, `windows`, `linux`, `macos`, `web`.
-  ///
-  /// These platforms should indicate what platforms the project will support after running the command.
-  /// The result can be used in generate methods such as [generateApp] and [generatePlugin].
-  ///
-  /// Adding argument is optional if the command does not require the user to explicitly state what platforms the project supports.
+  
   void _addPlatformsOptions() {
     argParser.addMultiOption('platforms',
         help: 'the platforms supported by this project.'

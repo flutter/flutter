@@ -164,7 +164,7 @@ class FlutterManifest {
       return _flutterDescriptor['module']['androidPackage'] as String;
     }
     if (supportedPlatforms == null) {
-      // Legacy format
+      // Pre-multi-platform plugin format
       if (isPlugin) {
         final YamlMap plugin = _flutterDescriptor['plugin'] as YamlMap;
         return plugin['androidPackage'] as String;
