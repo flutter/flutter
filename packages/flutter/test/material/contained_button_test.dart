@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -71,10 +73,10 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.from(colorScheme: colorScheme),
-        home: Center(
+        home: const Center(
           child: ContainedButton(
             onPressed: null,
-            child: const Text('button'),
+            child: Text('button'),
           ),
         ),
       ),
@@ -546,7 +548,7 @@ void main() {
         child: Material(
           child: ContainedButton(
             onPressed: () { /* to make sure the button is enabled */ },
-            child: Text('button'),
+            child: const Text('button'),
           ),
         ),
       ),

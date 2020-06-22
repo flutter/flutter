@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -83,10 +85,10 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.from(colorScheme: colorScheme),
-        home: Center(
+        home: const Center(
           child: OutlinedButton(
             onPressed: null,
-            child: const Text('button'),
+            child: Text('button'),
           ),
         ),
       ),
@@ -468,15 +470,15 @@ void main() {
 
     BorderSide getBorderSide(Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
-        return BorderSide(color: pressedColor, width: 1);
+        return const BorderSide(color: pressedColor, width: 1);
       }
       if (states.contains(MaterialState.hovered)) {
-        return BorderSide(color: hoverColor, width: 1);
+        return const BorderSide(color: hoverColor, width: 1);
       }
       if (states.contains(MaterialState.focused)) {
-        return BorderSide(color: focusedColor, width: 1);
+        return const BorderSide(color: focusedColor, width: 1);
       }
-      return BorderSide(color: defaultColor, width: 1);
+      return const BorderSide(color: defaultColor, width: 1);
     }
 
     await tester.pumpWidget(
@@ -574,7 +576,7 @@ void main() {
         child: Theme(
           data: ThemeData(),
           child: Center(
-            child: OutlinedButton(onPressed: onPressed, child: Text('button')),
+            child: OutlinedButton(onPressed: onPressed, child: const Text('button')),
           ),
         ),
       );
@@ -608,10 +610,10 @@ void main() {
               ).copyWith(
                 side: MaterialStateProperty.resolveWith<BorderSide>((Set<MaterialState> states) {
                   if (states.contains(MaterialState.disabled))
-                    return BorderSide(color: disabledBorderColor, width: borderWidth);
+                    return const BorderSide(color: disabledBorderColor, width: borderWidth);
                   if (states.contains(MaterialState.pressed))
-                    return BorderSide(color: highlightedBorderColor, width: borderWidth);
-                  return BorderSide(color: borderColor, width: borderWidth);
+                    return const BorderSide(color: highlightedBorderColor, width: borderWidth);
+                  return const BorderSide(color: borderColor, width: borderWidth);
                 }),
               ),
               clipBehavior: Clip.antiAlias,
