@@ -305,7 +305,7 @@ void showLicensePage({
 }
 
 /// The amount of vertical space to separate chunks of text.
-const double _textVerticalSeparation = 18;
+const double _textVerticalSeparation = 18.0;
 
 /// An about box. This is a dialog box with the application's icon, name,
 /// version number, and copyright, plus a button to show licenses for software
@@ -625,9 +625,9 @@ class _PackagesViewState extends State<_PackagesView> {
                       return Center(
                         child: Material(
                           color: Theme.of(context).cardColor,
-                          elevation: 4,
+                          elevation: 4.0,
                           child: Container(
-                            constraints: BoxConstraints.loose(const Size.fromWidth(600)),
+                            constraints: BoxConstraints.loose(const Size.fromWidth(600.0)),
                             child: _packagesList(context, selectedId, snapshot.data, widget.isLateral),
                           ),
                         ),
@@ -917,9 +917,9 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
         body: Center(
           child: Material(
             color: theme.cardColor,
-            elevation: 4,
+            elevation: 4.0,
             child: Container(
-              constraints: BoxConstraints.loose(const Size.fromWidth(600)),
+              constraints: BoxConstraints.loose(const Size.fromWidth(600.0)),
               child: Localizations.override(
                 locale: const Locale('en', 'US'),
                 context: context,
@@ -1011,8 +1011,8 @@ Widget _defaultApplicationIcon(BuildContext context) {
 }
 
 const int _materialGutterThreshold = 720;
-const double _wideGutterSize = 24;
-const double _narrowGutterSize = 12;
+const double _wideGutterSize = 24.0;
+const double _narrowGutterSize = 12.0;
 
 double _getGutterSize(BuildContext context) =>
     MediaQuery.of(context).size.width >= _materialGutterThreshold ? _wideGutterSize : _narrowGutterSize;
@@ -1437,10 +1437,10 @@ class _MasterPage extends StatelessWidget {
 
 }
 
-const double _kCardElevation = 4;
-const double _kMasterViewWidth = 320;
-const double _kDetailPageFABlessGutterWidth = 40;
-const double _kDetailPageFABGutterWidth = 84;
+const double _kCardElevation = 4.0;
+const double _kMasterViewWidth = 320.0;
+const double _kDetailPageFABlessGutterWidth = 40.0;
+const double _kDetailPageFABGutterWidth = 84.0;
 
 class _MasterDetailScaffold extends StatefulWidget {
   const _MasterDetailScaffold({
@@ -1647,10 +1647,10 @@ class _DetailView extends StatelessWidget {
               elevation: _kCardElevation,
               clipBehavior: Clip.antiAlias,
               margin: const EdgeInsets.fromLTRB(
-                  _kCardElevation, 0, _kCardElevation, 0),
+                  _kCardElevation, 0.0, _kCardElevation, 0.0),
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(3), bottom: Radius.zero),
+                    top: Radius.circular(3.0), bottom: Radius.zero),
               ),
               child: _builder(
                 context,

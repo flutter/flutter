@@ -260,7 +260,7 @@ void main() {
     // the safe area is sufficiently respected.
     expect(
       tester.getTopLeft(find.text('Licenses')),
-      const Offset(16.0 + safeareaPadding, 18 + safeareaPadding),
+      const Offset(16.0 + safeareaPadding, 18.0 + safeareaPadding),
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/54385
 
