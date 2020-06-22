@@ -7,8 +7,8 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:meta/meta.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:test_api/test_api.dart'; // ignore: deprecated_member_use
 import 'package:yaml/yaml.dart';
+import 'common.dart';
 
 /// Writes a schemaData used for validating pubspec.yaml files when parsing
 /// asset information.

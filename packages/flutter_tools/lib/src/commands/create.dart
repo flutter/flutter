@@ -31,20 +31,19 @@ import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';
 
-const List<String> _availablePlatforms = <String>[
-          'ios',
-          'android',
-          'windows',
-          'linux',
-          'macos',
-        ];
+const List<String> _kAvailablePlatforms = <String>[
+        'ios',
+        'android',
+        'windows',
+        'linux',
+        'macos',
+      ];
 
-const String _noPlatformsErrorMessage =
-        '''
+const String _kNoPlatformsErrorMessage = '''
 The plugin project was generated without specifying the `--platforms` flag, no platforms are currently supported.
 To add platforms, run `flutter create -t plugin --platforms <platforms> .` under the same
-directory. You can also find a detailed instruction on how to add platforms in the `pubspec.yaml` at https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms.
-        ''';
+directory. You can also find detailed instructions on how to add platforms in the `pubspec.yaml` at https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms.
+''';
 
 class CreateCommand extends FlutterCommand {
   CreateCommand() {
@@ -339,7 +338,7 @@ class CreateCommand extends FlutterCommand {
     final bool generatePackage = template == FlutterProjectType.package;
 
     final List<String> platforms = stringsArg('platforms');
-    // `--platforms` does not support module and package.
+    // `--platforms` does not support module or package.
     if (argResults.wasParsed('platforms') && (generateModule || generatePackage)) {
       final String template = generateModule ? 'module' : 'package';
       throwToolExit(
@@ -348,7 +347,7 @@ class CreateCommand extends FlutterCommand {
       );
     } else if (platforms == null || platforms.isEmpty) {
       throwToolExit('Must specify at least one platform using --platforms',
-          exitCode: 2);
+        exitCode: 2);
     }
 
     String organization = stringArg('org');
@@ -505,13 +504,13 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
 
   void _addPlatformsOptions() {
     argParser.addMultiOption('platforms',
-        help: 'the platforms supported by this project.'
-          'This argument only works when the --template is set to app or plugin.'
-          'Platform folders (android/) will be generated in the target project.'
-          'When adding platforms to a plugin project, the pubspec.yaml will be updated with the requested platform.'
-          'Adding desktop platforms requires the corresponding desktop config setting to be enabled.',
-        defaultsTo: _availablePlatforms,
-        allowed: _availablePlatforms);
+      help: 'the platforms supported by this project.'
+        'This argument only works when the --template is set to app or plugin.'
+        'Platform folders (e.g. android/) will be generated in the target project.'
+        'When adding platforms to a plugin project, the pubspec.yaml will be updated with the requested platform.'
+        'Adding desktop platforms requires the corresponding desktop config setting to be enabled.',
+      defaultsTo: _kAvailablePlatforms,
+      allowed: _kAvailablePlatforms);
   }
 
   Future<int> _generateModule(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
@@ -564,7 +563,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       templateContext['macos'] = false;
       templateContext['windows'] = false;
       willAddPlatforms = false;
-      globals.printError(_noPlatformsErrorMessage);
+      globals.printError(_kNoPlatformsErrorMessage);
     }
     templateContext['no_platforms'] = !willAddPlatforms;
     int generatedCount = 0;
@@ -600,21 +599,17 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
             prettyYaml += ' $key: ${platformsMapToPrint[platform][key] as String}\n';
           }
         }
-        globals.printStatus(
-          '''
-
+        globals.printStatus('''
 The `pubspec.yaml` under the project directory must be updated to support ${platformsToAdd.join(', ')},
 Add below lines to under the `platform:` key:
-          ''', emphasis: true);
+''', emphasis: true);
       globals.printStatus(prettyYaml, emphasis: true, color: TerminalColor.blue);
-      globals.printStatus(
-          '''
+      globals.printStatus('''
 If the `platforms` key does not exist in the `pubspec.yaml`, it might because that the plugin project does not
 use the multi-platforms plugin format. We highly recommend a migration to the multi-platforms plugin format.
 For detailed instructions on how to format the pubspec.yaml to support platforms using the multi-platforms format, see:
 https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms
-
-          ''', emphasis: true);
+''', emphasis: true);
       }
     }
 
@@ -623,7 +618,7 @@ https://flutter.dev/docs/development/packages-and-plugins/developing-packages#pl
     final bool generateAndroid = templateContext['android'] == true;
     if (generateAndroid) {
         gradle.updateLocalProperties(
-            project: project, requireAndroidSdk: false);
+          project: project, requireAndroidSdk: false);
     }
 
     final String projectName = templateContext['projectName'] as String;
@@ -680,26 +675,20 @@ https://flutter.dev/docs/development/packages-and-plugins/developing-packages#pl
   }
 
   List<String> _getSupportedPlatformsFromTemplateContext(Map<String, dynamic> templateContext) {
-    final List<String> platforms = <String>[];
-    if (templateContext['ios'] as bool) {
-      platforms.add('ios');
-    }
-    if (templateContext['android'] as bool) {
-      platforms.add('android');
-    }
-    if (templateContext['web'] as bool) {
-      platforms.add('web');
-    }
-    if (templateContext['linux'] as bool) {
-      platforms.add('linux');
-    }
-    if (templateContext['windows'] as bool) {
-      platforms.add('windows');
-    }
-    if (templateContext['macos'] as bool) {
-      platforms.add('macos');
-    }
-    return platforms;
+    return <String>[
+      if (templateContext['ios'] == true)
+        'ios',
+      if (templateContext['android'] == true)
+        'android',
+      if (templateContext['web'] == true)
+        'web',
+      if (templateContext['linux'] == true)
+        'linux',
+      if (templateContext['windows'] == true)
+        'windows',
+      if (templateContext['macos'] == true)
+        'macos',
+    ];
   }
 
   Map<String, dynamic> _createTemplateContext({
