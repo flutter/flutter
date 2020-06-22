@@ -215,14 +215,14 @@ def GetRunnerTarget(runner_type, product, aot):
   return base + target
 
 
-def GetTargetsToBuild(product=False):
+def GetTargetsToBuild(product=False, additional_targets=[]):
   targets_to_build = [
       'flutter/shell/platform/fuchsia:fuchsia',
-  ]
+  ] + additional_targets
   return targets_to_build
 
 
-def BuildTarget(runtime_mode, arch, product, enable_lto):
+def BuildTarget(runtime_mode, arch, product, enable_lto, additional_targets=[]):
   out_dir = 'fuchsia_%s_%s' % (runtime_mode, arch)
   flags = [
       '--fuchsia',
@@ -276,6 +276,12 @@ def main():
       default=False,
       help='If set, skips building and just creates packages.')
 
+  parser.add_argument(
+      '--targets',
+      default='',
+      help=('Comma-separated list; adds additional targets to build for '
+           'Fuchsia.'))
+
   args = parser.parse_args()
   RemoveDirectoryIfExists(_bucket_directory)
   build_mode = args.runtime_mode
@@ -292,7 +298,8 @@ def main():
       product = product_modes[i]
       if build_mode == 'all' or runtime_mode == build_mode:
         if not args.skip_build:
-          BuildTarget(runtime_mode, arch, product, enable_lto)
+          BuildTarget(runtime_mode, arch, product, enable_lto,
+                      args.targets.split(","))
         BuildBucket(runtime_mode, arch, product)
 
   if args.upload:
