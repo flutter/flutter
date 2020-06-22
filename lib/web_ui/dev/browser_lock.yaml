@@ -14,3 +14,7 @@ ios-safari:
   majorVersion: 13
   minorVersion: 5
   device: 'iPhone 11'
+## geckodriver is used for testing Firefox Browser. It works with multiple
+## Firefox Browser versions.
+## See: https://github.com/mozilla/geckodriver/releases
+geckodriver: 'v0.26.0'

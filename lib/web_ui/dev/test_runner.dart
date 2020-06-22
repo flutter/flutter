@@ -106,7 +106,7 @@ class TestCommand extends Command<bool> with ArgUtils {
       print('Running the unit tests only');
       return TestTypesRequested.unit;
     } else if (boolArg('integration-tests-only')) {
-      if (!isChrome && !isSafariOnMacOS) {
+      if (!isChrome && !isSafariOnMacOS && !isFirefox) {
         throw UnimplementedError(
             'Integration tests are only available on Chrome Desktop for now');
       }
@@ -132,7 +132,7 @@ class TestCommand extends Command<bool> with ArgUtils {
       case TestTypesRequested.all:
         // TODO(nurhan): https://github.com/flutter/flutter/issues/53322
         // TODO(nurhan): Expand browser matrix for felt integration tests.
-        if (runAllTests && (isChrome || isSafariOnMacOS)) {
+        if (runAllTests && (isChrome || isSafariOnMacOS || isFirefox)) {
           bool unitTestResult = await runUnitTests();
           bool integrationTestResult = await runIntegrationTests();
           if (integrationTestResult != unitTestResult) {
@@ -262,6 +262,9 @@ class TestCommand extends Command<bool> with ArgUtils {
 
   /// Whether [browser] is set to "chrome".
   bool get isChrome => browser == 'chrome';
+
+  /// Whether [browser] is set to "firefox".
+  bool get isFirefox => browser == 'firefox';
 
   /// Whether [browser] is set to "safari".
   bool get isSafariOnMacOS => browser == 'safari'
