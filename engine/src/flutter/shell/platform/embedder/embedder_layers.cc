@@ -108,7 +108,7 @@ void EmbedderLayers::PushPlatformViewLayer(
     view.struct_size = sizeof(FlutterPlatformView);
     view.identifier = identifier;
 
-    const auto& mutators = params.mutatorsStack;
+    const auto& mutators = params.mutatorsStack();
 
     std::vector<const FlutterPlatformViewMutation*> mutations_array;
 
@@ -180,10 +180,10 @@ void EmbedderLayers::PushPlatformViewLayer(
   layer.platform_view = platform_views_referenced_.back().get();
 
   const auto layer_bounds =
-      SkRect::MakeXYWH(params.offsetPixels.x(),                          //
-                       params.offsetPixels.y(),                          //
-                       params.sizePoints.width() * device_pixel_ratio_,  //
-                       params.sizePoints.height() * device_pixel_ratio_  //
+      SkRect::MakeXYWH(params.finalBoundingRect().x(),                     //
+                       params.finalBoundingRect().y(),                     //
+                       params.sizePoints().width() * device_pixel_ratio_,  //
+                       params.sizePoints().height() * device_pixel_ratio_  //
       );
 
   const auto transformed_layer_bounds =

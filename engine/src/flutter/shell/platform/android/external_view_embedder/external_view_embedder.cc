@@ -63,10 +63,10 @@ SkRect AndroidExternalViewEmbedder::GetViewRect(int view_id) const {
   const EmbeddedViewParams& params = view_params_.at(view_id);
   // TODO(egarciad): The rect should be computed from the mutator stack.
   // https://github.com/flutter/flutter/issues/59821
-  return SkRect::MakeXYWH(params.offsetPixels.x(),                          //
-                          params.offsetPixels.y(),                          //
-                          params.sizePoints.width() * device_pixel_ratio_,  //
-                          params.sizePoints.height() * device_pixel_ratio_  //
+  return SkRect::MakeXYWH(params.finalBoundingRect().x(),                     //
+                          params.finalBoundingRect().y(),                     //
+                          params.sizePoints().width() * device_pixel_ratio_,  //
+                          params.sizePoints().height() * device_pixel_ratio_  //
   );
 }
 
