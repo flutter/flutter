@@ -1336,7 +1336,7 @@ flutter:
 
       test('createPlatformsYamlMap should create the correct map', () async {
         final YamlMap map = Plugin.createPlatformsYamlMap(<String>['ios', 'android', 'linux'], 'PluginClass', 'some.android.package');
-        expect(map['platforms']['ios'], <String, String> {
+        expect(map['ios'], <String, String> {
           'pluginClass' : 'PluginClass'
         });
         expect(map['android'], <String, String> {
