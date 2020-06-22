@@ -271,7 +271,7 @@ class TextButton extends ButtonStyleButton {
 }
 
 @immutable
-class _TextButtonDefaultForeground extends MaterialStateProperty<Color> with Diagnosticable {
+class _TextButtonDefaultForeground extends MaterialStateProperty<Color> {
   _TextButtonDefaultForeground(this.primary, this.onSurface);
 
   final Color primary;
@@ -283,10 +283,15 @@ class _TextButtonDefaultForeground extends MaterialStateProperty<Color> with Dia
       return onSurface?.withOpacity(0.38);
     return primary;
   }
+
+  @override
+  String toString() {
+    return '{disabled: ${onSurface?.withOpacity(0.38)}, otherwise: $primary}';
+  }
 }
 
 @immutable
-class _TextButtonDefaultOverlay extends MaterialStateProperty<Color> with Diagnosticable {
+class _TextButtonDefaultOverlay extends MaterialStateProperty<Color> {
   _TextButtonDefaultOverlay(this.primary);
 
   final Color primary;
@@ -298,6 +303,11 @@ class _TextButtonDefaultOverlay extends MaterialStateProperty<Color> with Diagno
     if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed))
       return primary?.withOpacity(0.12);
     return null;
+  }
+
+  @override
+  String toString() {
+    return '{hovered: ${primary?.withOpacity(0.04)}, focused,pressed: ${primary?.withOpacity(0.12)}, otherwise: null}';
   }
 }
 
