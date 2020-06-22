@@ -379,9 +379,7 @@ class FlutterErrorDetails with Diagnosticable {
   /// The [exception] must not be null; other arguments can be left to
   /// their default values. (`throw null` results in a
   /// [NullThrownError] exception.)
-  // If you add a property to this class, do not forget to update _runTest in
-  // packages/flutter_test/lib/src/binding.dart, where we copy this class
-  // and unmangle the stack property.
+  // If you add a property to this class, do not forget to update [copyWith].
   const FlutterErrorDetails({
     this.exception,
     this.stack,
@@ -391,6 +389,28 @@ class FlutterErrorDetails with Diagnosticable {
     this.informationCollector,
     this.silent = false,
   });
+
+  /// Creates a copy of the error details but with the given fields replaced
+  /// with new values.
+  FlutterErrorDetails copyWith({
+    DiagnosticsNode context,
+    dynamic exception,
+    InformationCollector informationCollector,
+    String library,
+    bool silent,
+    StackTrace stack,
+    IterableFilter<String> stackFilter,
+  }) {
+    return FlutterErrorDetails(
+      context: context ?? this.context,
+      exception: exception ?? this.exception,
+      informationCollector: informationCollector ?? this.informationCollector,
+      library: library ?? this.library,
+      silent: silent ?? this.silent,
+      stack: stack ?? this.stack,
+      stackFilter: stackFilter ?? this.stackFilter,
+    );
+  }
 
   /// Transformers to transform [DiagnosticsNode] in [DiagnosticPropertiesBuilder]
   /// into a more descriptive form.

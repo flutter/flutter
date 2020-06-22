@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
-
+import 'package:stack_trace/stack_trace.dart' as stack_trace;
 
 Future<void> main() async {
   test('demangles stacks', () async {
@@ -29,6 +29,7 @@ Future<void> main() async {
       completer.future.then(
         (String value) {},
         onError: (dynamic error, StackTrace stack) {
+          assert(stack is stack_trace.Chain);
           FlutterError.reportError(FlutterErrorDetails(
             exception: error,
             stack: stack,
