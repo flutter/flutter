@@ -580,22 +580,10 @@ class RawKeyboard {
         listener(event);
       }
     }
-    // Send the key event to the keyEventHandler, and send the appropriate
-    // response to the platform so that it can resolve the event's handling.
-    _sendKeyEventResponse(event, handled: keyEventHandler?.call(event) ?? false);
-  }
 
-  void _sendKeyEventResponse(RawKeyEvent event, {@required bool handled}) {
-    // Only Android supports receiving responses to synchronous key events at
-    // the moment.
-    if (event.data is RawKeyEventDataAndroid) {
-      SystemChannels.keyEvent.send(<String, dynamic>{
-        'type': handled ? 'keyHandled' : 'keyNotHandled',
-        'data': <String, dynamic>{
-          'eventId': (event.data as RawKeyEventDataAndroid).eventId,
-        },
-      });
-    }
+    // Send the key event to the keyEventHandler, then send the appropriate
+    // response to the platform so that it can resolve the event's handling.
+    return <String, dynamic>{ 'handled': keyEventHandler?.call(event) ?? false };
   }
 
   static final Map<_ModifierSidePair, Set<PhysicalKeyboardKey>> _modifierKeyMap = <_ModifierSidePair, Set<PhysicalKeyboardKey>>{
