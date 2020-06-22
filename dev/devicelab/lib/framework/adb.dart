@@ -560,7 +560,7 @@ class IosDeviceDiscovery implements DeviceDiscovery {
 
     // [
     //   {
-    //     "name": "Christopher’s iPhone",
+    //     "name": "Flutter's iPhone",
     //     "id": "00008020-00017DA80CC1002E",
     //     "isSupported": true,
     //     "targetPlatform": "ios",
