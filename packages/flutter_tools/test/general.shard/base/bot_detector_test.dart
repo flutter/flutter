@@ -44,14 +44,6 @@ void main() {
     });
 
     group('isRunningOnBot', () {
-      testWithoutContext('returns false unconditionally if BOT=false is set', () async {
-        fakePlatform.environment['BOT'] = 'false';
-        fakePlatform.environment['TRAVIS'] = 'true';
-
-        expect(await botDetector.isRunningOnBot, isFalse);
-        expect(persistentToolState.isRunningOnBot, isFalse);
-      });
-
       testWithoutContext('returns false unconditionally if FLUTTER_HOST is set', () async {
         fakePlatform.environment['FLUTTER_HOST'] = 'foo';
         fakePlatform.environment['TRAVIS'] = 'true';
