@@ -130,7 +130,6 @@ executable("flow_unittests") {
   testonly = true
 
   sources = [
-    "embedded_view_params_unittests.cc",
     "flow_run_all_unittests.cc",
     "flow_test_utils.cc",
     "flow_test_utils.h",
