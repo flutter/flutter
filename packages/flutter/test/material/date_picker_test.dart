@@ -86,7 +86,7 @@ void main() {
   Future<void> prepareDatePicker(
     WidgetTester tester,
     Future<void> callback(Future<DateTime> date),
-    {TextDirection textDirection = TextDirection.ltr}
+    { TextDirection textDirection = TextDirection.ltr }
   ) async {
     BuildContext buttonContext;
     await tester.pumpWidget(MaterialApp(

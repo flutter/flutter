@@ -552,7 +552,7 @@ class _MonthPickerState extends State<_MonthPicker> {
   DateTime _focusableDayForMonth(DateTime month, int preferredDay) {
     final int daysInMonth = utils.getDaysInMonth(month.year, month.month);
 
-    // Can we ues the preferred day in this month?
+    // Can we use the preferred day in this month?
     if (preferredDay <= daysInMonth) {
       final DateTime newFocus = DateTime(month.year, month.month, preferredDay);
       if (_isSelectable(newFocus))
@@ -776,8 +776,8 @@ class _MonthPickerState extends State<_MonthPicker> {
 
 /// InheritedWidget indicating what the current focused date is for its children.
 ///
-/// This is used by the [_MonthPicker] to let its children [_DayPicker]s what
-/// the currently focused date (if any) should be.
+/// This is used by the [_MonthPicker] to let its children [_DayPicker]s know
+/// what the currently focused date (if any) should be.
 class _FocusedDate extends InheritedWidget {
   const _FocusedDate({
     Key key,
@@ -789,7 +789,7 @@ class _FocusedDate extends InheritedWidget {
 
   @override
   bool updateShouldNotify(_FocusedDate oldWidget) {
-    return date != oldWidget.date && !utils.isSameDay(date, oldWidget.date);
+    return !utils.isSameDay(date, oldWidget.date);
   }
 
   static DateTime of(BuildContext context) {
