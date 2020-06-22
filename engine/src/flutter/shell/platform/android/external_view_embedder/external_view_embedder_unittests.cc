@@ -198,9 +198,11 @@ TEST(AndroidExternalViewEmbedder, PlatformViewRect) {
   embedder->BeginFrame(SkISize::Make(100, 100), nullptr, 1.5,
                        raster_thread_merger);
 
-  auto view_params = std::make_unique<EmbeddedViewParams>();
-  view_params->offsetPixels = SkPoint::Make(10, 20);
-  view_params->sizePoints = SkSize::Make(30, 40);
+  MutatorsStack stack;
+  SkMatrix matrix = SkMatrix::MakeTrans(10, 20);
+  stack.PushTransform(matrix);
+  auto view_params =
+      std::make_unique<EmbeddedViewParams>(matrix, SkSize::Make(30, 40), stack);
 
   auto view_id = 0;
   embedder->PrerollCompositeEmbeddedView(view_id, std::move(view_params));
@@ -219,14 +221,21 @@ TEST(AndroidExternalViewEmbedder, PlatformViewRect__ChangedParams) {
                        raster_thread_merger);
 
   auto view_id = 0;
-  auto view_params_1 = std::make_unique<EmbeddedViewParams>();
-  view_params_1->offsetPixels = SkPoint::Make(10, 20);
-  view_params_1->sizePoints = SkSize::Make(30, 40);
+
+  MutatorsStack stack1;
+  SkMatrix matrix1 = SkMatrix::MakeTrans(10, 20);
+  stack1.PushTransform(matrix1);
+  auto view_params_1 = std::make_unique<EmbeddedViewParams>(
+      matrix1, SkSize::Make(30, 40), stack1);
+
   embedder->PrerollCompositeEmbeddedView(view_id, std::move(view_params_1));
 
-  auto view_params_2 = std::make_unique<EmbeddedViewParams>();
-  view_params_2->offsetPixels = SkPoint::Make(50, 60);
-  view_params_2->sizePoints = SkSize::Make(70, 80);
+  MutatorsStack stack2;
+  SkMatrix matrix2 = SkMatrix::MakeTrans(50, 60);
+  stack2.PushTransform(matrix2);
+  auto view_params_2 = std::make_unique<EmbeddedViewParams>(
+      matrix2, SkSize::Make(70, 80), stack2);
+
   embedder->PrerollCompositeEmbeddedView(view_id, std::move(view_params_2));
 
   ASSERT_EQ(SkRect::MakeXYWH(50, 60, 105, 120), embedder->GetViewRect(view_id));
@@ -281,11 +290,14 @@ TEST(AndroidExternalViewEmbedder, SubmitFrame__RecycleSurfaces) {
     embedder->BeginFrame(frame_size, nullptr, 1.5, raster_thread_merger);
 
     // Add an Android view.
-    auto view_params_1 = std::make_unique<EmbeddedViewParams>();
-    view_params_1->offsetPixels = SkPoint::Make(100, 100);
+    MutatorsStack stack1;
+    SkMatrix matrix1 = SkMatrix::MakeTrans(100, 100);
+    stack1.PushTransform(matrix1);
     // TODO(egarciad): Investigate why Flow applies the device pixel ratio to
     // the offsetPixels, but not the sizePoints.
-    view_params_1->sizePoints = SkSize::Make(200, 200);
+    auto view_params_1 = std::make_unique<EmbeddedViewParams>(
+        matrix1, SkSize::Make(200, 200), stack1);
+
     embedder->PrerollCompositeEmbeddedView(0, std::move(view_params_1));
     // This is the recording canvas flow writes to.
     auto canvas_1 = embedder->CompositeEmbeddedView(0);
@@ -329,11 +341,14 @@ TEST(AndroidExternalViewEmbedder, SubmitFrame__RecycleSurfaces) {
     embedder->BeginFrame(frame_size, nullptr, 1.5, raster_thread_merger);
 
     // Add an Android view.
-    auto view_params_1 = std::make_unique<EmbeddedViewParams>();
-    view_params_1->offsetPixels = SkPoint::Make(100, 100);
+    MutatorsStack stack1;
+    SkMatrix matrix1 = SkMatrix::MakeTrans(100, 100);
+    stack1.PushTransform(matrix1);
     // TODO(egarciad): Investigate why Flow applies the device pixel ratio to
     // the offsetPixels, but not the sizePoints.
-    view_params_1->sizePoints = SkSize::Make(200, 200);
+    auto view_params_1 = std::make_unique<EmbeddedViewParams>(
+        matrix1, SkSize::Make(200, 200), stack1);
+
     embedder->PrerollCompositeEmbeddedView(0, std::move(view_params_1));
     // This is the recording canvas flow writes to.
     auto canvas_1 = embedder->CompositeEmbeddedView(0);

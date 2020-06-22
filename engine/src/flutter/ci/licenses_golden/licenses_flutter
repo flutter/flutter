@@ -26,6 +26,7 @@ FILE: ../../../flutter/common/task_runners.cc
 FILE: ../../../flutter/common/task_runners.h
 FILE: ../../../flutter/flow/compositor_context.cc
 FILE: ../../../flutter/flow/compositor_context.h
+FILE: ../../../flutter/flow/embedded_view_params_unittests.cc
 FILE: ../../../flutter/flow/embedded_views.cc
 FILE: ../../../flutter/flow/embedded_views.h
 FILE: ../../../flutter/flow/gl_context_switch.cc
