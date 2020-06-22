@@ -17,13 +17,27 @@ FLUTTER_ASSERT_ARC
 - (void)setTextInputState:(NSDictionary*)state;
 @end
 
-@implementation FlutterTextInputPluginTest
-- (void)testSecureInput {
-  // Setup test.
-  id engine = OCMClassMock([FlutterEngine class]);
-  FlutterTextInputPlugin* textInputPlugin = [[FlutterTextInputPlugin alloc] init];
-  textInputPlugin.textInputDelegate = engine;
+@implementation FlutterTextInputPluginTest {
+  id engine;
+  FlutterTextInputPlugin* textInputPlugin;
+}
 
+- (void)setUp {
+  [super setUp];
+
+  engine = OCMClassMock([FlutterEngine class]);
+  textInputPlugin = [[FlutterTextInputPlugin alloc] init];
+  textInputPlugin.textInputDelegate = engine;
+}
+
+- (void)tearDown {
+  [engine stopMocking];
+  [[[[textInputPlugin textInputView] superview] subviews]
+      makeObjectsPerformSelector:@selector(removeFromSuperview)];
+  [super tearDown];
+}
+
+- (void)testSecureInput {
   NSDictionary* config = @{
     @"inputType" : @{@"name" : @"TextInuptType.text"},
     @"keyboardAppearance" : @"Brightness.light",
@@ -61,17 +75,9 @@ FLUTTER_ASSERT_ARC
   // The one FlutterTextInputView we inserted into the view hierarchy should be the text input
   // plugin's active text input view.
   XCTAssertEqual(inputView, textInputPlugin.textInputView);
-
-  // Clean up.
-  [engine stopMocking];
-  [[[[textInputPlugin textInputView] superview] subviews]
-      makeObjectsPerformSelector:@selector(removeFromSuperview)];
 }
 
 - (void)testTextChangesTriggerUpdateEditingClient {
-  // Setup test.
-  id engine = OCMClassMock([FlutterEngine class]);
-
   FlutterTextInputView* inputView = [[FlutterTextInputView alloc] init];
   inputView.textInputDelegate = engine;
 
@@ -86,15 +92,9 @@ FLUTTER_ASSERT_ARC
   // Don't send anything if there's nothing new.
   [inputView setTextInputState:@{@"text" : @"AFTER"}];
   OCMReject([engine updateEditingClient:0 withState:[OCMArg any]]);
-
-  // Clean up.
-  [engine stopMocking];
 }
 
 - (void)testSelectionChangeTriggersUpdateEditingClient {
-  // Setup test.
-  id engine = OCMClassMock([FlutterEngine class]);
-
   FlutterTextInputView* inputView = [[FlutterTextInputView alloc] init];
   inputView.textInputDelegate = engine;
 
@@ -118,15 +118,9 @@ FLUTTER_ASSERT_ARC
   [inputView
       setTextInputState:@{@"text" : @"SELECTION", @"selectionBase" : @1, @"selectionExtent" : @2}];
   OCMReject([engine updateEditingClient:0 withState:[OCMArg any]]);
-
-  // Clean up.
-  [engine stopMocking];
 }
 
 - (void)testComposingChangeTriggersUpdateEditingClient {
-  // Setup test.
-  id engine = OCMClassMock([FlutterEngine class]);
-
   FlutterTextInputView* inputView = [[FlutterTextInputView alloc] init];
   inputView.textInputDelegate = engine;
 
@@ -151,17 +145,9 @@ FLUTTER_ASSERT_ARC
   [inputView
       setTextInputState:@{@"text" : @"COMPOSING", @"composingBase" : @1, @"composingExtent" : @2}];
   OCMReject([engine updateEditingClient:0 withState:[OCMArg any]]);
-
-  // Clean up.
-  [engine stopMocking];
 }
 
 - (void)testAutofillInputViews {
-  // Setup test.
-  id engine = OCMClassMock([FlutterEngine class]);
-  FlutterTextInputPlugin* textInputPlugin = [[FlutterTextInputPlugin alloc] init];
-  textInputPlugin.textInputDelegate = engine;
-
   NSDictionary* template = @{
     @"inputType" : @{@"name" : @"TextInuptType.text"},
     @"keyboardAppearance" : @"Brightness.light",
@@ -214,26 +200,15 @@ FLUTTER_ASSERT_ARC
 
   // Verify behavior.
   OCMVerify([engine updateEditingClient:0 withState:[OCMArg isNotNil] withTag:@"field2"]);
-
-  // Clean up.
-  [engine stopMocking];
-  [[[[textInputPlugin textInputView] superview] subviews]
-      makeObjectsPerformSelector:@selector(removeFromSuperview)];
 }
 
 - (void)testAutocorrectionPromptRectAppears {
-  // Setup test.
-  id engine = OCMClassMock([FlutterEngine class]);
-
   FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithFrame:CGRectZero];
   inputView.textInputDelegate = engine;
   [inputView firstRectForRange:[FlutterTextRange rangeWithNSRange:NSMakeRange(0, 1)]];
 
   // Verify behavior.
   OCMVerify([engine showAutocorrectionPromptRectForStart:0 end:1 withClient:0]);
-
-  // Clean up mocks
-  [engine stopMocking];
 }
 
 - (void)testTextRangeFromPositionMatchesUITextViewBehavior {
@@ -247,5 +222,36 @@ FLUTTER_ASSERT_ARC
 
   XCTAssertEqual(range.location, 0);
   XCTAssertEqual(range.length, 2);
+}
+
+- (void)testUITextInputCallsUpdateEditingStateOnce {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] init];
+  inputView.textInputDelegate = engine;
+
+  __block int updateCount = 0;
+  OCMStub([engine updateEditingClient:0 withState:[OCMArg isNotNil]])
+      .andDo(^(NSInvocation* invocation) {
+        updateCount++;
+      });
+
+  [inputView insertText:@"text to insert"];
+  // Update the framework exactly once.
+  XCTAssertEqual(updateCount, 1);
+
+  [inputView deleteBackward];
+  XCTAssertEqual(updateCount, 2);
+
+  inputView.selectedTextRange = [FlutterTextRange rangeWithNSRange:NSMakeRange(0, 1)];
+  XCTAssertEqual(updateCount, 3);
+
+  [inputView replaceRange:[FlutterTextRange rangeWithNSRange:NSMakeRange(0, 1)]
+                 withText:@"replace text"];
+  XCTAssertEqual(updateCount, 4);
+
+  [inputView setMarkedText:@"marked text" selectedRange:NSMakeRange(0, 1)];
+  XCTAssertEqual(updateCount, 5);
+
+  [inputView unmarkText];
+  XCTAssertEqual(updateCount, 6);
 }
 @end
