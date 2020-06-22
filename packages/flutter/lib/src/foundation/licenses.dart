@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+// @dart = 2.9
 
 import 'dart:async';
 
@@ -49,7 +49,7 @@ abstract class LicenseEntry {
   const LicenseEntry();
 
   /// The names of the packages that this license entry applies to.
-  Iterable<String> get packages;
+  Iterable<String>? get packages;
 
   /// The paragraphs of the license, each as a [LicenseParagraph] consisting of
   /// a string and some formatting information. Paragraphs can include newline
@@ -125,7 +125,7 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
   const LicenseEntryWithLineBreaks(this.packages, this.text);
 
   @override
-  final List<String> packages;
+  final List<String>? packages;
 
   /// The text of the license.
   ///
@@ -148,7 +148,7 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
     int currentPosition = 0;
     int lastLineIndent = 0;
     int currentLineIndent = 0;
-    int currentParagraphIndentation;
+    int? currentParagraphIndentation;
     _LicenseEntryWithLineBreaksParserState state = _LicenseEntryWithLineBreaksParserState.beforeParagraph;
     final List<String> lines = <String>[];
 
@@ -160,7 +160,7 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
     LicenseParagraph getParagraph() {
       assert(lines.isNotEmpty);
       assert(currentParagraphIndentation != null);
-      final LicenseParagraph result = LicenseParagraph(lines.join(' '), currentParagraphIndentation);
+      final LicenseParagraph result = LicenseParagraph(lines.join(' '), currentParagraphIndentation!);
       assert(result.text.trimLeft() == result.text);
       assert(result.text.isNotEmpty);
       lines.clear();
@@ -295,7 +295,7 @@ class LicenseRegistry {
   // ignore: unused_element
   LicenseRegistry._();
 
-  static List<LicenseEntryCollector> _collectors;
+  static List<LicenseEntryCollector>? _collectors;
 
   /// Adds licenses to the registry.
   ///
@@ -306,7 +306,7 @@ class LicenseRegistry {
   /// licenses, the closure will not be called.
   static void addLicense(LicenseEntryCollector collector) {
     _collectors ??= <LicenseEntryCollector>[];
-    _collectors.add(collector);
+    _collectors!.add(collector);
   }
 
   /// Returns the licenses that have been registered.
@@ -315,7 +315,7 @@ class LicenseRegistry {
   static Stream<LicenseEntry> get licenses async* {
     if (_collectors == null)
       return;
-    for (final LicenseEntryCollector collector in _collectors)
+    for (final LicenseEntryCollector collector in _collectors!)
       yield* collector();
   }
 

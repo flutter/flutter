@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+// @dart = 2.9
 
 /// Framework code should use this method in favor of calling `toString` on
 /// [Object.runtimeType].
@@ -18,3 +18,12 @@ String objectRuntimeType(Object object, String optimizedValue) {
   }());
   return optimizedValue;
 }
+
+/// Allows promotion of a variable to another type.
+///
+/// ```dart
+/// num n = 42;
+/// promote(n as int);
+/// n.isEven;
+/// ```
+void promote(Object? object) { }

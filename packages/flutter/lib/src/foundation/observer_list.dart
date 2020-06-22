@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+// @dart = 2.9
 
 import 'dart:collection';
 
@@ -29,7 +29,7 @@ import 'dart:collection';
 class ObserverList<T> extends Iterable<T> {
   final List<T> _list = <T>[];
   bool _isDirty = false;
-  HashSet<T> _set;
+  late final HashSet<T> _set = HashSet<T>();
 
   /// Adds an item to the end of this list.
   ///
@@ -46,21 +46,17 @@ class ObserverList<T> extends Iterable<T> {
   /// Returns whether the item was present in the list.
   bool remove(T item) {
     _isDirty = true;
-    _set?.clear(); // Clear the set so that we don't leak items.
+    _set.clear(); // Clear the set so that we don't leak items.
     return _list.remove(item);
   }
 
   @override
-  bool contains(Object element) {
+  bool contains(Object? element) {
     if (_list.length < 3)
       return _list.contains(element);
 
     if (_isDirty) {
-      if (_set == null) {
-        _set = HashSet<T>.from(_list);
-      } else {
-        _set.addAll(_list);
-      }
+      _set.addAll(_list);
       _isDirty = false;
     }
 
@@ -107,7 +103,7 @@ class HashedObserverList<T> extends Iterable<T> {
   ///
   /// Returns whether the item was present in the list.
   bool remove(T item) {
-    final int value = _map[item];
+    final int? value = _map[item];
     if (value == null) {
       return false;
     }
@@ -120,7 +116,7 @@ class HashedObserverList<T> extends Iterable<T> {
   }
 
   @override
-  bool contains(Object element) => _map.containsKey(element);
+  bool contains(Object? element) => _map.containsKey(element);
 
   @override
   Iterator<T> get iterator => _map.keys.iterator;

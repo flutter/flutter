@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+// @dart = 2.9
+// ignore_for_file: unnecessary_null_comparison,always_require_non_null_named_parameters
 
 import 'dart:async';
 import 'dart:convert' show json;
@@ -249,6 +250,7 @@ abstract class BindingBase {
     _lockCount += 1;
     final Future<void> future = callback();
     assert(future != null, 'The lockEvents() callback returned null; it should return a Future<void> that completes when the lock is to expire.');
+    // ignore: void_checks
     future.whenComplete(() {
       _lockCount -= 1;
       if (!locked) {
@@ -316,8 +318,8 @@ abstract class BindingBase {
   /// {@macro flutter.foundation.bindingBase.registerServiceExtension}
   @protected
   void registerSignalServiceExtension({
-    @required String name,
-    @required AsyncCallback callback,
+    required String name,
+    required AsyncCallback callback,
   }) {
     assert(name != null);
     assert(callback != null);
@@ -346,9 +348,9 @@ abstract class BindingBase {
   /// {@macro flutter.foundation.bindingBase.registerServiceExtension}
   @protected
   void registerBoolServiceExtension({
-    @required String name,
-    @required AsyncValueGetter<bool> getter,
-    @required AsyncValueSetter<bool> setter,
+    required String name,
+    required AsyncValueGetter<bool> getter,
+    required AsyncValueSetter<bool> setter,
   }) {
     assert(name != null);
     assert(getter != null);
@@ -380,9 +382,9 @@ abstract class BindingBase {
   /// {@macro flutter.foundation.bindingBase.registerServiceExtension}
   @protected
   void registerNumericServiceExtension({
-    @required String name,
-    @required AsyncValueGetter<double> getter,
-    @required AsyncValueSetter<double> setter,
+    required String name,
+    required AsyncValueGetter<double> getter,
+    required AsyncValueSetter<double> setter,
   }) {
     assert(name != null);
     assert(getter != null);
@@ -391,7 +393,7 @@ abstract class BindingBase {
       name: name,
       callback: (Map<String, String> parameters) async {
         if (parameters.containsKey(name)) {
-          await setter(double.parse(parameters[name]));
+          await setter(double.parse(parameters[name]!));
           _postExtensionStateChangedEvent(name, (await getter()).toString());
         }
         return <String, dynamic>{name: (await getter()).toString()};
@@ -442,9 +444,9 @@ abstract class BindingBase {
   /// {@macro flutter.foundation.bindingBase.registerServiceExtension}
   @protected
   void registerStringServiceExtension({
-    @required String name,
-    @required AsyncValueGetter<String> getter,
-    @required AsyncValueSetter<String> setter,
+    required String name,
+    required AsyncValueGetter<String> getter,
+    required AsyncValueSetter<String> setter,
   }) {
     assert(name != null);
     assert(getter != null);
@@ -453,7 +455,7 @@ abstract class BindingBase {
       name: name,
       callback: (Map<String, String> parameters) async {
         if (parameters.containsKey('value')) {
-          await setter(parameters['value']);
+          await setter(parameters['value']!);
           _postExtensionStateChangedEvent(name, await getter());
         }
         return <String, dynamic>{'value': await getter()};
@@ -514,8 +516,8 @@ abstract class BindingBase {
   /// {@endtemplate}
   @protected
   void registerServiceExtension({
-    @required String name,
-    @required ServiceExtensionCallback callback,
+    required String name,
+    required ServiceExtensionCallback callback,
   }) {
     assert(name != null);
     assert(callback != null);
@@ -543,8 +545,8 @@ abstract class BindingBase {
       });
 
       dynamic caughtException;
-      StackTrace caughtStack;
-      Map<String, dynamic> result;
+      StackTrace? caughtStack;
+      late Map<String, dynamic> result;
       try {
         result = await callback(parameters);
       } catch (exception, stack) {

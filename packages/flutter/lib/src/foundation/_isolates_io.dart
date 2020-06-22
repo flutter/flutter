@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+// @dart = 2.9
 
 import 'dart:async';
 import 'dart:developer';
@@ -13,7 +13,7 @@ import 'constants.dart';
 import 'isolates.dart' as isolates;
 
 /// The dart:io implementation of [isolate.compute].
-Future<R> compute<Q, R>(isolates.ComputeCallback<Q, R> callback, Q message, { String debugLabel }) async {
+Future<R> compute<Q, R>(isolates.ComputeCallback<Q, R> callback, Q message, { String? debugLabel }) async {
   debugLabel ??= kReleaseMode ? 'compute' : callback.toString();
   final Flow flow = Flow.begin();
   Timeline.startSync('$debugLabel: start', flow: flow);

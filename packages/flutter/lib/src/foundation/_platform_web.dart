@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+// @dart = 2.9
 
 import 'dart:html' as html;
 import 'platform.dart' as platform;
@@ -14,7 +14,7 @@ platform.TargetPlatform get defaultTargetPlatform {
   // platforms configuration for Flutter.
   platform.TargetPlatform result = _browserPlatform();
   if (platform.debugDefaultTargetPlatformOverride != null)
-    result = platform.debugDefaultTargetPlatformOverride;
+    result = platform.debugDefaultTargetPlatformOverride!;
   return result;
 }
 
