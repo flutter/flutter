@@ -43,7 +43,7 @@ class BotDetector {
       return _persistentToolState.isRunningOnBot = false;
     }
 
-    return _persistentToolState.isRunningOnBot = _platform.environment['BOT'] == 'true'
+    return _persistentToolState.isRunningOnBot = _platform.environment.containsKey('BOT')
 
       // https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
       || _platform.environment['TRAVIS'] == 'true'
