@@ -239,7 +239,7 @@ class _MaterialStateColor extends MaterialStateColor {
 /// See also:
 ///
 ///  * [MouseCursor] for introduction on the mouse cursor system.
-///  * [SystemMouseCursors], which defines cursors that are supported by most
+///  * [SystemMouseCursors], which defines cursors that are supported by
 ///    native platforms.
 abstract class MaterialStateMouseCursor extends MouseCursor implements MaterialStateProperty<MouseCursor> {
   /// Creates a [MaterialStateMouseCursor].
