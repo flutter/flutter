@@ -14,17 +14,11 @@ import 'base/file_system.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
 import 'features.dart';
-import 'flutter_manifest.dart';
 import 'globals.dart' as globals;
 import 'platform_plugins.dart';
 import 'project.dart';
 import 'windows/property_sheet.dart';
 import 'windows/visual_studio_solution_utils.dart';
-
-const String _invalidPlatformsErrorMessage = '''
-Did not find a valid `platforms` map, it could be that the project is still using the legacy format for plugins.
-See https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms for an instruction on how to specify supported platforms.
-''';
 
 void _renderTemplateToFile(String template, dynamic context, String filePath) {
   final String renderedTemplate = globals.templateRenderer
@@ -189,7 +183,7 @@ class Plugin {
   ///    ios:
   ///      pluginClass: SamplePlugin
   static YamlMap createPlatformsYamlMap(List<String> platforms, String pluginClass, String androidPackage) {
-    Map<String, dynamic> map = <String, dynamic>{};
+    final Map<String, dynamic> map = <String, dynamic>{};
     for (final String platform in platforms) {
       map[platform] = <String, String>{
         'pluginClass': pluginClass,
@@ -475,40 +469,6 @@ List<dynamic> _createPluginLegacyDependencyGraph(List<Plugin> plugins) {
     });
   }
   return directAppDependencies;
-}
-
-bool _isPlatformKeyInsidePluginKey(final List<String> fileContents, int platformKeyIndex) {
-  int pluginKeyIndex = platformKeyIndex - 1;
-  while (pluginKeyIndex >= 0) {
-    final String lineWithoutSpace = fileContents[pluginKeyIndex].replaceAll(' ', '');
-    if (lineWithoutSpace.contains('#') || lineWithoutSpace.isEmpty) {
-      pluginKeyIndex --;
-      continue;
-    }
-    if (lineWithoutSpace.contains('plugin:')){
-      return true;
-    }
-    return false;
-  }
-  return false;
-}
-
-List<int> _findDummyPlatformMapLines(final List<String> fileContents, int startIndex) {
-  bool foundDummyPlatformKey = false; // If this is true, start looking for "pluginClass" key.
-  final List<int> keyIndexes = <int>[];
-  for (int i = 0; i < fileContents.length; i ++) {
-    final String lineWithoutSpace = fileContents[i].replaceAll(' ', '');
-    if (lineWithoutSpace.contains('#') || lineWithoutSpace.isEmpty) {
-      continue;
-    }
-    if (foundDummyPlatformKey && lineWithoutSpace == 'pluginClass:somePluginClass') {
-      keyIndexes.add(i);
-    } else if (lineWithoutSpace == 'some_platform:'){
-      foundDummyPlatformKey = true;
-      keyIndexes.add(i);
-    }
-  }
-  return keyIndexes;
 }
 
 // The .flutter-plugins file will be DEPRECATED in favor of .flutter-plugins-dependencies.

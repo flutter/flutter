@@ -1304,13 +1304,6 @@ flutter:
     });
 
     group('pubspec', () {
-      const String _pubspecWithNoPlatform = '''
-  flutter:
-    plugin:
-      platforms:
-        some_platform:
-          pluginClass: somePluginClass
-  ''';
 
       Directory projectDir;
       Directory tempDir;
