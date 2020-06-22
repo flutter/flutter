@@ -867,39 +867,6 @@ void main() {
     );
   });
 
-  testWidgets('OutlineButton uses borderSide width to paint', (WidgetTester tester) async {
-    final GlobalKey buttonKey = GlobalKey();
-    const double thickness = 12.5;
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Material(
-          child: Align(
-            alignment: Alignment.topLeft,
-            child: OutlineButton(
-              key: buttonKey,
-              borderSide: const BorderSide(
-                  color: Colors.black12,
-                  width: thickness),
-              onPressed: () {},
-              child: const SizedBox(
-                  width: 120,
-                  height: 50,
-                  child: Text('ABC'),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    final Finder outlineButton = find.byType(OutlineButton);
-    expect(outlineButton, paints..path(
-      includes: const <Offset>[Offset(60, thickness / 2.0)],
-      excludes: const <Offset>[Offset(60, thickness / 3.0)],
-    ));
-  });
-
   testWidgets('OutlineButton contributes semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
