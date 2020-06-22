@@ -8006,7 +8006,7 @@ void main() {
     inputWidth = editable.size.width;
     expect(cursorRight, inputWidth - kCaretGap);
 
-    // Since increasing the width of the input moves it right edge further to
+    // Since increasing the width of the input moves its right edge further to
     // the right, the cursor has followed this change and still appears on the
     // right of the input.
     setState(() {
