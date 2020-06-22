@@ -29,13 +29,13 @@ void main() {
 
   group('AssetBundle asset variants', () {
     FileSystem testFileSystem;
+
     setUp(() async {
       testFileSystem = MemoryFileSystem(
         style: globals.platform.isWindows
           ? FileSystemStyle.windows
           : FileSystemStyle.posix,
       );
-      testFileSystem.currentDirectory = testFileSystem.systemTempDirectory.createTempSync('flutter_asset_bundle_variant_test.');
     });
 
     testUsingContext('main asset and variants', () async {
