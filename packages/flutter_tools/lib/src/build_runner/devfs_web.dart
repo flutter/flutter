@@ -556,6 +556,11 @@ class WebAssetServer implements AssetReader {
   Future<String> sourceMapContents(String serverPath) async {
     return utf8.decode(_sourcemaps[serverPath]);
   }
+
+  @override
+  Future<String> metadataContents(String serverPath) {
+    return null;
+  }
 }
 
 class ConnectionResult {

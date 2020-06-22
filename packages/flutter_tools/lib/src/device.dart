@@ -352,7 +352,7 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
     return deviceNotifier.onRemoved;
   }
 
-  void dispose() => stopPolling();
+  Future<void> dispose() async => await stopPolling();
 
   @override
   String toString() => '$name device discovery';
@@ -646,7 +646,7 @@ class DebuggingOptions {
     this.enableSoftwareRendering = false,
     this.skiaDeterministicRendering = false,
     this.traceSkia = false,
-    this.traceWhitelist,
+    this.traceAllowlist,
     this.traceSystrace = false,
     this.endlessTraceBuffer = false,
     this.dumpSkpOnShaderCompilation = false,
@@ -676,7 +676,7 @@ class DebuggingOptions {
       this.webRunHeadless = false,
       this.webBrowserDebugPort,
       this.cacheSkSL = false,
-      this.traceWhitelist,
+      this.traceAllowlist,
     }) : debuggingEnabled = false,
       useTestFonts = false,
       startPaused = false,
@@ -704,7 +704,7 @@ class DebuggingOptions {
   final bool enableSoftwareRendering;
   final bool skiaDeterministicRendering;
   final bool traceSkia;
-  final String traceWhitelist;
+  final String traceAllowlist;
   final bool traceSystrace;
   final bool endlessTraceBuffer;
   final bool dumpSkpOnShaderCompilation;
