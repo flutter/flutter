@@ -702,7 +702,7 @@ class TextField extends StatefulWidget {
   ///
   /// The [mouseCursor] is the only property of [TextField] that controls the
   /// appearance of the mouse pointer. All other properties related to "cursor"
-  /// stands for the text cursor, which is usually a blinking vertical line at
+  /// stand for the text cursor, which is usually a blinking vertical line at
   /// the editing position.
   final MouseCursor mouseCursor;
 
