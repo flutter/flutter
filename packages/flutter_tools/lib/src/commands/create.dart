@@ -41,8 +41,7 @@ const List<String> _availablePlatforms = <String>[
 
 const String _noPlatformsErrorMessage =
         '''
-You have generated a new plugin project without
-specifying the `--platforms` flag. A plugin project that supports no platforms is generated.
+The plugin project was generated without specifying the `--platforms` flag, no platforms are currently supported.
 To add platforms, run `flutter create -t plugin --platforms <platforms> .` under the same
 directory. You can also find a detailed instruction on how to add platforms in the `pubspec.yaml` at https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms.
         ''';
@@ -503,7 +502,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
     }
     return FlutterCommandResult.success();
   }
-  
+
   void _addPlatformsOptions() {
     argParser.addMultiOption('platforms',
         help: 'the platforms supported by this project.'
@@ -610,7 +609,9 @@ Add below lines to under the `platform:` key:
       globals.printStatus(prettyYaml, emphasis: true, color: TerminalColor.blue);
       globals.printStatus(
           '''
-For detailed instructions on how to format the pubspec.yaml to support platforms, see:
+If the `platforms` key does not exist in the `pubspec.yaml`, it might because that the plugin project does not
+use the multi-platforms plugin format. We highly recommend a migration to the multi-platforms plugin format.
+For detailed instructions on how to format the pubspec.yaml to support platforms using the multi-platforms format, see:
 https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms
 
           ''', emphasis: true);
