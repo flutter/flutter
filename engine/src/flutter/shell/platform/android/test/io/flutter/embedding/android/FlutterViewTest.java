@@ -12,6 +12,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.media.ImageReader;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
@@ -368,6 +369,17 @@ public class FlutterViewTest {
     // Left padding is zero because the rotation is 270deg
     assertEquals(0, viewportMetricsCaptor.getValue().paddingLeft);
     assertEquals(100, viewportMetricsCaptor.getValue().paddingRight);
+  }
+
+  @Test
+  public void flutterImageView_acquiresImageAndInvalidates() {
+    final ImageReader mockReader = mock(ImageReader.class);
+    final FlutterImageView imageView =
+        spy(new FlutterImageView(RuntimeEnvironment.application, mockReader));
+
+    imageView.acquireLatestImage();
+    verify(mockReader, times(1)).acquireLatestImage();
+    verify(imageView, times(1)).invalidate();
   }
 
   /*
