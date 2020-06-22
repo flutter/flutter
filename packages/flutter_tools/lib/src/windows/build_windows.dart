@@ -69,7 +69,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
 
   final String buildModeName = getNameForBuildMode(buildInfo.mode ?? BuildMode.release);
   final String configuration = toTitleCase(getNameForBuildMode(buildInfo.mode ?? BuildMode.release));
-  final Directory buildDirectory = globals.fs.directory(getWindowsBuildDirectory()).childDirectory('cmakeXXX').childDirectory(buildModeName); // XXX
+  final Directory buildDirectory = globals.fs.directory(getWindowsBuildDirectory()).childDirectory(buildModeName); // XXX
   //final String solutionPath = windowsProject.solutionFile.path;
   final String solutionPath = buildDirectory.childFile('cmaketest.sln').path; // XXX Read from cmake.
   final Stopwatch sw = Stopwatch()..start();
@@ -104,11 +104,11 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   if (result != 0) {
     throwToolExit('Build process failed. To view the stack trace, please run `flutter run -d windows -v`.');
   }
-  await _runInstall(visualStudio.cmakePath, buildDirectory);
+  await _runInstall(visualStudio.cmakePath, buildDirectory, buildModeName);
   globals.flutterUsage.sendTiming('build', 'vs_build', Duration(milliseconds: sw.elapsedMilliseconds));
 }
 
-Future<void> _runInstall(String cmakePath, Directory buildDir) async {
+Future<void> _runInstall(String cmakePath, Directory buildDir, String buildModeName) async {
   final Stopwatch sw = Stopwatch()..start();
 
   int result;
@@ -118,6 +118,8 @@ Future<void> _runInstall(String cmakePath, Directory buildDir) async {
         cmakePath,
         '--install',
         buildDir.path,
+        '--config',
+        toTitleCase(buildModeName),
       ],
       trace: true,
     );

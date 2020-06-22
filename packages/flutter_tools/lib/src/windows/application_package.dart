@@ -10,6 +10,7 @@ import '../base/file_system.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../globals.dart' as globals;
+import '../linux/cmake.dart';
 import '../project.dart';
 
 abstract class WindowsApp extends ApplicationPackage {
@@ -61,16 +62,13 @@ class BuildableWindowsApp extends WindowsApp {
 
   @override
   String executable(BuildMode buildMode) {
-    final File exeNameFile = project.nameFile;
-    if (!exeNameFile.existsSync()) {
-      throwToolExit('Failed to find Windows executable name');
-    }
+    final String binaryName = getCmakeExecutableName(project);
     return globals.fs.path.join(
         getWindowsBuildDirectory(),
-        'x64',
-        toTitleCase(getNameForBuildMode(buildMode)),
-        'Runner',
-        exeNameFile.readAsStringSync().trim());
+        getNameForBuildMode(buildMode),
+        'bundle',
+        '$binaryName.exe',
+    );
   }
 
   @override

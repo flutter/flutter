@@ -4,10 +4,10 @@
 
 import '../project.dart';
 
-/// Extracts the `BINARY_NAME` from a Linux project CMake file.
+/// Extracts the `BINARY_NAME` from a project's CMake file.
 ///
 /// Returns `null` if it cannot be found.
-String getCmakeExecutableName(LinuxProject project) {
+String getCmakeExecutableName(CmakeBasedProject project) {
   if (!project.cmakeFile.existsSync()) {
     return null;
   }
