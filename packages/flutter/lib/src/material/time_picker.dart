@@ -268,7 +268,7 @@ class _HourMinuteControl extends StatelessWidget {
     final TextStyle style = timePickerTheme.hourMinuteTextStyle ?? themeData.textTheme.headline2;
     final ShapeBorder shape = timePickerTheme.hourMinuteShape ?? _kDefaultShape;
 
-    final Set<MaterialState> states = isSelected ? <MaterialState>{MaterialState.selected} : {};
+    final Set<MaterialState> states = isSelected ? <MaterialState>{MaterialState.selected} : <MaterialState>{};
     return Container(
       height: _kTimePickerHeaderControlHeight,
       child: Material(
@@ -525,9 +525,9 @@ class _DayPeriodControl extends StatelessWidget {
               : Colors.transparent;
         });
     final bool amSelected = selectedTime.period == DayPeriod.am;
-    final Set<MaterialState> amStates = amSelected ? <MaterialState>{MaterialState.selected} : {};
+    final Set<MaterialState> amStates = amSelected ? <MaterialState>{MaterialState.selected} : <MaterialState>{};
     final bool pmSelected = !amSelected;
-    final Set<MaterialState> pmStates = pmSelected ? <MaterialState>{MaterialState.selected} : {};
+    final Set<MaterialState> pmStates = pmSelected ? <MaterialState>{MaterialState.selected} : <MaterialState>{};
     final TextStyle textStyle = timePickerTheme.dayPeriodTextStyle ?? Theme.of(context).textTheme.subtitle1;
     final TextStyle amStyle = textStyle.copyWith(
       color: MaterialStateProperty.resolveAs(textColor, amStates),
