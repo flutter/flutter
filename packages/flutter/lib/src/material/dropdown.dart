@@ -1485,6 +1485,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
        assert(isExpanded != null),
        assert(itemHeight == null || itemHeight >= kMinInteractiveDimension),
        assert(autofocus != null),
+       assert(autovalidate != null),
        assert(
          autovalidate == false && autovalidateMode == null ||
          autovalidate == true && autovalidateMode == null ||
