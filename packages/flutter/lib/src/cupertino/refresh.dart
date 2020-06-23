@@ -13,8 +13,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'activity_indicator.dart';
-import 'colors.dart';
-import 'icons.dart';
+
+const double _kActivityIndicatorRadius = 14.0;
+const double _kActivityIndicatorMargin = 16.0;
 
 class _CupertinoSliverRefresh extends SingleChildRenderObjectWidget {
   const _CupertinoSliverRefresh({
@@ -294,7 +295,7 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
     Key key,
     this.refreshTriggerPullDistance = _defaultRefreshTriggerPullDistance,
     this.refreshIndicatorExtent = _defaultRefreshIndicatorExtent,
-    this.builder = buildSimpleRefreshIndicator,
+    this.builder = buildRefreshIndicator,
     this.onRefresh,
   }) : assert(refreshTriggerPullDistance != null),
        assert(refreshTriggerPullDistance > 0.0),
@@ -330,9 +331,6 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
   /// A builder that's called as this sliver's size changes, and as the state
   /// changes.
   ///
-  /// A default simple Twitter-style pull-to-refresh indicator is provided if
-  /// not specified.
-  ///
   /// Can be set to null, in which case nothing will be drawn in the overscrolled
   /// space.
   ///
@@ -361,41 +359,66 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
     return state.refreshState;
   }
 
-  /// Builds a simple refresh indicator that fades in a bottom aligned down
-  /// arrow before the refresh is triggered, a [CupertinoActivityIndicator]
-  /// during the refresh and fades the [CupertinoActivityIndicator] away when
-  /// the refresh is done.
-  static Widget buildSimpleRefreshIndicator(
+  /// Builds a refresh indicator that reflects the standard iOS pull-to-refresh
+  /// behavior. Specifically, this entails presenting an activity indicator that
+  /// changes depending on the current refreshState. As the user initially drags
+  /// down, the indicator will gradually reveal individual ticks until the refresh
+  /// becomes armed. At this point, the animated activity indicator will begin rotating.
+  /// Once the refresh has completed, the activity indicator shrinks away as the
+  /// space allocation animates back to closed.
+  static Widget buildRefreshIndicator(
     BuildContext context,
     RefreshIndicatorMode refreshState,
     double pulledExtent,
     double refreshTriggerPullDistance,
     double refreshIndicatorExtent,
   ) {
-    const Curve opacityCurve = Interval(0.4, 0.8, curve: Curves.easeInOut);
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 16.0),
-        child: refreshState == RefreshIndicatorMode.drag
-            ? Opacity(
-                opacity: opacityCurve.transform(
-                  min(pulledExtent / refreshTriggerPullDistance, 1.0)
-                ),
-                child: Icon(
-                  CupertinoIcons.down_arrow,
-                  color: CupertinoDynamicColor.resolve(CupertinoColors.inactiveGray, context),
-                  size: 36.0,
-                ),
-              )
-            : Opacity(
-                opacity: opacityCurve.transform(
-                  min(pulledExtent / refreshIndicatorExtent, 1.0)
-                ),
-                child: const CupertinoActivityIndicator(radius: 14.0),
-              ),
+    final double percentageComplete = pulledExtent / refreshTriggerPullDistance;
+
+    // Place the indicator at the top of the sliver that opens up. Note that we're using
+    // a Stack/Positioned widget because the CupertinoActivityIndicator does some internal
+    // translations based on the current size (which grows as the user drags) that makes
+    // Padding calculations difficult. Rather than be reliant on the internal implementation
+    // of the activity indicator, the Positioned widget allows us to be explicit where the
+    // widget gets placed. Also note that the indicator should appear over the top of the
+    // dragged widget, hence the use of Overflow.visible.
+    return Center(
+      child: Stack(
+        overflow: Overflow.visible,
+        children: <Widget>[
+          Positioned(
+            top: _kActivityIndicatorMargin,
+            left: 0.0,
+            right: 0.0,
+            child: _buildIndicatorForRefreshState(refreshState, _kActivityIndicatorRadius, percentageComplete),
+          ),
+        ],
       ),
     );
+  }
+
+  static Widget _buildIndicatorForRefreshState(RefreshIndicatorMode refreshState, double radius, double percentageComplete) {
+    switch (refreshState) {
+      case RefreshIndicatorMode.drag:
+        // While we're dragging, we draw individual ticks of the spinner while simultaneously
+        // easing the opacity in. Note that the opacity curve values here were derived using
+        // Xcode through inspecting a native app running on iOS 13.5.
+        const Curve opacityCurve = Interval(0.0, 0.35, curve: Curves.easeInOut);
+        return Opacity(
+          opacity: opacityCurve.transform(percentageComplete),
+          child: CupertinoActivityIndicator.partiallyRevealed(radius: radius, progress: percentageComplete),
+        );
+      case RefreshIndicatorMode.armed:
+      case RefreshIndicatorMode.refresh:
+        // Once we're armed or performing the refresh, we just show the normal spinner.
+        return CupertinoActivityIndicator(radius: radius);
+      case RefreshIndicatorMode.done:
+        // When the user lets go, the standard transition is to shrink the spinner.
+        return CupertinoActivityIndicator(radius: radius * percentageComplete);
+      default:
+        // Anything else doesn't show anything.
+        return Container();
+    }
   }
 
   @override
