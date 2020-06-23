@@ -38,6 +38,7 @@ void main() {
       expect(() => flutterPlatform.loadChannel('test2.dart', MockSuitePlatform()), throwsToolExit());
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('ensureConfiguration throws an error if a precompiled '
@@ -53,6 +54,7 @@ void main() {
       expect(() => flutterPlatform.loadChannel('test2.dart', MockSuitePlatform()), throwsToolExit());
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     group('The FLUTTER_TEST environment variable is passed to the test process', () {

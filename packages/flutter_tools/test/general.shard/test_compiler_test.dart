@@ -34,7 +34,7 @@ void main() {
     fileSystem.file('test/foo.dart').createSync(recursive: true);
     fileSystem.file(globalPackagesPath)
       ..createSync()
-      ..writeAsStringSync('\n');
+      ..writeAsStringSync('flutter_test:flutter_test/');
     residentCompiler = MockResidentCompiler();
   });
 
