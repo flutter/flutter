@@ -100,7 +100,7 @@ void main () {
 
       testWithoutContext('skips migrating script with embed', () {
         const String contents = '''
-shellScript = "/bin/sh \"\$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\\" embed\\n/bin/sh \"\$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\\" thin\n";
+shellScript = "/bin/sh \"\$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\\" embed\\n/bin/sh \"\$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\\" thin";
 			''';
         xcodeProjectInfoFile.writeAsStringSync(contents);
 
