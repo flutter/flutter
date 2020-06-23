@@ -617,8 +617,8 @@ https://flutter.dev/docs/development/packages-and-plugins/developing-packages#pl
     final FlutterProject project = FlutterProject.fromDirectory(directory);
     final bool generateAndroid = templateContext['android'] == true;
     if (generateAndroid) {
-        gradle.updateLocalProperties(
-          project: project, requireAndroidSdk: false);
+      gradle.updateLocalProperties(
+        project: project, requireAndroidSdk: false);
     }
 
     final String projectName = templateContext['projectName'] as String;
