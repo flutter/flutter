@@ -223,9 +223,9 @@ class KernelSnapshot extends Target {
     // See https://github.com/flutter/flutter/issues/44724
     bool forceLinkPlatform;
     switch (targetPlatform) {
-      case TargetPlatform.darwin_x64:
-      case TargetPlatform.windows_x64:
-      case TargetPlatform.linux_x64:
+      case TargetPlatform.darwin:
+      case TargetPlatform.windows:
+      case TargetPlatform.linux:
         forceLinkPlatform = true;
         break;
       default:

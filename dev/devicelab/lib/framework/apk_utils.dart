@@ -105,7 +105,7 @@ String get _androidHome {
   final String androidHome = Platform.environment['ANDROID_HOME'] ??
       Platform.environment['ANDROID_SDK_ROOT'];
   if (androidHome == null || androidHome.isEmpty) {
-    throw Exception('Unset env flag: `ANDROID_HOME` or `ANDROID_SDK_ROOT`.');
+    throw Exception('Environment variable `ANDROID_SDK_ROOT` is not set.');
   }
   return androidHome;
 }

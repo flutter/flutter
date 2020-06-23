@@ -48,13 +48,13 @@ class UnpackLinux extends Target {
       .getArtifactPath(
         Artifact.linuxDesktopPath,
         mode: buildMode,
-        platform: TargetPlatform.linux_x64,
+        platform: TargetPlatform.linux,
       );
     final String headersPath = environment.artifacts
       .getArtifactPath(
         Artifact.linuxHeaders,
         mode: buildMode,
-        platform: TargetPlatform.linux_x64,
+        platform: TargetPlatform.linux,
       );
     final Directory outputDirectory = environment.fileSystem.directory(
       environment.fileSystem.path.join(
@@ -71,7 +71,7 @@ class UnpackLinux extends Target {
       clientSourcePaths: <String>[headersPath],
       icuDataPath: environment.artifacts.getArtifactPath(
         Artifact.icuData,
-        platform: TargetPlatform.linux_x64,
+        platform: TargetPlatform.linux,
       )
     );
     final DepfileService depfileService = DepfileService(
@@ -127,7 +127,7 @@ abstract class BundleLinuxAssets extends Target {
     final Depfile depfile = await copyAssets(
       environment,
       outputDirectory,
-      targetPlatform: TargetPlatform.linux_x64,
+      targetPlatform: TargetPlatform.linux,
     );
     final DepfileService depfileService = DepfileService(
       fileSystem: environment.fileSystem,
@@ -206,7 +206,7 @@ class ProfileBundleLinuxAssets extends BundleLinuxAssets {
   @override
   List<Target> get dependencies => <Target>[
     ...super.dependencies,
-    const LinuxAotBundle(AotElfProfile(TargetPlatform.linux_x64)),
+    const LinuxAotBundle(AotElfProfile(TargetPlatform.linux)),
   ];
 }
 
@@ -222,6 +222,6 @@ class ReleaseBundleLinuxAssets extends BundleLinuxAssets {
   @override
   List<Target> get dependencies => <Target>[
     ...super.dependencies,
-    const LinuxAotBundle(AotElfRelease(TargetPlatform.linux_x64)),
+    const LinuxAotBundle(AotElfRelease(TargetPlatform.linux)),
   ];
 }

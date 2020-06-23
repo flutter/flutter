@@ -91,7 +91,7 @@ void main() {
       'foo',
     );
     globals.fs.file(path).createSync(recursive: true);
-    const Source fizzSource = Source.artifact(Artifact.windowsDesktopPath, platform: TargetPlatform.windows_x64);
+    const Source fizzSource = Source.artifact(Artifact.windowsDesktopPath, platform: TargetPlatform.windows);
     fizzSource.accept(visitor);
 
     expect(visitor.sources.single.resolveSymbolicLinksSync(), globals.fs.path.absolute(path));
@@ -228,7 +228,7 @@ void main() {
     );
     visitor = SourceVisitor(environment);
 
-    const Source fizzSource = Source.artifact(Artifact.windowsDesktopPath, platform: TargetPlatform.windows_x64);
+    const Source fizzSource = Source.artifact(Artifact.windowsDesktopPath, platform: TargetPlatform.windows);
     fizzSource.accept(visitor);
 
     expect(visitor.sources.single.path, contains('engine.version'));

@@ -236,6 +236,8 @@ void main() {
         any,
         workingDirectory: anyNamed('workingDirectory'),
         environment: anyNamed('environment'),
+        stdoutEncoding: utf8,
+        stderrEncoding: utf8,
       )).thenThrow(const ProcessException('vswhere', <String>[]));
       final VisualStudio visualStudio = VisualStudio(
         logger: BufferLogger.test(),
@@ -253,6 +255,8 @@ void main() {
         any,
         workingDirectory: anyNamed('workingDirectory'),
         environment: anyNamed('environment'),
+        stdoutEncoding: utf8,
+        stderrEncoding: utf8,
       )).thenThrow(const ProcessException('vswhere', <String>[]));
       final VisualStudio visualStudio = VisualStudio(
         logger: BufferLogger.test(),
@@ -271,6 +275,8 @@ void main() {
         any,
         workingDirectory: anyNamed('workingDirectory'),
         environment: anyNamed('environment'),
+        stdoutEncoding: utf8,
+        stderrEncoding: utf8,
       )).thenAnswer((Invocation invocation) {
         return FakeProcessResult(exitCode: 1, stderr: '', stdout: '');
       });

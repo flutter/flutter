@@ -92,6 +92,8 @@ void main() {
       find.text('I am the very model of a modern major general.'),
       findsOneWidget,
     );
+    await tester.tap(find.text('Pirate package '));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
     expect(find.text('Pirate license'), findsOneWidget);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/54385
 
@@ -136,9 +138,23 @@ void main() {
 
     await tester.pumpAndSettle();
 
+    // Check for packages.
     expect(find.text('AAA'), findsOneWidget);
-    expect(find.text('BBB'), findsOneWidget);
     expect(find.text('Another package'), findsOneWidget);
+
+    // Check license is displayed after entering into license page for 'AAA'.
+    await tester.tap(find.text('AAA'));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+    expect(find.text('BBB'), findsOneWidget);
+
+    /// Go back to list of packages.
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+
+    /// Check license is displayed after entering into license page for
+    /// 'Another package'.
+    await tester.tap(find.text('Another package'));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
     expect(find.text('Another license'), findsOneWidget);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/54385
 
@@ -197,9 +213,24 @@ void main() {
       find.text('I am the very model of a modern major general.'),
       findsOneWidget,
     );
+
+    // Check for packages.
     expect(find.text('AAA'), findsOneWidget);
-    expect(find.text('BBB'), findsOneWidget);
     expect(find.text('Another package'), findsOneWidget);
+
+    // Check license is displayed after entering into license page for 'AAA'.
+    await tester.tap(find.text('AAA'));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+    expect(find.text('BBB'), findsOneWidget);
+
+    /// Go back to list of packages.
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+
+    /// Check license is displayed after entering into license page for
+    /// 'Another package'.
+    await tester.tap(find.text('Another package'));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
     expect(find.text('Another license'), findsOneWidget);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/54385
 
@@ -225,7 +256,12 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(tester.getTopLeft(find.text('DEF')), const Offset(8.0 + safeareaPadding, 287.0));
+    // The position of the top left of app bar title should indicate whether
+    // the safe area is sufficiently respected.
+    expect(
+      tester.getTopLeft(find.text('Licenses')),
+      const Offset(16.0 + safeareaPadding, 18.0 + safeareaPadding),
+    );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/54385
 
   testWidgets('LicensePage returns early if unmounted', (WidgetTester tester) async {
@@ -250,7 +286,7 @@ void main() {
     await tester.pumpAndSettle();
     final FakeLicenseEntry licenseEntry = FakeLicenseEntry();
     licenseCompleter.complete(licenseEntry);
-    expect(licenseEntry.paragraphsCalled, false);
+    expect(licenseEntry.packagesCalled, false);
   });
 
   testWidgets('LicensePage returns late if unmounted', (WidgetTester tester) async {
@@ -275,7 +311,7 @@ void main() {
     );
 
     await tester.pumpAndSettle();
-    expect(licenseEntry.paragraphsCalled, true);
+    expect(licenseEntry.packagesCalled, true);
   });
 
   testWidgets('LicensePage logic defaults to executable name for app name', (WidgetTester tester) async {
@@ -524,16 +560,16 @@ void main() {
 class FakeLicenseEntry extends LicenseEntry {
   FakeLicenseEntry();
 
-  bool get paragraphsCalled => _paragraphsCalled;
-  bool _paragraphsCalled = false;
+  bool get packagesCalled => _packagesCalled;
+  bool _packagesCalled = false;
 
   @override
-  Iterable<String> packages = <String>[];
+  Iterable<LicenseParagraph> paragraphs = <LicenseParagraph>[];
 
   @override
-  Iterable<LicenseParagraph> get paragraphs {
-    _paragraphsCalled = true;
-    return <LicenseParagraph>[];
+  Iterable<String> get packages {
+    _packagesCalled = true;
+    return <String>[];
   }
 }
 

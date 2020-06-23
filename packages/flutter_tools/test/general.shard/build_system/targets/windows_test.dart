@@ -197,7 +197,7 @@ void main() {
 
     environment.buildDir.childFile('app.so').createSync(recursive: true);
 
-    await const WindowsAotBundle(AotElfProfile(TargetPlatform.windows_x64)).build(environment);
+    await const WindowsAotBundle(AotElfProfile(TargetPlatform.windows)).build(environment);
     await const ProfileBundleWindowsAssets().build(environment);
 
     // Depfile is created and so is copied.
@@ -224,7 +224,7 @@ void main() {
 
     environment.buildDir.childFile('app.so').createSync(recursive: true);
 
-    await const WindowsAotBundle(AotElfRelease(TargetPlatform.windows_x64)).build(environment);
+    await const WindowsAotBundle(AotElfRelease(TargetPlatform.windows)).build(environment);
     await const ReleaseBundleWindowsAssets().build(environment);
 
     // Depfile is created and so is copied.

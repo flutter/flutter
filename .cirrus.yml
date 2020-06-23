@@ -121,7 +121,8 @@ task:
         - dart --enable-asserts ./dev/bots/analyze.dart
 
     - name: fuchsia_precache-linux # linux-only
-      only_if: "changesInclude('.cirrus.yml', 'bin/internal/engine.version')"
+      # Skip on release branches
+      only_if: "changesInclude('.cirrus.yml', 'bin/internal/engine.version') && ($CIRRUS_BASE_BRANCH == 'master' || $CIRRUS_BRANCH == 'master')"
       script:
         - flutter precache --fuchsia --no-android --no-ios
         - flutter precache --flutter_runner --no-android --no-ios

@@ -283,11 +283,9 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
   Widget build(BuildContext context) {
     return Stack(
       children: <Widget>[
-        SingleChildScrollView(
-          child: SizedBox(
-            height: _maxDayPickerHeight,
-            child: _buildPicker(),
-          ),
+        SizedBox(
+          height: _subHeaderHeight + _maxDayPickerHeight,
+          child: _buildPicker(),
         ),
         // Put the mode toggle button on top so that it won't be covered up by the _MonthPicker
         _DatePickerModeToggleButton(
@@ -476,12 +474,17 @@ class _MonthPicker extends StatefulWidget {
 }
 
 class _MonthPickerState extends State<_MonthPicker> {
+  final GlobalKey _pageViewKey = GlobalKey();
   DateTime _currentMonth;
   DateTime _nextMonthDate;
   DateTime _previousMonthDate;
   PageController _pageController;
   MaterialLocalizations _localizations;
   TextDirection _textDirection;
+  Map<LogicalKeySet, Intent> _shortcutMap;
+  Map<Type, Action<Intent>> _actionMap;
+  FocusNode _dayGridFocus;
+  DateTime _focusedDay;
 
   @override
   void initState() {
@@ -490,6 +493,18 @@ class _MonthPickerState extends State<_MonthPicker> {
     _previousMonthDate = utils.addMonthsToMonthDate(_currentMonth, -1);
     _nextMonthDate = utils.addMonthsToMonthDate(_currentMonth, 1);
     _pageController = PageController(initialPage: utils.monthDelta(widget.firstDate, _currentMonth));
+    _shortcutMap = <LogicalKeySet, Intent>{
+      LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
+      LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
+      LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
+      LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
+    };
+    _actionMap = <Type, Action<Intent>>{
+      NextFocusIntent: CallbackAction<NextFocusIntent>(onInvoke: _handleGridNextFocus),
+      PreviousFocusIntent: CallbackAction<PreviousFocusIntent>(onInvoke: _handleGridPreviousFocus),
+      DirectionalFocusIntent: CallbackAction<DirectionalFocusIntent>(onInvoke: _handleDirectionFocus),
+    };
+    _dayGridFocus = FocusNode(debugLabel: 'Day Grid');
   }
 
   @override
@@ -502,19 +517,58 @@ class _MonthPickerState extends State<_MonthPicker> {
   @override
   void dispose() {
     _pageController?.dispose();
+    _dayGridFocus.dispose();
     super.dispose();
   }
 
-  void _handleMonthPageChanged(int monthPage) {
-    final DateTime monthDate = utils.addMonthsToMonthDate(widget.firstDate, monthPage);
-    if (_currentMonth.year != monthDate.year || _currentMonth.month != monthDate.month) {
-      _currentMonth = DateTime(monthDate.year, monthDate.month);
-      _previousMonthDate = utils.addMonthsToMonthDate(_currentMonth, -1);
-      _nextMonthDate = utils.addMonthsToMonthDate(_currentMonth, 1);
-      widget.onDisplayedMonthChanged?.call(_currentMonth);
-    }
+  void _handleDateSelected(DateTime selectedDate) {
+    _focusedDay = selectedDate;
+    widget.onChanged?.call(selectedDate);
   }
 
+  void _handleMonthPageChanged(int monthPage) {
+    setState(() {
+      final DateTime monthDate = utils.addMonthsToMonthDate(widget.firstDate, monthPage);
+      if (!utils.isSameMonth(_currentMonth, monthDate)) {
+        _currentMonth = DateTime(monthDate.year, monthDate.month);
+        _previousMonthDate = utils.addMonthsToMonthDate(_currentMonth, -1);
+        _nextMonthDate = utils.addMonthsToMonthDate(_currentMonth, 1);
+        widget.onDisplayedMonthChanged?.call(_currentMonth);
+        if (_focusedDay != null && !utils.isSameMonth(_focusedDay, _currentMonth)) {
+          // We have navigated to a new month with the grid focused, but the
+          // focused day is not in this month. Choose a new one trying to keep
+          // the same day of the month.
+          _focusedDay = _focusableDayForMonth(_currentMonth, _focusedDay.day);
+        }
+      }
+    });
+  }
+
+  /// Returns a focusable date for the given month.
+  ///
+  /// If the preferredDay is available in the month it will be returned,
+  /// otherwise the first selectable day in the month will be returned. If
+  /// no dates are selectable in the month, then it will return null.
+  DateTime _focusableDayForMonth(DateTime month, int preferredDay) {
+    final int daysInMonth = utils.getDaysInMonth(month.year, month.month);
+
+    // Can we use the preferred day in this month?
+    if (preferredDay <= daysInMonth) {
+      final DateTime newFocus = DateTime(month.year, month.month, preferredDay);
+      if (_isSelectable(newFocus))
+        return newFocus;
+    }
+
+    // Start at the 1st and take the first selectable date.
+    for (int day = 1; day <= daysInMonth; day++) {
+      final DateTime newFocus = DateTime(month.year, month.month, day);
+      if (_isSelectable(newFocus))
+        return newFocus;
+    }
+    return null;
+  }
+
+  /// Navigate to the next month.
   void _handleNextMonth() {
     if (!_isDisplayingLastMonth) {
       SemanticsService.announce(
@@ -528,6 +582,7 @@ class _MonthPickerState extends State<_MonthPicker> {
     }
   }
 
+  /// Navigate to the previous month.
   void _handlePreviousMonth() {
     if (!_isDisplayingFirstMonth) {
       SemanticsService.announce(
@@ -539,6 +594,15 @@ class _MonthPickerState extends State<_MonthPicker> {
         curve: Curves.ease,
       );
     }
+  }
+
+  /// Navigate to the given month.
+  void _showMonth(DateTime month) {
+    final int monthPage = utils.monthDelta(widget.firstDate, month);
+    _pageController.animateToPage(monthPage,
+      duration: _monthScrollDuration,
+      curve: Curves.ease
+    );
   }
 
   /// True if the earliest allowable month is displayed.
@@ -555,13 +619,96 @@ class _MonthPickerState extends State<_MonthPicker> {
     );
   }
 
+  /// Handler for when the overall day grid obtains or loses focus.
+  void _handleGridFocusChange(bool focused) {
+    setState(() {
+      if (focused && _focusedDay == null) {
+        if (utils.isSameMonth(widget.selectedDate, _currentMonth)) {
+          _focusedDay = widget.selectedDate;
+        } else if (utils.isSameMonth(widget.currentDate, _currentMonth)) {
+          _focusedDay = _focusableDayForMonth(_currentMonth, widget.currentDate.day);
+        } else {
+          _focusedDay = _focusableDayForMonth(_currentMonth, 1);
+        }
+      }
+    });
+  }
+
+  /// Move focus to the next element after the day grid.
+  void _handleGridNextFocus(NextFocusIntent intent) {
+    _dayGridFocus.requestFocus();
+    _dayGridFocus.nextFocus();
+  }
+
+  /// Move focus to the previous element before the day grid.
+  void _handleGridPreviousFocus(PreviousFocusIntent intent) {
+    _dayGridFocus.requestFocus();
+    _dayGridFocus.previousFocus();
+  }
+
+  /// Move the internal focus date in the direction of the given intent.
+  ///
+  /// This will attempt to move the focused day to the next selectable day in
+  /// the given direction. If the new date is not in the current month, then
+  /// the page view will be scrolled to show the new date's month.
+  ///
+  /// For horizontal directions, it will move forward or backward a day (depending
+  /// on the current [TextDirection]). For vertical directions it will move up and
+  /// down a week at a time.
+  void _handleDirectionFocus(DirectionalFocusIntent intent) {
+    assert(_focusedDay != null);
+    setState(() {
+      final DateTime nextDate = _nextDateInDirection(_focusedDay, intent.direction);
+      if (nextDate != null) {
+        _focusedDay = nextDate;
+        if (!utils.isSameMonth(_focusedDay, _currentMonth)) {
+          _showMonth(_focusedDay);
+        }
+      }
+    });
+  }
+
+  static const Map<TraversalDirection, Duration> _directionOffset = <TraversalDirection, Duration>{
+    TraversalDirection.up: Duration(days: -DateTime.daysPerWeek),
+    TraversalDirection.right: Duration(days: 1),
+    TraversalDirection.down: Duration(days: DateTime.daysPerWeek),
+    TraversalDirection.left: Duration(days: -1),
+  };
+
+  Duration _dayDirectionOffset(TraversalDirection traversalDirection, TextDirection textDirection) {
+    // Swap left and right if the text direction if RTL
+    if (textDirection == TextDirection.rtl) {
+      if (traversalDirection == TraversalDirection.left)
+        traversalDirection = TraversalDirection.right;
+      else if (traversalDirection == TraversalDirection.right)
+        traversalDirection = TraversalDirection.left;
+    }
+    return _directionOffset[traversalDirection];
+  }
+
+  DateTime _nextDateInDirection(DateTime date, TraversalDirection direction) {
+    final TextDirection textDirection = Directionality.of(context);
+    DateTime nextDate = date.toUtc().add(_dayDirectionOffset(direction, textDirection));
+    while (!nextDate.isBefore(widget.firstDate) && !nextDate.isAfter(widget.lastDate)) {
+      if (_isSelectable(nextDate)) {
+        return nextDate;
+      }
+      nextDate = nextDate.add(_dayDirectionOffset(direction, textDirection));
+    }
+    return null;
+  }
+
+  bool _isSelectable(DateTime date) {
+    return widget.selectableDayPredicate == null || widget.selectableDayPredicate.call(date);
+  }
+
   Widget _buildItems(BuildContext context, int index) {
     final DateTime month = utils.addMonthsToMonthDate(widget.firstDate, index);
     return _DayPicker(
       key: ValueKey<DateTime>(month),
       selectedDate: widget.selectedDate,
       currentDate: widget.currentDate,
-      onChanged: widget.onChanged,
+      onChanged: _handleDateSelected,
       firstDate: widget.firstDate,
       lastDate: widget.lastDate,
       displayedMonth: month,
@@ -599,14 +746,26 @@ class _MonthPickerState extends State<_MonthPicker> {
               ],
             ),
           ),
-          _DayHeaders(),
           Expanded(
-            child: PageView.builder(
-              controller: _pageController,
-              itemBuilder: _buildItems,
-              itemCount: utils.monthDelta(widget.firstDate, widget.lastDate) + 1,
-              scrollDirection: Axis.horizontal,
-              onPageChanged: _handleMonthPageChanged,
+            child: FocusableActionDetector(
+              shortcuts: _shortcutMap,
+              actions: _actionMap,
+              focusNode: _dayGridFocus,
+              onFocusChange: _handleGridFocusChange,
+              child: _FocusedDate(
+                date: _dayGridFocus.hasFocus ? _focusedDay : null,
+                child: Container(
+                  color: _dayGridFocus.hasFocus ? Theme.of(context).focusColor : null,
+                  child: PageView.builder(
+                    key: _pageViewKey,
+                    controller: _pageController,
+                    itemBuilder: _buildItems,
+                    itemCount: utils.monthDelta(widget.firstDate, widget.lastDate) + 1,
+                    scrollDirection: Axis.horizontal,
+                    onPageChanged: _handleMonthPageChanged,
+                  ),
+                ),
+              ),
             ),
           ),
         ],
@@ -615,11 +774,35 @@ class _MonthPickerState extends State<_MonthPicker> {
   }
 }
 
+/// InheritedWidget indicating what the current focused date is for its children.
+///
+/// This is used by the [_MonthPicker] to let its children [_DayPicker]s know
+/// what the currently focused date (if any) should be.
+class _FocusedDate extends InheritedWidget {
+  const _FocusedDate({
+    Key key,
+    Widget child,
+    this.date
+  }) : super(key: key, child: child);
+
+  final DateTime date;
+
+  @override
+  bool updateShouldNotify(_FocusedDate oldWidget) {
+    return !utils.isSameDay(date, oldWidget.date);
+  }
+
+  static DateTime of(BuildContext context) {
+    final _FocusedDate focusedDate = context.dependOnInheritedWidgetOfExactType<_FocusedDate>();
+    return focusedDate?.date;
+  }
+}
+
 /// Displays the days of a given month and allows choosing a day.
 ///
 /// The days are arranged in a rectangular grid with one column for each day of
 /// the week.
-class _DayPicker extends StatelessWidget {
+class _DayPicker extends StatefulWidget {
   /// Creates a day picker.
   _DayPicker({
     Key key,
@@ -669,10 +852,81 @@ class _DayPicker extends StatelessWidget {
   final SelectableDayPredicate selectableDayPredicate;
 
   @override
+  _DayPickerState createState() => _DayPickerState();
+}
+
+class _DayPickerState extends State<_DayPicker> {
+
+  /// List of [FocusNode]s, one for each day of the month.
+  List<FocusNode> _dayFocusNodes;
+
+  @override
+  void initState() {
+    super.initState();
+    final int daysInMonth = utils.getDaysInMonth(widget.displayedMonth.year, widget.displayedMonth.month);
+    _dayFocusNodes = List<FocusNode>.generate(
+      daysInMonth,
+      (int index) => FocusNode(skipTraversal: true, debugLabel: 'Day ${index + 1}')
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Check to see if the focused date is in this month, if so focus it.
+    final DateTime focusedDate = _FocusedDate.of(context);
+    if (focusedDate != null && utils.isSameMonth(widget.displayedMonth, focusedDate)) {
+      _dayFocusNodes[focusedDate.day - 1].requestFocus();
+    }
+  }
+
+  @override
+  void dispose() {
+    for (final FocusNode node in _dayFocusNodes) {
+      node.dispose();
+    }
+    super.dispose();
+  }
+
+  /// Builds widgets showing abbreviated days of week. The first widget in the
+  /// returned list corresponds to the first day of week for the current locale.
+  ///
+  /// Examples:
+  ///
+  /// ```
+  /// ┌ Sunday is the first day of week in the US (en_US)
+  /// |
+  /// S M T W T F S  <-- the returned list contains these widgets
+  /// _ _ _ _ _ 1 2
+  /// 3 4 5 6 7 8 9
+  ///
+  /// ┌ But it's Monday in the UK (en_GB)
+  /// |
+  /// M T W T F S S  <-- the returned list contains these widgets
+  /// _ _ _ _ 1 2 3
+  /// 4 5 6 7 8 9 10
+  /// ```
+  List<Widget> _dayHeaders(TextStyle headerStyle, MaterialLocalizations localizations) {
+    final List<Widget> result = <Widget>[];
+    for (int i = localizations.firstDayOfWeekIndex; true; i = (i + 1) % 7) {
+      final String weekday = localizations.narrowWeekdays[i];
+      result.add(ExcludeSemantics(
+        child: Center(child: Text(weekday, style: headerStyle)),
+      ));
+      if (i == (localizations.firstDayOfWeekIndex - 1) % 7)
+        break;
+    }
+    return result;
+  }
+
+  @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final TextTheme textTheme = Theme.of(context).textTheme;
+    final TextStyle headerStyle = textTheme.caption?.apply(
+      color: colorScheme.onSurface.withOpacity(0.60),
+    );
     final TextStyle dayStyle = textTheme.caption;
     final Color enabledDayColor = colorScheme.onSurface.withOpacity(0.87);
     final Color disabledDayColor = colorScheme.onSurface.withOpacity(0.38);
@@ -680,13 +934,13 @@ class _DayPicker extends StatelessWidget {
     final Color selectedDayBackground = colorScheme.primary;
     final Color todayColor = colorScheme.primary;
 
-    final int year = displayedMonth.year;
-    final int month = displayedMonth.month;
+    final int year = widget.displayedMonth.year;
+    final int month = widget.displayedMonth.month;
 
     final int daysInMonth = utils.getDaysInMonth(year, month);
     final int dayOffset = utils.firstDayOffset(year, month, localizations);
 
-    final List<Widget> dayItems = <Widget>[];
+    final List<Widget> dayItems = _dayHeaders(headerStyle, localizations);
     // 1-based day of month, e.g. 1-31 for January, and 1-29 for February on
     // a leap year.
     int day = -dayOffset;
@@ -696,13 +950,14 @@ class _DayPicker extends StatelessWidget {
         dayItems.add(Container());
       } else {
         final DateTime dayToBuild = DateTime(year, month, day);
-        final bool isDisabled = dayToBuild.isAfter(lastDate) ||
-            dayToBuild.isBefore(firstDate) ||
-            (selectableDayPredicate != null && !selectableDayPredicate(dayToBuild));
+        final bool isDisabled = dayToBuild.isAfter(widget.lastDate) ||
+            dayToBuild.isBefore(widget.firstDate) ||
+            (widget.selectableDayPredicate != null && !widget.selectableDayPredicate(dayToBuild));
+        final bool isSelectedDay = utils.isSameDay(widget.selectedDate, dayToBuild);
+        final bool isToday = utils.isSameDay(widget.currentDate, dayToBuild);
 
         BoxDecoration decoration;
         Color dayColor = enabledDayColor;
-        final bool isSelectedDay = utils.isSameDay(selectedDate, dayToBuild);
         if (isSelectedDay) {
           // The selected day gets a circle background highlight, and a
           // contrasting text color.
@@ -713,7 +968,7 @@ class _DayPicker extends StatelessWidget {
           );
         } else if (isDisabled) {
           dayColor = disabledDayColor;
-        } else if (utils.isSameDay(currentDate, dayToBuild)) {
+        } else if (isToday) {
           // The current day gets a different text color and a circle stroke
           // border.
           dayColor = todayColor;
@@ -735,9 +990,11 @@ class _DayPicker extends StatelessWidget {
             child: dayWidget,
           );
         } else {
-          dayWidget = GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: () => onChanged(dayToBuild),
+          dayWidget = InkResponse(
+            focusNode: _dayFocusNodes[day - 1],
+            onTap: () => widget.onChanged(dayToBuild),
+            radius: _dayPickerRowHeight / 2 + 4,
+            splashColor: selectedDayBackground.withOpacity(0.38),
             child: Semantics(
               // We want the day of month to be spoken first irrespective of the
               // locale-specific preferences or TextDirection. This is because
@@ -781,7 +1038,7 @@ class _DayPickerGridDelegate extends SliverGridDelegate {
     const int columnCount = DateTime.daysPerWeek;
     final double tileWidth = constraints.crossAxisExtent / columnCount;
     final double tileHeight = math.min(_dayPickerRowHeight,
-      constraints.viewportMainAxisExtent / _maxDayPickerRowCount);
+      constraints.viewportMainAxisExtent / (_maxDayPickerRowCount + 1));
     return SliverGridRegularTileLayout(
       childCrossAxisExtent: tileWidth,
       childMainAxisExtent: tileHeight,
@@ -797,64 +1054,6 @@ class _DayPickerGridDelegate extends SliverGridDelegate {
 }
 
 const _DayPickerGridDelegate _dayPickerGridDelegate = _DayPickerGridDelegate();
-
-class _DayHeaders extends StatelessWidget {
-  /// Builds widgets showing abbreviated days of week. The first widget in the
-  /// returned list corresponds to the first day of week for the current locale.
-  ///
-  /// Examples:
-  ///
-  /// ```
-  /// ┌ Sunday is the first day of week in the US (en_US)
-  /// |
-  /// S M T W T F S  <-- the returned list contains these widgets
-  /// _ _ _ _ _ 1 2
-  /// 3 4 5 6 7 8 9
-  ///
-  /// ┌ But it's Monday in the UK (en_GB)
-  /// |
-  /// M T W T F S S  <-- the returned list contains these widgets
-  /// _ _ _ _ 1 2 3
-  /// 4 5 6 7 8 9 10
-  /// ```
-  List<Widget> _getDayHeaders(TextStyle headerStyle, MaterialLocalizations localizations) {
-    final List<Widget> result = <Widget>[];
-    for (int i = localizations.firstDayOfWeekIndex; true; i = (i + 1) % 7) {
-      final String weekday = localizations.narrowWeekdays[i];
-      result.add(ExcludeSemantics(
-        child: Center(child: Text(weekday, style: headerStyle)),
-      ));
-      if (i == (localizations.firstDayOfWeekIndex - 1) % 7)
-        break;
-    }
-    return result;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final ColorScheme colorScheme = theme.colorScheme;
-    final TextStyle dayHeaderStyle = theme.textTheme.caption?.apply(
-      color: colorScheme.onSurface.withOpacity(0.60),
-    );
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final List<Widget> labels = _getDayHeaders(dayHeaderStyle, localizations);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: _monthPickerHorizontalPadding,
-      ),
-      child: GridView.custom(
-        shrinkWrap: true,
-        gridDelegate: _dayPickerGridDelegate,
-        childrenDelegate: SliverChildListDelegate(
-          labels,
-          addRepaintBoundaries: false,
-        ),
-      ),
-    );
-  }
-}
 
 /// A scrollable list of years to allow picking a year.
 class _YearPicker extends StatefulWidget {

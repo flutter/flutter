@@ -153,6 +153,7 @@ String generateTestBootstrap({
   File testConfigFile,
   bool updateGoldens = false,
   String languageVersionHeader = '',
+  bool nullSafety = false,
 }) {
   assert(testUrl != null);
   assert(host != null);

@@ -15,7 +15,7 @@ import 'macos_workflow.dart';
 /// A device that represents a desktop MacOS target.
 class MacOSDevice extends DesktopDevice {
   MacOSDevice() : super(
-      'macOS',
+      'macos',
       platformType: PlatformType.macos,
       ephemeral: false,
   );
@@ -24,10 +24,10 @@ class MacOSDevice extends DesktopDevice {
   bool isSupported() => true;
 
   @override
-  String get name => 'macOS';
+  String get name => 'macOS desktop';
 
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.darwin_x64;
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.darwin;
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
