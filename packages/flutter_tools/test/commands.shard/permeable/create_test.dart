@@ -403,7 +403,7 @@ void main() {
   testUsingContext('plugin project supports web', () async {
     await _createAndAnalyzeProject(
       projectDir,
-      <String>['--template=plugin'],
+      <String>['--template=plugin', '--platforms=web'],
       <String>[
         'lib/flutter_project.dart',
         'lib/flutter_project_web.dart',
@@ -1617,6 +1617,26 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
   });
 
+  testUsingContext('plugin supports web if requested', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=web', projectDir.path]);
+    expect(projectDir.childDirectory('lib').childFile('flutter_project_web.dart').existsSync(), true);
+    validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: const <String>[
+      'web'
+    ], pluginClass: 'FlutterProjectPlugin',
+    unexpectedPlatforms: <String>['some_platform'],
+    androidIdentifier: 'com.example.flutter_project',
+    webFileName: 'flutter_project_web.dart');
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWebEnabled: false),
+  });
+
   testUsingContext('create an empty plugin, then add ios', () async {
     Cache.flutterRoot = '../..';
     when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
@@ -1695,6 +1715,21 @@ void main() {
     expect(projectDir.childDirectory('example').childDirectory('windows').existsSync(), true);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+  });
+
+  testUsingContext('create an empty plugin, then add web', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=windows', projectDir.path]);
+
+    expect(projectDir.childDirectory('lib').childFile('flutter_project_web.dart').existsSync(), true);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
   });
 
   testUsingContext('create a plugin with ios, then add macos', () async {

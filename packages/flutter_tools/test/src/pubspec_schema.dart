@@ -28,7 +28,7 @@ void writeEmptySchemaFile(FileSystem filesystem) {
 }
 
 /// Check if the pubspec.yaml file under the `projectDir` is valid for a plugin project.
-void validatePubspecForPlugin({@required String projectDir, @required String pluginClass, @required List<String> expectedPlatforms, List<String> unexpectedPlatforms = const <String>[], String androidIdentifier}) {
+void validatePubspecForPlugin({@required String projectDir, @required String pluginClass, @required List<String> expectedPlatforms, List<String> unexpectedPlatforms = const <String>[], String androidIdentifier, String webFileName}) {
     final FlutterManifest manifest = FlutterManifest.createFromPath(projectDir+'/pubspec.yaml', fileSystem: globals.fs, logger: globals.logger);
     final YamlMap platformsMap = YamlMap.wrap(manifest.supportedPlatforms);
     for (final String platform in expectedPlatforms) {
@@ -36,6 +36,9 @@ void validatePubspecForPlugin({@required String projectDir, @required String plu
       expect(platformsMap[platform]['pluginClass'], pluginClass);
       if (platform == 'android') {
         expect(platformsMap[platform]['package'], androidIdentifier);
+      }
+      if (platform == 'web') {
+        expect(platformsMap[platform]['fileName'], webFile);
       }
     }
     for (final String platform in unexpectedPlatforms) {
