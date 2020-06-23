@@ -102,9 +102,9 @@ static jmethodID g_on_display_platform_view_method = nullptr;
 
 static jmethodID g_on_display_overlay_surface_method = nullptr;
 
-static jfieldID g_overlay_surface_id_field = nullptr;
+static jmethodID g_overlay_surface_id_method = nullptr;
 
-static jfieldID g_overlay_surface_surface_field = nullptr;
+static jmethodID g_overlay_surface_surface_method = nullptr;
 
 // Called By Java
 static jlong AttachJNI(JNIEnv* env,
@@ -708,16 +708,17 @@ bool RegisterApi(JNIEnv* env) {
     FML_LOG(ERROR) << "Could not locate FlutterOverlaySurface class";
     return false;
   }
-  g_overlay_surface_id_field =
-      env->GetFieldID(overlay_surface_class.obj(), "id", "J");
-  if (g_overlay_surface_id_field == nullptr) {
-    FML_LOG(ERROR) << "Could not locate FlutterOverlaySurface.id field";
+  g_overlay_surface_id_method =
+      env->GetMethodID(overlay_surface_class.obj(), "getId", "()J");
+  if (g_overlay_surface_id_method == nullptr) {
+    FML_LOG(ERROR) << "Could not locate FlutterOverlaySurface#getId() method";
     return false;
   }
-  g_overlay_surface_surface_field = env->GetFieldID(
-      overlay_surface_class.obj(), "surface", "Landroid/view/Surface;");
-  if (g_overlay_surface_surface_field == nullptr) {
-    FML_LOG(ERROR) << "Could not locate FlutterOverlaySurface.surface field";
+  g_overlay_surface_surface_method = env->GetMethodID(
+      overlay_surface_class.obj(), "getSurface", "()Landroid/view/Surface;");
+  if (g_overlay_surface_surface_method == nullptr) {
+    FML_LOG(ERROR)
+        << "Could not locate FlutterOverlaySurface#getSurface() method";
     return false;
   }
 
@@ -1147,13 +1148,13 @@ PlatformViewAndroidJNIImpl::FlutterViewCreateOverlaySurface() {
   }
 
   jlong overlay_id =
-      env->GetLongField(overlay.obj(), g_overlay_surface_id_field);
+      env->CallLongMethod(overlay.obj(), g_overlay_surface_id_method);
 
-  fml::jni::ScopedJavaLocalRef<jobject> overlay_surface(
-      env, env->GetObjectField(overlay.obj(), g_overlay_surface_surface_field));
+  jobject overlay_surface =
+      env->CallObjectMethod(overlay.obj(), g_overlay_surface_surface_method);
 
   auto overlay_window = fml::MakeRefCounted<AndroidNativeWindow>(
-      ANativeWindow_fromSurface(env, overlay_surface.obj()));
+      ANativeWindow_fromSurface(env, overlay_surface));
 
   return std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
       overlay_id, std::move(overlay_window));
