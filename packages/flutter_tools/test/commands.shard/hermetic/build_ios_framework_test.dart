@@ -9,7 +9,6 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_ios_framework.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -245,4 +244,3 @@ class MockFlutterVersion extends Mock implements FlutterVersion {}
 class MockGitTagVersion extends Mock implements GitTagVersion {}
 class MockCache extends Mock implements Cache {}
 class MockBuildSystem extends Mock implements BuildSystem {}
-class MockBundleBuilder extends Mock implements BundleBuilder {}
