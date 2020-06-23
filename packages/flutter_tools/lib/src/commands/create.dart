@@ -37,6 +37,7 @@ const List<String> _kAvailablePlatforms = <String>[
         'windows',
         'linux',
         'macos',
+        'web',
       ];
 
 const String _kNoPlatformsErrorMessage = '''
