@@ -69,6 +69,12 @@ void main() {
     return command;
   }
 
+  testUsingContext('bundle is deprecated', () async {
+    final BuildBundleCommand command = BuildBundleCommand(bundleBuilder: mockBundleBuilder);
+    expect(command.deprecated, isTrue);
+    expect(command.hidden, isTrue);
+  });
+
   testUsingContext('bundle getUsage indicate that project is a module', () async {
     final String projectPath = await createProject(tempDir,
         arguments: <String>['--no-pub', '--template=module']);

@@ -71,12 +71,10 @@ class BuildBundleCommand extends BuildSubCommand {
   final String name = 'bundle';
 
   @override
-  final String description = 'Build the Flutter assets directory from your app.';
+  bool get deprecated => true;
 
   @override
-  final String usageFooter = 'The Flutter assets directory contains your '
-      'application code and resources; they are used by some Flutter Android and'
-      ' iOS runtimes.';
+  final String description = 'Replaced by "flutter assemble".';
 
   @override
   Future<Map<CustomDimensions, String>> get usageValues async {
