@@ -12,7 +12,8 @@ import 'package:flutter/widgets.dart';
 
 import 'activity_indicator.dart';
 
-const double _activityIndicatorRadius = 14.0;
+const double _kActivityIndicatorRadius = 14.0;
+const double _kActivityIndicatorMargin = 16.0;
 
 class _CupertinoSliverRefresh extends SingleChildRenderObjectWidget {
   const _CupertinoSliverRefresh({
@@ -384,10 +385,10 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
         overflow: Overflow.visible,
         children: <Widget>[
           Positioned(
-            top: 16.0,
-            left: 0,
-            right: 0,
-            child: _buildIndicatorForRefreshState(refreshState, _activityIndicatorRadius, percentageComplete),
+            top: _kActivityIndicatorMargin,
+            left: 0.0,
+            right: 0.0,
+            child: _buildIndicatorForRefreshState(refreshState, _kActivityIndicatorRadius, percentageComplete),
           ),
         ],
       ),
