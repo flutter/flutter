@@ -126,19 +126,19 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
   FlutterProject _project;
 
   List<BuildInfo> get buildInfos {
-    final List<BuildInfo> buildModes = <BuildInfo>[];
+    final List<BuildInfo> buildInfos = <BuildInfo>[];
 
     if (boolArg('debug')) {
-      buildModes.add(BuildInfo.debug);
+      buildInfos.add(getBuildInfo(forcedBuildMode: BuildMode.debug));
     }
     if (boolArg('profile')) {
-      buildModes.add(BuildInfo.profile);
+      buildInfos.add(getBuildInfo(forcedBuildMode: BuildMode.profile));
     }
     if (boolArg('release')) {
-      buildModes.add(BuildInfo.release);
+      buildInfos.add(getBuildInfo(forcedBuildMode: BuildMode.release));
     }
 
-    return buildModes;
+    return buildInfos;
   }
 
   @override
@@ -377,7 +377,7 @@ end
           mainPath: globals.fs.path.absolute(targetFile),
           assetDirPath: destinationAppFrameworkDirectory.childDirectory('flutter_assets').path,
           precompiledSnapshot: buildInfo.mode != BuildMode.debug,
-          treeShakeIcons: boolArg('tree-shake-icons')
+          treeShakeIcons: buildInfo.treeShakeIcons,
         );
       }
     } finally {
