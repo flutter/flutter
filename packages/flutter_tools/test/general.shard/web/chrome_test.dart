@@ -61,7 +61,7 @@ void main() {
 
   testWithoutContext('can launch chrome and connect to the devtools', () async {
     expect(
-      () async => await testLaunchChrome(
+      () async => await _testLaunchChrome(
         '/.tmp_rand0/flutter_tools_chrome_device.rand0',
         processManager,
         chromeLauncher,
@@ -71,14 +71,14 @@ void main() {
   });
 
   testWithoutContext('cannot have two concurrent instances of chrome', () async {
-    await testLaunchChrome(
+    await _testLaunchChrome(
       '/.tmp_rand0/flutter_tools_chrome_device.rand0',
       processManager,
       chromeLauncher,
     );
 
     expect(
-      () async => await testLaunchChrome(
+      () async => await _testLaunchChrome(
         '/.tmp_rand0/flutter_tools_chrome_device.rand1',
         processManager,
         chromeLauncher,
@@ -88,7 +88,7 @@ void main() {
   });
 
   testWithoutContext('can launch new chrome after stopping a previous chrome', () async {
-    final Chromium chrome = await testLaunchChrome(
+    final Chromium chrome = await _testLaunchChrome(
       '/.tmp_rand0/flutter_tools_chrome_device.rand0',
       processManager,
       chromeLauncher,
@@ -96,7 +96,7 @@ void main() {
     await chrome.close();
 
     expect(
-      () async => await testLaunchChrome(
+      () async => await _testLaunchChrome(
         '/.tmp_rand0/flutter_tools_chrome_device.rand1',
         processManager,
         chromeLauncher,
@@ -221,7 +221,7 @@ void main() {
 
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
 
-Future<Chromium> testLaunchChrome(String userDataDir, FakeProcessManager processManager, ChromiumLauncher chromeLauncher) {
+Future<Chromium> _testLaunchChrome(String userDataDir, FakeProcessManager processManager, ChromiumLauncher chromeLauncher) {
   processManager.addCommand(FakeCommand(
     command: <String>[
       'example_chrome',
