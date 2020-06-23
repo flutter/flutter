@@ -141,11 +141,15 @@ GOTO :after_subroutine
     ENDLOCAL
 
     POPD
-
-    IF "%FLUTTER_TOOL_ARGS%" == "" (
-      "%dart%" --snapshot="%snapshot_path%" --packages="%flutter_tools_dir%\.packages" --no-enable-mirrors "%script_path%"
+    IF "%FLUTTER_AOT_TOOL%" NEQ "" (
+      ECHO Using dart2native...
+      CALL "%dart_sdk_path%\bin\dart2native" --packages="%flutter_tools_dir%\.packages" -o "%snapshot_path%" "%script_path%" >NUL
     ) else (
-      "%dart%" "%FLUTTER_TOOL_ARGS%" --snapshot="%snapshot_path%" --packages="%flutter_tools_dir%\.packages" "%script_path%"
+      IF "%FLUTTER_TOOL_ARGS%" == "" (
+        "%dart%" --snapshot="%snapshot_path%" --packages="%flutter_tools_dir%\.packages" --no-enable-mirrors "%script_path%"
+      ) else (
+        "%dart%" "%FLUTTER_TOOL_ARGS%" --snapshot="%snapshot_path%" --packages="%flutter_tools_dir%\.packages" "%script_path%"
+      )
     )
     IF "%ERRORLEVEL%" NEQ "0" (
       ECHO Error: Unable to create dart snapshot for flutter tool.

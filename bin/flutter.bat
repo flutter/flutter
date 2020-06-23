@@ -51,7 +51,10 @@ REM
 REM Do not use the CALL command in the next line to execute Dart. CALL causes
 REM Windows to re-read the line from disk after the CALL command has finished
 REM regardless of the ampersand chain.
-"%dart%" --disable-dart-dev --packages="%flutter_tools_dir%\.packages" %FLUTTER_TOOL_ARGS% "%snapshot_path%" %* & exit /B !ERRORLEVEL!
-
+IF "%FLUTTER_AOT_TOOL%" NEQ "" (
+  "%snapshot_path%" %* & exit /B !ERRORLEVEL!
+) else (
+  "%dart%" --disable-dart-dev --packages="%flutter_tools_dir%\.packages" %FLUTTER_TOOL_ARGS% "%snapshot_path%" %* & exit /B !ERRORLEVEL!
+)
 :final_exit
 EXIT /B %exit_code%
