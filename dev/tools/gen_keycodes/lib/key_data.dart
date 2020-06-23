@@ -28,6 +28,8 @@ class KeyData {
     String androidNameMap,
     String glfwKeyCodeHeader,
     String glfwNameMap,
+    String gtkKeyCodeHeader,
+    String gtkNameMap,
     String windowsKeyCodeHeader,
     String windowsNameMap,
   )   : assert(chromiumHidCodes != null),
@@ -36,11 +38,14 @@ class KeyData {
         assert(androidNameMap != null),
         assert(glfwKeyCodeHeader != null),
         assert(glfwNameMap != null),
+        assert(gtkKeyCodeHeader != null),
+        assert(gtkNameMap != null),
         assert(windowsKeyCodeHeader != null),
         assert(windowsNameMap != null) {
     _nameToAndroidScanCodes = _readAndroidScanCodes(androidKeyboardLayout);
     _nameToAndroidKeyCode = _readAndroidKeyCodes(androidKeyCodeHeader);
     _nameToGlfwKeyCode = _readGlfwKeyCodes(glfwKeyCodeHeader);
+    _nameToGtkKeyCode = _readGtkKeyCodes(gtkKeyCodeHeader);
     _nameToWindowsKeyCode = _readWindowsKeyCodes(windowsKeyCodeHeader);
     // Cast Android dom map
     final Map<String, List<dynamic>> dynamicAndroidNames = (json.decode(androidNameMap) as Map<String, dynamic>).cast<String, List<dynamic>>();
@@ -50,6 +55,11 @@ class KeyData {
     // Cast GLFW dom map
     final Map<String, List<dynamic>> dynamicGlfwNames = (json.decode(glfwNameMap) as Map<String, dynamic>).cast<String, List<dynamic>>();
     _nameToGlfwName = dynamicGlfwNames.map<String, List<String>>((String key, List<dynamic> value) {
+      return MapEntry<String, List<String>>(key, value.cast<String>());
+    });
+    // Cast GTK dom map
+    final Map<String, List<dynamic>> dynamicGtkNames = (json.decode(gtkNameMap) as Map<String, dynamic>).cast<String, List<dynamic>>();
+    _nameToGtkName = dynamicGtkNames.map<String, List<String>>((String key, List<dynamic> value) {
       return MapEntry<String, List<String>>(key, value.cast<String>());
     });
     // Cast Windows dom map
@@ -97,6 +107,17 @@ class KeyData {
         }
       }
 
+      // GTK key names
+      entry.gtkKeyNames = _nameToGtkName[entry.constantName]?.cast<String>();
+      if (entry.gtkKeyNames != null && entry.gtkKeyNames.isNotEmpty) {
+        for (final String gtkKeyName in entry.gtkKeyNames) {
+          if (_nameToGtkKeyCode[gtkKeyName] != null) {
+            entry.gtkKeyCodes ??= <int>[];
+            entry.gtkKeyCodes.add(_nameToGtkKeyCode[gtkKeyName]);
+          }
+        }
+      }
+
       // Windows key names
       entry.windowsKeyNames = _nameToWindowsName[entry.constantName]?.cast<String>();
       if (entry.windowsKeyNames != null && entry.windowsKeyNames.isNotEmpty) {
@@ -133,6 +154,13 @@ class KeyData {
   /// JSON.
   Map<String, List<String>> _nameToGlfwName;
 
+  /// The mapping from the Flutter name (e.g. "eject") to the GTK name (e.g.
+  /// "GDK_KEY_Eject").
+  ///
+  /// Only populated if data is parsed from the source files, not if parsed from
+  /// JSON.
+  Map<String, List<String>> _nameToGtkName;
+
   /// The mapping from the Android name (e.g. "MEDIA_EJECT") to the integer scan
   /// code (physical location) of the key.
   ///
@@ -153,6 +181,13 @@ class KeyData {
   /// Only populated if data is parsed from the source files, not if parsed from
   /// JSON.
   Map<String, int> _nameToGlfwKeyCode;
+
+  /// The mapping from GTK name (e.g. "GTK_KEY_comma") to the integer key code
+  /// (logical meaning) of the key.
+  ///
+  /// Only populated if data is parsed from the source files, not if parsed from
+  /// JSON.
+  Map<String, int> _nameToGtkKeyCode;
 
   /// The mapping from Widows name (e.g. "RETURN") to the integer key code
   /// (logical meaning) of the key.
@@ -244,6 +279,20 @@ class KeyData {
     return result;
   }
 
+  /// Parses entries from GTK's gdkkeysyms.h key code data file.
+  ///
+  /// Lines in this file look like this (without the ///):
+  ///  /** Space key. */
+  ///  #define GDK_KEY_space 0x020
+  Map<String, int> _readGtkKeyCodes(String headerFile) {
+    final RegExp definedCodes = RegExp(r'#define GDK_KEY_([a-zA-Z0-9_]+)\s*0x([0-9a-f]+),?');
+    final Map<String, int> replaced = <String, int>{};
+    for (final Match match in definedCodes.allMatches(headerFile)) {
+      replaced[match.group(1)] = int.parse(match.group(2), radix: 16);
+    }
+    return replaced;
+  }
+
   Map<String, int> _readWindowsKeyCodes(String headerFile) {
     final RegExp definedCodes = RegExp(r'define VK_([A-Z0-9_]+)\s*([A-Z0-9_x]+),?');
     final Map<String, int> replaced = <String, int>{};
@@ -332,6 +381,8 @@ class Key {
     this.androidKeyCodes,
     this.glfwKeyNames,
     this.glfwKeyCodes,
+    this.gtkKeyNames,
+    this.gtkKeyCodes,
   })  : assert(usbHidCode != null),
         assert(chromiumName != null),
         _constantName = enumName;
@@ -354,6 +405,8 @@ class Key {
       macOsScanCode: map['scanCodes']['macos'] as int,
       glfwKeyNames: (map['names']['glfw'] as List<dynamic>)?.cast<String>(),
       glfwKeyCodes: (map['keyCodes']['glfw'] as List<dynamic>)?.cast<int>(),
+      gtkKeyNames: (map['names']['gtk'] as List<dynamic>)?.cast<String>(),
+      gtkKeyCodes: (map['keyCodes']['gtk'] as List<dynamic>)?.cast<int>(),
     );
   }
 
@@ -402,6 +455,15 @@ class Key {
   /// value.
   List<int> glfwKeyCodes;
 
+  /// The list of names that GTK gives to this key (symbol names minus the
+  /// prefix).
+  List<String> gtkKeyNames;
+
+  /// The list of GTK key codes matching this key, created by looking up the
+  /// Linux name in the GTK data, and substituting the GTK key code
+  /// value.
+  List<int> gtkKeyCodes;
+
   /// Creates a JSON map from the key data.
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
@@ -411,6 +473,7 @@ class Key {
         'english': commentName,
         'chromium': chromiumName,
         'glfw': glfwKeyNames,
+        'gtk': gtkKeyNames,
         'windows': windowsKeyNames,
       },
       'scanCodes': <String, dynamic>{
@@ -424,6 +487,7 @@ class Key {
       'keyCodes': <String, List<int>>{
         'android': androidKeyCodes,
         'glfw': glfwKeyCodes,
+        'gtk': gtkKeyCodes,
         'windows': windowsKeyCodes,
       },
     };

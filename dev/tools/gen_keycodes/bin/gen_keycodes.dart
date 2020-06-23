@@ -49,6 +49,11 @@ Future<String> getGlfwKeyCodes() async {
   return await http.read(keyCodesUri);
 }
 
+Future<String> getGtkKeyCodes() async {
+  final Uri keyCodesUri = Uri.parse('https://gitlab.gnome.org/GNOME/gtk/-/raw/master/gdk/gdkkeysyms.h');
+  return await http.read(keyCodesUri);
+}
+
 Future<void> main(List<String> rawArguments) async {
   final ArgParser argParser = ArgParser();
   argParser.addOption(
@@ -91,6 +96,13 @@ Future<void> main(List<String> rawArguments) async {
         'correct file in the GLFW github repository.',
   );
   argParser.addOption(
+    'gtk-keycodes',
+    defaultsTo: null,
+    help: 'The path to where the GTK keycodes header file should be read. '
+        'If --gtk-keycodes is not specified, the input will be read from the '
+        'correct file in the GTK repository.',
+  );
+  argParser.addOption(
     'windows-keycodes',
     defaultsTo: null,
     help: 'The path to where the Windows keycodes header file should be read. '
@@ -106,6 +118,11 @@ Future<void> main(List<String> rawArguments) async {
     'glfw-domkey',
     defaultsTo: path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'key_name_to_glfw_name.json'),
     help: 'The path to where the GLFW keycode to DomKey mapping is.',
+  );
+  argParser.addOption(
+    'gtk-domkey',
+    defaultsTo: path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'key_name_to_gtk_name.json'),
+    help: 'The path to where the GTK keycode to DomKey mapping is.',
   );
   argParser.addOption(
     'data',
@@ -187,6 +204,13 @@ Future<void> main(List<String> rawArguments) async {
       glfwKeyCodes = File(parsedArguments['glfw-keycodes'] as String).readAsStringSync();
     }
 
+    String gtkKeyCodes;
+    if (parsedArguments['gtk-keycodes'] == null) {
+      gtkKeyCodes = await getGtkKeyCodes();
+    } else {
+      gtkKeyCodes = File(parsedArguments['gtk-keycodes'] as String).readAsStringSync();
+    }
+
     String windowsKeyCodes;
     if (parsedArguments['windows-keycodes'] == null) {
       windowsKeyCodes = await getWindowsKeyCodes();
@@ -196,9 +220,10 @@ Future<void> main(List<String> rawArguments) async {
 
     final String windowsToDomKey = File(parsedArguments['windows-domkey'] as String).readAsStringSync();
     final String glfwToDomKey = File(parsedArguments['glfw-domkey'] as String).readAsStringSync();
+    final String gtkToDomKey = File(parsedArguments['gtk-domkey'] as String).readAsStringSync();
     final String androidToDomKey = File(parsedArguments['android-domkey'] as String).readAsStringSync();
 
-    data = KeyData(hidCodes, androidScanCodes, androidKeyCodes, androidToDomKey, glfwKeyCodes, glfwToDomKey, windowsKeyCodes, windowsToDomKey);
+    data = KeyData(hidCodes, androidScanCodes, androidKeyCodes, androidToDomKey, glfwKeyCodes, glfwToDomKey, gtkKeyCodes, gtkToDomKey, windowsKeyCodes, windowsToDomKey);
 
     const JsonEncoder encoder = JsonEncoder.withIndent('  ');
     File(parsedArguments['data'] as String).writeAsStringSync(encoder.convert(data.toJson()));
@@ -221,7 +246,7 @@ Future<void> main(List<String> rawArguments) async {
   await mapsFile.writeAsString(generator.generateKeyboardMaps());
 
   final CcCodeGenerator ccCodeGenerator = CcCodeGenerator(data);
-  for (final String platform in <String>['android', 'darwin', 'glfw', 'fuchsia', 'linux', 'windows']) {
+  for (final String platform in <String>['android', 'darwin', 'glfw', 'gtk', 'fuchsia', 'linux', 'windows']) {
     final File platformFile = File(path.join(flutterRoot.path, '..', path.join('engine', 'src', 'flutter', 'shell', 'platform', platform, 'keycodes', 'keyboard_map_$platform.h')));
     if (!platformFile.existsSync()) {
       platformFile.createSync(recursive: true);
