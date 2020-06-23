@@ -38,7 +38,7 @@ void validatePubspecForPlugin({@required String projectDir, @required String plu
         expect(platformsMap[platform]['package'], androidIdentifier);
       }
       if (platform == 'web') {
-        expect(platformsMap[platform]['fileName'], webFile);
+        expect(platformsMap[platform]['fileName'], webFileName);
       }
     }
     for (final String platform in unexpectedPlatforms) {
