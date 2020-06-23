@@ -58,6 +58,13 @@ void main() {
     expect(localizations.dateRangePickerHelpText, isNotNull);
     expect(localizations.calendarModeButtonLabel, isNotNull);
     expect(localizations.inputDateModeButtonLabel, isNotNull);
+    expect(localizations.timePickerDialHelpText, isNotNull);
+    expect(localizations.timePickerInputHelpText, isNotNull);
+    expect(localizations.timePickerHourLabel, isNotNull);
+    expect(localizations.timePickerMinuteLabel, isNotNull);
+    expect(localizations.invalidTimeLabel, isNotNull);
+    expect(localizations.dialModeButtonLabel, isNotNull);
+    expect(localizations.inputTimeModeButtonLabel, isNotNull);
     expect(localizations.signedInLabel, isNotNull);
     expect(localizations.hideAccountsLabel, isNotNull);
     expect(localizations.showAccountsLabel, isNotNull);
