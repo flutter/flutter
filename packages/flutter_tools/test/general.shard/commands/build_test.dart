@@ -9,10 +9,12 @@ import 'package:flutter_tools/src/commands/build_apk.dart';
 import 'package:flutter_tools/src/commands/build_appbundle.dart';
 import 'package:flutter_tools/src/commands/build_fuchsia.dart';
 import 'package:flutter_tools/src/commands/build_ios.dart';
+import 'package:flutter_tools/src/commands/build_ios_framework.dart';
 import 'package:flutter_tools/src/commands/build_linux.dart';
 import 'package:flutter_tools/src/commands/build_macos.dart';
 import 'package:flutter_tools/src/commands/build_web.dart';
 import 'package:flutter_tools/src/commands/build_windows.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -29,6 +31,7 @@ void main() {
       BuildAppBundleCommand(verboseHelp: false),
       BuildFuchsiaCommand(verboseHelp: false),
       BuildAarCommand(verboseHelp: false),
+      BuildIOSFrameworkCommand(verboseHelp: false, buildSystem: globals.buildSystem),
     ];
 
     for (final BuildSubCommand command in commands) {
