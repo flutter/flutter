@@ -9,9 +9,6 @@ import static android.view.MotionEvent.PointerProperties;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.graphics.PixelFormat;
-import android.hardware.HardwareBuffer;
-import android.media.ImageReader;
 import android.os.Build;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -20,7 +17,6 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.UiThread;
 import androidx.annotation.VisibleForTesting;
-import io.flutter.embedding.android.FlutterImageView;
 import io.flutter.embedding.engine.FlutterOverlaySurface;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel;
@@ -74,12 +70,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   // platform view that
   // it is associated with(e.g if a platform view creates other views in the same virtual display.
   private final HashMap<Context, View> contextToPlatformView;
-
-  // Map of unique IDs to views that render overlay layers.
-  private HashMap<Long, FlutterImageView> overlayLayerViews;
-
-  // Next available unique ID for use in overlayLayerViews;
-  private long nextOverlayLayerId = 0;
 
   private final PlatformViewsChannel.PlatformViewsHandler channelHandler =
       new PlatformViewsChannel.PlatformViewsHandler() {
@@ -293,7 +283,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     vdControllers = new HashMap<>();
     accessibilityEventsDelegate = new AccessibilityEventsDelegate();
     contextToPlatformView = new HashMap<>();
-    overlayLayerViews = new HashMap<>();
   }
 
   /**
@@ -563,25 +552,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   }
 
   public FlutterOverlaySurface createOverlaySurface() {
-    ImageReader imageReader;
-    if (android.os.Build.VERSION.SDK_INT >= 29) {
-      imageReader =
-          ImageReader.newInstance(
-              flutterView.getWidth(),
-              flutterView.getHeight(),
-              PixelFormat.RGBA_8888,
-              2,
-              HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE | HardwareBuffer.USAGE_GPU_COLOR_OUTPUT);
-    } else {
-      imageReader =
-          ImageReader.newInstance(
-              flutterView.getWidth(), flutterView.getHeight(), PixelFormat.RGBA_8888, 2);
-    }
-
-    FlutterImageView imageView = new FlutterImageView(flutterView.getContext(), imageReader);
-    long id = nextOverlayLayerId++;
-    overlayLayerViews.put(id, imageView);
-
-    return new FlutterOverlaySurface(id, imageReader.getSurface());
+    // TODO: Implement this method. https://github.com/flutter/flutter/issues/58288
+    return null;
   }
 }
