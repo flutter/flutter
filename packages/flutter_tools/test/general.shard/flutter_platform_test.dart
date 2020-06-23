@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -15,6 +17,13 @@ import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
+  FileSystem fileSystem;
+
+  setUp(() {
+    fileSystem = MemoryFileSystem.test();
+    fileSystem.file('.packages').writeAsStringSync('\n');
+  });
+
   group('FlutterPlatform', () {
     testUsingContext('ensureConfiguration throws an error if an '
       'explicitObservatoryPort is specified and more than one test file', () async {
@@ -27,6 +36,8 @@ void main() {
       flutterPlatform.loadChannel('test1.dart', MockSuitePlatform());
 
       expect(() => flutterPlatform.loadChannel('test2.dart', MockSuitePlatform()), throwsToolExit());
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
     });
 
     testUsingContext('ensureConfiguration throws an error if a precompiled '
@@ -40,6 +51,8 @@ void main() {
       flutterPlatform.loadChannel('test1.dart', MockSuitePlatform());
 
       expect(() => flutterPlatform.loadChannel('test2.dart', MockSuitePlatform()), throwsToolExit());
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
     });
 
     group('The FLUTTER_TEST environment variable is passed to the test process', () {
@@ -49,6 +62,7 @@ void main() {
       final Map<Type, Generator> contextOverrides = <Type, Generator>{
         Platform: () => mockPlatform,
         ProcessManager: () => mockProcessManager,
+        FileSystem: () => fileSystem,
       };
 
       setUp(() {
