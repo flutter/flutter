@@ -115,25 +115,6 @@ class Chrome {
       workingDirectory: workingDirectory,
     );
 
-    chromeProcess.stdout
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
-        .listen((String line) {
-      print('[Chrome stdout] $line');
-    }, onDone: () {
-      print('[Chrome stdout done]');
-    });
-
-    chromeProcess.stderr
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
-        .listen((String line) {
-      print('[Chrome stderr] $line');
-    }, onDone: () {
-      print('[Chrome stderr done]');
-    });
-
-
     WipConnection debugConnection;
     if (withDebugging) {
       debugConnection = await _connectToChromeDebugPort(chromeProcess, options.debugPort);
