@@ -733,6 +733,11 @@ abstract class ResidentRunner {
   Completer<int> _finished = Completer<int>();
   bool hotMode;
 
+  /// Whether the compiler was instructed to run with null-safety enabled.
+  @protected
+  bool get usageNullSafety => debuggingOptions?.buildInfo
+    ?.extraFrontEndOptions?.any((String option) => option.contains('non-nullable')) ?? false;
+
   /// Returns true if every device is streaming observatory URIs.
   bool get isWaitingForObservatory {
     return flutterDevices.every((FlutterDevice device) {

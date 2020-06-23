@@ -14,22 +14,24 @@ import '../convert.dart';
 import '../globals.dart' as globals;
 import 'android_studio.dart';
 
+// ANDROID_HOME is deprecated.
+// See https://developer.android.com/studio/command-line/variables.html#envar
 const String kAndroidHome = 'ANDROID_HOME';
 const String kAndroidSdkRoot = 'ANDROID_SDK_ROOT';
 
 // Android SDK layout:
 
-// $ANDROID_HOME/platform-tools/adb
+// $ANDROID_SDK_ROOT/platform-tools/adb
 
-// $ANDROID_HOME/build-tools/19.1.0/aapt, dx, zipalign
-// $ANDROID_HOME/build-tools/22.0.1/aapt
-// $ANDROID_HOME/build-tools/23.0.2/aapt
-// $ANDROID_HOME/build-tools/24.0.0-preview/aapt
-// $ANDROID_HOME/build-tools/25.0.2/apksigner
+// $ANDROID_SDK_ROOT/build-tools/19.1.0/aapt, dx, zipalign
+// $ANDROID_SDK_ROOT/build-tools/22.0.1/aapt
+// $ANDROID_SDK_ROOT/build-tools/23.0.2/aapt
+// $ANDROID_SDK_ROOT/build-tools/24.0.0-preview/aapt
+// $ANDROID_SDK_ROOT/build-tools/25.0.2/apksigner
 
-// $ANDROID_HOME/platforms/android-22/android.jar
-// $ANDROID_HOME/platforms/android-23/android.jar
-// $ANDROID_HOME/platforms/android-N/android.jar
+// $ANDROID_SDK_ROOT/platforms/android-22/android.jar
+// $ANDROID_SDK_ROOT/platforms/android-23/android.jar
+// $ANDROID_SDK_ROOT/platforms/android-N/android.jar
 
 final RegExp _numberedAndroidPlatformRe = RegExp(r'^android-([0-9]+)$');
 final RegExp _sdkVersionRe = RegExp(r'^ro.build.version.sdk=([0-9]+)$');
