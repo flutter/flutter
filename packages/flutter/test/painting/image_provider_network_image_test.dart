@@ -20,8 +20,8 @@ import 'image_data.dart';
 void main() {
   TestRenderingFlutterBinding();
 
-  final DecoderCallback _basicDecoder = (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
-    return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight);
+  final DecoderCallback _basicDecoder = (Uint8List bytes, {int cacheWidth, int cacheHeight, bool allowUpscaling}) {
+    return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling);
   };
 
   _MockHttpClient httpClient;
