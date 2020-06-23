@@ -55,7 +55,7 @@ list(APPEND FLUTTER_LIBRARY_HEADERS
   "fl_view.h"
   "flutter_linux.h"
 )
-list_prepend(FLUTER_LIBRARY_HEADERS "${EPHEMERAL_DIR}/flutter_linux/")
+list_prepend(FLUTTER_LIBRARY_HEADERS "${EPHEMERAL_DIR}/flutter_linux/")
 add_library(flutter INTERFACE)
 target_include_directories(flutter INTERFACE
   "${EPHEMERAL_DIR}"
