@@ -39,7 +39,7 @@ void main() {
 
     testUsingContext('defaults', () async {
       final MockMacOSApp mockMacOSApp = MockMacOSApp();
-      expect(await device.targetPlatform, TargetPlatform.darwin_x64);
+      expect(await device.targetPlatform, TargetPlatform.darwin);
       expect(device.name, 'macOS desktop');
       expect(await device.installApp(mockMacOSApp), true);
       expect(await device.uninstallApp(mockMacOSApp), true);

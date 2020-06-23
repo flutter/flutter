@@ -33,7 +33,7 @@ String flutterFrameworkDir(BuildMode mode) {
 
 String flutterMacOSFrameworkDir(BuildMode mode) {
   return globals.fs.path.normalize(globals.fs.path.dirname(globals.artifacts.getArtifactPath(
-      Artifact.flutterMacOSFramework, platform: TargetPlatform.darwin_x64, mode: mode)));
+      Artifact.flutterMacOSFramework, platform: TargetPlatform.darwin, mode: mode)));
 }
 
 /// Writes or rewrites Xcode property files with the specified information.

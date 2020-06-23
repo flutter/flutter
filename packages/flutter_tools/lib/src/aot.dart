@@ -38,9 +38,9 @@ class AotBuilder {
     bool expectSo = false;
     switch (platform) {
       case TargetPlatform.android:
-      case TargetPlatform.darwin_x64:
-      case TargetPlatform.linux_x64:
-      case TargetPlatform.windows_x64:
+      case TargetPlatform.darwin:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:

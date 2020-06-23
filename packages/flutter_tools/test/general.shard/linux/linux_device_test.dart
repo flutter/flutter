@@ -27,7 +27,7 @@ void main() {
 
   testWithoutContext('LinuxDevice defaults', () async {
     final PrebuiltLinuxApp linuxApp = PrebuiltLinuxApp(executable: 'foo');
-    expect(await device.targetPlatform, TargetPlatform.linux_x64);
+    expect(await device.targetPlatform, TargetPlatform.linux);
     expect(device.name, 'Linux desktop');
     expect(await device.installApp(linuxApp), true);
     expect(await device.uninstallApp(linuxApp), true);

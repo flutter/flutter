@@ -30,7 +30,7 @@ class WindowsDevice extends DesktopDevice {
   String get name => 'Windows desktop';
 
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.windows_x64;
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.windows;
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
