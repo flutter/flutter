@@ -32,7 +32,7 @@ void main() {
   final MockClipboard mockClipboard = MockClipboard();
 
   setUp(() async {
-    // Fill the clipboard so that the PASTE option is available in the text
+    // Fill the clipboard so that the Paste option is available in the text
     // selection menu.
     SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
     await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));

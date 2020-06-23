@@ -370,10 +370,10 @@ flutter:
           exitCode: 1,
         ),
         const FakeCommand(
-          command: <String>['adb', '-s', '1234', 'logcat', '-v', 'time', '-s', 'flutter'],
+          command: <String>['adb', '-s', '1234', 'shell', '-x', 'logcat', '-v', 'time', '-s', 'flutter'],
         ),
         const FakeCommand(
-          command: <String>['adb', '-s', '1234', 'logcat', '-v', 'time'],
+          command: <String>['adb', '-s', '1234', 'shell', '-x', 'logcat', '-v', 'time'],
         )
       ])
     );

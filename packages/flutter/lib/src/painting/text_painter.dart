@@ -563,6 +563,9 @@ class TextPainter {
     }
     _lastMinWidth = minWidth;
     _lastMaxWidth = maxWidth;
+    // A change in layout invalidates the cached caret metrics as well.
+    _previousCaretPosition = null;
+    _previousCaretPrototype = null;
     _paragraph.layout(ui.ParagraphConstraints(width: maxWidth));
     if (minWidth != maxWidth) {
       final double newWidth = maxIntrinsicWidth.clamp(minWidth, maxWidth) as double;

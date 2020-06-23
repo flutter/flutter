@@ -749,6 +749,7 @@ class HotRunner extends ResidentRunner {
         sdkName: sdkName,
         emulator: emulator,
         fullRestart: true,
+        nullSafety: usageNullSafety,
         reason: reason).send();
       status?.cancel();
     }
@@ -790,7 +791,9 @@ class HotRunner extends ResidentRunner {
         sdkName: sdkName,
         emulator: emulator,
         fullRestart: false,
-        reason: reason).send();
+        nullSafety: usageNullSafety,
+        reason: reason,
+      ).send();
       return OperationResult(1, 'hot reload failed to complete', fatal: true);
     } finally {
       status.cancel();
@@ -868,6 +871,7 @@ class HotRunner extends ResidentRunner {
             emulator: emulator,
             fullRestart: false,
             reason: reason,
+            nullSafety: usageNullSafety,
           ).send();
           return OperationResult(1, 'Reload rejected');
         }
@@ -895,6 +899,7 @@ class HotRunner extends ResidentRunner {
           emulator: emulator,
           fullRestart: false,
           reason: reason,
+          nullSafety: usageNullSafety,
         ).send();
         return OperationResult(errorCode, errorMessage);
       }
@@ -1020,6 +1025,7 @@ class HotRunner extends ResidentRunner {
       syncedBytes: updatedDevFS.syncedBytes,
       invalidatedSourcesCount: updatedDevFS.invalidatedSourcesCount,
       transferTimeInMs: devFSTimer.elapsed.inMilliseconds,
+      nullSafety: usageNullSafety,
     ).send();
 
     if (shouldReportReloadTime) {

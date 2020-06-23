@@ -1810,6 +1810,51 @@ void main() {
     expect(getMaterialWidget(materialFinder).shape, roundedRectangleBorder);
   });
 
+  testWidgets('AppBars title has upper limit on text scaling, textScaleFactor = 1, 1.34, 2', (WidgetTester tester) async {
+    double textScaleFactor;
+
+    Widget buildFrame() {
+      return MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            final ThemeData themeData = Theme.of(context);
+            return Theme(
+              data: themeData.copyWith(
+                appBarTheme: themeData.appBarTheme.copyWith(
+                  // ignore: deprecated_member_use_from_same_package
+                  shouldCapTextScaleForTitle: true,
+                ),
+              ),
+              child: MediaQuery(
+                data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+                child: Scaffold(
+                  appBar: AppBar(
+                    centerTitle: false,
+                    title: const Text('Jumbo', style: TextStyle(fontSize: 18)),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    final Finder appBarTitle = find.text('Jumbo');
+
+    textScaleFactor = 1;
+    await tester.pumpWidget(buildFrame());
+    expect(tester.getRect(appBarTitle).height, 18);
+
+    textScaleFactor = 1.34;
+    await tester.pumpWidget(buildFrame());
+    expect(tester.getRect(appBarTitle).height, 24);
+
+    textScaleFactor = 2;
+    await tester.pumpWidget(buildFrame());
+    expect(tester.getRect(appBarTitle).height, 24);
+  });
+
   testWidgets('AppBars with jumbo titles, textScaleFactor = 3, 3.5, 4', (WidgetTester tester) async {
     double textScaleFactor;
     TextDirection textDirection;

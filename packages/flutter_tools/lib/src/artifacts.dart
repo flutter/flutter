@@ -45,14 +45,11 @@ enum Artifact {
   iosDeploy,
   idevicesyslog,
   idevicescreenshot,
-  ideviceinstaller,
   iproxy,
   /// The root of the Linux desktop sources.
   linuxDesktopPath,
   // The root of the cpp headers for Linux desktop.
   linuxHeaders,
-  // The root of the cpp client code for Linux desktop.
-  linuxCppClientWrapper,
   /// The root of the Windows desktop sources.
   windowsDesktopPath,
   /// The root of the cpp client code for Windows desktop.
@@ -116,8 +113,6 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
       return 'idevicesyslog';
     case Artifact.idevicescreenshot:
       return 'idevicescreenshot';
-    case Artifact.ideviceinstaller:
-      return 'ideviceinstaller';
     case Artifact.iproxy:
       return 'iproxy';
     case Artifact.linuxDesktopPath:
@@ -128,8 +123,6 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
       return '';
     case Artifact.windowsCppClientWrapper:
       return 'cpp_client_wrapper';
-    case Artifact.linuxCppClientWrapper:
-      return 'cpp_client_wrapper_glfw';
     case Artifact.skyEnginePath:
       return 'sky_engine';
     case Artifact.flutterMacOSPodspec:
@@ -166,6 +159,11 @@ class EngineBuildPaths {
 
 // Manages the engine artifacts of Flutter.
 abstract class Artifacts {
+  /// A test-specific implementation of artifacts that returns stable paths for
+  /// all artifacts.
+  @visibleForTesting
+  factory Artifacts.test() = _TestArtifacts;
+
   static LocalEngineArtifacts getLocalEngine(EngineBuildPaths engineBuildPaths) {
     return LocalEngineArtifacts(
       engineBuildPaths.targetEngine,
@@ -190,7 +188,7 @@ abstract class Artifacts {
 
 
 /// Manages the engine artifacts downloaded to the local cache.
-class CachedArtifacts extends Artifacts {
+class CachedArtifacts implements Artifacts {
   CachedArtifacts({
     @required FileSystem fileSystem,
     @required Platform platform,
@@ -272,9 +270,6 @@ class CachedArtifacts extends Artifacts {
       case Artifact.iosDeploy:
         final String artifactFileName = _artifactToFileName(artifact);
         return _cache.getArtifactDirectory('ios-deploy').childFile(artifactFileName).path;
-      case Artifact.ideviceinstaller:
-        final String artifactFileName = _artifactToFileName(artifact);
-        return _cache.getArtifactDirectory('ideviceinstaller').childFile(artifactFileName).path;
       case Artifact.iproxy:
         final String artifactFileName = _artifactToFileName(artifact);
         return _cache.getArtifactDirectory('usbmuxd').childFile(artifactFileName).path;
@@ -376,9 +371,6 @@ class CachedArtifacts extends Artifacts {
       case Artifact.windowsCppClientWrapper:
         final String engineArtifactsPath = _cache.getArtifactDirectory('engine').path;
         return _fileSystem.path.join(engineArtifactsPath, 'windows-x64', _artifactToFileName(artifact, platform, mode));
-      case Artifact.linuxCppClientWrapper:
-        final String engineArtifactsPath = _cache.getArtifactDirectory('engine').path;
-        return _fileSystem.path.join(engineArtifactsPath, 'linux-x64', _artifactToFileName(artifact, platform, mode));
       case Artifact.skyEnginePath:
         final Directory dartPackageDirectory = _cache.getCacheDir('pkg');
         return _fileSystem.path.join(dartPackageDirectory.path,  _artifactToFileName(artifact));
@@ -462,7 +454,7 @@ HostPlatform _currentHostPlatformAsHost(Platform platform) {
 }
 
 /// Manages the artifacts of a locally built engine.
-class LocalEngineArtifacts extends Artifacts {
+class LocalEngineArtifacts implements Artifacts {
   LocalEngineArtifacts(
     this.engineOutPath,
     this._hostEngineOutPath, {
@@ -533,16 +525,12 @@ class LocalEngineArtifacts extends Artifacts {
       case Artifact.idevicescreenshot:
       case Artifact.idevicesyslog:
         return _cache.getArtifactDirectory('libimobiledevice').childFile(artifactFileName).path;
-      case Artifact.ideviceinstaller:
-        return _cache.getArtifactDirectory('ideviceinstaller').childFile(artifactFileName).path;
       case Artifact.iosDeploy:
         return _cache.getArtifactDirectory('ios-deploy').childFile(artifactFileName).path;
       case Artifact.iproxy:
         return _cache.getArtifactDirectory('usbmuxd').childFile(artifactFileName).path;
       case Artifact.linuxDesktopPath:
       case Artifact.linuxHeaders:
-        return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);
-      case Artifact.linuxCppClientWrapper:
         return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);
       case Artifact.windowsDesktopPath:
         return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);
@@ -664,4 +652,27 @@ class OverrideArtifacts implements Artifacts {
 /// Locate the Dart SDK.
 String _dartSdkPath(FileSystem fileSystem) {
   return fileSystem.path.join(Cache.flutterRoot, 'bin', 'cache', 'dart-sdk');
+}
+
+class _TestArtifacts implements Artifacts {
+  @override
+  String getArtifactPath(Artifact artifact, {TargetPlatform platform, BuildMode mode}) {
+    final StringBuffer buffer = StringBuffer();
+    buffer.write(artifact);
+    if (platform != null) {
+      buffer.write('.$platform');
+    }
+    if (mode != null) {
+      buffer.write('.$mode');
+    }
+    return buffer.toString();
+  }
+
+  @override
+  String getEngineType(TargetPlatform platform, [ BuildMode mode ]) {
+    return 'test-engine';
+  }
+
+  @override
+  bool get isLocalEngine => false;
 }

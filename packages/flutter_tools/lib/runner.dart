@@ -67,7 +67,16 @@ Future<int> run(
     return await runZoned<Future<int>>(() async {
       try {
         await runner.run(args);
-        return await _exit(0);
+
+        // Triggering [runZoned]'s error callback does not necessarily mean that
+        // we stopped executing the body.  See https://github.com/dart-lang/sdk/issues/42150.
+        if (firstError == null) {
+          return await _exit(0);
+        }
+
+        // We already hit some error, so don't return success.  The error path
+        // (which should be in progress) is responsible for calling _exit().
+        return 1;
       // This catches all exceptions to send to crash logging, etc.
       } catch (error, stackTrace) {  // ignore: avoid_catches_without_on_clauses
         firstError = error;
@@ -79,9 +88,9 @@ Future<int> run(
       // If sending a crash report throws an error into the zone, we don't want
       // to re-try sending the crash report with *that* error. Rather, we want
       // to send the original error that triggered the crash report.
-      final Object e = firstError ?? error;
-      final StackTrace s = firstStackTrace ?? stackTrace;
-      await _handleToolError(e, s, verbose, args, reportCrashes, getVersion);
+      firstError ??= error;
+      firstStackTrace ??= stackTrace;
+      await _handleToolError(firstError, firstStackTrace, verbose, args, reportCrashes, getVersion);
     });
   }, overrides: overrides);
 }

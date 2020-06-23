@@ -12,6 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart';
 
+import 'gesture_utils.dart';
 
 void main() {
   testWidgets('Events bubble up the tree', (WidgetTester tester) async {
@@ -399,12 +400,4 @@ void main() {
       'listeners: down, move, up, cancel, signal',
     ]);
   });
-}
-
-Future<void> scrollAt(Offset position, WidgetTester tester) {
-  final TestPointer testPointer = TestPointer(1, PointerDeviceKind.mouse);
-  // Create a hover event so that |testPointer| has a location when generating the scroll.
-  testPointer.hover(position);
-  final HitTestResult result = tester.hitTestOnBinding(position);
-  return tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)), result);
 }

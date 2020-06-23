@@ -47,7 +47,7 @@ void main() {
       environment: <String, String>{},
       operatingSystem: 'macos',
     );
-    fileSystem = MemoryFileSystem();
+    fileSystem = MemoryFileSystem.test();
     fsUtils = FileSystemUtils(fileSystem: fileSystem, platform: osx);
   });
 
@@ -458,6 +458,12 @@ void main() {
     overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       FileSystem: () => fileSystem,
+      Platform: () => FakePlatform(
+        operatingSystem: 'macos',
+        environment: <String, String>{
+          'HOME': '/'
+        },
+      ),
     });
 
     testUsingContext('unified logging with app name', () async {

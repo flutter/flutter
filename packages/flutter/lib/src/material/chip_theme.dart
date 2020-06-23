@@ -188,7 +188,7 @@ class ChipThemeData with Diagnosticable {
     this.selectedShadowColor,
     this.showCheckmark,
     this.checkmarkColor,
-    @required this.labelPadding,
+    this.labelPadding,
     @required this.padding,
     @required this.shape,
     @required this.labelStyle,
@@ -200,7 +200,6 @@ class ChipThemeData with Diagnosticable {
        assert(disabledColor != null),
        assert(selectedColor != null),
        assert(secondarySelectedColor != null),
-       assert(labelPadding != null),
        assert(padding != null),
        assert(shape != null),
        assert(labelStyle != null),
@@ -249,7 +248,6 @@ class ChipThemeData with Diagnosticable {
     const int selectAlpha = 0x3d; // 12% + 12% = 24%
     const int textLabelAlpha = 0xde; // 87%
     const ShapeBorder shape = StadiumBorder();
-    const EdgeInsetsGeometry labelPadding = EdgeInsets.symmetric(horizontal: 8.0);
     const EdgeInsetsGeometry padding = EdgeInsets.all(4.0);
 
     primaryColor = primaryColor ?? (brightness == Brightness.light ? Colors.black : Colors.white);
@@ -269,7 +267,6 @@ class ChipThemeData with Diagnosticable {
       disabledColor: disabledColor,
       selectedColor: selectedColor,
       secondarySelectedColor: secondarySelectedColor,
-      labelPadding: labelPadding,
       padding: padding,
       shape: shape,
       labelStyle: labelStyle,

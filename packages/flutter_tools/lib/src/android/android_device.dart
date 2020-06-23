@@ -270,7 +270,7 @@ class AndroidDevice extends Device {
       workingDirectory: workingDirectory,
       allowReentrantFlutter: allowReentrantFlutter,
       environment: environment,
-      whiteListFailures: (int value) => allowHeapCorruptionOnWindows(value, _platform),
+      allowedFailures: (int value) => allowHeapCorruptionOnWindows(value, _platform),
     ).stdout.trim();
   }
 
@@ -284,7 +284,7 @@ class AndroidDevice extends Device {
       throwOnError: true,
       workingDirectory: workingDirectory,
       allowReentrantFlutter: allowReentrantFlutter,
-      whiteListFailures: (int value) => allowHeapCorruptionOnWindows(value, _platform),
+      allowedFailures: (int value) => allowHeapCorruptionOnWindows(value, _platform),
     );
   }
 
@@ -644,8 +644,8 @@ class AndroidDevice extends Device {
         ...<String>['--ez', 'skia-deterministic-rendering', 'true'],
       if (debuggingOptions.traceSkia)
         ...<String>['--ez', 'trace-skia', 'true'],
-      if (debuggingOptions.traceWhitelist != null)
-        ...<String>['--ez', 'trace-whitelist', debuggingOptions.traceWhitelist],
+      if (debuggingOptions.traceAllowlist != null)
+        ...<String>['--ez', 'trace-allowlist', debuggingOptions.traceAllowlist],
       if (debuggingOptions.traceSystrace)
         ...<String>['--ez', 'trace-systrace', 'true'],
       if (debuggingOptions.endlessTraceBuffer)
@@ -1024,7 +1024,11 @@ class AdbLogReader extends DeviceLogReader {
     }(await device.apiVersion);
 
     // Start the adb logcat process and filter the most recent logs since `lastTimestamp`.
+    // Some devices (notably LG) will only output logcat via shell
+    // https://github.com/flutter/flutter/issues/51853
     final List<String> args = <String>[
+      'shell',
+      '-x',
       'logcat',
       '-v',
       'time',
@@ -1034,9 +1038,9 @@ class AdbLogReader extends DeviceLogReader {
         'flutter',
       ] else if (apiVersion != null && apiVersion >= kLollipopVersionCode) ...<String>[
         // Otherwise, filter for logs appearing past the present.
-        // Empty `-T` means the timestamp of the logcat command invocation.
+        // '-T 0` means the timestamp of the logcat command invocation.
         '-T',
-        device.lastLogcatTimestamp ?? '',
+        if (device.lastLogcatTimestamp != null) '\'${device.lastLogcatTimestamp}\'' else '0',
       ],
     ];
     final Process process = await processManager.start(device.adbCommandForDevice(args));
@@ -1073,7 +1077,7 @@ class AdbLogReader extends DeviceLogReader {
   // 'W/ActivityManager(pid): '
   static final RegExp _logFormat = RegExp(r'^[VDIWEF]\/.*?\(\s*(\d+)\):\s');
 
-  static final List<RegExp> _whitelistedTags = <RegExp>[
+  static final List<RegExp> _allowedTags = <RegExp>[
     RegExp(r'^[VDIWEF]\/flutter[^:]*:\s+', caseSensitive: false),
     RegExp(r'^[IE]\/DartVM[^:]*:\s+'),
     RegExp(r'^[WEF]\/AndroidRuntime:\s+'),
@@ -1145,7 +1149,7 @@ class AdbLogReader extends DeviceLogReader {
         }
       } else {
         // Filter on approved names and levels.
-        acceptLine = _whitelistedTags.any((RegExp re) => re.hasMatch(line));
+        acceptLine = _allowedTags.any((RegExp re) => re.hasMatch(line));
       }
 
       if (acceptLine) {

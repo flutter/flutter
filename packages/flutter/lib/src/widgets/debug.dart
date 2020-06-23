@@ -242,13 +242,33 @@ bool debugCheckHasMediaQuery(BuildContext context) {
 /// assert(debugCheckHasDirectionality(context));
 /// ```
 ///
+/// To improve the error messages you can add some extra color using the
+/// named arguments.
+///
+///  * why: explain why the direction is needed, for example "to resolve
+///    the 'alignment' argument". Should be an adverb phrase describing why.
+///  * hint: explain why this might be happening, for example "The default
+///    value of the 'aligment' argument of the $runtimeType widget is an
+///    AlignmentDirectional value.". Should be a fully punctuated sentence.
+///  * alternative: provide additional advice specific to the situation,
+///    especially an alternative to providing a Directionality ancestor.
+///    For example, "Alternatively, consider specifying the 'textDirection'
+///    argument.". Should be a funny punctuated sentence.
+///
+/// Each one can be null, in which case it is skipped (this is the default).
+/// If they are non-null, they are included in the order above, interspersed
+/// with the more generic advice regarding [Directionality].
+///
 /// Does nothing if asserts are disabled. Always returns true.
-bool debugCheckHasDirectionality(BuildContext context) {
+bool debugCheckHasDirectionality(BuildContext context, { String why, String hint, String alternative }) {
   assert(() {
     if (context.widget is! Directionality && context.findAncestorWidgetOfExactType<Directionality>() == null) {
+      why = why == null ? '' : ' $why';
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('No Directionality widget found.'),
-        ErrorDescription('${context.widget.runtimeType} widgets require a Directionality widget ancestor.\n'),
+        ErrorDescription('${context.widget.runtimeType} widgets require a Directionality widget ancestor$why.\n'),
+        if (hint != null)
+          ErrorHint(hint),
         context.describeWidget('The specific widget that could not find a Directionality ancestor was'),
         context.describeOwnershipChain('The ownership chain for the affected widget is'),
         ErrorHint(
@@ -259,6 +279,8 @@ bool debugCheckHasDirectionality(BuildContext context) {
           'values, and to resolve EdgeInsetsDirectional, '
           'AlignmentDirectional, and other *Directional objects.'
         ),
+        if (alternative != null)
+          ErrorHint(alternative),
       ]);
     }
     return true;
