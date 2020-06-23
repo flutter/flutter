@@ -19,7 +19,7 @@ class ElevationOverlay {
   ElevationOverlay._();
 
   /// Applies an overlay color to a surface color to indicate
-  /// the level of surface elevation in a dark theme.
+  /// the level of its elevation in a dark theme.
   ///
   /// Material drop shadows can be difficult to see in a dark theme, so the
   /// elevation of a surface should be portrayed with an "overlay" in addition
