@@ -140,6 +140,35 @@ abstract class ButtonStyleButton extends StatefulWidget {
   ///
   /// A convenience method for subclasses.
   static MaterialStateProperty<T> allOrNull<T>(T value) => value == null ? null : MaterialStateProperty.all<T>(value);
+
+  /// Returns an interpolated value based on the [textScaleFactor] parameter:
+  ///
+  ///  * 0 - 1 [geometry1x]
+  ///  * 1 - 2 lerp([geometry1x], [geometry2x], [textScaleFactor] - 1)
+  ///  * 2 - 3 lerp([geometry2x], [geometry3x], [textScaleFactor] - 2)
+  ///  * otherwise [geometry3x]
+  ///
+  /// A convenience method for subclasses.
+  static EdgeInsetsGeometry scaledPadding(
+    EdgeInsetsGeometry geometry1x,
+    EdgeInsetsGeometry geometry2x,
+    EdgeInsetsGeometry geometry3x,
+    double textScaleFactor,
+  ) {
+    assert(geometry1x != null);
+    assert(geometry2x != null);
+    assert(geometry3x != null);
+    assert(textScaleFactor != null && textScaleFactor >= 0);
+
+    if (textScaleFactor <= 1) {
+      return geometry1x;
+    } else if (textScaleFactor >= 3) {
+      return geometry3x;
+    } else if (textScaleFactor <= 2) {
+      return EdgeInsetsGeometry.lerp(geometry1x, geometry2x, textScaleFactor - 1);
+    }
+    return EdgeInsetsGeometry.lerp(geometry2x, geometry3x, textScaleFactor - 2);
+  }
 }
 
 /// The base [State] class for buttons whose style is defined by a [ButtonStyle] object.

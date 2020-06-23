@@ -4,6 +4,9 @@
 
 // @dart = 2.8
 
+import 'dart:math' as math;
+import 'dart:ui' show lerpDouble;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -90,34 +93,11 @@ class TextButton extends ButtonStyleButton {
     VoidCallback onLongPress,
     ButtonStyle style,
     FocusNode focusNode,
-    bool autofocus = false,
-    Clip clipBehavior = Clip.none,
+    bool autofocus,
+    Clip clipBehavior,
     @required Widget icon,
     @required Widget label,
-  }) {
-    assert(icon != null);
-    assert(label != null);
-    final ButtonStyle paddingStyle = ButtonStyle(
-      padding: MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.only(left: 12, right: 16)),
-    );
-    return TextButton(
-      key: key,
-      onPressed: onPressed,
-      onLongPress: onLongPress,
-      style: style == null ? paddingStyle : style.merge(paddingStyle),
-      focusNode: focusNode,
-      autofocus: autofocus,
-      clipBehavior: clipBehavior,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          icon,
-          const SizedBox(width: 8.0),
-          label,
-        ],
-      ),
-    );
-  }
+  }) = _TextButtonWithIcon;
 
   /// A static convenience method that constructs a text button
   /// [ButtonStyle] given simple values.
@@ -205,13 +185,20 @@ class TextButton extends ButtonStyleButton {
   /// or pressed. The button's background color becomes its [Material]
   /// color and is transparent by default.
   ///
-  /// All of the ButtonStyle's defaults appear below. In this list
-  /// "Theme.foo" is shorthand for `Theme.of(context).foo`. Color
-  /// scheme values like "onSurface(0.38)" are shorthand for
+  /// All of the ButtonStyle's defaults appear below.
+  ///
+  /// In this list "Theme.foo" is shorthand for
+  /// `Theme.of(context).foo`. Color scheme values like
+  /// "onSurface(0.38)" are shorthand for
   /// `onSurface.withOpacity(0.38)`. [MaterialStateProperty] valued
   /// properties that are not followed by by a sublist have the same
   /// value for all states, otherwise the values are as specified for
   /// each state and "others" means all other states.
+  ///
+  /// The `textScaleFactor` is the value of
+  /// `MediaQuery.of(context).textScaleFactor` and the names of the
+  /// EdgeInsets constructors and `EdgeInsetsGeometry.lerp` have been
+  /// abbreviated for readability.
   ///
   /// The color of the [textStyle] is not used, the [foreground] color
   /// is used instead.
@@ -226,7 +213,11 @@ class TextButton extends ButtonStyleButton {
   ///   * focused or pressed - Theme.colorScheme.primary(0.12)
   /// * `shadowColor` - Colors.black
   /// * `elevation` - 0
-  /// * `padding` - EdgeInsets.symmetric(horizontal: 8),
+  /// * `padding`
+  ///   * textScaleFactor <= 1 - all(8)
+  ///   * 1 < textScaleFactor <= 2 - lerp(all(8), horizontal(8))
+  ///   * 2 < textScaleFactor <= 3 - lerp(horizontal(8), horizontal(4))
+  ///   * 3 < textScaleFactor - horizontal(4)
   /// * `minimumSize` - Size(64, 36)
   /// * `side` - BorderSide.none
   /// * `shape` - RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))
@@ -237,10 +228,24 @@ class TextButton extends ButtonStyleButton {
   /// * `tapTargetSize` - theme.materialTapTargetSize
   /// * `animationDuration` - kThemeChangeDuration
   /// * `enableFeedback` - true
+  ///
+  /// The default padding values for the [TextButton.icon] factory are slightly different:
+  ///
+  /// * `padding`
+  ///   * textScaleFactor <= 1 - all(8)
+  ///   * 1 < textScaleFactor <= 2 - lerp(all(8), horizontal(4))
+  ///   * 2 < textScaleFactor - horizontal(4)
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
+
+    final EdgeInsetsGeometry scaledPadding = ButtonStyleButton.scaledPadding(
+      const EdgeInsets.all(8),
+      const EdgeInsets.symmetric(horizontal: 8),
+      const EdgeInsets.symmetric(horizontal: 4),
+      MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1,
+    );
 
     return styleFrom(
       primary: colorScheme.primary,
@@ -249,7 +254,7 @@ class TextButton extends ButtonStyleButton {
       shadowColor: const Color(0xFF000000),
       elevation: 0,
       textStyle: theme.textTheme.button,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      padding: scaledPadding,
       minimumSize: const Size(64, 36),
       side: BorderSide.none,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
@@ -323,5 +328,60 @@ class _TextButtonDefaultMouseCursor extends MaterialStateProperty<MouseCursor> w
     if (states.contains(MaterialState.disabled))
       return disabledCursor;
     return enabledCursor;
+  }
+}
+
+class _TextButtonWithIcon extends TextButton {
+  _TextButtonWithIcon({
+    Key key,
+    @required VoidCallback onPressed,
+    VoidCallback onLongPress,
+    ButtonStyle style,
+    FocusNode focusNode,
+    bool autofocus = false,
+    Clip clipBehavior = Clip.none,
+    @required Widget icon,
+    @required Widget label,
+  }) : assert(icon != null),
+       assert(label != null),
+       super(
+         key: key,
+         onPressed: onPressed,
+         onLongPress: onLongPress,
+         style: style,
+         focusNode: focusNode,
+         autofocus: autofocus,
+         clipBehavior: clipBehavior,
+         child: _TextButtonWithIconChild(icon: icon, label: label),
+      );
+
+  @override
+  ButtonStyle defaultStyleOf(BuildContext context) {
+    final EdgeInsetsGeometry scaledPadding = ButtonStyleButton.scaledPadding(
+      const EdgeInsets.all(8),
+      const EdgeInsets.symmetric(horizontal: 4),
+      const EdgeInsets.symmetric(horizontal: 4),
+      MediaQuery.of(context).textScaleFactor,
+    );
+    return super.defaultStyleOf(context).copyWith(
+      padding: MaterialStateProperty.all<EdgeInsetsGeometry>(scaledPadding)
+    );
+  }
+}
+
+class _TextButtonWithIconChild extends StatelessWidget {
+  const _TextButtonWithIconChild({ Key key, this.label, this.icon }) : super(key: key);
+
+  final Widget label;
+  final Widget icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final double scale = MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1;
+    final double gap = scale <= 1 ? 8 : lerpDouble(8, 4, math.min(scale - 1, 1));
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[icon, SizedBox(width: gap), label],
+    );
   }
 }

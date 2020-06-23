@@ -546,7 +546,7 @@ void main() {
 
     // Scaled text rendering is different on Linux and Mac by one pixel.
     // TODO(gspencergoog): Figure out why this is, and fix it. https://github.com/flutter/flutter/issues/12357
-    expect(tester.getSize(find.byType(TextButton)).width, isIn(<double>[142.0, 143.0]));
+    expect(tester.getSize(find.byType(TextButton)).width, isIn(<double>[133.0, 134.0]));
     expect(tester.getSize(find.byType(TextButton)).height, equals(48.0));
     expect(tester.getSize(find.byType(Text)).width, isIn(<double>[126.0, 127.0]));
     expect(tester.getSize(find.byType(Text)).height, equals(42.0));
@@ -701,13 +701,13 @@ void main() {
     final RenderBox box = tester.renderObject(find.byKey(key));
     Rect childRect = tester.getRect(find.byKey(childKey));
     await tester.pumpAndSettle();
-    expect(box.size, equals(const Size(116, 100)));
+    expect(box.size, equals(const Size(116, 116)));
     expect(childRect, equals(const Rect.fromLTRB(350, 250, 450, 350)));
 
     await buildTest(const VisualDensity(horizontal: 3.0, vertical: 3.0));
     await tester.pumpAndSettle();
     childRect = tester.getRect(find.byKey(childKey));
-    expect(box.size, equals(const Size(140, 124)));
+    expect(box.size, equals(const Size(140, 140)));
     expect(childRect, equals(const Rect.fromLTRB(350, 250, 450, 350)));
 
     await buildTest(const VisualDensity(horizontal: -3.0, vertical: -3.0));
@@ -735,6 +735,235 @@ void main() {
     expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
   });
 
+  group('TextButton geometry is correct', () {
+    const ValueKey<String> buttonKey = ValueKey<String>('button');
+    const ValueKey<String> labelKey = ValueKey<String>('label');
+    const ValueKey<String> iconKey = ValueKey<String>('icon');
+
+    const List<double> textScaleFactorOptions = <double>[0.5, 1.0, 1.25, 1.5, 2.0, 2.5, 3.0, 4.0];
+    const List<TextDirection> textDirectionOptions = <TextDirection>[TextDirection.ltr, TextDirection.rtl];
+    const List<Widget> iconOptions = <Widget>[null, Icon(Icons.add, size: 18, key: iconKey)];
+
+    // Expected values for each textScaleFactor.
+    final Map<double, double> paddingVertical = <double, double>{
+      0.5: 8,
+      1: 8,
+      1.25: 6,
+      1.5: 4,
+      2: 0,
+      2.5: 0,
+      3: 0,
+      4: 0,
+    };
+    final Map<double, double> paddingWithIconGap = <double, double>{
+      0.5: 8,
+      1: 8,
+      1.25: 7,
+      1.5: 6,
+      2: 4,
+      2.5: 4,
+      3: 4,
+      4: 4,
+    };
+    final Map<double, double> textPaddingWithoutIconHorizontal = <double, double>{
+      0.5: 8,
+      1: 8,
+      1.25: 8,
+      1.5: 8,
+      2: 8,
+      2.5: 6,
+      3: 4,
+      4: 4,
+    };
+    final Map<double, double> textPaddingWithIconHorizontal = <double, double>{
+      0.5: 8,
+      1: 8,
+      1.25: 7,
+      1.5: 6,
+      2: 4,
+      2.5: 4,
+      3: 4,
+      4: 4,
+    };
+
+    Rect globalBounds(RenderBox renderBox) {
+      final Offset topLeft = renderBox.localToGlobal(Offset.zero);
+      return topLeft & renderBox.size;
+    }
+
+    for (final double textScaleFactor in textScaleFactorOptions) {
+      for (final TextDirection textDirection in textDirectionOptions) {
+        for (final Widget icon in iconOptions) {
+          final String testName = 'TextButton'
+            ', text scale $textScaleFactor'
+            '${icon != null ? ", with icon" : ""}'
+            '${textDirection == TextDirection.rtl ? ", RTL" : ""}';
+
+          testWidgets(testName, (WidgetTester tester) async {
+            await tester.pumpWidget(
+              MaterialApp(
+                theme: ThemeData.from(colorScheme: const ColorScheme.light()),
+                home: Builder(
+                  builder: (BuildContext context) {
+                    return MediaQuery(
+                      data: MediaQuery.of(context).copyWith(
+                        textScaleFactor: textScaleFactor,
+                      ),
+                      child: Directionality(
+                        textDirection: textDirection,
+                        child: Scaffold(
+                          body: Center(
+                            child: icon == null
+                              ? TextButton(
+                                  key: buttonKey,
+                                  onPressed: () {},
+                                  child: const Text('TextButton', key: labelKey),
+                                )
+                              : TextButton.icon(
+                                  key: buttonKey,
+                                  onPressed: () {},
+                                  icon: icon,
+                                  label: const Text('TextButton', key: labelKey),
+                                ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            );
+
+            final Element paddingElement = tester.element(
+              find.descendant(
+                of: find.byKey(buttonKey),
+                matching: find.byType(Padding),
+              ),
+            );
+            expect(Directionality.of(paddingElement), textDirection);
+            final Padding paddingWidget = paddingElement.widget as Padding;
+
+            // Compute expected padding, and check.
+
+            final double expectedPaddingTop = paddingVertical[textScaleFactor];
+            final double expectedPaddingBottom = paddingVertical[textScaleFactor];
+
+            final double expectedPaddingStart = icon != null
+              ? textPaddingWithIconHorizontal[textScaleFactor]
+              : textPaddingWithoutIconHorizontal[textScaleFactor];
+            final double expectedPaddingEnd = expectedPaddingStart;
+
+            double expectedPaddingLeft;
+            double expectedPaddingRight;
+            switch (textDirection) {
+              case TextDirection.ltr:
+                expectedPaddingLeft = expectedPaddingStart;
+                expectedPaddingRight = expectedPaddingEnd;
+                break;
+              case TextDirection.rtl:
+                expectedPaddingLeft = expectedPaddingEnd;
+                expectedPaddingRight = expectedPaddingStart;
+                break;
+            }
+
+            final EdgeInsets expectedPadding = EdgeInsets.fromLTRB(
+              expectedPaddingLeft,
+              expectedPaddingTop,
+              expectedPaddingRight,
+              expectedPaddingBottom,
+            );
+
+            expect(paddingWidget.padding.resolve(textDirection), expectedPadding);
+
+            // Measure padding in terms of the difference between the button and its label child
+            // and check that.
+
+            final RenderBox labelRenderBox = tester.renderObject<RenderBox>(find.byKey(labelKey));
+            final Rect labelBounds = globalBounds(labelRenderBox);
+            final RenderBox iconRenderBox = icon == null ? null : tester.renderObject<RenderBox>(find.byKey(iconKey));
+            final Rect iconBounds = icon == null ? null : globalBounds(iconRenderBox);
+            final Rect childBounds = icon == null ? labelBounds : labelBounds.expandToInclude(iconBounds);
+
+            // We measure the `InkResponse` descendant of the button
+            // element, because the button has a larger `RenderBox`
+            // which accommodates the minimum tap target with a height
+            // of 48.
+            final RenderBox buttonRenderBox = tester.renderObject<RenderBox>(
+              find.descendant(
+                of: find.byKey(buttonKey),
+                matching: find.byWidgetPredicate(
+                  (Widget widget) => widget is InkResponse,
+                ),
+              ),
+            );
+            final Rect buttonBounds = globalBounds(buttonRenderBox);
+            final EdgeInsets visuallyMeasuredPadding = _paddingBetween(
+              parent: buttonBounds,
+              child: childBounds,
+            );
+
+            // Since there is a requirement of a minimum width of 64
+            // and a minimum height of 36 on material buttons, the visual
+            // padding of smaller buttons may not match their settings.
+            // Therefore, we only test buttons that are large enough.
+            if (buttonBounds.width > 64) {
+              expect(
+                visuallyMeasuredPadding.left,
+                expectedPadding.left,
+              );
+              expect(
+                visuallyMeasuredPadding.right,
+                expectedPadding.right,
+              );
+            }
+
+            if (buttonBounds.height > 36) {
+              expect(
+                visuallyMeasuredPadding.top,
+                expectedPadding.top,
+              );
+              expect(
+                visuallyMeasuredPadding.bottom,
+                expectedPadding.bottom,
+              );
+            }
+
+            // Check the gap between the icon and the label
+            if (icon != null) {
+              final double gapWidth = textDirection == TextDirection.ltr
+                ? labelBounds.left - iconBounds.right
+                : iconBounds.left - labelBounds.right;
+              expect(gapWidth, paddingWithIconGap[textScaleFactor]);
+            }
+
+            // Check the text's height - should be consistent with the textScaleFactor.
+            final RenderBox textRenderObject = tester.renderObject<RenderBox>(
+              find.descendant(
+                of: find.byKey(labelKey),
+                matching: find.byElementPredicate(
+                  (Element element) => element.widget is RichText,
+                ),
+              ),
+            );
+            final double textHeight = textRenderObject.paintBounds.size.height;
+            expect(textHeight, (14 * textScaleFactor).ceil().toDouble());
+          });
+        }
+      }
+    }
+  });
+}
+
+
+/// Computes the padding between two [Rect]s, one inside the other.
+EdgeInsets _paddingBetween({ Rect parent, Rect child }) {
+  assert (parent.intersect(child) == child);
+  return EdgeInsets.fromLTRB(
+    child.left - parent.left,
+    child.top - parent.top,
+    parent.right - child.right,
+    parent.bottom - child.bottom,
+  );
 }
 
 TextStyle _iconStyle(WidgetTester tester, IconData icon) {
