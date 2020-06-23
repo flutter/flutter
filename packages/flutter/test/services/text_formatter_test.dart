@@ -257,8 +257,9 @@ void main() {
       testNewValue = const TextEditingValue(
         text: '\u{1f984}\u{1f984}\u{1f984}\u{1f984}', // Unicode U+1f984 (UNICORN FACE)
         selection: TextSelection(
-          baseOffset: 4,
-          extentOffset: 4,
+          // Caret is at the end of the string.
+          baseOffset: 8,
+          extentOffset: 8,
         ),
       );
 
@@ -266,16 +267,16 @@ void main() {
       LengthLimitingTextInputFormatter(2)
         .formatEditUpdate(testOldValue, testNewValue);
 
-      // Expecting two runes.
+      // Expecting two characters, with the caret moved to the new end of the
+      // string.
       expect(actualValue, const TextEditingValue(
         text: '\u{1f984}\u{1f984}',
         selection: TextSelection(
-          baseOffset: 2,
-          extentOffset: 2,
+          baseOffset: 4,
+          extentOffset: 4,
         ),
       ));
     });
-
 
     test('test length limiting formatter with complex Unicode characters', () {
       // TODO(gspencer): Test additional strings. We can do this once the
