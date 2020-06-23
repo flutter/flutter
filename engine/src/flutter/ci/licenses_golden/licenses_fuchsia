@@ -1,4 +1,4 @@
-Signature: 5f17cd0cd9d02d93e1f571462676bcaa
+Signature: 8b14bd533d5369ecee0a1988ebf7f17f
 
 UNUSED LICENSES:
 
@@ -3158,6 +3158,8 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castwindow/window.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/constants.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/error.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/types.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics/interest.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics/severity.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.factory.wlan/iovar.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/crash_register.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/data_register.fidl
