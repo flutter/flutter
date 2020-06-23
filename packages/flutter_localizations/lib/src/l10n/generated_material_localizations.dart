@@ -141,6 +141,12 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get invalidDateRangeLabel => 'Invalid range.';
 
   @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
+
+  @override
   String get licensesPageTitle => 'Lisensies';
 
   @override
@@ -406,6 +412,12 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'ፈቃዶች';
@@ -675,6 +687,12 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get invalidDateRangeLabel => 'Invalid range.';
 
   @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
+
+  @override
   String get licensesPageTitle => 'التراخيص';
 
   @override
@@ -940,6 +958,12 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'অনুজ্ঞাপত্ৰসমূহ';
@@ -1209,6 +1233,12 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get invalidDateRangeLabel => 'Invalid range.';
 
   @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
+
+  @override
   String get licensesPageTitle => 'Lisenziyalar';
 
   @override
@@ -1474,6 +1504,12 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Ліцэнзіі';
@@ -1743,6 +1779,12 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get invalidDateRangeLabel => 'Invalid range.';
 
   @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
+
+  @override
   String get licensesPageTitle => 'Лицензи';
 
   @override
@@ -2008,6 +2050,12 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'লাইসেন্স';
@@ -2277,6 +2325,12 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get invalidDateRangeLabel => 'Invalid range.';
 
   @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
+
+  @override
   String get licensesPageTitle => 'Licence';
 
   @override
@@ -2542,6 +2596,12 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Llicències';
@@ -2811,6 +2871,12 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get invalidDateRangeLabel => 'Invalid range.';
 
   @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
+
+  @override
   String get licensesPageTitle => 'Licence';
 
   @override
@@ -3078,6 +3144,12 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get invalidDateRangeLabel => 'Invalid range.';
 
   @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
+
+  @override
   String get licensesPageTitle => 'Licenser';
 
   @override
@@ -3343,6 +3415,12 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Lizenzen';
@@ -3648,6 +3726,12 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get invalidDateRangeLabel => 'Invalid range.';
 
   @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
+
+  @override
   String get licensesPageTitle => 'Άδειες';
 
   @override
@@ -3915,6 +3999,12 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String get invalidDateRangeLabel => 'Invalid range.';
 
   @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
+
+  @override
   String get licensesPageTitle => 'Licenses';
 
   @override
@@ -4095,6 +4185,12 @@ class MaterialLocalizationEnAu extends MaterialLocalizationEn {
   String get licensesPageTitle => 'Licences';
 
   @override
+  String get licensesPackageDetailTextOne => '1 licence';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licences';
+
+  @override
   String get copyButtonLabel => 'COPY';
 
   @override
@@ -4153,6 +4249,12 @@ class MaterialLocalizationEnCa extends MaterialLocalizationEn {
 
   @override
   String get licensesPageTitle => 'Licences';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 licence';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licences';
 
   @override
   String get copyButtonLabel => 'COPY';
@@ -4227,6 +4329,12 @@ class MaterialLocalizationEnGb extends MaterialLocalizationEn {
   String get licensesPageTitle => 'Licences';
 
   @override
+  String get licensesPackageDetailTextOne => '1 licence';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licences';
+
+  @override
   String get pasteButtonLabel => 'PASTE';
 
   @override
@@ -4290,6 +4398,12 @@ class MaterialLocalizationEnIe extends MaterialLocalizationEn {
   String get licensesPageTitle => 'Licences';
 
   @override
+  String get licensesPackageDetailTextOne => '1 licence';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licences';
+
+  @override
   String get pasteButtonLabel => 'PASTE';
 
   @override
@@ -4339,6 +4453,12 @@ class MaterialLocalizationEnIn extends MaterialLocalizationEn {
 
   @override
   String get licensesPageTitle => 'Licences';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 licence';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licences';
 
   @override
   String get copyButtonLabel => 'COPY';
@@ -4401,6 +4521,12 @@ class MaterialLocalizationEnNz extends MaterialLocalizationEn {
   String get licensesPageTitle => 'Licences';
 
   @override
+  String get licensesPackageDetailTextOne => '1 licence';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licences';
+
+  @override
   String get copyButtonLabel => 'COPY';
 
   @override
@@ -4459,6 +4585,12 @@ class MaterialLocalizationEnSg extends MaterialLocalizationEn {
 
   @override
   String get licensesPageTitle => 'Licences';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 licence';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licences';
 
   @override
   String get copyButtonLabel => 'COPY';
@@ -4531,6 +4663,12 @@ class MaterialLocalizationEnZa extends MaterialLocalizationEn {
 
   @override
   String get licensesPageTitle => 'Licences';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 licence';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licences';
 
   @override
   String get pasteButtonLabel => 'PASTE';
@@ -4669,6 +4807,12 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Licencias';
@@ -6621,6 +6765,12 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get invalidDateRangeLabel => 'Invalid range.';
 
   @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
+
+  @override
   String get licensesPageTitle => 'Litsentsid';
 
   @override
@@ -6886,6 +7036,12 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Lizentziak';
@@ -7155,6 +7311,12 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get invalidDateRangeLabel => 'Invalid range.';
 
   @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
+
+  @override
   String get licensesPageTitle => 'مجوزها';
 
   @override
@@ -7420,6 +7582,12 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Lisenssit';
@@ -7689,6 +7857,12 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get invalidDateRangeLabel => 'Invalid range.';
 
   @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
+
+  @override
   String get licensesPageTitle => 'Mga Lisensya';
 
   @override
@@ -7954,6 +8128,12 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Licences';
@@ -8283,6 +8463,12 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get invalidDateRangeLabel => 'Invalid range.';
 
   @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
+
+  @override
   String get licensesPageTitle => 'Licenzas';
 
   @override
@@ -8548,6 +8734,12 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Lizenzen';
@@ -8817,6 +9009,12 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get invalidDateRangeLabel => 'Invalid range.';
 
   @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
+
+  @override
   String get licensesPageTitle => 'લાઇસન્સ';
 
   @override
@@ -9082,6 +9280,12 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'רישיונות';
@@ -9351,6 +9555,12 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get invalidDateRangeLabel => 'Invalid range.';
 
   @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
+
+  @override
   String get licensesPageTitle => 'लाइसेंस';
 
   @override
@@ -9616,6 +9826,12 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Licence';
@@ -9885,6 +10101,12 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get invalidDateRangeLabel => 'Invalid range.';
 
   @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
+
+  @override
   String get licensesPageTitle => 'Licencek';
 
   @override
@@ -10150,6 +10372,12 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Արտոնագրեր';
@@ -10419,6 +10647,12 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get invalidDateRangeLabel => 'Invalid range.';
 
   @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
+
+  @override
   String get licensesPageTitle => 'Lisensi';
 
   @override
@@ -10684,6 +10918,12 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Leyfi';
@@ -10953,6 +11193,12 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get invalidDateRangeLabel => 'Invalid range.';
 
   @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
+
+  @override
   String get licensesPageTitle => 'Licenze';
 
   @override
@@ -11218,6 +11464,12 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'ライセンス';
@@ -11487,6 +11739,12 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get invalidDateRangeLabel => 'Invalid range.';
 
   @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
+
+  @override
   String get licensesPageTitle => 'ლიცენზიები';
 
   @override
@@ -11752,6 +12010,12 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Лицензиялар';
@@ -12021,6 +12285,12 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get invalidDateRangeLabel => 'Invalid range.';
 
   @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
+
+  @override
   String get licensesPageTitle => 'អាជ្ញាបណ្ណ';
 
   @override
@@ -12286,6 +12556,12 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => '\u{caa}\u{cb0}\u{cb5}\u{cbe}\u{ca8}\u{c97}\u{cbf}\u{c97}\u{cb3}\u{cc1}';
@@ -12555,6 +12831,12 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get invalidDateRangeLabel => 'Invalid range.';
 
   @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
+
+  @override
   String get licensesPageTitle => '라이선스';
 
   @override
@@ -12820,6 +13102,12 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Уруксаттамалар';
@@ -13089,6 +13377,12 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get invalidDateRangeLabel => 'Invalid range.';
 
   @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
+
+  @override
   String get licensesPageTitle => 'ໃບອະນຸຍາດ';
 
   @override
@@ -13354,6 +13648,12 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Licencijos';
@@ -13623,6 +13923,12 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get invalidDateRangeLabel => 'Invalid range.';
 
   @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
+
+  @override
   String get licensesPageTitle => 'Licences';
 
   @override
@@ -13888,6 +14194,12 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Лиценци';
@@ -14157,6 +14469,12 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get invalidDateRangeLabel => 'Invalid range.';
 
   @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
+
+  @override
   String get licensesPageTitle => 'ലൈസൻസുകൾ';
 
   @override
@@ -14422,6 +14740,12 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Лиценз';
@@ -14691,6 +15015,12 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get invalidDateRangeLabel => 'Invalid range.';
 
   @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
+
+  @override
   String get licensesPageTitle => 'परवाने';
 
   @override
@@ -14958,6 +15288,12 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get invalidDateRangeLabel => 'Invalid range.';
 
   @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
+
+  @override
   String get licensesPageTitle => 'Lesen';
 
   @override
@@ -15223,6 +15559,12 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'လိုင်စင်များ';
@@ -15522,6 +15864,12 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get invalidDateRangeLabel => 'Invalid range.';
 
   @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
+
+  @override
   String get licensesPageTitle => 'इजाजतपत्रहरू';
 
   @override
@@ -15787,6 +16135,12 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Licenties';
@@ -16056,6 +16410,12 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get invalidDateRangeLabel => 'Invalid range.';
 
   @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
+
+  @override
   String get licensesPageTitle => 'Lisenser';
 
   @override
@@ -16321,6 +16681,12 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'ଲାଇସେନ୍ସଗୁଡ଼କ';
@@ -16590,6 +16956,12 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get invalidDateRangeLabel => 'Invalid range.';
 
   @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
+
+  @override
   String get licensesPageTitle => 'ਲਾਇਸੰਸ';
 
   @override
@@ -16855,6 +17227,12 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Licencje';
@@ -17124,6 +17502,12 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get invalidDateRangeLabel => 'Invalid range.';
 
   @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
+
+  @override
   String get licensesPageTitle => 'جوازونه';
 
   @override
@@ -17389,6 +17773,12 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Licenças';
@@ -17742,6 +18132,12 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get invalidDateRangeLabel => 'Invalid range.';
 
   @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
+
+  @override
   String get licensesPageTitle => 'Licențe';
 
   @override
@@ -18007,6 +18403,12 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Лицензии';
@@ -18276,6 +18678,12 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get invalidDateRangeLabel => 'Invalid range.';
 
   @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
+
+  @override
   String get licensesPageTitle => 'බලපත්‍ර';
 
   @override
@@ -18541,6 +18949,12 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Licencie';
@@ -18810,6 +19224,12 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get invalidDateRangeLabel => 'Invalid range.';
 
   @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
+
+  @override
   String get licensesPageTitle => 'Licence';
 
   @override
@@ -19077,6 +19497,12 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get invalidDateRangeLabel => 'Invalid range.';
 
   @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
+
+  @override
   String get licensesPageTitle => 'Licencat';
 
   @override
@@ -19342,6 +19768,12 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Лиценце';
@@ -19830,6 +20262,12 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get invalidDateRangeLabel => 'Invalid range.';
 
   @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
+
+  @override
   String get licensesPageTitle => 'Licenser';
 
   @override
@@ -20095,6 +20533,12 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Leseni';
@@ -20364,6 +20808,12 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get invalidDateRangeLabel => 'Invalid range.';
 
   @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
+
+  @override
   String get licensesPageTitle => 'உரிமங்கள்';
 
   @override
@@ -20629,6 +21079,12 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'లైసెన్స్‌లు';
@@ -20898,6 +21354,12 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get invalidDateRangeLabel => 'Invalid range.';
 
   @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
+
+  @override
   String get licensesPageTitle => 'ใบอนุญาต';
 
   @override
@@ -21163,6 +21625,12 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Mga Lisensya';
@@ -21432,6 +21900,12 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get invalidDateRangeLabel => 'Invalid range.';
 
   @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
+
+  @override
   String get licensesPageTitle => 'Lisanslar';
 
   @override
@@ -21697,6 +22171,12 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Ліцензії';
@@ -21966,6 +22446,12 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get invalidDateRangeLabel => 'Invalid range.';
 
   @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
+
+  @override
   String get licensesPageTitle => 'لائسنسز';
 
   @override
@@ -22231,6 +22717,12 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Litsenziyalar';
@@ -22500,6 +22992,12 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get invalidDateRangeLabel => 'Invalid range.';
 
   @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
+
+  @override
   String get licensesPageTitle => 'Giấy phép';
 
   @override
@@ -22765,6 +23263,12 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => '许可';
@@ -23329,6 +23833,12 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Amalayisense';
