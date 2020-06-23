@@ -4,6 +4,9 @@
 
 // @dart = 2.8
 
+import 'dart:math' as math;
+import 'dart:ui' show lerpDouble;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -79,41 +82,18 @@ class ContainedButton extends ButtonStyleButton {
   /// The icon and label are arranged in a row and padded by 12 logical pixels
   /// at the start, and 16 at the end, with an 8 pixel gap in between.
   ///
-  /// The [icon], [label], [autofocus], and [clipBehavior] arguments must not be null.
+  /// The [icon] and [label] arguments must not be null.
   factory ContainedButton.icon({
     Key key,
     @required VoidCallback onPressed,
     VoidCallback onLongPress,
     ButtonStyle style,
     FocusNode focusNode,
-    bool autofocus = false,
-    Clip clipBehavior = Clip.none,
+    bool autofocus,
+    Clip clipBehavior,
     @required Widget icon,
     @required Widget label,
-  }) {
-    assert(icon != null);
-    assert(label != null);
-    final ButtonStyle paddingStyle = ButtonStyle(
-      padding: MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.only(left: 12, right: 16)),
-    );
-    return ContainedButton(
-      key: key,
-      onPressed: onPressed,
-      onLongPress: onLongPress,
-      style: style == null ? paddingStyle : style.merge(paddingStyle),
-      focusNode: focusNode,
-      autofocus: autofocus,
-      clipBehavior: clipBehavior,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          icon,
-          const SizedBox(width: 8.0),
-          label,
-        ],
-      ),
-    );
-  }
+  }) = _ContainedButtonWithIcon;
 
   /// A static convenience method that constructs a contained button
   /// [ButtonStyle] given simple values.
@@ -221,6 +201,11 @@ class ContainedButton extends ButtonStyleButton {
   /// value for all states, otherwise the values are as specified for
   /// each state, and "others" means all other states.
   ///
+  /// The `textScaleFactor` is the value of
+  /// `MediaQuery.of(context).textScaleFactor` and the names of the
+  /// EdgeInsets constructors and `EdgeInsetsGeometry.lerp` have been
+  /// abbreviated for readability.
+  ///
   /// The color of the [textStyle] is not used, the [foreground] color
   /// is used instead.
   ///
@@ -239,7 +224,11 @@ class ContainedButton extends ButtonStyleButton {
   ///   * disabled - 0
   ///   * hovered or focused - 2
   ///   * pressed - 6
-  /// * `padding` - EdgeInsets.symmetric(horizontal: 16)
+  /// * `padding`
+  ///   * textScaleFactor <= 1 - horizontal(16)
+  ///   * 1 < textScaleFactor <= 2 - lerp(horizontal(16), horizontal(8))
+  ///   * 2 < textScaleFactor <= 3 - lerp(horizontal(8), horizontal(4))
+  ///   * 3 < textScaleFactor - horizontal(4)
   /// * `minimumSize` - Size(64, 36)
   /// * `side` - BorderSide.none
   /// * `shape` - RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))
@@ -250,10 +239,26 @@ class ContainedButton extends ButtonStyleButton {
   /// * `tapTargetSize` - theme.materialTapTargetSize
   /// * `animationDuration` - kThemeChangeDuration
   /// * `enableFeedback` - true
+  ///
+  /// The default padding values for the [ContainedButton.icon] factory are slightly different:
+  ///
+  /// * `padding`
+  ///   * textScaleFactor <= 1 - start(12) end(16)
+  ///   * 1 < textScaleFactor <= 2 - lerp(start(12) end(16), horizontal(8))
+  ///   * 2 < textScaleFactor <= 3 - lerp(horizontal(8), horizontal(4))
+  ///   * 3 < textScaleFactor - horizontal(4)
+
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
+
+    final EdgeInsetsGeometry scaledPadding = ButtonStyleButton.scaledPadding(
+      const EdgeInsets.symmetric(horizontal: 16),
+      const EdgeInsets.symmetric(horizontal: 8),
+      const EdgeInsets.symmetric(horizontal: 4),
+      MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1,
+    );
 
     return styleFrom(
       primary: colorScheme.primary,
@@ -262,7 +267,7 @@ class ContainedButton extends ButtonStyleButton {
       shadowColor: const Color(0xFF000000),
       elevation: 2,
       textStyle: theme.textTheme.button,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: scaledPadding,
       minimumSize: const Size(64, 36),
       side: BorderSide.none,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
@@ -361,5 +366,66 @@ class _ContainedButtonDefaultMouseCursor extends MaterialStateProperty<MouseCurs
     if (states.contains(MaterialState.disabled))
       return disabledCursor;
     return enabledCursor;
+  }
+}
+
+class _ContainedButtonWithIcon extends ContainedButton {
+  _ContainedButtonWithIcon({
+    Key key,
+    @required VoidCallback onPressed,
+    VoidCallback onLongPress,
+    ButtonStyle style,
+    FocusNode focusNode,
+    bool autofocus = false,
+    Clip clipBehavior = Clip.none,
+    @required Widget icon,
+    @required Widget label,
+  }) : assert(icon != null),
+       assert(label != null),
+       super(
+         key: key,
+         onPressed: onPressed,
+         onLongPress: onLongPress,
+         style: style,
+         focusNode: focusNode,
+         autofocus: autofocus,
+         clipBehavior: clipBehavior,
+         child: _ContainedButtonWithIconChild(icon: icon, label: label),
+      );
+
+  /// * `padding`
+  ///   * textScaleFactor <= 1 - start(12) end(16)
+  ///   * 1 < textScaleFactor <= 2 - lerp(start(12) end(16), horizontal(8))
+  ///   * 2 < textScaleFactor <= 3 - lerp(horizontal(8), start(8) end(4))
+  ///   * 3 < textScaleFactor - start(8) end(4)
+
+  @override
+  ButtonStyle defaultStyleOf(BuildContext context) {
+    final EdgeInsetsGeometry scaledPadding = ButtonStyleButton.scaledPadding(
+      const EdgeInsetsDirectional.fromSTEB(12, 0, 16, 0),
+      const EdgeInsets.symmetric(horizontal: 8),
+      const EdgeInsetsDirectional.fromSTEB(8, 0, 4, 0),
+      MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1,
+    );
+    return super.defaultStyleOf(context).copyWith(
+      padding: MaterialStateProperty.all<EdgeInsetsGeometry>(scaledPadding)
+    );
+  }
+}
+
+class _ContainedButtonWithIconChild extends StatelessWidget {
+  const _ContainedButtonWithIconChild({ Key key, this.label, this.icon }) : super(key: key);
+
+  final Widget label;
+  final Widget icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final double scale = MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1;
+    final double gap = scale <= 1 ? 8 : lerpDouble(8, 4, math.min(scale - 1, 1));
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[icon, SizedBox(width: gap), label],
+    );
   }
 }

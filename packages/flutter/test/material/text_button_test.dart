@@ -735,7 +735,7 @@ void main() {
     expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
   });
 
-  group('TextButton geometry is correct', () {
+  group('Default TextButton padding for textScaleFactor, textDirection', () {
     const ValueKey<String> buttonKey = ValueKey<String>('button');
     const ValueKey<String> labelKey = ValueKey<String>('label');
     const ValueKey<String> iconKey = ValueKey<String>('icon');
@@ -791,6 +791,17 @@ void main() {
       return topLeft & renderBox.size;
     }
 
+    /// Computes the padding between two [Rect]s, one inside the other.
+    EdgeInsets paddingBetween({ Rect parent, Rect child }) {
+      assert (parent.intersect(child) == child);
+      return EdgeInsets.fromLTRB(
+        child.left - parent.left,
+        child.top - parent.top,
+        parent.right - child.right,
+        parent.bottom - child.bottom,
+      );
+    }
+
     for (final double textScaleFactor in textScaleFactorOptions) {
       for (final TextDirection textDirection in textDirectionOptions) {
         for (final Widget icon in iconOptions) {
@@ -817,13 +828,13 @@ void main() {
                               ? TextButton(
                                   key: buttonKey,
                                   onPressed: () {},
-                                  child: const Text('TextButton', key: labelKey),
+                                  child: const Text('button', key: labelKey),
                                 )
                               : TextButton.icon(
                                   key: buttonKey,
                                   onPressed: () {},
                                   icon: icon,
-                                  label: const Text('TextButton', key: labelKey),
+                                  label: const Text('button', key: labelKey),
                                 ),
                           ),
                         ),
@@ -853,25 +864,12 @@ void main() {
               : textPaddingWithoutIconHorizontal[textScaleFactor];
             final double expectedPaddingEnd = expectedPaddingStart;
 
-            double expectedPaddingLeft;
-            double expectedPaddingRight;
-            switch (textDirection) {
-              case TextDirection.ltr:
-                expectedPaddingLeft = expectedPaddingStart;
-                expectedPaddingRight = expectedPaddingEnd;
-                break;
-              case TextDirection.rtl:
-                expectedPaddingLeft = expectedPaddingEnd;
-                expectedPaddingRight = expectedPaddingStart;
-                break;
-            }
-
-            final EdgeInsets expectedPadding = EdgeInsets.fromLTRB(
-              expectedPaddingLeft,
+            final EdgeInsets expectedPadding = EdgeInsetsDirectional.fromSTEB(
+              expectedPaddingStart,
               expectedPaddingTop,
-              expectedPaddingRight,
+              expectedPaddingEnd,
               expectedPaddingBottom,
-            );
+            ).resolve(textDirection);
 
             expect(paddingWidget.padding.resolve(textDirection), expectedPadding);
 
@@ -897,7 +895,7 @@ void main() {
               ),
             );
             final Rect buttonBounds = globalBounds(buttonRenderBox);
-            final EdgeInsets visuallyMeasuredPadding = _paddingBetween(
+            final EdgeInsets visuallyMeasuredPadding = paddingBetween(
               parent: buttonBounds,
               child: childBounds,
             );
@@ -946,25 +944,49 @@ void main() {
               ),
             );
             final double textHeight = textRenderObject.paintBounds.size.height;
-            expect(textHeight, (14 * textScaleFactor).ceil().toDouble());
+            final double expectedTextHeight = 14 * textScaleFactor;
+            expect(textHeight, moreOrLessEquals(expectedTextHeight, epsilon: 0.5));
           });
         }
       }
     }
   });
+
+  testWidgets('Override TextButton default padding', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.from(colorScheme: const ColorScheme.light()),
+        home: Builder(
+          builder: (BuildContext context) {
+            return MediaQuery(
+              data: MediaQuery.of(context).copyWith(
+                textScaleFactor: 2,
+              ),
+              child: Scaffold(
+                body: Center(
+                  child: TextButton(
+                    style: TextButton.styleFrom(padding: const EdgeInsets.all(22)),
+                    onPressed: () {},
+                    child: const Text('TextButton')
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final Padding paddingWidget = tester.widget<Padding>(
+      find.descendant(
+        of: find.byType(TextButton),
+        matching: find.byType(Padding),
+      ),
+    );
+    expect(paddingWidget.padding, const EdgeInsets.all(22));
+  });
 }
 
-
-/// Computes the padding between two [Rect]s, one inside the other.
-EdgeInsets _paddingBetween({ Rect parent, Rect child }) {
-  assert (parent.intersect(child) == child);
-  return EdgeInsets.fromLTRB(
-    child.left - parent.left,
-    child.top - parent.top,
-    parent.right - child.right,
-    parent.bottom - child.bottom,
-  );
-}
 
 TextStyle _iconStyle(WidgetTester tester, IconData icon) {
   final RichText iconRichText = tester.widget<RichText>(

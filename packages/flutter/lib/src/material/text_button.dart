@@ -86,7 +86,7 @@ class TextButton extends ButtonStyleButton {
   /// The icon and label are arranged in a row and padded by 12 logical pixels
   /// at the start, and 16 at the end, with an 8 pixel gap in between.
   ///
-  /// The [icon], [label], [autofocus], and [clipBehavior] arguments must not be null.
+  /// The [icon] and [label] arguments must not be null.
   factory TextButton.icon({
     Key key,
     @required VoidCallback onPressed,
@@ -361,7 +361,7 @@ class _TextButtonWithIcon extends TextButton {
       const EdgeInsets.all(8),
       const EdgeInsets.symmetric(horizontal: 4),
       const EdgeInsets.symmetric(horizontal: 4),
-      MediaQuery.of(context).textScaleFactor,
+      MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1,
     );
     return super.defaultStyleOf(context).copyWith(
       padding: MaterialStateProperty.all<EdgeInsetsGeometry>(scaledPadding)
