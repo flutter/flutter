@@ -776,6 +776,7 @@ void testInMemory(String description, Future<void> testMethod()) {
   final FileSystem testFileSystem = MemoryFileSystem(
     style: globals.platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
   );
+  testFileSystem.file('.packages').writeAsStringSync('\n');
   // Transfer needed parts of the Flutter installation folder
   // to the in-memory file system used during testing.
   transfer(Cache().getArtifactDirectory('gradle_wrapper'), testFileSystem);
