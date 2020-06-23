@@ -1454,7 +1454,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
                 animation.status == AnimationStatus.dismissed, // dismissed is possible when doing a manual pop gesture
       child: barrier,
     );
-    if (barrierDismissible) {
+    if (semanticsDismissible && barrierDismissible) {
+      // To be sorted after the _modalScope.
       barrier = Semantics(
         sortKey: const OrdinalSortKey(1.0),
         child: barrier,
@@ -1469,6 +1470,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   // one of the builders
   Widget _buildModalScope(BuildContext context) {
+    // To be sorted before the _modalBarrier.
     return _modalScopeCache ??= Semantics(
       sortKey: const OrdinalSortKey(0.0),
       child: _ModalScope<T>(

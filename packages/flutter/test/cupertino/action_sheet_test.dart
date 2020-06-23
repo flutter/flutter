@@ -982,7 +982,6 @@ void main() {
                     ),
                   ]
                 ),
-                TestSemantics(),
               ],
             ),
           ],

@@ -1203,6 +1203,7 @@ void main() {
     });
 
     testWidgets('modal route semantics order', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/46625.
       final SemanticsTester semantics = SemanticsTester(tester);
       await tester.pumpWidget(MaterialApp(
         home: Material(
@@ -1215,6 +1216,7 @@ void main() {
                     Navigator.of(context).push<void>(
                       _TestDialogRouteWithCustomBarrierCurve<void>(
                         child: const Text('Hello World'),
+                        barrierLabel: 'test label',
                         barrierCurve: Curves.linear,
                       ),
                     );
@@ -1259,6 +1261,9 @@ void main() {
               TestSemantics(
                 id: 5,
                 rect: TestSemantics.fullScreen,
+                actions: <SemanticsAction>[SemanticsAction.tap],
+                label: 'test label',
+                textDirection: TextDirection.ltr,
               ),
             ],
           ),
@@ -1268,7 +1273,7 @@ void main() {
 
       expect(semantics, hasSemantics(expectedSemantics));
       semantics.dispose();
-    });
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}));
 
     testWidgets('focus traverse correct when pop multiple page simultaneously', (WidgetTester tester) async {
       // Regression test: https://github.com/flutter/flutter/issues/48903
@@ -1471,6 +1476,7 @@ class DialogObserver extends NavigatorObserver {
 class _TestDialogRouteWithCustomBarrierCurve<T> extends PopupRoute<T> {
   _TestDialogRouteWithCustomBarrierCurve({
     @required Widget child,
+    this.barrierLabel,
     Curve barrierCurve,
   }) : _barrierCurve = barrierCurve,
        _child = child;
@@ -1481,7 +1487,7 @@ class _TestDialogRouteWithCustomBarrierCurve<T> extends PopupRoute<T> {
   bool get barrierDismissible => true;
 
   @override
-  String get barrierLabel => null;
+  final String barrierLabel;
 
   @override
   Color get barrierColor => Colors.black; // easier value to test against
