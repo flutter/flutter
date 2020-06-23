@@ -81,16 +81,16 @@ class Form extends StatefulWidget {
     this.autovalidate = false,
     this.onWillPop,
     this.onChanged,
-    AutoValidateMode autoValidateMode,
+    AutovalidateMode autovalidateMode,
   }) : assert(child != null),
-       assert(autovalidate == false && autoValidateMode == null ||
-       autovalidate == true && autoValidateMode == null ||
-       autovalidate == false && autoValidateMode != null,
+       assert(autovalidate == false && autovalidateMode == null ||
+       autovalidate == true && autovalidateMode == null ||
+       autovalidate == false && autovalidateMode != null,
        'autovalidate and autovalidateMode should not be used together.'
        ),
-       autoValidateMode = autovalidate
-           ? AutoValidateMode.always
-           : (autoValidateMode ?? AutoValidateMode.disabled),
+       autovalidateMode = autovalidate
+           ? AutovalidateMode.always
+           : (autovalidateMode ?? AutovalidateMode.disabled),
        super(key: key);
 
   /// Returns the closest [FormState] which encloses the given context.
@@ -138,15 +138,15 @@ class Form extends StatefulWidget {
 
   /// Used to enable/disable form fields auto validation and update their error text.
   ///
-  /// If [AutoValidateMode.onUserInteraction] this form will only auto-validate
-  /// after its content changes. If [AutoValidateMode.always], it will auto
-  /// validate even without user interaction. If [AutoValidateMode.disabled],
+  /// If [AutovalidateMode.onUserInteraction] this form will only auto-validate
+  /// after its content changes. If [AutovalidateMode.always], it will auto
+  /// validate even without user interaction. If [AutovalidateMode.disabled],
   /// the auto validation will be disabled.
   ///
-  /// Defaults to [AutoValidateMode.disabled] if [autovalidate] is false which
+  /// Defaults to [AutovalidateMode.disabled] if [autovalidate] is false which
   /// means no auto validation will occur. If [autovalidate] is true then this
-  /// is set to [AutoValidateMode.always] for backward compatibility.
-  final AutoValidateMode autoValidateMode;
+  /// is set to [AutovalidateMode.always] for backward compatibility.
+  final AutovalidateMode autovalidateMode;
 
   @override
   FormState createState() => FormState();
@@ -189,16 +189,16 @@ class FormState extends State<Form> {
 
   @override
   Widget build(BuildContext context) {
-    switch (widget.autoValidateMode) {
-      case AutoValidateMode.always:
+    switch (widget.autovalidateMode) {
+      case AutovalidateMode.always:
         _validate();
         break;
-      case AutoValidateMode.onUserInteraction:
+      case AutovalidateMode.onUserInteraction:
         if (_hasInteractedByUser) {
           _validate();
         }
         break;
-      case AutoValidateMode.disabled:
+      case AutovalidateMode.disabled:
         break;
     }
 
@@ -223,7 +223,7 @@ class FormState extends State<Form> {
   ///
   /// The [Form.onChanged] callback will be called.
   ///
-  /// If the form's [Form.autoValidateMode] property is [AutoValidateMode.always],
+  /// If the form's [Form.autovalidateMode] property is [AutovalidateMode.always],
   /// the fields will all be revalidated after being reset.
   void reset() {
     for (final FormFieldState<dynamic> field in _fields)
@@ -323,17 +323,17 @@ class FormField<T> extends StatefulWidget {
     this.initialValue,
     this.autovalidate = false,
     this.enabled = true,
-    AutoValidateMode autoValidateMode,
+    AutovalidateMode autovalidateMode,
   }) : assert(builder != null),
        assert(
-         autovalidate == false && autoValidateMode == null ||
-         autovalidate == true && autoValidateMode == null ||
-         autovalidate == false && autoValidateMode != null,
+         autovalidate == false && autovalidateMode == null ||
+         autovalidate == true && autovalidateMode == null ||
+         autovalidate == false && autovalidateMode != null,
          'autovalidate and autovalidateMode should not be used together.'
        ),
-       autoValidateMode = autovalidate
-           ? AutoValidateMode.always
-           : (autoValidateMode ?? AutoValidateMode.disabled),
+       autovalidateMode = autovalidate
+           ? AutovalidateMode.always
+           : (autovalidateMode ?? AutovalidateMode.disabled),
        super(key: key);
 
   /// An optional method to call with the final value when the form is saved via
@@ -371,23 +371,23 @@ class FormField<T> extends StatefulWidget {
 
   /// Whether the form is able to receive user input.
   ///
-  /// Defaults to true. If [autoValidateMode] is not [AutoValidateMode.disabled],
+  /// Defaults to true. If [autovalidateMode] is not [AutovalidateMode.disabled],
   /// the field will be auto validated. Likewise, if this field is false, the widget
-  /// will not be validated regardless of [autoValidateMode].
+  /// will not be validated regardless of [autovalidateMode].
   final bool enabled;
 
   /// Used to enable/disable this form field auto validation and update its
   /// error text.
   ///
-  /// If [AutoValidateMode.onUserInteraction] this form field will only
-  /// auto-validate after its content changes, if [AutoValidateMode.always] it
+  /// If [AutovalidateMode.onUserInteraction] this form field will only
+  /// auto-validate after its content changes, if [AutovalidateMode.always] it
   /// will auto validate even without user interaction and
-  /// if [AutoValidateMode.disabled] the auto validation will be disabled.
+  /// if [AutovalidateMode.disabled] the auto validation will be disabled.
   ///
-  /// Defaults to [AutoValidateMode.disabled] if [autovalidate] is false which
+  /// Defaults to [AutovalidateMode.disabled] if [autovalidate] is false which
   /// means no auto validation will occur. If [autovalidate] is true then this
-  /// is set to [AutoValidateMode.always] for backward compatibility.
-  final AutoValidateMode autoValidateMode;
+  /// is set to [AutovalidateMode.always] for backward compatibility.
+  final AutovalidateMode autovalidateMode;
 
   @override
   FormFieldState<T> createState() => FormFieldState<T>();
@@ -458,8 +458,8 @@ class FormFieldState<T> extends State<FormField<T>> {
   /// Updates this field's state to the new value. Useful for responding to
   /// child widget changes, e.g. [Slider]'s [Slider.onChanged] argument.
   ///
-  /// Triggers the [Form.onChanged] callback and, if [Form.autoValidateMode] is
-  /// [AutoValidateMode.always] or [AutoValidateMode.onUserInteraction],
+  /// Triggers the [Form.onChanged] callback and, if [Form.autovalidateMode] is
+  /// [AutovalidateMode.always] or [AutovalidateMode.onUserInteraction],
   /// revalidates all the fields of the form.
   void didChange(T value) {
     setState(() {
@@ -496,16 +496,16 @@ class FormFieldState<T> extends State<FormField<T>> {
   @override
   Widget build(BuildContext context) {
     if (widget.enabled) {
-      switch (widget.autoValidateMode) {
-        case AutoValidateMode.always:
+      switch (widget.autovalidateMode) {
+        case AutovalidateMode.always:
           _validate();
           break;
-        case AutoValidateMode.onUserInteraction:
+        case AutovalidateMode.onUserInteraction:
           if (_hasInteractedByUser) {
             _validate();
           }
           break;
-        case AutoValidateMode.disabled:
+        case AutovalidateMode.disabled:
           break;
       }
     }
@@ -514,8 +514,9 @@ class FormFieldState<T> extends State<FormField<T>> {
   }
 }
 
-/// Used to configure the auto validation of [TextFormField] and [Form] widgets.
-enum AutoValidateMode {
+/// Used to configure the auto validation of [FormField], [TextFormField] and
+/// [Form] widgets.
+enum AutovalidateMode {
   /// No auto validation will occur.
   disabled,
 

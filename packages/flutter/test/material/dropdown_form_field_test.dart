@@ -29,7 +29,7 @@ Finder _iconRichText(Key iconKey) {
 
 Widget buildFormFrame({
   Key buttonKey,
-  AutoValidateMode autoValidateMode = AutoValidateMode.disabled,
+  AutovalidateMode autovalidateMode = AutovalidateMode.disabled,
   int elevation = 8,
   String value = 'two',
   ValueChanged<String> onChanged,
@@ -55,7 +55,7 @@ Widget buildFormFrame({
         child: RepaintBoundary(
           child: DropdownButtonFormField<String>(
             key: buttonKey,
-            autoValidateMode: autoValidateMode,
+            autovalidateMode: autovalidateMode,
             elevation: elevation,
             value: value,
             hint: hint,
@@ -180,7 +180,7 @@ void main() {
                   _validateCalled++;
                   return currentValue == null ? 'Must select value' : null;
                 },
-                autoValidateMode: AutoValidateMode.always,
+                autovalidateMode: AutovalidateMode.always,
               ),
             ),
           );
@@ -764,7 +764,7 @@ void main() {
     expect(find.text(currentValue), findsOneWidget);
   });
 
-  testWidgets('autoValidateMode is passed to super', (WidgetTester tester) async {
+  testWidgets('autovalidateMode is passed to super', (WidgetTester tester) async {
     int _validateCalled = 0;
 
     await tester.pumpWidget(
@@ -772,7 +772,7 @@ void main() {
         home: Material(
           child: Center(
             child: DropdownButtonFormField<String>(
-              autoValidateMode: AutoValidateMode.always,
+              autovalidateMode: AutovalidateMode.always,
               items: menuItems.map((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
@@ -793,14 +793,14 @@ void main() {
     expect(_validateCalled, 1);
   });
 
-  testWidgets('autoValidateMode and autovalidate should not be used at the same time', (WidgetTester tester) async {
+  testWidgets('autovalidateMode and autovalidate should not be used at the same time', (WidgetTester tester) async {
     Widget builder() {
       return MaterialApp(
         home: Material(
           child: Center(
             child: DropdownButtonFormField<String>(
               autovalidate: true,
-              autoValidateMode: AutoValidateMode.always,
+              autovalidateMode: AutovalidateMode.always,
               items: menuItems.map((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
