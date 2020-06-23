@@ -88,8 +88,9 @@ class Form extends StatefulWidget {
        autovalidate == false && autoValidateMode != null,
        'autovalidate and autovalidateMode should not be used together.'
        ),
-       autoValidateMode = autovalidate ? AutoValidateMode.always
-       : (autoValidateMode ?? AutoValidateMode.disabled),
+       autoValidateMode = autovalidate
+           ? AutoValidateMode.always
+           : (autoValidateMode ?? AutoValidateMode.disabled),
        super(key: key);
 
   /// Returns the closest [FormState] which encloses the given context.
@@ -138,8 +139,8 @@ class Form extends StatefulWidget {
   /// Used to enable/disable form fields auto validation and update their error text.
   ///
   /// If [AutoValidateMode.onUserInteraction] this form will only auto-validate
-  /// after its content changes, if [AutoValidateMode.always] it will auto
-  /// validate even without user interaction and if [AutoValidateMode.disabled]
+  /// after its content changes. If [AutoValidateMode.always], it will auto
+  /// validate even without user interaction. If [AutoValidateMode.disabled],
   /// the auto validation will be disabled.
   ///
   /// Defaults to [AutoValidateMode.disabled] if [autovalidate] is false which
@@ -324,13 +325,15 @@ class FormField<T> extends StatefulWidget {
     this.enabled = true,
     AutoValidateMode autoValidateMode,
   }) : assert(builder != null),
-       assert(autovalidate == false && autoValidateMode == null ||
-       autovalidate == true && autoValidateMode == null ||
-       autovalidate == false && autoValidateMode != null,
-       'autovalidate and autovalidateMode should not be used together.'
+       assert(
+         autovalidate == false && autoValidateMode == null ||
+         autovalidate == true && autoValidateMode == null ||
+         autovalidate == false && autoValidateMode != null,
+         'autovalidate and autovalidateMode should not be used together.'
        ),
-       autoValidateMode = autovalidate ? AutoValidateMode.always
-       : (autoValidateMode ?? AutoValidateMode.disabled),
+       autoValidateMode = autovalidate
+           ? AutoValidateMode.always
+           : (autoValidateMode ?? AutoValidateMode.disabled),
        super(key: key);
 
   /// An optional method to call with the final value when the form is saved via

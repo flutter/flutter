@@ -187,21 +187,24 @@ class TextFormField extends FormField<String> {
        assert(autocorrect != null),
        assert(enableSuggestions != null),
        assert(autovalidate != null),
-       assert(autovalidate == false && autoValidateMode == null ||
-       autovalidate == true && autoValidateMode == null ||
-       autovalidate == false && autoValidateMode != null,
-       'autovalidate and autovalidateMode should not be used together.'
+       assert(
+         autovalidate == false && autoValidateMode == null ||
+         autovalidate == true && autoValidateMode == null ||
+         autovalidate == false && autoValidateMode != null,
+         'autovalidate and autovalidateMode should not be used together.'
        ),
        assert(maxLengthEnforced != null),
        assert(scrollPadding != null),
        assert(maxLines == null || maxLines > 0),
        assert(minLines == null || minLines > 0),
-       assert((maxLines == null) || (minLines == null) || (maxLines >= minLines),
-       "minLines can't be greater than maxLines",
+       assert(
+         (maxLines == null) || (minLines == null) || (maxLines >= minLines),
+         "minLines can't be greater than maxLines",
        ),
        assert(expands != null),
-       assert(!expands || (maxLines == null && minLines == null),
-       'minLines and maxLines must be null when expands is true.',
+       assert(
+         !expands || (maxLines == null && minLines == null),
+         'minLines and maxLines must be null when expands is true.',
        ),
        assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
        assert(maxLength == null || maxLength > 0),

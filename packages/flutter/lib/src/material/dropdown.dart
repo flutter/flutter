@@ -1485,10 +1485,11 @@ class DropdownButtonFormField<T> extends FormField<T> {
        assert(isExpanded != null),
        assert(itemHeight == null || itemHeight >= kMinInteractiveDimension),
        assert(autofocus != null),
-       assert(autovalidate == false && autoValidateMode == null ||
-       autovalidate == true && autoValidateMode == null ||
-       autovalidate == false && autoValidateMode != null,
-       'autovalidate and autovalidateMode should not be used together.'
+       assert(
+         autovalidate == false && autoValidateMode == null ||
+         autovalidate == true && autoValidateMode == null ||
+         autovalidate == false && autoValidateMode != null,
+         'autovalidate and autovalidateMode should not be used together.'
        ),
        decoration = decoration ?? InputDecoration(focusColor: focusColor),
        super(
@@ -1496,8 +1497,9 @@ class DropdownButtonFormField<T> extends FormField<T> {
          onSaved: onSaved,
          initialValue: value,
          validator: validator,
-         autoValidateMode: autovalidate ? AutoValidateMode.always
-         : (autoValidateMode ?? AutoValidateMode.disabled),
+         autoValidateMode: autovalidate
+             ? AutoValidateMode.always
+             : (autoValidateMode ?? AutoValidateMode.disabled),
          builder: (FormFieldState<T> field) {
            final _DropdownButtonFormFieldState<T> state = field as _DropdownButtonFormFieldState<T>;
            final InputDecoration decorationArg =  decoration ?? InputDecoration(focusColor: focusColor);
