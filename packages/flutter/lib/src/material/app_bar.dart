@@ -221,8 +221,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// Becomes the leading component of the [NavigationToolBar] built
   /// by this widget. The [leading] widget's width and height are constrained to
-  /// be no bigger than default toolbar's height, which is [kToolbarHeight] and
-  /// [toolbarHeight] respectively.
+  /// be no bigger than [kToolbarHeight] and [toolbarHeight] respectively.
   ///
   /// If this is null and [automaticallyImplyLeading] is set to true, the
   /// [AppBar] will imply an appropriate widget. For example, if the [AppBar] is
@@ -293,9 +292,10 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///   home: Scaffold(
   ///     appBar: AppBar(
   ///        title: SizedBox(
-  ///        height: kToolbarHeight,
-  ///          child: child: Image.asset(logoAsset),
+  ///        height: toolbarHeight,
+  ///        child: child: Image.asset(logoAsset),
   ///      ),
+  ///      toolbarHeight: toolbarHeight,
   ///   ),
   /// )
   /// ```
@@ -436,7 +436,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   @override
   final Size preferredSize;
 
-  /// Defines the height of toolbar component of [AppBar].
+  /// Defines the height of the toolbar component of an [AppBar].
   ///
   /// By default, the value of `toolbarHeight` is [kToolbarHeight].
   final double toolbarHeight;
@@ -1284,7 +1284,7 @@ class SliverAppBar extends StatefulWidget {
   /// offset specified by [stretchTriggerOffset].
   final AsyncCallback onStretchTrigger;
 
-  /// Defines the height of toolbar component of [AppBar].
+  /// Defines the height of the toolbar component of an [AppBar].
   ///
   /// By default, the value of `toolbarHeight` is [kToolbarHeight].
   final double toolbarHeight;
