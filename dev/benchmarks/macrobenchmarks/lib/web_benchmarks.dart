@@ -107,6 +107,8 @@ Future<void> _runBenchmark(String benchmarkName) async {
     return;
   }
 
+  print('Running benchmark!');
+
   await runZoned<Future<void>>(
     () async {
       final Recorder recorder = recorderFactory();
