@@ -166,8 +166,8 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
 
     assert(childScrollOffset(firstChild) > -precisionErrorTolerance);
 
-    // If the scroll offset is at the zero, we should make sure we are
-    // actually at the beginning of the list
+    // If the scroll offset is at zero, we should make sure we are
+    // actually at the beginning of the list.
     if (scrollOffset < precisionErrorTolerance) {
       if (indexOf(firstChild) > 0) {
         final double earliestScrollOffset = childScrollOffset(firstChild);

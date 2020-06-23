@@ -311,6 +311,7 @@ void main() {
   testWidgets(
     'SliverList can handle inaccurate scroll offset due to changes in children list',
       (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/pull/59888.
       bool skip = true;
       Widget _buildItem(BuildContext context, int index) {
         return !skip || index.isEven
@@ -395,7 +396,7 @@ void main() {
       expect(find.text('item13'), findsOneWidget);
       expect(find.text('item14'), findsNothing);
 
-      // It need to be correct as we scroll, so we have to drag multiple times.
+      // It need to be corrected as we scroll, so we have to drag multiple times.
       await tester.drag(find.byType(CustomScrollView), const Offset(0.0, 250.0));
       await tester.pump();
       await tester.drag(find.byType(CustomScrollView), const Offset(0.0, 250.0));
@@ -403,6 +404,7 @@ void main() {
       await tester.drag(find.byType(CustomScrollView), const Offset(0.0, 250.0));
       await tester.pump();
 
+      // Only items 0~6 are on the screen.
       expect(find.text('item0'), findsOneWidget);
       expect(find.text('item6'), findsOneWidget);
       expect(find.text('item7'), findsNothing);
