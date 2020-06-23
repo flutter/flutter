@@ -59,7 +59,7 @@ static void LogLastEGLError() {
   FML_LOG(ERROR) << "Unknown EGL Error";
 }
 
-static EGLResult<EGLSurface> CreateContext(EGLDisplay display,
+static EGLResult<EGLContext> CreateContext(EGLDisplay display,
                                            EGLConfig config,
                                            EGLContext share = EGL_NO_CONTEXT) {
   EGLint attributes[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
