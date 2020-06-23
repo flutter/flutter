@@ -599,7 +599,7 @@ void main() {
 
   testWidgets('TextButton onPressed and onLongPress callbacks are correctly called when non-null', (WidgetTester tester) async {
     bool wasPressed;
-    Finder flatButton;
+    Finder textButton;
 
     Widget buildFrame({ VoidCallback onPressed, VoidCallback onLongPress }) {
       return Directionality(
@@ -617,9 +617,9 @@ void main() {
     await tester.pumpWidget(
       buildFrame(onPressed: () { wasPressed = true; }, onLongPress: null),
     );
-    flatButton = find.byType(TextButton);
-    expect(tester.widget<TextButton>(flatButton).enabled, true);
-    await tester.tap(flatButton);
+    textButton = find.byType(TextButton);
+    expect(tester.widget<TextButton>(textButton).enabled, true);
+    await tester.tap(textButton);
     expect(wasPressed, true);
 
     // onPressed null, onLongPress not null.
@@ -627,17 +627,17 @@ void main() {
     await tester.pumpWidget(
       buildFrame(onPressed: null, onLongPress: () { wasPressed = true; }),
     );
-    flatButton = find.byType(TextButton);
-    expect(tester.widget<TextButton>(flatButton).enabled, true);
-    await tester.longPress(flatButton);
+    textButton = find.byType(TextButton);
+    expect(tester.widget<TextButton>(textButton).enabled, true);
+    await tester.longPress(textButton);
     expect(wasPressed, true);
 
     // onPressed null, onLongPress null.
     await tester.pumpWidget(
       buildFrame(onPressed: null, onLongPress: null),
     );
-    flatButton = find.byType(TextButton);
-    expect(tester.widget<TextButton>(flatButton).enabled, false);
+    textButton = find.byType(TextButton);
+    expect(tester.widget<TextButton>(textButton).enabled, false);
   });
 
   testWidgets('TextButton onPressed and onLongPress callbacks are distinctly recognized', (WidgetTester tester) async {
@@ -659,15 +659,15 @@ void main() {
       ),
     );
 
-    final Finder flatButton = find.byType(TextButton);
-    expect(tester.widget<TextButton>(flatButton).enabled, true);
+    final Finder textButton = find.byType(TextButton);
+    expect(tester.widget<TextButton>(textButton).enabled, true);
 
     expect(didPressButton, isFalse);
-    await tester.tap(flatButton);
+    await tester.tap(textButton);
     expect(didPressButton, isTrue);
 
     expect(didLongPressButton, isFalse);
-    await tester.longPress(flatButton);
+    await tester.longPress(textButton);
     expect(didLongPressButton, isTrue);
   });
 

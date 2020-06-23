@@ -591,10 +591,9 @@ void main() {
 
   testWidgets('OutlinedButton shape and border component overrides', (WidgetTester tester) async {
     const Color fillColor = Color(0xFF00FF00);
-    const Color borderColor = Color(0xFFFF0000);
-    const Color highlightedBorderColor = Color(0xFF0000FF);
-    const Color disabledBorderColor = Color(0xFFFF00FF);
-    const double borderWidth = 4.0;
+    const BorderSide disabledBorderSide = BorderSide(color: Color(0xFFFF0000), width: 3);
+    const BorderSide enabledBorderSide = BorderSide(color: Color(0xFFFF00FF), width: 4);
+    const BorderSide pressedBorderSide = BorderSide(color: Color(0xFF0000FF), width: 5);
 
     Widget buildFrame({ VoidCallback onPressed }) {
       return Directionality(
@@ -605,15 +604,15 @@ void main() {
             alignment: Alignment.topLeft,
             child: OutlinedButton(
               style: OutlinedButton.styleFrom(
-                backgroundColor: fillColor,
                 shape: const RoundedRectangleBorder(), // default border radius is 0
+                backgroundColor: fillColor,
               ).copyWith(
                 side: MaterialStateProperty.resolveWith<BorderSide>((Set<MaterialState> states) {
                   if (states.contains(MaterialState.disabled))
-                    return const BorderSide(color: disabledBorderColor, width: borderWidth);
+                    return disabledBorderSide;
                   if (states.contains(MaterialState.pressed))
-                    return const BorderSide(color: highlightedBorderColor, width: borderWidth);
-                  return const BorderSide(color: borderColor, width: borderWidth);
+                    return pressedBorderSide;
+                  return enabledBorderSide;
                 }),
               ),
               clipBehavior: Clip.antiAlias,
@@ -625,9 +624,16 @@ void main() {
       );
     }
 
-    const Rect clipRect = Rect.fromLTRB(0.0, 0.0, 116.0, 36.0);
+    const Rect clipRect = Rect.fromLTRB(0.0, 0.0, 100.0, 36.0);
     final Path clipPath = Path()..addRect(clipRect);
     final Finder outlinedButton = find.byType(OutlinedButton);
+
+    BorderSide getBorderSide() {
+      final OutlinedBorder border = tester.widget<Material>(
+        find.descendant(of: outlinedButton, matching: find.byType(Material))
+      ).shape as OutlinedBorder;
+      return border.side;
+    }
 
     // Pump a button with a null onPressed callback to make it disabled.
     await tester.pumpWidget(
@@ -636,7 +642,7 @@ void main() {
 
     // Expect that the button is disabled and painted with the disabled border color.
     expect(tester.widget<OutlinedButton>(outlinedButton).enabled, false);
-    expect(outlinedButton, paints..drrect(color: disabledBorderColor));
+    expect(getBorderSide(), disabledBorderSide);
     _checkPhysicalLayer(
       tester.element(outlinedButton),
       fillColor,
@@ -651,17 +657,15 @@ void main() {
 
     // Wait for the border color to change from disabled to enabled.
     await tester.pumpAndSettle();
+    expect(getBorderSide(), enabledBorderSide);
 
     final Offset center = tester.getCenter(outlinedButton);
     final TestGesture gesture = await tester.startGesture(center);
     await tester.pump(); // start gesture
-    // Wait for the border's color to change to highlightedBorderColor and
-    // the fillColor to become opaque.
+
+    // Wait for the border's color to change to pressed
     await tester.pump(const Duration(milliseconds: 200));
-    expect(
-      outlinedButton,
-      paints
-        ..drrect(color: highlightedBorderColor/*,strokeWidth: borderWidth*/));
+    expect(getBorderSide(), pressedBorderSide);
     _checkPhysicalLayer(
       tester.element(outlinedButton),
       fillColor,
@@ -672,10 +676,7 @@ void main() {
     // Tap gesture completes, button returns to its initial configuration.
     await gesture.up();
     await tester.pumpAndSettle();
-    expect(
-      outlinedButton,
-      paints
-        ..drrect(color: borderColor/*, strokeWidth: borderWidth*/));
+    expect(getBorderSide(), enabledBorderSide);
     _checkPhysicalLayer(
       tester.element(outlinedButton),
       fillColor,
@@ -790,7 +791,13 @@ void main() {
           child: MediaQuery(
             data: const MediaQueryData(textScaleFactor: 1.3),
             child: Center(
-              child: FlatButton(
+              child: OutlinedButton(
+                style: ButtonStyle(
+                  // Specifying minimumSize to mimic the original minimumSize for
+                  // RaisedButton so that the corresponding button size matches
+                  // the original version of this test.
+                  minimumSize: MaterialStateProperty.all<Size>(const Size(88, 36)),
+                ),
                 onPressed: () {},
                 child: const Text('ABC'),
               ),
@@ -800,7 +807,7 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.byType(FlatButton)), equals(const Size(88.0, 48.0)));
+    expect(tester.getSize(find.byType(OutlinedButton)), equals(const Size(88.0, 48.0)));
     // Scaled text rendering is different on Linux and Mac by one pixel.
     // TODO(gspencergoog): Figure out why this is, and fix it. https://github.com/flutter/flutter/issues/12357
     expect(tester.getSize(find.byType(Text)).width, isIn(<double>[54.0, 55.0]));
@@ -814,7 +821,7 @@ void main() {
           child: MediaQuery(
             data: const MediaQueryData(textScaleFactor: 3.0),
             child: Center(
-              child: FlatButton(
+              child: OutlinedButton(
                 onPressed: () {},
                 child: const Text('ABC'),
               ),
@@ -826,8 +833,8 @@ void main() {
 
     // Scaled text rendering is different on Linux and Mac by one pixel.
     // TODO(gspencergoog): Figure out why this is, and fix it. https://github.com/flutter/flutter/issues/12357
-    expect(tester.getSize(find.byType(FlatButton)).width, isIn(<double>[158.0, 159.0]));
-    expect(tester.getSize(find.byType(FlatButton)).height, equals(48.0));
+    expect(tester.getSize(find.byType(OutlinedButton)).width, isIn(<double>[133.0, 134.0]));
+    expect(tester.getSize(find.byType(OutlinedButton)).height, equals(48.0));
     expect(tester.getSize(find.byType(Text)).width, isIn(<double>[126.0, 127.0]));
     expect(tester.getSize(find.byType(Text)).height, equals(42.0));
   });
@@ -875,13 +882,7 @@ void main() {
             textDirection: TextDirection.rtl,
             child: Center(
               child: OutlinedButton(
-                style: ButtonStyle(
-                  visualDensity: visualDensity,
-                  // Specifying minimumSize to mimic the original minimumSize for
-                  // RaisedButton so that the corresponding button size matches
-                  // the original version of this test.
-                  minimumSize: MaterialStateProperty.all<Size>(const Size(88, 36)),
-                ),
+                style: ButtonStyle(visualDensity: visualDensity),
                 key: key,
                 onPressed: () {},
                 child: useText
@@ -898,38 +899,289 @@ void main() {
     final RenderBox box = tester.renderObject(find.byKey(key));
     Rect childRect = tester.getRect(find.byKey(childKey));
     await tester.pumpAndSettle();
-    expect(box.size, equals(const Size(132, 100)));
+    expect(box.size, equals(const Size(116, 116)));
     expect(childRect, equals(const Rect.fromLTRB(350, 250, 450, 350)));
 
     await buildTest(const VisualDensity(horizontal: 3.0, vertical: 3.0));
     await tester.pumpAndSettle();
     childRect = tester.getRect(find.byKey(childKey));
-    expect(box.size, equals(const Size(156, 124)));
+    expect(box.size, equals(const Size(140, 140)));
     expect(childRect, equals(const Rect.fromLTRB(350, 250, 450, 350)));
 
     await buildTest(const VisualDensity(horizontal: -3.0, vertical: -3.0));
     await tester.pumpAndSettle();
     childRect = tester.getRect(find.byKey(childKey));
-    expect(box.size, equals(const Size(108, 100)));
+    expect(box.size, equals(const Size(100, 100)));
     expect(childRect, equals(const Rect.fromLTRB(350, 250, 450, 350)));
 
     await buildTest(const VisualDensity(), useText: true);
     await tester.pumpAndSettle();
     childRect = tester.getRect(find.byKey(childKey));
-    expect(box.size, equals(const Size(88, 48)));
+    expect(box.size, equals(const Size(72, 48)));
     expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
 
     await buildTest(const VisualDensity(horizontal: 3.0, vertical: 3.0), useText: true);
     await tester.pumpAndSettle();
     childRect = tester.getRect(find.byKey(childKey));
-    expect(box.size, equals(const Size(112, 60)));
+    expect(box.size, equals(const Size(96, 60)));
     expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
 
     await buildTest(const VisualDensity(horizontal: -3.0, vertical: -3.0), useText: true);
     await tester.pumpAndSettle();
     childRect = tester.getRect(find.byKey(childKey));
-    expect(box.size, equals(const Size(76, 36)));
+    expect(box.size, equals(const Size(56, 36)));
     expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
+  });
+
+  group('Default OutlinedButton padding for textScaleFactor, textDirection', () {
+    const ValueKey<String> buttonKey = ValueKey<String>('button');
+    const ValueKey<String> labelKey = ValueKey<String>('label');
+    const ValueKey<String> iconKey = ValueKey<String>('icon');
+
+    const List<double> textScaleFactorOptions = <double>[0.5, 1.0, 1.25, 1.5, 2.0, 2.5, 3.0, 4.0];
+    const List<TextDirection> textDirectionOptions = <TextDirection>[TextDirection.ltr, TextDirection.rtl];
+    const List<Widget> iconOptions = <Widget>[null, Icon(Icons.add, size: 18, key: iconKey)];
+
+    // Expected values for each textScaleFactor.
+    final Map<double, double> paddingVertical = <double, double>{
+      0.5: 8,
+      1: 8,
+      1.25: 6,
+      1.5: 4,
+      2: 0,
+      2.5: 0,
+      3: 0,
+      4: 0,
+    };
+    final Map<double, double> paddingWithIconGap = <double, double>{
+      0.5: 8,
+      1: 8,
+      1.25: 7,
+      1.5: 6,
+      2: 4,
+      2.5: 4,
+      3: 4,
+      4: 4,
+    };
+    final Map<double, double> textPaddingWithoutIconHorizontal = <double, double>{
+      0.5: 8,
+      1: 8,
+      1.25: 8,
+      1.5: 8,
+      2: 8,
+      2.5: 6,
+      3: 4,
+      4: 4,
+    };
+    final Map<double, double> textPaddingWithIconHorizontal = <double, double>{
+      0.5: 8,
+      1: 8,
+      1.25: 7,
+      1.5: 6,
+      2: 4,
+      2.5: 4,
+      3: 4,
+      4: 4,
+    };
+
+    Rect globalBounds(RenderBox renderBox) {
+      final Offset topLeft = renderBox.localToGlobal(Offset.zero);
+      return topLeft & renderBox.size;
+    }
+
+    /// Computes the padding between two [Rect]s, one inside the other.
+    EdgeInsets paddingBetween({ Rect parent, Rect child }) {
+      assert (parent.intersect(child) == child);
+      return EdgeInsets.fromLTRB(
+        child.left - parent.left,
+        child.top - parent.top,
+        parent.right - child.right,
+        parent.bottom - child.bottom,
+      );
+    }
+
+    for (final double textScaleFactor in textScaleFactorOptions) {
+      for (final TextDirection textDirection in textDirectionOptions) {
+        for (final Widget icon in iconOptions) {
+          final String testName = 'OutlinedButton'
+            ', text scale $textScaleFactor'
+            '${icon != null ? ", with icon" : ""}'
+            '${textDirection == TextDirection.rtl ? ", RTL" : ""}';
+
+          testWidgets(testName, (WidgetTester tester) async {
+            await tester.pumpWidget(
+              MaterialApp(
+                theme: ThemeData.from(colorScheme: const ColorScheme.light()),
+                home: Builder(
+                  builder: (BuildContext context) {
+                    return MediaQuery(
+                      data: MediaQuery.of(context).copyWith(
+                        textScaleFactor: textScaleFactor,
+                      ),
+                      child: Directionality(
+                        textDirection: textDirection,
+                        child: Scaffold(
+                          body: Center(
+                            child: icon == null
+                              ? OutlinedButton(
+                                  key: buttonKey,
+                                  onPressed: () {},
+                                  child: const Text('button', key: labelKey),
+                                )
+                              : OutlinedButton.icon(
+                                  key: buttonKey,
+                                  onPressed: () {},
+                                  icon: icon,
+                                  label: const Text('button', key: labelKey),
+                                ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            );
+
+            final Element paddingElement = tester.element(
+              find.descendant(
+                of: find.byKey(buttonKey),
+                matching: find.byType(Padding),
+              ),
+            );
+            expect(Directionality.of(paddingElement), textDirection);
+            final Padding paddingWidget = paddingElement.widget as Padding;
+
+            // Compute expected padding, and check.
+
+            final double expectedPaddingTop = paddingVertical[textScaleFactor];
+            final double expectedPaddingBottom = paddingVertical[textScaleFactor];
+
+            final double expectedPaddingStart = icon != null
+              ? textPaddingWithIconHorizontal[textScaleFactor]
+              : textPaddingWithoutIconHorizontal[textScaleFactor];
+            final double expectedPaddingEnd = expectedPaddingStart;
+
+            final EdgeInsets expectedPadding = EdgeInsetsDirectional.fromSTEB(
+              expectedPaddingStart,
+              expectedPaddingTop,
+              expectedPaddingEnd,
+              expectedPaddingBottom,
+            ).resolve(textDirection);
+
+            expect(paddingWidget.padding.resolve(textDirection), expectedPadding);
+
+            // Measure padding in terms of the difference between the button and its label child
+            // and check that.
+
+            final RenderBox labelRenderBox = tester.renderObject<RenderBox>(find.byKey(labelKey));
+            final Rect labelBounds = globalBounds(labelRenderBox);
+            final RenderBox iconRenderBox = icon == null ? null : tester.renderObject<RenderBox>(find.byKey(iconKey));
+            final Rect iconBounds = icon == null ? null : globalBounds(iconRenderBox);
+            final Rect childBounds = icon == null ? labelBounds : labelBounds.expandToInclude(iconBounds);
+
+            // We measure the `InkResponse` descendant of the button
+            // element, because the button has a larger `RenderBox`
+            // which accommodates the minimum tap target with a height
+            // of 48.
+            final RenderBox buttonRenderBox = tester.renderObject<RenderBox>(
+              find.descendant(
+                of: find.byKey(buttonKey),
+                matching: find.byWidgetPredicate(
+                  (Widget widget) => widget is InkResponse,
+                ),
+              ),
+            );
+            final Rect buttonBounds = globalBounds(buttonRenderBox);
+            final EdgeInsets visuallyMeasuredPadding = paddingBetween(
+              parent: buttonBounds,
+              child: childBounds,
+            );
+
+            // Since there is a requirement of a minimum width of 64
+            // and a minimum height of 36 on material buttons, the visual
+            // padding of smaller buttons may not match their settings.
+            // Therefore, we only test buttons that are large enough.
+            if (buttonBounds.width > 64) {
+              expect(
+                visuallyMeasuredPadding.left,
+                expectedPadding.left,
+              );
+              expect(
+                visuallyMeasuredPadding.right,
+                expectedPadding.right,
+              );
+            }
+
+            if (buttonBounds.height > 36) {
+              expect(
+                visuallyMeasuredPadding.top,
+                expectedPadding.top,
+              );
+              expect(
+                visuallyMeasuredPadding.bottom,
+                expectedPadding.bottom,
+              );
+            }
+
+            // Check the gap between the icon and the label
+            if (icon != null) {
+              final double gapWidth = textDirection == TextDirection.ltr
+                ? labelBounds.left - iconBounds.right
+                : iconBounds.left - labelBounds.right;
+              expect(gapWidth, paddingWithIconGap[textScaleFactor]);
+            }
+
+            // Check the text's height - should be consistent with the textScaleFactor.
+            final RenderBox textRenderObject = tester.renderObject<RenderBox>(
+              find.descendant(
+                of: find.byKey(labelKey),
+                matching: find.byElementPredicate(
+                  (Element element) => element.widget is RichText,
+                ),
+              ),
+            );
+            final double textHeight = textRenderObject.paintBounds.size.height;
+            final double expectedTextHeight = 14 * textScaleFactor;
+            expect(textHeight, moreOrLessEquals(expectedTextHeight, epsilon: 0.5));
+          });
+        }
+      }
+    }
+  });
+
+  testWidgets('Override OutlinedButton default padding', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.from(colorScheme: const ColorScheme.light()),
+        home: Builder(
+          builder: (BuildContext context) {
+            return MediaQuery(
+              data: MediaQuery.of(context).copyWith(
+                textScaleFactor: 2,
+              ),
+              child: Scaffold(
+                body: Center(
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(padding: const EdgeInsets.all(22)),
+                    onPressed: () {},
+                    child: const Text('OutlinedButton')
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final Padding paddingWidget = tester.widget<Padding>(
+      find.descendant(
+        of: find.byType(OutlinedButton),
+        matching: find.byType(Padding),
+      ),
+    );
+    expect(paddingWidget.padding, const EdgeInsets.all(22));
   });
 }
 

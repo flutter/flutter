@@ -214,10 +214,10 @@ class TextButton extends ButtonStyleButton {
   /// * `shadowColor` - Colors.black
   /// * `elevation` - 0
   /// * `padding`
-  ///   * textScaleFactor <= 1 - all(8)
-  ///   * 1 < textScaleFactor <= 2 - lerp(all(8), horizontal(8))
-  ///   * 2 < textScaleFactor <= 3 - lerp(horizontal(8), horizontal(4))
-  ///   * 3 < textScaleFactor - horizontal(4)
+  ///   * `textScaleFactor <= 1` - all(8)
+  ///   * `1 < textScaleFactor <= 2` - lerp(all(8), horizontal(8))
+  ///   * `2 < textScaleFactor <= 3` - lerp(horizontal(8), horizontal(4))
+  ///   * `3 < textScaleFactor` - horizontal(4)
   /// * `minimumSize` - Size(64, 36)
   /// * `side` - BorderSide.none
   /// * `shape` - RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))
@@ -232,9 +232,9 @@ class TextButton extends ButtonStyleButton {
   /// The default padding values for the [TextButton.icon] factory are slightly different:
   ///
   /// * `padding`
-  ///   * textScaleFactor <= 1 - all(8)
-  ///   * 1 < textScaleFactor <= 2 - lerp(all(8), horizontal(4))
-  ///   * 2 < textScaleFactor - horizontal(4)
+  ///   * `textScaleFactor <= 1` - all(8)
+  ///   * `1 < textScaleFactor <= 2 `- lerp(all(8), horizontal(4))
+  ///   * `2 < textScaleFactor` - horizontal(4)
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -338,8 +338,8 @@ class _TextButtonWithIcon extends TextButton {
     VoidCallback onLongPress,
     ButtonStyle style,
     FocusNode focusNode,
-    bool autofocus = false,
-    Clip clipBehavior = Clip.none,
+    bool autofocus,
+    Clip clipBehavior,
     @required Widget icon,
     @required Widget label,
   }) : assert(icon != null),
@@ -350,8 +350,8 @@ class _TextButtonWithIcon extends TextButton {
          onLongPress: onLongPress,
          style: style,
          focusNode: focusNode,
-         autofocus: autofocus,
-         clipBehavior: clipBehavior,
+         autofocus: autofocus ?? false,
+         clipBehavior: clipBehavior ?? Clip.none,
          child: _TextButtonWithIconChild(icon: icon, label: label),
       );
 

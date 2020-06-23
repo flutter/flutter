@@ -226,9 +226,9 @@ class ContainedButton extends ButtonStyleButton {
   ///   * pressed - 6
   /// * `padding`
   ///   * textScaleFactor <= 1 - horizontal(16)
-  ///   * 1 < textScaleFactor <= 2 - lerp(horizontal(16), horizontal(8))
-  ///   * 2 < textScaleFactor <= 3 - lerp(horizontal(8), horizontal(4))
-  ///   * 3 < textScaleFactor - horizontal(4)
+  ///   * `1 < textScaleFactor <= 2` - lerp(horizontal(16), horizontal(8))
+  ///   * `2 < textScaleFactor <= 3` - lerp(horizontal(8), horizontal(4))
+  ///   * `3 < textScaleFactor` - horizontal(4)
   /// * `minimumSize` - Size(64, 36)
   /// * `side` - BorderSide.none
   /// * `shape` - RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))
@@ -243,10 +243,10 @@ class ContainedButton extends ButtonStyleButton {
   /// The default padding values for the [ContainedButton.icon] factory are slightly different:
   ///
   /// * `padding`
-  ///   * textScaleFactor <= 1 - start(12) end(16)
-  ///   * 1 < textScaleFactor <= 2 - lerp(start(12) end(16), horizontal(8))
-  ///   * 2 < textScaleFactor <= 3 - lerp(horizontal(8), horizontal(4))
-  ///   * 3 < textScaleFactor - horizontal(4)
+  ///   * `textScaleFactor <= 1` - start(12) end(16)
+  ///   * `1 < textScaleFactor <= 2` - lerp(start(12) end(16), horizontal(8))
+  ///   * `2 < textScaleFactor <= 3` - lerp(horizontal(8), horizontal(4))
+  ///   * `3 < textScaleFactor` - horizontal(4)
 
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
@@ -376,8 +376,8 @@ class _ContainedButtonWithIcon extends ContainedButton {
     VoidCallback onLongPress,
     ButtonStyle style,
     FocusNode focusNode,
-    bool autofocus = false,
-    Clip clipBehavior = Clip.none,
+    bool autofocus,
+    Clip clipBehavior,
     @required Widget icon,
     @required Widget label,
   }) : assert(icon != null),
@@ -388,16 +388,10 @@ class _ContainedButtonWithIcon extends ContainedButton {
          onLongPress: onLongPress,
          style: style,
          focusNode: focusNode,
-         autofocus: autofocus,
-         clipBehavior: clipBehavior,
+         autofocus: autofocus ?? false,
+         clipBehavior: clipBehavior ?? Clip.none,
          child: _ContainedButtonWithIconChild(icon: icon, label: label),
       );
-
-  /// * `padding`
-  ///   * textScaleFactor <= 1 - start(12) end(16)
-  ///   * 1 < textScaleFactor <= 2 - lerp(start(12) end(16), horizontal(8))
-  ///   * 2 < textScaleFactor <= 3 - lerp(horizontal(8), start(8) end(4))
-  ///   * 3 < textScaleFactor - start(8) end(4)
 
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {

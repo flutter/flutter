@@ -4,6 +4,9 @@
 
 // @dart = 2.8
 
+import 'dart:math' as math;
+import 'dart:ui' show lerpDouble;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -76,41 +79,18 @@ class OutlinedButton extends ButtonStyleButton {
   /// The icon and label are arranged in a row and padded by 12 logical pixels
   /// at the start, and 16 at the end, with an 8 pixel gap in between.
   ///
-  /// The [icon], [label], [autofocus], and [clipBehavior] arguments must not be null.
+  /// The [icon] and [label] arguments must not be null.
   factory OutlinedButton.icon({
     Key key,
     @required VoidCallback onPressed,
     VoidCallback onLongPress,
     ButtonStyle style,
     FocusNode focusNode,
-    bool autofocus = false,
-    Clip clipBehavior = Clip.none,
+    bool autofocus,
+    Clip clipBehavior,
     @required Widget icon,
     @required Widget label,
-  }) {
-    assert(icon != null);
-    assert(label != null);
-    final ButtonStyle paddingStyle = ButtonStyle(
-      padding: MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.only(left: 12, right: 16)),
-    );
-    return OutlinedButton(
-      key: key,
-      onPressed: onPressed,
-      onLongPress: onLongPress,
-      style: style == null ? paddingStyle : style.merge(paddingStyle),
-      focusNode: focusNode,
-      autofocus: autofocus,
-      clipBehavior: clipBehavior,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          icon,
-          const SizedBox(width: 8.0),
-          label,
-        ],
-      ),
-    );
-  }
+  }) = _OutlinedButtonWithIcon;
 
   /// A static convenience method that constructs an outlined button
   /// [ButtonStyle] given simple values.
@@ -224,7 +204,11 @@ class OutlinedButton extends ButtonStyleButton {
   ///   * focused or pressed - Theme.colorScheme.primary(0.12)
   /// * `shadowColor` - Colors.black
   /// * `elevation` - 0
-  /// * `padding` - EdgeInsets.symmetric(horizontal: 16),
+  /// * `padding`
+  ///   * `textScaleFactor <= 1` - all(8)
+  ///   * `1 < textScaleFactor <= 2` - lerp(all(8), horizontal(8))
+  ///   * `2 < textScaleFactor <= 3` - lerp(horizontal(8), horizontal(4))
+  ///   * `3 < textScaleFactor` - horizontal(4)
   /// * `minimumSize` - Size(64, 36)
   /// * `side` - BorderSide(width: 1, color: Theme.colorScheme.onSurface(0.12))
   /// * `shape` - RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))
@@ -240,6 +224,13 @@ class OutlinedButton extends ButtonStyleButton {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
 
+    final EdgeInsetsGeometry scaledPadding = ButtonStyleButton.scaledPadding(
+      const EdgeInsets.all(8),
+      const EdgeInsets.symmetric(horizontal: 8),
+      const EdgeInsets.symmetric(horizontal: 4),
+      MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1,
+    );
+
     return styleFrom(
       primary: colorScheme.primary,
       onSurface: colorScheme.onSurface,
@@ -247,15 +238,15 @@ class OutlinedButton extends ButtonStyleButton {
       shadowColor: const Color(0xFF000000),
       elevation: 0,
       textStyle: theme.textTheme.button,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: scaledPadding,
       minimumSize: const Size(64, 36),
       side: BorderSide(
         color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
         width: 1,
       ),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(4)),
-      ),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
+      enabledMouseCursor: SystemMouseCursors.click,
+      disabledMouseCursor: SystemMouseCursors.forbidden,
       visualDensity: theme.visualDensity,
       tapTargetSize: theme.materialTapTargetSize,
       animationDuration: kThemeChangeDuration,
@@ -312,5 +303,60 @@ class _OutlinedButtonDefaultMouseCursor extends MaterialStateProperty<MouseCurso
     if (states.contains(MaterialState.disabled))
       return disabledCursor;
     return enabledCursor;
+  }
+}
+
+class _OutlinedButtonWithIcon extends OutlinedButton {
+  _OutlinedButtonWithIcon({
+    Key key,
+    @required VoidCallback onPressed,
+    VoidCallback onLongPress,
+    ButtonStyle style,
+    FocusNode focusNode,
+    bool autofocus,
+    Clip clipBehavior,
+    @required Widget icon,
+    @required Widget label,
+  }) : assert(icon != null),
+       assert(label != null),
+       super(
+         key: key,
+         onPressed: onPressed,
+         onLongPress: onLongPress,
+         style: style,
+         focusNode: focusNode,
+         autofocus: autofocus ?? false,
+         clipBehavior: clipBehavior ?? Clip.none,
+         child: _OutlinedButtonWithIconChild(icon: icon, label: label),
+      );
+
+  @override
+  ButtonStyle defaultStyleOf(BuildContext context) {
+    final EdgeInsetsGeometry scaledPadding = ButtonStyleButton.scaledPadding(
+      const EdgeInsets.all(8),
+      const EdgeInsets.symmetric(horizontal: 4),
+      const EdgeInsets.symmetric(horizontal: 4),
+      MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1,
+    );
+    return super.defaultStyleOf(context).copyWith(
+      padding: MaterialStateProperty.all<EdgeInsetsGeometry>(scaledPadding)
+    );
+  }
+}
+
+class _OutlinedButtonWithIconChild extends StatelessWidget {
+  const _OutlinedButtonWithIconChild({ Key key, this.label, this.icon }) : super(key: key);
+
+  final Widget label;
+  final Widget icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final double scale = MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1;
+    final double gap = scale <= 1 ? 8 : lerpDouble(8, 4, math.min(scale - 1, 1));
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[icon, SizedBox(width: gap), label],
+    );
   }
 }
