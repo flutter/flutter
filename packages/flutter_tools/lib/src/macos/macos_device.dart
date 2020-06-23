@@ -27,7 +27,7 @@ class MacOSDevice extends DesktopDevice {
   String get name => 'macOS desktop';
 
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.darwin_x64;
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.darwin;
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
