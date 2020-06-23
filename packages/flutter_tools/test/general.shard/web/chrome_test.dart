@@ -109,7 +109,7 @@ void main() {
     processManager.addCommand(const FakeCommand(
       command: <String>[
         'example_chrome',
-        '--user-data-dir=/.tmp_rand1/flutter_tools_chrome_device.rand1',
+        '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
         '--remote-debugging-port=10000',
         ...kChromeArgs,
         'example_url',
@@ -131,7 +131,7 @@ void main() {
     processManager.addCommand(const FakeCommand(
       command: <String>[
         'example_chrome',
-        '--user-data-dir=/.tmp_rand1/flutter_tools_chrome_device.rand1',
+        '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
         '--remote-debugging-port=1234',
         ...kChromeArgs,
         '--headless',
@@ -174,7 +174,7 @@ void main() {
 
     processManager.addCommand(FakeCommand(command: const <String>[
       'example_chrome',
-      '--user-data-dir=/.tmp_rand1/flutter_tools_chrome_device.rand1',
+      '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
       '--remote-debugging-port=1234',
       ...kChromeArgs,
       'example_url',
@@ -188,7 +188,7 @@ void main() {
 
     // validate preferences
     final File tempFile = fileSystem
-      .directory('.tmp_rand1/flutter_tools_chrome_device.rand1')
+      .directory('.tmp_rand0/flutter_tools_chrome_device.rand0')
       .childDirectory('Default')
       .childFile('preferences');
 
@@ -204,7 +204,7 @@ void main() {
 
     // validate local storage
     final Directory storageDir = fileSystem
-        .directory('.tmp_rand1/flutter_tools_chrome_device.rand1')
+        .directory('.tmp_rand0/flutter_tools_chrome_device.rand0')
         .childDirectory('Default')
         .childDirectory('Local Storage')
         .childDirectory('leveldb');
