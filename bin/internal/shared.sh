@@ -143,7 +143,12 @@ function upgrade_flutter () (
 
     retry_upgrade
 
-    "$DART" --disable-dart-dev $FLUTTER_TOOL_ARGS --snapshot="$SNAPSHOT_PATH" --packages="$FLUTTER_TOOLS_DIR/.packages" --no-enable-mirrors "$SCRIPT_PATH"
+    if [[ -n "$FLUTTER_AOT_TOOL" ]]; then
+      echo Using dart2native...
+      "$FLUTTER_ROOT/bin/cache/dart-sdk/bin/dart2native" --packages="$FLUTTER_TOOLS_DIR/.packages" -o "$SNAPSHOT_PATH" "$SCRIPT_PATH"
+    else
+      "$DART" --disable-dart-dev $FLUTTER_TOOL_ARGS --snapshot="$SNAPSHOT_PATH" --packages="$FLUTTER_TOOLS_DIR/.packages" --no-enable-mirrors "$SCRIPT_PATH"
+    fi
     echo "$revision" > "$STAMP_PATH"
   fi
   # The exit here is extraneous since the function is run in a subshell, but
@@ -211,7 +216,11 @@ function shared::execute() {
     flutter*)
       # FLUTTER_TOOL_ARGS aren't quoted below, because it is meant to be
       # considered as separate space-separated args.
-      "$DART" --disable-dart-dev --packages="$FLUTTER_TOOLS_DIR/.packages" $FLUTTER_TOOL_ARGS "$SNAPSHOT_PATH" "$@"
+      if [[ -n "$FLUTTER_AOT_TOOL" ]]; then
+        "$SNAPSHOT_PATH" "$@"
+      else
+        "$DART" --disable-dart-dev --packages="$FLUTTER_TOOLS_DIR/.packages" $FLUTTER_TOOL_ARGS "$SNAPSHOT_PATH" "$@"
+      fi
       ;;
     dart*)
       "$DART" "$@"
