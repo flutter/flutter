@@ -72,6 +72,13 @@
     "description": "The title for the Flutter licenses page."
   },
 
+  "licensesPackageDetailTextOne": "1 license",
+  "licensesPackageDetailTextOther": "$licenseCount licenses",
+  "@licensesPackageDetailText": {
+    "description": "The subtitle and detail text for a package displayed on the Flutter licenses page. The value of $licenseCount is an integer which indicates the number of licenses the package has. A zero value is not allowed.",
+    "plural": "licenseCount"
+  },
+
   "pageRowsInfoTitle": "$firstRow–$lastRow of $rowCount",
   "@pageRowsInfoTitle": {
     "description": "The text shown in the footer of a paginated data table when the exact overall row count is known. This message describes an integer range where $firstRow is the index of the start of the range, $lastRow is the index of the end of the range, and $rowCount is the limit of the range. All values are greater than or equal to zero.",
