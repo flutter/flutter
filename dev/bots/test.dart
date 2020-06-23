@@ -1113,7 +1113,7 @@ Map<String, String> _initGradleEnvironment() {
       ? Platform.environment['ANDROID_SDK_ROOT']
       : Platform.environment['ANDROID_HOME'];
   if (androidSdkRoot == null || androidSdkRoot.isEmpty) {
-    print('${red}Could not find Android SDK; set ANDROID_SDK_ROOT (or ANDROID_HOME).$reset');
+    print('${red}Could not find Android SDK; set ANDROID_SDK_ROOT.$reset');
     exit(1);
   }
   return <String, String>{

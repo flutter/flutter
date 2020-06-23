@@ -995,8 +995,9 @@ class EditableText extends StatefulWidget {
   /// If this property is null, [SystemMouseCursors.text] will be used.
   ///
   /// The [mouseCursor] is the only property of [EditableText] that controls the
-  /// mouse pointer. All other properties related to "cursor" stands for the text
-  /// cursor, which is usually a blinking vertical line at the editing position.
+  /// appearance of the mouse pointer. All other properties related to "cursor"
+  /// stands for the text cursor, which is usually a blinking vertical line at
+  /// the editing position.
   final MouseCursor mouseCursor;
 
   /// If true, the [RenderEditable] created by this widget will not handle
