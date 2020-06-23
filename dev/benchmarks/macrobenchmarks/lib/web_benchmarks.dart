@@ -63,27 +63,13 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
     BenchBuildColorsGrid.domBenchmarkName: () => BenchBuildColorsGrid.dom(),
     BenchBuildColorsGrid.canvasBenchmarkName: () => BenchBuildColorsGrid.canvas(),
 
-    // The following benchmarks are for the Flutter Gallery.
-    // These benchmarks are failing when run with CanvasKit, so we skip them
+    // The following benchmark is for the Flutter Gallery.
+    // This benchmark is failing when run with CanvasKit, so we skip it
     // for now.
     // TODO(yjbanov): https://github.com/flutter/flutter/issues/59082
     '${_galleryBenchmarkPrefix}_studies_perf': () => GalleryRecorder(
       benchmarkName: '${_galleryBenchmarkPrefix}_studies_perf',
       shouldRunPredicate: (String demo) => typeOfDemo(demo) == DemoType.study,
-    ),
-    '${_galleryBenchmarkPrefix}_animated_widgets_perf': () => GalleryRecorder(
-      benchmarkName: '${_galleryBenchmarkPrefix}_animated_widgets_perf',
-      shouldRunPredicate: (String demo) =>
-      typeOfDemo(demo) == DemoType.animatedWidget,
-    ),
-    '${_galleryBenchmarkPrefix}_unanimated_widgets_perf': () => GalleryRecorder(
-      benchmarkName: '${_galleryBenchmarkPrefix}_unanimated_widgets_perf',
-      shouldRunPredicate: (String demo) =>
-      typeOfDemo(demo) == DemoType.unanimatedWidget,
-    ),
-    '${_galleryBenchmarkPrefix}_scroll_perf': () => GalleryRecorder(
-      benchmarkName: '${_galleryBenchmarkPrefix}_scroll_perf',
-      testScrollsOnly: true,
     ),
   },
 };
