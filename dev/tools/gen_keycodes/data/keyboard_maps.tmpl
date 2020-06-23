@@ -71,6 +71,18 @@ const Map<int, LogicalKeyboardKey> kGlfwNumpadMap = <int, LogicalKeyboardKey>{
 @@@GLFW_NUMPAD_MAP@@@
 };
 
+/// Maps GTK-specific key codes to the matching [LogicalKeyboardKey].
+const Map<int, LogicalKeyboardKey> kGtkToLogicalKey = <int, LogicalKeyboardKey>{
+@@@GTK_KEY_CODE_MAP@@@
+};
+
+/// A map of GTK key codes which have printable representations, but appear
+/// on the number pad. Used to provide different key objects for keys like
+/// KEY_EQUALS and NUMPAD_EQUALS.
+const Map<int, LogicalKeyboardKey> kGtkNumpadMap = <int, LogicalKeyboardKey>{
+@@@GTK_NUMPAD_MAP@@@
+};
+
 /// Maps XKB specific key code values representing [PhysicalKeyboardKey].
 const Map<int, PhysicalKeyboardKey> kLinuxToPhysicalKey = <int, PhysicalKeyboardKey>{
 @@@XKB_SCAN_CODE_MAP@@@
