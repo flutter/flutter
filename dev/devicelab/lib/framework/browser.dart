@@ -254,17 +254,20 @@ Future<WipConnection> _connectToChromeDebugPort(io.Process chromeProcess, int po
       print('[CHROME]: $line');
     });
 
-  await chromeProcess.stderr
+  Completer<bool> devToolsReady = Completer<bool>();
+
+  chromeProcess.stderr
     .transform(utf8.decoder)
     .transform(const LineSplitter())
     .map((String line) {
-      print('[CHROME]: $line');
+      print('[CHROME stderr]: $line');
+      if (line.startsWith('DevTools listening')) {
+        devToolsReady.complete(true);
+      }
       return line;
-    })
-    .firstWhere((String line) => line.startsWith('DevTools listening'), orElse: () {
-      throw Exception('Expected Chrome to print "DevTools listening" string '
-          'with DevTools URL, but the string was never printed.');
     });
+
+  await devToolsReady.future;
 
   final Uri devtoolsUri = await _getRemoteDebuggerUrl(Uri.parse('http://localhost:$port'));
   print('Connecting to DevTools: $devtoolsUri');
