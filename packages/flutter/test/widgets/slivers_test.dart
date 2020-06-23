@@ -396,7 +396,7 @@ void main() {
       expect(find.text('item13'), findsOneWidget);
       expect(find.text('item14'), findsNothing);
 
-      // It need to be corrected as we scroll, so we have to drag multiple times.
+      // It will be corrected as we scroll, so we have to drag multiple times.
       await tester.drag(find.byType(CustomScrollView), const Offset(0.0, 250.0));
       await tester.pump();
       await tester.drag(find.byType(CustomScrollView), const Offset(0.0, 250.0));
