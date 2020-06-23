@@ -151,7 +151,7 @@ void main() {
 
     final MultiFrameImageStreamCompleter completer = provider.load(provider, _decoder) as MultiFrameImageStreamCompleter;
 
-    expect(completer.tag, file.path);
+    expect(completer.debugLabel, file.path);
   });
 
   test('Memory image sets tag', () async {
@@ -160,7 +160,7 @@ void main() {
 
     final MultiFrameImageStreamCompleter completer = provider.load(provider, _decoder) as MultiFrameImageStreamCompleter;
 
-    expect(completer.tag, 'MemoryImage(${describeIdentity(bytes)})');
+    expect(completer.debugLabel, 'MemoryImage(${describeIdentity(bytes)})');
   });
 
   test('Asset image sets tag', () async {
@@ -169,7 +169,7 @@ void main() {
     final AssetBundleImageKey key = await provider.obtainKey(ImageConfiguration.empty);
     final MultiFrameImageStreamCompleter completer = provider.load(key, _decoder) as MultiFrameImageStreamCompleter;
 
-    expect(completer.tag, asset);
+    expect(completer.debugLabel, asset);
   });
 }
 

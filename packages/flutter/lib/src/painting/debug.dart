@@ -32,9 +32,9 @@ typedef HttpClientProvider = HttpClient Function();
 HttpClientProvider debugNetworkImageHttpClientProvider;
 
 
-/// If this value is a positive number, the framework will check that images
-/// it renders are not more than that many kilobytes greater than the minimum
-/// size needed to display the image at its current resolution without scaling.
+/// If this value is set between 0.0 and 1.0, the framework will check that the
+/// display size of an image is within this percentage of its decoded size on a
+/// logarithmic scale.
 ///
 /// For example, if a 100x100 image is decoded it takes roughly 53kb in memory
 /// (including mipmapping overhead). If it is only ever displayed at 50x50, it
@@ -47,7 +47,7 @@ HttpClientProvider debugNetworkImageHttpClientProvider;
 /// be panned or scaled up in the application, how many images are being
 /// displayed, and whether the application will run on multiple devices with
 /// different resolutions and memory capacities.
-int debugImageOverheadAllowedInKilobytes;
+double debugImageOverheadPercentage;
 
 /// Returns true if none of the painting library debug variables have been changed.
 ///
@@ -64,7 +64,7 @@ bool debugAssertAllPaintingVarsUnset(String reason, { bool debugDisableShadowsOv
   assert(() {
     if (debugDisableShadows != debugDisableShadowsOverride ||
         debugNetworkImageHttpClientProvider != null ||
-        debugImageOverheadAllowedInKilobytes != null) {
+        debugImageOverheadPercentage != null) {
       throw FlutterError(reason);
     }
     return true;

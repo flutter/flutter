@@ -69,7 +69,7 @@ void main() {
       expect(lastErrorDetails, null);
       lastErrorDetails = details;
     };
-    debugImageOverheadAllowedInKilobytes = 0;
+    debugImageOverheadPercentage = 0;
 
     final TestImage image = TestImage(width: 300, height: 300);
     final TestCanvas canvas = TestCanvas();
@@ -77,7 +77,7 @@ void main() {
       canvas: canvas,
       rect: const Rect.fromLTWH(50.0, 75.0, 200.0, 100.0),
       image: image,
-      imageTag: 'test.png',
+      debugImageLabel: 'test.png',
     );
     expect(lastErrorDetails, isNotNull);
     expect(lastErrorDetails.exception, isA<FlutterError>());
@@ -88,7 +88,7 @@ void main() {
     );
 
     FlutterError.onError = oldHandler;
-    debugImageOverheadAllowedInKilobytes = null;
+    debugImageOverheadPercentage = null;
   });
 
   test('Passes fair memory usage', () {
@@ -97,7 +97,7 @@ void main() {
     FlutterError.onError = (FlutterErrorDetails details) {
       fail('Expected no FlutterError to be thrown.');
     };
-    debugImageOverheadAllowedInKilobytes = 0;
+    debugImageOverheadPercentage = 0;
 
     TestImage image = TestImage(width: 200, height: 100);
     TestCanvas canvas = TestCanvas();
@@ -105,11 +105,11 @@ void main() {
       canvas: canvas,
       rect: const Rect.fromLTWH(50.0, 75.0, 200.0, 100.0),
       image: image,
-      imageTag: 'test.png',
+      debugImageLabel: 'test.png',
     );
     expect(lastErrorDetails, null);
 
-    debugImageOverheadAllowedInKilobytes = 100;
+    debugImageOverheadPercentage = 100;
 
     image = TestImage(width: 220, height: 110);
     canvas = TestCanvas();
@@ -117,12 +117,12 @@ void main() {
       canvas: canvas,
       rect: const Rect.fromLTWH(50.0, 75.0, 200.0, 100.0),
       image: image,
-      imageTag: 'test.png',
+      debugImageLabel: 'test.png',
     );
     expect(lastErrorDetails, null);
 
     FlutterError.onError = oldHandler;
-    debugImageOverheadAllowedInKilobytes = null;
+    debugImageOverheadPercentage = null;
   });
   // See also the DecorationImage tests in: decoration_test.dart
 }

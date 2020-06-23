@@ -1732,15 +1732,15 @@ void main() {
     skip: kIsWeb,
   );
 
-  testWidgets('Reports error if debugImageOverheadAllowedInKilobytes is violated', (WidgetTester tester) async {
-    debugImageOverheadAllowedInKilobytes = 0;
+  testWidgets('Reports error if debugImageOverheadPercentage is violated', (WidgetTester tester) async {
+    debugImageOverheadPercentage = 0;
 
     final ui.Image image = await tester.runAsync(() => createTestImage(kBlueRectPng));
     final TestImageStreamCompleter streamCompleter = TestImageStreamCompleter(
       ImageInfo(
         image: image,
         scale: 1.0,
-        tag: 'test.png',
+        debugLabel: 'test.png',
       ),
     );
     final TestImageProvider imageProvider = TestImageProvider(streamCompleter: streamCompleter);
@@ -1762,7 +1762,7 @@ void main() {
       'If this image is never displayed at its full resolution, consider using a ResizeImage ImageProvider or setting the cacheWidth/cacheHeight parameters on the Image widget.',
     );
 
-    debugImageOverheadAllowedInKilobytes = null;
+    debugImageOverheadPercentage = null;
   });
 }
 

@@ -28,7 +28,7 @@ class RenderImage extends RenderBox {
   /// [alignment] will need resolving or if [matchTextDirection] is true.
   RenderImage({
     ui.Image image,
-    this.imageTag,
+    this.debugImageLabel,
     double width,
     double height,
     double scale = 1.0,
@@ -96,7 +96,7 @@ class RenderImage extends RenderBox {
   }
 
   /// A string used to identify the source of the image.
-  String imageTag;
+  String debugImageLabel;
 
   /// If non-null, requires the image to have this width.
   ///
@@ -381,7 +381,7 @@ class RenderImage extends RenderBox {
       canvas: context.canvas,
       rect: offset & size,
       image: _image,
-      imageTag: imageTag,
+      debugImageLabel: debugImageLabel,
       scale: _scale,
       colorFilter: _colorFilter,
       fit: _fit,

@@ -261,7 +261,7 @@ void main() {
 
     final MultiFrameImageStreamCompleter completer = provider.load(provider, _decoder) as MultiFrameImageStreamCompleter;
 
-    expect(completer.tag, url);
+    expect(completer.debugLabel, url);
   });
 
 }

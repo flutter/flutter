@@ -4,6 +4,7 @@
 
 // @dart = 2.8
 
+import 'dart:math' as math;
 import 'dart:ui' as ui show Image;
 
 import 'package:flutter/foundation.dart';
@@ -276,7 +277,7 @@ class DecorationImagePainter {
       canvas: canvas,
       rect: rect,
       image: _image.image,
-      imageTag: _image.tag,
+      debugImageLabel: _image.debugLabel,
       scale: _details.scale * _image.scale,
       colorFilter: _details.colorFilter,
       fit: _details.fit,
@@ -391,7 +392,7 @@ void paintImage({
   @required Canvas canvas,
   @required Rect rect,
   @required ui.Image image,
-  String imageTag,
+  String debugImageLabel,
   double scale = 1.0,
   ColorFilter colorFilter,
   BoxFit fit,
@@ -437,14 +438,15 @@ void paintImage({
 
   // Output size is fully calculated.
   assert(() {
-    if (debugImageOverheadAllowedInKilobytes != null) {
-      final double acutalSizeBytes = image.width * image.height * 4 * (4/3);
-      final double possibleSizeBytes = outputSize.width * outputSize.height * 4 * (4/3);
-      final int overhead = (acutalSizeBytes - possibleSizeBytes) ~/ 1024;
-      if (overhead > debugImageOverheadAllowedInKilobytes) {
+    if (debugImageOverheadPercentage != null) {
+      final double displaySizeBytes = outputSize.width * outputSize.height * 4 * (4/3);
+      final double decodedSizeBytes = image.width * image.height * 4 * (4/3);
+      final double logRatio = math.log(displaySizeBytes) / math.log(decodedSizeBytes);
+      if (logRatio >= debugImageOverheadPercentage) {
+        final int overhead = (decodedSizeBytes - displaySizeBytes) ~/ 1024;
         FlutterError.reportError(FlutterErrorDetails(
           exception: FlutterError(
-            'The image $imageTag (${image.width}×${image.height}) exceeds its '
+            'The image $debugImageLabel (${image.width}×${image.height}) exceeds its '
             'paint bounds (${outputSize.width.toInt()}×${outputSize.height.toInt()}), '
             'adding an overhead of ${overhead}kb.\n\n'
             'If this image is never displayed at its full resolution, consider '

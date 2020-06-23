@@ -22,7 +22,7 @@ class ImageInfo {
   /// Both the image and the scale must not be null.
   ///
   /// The tag may be used to identify the source of this image.
-  const ImageInfo({ @required this.image, this.scale = 1.0, this.tag })
+  const ImageInfo({ @required this.image, this.scale = 1.0, this.debugLabel })
     : assert(image != null),
       assert(scale != null);
 
@@ -45,13 +45,13 @@ class ImageInfo {
   final double scale;
 
   /// A string used for debugging purpopses to identify the source of this image.
-  final String tag;
+  final String debugLabel;
 
   @override
-  String toString() => '${tag != null ? '$tag ' : ''}$image @ ${debugFormatDouble(scale)}x';
+  String toString() => '${debugLabel != null ? '$debugLabel ' : ''}$image @ ${debugFormatDouble(scale)}x';
 
   @override
-  int get hashCode => hashValues(image, scale, tag);
+  int get hashCode => hashValues(image, scale, debugLabel);
 
   @override
   bool operator ==(Object other) {
@@ -60,7 +60,7 @@ class ImageInfo {
     return other is ImageInfo
         && other.image == image
         && other.scale == scale
-        && other.tag == tag;
+        && other.debugLabel == debugLabel;
   }
 }
 
@@ -639,7 +639,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   MultiFrameImageStreamCompleter({
     @required Future<ui.Codec> codec,
     @required double scale,
-    this.tag,
+    this.debugLabel,
     Stream<ImageChunkEvent> chunkEvents,
     InformationCollector informationCollector,
   }) : assert(codec != null),
@@ -670,7 +670,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   }
 
   /// A string identifying the source of the underlying image.
-  final String tag;
+  final String debugLabel;
 
   ui.Codec _codec;
   final double _scale;
@@ -701,7 +701,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     if (!hasListeners)
       return;
     if (_isFirstFrame() || _hasFrameDurationPassed(timestamp)) {
-      _emitFrame(ImageInfo(image: _nextFrame.image, scale: _scale, tag: tag));
+      _emitFrame(ImageInfo(image: _nextFrame.image, scale: _scale, debugLabel: debugLabel));
       _shownTimestamp = timestamp;
       _frameDuration = _nextFrame.duration;
       _nextFrame = null;
@@ -742,7 +742,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     if (_codec.frameCount == 1) {
       // This is not an animated image, just return it and don't schedule more
       // frames.
-      _emitFrame(ImageInfo(image: _nextFrame.image, scale: _scale, tag: tag));
+      _emitFrame(ImageInfo(image: _nextFrame.image, scale: _scale, debugLabel: debugLabel));
       return;
     }
     _scheduleAppFrame();
