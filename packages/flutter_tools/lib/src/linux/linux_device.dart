@@ -29,7 +29,7 @@ class LinuxDevice extends DesktopDevice {
   String get name => 'Linux desktop';
 
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.linux_x64;
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.linux;
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {

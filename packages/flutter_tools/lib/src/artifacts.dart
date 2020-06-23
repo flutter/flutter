@@ -69,7 +69,7 @@ enum Artifact {
 }
 
 String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMode mode ]) {
-  final String exe = platform == TargetPlatform.windows_x64 ? '.exe' : '';
+  final String exe = platform == TargetPlatform.windows ? '.exe' : '';
   switch (artifact) {
     case Artifact.genSnapshot:
       return 'gen_snapshot';
@@ -211,9 +211,9 @@ class CachedArtifacts implements Artifacts {
         return _getAndroidArtifactPath(artifact, platform, mode);
       case TargetPlatform.ios:
         return _getIosArtifactPath(artifact, platform, mode);
-      case TargetPlatform.darwin_x64:
-      case TargetPlatform.linux_x64:
-      case TargetPlatform.windows_x64:
+      case TargetPlatform.darwin:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
         return _getDesktopArtifactPath(artifact, platform, mode);
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
@@ -390,9 +390,9 @@ class CachedArtifacts implements Artifacts {
     final String engineDir = _cache.getArtifactDirectory('engine').path;
     final String platformName = getNameForTargetPlatform(platform);
     switch (platform) {
-      case TargetPlatform.linux_x64:
-      case TargetPlatform.darwin_x64:
-      case TargetPlatform.windows_x64:
+      case TargetPlatform.linux:
+      case TargetPlatform.darwin:
+      case TargetPlatform.windows:
         // TODO(jonahwilliams): remove once debug desktop artifacts are uploaded
         // under a separate directory from the host artifacts.
         // https://github.com/flutter/flutter/issues/38935
@@ -429,13 +429,13 @@ class CachedArtifacts implements Artifacts {
 
 TargetPlatform _currentHostPlatform(Platform platform) {
   if (platform.isMacOS) {
-    return TargetPlatform.darwin_x64;
+    return TargetPlatform.darwin;
   }
   if (platform.isLinux) {
-    return TargetPlatform.linux_x64;
+    return TargetPlatform.linux;
   }
   if (platform.isWindows) {
-    return TargetPlatform.windows_x64;
+    return TargetPlatform.windows;
   }
   throw UnimplementedError('Host OS not supported.');
 }

@@ -143,7 +143,7 @@ class AOTSnapshotter {
     }
 
     final String assembly = _fileSystem.path.join(outputDir.path, 'snapshot_assembly.S');
-    if (platform == TargetPlatform.ios || platform == TargetPlatform.darwin_x64) {
+    if (platform == TargetPlatform.ios || platform == TargetPlatform.darwin) {
       genSnapshotArgs.addAll(<String>[
         '--snapshot_kind=app-aot-assembly',
         '--assembly=$assembly',
@@ -207,7 +207,7 @@ class AOTSnapshotter {
 
     // On iOS and macOS, we use Xcode to compile the snapshot into a dynamic library that the
     // end-developer can link into their app.
-    if (platform == TargetPlatform.ios || platform == TargetPlatform.darwin_x64) {
+    if (platform == TargetPlatform.ios || platform == TargetPlatform.darwin) {
       final RunResult result = await _buildFramework(
         appleArch: darwinArch,
         isIOS: platform == TargetPlatform.ios,
@@ -297,9 +297,9 @@ class AOTSnapshotter {
       TargetPlatform.android_arm64,
       TargetPlatform.android_x64,
       TargetPlatform.ios,
-      TargetPlatform.darwin_x64,
-      TargetPlatform.linux_x64,
-      TargetPlatform.windows_x64,
+      TargetPlatform.darwin,
+      TargetPlatform.linux,
+      TargetPlatform.windows,
     ].contains(platform);
   }
 }

@@ -1057,17 +1057,17 @@ DevelopmentArtifact _artifactFromTargetPlatform(TargetPlatform targetPlatform) {
       return DevelopmentArtifact.web;
     case TargetPlatform.ios:
       return DevelopmentArtifact.iOS;
-    case TargetPlatform.darwin_x64:
+    case TargetPlatform.darwin:
       if (featureFlags.isMacOSEnabled) {
         return DevelopmentArtifact.macOS;
       }
       return null;
-    case TargetPlatform.windows_x64:
+    case TargetPlatform.windows:
       if (featureFlags.isWindowsEnabled) {
         return DevelopmentArtifact.windows;
       }
       return null;
-    case TargetPlatform.linux_x64:
+    case TargetPlatform.linux:
       if (featureFlags.isLinuxEnabled) {
         return DevelopmentArtifact.linux;
       }
