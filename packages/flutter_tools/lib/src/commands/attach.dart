@@ -89,6 +89,15 @@ class AttachCommand extends FlutterCommand {
         help: 'Specify a file to write the process id to. '
               'You can send SIGUSR1 to trigger a hot reload '
               'and SIGUSR2 to trigger a hot restart.',
+      )..addFlag(
+        'disable-dds',
+        hide: !verboseHelp,
+        help: 'Disable the Dart Developer Service (DDS). This flag should only be provided'
+              ' when attaching to an application with an existing DDS instance (e.g.,'
+              ' attaching to an application currently connected to by "flutter run") or'
+              ' when running certain tests.\n'
+              'Note: passing this flag may degrade IDE functionality if a DDS instance is not'
+              ' already connected to the target application.'
       )..addOption(
         'project-root',
         hide: !verboseHelp,
@@ -372,7 +381,7 @@ class AttachCommand extends FlutterCommand {
     );
     flutterDevice.observatoryUris = observatoryUris;
     final List<FlutterDevice> flutterDevices =  <FlutterDevice>[flutterDevice];
-    final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(getBuildInfo());
+    final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(getBuildInfo(), disableDds: boolArg('disable-dds'));
 
     return getBuildInfo().isDebug
       ? hotRunnerFactory.build(

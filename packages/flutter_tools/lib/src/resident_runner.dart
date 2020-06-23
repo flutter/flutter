@@ -211,6 +211,7 @@ class FlutterDevice {
     ReloadMethod reloadMethod,
     GetSkSLMethod getSkSLMethod,
     PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
+    bool disableDds = false,
   }) {
     final Completer<void> completer = Completer<void>();
     StreamSubscription<void> subscription;
@@ -221,12 +222,12 @@ class FlutterDevice {
       globals.printTrace('Connecting to service protocol: $observatoryUri');
       isWaitingForVm = true;
       vm_service.VmService service;
-
-      await device.dds.startDartDevelopmentService(
-        observatoryUri,
-        false, // TODO(bkonyi): ipv6 support?
-      );
-
+      if (!disableDds) {
+        await device.dds.startDartDevelopmentService(
+          observatoryUri,
+          false, // TODO(bkonyi): ipv6 support?
+        );
+      }
       try {
         service = await connectToVmService(
           observatoryUri,
@@ -948,6 +949,7 @@ abstract class ResidentRunner {
   Future<void> exit() async {
     _exited = true;
     await shutdownDevtools();
+    await shutdownDartDevelopmentService();
     await stopEchoingDeviceLog();
     await preExit();
     await exitApp();
@@ -955,6 +957,7 @@ abstract class ResidentRunner {
 
   Future<void> detach() async {
     await shutdownDevtools();
+    await shutdownDartDevelopmentService();
     await stopEchoingDeviceLog();
     await preExit();
     appFinished();
@@ -1117,6 +1120,12 @@ abstract class ResidentRunner {
     );
   }
 
+  Future<void> shutdownDartDevelopmentService() async {
+    await Future.wait<void>(
+      flutterDevices.map<Future<void>>((FlutterDevice device) => device.device.dds.shutdown())
+    );
+  }
+
   @protected
   void cacheInitialDillCompilation() {
     if (_dillOutputPath != null) {
@@ -1170,6 +1179,7 @@ abstract class ResidentRunner {
         reloadSources: reloadSources,
         restart: restart,
         compileExpression: compileExpression,
+        disableDds: debuggingOptions.disableDds,
         reloadMethod: reloadMethod,
         getSkSLMethod: getSkSLMethod,
         printStructuredErrorLogMethod: printStructuredErrorLog,

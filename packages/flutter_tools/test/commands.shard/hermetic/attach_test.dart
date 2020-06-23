@@ -429,7 +429,7 @@ void main() {
 
       setUp(() {
         portForwarder = MockPortForwarder();
-        MockDartDevelopmentService mockDds = MockDartDevelopmentService();
+        final MockDartDevelopmentService mockDds = MockDartDevelopmentService();
         device = MockAndroidDevice();
 
         when(device.portForwarder)

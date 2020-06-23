@@ -27,12 +27,16 @@ class DartDevelopmentService {
       'connecting to VM service at $observatoryUri.'
       '\n${StackTrace.current}'
     );
-    _ddsInstance =
-      await dds.DartDevelopmentService.startDartDevelopmentService(
-        observatoryUri,
-        serviceUri: ddsUri,
-      );
-    globals.printTrace('DDS is listening at ${_ddsInstance.uri}.');
+    try {
+      _ddsInstance =
+        await dds.DartDevelopmentService.startDartDevelopmentService(
+          observatoryUri,
+          serviceUri: ddsUri,
+        );
+      globals.printTrace('DDS is listening at ${_ddsInstance.uri}.');
+    } on dds.DartDevelopmentServiceException catch (e) {
+      globals.printError('Warning: Failed to start DDS: ${e.message}');
+    }
   }
 
   Future<void> shutdown() async => await _ddsInstance.shutdown();

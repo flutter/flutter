@@ -202,6 +202,15 @@ class RunCommand extends RunCommandBase {
         hide: !verboseHelp,
         help: 'No longer require an authentication code to connect to the VM '
               'service (not recommended).')
+      ..addFlag('disable-dds',
+        negatable: false,
+        hide: !verboseHelp,
+        help: 'Disable the Dart Developer Service (DDS). This flag should only be provided'
+              ' when attaching to an application with an existing DDS instance (e.g.,'
+              ' attaching to an application currently connected to by "flutter run") or'
+              ' when running certain tests.\n'
+              'Note: passing this flag may degrade IDE functionality if a DDS instance is not'
+              ' already connected to the target application.')
       ..addFlag('web-initialize-platform',
         negatable: true,
         defaultsTo: true,
@@ -383,6 +392,7 @@ class RunCommand extends RunCommandBase {
         buildInfo,
         startPaused: boolArg('start-paused'),
         disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
+        disableDds: boolArg('disable-dds'),
         dartFlags: stringArg('dart-flags') ?? '',
         useTestFonts: boolArg('use-test-fonts'),
         enableSoftwareRendering: boolArg('enable-software-rendering'),

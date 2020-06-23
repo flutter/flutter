@@ -68,7 +68,7 @@ void main() {
       tryToDelete(tempDir);
     });
 
-    applyDdsMocks(Device device) {
+    void applyDdsMocks(Device device) {
       final MockDartDevelopmentService mockDds = MockDartDevelopmentService();
       when(device.dds).thenReturn(mockDds);
       when(mockDds.startDartDevelopmentService(any, any)).thenReturn(null);

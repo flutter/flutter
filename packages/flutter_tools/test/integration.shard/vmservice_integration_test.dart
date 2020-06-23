@@ -45,7 +45,8 @@ void main() {
       final Response response =
           await vmService.callMethod('getSupportedProtocols');
       expect(response.json['protocols'].length == 2, true);
-      for (final Map<String, dynamic> protocol in response.json['protocols'].cast<Map<String, dynamic>>()) {
+      for (final Map<String, dynamic> protocol in (response.json['protocols']
+            as List<dynamic>).cast<Map<String, dynamic>>()) {
         expect(<String>{'VM Service', 'DDS'}.contains(protocol['protocolName']), isTrue);
       }
     });
