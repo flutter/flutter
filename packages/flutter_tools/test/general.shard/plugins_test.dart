@@ -1324,7 +1324,7 @@ flutter:
         _createPubspecFile(_pluginYaml);
         validatePubspecForPlugin(projectDir: projectDir.absolute.path, pluginClass: 'SomePlugin', expectedPlatforms: <String>[
           'ios', 'macos', 'windows', 'linux', 'android', 'web'
-        ], androidIdentifier: 'AndroidPackage');
+        ], androidIdentifier: 'AndroidPackage', webFileName: 'lib/SomeFile.dart');
       });
 
       test('createPlatformsYamlMap should create the correct map', () async {

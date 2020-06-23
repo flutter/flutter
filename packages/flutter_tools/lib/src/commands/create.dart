@@ -552,10 +552,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
 
   Future<int> _generatePlugin(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
     // Plugin doesn't create any platform by default
-    bool willAddPlatforms = false;
-    if (argResults.wasParsed('platforms')) {
-      willAddPlatforms = true;
-    } else {
+    if (!argResults.wasParsed('platforms')) {
       // If the user didn't explicitly declare the platforms, we don't generate any platforms.
       templateContext['ios'] = false;
       templateContext['android'] = false;
@@ -563,9 +560,10 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       templateContext['linux'] = false;
       templateContext['macos'] = false;
       templateContext['windows'] = false;
-      willAddPlatforms = false;
       globals.printError(_kNoPlatformsErrorMessage);
     }
+    final List<String> platforms = _getSupportedPlatformsFromTemplateContext(templateContext);
+    final bool willAddPlatforms = platforms.isNotEmpty;
     templateContext['no_platforms'] = !willAddPlatforms;
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
@@ -586,7 +584,6 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       // If adding new platforms to an existing plugin project, prints
       // a help message containing the platforms maps need to be added to the `platforms` key in the pubspec.
       final String pubspecPath = globals.fs.path.join(directory.absolute.path, 'pubspec.yaml');
-      final List<String> platforms = _getSupportedPlatformsFromTemplateContext(templateContext);
       final List<String> platformsToAdd = List<String>.from(platforms);
       final FlutterManifest manifest = FlutterManifest.createFromPath(pubspecPath, fileSystem: globals.fs, logger: globals.logger);
       final List<String> existingPlatforms = manifest.supportedPlatforms.keys.toList();

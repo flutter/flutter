@@ -1629,10 +1629,28 @@ void main() {
     expect(projectDir.childDirectory('lib').childFile('flutter_project_web.dart').existsSync(), true);
     validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: const <String>[
       'web'
-    ], pluginClass: 'FlutterProjectPlugin',
+    ], pluginClass: 'FlutterProjectWeb',
     unexpectedPlatforms: <String>['some_platform'],
     androidIdentifier: 'com.example.flutter_project',
     webFileName: 'flutter_project_web.dart');
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
+  });
+
+  testUsingContext('plugin doe not support web if feature is not enabled', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=web', projectDir.path]);
+    expect(projectDir.childDirectory('lib').childFile('flutter_project_web.dart').existsSync(), false);
+    validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: const <String>[
+      'some_platform'
+    ], pluginClass: 'somePluginClass',
+    unexpectedPlatforms: <String>['web']);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: false),
   });
@@ -1725,7 +1743,7 @@ void main() {
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
-    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=windows', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=web', projectDir.path]);
 
     expect(projectDir.childDirectory('lib').childFile('flutter_project_web.dart').existsSync(), true);
   }, overrides: <Type, Generator>{
