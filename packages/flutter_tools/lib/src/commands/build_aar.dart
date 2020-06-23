@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
 import '../android/android_builder.dart';
 import '../android/gradle_utils.dart';
 import '../base/common.dart';
@@ -17,7 +19,7 @@ import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
 
 class BuildAarCommand extends BuildSubCommand {
-  BuildAarCommand() {
+  BuildAarCommand({ @required bool verboseHelp }) {
     argParser
       ..addFlag(
         'debug',
@@ -41,7 +43,8 @@ class BuildAarCommand extends BuildSubCommand {
     addSplitDebugInfoOption();
     addDartObfuscationOption();
     usesTrackWidgetCreation(verboseHelp: false);
-    addNullSafetyModeOptions();
+    addNullSafetyModeOptions(hide: !verboseHelp);
+    addEnableExperimentation(hide: !verboseHelp);
     argParser
       ..addMultiOption(
         'target-platform',

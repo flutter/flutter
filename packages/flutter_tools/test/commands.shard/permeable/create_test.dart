@@ -391,9 +391,40 @@ void main() {
         'ios/Classes/FlutterProjectPlugin.m',
         'lib/flutter_project.dart',
       ],
+      unexpectedPaths: <String>[
+        'lib/flutter_project_web.dart',
+      ],
     );
     return _runFlutterTest(projectDir.childDirectory('example'));
   }, overrides: <Type, Generator>{
+    Pub: () => Pub(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+    ),
+  });
+
+  testUsingContext('plugin project supports web', () async {
+    await _createAndAnalyzeProject(
+      projectDir,
+      <String>['--template=plugin'],
+      <String>[
+        'lib/flutter_project.dart',
+        'lib/flutter_project_web.dart',
+      ],
+    );
+    final String rawPubspec = await projectDir.childFile('pubspec.yaml').readAsString();
+    final Pubspec pubspec = Pubspec.parse(rawPubspec);
+    // Expect the dependency on flutter_web_plugins exists
+    expect(pubspec.dependencies, contains('flutter_web_plugins'));
+    // The platform is correctly registered
+    expect(pubspec.flutter['plugin']['platforms']['web']['pluginClass'], 'FlutterProjectWeb');
+    expect(pubspec.flutter['plugin']['platforms']['web']['fileName'], 'flutter_project_web.dart');
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
     Pub: () => Pub(
       fileSystem: globals.fs,
       logger: globals.logger,

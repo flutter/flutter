@@ -54,13 +54,13 @@ class UnpackWindows extends Target {
     final String engineSourcePath = environment.artifacts
       .getArtifactPath(
         Artifact.windowsDesktopPath,
-        platform: TargetPlatform.windows_x64,
+        platform: TargetPlatform.windows,
         mode: buildMode,
       );
     final String clientSourcePath = environment.artifacts
       .getArtifactPath(
         Artifact.windowsCppClientWrapper,
-        platform: TargetPlatform.windows_x64,
+        platform: TargetPlatform.windows,
         mode: buildMode,
       );
     final Directory outputDirectory = environment.fileSystem.directory(
@@ -79,7 +79,7 @@ class UnpackWindows extends Target {
       clientSourcePaths: <String>[clientSourcePath],
       icuDataPath: environment.artifacts.getArtifactPath(
         Artifact.icuData,
-        platform: TargetPlatform.windows_x64
+        platform: TargetPlatform.windows
       )
     );
     final DepfileService depfileService = DepfileService(
@@ -135,7 +135,7 @@ abstract class BundleWindowsAssets extends Target {
     final Depfile depfile = await copyAssets(
       environment,
       outputDirectory,
-      targetPlatform: TargetPlatform.windows_x64,
+      targetPlatform: TargetPlatform.windows,
     );
     final DepfileService depfileService = DepfileService(
       fileSystem: environment.fileSystem,
@@ -197,7 +197,7 @@ class ReleaseBundleWindowsAssets extends BundleWindowsAssets {
   @override
   List<Target> get dependencies => <Target>[
     ...super.dependencies,
-    const WindowsAotBundle(AotElfRelease(TargetPlatform.windows_x64)),
+    const WindowsAotBundle(AotElfRelease(TargetPlatform.windows)),
   ];
 }
 
@@ -213,7 +213,7 @@ class ProfileBundleWindowsAssets extends BundleWindowsAssets {
   @override
   List<Target> get dependencies => <Target>[
     ...super.dependencies,
-    const WindowsAotBundle(AotElfProfile(TargetPlatform.windows_x64)),
+    const WindowsAotBundle(AotElfProfile(TargetPlatform.windows)),
   ];
 }
 

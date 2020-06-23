@@ -304,6 +304,6 @@ void exitWithNoSdkMessage() {
   BuildEvent('unsupported-project', eventError: 'android-sdk-not-found', flutterUsage: globals.flutterUsage).send();
   throwToolExit(
     '$warningMark No Android SDK found. '
-    'Try setting the ANDROID_HOME environment variable.'
+    'Try setting the ANDROID_SDK_ROOT environment variable.'
   );
 }
