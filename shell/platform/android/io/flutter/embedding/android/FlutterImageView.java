@@ -17,6 +17,8 @@ import android.media.ImageReader;
 import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import io.flutter.embedding.engine.renderer.FlutterRenderer;
+import io.flutter.embedding.engine.renderer.RenderSurface;
 
 /**
  * Paints a Flutter UI provided by an {@link android.media.ImageReader} onto a {@link
@@ -32,10 +34,12 @@ import androidx.annotation.Nullable;
  */
 @SuppressLint("ViewConstructor")
 @TargetApi(19)
-public class FlutterImageView extends View {
+public class FlutterImageView extends View implements RenderSurface {
   private final ImageReader imageReader;
   @Nullable private Image nextImage;
   @Nullable private Image currentImage;
+  @Nullable private Bitmap currentBitmap;
+  @Nullable private FlutterRenderer flutterRenderer;
 
   /**
    * Constructs a {@code FlutterImageView} with an {@link android.media.ImageReader} that provides
@@ -44,6 +48,37 @@ public class FlutterImageView extends View {
   public FlutterImageView(@NonNull Context context, @NonNull ImageReader imageReader) {
     super(context, null);
     this.imageReader = imageReader;
+  }
+
+  @Nullable
+  @Override
+  public FlutterRenderer getAttachedRenderer() {
+    return flutterRenderer;
+  }
+
+  /**
+   * Invoked by the owner of this {@code FlutterImageView} when it wants to begin rendering a
+   * Flutter UI to this {@code FlutterImageView}.
+   */
+  @Override
+  public void attachToRenderer(@NonNull FlutterRenderer flutterRenderer) {
+    if (this.flutterRenderer != null) {
+      this.flutterRenderer.stopRenderingToSurface();
+    }
+
+    this.flutterRenderer = flutterRenderer;
+    flutterRenderer.startRenderingToSurface(imageReader.getSurface());
+  }
+
+  /**
+   * Invoked by the owner of this {@code FlutterImageView} when it no longer wants to render a
+   * Flutter UI to this {@code FlutterImageView}.
+   */
+  public void detachFromRenderer() {
+    if (flutterRenderer != null) {
+      flutterRenderer.stopRenderingToSurface();
+      flutterRenderer = null;
+    }
   }
 
   /** Acquires the next image to be drawn to the {@link android.graphics.Canvas}. */
@@ -56,51 +91,44 @@ public class FlutterImageView extends View {
   @Override
   protected void onDraw(Canvas canvas) {
     super.onDraw(canvas);
-    if (nextImage == null) {
-      return;
+    if (nextImage != null) {
+      if (currentImage != null) {
+        currentImage.close();
+      }
+      currentImage = nextImage;
+      nextImage = null;
+      updateCurrentBitmap();
     }
 
-    if (currentImage != null) {
-      currentImage.close();
+    if (currentBitmap != null) {
+      canvas.drawBitmap(currentBitmap, 0, 0, null);
     }
-    currentImage = nextImage;
-    nextImage = null;
-
-    if (android.os.Build.VERSION.SDK_INT >= 29) {
-      drawImageBuffer(canvas);
-      return;
-    }
-
-    drawImagePlane(canvas);
   }
 
   @TargetApi(29)
-  private void drawImageBuffer(@NonNull Canvas canvas) {
-    final HardwareBuffer buffer = currentImage.getHardwareBuffer();
+  private void updateCurrentBitmap() {
+    if (android.os.Build.VERSION.SDK_INT >= 29) {
+      final HardwareBuffer buffer = currentImage.getHardwareBuffer();
+      currentBitmap = Bitmap.wrapHardwareBuffer(buffer, ColorSpace.get(ColorSpace.Named.SRGB));
+    } else {
+      final Plane[] imagePlanes = currentImage.getPlanes();
+      if (imagePlanes.length != 1) {
+        return;
+      }
 
-    final Bitmap bitmap = Bitmap.wrapHardwareBuffer(buffer, ColorSpace.get(ColorSpace.Named.SRGB));
-    canvas.drawBitmap(bitmap, 0, 0, null);
-  }
+      final Plane imagePlane = imagePlanes[0];
+      final int desiredWidth = imagePlane.getRowStride() / imagePlane.getPixelStride();
+      final int desiredHeight = currentImage.getHeight();
 
-  private void drawImagePlane(@NonNull Canvas canvas) {
-    if (currentImage == null) {
-      return;
+      if (currentBitmap == null
+          || currentBitmap.getWidth() != desiredWidth
+          || currentBitmap.getHeight() != desiredHeight) {
+        currentBitmap =
+            Bitmap.createBitmap(
+                desiredWidth, desiredHeight, android.graphics.Bitmap.Config.ARGB_8888);
+      }
+
+      currentBitmap.copyPixelsFromBuffer(imagePlane.getBuffer());
     }
-
-    final Plane[] imagePlanes = currentImage.getPlanes();
-    if (imagePlanes.length != 1) {
-      return;
-    }
-
-    final Plane imagePlane = imagePlanes[0];
-    final int desiredWidth = imagePlane.getRowStride() / imagePlane.getPixelStride();
-    final int desiredHeight = currentImage.getHeight();
-
-    final Bitmap bitmap =
-        android.graphics.Bitmap.createBitmap(
-            desiredWidth, desiredHeight, android.graphics.Bitmap.Config.ARGB_8888);
-
-    bitmap.copyPixelsFromBuffer(imagePlane.getBuffer());
-    canvas.drawBitmap(bitmap, 0, 0, null);
   }
 }
