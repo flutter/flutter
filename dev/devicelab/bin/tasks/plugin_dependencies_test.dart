@@ -40,6 +40,7 @@ Future<void> main() async {
             '--org',
             'io.flutter.devicelab.plugin_a',
             '--template=plugin',
+            '--platforms=android,ios',
             pluginADirectory.path,
           ],
         );
@@ -55,6 +56,7 @@ Future<void> main() async {
             '--org',
             'io.flutter.devicelab.plugin_b',
             '--template=plugin',
+            '--platforms=android,ios',
             pluginBDirectory.path,
           ],
         );
@@ -70,6 +72,7 @@ Future<void> main() async {
             '--org',
             'io.flutter.devicelab.plugin_c',
             '--template=plugin',
+            '--platforms=ios',
             pluginCDirectory.path,
           ],
         );
