@@ -604,8 +604,9 @@ void FlutterPlatformViewsController::BringLayersIntoView(LayersMap layer_map) {
 }
 
 void FlutterPlatformViewsController::EndFrame(
+    bool should_resubmit_frame,
     fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
-  if (merge_threads_) {
+  if (should_resubmit_frame && merge_threads_) {
     raster_thread_merger->MergeWithLease(kDefaultMergedLeaseDuration);
     merge_threads_ = false;
   }

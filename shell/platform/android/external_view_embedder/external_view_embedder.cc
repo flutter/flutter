@@ -254,8 +254,9 @@ void AndroidExternalViewEmbedder::CancelFrame() {
 
 // |ExternalViewEmbedder|
 void AndroidExternalViewEmbedder::EndFrame(
+    bool should_resubmit_frame,
     fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
-  if (should_run_rasterizer_on_platform_thread_) {
+  if (should_resubmit_frame && should_run_rasterizer_on_platform_thread_) {
     raster_thread_merger->MergeWithLease(kDefaultMergedLeaseDuration);
     should_run_rasterizer_on_platform_thread_ = false;
   }

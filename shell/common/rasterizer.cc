@@ -151,12 +151,10 @@ void Rasterizer::Draw(fml::RefPtr<Pipeline<flutter::LayerTree>> pipeline) {
 
   // Merging the thread as we know the next `Draw` should be run on the platform
   // thread.
-  if (raster_status == RasterStatus::kResubmit) {
-    auto* external_view_embedder = surface_->GetExternalViewEmbedder();
-    // We know only the `external_view_embedder` can
-    // causes|RasterStatus::kResubmit|. Check to make sure.
-    FML_DCHECK(external_view_embedder != nullptr);
-    external_view_embedder->EndFrame(raster_thread_merger_);
+  if (surface_ != nullptr && surface_->GetExternalViewEmbedder() != nullptr) {
+    auto should_resubmit_frame = raster_status == RasterStatus::kResubmit;
+    surface_->GetExternalViewEmbedder()->EndFrame(should_resubmit_frame,
+                                                  raster_thread_merger_);
   }
 
   // Consume as many pipeline items as possible. But yield the event loop
