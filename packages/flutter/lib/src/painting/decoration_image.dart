@@ -4,10 +4,11 @@
 
 // @dart = 2.8
 
-import 'dart:math' as math;
+import 'dart:developer' as developer;
 import 'dart:ui' as ui show Image;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'alignment.dart';
 import 'basic_types.dart';
@@ -320,6 +321,25 @@ class DecorationImagePainter {
   }
 }
 
+/// Used by [paintImage] to report image sizes drawn at the end of the frame.
+List<ImageSizeInfo> _pendingImageSizeInfo = <ImageSizeInfo>[];
+
+/// [ImageSizeInfo]s that were reported on the last frame.
+///
+/// Used to prevent duplicative reports from frame to frame.
+Set<ImageSizeInfo> _lastFrameImageSizeInfo = <ImageSizeInfo>{};
+
+/// Flushes inter-frame tracking of image size information from [paintImage].
+///
+/// Has no effect if asserts are disabled.
+@visibleForTesting
+void debugFlushLastFrameImageSizeInfo() {
+  assert(() {
+    _lastFrameImageSizeInfo = <ImageSizeInfo>{};
+    return true;
+  }());
+}
+
 /// Paints an image into the given rectangle on the canvas.
 ///
 /// The arguments have the following meanings:
@@ -437,27 +457,36 @@ void paintImage({
   }
 
   // Output size is fully calculated.
-  assert(() {
-    if (debugImageOverheadPercentage != null) {
-      final double displaySizeBytes = outputSize.width * outputSize.height * 4 * (4/3);
-      final double decodedSizeBytes = image.width * image.height * 4 * (4/3);
-      final double logRatio = math.log(displaySizeBytes) / math.log(decodedSizeBytes);
-      if (logRatio >= debugImageOverheadPercentage) {
-        final int overhead = (decodedSizeBytes - displaySizeBytes) ~/ 1024;
-        FlutterError.reportError(FlutterErrorDetails(
-          exception: FlutterError(
-            'The image $debugImageLabel (${image.width}×${image.height}) exceeds its '
-            'paint bounds (${outputSize.width.toInt()}×${outputSize.height.toInt()}), '
-            'adding an overhead of ${overhead}kb.\n\n'
-            'If this image is never displayed at its full resolution, consider '
-            'using a ResizeImage ImageProvider or setting the cacheWidth/cacheHeight '
-            'parameters on the Image widget.'),
-          context: ErrorSummary('while painting an image'),
-        ));
+  if (!kReleaseMode) {
+    final ImageSizeInfo sizeInfo = ImageSizeInfo(
+      // Some ImageProvider implementations may not have given this.
+      source: debugImageLabel ?? '<Unknown Image(${image.width}×${image.height})>',
+      imageSize: Size(image.width.toDouble(), image.height.toDouble()),
+      displaySize: outputSize,
+    );
+    // Avoid emitting events that are the same as those emitted in the last frame.
+    if (!_lastFrameImageSizeInfo.contains(sizeInfo)) {
+      _pendingImageSizeInfo.add(sizeInfo);
+      if (debugOnPaintImage != null) {
+        debugOnPaintImage(sizeInfo);
       }
+      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+        _lastFrameImageSizeInfo = _pendingImageSizeInfo.toSet();
+        if (_pendingImageSizeInfo.isEmpty) {
+          return;
+        }
+        developer.postEvent(
+          'Flutter.ImageSizesForFrame',
+          <Object, Object>{
+            for (ImageSizeInfo imageSizeInfo in _pendingImageSizeInfo)
+              imageSizeInfo.source: imageSizeInfo.toJson()
+          },
+        );
+        _pendingImageSizeInfo = <ImageSizeInfo>[];
+      });
+
     }
-    return true;
-  }());
+  }
 
   if (repeat != ImageRepeat.noRepeat && destinationSize == outputSize) {
     // There's no need to repeat the image because we're exactly filling the

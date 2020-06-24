@@ -337,6 +337,9 @@ abstract class ImageStreamCompleter with Diagnosticable {
   ImageInfo _currentImage;
   FlutterErrorDetails _currentError;
 
+  /// A string identifying the source of the underlying image.
+  String debugLabel;
+
   /// Whether any listeners are currently registered.
   ///
   /// Clients should not depend on this value for their behavior, because having
@@ -639,12 +642,13 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   MultiFrameImageStreamCompleter({
     @required Future<ui.Codec> codec,
     @required double scale,
-    this.debugLabel,
+    String debugLabel,
     Stream<ImageChunkEvent> chunkEvents,
     InformationCollector informationCollector,
   }) : assert(codec != null),
        _informationCollector = informationCollector,
        _scale = scale {
+    this.debugLabel = debugLabel;
     codec.then<void>(_handleCodecReady, onError: (dynamic error, StackTrace stack) {
       reportError(
         context: ErrorDescription('resolving an image codec'),
@@ -668,9 +672,6 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       );
     }
   }
-
-  /// A string identifying the source of the underlying image.
-  final String debugLabel;
 
   ui.Codec _codec;
   final double _scale;

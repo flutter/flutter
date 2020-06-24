@@ -1732,8 +1732,13 @@ void main() {
     skip: kIsWeb,
   );
 
-  testWidgets('Reports error if debugImageOverheadPercentage is violated', (WidgetTester tester) async {
-    debugImageOverheadPercentage = 0;
+  testWidgets('Reports image size when painted', (WidgetTester tester) async {
+    ImageSizeInfo imageSizeInfo;
+    int count = 0;
+    debugOnPaintImage = (ImageSizeInfo info) {
+      count += 1;
+      imageSizeInfo = info;
+    };
 
     final ui.Image image = await tester.runAsync(() => createTestImage(kBlueRectPng));
     final TestImageStreamCompleter streamCompleter = TestImageStreamCompleter(
@@ -1755,14 +1760,17 @@ void main() {
       ),
     );
 
-    final FlutterError error = tester.takeException() as FlutterError;
+    expect(count, 1);
     expect(
-      error.message,
-      'The image test.png (100×100) exceeds its paint bounds (50×50), adding an overhead of 39kb.\n\n'
-      'If this image is never displayed at its full resolution, consider using a ResizeImage ImageProvider or setting the cacheWidth/cacheHeight parameters on the Image widget.',
+      imageSizeInfo,
+      const ImageSizeInfo(
+        source: 'test.png',
+        imageSize: Size(100, 100),
+        displaySize: Size(50, 50),
+      ),
     );
 
-    debugImageOverheadPercentage = null;
+    debugOnPaintImage = null;
   });
 }
 

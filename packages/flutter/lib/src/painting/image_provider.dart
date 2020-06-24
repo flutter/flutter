@@ -765,7 +765,9 @@ class ResizeImage extends ImageProvider<_SizeAwareCacheKey> {
       );
       return decode(bytes, cacheWidth: width, cacheHeight: height, allowUpscaling: this.allowUpscaling);
     };
-    return imageProvider.load(key.providerCacheKey, decodeResize);
+    final ImageStreamCompleter completer = imageProvider.load(key.providerCacheKey, decodeResize);
+    completer.debugLabel = '${completer.debugLabel} - Resized(${key.width}×${key.height})';
+    return completer;
   }
 
   @override
