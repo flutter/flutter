@@ -421,7 +421,7 @@ mixin FabTopOffsetY on StandardFabLocation {
       final double fabHalfHeight = scaffoldGeometry.floatingActionButtonSize.height / 2.0;
       return scaffoldGeometry.contentTop - fabHalfHeight;
     }
-    // Ensure we are placed within the bounds of a safe area.
+    // Otherwise, ensure we are placed within the bounds of a safe area.
     return scaffoldGeometry.minViewPadding.top;
   }
 }
@@ -441,13 +441,13 @@ mixin FabFloatOffsetY on StandardFabLocation {
       scaffoldGeometry.minViewPadding.bottom,
     );
 
-    double fabY = contentBottom - fabHeight - bottomMargin;
+    double fabY = contentBottom - fabHeight - bottomMargin + adjustment;
     if (snackBarHeight > 0.0)
-      fabY = math.min(fabY, contentBottom - snackBarHeight - fabHeight - bottomMargin);
+      fabY = math.min(fabY, contentBottom - snackBarHeight - fabHeight - kFloatingActionButtonMargin) + adjustment;
     if (bottomSheetHeight > 0.0)
       fabY = math.min(fabY, contentBottom - bottomSheetHeight - fabHeight / 2.0);
-
-    return fabY + adjustment;
+    print(snackBarHeight);
+    return fabY;
   }
 }
 

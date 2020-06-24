@@ -549,7 +549,6 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         textDirection: textDirection,
         minViewPadding: minViewPadding,
       );
-
       final Offset currentFabOffset = currentFloatingActionButtonLocation.getOffset(currentGeometry);
       final Offset previousFabOffset = previousFloatingActionButtonLocation.getOffset(currentGeometry);
       final Offset fabOffset = floatingActionButtonMotionAnimator.getOffset(
@@ -573,7 +572,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       } else {
         snackBarYOffsetBase = contentBottom;
       }
-//      print('snackBarYOffsetBase: $snackBarYOffsetBase');
+
       positionChild(_ScaffoldSlot.snackBar, Offset(0.0, snackBarYOffsetBase - snackBarSize.height));
     }
 
@@ -2518,7 +2517,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     // The minimum viewPadding for interactive elements positioned by the
     // Scaffold to keep within safe interactive areas.
     final EdgeInsets minViewPadding = mediaQuery.viewPadding.copyWith(
-      bottom: _resizeToAvoidBottomInset &&  mediaQuery.viewInsets.bottom != 0.0 ? 0.0 : null,
+      bottom:
+//      0.0,
+      _resizeToAvoidBottomInset &&  mediaQuery.viewInsets.bottom != 0.0 ? 0.0 : null,
     );
 
     // extendBody locked when keyboard is open
