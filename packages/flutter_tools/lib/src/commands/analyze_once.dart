@@ -16,10 +16,8 @@ import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../dart/analysis.dart';
-import 'analyze.dart';
 import 'analyze_base.dart';
 
-/// An aspect of the [AnalyzeCommand] to perform once time analysis.
 class AnalyzeOnce extends AnalyzeBase {
   AnalyzeOnce(
     ArgResults argResults,
@@ -48,6 +46,9 @@ class AnalyzeOnce extends AnalyzeBase {
 
   /// The working directory for testing analysis using dartanalyzer.
   final Directory workingDirectory;
+  final Completer<void> analysisCompleter = Completer<void>();
+  final List<AnalysisError> errors = <AnalysisError>[];
+  StreamSubscription<bool> subscription;
 
   @override
   Future<void> analyze() async {
@@ -87,10 +88,6 @@ class AnalyzeOnce extends AnalyzeBase {
       throwToolExit('Nothing to analyze.', exitCode: 0);
     }
 
-    // analyze all
-    final Completer<void> analysisCompleter = Completer<void>();
-    final List<AnalysisError> errors = <AnalysisError>[];
-
     final String sdkPath = argResults['dart-sdk'] as String ??
       artifacts.getArtifactPath(Artifact.engineDartSdkPath);
 
@@ -108,18 +105,8 @@ class AnalyzeOnce extends AnalyzeBase {
     Stopwatch timer;
     Status progress;
     try {
-      StreamSubscription<bool> subscription;
-      subscription = server.onAnalyzing.listen((bool isAnalyzing) {
-        if (!isAnalyzing) {
-          analysisCompleter.complete();
-          subscription?.cancel();
-          subscription = null;
-        }
-      });
-      server.onErrors.listen((FileAnalysisErrors fileErrors) {
-        // Record the issues found (but filter out to do comments).
-        errors.addAll(fileErrors.errors.where((AnalysisError error) => error.type != 'TODO'));
-      });
+      subscription = server.onAnalyzing.listen((bool isAnalyzing) => _handleAnalysisStatus(isAnalyzing));
+      server.onErrors.listen(_handleAnalysisErrors);
 
       await server.start();
       // Completing the future in the callback can't fail.
@@ -175,12 +162,7 @@ class AnalyzeOnce extends AnalyzeBase {
 
     final String seconds = (timer.elapsedMilliseconds / 1000.0).toStringAsFixed(1);
 
-    String dartdocMessage;
-    if (undocumentedMembers == 1) {
-      dartdocMessage = 'one public member lacks documentation';
-    } else {
-      dartdocMessage = '$undocumentedMembers public members lack documentation';
-    }
+    String dartdocMessage = generateDartDocMessage(undocumentedMembers);
 
     // We consider any level of error to be an error exit (we don't report different levels).
     if (errors.isNotEmpty) {
@@ -204,5 +186,19 @@ class AnalyzeOnce extends AnalyzeBase {
         logger.printStatus('No issues found! (ran in ${seconds}s)');
       }
     }
+  }
+
+  void _handleAnalysisStatus(bool isAnalyzing) {
+    if (!isAnalyzing) {
+      analysisCompleter.complete();
+      subscription?.cancel();
+      subscription = null;
+    }
+  }
+
+  void _handleAnalysisErrors(FileAnalysisErrors fileErrors) {
+    fileErrors.errors.removeWhere((AnalysisError error) => error.type == 'TODO');
+
+    errors.addAll(fileErrors.errors);
   }
 }

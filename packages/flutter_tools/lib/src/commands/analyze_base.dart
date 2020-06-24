@@ -85,6 +85,18 @@ abstract class AnalyzeBase {
   }
 
   bool get isBenchmarking => argResults['benchmark'] as bool;
+
+  String generateDartDocMessage(int undocumentedMembers) {
+    String dartdocMessage;
+
+    if (undocumentedMembers == 1) {
+      dartdocMessage = 'one public member lacks documentation';
+    } else {
+      dartdocMessage = '$undocumentedMembers public members lack documentation';
+    }
+
+    return dartdocMessage;
+  }
 }
 
 class PackageDependency {
