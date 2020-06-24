@@ -584,8 +584,13 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   }
 
   @override
-  void applyPaintTransform(RenderObject child, Matrix4 transform) {
-    applyPaintTransformForBoxChild(child as RenderBox, transform);
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    if (_keepAliveBucket.containsKey(indexOf(child))) {
+      // The children that are kept alive can't be drawn.
+      transform.setZero();
+    } else {
+      applyPaintTransformForBoxChild(child, transform);
+    }
   }
 
   @override
