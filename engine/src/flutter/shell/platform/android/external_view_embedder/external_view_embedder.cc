@@ -91,16 +91,6 @@ bool AndroidExternalViewEmbedder::SubmitFrame(
 
   for (size_t i = 0; i < composition_order_.size(); i++) {
     int64_t view_id = composition_order_[i];
-    SkRect view_rect = GetViewRect(view_id);
-
-    // Display the platform view. If it's already displayed, then it's
-    // just positioned and sized.
-    jni_facade_->FlutterViewOnDisplayPlatformView(view_id,            //
-                                                  view_rect.x(),      //
-                                                  view_rect.y(),      //
-                                                  view_rect.width(),  //
-                                                  view_rect.height()  //
-    );
 
     sk_sp<SkPicture> picture =
         picture_recorders_.at(view_id)->finishRecordingAsPicture();
@@ -156,6 +146,15 @@ bool AndroidExternalViewEmbedder::SubmitFrame(
   frame->Submit();
 
   for (int64_t view_id : composition_order_) {
+    SkRect view_rect = GetViewRect(view_id);
+    // Display the platform view. If it's already displayed, then it's
+    // just positioned and sized.
+    jni_facade_->FlutterViewOnDisplayPlatformView(view_id,            //
+                                                  view_rect.x(),      //
+                                                  view_rect.y(),      //
+                                                  view_rect.width(),  //
+                                                  view_rect.height()  //
+    );
     for (const SkRect& overlay_rect : overlay_layers.at(view_id)) {
       CreateSurfaceIfNeeded(context,               //
                             view_id,               //
