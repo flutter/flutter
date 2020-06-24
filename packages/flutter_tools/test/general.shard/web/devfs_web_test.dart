@@ -2,14 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:io';
 
-import 'package:dwds/data/build_result.dart';
 import 'package:dwds/dwds.dart';
-import 'package:dwds/src/loaders/strategy.dart';
-import 'package:dwds/src/readers/asset_reader.dart';
-import 'package:dwds/src/services/expression_compiler.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -18,7 +13,6 @@ import 'package:flutter_tools/src/build_runner/devfs_web.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:logging/logging.dart';
 import 'package:mockito/mockito.dart';
 import 'package:package_config/package_config.dart';
 import 'package:shelf/shelf.dart';
@@ -530,46 +524,6 @@ void main() {
 
     expect(uri, Uri.http('localhost:0', ''));
     await webDevFS.destroy();
-  }));
-
-  test('Launches DWDS with the correct arguments', () => testbed.run(() async {
-    globals.fs.file('.packages').writeAsStringSync('\n');
-    final WebAssetServer server = await WebAssetServer.start(
-      null,
-      'any',
-      8123,
-      (String url) => null,
-      true,
-      BuildMode.debug,
-      true,
-      Uri.file('test.dart'),
-      null,
-      dwdsLauncher: ({
-        AssetReader assetReader,
-        Stream<BuildResult> buildResults,
-        ConnectionProvider chromeConnection,
-        bool enableDebugExtension,
-        bool enableDebugging,
-        ExpressionCompiler expressionCompiler,
-        String hostname,
-        LoadStrategy loadStrategy,
-        void Function(Level, String) logWriter,
-        bool serveDevTools,
-        UrlEncoder urlEncoder,
-        bool useSseForDebugProxy,
-        bool verbose,
-      }) async {
-        expect(serveDevTools, false);
-        expect(verbose, null);
-        expect(enableDebugging, true);
-        expect(enableDebugExtension, true);
-        expect(useSseForDebugProxy, true);
-        expect(hostname, 'any');
-
-        return MockDwds();
-      });
-
-    await server.dispose();
   }));
 }
 
