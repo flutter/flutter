@@ -89,7 +89,6 @@ Future<void> _runCmakeGeneration(String cmakePath, Directory buildDir, String bu
         buildDir.path,
         '-G',
         'Visual Studio 16 2019',
-        '-DCMAKE_BUILD_TYPE=$buildFlag',
       ],
       environment: <String, String>{
         'CC': 'clang',
