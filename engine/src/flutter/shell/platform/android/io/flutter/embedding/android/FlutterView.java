@@ -171,7 +171,7 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
       renderSurface = flutterTextureView;
     } else {
       throw new IllegalArgumentException(
-          String.format("RenderMode not supported with this constructor: ", renderMode));
+          String.format("RenderMode not supported with this constructor: %s", renderMode));
     }
 
     init();
@@ -265,7 +265,7 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
       renderSurface = flutterTextureView;
     } else {
       throw new IllegalArgumentException(
-          String.format("RenderMode not supported with this constructor: ", renderMode));
+          String.format("RenderMode not supported with this constructor: %s", renderMode));
     }
 
     init();
