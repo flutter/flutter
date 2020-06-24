@@ -201,7 +201,6 @@ public class FlutterLoader {
               + applicationInfo.nativeLibraryDir
               + File.separator
               + DEFAULT_LIBRARY);
-
       if (args != null) {
         Collections.addAll(shellArgs, args);
       }
@@ -234,6 +233,17 @@ public class FlutterLoader {
       }
 
       long initTimeMillis = SystemClock.uptimeMillis() - initStartTimestampMillis;
+
+      // TODO(cyanlaz): Remove this when dynamic thread merging is done.
+      // https://github.com/flutter/flutter/issues/59930
+      Bundle bundle = applicationInfo.metaData;
+      if (bundle != null) {
+        boolean use_embedded_view = bundle.getBoolean("io.flutter.embedded_views_preview");
+        if (use_embedded_view) {
+          shellArgs.add("--use-embedded-view");
+        }
+      }
+
       FlutterJNI.nativeInit(
           applicationContext,
           shellArgs.toArray(new String[0]),
