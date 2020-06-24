@@ -14,6 +14,8 @@ dependencies:
   completion: 0.2.2
   coverage: 0.14.0
   crypto: 2.1.5
+  dds: 1.2.1
+  dwds: 5.0.0
   file: 5.2.1
   flutter_template_images: 1.0.1
   http: 0.12.1

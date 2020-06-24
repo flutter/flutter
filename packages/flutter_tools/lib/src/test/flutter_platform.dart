@@ -872,8 +872,9 @@ class FlutterPlatform extends PlatformPlugin {
   void _pipeStandardStreamsToConsole(
     Process process, {
     void startTimeoutTimer(),
-    void reportObservatoryUri(Uri uri),
+    Future<void> reportObservatoryUri(Uri uri),
   }) {
+
     const String observatoryString = 'Observatory listening on ';
     for (final Stream<List<int>> stream in <Stream<List<int>>>[
       process.stderr,
@@ -883,7 +884,7 @@ class FlutterPlatform extends PlatformPlugin {
           .transform<String>(utf8.decoder)
           .transform<String>(const LineSplitter())
           .listen(
-        (String line) {
+        (String line) async {
           if (line == _kStartTimeoutTimerMessage) {
             if (startTimeoutTimer != null) {
               startTimeoutTimer();
@@ -896,7 +897,7 @@ class FlutterPlatform extends PlatformPlugin {
             try {
               final Uri uri = Uri.parse(line.substring(observatoryString.length));
               if (reportObservatoryUri != null) {
-                reportObservatoryUri(uri);
+                await reportObservatoryUri(uri);
               }
             } on Exception catch (error) {
               globals.printError('Could not parse shell observatory port message: $error');
