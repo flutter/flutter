@@ -1122,7 +1122,9 @@ abstract class ResidentRunner {
 
   Future<void> shutdownDartDevelopmentService() async {
     await Future.wait<void>(
-      flutterDevices.map<Future<void>>((FlutterDevice device) => device.device?.dds?.shutdown())
+      flutterDevices.map<Future<void>>(
+        (FlutterDevice device) => device.device?.dds?.shutdown()
+      ).where((Future<void> element) => element != null)
     );
   }
 
