@@ -224,8 +224,7 @@ class _TimePickerHeader extends StatelessWidget {
         children: <Widget>[
           const SizedBox(height: 16.0),
           Text(
-            // TODO(rami-a): localize 'SELECT TIME.'
-            helpText ?? 'SELECT TIME',
+            helpText ?? MaterialLocalizations.of(context).timePickerDialHelpText,
             style: TimePickerTheme.of(context).helpTextStyle ?? themeData.textTheme.overline,
           ),
           controls,
@@ -1387,8 +1386,7 @@ class _TimePickerInputState extends State<_TimePickerInput> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            // TODO(rami-a): localize 'ENTER TIME'
-            widget.helpText ?? 'ENTER TIME',
+            widget.helpText ?? MaterialLocalizations.of(context).timePickerInputHelpText,
             style: TimePickerTheme.of(context).helpTextStyle ?? theme.textTheme.overline,
           ),
           const SizedBox(height: 16.0),
@@ -1418,8 +1416,12 @@ class _TimePickerInputState extends State<_TimePickerInput> {
                   const SizedBox(height: 8.0),
                   if (!hourHasError && !minuteHasError)
                     ExcludeSemantics(
-                      // TODO(rami-a): localize 'Hour'
-                      child: Text('Hour', style: theme.textTheme.caption, maxLines: 1, overflow: TextOverflow.ellipsis),
+                      child: Text(
+                        MaterialLocalizations.of(context).timePickerHourLabel,
+                        style: theme.textTheme.caption,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                 ],
               )),
@@ -1441,8 +1443,12 @@ class _TimePickerInputState extends State<_TimePickerInput> {
                   const SizedBox(height: 8.0),
                   if (!hourHasError && !minuteHasError)
                     ExcludeSemantics(
-                      // TODO(rami-a): localize 'Minute'
-                      child: Text('Minute', style: theme.textTheme.caption, maxLines: 1, overflow: TextOverflow.ellipsis),
+                      child: Text(
+                        MaterialLocalizations.of(context).timePickerMinuteLabel,
+                        style: theme.textTheme.caption,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                 ],
               )),
@@ -1458,8 +1464,7 @@ class _TimePickerInputState extends State<_TimePickerInput> {
           ),
           if (hourHasError || minuteHasError)
             Text(
-              // TODO(rami-a): localize 'Enter a valid time'
-              'Enter a valid time',
+              MaterialLocalizations.of(context).invalidTimeLabel,
               style: theme.textTheme.bodyText2.copyWith(color: theme.colorScheme.error),
             )
           else
@@ -1811,10 +1816,9 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
           ),
           onPressed: _handleEntryModeToggle,
           icon: Icon(_entryMode == TimePickerEntryMode.dial ? Icons.keyboard : Icons.access_time),
-          // TODO(rami-a): Localize these strings.
           tooltip: _entryMode == TimePickerEntryMode.dial
-              ? 'Switch to text input mode'
-              : 'Switch to dial picker mode',
+              ? MaterialLocalizations.of(context).inputTimeModeButtonLabel
+              : MaterialLocalizations.of(context).dialModeButtonLabel,
         ),
         Expanded(
           // TODO(rami-a): Move away from ButtonBar to avoid https://github.com/flutter/flutter/issues/53378.
