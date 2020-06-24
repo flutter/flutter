@@ -96,6 +96,7 @@ void main() {
     FakeDevice unsupported;
     FakeDevice webDevice;
     FakeDevice fuchsiaDevice;
+    MockStdio mockStdio;
 
     setUp(() {
       ephemeralOne = FakeDevice('ephemeralOne', 'ephemeralOne', true);
@@ -107,6 +108,7 @@ void main() {
         ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.web_javascript);
       fuchsiaDevice = FakeDevice('fuchsiay', 'fuchsiay')
         ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.fuchsia_x64);
+      mockStdio = MockStdio();
     });
 
     testUsingContext('chooses ephemeral device', () async {
@@ -129,6 +131,7 @@ void main() {
         nonEphemeralTwo,
       ];
 
+      when(mockStdio.stdinHasTerminal).thenReturn(true);
       when(globals.terminal.promptForCharInput(<String>['0', '1'],
       logger: globals.logger,
       prompt: globals.userMessages.flutterChooseOne)
@@ -141,6 +144,7 @@ void main() {
         nonEphemeralOne
       ]);
     }, overrides: <Type, Generator>{
+      Stdio: () => mockStdio,
       AnsiTerminal: () => MockTerminal(),
     });
 
@@ -150,6 +154,7 @@ void main() {
         nonEphemeralTwo,
       ];
 
+      when(mockStdio.stdinHasTerminal).thenReturn(true);
       when(globals.terminal.promptForCharInput(<String>['0', '1'],
       logger: globals.logger,
       prompt: globals.userMessages.flutterChooseOne)
@@ -162,6 +167,7 @@ void main() {
         nonEphemeralTwo
       ]);
     }, overrides: <Type, Generator>{
+      Stdio: () => mockStdio,
       AnsiTerminal: () => MockTerminal(),
     });
 
@@ -171,6 +177,7 @@ void main() {
         ephemeralTwo,
       ];
 
+      when(mockStdio.stdinHasTerminal).thenReturn(true);
       when(globals.terminal.promptForCharInput(<String>['0', '1'],
         logger: globals.logger,
         prompt: globals.userMessages.flutterChooseOne)
@@ -183,6 +190,7 @@ void main() {
         ephemeralOne
       ]);
     }, overrides: <Type, Generator>{
+      Stdio: () => mockStdio,
       AnsiTerminal: () => MockTerminal(),
     });
 
@@ -192,6 +200,7 @@ void main() {
         ephemeralTwo,
       ];
 
+      when(mockStdio.stdinHasTerminal).thenReturn(true);
       when(globals.terminal.promptForCharInput(<String>['0', '1'],
         logger: globals.logger,
         prompt: globals.userMessages.flutterChooseOne)
@@ -204,6 +213,7 @@ void main() {
         ephemeralTwo
       ]);
     }, overrides: <Type, Generator>{
+      Stdio: () => mockStdio,
       AnsiTerminal: () => MockTerminal(),
     });
 
@@ -318,3 +328,4 @@ class TestDeviceManager extends DeviceManager {
 
 class MockProcess extends Mock implements Process {}
 class MockTerminal extends Mock implements AnsiTerminal {}
+class MockStdio extends Mock implements Stdio {}
