@@ -4,12 +4,11 @@
 
 import 'dart:async';
 
-import 'package:flutter_devicelab/tasks/plugin_tests.dart';
+import 'package:flutter_devicelab/tasks/perf_tests.dart';
+import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 
 Future<void> main() async {
-  await task(combine(<TaskFunction>[
-    PluginTest('apk', <String>['-a', 'java', '--platforms=android']),
-    PluginTest('apk', <String>['-a', 'kotlin', '--platforms=android']),
-  ]));
+  deviceOperatingSystem = DeviceOperatingSystem.ios;
+  await task(createFlutterGalleryTransitionsPerfSkSLWarmupTest());
 }

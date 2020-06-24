@@ -10,15 +10,18 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
+import 'package:yaml/yaml.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/pubspec_schema.dart';
 
 void main() {
   group('plugins', () {
@@ -109,16 +112,14 @@ void main() {
           ..writeAsStringSync('apackage:file://${dummyPackageDirectory.path}\n');
     });
 
-    // Makes the dummy package pointed to by packagesFile look like a plugin.
-    void configureDummyPackageAsPlugin() {
-      dummyPackageDirectory.parent.childFile('pubspec.yaml')..createSync(recursive: true)..writeAsStringSync('''
+    const String _pluginYaml = '''
   flutter:
     plugin:
       platforms:
         ios:
-          pluginClass: FLESomePlugin
+          pluginClass: SomePlugin
         macos:
-          pluginClass: FLESomePlugin
+          pluginClass: SomePlugin
         windows:
           pluginClass: SomePlugin
         linux:
@@ -129,7 +130,10 @@ void main() {
         android:
           pluginClass: SomePlugin
           package: AndroidPackage
-  ''');
+  ''';
+    // Makes the dummy package pointed to by packagesFile look like a plugin.
+    void configureDummyPackageAsPlugin() {
+      dummyPackageDirectory.parent.childFile('pubspec.yaml')..createSync(recursive: true)..writeAsStringSync(_pluginYaml);
     }
 
     void createNewJavaPlugin1() {
@@ -1297,6 +1301,51 @@ flutter:
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => featureFlags,
       });
+    });
+
+    group('pubspec', () {
+
+      Directory projectDir;
+      Directory tempDir;
+      setUp(() {
+        tempDir = globals.fs.systemTempDirectory.createTempSync('plugin_test.');
+        projectDir = tempDir.childDirectory('flutter_project');
+      });
+
+      tearDown(() {
+        tryToDelete(tempDir);
+      });
+
+      void _createPubspecFile(String yamlString) {
+        projectDir.childFile('pubspec.yaml')..createSync(recursive: true)..writeAsStringSync(yamlString);
+      }
+
+      test('validatePubspecForPlugin works', () async {
+        _createPubspecFile(_pluginYaml);
+        validatePubspecForPlugin(projectDir: projectDir.absolute.path, pluginClass: 'SomePlugin', expectedPlatforms: <String>[
+          'ios', 'macos', 'windows', 'linux', 'android', 'web'
+        ], androidIdentifier: 'AndroidPackage', webFileName: 'lib/SomeFile.dart');
+      });
+
+      test('createPlatformsYamlMap should create the correct map', () async {
+        final YamlMap map = Plugin.createPlatformsYamlMap(<String>['ios', 'android', 'linux'], 'PluginClass', 'some.android.package');
+        expect(map['ios'], <String, String> {
+          'pluginClass' : 'PluginClass'
+        });
+        expect(map['android'], <String, String> {
+          'pluginClass' : 'PluginClass',
+          'package': 'some.android.package',
+        });
+        expect(map['linux'], <String, String> {
+          'pluginClass' : 'PluginClass'
+        });
+      });
+
+      test('createPlatformsYamlMap should create empty map', () async {
+        final YamlMap map = Plugin.createPlatformsYamlMap(<String>[], null, null);
+        expect(map.isEmpty, true);
+      });
+
     });
   });
 }

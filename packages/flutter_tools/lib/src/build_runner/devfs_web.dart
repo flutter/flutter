@@ -837,7 +837,8 @@ class ReleaseAssetServer {
     } else {
       for (final Uri uri in _searchPaths) {
         final Uri potential = uri.resolve(request.url.path);
-        if (potential == null || !globals.fs.isFileSync(potential.toFilePath())) {
+        if (potential == null || !globals.fs.isFileSync(
+          potential.toFilePath(windows: globals.platform.isWindows))) {
           continue;
         }
         fileUri = potential;
