@@ -5022,6 +5022,32 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
   });
 
+  testWidgets('Can access characters on editing string', (WidgetTester tester) async {
+    int charactersLength;
+    final Widget widget = MaterialApp(
+      home: EditableText(
+        backgroundCursorColor: Colors.grey,
+        controller: TextEditingController(),
+        focusNode: FocusNode(),
+        style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
+        cursorColor: Colors.blue,
+        selectionControls: materialTextSelectionControls,
+        keyboardType: TextInputType.text,
+        onChanged: (String value) {
+          charactersLength = value.characters.length;
+        },
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    // Enter an extended grapheme cluster whose string length is different than
+    // its characters length.
+    await tester.enterText(find.byType(EditableText), '👨‍👩‍👦');
+    await tester.pump();
+
+    expect(charactersLength, 1);
+  });
+
   testWidgets('EditableText can set and update clipBehavior', (WidgetTester tester) async {
     await tester.pumpWidget(MediaQuery(
       data: const MediaQueryData(devicePixelRatio: 1.0),
