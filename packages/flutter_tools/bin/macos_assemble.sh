@@ -67,6 +67,11 @@ if [[ -n "$PERFORMANCE_MEASUREMENT_FILE" ]]; then
   performance_measurement_option="--performance-measurement-file=${PERFORMANCE_MEASUREMENT_FILE}"
 fi
 
+bundle_sksl_path=""
+if [[ -n "$BUNDLE_SKSL_PATH" ]]; then
+  bundle_sksl_path="-iBundleSkSLPath=${BUNDLE_SKSL_PATH}"
+fi
+
 RunCommand "${FLUTTER_ROOT}/bin/flutter"                                    \
     ${verbose_flag}                                                         \
     ${flutter_engine_flag}                                                  \
@@ -80,6 +85,7 @@ RunCommand "${FLUTTER_ROOT}/bin/flutter"                                    \
     -dDartObfuscation="${DART_OBFUSCATION}"                                 \
     -dSplitDebugInfo="${SPLIT_DEBUG_INFO}"                                  \
     -dTrackWidgetCreation="${TRACK_WIDGET_CREATION}"                        \
+    ${bundle_sksl_path}                                                     \
     --DartDefines="${DART_DEFINES}"                                         \
     --ExtraGenSnapshotOptions="${EXTRA_GEN_SNAPSHOT_OPTIONS}"               \
     --ExtraFrontEndOptions="${EXTRA_FRONT_END_OPTIONS}"                     \

@@ -16,7 +16,6 @@ import '../base/logger.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../emulator.dart';
@@ -52,7 +51,6 @@ class DaemonCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     globals.printStatus('Starting device daemon...');
     isRunningFromDaemon = true;
-    Cache.releaseLockEarly();
 
     final Daemon daemon = Daemon(
       stdinCommandStream, stdoutCommandResponse,
@@ -181,10 +179,10 @@ class Daemon {
 
   void _send(Map<String, dynamic> map) => sendCommand(map);
 
-  void shutdown({ dynamic error }) {
-    _commandSubscription?.cancel();
+  Future<void> shutdown({ dynamic error }) async {
+    await _commandSubscription?.cancel();
     for (final Domain domain in _domainMap.values) {
-      domain.dispose();
+      await domain.dispose();
     }
     if (!_onExitCompleter.isCompleted) {
       if (error == null) {
@@ -275,7 +273,7 @@ abstract class Domain {
     return val as int;
   }
 
-  void dispose() { }
+  Future<void> dispose() async { }
 }
 
 /// This domain responds to methods like [version] and [shutdown].
@@ -353,8 +351,8 @@ class DaemonDomain extends Domain {
   }
 
   @override
-  void dispose() {
-    _subscription?.cancel();
+  Future<void> dispose() async {
+    await _subscription?.cancel();
   }
 
   /// Enumerates the platforms supported by the provided project.
@@ -449,9 +447,13 @@ class AppDomain extends Domain {
     bool ipv6 = false,
     String isolateFilter,
   }) async {
-    if (await device.isLocalEmulator && !options.buildInfo.supportsEmulator) {
-      throw Exception('${toTitleCase(options.buildInfo.friendlyModeName)} mode is not supported for emulators.');
+    if (!await device.supportsRuntimeMode(options.buildInfo.mode)) {
+      throw Exception(
+        '${toTitleCase(options.buildInfo.friendlyModeName)} '
+        'mode is not supported for ${device.name}.',
+      );
     }
+
     // We change the current working directory for the duration of the `start` command.
     final Directory cwd = globals.fs.currentDirectory;
     globals.fs.currentDirectory = globals.fs.directory(projectDirectory);
@@ -826,9 +828,9 @@ class DeviceDomain extends Domain {
   }
 
   @override
-  void dispose() {
+  Future<void> dispose() async {
     for (final PollingDeviceDiscovery discoverer in _discoverers) {
-      discoverer.dispose();
+      await discoverer.dispose();
     }
   }
 
@@ -916,13 +918,14 @@ dynamic _toJsonable(dynamic obj) {
 }
 
 class NotifyingLogger extends Logger {
-  NotifyingLogger({ @required this.verbose }) {
+  NotifyingLogger({ @required this.verbose, this.parent }) {
     _messageController = StreamController<LogMessage>.broadcast(
       onListen: _onListen,
     );
   }
 
   final bool verbose;
+  final Logger parent;
   final List<LogMessage> messageBuffer = <LogMessage>[];
   StreamController<LogMessage> _messageController;
 
@@ -966,7 +969,7 @@ class NotifyingLogger extends Logger {
     if (!verbose) {
       return;
     }
-    _sendMessage(LogMessage('trace', message));
+    parent?.printError(message);
   }
 
   @override

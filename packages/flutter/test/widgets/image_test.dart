@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:typed_data';
@@ -1553,7 +1555,7 @@ void main() {
     expect(provider.loadCallCount, 1);
   });
 
-  testWidgets('precacheImage allows time to take over weak refernce', (WidgetTester tester) async {
+  testWidgets('precacheImage allows time to take over weak reference', (WidgetTester tester) async {
     final TestImageProvider provider = TestImageProvider();
     Future<void> precache;
     await tester.pumpWidget(

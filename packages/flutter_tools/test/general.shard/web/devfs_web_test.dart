@@ -43,7 +43,9 @@ void main() {
   MockHttpServer mockHttpServer;
 
   setUpAll(() async {
-    packages = await loadPackageConfigUri(Uri.base.resolve('.packages'));
+    packages = PackageConfig(<Package>[
+      Package('flutter_tools', Uri.file('/flutter_tools/lib/').normalizePath())
+    ]);
   });
 
   setUp(() {
@@ -360,6 +362,13 @@ void main() {
   test('handles serving missing asset file', () => testbed.run(() async {
     final Response response = await webAssetServer
       .handleRequest(Request('GET', Uri.parse('http://foobar/assets/foo')));
+
+    expect(response.statusCode, HttpStatus.notFound);
+  }));
+
+  test('handles serving unresolvable package file', () => testbed.run(() async {
+    final Response response = await webAssetServer
+      .handleRequest(Request('GET', Uri.parse('http://foobar/packages/notpackage/file')));
 
     expect(response.statusCode, HttpStatus.notFound);
   }));

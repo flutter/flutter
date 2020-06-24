@@ -6,13 +6,12 @@ import '../../artifacts.dart';
 import '../../base/build.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
-import '../../devfs.dart';
 import '../../globals.dart' as globals;
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
 import 'assets.dart';
-import 'dart.dart';
+import 'common.dart';
 import 'icon_tree_shaker.dart';
 
 /// Prepares the asset bundle in the format expected by flutter.gradle.
@@ -63,27 +62,11 @@ abstract class AndroidAssetBundle extends Target {
           .copySync(outputDirectory.childFile('isolate_snapshot_data').path);
     }
     if (_copyAssets) {
-      final String shaderBundlePath = environment.inputs[kBundleSkSLPath];
-      final DevFSContent skslBundle = processSkSLBundle(
-        shaderBundlePath,
-        engineVersion: environment.engineVersion,
-        fileSystem: environment.fileSystem,
-        logger: environment.logger,
-        targetPlatform: TargetPlatform.android,
-      );
       final Depfile assetDepfile = await copyAssets(
         environment,
         outputDirectory,
-        additionalContent: <String, DevFSContent>{
-          if (skslBundle != null)
-            kSkSLShaderBundlePath: skslBundle,
-        }
+        targetPlatform: TargetPlatform.android,
       );
-      if (shaderBundlePath != null) {
-        final File skSLBundleFile = environment.fileSystem
-          .file(shaderBundlePath).absolute;
-        assetDepfile.inputs.add(skSLBundleFile);
-      }
       final DepfileService depfileService = DepfileService(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -207,7 +190,7 @@ class AndroidAot extends AotElfBase {
 
   @override
   List<Source> get inputs => <Source>[
-    const Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/dart.dart'),
+    const Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/android.dart'),
     const Source.pattern('{BUILD_DIR}/app.dill'),
     const Source.pattern('{PROJECT_DIR}/.packages'),
     const Source.artifact(Artifact.engineDartBinary),

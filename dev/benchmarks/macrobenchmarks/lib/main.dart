@@ -35,7 +35,7 @@ class MacrobenchmarksApp extends StatelessWidget {
         kCubicBezierRouteName: (BuildContext context) => CubicBezierPage(),
         kBackdropFilterRouteName: (BuildContext context) => BackdropFilterPage(),
         kPostBackdropFilterRouteName: (BuildContext context) => PostBackdropFilterPage(),
-        kSimpleAnimationRouteName: (BuildContext conttext) => SimpleAnimationPage(),
+        kSimpleAnimationRouteName: (BuildContext context) => SimpleAnimationPage(),
         kPictureCacheRouteName: (BuildContext context) => PictureCachePage(),
         kLargeImagesRouteName: (BuildContext context) => LargeImagesPage(),
         kTextRouteName: (BuildContext context) => TextPage(),

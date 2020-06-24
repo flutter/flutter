@@ -517,10 +517,13 @@ class WebAssetServer implements AssetReader {
     // The file might have been a package file which is signaled by a
     // `/packages/<package>/<path>` request.
     if (segments.first == 'packages') {
-      final File packageFile = globals.fs.file(_packages.resolve(Uri(
-        scheme: 'package', pathSegments: segments.skip(1))));
-      if (packageFile.existsSync()) {
-        return packageFile;
+      final Uri filePath = _packages.resolve(Uri(
+        scheme: 'package', pathSegments: segments.skip(1)));
+      if (filePath != null) {
+        final File packageFile = globals.fs.file(filePath);
+        if (packageFile.existsSync()) {
+          return packageFile;
+        }
       }
     }
 
@@ -552,6 +555,11 @@ class WebAssetServer implements AssetReader {
   @override
   Future<String> sourceMapContents(String serverPath) async {
     return utf8.decode(_sourcemaps[serverPath]);
+  }
+
+  @override
+  Future<String> metadataContents(String serverPath) {
+    return null;
   }
 }
 
@@ -829,7 +837,8 @@ class ReleaseAssetServer {
     } else {
       for (final Uri uri in _searchPaths) {
         final Uri potential = uri.resolve(request.url.path);
-        if (potential == null || !globals.fs.isFileSync(potential.toFilePath())) {
+        if (potential == null || !globals.fs.isFileSync(
+          potential.toFilePath(windows: globals.platform.isWindows))) {
           continue;
         }
         fileUri = potential;

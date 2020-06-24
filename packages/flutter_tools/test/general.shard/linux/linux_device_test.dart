@@ -28,13 +28,18 @@ void main() {
   testWithoutContext('LinuxDevice defaults', () async {
     final PrebuiltLinuxApp linuxApp = PrebuiltLinuxApp(executable: 'foo');
     expect(await device.targetPlatform, TargetPlatform.linux_x64);
-    expect(device.name, 'Linux');
+    expect(device.name, 'Linux desktop');
     expect(await device.installApp(linuxApp), true);
     expect(await device.uninstallApp(linuxApp), true);
     expect(await device.isLatestBuildInstalled(linuxApp), true);
     expect(await device.isAppInstalled(linuxApp), true);
     expect(await device.stopApp(linuxApp), true);
     expect(device.category, Category.desktop);
+
+    expect(device.supportsRuntimeMode(BuildMode.debug), true);
+    expect(device.supportsRuntimeMode(BuildMode.profile), true);
+    expect(device.supportsRuntimeMode(BuildMode.release), true);
+    expect(device.supportsRuntimeMode(BuildMode.jitRelease), false);
   });
 
   testWithoutContext('LinuxDevice: no devices listed if platform unsupported', () async {

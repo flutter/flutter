@@ -19,6 +19,7 @@ import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:quiver/testing/async.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -91,6 +92,9 @@ void main() {
       );
       mockXcode = MockXcode();
       when(mockXcode.isVersionSatisfactory).thenReturn(true);
+      fileSystem.file('foo/.packages')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('\n');
     });
 
     testUsingContext('with buildable app', () async {
@@ -333,6 +337,7 @@ IOSDevice setUpIOSDevice({
     ),
     cpuArchitecture: DarwinArch.arm64,
     interfaceType: IOSDeviceInterface.usb,
+    vmServiceConnectUri: (String string, {Log log}) async => MockVmService(),
   );
 }
 
@@ -340,3 +345,4 @@ class MockArtifacts extends Mock implements Artifacts {}
 class MockCache extends Mock implements Cache {}
 class MockXcode extends Mock implements Xcode {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
+class MockVmService extends Mock implements VmService {}

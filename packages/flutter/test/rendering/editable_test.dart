@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -24,6 +26,44 @@ class FakeEditableTextState with TextSelectionDelegate {
 }
 
 void main() {
+  test('RenderEditable respects clipBehavior', () {
+    const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
+    final TestClipPaintingContext context = TestClipPaintingContext();
+
+    final String longString = 'a' * 10000;
+
+    // By default, clipBehavior should be Clip.none
+    final RenderEditable defaultEditable = RenderEditable(
+      text: TextSpan(text: longString),
+      textDirection: TextDirection.ltr,
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: FakeEditableTextState(),
+      selection: const TextSelection(baseOffset: 0, extentOffset: 0),
+    );
+    layout(defaultEditable, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
+    defaultEditable.paint(context, Offset.zero);
+    expect(context.clipBehavior, equals(Clip.hardEdge));
+
+    context.clipBehavior = Clip.none; // Reset as Clip.none won't write into clipBehavior.
+    for (final Clip clip in Clip.values) {
+      final RenderEditable editable = RenderEditable(
+        text: TextSpan(text: longString),
+        textDirection: TextDirection.ltr,
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        offset: ViewportOffset.zero(),
+        textSelectionDelegate: FakeEditableTextState(),
+        selection: const TextSelection(baseOffset: 0, extentOffset: 0),
+        clipBehavior: clip,
+      );
+      layout(editable, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
+      editable.paint(context, Offset.zero);
+      expect(context.clipBehavior, equals(clip));
+    }
+  });
+
   test('editable intrinsics', () {
     final TextSelectionDelegate delegate = FakeEditableTextState();
     final RenderEditable editable = RenderEditable(
@@ -765,6 +805,106 @@ void main() {
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
       text: const TextSpan(
+        text: '0123😆6789',
+        style: TextStyle(
+          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+        ),
+      ),
+      selection: const TextSelection.collapsed(
+        offset: 0,
+      ),
+    );
+
+    layout(editable);
+    editable.hasFocus = true;
+
+    editable.selection = const TextSelection.collapsed(offset: 4);
+    pumpFrame();
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
+    await simulateKeyUpEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
+    expect(currentSelection.isCollapsed, true);
+    expect(currentSelection.baseOffset, 6);
+    editable.selection = currentSelection;
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
+    await simulateKeyUpEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
+    expect(currentSelection.isCollapsed, true);
+    expect(currentSelection.baseOffset, 4);
+    editable.selection = currentSelection;
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
+    await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
+    expect(delegate.textEditingValue.text, '01236789');
+  }, skip: kIsWeb);
+
+  test('arrow keys and delete handle grapheme clusters correctly', () async {
+    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final ViewportOffset viewportOffset = ViewportOffset.zero();
+    TextSelection currentSelection;
+    final RenderEditable editable = RenderEditable(
+      backgroundCursorColor: Colors.grey,
+      selectionColor: Colors.black,
+      textDirection: TextDirection.ltr,
+      cursorColor: Colors.red,
+      offset: viewportOffset,
+      textSelectionDelegate: delegate,
+      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+        currentSelection = selection;
+      },
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      text: const TextSpan(
+        text: '0123👨‍👩‍👦2345',
+        style: TextStyle(
+          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+        ),
+      ),
+      selection: const TextSelection.collapsed(
+        offset: 0,
+      ),
+    );
+
+    layout(editable);
+    editable.hasFocus = true;
+
+    editable.selection = const TextSelection.collapsed(offset: 4);
+    pumpFrame();
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
+    await simulateKeyUpEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
+    expect(currentSelection.isCollapsed, true);
+    expect(currentSelection.baseOffset, 12);
+    editable.selection = currentSelection;
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
+    await simulateKeyUpEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
+    expect(currentSelection.isCollapsed, true);
+    expect(currentSelection.baseOffset, 4);
+    editable.selection = currentSelection;
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
+    await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
+    expect(delegate.textEditingValue.text, '01232345');
+  }, skip: kIsWeb);
+
+  test('arrow keys and delete handle surrogate pairs correctly', () async {
+    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final ViewportOffset viewportOffset = ViewportOffset.zero();
+    TextSelection currentSelection;
+    final RenderEditable editable = RenderEditable(
+      backgroundCursorColor: Colors.grey,
+      selectionColor: Colors.black,
+      textDirection: TextDirection.ltr,
+      cursorColor: Colors.red,
+      offset: viewportOffset,
+      textSelectionDelegate: delegate,
+      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+        currentSelection = selection;
+      },
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      text: const TextSpan(
         text: '\u{1F44D}',  // Thumbs up
         style: TextStyle(
           height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
@@ -796,4 +936,117 @@ void main() {
     await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
     expect(delegate.textEditingValue.text, '');
   }, skip: kIsWeb); // Key simulation doesn't work on web.
+
+  test('getEndpointsForSelection handles empty characters', () {
+    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final RenderEditable editable = RenderEditable(
+      // This is a Unicode left-to-right mark character that will not render
+      // any glyphs.
+      text: const TextSpan(text: '\u200e'),
+      textAlign: TextAlign.start,
+      textDirection: TextDirection.ltr,
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: delegate,
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+    );
+    editable.layout(BoxConstraints.loose(const Size(100, 100)));
+    final List<TextSelectionPoint> endpoints = editable.getEndpointsForSelection(
+      const TextSelection(baseOffset: 0, extentOffset: 1));
+    expect(endpoints[0].point.dx, 0);
+  });
+
+  group('nextCharacter', () {
+    test('handles normal strings correctly', () {
+      expect(RenderEditable.nextCharacter(0, '01234567'), 1);
+      expect(RenderEditable.nextCharacter(3, '01234567'), 4);
+      expect(RenderEditable.nextCharacter(7, '01234567'), 8);
+      expect(RenderEditable.nextCharacter(8, '01234567'), 8);
+    });
+
+    test('throws for invalid indices', () {
+      expect(() => RenderEditable.nextCharacter(-1, '01234567'), throwsAssertionError);
+      expect(() => RenderEditable.nextCharacter(9, '01234567'), throwsAssertionError);
+    });
+
+    test('skips spaces in normal strings when includeWhitespace is false', () {
+      expect(RenderEditable.nextCharacter(3, '0123 5678', false), 5);
+      expect(RenderEditable.nextCharacter(4, '0123 5678', false), 5);
+      expect(RenderEditable.nextCharacter(3, '0123      0123', false), 10);
+      expect(RenderEditable.nextCharacter(2, '0123      0123', false), 3);
+      expect(RenderEditable.nextCharacter(4, '0123      0123', false), 10);
+      expect(RenderEditable.nextCharacter(9, '0123      0123', false), 10);
+      expect(RenderEditable.nextCharacter(10, '0123      0123', false), 11);
+      // If the subsequent characters are all whitespace, it returns the length
+      // of the string.
+      expect(RenderEditable.nextCharacter(5, '0123      ', false), 10);
+    });
+
+    test('handles surrogate pairs correctly', () {
+      expect(RenderEditable.nextCharacter(3, '0123👨👩👦0123'), 4);
+      expect(RenderEditable.nextCharacter(4, '0123👨👩👦0123'), 6);
+      expect(RenderEditable.nextCharacter(5, '0123👨👩👦0123'), 6);
+      expect(RenderEditable.nextCharacter(6, '0123👨👩👦0123'), 8);
+      expect(RenderEditable.nextCharacter(7, '0123👨👩👦0123'), 8);
+      expect(RenderEditable.nextCharacter(8, '0123👨👩👦0123'), 10);
+      expect(RenderEditable.nextCharacter(9, '0123👨👩👦0123'), 10);
+      expect(RenderEditable.nextCharacter(10, '0123👨👩👦0123'), 11);
+    });
+
+    test('handles extended grapheme clusters correctly', () {
+      expect(RenderEditable.nextCharacter(3, '0123👨‍👩‍👦2345'), 4);
+      expect(RenderEditable.nextCharacter(4, '0123👨‍👩‍👦2345'), 12);
+      // Even when extent falls within an extended grapheme cluster, it still
+      // identifies the whole grapheme cluster.
+      expect(RenderEditable.nextCharacter(5, '0123👨‍👩‍👦2345'), 12);
+      expect(RenderEditable.nextCharacter(12, '0123👨‍👩‍👦2345'), 13);
+    });
+  });
+
+  group('previousCharacter', () {
+    test('handles normal strings correctly', () {
+      expect(RenderEditable.previousCharacter(8, '01234567'), 7);
+      expect(RenderEditable.previousCharacter(0, '01234567'), 0);
+      expect(RenderEditable.previousCharacter(1, '01234567'), 0);
+      expect(RenderEditable.previousCharacter(5, '01234567'), 4);
+      expect(RenderEditable.previousCharacter(8, '01234567'), 7);
+    });
+
+    test('throws for invalid indices', () {
+      expect(() => RenderEditable.previousCharacter(-1, '01234567'), throwsAssertionError);
+      expect(() => RenderEditable.previousCharacter(9, '01234567'), throwsAssertionError);
+    });
+
+    test('skips spaces in normal strings when includeWhitespace is false', () {
+      expect(RenderEditable.previousCharacter(10, '0123      0123', false), 3);
+      expect(RenderEditable.previousCharacter(11, '0123      0123', false), 10);
+      expect(RenderEditable.previousCharacter(9, '0123      0123', false), 3);
+      expect(RenderEditable.previousCharacter(4, '0123      0123', false), 3);
+      expect(RenderEditable.previousCharacter(3, '0123      0123', false), 2);
+      // If the previous characters are all whitespace, it returns zero.
+      expect(RenderEditable.previousCharacter(3, '          0123', false), 0);
+    });
+
+    test('handles surrogate pairs correctly', () {
+      expect(RenderEditable.previousCharacter(11, '0123👨👩👦0123'), 10);
+      expect(RenderEditable.previousCharacter(10, '0123👨👩👦0123'), 8);
+      expect(RenderEditable.previousCharacter(9, '0123👨👩👦0123'), 8);
+      expect(RenderEditable.previousCharacter(8, '0123👨👩👦0123'), 6);
+      expect(RenderEditable.previousCharacter(7, '0123👨👩👦0123'), 6);
+      expect(RenderEditable.previousCharacter(6, '0123👨👩👦0123'), 4);
+      expect(RenderEditable.previousCharacter(5, '0123👨👩👦0123'), 4);
+      expect(RenderEditable.previousCharacter(4, '0123👨👩👦0123'), 3);
+      expect(RenderEditable.previousCharacter(3, '0123👨👩👦0123'), 2);
+    });
+
+    test('handles extended grapheme clusters correctly', () {
+      expect(RenderEditable.previousCharacter(13, '0123👨‍👩‍👦2345'), 12);
+      // Even when extent falls within an extended grapheme cluster, it still
+      // identifies the whole grapheme cluster.
+      expect(RenderEditable.previousCharacter(12, '0123👨‍👩‍👦2345'), 4);
+      expect(RenderEditable.previousCharacter(11, '0123👨‍👩‍👦2345'), 4);
+      expect(RenderEditable.previousCharacter(5, '0123👨‍👩‍👦2345'), 4);
+      expect(RenderEditable.previousCharacter(4, '0123👨‍👩‍👦2345'), 3);
+    });
+  });
 }

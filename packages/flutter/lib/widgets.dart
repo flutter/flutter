@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 /// The Flutter widgets framework.
 ///
 /// To use, import `package:flutter/widgets.dart`.
@@ -13,6 +15,7 @@
 library widgets;
 
 export 'package:vector_math/vector_math_64.dart' show Matrix4;
+export 'package:characters/characters.dart';
 
 export 'src/widgets/actions.dart';
 export 'src/widgets/animated_cross_fade.dart';

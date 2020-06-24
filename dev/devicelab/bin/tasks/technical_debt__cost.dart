@@ -18,7 +18,7 @@ const double skipCost = 2473.0; // 20 hours: 5 to fix the issue we're ignoring, 
 const double ignoreForFileCost = 2477.0; // similar thinking as skipCost
 const double asDynamicCost = 2011.0; // a few days to refactor the code.
 const double deprecationCost = 233.0; // a few hours to remove the old code.
-const double grandfatheredDeprecationCost = 9973.0; // a couple of weeks.
+const double legacyDeprecationCost = 9973.0; // a couple of weeks.
 
 final RegExp todoPattern = RegExp(r'(?://|#) *TODO');
 final RegExp ignorePattern = RegExp(r'// *ignore:');
@@ -26,7 +26,7 @@ final RegExp ignoreForFilePattern = RegExp(r'// *ignore_for_file:');
 final RegExp asDynamicPattern = RegExp(r'\bas dynamic\b');
 final RegExp deprecationPattern = RegExp(r'^ *@[dD]eprecated');
 const Pattern globalsPattern = 'globals.';
-const String grandfatheredDeprecationPattern = '// ignore: flutter_deprecation_syntax, https';
+const String legacyDeprecationPattern = '// ignore: flutter_deprecation_syntax, https';
 
 Future<double> findCostsForFile(File file) async {
   if (path.extension(file.path) == '.py')
@@ -48,8 +48,8 @@ Future<double> findCostsForFile(File file) async {
       total += asDynamicCost;
     if (line.contains(deprecationPattern))
       total += deprecationCost;
-    if (line.contains(grandfatheredDeprecationPattern))
-      total += grandfatheredDeprecationCost;
+    if (line.contains(legacyDeprecationPattern))
+      total += legacyDeprecationCost;
     if (isTest && line.contains('skip:'))
       total += skipCost;
   }

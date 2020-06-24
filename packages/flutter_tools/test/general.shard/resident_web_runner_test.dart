@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:dwds/dwds.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -15,6 +16,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_runner/devfs_web.dart';
 import 'package:flutter_tools/src/build_runner/resident_web_runner.dart';
 import 'package:flutter_tools/src/compile.dart';
+import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -55,6 +57,12 @@ const List<VmServiceExpectation> kAttachIsolateExpectations = <VmServiceExpectat
     args: <String, Object>{
       'streamId': 'Isolate'
     }
+  ),
+  FakeVmServiceRequest(
+    method: 'streamListen',
+    args: <String, Object>{
+      'streamId': 'Extension',
+    },
   ),
   FakeVmServiceRequest(
     method: 'registerService',
@@ -108,6 +116,9 @@ void main() {
     });
     testbed = Testbed(
       setup: () {
+        globals.fs.file(globalPackagesPath)
+          ..createSync(recursive: true)
+          ..writeAsStringSync('\n');
         residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
           mockFlutterDevice,
           flutterProject: FlutterProject.current(),
@@ -338,6 +349,68 @@ void main() {
 
     expect(testLogger.statusText, contains('THIS MESSAGE IS IMPORTANT'));
     expect(testLogger.statusText, contains('SO IS THIS'));
+  }));
+
+  test('Listens to extension events with structured errors', () => testbed.run(() async {
+    final Map<String, String> extensionData = <String, String>{
+      'test': 'data',
+      'renderedErrorText': 'error text',
+    };
+    final Map<String, String> emptyExtensionData = <String, String>{
+      'test': 'data',
+      'renderedErrorText': '',
+    };
+    final Map<String, String> nonStructuredErrorData = <String, String>{
+      'other': 'other stuff',
+    };
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      ...kAttachExpectations,
+      FakeVmServiceStreamResponse(
+        streamId: 'Extension',
+        event: vm_service.Event(
+          timestamp: 0,
+          extensionKind: 'Flutter.Error',
+          extensionData: vm_service.ExtensionData.parse(extensionData),
+          kind: vm_service.EventStreams.kExtension,
+        ),
+      ),
+      // Empty error text should not break anything.
+      FakeVmServiceStreamResponse(
+        streamId: 'Extension',
+        event: vm_service.Event(
+          timestamp: 0,
+          extensionKind: 'Flutter.Error',
+          extensionData: vm_service.ExtensionData.parse(emptyExtensionData),
+          kind: vm_service.EventStreams.kExtension,
+        ),
+      ),
+      // This is not Flutter.Error kind data, so it should not be logged.
+      FakeVmServiceStreamResponse(
+        streamId: 'Extension',
+        event: vm_service.Event(
+          timestamp: 0,
+          extensionKind: 'Other',
+          extensionData: vm_service.ExtensionData.parse(nonStructuredErrorData),
+          kind: vm_service.EventStreams.kExtension,
+        ),
+      ),
+    ]);
+
+    _setupMocks();
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    unawaited(residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+
+    // Need these to run events, otherwise expect statements below run before
+    // structured errors are processed.
+    await null;
+    await null;
+    await null;
+
+    expect(testLogger.statusText, contains('\nerror text'));
+    expect(testLogger.statusText, isNot(contains('other stuff')));
   }));
 
   test('Does not run main with --start-paused', () => testbed.run(() async {
@@ -1005,13 +1078,50 @@ void main() {
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }));
 
+  test('debugToggleBrightness', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      ...kAttachExpectations,
+      const FakeVmServiceRequest(
+        method: 'ext.flutter.brightnessOverride',
+        args: <String, Object>{
+          'isolateId': null,
+        },
+        jsonResponse: <String, Object>{
+          'value': 'Brightness.light'
+        },
+      ),
+      const FakeVmServiceRequest(
+        method: 'ext.flutter.brightnessOverride',
+        args: <String, Object>{
+          'isolateId': null,
+          'value': 'Brightness.dark',
+        },
+        jsonResponse: <String, Object>{
+          'value': 'Brightness.dark'
+        },
+      ),
+    ]);
+    _setupMocks();
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    unawaited(residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+
+    await residentWebRunner.debugToggleBrightness();
+
+    expect(testLogger.statusText,
+      contains('Changed brightness to Brightness.dark.'));
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  }));
+
   test('cleanup of resources is safe to call multiple times', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
     ]);
     _setupMocks();
     bool debugClosed = false;
-    when(mockDevice.stopApp(any)).thenAnswer((Invocation invocation) async {
+    when(mockDevice.stopApp(any, userIdentifier: anyNamed('userIdentifier'))).thenAnswer((Invocation invocation) async {
       if (debugClosed) {
         throw StateError('debug connection closed twice');
       }
@@ -1073,19 +1183,7 @@ void main() {
   test('Sends launched app.webLaunchUrl event for Chrome device', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachLogExpectations,
-      const FakeVmServiceRequest(
-        method: 'streamListen',
-        args: <String, Object>{
-          'streamId': 'Isolate'
-        }
-      ),
-      const FakeVmServiceRequest(
-        method: 'registerService',
-        args: <String, Object>{
-          'service': 'reloadSources',
-          'alias': 'FlutterTools',
-        }
-      )
+      ...kAttachIsolateExpectations,
     ]);
     _setupMocks();
     final ChromiumLauncher chromiumLauncher = MockChromeLauncher();

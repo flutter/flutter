@@ -202,7 +202,7 @@ class ColdRunner extends ResidentRunner {
     for (final FlutterDevice device in flutterDevices) {
       // If we're running in release mode, stop the app using the device logic.
       if (device.vmService == null) {
-        await device.device.stopApp(device.package);
+        await device.device.stopApp(device.package, userIdentifier: device.userIdentifier);
       }
     }
     await super.preExit();

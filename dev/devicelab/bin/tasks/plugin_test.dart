@@ -9,14 +9,14 @@ import 'package:flutter_devicelab/framework/framework.dart';
 
 Future<void> main() async {
   await task(combine(<TaskFunction>[
-    PluginTest('apk', <String>['-a', 'java']),
-    PluginTest('apk', <String>['-a', 'kotlin']),
+    PluginTest('apk', <String>['-a', 'java', '--platforms=android']),
+    PluginTest('apk', <String>['-a', 'kotlin', '--platforms=android']),
     // These create the plugins using the new v2 plugin templates but create the
     // apps using the old v1 embedding app templates to make sure new plugins
     // are by default backward compatible.
-    PluginTest('apk', <String>['-a', 'java'], pluginCreateEnvironment:
+    PluginTest('apk', <String>['-a', 'java', '--platforms=android'], pluginCreateEnvironment:
         <String, String>{'ENABLE_ANDROID_EMBEDDING_V2': 'true'}),
-    PluginTest('apk', <String>['-a', 'kotlin'], pluginCreateEnvironment:
+    PluginTest('apk', <String>['-a', 'kotlin', '--platforms=android'], pluginCreateEnvironment:
         <String, String>{'ENABLE_ANDROID_EMBEDDING_V2': 'true'}),
   ]));
 }

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:collection';
 import 'dart:math' as math;
@@ -2104,7 +2106,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   // Backwards compatibility for deprecated resizeToAvoidBottomPadding property
   bool get _resizeToAvoidBottomInset {
-    // ignore: deprecated_member_use_from_same_package
     return widget.resizeToAvoidBottomInset ?? widget.resizeToAvoidBottomPadding ?? true;
   }
 

@@ -43,7 +43,7 @@ void main() {
       // Restore locking to prevent potential side-effects in
       // tests outside this group (this option is globally shared).
       Cache.enableLocking();
-      Cache.releaseLockEarly();
+      Cache.releaseLock();
     });
 
     test('should throw when locking is not acquired', () {
@@ -60,7 +60,7 @@ void main() {
       when(mockFile.openSync(mode: anyNamed('mode'))).thenReturn(mockRandomAccessFile);
       await Cache.lock();
       Cache.checkLockAcquired();
-      Cache.releaseLockEarly();
+      Cache.releaseLock();
     }, overrides: <Type, Generator>{
       FileSystem: () => mockFileSystem,
       ProcessManager: () => FakeProcessManager.any(),

@@ -25,7 +25,7 @@ class BuildWebCommand extends BuildSubCommand {
     addBuildModeFlags(excludeDebug: true);
     usesDartDefineOption();
     addEnableExperimentation(hide: !verboseHelp);
-    addNullSafetyModeOptions();
+    addNullSafetyModeOptions(hide: !verboseHelp);
     argParser.addFlag('web-initialize-platform',
         defaultsTo: true,
         negatable: true,
@@ -53,7 +53,7 @@ class BuildWebCommand extends BuildSubCommand {
   bool get hidden => !featureFlags.isWebEnabled;
 
   @override
-  final String description = 'build a web application bundle.';
+  final String description = 'Build a web application bundle.';
 
   @override
   Future<FlutterCommandResult> runCommand() async {

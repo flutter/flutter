@@ -9,19 +9,12 @@ import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
 import 'assets.dart';
-import 'dart.dart';
+import 'common.dart';
 import 'desktop.dart';
 import 'icon_tree_shaker.dart';
 
 /// The only files/subdirectories we care out.
 const List<String> _kLinuxArtifacts = <String>[
-  // GLFW. Will be removed after the switch to GTK.
-  'libflutter_linux_glfw.so',
-  'flutter_export.h',
-  'flutter_messenger.h',
-  'flutter_plugin_registrar.h',
-  'flutter_glfw.h',
-  // GTK. Not yet used by the template.
   'libflutter_linux_gtk.so',
 ];
 
@@ -57,14 +50,6 @@ class UnpackLinux extends Target {
         mode: buildMode,
         platform: TargetPlatform.linux_x64,
       );
-    // For the GLFW embedding.
-    final String clientSourcePath = environment.artifacts
-      .getArtifactPath(
-        Artifact.linuxCppClientWrapper,
-        mode: buildMode,
-        platform: TargetPlatform.linux_x64,
-      );
-    // For the GTK embedding.
     final String headersPath = environment.artifacts
       .getArtifactPath(
         Artifact.linuxHeaders,
@@ -83,7 +68,7 @@ class UnpackLinux extends Target {
       engineSourcePath: engineSourcePath,
       outputDirectory: outputDirectory,
       artifacts: _kLinuxArtifacts,
-      clientSourcePaths: <String>[clientSourcePath, headersPath],
+      clientSourcePaths: <String>[headersPath],
       icuDataPath: environment.artifacts.getArtifactPath(
         Artifact.icuData,
         platform: TargetPlatform.linux_x64,
@@ -139,7 +124,11 @@ abstract class BundleLinuxAssets extends Target {
       environment.buildDir.childFile('app.dill')
         .copySync(outputDirectory.childFile('kernel_blob.bin').path);
     }
-    final Depfile depfile = await copyAssets(environment, outputDirectory);
+    final Depfile depfile = await copyAssets(
+      environment,
+      outputDirectory,
+      targetPlatform: TargetPlatform.linux_x64,
+    );
     final DepfileService depfileService = DepfileService(
       fileSystem: environment.fileSystem,
       logger: environment.logger,

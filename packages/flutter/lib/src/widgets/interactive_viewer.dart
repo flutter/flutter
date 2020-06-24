@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
@@ -657,16 +659,17 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
   // Returns true iff the given _GestureType is enabled.
   bool _gestureIsSupported(_GestureType gestureType) {
-    if (_gestureType == _GestureType.pan && !widget.panEnabled) {
-      return false;
+    switch (gestureType) {
+      case _GestureType.rotate:
+        return _rotateEnabled;
+
+      case _GestureType.scale:
+        return widget.scaleEnabled;
+
+      case _GestureType.pan:
+      default:
+        return widget.panEnabled;
     }
-    if (_gestureType == _GestureType.scale && !widget.scaleEnabled) {
-      return false;
-    }
-    if (_gestureType == _GestureType.rotate && !_rotateEnabled) {
-      return false;
-    }
-    return true;
   }
 
   // Handle the start of a gesture. All of pan, scale, and rotate are handled
@@ -839,6 +842,9 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
   // Handle mousewheel scroll events.
   void _receivedPointerSignal(PointerSignalEvent event) {
+    if (!_gestureIsSupported(_GestureType.scale)) {
+      return;
+    }
     if (event is PointerScrollEvent) {
       final RenderBox childRenderBox = _childKey.currentContext.findRenderObject() as RenderBox;
       final Size childSize = childRenderBox.size;

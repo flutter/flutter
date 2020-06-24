@@ -6,12 +6,12 @@ import 'dart:async';
 
 import 'package:args/command_runner.dart';
 
+import '../android/android_device.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../device.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
@@ -66,7 +66,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesPubOption();
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
     usesIsolateFilterOption(hide: !verboseHelp);
-    addNullSafetyModeOptions();
+    addNullSafetyModeOptions(hide: !verboseHelp);
+    usesDeviceUserOption();
   }
 
   bool get traceStartup => boolArg('trace-startup');
@@ -106,8 +107,14 @@ class RunCommand extends RunCommandBase {
               'By default, Flutter will not log skia code.',
       )
       ..addOption('trace-whitelist',
+        hide: true,
+        help: '(deprecated) Use --trace-allowlist instead',
+        valueHelp: 'foo,bar',
+      )
+      ..addOption('trace-allowlist',
+        hide: true,
         help: 'Filters out all trace events except those that are specified in '
-              'this comma separated list of whitelisted prefixes.',
+            'this comma separated list of allowed prefixes.',
         valueHelp: 'foo,bar',
       )
       ..addFlag('endless-trace-buffer',
@@ -146,8 +153,8 @@ class RunCommand extends RunCommandBase {
         hide: !verboseHelp,
         help: 'Pass a list of comma separated flags to the Dart instance at '
               'application startup. Flags passed through this option must be '
-              'present on the whitelist defined within the Flutter engine. If '
-              'a non-whitelisted flag is encountered, the process will be '
+              'present on the allowlist defined within the Flutter engine. If '
+              'a disallowed flag is encountered, the process will be '
               'terminated immediately.\n\n'
               'This flag is not available on the stable channel and is only '
               'applied in debug and profile modes. This option should only '
@@ -220,6 +227,8 @@ class RunCommand extends RunCommandBase {
   final String description = 'Run your Flutter app on an attached device.';
 
   List<Device> devices;
+
+  String get userIdentifier => stringArg(FlutterOptions.kDeviceUser);
 
   @override
   Future<String> get usagePath async {
@@ -336,6 +345,21 @@ class RunCommand extends RunCommandBase {
     if (deviceManager.hasSpecifiedAllDevices && runningWithPrebuiltApplication) {
       throwToolExit('Using -d all with --use-application-binary is not supported');
     }
+
+    if (userIdentifier != null
+      && devices.every((Device device) => device is! AndroidDevice)) {
+      throwToolExit(
+        '--${FlutterOptions.kDeviceUser} is only supported for Android. At least one Android device is required.'
+      );
+    }
+  }
+
+  String get _traceAllowlist {
+    final String deprecatedValue = stringArg('trace-whitelist');
+    if (deprecatedValue != null) {
+      globals.printError('--trace-whitelist has been deprecated, use --trace-allowlist instead');
+    }
+    return stringArg('trace-allowlist') ?? deprecatedValue;
   }
 
   DebuggingOptions _createDebuggingOptions() {
@@ -364,7 +388,7 @@ class RunCommand extends RunCommandBase {
         enableSoftwareRendering: boolArg('enable-software-rendering'),
         skiaDeterministicRendering: boolArg('skia-deterministic-rendering'),
         traceSkia: boolArg('trace-skia'),
-        traceWhitelist: stringArg('trace-whitelist'),
+        traceAllowlist: _traceAllowlist,
         traceSystrace: boolArg('trace-systrace'),
         endlessTraceBuffer: boolArg('endless-trace-buffer'),
         dumpSkpOnShaderCompilation: dumpSkpOnShaderCompilation,
@@ -392,8 +416,6 @@ class RunCommand extends RunCommandBase {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    Cache.releaseLockEarly();
-
     // Enable hot mode by default if `--no-hot` was not passed and we are in
     // debug mode.
     final bool hotMode = shouldUseHotMode();
@@ -407,7 +429,9 @@ class RunCommand extends RunCommandBase {
       final Daemon daemon = Daemon(
         stdinCommandStream,
         stdoutCommandResponse,
-        notifyingLogger: NotifyingLogger(verbose: globals.logger.isVerbose),
+        notifyingLogger: (globals.logger is NotifyingLogger)
+          ? globals.logger as NotifyingLogger
+          : NotifyingLogger(verbose: globals.logger.isVerbose, parent: globals.logger),
         logToStdout: true,
       );
       AppInstance app;
@@ -446,33 +470,30 @@ class RunCommand extends RunCommandBase {
                            'channel.', null);
     }
 
+    final BuildMode buildMode = getBuildMode();
     for (final Device device in devices) {
-      if (await device.isLocalEmulator) {
-        if (await device.supportsHardwareRendering) {
-          final bool enableSoftwareRendering = boolArg('enable-software-rendering') == true;
-          if (enableSoftwareRendering) {
-            globals.printStatus(
-              'Using software rendering with device ${device.name}. You may get better performance '
-              'with hardware mode by configuring hardware rendering for your device.'
-            );
-          } else {
-            globals.printStatus(
-              'Using hardware rendering with device ${device.name}. If you get graphics artifacts, '
-              'consider enabling software rendering with "--enable-software-rendering".'
-            );
-          }
-        }
-
-        if (!isEmulatorBuildMode(getBuildMode())) {
-          throwToolExit('${toTitleCase(getFriendlyModeName(getBuildMode()))} mode is not supported for emulators.');
-        }
+      if (!await device.supportsRuntimeMode(buildMode)) {
+        throwToolExit(
+          '${toTitleCase(getFriendlyModeName(buildMode))} '
+          'mode is not supported by ${device.name}.',
+        );
       }
-    }
-
-    if (hotMode) {
-      for (final Device device in devices) {
+      if (hotMode) {
         if (!device.supportsHotReload) {
           throwToolExit('Hot reload is not supported by ${device.name}. Run with --no-hot.');
+        }
+      }
+      if (await device.isLocalEmulator && await device.supportsHardwareRendering) {
+        if (boolArg('enable-software-rendering')) {
+           globals.printStatus(
+            'Using software rendering with device ${device.name}. You may get better performance '
+            'with hardware mode by configuring hardware rendering for your device.'
+           );
+        } else {
+          globals.printStatus(
+            'Using hardware rendering with device ${device.name}. If you notice graphics artifacts, '
+            'consider enabling software rendering with "--enable-software-rendering".'
+          );
         }
       }
     }
@@ -494,6 +515,7 @@ class RunCommand extends RunCommandBase {
           experimentalFlags: expFlags,
           target: stringArg('target'),
           buildInfo: getBuildInfo(),
+          userIdentifier: userIdentifier,
         ),
     ];
     // Only support "web mode" with a single web device due to resident runner

@@ -2,12 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/semantics.dart';
 
+import 'actions.dart';
 import 'basic.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
@@ -649,6 +653,13 @@ mixin LocalHistoryRoute<T> on Route<T> {
   }
 }
 
+class _DismissModalAction extends DismissAction {
+  @override
+  Object invoke(DismissIntent intent) {
+    return Navigator.of(primaryFocus.context).maybePop();
+  }
+}
+
 class _ModalScopeStatus extends InheritedWidget {
   const _ModalScopeStatus({
     Key key,
@@ -760,6 +771,10 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
     setState(fn);
   }
 
+  static final Map<Type, Action<Intent>> _actionMap = <Type, Action<Intent>>{
+    DismissIntent: _DismissModalAction(),
+  };
+
   @override
   Widget build(BuildContext context) {
     return _ModalScopeStatus(
@@ -770,44 +785,47 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
         offstage: widget.route.offstage, // _routeSetState is called if this updates
         child: PageStorage(
           bucket: widget.route._storageBucket, // immutable
-          child: FocusScope(
-            node: focusScopeNode, // immutable
-            child: RepaintBoundary(
-              child: AnimatedBuilder(
-                animation: _listenable, // immutable
-                builder: (BuildContext context, Widget child) {
-                  return widget.route.buildTransitions(
-                    context,
-                    widget.route.animation,
-                    widget.route.secondaryAnimation,
-                    // This additional AnimatedBuilder is include because if the
-                    // value of the userGestureInProgressNotifier changes, it's
-                    // only necessary to rebuild the IgnorePointer widget and set
-                    // the focus node's ability to focus.
-                    AnimatedBuilder(
-                      animation: widget.route.navigator?.userGestureInProgressNotifier ?? ValueNotifier<bool>(false),
-                      builder: (BuildContext context, Widget child) {
-                        final bool ignoreEvents = _shouldIgnoreFocusRequest;
-                        focusScopeNode.canRequestFocus = !ignoreEvents;
-                        return IgnorePointer(
-                          ignoring: ignoreEvents,
-                          child: child,
+          child: Actions(
+            actions: _actionMap,
+            child: FocusScope(
+              node: focusScopeNode, // immutable
+              child: RepaintBoundary(
+                child: AnimatedBuilder(
+                  animation: _listenable, // immutable
+                  builder: (BuildContext context, Widget child) {
+                    return widget.route.buildTransitions(
+                      context,
+                      widget.route.animation,
+                      widget.route.secondaryAnimation,
+                      // This additional AnimatedBuilder is include because if the
+                      // value of the userGestureInProgressNotifier changes, it's
+                      // only necessary to rebuild the IgnorePointer widget and set
+                      // the focus node's ability to focus.
+                      AnimatedBuilder(
+                        animation: widget.route.navigator?.userGestureInProgressNotifier ?? ValueNotifier<bool>(false),
+                        builder: (BuildContext context, Widget child) {
+                          final bool ignoreEvents = _shouldIgnoreFocusRequest;
+                          focusScopeNode.canRequestFocus = !ignoreEvents;
+                          return IgnorePointer(
+                            ignoring: ignoreEvents,
+                            child: child,
+                          );
+                        },
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: _page ??= RepaintBoundary(
+                    key: widget.route._subtreeKey, // immutable
+                    child: Builder(
+                      builder: (BuildContext context) {
+                        return widget.route.buildPage(
+                          context,
+                          widget.route.animation,
+                          widget.route.secondaryAnimation,
                         );
                       },
-                      child: child,
                     ),
-                  );
-                },
-                child: _page ??= RepaintBoundary(
-                  key: widget.route._subtreeKey, // immutable
-                  child: Builder(
-                    builder: (BuildContext context) {
-                      return widget.route.buildPage(
-                        context,
-                        widget.route.animation,
-                        widget.route.secondaryAnimation,
-                      );
-                    },
                   ),
                 ),
               ),
@@ -1431,11 +1449,19 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
         child: barrier,
       );
     }
-    return IgnorePointer(
+    barrier = IgnorePointer(
       ignoring: animation.status == AnimationStatus.reverse || // changedInternalState is called when animation.status updates
                 animation.status == AnimationStatus.dismissed, // dismissed is possible when doing a manual pop gesture
       child: barrier,
     );
+    if (semanticsDismissible && barrierDismissible) {
+      // To be sorted after the _modalScope.
+      barrier = Semantics(
+        sortKey: const OrdinalSortKey(1.0),
+        child: barrier,
+      );
+    }
+    return barrier;
   }
 
   // We cache the part of the modal scope that doesn't change from frame to
@@ -1444,10 +1470,14 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   // one of the builders
   Widget _buildModalScope(BuildContext context) {
-    return _modalScopeCache ??= _ModalScope<T>(
-      key: _scopeKey,
-      route: this,
-      // _ModalScope calls buildTransitions() and buildChild(), defined above
+    // To be sorted before the _modalBarrier.
+    return _modalScopeCache ??= Semantics(
+      sortKey: const OrdinalSortKey(0.0),
+      child: _ModalScope<T>(
+        key: _scopeKey,
+        route: this,
+        // _ModalScope calls buildTransitions() and buildChild(), defined above
+      )
     );
   }
 

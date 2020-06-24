@@ -574,10 +574,8 @@ void main() {
         }, retainPriorEvents: true);
 
         expect(log, const <String>[
-          'getVMTimelineMicros',
           'startTracing',
           'action',
-          'getVMTimelineMicros',
           'stopTracing',
           'download',
         ]);

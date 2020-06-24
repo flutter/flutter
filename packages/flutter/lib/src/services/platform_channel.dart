@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:typed_data';
 
@@ -46,7 +48,7 @@ class BasicMessageChannel<T> {
   final MessageCodec<T> codec;
 
   /// The messenger which sends the bytes for this channel, not null.
-  BinaryMessenger get binaryMessenger => _binaryMessenger ?? defaultBinaryMessenger; // ignore: deprecated_member_use_from_same_package
+  BinaryMessenger get binaryMessenger => _binaryMessenger ?? defaultBinaryMessenger;
   final BinaryMessenger _binaryMessenger;
 
   /// Sends the specified [message] to the platform plugins on this channel.
@@ -140,7 +142,7 @@ class MethodChannel {
   /// The messenger used by this channel to send platform messages.
   ///
   /// The messenger may not be null.
-  BinaryMessenger get binaryMessenger => _binaryMessenger ?? defaultBinaryMessenger; // ignore: deprecated_member_use_from_same_package
+  BinaryMessenger get binaryMessenger => _binaryMessenger ?? defaultBinaryMessenger;
   final BinaryMessenger _binaryMessenger;
 
   @optionalTypeArgs
@@ -504,7 +506,7 @@ class EventChannel {
   final MethodCodec codec;
 
   /// The messenger used by this channel to send platform messages, not null.
-  BinaryMessenger get binaryMessenger => _binaryMessenger ?? defaultBinaryMessenger; // ignore: deprecated_member_use_from_same_package
+  BinaryMessenger get binaryMessenger => _binaryMessenger ?? defaultBinaryMessenger;
   final BinaryMessenger _binaryMessenger;
 
   /// Sets up a broadcast stream for receiving events on this channel.
