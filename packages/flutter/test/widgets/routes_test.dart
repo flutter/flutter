@@ -13,6 +13,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
+import 'semantics_tester.dart';
+
 final List<String> results = <String>[];
 
 Set<TestRoute> routes = HashSet<TestRoute>();
@@ -1200,6 +1202,79 @@ void main() {
       expect(modalBarrierAnimation.value, Colors.black);
     });
 
+    testWidgets('modal route semantics order', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/46625.
+      final SemanticsTester semantics = SemanticsTester(tester);
+      await tester.pumpWidget(MaterialApp(
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return Center(
+                child: RaisedButton(
+                  child: const Text('X'),
+                  onPressed: () {
+                    Navigator.of(context).push<void>(
+                      _TestDialogRouteWithCustomBarrierCurve<void>(
+                        child: const Text('Hello World'),
+                        barrierLabel: 'test label',
+                        barrierCurve: Curves.linear,
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+      ));
+
+      await tester.tap(find.text('X'));
+      await tester.pumpAndSettle();
+      expect(find.text('Hello World'), findsOneWidget);
+
+      final TestSemantics expectedSemantics = TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics.rootChild(
+            id: 1,
+            rect: TestSemantics.fullScreen,
+            children: <TestSemantics>[
+              TestSemantics(
+                id: 6,
+                rect: TestSemantics.fullScreen,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    id: 7,
+                    rect: TestSemantics.fullScreen,
+                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        id: 8,
+                        label: 'Hello World',
+                        rect: TestSemantics.fullScreen,
+                        textDirection: TextDirection.ltr,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              // Modal barrier is put after modal scope
+              TestSemantics(
+                id: 5,
+                rect: TestSemantics.fullScreen,
+                actions: <SemanticsAction>[SemanticsAction.tap],
+                label: 'test label',
+                textDirection: TextDirection.ltr,
+              ),
+            ],
+          ),
+        ],
+      )
+      ;
+
+      expect(semantics, hasSemantics(expectedSemantics));
+      semantics.dispose();
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}));
+
     testWidgets('focus traverse correct when pop multiple page simultaneously', (WidgetTester tester) async {
       // Regression test: https://github.com/flutter/flutter/issues/48903
       final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -1401,6 +1476,7 @@ class DialogObserver extends NavigatorObserver {
 class _TestDialogRouteWithCustomBarrierCurve<T> extends PopupRoute<T> {
   _TestDialogRouteWithCustomBarrierCurve({
     @required Widget child,
+    this.barrierLabel,
     Curve barrierCurve,
   }) : _barrierCurve = barrierCurve,
        _child = child;
@@ -1411,7 +1487,7 @@ class _TestDialogRouteWithCustomBarrierCurve<T> extends PopupRoute<T> {
   bool get barrierDismissible => true;
 
   @override
-  String get barrierLabel => null;
+  final String barrierLabel;
 
   @override
   Color get barrierColor => Colors.black; // easier value to test against

@@ -1370,37 +1370,41 @@ void main() {
           TestSemantics(
             children: <TestSemantics>[
               TestSemantics(
-                flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                children: <TestSemantics>[
+                children: <TestSemantics> [
                   TestSemantics(
+                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                     children: <TestSemantics>[
                       TestSemantics(
-                        label: 'Leading',
-                        textDirection: TextDirection.ltr,
-                      ),
-                      TestSemantics(
-                        flags: <SemanticsFlag>[
-                          SemanticsFlag.namesRoute,
-                          SemanticsFlag.isHeader,
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            label: 'Leading',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          TestSemantics(
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.namesRoute,
+                              SemanticsFlag.isHeader,
+                            ],
+                            label: 'Title',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          TestSemantics(
+                            label: 'Action 1',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          TestSemantics(
+                            label: 'Action 2',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          TestSemantics(
+                            label: 'Action 3',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          TestSemantics(
+                            label: 'Bottom',
+                            textDirection: TextDirection.ltr,
+                          ),
                         ],
-                        label: 'Title',
-                        textDirection: TextDirection.ltr,
-                      ),
-                      TestSemantics(
-                        label: 'Action 1',
-                        textDirection: TextDirection.ltr,
-                      ),
-                      TestSemantics(
-                        label: 'Action 2',
-                        textDirection: TextDirection.ltr,
-                      ),
-                      TestSemantics(
-                        label: 'Action 3',
-                        textDirection: TextDirection.ltr,
-                      ),
-                      TestSemantics(
-                        label: 'Bottom',
-                        textDirection: TextDirection.ltr,
                       ),
                     ],
                   ),
@@ -1453,40 +1457,44 @@ void main() {
           TestSemantics(
             children: <TestSemantics>[
               TestSemantics(
-                flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                 children: <TestSemantics>[
                   TestSemantics(
-                    textDirection: TextDirection.rtl,
+                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                     children: <TestSemantics>[
                       TestSemantics(
+                        textDirection: TextDirection.rtl,
                         children: <TestSemantics>[
                           TestSemantics(
-                            label: 'Leading',
-                            textDirection: TextDirection.rtl,
-                          ),
-                          TestSemantics(
-                            flags: <SemanticsFlag>[
-                              SemanticsFlag.namesRoute,
-                              SemanticsFlag.isHeader,
+                            children: <TestSemantics>[
+                              TestSemantics(
+                                label: 'Leading',
+                                textDirection: TextDirection.rtl,
+                              ),
+                              TestSemantics(
+                                flags: <SemanticsFlag>[
+                                  SemanticsFlag.namesRoute,
+                                  SemanticsFlag.isHeader,
+                                ],
+                                label: 'Title',
+                                textDirection: TextDirection.rtl,
+                              ),
+                              TestSemantics(
+                                label: 'Action 1',
+                                textDirection: TextDirection.rtl,
+                              ),
+                              TestSemantics(
+                                label: 'Action 2',
+                                textDirection: TextDirection.rtl,
+                              ),
+                              TestSemantics(
+                                label: 'Action 3',
+                                textDirection: TextDirection.rtl,
+                              ),
+                              TestSemantics(
+                                label: 'Bottom',
+                                textDirection: TextDirection.rtl,
+                              ),
                             ],
-                            label: 'Title',
-                            textDirection: TextDirection.rtl,
-                          ),
-                          TestSemantics(
-                            label: 'Action 1',
-                            textDirection: TextDirection.rtl,
-                          ),
-                          TestSemantics(
-                            label: 'Action 2',
-                            textDirection: TextDirection.rtl,
-                          ),
-                          TestSemantics(
-                            label: 'Action 3',
-                            textDirection: TextDirection.rtl,
-                          ),
-                          TestSemantics(
-                            label: 'Bottom',
-                            textDirection: TextDirection.rtl,
                           ),
                         ],
                       ),
@@ -1530,17 +1538,21 @@ void main() {
           TestSemantics(
             children: <TestSemantics>[
               TestSemantics(
-                flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                 children: <TestSemantics>[
                   TestSemantics(
+                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                     children: <TestSemantics>[
                       TestSemantics(
-                        label: 'Leading',
-                        textDirection: TextDirection.ltr,
-                      ),
-                      TestSemantics(
-                        label: 'Action 1',
-                        textDirection: TextDirection.ltr,
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            label: 'Leading',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          TestSemantics(
+                            label: 'Action 1',
+                            textDirection: TextDirection.ltr,
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -1583,22 +1595,26 @@ void main() {
             textDirection: TextDirection.ltr,
             children: <TestSemantics>[
               TestSemantics(
-                flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                 children: <TestSemantics>[
                   TestSemantics(
+                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                     children: <TestSemantics>[
                       TestSemantics(
-                        flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                         children: <TestSemantics>[
                           TestSemantics(
+                            flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                             children: <TestSemantics>[
                               TestSemantics(
-                                label: 'Leading',
-                                textDirection: TextDirection.ltr,
-                              ),
-                              TestSemantics(
-                                label: 'Action 1',
-                                textDirection: TextDirection.ltr,
+                                children: <TestSemantics>[
+                                  TestSemantics(
+                                    label: 'Leading',
+                                    textDirection: TextDirection.ltr,
+                                  ),
+                                  TestSemantics(
+                                    label: 'Action 1',
+                                    textDirection: TextDirection.ltr,
+                                  ),
+                                ],
                               ),
                             ],
                           ),
