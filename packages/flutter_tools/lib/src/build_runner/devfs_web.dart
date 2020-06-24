@@ -179,7 +179,7 @@ class WebAssetServer implements AssetReader {
           fileSystem: globals.fs,
           platform: globals.platform,
           flutterRoot: Cache.flutterRoot,
-          webBuilDirectory: getWebBuildDirectory(),
+          webBuildDirectory: getWebBuildDirectory(),
         );
         shelf.serveRequests(httpServer, releaseAssetServer.handle);
         return server;
