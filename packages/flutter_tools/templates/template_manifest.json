@@ -76,6 +76,7 @@
         "templates/app/ios.tmpl/Runner.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist",
         "templates/app/ios.tmpl/Runner.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings",
         "templates/app/lib/main.dart.tmpl",
+        "templates/app/linux.tmpl/my_application.cc.tmpl",
         "templates/app/linux.tmpl/.gitignore",
         "templates/app/linux.tmpl/CMakeLists.txt.tmpl",
         "templates/app/linux.tmpl/flutter/.template_version",
@@ -284,6 +285,7 @@
         "templates/plugin/windows.tmpl/plugin.vcxproj.tmpl",
         "templates/plugin/windows.tmpl/PluginInfo.props.tmpl",
         "templates/plugin/windows.tmpl/projectName_plugin.cpp.tmpl",
-        "templates/plugin/windows.tmpl/projectName_plugin.h.tmpl"
+        "templates/plugin/windows.tmpl/projectName_plugin.h.tmpl",
+        "templates/plugin/lib/projectName_web.dart.tmpl"
     ]
 }
