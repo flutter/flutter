@@ -1947,7 +1947,7 @@ void main() {
       );
     } on AssertionError catch (error) {
       expect(error.toString(), contains('toolbarHeight != null'));
-      expect(error.toString(), contains('is not true.'));
+      expect(error.toString(), contains('is not true'));
     }
   });
 }
