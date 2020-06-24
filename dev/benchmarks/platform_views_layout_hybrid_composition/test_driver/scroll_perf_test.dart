@@ -54,10 +54,10 @@ void main() {
       summary.writeTimelineToFile(summaryName, pretty: true);
     }
 
-    test('platform_views_scroll_perf', () async {
+    test('platform_views_scroll_perf_hybrid_composition', () async {
       // Disable frame sync, since there are ongoing animations.
       await driver.runUnsynchronized(() async {
-        await testScrollPerf('platform-views-scroll', 'platform_views_scroll_perf');
+        await testScrollPerf('platform-views-scroll', 'platform_views_scroll_perf_hybrid_composition');
       });
     });
   });
