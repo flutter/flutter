@@ -455,7 +455,7 @@ class RangeMaintainingScrollPhysics extends ScrollPhysics {
 ///
 /// {@tool snippet}
 /// ```dart
-/// BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics());
+/// BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics())
 /// ```
 /// (@end-tool}
 ///
