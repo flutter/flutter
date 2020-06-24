@@ -31,11 +31,25 @@ flutter:
   # adding or updating assets for this project.
   plugin:
     platforms:
+{{#no_platforms}}
+    # This plugin project was generated without specifying any
+    # platforms with the `--platform` argument. If you see the `fake_platform` map below, remove it and
+    # then add platforms following the instruction here:
+    # https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms
+    # -------------------
+      some_platform:
+        pluginClass: somePluginClass
+    # -------------------
+{{/no_platforms}}
+{{#android}}
       android:
         package: {{androidIdentifier}}
         pluginClass: {{pluginClass}}
+{{/android}}
+{{#ios}}
       ios:
         pluginClass: {{pluginClass}}
+{{/ios}}
 {{#linux}}
       linux:
         pluginClass: {{pluginClass}}
@@ -44,6 +58,10 @@ flutter:
       macos:
         pluginClass: {{pluginClass}}
 {{/macos}}
+{{#windows}}
+      windows:
+        pluginClass: {{pluginClass}}
+{{/windows}}
 {{#web}}
       web:
         pluginClass: {{pluginDartClass}}Web
