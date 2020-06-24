@@ -579,6 +579,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       // our main future completing.
       assert(Zone.current == _parentZone);
       if (_pendingExceptionDetails != null) {
+        assert(
+          _unmangle(_pendingExceptionDetails.stack) == _pendingExceptionDetails.stack,
+          'The test binding presented an unmangled stack trace to the framework.',
+        );
         debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
         reportTestException(_pendingExceptionDetails, testDescription);
         _pendingExceptionDetails = null;
@@ -611,6 +615,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     _oldExceptionHandler = FlutterError.onError;
     int _exceptionCount = 0; // number of un-taken exceptions
     FlutterError.onError = (FlutterErrorDetails details) {
+      details = details.copyWith(stack: _unmangle(details.stack));
       if (_pendingExceptionDetails != null) {
         debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the errors!
         if (_exceptionCount == 0) {

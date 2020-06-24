@@ -159,6 +159,11 @@ class EngineBuildPaths {
 
 // Manages the engine artifacts of Flutter.
 abstract class Artifacts {
+  /// A test-specific implementation of artifacts that returns stable paths for
+  /// all artifacts.
+  @visibleForTesting
+  factory Artifacts.test() = _TestArtifacts;
+
   static LocalEngineArtifacts getLocalEngine(EngineBuildPaths engineBuildPaths) {
     return LocalEngineArtifacts(
       engineBuildPaths.targetEngine,
@@ -183,7 +188,7 @@ abstract class Artifacts {
 
 
 /// Manages the engine artifacts downloaded to the local cache.
-class CachedArtifacts extends Artifacts {
+class CachedArtifacts implements Artifacts {
   CachedArtifacts({
     @required FileSystem fileSystem,
     @required Platform platform,
@@ -449,7 +454,7 @@ HostPlatform _currentHostPlatformAsHost(Platform platform) {
 }
 
 /// Manages the artifacts of a locally built engine.
-class LocalEngineArtifacts extends Artifacts {
+class LocalEngineArtifacts implements Artifacts {
   LocalEngineArtifacts(
     this.engineOutPath,
     this._hostEngineOutPath, {
@@ -647,4 +652,27 @@ class OverrideArtifacts implements Artifacts {
 /// Locate the Dart SDK.
 String _dartSdkPath(FileSystem fileSystem) {
   return fileSystem.path.join(Cache.flutterRoot, 'bin', 'cache', 'dart-sdk');
+}
+
+class _TestArtifacts implements Artifacts {
+  @override
+  String getArtifactPath(Artifact artifact, {TargetPlatform platform, BuildMode mode}) {
+    final StringBuffer buffer = StringBuffer();
+    buffer.write(artifact);
+    if (platform != null) {
+      buffer.write('.$platform');
+    }
+    if (mode != null) {
+      buffer.write('.$mode');
+    }
+    return buffer.toString();
+  }
+
+  @override
+  String getEngineType(TargetPlatform platform, [ BuildMode mode ]) {
+    return 'test-engine';
+  }
+
+  @override
+  bool get isLocalEngine => false;
 }

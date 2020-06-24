@@ -22,6 +22,7 @@ class FakeCommand {
     @required this.command,
     this.workingDirectory,
     this.environment,
+    this.encoding,
     this.duration = const Duration(),
     this.onRun,
     this.exitCode = 0,
@@ -50,6 +51,12 @@ class FakeCommand {
   /// Otherwise, each key in this environment must be present and must have a
   /// value that matches the one given here for the [FakeCommand] to match.
   final Map<String, String> environment;
+
+  /// The stdout and stderr encoding that must be matched for this [FakeCommand]
+  /// to be considered correct.
+  ///
+  /// If this is null, then the encodings are ignored.
+  final Encoding encoding;
 
   /// The time to allow to elapse before returning the [exitCode], if this command
   /// is "executed".
@@ -87,13 +94,21 @@ class FakeCommand {
   /// [FakeProcess].
   final IOSink stdin;
 
-  void _matches(List<String> command, String workingDirectory, Map<String, String> environment) {
+  void _matches(
+    List<String> command,
+    String workingDirectory,
+    Map<String, String> environment,
+    Encoding encoding,
+  ) {
     expect(command, equals(this.command));
     if (this.workingDirectory != null) {
       expect(this.workingDirectory, workingDirectory);
     }
     if (this.environment != null) {
       expect(this.environment, environment);
+    }
+    if (this.encoding != null) {
+      expect(this.encoding, encoding);
     }
   }
 }
@@ -190,13 +205,23 @@ abstract class FakeProcessManager implements ProcessManager {
   bool get hasRemainingExpectations;
 
   @protected
-  FakeCommand findCommand(List<String> command, String workingDirectory, Map<String, String> environment);
+  FakeCommand findCommand(
+    List<String> command,
+    String workingDirectory,
+    Map<String, String> environment,
+    Encoding encoding,
+  );
 
   int _pid = 9999;
 
-  _FakeProcess _runCommand(List<String> command, String workingDirectory, Map<String, String> environment) {
+  _FakeProcess _runCommand(
+    List<String> command,
+    String workingDirectory,
+    Map<String, String> environment,
+    Encoding encoding,
+  ) {
     _pid += 1;
-    final FakeCommand fakeCommand = findCommand(command, workingDirectory, environment);
+    final FakeCommand fakeCommand = findCommand(command, workingDirectory, environment, encoding);
     return _FakeProcess(
       fakeCommand.exitCode,
       fakeCommand.duration,
@@ -217,7 +242,7 @@ abstract class FakeProcessManager implements ProcessManager {
     bool includeParentEnvironment = true, // ignored
     bool runInShell = false, // ignored
     ProcessStartMode mode = ProcessStartMode.normal, // ignored
-  }) async => _runCommand(command.cast<String>(), workingDirectory, environment);
+  }) async => _runCommand(command.cast<String>(), workingDirectory, environment, systemEncoding);
 
   @override
   Future<ProcessResult> run(
@@ -229,7 +254,7 @@ abstract class FakeProcessManager implements ProcessManager {
     Encoding stdoutEncoding = systemEncoding,
     Encoding stderrEncoding = systemEncoding,
   }) async {
-    final _FakeProcess process = _runCommand(command.cast<String>(), workingDirectory, environment);
+    final _FakeProcess process = _runCommand(command.cast<String>(), workingDirectory, environment, stdoutEncoding);
     await process.exitCode;
     return ProcessResult(
       process.pid,
@@ -249,7 +274,7 @@ abstract class FakeProcessManager implements ProcessManager {
     Encoding stdoutEncoding = systemEncoding, // actual encoder is ignored
     Encoding stderrEncoding = systemEncoding, // actual encoder is ignored
   }) {
-    final _FakeProcess process = _runCommand(command.cast<String>(), workingDirectory, environment);
+    final _FakeProcess process = _runCommand(command.cast<String>(), workingDirectory, environment, stdoutEncoding);
     return ProcessResult(
       process.pid,
       process._exitCode,
@@ -272,11 +297,17 @@ class _FakeAnyProcessManager extends FakeProcessManager {
   _FakeAnyProcessManager() : super._();
 
   @override
-  FakeCommand findCommand(List<String> command, String workingDirectory, Map<String, String> environment) {
+  FakeCommand findCommand(
+    List<String> command,
+    String workingDirectory,
+    Map<String, String> environment,
+    Encoding encoding,
+  ) {
     return FakeCommand(
       command: command,
       workingDirectory: workingDirectory,
       environment: environment,
+      encoding: encoding,
       duration: const Duration(),
       exitCode: 0,
       stdout: '',
@@ -297,12 +328,17 @@ class _SequenceProcessManager extends FakeProcessManager {
   final List<FakeCommand> _commands;
 
   @override
-  FakeCommand findCommand(List<String> command, String workingDirectory, Map<String, String> environment) {
+  FakeCommand findCommand(
+    List<String> command,
+    String workingDirectory,
+    Map<String, String> environment,
+    Encoding encoding,
+  ) {
     expect(_commands, isNotEmpty,
       reason: 'ProcessManager was told to execute $command (in $workingDirectory) '
               'but the FakeProcessManager.list expected no more processes.'
     );
-    _commands.first._matches(command, workingDirectory, environment);
+    _commands.first._matches(command, workingDirectory, environment, encoding);
     return _commands.removeAt(0);
   }
 

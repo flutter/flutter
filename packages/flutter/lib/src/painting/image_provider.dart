@@ -162,13 +162,15 @@ class ImageConfiguration {
 
 /// Performs the decode process for use in [ImageProvider.load].
 ///
-/// This callback allows decoupling of the `cacheWidth` and `cacheHeight`
-/// parameters from implementations of [ImageProvider] that do not use them.
+/// This callback allows decoupling of the `cacheWidth`, `cacheHeight`, and
+/// `allowUpscaling` parameters from implementations of [ImageProvider] that do
+/// not expose them.
 ///
 /// See also:
 ///
-///  * [ResizeImage], which uses this to override the `cacheWidth` and `cacheHeight` parameters.
-typedef DecoderCallback = Future<ui.Codec> Function(Uint8List bytes, {int cacheWidth, int cacheHeight});
+///  * [ResizeImage], which uses this to override the `cacheWidth`,
+///    `cacheHeight`, and `allowUpscaling` parameters.
+typedef DecoderCallback = Future<ui.Codec> Function(Uint8List bytes, {int cacheWidth, int cacheHeight, bool allowUpscaling});
 
 /// Identifies an image without committing to the precise final asset. This
 /// allows a set of images to be identified and for the precise image to later
@@ -718,7 +720,9 @@ class ResizeImage extends ImageProvider<_SizeAwareCacheKey> {
     this.imageProvider, {
     this.width,
     this.height,
-  }) : assert(width != null || height != null);
+    this.allowUpscaling = false,
+  }) : assert(width != null || height != null),
+       assert(allowUpscaling != null);
 
   /// The [ImageProvider] that this class wraps.
   final ImageProvider imageProvider;
@@ -728,6 +732,15 @@ class ResizeImage extends ImageProvider<_SizeAwareCacheKey> {
 
   /// The height the image should decode to and cache.
   final int height;
+
+  /// Whether the [width] and [height] parameters should be clamped to the
+  /// intrinsic width and height of the image.
+  ///
+  /// In general, it is better for memory usage to avoid scaling the image
+  /// beyond its intrinsic dimensions when decoding it. If there is a need to
+  /// scale an image larger, it is better to apply a scale to the canvas, or
+  /// to use an appropriate [Image.fit].
+  final bool allowUpscaling;
 
   /// Composes the `provider` in a [ResizeImage] only when `cacheWidth` and
   /// `cacheHeight` are not both null.
@@ -743,12 +756,13 @@ class ResizeImage extends ImageProvider<_SizeAwareCacheKey> {
 
   @override
   ImageStreamCompleter load(_SizeAwareCacheKey key, DecoderCallback decode) {
-    final DecoderCallback decodeResize = (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
+    final DecoderCallback decodeResize = (Uint8List bytes, {int cacheWidth, int cacheHeight, bool allowUpscaling}) {
       assert(
-        cacheWidth == null && cacheHeight == null,
-        'ResizeImage cannot be composed with another ImageProvider that applies cacheWidth or cacheHeight.'
+        cacheWidth == null && cacheHeight == null && allowUpscaling == null,
+        'ResizeImage cannot be composed with another ImageProvider that applies '
+        'cacheWidth, cacheHeight, or allowUpscaling.'
       );
-      return decode(bytes, cacheWidth: width, cacheHeight: height);
+      return decode(bytes, cacheWidth: width, cacheHeight: height, allowUpscaling: this.allowUpscaling);
     };
     return imageProvider.load(key.providerCacheKey, decodeResize);
   }

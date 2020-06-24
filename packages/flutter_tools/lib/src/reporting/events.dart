@@ -39,6 +39,7 @@ class HotEvent extends UsageEvent {
     @required this.sdkName,
     @required this.emulator,
     @required this.fullRestart,
+    @required this.nullSafety,
     this.reason,
     this.finalLibraryCount,
     this.syncedLibraryCount,
@@ -55,6 +56,7 @@ class HotEvent extends UsageEvent {
   final String sdkName;
   final bool emulator;
   final bool fullRestart;
+  final bool nullSafety;
   final int finalLibraryCount;
   final int syncedLibraryCount;
   final int syncedClassesCount;
@@ -89,6 +91,8 @@ class HotEvent extends UsageEvent {
         CustomDimensions.hotEventTransferTimeInMs: transferTimeInMs.toString(),
       if (overallTimeInMs != null)
         CustomDimensions.hotEventOverallTimeInMs: overallTimeInMs.toString(),
+      if (nullSafety != null)
+        CustomDimensions.nullSafety: nullSafety.toString(),
     });
     flutterUsage.sendEvent(category, parameter, parameters: parameters);
   }

@@ -122,6 +122,9 @@ abstract class MaterialLocalizations {
   /// Title for the [LicensePage] widget.
   String get licensesPageTitle;
 
+  /// Subtitle for a package in the [LicensePage] widget.
+  String licensesPackageDetailText(int licenseCount);
+
   /// Title for the [PaginatedDataTable]'s row info footer.
   String pageRowsInfoTitle(int firstRow, int lastRow, int rowCount, bool rowCountIsApproximate);
 
@@ -861,6 +864,17 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get licensesPageTitle => 'Licenses';
 
   @override
+  String licensesPackageDetailText(int licenseCount) {
+    assert (licenseCount >= 1);
+    switch (licenseCount) {
+      case 1:
+        return '1 license';
+      default:
+        return '$licenseCount licenses';
+    }
+  }
+
+  @override
   String pageRowsInfoTitle(int firstRow, int lastRow, int rowCount, bool rowCountIsApproximate) {
     return rowCountIsApproximate
       ? '$firstRow–$lastRow of about $rowCount'
@@ -899,19 +913,19 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get continueButtonLabel => 'CONTINUE';
 
   @override
-  String get copyButtonLabel => 'COPY';
+  String get copyButtonLabel => 'Copy';
 
   @override
-  String get cutButtonLabel => 'CUT';
+  String get cutButtonLabel => 'Cut';
 
   @override
   String get okButtonLabel => 'OK';
 
   @override
-  String get pasteButtonLabel => 'PASTE';
+  String get pasteButtonLabel => 'Paste';
 
   @override
-  String get selectAllButtonLabel => 'SELECT ALL';
+  String get selectAllButtonLabel => 'Select all';
 
   @override
   String get viewLicensesButtonLabel => 'VIEW LICENSES';

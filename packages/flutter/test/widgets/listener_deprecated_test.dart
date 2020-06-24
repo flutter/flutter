@@ -13,10 +13,6 @@ import 'package:flutter/gestures.dart';
 // The tests in this file are moved from listener_test.dart, which tests several
 // deprecated APIs. The file should be removed once these parameters are.
 
-// ignore_for_file: deprecated_member_use_from_same_package
-// We have to ignore the lint rule here because we need to use the deprecated
-// callbacks in order to test them.
-
 class HoverClient extends StatefulWidget {
   const HoverClient({Key key, this.onHover, this.child}) : super(key: key);
 

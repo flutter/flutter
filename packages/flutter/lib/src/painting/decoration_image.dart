@@ -135,7 +135,7 @@ class DecorationImage {
 
   /// Defines image pixels to be shown per logical pixels.
   ///
-  /// By default the the value of scale is 1.0. The scale for the image is
+  /// By default the value of scale is 1.0. The scale for the image is
   /// calculated by multiplying [scale] with `scale` of the given [ImageProvider].
   final double scale;
 
