@@ -832,7 +832,7 @@ class ReleaseAssetServer {
   }) : _fileSystem = fileSystem,
        _platform = platform,
        _flutterRoot = flutterRoot,
-       _webBuildDirectory = webBuilDirectory,
+       _webBuildDirectory = webBuildDirectory,
        _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform);
 
   final Uri entrypoint;
