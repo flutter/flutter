@@ -8,6 +8,7 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/memory/ref_ptr.h"
+#include "flutter/shell/platform/android/android_shell_holder.h"
 
 namespace flutter {
 
@@ -122,6 +123,9 @@ intptr_t AndroidSurfaceGL::GLContextFBO() const {
 
 // |GPUSurfaceGLDelegate|
 ExternalViewEmbedder* AndroidSurfaceGL::GetExternalViewEmbedder() {
+  if (!AndroidShellHolder::use_embedded_view) {
+    return nullptr;
+  }
   return external_view_embedder_.get();
 }
 

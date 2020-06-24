@@ -11,6 +11,7 @@
 #include "flutter/fml/platform/android/jni_weak_ref.h"
 #include "flutter/fml/platform/android/scoped_java_ref.h"
 #include "flutter/fml/trace_event.h"
+#include "flutter/shell/platform/android/android_shell_holder.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 
 namespace flutter {
@@ -145,6 +146,9 @@ bool AndroidSurfaceSoftware::PresentBackingStore(
 
 // |GPUSurfaceSoftwareDelegate|
 ExternalViewEmbedder* AndroidSurfaceSoftware::GetExternalViewEmbedder() {
+  if (!AndroidShellHolder::use_embedded_view) {
+    return nullptr;
+  }
   return external_view_embedder_.get();
 }
 

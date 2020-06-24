@@ -117,7 +117,6 @@ class PlatformViewAndroid final : public PlatformView {
 
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformViewAndroid);
 };
-
 }  // namespace flutter
 
 #endif  // SHELL_PLATFORM_ANDROID_PLATFORM_VIEW_ANDROID_H_
