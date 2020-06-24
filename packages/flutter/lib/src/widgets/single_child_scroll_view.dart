@@ -222,9 +222,11 @@ class SingleChildScrollView extends StatelessWidget {
     this.child,
     this.dragStartBehavior = DragStartBehavior.start,
     this.clipBehavior = Clip.hardEdge,
+    this.overflowArea = EdgeInsets.zero,
   }) : assert(scrollDirection != null),
        assert(dragStartBehavior != null),
        assert(clipBehavior != null),
+       assert(overflowArea != null),
        assert(!(controller != null && primary == true),
           'Primary ScrollViews obtain their ScrollController via inheritance from a PrimaryScrollController widget. '
           'You cannot both set primary to true and pass an explicit controller.'
@@ -253,6 +255,9 @@ class SingleChildScrollView extends StatelessWidget {
 
   /// The amount of space by which to inset the child.
   final EdgeInsetsGeometry padding;
+
+  /// The amount of content rendered outside the clip area
+  final EdgeInsets overflowArea;
 
   /// An object that can be used to control the position to which this scroll
   /// view is scrolled.
@@ -323,6 +328,7 @@ class SingleChildScrollView extends StatelessWidget {
           offset: offset,
           child: contents,
           clipBehavior: clipBehavior,
+          overflowArea: overflowArea,
         );
       },
     );
@@ -339,13 +345,16 @@ class _SingleChildViewport extends SingleChildRenderObjectWidget {
     this.offset,
     Widget child,
     @required this.clipBehavior,
+    @required this.overflowArea,
   }) : assert(axisDirection != null),
        assert(clipBehavior != null),
+       assert(overflowArea != null),
        super(key: key, child: child);
 
   final AxisDirection axisDirection;
   final ViewportOffset offset;
   final Clip clipBehavior;
+  final EdgeInsets overflowArea;
 
   @override
   _RenderSingleChildViewport createRenderObject(BuildContext context) {
@@ -353,6 +362,7 @@ class _SingleChildViewport extends SingleChildRenderObjectWidget {
       axisDirection: axisDirection,
       offset: offset,
       clipBehavior: clipBehavior,
+      overflowArea: overflowArea,
     );
   }
 
@@ -362,7 +372,8 @@ class _SingleChildViewport extends SingleChildRenderObjectWidget {
     renderObject
       ..axisDirection = axisDirection
       ..offset = offset
-      ..clipBehavior = clipBehavior;
+      ..clipBehavior = clipBehavior
+      ..overflowArea = overflowArea;
   }
 }
 
@@ -373,14 +384,17 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     double cacheExtent = RenderAbstractViewport.defaultCacheExtent,
     RenderBox child,
     @required Clip clipBehavior,
+    @required EdgeInsets overflowArea,
   }) : assert(axisDirection != null),
        assert(offset != null),
        assert(cacheExtent != null),
        assert(clipBehavior != null),
+       assert(overflowArea != null),
        _axisDirection = axisDirection,
        _offset = offset,
        _cacheExtent = cacheExtent,
-       _clipBehavior = clipBehavior {
+       _clipBehavior = clipBehavior,
+       _overflowArea = overflowArea {
     this.child = child;
   }
 
@@ -430,6 +444,18 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     assert(value != null);
     if (value != _clipBehavior) {
       _clipBehavior = value;
+      markNeedsPaint();
+      markNeedsSemanticsUpdate();
+    }
+  }
+
+  /// Defaults to [EdgeInsets.zero], and must not be null.
+  EdgeInsets get overflowArea => _overflowArea;
+  EdgeInsets _overflowArea = EdgeInsets.zero;
+  set overflowArea(EdgeInsets value) {
+    assert(value != null);
+    if (value != _overflowArea) {
+      _overflowArea = value;
       markNeedsPaint();
       markNeedsSemanticsUpdate();
     }
@@ -566,9 +592,17 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     return null;
   }
 
+  Offset _overflowOffset() {
+    return Offset(-_overflowArea.left, -_overflowArea.top);
+  }
+  Size _overflowSize() {
+    return Size(size.width + _overflowArea.left + _overflowArea.right, size.height + _overflowArea.top + _overflowArea.bottom);
+  }
   bool _shouldClipAtPaintOffset(Offset paintOffset) {
     assert(child != null);
-    return paintOffset < Offset.zero || !(Offset.zero & size).contains((paintOffset & child.size).bottomRight);
+    final Offset overflowOffset = _overflowOffset();
+    final Size overflowSize = _overflowSize();
+    return paintOffset < overflowOffset || !(overflowOffset & overflowSize).contains((paintOffset & child.size).bottomRight);
   }
 
   @override
@@ -581,7 +615,9 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
       }
 
       if (_shouldClipAtPaintOffset(paintOffset) && clipBehavior != Clip.none) {
-        context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintContents, clipBehavior: clipBehavior);
+        final Offset overflowOffset = _overflowOffset();
+        final Size overflowSize = _overflowSize();
+        context.pushClipRect(needsCompositing, offset, overflowOffset & overflowSize, paintContents, clipBehavior: clipBehavior);
       } else {
         paintContents(context, offset);
       }
@@ -596,8 +632,11 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
 
   @override
   Rect describeApproximatePaintClip(RenderObject child) {
-    if (child != null && _shouldClipAtPaintOffset(_paintOffset))
-      return Offset.zero & size;
+    if (child != null && _shouldClipAtPaintOffset(_paintOffset)) {
+      final Offset overflowOffset = _overflowOffset();
+      final Size overflowSize = _overflowSize();
+      return overflowOffset & overflowSize;
+    }
     return null;
   }
 
