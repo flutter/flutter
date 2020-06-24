@@ -19,8 +19,8 @@ import 'mocks_for_image_cache.dart';
 void main() {
   TestRenderingFlutterBinding();
 
-  final DecoderCallback _basicDecoder = (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
-    return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight);
+  final DecoderCallback _basicDecoder = (Uint8List bytes, {int cacheWidth, int cacheHeight, bool allowUpscaling}) {
+    return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling ?? false);
   };
 
   FlutterExceptionHandler oldError;

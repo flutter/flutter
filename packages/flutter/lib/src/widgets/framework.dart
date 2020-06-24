@@ -2603,7 +2603,7 @@ class BuildOwner {
       _debugBuilding = true;
       return true;
     }());
-    Timeline.startSync('Build', arguments: timelineWhitelistArguments);
+    Timeline.startSync('Build', arguments: timelineArgumentsIndicatingLandmarkEvent);
     try {
       _scheduledFlushDirtyElements = true;
       if (callback != null) {
@@ -2748,7 +2748,7 @@ class BuildOwner {
   /// After the current call stack unwinds, a microtask that notifies listeners
   /// about changes to global keys will run.
   void finalizeTree() {
-    Timeline.startSync('Finalize tree', arguments: timelineWhitelistArguments);
+    Timeline.startSync('Finalize tree', arguments: timelineArgumentsIndicatingLandmarkEvent);
     try {
       lockState(() {
         _inactiveElements._unmountAll(); // this unregisters the GlobalKeys
@@ -3409,7 +3409,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   Element _retakeInactiveElement(GlobalKey key, Widget newWidget) {
     // The "inactivity" of the element being retaken here may be forward-looking: if
     // we are taking an element with a GlobalKey from an element that currently has
-    // it as a child, then we know that that element will soon no longer have that
+    // it as a child, then we know that element will soon no longer have that
     // element as a child. The only way that assumption could be false is if the
     // global key is being duplicated, and we'll try to track that using the
     // _debugTrackElementThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans call below.
@@ -4534,7 +4534,7 @@ abstract class ComponentElement extends Element {
   @override
   void performRebuild() {
     if (!kReleaseMode && debugProfileBuildsEnabled)
-      Timeline.startSync('${widget.runtimeType}',  arguments: timelineWhitelistArguments);
+      Timeline.startSync('${widget.runtimeType}',  arguments: timelineArgumentsIndicatingLandmarkEvent);
 
     assert(_debugSetAllowIgnoredCallsToMarkNeedsBuild(true));
     Widget built;

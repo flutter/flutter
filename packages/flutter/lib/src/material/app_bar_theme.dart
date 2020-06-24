@@ -41,6 +41,12 @@ class AppBarTheme with Diagnosticable {
     this.actionsIconTheme,
     this.textTheme,
     this.centerTitle,
+    @Deprecated(
+      'Deprecated property to cap text scaling for title. '
+      'This feature was deprecated after v1.19.0.'
+    )
+    // ignore: deprecated_member_use_from_same_package
+    this.shouldCapTextScaleForTitle = false,
   });
 
   /// Default value for [AppBar.brightness].
@@ -83,6 +89,19 @@ class AppBarTheme with Diagnosticable {
   /// If null, the value is adapted to current [TargetPlatform].
   final bool centerTitle;
 
+  /// Cap text scale to a maximum for [AppBar.title].
+  ///
+  /// This flag is deprecated and caps the text scaling to a maximum for
+  /// [AppBar.title], to keep the visual hierarchy in an app with large font
+  /// sizes. It exists to provide backwards compatibility to ease migrations,
+  /// and will eventually be removed as the maximum text scale will be enabled
+  /// by default.
+  @Deprecated(
+    'Deprecated property to cap text scaling for title. '
+    'This feature was deprecated after v1.19.0.'
+  )
+  final bool shouldCapTextScaleForTitle;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   AppBarTheme copyWith({
@@ -94,6 +113,12 @@ class AppBarTheme with Diagnosticable {
     IconThemeData iconTheme,
     TextTheme textTheme,
     bool centerTitle,
+    @Deprecated(
+      'Deprecated property to cap text scaling for title. '
+      'This feature was deprecated after v1.19.0.'
+    )
+    // ignore: deprecated_member_use_from_same_package
+    bool shouldCapTextScaleForTitle,
   }) {
     return AppBarTheme(
       brightness: brightness ?? this.brightness,
@@ -104,6 +129,8 @@ class AppBarTheme with Diagnosticable {
       actionsIconTheme: actionsIconTheme ?? this.actionsIconTheme,
       textTheme: textTheme ?? this.textTheme,
       centerTitle: centerTitle ?? this.centerTitle,
+      // ignore: deprecated_member_use_from_same_package
+      shouldCapTextScaleForTitle: shouldCapTextScaleForTitle ?? this.shouldCapTextScaleForTitle,
     );
   }
 
@@ -128,6 +155,8 @@ class AppBarTheme with Diagnosticable {
       actionsIconTheme: IconThemeData.lerp(a?.actionsIconTheme, b?.actionsIconTheme, t),
       textTheme: TextTheme.lerp(a?.textTheme, b?.textTheme, t),
       centerTitle: t < 0.5 ? a?.centerTitle : b?.centerTitle,
+      // ignore: deprecated_member_use_from_same_package
+      shouldCapTextScaleForTitle: a?.shouldCapTextScaleForTitle == true || b?.shouldCapTextScaleForTitle == true,
     );
   }
 
@@ -159,7 +188,9 @@ class AppBarTheme with Diagnosticable {
         && other.iconTheme == iconTheme
         && other.actionsIconTheme == actionsIconTheme
         && other.textTheme == textTheme
-        && other.centerTitle == centerTitle;
+        && other.centerTitle == centerTitle
+        // ignore: deprecated_member_use_from_same_package
+        && other.shouldCapTextScaleForTitle == shouldCapTextScaleForTitle;
   }
 
   @override
@@ -173,5 +204,7 @@ class AppBarTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<IconThemeData>('actionsIconTheme', actionsIconTheme, defaultValue: null));
     properties.add(DiagnosticsProperty<TextTheme>('textTheme', textTheme, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('centerTitle', centerTitle, defaultValue: null));
+    // ignore: deprecated_member_use_from_same_package
+    properties.add(DiagnosticsProperty<bool>('shouldCapTextScaleForTitle', shouldCapTextScaleForTitle, defaultValue: null));
   }
 }

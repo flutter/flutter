@@ -23,6 +23,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
+import '../dart/language_version.dart';
 import '../dart/pub.dart';
 import '../devfs.dart';
 import '../device.dart';
@@ -258,6 +259,30 @@ abstract class ResidentWebRunner extends ResidentRunner {
             isolateId: null,
           );
       globals.printStatus('Switched operating system to $platform');
+    } on vmservice.RPCError {
+      return;
+    }
+  }
+
+  @override
+  Future<void> debugToggleBrightness() async {
+    try {
+      final Brightness currentBrightness = await _vmService
+        ?.flutterBrightnessOverride(
+          isolateId: null,
+        );
+      Brightness next;
+      if (currentBrightness == Brightness.light) {
+        next = Brightness.dark;
+      } else if (currentBrightness == Brightness.dark) {
+        next = Brightness.light;
+      }
+      next = await _vmService
+        ?.flutterBrightnessOverride(
+            brightness: next,
+            isolateId: null,
+          );
+      globals.logger.printStatus('Changed brightness to $next.');
     } on vmservice.RPCError {
       return;
     }
@@ -544,6 +569,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
         fullRestart: true,
         reason: reason,
         overallTimeInMs: timer.elapsed.inMilliseconds,
+        nullSafety: usageNullSafety,
       ).send();
     }
     return OperationResult.ok;
@@ -581,6 +607,10 @@ class _ResidentWebRunner extends ResidentWebRunner {
       }
 
       final String entrypoint = <String>[
+        determineLanguageVersion(
+          globals.fs.file(mainUri),
+          packageConfig[flutterProject.manifest.appName],
+        ),
         '// Flutter web bootstrap script for $importedEntrypoint.',
         '',
         "import 'dart:ui' as ui;",

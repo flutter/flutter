@@ -9,7 +9,9 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/semantics.dart';
 
+import 'actions.dart';
 import 'basic.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
@@ -185,6 +187,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
         }
         break;
     }
+    changedInternalState();
   }
 
   @override
@@ -192,19 +195,16 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     assert(!_transitionCompleter.isCompleted, 'Cannot install a $runtimeType after disposing it.');
     _controller = createAnimationController();
     assert(_controller != null, '$runtimeType.createAnimationController() returned null.');
-    _animation = createAnimation()
-      ..addStatusListener(_handleStatusChanged);
+    _animation = createAnimation();
     assert(_animation != null, '$runtimeType.createAnimation() returned null.');
     super.install();
-    if (_animation.isCompleted && overlayEntries.isNotEmpty) {
-      overlayEntries.first.opaque = opaque;
-    }
   }
 
   @override
   TickerFuture didPush() {
     assert(_controller != null, '$runtimeType.didPush called before calling install() or after calling dispose().');
     assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
+    _didPushOrReplace();
     super.didPush();
     return _controller.forward();
   }
@@ -213,6 +213,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   void didAdd() {
     assert(_controller != null, '$runtimeType.didPush called before calling install() or after calling dispose().');
     assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
+    _didPushOrReplace();
     super.didAdd();
     _controller.value = _controller.upperBound;
   }
@@ -223,7 +224,17 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
     if (oldRoute is TransitionRoute)
       _controller.value = oldRoute._controller.value;
+    _didPushOrReplace();
     super.didReplace(oldRoute);
+  }
+
+  void _didPushOrReplace() {
+    _animation.addStatusListener(_handleStatusChanged);
+    // If the animation is already completed, _handleStatusChanged will not get
+    // a chance to set opaqueness of OverlayEntry.
+    if (_animation.isCompleted && overlayEntries.isNotEmpty) {
+      overlayEntries.first.opaque = opaque;
+    }
   }
 
   @override
@@ -642,6 +653,13 @@ mixin LocalHistoryRoute<T> on Route<T> {
   }
 }
 
+class _DismissModalAction extends DismissAction {
+  @override
+  Object invoke(DismissIntent intent) {
+    return Navigator.of(primaryFocus.context).maybePop();
+  }
+}
+
 class _ModalScopeStatus extends InheritedWidget {
   const _ModalScopeStatus({
     Key key,
@@ -753,6 +771,10 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
     setState(fn);
   }
 
+  static final Map<Type, Action<Intent>> _actionMap = <Type, Action<Intent>>{
+    DismissIntent: _DismissModalAction(),
+  };
+
   @override
   Widget build(BuildContext context) {
     return _ModalScopeStatus(
@@ -763,44 +785,47 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
         offstage: widget.route.offstage, // _routeSetState is called if this updates
         child: PageStorage(
           bucket: widget.route._storageBucket, // immutable
-          child: FocusScope(
-            node: focusScopeNode, // immutable
-            child: RepaintBoundary(
-              child: AnimatedBuilder(
-                animation: _listenable, // immutable
-                builder: (BuildContext context, Widget child) {
-                  return widget.route.buildTransitions(
-                    context,
-                    widget.route.animation,
-                    widget.route.secondaryAnimation,
-                    // This additional AnimatedBuilder is include because if the
-                    // value of the userGestureInProgressNotifier changes, it's
-                    // only necessary to rebuild the IgnorePointer widget and set
-                    // the focus node's ability to focus.
-                    AnimatedBuilder(
-                      animation: widget.route.navigator?.userGestureInProgressNotifier ?? ValueNotifier<bool>(false),
-                      builder: (BuildContext context, Widget child) {
-                        final bool ignoreEvents = _shouldIgnoreFocusRequest;
-                        focusScopeNode.canRequestFocus = !ignoreEvents;
-                        return IgnorePointer(
-                          ignoring: ignoreEvents,
-                          child: child,
+          child: Actions(
+            actions: _actionMap,
+            child: FocusScope(
+              node: focusScopeNode, // immutable
+              child: RepaintBoundary(
+                child: AnimatedBuilder(
+                  animation: _listenable, // immutable
+                  builder: (BuildContext context, Widget child) {
+                    return widget.route.buildTransitions(
+                      context,
+                      widget.route.animation,
+                      widget.route.secondaryAnimation,
+                      // This additional AnimatedBuilder is include because if the
+                      // value of the userGestureInProgressNotifier changes, it's
+                      // only necessary to rebuild the IgnorePointer widget and set
+                      // the focus node's ability to focus.
+                      AnimatedBuilder(
+                        animation: widget.route.navigator?.userGestureInProgressNotifier ?? ValueNotifier<bool>(false),
+                        builder: (BuildContext context, Widget child) {
+                          final bool ignoreEvents = _shouldIgnoreFocusRequest;
+                          focusScopeNode.canRequestFocus = !ignoreEvents;
+                          return IgnorePointer(
+                            ignoring: ignoreEvents,
+                            child: child,
+                          );
+                        },
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: _page ??= RepaintBoundary(
+                    key: widget.route._subtreeKey, // immutable
+                    child: Builder(
+                      builder: (BuildContext context) {
+                        return widget.route.buildPage(
+                          context,
+                          widget.route.animation,
+                          widget.route.secondaryAnimation,
                         );
                       },
-                      child: child,
                     ),
-                  );
-                },
-                child: _page ??= RepaintBoundary(
-                  key: widget.route._subtreeKey, // immutable
-                  child: Builder(
-                    builder: (BuildContext context) {
-                      return widget.route.buildPage(
-                        context,
-                        widget.route.animation,
-                        widget.route.secondaryAnimation,
-                      );
-                    },
                   ),
                 ),
               ),
@@ -847,7 +872,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// ```
   ///
   /// The given [BuildContext] will be rebuilt if the state of the route changes
-  /// while it is visible (specifically, if [isCurrent] or [canPop] change value).
+  /// (specifically, if [isCurrent] or [canPop] change value).
   @optionalTypeArgs
   static ModalRoute<T> of<T extends Object>(BuildContext context) {
     final _ModalScopeStatus widget = context.dependOnInheritedWidgetOfExactType<_ModalScopeStatus>();
@@ -927,8 +952,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// is not wrapped in any transition widgets.
   ///
   /// The [buildTransitions] method, in contrast to [buildPage], is called each
-  /// time the [Route]'s state changes while it is visible (e.g. if the value of
-  /// [canPop] changes on the active route).
+  /// time the [Route]'s state changes (e.g. the value of [canPop]).
   ///
   /// The [buildTransitions] method is typically used to define transitions
   /// that animate the new topmost route's comings and goings. When the
@@ -1384,9 +1408,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   /// Whether this route can be popped.
   ///
-  /// When this changes, if the route is visible, the route will
-  /// rebuild, and any widgets that used [ModalRoute.of] will be
-  /// notified.
+  /// When this changes, the route will rebuild, and any widgets that used
+  /// [ModalRoute.of] will be notified.
   bool get canPop => !isFirst || willHandlePopInternally;
 
   // Internals
@@ -1426,11 +1449,19 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
         child: barrier,
       );
     }
-    return IgnorePointer(
+    barrier = IgnorePointer(
       ignoring: animation.status == AnimationStatus.reverse || // changedInternalState is called when animation.status updates
                 animation.status == AnimationStatus.dismissed, // dismissed is possible when doing a manual pop gesture
       child: barrier,
     );
+    if (semanticsDismissible && barrierDismissible) {
+      // To be sorted after the _modalScope.
+      barrier = Semantics(
+        sortKey: const OrdinalSortKey(1.0),
+        child: barrier,
+      );
+    }
+    return barrier;
   }
 
   // We cache the part of the modal scope that doesn't change from frame to
@@ -1439,10 +1470,14 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   // one of the builders
   Widget _buildModalScope(BuildContext context) {
-    return _modalScopeCache ??= _ModalScope<T>(
-      key: _scopeKey,
-      route: this,
-      // _ModalScope calls buildTransitions() and buildChild(), defined above
+    // To be sorted before the _modalBarrier.
+    return _modalScopeCache ??= Semantics(
+      sortKey: const OrdinalSortKey(0.0),
+      child: _ModalScope<T>(
+        key: _scopeKey,
+        route: this,
+        // _ModalScope calls buildTransitions() and buildChild(), defined above
+      )
     );
   }
 
