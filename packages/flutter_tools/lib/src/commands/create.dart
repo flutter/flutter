@@ -41,7 +41,7 @@ const List<String> _kAvailablePlatforms = <String>[
       ];
 
 const String _kNoPlatformsErrorMessage = '''
-The plugin project was generated without specifying the `--platforms` flag, no platforms are currently supported.
+The plugin project was generated without specifying the `--platforms` flag, no new platforms are added.
 To add platforms, run `flutter create -t plugin --platforms <platforms> .` under the same
 directory. You can also find detailed instructions on how to add platforms in the `pubspec.yaml` at https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms.
 ''';
@@ -562,8 +562,20 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       templateContext['windows'] = false;
       globals.printError(_kNoPlatformsErrorMessage);
     }
-    final List<String> platforms = _getSupportedPlatformsFromTemplateContext(templateContext);
-    final bool willAddPlatforms = platforms.isNotEmpty;
+    final List<String> platformsToAdd = _getSupportedPlatformsFromTemplateContext(templateContext);
+
+    final String pubspecPath = globals.fs.path.join(directory.absolute.path, 'pubspec.yaml');
+    final FlutterManifest manifest = FlutterManifest.createFromPath(pubspecPath, fileSystem: globals.fs, logger: globals.logger);
+    List<String> existingPlatforms = <String>[];
+    if (manifest.supportedPlatforms != null) {
+      existingPlatforms = manifest.supportedPlatforms.keys.toList();
+      for (final String existingPlatform in existingPlatforms) {
+        // re-generate files for existing platforms
+        templateContext[existingPlatform] = true;
+      }
+    }
+
+    final bool willAddPlatforms = platformsToAdd.isNotEmpty;
     templateContext['no_platforms'] = !willAddPlatforms;
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
@@ -583,10 +595,6 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
     if (willAddPlatforms) {
       // If adding new platforms to an existing plugin project, prints
       // a help message containing the platforms maps need to be added to the `platforms` key in the pubspec.
-      final String pubspecPath = globals.fs.path.join(directory.absolute.path, 'pubspec.yaml');
-      final List<String> platformsToAdd = List<String>.from(platforms);
-      final FlutterManifest manifest = FlutterManifest.createFromPath(pubspecPath, fileSystem: globals.fs, logger: globals.logger);
-      final List<String> existingPlatforms = manifest.supportedPlatforms.keys.toList();
       platformsToAdd.removeWhere(existingPlatforms.contains);
       final YamlMap platformsMapToPrint = Plugin.createPlatformsYamlMap(platformsToAdd, templateContext['pluginClass'] as String, templateContext['androidIdentifier'] as String);
       if (platformsMapToPrint.isNotEmpty) {
