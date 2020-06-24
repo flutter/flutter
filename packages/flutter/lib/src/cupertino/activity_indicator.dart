@@ -95,7 +95,9 @@ class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator>
       vsync: this,
     );
 
-    if (widget.animating) _controller.repeat();
+    if (widget.animating) {
+      _controller.repeat();
+    }
   }
 
   @override
@@ -156,7 +158,7 @@ const List<int> _kAlphaValues = <int>[
 ];
 
 /// Alpha values for new style that introduced in iOS14.
-const List<int> _kNewAlphaValues = [
+const List<int> _kNewAlphaValues = <int>[
   47,
   47,
   47,
@@ -177,8 +179,7 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
     @required this.radius,
     @required this.progress,
     bool useNewStyle = false,
-  })  : useNewStyle = useNewStyle,
-        alphaValues = useNewStyle ? _kNewAlphaValues : _kAlphaValues,
+  })  : alphaValues = useNewStyle ? _kNewAlphaValues : _kAlphaValues,
         tickFundamentalRRect = RRect.fromLTRBXY(
           -radius / _kDefaultIndicatorRadius,
           -radius / (useNewStyle ? 3.0 : 2.0),
@@ -193,15 +194,14 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
   final Color activeColor;
   final double radius;
   final double progress;
-  final bool useNewStyle;
 
   final List<int> alphaValues;
   final RRect tickFundamentalRRect;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint();
-    final tickCount = alphaValues.length;
+    final Paint paint = Paint();
+    final int tickCount = alphaValues.length;
 
     canvas.save();
     canvas.translate(size.width / 2.0, size.height / 2.0);
@@ -223,7 +223,6 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
   bool shouldRepaint(_CupertinoActivityIndicatorPainter oldPainter) {
     return oldPainter.position != position ||
         oldPainter.activeColor != activeColor ||
-        oldPainter.progress != progress ||
-        oldPainter.useNewStyle != useNewStyle;
+        oldPainter.progress != progress;
   }
 }
