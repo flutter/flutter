@@ -143,6 +143,7 @@ void main() {
       '     Offstage\n'
       '     _ModalScopeStatus\n'
       '     _ModalScope<dynamic>-[LabeledGlobalKey<_ModalScopeState<dynamic>>#00000]\n'
+      '     Semantics\n'
       '     _EffectiveTickerMode\n'
       '     TickerMode\n'
       '     _OverlayEntryWidget-[LabeledGlobalKey<_OverlayEntryWidgetState>#00000]\n'
