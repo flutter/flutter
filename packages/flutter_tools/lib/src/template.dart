@@ -49,6 +49,7 @@ class Template {
         continue;
       }
       if (_templateManifest != null && !_templateManifest.contains(Uri.file(entity.absolute.path))) {
+        globals.logger.printTrace('Skipping ${entity.absolute.path}, missing from the template manifest.');
         // Skip stale files in the flutter_tools directory.
         continue;
       }

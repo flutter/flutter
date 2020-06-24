@@ -20,7 +20,8 @@ void main() {
     final Set<Uri> activeTemplateList = Directory('templates')
       .listSync(recursive: true)
       .whereType<File>()
-      .where((File file) => path.basename(file.path) != 'template_manifest.json')
+      .where((File file) => path.basename(file.path) != 'template_manifest.json' &&
+        path.basename(file.path) != '.DS_Store')
       .map((File file) => file.uri)
       .toSet();
 
