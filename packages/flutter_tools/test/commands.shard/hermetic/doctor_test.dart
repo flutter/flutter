@@ -43,6 +43,11 @@ final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
   Platform: _kNoColorOutputPlatform,
 };
 
+final Platform macPlatform = FakePlatform(
+  operatingSystem: 'macos',
+  environment: <String, String>{'HOME': '/foo/bar'}
+);
+
 void main() {
   MockProcessManager mockProcessManager;
   MockFlutterVersion mockFlutterVersion;
@@ -93,11 +98,14 @@ void main() {
       expect(validator.plistFile, '/path/to/app/Contents/Info.plist');
       expect(validator.pluginsPath, pluginsDirectory.path);
     }, overrides: <Type, Generator>{
-      Platform: () => FakePlatform()
-        ..environment = <String, String>{'HOME': '/foo/bar'},
+      Platform: () => macPlatform,
       PlistParser: () => mockPlistParser,
       FileSystem: () => fileSystem,
       ProcessManager: () => mockProcessManager,
+      FileSystemUtils: () => FileSystemUtils(
+        fileSystem: fileSystem,
+        platform: macPlatform,
+      )
     });
 
     testUsingContext('legacy intellij plugins path checking on mac', () async {
@@ -106,9 +114,14 @@ void main() {
       final IntelliJValidatorOnMac validator = IntelliJValidatorOnMac('Test', 'TestID', '/foo');
       expect(validator.pluginsPath, '/foo/bar/Library/Application Support/TestID2020.10');
     }, overrides: <Type, Generator>{
-      Platform: () => FakePlatform()
-        ..environment = <String, String>{'HOME': '/foo/bar'},
+      Platform: () => macPlatform,
       PlistParser: () => mockPlistParser,
+      FileSystem: () => fileSystem,
+      FileSystemUtils: () => FileSystemUtils(
+        fileSystem: fileSystem,
+        platform: macPlatform,
+      ),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('intellij plugins path checking on mac with override', () async {
@@ -118,6 +131,13 @@ void main() {
       expect(validator.pluginsPath, '/path/to/JetBrainsToolboxApp.plugins');
     }, overrides: <Type, Generator>{
       PlistParser: () => mockPlistParser,
+      Platform: () => macPlatform,
+      FileSystem: () => fileSystem,
+      FileSystemUtils: () => FileSystemUtils(
+        fileSystem: fileSystem,
+        platform: macPlatform,
+      ),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('vs code validator when both installed', () async {

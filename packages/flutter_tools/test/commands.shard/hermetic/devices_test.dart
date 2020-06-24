@@ -34,7 +34,7 @@ void main() {
       expect(testLogger.statusText, containsIgnoringWhitespace('No devices detected'));
     }, overrides: <Type, Generator>{
       AndroidSdk: () => null,
-      DeviceManager: () => DeviceManager(),
+      DeviceManager: () => NoDevicesManager(),
       ProcessManager: () => MockProcessManager(),
     });
 
@@ -159,4 +159,13 @@ class _FakeDeviceManager extends DeviceManager {
   Future<List<String>> getDeviceDiagnostics() => Future<List<String>>.value(
     <String>['Cannot connect to device ABC']
   );
+}
+
+class NoDevicesManager extends DeviceManager {
+  @override
+  Future<List<Device>> getAllConnectedDevices() async => <Device>[];
+
+  @override
+  Future<List<Device>> refreshAllConnectedDevices({Duration timeout}) =>
+    getAllConnectedDevices();
 }
