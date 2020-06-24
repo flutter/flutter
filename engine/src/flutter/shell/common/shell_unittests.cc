@@ -474,7 +474,8 @@ TEST_F(ShellTest,
   auto settings = CreateSettingsForFixture();
   fml::AutoResetWaitableEvent endFrameLatch;
   bool end_frame_called = false;
-  auto end_frame_callback = [&] {
+  auto end_frame_callback = [&](bool should_resubmit_frame) {
+    ASSERT_TRUE(should_resubmit_frame);
     end_frame_called = true;
     endFrameLatch.Signal();
   };

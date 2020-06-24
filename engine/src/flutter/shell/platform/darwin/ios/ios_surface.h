@@ -85,7 +85,8 @@ class IOSSurface : public ExternalViewEmbedder {
   bool SubmitFrame(GrContext* context, std::unique_ptr<SurfaceFrame> frame) override;
 
   // |ExternalViewEmbedder|
-  void EndFrame(fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) override;
+  void EndFrame(bool should_resubmit_frame,
+                fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) override;
 
  public:
   FML_DISALLOW_COPY_AND_ASSIGN(IOSSurface);

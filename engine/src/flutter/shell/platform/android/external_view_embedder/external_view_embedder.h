@@ -65,6 +65,7 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
 
   // |ExternalViewEmbedder|
   void EndFrame(
+      bool should_resubmit_frame,
       fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) override;
 
   // Gets the rect based on the device pixel ratio of a platform view displayed

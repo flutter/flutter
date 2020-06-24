@@ -15,7 +15,7 @@ namespace flutter {
 ///
 class ShellTestExternalViewEmbedder final : public ExternalViewEmbedder {
  public:
-  using EndFrameCallBack = std::function<void(void)>;
+  using EndFrameCallBack = std::function<void(bool)>;
 
   ShellTestExternalViewEmbedder(const EndFrameCallBack& end_frame_call_back,
                                 PostPrerollResult post_preroll_result)
@@ -56,6 +56,7 @@ class ShellTestExternalViewEmbedder final : public ExternalViewEmbedder {
 
   // |ExternalViewEmbedder|
   void EndFrame(
+      bool should_resubmit_frame,
       fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) override;
 
   // |ExternalViewEmbedder|

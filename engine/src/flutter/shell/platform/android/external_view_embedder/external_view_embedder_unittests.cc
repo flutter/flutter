@@ -158,7 +158,7 @@ TEST(AndroidExternalViewEmbedder, RasterizerRunsOnPlatformThread) {
   ASSERT_TRUE(embedder->SubmitFrame(nullptr, nullptr));
 
   EXPECT_CALL(*jni_mock, FlutterViewEndFrame());
-  embedder->EndFrame(raster_thread_merger);
+  embedder->EndFrame(/*should_resubmit_frame=*/true, raster_thread_merger);
 
   ASSERT_TRUE(raster_thread_merger->IsMerged());
 
@@ -182,7 +182,7 @@ TEST(AndroidExternalViewEmbedder, RasterizerRunsOnRasterizerThread) {
   ASSERT_EQ(PostPrerollResult::kSuccess, result);
 
   EXPECT_CALL(*jni_mock, FlutterViewEndFrame());
-  embedder->EndFrame(raster_thread_merger);
+  embedder->EndFrame(/*should_resubmit_frame=*/true, raster_thread_merger);
 
   ASSERT_FALSE(raster_thread_merger->IsMerged());
 }
@@ -332,7 +332,7 @@ TEST(AndroidExternalViewEmbedder, SubmitFrame__RecycleSurfaces) {
     embedder->SubmitFrame(gr_context.get(), std::move(surface_frame));
 
     EXPECT_CALL(*jni_mock, FlutterViewEndFrame());
-    embedder->EndFrame(raster_thread_merger);
+    embedder->EndFrame(/*should_resubmit_frame=*/false, raster_thread_merger);
   }
 
   // ------------------ Second frame ------------------ //
@@ -380,7 +380,7 @@ TEST(AndroidExternalViewEmbedder, SubmitFrame__RecycleSurfaces) {
     embedder->SubmitFrame(gr_context.get(), std::move(surface_frame));
 
     EXPECT_CALL(*jni_mock, FlutterViewEndFrame());
-    embedder->EndFrame(raster_thread_merger);
+    embedder->EndFrame(/*should_resubmit_frame=*/false, raster_thread_merger);
   }
 }
 
@@ -399,7 +399,7 @@ TEST(AndroidExternalViewEmbedder, DoesNotCallJNIPlatformThreadOnlyMethods) {
                        raster_thread_merger);
 
   EXPECT_CALL(*jni_mock, FlutterViewEndFrame()).Times(0);
-  embedder->EndFrame(raster_thread_merger);
+  embedder->EndFrame(/*should_resubmit_frame=*/false, raster_thread_merger);
 }
 
 }  // namespace testing
