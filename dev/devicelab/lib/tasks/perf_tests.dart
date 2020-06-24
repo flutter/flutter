@@ -91,6 +91,14 @@ TaskFunction createCubicBezierPerfSkSLWarmupTest() {
   ).run;
 }
 
+TaskFunction createFlutterGalleryTransitionsPerfSkSLWarmupTest() {
+  return PerfTestWithSkSL(
+    '${flutterDirectory.path}/dev/integration_tests/flutter_gallery',
+    'test_driver/transitions_perf.dart',
+    'transitions',
+  ).run;
+}
+
 TaskFunction createBackdropFilterPerfTest({bool needsMeasureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -296,8 +304,8 @@ class PerfTest {
 
   @protected
   Future<TaskResult> internalRun({
-      bool keepRunning = false,
       bool cacheSkSL = false,
+      bool noBuild = false,
       String existingApp,
       String writeSkslFileName,
   }) {
@@ -309,10 +317,11 @@ class PerfTest {
 
       await flutter('drive', options: <String>[
         '-v',
+        '--verbose-system-logs',
         '--profile',
         '--trace-startup', // Enables "endless" timeline event buffering.
-        '-t',
-        testTarget,
+        '-t', testTarget,
+        if (noBuild) '--no-build',
         if (testDriver != null)
           ...<String>['--driver', testDriver],
         if (existingApp != null)
@@ -320,7 +329,6 @@ class PerfTest {
         if (writeSkslFileName != null)
           ...<String>['--write-sksl-on-exit', writeSkslFileName],
         if (cacheSkSL) '--cache-sksl',
-        if (keepRunning) '--keep-app-running',
         '-d',
         deviceId,
       ]);
@@ -401,23 +409,29 @@ class PerfTestWithSkSL extends PerfTest {
   }
 
   Future<void> _generateSkSL() async {
+    // `flutter drive` without `flutter run`, and `flutter drive --existing-app`
+    // with `flutter run` may generate different SkSLs. Hence we run both
+    // versions to generate as many SkSLs as possible.
+    //
+    // 1st, `flutter drive --existing-app` with `flutter run`. The
+    // `--write-sksl-on-exit` option doesn't seem to be compatible with
+    // `flutter drive --existing-app` as it will complain web socket connection
+    // issues.
+    final String observatoryUri = await _runApp(cacheSkSL: true);
+    await super.internalRun(cacheSkSL: true, existingApp: observatoryUri);
+    _runProcess.kill();
+    await _runProcess.exitCode;
+
+    // 2nd, `flutter drive` without `flutter run`. The --no-build option ensures
+    // that we won't remove the SkSLs generated earlier.
     await super.internalRun(
-      keepRunning: true,
       cacheSkSL: true,
+      noBuild: true,
       writeSkslFileName: _skslJsonFileName,
     );
   }
 
-  // Return the VMService URI.
-  Future<String> _buildAndRun() async {
-    await flutter('build', options: <String>[
-      // TODO(liyuqian): also supports iOS once https://github.com/flutter/flutter/issues/53115 is fully closed.
-      'apk',
-      '--profile',
-      '--bundle-sksl-path', _skslJsonFileName,
-      '-t', testTarget,
-    ]);
-
+  Future<String> _runApp({String appBinary, bool cacheSkSL = false}) async {
     if (File(_vmserviceFileName).existsSync()) {
       File(_vmserviceFileName).deleteSync();
     }
@@ -427,12 +441,13 @@ class PerfTestWithSkSL extends PerfTest {
       <String>[
         'run',
         '--verbose',
+        '--verbose-system-logs',
         '--profile',
+        if (cacheSkSL) '--cache-sksl',
         '-d', _device.deviceId,
         '-t', testTarget,
         '--endless-trace-buffer',
-        '--use-application-binary',
-        '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk',
+        if (appBinary != null) ...<String>['--use-application-binary', _appBinary],
         '--vmservice-out-file', _vmserviceFileName,
       ],
     );
@@ -445,8 +460,34 @@ class PerfTestWithSkSL extends PerfTest {
     return file.readAsStringSync();
   }
 
+  // Return the VMService URI.
+  Future<String> _buildAndRun() async {
+    await flutter('build', options: <String>[
+      if (_isAndroid) 'apk' else 'ios',
+      '--profile',
+      '--bundle-sksl-path', _skslJsonFileName,
+      '-t', testTarget,
+    ]);
+
+    return _runApp(appBinary: _appBinary);
+  }
+
   String get _skslJsonFileName => '$testDirectory/flutter_01.sksl.json';
   String get _vmserviceFileName => '$testDirectory/$_kVmserviceOutFileName';
+
+  bool get _isAndroid => deviceOperatingSystem == DeviceOperatingSystem.android;
+
+  String get _appBinary {
+    if (_isAndroid) {
+      return '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
+    }
+    for (final FileSystemEntity entry in Directory('$testDirectory/build/ios/iphoneos/').listSync()) {
+      if (entry.path.endsWith('.app')) {
+        return entry.path;
+      }
+    }
+    throw 'No app found.';
+  }
 
   Stream<String> _transform(Stream<List<int>> stream) =>
       stream.transform<String>(utf8.decoder).transform<String>(const LineSplitter());

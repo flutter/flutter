@@ -186,7 +186,9 @@ class TestCompiler {
           // The idea is to keep the cache file up-to-date and include as
           // much as possible in an effort to re-use as many packages as
           // possible.
-          globals.fsUtils.ensureDirectoryExists(testFilePath);
+          if (!testCache.parent.existsSync()) {
+            testCache.parent.createSync(recursive: true);
+          }
           await outputFile.copy(testFilePath);
         }
         request.result.complete(kernelReadyToRun.path);
