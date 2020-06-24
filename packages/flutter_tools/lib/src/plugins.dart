@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
+import 'package:path/path.dart' as path; // ignore: package_path_import
 import 'package:yaml/yaml.dart';
 
 import 'android/gradle.dart';
@@ -841,7 +842,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
 set(PLUGIN_BUNDLED_LIBRARIES)
 
 foreach(plugin ${FLUTTER_PLUGIN_LIST})
-  add_subdirectory({{pluginsDir}}/${plugin}/${os} plugins/${plugin})
+  add_subdirectory({{pluginsDir}}/${plugin}/{{os}} plugins/${plugin})
   target_link_libraries(${BINARY_NAME} PRIVATE ${plugin}_plugin)
   list(APPEND PLUGIN_BUNDLED_LIBRARIES $<TARGET_FILE:${plugin}_plugin>)
   list(APPEND PLUGIN_BUNDLED_LIBRARIES ${${plugin}_bundled_libraries})
@@ -968,13 +969,15 @@ Future<void> _writeWindowsPluginFiles(FlutterProject project, List<Plugin> plugi
   // included by the main CMakeLists.txt, so relative paths must be relative to
   // that file's directory.
   final String makefileDirPath = project.windows.cmakeFile.parent.absolute.path;
+  final path.Context cmakePathContext = path.Context(style: path.Style.posix);
+  final List<String> relativePathComponents = globals.fs.path.split(globals.fs.path.relative(
+    project.windows.pluginSymlinkDirectory.absolute.path,
+    from: makefileDirPath,
+  ));
   final Map<String, dynamic> context = <String, dynamic>{
     'os': 'windows',
     'plugins': windowsPlugins,
-    'pluginsDir': globals.fs.path.relative(
-      project.windows.pluginSymlinkDirectory.absolute.path,
-      from: makefileDirPath,
-    ),
+    'pluginsDir': cmakePathContext.joinAll(relativePathComponents),
   };
   await _writeCppPluginRegistrant(project.windows.managedDirectory, context);
   await _writePluginCmakefile(project.windows.generatedPluginCmakeFile, context);
