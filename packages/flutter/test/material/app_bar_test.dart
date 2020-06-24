@@ -1075,7 +1075,8 @@ void main() {
     expect(find.byIcon(Icons.menu), findsNothing);
   });
 
-  testWidgets('AppBar ink slash draw on the correct canvas', (WidgetTester tester) async {
+  testWidgets('AppBar ink splash draw on the correct canvas', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/58665
     final Key key = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
