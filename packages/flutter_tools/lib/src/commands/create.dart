@@ -6,8 +6,9 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:uuid/uuid.dart';
+import 'package:yaml/yaml.dart';
 
-import '../android/android.dart' as android;
+import '../android/android.dart' as android_common;
 import '../android/android_sdk.dart' as android_sdk;
 import '../android/gradle_utils.dart' as gradle;
 import '../base/common.dart';
@@ -15,20 +16,39 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/net.dart';
+import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../dart/pub.dart';
 import '../features.dart';
+import '../flutter_manifest.dart';
 import '../flutter_project_metadata.dart';
 import '../globals.dart' as globals;
+import '../plugins.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';
 
+const List<String> _kAvailablePlatforms = <String>[
+        'ios',
+        'android',
+        'windows',
+        'linux',
+        'macos',
+        'web',
+      ];
+
+const String _kNoPlatformsErrorMessage = '''
+The plugin project was generated without specifying the `--platforms` flag, no platforms are currently supported.
+To add platforms, run `flutter create -t plugin --platforms <platforms> .` under the same
+directory. You can also find detailed instructions on how to add platforms in the `pubspec.yaml` at https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms.
+''';
+
 class CreateCommand extends FlutterCommand {
   CreateCommand() {
+    _addPlatformsOptions();
     argParser.addFlag('pub',
       defaultsTo: true,
       help: 'Whether to run "flutter pub get" after the project has been created.',
@@ -318,6 +338,19 @@ class CreateCommand extends FlutterCommand {
     final bool generatePlugin = template == FlutterProjectType.plugin;
     final bool generatePackage = template == FlutterProjectType.package;
 
+    final List<String> platforms = stringsArg('platforms');
+    // `--platforms` does not support module or package.
+    if (argResults.wasParsed('platforms') && (generateModule || generatePackage)) {
+      final String template = generateModule ? 'module' : 'package';
+      throwToolExit(
+        'The "--platforms" argument is not supported in $template template.',
+        exitCode: 2
+      );
+    } else if (platforms == null || platforms.isEmpty) {
+      throwToolExit('Must specify at least one platform using --platforms',
+        exitCode: 2);
+    }
+
     String organization = stringArg('org');
     if (!argResults.wasParsed('org')) {
       final FlutterProject project = FlutterProject.fromDirectory(projectDir);
@@ -344,7 +377,7 @@ class CreateCommand extends FlutterCommand {
       throwToolExit(error);
     }
 
-    final Map<String, dynamic> templateContext = _templateContext(
+    final Map<String, dynamic> templateContext = _createTemplateContext(
       organization: organization,
       projectName: projectName,
       projectDescription: stringArg('description'),
@@ -353,10 +386,12 @@ class CreateCommand extends FlutterCommand {
       withPluginHook: generatePlugin,
       androidLanguage: stringArg('android-language'),
       iosLanguage: stringArg('ios-language'),
-      web: featureFlags.isWebEnabled,
-      linux: featureFlags.isLinuxEnabled,
-      macos: featureFlags.isMacOSEnabled,
-      windows: featureFlags.isWindowsEnabled,
+      ios: platforms.contains('ios'),
+      android: platforms.contains('android'),
+      web: featureFlags.isWebEnabled && platforms.contains('web'),
+      linux: featureFlags.isLinuxEnabled && platforms.contains('linux'),
+      macos: featureFlags.isMacOSEnabled && platforms.contains('macos'),
+      windows: featureFlags.isWindowsEnabled && platforms.contains('windows'),
     );
 
     final String relativeDirPath = globals.fs.path.relative(projectDirPath);
@@ -417,7 +452,8 @@ class CreateCommand extends FlutterCommand {
       if (globals.doctor.canLaunchAnything) {
         // Let them know a summary of the state of their tooling.
         await globals.doctor.summary();
-
+        final List<String> platforms = _getSupportedPlatformsFromTemplateContext(templateContext);
+        final String platformsString = platforms.join(', ');
         globals.printStatus('''
 In order to run your $application, type:
 
@@ -430,7 +466,7 @@ Your $application code is in $relativeAppMain.
           globals.printStatus('''
 Your plugin code is in $relativePluginMain.
 
-Host platform code is in the "android" and "ios" directories under $relativePluginPath.
+Host platform code is in the $platformsString directories under $relativePluginPath.
 To edit platform code in an IDE see https://flutter.dev/developing-packages/#edit-plugin-package.
 ''');
         }
@@ -465,6 +501,17 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       }
     }
     return FlutterCommandResult.success();
+  }
+
+  void _addPlatformsOptions() {
+    argParser.addMultiOption('platforms',
+      help: 'the platforms supported by this project.'
+        'This argument only works when the --template is set to app or plugin.'
+        'Platform folders (e.g. android/) will be generated in the target project.'
+        'When adding platforms to a plugin project, the pubspec.yaml will be updated with the requested platform.'
+        'Adding desktop platforms requires the corresponding desktop config setting to be enabled.',
+      defaultsTo: _kAvailablePlatforms,
+      allowed: _kAvailablePlatforms);
   }
 
   Future<int> _generateModule(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
@@ -504,12 +551,27 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
   }
 
   Future<int> _generatePlugin(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
+    // Plugin doesn't create any platform by default
+    if (!argResults.wasParsed('platforms')) {
+      // If the user didn't explicitly declare the platforms, we don't generate any platforms.
+      templateContext['ios'] = false;
+      templateContext['android'] = false;
+      templateContext['web'] = false;
+      templateContext['linux'] = false;
+      templateContext['macos'] = false;
+      templateContext['windows'] = false;
+      globals.printError(_kNoPlatformsErrorMessage);
+    }
+    final List<String> platforms = _getSupportedPlatformsFromTemplateContext(templateContext);
+    final bool willAddPlatforms = platforms.isNotEmpty;
+    templateContext['no_platforms'] = !willAddPlatforms;
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
         ? stringArg('description')
         : 'A new flutter plugin project.';
     templateContext['description'] = description;
     generatedCount += await _renderTemplate('plugin', directory, templateContext, overwrite: overwrite);
+
     if (boolArg('pub')) {
       await pub.get(
         context: PubContext.createPlugin,
@@ -517,8 +579,45 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
         offline: boolArg('offline'),
       );
     }
+
+    if (willAddPlatforms) {
+      // If adding new platforms to an existing plugin project, prints
+      // a help message containing the platforms maps need to be added to the `platforms` key in the pubspec.
+      final String pubspecPath = globals.fs.path.join(directory.absolute.path, 'pubspec.yaml');
+      final List<String> platformsToAdd = List<String>.from(platforms);
+      final FlutterManifest manifest = FlutterManifest.createFromPath(pubspecPath, fileSystem: globals.fs, logger: globals.logger);
+      final List<String> existingPlatforms = manifest.supportedPlatforms.keys.toList();
+      platformsToAdd.removeWhere(existingPlatforms.contains);
+      final YamlMap platformsMapToPrint = Plugin.createPlatformsYamlMap(platformsToAdd, templateContext['pluginClass'] as String, templateContext['androidIdentifier'] as String);
+      if (platformsMapToPrint.isNotEmpty) {
+        String prettyYaml = '';
+        for (final String platform in platformsMapToPrint.keys.toList().cast<String>()) {
+          prettyYaml += '$platform:\n';
+          for (final String key in (platformsMapToPrint[platform] as YamlMap).keys.toList().cast<String>()) {
+            prettyYaml += ' $key: ${platformsMapToPrint[platform][key] as String}\n';
+          }
+        }
+        globals.printStatus('''
+The `pubspec.yaml` under the project directory must be updated to support ${platformsToAdd.join(', ')},
+Add below lines to under the `platform:` key:
+''', emphasis: true);
+      globals.printStatus(prettyYaml, emphasis: true, color: TerminalColor.blue);
+      globals.printStatus('''
+If the `platforms` key does not exist in the `pubspec.yaml`, it might because that the plugin project does not
+use the multi-platforms plugin format. We highly recommend a migration to the multi-platforms plugin format.
+For detailed instructions on how to format the pubspec.yaml to support platforms using the multi-platforms format, see:
+https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms
+''', emphasis: true);
+      }
+    }
+
+
     final FlutterProject project = FlutterProject.fromDirectory(directory);
-    gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
+    final bool generateAndroid = templateContext['android'] == true;
+    if (generateAndroid) {
+      gradle.updateLocalProperties(
+        project: project, requireAndroidSdk: false);
+    }
 
     final String projectName = templateContext['projectName'] as String;
     final String organization = templateContext['organization'] as String;
@@ -527,19 +626,22 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
     templateContext['projectName'] = exampleProjectName;
     templateContext['androidIdentifier'] = _createAndroidIdentifier(organization, exampleProjectName);
     templateContext['iosIdentifier'] = _createUTIIdentifier(organization, exampleProjectName);
+    templateContext['macosIdentifier'] = _createUTIIdentifier(organization, exampleProjectName);
     templateContext['description'] = 'Demonstrates how to use the $projectName plugin.';
     templateContext['pluginProjectName'] = projectName;
     templateContext['androidPluginIdentifier'] = androidPluginIdentifier;
 
-    generatedCount += await _generateApp(project.example.directory, templateContext, overwrite: overwrite);
+    generatedCount += await _generateApp(project.example.directory, templateContext, overwrite: overwrite, pluginExampleApp: true);
     return generatedCount;
   }
 
-  Future<int> _generateApp(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
+  Future<int> _generateApp(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false, bool pluginExampleApp = false}) async {
     int generatedCount = 0;
     generatedCount += await _renderTemplate('app', directory, templateContext, overwrite: overwrite);
     final FlutterProject project = FlutterProject.fromDirectory(directory);
-    generatedCount += _injectGradleWrapper(project);
+    if (templateContext['android'] == true) {
+      generatedCount += _injectGradleWrapper(project);
+    }
 
     if (boolArg('with-driver-test')) {
       final Directory testDirectory = directory.childDirectory('test_driver');
@@ -548,11 +650,11 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
 
     if (boolArg('pub')) {
       await pub.get(context: PubContext.create, directory: directory.path, offline: boolArg('offline'));
-      await project.ensureReadyForPlatformSpecificTooling(checkProjects: false);
+      await project.ensureReadyForPlatformSpecificTooling(checkProjects: pluginExampleApp);
     }
-
-    gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
-
+    if (templateContext['android'] == true) {
+      gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
+    }
     return generatedCount;
   }
 
@@ -570,7 +672,24 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
     return -files.length;
   }
 
-  Map<String, dynamic> _templateContext({
+  List<String> _getSupportedPlatformsFromTemplateContext(Map<String, dynamic> templateContext) {
+    return <String>[
+      if (templateContext['ios'] == true)
+        'ios',
+      if (templateContext['android'] == true)
+        'android',
+      if (templateContext['web'] == true)
+        'web',
+      if (templateContext['linux'] == true)
+        'linux',
+      if (templateContext['windows'] == true)
+        'windows',
+      if (templateContext['macos'] == true)
+        'macos',
+    ];
+  }
+
+  Map<String, dynamic> _createTemplateContext({
     String organization,
     String projectName,
     String projectDescription,
@@ -579,6 +698,8 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
     String flutterRoot,
     bool renderDriverTest = false,
     bool withPluginHook = false,
+    bool ios = false,
+    bool android = false,
     bool web = false,
     bool linux = false,
     bool macos = false,
@@ -603,7 +724,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       'description': projectDescription,
       'dartSdk': '$flutterRoot/bin/cache/dart-sdk',
       'useAndroidEmbeddingV2': featureFlags.isAndroidEmbeddingV2Enabled,
-      'androidMinApiLevel': android.minApiLevel,
+      'androidMinApiLevel': android_common.minApiLevel,
       'androidSdkVersion': android_sdk.minimumAndroidSdkVersion,
       'withDriverTest': renderDriverTest,
       'pluginClass': pluginClass,
@@ -616,6 +737,8 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       'iosLanguage': iosLanguage,
       'flutterRevision': globals.flutterVersion.frameworkRevision,
       'flutterChannel': globals.flutterVersion.channel,
+      'ios': ios,
+      'android': android,
       'web': web,
       'linux': linux,
       'macos': macos,
