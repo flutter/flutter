@@ -84,9 +84,6 @@ class ImageSizeInfo {
   }
 
   @override
-  String toString() => 'ISI: $imageSize $displaySize $source';
-
-  @override
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
@@ -99,6 +96,9 @@ class ImageSizeInfo {
 
   @override
   int get hashCode => hashValues(source, displaySize, imageSize);
+
+  @override
+  String toString() => 'ImageSizeInfo($source, imageSize: $imageSize displaySize: $displaySize)';
 }
 
 /// If not null, called when the framework is about to paint an [Image] to a
