@@ -826,25 +826,25 @@ class WebDevFS implements DevFS {
 class ReleaseAssetServer {
   ReleaseAssetServer(this.entrypoint, {
     @required FileSystem fileSystem,
-    @required String webBuilDirectory,
+    @required String webBuildDirectory,
     @required String flutterRoot,
     @required Platform platform,
   }) : _fileSystem = fileSystem,
        _platform = platform,
        _flutterRoot = flutterRoot,
-       _webBuilDirectory = webBuilDirectory,
+       _webBuildDirectory = webBuilDirectory,
        _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform);
 
   final Uri entrypoint;
   final String _flutterRoot;
-  final String _webBuilDirectory;
+  final String _webBuildDirectory;
   final FileSystem _fileSystem;
   final FileSystemUtils _fileSystemUtils;
   final Platform _platform;
 
   // Locations where source files, assets, or source maps may be located.
   List<Uri> _searchPaths() => <Uri>[
-    _fileSystem.directory(_webBuilDirectory).uri,
+    _fileSystem.directory(_webBuildDirectory).uri,
     _fileSystem.directory(_flutterRoot).uri,
     _fileSystem.directory(_flutterRoot).parent.uri,
     _fileSystem.currentDirectory.uri,
@@ -878,7 +878,7 @@ class ReleaseAssetServer {
       });
     }
     if (request.url.path == '') {
-      final File file = _fileSystem.file(_fileSystem.path.join(_webBuilDirectory, 'index.html'));
+      final File file = _fileSystem.file(_fileSystem.path.join(_webBuildDirectory, 'index.html'));
       return shelf.Response.ok(file.readAsBytesSync(), headers: <String, String>{
         'Content-Type': 'text/html',
       });
