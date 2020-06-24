@@ -49,7 +49,7 @@ void main() {
       fileSystem: fileSystem,
       platform: platform,
       flutterRoot: '/flutter',
-      webBuilDirectory: 'build/web',
+      webBuildDirectory: 'build/web',
     );
     fileSystem.file('build/web/assets/foo.png')
       ..createSync(recursive: true)
@@ -68,7 +68,7 @@ void main() {
       fileSystem: fileSystem,
       platform: platform,
       flutterRoot: '/flutter',
-      webBuilDirectory: 'build/web',
+      webBuildDirectory: 'build/web',
     );
     fileSystem.file('build/web/assets/foo.js')
       ..createSync(recursive: true)
@@ -87,7 +87,7 @@ void main() {
       fileSystem: fileSystem,
       platform: platform,
       flutterRoot: '/flutter',
-      webBuilDirectory: 'build/web',
+      webBuildDirectory: 'build/web',
     );
     fileSystem.file('build/web/assets/foo.html')
       ..createSync(recursive: true)
@@ -106,7 +106,7 @@ void main() {
       fileSystem: fileSystem,
       platform: platform,
       flutterRoot: '/flutter',
-      webBuilDirectory: 'build/web',
+      webBuildDirectory: 'build/web',
     );
     fileSystem.file('flutter/bar.dart')
       ..createSync(recursive: true)
@@ -122,7 +122,7 @@ void main() {
       fileSystem: fileSystem,
       platform: platform,
       flutterRoot: '/flutter',
-      webBuilDirectory: 'build/web',
+      webBuildDirectory: 'build/web',
     );
     fileSystem.file('bar.dart')
       ..createSync(recursive: true)
