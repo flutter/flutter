@@ -10,8 +10,8 @@ import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../cmake.dart';
 import '../globals.dart' as globals;
-import '../linux/cmake.dart';  // XXX Move, obviously.
 import '../plugins.dart';
 import '../project.dart';
 import 'property_sheet.dart';

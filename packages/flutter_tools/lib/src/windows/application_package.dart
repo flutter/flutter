@@ -5,12 +5,10 @@
 import 'package:meta/meta.dart';
 
 import '../application_package.dart';
-import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/utils.dart';
 import '../build_info.dart';
+import '../cmake.dart';
 import '../globals.dart' as globals;
-import '../linux/cmake.dart';
 import '../project.dart';
 
 abstract class WindowsApp extends ApplicationPackage {
