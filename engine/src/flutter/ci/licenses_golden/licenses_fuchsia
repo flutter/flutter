@@ -1,4 +1,4 @@
-Signature: 214e648a06a82df687b4a2176ba8b6c6
+Signature: a384793ebe71e1058402432bcc7536c1
 
 UNUSED LICENSES:
 
@@ -1485,7 +1485,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/fd.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl-async/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/envelope_frames.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/internal_callable_traits.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/txn_header.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/visitor.h
