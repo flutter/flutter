@@ -63,6 +63,8 @@ class ImageSizeInfo {
   int get decodedSizeInBytes => _sizeToBytes(imageSize);
 
   int _sizeToBytes(Size size) {
+    // Assume 4 bytes per pixel and that mipmapping will be used, which adds
+    // 4/3.
     return (size.width * size.height * 4 * (4/3)).toInt();
   }
 
@@ -98,7 +100,7 @@ class ImageSizeInfo {
   int get hashCode => hashValues(source, displaySize, imageSize);
 
   @override
-  String toString() => 'ImageSizeInfo($source, imageSize: $imageSize displaySize: $displaySize)';
+  String toString() => 'ImageSizeInfo($source, imageSize: $imageSize, displaySize: $displaySize)';
 }
 
 /// If not null, called when the framework is about to paint an [Image] to a
