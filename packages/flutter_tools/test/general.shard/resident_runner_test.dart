@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -92,7 +93,7 @@ void main() {
 
   setUp(() {
     testbed = Testbed(setup: () {
-      globals.fs.file('.packages').writeAsStringSync('\n');
+      globals.fs.file(globalPackagesPath).writeAsStringSync('\n');
       globals.fs.file(globals.fs.path.join('build', 'app.dill'))
         ..createSync(recursive: true)
         ..writeAsStringSync('ABC');
@@ -844,6 +845,11 @@ void main() {
       'data': <String, Object>{'A': 'B'}
     });
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  }, overrides: <Type, Generator>{
+    FileSystemUtils: () => FileSystemUtils(
+      fileSystem: globals.fs,
+      platform: globals.platform,
+    )
   }));
 
   testUsingContext('ResidentRunner can take screenshot on debug device', () => testbed.run(() async {
