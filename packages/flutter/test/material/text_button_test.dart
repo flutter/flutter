@@ -554,46 +554,30 @@ void main() {
 
 
   testWidgets('TextButton size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
-    final Key key1 = UniqueKey();
-    await tester.pumpWidget(
-      Theme(
-        data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.padded),
+    Widget buildFrame(MaterialTapTargetSize tapTargetSize, Key key) {
+      return Theme(
+        data: ThemeData(materialTapTargetSize: tapTargetSize),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Material(
             child: Center(
               child: TextButton(
-                key: key1,
+                key: key,
                 child: const SizedBox(width: 50.0, height: 8.0),
                 onPressed: () { },
               ),
             ),
           ),
         ),
-      ),
-    );
+      );
+    }
 
+    final Key key1 = UniqueKey();
+    await tester.pumpWidget(buildFrame(MaterialTapTargetSize.padded, key1));
     expect(tester.getSize(find.byKey(key1)), const Size(66.0, 48.0));
 
     final Key key2 = UniqueKey();
-    await tester.pumpWidget(
-      Theme(
-        data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Material(
-            child: Center(
-              child: TextButton(
-                key: key2,
-                child: const SizedBox(width: 50.0, height: 8.0),
-                onPressed: () { },
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-
+    await tester.pumpWidget(buildFrame(MaterialTapTargetSize.shrinkWrap, key2));
     expect(tester.getSize(find.byKey(key2)), const Size(66.0, 36.0));
   });
 

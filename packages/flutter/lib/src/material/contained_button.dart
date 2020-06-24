@@ -39,7 +39,7 @@ import 'theme_data.dart';
 /// buttons in a subtree can be overridden with the
 /// [ContainedButtonTheme], and the style of all of the contained
 /// buttons in an app can be overridden with the [Theme]'s
-/// [ThemeData.textButtonTheme] property.
+/// [ThemeData.containedButtonTheme] property.
 ///
 /// The static [styleFrom] method is a convenient way to create a
 /// contained button [ButtonStyle] from simple values.
@@ -50,7 +50,7 @@ import 'theme_data.dart';
 /// See also:
 ///
 ///  * [TextButton], a simple flat button without a shadow.
-///  * [OultinedButton], a [TextButton] with a border outline.
+///  * [OutlinedButton], a [TextButton] with a border outline.
 ///  * <https://material.io/design/components/buttons.html>
 class ContainedButton extends ButtonStyleButton {
   /// Create a ContainedButton.

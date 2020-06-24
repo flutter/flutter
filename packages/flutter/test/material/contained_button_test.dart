@@ -424,6 +424,36 @@ void main() {
     expect(inkFeatures, paints..rect(color: focusColor));
   });
 
+  testWidgets('Does ContainedButton work with autofocus', (WidgetTester tester) async {
+    const Color focusColor = Color(0xff001122);
+
+    Color getOverlayColor(Set<MaterialState> states) {
+      return states.contains(MaterialState.focused) ? focusColor : null;
+    }
+
+    final FocusNode focusNode = FocusNode(debugLabel: 'ContainedButton Node');
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ContainedButton(
+          autofocus: true,
+          style: ButtonStyle(
+            overlayColor: MaterialStateProperty.resolveWith<Color>(getOverlayColor),
+          ),
+          focusNode: focusNode,
+          onPressed: () { },
+          child: const Text('button'),
+        ),
+      ),
+    );
+
+    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    await tester.pumpAndSettle();
+
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paints..rect(color: focusColor));
+  });
+
   testWidgets('Does ContainedButton contribute semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
@@ -472,7 +502,6 @@ void main() {
   });
 
   testWidgets('ContainedButton size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
-    final Key key1 = UniqueKey();
     final ButtonStyle style = ButtonStyle(
       // Specifying minimumSize to mimic the original minimumSize for
       // RaisedButton so that the corresponding button size matches
@@ -480,15 +509,15 @@ void main() {
       minimumSize: MaterialStateProperty.all<Size>(const Size(88, 36)),
     );
 
-    await tester.pumpWidget(
-      Theme(
-        data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.padded),
+    Widget buildFrame(MaterialTapTargetSize tapTargetSize, Key key) {
+      return Theme(
+        data: ThemeData(materialTapTargetSize: tapTargetSize),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Material(
             child: Center(
               child: ContainedButton(
-                key: key1,
+                key: key,
                 style: style,
                 child: const SizedBox(width: 50.0, height: 8.0),
                 onPressed: () { },
@@ -496,31 +525,15 @@ void main() {
             ),
           ),
         ),
-      ),
-    );
+      );
+    }
 
+    final Key key1 = UniqueKey();
+    await tester.pumpWidget(buildFrame(MaterialTapTargetSize.padded, key1));
     expect(tester.getSize(find.byKey(key1)), const Size(88.0, 48.0));
 
     final Key key2 = UniqueKey();
-    await tester.pumpWidget(
-      Theme(
-        data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Material(
-            child: Center(
-              child: ContainedButton(
-                style: style,
-                key: key2,
-                child: const SizedBox(width: 50.0, height: 8.0),
-                onPressed: () { },
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-
+    await tester.pumpWidget(buildFrame(MaterialTapTargetSize.shrinkWrap, key2));
     expect(tester.getSize(find.byKey(key2)), const Size(88.0, 36.0));
   });
 

@@ -53,7 +53,7 @@ import 'theme_data.dart';
 ///
 /// See also:
 ///
-///  * [OultinedButton], a [TextButton] with a border outline.
+///  * [OutlinedButton], a [TextButton] with a border outline.
 ///  * [ContainedButton], a filled button whose material elevates when pressed.
 ///  * <https://material.io/design/components/buttons.html>
 class TextButton extends ButtonStyleButton {
@@ -83,8 +83,8 @@ class TextButton extends ButtonStyleButton {
   /// Create a text button from a pair of widgets that serve as the button's
   /// [icon] and [label].
   ///
-  /// The icon and label are arranged in a row and padded by 12 logical pixels
-  /// at the start, and 16 at the end, with an 8 pixel gap in between.
+  /// The icon and label are arranged in a row and padded by 8 logical pixels
+  /// at the ends, with an 8 pixel gap in between.
   ///
   /// The [icon] and [label] arguments must not be null.
   factory TextButton.icon({

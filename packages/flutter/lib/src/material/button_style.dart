@@ -136,7 +136,7 @@ class ButtonStyle with Diagnosticable {
   final MaterialStateProperty<Color> foregroundColor;
 
   /// The highlight color that's typically used to indicate that
-  /// the button is focused or hovered, pressed.
+  /// the button is focused, hovered, or pressed.
   final MaterialStateProperty<Color> overlayColor;
 
   /// The shadow color of the button's [Material].
