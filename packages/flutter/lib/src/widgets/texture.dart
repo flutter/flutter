@@ -48,11 +48,12 @@ class Texture extends LeafRenderObjectWidget {
   final int textureId;
 
   /// {@template FilterQuality}
-  /// The quality of sampling texture the texture and rendering it on screen.
+  /// The quality of sampling the texture and rendering it on screen.
   ///
-  /// Use the [FilterQuality.low] quality setting to scale the texture, which corresponds to
-  /// bilinear interpolation, and the [FilterQuality.none] corresponds
-  /// to nearest-neighbor.
+  /// When the texture is scaled, a default [FilterQuality.low] is used for a higher quality but slower
+  /// interpolation (typically bilinear). It can be changed to [FilterQuality.none] for a lower quality but
+  /// faster interpolation (typically nearest-neighbor). See also [FilterQuality.medium] and
+  /// [FilterQuality.high] for more options.
   /// {@endtemplate}
   final FilterQuality filterQuality;
 
