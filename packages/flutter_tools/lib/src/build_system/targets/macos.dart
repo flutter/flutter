@@ -211,7 +211,7 @@ class CompileMacOSFramework extends Target {
       buildMode: buildMode,
       mainPath: environment.buildDir.childFile('app.dill').path,
       outputPath: environment.buildDir.path,
-      platform: TargetPlatform.darwin,
+      platform: TargetPlatform.darwin_x64,
       darwinArch: DarwinArch.x86_64,
       packagesPath: environment.projectDir.childFile('.packages').path,
       splitDebugInfo: splitDebugInfo,
@@ -232,7 +232,7 @@ class CompileMacOSFramework extends Target {
   List<Source> get inputs => const <Source>[
     Source.pattern('{BUILD_DIR}/app.dill'),
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/macos.dart'),
-    Source.artifact(Artifact.genSnapshot, mode: BuildMode.release, platform: TargetPlatform.darwin),
+    Source.artifact(Artifact.genSnapshot, mode: BuildMode.release, platform: TargetPlatform.darwin_x64),
   ];
 
   @override
@@ -296,7 +296,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
     final Depfile assetDepfile = await copyAssets(
       environment,
       assetDirectory,
-      targetPlatform: TargetPlatform.darwin,
+      targetPlatform: TargetPlatform.darwin_x64,
     );
     final DepfileService depfileService = DepfileService(
       fileSystem: globals.fs,
@@ -346,9 +346,9 @@ abstract class MacOSBundleFlutterAssets extends Target {
       // Copy precompiled runtimes.
       try {
         final String vmSnapshotData = globals.artifacts.getArtifactPath(Artifact.vmSnapshotData,
-            platform: TargetPlatform.darwin, mode: BuildMode.debug);
+            platform: TargetPlatform.darwin_x64, mode: BuildMode.debug);
         final String isolateSnapshotData = globals.artifacts.getArtifactPath(Artifact.isolateSnapshotData,
-            platform: TargetPlatform.darwin, mode: BuildMode.debug);
+            platform: TargetPlatform.darwin_x64, mode: BuildMode.debug);
         globals.fs.file(vmSnapshotData).copySync(
             assetDirectory.childFile('vm_snapshot_data').path);
         globals.fs.file(isolateSnapshotData).copySync(
@@ -409,8 +409,8 @@ class DebugMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
   List<Source> get inputs => <Source>[
     ...super.inputs,
     const Source.pattern('{BUILD_DIR}/app.dill'),
-    const Source.artifact(Artifact.isolateSnapshotData, platform: TargetPlatform.darwin, mode: BuildMode.debug),
-    const Source.artifact(Artifact.vmSnapshotData, platform: TargetPlatform.darwin, mode: BuildMode.debug),
+    const Source.artifact(Artifact.isolateSnapshotData, platform: TargetPlatform.darwin_x64, mode: BuildMode.debug),
+    const Source.artifact(Artifact.vmSnapshotData, platform: TargetPlatform.darwin_x64, mode: BuildMode.debug),
   ];
 
   @override

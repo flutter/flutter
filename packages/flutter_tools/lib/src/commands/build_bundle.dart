@@ -100,17 +100,17 @@ class BuildBundleCommand extends BuildSubCommand {
     }
     // Check for target platforms that are only allowed via feature flags.
     switch (platform) {
-      case TargetPlatform.darwin:
+      case TargetPlatform.darwin_x64:
         if (!featureFlags.isMacOSEnabled) {
           throwToolExit('macOS is not a supported target platform.');
         }
         break;
-      case TargetPlatform.windows:
+      case TargetPlatform.windows_x64:
         if (!featureFlags.isWindowsEnabled) {
           throwToolExit('Windows is not a supported target platform.');
         }
         break;
-      case TargetPlatform.linux:
+      case TargetPlatform.linux_x64:
         if (!featureFlags.isLinuxEnabled) {
           throwToolExit('Linux is not a supported target platform.');
         }
