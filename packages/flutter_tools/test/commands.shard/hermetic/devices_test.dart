@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/devices.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -23,9 +24,19 @@ void main() {
       Cache.disableLocking();
     });
 
+    MockCache cache;
+
+    setUp(() {
+      cache = MockCache();
+      when(cache.dyLdLibEntry).thenReturn(const MapEntry<String, String>('foo', 'bar'));
+    });
+
     testUsingContext('returns 0 when called', () async {
       final DevicesCommand command = DevicesCommand();
       await createTestCommandRunner(command).run(<String>['devices']);
+    }, overrides: <Type, Generator>{
+      Cache: () => cache,
+      Artifacts: () => Artifacts.test(),
     });
 
     testUsingContext('no error when no connected devices', () async {
@@ -36,6 +47,8 @@ void main() {
       AndroidSdk: () => null,
       DeviceManager: () => NoDevicesManager(),
       ProcessManager: () => MockProcessManager(),
+      Cache: () => cache,
+      Artifacts: () => Artifacts.test(),
     });
 
     testUsingContext('get devices\' platform types', () async {
@@ -46,6 +59,8 @@ void main() {
     }, overrides: <Type, Generator>{
       DeviceManager: () => _FakeDeviceManager(),
       ProcessManager: () => MockProcessManager(),
+      Cache: () => cache,
+      Artifacts: () => Artifacts.test(),
     });
 
     testUsingContext('Outputs parsable JSON with --machine flag', () async {
@@ -93,6 +108,8 @@ void main() {
     }, overrides: <Type, Generator>{
       DeviceManager: () => _FakeDeviceManager(),
       ProcessManager: () => MockProcessManager(),
+      Cache: () => cache,
+      Artifacts: () => Artifacts.test(),
     });
 
     testUsingContext('available devices and diagnostics', () async {
@@ -169,3 +186,5 @@ class NoDevicesManager extends DeviceManager {
   Future<List<Device>> refreshAllConnectedDevices({Duration timeout}) =>
     getAllConnectedDevices();
 }
+
+class MockCache extends Mock implements Cache {}
