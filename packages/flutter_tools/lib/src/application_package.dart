@@ -52,7 +52,7 @@ class ApplicationPackageFactory {
             : IOSApp.fromPrebuiltApp(applicationBinary);
       case TargetPlatform.tester:
         return FlutterTesterApp.fromCurrentDirectory();
-      case TargetPlatform.darwin:
+      case TargetPlatform.darwin_x64:
         return applicationBinary == null
             ? MacOSApp.fromMacOSProject(FlutterProject.current().macos)
             : MacOSApp.fromPrebuiltApp(applicationBinary);
@@ -61,11 +61,11 @@ class ApplicationPackageFactory {
           return null;
         }
         return WebApplicationPackage(FlutterProject.current());
-      case TargetPlatform.linux:
+      case TargetPlatform.linux_x64:
         return applicationBinary == null
             ? LinuxApp.fromLinuxProject(FlutterProject.current().linux)
             : LinuxApp.fromPrebuiltApp(applicationBinary);
-      case TargetPlatform.windows:
+      case TargetPlatform.windows_x64:
         return applicationBinary == null
             ? WindowsApp.fromWindowsProject(FlutterProject.current().windows)
             : WindowsApp.fromPrebuiltApp(applicationBinary);
@@ -436,13 +436,13 @@ class ApplicationPackageStore {
       case TargetPlatform.fuchsia_x64:
         fuchsia ??= FuchsiaApp.fromFuchsiaProject(FlutterProject.current().fuchsia);
         return fuchsia;
-      case TargetPlatform.darwin:
+      case TargetPlatform.darwin_x64:
         macOS ??= MacOSApp.fromMacOSProject(FlutterProject.current().macos);
         return macOS;
-      case TargetPlatform.linux:
+      case TargetPlatform.linux_x64:
         linux ??= LinuxApp.fromLinuxProject(FlutterProject.current().linux);
         return linux;
-      case TargetPlatform.windows:
+      case TargetPlatform.windows_x64:
         windows ??= WindowsApp.fromWindowsProject(FlutterProject.current().windows);
         return windows;
       case TargetPlatform.tester:

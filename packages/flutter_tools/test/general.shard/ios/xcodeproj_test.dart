@@ -554,7 +554,7 @@ Information about project "Runner":
 
     testUsingOsxContext('do not set OTHER_LDFLAGS for macOS', () async {
       when(mockArtifacts.getArtifactPath(Artifact.flutterMacOSFramework,
-          platform: TargetPlatform.darwin, mode: anyNamed('mode'))).thenReturn(fs.path.join('engine', 'FlutterMacOS.framework'));
+          platform: TargetPlatform.darwin_x64, mode: anyNamed('mode'))).thenReturn(fs.path.join('engine', 'FlutterMacOS.framework'));
       when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
 
       const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);

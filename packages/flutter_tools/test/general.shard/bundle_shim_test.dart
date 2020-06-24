@@ -59,7 +59,7 @@ void main() {
       flutterProject: FlutterProject.current(),
       mainPath: 'lib/main.dart',
       outputDir: 'example',
-      targetPlatform: TargetPlatform.linux,
+      targetPlatform: TargetPlatform.linux_x64,
       depfilePath: 'example.d',
       precompiled: false,
       treeShakeIcons: false,

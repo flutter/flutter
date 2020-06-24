@@ -31,7 +31,7 @@ void main() {
 
     testUsingContext('defaults', () async {
       final PrebuiltWindowsApp windowsApp = PrebuiltWindowsApp(executable: 'foo');
-      expect(await device.targetPlatform, TargetPlatform.windows);
+      expect(await device.targetPlatform, TargetPlatform.windows_x64);
       expect(device.name, 'Windows desktop');
       expect(await device.installApp(windowsApp), true);
       expect(await device.uninstallApp(windowsApp), true);

@@ -273,7 +273,7 @@ String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String bui
     return null;
   }
   if (targetPlatform == TargetPlatform.ios ||
-      targetPlatform == TargetPlatform.darwin) {
+      targetPlatform == TargetPlatform.darwin_x64) {
     // See CFBundleVersion at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
     final RegExp disallowed = RegExp(r'[^\d\.]');
     String tmpBuildNumber = buildNumber.replaceAll(disallowed, '');
@@ -320,7 +320,7 @@ String validatedBuildNameForPlatform(TargetPlatform targetPlatform, String build
     return null;
   }
   if (targetPlatform == TargetPlatform.ios ||
-      targetPlatform == TargetPlatform.darwin) {
+      targetPlatform == TargetPlatform.darwin_x64) {
     // See CFBundleShortVersionString at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
     final RegExp disallowed = RegExp(r'[^\d\.]');
     String tmpBuildName = buildName.replaceAll(disallowed, '');
@@ -370,11 +370,8 @@ bool isEmulatorBuildMode(BuildMode mode) {
 
 enum HostPlatform {
   darwin_x64,
-  darwin_arm64,
   linux_x64,
-  linux_arm64,
   windows_x64,
-  windows_arm64,
 }
 
 String getNameForHostPlatform(HostPlatform platform) {
@@ -385,12 +382,6 @@ String getNameForHostPlatform(HostPlatform platform) {
       return 'linux-x64';
     case HostPlatform.windows_x64:
       return 'windows-x64';
-    case HostPlatform.darwin_arm64:
-      return 'darwin-arm64';
-    case HostPlatform.linux_arm64:
-      return 'linux-arm64';
-    case HostPlatform.windows_arm64:
-      return 'windows-arm64';
   }
   assert(false);
   return null;
@@ -399,9 +390,9 @@ String getNameForHostPlatform(HostPlatform platform) {
 enum TargetPlatform {
   android,
   ios,
-  darwin,
-  linux,
-  windows,
+  darwin_x64,
+  linux_x64,
+  windows_x64,
   fuchsia_arm64,
   fuchsia_x64,
   tester,
@@ -414,16 +405,6 @@ enum TargetPlatform {
   android_arm64,
   android_x64,
   android_x86,
-}
-
-enum WindowsArch {
-  x86_64,
-  arm64,
-}
-
-enum LinuxArch {
-  x86_64,
-  arm64,
 }
 
 /// iOS and macOS target device architecture.
@@ -491,11 +472,11 @@ String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch darwinArch}
         return 'ios-${getNameForDarwinArch(darwinArch)}';
       }
       return 'ios';
-    case TargetPlatform.darwin:
+    case TargetPlatform.darwin_x64:
       return 'darwin-x64';
-    case TargetPlatform.linux:
+    case TargetPlatform.linux_x64:
       return 'linux-x64';
-    case TargetPlatform.windows:
+    case TargetPlatform.windows_x64:
       return 'windows-x64';
     case TargetPlatform.fuchsia_arm64:
       return 'fuchsia-arm64';
@@ -531,11 +512,11 @@ TargetPlatform getTargetPlatformForName(String platform) {
     case 'ios':
       return TargetPlatform.ios;
     case 'darwin-x64':
-      return TargetPlatform.darwin;
+      return TargetPlatform.darwin_x64;
     case 'linux-x64':
-      return TargetPlatform.linux;
+      return TargetPlatform.linux_x64;
     case 'windows-x64':
-      return TargetPlatform.windows;
+      return TargetPlatform.windows_x64;
     case 'web-javascript':
       return TargetPlatform.web_javascript;
   }
