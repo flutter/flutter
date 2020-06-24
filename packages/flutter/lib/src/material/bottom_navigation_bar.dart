@@ -459,10 +459,10 @@ class _BottomNavigationTile extends StatelessWidget {
         break;
     }
 
-    Widget result = Semantics(
-      container: true,
-      selected: selected,
-      child: MergeSemantics(
+    Widget result = MergeSemantics(
+      child: Semantics(
+        container: true,
+        selected: selected,
         child: Stack(
           children: <Widget>[
             Tooltip(
@@ -504,7 +504,7 @@ class _BottomNavigationTile extends StatelessWidget {
             ),
             Semantics(
               label: indexLabel,
-            )
+            ),
           ],
         ),
       ),
