@@ -1,4 +1,4 @@
-Signature: 76822531f26e9948a5e403885dc5c243
+Signature: 43862d802a31aeaae4581a62865a66d2
 
 UNUSED LICENSES:
 
@@ -5225,6 +5225,7 @@ FILE: ../../../third_party/skia/experimental/skrive/src/Artboard.cpp
 FILE: ../../../third_party/skia/experimental/skrive/src/Color.cpp
 FILE: ../../../third_party/skia/experimental/skrive/src/Component.cpp
 FILE: ../../../third_party/skia/experimental/skrive/src/Drawable.cpp
+FILE: ../../../third_party/skia/experimental/skrive/src/Ellipse.cpp
 FILE: ../../../third_party/skia/experimental/skrive/src/Node.cpp
 FILE: ../../../third_party/skia/experimental/skrive/src/Paint.cpp
 FILE: ../../../third_party/skia/experimental/skrive/src/Shape.cpp
