@@ -322,7 +322,7 @@ class DecorationImagePainter {
 }
 
 /// Used by [paintImage] to report image sizes drawn at the end of the frame.
-List<ImageSizeInfo> _pendingImageSizeInfo = <ImageSizeInfo>[];
+Map<String, ImageSizeInfo> _pendingImageSizeInfo = <String, ImageSizeInfo>{};
 
 /// [ImageSizeInfo]s that were reported on the last frame.
 ///
@@ -466,23 +466,27 @@ void paintImage({
     );
     // Avoid emitting events that are the same as those emitted in the last frame.
     if (!_lastFrameImageSizeInfo.contains(sizeInfo)) {
-      _pendingImageSizeInfo.add(sizeInfo);
+      final ImageSizeInfo existingSizeInfo = _pendingImageSizeInfo[sizeInfo.source];
+      if (existingSizeInfo == null || existingSizeInfo.displaySizeInBytes < sizeInfo.displaySizeInBytes) {
+        _pendingImageSizeInfo[sizeInfo.source] = sizeInfo;
+      }
+      // _pendingImageSizeInfo.add(sizeInfo);
       if (debugOnPaintImage != null) {
         debugOnPaintImage(sizeInfo);
       }
       SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
-        _lastFrameImageSizeInfo = _pendingImageSizeInfo.toSet();
+        _lastFrameImageSizeInfo = _pendingImageSizeInfo.values.toSet();
         if (_pendingImageSizeInfo.isEmpty) {
           return;
         }
         developer.postEvent(
           'Flutter.ImageSizesForFrame',
           <Object, Object>{
-            for (ImageSizeInfo imageSizeInfo in _pendingImageSizeInfo)
+            for (ImageSizeInfo imageSizeInfo in _pendingImageSizeInfo.values)
               imageSizeInfo.source: imageSizeInfo.toJson()
           },
         );
-        _pendingImageSizeInfo = <ImageSizeInfo>[];
+        _pendingImageSizeInfo = <String, ImageSizeInfo>{};
       });
 
     }
