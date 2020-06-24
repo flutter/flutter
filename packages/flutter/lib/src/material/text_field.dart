@@ -93,7 +93,11 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
       switch (Theme.of(_state.context).platform) {
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
-          renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
+          if (details.kind == PointerDeviceKind.mouse) {
+            renderEditable.selectPosition(cause: SelectionChangedCause.tap);
+          } else {
+            renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
+          }
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:

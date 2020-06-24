@@ -480,6 +480,7 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
         onTapUp!(pointer, TapUpDetails(
           localPosition: position.local,
           globalPosition: position.global,
+          kind: getKindForPointer(pointer),
         ));
       });
     if (onTap != null)
