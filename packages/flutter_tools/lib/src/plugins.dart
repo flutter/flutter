@@ -781,7 +781,7 @@ const String _cppPluginRegistryImplementationTemplate = '''
 #include "generated_plugin_registrant.h"
 
 {{#plugins}}
-#include <{{filename}}.h>
+#include <{{name}}/{{filename}}.h>
 {{/plugins}}
 
 void RegisterPlugins(flutter::PluginRegistry* registry) {
