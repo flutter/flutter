@@ -17,8 +17,6 @@ import 'features.dart';
 import 'globals.dart' as globals;
 import 'platform_plugins.dart';
 import 'project.dart';
-import 'windows/property_sheet.dart';
-import 'windows/visual_studio_solution_utils.dart';
 
 void _renderTemplateToFile(String template, dynamic context, String filePath) {
   final String renderedTemplate = globals.templateRenderer
@@ -966,7 +964,7 @@ List<Plugin> _filterNativePlugins(List<Plugin> plugins, String platformKey) {
 Future<void> _writeWindowsPluginFiles(FlutterProject project, List<Plugin> plugins) async {
   final List<Plugin>nativePlugins = _filterNativePlugins(plugins, WindowsPlugin.kConfigKey);
   final List<Map<String, dynamic>> windowsPlugins = _extractPlatformMaps(nativePlugins, WindowsPlugin.kConfigKey);
-    // The generated file is checked in, so can't use absolute paths. It is
+  // The generated file is checked in, so can't use absolute paths. It is
   // included by the main CMakeLists.txt, so relative paths must be relative to
   // that file's directory.
   final String makefileDirPath = project.windows.cmakeFile.parent.absolute.path;
@@ -979,7 +977,6 @@ Future<void> _writeWindowsPluginFiles(FlutterProject project, List<Plugin> plugi
     ),
   };
   await _writeCppPluginRegistrant(project.windows.managedDirectory, context);
-  await _writeWindowsPluginProperties(project.windows, windowsPlugins);
   await _writePluginCmakefile(project.windows.generatedPluginCmakeFile, context);
 }
 
@@ -995,20 +992,6 @@ Future<void> _writeCppPluginRegistrant(Directory destination, Map<String, dynami
     templateContext,
     globals.fs.path.join(registryDirectory, 'generated_plugin_registrant.cc'),
   );
-}
-
-Future<void> _writeWindowsPluginProperties(WindowsProject project, List<Map<String, dynamic>> windowsPlugins) async {
-  final List<String> pluginLibraryFilenames = windowsPlugins.map(
-    (Map<String, dynamic> plugin) => '${plugin['name']}_plugin.lib').toList();
-  // Use paths relative to the VS project directory.
-  final String projectDir = project.vcprojFile.parent.path;
-  final String symlinkDirPath = project.pluginSymlinkDirectory.path.substring(projectDir.length + 1);
-  final List<String> pluginIncludePaths = windowsPlugins.map((Map<String, dynamic> plugin) =>
-    globals.fs.path.join(symlinkDirPath, plugin['name'] as String, 'windows')).toList();
-  project.generatedPluginPropertySheetFile.writeAsStringSync(PropertySheet(
-    includePaths: pluginIncludePaths,
-    libraryDependencies: pluginLibraryFilenames,
-  ).toString());
 }
 
 Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
@@ -1151,9 +1134,6 @@ Future<void> injectPlugins(FlutterProject project, {bool checkProjects = false})
   }
   if (featureFlags.isWindowsEnabled && project.windows.existsSync()) {
     await _writeWindowsPluginFiles(project, plugins);
-
-    final List<Plugin> nativePlugins = _filterNativePlugins(plugins, WindowsPlugin.kConfigKey);
-    await VisualStudioSolutionUtils(project: project.windows, fileSystem: globals.fs).updatePlugins(nativePlugins);
   }
   for (final XcodeBasedProject subproject in <XcodeBasedProject>[project.ios, project.macos]) {
     if (!project.isModule && (!checkProjects || subproject.existsSync())) {

@@ -1021,7 +1021,7 @@ class WindowsProject extends FlutterProjectPlatform implements CmakeBasedProject
   String get pluginConfigKey => WindowsPlugin.kConfigKey;
 
   @override
-  bool existsSync() => _editableDirectory.existsSync() && solutionFile.existsSync();
+  bool existsSync() => _editableDirectory.existsSync() && cmakeFile.existsSync();
 
   @override
   File get cmakeFile => _editableDirectory.childFile('CMakeLists.txt');
@@ -1043,26 +1043,6 @@ class WindowsProject extends FlutterProjectPlatform implements CmakeBasedProject
   /// generated on the fly. All generated files that are not intended to be
   /// checked in should live here.
   Directory get ephemeralDirectory => managedDirectory.childDirectory('ephemeral');
-
-  /// Contains definitions for FLUTTER_ROOT, LOCAL_ENGINE, and more flags for
-  /// the build.
-  File get generatedPropertySheetFile => ephemeralDirectory.childFile('Generated.props');
-
-// XXX Remove unused getters.
-  /// Contains configuration to add plugins to the build.
-  File get generatedPluginPropertySheetFile => managedDirectory.childFile('GeneratedPlugins.props');
-
-  // The MSBuild project file.
-  File get vcprojFile => _editableDirectory.childFile('Runner.vcxproj');
-
-  // The MSBuild solution file.
-  File get solutionFile => _editableDirectory.childFile('Runner.sln');
-
-// XXX Share the Linux logic.
-  /// The file where the VS build will write the name of the built app.
-  ///
-  /// Ideally this will be replaced in the future with inspection of the project.
-  File get nameFile => ephemeralDirectory.childFile('exe_filename');
 
   /// The directory to write plugin symlinks.
   Directory get pluginSymlinkDirectory => ephemeralDirectory.childDirectory('.plugin_symlinks');
