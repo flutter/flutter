@@ -389,6 +389,28 @@ class FlutterErrorDetails with Diagnosticable {
     this.silent = false,
   });
 
+  /// Creates a copy of the error details but with the given fields replaced
+  /// with new values.
+  FlutterErrorDetails copyWith({
+    DiagnosticsNode context,
+    dynamic exception,
+    InformationCollector informationCollector,
+    String library,
+    bool silent,
+    StackTrace stack,
+    IterableFilter<String> stackFilter,
+  }) {
+    return FlutterErrorDetails(
+      context: context ?? this.context,
+      exception: exception ?? this.exception,
+      informationCollector: informationCollector ?? this.informationCollector,
+      library: library ?? this.library,
+      silent: silent ?? this.silent,
+      stack: stack ?? this.stack,
+      stackFilter: stackFilter ?? this.stackFilter,
+    );
+  }
+
   /// Transformers to transform [DiagnosticsNode] in [DiagnosticPropertiesBuilder]
   /// into a more descriptive form.
   ///

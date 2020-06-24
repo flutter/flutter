@@ -122,6 +122,9 @@ abstract class MaterialLocalizations {
   /// Title for the [LicensePage] widget.
   String get licensesPageTitle;
 
+  /// Subtitle for a package in the [LicensePage] widget.
+  String licensesPackageDetailText(int licenseCount);
+
   /// Title for the [PaginatedDataTable]'s row info footer.
   String pageRowsInfoTitle(int firstRow, int lastRow, int rowCount, bool rowCountIsApproximate);
 
@@ -859,6 +862,17 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Licenses';
+
+  @override
+  String licensesPackageDetailText(int licenseCount) {
+    assert (licenseCount >= 1);
+    switch (licenseCount) {
+      case 1:
+        return '1 license';
+      default:
+        return '$licenseCount licenses';
+    }
+  }
 
   @override
   String pageRowsInfoTitle(int firstRow, int lastRow, int rowCount, bool rowCountIsApproximate) {
