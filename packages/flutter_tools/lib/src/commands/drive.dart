@@ -504,12 +504,12 @@ void restoreTestRunner() {
 Future<void> _runTests(List<String> testArgs, Map<String, String> environment) async {
   globals.printTrace('Running driver tests.');
 
-  globalPackagesPath = globals.fs.path.normalize(globals.fs.path.absolute(globalPackagesPath));
+  globalPackagesPath = globals.fs.path.normalize(globals.fs.path.absolute(globalPackagesPathDepreactedNoUse));
   final int result = await processUtils.stream(
     <String>[
       globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
       ...testArgs,
-      '--packages=$globalPackagesPath',
+      '--packages=$globalPackagesPathDepreactedNoUse',
       '-rexpanded',
     ],
     environment: environment,

@@ -418,7 +418,7 @@ class MockFlutterDevice extends Mock implements FlutterDevice {}
 
 class TestRunner extends ResidentRunner {
   TestRunner(List<FlutterDevice> devices)
-    : super(devices);
+    : super(devices, debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug));
 
   bool hasHelpBeenPrinted = false;
   String receivedCommand;

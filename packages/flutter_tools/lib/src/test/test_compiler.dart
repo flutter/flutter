@@ -107,7 +107,7 @@ class TestCompiler {
       initializeFromDill: testFilePath,
       unsafePackageSerialization: false,
       dartDefines: const <String>[],
-      packagesPath: globalPackagesPath,
+      packagesPath: globalPackagesPathDepreactedNoUse,
       extraFrontEndOptions: extraFrontEndOptions,
     );
     if (flutterProject.hasBuilders) {
@@ -133,7 +133,7 @@ class TestCompiler {
     }
     if (_packageConfig == null) {
       _packageConfig ??= await loadPackageConfigWithLogging(
-        globals.fs.file(globalPackagesPath),
+        globals.fs.file(globalPackagesPathDepreactedNoUse),
         logger: globals.logger,
       );
       // Compilation will fail if there is no flutter_test dependency, since

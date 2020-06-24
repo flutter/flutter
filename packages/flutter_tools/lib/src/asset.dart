@@ -51,7 +51,7 @@ abstract class AssetBundle {
   Future<int> build({
     String manifestPath = defaultManifestPath,
     String assetDirPath,
-    String packagesPath,
+    @required String packagesPath,
     bool includeDefaultFonts = true,
     bool reportLicensedPackages = false,
   });
@@ -122,12 +122,11 @@ class ManifestAssetBundle implements AssetBundle {
   Future<int> build({
     String manifestPath = defaultManifestPath,
     String assetDirPath,
-    String packagesPath,
+    @required String packagesPath,
     bool includeDefaultFonts = true,
     bool reportLicensedPackages = false,
   }) async {
     assetDirPath ??= getAssetBuildDirectory();
-    packagesPath ??= globals.fs.path.absolute(globalPackagesPath);
     FlutterManifest flutterManifest;
     try {
       flutterManifest = FlutterManifest.createFromPath(

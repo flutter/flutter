@@ -13,7 +13,7 @@ import '../base/logger.dart';
 
 const String kPackagesFileName = '.packages';
 
-String get globalPackagesPath => _globalPackagesPath ?? kPackagesFileName;
+String get globalPackagesPathDepreactedNoUse => _globalPackagesPath ?? kPackagesFileName;
 
 set globalPackagesPath(String value) {
   _globalPackagesPath = value;
@@ -55,7 +55,7 @@ Future<PackageConfig> loadPackageConfigWithLogging(File file, {
         message += '\nDid you run this command from the same directory as your pubspec.yaml file?';
       }
       logger.printError(message);
-      throwToolExit(null);
+      throwToolExit(file.path);
     }
   );
 }

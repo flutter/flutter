@@ -685,6 +685,7 @@ abstract class FlutterCommand extends Command<void> {
       bundleSkSLPath: bundleSkSLPath,
       dartExperiments: experiments,
       performanceMeasurementFile: performanceMeasurementFile,
+      packagesPath: globalResults['packages'] as String ?? '.packages'
     );
   }
 

@@ -16,7 +16,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_runner/devfs_web.dart';
 import 'package:flutter_tools/src/build_runner/resident_web_runner.dart';
 import 'package:flutter_tools/src/compile.dart';
-import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -116,7 +115,7 @@ void main() {
     });
     testbed = Testbed(
       setup: () {
-        globals.fs.file(globalPackagesPath)
+        globals.fs.file('.packages')
           ..createSync(recursive: true)
           ..writeAsStringSync('\n');
         residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
@@ -127,8 +126,6 @@ void main() {
           stayResident: true,
           urlTunneller: null,
         ) as ResidentWebRunner;
-        globals.fs.currentDirectory.childFile('.packages')
-          .writeAsStringSync('\n');
       },
       overrides: <Type, Generator>{
         Pub: () => MockPub(),

@@ -183,7 +183,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     // Make the global packages path absolute.
     // (Makes sure it still works after we change the current directory.)
     globalPackagesPath =
-        globals.fs.path.normalize(globals.fs.path.absolute(globalPackagesPath));
+        globals.fs.path.normalize(globals.fs.path.absolute(globalPackagesPathDepreactedNoUse));
 
     // Call package:test's main method in the appropriate directory.
     final Directory saved = globals.fs.currentDirectory;
