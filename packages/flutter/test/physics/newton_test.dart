@@ -41,7 +41,7 @@ void main() {
     expect(endPosition, greaterThan(startPosition));
     expect(endVelocity, lessThan(startVelocity));
 
-    // Verify that that the "through" FrictionSimulation ends up at
+    // Verify that the "through" FrictionSimulation ends up at
     // endPosition and endVelocity; implies that it computed the right
     // value for _drag.
     FrictionSimulation friction = FrictionSimulation.through(

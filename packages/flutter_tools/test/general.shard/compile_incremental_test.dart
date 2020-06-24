@@ -4,10 +4,10 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/async_guard.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
@@ -26,13 +26,21 @@ void main() {
   MockStdIn mockFrontendServerStdIn;
   MockStream mockFrontendServerStdErr;
   StreamController<String> stdErrStreamController;
+  BufferLogger testLogger;
 
   setUp(() {
-    generator = ResidentCompiler('sdkroot', buildMode: BuildMode.debug);
+    testLogger = BufferLogger.test();
     mockProcessManager = MockProcessManager();
     mockFrontendServer = MockProcess();
     mockFrontendServerStdIn = MockStdIn();
     mockFrontendServerStdErr = MockStream();
+    generator = ResidentCompiler(
+      'sdkroot',
+      buildMode: BuildMode.debug,
+      logger: testLogger,
+      processManager: mockProcessManager,
+      artifacts: Artifacts.test(),
+    );
 
     when(mockFrontendServer.stdin).thenReturn(mockFrontendServerStdIn);
     when(mockFrontendServer.stderr)
@@ -50,7 +58,7 @@ void main() {
     );
   });
 
-  testUsingContext('incremental compile single dart compile', () async {
+  testWithoutContext('incremental compile single dart compile', () async {
     when(mockFrontendServer.stdout)
         .thenAnswer((Invocation invocation) => Stream<List<int>>.fromFuture(
           Future<List<int>>.value(utf8.encode(
@@ -68,13 +76,9 @@ void main() {
     verifyNoMoreInteractions(mockFrontendServerStdIn);
     expect(testLogger.errorText, equals('line1\nline2\n'));
     expect(output.outputFilename, equals('/path/to/main.dart.dill'));
-  }, overrides: <Type, Generator>{
-    ProcessManager: () => mockProcessManager,
-    OutputPreferences: () => OutputPreferences(showColor: false),
-    Platform: kNoColorTerminalPlatform,
   });
 
-  testUsingContext('incremental compile single dart compile abnormally terminates', () async {
+  testWithoutContext('incremental compile single dart compile abnormally terminates', () async {
     when(mockFrontendServer.stdout)
         .thenAnswer((Invocation invocation) => const Stream<List<int>>.empty()
     );
@@ -85,13 +89,9 @@ void main() {
       outputPath: '/build/',
       packageConfig: PackageConfig.empty,
     )), throwsToolExit());
-  }, overrides: <Type, Generator>{
-    ProcessManager: () => mockProcessManager,
-    OutputPreferences: () => OutputPreferences(showColor: false),
-    Platform: kNoColorTerminalPlatform,
   });
 
-  testUsingContext('incremental compile single dart compile abnormally terminates via exitCode', () async {
+  testWithoutContext('incremental compile single dart compile abnormally terminates via exitCode', () async {
     when(mockFrontendServer.exitCode)
         .thenAnswer((Invocation invocation) async => 1);
     when(mockFrontendServer.stdout)
@@ -104,13 +104,9 @@ void main() {
       outputPath: '/build/',
       packageConfig: PackageConfig.empty,
     )), throwsToolExit());
-  }, overrides: <Type, Generator>{
-    ProcessManager: () => mockProcessManager,
-    OutputPreferences: () => OutputPreferences(showColor: false),
-    Platform: kNoColorTerminalPlatform,
   });
 
-  testUsingContext('incremental compile and recompile', () async {
+  testWithoutContext('incremental compile and recompile', () async {
     final StreamController<List<int>> streamController = StreamController<List<int>>();
     when(mockFrontendServer.stdout)
         .thenAnswer((Invocation invocation) => streamController.stream);
@@ -145,13 +141,9 @@ void main() {
       'line1\nline2\n'
       'line1\nline2\n'
     ));
-  }, overrides: <Type, Generator>{
-    ProcessManager: () => mockProcessManager,
-    OutputPreferences: () => OutputPreferences(showColor: false),
-    Platform: kNoColorTerminalPlatform,
   });
 
-  testUsingContext('incremental compile can suppress errors', () async {
+  testWithoutContext('incremental compile can suppress errors', () async {
     final StreamController<List<int>> stdoutController = StreamController<List<int>>();
     when(mockFrontendServer.stdout)
       .thenAnswer((Invocation invocation) => stdoutController.stream);
@@ -179,17 +171,14 @@ void main() {
 
     // Compiler message is not printed with suppressErrors: true above.
     expect(testLogger.errorText, isNot(equals(
-      'line0\nline1\n'
-      'line1\nline2\n'
       'line1\nline2\n'
     )));
-  }, overrides: <Type, Generator>{
-    ProcessManager: () => mockProcessManager,
-    OutputPreferences: () => OutputPreferences(showColor: false),
-    Platform: kNoColorTerminalPlatform,
+    expect(testLogger.traceText, contains(
+      'line1\nline2\n'
+    ));
   });
 
-  testUsingContext('incremental compile and recompile twice', () async {
+  testWithoutContext('incremental compile and recompile twice', () async {
     final StreamController<List<int>> streamController = StreamController<List<int>>();
     when(mockFrontendServer.stdout)
         .thenAnswer((Invocation invocation) => streamController.stream);
@@ -216,10 +205,6 @@ void main() {
       'line1\nline2\n'
       'line2\nline3\n'
     ));
-  }, overrides: <Type, Generator>{
-    ProcessManager: () => mockProcessManager,
-    OutputPreferences: () => OutputPreferences(showColor: false),
-    Platform: kNoColorTerminalPlatform,
   });
 }
 

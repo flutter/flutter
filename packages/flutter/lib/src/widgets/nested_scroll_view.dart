@@ -375,11 +375,13 @@ class NestedScrollView extends StatefulWidget {
     @required this.body,
     this.dragStartBehavior = DragStartBehavior.start,
     this.floatHeaderSlivers = false,
+    this.clipBehavior = Clip.hardEdge,
   }) : assert(scrollDirection != null),
        assert(reverse != null),
        assert(headerSliverBuilder != null),
        assert(body != null),
        assert(floatHeaderSlivers != null),
+       assert(clipBehavior != null),
        super(key: key);
 
   /// An object that can be used to control the position to which the outer
@@ -449,6 +451,11 @@ class NestedScrollView extends StatefulWidget {
   /// This is useful for an outer scrollable containing a [SliverAppBar] that
   /// is expected to float. This cannot be null.
   final bool floatHeaderSlivers;
+
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.hardEdge].
+  final Clip clipBehavior;
 
   /// Returns the [SliverOverlapAbsorberHandle] of the nearest ancestor
   /// [NestedScrollView].
@@ -628,6 +635,7 @@ class NestedScrollViewState extends State<NestedScrollView> {
               _lastHasScrolledBody,
             ),
             handle: _absorberHandle,
+            clipBehavior: widget.clipBehavior,
           );
         },
       ),
@@ -643,6 +651,7 @@ class _NestedScrollViewCustomScrollView extends CustomScrollView {
     @required ScrollController controller,
     @required List<Widget> slivers,
     @required this.handle,
+    @required this.clipBehavior,
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
   }) : super(
          scrollDirection: scrollDirection,
@@ -654,6 +663,7 @@ class _NestedScrollViewCustomScrollView extends CustomScrollView {
        );
 
   final SliverOverlapAbsorberHandle handle;
+  final Clip clipBehavior;
 
   @override
   Widget buildViewport(
@@ -668,6 +678,7 @@ class _NestedScrollViewCustomScrollView extends CustomScrollView {
       offset: offset,
       slivers: slivers,
       handle: handle,
+      clipBehavior: clipBehavior,
     );
   }
 }
@@ -2034,6 +2045,7 @@ class NestedScrollViewViewport extends Viewport {
     Key center,
     List<Widget> slivers = const <Widget>[],
     @required this.handle,
+    Clip clipBehavior = Clip.hardEdge,
   }) : assert(handle != null),
        super(
          key: key,
@@ -2043,6 +2055,7 @@ class NestedScrollViewViewport extends Viewport {
          offset: offset,
          center: center,
          slivers: slivers,
+         clipBehavior: clipBehavior,
        );
 
   /// The handle to the [SliverOverlapAbsorber] that is feeding this injector.
@@ -2059,6 +2072,7 @@ class NestedScrollViewViewport extends Viewport {
       anchor: anchor,
       offset: offset,
       handle: handle,
+      clipBehavior: clipBehavior,
     );
   }
 
@@ -2072,7 +2086,8 @@ class NestedScrollViewViewport extends Viewport {
       )
       ..anchor = anchor
       ..offset = offset
-      ..handle = handle;
+      ..handle = handle
+      ..clipBehavior = clipBehavior;
   }
 
   @override
@@ -2099,6 +2114,7 @@ class RenderNestedScrollViewViewport extends RenderViewport {
     List<RenderSliver> children,
     RenderSliver center,
     @required SliverOverlapAbsorberHandle handle,
+    Clip clipBehavior = Clip.hardEdge,
   }) : assert(handle != null),
        _handle = handle,
        super(
@@ -2108,6 +2124,7 @@ class RenderNestedScrollViewViewport extends RenderViewport {
          anchor: anchor,
          children: children,
          center: center,
+         clipBehavior: clipBehavior,
        );
 
   /// The object to notify when [markNeedsLayout] is called.

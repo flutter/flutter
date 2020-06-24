@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_runner/devfs_web.dart';
 import 'package:flutter_tools/src/build_runner/resident_web_runner.dart';
 import 'package:flutter_tools/src/compile.dart';
+import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -115,6 +116,9 @@ void main() {
     });
     testbed = Testbed(
       setup: () {
+        globals.fs.file(globalPackagesPath)
+          ..createSync(recursive: true)
+          ..writeAsStringSync('\n');
         residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
           mockFlutterDevice,
           flutterProject: FlutterProject.current(),
@@ -1071,6 +1075,43 @@ void main() {
 
     expect(testLogger.statusText,
       contains('Switched operating system to fuchsia'));
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  }));
+
+  test('debugToggleBrightness', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      ...kAttachExpectations,
+      const FakeVmServiceRequest(
+        method: 'ext.flutter.brightnessOverride',
+        args: <String, Object>{
+          'isolateId': null,
+        },
+        jsonResponse: <String, Object>{
+          'value': 'Brightness.light'
+        },
+      ),
+      const FakeVmServiceRequest(
+        method: 'ext.flutter.brightnessOverride',
+        args: <String, Object>{
+          'isolateId': null,
+          'value': 'Brightness.dark',
+        },
+        jsonResponse: <String, Object>{
+          'value': 'Brightness.dark'
+        },
+      ),
+    ]);
+    _setupMocks();
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    unawaited(residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+
+    await residentWebRunner.debugToggleBrightness();
+
+    expect(testLogger.statusText,
+      contains('Changed brightness to Brightness.dark.'));
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }));
 

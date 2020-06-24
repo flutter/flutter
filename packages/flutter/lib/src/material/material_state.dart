@@ -233,6 +233,14 @@ class _MaterialStateColor extends MaterialStateColor {
 ///
 /// This should only be used as parameters when they are documented to take
 /// [MaterialStateMouseCursor], otherwise only the default state will be used.
+///
+/// This class also predefines several kinds of material state mouse cursors.
+///
+/// See also:
+///
+///  * [MouseCursor] for introduction on the mouse cursor system.
+///  * [SystemMouseCursors], which defines cursors that are supported by
+///    native platforms.
 abstract class MaterialStateMouseCursor extends MouseCursor implements MaterialStateProperty<MouseCursor> {
   /// Creates a [MaterialStateMouseCursor].
   const MaterialStateMouseCursor();
@@ -257,22 +265,47 @@ abstract class MaterialStateMouseCursor extends MouseCursor implements MaterialS
   /// disabled, the cursor resolves to [SystemMouseCursors.basic].
   ///
   /// This cursor is the default for many Material widgets.
-  static const MaterialStateMouseCursor clickable = _ClickableMouseCursor();
+  static const MaterialStateMouseCursor clickable = _EnabledAndDisabledMouseCursor(
+    enabledCursor: SystemMouseCursors.click,
+    disabledCursor: SystemMouseCursors.basic,
+    name: 'clickable',
+  );
+
+  /// A mouse cursor for material widgets related to text, which resolves differently
+  /// when the widget is disabled.
+  ///
+  /// By default this cursor resolves to [SystemMouseCursors.text]. If the widget is
+  /// disabled, the cursor resolves to [SystemMouseCursors.basic].
+  ///
+  /// This cursor is the default for many Material widgets.
+  static const MaterialStateMouseCursor textable = _EnabledAndDisabledMouseCursor(
+    enabledCursor: SystemMouseCursors.text,
+    disabledCursor: SystemMouseCursors.basic,
+    name: 'textable',
+  );
 }
 
-class _ClickableMouseCursor extends MaterialStateMouseCursor {
-  const _ClickableMouseCursor();
+class _EnabledAndDisabledMouseCursor extends MaterialStateMouseCursor {
+  const _EnabledAndDisabledMouseCursor({
+    this.enabledCursor,
+    this.disabledCursor,
+    this.name,
+  });
+
+  final MouseCursor enabledCursor;
+  final MouseCursor disabledCursor;
+  final String name;
 
   @override
   MouseCursor resolve(Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
-      return SystemMouseCursors.basic;
+      return disabledCursor;
     }
-    return SystemMouseCursors.click;
+    return enabledCursor;
   }
 
   @override
-  String get debugDescription => 'MaterialStateMouseCursor(clickable)';
+  String get debugDescription => 'MaterialStateMouseCursor($name)';
 }
 
 /// Interface for classes that can return a value of type `T` based on a set of

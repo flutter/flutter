@@ -120,6 +120,9 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Vee uit';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Dialoog';
 
   @override
@@ -135,10 +138,22 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Lisensies';
@@ -273,7 +288,19 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Kies ure';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Kies minute';
@@ -387,6 +414,9 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'ሰርዝ';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'መገናኛ';
 
   @override
@@ -402,10 +432,22 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'ፈቃዶች';
@@ -540,7 +582,19 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'ሰዓታትን ምረጥ';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'ደቂቃዎችን ይምረጡ';
@@ -654,6 +708,9 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'حذف';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'مربع حوار';
 
   @override
@@ -669,10 +726,22 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'التراخيص';
@@ -807,7 +876,19 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.h_colon_mm_space_a;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'اختيار الساعات';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'اختيار الدقائق';
@@ -921,6 +1002,9 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'মচক';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'ডায়ল\'গ';
 
   @override
@@ -936,10 +1020,22 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'অনুজ্ঞাপত্ৰসমূহ';
@@ -1074,7 +1170,19 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'সময় বাছনি কৰক';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'মিনিট বাছনি কৰক';
@@ -1188,6 +1296,9 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Silin';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Dialoq';
 
   @override
@@ -1203,10 +1314,22 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Lisenziyalar';
@@ -1341,7 +1464,19 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Saat seçin';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Dəqiqə seçin';
@@ -1455,6 +1590,9 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Выдаліць';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Дыялогавае акно';
 
   @override
@@ -1470,10 +1608,22 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Ліцэнзіі';
@@ -1608,7 +1758,19 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Выберыце гадзіны';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Выберыце хвіліны';
@@ -1722,6 +1884,9 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Изтриване';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Диалогов прозорец';
 
   @override
@@ -1737,10 +1902,22 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Лицензи';
@@ -1875,7 +2052,19 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Избиране на часове';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Избиране на минути';
@@ -1989,6 +2178,9 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'মুছে দিন';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'ডায়ালগ';
 
   @override
@@ -2004,10 +2196,22 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'লাইসেন্স';
@@ -2142,7 +2346,19 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'ঘণ্টা বেছে নিন';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'মিনিট বেছে নিন';
@@ -2256,6 +2472,9 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Brisanje';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Dijaloški okvir';
 
   @override
@@ -2271,10 +2490,22 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Licence';
@@ -2409,7 +2640,19 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Odaberite sat';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Odaberite minute';
@@ -2523,6 +2766,9 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Suprimeix';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Diàleg';
 
   @override
@@ -2538,10 +2784,22 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Llicències';
@@ -2676,7 +2934,19 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Selecciona les hores';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Selecciona els minuts';
@@ -2790,6 +3060,9 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Smazat';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Dialogové okno';
 
   @override
@@ -2805,10 +3078,22 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Licence';
@@ -2943,7 +3228,19 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Vyberte hodiny';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Vyberte minuty';
@@ -3057,6 +3354,9 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Slet';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Dialogboks';
 
   @override
@@ -3072,10 +3372,22 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Licenser';
@@ -3210,7 +3522,19 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Vælg timer';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Vælg minutter';
@@ -3324,6 +3648,9 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Löschen';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Dialogfeld';
 
   @override
@@ -3339,10 +3666,22 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Lizenzen';
@@ -3477,7 +3816,19 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Stunden auswählen';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Minuten auswählen';
@@ -3627,6 +3978,9 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Διαγραφή';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Παράθυρο διαλόγου';
 
   @override
@@ -3642,10 +3996,22 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Άδειες';
@@ -3780,7 +4146,19 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Επιλογή ωρών';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Επιλογή λεπτών';
@@ -3894,6 +4272,9 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Delete';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Dialog';
 
   @override
@@ -3909,10 +4290,22 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Licenses';
@@ -4047,7 +4440,19 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.h_colon_mm_space_a;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Select hours';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Select minutes';
@@ -4093,6 +4498,12 @@ class MaterialLocalizationEnAu extends MaterialLocalizationEn {
 
   @override
   String get licensesPageTitle => 'Licences';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 licence';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licences';
 
   @override
   String get copyButtonLabel => 'COPY';
@@ -4153,6 +4564,12 @@ class MaterialLocalizationEnCa extends MaterialLocalizationEn {
 
   @override
   String get licensesPageTitle => 'Licences';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 licence';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licences';
 
   @override
   String get copyButtonLabel => 'COPY';
@@ -4227,6 +4644,12 @@ class MaterialLocalizationEnGb extends MaterialLocalizationEn {
   String get licensesPageTitle => 'Licences';
 
   @override
+  String get licensesPackageDetailTextOne => '1 licence';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licences';
+
+  @override
   String get pasteButtonLabel => 'PASTE';
 
   @override
@@ -4290,6 +4713,12 @@ class MaterialLocalizationEnIe extends MaterialLocalizationEn {
   String get licensesPageTitle => 'Licences';
 
   @override
+  String get licensesPackageDetailTextOne => '1 licence';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licences';
+
+  @override
   String get pasteButtonLabel => 'PASTE';
 
   @override
@@ -4339,6 +4768,12 @@ class MaterialLocalizationEnIn extends MaterialLocalizationEn {
 
   @override
   String get licensesPageTitle => 'Licences';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 licence';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licences';
 
   @override
   String get copyButtonLabel => 'COPY';
@@ -4401,6 +4836,12 @@ class MaterialLocalizationEnNz extends MaterialLocalizationEn {
   String get licensesPageTitle => 'Licences';
 
   @override
+  String get licensesPackageDetailTextOne => '1 licence';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licences';
+
+  @override
   String get copyButtonLabel => 'COPY';
 
   @override
@@ -4459,6 +4900,12 @@ class MaterialLocalizationEnSg extends MaterialLocalizationEn {
 
   @override
   String get licensesPageTitle => 'Licences';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 licence';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licences';
 
   @override
   String get copyButtonLabel => 'COPY';
@@ -4531,6 +4978,12 @@ class MaterialLocalizationEnZa extends MaterialLocalizationEn {
 
   @override
   String get licensesPageTitle => 'Licences';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 licence';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licences';
 
   @override
   String get pasteButtonLabel => 'PASTE';
@@ -4650,6 +5103,9 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Eliminar';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Cuadro de diálogo';
 
   @override
@@ -4665,10 +5121,22 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Licencias';
@@ -4803,7 +5271,19 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Seleccionar horas';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Seleccionar minutos';
@@ -6600,6 +7080,9 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Kustuta';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Dialoog';
 
   @override
@@ -6615,10 +7098,22 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Litsentsid';
@@ -6753,7 +7248,19 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Tundide valimine';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Minutite valimine';
@@ -6867,6 +7374,9 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Ezabatu';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Leihoa';
 
   @override
@@ -6882,10 +7392,22 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Lizentziak';
@@ -7020,7 +7542,19 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Hautatu orduak';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Hautatu minutuak';
@@ -7134,6 +7668,9 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'حذف';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'کادر گفتگو';
 
   @override
@@ -7149,10 +7686,22 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'مجوزها';
@@ -7287,7 +7836,19 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'انتخاب ساعت';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'انتخاب دقیقه';
@@ -7401,6 +7962,9 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Poista';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Valintaikkuna';
 
   @override
@@ -7416,10 +7980,22 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Lisenssit';
@@ -7554,7 +8130,19 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Valitse tunnit';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Valitse minuutit';
@@ -7668,6 +8256,9 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'I-delete';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Dialog';
 
   @override
@@ -7683,10 +8274,22 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Mga Lisensya';
@@ -7821,7 +8424,19 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Pumili ng mga oras';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Pumili ng mga minuto';
@@ -7935,6 +8550,9 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Supprimer';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Boîte de dialogue';
 
   @override
@@ -7950,10 +8568,22 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Licences';
@@ -8088,7 +8718,19 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Sélectionner une heure';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Sélectionner des minutes';
@@ -8262,6 +8904,9 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Eliminar';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Cadro de diálogo';
 
   @override
@@ -8277,10 +8922,22 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Licenzas';
@@ -8415,7 +9072,19 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Seleccionar horas';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Seleccionar minutos';
@@ -8529,6 +9198,9 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Löschen';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Dialogfeld';
 
   @override
@@ -8544,10 +9216,22 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Lizenzen';
@@ -8682,7 +9366,19 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Stunden auswählen';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Minuten auswählen';
@@ -8796,6 +9492,9 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'ડિલીટ કરો';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'સંવાદ';
 
   @override
@@ -8811,10 +9510,22 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'લાઇસન્સ';
@@ -8949,7 +9660,19 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'કલાક પસંદ કરો';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'મિનિટ પસંદ કરો';
@@ -9063,6 +9786,9 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'מחיקה';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'תיבת דו-שיח';
 
   @override
@@ -9078,10 +9804,22 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'רישיונות';
@@ -9216,7 +9954,19 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'בחירת שעות';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'בחירת דקות';
@@ -9330,6 +10080,9 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'मिटाएं';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'संवाद';
 
   @override
@@ -9345,10 +10098,22 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'लाइसेंस';
@@ -9483,7 +10248,19 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.a_space_h_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'घंटे के हिसाब से समय चुनें';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'मिनट के हिसाब से समय चुनें';
@@ -9597,6 +10374,9 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Brisanje';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Dijalog';
 
   @override
@@ -9612,10 +10392,22 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Licence';
@@ -9750,7 +10542,19 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Odaberite sate';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Odaberite minute';
@@ -9864,6 +10668,9 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Törlés';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Párbeszédablak';
 
   @override
@@ -9879,10 +10686,22 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Licencek';
@@ -10017,7 +10836,19 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Óra kiválasztása';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Perc kiválasztása';
@@ -10131,6 +10962,9 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Ջնջել';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Երկխոսության պատուհան';
 
   @override
@@ -10146,10 +10980,22 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Արտոնագրեր';
@@ -10284,7 +11130,19 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Ընտրեք ժամը';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Ընտրեք րոպեները';
@@ -10398,6 +11256,9 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Hapus';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Dialog';
 
   @override
@@ -10413,10 +11274,22 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Lisensi';
@@ -10551,7 +11424,19 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Pilih jam';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Pilih menit';
@@ -10665,6 +11550,9 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Eyða';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Gluggi';
 
   @override
@@ -10680,10 +11568,22 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Leyfi';
@@ -10818,7 +11718,19 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Velja klukkustundir';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Velja mínútur';
@@ -10932,6 +11844,9 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Elimina';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Finestra di dialogo';
 
   @override
@@ -10947,10 +11862,22 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Licenze';
@@ -11085,7 +12012,19 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Seleziona le ore';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Seleziona i minuti';
@@ -11199,6 +12138,9 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => '削除';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'ダイアログ';
 
   @override
@@ -11214,10 +12156,22 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'ライセンス';
@@ -11352,7 +12306,19 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => '時間を選択';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => '分を選択';
@@ -11466,6 +12432,9 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'წაშლა';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'დიალოგი';
 
   @override
@@ -11481,10 +12450,22 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'ლიცენზიები';
@@ -11619,7 +12600,19 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'აირჩიეთ საათები';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'აირჩიეთ წუთები';
@@ -11733,6 +12726,9 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Жою';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Диалогтық терезе';
 
   @override
@@ -11748,10 +12744,22 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Лицензиялар';
@@ -11886,7 +12894,19 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Сағаттарды таңдаңыз';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Минуттарды таңдаңыз';
@@ -12000,6 +13020,9 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'លុប';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'ប្រអប់';
 
   @override
@@ -12015,10 +13038,22 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'អាជ្ញាបណ្ណ';
@@ -12153,7 +13188,19 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.h_colon_mm_space_a;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'ជ្រើសរើស​ម៉ោង';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'ជ្រើសរើស​នាទី';
@@ -12267,6 +13314,9 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => '\u{c85}\u{cb3}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => '\u{ca1}\u{cc8}\u{cb2}\u{cbe}\u{c97}\u{ccd}';
 
   @override
@@ -12282,10 +13332,22 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => '\u{caa}\u{cb0}\u{cb5}\u{cbe}\u{ca8}\u{c97}\u{cbf}\u{c97}\u{cb3}\u{cc1}';
@@ -12420,7 +13482,19 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => '\u{c97}\u{c82}\u{c9f}\u{cc6}\u{c97}\u{cb3}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => '\u{ca8}\u{cbf}\u{cae}\u{cbf}\u{cb7}\u{c97}\u{cb3}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
@@ -12534,6 +13608,9 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => '삭제';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => '대화상자';
 
   @override
@@ -12549,10 +13626,22 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => '라이선스';
@@ -12687,7 +13776,19 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.a_space_h_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => '시간 선택';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => '분 선택';
@@ -12801,6 +13902,9 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Жок кылуу';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Диалог';
 
   @override
@@ -12816,10 +13920,22 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Уруксаттамалар';
@@ -12954,7 +14070,19 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Саатты тандаңыз';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Мүнөттөрдү тандаңыз';
@@ -13068,6 +14196,9 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'ລຶບ';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'ຂໍ້ຄວາມ';
 
   @override
@@ -13083,10 +14214,22 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'ໃບອະນຸຍາດ';
@@ -13221,7 +14364,19 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'ເລືອກໂມງ';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'ເລືອກນາທີ';
@@ -13335,6 +14490,9 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Ištrinti';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Dialogo langas';
 
   @override
@@ -13350,10 +14508,22 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Licencijos';
@@ -13488,7 +14658,19 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Pasirinkite valandas';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Pasirinkite minutes';
@@ -13602,6 +14784,9 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Dzēst';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Dialoglodziņš';
 
   @override
@@ -13617,10 +14802,22 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Licences';
@@ -13755,7 +14952,19 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Atlasiet stundas';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Atlasiet minūtes';
@@ -13869,6 +15078,9 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Избриши';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Дијалог';
 
   @override
@@ -13884,10 +15096,22 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Лиценци';
@@ -14022,7 +15246,19 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Изберете часови';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Изберете минути';
@@ -14136,6 +15372,9 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'ഇല്ലാതാക്കുക';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'ഡയലോഗ്';
 
   @override
@@ -14151,10 +15390,22 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'ലൈസൻസുകൾ';
@@ -14289,7 +15540,19 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'മണിക്കൂർ തിരഞ്ഞെടുക്കുക';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'മിനിറ്റ് തിരഞ്ഞെടുക്കുക';
@@ -14403,6 +15666,9 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Устгах';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Харилцах цонх';
 
   @override
@@ -14418,10 +15684,22 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Лиценз';
@@ -14556,7 +15834,19 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Цаг сонгоно уу';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Минут сонгоно уу';
@@ -14670,6 +15960,9 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'हटवा';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'डायलॉग';
 
   @override
@@ -14685,10 +15978,22 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'परवाने';
@@ -14823,7 +16128,19 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.h_colon_mm_space_a;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'तास निवडा';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'मिनिटे निवडा';
@@ -14937,6 +16254,9 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Padam';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Dialog';
 
   @override
@@ -14952,10 +16272,22 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Lesen';
@@ -15090,7 +16422,19 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.h_colon_mm_space_a;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Pilih jam';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Pilih minit';
@@ -15204,6 +16548,9 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'ဖျက်ရန်';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'ဒိုင်ယာလော့';
 
   @override
@@ -15219,10 +16566,22 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'လိုင်စင်များ';
@@ -15357,7 +16716,19 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'နာရီကို ရွေးပါ';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'မိနစ်ကို ရွေးပါ';
@@ -15501,6 +16872,9 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'मेट्नुहोस्';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'संवाद';
 
   @override
@@ -15516,10 +16890,22 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'इजाजतपत्रहरू';
@@ -15654,7 +17040,19 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'घन्टा चयन गर्नुहोस्';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'मिनेट चयन गर्नुहोस्';
@@ -15768,6 +17166,9 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Verwijderen';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Dialoogvenster';
 
   @override
@@ -15783,10 +17184,22 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Licenties';
@@ -15921,7 +17334,19 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Uren selecteren';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Minuten selecteren';
@@ -16035,6 +17460,9 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Slett';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Dialogboks';
 
   @override
@@ -16050,10 +17478,22 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Lisenser';
@@ -16188,7 +17628,19 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Angi timer';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Angi minutter';
@@ -16302,6 +17754,9 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'ଡିଲିଟ୍ କରନ୍ତୁ';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'ଡାୟଲଗ୍';
 
   @override
@@ -16317,10 +17772,22 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'ଲାଇସେନ୍ସଗୁଡ଼କ';
@@ -16455,7 +17922,19 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'ଘଣ୍ଟା ଚୟନ କରନ୍ତୁ';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'ମିନିଟ୍ ଚୟନ କରନ୍ତୁ';
@@ -16569,6 +18048,9 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'ਮਿਟਾਓ';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'ਵਿੰਡੋ';
 
   @override
@@ -16584,10 +18066,22 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'ਲਾਇਸੰਸ';
@@ -16722,7 +18216,19 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'ਘੰਟੇ ਚੁਣੋ';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'ਮਿੰਟ ਚੁਣੋ';
@@ -16836,6 +18342,9 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Usuń';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Okno dialogowe';
 
   @override
@@ -16851,10 +18360,22 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Licencje';
@@ -16989,7 +18510,19 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Wybierz godziny';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Wybierz minuty';
@@ -17103,6 +18636,9 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => '';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'خبرې اترې';
 
   @override
@@ -17118,10 +18654,22 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'جوازونه';
@@ -17256,7 +18804,19 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'وختونه وټاکئ';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'منې غوره کړئ';
@@ -17370,6 +18930,9 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Excluir';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Caixa de diálogo';
 
   @override
@@ -17385,10 +18948,22 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Licenças';
@@ -17523,7 +19098,19 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Selecione as horas';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Selecione os minutos';
@@ -17721,6 +19308,9 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Ștergeți';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Casetă de dialog';
 
   @override
@@ -17736,10 +19326,22 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Licențe';
@@ -17874,7 +19476,19 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Selectați orele';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Selectați minutele';
@@ -17988,6 +19602,9 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Удалить';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Диалоговое окно';
 
   @override
@@ -18003,10 +19620,22 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Лицензии';
@@ -18141,7 +19770,19 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Выберите часы';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Выберите минуты';
@@ -18255,6 +19896,9 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'මකන්න';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'සංවාදය';
 
   @override
@@ -18270,10 +19914,22 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'බලපත්‍ර';
@@ -18408,7 +20064,19 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'පැය ගණන තෝරන්න';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'මිනිත්තු ගණන තෝරන්න';
@@ -18522,6 +20190,9 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Odstrániť';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Dialógové okno';
 
   @override
@@ -18537,10 +20208,22 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Licencie';
@@ -18675,7 +20358,19 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Vybrať hodiny';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Vybrať minúty';
@@ -18789,6 +20484,9 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Brisanje';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Pogovorno okno';
 
   @override
@@ -18804,10 +20502,22 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Licence';
@@ -18942,7 +20652,19 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Izberite ure';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Izberite minute';
@@ -19056,6 +20778,9 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Fshi';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Dialogu';
 
   @override
@@ -19071,10 +20796,22 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Licencat';
@@ -19209,7 +20946,19 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Zgjidh orët';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Zgjidh minutat';
@@ -19323,6 +21072,9 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Избришите';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Дијалог';
 
   @override
@@ -19338,10 +21090,22 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Лиценце';
@@ -19476,7 +21240,19 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Изаберите сате';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Изаберите минуте';
@@ -19809,6 +21585,9 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Radera';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Dialogruta';
 
   @override
@@ -19824,10 +21603,22 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Licenser';
@@ -19962,7 +21753,19 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Välj timmar';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Välj minuter';
@@ -20076,6 +21879,9 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Futa';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Kidirisha';
 
   @override
@@ -20091,10 +21897,22 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Leseni';
@@ -20229,7 +22047,19 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.h_colon_mm_space_a;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Chagua saa';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Chagua dakika';
@@ -20343,6 +22173,9 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'நீக்கு';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'உரையாடல்';
 
   @override
@@ -20358,10 +22191,22 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'உரிமங்கள்';
@@ -20496,7 +22341,19 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.a_space_h_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'மணிநேரத்தைத் தேர்ந்தெடுக்கவும்';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'நிமிடங்களைத் தேர்ந்தெடுக்கவும்';
@@ -20610,6 +22467,9 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'తొలగించు';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'డైలాగ్';
 
   @override
@@ -20625,10 +22485,22 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'లైసెన్స్‌లు';
@@ -20763,7 +22635,19 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'గంటలను ఎంచుకోండి';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'నిమిషాలను ఎంచుకోండి';
@@ -20877,6 +22761,9 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'ลบ';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'กล่องโต้ตอบ';
 
   @override
@@ -20892,10 +22779,22 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'ใบอนุญาต';
@@ -21030,7 +22929,19 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.a_space_h_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'เลือกชั่วโมง';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'เลือกนาที';
@@ -21144,6 +23055,9 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'I-delete';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Dialog';
 
   @override
@@ -21159,10 +23073,22 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Mga Lisensya';
@@ -21297,7 +23223,19 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Pumili ng mga oras';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Pumili ng mga minuto';
@@ -21411,6 +23349,9 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Sil';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'İletişim kutusu';
 
   @override
@@ -21426,10 +23367,22 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Lisanslar';
@@ -21564,7 +23517,19 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Saati seçin';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Dakikayı seçin';
@@ -21678,6 +23643,9 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Видалити';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Вікно';
 
   @override
@@ -21693,10 +23661,22 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Ліцензії';
@@ -21831,7 +23811,19 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Виберіть години';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Виберіть хвилини';
@@ -21945,6 +23937,9 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'حذف کریں';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'ڈائلاگ';
 
   @override
@@ -21960,10 +23955,22 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'لائسنسز';
@@ -22098,7 +24105,19 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.h_colon_mm_space_a;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'گھنٹے منتخب کریں';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'منٹ منتخب کریں';
@@ -22212,6 +24231,9 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Olib tashlash';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Muloqot oynasi';
 
   @override
@@ -22227,10 +24249,22 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Litsenziyalar';
@@ -22365,7 +24399,19 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Soatni tanlang';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Daqiqani tanlang';
@@ -22479,6 +24525,9 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Xóa';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Hộp thoại';
 
   @override
@@ -22494,10 +24543,22 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Giấy phép';
@@ -22632,7 +24693,19 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Chọn giờ';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Chọn phút';
@@ -22746,6 +24819,9 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => '删除';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => '对话框';
 
   @override
@@ -22761,10 +24837,22 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => '许可';
@@ -22899,7 +24987,19 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.a_space_h_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => '选择小时';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => '选择分钟';
@@ -23310,6 +25410,9 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Susa';
 
   @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
   String get dialogLabel => 'Ingxoxo';
 
   @override
@@ -23325,10 +25428,22 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
   String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 license';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
   String get licensesPageTitle => 'Amalayisense';
@@ -23463,7 +25578,19 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
   String get timePickerHourModeAnnouncement => 'Khetha amahora';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Khetha amaminithi';

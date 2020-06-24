@@ -41,7 +41,7 @@ void main() {
       +
       (
         'test/analyze-test-input/root/packages/foo/deprecation.dart:12: Deprecation notice does not match required pattern.\n'
-        'test/analyze-test-input/root/packages/foo/deprecation.dart:18: Deprecation notice should be a grammatically correct sentence and start with a capital letter; see style guide.\n'
+        'test/analyze-test-input/root/packages/foo/deprecation.dart:18: Deprecation notice should be a grammatically correct sentence and start with a capital letter; see style guide: STYLE_GUIDE_URL\n'
         'test/analyze-test-input/root/packages/foo/deprecation.dart:25: Deprecation notice should be a grammatically correct sentence and end with a period.\n'
         'test/analyze-test-input/root/packages/foo/deprecation.dart:29: Deprecation notice does not match required pattern.\n'
         'test/analyze-test-input/root/packages/foo/deprecation.dart:32: Deprecation notice does not match required pattern.\n'
@@ -49,7 +49,12 @@ void main() {
         'test/analyze-test-input/root/packages/foo/deprecation.dart:41: Deprecation notice does not match required pattern.\n'
         'test/analyze-test-input/root/packages/foo/deprecation.dart:48: End of deprecation notice does not match required pattern.\n'
         'test/analyze-test-input/root/packages/foo/deprecation.dart:51: Unexpected deprecation notice indent.\n'
+        'test/analyze-test-input/root/packages/foo/deprecation.dart:70: Deprecation notice does not accurately indicate a dev branch version number; please see RELEASES_URL to find the latest dev build version number.\n'
+        'test/analyze-test-input/root/packages/foo/deprecation.dart:76: Deprecation notice does not accurately indicate a dev branch version number; please see RELEASES_URL to find the latest dev build version number.\n'
+        'test/analyze-test-input/root/packages/foo/deprecation.dart:82: Deprecation notice does not accurately indicate a dev branch version number; please see RELEASES_URL to find the latest dev build version number.\n'
         .replaceAll('/', Platform.isWindows ? r'\' : '/')
+        .replaceAll('STYLE_GUIDE_URL', 'https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo')
+        .replaceAll('RELEASES_URL', 'https://flutter.dev/docs/development/tools/sdk/releases')
       )
       +
       'See: https://github.com/flutter/flutter/wiki/Tree-hygiene#handling-breaking-changes\n'
@@ -95,7 +100,7 @@ void main() {
   test('analyze.dart - verifyNoBinaries - positive', () async {
     final String result = await capture(() => verifyNoBinaries(
       testRootPath,
-      grandfatheredBinaries: <Hash256>{const Hash256(0x39A050CD69434936, 0, 0, 0)},
+      legacyBinaries: <Hash256>{const Hash256(0x39A050CD69434936, 0, 0, 0)},
     ), exitCode: Platform.isWindows ? 0 : 1);
     if (!Platform.isWindows) {
       // The output starts with the call to git ls-files, the details of which
@@ -116,7 +121,7 @@ void main() {
   test('analyze.dart - verifyNoBinaries - negative', () async {
     await capture(() => verifyNoBinaries(
       testRootPath,
-      grandfatheredBinaries: <Hash256>{
+      legacyBinaries: <Hash256>{
         const Hash256(0xA8100AE6AA1940D0, 0xB663BB31CD466142, 0xEBBDBD5187131B92, 0xD93818987832EB89), // sha256("\xff")
         const Hash256(0x155644D3F13D98BF, 0, 0, 0),
       },
