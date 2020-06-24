@@ -378,6 +378,11 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
 
 #pragma mark - UIAccessibilityElement protocol
 
+- (void)setAccessibilityContainer:(id)container {
+  // Explicit noop.  The containers are calculated lazily in `accessibilityContainer`.
+  // See also: https://github.com/flutter/flutter/issues/54366
+}
+
 - (id)accessibilityContainer {
   if ([self hasChildren] || [self uid] == kRootNodeId) {
     if (_container == nil)
