@@ -43,7 +43,9 @@ void main() {
   MockHttpServer mockHttpServer;
 
   setUpAll(() async {
-    packages = await loadPackageConfigUri(Uri.base.resolve('.packages'));
+    packages = PackageConfig(<Package>[
+      Package('flutter_tools', Uri.file('/flutter_tools/lib/').normalizePath())
+    ]);
   });
 
   setUp(() {
