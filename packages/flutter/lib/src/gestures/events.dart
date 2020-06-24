@@ -908,7 +908,7 @@ class PointerEnterEvent extends PointerEvent {
     down: event?.down,
     synthesized: event?.synthesized,
     transform: event?.transform,
-    original: event?.original as PointerEnterEvent,
+    original: null,
   );
 
   @override
@@ -1054,7 +1054,7 @@ class PointerExitEvent extends PointerEvent {
     down: event?.down,
     synthesized: event?.synthesized,
     transform: event?.transform,
-    original: event?.original as PointerExitEvent,
+    original: null,
   );
 
   @override

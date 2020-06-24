@@ -768,7 +768,7 @@ class BoxHitTestResult extends HitTestResult {
         ? position
         : position - offset;
     if (offset != null) {
-      pushTransformPart(OffsetTransformPart(-offset));
+      pushOffset(-offset);
     }
     final bool isHit = hitTest(this, transformedPosition);
     if (offset != null) {
