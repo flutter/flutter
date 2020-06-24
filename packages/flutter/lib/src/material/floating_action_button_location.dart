@@ -436,18 +436,18 @@ mixin FabFloatOffsetY on StandardFabLocation {
     final double bottomSheetHeight = scaffoldGeometry.bottomSheetSize.height;
     final double fabHeight = scaffoldGeometry.floatingActionButtonSize.height;
     final double snackBarHeight = scaffoldGeometry.snackBarSize.height;
-    final double bottomMargin = math.max(
+    final double safeMargin = math.max(
       kFloatingActionButtonMargin,
       scaffoldGeometry.minViewPadding.bottom,
     );
 
-    double fabY = contentBottom - fabHeight - bottomMargin + adjustment;
+    double fabY = contentBottom - fabHeight - safeMargin;
     if (snackBarHeight > 0.0)
-      fabY = math.min(fabY, contentBottom - snackBarHeight - fabHeight - kFloatingActionButtonMargin) + adjustment;
+      fabY = math.min(fabY, contentBottom - snackBarHeight - fabHeight - kFloatingActionButtonMargin);
     if (bottomSheetHeight > 0.0)
       fabY = math.min(fabY, contentBottom - bottomSheetHeight - fabHeight / 2.0);
-    print(snackBarHeight);
-    return fabY;
+
+    return fabY + adjustment;
   }
 }
 

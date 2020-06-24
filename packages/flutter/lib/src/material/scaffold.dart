@@ -556,7 +556,6 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         end: currentFabOffset,
         progress: floatingActionButtonMoveAnimationProgress,
       );
-
       positionChild(_ScaffoldSlot.floatingActionButton, fabOffset);
       floatingActionButtonRect = fabOffset & fabSize;
     }
@@ -2506,7 +2505,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       _buildDrawer(children, textDirection);
     }
 
-//    print('Scaffold mediaQuery: $mediaQuery');
     // The minimum insets for contents of the Scaffold to keep visible.
     final EdgeInsets minInsets = mediaQuery.padding.copyWith(
       bottom: _resizeToAvoidBottomInset
@@ -2524,8 +2522,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
     // extendBody locked when keyboard is open
     final bool _extendBody = minInsets.bottom <= 0 && widget.extendBody;
-    
-//    print('minViewPadding: $minViewPadding, minInsets: $minInsets');
 
     return _ScaffoldScope(
       hasDrawer: hasDrawer,

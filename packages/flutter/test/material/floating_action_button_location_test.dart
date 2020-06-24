@@ -609,26 +609,6 @@ void main() {
   });
 
   group('Locations account for safe interactive areas', () {
-    // TODO(Piinks): Group by position and then test each config, move to FABLocation test file
-    // also, test here for the scaffold view padding layout geometry
-    //
-    // Top locations, with keyboard up and down, for each (6):
-    //  - Default
-    //  - Default with resizeToAvoidBottomInsets: false
-    //  - with an AppBar
-    //  - with an AppBar and resizeToAvoidBottomInsets:false
-    //  - check that left and right padding WAI with textDirection
-    // Docked locations, with keyboard up and down, for each (6):
-    //  - Default
-    //  - Default with resizeToAvoidBottomInsets: false
-    //  - with BottomNavigationBar
-    //  - with BottomNavigationBar and resizeToAvoidBottomInsets: false
-    //  - with BottomSheet
-    //  - with BottomSheet and resizeToAvoidBottomInsets: false
-    //  - with SnackBar
-    //  - with SnackBar and resizeToAvoidBottomInsets: false
-    //  - check that left and right with textDirection WAI
-
     Widget _buildTest(
       FloatingActionButtonLocation location,
       MediaQueryData data,
@@ -676,13 +656,12 @@ void main() {
       );
     }
 
-    // Float locations, for each (6):
+    // Test float locations, for each (6), keyboard presented or not:
     //  - Default
     //  - with resizeToAvoidBottomInset: false
     //  - with BottomSheet
     //  - with BottomSheet and resizeToAvoidBottomInset: false
     //  - with SnackBar
-    //  - with SnackBar and resizeToAvoidBottomInset: false
     Future<void> _runFloatTests(
       WidgetTester tester,
       FloatingActionButtonLocation location,
@@ -858,6 +837,24 @@ void main() {
     testWidgets('miniEndFloat', (WidgetTester tester) async {
     });
 
+    // Test docked locations, for each (6), keyboard presented or not:
+    //  - Default
+    //  - Default with resizeToAvoidBottomInset: false
+    //  - docked with BottomNavigationBar
+    //  - docked with BottomNavigationBar and resizeToAvoidBottomInset: false
+    //  - with BottomSheet
+    //  - with BottomSheet and resizeToAvoidBottomInset: false
+    //  - with SnackBar
+    Future<void> _runDockedTests(
+      WidgetTester tester,
+      FloatingActionButtonLocation location,
+      Rect defaultRect,
+      Rect bottomNavigationBarRect,
+      Rect bottomSheetRect,
+      Rect snackBarRect, {
+      bool mini = false,
+    }) async  {}
+
     testWidgets('startDocked', (WidgetTester tester) async {
 
     });
@@ -881,6 +878,17 @@ void main() {
     testWidgets('miniEndDocked', (WidgetTester tester) async {
 
     });
+
+    // Test top locations, for each (6):
+    //  - Default
+    //  - with an AppBar
+    Future<void> _runTopTests(
+      WidgetTester tester,
+      FloatingActionButtonLocation location,
+      Rect defaultRect,
+      Rect appBarRect, {
+      bool mini = false,
+    }) async  {}
 
     testWidgets('startTop', (WidgetTester tester) async {
 
@@ -907,7 +915,6 @@ void main() {
     });
   });
 }
-
 
 class _GeometryListener extends StatefulWidget {
   @override
