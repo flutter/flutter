@@ -65,15 +65,48 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
     timeout: null,
   );
   try {
-    await _runCmake(visualStudio.cmakePath, buildModeName, windowsProject.cmakeFile.parent, buildDirectory);
-    await _runBuild(visualStudio.cmakePath, buildDirectory);
+    await _runCmakeGeneration(visualStudio.cmakePath, buildDirectory, buildModeName, windowsProject.cmakeFile.parent);
+    await _runBuild(visualStudio.cmakePath, buildDirectory, buildModeName);
   } finally {
     status.cancel();
   }
   await _runInstall(visualStudio.cmakePath, buildDirectory, buildModeName);
 }
 
-Future<void> _runBuild(String cmakePath, Directory buildDir) async {
+Future<void> _runCmakeGeneration(String cmakePath, Directory buildDir, String buildModeName, Directory sourceDir) async {
+  final Stopwatch sw = Stopwatch()..start();
+
+  await buildDir.create(recursive: true);
+  final String buildFlag = toTitleCase(buildModeName);
+  int result;
+  try {
+    result = await processUtils.stream(
+      <String>[
+        cmakePath,
+        '-S',
+        sourceDir.path,
+        '-B',
+        buildDir.path,
+        '-G',
+        'Visual Studio 16 2019',
+        '-DCMAKE_BUILD_TYPE=$buildFlag',
+      ],
+      environment: <String, String>{
+        'CC': 'clang',
+        'CXX': 'clang++'
+      },
+      trace: true,
+    );
+  } on ArgumentError {
+    throwToolExit("cmake not found. Run 'flutter doctor' for more information.");
+  }
+  if (result != 0) {
+    throwToolExit('Unable to generate build files');
+  }
+  globals.flutterUsage.sendTiming('build', 'windows-cmake-generation', Duration(milliseconds: sw.elapsedMilliseconds));
+}
+
+Future<void> _runBuild(String cmakePath, Directory buildDir, String buildModeName) async {
   final Stopwatch sw = Stopwatch()..start();
 
   int result;
@@ -83,6 +116,8 @@ Future<void> _runBuild(String cmakePath, Directory buildDir) async {
         cmakePath,
         '--build',
         buildDir.path,
+        '--config',
+        toTitleCase(buildModeName),
         if (globals.logger.isVerbose)
           '--verbose'
       ],
@@ -143,39 +178,6 @@ void _writeGeneratedFlutterConfig(
     environment['LOCAL_ENGINE'] = globals.fs.path.basename(engineOutPath);
   }
   writeGeneratedCmakeConfig(Cache.flutterRoot, windowsProject, environment);
-}
-
-Future<void> _runCmake(String cmakePath, String buildModeName, Directory sourceDir, Directory buildDir) async {
-  final Stopwatch sw = Stopwatch()..start();
-
-  await buildDir.create(recursive: true);
-  final String buildFlag = toTitleCase(buildModeName);
-  int result;
-  try {
-    result = await processUtils.stream(
-      <String>[
-        cmakePath,
-        '-S',
-        sourceDir.path,
-        '-B',
-        buildDir.path,
-        '-G',
-        'Visual Studio 16 2019',
-        '-DCMAKE_BUILD_TYPE=$buildFlag',
-      ],
-      environment: <String, String>{
-        'CC': 'clang',
-        'CXX': 'clang++'
-      },
-      trace: true,
-    );
-  } on ArgumentError {
-    throwToolExit("cmake not found. Run 'flutter doctor' for more information.");
-  }
-  if (result != 0) {
-    throwToolExit('Unable to generate build files');
-  }
-  globals.flutterUsage.sendTiming('build', 'windows-cmake-generation', Duration(milliseconds: sw.elapsedMilliseconds));
 }
 
 // Checks the template version of [project] against the current template
