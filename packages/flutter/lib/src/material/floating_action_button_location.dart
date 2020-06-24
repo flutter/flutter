@@ -471,11 +471,10 @@ mixin FabDockedOffsetY on StandardFabLocation {
     double fabY = contentBottom - fabHeight / 2.0 - safeMargin;
     // The FAB should sit with a margin between it and the snack bar.
     if (snackBarHeight > 0.0)
-      fabY = math.min(fabY, contentBottom - snackBarHeight - fabHeight - math.max(kFloatingActionButtonMargin, safeMargin));
+      fabY = math.min(fabY, contentBottom - snackBarHeight - fabHeight - kFloatingActionButtonMargin);
     // The FAB should sit with its center in front of the top of the bottom sheet.
     if (bottomSheetHeight > 0.0)
       fabY = math.min(fabY, contentBottom - bottomSheetHeight - fabHeight / 2.0);
-    print(snackBarHeight);
     final double maxFabY = scaffoldGeometry.scaffoldSize.height - fabHeight - safeMargin;
     return math.min(maxFabY, fabY);
   }
