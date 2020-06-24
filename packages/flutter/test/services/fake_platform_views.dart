@@ -31,7 +31,7 @@ class FakePlatformViewController extends PlatformViewController {
   int get viewId => _id;
 
   @override
-  void dispatchPointerEvent(PointerEvent event) {
+  Future<void> dispatchPointerEvent(PointerEvent event) async {
     dispatchedPointerEvents.add(event);
   }
 
@@ -42,12 +42,12 @@ class FakePlatformViewController extends PlatformViewController {
   }
 
   @override
-  void dispose() {
+  Future<void> dispose() async {
     disposed = true;
   }
 
   @override
-  void clearFocus() {
+  Future<void> clearFocus() async {
     focusCleared = true;
   }
 }

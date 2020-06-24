@@ -726,13 +726,13 @@ abstract class PlatformViewController {
   int get viewId;
 
   /// Dispatches the `event` to the platform view.
-  void dispatchPointerEvent(PointerEvent event);
+  Future<void> dispatchPointerEvent(PointerEvent event);
 
   /// Disposes the platform view.
   ///
   /// The [PlatformViewController] is unusable after calling dispose.
-  void dispose();
+  Future<void> dispose();
 
   /// Clears the view's focus on the platform side.
-  void clearFocus();
+  Future<void> clearFocus();
 }

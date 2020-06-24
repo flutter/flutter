@@ -398,22 +398,22 @@ class _HtmlElementViewController extends PlatformViewController {
   }
 
   @override
-  void clearFocus() {
+  Future<void> clearFocus() async {
     // Currently this does nothing on Flutter Web.
     // TODO(het): Implement this. See https://github.com/flutter/flutter/issues/39496
   }
 
   @override
-  void dispatchPointerEvent(PointerEvent event) {
+  Future<void> dispatchPointerEvent(PointerEvent event) async {
     // We do not dispatch pointer events to HTML views because they may contain
     // cross-origin iframes, which only accept user-generated events.
   }
 
   @override
-  void dispose() {
+  Future<void> dispose() async {
     if (_initialized) {
       // Asynchronously dispose this view.
-      SystemChannels.platform_views.invokeMethod<void>('dispose', viewId);
+      await SystemChannels.platform_views.invokeMethod<void>('dispose', viewId);
     }
   }
 }
