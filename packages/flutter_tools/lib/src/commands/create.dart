@@ -487,13 +487,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
 
       // Warn about unstable templates. This shuold be last so that it's not
       // lost among the other output.
-      if (featureFlags.isLinuxEnabled) {
-        globals.printStatus('');
-        globals.printStatus('WARNING: The Linux tooling and APIs are not yet stable. '
-            'You will likely need to re-create the "linux" directory after future '
-            'Flutter updates.');
-      }
-      if (featureFlags.isWindowsEnabled) {
+      if (featureFlags.isWindowsEnabled && platforms.contains('windows')) {
         globals.printStatus('');
         globals.printStatus('WARNING: The Windows tooling and APIs are not yet stable. '
             'You will likely need to re-create the "windows" directory after future '
