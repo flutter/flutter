@@ -462,52 +462,51 @@ class _BottomNavigationTile extends StatelessWidget {
     Widget result = Semantics(
       container: true,
       selected: selected,
-      child: Stack(
-        children: <Widget>[
-          MergeSemantics(
-            child: Semantics(
-              container: true,
-              label: indexLabel,
-              child: Tooltip(
-                preferBelow: false,
-                excludeFromSemantics: true,
-                verticalOffset: selectedIconSize + selectedFontSize,
-                child: InkResponse(
-                  onTap: onTap,
-                  mouseCursor: mouseCursor,
-                  child: Padding(
-                    padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        _TileIcon(
-                          colorTween: colorTween,
-                          animation: animation,
-                          iconSize: iconSize,
-                          selected: selected,
-                          item: item,
-                          selectedIconTheme: selectedIconTheme ?? bottomTheme.selectedIconTheme,
-                          unselectedIconTheme: unselectedIconTheme ?? bottomTheme.unselectedIconTheme,
-                        ),
-                        _Label(
-                          colorTween: colorTween,
-                          animation: animation,
-                          item: item,
-                          selectedLabelStyle: selectedLabelStyle ?? bottomTheme.selectedLabelStyle,
-                          unselectedLabelStyle: unselectedLabelStyle ?? bottomTheme.unselectedLabelStyle,
-                          showSelectedLabels: showSelectedLabels ?? bottomTheme.showUnselectedLabels,
-                          showUnselectedLabels: showUnselectedLabels ?? bottomTheme.showUnselectedLabels,
-                        ),
-                      ],
-                    ),
+      child: MergeSemantics(
+        child: Stack(
+          children: <Widget>[
+            Tooltip(
+              preferBelow: false,
+              excludeFromSemantics: true,
+              verticalOffset: selectedIconSize + selectedFontSize,
+              child: InkResponse(
+                onTap: onTap,
+                mouseCursor: mouseCursor,
+                child: Padding(
+                  padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      _TileIcon(
+                        colorTween: colorTween,
+                        animation: animation,
+                        iconSize: iconSize,
+                        selected: selected,
+                        item: item,
+                        selectedIconTheme: selectedIconTheme ?? bottomTheme.selectedIconTheme,
+                        unselectedIconTheme: unselectedIconTheme ?? bottomTheme.unselectedIconTheme,
+                      ),
+                      _Label(
+                        colorTween: colorTween,
+                        animation: animation,
+                        item: item,
+                        selectedLabelStyle: selectedLabelStyle ?? bottomTheme.selectedLabelStyle,
+                        unselectedLabelStyle: unselectedLabelStyle ?? bottomTheme.unselectedLabelStyle,
+                        showSelectedLabels: showSelectedLabels ?? bottomTheme.showUnselectedLabels,
+                        showUnselectedLabels: showUnselectedLabels ?? bottomTheme.showUnselectedLabels,
+                      ),
+                    ],
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+            Semantics(
+              label: indexLabel,
+            )
+          ],
+        ),
       ),
     );
 
