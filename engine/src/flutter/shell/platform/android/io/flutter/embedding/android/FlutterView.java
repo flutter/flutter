@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Insets;
 import android.graphics.Rect;
+import android.media.ImageReader;
 import android.os.Build;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
@@ -303,6 +304,7 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
     super(context, attrs);
 
     this.flutterImageView = flutterImageView;
+    this.renderSurface = flutterImageView;
 
     init();
   }
@@ -938,6 +940,32 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
     flutterRenderer.setSemanticsEnabled(false);
     renderSurface.detachFromRenderer();
     flutterEngine = null;
+  }
+
+  public void convertToImageView() {
+    renderSurface.detachFromRenderer();
+
+    ImageReader imageReader = PlatformViewsController.createImageReader(getWidth(), getHeight());
+    flutterImageView = new FlutterImageView(getContext(), imageReader);
+    renderSurface = flutterImageView;
+    if (flutterEngine != null) {
+      renderSurface.attachToRenderer(flutterEngine.getRenderer());
+    }
+
+    removeAllViews();
+    addView(flutterImageView);
+
+    // TODO(jsimmons): this is a temporary hack that schedules a redraw of the FlutterImageView
+    // at a time when the engine has presumably posted a frame.  Remove this when
+    // PlatformViewsController.onEndFrame callbacks have been implemented.
+    postDelayed(
+        new Runnable() {
+          public void run() {
+            flutterImageView.acquireLatestImage();
+            flutterImageView.invalidate();
+          }
+        },
+        1000);
   }
 
   /** Returns true if this {@code FlutterView} is currently attached to a {@link FlutterEngine}. */

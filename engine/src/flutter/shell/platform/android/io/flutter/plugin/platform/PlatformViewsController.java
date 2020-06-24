@@ -22,6 +22,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.UiThread;
 import androidx.annotation.VisibleForTesting;
 import io.flutter.embedding.android.FlutterImageView;
+import io.flutter.embedding.android.FlutterView;
 import io.flutter.embedding.engine.FlutterOverlaySurface;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel;
@@ -79,8 +80,11 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   // Map of unique IDs to views that render overlay layers.
   private final LongSparseArray<FlutterImageView> overlayLayerViews;
 
-  // Next available unique ID for use in overlayLayerViews;
+  // Next available unique ID for use in overlayLayerViews.
   private long nextOverlayLayerId = 0;
+
+  // Tracks whether the flutterView has been converted to use a FlutterImageView.
+  private boolean flutterViewConvertedToImageView = false;
 
   private final PlatformViewsChannel.PlatformViewsHandler channelHandler =
       new PlatformViewsChannel.PlatformViewsHandler() {
@@ -552,7 +556,10 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   }
 
   public void onDisplayOverlaySurface(int id, int x, int y, int width, int height) {
-    // TODO: Implement this method. https://github.com/flutter/flutter/issues/58288
+    if (!flutterViewConvertedToImageView) {
+      ((FlutterView) flutterView).convertToImageView();
+      flutterViewConvertedToImageView = true;
+    }
   }
 
   public void onBeginFrame() {
@@ -564,22 +571,22 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   }
 
   @TargetApi(19)
-  public FlutterOverlaySurface createOverlaySurface() {
-    ImageReader imageReader;
+  public static ImageReader createImageReader(int width, int height) {
     if (android.os.Build.VERSION.SDK_INT >= 29) {
-      imageReader =
-          ImageReader.newInstance(
-              flutterView.getWidth(),
-              flutterView.getHeight(),
-              PixelFormat.RGBA_8888,
-              2,
-              HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE | HardwareBuffer.USAGE_GPU_COLOR_OUTPUT);
+      return ImageReader.newInstance(
+          width,
+          height,
+          PixelFormat.RGBA_8888,
+          2,
+          HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE | HardwareBuffer.USAGE_GPU_COLOR_OUTPUT);
     } else {
-      imageReader =
-          ImageReader.newInstance(
-              flutterView.getWidth(), flutterView.getHeight(), PixelFormat.RGBA_8888, 2);
+      return ImageReader.newInstance(width, height, PixelFormat.RGBA_8888, 2);
     }
+  }
 
+  @TargetApi(19)
+  public FlutterOverlaySurface createOverlaySurface() {
+    ImageReader imageReader = createImageReader(flutterView.getWidth(), flutterView.getHeight());
     FlutterImageView imageView = new FlutterImageView(flutterView.getContext(), imageReader);
     long id = nextOverlayLayerId++;
     overlayLayerViews.put(id, imageView);
