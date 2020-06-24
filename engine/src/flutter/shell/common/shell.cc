@@ -431,6 +431,9 @@ Shell::~Shell() {
 }
 
 void Shell::NotifyLowMemoryWarning() const {
+  auto trace_id = fml::tracing::TraceNonce();
+  TRACE_EVENT_ASYNC_BEGIN0("flutter", "Shell::NotifyLowMemoryWarning",
+                           trace_id);
   // This does not require a current isolate but does require a running VM.
   // Since a valid shell will not be returned to the embedder without a valid
   // DartVMRef, we can be certain that this is a safe spot to assume a VM is
@@ -438,10 +441,12 @@ void Shell::NotifyLowMemoryWarning() const {
   ::Dart_NotifyLowMemory();
 
   task_runners_.GetRasterTaskRunner()->PostTask(
-      [rasterizer = rasterizer_->GetWeakPtr()]() {
+      [rasterizer = rasterizer_->GetWeakPtr(), trace_id = trace_id]() {
         if (rasterizer) {
           rasterizer->NotifyLowMemoryWarning();
         }
+        TRACE_EVENT_ASYNC_END0("flutter", "Shell::NotifyLowMemoryWarning",
+                               trace_id);
       });
   // The IO Manager uses resource cache limits of 0, so it is not necessary
   // to purge them.
