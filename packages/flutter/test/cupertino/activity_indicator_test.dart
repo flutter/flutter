@@ -11,8 +11,8 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
-  testWidgets('Activity indicator animate property works', (WidgetTester tester) async {
-
+  testWidgets('Activity indicator animate property works',
+      (WidgetTester tester) async {
     await tester.pumpWidget(buildCupertinoActivityIndicator());
     expect(SchedulerBinding.instance.transientCallbackCount, equals(1));
 
@@ -38,7 +38,10 @@ void main() {
             key: key,
             child: Container(
               color: CupertinoColors.white,
-              child: const CupertinoActivityIndicator(animating: false, radius: 35),
+              child: const CupertinoActivityIndicator(
+                animating: false,
+                radius: 35,
+              ),
             ),
           ),
         ),
@@ -58,7 +61,10 @@ void main() {
             key: key,
             child: Container(
               color: CupertinoColors.black,
-              child: const CupertinoActivityIndicator(animating: false, radius: 35),
+              child: const CupertinoActivityIndicator(
+                animating: false,
+                radius: 35,
+              ),
             ),
           ),
         ),
@@ -71,6 +77,57 @@ void main() {
     );
   });
 
+  testWidgets('Activity indicator with new style', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    await tester.pumpWidget(
+      Center(
+        child: MediaQuery(
+          data: const MediaQueryData(platformBrightness: Brightness.light),
+          child: RepaintBoundary(
+            key: key,
+            child: Container(
+              color: CupertinoColors.white,
+              child: const CupertinoActivityIndicator(
+                animating: false,
+                radius: 35,
+                useNewStyle: true,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byKey(key),
+      matchesGoldenFile('activityIndicator.new.paused.light.png'),
+    );
+
+    await tester.pumpWidget(
+      Center(
+        child: MediaQuery(
+          data: const MediaQueryData(platformBrightness: Brightness.dark),
+          child: RepaintBoundary(
+            key: key,
+            child: Container(
+              color: CupertinoColors.black,
+              child: const CupertinoActivityIndicator(
+                animating: false,
+                radius: 35,
+                useNewStyle: true,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byKey(key),
+      matchesGoldenFile('activityIndicator.new.paused.dark.png'),
+    );
+  });
+
   testWidgets('Activity indicator 0% in progress', (WidgetTester tester) async {
     final Key key = UniqueKey();
     await tester.pumpWidget(
@@ -79,7 +136,8 @@ void main() {
           key: key,
           child: Container(
             color: CupertinoColors.white,
-            child: const CupertinoActivityIndicator.partiallyRevealed(progress: 0),
+            child:
+                const CupertinoActivityIndicator.partiallyRevealed(progress: 0),
           ),
         ),
       ),
@@ -91,7 +149,8 @@ void main() {
     );
   });
 
-  testWidgets('Activity indicator 30% in progress', (WidgetTester tester) async {
+  testWidgets('Activity indicator 30% in progress',
+      (WidgetTester tester) async {
     final Key key = UniqueKey();
     await tester.pumpWidget(
       Center(
@@ -99,7 +158,9 @@ void main() {
           key: key,
           child: Container(
             color: CupertinoColors.white,
-            child: const CupertinoActivityIndicator.partiallyRevealed(progress: 0.5),
+            child: const CupertinoActivityIndicator.partiallyRevealed(
+              progress: 0.5,
+            ),
           ),
         ),
       ),
@@ -111,7 +172,8 @@ void main() {
     );
   });
 
-  testWidgets('Activity indicator 100% in progress', (WidgetTester tester) async {
+  testWidgets('Activity indicator 100% in progress',
+      (WidgetTester tester) async {
     final Key key = UniqueKey();
     await tester.pumpWidget(
       Center(
@@ -119,7 +181,8 @@ void main() {
           key: key,
           child: Container(
             color: CupertinoColors.white,
-            child: const CupertinoActivityIndicator.partiallyRevealed(progress: 1),
+            child:
+                const CupertinoActivityIndicator.partiallyRevealed(progress: 1),
           ),
         ),
       ),
@@ -148,7 +211,7 @@ void main() {
   });
 }
 
-Widget buildCupertinoActivityIndicator([ bool animating ]) {
+Widget buildCupertinoActivityIndicator([bool animating]) {
   return MediaQuery(
     data: const MediaQueryData(platformBrightness: Brightness.light),
     child: CupertinoActivityIndicator(
