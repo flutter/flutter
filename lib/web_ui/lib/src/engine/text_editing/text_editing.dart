@@ -68,6 +68,8 @@ void _hideAutofillElements(html.HtmlElement domElement) {
     ..outline = 'none'
     ..border = 'none'
     ..resize = 'none'
+    ..width = '0'
+    ..height = '0'
     ..textShadow = 'transparent'
     ..transformOrigin = '0 0 0';
 
@@ -500,7 +502,22 @@ class GloballyPositionedTextEditingStrategy extends DefaultTextEditingStrategy {
   @override
   void placeElement() {
     super.placeElement();
-    _geometry?.applyToDomElement(domElement);
+    if (hasAutofillGroup) {
+       _geometry?.applyToDomElement(focusedFormElement);
+       placeForm();
+       // On Chrome, when a form is focused, it opens an autofill menu
+       // immeddiately.
+       // Flutter framework sends `setEditableSizeAndTransform` for informing
+       // the engine about the location of the text field. This call will
+       // arrive after `show` call.
+       // Therefore on Chrome we place the element when
+       //  `setEditableSizeAndTransform` method is called and focus on the form
+       // only after placing it to the correct position. Hence autofill menu
+       // does not appear on top-left of the page.
+       focusedFormElement.focus();
+    } else {
+      _geometry?.applyToDomElement(domElement);
+    }
   }
 }
 
@@ -549,6 +566,11 @@ abstract class DefaultTextEditingStrategy implements TextEditingStrategy {
   final List<StreamSubscription<html.Event>> _subscriptions =
       <StreamSubscription<html.Event>>[];
 
+  bool get hasAutofillGroup => _inputConfiguration.autofillGroup != null;
+
+  html.FormElement get focusedFormElement =>
+      _inputConfiguration.autofillGroup.formElement;
+
   @override
   void initializeTextEditing(
     InputConfiguration inputConfig, {
@@ -571,9 +593,11 @@ abstract class DefaultTextEditingStrategy implements TextEditingStrategy {
 
     _setStaticStyleAttributes(domElement);
     _style?.applyToDomElement(domElement);
-    if (_inputConfiguration.autofillGroup != null) {
-      _inputConfiguration.autofillGroup.placeForm(domElement);
-    } else {
+    if (!hasAutofillGroup) {
+      // If there is an Autofill Group the `FormElement`, it will be appended to the
+      // DOM later, when the first location information arrived.
+      // Otherwise, on Blink based Desktop browsers, the autofill menu appears
+      // on top left of the screen.
       domRenderer.glassPaneElement.append(domElement);
     }
 
@@ -657,11 +681,12 @@ abstract class DefaultTextEditingStrategy implements TextEditingStrategy {
     _lastEditingState.applyToDomElement(domElement);
   }
 
-  /// Puts the DOM element used for text editing on the UI at the appropriate
-  /// location and sizes it accordingly.
-  @mustCallSuper
   void placeElement() {
     domElement.focus();
+  }
+
+  void placeForm() {
+    _inputConfiguration.autofillGroup.placeForm(domElement);
   }
 
   void _handleChange(html.Event event) {
@@ -789,6 +814,11 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
     super.initializeTextEditing(inputConfig,
         onChange: onChange, onAction: onAction);
     inputConfig.inputType.configureInputMode(domElement);
+    if (hasAutofillGroup) {
+      placeForm();
+    } else {
+      domRenderer.glassPaneElement.append(domElement);
+    }
   }
 
   @override
@@ -887,6 +917,12 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
       placeElement();
     });
   }
+
+  @override
+  void placeElement() {
+    domElement.focus();
+    _geometry?.applyToDomElement(domElement);
+  }
 }
 
 /// Android behaviour for text editing.
@@ -908,6 +944,11 @@ class AndroidTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
     super.initializeTextEditing(inputConfig,
         onChange: onChange, onAction: onAction);
     inputConfig.inputType.configureInputMode(domElement);
+    if (hasAutofillGroup) {
+      placeForm();
+    } else {
+      domRenderer.glassPaneElement.append(domElement);
+    }
   }
 
   @override
@@ -936,6 +977,12 @@ class AndroidTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
       }
     }));
   }
+
+  @override
+  void placeElement() {
+    domElement.focus();
+    _geometry?.applyToDomElement(domElement);
+  }
 }
 
 /// Firefox behaviour for text editing.
@@ -944,6 +991,21 @@ class AndroidTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
 /// impelemented diefferently in Firefox.
 class FirefoxTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
   FirefoxTextEditingStrategy(HybridTextEditing owner) : super(owner);
+
+  @override
+  void initializeTextEditing(
+    InputConfiguration inputConfig, {
+    @required _OnChangeCallback onChange,
+    @required _OnActionCallback onAction,
+  }) {
+    super.initializeTextEditing(inputConfig,
+        onChange: onChange, onAction: onAction);
+    if (hasAutofillGroup) {
+      placeForm();
+    } else {
+      domRenderer.glassPaneElement.append(domElement);
+    }
+  }
 
   @override
   void addEventHandlers() {
@@ -986,6 +1048,12 @@ class FirefoxTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
     }));
 
     preventDefaultForMouseEvents();
+  }
+
+  @override
+  void placeElement() {
+    domElement.focus();
+    _geometry?.applyToDomElement(domElement);
   }
 }
 
