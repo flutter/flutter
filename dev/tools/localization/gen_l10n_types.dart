@@ -380,21 +380,40 @@ class AppResourceBundle {
 
     // If the locale string was not defined in @@locale, look for the first
     // instance of an ISO 639-1 language code, matching exactly.
-    if (localeString == null) {
-      final String fileName = path.basenameWithoutExtension(file.path);
+    final String fileName = path.basenameWithoutExtension(file.path);
 
-      for (int index = 0; index < fileName.length; index += 1) {
-        // If an underscore was found, check if locale string follows.
-        if (fileName[index] == '_' && fileName[index + 1] != null) {
-          // If Locale.tryParse fails, it returns the String 'null'.
-          final String parserResult = Locale.tryParse(fileName.substring(index + 1)).toString();
+    for (int index = 0; index < fileName.length; index += 1) {
+      // If an underscore was found, check if locale string follows.
+      if (fileName[index] == '_' && fileName[index + 1] != null) {
+        // If Locale.tryParse fails, it returns the String 'null'.
+        final Locale parserResult = Locale.tryParse(fileName.substring(index + 1));
 
-          // If the parserResult is not an actual locale identifier, end the loop.
-          if (parserResult != 'null') {
-            // The parsed result uses dashes ('-'), but we want underscores ('_').
-            localeString = parserResult.replaceAll('-', '_');
-            break;
+        // If the parserResult is not an actual locale identifier, end the loop.
+        if (parserResult != null && parserResult.languageCode != 'und') {
+          // The parsed result uses dashes ('-'), but we want underscores ('_').
+          final String parserLocaleString = parserResult.toString().replaceAll('-', '_');
+
+
+          if (localeString == null) {
+            // If @@locale was not defined, use the filename locale suffix.
+            localeString = parserLocaleString;
+          } else {
+            // If the localeString was defined in @@locale and in the filename, verify to
+            // see if the parsed locale matches, throw an error if it does not. This
+            // prevents developers from confusing issues when both @@locale and
+            // "_{locale}" is specified in the filename.
+            if (localeString != parserLocaleString) {
+              throw L10nException(
+                'The locale specified in @@locale and the arb filename do not match. \n'
+                'Please make sure that they match, since this prevents any confusion \n'
+                'with which locale to use. Otherwise, specify the locale in either the \n'
+                'filename of the @@locale key only.\n'
+                'Current @@locale value: $localeString\n'
+                'Current filename extension: $parserLocaleString'
+              );
+            }
           }
+          break;
         }
       }
     }

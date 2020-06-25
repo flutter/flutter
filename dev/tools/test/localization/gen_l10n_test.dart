@@ -828,7 +828,7 @@ void main() {
       expect(generator.supportedLocales.contains(LocaleInfo.fromString('zh')), true);
     });
 
-    test('correctly prioritizes @@locale property in arb file over filename', () {
+    test('correctly requires @@locale property in arb file to match the filename locale suffix', () {
       const String arbFileWithEnLocale = '''
 {
   "@@locale": "en",
@@ -866,15 +866,14 @@ void main() {
         );
         generator.loadResources();
       } on L10nException catch (e) {
-        fail('Setting language and locales should not fail: \n${e.message}');
+        expect(e.message, contains('The locale specified in @@locale and the arb filename do not match.'));
+        return;
       }
 
-      // @@locale property should hold higher priority
-      expect(generator.supportedLocales.contains(LocaleInfo.fromString('en')), true);
-      expect(generator.supportedLocales.contains(LocaleInfo.fromString('zh')), true);
-      // filename should not be used since @@locale is specified
-      expect(generator.supportedLocales.contains(LocaleInfo.fromString('es')), false);
-      expect(generator.supportedLocales.contains(LocaleInfo.fromString('am')), false);
+      fail(
+        'An exception should occur if the @@locale and the filename extensions are '
+        'defined but not matching.'
+      );
     });
 
     test("throws when arb file's locale could not be determined", () {
