@@ -337,6 +337,32 @@ void main() {
     expect(outputDirectory.childFile('output-localization-file_es.dart').existsSync(), isTrue);
   });
 
+  test('filenames with invalid locales should not be recognized', () {
+    final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+      ..createSync(recursive: true);
+    l10nDirectory.childFile('app_localizations_en.arb')
+      .writeAsStringSync(singleMessageArbFileString);
+    l10nDirectory.childFile('app_localizations_en_CA_foo.arb')
+      .writeAsStringSync(singleMessageArbFileString);
+    LocalizationsGenerator generator;
+    try {
+      generator = LocalizationsGenerator(fs);
+      generator
+        ..initialize(
+          inputPathString: defaultL10nPathString,
+          templateArbFileName: 'app_localizations_en.arb',
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        )
+        ..loadResources();
+    } on L10nException catch (e) {
+      expect(e.message, contains('The following .arb file\'s locale could not be determined'));
+      return;
+    }
+
+    fail('Using app_en_CA_foo.arb should fail as it is not a valid locale.');
+  });
+
   test('correctly creates an unimplemented messages file', () {
     fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
       ..createSync(recursive: true)
