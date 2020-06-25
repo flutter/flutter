@@ -57,29 +57,9 @@ void main() {
   }
 
   // Creates the mock files necessary to run a build.
-  void setUpMockProjectFilesForBuild({int templateVersion}) {
+  void setUpMockProjectFilesForBuild() {
     setUpMockCoreProjectFiles();
     fileSystem.file(fileSystem.path.join('linux', 'CMakeLists.txt')).createSync(recursive: true);
-
-    final String versionFileSubpath = fileSystem.path.join('flutter', '.template_version');
-    const int expectedTemplateVersion = 10;  // Arbitrary value for tests.
-    final File sourceTemplateVersionfile = fileSystem.file(fileSystem.path.join(
-      fileSystem.path.absolute(Cache.flutterRoot),
-      'packages',
-      'flutter_tools',
-      'templates',
-      'app',
-      'linux.tmpl',
-      versionFileSubpath,
-    ));
-    sourceTemplateVersionfile.createSync(recursive: true);
-    sourceTemplateVersionfile.writeAsStringSync(expectedTemplateVersion.toString());
-
-    final File projectTemplateVersionFile = fileSystem.file(
-      fileSystem.path.join('linux', versionFileSubpath));
-    templateVersion ??= expectedTemplateVersion;
-    projectTemplateVersionFile.createSync(recursive: true);
-    projectTemplateVersionFile.writeAsStringSync(templateVersion.toString());
   }
 
   // Returns the command matching the build_linux call to cmake.
@@ -141,34 +121,6 @@ void main() {
     Platform: () => notLinuxPlatform,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
-    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-  });
-
-  testUsingContext('Linux build fails with instructions when template is too old', () async {
-    final BuildCommand command = BuildCommand();
-    setUpMockProjectFilesForBuild(templateVersion: 1);
-
-    expect(createTestCommandRunner(command).run(
-      const <String>['build', 'linux', '--no-pub']
-    ), throwsToolExit(message: 'flutter create .'));
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-    Platform: () => linuxPlatform,
-    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-  });
-
-  testUsingContext('Linux build fails with instructions when template is too new', () async {
-    final BuildCommand command = BuildCommand();
-    setUpMockProjectFilesForBuild(templateVersion: 999);
-
-    expect(createTestCommandRunner(command).run(
-      const <String>['build', 'linux', '--no-pub']
-    ), throwsToolExit(message: 'Upgrade Flutter'));
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-    Platform: () => linuxPlatform,
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
   });
 

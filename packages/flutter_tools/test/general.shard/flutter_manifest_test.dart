@@ -900,6 +900,49 @@ flutter:
 
     expect(flutterManifest.isEmpty, false);
   });
+
+  testWithoutContext('FlutterManifest getSupportedPlatforms return null if runs on legacy format', () {
+    const String manifest = '''
+name: test
+flutter:
+  plugin:
+    androidPackage: com.example
+''';
+    final BufferLogger logger = BufferLogger.test();
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest.isPlugin, true);
+    expect(flutterManifest.supportedPlatforms, null);
+  });
+
+  testWithoutContext('FlutterManifest getSupportedPlatforms returns valid platforms.', () {
+    const String manifest = '''
+name: test
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.example
+        pluginClass: SomeClass
+      ios:
+        pluginClass: SomeClass
+''';
+    final BufferLogger logger = BufferLogger.test();
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest.isPlugin, true);
+    expect(flutterManifest.supportedPlatforms['ios'],
+                              <String, dynamic>{'pluginClass': 'SomeClass'});
+    expect(flutterManifest.supportedPlatforms['android'],
+                              <String, dynamic>{'pluginClass': 'SomeClass',
+                                                'package': 'com.example'});
+  });
 }
 
 Matcher matchesManifest({

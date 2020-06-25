@@ -31,10 +31,27 @@ void main() {
 
   test('flutter run reports an early error in an application', () async {
     final StringBuffer stdout = StringBuffer();
-    _flutter.stdout.listen(stdout.writeln);
 
     await _flutter.run(startPaused: true, withDebugger: true, structuredErrors: true);
     await _flutter.resume();
+
+    final Completer<void> completer = Completer<void>();
+    bool lineFound = false;
+
+    await Future<void>(() async {
+      _flutter.stdout.listen((String line) {
+        stdout.writeln(line);
+        if (line.startsWith('Another exception was thrown') && !lineFound) {
+          lineFound = true;
+          completer.complete();
+        }
+      });
+      await completer.future;
+    }).timeout(const Duration(seconds: 15), onTimeout: () {
+      // Complete anyway in case we don't see the 'Another exception' line.
+      completer.complete();
+    });
+
     await _flutter.stop();
 
     expect(stdout.toString(), contains(_exceptionStart));
