@@ -735,7 +735,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     implements _ParentInkResponseState {
   Set<InteractiveInkFeature> _splashes;
   InteractiveInkFeature _currentSplash;
-  bool _hovering = false;
+  bool _hovering = false; // Whether the widget is being hovered, even if it's disabled.
   final Map<_HighlightType, InkHighlight> _highlights = <_HighlightType, InkHighlight>{};
   Map<Type, Action<Intent>> _actionMap;
 
@@ -776,8 +776,11 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   void didUpdateWidget(_InkResponseStateWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (_isWidgetEnabled(widget) != _isWidgetEnabled(oldWidget)) {
-      _handleHoverChange(_hovering);
       _updateFocusHighlights();
+      final bool effectiveHovering = _shouldWidgetShowHovering(widget);
+      if (effectiveHovering != _shouldWidgetShowHovering(oldWidget)) {
+        updateHighlight(_HighlightType.hover, value: effectiveHovering);
+      }
     }
   }
 
@@ -1045,10 +1048,17 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 
   void _handleMouseEnter(PointerEnterEvent event) => _handleHoverChange(true);
   void _handleMouseExit(PointerExitEvent event) => _handleHoverChange(false);
+
+  bool _shouldWidgetShowHovering(_InkResponseStateWidget widget) => _isWidgetEnabled(widget) && _hovering;
+  bool get _shouldShowHovering => _shouldWidgetShowHovering(widget);
   void _handleHoverChange(bool hovering) {
-    if (_hovering != hovering) {
+    final bool oldEffectiveHovering = _shouldShowHovering;
+    setState(() {
       _hovering = hovering;
-      updateHighlight(_HighlightType.hover, value: enabled && _hovering);
+    });
+    final bool effectiveHovering = _shouldShowHovering;
+    if (effectiveHovering != oldEffectiveHovering) {
+      updateHighlight(_HighlightType.hover, value: effectiveHovering);
     }
   }
 
@@ -1076,7 +1086,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
       widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
       <MaterialState>{
         if (!enabled) MaterialState.disabled,
-        if (_hovering) MaterialState.hovered,
+        if (_shouldShowHovering) MaterialState.hovered,
         if (_hasFocus) MaterialState.focused,
       },
     );
@@ -1091,8 +1101,8 @@ class _InkResponseState extends State<_InkResponseStateWidget>
           autofocus: widget.autofocus,
           child: MouseRegion(
             cursor: effectiveMouseCursor,
-            onEnter: enabled ? _handleMouseEnter : null,
-            onExit: enabled ? _handleMouseExit : null,
+            onEnter: _handleMouseEnter,
+            onExit: _handleMouseExit,
             child: GestureDetector(
               onTapDown: enabled ? _handleTapDown : null,
               onTap: enabled ? () => _handleTap(context) : null,

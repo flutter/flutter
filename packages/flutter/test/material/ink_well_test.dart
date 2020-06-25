@@ -737,6 +737,110 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isFalse);
   });
 
+  testWidgets('ink response reports being hovered when turning enabled', (WidgetTester tester) async {
+    final GlobalKey childKey = GlobalKey();
+    bool hovering = false;
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Container(
+            width: 100,
+            height: 100,
+            child: InkWell(
+              mouseCursor: const _GrabHoveringMouseCursor(),
+              onHover: (bool value) { hovering = value; },
+              child: Container(key: childKey),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    await gesture.moveTo(tester.getCenter(find.byKey(childKey)));
+    expect(hovering, isFalse);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Container(
+            width: 100,
+            height: 100,
+            child: InkWell(
+              mouseCursor: const _GrabHoveringMouseCursor(),
+              onTap: () {},
+              onHover: (bool value) { hovering = value; },
+              child: Container(key: childKey),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(hovering, isTrue);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.grab);
+  });
+
+  testWidgets('ink response reports being unhovered when turning disabled', (WidgetTester tester) async {
+    final GlobalKey childKey = GlobalKey();
+    bool hovering = false;
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Container(
+            width: 100,
+            height: 100,
+            child: InkWell(
+              mouseCursor: const _GrabHoveringMouseCursor(),
+              onTap: () {},
+              onHover: (bool value) { hovering = value; },
+              child: Container(key: childKey),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    await gesture.moveTo(tester.getCenter(find.byKey(childKey)));
+    expect(hovering, isTrue);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.grab);
+
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Container(
+            width: 100,
+            height: 100,
+            child: InkWell(
+              mouseCursor: const _GrabHoveringMouseCursor(),
+              onHover: (bool value) { hovering = value; },
+              child: Container(key: childKey),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(hovering, isFalse);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+  });
+
   testWidgets('When ink wells are nested, only the inner one is triggered by tap splash', (WidgetTester tester) async {
     final GlobalKey middleKey = GlobalKey();
     final GlobalKey innerKey = GlobalKey();
@@ -1191,4 +1295,19 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
     expect(material, paintsExactlyCountTimes(#drawCircle, 1));
   });
+}
+
+// A mouse cursor that displays "grab" when hovered, basic otherwise.
+class _GrabHoveringMouseCursor extends MaterialStateMouseCursor {
+  const _GrabHoveringMouseCursor();
+
+  @override
+  MouseCursor resolve(Set<MaterialState> states) {
+    if (states.contains(MaterialState.hovered))
+      return SystemMouseCursors.grab;
+    return SystemMouseCursors.basic;
+  }
+
+  @override
+  String get debugDescription => 'GrabHoveringMouseCursor()';
 }
