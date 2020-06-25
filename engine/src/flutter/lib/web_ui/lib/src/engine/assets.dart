@@ -68,6 +68,7 @@ class AssetManager {
         throw AssetManagerException(url, target.status);
       }
 
+      html.window.console.warn('Caught ProgressEvent with target: $target');
       rethrow;
     }
   }
