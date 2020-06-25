@@ -40,7 +40,6 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
     this.productId = 0,
     this.deviceId = 0,
     this.repeatCount = 0,
-    this.eventId = 0,
   }) : assert(flags != null),
        assert(codePoint != null),
        assert(keyCode != null),
@@ -142,12 +141,6 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
   /// See <https://developer.android.com/reference/android/view/KeyEvent#getRepeatCount()>
   /// for more information.
   final int repeatCount;
-
-  /// The event ID of this event.
-  ///
-  /// This is to allow the platform side code to look up the event when the
-  /// event is responded to.
-  final int eventId;
 
   // The source code that indicates that an event came from a joystick.
   // from https://developer.android.com/reference/android/view/InputDevice.html#SOURCE_JOYSTICK
