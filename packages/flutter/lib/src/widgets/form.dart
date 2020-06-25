@@ -83,10 +83,11 @@ class Form extends StatefulWidget {
     this.onChanged,
     AutovalidateMode autovalidateMode,
   }) : assert(child != null),
-       assert(autovalidate == false && autovalidateMode == null ||
-       autovalidate == true && autovalidateMode == null ||
-       autovalidate == false && autovalidateMode != null,
-       'autovalidate and autovalidateMode should not be used together.'
+       assert(autovalidate != null),
+       assert(
+         autovalidate == false ||
+         autovalidate == true && autovalidateMode == null,
+         'autovalidate and autovalidateMode should not be used together.'
        ),
        autovalidateMode = autovalidate
            ? AutovalidateMode.always
@@ -326,9 +327,8 @@ class FormField<T> extends StatefulWidget {
     AutovalidateMode autovalidateMode,
   }) : assert(builder != null),
        assert(
-         autovalidate == false && autovalidateMode == null ||
-         autovalidate == true && autovalidateMode == null ||
-         autovalidate == false && autovalidateMode != null,
+         autovalidate == false ||
+         autovalidate == true && autovalidateMode == null,
          'autovalidate and autovalidateMode should not be used together.'
        ),
        autovalidateMode = autovalidate

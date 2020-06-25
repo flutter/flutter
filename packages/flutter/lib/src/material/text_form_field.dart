@@ -188,9 +188,8 @@ class TextFormField extends FormField<String> {
        assert(enableSuggestions != null),
        assert(autovalidate != null),
        assert(
-         autovalidate == false && autovalidateMode == null ||
-         autovalidate == true && autovalidateMode == null ||
-         autovalidate == false && autovalidateMode != null,
+         autovalidate == false ||
+         autovalidate == true && autovalidateMode == null,
          'autovalidate and autovalidateMode should not be used together.'
        ),
        assert(maxLengthEnforced != null),
@@ -215,8 +214,9 @@ class TextFormField extends FormField<String> {
        onSaved: onSaved,
        validator: validator,
        enabled: enabled ?? decoration?.enabled ?? true,
-       autovalidateMode: autovalidate ? AutovalidateMode.always
-       : (autovalidateMode ?? AutovalidateMode.disabled),
+       autovalidateMode: autovalidate
+           ? AutovalidateMode.always
+           : (autovalidateMode ?? AutovalidateMode.disabled),
        builder: (FormFieldState<String> field) {
          final _TextFormFieldState state = field as _TextFormFieldState;
          final InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
