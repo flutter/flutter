@@ -709,7 +709,7 @@ bool RegisterApi(JNIEnv* env) {
     return false;
   }
   g_overlay_surface_id_method =
-      env->GetMethodID(overlay_surface_class.obj(), "getId", "()J");
+      env->GetMethodID(overlay_surface_class.obj(), "getId", "()I");
   if (g_overlay_surface_id_method == nullptr) {
     FML_LOG(ERROR) << "Could not locate FlutterOverlaySurface#getId() method";
     return false;
@@ -1147,8 +1147,8 @@ PlatformViewAndroidJNIImpl::FlutterViewCreateOverlaySurface() {
                                                                      nullptr);
   }
 
-  jlong overlay_id =
-      env->CallLongMethod(overlay.obj(), g_overlay_surface_id_method);
+  jint overlay_id =
+      env->CallIntMethod(overlay.obj(), g_overlay_surface_id_method);
 
   jobject overlay_surface =
       env->CallObjectMethod(overlay.obj(), g_overlay_surface_surface_method);

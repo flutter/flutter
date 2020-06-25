@@ -12,14 +12,14 @@ import androidx.annotation.NonNull;
 public class FlutterOverlaySurface {
   @NonNull private final Surface surface;
 
-  private final long id;
+  private final int id;
 
-  public FlutterOverlaySurface(long id, @NonNull Surface surface) {
+  public FlutterOverlaySurface(int id, @NonNull Surface surface) {
     this.id = id;
     this.surface = surface;
   }
 
-  public long getId() {
+  public int getId() {
     return id;
   }
 

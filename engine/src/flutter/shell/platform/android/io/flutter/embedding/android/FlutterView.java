@@ -954,18 +954,12 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
 
     removeAllViews();
     addView(flutterImageView);
+  }
 
-    // TODO(jsimmons): this is a temporary hack that schedules a redraw of the FlutterImageView
-    // at a time when the engine has presumably posted a frame.  Remove this when
-    // PlatformViewsController.onEndFrame callbacks have been implemented.
-    postDelayed(
-        new Runnable() {
-          public void run() {
-            flutterImageView.acquireLatestImage();
-            flutterImageView.invalidate();
-          }
-        },
-        1000);
+  public void acquireLatestImageViewFrame() {
+    if (flutterImageView != null) {
+      flutterImageView.acquireLatestImage();
+    }
   }
 
   /** Returns true if this {@code FlutterView} is currently attached to a {@link FlutterEngine}. */
