@@ -112,32 +112,37 @@ void _tests() {
               children: <TestSemantics>[
                 TestSemantics(
                   id: 2,
-                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                   children: <TestSemantics>[
                     TestSemantics(
                       id: 3,
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                       children: <TestSemantics>[
                         TestSemantics(
-                          id: 6,
-                          flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                          id: 4,
                           children: <TestSemantics>[
                             TestSemantics(
-                              id: 4,
-                              tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
-                              label: 'Plain text',
-                              textDirection: TextDirection.ltr,
-                            ),
-                            TestSemantics(
-                              id: 5,
-                              tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
-                              flags: <SemanticsFlag>[SemanticsFlag.hasCheckedState, SemanticsFlag.isChecked, SemanticsFlag.isSelected],
-                              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.decrease],
-                              label: '‪Interactive text‬',
-                              value: 'test-value',
-                              increasedValue: 'test-increasedValue',
-                              decreasedValue: 'test-decreasedValue',
-                              hint: 'test-hint',
-                              textDirection: TextDirection.rtl,
+                              id: 7,
+                              flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                              children: <TestSemantics>[
+                                TestSemantics(
+                                  id: 5,
+                                  tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                                  label: 'Plain text',
+                                  textDirection: TextDirection.ltr,
+                                ),
+                                TestSemantics(
+                                  id: 6,
+                                  tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                                  flags: <SemanticsFlag>[SemanticsFlag.hasCheckedState, SemanticsFlag.isChecked, SemanticsFlag.isSelected],
+                                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.decrease],
+                                  label: '‪Interactive text‬',
+                                  value: 'test-value',
+                                  increasedValue: 'test-increasedValue',
+                                  decreasedValue: 'test-decreasedValue',
+                                  hint: 'test-hint',
+                                  textDirection: TextDirection.rtl,
+                                ),
+                              ],
                             ),
                           ],
                         ),

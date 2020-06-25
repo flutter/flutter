@@ -1820,6 +1820,131 @@ void main() {
       , throwsToolExit(message: 'The "--platforms" argument is not supported', exitCode: 2));
   });
 
+  testUsingContext('create a plugin with android, delete then re-create folders', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=android', projectDir.path]);
+    expect(projectDir.childDirectory('android').existsSync(), true);
+    expect(projectDir.childDirectory('example').childDirectory('android').existsSync(), true);
+
+    globals.fs.file(globals.fs.path.join(projectDir.path, 'android')).deleteSync(recursive: true);
+    globals.fs.file(globals.fs.path.join(projectDir.path, 'example/android')).deleteSync(recursive: true);
+    expect(projectDir.childDirectory('android').existsSync(), false);
+    expect(projectDir.childDirectory('example').childDirectory('android').existsSync(), false);
+
+    await runner.run(<String>['create', '--no-pub', projectDir.path]);
+
+    expect(projectDir.childDirectory('android').existsSync(), true);
+    expect(projectDir.childDirectory('example').childDirectory('android').existsSync(), true);
+  });
+
+  testUsingContext('create a plugin with android, delete then re-create folders while also adding windows', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=android', projectDir.path]);
+    expect(projectDir.childDirectory('android').existsSync(), true);
+    expect(projectDir.childDirectory('example').childDirectory('android').existsSync(), true);
+
+    globals.fs.file(globals.fs.path.join(projectDir.path, 'android')).deleteSync(recursive: true);
+    globals.fs.file(globals.fs.path.join(projectDir.path, 'example/android')).deleteSync(recursive: true);
+    expect(projectDir.childDirectory('android').existsSync(), false);
+    expect(projectDir.childDirectory('example').childDirectory('android').existsSync(), false);
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=windows', projectDir.path]);
+
+    expect(projectDir.childDirectory('android').existsSync(), true);
+    expect(projectDir.childDirectory('example').childDirectory('android').existsSync(), true);
+    expect(projectDir.childDirectory('windows').existsSync(), true);
+    expect(projectDir.childDirectory('example').childDirectory('windows').existsSync(), true);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+  });
+
+  testUsingContext('flutter create . on and existing plugin does not add android folders if android is not supported in pubspec', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=ios', projectDir.path]);
+
+    await runner.run(<String>['create', '--no-pub', projectDir.path]);
+    expect(projectDir.childDirectory('android').existsSync(), false);
+    expect(projectDir.childDirectory('example').childDirectory('android').existsSync(), false);
+  });
+
+  testUsingContext('flutter create . on and existing plugin does not add windows folder even feature is enabled', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=android', projectDir.path]);
+
+    await runner.run(<String>['create', '--no-pub', projectDir.path]);
+    expect(projectDir.childDirectory('windows').existsSync(), false);
+    expect(projectDir.childDirectory('example').childDirectory('windows').existsSync(), false);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+  });
+
+  testUsingContext('flutter create . on and existing plugin does not add linux folder even feature is enabled', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=android', projectDir.path]);
+
+    await runner.run(<String>['create', '--no-pub', projectDir.path]);
+    expect(projectDir.childDirectory('linux').existsSync(), false);
+    expect(projectDir.childDirectory('example').childDirectory('linux').existsSync(), false);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+  });
+
+  testUsingContext('flutter create . on and existing plugin does not add web files even feature is enabled', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=android', projectDir.path]);
+
+    await runner.run(<String>['create', '--no-pub', projectDir.path]);
+    expect(projectDir.childDirectory('lib').childFile('flutter_project_web.dart').existsSync(), false);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
+  });
+
+  testUsingContext('flutter create . on and existing plugin does not add macos folder even feature is enabled', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=android', projectDir.path]);
+
+    await runner.run(<String>['create', '--no-pub', projectDir.path]);
+    expect(projectDir.childDirectory('macos').existsSync(), false);
+    expect(projectDir.childDirectory('example').childDirectory('macos').existsSync(), false);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+  });
+
 }
 
 Future<void> _createProject(

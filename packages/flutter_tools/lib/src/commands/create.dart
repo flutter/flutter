@@ -41,7 +41,7 @@ const List<String> _kAvailablePlatforms = <String>[
       ];
 
 const String _kNoPlatformsErrorMessage = '''
-The plugin project was generated without specifying the `--platforms` flag, no platforms are currently supported.
+The plugin project was generated without specifying the `--platforms` flag, no new platforms are added.
 To add platforms, run `flutter create -t plugin --platforms <platforms> .` under the same
 directory. You can also find detailed instructions on how to add platforms in the `pubspec.yaml` at https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms.
 ''';
@@ -278,6 +278,29 @@ class CreateCommand extends FlutterCommand {
     return template;
   }
 
+  Set<Uri> get templateManifest => _templateManifest ??= _computeTemplateManifest();
+  Set<Uri> _templateManifest;
+  Set<Uri> _computeTemplateManifest() {
+    final String flutterToolsAbsolutePath = globals.fs.path.join(
+      Cache.flutterRoot,
+      'packages',
+      'flutter_tools',
+    );
+    final String manifestPath = globals.fs.path.join(
+      flutterToolsAbsolutePath,
+      'templates',
+      'template_manifest.json',
+    );
+    final Map<String, Object> manifest = json.decode(
+      globals.fs.file(manifestPath).readAsStringSync(),
+    ) as Map<String, Object>;
+    return Set<Uri>.from(
+      (manifest['files'] as List<Object>)
+        .cast<String>()
+        .map<Uri>((String path) => Uri.file(globals.fs.path.join(flutterToolsAbsolutePath, path))),
+      );
+  }
+
   @override
   Future<FlutterCommandResult> runCommand() async {
     if (argResults['list-samples'] != null) {
@@ -487,13 +510,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
 
       // Warn about unstable templates. This shuold be last so that it's not
       // lost among the other output.
-      if (featureFlags.isLinuxEnabled) {
-        globals.printStatus('');
-        globals.printStatus('WARNING: The Linux tooling and APIs are not yet stable. '
-            'You will likely need to re-create the "linux" directory after future '
-            'Flutter updates.');
-      }
-      if (featureFlags.isWindowsEnabled) {
+      if (featureFlags.isWindowsEnabled && platforms.contains('windows')) {
         globals.printStatus('');
         globals.printStatus('WARNING: The Windows tooling and APIs are not yet stable. '
             'You will likely need to re-create the "windows" directory after future '
@@ -562,8 +579,20 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       templateContext['windows'] = false;
       globals.printError(_kNoPlatformsErrorMessage);
     }
-    final List<String> platforms = _getSupportedPlatformsFromTemplateContext(templateContext);
-    final bool willAddPlatforms = platforms.isNotEmpty;
+    final List<String> platformsToAdd = _getSupportedPlatformsFromTemplateContext(templateContext);
+
+    final String pubspecPath = globals.fs.path.join(directory.absolute.path, 'pubspec.yaml');
+    final FlutterManifest manifest = FlutterManifest.createFromPath(pubspecPath, fileSystem: globals.fs, logger: globals.logger);
+    List<String> existingPlatforms = <String>[];
+    if (manifest.supportedPlatforms != null) {
+      existingPlatforms = manifest.supportedPlatforms.keys.toList();
+      for (final String existingPlatform in existingPlatforms) {
+        // re-generate files for existing platforms
+        templateContext[existingPlatform] = true;
+      }
+    }
+
+    final bool willAddPlatforms = platformsToAdd.isNotEmpty;
     templateContext['no_platforms'] = !willAddPlatforms;
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
@@ -583,10 +612,6 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
     if (willAddPlatforms) {
       // If adding new platforms to an existing plugin project, prints
       // a help message containing the platforms maps need to be added to the `platforms` key in the pubspec.
-      final String pubspecPath = globals.fs.path.join(directory.absolute.path, 'pubspec.yaml');
-      final List<String> platformsToAdd = List<String>.from(platforms);
-      final FlutterManifest manifest = FlutterManifest.createFromPath(pubspecPath, fileSystem: globals.fs, logger: globals.logger);
-      final List<String> existingPlatforms = manifest.supportedPlatforms.keys.toList();
       platformsToAdd.removeWhere(existingPlatforms.contains);
       final YamlMap platformsMapToPrint = Plugin.createPlatformsYamlMap(platformsToAdd, templateContext['pluginClass'] as String, templateContext['androidIdentifier'] as String);
       if (platformsMapToPrint.isNotEmpty) {
@@ -748,7 +773,11 @@ https://flutter.dev/docs/development/packages-and-plugins/developing-packages#pl
   }
 
   Future<int> _renderTemplate(String templateName, Directory directory, Map<String, dynamic> context, { bool overwrite = false }) async {
-    final Template template = await Template.fromName(templateName, fileSystem: globals.fs);
+    final Template template = await Template.fromName(
+      templateName,
+      fileSystem: globals.fs,
+      templateManifest: templateManifest,
+    );
     return template.render(directory, context, overwriteExisting: overwrite);
   }
 
