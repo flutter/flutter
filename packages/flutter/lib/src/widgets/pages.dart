@@ -190,33 +190,33 @@ class _PageBasedPageRouteBuilder<T> extends PageRoute<T>{
   ) : assert(page != null),
        super(settings: page, fullscreenDialog: page.fullscreenDialog);
 
-  TransitionBuilderPage<T> get page => settings as TransitionBuilderPage<T>;
+  TransitionBuilderPage<T> get _page => settings as TransitionBuilderPage<T>;
 
   @override
-  Duration get transitionDuration => page.transitionDuration;
+  Duration get transitionDuration => _page.transitionDuration;
 
   @override
-  bool get opaque => page.opaque;
+  bool get opaque => _page.opaque;
 
   @override
-  bool get barrierDismissible => page.barrierDismissible;
+  bool get barrierDismissible => _page.barrierDismissible;
 
   @override
-  Color get barrierColor => page.barrierColor;
+  Color get barrierColor => _page.barrierColor;
 
   @override
-  String get barrierLabel => page.barrierLabel;
+  String get barrierLabel => _page.barrierLabel;
 
   @override
-  bool get maintainState => page.maintainState;
+  bool get maintainState => _page.maintainState;
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    return page.pageBuilder(context, animation, secondaryAnimation);
+    return _page.pageBuilder(context, animation, secondaryAnimation);
   }
 
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-    return page.transitionsBuilder(context, animation, secondaryAnimation, child);
+    return _page.transitionsBuilder(context, animation, secondaryAnimation, child);
   }
 }

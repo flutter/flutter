@@ -374,22 +374,22 @@ class _PageBasedCupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTr
        assert(opaque),
        super(settings: page);
 
-  CupertinoPage<T> get page => settings as CupertinoPage<T>;
+  CupertinoPage<T> get _page => settings as CupertinoPage<T>;
 
   @override
-  WidgetBuilder get builder => page.builder;
+  WidgetBuilder get builder => _page.builder;
 
   @override
-  String get title => page.title;
+  String get title => _page.title;
 
   @override
-  bool get maintainState => page.maintainState;
+  bool get maintainState => _page.maintainState;
 
   @override
-  bool get fullscreenDialog => page.fullscreenDialog;
+  bool get fullscreenDialog => _page.fullscreenDialog;
 
   @override
-  String get debugLabel => '${super.debugLabel}(${page.name})';
+  String get debugLabel => '${super.debugLabel}(${_page.name})';
 }
 
 /// A page that creates a cupertino style [PageRoute].

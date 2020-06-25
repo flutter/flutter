@@ -183,17 +183,17 @@ class _PageBasedMaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTran
        assert(opaque),
        super(settings: page);
 
-  MaterialPage<T> get page => settings as MaterialPage<T>;
+  MaterialPage<T> get _page => settings as MaterialPage<T>;
 
   @override
-  WidgetBuilder get builder => page.builder;
+  WidgetBuilder get builder => _page.builder;
 
   @override
-  bool get maintainState => page.maintainState;
+  bool get maintainState => _page.maintainState;
 
   @override
-  bool get fullscreenDialog => page.fullscreenDialog;
+  bool get fullscreenDialog => _page.fullscreenDialog;
 
   @override
-  String get debugLabel => '${super.debugLabel}(${page.name})';
+  String get debugLabel => '${super.debugLabel}(${_page.name})';
 }
