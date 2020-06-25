@@ -415,7 +415,6 @@ class HotRunnerFactory {
     applicationBinary: applicationBinary,
     hostIsIde: hostIsIde,
     projectRootPath: projectRootPath,
-    packagesFilePath: packagesFilePath,
     dillOutputPath: dillOutputPath,
     stayResident: stayResident,
     ipv6: ipv6,

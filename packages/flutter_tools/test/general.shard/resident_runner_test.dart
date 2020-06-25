@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -93,9 +92,8 @@ void main() {
 
   setUp(() {
     testbed = Testbed(setup: () {
-      globals.fs.file(globalPackagesPath)
-        ..createSync(recursive: true)
-        ..writeAsStringSync('\n');
+      globals.fs.file('.packages')
+        .writeAsStringSync('\n');
       globals.fs.file(globals.fs.path.join('build', 'app.dill'))
         ..createSync(recursive: true)
         ..writeAsStringSync('ABC');
@@ -1124,6 +1122,7 @@ void main() {
     final FlutterDevice device = FlutterDevice(mockDevice, buildInfo: BuildInfo.debug);
     final ResidentRunner residentRunner = HotRunner(
       <FlutterDevice>[device],
+      debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug)
     );
 
     expect(await residentRunner.listFlutterViews(), isEmpty);

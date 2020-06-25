@@ -58,8 +58,10 @@ class WebEntrypointTarget extends Target {
     final bool shouldInitializePlatform = environment.defines[kInitializePlatform] == 'true';
     final bool hasPlugins = environment.defines[kHasWebPlugins] == 'true';
     final Uri importUri = environment.fileSystem.file(targetFile).absolute.uri;
+    // TODO(jonahwilliams): support configuration of this file.
+    const String packageFile = '.packages';
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-      environment.projectDir.childFile('.packages'),
+      environment.fileSystem.file(packageFile),
       logger: environment.logger,
     );
 
@@ -156,7 +158,8 @@ class Dart2JSTarget extends Target {
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final String specPath = globals.fs.path.join(
       globals.artifacts.getArtifactPath(Artifact.flutterWebSdk), 'libraries.json');
-    final String packageFile = globalPackagesPath;
+    // TODO(jonahwilliams): support configuration of this file.
+    const String packageFile = '.packages';
     final File outputKernel = environment.buildDir.childFile('app.dill');
     final File outputFile = environment.buildDir.childFile('main.dart.js');
     final List<String> dartDefines = decodeDartDefines(environment.defines, kDartDefines);
