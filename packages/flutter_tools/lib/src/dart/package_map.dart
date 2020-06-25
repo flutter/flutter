@@ -12,12 +12,9 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 
-// No touching!
-@visibleForTesting
-bool debugDangerousIgnorePackageLoadErrors = false;
-
 const String kPackagesFileName = '.packages';
 
+// No touching!
 String get globalPackagesPath => _globalPackagesPath ?? kPackagesFileName;
 
 set globalPackagesPath(String value) {
@@ -64,7 +61,7 @@ Future<PackageConfig> loadPackageConfigWithLogging(File file, {
       didError = true;
     }
   );
-  if (didError && !debugDangerousIgnorePackageLoadErrors) {
+  if (didError) {
     throwToolExit(null);
   }
   return result;

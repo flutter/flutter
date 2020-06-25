@@ -9,7 +9,6 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
-import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/test/test_compiler.dart';
 import 'package:mockito/mockito.dart';
@@ -32,7 +31,7 @@ void main() {
     fileSystem.file('pubspec.yaml').createSync();
     fileSystem.file('.packages').writeAsStringSync('flutter_test:flutter_test/');
     fileSystem.file('test/foo.dart').createSync(recursive: true);
-    fileSystem.file(globalPackagesPath)
+    fileSystem.file('.packages')
       ..createSync()
       ..writeAsStringSync('flutter_test:flutter_test/');
     residentCompiler = MockResidentCompiler();
