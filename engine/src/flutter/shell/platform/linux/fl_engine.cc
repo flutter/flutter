@@ -274,10 +274,24 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   custom_task_runners.struct_size = sizeof(FlutterCustomTaskRunners);
   custom_task_runners.platform_task_runner = &platform_task_runner;
 
+  g_autoptr(GPtrArray) command_line_args =
+      g_ptr_array_new_with_free_func(g_free);
+  g_ptr_array_add(command_line_args, g_strdup("flutter"));
+  G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+  gboolean enable_mirrors = fl_dart_project_get_enable_mirrors(self->project);
+  G_GNUC_END_IGNORE_DEPRECATIONS
+  if (enable_mirrors) {
+    g_ptr_array_add(command_line_args,
+                    g_strdup("--dart-flags=--enable_mirrors=true"));
+  }
+
   FlutterProjectArgs args = {};
   args.struct_size = sizeof(FlutterProjectArgs);
   args.assets_path = fl_dart_project_get_assets_path(self->project);
   args.icu_data_path = fl_dart_project_get_icu_data_path(self->project);
+  args.command_line_argc = command_line_args->len;
+  args.command_line_argv =
+      reinterpret_cast<const char* const*>(command_line_args->pdata);
   args.platform_message_callback = fl_engine_platform_message_cb;
   args.custom_task_runners = &custom_task_runners;
   args.shutdown_dart_vm_when_done = true;

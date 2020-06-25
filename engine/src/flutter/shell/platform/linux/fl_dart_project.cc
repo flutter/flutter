@@ -9,6 +9,7 @@
 struct _FlDartProject {
   GObject parent_instance;
 
+  gboolean enable_mirrors;
   gchar* aot_library_path;
   gchar* assets_path;
   gchar* icu_data_path;
@@ -58,6 +59,19 @@ G_MODULE_EXPORT FlDartProject* fl_dart_project_new() {
       g_build_filename(executable_dir, "data", "icudtl.dat", nullptr);
 
   return self;
+}
+
+G_MODULE_EXPORT void fl_dart_project_set_enable_mirrors(
+    FlDartProject* self,
+    gboolean enable_mirrors) {
+  g_return_if_fail(FL_IS_DART_PROJECT(self));
+  self->enable_mirrors = enable_mirrors;
+}
+
+G_MODULE_EXPORT gboolean
+fl_dart_project_get_enable_mirrors(FlDartProject* self) {
+  g_return_val_if_fail(FL_IS_DART_PROJECT(self), FALSE);
+  return self->enable_mirrors;
 }
 
 G_MODULE_EXPORT const gchar* fl_dart_project_get_aot_library_path(
