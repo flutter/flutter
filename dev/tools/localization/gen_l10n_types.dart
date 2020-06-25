@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:intl/locale.dart';
+import 'package:path/path.dart' as path;
 
 import 'localizations_utils.dart';
 
@@ -380,11 +381,7 @@ class AppResourceBundle {
     // If the locale string was not defined in @@locale, look for the first
     // instance of an ISO 639-1 language code, matching exactly.
     if (localeString == null) {
-      final String fileName = file.path
-        // Clean out the path to only contain the filename.
-        .split('/').last
-        // Remove the file type suffix.
-        .split('.')[0];
+      final String fileName = path.basenameWithoutExtension(file.path);
 
       for (int index = 0; index < fileName.length; index += 1) {
         // If an underscore was found, check if locale string follows.
