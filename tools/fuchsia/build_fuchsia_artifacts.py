@@ -159,6 +159,10 @@ def CopyVulkanDepsToBucket(src, dst, arch):
     FindFileAndCopyTo('VkLayer_khronos_validation.json', '%s/pkg' % (sdk_path), deps_bucket_path)
     FindFileAndCopyTo('VkLayer_khronos_validation.so', '%s/arch/%s' % (sdk_path, arch), deps_bucket_path)
 
+def CopyIcuDepsToBucket(src, dst):
+  source_root = os.path.join(_out_dir, src)
+  deps_bucket_path = os.path.join(_bucket_directory, dst)
+  FindFileAndCopyTo('icudtl.dat', source_root, deps_bucket_path)
 
 def BuildBucket(runtime_mode, arch, product):
   out_dir = 'fuchsia_%s_%s/' % (runtime_mode, arch)
@@ -166,6 +170,7 @@ def BuildBucket(runtime_mode, arch, product):
   deps_dir = 'flutter/%s/deps/' % (arch)
   CopyToBucket(out_dir, bucket_dir, product)
   CopyVulkanDepsToBucket(out_dir, deps_dir, arch)
+  CopyIcuDepsToBucket(out_dir, deps_dir)
 
 
 def ProcessCIPDPackage(upload, engine_version):
