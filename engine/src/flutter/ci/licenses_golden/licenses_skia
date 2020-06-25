@@ -1,4 +1,4 @@
-Signature: b3e814b93da372c39dbd3a9b96a6ac4e
+Signature: 796a01aa44011335f21891108638e26c
 
 UNUSED LICENSES:
 
@@ -5880,6 +5880,7 @@ FILE: ../../../third_party/skia/src/core/SkBuffer.cpp
 FILE: ../../../third_party/skia/src/core/SkBuffer.h
 FILE: ../../../third_party/skia/src/core/SkColor.cpp
 FILE: ../../../third_party/skia/src/core/SkColorFilter.cpp
+FILE: ../../../third_party/skia/src/core/SkColorFilterBase.h
 FILE: ../../../third_party/skia/src/core/SkCoreBlitters.h
 FILE: ../../../third_party/skia/src/core/SkDebug.cpp
 FILE: ../../../third_party/skia/src/core/SkDeque.cpp
