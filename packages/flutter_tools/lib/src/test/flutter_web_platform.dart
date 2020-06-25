@@ -97,7 +97,7 @@ class FlutterWebPlatform extends PlatformPlugin {
   }
 
   final Future<PackageConfig> _packagesFuture = loadPackageConfigWithLogging(
-    globals.fs.file(globalPackagesPathDepreactedNoUse),
+    globals.fs.file(globalPackagesPath),
     logger: globals.logger,
   );
 
@@ -871,7 +871,7 @@ class TestGoldenComparator {
       shellPath,
       '--disable-observatory',
       '--non-interactive',
-      '--packages=$globalPackagesPathDepreactedNoUse',
+      '--packages=$globalPackagesPath',
       output,
     ];
 

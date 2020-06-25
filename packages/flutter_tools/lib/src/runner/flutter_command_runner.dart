@@ -348,7 +348,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     if (engineSourcePath == null && globalResults['local-engine'] != null) {
       try {
         final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-          globals.fs.file(globalPackagesPathDepreactedNoUse),
+          globals.fs.file(globalPackagesPath),
           logger: globals.logger,
           throwOnError: false,
         );

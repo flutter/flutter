@@ -13,7 +13,8 @@ import '../base/logger.dart';
 
 const String kPackagesFileName = '.packages';
 
-String get globalPackagesPathDepreactedNoUse => _globalPackagesPath ?? kPackagesFileName;
+// No touching!
+String get globalPackagesPath => _globalPackagesPath ?? kPackagesFileName;
 
 set globalPackagesPath(String value) {
   _globalPackagesPath = value;

@@ -407,7 +407,7 @@ class FlutterPlatform extends PlatformPlugin {
     int ourTestCount,
   ) async {
     _packageConfig ??= await loadPackageConfigWithLogging(
-      globals.fs.file(globalPackagesPathDepreactedNoUse),
+      globals.fs.file(globalPackagesPath),
       logger: globals.logger,
     );
     globals.printTrace('test $ourTestCount: starting test $testPath');
@@ -476,7 +476,7 @@ class FlutterPlatform extends PlatformPlugin {
       final Process process = await _startProcess(
         shellPath,
         mainDart,
-        packages: globalPackagesPathDepreactedNoUse,
+        packages: globalPackagesPath,
         enableObservatory: enableObservatory,
         startPaused: startPaused,
         disableServiceAuthCodes: disableServiceAuthCodes,
