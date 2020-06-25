@@ -171,6 +171,7 @@ void main() {
         nonEphemeralOne
       ]);
     }, overrides: <Type, Generator>{
+      Artifacts: () => Artifacts.test(),
       Stdio: () => mockStdio,
       AnsiTerminal: () => MockTerminal(),
     });
@@ -194,6 +195,7 @@ void main() {
         nonEphemeralTwo
       ]);
     }, overrides: <Type, Generator>{
+      Artifacts: () => Artifacts.test(),
       Stdio: () => mockStdio,
       AnsiTerminal: () => MockTerminal(),
     });
@@ -217,6 +219,7 @@ void main() {
         ephemeralOne
       ]);
     }, overrides: <Type, Generator>{
+      Artifacts: () => Artifacts.test(),
       Stdio: () => mockStdio,
       AnsiTerminal: () => MockTerminal(),
     });
