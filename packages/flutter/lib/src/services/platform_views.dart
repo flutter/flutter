@@ -643,7 +643,8 @@ class AndroidViewController extends PlatformViewController {
   int _textureId;
 
   // Helps convert PointerEvents to AndroidMotionEvents.
-  _AndroidMotionEventConverter _motionEventConverter;
+  final _AndroidMotionEventConverter _motionEventConverter =
+    _AndroidMotionEventConverter();
 
   set pointTransformer(PointTransformer transformer) {
     _motionEventConverter._pointTransformer = transformer;
