@@ -61,6 +61,99 @@ void main() {
     expect(context.clipBehavior, equals(Clip.antiAlias));
   });
 
+  testWidgets('SingleChildScrollView respects overflowArea', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final TestScrollController controller = TestScrollController();
+    List<Widget> children;
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: SingleChildScrollView(
+        controller: controller,
+        overflowArea: EdgeInsets.zero,
+        child: Column(
+          children: children = List<Widget>.generate(5, (int i) {
+            return Container(
+              height: 200.0,
+              child: Text('Tile $i'),
+            );
+          })
+        )
+      )
+    ));
+
+    // 1st, check that the render object has received the default overflow area.
+    final dynamic renderObject = tester.allRenderObjects.where((RenderObject o) => o.runtimeType.toString() == '_RenderSingleChildViewport').first;
+    expect(renderObject.overflowArea, equals(EdgeInsets.zero));
+    tester.renderObject(find.byWidget(children[4])).showOnScreen();
+    await tester.pumpAndSettle();
+    expect(controller.offset, equals(400.0));
+
+    // 2nd, pump a new widget to check that the render object can update its overflow area.
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: SingleChildScrollView(
+        controller: controller,
+        overflowArea: const EdgeInsets.only(top: 200, bottom: 200),
+        child: Column(
+          children: children = List<Widget>.generate(5, (int i) {
+            return Container(
+              height: 200.0,
+              child: Text('Tile $i'),
+            );
+          })
+        )
+      )
+    ));
+    expect(renderObject.overflowArea, equals(const EdgeInsets.only(top: 200, bottom: 200)));
+
+    // 3rd, check if the overflow area didn't affect the viewport
+    tester.renderObject(find.byWidget(children[4])).showOnScreen();
+    await tester.pumpAndSettle();
+    expect(controller.offset, equals(400.0));
+
+    // 4th, check if the 2nd tile is shown due to the top overflow area
+    expect(semantics, hasSemantics(
+      TestSemantics(
+        children: <TestSemantics>[
+          TestSemantics(
+            flags: <SemanticsFlag>[
+              SemanticsFlag.hasImplicitScrolling,
+            ],
+            actions: <SemanticsAction>[
+              SemanticsAction.scrollDown,
+            ],
+            children: <TestSemantics>[
+              TestSemantics(
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.isHidden,
+                ],
+                label: r'Tile 0',
+                textDirection: TextDirection.ltr,
+              ),
+              TestSemantics(
+                label: r'Tile 1',
+                textDirection: TextDirection.ltr,
+              ),
+              TestSemantics(
+                label: r'Tile 2',
+                textDirection: TextDirection.ltr,
+              ),
+              TestSemantics(
+                label: r'Tile 3',
+                textDirection: TextDirection.ltr,
+              ),
+              TestSemantics(
+                label: r'Tile 4',
+                textDirection: TextDirection.ltr,
+              ),
+            ],
+          ),
+        ],
+      ),
+      ignoreRect: true, ignoreTransform: true, ignoreId: true,
+    ));
+  });
+
   testWidgets('SingleChildScrollView control test', (WidgetTester tester) async {
     await tester.pumpWidget(SingleChildScrollView(
       child: Container(
