@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
@@ -10,6 +11,10 @@ import 'package:package_config/package_config.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+
+// No touching!
+@visibleForTesting
+bool debugDangerousIgnorePackageLoadErrors = false;
 
 const String kPackagesFileName = '.packages';
 
@@ -31,9 +36,10 @@ String _globalPackagesPath;
 Future<PackageConfig> loadPackageConfigWithLogging(File file, {
   @required Logger logger,
   bool throwOnError = true,
-}) {
+}) async {
   final FileSystem fileSystem = file.fileSystem;
-  return loadPackageConfigUri(
+  bool didError = false;
+  final PackageConfig result = await loadPackageConfigUri(
     file.absolute.uri,
     loader: (Uri uri) {
       final File configFile = fileSystem.file(uri);
@@ -55,7 +61,11 @@ Future<PackageConfig> loadPackageConfigWithLogging(File file, {
         message += '\nDid you run this command from the same directory as your pubspec.yaml file?';
       }
       logger.printError(message);
-      throwToolExit(null);
+      didError = true;
     }
   );
+  if (didError && !debugDangerousIgnorePackageLoadErrors) {
+    throwToolExit(null);
+  }
+  return result;
 }
