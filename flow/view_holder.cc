@@ -95,7 +95,6 @@ ViewHolder::ViewHolder(fml::RefPtr<fml::TaskRunner> ui_task_runner,
     : ui_task_runner_(std::move(ui_task_runner)),
       pending_view_holder_token_(std::move(view_holder_token)),
       pending_bind_callback_(on_bind_callback) {
-  FML_DCHECK(ui_task_runner_);
   FML_DCHECK(pending_view_holder_token_.value);
 }
 
@@ -114,11 +113,13 @@ void ViewHolder::UpdateScene(SceneUpdateContext& context,
     opacity_node_->AddChild(*entity_node_);
     opacity_node_->SetLabel("flutter::ViewHolder");
     entity_node_->Attach(*view_holder_);
-    ui_task_runner_->PostTask(
-        [bind_callback = std::move(pending_bind_callback_),
-         view_holder_id = view_holder_->id()]() {
-          bind_callback(view_holder_id);
-        });
+    if (ui_task_runner_ && pending_view_holder_token_.value) {
+      ui_task_runner_->PostTask(
+          [bind_callback = std::move(pending_bind_callback_),
+           view_holder_id = view_holder_->id()]() {
+            bind_callback(view_holder_id);
+          });
+    }
   }
   FML_DCHECK(entity_node_);
   FML_DCHECK(opacity_node_);

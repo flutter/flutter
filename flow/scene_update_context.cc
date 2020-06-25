@@ -4,8 +4,11 @@
 
 #include "flutter/flow/scene_update_context.h"
 
+#include <lib/ui/scenic/cpp/view_token_pair.h>
+
 #include "flutter/flow/layers/layer.h"
 #include "flutter/flow/matrix_decomposition.h"
+#include "flutter/flow/view_holder.h"
 #include "flutter/fml/trace_event.h"
 #include "include/core/SkColor.h"
 
@@ -221,6 +224,37 @@ SceneUpdateContext::ExecutePaintTasks(CompositorContext::ScopedFrame& frame) {
   topmost_global_scenic_elevation_ = kScenicZElevationBetweenLayers;
   scenic_elevation_ = 0.f;
   return surfaces_to_submit;
+}
+
+void SceneUpdateContext::UpdateScene(int64_t view_id,
+                                     const SkPoint& offset,
+                                     const SkSize& size) {
+  auto* view_holder = ViewHolder::FromId(view_id);
+  FML_DCHECK(view_holder);
+
+  view_holder->SetProperties(size.width(), size.height(), 0, 0, 0, 0,
+                             view_holder->hit_testable());
+  view_holder->UpdateScene(*this, offset, size,
+                           SkScalarRoundToInt(alphaf() * 255),
+                           view_holder->focusable());
+}
+
+void SceneUpdateContext::CreateView(int64_t view_id,
+                                    bool hit_testable,
+                                    bool focusable) {
+  zx_handle_t handle = (zx_handle_t)view_id;
+  flutter::ViewHolder::Create(handle, nullptr,
+                              scenic::ToViewHolderToken(zx::eventpair(handle)),
+                              nullptr);
+  auto* view_holder = ViewHolder::FromId(view_id);
+  FML_DCHECK(view_holder);
+
+  view_holder->set_hit_testable(hit_testable);
+  view_holder->set_focusable(focusable);
+}
+
+void SceneUpdateContext::DestroyView(int64_t view_id) {
+  ViewHolder::Destroy(view_id);
 }
 
 SceneUpdateContext::Entity::Entity(SceneUpdateContext& context)
