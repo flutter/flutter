@@ -427,17 +427,167 @@ enum _AndroidViewState {
   disposed,
 }
 
+typedef PointTransformer = Offset Function(Offset position);
+
+// Helper for converting PointerEvents into AndroidMotionEvents.
+class _AndroidMotionEventConverter {
+  _AndroidMotionEventConverter();
+
+  final Map<int, AndroidPointerCoords> pointerPositions =
+      <int, AndroidPointerCoords>{};
+  final Map<int, AndroidPointerProperties> pointerProperties =
+      <int, AndroidPointerProperties>{};
+
+  PointTransformer _pointTransformer;
+
+  set pointTransformer(PointTransformer transformer) {
+    _pointTransformer = transformer;
+  }
+
+  int nextPointerId = 0;
+  int downTimeMillis;
+
+  void handlePointerDownEvent(PointerDownEvent event) {
+    if (nextPointerId == 0) {
+      downTimeMillis = event.timeStamp.inMilliseconds;
+    }
+    pointerProperties[event.pointer] = propertiesFor(event, nextPointerId++);
+  }
+
+  void updatePointerPositions(PointerEvent event) {
+    assert(_pointTransformer != null);
+    final Offset position = _pointTransformer(event.position);
+    pointerPositions[event.pointer] = AndroidPointerCoords(
+      orientation: event.orientation,
+      pressure: event.pressure,
+      size: event.size,
+      toolMajor: event.radiusMajor,
+      toolMinor: event.radiusMinor,
+      touchMajor: event.radiusMajor,
+      touchMinor: event.radiusMinor,
+      x: position.dx,
+      y: position.dy,
+    );
+  }
+
+  void handlePointerUpEvent(PointerUpEvent event) {
+    pointerPositions.remove(event.pointer);
+    pointerProperties.remove(event.pointer);
+    if (pointerProperties.isEmpty) {
+      nextPointerId = 0;
+      downTimeMillis = null;
+    }
+  }
+
+  void handlePointerCancelEvent(PointerCancelEvent event) {
+    pointerPositions.clear();
+    pointerProperties.clear();
+    nextPointerId = 0;
+    downTimeMillis = null;
+  }
+
+  AndroidMotionEvent toAndroidMotionEvent(PointerEvent event) {
+    final List<int> pointers = pointerPositions.keys.toList();
+    final int pointerIdx = pointers.indexOf(event.pointer);
+    final int numPointers = pointers.length;
+
+    // This value must match the value in engine's FlutterView.java.
+    // This flag indicates whether the original Android pointer events were batched together.
+    const int kPointerDataFlagBatched = 1;
+
+    // Android MotionEvent objects can batch information on multiple pointers.
+    // Flutter breaks these such batched events into multiple PointerEvent objects.
+    // When there are multiple active pointers we accumulate the information for all pointers
+    // as we get PointerEvents, and only send it to the embedded Android view when
+    // we see the last pointer. This way we achieve the same batching as Android.
+    if (event.platformData == kPointerDataFlagBatched ||
+        (isSinglePointerAction(event) && pointerIdx < numPointers - 1)) {
+      return null;
+    }
+
+    int action;
+    switch (event.runtimeType) {
+      case PointerDownEvent:
+        action = numPointers == 1
+            ? AndroidViewController.kActionDown
+            : AndroidViewController.pointerAction(
+                pointerIdx, AndroidViewController.kActionPointerDown);
+        break;
+      case PointerUpEvent:
+        action = numPointers == 1
+            ? AndroidViewController.kActionUp
+            : AndroidViewController.pointerAction(
+                pointerIdx, AndroidViewController.kActionPointerUp);
+        break;
+      case PointerMoveEvent:
+        action = AndroidViewController.kActionMove;
+        break;
+      case PointerCancelEvent:
+        action = AndroidViewController.kActionCancel;
+        break;
+      default:
+        return null;
+    }
+
+    return AndroidMotionEvent(
+      downTime: downTimeMillis,
+      eventTime: event.timeStamp.inMilliseconds,
+      action: action,
+      pointerCount: pointerPositions.length,
+      pointerProperties: pointers
+          .map<AndroidPointerProperties>((int i) => pointerProperties[i])
+          .toList(),
+      pointerCoords: pointers
+          .map<AndroidPointerCoords>((int i) => pointerPositions[i])
+          .toList(),
+      metaState: 0,
+      buttonState: 0,
+      xPrecision: 1.0,
+      yPrecision: 1.0,
+      deviceId: 0,
+      edgeFlags: 0,
+      source: 0,
+      flags: 0,
+    );
+  }
+
+  AndroidPointerProperties propertiesFor(PointerEvent event, int pointerId) {
+    int toolType = AndroidPointerProperties.kToolTypeUnknown;
+    switch (event.kind) {
+      case PointerDeviceKind.touch:
+        toolType = AndroidPointerProperties.kToolTypeFinger;
+        break;
+      case PointerDeviceKind.mouse:
+        toolType = AndroidPointerProperties.kToolTypeMouse;
+        break;
+      case PointerDeviceKind.stylus:
+        toolType = AndroidPointerProperties.kToolTypeStylus;
+        break;
+      case PointerDeviceKind.invertedStylus:
+        toolType = AndroidPointerProperties.kToolTypeEraser;
+        break;
+      case PointerDeviceKind.unknown:
+        toolType = AndroidPointerProperties.kToolTypeUnknown;
+        break;
+    }
+    return AndroidPointerProperties(id: pointerId, toolType: toolType);
+  }
+
+  bool isSinglePointerAction(PointerEvent event) =>
+      event is! PointerDownEvent && event is! PointerUpEvent;
+}
+
 /// Controls an Android view.
 ///
 /// Typically created with [PlatformViewsService.initAndroidView].
-class AndroidViewController {
+class AndroidViewController extends PlatformViewController {
   AndroidViewController._(
-    this.id,
+    this.viewId,
     String viewType,
     dynamic creationParams,
     MessageCodec<dynamic> creationParamsCodec,
     TextDirection layoutDirection,
-  ) : assert(id != null),
+  ) : assert(viewId != null),
       assert(viewType != null),
       assert(layoutDirection != null),
       assert(creationParams == null || creationParamsCodec != null),
@@ -484,12 +634,20 @@ class AndroidViewController {
   static const int kAndroidLayoutDirectionRtl = 1;
 
   /// The unique identifier of the Android view controlled by this controller.
-  final int id;
+  @override
+  final int viewId;
 
   final String _viewType;
 
   /// The texture entry id into which the Android view is rendered.
   int _textureId;
+
+  // Helps convert PointerEvents to AndroidMotionEvents.
+  _AndroidMotionEventConverter _motionEventConverter;
+
+  set pointTransformer(PointTransformer transformer) {
+    _motionEventConverter._pointTransformer = transformer;
+  }
 
   /// Returns the texture entry id that the Android view is rendering into.
   ///
@@ -506,6 +664,10 @@ class AndroidViewController {
   final MessageCodec<dynamic> _creationParamsCodec;
 
   final List<PlatformViewCreatedCallback> _platformViewCreatedCallbacks = <PlatformViewCreatedCallback>[];
+
+  /// The unique identifier of the Android view controlled by this controller.
+  @Deprecated('Please use `viewId`.')
+  int get id => viewId;
 
   /// Whether the platform view has already been created.
   bool get isCreated => _state == _AndroidViewState.created;
@@ -529,6 +691,7 @@ class AndroidViewController {
   /// The [AndroidViewController] object is unusable after calling this.
   /// The identifier of the platform view cannot be reused after the view is
   /// disposed.
+  @override
   Future<void> dispose() async {
     if (_state == _AndroidViewState.creating || _state == _AndroidViewState.created)
       await SystemChannels.platform_views.invokeMethod<void>('dispose', id);
@@ -581,6 +744,7 @@ class AndroidViewController {
   }
 
   /// Clears the focus from the Android View if it is focused.
+  @override
   Future<void> clearFocus() {
     if (_state != _AndroidViewState.created) {
       return null;
@@ -605,7 +769,30 @@ class AndroidViewController {
   /// The Android MotionEvent object is created with [MotionEvent.obtain](https://developer.android.com/reference/android/view/MotionEvent.html#obtain(long,%20long,%20int,%20float,%20float,%20float,%20float,%20int,%20float,%20float,%20int,%20int)).
   /// See documentation of [MotionEvent.obtain](https://developer.android.com/reference/android/view/MotionEvent.html#obtain(long,%20long,%20int,%20float,%20float,%20float,%20float,%20int,%20float,%20float,%20int,%20int))
   /// for description of the parameters.
-  Future<void> sendMotionEvent(AndroidMotionEvent event) async {
+  @override
+  Future<void> dispatchPointerEvent(PointerEvent event) async {
+    if (event is PointerDownEvent) {
+      _motionEventConverter.handlePointerDownEvent(event);
+    }
+
+    _motionEventConverter.updatePointerPositions(event);
+
+    final AndroidMotionEvent androidEvent =
+        _motionEventConverter.toAndroidMotionEvent(event);
+
+    if (event is PointerUpEvent) {
+      _motionEventConverter.handlePointerUpEvent(event);
+    } else if (event is PointerCancelEvent) {
+      _motionEventConverter.handlePointerCancelEvent(event);
+    }
+
+    if (androidEvent == null) {
+      return;
+    }
+    await _sendMotionEvent(androidEvent);
+  }
+
+  Future<void> _sendMotionEvent(AndroidMotionEvent event) async {
     await SystemChannels.platform_views.invokeMethod<dynamic>(
         'touch',
         event._asList(id),

@@ -412,7 +412,6 @@ class _HtmlElementViewController extends PlatformViewController {
   @override
   Future<void> dispose() async {
     if (_initialized) {
-      // Asynchronously dispose this view.
       await SystemChannels.platform_views.invokeMethod<void>('dispose', viewId);
     }
   }
