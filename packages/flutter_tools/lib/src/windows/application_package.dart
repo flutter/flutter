@@ -6,6 +6,7 @@ import 'package:meta/meta.dart';
 
 import '../application_package.dart';
 import '../base/file_system.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../cmake.dart';
 import '../globals.dart' as globals;
@@ -63,8 +64,8 @@ class BuildableWindowsApp extends WindowsApp {
     final String binaryName = getCmakeExecutableName(project);
     return globals.fs.path.join(
         getWindowsBuildDirectory(),
-        'bundle',
-        getNameForBuildMode(buildMode),
+        'runner',
+        toTitleCase(getNameForBuildMode(buildMode)),
         '$binaryName.exe',
     );
   }
