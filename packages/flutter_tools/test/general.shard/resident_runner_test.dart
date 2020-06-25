@@ -92,7 +92,8 @@ void main() {
 
   setUp(() {
     testbed = Testbed(setup: () {
-      globals.fs.file('.packages').writeAsStringSync('\n');
+      globals.fs.file('.packages')
+        .writeAsStringSync('\n');
       globals.fs.file(globals.fs.path.join('build', 'app.dill'))
         ..createSync(recursive: true)
         ..writeAsStringSync('ABC');

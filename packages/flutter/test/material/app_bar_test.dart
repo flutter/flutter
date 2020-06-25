@@ -18,6 +18,7 @@ Widget buildSliverAppBarApp({
   double collapsedHeight,
   double expandedHeight,
   bool snap = false,
+  double toolbarHeight = kToolbarHeight,
 }) {
   return Localizations(
     locale: const Locale('en', 'US'),
@@ -41,6 +42,7 @@ Widget buildSliverAppBarApp({
                   pinned: pinned,
                   collapsedHeight: collapsedHeight,
                   expandedHeight: expandedHeight,
+                  toolbarHeight: toolbarHeight,
                   snap: snap,
                   bottom: TabBar(
                     tabs: <String>['A','B','C'].map<Widget>((String t) => Tab(text: 'TAB $t')).toList(),
@@ -1939,5 +1941,74 @@ void main() {
     await tester.pumpWidget(buildFrame());
     expect(tester.getRect(appBarTitle), const Rect.fromLTRB(200, -12, 800.0 - 200.0, 68));
     expect(tester.getCenter(appBarTitle).dy, tester.getCenter(toolbar).dy);
+  });
+
+  testWidgets('AppBar respects toolbarHeight', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('Title'),
+            toolbarHeight: 48,
+          ),
+          body: Container(),
+        ),
+      )
+    );
+
+    expect(appBarHeight(tester), 48);
+  });
+
+  testWidgets('SliverAppBar default collapsedHeight with respect to toolbarHeight', (WidgetTester tester) async {
+    const double toolbarHeight = 100.0;
+
+    await tester.pumpWidget(buildSliverAppBarApp(
+      floating: false,
+      pinned: false,
+      toolbarHeight: toolbarHeight,
+    ));
+
+    final ScrollController controller = primaryScrollController(tester);
+    final double initialTabBarHeight = tabBarHeight(tester);
+
+    // Scroll the not-pinned appbar out of view, to its collapsed height.
+    controller.jumpTo(300.0);
+    await tester.pump();
+    expect(find.byType(SliverAppBar), findsNothing);
+    // By default, the collapsedHeight is toolbarHeight + bottom.preferredSize.height,
+    // in this case initialTabBarHeight.
+    expect(appBarHeight(tester), toolbarHeight + initialTabBarHeight);
+  });
+
+  testWidgets('SliverAppBar collapsedHeight with toolbarHeight', (WidgetTester tester) async {
+    const double toolbarHeight = 100.0;
+    const double collapsedHeight = 150.0;
+
+    await tester.pumpWidget(buildSliverAppBarApp(
+      floating: false,
+      pinned: false,
+      toolbarHeight: toolbarHeight,
+      collapsedHeight: collapsedHeight
+    ));
+
+    final ScrollController controller = primaryScrollController(tester);
+    final double initialTabBarHeight = tabBarHeight(tester);
+
+    // Scroll the not-pinned appbar out of view, to its collapsed height.
+    controller.jumpTo(300.0);
+    await tester.pump();
+    expect(find.byType(SliverAppBar), findsNothing);
+    expect(appBarHeight(tester), collapsedHeight + initialTabBarHeight);
+  });
+
+  test('SliverApp toolbarHeight cannot be null', () {
+    try{
+       SliverAppBar(
+        toolbarHeight: null,
+      );
+    } on AssertionError catch (error) {
+      expect(error.toString(), contains('toolbarHeight != null'));
+      expect(error.toString(), contains('is not true'));
+    }
   });
 }
