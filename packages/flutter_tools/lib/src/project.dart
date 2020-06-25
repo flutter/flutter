@@ -1046,6 +1046,8 @@ class LinuxProject extends FlutterProjectPlatform {
   @override
   String get pluginConfigKey => LinuxPlugin.kConfigKey;
 
+  static final RegExp _applicationIdPattern = RegExp('^\\s*"application-id"\\s*,\\s*[\'"](.*)[\'"]\\s*,\\s*\$');
+
   Directory get _editableDirectory => project.directory.childDirectory('linux');
 
   /// The directory in the project that is managed by Flutter. As much as
@@ -1075,6 +1077,11 @@ class LinuxProject extends FlutterProjectPlatform {
   Directory get pluginSymlinkDirectory => ephemeralDirectory.childDirectory('.plugin_symlinks');
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {}
+
+  String get applicationId {
+    final File sourceFile = _editableDirectory.childFile('my_application.cc');
+    return _firstMatchInFile(sourceFile, _applicationIdPattern)?.group(1);
+  }
 }
 
 /// The Fuchsia sub project
