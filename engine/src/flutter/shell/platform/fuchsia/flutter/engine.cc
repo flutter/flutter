@@ -6,6 +6,7 @@
 
 #include <lib/async/cpp/task.h>
 #include <zircon/status.h>
+
 #include <sstream>
 
 #include "flutter/common/task_runners.h"
@@ -102,6 +103,16 @@ Engine::Engine(Delegate& delegate,
   OnEnableWireframe on_enable_wireframe_callback = std::bind(
       &Engine::OnDebugWireframeSettingsChanged, this, std::placeholders::_1);
 
+  flutter_runner::OnCreateView on_create_view_callback =
+      std::bind(&Engine::OnCreateView, this, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3);
+
+  flutter_runner::OnDestroyView on_destroy_view_callback =
+      std::bind(&Engine::OnDestroyView, this, std::placeholders::_1);
+
+  OnGetViewEmbedder on_get_view_embedder_callback =
+      std::bind(&Engine::GetViewEmbedder, this);
+
   // SessionListener has a OnScenicError method; invoke this callback on the
   // platform thread when that happens. The Session itself should also be
   // disconnected when this happens, and it will also attempt to terminate.
@@ -135,6 +146,10 @@ Engine::Engine(Delegate& delegate,
                std::move(on_session_size_change_hint_callback),
            on_enable_wireframe_callback =
                std::move(on_enable_wireframe_callback),
+           on_create_view_callback = std::move(on_create_view_callback),
+           on_destroy_view_callback = std::move(on_destroy_view_callback),
+           on_get_view_embedder_callback =
+               std::move(on_get_view_embedder_callback),
            vsync_handle = vsync_event_.get(),
            product_config = product_config](flutter::Shell& shell) mutable {
             return std::make_unique<flutter_runner::PlatformView>(
@@ -149,6 +164,9 @@ Engine::Engine(Delegate& delegate,
                 std::move(on_session_metrics_change_callback),
                 std::move(on_session_size_change_hint_callback),
                 std::move(on_enable_wireframe_callback),
+                std::move(on_create_view_callback),
+                std::move(on_destroy_view_callback),
+                std::move(on_get_view_embedder_callback),
                 vsync_handle,  // vsync handle
                 product_config);
           });
@@ -499,6 +517,53 @@ void Engine::OnDebugWireframeSettingsChanged(bool enabled) {
           compositor_context->OnWireframeEnabled(enabled);
         }
       });
+}
+
+void Engine::OnCreateView(int64_t view_id, bool hit_testable, bool focusable) {
+  if (!shell_) {
+    return;
+  }
+
+  shell_->GetTaskRunners().GetRasterTaskRunner()->PostTask(
+      [rasterizer = shell_->GetRasterizer(), view_id, hit_testable,
+       focusable]() {
+        if (rasterizer) {
+          auto compositor_context =
+              reinterpret_cast<flutter_runner::CompositorContext*>(
+                  rasterizer->compositor_context());
+          compositor_context->OnCreateView(view_id, hit_testable, focusable);
+        }
+      });
+}
+
+void Engine::OnDestroyView(int64_t view_id) {
+  if (!shell_) {
+    return;
+  }
+
+  shell_->GetTaskRunners().GetRasterTaskRunner()->PostTask(
+      [rasterizer = shell_->GetRasterizer(), view_id]() {
+        if (rasterizer) {
+          auto compositor_context =
+              reinterpret_cast<flutter_runner::CompositorContext*>(
+                  rasterizer->compositor_context());
+          compositor_context->OnDestroyView(view_id);
+        }
+      });
+}
+
+flutter::ExternalViewEmbedder* Engine::GetViewEmbedder() {
+  // GetEmbedder should be called only after rasterizer is created.
+  FML_DCHECK(shell_);
+  FML_DCHECK(shell_->GetRasterizer());
+
+  auto rasterizer = shell_->GetRasterizer();
+  auto compositor_context =
+      reinterpret_cast<flutter_runner::CompositorContext*>(
+          rasterizer->compositor_context());
+  flutter::ExternalViewEmbedder* view_embedder =
+      compositor_context->GetViewEmbedder();
+  return view_embedder;
 }
 
 void Engine::OnSessionSizeChangeHint(float width_change_factor,
