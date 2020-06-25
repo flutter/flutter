@@ -771,6 +771,8 @@ class AndroidViewController extends PlatformViewController {
   /// for description of the parameters.
   @override
   Future<void> dispatchPointerEvent(PointerEvent event) async {
+    assert(_motionEventConverter._pointTransformer != null);
+
     if (event is PointerDownEvent) {
       _motionEventConverter.handlePointerDownEvent(event);
     }
