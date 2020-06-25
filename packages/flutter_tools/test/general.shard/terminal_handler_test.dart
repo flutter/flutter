@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/vmservice.dart';
@@ -27,6 +28,7 @@ void main() {
             trackWidgetCreation: false,
             treeShakeIcons: false,
           ),
+          generator: MockResidentCompiler(),
         ),
       ],
     );
@@ -413,12 +415,12 @@ class MockDevice extends Mock implements Device {
 }
 
 class MockResidentRunner extends Mock implements ResidentRunner {}
-
 class MockFlutterDevice extends Mock implements FlutterDevice {}
+class MockResidentCompiler extends Mock implements ResidentCompiler {}
 
 class TestRunner extends ResidentRunner {
   TestRunner(List<FlutterDevice> devices)
-    : super(devices);
+    : super(devices, debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug));
 
   bool hasHelpBeenPrinted = false;
   String receivedCommand;
