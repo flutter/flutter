@@ -786,10 +786,9 @@ class AndroidViewController extends PlatformViewController {
       _motionEventConverter.handlePointerCancelEvent(event);
     }
 
-    if (androidEvent == null) {
-      return;
+    if (androidEvent != null) {
+      await _sendMotionEvent(androidEvent);
     }
-    await _sendMotionEvent(androidEvent);
   }
 
   Future<void> _sendMotionEvent(AndroidMotionEvent event) async {
