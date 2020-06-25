@@ -23,7 +23,7 @@
   [super viewDidLoad];
 
   [self.view setFrame:self.view.window.bounds];
-  self.title = @"Flutter iOS Demos";
+  self.title = @"Flutter iOS Demos Home";
   self.view.backgroundColor = UIColor.whiteColor;
 
   _stackView = [[UIStackView alloc] initWithFrame:self.view.frame];
