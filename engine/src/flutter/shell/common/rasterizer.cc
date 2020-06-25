@@ -4,12 +4,11 @@
 
 #include "flutter/shell/common/rasterizer.h"
 
-#include "flutter/shell/common/persistent_cache.h"
-
 #include <utility>
 
 #include "flutter/fml/time/time_delta.h"
 #include "flutter/fml/time/time_point.h"
+#include "flutter/shell/common/persistent_cache.h"
 #include "third_party/skia/include/core/SkEncodedImageFormat.h"
 #include "third_party/skia/include/core/SkImageEncoder.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
@@ -77,6 +76,9 @@ void Rasterizer::Setup(std::unique_ptr<Surface> surface) {
                              user_override_resource_cache_bytes_);
   }
   compositor_context_->OnGrContextCreated();
+#if !defined(OS_FUCHSIA)
+  // TODO(sanjayc77): https://github.com/flutter/flutter/issues/53179. Add
+  // support for raster thread merger for Fuchsia.
   if (surface_->GetExternalViewEmbedder()) {
     const auto platform_id =
         task_runners_.GetPlatformTaskRunner()->GetTaskQueueId();
@@ -84,6 +86,7 @@ void Rasterizer::Setup(std::unique_ptr<Surface> surface) {
     raster_thread_merger_ =
         fml::MakeRefCounted<fml::RasterThreadMerger>(platform_id, gpu_id);
   }
+#endif  // defined(OS_FUCHSIA)
 }
 
 void Rasterizer::Teardown() {

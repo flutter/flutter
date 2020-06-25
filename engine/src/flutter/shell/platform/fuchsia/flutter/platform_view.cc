@@ -92,6 +92,9 @@ PlatformView::PlatformView(
     OnMetricsUpdate session_metrics_did_change_callback,
     OnSizeChangeHint session_size_change_hint_callback,
     OnEnableWireframe wireframe_enabled_callback,
+    OnCreateView on_create_view_callback,
+    OnDestroyView on_destroy_view_callback,
+    OnGetViewEmbedder on_get_view_embedder_callback,
     zx_handle_t vsync_event_handle,
     FlutterRunnerProductConfiguration product_config)
     : flutter::PlatformView(delegate, std::move(task_runners)),
@@ -103,8 +106,10 @@ PlatformView::PlatformView(
       metrics_changed_callback_(std::move(session_metrics_did_change_callback)),
       size_change_hint_callback_(std::move(session_size_change_hint_callback)),
       wireframe_enabled_callback_(std::move(wireframe_enabled_callback)),
+      on_create_view_callback_(std::move(on_create_view_callback)),
+      on_destroy_view_callback_(std::move(on_destroy_view_callback)),
+      on_get_view_embedder_callback_(std::move(on_get_view_embedder_callback)),
       ime_client_(this),
-      surface_(std::make_unique<Surface>(debug_label_)),
       vsync_event_handle_(vsync_event_handle),
       product_config_(product_config) {
   // Register all error handlers.
@@ -573,7 +578,8 @@ std::unique_ptr<flutter::Surface> PlatformView::CreateRenderingSurface() {
   // This platform does not repeatly lose and gain a surface connection. So the
   // surface is setup once during platform view setup and returned to the
   // shell on the initial (and only) |NotifyCreated| call.
-  return std::move(surface_);
+  auto view_embedder = on_get_view_embedder_callback_();
+  return std::make_unique<Surface>(debug_label_, view_embedder);
 }
 
 // |flutter::PlatformView|
@@ -775,6 +781,55 @@ void PlatformView::HandleFlutterPlatformViewsChannelPlatformMessage(
     }
 
     wireframe_enabled_callback_(enable->value.GetBool());
+  } else if (method->value == "View.create") {
+    auto args_it = root.FindMember("args");
+    if (args_it == root.MemberEnd() || !args_it->value.IsObject()) {
+      FML_LOG(ERROR) << "No arguments found.";
+      return;
+    }
+    const auto& args = args_it->value;
+
+    auto view_id = args.FindMember("viewId");
+    if (!view_id->value.IsUint64()) {
+      FML_LOG(ERROR) << "Argument 'viewId' is not a int64";
+      return;
+    }
+
+    auto hit_testable = args.FindMember("hitTestable");
+    if (!hit_testable->value.IsBool()) {
+      FML_LOG(ERROR) << "Argument 'hitTestable' is not a bool";
+      return;
+    }
+
+    auto focusable = args.FindMember("focusable");
+    if (!focusable->value.IsBool()) {
+      FML_LOG(ERROR) << "Argument 'focusable' is not a bool";
+      return;
+    }
+
+    on_create_view_callback_(view_id->value.GetUint64(),
+                             hit_testable->value.GetBool(),
+                             focusable->value.GetBool());
+    // The client is waiting for view creation. Send an empty response back
+    // to signal the view was created.
+    if (message->response().get()) {
+      message->response()->Complete(
+          std::make_unique<fml::NonOwnedMapping>((const uint8_t*)"[0]", 3u));
+    }
+  } else if (method->value == "View.dispose") {
+    auto args_it = root.FindMember("args");
+    if (args_it == root.MemberEnd() || !args_it->value.IsObject()) {
+      FML_LOG(ERROR) << "No arguments found.";
+      return;
+    }
+    const auto& args = args_it->value;
+
+    auto view_id = args.FindMember("viewId");
+    if (!view_id->value.IsUint64()) {
+      FML_LOG(ERROR) << "Argument 'viewId' is not a int64";
+      return;
+    }
+    on_destroy_view_callback_(view_id->value.GetUint64());
   } else {
     FML_DLOG(ERROR) << "Unknown " << message->channel() << " method "
                     << method->value.GetString();

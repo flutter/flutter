@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "flutter/flow/compositor_context.h"
+#include "flutter/flow/embedded_views.h"
 #include "flutter/flow/raster_cache_key.h"
 #include "flutter/fml/compiler_specific.h"
 #include "flutter/fml/logging.h"
@@ -32,7 +33,7 @@ constexpr float kOneMinusEpsilon = 1 - FLT_EPSILON;
 // How much layers are separated in Scenic z elevation.
 constexpr float kScenicZElevationBetweenLayers = 10.f;
 
-class SceneUpdateContext {
+class SceneUpdateContext : public flutter::ExternalViewEmbedder {
  public:
   class SurfaceProducerSurface {
    public:
@@ -180,7 +181,7 @@ class SceneUpdateContext {
 
   // The transformation matrix of the current context. It's used to construct
   // the LayerRasterCacheKey for a given layer.
-  SkMatrix Matrix() const { return SkMatrix::Scale(ScaleX(), ScaleY()); }
+  SkMatrix Matrix() const { return SkMatrix::MakeScale(ScaleX(), ScaleY()); }
 
   bool HasRetainedNode(const LayerRasterCacheKey& key) const {
     return surface_producer_->HasRetainedNode(key);
@@ -203,6 +204,40 @@ class SceneUpdateContext {
     topmost_global_scenic_elevation_ += kScenicZElevationBetweenLayers;
     return elevation;
   }
+
+  // |ExternalViewEmbedder|
+  SkCanvas* GetRootCanvas() override { return nullptr; }
+
+  // |ExternalViewEmbedder|
+  void CancelFrame() override {}
+
+  // |ExternalViewEmbedder|
+  void BeginFrame(
+      SkISize frame_size,
+      GrContext* context,
+      double device_pixel_ratio,
+      fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) override {}
+
+  // |ExternalViewEmbedder|
+  void PrerollCompositeEmbeddedView(
+      int view_id,
+      std::unique_ptr<EmbeddedViewParams> params) override {}
+
+  // |ExternalViewEmbedder|
+  std::vector<SkCanvas*> GetCurrentCanvases() override {
+    return std::vector<SkCanvas*>();
+  }
+
+  // |ExternalViewEmbedder|
+  virtual SkCanvas* CompositeEmbeddedView(int view_id) override {
+    return nullptr;
+  }
+
+  void CreateView(int64_t view_id, bool hit_testable, bool focusable);
+
+  void DestroyView(int64_t view_id);
+
+  void UpdateScene(int64_t view_id, const SkPoint& offset, const SkSize& size);
 
  private:
   struct PaintTask {

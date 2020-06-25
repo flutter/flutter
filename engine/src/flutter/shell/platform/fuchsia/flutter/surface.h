@@ -16,13 +16,15 @@ namespace flutter_runner {
 // raster thread.
 class Surface final : public flutter::Surface {
  public:
-  Surface(std::string debug_label);
+  Surface(std::string debug_label,
+          flutter::ExternalViewEmbedder* view_embedder);
 
   ~Surface() override;
 
  private:
   const bool valid_ = CanConnectToDisplay();
   const std::string debug_label_;
+  flutter::ExternalViewEmbedder* view_embedder_;
 
   // |flutter::Surface|
   bool IsValid() override;
@@ -36,6 +38,9 @@ class Surface final : public flutter::Surface {
 
   // |flutter::Surface|
   SkMatrix GetRootTransformation() const override;
+
+  // |flutter::Surface|
+  flutter::ExternalViewEmbedder* GetExternalViewEmbedder() override;
 
   static bool CanConnectToDisplay();
 
