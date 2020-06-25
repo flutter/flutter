@@ -5,6 +5,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:intl/locale.dart';
+
 import 'localizations_utils.dart';
 
 // The set of date formats that can be automatically localized.
@@ -384,15 +386,18 @@ class AppResourceBundle {
         // Remove the file type suffix.
         .split('.')[0];
 
-      // Separate out the filename by the underscores in the string.
-      final List<String> fileNameSeparatedByUnderscores = fileName.split('_');
+      for (int index = 0; index < fileName.length; index += 1) {
+        // If an underscore was found, check if locale string follows.
+        if (fileName[index] == '_' && fileName[index + 1] != null) {
+          // If Locale.tryParse fails, it returns the String 'null'.
+          final String parserResult = Locale.tryParse(fileName.substring(index + 1)).toString();
 
-      for (int index = 0; index < fileNameSeparatedByUnderscores.length; index += 1) {
-        final String section = fileNameSeparatedByUnderscores[index];
-        // If the language code was detected, grab everything in the sublist from
-        // this point onwards and set localeString to this sublist joined by '_'.
-        if (_iso639Languages.contains(section)) {
-          localeString = fileNameSeparatedByUnderscores.sublist(index).join('_');
+          // If the parserResult is not an actual locale identifier, end the loop.
+          if (parserResult != 'null') {
+            // The parsed result uses dashes ('-'), but we want underscores ('_').
+            localeString = parserResult.replaceAll('-', '_');
+            break;
+          }
         }
       }
     }
