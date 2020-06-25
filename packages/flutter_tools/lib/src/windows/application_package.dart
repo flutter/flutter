@@ -63,8 +63,8 @@ class BuildableWindowsApp extends WindowsApp {
     final String binaryName = getCmakeExecutableName(project);
     return globals.fs.path.join(
         getWindowsBuildDirectory(),
-        getNameForBuildMode(buildMode),
         'bundle',
+        getNameForBuildMode(buildMode),
         '$binaryName.exe',
     );
   }

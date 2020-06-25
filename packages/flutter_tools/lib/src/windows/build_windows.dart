@@ -52,32 +52,31 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
     logger: globals.logger,
     processManager: globals.processManager,
   );
-  final String vcvarsScript = visualStudio.vcvarsPath;
-  if (vcvarsScript == null) {
+  final String cmakePath = visualStudio.cmakePath;
+  if (cmakePath == null) {
     throwToolExit('Unable to find suitable Visual Studio toolchain. '
         'Please run `flutter doctor` for more details.');
   }
 
   final String buildModeName = getNameForBuildMode(buildInfo.mode ?? BuildMode.release);
-  final Directory buildDirectory = globals.fs.directory(getWindowsBuildDirectory()).childDirectory(buildModeName);
+  final Directory buildDirectory = globals.fs.directory(getWindowsBuildDirectory());
   final Status status = globals.logger.startProgress(
     'Building Windows application...',
     timeout: null,
   );
   try {
-    await _runCmakeGeneration(visualStudio.cmakePath, buildDirectory, buildModeName, windowsProject.cmakeFile.parent);
-    await _runBuild(visualStudio.cmakePath, buildDirectory, buildModeName);
+    await _runCmakeGeneration(cmakePath, buildDirectory, windowsProject.cmakeFile.parent);
+    await _runBuild(cmakePath, buildDirectory, buildModeName);
   } finally {
     status.cancel();
   }
-  await _runInstall(visualStudio.cmakePath, buildDirectory, buildModeName);
+  await _runInstall(cmakePath, buildDirectory, buildModeName);
 }
 
-Future<void> _runCmakeGeneration(String cmakePath, Directory buildDir, String buildModeName, Directory sourceDir) async {
+Future<void> _runCmakeGeneration(String cmakePath, Directory buildDir, Directory sourceDir) async {
   final Stopwatch sw = Stopwatch()..start();
 
   await buildDir.create(recursive: true);
-  final String buildFlag = toTitleCase(buildModeName);
   int result;
   try {
     result = await processUtils.stream(
@@ -90,10 +89,6 @@ Future<void> _runCmakeGeneration(String cmakePath, Directory buildDir, String bu
         '-G',
         'Visual Studio 16 2019',
       ],
-      environment: <String, String>{
-        'CC': 'clang',
-        'CXX': 'clang++'
-      },
       trace: true,
     );
   } on ArgumentError {
