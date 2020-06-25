@@ -6,6 +6,7 @@
 
 @TestOn('chrome')
 
+import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -34,6 +35,13 @@ class OnTapPage extends StatelessWidget {
       ),
     );
   }
+}
+
+String serializeRouteInformation(RouteInformation routeInformation) {
+  return jsonEncode(<String, dynamic>{
+    'location': routeInformation.location,
+    'configuration': routeInformation.configuration,
+  });
 }
 
 void main() {
@@ -258,4 +266,121 @@ void main() {
       }),
     );
   });
+
+  testWidgets('PlatformRouteInformationProvider reports URL', (WidgetTester tester) async {
+    final List<MethodCall> log = <MethodCall>[];
+    SystemChannels.navigation.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
+
+    final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
+      initialRouteInformation: const RouteInformation(
+        location: 'initial',
+      ),
+    );
+    final SimpleRouterDelegate delegate = SimpleRouterDelegate(
+      reportConfiguration: true,
+      builder: (BuildContext context, RouteInformation information) {
+        return Text(information.location);
+      }
+    );
+
+    await tester.pumpWidget(MaterialApp.router(
+      routeInformationProvider: provider,
+      routeInformationParser: SimpleRouteInformationParser(),
+      routerDelegate: delegate,
+    ));
+    expect(find.text('initial'), findsOneWidget);
+
+    // Triggers a router rebuild and verify the route information is reported
+    // to the web engine.
+    delegate.routeInformation = const RouteInformation(
+      location: 'update',
+    );
+    await tester.pump();
+    expect(find.text('update'), findsOneWidget);
+
+    expect(log, hasLength(1));
+    expect(
+      log.last,
+      isMethodCall('routeUpdated', arguments: <String, dynamic>{
+        'previousRouteName': serializeRouteInformation(const RouteInformation(location: 'initial')),
+        'routeName': serializeRouteInformation(const RouteInformation(location: 'update')),
+      }),
+    );
+
+    // The other alternative way to trigger the rebuild also reports correctly.
+    provider.value = const RouteInformation(
+      location: 'update2',
+    );
+    await tester.pump();
+    expect(find.text('update2'), findsOneWidget);
+    expect(log, hasLength(2));
+    expect(
+      log.last,
+      isMethodCall('routeUpdated', arguments: <String, dynamic>{
+        'previousRouteName': serializeRouteInformation(const RouteInformation(location: 'update')),
+        'routeName': serializeRouteInformation(const RouteInformation(location: 'update2')),
+      }),
+    );
+  });
+}
+
+typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext, RouteInformation);
+typedef SimpleRouterDelegatePopRoute = Future<bool> Function();
+
+class SimpleRouteInformationParser extends RouteInformationParser<RouteInformation> {
+  SimpleRouteInformationParser();
+
+  @override
+  Future<RouteInformation> parseRouteInformation(RouteInformation information) {
+    return SynchronousFuture<RouteInformation>(information);
+  }
+
+  @override
+  RouteInformation restoreRouteInformation(RouteInformation configuration) {
+    return configuration;
+  }
+}
+
+class SimpleRouterDelegate extends RouterDelegate<RouteInformation> with ChangeNotifier {
+  SimpleRouterDelegate({
+    @required this.builder,
+    this.onPopRoute,
+    this.reportConfiguration = false,
+  });
+
+  RouteInformation get routeInformation => _routeInformation;
+  RouteInformation _routeInformation;
+  set routeInformation(RouteInformation newValue) {
+    _routeInformation = newValue;
+    notifyListeners();
+  }
+
+  SimpleRouterDelegateBuilder builder;
+  SimpleRouterDelegatePopRoute onPopRoute;
+  final bool reportConfiguration;
+
+  @override
+  RouteInformation get currentConfiguration {
+    if (reportConfiguration)
+      return routeInformation;
+    return null;
+  }
+
+  @override
+  Future<void> setNewRoutePath(RouteInformation configuration) {
+    _routeInformation = configuration;
+    return SynchronousFuture<void>(null);
+  }
+
+  @override
+  Future<bool> popRoute() {
+    if (onPopRoute != null)
+      return onPopRoute();
+    return SynchronousFuture<bool>(true);
+  }
+
+  @override
+  Widget build(BuildContext context) => builder(context, routeInformation);
 }
