@@ -16,7 +16,6 @@ import 'package:test_core/src/executable.dart'
     as test; // ignore: implementation_imports
 import 'package:simulators/simulator_manager.dart';
 
-import 'common.dart';
 import 'environment.dart';
 import 'exceptions.dart';
 import 'integration_tests_manager.dart';
@@ -121,12 +120,6 @@ class TestCommand extends Command<bool> with ArgUtils {
   Future<bool> run() async {
     SupportedBrowsers.instance
       ..argParsers.forEach((t) => t.parseOptions(argResults));
-
-    // Mac Web Engine Try bots are failing. Investigate further.
-    // TODO: https://github.com/flutter/flutter/issues/60251
-    if(isSafariOnMacOS && isLuci) {
-      return true;
-    }
 
     // Check the flags to see what type of integration tests are requested.
     testTypesRequested = findTestType();
