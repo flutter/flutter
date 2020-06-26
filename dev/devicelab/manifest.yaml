@@ -160,7 +160,7 @@ tasks:
     description: >
       Measures the runtime performance of constructing and destructing widgets on Android.
     stage: devicelab
-    required_agent_capabilities: ["mac/android"]
+    required_agent_capabilities: ["linux/android"]
 
   picture_cache_perf__timeline_summary:
     description: >
