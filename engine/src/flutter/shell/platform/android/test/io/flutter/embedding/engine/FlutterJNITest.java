@@ -96,7 +96,10 @@ public class FlutterJNITest {
           "en", "CA", ""
         };
     result = flutterJNI.computePlatformResolvedLocale(supportedLocales);
-    assertEquals(result.length, 0); // This should change when full algo is implemented.
+    assertEquals(result.length, 3);
+    assertEquals(result[0], "en");
+    assertEquals(result[1], "CA");
+    assertEquals(result[2], "");
 
     supportedLocales =
         new String[] {
@@ -137,7 +140,11 @@ public class FlutterJNITest {
     localeList = new LocaleList();
     when(config.getLocales()).thenReturn(localeList);
     result = flutterJNI.computePlatformResolvedLocale(supportedLocales);
-    assertEquals(result.length, 0);
+    // The first locale is default.
+    assertEquals(result.length, 3);
+    assertEquals(result[0], "fr");
+    assertEquals(result[1], "FR");
+    assertEquals(result[2], "");
   }
 
   public void onDisplayPlatformView__callsPlatformViewsController() {
