@@ -465,9 +465,6 @@ class _BottomNavigationTile extends StatelessWidget {
         selected: selected,
         child: Stack(
           children: <Widget>[
-            Semantics(
-              label: indexLabel,
-            ),
             Tooltip(
               preferBelow: false,
               verticalOffset: selectedIconSize + selectedFontSize,
@@ -503,6 +500,10 @@ class _BottomNavigationTile extends StatelessWidget {
                   ),
                 ),
               ),
+            ),
+            Semantics(
+              container: true,
+              label: indexLabel,
             ),
           ],
         ),
