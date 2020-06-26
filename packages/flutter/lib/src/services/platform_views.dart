@@ -772,7 +772,7 @@ class AndroidViewController extends PlatformViewController {
     return null;
   }
 
-  /// Sends an Android [MotionEvent](https://developer.android.com/reference/android/view/MotionEvent)
+  /// Converts the [PointerEvent] and sends an Android [MotionEvent](https://developer.android.com/reference/android/view/MotionEvent)
   /// to the view.
   ///
   /// The Android MotionEvent object is created with [MotionEvent.obtain](https://developer.android.com/reference/android/view/MotionEvent.html#obtain(long,%20long,%20int,%20float,%20float,%20float,%20float,%20int,%20float,%20float,%20int,%20int)).
@@ -798,11 +798,17 @@ class AndroidViewController extends PlatformViewController {
     }
 
     if (androidEvent != null) {
-      await _sendMotionEvent(androidEvent);
+      await sendMotionEvent(androidEvent);
     }
   }
 
-  Future<void> _sendMotionEvent(AndroidMotionEvent event) async {
+  /// Sends an Android [MotionEvent](https://developer.android.com/reference/android/view/MotionEvent)
+  /// to the view.
+  ///
+  /// The Android MotionEvent object is created with [MotionEvent.obtain](https://developer.android.com/reference/android/view/MotionEvent.html#obtain(long,%20long,%20int,%20float,%20float,%20float,%20float,%20int,%20float,%20float,%20int,%20int)).
+  /// See documentation of [MotionEvent.obtain](https://developer.android.com/reference/android/view/MotionEvent.html#obtain(long,%20long,%20int,%20float,%20float,%20float,%20float,%20int,%20float,%20float,%20int,%20int))
+  /// for description of the parameters.
+  Future<void> sendMotionEvent(AndroidMotionEvent event) async {
     await SystemChannels.platform_views.invokeMethod<dynamic>(
         'touch',
         event._asList(id),
