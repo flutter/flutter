@@ -20,9 +20,9 @@ class ClipRectLayer : public ContainerLayer {
     return clip_behavior_ == Clip::antiAliasWithSaveLayer;
   }
 
-#if defined(OS_FUCHSIA)
+#if defined(LEGACY_FUCHSIA_EMBEDDER)
   void UpdateScene(SceneUpdateContext& context) override;
-#endif  // defined(OS_FUCHSIA)
+#endif
 
  private:
   SkRect clip_rect_;

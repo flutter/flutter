@@ -86,7 +86,7 @@ void Rasterizer::Setup(std::unique_ptr<Surface> surface) {
     raster_thread_merger_ =
         fml::MakeRefCounted<fml::RasterThreadMerger>(platform_id, gpu_id);
   }
-#endif  // defined(OS_FUCHSIA)
+#endif
 }
 
 void Rasterizer::Teardown() {

@@ -88,7 +88,7 @@ void OpacityLayer::Paint(PaintContext& context) const {
   PaintChildren(context);
 }
 
-#if defined(OS_FUCHSIA)
+#if defined(LEGACY_FUCHSIA_EMBEDDER)
 
 void OpacityLayer::UpdateScene(SceneUpdateContext& context) {
   float saved_alpha = context.alphaf();
@@ -97,6 +97,6 @@ void OpacityLayer::UpdateScene(SceneUpdateContext& context) {
   context.set_alphaf(saved_alpha);
 }
 
-#endif  // defined(OS_FUCHSIA)
+#endif
 
 }  // namespace flutter

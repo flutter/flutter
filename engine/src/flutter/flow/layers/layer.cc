@@ -55,7 +55,7 @@ Layer::AutoPrerollSaveLayerState::~AutoPrerollSaveLayerState() {
   }
 }
 
-#if defined(OS_FUCHSIA)
+#if defined(LEGACY_FUCHSIA_EMBEDDER)
 
 void Layer::CheckForChildLayerBelow(PrerollContext* context) {
   child_layer_exists_below_ = context->child_scene_layer_exists_below;
@@ -103,7 +103,7 @@ void Layer::UpdateScene(SceneUpdateContext& context) {
   }
 }
 
-#endif  // defined(OS_FUCHSIA)
+#endif
 
 Layer::AutoSaveLayer::AutoSaveLayer(const PaintContext& paint_context,
                                     const SkRect& bounds,

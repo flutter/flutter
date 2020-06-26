@@ -18,10 +18,10 @@ class ContainerLayer : public Layer {
 
   void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
   void Paint(PaintContext& context) const override;
-#if defined(OS_FUCHSIA)
+#if defined(LEGACY_FUCHSIA_EMBEDDER)
   void CheckForChildLayerBelow(PrerollContext* context) override;
   void UpdateScene(SceneUpdateContext& context) override;
-#endif  // defined(OS_FUCHSIA)
+#endif
 
   const std::vector<std::shared_ptr<Layer>>& layers() const { return layers_; }
 
@@ -31,9 +31,9 @@ class ContainerLayer : public Layer {
                        SkRect* child_paint_bounds);
   void PaintChildren(PaintContext& context) const;
 
-#if defined(OS_FUCHSIA)
+#if defined(LEGACY_FUCHSIA_EMBEDDER)
   void UpdateSceneChildren(SceneUpdateContext& context);
-#endif  // defined(OS_FUCHSIA)
+#endif
 
   // Try to prepare the raster cache for a given layer.
   //

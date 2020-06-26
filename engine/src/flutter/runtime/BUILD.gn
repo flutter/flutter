@@ -4,9 +4,7 @@
 
 import("//flutter/common/config.gni")
 import("//flutter/testing/testing.gni")
-
 if (is_fuchsia) {
-  import("//build/fuchsia/sdk.gni")
   import("//flutter/tools/fuchsia/fuchsia_archive.gni")
 }
 
@@ -42,7 +40,7 @@ group("libdart") {
   }
 }
 
-source_set("runtime") {
+source_set_maybe_fuchsia_legacy("runtime") {
   sources = [
     "dart_isolate.cc",
     "dart_isolate.h",
@@ -74,26 +72,24 @@ source_set("runtime") {
     "window_data.h",
   ]
 
+  public_deps = [
+    "//third_party/rapidjson",
+  ]
+
+  public_configs = [ "//flutter:config" ]
+
   deps = [
     ":test_font",
     "//flutter/assets",
     "//flutter/common",
-    "//flutter/flow",
     "//flutter/fml",
     "//flutter/lib/io",
-    "//flutter/lib/ui",
     "//flutter/third_party/tonic",
     "//flutter/third_party/txt",
     "//third_party/dart/runtime:dart_api",
     "//third_party/dart/runtime/bin:dart_io_api",
     "//third_party/skia",
   ]
-
-  public_deps = [
-    "//third_party/rapidjson",
-  ]
-
-  public_configs = [ "//flutter:config" ]
 
   if (flutter_runtime_mode != "release" && !is_fuchsia) {
     # Only link in Observatory in non-release modes on non-Fuchsia. Fuchsia
@@ -102,53 +98,77 @@ source_set("runtime") {
       "//third_party/dart/runtime/observatory:embedded_observatory_archive",
     ]
   }
+
+  deps_legacy_and_next = [
+    "//flutter/flow:flow",
+    "//flutter/lib/ui:ui",
+  ]
 }
 
 test_fixtures("runtime_fixtures") {
   dart_main = "fixtures/runtime_test.dart"
 }
 
-source_set("runtime_unittests_common") {
-  visibility = [ ":*" ]
-
+source_set_maybe_fuchsia_legacy("runtime_unittests_common") {
   testonly = true
-
-  sources = [
-    "runtime_test.cc",
-    "runtime_test.h",
-  ]
-
-  public_deps = [
-    ":libdart",
-    ":runtime",
-    ":runtime_fixtures",
-    "//flutter/common",
-    "//flutter/fml",
-    "//flutter/lib/snapshot",
-    "//flutter/shell/common",
-    "//flutter/testing",
-    "//flutter/testing:dart",
-    "//flutter/third_party/tonic",
-    "//third_party/dart/runtime/bin:elf_loader",
-    "//third_party/skia",
-  ]
-}
-
-executable("runtime_unittests") {
-  testonly = true
-
-  configs += [ "//flutter:export_dynamic_symbols" ]
 
   sources = [
     "dart_isolate_unittests.cc",
     "dart_lifecycle_unittests.cc",
     "dart_service_isolate_unittests.cc",
     "dart_vm_unittests.cc",
+    "runtime_test.cc",
+    "runtime_test.h",
   ]
 
-  deps = [
-    ":runtime_unittests_common",
+  public_deps = [
+    ":libdart",
+    ":runtime_fixtures",
+    "//flutter/common",
+    "//flutter/fml",
+    "//flutter/lib/snapshot",
+    "//flutter/testing",
+    "//flutter/third_party/tonic",
+    "//third_party/dart/runtime/bin:elf_loader",
+    "//third_party/skia",
   ]
+
+  deps_legacy_and_next = [
+    ":runtime",
+    "//flutter/testing:dart",
+  ]
+}
+
+if (is_fuchsia) {
+  executable("runtime_unittests") {
+    testonly = true
+
+    configs += [ "//flutter:export_dynamic_symbols" ]
+
+    deps = [
+      ":runtime_unittests_common_fuchsia_legacy",
+    ]
+  }
+
+  executable("runtime_unittests_next") {
+    testonly = true
+
+    configs += [ "//flutter:export_dynamic_symbols" ]
+
+    deps = [
+      ":runtime_unittests_common",
+    ]
+  }
+} else {
+  executable("runtime_unittests") {
+    testonly = true
+
+    configs += [ "//flutter:export_dynamic_symbols" ]
+
+    deps = [
+      ":runtime_unittests_common",
+    ]
+  }
 }
 
 if (is_fuchsia) {
@@ -159,6 +179,25 @@ if (is_fuchsia) {
     ]
 
     binary = "runtime_unittests"
+
+    # TODO(gw280): https://github.com/flutter/flutter/issues/50294
+    # Right now we need to manually specify all the fixtures that are
+    # declared in the test_fixtures() call above.
+    resources = [
+      {
+        path = "$target_gen_dir/assets/kernel_blob.bin"
+        dest = "assets/kernel_blob.bin"
+      },
+    ]
+  }
+
+  fuchsia_test_archive("runtime_tests_next") {
+    deps = [
+      ":runtime_fixtures",
+      ":runtime_unittests_next",
+    ]
+
+    binary = "runtime_unittests_next"
 
     # TODO(gw280): https://github.com/flutter/flutter/issues/50294
     # Right now we need to manually specify all the fixtures that are

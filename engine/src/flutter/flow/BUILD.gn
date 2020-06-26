@@ -2,13 +2,14 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//flutter/common/config.gni")
+import("//flutter/testing/testing.gni")
 if (is_fuchsia) {
   import("//build/fuchsia/sdk.gni")
   import("//flutter/tools/fuchsia/fuchsia_archive.gni")
 }
-import("//flutter/testing/testing.gni")
 
-source_set("flow") {
+source_set_maybe_fuchsia_legacy("flow") {
   sources = [
     "compositor_context.cc",
     "compositor_context.h",
@@ -74,37 +75,33 @@ source_set("flow") {
 
   public_configs = [ "//flutter:config" ]
 
-  public_deps = []
-
   deps = [
     "//flutter/common",
     "//flutter/fml",
     "//third_party/skia",
   ]
 
-  if (is_fuchsia) {
-    sources += [
-      "layers/child_scene_layer.cc",
-      "layers/child_scene_layer.h",
-      "scene_update_context.cc",
-      "scene_update_context.h",
-      "view_holder.cc",
-      "view_holder.h",
-    ]
+  sources_legacy = [
+    "layers/child_scene_layer.cc",
+    "layers/child_scene_layer.h",
+    "scene_update_context.cc",
+    "scene_update_context.h",
+    "view_holder.cc",
+    "view_holder.h",
+  ]
 
-    public_deps += [
-      "$fuchsia_sdk_root/fidl:fuchsia.ui.app",
-      "$fuchsia_sdk_root/fidl:fuchsia.ui.gfx",
-      "$fuchsia_sdk_root/pkg:scenic_cpp",
-    ]
-  }
+  public_deps_legacy = [
+    "$fuchsia_sdk_root/fidl:fuchsia.ui.app",
+    "$fuchsia_sdk_root/fidl:fuchsia.ui.gfx",
+    "$fuchsia_sdk_root/pkg:scenic_cpp",
+  ]
 }
 
 test_fixtures("flow_fixtures") {
   fixtures = []
 }
 
-source_set("flow_testing") {
+source_set_maybe_fuchsia_legacy("flow_testing") {
   testonly = true
 
   sources = [
@@ -113,6 +110,8 @@ source_set("flow_testing") {
     "testing/layer_test.h",
     "testing/mock_layer.cc",
     "testing/mock_layer.h",
+    "testing/mock_raster_cache.cc",
+    "testing/mock_raster_cache.h",
     "testing/mock_texture.cc",
     "testing/mock_texture.h",
     "testing/skia_gpu_object_layer_test.cc",
@@ -120,13 +119,14 @@ source_set("flow_testing") {
   ]
 
   public_deps = [
-    ":flow",
     "//flutter/testing:skia",
     "//third_party/googletest:gtest",
   ]
+
+  deps_legacy_and_next = [ ":flow" ]
 }
 
-executable("flow_unittests") {
+source_set_maybe_fuchsia_legacy("flow_unittests_common") {
   testonly = true
 
   sources = [
@@ -161,14 +161,8 @@ executable("flow_unittests") {
     "texture_unittests.cc",
   ]
 
-  if (is_fuchsia) {
-    sources += [ "layers/fuchsia_layer_unittests.cc" ]
-  }
-
   deps = [
-    ":flow",
     ":flow_fixtures",
-    ":flow_testing",
     "//flutter/fml",
     "//flutter/testing:skia",
     "//flutter/testing:testing_lib",
@@ -177,8 +171,38 @@ executable("flow_unittests") {
     "//third_party/skia",
   ]
 
-  if (is_fuchsia) {
-    deps += [ "//build/fuchsia/pkg:sys_cpp_testing" ]
+  sources_legacy = [ "layers/fuchsia_layer_unittests.cc" ]
+
+  deps_legacy = [ "//build/fuchsia/pkg:sys_cpp_testing" ]
+
+  deps_legacy_and_next = [
+    ":flow",
+    ":flow_testing",
+  ]
+}
+
+if (is_fuchsia) {
+  executable("flow_unittests") {
+    testonly = true
+
+    deps = [
+      ":flow_unittests_common_fuchsia_legacy",
+    ]
+  }
+  executable("flow_unittests_next") {
+    testonly = true
+
+    deps = [
+      ":flow_unittests_common",
+    ]
+  }
+} else {
+  executable("flow_unittests") {
+    testonly = true
+
+    deps = [
+      ":flow_unittests_common",
+    ]
   }
 }
 
@@ -191,6 +215,39 @@ if (is_fuchsia) {
     ]
 
     binary = "flow_unittests"
+
+    libraries = common_libs
+
+    meta_dir = "//flutter/testing/fuchsia/meta"
+    cmx_file = "$meta_dir/fuchsia_test.cmx"
+
+    resources = [
+      {
+        path = rebase_path(
+                "//flutter/testing/resources/performance_overlay_gold_60fps.png")
+        dest = "flutter/testing/resources/performance_overlay_gold_60fps.png"
+      },
+      {
+        path = rebase_path(
+                "//flutter/testing/resources/performance_overlay_gold_90fps.png")
+        dest = "flutter/testing/resources/performance_overlay_gold_90fps.png"
+      },
+      {
+        path = rebase_path(
+                "//flutter/testing/resources/performance_overlay_gold_120fps.png")
+        dest = "flutter/testing/resources/performance_overlay_gold_120fps.png"
+      },
+    ]
+  }
+
+  fuchsia_archive("flow_tests_next") {
+    testonly = true
+
+    deps = [
+      ":flow_unittests_next",
+    ]
+
+    binary = "flow_unittests_next"
 
     libraries = common_libs
 

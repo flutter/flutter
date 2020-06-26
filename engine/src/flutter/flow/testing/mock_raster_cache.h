@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef TESTING_MOCK_RASTER_CACHE_H_
-#define TESTING_MOCK_RASTER_CACHE_H_
+#ifndef FLOW_TESTING_MOCK_RASTER_CACHE_H_
+#define FLOW_TESTING_MOCK_RASTER_CACHE_H_
 
 #include "flutter/flow/raster_cache.h"
 #include "third_party/skia/include/core/SkImage.h"
@@ -61,4 +61,4 @@ class MockRasterCache : public RasterCache {
 }  // namespace testing
 }  // namespace flutter
 
-#endif  // TESTING_MOCK_RASTER_CACHE_H_
+#endif  // FLOW_TESTING_MOCK_RASTER_CACHE_H_

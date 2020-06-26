@@ -27,13 +27,13 @@
 #include "third_party/skia/include/core/SkRect.h"
 #include "third_party/skia/include/utils/SkNWayCanvas.h"
 
-#if defined(OS_FUCHSIA)
+#if defined(LEGACY_FUCHSIA_EMBEDDER)
 
 #include "flutter/flow/scene_update_context.h"  //nogncheck
 #include "lib/ui/scenic/cpp/resources.h"        //nogncheck
 #include "lib/ui/scenic/cpp/session.h"          //nogncheck
 
-#endif  // defined(OS_FUCHSIA)
+#endif
 
 namespace flutter {
 
@@ -66,11 +66,11 @@ struct PrerollContext {
   float total_elevation = 0.0f;
   bool has_platform_view = false;
   bool is_opaque = true;
-#if defined(OS_FUCHSIA)
+#if defined(LEGACY_FUCHSIA_EMBEDDER)
   // True if, during the traversal so far, we have seen a child_scene_layer.
   // Informs whether a layer needs to be system composited.
   bool child_scene_layer_exists_below = false;
-#endif  // defined(OS_FUCHSIA)
+#endif
 };
 
 // Represents a single composited layer. Created on the UI thread but then
@@ -162,7 +162,7 @@ class Layer {
 
   virtual void Paint(PaintContext& context) const = 0;
 
-#if defined(OS_FUCHSIA)
+#if defined(LEGACY_FUCHSIA_EMBEDDER)
   // Updates the system composited scene.
   virtual void UpdateScene(SceneUpdateContext& context);
   virtual void CheckForChildLayerBelow(PrerollContext* context);
@@ -186,7 +186,7 @@ class Layer {
   uint64_t unique_id() const { return unique_id_; }
 
  protected:
-#if defined(OS_FUCHSIA)
+#if defined(LEGACY_FUCHSIA_EMBEDDER)
   bool child_layer_exists_below_ = false;
 #endif
 

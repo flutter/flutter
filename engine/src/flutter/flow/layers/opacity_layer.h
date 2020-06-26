@@ -31,9 +31,9 @@ class OpacityLayer : public MergedContainerLayer {
 
   void Paint(PaintContext& context) const override;
 
-#if defined(OS_FUCHSIA)
+#if defined(LEGACY_FUCHSIA_EMBEDDER)
   void UpdateScene(SceneUpdateContext& context) override;
-#endif  // defined(OS_FUCHSIA)
+#endif
 
  private:
   SkAlpha alpha_;

@@ -3,7 +3,8 @@
 # found in the LICENSE file.
 
 declare_args() {
-  shell_enable_vulkan = false
+  shell_enable_gl = !is_fuchsia
   shell_enable_metal = false
+  shell_enable_vulkan = false
   stripped_symbols = true
 }
