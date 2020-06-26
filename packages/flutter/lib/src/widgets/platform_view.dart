@@ -903,8 +903,9 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
 
 /// Integrates a platform view with Flutter's compositor, touch, and semantics subsystems.
 ///
-/// The compositor integration is done by adding a [PlatformViewLayer] to the layer tree. [PlatformViewLayer]
-/// isn't supported on all platforms (e.g on Android platform views are composited using a [TextureLayer]).
+/// The compositor integration is done by adding a [PlatformViewLayer] to the layer tree. [PlatformViewSurface]
+/// isn't supported on all platforms (e.g on Android platform views can be composited by using a [TextureLayer] or
+/// [AndroidViewSurface]).
 /// Custom Flutter embedders can support [PlatformViewLayer]s by implementing a SystemCompositor.
 ///
 /// The widget fills all available space, the parent of this object must provide bounded layout
@@ -914,7 +915,7 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
 ///
 /// See also:
 ///
-///  * [AndroidView] which embeds an Android platform view in the widget hierarchy.
+///  * [AndroidView] which embeds an Android platform view in the widget hierarchy using a [TextureLayer].
 ///  * [UIKitView] which embeds an iOS platform view in the widget hierarchy.
 // TODO(amirh): Link to the embedder's system compositor documentation once available.
 class PlatformViewSurface extends LeafRenderObjectWidget {
@@ -993,5 +994,48 @@ class PlatformViewSurface extends LeafRenderObjectWidget {
       ..controller = controller
       ..hitTestBehavior = hitTestBehavior
       ..updateGestureRecognizers(gestureRecognizers);
+  }
+}
+
+/// Integrates an Android view with Flutter's compositor, touch, and semantics subsystems.
+///
+/// The compositor integration is done by adding a [PlatformViewLayer] to the layer tree. [PlatformViewLayer]
+/// isn't supported on all platforms. Custom Flutter embedders can support
+/// [PlatformViewLayer]s by implementing a SystemCompositor.
+///
+/// The widget fills all available space, the parent of this object must provide bounded layout
+/// constraints.
+///
+/// If the associated platform view is not created, the [AndroidViewSurface] does not paint any contents.
+///
+/// See also:
+///
+///  * [AndroidView] which embeds an Android platform view in the widget hierarchy using a [TextureLayer].
+///  * [UIKitView] which embeds an iOS platform view in the widget hierarchy.
+class AndroidViewSurface extends PlatformViewSurface {
+  /// Construct an `AndroidPlatformViewSurface`.
+  const AndroidViewSurface({
+    Key key,
+    @required AndroidViewController controller,
+    @required PlatformViewHitTestBehavior hitTestBehavior,
+    @required Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers,
+  }) : assert(controller != null),
+       assert(hitTestBehavior != null),
+       assert(gestureRecognizers != null),
+       super(
+          key: key,
+          controller: controller,
+          hitTestBehavior: hitTestBehavior,
+          gestureRecognizers: gestureRecognizers);
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    final PlatformViewRenderBox renderBox =
+        super.createRenderObject(context) as PlatformViewRenderBox;
+
+    (controller as AndroidViewController).pointTransformer =
+        (Offset position) => renderBox.globalToLocal(position);
+
+    return renderBox;
   }
 }
