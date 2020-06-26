@@ -766,6 +766,7 @@ Future<void> _runWebIntegrationTests() async {
       '--dart-define=test.valueB=Value',
     ]
   );
+  await _runWebHotReloadTest('lib/hot_reload_test.dart');
 }
 
 Future<void> _runWebStackTraceTest(String buildMode) async {
@@ -902,6 +903,79 @@ Future<void> _runWebDebugTest(String target, {
     print(output.stdout);
     print('${red}Web stack trace integration test failed.$reset');
     exit(1);
+  }
+}
+
+
+/// Debug mode is special because `flutter build web` doesn't build in debug mode.
+///
+/// Instead, we use `flutter run --debug` and sniff out the standard output.
+Future<void> _runWebHotReloadTest(String target, {
+  bool enableNullSafety = false,
+  List<String> additionalArguments = const<String>[],
+}) async {
+  final String testAppDirectory = path.join(flutterRoot, 'dev', 'integration_tests', 'web');
+  final File file = File(path.join(testAppDirectory, target));
+  final String oldContents = file.readAsStringSync();
+  try {
+    final CapturedOutput output = CapturedOutput();
+    bool started = false;
+    bool success = false;
+    await runCommand(
+      flutter,
+      <String>[
+        'run',
+        '--debug',
+        if (enableNullSafety)
+          ...<String>[
+            '--enable-experiment',
+            'non-nullable',
+            '--no-sound-null-safety'
+          ],
+        '-d',
+        'chrome',
+        '--web-run-headless',
+        ...additionalArguments,
+        '-t',
+        target,
+      ],
+      output: output,
+      outputMode: OutputMode.capture,
+      outputListener: (String line, Process process) async {
+        if (line.contains('For a more detailed help message, press "h".')) {
+          final String newContents = oldContents
+            .split('\n')
+            .map((String line) {
+              if (line.endsWith('// HOT RELOAD MARKER')) {
+                return "final String message = 'GOODBYE'; // HOT RELOAD MARKER";
+              }
+              return line;
+            }).join('\n');
+            file.writeAsStringSync(newContents, flush: true);
+            await Future<void>.delayed(const Duration(milliseconds: 50));
+            started = true;
+            process.stdin.add('R'.codeUnits);
+        }
+        if (started || line.contains('GOODBYE')) {
+          success = true;
+          process.stdin.add('q'.codeUnits);
+        }
+      },
+      workingDirectory: testAppDirectory,
+      environment: <String, String>{
+        'FLUTTER_WEB': 'true',
+      },
+    );
+
+    if (success) {
+      print('${green}Web hot reload integration test passed.$reset');
+    } else {
+      print(output.stdout);
+      print('${red}Web hot reload integration test failed.$reset');
+      exit(1);
+    }
+  } finally {
+    file.writeAsStringSync(oldContents);
   }
 }
 
