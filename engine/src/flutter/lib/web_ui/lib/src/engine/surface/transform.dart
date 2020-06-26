@@ -2,26 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 part of engine;
 
 /// A surface that transforms its children using CSS transform.
 class PersistedTransform extends PersistedContainerSurface
     implements ui.TransformEngineLayer {
-  PersistedTransform(PersistedTransform oldLayer, this.matrix4)
+  PersistedTransform(PersistedTransform? oldLayer, this.matrix4)
       : super(oldLayer);
 
   final Float32List matrix4;
 
   @override
   void recomputeTransformAndClip() {
-    _transform = parent._transform.multiplied(Matrix4.fromFloat32List(matrix4));
+    _transform = parent!._transform!.multiplied(Matrix4.fromFloat32List(matrix4));
     _localTransformInverse = null;
     _projectedClip = null;
   }
 
   @override
-  Matrix4 get localTransformInverse {
+  Matrix4? get localTransformInverse {
     _localTransformInverse ??=
         Matrix4.tryInvert(Matrix4.fromFloat32List(matrix4));
     return _localTransformInverse;
@@ -35,7 +34,7 @@ class PersistedTransform extends PersistedContainerSurface
 
   @override
   void apply() {
-    rootElement.style.transform = float64ListToCssTransform(matrix4);
+    rootElement!.style.transform = float64ListToCssTransform(matrix4);
   }
 
   @override

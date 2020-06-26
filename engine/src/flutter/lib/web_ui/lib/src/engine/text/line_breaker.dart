@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 /// Various types of line breaks as defined by the Unicode spec.
@@ -29,7 +29,7 @@ class LineBreakResult {
 }
 
 /// Normalizes properties that behave the same way into one common property.
-LineCharProperty _normalizeLineProperty(LineCharProperty prop) {
+LineCharProperty? _normalizeLineProperty(LineCharProperty? prop) {
   // LF and NL behave exactly the same as BK.
   // See: https://www.unicode.org/reports/tr14/tr14-22.html#ExplicitBreaks
   if (prop == LineCharProperty.LF || prop == LineCharProperty.NL) {
@@ -56,11 +56,11 @@ LineCharProperty _normalizeLineProperty(LineCharProperty prop) {
 /// * https://www.unicode.org/Public/11.0.0/ucd/LineBreak.txt
 LineBreakResult nextLineBreak(String text, int index) {
   // "raw" refers to the property before normalization.
-  LineCharProperty rawCurr = lineLookup.find(text, index);
-  LineCharProperty curr = _normalizeLineProperty(rawCurr);
+  LineCharProperty? rawCurr = lineLookup.find(text, index);
+  LineCharProperty? curr = _normalizeLineProperty(rawCurr);
 
-  LineCharProperty rawPrev;
-  LineCharProperty prev;
+  LineCharProperty? rawPrev;
+  LineCharProperty? prev;
 
   bool hasSpaces = false;
 

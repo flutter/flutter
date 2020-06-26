@@ -2,21 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 /// An implementation of [ui.Canvas] that is backed by a CanvasKit canvas.
 class CanvasKitCanvas implements ui.Canvas {
-  final SkCanvas _canvas;
+  final SkCanvas? _canvas;
 
-  factory CanvasKitCanvas(ui.PictureRecorder recorder, [ui.Rect cullRect]) {
-    assert(recorder != null);
+  factory CanvasKitCanvas(ui.PictureRecorder recorder, [ui.Rect? cullRect]) {
+    assert(recorder != null); // ignore: unnecessary_null_comparison
     if (recorder.isRecording) {
       throw ArgumentError(
           '"recorder" must not already be associated with another Canvas.');
     }
     cullRect ??= ui.Rect.largest;
-    final SkPictureRecorder skRecorder = recorder;
+    final SkPictureRecorder skRecorder = recorder as SkPictureRecorder;
     return CanvasKitCanvas._(skRecorder.beginRecording(cullRect));
   }
 
@@ -24,12 +24,12 @@ class CanvasKitCanvas implements ui.Canvas {
 
   @override
   void save() {
-    _canvas.save();
+    _canvas!.save();
   }
 
   @override
-  void saveLayer(ui.Rect bounds, ui.Paint paint) {
-    assert(paint != null);
+  void saveLayer(ui.Rect? bounds, ui.Paint paint) {
+    assert(paint != null); // ignore: unnecessary_null_comparison
     if (bounds == null) {
       _saveLayerWithoutBounds(paint);
     } else {
@@ -39,48 +39,48 @@ class CanvasKitCanvas implements ui.Canvas {
   }
 
   void _saveLayerWithoutBounds(ui.Paint paint) {
-    _canvas.saveLayerWithoutBounds(paint);
+    _canvas!.saveLayerWithoutBounds(paint as SkPaint);
   }
 
   void _saveLayer(ui.Rect bounds, ui.Paint paint) {
-    _canvas.saveLayer(bounds, paint);
+    _canvas!.saveLayer(bounds, paint as SkPaint);
   }
 
   @override
   void restore() {
-    _canvas.restore();
+    _canvas!.restore();
   }
 
   @override
   int getSaveCount() {
-    return _canvas.saveCount;
+    return _canvas!.saveCount!;
   }
 
   @override
   void translate(double dx, double dy) {
-    _canvas.translate(dx, dy);
+    _canvas!.translate(dx, dy);
   }
 
   @override
-  void scale(double sx, [double sy]) => _scale(sx, sy ?? sx);
+  void scale(double sx, [double? sy]) => _scale(sx, sy ?? sx);
 
   void _scale(double sx, double sy) {
-    _canvas.scale(sx, sy);
+    _canvas!.scale(sx, sy);
   }
 
   @override
   void rotate(double radians) {
-    _canvas.rotate(radians);
+    _canvas!.rotate(radians);
   }
 
   @override
   void skew(double sx, double sy) {
-    _canvas.skew(sx, sy);
+    _canvas!.skew(sx, sy);
   }
 
   @override
   void transform(Float64List matrix4) {
-    assert(matrix4 != null);
+    assert(matrix4 != null); // ignore: unnecessary_null_comparison
     if (matrix4.length != 16) {
       throw ArgumentError('"matrix4" must have 16 entries.');
     }
@@ -88,234 +88,240 @@ class CanvasKitCanvas implements ui.Canvas {
   }
 
   void _transform(Float32List matrix4) {
-    _canvas.transform(matrix4);
+    _canvas!.transform(matrix4);
   }
 
   @override
   void clipRect(ui.Rect rect,
       {ui.ClipOp clipOp = ui.ClipOp.intersect, bool doAntiAlias = true}) {
     assert(rectIsValid(rect));
-    assert(clipOp != null);
-    assert(doAntiAlias != null);
+    assert(clipOp != null); // ignore: unnecessary_null_comparison
+    assert(doAntiAlias != null); // ignore: unnecessary_null_comparison
     _clipRect(rect, clipOp, doAntiAlias);
   }
 
   void _clipRect(ui.Rect rect, ui.ClipOp clipOp, bool doAntiAlias) {
-    _canvas.clipRect(rect, clipOp, doAntiAlias);
+    _canvas!.clipRect(rect, clipOp, doAntiAlias);
   }
 
   @override
   void clipRRect(ui.RRect rrect, {bool doAntiAlias = true}) {
     assert(rrectIsValid(rrect));
-    assert(doAntiAlias != null);
+    assert(doAntiAlias != null); // ignore: unnecessary_null_comparison
     _clipRRect(rrect, doAntiAlias);
   }
 
   void _clipRRect(ui.RRect rrect, bool doAntiAlias) {
-    _canvas.clipRRect(rrect, doAntiAlias);
+    _canvas!.clipRRect(rrect, doAntiAlias);
   }
 
   @override
   void clipPath(ui.Path path, {bool doAntiAlias = true}) {
+    // ignore: unnecessary_null_comparison
     assert(path != null); // path is checked on the engine side
-    assert(doAntiAlias != null);
+    assert(doAntiAlias != null); // ignore: unnecessary_null_comparison
     _clipPath(path, doAntiAlias);
   }
 
   void _clipPath(ui.Path path, bool doAntiAlias) {
-    _canvas.clipPath(path, doAntiAlias);
+    _canvas!.clipPath(path, doAntiAlias);
   }
 
   @override
   void drawColor(ui.Color color, ui.BlendMode blendMode) {
-    assert(color != null);
-    assert(blendMode != null);
+    assert(color != null); // ignore: unnecessary_null_comparison
+    assert(blendMode != null); // ignore: unnecessary_null_comparison
     _drawColor(color, blendMode);
   }
 
   void _drawColor(ui.Color color, ui.BlendMode blendMode) {
-    _canvas.drawColor(color, blendMode);
+    _canvas!.drawColor(color, blendMode);
   }
 
   @override
   void drawLine(ui.Offset p1, ui.Offset p2, ui.Paint paint) {
     assert(_offsetIsValid(p1));
     assert(_offsetIsValid(p2));
-    assert(paint != null);
+    assert(paint != null); // ignore: unnecessary_null_comparison
     _drawLine(p1, p2, paint);
   }
 
   void _drawLine(ui.Offset p1, ui.Offset p2, ui.Paint paint) {
-    _canvas.drawLine(p1, p2, paint);
+    _canvas!.drawLine(p1, p2, paint as SkPaint);
   }
 
   @override
   void drawPaint(ui.Paint paint) {
-    assert(paint != null);
+    assert(paint != null); // ignore: unnecessary_null_comparison
     _drawPaint(paint);
   }
 
   void _drawPaint(ui.Paint paint) {
-    _canvas.drawPaint(paint);
+    _canvas!.drawPaint(paint as SkPaint);
   }
 
   @override
   void drawRect(ui.Rect rect, ui.Paint paint) {
     assert(rectIsValid(rect));
-    assert(paint != null);
+    assert(paint != null); // ignore: unnecessary_null_comparison
     _drawRect(rect, paint);
   }
 
   void _drawRect(ui.Rect rect, ui.Paint paint) {
-    _canvas.drawRect(rect, paint);
+    _canvas!.drawRect(rect, paint as SkPaint);
   }
 
   @override
   void drawRRect(ui.RRect rrect, ui.Paint paint) {
     assert(rrectIsValid(rrect));
-    assert(paint != null);
+    assert(paint != null); // ignore: unnecessary_null_comparison
     _drawRRect(rrect, paint);
   }
 
   void _drawRRect(ui.RRect rrect, ui.Paint paint) {
-    _canvas.drawRRect(rrect, paint);
+    _canvas!.drawRRect(rrect, paint as SkPaint);
   }
 
   @override
   void drawDRRect(ui.RRect outer, ui.RRect inner, ui.Paint paint) {
     assert(rrectIsValid(outer));
     assert(rrectIsValid(inner));
-    assert(paint != null);
+    assert(paint != null); // ignore: unnecessary_null_comparison
     _drawDRRect(outer, inner, paint);
   }
 
   void _drawDRRect(ui.RRect outer, ui.RRect inner, ui.Paint paint) {
-    _canvas.drawDRRect(outer, inner, paint);
+    _canvas!.drawDRRect(outer, inner, paint as SkPaint);
   }
 
   @override
   void drawOval(ui.Rect rect, ui.Paint paint) {
     assert(rectIsValid(rect));
-    assert(paint != null);
+    assert(paint != null); // ignore: unnecessary_null_comparison
     _drawOval(rect, paint);
   }
 
   void _drawOval(ui.Rect rect, ui.Paint paint) {
-    _canvas.drawOval(rect, paint);
+    _canvas!.drawOval(rect, paint as SkPaint);
   }
 
   @override
   void drawCircle(ui.Offset c, double radius, ui.Paint paint) {
     assert(_offsetIsValid(c));
-    assert(paint != null);
+    assert(paint != null); // ignore: unnecessary_null_comparison
     _drawCircle(c, radius, paint);
   }
 
   void _drawCircle(ui.Offset c, double radius, ui.Paint paint) {
-    _canvas.drawCircle(c, radius, paint);
+    _canvas!.drawCircle(c, radius, paint as SkPaint);
   }
 
   @override
   void drawArc(ui.Rect rect, double startAngle, double sweepAngle,
       bool useCenter, ui.Paint paint) {
     assert(rectIsValid(rect));
-    assert(paint != null);
+    assert(paint != null); // ignore: unnecessary_null_comparison
     _drawArc(rect, startAngle, sweepAngle, useCenter, paint);
   }
 
   void _drawArc(ui.Rect rect, double startAngle, double sweepAngle,
       bool useCenter, ui.Paint paint) {
-    _canvas.drawArc(rect, startAngle, sweepAngle, useCenter, paint);
+    _canvas!.drawArc(rect, startAngle, sweepAngle, useCenter, paint as SkPaint);
   }
 
   @override
   void drawPath(ui.Path path, ui.Paint paint) {
+    // ignore: unnecessary_null_comparison
     assert(path != null); // path is checked on the engine side
-    assert(paint != null);
+    assert(paint != null); // ignore: unnecessary_null_comparison
     _drawPath(path, paint);
   }
 
   void _drawPath(ui.Path path, ui.Paint paint) {
-    _canvas.drawPath(path, paint);
+    _canvas!.drawPath(path, paint as SkPaint);
   }
 
   @override
   void drawImage(ui.Image image, ui.Offset p, ui.Paint paint) {
+    // ignore: unnecessary_null_comparison
     assert(image != null); // image is checked on the engine side
     assert(_offsetIsValid(p));
-    assert(paint != null);
+    assert(paint != null); // ignore: unnecessary_null_comparison
     _drawImage(image, p, paint);
   }
 
   void _drawImage(ui.Image image, ui.Offset p, ui.Paint paint) {
-    _canvas.drawImage(image, p, paint);
+    _canvas!.drawImage(image, p, paint as SkPaint);
   }
 
   @override
   void drawImageRect(ui.Image image, ui.Rect src, ui.Rect dst, ui.Paint paint) {
+    // ignore: unnecessary_null_comparison
     assert(image != null); // image is checked on the engine side
     assert(rectIsValid(src));
     assert(rectIsValid(dst));
-    assert(paint != null);
+    assert(paint != null); // ignore: unnecessary_null_comparison
     _drawImageRect(image, src, dst, paint);
   }
 
   void _drawImageRect(
       ui.Image image, ui.Rect src, ui.Rect dst, ui.Paint paint) {
-    _canvas.drawImageRect(image, src, dst, paint);
+    _canvas!.drawImageRect(image, src, dst, paint as SkPaint);
   }
 
   @override
   void drawImageNine(
       ui.Image image, ui.Rect center, ui.Rect dst, ui.Paint paint) {
+    // ignore: unnecessary_null_comparison
     assert(image != null); // image is checked on the engine side
     assert(rectIsValid(center));
     assert(rectIsValid(dst));
-    assert(paint != null);
+    assert(paint != null); // ignore: unnecessary_null_comparison
     _drawImageNine(image, center, dst, paint);
   }
 
   void _drawImageNine(
       ui.Image image, ui.Rect center, ui.Rect dst, ui.Paint paint) {
-    _canvas.drawImageNine(image, center, dst, paint);
+    _canvas!.drawImageNine(image, center, dst, paint as SkPaint);
   }
 
   @override
   void drawPicture(ui.Picture picture) {
+    // ignore: unnecessary_null_comparison
     assert(picture != null); // picture is checked on the engine side
     _drawPicture(picture);
   }
 
   void _drawPicture(ui.Picture picture) {
-    _canvas.drawPicture(picture);
+    _canvas!.drawPicture(picture);
   }
 
   @override
   void drawParagraph(ui.Paragraph paragraph, ui.Offset offset) {
-    assert(paragraph != null);
+    assert(paragraph != null); // ignore: unnecessary_null_comparison
     assert(_offsetIsValid(offset));
     _drawParagraph(paragraph, offset);
   }
 
   void _drawParagraph(ui.Paragraph paragraph, ui.Offset offset) {
-    _canvas.drawParagraph(paragraph, offset);
+    _canvas!.drawParagraph(paragraph, offset);
   }
 
   @override
   void drawPoints(
       ui.PointMode pointMode, List<ui.Offset> points, ui.Paint paint) {
-    assert(pointMode != null);
-    assert(points != null);
-    assert(paint != null);
+    assert(pointMode != null); // ignore: unnecessary_null_comparison
+    assert(points != null); // ignore: unnecessary_null_comparison
+    assert(paint != null); // ignore: unnecessary_null_comparison
     _drawPoints(paint, pointMode, encodePointList(points));
   }
 
   @override
   void drawRawPoints(
       ui.PointMode pointMode, Float32List points, ui.Paint paint) {
-    assert(pointMode != null);
-    assert(points != null);
-    assert(paint != null);
+    assert(pointMode != null); // ignore: unnecessary_null_comparison
+    assert(points != null); // ignore: unnecessary_null_comparison
+    assert(paint != null); // ignore: unnecessary_null_comparison
     if (points.length % 2 != 0) {
       throw ArgumentError('"points" must have an even number of values.');
     }
@@ -323,22 +329,23 @@ class CanvasKitCanvas implements ui.Canvas {
   }
 
   void _drawPoints(
-      ui.Paint paint, ui.PointMode pointMode, List<List<double>> points) {
-    _canvas.drawPoints(paint, pointMode, points);
+      ui.Paint paint, ui.PointMode pointMode, List<List<double>>? points) {
+    _canvas!.drawPoints(paint as SkPaint, pointMode, points as js.JsArray<js.JsArray<double>>?);
   }
 
   @override
   void drawVertices(
       ui.Vertices vertices, ui.BlendMode blendMode, ui.Paint paint) {
+    // ignore: unnecessary_null_comparison
     assert(vertices != null); // vertices is checked on the engine side
-    assert(paint != null);
-    assert(blendMode != null);
+    assert(paint != null); // ignore: unnecessary_null_comparison
+    assert(blendMode != null); // ignore: unnecessary_null_comparison
     _drawVertices(vertices, blendMode, paint);
   }
 
   void _drawVertices(
       ui.Vertices vertices, ui.BlendMode blendMode, ui.Paint paint) {
-    _canvas.drawVertices(vertices, blendMode, paint);
+    _canvas!.drawVertices(vertices, blendMode, paint as SkPaint);
   }
 
   @override
@@ -348,14 +355,15 @@ class CanvasKitCanvas implements ui.Canvas {
       List<ui.Rect> rects,
       List<ui.Color> colors,
       ui.BlendMode blendMode,
-      ui.Rect cullRect,
+      ui.Rect? cullRect,
       ui.Paint paint) {
+    // ignore: unnecessary_null_comparison
     assert(atlas != null); // atlas is checked on the engine side
-    assert(transforms != null);
-    assert(rects != null);
-    assert(colors != null);
-    assert(blendMode != null);
-    assert(paint != null);
+    assert(transforms != null); // ignore: unnecessary_null_comparison
+    assert(rects != null); // ignore: unnecessary_null_comparison
+    assert(colors != null); // ignore: unnecessary_null_comparison
+    assert(blendMode != null); // ignore: unnecessary_null_comparison
+    assert(paint != null); // ignore: unnecessary_null_comparison
 
     final int rectCount = rects.length;
     if (transforms.length != rectCount) {
@@ -387,7 +395,7 @@ class CanvasKitCanvas implements ui.Canvas {
       rectBuffer[index3] = rect.bottom;
     }
 
-    final js.JsArray<Float32List> colorBuffer =
+    final js.JsArray<Float32List>? colorBuffer =
         colors.isEmpty ? null : makeColorList(colors);
 
     _drawAtlas(
@@ -401,14 +409,15 @@ class CanvasKitCanvas implements ui.Canvas {
       Float32List rects,
       Int32List colors,
       ui.BlendMode blendMode,
-      ui.Rect cullRect,
+      ui.Rect? cullRect,
       ui.Paint paint) {
+    // ignore: unnecessary_null_comparison
     assert(atlas != null); // atlas is checked on the engine side
-    assert(rstTransforms != null);
-    assert(rects != null);
-    assert(colors != null);
-    assert(blendMode != null);
-    assert(paint != null);
+    assert(rstTransforms != null); // ignore: unnecessary_null_comparison
+    assert(rects != null); // ignore: unnecessary_null_comparison
+    assert(colors != null); // ignore: unnecessary_null_comparison
+    assert(blendMode != null); // ignore: unnecessary_null_comparison
+    assert(paint != null); // ignore: unnecessary_null_comparison
 
     final int rectCount = rects.length;
     if (rstTransforms.length != rectCount)
@@ -416,7 +425,7 @@ class CanvasKitCanvas implements ui.Canvas {
     if (rectCount % 4 != 0)
       throw ArgumentError(
           '"rstTransforms" and "rects" lengths must be a multiple of four.');
-    if (colors != null && colors.length * 4 != rectCount)
+    if (colors.length * 4 != rectCount)
       throw ArgumentError(
           'If non-null, "colors" length must be one fourth the length of "rstTransforms" and "rects".');
 
@@ -430,23 +439,24 @@ class CanvasKitCanvas implements ui.Canvas {
     ui.Image atlas,
     Float32List rstTransforms,
     Float32List rects,
-    js.JsArray<Float32List> colors,
+    js.JsArray<Float32List>? colors,
     ui.BlendMode blendMode,
   ) {
-    _canvas.drawAtlasRaw(paint, atlas, rstTransforms, rects, colors, blendMode);
+    _canvas!.drawAtlasRaw(paint as SkPaint, atlas, rstTransforms, rects, colors, blendMode);
   }
 
   @override
   void drawShadow(ui.Path path, ui.Color color, double elevation,
       bool transparentOccluder) {
+    // ignore: unnecessary_null_comparison
     assert(path != null); // path is checked on the engine side
-    assert(color != null);
-    assert(transparentOccluder != null);
+    assert(color != null); // ignore: unnecessary_null_comparison
+    assert(transparentOccluder != null); // ignore: unnecessary_null_comparison
     _drawShadow(path, color, elevation, transparentOccluder);
   }
 
   void _drawShadow(ui.Path path, ui.Color color, double elevation,
       bool transparentOccluder) {
-    _canvas.drawShadow(path, color, elevation, transparentOccluder);
+    _canvas!.drawShadow(path, color, elevation, transparentOccluder);
   }
 }

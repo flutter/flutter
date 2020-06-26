@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 /// Generic callback signature, used by [_futurize].
@@ -12,7 +12,7 @@ typedef Callback<T> = void Function(T result);
 ///
 /// Return value should be null on success, and a string error message on
 /// failure.
-typedef Callbacker<T> = String/*?*/ Function(Callback<T> callback);
+typedef Callbacker<T> = String? Function(Callback<T> callback);
 
 /// Converts a method that receives a value-returning callback to a method that
 /// returns a Future.
@@ -35,9 +35,9 @@ typedef Callbacker<T> = String/*?*/ Function(Callback<T> callback);
 ///   return _futurize(_doSomethingAndCallback);
 /// }
 /// ```
-Future<T>/*!*/ futurize<T>(Callbacker<T> callbacker) {
+Future<T> futurize<T>(Callbacker<T> callbacker) {
   final Completer<T> completer = Completer<T>.sync();
-  final String error = callbacker((T t) {
+  final String? error = callbacker((T t) {
     if (t == null) {
       completer.completeError(Exception('operation failed'));
     } else {
@@ -319,13 +319,13 @@ String _pathToSvgClipPath(ui.Path path,
   sb.write('<clipPath id=$clipId clipPathUnits="objectBoundingBox">');
 
   sb.write('<path transform="scale($scaleX, $scaleY)" fill="#FFFFFF" d="');
-  pathToSvg(path, sb, offsetX: offsetX, offsetY: offsetY);
+  pathToSvg(path as SurfacePath, sb, offsetX: offsetX, offsetY: offsetY);
   sb.write('"></path></clipPath></defs></svg');
   return sb.toString();
 }
 
 /// Converts color to a css compatible attribute value.
-String colorToCssString(ui.Color color) {
+String? colorToCssString(ui.Color? color) {
   if (color == null) {
     return null;
   }
@@ -430,7 +430,7 @@ bool get _isMacOrIOS => operatingSystem == OperatingSystem.iOs ||
 ///
 /// If the given [fontFamily] is a generic font-family, then just return it.
 /// Otherwise, wrap the family name in quotes and add a fallback font family.
-String canonicalizeFontFamily(String fontFamily) {
+String? canonicalizeFontFamily(String? fontFamily) {
   if (_genericFontFamilies.contains(fontFamily)) {
     return fontFamily;
   }
@@ -449,9 +449,6 @@ String canonicalizeFontFamily(String fontFamily) {
 
 /// Converts a list of [Offset] to a typed array of floats.
 Float32List offsetListToFloat32List(List<ui.Offset> offsetList) {
-  if (offsetList == null) {
-    return null;
-  }
   final int length = offsetList.length;
   final floatList = Float32List(length * 2);
   for (int i = 0, destIndex = 0; i < length; i++, destIndex += 2) {
@@ -471,13 +468,13 @@ Float32List offsetListToFloat32List(List<ui.Offset> offsetList) {
 ///
 /// * Use 3D transform instead of 2D: this does not work because it causes text
 ///   blurriness: https://github.com/flutter/flutter/issues/32274
-void applyWebkitClipFix(html.Element containerElement) {
+void applyWebkitClipFix(html.Element? containerElement) {
   if (browserEngine == BrowserEngine.webkit) {
-    containerElement.style.zIndex = '0';
+    containerElement!.style.zIndex = '0';
   }
 }
 
-final ByteData _fontChangeMessage = JSONMessageCodec().encodeMessage(<String, dynamic>{'type': 'fontsChange'});
+final ByteData? _fontChangeMessage = JSONMessageCodec().encodeMessage(<String, dynamic>{'type': 'fontsChange'});
 
 // Font load callbacks will typically arrive in sequence, we want to prevent
 // sendFontChangeMessage of causing multiple synchronous rebuilds.
@@ -519,4 +516,14 @@ class _FastMatrix64 {
 /// Flutter mobile.
 double convertSigmaToRadius(double sigma) {
   return sigma * 2.0;
+}
+
+/// Used to check for null values that are non-nullable.
+///
+/// This is useful when some external API (e.g. HTML DOM) disagrees with
+/// Dart type declarations (e.g. `dart:html`). Where `dart:html` may believe
+/// something to be non-null, it may actually be null (e.g. old browsers do
+/// not implement a feature, such as clipboard).
+bool isUnsoundNull(dynamic object) {
+  return object == null;
 }

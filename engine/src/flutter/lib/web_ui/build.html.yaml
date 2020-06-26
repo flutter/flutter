@@ -9,6 +9,7 @@ targets:
           compiler: dart2js
           dart2js_args:
             - --no-minify
+            - --disable-inlining
             - --enable-asserts
             - --enable-experiment=non-nullable
             - --no-sound-null-safety

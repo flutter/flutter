@@ -406,9 +406,9 @@ void main() async {
     expect(
       paragraph.getBoxesForRange(1, 2).single,
       const TextBox.fromLTRBD(
-        10,
+        970,
         0,
-        20,
+        980,
         10,
         TextDirection.rtl,
       ),

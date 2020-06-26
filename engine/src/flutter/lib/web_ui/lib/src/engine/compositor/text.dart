@@ -1,23 +1,23 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// @dart = 2.6
+
 part of engine;
 
 class SkParagraphStyle implements ui.ParagraphStyle {
   SkParagraphStyle({
-    ui.TextAlign textAlign,
-    ui.TextDirection textDirection,
-    int maxLines,
-    String fontFamily,
-    double fontSize,
-    double height,
-    ui.TextHeightBehavior textHeightBehavior,
-    ui.FontWeight fontWeight,
-    ui.FontStyle fontStyle,
-    ui.StrutStyle strutStyle,
-    String ellipsis,
-    ui.Locale locale,
+    ui.TextAlign? textAlign,
+    ui.TextDirection? textDirection,
+    int? maxLines,
+    String? fontFamily,
+    double? fontSize,
+    double? height,
+    ui.TextHeightBehavior? textHeightBehavior,
+    ui.FontWeight? fontWeight,
+    ui.FontStyle? fontStyle,
+    ui.StrutStyle? strutStyle,
+    String? ellipsis,
+    ui.Locale? locale,
   }) {
     skParagraphStyle = toSkParagraphStyle(
       textAlign,
@@ -36,15 +36,15 @@ class SkParagraphStyle implements ui.ParagraphStyle {
     _fontFamily = fontFamily;
   }
 
-  js.JsObject skParagraphStyle;
-  ui.TextDirection _textDirection;
-  String _fontFamily;
+  js.JsObject? skParagraphStyle;
+  ui.TextDirection? _textDirection;
+  String? _fontFamily;
 
   static Map<String, dynamic> toSkTextStyle(
-    String fontFamily,
-    double fontSize,
-    ui.FontWeight fontWeight,
-    ui.FontStyle fontStyle,
+    String? fontFamily,
+    double? fontSize,
+    ui.FontWeight? fontWeight,
+    ui.FontStyle? fontStyle,
   ) {
     final Map<String, dynamic> skTextStyle = <String, dynamic>{};
     if (fontWeight != null || fontStyle != null) {
@@ -67,17 +67,17 @@ class SkParagraphStyle implements ui.ParagraphStyle {
     return skTextStyle;
   }
 
-  static js.JsObject toSkParagraphStyle(
-    ui.TextAlign textAlign,
-    ui.TextDirection textDirection,
-    int maxLines,
-    String fontFamily,
-    double fontSize,
-    double height,
-    ui.TextHeightBehavior textHeightBehavior,
-    ui.FontWeight fontWeight,
-    ui.FontStyle fontStyle,
-    String ellipsis,
+  static js.JsObject? toSkParagraphStyle(
+    ui.TextAlign? textAlign,
+    ui.TextDirection? textDirection,
+    int? maxLines,
+    String? fontFamily,
+    double? fontSize,
+    double? height,
+    ui.TextHeightBehavior? textHeightBehavior,
+    ui.FontWeight? fontWeight,
+    ui.FontStyle? fontStyle,
+    String? ellipsis,
   ) {
     final Map<String, dynamic> skParagraphStyle = <String, dynamic>{};
 
@@ -140,28 +140,28 @@ class SkParagraphStyle implements ui.ParagraphStyle {
 }
 
 class SkTextStyle implements ui.TextStyle {
-  js.JsObject skTextStyle;
+  js.JsObject? skTextStyle;
 
   SkTextStyle({
-    ui.Color color,
-    ui.TextDecoration decoration,
-    ui.Color decorationColor,
-    ui.TextDecorationStyle decorationStyle,
-    double decorationThickness,
-    ui.FontWeight fontWeight,
-    ui.FontStyle fontStyle,
-    ui.TextBaseline textBaseline,
-    String fontFamily,
-    List<String> fontFamilyFallback,
-    double fontSize,
-    double letterSpacing,
-    double wordSpacing,
-    double height,
-    ui.Locale locale,
-    SkPaint background,
-    SkPaint foreground,
-    List<ui.Shadow> shadows,
-    List<ui.FontFeature> fontFeatures,
+    ui.Color? color,
+    ui.TextDecoration? decoration,
+    ui.Color? decorationColor,
+    ui.TextDecorationStyle? decorationStyle,
+    double? decorationThickness,
+    ui.FontWeight? fontWeight,
+    ui.FontStyle? fontStyle,
+    ui.TextBaseline? textBaseline,
+    String? fontFamily,
+    List<String>? fontFamilyFallback,
+    double? fontSize,
+    double? letterSpacing,
+    double? wordSpacing,
+    double? height,
+    ui.Locale? locale,
+    SkPaint? background,
+    SkPaint? foreground,
+    List<ui.Shadow>? shadows,
+    List<ui.FontFeature>? fontFeatures,
   }) {
     final js.JsObject style = js.JsObject(js.context['Object']);
 
@@ -203,7 +203,7 @@ class SkTextStyle implements ui.TextStyle {
     if (skiaFontCollection.fontFamilyOverrides.containsKey(fontFamily)) {
       fontFamily = skiaFontCollection.fontFamilyOverrides[fontFamily];
     }
-    List<String> fontFamilies = <String>[fontFamily];
+    List<String?> fontFamilies = <String?>[fontFamily];
     if (fontFamilyFallback != null &&
         !fontFamilyFallback.every((font) => fontFamily == font)) {
       fontFamilies.addAll(fontFamilyFallback);
@@ -234,9 +234,9 @@ class SkTextStyle implements ui.TextStyle {
   }
 }
 
-Map<String, js.JsObject> toSkFontStyle(
-    ui.FontWeight fontWeight, ui.FontStyle fontStyle) {
-  Map<String, js.JsObject> style = <String, js.JsObject>{};
+Map<String, js.JsObject?> toSkFontStyle(
+    ui.FontWeight? fontWeight, ui.FontStyle? fontStyle) {
+  Map<String, js.JsObject?> style = <String, js.JsObject?>{};
   if (fontWeight != null) {
     switch (fontWeight) {
       case ui.FontWeight.w100:
@@ -285,37 +285,37 @@ Map<String, js.JsObject> toSkFontStyle(
 class SkParagraph implements ui.Paragraph {
   SkParagraph(this.skParagraph, this._textDirection, this._fontFamily);
 
-  final js.JsObject skParagraph;
-  final ui.TextDirection _textDirection;
-  final String _fontFamily;
+  final js.JsObject? skParagraph;
+  final ui.TextDirection? _textDirection;
+  final String? _fontFamily;
 
   @override
   double get alphabeticBaseline =>
-      skParagraph.callMethod('getAlphabeticBaseline');
+      skParagraph!.callMethod('getAlphabeticBaseline');
 
   @override
-  bool get didExceedMaxLines => skParagraph.callMethod('didExceedMaxLines');
+  bool get didExceedMaxLines => skParagraph!.callMethod('didExceedMaxLines');
 
   @override
-  double get height => skParagraph.callMethod('getHeight');
+  double get height => skParagraph!.callMethod('getHeight');
 
   @override
   double get ideographicBaseline =>
-      skParagraph.callMethod('getIdeographicBaseline');
+      skParagraph!.callMethod('getIdeographicBaseline');
 
   @override
-  double get longestLine => skParagraph.callMethod('getLongestLine');
+  double get longestLine => skParagraph!.callMethod('getLongestLine');
 
   @override
   double get maxIntrinsicWidth =>
-      skParagraph.callMethod('getMaxIntrinsicWidth');
+      skParagraph!.callMethod('getMaxIntrinsicWidth');
 
   @override
   double get minIntrinsicWidth =>
-      skParagraph.callMethod('getMinIntrinsicWidth');
+      skParagraph!.callMethod('getMinIntrinsicWidth');
 
   @override
-  double get width => skParagraph.callMethod('getMaxWidth');
+  double get width => skParagraph!.callMethod('getMaxWidth');
 
   // TODO(hterkelsen): Implement placeholders once it's in CanvasKit
   @override
@@ -334,7 +334,7 @@ class SkParagraph implements ui.Paragraph {
       return const <ui.TextBox>[];
     }
 
-    js.JsObject heightStyle;
+    js.JsObject? heightStyle;
     switch (boxHeightStyle) {
       case ui.BoxHeightStyle.tight:
         heightStyle = canvasKit['RectHeightStyle']['Tight'];
@@ -350,7 +350,7 @@ class SkParagraph implements ui.Paragraph {
         break;
     }
 
-    js.JsObject widthStyle;
+    js.JsObject? widthStyle;
     switch (boxWidthStyle) {
       case ui.BoxWidthStyle.tight:
         widthStyle = canvasKit['RectWidthStyle']['Tight'];
@@ -361,24 +361,24 @@ class SkParagraph implements ui.Paragraph {
     }
 
     List<js.JsObject> skRects =
-        skParagraph.callMethod('getRectsForRange', <dynamic>[
+        skParagraph!.callMethod('getRectsForRange', <dynamic>[
       start,
       end,
       heightStyle,
       widthStyle,
     ]);
 
-    List<ui.TextBox> result = List<ui.TextBox>(skRects.length);
+    List<ui.TextBox> result = <ui.TextBox>[];
 
     for (int i = 0; i < skRects.length; i++) {
       final js.JsObject rect = skRects[i];
-      result[i] = ui.TextBox.fromLTRBD(
+      result.add(ui.TextBox.fromLTRBD(
         rect['fLeft'],
         rect['fTop'],
         rect['fRight'],
         rect['fBottom'],
-        _textDirection,
-      );
+        _textDirection!,
+      ));
     }
 
     return result;
@@ -387,7 +387,7 @@ class SkParagraph implements ui.Paragraph {
   @override
   ui.TextPosition getPositionForOffset(ui.Offset offset) {
     js.JsObject positionWithAffinity =
-        skParagraph.callMethod('getGlyphPositionAtCoordinate', <double>[
+        skParagraph!.callMethod('getGlyphPositionAtCoordinate', <double>[
       offset.dx,
       offset.dy,
     ]);
@@ -397,13 +397,13 @@ class SkParagraph implements ui.Paragraph {
   @override
   ui.TextRange getWordBoundary(ui.TextPosition position) {
     js.JsObject skRange =
-        skParagraph.callMethod('getWordBoundary', <int>[position.offset]);
+        skParagraph!.callMethod('getWordBoundary', <int>[position.offset]);
     return ui.TextRange(start: skRange['start'], end: skRange['end']);
   }
 
   @override
   void layout(ui.ParagraphConstraints constraints) {
-    assert(constraints.width != null);
+    assert(constraints.width != null); // ignore: unnecessary_null_comparison
 
     // Infinite width breaks layout, just use a very large number instead.
     // TODO(het): Remove this once https://bugs.chromium.org/p/skia/issues/detail?id=9874
@@ -418,7 +418,7 @@ class SkParagraph implements ui.Paragraph {
     // TODO(het): CanvasKit throws an exception when laid out with
     // a font that wasn't registered.
     try {
-      skParagraph.callMethod('layout', <double>[width]);
+      skParagraph!.callMethod('layout', <double>[width]);
     } catch (e) {
       html.window.console.warn('CanvasKit threw an exception while laying '
           'out the paragraph. The font was "$_fontFamily". Exception:\n$e');
@@ -440,17 +440,17 @@ class SkParagraph implements ui.Paragraph {
 }
 
 class SkParagraphBuilder implements ui.ParagraphBuilder {
-  js.JsObject _paragraphBuilder;
-  ui.TextDirection _textDirection;
-  String _fontFamily;
+  js.JsObject? _paragraphBuilder;
+  ui.TextDirection? _textDirection;
+  String? _fontFamily;
 
   SkParagraphBuilder(ui.ParagraphStyle style) {
-    SkParagraphStyle skStyle = style;
+    SkParagraphStyle skStyle = style as SkParagraphStyle;
     _textDirection = skStyle._textDirection;
     _fontFamily = skStyle._fontFamily;
     _paragraphBuilder = canvasKit['ParagraphBuilder'].callMethod(
       'Make',
-      <js.JsObject>[
+      <js.JsObject?>[
         skStyle.skParagraphStyle,
         skiaFontCollection.skFontMgr,
       ],
@@ -464,22 +464,22 @@ class SkParagraphBuilder implements ui.ParagraphBuilder {
     double height,
     ui.PlaceholderAlignment alignment, {
     double scale = 1.0,
-    double baselineOffset,
-    ui.TextBaseline baseline,
+    double? baselineOffset,
+    ui.TextBaseline? baseline,
   }) {
     throw UnimplementedError('addPlaceholder');
   }
 
   @override
   void addText(String text) {
-    _paragraphBuilder.callMethod('addText', <String>[text]);
+    _paragraphBuilder!.callMethod('addText', <String>[text]);
   }
 
   @override
   ui.Paragraph build() {
     final SkParagraph paragraph = SkParagraph(
-        _paragraphBuilder.callMethod('build'), _textDirection, _fontFamily);
-    _paragraphBuilder.callMethod('delete');
+        _paragraphBuilder!.callMethod('build'), _textDirection, _fontFamily);
+    _paragraphBuilder!.callMethod('delete');
     _paragraphBuilder = null;
     return paragraph;
   }
@@ -493,13 +493,13 @@ class SkParagraphBuilder implements ui.ParagraphBuilder {
 
   @override
   void pop() {
-    _paragraphBuilder.callMethod('pop');
+    _paragraphBuilder!.callMethod('pop');
   }
 
   @override
   void pushStyle(ui.TextStyle style) {
-    final SkTextStyle skStyle = style;
-    _paragraphBuilder
-        .callMethod('pushStyle', <js.JsObject>[skStyle.skTextStyle]);
+    final SkTextStyle skStyle = style as SkTextStyle;
+    _paragraphBuilder!
+        .callMethod('pushStyle', <js.JsObject?>[skStyle.skTextStyle]);
   }
 }

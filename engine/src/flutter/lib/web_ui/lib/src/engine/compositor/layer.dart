@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 /// A layer to be composed into a scene.
@@ -11,7 +11,7 @@ part of engine;
 /// painting command.
 abstract class Layer implements ui.EngineLayer {
   /// The layer that contains us as a child.
-  ContainerLayer parent;
+  ContainerLayer? parent;
 
   /// An estimated rectangle that this layer will draw into.
   ui.Rect paintBounds = ui.Rect.zero;
@@ -33,10 +33,10 @@ abstract class Layer implements ui.EngineLayer {
 /// A context shared by all layers during the preroll pass.
 class PrerollContext {
   /// A raster cache. Used to register candidates for caching.
-  final RasterCache rasterCache;
+  final RasterCache? rasterCache;
 
   /// A compositor for embedded HTML views.
-  final HtmlViewEmbedder viewEmbedder;
+  final HtmlViewEmbedder? viewEmbedder;
 
   final MutatorsStack mutatorsStack = MutatorsStack();
 
@@ -51,13 +51,13 @@ class PaintContext {
   SkNWayCanvas internalNodesCanvas;
 
   /// The canvas for leaf nodes to paint to.
-  SkCanvas leafNodesCanvas;
+  SkCanvas? leafNodesCanvas;
 
   /// A raster cache potentially containing pre-rendered pictures.
-  final RasterCache rasterCache;
+  final RasterCache? rasterCache;
 
   /// A compositor for embedded HTML views.
-  final HtmlViewEmbedder viewEmbedder;
+  final HtmlViewEmbedder? viewEmbedder;
 
   PaintContext(
     this.internalNodesCanvas,
@@ -207,7 +207,7 @@ class ClipRectLayer extends ContainerLayer {
 class ClipRRectLayer extends ContainerLayer {
   /// The rounded rectangle used to clip child layers.
   final ui.RRect _clipRRect;
-  final ui.Clip _clipBehavior;
+  final ui.Clip? _clipBehavior;
 
   ClipRRectLayer(this._clipRRect, this._clipBehavior)
       : assert(_clipBehavior != ui.Clip.none);
@@ -379,19 +379,19 @@ class PictureLayer extends Layer {
 
   @override
   void preroll(PrerollContext prerollContext, Matrix4 matrix) {
-    paintBounds = picture.cullRect.shift(offset);
+    paintBounds = picture.cullRect!.shift(offset);
   }
 
   @override
   void paint(PaintContext paintContext) {
-    assert(picture != null);
+    assert(picture != null); // ignore: unnecessary_null_comparison
     assert(needsPainting);
 
-    paintContext.leafNodesCanvas.save();
-    paintContext.leafNodesCanvas.translate(offset.dx, offset.dy);
+    paintContext.leafNodesCanvas!.save();
+    paintContext.leafNodesCanvas!.translate(offset.dx, offset.dy);
 
-    paintContext.leafNodesCanvas.drawPicture(picture);
-    paintContext.leafNodesCanvas.restore();
+    paintContext.leafNodesCanvas!.drawPicture(picture);
+    paintContext.leafNodesCanvas!.restore();
   }
 }
 
@@ -401,10 +401,10 @@ class PictureLayer extends Layer {
 /// on the given elevation.
 class PhysicalShapeLayer extends ContainerLayer
     implements ui.PhysicalShapeEngineLayer {
-  final double _elevation;
-  final ui.Color _color;
-  final ui.Color _shadowColor;
-  final ui.Path _path;
+  final double? _elevation;
+  final ui.Color? _color;
+  final ui.Color? _shadowColor;
+  final ui.Path? _path;
   final ui.Clip _clipBehavior;
 
   PhysicalShapeLayer(
@@ -419,7 +419,7 @@ class PhysicalShapeLayer extends ContainerLayer
   void preroll(PrerollContext prerollContext, Matrix4 matrix) {
     prerollChildren(prerollContext, matrix);
 
-    paintBounds = _path.getBounds();
+    paintBounds = _path!.getBounds();
     if (_elevation == 0.0) {
       // No need to extend the paint bounds if there is no shadow.
       return;
@@ -479,16 +479,16 @@ class PhysicalShapeLayer extends ContainerLayer
     assert(needsPainting);
 
     if (_elevation != 0) {
-      drawShadow(paintContext.leafNodesCanvas, _path, _shadowColor, _elevation,
-          _color.alpha != 0xff);
+      drawShadow(paintContext.leafNodesCanvas!, _path!, _shadowColor!, _elevation!,
+          _color!.alpha != 0xff);
     }
 
-    final ui.Paint paint = ui.Paint()..color = _color;
+    final ui.Paint paint = ui.Paint()..color = _color!;
     if (_clipBehavior != ui.Clip.antiAliasWithSaveLayer) {
-      paintContext.leafNodesCanvas.drawPath(_path, paint);
+      paintContext.leafNodesCanvas!.drawPath(_path!, paint as SkPaint);
     }
 
-    final int saveCount = paintContext.internalNodesCanvas.save();
+    final int? saveCount = paintContext.internalNodesCanvas.save();
     switch (_clipBehavior) {
       case ui.Clip.hardEdge:
         paintContext.internalNodesCanvas.clipPath(_path, false);
@@ -509,7 +509,7 @@ class PhysicalShapeLayer extends ContainerLayer
       // (https://github.com/flutter/flutter/issues/18057#issue-328003931)
       // using saveLayer, we have to call drawPaint instead of drawPath as
       // anti-aliased drawPath will always have such artifacts.
-      paintContext.leafNodesCanvas.drawPaint(paint);
+      paintContext.leafNodesCanvas!.drawPaint(paint as SkPaint);
     }
 
     paintChildren(paintContext);
@@ -539,7 +539,7 @@ class PlatformViewLayer extends Layer {
   @override
   void preroll(PrerollContext context, Matrix4 matrix) {
     paintBounds = ui.Rect.fromLTWH(offset.dx, offset.dy, width, height);
-    context.viewEmbedder.prerollCompositeEmbeddedView(
+    context.viewEmbedder!.prerollCompositeEmbeddedView(
       viewId,
       EmbeddedViewParams(
         offset,
@@ -551,7 +551,7 @@ class PlatformViewLayer extends Layer {
 
   @override
   void paint(PaintContext context) {
-    SkCanvas canvas = context.viewEmbedder.compositeEmbeddedView(viewId);
+    SkCanvas? canvas = context.viewEmbedder!.compositeEmbeddedView(viewId);
     context.leafNodesCanvas = canvas;
   }
 }

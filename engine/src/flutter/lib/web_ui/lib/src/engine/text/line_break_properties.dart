@@ -12,7 +12,7 @@
 // # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 // # For terms of use, see http://www.unicode.org/terms_of_use.html
 
-// @dart = 2.6
+
 part of engine;
 
 /// For an explanation of these enum values, see:

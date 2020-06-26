@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 /// [MessageCodec] with unencoded binary messages represented using [ByteData].
@@ -31,17 +31,11 @@ class StringCodec implements MessageCodec<String> {
 
   @override
   String decodeMessage(ByteData message) {
-    if (message == null) {
-      return null;
-    }
     return utf8.decoder.convert(message.buffer.asUint8List());
   }
 
   @override
   ByteData encodeMessage(String message) {
-    if (message == null) {
-      return null;
-    }
     final Uint8List encoded = utf8.encoder.convert(message);
     return encoded.buffer.asByteData();
   }
@@ -74,7 +68,7 @@ class JSONMessageCodec implements MessageCodec<dynamic> {
   const JSONMessageCodec();
 
   @override
-  ByteData encodeMessage(dynamic message) {
+  ByteData? encodeMessage(dynamic message) {
     if (message == null) {
       return null;
     }
@@ -82,7 +76,7 @@ class JSONMessageCodec implements MessageCodec<dynamic> {
   }
 
   @override
-  dynamic decodeMessage(ByteData message) {
+  dynamic decodeMessage(ByteData? message) {
     if (message == null) {
       return message;
     }
@@ -113,7 +107,7 @@ class JSONMethodCodec implements MethodCodec {
   const JSONMethodCodec();
 
   @override
-  ByteData encodeMethodCall(MethodCall call) {
+  ByteData? encodeMethodCall(MethodCall call) {
     return const JSONMessageCodec().encodeMessage(<String, dynamic>{
       'method': call.method,
       'args': call.arguments,
@@ -121,7 +115,7 @@ class JSONMethodCodec implements MethodCodec {
   }
 
   @override
-  MethodCall decodeMethodCall(ByteData methodCall) {
+  MethodCall decodeMethodCall(ByteData? methodCall) {
     final dynamic decoded = const JSONMessageCodec().decodeMessage(methodCall);
     if (decoded is! Map) {
       throw FormatException('Expected method call Map, got $decoded');
@@ -156,14 +150,14 @@ class JSONMethodCodec implements MethodCodec {
   }
 
   @override
-  ByteData encodeSuccessEnvelope(dynamic result) {
+  ByteData? encodeSuccessEnvelope(dynamic result) {
     return const JSONMessageCodec().encodeMessage(<dynamic>[result]);
   }
 
   @override
-  ByteData encodeErrorEnvelope(
-      {@required String code, String message, dynamic details}) {
-    assert(code != null);
+  ByteData? encodeErrorEnvelope(
+      {required String code, String? message, dynamic details}) {
+    assert(code != null); // ignore: unnecessary_null_comparison
     return const JSONMessageCodec()
         .encodeMessage(<dynamic>[code, message, details]);
   }
@@ -271,7 +265,7 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
   const StandardMessageCodec();
 
   @override
-  ByteData encodeMessage(dynamic message) {
+  ByteData? encodeMessage(dynamic message) {
     if (message == null) {
       return null;
     }
@@ -281,7 +275,7 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
   }
 
   @override
-  dynamic decodeMessage(ByteData message) {
+  dynamic decodeMessage(ByteData? message) {
     if (message == null) {
       return null;
     }
@@ -326,7 +320,7 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
       buffer.putUint8(_valueString);
       final List<int> bytes = utf8.encoder.convert(value);
       writeSize(buffer, bytes.length);
-      buffer.putUint8List(bytes);
+      buffer.putUint8List(bytes as Uint8List);
     } else if (value is Uint8List) {
       buffer.putUint8(_valueUint8List);
       writeSize(buffer, value.length);
@@ -428,9 +422,9 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
         break;
       case _valueList:
         final int length = readSize(buffer);
-        result = List<dynamic>(length);
+        result = <dynamic>[];
         for (int i = 0; i < length; i++) {
-          result[i] = readValue(buffer);
+          result.add(readValue(buffer));
         }
         break;
       case _valueMap:
@@ -517,8 +511,8 @@ class StandardMethodCodec implements MethodCodec {
   }
 
   @override
-  MethodCall decodeMethodCall(ByteData methodCall) {
-    final ReadBuffer buffer = ReadBuffer(methodCall);
+  MethodCall decodeMethodCall(ByteData? methodCall) {
+    final ReadBuffer buffer = ReadBuffer(methodCall!);
     final dynamic method = messageCodec.readValue(buffer);
     final dynamic arguments = messageCodec.readValue(buffer);
     if (method is String && !buffer.hasRemaining)
@@ -537,7 +531,7 @@ class StandardMethodCodec implements MethodCodec {
 
   @override
   ByteData encodeErrorEnvelope(
-      {@required String code, String message, dynamic details}) {
+      {required String code, String? message, dynamic details}) {
     final WriteBuffer buffer = WriteBuffer();
     buffer.putUint8(1);
     messageCodec.writeValue(buffer, code);

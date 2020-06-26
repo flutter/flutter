@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 /// Converts [path] to SVG path syntax to be used as "d" attribute in path
@@ -13,20 +13,20 @@ void pathToSvg(SurfacePath path, StringBuffer sb,
     for (PathCommand command in subPath.commands) {
       switch (command.type) {
         case PathCommandTypes.moveTo:
-          final MoveTo moveTo = command;
+          final MoveTo moveTo = command as MoveTo;
           sb.write('M ${moveTo.x + offsetX} ${moveTo.y + offsetY}');
           break;
         case PathCommandTypes.lineTo:
-          final LineTo lineTo = command;
+          final LineTo lineTo = command as LineTo;
           sb.write('L ${lineTo.x + offsetX} ${lineTo.y + offsetY}');
           break;
         case PathCommandTypes.bezierCurveTo:
-          final BezierCurveTo curve = command;
+          final BezierCurveTo curve = command as BezierCurveTo;
           sb.write('C ${curve.x1 + offsetX} ${curve.y1 + offsetY} '
               '${curve.x2 + offsetX} ${curve.y2 + offsetY} ${curve.x3 + offsetX} ${curve.y3 + offsetY}');
           break;
         case PathCommandTypes.quadraticCurveTo:
-          final QuadraticCurveTo quadraticCurveTo = command;
+          final QuadraticCurveTo quadraticCurveTo = command as QuadraticCurveTo;
           sb.write(
               'Q ${quadraticCurveTo.x1 + offsetX} ${quadraticCurveTo.y1 + offsetY} '
               '${quadraticCurveTo.x2 + offsetX} ${quadraticCurveTo.y2 + offsetY}');
@@ -35,7 +35,7 @@ void pathToSvg(SurfacePath path, StringBuffer sb,
           sb.write('Z');
           break;
         case PathCommandTypes.ellipse:
-          final Ellipse ellipse = command;
+          final Ellipse ellipse = command as Ellipse;
           // Handle edge case where start and end points are the same by drawing
           // 2 half arcs.
           if ((ellipse.endAngle - ellipse.startAngle) % (2 * math.pi) == 0.0) {
@@ -74,7 +74,7 @@ void pathToSvg(SurfacePath path, StringBuffer sb,
           }
           break;
         case PathCommandTypes.rRect:
-          final RRectCommand rrectCommand = command;
+          final RRectCommand rrectCommand = command as RRectCommand;
           final ui.RRect rrect = rrectCommand.rrect;
           double left = rrect.left + offsetX;
           double right = rrect.right + offsetX;
@@ -125,7 +125,7 @@ void pathToSvg(SurfacePath path, StringBuffer sb,
           );
           break;
         case PathCommandTypes.rect:
-          final RectCommand rectCommand = command;
+          final RectCommand rectCommand = command as RectCommand;
           final bool horizontalSwap = rectCommand.width < 0;
           final double left = offsetX +
               (horizontalSwap

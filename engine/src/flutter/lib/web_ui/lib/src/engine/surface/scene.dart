@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 class SurfaceScene implements ui.Scene {
@@ -12,7 +12,7 @@ class SurfaceScene implements ui.Scene {
   /// To create a Scene object, use a [SceneBuilder].
   SurfaceScene(this.webOnlyRootElement);
 
-  final html.Element webOnlyRootElement;
+  final html.Element? webOnlyRootElement;
 
   /// Creates a raster image representation of the current state of the scene.
   /// This is a slow operation that is performed on a background thread.
@@ -28,7 +28,7 @@ class SurfaceScene implements ui.Scene {
 
 /// A surface that creates a DOM element for whole app.
 class PersistedScene extends PersistedContainerSurface {
-  PersistedScene(PersistedScene oldLayer) : super(oldLayer) {
+  PersistedScene(PersistedScene? oldLayer) : super(oldLayer) {
     _transform = Matrix4.identity();
   }
 
@@ -46,7 +46,7 @@ class PersistedScene extends PersistedContainerSurface {
   }
 
   @override
-  Matrix4 get localTransformInverse => _localTransformInverse;
+  Matrix4? get localTransformInverse => _localTransformInverse;
 
   @override
   html.Element createElement() {

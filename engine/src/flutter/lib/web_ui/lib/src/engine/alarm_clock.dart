@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 part of engine;
 
 /// A function that returns current system time.
@@ -24,13 +23,13 @@ class AlarmClock {
   final TimestampFunction _timestampFunction;
 
   /// The underlying timer used to schedule the callback.
-  Timer _timer;
+  Timer? _timer;
 
   /// Current target time the [callback] is scheduled for.
-  DateTime _datetime;
+  DateTime? _datetime;
 
   /// The callback called when the alarm goes off.
-  ui.VoidCallback callback;
+  late ui.VoidCallback callback;
 
   /// The time when the alarm clock will go off.
   ///
@@ -39,8 +38,8 @@ class AlarmClock {
   /// If the value is updated before an already scheduled timer goes off, the
   /// previous time will not call the [callback]. Think of the updating this
   /// value as "changing your mind" about when you want the next timer to fire.
-  DateTime get datetime => _datetime;
-  set datetime(DateTime value) {
+  DateTime? get datetime => _datetime;
+  set datetime(DateTime? value) {
     if (value == _datetime) {
       return;
     }
@@ -72,7 +71,7 @@ class AlarmClock {
     } else {
       assert(_datetime != null,
           'We can only have a timer if there is a non-null datetime');
-      if (_datetime.isAfter(value)) {
+      if (_datetime!.isAfter(value)) {
         // This is the case when the value moves the target time to an earlier
         // point. Because there is no way to reconfigure an existing timer, we
         // must cancel the old timer and schedule a new one.
@@ -89,7 +88,7 @@ class AlarmClock {
 
   void _cancelTimer() {
     if (_timer != null) {
-      _timer.cancel();
+      _timer!.cancel();
       _timer = null;
     }
   }
@@ -100,12 +99,12 @@ class AlarmClock {
     final DateTime now = _timestampFunction();
     // We use the "not before" logic instead of "is after" because we may have
     // zero difference between now and _datetime.
-    if (!now.isBefore(_datetime)) {
+    if (!now.isBefore(_datetime!)) {
       _timer = null;
       callback();
     } else {
       // The timer fired before the target date. We need to reschedule.
-      _timer = Timer(_datetime.difference(now), _timerDidFire);
+      _timer = Timer(_datetime!.difference(now), _timerDidFire);
     }
   }
 }

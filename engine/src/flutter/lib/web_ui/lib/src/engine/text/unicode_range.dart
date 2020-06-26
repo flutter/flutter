@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 const int _kChar_0 = 48;
@@ -88,8 +88,8 @@ class UnicodePropertyLookup<P> {
   /// located at that [index].
   ///
   /// If the [index] is out of range, null will be returned.
-  P find(String text, int index) {
-    if (index < 0 || index >= text.length) {
+  P? find(String? text, int index) {
+    if (index < 0 || index >= text!.length) {
       return null;
     }
     return findForChar(text.codeUnitAt(index));
@@ -99,7 +99,7 @@ class UnicodePropertyLookup<P> {
   ///
   /// If a property can't be found for the given character, null will be
   /// returned.
-  P findForChar(int char) {
+  P? findForChar(int char) {
     final int rangeIndex = _binarySearch(char);
     return rangeIndex == -1 ? null : ranges[rangeIndex].property;
   }

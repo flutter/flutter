@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 /// The CanvasKit implementation of [ui.ImageFilter].
 ///
 /// Currently only supports `blur`.
 class SkImageFilter implements ui.ImageFilter {
-  js.JsObject skImageFilter;
+  js.JsObject? skImageFilter;
 
   SkImageFilter.blur({double sigmaX = 0.0, double sigmaY = 0.0})
       : _sigmaX = sigmaX,

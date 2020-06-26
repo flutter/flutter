@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 /// After a keydown is received, this is the duration we wait for a repeat event
@@ -22,8 +22,8 @@ class Keyboard {
   }
 
   /// The [Keyboard] singleton.
-  static Keyboard get instance => _instance;
-  static Keyboard _instance;
+  static Keyboard? get instance => _instance;
+  static Keyboard? _instance;
 
   /// A mapping of [KeyboardEvent.code] to [Timer].
   ///
@@ -31,8 +31,8 @@ class Keyboard {
   /// if no repeat events were received.
   final Map<String, Timer> _keydownTimers = <String, Timer>{};
 
-  html.EventListener _keydownListener;
-  html.EventListener _keyupListener;
+  html.EventListener? _keydownListener;
+  html.EventListener? _keyupListener;
 
   Keyboard._() {
     _keydownListener = (html.Event event) {
@@ -58,7 +58,7 @@ class Keyboard {
     html.window.removeEventListener('keyup', _keyupListener);
 
     for (final String key in _keydownTimers.keys) {
-      _keydownTimers[key].cancel();
+      _keydownTimers[key]!.cancel();
     }
     _keydownTimers.clear();
 
@@ -79,7 +79,7 @@ class Keyboard {
       return;
     }
 
-    final html.KeyboardEvent keyboardEvent = event as html.KeyboardEvent;
+    final html.KeyboardEvent keyboardEvent = event;
 
     if (window._onPlatformMessage == null) {
       return;
@@ -185,4 +185,4 @@ bool _isModifierKey(html.KeyboardEvent event) {
   return key == 'Meta' || key == 'Shift' || key == 'Alt' || key == 'Control';
 }
 
-void _noopCallback(ByteData data) {}
+void _noopCallback(ByteData? data) {}

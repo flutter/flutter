@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 /// A description of a color filter to apply when drawing a shape or compositing
@@ -109,9 +109,9 @@ class EngineColorFilter implements ui.ColorFilter {
         _matrix = null,
         _type = _TypeSrgbToLinearGamma;
 
-  final ui.Color _color;
-  final ui.BlendMode _blendMode;
-  final List<double> _matrix;
+  final ui.Color? _color;
+  final ui.BlendMode? _blendMode;
+  final List<double>? _matrix;
   final int _type;
 
   // The type of SkColorFilter class to create for Skia.
@@ -137,7 +137,7 @@ class EngineColorFilter implements ui.ColorFilter {
     return _color == typedOther._color && _blendMode == typedOther._blendMode;
   }
 
-  SkColorFilter _toSkColorFilter() {
+  SkColorFilter? _toSkColorFilter() {
     switch (_type) {
       case _TypeMode:
         if (_color == null || _blendMode == null) {
@@ -148,7 +148,7 @@ class EngineColorFilter implements ui.ColorFilter {
         if (_matrix == null) {
           return null;
         }
-        assert(_matrix.length == 20, 'Color Matrix must have 20 entries.');
+        assert(_matrix!.length == 20, 'Color Matrix must have 20 entries.');
         return SkColorFilter.matrix(this);
       case _TypeLinearToSrgbGamma:
         return SkColorFilter.linearToSrgbGamma(this);

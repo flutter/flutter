@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 /// Renders [_label] and [_value] to the semantics DOM.
@@ -43,7 +43,7 @@ class LabelAndValue extends RoleManager {
   ///   its label is not reachable via accessibility focus. This happens, for
   ///   example in popup dialogs, such as the alert dialog. The text of the
   ///   alert is supplied as a label on the parent node.
-  html.Element _auxiliaryValueElement;
+  html.Element? _auxiliaryValueElement;
 
   @override
   void update() {
@@ -89,22 +89,22 @@ class LabelAndValue extends RoleManager {
       // nodes, then VoiceOver behaves as expected with absolute positioning and
       // sizing.
       if (semanticsObject.hasChildren) {
-        _auxiliaryValueElement.style
+        _auxiliaryValueElement!.style
           ..position = 'absolute'
           ..top = '0'
           ..left = '0'
-          ..width = '${semanticsObject.rect.width}px'
-          ..height = '${semanticsObject.rect.height}px';
+          ..width = '${semanticsObject.rect!.width}px'
+          ..height = '${semanticsObject.rect!.height}px';
       }
-      _auxiliaryValueElement.style.fontSize = '6px';
-      semanticsObject.element.append(_auxiliaryValueElement);
+      _auxiliaryValueElement!.style.fontSize = '6px';
+      semanticsObject.element.append(_auxiliaryValueElement!);
     }
-    _auxiliaryValueElement.text = combinedValue.toString();
+    _auxiliaryValueElement!.text = combinedValue.toString();
   }
 
   void _cleanUpDom() {
     if (_auxiliaryValueElement != null) {
-      _auxiliaryValueElement.remove();
+      _auxiliaryValueElement!.remove();
       _auxiliaryValueElement = null;
     }
     semanticsObject.element.attributes.remove('aria-label');

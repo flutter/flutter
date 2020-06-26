@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 // This URL was found by using the Google Fonts Developer API to find the URL
@@ -16,11 +16,11 @@ const String _robotoUrl =
 /// Manages the fonts used in the Skia-based backend.
 class SkiaFontCollection {
   /// Fonts that have been registered but haven't been loaded yet.
-  final List<Future<_RegisteredFont>> _unloadedFonts =
+  final List<Future<_RegisteredFont?>> _unloadedFonts =
       <Future<_RegisteredFont>>[];
 
   /// Fonts which have been registered and loaded.
-  final List<_RegisteredFont> _registeredFonts = <_RegisteredFont>[];
+  final List<_RegisteredFont?> _registeredFonts = <_RegisteredFont?>[];
 
   /// A mapping from the name a font was registered with, to the family name
   /// embedded in the font's bytes (the font's "actual" name).
@@ -32,14 +32,14 @@ class SkiaFontCollection {
   /// must convert them to their actual family name when we pass them to Skia.
   final Map<String, String> fontFamilyOverrides = <String, String>{};
 
-  final Set<String> registeredFamilies = <String>{};
+  final Set<String?> registeredFamilies = <String?>{};
 
   Future<void> ensureFontsLoaded() async {
     await _loadFonts();
     _computeFontFamilyOverrides();
 
     final List<Uint8List> fontBuffers =
-        _registeredFonts.map<Uint8List>((f) => f.bytes).toList();
+        _registeredFonts.map<Uint8List>((f) => f!.bytes).toList();
 
     skFontMgr = canvasKit['SkFontMgr'].callMethod('FromData', fontBuffers);
   }
@@ -51,7 +51,7 @@ class SkiaFontCollection {
       return;
     }
 
-    final List<_RegisteredFont> loadedFonts = await Future.wait(_unloadedFonts);
+    final List<_RegisteredFont?> loadedFonts = await Future.wait(_unloadedFonts);
     _registeredFonts.addAll(loadedFonts.where((x) => x != null));
     _unloadedFonts.clear();
   }
@@ -59,8 +59,8 @@ class SkiaFontCollection {
   void _computeFontFamilyOverrides() {
     fontFamilyOverrides.clear();
 
-    for (_RegisteredFont font in _registeredFonts) {
-      if (fontFamilyOverrides.containsKey(font.flutterFamily)) {
+    for (_RegisteredFont? font in _registeredFonts) {
+      if (fontFamilyOverrides.containsKey(font!.flutterFamily)) {
         if (fontFamilyOverrides[font.flutterFamily] != font.actualFamily) {
           html.window.console.warn('Fonts in family ${font.flutterFamily} '
               'have different actual family names.');
@@ -74,8 +74,8 @@ class SkiaFontCollection {
     }
   }
 
-  Future<void> loadFontFromList(Uint8List list, {String fontFamily}) async {
-    String actualFamily = _readActualFamilyName(list);
+  Future<void> loadFontFromList(Uint8List list, {String? fontFamily}) async {
+    String? actualFamily = _readActualFamilyName(list);
 
     if (actualFamily == null) {
       if (fontFamily == null) {
@@ -111,20 +111,15 @@ class SkiaFontCollection {
       }
     }
 
-    if (byteData == null) {
-      throw AssertionError(
-          'There was a problem trying to load FontManifest.json');
-    }
-
-    final List<dynamic> fontManifest =
+    final List<dynamic>? fontManifest =
         json.decode(utf8.decode(byteData.buffer.asUint8List()));
     if (fontManifest == null) {
       throw AssertionError(
           'There was a problem trying to load FontManifest.json');
     }
 
-    for (Map<String, dynamic> fontFamily in fontManifest) {
-      final String family = fontFamily['family'];
+    for (Map<String, dynamic> fontFamily in fontManifest.cast<Map<String, dynamic>>()) {
+      final String? family = fontFamily['family'];
       final List<dynamic> fontAssets = fontFamily['fonts'];
 
       registeredFamilies.add(family);
@@ -146,10 +141,10 @@ class SkiaFontCollection {
     }
   }
 
-  Future<_RegisteredFont> _registerFont(String url, String family) async {
+  Future<_RegisteredFont?> _registerFont(String url, String? family) async {
     ByteBuffer buffer;
     try {
-      buffer = await html.window.fetch(url).then(_getArrayBuffer);
+      buffer = await html.window.fetch(url).then(_getArrayBuffer as FutureOr<ByteBuffer> Function(dynamic));
     } catch (e) {
       html.window.console.warn('Failed to load font $family at $url');
       html.window.console.warn(e);
@@ -157,7 +152,7 @@ class SkiaFontCollection {
     }
 
     final Uint8List bytes = buffer.asUint8List();
-    String actualFamily = _readActualFamilyName(bytes);
+    String? actualFamily = _readActualFamilyName(bytes);
 
     if (actualFamily == null) {
       html.window.console.warn('Failed to determine the actual name of the '
@@ -165,25 +160,25 @@ class SkiaFontCollection {
       actualFamily = family;
     }
 
-    return _RegisteredFont(bytes, family, actualFamily);
+    return _RegisteredFont(bytes, family!, actualFamily!);
   }
 
-  String _readActualFamilyName(Uint8List bytes) {
+  String? _readActualFamilyName(Uint8List bytes) {
     final js.JsObject tmpFontMgr =
         canvasKit['SkFontMgr'].callMethod('FromData', <Uint8List>[bytes]);
-    String actualFamily = tmpFontMgr.callMethod('getFamilyName', <int>[0]);
+    String? actualFamily = tmpFontMgr.callMethod('getFamilyName', <int>[0]);
     tmpFontMgr.callMethod('delete');
     return actualFamily;
   }
 
-  Future<ByteBuffer> _getArrayBuffer(dynamic fetchResult) {
+  Future<ByteBuffer>? _getArrayBuffer(dynamic fetchResult) {
     // TODO(yjbanov): fetchResult.arrayBuffer is a dynamic invocation. Clean it up.
     return fetchResult
         .arrayBuffer()
         .then<ByteBuffer>((dynamic x) => x as ByteBuffer);
   }
 
-  js.JsObject skFontMgr;
+  js.JsObject? skFontMgr;
 }
 
 /// Represents a font that has been registered.
@@ -198,7 +193,7 @@ class _RegisteredFont {
   final String actualFamily;
 
   _RegisteredFont(this.bytes, this.flutterFamily, this.actualFamily)
-      : assert(bytes != null),
-        assert(flutterFamily != null),
-        assert(actualFamily != null);
+      : assert(bytes != null), // ignore: unnecessary_null_comparison
+        assert(flutterFamily != null), // ignore: unnecessary_null_comparison
+        assert(actualFamily != null); // ignore: unnecessary_null_comparison
 }

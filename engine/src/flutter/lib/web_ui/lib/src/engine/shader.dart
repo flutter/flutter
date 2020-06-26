@@ -2,25 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 bool _offsetIsValid(ui.Offset offset) {
-  assert(offset != null, 'Offset argument was null.');
+  assert(offset != null, 'Offset argument was null.'); // ignore: unnecessary_null_comparison
   assert(!offset.dx.isNaN && !offset.dy.isNaN,
       'Offset argument contained a NaN value.');
   return true;
 }
 
 bool _matrix4IsValid(Float32List matrix4) {
-  assert(matrix4 != null, 'Matrix4 argument was null.');
+  assert(matrix4 != null, 'Matrix4 argument was null.'); // ignore: unnecessary_null_comparison
   assert(matrix4.length == 16, 'Matrix4 must have 16 entries.');
   return true;
 }
 
 abstract class EngineShader {
   /// Create a shader for use in the Skia backend.
-  js.JsObject createSkiaShader();
+  js.JsObject? createSkiaShader();
 }
 
 abstract class EngineGradient implements ui.Gradient, EngineShader {
@@ -28,7 +28,7 @@ abstract class EngineGradient implements ui.Gradient, EngineShader {
   EngineGradient._();
 
   /// Creates a fill style to be used in painting.
-  Object createPaintStyle(html.CanvasRenderingContext2D ctx);
+  Object createPaintStyle(html.CanvasRenderingContext2D? ctx);
 
   List<dynamic> webOnlySerializeToCssPaint() {
     throw UnsupportedError('CSS paint not implemented for this shader type');
@@ -39,10 +39,10 @@ class GradientSweep extends EngineGradient {
   GradientSweep(this.center, this.colors, this.colorStops, this.tileMode,
       this.startAngle, this.endAngle, this.matrix4)
       : assert(_offsetIsValid(center)),
-        assert(colors != null),
-        assert(tileMode != null),
-        assert(startAngle != null),
-        assert(endAngle != null),
+        assert(colors != null), // ignore: unnecessary_null_comparison
+        assert(tileMode != null), // ignore: unnecessary_null_comparison
+        assert(startAngle != null), // ignore: unnecessary_null_comparison
+        assert(endAngle != null), // ignore: unnecessary_null_comparison
         assert(startAngle < endAngle),
         assert(matrix4 == null || _matrix4IsValid(matrix4)),
         super._() {
@@ -50,17 +50,17 @@ class GradientSweep extends EngineGradient {
   }
 
   @override
-  Object createPaintStyle(html.CanvasRenderingContext2D ctx) {
+  Object createPaintStyle(html.CanvasRenderingContext2D? ctx) {
     throw UnimplementedError();
   }
 
   final ui.Offset center;
   final List<ui.Color> colors;
-  final List<double> colorStops;
+  final List<double>? colorStops;
   final ui.TileMode tileMode;
   final double startAngle;
   final double endAngle;
-  final Float32List matrix4;
+  final Float32List? matrix4;
 
   @override
   js.JsObject createSkiaShader() {
@@ -68,7 +68,7 @@ class GradientSweep extends EngineGradient {
   }
 }
 
-void _validateColorStops(List<ui.Color> colors, List<double> colorStops) {
+void _validateColorStops(List<ui.Color> colors, List<double>? colorStops) {
   if (colorStops == null) {
     if (colors.length != 2)
       throw ArgumentError(
@@ -87,11 +87,11 @@ class GradientLinear extends EngineGradient {
     this.colors,
     this.colorStops,
     this.tileMode,
-    Float64List matrix,
+    Float64List? matrix,
   )   : assert(_offsetIsValid(from)),
         assert(_offsetIsValid(to)),
-        assert(colors != null),
-        assert(tileMode != null),
+        assert(colors != null), // ignore: unnecessary_null_comparison
+        assert(tileMode != null), // ignore: unnecessary_null_comparison
         this.matrix4 = matrix == null ? null : _FastMatrix64(matrix),
         super._() {
     if (assertionsEnabled) {
@@ -102,35 +102,36 @@ class GradientLinear extends EngineGradient {
   final ui.Offset from;
   final ui.Offset to;
   final List<ui.Color> colors;
-  final List<double> colorStops;
+  final List<double>? colorStops;
   final ui.TileMode tileMode;
-  final _FastMatrix64 matrix4;
+  final _FastMatrix64? matrix4;
 
   @override
-  html.CanvasGradient createPaintStyle(html.CanvasRenderingContext2D ctx) {
-    final bool hasMatrix = matrix4 != null;
+  html.CanvasGradient createPaintStyle(html.CanvasRenderingContext2D? ctx) {
+    _FastMatrix64? matrix4 = this.matrix4;
     html.CanvasGradient gradient;
-    if (hasMatrix) {
+    if (matrix4 != null) {
       final centerX = (from.dx + to.dx) / 2.0;
       final centerY = (from.dy + to.dy) / 2.0;
       matrix4.transform(from.dx - centerX, from.dy - centerY);
       final double fromX = matrix4.transformedX + centerX;
       final double fromY = matrix4.transformedY + centerY;
       matrix4.transform(to.dx - centerX, to.dy - centerY);
-      gradient = ctx.createLinearGradient(fromX, fromY,
+      gradient = ctx!.createLinearGradient(fromX, fromY,
           matrix4.transformedX + centerX, matrix4.transformedY + centerY);
     } else {
-      gradient = ctx.createLinearGradient(from.dx, from.dy, to.dx, to.dy);
+      gradient = ctx!.createLinearGradient(from.dx, from.dy, to.dx, to.dy);
     }
 
+    final List<double>? colorStops = this.colorStops;
     if (colorStops == null) {
       assert(colors.length == 2);
-      gradient.addColorStop(0, colorToCssString(colors[0]));
-      gradient.addColorStop(1, colorToCssString(colors[1]));
+      gradient.addColorStop(0, colorToCssString(colors[0])!);
+      gradient.addColorStop(1, colorToCssString(colors[1])!);
       return gradient;
     }
     for (int i = 0; i < colors.length; i++) {
-      gradient.addColorStop(colorStops[i], colorToCssString(colors[i]));
+      gradient.addColorStop(colorStops[i], colorToCssString(colors[i])!);
     }
     return gradient;
   }
@@ -154,7 +155,7 @@ class GradientLinear extends EngineGradient {
   }
 
   @override
-  js.JsObject createSkiaShader() {
+  js.JsObject? createSkiaShader() {
     assert(experimentalUseSkia);
 
     var jsColors = makeColorList(colors);
@@ -181,35 +182,36 @@ class GradientRadial extends EngineGradient {
   final ui.Offset center;
   final double radius;
   final List<ui.Color> colors;
-  final List<double> colorStops;
+  final List<double>? colorStops;
   final ui.TileMode tileMode;
-  final Float32List matrix4;
+  final Float32List? matrix4;
 
   @override
-  Object createPaintStyle(html.CanvasRenderingContext2D ctx) {
+  Object createPaintStyle(html.CanvasRenderingContext2D? ctx) {
     if (!experimentalUseSkia) {
       if (tileMode != ui.TileMode.clamp) {
         throw UnimplementedError(
             'TileMode not supported in GradientRadial shader');
       }
     }
-    final html.CanvasGradient gradient = ctx.createRadialGradient(
+    final html.CanvasGradient gradient = ctx!.createRadialGradient(
         center.dx, center.dy, 0, center.dx, center.dy, radius);
+    final List<double>? colorStops = this.colorStops;
     if (colorStops == null) {
       assert(colors.length == 2);
-      gradient.addColorStop(0, colorToCssString(colors[0]));
-      gradient.addColorStop(1, colorToCssString(colors[1]));
+      gradient.addColorStop(0, colorToCssString(colors[0])!);
+      gradient.addColorStop(1, colorToCssString(colors[1])!);
       return gradient;
     } else {
       for (int i = 0; i < colors.length; i++) {
-        gradient.addColorStop(colorStops[i], colorToCssString(colors[i]));
+        gradient.addColorStop(colorStops[i], colorToCssString(colors[i])!);
       }
     }
     return gradient;
   }
 
   @override
-  js.JsObject createSkiaShader() {
+  js.JsObject? createSkiaShader() {
     assert(experimentalUseSkia);
 
     var jsColors = makeColorList(colors);
@@ -236,17 +238,17 @@ class GradientConical extends EngineGradient {
   final ui.Offset center;
   final double radius;
   final List<ui.Color> colors;
-  final List<double> colorStops;
+  final List<double>? colorStops;
   final ui.TileMode tileMode;
-  final Float32List matrix4;
+  final Float32List? matrix4;
 
   @override
-  Object createPaintStyle(html.CanvasRenderingContext2D ctx) {
+  Object createPaintStyle(html.CanvasRenderingContext2D? ctx) {
     throw UnimplementedError();
   }
 
   @override
-  js.JsObject createSkiaShader() {
+  js.JsObject? createSkiaShader() {
     assert(experimentalUseSkia);
 
     var jsColors = makeColorList(colors);
@@ -293,7 +295,7 @@ class EngineImageFilter implements ui.ImageFilter {
   }
 }
 
-js.JsObject _skTileMode(ui.TileMode tileMode) {
+js.JsObject? _skTileMode(ui.TileMode tileMode) {
   switch (tileMode) {
     case ui.TileMode.clamp:
       return canvasKit['TileMode']['Clamp'];
@@ -316,6 +318,6 @@ class EngineImageShader implements ui.ImageShader, EngineShader {
   final Float64List matrix4;
   final SkImage _skImage;
 
-  js.JsObject createSkiaShader() => _skImage.skImage.callMethod(
+  js.JsObject? createSkiaShader() => _skImage.skImage!.callMethod(
       'makeShader', <dynamic>[_skTileMode(tileModeX), _skTileMode(tileModeY)]);
 }

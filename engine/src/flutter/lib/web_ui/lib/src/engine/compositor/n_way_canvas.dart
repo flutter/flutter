@@ -2,86 +2,86 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 /// A virtual canvas that applies operations to multiple canvases at once.
 class SkNWayCanvas {
-  final List<SkCanvas> _canvases = <SkCanvas>[];
+  final List<SkCanvas?> _canvases = <SkCanvas?>[];
 
-  void addCanvas(SkCanvas canvas) {
+  void addCanvas(SkCanvas? canvas) {
     _canvases.add(canvas);
   }
 
   /// Calls [save] on all canvases.
-  int save() {
-    int saveCount;
+  int? save() {
+    int? saveCount;
     for (int i = 0; i < _canvases.length; i++) {
-      saveCount = _canvases[i].save();
+      saveCount = _canvases[i]!.save();
     }
     return saveCount;
   }
 
   /// Calls [saveLayer] on all canvases.
-  void saveLayer(ui.Rect bounds, ui.Paint paint) {
+  void saveLayer(ui.Rect bounds, ui.Paint? paint) {
     for (int i = 0; i < _canvases.length; i++) {
-      _canvases[i].saveLayer(bounds, paint);
+      _canvases[i]!.saveLayer(bounds, paint as SkPaint);
     }
   }
 
   /// Calls [saveLayerWithFilter] on all canvases.
   void saveLayerWithFilter(ui.Rect bounds, ui.ImageFilter filter) {
     for (int i = 0; i < _canvases.length; i++) {
-      _canvases[i].saveLayerWithFilter(bounds, filter);
+      _canvases[i]!.saveLayerWithFilter(bounds, filter);
     }
   }
 
   /// Calls [restore] on all canvases.
   void restore() {
     for (int i = 0; i < _canvases.length; i++) {
-      _canvases[i].restore();
+      _canvases[i]!.restore();
     }
   }
 
   /// Calls [restoreToCount] on all canvases.
-  void restoreToCount(int count) {
+  void restoreToCount(int? count) {
     for (int i = 0; i < _canvases.length; i++) {
-      _canvases[i].restoreToCount(count);
+      _canvases[i]!.restoreToCount(count);
     }
   }
 
   /// Calls [translate] on all canvases.
   void translate(double dx, double dy) {
     for (int i = 0; i < _canvases.length; i++) {
-      _canvases[i].translate(dx, dy);
+      _canvases[i]!.translate(dx, dy);
     }
   }
 
   /// Calls [transform] on all canvases.
-  void transform(Float32List matrix) {
+  void transform(Float32List? matrix) {
     for (int i = 0; i < _canvases.length; i++) {
-      _canvases[i].transform(matrix);
+      _canvases[i]!.transform(matrix);
     }
   }
 
   /// Calls [clipPath] on all canvases.
-  void clipPath(ui.Path path, bool doAntiAlias) {
+  void clipPath(ui.Path? path, bool doAntiAlias) {
     for (int i = 0; i < _canvases.length; i++) {
-      _canvases[i].clipPath(path, doAntiAlias);
+      _canvases[i]!.clipPath(path!, doAntiAlias);
     }
   }
 
   /// Calls [clipRect] on all canvases.
   void clipRect(ui.Rect rect, ui.ClipOp clipOp, bool doAntiAlias) {
     for (int i = 0; i < _canvases.length; i++) {
-      _canvases[i].clipRect(rect, clipOp, doAntiAlias);
+      _canvases[i]!.clipRect(rect, clipOp, doAntiAlias);
     }
   }
 
   /// Calls [clipRRect] on all canvases.
   void clipRRect(ui.RRect rrect, bool doAntiAlias) {
     for (int i = 0; i < _canvases.length; i++) {
-      _canvases[i].clipRRect(rrect, doAntiAlias);
+      _canvases[i]!.clipRRect(rrect, doAntiAlias);
     }
   }
 }

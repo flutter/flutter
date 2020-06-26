@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 /// Implementation of [ui.Paint] used by the HTML rendering backend.
@@ -46,7 +46,7 @@ class SurfacePaint implements ui.Paint {
   }
 
   @override
-  ui.StrokeCap get strokeCap => _paintData.strokeCap;
+  ui.StrokeCap get strokeCap => _paintData.strokeCap ?? ui.StrokeCap.butt;
 
   @override
   set strokeCap(ui.StrokeCap value) {
@@ -58,7 +58,7 @@ class SurfacePaint implements ui.Paint {
   }
 
   @override
-  ui.StrokeJoin get strokeJoin => _paintData.strokeJoin;
+  ui.StrokeJoin get strokeJoin => _paintData.strokeJoin ?? ui.StrokeJoin.miter;
 
   @override
   set strokeJoin(ui.StrokeJoin value) {
@@ -82,7 +82,7 @@ class SurfacePaint implements ui.Paint {
   }
 
   @override
-  ui.Color get color => _paintData.color;
+  ui.Color get color => _paintData.color ?? _defaultPaintColor;
 
   @override
   set color(ui.Color value) {
@@ -105,10 +105,10 @@ class SurfacePaint implements ui.Paint {
   static const ui.Color _defaultPaintColor = ui.Color(0xFF000000);
 
   @override
-  ui.Shader get shader => _paintData.shader;
+  ui.Shader? get shader => _paintData.shader;
 
   @override
-  set shader(ui.Shader value) {
+  set shader(ui.Shader? value) {
     if (_frozen) {
       _paintData = _paintData.clone();
       _frozen = false;
@@ -117,10 +117,10 @@ class SurfacePaint implements ui.Paint {
   }
 
   @override
-  ui.MaskFilter get maskFilter => _paintData.maskFilter;
+  ui.MaskFilter? get maskFilter => _paintData.maskFilter;
 
   @override
-  set maskFilter(ui.MaskFilter value) {
+  set maskFilter(ui.MaskFilter? value) {
     if (_frozen) {
       _paintData = _paintData.clone();
       _frozen = false;
@@ -129,7 +129,7 @@ class SurfacePaint implements ui.Paint {
   }
 
   @override
-  ui.FilterQuality get filterQuality => _paintData.filterQuality;
+  ui.FilterQuality get filterQuality => _paintData.filterQuality ?? ui.FilterQuality.none;
 
   @override
   set filterQuality(ui.FilterQuality value) {
@@ -141,10 +141,10 @@ class SurfacePaint implements ui.Paint {
   }
 
   @override
-  ui.ColorFilter get colorFilter => _paintData.colorFilter;
+  ui.ColorFilter? get colorFilter => _paintData.colorFilter;
 
   @override
-  set colorFilter(ui.ColorFilter value) {
+  set colorFilter(ui.ColorFilter? value) {
     if (_frozen) {
       _paintData = _paintData.clone();
       _frozen = false;
@@ -155,22 +155,22 @@ class SurfacePaint implements ui.Paint {
   // TODO(flutter_web): see https://github.com/flutter/flutter/issues/33605
   @override
   double get strokeMiterLimit {
-    return null;
+    throw UnsupportedError('SurfacePaint.strokeMiterLimit');
   }
 
   @override
   set strokeMiterLimit(double value) {
-    assert(value != null);
+    assert(value != null); // ignore: unnecessary_null_comparison
   }
 
   @override
-  ui.ImageFilter get imageFilter {
+  ui.ImageFilter? get imageFilter {
     // TODO(flutter/flutter#35156): Implement ImageFilter.
     return null;
   }
 
   @override
-  set imageFilter(ui.ImageFilter value) {
+  set imageFilter(ui.ImageFilter? value) {
     // TODO(flutter/flutter#35156): Implement ImageFilter.
   }
 
@@ -192,11 +192,11 @@ class SurfacePaint implements ui.Paint {
     result.write('Paint(');
     if (style == ui.PaintingStyle.stroke) {
       result.write('$style');
-      if (strokeWidth != null && strokeWidth != 0.0)
+      if (strokeWidth != 0.0)
         result.write(' $strokeWidth');
       else
         result.write(' hairline');
-      if (strokeCap != null && strokeCap != ui.StrokeCap.butt)
+      if (strokeCap != ui.StrokeCap.butt)
         result.write(' $strokeCap');
       semicolon = '; ';
     }
@@ -205,10 +205,7 @@ class SurfacePaint implements ui.Paint {
       semicolon = '; ';
     }
     if (color != _defaultPaintColor) {
-      if (color != null)
-        result.write('$semicolon$color');
-      else
-        result.write('${semicolon}no color');
+      result.write('$semicolon$color');
       semicolon = '; ';
     }
     result.write(')');
@@ -219,17 +216,17 @@ class SurfacePaint implements ui.Paint {
 /// Private Paint context data used for recording canvas commands allowing
 /// Paint to be mutated post canvas draw operations.
 class SurfacePaintData {
-  ui.BlendMode blendMode;
-  ui.PaintingStyle style;
-  double strokeWidth;
-  ui.StrokeCap strokeCap;
-  ui.StrokeJoin strokeJoin;
+  ui.BlendMode? blendMode;
+  ui.PaintingStyle? style;
+  double? strokeWidth;
+  ui.StrokeCap? strokeCap;
+  ui.StrokeJoin? strokeJoin;
   bool isAntiAlias = true;
-  ui.Color color;
-  ui.Shader shader;
-  ui.MaskFilter maskFilter;
-  ui.FilterQuality filterQuality;
-  ui.ColorFilter colorFilter;
+  ui.Color? color;
+  ui.Shader? shader;
+  ui.MaskFilter? maskFilter;
+  ui.FilterQuality? filterQuality;
+  ui.ColorFilter? colorFilter;
 
   // Internal for recording canvas use.
   SurfacePaintData clone() {

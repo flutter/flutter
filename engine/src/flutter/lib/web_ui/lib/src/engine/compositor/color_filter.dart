@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 /// A [ui.ColorFilter] backed by Skia's [SkColorFilter].
 class SkColorFilter {
-  js.JsObject skColorFilter;
+  js.JsObject? skColorFilter;
 
   SkColorFilter.mode(EngineColorFilter filter) {
-    setSharedSkColor1(filter._color);
+    setSharedSkColor1(filter._color!);
     skColorFilter =
         canvasKit['SkColorFilter'].callMethod('MakeBlend', <dynamic>[
       sharedSkColor1,
@@ -23,7 +23,7 @@ class SkColorFilter {
     final js.JsArray<double> colorMatrix = js.JsArray<double>();
     colorMatrix.length = 20;
     for (int i = 0; i < 20; i++) {
-      colorMatrix[i] = filter._matrix[i];
+      colorMatrix[i] = filter._matrix![i];
     }
     skColorFilter = canvasKit['SkColorFilter']
         .callMethod('MakeMatrix', <js.JsArray>[colorMatrix]);

@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 /// A surface that applies an image filter to background.
 class PersistedBackdropFilter extends PersistedContainerSurface
     implements ui.BackdropFilterEngineLayer {
-  PersistedBackdropFilter(PersistedBackdropFilter oldLayer, this.filter)
+  PersistedBackdropFilter(PersistedBackdropFilter? oldLayer, this.filter)
       : super(oldLayer);
 
   final EngineImageFilter filter;
@@ -17,14 +17,14 @@ class PersistedBackdropFilter extends PersistedContainerSurface
   /// [rootElement] is used to host child in front of [filterElement] that
   /// is transformed to cover background.
   @override
-  html.Element get childContainer => _childContainer;
-  html.Element _childContainer;
-  html.Element _filterElement;
-  ui.Rect _activeClipBounds;
+  html.Element? get childContainer => _childContainer;
+  html.Element? _childContainer;
+  html.Element? _filterElement;
+  ui.Rect? _activeClipBounds;
   // Cached inverted transform for _transform.
-  Matrix4 _invertedTransform;
+  late Matrix4 _invertedTransform;
   // Reference to transform last used to cache [_invertedTransform].
-  Matrix4 _previousTransform;
+  Matrix4? _previousTransform;
 
   @override
   void adoptElements(PersistedBackdropFilter oldSurface) {
@@ -39,14 +39,14 @@ class PersistedBackdropFilter extends PersistedContainerSurface
     final html.Element element = defaultCreateElement('flt-backdrop')
       ..style.transformOrigin = '0 0 0';
     _childContainer = html.Element.tag('flt-backdrop-interior');
-    _childContainer.style.position = 'absolute';
+    _childContainer!.style.position = 'absolute';
     if (_debugExplainSurfaceStats) {
       // This creates an additional interior element. Count it too.
       _surfaceStatsFor(this).allocatedDomNodeCount++;
     }
     _filterElement = defaultCreateElement('flt-backdrop-filter');
-    _filterElement.style.transformOrigin = '0 0 0';
-    element..append(_filterElement)..append(_childContainer);
+    _filterElement!.style.transformOrigin = '0 0 0';
+    element..append(_filterElement!)..append(_childContainer!);
     return element;
   }
 
@@ -63,7 +63,7 @@ class PersistedBackdropFilter extends PersistedContainerSurface
   @override
   void apply() {
     if (_previousTransform != _transform) {
-      _invertedTransform = Matrix4.inverted(_transform);
+      _invertedTransform = Matrix4.inverted(_transform!);
       _previousTransform = _transform;
     }
     // https://api.flutter.dev/flutter/widgets/BackdropFilter-class.html
@@ -82,19 +82,19 @@ class PersistedBackdropFilter extends PersistedContainerSurface
     double top = rect.top;
     double width = rect.width;
     double height = rect.height;
-    PersistedContainerSurface parentSurface = parent;
+    PersistedContainerSurface? parentSurface = parent;
     while (parentSurface != null) {
       if (parentSurface.isClipping) {
-        _activeClipBounds = parentSurface._localClipBounds;
-        left = _activeClipBounds.left;
-        top = _activeClipBounds.top;
-        width = _activeClipBounds.width;
-        height = _activeClipBounds.height;
+        final ui.Rect activeClipBounds = (_activeClipBounds = parentSurface._localClipBounds)!;
+        left = activeClipBounds.left;
+        top = activeClipBounds.top;
+        width = activeClipBounds.width;
+        height = activeClipBounds.height;
         break;
       }
       parentSurface = parentSurface.parent;
     }
-    final html.CssStyleDeclaration filterElementStyle = _filterElement.style;
+    final html.CssStyleDeclaration filterElementStyle = _filterElement!.style;
     filterElementStyle
       ..position = 'absolute'
       ..left = '${left}px'
@@ -113,10 +113,10 @@ class PersistedBackdropFilter extends PersistedContainerSurface
       // Gaussian blur with standard deviation (normal distribution),
       // the blur will fall within 2 * sigma pixels.
       if (browserEngine == BrowserEngine.webkit) {
-        domRenderer.setElementStyle(_filterElement, '-webkit-backdrop-filter',
+        domRenderer.setElementStyle(_filterElement!, '-webkit-backdrop-filter',
             _imageFilterToCss(filter));
       }
-      domRenderer.setElementStyle(_filterElement, 'backdrop-filter', _imageFilterToCss(filter));
+      domRenderer.setElementStyle(_filterElement!, 'backdrop-filter', _imageFilterToCss(filter));
     }
   }
 
@@ -132,7 +132,7 @@ class PersistedBackdropFilter extends PersistedContainerSurface
 
   void _checkForUpdatedAncestorClipElement() {
     // If parent clip element has moved, adjust bounds.
-    PersistedContainerSurface parentSurface = parent;
+    PersistedContainerSurface? parentSurface = parent;
     while (parentSurface != null) {
       if (parentSurface.isClipping) {
         if (parentSurface._localClipBounds != _activeClipBounds) {

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 part of engine;
 
 class Matrix4 {
@@ -13,7 +12,7 @@ class Matrix4 {
 
   /// Returns a matrix that is the inverse of [other] if [other] is invertible,
   /// otherwise `null`.
-  static Matrix4 tryInvert(Matrix4 other) {
+  static Matrix4? tryInvert(Matrix4 other) {
     final Matrix4 r = Matrix4.zero();
     final double determinant = r.copyInverse(other);
     if (determinant == 0.0) {
@@ -243,7 +242,7 @@ class Matrix4 {
   }
 
   /// Scale this matrix by a [Vector3], [Vector4], or x,y,z
-  void scale(double x, [double y, double z]) {
+  void scale(double x, [double? y, double? z]) {
     final double sx = x;
     final double sy = y ?? x;
     final double sz = z ?? x;
@@ -268,7 +267,7 @@ class Matrix4 {
 
   /// Create a copy of [this] scaled by a [Vector3], [Vector4] or [x],[y], and
   /// [z].
-  Matrix4 scaled(double x, [double y, double z]) => clone()..scale(x, y, z);
+  Matrix4 scaled(double x, [double? y, double? z]) => clone()..scale(x, y, z);
 
   /// Zeros [this].
   void setZero() {
@@ -963,7 +962,7 @@ class Matrix4 {
 
   /// Rotate a copy of [arg] of type [Vector3] using the rotation defined by
   /// [this]. If a [out] parameter is supplied, the copy is stored in [out].
-  Vector3 rotated3(Vector3 arg, [Vector3 out]) {
+  Vector3 rotated3(Vector3 arg, [Vector3? out]) {
     if (out == null) {
       out = Vector3.copy(arg);
     } else {
@@ -1132,7 +1131,7 @@ class Vector3 {
 
   /// Generate random vector in the range (0, 0, 0) to (1, 1, 1). You can
   /// optionally pass your own random number generator.
-  factory Vector3.random([math.Random rng]) {
+  factory Vector3.random([math.Random? rng]) {
     rng ??= math.Random();
     return Vector3(rng.nextDouble(), rng.nextDouble(), rng.nextDouble());
   }

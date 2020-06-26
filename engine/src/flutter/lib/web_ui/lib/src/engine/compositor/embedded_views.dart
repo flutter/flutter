@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 /// This composites HTML views into the [ui.Scene].
@@ -25,10 +25,10 @@ class HtmlViewEmbedder {
       <int, EmbeddedViewParams>{};
 
   /// The HTML element associated with the given view id.
-  final Map<int, html.Element> _views = <int, html.Element>{};
+  final Map<int?, html.Element> _views = <int?, html.Element>{};
 
   /// The root view in the stack of mutator elements for the view id.
-  final Map<int, html.Element> _rootViews = <int, html.Element>{};
+  final Map<int?, html.Element?> _rootViews = <int?, html.Element?>{};
 
   /// The overlay for the view id.
   final Map<int, Overlay> _overlays = <int, Overlay>{};
@@ -37,7 +37,7 @@ class HtmlViewEmbedder {
   final Set<int> _viewsToRecomposite = <int>{};
 
   /// The views that need to be disposed of on the next frame.
-  final Set<int> _viewsToDispose = <int>{};
+  final Set<int?> _viewsToDispose = <int?>{};
 
   /// The list of view ids that should be composited, in order.
   List<int> _compositionOrder = <int>[];
@@ -49,7 +49,7 @@ class HtmlViewEmbedder {
   Map<int, int> _clipCount = <int, int>{};
 
   /// The size of the frame, in physical pixels.
-  ui.Size _frameSize;
+  ui.Size _frameSize = _computeFrameSize();
 
   void set frameSize(ui.Size size) {
     if (_frameSize == size) {
@@ -60,8 +60,8 @@ class HtmlViewEmbedder {
   }
 
   void handlePlatformViewCall(
-    ByteData data,
-    ui.PlatformMessageResponseCallback callback,
+    ByteData? data,
+    ui.PlatformMessageResponseCallback? callback,
   ) {
     const MethodCodec codec = StandardMethodCodec();
     final MethodCall decoded = codec.decodeMethodCall(data);
@@ -71,21 +71,21 @@ class HtmlViewEmbedder {
         _create(decoded, callback);
         return;
       case 'dispose':
-        _dispose(decoded, callback);
+        _dispose(decoded, callback!);
         return;
     }
-    callback(null);
+    callback!(null);
   }
 
   void _create(
-      MethodCall methodCall, ui.PlatformMessageResponseCallback callback) {
+      MethodCall methodCall, ui.PlatformMessageResponseCallback? callback) {
     final Map<dynamic, dynamic> args = methodCall.arguments;
-    final int viewId = args['id'];
-    final String viewType = args['viewType'];
+    final int? viewId = args['id'];
+    final String? viewType = args['viewType'];
     const MethodCodec codec = StandardMethodCodec();
 
     if (_views[viewId] != null) {
-      callback(codec.encodeErrorEnvelope(
+      callback!(codec.encodeErrorEnvelope(
         code: 'recreating_view',
         message: 'trying to create an already created view',
         details: 'view id: $viewId',
@@ -93,10 +93,10 @@ class HtmlViewEmbedder {
       return;
     }
 
-    final ui.PlatformViewFactory factory =
+    final ui.PlatformViewFactory? factory =
         ui.platformViewRegistry.registeredFactories[viewType];
     if (factory == null) {
-      callback(codec.encodeErrorEnvelope(
+      callback!(codec.encodeErrorEnvelope(
         code: 'unregistered_view_type',
         message: 'trying to create a view with an unregistered type',
         details: 'unregistered view type: $viewType',
@@ -105,17 +105,17 @@ class HtmlViewEmbedder {
     }
 
     // TODO(het): Support creation parameters.
-    html.Element embeddedView = factory(viewId);
+    html.Element embeddedView = factory(viewId!);
     _views[viewId] = embeddedView;
 
     _rootViews[viewId] = embeddedView;
 
-    callback(codec.encodeSuccessEnvelope(null));
+    callback!(codec.encodeSuccessEnvelope(null));
   }
 
   void _dispose(
       MethodCall methodCall, ui.PlatformMessageResponseCallback callback) {
-    int viewId = methodCall.arguments;
+    int? viewId = methodCall.arguments;
     const MethodCodec codec = StandardMethodCodec();
     if (!_views.containsKey(viewId)) {
       callback(codec.encodeErrorEnvelope(
@@ -128,11 +128,11 @@ class HtmlViewEmbedder {
     callback(codec.encodeSuccessEnvelope(null));
   }
 
-  List<SkCanvas> getCurrentCanvases() {
-    final List<SkCanvas> canvases = <SkCanvas>[];
+  List<SkCanvas?> getCurrentCanvases() {
+    final List<SkCanvas?> canvases = <SkCanvas?>[];
     for (int i = 0; i < _compositionOrder.length; i++) {
       final int viewId = _compositionOrder[i];
-      canvases.add(_pictureRecorders[viewId].recordingCanvas);
+      canvases.add(_pictureRecorders[viewId]!.recordingCanvas);
     }
     return canvases;
   }
@@ -140,7 +140,7 @@ class HtmlViewEmbedder {
   void prerollCompositeEmbeddedView(int viewId, EmbeddedViewParams params) {
     final pictureRecorder = SkPictureRecorder();
     pictureRecorder.beginRecording(ui.Offset.zero & _frameSize);
-    pictureRecorder.recordingCanvas.clear(ui.Color(0x00000000));
+    pictureRecorder.recordingCanvas!.clear(ui.Color(0x00000000));
     _pictureRecorders[viewId] = pictureRecorder;
     _compositionOrder.add(viewId);
 
@@ -152,28 +152,28 @@ class HtmlViewEmbedder {
     _viewsToRecomposite.add(viewId);
   }
 
-  SkCanvas compositeEmbeddedView(int viewId) {
+  SkCanvas? compositeEmbeddedView(int viewId) {
     // Do nothing if this view doesn't need to be composited.
     if (!_viewsToRecomposite.contains(viewId)) {
-      return _pictureRecorders[viewId].recordingCanvas;
+      return _pictureRecorders[viewId]!.recordingCanvas;
     }
-    _compositeWithParams(viewId, _currentCompositionParams[viewId]);
+    _compositeWithParams(viewId, _currentCompositionParams[viewId]!);
     _viewsToRecomposite.remove(viewId);
-    return _pictureRecorders[viewId].recordingCanvas;
+    return _pictureRecorders[viewId]!.recordingCanvas;
   }
 
   void _compositeWithParams(int viewId, EmbeddedViewParams params) {
-    final html.Element platformView = _views[viewId];
+    final html.Element platformView = _views[viewId]!;
     platformView.style.width = '${params.size.width}px';
     platformView.style.height = '${params.size.height}px';
     platformView.style.position = 'absolute';
 
     final int currentClippingCount = _countClips(params.mutators);
-    final int previousClippingCount = _clipCount[viewId];
+    final int? previousClippingCount = _clipCount[viewId];
     if (currentClippingCount != previousClippingCount) {
       _clipCount[viewId] = currentClippingCount;
-      html.Element oldPlatformViewRoot = _rootViews[viewId];
-      html.Element newPlatformViewRoot = _reconstructClipViewsChain(
+      html.Element oldPlatformViewRoot = _rootViews[viewId]!;
+      html.Element? newPlatformViewRoot = _reconstructClipViewsChain(
         currentClippingCount,
         platformView,
         oldPlatformViewRoot,
@@ -193,35 +193,35 @@ class HtmlViewEmbedder {
     return clipCount;
   }
 
-  html.Element _reconstructClipViewsChain(
+  html.Element? _reconstructClipViewsChain(
     int numClips,
     html.Element platformView,
     html.Element headClipView,
   ) {
     int indexInFlutterView = -1;
     if (headClipView.parent != null) {
-      indexInFlutterView = skiaSceneHost.children.indexOf(headClipView);
+      indexInFlutterView = skiaSceneHost!.children.indexOf(headClipView);
       headClipView.remove();
     }
-    html.Element head = platformView;
+    html.Element? head = platformView;
     int clipIndex = 0;
     // Re-use as much existing clip views as needed.
     while (head != headClipView && clipIndex < numClips) {
-      head = head.parent;
+      head = head!.parent;
       clipIndex++;
     }
     // If there weren't enough existing clip views, add more.
     while (clipIndex < numClips) {
       html.Element clippingView = html.Element.tag('flt-clip');
-      clippingView.append(head);
+      clippingView.append(head!);
       head = clippingView;
       clipIndex++;
     }
-    head.remove();
+    head!.remove();
 
     // If the chain was previously attached, attach it to the same position.
     if (indexInFlutterView > -1) {
-      skiaSceneHost.children.insert(indexInFlutterView, head);
+      skiaSceneHost!.children.insert(indexInFlutterView, head);
     }
     return head;
   }
@@ -235,27 +235,27 @@ class HtmlViewEmbedder {
     for (final Mutator mutator in mutators) {
       switch (mutator.type) {
         case MutatorType.transform:
-          headTransform.multiply(mutator.matrix);
+          headTransform.multiply(mutator.matrix!);
           head.style.transform =
               float64ListToCssTransform(headTransform.storage);
           break;
         case MutatorType.clipRect:
         case MutatorType.clipRRect:
         case MutatorType.clipPath:
-          html.Element clipView = head.parent;
+          html.Element clipView = head.parent!;
           clipView.style.clip = '';
           clipView.style.clipPath = '';
           headTransform = Matrix4.identity();
           clipView.style.transform = '';
           if (mutator.rect != null) {
-            final ui.Rect rect = mutator.rect;
+            final ui.Rect rect = mutator.rect!;
             clipView.style.clip = 'rect(${rect.top}px, ${rect.right}px, '
                 '${rect.bottom}px, ${rect.left}px)';
           } else if (mutator.rrect != null) {
             final SkPath path = SkPath();
-            path.addRRect(mutator.rrect);
+            path.addRRect(mutator.rrect!);
             _ensureSvgPathDefs();
-            html.Element pathDefs = _svgPathDefs.querySelector('#sk_path_defs');
+            html.Element pathDefs = _svgPathDefs!.querySelector('#sk_path_defs')!;
             _clipPathCount += 1;
             html.Element newClipPath =
                 html.Element.html('<clipPath id="svgClip$_clipPathCount">'
@@ -264,9 +264,9 @@ class HtmlViewEmbedder {
             pathDefs.append(newClipPath);
             clipView.style.clipPath = 'url(#svgClip$_clipPathCount)';
           } else if (mutator.path != null) {
-            final SkPath path = mutator.path;
+            final SkPath path = mutator.path as SkPath;
             _ensureSvgPathDefs();
-            html.Element pathDefs = _svgPathDefs.querySelector('#sk_path_defs');
+            html.Element pathDefs = _svgPathDefs!.querySelector('#sk_path_defs')!;
             _clipPathCount += 1;
             html.Element newClipPath =
                 html.Element.html('<clipPath id="svgClip$_clipPathCount">'
@@ -309,7 +309,7 @@ class HtmlViewEmbedder {
 
   int _clipPathCount = 0;
 
-  html.Element _svgPathDefs;
+  html.Element? _svgPathDefs;
 
   /// Ensures we add a container of SVG path defs to the DOM so they can
   /// be referred to in clip-path: url(#blah).
@@ -321,7 +321,7 @@ class HtmlViewEmbedder {
       '<svg width="0" height="0"><defs id="sk_path_defs"></defs></svg>',
       treeSanitizer: _NullTreeSanitizer(),
     );
-    skiaSceneHost.append(_svgPathDefs);
+    skiaSceneHost!.append(_svgPathDefs!);
   }
 
   void submitFrame() {
@@ -331,9 +331,9 @@ class HtmlViewEmbedder {
       int viewId = _compositionOrder[i];
       ensureOverlayInitialized(viewId);
       final SurfaceFrame frame =
-          _overlays[viewId].surface.acquireFrame(_frameSize);
+          _overlays[viewId]!.surface.acquireFrame(_frameSize);
       final SkCanvas canvas = frame.skiaCanvas;
-      canvas.drawPicture(_pictureRecorders[viewId].endRecording());
+      canvas.drawPicture(_pictureRecorders[viewId]!.endRecording());
       frame.submit();
     }
     _pictureRecorders.clear();
@@ -345,12 +345,12 @@ class HtmlViewEmbedder {
 
     for (int i = 0; i < _compositionOrder.length; i++) {
       int viewId = _compositionOrder[i];
-      html.Element platformViewRoot = _rootViews[viewId];
-      html.Element overlay = _overlays[viewId].surface.htmlElement;
+      html.Element platformViewRoot = _rootViews[viewId]!;
+      html.Element overlay = _overlays[viewId]!.surface.htmlElement!;
       platformViewRoot.remove();
-      skiaSceneHost.append(platformViewRoot);
+      skiaSceneHost!.append(platformViewRoot);
       overlay.remove();
-      skiaSceneHost.append(overlay);
+      skiaSceneHost!.append(overlay);
       _activeCompositionOrder.add(viewId);
     }
     _compositionOrder.clear();
@@ -361,13 +361,13 @@ class HtmlViewEmbedder {
       return;
     }
 
-    for (int viewId in _viewsToDispose) {
-      final html.Element rootView = _rootViews[viewId];
+    for (int? viewId in _viewsToDispose) {
+      final html.Element rootView = _rootViews[viewId]!;
       rootView.remove();
       _views.remove(viewId);
       _rootViews.remove(viewId);
       if (_overlays[viewId] != null) {
-        final Overlay overlay = _overlays[viewId];
+        final Overlay overlay = _overlays[viewId]!;
         overlay.surface.htmlElement?.remove();
       }
       _overlays.remove(viewId);
@@ -379,12 +379,12 @@ class HtmlViewEmbedder {
   }
 
   void ensureOverlayInitialized(int viewId) {
-    Overlay overlay = _overlays[viewId];
+    Overlay? overlay = _overlays[viewId];
     if (overlay != null) {
       return;
     }
-    Surface surface = Surface();
-    SkSurface skSurface = surface.acquireRenderSurface(_frameSize);
+    Surface surface = Surface(this);
+    SkSurface? skSurface = surface.acquireRenderSurface(_frameSize);
     _overlays[viewId] = Overlay(surface, skSurface);
   }
 }
@@ -435,11 +435,11 @@ class Mutator {
   );
 
   final MutatorType type;
-  final ui.Rect rect;
-  final ui.RRect rrect;
-  final ui.Path path;
-  final Matrix4 matrix;
-  final int alpha;
+  final ui.Rect? rect;
+  final ui.RRect? rrect;
+  final ui.Path? path;
+  final Matrix4? matrix;
+  final int? alpha;
 
   const Mutator.clipRect(ui.Rect rect)
       : this._(MutatorType.clipRect, rect, null, null, null, null);
@@ -457,7 +457,7 @@ class Mutator {
       type == MutatorType.clipRRect ||
       type == MutatorType.clipPath;
 
-  double get alphaFloat => alpha / 255.0;
+  double get alphaFloat => alpha! / 255.0;
 
   bool operator ==(dynamic other) {
     if (identical(this, other)) {
@@ -555,7 +555,7 @@ class MutatorsStack extends Iterable<Mutator> {
 /// Represents a surface overlaying a platform view.
 class Overlay {
   final Surface surface;
-  final SkSurface skSurface;
+  final SkSurface? skSurface;
 
   Overlay(this.surface, this.skSurface);
 }
