@@ -667,7 +667,9 @@ class AndroidViewController extends PlatformViewController {
   final List<PlatformViewCreatedCallback> _platformViewCreatedCallbacks = <PlatformViewCreatedCallback>[];
 
   /// The unique identifier of the Android view controlled by this controller.
-  @Deprecated('Please use `viewId`.')
+  @Deprecated(
+      'Call `viewId` instead. '
+      'This feature was deprecated after v1.20.0-0.0.pre.')
   int get id => viewId;
 
   /// Whether the platform view has already been created.
