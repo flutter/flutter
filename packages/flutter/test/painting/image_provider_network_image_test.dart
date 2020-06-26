@@ -8,6 +8,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
 import 'dart:typed_data';
+import 'dart:ui' show Codec, FrameInfo;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -219,8 +220,68 @@ void main() {
 
     debugNetworkImageHttpClientProvider = null;
   }, skip: isBrowser); // Browser does not resolve images this way.
+
+  Future<Codec> _decoder(Uint8List bytes, {int cacheWidth, int cacheHeight, bool allowUpscaling}) async {
+    return FakeCodec();
+  }
+
+  test('Network image sets tag', () async {
+    const String url = 'http://test.png';
+    const int chunkSize = 8;
+    final List<Uint8List> chunks = <Uint8List>[
+      for (int offset = 0; offset < kTransparentImage.length; offset += chunkSize)
+        Uint8List.fromList(kTransparentImage.skip(offset).take(chunkSize).toList()),
+    ];
+    final _MockHttpClientRequest request = _MockHttpClientRequest();
+    final _MockHttpClientResponse response = _MockHttpClientResponse();
+    when(httpClient.getUrl(any)).thenAnswer((_) => Future<HttpClientRequest>.value(request));
+    when(request.close()).thenAnswer((_) => Future<HttpClientResponse>.value(response));
+    when(response.statusCode).thenReturn(HttpStatus.ok);
+    when(response.contentLength).thenReturn(kTransparentImage.length);
+    when(response.listen(
+      any,
+      onDone: anyNamed('onDone'),
+      onError: anyNamed('onError'),
+      cancelOnError: anyNamed('cancelOnError'),
+    )).thenAnswer((Invocation invocation) {
+      final void Function(List<int>) onData = invocation.positionalArguments[0] as void Function(List<int>);
+      final void Function(Object) onError = invocation.namedArguments[#onError] as void Function(Object);
+      final VoidCallback onDone = invocation.namedArguments[#onDone] as VoidCallback;
+      final bool cancelOnError = invocation.namedArguments[#cancelOnError] as bool;
+
+      return Stream<Uint8List>.fromIterable(chunks).listen(
+        onData,
+        onDone: onDone,
+        onError: onError,
+        cancelOnError: cancelOnError,
+      );
+    });
+
+    const NetworkImage provider = NetworkImage(url);
+
+    final MultiFrameImageStreamCompleter completer = provider.load(provider, _decoder) as MultiFrameImageStreamCompleter;
+
+    expect(completer.debugLabel, url);
+  });
+
 }
 
 class _MockHttpClient extends Mock implements HttpClient {}
 class _MockHttpClientRequest extends Mock implements HttpClientRequest {}
 class _MockHttpClientResponse extends Mock implements HttpClientResponse {}
+
+class FakeCodec implements Codec {
+  @override
+  void dispose() {}
+
+  @override
+  int get frameCount => throw UnimplementedError();
+
+  @override
+  Future<FrameInfo> getNextFrame() {
+    throw UnimplementedError();
+  }
+
+  @override
+  int get repetitionCount => throw UnimplementedError();
+}

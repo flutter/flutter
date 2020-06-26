@@ -651,6 +651,7 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key, decode),
       scale: key.scale,
+      debugLabel: key.name,
       informationCollector: collector
     );
   }
@@ -764,7 +765,11 @@ class ResizeImage extends ImageProvider<_SizeAwareCacheKey> {
       );
       return decode(bytes, cacheWidth: width, cacheHeight: height, allowUpscaling: this.allowUpscaling);
     };
-    return imageProvider.load(key.providerCacheKey, decodeResize);
+    final ImageStreamCompleter completer = imageProvider.load(key.providerCacheKey, decodeResize);
+    if (!kReleaseMode) {
+      completer.debugLabel = '${completer.debugLabel} - Resized(${key.width}×${key.height})';
+    }
+    return completer;
   }
 
   @override
@@ -860,6 +865,7 @@ class FileImage extends ImageProvider<FileImage> {
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key, decode),
       scale: key.scale,
+      debugLabel: key.file.path,
       informationCollector: () sync* {
         yield ErrorDescription('Path: ${file?.path}');
       },
@@ -933,6 +939,7 @@ class MemoryImage extends ImageProvider<MemoryImage> {
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key, decode),
       scale: key.scale,
+      debugLabel: 'MemoryImage(${describeIdentity(key.bytes)})',
     );
   }
 
