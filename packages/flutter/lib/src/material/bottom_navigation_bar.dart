@@ -461,7 +461,6 @@ class _BottomNavigationTile extends StatelessWidget {
 
     Widget result = MergeSemantics(
       child: Semantics(
-        container: true,
         selected: selected,
         child: Stack(
           children: <Widget>[
