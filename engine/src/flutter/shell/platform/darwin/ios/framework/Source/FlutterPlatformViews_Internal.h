@@ -14,6 +14,7 @@
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlatformViews.h"
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlugin.h"
 #include "flutter/shell/platform/darwin/ios/ios_context.h"
+#include "third_party/skia/include/core/SkPictureRecorder.h"
 
 // A UIView that is used as the parent for embedded UIViews.
 //
