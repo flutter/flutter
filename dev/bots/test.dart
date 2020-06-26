@@ -960,7 +960,7 @@ Future<void> _runWebHotReloadTest(String target, {
           success = true;
           process.stdin.add('q'.codeUnits);
         }
-        if (start && line.contains('HELLO')) {
+        if (started && line.contains('HELLO')) {
           success = false;
           process.stdin.add('q'.codeUnits);
         }
