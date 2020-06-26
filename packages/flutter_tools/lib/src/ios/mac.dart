@@ -24,6 +24,7 @@ import '../macos/xcode.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import 'code_signing.dart';
+import 'devices.dart';
 import 'migrations/ios_migrator.dart';
 import 'migrations/project_base_configuration_migration.dart';
 import 'migrations/remove_framework_link_and_embedding_migration.dart';
@@ -66,13 +67,19 @@ class IMobileDevice {
   }
 
   /// Captures a screenshot to the specified outputFile.
-  Future<void> takeScreenshot(File outputFile, String deviceID) {
+  Future<void> takeScreenshot(
+    File outputFile,
+    String deviceID,
+    IOSDeviceInterface interfaceType,
+  ) {
     return _processUtils.run(
       <String>[
         _idevicescreenshotPath,
         outputFile.path,
         '--udid',
         deviceID,
+        if (interfaceType == IOSDeviceInterface.network)
+          '--network',
       ],
       throwOnError: true,
       environment: Map<String, String>.fromEntries(
