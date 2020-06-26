@@ -44,7 +44,7 @@ class MacrobenchmarksApp extends StatelessWidget {
         kColorFilterAndFadeRouteName: (BuildContext context) => ColorFilterAndFadePage(),
         kFadingChildAnimationRouteName: (BuildContext context) => const FilteredChildAnimationPage(FilterType.opacity),
         kImageFilteredTransformAnimationRouteName: (BuildContext context) => const FilteredChildAnimationPage(FilterType.rotateFilter),
-        kMultiWidgetConstructionRouteName: (BuildContext context) => const MultiWidgetConstructTable(5, 5),
+        kMultiWidgetConstructionRouteName: (BuildContext context) => const MultiWidgetConstructTable(5, 8),
       },
     );
   }
