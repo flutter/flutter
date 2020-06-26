@@ -353,3 +353,10 @@ void _merge<T>(
   target[targetOffset++] = secondElement;
   target.setRange(targetOffset, targetOffset + (secondEnd - cursor2), secondList, cursor2);
 }
+
+/// Casts the provided `map` [Object] to a typed `Map<S, T>` where `S` is the
+/// type of the keys and `T` is the type of the values.
+Map<S, T> castToMap<S, T>(Object map) {
+  final Map<dynamic, dynamic> casted = map as Map<dynamic, dynamic>;
+  return casted.cast<S, T>();
+}

@@ -286,4 +286,31 @@ class SystemChannels {
     'flutter/mousecursor',
     StandardMethodCodec(),
   );
+
+  /// A [MethodChannel] for synchronizing restoration data with the engine.
+  ///
+  /// The following outgoing methods are defined for this channel (invoked using
+  /// [OptionalMethodChannel.invokeMethod]):
+  ///
+  ///  * `get`: Retrieves the current restoration data (e.g. provided by the
+  ///    operating system) from the engine. The restoration data is returned as
+  ///    [ByteData].
+  ///  * `put`: Sends the current restoration data to the engine. Takes the
+  ///    restoration data encoded as [ByteData] as argument.
+  ///
+  /// The following incoming methods are defined for this channel (registered
+  /// using [MethodChannel.setMethodCallHandler]).
+  ///
+  ///  * `push`: Called by the engine to send newly provided restoration data
+  ///    to the framework. The new restoration data is provided as an argument
+  ///    of type [ByteData].
+  ///
+  /// See also:
+  ///
+  ///  * [RestorationManager], which uses this channel and also describes how
+  ///    restoration data is used in Flutter.
+  static const MethodChannel restoration = OptionalMethodChannel(
+    'flutter/restoration',
+    StandardMethodCodec(),
+  );
 }

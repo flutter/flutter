@@ -13,6 +13,7 @@ import 'package:flutter/scheduler.dart';
 
 import 'asset_bundle.dart';
 import 'binary_messenger.dart';
+import 'restoration.dart';
 import 'system_channels.dart';
 
 /// Listens for platform messages and directs them to the [defaultBinaryMessenger].
@@ -204,6 +205,13 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     }
     return null;
   }
+
+  /// The [RestorationManager] synchronizes the restoration data between
+  /// engine and framework.
+  ///
+  /// See the docs for [RestorationManager] for a discussion of restoration
+  /// state and how it is organized in Flutter.
+  final RestorationManager restorationManager = RestorationManager();
 }
 
 /// The default implementation of [BinaryMessenger].
