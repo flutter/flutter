@@ -946,18 +946,22 @@ Future<void> _runWebHotReloadTest(String target, {
           final String newContents = oldContents
             .split('\n')
             .map((String line) {
-              if (line.endsWith('// HOT RELOAD MARKER')) {
+              if (line.endsWith('HOT RELOAD MARKER')) {
                 return "final String message = 'GOODBYE'; // HOT RELOAD MARKER";
               }
               return line;
             }).join('\n');
             file.writeAsStringSync(newContents, flush: true);
-            await Future<void>.delayed(const Duration(milliseconds: 50));
+            await Future<void>.delayed(const Duration(milliseconds: 250));
             started = true;
             process.stdin.add('R'.codeUnits);
         }
-        if (started || line.contains('GOODBYE')) {
+        if (started && line.contains('GOODBYE')) {
           success = true;
+          process.stdin.add('q'.codeUnits);
+        }
+        if (start && line.contains('HELLO')) {
+          success = false;
           process.stdin.add('q'.codeUnits);
         }
       },
