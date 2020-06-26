@@ -76,3 +76,119 @@ if (is_ios || is_mac) {
   ]
   flutter_cflags_objcc = flutter_cflags_objc
 }
+
+# This template creates a `source_set` in both standard and "fuchsia_legacy"
+# configurations.
+#
+# The "fuchsia_legacy" configuration includes old, non-embedder API sources and
+# defines the LEGACY_FUCHSIA_EMBEDDER symbol.  This template and the config
+# are both transitional and will be removed after the embedder API transition
+# is complete.
+# TODO(fxb/54041): Remove when no longer neccesary.
+#
+# `sources`, `defines`, `public_configs`, `configs`, `public_deps`, `deps` work
+# as they do in a normal `source_set`.
+#
+# `legacy_deps` is the list of dependencies which should be mutated by
+# appending '_fuchsia_legacy' when creating the 2 `source_set`'s.  The template adds
+# `legacy_deps` to `public_deps`, whether it mutates them or not.
+template("source_set_maybe_fuchsia_legacy") {
+  public_deps_non_legacy = []
+  deps_non_legacy = []
+  if (defined(invoker.public_deps)) {
+    public_deps_non_legacy += invoker.public_deps
+  }
+  if (defined(invoker.deps)) {
+    deps_non_legacy += invoker.deps
+  }
+  if (defined(invoker.public_deps_legacy_and_next)) {
+    foreach(legacy_dep, invoker.public_deps_legacy_and_next) {
+      public_deps_non_legacy += [ legacy_dep ]
+    }
+  }
+  if (defined(invoker.deps_legacy_and_next)) {
+    foreach(legacy_dep, invoker.deps_legacy_and_next) {
+      deps_non_legacy += [ legacy_dep ]
+    }
+  }
+
+  source_set(target_name) {
+    forward_variables_from(invoker,
+                           [
+                             "testonly",
+                             "sources",
+                             "defines",
+                             "public_configs",
+                             "configs",
+                           ])
+    public_deps = public_deps_non_legacy
+    deps = deps_non_legacy
+  }
+
+  if (is_fuchsia) {
+    legagcy_suffix = "_fuchsia_legacy"
+
+    sources_legacy = []
+    if (defined(invoker.sources_legacy)) {
+      sources_legacy += invoker.sources_legacy
+    }
+    if (defined(invoker.sources)) {
+      sources_legacy += invoker.sources
+    }
+
+    public_configs_legacy = [ "//flutter:fuchsia_legacy" ]
+    if (defined(invoker.public_configs)) {
+      public_configs_legacy += invoker.public_configs
+    }
+
+    public_deps_legacy = []
+    deps_legacy = []
+    if (defined(invoker.public_deps)) {
+      public_deps_legacy += invoker.public_deps
+    }
+    if (defined(invoker.deps)) {
+      deps_legacy += invoker.deps
+    }
+    if (defined(invoker.public_deps_legacy)) {
+      public_deps_legacy += invoker.public_deps_legacy
+    }
+    if (defined(invoker.deps_legacy)) {
+      deps_legacy += invoker.deps_legacy
+    }
+    if (defined(invoker.public_deps_legacy_and_next)) {
+      foreach(legacy_dep, invoker.public_deps_legacy_and_next) {
+        public_deps_legacy += [ legacy_dep + legagcy_suffix ]
+      }
+    }
+    if (defined(invoker.deps_legacy_and_next)) {
+      foreach(legacy_dep, invoker.deps_legacy_and_next) {
+        deps_legacy += [ legacy_dep + legagcy_suffix ]
+      }
+    }
+
+    source_set(target_name + legagcy_suffix) {
+      forward_variables_from(invoker,
+                             [
+                               "testonly",
+                               "defines",
+                               "configs",
+                             ])
+      sources = sources_legacy
+
+      public_configs = public_configs_legacy
+
+      public_deps = public_deps_legacy
+      deps = deps_legacy
+    }
+  } else {
+    if (defined(invoker.sources_legacy)) {
+      not_needed(invoker, [ "sources_legacy" ])
+    }
+    if (defined(invoker.public_deps_legacy)) {
+      not_needed(invoker, [ "public_deps_legacy" ])
+    }
+    if (defined(invoker.deps_legacy)) {
+      not_needed(invoker, [ "deps_legacy" ])
+    }
+  }
+}

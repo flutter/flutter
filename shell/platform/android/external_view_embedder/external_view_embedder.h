@@ -5,6 +5,8 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_H_
 
+#include <unordered_map>
+
 #include "flutter/flow/embedded_views.h"
 #include "flutter/flow/rtree.h"
 #include "flutter/shell/platform/android/context/android_context.h"
