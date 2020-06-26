@@ -548,7 +548,7 @@ class _TooltipOverlay extends StatelessWidget {
 
 class _TooltipSemanticsWidget extends SingleChildRenderObjectWidget {
   const _TooltipSemanticsWidget({
-    Key key, 
+    Key key,
     Widget child
   }) : super(key: key, child: child);
 
