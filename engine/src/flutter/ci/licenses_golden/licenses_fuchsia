@@ -1,4 +1,4 @@
-Signature: 4878b08cb90774da016ea03d4b9e8fbc
+Signature: 67e3f6fd0ca889b6554fefdd09f7c67a
 
 UNUSED LICENSES:
 
@@ -2826,11 +2826,8 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/component/component_contex
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/config/config.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/intent/intent.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/lifecycle/lifecycle.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/module/link_path.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/module/module_data.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/module/module_state.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/story/create_link.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/story/create_module_parameter_map.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/story/story_shell.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/story/story_state.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/surface/surface.fidl
