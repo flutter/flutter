@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 /// When set to true, all platform messages will be printed to the console.
@@ -11,7 +11,7 @@ const bool _debugPrintPlatformMessages = false;
 /// Requests that the browser schedule a frame.
 ///
 /// This may be overridden in tests, for example, to pump fake frames.
-ui.VoidCallback scheduleFrameCallback;
+ui.VoidCallback? scheduleFrameCallback;
 
 /// The Web implementation of [ui.Window].
 class EngineWindow extends ui.Window {
@@ -26,14 +26,12 @@ class EngineWindow extends ui.Window {
   }
 
   @override
-  double get devicePixelRatio => _debugDevicePixelRatio != null
-      ? _debugDevicePixelRatio
-      : browserDevicePixelRatio;
+  double get devicePixelRatio => _debugDevicePixelRatio ?? browserDevicePixelRatio;
 
   /// Returns device pixel ratio returned by browser.
   static double get browserDevicePixelRatio {
-    double ratio = html.window.devicePixelRatio;
-    // Guard against WebOS returning 0.
+    double? ratio = html.window.devicePixelRatio as double?;
+    // Guard against WebOS returning 0 and other browsers returning null.
     return (ratio == null || ratio == 0.0) ? 1.0 : ratio;
   }
 
@@ -44,7 +42,7 @@ class EngineWindow extends ui.Window {
     _debugDevicePixelRatio = value;
   }
 
-  double _debugDevicePixelRatio;
+  double? _debugDevicePixelRatio;
 
   @override
   ui.Size get physicalSize {
@@ -52,7 +50,7 @@ class EngineWindow extends ui.Window {
       _computePhysicalSize();
     }
     assert(_physicalSize != null);
-    return _physicalSize;
+    return _physicalSize!;
   }
 
   /// Computes the physical size of the screen from [html.window].
@@ -73,10 +71,10 @@ class EngineWindow extends ui.Window {
     if (!override) {
       double windowInnerWidth;
       double windowInnerHeight;
-      final html.VisualViewport viewport = html.window.visualViewport;
+      final html.VisualViewport? viewport = html.window.visualViewport;
       if (viewport != null) {
-        windowInnerWidth = viewport.width * devicePixelRatio;
-        windowInnerHeight = viewport.height * devicePixelRatio;
+        windowInnerWidth = viewport.width * devicePixelRatio as double;
+        windowInnerHeight = viewport.height * devicePixelRatio as double;
       } else {
         windowInnerWidth = html.window.innerWidth * devicePixelRatio;
         windowInnerHeight = html.window.innerHeight * devicePixelRatio;
@@ -90,13 +88,13 @@ class EngineWindow extends ui.Window {
 
   void computeOnScreenKeyboardInsets() {
     double windowInnerHeight;
-    final html.VisualViewport viewport = html.window.visualViewport;
+    final html.VisualViewport? viewport = html.window.visualViewport;
     if (viewport != null) {
-      windowInnerHeight = viewport.height * devicePixelRatio;
+      windowInnerHeight = viewport.height * devicePixelRatio as double;
     } else {
       windowInnerHeight = html.window.innerHeight * devicePixelRatio;
     }
-    final double bottomPadding = _physicalSize.height - windowInnerHeight;
+    final double bottomPadding = _physicalSize!.height - windowInnerHeight;
     _viewInsets =
         WindowPadding(bottom: bottomPadding, left: 0, right: 0, top: 0);
   }
@@ -119,18 +117,18 @@ class EngineWindow extends ui.Window {
     double height = 0;
     double width = 0;
     if (html.window.visualViewport != null) {
-      height = html.window.visualViewport.height * devicePixelRatio;
-      width = html.window.visualViewport.width * devicePixelRatio;
+      height = html.window.visualViewport!.height * devicePixelRatio as double;
+      width = html.window.visualViewport!.width * devicePixelRatio as double;
     } else {
       height = html.window.innerHeight * devicePixelRatio;
       width = html.window.innerWidth * devicePixelRatio;
     }
     // First confirm both heught and width is effected.
-    if (_physicalSize.height != height && _physicalSize.width != width) {
+    if (_physicalSize!.height != height && _physicalSize!.width != width) {
       // If prior to rotation height is bigger than width it should be the
       // opposite after the rotation and vice versa.
-      if ((_physicalSize.height > _physicalSize.width && height < width) ||
-          (_physicalSize.width > _physicalSize.height && width < height)) {
+      if ((_physicalSize!.height > _physicalSize!.width && height < width) ||
+          (_physicalSize!.width > _physicalSize!.height && width < height)) {
         // Rotation detected
         return true;
       }
@@ -140,13 +138,13 @@ class EngineWindow extends ui.Window {
 
   @override
   WindowPadding get viewInsets => _viewInsets;
-  WindowPadding _viewInsets = ui.WindowPadding.zero;
+  WindowPadding _viewInsets = ui.WindowPadding.zero as WindowPadding;
 
   /// Lazily populated and cleared at the end of the frame.
-  ui.Size _physicalSize;
+  ui.Size? _physicalSize;
 
   /// Overrides the value of [physicalSize] in tests.
-  ui.Size webOnlyDebugPhysicalSizeOverride;
+  ui.Size? webOnlyDebugPhysicalSizeOverride;
 
   @override
   double get physicalDepth => double.maxFinite;
@@ -162,10 +160,10 @@ class EngineWindow extends ui.Window {
   ///
   /// The reason for the lazy initialization is to give enough time for the app to set [locationStrategy]
   /// in `lib/src/ui/initialization.dart`.
-  String _defaultRouteName;
+  String? _defaultRouteName;
 
   @override
-  String/*!*/ get defaultRouteName => _defaultRouteName ??= _browserHistory.currentPath;
+  String get defaultRouteName => _defaultRouteName ??= _browserHistory.currentPath;
 
   @override
   void scheduleFrame() {
@@ -173,27 +171,27 @@ class EngineWindow extends ui.Window {
       throw new Exception(
           'scheduleFrameCallback must be initialized first.');
     }
-    scheduleFrameCallback();
+    scheduleFrameCallback!();
   }
 
   /// Change the strategy to use for handling browser history location.
   /// Setting this member will automatically update [_browserHistory].
   ///
   /// By setting this to null, the browser history will be disabled.
-  set locationStrategy(LocationStrategy strategy) {
+  set locationStrategy(LocationStrategy? strategy) {
     _browserHistory.locationStrategy = strategy;
   }
 
   /// Returns the currently active location strategy.
   @visibleForTesting
-  LocationStrategy get locationStrategy => _browserHistory.locationStrategy;
+  LocationStrategy? get locationStrategy => _browserHistory.locationStrategy;
 
   @override
-  ui.VoidCallback get onTextScaleFactorChanged => _onTextScaleFactorChanged;
-  ui.VoidCallback _onTextScaleFactorChanged;
-  Zone _onTextScaleFactorChangedZone;
+  ui.VoidCallback? get onTextScaleFactorChanged => _onTextScaleFactorChanged;
+  ui.VoidCallback? _onTextScaleFactorChanged;
+  Zone? _onTextScaleFactorChangedZone;
   @override
-  set onTextScaleFactorChanged(ui.VoidCallback callback) {
+  set onTextScaleFactorChanged(ui.VoidCallback? callback) {
     _onTextScaleFactorChanged = callback;
     _onTextScaleFactorChangedZone = Zone.current;
   }
@@ -205,12 +203,12 @@ class EngineWindow extends ui.Window {
   }
 
   @override
-  ui.VoidCallback get onPlatformBrightnessChanged =>
+  ui.VoidCallback? get onPlatformBrightnessChanged =>
       _onPlatformBrightnessChanged;
-  ui.VoidCallback _onPlatformBrightnessChanged;
-  Zone _onPlatformBrightnessChangedZone;
+  ui.VoidCallback? _onPlatformBrightnessChanged;
+  Zone? _onPlatformBrightnessChangedZone;
   @override
-  set onPlatformBrightnessChanged(ui.VoidCallback callback) {
+  set onPlatformBrightnessChanged(ui.VoidCallback? callback) {
     _onPlatformBrightnessChanged = callback;
     _onPlatformBrightnessChangedZone = Zone.current;
   }
@@ -222,11 +220,11 @@ class EngineWindow extends ui.Window {
   }
 
   @override
-  ui.VoidCallback/*?*/ get onMetricsChanged => _onMetricsChanged;
-  ui.VoidCallback/*?*/ _onMetricsChanged;
-  Zone/*!*/ _onMetricsChangedZone = Zone.root;
+  ui.VoidCallback? get onMetricsChanged => _onMetricsChanged;
+  ui.VoidCallback? _onMetricsChanged;
+  Zone _onMetricsChangedZone = Zone.root;
   @override
-  set onMetricsChanged(ui.VoidCallback callback) {
+  set onMetricsChanged(ui.VoidCallback? callback) {
     _onMetricsChanged = callback;
     _onMetricsChangedZone = Zone.current;
   }
@@ -240,11 +238,11 @@ class EngineWindow extends ui.Window {
   }
 
   @override
-  ui.VoidCallback get onLocaleChanged => _onLocaleChanged;
-  ui.VoidCallback _onLocaleChanged;
-  Zone _onLocaleChangedZone;
+  ui.VoidCallback? get onLocaleChanged => _onLocaleChanged;
+  ui.VoidCallback? _onLocaleChanged;
+  Zone? _onLocaleChangedZone;
   @override
-  set onLocaleChanged(ui.VoidCallback callback) {
+  set onLocaleChanged(ui.VoidCallback? callback) {
     _onLocaleChanged = callback;
     _onLocaleChangedZone = Zone.current;
   }
@@ -261,11 +259,11 @@ class EngineWindow extends ui.Window {
   /// * https://developer.mozilla.org/en-US/docs/Web/API/NavigatorLanguage/languages,
   ///   which explains browser quirks in the implementation notes.
   @override
-  ui.Locale get locale => _locales.first;
+  ui.Locale get locale => _locales!.first;
 
   @override
-  List<ui.Locale> get locales => _locales;
-  List<ui.Locale> _locales = parseBrowserLanguages();
+  List<ui.Locale>? get locales => _locales;
+  List<ui.Locale>? _locales = parseBrowserLanguages();
 
   /// Sets locales to `null`.
   ///
@@ -310,11 +308,11 @@ class EngineWindow extends ui.Window {
   }
 
   @override
-  ui.FrameCallback get onBeginFrame => _onBeginFrame;
-  ui.FrameCallback _onBeginFrame;
-  Zone _onBeginFrameZone;
+  ui.FrameCallback? get onBeginFrame => _onBeginFrame;
+  ui.FrameCallback? _onBeginFrame;
+  Zone? _onBeginFrameZone;
   @override
-  set onBeginFrame(ui.FrameCallback callback) {
+  set onBeginFrame(ui.FrameCallback? callback) {
     _onBeginFrame = callback;
     _onBeginFrameZone = Zone.current;
   }
@@ -326,11 +324,11 @@ class EngineWindow extends ui.Window {
   }
 
   @override
-  ui.TimingsCallback get onReportTimings => _onReportTimings;
-  ui.TimingsCallback _onReportTimings;
-  Zone _onReportTimingsZone;
+  ui.TimingsCallback? get onReportTimings => _onReportTimings;
+  ui.TimingsCallback? _onReportTimings;
+  Zone? _onReportTimingsZone;
   @override
-  set onReportTimings(ui.TimingsCallback callback) {
+  set onReportTimings(ui.TimingsCallback? callback) {
     _onReportTimings = callback;
     _onReportTimingsZone = Zone.current;
   }
@@ -343,11 +341,11 @@ class EngineWindow extends ui.Window {
   }
 
   @override
-  ui.VoidCallback get onDrawFrame => _onDrawFrame;
-  ui.VoidCallback _onDrawFrame;
-  Zone _onDrawFrameZone;
+  ui.VoidCallback? get onDrawFrame => _onDrawFrame;
+  ui.VoidCallback? _onDrawFrame;
+  Zone? _onDrawFrameZone;
   @override
-  set onDrawFrame(ui.VoidCallback callback) {
+  set onDrawFrame(ui.VoidCallback? callback) {
     _onDrawFrame = callback;
     _onDrawFrameZone = Zone.current;
   }
@@ -359,11 +357,11 @@ class EngineWindow extends ui.Window {
   }
 
   @override
-  ui.PointerDataPacketCallback get onPointerDataPacket => _onPointerDataPacket;
-  ui.PointerDataPacketCallback _onPointerDataPacket;
-  Zone _onPointerDataPacketZone;
+  ui.PointerDataPacketCallback? get onPointerDataPacket => _onPointerDataPacket;
+  ui.PointerDataPacketCallback? _onPointerDataPacket;
+  Zone? _onPointerDataPacketZone;
   @override
-  set onPointerDataPacket(ui.PointerDataPacketCallback callback) {
+  set onPointerDataPacket(ui.PointerDataPacketCallback? callback) {
     _onPointerDataPacket = callback;
     _onPointerDataPacketZone = Zone.current;
   }
@@ -376,11 +374,11 @@ class EngineWindow extends ui.Window {
   }
 
   @override
-  ui.VoidCallback get onSemanticsEnabledChanged => _onSemanticsEnabledChanged;
-  ui.VoidCallback _onSemanticsEnabledChanged;
-  Zone _onSemanticsEnabledChangedZone;
+  ui.VoidCallback? get onSemanticsEnabledChanged => _onSemanticsEnabledChanged;
+  ui.VoidCallback? _onSemanticsEnabledChanged;
+  Zone? _onSemanticsEnabledChangedZone;
   @override
-  set onSemanticsEnabledChanged(ui.VoidCallback callback) {
+  set onSemanticsEnabledChanged(ui.VoidCallback? callback) {
     _onSemanticsEnabledChanged = callback;
     _onSemanticsEnabledChangedZone = Zone.current;
   }
@@ -392,11 +390,11 @@ class EngineWindow extends ui.Window {
   }
 
   @override
-  ui.SemanticsActionCallback get onSemanticsAction => _onSemanticsAction;
-  ui.SemanticsActionCallback _onSemanticsAction;
-  Zone _onSemanticsActionZone;
+  ui.SemanticsActionCallback? get onSemanticsAction => _onSemanticsAction;
+  ui.SemanticsActionCallback? _onSemanticsAction;
+  Zone? _onSemanticsActionZone;
   @override
-  set onSemanticsAction(ui.SemanticsActionCallback callback) {
+  set onSemanticsAction(ui.SemanticsActionCallback? callback) {
     _onSemanticsAction = callback;
     _onSemanticsActionZone = Zone.current;
   }
@@ -404,18 +402,18 @@ class EngineWindow extends ui.Window {
   /// Engine code should use this method instead of the callback directly.
   /// Otherwise zones won't work properly.
   void invokeOnSemanticsAction(
-      int id, ui.SemanticsAction action, ByteData args) {
-    _invoke3<int, ui.SemanticsAction, ByteData>(
+      int id, ui.SemanticsAction action, ByteData? args) {
+    _invoke3<int, ui.SemanticsAction, ByteData?>(
         _onSemanticsAction, _onSemanticsActionZone, id, action, args);
   }
 
   @override
-  ui.VoidCallback get onAccessibilityFeaturesChanged =>
+  ui.VoidCallback? get onAccessibilityFeaturesChanged =>
       _onAccessibilityFeaturesChanged;
-  ui.VoidCallback _onAccessibilityFeaturesChanged;
-  Zone _onAccessibilityFeaturesChangedZone;
+  ui.VoidCallback? _onAccessibilityFeaturesChanged;
+  Zone? _onAccessibilityFeaturesChangedZone;
   @override
-  set onAccessibilityFeaturesChanged(ui.VoidCallback callback) {
+  set onAccessibilityFeaturesChanged(ui.VoidCallback? callback) {
     _onAccessibilityFeaturesChanged = callback;
     _onAccessibilityFeaturesChangedZone = Zone.current;
   }
@@ -428,11 +426,11 @@ class EngineWindow extends ui.Window {
   }
 
   @override
-  ui.PlatformMessageCallback get onPlatformMessage => _onPlatformMessage;
-  ui.PlatformMessageCallback _onPlatformMessage;
-  Zone _onPlatformMessageZone;
+  ui.PlatformMessageCallback? get onPlatformMessage => _onPlatformMessage;
+  ui.PlatformMessageCallback? _onPlatformMessage;
+  Zone? _onPlatformMessageZone;
   @override
-  set onPlatformMessage(ui.PlatformMessageCallback callback) {
+  set onPlatformMessage(ui.PlatformMessageCallback? callback) {
     _onPlatformMessage = callback;
     _onPlatformMessageZone = Zone.current;
   }
@@ -440,8 +438,8 @@ class EngineWindow extends ui.Window {
   /// Engine code should use this method instead of the callback directly.
   /// Otherwise zones won't work properly.
   void invokeOnPlatformMessage(
-      String name, ByteData data, ui.PlatformMessageResponseCallback callback) {
-    _invoke3<String, ByteData, ui.PlatformMessageResponseCallback>(
+      String name, ByteData? data, ui.PlatformMessageResponseCallback callback) {
+    _invoke3<String, ByteData?, ui.PlatformMessageResponseCallback>(
       _onPlatformMessage,
       _onPlatformMessageZone,
       name,
@@ -452,9 +450,9 @@ class EngineWindow extends ui.Window {
 
   @override
   void sendPlatformMessage(
-    String/*!*/ name,
-    ByteData/*?*/ data,
-    ui.PlatformMessageResponseCallback/*?*/ callback,
+    String name,
+    ByteData? data,
+    ui.PlatformMessageResponseCallback? callback,
   ) {
     _sendPlatformMessage(
         name, data, _zonedPlatformMessageResponseCallback(callback));
@@ -462,7 +460,7 @@ class EngineWindow extends ui.Window {
 
   /// Wraps the given [callback] in another callback that ensures that the
   /// original callback is called in the zone it was registered in.
-  static ui.PlatformMessageResponseCallback/*?*/ _zonedPlatformMessageResponseCallback(ui.PlatformMessageResponseCallback/*?*/ callback) {
+  static ui.PlatformMessageResponseCallback? _zonedPlatformMessageResponseCallback(ui.PlatformMessageResponseCallback? callback) {
     if (callback == null) {
       return null;
     }
@@ -470,15 +468,15 @@ class EngineWindow extends ui.Window {
     // Store the zone in which the callback is being registered.
     final Zone registrationZone = Zone.current;
 
-    return (ByteData data) {
+    return (ByteData? data) {
       registrationZone.runUnaryGuarded(callback, data);
     };
   }
 
   void _sendPlatformMessage(
-    String/*!*/ name,
-    ByteData/*?*/ data,
-    ui.PlatformMessageResponseCallback/*?*/ callback,
+    String name,
+    ByteData? data,
+    ui.PlatformMessageResponseCallback? callback,
   ) {
     // In widget tests we want to bypass processing of platform messages.
     if (assertionsEnabled && ui.debugEmulateFlutterTesterEnvironment) {
@@ -497,8 +495,8 @@ class EngineWindow extends ui.Window {
 
     switch (name) {
       case 'flutter/assets':
-        assert(ui.webOnlyAssetManager != null);
-        final String url = utf8.decode(data.buffer.asUint8List());
+        assert(ui.webOnlyAssetManager != null); // ignore: unnecessary_null_comparison
+        final String url = utf8.decode(data!.buffer.asUint8List());
         ui.webOnlyAssetManager.load(url).then((ByteData assetData) {
           _replyToPlatformMessage(callback, assetData);
         }, onError: (dynamic error) {
@@ -519,7 +517,7 @@ class EngineWindow extends ui.Window {
             });
             return;
           case 'HapticFeedback.vibrate':
-            final String type = decoded.arguments;
+            final String? type = decoded.arguments;
             domRenderer.vibrate(_getHapticFeedbackDuration(type));
             _replyToPlatformMessage(
                 callback, codec.encodeSuccessEnvelope(true));
@@ -532,7 +530,7 @@ class EngineWindow extends ui.Window {
                 callback, codec.encodeSuccessEnvelope(true));
             return;
           case 'SystemChrome.setPreferredOrientations':
-            final List<dynamic> arguments = decoded.arguments;
+            final List<dynamic>? arguments = decoded.arguments;
             domRenderer.setPreferredOrientation(arguments).then((bool success) {
               _replyToPlatformMessage(callback,
                 codec.encodeSuccessEnvelope(success));
@@ -559,10 +557,10 @@ class EngineWindow extends ui.Window {
       case 'flutter/mousecursor':
         const MethodCodec codec = StandardMethodCodec();
         final MethodCall decoded = codec.decodeMethodCall(data);
-        final Map<dynamic, dynamic> arguments = decoded.arguments;
+        final Map<dynamic, dynamic>? arguments = decoded.arguments;
         switch (decoded.method) {
           case 'activateSystemCursor':
-            MouseCursor.instance.activateSystemCursor(arguments['kind']);
+            MouseCursor.instance!.activateSystemCursor(arguments!['kind']);
         }
         return;
 
@@ -576,9 +574,9 @@ class EngineWindow extends ui.Window {
 
       case 'flutter/platform_views':
         if (experimentalUseSkia) {
-          rasterizer.viewEmbedder.handlePlatformViewCall(data, callback);
+          rasterizer!.surface.viewEmbedder.handlePlatformViewCall(data, callback);
         } else {
-          ui.handlePlatformViewCall(data, callback);
+          ui.handlePlatformViewCall(data!, callback!);
         }
         return;
 
@@ -592,17 +590,17 @@ class EngineWindow extends ui.Window {
       case 'flutter/navigation':
         const MethodCodec codec = JSONMethodCodec();
         final MethodCall decoded = codec.decodeMethodCall(data);
-        final Map<String, dynamic> message = decoded.arguments;
+        final Map<String, dynamic>? message = decoded.arguments;
         switch (decoded.method) {
           case 'routeUpdated':
           case 'routePushed':
           case 'routeReplaced':
-            _browserHistory.setRouteName(message['routeName']);
+            _browserHistory.setRouteName(message!['routeName']);
             _replyToPlatformMessage(
                 callback, codec.encodeSuccessEnvelope(true));
             break;
           case 'routePopped':
-            _browserHistory.setRouteName(message['previousRouteName']);
+            _browserHistory.setRouteName(message!['previousRouteName']);
             _replyToPlatformMessage(
                 callback, codec.encodeSuccessEnvelope(true));
             break;
@@ -615,7 +613,7 @@ class EngineWindow extends ui.Window {
     }
 
     if (pluginMessageCallHandler != null) {
-      pluginMessageCallHandler(name, data, callback);
+      pluginMessageCallHandler!(name, data, callback);
       return;
     }
 
@@ -629,7 +627,7 @@ class EngineWindow extends ui.Window {
     // callback(null);
   }
 
-  int _getHapticFeedbackDuration(String type) {
+  int _getHapticFeedbackDuration(String? type) {
     switch (type) {
       case 'HapticFeedbackType.lightImpact':
         return DomRenderer.vibrateLightImpact;
@@ -648,8 +646,8 @@ class EngineWindow extends ui.Window {
   /// messages and responses have to be exchanged asynchronously. We simulate
   /// that by adding a zero-length delay to the reply.
   void _replyToPlatformMessage(
-    ui.PlatformMessageResponseCallback callback,
-    ByteData data,
+    ui.PlatformMessageResponseCallback? callback,
+    ByteData? data,
   ) {
     Future<void>.delayed(Duration.zero).then((_) {
       if (callback != null) {
@@ -681,7 +679,7 @@ class EngineWindow extends ui.Window {
   /// A callback that is invoked whenever [_brightnessMediaQuery] changes value.
   ///
   /// Updates the [_platformBrightness] with the new user preference.
-  html.EventListener _brightnessMediaQueryListener;
+  html.EventListener? _brightnessMediaQueryListener;
 
   /// Set the callback function for listening changes in [_brightnessMediaQuery] value.
   void _addBrightnessMediaQueryListener() {
@@ -690,7 +688,7 @@ class EngineWindow extends ui.Window {
         : ui.Brightness.light);
 
     _brightnessMediaQueryListener = (html.Event event) {
-      final html.MediaQueryListEvent mqEvent = event;
+      final html.MediaQueryListEvent mqEvent = event as html.MediaQueryListEvent;
       _updatePlatformBrightness(
           mqEvent.matches ? ui.Brightness.dark : ui.Brightness.light);
     };
@@ -707,34 +705,34 @@ class EngineWindow extends ui.Window {
   }
 
   @override
-  void render(ui.Scene/*!*/ scene) {
+  void render(ui.Scene scene) {
     if (experimentalUseSkia) {
-      final LayerScene layerScene = scene;
-      rasterizer.draw(layerScene.layerTree);
+      final LayerScene layerScene = scene as LayerScene;
+      rasterizer!.draw(layerScene.layerTree);
     } else {
-      final SurfaceScene surfaceScene = scene;
+      final SurfaceScene surfaceScene = scene as SurfaceScene;
       domRenderer.renderScene(surfaceScene.webOnlyRootElement);
     }
   }
 
   @visibleForTesting
-  Rasterizer rasterizer = experimentalUseSkia ? Rasterizer(Surface()) : null;
+  late Rasterizer? rasterizer = experimentalUseSkia ? Rasterizer(Surface(HtmlViewEmbedder())) : null;
 }
 
-bool _handleWebTestEnd2EndMessage(MethodCodec codec, ByteData data) {
+bool _handleWebTestEnd2EndMessage(MethodCodec codec, ByteData? data) {
   final MethodCall decoded = codec.decodeMethodCall(data);
   double ratio = double.parse(decoded.arguments);
   switch (decoded.method) {
     case 'setDevicePixelRatio':
       window.debugOverrideDevicePixelRatio(ratio);
-      window.onMetricsChanged();
+      window.onMetricsChanged!();
       return true;
   }
   return false;
 }
 
 /// Invokes [callback] inside the given [zone].
-void _invoke(void callback(), Zone zone) {
+void _invoke(void callback()?, Zone? zone) {
   if (callback == null) {
     return;
   }
@@ -744,12 +742,12 @@ void _invoke(void callback(), Zone zone) {
   if (identical(zone, Zone.current)) {
     callback();
   } else {
-    zone.runGuarded(callback);
+    zone!.runGuarded(callback);
   }
 }
 
 /// Invokes [callback] inside the given [zone] passing it [arg].
-void _invoke1<A>(void callback(A a), Zone zone, A arg) {
+void _invoke1<A>(void callback(A a)?, Zone? zone, A arg) {
   if (callback == null) {
     return;
   }
@@ -759,13 +757,13 @@ void _invoke1<A>(void callback(A a), Zone zone, A arg) {
   if (identical(zone, Zone.current)) {
     callback(arg);
   } else {
-    zone.runUnaryGuarded<A>(callback, arg);
+    zone!.runUnaryGuarded<A>(callback, arg);
   }
 }
 
 /// Invokes [callback] inside the given [zone] passing it [arg1], [arg2], and [arg3].
 void _invoke3<A1, A2, A3>(
-    void callback(A1 a1, A2 a2, A3 a3), Zone zone, A1 arg1, A2 arg2, A3 arg3) {
+    void callback(A1 a1, A2 a2, A3 a3)?, Zone? zone, A1 arg1, A2 arg2, A3 arg3) {
   if (callback == null) {
     return;
   }
@@ -775,7 +773,7 @@ void _invoke3<A1, A2, A3>(
   if (identical(zone, Zone.current)) {
     callback(arg1, arg2, arg3);
   } else {
-    zone.runGuarded(() {
+    zone!.runGuarded(() {
       callback(arg1, arg2, arg3);
     });
   }
@@ -786,15 +784,15 @@ void _invoke3<A1, A2, A3>(
 /// `dart:ui` window delegates to this value. However, this value has a wider
 /// API surface, providing Web-specific functionality that the standard
 /// `dart:ui` version does not.
-final EngineWindow/*!*/ window = EngineWindow();
+final EngineWindow window = EngineWindow();
 
 /// The Web implementation of [ui.WindowPadding].
 class WindowPadding implements ui.WindowPadding {
   const WindowPadding({
-    this.left,
-    this.top,
-    this.right,
-    this.bottom,
+    required this.left,
+    required this.top,
+    required this.right,
+    required this.bottom,
   });
 
   final double left;

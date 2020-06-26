@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 /// A canvas that renders to DOM elements and CSS properties.
@@ -111,10 +111,10 @@ class DomCanvas extends EngineCanvas with SaveElementStackTracking {
       ..transform = effectiveTransform;
 
     final String cssColor =
-        paint.color == null ? '#000000' : colorToCssString(paint.color);
+        paint.color == null ? '#000000' : colorToCssString(paint.color)!;
 
     if (paint.maskFilter != null) {
-      style.filter = 'blur(${paint.maskFilter.webOnlySigma}px)';
+      style.filter = 'blur(${paint.maskFilter!.webOnlySigma}px)';
     }
 
     if (isStroke) {
@@ -179,7 +179,7 @@ class DomCanvas extends EngineCanvas with SaveElementStackTracking {
   @override
   void drawParagraph(ui.Paragraph paragraph, ui.Offset offset) {
     final html.Element paragraphElement =
-        _drawParagraphElement(paragraph, offset, transform: currentTransform);
+        _drawParagraphElement(paragraph as EngineParagraph, offset, transform: currentTransform);
     currentElement.append(paragraphElement);
   }
 

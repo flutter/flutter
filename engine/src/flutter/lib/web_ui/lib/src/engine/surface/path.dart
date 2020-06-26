@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 /// A complex, one-dimensional subset of a plane.
@@ -26,18 +26,18 @@ class SurfacePath implements ui.Path {
   final List<Subpath> subpaths;
   ui.PathFillType _fillType = ui.PathFillType.nonZero;
 
-  Subpath get _currentSubpath => subpaths.isEmpty ? null : subpaths.last;
+  Subpath get _currentSubpath => subpaths.last;
 
-  List<PathCommand> get _commands => _currentSubpath?.commands;
+  List<PathCommand> get _commands => _currentSubpath.commands;
 
   /// The current x-coordinate for this path.
-  double get _currentX => _currentSubpath?.currentX ?? 0.0;
+  double get _currentX => subpaths.isNotEmpty ? _currentSubpath.currentX : 0.0;
 
   /// The current y-coordinate for this path.
-  double get _currentY => _currentSubpath?.currentY ?? 0.0;
+  double get _currentY => subpaths.isNotEmpty ? _currentSubpath.currentY : 0.0;
 
   /// Recorder used for hit testing paths.
-  static RawRecordingCanvas _rawRecorder;
+  static RawRecordingCanvas? _rawRecorder;
 
   SurfacePath() : subpaths = <Subpath>[];
 
@@ -465,7 +465,7 @@ class SurfacePath implements ui.Path {
   /// The `points` argument is interpreted as offsets from the origin.
   @override
   void addPolygon(List<ui.Offset> points, bool close) {
-    assert(points != null);
+    assert(points != null); // ignore: unnecessary_null_comparison
     if (points.isEmpty) {
       return;
     }
@@ -504,13 +504,14 @@ class SurfacePath implements ui.Path {
   /// after the matrix is translated by the given offset. The matrix is a 4x4
   /// matrix stored in column major order.
   @override
-  void addPath(ui.Path path, ui.Offset offset, {Float64List matrix4}) {
+  void addPath(ui.Path path, ui.Offset offset, {Float64List? matrix4}) {
+    // ignore: unnecessary_null_comparison
     assert(path != null); // path is checked on the engine side
     assert(offsetIsValid(offset));
     if (matrix4 != null) {
-      _addPathWithMatrix(path, offset.dx, offset.dy, toMatrix32(matrix4));
+      _addPathWithMatrix(path as SurfacePath, offset.dx, offset.dy, toMatrix32(matrix4));
     } else {
-      _addPath(path, offset.dx, offset.dy);
+      _addPath(path as SurfacePath, offset.dx, offset.dy);
     }
   }
 
@@ -539,15 +540,16 @@ class SurfacePath implements ui.Path {
   /// after the matrix is translated by the given `offset`.  The matrix is a 4x4
   /// matrix stored in column major order.
   @override
-  void extendWithPath(ui.Path path, ui.Offset offset, {Float64List matrix4}) {
+  void extendWithPath(ui.Path path, ui.Offset offset, {Float64List? matrix4}) {
+    // ignore: unnecessary_null_comparison
     assert(path != null); // path is checked on the engine side
     assert(offsetIsValid(offset));
     if (matrix4 != null) {
       final Float32List matrix32 = toMatrix32(matrix4);
       assert(matrix4IsValid(matrix32));
-      _extendWithPathAndMatrix(path, offset.dx, offset.dy, matrix32);
+      _extendWithPathAndMatrix(path as SurfacePath, offset.dx, offset.dy, matrix32);
     } else {
-      _extendWithPath(path, offset.dx, offset.dy);
+      _extendWithPath(path as SurfacePath, offset.dx, offset.dy);
     }
   }
 
@@ -668,22 +670,22 @@ class SurfacePath implements ui.Path {
     final ui.Size size = window.physicalSize;
     // If device pixel ratio has changed we can't reuse prior raw recorder.
     if (_rawRecorder != null &&
-        _rawRecorder._devicePixelRatio !=
+        _rawRecorder!._devicePixelRatio !=
             EngineWindow.browserDevicePixelRatio) {
       _rawRecorder = null;
     }
     final double dpr = window.devicePixelRatio;
-    _rawRecorder ??=
+    final RawRecordingCanvas rawRecorder = _rawRecorder ??=
         RawRecordingCanvas(ui.Size(size.width / dpr, size.height / dpr));
     // Account for the shift due to padding.
-    _rawRecorder.translate(-BitmapCanvas.kPaddingPixels.toDouble(),
+    rawRecorder.translate(-BitmapCanvas.kPaddingPixels.toDouble(),
         -BitmapCanvas.kPaddingPixels.toDouble());
-    _rawRecorder.drawPath(
+    rawRecorder.drawPath(
         this, (SurfacePaint()..color = const ui.Color(0xFF000000)).paintData);
-    final double recorderDevicePixelRatio = _rawRecorder._devicePixelRatio;
-    final bool result = _rawRecorder._canvasPool.context.isPointInPath(
+    final double recorderDevicePixelRatio = rawRecorder._devicePixelRatio;
+    final bool result = rawRecorder._canvasPool.context.isPointInPath(
         pointX * recorderDevicePixelRatio, pointY * recorderDevicePixelRatio);
-    _rawRecorder.dispose();
+    rawRecorder.dispose();
     return result;
   }
 
@@ -746,17 +748,17 @@ class SurfacePath implements ui.Path {
         bool skipBounds = false;
         switch (op.type) {
           case PathCommandTypes.moveTo:
-            final MoveTo cmd = op;
+            final MoveTo cmd = op as MoveTo;
             curX = minX = maxX = cmd.x;
             curY = minY = maxY = cmd.y;
             break;
           case PathCommandTypes.lineTo:
-            final LineTo cmd = op;
+            final LineTo cmd = op as LineTo;
             curX = minX = maxX = cmd.x;
             curY = minY = maxY = cmd.y;
             break;
           case PathCommandTypes.ellipse:
-            final Ellipse cmd = op;
+            final Ellipse cmd = op as Ellipse;
             // Rotate 4 corners of bounding box.
             final double rx = cmd.radiusX;
             final double ry = cmd.radiusY;
@@ -805,7 +807,7 @@ class SurfacePath implements ui.Path {
             curY = centerY;
             break;
           case PathCommandTypes.quadraticCurveTo:
-            final QuadraticCurveTo cmd = op;
+            final QuadraticCurveTo cmd = op as QuadraticCurveTo;
             final double x1 = curX;
             final double y1 = curY;
             final double cpX = cmd.x1;
@@ -827,14 +829,14 @@ class SurfacePath implements ui.Path {
 
             double denom = x1 - (2 * cpX) + x2;
             if (denom.abs() > epsilon) {
-              final num t1 = (x1 - cpX) / denom;
+              final double t1 = (x1 - cpX) / denom;
               if ((t1 >= 0) && (t1 <= 1.0)) {
                 // Solve (x,y) for curve at t = tx to find extrema
-                final num tprime = 1.0 - t1;
-                final num extremaX = (tprime * tprime * x1) +
+                final double tprime = 1.0 - t1;
+                final double extremaX = (tprime * tprime * x1) +
                     (2 * t1 * tprime * cpX) +
                     (t1 * t1 * x2);
-                final num extremaY = (tprime * tprime * y1) +
+                final double extremaY = (tprime * tprime * y1) +
                     (2 * t1 * tprime * cpY) +
                     (t1 * t1 * y2);
                 // Expand bounds.
@@ -847,13 +849,13 @@ class SurfacePath implements ui.Path {
             // Now calculate dy/dt = 0
             denom = y1 - (2 * cpY) + y2;
             if (denom.abs() > epsilon) {
-              final num t2 = (y1 - cpY) / denom;
+              final double t2 = (y1 - cpY) / denom;
               if ((t2 >= 0) && (t2 <= 1.0)) {
-                final num tprime2 = 1.0 - t2;
-                final num extrema2X = (tprime2 * tprime2 * x1) +
+                final double tprime2 = 1.0 - t2;
+                final double extrema2X = (tprime2 * tprime2 * x1) +
                     (2 * t2 * tprime2 * cpX) +
                     (t2 * t2 * x2);
-                final num extrema2Y = (tprime2 * tprime2 * y1) +
+                final double extrema2Y = (tprime2 * tprime2 * y1) +
                     (2 * t2 * tprime2 * cpY) +
                     (t2 * t2 * y2);
                 // Expand bounds.
@@ -867,7 +869,7 @@ class SurfacePath implements ui.Path {
             curY = y2;
             break;
           case PathCommandTypes.bezierCurveTo:
-            final BezierCurveTo cmd = op;
+            final BezierCurveTo cmd = op as BezierCurveTo;
             final double startX = curX;
             final double startY = curY;
             final double cpX1 = cmd.x1;
@@ -902,13 +904,13 @@ class SurfacePath implements ui.Path {
               // Now find roots for quadratic equation with known coefficients
               // a,b,c
               // The roots are (-b+-sqrt(b*b-4*a*c)) / 2a
-              num s = (b * b) - (4 * a * c);
+              double s = (b * b) - (4 * a * c);
               // If s is negative, we have no real roots
               if ((s >= 0.0) && (a.abs() > epsilon)) {
                 if (s == 0.0) {
                   // we have only 1 root
-                  final num t = -b / (2 * a);
-                  final num tprime = 1.0 - t;
+                  final double t = -b / (2 * a);
+                  final double tprime = 1.0 - t;
                   if ((t >= 0.0) && (t <= 1.0)) {
                     extremaX = ((tprime * tprime * tprime) * startX) +
                         ((3 * tprime * tprime * t) * cpX1) +
@@ -920,8 +922,8 @@ class SurfacePath implements ui.Path {
                 } else {
                   // we have 2 roots
                   s = math.sqrt(s);
-                  num t = (-b - s) / (2 * a);
-                  num tprime = 1.0 - t;
+                  double t = (-b - s) / (2 * a);
+                  double tprime = 1.0 - t;
                   if ((t >= 0.0) && (t <= 1.0)) {
                     extremaX = ((tprime * tprime * tprime) * startX) +
                         ((3 * tprime * tprime * t) * cpX1) +
@@ -960,13 +962,13 @@ class SurfacePath implements ui.Path {
               // Now find roots for quadratic equation with known coefficients
               // a,b,c
               // The roots are (-b+-sqrt(b*b-4*a*c)) / 2a
-              num s = (b * b) - (4 * a * c);
+              double s = (b * b) - (4 * a * c);
               // If s is negative, we have no real roots
               if ((s >= 0.0) && (a.abs() > epsilon)) {
                 if (s == 0.0) {
                   // we have only 1 root
-                  final num t = -b / (2 * a);
-                  final num tprime = 1.0 - t;
+                  final double t = -b / (2 * a);
+                  final double tprime = 1.0 - t;
                   if ((t >= 0.0) && (t <= 1.0)) {
                     extremaY = ((tprime * tprime * tprime) * startY) +
                         ((3 * tprime * tprime * t) * cpY1) +
@@ -978,8 +980,8 @@ class SurfacePath implements ui.Path {
                 } else {
                   // we have 2 roots
                   s = math.sqrt(s);
-                  final num t = (-b - s) / (2 * a);
-                  final num tprime = 1.0 - t;
+                  final double t = (-b - s) / (2 * a);
+                  final double tprime = 1.0 - t;
                   if ((t >= 0.0) && (t <= 1.0)) {
                     extremaY = ((tprime * tprime * tprime) * startY) +
                         ((3 * tprime * tprime * t) * cpY1) +
@@ -989,8 +991,8 @@ class SurfacePath implements ui.Path {
                     maxY = math.max(extremaY, maxY);
                   }
                   // check 2nd root
-                  final num t2 = (-b + s) / (2 * a);
-                  final num tprime2 = 1.0 - t2;
+                  final double t2 = (-b + s) / (2 * a);
+                  final double tprime2 = 1.0 - t2;
                   if ((t2 >= 0.0) && (t2 <= 1.0)) {
                     extremaY = ((tprime2 * tprime2 * tprime2) * startY) +
                         ((3 * tprime2 * tprime2 * t2) * cpY1) +
@@ -1006,7 +1008,7 @@ class SurfacePath implements ui.Path {
             curY = endY;
             break;
           case PathCommandTypes.rect:
-            final RectCommand cmd = op;
+            final RectCommand cmd = op as RectCommand;
             minX = cmd.x;
             double width = cmd.width;
             if (cmd.width < 0) {
@@ -1025,7 +1027,7 @@ class SurfacePath implements ui.Path {
             maxY = minY + height;
             break;
           case PathCommandTypes.rRect:
-            final RRectCommand cmd = op;
+            final RRectCommand cmd = op as RRectCommand;
             final ui.RRect rRect = cmd.rrect;
             curX = minX = rRect.left;
             maxX = rRect.left + rRect.width;
@@ -1072,7 +1074,7 @@ class SurfacePath implements ui.Path {
   ///
   /// Used for web optimization of physical shape represented as
   /// a persistent div.
-  ui.RRect get webOnlyPathAsRoundedRect {
+  ui.RRect? get webOnlyPathAsRoundedRect {
     if (subpaths.length != 1) {
       return null;
     }
@@ -1088,7 +1090,7 @@ class SurfacePath implements ui.Path {
   ///
   /// Used for web optimization of physical shape represented as
   /// a persistent div.
-  ui.Rect get webOnlyPathAsRect {
+  ui.Rect? get webOnlyPathAsRect {
     if (subpaths.length != 1) {
       return null;
     }
@@ -1106,7 +1108,7 @@ class SurfacePath implements ui.Path {
   ///
   /// Used for web optimization of physical shape represented as
   /// a persistent div.
-  Ellipse get webOnlyPathAsCircle {
+  Ellipse? get webOnlyPathAsCircle {
     if (subpaths.length != 1) {
       return null;
     }

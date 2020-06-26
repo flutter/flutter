@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 /// EXPERIMENTAL: Enable the Skia-based rendering backend.
@@ -21,8 +21,8 @@ const String canvasKitBaseUrl = 'https://unpkg.com/canvaskit-wasm@0.16.2/bin/';
 /// This calls `CanvasKitInit` and assigns the global [canvasKit] object.
 Future<void> initializeSkia() {
   final Completer<void> canvasKitCompleter = Completer<void>();
-  StreamSubscription<html.Event> loadSubscription;
-  loadSubscription = domRenderer.canvasKitScript.onLoad.listen((_) {
+  late StreamSubscription<html.Event> loadSubscription;
+  loadSubscription = domRenderer.canvasKitScript!.onLoad.listen((_) {
     loadSubscription.cancel();
     final js.JsObject canvasKitInitArgs = js.JsObject.jsify(<String, dynamic>{
       'locateFile': (String file, String unusedBase) => canvasKitBaseUrl + file,
@@ -46,15 +46,16 @@ Future<void> initializeSkia() {
 /// The entrypoint into all CanvasKit functions and classes.
 ///
 /// This is created by [initializeSkia].
-js.JsObject canvasKit;
+late js.JsObject canvasKit;
 
 /// The Skia font collection.
-SkiaFontCollection skiaFontCollection;
+SkiaFontCollection get skiaFontCollection => _skiaFontCollection!;
+SkiaFontCollection? _skiaFontCollection;
 
 /// Initializes [skiaFontCollection].
 void ensureSkiaFontCollectionInitialized() {
-  skiaFontCollection ??= SkiaFontCollection();
+  _skiaFontCollection ??= SkiaFontCollection();
 }
 
 /// The scene host, where the root canvas and overlay canvases are added to.
-html.Element skiaSceneHost;
+html.Element? skiaSceneHost;

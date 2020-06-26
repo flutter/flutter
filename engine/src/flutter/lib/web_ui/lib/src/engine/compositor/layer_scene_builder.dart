@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 class LayerScene implements ui.Scene {
   final LayerTree layerTree;
 
-  LayerScene(Layer rootLayer) : layerTree = LayerTree() {
+  LayerScene(Layer? rootLayer) : layerTree = LayerTree() {
     layerTree.rootLayer = rootLayer;
   }
 
@@ -16,21 +16,21 @@ class LayerScene implements ui.Scene {
   void dispose() {}
 
   @override
-  Future<ui.Image> toImage(int width, int height) => null;
-
-  html.Element get webOnlyRootElement => null;
+  Future<ui.Image> toImage(int width, int height) {
+    throw UnsupportedError('LayerScene.toImage not implemented.');
+  }
 }
 
 class LayerSceneBuilder implements ui.SceneBuilder {
-  Layer rootLayer;
-  ContainerLayer currentLayer;
+  Layer? rootLayer;
+  ContainerLayer? currentLayer;
 
   @override
   void addChildScene({
     ui.Offset offset = ui.Offset.zero,
     double width = 0.0,
     double height = 0.0,
-    ui.SceneHost sceneHost,
+    ui.SceneHost? sceneHost,
     bool hitTestable = true,
   }) {
     throw UnimplementedError();
@@ -49,7 +49,7 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     bool isComplexHint = false,
     bool willChangeHint = false,
   }) {
-    currentLayer.add(PictureLayer(picture, offset, isComplexHint, willChangeHint));
+    currentLayer!.add(PictureLayer(picture as SkPicture, offset, isComplexHint, willChangeHint));
   }
 
   @override
@@ -57,7 +57,7 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     if (currentLayer == null) {
       return;
     }
-    currentLayer.add(retainedLayer);
+    currentLayer!.add(retainedLayer as Layer);
   }
 
   @override
@@ -78,9 +78,9 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     ui.Offset offset = ui.Offset.zero,
     double width = 0.0,
     double height = 0.0,
-    Object webOnlyPaintedBy,
+    Object? webOnlyPaintedBy,
   }) {
-    currentLayer.add(PlatformViewLayer(viewId, offset, width, height));
+    currentLayer!.add(PlatformViewLayer(viewId, offset, width, height));
   }
 
   @override
@@ -93,43 +93,43 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     if (currentLayer == null) {
       return;
     }
-    currentLayer = currentLayer.parent;
+    currentLayer = currentLayer!.parent;
   }
 
   @override
-  ui.BackdropFilterEngineLayer pushBackdropFilter(
+  ui.BackdropFilterEngineLayer? pushBackdropFilter(
     ui.ImageFilter filter, {
-    ui.EngineLayer oldLayer,
+    ui.EngineLayer? oldLayer,
   }) {
     pushLayer(BackdropFilterLayer(filter));
     return null;
   }
 
   @override
-  ui.ClipPathEngineLayer pushClipPath(
+  ui.ClipPathEngineLayer? pushClipPath(
     ui.Path path, {
     ui.Clip clipBehavior = ui.Clip.antiAlias,
-    ui.EngineLayer oldLayer,
+    ui.EngineLayer? oldLayer,
   }) {
     pushLayer(ClipPathLayer(path, clipBehavior));
     return null;
   }
 
   @override
-  ui.ClipRRectEngineLayer pushClipRRect(
+  ui.ClipRRectEngineLayer? pushClipRRect(
     ui.RRect rrect, {
-    ui.Clip clipBehavior,
-    ui.EngineLayer oldLayer,
+    ui.Clip? clipBehavior,
+    ui.EngineLayer? oldLayer,
   }) {
     pushLayer(ClipRRectLayer(rrect, clipBehavior));
     return null;
   }
 
   @override
-  ui.ClipRectEngineLayer pushClipRect(
+  ui.ClipRectEngineLayer? pushClipRect(
     ui.Rect rect, {
     ui.Clip clipBehavior = ui.Clip.antiAlias,
-    ui.EngineLayer oldLayer,
+    ui.EngineLayer? oldLayer,
   }) {
     pushLayer(ClipRectLayer(rect, clipBehavior));
     return null;
@@ -138,17 +138,17 @@ class LayerSceneBuilder implements ui.SceneBuilder {
   @override
   ui.ColorFilterEngineLayer pushColorFilter(
     ui.ColorFilter filter, {
-    ui.ColorFilterEngineLayer oldLayer,
+    ui.ColorFilterEngineLayer? oldLayer,
   }) {
-    assert(filter != null);
+    assert(filter != null); // ignore: unnecessary_null_comparison
     throw UnimplementedError();
   }
 
-  ui.ImageFilterEngineLayer pushImageFilter(
+  ui.ImageFilterEngineLayer? pushImageFilter(
     ui.ImageFilter filter, {
-    ui.ImageFilterEngineLayer oldLayer,
+    ui.ImageFilterEngineLayer? oldLayer,
   }) {
-    assert(filter != null);
+    assert(filter != null); // ignore: unnecessary_null_comparison
     pushLayer(ImageFilterLayer(filter));
     return null;
   }
@@ -157,7 +157,7 @@ class LayerSceneBuilder implements ui.SceneBuilder {
   ui.OffsetEngineLayer pushOffset(
     double dx,
     double dy, {
-    ui.EngineLayer oldLayer,
+    ui.EngineLayer? oldLayer,
   }) {
     final Matrix4 matrix = Matrix4.translationValues(dx, dy, 0.0);
     final TransformLayer layer = TransformLayer(matrix);
@@ -168,7 +168,7 @@ class LayerSceneBuilder implements ui.SceneBuilder {
   @override
   ui.OpacityEngineLayer pushOpacity(
     int alpha, {
-    ui.EngineLayer oldLayer,
+    ui.EngineLayer? oldLayer,
     ui.Offset offset = ui.Offset.zero,
   }) {
     final OpacityLayer layer = OpacityLayer(alpha, offset);
@@ -178,12 +178,12 @@ class LayerSceneBuilder implements ui.SceneBuilder {
 
   @override
   ui.PhysicalShapeEngineLayer pushPhysicalShape({
-    ui.Path path,
-    double elevation,
-    ui.Color color,
-    ui.Color shadowColor,
+    required ui.Path path,
+    required double elevation,
+    required ui.Color color,
+    ui.Color? shadowColor,
     ui.Clip clipBehavior = ui.Clip.none,
-    ui.EngineLayer oldLayer,
+    ui.EngineLayer? oldLayer,
   }) {
     final PhysicalShapeLayer layer =
         PhysicalShapeLayer(elevation, color, shadowColor, path, clipBehavior);
@@ -196,15 +196,15 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     ui.Shader shader,
     ui.Rect maskRect,
     ui.BlendMode blendMode, {
-    ui.EngineLayer oldLayer,
+    ui.EngineLayer? oldLayer,
   }) {
     throw UnimplementedError();
   }
 
   @override
-  ui.TransformEngineLayer pushTransform(
+  ui.TransformEngineLayer? pushTransform(
     Float64List matrix4, {
-    ui.EngineLayer oldLayer,
+    ui.EngineLayer? oldLayer,
   }) {
     final Matrix4 matrix = Matrix4.fromFloat32List(toMatrix32(matrix4));
     pushLayer(TransformLayer(matrix));
@@ -236,7 +236,7 @@ class LayerSceneBuilder implements ui.SceneBuilder {
       return;
     }
 
-    currentLayer.add(layer);
+    currentLayer!.add(layer);
     currentLayer = layer;
   }
 

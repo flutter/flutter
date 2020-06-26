@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 // TODO(yjbanov): this is currently very naive. We probably want to cache
@@ -36,10 +36,10 @@ void _reduceCanvasMemoryUsage() {
 /// canvases forcing us to allocate new large canvases.
 class _PaintRequest {
   _PaintRequest({
-    this.canvasSize,
-    this.paintCallback,
-  })  : assert(canvasSize != null),
-        assert(paintCallback != null);
+    required this.canvasSize,
+    required this.paintCallback,
+  })  : assert(canvasSize != null), // ignore: unnecessary_null_comparison
+        assert(paintCallback != null); // ignore: unnecessary_null_comparison
 
   final ui.Size canvasSize;
   final ui.VoidCallback paintCallback;
@@ -50,7 +50,7 @@ class _PaintRequest {
 /// the number of reusable canvases.
 List<_PaintRequest> _paintQueue = <_PaintRequest>[];
 
-void _recycleCanvas(EngineCanvas canvas) {
+void _recycleCanvas(EngineCanvas? canvas) {
   if (canvas is BitmapCanvas) {
     if (canvas.isReusable()) {
       _recycledCanvases.add(canvas);
@@ -99,7 +99,7 @@ PersistedHoudiniPicture houdiniPictureFactory(
 
 class PersistedHoudiniPicture extends PersistedPicture {
   PersistedHoudiniPicture(double dx, double dy, ui.Picture picture, int hints)
-      : super(dx, dy, picture, hints) {
+      : super(dx, dy, picture as EnginePicture, hints) {
     if (!_cssPainterRegistered) {
       _registerCssPainter();
     }
@@ -139,20 +139,20 @@ class PersistedHoudiniPicture extends PersistedPicture {
   int get bitmapPixelCount => 0;
 
   @override
-  void applyPaint(EngineCanvas oldCanvas) {
+  void applyPaint(EngineCanvas? oldCanvas) {
     _recycleCanvas(oldCanvas);
     final HoudiniCanvas canvas = HoudiniCanvas(_optimalLocalCullRect);
     _canvas = canvas;
-    domRenderer.clearDom(rootElement);
-    rootElement.append(_canvas.rootElement);
-    picture.recordingCanvas.apply(_canvas, _optimalLocalCullRect);
+    domRenderer.clearDom(rootElement!);
+    rootElement!.append(_canvas!.rootElement);
+    picture.recordingCanvas!.apply(_canvas, _optimalLocalCullRect);
     canvas.commit();
   }
 }
 
 class PersistedStandardPicture extends PersistedPicture {
   PersistedStandardPicture(double dx, double dy, ui.Picture picture, int hints)
-      : super(dx, dy, picture, hints);
+      : super(dx, dy, picture as EnginePicture, hints);
 
   @override
   double matchForUpdate(PersistedStandardPicture existingSurface) {
@@ -161,15 +161,15 @@ class PersistedStandardPicture extends PersistedPicture {
       return 0.0;
     }
 
-    if (!existingSurface.picture.recordingCanvas.didDraw) {
+    if (!existingSurface.picture.recordingCanvas!.didDraw) {
       // The previous surface didn't draw anything and therefore has no
       // resources to reuse.
       return 1.0;
     }
 
     final bool didRequireBitmap =
-        existingSurface.picture.recordingCanvas.hasArbitraryPaint;
-    final bool requiresBitmap = picture.recordingCanvas.hasArbitraryPaint;
+        existingSurface.picture.recordingCanvas!.hasArbitraryPaint;
+    final bool requiresBitmap = picture.recordingCanvas!.hasArbitraryPaint;
     if (didRequireBitmap != requiresBitmap) {
       // Switching canvas types is always expensive.
       return 1.0;
@@ -179,17 +179,17 @@ class PersistedStandardPicture extends PersistedPicture {
       // which point we may return other values here.
       return 1.0;
     } else {
-      final BitmapCanvas oldCanvas = existingSurface._canvas;
+      final BitmapCanvas? oldCanvas = existingSurface._canvas as BitmapCanvas?;
       if (oldCanvas == null) {
         // We did not allocate a canvas last time. This can happen when the
         // picture is completely clipped out of the view.
         return 1.0;
-      } else if (!oldCanvas.doesFitBounds(_exactLocalCullRect)) {
+      } else if (!oldCanvas.doesFitBounds(_exactLocalCullRect!)) {
         // The canvas needs to be resized before painting.
         return 1.0;
       } else {
-        final int newPixelCount = BitmapCanvas._widthToPhysical(_exactLocalCullRect.width)
-             * BitmapCanvas._heightToPhysical(_exactLocalCullRect.height);
+        final int newPixelCount = BitmapCanvas._widthToPhysical(_exactLocalCullRect!.width)
+             * BitmapCanvas._heightToPhysical(_exactLocalCullRect!.height);
         final int oldPixelCount =
             oldCanvas._widthInBitmapPixels * oldCanvas._heightInBitmapPixels;
 
@@ -206,7 +206,7 @@ class PersistedStandardPicture extends PersistedPicture {
   }
 
   @override
-  Matrix4 get localTransformInverse => null;
+  Matrix4? get localTransformInverse => null;
 
   @override
   int get bitmapPixelCount {
@@ -214,39 +214,39 @@ class PersistedStandardPicture extends PersistedPicture {
       return 0;
     }
 
-    final BitmapCanvas bitmapCanvas = _canvas;
+    final BitmapCanvas bitmapCanvas = _canvas as BitmapCanvas;
     return bitmapCanvas.bitmapPixelCount;
   }
 
   @override
-  void applyPaint(EngineCanvas oldCanvas) {
-    if (picture.recordingCanvas.hasArbitraryPaint) {
+  void applyPaint(EngineCanvas? oldCanvas) {
+    if (picture.recordingCanvas!.hasArbitraryPaint) {
       _applyBitmapPaint(oldCanvas);
     } else {
       _applyDomPaint(oldCanvas);
     }
   }
 
-  void _applyDomPaint(EngineCanvas oldCanvas) {
+  void _applyDomPaint(EngineCanvas? oldCanvas) {
     _recycleCanvas(oldCanvas);
     _canvas = DomCanvas();
-    domRenderer.clearDom(rootElement);
-    rootElement.append(_canvas.rootElement);
-    picture.recordingCanvas.apply(_canvas, _optimalLocalCullRect);
+    domRenderer.clearDom(rootElement!);
+    rootElement!.append(_canvas!.rootElement);
+    picture.recordingCanvas!.apply(_canvas, _optimalLocalCullRect);
   }
 
-  void _applyBitmapPaint(EngineCanvas oldCanvas) {
+  void _applyBitmapPaint(EngineCanvas? oldCanvas) {
     if (oldCanvas is BitmapCanvas &&
-        oldCanvas.doesFitBounds(_optimalLocalCullRect) &&
+        oldCanvas.doesFitBounds(_optimalLocalCullRect!) &&
         oldCanvas.isReusable()) {
       if (_debugShowCanvasReuseStats) {
         DebugCanvasReuseOverlay.instance.keptCount++;
       }
-      oldCanvas.bounds = _optimalLocalCullRect;
+      oldCanvas.bounds = _optimalLocalCullRect!;
       _canvas = oldCanvas;
       oldCanvas.setElementCache(_elementCache);
-      _canvas.clear();
-      picture.recordingCanvas.apply(_canvas, _optimalLocalCullRect);
+      _canvas!.clear();
+      picture.recordingCanvas!.apply(_canvas, _optimalLocalCullRect);
     } else {
       // We can't use the old canvas because the size has changed, so we put
       // it in a cache for later reuse.
@@ -256,20 +256,20 @@ class PersistedStandardPicture extends PersistedPicture {
       // picture to be painted after the update cycle is done syncing the layer
       // tree then reuse canvases that were freed up.
       _paintQueue.add(_PaintRequest(
-        canvasSize: _optimalLocalCullRect.size,
+        canvasSize: _optimalLocalCullRect!.size,
         paintCallback: () {
-          _canvas = _findOrCreateCanvas(_optimalLocalCullRect);
+          _canvas = _findOrCreateCanvas(_optimalLocalCullRect!);
           assert(_canvas is BitmapCanvas
-              && (_canvas as BitmapCanvas)._elementCache == _elementCache);
+              && (_canvas as BitmapCanvas?)!._elementCache == _elementCache);
           if (_debugExplainSurfaceStats) {
-            final BitmapCanvas bitmapCanvas = _canvas;
+            final BitmapCanvas bitmapCanvas = _canvas as BitmapCanvas;
             _surfaceStatsFor(this).paintPixelCount +=
                 bitmapCanvas.bitmapPixelCount;
           }
-          domRenderer.clearDom(rootElement);
-          rootElement.append(_canvas.rootElement);
-          _canvas.clear();
-          picture.recordingCanvas.apply(_canvas, _optimalLocalCullRect);
+          domRenderer.clearDom(rootElement!);
+          rootElement!.append(_canvas!.rootElement);
+          _canvas!.clear();
+          picture.recordingCanvas!.apply(_canvas, _optimalLocalCullRect);
         },
       ));
     }
@@ -288,7 +288,7 @@ class PersistedStandardPicture extends PersistedPicture {
   ///   sure we do not use too much memory for small canvases.
   BitmapCanvas _findOrCreateCanvas(ui.Rect bounds) {
     final ui.Size canvasSize = bounds.size;
-    BitmapCanvas bestRecycledCanvas;
+    BitmapCanvas? bestRecycledCanvas;
     double lastPixelCount = double.infinity;
     for (int i = 0; i < _recycledCanvases.length; i++) {
       final BitmapCanvas candidate = _recycledCanvases[i];
@@ -358,19 +358,19 @@ class PersistedStandardPicture extends PersistedPicture {
 /// to draw shapes and text.
 abstract class PersistedPicture extends PersistedLeafSurface {
   PersistedPicture(this.dx, this.dy, this.picture, this.hints)
-      : localPaintBounds = picture.recordingCanvas.pictureBounds;
+      : localPaintBounds = picture.recordingCanvas!.pictureBounds;
 
-  EngineCanvas _canvas;
+  EngineCanvas? _canvas;
 
   /// Returns the canvas used by this picture layer.
   ///
   /// Useful for tests.
-  EngineCanvas get debugCanvas => _canvas;
+  EngineCanvas? get debugCanvas => _canvas;
 
   final double dx;
   final double dy;
   final EnginePicture picture;
-  final ui.Rect localPaintBounds;
+  final ui.Rect? localPaintBounds;
   final int hints;
 
   /// Cache for reusing elements such as images across picture updates.
@@ -384,10 +384,10 @@ abstract class PersistedPicture extends PersistedLeafSurface {
 
   @override
   void recomputeTransformAndClip() {
-    _transform = parent._transform;
+    _transform = parent!._transform;
     if (dx != 0.0 || dy != 0.0) {
-      _transform = _transform.clone();
-      _transform.translate(dx, dy);
+      _transform = _transform!.clone();
+      _transform!.translate(dx, dy);
     }
     _computeExactCullRects();
   }
@@ -399,14 +399,14 @@ abstract class PersistedPicture extends PersistedLeafSurface {
   /// contain everything that's visible, but it may be bigger than necessary.
   /// Therefore it should not be used for clipping. It is meant to be used for
   /// optimizing canvas allocation.
-  ui.Rect get optimalLocalCullRect => _optimalLocalCullRect;
-  ui.Rect _optimalLocalCullRect;
+  ui.Rect? get optimalLocalCullRect => _optimalLocalCullRect;
+  ui.Rect? _optimalLocalCullRect;
 
   /// Same as [optimalLocalCullRect] but in screen coordinate system.
-  ui.Rect get debugExactGlobalCullRect => _exactGlobalCullRect;
-  ui.Rect _exactGlobalCullRect;
+  ui.Rect? get debugExactGlobalCullRect => _exactGlobalCullRect;
+  ui.Rect? _exactGlobalCullRect;
 
-  ui.Rect _exactLocalCullRect;
+  ui.Rect? _exactLocalCullRect;
 
   /// Computes the canvas paint bounds based on the estimated paint bounds and
   /// the scaling produced by transformations.
@@ -420,15 +420,15 @@ abstract class PersistedPicture extends PersistedLeafSurface {
     assert(transform != null);
     assert(localPaintBounds != null);
 
-    if (parent._projectedClip == null) {
+    if (parent!._projectedClip == null) {
       // Compute and cache chain of clipping bounds on parent of picture since
       // parent may include multiple pictures so it can be reused by all
       // child pictures.
-      ui.Rect bounds;
-      PersistedSurface parentSurface = parent;
+      ui.Rect? bounds;
+      PersistedSurface? parentSurface = parent;
       final Matrix4 clipTransform = Matrix4.identity();
       while (parentSurface != null) {
-        final ui.Rect localClipBounds = parentSurface._localClipBounds;
+        final ui.Rect? localClipBounds = parentSurface._localClipBounds;
         if (localClipBounds != null) {
           if (bounds == null) {
             bounds = transformRect(clipTransform, localClipBounds);
@@ -437,7 +437,7 @@ abstract class PersistedPicture extends PersistedLeafSurface {
                 bounds.intersect(transformRect(clipTransform, localClipBounds));
           }
         }
-        final Matrix4 localInverse = parentSurface.localTransformInverse;
+        final Matrix4? localInverse = parentSurface.localTransformInverse;
         if (localInverse != null && !localInverse.isIdentity()) {
           clipTransform.multiply(localInverse);
         }
@@ -447,30 +447,30 @@ abstract class PersistedPicture extends PersistedLeafSurface {
         bounds = ui.Rect.zero;
       }
       // Cache projected clip on parent.
-      parent._projectedClip = bounds;
+      parent!._projectedClip = bounds;
     }
     // Intersect localPaintBounds with parent projected clip to calculate
     // and cache [_exactLocalCullRect].
-    if (parent._projectedClip == null) {
+    if (parent!._projectedClip == null) {
       _exactLocalCullRect = localPaintBounds;
     } else {
-      _exactLocalCullRect = localPaintBounds.intersect(parent._projectedClip);
+      _exactLocalCullRect = localPaintBounds!.intersect(parent!._projectedClip!);
     }
-    if (_exactLocalCullRect.width <= 0 || _exactLocalCullRect.height <= 0) {
+    if (_exactLocalCullRect!.width <= 0 || _exactLocalCullRect!.height <= 0) {
       _exactLocalCullRect = ui.Rect.zero;
       _exactGlobalCullRect = ui.Rect.zero;
     } else {
       assert(() {
-        _exactGlobalCullRect = transformRect(transform, _exactLocalCullRect);
+        _exactGlobalCullRect = transformRect(transform!, _exactLocalCullRect!);
         return true;
       }());
     }
   }
 
-  bool _computeOptimalCullRect(PersistedPicture oldSurface) {
+  bool _computeOptimalCullRect(PersistedPicture? oldSurface) {
     assert(_exactLocalCullRect != null);
 
-    if (oldSurface == null || !oldSurface.picture.recordingCanvas.didDraw) {
+    if (oldSurface == null || !oldSurface.picture.recordingCanvas!.didDraw) {
       // First useful paint.
       _optimalLocalCullRect = _exactLocalCullRect;
       return true;
@@ -479,7 +479,7 @@ abstract class PersistedPicture extends PersistedLeafSurface {
     assert(oldSurface._optimalLocalCullRect != null);
 
     final bool surfaceBeingRetained = identical(oldSurface, this);
-    final ui.Rect oldOptimalLocalCullRect = surfaceBeingRetained
+    final ui.Rect? oldOptimalLocalCullRect = surfaceBeingRetained
         ? _optimalLocalCullRect
         : oldSurface._optimalLocalCullRect;
 
@@ -490,7 +490,7 @@ abstract class PersistedPicture extends PersistedLeafSurface {
       return oldOptimalLocalCullRect != ui.Rect.zero;
     }
 
-    if (rectContainsOther(oldOptimalLocalCullRect, _exactLocalCullRect)) {
+    if (rectContainsOther(oldOptimalLocalCullRect!, _exactLocalCullRect!)) {
       // The cull rect we computed in the past contains the newly computed cull
       // rect. This can happen, for example, when the picture is being shrunk by
       // a clip when it is scrolled out of the screen. In this case we do not
@@ -512,18 +512,18 @@ abstract class PersistedPicture extends PersistedLeafSurface {
 
     // Compute the delta, by which each of the side of the clip rect has "moved"
     // since the last time we updated the cull rect.
-    final double leftwardDelta = oldOptimalLocalCullRect.left - _exactLocalCullRect.left;
-    final double upwardDelta = oldOptimalLocalCullRect.top - _exactLocalCullRect.top;
-    final double rightwardDelta = _exactLocalCullRect.right - oldOptimalLocalCullRect.right;
-    final double bottomwardDelta = _exactLocalCullRect.bottom - oldOptimalLocalCullRect.bottom;
+    final double leftwardDelta = oldOptimalLocalCullRect.left - _exactLocalCullRect!.left;
+    final double upwardDelta = oldOptimalLocalCullRect.top - _exactLocalCullRect!.top;
+    final double rightwardDelta = _exactLocalCullRect!.right - oldOptimalLocalCullRect.right;
+    final double bottomwardDelta = _exactLocalCullRect!.bottom - oldOptimalLocalCullRect.bottom;
 
     // Compute the new optimal rect to paint into.
     final ui.Rect newLocalCullRect = ui.Rect.fromLTRB(
-      _exactLocalCullRect.left - _predictTrend(leftwardDelta, _exactLocalCullRect.width),
-      _exactLocalCullRect.top - _predictTrend(upwardDelta, _exactLocalCullRect.height),
-      _exactLocalCullRect.right + _predictTrend(rightwardDelta, _exactLocalCullRect.width),
-      _exactLocalCullRect.bottom + _predictTrend(bottomwardDelta, _exactLocalCullRect.height),
-    ).intersect(localPaintBounds);
+      _exactLocalCullRect!.left - _predictTrend(leftwardDelta, _exactLocalCullRect!.width),
+      _exactLocalCullRect!.top - _predictTrend(upwardDelta, _exactLocalCullRect!.height),
+      _exactLocalCullRect!.right + _predictTrend(rightwardDelta, _exactLocalCullRect!.width),
+      _exactLocalCullRect!.bottom + _predictTrend(bottomwardDelta, _exactLocalCullRect!.height),
+    ).intersect(localPaintBounds!);
 
     final bool localCullRectChanged = _optimalLocalCullRect != newLocalCullRect;
     _optimalLocalCullRect = newLocalCullRect;
@@ -555,14 +555,14 @@ abstract class PersistedPicture extends PersistedLeafSurface {
   /// return zero.
   int get bitmapPixelCount;
 
-  void _applyPaint(PersistedPicture oldSurface) {
-    final EngineCanvas oldCanvas = oldSurface?._canvas;
-    if (!picture.recordingCanvas.didDraw || _optimalLocalCullRect.isEmpty) {
+  void _applyPaint(PersistedPicture? oldSurface) {
+    final EngineCanvas? oldCanvas = oldSurface?._canvas;
+    if (!picture.recordingCanvas!.didDraw || _optimalLocalCullRect!.isEmpty) {
       // The picture is empty, or it has been completely clipped out. Skip
       // painting. This removes all the setup work and scaffolding objects
       // that won't be useful for anything anyway.
       _recycleCanvas(oldCanvas);
-      domRenderer.clearDom(rootElement);
+      domRenderer.clearDom(rootElement!);
       _canvas = null;
       return;
     }
@@ -576,10 +576,10 @@ abstract class PersistedPicture extends PersistedLeafSurface {
   }
 
   /// Concrete implementations implement this method to do actual painting.
-  void applyPaint(EngineCanvas oldCanvas);
+  void applyPaint(EngineCanvas? oldCanvas);
 
   void _applyTranslate() {
-    rootElement.style.transform = 'translate(${dx}px, ${dy}px)';
+    rootElement!.style.transform = 'translate(${dx}px, ${dy}px)';
   }
 
   @override
@@ -640,14 +640,14 @@ abstract class PersistedPicture extends PersistedLeafSurface {
   @override
   void debugPrintChildren(StringBuffer buffer, int indent) {
     super.debugPrintChildren(buffer, indent);
-    if (rootElement != null && rootElement.firstChild != null) {
-      final html.Element firstChild = rootElement.firstChild;
+    if (rootElement != null && rootElement!.firstChild != null) {
+      final html.Element firstChild = rootElement!.firstChild as html.Element;
       final String canvasTag = firstChild.tagName.toLowerCase();
-      final int canvasHash = rootElement.firstChild.hashCode;
+      final int canvasHash = rootElement!.firstChild!.hashCode;
       buffer.writeln('${'  ' * (indent + 1)}<$canvasTag @$canvasHash />');
     } else if (rootElement != null) {
       buffer.writeln(
-          '${'  ' * (indent + 1)}<${rootElement.tagName.toLowerCase()} @$hashCode />');
+          '${'  ' * (indent + 1)}<${rootElement!.tagName.toLowerCase()} @$hashCode />');
     } else {
       buffer.writeln('${'  ' * (indent + 1)}<recycled-canvas />');
     }
@@ -657,8 +657,8 @@ abstract class PersistedPicture extends PersistedLeafSurface {
   void debugValidate(List<String> validationErrors) {
     super.debugValidate(validationErrors);
 
-    if (picture.recordingCanvas.didDraw) {
-      if (!_optimalLocalCullRect.isEmpty && debugCanvas == null) {
+    if (picture.recordingCanvas!.didDraw) {
+      if (!_optimalLocalCullRect!.isEmpty && debugCanvas == null) {
         validationErrors
             .add('$runtimeType has non-trivial picture but it has null canvas');
       }

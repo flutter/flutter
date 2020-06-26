@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 const String _ahemFontFamily = 'Ahem';
@@ -17,8 +17,8 @@ const String _robotoFontUrl = 'packages/ui/assets/Roboto-Regular.ttf';
 /// font manifest. If test fonts are enabled, then call
 /// [registerTestFonts] as well.
 class FontCollection {
-  FontManager _assetFontManager;
-  FontManager _testFontManager;
+  FontManager? _assetFontManager;
+  FontManager? _testFontManager;
 
   /// Reads the font manifest using the [assetManager] and registers all of the
   /// fonts declared within.
@@ -37,12 +37,7 @@ class FontCollection {
       }
     }
 
-    if (byteData == null) {
-      throw AssertionError(
-          'There was a problem trying to load FontManifest.json');
-    }
-
-    final List<dynamic> fontManifest =
+    final List<dynamic>? fontManifest =
         json.decode(utf8.decode(byteData.buffer.asUint8List()));
     if (fontManifest == null) {
       throw AssertionError(
@@ -55,8 +50,8 @@ class FontCollection {
       _assetFontManager = _PolyfillFontManager();
     }
 
-    for (Map<String, dynamic> fontFamily in fontManifest) {
-      final String family = fontFamily['family'];
+    for (Map<String, dynamic> fontFamily in fontManifest.cast<Map<String, dynamic>>()) {
+      final String? family = fontFamily['family'];
       final List<dynamic> fontAssets = fontFamily['fonts'];
 
       for (dynamic fontAssetItem in fontAssets) {
@@ -68,22 +63,22 @@ class FontCollection {
             descriptors[descriptor] = '${fontAsset[descriptor]}';
           }
         }
-        _assetFontManager.registerAsset(
-            family, 'url(${assetManager.getAssetUrl(asset)})', descriptors);
+        _assetFontManager!.registerAsset(
+            family!, 'url(${assetManager.getAssetUrl(asset)})', descriptors);
       }
     }
   }
 
-  Future<void> loadFontFromList(Uint8List list, {String fontFamily}) {
-    return _assetFontManager._loadFontFaceBytes(fontFamily, list);
+  Future<void> loadFontFromList(Uint8List list, {required String fontFamily}) {
+    return _assetFontManager!._loadFontFaceBytes(fontFamily, list);
   }
 
   /// Registers fonts that are used by tests.
   void debugRegisterTestFonts() {
     _testFontManager = FontManager();
-    _testFontManager.registerAsset(
+    _testFontManager!.registerAsset(
         _ahemFontFamily, 'url($_ahemFontUrl)', const <String, String>{});
-    _testFontManager.registerAsset(
+    _testFontManager!.registerAsset(
         _robotoFontFamily, 'url($_robotoFontUrl)', const <String, String>{});
   }
 
@@ -256,14 +251,14 @@ class _PolyfillFontManager extends FontManager {
     }
     paragraph.text = _testString;
 
-    html.document.body.append(paragraph);
+    html.document.body!.append(paragraph);
     final int sansSerifWidth = paragraph.offsetWidth;
 
     paragraph.style.fontFamily = "'$family', $fallbackFontName";
 
     final Completer<void> completer = Completer<void>();
 
-    DateTime _fontLoadStart;
+    late DateTime _fontLoadStart;
 
     void _watchWidth() {
       if (paragraph.offsetWidth != sansSerifWidth) {
@@ -281,7 +276,7 @@ class _PolyfillFontManager extends FontManager {
       }
     }
 
-    final Map<String, String> fontStyleMap = <String, String>{};
+    final Map<String, String?> fontStyleMap = <String, String?>{};
     fontStyleMap['font-family'] = "'$family'";
     fontStyleMap['src'] = asset;
     if (descriptors['style'] != null) {
@@ -296,7 +291,7 @@ class _PolyfillFontManager extends FontManager {
     final html.StyleElement fontLoadStyle = html.StyleElement();
     fontLoadStyle.type = 'text/css';
     fontLoadStyle.innerHtml = '@font-face { $fontFaceDeclaration }';
-    html.document.head.append(fontLoadStyle);
+    html.document.head!.append(fontLoadStyle);
 
     // HACK: If this is an icon font, then when it loads it won't change the
     // width of our test string. So we just have to hope it loads before the
@@ -314,4 +309,4 @@ class _PolyfillFontManager extends FontManager {
 }
 
 final bool supportsFontLoadingApi = js_util.hasProperty(html.window, 'FontFace');
-final bool supportsFontsClearApi = html.document.fonts != null && js_util.hasProperty(html.document.fonts, 'clear');
+final bool supportsFontsClearApi = js_util.hasProperty(html.document, 'fonts') && js_util.hasProperty(html.document.fonts, 'clear');

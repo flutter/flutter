@@ -11,7 +11,7 @@
 //                framework. Currently the framework does not report the
 //                grouping of radio buttons.
 
-// @dart = 2.6
+
 part of engine;
 
 /// The specific type of checkable control.
@@ -28,6 +28,16 @@ enum _CheckableKind {
   toggle,
 }
 
+_CheckableKind _checkableKindFromSemanticsFlag(SemanticsObject semanticsObject) {
+  if (semanticsObject.hasFlag(ui.SemanticsFlag.isInMutuallyExclusiveGroup)) {
+    return _CheckableKind.radio;
+  } else if (semanticsObject.hasFlag(ui.SemanticsFlag.hasToggledState)) {
+    return _CheckableKind.toggle;
+  } else {
+    return _CheckableKind.checkbox;
+  }
+}
+
 /// Renders semantics objects that have checkable (on/off) states.
 ///
 /// Three objects which are implemented by this class are checkboxes, radio
@@ -37,18 +47,11 @@ enum _CheckableKind {
 /// [ui.SemanticsFlag.isInMutuallyExclusiveGroup], [ui.SemanticsFlag.isToggled],
 /// [ui.SemanticsFlag.hasToggledState]
 class Checkable extends RoleManager {
-  _CheckableKind _kind;
+  final _CheckableKind _kind;
 
   Checkable(SemanticsObject semanticsObject)
-      : super(Role.checkable, semanticsObject) {
-    if (semanticsObject.hasFlag(ui.SemanticsFlag.isInMutuallyExclusiveGroup)) {
-      _kind = _CheckableKind.radio;
-    } else if (semanticsObject.hasFlag(ui.SemanticsFlag.hasToggledState)) {
-      _kind = _CheckableKind.toggle;
-    } else {
-      _kind = _CheckableKind.checkbox;
-    }
-  }
+      : _kind = _checkableKindFromSemanticsFlag(semanticsObject),
+        super(Role.checkable, semanticsObject);
 
   @override
   void update() {

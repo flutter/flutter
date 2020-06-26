@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 /// Text editing used by accesibility mode.
@@ -46,11 +46,10 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
 
   @override
   void initializeTextEditing(InputConfiguration inputConfig,
-      {_OnChangeCallback onChange, _OnActionCallback onAction}) {
+      {_OnChangeCallback? onChange, _OnActionCallback? onAction}) {
     // In accesibilty mode, the user of this class is supposed to insert the
     // [domElement] on their own. Let's make sure they did.
-    assert(domElement != null);
-    assert(html.document.body.contains(domElement));
+    assert(html.document.body!.contains(domElement));
 
     isEnabled = true;
     _inputConfiguration = inputConfig;
@@ -61,7 +60,7 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
   }
 
   @override
-  void setEditingState(EditingState editingState) {
+  void setEditingState(EditingState? editingState) {
     super.setEditingState(editingState);
 
     // Refocus after setting editing state.
@@ -91,8 +90,8 @@ class TextField extends RoleManager {
     _setupDomElement();
   }
 
-  SemanticsTextEditingStrategy textEditingElement;
-  html.Element get _textFieldElement => textEditingElement.domElement;
+  SemanticsTextEditingStrategy? textEditingElement;
+  html.Element get _textFieldElement => textEditingElement!.domElement;
 
   void _setupDomElement() {
     // On iOS, even though the semantic text field is transparent, the cursor
@@ -119,8 +118,8 @@ class TextField extends RoleManager {
       //   and size of the parent `<flt-semantics>` element.
       ..top = '0'
       ..left = '0'
-      ..width = '${semanticsObject.rect.width}px'
-      ..height = '${semanticsObject.rect.height}px';
+      ..width = '${semanticsObject.rect!.width}px'
+      ..height = '${semanticsObject.rect!.height}px';
     semanticsObject.element.append(_textFieldElement);
 
     switch (browserEngine) {
@@ -160,18 +159,18 @@ class TextField extends RoleManager {
   /// events are present regardless of whether accessibility is enabled or not,
   /// this mode is always enabled.
   void _initializeForWebkit() {
-    num lastTouchStartOffsetX;
-    num lastTouchStartOffsetY;
+    num? lastTouchStartOffsetX;
+    num? lastTouchStartOffsetY;
 
     _textFieldElement.addEventListener('touchstart', (html.Event event) {
       textEditing.useCustomEditableElement(textEditingElement);
-      final html.TouchEvent touchEvent = event;
+      final html.TouchEvent touchEvent = event as html.TouchEvent;
       lastTouchStartOffsetX = touchEvent.changedTouches.last.client.x;
       lastTouchStartOffsetY = touchEvent.changedTouches.last.client.y;
     }, true);
 
     _textFieldElement.addEventListener('touchend', (html.Event event) {
-      final html.TouchEvent touchEvent = event;
+      final html.TouchEvent touchEvent = event as html.TouchEvent;
 
       if (lastTouchStartOffsetX != null) {
         assert(lastTouchStartOffsetY != null);

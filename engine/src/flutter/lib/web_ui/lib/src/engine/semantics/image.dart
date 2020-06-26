@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 /// Represents semantic objects that deliver information in a visual manner.
@@ -17,7 +17,7 @@ class ImageRoleManager extends RoleManager {
   /// The element with role="img" and aria-label could block access to all
   /// children elements, therefore create an auxiliary element and  describe the
   /// image in that if the semantic object have child nodes.
-  html.Element _auxiliaryImageElement;
+  html.Element? _auxiliaryImageElement;
 
   @override
   void update() {
@@ -30,18 +30,18 @@ class ImageRoleManager extends RoleManager {
         // other nodes, then VoiceOver behaves as expected with absolute
         // positioning and sizing.
         if (semanticsObject.hasChildren) {
-          _auxiliaryImageElement.style
+          _auxiliaryImageElement!.style
             ..position = 'absolute'
             ..top = '0'
             ..left = '0'
-            ..width = '${semanticsObject.rect.width}px'
-            ..height = '${semanticsObject.rect.height}px';
+            ..width = '${semanticsObject.rect!.width}px'
+            ..height = '${semanticsObject.rect!.height}px';
         }
-        _auxiliaryImageElement.style.fontSize = '6px';
-        semanticsObject.element.append(_auxiliaryImageElement);
+        _auxiliaryImageElement!.style.fontSize = '6px';
+        semanticsObject.element.append(_auxiliaryImageElement!);
       }
 
-      _auxiliaryImageElement.setAttribute('role', 'img');
+      _auxiliaryImageElement!.setAttribute('role', 'img');
       _setLabel(_auxiliaryImageElement);
     } else if (semanticsObject.isVisualOnly) {
       semanticsObject.setAriaRole('img', true);
@@ -53,15 +53,15 @@ class ImageRoleManager extends RoleManager {
     }
   }
 
-  void _setLabel(html.Element element) {
+  void _setLabel(html.Element? element) {
     if (semanticsObject.hasLabel) {
-      element.setAttribute('aria-label', semanticsObject.label);
+      element!.setAttribute('aria-label', semanticsObject.label!);
     }
   }
 
   void _cleanUpAuxiliaryElement() {
     if (_auxiliaryImageElement != null) {
-      _auxiliaryImageElement.remove();
+      _auxiliaryImageElement!.remove();
       _auxiliaryImageElement = null;
     }
   }

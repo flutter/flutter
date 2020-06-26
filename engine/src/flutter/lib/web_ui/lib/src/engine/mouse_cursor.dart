@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 /// Provides mouse cursor bindings, such as the `flutter/mousecursor` channel.
@@ -15,8 +15,8 @@ class MouseCursor {
   }
 
   /// The [MouseCursor] singleton.
-  static MouseCursor get instance => _instance;
-  static MouseCursor _instance;
+  static MouseCursor? get instance => _instance;
+  static MouseCursor? _instance;
 
   MouseCursor._() {}
 
@@ -33,13 +33,13 @@ class MouseCursor {
     'horizontalDoubleArrow': 'ew-resize',
     'verticalDoubleArrow': 'ns-resize',
   };
-  static String _mapKindToCssValue(String kind) {
+  static String _mapKindToCssValue(String? kind) {
     return _kindToCssValueMap[kind] ?? 'default';
   }
 
-  void activateSystemCursor(String kind) {
+  void activateSystemCursor(String? kind) {
     domRenderer.setElementStyle(
-      domRenderer.glassPaneElement,
+      domRenderer.glassPaneElement!,
       'cursor',
       _mapKindToCssValue(kind),
     );

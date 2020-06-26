@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 /// Various types of inputs used in text fields.
@@ -57,7 +57,7 @@ abstract class EngineInputType {
   ///
   /// For various `inputmode` values supported by browsers, see:
   /// <https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/inputmode>.
-  String get inputmodeAttribute;
+  String? get inputmodeAttribute;
 
   /// Whether this input type allows the "Enter" key to submit the input action.
   bool get submitActionOnEnter => true;
@@ -75,7 +75,7 @@ abstract class EngineInputType {
     // keyboard shows up.
     if (operatingSystem == OperatingSystem.iOs ||
         operatingSystem == OperatingSystem.android) {
-      domElement.setAttribute('inputmode', inputmodeAttribute);
+      domElement.setAttribute('inputmode', inputmodeAttribute!);
     }
   }
 }
@@ -125,7 +125,7 @@ class MultilineInputType extends EngineInputType {
   const MultilineInputType();
 
   @override
-  final String inputmodeAttribute = null;
+  final String? inputmodeAttribute = null;
 
   @override
   bool get submitActionOnEnter => false;

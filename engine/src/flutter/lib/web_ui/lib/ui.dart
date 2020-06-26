@@ -48,7 +48,7 @@ void webOnlyInitializeEngine() {
   engine.initializeEngine();
 }
 
-void webOnlySetPluginHandler(Future<void> Function(String, ByteData, PlatformMessageResponseCallback) handler) {
+void webOnlySetPluginHandler(Future<void> Function(String, ByteData?, PlatformMessageResponseCallback?) handler) {
   engine.pluginMessageCallHandler = handler;
 }
 

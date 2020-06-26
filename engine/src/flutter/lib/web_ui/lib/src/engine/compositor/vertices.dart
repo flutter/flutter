@@ -2,29 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 js.JsArray<Float32List> _encodeRawColorList(Int32List rawColors) {
   final int colorCount = rawColors.length;
-  final List<ui.Color> colors = List<ui.Color>(colorCount);
+  final List<ui.Color> colors = <ui.Color>[];
   for (int i = 0; i < colorCount; ++i) {
-    colors[i] = ui.Color(rawColors[i]);
+    colors.add(ui.Color(rawColors[i]));
   }
   return makeColorList(colors);
 }
 
 class SkVertices implements ui.Vertices {
-  js.JsObject skVertices;
+  js.JsObject? skVertices;
 
   SkVertices(
     ui.VertexMode mode,
     List<ui.Offset> positions, {
-    List<ui.Offset> textureCoordinates,
-    List<ui.Color> colors,
-    List<int> indices,
-  })  : assert(mode != null),
-        assert(positions != null) {
+    List<ui.Offset>? textureCoordinates,
+    List<ui.Color>? colors,
+    List<int>? indices,
+  })  : assert(mode != null), // ignore: unnecessary_null_comparison
+        assert(positions != null) { // ignore: unnecessary_null_comparison
     if (textureCoordinates != null &&
         textureCoordinates.length != positions.length)
       throw ArgumentError(
@@ -36,10 +36,10 @@ class SkVertices implements ui.Vertices {
       throw ArgumentError(
           '"indices" values must be valid indices in the positions list.');
 
-    final js.JsArray<js.JsArray<double>> encodedPositions = encodePointList(positions);
-    final js.JsArray<js.JsArray<double>> encodedTextures =
+    final js.JsArray<js.JsArray<double>>? encodedPositions = encodePointList(positions);
+    final js.JsArray<js.JsArray<double>>? encodedTextures =
         encodePointList(textureCoordinates);
-    final js.JsArray<Float32List> encodedColors =
+    final js.JsArray<Float32List>? encodedColors =
         colors != null ? makeColorList(colors) : null;
     if (!_init(mode, encodedPositions, encodedTextures, encodedColors, indices))
       throw ArgumentError('Invalid configuration for vertices.');
@@ -48,11 +48,11 @@ class SkVertices implements ui.Vertices {
   SkVertices.raw(
     ui.VertexMode mode,
     Float32List positions, {
-    Float32List textureCoordinates,
-    Int32List colors,
-    Uint16List indices,
-  })  : assert(mode != null),
-        assert(positions != null) {
+    Float32List? textureCoordinates,
+    Int32List? colors,
+    Uint16List? indices,
+  })  : assert(mode != null), // ignore: unnecessary_null_comparison
+        assert(positions != null) { // ignore: unnecessary_null_comparison
     if (textureCoordinates != null &&
         textureCoordinates.length != positions.length)
       throw ArgumentError(
@@ -66,9 +66,9 @@ class SkVertices implements ui.Vertices {
 
     if (!_init(
       mode,
-      encodeRawPointList(positions),
-      encodeRawPointList(textureCoordinates),
-      _encodeRawColorList(colors),
+      encodeRawPointList(positions) as js.JsArray<js.JsArray<double>>?,
+      encodeRawPointList(textureCoordinates) as js.JsArray<js.JsArray<double>>?,
+      colors != null ? _encodeRawColorList(colors) : null,
       indices,
     )) {
       throw ArgumentError('Invalid configuration for vertices.');
@@ -77,11 +77,11 @@ class SkVertices implements ui.Vertices {
 
   bool _init(
       ui.VertexMode mode,
-      js.JsArray<js.JsArray<double>> positions,
-      js.JsArray<js.JsArray<double>> textureCoordinates,
-      js.JsArray<Float32List> colors,
-      List<int> indices) {
-    js.JsObject skVertexMode;
+      js.JsArray<js.JsArray<double>>? positions,
+      js.JsArray<js.JsArray<double>>? textureCoordinates,
+      js.JsArray<Float32List>? colors,
+      List<int>? indices) {
+    js.JsObject? skVertexMode;
     switch (mode) {
       case ui.VertexMode.triangles:
         skVertexMode = canvasKit['VertexMode']['Triangles'];
@@ -94,7 +94,7 @@ class SkVertices implements ui.Vertices {
         break;
     }
 
-    final js.JsObject vertices =
+    final js.JsObject? vertices =
         canvasKit.callMethod('MakeSkVertices', <dynamic>[
       skVertexMode,
       positions,
