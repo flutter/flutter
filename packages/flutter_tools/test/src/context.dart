@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' as io;
 
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
@@ -158,8 +157,8 @@ void testUsingContext(
               rethrow;
             }
           }, onError: (Object error, StackTrace stackTrace) { // ignore: deprecated_member_use
-            io.stdout.writeln(error);
-            io.stdout.writeln(stackTrace);
+            print(error);
+            print(stackTrace);
             _printBufferedErrors(context);
             throw error;
           });

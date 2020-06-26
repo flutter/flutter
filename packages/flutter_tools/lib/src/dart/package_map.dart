@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
@@ -32,9 +33,10 @@ String _globalPackagesPath;
 Future<PackageConfig> loadPackageConfigWithLogging(File file, {
   @required Logger logger,
   bool throwOnError = true,
-}) {
+}) async {
   final FileSystem fileSystem = file.fileSystem;
-  return loadPackageConfigUri(
+  bool didError = false;
+  final PackageConfig result = await loadPackageConfigUri(
     file.absolute.uri,
     loader: (Uri uri) {
       final File configFile = fileSystem.file(uri);
@@ -56,7 +58,11 @@ Future<PackageConfig> loadPackageConfigWithLogging(File file, {
         message += '\nDid you run this command from the same directory as your pubspec.yaml file?';
       }
       logger.printError(message);
-      throwToolExit(file.path);
+      didError = true;
     }
   );
+  if (didError) {
+    throwToolExit(null);
+  }
+  return result;
 }
