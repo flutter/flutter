@@ -1,4 +1,4 @@
-Signature: 0579cecf44e14519046bd9619b71f71d
+Signature: 244475f977c469232c5f2094e3fcde2f
 
 UNUSED LICENSES:
 
@@ -3919,6 +3919,7 @@ FILE: ../../../third_party/skia/modules/canvaskit/viewer_bindings.cpp
 FILE: ../../../third_party/skia/src/core/SkIDChangeListener.cpp
 FILE: ../../../third_party/skia/src/core/SkMatrixProvider.h
 FILE: ../../../third_party/skia/src/core/SkVM_fwd.h
+FILE: ../../../third_party/skia/src/gpu/GrBackendSemaphore.cpp
 FILE: ../../../third_party/skia/src/gpu/GrBackendSurfaceMutableStateImpl.h
 FILE: ../../../third_party/skia/src/gpu/GrBackendUtils.h
 FILE: ../../../third_party/skia/src/gpu/GrBlockAllocator.cpp
@@ -3961,6 +3962,8 @@ FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DResourceProvider.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DResourceState.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DRootSignature.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DRootSignature.h
+FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DSemaphore.cpp
+FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DSemaphore.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DStencilAttachment.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DStencilAttachment.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DTexture.cpp
