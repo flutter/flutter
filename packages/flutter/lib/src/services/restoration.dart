@@ -165,7 +165,7 @@ class RestorationManager {
   }
 
   Future<dynamic> _methodHandler(MethodCall call) {
-    switch(call.method) {
+    switch (call.method) {
       case 'push':
         _handleRestorationDataUpdate(call.arguments as Uint8List);
         break;
