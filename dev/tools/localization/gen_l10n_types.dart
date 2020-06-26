@@ -5,6 +5,9 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:intl/locale.dart';
+import 'package:path/path.dart' as path;
+
 import 'localizations_utils.dart';
 
 // The set of date formats that can be automatically localized.
@@ -374,19 +377,53 @@ class AppResourceBundle {
     }
 
     String localeString = resources['@@locale'] as String;
-    if (localeString == null) {
-      final RegExp filenameRE = RegExp(r'^[^_]*_(\w+)\.arb$');
-      final RegExpMatch match = filenameRE.firstMatch(file.path);
-      localeString = match == null ? null : match[1];
+
+    // Look for the first instance of an ISO 639-1 language code, matching exactly.
+    final String fileName = path.basenameWithoutExtension(file.path);
+
+    for (int index = 0; index < fileName.length; index += 1) {
+      // If an underscore was found, check if locale string follows.
+      if (fileName[index] == '_' && fileName[index + 1] != null) {
+        // If Locale.tryParse fails, it returns null.
+        final Locale parserResult = Locale.tryParse(fileName.substring(index + 1));
+        // If the parserResult is not an actual locale identifier, end the loop.
+        if (parserResult != null && _iso639Languages.contains(parserResult.languageCode)) {
+          // The parsed result uses dashes ('-'), but we want underscores ('_').
+          final String parserLocaleString = parserResult.toString().replaceAll('-', '_');
+
+
+          if (localeString == null) {
+            // If @@locale was not defined, use the filename locale suffix.
+            localeString = parserLocaleString;
+          } else {
+            // If the localeString was defined in @@locale and in the filename, verify to
+            // see if the parsed locale matches, throw an error if it does not. This
+            // prevents developers from confusing issues when both @@locale and
+            // "_{locale}" is specified in the filename.
+            if (localeString != parserLocaleString) {
+              throw L10nException(
+                'The locale specified in @@locale and the arb filename do not match. \n'
+                'Please make sure that they match, since this prevents any confusion \n'
+                'with which locale to use. Otherwise, specify the locale in either the \n'
+                'filename of the @@locale key only.\n'
+                'Current @@locale value: $localeString\n'
+                'Current filename extension: $parserLocaleString'
+              );
+            }
+          }
+          break;
+        }
+      }
     }
+
     if (localeString == null) {
       throw L10nException(
         "The following .arb file's locale could not be determined: \n"
         '${file.path} \n'
         "Make sure that the locale is specified in the file's '@@locale' "
         'property or as part of the filename (e.g. file_en.arb)'
-       );
-     }
+      );
+    }
 
     final Iterable<String> ids = resources.keys.where((String key) => !key.startsWith('@'));
     return AppResourceBundle._(file, LocaleInfo.fromString(localeString), resources, ids);
@@ -469,3 +506,191 @@ class AppResourceBundleCollection {
     return 'AppResourceBundleCollection(${_directory.path}, ${locales.length} locales)';
   }
 }
+
+// A set containing all the ISO630-1 languages. This list was pulled from https://datahub.io/core/language-codes.
+final Set<String> _iso639Languages = <String>{
+  'aa',
+  'ab',
+  'ae',
+  'af',
+  'ak',
+  'am',
+  'an',
+  'ar',
+  'as',
+  'av',
+  'ay',
+  'az',
+  'ba',
+  'be',
+  'bg',
+  'bh',
+  'bi',
+  'bm',
+  'bn',
+  'bo',
+  'br',
+  'bs',
+  'ca',
+  'ce',
+  'ch',
+  'co',
+  'cr',
+  'cs',
+  'cu',
+  'cv',
+  'cy',
+  'da',
+  'de',
+  'dv',
+  'dz',
+  'ee',
+  'el',
+  'en',
+  'eo',
+  'es',
+  'et',
+  'eu',
+  'fa',
+  'ff',
+  'fi',
+  'fj',
+  'fo',
+  'fr',
+  'fy',
+  'ga',
+  'gd',
+  'gl',
+  'gn',
+  'gu',
+  'gv',
+  'ha',
+  'he',
+  'hi',
+  'ho',
+  'hr',
+  'ht',
+  'hu',
+  'hy',
+  'hz',
+  'ia',
+  'id',
+  'ie',
+  'ig',
+  'ii',
+  'ik',
+  'io',
+  'is',
+  'it',
+  'iu',
+  'ja',
+  'jv',
+  'ka',
+  'kg',
+  'ki',
+  'kj',
+  'kk',
+  'kl',
+  'km',
+  'kn',
+  'ko',
+  'kr',
+  'ks',
+  'ku',
+  'kv',
+  'kw',
+  'ky',
+  'la',
+  'lb',
+  'lg',
+  'li',
+  'ln',
+  'lo',
+  'lt',
+  'lu',
+  'lv',
+  'mg',
+  'mh',
+  'mi',
+  'mk',
+  'ml',
+  'mn',
+  'mr',
+  'ms',
+  'mt',
+  'my',
+  'na',
+  'nb',
+  'nd',
+  'ne',
+  'ng',
+  'nl',
+  'nn',
+  'no',
+  'nr',
+  'nv',
+  'ny',
+  'oc',
+  'oj',
+  'om',
+  'or',
+  'os',
+  'pa',
+  'pi',
+  'pl',
+  'ps',
+  'pt',
+  'qu',
+  'rm',
+  'rn',
+  'ro',
+  'ru',
+  'rw',
+  'sa',
+  'sc',
+  'sd',
+  'se',
+  'sg',
+  'si',
+  'sk',
+  'sl',
+  'sm',
+  'sn',
+  'so',
+  'sq',
+  'sr',
+  'ss',
+  'st',
+  'su',
+  'sv',
+  'sw',
+  'ta',
+  'te',
+  'tg',
+  'th',
+  'ti',
+  'tk',
+  'tl',
+  'tn',
+  'to',
+  'tr',
+  'ts',
+  'tt',
+  'tw',
+  'ty',
+  'ug',
+  'uk',
+  'ur',
+  'uz',
+  've',
+  'vi',
+  'vo',
+  'wa',
+  'wo',
+  'xh',
+  'yi',
+  'yo',
+  'za',
+  'zh',
+  'zu',
+};
