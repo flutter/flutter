@@ -163,10 +163,8 @@ class FormState extends State<Form> {
   void _fieldDidChange() {
     if (widget.onChanged != null)
       widget.onChanged();
-    if (!_hasInteractedByUser) {
-      _hasInteractedByUser = _fields
-          .any((FormFieldState<dynamic> field) => field._hasInteractedByUser);
-    }
+    _hasInteractedByUser = _fields
+        .any((FormFieldState<dynamic> field) => field._hasInteractedByUser);
     _forceRebuild();
   }
 
