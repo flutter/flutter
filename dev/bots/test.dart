@@ -766,7 +766,7 @@ Future<void> _runWebIntegrationTests() async {
       '--dart-define=test.valueB=Value',
     ]
   );
-  await _runWebHotReloadTest('lib/hot_reload_test.dart');
+  await _runWebHotReloadTest('lib/hot_restart_test.dart');
 }
 
 Future<void> _runWebStackTraceTest(String buildMode) async {
