@@ -14,7 +14,6 @@ import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
-import 'mouse_tracking.dart';
 
 /// Information collected for an annotation that is found in the layer tree.
 ///
