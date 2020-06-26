@@ -39,10 +39,10 @@ class _MultiWidgetConstructTableState extends State<MultiWidgetConstructTable>
         final double colorPosition = curve.value;
         final int c1Position = (colorPosition * (colorList.length + 1)).floor();
         final Color c1 = colorList[c1Position % colorList.length][900];
-        final Color c2 = colorList[(c1Position+1) % colorList.length][900];
+        final Color c2 = colorList[(c1Position + 1) % colorList.length][900];
         setState(() {
-          baseColor = Color.lerp(c1, c2,
-              colorPosition * (colorList.length + 1) - c1Position);
+          baseColor = Color.lerp(
+              c1, c2, colorPosition * (colorList.length + 1) - c1Position);
         });
       })
       ..addStatusListener((AnimationStatus state) {
@@ -78,19 +78,46 @@ class _MultiWidgetConstructTableState extends State<MultiWidgetConstructTable>
               widget.column,
               (int column) {
                 final int label = row * widget.column + column;
-                return Container(
-                  // This key forces rebuilding the element
-                  key: ValueKey<int>(widgetCounter + label),
-                  color:
-                      Color.lerp(Colors.white, baseColor, label / totalLength),
-                  child: Text('${widgetCounter + label}'),
-                  constraints: BoxConstraints.expand(height: height),
-                );
+                return counter % 2 == 0
+                    ? Container(
+                        // This key forces rebuilding the element
+                        key: ValueKey<int>(widgetCounter + label),
+                        color: Color.lerp(
+                            Colors.white, baseColor, label / totalLength),
+                        child: Text('${widgetCounter + label}'),
+                        constraints: BoxConstraints.expand(height: height),
+                      )
+                    : MyContainer(
+                        // This key forces rebuilding the element
+                        key: ValueKey<int>(widgetCounter + label),
+                        color: Color.lerp(
+                            Colors.white, baseColor, label / totalLength),
+                        child: Text('${widgetCounter + label}'),
+                        constraints: BoxConstraints.expand(height: height),
+                      );
               },
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+// This class is intended to break the original Widget tree
+class MyContainer extends StatelessWidget {
+  const MyContainer({this.color, this.child, this.constraints, Key key})
+      : super(key: key);
+  final Color color;
+  final Widget child;
+  final BoxConstraints constraints;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: color,
+      child: child,
+      constraints: constraints,
     );
   }
 }

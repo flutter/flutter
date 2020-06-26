@@ -242,6 +242,14 @@ TaskFunction createImageFilteredTransformAnimationPerfTest() {
   ).run;
 }
 
+TaskFunction createsMultiWidgetConstructPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/multi_widget_construction_perf.dart',
+    'multi_widget_construction_perf',
+  ).run;
+}
+
 /// Measure application startup performance.
 class StartupTest {
   const StartupTest(this.testDirectory, { this.reportMetrics = true });
