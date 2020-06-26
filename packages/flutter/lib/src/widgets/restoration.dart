@@ -382,7 +382,7 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
   /// Called by the [RestorationMixin] with the `value` returned by either
   /// [createDefaultValue] or [fromPrimitives] to set the value that this property
   /// currently wraps.
-  /// 
+  ///
   /// The [initWithValue] method may be called multiple times throughout the life
   /// of the [RestorableProperty] whenever new restoration data has been provided
   /// to the [RestorationMixin] the property is registered to. When
@@ -393,12 +393,12 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
   /// Called by the [RestorationMixin] if no restoration data is available to
   /// restore the value of the property from to obtain the default value for
   /// the property.
-  /// 
+  ///
   /// The method returns the default value that the property should wrap if
   /// no restoration data is available. After this method has been called,
   /// [initWithValue] will be invoked with the returned value.
-  /// 
-  /// The method may be called multiple times throughout the life of the 
+  ///
+  /// The method may be called multiple times throughout the life of the
   /// [RestorableProperty]. Whenever new restoration data has been provided
   /// to the [RestorationMixin] the property is registered to, either this
   /// method or [fromPrimitives] is called before [initWithValue] is invoked.
@@ -406,11 +406,11 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
 
   /// Called by the [RestorationMixin] to retrieve the information that this
   /// property wants to store in the restoration data.
-  /// 
+  ///
   /// The returned object must be serializable with the [StandardMessageCodec]
   /// and if it includes any collections, those should not be modified after
   /// they have been returned by this method.
-  /// 
+  ///
   /// The information returned by this method may be handed back to the property
   /// in a call to [fromPrimitives] at a later point in time (possibly after the
   /// application restarted) to restore the value that the property is currently
@@ -459,7 +459,7 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
     super.dispose();
     _disposed = true;
   }
-  
+
   // ID under which the property has been registered with the RestorationMixin.
   RestorationId _id;
   RestorationMixin _owner;
@@ -473,7 +473,7 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
     _id = null;
     _owner = null;
   }
-  
+
   /// The [State] object that this property is registered with.
   @protected
   State get state => _owner;
@@ -791,7 +791,7 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
     final T initialValue = serializedValue != null
         ? property.fromPrimitives(serializedValue)
         : property.createDefaultValue();
-    
+
     if (!property.isRegistered) {
       property._register(id, this);
       final VoidCallback listener = () {
@@ -954,7 +954,7 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
     _bucket.rename(restorationId);
     newParent.adoptChild(_bucket);
   }
-  
+
   void _setNewBucketIfNecessary({@required RestorationBucket newBucket}) {
     if (newBucket == _bucket) {
       return;
@@ -971,7 +971,7 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
     }
     oldBucket?.dispose();
   }
-  
+
   void _updateProperty(RestorableProperty<Object> property) {
     if (property.enabled) {
       _bucket?.put(property._id, property.toPrimitives());
