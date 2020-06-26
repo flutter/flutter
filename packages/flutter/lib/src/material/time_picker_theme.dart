@@ -41,6 +41,7 @@ class TimePickerThemeData with Diagnosticable {
     this.dayPeriodColor,
     this.dialHandColor,
     this.dialBackgroundColor,
+    this.dialTextColor,
     this.entryModeIconColor,
     this.hourMinuteTextStyle,
     this.dayPeriodTextStyle,
@@ -121,6 +122,16 @@ class TimePickerThemeData with Diagnosticable {
   /// [ColorScheme.primary].
   final Color dialBackgroundColor;
 
+  /// The color of the dial text that represents specific hours and minutes.
+  ///
+  /// If [dialTextColor] is a [MaterialStateColor], then the effective
+  /// text color can depend on the [MaterialState.selected] state, i.e. if the
+  /// text is selected or not.
+  ///
+  /// By default the overall theme's `textTheme` color is used when the text is
+  /// selected and `accentTextTheme` color is used when it's not selected.
+  final Color dialTextColor;
+
   /// The color of the entry mode [IconButton].
   ///
   /// If this is null, the time picker defaults to
@@ -199,6 +210,7 @@ class TimePickerThemeData with Diagnosticable {
     Color dayPeriodColor,
     Color dialHandColor,
     Color dialBackgroundColor,
+    Color dialTextColor,
     Color entryModeIconColor,
     TextStyle hourMinuteTextStyle,
     TextStyle dayPeriodTextStyle,
@@ -217,6 +229,7 @@ class TimePickerThemeData with Diagnosticable {
       dayPeriodColor: dayPeriodColor ?? this.dayPeriodColor,
       dialHandColor: dialHandColor ?? this.dialHandColor,
       dialBackgroundColor: dialBackgroundColor ?? this.dialBackgroundColor,
+      dialTextColor: dialTextColor ?? this.dialTextColor,
       entryModeIconColor: entryModeIconColor ?? this.entryModeIconColor,
       hourMinuteTextStyle: hourMinuteTextStyle ?? this.hourMinuteTextStyle,
       dayPeriodTextStyle: dayPeriodTextStyle ?? this.dayPeriodTextStyle,
@@ -256,6 +269,7 @@ class TimePickerThemeData with Diagnosticable {
       dayPeriodColor: Color.lerp(a?.dayPeriodColor, b?.dayPeriodColor, t),
       dialHandColor: Color.lerp(a?.dialHandColor, b?.dialHandColor, t),
       dialBackgroundColor: Color.lerp(a?.dialBackgroundColor, b?.dialBackgroundColor, t),
+      dialTextColor: Color.lerp(a?.dialTextColor, b?.dialTextColor, t),
       entryModeIconColor: Color.lerp(a?.entryModeIconColor, b?.entryModeIconColor, t),
       hourMinuteTextStyle: TextStyle.lerp(a?.hourMinuteTextStyle, b?.hourMinuteTextStyle, t),
       dayPeriodTextStyle: TextStyle.lerp(a?.dayPeriodTextStyle, b?.dayPeriodTextStyle, t),
@@ -278,6 +292,7 @@ class TimePickerThemeData with Diagnosticable {
       dayPeriodColor,
       dialHandColor,
       dialBackgroundColor,
+      dialTextColor,
       entryModeIconColor,
       hourMinuteTextStyle,
       dayPeriodTextStyle,
@@ -304,6 +319,7 @@ class TimePickerThemeData with Diagnosticable {
         && other.dayPeriodColor == dayPeriodColor
         && other.dialHandColor == dialHandColor
         && other.dialBackgroundColor == dialBackgroundColor
+        && other.dialTextColor == dialTextColor
         && other.entryModeIconColor == entryModeIconColor
         && other.hourMinuteTextStyle == hourMinuteTextStyle
         && other.dayPeriodTextStyle == dayPeriodTextStyle
@@ -325,6 +341,7 @@ class TimePickerThemeData with Diagnosticable {
     properties.add(ColorProperty('dayPeriodColor', dayPeriodColor, defaultValue: null));
     properties.add(ColorProperty('dialHandColor', dialHandColor, defaultValue: null));
     properties.add(ColorProperty('dialBackgroundColor', dialBackgroundColor, defaultValue: null));
+    properties.add(ColorProperty('dialTextColor', dialTextColor, defaultValue: null));
     properties.add(ColorProperty('entryModeIconColor', entryModeIconColor, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('hourMinuteTextStyle', hourMinuteTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('dayPeriodTextStyle', dayPeriodTextStyle, defaultValue: null));
