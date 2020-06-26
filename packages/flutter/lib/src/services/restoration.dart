@@ -59,9 +59,9 @@ typedef _BucketVisitor = void Function(RestorationBucket bucket);
 /// In addition to providing restoration data when the app is launched,
 /// restoration data may also be provided to a running app to restore it to a
 /// previous state. When this happens, the current bucket hierarchy is
-/// decommissioned and replaced with the hierarchy deserialize from the newly
+/// decommissioned and replaced with the hierarchy deserialized from the newly
 /// provided restoration data. Buckets in the old hierarchy notify their
-/// listeners when they get decommissioned. In responds to the notification,
+/// listeners when they get decommissioned. In response to the notification,
 /// listeners must stop using the old buckets. Owners of those buckets must
 /// dispose them and claim a new child as a replacement from a parent in the
 /// new bucket hierarchy (that parent may be the updated [rootBucket]).
@@ -344,7 +344,7 @@ class RestorationId {
 
   @override
   String toString() {
-    return '$runtimeType($value)';
+    return '${objectRuntimeType(this, 'RestorationId')}($value)';
   }
 }
 
@@ -820,7 +820,7 @@ class RestorationBucket extends ChangeNotifier {
   }
 
   @override
-  String toString() => '$runtimeType(id: $id, owner: $debugOwner)';
+  String toString() => '${objectRuntimeType(this, 'RestorationBucket')}(id: $id, owner: $debugOwner)';
 }
 
 /// Returns true when the provided `object` is serializable for state
