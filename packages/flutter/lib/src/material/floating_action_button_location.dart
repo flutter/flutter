@@ -413,7 +413,15 @@ abstract class StandardFabLocation extends FloatingActionButtonLocation {
 
 }
 
-/// Mixin for a "top" floating action button location, such as [FloatingActionButtonLocation.startTop].
+/// Mixin for a "top" floating action button location, such as
+/// [FloatingActionButtonLocation.startTop].
+///
+/// The [adjustment], typically [kMiniButtonOffsetAdjustment], is ignored in the
+/// Y axis of "top" positions. For "top" positions, the X offset is adjusted to
+/// move closer to the edge of the screen. This is so that a minified floating
+/// action button appears to align with [CircleAvatar]s in the
+/// [ListTile.leading] slot of a [ListTile] in a [ListView] in the
+/// [Scaffold.body].
 mixin FabTopOffsetY on StandardFabLocation {
   /// Calculates y-offset for [FloatingActionButtonLocation]s floating over
   /// the transition between the [Scaffold.appBar] and the [Scaffold.body].

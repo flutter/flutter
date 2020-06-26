@@ -138,11 +138,11 @@ class ScaffoldPrelayoutGeometry {
   /// The minimum padding to inset interactive elements to be within a safe,
   /// un-obscured space.
   ///
-  /// This value is the result of calling [MediaQuery.viewPadding] in the
-  /// [Scaffold]'s [BuildContext], this helps distinguish different types of
-  /// obstructions. For example, by using the viewPadding property, padding
-  /// would defer to the iPhone "safe area" regardless of whether a keyboard is
-  /// showing.
+  /// This value reflects the [MediaQuery.viewPadding] of the [Scaffold]'s
+  /// [BuildContext] when [Scaffold.resizeToAvoidBottomInset] is false or and
+  /// the [MediaQuery.viewInsets] > 0.0. This helps distinguish between
+  /// different types of obstructions on the screen, such as software keyboards
+  /// and physical device notches.
   final EdgeInsets minViewPadding;
 
   /// The [Size] of the whole [Scaffold].
