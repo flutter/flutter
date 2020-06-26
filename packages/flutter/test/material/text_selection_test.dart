@@ -638,7 +638,7 @@ void main() {
     expect(find.text('Select all'), findsOneWidget);
   }, skip: isBrowser, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
 
-    // TODO(justinmc): https://github.com/flutter/flutter/issues/60145
+  // TODO(justinmc): https://github.com/flutter/flutter/issues/60145
   testWidgets('Paste always appears regardless of clipboard content on iOS', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',

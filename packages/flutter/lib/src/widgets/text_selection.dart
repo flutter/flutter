@@ -1529,9 +1529,16 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
     // TODO(justinmc): Use the new iOS 14 clipboard API method hasStrings that
     // won't trigger the notification.
     // https://github.com/flutter/flutter/issues/60145
-    if (defaultTargetPlatform == TargetPlatform.iOS) {
-      value = ClipboardStatus.pasteable;
-      return;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+        value = ClipboardStatus.pasteable;
+        return;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        break;
     }
 
     Clipboard.getData(Clipboard.kTextPlain).then((ClipboardData data) {
