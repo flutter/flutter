@@ -427,6 +427,9 @@ enum _AndroidViewState {
   disposed,
 }
 
+/// Converts a given point from the global coordinate system in logical pixels to the local coordinate system for this box.
+///
+/// This is typically provided by using [RenderBox.globalToLocal].
 typedef PointTransformer = Offset Function(Offset position);
 
 // Helper for converting PointerEvents into AndroidMotionEvents.
@@ -646,6 +649,9 @@ class AndroidViewController extends PlatformViewController {
   final _AndroidMotionEventConverter _motionEventConverter =
     _AndroidMotionEventConverter();
 
+  /// Converts a given point from the global coordinate system in logical pixels to the local coordinate system for this box.
+  ///
+  /// This is typically provided by using [RenderBox.globalToLocal].
   set pointTransformer(PointTransformer transformer) {
     _motionEventConverter._pointTransformer = transformer;
   }
