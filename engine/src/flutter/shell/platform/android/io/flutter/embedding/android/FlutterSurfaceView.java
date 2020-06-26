@@ -200,12 +200,27 @@ public class FlutterSurfaceView extends SurfaceView implements RenderSurface {
       // Make the SurfaceView invisible to avoid showing a black rectangle.
       setAlpha(0.0f);
 
-      this.flutterRenderer.removeIsDisplayingFlutterUiListener(flutterUiDisplayListener);
+      flutterRenderer.removeIsDisplayingFlutterUiListener(flutterUiDisplayListener);
 
       flutterRenderer = null;
       isAttachedToFlutterRenderer = false;
     } else {
       Log.w(TAG, "detachFromRenderer() invoked when no FlutterRenderer was attached.");
+    }
+  }
+
+  /**
+   * Invoked by the owner of this {@code FlutterSurfaceView} when it should pause rendering Flutter
+   * UI to this {@code FlutterSurfaceView}.
+   */
+  public void pause() {
+    if (flutterRenderer != null) {
+      // Don't remove the `flutterUiDisplayListener` as `onFlutterUiDisplayed()` will make
+      // the `FlutterSurfaceView` visible.
+      flutterRenderer = null;
+      isAttachedToFlutterRenderer = false;
+    } else {
+      Log.w(TAG, "pause() invoked when no FlutterRenderer was attached.");
     }
   }
 

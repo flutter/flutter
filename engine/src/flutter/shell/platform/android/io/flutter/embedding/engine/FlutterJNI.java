@@ -314,6 +314,23 @@ public class FlutterJNI {
   private native void nativeSurfaceCreated(long nativePlatformViewId, @NonNull Surface surface);
 
   /**
+   * In hybrid composition, call this method when the {@link Surface} has changed.
+   *
+   * <p>In hybrid composition, the root surfaces changes from {@link
+   * android.view.SurfaceHolder#getSurface()} to {@link android.media.ImageReader#getSurface()} when
+   * a platform view is in the current frame.
+   */
+  @UiThread
+  public void onSurfaceWindowChanged(@NonNull Surface surface) {
+    ensureRunningOnMainThread();
+    ensureAttachedToNative();
+    nativeSurfaceWindowChanged(nativePlatformViewId, surface);
+  }
+
+  private native void nativeSurfaceWindowChanged(
+      long nativePlatformViewId, @NonNull Surface surface);
+
+  /**
    * Call this method when the {@link Surface} changes that was previously registered with {@link
    * #onSurfaceCreated(Surface)}.
    *

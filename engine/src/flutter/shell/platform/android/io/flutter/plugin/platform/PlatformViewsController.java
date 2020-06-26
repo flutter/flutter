@@ -54,6 +54,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   private Context context;
 
   // The View currently rendering the Flutter UI associated with these platform views.
+  // TODO(egarciad): Investigate if this can be downcasted to `FlutterView`.
   private View flutterView;
 
   // The texture registry maintaining the textures into which the embedded views will be rendered.
@@ -557,20 +558,23 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     vdControllers.clear();
   }
 
+  private void initializeRootImageViewIfNeeded() {
+    if (!flutterViewConvertedToImageView) {
+      ((FlutterView) flutterView).convertToImageView();
+      flutterViewConvertedToImageView = true;
+    }
+  }
+
   public void onDisplayPlatformView(int viewId, int x, int y, int width, int height) {
+    initializeRootImageViewIfNeeded();
     // TODO: Implement this method. https://github.com/flutter/flutter/issues/58288
   }
 
   public void onDisplayOverlaySurface(int id, int x, int y, int width, int height) {
-    FlutterView flutterView = (FlutterView) this.flutterView;
-    if (!flutterViewConvertedToImageView) {
-      flutterView.convertToImageView();
-      flutterViewConvertedToImageView = true;
-    }
-
+    initializeRootImageViewIfNeeded();
     FlutterImageView overlayView = overlayLayerViews.get(id);
     if (overlayView.getParent() == null) {
-      flutterView.addView(overlayView);
+      ((FlutterView) flutterView).addView(overlayView);
     }
 
     FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams((int) width, (int) height);
@@ -579,7 +583,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     overlayView.setLayoutParams(layoutParams);
     overlayView.setVisibility(View.VISIBLE);
     overlayView.bringToFront();
-
     currentFrameUsedOverlayLayerIds.add(id);
   }
 
@@ -599,8 +602,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     }
 
     if (flutterViewConvertedToImageView) {
-      FlutterView flutterView = (FlutterView) this.flutterView;
-      flutterView.acquireLatestImageViewFrame();
+      ((FlutterView) flutterView).acquireLatestImageViewFrame();
     }
   }
 
@@ -621,7 +623,9 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   @TargetApi(19)
   public FlutterOverlaySurface createOverlaySurface() {
     ImageReader imageReader = createImageReader(flutterView.getWidth(), flutterView.getHeight());
-    FlutterImageView imageView = new FlutterImageView(flutterView.getContext(), imageReader);
+    FlutterImageView imageView =
+        new FlutterImageView(
+            flutterView.getContext(), imageReader, FlutterImageView.SurfaceKind.overlay);
     int id = nextOverlayLayerId++;
     overlayLayerViews.put(id, imageView);
 

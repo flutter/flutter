@@ -184,6 +184,18 @@ public class FlutterRenderer implements TextureRegistry {
   }
 
   /**
+   * Swaps the {@link Surface} used to render the current frame.
+   *
+   * <p>In hybrid composition, the root surfaces changes from {@link
+   * android.view.SurfaceHolder#getSurface()} to {@link android.media.ImageReader#getSurface()} when
+   * a platform view is in the current frame.
+   */
+  public void swapSurface(@NonNull Surface surface) {
+    this.surface = surface;
+    flutterJNI.onSurfaceWindowChanged(surface);
+  }
+
+  /**
    * Notifies Flutter that a {@code surface} previously registered with {@link
    * #startRenderingToSurface(Surface)} has changed size to the given {@code width} and {@code
    * height}.

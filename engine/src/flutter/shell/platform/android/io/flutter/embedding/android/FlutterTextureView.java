@@ -173,6 +173,19 @@ public class FlutterTextureView extends TextureView implements RenderSurface {
     }
   }
 
+  /**
+   * Invoked by the owner of this {@code FlutterTextureView} when it should pause rendering Flutter
+   * UI to this {@code FlutterTextureView}.
+   */
+  public void pause() {
+    if (flutterRenderer != null) {
+      flutterRenderer = null;
+      isAttachedToFlutterRenderer = false;
+    } else {
+      Log.w(TAG, "pause() invoked when no FlutterRenderer was attached.");
+    }
+  }
+
   // FlutterRenderer and getSurfaceTexture() must both be non-null.
   private void connectSurfaceToRenderer() {
     if (flutterRenderer == null || getSurfaceTexture() == null) {

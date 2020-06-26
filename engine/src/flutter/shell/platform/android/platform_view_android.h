@@ -41,6 +41,9 @@ class PlatformViewAndroid final : public PlatformView {
 
   void NotifyCreated(fml::RefPtr<AndroidNativeWindow> native_window);
 
+  void NotifySurfaceWindowChanged(
+      fml::RefPtr<AndroidNativeWindow> native_window);
+
   void NotifyChanged(const SkISize& size);
 
   // |PlatformView|
