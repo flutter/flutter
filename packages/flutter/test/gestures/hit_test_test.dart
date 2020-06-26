@@ -76,6 +76,54 @@ void main() {
     result.publicPushTransform(m2);
     expect(currentTransform(result), equals(m2 * m3));
   });
+
+  test('HitTestResult should correctly push and pop offsets', () {
+    Matrix4 currentTransform(HitTestResult targetResult) {
+      final HitTestEntry entry = HitTestEntry(_DummyHitTestTarget());
+      targetResult.add(entry);
+      return entry.transform;
+    }
+
+    final MyHitTestResult result = MyHitTestResult();
+
+    final Matrix4 m1 = Matrix4.rotationZ(1);
+    final Matrix4 m2 = Matrix4.diagonal3Values(1.1, 1.2, 1.0);
+    const Offset o3 = Offset(10, 20);
+    final Matrix4 m3 = Matrix4.translationValues(o3.dx, o3.dy, 0.0);
+
+    // Test pushing offset as the first element
+    result.publicPushOffset(o3);
+    expect(currentTransform(result), equals(m3));
+    result.publicPopTransform();
+
+    result.publicPushOffset(o3);
+    result.publicPushTransform(m1);
+    expect(currentTransform(result), equals(m1 * m3));
+    expect(currentTransform(result), equals(m1 * m3)); // Test repeated add
+
+    // The `wrapped` is wrapped at [m1, m2]
+    final MyHitTestResult wrapped = MyHitTestResult.wrap(result);
+    expect(currentTransform(wrapped), equals(m1 * m3));
+
+    result.publicPushTransform(m2);
+    expect(currentTransform(result), equals(m2 * m1 * m3));
+    expect(currentTransform(wrapped), equals(m2 * m1 * m3));
+
+    result.publicPopTransform();
+    result.publicPopTransform();
+    result.publicPopTransform();
+    expect(currentTransform(result), equals(Matrix4.identity()));
+
+    result.publicPushTransform(m2);
+    result.publicPushOffset(o3);
+    result.publicPushTransform(m1);
+
+    expect(currentTransform(result), equals(m1 * m3 * m2));
+
+    result.publicPopTransform();
+
+    expect(currentTransform(result), equals(m3 * m2));
+  });
 }
 
 class _DummyHitTestTarget implements HitTestTarget {
@@ -90,5 +138,6 @@ class MyHitTestResult extends HitTestResult {
   MyHitTestResult.wrap(HitTestResult result) : super.wrap(result);
 
   void publicPushTransform(Matrix4 transform) => pushTransform(transform);
+  void publicPushOffset(Offset offset) => pushOffset(offset);
   void publicPopTransform() => popTransform();
 }
