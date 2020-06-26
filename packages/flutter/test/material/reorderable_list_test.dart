@@ -607,13 +607,13 @@ void main() {
           await tester.pumpWidget(
             MaterialApp(
               home: Directionality(
-              textDirection: TextDirection.ltr,
-              child: NotificationListener<OverscrollNotification>(
-                onNotification: (OverscrollNotification message) { scrolled = true; return false; },
-                child: listViewDefault,
+                textDirection: TextDirection.ltr,
+                child: NotificationListener<OverscrollNotification>(
+                  onNotification: (OverscrollNotification message) { scrolled = true; return false; },
+                  child: listViewDefault,
+                ),
               ),
             ),
-            )
           );
           await tester.dragFrom(const Offset(100.0, 100.0), const Offset(0.0, 100.0));
           expect(scrolled, isFalse);
