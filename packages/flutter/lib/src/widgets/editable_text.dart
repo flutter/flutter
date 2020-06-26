@@ -29,6 +29,7 @@ import 'media_query.dart';
 import 'scroll_controller.dart';
 import 'scroll_physics.dart';
 import 'scrollable.dart';
+import 'text.dart';
 import 'text_selection.dart';
 import 'ticker_provider.dart';
 
@@ -995,8 +996,9 @@ class EditableText extends StatefulWidget {
   /// If this property is null, [SystemMouseCursors.text] will be used.
   ///
   /// The [mouseCursor] is the only property of [EditableText] that controls the
-  /// mouse pointer. All other properties related to "cursor" stands for the text
-  /// cursor, which is usually a blinking vertical line at the editing position.
+  /// appearance of the mouse pointer. All other properties related to "cursor"
+  /// stands for the text cursor, which is usually a blinking vertical line at
+  /// the editing position.
   final MouseCursor mouseCursor;
 
   /// If true, the [RenderEditable] created by this widget will not handle
@@ -2252,7 +2254,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                 textAlign: widget.textAlign,
                 textDirection: _textDirection,
                 locale: widget.locale,
-                textHeightBehavior: widget.textHeightBehavior,
+                textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.of(context),
                 textWidthBasis: widget.textWidthBasis,
                 obscuringCharacter: widget.obscuringCharacter,
                 obscureText: widget.obscureText,

@@ -32,6 +32,7 @@ Future<void> main() async {
           options: <String>[
             '--org', 'io.flutter.devicelab',
             '-t', 'plugin',
+            '--platforms=ios,android',
             'ios_only',
           ],
         );

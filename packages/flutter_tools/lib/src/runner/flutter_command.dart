@@ -685,6 +685,7 @@ abstract class FlutterCommand extends Command<void> {
       bundleSkSLPath: bundleSkSLPath,
       dartExperiments: experiments,
       performanceMeasurementFile: performanceMeasurementFile,
+      packagesPath: globalResults['packages'] as String ?? '.packages'
     );
   }
 
@@ -802,6 +803,10 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  List<String> get _enabledExperiments => argParser.options.containsKey(FlutterOptions.kEnableExperiment)
+    ? stringsArg(FlutterOptions.kEnableExperiment)
+    : <String>[];
+
   /// Perform validation then call [runCommand] to execute the command.
   /// Return a [Future] that completes with an exit code
   /// indicating whether execution was successful.
@@ -815,7 +820,7 @@ abstract class FlutterCommand extends Command<void> {
     // sky_engine package is available in the flutter cache for pub to find.
     if (shouldUpdateCache) {
       // First always update universal artifacts, as some of these (e.g.
-      // idevice_id on macOS) are required to determine `requiredArtifacts`.
+      // ios-deploy on macOS) are required to determine `requiredArtifacts`.
       await globals.cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal});
 
       await globals.cache.updateAll(await requiredArtifacts);
@@ -836,11 +841,11 @@ abstract class FlutterCommand extends Command<void> {
     setupApplicationPackages();
 
     if (commandPath != null) {
-      final Map<CustomDimensions, String> additionalUsageValues =
-        <CustomDimensions, String>{
+      final Map<CustomDimensions, Object> additionalUsageValues =
+        <CustomDimensions, Object>{
           ...?await usageValues,
-          CustomDimensions.commandHasTerminal:
-            globals.stdio.hasTerminal ? 'true' : 'false',
+          CustomDimensions.commandHasTerminal: globals.stdio.hasTerminal,
+          CustomDimensions.nullSafety: _enabledExperiments.contains('non-nullable'),
         };
       Usage.command(commandPath, parameters: additionalUsageValues);
     }

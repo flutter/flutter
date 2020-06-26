@@ -115,6 +115,9 @@ void main() {
     });
     testbed = Testbed(
       setup: () {
+        globals.fs.file('.packages')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('\n');
         residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
           mockFlutterDevice,
           flutterProject: FlutterProject.current(),
@@ -123,8 +126,6 @@ void main() {
           stayResident: true,
           urlTunneller: null,
         ) as ResidentWebRunner;
-        globals.fs.currentDirectory.childFile('.packages')
-          .writeAsStringSync('\n');
       },
       overrides: <Type, Generator>{
         Pub: () => MockPub(),
