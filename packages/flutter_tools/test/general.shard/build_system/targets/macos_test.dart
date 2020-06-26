@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/assets.dart';
 import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/macos.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/macos/xcode.dart';
@@ -26,37 +25,32 @@ import '../../../src/testbed.dart';
 const String _kInputPrefix = 'bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.framework';
 const String _kOutputPrefix = 'FlutterMacOS.framework';
 
-final List<File> inputs = <File>[
-  globals.fs.file('$_kInputPrefix/FlutterMacOS'),
+final List<String> inputs = <String>[
+  '$_kInputPrefix/FlutterMacOS',
   // Headers
-  globals.fs.file('$_kInputPrefix/Headers/FlutterDartProject.h'),
-  globals.fs.file('$_kInputPrefix/Headers/FlutterEngine.h'),
-  globals.fs.file('$_kInputPrefix/Headers/FlutterViewController.h'),
-  globals.fs.file('$_kInputPrefix/Headers/FlutterBinaryMessenger.h'),
-  globals.fs.file('$_kInputPrefix/Headers/FlutterChannels.h'),
-  globals.fs.file('$_kInputPrefix/Headers/FlutterCodecs.h'),
-  globals.fs.file('$_kInputPrefix/Headers/FlutterMacros.h'),
-  globals.fs.file('$_kInputPrefix/Headers/FlutterPluginMacOS.h'),
-  globals.fs.file('$_kInputPrefix/Headers/FlutterPluginRegistrarMacOS.h'),
-  globals.fs.file('$_kInputPrefix/Headers/FlutterMacOS.h'),
+  '$_kInputPrefix/Headers/FlutterDartProject.h',
+  '$_kInputPrefix/Headers/FlutterEngine.h',
+  '$_kInputPrefix/Headers/FlutterViewController.h',
+  '$_kInputPrefix/Headers/FlutterBinaryMessenger.h',
+  '$_kInputPrefix/Headers/FlutterChannels.h',
+  '$_kInputPrefix/Headers/FlutterCodecs.h',
+  '$_kInputPrefix/Headers/FlutterMacros.h',
+  '$_kInputPrefix/Headers/FlutterPluginMacOS.h',
+  '$_kInputPrefix/Headers/FlutterPluginRegistrarMacOS.h',
+  '$_kInputPrefix/Headers/FlutterMacOS.h',
   // Modules
-  globals.fs.file('$_kInputPrefix/Modules/module.modulemap'),
+  '$_kInputPrefix/Modules/module.modulemap',
   // Resources
-  globals.fs.file('$_kInputPrefix/Resources/icudtl.dat'),
-  globals.fs.file('$_kInputPrefix/Resources/Info.plist'),
+  '$_kInputPrefix/Resources/icudtl.dat',
+  '$_kInputPrefix/Resources/Info.plist',
   // Ignore Versions folder for now
-  globals.fs.file('packages/flutter_tools/lib/src/build_system/targets/macos.dart'),
+  'packages/flutter_tools/lib/src/build_system/targets/macos.dart',
 ];
 
 void main() {
   Testbed testbed;
   Environment environment;
   Platform platform;
-
-  setUpAll(() {
-    Cache.disableLocking();
-    Cache.flutterRoot = '';
-  });
 
   setUp(() {
     platform = FakePlatform(operatingSystem: 'macos', environment: <String, String>{});
@@ -82,8 +76,8 @@ void main() {
   });
 
   test('Copies files to correct cache directory', () => testbed.run(() async {
-    for (final File input in inputs) {
-      input.createSync(recursive: true);
+    for (final String input in inputs) {
+      globals.fs.file(input).createSync(recursive: true);
     }
     // Create output directory so we can test that it is deleted.
     environment.outputDir.childDirectory(_kOutputPrefix)
@@ -111,8 +105,8 @@ void main() {
     await const DebugUnpackMacOS().build(environment);
 
     expect(globals.fs.directory(_kOutputPrefix).existsSync(), true);
-    for (final File file in inputs) {
-      expect(globals.fs.file(file.path.replaceFirst(_kInputPrefix, _kOutputPrefix)), exists);
+    for (final String path in inputs) {
+      expect(globals.fs.file(path.replaceFirst(_kInputPrefix, _kOutputPrefix)), exists);
     }
   }));
 
