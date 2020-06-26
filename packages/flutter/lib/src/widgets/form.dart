@@ -137,16 +137,10 @@ class Form extends StatefulWidget {
   /// will rebuild.
   final VoidCallback onChanged;
 
-  /// Used to enable/disable form fields auto validation and update their error text.
+  /// Used to enable/disable form fields auto validation and update their error
+  /// text.
   ///
-  /// If [AutovalidateMode.onUserInteraction] this form will only auto-validate
-  /// after its content changes. If [AutovalidateMode.always], it will auto
-  /// validate even without user interaction. If [AutovalidateMode.disabled],
-  /// the auto validation will be disabled.
-  ///
-  /// Defaults to [AutovalidateMode.disabled] if [autovalidate] is false which
-  /// means no auto validation will occur. If [autovalidate] is true then this
-  /// is set to [AutovalidateMode.always] for backward compatibility.
+  /// {@macro flutter.widgets.form.autovalidateMode}
   final AutovalidateMode autovalidateMode;
 
   @override
@@ -382,6 +376,7 @@ class FormField<T> extends StatefulWidget {
   /// Used to enable/disable this form field auto validation and update its
   /// error text.
   ///
+  /// {@template flutter.widgets.form.autovalidateMode}
   /// If [AutovalidateMode.onUserInteraction] this form field will only
   /// auto-validate after its content changes, if [AutovalidateMode.always] it
   /// will auto validate even without user interaction and
@@ -390,6 +385,7 @@ class FormField<T> extends StatefulWidget {
   /// Defaults to [AutovalidateMode.disabled] if [autovalidate] is false which
   /// means no auto validation will occur. If [autovalidate] is true then this
   /// is set to [AutovalidateMode.always] for backward compatibility.
+  /// {@endtemplate}
   final AutovalidateMode autovalidateMode;
 
   @override
@@ -517,8 +513,7 @@ class FormFieldState<T> extends State<FormField<T>> {
   }
 }
 
-/// Used to configure the auto validation of [FormField], [TextFormField] and
-/// [Form] widgets.
+/// Used to configure the auto validation of [FormField] and [Form] widgets.
 enum AutovalidateMode {
   /// No auto validation will occur.
   disabled,
