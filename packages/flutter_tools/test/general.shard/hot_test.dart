@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -163,7 +162,7 @@ void main() {
     });
 
     testUsingContext('Does not hot restart when device does not support it', () async {
-      fileSystem.file(globalPackagesPath)
+      fileSystem.file('.packages')
         ..createSync(recursive: true)
         ..writeAsStringSync('\n');
       // Setup mocks
@@ -175,7 +174,10 @@ void main() {
       final List<FlutterDevice> devices = <FlutterDevice>[
         FlutterDevice(mockDevice, generator: residentCompiler, buildInfo: BuildInfo.debug)..devFS = mockDevFs,
       ];
-      final OperationResult result = await HotRunner(devices).restart(fullRestart: true);
+      final OperationResult result = await HotRunner(
+        devices,
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+      ).restart(fullRestart: true);
       // Expect hot restart failed.
       expect(result.isOk, false);
       expect(result.message, 'hotRestart not supported');
@@ -188,7 +190,7 @@ void main() {
     });
 
     testUsingContext('Does not hot restart when one of many devices does not support it', () async {
-      fileSystem.file(globalPackagesPath)
+      fileSystem.file('.packages')
         ..createSync(recursive: true)
         ..writeAsStringSync('\n');
       // Setup mocks
@@ -203,7 +205,10 @@ void main() {
         FlutterDevice(mockDevice, generator: residentCompiler, buildInfo: BuildInfo.debug)..devFS = mockDevFs,
         FlutterDevice(mockHotDevice, generator: residentCompiler, buildInfo: BuildInfo.debug)..devFS = mockDevFs,
       ];
-      final OperationResult result = await HotRunner(devices).restart(fullRestart: true);
+      final OperationResult result = await HotRunner(
+        devices,
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug)
+      ).restart(fullRestart: true);
       // Expect hot restart failed.
       expect(result.isOk, false);
       expect(result.message, 'hotRestart not supported');
@@ -302,7 +307,10 @@ void main() {
           ..vmService = fakeVmServiceHost.vmService
           ..devFS = mockDevFs,
       ];
-      final HotRunner hotRunner = HotRunner(devices);
+      final HotRunner hotRunner = HotRunner(
+        devices,
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+      );
       final OperationResult result = await hotRunner.restart(fullRestart: true);
       // Expect hot restart was successful.
       expect(hotRunner.uri, mockDevFs.baseUri);
@@ -317,7 +325,7 @@ void main() {
     });
 
     testUsingContext('setup function fails', () async {
-      fileSystem.file(globalPackagesPath)
+      fileSystem.file('.packages')
         ..createSync(recursive: true)
         ..writeAsStringSync('\n');
       final MockDevice mockDevice = MockDevice();
@@ -327,7 +335,10 @@ void main() {
       final List<FlutterDevice> devices = <FlutterDevice>[
         FlutterDevice(mockDevice, generator: residentCompiler, buildInfo: BuildInfo.debug),
       ];
-      final OperationResult result = await HotRunner(devices).restart(fullRestart: true);
+      final OperationResult result = await HotRunner(
+        devices,
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+      ).restart(fullRestart: true);
       expect(result.isOk, false);
       expect(result.message, 'setupHotRestart failed');
     }, overrides: <Type, Generator>{
@@ -339,7 +350,7 @@ void main() {
     });
 
     testUsingContext('hot restart supported', () async {
-      fileSystem.file(globalPackagesPath)
+      fileSystem.file('.packages')
         ..createSync(recursive: true)
         ..writeAsStringSync('\n');
       // Setup mocks
@@ -389,7 +400,10 @@ void main() {
           ..vmService = fakeVmServiceHost.vmService
           ..devFS = mockDevFs,
       ];
-      final HotRunner hotRunner = HotRunner(devices);
+      final HotRunner hotRunner = HotRunner(
+        devices,
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+      );
       final OperationResult result = await hotRunner.restart(fullRestart: true);
       // Expect hot restart successful.
       expect(hotRunner.uri, mockDevFs.baseUri);
@@ -413,7 +427,7 @@ void main() {
       });
 
       testUsingContext('shutdown hook called after signal', () async {
-        fileSystem.file(globalPackagesPath)
+        fileSystem.file('.packages')
           ..createSync(recursive: true)
           ..writeAsStringSync('\n');
         final MockDevice mockDevice = MockDevice();
@@ -423,7 +437,10 @@ void main() {
         final List<FlutterDevice> devices = <FlutterDevice>[
           FlutterDevice(mockDevice, generator: residentCompiler, buildInfo: BuildInfo.debug),
         ];
-        await HotRunner(devices).cleanupAfterSignal();
+        await HotRunner(
+          devices,
+          debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug)
+        ).cleanupAfterSignal();
         expect(shutdownTestingConfig.shutdownHookCalled, true);
       }, overrides: <Type, Generator>{
         HotRunnerConfig: () => shutdownTestingConfig,
@@ -434,7 +451,7 @@ void main() {
       });
 
       testUsingContext('shutdown hook called after app stop', () async {
-        fileSystem.file(globalPackagesPath)
+        fileSystem.file('.packages')
           ..createSync(recursive: true)
           ..writeAsStringSync('\n');
         final MockDevice mockDevice = MockDevice();
@@ -444,7 +461,10 @@ void main() {
         final List<FlutterDevice> devices = <FlutterDevice>[
           FlutterDevice(mockDevice, generator: residentCompiler, buildInfo: BuildInfo.debug),
         ];
-        await HotRunner(devices).preExit();
+        await HotRunner(
+          devices,
+          debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug)
+        ).preExit();
         expect(shutdownTestingConfig.shutdownHookCalled, true);
       }, overrides: <Type, Generator>{
         HotRunnerConfig: () => shutdownTestingConfig,
@@ -465,7 +485,7 @@ void main() {
 
     testUsingContext('Exits with code 2 when when HttpException is thrown '
       'during VM service connection', () async {
-      fileSystem.file(globalPackagesPath)
+      fileSystem.file('.packages')
         ..createSync(recursive: true)
         ..writeAsStringSync('\n');
 

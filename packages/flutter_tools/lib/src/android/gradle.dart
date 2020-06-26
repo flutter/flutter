@@ -790,6 +790,7 @@ Future<void> buildPluginsAsAar(
             BuildMode.release, // Plugins are built as release.
             null, // Plugins don't define flavors.
             treeShakeIcons: androidBuildInfo.buildInfo.treeShakeIcons,
+            packagesPath: androidBuildInfo.buildInfo.packagesPath,
           ),
         ),
         target: '',
