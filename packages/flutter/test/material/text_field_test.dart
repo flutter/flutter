@@ -143,6 +143,8 @@ void main() {
   const String kMoreThanFourLines =
     kThreeLines +
     "\nFourth line won't display and ends at";
+  // Gap between caret and edge of input, defined in editable.dart.
+  const int kCaretGap = 1;
 
   setUp(() async {
     debugResetSemanticsIdCounter();
@@ -754,10 +756,7 @@ void main() {
       const TextPosition(offset: testValueSpaces.length),
     ).bottomRight;
 
-    // Gap between caret and edge of input, defined in editable.dart.
-    const int _kCaretGap = 1;
-
-    expect(cursorOffsetSpaces.dx, inputWidth - _kCaretGap);
+    expect(cursorOffsetSpaces.dx, inputWidth - kCaretGap);
   });
 
   testWidgets('mobile obscureText control test', (WidgetTester tester) async {
@@ -3519,6 +3518,36 @@ void main() {
     expect(textController.text, '0123456789');
   });
 
+  testWidgets('maxLength limits input with surrogate pairs.', (WidgetTester tester) async {
+    final TextEditingController textController = TextEditingController();
+
+    await tester.pumpWidget(boilerplate(
+      child: TextField(
+        controller: textController,
+        maxLength: 10,
+      ),
+    ));
+
+    const String surrogatePair = '😆';
+    await tester.enterText(find.byType(TextField), surrogatePair + '0123456789101112');
+    expect(textController.text, surrogatePair + '012345678');
+  });
+
+  testWidgets('maxLength limits input with grapheme clusters.', (WidgetTester tester) async {
+    final TextEditingController textController = TextEditingController();
+
+    await tester.pumpWidget(boilerplate(
+      child: TextField(
+        controller: textController,
+        maxLength: 10,
+      ),
+    ));
+
+    const String graphemeCluster = '👨‍👩‍👦';
+    await tester.enterText(find.byType(TextField), graphemeCluster + '0123456789101112');
+    expect(textController.text, graphemeCluster + '012345678');
+  });
+
   testWidgets('maxLength limits input in the center of a maxed-out field.', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/37420.
     final TextEditingController textController = TextEditingController();
@@ -3646,6 +3675,96 @@ void main() {
     expect(counterTextWidget.style.color, isNot(equals(Colors.deepPurpleAccent)));
   });
 
+  testWidgets('maxLength shows warning when maxLengthEnforced is false with surrogate pairs.', (WidgetTester tester) async {
+    final TextEditingController textController = TextEditingController();
+    const TextStyle testStyle = TextStyle(color: Colors.deepPurpleAccent);
+
+    await tester.pumpWidget(boilerplate(
+      child: TextField(
+        decoration: const InputDecoration(errorStyle: testStyle),
+        controller: textController,
+        maxLength: 10,
+        maxLengthEnforced: false,
+      ),
+    ));
+
+    await tester.enterText(find.byType(TextField), '😆012345678910111');
+    await tester.pump();
+
+    expect(textController.text, '😆012345678910111');
+    expect(find.text('16/10'), findsOneWidget);
+    Text counterTextWidget = tester.widget(find.text('16/10'));
+    expect(counterTextWidget.style.color, equals(Colors.deepPurpleAccent));
+
+    await tester.enterText(find.byType(TextField), '😆012345678');
+    await tester.pump();
+
+    expect(textController.text, '😆012345678');
+    expect(find.text('10/10'), findsOneWidget);
+    counterTextWidget = tester.widget(find.text('10/10'));
+    expect(counterTextWidget.style.color, isNot(equals(Colors.deepPurpleAccent)));
+  });
+
+  testWidgets('maxLength shows warning when maxLengthEnforced is false with grapheme clusters.', (WidgetTester tester) async {
+    final TextEditingController textController = TextEditingController();
+    const TextStyle testStyle = TextStyle(color: Colors.deepPurpleAccent);
+
+    await tester.pumpWidget(boilerplate(
+      child: TextField(
+        decoration: const InputDecoration(errorStyle: testStyle),
+        controller: textController,
+        maxLength: 10,
+        maxLengthEnforced: false,
+      ),
+    ));
+
+    await tester.enterText(find.byType(TextField), '👨‍👩‍👦012345678910111');
+    await tester.pump();
+
+    expect(textController.text, '👨‍👩‍👦012345678910111');
+    expect(find.text('16/10'), findsOneWidget);
+    Text counterTextWidget = tester.widget(find.text('16/10'));
+    expect(counterTextWidget.style.color, equals(Colors.deepPurpleAccent));
+
+    await tester.enterText(find.byType(TextField), '👨‍👩‍👦012345678');
+    await tester.pump();
+
+    expect(textController.text, '👨‍👩‍👦012345678');
+    expect(find.text('10/10'), findsOneWidget);
+    counterTextWidget = tester.widget(find.text('10/10'));
+    expect(counterTextWidget.style.color, isNot(equals(Colors.deepPurpleAccent)));
+  });
+
+  testWidgets('maxLength limits input with surrogate pairs.', (WidgetTester tester) async {
+    final TextEditingController textController = TextEditingController();
+
+    await tester.pumpWidget(boilerplate(
+      child: TextField(
+        controller: textController,
+        maxLength: 10,
+      ),
+    ));
+
+    const String surrogatePair = '😆';
+    await tester.enterText(find.byType(TextField), surrogatePair + '0123456789101112');
+    expect(textController.text, surrogatePair + '012345678');
+  });
+
+  testWidgets('maxLength limits input with grapheme clusters.', (WidgetTester tester) async {
+    final TextEditingController textController = TextEditingController();
+
+    await tester.pumpWidget(boilerplate(
+      child: TextField(
+        controller: textController,
+        maxLength: 10,
+      ),
+    ));
+
+    const String graphemeCluster = '👨‍👩‍👦';
+    await tester.enterText(find.byType(TextField), graphemeCluster + '0123456789101112');
+    expect(textController.text, graphemeCluster + '012345678');
+  });
+
   testWidgets('setting maxLength shows counter', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Material(
@@ -3664,6 +3783,48 @@ void main() {
     await tester.pump();
 
     expect(find.text('5/10'), findsOneWidget);
+  });
+
+  testWidgets('maxLength counter measures surrogate pairs as one character', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: Center(
+            child: TextField(
+              maxLength: 10,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('0/10'), findsOneWidget);
+
+    const String surrogatePair = '😆';
+    await tester.enterText(find.byType(TextField), surrogatePair);
+    await tester.pump();
+
+    expect(find.text('1/10'), findsOneWidget);
+  });
+
+  testWidgets('maxLength counter measures grapheme clusters as one character', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: Center(
+            child: TextField(
+              maxLength: 10,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('0/10'), findsOneWidget);
+
+    const String familyEmoji = '👨‍👩‍👦';
+    await tester.enterText(find.byType(TextField), familyEmoji);
+    await tester.pump();
+
+    expect(find.text('1/10'), findsOneWidget);
   });
 
   testWidgets('setting maxLength to TextField.noMaxLength shows only entered length', (WidgetTester tester) async {
@@ -7941,26 +8102,133 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
-          child: TextField(
-            decoration: InputDecoration(
-              // Add an icon so that the left edge is not the text area
-              icon: Icon(Icons.person),
+          child: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: TextField(
+              mouseCursor: SystemMouseCursors.grab,
+              decoration: InputDecoration(
+                // Add an icon so that the left edge is not the text area
+                icon: Icon(Icons.person),
+              ),
             ),
           ),
         ),
       ),
     );
 
+    // Center, which is within the text area
+    final Offset center = tester.getCenter(find.byType(TextField));
+    // Top left, which is not the text area
+    final Offset edge = tester.getTopLeft(find.byType(TextField)) + const Offset(1, 1);
+
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
-    await gesture.addPointer(location: tester.getCenter(find.byType(TextField)));
+    await gesture.addPointer(location: center);
     addTearDown(gesture.removePointer);
 
     await tester.pump();
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.grab);
 
-    // Test top left, which is not the text area
-    await gesture.moveTo(tester.getTopLeft(find.byType(TextField)) + const Offset(1, 1));
+    // Test default cursor
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: TextField(
+              decoration: InputDecoration(
+                icon: Icon(Icons.person),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    await gesture.moveTo(edge);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    await gesture.moveTo(center);
+
+    // Test default cursor when disabled
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: TextField(
+              enabled: false,
+              decoration: InputDecoration(
+                icon: Icon(Icons.person),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    await gesture.moveTo(edge);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    await gesture.moveTo(center);
+  });
+
+  testWidgets('Caret rtl with changing width', (WidgetTester tester) async {
+    StateSetter setState;
+    bool isWide = false;
+    const double wideWidth = 300.0;
+    const double narrowWidth = 200.0;
+    final TextEditingController controller = TextEditingController();
+    await tester.pumpWidget(
+      boilerplate(
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setter) {
+            setState = setter;
+            return Container(
+              width: isWide ? wideWidth : narrowWidth,
+              child: TextField(
+                key: textFieldKey,
+                controller: controller,
+                textDirection: TextDirection.rtl,
+              ),
+            );
+          }
+        ),
+      ),
+    );
+
+    // The cursor is on the right of the input because it's RTL.
+    RenderEditable editable = findRenderEditable(tester);
+    double cursorRight = editable.getLocalRectForCaret(
+      TextPosition(offset: controller.value.text.length),
+    ).topRight.dx;
+    double inputWidth = editable.size.width;
+    expect(inputWidth, narrowWidth);
+    expect(cursorRight, inputWidth - kCaretGap);
+
+    // After entering some text, the cursor remains on the right of the input.
+    await tester.enterText(find.byType(TextField), '12345');
+    await tester.pump();
+    editable = findRenderEditable(tester);
+    cursorRight = editable.getLocalRectForCaret(
+      TextPosition(offset: controller.value.text.length),
+    ).topRight.dx;
+    inputWidth = editable.size.width;
+    expect(cursorRight, inputWidth - kCaretGap);
+
+    // Since increasing the width of the input moves its right edge further to
+    // the right, the cursor has followed this change and still appears on the
+    // right of the input.
+    setState(() {
+      isWide = true;
+    });
+    await tester.pump();
+    editable = findRenderEditable(tester);
+    cursorRight = editable.getLocalRectForCaret(
+      TextPosition(offset: controller.value.text.length),
+    ).topRight.dx;
+    inputWidth = editable.size.width;
+    expect(inputWidth, wideWidth);
+    expect(cursorRight, inputWidth - kCaretGap);
   });
 }

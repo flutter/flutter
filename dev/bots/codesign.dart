@@ -62,7 +62,6 @@ bool checkCacheIsCurrent() {
 }
 
 List<String> get binariesWithEntitlements => List<String>.unmodifiable(<String>[
-  'idevice_id',
   'ideviceinfo',
   'idevicename',
   'idevicescreenshot',

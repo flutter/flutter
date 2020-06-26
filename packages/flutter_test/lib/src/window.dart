@@ -87,22 +87,6 @@ class TestWindow implements Window {
   }
 
   @override
-  double get physicalDepth => _physicalDepthTestValue ?? _window.physicalDepth;
-  double _physicalDepthTestValue;
-  /// Hides the real physical depth and reports the given
-  /// [physicalDepthTestValue] instead.
-  set physicalDepthTestValue (double physicalDepthTestValue) {
-    _physicalDepthTestValue = physicalDepthTestValue;
-    onMetricsChanged();
-  }
-  /// Deletes any existing test physical depth and returns to using the real
-  /// physical depth.
-  void clearPhysicalDepthTestValue() {
-    _physicalDepthTestValue = null;
-    onMetricsChanged();
-  }
-
-  @override
   WindowPadding get viewInsets => _viewInsetsTestValue ??  _window.viewInsets;
   WindowPadding _viewInsetsTestValue;
   /// Hides the real view insets and reports the given [viewInsetsTestValue]
@@ -418,7 +402,6 @@ class TestWindow implements Window {
     clearLocalesTestValue();
     clearPaddingTestValue();
     clearPhysicalSizeTestValue();
-    clearPhysicalDepthTestValue();
     clearSemanticsEnabledTestValue();
     clearTextScaleFactorTestValue();
     clearViewInsetsTestValue();

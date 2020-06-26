@@ -66,12 +66,10 @@ FileSystem get fs => ErrorHandlingFileSystem(
   platform: platform,
 );
 
-final FileSystemUtils _defaultFileSystemUtils = FileSystemUtils(
+FileSystemUtils get fsUtils => context.get<FileSystemUtils>() ?? FileSystemUtils(
   fileSystem: fs,
   platform: platform,
 );
-
-FileSystemUtils get fsUtils => context.get<FileSystemUtils>() ?? _defaultFileSystemUtils;
 
 const ProcessManager _kLocalProcessManager = LocalProcessManager();
 

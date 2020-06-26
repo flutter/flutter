@@ -37,6 +37,13 @@ class MockXcode extends Mock implements Xcode {}
 class MockSimControl extends Mock implements SimControl {}
 class MockPlistUtils extends Mock implements PlistParser {}
 
+final Platform macosPlatform = FakePlatform(
+  operatingSystem: 'macos',
+  environment: <String, String>{
+    'HOME': '/'
+  },
+);
+
 void main() {
   FakePlatform osx;
   FileSystemUtils fsUtils;
@@ -47,7 +54,7 @@ void main() {
       environment: <String, String>{},
       operatingSystem: 'macos',
     );
-    fileSystem = MemoryFileSystem();
+    fileSystem = MemoryFileSystem.test();
     fsUtils = FileSystemUtils(fileSystem: fileSystem, platform: osx);
   });
 
@@ -458,6 +465,11 @@ void main() {
     overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       FileSystem: () => fileSystem,
+      Platform: () => macosPlatform,
+      FileSystemUtils: () => FileSystemUtils(
+        fileSystem: fileSystem,
+        platform: macosPlatform,
+      )
     });
 
     testUsingContext('unified logging with app name', () async {

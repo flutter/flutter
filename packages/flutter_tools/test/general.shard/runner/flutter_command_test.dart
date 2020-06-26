@@ -31,6 +31,7 @@ void main() {
     List<int> mockTimes;
 
     setUp(() {
+      Cache.disableLocking();
       cache = MockitoCache();
       usage = MockitoUsage();
       clock = MockClock();
@@ -41,6 +42,10 @@ void main() {
         (Invocation _) => DateTime.fromMillisecondsSinceEpoch(mockTimes.removeAt(0))
       );
       when(mockProcessInfo.maxRss).thenReturn(10);
+    });
+
+    tearDown(() {
+      Cache.enableLocking();
     });
 
     testUsingContext('help text contains global options', () {
@@ -89,6 +94,30 @@ void main() {
             'of Flutter.'));
       expect(flutterCommand.deprecated, isTrue);
       expect(flutterCommand.hidden, isTrue);
+    });
+
+    testUsingContext('null-safety is surfaced in command usage analytics', () async {
+      final FakeNullSafeCommand fake = FakeNullSafeCommand();
+      final CommandRunner<void> commandRunner = createTestCommandRunner(fake);
+
+      await commandRunner.run(<String>['safety', '--enable-experiment=non-nullable']);
+
+      final VerificationResult resultA = verify(usage.sendCommand(
+        'safety',
+        parameters: captureAnyNamed('parameters'),
+      ));
+      expect(resultA.captured.first, containsPair('cd47', 'true'));
+      reset(usage);
+
+      await commandRunner.run(<String>['safety', '--enable-experiment=foo']);
+
+      final VerificationResult resultB = verify(usage.sendCommand(
+        'safety',
+        parameters: captureAnyNamed('parameters'),
+      ));
+      expect(resultB.captured.first, containsPair('cd47', 'false'));
+    }, overrides: <Type, Generator>{
+      Usage: () => usage,
     });
 
     testUsingContext('uses the error handling file system', () async {
@@ -456,6 +485,23 @@ class FakeDeprecatedCommand extends FlutterCommand {
 
   @override
   bool get deprecated => true;
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    return FlutterCommandResult.success();
+  }
+}
+
+class FakeNullSafeCommand extends FlutterCommand {
+  FakeNullSafeCommand() {
+    addEnableExperimentation(hide: false);
+  }
+
+  @override
+  String get description => 'test null safety';
+
+  @override
+  String get name => 'safety';
 
   @override
   Future<FlutterCommandResult> runCommand() async {
