@@ -3,6 +3,7 @@
 *~
 .*.sw?
 .checkstyle
+.clangd
 .classpath
 .cproject
 .DS_Store
@@ -14,6 +15,7 @@
 .project
 .pub
 .pydevproject
+compile_commands.json
 cscope.*
 Session.vim
 tags
