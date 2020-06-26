@@ -561,7 +561,7 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
 /// void main() => runApp(RestorationExampleApp());
 /// ```
 ///
-/// ```dart code-preamble
+/// ```dart preamble
 /// class RestorationExampleApp extends StatelessWidget {
 ///   @override
 ///   Widget build(BuildContext context) {
