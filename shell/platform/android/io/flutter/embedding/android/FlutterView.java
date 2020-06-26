@@ -943,16 +943,15 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
   }
 
   public void convertToImageView() {
-    renderSurface.detachFromRenderer();
+    renderSurface.pause();
 
     ImageReader imageReader = PlatformViewsController.createImageReader(getWidth(), getHeight());
-    flutterImageView = new FlutterImageView(getContext(), imageReader);
+    flutterImageView =
+        new FlutterImageView(getContext(), imageReader, FlutterImageView.SurfaceKind.background);
     renderSurface = flutterImageView;
     if (flutterEngine != null) {
       renderSurface.attachToRenderer(flutterEngine.getRenderer());
     }
-
-    removeAllViews();
     addView(flutterImageView);
   }
 

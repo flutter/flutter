@@ -140,6 +140,20 @@ static void SurfaceCreated(JNIEnv* env,
   ANDROID_SHELL_HOLDER->GetPlatformView()->NotifyCreated(std::move(window));
 }
 
+static void SurfaceWindowChanged(JNIEnv* env,
+                                 jobject jcaller,
+                                 jlong shell_holder,
+                                 jobject jsurface) {
+  // Note: This frame ensures that any local references used by
+  // ANativeWindow_fromSurface are released immediately. This is needed as a
+  // workaround for https://code.google.com/p/android/issues/detail?id=68174
+  fml::jni::ScopedJavaLocalFrame scoped_local_reference_frame(env);
+  auto window = fml::MakeRefCounted<AndroidNativeWindow>(
+      ANativeWindow_fromSurface(env, jsurface));
+  ANDROID_SHELL_HOLDER->GetPlatformView()->NotifySurfaceWindowChanged(
+      std::move(window));
+}
+
 static void SurfaceChanged(JNIEnv* env,
                            jobject jcaller,
                            jlong shell_holder,
@@ -540,6 +554,11 @@ bool RegisterApi(JNIEnv* env) {
           .name = "nativeSurfaceCreated",
           .signature = "(JLandroid/view/Surface;)V",
           .fnPtr = reinterpret_cast<void*>(&SurfaceCreated),
+      },
+      {
+          .name = "nativeSurfaceWindowChanged",
+          .signature = "(JLandroid/view/Surface;)V",
+          .fnPtr = reinterpret_cast<void*>(&SurfaceWindowChanged),
       },
       {
           .name = "nativeSurfaceChanged",
