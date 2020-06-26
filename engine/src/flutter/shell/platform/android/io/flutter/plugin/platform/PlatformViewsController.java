@@ -611,10 +611,10 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
           width,
           height,
           PixelFormat.RGBA_8888,
-          2,
+          3,
           HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE | HardwareBuffer.USAGE_GPU_COLOR_OUTPUT);
     } else {
-      return ImageReader.newInstance(width, height, PixelFormat.RGBA_8888, 2);
+      return ImageReader.newInstance(width, height, PixelFormat.RGBA_8888, 3);
     }
   }
 
