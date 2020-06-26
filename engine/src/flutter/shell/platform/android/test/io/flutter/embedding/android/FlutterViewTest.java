@@ -2,6 +2,7 @@ package io.flutter.embedding.android;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -12,6 +13,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.media.Image;
 import android.media.ImageReader;
 import android.view.View;
 import android.view.ViewGroup;
@@ -374,12 +376,41 @@ public class FlutterViewTest {
   @Test
   public void flutterImageView_acquiresImageAndInvalidates() {
     final ImageReader mockReader = mock(ImageReader.class);
+    when(mockReader.getMaxImages()).thenReturn(2);
+
     final FlutterImageView imageView =
-        spy(new FlutterImageView(RuntimeEnvironment.application, mockReader));
+        spy(
+            new FlutterImageView(
+                RuntimeEnvironment.application,
+                mockReader,
+                FlutterImageView.SurfaceKind.background));
 
     imageView.acquireLatestImage();
     verify(mockReader, times(1)).acquireLatestImage();
     verify(imageView, times(1)).invalidate();
+  }
+
+  @Test
+  public void flutterImageView_acquiresMaxImagesAtMost() {
+    final ImageReader mockReader = mock(ImageReader.class);
+    when(mockReader.getMaxImages()).thenReturn(2);
+
+    final Image mockImage = mock(Image.class);
+    when(mockReader.acquireLatestImage()).thenReturn(mockImage);
+
+    final FlutterImageView imageView =
+        spy(
+            new FlutterImageView(
+                RuntimeEnvironment.application,
+                mockReader,
+                FlutterImageView.SurfaceKind.background));
+
+    doNothing().when(imageView).invalidate();
+    imageView.acquireLatestImage();
+    imageView.acquireLatestImage();
+    imageView.acquireLatestImage();
+
+    verify(mockReader, times(2)).acquireLatestImage();
   }
 
   /*
