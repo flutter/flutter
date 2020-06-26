@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include "compositor_context.h"
 #include "flutter/flow/surface.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/weak_ptr.h"

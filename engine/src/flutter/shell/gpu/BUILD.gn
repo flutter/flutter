@@ -2,19 +2,23 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//flutter/common/config.gni")
 import("//flutter/shell/config.gni")
 
 gpu_dir = "//flutter/shell/gpu"
 
 gpu_common_deps = [
   "//flutter/common",
-  "//flutter/flow",
   "//flutter/fml",
-  "//flutter/shell/common",
   "//third_party/skia",
 ]
 
-source_set("gpu_surface_software") {
+gpu_common_deps_legacy_and_next = [
+  "//flutter/flow:flow",
+  "//flutter/shell/common:common",
+]
+
+source_set_maybe_fuchsia_legacy("gpu_surface_software") {
   sources = [
     "$gpu_dir/gpu_surface_delegate.h",
     "$gpu_dir/gpu_surface_software.cc",
@@ -24,9 +28,11 @@ source_set("gpu_surface_software") {
   ]
 
   deps = gpu_common_deps
+
+  deps_legacy_and_next = gpu_common_deps_legacy_and_next
 }
 
-source_set("gpu_surface_gl") {
+source_set_maybe_fuchsia_legacy("gpu_surface_gl") {
   sources = [
     "$gpu_dir/gpu_surface_delegate.h",
     "$gpu_dir/gpu_surface_gl.cc",
@@ -35,10 +41,12 @@ source_set("gpu_surface_gl") {
     "$gpu_dir/gpu_surface_gl_delegate.h",
   ]
 
-  deps = gpu_common_deps + [ "//third_party/skia" ]
+  deps = gpu_common_deps
+
+  deps_legacy_and_next = gpu_common_deps_legacy_and_next
 }
 
-source_set("gpu_surface_vulkan") {
+source_set_maybe_fuchsia_legacy("gpu_surface_vulkan") {
   sources = [
     "$gpu_dir/gpu_surface_delegate.h",
     "$gpu_dir/gpu_surface_vulkan.cc",
@@ -47,18 +55,19 @@ source_set("gpu_surface_vulkan") {
     "$gpu_dir/gpu_surface_vulkan_delegate.h",
   ]
 
-  deps = gpu_common_deps + [
-           "//third_party/skia",
-           "//flutter/vulkan",
-         ]
+  deps = gpu_common_deps + [ "//flutter/vulkan" ]
+
+  deps_legacy_and_next = gpu_common_deps_legacy_and_next
 }
 
-source_set("gpu_surface_metal") {
+source_set_maybe_fuchsia_legacy("gpu_surface_metal") {
   sources = [
     "$gpu_dir/gpu_surface_delegate.h",
     "$gpu_dir/gpu_surface_metal.h",
     "$gpu_dir/gpu_surface_metal.mm",
   ]
 
-  deps = gpu_common_deps + [ "//third_party/skia" ]
+  deps = gpu_common_deps
+
+  deps_legacy_and_next = gpu_common_deps_legacy_and_next
 }

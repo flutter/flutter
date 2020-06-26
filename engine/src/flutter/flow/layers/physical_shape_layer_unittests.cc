@@ -135,7 +135,7 @@ TEST_F(PhysicalShapeLayerTest, ElevationSimple) {
 
   // The Fuchsia system compositor handles all elevated PhysicalShapeLayers and
   // their shadows , so we do not use the direct |Paint()| path there.
-#if !defined(OS_FUCHSIA)
+#if !defined(LEGACY_FUCHSIA_EMBEDDER)
   SkPaint layer_paint;
   layer_paint.setColor(SK_ColorGREEN);
   layer_paint.setAntiAlias(true);
@@ -192,7 +192,7 @@ TEST_F(PhysicalShapeLayerTest, ElevationComplex) {
 
   // The Fuchsia system compositor handles all elevated PhysicalShapeLayers and
   // their shadows , so we do not use the direct |Paint()| path there.
-#if !defined(OS_FUCHSIA)
+#if !defined(LEGACY_FUCHSIA_EMBEDDER)
   SkPaint layer_paint;
   layer_paint.setColor(SK_ColorBLACK);
   layer_paint.setAntiAlias(true);

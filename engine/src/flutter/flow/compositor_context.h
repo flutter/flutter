@@ -15,7 +15,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/raster_thread_merger.h"
 #include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkPictureRecorder.h"
+#include "third_party/skia/include/gpu/GrContext.h"
 
 namespace flutter {
 

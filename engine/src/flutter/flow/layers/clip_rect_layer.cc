@@ -33,7 +33,7 @@ void ClipRectLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   context->cull_rect = previous_cull_rect;
 }
 
-#if defined(OS_FUCHSIA)
+#if defined(LEGACY_FUCHSIA_EMBEDDER)
 
 void ClipRectLayer::UpdateScene(SceneUpdateContext& context) {
   TRACE_EVENT0("flutter", "ClipRectLayer::UpdateScene");
@@ -44,7 +44,7 @@ void ClipRectLayer::UpdateScene(SceneUpdateContext& context) {
   UpdateSceneChildren(context);
 }
 
-#endif  // defined(OS_FUCHSIA)
+#endif
 
 void ClipRectLayer::Paint(PaintContext& context) const {
   TRACE_EVENT0("flutter", "ClipRectLayer::Paint");

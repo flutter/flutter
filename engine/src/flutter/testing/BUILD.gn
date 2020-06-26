@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//flutter/common/config.gni")
 import("//flutter/shell/config.gni")
 import("testing.gni")
 
@@ -40,7 +41,7 @@ source_set("testing") {
   ]
 }
 
-source_set("dart") {
+source_set_maybe_fuchsia_legacy("dart") {
   testonly = true
 
   sources = [
@@ -55,12 +56,13 @@ source_set("dart") {
   public_deps = [
     ":testing_lib",
     "//flutter/common",
-    "//flutter/runtime",
     "//flutter/runtime:libdart",
     "//flutter/third_party/tonic",
     "//third_party/dart/runtime/bin:elf_loader",
     "//third_party/skia",
   ]
+
+  public_deps_legacy_and_next = [ "//flutter/runtime:runtime" ]
 }
 
 source_set("skia") {
@@ -72,13 +74,10 @@ source_set("skia") {
     "canvas_test.h",
     "mock_canvas.cc",
     "mock_canvas.h",
-    "mock_raster_cache.cc",
-    "mock_raster_cache.h",
   ]
 
   public_deps = [
     ":testing_lib",
-    "//flutter/flow",
     "//third_party/skia",
   ]
 }

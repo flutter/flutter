@@ -32,6 +32,7 @@
 #include "flutter/shell/version/version.h"
 #include "flutter/testing/testing.h"
 #include "rapidjson/writer.h"
+#include "third_party/skia/include/core/SkPictureRecorder.h"
 #include "third_party/tonic/converter/dart_converter.h"
 
 namespace flutter {
@@ -517,7 +518,7 @@ TEST_F(ShellTest,
 
   DestroyShell(std::move(shell));
 }
-#endif  // defined(OS_FUCHSIA)
+#endif
 
 TEST(SettingsTest, FrameTimingSetsAndGetsProperly) {
   // Ensure that all phases are in kPhases.

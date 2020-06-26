@@ -12,7 +12,7 @@ ShaderMaskLayer::ShaderMaskLayer(sk_sp<SkShader> shader,
     : shader_(shader), mask_rect_(mask_rect), blend_mode_(blend_mode) {}
 
 void ShaderMaskLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
-#if defined(OS_FUCHSIA)
+#if defined(LEGACY_FUCHSIA_EMBEDDER)
   CheckForChildLayerBelow(context);
 #endif
 

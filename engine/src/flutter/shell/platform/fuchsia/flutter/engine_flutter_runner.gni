@@ -90,16 +90,15 @@ template("flutter_runner") {
     # The use of these dependencies is temporary and will be moved behind the
     # embedder API.
     flutter_deps = [
-      "../flutter:fuchsia_gpu_configuration",
+      "../flutter:fuchsia_legacy_gpu_configuration",
       "//flutter/assets",
       "//flutter/common",
-      "//flutter/flow",
-      "//flutter/lib/ui",
-      "//flutter/runtime",
-      "//flutter/third_party/txt",
-      "//flutter/vulkan",
       "//flutter/fml",
-      "//flutter/shell/common",
+      "//flutter/flow:flow_fuchsia_legacy",
+      "//flutter/lib/ui:ui_fuchsia_legacy",
+      "//flutter/runtime:runtime_fuchsia_legacy",
+      "//flutter/shell/common:common_fuchsia_legacy",
+      "//flutter/vulkan",
     ]
 
     _fuchsia_platform = "//flutter/shell/platform/fuchsia"

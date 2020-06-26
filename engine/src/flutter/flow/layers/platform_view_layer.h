@@ -17,7 +17,7 @@ class PlatformViewLayer : public Layer {
 
   void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
   void Paint(PaintContext& context) const override;
-#if defined(OS_FUCHSIA)
+#if defined(LEGACY_FUCHSIA_EMBEDDER)
   // Updates the system composited scene.
   void UpdateScene(SceneUpdateContext& context) override;
 #endif

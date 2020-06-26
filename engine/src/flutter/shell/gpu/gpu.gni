@@ -33,4 +33,30 @@ template("shell_gpu_configuration") {
       public_deps += [ "//flutter/shell/gpu:gpu_surface_metal" ]
     }
   }
+
+  if (is_fuchsia) {
+    legagcy_suffix = "_fuchsia_legacy"
+    group(target_name + legagcy_suffix) {
+      public_deps = []
+
+      if (invoker.enable_software) {
+        public_deps +=
+            [ "//flutter/shell/gpu:gpu_surface_software" + legagcy_suffix ]
+      }
+
+      if (invoker.enable_gl) {
+        public_deps += [ "//flutter/shell/gpu:gpu_surface_gl" + legagcy_suffix ]
+      }
+
+      if (invoker.enable_vulkan) {
+        public_deps +=
+            [ "//flutter/shell/gpu:gpu_surface_vulkan" + legagcy_suffix ]
+      }
+
+      if (invoker.enable_metal) {
+        public_deps +=
+            [ "//flutter/shell/gpu:gpu_surface_metal" + legagcy_suffix ]
+      }
+    }
+  }
 }

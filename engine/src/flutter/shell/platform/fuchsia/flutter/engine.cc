@@ -9,6 +9,7 @@
 
 #include <sstream>
 
+#include "compositor_context.h"
 #include "flutter/common/task_runners.h"
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/synchronization/waitable_event.h"

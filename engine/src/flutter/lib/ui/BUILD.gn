@@ -6,7 +6,7 @@ import("//build/fuchsia/sdk.gni")
 import("//flutter/common/config.gni")
 import("//flutter/testing/testing.gni")
 
-source_set("ui") {
+source_set_maybe_fuchsia_legacy("ui") {
   sources = [
     "compositing/scene.cc",
     "compositing/scene.h",
@@ -109,10 +109,13 @@ source_set("ui") {
 
   public_configs = [ "//flutter:config" ]
 
+  public_deps = [
+    "//flutter/third_party/txt",
+  ]
+
   deps = [
     "//flutter/assets",
     "//flutter/common",
-    "//flutter/flow",
     "//flutter/fml",
     "//flutter/runtime:test_font",
     "//flutter/third_party/tonic",
@@ -121,26 +124,22 @@ source_set("ui") {
     "//third_party/skia",
   ]
 
-  public_deps = [
-    "//flutter/third_party/txt",
-  ]
-
   if (flutter_enable_skshaper) {
     defines = [ "FLUTTER_ENABLE_SKSHAPER" ]
   }
 
-  if (is_fuchsia) {
-    sources += [
-      "compositing/scene_host.cc",
-      "compositing/scene_host.h",
-    ]
+  sources_legacy = [
+    "compositing/scene_host.cc",
+    "compositing/scene_host.h",
+  ]
 
-    deps += [
-      "$fuchsia_sdk_root/pkg:async-cpp",
-      "//flutter/shell/platform/fuchsia/dart-pkg/fuchsia",
-      "//flutter/shell/platform/fuchsia/dart-pkg/zircon",
-    ]
-  }
+  deps_legacy = [
+    "$fuchsia_sdk_root/pkg:async-cpp",
+    "//flutter/shell/platform/fuchsia/dart-pkg/fuchsia",
+    "//flutter/shell/platform/fuchsia/dart-pkg/zircon",
+  ]
+
+  deps_legacy_and_next = [ "//flutter/flow:flow" ]
 }
 
 if (current_toolchain == host_toolchain) {

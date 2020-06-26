@@ -29,7 +29,7 @@ void ContainerLayer::Paint(PaintContext& context) const {
 void ContainerLayer::PrerollChildren(PrerollContext* context,
                                      const SkMatrix& child_matrix,
                                      SkRect* child_paint_bounds) {
-#if defined(OS_FUCHSIA)
+#if defined(LEGACY_FUCHSIA_EMBEDDER)
   child_layer_exists_below_ = context->child_scene_layer_exists_below;
   context->child_scene_layer_exists_below = false;
 #endif
@@ -57,7 +57,7 @@ void ContainerLayer::PrerollChildren(PrerollContext* context,
 
   context->has_platform_view = child_has_platform_view;
 
-#if defined(OS_FUCHSIA)
+#if defined(LEGACY_FUCHSIA_EMBEDDER)
   if (child_layer_exists_below_) {
     set_needs_system_composite(true);
   }
@@ -87,7 +87,7 @@ void ContainerLayer::TryToPrepareRasterCache(PrerollContext* context,
   }
 }
 
-#if defined(OS_FUCHSIA)
+#if defined(LEGACY_FUCHSIA_EMBEDDER)
 
 void ContainerLayer::CheckForChildLayerBelow(PrerollContext* context) {
   // All ContainerLayers make the check in PrerollChildren.
@@ -158,7 +158,7 @@ void ContainerLayer::UpdateSceneChildren(SceneUpdateContext& context) {
   }
 }
 
-#endif  // defined(OS_FUCHSIA)
+#endif
 
 MergedContainerLayer::MergedContainerLayer() {
   // Ensure the layer has only one direct child.

@@ -6,6 +6,7 @@
 
 #include <fcntl.h>
 #include <lib/fdio/watcher.h>
+#include <lib/zx/time.h>
 #include <unistd.h>
 
 #include "flutter/fml/unique_fd.h"
@@ -57,7 +58,8 @@ bool Surface::CanConnectToDisplay() {
   }
 
   zx_status_t status = fdio_watch_directory(
-      fd.get(), DriverWatcher, zx_deadline_after(ZX_SEC(5)), nullptr);
+      fd.get(), DriverWatcher,
+      zx::deadline_after(zx::duration(ZX_SEC(5))).get(), nullptr);
   return status == ZX_ERR_STOP;
 }
 

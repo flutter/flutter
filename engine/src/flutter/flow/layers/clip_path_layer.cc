@@ -4,11 +4,11 @@
 
 #include "flutter/flow/layers/clip_path_layer.h"
 
-#if defined(OS_FUCHSIA)
+#if defined(LEGACY_FUCHSIA_EMBEDDER)
 
 #include "lib/ui/scenic/cpp/commands.h"
 
-#endif  // defined(OS_FUCHSIA)
+#endif
 
 namespace flutter {
 
@@ -40,7 +40,7 @@ void ClipPathLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   context->cull_rect = previous_cull_rect;
 }
 
-#if defined(OS_FUCHSIA)
+#if defined(LEGACY_FUCHSIA_EMBEDDER)
 
 void ClipPathLayer::UpdateScene(SceneUpdateContext& context) {
   TRACE_EVENT0("flutter", "ClipPathLayer::UpdateScene");
@@ -51,7 +51,7 @@ void ClipPathLayer::UpdateScene(SceneUpdateContext& context) {
   UpdateSceneChildren(context);
 }
 
-#endif  // defined(OS_FUCHSIA)
+#endif
 
 void ClipPathLayer::Paint(PaintContext& context) const {
   TRACE_EVENT0("flutter", "ClipPathLayer::Paint");
