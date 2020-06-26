@@ -10,6 +10,7 @@ import 'package:process/process.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
+import 'devices.dart';
 
 /// Wraps iproxy command line tool port forwarding.
 ///
@@ -21,8 +22,9 @@ class IProxy {
     @required ProcessManager processManager,
     @required MapEntry<String, String> dyLdLibEntry,
   }) : _dyLdLibEntry = dyLdLibEntry,
-        _processUtils = ProcessUtils(processManager: processManager, logger: logger),
-        _iproxyPath = iproxyPath;
+       _processUtils = ProcessUtils(processManager: processManager, logger: logger),
+       _logger = logger,
+       _iproxyPath = iproxyPath;
 
   /// Create a [IProxy] for testing.
   ///
@@ -44,9 +46,10 @@ class IProxy {
 
   final String _iproxyPath;
   final ProcessUtils _processUtils;
+  final Logger _logger;
   final MapEntry<String, String> _dyLdLibEntry;
 
-  Future<Process> forward(int devicePort, int hostPort, String deviceId) {
+  Future<Process> forward(int devicePort, int hostPort, String deviceId, IOSDeviceInterface interfaceType) {
     // Usage: iproxy LOCAL_PORT:DEVICE_PORT --udid UDID
     return _processUtils.start(
       <String>[
@@ -54,6 +57,10 @@ class IProxy {
         '$hostPort:$devicePort',
         '--udid',
         deviceId,
+        if (interfaceType == IOSDeviceInterface.network)
+          '--network',
+        if (_logger.isVerbose)
+          '--debug',
       ],
       environment: Map<String, String>.fromEntries(
         <MapEntry<String, String>>[_dyLdLibEntry],

@@ -190,15 +190,6 @@ class IOSDevice extends Device {
   }
 
   @override
-  bool get supportsHotReload => interfaceType == IOSDeviceInterface.usb;
-
-  @override
-  bool get supportsHotRestart => interfaceType == IOSDeviceInterface.usb;
-
-  @override
-  bool get supportsFlutterExit => interfaceType == IOSDeviceInterface.usb;
-
-  @override
   final String name;
 
   @override
@@ -493,6 +484,7 @@ class IOSDevice extends Device {
     iproxy: _iproxy,
     id: id,
     operatingSystemUtils: globals.os,
+    interfaceType: interfaceType,
   );
 
   @visibleForTesting
@@ -762,10 +754,12 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
     @required String id,
     @required IProxy iproxy,
     @required OperatingSystemUtils operatingSystemUtils,
+    @required IOSDeviceInterface interfaceType,
   }) : _logger = logger,
        _id = id,
        _iproxy = iproxy,
-       _operatingSystemUtils = operatingSystemUtils;
+       _operatingSystemUtils = operatingSystemUtils,
+       _interfaceType = interfaceType;
 
   /// Create a [IOSDevicePortForwarder] for testing.
   ///
@@ -787,6 +781,7 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
       ),
       id: id ?? '1234',
       operatingSystemUtils: operatingSystemUtils,
+      interfaceType: IOSDeviceInterface.usb,
     );
   }
 
@@ -794,6 +789,7 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
   final String _id;
   final IProxy _iproxy;
   final OperatingSystemUtils _operatingSystemUtils;
+  final IOSDeviceInterface _interfaceType;
 
   @override
   List<ForwardedPort> forwardedPorts = <ForwardedPort>[];
@@ -819,7 +815,7 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
     bool connected = false;
     while (!connected) {
       _logger.printTrace('Attempting to forward device port $devicePort to host port $hostPort');
-      process = await _iproxy.forward(devicePort, hostPort, _id);
+      process = await _iproxy.forward(devicePort, hostPort, _id, _interfaceType);
       // TODO(ianh): This is a flakey race condition, https://github.com/libimobiledevice/libimobiledevice/issues/674
       connected = !await process.stdout.isEmpty.timeout(_kiProxyPortForwardTimeout, onTimeout: () => false);
       if (!connected) {

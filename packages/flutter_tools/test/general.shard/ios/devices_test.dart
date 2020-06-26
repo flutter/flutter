@@ -234,6 +234,7 @@ void main() {
             processManager: FakeProcessManager.any(),
           ),
           iproxy: iproxy,
+          interfaceType: IOSDeviceInterface.usb,
         );
         portForwarder.addForwardedPorts(<ForwardedPort>[forwardedPort]);
         return portForwarder;

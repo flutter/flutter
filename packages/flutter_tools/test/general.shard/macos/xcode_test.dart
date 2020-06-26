@@ -100,8 +100,8 @@ void main() {
         when(processManager.runSync(<String>['xcrun', '--find', 'xcdevice']))
           .thenReturn(ProcessResult(1, 0, '/path/to/xcdevice', ''));
 
-        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '2']))
-          .thenThrow(const ProcessException('xcrun', <String>['xcdevice', 'list', '--timeout', '2']));
+        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '10']))
+          .thenThrow(const ProcessException('xcrun', <String>['xcdevice', 'list', '--timeout', '10']));
 
         expect(await xcdevice.getAvailableIOSDevices(), isEmpty);
       });
@@ -545,11 +545,11 @@ void main() {
 ''';
 
           fakeProcessManager.addCommand(const FakeCommand(
-            command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '2'],
+            command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '10'],
             stdout: devicesOutput,
           ));
           final List<IOSDevice> devices = await xcdevice.getAvailableIOSDevices();
-          expect(devices, hasLength(3));
+          expect(devices, hasLength(4));
           expect(devices[0].id, '00008027-00192736010F802E');
           expect(devices[0].name, 'An iPhone (Space Gray)');
           expect(await devices[0].sdkNameAndVersion, 'iOS 13.3');
@@ -558,10 +558,14 @@ void main() {
           expect(devices[1].name, 'iPad 1');
           expect(await devices[1].sdkNameAndVersion, 'iOS 10.1');
           expect(devices[1].cpuArchitecture, DarwinArch.armv7);
-          expect(devices[2].id, 'f577a7903cc54959be2e34bc4f7f80b7009efcf4');
-          expect(devices[2].name, 'iPad 2');
+          expect(devices[2].id, '234234234234234234345445687594e089dede3c44');
+          expect(devices[2].name, 'A networked iPad');
           expect(await devices[2].sdkNameAndVersion, 'iOS 10.1');
-          expect(devices[2].cpuArchitecture, DarwinArch.arm64); // Defaults to arm64 for unknown architecture.
+          expect(devices[2].cpuArchitecture, DarwinArch.arm64);
+          expect(devices[3].id, 'f577a7903cc54959be2e34bc4f7f80b7009efcf4');
+          expect(devices[3].name, 'iPad 2');
+          expect(await devices[3].sdkNameAndVersion, 'iOS 10.1');
+          expect(devices[3].cpuArchitecture, DarwinArch.arm64); // Defaults to arm64 for unknown architecture.
           expect(fakeProcessManager.hasRemainingExpectations, isFalse);
         }, overrides: <Type, Generator>{
           Platform: () => macPlatform,
@@ -615,7 +619,7 @@ void main() {
 ''';
 
           fakeProcessManager.addCommand(const FakeCommand(
-            command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '2'],
+            command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '10'],
             stdout: devicesOutput,
           ));
           final List<IOSDevice> devices = await xcdevice.getAvailableIOSDevices();
@@ -664,7 +668,7 @@ void main() {
 ''';
 
           fakeProcessManager.addCommand(const FakeCommand(
-            command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '2'],
+            command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '10'],
             stdout: devicesOutput,
           ));
           final List<IOSDevice> devices = await xcdevice.getAvailableIOSDevices();
@@ -715,7 +719,7 @@ void main() {
 ''';
 
           fakeProcessManager.addCommand(const FakeCommand(
-            command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '2'],
+            command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '10'],
             stdout: devicesOutput,
           ));
 
