@@ -783,7 +783,6 @@ class AndroidViewController extends PlatformViewController {
   /// The Android MotionEvent object is created with [MotionEvent.obtain](https://developer.android.com/reference/android/view/MotionEvent.html#obtain(long,%20long,%20int,%20float,%20float,%20float,%20float,%20int,%20float,%20float,%20int,%20int)).
   /// See documentation of [MotionEvent.obtain](https://developer.android.com/reference/android/view/MotionEvent.html#obtain(long,%20long,%20int,%20float,%20float,%20float,%20float,%20int,%20float,%20float,%20int,%20int))
   /// for description of the parameters.
-  ///
   @override
   Future<void> dispatchPointerEvent(PointerEvent event) async {
     assert(_motionEventConverter._pointTransformer != null);
