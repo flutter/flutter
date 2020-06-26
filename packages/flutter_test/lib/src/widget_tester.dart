@@ -1012,7 +1012,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     final Element element = candidates.single;
     RenderObject renderObject = element.findRenderObject();
     SemanticsNode result = renderObject.debugSemantics;
-    while (renderObject != null && result == null) {
+    while (renderObject != null && (result == null || result.isMergedIntoParent)) {
       renderObject = renderObject?.parent as RenderObject;
       result = renderObject?.debugSemantics;
     }
