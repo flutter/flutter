@@ -26,9 +26,25 @@ public class LocalizationPlugin {
     this.localizationChannel = localizationChannel;
   }
 
+  /**
+   * Computes the {@link Locale} in supportedLocales that best matches the user's preferred locales.
+   *
+   * <p>FlutterEngine must be non-null when this method is invoked.
+   */
+  @SuppressWarnings("deprecation")
   public Locale resolveNativeLocale(List<Locale> supportedLocales) {
-    Locale platformResolvedLocale = null;
+    if (supportedLocales == null || supportedLocales.isEmpty()) {
+      return null;
+    }
+
+    // Android improved the localization resolution algorithms after API 24 (7.0, Nougat).
+    // See https://developer.android.com/guide/topics/resources/multilingual-support
+    //
+    // LanguageRange and Locale.lookup was added in API 26 and is the preferred way to
+    // select a locale. Pre-API 26, we implement a manual locale resolution.
     if (Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+      // Modern locale resolution using LanguageRange
+      // https://developer.android.com/guide/topics/resources/multilingual-support#postN
       List<Locale.LanguageRange> languageRanges = new ArrayList<>();
       LocaleList localeList = context.getResources().getConfiguration().getLocales();
       int localeCount = localeList.size();
@@ -37,14 +53,60 @@ public class LocalizationPlugin {
         String localeString = locale.toString();
         // This string replacement converts the locale string into the ranges format.
         languageRanges.add(new Locale.LanguageRange(localeString.replace("_", "-")));
+        languageRanges.add(new Locale.LanguageRange(locale.getLanguage()));
+        languageRanges.add(new Locale.LanguageRange(locale.getLanguage() + "-*"));
       }
-
-      // TODO(garyq): This should be modified to achieve Android's full
-      // locale resolution:
-      // https://developer.android.com/guide/topics/resources/multilingual-support
-      platformResolvedLocale = Locale.lookup(languageRanges, supportedLocales);
+      Locale platformResolvedLocale = Locale.lookup(languageRanges, supportedLocales);
+      if (platformResolvedLocale != null) {
+        return platformResolvedLocale;
+      }
+      return supportedLocales.get(0);
+    } else if (Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+      // Modern locale resolution without languageRange
+      // https://developer.android.com/guide/topics/resources/multilingual-support#postN
+      LocaleList localeList = context.getResources().getConfiguration().getLocales();
+      for (int index = 0; index < localeList.size(); ++index) {
+        Locale preferredLocale = localeList.get(index);
+        // Look for exact match.
+        for (Locale locale : supportedLocales) {
+          if (preferredLocale.equals(locale)) {
+            return locale;
+          }
+        }
+        // Look for exact language only match.
+        for (Locale locale : supportedLocales) {
+          if (preferredLocale.getLanguage().equals(locale.toLanguageTag())) {
+            return locale;
+          }
+        }
+        // Look for any locale with matching language.
+        for (Locale locale : supportedLocales) {
+          if (preferredLocale.getLanguage().equals(locale.getLanguage())) {
+            return locale;
+          }
+        }
+      }
+      return supportedLocales.get(0);
     }
-    return platformResolvedLocale;
+
+    // Legacy locale resolution
+    // https://developer.android.com/guide/topics/resources/multilingual-support#preN
+    Locale preferredLocale = context.getResources().getConfiguration().locale;
+    if (preferredLocale != null) {
+      // Look for exact match.
+      for (Locale locale : supportedLocales) {
+        if (preferredLocale.equals(locale)) {
+          return locale;
+        }
+      }
+      // Look for exact language only match.
+      for (Locale locale : supportedLocales) {
+        if (preferredLocale.getLanguage().equals(locale.toString())) {
+          return locale;
+        }
+      }
+    }
+    return supportedLocales.get(0);
   }
 
   /**
