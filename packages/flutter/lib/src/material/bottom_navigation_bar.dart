@@ -459,7 +459,7 @@ class _BottomNavigationTile extends StatelessWidget {
         break;
     }
 
-    Widget result = MergeSemantics(
+    final Widget result = MergeSemantics(
       child: Semantics(
         selected: selected,
         child: Stack(
