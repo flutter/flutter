@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 /// Listens to HTML "click" gestures detected by the browser.
@@ -15,7 +15,7 @@ class Tappable extends RoleManager {
   Tappable(SemanticsObject semanticsObject)
       : super(Role.tappable, semanticsObject);
 
-  html.EventListener _clickListener;
+  html.EventListener? _clickListener;
 
   @override
   void update() {

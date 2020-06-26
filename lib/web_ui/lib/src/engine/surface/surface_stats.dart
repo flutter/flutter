@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 part of engine;
 
 /// Surfaces that were retained this frame.
@@ -39,7 +38,7 @@ class _DebugSurfaceStats {
   _DebugSurfaceStats(this.surface);
 
   /// The surface these stats are for, or `null` if these are aggregated stats.
-  final PersistedSurface surface;
+  final PersistedSurface? surface;
 
   /// How many times a surface was retained from a previously rendered frame.
   int retainSurfaceCount = 0;
@@ -88,7 +87,7 @@ class _DebugSurfaceStats {
   }
 }
 
-html.CanvasRenderingContext2D _debugSurfaceStatsOverlayCtx;
+html.CanvasRenderingContext2D? _debugSurfaceStatsOverlayCtx;
 
 void _debugRepaintSurfaceStatsOverlay(PersistedScene scene) {
   final int overlayWidth = html.window.innerWidth;
@@ -115,10 +114,10 @@ void _debugRepaintSurfaceStatsOverlay(PersistedScene scene) {
       ..zIndex = '1000'
       ..opacity = '0.8';
     _debugSurfaceStatsOverlayCtx = _debugSurfaceStatsOverlay.context2D;
-    html.document.body.append(_debugSurfaceStatsOverlay);
+    html.document.body!.append(_debugSurfaceStatsOverlay);
   }
 
-  _debugSurfaceStatsOverlayCtx
+  _debugSurfaceStatsOverlayCtx!
     ..fillStyle = 'black'
     ..beginPath()
     ..rect(0, 0, overlayWidth, overlayHeight)
@@ -131,7 +130,7 @@ void _debugRepaintSurfaceStatsOverlay(PersistedScene scene) {
   final double physicsScreenPixelCount =
       physicalScreenWidth * physicalScreenHeight;
 
-  final int totalDomNodeCount = scene.rootElement.querySelectorAll('*').length;
+  final int totalDomNodeCount = scene.rootElement!.querySelectorAll('*').length;
 
   for (int i = 0; i < _surfaceStatsTimeline.length; i++) {
     final Map<PersistedSurface, _DebugSurfaceStats> statsMap =
@@ -141,7 +140,7 @@ void _debugRepaintSurfaceStatsOverlay(PersistedScene scene) {
     for (_DebugSurfaceStats oneSurfaceStats in statsMap.values) {
       totals.aggregate(oneSurfaceStats);
       if (oneSurfaceStats.surface is PersistedPicture) {
-        final PersistedPicture picture = oneSurfaceStats.surface;
+        final PersistedPicture picture = oneSurfaceStats.surface as PersistedPicture;
         pixelCount += picture.bitmapPixelCount;
       }
     }
@@ -155,7 +154,7 @@ void _debugRepaintSurfaceStatsOverlay(PersistedScene scene) {
         totals.retainSurfaceCount / _surfaceStatsTimeline[i].length;
 
     // Repaints
-    _debugSurfaceStatsOverlayCtx
+    _debugSurfaceStatsOverlayCtx!
       ..lineWidth = strokeWidth
       ..strokeStyle = 'red'
       ..beginPath()
@@ -164,7 +163,7 @@ void _debugRepaintSurfaceStatsOverlay(PersistedScene scene) {
       ..stroke();
 
     // DOM allocations
-    _debugSurfaceStatsOverlayCtx
+    _debugSurfaceStatsOverlayCtx!
       ..lineWidth = strokeWidth
       ..strokeStyle = 'red'
       ..beginPath()
@@ -173,7 +172,7 @@ void _debugRepaintSurfaceStatsOverlay(PersistedScene scene) {
       ..stroke();
 
     // Bitmap allocations
-    _debugSurfaceStatsOverlayCtx
+    _debugSurfaceStatsOverlayCtx!
       ..lineWidth = strokeWidth
       ..strokeStyle = 'red'
       ..beginPath()
@@ -182,7 +181,7 @@ void _debugRepaintSurfaceStatsOverlay(PersistedScene scene) {
       ..stroke();
 
     // Surface retentions
-    _debugSurfaceStatsOverlayCtx
+    _debugSurfaceStatsOverlayCtx!
       ..lineWidth = strokeWidth
       ..strokeStyle = 'green'
       ..beginPath()
@@ -191,7 +190,7 @@ void _debugRepaintSurfaceStatsOverlay(PersistedScene scene) {
       ..stroke();
   }
 
-  _debugSurfaceStatsOverlayCtx
+  _debugSurfaceStatsOverlayCtx!
     ..font = 'normal normal 14px sans-serif'
     ..fillStyle = 'white'
     ..fillText('Repaint rate', 5, rowHeight - 5)
@@ -200,7 +199,7 @@ void _debugRepaintSurfaceStatsOverlay(PersistedScene scene) {
     ..fillText('Retain rate', 5, 4 * rowHeight - 5);
 
   for (int i = 1; i <= rowCount; i++) {
-    _debugSurfaceStatsOverlayCtx
+    _debugSurfaceStatsOverlayCtx!
       ..lineWidth = 1
       ..strokeStyle = 'blue'
       ..beginPath()
@@ -231,7 +230,7 @@ void _debugPrintSurfaceStats(PersistedScene scene, int frameNumber) {
 
   void countReusesRecursively(PersistedSurface surface) {
     final _DebugSurfaceStats stats = _surfaceStatsFor(surface);
-    assert(stats != null);
+    assert(stats != null); // ignore: unnecessary_null_comparison
 
     surfaceRetainCount += stats.retainSurfaceCount;
     elementReuseCount += stats.reuseElementCount;

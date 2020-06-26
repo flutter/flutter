@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 html.HtmlElement _createContainer() {
@@ -32,7 +32,7 @@ class DebugCanvasReuseOverlay {
       ..textDecoration = 'underline';
     title.text = 'Canvas Reuse';
 
-    html.document.body.append(
+    html.document.body!.append(
       container
         ..append(title)
         ..append(
@@ -71,8 +71,8 @@ class DebugCanvasReuseOverlay {
     );
   }
 
-  static DebugCanvasReuseOverlay _instance;
-  static DebugCanvasReuseOverlay/*!*/ get instance {
+  static DebugCanvasReuseOverlay? _instance;
+  static DebugCanvasReuseOverlay get instance {
     if (_instance == null) {
       // Only call the constructor when assertions are enabled to guard against
       // mistakingly including this class in a release build.
@@ -80,7 +80,7 @@ class DebugCanvasReuseOverlay {
         _instance = DebugCanvasReuseOverlay._();
       }
     }
-    return _instance;
+    return _instance!;
   }
 
   final html.Text _created = html.Text('0');

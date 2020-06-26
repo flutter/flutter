@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 /// A surface that translates its children using CSS transform and translate.
 class PersistedOffset extends PersistedContainerSurface
     implements ui.OffsetEngineLayer {
-  PersistedOffset(PersistedOffset oldLayer, this.dx, this.dy) : super(oldLayer);
+  PersistedOffset(PersistedOffset? oldLayer, this.dx, this.dy) : super(oldLayer);
 
   /// Horizontal displacement.
   final double dx;
@@ -18,10 +18,10 @@ class PersistedOffset extends PersistedContainerSurface
 
   @override
   void recomputeTransformAndClip() {
-    _transform = parent._transform;
+    _transform = parent!._transform;
     if (dx != 0.0 || dy != 0.0) {
-      _transform = _transform.clone();
-      _transform.translate(dx, dy);
+      _transform = _transform!.clone();
+      _transform!.translate(dx, dy);
     }
     _projectedClip = null;
     _localTransformInverse = null;
@@ -38,7 +38,7 @@ class PersistedOffset extends PersistedContainerSurface
 
   @override
   void apply() {
-    rootElement.style.transform = 'translate(${dx}px, ${dy}px)';
+    rootElement!.style.transform = 'translate(${dx}px, ${dy}px)';
   }
 
   @override

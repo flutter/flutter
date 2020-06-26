@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 /// A surface that applies an [imageFilter] to its children.
 class PersistedImageFilter extends PersistedContainerSurface
     implements ui.ImageFilterEngineLayer {
-  PersistedImageFilter(PersistedImageFilter oldLayer, this.filter) : super(oldLayer);
+  PersistedImageFilter(PersistedImageFilter? oldLayer, this.filter) : super(oldLayer);
 
   final ui.ImageFilter filter;
 
@@ -19,7 +19,7 @@ class PersistedImageFilter extends PersistedContainerSurface
 
   @override
   void apply() {
-    rootElement.style.filter = _imageFilterToCss(filter);
+    rootElement!.style.filter = _imageFilterToCss(filter as EngineImageFilter);
   }
 
   @override

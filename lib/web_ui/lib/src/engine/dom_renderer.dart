@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 class DomRenderer {
@@ -32,22 +32,22 @@ class DomRenderer {
       const html.EventStreamProvider<html.Event>('languagechange');
 
   /// Listens to window resize events.
-  StreamSubscription<html.Event> _resizeSubscription;
+  StreamSubscription<html.Event>? _resizeSubscription;
 
   /// Listens to window locale events.
-  StreamSubscription<html.Event> _localeSubscription;
+  StreamSubscription<html.Event>? _localeSubscription;
 
   /// Contains Flutter-specific CSS rules, such as default margins and
   /// paddings.
-  html.StyleElement _styleElement;
+  html.StyleElement? _styleElement;
 
   /// Configures the screen, such as scaling.
-  html.MetaElement _viewportMeta;
+  html.MetaElement? _viewportMeta;
 
   /// The canvaskit script, downloaded from a CDN. Only created if
   /// [experimentalUseSkia] is set to true.
-  html.ScriptElement get canvasKitScript => _canvasKitScript;
-  html.ScriptElement _canvasKitScript;
+  html.ScriptElement? get canvasKitScript => _canvasKitScript;
+  html.ScriptElement? _canvasKitScript;
 
   /// The element that contains the [sceneElement].
   ///
@@ -57,18 +57,18 @@ class DomRenderer {
   /// This element precedes the [glassPaneElement] so that it never receives
   /// input events. All input events are processed by [glassPaneElement] and the
   /// semantics tree.
-  html.Element get sceneHostElement => _sceneHostElement;
-  html.Element _sceneHostElement;
+  html.Element? get sceneHostElement => _sceneHostElement;
+  html.Element? _sceneHostElement;
 
   /// The last scene element rendered by the [render] method.
-  html.Element get sceneElement => _sceneElement;
-  html.Element _sceneElement;
+  html.Element? get sceneElement => _sceneElement;
+  html.Element? _sceneElement;
 
   /// This is state persistant across hot restarts that indicates what
   /// to clear.  We delay removal of old visible state to make the
   /// transition appear smooth.
   static const String _staleHotRestartStore = '__flutter_state';
-  List<html.Element> _staleHotRestartState;
+  List<html.Element?>? _staleHotRestartState;
 
   /// Used to decide if the browser tab still has the focus.
   ///
@@ -78,14 +78,14 @@ class DomRenderer {
   /// This getter calls the `hasFocus` method of the `Document` interface.
   /// See for more details:
   /// https://developer.mozilla.org/en-US/docs/Web/API/Document/hasFocus
-  bool get windowHasFocus => js_util.callMethod(html.document, 'hasFocus', <dynamic>[]);
+  bool? get windowHasFocus => js_util.callMethod(html.document, 'hasFocus', <dynamic>[]);
 
   void _setupHotRestart() {
     // This persists across hot restarts to clear stale DOM.
     _staleHotRestartState =
         js_util.getProperty(html.window, _staleHotRestartStore);
     if (_staleHotRestartState == null) {
-      _staleHotRestartState = <html.Element>[];
+      _staleHotRestartState = <html.Element?>[];
       js_util.setProperty(
           html.window, _staleHotRestartStore, _staleHotRestartState);
     }
@@ -93,7 +93,7 @@ class DomRenderer {
     registerHotRestartListener(() {
       _resizeSubscription?.cancel();
       _localeSubscription?.cancel();
-      _staleHotRestartState.addAll(<html.Element>[
+      _staleHotRestartState!.addAll(<html.Element?>[
         _glassPaneElement,
         _styleElement,
         _viewportMeta,
@@ -103,11 +103,11 @@ class DomRenderer {
   }
 
   void _clearOnHotRestart() {
-    if (_staleHotRestartState.isNotEmpty) {
-      for (html.Element element in _staleHotRestartState) {
+    if (_staleHotRestartState!.isNotEmpty) {
+      for (html.Element? element in _staleHotRestartState!) {
         element?.remove();
       }
-      _staleHotRestartState.clear();
+      _staleHotRestartState!.clear();
     }
   }
 
@@ -115,11 +115,11 @@ class DomRenderer {
   /// already in the right place, skip DOM mutation. This is both faster and
   /// more correct, because moving DOM nodes loses internal state, such as
   /// text selection.
-  void renderScene(html.Element sceneElement) {
+  void renderScene(html.Element? sceneElement) {
     if (sceneElement != _sceneElement) {
       _sceneElement?.remove();
       _sceneElement = sceneElement;
-      append(_sceneHostElement, sceneElement);
+      append(_sceneHostElement!, sceneElement!);
     }
     assert(() {
       _clearOnHotRestart();
@@ -133,38 +133,16 @@ class DomRenderer {
   /// which captures semantics input events. The semantics DOM tree must be a
   /// child of the glass pane element so that events bubble up to the glass pane
   /// if they are not handled by semantics.
-  html.Element get glassPaneElement => _glassPaneElement;
-  html.Element _glassPaneElement;
+  html.Element? get glassPaneElement => _glassPaneElement;
+  html.Element? _glassPaneElement;
 
-  final html.Element rootElement = html.document.body;
+  final html.Element rootElement = html.document.body!;
 
   void addElementClass(html.Element element, String className) {
     element.classes.add(className);
   }
 
-  void attachBeforeElement(
-      html.Element parent, html.Element before, html.Element newElement) {
-    assert(parent != null);
-    if (parent != null) {
-      assert(() {
-        if (before == null) {
-          return true;
-        }
-        if (before.parent != parent) {
-          throw Exception(
-            'attachBeforeElement was called with `before` element that\'s '
-            'not a child of the `parent` element:\n'
-            '  before: $before\n'
-            '  parent: $parent',
-          );
-        }
-        return true;
-      }());
-      parent.insertBefore(newElement, before);
-    }
-  }
-
-  html.Element createElement(String tagName, {html.Element parent}) {
+  html.Element createElement(String tagName, {html.Element? parent}) {
     final html.Element element = html.document.createElement(tagName);
     parent?.append(element);
     return element;
@@ -194,7 +172,7 @@ class DomRenderer {
     js_util.setProperty(element, name, value);
   }
 
-  void setElementStyle(html.Element element, String name, String value) {
+  void setElementStyle(html.Element element, String name, String? value) {
     if (value == null) {
       element.style.removeProperty(name);
     } else {
@@ -210,21 +188,21 @@ class DomRenderer {
     element.children.clear();
   }
 
-  html.Element getParent(html.Element element) => element.parent;
+  html.Element? getParent(html.Element element) => element.parent;
 
   void setTitle(String title) {
     html.document.title = title;
   }
 
   void setThemeColor(ui.Color color) {
-    html.MetaElement theme = html.document.querySelector('#flutterweb-theme');
+    html.MetaElement? theme = html.document.querySelector('#flutterweb-theme') as html.MetaElement?;
     if (theme == null) {
       theme = html.MetaElement()
         ..id = 'flutterweb-theme'
         ..name = 'theme-color';
-      html.document.head.append(theme);
+      html.document.head!.append(theme);
     }
-    theme.content = colorToCssString(color);
+    theme.content = colorToCssString(color)!;
   }
 
   static const String defaultFontStyle = 'normal';
@@ -237,8 +215,8 @@ class DomRenderer {
   void reset() {
     _styleElement?.remove();
     _styleElement = html.StyleElement();
-    html.document.head.append(_styleElement);
-    final html.CssStyleSheet sheet = _styleElement.sheet;
+    html.document.head!.append(_styleElement!);
+    final html.CssStyleSheet sheet = _styleElement!.sheet as html.CssStyleSheet;
     final bool isWebKit = browserEngine == BrowserEngine.webkit;
     final bool isFirefox = browserEngine == BrowserEngine.firefox;
     // TODO(butterfly): use more efficient CSS selectors; descendant selectors
@@ -329,7 +307,7 @@ flt-glass-pane * {
 ''', sheet.cssRules.length);
     }
 
-    final html.BodyElement bodyElement = html.document.body;
+    final html.BodyElement bodyElement = html.document.body!;
     setElementStyle(bodyElement, 'position', 'fixed');
     setElementStyle(bodyElement, 'top', '0');
     setElementStyle(bodyElement, 'right', '0');
@@ -361,7 +339,7 @@ flt-glass-pane * {
     bodyElement.spellcheck = false;
 
     for (html.Element viewportMeta
-        in html.document.head.querySelectorAll('meta[name="viewport"]')) {
+        in html.document.head!.querySelectorAll('meta[name="viewport"]')) {
       if (assertionsEnabled) {
         // Filter out the meta tag that we ourselves placed on the page. This is
         // to avoid UI flicker during hot restart. Hot restart will clean up the
@@ -387,26 +365,27 @@ flt-glass-pane * {
       ..name = 'viewport'
       ..content = 'width=device-width, initial-scale=1.0, '
           'maximum-scale=1.0, user-scalable=no';
-    html.document.head.append(_viewportMeta);
+    html.document.head!.append(_viewportMeta!);
 
     // IMPORTANT: the glass pane element must come after the scene element in the DOM node list so
     //            it can intercept input events.
     _glassPaneElement?.remove();
-    _glassPaneElement = createElement('flt-glass-pane');
-    _glassPaneElement.style
+    final html.Element glassPaneElement = createElement('flt-glass-pane');
+    _glassPaneElement = glassPaneElement;
+    glassPaneElement.style
       ..position = 'absolute'
       ..top = '0'
       ..right = '0'
       ..bottom = '0'
       ..left = '0';
-    bodyElement.append(_glassPaneElement);
+    bodyElement.append(glassPaneElement);
 
     _sceneHostElement = createElement('flt-scene-host');
 
     // Don't allow the scene to receive pointer events.
-    _sceneHostElement.style.pointerEvents = 'none';
+    _sceneHostElement!.style.pointerEvents = 'none';
 
-    _glassPaneElement.append(_sceneHostElement);
+    glassPaneElement.append(_sceneHostElement!);
 
     final html.Element _accesibilityPlaceholder = EngineSemanticsOwner
         .instance.semanticsHelper
@@ -420,12 +399,12 @@ flt-glass-pane * {
     glassPaneElement
         .insertBefore(_accesibilityPlaceholder, _sceneHostElement);
 
-    PointerBinding.initInstance(_glassPaneElement);
+    PointerBinding.initInstance(glassPaneElement);
 
     // Hide the DOM nodes used to render the scene from accessibility, because
     // the accessibility tree is built from the SemanticsNode tree as a parallel
     // DOM tree.
-    setElementAttribute(_sceneHostElement, 'aria-hidden', 'true');
+    setElementAttribute(_sceneHostElement!, 'aria-hidden', 'true');
 
     if (html.window.visualViewport == null && isWebKit) {
       // Safari sometimes gives us bogus innerWidth/innerHeight values when the
@@ -460,13 +439,13 @@ flt-glass-pane * {
     if (experimentalUseSkia) {
       _canvasKitScript?.remove();
       _canvasKitScript = html.ScriptElement();
-      _canvasKitScript.src = canvasKitBaseUrl + 'canvaskit.js';
-      html.document.head.append(_canvasKitScript);
+      _canvasKitScript!.src = canvasKitBaseUrl + 'canvaskit.js';
+      html.document.head!.append(_canvasKitScript!);
     }
 
     if (html.window.visualViewport != null) {
       _resizeSubscription =
-          html.window.visualViewport.onResize.listen(_metricsDidChange);
+          html.window.visualViewport!.onResize.listen(_metricsDidChange);
     } else {
       _resizeSubscription = html.window.onResize.listen(_metricsDidChange);
     }
@@ -484,7 +463,7 @@ flt-glass-pane * {
   ///
   /// Note: always check for rotations for a mobile device. Update the physical
   /// size if the change is caused by a rotation.
-  void _metricsDidChange(html.Event event) {
+  void _metricsDidChange(html.Event? event) {
     if(isMobile && !window.isRotation() && textEditing.isEditing) {
       window.computeOnScreenKeyboardInsets();
       window.invokeOnMetricsChanged();
@@ -500,7 +479,7 @@ flt-glass-pane * {
   void _languageDidChange(html.Event event) {
     window._updateLocales();
     if (ui.window.onLocaleChanged != null) {
-      ui.window.onLocaleChanged();
+      ui.window.onLocaleChanged!();
     }
   }
 
@@ -511,18 +490,18 @@ flt-glass-pane * {
   /// Removes all children of a DOM node.
   void clearDom(html.Node node) {
     while (node.lastChild != null) {
-      node.lastChild.remove();
+      node.lastChild!.remove();
     }
   }
 
-  static bool _ellipseFeatureDetected;
+  static bool? _ellipseFeatureDetected;
 
   /// Draws CanvasElement ellipse with fallback.
   static void ellipse(html.CanvasRenderingContext2D context,
       double centerX, double centerY, double radiusX, double radiusY,
       double rotation, double startAngle, double endAngle, bool antiClockwise) {
     _ellipseFeatureDetected ??= js_util.getProperty(context, 'ellipse') != null;
-    if (_ellipseFeatureDetected) {
+    if (_ellipseFeatureDetected!) {
       context.ellipse(centerX, centerY, radiusX, radiusY,
           rotation, startAngle, endAngle, antiClockwise);
     } else {
@@ -554,17 +533,17 @@ flt-glass-pane * {
   /// defer to the operating system default.
   ///
   /// See w3c screen api: https://www.w3.org/TR/screen-orientation/
-  Future<bool> setPreferredOrientation(List<dynamic> orientations) {
+  Future<bool> setPreferredOrientation(List<dynamic>? orientations) {
     final html.Screen screen = html.window.screen;
-    if (screen != null) {
+    if (!_unsafeIsNull(screen)) {
       final html.ScreenOrientation screenOrientation =
           screen.orientation;
-      if (screenOrientation != null) {
-        if (orientations.isEmpty) {
+      if (!_unsafeIsNull(screenOrientation)) {
+        if (orientations!.isEmpty) {
           screenOrientation.unlock();
           return Future.value(true);
         } else {
-          String lockType = _deviceOrientationToLockType(orientations.first);
+          String? lockType = _deviceOrientationToLockType(orientations.first);
           if (lockType != null) {
             final Completer<bool> completer = Completer<bool>();
             try {
@@ -588,7 +567,7 @@ flt-glass-pane * {
   }
 
   // Converts device orientation to w3c OrientationLockType enum.
-  static String _deviceOrientationToLockType(String deviceOrientation) {
+  static String? _deviceOrientationToLockType(String deviceOrientation) {
     switch(deviceOrientation) {
       case 'DeviceOrientation.portraitUp':
         return orientationLockTypePortraitPrimary;
@@ -604,11 +583,14 @@ flt-glass-pane * {
   }
 
   /// The element corresponding to the only child of the root surface.
-  html.Element get _rootApplicationElement {
+  html.Element? get _rootApplicationElement {
     final html.Element lastElement = rootElement.children.last;
-    return lastElement.children.singleWhere((html.Element element) {
-      return element.tagName == 'FLT-SCENE';
-    }, orElse: () => null);
+    for (html.Element child in lastElement.children) {
+      if (child.tagName == 'FLT-SCENE') {
+        return child;
+      }
+    }
+    return null;
   }
 
   /// Provides haptic feedback.
@@ -621,22 +603,22 @@ flt-glass-pane * {
 
   String get currentHtml => _rootApplicationElement?.outerHtml ?? '';
 
-  DebugDomRendererFrameStatistics _debugFrameStatistics;
+  DebugDomRendererFrameStatistics? _debugFrameStatistics;
 
-  DebugDomRendererFrameStatistics debugFlushFrameStatistics() {
+  DebugDomRendererFrameStatistics? debugFlushFrameStatistics() {
     if (!assertionsEnabled) {
       throw Exception('This code should not be reachable in production.');
     }
-    final DebugDomRendererFrameStatistics current = _debugFrameStatistics;
+    final DebugDomRendererFrameStatistics? current = _debugFrameStatistics;
     _debugFrameStatistics = DebugDomRendererFrameStatistics();
     return current;
   }
 
-  void debugRulerCacheHit() => _debugFrameStatistics.paragraphRulerCacheHits++;
+  void debugRulerCacheHit() => _debugFrameStatistics!.paragraphRulerCacheHits++;
   void debugRulerCacheMiss() =>
-      _debugFrameStatistics.paragraphRulerCacheMisses++;
-  void debugRichTextLayout() => _debugFrameStatistics.richTextLayouts++;
-  void debugPlainTextLayout() => _debugFrameStatistics.plainTextLayouts++;
+      _debugFrameStatistics!.paragraphRulerCacheMisses++;
+  void debugRichTextLayout() => _debugFrameStatistics!.richTextLayouts++;
+  void debugPlainTextLayout() => _debugFrameStatistics!.plainTextLayouts++;
 }
 
 /// Miscellaneous statistics collecting during a single frame's execution.

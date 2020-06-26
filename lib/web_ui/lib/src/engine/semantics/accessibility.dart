@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 /// Singleton for accessing accessibility announcements from the platform.
@@ -18,7 +18,7 @@ class AccessibilityAnnouncements {
     return _instance ??= AccessibilityAnnouncements._();
   }
 
-  static AccessibilityAnnouncements _instance;
+  static AccessibilityAnnouncements? _instance;
 
   AccessibilityAnnouncements._() {
     registerHotRestartListener(() {
@@ -31,7 +31,7 @@ class AccessibilityAnnouncements {
   ///
   /// The element is added to the DOM temporarily for announcing the
   /// message to the assistive technology.
-  Timer _removeElementTimer;
+  Timer? _removeElementTimer;
 
   /// The duration the accessibility announcements stay on the DOM.
   ///
@@ -47,20 +47,20 @@ class AccessibilityAnnouncements {
   /// This element has aria-live attribute.
   ///
   /// It also has id 'accessibility-element' for testing purposes.
-  html.HtmlElement _element;
+  html.HtmlElement? _element;
 
   html.HtmlElement get _domElement => _element ??= _createElement();
 
   /// Decodes the message coming from the 'flutter/accessibility' channel.
-  void handleMessage(StandardMessageCodec codec, ByteData data) {
+  void handleMessage(StandardMessageCodec codec, ByteData? data) {
     final Map<dynamic, dynamic> inputMap =
         codec.decodeMessage(data);
     final Map<dynamic, dynamic> dataMap = inputMap['data'];
-    final String message = dataMap['message'];
+    final String? message = dataMap['message'];
     if (message != null && message.isNotEmpty) {
       _initLiveRegion(message);
       _removeElementTimer = Timer(durationA11yMessageIsOnDom, () {
-        _element.remove();
+        _element!.remove();
       });
     }
   }
@@ -68,7 +68,7 @@ class AccessibilityAnnouncements {
   void _initLiveRegion(String message) {
     _domElement.setAttribute('aria-live', 'polite');
     _domElement.text = message;
-    html.document.body.append(_domElement);
+    html.document.body!.append(_domElement);
   }
 
   html.LabelElement _createElement() {

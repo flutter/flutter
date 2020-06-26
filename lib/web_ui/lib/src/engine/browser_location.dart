@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 // TODO(mdebbar): add other strategies.
@@ -115,7 +115,7 @@ class HashLocationStrategy extends LocationStrategy {
   /// `history.back` transition.
   Future<void> _waitForPopState() {
     final Completer<void> completer = Completer<void>();
-    ui.VoidCallback unsubscribe;
+    late ui.VoidCallback unsubscribe;
     unsubscribe = onPopState((_) {
       unsubscribe();
       completer.complete();
@@ -141,7 +141,7 @@ abstract class PlatformLocation {
 
   String get pathname;
   String get search;
-  String get hash;
+  String? get hash;
 
   void pushState(dynamic state, String title, String url);
   void replaceState(dynamic state, String title, String url);

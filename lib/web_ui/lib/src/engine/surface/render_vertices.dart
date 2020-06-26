@@ -2,24 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
-_GlRenderer _glRenderer;
+_GlRenderer? _glRenderer;
 
 class SurfaceVertices implements ui.Vertices {
   final ui.VertexMode _mode;
   final Float32List _positions;
-  final Int32List/*?*/ _colors;
-  final Uint16List _indices; // ignore: unused_field
+  final Int32List? _colors;
+  final Uint16List? _indices; // ignore: unused_field
 
   SurfaceVertices(
     ui.VertexMode mode,
     List<ui.Offset> positions, {
-    List<ui.Color> colors,
-    List<int> indices,
-  })  : assert(mode != null),
-        assert(positions != null),
+    List<ui.Color>? colors,
+    List<int>? indices,
+  })  : assert(mode != null), // ignore: unnecessary_null_comparison
+        assert(positions != null), // ignore: unnecessary_null_comparison
         _mode = mode,
         _colors = colors != null ? _int32ListFromColors(colors) : null,
         _indices = indices != null ? Uint16List.fromList(indices) : null,
@@ -30,10 +30,10 @@ class SurfaceVertices implements ui.Vertices {
   SurfaceVertices.raw(
     ui.VertexMode mode,
     Float32List positions, {
-    Int32List colors,
-    Uint16List indices,
-  })  : assert(mode != null),
-        assert(positions != null),
+    Int32List? colors,
+    Uint16List? indices,
+  })  : assert(mode != null), // ignore: unnecessary_null_comparison
+        assert(positions != null), // ignore: unnecessary_null_comparison
         _mode = mode,
         _positions = positions,
         _colors = colors,
@@ -61,7 +61,7 @@ void disposeWebGl() {
 
 abstract class _GlRenderer {
   void drawVertices(
-      html.CanvasRenderingContext2D context,
+      html.CanvasRenderingContext2D? context,
       int canvasWidthInPixels,
       int canvasHeightInPixels,
       Matrix4 transform,
@@ -69,7 +69,7 @@ abstract class _GlRenderer {
       ui.BlendMode blendMode,
       SurfacePaintData paint);
 
-  void drawHairline(html.CanvasRenderingContext2D _ctx, Float32List positions);
+  void drawHairline(html.CanvasRenderingContext2D? _ctx, Float32List positions);
 }
 
 /// Treeshakeable backend for rendering webgl on canvas.
@@ -124,7 +124,7 @@ class _WebGlRenderer implements _GlRenderer {
 
   @override
   void drawVertices(
-      html.CanvasRenderingContext2D context,
+      html.CanvasRenderingContext2D? context,
       int canvasWidthInPixels,
       int canvasHeightInPixels,
       Matrix4 transform,
@@ -162,59 +162,59 @@ class _WebGlRenderer implements _GlRenderer {
       return;
     }
     _GlContext gl =
-        _OffscreenCanvas.createGlContext(widthInPixels, heightInPixels);
+        _OffscreenCanvas.createGlContext(widthInPixels, heightInPixels)!;
     final bool isWebKit = (browserEngine == BrowserEngine.webkit);
     _GlProgram glProgram = isWebKit
         ? gl.useAndCacheProgram(
-            _vertexShaderTriangleEs1, _fragmentShaderTriangleEs1)
+            _vertexShaderTriangleEs1, _fragmentShaderTriangleEs1)!
         : gl.useAndCacheProgram(
-            _vertexShaderTriangle, _fragmentShaderTriangle);
+            _vertexShaderTriangle, _fragmentShaderTriangle)!;
 
-    Object transformUniform = gl.getUniformLocation(glProgram.program, 'u_ctransform');
+    Object? transformUniform = gl.getUniformLocation(glProgram.program, 'u_ctransform');
     Matrix4 transformAtOffset = transform.clone()..translate(-offsetX, -offsetY);
     gl.setUniformMatrix4fv(transformUniform, false, transformAtOffset.storage);
 
     // Set uniform to scale 0..width/height pixels coordinates to -1..1
     // clipspace range and flip the Y axis.
-    Object resolution = gl.getUniformLocation(glProgram.program, 'u_scale');
+    Object? resolution = gl.getUniformLocation(glProgram.program, 'u_scale');
     gl.setUniform4f(resolution, 2.0 / widthInPixels.toDouble(),
         -2.0 / heightInPixels.toDouble(), 1, 1);
-    Object shift = gl.getUniformLocation(glProgram.program, 'u_shift');
+    Object? shift = gl.getUniformLocation(glProgram.program, 'u_shift');
     gl.setUniform4f(shift, -1, 1, 0, 0);
 
     // Setup geometry.
-    Object positionsBuffer = gl.createBuffer();
-    assert(positionsBuffer != null);
+    Object positionsBuffer = gl.createBuffer()!;
+    assert(positionsBuffer != null); // ignore: unnecessary_null_comparison
     gl.bindArrayBuffer(positionsBuffer);
     gl.bufferData(positions, gl.kStaticDraw);
     js_util.callMethod(
-        gl.glContext, 'vertexAttribPointer', <dynamic>[0, 2, gl.kFloat, false, 0, 0]);
+        gl.glContext!, 'vertexAttribPointer', <dynamic>[0, 2, gl.kFloat, false, 0, 0]);
     gl.enableVertexAttribArray(0);
 
     // Setup color buffer.
-    Object colorsBuffer = gl.createBuffer();
+    Object? colorsBuffer = gl.createBuffer();
     gl.bindArrayBuffer(colorsBuffer);
     // Buffer kBGRA_8888.
     gl.bufferData(vertices._colors, gl.kStaticDraw);
 
-    js_util.callMethod(gl.glContext, 'vertexAttribPointer',
+    js_util.callMethod(gl.glContext!, 'vertexAttribPointer',
         <dynamic>[1, 4, gl.kUnsignedByte, true, 0, 0]);
     gl.enableVertexAttribArray(1);
     gl.clear();
     final int vertexCount = positions.length ~/ 2;
     gl.drawTriangles(vertexCount, vertices._mode);
 
-    context.save();
+    context!.save();
     context.resetTransform();
     gl.drawImage(context, offsetX, offsetY);
     context.restore();
   }
 
   @override
-  void drawHairline(html.CanvasRenderingContext2D _ctx, Float32List positions) {
-    assert(positions != null);
+  void drawHairline(html.CanvasRenderingContext2D? _ctx, Float32List positions) {
+    assert(positions != null); // ignore: unnecessary_null_comparison
     final int pointCount = positions.length ~/ 2;
-    _ctx.lineWidth = 1.0;
+    _ctx!.lineWidth = 1.0;
     _ctx.beginPath();
     for (int i = 0, len = pointCount * 2; i < len;) {
       for (int triangleVertexIndex = 0;
@@ -337,13 +337,13 @@ Float32List _convertVertexPositions(ui.VertexMode mode, Float32List positions) {
 
 /// Compiled and cached gl program.
 class _GlProgram {
-  final Object program;
+  final Object? program;
   _GlProgram(this.program);
 }
 
 /// JS Interop helper for webgl apis.
 class _GlContext {
-  final Object glContext;
+  final Object? glContext;
   final bool isOffscreen;
   dynamic _kCompileStatus;
   dynamic _kArrayBuffer;
@@ -354,15 +354,15 @@ class _GlContext {
   dynamic _kLinkStatus;
   dynamic _kUnsignedByte;
   dynamic _kRGBA;
-  Object _canvas;
-  int _widthInPixels;
-  int _heightInPixels;
-  static Map<String, _GlProgram> _programCache;
+  Object? _canvas;
+  int? _widthInPixels;
+  int? _heightInPixels;
+  static late Map<String, _GlProgram?> _programCache;
 
   _GlContext.fromOffscreenCanvas(html.OffscreenCanvas canvas)
       : glContext = canvas.getContext('webgl2', <String, dynamic>{'premultipliedAlpha': false}),
         isOffscreen = true {
-    _programCache = <String, _GlProgram>{};
+    _programCache = <String, _GlProgram?>{};
     _canvas = canvas;
   }
 
@@ -370,7 +370,7 @@ class _GlContext {
       : glContext = canvas.getContext(useWebGl1 ? 'webgl' : 'webgl2',
           <String, dynamic>{'premultipliedAlpha': false}),
         isOffscreen = false {
-    _programCache = <String, _GlProgram>{};
+    _programCache = <String, _GlProgram?>{};
     _canvas = canvas;
   }
 
@@ -389,17 +389,17 @@ class _GlContext {
         left, top, _widthInPixels, _heightInPixels]);
   }
 
-  _GlProgram useAndCacheProgram(
+  _GlProgram? useAndCacheProgram(
       String vertexShaderSource, String fragmentShaderSource) {
     String cacheKey = '$vertexShaderSource||$fragmentShaderSource';
-    _GlProgram cachedProgram = _programCache[cacheKey];
+    _GlProgram? cachedProgram = _programCache[cacheKey];
     if (cachedProgram == null) {
       // Create and compile shaders.
       Object vertexShader = compileShader('VERTEX_SHADER', vertexShaderSource);
       Object fragmentShader =
           compileShader('FRAGMENT_SHADER', fragmentShaderSource);
       // Create a gl program and link shaders.
-      Object program = createProgram();
+      Object? program = createProgram();
       attachShader(program, vertexShader);
       attachShader(program, fragmentShader);
       linkProgram(program);
@@ -411,61 +411,61 @@ class _GlContext {
   }
 
   Object compileShader(String shaderType, String source) {
-    Object shader = _createShader(shaderType);
+    Object? shader = _createShader(shaderType);
     if (shader == null) {
       throw Exception(error);
     }
-    js_util.callMethod(glContext, 'shaderSource', <dynamic>[shader, source]);
-    js_util.callMethod(glContext, 'compileShader', <dynamic>[shader]);
+    js_util.callMethod(glContext!, 'shaderSource', <dynamic>[shader, source]);
+    js_util.callMethod(glContext!, 'compileShader', <dynamic>[shader]);
     bool shaderStatus = js_util
-        .callMethod(glContext, 'getShaderParameter', <dynamic>[shader, compileStatus]);
+        .callMethod(glContext!, 'getShaderParameter', <dynamic>[shader, compileStatus]);
     if (!shaderStatus) {
       throw Exception('Shader compilation failed: ${getShaderInfoLog(shader)}');
     }
     return shader;
   }
 
-  Object createProgram() =>
-      js_util.callMethod(glContext, 'createProgram', const <dynamic>[]);
+  Object? createProgram() =>
+      js_util.callMethod(glContext!, 'createProgram', const <dynamic>[]);
 
-  void attachShader(Object program, Object shader) {
-    js_util.callMethod(glContext, 'attachShader', <dynamic>[program, shader]);
+  void attachShader(Object? program, Object shader) {
+    js_util.callMethod(glContext!, 'attachShader', <dynamic>[program, shader]);
   }
 
-  void linkProgram(Object program) {
-    js_util.callMethod(glContext, 'linkProgram', <dynamic>[program]);
+  void linkProgram(Object? program) {
+    js_util.callMethod(glContext!, 'linkProgram', <dynamic>[program]);
     if (!js_util
-        .callMethod(glContext, 'getProgramParameter', <dynamic>[program, kLinkStatus])) {
+        .callMethod(glContext!, 'getProgramParameter', <dynamic>[program, kLinkStatus])) {
       throw Exception(getProgramInfoLog(program));
     }
   }
 
-  void useProgram(Object program) {
-    js_util.callMethod(glContext, 'useProgram', <dynamic>[program]);
+  void useProgram(Object? program) {
+    js_util.callMethod(glContext!, 'useProgram', <dynamic>[program]);
   }
 
-  Object createBuffer() =>
-      js_util.callMethod(glContext, 'createBuffer', const <dynamic>[]);
+  Object? createBuffer() =>
+      js_util.callMethod(glContext!, 'createBuffer', const <dynamic>[]);
 
-  void bindArrayBuffer(Object buffer) {
-    js_util.callMethod(glContext, 'bindBuffer', <dynamic>[kArrayBuffer, buffer]);
+  void bindArrayBuffer(Object? buffer) {
+    js_util.callMethod(glContext!, 'bindBuffer', <dynamic>[kArrayBuffer, buffer]);
   }
 
   void deleteBuffer(Object buffer) {
-    js_util.callMethod(glContext, 'deleteBuffer', <dynamic>[buffer]);
+    js_util.callMethod(glContext!, 'deleteBuffer', <dynamic>[buffer]);
   }
 
-  void bufferData(TypedData data, dynamic type) {
-    js_util.callMethod(glContext, 'bufferData', <dynamic>[kArrayBuffer, data, type]);
+  void bufferData(TypedData? data, dynamic type) {
+    js_util.callMethod(glContext!, 'bufferData', <dynamic>[kArrayBuffer, data, type]);
   }
 
   void enableVertexAttribArray(int index) {
-    js_util.callMethod(glContext, 'enableVertexAttribArray', <dynamic>[index]);
+    js_util.callMethod(glContext!, 'enableVertexAttribArray', <dynamic>[index]);
   }
 
   /// Clear background.
   void clear() {
-    js_util.callMethod(glContext, 'clear', <dynamic>[kColorBufferBit]);
+    js_util.callMethod(glContext!, 'clear', <dynamic>[kColorBufferBit]);
   }
 
   /// Destroys gl context.
@@ -474,25 +474,25 @@ class _GlContext {
   }
 
   void deleteProgram(Object program) {
-    js_util.callMethod(glContext, 'deleteProgram', <dynamic>[program]);
+    js_util.callMethod(glContext!, 'deleteProgram', <dynamic>[program]);
   }
 
   void deleteShader(Object shader) {
-    js_util.callMethod(glContext, 'deleteShader', <dynamic>[shader]);
+    js_util.callMethod(glContext!, 'deleteShader', <dynamic>[shader]);
   }
 
   dynamic _getExtension(String extensionName) =>
-      js_util.callMethod(glContext, 'getExtension', <dynamic>[extensionName]);
+      js_util.callMethod(glContext!, 'getExtension', <dynamic>[extensionName]);
 
   void drawTriangles(int triangleCount, ui.VertexMode vertexMode) {
     dynamic mode = _triangleTypeFromMode(vertexMode);
-    js_util.callMethod(glContext, 'drawArrays', <dynamic>[mode, 0, triangleCount]);
+    js_util.callMethod(glContext!, 'drawArrays', <dynamic>[mode, 0, triangleCount]);
   }
 
   /// Sets affine transformation from normalized device coordinates
   /// to window coordinates
   void viewport(double x, double y, double width, double height) {
-    js_util.callMethod(glContext, 'viewport', <dynamic>[x, y, width, height]);
+    js_util.callMethod(glContext!, 'viewport', <dynamic>[x, y, width, height]);
   }
 
   dynamic _triangleTypeFromMode(ui.VertexMode mode) {
@@ -509,105 +509,105 @@ class _GlContext {
     }
   }
 
-  Object _createShader(String shaderType) => js_util.callMethod(
-      glContext, 'createShader', <dynamic>[js_util.getProperty(glContext, shaderType)]);
+  Object? _createShader(String shaderType) => js_util.callMethod(
+      glContext!, 'createShader', <dynamic>[js_util.getProperty(glContext!, shaderType)]);
 
   /// Error state of gl context.
-  dynamic get error => js_util.callMethod(glContext, 'getError', const <dynamic>[]);
+  dynamic get error => js_util.callMethod(glContext!, 'getError', const <dynamic>[]);
 
   /// Shader compiler error, if this returns [kFalse], to get details use
   /// [getShaderInfoLog].
   dynamic get compileStatus =>
-      _kCompileStatus ??= js_util.getProperty(glContext, 'COMPILE_STATUS');
+      _kCompileStatus ??= js_util.getProperty(glContext!, 'COMPILE_STATUS');
 
   dynamic get kArrayBuffer =>
-      _kArrayBuffer ??= js_util.getProperty(glContext, 'ARRAY_BUFFER');
+      _kArrayBuffer ??= js_util.getProperty(glContext!, 'ARRAY_BUFFER');
 
   dynamic get kLinkStatus =>
-      _kLinkStatus ??= js_util.getProperty(glContext, 'LINK_STATUS');
+      _kLinkStatus ??= js_util.getProperty(glContext!, 'LINK_STATUS');
 
-  dynamic get kFloat => _kFloat ??= js_util.getProperty(glContext, 'FLOAT');
+  dynamic get kFloat => _kFloat ??= js_util.getProperty(glContext!, 'FLOAT');
 
-  dynamic get kRGBA => _kRGBA ??= js_util.getProperty(glContext, 'RGBA');
+  dynamic get kRGBA => _kRGBA ??= js_util.getProperty(glContext!, 'RGBA');
 
   dynamic get kUnsignedByte =>
-      _kUnsignedByte ??= js_util.getProperty(glContext, 'UNSIGNED_BYTE');
+      _kUnsignedByte ??= js_util.getProperty(glContext!, 'UNSIGNED_BYTE');
 
   dynamic get kStaticDraw =>
-      _kStaticDraw ??= js_util.getProperty(glContext, 'STATIC_DRAW');
+      _kStaticDraw ??= js_util.getProperty(glContext!, 'STATIC_DRAW');
 
   dynamic get kTriangles =>
-      _kTriangles ??= js_util.getProperty(glContext, 'TRIANGLES');
+      _kTriangles ??= js_util.getProperty(glContext!, 'TRIANGLES');
 
   dynamic get kTriangleFan =>
-      _kTriangles ??= js_util.getProperty(glContext, 'TRIANGLE_FAN');
+      _kTriangles ??= js_util.getProperty(glContext!, 'TRIANGLE_FAN');
 
   dynamic get kTriangleStrip =>
-      _kTriangles ??= js_util.getProperty(glContext, 'TRIANGLE_STRIP');
+      _kTriangles ??= js_util.getProperty(glContext!, 'TRIANGLE_STRIP');
 
   dynamic get kColorBufferBit =>
-      _kColorBufferBit ??= js_util.getProperty(glContext, 'COLOR_BUFFER_BIT');
+      _kColorBufferBit ??= js_util.getProperty(glContext!, 'COLOR_BUFFER_BIT');
 
   /// Returns reference to uniform in program.
-  Object getUniformLocation(Object program, String uniformName) {
+  Object? getUniformLocation(Object? program, String uniformName) {
     return js_util
-        .callMethod(glContext, 'getUniformLocation', <dynamic>[program, uniformName]);
+        .callMethod(glContext!, 'getUniformLocation', <dynamic>[program, uniformName]);
   }
 
   /// Sets vec2 uniform values.
   void setUniform2f(Object uniform, double value1, double value2) {
     return js_util
-        .callMethod(glContext, 'uniform2f', <dynamic>[uniform, value1, value2]);
+        .callMethod(glContext!, 'uniform2f', <dynamic>[uniform, value1, value2]);
   }
 
   /// Sets vec4 uniform values.
-  void setUniform4f(Object uniform, double value1, double value2, double value3,
+  void setUniform4f(Object? uniform, double value1, double value2, double value3,
       double value4) {
     return js_util.callMethod(
-        glContext, 'uniform4f', <dynamic>[uniform, value1, value2, value3, value4]);
+        glContext!, 'uniform4f', <dynamic>[uniform, value1, value2, value3, value4]);
   }
 
   /// Sets mat4 uniform values.
-  void setUniformMatrix4fv(Object uniform, bool transpose, Float32List value) {
+  void setUniformMatrix4fv(Object? uniform, bool transpose, Float32List? value) {
     return js_util.callMethod(
-        glContext, 'uniformMatrix4fv', <dynamic>[uniform, transpose, value]);
+        glContext!, 'uniformMatrix4fv', <dynamic>[uniform, transpose, value]);
   }
 
   /// Shader compile error log.
   dynamic getShaderInfoLog(Object glShader) {
-    return js_util.callMethod(glContext, 'getShaderInfoLog', <dynamic>[glShader]);
+    return js_util.callMethod(glContext!, 'getShaderInfoLog', <dynamic>[glShader]);
   }
 
   ///  Errors that occurred during failed linking or validation of program
   ///  objects. Typically called after [linkProgram].
-  String getProgramInfoLog(Object glProgram) {
-    return js_util.callMethod(glContext, 'getProgramInfoLog', <dynamic>[glProgram]);
+  String? getProgramInfoLog(Object? glProgram) {
+    return js_util.callMethod(glContext!, 'getProgramInfoLog', <dynamic>[glProgram]);
   }
 
-  int get drawingBufferWidth =>
-      js_util.getProperty(glContext, 'drawingBufferWidth');
-  int get drawingBufferHeight =>
-      js_util.getProperty(glContext, 'drawingBufferWidth');
+  int? get drawingBufferWidth =>
+      js_util.getProperty(glContext!, 'drawingBufferWidth');
+  int? get drawingBufferHeight =>
+      js_util.getProperty(glContext!, 'drawingBufferWidth');
 
   html.ImageData readImageData() {
     if (browserEngine == BrowserEngine.webkit ||
         browserEngine == BrowserEngine.firefox) {
       const int kBytesPerPixel = 4;
-      final int bufferWidth = _widthInPixels;
-      final int bufferHeight = _heightInPixels;
+      final int bufferWidth = _widthInPixels!;
+      final int bufferHeight = _heightInPixels!;
       final Uint8List pixels =
           Uint8List(bufferWidth * bufferHeight * kBytesPerPixel);
-      js_util.callMethod(glContext, 'readPixels',
+      js_util.callMethod(glContext!, 'readPixels',
           <dynamic>[0, 0, bufferWidth, bufferHeight, kRGBA, kUnsignedByte, pixels]);
       return html.ImageData(
           Uint8ClampedList.fromList(pixels), bufferWidth, bufferHeight);
     } else {
       const int kBytesPerPixel = 4;
-      final int bufferWidth = _widthInPixels;
-      final int bufferHeight = _heightInPixels;
+      final int bufferWidth = _widthInPixels!;
+      final int bufferHeight = _heightInPixels!;
       final Uint8ClampedList pixels =
           Uint8ClampedList(bufferWidth * bufferHeight * kBytesPerPixel);
-      js_util.callMethod(glContext, 'readPixels',
+      js_util.callMethod(glContext!, 'readPixels',
           <dynamic>[0, 0, bufferWidth, bufferHeight, kRGBA, kUnsignedByte, pixels]);
       return html.ImageData(pixels, bufferWidth, bufferHeight);
     }
@@ -616,11 +616,11 @@ class _GlContext {
 
 /// Shared Cached OffscreenCanvas for webgl rendering to image.
 class _OffscreenCanvas {
-  static html.OffscreenCanvas _canvas;
+  static html.OffscreenCanvas? _canvas;
   static int _maxPixelWidth = 0;
   static int _maxPixelHeight = 0;
-  static html.CanvasElement _glCanvas;
-  static _GlContext _cachedContext;
+  static html.CanvasElement? _glCanvas;
+  static _GlContext? _cachedContext;
 
   _OffscreenCanvas(int width, int height) {
     assert(width > 0 && height > 0);
@@ -642,16 +642,16 @@ class _OffscreenCanvas {
     _cachedContext = null;
   }
 
-  html.OffscreenCanvas get canvas => _canvas;
+  html.OffscreenCanvas? get canvas => _canvas;
 
-  static _GlContext createGlContext(int widthInPixels, int heightInPixels) {
+  static _GlContext? createGlContext(int widthInPixels, int heightInPixels) {
     final bool isWebKit = (browserEngine == BrowserEngine.webkit);
 
     if (_OffscreenCanvas.supported) {
       final _OffscreenCanvas offScreenCanvas =
           _OffscreenCanvas(widthInPixels, heightInPixels);
-      _cachedContext ??= _GlContext.fromOffscreenCanvas(offScreenCanvas.canvas);
-      _cachedContext.setViewportSize(widthInPixels, heightInPixels);
+      _cachedContext ??= _GlContext.fromOffscreenCanvas(offScreenCanvas.canvas!);
+      _cachedContext!.setViewportSize(widthInPixels, heightInPixels);
       return _cachedContext;
     } else {
       // Allocate new canvas element is size is larger.
@@ -660,10 +660,10 @@ class _OffscreenCanvas {
           width: widthInPixels,
           height: heightInPixels,
         );
-        _glCanvas.className = 'gl-canvas';
+        _glCanvas!.className = 'gl-canvas';
         final double cssWidth = widthInPixels / EngineWindow.browserDevicePixelRatio;
         final double cssHeight = heightInPixels / EngineWindow.browserDevicePixelRatio;
-        _glCanvas.style
+        _glCanvas!.style
           ..position = 'absolute'
           ..width = '${cssWidth}px'
           ..height = '${cssHeight}px';
@@ -672,8 +672,8 @@ class _OffscreenCanvas {
         _cachedContext?.dispose();
         _cachedContext = null;
       }
-      _cachedContext ??= _GlContext.fromCanvas(_glCanvas, isWebKit);
-      _cachedContext.setViewportSize(widthInPixels, heightInPixels);
+      _cachedContext ??= _GlContext.fromCanvas(_glCanvas!, isWebKit);
+      _cachedContext!.setViewportSize(widthInPixels, heightInPixels);
       return _cachedContext;
     }
   }

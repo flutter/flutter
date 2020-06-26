@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 /// Handles clipboard related platform messages.
@@ -16,16 +16,16 @@ class ClipboardMessageHandler {
 
   /// Handles the platform message which stores the given text to the clipboard.
   void setDataMethodCall(
-      MethodCall methodCall, ui.PlatformMessageResponseCallback callback) {
+      MethodCall methodCall, ui.PlatformMessageResponseCallback? callback) {
     const MethodCodec codec = JSONMethodCodec();
     bool errorEnvelopeEncoded = false;
     _copyToClipboardStrategy
         .setData(methodCall.arguments['text'])
         .then((bool success) {
       if (success) {
-        callback(codec.encodeSuccessEnvelope(true));
+        callback!(codec.encodeSuccessEnvelope(true));
       } else {
-        callback(codec.encodeErrorEnvelope(
+        callback!(codec.encodeErrorEnvelope(
             code: 'copy_fail', message: 'Clipboard.setData failed'));
         errorEnvelopeEncoded = true;
       }
@@ -33,21 +33,21 @@ class ClipboardMessageHandler {
       // Don't encode a duplicate reply if we already failed and an error
       // was already encoded.
       if (!errorEnvelopeEncoded) {
-        callback(codec.encodeErrorEnvelope(
+        callback!(codec.encodeErrorEnvelope(
             code: 'copy_fail', message: 'Clipboard.setData failed'));
       }
     });
   }
 
   /// Handles the platform message which retrieves text data from the clipboard.
-  void getDataMethodCall(ui.PlatformMessageResponseCallback callback) {
+  void getDataMethodCall(ui.PlatformMessageResponseCallback? callback) {
     const MethodCodec codec = JSONMethodCodec();
     _pasteFromClipboardStrategy.getData().then((String data) {
       final Map<String, dynamic> map = <String, dynamic>{'text': data};
-      callback(codec.encodeSuccessEnvelope(map));
+      callback!(codec.encodeSuccessEnvelope(map));
     }).catchError((dynamic error) {
       print('Could not get text from clipboard: $error');
-      callback(codec.encodeErrorEnvelope(
+      callback!(codec.encodeErrorEnvelope(
           code: 'paste_fail', message: 'Clipboard.getData failed'));
     });
   }
@@ -62,13 +62,17 @@ class ClipboardMessageHandler {
   }
 }
 
+bool _unsafeIsNull(dynamic object) {
+  return object == null;
+}
+
 /// Provides functionality for writing text to clipboard.
 ///
 /// A concrete implementation is picked at runtime based on the available
 /// APIs and the browser.
 abstract class CopyToClipboardStrategy {
   factory CopyToClipboardStrategy() {
-    return (html.window.navigator.clipboard?.writeText != null)
+    return !_unsafeIsNull(html.window.navigator.clipboard)
         ? ClipboardAPICopyStrategy()
         : ExecCommandCopyStrategy();
   }
@@ -78,7 +82,7 @@ abstract class CopyToClipboardStrategy {
   /// Returns `true` for a successful action.
   ///
   /// Returns `false` for an uncessful action or when there is an excaption.
-  Future<bool> setData(String text);
+  Future<bool> setData(String? text);
 }
 
 /// Provides functionality for reading text from clipboard.
@@ -88,7 +92,7 @@ abstract class CopyToClipboardStrategy {
 abstract class PasteFromClipboardStrategy {
   factory PasteFromClipboardStrategy() {
     return (browserEngine == BrowserEngine.firefox ||
-            html.window.navigator.clipboard?.readText == null)
+            _unsafeIsNull(html.window.navigator.clipboard))
         ? ExecCommandPasteStrategy()
         : ClipboardAPIPasteStrategy();
   }
@@ -103,11 +107,11 @@ abstract class PasteFromClipboardStrategy {
 /// See: https://developer.mozilla.org/en-US/docs/Web/API/Clipboard_API
 class ClipboardAPICopyStrategy implements CopyToClipboardStrategy {
   @override
-  Future<bool> setData(String text) async {
+  Future<bool> setData(String? text) async {
     try {
-      await html.window.navigator.clipboard.writeText(text);
-    } catch (e) {
-      print('copy is not successful ${e.message}');
+      await html.window.navigator.clipboard.writeText(text!);
+    } catch (error) {
+      print('copy is not successful $error');
       return Future.value(false);
     }
     return Future.value(true);
@@ -130,11 +134,11 @@ class ClipboardAPIPasteStrategy implements PasteFromClipboardStrategy {
 /// Provides a fallback strategy for browsers which does not support ClipboardAPI.
 class ExecCommandCopyStrategy implements CopyToClipboardStrategy {
   @override
-  Future<bool> setData(String text) {
+  Future<bool> setData(String? text) {
     return Future.value(_setDataSync(text));
   }
 
-  bool _setDataSync(String text) {
+  bool _setDataSync(String? text) {
     // Copy content to clipboard with execCommand.
     // See: https://developers.google.com/web/updates/2015/04/cut-and-copy-commands
     final html.TextAreaElement tempTextArea = _appendTemporaryTextArea();
@@ -147,8 +151,8 @@ class ExecCommandCopyStrategy implements CopyToClipboardStrategy {
       if (!result) {
         print('copy is not successful');
       }
-    } catch (e) {
-      print('copy is not successful ${e.message}');
+    } catch (error) {
+      print('copy is not successful $error');
     } finally {
       _removeTemporaryTextArea(tempTextArea);
     }
@@ -167,13 +171,13 @@ class ExecCommandCopyStrategy implements CopyToClipboardStrategy {
       ..backgroundColor = 'transparent'
       ..background = 'transparent';
 
-    html.document.body.append(tempElement);
+    html.document.body!.append(tempElement);
 
     return tempElement;
   }
 
   void _removeTemporaryTextArea(html.HtmlElement element) {
-    element?.remove();
+    element.remove();
   }
 }
 

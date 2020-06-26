@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 /// Converts conic curve to a list of quadratic curves for rendering on
@@ -40,10 +40,10 @@ class Conic {
     if (subdivideCount == _maxSubdivisionCount) {
       // We have an extreme number of quads, chop this conic and check if
       // it generates a pair of lines, in which case we should not subdivide.
-      final List<Conic> dst = List<Conic>(2);
+      final _ConicPair dst = _ConicPair();
       _chop(dst);
-      final Conic conic0 = dst[0];
-      final Conic conic1 = dst[1];
+      final Conic conic0 = dst.first!;
+      final Conic conic1 = dst.second!;
       // If this chop generates pair of lines no need to subdivide.
       if (conic0.p1x == conic0.p2x &&
           conic0.p1y == conic0.p2y &&
@@ -93,10 +93,10 @@ class Conic {
       pointList.add(ui.Offset(src.p2x, src.p2y));
       return;
     }
-    final List<Conic> dst = List<Conic>(2);
+    final _ConicPair dst = _ConicPair();
     src._chop(dst);
-    final Conic conic0 = dst[0];
-    final Conic conic1 = dst[1];
+    final Conic conic0 = dst.first!;
+    final Conic conic1 = dst.second!;
     final double startY = src.p0y;
     final double endY = src.p2y;
     final double cpY = src.p1y;
@@ -135,7 +135,7 @@ class Conic {
   }
 
   // Splits conic into 2 parts based on weight.
-  void _chop(List<Conic> dst) {
+  void _chop(_ConicPair pair) {
     final double scale = 1.0 / (1.0 + fW);
     final double newW = _subdivideWeightValue(fW);
     final ui.Offset wp1 = ui.Offset(fW * p1x, fW * p1y);
@@ -147,9 +147,9 @@ class Conic {
       m = ui.Offset((p0x + (w2 * p1x) + p2x) * scaleHalf,
           (p0y + (w2 * p1y) + p2y) * scaleHalf);
     }
-    dst[0] = Conic(p0x, p0y, (p0x + wp1.dx) * scale, (p0y + wp1.dy) * scale,
+    pair.first = Conic(p0x, p0y, (p0x + wp1.dx) * scale, (p0y + wp1.dy) * scale,
         m.dx, m.dy, newW);
-    dst[1] = Conic(m.dx, m.dy, (p2x + wp1.dx) * scale, (p2y + wp1.dy) * scale,
+    pair.second = Conic(m.dx, m.dy, (p2x + wp1.dx) * scale, (p2y + wp1.dy) * scale,
         p2x, p2y, newW);
   }
 
@@ -187,4 +187,9 @@ class Conic {
     }
     return pow2;
   }
+}
+
+class _ConicPair {
+  Conic? first;
+  Conic? second;
 }

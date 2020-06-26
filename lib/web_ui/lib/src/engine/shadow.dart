@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 /// How far is the light source from the surface of the UI.
@@ -81,8 +81,8 @@ ui.Rect computePenumbraBounds(ui.Rect shape, double elevation) {
 @immutable
 class SurfaceShadowData {
   const SurfaceShadowData({
-    @required this.blurWidth,
-    @required this.offset,
+    required this.blurWidth,
+    required this.offset,
   });
 
   /// The length in pixels of the shadow.
@@ -106,7 +106,7 @@ class SurfaceShadowData {
 /// (cannot) use Skia's shadow API directly. However, this algorithms is
 /// consistent with [computePenumbraBounds] used by [RecordingCanvas] during
 /// bounds estimation.
-SurfaceShadowData computeShadow(ui.Rect shape, double elevation) {
+SurfaceShadowData? computeShadow(ui.Rect shape, double elevation) {
   if (elevation == 0.0) {
     return null;
   }
@@ -128,13 +128,13 @@ SurfaceShadowData computeShadow(ui.Rect shape, double elevation) {
 
 /// Applies a CSS shadow to the [shape].
 void applyCssShadow(
-    html.Element element, ui.Rect shape, double elevation, ui.Color color) {
-  final SurfaceShadowData shadow = computeShadow(shape, elevation);
+    html.Element? element, ui.Rect shape, double elevation, ui.Color color) {
+  final SurfaceShadowData? shadow = computeShadow(shape, elevation);
   if (shadow == null) {
-    element.style.boxShadow = 'none';
+    element!.style.boxShadow = 'none';
   } else {
     color = toShadowColor(color);
-    element.style.boxShadow = '${shadow.offset.dx}px ${shadow.offset.dy}px '
+    element!.style.boxShadow = '${shadow.offset.dx}px ${shadow.offset.dy}px '
         '${shadow.blurWidth}px 0px rgba(${color.red}, ${color.green}, ${color.blue}, ${color.alpha / 255})';
   }
 }

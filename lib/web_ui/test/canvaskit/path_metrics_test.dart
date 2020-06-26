@@ -62,8 +62,8 @@ void main() {
       expect(iter2.current, isNotNull);
       expect(iter1.moveNext(), false);
       expect(iter2.moveNext(), false);
-      expect(iter1.current, isNull);
-      expect(iter2.current, isNull);
+      expect(() => iter1.current, throwsRangeError);
+      expect(() => iter2.current, throwsRangeError);
     });
   },
       // This test failed on iOS Safari.

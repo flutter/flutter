@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 /// A message encoding/decoding mechanism.
@@ -18,7 +18,7 @@ abstract class MessageCodec<T> {
   /// Encodes the specified [message] in binary.
   ///
   /// Returns null if the message is null.
-  ByteData encodeMessage(T message);
+  ByteData? encodeMessage(T message);
 
   /// Decodes the specified [message] from binary.
   ///
@@ -31,6 +31,7 @@ abstract class MessageCodec<T> {
 class MethodCall {
   /// Creates a [MethodCall] representing the invocation of [method] with the
   /// specified [arguments].
+  // ignore: unnecessary_null_comparison
   const MethodCall(this.method, [this.arguments]) : assert(method != null);
 
   /// The name of the method to be called.
@@ -57,10 +58,10 @@ class MethodCall {
 ///   between Flutter and platform plugins.
 abstract class MethodCodec {
   /// Encodes the specified [methodCall] into binary.
-  ByteData encodeMethodCall(MethodCall methodCall);
+  ByteData? encodeMethodCall(MethodCall methodCall);
 
   /// Decodes the specified [methodCall] from binary.
-  MethodCall decodeMethodCall(ByteData methodCall);
+  MethodCall decodeMethodCall(ByteData? methodCall);
 
   /// Decodes the specified result [envelope] from binary.
   ///
@@ -69,14 +70,14 @@ abstract class MethodCodec {
   dynamic decodeEnvelope(ByteData envelope);
 
   /// Encodes a successful [result] into a binary envelope.
-  ByteData encodeSuccessEnvelope(dynamic result);
+  ByteData? encodeSuccessEnvelope(dynamic result);
 
   /// Encodes an error result into a binary envelope.
   ///
   /// The specified error [code], human-readable error [message], and error
   /// [details] correspond to the fields of [PlatformException].
-  ByteData encodeErrorEnvelope(
-      {@required String code, String message, dynamic details});
+  ByteData? encodeErrorEnvelope(
+      {required String code, String? message, dynamic details});
 }
 
 /// Thrown to indicate that a platform interaction failed in the platform
@@ -97,16 +98,16 @@ class PlatformException implements Exception {
   /// [message], and with the optional error [details] which must be a valid
   /// value for the [MethodCodec] involved in the interaction.
   PlatformException({
-    @required this.code,
+    required this.code,
     this.message,
     this.details,
-  }) : assert(code != null);
+  }) : assert(code != null); // ignore: unnecessary_null_comparison
 
   /// An error code.
   final String code;
 
   /// A human-readable error message, possibly null.
-  final String message;
+  final String? message;
 
   /// Error details, possibly null.
   final dynamic details;
@@ -131,7 +132,7 @@ class MissingPluginException implements Exception {
   MissingPluginException([this.message]);
 
   /// A human-readable error message, possibly null.
-  final String message;
+  final String? message;
 
   @override
   String toString() => 'MissingPluginException($message)';

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+
 part of engine;
 
 const MethodCall _popRouteMethodCall = MethodCall('popRoute');
@@ -34,8 +34,8 @@ bool _isFlutterEntry(dynamic state) {
 ///
 /// There should only be one global instance of this class.
 class BrowserHistory {
-  LocationStrategy _locationStrategy;
-  ui.VoidCallback _unsubscribe;
+  LocationStrategy? _locationStrategy;
+  ui.VoidCallback? _unsubscribe;
 
   /// Changing the location strategy will unsubscribe from the old strategy's
   /// event listeners, and subscribe to the new one.
@@ -45,7 +45,7 @@ class BrowserHistory {
   ///
   /// If the given strategy is null, it will render this [BrowserHistory]
   /// instance inactive.
-  set locationStrategy(LocationStrategy strategy) {
+  set locationStrategy(LocationStrategy? strategy) {
     if (strategy != _locationStrategy) {
       _tearoffStrategy(_locationStrategy);
       _locationStrategy = strategy;
@@ -55,22 +55,22 @@ class BrowserHistory {
 
   /// Returns the currently active location strategy.
   @visibleForTesting
-  LocationStrategy get locationStrategy => _locationStrategy;
+  LocationStrategy? get locationStrategy => _locationStrategy;
 
   /// The path of the current location of the user's browser.
   String get currentPath => _locationStrategy?.path ?? '/';
 
   /// Update the url with the given [routeName].
-  void setRouteName(String routeName) {
+  void setRouteName(String? routeName) {
     if (_locationStrategy != null) {
-      _setupFlutterEntry(_locationStrategy, replace: true, path: routeName);
+      _setupFlutterEntry(_locationStrategy!, replace: true, path: routeName);
     }
   }
 
   /// This method does the same thing as the browser back button.
   Future<void> back() {
     if (_locationStrategy != null) {
-      return _locationStrategy.back();
+      return _locationStrategy!.back();
     }
     return Future<void>.value();
   }
@@ -81,21 +81,21 @@ class BrowserHistory {
       _tearoffStrategy(_locationStrategy);
       // After tearing off the location strategy, we should be on the "origin"
       // entry. So we need to go back one more time to exit the app.
-      final Future<void> backFuture = _locationStrategy.back();
+      final Future<void> backFuture = _locationStrategy!.back();
       _locationStrategy = null;
       return backFuture;
     }
     return Future<void>.value();
   }
 
-  String _userProvidedRouteName;
+  String? _userProvidedRouteName;
   void _popStateListener(covariant html.PopStateEvent event) {
     if (_isOriginEntry(event.state)) {
       // If we find ourselves in the origin entry, it means that the user
       // clicked the back button.
 
       // 1. Re-push the flutter entry to keep it always at the top of history.
-      _setupFlutterEntry(_locationStrategy);
+      _setupFlutterEntry(_locationStrategy!);
 
       // 2. Send a 'popRoute' platform message so the app can handle it accordingly.
       if (window._onPlatformMessage != null) {
@@ -113,7 +113,7 @@ class BrowserHistory {
       // brings us here.
       assert(_userProvidedRouteName != null);
 
-      final String newRouteName = _userProvidedRouteName;
+      final String newRouteName = _userProvidedRouteName!;
       _userProvidedRouteName = null;
 
       // Send a 'pushRoute' platform message so the app handles it accordingly.
@@ -137,7 +137,7 @@ class BrowserHistory {
       // 2. Then we remove the new entry.
       // This will take us back to our "flutter" entry and it causes a new
       // popstate event that will be handled in the "else if" section above.
-      _locationStrategy.back();
+      _locationStrategy!.back();
     }
   }
 
@@ -145,7 +145,7 @@ class BrowserHistory {
   /// replaces the state of the entry so that we can recognize it later using
   /// [_isOriginEntry] inside [_popStateListener].
   void _setupOriginEntry(LocationStrategy strategy) {
-    assert(strategy != null);
+    assert(strategy != null); // ignore: unnecessary_null_comparison
     strategy.replaceState(_originState, 'origin', '');
   }
 
@@ -154,9 +154,9 @@ class BrowserHistory {
   void _setupFlutterEntry(
     LocationStrategy strategy, {
     bool replace = false,
-    String path,
+    String? path,
   }) {
-    assert(strategy != null);
+    assert(strategy != null); // ignore: unnecessary_null_comparison
     path ??= currentPath;
     if (replace) {
       strategy.replaceState(_flutterState, 'flutter', path);
@@ -165,7 +165,7 @@ class BrowserHistory {
     }
   }
 
-  void _setupStrategy(LocationStrategy strategy) {
+  void _setupStrategy(LocationStrategy? strategy) {
     if (strategy == null) {
       return;
     }
@@ -180,16 +180,16 @@ class BrowserHistory {
       _setupOriginEntry(strategy);
       _setupFlutterEntry(strategy, replace: false, path: path);
     }
-    _unsubscribe = strategy.onPopState(_popStateListener);
+    _unsubscribe = strategy.onPopState(_popStateListener as dynamic Function(html.Event));
   }
 
-  void _tearoffStrategy(LocationStrategy strategy) {
+  void _tearoffStrategy(LocationStrategy? strategy) {
     if (strategy == null) {
       return;
     }
 
     assert(_unsubscribe != null);
-    _unsubscribe();
+    _unsubscribe!();
     _unsubscribe = null;
 
     // Remove the "flutter" entry and go back to the "origin" entry so that the
