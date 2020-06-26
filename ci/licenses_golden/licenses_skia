@@ -1,4 +1,4 @@
-Signature: 244475f977c469232c5f2094e3fcde2f
+Signature: 8fa944f3dbd232ff78f3e21e069bcc68
 
 UNUSED LICENSES:
 
@@ -3984,6 +3984,8 @@ FILE: ../../../third_party/skia/src/gpu/geometry/GrShape.cpp
 FILE: ../../../third_party/skia/src/gpu/geometry/GrShape.h
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLUniformHandler.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkManagedResource.h
+FILE: ../../../third_party/skia/src/image/SkRescaleAndReadPixels.cpp
+FILE: ../../../third_party/skia/src/image/SkRescaleAndReadPixels.h
 FILE: ../../../third_party/skia/src/sksl/SkSLSPIRVtoHLSL.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLSPIRVtoHLSL.h
 FILE: ../../../third_party/skia/src/sksl/SkSLSampleMatrix.cpp
@@ -5233,6 +5235,7 @@ FILE: ../../../third_party/skia/experimental/skrive/src/Drawable.cpp
 FILE: ../../../third_party/skia/experimental/skrive/src/Ellipse.cpp
 FILE: ../../../third_party/skia/experimental/skrive/src/Node.cpp
 FILE: ../../../third_party/skia/experimental/skrive/src/Paint.cpp
+FILE: ../../../third_party/skia/experimental/skrive/src/Rectangle.cpp
 FILE: ../../../third_party/skia/experimental/skrive/src/Shape.cpp
 FILE: ../../../third_party/skia/experimental/skrive/src/SkRive.cpp
 FILE: ../../../third_party/skia/experimental/skrive/src/reader/BinaryReader.cpp
