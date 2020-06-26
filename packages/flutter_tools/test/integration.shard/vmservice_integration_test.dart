@@ -40,14 +40,11 @@ void main() {
     });
 
     test('getSupportedProtocols includes DDS', () async {
-      // TODO(bkonyi): replace with actual VmService.getSupportedProtocols when
-      // package:dwds adds support.
-      final Response response =
-          await vmService.callMethod('getSupportedProtocols');
-      expect(response.json['protocols'].length == 2, true);
-      for (final Map<String, dynamic> protocol in (response.json['protocols']
-            as List<dynamic>).cast<Map<String, dynamic>>()) {
-        expect(<String>{'VM Service', 'DDS'}.contains(protocol['protocolName']), isTrue);
+      final ProtocolList protocolList =
+          await vmService.getSupportedProtocols();
+      expect(protocolList.protocols, hasLength(2));
+      for (final Protocol protocol in protocolList.protocols) {
+        expect(protocol.protocolName, anyOf('VM Service', 'DDS'));
       }
     });
 

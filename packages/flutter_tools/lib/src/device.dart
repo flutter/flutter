@@ -515,7 +515,9 @@ abstract class Device {
   DevicePortForwarder get portForwarder;
 
   /// Get the DDS instance for this device.
-  DartDevelopmentService get dds => _dds ??= DartDevelopmentService();
+  DartDevelopmentService get dds => _dds ??= DartDevelopmentService(
+    logger: globals.logger,
+  );
   DartDevelopmentService _dds;
 
   /// Clear the device's logs.

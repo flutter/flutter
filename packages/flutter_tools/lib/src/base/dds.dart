@@ -5,11 +5,16 @@
 import 'dart:async';
 
 import 'package:dds/dds.dart' as dds;
+import 'package:meta/meta.dart';
 
-import '../globals.dart' as globals;
 import 'io.dart' as io;
+import 'logger.dart';
 
+/// Helper class to launch a [dds.DartDevelopmentService]. Allows for us to
+/// mock out this functionality for testing purposes.
 class DartDevelopmentService {
+  DartDevelopmentService({@required this.logger});
+
   Future<void> startDartDevelopmentService(
     Uri observatoryUri,
     bool ipv6,
@@ -22,7 +27,7 @@ class DartDevelopmentService {
       ).host,
       port: 0,
     );
-    globals.printTrace(
+    logger.printTrace(
       'Launching a Dart Developer Service (DDS) instance at $ddsUri, '
       'connecting to VM service at $observatoryUri.'
       '\n${StackTrace.current}'
@@ -33,13 +38,14 @@ class DartDevelopmentService {
           observatoryUri,
           serviceUri: ddsUri,
         );
-      globals.printTrace('DDS is listening at ${_ddsInstance.uri}.');
+      logger.printTrace('DDS is listening at ${_ddsInstance.uri}.');
     } on dds.DartDevelopmentServiceException catch (e) {
-      globals.printError('Warning: Failed to start DDS: ${e.message}');
+      logger.printError('Warning: Failed to start DDS: ${e.message}');
     }
   }
 
   Future<void> shutdown() async => await _ddsInstance?.shutdown();
 
+  final Logger logger;
   dds.DartDevelopmentService _ddsInstance;
 }

@@ -212,6 +212,7 @@ class FlutterDevice {
     GetSkSLMethod getSkSLMethod,
     PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
     bool disableDds = false,
+    bool ipv6 = false,
   }) {
     final Completer<void> completer = Completer<void>();
     StreamSubscription<void> subscription;
@@ -225,7 +226,7 @@ class FlutterDevice {
       if (!disableDds) {
         await device.dds.startDartDevelopmentService(
           observatoryUri,
-          false, // TODO(bkonyi): ipv6 support?
+          ipv6,
         );
       }
       try {
@@ -1185,6 +1186,7 @@ abstract class ResidentRunner {
         reloadMethod: reloadMethod,
         getSkSLMethod: getSkSLMethod,
         printStructuredErrorLogMethod: printStructuredErrorLog,
+        ipv6: ipv6,
       );
       // This will wait for at least one flutter view before returning.
       final Status status = globals.logger.startProgress(
