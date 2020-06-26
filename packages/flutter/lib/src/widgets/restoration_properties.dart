@@ -137,7 +137,7 @@ class RestorableInt extends RestorableNum<int> {
   RestorableInt(int defaultValue) : super(defaultValue);
 }
 
-/// A [RestorableProperty] that knows how to store and restore an [String].
+/// A [RestorableProperty] that knows how to store and restore a [String].
 ///
 /// {@macro flutter.widgets.restoration.primitivevalue}
 class RestorableString extends _RestorablePrimitiveValue<String> {
@@ -147,7 +147,7 @@ class RestorableString extends _RestorablePrimitiveValue<String> {
   RestorableString(String defaultValue) : super(defaultValue);
 }
 
-/// A [RestorableProperty] that knows how to store and restore an [bool].
+/// A [RestorableProperty] that knows how to store and restore a [bool].
 ///
 /// {@macro flutter.widgets.restoration.primitivevalue}
 class RestorableBool extends _RestorablePrimitiveValue<bool> {
