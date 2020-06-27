@@ -69,7 +69,6 @@ void main() {
       textDirection: TextDirection.ltr,
       child: SingleChildScrollView(
         controller: controller,
-        overflowArea: EdgeInsets.zero,
         child: Column(
           children: children = List<Widget>.generate(5, (int i) {
             return Container(
@@ -81,9 +80,9 @@ void main() {
       )
     ));
 
-    // 1st, check that the render object has received the default overflow area.
-    final dynamic renderObject = tester.allRenderObjects.where((RenderObject o) => o.runtimeType.toString() == '_RenderSingleChildViewport').first;
-    expect(renderObject.overflowArea, equals(EdgeInsets.zero));
+    // 1st, check that the render object has received the default visible overflow.
+    dynamic renderObject = tester.allRenderObjects.where((RenderObject o) => o.runtimeType.toString() == '_RenderSingleChildViewport').first;
+    expect(renderObject.visibleOverflow, equals(EdgeInsets.zero));
     tester.renderObject(find.byWidget(children[4])).showOnScreen();
     await tester.pumpAndSettle();
     expect(controller.offset, equals(400.0));
@@ -93,7 +92,7 @@ void main() {
       textDirection: TextDirection.ltr,
       child: SingleChildScrollView(
         controller: controller,
-        overflowArea: const EdgeInsets.only(top: 200, bottom: 200),
+        scrollPadding: const EdgeInsets.only(top: 200, bottom: 200),
         child: Column(
           children: children = List<Widget>.generate(5, (int i) {
             return Container(
@@ -104,14 +103,15 @@ void main() {
         )
       )
     ));
-    expect(renderObject.overflowArea, equals(const EdgeInsets.only(top: 200, bottom: 200)));
+    renderObject = tester.allRenderObjects.where((RenderObject o) => o.runtimeType.toString() == '_RenderSingleChildViewport').first;
+    expect(renderObject.visibleOverflow, equals(const EdgeInsets.only(top: 200, bottom: 200)));
 
-    // 3rd, check if the overflow area didn't affect the viewport
+    // 3rd, check if the 4th tile is focus pass scroll padding
     tester.renderObject(find.byWidget(children[4])).showOnScreen();
     await tester.pumpAndSettle();
-    expect(controller.offset, equals(400.0));
+    expect(controller.offset, equals(800.0));
 
-    // 4th, check if the 2nd tile is shown due to the top overflow area
+    // 4th, check if the 3rd tile is shown due to the top scroll padding
     expect(semantics, hasSemantics(
       TestSemantics(
         children: <TestSemantics>[
@@ -127,14 +127,6 @@ void main() {
                 flags: <SemanticsFlag>[
                   SemanticsFlag.isHidden,
                 ],
-                label: r'Tile 0',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                label: r'Tile 1',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
                 label: r'Tile 2',
                 textDirection: TextDirection.ltr,
               ),
