@@ -997,6 +997,11 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// The ancestor's semantic data will include the child's as well as
   /// other nodes that have been merged together.
   ///
+  /// If the [SemanticsNode] of the object identified by the finder is
+  /// force-merged into an ancestor (e.g. via the [MergeSemantics] widget)
+  /// the node into which it is merged is returned. That node will include
+  /// all the semantics information of the nodes merged into it.
+  ///
   /// Will throw a [StateError] if the finder returns more than one element or
   /// if no semantics are found or are not enabled.
   SemanticsNode getSemantics(Finder finder) {
@@ -1012,7 +1017,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     final Element element = candidates.single;
     RenderObject renderObject = element.findRenderObject();
     SemanticsNode result = renderObject.debugSemantics;
-    while (renderObject != null && result == null) {
+    while (renderObject != null && (result == null || result.isMergedIntoParent)) {
       renderObject = renderObject?.parent as RenderObject;
       result = renderObject?.debugSemantics;
     }

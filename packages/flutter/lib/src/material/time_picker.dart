@@ -1127,8 +1127,8 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     TimeOfDay(hour: 22, minute: 0),
   ];
 
-  _TappableLabel _buildTappableLabel(TextTheme textTheme, int value, String label, VoidCallback onTap) {
-    final TextStyle style = textTheme.subtitle1;
+  _TappableLabel _buildTappableLabel(TextTheme textTheme, Color color, int value, String label, VoidCallback onTap) {
+    final TextStyle style = textTheme.subtitle1.copyWith(color: color);
     final double labelScaleFactor = math.min(MediaQuery.of(context).textScaleFactor, 2.0);
     return _TappableLabel(
       value: value,
@@ -1141,10 +1141,11 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     );
   }
 
-  List<_TappableLabel> _build24HourRing(TextTheme textTheme) => <_TappableLabel>[
+  List<_TappableLabel> _build24HourRing(TextTheme textTheme, Color color) => <_TappableLabel>[
     for (final TimeOfDay timeOfDay in _twentyFourHours)
       _buildTappableLabel(
         textTheme,
+        color,
         timeOfDay.hour,
         localizations.formatHour(timeOfDay, alwaysUse24HourFormat: media.alwaysUse24HourFormat),
         () {
@@ -1153,10 +1154,11 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
       ),
   ];
 
-  List<_TappableLabel> _build12HourRing(TextTheme textTheme) => <_TappableLabel>[
+  List<_TappableLabel> _build12HourRing(TextTheme textTheme, Color color) => <_TappableLabel>[
     for (final TimeOfDay timeOfDay in _amHours)
       _buildTappableLabel(
         textTheme,
+        color,
         timeOfDay.hour,
         localizations.formatHour(timeOfDay, alwaysUse24HourFormat: media.alwaysUse24HourFormat),
         () {
@@ -1165,7 +1167,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
       ),
   ];
 
-  List<_TappableLabel> _buildMinutes(TextTheme textTheme) {
+  List<_TappableLabel> _buildMinutes(TextTheme textTheme, Color color) {
     const List<TimeOfDay> _minuteMarkerValues = <TimeOfDay>[
       TimeOfDay(hour: 0, minute: 0),
       TimeOfDay(hour: 0, minute: 5),
@@ -1185,6 +1187,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
       for (final TimeOfDay timeOfDay in _minuteMarkerValues)
         _buildTappableLabel(
           textTheme,
+          color,
           timeOfDay.minute,
           localizations.formatMinute(timeOfDay),
           () {
@@ -1200,6 +1203,8 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     final TimePickerThemeData pickerTheme = TimePickerTheme.of(context);
     final Color backgroundColor = pickerTheme.dialBackgroundColor ?? themeData.colorScheme.onBackground.withOpacity(0.12);
     final Color accentColor = pickerTheme.dialHandColor ?? themeData.colorScheme.primary;
+    final Color primaryLabelColor = MaterialStateProperty.resolveAs(pickerTheme.dialTextColor, <MaterialState>{});
+    final Color secondaryLabelColor = MaterialStateProperty.resolveAs(pickerTheme.dialTextColor, <MaterialState>{MaterialState.selected});
     List<_TappableLabel> primaryLabels;
     List<_TappableLabel> secondaryLabels;
     int selectedDialValue;
@@ -1207,18 +1212,18 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
       case _TimePickerMode.hour:
         if (widget.use24HourDials) {
           selectedDialValue = widget.selectedTime.hour;
-          primaryLabels = _build24HourRing(theme.textTheme);
-          secondaryLabels = _build24HourRing(theme.accentTextTheme);
+          primaryLabels = _build24HourRing(theme.textTheme, primaryLabelColor);
+          secondaryLabels = _build24HourRing(theme.accentTextTheme, secondaryLabelColor);
         } else {
           selectedDialValue = widget.selectedTime.hourOfPeriod;
-          primaryLabels = _build12HourRing(theme.textTheme);
-          secondaryLabels = _build12HourRing(theme.accentTextTheme);
+          primaryLabels = _build12HourRing(theme.textTheme, primaryLabelColor);
+          secondaryLabels = _build12HourRing(theme.accentTextTheme, secondaryLabelColor);
         }
         break;
       case _TimePickerMode.minute:
         selectedDialValue = widget.selectedTime.minute;
-        primaryLabels = _buildMinutes(theme.textTheme);
-        secondaryLabels = _buildMinutes(theme.accentTextTheme);
+        primaryLabels = _buildMinutes(theme.textTheme, primaryLabelColor);
+        secondaryLabels = _buildMinutes(theme.accentTextTheme, secondaryLabelColor);
         break;
     }
 

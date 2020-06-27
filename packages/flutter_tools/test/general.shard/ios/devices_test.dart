@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -226,6 +227,12 @@ void main() {
           iproxyPath: mockArtifacts.getArtifactPath(Artifact.iproxy, platform: TargetPlatform.ios),
           logger: logger,
           processManager: FakeProcessManager.any(),
+          operatingSystemUtils: OperatingSystemUtils(
+            fileSystem: mockFileSystem,
+            logger: logger,
+            platform: FakePlatform(operatingSystem: 'macos'),
+            processManager: FakeProcessManager.any(),
+          ),
         );
         portForwarder.addForwardedPorts(<ForwardedPort>[forwardedPort]);
         return portForwarder;
