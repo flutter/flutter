@@ -1340,7 +1340,7 @@ void main() {
     const Size kSmallScreenSizePortrait = Size(320, 521);
     const Size kSmallScreenSizeLandscape = Size(521, 320);
 
-    Future<void> _showPicker(WidgetTester tester, Size size, [double textScaleFactor = 1.0]) async {
+    Future<void> _showPicker(WidgetTester tester, Size size) async {
       tester.binding.window.physicalSizeTestValue = size;
       tester.binding.window.devicePixelRatioTestValue = 1.0;
       tester.binding.window.clearPhysicalSizeTestValue();

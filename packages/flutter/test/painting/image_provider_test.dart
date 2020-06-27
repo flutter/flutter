@@ -141,7 +141,7 @@ void main() {
     expect(await error.future, isStateError);
   });
 
-  Future<Codec> _decoder(Uint8List bytes, {int cacheWidth, int cacheHeight, bool allowUpscaling}) async {
+  Future<Codec> _decoder(Uint8List bytes) async {
     return FakeCodec();
   }
 
