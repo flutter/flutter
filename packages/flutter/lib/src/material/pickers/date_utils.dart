@@ -72,8 +72,7 @@ DateTime addMonthsToMonthDate(DateTime monthDate, int monthsToAdd) {
   return DateTime(monthDate.year, monthDate.month + monthsToAdd);
 }
 
-/// Returns a [DateTime] with the added number of days and truncates any day
-/// and time information.
+/// Returns a [DateTime] with the added number of days and no time set.
 DateTime addDaysToDate(DateTime date, int days) {
   return DateTime(date.year, date.month, date.day + days);
 }
