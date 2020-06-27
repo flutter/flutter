@@ -256,7 +256,7 @@ class SingleChildScrollView extends StatelessWidget {
   final EdgeInsetsGeometry padding;
 
   /// The amount of space inset that cannot be interacted with
-  /// 
+  ///
   /// For example, it can be used for an area that is blocked by a
   /// semi-transparent component on top, and the content under it still
   /// needs to be visible but cannot be interacted with.
