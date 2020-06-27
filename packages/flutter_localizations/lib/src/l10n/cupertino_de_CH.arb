@@ -9,6 +9,7 @@
   "postMeridiemAbbreviation": "PM",
   "todayLabel": "Heute",
   "alertDialogLabel": "Benachrichtigung",
+  "tabSemanticsLabel": "Tab $tabIndex von $tabCount",
   "timerPickerHourLabelOne": "Stunde",
   "timerPickerHourLabelOther": "Stunden",
   "timerPickerMinuteLabelOne": "Min.",
@@ -19,6 +20,5 @@
   "copyButtonLabel": "Kopieren",
   "pasteButtonLabel": "Einsetzen",
   "selectAllButtonLabel": "Alles auswählen",
-  "tabSemanticsLabel": "Tab $tabIndex von $tabCount",
-  "modalBarrierDismissLabel": "Schließen"
+  "modalBarrierDismissLabel": "Schliessen"
 }

@@ -19,6 +19,6 @@
   "copyButtonLabel": "کپی",
   "pasteButtonLabel": "جای‌گذاری",
   "selectAllButtonLabel": "انتخاب همه",
-  "tabSemanticsLabel": "TBD",
+  "tabSemanticsLabel": "برگه $tabIndex از $tabCount",
   "modalBarrierDismissLabel": "نپذیرفتن"
 }
