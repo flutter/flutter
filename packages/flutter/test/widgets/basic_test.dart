@@ -5,6 +5,7 @@
 // @dart = 2.8
 
 import 'dart:math' as math;
+import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -398,6 +399,162 @@ void main() {
     );
     // TODO(Piinks): Remove skip once web goldens are supported, https://github.com/flutter/flutter/issues/40297
   }, skip: isBrowser);
+
+  testWidgets('IgnorePointer ignores pointers', (WidgetTester tester) async {
+    final List<String> logs = <String>[];
+    Widget target({bool ignoring}) => Align(
+      alignment: Alignment.topLeft,
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: SizedBox(
+          width: 100,
+          height: 100,
+          child: Listener(
+            onPointerDown: (_) { logs.add('down1'); },
+            child: MouseRegion(
+              onEnter: (_) { logs.add('enter1'); },
+              onExit: (_) { logs.add('exit1'); },
+              cursor: SystemMouseCursors.forbidden,
+              child: Stack(
+                children: <Widget>[
+                  Listener(
+                    onPointerDown: (_) { logs.add('down2'); },
+                    child: MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      onEnter: (_) { logs.add('enter2'); },
+                      onExit: (_) { logs.add('exit2'); },
+                    ),
+                  ),
+                  IgnorePointer(
+                    ignoring: ignoring,
+                    child: Listener(
+                      onPointerDown: (_) { logs.add('down3'); },
+                      child: MouseRegion(
+                        cursor: SystemMouseCursors.text,
+                        onEnter: (_) { logs.add('enter3'); },
+                        onExit: (_) { logs.add('exit3'); },
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(pointer: 1, kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: const Offset(200, 200));
+    addTearDown(gesture.removePointer);
+
+    await tester.pumpWidget(target(ignoring: true));
+    expect(logs, isEmpty);
+
+    await gesture.moveTo(const Offset(50, 50));
+    expect(logs, <String>['enter1', 'enter2']);
+    logs.clear();
+
+    await gesture.down(const Offset(50, 50));
+    expect(logs, <String>['down2', 'down1']);
+    logs.clear();
+
+    await gesture.up();
+    expect(logs, isEmpty);
+
+    await tester.pumpWidget(target(ignoring: false));
+    expect(logs, <String>['exit2', 'enter3']);
+    logs.clear();
+
+    await gesture.down(const Offset(50, 50));
+    expect(logs, <String>['down3', 'down1']);
+    logs.clear();
+
+    await gesture.up();
+    expect(logs, isEmpty);
+
+    await tester.pumpWidget(target(ignoring: true));
+    expect(logs, <String>['exit3', 'enter2']);
+    logs.clear();
+  });
+
+  testWidgets('AbsorbPointer absorbs pointers', (WidgetTester tester) async {
+    final List<String> logs = <String>[];
+    Widget target({bool absorbing}) => Align(
+      alignment: Alignment.topLeft,
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: SizedBox(
+          width: 100,
+          height: 100,
+          child: Listener(
+            onPointerDown: (_) { logs.add('down1'); },
+            child: MouseRegion(
+              onEnter: (_) { logs.add('enter1'); },
+              onExit: (_) { logs.add('exit1'); },
+              cursor: SystemMouseCursors.forbidden,
+              child: Stack(
+                children: <Widget>[
+                  Listener(
+                    onPointerDown: (_) { logs.add('down2'); },
+                    child: MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      onEnter: (_) { logs.add('enter2'); },
+                      onExit: (_) { logs.add('exit2'); },
+                    ),
+                  ),
+                  AbsorbPointer(
+                    absorbing: absorbing,
+                    child: Listener(
+                      onPointerDown: (_) { logs.add('down3'); },
+                      child: MouseRegion(
+                        cursor: SystemMouseCursors.text,
+                        onEnter: (_) { logs.add('enter3'); },
+                        onExit: (_) { logs.add('exit3'); },
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(pointer: 1, kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: const Offset(200, 200));
+    addTearDown(gesture.removePointer);
+
+    await tester.pumpWidget(target(absorbing: true));
+    expect(logs, isEmpty);
+
+    await gesture.moveTo(const Offset(50, 50));
+    expect(logs, <String>['enter1']);
+    logs.clear();
+
+    await gesture.down(const Offset(50, 50));
+    expect(logs, <String>['down1']);
+    logs.clear();
+
+    await gesture.up();
+    expect(logs, isEmpty);
+
+    await tester.pumpWidget(target(absorbing: false));
+    expect(logs, <String>['enter3']);
+    logs.clear();
+
+    await gesture.down(const Offset(50, 50));
+    expect(logs, <String>['down3', 'down1']);
+    logs.clear();
+
+    await gesture.up();
+    expect(logs, isEmpty);
+
+    await tester.pumpWidget(target(absorbing: true));
+    expect(logs, <String>['exit3']);
+    logs.clear();
+  });
 }
 
 HitsRenderBox hits(RenderBox renderBox) => HitsRenderBox(renderBox);
