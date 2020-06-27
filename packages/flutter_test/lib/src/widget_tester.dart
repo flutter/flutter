@@ -566,6 +566,57 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     }).then<int>((_) => count);
   }
 
+  /// Triggers multiple frames for `duration` amount of time or until there are
+  /// no longer any frames scheduled, whichever is earlier. 
+  ///
+  /// This will call call [pump] at least once, even if no frames are scheduled
+  /// when the function is called, to flush any pending microtasks which may 
+  /// themselves schedule a frame.
+  ///
+  /// `frequency` specify the frequency (in Hz) for frame requests. This is an
+  /// analog to screen refresh rate. The frequency rate will be rounded down to 
+  /// integer microseconds frame interval. Default to be 59.94 Hz.
+  ///
+  /// This is useful when you are expecting there may be an infinite long
+  /// animations. To wait some finite animation you may want to use
+  /// [pumpAndSettle] instead.
+  ///
+  /// If the function returns, it returns the number of pumps that it performed.
+  /// When building and rendering frames is not expensive, the return value
+  /// should be `1 + (duration.inMicroseconds / (1E6 ~/ frequency)).floor()`.
+  ///
+  /// One can check if the return value from this function matches the expected
+  /// number of pumps to help cath regressions that cause loss of frame(s).
+  Future<int> pumpContinuous(Duration duration, [
+    EnginePhase phase = EnginePhase.sendSemanticsUpdate, 
+    double frequency = 59.94,
+  ]) async {
+    assert(duration != null);
+    assert(duration > Duration.zero);
+    assert(frequency > 0);
+    assert(() {
+      final WidgetsBinding binding = this.binding;
+      if (binding is LiveTestWidgetsFlutterBinding &&
+          binding.framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark) {
+        throw 'When using LiveTestWidgetsFlutterBindingFramePolicy.benchmark, '
+              'hasScheduledFrame is never set to true. This means that pumpContinuous() '
+              'cannot be used, because it has no way to know if the application has '
+              'stopped registering new frames.';
+        }
+      return true;
+    }());
+    int count = 0;
+    final Duration interval = Duration(microseconds: 1E6 ~/ frequency);
+    return TestAsyncUtils.guard<void>(() async {
+      final DateTime endTime = binding.clock.fromNowBy(duration);
+      do {
+        await binding.pump(interval, phase);
+        count += 1;
+      } while (binding.clock.now().isBefore(endTime) 
+               && binding.hasScheduledFrame);
+    }).then<int>((_) => count);
+  }
+
   /// Repeatedly pump frames that render the `target` widget with a fixed time
   /// `interval` as many as `maxDuration` allows.
   ///
