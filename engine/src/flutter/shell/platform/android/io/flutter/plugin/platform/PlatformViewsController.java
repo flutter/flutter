@@ -44,10 +44,6 @@ import java.util.List;
 public class PlatformViewsController implements PlatformViewsAccessibilityDelegate {
   private static final String TAG = "PlatformViewsController";
 
-  // API level 20 is required for VirtualDisplay#setSurface which we use when resizing a platform
-  // view.
-  private static final int MINIMAL_SDK = Build.VERSION_CODES.KITKAT_WATCH;
-
   private final PlatformViewRegistryImpl registry;
 
   // The context of the Activity or Fragment hosting the render target for the Flutter engine.
@@ -80,6 +76,9 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   // it is associated with(e.g if a platform view creates other views in the same virtual display.
   private final HashMap<Context, View> contextToPlatformView;
 
+  private final SparseArray<PlatformViewsChannel.PlatformViewCreationRequest> platformViewRequests;
+  private final SparseArray<View> platformViews;
+
   // Map of unique IDs to views that render overlay layers.
   private final SparseArray<FlutterImageView> overlayLayerViews;
 
@@ -92,14 +91,39 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   // Overlay layer IDs that were displayed since the start of the current frame.
   private HashSet<Integer> currentFrameUsedOverlayLayerIds;
 
+  // Platform view IDs that were displayed since the start of the current frame.
+  private HashSet<Integer> currentFrameUsedPlatformViewIds;
+
   private final PlatformViewsChannel.PlatformViewsHandler channelHandler =
       new PlatformViewsChannel.PlatformViewsHandler() {
+
+        @Override
+        public void createAndroidViewForPlatformView(
+            @NonNull PlatformViewsChannel.PlatformViewCreationRequest request) {
+          // API level 19 is required for android.graphics.ImageReader.
+          ensureValidAndroidVersion(Build.VERSION_CODES.KITKAT);
+          platformViewRequests.put(request.viewId, request);
+        }
+
+        @Override
+        public void disposeAndroidViewForPlatformView(int viewId) {
+          // Hybrid view.
+          if (platformViewRequests.get(viewId) != null) {
+            platformViewRequests.remove(viewId);
+          }
+          if (platformViews.get(viewId) != null) {
+            ((FlutterView) flutterView).removeView(platformViews.get(viewId));
+            platformViews.remove(viewId);
+          }
+        }
+
         @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
         @Override
-        public long createPlatformView(
+        public long createVirtualDisplayForPlatformView(
             @NonNull PlatformViewsChannel.PlatformViewCreationRequest request) {
-          ensureValidAndroidVersion();
-
+          // API level 20 is required for VirtualDisplay#setSurface which we use when resizing a
+          // platform view.
+          ensureValidAndroidVersion(Build.VERSION_CODES.KITKAT_WATCH);
           if (!validateDirection(request.direction)) {
             throw new IllegalStateException(
                 "Trying to create a view with unknown direction value: "
@@ -171,9 +195,8 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         }
 
         @Override
-        public void disposePlatformView(int viewId) {
-          ensureValidAndroidVersion();
-
+        public void disposeVirtualDisplayForPlatformView(int viewId) {
+          ensureValidAndroidVersion(Build.VERSION_CODES.KITKAT_WATCH);
           VirtualDisplayController vdController = vdControllers.get(viewId);
           if (vdController == null) {
             throw new IllegalStateException(
@@ -193,7 +216,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         public void resizePlatformView(
             @NonNull PlatformViewsChannel.PlatformViewResizeRequest request,
             @NonNull Runnable onComplete) {
-          ensureValidAndroidVersion();
+          ensureValidAndroidVersion(Build.VERSION_CODES.KITKAT_WATCH);
 
           final VirtualDisplayController vdController = vdControllers.get(request.viewId);
           if (vdController == null) {
@@ -224,8 +247,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
         @Override
         public void onTouch(@NonNull PlatformViewsChannel.PlatformViewTouch touch) {
-          ensureValidAndroidVersion();
-
           float density = context.getResources().getDisplayMetrics().density;
           PointerProperties[] pointerProperties =
               parsePointerPropertiesList(touch.rawPointerPropertiesList)
@@ -256,14 +277,13 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
                   touch.source,
                   touch.flags);
 
+          ensureValidAndroidVersion(Build.VERSION_CODES.KITKAT_WATCH);
           vdControllers.get(touch.viewId).dispatchTouchEvent(event);
         }
 
         @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
         @Override
         public void setDirection(int viewId, int direction) {
-          ensureValidAndroidVersion();
-
           if (!validateDirection(direction)) {
             throw new IllegalStateException(
                 "Trying to set unknown direction value: "
@@ -273,6 +293,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
                     + ")");
           }
 
+          ensureValidAndroidVersion(Build.VERSION_CODES.KITKAT_WATCH);
           View view = vdControllers.get(viewId).getView();
           if (view == null) {
             throw new IllegalStateException(
@@ -284,17 +305,18 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
         @Override
         public void clearFocus(int viewId) {
+          ensureValidAndroidVersion(Build.VERSION_CODES.KITKAT_WATCH);
           View view = vdControllers.get(viewId).getView();
           view.clearFocus();
         }
 
-        private void ensureValidAndroidVersion() {
-          if (Build.VERSION.SDK_INT < MINIMAL_SDK) {
+        private void ensureValidAndroidVersion(int minSdkVersion) {
+          if (Build.VERSION.SDK_INT < minSdkVersion) {
             throw new IllegalStateException(
                 "Trying to use platform views with API "
                     + Build.VERSION.SDK_INT
                     + ", required API level is: "
-                    + MINIMAL_SDK);
+                    + minSdkVersion);
           }
         }
       };
@@ -306,6 +328,10 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     contextToPlatformView = new HashMap<>();
     overlayLayerViews = new SparseArray<>();
     currentFrameUsedOverlayLayerIds = new HashSet<>();
+    currentFrameUsedPlatformViewIds = new HashSet<>();
+
+    platformViewRequests = new SparseArray<>();
+    platformViews = new SparseArray<>();
   }
 
   /**
@@ -565,13 +591,61 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     }
   }
 
+  private void initializePlatformViewIfNeeded(int viewId) {
+    if (platformViews.get(viewId) != null) {
+      return;
+    }
+
+    PlatformViewsChannel.PlatformViewCreationRequest request = platformViewRequests.get(viewId);
+    if (request == null) {
+      throw new IllegalStateException(
+          "Platform view hasn't been initialized from the platform view channel.");
+    }
+
+    if (!validateDirection(request.direction)) {
+      throw new IllegalStateException(
+          "Trying to create a view with unknown direction value: "
+              + request.direction
+              + "(view id: "
+              + viewId
+              + ")");
+    }
+
+    PlatformViewFactory factory = registry.getFactory(request.viewType);
+    if (factory == null) {
+      throw new IllegalStateException(
+          "Trying to create a platform view of unregistered type: " + request.viewType);
+    }
+
+    Object createParams = null;
+    if (request.params != null) {
+      createParams = factory.getCreateArgsCodec().decodeMessage(request.params);
+    }
+
+    PlatformView platformView = factory.create(context, viewId, createParams);
+    View view = platformView.getView();
+    platformViews.put(viewId, view);
+
+    ((FlutterView) flutterView).addView(view);
+  }
+
   public void onDisplayPlatformView(int viewId, int x, int y, int width, int height) {
     initializeRootImageViewIfNeeded();
-    // TODO: Implement this method. https://github.com/flutter/flutter/issues/58288
+    initializePlatformViewIfNeeded(viewId);
+
+    View platformView = platformViews.get(viewId);
+    FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams((int) width, (int) height);
+    layoutParams.leftMargin = (int) x;
+    layoutParams.topMargin = (int) y;
+    platformView.setLayoutParams(layoutParams);
+    platformView.setVisibility(View.VISIBLE);
+    platformView.bringToFront();
+    currentFrameUsedPlatformViewIds.add(viewId);
   }
 
   public void onDisplayOverlaySurface(int id, int x, int y, int width, int height) {
     initializeRootImageViewIfNeeded();
+
     FlutterImageView overlayView = overlayLayerViews.get(id);
     if (overlayView.getParent() == null) {
       ((FlutterView) flutterView).addView(overlayView);
@@ -588,19 +662,32 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
   public void onBeginFrame() {
     currentFrameUsedOverlayLayerIds.clear();
+    currentFrameUsedPlatformViewIds.clear();
   }
 
   public void onEndFrame() {
+    // Hide overlay surfaces that aren't rendered in the current frame.
     for (int i = 0; i < overlayLayerViews.size(); i++) {
-      int key = overlayLayerViews.keyAt(i);
+      int overlayId = overlayLayerViews.keyAt(i);
       FlutterImageView overlayView = overlayLayerViews.valueAt(i);
-      if (currentFrameUsedOverlayLayerIds.contains(key)) {
+      if (currentFrameUsedOverlayLayerIds.contains(overlayId)) {
         overlayView.acquireLatestImage();
       } else {
         overlayView.setVisibility(View.GONE);
       }
     }
-
+    // Hide platform views that aren't rendered in the current frame.
+    // The platform view is destroyed  by the framework after the widget is disposed.
+    //
+    // The framework diposes the platform view, when its `State` object will never
+    // build again.
+    for (int i = 0; i < platformViews.size(); i++) {
+      int viewId = platformViews.keyAt(i);
+      if (!currentFrameUsedPlatformViewIds.contains(viewId)) {
+        platformViews.get(viewId).setVisibility(View.GONE);
+      }
+    }
+    // If the background surface is still an image, then acquire the latest image.
     if (flutterViewConvertedToImageView) {
       ((FlutterView) flutterView).acquireLatestImageViewFrame();
     }
