@@ -4071,8 +4071,8 @@ void main() {
   testWidgets('InputDecorator hint is displayed when floatingLabelBehavior is always', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildInputDecorator(
-        // isEmpty: false (default)
         // isFocused: false (default)
+        isEmpty: true,
         decoration: const InputDecoration(
           floatingLabelBehavior: FloatingLabelBehavior.always,
           hintText: 'hint',
