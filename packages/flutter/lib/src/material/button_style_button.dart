@@ -87,7 +87,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
   final Widget child;
 
   /// Returns a non-null [ButtonStyle] that's based primarily on the [Theme]'s
-  /// [Theme.textTheme] and [Theme.colorScheme].
+  /// [ThemeData.textTheme] and [ThemeData.colorScheme].
   ///
   /// The returned style can be overriden by the [style] parameter and
   /// by the style returned by [themeStyleOf]. For example the default
@@ -158,7 +158,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
     assert(geometry1x != null);
     assert(geometry2x != null);
     assert(geometry3x != null);
-    assert(textScaleFactor != null && textScaleFactor >= 0);
+    assert(textScaleFactor != null);
 
     if (textScaleFactor <= 1) {
       return geometry1x;
@@ -239,11 +239,11 @@ class _ButtonStyleState extends State<ButtonStyleButton> {
     final ButtonStyle widgetStyle = widget.style;
     final ButtonStyle themeStyle = widget.themeStyleOf(context);
     final ButtonStyle defaultStyle = widget.defaultStyleOf(context);
+    assert(defaultStyle != null);
 
-    // Resolve the MaterialStateProperty returned by getProperty to a value.
     T resolve<T>(MaterialStateProperty<T> Function(ButtonStyle style) getProperty) {
       final MaterialStateProperty<T> widgetValue = getProperty(widgetStyle);
-      final MaterialStateProperty<T> themeValue  = getProperty(themeStyle);
+      final MaterialStateProperty<T> themeValue = getProperty(themeStyle);
       final MaterialStateProperty<T> defaultValue = getProperty(defaultStyle);
       assert(defaultValue != null);
       return widgetValue?.resolve(_states) ?? themeValue?.resolve(_states) ?? defaultValue.resolve(_states);
@@ -263,12 +263,14 @@ class _ButtonStyleState extends State<ButtonStyleButton> {
     // all of the states that buttons care about except MaterialState.disabled.
     final MaterialStateProperty<Color> overlayColor = MaterialStateProperty.resolveWith<Color>(
       (Set<MaterialState> states) {
-        return widgetStyle?.overlayColor?.resolve(states) ?? themeStyle?.overlayColor?.resolve(states) ?? defaultStyle.overlayColor?.resolve(states);
+        return widgetStyle?.overlayColor?.resolve(states)
+          ?? themeStyle?.overlayColor?.resolve(states)
+          ?? defaultStyle.overlayColor?.resolve(states);
       }
     );
 
-    final VisualDensity resolvedVisualDensity = widgetStyle?.visualDensity ?? defaultStyle.visualDensity;
-    final MaterialTapTargetSize resolvedTapTargetSize =  widgetStyle?.tapTargetSize ?? defaultStyle.tapTargetSize;
+    final VisualDensity resolvedVisualDensity = widgetStyle?.visualDensity ?? themeStyle?.visualDensity ?? defaultStyle.visualDensity;
+    final MaterialTapTargetSize resolvedTapTargetSize =  widgetStyle?.tapTargetSize ?? themeStyle?.tapTargetSize ?? defaultStyle.tapTargetSize;
 
     final Offset densityAdjustment = resolvedVisualDensity.baseSizeAdjustment;
     final BoxConstraints effectiveConstraints = resolvedVisualDensity.effectiveConstraints(
@@ -295,14 +297,14 @@ class _ButtonStyleState extends State<ButtonStyleButton> {
         color: resolvedBackgroundColor,
         shadowColor: resolvedShadowColor,
         type: resolvedBackgroundColor == null ? MaterialType.transparency : MaterialType.button,
-        animationDuration: widgetStyle?.animationDuration ?? themeStyle?.animationDuration ?? kThemeChangeDuration,
+        animationDuration: widgetStyle?.animationDuration ?? themeStyle?.animationDuration ?? defaultStyle.animationDuration,
         clipBehavior: widget.clipBehavior,
         child: InkWell(
           onTap: widget.onPressed,
           onLongPress: widget.onLongPress,
           onHighlightChanged: _handleHighlightChanged,
           onHover: _handleHoveredChanged,
-          enableFeedback: widgetStyle?.enableFeedback ?? themeStyle?.enableFeedback ?? true,
+          enableFeedback: widgetStyle?.enableFeedback ?? themeStyle?.enableFeedback ?? defaultStyle.enableFeedback,
           focusNode: widget.focusNode,
           canRequestFocus: widget.enabled,
           onFocusChange: _handleFocusedChanged,

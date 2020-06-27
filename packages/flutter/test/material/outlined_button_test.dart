@@ -624,7 +624,8 @@ void main() {
       );
     }
 
-    const Rect clipRect = Rect.fromLTRB(0.0, 0.0, 100.0, 36.0);
+    // 116 = 16 + 'button'.length * 14 + 16, horizontal padding = 16
+    const Rect clipRect = Rect.fromLTRB(0.0, 0.0, 116.0, 36.0);
     final Path clipPath = Path()..addRect(clipRect);
     final Finder outlinedButton = find.byType(OutlinedButton);
 
@@ -899,37 +900,37 @@ void main() {
     final RenderBox box = tester.renderObject(find.byKey(key));
     Rect childRect = tester.getRect(find.byKey(childKey));
     await tester.pumpAndSettle();
-    expect(box.size, equals(const Size(116, 116)));
+    expect(box.size, equals(const Size(132, 100)));
     expect(childRect, equals(const Rect.fromLTRB(350, 250, 450, 350)));
 
     await buildTest(const VisualDensity(horizontal: 3.0, vertical: 3.0));
     await tester.pumpAndSettle();
     childRect = tester.getRect(find.byKey(childKey));
-    expect(box.size, equals(const Size(140, 140)));
+    expect(box.size, equals(const Size(156, 124)));
     expect(childRect, equals(const Rect.fromLTRB(350, 250, 450, 350)));
 
     await buildTest(const VisualDensity(horizontal: -3.0, vertical: -3.0));
     await tester.pumpAndSettle();
     childRect = tester.getRect(find.byKey(childKey));
-    expect(box.size, equals(const Size(100, 100)));
+    expect(box.size, equals(const Size(108, 100)));
     expect(childRect, equals(const Rect.fromLTRB(350, 250, 450, 350)));
 
     await buildTest(const VisualDensity(), useText: true);
     await tester.pumpAndSettle();
     childRect = tester.getRect(find.byKey(childKey));
-    expect(box.size, equals(const Size(72, 48)));
+    expect(box.size, equals(const Size(88, 48)));
     expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
 
     await buildTest(const VisualDensity(horizontal: 3.0, vertical: 3.0), useText: true);
     await tester.pumpAndSettle();
     childRect = tester.getRect(find.byKey(childKey));
-    expect(box.size, equals(const Size(96, 60)));
+    expect(box.size, equals(const Size(112, 60)));
     expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
 
     await buildTest(const VisualDensity(horizontal: -3.0, vertical: -3.0), useText: true);
     await tester.pumpAndSettle();
     childRect = tester.getRect(find.byKey(childKey));
-    expect(box.size, equals(const Size(56, 36)));
+    expect(box.size, equals(const Size(64, 36)));
     expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
   });
 
@@ -944,10 +945,10 @@ void main() {
 
     // Expected values for each textScaleFactor.
     final Map<double, double> paddingVertical = <double, double>{
-      0.5: 8,
-      1: 8,
-      1.25: 6,
-      1.5: 4,
+      0.5: 0,
+      1: 0,
+      1.25: 0,
+      1.5: 0,
       2: 0,
       2.5: 0,
       3: 0,
@@ -963,23 +964,13 @@ void main() {
       3: 4,
       4: 4,
     };
-    final Map<double, double> textPaddingWithoutIconHorizontal = <double, double>{
-      0.5: 8,
-      1: 8,
-      1.25: 8,
-      1.5: 8,
+    final Map<double, double> paddingHorizontal = <double, double>{
+      0.5: 16,
+      1: 16,
+      1.25: 14,
+      1.5: 12,
       2: 8,
       2.5: 6,
-      3: 4,
-      4: 4,
-    };
-    final Map<double, double> textPaddingWithIconHorizontal = <double, double>{
-      0.5: 8,
-      1: 8,
-      1.25: 7,
-      1.5: 6,
-      2: 4,
-      2.5: 4,
       3: 4,
       4: 4,
     };
@@ -1056,10 +1047,7 @@ void main() {
 
             final double expectedPaddingTop = paddingVertical[textScaleFactor];
             final double expectedPaddingBottom = paddingVertical[textScaleFactor];
-
-            final double expectedPaddingStart = icon != null
-              ? textPaddingWithIconHorizontal[textScaleFactor]
-              : textPaddingWithoutIconHorizontal[textScaleFactor];
+            final double expectedPaddingStart = paddingHorizontal[textScaleFactor];
             final double expectedPaddingEnd = expectedPaddingStart;
 
             final EdgeInsets expectedPadding = EdgeInsetsDirectional.fromSTEB(

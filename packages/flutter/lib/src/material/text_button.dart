@@ -129,7 +129,7 @@ class TextButton extends ButtonStyleButton {
   /// TextButton(
   ///   style: TextButton.styleFrom(primary: Colors.green),
   /// )
-  ///```
+  /// ```
   static ButtonStyle styleFrom({
     Color primary,
     Color onSurface,
@@ -251,7 +251,7 @@ class TextButton extends ButtonStyleButton {
       primary: colorScheme.primary,
       onSurface: colorScheme.onSurface,
       backgroundColor: Colors.transparent,
-      shadowColor: const Color(0xFF000000),
+      shadowColor: Colors.black,
       elevation: 0,
       textStyle: theme.textTheme.button,
       padding: scaledPadding,

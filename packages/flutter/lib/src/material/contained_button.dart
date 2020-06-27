@@ -14,6 +14,7 @@ import 'package:flutter/widgets.dart';
 import 'button_style.dart';
 import 'button_style_button.dart';
 import 'color_scheme.dart';
+import 'colors.dart';
 import 'constants.dart';
 import 'contained_button_theme.dart';
 import 'material_state.dart';
@@ -131,7 +132,7 @@ class ContainedButton extends ButtonStyleButton {
   /// ContainedButton(
   ///   style: TextButton.styleFrom(primary: Colors.green),
   /// )
-  ///```
+  /// ```
   static ButtonStyle styleFrom({
     Color primary,
     Color onPrimary,
@@ -247,7 +248,6 @@ class ContainedButton extends ButtonStyleButton {
   ///   * `1 < textScaleFactor <= 2` - lerp(start(12) end(16), horizontal(8))
   ///   * `2 < textScaleFactor <= 3` - lerp(horizontal(8), horizontal(4))
   ///   * `3 < textScaleFactor` - horizontal(4)
-
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -264,7 +264,7 @@ class ContainedButton extends ButtonStyleButton {
       primary: colorScheme.primary,
       onPrimary: colorScheme.onPrimary,
       onSurface: colorScheme.onSurface,
-      shadowColor: const Color(0xFF000000),
+      shadowColor: Colors.black,
       elevation: 2,
       textStyle: theme.textTheme.button,
       padding: scaledPadding,
@@ -289,7 +289,7 @@ class ContainedButton extends ButtonStyleButton {
 }
 
 @immutable
-class _ContainedButtonDefaultBackground extends MaterialStateProperty<Color>  with Diagnosticable {
+class _ContainedButtonDefaultBackground extends MaterialStateProperty<Color> with Diagnosticable {
   _ContainedButtonDefaultBackground(this.primary, this.onSurface);
 
   final Color primary;
@@ -304,7 +304,7 @@ class _ContainedButtonDefaultBackground extends MaterialStateProperty<Color>  wi
 }
 
 @immutable
-class _ContainedButtonDefaultForeground extends MaterialStateProperty<Color>  with Diagnosticable {
+class _ContainedButtonDefaultForeground extends MaterialStateProperty<Color> with Diagnosticable {
   _ContainedButtonDefaultForeground(this.onPrimary, this.onSurface);
 
   final Color onPrimary;

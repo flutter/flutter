@@ -114,7 +114,7 @@ class OutlinedButton extends ButtonStyleButton {
   /// a [ButtonStyle] that doesn't override anything.
   ///
   /// For example, to override the default shape and outline for an
-  /// [OutlineButton], one could write:
+  /// [OutlinedButton], one could write:
   ///
   /// ```dart
   /// OutlinedButton(
@@ -123,7 +123,7 @@ class OutlinedButton extends ButtonStyleButton {
   ///      side: BorderSide(width: 2, color: Colors.green),
   ///   ),
   /// )
-  ///```
+  /// ```
   static ButtonStyle styleFrom({
     Color primary,
     Color onSurface,
@@ -205,8 +205,8 @@ class OutlinedButton extends ButtonStyleButton {
   /// * `shadowColor` - Colors.black
   /// * `elevation` - 0
   /// * `padding`
-  ///   * `textScaleFactor <= 1` - all(8)
-  ///   * `1 < textScaleFactor <= 2` - lerp(all(8), horizontal(8))
+  ///   * `textScaleFactor <= 1` - horizontal(16)
+  ///   * `1 < textScaleFactor <= 2` - lerp(horizontal(16), horizontal(8))
   ///   * `2 < textScaleFactor <= 3` - lerp(horizontal(8), horizontal(4))
   ///   * `3 < textScaleFactor` - horizontal(4)
   /// * `minimumSize` - Size(64, 36)
@@ -225,7 +225,7 @@ class OutlinedButton extends ButtonStyleButton {
     final ColorScheme colorScheme = theme.colorScheme;
 
     final EdgeInsetsGeometry scaledPadding = ButtonStyleButton.scaledPadding(
-      const EdgeInsets.all(8),
+      const EdgeInsets.symmetric(horizontal: 16),
       const EdgeInsets.symmetric(horizontal: 8),
       const EdgeInsets.symmetric(horizontal: 4),
       MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1,
@@ -235,7 +235,7 @@ class OutlinedButton extends ButtonStyleButton {
       primary: colorScheme.primary,
       onSurface: colorScheme.onSurface,
       backgroundColor: Colors.transparent,
-      shadowColor: const Color(0xFF000000),
+      shadowColor: Colors.black,
       elevation: 0,
       textStyle: theme.textTheme.button,
       padding: scaledPadding,
@@ -329,19 +329,6 @@ class _OutlinedButtonWithIcon extends OutlinedButton {
          clipBehavior: clipBehavior ?? Clip.none,
          child: _OutlinedButtonWithIconChild(icon: icon, label: label),
       );
-
-  @override
-  ButtonStyle defaultStyleOf(BuildContext context) {
-    final EdgeInsetsGeometry scaledPadding = ButtonStyleButton.scaledPadding(
-      const EdgeInsets.all(8),
-      const EdgeInsets.symmetric(horizontal: 4),
-      const EdgeInsets.symmetric(horizontal: 4),
-      MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1,
-    );
-    return super.defaultStyleOf(context).copyWith(
-      padding: MaterialStateProperty.all<EdgeInsetsGeometry>(scaledPadding)
-    );
-  }
 }
 
 class _OutlinedButtonWithIconChild extends StatelessWidget {

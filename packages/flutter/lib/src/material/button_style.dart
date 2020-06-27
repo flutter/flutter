@@ -13,16 +13,16 @@ import 'package:flutter/widgets.dart';
 import 'material_state.dart';
 import 'theme_data.dart';
 
-/// A simple container for the visual properties that most buttons have in common.
+/// The visual properties that most buttons have in common.
 ///
 /// Buttons and their themes have a ButtonStyle property which defines the visual
 /// properties whose default values are to be overidden. The default values are
 /// defined by the invidual button widgets and are typically based on overall
-/// theme's [Theme.colorScheme] and [Theme.textTheme].
+/// theme's [ThemeData.colorScheme] and [ThemeData.textTheme].
 ///
 /// All of the ButtonStyle properties are null by default.
 ///
-/// Most of the ButtonStyle properties are [MaterialStateProperty] objects which
+/// Many of the ButtonStyle properties are [MaterialStateProperty] objects which
 /// resolve to different values depending on the button's state. For example
 /// the [Color] properties are defined with `MaterialStateProperty<Color>` and
 /// can resolve to different colors depending on if the button is pressed,

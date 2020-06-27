@@ -104,7 +104,7 @@ class OutlinedButtonTheme extends InheritedTheme {
   /// The closest instance of this class that encloses the given context.
   ///
   /// If there is no enclosing [OutlinedButtonsTheme] widget, then
-  /// [ThemeData.textButtonTheme] is used.
+  /// [ThemeData.outlinedButtonTheme] is used.
   ///
   /// Typical usage is as follows:
   ///

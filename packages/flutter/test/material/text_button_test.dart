@@ -14,11 +14,6 @@ import '../widgets/semantics_tester.dart';
 
 void main() {
   testWidgets('TextButton defaults', (WidgetTester tester) async {
-    final Finder rawButtonMaterial = find.descendant(
-      of: find.byType(TextButton),
-      matching: find.byType(Material),
-    );
-
     const ColorScheme colorScheme = ColorScheme.light();
 
     // Enabled TextButton
@@ -34,7 +29,12 @@ void main() {
       ),
     );
 
-    Material material = tester.widget<Material>(rawButtonMaterial);
+    final Finder buttonMaterial = find.descendant(
+      of: find.byType(TextButton),
+      matching: find.byType(Material),
+    );
+
+    Material material = tester.widget<Material>(buttonMaterial);
     expect(material.animationDuration, const Duration(milliseconds: 200));
     expect(material.borderOnForeground, true);
     expect(material.borderRadius, null);
@@ -53,7 +53,7 @@ void main() {
     await tester.startGesture(center);
     await tester.pumpAndSettle();
 
-    material = tester.widget<Material>(rawButtonMaterial);
+    material = tester.widget<Material>(buttonMaterial);
     // No change vs enabled and not pressed.
     expect(material.animationDuration, const Duration(milliseconds: 200));
     expect(material.borderOnForeground, true);
@@ -82,7 +82,7 @@ void main() {
       ),
     );
 
-    material = tester.widget<Material>(rawButtonMaterial);
+    material = tester.widget<Material>(buttonMaterial);
     expect(material.animationDuration, const Duration(milliseconds: 200));
     expect(material.borderOnForeground, true);
     expect(material.borderRadius, null);
