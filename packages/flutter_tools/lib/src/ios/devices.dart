@@ -355,6 +355,8 @@ class IOSDevice extends Device {
       '--enable-service-port-fallback',
       '--disable-service-auth-codes',
       '--observatory-port=$assumedObservatoryPort',
+      if (interfaceType == IOSDeviceInterface.network)
+        '--observatory-host=${ipv6 ? '::/0' : '0.0.0.0'}',
       if (debuggingOptions.startPaused) '--start-paused',
       if (dartVmFlags.isNotEmpty) '--dart-flags="$dartVmFlags"',
       if (debuggingOptions.useTestFonts) '--use-test-fonts',

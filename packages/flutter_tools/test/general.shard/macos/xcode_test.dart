@@ -100,8 +100,8 @@ void main() {
         when(processManager.runSync(<String>['xcrun', '--find', 'xcdevice']))
           .thenReturn(ProcessResult(1, 0, '/path/to/xcdevice', ''));
 
-        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '10']))
-          .thenThrow(const ProcessException('xcrun', <String>['xcdevice', 'list', '--timeout', '10']));
+        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '2']))
+          .thenThrow(const ProcessException('xcrun', <String>['xcdevice', 'list', '--timeout', '2']));
 
         expect(await xcdevice.getAvailableIOSDevices(), isEmpty);
       });
@@ -545,7 +545,7 @@ void main() {
 ''';
 
           fakeProcessManager.addCommand(const FakeCommand(
-            command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '10'],
+            command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '2'],
             stdout: devicesOutput,
           ));
           final List<IOSDevice> devices = await xcdevice.getAvailableIOSDevices();
@@ -619,7 +619,7 @@ void main() {
 ''';
 
           fakeProcessManager.addCommand(const FakeCommand(
-            command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '10'],
+            command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '2'],
             stdout: devicesOutput,
           ));
           final List<IOSDevice> devices = await xcdevice.getAvailableIOSDevices();
@@ -668,7 +668,7 @@ void main() {
 ''';
 
           fakeProcessManager.addCommand(const FakeCommand(
-            command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '10'],
+            command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '2'],
             stdout: devicesOutput,
           ));
           final List<IOSDevice> devices = await xcdevice.getAvailableIOSDevices();
@@ -719,7 +719,7 @@ void main() {
 ''';
 
           fakeProcessManager.addCommand(const FakeCommand(
-            command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '10'],
+            command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '2'],
             stdout: devicesOutput,
           ));
 
