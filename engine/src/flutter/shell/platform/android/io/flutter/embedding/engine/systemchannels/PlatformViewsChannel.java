@@ -80,29 +80,47 @@ public class PlatformViewsChannel {
 
         private void create(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
           Map<String, Object> createArgs = call.arguments();
+          boolean usesHybridComposition =
+              createArgs.containsKey("hybrid") && (boolean) createArgs.get("hybrid");
+          // In hybrid mode, the size of the view is determined by the size of the Flow layer.
+          double width = (usesHybridComposition) ? 0 : (double) createArgs.get("width");
+          double height = (usesHybridComposition) ? 0 : (double) createArgs.get("height");
+
           PlatformViewCreationRequest request =
               new PlatformViewCreationRequest(
                   (int) createArgs.get("id"),
                   (String) createArgs.get("viewType"),
-                  (double) createArgs.get("width"),
-                  (double) createArgs.get("height"),
+                  width,
+                  height,
                   (int) createArgs.get("direction"),
                   createArgs.containsKey("params")
                       ? ByteBuffer.wrap((byte[]) createArgs.get("params"))
                       : null);
-
           try {
-            long textureId = handler.createPlatformView(request);
-            result.success(textureId);
+            if (usesHybridComposition) {
+              handler.createAndroidViewForPlatformView(request);
+              result.success(null);
+            } else {
+              long textureId = handler.createVirtualDisplayForPlatformView(request);
+              result.success(textureId);
+            }
           } catch (IllegalStateException exception) {
             result.error("error", detailedExceptionString(exception), null);
           }
         }
 
         private void dispose(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
-          int viewId = call.arguments();
+          Map<String, Object> disposeArgs = call.arguments();
+          int viewId = (int) disposeArgs.get("id");
+          boolean usesHybridComposition =
+              disposeArgs.containsKey("hybrid") && (boolean) disposeArgs.get("hybrid");
+
           try {
-            handler.disposePlatformView(viewId);
+            if (usesHybridComposition) {
+              handler.disposeAndroidViewForPlatformView(viewId);
+            } else {
+              handler.disposeVirtualDisplayForPlatformView(viewId);
+            }
             result.success(null);
           } catch (IllegalStateException exception) {
             result.error("error", detailedExceptionString(exception), null);
@@ -216,18 +234,29 @@ public class PlatformViewsChannel {
      * The Flutter application would like to display a new Android {@code View}, i.e., platform
      * view.
      *
-     * <p>The handler should instantiate the desired Android {@code View}, create a new {@link
-     * io.flutter.view.FlutterView.SurfaceTextureRegistryEntry} within the given Flutter execution
-     * context, and then return the new texture's ID.
+     * <p>The Android {@code View} is added to the view hierarchy.
      */
-    // TODO(mattcarroll): Introduce an annotation for @TextureId
-    long createPlatformView(@NonNull PlatformViewCreationRequest request);
+    void createAndroidViewForPlatformView(@NonNull PlatformViewCreationRequest request);
 
     /**
-     * The Flutter application could like dispose of an existing Android {@code View}, i.e.,
-     * platform view.
+     * The Flutter application would like to dispose of an existing Android {@code View} rendered in
+     * the view hierarchy.
      */
-    void disposePlatformView(int viewId);
+    void disposeAndroidViewForPlatformView(int viewId);
+
+    /**
+     * The Flutter application would like to display a new Android {@code View}.
+     *
+     * <p>{@code View} is added to a {@code VirtualDisplay}. The framework uses id returned by this
+     * method to lookup the texture in the engine.
+     */
+    long createVirtualDisplayForPlatformView(@NonNull PlatformViewCreationRequest request);
+
+    /**
+     * The Flutter application would like to dispose of an existing Android {@code View} rendered in
+     * a virtual display.
+     */
+    void disposeVirtualDisplayForPlatformView(int viewId);
 
     /**
      * The Flutter application would like to resize an existing Android {@code View}, i.e., platform
@@ -279,6 +308,7 @@ public class PlatformViewsChannel {
     /** Custom parameters that are unique to the desired platform view. */
     @Nullable public final ByteBuffer params;
 
+    /** Creates a request to construct a platform view that uses a virtual display. */
     public PlatformViewCreationRequest(
         int viewId,
         @NonNull String viewType,
@@ -295,7 +325,11 @@ public class PlatformViewsChannel {
     }
   }
 
-  /** Request sent from Flutter to resize a platform view. */
+  /**
+   * Request sent from Flutter to resize a platform view.
+   *
+   * <p>This only applies to platform views that use virtual displays.
+   */
   public static class PlatformViewResizeRequest {
     /** The ID of the platform view as seen by the Flutter side. */
     public final int viewId;
