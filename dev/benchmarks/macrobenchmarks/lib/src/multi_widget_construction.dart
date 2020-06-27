@@ -33,28 +33,19 @@ class _MultiWidgetConstructTableState extends State<MultiWidgetConstructTable>
   void initState() {
     super.initState();
     controller = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 10000));
-    curve = CurvedAnimation(parent: controller, curve: Curves.linear)
-      ..addListener(() {
-        final double colorPosition = curve.value;
-        final int c1Position = (colorPosition * (colorList.length + 1)).floor();
-        final Color c1 = colorList[c1Position % colorList.length][900];
-        final Color c2 = colorList[(c1Position + 1) % colorList.length][900];
-        setState(() {
-          baseColor = Color.lerp(
-              c1, c2, colorPosition * (colorList.length + 1) - c1Position);
-        });
-      })
-      ..addStatusListener((AnimationStatus state) {
-        if (state == AnimationStatus.completed) {
-          controller.reverse();
-        } else if (state == AnimationStatus.dismissed) {
-          controller.reset();
-          controller.forward();
-        }
+      vsync: this,
+      duration: const Duration(milliseconds: 10000),
+      lowerBound: 0,
+      upperBound: colorList.length + 1.0,
+    )..addListener(() {
+      final double colorPosition = controller.value;
+      final int c1Position = colorPosition.floor();
+      final Color c1 = colorList[c1Position % colorList.length][900];
+      final Color c2 = colorList[(c1Position + 1) % colorList.length][900];
+      setState(() {
+        baseColor = Color.lerp(c1, c2, colorPosition - c1Position);
       });
-
-    controller.forward();
+    })..repeat();
   }
 
   @override
@@ -67,7 +58,7 @@ class _MultiWidgetConstructTableState extends State<MultiWidgetConstructTable>
   Widget build(BuildContext context) {
     final int totalLength = widget.row * widget.column;
     final int widgetCounter = counter * totalLength;
-    final double height = MediaQuery.of(context).size.height / widget.column;
+    final double height = MediaQuery.of(context).size.height / widget.row;
     counter++;
     return Scaffold(
       body: Table(
