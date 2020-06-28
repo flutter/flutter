@@ -276,7 +276,7 @@ class DeviceManager {
   void _displayDeviceOptions(List<Device> devices) {
     int count = 0;
     for (final Device device in devices) {
-      globals.printStatus(userMessages.flutterChooseDevice(count, device.id));
+      globals.printStatus(userMessages.flutterChooseDevice(count, device.name, device.id));
       count++;
     }
   }
