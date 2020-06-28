@@ -210,6 +210,7 @@ class FadeInImage extends StatelessWidget {
     @required String image,
     this.imageErrorBuilder,
     AssetBundle bundle,
+    String package,
     double placeholderScale,
     double imageScale = 1.0,
     this.excludeFromSemantics = false,
@@ -231,8 +232,8 @@ class FadeInImage extends StatelessWidget {
   }) : assert(placeholder != null),
        assert(image != null),
        placeholder = placeholderScale != null
-         ? ResizeImage.resizeIfNeeded(placeholderCacheWidth, placeholderCacheHeight, ExactAssetImage(placeholder, bundle: bundle, scale: placeholderScale))
-         : ResizeImage.resizeIfNeeded(placeholderCacheWidth, placeholderCacheHeight, AssetImage(placeholder, bundle: bundle)),
+         ? ResizeImage.resizeIfNeeded(placeholderCacheWidth, placeholderCacheHeight, ExactAssetImage(placeholder, bundle: bundle, scale: placeholderScale, package: package))
+         : ResizeImage.resizeIfNeeded(placeholderCacheWidth, placeholderCacheHeight, AssetImage(placeholder, bundle: bundle, package: package)),
        assert(imageScale != null),
        assert(fadeOutDuration != null),
        assert(fadeOutCurve != null),
