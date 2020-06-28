@@ -223,7 +223,7 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
     config.isSemanticBoundary = true;
 
     if (_viewController.isCreated) {
-      config.platformViewId = _viewController.id;
+      config.platformViewId = _viewController.viewId;
     }
   }
 }

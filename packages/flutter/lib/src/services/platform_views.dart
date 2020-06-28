@@ -717,7 +717,7 @@ abstract class AndroidViewController extends PlatformViewController {
   /// The unique identifier of the Android view controlled by this controller.
   @Deprecated(
     'Call `viewId` instead. '
-    'This feature was deprecated after v1.20.0-0.0.pre.')
+    'This feature was deprecated after v1.20.0-2.0.pre.')
   int get id => viewId;
 
   /// Sends an Android [MotionEvent](https://developer.android.com/reference/android/view/MotionEvent)
@@ -840,7 +840,7 @@ abstract class AndroidViewController extends PlatformViewController {
       await _sendDisposeMessage();
     _platformViewCreatedCallbacks.clear();
     _state = _AndroidViewState.disposed;
-    PlatformViewsService._instance._focusCallbacks.remove(id);
+    PlatformViewsService._instance._focusCallbacks.remove(viewId);
   }
 }
 
@@ -934,7 +934,7 @@ class TextureAndroidViewController extends AndroidViewController {
   @override
   Future<void> setSize(Size size) async {
     assert(_state != _AndroidViewState.disposed,
-        'trying to size a disposed Android View. View id: $id');
+        'trying to size a disposed Android View. View id: $viewId');
 
     assert(size != null);
     assert(!size.isEmpty);
@@ -945,7 +945,7 @@ class TextureAndroidViewController extends AndroidViewController {
     }
 
     await SystemChannels.platform_views.invokeMethod<void>('resize', <String, dynamic>{
-      'id': id,
+      'id': viewId,
       'width': size.width,
       'height': size.height,
     });
@@ -953,7 +953,7 @@ class TextureAndroidViewController extends AndroidViewController {
 
   Future<void> _sendCreateMessage() async {
     final Map<String, dynamic> args = <String, dynamic>{
-      'id': id,
+      'id': viewId,
       'viewType': _viewType,
       'width': _size.width,
       'height': _size.height,
@@ -970,7 +970,7 @@ class TextureAndroidViewController extends AndroidViewController {
     _textureId = await SystemChannels.platform_views.invokeMethod('create', args);
     _state = _AndroidViewState.created;
     for (final PlatformViewCreatedCallback callback in _platformViewCreatedCallbacks) {
-      callback(id);
+      callback(viewId);
     }
   }
 
