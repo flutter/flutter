@@ -248,9 +248,14 @@ class DeviceManager {
       // Note: ephemeral is nullable for device types where this is not well
       // defined.
       if (devices.any((Device device) => device.ephemeral == true)) {
-        devices = devices
+        // if there is only one ephemeral device, get it
+        final List<Device> ephemeralDevices = devices
             .where((Device device) => device.ephemeral == true)
             .toList();
+
+            if (ephemeralDevices.length == 1){
+              devices = ephemeralDevices;
+            }
       }
       // If it was not able to prioritize a device. For example, if the user
       // has two active Android devices running, then we request the user to

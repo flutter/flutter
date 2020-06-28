@@ -249,6 +249,33 @@ void main() {
       Cache: () => cache,
     });
 
+    testUsingContext('choose non-ephemeral device', () async {
+      final List<Device> devices = <Device>[
+        ephemeralOne,
+        ephemeralTwo,
+        nonEphemeralOne,
+        nonEphemeralTwo,
+      ];
+
+      when(mockStdio.stdinHasTerminal).thenReturn(true);
+      when(globals.terminal.promptForCharInput(<String>['0', '1', '2', '3'],
+        logger: globals.logger,
+        prompt: globals.userMessages.flutterChooseOne)
+      ).thenAnswer((Invocation invocation) async => '2');
+
+      final DeviceManager deviceManager = TestDeviceManager(devices);
+      final List<Device> filtered = await deviceManager.findTargetDevices(FlutterProject.current());
+
+      expect(filtered, <Device>[
+        nonEphemeralOne
+      ]);
+    }, overrides: <Type, Generator>{
+      Stdio: () => mockStdio,
+      AnsiTerminal: () => MockTerminal(),
+      Artifacts: () => Artifacts.test(),
+      Cache: () => cache,
+    });
+
     testUsingContext('Removes a single unsupported device', () async {
       final List<Device> devices = <Device>[
         unsupported,
