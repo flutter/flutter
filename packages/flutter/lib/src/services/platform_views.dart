@@ -716,7 +716,7 @@ abstract class AndroidViewController extends PlatformViewController {
 
   /// The unique identifier of the Android view controlled by this controller.
   @Deprecated(
-    'Call `viewId` instead. '
+    'Call `controller.viewId` instead. '
     'This feature was deprecated after v1.20.0-2.0.pre.')
   int get id => viewId;
 
