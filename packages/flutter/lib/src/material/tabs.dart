@@ -595,8 +595,8 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// The [indicatorPadding] parameter defaults to [EdgeInsets.zero], and must not be null.
   ///
-  /// If [indicator] is not null, then [indicatorWeight], [indicatorPadding], and
-  /// [indicatorColor] are ignored.
+  /// If [indicator] is not null or provided from [TabBarTheme],
+  /// then [indicatorWeight], [indicatorPadding], and [indicatorColor] are ignored.
   const TabBar({
     Key key,
     @required this.tabs,
