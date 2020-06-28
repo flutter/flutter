@@ -102,6 +102,11 @@ class PlatformViewsService {
   ///
   /// The `id, `viewType, and `layoutDirection` parameters must not be null.
   /// If `creationParams` is non null then `creationParamsCodec` must not be null.
+  ///
+  /// Setting [surfaceController] to `true` will return a
+  /// [SurfaceAndroidViewController] which can be used with an
+  /// [AndroidViewSurface]. Setting this to `false` will return the default
+  /// [TextureAndroidViewController].
   static AndroidViewController initAndroidView({
     @required int id,
     @required String viewType,
@@ -109,18 +114,33 @@ class PlatformViewsService {
     dynamic creationParams,
     MessageCodec<dynamic> creationParamsCodec,
     VoidCallback onFocus,
+    bool surfaceController = false,
   }) {
     assert(id != null);
     assert(viewType != null);
     assert(layoutDirection != null);
     assert(creationParams == null || creationParamsCodec != null);
-    final AndroidViewController controller = AndroidViewController._(
-      id,
-      viewType,
-      creationParams,
-      creationParamsCodec,
-      layoutDirection,
-    );
+    assert(surfaceController != null);
+
+    AndroidViewController controller;
+    if (surfaceController) {
+      controller = SurfaceAndroidViewController._(
+        viewId: id,
+        viewType: viewType,
+        layoutDirection: layoutDirection,
+        creationParams: creationParams,
+        creationParamsCodec: creationParamsCodec,
+      ).._sendCreateMessage();
+    } else {
+      controller = TextureAndroidViewController._(
+        viewId: id,
+        viewType: viewType,
+        layoutDirection: layoutDirection,
+        creationParams: creationParams,
+        creationParamsCodec: creationParamsCodec,
+      );
+    }
+
     _instance._focusCallbacks[id] = onFocus ?? () {};
     return controller;
   }
@@ -747,14 +767,16 @@ abstract class AndroidViewController extends PlatformViewController {
     assert(_state != _AndroidViewState.disposed,
         'trying to set a layout direction for a disposed UIView. View id: $viewId');
 
-    if (layoutDirection == _layoutDirection) return;
+    if (layoutDirection == _layoutDirection)
+      return;
 
     assert(layoutDirection != null);
     _layoutDirection = layoutDirection;
 
     // If the view was not yet created we just update _layoutDirection and return, as the new
     // direction will be used in _create.
-    if (_state == _AndroidViewState.waitingForSize) return;
+    if (_state == _AndroidViewState.waitingForSize)
+      return;
 
     await SystemChannels.platform_views
         .invokeMethod<void>('setDirection', <String, dynamic>{
@@ -822,11 +844,11 @@ abstract class AndroidViewController extends PlatformViewController {
   }
 }
 
-/// Controls an Android view.
+/// Controls an Android view by rendering to an [AndroidViewSurface].
 ///
 /// Typically created with [PlatformViewsService.initAndroidView].
-class HybridAndroidViewController extends AndroidViewController {
-  HybridAndroidViewController._({
+class SurfaceAndroidViewController extends AndroidViewController {
+  SurfaceAndroidViewController._({
     @required int viewId,
     @required String viewType,
     @required TextDirection layoutDirection,
@@ -860,7 +882,7 @@ class HybridAndroidViewController extends AndroidViewController {
 
   @override
   int get textureId {
-    throw UnimplementedError('Not supported for $HybridAndroidViewController.');
+    throw UnimplementedError('Not supported for $SurfaceAndroidViewController.');
   }
 
   @override
@@ -874,7 +896,7 @@ class HybridAndroidViewController extends AndroidViewController {
 
   @override
   Future<void> setSize(Size size) {
-    throw UnimplementedError('Not supported for $HybridAndroidViewController.');
+    throw UnimplementedError('Not supported for $SurfaceAndroidViewController.');
   }
 }
 
@@ -882,13 +904,13 @@ class HybridAndroidViewController extends AndroidViewController {
 ///
 /// Typically created with [PlatformViewsService.initAndroidView].
 class TextureAndroidViewController extends AndroidViewController {
-  TextureAndroidViewController._(
-    int viewId,
-    String viewType,
+  TextureAndroidViewController._({
+    @required int viewId,
+    @required String viewType,
+    @required TextDirection layoutDirection,
     dynamic creationParams,
     MessageCodec<dynamic> creationParamsCodec,
-    TextDirection layoutDirection,
-  ) : super._(
+  }) : super._(
           viewId: viewId,
           viewType: viewType,
           layoutDirection: layoutDirection,
