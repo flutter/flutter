@@ -18,6 +18,7 @@ import 'feedback.dart';
 import 'input_decorator.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'material_state.dart';
 import 'selectable_text.dart' show iOSHorizontalOffset;
 import 'text_selection.dart';
 import 'theme.dart';
@@ -346,6 +347,7 @@ class TextField extends StatefulWidget {
     this.dragStartBehavior = DragStartBehavior.start,
     this.enableInteractiveSelection = true,
     this.onTap,
+    this.mouseCursor,
     this.buildCounter,
     this.scrollController,
     this.scrollPhysics,
@@ -685,6 +687,25 @@ class TextField extends StatefulWidget {
   /// {@endtemplate}
   final GestureTapCallback onTap;
 
+  /// The cursor for a mouse pointer when it enters or is hovering over the
+  /// widget.
+  ///
+  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
+  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  ///
+  ///  * [MaterialState.error].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.disabled].
+  ///
+  /// If this property is null, [MaterialStateMouseCursor.textable] will be used.
+  ///
+  /// The [mouseCursor] is the only property of [TextField] that controls the
+  /// appearance of the mouse pointer. All other properties related to "cursor"
+  /// stand for the text cursor, which is usually a blinking vertical line at
+  /// the editing position.
+  final MouseCursor mouseCursor;
+
   /// Callback that generates a custom [InputDecorator.counter] widget.
   ///
   /// See [InputCounterWidgetBuilder] for an explanation of the passed in
@@ -799,6 +820,10 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
 
   int get _currentLength => _effectiveController.value.text.runes.length;
 
+  bool get _hasIntrinsicError => widget.maxLength != null && widget.maxLength > 0 && _effectiveController.value.text.runes.length > widget.maxLength;
+
+  bool get _hasError => widget.decoration?.errorText != null || _hasIntrinsicError;
+
   InputDecoration _getEffectiveDecoration() {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final ThemeData themeData = Theme.of(context);
@@ -849,17 +874,16 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
       counterText += '/${widget.maxLength}';
       final int remaining = (widget.maxLength - currentLength).clamp(0, widget.maxLength) as int;
       semanticCounterText = localizations.remainingTextFieldCharacterCount(remaining);
+    }
 
-      // Handle length exceeds maxLength
-      if (_effectiveController.value.text.runes.length > widget.maxLength) {
-        return effectiveDecoration.copyWith(
-          errorText: effectiveDecoration.errorText ?? '',
-          counterStyle: effectiveDecoration.errorStyle
-            ?? themeData.textTheme.caption.copyWith(color: themeData.errorColor),
-          counterText: counterText,
-          semanticCounterText: semanticCounterText,
-        );
-      }
+    if (_hasIntrinsicError) {
+      return effectiveDecoration.copyWith(
+        errorText: effectiveDecoration.errorText ?? '',
+        counterStyle: effectiveDecoration.errorStyle
+          ?? themeData.textTheme.caption.copyWith(color: themeData.errorColor),
+        counterText: counterText,
+        semanticCounterText: semanticCounterText,
+      );
     }
 
     return effectiveDecoration.copyWith(
@@ -1113,10 +1137,20 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
         child: child,
       );
     }
+    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
+      widget.mouseCursor ?? MaterialStateMouseCursor.textable,
+      <MaterialState>{
+        if (!_isEnabled) MaterialState.disabled,
+        if (_isHovering) MaterialState.hovered,
+        if (focusNode.hasFocus) MaterialState.focused,
+        if (_hasError) MaterialState.error,
+      },
+    );
+
     return IgnorePointer(
       ignoring: !_isEnabled,
       child: MouseRegion(
-        cursor: SystemMouseCursors.text,
+        cursor: effectiveMouseCursor,
         onEnter: (PointerEnterEvent event) => _handleHover(true),
         onExit: (PointerExitEvent event) => _handleHover(false),
         child: AnimatedBuilder(

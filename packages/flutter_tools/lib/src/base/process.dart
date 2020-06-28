@@ -236,6 +236,7 @@ abstract class ProcessUtils {
     String workingDirectory,
     Map<String, String> environment,
     bool allowReentrantFlutter = false,
+    Encoding encoding = systemEncoding,
   });
 
   /// This runs the command in the background from the specified working
@@ -412,12 +413,15 @@ class _DefaultProcessUtils implements ProcessUtils {
     String workingDirectory,
     Map<String, String> environment,
     bool allowReentrantFlutter = false,
+    Encoding encoding = systemEncoding,
   }) {
     _traceCommand(cmd, workingDirectory: workingDirectory);
     final ProcessResult results = _processManager.runSync(
       cmd,
       workingDirectory: workingDirectory,
       environment: _environment(allowReentrantFlutter, environment),
+      stderrEncoding: encoding,
+      stdoutEncoding: encoding,
     );
     final RunResult runResult = RunResult(results, cmd);
 

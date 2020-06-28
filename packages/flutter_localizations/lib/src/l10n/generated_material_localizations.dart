@@ -3855,10 +3855,10 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String get continueButtonLabel => 'CONTINUE';
 
   @override
-  String get copyButtonLabel => 'COPY';
+  String get copyButtonLabel => 'Copy';
 
   @override
-  String get cutButtonLabel => 'CUT';
+  String get cutButtonLabel => 'Cut';
 
   @override
   String get dateHelpText => 'mm/dd/yyyy';
@@ -3942,7 +3942,7 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow of about \$rowCount';
 
   @override
-  String get pasteButtonLabel => 'PASTE';
+  String get pasteButtonLabel => 'Paste';
 
   @override
   String get popupMenuLabel => 'Popup menu';
@@ -4008,7 +4008,7 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Search';
 
   @override
-  String get selectAllButtonLabel => 'SELECT ALL';
+  String get selectAllButtonLabel => 'Select all';
 
   @override
   String get selectYearSemanticsLabel => 'Select year';
@@ -4095,6 +4095,18 @@ class MaterialLocalizationEnAu extends MaterialLocalizationEn {
   String get licensesPageTitle => 'Licences';
 
   @override
+  String get copyButtonLabel => 'COPY';
+
+  @override
+  String get cutButtonLabel => 'CUT';
+
+  @override
+  String get pasteButtonLabel => 'PASTE';
+
+  @override
+  String get selectAllButtonLabel => 'SELECT ALL';
+
+  @override
   String get viewLicensesButtonLabel => 'VIEW LICENCES';
 
   @override
@@ -4141,6 +4153,18 @@ class MaterialLocalizationEnCa extends MaterialLocalizationEn {
 
   @override
   String get licensesPageTitle => 'Licences';
+
+  @override
+  String get copyButtonLabel => 'COPY';
+
+  @override
+  String get cutButtonLabel => 'CUT';
+
+  @override
+  String get pasteButtonLabel => 'PASTE';
+
+  @override
+  String get selectAllButtonLabel => 'SELECT ALL';
 
   @override
   String get viewLicensesButtonLabel => 'VIEW LICENCES';
@@ -4191,10 +4215,22 @@ class MaterialLocalizationEnGb extends MaterialLocalizationEn {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
+  String get copyButtonLabel => 'COPY';
+
+  @override
+  String get selectAllButtonLabel => 'SELECT ALL';
+
+  @override
   String get viewLicensesButtonLabel => 'VIEW LICENCES';
 
   @override
   String get licensesPageTitle => 'Licences';
+
+  @override
+  String get pasteButtonLabel => 'PASTE';
+
+  @override
+  String get cutButtonLabel => 'CUT';
 
   @override
   String get popupMenuLabel => 'Pop-up menu';
@@ -4242,10 +4278,22 @@ class MaterialLocalizationEnIe extends MaterialLocalizationEn {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
+  String get copyButtonLabel => 'COPY';
+
+  @override
+  String get selectAllButtonLabel => 'SELECT ALL';
+
+  @override
   String get viewLicensesButtonLabel => 'VIEW LICENCES';
 
   @override
   String get licensesPageTitle => 'Licences';
+
+  @override
+  String get pasteButtonLabel => 'PASTE';
+
+  @override
+  String get cutButtonLabel => 'CUT';
 
   @override
   String get popupMenuLabel => 'Pop-up menu';
@@ -4291,6 +4339,18 @@ class MaterialLocalizationEnIn extends MaterialLocalizationEn {
 
   @override
   String get licensesPageTitle => 'Licences';
+
+  @override
+  String get copyButtonLabel => 'COPY';
+
+  @override
+  String get cutButtonLabel => 'CUT';
+
+  @override
+  String get pasteButtonLabel => 'PASTE';
+
+  @override
+  String get selectAllButtonLabel => 'SELECT ALL';
 
   @override
   String get viewLicensesButtonLabel => 'VIEW LICENCES';
@@ -4341,6 +4401,18 @@ class MaterialLocalizationEnNz extends MaterialLocalizationEn {
   String get licensesPageTitle => 'Licences';
 
   @override
+  String get copyButtonLabel => 'COPY';
+
+  @override
+  String get cutButtonLabel => 'CUT';
+
+  @override
+  String get pasteButtonLabel => 'PASTE';
+
+  @override
+  String get selectAllButtonLabel => 'SELECT ALL';
+
+  @override
   String get viewLicensesButtonLabel => 'VIEW LICENCES';
 
   @override
@@ -4387,6 +4459,18 @@ class MaterialLocalizationEnSg extends MaterialLocalizationEn {
 
   @override
   String get licensesPageTitle => 'Licences';
+
+  @override
+  String get copyButtonLabel => 'COPY';
+
+  @override
+  String get cutButtonLabel => 'CUT';
+
+  @override
+  String get pasteButtonLabel => 'PASTE';
+
+  @override
+  String get selectAllButtonLabel => 'SELECT ALL';
 
   @override
   String get viewLicensesButtonLabel => 'VIEW LICENCES';
@@ -4437,10 +4521,22 @@ class MaterialLocalizationEnZa extends MaterialLocalizationEn {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
+  String get copyButtonLabel => 'COPY';
+
+  @override
+  String get selectAllButtonLabel => 'SELECT ALL';
+
+  @override
   String get viewLicensesButtonLabel => 'VIEW LICENCES';
 
   @override
   String get licensesPageTitle => 'Licences';
+
+  @override
+  String get pasteButtonLabel => 'PASTE';
+
+  @override
+  String get cutButtonLabel => 'CUT';
 
   @override
   String get popupMenuLabel => 'Pop-up menu';
