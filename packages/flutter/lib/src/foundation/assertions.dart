@@ -869,10 +869,10 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
 
   /// Called by the Flutter framework before attempting to parse a [StackTrace].
   ///
-  /// Some [StackTrace]s have a different toString format from what the
-  /// framework expects, like ones from package:stack_trace. To make sure we can
-  /// still parse and filter mangled [StackTrace]s, the framework first calls
-  /// this function to demangle them.
+  /// Some [StackTrace] implementations have a different toString format from
+  /// what the framework expects, like ones from package:stack_trace. To make
+  /// sure we can still parse and filter mangled [StackTrace]s, the framework
+  /// first calls this function to demangle them.
   ///
   /// This should be set in any environment that could propagate a non-standard
   /// stack trace to the framework. Otherwise, the default behavior is to assume
