@@ -616,7 +616,7 @@ abstract class AndroidViewController extends PlatformViewController {
   })  : assert(viewId != null),
         assert(viewType != null),
         assert(layoutDirection != null),
-        assert(_creationParams == null || _creationParamsCodec != null),
+        assert(creationParams == null || creationParamsCodec != null),
         _viewType = viewType,
         _layoutDirection = layoutDirection,
         _creationParams = creationParams,
