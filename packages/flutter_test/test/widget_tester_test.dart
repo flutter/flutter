@@ -309,6 +309,28 @@ void main() {
       expect(count, 6);
     });
 
+    testWidgets('pumpContinuous', (WidgetTester tester) async {
+      await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
+      int count;
+
+      final AnimationController test = AnimationController(
+        duration: const Duration(milliseconds: 200),
+        vsync: tester,
+      );
+      count = await tester.pumpContinuous(const Duration(milliseconds: 80));
+      expect(count, 1); // No animation, it always pumps at least one frame
+
+      test.forward(from: 0.0);
+      count = await tester.pumpContinuous(const Duration(milliseconds: 80));
+      expect(count, 1 + (80/16.685).floor()); // ends after 80 ms
+
+      test.forward(from: 0.4);
+      count = await tester.pumpContinuous(const Duration(seconds: 1));
+      expect(count, 1 + (120/16.685).ceil()); // remaining animation time 120 ms
+
+      test.dispose();
+    });
+
     testWidgets('pumpFrames', (WidgetTester tester) async {
       final List<int> logPaints = <int>[];
       int initial;
