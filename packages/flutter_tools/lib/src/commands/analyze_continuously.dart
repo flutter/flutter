@@ -167,7 +167,7 @@ class AnalyzeContinuously extends AnalyzeBase {
         errorsMessage = 'No issues found!';
       }
 
-      String dartdocMessage = generateDartDocMessage(undocumentedMembers);
+      final String dartdocMessage = generateDartDocMessage(undocumentedMembers);
 
       final String files = '${analyzedPaths.length} ${pluralize('file', analyzedPaths.length)}';
       final String seconds = (analysisTimer.elapsedMilliseconds / 1000.0).toStringAsFixed(2);

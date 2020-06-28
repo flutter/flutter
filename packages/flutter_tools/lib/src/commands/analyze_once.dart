@@ -162,7 +162,7 @@ class AnalyzeOnce extends AnalyzeBase {
 
     final String seconds = (timer.elapsedMilliseconds / 1000.0).toStringAsFixed(1);
 
-    String dartdocMessage = generateDartDocMessage(undocumentedMembers);
+    final String dartdocMessage = generateDartDocMessage(undocumentedMembers);
 
     // We consider any level of error to be an error exit (we don't report different levels).
     if (errors.isNotEmpty) {
