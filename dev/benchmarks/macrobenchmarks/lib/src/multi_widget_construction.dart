@@ -24,73 +24,73 @@ class _MultiWidgetConstructTableState extends State<MultiWidgetConstructTable>
     Colors.cyan, Colors.lightBlue, Colors.blue, Colors.indigo, Colors.purple,
   ];
   int counter = 0;
-  Color baseColor = colorList[0][900];
 
-  AnimationController controller;
-  CurvedAnimation curve;
+  AnimationController _controller;
 
   @override
   void initState() {
     super.initState();
-    controller = AnimationController(
+    _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 10000),
       lowerBound: 0,
       upperBound: colorList.length + 1.0,
-    )..addListener(() {
-      final double colorPosition = controller.value;
-      final int c1Position = colorPosition.floor();
-      final Color c1 = colorList[c1Position % colorList.length][900];
-      final Color c2 = colorList[(c1Position + 1) % colorList.length][900];
-      setState(() {
-        baseColor = Color.lerp(c1, c2, colorPosition - c1Position);
-      });
-    })..repeat();
+    )..repeat();
   }
 
   @override
   void dispose() {
-    controller.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final int totalLength = widget.row * widget.column;
-    final int widgetCounter = counter * totalLength;
-    final double height = MediaQuery.of(context).size.height / widget.row;
-    counter++;
-    return Scaffold(
-      body: Table(
-        children: List<TableRow>.generate(
-          widget.row,
-          (int row) => TableRow(
-            children: List<Widget>.generate(
-              widget.column,
-              (int column) {
-                final int label = row * widget.column + column;
-                return counter % 2 == 0
-                    ? Container(
-                        // This key forces rebuilding the element
-                        key: ValueKey<int>(widgetCounter + label),
-                        color: Color.lerp(
-                            Colors.white, baseColor, label / totalLength),
-                        child: Text('${widgetCounter + label}'),
-                        constraints: BoxConstraints.expand(height: height),
-                      )
-                    : MyContainer(
-                        // This key forces rebuilding the element
-                        key: ValueKey<int>(widgetCounter + label),
-                        color: Color.lerp(
-                            Colors.white, baseColor, label / totalLength),
-                        child: Text('${widgetCounter + label}'),
-                        constraints: BoxConstraints.expand(height: height),
-                      );
-              },
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (BuildContext context, _) {
+        final int totalLength = widget.row * widget.column;
+        final int widgetCounter = counter * totalLength;
+        final double height = MediaQuery.of(context).size.height / widget.row;
+        final double colorPosition = _controller.value;
+        final int c1Position = colorPosition.floor();
+        final Color c1 = colorList[c1Position % colorList.length][900];
+        final Color c2 = colorList[(c1Position + 1) % colorList.length][900];
+        final Color baseColor = Color.lerp(c1, c2, colorPosition - c1Position);
+        counter++;
+        return Scaffold(
+          body: Table(
+            children: List<TableRow>.generate(
+              widget.row,
+              (int row) => TableRow(
+                children: List<Widget>.generate(
+                  widget.column,
+                  (int column) {
+                    final int label = row * widget.column + column;
+                    return counter % 2 == 0
+                        ? Container(
+                            // This key forces rebuilding the element
+                            key: ValueKey<int>(widgetCounter + label),
+                            color: Color.lerp(
+                                Colors.white, baseColor, label / totalLength),
+                            child: Text('${widgetCounter + label}'),
+                            constraints: BoxConstraints.expand(height: height),
+                          )
+                        : MyContainer(
+                            // This key forces rebuilding the element
+                            key: ValueKey<int>(widgetCounter + label),
+                            color: Color.lerp(
+                                Colors.white, baseColor, label / totalLength),
+                            child: Text('${widgetCounter + label}'),
+                            constraints: BoxConstraints.expand(height: height),
+                          );
+                  },
+                ),
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
