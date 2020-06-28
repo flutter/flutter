@@ -9,7 +9,7 @@ import 'package:flutter_devicelab/framework/framework.dart';
 
 Future<void> main() async {
   await task(combine(<TaskFunction>[
-    PluginTest('ios', <String>['-i', 'objc']),
-    PluginTest('ios', <String>['-i', 'swift']),
+    PluginTest('ios', <String>['-i', 'objc', '--platforms=ios']),
+    PluginTest('ios', <String>['-i', 'swift', '--platforms=ios']),
   ]));
 }

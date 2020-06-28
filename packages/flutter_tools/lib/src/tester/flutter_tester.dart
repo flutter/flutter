@@ -14,7 +14,6 @@ import '../base/io.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../convert.dart';
-import '../dart/package_map.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -138,7 +137,7 @@ class FlutterTesterDevice extends Device {
       '--run-forever',
       '--non-interactive',
       '--enable-dart-profiling',
-      '--packages=$globalPackagesPath',
+      '--packages=${debuggingOptions.buildInfo.packagesPath}',
     ];
     if (debuggingOptions.debuggingEnabled) {
       if (debuggingOptions.startPaused) {

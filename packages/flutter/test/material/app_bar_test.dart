@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 Widget buildSliverAppBarApp({
@@ -18,6 +19,7 @@ Widget buildSliverAppBarApp({
   double collapsedHeight,
   double expandedHeight,
   bool snap = false,
+  double toolbarHeight = kToolbarHeight,
 }) {
   return Localizations(
     locale: const Locale('en', 'US'),
@@ -41,6 +43,7 @@ Widget buildSliverAppBarApp({
                   pinned: pinned,
                   collapsedHeight: collapsedHeight,
                   expandedHeight: expandedHeight,
+                  toolbarHeight: toolbarHeight,
                   snap: snap,
                   bottom: TabBar(
                     tabs: <String>['A','B','C'].map<Widget>((String t) => Tab(text: 'TAB $t')).toList(),
@@ -1101,6 +1104,48 @@ void main() {
     expect(find.byIcon(Icons.menu), findsNothing);
   });
 
+  testWidgets('AppBar ink splash draw on the correct canvas', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/58665
+    final Key key = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: AppBar(
+            title: const Text('Abc'),
+            actions: <Widget>[
+              IconButton(
+                key: key,
+                icon: const Icon(Icons.add_circle),
+                tooltip: 'First button',
+                onPressed: () {},
+              ),
+            ],
+            flexibleSpace: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: const Alignment(0.0, -1.0),
+                  end: const Alignment(-0.04, 1.0),
+                  colors: <Color>[Colors.blue.shade500, Colors.blue.shade800],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    final RenderObject painter = tester.renderObject(
+      find.descendant(
+        of: find.descendant(
+          of: find.byType(AppBar),
+          matching: find.byType(Stack),
+        ),
+        matching: find.byType(Material)
+      )
+    );
+    await tester.tap(find.byKey(key));
+    expect(painter, paints..save()..translate()..save()..translate()..circle(x: 24.0, y: 28.0));
+  });
+
   testWidgets('AppBar handles loose children 0', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
@@ -1370,37 +1415,41 @@ void main() {
           TestSemantics(
             children: <TestSemantics>[
               TestSemantics(
-                flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                children: <TestSemantics>[
+                children: <TestSemantics> [
                   TestSemantics(
+                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                     children: <TestSemantics>[
                       TestSemantics(
-                        label: 'Leading',
-                        textDirection: TextDirection.ltr,
-                      ),
-                      TestSemantics(
-                        flags: <SemanticsFlag>[
-                          SemanticsFlag.namesRoute,
-                          SemanticsFlag.isHeader,
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            label: 'Leading',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          TestSemantics(
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.namesRoute,
+                              SemanticsFlag.isHeader,
+                            ],
+                            label: 'Title',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          TestSemantics(
+                            label: 'Action 1',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          TestSemantics(
+                            label: 'Action 2',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          TestSemantics(
+                            label: 'Action 3',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          TestSemantics(
+                            label: 'Bottom',
+                            textDirection: TextDirection.ltr,
+                          ),
                         ],
-                        label: 'Title',
-                        textDirection: TextDirection.ltr,
-                      ),
-                      TestSemantics(
-                        label: 'Action 1',
-                        textDirection: TextDirection.ltr,
-                      ),
-                      TestSemantics(
-                        label: 'Action 2',
-                        textDirection: TextDirection.ltr,
-                      ),
-                      TestSemantics(
-                        label: 'Action 3',
-                        textDirection: TextDirection.ltr,
-                      ),
-                      TestSemantics(
-                        label: 'Bottom',
-                        textDirection: TextDirection.ltr,
                       ),
                     ],
                   ),
@@ -1453,40 +1502,44 @@ void main() {
           TestSemantics(
             children: <TestSemantics>[
               TestSemantics(
-                flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                 children: <TestSemantics>[
                   TestSemantics(
-                    textDirection: TextDirection.rtl,
+                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                     children: <TestSemantics>[
                       TestSemantics(
+                        textDirection: TextDirection.rtl,
                         children: <TestSemantics>[
                           TestSemantics(
-                            label: 'Leading',
-                            textDirection: TextDirection.rtl,
-                          ),
-                          TestSemantics(
-                            flags: <SemanticsFlag>[
-                              SemanticsFlag.namesRoute,
-                              SemanticsFlag.isHeader,
+                            children: <TestSemantics>[
+                              TestSemantics(
+                                label: 'Leading',
+                                textDirection: TextDirection.rtl,
+                              ),
+                              TestSemantics(
+                                flags: <SemanticsFlag>[
+                                  SemanticsFlag.namesRoute,
+                                  SemanticsFlag.isHeader,
+                                ],
+                                label: 'Title',
+                                textDirection: TextDirection.rtl,
+                              ),
+                              TestSemantics(
+                                label: 'Action 1',
+                                textDirection: TextDirection.rtl,
+                              ),
+                              TestSemantics(
+                                label: 'Action 2',
+                                textDirection: TextDirection.rtl,
+                              ),
+                              TestSemantics(
+                                label: 'Action 3',
+                                textDirection: TextDirection.rtl,
+                              ),
+                              TestSemantics(
+                                label: 'Bottom',
+                                textDirection: TextDirection.rtl,
+                              ),
                             ],
-                            label: 'Title',
-                            textDirection: TextDirection.rtl,
-                          ),
-                          TestSemantics(
-                            label: 'Action 1',
-                            textDirection: TextDirection.rtl,
-                          ),
-                          TestSemantics(
-                            label: 'Action 2',
-                            textDirection: TextDirection.rtl,
-                          ),
-                          TestSemantics(
-                            label: 'Action 3',
-                            textDirection: TextDirection.rtl,
-                          ),
-                          TestSemantics(
-                            label: 'Bottom',
-                            textDirection: TextDirection.rtl,
                           ),
                         ],
                       ),
@@ -1530,17 +1583,21 @@ void main() {
           TestSemantics(
             children: <TestSemantics>[
               TestSemantics(
-                flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                 children: <TestSemantics>[
                   TestSemantics(
+                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                     children: <TestSemantics>[
                       TestSemantics(
-                        label: 'Leading',
-                        textDirection: TextDirection.ltr,
-                      ),
-                      TestSemantics(
-                        label: 'Action 1',
-                        textDirection: TextDirection.ltr,
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            label: 'Leading',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          TestSemantics(
+                            label: 'Action 1',
+                            textDirection: TextDirection.ltr,
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -1583,22 +1640,26 @@ void main() {
             textDirection: TextDirection.ltr,
             children: <TestSemantics>[
               TestSemantics(
-                flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                 children: <TestSemantics>[
                   TestSemantics(
+                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                     children: <TestSemantics>[
                       TestSemantics(
-                        flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                         children: <TestSemantics>[
                           TestSemantics(
+                            flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                             children: <TestSemantics>[
                               TestSemantics(
-                                label: 'Leading',
-                                textDirection: TextDirection.ltr,
-                              ),
-                              TestSemantics(
-                                label: 'Action 1',
-                                textDirection: TextDirection.ltr,
+                                children: <TestSemantics>[
+                                  TestSemantics(
+                                    label: 'Leading',
+                                    textDirection: TextDirection.ltr,
+                                  ),
+                                  TestSemantics(
+                                    label: 'Action 1',
+                                    textDirection: TextDirection.ltr,
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -1923,5 +1984,74 @@ void main() {
     await tester.pumpWidget(buildFrame());
     expect(tester.getRect(appBarTitle), const Rect.fromLTRB(200, -12, 800.0 - 200.0, 68));
     expect(tester.getCenter(appBarTitle).dy, tester.getCenter(toolbar).dy);
+  });
+
+  testWidgets('AppBar respects toolbarHeight', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('Title'),
+            toolbarHeight: 48,
+          ),
+          body: Container(),
+        ),
+      )
+    );
+
+    expect(appBarHeight(tester), 48);
+  });
+
+  testWidgets('SliverAppBar default collapsedHeight with respect to toolbarHeight', (WidgetTester tester) async {
+    const double toolbarHeight = 100.0;
+
+    await tester.pumpWidget(buildSliverAppBarApp(
+      floating: false,
+      pinned: false,
+      toolbarHeight: toolbarHeight,
+    ));
+
+    final ScrollController controller = primaryScrollController(tester);
+    final double initialTabBarHeight = tabBarHeight(tester);
+
+    // Scroll the not-pinned appbar out of view, to its collapsed height.
+    controller.jumpTo(300.0);
+    await tester.pump();
+    expect(find.byType(SliverAppBar), findsNothing);
+    // By default, the collapsedHeight is toolbarHeight + bottom.preferredSize.height,
+    // in this case initialTabBarHeight.
+    expect(appBarHeight(tester), toolbarHeight + initialTabBarHeight);
+  });
+
+  testWidgets('SliverAppBar collapsedHeight with toolbarHeight', (WidgetTester tester) async {
+    const double toolbarHeight = 100.0;
+    const double collapsedHeight = 150.0;
+
+    await tester.pumpWidget(buildSliverAppBarApp(
+      floating: false,
+      pinned: false,
+      toolbarHeight: toolbarHeight,
+      collapsedHeight: collapsedHeight
+    ));
+
+    final ScrollController controller = primaryScrollController(tester);
+    final double initialTabBarHeight = tabBarHeight(tester);
+
+    // Scroll the not-pinned appbar out of view, to its collapsed height.
+    controller.jumpTo(300.0);
+    await tester.pump();
+    expect(find.byType(SliverAppBar), findsNothing);
+    expect(appBarHeight(tester), collapsedHeight + initialTabBarHeight);
+  });
+
+  test('SliverApp toolbarHeight cannot be null', () {
+    try{
+       SliverAppBar(
+        toolbarHeight: null,
+      );
+    } on AssertionError catch (error) {
+      expect(error.toString(), contains('toolbarHeight != null'));
+      expect(error.toString(), contains('is not true'));
+    }
   });
 }

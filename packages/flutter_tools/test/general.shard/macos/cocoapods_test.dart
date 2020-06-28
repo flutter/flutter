@@ -43,7 +43,6 @@ void main() {
 
   void podsIsInHomeDir() {
     fileSystem.directory(fileSystem.path.join(
-      globals.fsUtils.homeDirPath,
       '.cocoapods',
       'repos',
       'master',
@@ -52,7 +51,6 @@ void main() {
 
   String podsIsInCustomDir({String cocoapodsReposDir}) {
     cocoapodsReposDir ??= fileSystem.path.join(
-      globals.fsUtils.homeDirPath,
       'cache',
       'cocoapods',
       'repos',
@@ -292,6 +290,9 @@ void main() {
 
   group('Update xcconfig', () {
     testUsingContext('includes Pod config in xcconfig files, if the user manually added Pod dependencies without using Flutter plugins', () async {
+      globals.fs.file(globals.fs.path.join('project', 'foo', '.packages'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('\n');
       projectUnderTest.ios.podfile..createSync()..writeAsStringSync('Custom Podfile');
       projectUnderTest.ios.podfileLock..createSync()..writeAsStringSync('Podfile.lock from user executed `pod install`');
       projectUnderTest.packagesFile..createSync()..writeAsStringSync('');

@@ -1040,11 +1040,15 @@ void main() {
         TestSemantics.rootChild(
           children: <TestSemantics>[
             TestSemantics(
-              flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
               children: <TestSemantics>[
                 TestSemantics(
-                  label: 'Foo\nBar',
-                  textDirection: TextDirection.ltr,
+                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      label: 'Foo\nBar',
+                      textDirection: TextDirection.ltr,
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -1076,11 +1080,15 @@ void main() {
         TestSemantics.rootChild(
           children: <TestSemantics>[
             TestSemantics(
-              flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
               children: <TestSemantics>[
                 TestSemantics(
-                  label: 'Bar',
-                  textDirection: TextDirection.ltr,
+                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      label: 'Bar',
+                      textDirection: TextDirection.ltr,
+                    ),
+                  ],
                 ),
               ],
             ),

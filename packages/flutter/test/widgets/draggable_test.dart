@@ -2284,39 +2284,44 @@ void main() {
             children: <TestSemantics>[
               TestSemantics(
                 id: 2,
-                flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                 children: <TestSemantics>[
                   TestSemantics(
                     id: 3,
+                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                     children: <TestSemantics>[
                       TestSemantics(
-                        id: 8,
-                        flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
-                        actions: <SemanticsAction>[SemanticsAction.scrollLeft],
+                        id: 4,
                         children: <TestSemantics>[
                           TestSemantics(
-                            id: 4,
-                            tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
-                            label: 'Target',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            id: 5,
-                            tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
-                            label: 'H',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            id: 6,
-                            tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
-                            label: 'V',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            id: 7,
-                            tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
-                            label: 'N',
-                            textDirection: TextDirection.ltr,
+                            id: 9,
+                            flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                            actions: <SemanticsAction>[SemanticsAction.scrollLeft],
+                            children: <TestSemantics>[
+                              TestSemantics(
+                                id: 5,
+                                tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                                label: 'Target',
+                                textDirection: TextDirection.ltr,
+                              ),
+                              TestSemantics(
+                                id: 6,
+                                tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                                label: 'H',
+                                textDirection: TextDirection.ltr,
+                              ),
+                              TestSemantics(
+                                id: 7,
+                                tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                                label: 'V',
+                                textDirection: TextDirection.ltr,
+                              ),
+                              TestSemantics(
+                                id: 8,
+                                tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                                label: 'N',
+                                textDirection: TextDirection.ltr,
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -2345,34 +2350,39 @@ void main() {
             children: <TestSemantics>[
               TestSemantics(
                 id: 2,
-                flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                 children: <TestSemantics>[
                   TestSemantics(
                     id: 3,
+                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                     children: <TestSemantics>[
                       TestSemantics(
-                        id: 8,
-                        flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                        id: 4,
                         children: <TestSemantics>[
                           TestSemantics(
-                            id: 4,
-                            tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
-                            label: 'Target',
-                            textDirection: TextDirection.ltr,
+                            id: 9,
+                            flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                            children: <TestSemantics>[
+                              TestSemantics(
+                                id: 5,
+                                tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                                label: 'Target',
+                                textDirection: TextDirection.ltr,
+                              ),
+                              TestSemantics(
+                                id: 6,
+                                tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                                label: 'H',
+                                textDirection: TextDirection.ltr,
+                              ),
+                              TestSemantics(
+                                id: 7,
+                                tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                                label: 'V',
+                                textDirection: TextDirection.ltr,
+                              ),
+                              /// N is moved offscreen.
+                            ],
                           ),
-                          TestSemantics(
-                            id: 5,
-                            tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
-                            label: 'H',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            id: 6,
-                            tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
-                            label: 'V',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          /// N is moved offscreen.
                         ],
                       ),
                     ],

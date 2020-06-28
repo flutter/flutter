@@ -2375,18 +2375,22 @@ void main() {
             TestSemantics.rootChild(
               children: <TestSemantics>[
                 TestSemantics(
-                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                   children: <TestSemantics>[
                     TestSemantics(
-                      flags: <SemanticsFlag>[
-                        SemanticsFlag.isTextField,
-                        SemanticsFlag.isObscured,
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.isTextField,
+                            SemanticsFlag.isObscured,
+                          ],
+                          value: expectedValue,
+                          textDirection: TextDirection.ltr,
+                        ),
                       ],
-                      value: expectedValue,
-                      textDirection: TextDirection.ltr,
-                    ),
+                    )
                   ],
-                ),
+                )
               ],
             ),
           ],
@@ -2426,16 +2430,20 @@ void main() {
             TestSemantics.rootChild(
               children: <TestSemantics>[
                 TestSemantics(
-                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                  children: <TestSemantics>[
+                  children:<TestSemantics>[
                     TestSemantics(
-                      flags: <SemanticsFlag>[
-                        SemanticsFlag.isTextField,
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.isTextField,
+                          ],
+                          value: originalText,
+                          textDirection: TextDirection.ltr,
+                        ),
                       ],
-                      value: originalText,
-                      textDirection: TextDirection.ltr,
                     ),
-                  ],
+                  ]
                 ),
               ],
             ),
@@ -2471,25 +2479,29 @@ void main() {
             TestSemantics.rootChild(
               children: <TestSemantics>[
                 TestSemantics(
-                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                  children: <TestSemantics>[
+                  children:<TestSemantics>[
                     TestSemantics(
-                      flags: <SemanticsFlag>[
-                        SemanticsFlag.isTextField,
-                        SemanticsFlag.isObscured,
-                        SemanticsFlag.isFocused,
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.isTextField,
+                            SemanticsFlag.isObscured,
+                            SemanticsFlag.isFocused,
+                          ],
+                          actions: <SemanticsAction>[
+                            SemanticsAction.moveCursorBackwardByCharacter,
+                            SemanticsAction.setSelection,
+                            SemanticsAction.moveCursorBackwardByWord,
+                          ],
+                          value: expectedValue,
+                          textDirection: TextDirection.ltr,
+                          textSelection: const TextSelection.collapsed(offset: 24),
+                        ),
                       ],
-                      actions: <SemanticsAction>[
-                        SemanticsAction.moveCursorBackwardByCharacter,
-                        SemanticsAction.setSelection,
-                        SemanticsAction.moveCursorBackwardByWord,
-                      ],
-                      value: expectedValue,
-                      textDirection: TextDirection.ltr,
-                      textSelection: const TextSelection.collapsed(offset: 24),
                     ),
-                  ],
-                ),
+                  ]
+                )
               ],
             ),
           ],
@@ -2654,7 +2666,7 @@ void main() {
       await tester.pump();
 
       final SemanticsOwner owner = tester.binding.pipelineOwner.semanticsOwner;
-      const int expectedNodeId = 4;
+      const int expectedNodeId = 5;
 
       expect(
         semantics,
@@ -2666,29 +2678,34 @@ void main() {
                 children: <TestSemantics>[
                   TestSemantics(
                     id: 2,
-                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                     children: <TestSemantics>[
-                      TestSemantics.rootChild(
-                        id: expectedNodeId,
-                        flags: <SemanticsFlag>[
-                          SemanticsFlag.isTextField,
-                          SemanticsFlag.isFocused,
+                      TestSemantics(
+                        id: 3,
+                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                        children: <TestSemantics>[
+                          TestSemantics.rootChild(
+                            id: expectedNodeId,
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.isTextField,
+                              SemanticsFlag.isFocused,
+                            ],
+                            actions: <SemanticsAction>[
+                              SemanticsAction.moveCursorBackwardByCharacter,
+                              SemanticsAction.moveCursorBackwardByWord,
+                              SemanticsAction.setSelection,
+                              SemanticsAction.copy,
+                              SemanticsAction.cut,
+                              SemanticsAction.paste,
+                            ],
+                            value: 'test',
+                            textSelection: TextSelection.collapsed(
+                              offset: controller.text.length),
+                            textDirection: TextDirection.ltr,
+                          ),
                         ],
-                        actions: <SemanticsAction>[
-                          SemanticsAction.moveCursorBackwardByCharacter,
-                          SemanticsAction.moveCursorBackwardByWord,
-                          SemanticsAction.setSelection,
-                          SemanticsAction.copy,
-                          SemanticsAction.cut,
-                          SemanticsAction.paste,
-                        ],
-                        value: 'test',
-                        textSelection: TextSelection.collapsed(
-                            offset: controller.text.length),
-                        textDirection: TextDirection.ltr,
                       ),
-                    ],
-                  ),
+                    ]
+                  )
                 ],
               ),
             ],
@@ -5020,6 +5037,32 @@ void main() {
     );
 
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+  });
+
+  testWidgets('Can access characters on editing string', (WidgetTester tester) async {
+    int charactersLength;
+    final Widget widget = MaterialApp(
+      home: EditableText(
+        backgroundCursorColor: Colors.grey,
+        controller: TextEditingController(),
+        focusNode: FocusNode(),
+        style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
+        cursorColor: Colors.blue,
+        selectionControls: materialTextSelectionControls,
+        keyboardType: TextInputType.text,
+        onChanged: (String value) {
+          charactersLength = value.characters.length;
+        },
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    // Enter an extended grapheme cluster whose string length is different than
+    // its characters length.
+    await tester.enterText(find.byType(EditableText), '👨‍👩‍👦');
+    await tester.pump();
+
+    expect(charactersLength, 1);
   });
 
   testWidgets('EditableText can set and update clipBehavior', (WidgetTester tester) async {

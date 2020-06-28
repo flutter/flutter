@@ -156,6 +156,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  multi_widget_construction_perf__timeline_summary:
+    description: >
+      Measures the runtime performance of constructing and destructing widgets on Android.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
   picture_cache_perf__timeline_summary:
     description: >
       Measures the runtime performance of raster caching many pictures on Android.
@@ -174,6 +180,14 @@ tasks:
       with SkSL shader warm-up.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
+
+  flutter_gallery_sksl_warmup_ios32__transition_perf:
+    description: >
+      Measures the runtime performance of Flutter gallery transitions on iPhone4s
+      with SkSL shader warm-up.
+    stage: devicelab
+    required_agent_capabilities: ["mac/ios32"]
+    flaky: true
 
   backdrop_filter_perf__timeline_summary:
     description: >
@@ -738,6 +752,14 @@ tasks:
       Android.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+
+  flutter_gallery_sksl_warmup__transition_perf:
+    description: >
+      Measures the runtime performance of Flutter gallery transitions on Android
+      with SkSL shader warm-up.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
 
   flutter_gallery__transition_perf_with_semantics:
     description: >
