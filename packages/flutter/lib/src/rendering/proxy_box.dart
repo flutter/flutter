@@ -2726,8 +2726,7 @@ class RenderMouseRegion extends RenderProxyBox implements MouseTrackerAnnotation
 
   @override
   bool hitTest(BoxHitTestResult result, { @required Offset position }) {
-    final bool hit = super.hitTest(result, position: position);
-    return hit && _opaque;
+    return super.hitTest(result, position: position) && _opaque;
   }
 
   /// Whether this object should prevent [RenderMouseRegion]s visually behind it

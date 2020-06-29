@@ -149,12 +149,12 @@ class HitTestResult {
   // A stack of transform parts.
   //
   // Elements with index < `_globalizedTransforms` are globalized matrices,
-  // meaning they have been multiplied by the ancesters and is thus relative to
+  // meaning they have been multiplied by the ancesters and are thus relative to
   // the global coordinate space. The others are relative to the parent's
   // coordinate space, which are only globalized by `_globalizeTransforms`
   // before being used by `_lastTransform`.
   final List<_TransformPart> _transforms;
-  // The number of elements (from the head) in `_transforms` that has been
+  // The number of elements (from the head) in `_transforms` that have been
   // globalized.
   //
   // The `_globalizedTransforms` is a reference of int, instead of a direct int,
