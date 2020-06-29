@@ -517,9 +517,6 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
   }
 
   @override
-  bool hitTestSelf(Offset position) => true;
-
-  @override
   void paint(PaintingContext context, Offset offset) {
     if (_inkFeatures != null && _inkFeatures.isNotEmpty) {
       final Canvas canvas = context.canvas;
