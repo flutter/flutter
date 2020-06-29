@@ -144,5 +144,10 @@ void main() {
       style,
       const ButtonStyle().merge(style),
     );
+
+    expect(
+      style.copyWith(),
+      style.merge(const ButtonStyle())
+    );
   });
 }

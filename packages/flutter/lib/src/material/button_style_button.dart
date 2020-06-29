@@ -241,12 +241,17 @@ class _ButtonStyleState extends State<ButtonStyleButton> {
     final ButtonStyle defaultStyle = widget.defaultStyleOf(context);
     assert(defaultStyle != null);
 
+    T effectiveValue<T>(T Function(ButtonStyle style) getProperty) {
+      final T widgetValue  = getProperty(widgetStyle);
+      final T themeValue   = getProperty(themeStyle);
+      final T defaultValue = getProperty(defaultStyle);
+      return widgetValue ?? themeValue ?? defaultValue;
+    }
+
     T resolve<T>(MaterialStateProperty<T> Function(ButtonStyle style) getProperty) {
-      final MaterialStateProperty<T> widgetValue = getProperty(widgetStyle);
-      final MaterialStateProperty<T> themeValue = getProperty(themeStyle);
-      final MaterialStateProperty<T> defaultValue = getProperty(defaultStyle);
-      assert(defaultValue != null);
-      return widgetValue?.resolve(_states) ?? themeValue?.resolve(_states) ?? defaultValue.resolve(_states);
+      return effectiveValue(
+        (ButtonStyle style) => getProperty(style)?.resolve(_states),
+      );
     }
 
     final TextStyle resolvedTextStyle = resolve<TextStyle>((ButtonStyle style) => style?.textStyle);
@@ -262,16 +267,13 @@ class _ButtonStyleState extends State<ButtonStyleButton> {
     // The InkWell's overlayColor parameter is a MaterialStatePropery that resolves against
     // all of the states that buttons care about except MaterialState.disabled.
     final MaterialStateProperty<Color> overlayColor = MaterialStateProperty.resolveWith<Color>(
-      (Set<MaterialState> states) {
-        return widgetStyle?.overlayColor?.resolve(states)
-          ?? themeStyle?.overlayColor?.resolve(states)
-          ?? defaultStyle.overlayColor?.resolve(states);
-      }
+      (Set<MaterialState> states) => effectiveValue((ButtonStyle style) => style?.overlayColor?.resolve(states)),
     );
 
-    final VisualDensity resolvedVisualDensity = widgetStyle?.visualDensity ?? themeStyle?.visualDensity ?? defaultStyle.visualDensity;
-    final MaterialTapTargetSize resolvedTapTargetSize =  widgetStyle?.tapTargetSize ?? themeStyle?.tapTargetSize ?? defaultStyle.tapTargetSize;
-
+    final VisualDensity resolvedVisualDensity = effectiveValue((ButtonStyle style) => style?.visualDensity);
+    final MaterialTapTargetSize resolvedTapTargetSize = effectiveValue((ButtonStyle style) => style?.tapTargetSize);
+    final Duration resolvedAnimationDuration = effectiveValue((ButtonStyle style) => style?.animationDuration);
+    final bool resolvedEnableFeedback = effectiveValue((ButtonStyle style) => style?.enableFeedback);
     final Offset densityAdjustment = resolvedVisualDensity.baseSizeAdjustment;
     final BoxConstraints effectiveConstraints = resolvedVisualDensity.effectiveConstraints(
       BoxConstraints(
@@ -297,14 +299,14 @@ class _ButtonStyleState extends State<ButtonStyleButton> {
         color: resolvedBackgroundColor,
         shadowColor: resolvedShadowColor,
         type: resolvedBackgroundColor == null ? MaterialType.transparency : MaterialType.button,
-        animationDuration: widgetStyle?.animationDuration ?? themeStyle?.animationDuration ?? defaultStyle.animationDuration,
+        animationDuration: resolvedAnimationDuration,
         clipBehavior: widget.clipBehavior,
         child: InkWell(
           onTap: widget.onPressed,
           onLongPress: widget.onLongPress,
           onHighlightChanged: _handleHighlightChanged,
           onHover: _handleHoveredChanged,
-          enableFeedback: widgetStyle?.enableFeedback ?? themeStyle?.enableFeedback ?? defaultStyle.enableFeedback,
+          enableFeedback: resolvedEnableFeedback,
           focusNode: widget.focusNode,
           canRequestFocus: widget.enabled,
           onFocusChange: _handleFocusedChanged,
