@@ -156,7 +156,7 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Lisensies';
@@ -453,7 +453,7 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'ፈቃዶች';
@@ -750,7 +750,7 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'التراخيص';
@@ -1047,7 +1047,7 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'অনুজ্ঞাপত্ৰসমূহ';
@@ -1344,7 +1344,7 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Lisenziyalar';
@@ -1641,7 +1641,7 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Ліцэнзіі';
@@ -1938,7 +1938,7 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Лицензи';
@@ -2235,7 +2235,7 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'লাইসেন্স';
@@ -2532,7 +2532,7 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Licence';
@@ -2829,7 +2829,7 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Llicències';
@@ -3126,7 +3126,7 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Licence';
@@ -3423,7 +3423,7 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Licenser';
@@ -3720,7 +3720,7 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Lizenzen';
@@ -4056,7 +4056,7 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Άδειες';
@@ -5283,7 +5283,7 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Licencias';
@@ -7923,7 +7923,7 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Litsentsid';
@@ -8220,7 +8220,7 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Lizentziak';
@@ -8517,7 +8517,7 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'مجوزها';
@@ -8814,7 +8814,7 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Lisenssit';
@@ -9111,7 +9111,7 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Mga Lisensya';
@@ -9408,7 +9408,7 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Licences';
@@ -9789,7 +9789,7 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Licenzas';
@@ -10086,7 +10086,7 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Lizenzen';
@@ -10383,7 +10383,7 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'લાઇસન્સ';
@@ -10680,7 +10680,7 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'רישיונות';
@@ -10977,7 +10977,7 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'लाइसेंस';
@@ -11274,7 +11274,7 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Licence';
@@ -11571,7 +11571,7 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Licencek';
@@ -11868,7 +11868,7 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Արտոնագրեր';
@@ -12165,7 +12165,7 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Lisensi';
@@ -12462,7 +12462,7 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Leyfi';
@@ -12759,7 +12759,7 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Licenze';
@@ -13056,7 +13056,7 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'ライセンス';
@@ -13353,7 +13353,7 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'ლიცენზიები';
@@ -13650,7 +13650,7 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Лицензиялар';
@@ -13947,7 +13947,7 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'អាជ្ញាបណ្ណ';
@@ -14244,7 +14244,7 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => '\u{caa}\u{cb0}\u{cb5}\u{cbe}\u{ca8}\u{c97}\u{cbf}\u{c97}\u{cb3}\u{cc1}';
@@ -14541,7 +14541,7 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => '라이선스';
@@ -14838,7 +14838,7 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Уруксаттамалар';
@@ -15135,7 +15135,7 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'ໃບອະນຸຍາດ';
@@ -15432,7 +15432,7 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Licencijos';
@@ -15729,7 +15729,7 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Licences';
@@ -16026,7 +16026,7 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Лиценци';
@@ -16323,7 +16323,7 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'ലൈസൻസുകൾ';
@@ -16620,7 +16620,7 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Лиценз';
@@ -16917,7 +16917,7 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'परवाने';
@@ -17214,7 +17214,7 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Lesen';
@@ -17511,7 +17511,7 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'လိုင်စင်များ';
@@ -17838,7 +17838,7 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'इजाजतपत्रहरू';
@@ -18135,7 +18135,7 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Licenties';
@@ -18432,7 +18432,7 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Lisenser';
@@ -18729,7 +18729,7 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'ଲାଇସେନ୍ସଗୁଡ଼କ';
@@ -19026,7 +19026,7 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'ਲਾਇਸੰਸ';
@@ -19323,7 +19323,7 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Licencje';
@@ -19620,7 +19620,7 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'جوازونه';
@@ -19917,7 +19917,7 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Licenças';
@@ -20328,7 +20328,7 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Licențe';
@@ -20625,7 +20625,7 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Лицензии';
@@ -20922,7 +20922,7 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'බලපත්‍ර';
@@ -21219,7 +21219,7 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Licencie';
@@ -21516,7 +21516,7 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Licence';
@@ -21813,7 +21813,7 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Licencat';
@@ -22110,7 +22110,7 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Лиценце';
@@ -22677,7 +22677,7 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Licenser';
@@ -22974,7 +22974,7 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Leseni';
@@ -23271,7 +23271,7 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'உரிமங்கள்';
@@ -23568,7 +23568,7 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'లైసెన్స్‌లు';
@@ -23865,7 +23865,7 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'ใบอนุญาต';
@@ -24162,7 +24162,7 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Mga Lisensya';
@@ -24459,7 +24459,7 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Lisanslar';
@@ -24756,7 +24756,7 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Ліцензії';
@@ -25053,7 +25053,7 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'لائسنسز';
@@ -25350,7 +25350,7 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Litsenziyalar';
@@ -25647,7 +25647,7 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Giấy phép';
@@ -25944,7 +25944,7 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => '许可';
@@ -26604,7 +26604,7 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => null;
+  String get licensesPackageDetailTextZero => 'No licenses';
 
   @override
   String get licensesPageTitle => 'Amalayisense';

@@ -70,13 +70,14 @@
   "dateRangePickerHelpText": "အပိုင်းအခြား ရွေးရန်",
   "calendarModeButtonLabel": "ပြက္ခဒိန်သို့ ပြောင်းရန်",
   "inputDateModeButtonLabel": "ထည့်သွင်းမှုသို့ ပြောင်းရန်",
-  "licensesPackageDetailTextOne": "1 license",
-  "licensesPackageDetailTextOther": "$licenseCount licenses",
   "timePickerDialHelpText": "SELECT TIME",
   "timePickerInputHelpText": "ENTER TIME",
   "timePickerHourLabel": "Hour",
   "timePickerMinuteLabel": "Minute",
   "invalidTimeLabel": "Enter a valid time",
   "dialModeButtonLabel": "Switch to dial picker mode",
-  "inputTimeModeButtonLabel": "Switch to text input mode"
+  "inputTimeModeButtonLabel": "Switch to text input mode",
+  "licensesPackageDetailTextZero": "No licenses",
+  "licensesPackageDetailTextOne": "1 license",
+  "licensesPackageDetailTextOther": "$licenseCount licenses"
 }
