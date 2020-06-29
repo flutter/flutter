@@ -20,7 +20,6 @@ import 'build_system/targets/common.dart';
 import 'build_system/targets/icon_tree_shaker.dart';
 import 'cache.dart';
 import 'convert.dart';
-import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'globals.dart' as globals;
 import 'project.dart';
@@ -95,7 +94,7 @@ class BundleBuilder {
     mainPath ??= defaultMainPath;
     depfilePath ??= defaultDepfilePath;
     assetDirPath ??= getAssetBuildDirectory();
-    packagesPath ??= globals.fs.path.absolute(globalPackagesPath);
+    packagesPath ??= globals.fs.path.absolute('.packages');
     final FlutterProject flutterProject = FlutterProject.current();
     await buildWithAssemble(
       buildMode: buildInfo.mode,
@@ -192,12 +191,12 @@ Future<void> buildWithAssemble({
 Future<AssetBundle> buildAssets({
   String manifestPath,
   String assetDirPath,
-  String packagesPath,
+  @required String packagesPath,
   bool includeDefaultFonts = true,
   bool reportLicensedPackages = false,
 }) async {
   assetDirPath ??= getAssetBuildDirectory();
-  packagesPath ??= globals.fs.path.absolute(globalPackagesPath);
+  packagesPath ??= globals.fs.path.absolute(packagesPath);
 
   // Build the asset bundle.
   final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();

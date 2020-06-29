@@ -140,7 +140,7 @@ class WebAssetServer implements AssetReader {
     int port,
     UrlTunneller urlTunneller,
     bool useSseForDebugProxy,
-    BuildMode buildMode,
+    BuildInfo buildInfo,
     bool enableDwds,
     Uri entrypoint,
     ExpressionCompiler expressionCompiler, {
@@ -156,7 +156,7 @@ class WebAssetServer implements AssetReader {
       }
       final HttpServer httpServer = await HttpServer.bind(address, port);
       final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-        globals.fs.file(globalPackagesPath),
+        globals.fs.file(buildInfo.packagesPath),
         logger: globals.logger,
       );
       final Map<String, String> digests = <String, String>{};
@@ -173,7 +173,7 @@ class WebAssetServer implements AssetReader {
       }
 
       // In release builds deploy a simpler proxy server.
-      if (buildMode != BuildMode.debug) {
+      if (buildInfo.mode != BuildMode.debug) {
         final ReleaseAssetServer releaseAssetServer = ReleaseAssetServer(
           entrypoint,
           fileSystem: globals.fs,
@@ -589,7 +589,7 @@ class WebDevFS implements DevFS {
     @required this.packagesFilePath,
     @required this.urlTunneller,
     @required this.useSseForDebugProxy,
-    @required this.buildMode,
+    @required this.buildInfo,
     @required this.enableDwds,
     @required this.entrypoint,
     @required this.expressionCompiler,
@@ -603,7 +603,7 @@ class WebDevFS implements DevFS {
   final String packagesFilePath;
   final UrlTunneller urlTunneller;
   final bool useSseForDebugProxy;
-  final BuildMode buildMode;
+  final BuildInfo buildInfo;
   final bool enableDwds;
   final bool testMode;
   final ExpressionCompiler expressionCompiler;
@@ -670,7 +670,7 @@ class WebDevFS implements DevFS {
       port,
       urlTunneller,
       useSseForDebugProxy,
-      buildMode,
+      buildInfo,
       enableDwds,
       entrypoint,
       expressionCompiler,

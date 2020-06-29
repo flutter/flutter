@@ -66,7 +66,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
   }
 }
 
-const String kExitMessage =  'Failed to establish connection with the application '
+const String kExitMessage = 'Failed to establish connection with the application '
   'instance in Chrome.\nThis can happen if the websocket connection used by the '
   'web tooling is unable to correctly establish a connection, for example due to a firewall.';
 
@@ -447,7 +447,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
           packagesFilePath: packagesFilePath,
           urlTunneller: urlTunneller,
           useSseForDebugProxy: debuggingOptions.webUseSseForDebugProxy,
-          buildMode: debuggingOptions.buildInfo.mode,
+          buildInfo: debuggingOptions.buildInfo,
           enableDwds: _enableDwds,
           entrypoint: globals.fs.file(target).uri,
           expressionCompiler: expressionCompiler,
@@ -639,7 +639,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
     final bool rebuildBundle = assetBundle.needsBuild();
     if (rebuildBundle) {
       globals.printTrace('Updating assets');
-      final int result = await assetBundle.build();
+      final int result = await assetBundle.build(packagesPath: debuggingOptions.buildInfo.packagesPath);
       if (result != 0) {
         return UpdateFSReport(success: false);
       }

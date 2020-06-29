@@ -29,6 +29,7 @@ class BuildInfo {
     this.dartExperiments = const <String>[],
     @required this.treeShakeIcons,
     this.performanceMeasurementFile,
+    this.packagesPath = '.packages',
   });
 
   final BuildMode mode;
@@ -43,6 +44,12 @@ class BuildInfo {
   /// `assemblePaidRelease`), and the Xcode build configuration will be
   /// Mode-Flavor (e.g. Release-Paid).
   final String flavor;
+
+  /// The path to the .packages file to use for compilation.
+  ///
+  /// This is used by package:package_config to locate the actual package_config.json
+  /// file. If not provded, defaults to `.packages`.
+  final String packagesPath;
 
   final List<String> fileSystemRoots;
   final String fileSystemScheme;
@@ -156,6 +163,8 @@ class BuildInfo {
         'PERFORMANCE_MEASUREMENT_FILE': performanceMeasurementFile,
       if (bundleSkSLPath != null)
         'BUNDLE_SKSL_PATH': bundleSkSLPath,
+      if (packagesPath != null)
+        'PACKAGE_CONFIG': packagesPath,
     };
   }
 }
