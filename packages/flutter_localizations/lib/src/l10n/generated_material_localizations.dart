@@ -4560,6 +4560,9 @@ class MaterialLocalizationEnAu extends MaterialLocalizationEn {
   String get licensesPageTitle => 'Licences';
 
   @override
+  String get licensesPackageDetailTextZero => 'No licences';
+
+  @override
   String get licensesPackageDetailTextOne => '1 licence';
 
   @override
@@ -4636,6 +4639,9 @@ class MaterialLocalizationEnCa extends MaterialLocalizationEn {
 
   @override
   String get licensesPageTitle => 'Licences';
+
+  @override
+  String get licensesPackageDetailTextZero => 'No licences';
 
   @override
   String get licensesPackageDetailTextOne => '1 licence';
@@ -4728,6 +4734,9 @@ class MaterialLocalizationEnGb extends MaterialLocalizationEn {
   String get licensesPageTitle => 'Licences';
 
   @override
+  String get licensesPackageDetailTextZero => 'No licences';
+
+  @override
   String get licensesPackageDetailTextOne => '1 licence';
 
   @override
@@ -4809,6 +4818,9 @@ class MaterialLocalizationEnIe extends MaterialLocalizationEn {
   String get licensesPageTitle => 'Licences';
 
   @override
+  String get licensesPackageDetailTextZero => 'No licences';
+
+  @override
   String get licensesPackageDetailTextOne => '1 licence';
 
   @override
@@ -4876,6 +4888,9 @@ class MaterialLocalizationEnIn extends MaterialLocalizationEn {
 
   @override
   String get licensesPageTitle => 'Licences';
+
+  @override
+  String get licensesPackageDetailTextZero => 'No licences';
 
   @override
   String get licensesPackageDetailTextOne => '1 licence';
@@ -4956,6 +4971,9 @@ class MaterialLocalizationEnNz extends MaterialLocalizationEn {
   String get licensesPageTitle => 'Licences';
 
   @override
+  String get licensesPackageDetailTextZero => 'No licences';
+
+  @override
   String get licensesPackageDetailTextOne => '1 licence';
 
   @override
@@ -5032,6 +5050,9 @@ class MaterialLocalizationEnSg extends MaterialLocalizationEn {
 
   @override
   String get licensesPageTitle => 'Licences';
+
+  @override
+  String get licensesPackageDetailTextZero => 'No licences';
 
   @override
   String get licensesPackageDetailTextOne => '1 licence';
@@ -5122,6 +5143,9 @@ class MaterialLocalizationEnZa extends MaterialLocalizationEn {
 
   @override
   String get licensesPageTitle => 'Licences';
+
+  @override
+  String get licensesPackageDetailTextZero => 'No licences';
 
   @override
   String get licensesPackageDetailTextOne => '1 licence';
