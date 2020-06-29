@@ -6,6 +6,8 @@ import("//third_party/dart/build/dart/dart_action.gni")
 import("//third_party/dart/utils/compile_platform.gni")
 
 sdk_dill = "$root_out_dir/flutter_web_sdk/kernel/flutter_ddc_sdk.dill"
+sdk_dill_sound =
+    "$root_out_dir/flutter_web_sdk/kernel/flutter_ddc_sdk_sound.dill"
 
 web_ui_sources = exec_script("//third_party/dart/tools/list_dart_files.py",
                              [
@@ -29,8 +31,11 @@ web_engine_sources += [ "//flutter/lib/web_ui/lib/src/engine.dart" ]
 group("web_sdk") {
   deps = [
     ":flutter_dartdevc_canvaskit_kernel_sdk",
+    ":flutter_dartdevc_canvaskit_kernel_sdk_sound",
     ":flutter_dartdevc_kernel_sdk",
     ":flutter_dartdevc_kernel_sdk_outline",
+    ":flutter_dartdevc_kernel_sdk_outline_sound",
+    ":flutter_dartdevc_kernel_sdk_sound",
     ":web_engine_sources",
     ":web_ui_library",
     ":web_ui_sources",
@@ -164,7 +169,6 @@ prebuilt_dart_action("flutter_dartdevc_kernel_sdk") {
 
   args = [
     "--enable-experiment=non-nullable",
-    "-k",
     "--compile-sdk",
     "dart:core",
 
@@ -216,7 +220,6 @@ prebuilt_dart_action("flutter_dartdevc_canvaskit_kernel_sdk") {
 
   args = [
     "--enable-experiment=non-nullable",
-    "-k",
     "--compile-sdk",
     "dart:core",
 
@@ -246,5 +249,157 @@ prebuilt_dart_action("flutter_dartdevc_canvaskit_kernel_sdk") {
     "-o",
     rebase_path(
         "$root_out_dir/flutter_web_sdk/kernel/legacy-canvaskit/dart_sdk.js"),
+  ]
+}
+
+# Compiles the DDC CanvasKit SDK's JS code for null safety.
+prebuilt_dart_action("flutter_dartdevc_canvaskit_kernel_sdk_sound") {
+  deps = [
+    "//third_party/dart:create_sdk",
+    "//third_party/dart/pkg:pkg_files_stamp",
+    "//third_party/dart/utils/dartdevc:dartdevc_files_stamp",
+    "//third_party/dart/utils/dartdevc:dartdevc_sdk_patch_stamp",
+  ]
+
+  inputs = [ "sdk_rewriter.dart" ] + web_ui_sources + web_engine_sources
+
+  packages = "//third_party/dart/.packages"
+
+  script = "//third_party/dart/pkg/dev_compiler/bin/dartdevc.dart"
+
+  outputs = [
+    "$root_out_dir/flutter_web_sdk/kernel/amd-canvaskit-sound/dart_sdk.js",
+    "$root_out_dir/flutter_web_sdk/kernel/amd-canvaskit-sound/dart_sdk.js.map",
+  ]
+
+  args = [
+    "--enable-experiment=non-nullable",
+    "--sound-null-safety",
+    "--compile-sdk",
+    "dart:core",
+
+    # Additional Flutter web dart libraries
+    "dart:ui",
+    "dart:_engine",
+    "--no-summarize",
+    "--packages",
+    "file:///" + rebase_path("//third_party/dart/.packages"),
+    "--multi-root-scheme",
+    "org-dartlang-sdk",
+    "--multi-root",
+    "file:///" + rebase_path("$root_out_dir"),
+    "--multi-root-output-path",
+    rebase_path("$root_out_dir/"),
+    "--libraries-file",
+    "org-dartlang-sdk:///flutter_web_sdk/libraries.json",
+    "--inline-source-map",
+    "-DFLUTTER_WEB_USE_SKIA=true",
+    "--modules",
+    "amd",
+    "-o",
+    rebase_path(
+        "$root_out_dir/flutter_web_sdk/kernel/amd-canvaskit-sound/dart_sdk.js"),
+    "--modules",
+    "legacy",
+    "-o",
+    rebase_path(
+        "$root_out_dir/flutter_web_sdk/kernel/legacy-canvaskit-sound/dart_sdk.js"),
+  ]
+}
+
+# Compiles the DDC SDK's JS code for null safety.
+prebuilt_dart_action("flutter_dartdevc_kernel_sdk_sound") {
+  deps = [
+    "//third_party/dart:create_sdk",
+    "//third_party/dart/pkg:pkg_files_stamp",
+    "//third_party/dart/utils/dartdevc:dartdevc_files_stamp",
+    "//third_party/dart/utils/dartdevc:dartdevc_sdk_patch_stamp",
+  ]
+
+  inputs = [ "sdk_rewriter.dart" ] + web_ui_sources + web_engine_sources
+
+  packages = "//third_party/dart/.packages"
+
+  script = "//third_party/dart/pkg/dev_compiler/bin/dartdevc.dart"
+
+  outputs = [
+    "$root_out_dir/flutter_web_sdk/kernel/amd-sound/dart_sdk.js",
+    "$root_out_dir/flutter_web_sdk/kernel/amd-sound/dart_sdk.js.map",
+  ]
+
+  args = [
+    "--enable-experiment=non-nullable",
+    "--sound-null-safety",
+    "--compile-sdk",
+    "dart:core",
+
+    # Additional Flutter web dart libraries
+    "dart:ui",
+    "dart:_engine",
+    "--no-summarize",
+    "--packages",
+    "file:///" + rebase_path("//third_party/dart/.packages"),
+    "--multi-root-scheme",
+    "org-dartlang-sdk",
+    "--multi-root",
+    "file:///" + rebase_path("$root_out_dir"),
+    "--multi-root-output-path",
+    rebase_path("$root_out_dir/"),
+    "--libraries-file",
+    "org-dartlang-sdk:///flutter_web_sdk/libraries.json",
+    "--inline-source-map",
+    "--modules",
+    "amd",
+    "-o",
+    rebase_path("$root_out_dir/flutter_web_sdk/kernel/amd-sound/dart_sdk.js"),
+    "--modules",
+    "legacy",
+    "-o",
+    rebase_path(
+        "$root_out_dir/flutter_web_sdk/kernel/legacy-sound/dart_sdk.js"),
+  ]
+}
+
+# Compile the DDC SDK's summary.
+prebuilt_dart_action("flutter_dartdevc_kernel_sdk_outline_sound") {
+  deps = [
+    "//third_party/dart:create_sdk",
+    "//third_party/dart/pkg:pkg_files_stamp",
+    "//third_party/dart/utils/dartdevc:dartdevc_files_stamp",
+    "//third_party/dart/utils/dartdevc:dartdevc_sdk_patch_stamp",
+  ]
+
+  inputs = [ "sdk_rewriter.dart" ] + web_ui_sources + web_engine_sources
+
+  outputs = [
+    sdk_dill_sound,
+  ]
+
+  script = "//third_party/dart/utils/bazel/kernel_worker.dart"
+
+  args = [
+    "--enable-experiment=non-nullable",
+    "--sound-null-safety ",
+    "--summary-only",
+    "--target",
+    "ddc",
+    "--packages-file",
+    "file:///" + rebase_path("//third_party/dart/.packages"),
+    "--multi-root-scheme",
+    "org-dartlang-sdk",
+    "--multi-root",
+    "file:///" + rebase_path("$root_out_dir"),
+    "--libraries-file",
+    "org-dartlang-sdk:///flutter_web_sdk/libraries.json",
+    "--output",
+    rebase_path(sdk_dill_sound),
+    "--source",
+    "dart:core",
+
+    # Additional Flutter web dart libraries
+    "--source",
+    "dart:ui",
+    "--source",
+    "dart:_engine",
   ]
 }
