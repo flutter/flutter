@@ -319,8 +319,7 @@ Future<void> _runToolTests() async {
       final String suffix = Platform.isWindows && subshard == 'commands'
         ? 'permeable'
         : '';
-      await _pubRun
-        (
+      await _pubRunTester(
         toolsPath,
         testPaths: <String>[path.join(kTest, '$subshard$kDotShard', suffix)],
         // Detect unit test time regressions (poor time delay handling, etc).
