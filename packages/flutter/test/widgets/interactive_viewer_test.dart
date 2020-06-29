@@ -450,6 +450,56 @@ void main() {
 
       expect(transformationController.value.getMaxScaleOnAxis(), equals(1.0));
     });
+
+    testWidgets('viewport changes size', (WidgetTester tester) async {
+      final TransformationController transformationController = TransformationController();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer(
+                transformationController: transformationController,
+                child: Container(),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(transformationController.value, equals(Matrix4.identity()));
+
+      // Attempting to drag to pan doesn't work because the child fits inside
+      // the viewport and has a tight boundary.
+      final Offset childOffset = tester.getTopLeft(find.byType(Container));
+      final Offset childInterior = Offset(
+        childOffset.dx + 20.0,
+        childOffset.dy + 20.0,
+      );
+      TestGesture gesture = await tester.startGesture(childInterior);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.moveTo(childOffset);
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(transformationController.value, equals(Matrix4.identity()));
+
+      // Shrink the size of the screen.
+      tester.binding.window.physicalSizeTestValue = const Size(100.0, 100.0);
+      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+      await tester.pump();
+
+      // Attempting to drag to pan still doesn't work, because the image has
+      // resized itself to fit the new screen size, and InteractiveViewer has
+      // updated its measurements to take that into consideration.
+      gesture = await tester.startGesture(childInterior);
+      await tester.pump();
+      await gesture.moveTo(childOffset);
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(transformationController.value, equals(Matrix4.identity()));
+    });
   });
 
   group('getNearestPointOnLine', () {

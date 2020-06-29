@@ -492,13 +492,14 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   // This value was eyeballed to give a feel similar to Google Photos.
   static const double _kDrag = 0.0000135;
 
+  // Cache the size of the child because when it changes, the boundaryRect needs
+  // to be recalculated.
+  Size _childSize;
+
   // The _boundaryRect is calculated by adding the boundaryMargin to the size of
   // the child.
   Rect _boundaryRectCached;
   Rect get _boundaryRect {
-    if (_boundaryRectCached != null) {
-      return _boundaryRectCached;
-    }
     assert(_childKey.currentContext != null);
     assert(!widget.boundaryMargin.left.isNaN);
     assert(!widget.boundaryMargin.right.isNaN);
@@ -506,8 +507,12 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     assert(!widget.boundaryMargin.bottom.isNaN);
 
     final RenderBox childRenderBox = _childKey.currentContext.findRenderObject() as RenderBox;
-    final Size childSize = childRenderBox.size;
-    _boundaryRectCached = widget.boundaryMargin.inflateRect(Offset.zero & childSize);
+    if (childRenderBox.size == _childSize && _boundaryRectCached != null) {
+      return _boundaryRectCached;
+    }
+
+    _childSize = childRenderBox.size;
+    _boundaryRectCached = widget.boundaryMargin.inflateRect(Offset.zero & _childSize);
     // Boundaries that are partially infinite are not allowed because Matrix4's
     // rotation and translation methods don't handle infinites well.
     assert(_boundaryRectCached.isFinite ||
