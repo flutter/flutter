@@ -84,11 +84,7 @@ void main() {
       });
       final RestorationManager manager = RestorationManager();
 
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
-        'flutter/restoration',
-        const StandardMethodCodec().encodeMethodCall(MethodCall('push', _createEncodedRestorationData1())),
-        (_) { },
-      );
+      await _pushDataFromEngine(_createEncodedRestorationData1());
 
       RestorationBucket rootBucket;
       manager.rootBucket.then((RestorationBucket bucket) => rootBucket = bucket);
@@ -129,11 +125,7 @@ void main() {
       });
 
       // Send new Data.
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
-        'flutter/restoration',
-        const StandardMethodCodec().encodeMethodCall(MethodCall('push', _createEncodedRestorationData2())),
-        (_) { },
-      );
+      await _pushDataFromEngine(_createEncodedRestorationData2());
 
       expect(rootDecommissioned, isTrue);
       expect(childDecommissioned, isTrue);
@@ -230,7 +222,7 @@ void main() {
       expect(callsToEngine.single.method, 'put');
     });
 
-    testWidgets('Cannot call scheduleUpdate from finalizer', (WidgetTester tester) async {
+    testWidgets('cannot call scheduleUpdate from finalizer', (WidgetTester tester) async {
       final List<MethodCall> callsToEngine = <MethodCall>[];
       SystemChannels.restoration.setMockMethodCallHandler((MethodCall call) async {
         callsToEngine.add(call);
@@ -258,6 +250,14 @@ void main() {
       expect(errors.single.message, 'Calling scheduleUpdate from a finalizer is not allowed.');
     });
   });
+}
+
+Future<void> _pushDataFromEngine(Uint8List data) async {
+  await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+    'flutter/restoration',
+    const StandardMethodCodec().encodeMethodCall(MethodCall('push', data)),
+    (_) { },
+  );
 }
 
 Uint8List _createEncodedRestorationData1() {
