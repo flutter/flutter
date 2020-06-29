@@ -5,11 +5,11 @@
 import 'package:flutter/material.dart';
 
 class MultiWidgetConstructTable extends StatefulWidget {
-  const MultiWidgetConstructTable(this.column, this.row, {Key key})
+  const MultiWidgetConstructTable(this.columnCount, this.rowCount, {Key key})
       : super(key: key);
 
-  final int column;
-  final int row;
+  final int columnCount;
+  final int rowCount;
 
   @override
   _MultiWidgetConstructTableState createState() =>
@@ -49,9 +49,9 @@ class _MultiWidgetConstructTableState extends State<MultiWidgetConstructTable>
     return AnimatedBuilder(
       animation: _controller,
       builder: (BuildContext context, _) {
-        final int totalLength = widget.row * widget.column;
+        final int totalLength = widget.rowCount * widget.columnCount;
         final int widgetCounter = counter * totalLength;
-        final double height = MediaQuery.of(context).size.height / widget.row;
+        final double height = MediaQuery.of(context).size.height / widget.rowCount;
         final double colorPosition = _controller.value;
         final int c1Position = colorPosition.floor();
         final Color c1 = colorList[c1Position % colorList.length][900];
@@ -61,12 +61,12 @@ class _MultiWidgetConstructTableState extends State<MultiWidgetConstructTable>
         return Scaffold(
           body: Table(
             children: List<TableRow>.generate(
-              widget.row,
+              widget.rowCount,
               (int row) => TableRow(
                 children: List<Widget>.generate(
-                  widget.column,
+                  widget.columnCount,
                   (int column) {
-                    final int label = row * widget.column + column;
+                    final int label = row * widget.columnCount + column;
                     return counter % 2 == 0
                         ? Container(
                             // This key forces rebuilding the element
