@@ -964,7 +964,7 @@ Future<void> _pubRunTester(String workingDirectory, {
     environment: pubEnvironment,
   );
   await runCommand(
-    'tester',
+    path.join(pubCache, 'bin', 'tester'),
     <String>[
       '-j$cpus',
       '--ci',
