@@ -64,6 +64,9 @@ class IOSDevices extends PollingDeviceDiscovery {
         'Control of iOS devices or simulators only supported on macOS.'
       );
     }
+    if (!_xcdevice.isInstalled) {
+      return;
+    }
 
     deviceNotifier ??= ItemListNotifier<Device>();
 
@@ -72,7 +75,7 @@ class IOSDevices extends PollingDeviceDiscovery {
 
     // cancel any outstanding subscriptions.
     await _observedDeviceEventsSubscription?.cancel();
-    _observedDeviceEventsSubscription = _xcdevice.observedDeviceEvents().listen(
+    _observedDeviceEventsSubscription = _xcdevice.observedDeviceEvents()?.listen(
       _onDeviceEvent,
       onError: (dynamic error, StackTrace stack) {
         _logger.printTrace('Process exception running xcdevice observe:\n$error\n$stack');
