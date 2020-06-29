@@ -431,6 +431,7 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/initialization.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/layer.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/layer_scene_builder.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/layer_tree.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/mask_filter.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/n_way_canvas.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/painting.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/path.dart
@@ -440,6 +441,7 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/picture_recorder.dar
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/platform_message.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/raster_cache.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/rasterizer.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/skia_object_cache.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/surface.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/text.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/util.dart

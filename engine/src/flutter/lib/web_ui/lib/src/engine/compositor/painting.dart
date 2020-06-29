@@ -9,7 +9,7 @@ part of engine;
 ///
 /// This class is backed by a Skia object that must be explicitly
 /// deleted to avoid a memory leak. This is done by extending [SkiaObject].
-class SkPaint extends SkiaObject implements ui.Paint {
+class SkPaint extends ResurrectableSkiaObject implements ui.Paint {
   SkPaint();
 
   static const ui.Color _defaultPaintColor = ui.Color(0xFF000000);
@@ -22,7 +22,7 @@ class SkPaint extends SkiaObject implements ui.Paint {
   @override
   set blendMode(ui.BlendMode value) {
     _blendMode = value;
-    _syncBlendMode(skiaObject!);
+    _syncBlendMode(skiaObject);
   }
 
   void _syncBlendMode(js.JsObject object) {
@@ -41,7 +41,7 @@ class SkPaint extends SkiaObject implements ui.Paint {
     _syncStyle(skiaObject);
   }
 
-  void _syncStyle(js.JsObject? object) {
+  void _syncStyle(js.JsObject object) {
     js.JsObject? skPaintStyle;
     switch (_style) {
       case ui.PaintingStyle.stroke:
@@ -51,7 +51,7 @@ class SkPaint extends SkiaObject implements ui.Paint {
         skPaintStyle = _skPaintStyleFill;
         break;
     }
-    object!.callMethod('setStyle', <js.JsObject?>[skPaintStyle]);
+    object.callMethod('setStyle', <js.JsObject?>[skPaintStyle]);
   }
 
   ui.PaintingStyle _style = ui.PaintingStyle.fill;
@@ -61,7 +61,7 @@ class SkPaint extends SkiaObject implements ui.Paint {
   @override
   set strokeWidth(double value) {
     _strokeWidth = value;
-    _syncStrokeWidth(skiaObject!);
+    _syncStrokeWidth(skiaObject);
   }
 
   void _syncStrokeWidth(js.JsObject object) {
@@ -95,7 +95,7 @@ class SkPaint extends SkiaObject implements ui.Paint {
   @override
   set isAntiAlias(bool value) {
     _isAntiAlias = value;
-    _syncAntiAlias(skiaObject!);
+    _syncAntiAlias(skiaObject);
   }
 
   void _syncAntiAlias(js.JsObject object) {
@@ -109,7 +109,7 @@ class SkPaint extends SkiaObject implements ui.Paint {
   @override
   set color(ui.Color value) {
     _color = value;
-    _syncColor(skiaObject!);
+    _syncColor(skiaObject);
   }
 
   void _syncColor(js.JsObject object) {
@@ -135,7 +135,7 @@ class SkPaint extends SkiaObject implements ui.Paint {
   @override
   set shader(ui.Shader? value) {
     _shader = value as EngineShader?;
-    _syncShader(skiaObject!);
+    _syncShader(skiaObject);
   }
 
   void _syncShader(js.JsObject object) {
@@ -156,32 +156,15 @@ class SkPaint extends SkiaObject implements ui.Paint {
     _syncMaskFilter(skiaObject);
   }
 
-  void _syncMaskFilter(js.JsObject? object) {
-    js.JsObject? skMaskFilter;
+  void _syncMaskFilter(js.JsObject object) {
+    SkMaskFilter? skMaskFilter;
     if (_maskFilter != null) {
       final ui.BlurStyle blurStyle = _maskFilter!.webOnlyBlurStyle;
       final double sigma = _maskFilter!.webOnlySigma;
 
-      js.JsObject? skBlurStyle;
-      switch (blurStyle) {
-        case ui.BlurStyle.normal:
-          skBlurStyle = canvasKit['BlurStyle']['Normal'];
-          break;
-        case ui.BlurStyle.solid:
-          skBlurStyle = canvasKit['BlurStyle']['Solid'];
-          break;
-        case ui.BlurStyle.outer:
-          skBlurStyle = canvasKit['BlurStyle']['Outer'];
-          break;
-        case ui.BlurStyle.inner:
-          skBlurStyle = canvasKit['BlurStyle']['Inner'];
-          break;
-      }
-
-      skMaskFilter = canvasKit.callMethod(
-          'MakeBlurMaskFilter', <dynamic>[skBlurStyle, sigma, true]);
+      skMaskFilter = SkMaskFilter.blur(blurStyle, sigma);
     }
-    object!.callMethod('setMaskFilter', <js.JsObject?>[skMaskFilter]);
+    object.callMethod('setMaskFilter', <js.JsObject?>[skMaskFilter?.skiaObject]);
   }
 
   ui.MaskFilter? _maskFilter;
@@ -220,14 +203,14 @@ class SkPaint extends SkiaObject implements ui.Paint {
   @override
   set colorFilter(ui.ColorFilter? value) {
     _colorFilter = value as EngineColorFilter?;
-    _syncColorFilter(skiaObject!);
+    _syncColorFilter(skiaObject);
   }
 
   void _syncColorFilter(js.JsObject object) {
     js.JsObject? skColorFilterJs;
     if (_colorFilter != null) {
-      SkColorFilter skFilter = _colorFilter!._toSkColorFilter()!;
-      skColorFilterJs = skFilter.skColorFilter;
+      SkColorFilter? skFilter = _colorFilter!._toSkColorFilter();
+      skColorFilterJs = skFilter!.skiaObject;
     }
     object.callMethod('setColorFilter', <js.JsObject?>[skColorFilterJs]);
   }
@@ -249,13 +232,13 @@ class SkPaint extends SkiaObject implements ui.Paint {
   @override
   set imageFilter(ui.ImageFilter? value) {
     _imageFilter = value as SkImageFilter?;
-    _syncImageFilter(skiaObject!);
+    _syncImageFilter(skiaObject);
   }
 
   void _syncImageFilter(js.JsObject object) {
     js.JsObject? imageFilterJs;
     if (_imageFilter != null) {
-      imageFilterJs = _imageFilter!.skImageFilter;
+      imageFilterJs = _imageFilter!.skiaObject;
     }
     object.callMethod('setImageFilter', <js.JsObject?>[imageFilterJs]);
   }

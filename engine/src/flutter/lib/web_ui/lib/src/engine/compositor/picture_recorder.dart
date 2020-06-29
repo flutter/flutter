@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 part of engine;
 
 class SkPictureRecorder implements ui.PictureRecorder {
@@ -29,7 +28,8 @@ class SkPictureRecorder implements ui.PictureRecorder {
         _recorder!.callMethod('finishRecordingAsPicture');
     _recorder!.callMethod('delete');
     _recorder = null;
-    return SkPicture(skPicture, _cullRect);
+
+    return SkPicture(OneShotSkiaObject(skPicture), _cullRect);
   }
 
   @override

@@ -150,7 +150,8 @@ class ClipPathLayer extends ContainerLayer {
     assert(needsPainting);
 
     paintContext.internalNodesCanvas.save();
-    paintContext.internalNodesCanvas.clipPath(_clipPath, _clipBehavior != ui.Clip.hardEdge);
+    paintContext.internalNodesCanvas
+        .clipPath(_clipPath, _clipBehavior != ui.Clip.hardEdge);
 
     if (_clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
       paintContext.internalNodesCanvas.saveLayer(paintBounds, null);
