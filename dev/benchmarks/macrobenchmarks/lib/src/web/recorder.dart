@@ -948,8 +948,7 @@ String _ratioToPercent(double value) {
 /// Implemented by recorders that use [_RecordingWidgetsBinding] to receive
 /// frame life-cycle calls.
 abstract class FrameRecorder {
-  /// Called by the recorder when it stops recording and doesn't need to collect
-  /// any more data.
+  /// Add a callback that will be called by the recorder when it stops recording.
   void registerDidStop(VoidCallback cb);
 
   /// Called just before calling [SchedulerBinding.handleDrawFrame].
