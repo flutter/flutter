@@ -70,6 +70,8 @@
   "dateRangePickerHelpText": "তারিখের ব্যাপ্তি বেছে নিন",
   "calendarModeButtonLabel": "ক্যালেন্ডার মোডে বদল করুন",
   "inputDateModeButtonLabel": "ইনপুট মোডে বদল করুন",
+  "licensesPackageDetailTextOne": "1 license",
+  "licensesPackageDetailTextOther": "$licenseCount licenses",
   "timePickerDialHelpText": "SELECT TIME",
   "timePickerInputHelpText": "ENTER TIME",
   "timePickerHourLabel": "Hour",

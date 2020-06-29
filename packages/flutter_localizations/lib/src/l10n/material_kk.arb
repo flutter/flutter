@@ -72,6 +72,8 @@
   "dateRangePickerHelpText": "АУҚЫМДЫ ТАҢДАУ",
   "calendarModeButtonLabel": "Күнтізбеге ауысу",
   "inputDateModeButtonLabel": "Мәтін енгізуге ауысу",
+  "licensesPackageDetailTextOne": "1 license",
+  "licensesPackageDetailTextOther": "$licenseCount licenses",
   "timePickerDialHelpText": "SELECT TIME",
   "timePickerInputHelpText": "ENTER TIME",
   "timePickerHourLabel": "Hour",

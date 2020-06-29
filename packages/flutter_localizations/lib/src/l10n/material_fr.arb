@@ -72,6 +72,8 @@
   "dateRangePickerHelpText": "SÉLECTIONNER UNE PLAGE",
   "calendarModeButtonLabel": "Passer à l'agenda",
   "inputDateModeButtonLabel": "Passer à la saisie",
+  "licensesPackageDetailTextOne": "1 license",
+  "licensesPackageDetailTextOther": "$licenseCount licenses",
   "timePickerDialHelpText": "SELECT TIME",
   "timePickerInputHelpText": "ENTER TIME",
   "timePickerHourLabel": "Hour",

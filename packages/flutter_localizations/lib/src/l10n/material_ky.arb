@@ -70,6 +70,8 @@
   "dateRangePickerHelpText": "ДИАПАЗОНДУ ТАНДОО",
   "calendarModeButtonLabel": "Жылнаамага которулуңуз",
   "inputDateModeButtonLabel": "Терип киргизүү режимине которулуңуз",
+  "licensesPackageDetailTextOne": "1 license",
+  "licensesPackageDetailTextOther": "$licenseCount licenses",
   "timePickerDialHelpText": "SELECT TIME",
   "timePickerInputHelpText": "ENTER TIME",
   "timePickerHourLabel": "Hour",

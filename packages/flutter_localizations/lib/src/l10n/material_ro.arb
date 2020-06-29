@@ -74,6 +74,8 @@
   "dateRangePickerHelpText": "SELECTAȚI UN INTERVAL",
   "calendarModeButtonLabel": "Comutați la calendar",
   "inputDateModeButtonLabel": "Comutați la introducerea textului",
+  "licensesPackageDetailTextOne": "1 license",
+  "licensesPackageDetailTextOther": "$licenseCount licenses",
   "timePickerDialHelpText": "SELECT TIME",
   "timePickerInputHelpText": "ENTER TIME",
   "timePickerHourLabel": "Hour",

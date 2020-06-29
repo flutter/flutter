@@ -76,6 +76,8 @@
   "dateRangePickerHelpText": "ВЫБЕРИТЕ ДИАПАЗОН ДАТ",
   "calendarModeButtonLabel": "Переключиться на календарь",
   "inputDateModeButtonLabel": "Переключиться на ручной ввод",
+  "licensesPackageDetailTextOne": "1 license",
+  "licensesPackageDetailTextOther": "$licenseCount licenses",
   "timePickerDialHelpText": "SELECT TIME",
   "timePickerInputHelpText": "ENTER TIME",
   "timePickerHourLabel": "Hour",

@@ -71,6 +71,8 @@
   "dateRangePickerHelpText": "เลือกช่วง",
   "calendarModeButtonLabel": "เปลี่ยนเป็นปฏิทิน",
   "inputDateModeButtonLabel": "เปลี่ยนเป็นโหมดป้อนข้อความ",
+  "licensesPackageDetailTextOne": "1 license",
+  "licensesPackageDetailTextOther": "$licenseCount licenses",
   "timePickerDialHelpText": "SELECT TIME",
   "timePickerInputHelpText": "ENTER TIME",
   "timePickerHourLabel": "Hour",

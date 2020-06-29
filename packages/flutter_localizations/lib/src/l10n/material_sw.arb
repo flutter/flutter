@@ -72,6 +72,8 @@
   "dateRangePickerHelpText": "CHAGUA KIPINDI",
   "calendarModeButtonLabel": "Badili utumie hali ya kalenda",
   "inputDateModeButtonLabel": "Badili utumie hali ya kuweka maandishi",
+  "licensesPackageDetailTextOne": "1 license",
+  "licensesPackageDetailTextOther": "$licenseCount licenses",
   "timePickerDialHelpText": "SELECT TIME",
   "timePickerInputHelpText": "ENTER TIME",
   "timePickerHourLabel": "Hour",

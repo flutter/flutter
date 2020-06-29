@@ -70,6 +70,8 @@
   "dateRangePickerHelpText": "ZGJIDH GAMËN",
   "calendarModeButtonLabel": "Kalo te kalendari",
   "inputDateModeButtonLabel": "Kalo te hyrja",
+  "licensesPackageDetailTextOne": "1 license",
+  "licensesPackageDetailTextOther": "$licenseCount licenses",
   "timePickerDialHelpText": "SELECT TIME",
   "timePickerInputHelpText": "ENTER TIME",
   "timePickerHourLabel": "Hour",

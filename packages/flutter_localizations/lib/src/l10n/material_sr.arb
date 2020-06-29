@@ -73,6 +73,8 @@
   "dateRangePickerHelpText": "ИЗАБЕРИТЕ ПЕРИОД",
   "calendarModeButtonLabel": "Пређите на календар",
   "inputDateModeButtonLabel": "Пређите на унос",
+  "licensesPackageDetailTextOne": "1 license",
+  "licensesPackageDetailTextOther": "$licenseCount licenses",
   "timePickerDialHelpText": "SELECT TIME",
   "timePickerInputHelpText": "ENTER TIME",
   "timePickerHourLabel": "Hour",

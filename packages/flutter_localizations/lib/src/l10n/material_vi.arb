@@ -71,6 +71,8 @@
   "dateRangePickerHelpText": "CHỌN PHẠM VI",
   "calendarModeButtonLabel": "Chuyển sang lịch",
   "inputDateModeButtonLabel": "Chuyển sang chế độ nhập",
+  "licensesPackageDetailTextOne": "1 license",
+  "licensesPackageDetailTextOther": "$licenseCount licenses",
   "timePickerDialHelpText": "SELECT TIME",
   "timePickerInputHelpText": "ENTER TIME",
   "timePickerHourLabel": "Hour",

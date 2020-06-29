@@ -71,6 +71,8 @@
   "dateRangePickerHelpText": "انتخاب محدوده",
   "calendarModeButtonLabel": "رفتن به تقویم",
   "inputDateModeButtonLabel": "رفتن به ورودی",
+  "licensesPackageDetailTextOne": "1 license",
+  "licensesPackageDetailTextOther": "$licenseCount licenses",
   "timePickerDialHelpText": "SELECT TIME",
   "timePickerInputHelpText": "ENTER TIME",
   "timePickerHourLabel": "Hour",

@@ -75,6 +75,8 @@
   "dateRangePickerHelpText": "WYBIERZ ZAKRES",
   "calendarModeButtonLabel": "Przełącz na kalendarz",
   "inputDateModeButtonLabel": "Przełącz na wpisywanie",
+  "licensesPackageDetailTextOne": "1 license",
+  "licensesPackageDetailTextOther": "$licenseCount licenses",
   "timePickerDialHelpText": "SELECT TIME",
   "timePickerInputHelpText": "ENTER TIME",
   "timePickerHourLabel": "Hour",

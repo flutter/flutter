@@ -72,6 +72,8 @@
   "dateRangePickerHelpText": "வரம்பைத் தேர்ந்தெடுக்கவும்",
   "calendarModeButtonLabel": "கேலெண்டருக்கு மாற்று",
   "inputDateModeButtonLabel": "உள்ளீட்டுக்கு மாற்று",
+  "licensesPackageDetailTextOne": "1 license",
+  "licensesPackageDetailTextOther": "$licenseCount licenses",
   "timePickerDialHelpText": "SELECT TIME",
   "timePickerInputHelpText": "ENTER TIME",
   "timePickerHourLabel": "Hour",

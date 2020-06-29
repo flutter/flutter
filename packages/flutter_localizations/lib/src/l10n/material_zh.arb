@@ -71,6 +71,8 @@
   "dateRangePickerHelpText": "选择范围",
   "calendarModeButtonLabel": "切换到日历模式",
   "inputDateModeButtonLabel": "切换到输入模式",
+  "licensesPackageDetailTextOne": "1 license",
+  "licensesPackageDetailTextOther": "$licenseCount licenses",
   "timePickerDialHelpText": "SELECT TIME",
   "timePickerInputHelpText": "ENTER TIME",
   "timePickerHourLabel": "Hour",

@@ -70,6 +70,8 @@
   "dateRangePickerHelpText": "ORALIQNI TANLANG",
   "calendarModeButtonLabel": "Taqvimda ochish",
   "inputDateModeButtonLabel": "Mustaqil kiritish",
+  "licensesPackageDetailTextOne": "1 license",
+  "licensesPackageDetailTextOther": "$licenseCount licenses",
   "timePickerDialHelpText": "SELECT TIME",
   "timePickerInputHelpText": "ENTER TIME",
   "timePickerHourLabel": "Hour",

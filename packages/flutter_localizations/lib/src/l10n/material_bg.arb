@@ -71,6 +71,8 @@
   "dateRangePickerHelpText": "ИЗБИРАНЕ НА ПЕРИОД ОТ ВРЕМЕ",
   "calendarModeButtonLabel": "Превключване към календара",
   "inputDateModeButtonLabel": "Превключване към въвеждане",
+  "licensesPackageDetailTextOne": "1 license",
+  "licensesPackageDetailTextOther": "$licenseCount licenses",
   "timePickerDialHelpText": "SELECT TIME",
   "timePickerInputHelpText": "ENTER TIME",
   "timePickerHourLabel": "Hour",

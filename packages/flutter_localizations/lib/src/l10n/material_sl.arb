@@ -75,6 +75,8 @@
   "dateRangePickerHelpText": "IZBIRA OBDOBJA",
   "calendarModeButtonLabel": "Preklop na koledar",
   "inputDateModeButtonLabel": "Preklop na vnos",
+  "licensesPackageDetailTextOne": "1 license",
+  "licensesPackageDetailTextOther": "$licenseCount licenses",
   "timePickerDialHelpText": "SELECT TIME",
   "timePickerInputHelpText": "ENTER TIME",
   "timePickerHourLabel": "Hour",

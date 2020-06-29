@@ -75,6 +75,8 @@
   "dateRangePickerHelpText": "VYBERTE ROZSAH",
   "calendarModeButtonLabel": "Prepnúť na kalendár",
   "inputDateModeButtonLabel": "Prepnúť na zadávanie",
+  "licensesPackageDetailTextOne": "1 license",
+  "licensesPackageDetailTextOther": "$licenseCount licenses",
   "timePickerDialHelpText": "SELECT TIME",
   "timePickerInputHelpText": "ENTER TIME",
   "timePickerHourLabel": "Hour",
