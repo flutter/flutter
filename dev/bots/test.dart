@@ -964,8 +964,11 @@ Future<void> _pubRunTester(String workingDirectory, {
     environment: pubEnvironment,
   );
   await runCommand(
-    path.join(pubCache, 'bin', 'tester'),
+    pub,
     <String>[
+      'global',
+      'run',
+      'tester',
       '-j$cpus',
       '--ci',
       if (perTestTimeout != null)
