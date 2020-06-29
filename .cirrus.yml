@@ -542,6 +542,7 @@ task:
       - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
       - flutter precache
       - flutter doctor -v
+    reupload_on_changes: false
   pub_cache:
     folder: $HOME/.pub-cache
     fingerprint_script: echo $OS; grep -r --include=pubspec.yaml 'PUBSPEC CHECKSUM' "$CIRRUS_WORKING_DIR"
@@ -549,6 +550,7 @@ task:
       - git fetch origin
       - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
       - flutter update-packages
+    reupload_on_changes: false
   setup_script:
     - date
     - which flutter
