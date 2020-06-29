@@ -176,7 +176,8 @@ void main() {
     });
   });
 
-  testWidgets('Paste only appears when clipboard has contents', (WidgetTester tester) async {
+  // TODO(justinmc): https://github.com/flutter/flutter/issues/60145
+  testWidgets('Paste always appears regardless of clipboard content on iOS', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
@@ -202,8 +203,8 @@ void main() {
     await tester.tapAt(textOffsetToPosition(tester, index));
     await tester.pumpAndSettle();
 
-    // No Paste yet, because nothing has been copied.
-    expect(find.text('Paste'), findsNothing);
+    // Paste is showing even though clipboard is empty.
+    expect(find.text('Paste'), findsOneWidget);
     expect(find.text('Copy'), findsOneWidget);
     expect(find.text('Cut'), findsOneWidget);
 
@@ -219,7 +220,7 @@ void main() {
     await tester.tapAt(textOffsetToPosition(tester, index));
     await tester.pumpAndSettle();
 
-    // Paste now shows.
+    // Paste still shows.
     expect(find.text('Paste'), findsOneWidget);
     expect(find.text('Copy'), findsOneWidget);
     expect(find.text('Cut'), findsOneWidget);

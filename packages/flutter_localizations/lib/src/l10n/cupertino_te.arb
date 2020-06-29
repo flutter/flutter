@@ -19,6 +19,6 @@
   "copyButtonLabel": "కాపీ చేయి",
   "pasteButtonLabel": "అతికించు",
   "selectAllButtonLabel": "అన్నింటినీ ఎంచుకోండి",
-  "tabSemanticsLabel": "TBD",
+  "tabSemanticsLabel": "$tabCountలో $tabIndexవ ట్యాబ్",
   "modalBarrierDismissLabel": "విస్మరించు"
 }
