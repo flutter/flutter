@@ -322,11 +322,13 @@ void main() {
 
       test.forward(from: 0.0);
       count = await tester.pumpContinuous(const Duration(milliseconds: 80));
-      expect(count, 1 + (80/16.685).floor()); // ends after 80 ms
+      // ends after 80 ms
+      expect(count, 1 + (80E3/kDefaultFrameIntervalInMicroseconds).floor());
 
       test.forward(from: 0.4);
       count = await tester.pumpContinuous(const Duration(seconds: 1));
-      expect(count, 1 + (120/16.685).ceil()); // remaining animation time 120 ms
+      // remaining animation time 120 ms
+      expect(count, 1 + (120E3/kDefaultFrameIntervalInMicroseconds).ceil());
 
       test.dispose();
     });

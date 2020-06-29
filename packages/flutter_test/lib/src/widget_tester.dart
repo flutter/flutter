@@ -48,6 +48,12 @@ export 'package:test_api/test_api.dart' hide
 /// Signature for callback to [testWidgets] and [benchmarkWidgets].
 typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 
+/// The default refresh rate for continuous pumping
+const double kDefaultRefreshRate = 59.94;
+
+/// The default frame interval for continuous pumping
+const int kDefaultFrameIntervalInMicroseconds = 1E6 ~/ kDefaultRefreshRate;
+
 /// Runs the [callback] inside the Flutter test environment.
 ///
 /// Use this function for testing custom [StatelessWidget]s and
@@ -572,8 +578,8 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// This does not promise settle of the widget, and there maybe remaining
   /// animation and therefore undisposed `Ticker`s.
   ///
-  /// This will call call [pump] at least once, even if no frames are scheduled
-  /// when the function is called, to flush any pending microtasks which may
+  /// This will call [pump] at least once, even if no frames are scheduled when
+  /// the function is called, to flush any pending microtasks which may
   /// themselves schedule a frame.
   ///
   /// `frequency` specify the frequency (in Hz) for frame requests. This is an
@@ -595,7 +601,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// number of pumps to help cath regressions that cause loss of frame(s).
   Future<int> pumpContinuous(Duration duration, {
     EnginePhase phase = EnginePhase.sendSemanticsUpdate,
-    double frequency = 59.94,
+    double frequency = kDefaultRefreshRate,
   }) async {
     assert(duration != null);
     assert(duration > Duration.zero);
@@ -631,7 +637,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   Future<void> pumpFrames(
     Widget target,
     Duration maxDuration, [
-    Duration interval = const Duration(milliseconds: 16, microseconds: 683),
+    Duration interval = const Duration(microseconds: kDefaultFrameIntervalInMicroseconds),
   ]) {
     assert(maxDuration != null);
     // The interval following the last frame doesn't have to be within the fullDuration.

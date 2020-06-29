@@ -1218,7 +1218,8 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
   /// which can cause differences in behavior.
   fullyLive,
 
-  /// Ignore any request to schedule a frame.
+  /// Ignore any request to schedule a frame. This is not benchmark for general
+  /// performance test but intended for drawing frames beyond engine requests.
   ///
   /// This is intended to be used by benchmarks (hence the name) that drive the
   /// pipeline directly. It tells the binding to entirely ignore requests for a
