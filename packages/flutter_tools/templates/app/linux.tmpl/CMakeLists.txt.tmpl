@@ -79,6 +79,11 @@ if(PLUGIN_BUNDLED_LIBRARIES)
     COMPONENT Runtime)
 endif()
 
+install(FILES app.desktop DESTINATION "${INSTALL_BUNDLE_DATA_DIR}/applications" RENAME "{{projectName}}.desktop"
+  COMPONENT Runtime)
+install(FILES icon.png DESTINATION "${INSTALL_BUNDLE_DATA_DIR}/icons" RENAME "{{projectName}}.png"
+  COMPONENT Runtime)
+
 # Fully re-copy the assets directory on each build to avoid having stale files
 # from a previous install.
 set(FLUTTER_ASSET_DIR_NAME "flutter_assets")

@@ -76,6 +76,8 @@
         "templates/app/ios.tmpl/Runner.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist",
         "templates/app/ios.tmpl/Runner.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings",
         "templates/app/lib/main.dart.tmpl",
+        "templates/app/linux.tmpl/app.desktop.tmpl",
+        "templates/app/linux.tmpl/icon.png",
         "templates/app/linux.tmpl/my_application.cc.tmpl",
         "templates/app/linux.tmpl/.gitignore",
         "templates/app/linux.tmpl/CMakeLists.txt.tmpl",
