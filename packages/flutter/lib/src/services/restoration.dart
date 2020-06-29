@@ -130,19 +130,22 @@ class RestorationManager {
   ///  * [RootRestorationScope], which makes the root bucket available in the
   ///    [Widget] tree.
   Future<RestorationBucket> get rootBucket {
+    if (!_isListeningForEngineUpdates) {
+      SystemChannels.restoration.setMethodCallHandler(_methodHandler);
+      _isListeningForEngineUpdates = true;
+    }
     if (_rootBucket != null) {
       return SynchronousFuture<RestorationBucket>(_rootBucket);
     }
     if (_pendingRootBucket == null) {
       _pendingRootBucket = Completer<RestorationBucket>();
       _getRootBucketFromEngine();
-      // Start listening to updates.
-      SystemChannels.restoration.setMethodCallHandler(_methodHandler);
     }
     return _pendingRootBucket.future;
   }
   RestorationBucket _rootBucket;
   Completer<RestorationBucket> _pendingRootBucket;
+  bool _isListeningForEngineUpdates = false;
 
   Future<void> _getRootBucketFromEngine() async {
     final Map<String, dynamic> data = await retrieveFromEngine();
@@ -284,7 +287,8 @@ class RestorationManager {
     // data is finalized and sent to the engine at the end of the frame. They
     // check whether this hope became reality in a finalizer callback.
 
-    assert(!_debugDoingUpdate);
+    assert(_rootBucket != null);
+    assert(!_debugDoingUpdate, 'Calling scheduleUpdate from a finalizer is not allowed.');
     if (finalizer != null) {
       _finalizers.add(finalizer);
     }
