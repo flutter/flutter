@@ -36,8 +36,7 @@ class _NestedMouseRegion extends StatelessWidget {
 ///
 /// Measures our ability to hit test mouse regions.
 class BenchMouseRegionGridHover extends WidgetRecorder {
-  BenchMouseRegionGridHover()
-    : super(name: benchmarkName) {
+  BenchMouseRegionGridHover() : super(name: benchmarkName) {
     tester = _Tester(onDataPoint: handleDataPoint);
   }
 

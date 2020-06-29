@@ -345,10 +345,10 @@ abstract class WidgetRecorder extends Recorder implements FrameRecorder {
   /// pumping frames automatically.
   Widget createWidget();
 
-  final List<VoidCallback> _didStops = <VoidCallback>[];
+  final List<VoidCallback> _didStopCallbacks = <VoidCallback>[];
   @override
   void registerDidStop(VoidCallback fn) {
-    _didStops.add(fn);
+    _didStopCallbacks.add(fn);
   }
 
   @override
@@ -376,7 +376,7 @@ abstract class WidgetRecorder extends Recorder implements FrameRecorder {
     if (shouldContinue()) {
       window.scheduleFrame();
     } else {
-      _didStops.forEach((VoidCallback fn) { fn(); });
+      _didStopCallbacks.forEach((VoidCallback fn) { fn(); });
       _runCompleter.complete();
     }
   }
@@ -440,10 +440,10 @@ abstract class WidgetBuildRecorder extends Recorder implements FrameRecorder {
   /// consider using [WidgetRecorder].
   Widget createWidget();
 
-  final List<VoidCallback> _didStops = <VoidCallback>[];
+  final List<VoidCallback> _didStopCallbacks = <VoidCallback>[];
   @override
   void registerDidStop(VoidCallback fn) {
-    _didStops.add(fn);
+    _didStopCallbacks.add(fn);
   }
 
   @override
@@ -490,7 +490,7 @@ abstract class WidgetBuildRecorder extends Recorder implements FrameRecorder {
       showWidget = !showWidget;
       _hostState._setStateTrampoline();
     } else {
-      _didStops.forEach((VoidCallback fn) { fn(); });
+      _didStopCallbacks.forEach((VoidCallback fn) { fn(); });
       _runCompleter.complete();
     }
   }
