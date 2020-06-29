@@ -470,7 +470,7 @@ class _MonthPicker extends StatefulWidget {
   final SelectableDayPredicate selectableDayPredicate;
 
   @override
-  State<StatefulWidget> createState() => _MonthPickerState();
+  _MonthPickerState createState() => _MonthPickerState();
 }
 
 class _MonthPickerState extends State<_MonthPicker> {
