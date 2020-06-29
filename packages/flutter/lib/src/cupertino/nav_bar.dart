@@ -790,7 +790,7 @@ class _LargeTitleNavigationBarSliverDelegate
 
     final Widget navBar = _wrapWithBackground(
       border: border,
-      backgroundColor: CupertinoDynamicColor.resolve(backgroundColor, context)!,
+      backgroundColor: showLargeTitle ? const Color(0x00000000) : CupertinoDynamicColor.resolve(backgroundColor, context)!,
       brightness: brightness,
       child: DefaultTextStyle(
         style: CupertinoTheme.of(context).textTheme.textStyle,
