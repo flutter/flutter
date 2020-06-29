@@ -1016,6 +1016,23 @@ void main() {
     });
   });
 
+  group('AndroidViewSurface', () {
+    FakeAndroidViewController controller;
+
+    setUp(() {
+      controller = FakeAndroidViewController(0);
+    });
+
+    testWidgets('AndroidViewSurface sets pointTransformer of view controller', (WidgetTester tester) async {
+      final AndroidViewSurface surface = AndroidViewSurface(
+        controller: controller,
+        hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+        gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},);
+      await tester.pumpWidget(surface);
+      expect(controller.pointTransformer, isNotNull);
+    });
+  });
+
   group('UiKitView', () {
     testWidgets('Create UIView', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();

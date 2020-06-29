@@ -52,6 +52,76 @@ class FakePlatformViewController extends PlatformViewController {
   }
 }
 
+class FakeAndroidViewController implements AndroidViewController {
+  FakeAndroidViewController(this.viewId);
+
+  bool disposed = false;
+  bool focusCleared = false;
+
+  /// Events that are dispatched;
+  List<PointerEvent> dispatchedPointerEvents = <PointerEvent>[];
+
+  @override
+  final int viewId;
+
+  @override
+  Offset Function(Offset position) pointTransformer;
+
+  @override
+  Future<void> dispatchPointerEvent(PointerEvent event) async {
+    dispatchedPointerEvents.add(event);
+  }
+
+  void clearTestingVariables() {
+    dispatchedPointerEvents.clear();
+    disposed = false;
+    focusCleared = false;
+  }
+
+  @override
+  Future<void> dispose() async {
+    disposed = true;
+  }
+
+  @override
+  Future<void> clearFocus() async {
+    focusCleared = true;
+  }
+
+  @override
+  Future<void> setSize(Size size) {
+    throw UnimplementedError();
+  }
+
+  @override
+  int get textureId => throw UnimplementedError();
+
+  @override
+  bool isCreated;
+
+  @override
+  void addOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) =>
+      throw UnimplementedError();
+
+  @override
+  int get id => throw UnimplementedError();
+
+  @override
+  void removeOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> sendMotionEvent(AndroidMotionEvent event) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> setLayoutDirection(TextDirection layoutDirection) {
+    throw UnimplementedError();
+  }
+}
+
 class FakeAndroidPlatformViewsController {
   FakeAndroidPlatformViewsController() {
     SystemChannels.platform_views.setMockMethodCallHandler(_onMethodCall);
