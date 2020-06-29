@@ -71,8 +71,6 @@
   "dateRangePickerHelpText": "SELEZIONA INTERVALLO",
   "calendarModeButtonLabel": "Passa al calendario",
   "inputDateModeButtonLabel": "Passa alla modalità di immissione",
-  "licensesPackageDetailTextOne": "1 license",
-  "licensesPackageDetailTextOther": "$licenseCount licenses",
   "timePickerDialHelpText": "SELECT TIME",
   "timePickerInputHelpText": "ENTER TIME",
   "timePickerHourLabel": "Hour",

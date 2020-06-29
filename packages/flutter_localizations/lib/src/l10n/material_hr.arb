@@ -73,8 +73,6 @@
   "dateRangePickerHelpText": "ODABERITE RASPON",
   "calendarModeButtonLabel": "Prijeđite na kalendar",
   "inputDateModeButtonLabel": "Prijeđite na unos",
-  "licensesPackageDetailTextOne": "1 license",
-  "licensesPackageDetailTextOther": "$licenseCount licenses",
   "timePickerDialHelpText": "SELECT TIME",
   "timePickerInputHelpText": "ENTER TIME",
   "timePickerHourLabel": "Hour",

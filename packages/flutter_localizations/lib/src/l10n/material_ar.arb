@@ -78,8 +78,6 @@
   "dateRangePickerHelpText": "اختيار النطاق",
   "calendarModeButtonLabel": "التبديل إلى التقويم",
   "inputDateModeButtonLabel": "التبديل إلى الإدخال",
-  "licensesPackageDetailTextOne": "1 license",
-  "licensesPackageDetailTextOther": "$licenseCount licenses",
   "timePickerDialHelpText": "SELECT TIME",
   "timePickerInputHelpText": "ENTER TIME",
   "timePickerHourLabel": "Hour",

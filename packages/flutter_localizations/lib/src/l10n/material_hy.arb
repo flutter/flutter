@@ -76,8 +76,6 @@
   "dateRangePickerHelpText": "ԸՆՏՐԵԼ ԺԱՄԱՆԱԿԱՀԱՏՎԱԾ",
   "calendarModeButtonLabel": "Անցնել օրացույցին",
   "inputDateModeButtonLabel": "Անցնել ներածման ռեժիմին",
-  "licensesPackageDetailTextOne": "1 license",
-  "licensesPackageDetailTextOther": "$licenseCount licenses",
   "timePickerDialHelpText": "SELECT TIME",
   "timePickerInputHelpText": "ENTER TIME",
   "timePickerHourLabel": "Hour",

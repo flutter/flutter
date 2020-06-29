@@ -37,8 +37,6 @@
   "aboutListTileTitle": "About $applicationName",
   "backButtonTooltip": "Back",
   "licensesPageTitle": "Licences",
-  "licensesPackageDetailTextOne": "1 licence",
-  "licensesPackageDetailTextOther": "$licenseCount licences",
   "okButtonLabel": "OK",
   "pasteButtonLabel": "PASTE",
   "previousMonthTooltip": "Previous month",

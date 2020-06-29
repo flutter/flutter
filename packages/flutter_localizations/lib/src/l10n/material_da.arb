@@ -71,8 +71,6 @@
   "dateRangePickerHelpText": "VÆLG OMRÅDE",
   "calendarModeButtonLabel": "Skift til kalender",
   "inputDateModeButtonLabel": "Skift til input",
-  "licensesPackageDetailTextOne": "1 license",
-  "licensesPackageDetailTextOther": "$licenseCount licenses",
   "timePickerDialHelpText": "SELECT TIME",
   "timePickerInputHelpText": "ENTER TIME",
   "timePickerHourLabel": "Hour",

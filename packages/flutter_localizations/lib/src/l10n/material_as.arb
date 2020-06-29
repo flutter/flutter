@@ -70,8 +70,6 @@
   "dateRangePickerHelpText": "পৰিসৰ বাছনি কৰক",
   "calendarModeButtonLabel": "কেলেণ্ডাৰলৈ সলনি কৰক",
   "inputDateModeButtonLabel": "ইনপুটলৈ সলনি কৰক",
-  "licensesPackageDetailTextOne": "1 license",
-  "licensesPackageDetailTextOther": "$licenseCount licenses",
   "timePickerDialHelpText": "SELECT TIME",
   "timePickerInputHelpText": "ENTER TIME",
   "timePickerHourLabel": "Hour",

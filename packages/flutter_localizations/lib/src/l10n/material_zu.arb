@@ -70,8 +70,6 @@
   "dateRangePickerHelpText": "KHETHA IBANGA",
   "calendarModeButtonLabel": "Shintshela kukhalenda",
   "inputDateModeButtonLabel": "Shintshela kokokufaka",
-  "licensesPackageDetailTextOne": "1 license",
-  "licensesPackageDetailTextOther": "$licenseCount licenses",
   "timePickerDialHelpText": "SELECT TIME",
   "timePickerInputHelpText": "ENTER TIME",
   "timePickerHourLabel": "Hour",

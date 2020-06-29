@@ -72,8 +72,6 @@
   "dateRangePickerHelpText": "PILIH JULAT",
   "calendarModeButtonLabel": "Tukar kepada kalendar",
   "inputDateModeButtonLabel": "Tukar kepada input",
-  "licensesPackageDetailTextOne": "1 license",
-  "licensesPackageDetailTextOther": "$licenseCount licenses",
   "timePickerDialHelpText": "SELECT TIME",
   "timePickerInputHelpText": "ENTER TIME",
   "timePickerHourLabel": "Hour",

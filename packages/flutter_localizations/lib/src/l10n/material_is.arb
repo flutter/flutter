@@ -70,8 +70,6 @@
   "dateRangePickerHelpText": "VELJA SVIÐ",
   "calendarModeButtonLabel": "Skipta yfir í dagatal",
   "inputDateModeButtonLabel": "Skipta yfir í innslátt",
-  "licensesPackageDetailTextOne": "1 license",
-  "licensesPackageDetailTextOther": "$licenseCount licenses",
   "timePickerDialHelpText": "SELECT TIME",
   "timePickerInputHelpText": "ENTER TIME",
   "timePickerHourLabel": "Hour",
