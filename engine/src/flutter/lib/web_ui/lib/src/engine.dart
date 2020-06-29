@@ -5,7 +5,8 @@
 library engine;
 
 import 'dart:async';
-import 'dart:collection' show ListBase, IterableBase;
+import 'dart:collection'
+    show ListBase, IterableBase, DoubleLinkedQueue, DoubleLinkedQueueEntry;
 import 'dart:convert' hide Codec;
 import 'dart:developer' as developer;
 import 'dart:html' as html;
@@ -37,6 +38,7 @@ part 'engine/compositor/initialization.dart';
 part 'engine/compositor/layer.dart';
 part 'engine/compositor/layer_scene_builder.dart';
 part 'engine/compositor/layer_tree.dart';
+part 'engine/compositor/mask_filter.dart';
 part 'engine/compositor/n_way_canvas.dart';
 part 'engine/compositor/path.dart';
 part 'engine/compositor/painting.dart';
@@ -46,6 +48,7 @@ part 'engine/compositor/picture_recorder.dart';
 part 'engine/compositor/platform_message.dart';
 part 'engine/compositor/raster_cache.dart';
 part 'engine/compositor/rasterizer.dart';
+part 'engine/compositor/skia_object_cache.dart';
 part 'engine/compositor/surface.dart';
 part 'engine/compositor/text.dart';
 part 'engine/compositor/util.dart';
