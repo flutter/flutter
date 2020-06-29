@@ -115,7 +115,7 @@ class CupertinoLocalizationAf extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Kies alles';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'Oortjie \$tabIndex van \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -269,7 +269,7 @@ class CupertinoLocalizationAm extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'ሁሉንም ምረጥ';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'ትር \$tabIndex ከ\$tabCount';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -423,7 +423,7 @@ class CupertinoLocalizationAr extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'اختيار الكل';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'علامة التبويب \$tabIndex من \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => 'ساعات';
@@ -577,7 +577,7 @@ class CupertinoLocalizationAs extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'সকলো বাছনি কৰক';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => '\$tabCount টা টেবৰ \$tabIndex নম্বৰটো';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -731,7 +731,7 @@ class CupertinoLocalizationAz extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Hamısını seçin';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'Tab \$tabIndex/\$tabCount';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -885,7 +885,7 @@ class CupertinoLocalizationBe extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Выбраць усе';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'Укладка \$tabIndex з \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => 'гадзіны';
@@ -1039,7 +1039,7 @@ class CupertinoLocalizationBg extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Избиране на всички';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'Раздел \$tabIndex от \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -1193,7 +1193,7 @@ class CupertinoLocalizationBn extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'সব বেছে নিন';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => '\$tabCount-এর মধ্যে \$tabIndex নম্বর ট্যাব';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -1347,7 +1347,7 @@ class CupertinoLocalizationBs extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Odaberi sve';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'Kartica \$tabIndex od \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => 'sata';
@@ -1501,7 +1501,7 @@ class CupertinoLocalizationCa extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Selecciona-ho tot';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'Pestanya \$tabIndex de \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -1655,7 +1655,7 @@ class CupertinoLocalizationCs extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Vybrat vše';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'Karta \$tabIndex z \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => 'hodiny';
@@ -1809,7 +1809,7 @@ class CupertinoLocalizationDa extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Vælg alle';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'Fane \$tabIndex af \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -1963,7 +1963,7 @@ class CupertinoLocalizationDe extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Alles auswählen';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'Tab \$tabIndex von \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -1990,10 +1990,10 @@ class CupertinoLocalizationDe extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'min';
+  String get timerPickerMinuteLabelOne => 'Min.';
 
   @override
-  String get timerPickerMinuteLabelOther => 'min';
+  String get timerPickerMinuteLabelOther => 'Min.';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -2021,6 +2021,37 @@ class CupertinoLocalizationDe extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Heute';
+}
+
+/// The translations for German, as used in Switzerland (`de_CH`).
+class CupertinoLocalizationDeCh extends CupertinoLocalizationDe {
+  /// Create an instance of the translation bundle for German, as used in Switzerland.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  const CupertinoLocalizationDeCh({
+    String localeName = 'de_CH',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat dayFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat singleDigitHourFormat,
+    @required intl.DateFormat singleDigitMinuteFormat,
+    @required intl.DateFormat doubleDigitMinuteFormat,
+    @required intl.DateFormat singleDigitSecondFormat,
+    @required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
+
+  @override
+  String get modalBarrierDismissLabel => 'Schliessen';
 }
 
 /// The translations for Modern Greek (`el`).
@@ -2117,7 +2148,7 @@ class CupertinoLocalizationEl extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Επιλογή όλων';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'Καρτέλα \$tabIndex από \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -2697,7 +2728,7 @@ class CupertinoLocalizationEs extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Seleccionar todos';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'Pestaña \$tabIndex de \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -3711,7 +3742,7 @@ class CupertinoLocalizationEt extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Vali kõik';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => '\$tabIndex. vaheleht \$tabCount-st';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -3865,7 +3896,7 @@ class CupertinoLocalizationEu extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Hautatu guztiak';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => '\$tabIndex/\$tabCount fitxa';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -4019,7 +4050,7 @@ class CupertinoLocalizationFa extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'انتخاب همه';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'برگه \$tabIndex از \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -4173,7 +4204,7 @@ class CupertinoLocalizationFi extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Valitse kaikki';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'Välilehti \$tabIndex/\$tabCount';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -4327,7 +4358,7 @@ class CupertinoLocalizationFil extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Piliin Lahat';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'Tab \$tabIndex ng \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -4481,7 +4512,7 @@ class CupertinoLocalizationFr extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Tout sélect.';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'Onglet \$tabIndex sur \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -4687,7 +4718,7 @@ class CupertinoLocalizationGl extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Seleccionar todo';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'Pestana \$tabIndex de \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -4841,7 +4872,7 @@ class CupertinoLocalizationGsw extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Alles auswählen';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'Tab \$tabIndex von \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -4868,10 +4899,10 @@ class CupertinoLocalizationGsw extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'min';
+  String get timerPickerMinuteLabelOne => 'Min.';
 
   @override
-  String get timerPickerMinuteLabelOther => 'min';
+  String get timerPickerMinuteLabelOther => 'Min.';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -4995,7 +5026,7 @@ class CupertinoLocalizationGu extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'બધા પસંદ કરો';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => '\$tabCountમાંથી \$tabIndex ટૅબ';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -5149,7 +5180,7 @@ class CupertinoLocalizationHe extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'בחירת הכול';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'כרטיסייה \$tabIndex מתוך \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -5303,7 +5334,7 @@ class CupertinoLocalizationHi extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'सभी चुनें';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => '\$tabCount का टैब \$tabIndex';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -5457,7 +5488,7 @@ class CupertinoLocalizationHr extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Odaberi sve';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'Kartica \$tabIndex od \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => 'sata';
@@ -5611,7 +5642,7 @@ class CupertinoLocalizationHu extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Összes kijelölése';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => '\$tabCount/\$tabIndex. lap';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -5765,7 +5796,7 @@ class CupertinoLocalizationHy extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Նշել բոլորը';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'Ներդիր \$tabIndex՝ \$tabCount-ից';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -5919,7 +5950,7 @@ class CupertinoLocalizationId extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Pilih Semua';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'Tab \$tabIndex dari \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -6073,7 +6104,7 @@ class CupertinoLocalizationIs extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Velja allt';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'Flipi \$tabIndex af \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -6227,7 +6258,7 @@ class CupertinoLocalizationIt extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Seleziona tutto';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'Scheda \$tabIndex di \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -6381,7 +6412,7 @@ class CupertinoLocalizationJa extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'すべて選択';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'タブ: \$tabIndex/\$tabCount';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -6535,7 +6566,7 @@ class CupertinoLocalizationKa extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'ყველას არჩევა';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'ჩანართი \$tabIndex / \$tabCount-დან';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -6689,7 +6720,7 @@ class CupertinoLocalizationKk extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Барлығын таңдау';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'Қойынды: \$tabIndex/\$tabCount';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -6843,7 +6874,7 @@ class CupertinoLocalizationKm extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'ជ្រើសរើស​ទាំងអស់';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'ផ្ទាំងទី \$tabIndex នៃ \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -6997,7 +7028,7 @@ class CupertinoLocalizationKn extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => '\u{c8e}\u{cb2}\u{ccd}\u{cb2}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc2}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => '\u{24}\u{74}\u{61}\u{62}\u{43}\u{6f}\u{75}\u{6e}\u{74}\u{20}\u{cb0}\u{cb2}\u{ccd}\u{cb2}\u{cbf}\u{ca8}\u{20}\u{24}\u{74}\u{61}\u{62}\u{49}\u{6e}\u{64}\u{65}\u{78}\u{20}\u{c9f}\u{ccd}\u{caf}\u{cbe}\u{cac}\u{ccd}';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -7151,7 +7182,7 @@ class CupertinoLocalizationKo extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => '전체 선택';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => '탭 \$tabCount개 중 \$tabIndex번째';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -7305,7 +7336,7 @@ class CupertinoLocalizationKy extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Баарын тандоо';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => '\$tabCount ичинен \$tabIndex-өтмөк';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -7459,7 +7490,7 @@ class CupertinoLocalizationLo extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'ເລືອກທັງໝົດ';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'ແຖບທີ \$tabIndex ຈາກທັງໝົດ \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -7613,7 +7644,7 @@ class CupertinoLocalizationLt extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Pasirinkti viską';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => '\$tabIndex skirtukas iš \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => 'val.';
@@ -7767,7 +7798,7 @@ class CupertinoLocalizationLv extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Atlasīt visu';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => '\$tabIndex. cilne no \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -7921,7 +7952,7 @@ class CupertinoLocalizationMk extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Избери ги сите';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'Картичка \$tabIndex од \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -8075,7 +8106,7 @@ class CupertinoLocalizationMl extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'എല്ലാം തിരഞ്ഞെടുക്കുക';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => '\$tabCount ടാബിൽ \$tabIndex-ാമത്തേത്';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -8229,7 +8260,7 @@ class CupertinoLocalizationMn extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Бүгдийг сонгох';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => '\$tabCount-н \$tabIndex-р таб';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -8383,7 +8414,7 @@ class CupertinoLocalizationMr extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'सर्व निवडा';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => '\$tabCount पैकी \$tabIndex टॅब';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -8537,7 +8568,7 @@ class CupertinoLocalizationMs extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Pilih Semua';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'Tab \$tabIndex daripada \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -8691,7 +8722,7 @@ class CupertinoLocalizationMy extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'အားလုံး ရွေးရန်';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'တဘ် \$tabCount ခုအနက် \$tabIndex ခု';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -8873,7 +8904,7 @@ class CupertinoLocalizationNe extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'सबै चयन गर्नुहोस्';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => '\$tabCount मध्ये \$tabIndex ट्याब';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -9027,7 +9058,7 @@ class CupertinoLocalizationNl extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Alles selecteren';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'Tabblad \$tabIndex van \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -9181,7 +9212,7 @@ class CupertinoLocalizationNo extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Velg alle';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'Fane \$tabIndex av \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -9335,7 +9366,7 @@ class CupertinoLocalizationOr extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'ସମସ୍ତ ଚୟନ କରନ୍ତୁ';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => '\$tabCountର \$tabIndex ଟାବ୍';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -9489,7 +9520,7 @@ class CupertinoLocalizationPa extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'ਸਭ ਚੁਣੋ';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => '\$tabCount ਵਿੱਚੋਂ \$tabIndex ਟੈਬ';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -9643,7 +9674,7 @@ class CupertinoLocalizationPl extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Wybierz wszystkie';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'Karta \$tabIndex z \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => 'godziny';
@@ -9797,7 +9828,7 @@ class CupertinoLocalizationPt extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Selecionar Tudo';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'Guia \$tabIndex de \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -9883,6 +9914,9 @@ class CupertinoLocalizationPtPt extends CupertinoLocalizationPt {
     singleDigitSecondFormat: singleDigitSecondFormat,
     decimalFormat: decimalFormat,
   );
+
+  @override
+  String get tabSemanticsLabelRaw => 'Separador \$tabIndex de \$tabCount';
 
   @override
   String get datePickerHourSemanticsLabelOther => '\$hour hora';
@@ -9994,7 +10028,7 @@ class CupertinoLocalizationRo extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Selectați-le pe toate';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'Fila \$tabIndex din \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => 'ore';
@@ -10148,7 +10182,7 @@ class CupertinoLocalizationRu extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Выбрать все';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'Вкладка \$tabIndex из \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => 'часа';
@@ -10302,7 +10336,7 @@ class CupertinoLocalizationSi extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'සියල්ල තෝරන්න';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'ටැබ \$tabCount න් \$tabIndex';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -10456,7 +10490,7 @@ class CupertinoLocalizationSk extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Vybrať všetko';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'Karta \$tabIndex z \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => 'hodiny';
@@ -10610,7 +10644,7 @@ class CupertinoLocalizationSl extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Izberi vse';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'Zavihek \$tabIndex od \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => 'ure';
@@ -10764,7 +10798,7 @@ class CupertinoLocalizationSq extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Zgjidhi të gjitha';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'Skeda \$tabIndex nga \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -10918,7 +10952,7 @@ class CupertinoLocalizationSr extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Изабери све';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => '\$tabIndex. картица од \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => 'сата';
@@ -11076,6 +11110,9 @@ class CupertinoLocalizationSrLatn extends CupertinoLocalizationSr {
   String get selectAllButtonLabel => 'Izaberi sve';
 
   @override
+  String get tabSemanticsLabelRaw => '\$tabIndex. kartica od \$tabCount';
+
+  @override
   String get timerPickerHourLabelFew => 'sata';
 
   @override
@@ -11200,7 +11237,7 @@ class CupertinoLocalizationSv extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Markera alla';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'Flik \$tabIndex av \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -11354,7 +11391,7 @@ class CupertinoLocalizationSw extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Teua Zote';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'Kichupo cha \$tabIndex kati ya \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -11508,7 +11545,7 @@ class CupertinoLocalizationTa extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'எல்லாம் தேர்ந்தெடு';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'தாவல் \$tabIndex / \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -11662,7 +11699,7 @@ class CupertinoLocalizationTe extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'అన్నింటినీ ఎంచుకోండి';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => '\$tabCountలో \$tabIndexవ ట్యాబ్';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -11816,7 +11853,7 @@ class CupertinoLocalizationTh extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'เลือกทั้งหมด';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'แท็บที่ \$tabIndex จาก \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -11970,7 +12007,7 @@ class CupertinoLocalizationTl extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Piliin Lahat';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'Tab \$tabIndex ng \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -12124,7 +12161,7 @@ class CupertinoLocalizationTr extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Tümünü Seç';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'Sekme \$tabIndex/\$tabCount';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -12278,7 +12315,7 @@ class CupertinoLocalizationUk extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Вибрати все';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'Вкладка \$tabIndex з \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => 'години';
@@ -12432,7 +12469,7 @@ class CupertinoLocalizationUr extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'سبھی منتخب کریں';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => '\$tabCount میں سے \$tabIndex ٹیب';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -12586,7 +12623,7 @@ class CupertinoLocalizationUz extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Barchasini tanlash';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => '\$tabCount varaqdan \$tabIndex';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -12740,7 +12777,7 @@ class CupertinoLocalizationVi extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Chọn tất cả';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'Thẻ \$tabIndex/\$tabCount';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -12894,7 +12931,7 @@ class CupertinoLocalizationZh extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => '全选';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => '第 \$tabIndex 个标签，共 \$tabCount 个';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -13043,6 +13080,9 @@ class CupertinoLocalizationZhHant extends CupertinoLocalizationZh {
   String get selectAllButtonLabel => '全選';
 
   @override
+  String get tabSemanticsLabelRaw => '\$tabCount 個分頁中嘅第 \$tabIndex 個';
+
+  @override
   String get timerPickerHourLabelOne => '小時';
 
   @override
@@ -13109,6 +13149,9 @@ class CupertinoLocalizationZhHantTw extends CupertinoLocalizationZhHant {
     singleDigitSecondFormat: singleDigitSecondFormat,
     decimalFormat: decimalFormat,
   );
+
+  @override
+  String get tabSemanticsLabelRaw => '第 \$tabIndex 個分頁標籤，共 \$tabCount 個';
 
   @override
   String get datePickerMinuteSemanticsLabelOne => '1 分';
@@ -13226,7 +13269,7 @@ class CupertinoLocalizationZu extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Khetha konke';
 
   @override
-  String get tabSemanticsLabelRaw => 'TBD';
+  String get tabSemanticsLabelRaw => 'Ithebhu \$tabIndex kwangu-\$tabCount';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -13399,7 +13442,7 @@ final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <Str
 ///  * `ca` - Catalan Valencian
 ///  * `cs` - Czech
 ///  * `da` - Danish
-///  * `de` - German
+///  * `de` - German (plus one country variation)
 ///  * `el` - Modern Greek
 ///  * `en` - English (plus 8 country variations)
 ///  * `es` - Spanish Castilian (plus 20 country variations)
@@ -13504,8 +13547,13 @@ GlobalCupertinoLocalizations getCupertinoTranslation(
       return CupertinoLocalizationCs(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'da':
       return CupertinoLocalizationDa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-    case 'de':
+    case 'de': {
+      switch (locale.countryCode) {
+        case 'CH':
+          return CupertinoLocalizationDeCh(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      }
       return CupertinoLocalizationDe(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+    }
     case 'el':
       return CupertinoLocalizationEl(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'en': {
