@@ -19,6 +19,6 @@
   "copyButtonLabel": "Nakili",
   "pasteButtonLabel": "Bandika",
   "selectAllButtonLabel": "Teua Zote",
-  "tabSemanticsLabel": "TBD",
+  "tabSemanticsLabel": "Kichupo cha $tabIndex kati ya $tabCount",
   "modalBarrierDismissLabel": "Ondoa"
 }
