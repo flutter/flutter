@@ -319,12 +319,21 @@ Future<void> _runToolTests() async {
       final String suffix = Platform.isWindows && subshard == 'commands'
         ? 'permeable'
         : '';
-      await _pubRunTester(
-        toolsPath,
-        testPaths: <String>[path.join(kTest, '$subshard$kDotShard', suffix)],
-        // Detect unit test time regressions (poor time delay handling, etc).
-        perTestTimeout: (subshard == 'general') ? 5 : null,
-      );
+      // Try out tester on unit test shard
+      if (subshard == 'general') {
+        await _pubRunTester(
+          toolsPath,
+          testPaths: <String>[path.join(kTest, '$subshard$kDotShard', suffix)],
+          // Detect unit test time regressions (poor time delay handling, etc).
+          perTestTimeout: (subshard == 'general') ? 5 : null,
+        );
+      } else {
+        await _pubRunTest(
+          toolsPath,
+          testPaths: <String>[path.join(kTest, '$subshard$kDotShard', suffix)],
+          enableFlutterToolAsserts: true,
+        );
+      }
     },
   );
 
