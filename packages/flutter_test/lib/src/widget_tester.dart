@@ -567,17 +567,17 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   }
 
   /// Triggers multiple frames for `duration` amount of time or until there are
-  /// no longer any frames scheduled, whichever is earlier. 
-  /// 
+  /// no longer any frames scheduled, whichever is earlier.
+  ///
   /// This does not promise settle of the widget, and there maybe remaining
   /// animation and therefore undisposed `Ticker`s.
   ///
   /// This will call call [pump] at least once, even if no frames are scheduled
-  /// when the function is called, to flush any pending microtasks which may 
+  /// when the function is called, to flush any pending microtasks which may
   /// themselves schedule a frame.
   ///
   /// `frequency` specify the frequency (in Hz) for frame requests. This is an
-  /// analog to screen refresh rate. The frequency rate will be rounded down to 
+  /// analog to screen refresh rate. The frequency rate will be rounded down to
   /// integer microseconds frame interval. Default to be 59.94 Hz.
   ///
   /// This is useful when you are expecting there may be an infinite long
@@ -586,7 +586,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   ///
   /// If the function returns, it returns the number of pumps that it performed.
   /// When building and rendering frames is not expensive, the return value
-  /// should be `1 + (duration.inMicroseconds / (1E6 ~/ frequency)).floor()` 
+  /// should be `1 + (duration.inMicroseconds / (1E6 ~/ frequency)).floor()`
   /// or `1 + (\[remaining animation time\] / (1E6 ~/ frequency)).ceil()`.
   /// The formula may not be accurate when the division resul is very close to
   /// an integer, due to fluctuation and/or truncation error.
@@ -594,7 +594,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// One can check if the return value from this function matches the expected
   /// number of pumps to help cath regressions that cause loss of frame(s).
   Future<int> pumpContinuous(Duration duration, {
-    EnginePhase phase = EnginePhase.sendSemanticsUpdate, 
+    EnginePhase phase = EnginePhase.sendSemanticsUpdate,
     double frequency = 59.94,
   }) async {
     assert(duration != null);
@@ -618,7 +618,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       do {
         await binding.pump(interval, phase);
         count += 1;
-      } while (binding.clock.now().isBefore(endTime) 
+      } while (binding.clock.now().isBefore(endTime)
                && binding.hasScheduledFrame);
     }).then<int>((_) => count);
   }
