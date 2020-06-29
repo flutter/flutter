@@ -346,15 +346,15 @@ class ButtonStyle with Diagnosticable {
     if (a == null && b == null)
       return null;
     return ButtonStyle(
-      textStyle: _lerpTextStyles(a?.textStyle, b?.textStyle, t),
-      backgroundColor: _lerpColors(a?.backgroundColor, b?.backgroundColor, t),
-      foregroundColor: _lerpColors(a?.foregroundColor, b?.foregroundColor, t),
-      overlayColor: _lerpColors(a?.overlayColor, b?.overlayColor, t),
-      shadowColor: _lerpColors(a?.shadowColor, b?.shadowColor, t),
-      elevation: _lerpDoubles(a?.elevation, b?.elevation, t),
-      padding: _lerpInsets(a?.padding, b?.padding, t),
-      minimumSize: _lerpSizes(a?.minimumSize, b?.minimumSize, t),
-      side: _lerpSides(a?.side, b?.side, t),
+      textStyle: _lerpProperties<TextStyle>(a?.textStyle, b?.textStyle, t, TextStyle.lerp),
+      backgroundColor: _lerpProperties<Color>(a?.backgroundColor, b?.backgroundColor, t, Color.lerp),
+      foregroundColor:  _lerpProperties<Color>(a?.foregroundColor, b?.foregroundColor, t, Color.lerp),
+      overlayColor: _lerpProperties<Color>(a?.overlayColor, b?.overlayColor, t, Color.lerp),
+      shadowColor: _lerpProperties<Color>(a?.shadowColor, b?.shadowColor, t, Color.lerp),
+      elevation: _lerpProperties<double>(a?.elevation, b?.elevation, t, lerpDouble),
+      padding:  _lerpProperties<EdgeInsetsGeometry>(a?.padding, b?.padding, t, EdgeInsetsGeometry.lerp),
+      minimumSize: _lerpProperties<Size>(a?.minimumSize, b?.minimumSize, t, Size.lerp),
+      side: _lerpProperties<BorderSide>(a?.side, b?.side, t, BorderSide.lerp),
       shape: _lerpShapes(a?.shape, b?.shape, t),
       mouseCursor: t < 0.5 ? a.mouseCursor : b.mouseCursor,
       visualDensity: t < 0.5 ? a.visualDensity : b.visualDensity,
@@ -364,42 +364,14 @@ class ButtonStyle with Diagnosticable {
     );
   }
 
-  static MaterialStateProperty<TextStyle> _lerpTextStyles(MaterialStateProperty<TextStyle> a, MaterialStateProperty<TextStyle> b, double t) {
+  static MaterialStateProperty<T> _lerpProperties<T>(MaterialStateProperty<T> a, MaterialStateProperty<T> b, double t, T Function(T, T, double) lerpFunction ) {
+    // Avoid creating a _LerpProperties object for a common case.
     if (a == null && b == null)
       return null;
-    return _LerpTextStyles(a, b, t);
+    return _LerpProperties<T>(a, b, t, lerpFunction);
   }
 
-  static MaterialStateProperty<Color> _lerpColors(MaterialStateProperty<Color> a, MaterialStateProperty<Color> b, double t) {
-    if (a == null && b == null)
-      return null;
-    return _LerpColors(a, b, t);
-  }
-
-  static MaterialStateProperty<double> _lerpDoubles(MaterialStateProperty<double> a, MaterialStateProperty<double> b, double t) {
-    if (a == null && b == null)
-      return null;
-    return _LerpDoubles(a, b, t);
-  }
-
-  static MaterialStateProperty<EdgeInsetsGeometry> _lerpInsets(MaterialStateProperty<EdgeInsetsGeometry> a, MaterialStateProperty<EdgeInsetsGeometry> b, double t) {
-    if (a == null && b == null)
-      return null;
-    return _LerpInsets(a, b, t);
-  }
-
-  static MaterialStateProperty<Size> _lerpSizes(MaterialStateProperty<Size> a, MaterialStateProperty<Size> b, double t) {
-    if (a == null && b == null)
-      return null;
-    return _LerpSizes(a, b, t);
-  }
-
-  static MaterialStateProperty<BorderSide> _lerpSides(MaterialStateProperty<BorderSide> a, MaterialStateProperty<BorderSide> b, double t) {
-    if (a == null && b == null)
-      return null;
-    return _LerpSides(a, b, t);
-  }
-
+  // TODO(hansmuller): OutlinedBorder needs a lerp method - https://github.com/flutter/flutter/issues/60555.
   static MaterialStateProperty<OutlinedBorder> _lerpShapes(MaterialStateProperty<OutlinedBorder> a, MaterialStateProperty<OutlinedBorder> b, double t) {
     if (a == null && b == null)
       return null;
@@ -407,93 +379,19 @@ class ButtonStyle with Diagnosticable {
   }
 }
 
-class _LerpTextStyles implements MaterialStateProperty<TextStyle> {
-  const _LerpTextStyles(this.a, this.b, this.t);
+class _LerpProperties<T> implements MaterialStateProperty<T> {
+  const _LerpProperties(this.a, this.b, this.t, this.lerpFunction);
 
-  final MaterialStateProperty<TextStyle> a;
-  final MaterialStateProperty<TextStyle> b;
+  final MaterialStateProperty<T> a;
+  final MaterialStateProperty<T> b;
   final double t;
+  final T Function(T, T, double) lerpFunction;
 
   @override
-  TextStyle resolve(Set<MaterialState> states) {
-    final TextStyle resolvedA = a?.resolve(states);
-    final TextStyle resolvedB = b?.resolve(states);
-    return TextStyle.lerp(resolvedA, resolvedB, t);
-  }
-}
-
-class _LerpColors implements MaterialStateProperty<Color> {
-  const _LerpColors(this.a, this.b, this.t);
-
-  final MaterialStateProperty<Color> a;
-  final MaterialStateProperty<Color> b;
-  final double t;
-
-  @override
-  Color resolve(Set<MaterialState> states) {
-    final Color resolvedA = a?.resolve(states);
-    final Color resolvedB = b?.resolve(states);
-    return Color.lerp(resolvedA, resolvedB, t);
-  }
-}
-
-class _LerpDoubles implements MaterialStateProperty<double> {
-  const _LerpDoubles(this.a, this.b, this.t);
-
-  final MaterialStateProperty<double> a;
-  final MaterialStateProperty<double> b;
-  final double t;
-
-  @override
-  double resolve(Set<MaterialState> states) {
-    final double resolvedA = a?.resolve(states);
-    final double resolvedB = b?.resolve(states);
-    return lerpDouble(resolvedA, resolvedB, t);
-  }
-}
-
-class _LerpInsets implements MaterialStateProperty<EdgeInsetsGeometry> {
-  const _LerpInsets(this.a, this.b, this.t);
-
-  final MaterialStateProperty<EdgeInsetsGeometry> a;
-  final MaterialStateProperty<EdgeInsetsGeometry> b;
-  final double t;
-
-  @override
-  EdgeInsetsGeometry resolve(Set<MaterialState> states) {
-    final EdgeInsetsGeometry resolvedA = a?.resolve(states);
-    final EdgeInsetsGeometry resolvedB = b?.resolve(states);
-    return EdgeInsetsGeometry.lerp(resolvedA, resolvedB, t);
-  }
-}
-
-class _LerpSizes implements MaterialStateProperty<Size> {
-  const _LerpSizes(this.a, this.b, this.t);
-
-  final MaterialStateProperty<Size> a;
-  final MaterialStateProperty<Size> b;
-  final double t;
-
-  @override
-  Size resolve(Set<MaterialState> states) {
-    final Size resolvedA = a?.resolve(states);
-    final Size resolvedB = b?.resolve(states);
-    return Size.lerp(resolvedA, resolvedB, t);
-  }
-}
-
-class _LerpSides implements MaterialStateProperty<BorderSide> {
-  const _LerpSides(this.a, this.b, this.t);
-
-  final MaterialStateProperty<BorderSide> a;
-  final MaterialStateProperty<BorderSide> b;
-  final double t;
-
-  @override
-  BorderSide resolve(Set<MaterialState> states) {
-    final BorderSide resolvedA = a?.resolve(states);
-    final BorderSide resolvedB = b?.resolve(states);
-    return BorderSide.lerp(resolvedA, resolvedB, t);
+  T resolve(Set<MaterialState> states) {
+    final T resolvedA = a?.resolve(states);
+    final T resolvedB = b?.resolve(states);
+    return lerpFunction(resolvedA, resolvedB, t);
   }
 }
 
