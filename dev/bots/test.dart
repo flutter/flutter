@@ -121,17 +121,17 @@ Future<void> main(List<String> args) async {
     await _runSmokeTests();
     print('═' * 80);
     await selectShard(const <String, ShardRunner>{
-      'add_to_app_tests': _runAddToAppTests,
-      'add_to_app_life_cycle_tests': _runAddToAppLifeCycleTests,
-      'build_tests': _runBuildTests,
-      'firebase_test_lab_tests': _runFirebaseTestLabTests,
-      'framework_coverage': _runFrameworkCoverage,
-      'framework_tests': _runFrameworkTests,
-      'hostonly_devicelab_tests': _runHostOnlyDeviceLabTests,
-      'tool_coverage': _runToolCoverage,
+      // 'add_to_app_tests': _runAddToAppTests,
+      // 'add_to_app_life_cycle_tests': _runAddToAppLifeCycleTests,
+      // 'build_tests': _runBuildTests,
+      // 'firebase_test_lab_tests': _runFirebaseTestLabTests,
+      // 'framework_coverage': _runFrameworkCoverage,
+      // 'framework_tests': _runFrameworkTests,
+      // 'hostonly_devicelab_tests': _runHostOnlyDeviceLabTests,
+      // 'tool_coverage': _runToolCoverage,
       'tool_tests': _runToolTests,
-      'web_tests': _runWebUnitTests,
-      'web_integration_tests': _runWebIntegrationTests,
+      // 'web_tests': _runWebUnitTests,
+      // 'web_integration_tests': _runWebIntegrationTests,
     });
   } on ExitException catch (error) {
     error.apply();
@@ -302,8 +302,6 @@ Future<void> _runToolCoverage() async {
 }
 
 Future<void> _runToolTests() async {
-  final bq.BigqueryApi bigqueryApi = await _getBigqueryApi();
-
   const String kDotShard = '.shard';
   const String kTest = 'test';
   final String toolsPath = path.join(flutterRoot, 'packages', 'flutter_tools');
@@ -321,13 +319,11 @@ Future<void> _runToolTests() async {
       final String suffix = Platform.isWindows && subshard == 'commands'
         ? 'permeable'
         : '';
-      await _pubRunTest(
+      await _pubRunTester(
         toolsPath,
         testPaths: <String>[path.join(kTest, '$subshard$kDotShard', suffix)],
-        tableData: bigqueryApi?.tabledata,
-        enableFlutterToolAsserts: true,
         // Detect unit test time regressions (poor time delay handling, etc).
-        perTestTimeout: (subshard == 'general') ? const Duration(seconds: 2) : null,
+        perTestTimeout: (subshard == 'general') ? 2 : null,
       );
     },
   );
@@ -922,6 +918,64 @@ Future<void> _runFlutterWebTest(String workingDirectory, List<String> tests) asy
       'FLUTTER_WEB': 'true',
       'FLUTTER_LOW_RESOURCE_MODE': 'true',
     },
+  );
+}
+
+const String _supportedTesterVersion = '0.0.1-dev9';
+
+Future<void> _pubRunTester(String workingDirectory, {
+  List<String> testPaths,
+  bool forceSingleCore = false,
+  int perTestTimeout,
+}) async {
+  int cpus;
+  final String cpuVariable = Platform.environment['CPU']; // CPU is set in cirrus.yml
+  if (cpuVariable != null) {
+    cpus = int.tryParse(cpuVariable, radix: 10);
+    if (cpus == null) {
+      print('${red}The CPU environment variable, if set, must be set to the integer number of available cores.$reset');
+      print('Actual value: "$cpuVariable"');
+      exit(1);
+    }
+  } else {
+    cpus = 2; // Don't default to 1, otherwise we won't catch race conditions.
+  }
+  // Integration tests that depend on external processes like chrome
+  // can get stuck if there are multiple instances running at once.
+  if (forceSingleCore) {
+    cpus = 1;
+  }
+  final List<String> args = <String>[
+    'global',
+    'activate',
+    'tester',
+    _supportedTesterVersion
+  ];
+  final Map<String, String> pubEnvironment = <String, String>{
+    'FLUTTER_ROOT': flutterRoot,
+  };
+  if (Directory(pubCache).existsSync()) {
+    pubEnvironment['PUB_CACHE'] = pubCache;
+  }
+  await runCommand(
+    pub,
+    args,
+    workingDirectory: workingDirectory,
+    environment: pubEnvironment,
+  );
+  await runCommand(
+    'tester',
+    <String>[
+      '-j$cpus',
+      '--ci',
+      if (perTestTimeout != null)
+        '--timeout=$perTestTimeout',
+      else
+        '--timeout=-1',
+      ...testPaths,
+    ],
+    workingDirectory: workingDirectory,
+    environment: pubEnvironment,
   );
 }
 
