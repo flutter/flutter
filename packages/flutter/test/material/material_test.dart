@@ -220,6 +220,7 @@ void main() {
   });
 
   testWidgets('Transparent material widget does not absorb hit test', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/58665.
     bool pressed = false;
     await tester.pumpWidget(
       MaterialApp(
