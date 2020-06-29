@@ -5,6 +5,7 @@
 // @dart = 2.8
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'feedback_tester.dart';
@@ -49,7 +50,11 @@ void main() {
     saveText = null;
   });
 
-  Future<void> preparePicker(WidgetTester tester, Future<void> callback(Future<DateTimeRange> date)) async {
+  Future<void> preparePicker(
+    WidgetTester tester,
+    Future<void> callback(Future<DateTimeRange> date),
+    { TextDirection textDirection = TextDirection.ltr }
+  ) async {
     BuildContext buttonContext;
     await tester.pumpWidget(MaterialApp(
       home: Material(
@@ -86,6 +91,12 @@ void main() {
       fieldEndLabelText: fieldEndLabelText,
       helpText: helpText,
       saveText: saveText,
+      builder: (BuildContext context, Widget child) {
+        return Directionality(
+          textDirection: textDirection,
+          child: child,
+        );
+      },
     );
 
     await tester.pumpAndSettle(const Duration(seconds: 1));
@@ -234,6 +245,186 @@ void main() {
         await tester.pump(hapticFeedbackInterval);
         expect(feedback.hapticCount, 0);
       });
+    });
+  });
+
+  group('Keyboard navigation', () {
+    testWidgets('Can toggle to calendar entry mode', (WidgetTester tester) async {
+      await preparePicker(tester, (Future<DateTimeRange> range) async {
+        expect(find.byType(TextField), findsNothing);
+        // Navigate to the entry toggle button and activate it
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.sendKeyEvent(LogicalKeyboardKey.space);
+        await tester.pumpAndSettle();
+        // Should be in the input mode
+        expect(find.byType(TextField), findsNWidgets(2));
+      });
+    });
+
+    testWidgets('Can navigate date grid with arrow keys', (WidgetTester tester) async {
+      await preparePicker(tester, (Future<DateTimeRange> range) async {
+        // Navigate to the grid
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.pumpAndSettle();
+
+        // Navigate from Jan 15 to Jan 18 with arrow keys
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+        await tester.pumpAndSettle();
+
+        // Activate it to select the beginning of the range
+        await tester.sendKeyEvent(LogicalKeyboardKey.space);
+        await tester.pumpAndSettle();
+
+        // Navigate to Jan 29
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+        await tester.pumpAndSettle();
+
+        // Activate it to select the end of the range
+        await tester.sendKeyEvent(LogicalKeyboardKey.space);
+        await tester.pumpAndSettle();
+
+        // Navigate out of the grid and to the OK button
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+
+        // Activate OK
+        await tester.sendKeyEvent(LogicalKeyboardKey.space);
+        await tester.pumpAndSettle();
+
+        // Should have selected Jan 18 - Jan 29
+        expect(await range, DateTimeRange(
+          start: DateTime(2016, DateTime.january, 18),
+          end: DateTime(2016, DateTime.january, 29),
+        ));
+      });
+    });
+
+    testWidgets('Navigating with arrow keys scrolls as needed', (WidgetTester tester) async {
+      await preparePicker(tester, (Future<DateTimeRange> range) async {
+        // Jan and Feb headers should be showing, but no Mar
+        expect(find.text('January 2016'), findsOneWidget);
+        expect(find.text('February 2016'), findsOneWidget);
+        expect(find.text('Mar 2016'), findsNothing);
+
+        // Navigate to the grid
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+
+        // Navigate from Jan 15 to Jan 18 with arrow keys
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.pumpAndSettle();
+
+        // Activate it to select the beginning of the range
+        await tester.sendKeyEvent(LogicalKeyboardKey.space);
+        await tester.pumpAndSettle();
+
+        // Navigate to Mar 17
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+        await tester.pumpAndSettle();
+
+        // Jan should have scrolled off, Mar should be visible
+        expect(find.text('January 2016'), findsNothing);
+        expect(find.text('February 2016'), findsOneWidget);
+        expect(find.text('March 2016'), findsOneWidget);
+
+        // Activate it to select the end of the range
+        await tester.sendKeyEvent(LogicalKeyboardKey.space);
+        await tester.pumpAndSettle();
+
+        // Navigate out of the grid and to the OK button
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+
+        // Activate OK
+        await tester.sendKeyEvent(LogicalKeyboardKey.space);
+        await tester.pumpAndSettle();
+
+        // Should have selected Jan 18 - Mar 17
+        expect(await range, DateTimeRange(
+          start: DateTime(2016, DateTime.january, 18),
+          end: DateTime(2016, DateTime.march, 17),
+        ));
+      });
+    });
+
+    testWidgets('RTL text direction reverses the horizontal arrow key navigation', (WidgetTester tester) async {
+      await preparePicker(tester, (Future<DateTimeRange> range) async {
+        // Navigate to the grid
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+
+        // Navigate from Jan 15 to 19 with arrow keys
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+        await tester.pumpAndSettle();
+
+        // Activate it
+        await tester.sendKeyEvent(LogicalKeyboardKey.space);
+        await tester.pumpAndSettle();
+
+        // Navigate to Jan 21
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+        await tester.pumpAndSettle();
+
+        // Activate it
+        await tester.sendKeyEvent(LogicalKeyboardKey.space);
+        await tester.pumpAndSettle();
+
+        // Navigate out of the grid and to the OK button
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+
+        // Activate OK
+        await tester.sendKeyEvent(LogicalKeyboardKey.space);
+        await tester.pumpAndSettle();
+
+        // Should have selected Jan 19 - Mar 21
+        expect(await range, DateTimeRange(
+          start: DateTime(2016, DateTime.january, 19),
+          end: DateTime(2016, DateTime.january, 21),
+        ));
+      },
+      textDirection: TextDirection.rtl);
     });
   });
 

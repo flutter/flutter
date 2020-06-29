@@ -88,4 +88,7 @@ class DateTimeRange {
 
   @override
   int get hashCode => hashValues(start, end);
+
+  @override
+  String toString() => '$start - $end';
 }
