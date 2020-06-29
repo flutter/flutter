@@ -668,14 +668,14 @@ class _MonthPickerState extends State<_MonthPicker> {
     });
   }
 
-  static const Map<TraversalDirection, Duration> _directionOffset = <TraversalDirection, Duration>{
-    TraversalDirection.up: Duration(days: -DateTime.daysPerWeek),
-    TraversalDirection.right: Duration(days: 1),
-    TraversalDirection.down: Duration(days: DateTime.daysPerWeek),
-    TraversalDirection.left: Duration(days: -1),
+  static const Map<TraversalDirection, int> _directionOffset = <TraversalDirection, int>{
+    TraversalDirection.up: -DateTime.daysPerWeek,
+    TraversalDirection.right: 1,
+    TraversalDirection.down: DateTime.daysPerWeek,
+    TraversalDirection.left: -1,
   };
 
-  Duration _dayDirectionOffset(TraversalDirection traversalDirection, TextDirection textDirection) {
+  int _dayDirectionOffset(TraversalDirection traversalDirection, TextDirection textDirection) {
     // Swap left and right if the text direction if RTL
     if (textDirection == TextDirection.rtl) {
       if (traversalDirection == TraversalDirection.left)
@@ -688,12 +688,12 @@ class _MonthPickerState extends State<_MonthPicker> {
 
   DateTime _nextDateInDirection(DateTime date, TraversalDirection direction) {
     final TextDirection textDirection = Directionality.of(context);
-    DateTime nextDate = date.toUtc().add(_dayDirectionOffset(direction, textDirection));
+    DateTime nextDate = utils.addDaysToDate(date, _dayDirectionOffset(direction, textDirection));
     while (!nextDate.isBefore(widget.firstDate) && !nextDate.isAfter(widget.lastDate)) {
       if (_isSelectable(nextDate)) {
         return nextDate;
       }
-      nextDate = nextDate.add(_dayDirectionOffset(direction, textDirection));
+      nextDate = utils.addDaysToDate(nextDate, _dayDirectionOffset(direction, textDirection));
     }
     return null;
   }

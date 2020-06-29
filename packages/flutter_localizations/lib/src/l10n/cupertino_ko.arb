@@ -19,6 +19,6 @@
   "copyButtonLabel": "복사",
   "pasteButtonLabel": "붙여넣기",
   "selectAllButtonLabel": "전체 선택",
-  "tabSemanticsLabel": "TBD",
+  "tabSemanticsLabel": "탭 $tabCount개 중 $tabIndex번째",
   "modalBarrierDismissLabel": "닫기"
 }
