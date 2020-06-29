@@ -69,17 +69,17 @@ class _AndroidViewController extends PlatformViewController {
   }
 
   @override
-  void clearFocus() {
+  Future<void> clearFocus() async {
     // TODO(egarciad): Implement clear focus.
   }
 
   @override
-  void dispatchPointerEvent(PointerEvent event) {
+  Future<void> dispatchPointerEvent(PointerEvent event) async {
     // TODO(egarciad): Implement dispatchPointerEvent
   }
 
   @override
-  void dispose() {
+  Future<void> dispose() async {
     if (_initialized) {
       // TODO(egarciad): Dispose the android view.
     }
