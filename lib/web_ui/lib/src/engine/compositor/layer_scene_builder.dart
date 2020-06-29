@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 part of engine;
 
 class LayerScene implements ui.Scene {
@@ -49,7 +48,8 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     bool isComplexHint = false,
     bool willChangeHint = false,
   }) {
-    currentLayer!.add(PictureLayer(picture as SkPicture, offset, isComplexHint, willChangeHint));
+    currentLayer!.add(PictureLayer(
+        picture as SkPicture, offset, isComplexHint, willChangeHint));
   }
 
   @override

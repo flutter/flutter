@@ -79,9 +79,8 @@ class Surface {
 
     final SkSurface? currentSurface = _surface;
     if (currentSurface != null) {
-      final bool isSameSize =
-        size.width == currentSurface.width() &&
-        size.height == currentSurface.height();
+      final bool isSameSize = size.width == currentSurface.width() &&
+          size.height == currentSurface.height();
       if (isSameSize) {
         // The existing surface is still reusable.
         return;
@@ -131,7 +130,7 @@ class Surface {
     }
 
     htmlElement = htmlCanvas;
-    return SkSurface(skSurface, glContext);
+    return SkSurface(skSurface, grContext, glContext);
   }
 
   bool _presentSurface() {
@@ -144,9 +143,10 @@ class Surface {
 /// A Dart wrapper around Skia's SkSurface.
 class SkSurface {
   final js.JsObject _surface;
+  final js.JsObject _grContext;
   final int _glContext;
 
-  SkSurface(this._surface, this._glContext);
+  SkSurface(this._surface, this._grContext, this._glContext);
 
   SkCanvas getCanvas() {
     final js.JsObject skCanvas = _surface.callMethod('getCanvas');
@@ -160,5 +160,7 @@ class SkSurface {
 
   void dispose() {
     _surface.callMethod('dispose');
+    _grContext.callMethod('releaseResourcesAndAbandonContext');
+    _grContext.callMethod('delete');
   }
 }

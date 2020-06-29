@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 part of engine;
 
 /// A Dart wrapper around Skia's SKCanvas.
@@ -168,7 +167,7 @@ class SkCanvas {
   void drawParagraph(ui.Paragraph paragraph, ui.Offset offset) {
     final SkParagraph skParagraph = paragraph as SkParagraph;
     skCanvas.callMethod('drawParagraph', <dynamic>[
-      skParagraph.skParagraph,
+      skParagraph.skiaObject,
       offset.dx,
       offset.dy,
     ]);
@@ -183,7 +182,8 @@ class SkCanvas {
 
   void drawPicture(ui.Picture picture) {
     final SkPicture skPicture = picture as SkPicture;
-    skCanvas.callMethod('drawPicture', <js.JsObject?>[skPicture.skPicture]);
+    skCanvas.callMethod(
+        'drawPicture', <js.JsObject?>[skPicture.skPicture.skiaObject]);
   }
 
   // TODO(hterkelsen): https://github.com/flutter/flutter/issues/58824
@@ -211,8 +211,8 @@ class SkCanvas {
 
   void drawShadow(ui.Path path, ui.Color color, double elevation,
       bool transparentOccluder) {
-    drawSkShadow(skCanvas, path as SkPath, color, elevation, transparentOccluder,
-        ui.window.devicePixelRatio);
+    drawSkShadow(skCanvas, path as SkPath, color, elevation,
+        transparentOccluder, ui.window.devicePixelRatio);
   }
 
   void drawVertices(
@@ -243,7 +243,6 @@ class SkCanvas {
   }
 
   void saveLayer(ui.Rect bounds, SkPaint paint) {
-    assert(bounds != null, 'Use saveLayerWithoutBounds'); // ignore: unnecessary_null_comparison
     skCanvas.callMethod('saveLayer', <js.JsObject?>[
       makeSkRect(bounds),
       paint.skiaObject,
@@ -260,7 +259,7 @@ class SkCanvas {
       'saveLayer',
       <dynamic>[
         null,
-        skImageFilter.skImageFilter,
+        skImageFilter.skiaObject,
         0,
         makeSkRect(bounds),
       ],
