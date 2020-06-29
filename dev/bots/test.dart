@@ -121,17 +121,17 @@ Future<void> main(List<String> args) async {
     await _runSmokeTests();
     print('═' * 80);
     await selectShard(const <String, ShardRunner>{
-      // 'add_to_app_tests': _runAddToAppTests,
-      // 'add_to_app_life_cycle_tests': _runAddToAppLifeCycleTests,
-      // 'build_tests': _runBuildTests,
-      // 'firebase_test_lab_tests': _runFirebaseTestLabTests,
-      // 'framework_coverage': _runFrameworkCoverage,
-      // 'framework_tests': _runFrameworkTests,
-      // 'hostonly_devicelab_tests': _runHostOnlyDeviceLabTests,
-      // 'tool_coverage': _runToolCoverage,
+      'add_to_app_tests': _runAddToAppTests,
+      'add_to_app_life_cycle_tests': _runAddToAppLifeCycleTests,
+      'build_tests': _runBuildTests,
+      'firebase_test_lab_tests': _runFirebaseTestLabTests,
+      'framework_coverage': _runFrameworkCoverage,
+      'framework_tests': _runFrameworkTests,
+      'hostonly_devicelab_tests': _runHostOnlyDeviceLabTests,
+      'tool_coverage': _runToolCoverage,
       'tool_tests': _runToolTests,
-      // 'web_tests': _runWebUnitTests,
-      // 'web_integration_tests': _runWebIntegrationTests,
+      'web_tests': _runWebUnitTests,
+      'web_integration_tests': _runWebIntegrationTests,
     });
   } on ExitException catch (error) {
     error.apply();
@@ -964,12 +964,12 @@ Future<void> _pubRunTester(String workingDirectory, {
     environment: pubEnvironment,
   );
   await runCommand(
-    'tester',
+    path.join(pubCache, 'bin', 'tester'),
     <String>[
       '-j$cpus',
       '--ci',
       if (perTestTimeout != null)
-        '--timeout=$perTestTimeout',
+        '--timeout=$perTestTimeout'
       else
         '--timeout=-1',
       ...testPaths,
