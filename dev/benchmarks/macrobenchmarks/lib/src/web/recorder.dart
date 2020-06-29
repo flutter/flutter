@@ -345,8 +345,11 @@ abstract class WidgetRecorder extends Recorder implements FrameRecorder {
   /// pumping frames automatically.
   Widget createWidget();
 
+  final List<VoidCallback> _didStops = <VoidCallback>[];
   @override
-  VoidCallback didStop;
+  void registerDidStop(VoidCallback fn) {
+    _didStops.add(fn);
+  }
 
   @override
   Profile profile;
@@ -373,7 +376,7 @@ abstract class WidgetRecorder extends Recorder implements FrameRecorder {
     if (shouldContinue()) {
       window.scheduleFrame();
     } else {
-      didStop();
+      _didStops.forEach((VoidCallback fn) { fn(); });
       _runCompleter.complete();
     }
   }
@@ -437,8 +440,11 @@ abstract class WidgetBuildRecorder extends Recorder implements FrameRecorder {
   /// consider using [WidgetRecorder].
   Widget createWidget();
 
+  final List<VoidCallback> _didStops = <VoidCallback>[];
   @override
-  VoidCallback didStop;
+  void registerDidStop(VoidCallback fn) {
+    _didStops.add(fn);
+  }
 
   @override
   Profile profile;
@@ -484,7 +490,7 @@ abstract class WidgetBuildRecorder extends Recorder implements FrameRecorder {
       showWidget = !showWidget;
       _hostState._setStateTrampoline();
     } else {
-      didStop();
+      _didStops.forEach((VoidCallback fn) { fn(); });
       _runCompleter.complete();
     }
   }
@@ -944,7 +950,7 @@ String _ratioToPercent(double value) {
 abstract class FrameRecorder {
   /// Called by the recorder when it stops recording and doesn't need to collect
   /// any more data.
-  set didStop(VoidCallback cb);
+  void registerDidStop(VoidCallback cb);
 
   /// Called just before calling [SchedulerBinding.handleDrawFrame].
   void frameWillDraw();
@@ -998,9 +1004,9 @@ class _RecordingWidgetsBinding extends BindingBase
     }
     final FlutterExceptionHandler originalOnError = FlutterError.onError;
 
-    recorder.didStop = () {
+    recorder.registerDidStop(() {
       _benchmarkStopped = true;
-    };
+    });
 
     // Fail hard and fast on errors. Benchmarks should not have any errors.
     FlutterError.onError = (FlutterErrorDetails details) {
@@ -1180,5 +1186,78 @@ void _dispatchEngineBenchmarkValue(String name, double value) {
   final EngineBenchmarkValueListener listener = _engineBenchmarkListeners[name];
   if (listener != null) {
     listener(value);
+  }
+}
+
+abstract class EmptyRecorder extends Recorder implements FrameRecorder {
+  EmptyRecorder({
+    @required String name,
+    this.useCustomWarmUp = false,
+  }) : super._(name, true);
+
+  /// Creates a widget to be benchmarked.
+  ///
+  /// The widget must create its own animation to drive the benchmark. The
+  /// animation should continue indefinitely. The benchmark harness will stop
+  /// pumping frames automatically.
+  Widget createWidget();
+
+  final List<VoidCallback> _didStops = <VoidCallback>[];
+  @override
+  void registerDidStop(VoidCallback fn) {
+    _didStops.add(fn);
+  }
+
+  @override
+  Profile profile;
+  Completer<void> _runCompleter;
+
+  /// Whether to delimit warm-up frames in a custom way.
+  final bool useCustomWarmUp;
+
+  Stopwatch _drawFrameStopwatch;
+
+  @override
+  @mustCallSuper
+  void frameWillDraw() {
+    startMeasureFrame(profile);
+    _drawFrameStopwatch = Stopwatch()..start();
+  }
+
+  @override
+  @mustCallSuper
+  void frameDidDraw() {
+    endMeasureFrame();
+
+    if (shouldContinue()) {
+      window.scheduleFrame();
+    } else {
+      _didStops.forEach((VoidCallback fn) { fn(); });
+      _runCompleter.complete();
+    }
+  }
+
+  @override
+  void _onError(dynamic error, StackTrace stackTrace) {
+    _runCompleter.completeError(error, stackTrace);
+  }
+
+  @override
+  Future<Profile> run() async {
+    _runCompleter = Completer<void>();
+    profile = Profile(name: name, useCustomWarmUp: useCustomWarmUp);
+    final _RecordingWidgetsBinding binding =
+        _RecordingWidgetsBinding.ensureInitialized();
+    final Widget widget = createWidget();
+
+    binding._beginRecording(this, widget);
+
+    try {
+      await _runCompleter.future;
+      return profile;
+    } finally {
+      _runCompleter = null;
+      profile = null;
+    }
   }
 }
