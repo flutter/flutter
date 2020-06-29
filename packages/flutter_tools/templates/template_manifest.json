@@ -280,8 +280,8 @@
         "templates/plugin/test/projectName_test.dart.tmpl",
         "templates/plugin/windows.tmpl/.gitignore",
         "templates/plugin/windows.tmpl/CMakeLists.txt.tmpl",
+        "templates/plugin/windows.tmpl/include/projectName.tmpl/projectName_plugin.h.tmpl",
         "templates/plugin/windows.tmpl/projectName_plugin.cpp.tmpl",
-        "templates/plugin/windows.tmpl/projectName_plugin.h.tmpl",
         "templates/plugin/lib/projectName_web.dart.tmpl"
     ]
 }
