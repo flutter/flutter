@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
+import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -20,27 +22,33 @@ void main() {
     const int devicePort = 456;
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
-        command: <String>['iproxy', '1024', '456', '1234'],
+        command: <String>['iproxy', '49154', '456', '1234'],
         // iproxy does not exit with 0 when it cannot forward.
         exitCode: 0,
         stdout: null, // no stdout indicates failure.
         environment: kDyLdLibEntry,
       ),
       const FakeCommand(
-        command: <String>['iproxy', '1025', '456', '1234'],
+        command: <String>['iproxy', '49155', '456', '1234'],
         exitCode: 0,
         stdout: 'not empty',
         environment: kDyLdLibEntry,
       ),
     ]);
+    final MockOperatingSystemUtils operatingSystemUtils = MockOperatingSystemUtils();
+    when(operatingSystemUtils.findFreePort()).thenAnswer((Invocation invocation) => Future<int>.value(49154));
+
     final IOSDevicePortForwarder portForwarder = IOSDevicePortForwarder.test(
       processManager: processManager,
       logger: BufferLogger.test(),
+        operatingSystemUtils: operatingSystemUtils,
     );
     final int hostPort = await portForwarder.forward(devicePort);
 
-    // First port tried (1024) should fail, then succeed on the next
-    expect(hostPort, 1024 + 1);
+    // First port tried (49154) should fail, then succeed on the next
+    expect(hostPort, 49154 + 1);
     expect(processManager.hasRemainingExpectations, false);
   });
 }
+
+class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}

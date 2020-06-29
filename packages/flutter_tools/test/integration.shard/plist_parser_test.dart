@@ -13,8 +13,8 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:process/process.dart';
 
-import '../../src/common.dart';
-import '../../src/context.dart';
+import '../src/common.dart';
+import '../src/context.dart';
 
 const String base64PlistXml =
     'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPCFET0NUWVBFIHBsaXN0I'
