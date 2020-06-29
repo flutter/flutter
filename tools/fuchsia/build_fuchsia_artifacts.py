@@ -23,6 +23,10 @@ _src_root_dir = os.path.join(_script_dir, '..', '..', '..')
 _out_dir = os.path.join(_src_root_dir, 'out')
 _bucket_directory = os.path.join(_out_dir, 'fuchsia_bucket')
 _fuchsia_base = 'flutter/shell/platform/fuchsia'
+_default_targets = [
+    'flutter:flutter',
+    'flutter:fuchsia_tests',
+]
 
 
 def IsLinux():
@@ -164,8 +168,7 @@ def CopyIcuDepsToBucket(src, dst):
   deps_bucket_path = os.path.join(_bucket_directory, dst)
   FindFileAndCopyTo('icudtl.dat', source_root, deps_bucket_path)
 
-def BuildBucket(runtime_mode, arch, product):
-  out_dir = 'fuchsia_%s_%s/' % (runtime_mode, arch)
+def BuildBucket(out_dir, runtime_mode, arch, product):
   bucket_dir = 'flutter/%s/%s/' % (arch, runtime_mode)
   deps_dir = 'flutter/%s/deps/' % (arch)
   CopyToBucket(out_dir, bucket_dir, product)
@@ -219,16 +222,7 @@ def GetRunnerTarget(runner_type, product, aot):
   target += 'runner'
   return base + target
 
-
-def GetTargetsToBuild(product=False, additional_targets=[]):
-  targets_to_build = [
-      'flutter/shell/platform/fuchsia:fuchsia',
-  ] + additional_targets
-  return targets_to_build
-
-
-def BuildTarget(runtime_mode, arch, product, enable_lto, additional_targets=[]):
-  out_dir = 'fuchsia_%s_%s' % (runtime_mode, arch)
+def BuildTarget(out_dir, runtime_mode, arch, enable_opt, enable_lto, additional_targets=[]):
   flags = [
       '--fuchsia',
       '--fuchsia-cpu',
@@ -237,11 +231,14 @@ def BuildTarget(runtime_mode, arch, product, enable_lto, additional_targets=[]):
       runtime_mode,
   ]
 
+  if not enable_opt:
+    flags.append('--unoptimized')
+
   if not enable_lto:
     flags.append('--no-lto')
 
   RunGN(out_dir, flags)
-  BuildNinjaTargets(out_dir, GetTargetsToBuild(product))
+  BuildNinjaTargets(out_dir, _default_targets + additional_targets)
 
   return
 
@@ -270,6 +267,12 @@ def main():
       '--archs', type=str, choices=['x64', 'arm64', 'all'], default='all')
 
   parser.add_argument(
+      '--unoptimized',
+      action='store_true',
+      default=False,
+      help='If set, disables compiler optimizations for the build.')
+
+  parser.add_argument(
       '--no-lto',
       action='store_true',
       default=False,
@@ -295,6 +298,7 @@ def main():
   runtime_modes = ['debug', 'profile', 'release']
   product_modes = [False, False, True]
 
+  enable_opt = not args.unoptimized
   enable_lto = not args.no_lto
 
   for arch in archs:
@@ -302,10 +306,11 @@ def main():
       runtime_mode = runtime_modes[i]
       product = product_modes[i]
       if build_mode == 'all' or runtime_mode == build_mode:
+        out_dir = 'fuchsia_%s_%s%s' % (runtime_mode, '' if enable_opt else 'unopt_', arch)
         if not args.skip_build:
-          BuildTarget(runtime_mode, arch, product, enable_lto,
+          BuildTarget(out_dir, runtime_mode, arch, enable_opt, enable_lto,
                       args.targets.split(","))
-        BuildBucket(runtime_mode, arch, product)
+        BuildBucket(out_dir, runtime_mode, arch, product)
 
   if args.upload:
     if args.engine_version is None:
