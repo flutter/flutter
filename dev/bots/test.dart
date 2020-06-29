@@ -969,7 +969,7 @@ Future<void> _pubRunTester(String workingDirectory, {
       '-j$cpus',
       '--ci',
       if (perTestTimeout != null)
-        '--timeout=$perTestTimeout',
+        '--timeout=$perTestTimeout'
       else
         '--timeout=-1',
       ...testPaths,
