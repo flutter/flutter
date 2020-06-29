@@ -510,7 +510,7 @@ class IOSDevice extends Device {
 
   @override
   Future<void> takeScreenshot(File outputFile) async {
-    await _iMobileDevice.takeScreenshot(outputFile, id);
+    await _iMobileDevice.takeScreenshot(outputFile);
   }
 
   @override
@@ -832,8 +832,8 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
       process = await _processUtils.start(
         <String>[
           _iproxyPath,
-          '$hostPort:$devicePort',
-          '--udid',
+          hostPort.toString(),
+          devicePort.toString(),
           _id,
         ],
         environment: Map<String, String>.fromEntries(

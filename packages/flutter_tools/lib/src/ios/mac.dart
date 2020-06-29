@@ -66,13 +66,11 @@ class IMobileDevice {
   }
 
   /// Captures a screenshot to the specified outputFile.
-  Future<void> takeScreenshot(File outputFile, String deviceID) {
+  Future<void> takeScreenshot(File outputFile) {
     return _processUtils.run(
       <String>[
         _idevicescreenshotPath,
         outputFile.path,
-        '--udid',
-        deviceID,
       ],
       throwOnError: true,
       environment: Map<String, String>.fromEntries(
