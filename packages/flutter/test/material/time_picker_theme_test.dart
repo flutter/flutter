@@ -26,8 +26,7 @@ void main() {
     expect(timePickerTheme.dayPeriodColor, null);
     expect(timePickerTheme.dialHandColor, null);
     expect(timePickerTheme.dialBackgroundColor, null);
-    expect(timePickerTheme.dialHandColor, null);
-    expect(timePickerTheme.dialBackgroundColor, null);
+    expect(timePickerTheme.dialTextColor, null);
     expect(timePickerTheme.entryModeIconColor, null);
     expect(timePickerTheme.hourMinuteTextStyle, null);
     expect(timePickerTheme.dayPeriodTextStyle, null);
@@ -61,6 +60,7 @@ void main() {
       dayPeriodColor: Color(0xFFFFFFFF),
       dialHandColor: Color(0xFFFFFFFF),
       dialBackgroundColor: Color(0xFFFFFFFF),
+      dialTextColor: Color(0xFFFFFFFF),
       entryModeIconColor: Color(0xFFFFFFFF),
       hourMinuteTextStyle: TextStyle(),
       dayPeriodTextStyle: TextStyle(),
@@ -84,6 +84,7 @@ void main() {
       'dayPeriodColor: Color(0xffffffff)',
       'dialHandColor: Color(0xffffffff)',
       'dialBackgroundColor: Color(0xffffffff)',
+      'dialTextColor: Color(0xffffffff)',
       'entryModeIconColor: Color(0xffffffff)',
       'hourMinuteTextStyle: TextStyle(<all styles inherited>)',
       'dayPeriodTextStyle: TextStyle(<all styles inherited>)',
@@ -150,6 +151,21 @@ void main() {
       helperText.text.style,
       Typography.material2014().englishLike.overline
           .merge(Typography.material2014().black.overline),
+    );
+
+    final CustomPaint dialPaint = tester.widget(findDialPaint);
+    final dynamic dialPainter = dialPaint.painter;
+    final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
+    expect(
+      primaryLabels.first.painter.text.style,
+      Typography.material2014().englishLike.subhead
+        .merge(Typography.material2014().black.subhead),
+    );
+    final List<dynamic> secondaryLabels = dialPainter.secondaryLabels as List<dynamic>;
+    expect(
+      secondaryLabels.first.painter.text.style,
+      Typography.material2014().englishLike.subhead
+          .merge(Typography.material2014().white.subhead),
     );
 
     final Material hourMaterial = _textMaterial(tester, '7');
@@ -276,6 +292,23 @@ void main() {
           .merge(timePickerTheme.helpTextStyle),
     );
 
+    final CustomPaint dialPaint = tester.widget(findDialPaint);
+    final dynamic dialPainter = dialPaint.painter;
+    final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
+    expect(
+      primaryLabels.first.painter.text.style,
+      Typography.material2014().englishLike.subhead
+          .merge(Typography.material2014().black.subhead)
+          .copyWith(color: _unselectedColor),
+    );
+    final List<dynamic> secondaryLabels = dialPainter.secondaryLabels as List<dynamic>;
+    expect(
+      secondaryLabels.first.painter.text.style,
+      Typography.material2014().englishLike.subhead
+          .merge(Typography.material2014().white.subhead)
+          .copyWith(color: _selectedColor),
+    );
+
     final Material hourMaterial = _textMaterial(tester, '7');
     expect(hourMaterial.color, _selectedColor);
     expect(hourMaterial.shape, timePickerTheme.hourMinuteShape);
@@ -343,6 +376,7 @@ TimePickerThemeData _timePickerTheme() {
     dayPeriodColor: materialStateColor,
     dialHandColor: Colors.brown,
     dialBackgroundColor: Colors.pinkAccent,
+    dialTextColor: materialStateColor,
     entryModeIconColor: Colors.red,
     hourMinuteTextStyle: const TextStyle(fontSize: 8.0),
     dayPeriodTextStyle: const TextStyle(fontSize: 8.0),
@@ -426,3 +460,8 @@ IconButton _entryModeIconButton(WidgetTester tester) {
 RenderParagraph _textRenderParagraph(WidgetTester tester, String text) {
   return tester.element<StatelessElement>(find.text(text).first).renderObject as RenderParagraph;
 }
+
+final Finder findDialPaint = find.descendant(
+  of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_Dial'),
+  matching: find.byWidgetPredicate((Widget w) => w is CustomPaint),
+);
