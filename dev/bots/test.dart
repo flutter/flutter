@@ -325,7 +325,7 @@ Future<void> _runToolTests() async {
           toolsPath,
           testPaths: <String>[path.join(kTest, '$subshard$kDotShard', suffix)],
           // Detect unit test time regressions (poor time delay handling, etc).
-          perTestTimeout: (subshard == 'general') ? 5 : null,
+          perTestTimeout: (subshard == 'general') ? 15 : null,
         );
       } else {
         await _pubRunTest(
