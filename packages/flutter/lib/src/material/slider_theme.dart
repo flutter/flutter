@@ -2513,29 +2513,11 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
     // Add a stroke of 1dp around the circle if this thumb would overlap
     // the other thumb.
     if (isOnTop == true) {
-      bool showValueIndicator;
-      switch (sliderTheme.showValueIndicator) {
-        case ShowValueIndicator.onlyForDiscrete:
-          showValueIndicator = isDiscrete;
-          break;
-        case ShowValueIndicator.onlyForContinuous:
-          showValueIndicator = !isDiscrete;
-          break;
-        case ShowValueIndicator.always:
-          showValueIndicator = true;
-          break;
-        case ShowValueIndicator.never:
-          showValueIndicator = false;
-          break;
-      }
-
-      if (!showValueIndicator || activationAnimation.value == 0) {
-        final Paint strokePaint = Paint()
-          ..color = sliderTheme.overlappingShapeStrokeColor
-          ..strokeWidth = 1.0
-          ..style = PaintingStyle.stroke;
-        canvas.drawCircle(center, radius, strokePaint);
-      }
+      final Paint strokePaint = Paint()
+        ..color = sliderTheme.overlappingShapeStrokeColor
+        ..strokeWidth = 1.0
+        ..style = PaintingStyle.stroke;
+      canvas.drawCircle(center, radius, strokePaint);
     }
 
     final Color color = colorTween.evaluate(enableAnimation);
