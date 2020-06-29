@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -280,6 +282,7 @@ void main() {
       dividerTheme: const DividerThemeData(color: Colors.black),
       buttonBarTheme: const ButtonBarThemeData(alignment: MainAxisAlignment.start),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(type: BottomNavigationBarType.fixed),
+      timePickerTheme: const TimePickerThemeData(backgroundColor: Colors.black),
       fixTextFieldOutlineLabel: false,
     );
 
@@ -361,6 +364,7 @@ void main() {
       dividerTheme: const DividerThemeData(color: Colors.white),
       buttonBarTheme: const ButtonBarThemeData(alignment: MainAxisAlignment.end),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(type: BottomNavigationBarType.shifting),
+      timePickerTheme: const TimePickerThemeData(backgroundColor: Colors.white),
       fixTextFieldOutlineLabel: true,
     );
 
@@ -428,6 +432,7 @@ void main() {
       dividerTheme: otherTheme.dividerTheme,
       buttonBarTheme: otherTheme.buttonBarTheme,
       bottomNavigationBarTheme: otherTheme.bottomNavigationBarTheme,
+      timePickerTheme: otherTheme.timePickerTheme,
       fixTextFieldOutlineLabel: otherTheme.fixTextFieldOutlineLabel,
     );
 
@@ -497,6 +502,7 @@ void main() {
     expect(themeDataCopy.dividerTheme, equals(otherTheme.dividerTheme));
     expect(themeDataCopy.buttonBarTheme, equals(otherTheme.buttonBarTheme));
     expect(themeDataCopy.bottomNavigationBarTheme, equals(otherTheme.bottomNavigationBarTheme));
+    expect(themeDataCopy.timePickerTheme, equals(otherTheme.timePickerTheme));
     expect(themeDataCopy.fixTextFieldOutlineLabel, equals(otherTheme.fixTextFieldOutlineLabel));
   });
 

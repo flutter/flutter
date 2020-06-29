@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -2844,7 +2846,6 @@ void main() {
         isEmpty: true,
         decoration: const InputDecoration(
           border: OutlineInputBorder(borderSide: BorderSide.none),
-          // ignore: deprecated_member_use_from_same_package
           hasFloatingPlaceholder: false,
           labelText: 'label',
         ),
@@ -2869,7 +2870,6 @@ void main() {
         // isFocused: false (default)
         decoration: const InputDecoration(
           border: OutlineInputBorder(borderSide: BorderSide.none),
-          // ignore: deprecated_member_use_from_same_package
           hasFloatingPlaceholder: false,
           labelText: 'label',
         ),
@@ -3939,7 +3939,6 @@ void main() {
       helperMaxLines: 6,
       hintStyle: TextStyle(),
       errorMaxLines: 5,
-      // ignore: deprecated_member_use_from_same_package
       hasFloatingPlaceholder: false,
       floatingLabelBehavior: FloatingLabelBehavior.never,
       contentPadding: EdgeInsetsDirectional.only(start: 40.0, top: 12.0, bottom: 12.0),
@@ -4049,7 +4048,7 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    // floatingLabelGeight = 12 (ahem font size 16dps * 0.75 = 12)
+    // floatingLabelHeight = 12 (ahem font size 16dps * 0.75 = 12)
     // labelY = -floatingLabelHeight/2 + borderWidth/2
     expect(tester.getTopLeft(find.text('label')).dy, -4.0);
   });
@@ -4158,5 +4157,65 @@ void main() {
     await tester.pump();
 
     expect(tester.getTopLeft(find.text(hintText)).dy, topPosition);
+  });
+
+  testWidgets("InputDecorator label width isn't affected by prefix or suffix", (WidgetTester tester) async {
+    const String labelText = 'My Label';
+    const String prefixText = 'The five boxing wizards jump quickly.';
+    const String suffixText = 'Suffix';
+
+    Widget getLabeledInputDecorator(bool showFix) {
+      return MaterialApp(
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return Theme(
+                data: Theme.of(context),
+                child: Align(
+                  alignment: Alignment.topLeft,
+                  child: TextField(
+                    decoration: InputDecoration(
+                      icon: const Icon(Icons.assistant),
+                      prefixText: showFix ? prefixText : null,
+                      suffixText: showFix ? suffixText : null,
+                      suffixIcon: const Icon(Icons.threesixty),
+                      labelText: labelText,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    // Build with no prefix or suffix.
+    await tester.pumpWidget(getLabeledInputDecorator(false));
+
+    // Get the width of the label when there is no prefix/suffix.
+    expect(find.text(prefixText), findsNothing);
+    expect(find.text(suffixText), findsNothing);
+    final double labelWidth = tester.getSize(find.text(labelText)).width;
+
+    // Build with a prefix and suffix.
+    await tester.pumpWidget(getLabeledInputDecorator(true));
+
+    // The prefix and suffix exist but aren't visible. They have not affected
+    // the width of the label.
+    expect(find.text(prefixText), findsOneWidget);
+    expect(getOpacity(tester, prefixText), 0.0);
+    expect(find.text(suffixText), findsOneWidget);
+    expect(getOpacity(tester, suffixText), 0.0);
+    expect(tester.getSize(find.text(labelText)).width, labelWidth);
+
+    // Tap to focus.
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    // The prefix and suffix are visible, and the label is floating and still
+    // hasn't had its width affected.
+    expect(tester.getSize(find.text(labelText)).width, labelWidth);
+    expect(getOpacity(tester, prefixText), 1.0);
   });
 }

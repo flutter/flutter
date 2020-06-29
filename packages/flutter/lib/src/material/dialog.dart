@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(shihaohong): remove ignoring deprecated member use analysis
-// when AlertDialog.scrollable parameter is removed. See
-// https://flutter.dev/go/scrollable-alert-dialog for more details.
-// ignore_for_file: deprecated_member_use_from_same_package
+// @dart = 2.8
 
 import 'dart:async';
 import 'dart:ui';

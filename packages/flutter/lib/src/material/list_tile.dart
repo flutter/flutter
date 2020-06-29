@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
@@ -1448,11 +1450,15 @@ class _RenderListTile extends RenderBox {
     final Size trailingSize = _layoutBox(trailing, iconConstraints);
     assert(
       tileWidth != leadingSize.width,
-      'Leading widget consumes entire tile width. Please use a sized widget.'
+      'Leading widget consumes entire tile width. Please use a sized widget, '
+      'or consider replacing ListTile with a custom widget '
+      '(see https://api.flutter.dev/flutter/material/ListTile-class.html#material.ListTile.4)'
     );
     assert(
       tileWidth != trailingSize.width,
-      'Trailing widget consumes entire tile width. Please use a sized widget.'
+      'Trailing widget consumes entire tile width. Please use a sized widget, '
+      'or consider replacing ListTile with a custom widget '
+      '(see https://api.flutter.dev/flutter/material/ListTile-class.html#material.ListTile.4)'
     );
 
     final double titleStart = hasLeading

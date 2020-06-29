@@ -29,6 +29,6 @@
   "copyButtonLabel": "Капіраваць",
   "pasteButtonLabel": "Уставіць",
   "selectAllButtonLabel": "Выбраць усе",
-  "tabSemanticsLabel": "TBD",
+  "tabSemanticsLabel": "Укладка $tabIndex з $tabCount",
   "modalBarrierDismissLabel": "Адхіліць"
 }

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
@@ -3002,8 +3004,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         needsExplicitDecision = true;
         assert(
           newEntry.route.settings == nextPage,
-          'If a route is created from a page, its must have that page as its '
-          'settings.',
+          'The settings getter of a page-based Route must return a Page object. '
+          'Please set the settings to the Page in the Page.createRoute method.'
         );
         newHistory.add(newEntry);
       } else {

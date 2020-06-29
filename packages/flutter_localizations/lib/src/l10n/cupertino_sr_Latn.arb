@@ -1,4 +1,5 @@
 {
+  "tabSemanticsLabel": "$tabIndex. kartica od $tabCount",
   "datePickerHourSemanticsLabelFew": "$hour sata",
   "datePickerMinuteSemanticsLabelFew": "$minute minuta",
   "timerPickerHourLabelFew": "sata",

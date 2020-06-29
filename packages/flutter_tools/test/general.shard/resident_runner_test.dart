@@ -92,7 +92,8 @@ void main() {
 
   setUp(() {
     testbed = Testbed(setup: () {
-      globals.fs.file('.packages').writeAsStringSync('\n');
+      globals.fs.file('.packages')
+        .writeAsStringSync('\n');
       globals.fs.file(globals.fs.path.join('build', 'app.dill'))
         ..createSync(recursive: true)
         ..writeAsStringSync('ABC');
@@ -418,11 +419,77 @@ void main() {
       cdKey(CustomDimensions.hotEventSdkName): 'Example',
       cdKey(CustomDimensions.hotEventEmulator): 'false',
       cdKey(CustomDimensions.hotEventFullRestart): 'false',
+      cdKey(CustomDimensions.nullSafety): 'false',
     })).called(1);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     Usage: () => MockUsage(),
   }));
+
+  testUsingContext('ResidentRunner reports hot reload event with null safety analytics', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      listViews,
+      listViews,
+      listViews,
+    ]);
+    residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(const BuildInfo(
+        BuildMode.debug, '', treeShakeIcons: false, extraFrontEndOptions: <String>[
+        '--enable-experiment=non-nullable',
+        ],
+      )),
+    );
+    when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation invocation) async {
+      return 'Example';
+    });
+    when(mockDevice.targetPlatform).thenAnswer((Invocation invocation) async {
+      return TargetPlatform.android_arm;
+    });
+    when(mockDevice.isLocalEmulator).thenAnswer((Invocation invocation) async {
+      return false;
+    });
+    final Completer<DebugConnectionInfo> onConnectionInfo = Completer<DebugConnectionInfo>.sync();
+    final Completer<void> onAppStart = Completer<void>.sync();
+    unawaited(residentRunner.attach(
+      appStartedCompleter: onAppStart,
+      connectionInfoCompleter: onConnectionInfo,
+    ));
+    await onAppStart.future;
+    when(mockFlutterDevice.updateDevFS(
+      mainUri: anyNamed('mainUri'),
+      target: anyNamed('target'),
+      bundle: anyNamed('bundle'),
+      firstBuildTime: anyNamed('firstBuildTime'),
+      bundleFirstUpload: anyNamed('bundleFirstUpload'),
+      bundleDirty: anyNamed('bundleDirty'),
+      fullRestart: anyNamed('fullRestart'),
+      projectRootPath: anyNamed('projectRootPath'),
+      pathToReload: anyNamed('pathToReload'),
+      invalidatedFiles: anyNamed('invalidatedFiles'),
+      dillOutputPath: anyNamed('dillOutputPath'),
+      packageConfig: anyNamed('packageConfig'),
+    )).thenThrow(vm_service.RPCError('something bad happened', 666, ''));
+
+    final OperationResult result = await residentRunner.restart(fullRestart: false);
+    expect(result.fatal, true);
+    expect(result.code, 1);
+    verify(globals.flutterUsage.sendEvent('hot', 'exception', parameters: <String, String>{
+      cdKey(CustomDimensions.hotEventTargetPlatform):
+        getNameForTargetPlatform(TargetPlatform.android_arm),
+      cdKey(CustomDimensions.hotEventSdkName): 'Example',
+      cdKey(CustomDimensions.hotEventEmulator): 'false',
+      cdKey(CustomDimensions.hotEventFullRestart): 'false',
+      cdKey(CustomDimensions.nullSafety): 'true',
+    })).called(1);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  }, overrides: <Type, Generator>{
+    Usage: () => MockUsage(),
+  }));
+
 
   testUsingContext('ResidentRunner can send target platform to analytics from hot reload', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
@@ -587,6 +654,7 @@ void main() {
       cdKey(CustomDimensions.hotEventSdkName): 'Example',
       cdKey(CustomDimensions.hotEventEmulator): 'false',
       cdKey(CustomDimensions.hotEventFullRestart): 'true',
+      cdKey(CustomDimensions.nullSafety): 'false',
     })).called(1);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
@@ -700,6 +768,7 @@ void main() {
           commandHelp.c,
           commandHelp.q,
           commandHelp.s,
+          commandHelp.b,
           commandHelp.w,
           commandHelp.t,
           commandHelp.L,
@@ -776,6 +845,11 @@ void main() {
       'data': <String, Object>{'A': 'B'}
     });
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  }, overrides: <Type, Generator>{
+    FileSystemUtils: () => FileSystemUtils(
+      fileSystem: globals.fs,
+      platform: globals.platform,
+    )
   }));
 
   testUsingContext('ResidentRunner can take screenshot on debug device', () => testbed.run(() async {
@@ -1044,6 +1118,17 @@ void main() {
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }));
 
+  testUsingContext('listViews handles a null VM service', () => testbed.run(() async {
+    final FlutterDevice device = FlutterDevice(mockDevice, buildInfo: BuildInfo.debug);
+    final ResidentRunner residentRunner = HotRunner(
+      <FlutterDevice>[device],
+      debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug)
+    );
+
+    expect(await residentRunner.listFlutterViews(), isEmpty);
+  }));
+
+
   testUsingContext('ResidentRunner debugDumpApp calls flutter device', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     await residentRunner.debugDumpApp();
@@ -1084,6 +1169,36 @@ void main() {
     await residentRunner.debugToggleDebugPaintSizeEnabled();
 
     verify(mockFlutterDevice.toggleDebugPaintSizeEnabled()).called(1);
+  }));
+
+  testUsingContext('ResidentRunner debugToggleBrightness calls flutter device', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+    await residentRunner.debugToggleBrightness();
+
+    verify(mockFlutterDevice.toggleBrightness()).called(2);
+  }));
+
+  testUsingContext('FlutterDevice.toggleBrightness invokes correct VM service request', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      listViews,
+      const FakeVmServiceRequest(
+        method: 'ext.flutter.brightnessOverride',
+        args: <String, Object>{
+          'isolateId': '1',
+        },
+        jsonResponse: <String, Object>{
+          'value': 'Brightness.dark'
+        },
+      ),
+    ]);
+    final FlutterDevice device = FlutterDevice(
+      mockDevice,
+      buildInfo: BuildInfo.debug,
+    );
+    device.vmService = fakeVmServiceHost.vmService;
+
+    expect(await device.toggleBrightness(), Brightness.dark);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }));
 
   testUsingContext('ResidentRunner debugToggleDebugCheckElevationsEnabled calls flutter device', () => testbed.run(() async {

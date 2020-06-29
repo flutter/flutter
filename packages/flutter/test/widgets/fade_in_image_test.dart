@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -321,11 +323,12 @@ Future<void> main() async {
         );
 
         bool called = false;
-        final DecoderCallback decode = (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
+        final DecoderCallback decode = (Uint8List bytes, {int cacheWidth, int cacheHeight, bool allowUpscaling}) {
           expect(cacheWidth, 20);
           expect(cacheHeight, 30);
+          expect(allowUpscaling, false);
           called = true;
-          return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight);
+          return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling);
         };
         final ImageProvider resizeImage = image.placeholder;
         expect(image.placeholder, isA<ResizeImage>());
@@ -343,9 +346,10 @@ Future<void> main() async {
         );
 
         bool called = false;
-        final DecoderCallback decode = (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
+        final DecoderCallback decode = (Uint8List bytes, {int cacheWidth, int cacheHeight, bool allowUpscaling}) {
           expect(cacheWidth, null);
           expect(cacheHeight, null);
+          expect(allowUpscaling, null);
           called = true;
           return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight);
         };

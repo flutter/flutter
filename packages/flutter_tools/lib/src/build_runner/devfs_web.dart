@@ -20,6 +20,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/net.dart';
+import '../base/platform.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../bundle.dart';
@@ -139,7 +140,7 @@ class WebAssetServer implements AssetReader {
     int port,
     UrlTunneller urlTunneller,
     bool useSseForDebugProxy,
-    BuildMode buildMode,
+    BuildInfo buildInfo,
     bool enableDwds,
     Uri entrypoint,
     ExpressionCompiler expressionCompiler, {
@@ -155,7 +156,7 @@ class WebAssetServer implements AssetReader {
       }
       final HttpServer httpServer = await HttpServer.bind(address, port);
       final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-        globals.fs.file(globalPackagesPath),
+        globals.fs.file(buildInfo.packagesPath),
         logger: globals.logger,
       );
       final Map<String, String> digests = <String, String>{};
@@ -172,8 +173,14 @@ class WebAssetServer implements AssetReader {
       }
 
       // In release builds deploy a simpler proxy server.
-      if (buildMode != BuildMode.debug) {
-        final ReleaseAssetServer releaseAssetServer = ReleaseAssetServer(entrypoint);
+      if (buildInfo.mode != BuildMode.debug) {
+        final ReleaseAssetServer releaseAssetServer = ReleaseAssetServer(
+          entrypoint,
+          fileSystem: globals.fs,
+          platform: globals.platform,
+          flutterRoot: Cache.flutterRoot,
+          webBuildDirectory: getWebBuildDirectory(),
+        );
         shelf.serveRequests(httpServer, releaseAssetServer.handle);
         return server;
       }
@@ -517,10 +524,13 @@ class WebAssetServer implements AssetReader {
     // The file might have been a package file which is signaled by a
     // `/packages/<package>/<path>` request.
     if (segments.first == 'packages') {
-      final File packageFile = globals.fs.file(_packages.resolve(Uri(
-        scheme: 'package', pathSegments: segments.skip(1))));
-      if (packageFile.existsSync()) {
-        return packageFile;
+      final Uri filePath = _packages.resolve(Uri(
+        scheme: 'package', pathSegments: segments.skip(1)));
+      if (filePath != null) {
+        final File packageFile = globals.fs.file(filePath);
+        if (packageFile.existsSync()) {
+          return packageFile;
+        }
       }
     }
 
@@ -553,6 +563,11 @@ class WebAssetServer implements AssetReader {
   Future<String> sourceMapContents(String serverPath) async {
     return utf8.decode(_sourcemaps[serverPath]);
   }
+
+  @override
+  Future<String> metadataContents(String serverPath) {
+    return null;
+  }
 }
 
 class ConnectionResult {
@@ -574,7 +589,7 @@ class WebDevFS implements DevFS {
     @required this.packagesFilePath,
     @required this.urlTunneller,
     @required this.useSseForDebugProxy,
-    @required this.buildMode,
+    @required this.buildInfo,
     @required this.enableDwds,
     @required this.entrypoint,
     @required this.expressionCompiler,
@@ -588,7 +603,7 @@ class WebDevFS implements DevFS {
   final String packagesFilePath;
   final UrlTunneller urlTunneller;
   final bool useSseForDebugProxy;
-  final BuildMode buildMode;
+  final BuildInfo buildInfo;
   final bool enableDwds;
   final bool testMode;
   final ExpressionCompiler expressionCompiler;
@@ -655,7 +670,7 @@ class WebDevFS implements DevFS {
       port,
       urlTunneller,
       useSseForDebugProxy,
-      buildMode,
+      buildInfo,
       enableDwds,
       entrypoint,
       expressionCompiler,
@@ -809,17 +824,31 @@ class WebDevFS implements DevFS {
 }
 
 class ReleaseAssetServer {
-  ReleaseAssetServer(this.entrypoint);
+  ReleaseAssetServer(this.entrypoint, {
+    @required FileSystem fileSystem,
+    @required String webBuildDirectory,
+    @required String flutterRoot,
+    @required Platform platform,
+  }) : _fileSystem = fileSystem,
+       _platform = platform,
+       _flutterRoot = flutterRoot,
+       _webBuildDirectory = webBuildDirectory,
+       _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform);
 
   final Uri entrypoint;
+  final String _flutterRoot;
+  final String _webBuildDirectory;
+  final FileSystem _fileSystem;
+  final FileSystemUtils _fileSystemUtils;
+  final Platform _platform;
 
   // Locations where source files, assets, or source maps may be located.
-  final List<Uri> _searchPaths = <Uri>[
-    globals.fs.directory(getWebBuildDirectory()).uri,
-    globals.fs.directory(Cache.flutterRoot).uri,
-    globals.fs.directory(Cache.flutterRoot).parent.uri,
-    globals.fs.currentDirectory.uri,
-    globals.fs.directory(globals.fsUtils.homeDirPath).uri,
+  List<Uri> _searchPaths() => <Uri>[
+    _fileSystem.directory(_webBuildDirectory).uri,
+    _fileSystem.directory(_flutterRoot).uri,
+    _fileSystem.directory(_flutterRoot).parent.uri,
+    _fileSystem.currentDirectory.uri,
+    _fileSystem.directory(_fileSystemUtils.homeDirPath).uri,
   ];
 
   Future<shelf.Response> handle(shelf.Request request) async {
@@ -827,9 +856,10 @@ class ReleaseAssetServer {
     if (request.url.toString() == 'main.dart') {
       fileUri = entrypoint;
     } else {
-      for (final Uri uri in _searchPaths) {
+      for (final Uri uri in _searchPaths()) {
         final Uri potential = uri.resolve(request.url.path);
-        if (potential == null || !globals.fs.isFileSync(potential.toFilePath())) {
+        if (potential == null || !_fileSystem.isFileSync(
+          potential.toFilePath(windows: _platform.isWindows))) {
           continue;
         }
         fileUri = potential;
@@ -837,7 +867,7 @@ class ReleaseAssetServer {
       }
     }
     if (fileUri != null) {
-      final File file = globals.fs.file(fileUri);
+      final File file = _fileSystem.file(fileUri);
       final Uint8List bytes = file.readAsBytesSync();
       // Fallback to "application/octet-stream" on null which
       // makes no claims as to the structure of the data.
@@ -848,7 +878,7 @@ class ReleaseAssetServer {
       });
     }
     if (request.url.path == '') {
-      final File file = globals.fs.file(globals.fs.path.join(getWebBuildDirectory(), 'index.html'));
+      final File file = _fileSystem.file(_fileSystem.path.join(_webBuildDirectory, 'index.html'));
       return shelf.Response.ok(file.readAsBytesSync(), headers: <String, String>{
         'Content-Type': 'text/html',
       });

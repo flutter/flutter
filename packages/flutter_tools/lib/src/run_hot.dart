@@ -26,8 +26,7 @@ import 'reporting/reporting.dart';
 import 'resident_runner.dart';
 import 'vmservice.dart';
 
-ProjectFileInvalidator get projectFileInvalidator => context.get<ProjectFileInvalidator>() ?? _defaultInvalidator;
-final ProjectFileInvalidator _defaultInvalidator = ProjectFileInvalidator(
+ProjectFileInvalidator get projectFileInvalidator => context.get<ProjectFileInvalidator>() ?? ProjectFileInvalidator(
   fileSystem: globals.fs,
   platform: globals.platform,
   logger: globals.logger,
@@ -67,12 +66,11 @@ class HotRunner extends ResidentRunner {
   HotRunner(
     List<FlutterDevice> devices, {
     String target,
-    DebuggingOptions debuggingOptions,
+    @required DebuggingOptions debuggingOptions,
     this.benchmarkMode = false,
     this.applicationBinary,
     this.hostIsIde = false,
     String projectRootPath,
-    String packagesFilePath,
     String dillOutputPath,
     bool stayResident = true,
     bool ipv6 = false,
@@ -80,7 +78,6 @@ class HotRunner extends ResidentRunner {
              target: target,
              debuggingOptions: debuggingOptions,
              projectRootPath: projectRootPath,
-             packagesFilePath: packagesFilePath,
              stayResident: stayResident,
              hotMode: true,
              dillOutputPath: dillOutputPath,
@@ -157,7 +154,7 @@ class HotRunner extends ResidentRunner {
     final UpdateFSReport results = UpdateFSReport(success: true);
     final List<Uri> invalidated =  <Uri>[Uri.parse(libraryId)];
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-      globals.fs.file(globalPackagesPath),
+      globals.fs.file(debuggingOptions.buildInfo.packagesPath),
       logger: globals.logger,
     );
     for (final FlutterDevice device in flutterDevices) {
@@ -343,7 +340,7 @@ class HotRunner extends ResidentRunner {
 
     final List<Future<bool>> startupTasks = <Future<bool>>[];
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-      globals.fs.file(globalPackagesPath),
+      globals.fs.file(debuggingOptions.buildInfo.packagesPath),
       logger: globals.logger,
     );
     for (final FlutterDevice device in flutterDevices) {
@@ -407,7 +404,7 @@ class HotRunner extends ResidentRunner {
     final bool rebuildBundle = assetBundle.needsBuild();
     if (rebuildBundle) {
       globals.printTrace('Updating assets');
-      final int result = await assetBundle.build();
+      final int result = await assetBundle.build(packagesPath: '.packages');
       if (result != 0) {
         return UpdateFSReport(success: false);
       }
@@ -749,6 +746,7 @@ class HotRunner extends ResidentRunner {
         sdkName: sdkName,
         emulator: emulator,
         fullRestart: true,
+        nullSafety: usageNullSafety,
         reason: reason).send();
       status?.cancel();
     }
@@ -790,7 +788,9 @@ class HotRunner extends ResidentRunner {
         sdkName: sdkName,
         emulator: emulator,
         fullRestart: false,
-        reason: reason).send();
+        nullSafety: usageNullSafety,
+        reason: reason,
+      ).send();
       return OperationResult(1, 'hot reload failed to complete', fatal: true);
     } finally {
       status.cancel();
@@ -868,6 +868,7 @@ class HotRunner extends ResidentRunner {
             emulator: emulator,
             fullRestart: false,
             reason: reason,
+            nullSafety: usageNullSafety,
           ).send();
           return OperationResult(1, 'Reload rejected');
         }
@@ -895,6 +896,7 @@ class HotRunner extends ResidentRunner {
           emulator: emulator,
           fullRestart: false,
           reason: reason,
+          nullSafety: usageNullSafety,
         ).send();
         return OperationResult(errorCode, errorMessage);
       }
@@ -1020,6 +1022,7 @@ class HotRunner extends ResidentRunner {
       syncedBytes: updatedDevFS.syncedBytes,
       invalidatedSourcesCount: updatedDevFS.invalidatedSourcesCount,
       transferTimeInMs: devFSTimer.elapsed.inMilliseconds,
+      nullSafety: usageNullSafety,
     ).send();
 
     if (shouldReportReloadTime) {
@@ -1283,7 +1286,7 @@ class ProjectFileInvalidator {
 
   Future<PackageConfig> _createPackageConfig(String packagesPath) {
     return loadPackageConfigWithLogging(
-      _fileSystem.file(globalPackagesPath),
+      _fileSystem.file(packagesPath),
       logger: _logger,
     );
   }

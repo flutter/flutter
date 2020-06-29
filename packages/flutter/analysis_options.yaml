@@ -1,0 +1,7 @@
+# Use the parent analysis options settings and enable null-experiment.
+
+include: ../analysis_options.yaml
+
+analyzer:
+  enable-experiment:
+    - non-nullable

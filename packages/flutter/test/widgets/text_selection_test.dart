@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter/widgets.dart';
@@ -193,7 +195,7 @@ void main() {
     expect(singleLongTapStartCount, 0);
   });
 
-  testWidgets('a force press intiates a force press', (WidgetTester tester) async {
+  testWidgets('a force press initiates a force press', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
 
     const int pointerValue = 1;
@@ -259,7 +261,7 @@ void main() {
     expect(forcePressStartCount, 4);
   });
 
-  testWidgets('a tap and then force press intiates a force press and not a double tap', (WidgetTester tester) async {
+  testWidgets('a tap and then force press initiates a force press and not a double tap', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
 
     const int pointerValue = 1;

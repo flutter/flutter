@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
@@ -474,7 +476,7 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
       ),
     ]))..addStatusListener((AnimationStatus status) {
       if (_placeholderOpacityAnimation.isCompleted) {
-        // Need to rebuild to remove placeholder now that it is invisibile.
+        // Need to rebuild to remove placeholder now that it is invisible.
         setState(() {});
       }
     });

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -30,7 +32,7 @@ void main() {
   final MockClipboard mockClipboard = MockClipboard();
 
   setUp(() async {
-    // Fill the clipboard so that the PASTE option is available in the text
+    // Fill the clipboard so that the Paste option is available in the text
     // selection menu.
     SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
     await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
@@ -270,7 +272,7 @@ void main() {
     expect(textField.focusNode.hasFocus, isFalse);
   });
 
-  testWidgets('Fresh search allways starts with empty query', (WidgetTester tester) async {
+  testWidgets('Fresh search always starts with empty query', (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate();
 
     await tester.pumpWidget(TestHomePage(
@@ -591,19 +593,54 @@ void main() {
             textDirection: TextDirection.ltr,
             children: <TestSemantics>[
               TestSemantics(
-                id: 7,
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.scopesRoute,
-                  SemanticsFlag.namesRoute,
-                ],
-                label: routeName,
-                textDirection: TextDirection.ltr,
+                id: 2,
                 children: <TestSemantics>[
                   TestSemantics(
-                    id: 9,
+                    id: 7,
+                    flags: <SemanticsFlag>[
+                      SemanticsFlag.scopesRoute,
+                      SemanticsFlag.namesRoute,
+                    ],
+                    label: routeName,
+                    textDirection: TextDirection.ltr,
                     children: <TestSemantics>[
                       TestSemantics(
-                        id: 10,
+                        id: 9,
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            id: 10,
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.hasEnabledState,
+                              SemanticsFlag.isButton,
+                              SemanticsFlag.isEnabled,
+                              SemanticsFlag.isFocusable,
+                            ],
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: 'Back',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          TestSemantics(
+                            id: 11,
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.isTextField,
+                              SemanticsFlag.isFocused,
+                              SemanticsFlag.isHeader,
+                              if (debugDefaultTargetPlatformOverride != TargetPlatform.iOS &&
+                                debugDefaultTargetPlatformOverride != TargetPlatform.macOS) SemanticsFlag.namesRoute,
+                            ],
+                            actions: <SemanticsAction>[
+                              SemanticsAction.tap,
+                              SemanticsAction.setSelection,
+                              SemanticsAction.paste,
+                            ],
+                            label: 'Search',
+                            textDirection: TextDirection.ltr,
+                            textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
+                          ),
+                        ],
+                      ),
+                      TestSemantics(
+                        id: 8,
                         flags: <SemanticsFlag>[
                           SemanticsFlag.hasEnabledState,
                           SemanticsFlag.isButton,
@@ -611,40 +648,10 @@ void main() {
                           SemanticsFlag.isFocusable,
                         ],
                         actions: <SemanticsAction>[SemanticsAction.tap],
-                        label: 'Back',
+                        label: 'Suggestions',
                         textDirection: TextDirection.ltr,
                       ),
-                      TestSemantics(
-                        id: 11,
-                        flags: <SemanticsFlag>[
-                          SemanticsFlag.isTextField,
-                          SemanticsFlag.isFocused,
-                          SemanticsFlag.isHeader,
-                          if (debugDefaultTargetPlatformOverride != TargetPlatform.iOS &&
-                              debugDefaultTargetPlatformOverride != TargetPlatform.macOS) SemanticsFlag.namesRoute,
-                        ],
-                        actions: <SemanticsAction>[
-                          SemanticsAction.tap,
-                          SemanticsAction.setSelection,
-                          SemanticsAction.paste,
-                        ],
-                        label: 'Search',
-                        textDirection: TextDirection.ltr,
-                        textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
-                      ),
                     ],
-                  ),
-                  TestSemantics(
-                    id: 8,
-                    flags: <SemanticsFlag>[
-                      SemanticsFlag.hasEnabledState,
-                      SemanticsFlag.isButton,
-                      SemanticsFlag.isEnabled,
-                      SemanticsFlag.isFocusable,
-                    ],
-                    actions: <SemanticsAction>[SemanticsAction.tap],
-                    label: 'Suggestions',
-                    textDirection: TextDirection.ltr,
                   ),
                 ],
               ),

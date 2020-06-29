@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:collection';
 import 'dart:math' as math;
@@ -78,6 +80,7 @@ class ScaffoldPrelayoutGeometry {
     @required this.contentTop,
     @required this.floatingActionButtonSize,
     @required this.minInsets,
+    @required this.minViewPadding,
     @required this.scaffoldSize,
     @required this.snackBarSize,
     @required this.textDirection,
@@ -131,6 +134,16 @@ class ScaffoldPrelayoutGeometry {
   /// If [Scaffold.resizeToAvoidBottomInset] is set to false, [minInsets.bottom]
   /// will be 0.0.
   final EdgeInsets minInsets;
+
+  /// The minimum padding to inset interactive elements to be within a safe,
+  /// un-obscured space.
+  ///
+  /// This value reflects the [MediaQuery.viewPadding] of the [Scaffold]'s
+  /// [BuildContext] when [Scaffold.resizeToAvoidBottomInset] is false or and
+  /// the [MediaQuery.viewInsets] > 0.0. This helps distinguish between
+  /// different types of obstructions on the screen, such as software keyboards
+  /// and physical device notches.
+  final EdgeInsets minViewPadding;
 
   /// The [Size] of the whole [Scaffold].
   ///
@@ -387,6 +400,7 @@ class _BodyBuilder extends StatelessWidget {
 class _ScaffoldLayout extends MultiChildLayoutDelegate {
   _ScaffoldLayout({
     @required this.minInsets,
+    @required this.minViewPadding,
     @required this.textDirection,
     @required this.geometryNotifier,
     // for floating action button
@@ -408,6 +422,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   final bool extendBody;
   final bool extendBodyBehindAppBar;
   final EdgeInsets minInsets;
+  final EdgeInsets minViewPadding;
   final TextDirection textDirection;
   final _ScaffoldGeometryNotifier geometryNotifier;
 
@@ -534,6 +549,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         scaffoldSize: size,
         snackBarSize: snackBarSize,
         textDirection: textDirection,
+        minViewPadding: minViewPadding,
       );
       final Offset currentFabOffset = currentFloatingActionButtonLocation.getOffset(currentGeometry);
       final Offset previousFabOffset = previousFloatingActionButtonLocation.getOffset(currentGeometry);
@@ -2090,7 +2106,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   // Backwards compatibility for deprecated resizeToAvoidBottomPadding property
   bool get _resizeToAvoidBottomInset {
-    // ignore: deprecated_member_use_from_same_package
     return widget.resizeToAvoidBottomInset ?? widget.resizeToAvoidBottomPadding ?? true;
   }
 
@@ -2496,6 +2511,12 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       bottom: _resizeToAvoidBottomInset ? mediaQuery.viewInsets.bottom : 0.0,
     );
 
+    // The minimum viewPadding for interactive elements positioned by the
+    // Scaffold to keep within safe interactive areas.
+    final EdgeInsets minViewPadding = mediaQuery.viewPadding.copyWith(
+      bottom: _resizeToAvoidBottomInset &&  mediaQuery.viewInsets.bottom != 0.0 ? 0.0 : null,
+    );
+
     // extendBody locked when keyboard is open
     final bool _extendBody = minInsets.bottom <= 0 && widget.extendBody;
 
@@ -2513,6 +2534,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
                 extendBody: _extendBody,
                 extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
                 minInsets: minInsets,
+                minViewPadding: minViewPadding,
                 currentFloatingActionButtonLocation: _floatingActionButtonLocation,
                 floatingActionButtonMoveAnimationProgress: _floatingActionButtonMoveController.value,
                 floatingActionButtonMotionAnimator: _floatingActionButtonAnimator,

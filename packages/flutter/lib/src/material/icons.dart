@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/widgets.dart';
 
 /// Identifiers for the supported material design icons.
@@ -59,7 +61,7 @@ import 'package:flutter/widgets.dart';
 ///  * [IconButton]
 ///  * <https://design.google.com/icons/>
 class Icons {
-  // This class is not meant to be instatiated or extended; this constructor
+  // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
   // ignore: unused_element
   Icons._();

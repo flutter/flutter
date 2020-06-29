@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
-import 'package:intl/date_symbols.dart' as intl;
 
 import 'cupertino_localizations.dart';
 import 'l10n/generated_material_localizations.dart';
@@ -445,6 +444,115 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
     if (alwaysUse24HourFormat)
       return _get24HourVersionOf(timeOfDayFormatRaw);
     return timeOfDayFormatRaw;
+  }
+
+  /// The "zero" form of [licensesPackageDetailText].
+  ///
+  /// This form is optional.
+  ///
+  /// See also:
+  ///
+  ///  * [Intl.plural], to which this form is passed.
+  ///  * [licensesPackageDetailTextZero], the "zero" form
+  ///  * [licensesPackageDetailTextOne], the "one" form
+  ///  * [licensesPackageDetailTextTwo], the "two" form
+  ///  * [licensesPackageDetailTextFew], the "few" form
+  ///  * [licensesPackageDetailTextMany], the "many" form
+  ///  * [licensesPackageDetailTextOther], the "other" form
+  @protected
+  String get licensesPackageDetailTextZero => null;
+
+  /// The "one" form of [licensesPackageDetailText].
+  ///
+  /// This form is optional.
+  ///
+  /// See also:
+  ///
+  ///  * [licensesPackageDetailTextZero], the "zero" form
+  ///  * [licensesPackageDetailTextOne], the "one" form
+  ///  * [licensesPackageDetailTextTwo], the "two" form
+  ///  * [licensesPackageDetailTextFew], the "few" form
+  ///  * [licensesPackageDetailTextMany], the "many" form
+  ///  * [licensesPackageDetailTextOther], the "other" form
+  @protected
+  String get licensesPackageDetailTextOne => null;
+
+  /// The "two" form of [licensesPackageDetailText].
+  ///
+  /// This form is optional.
+  ///
+  /// See also:
+  ///
+  ///  * [Intl.plural], to which this form is passed.
+  ///  * [licensesPackageDetailTextZero], the "zero" form
+  ///  * [licensesPackageDetailTextOne], the "one" form
+  ///  * [licensesPackageDetailTextTwo], the "two" form
+  ///  * [licensesPackageDetailTextFew], the "few" form
+  ///  * [licensesPackageDetailTextMany], the "many" form
+  ///  * [licensesPackageDetailTextOther], the "other" form
+  @protected
+  String get licensesPackageDetailTextTwo => null;
+
+  /// The "many" form of [licensesPackageDetailText].
+  ///
+  /// This form is optional.
+  ///
+  /// See also:
+  ///
+  ///  * [Intl.plural], to which this form is passed.
+  ///  * [licensesPackageDetailTextZero], the "zero" form
+  ///  * [licensesPackageDetailTextOne], the "one" form
+  ///  * [licensesPackageDetailTextTwo], the "two" form
+  ///  * [licensesPackageDetailTextFew], the "few" form
+  ///  * [licensesPackageDetailTextMany], the "many" form
+  ///  * [licensesPackageDetailTextOther], the "other" form
+  @protected
+  String get licensesPackageDetailTextMany => null;
+
+  /// The "few" form of [licensesPackageDetailText].
+  ///
+  /// This form is optional.
+  ///
+  /// See also:
+  ///
+  ///  * [Intl.plural], to which this form is passed.
+  ///  * [licensesPackageDetailTextZero], the "zero" form
+  ///  * [licensesPackageDetailTextOne], the "one" form
+  ///  * [licensesPackageDetailTextTwo], the "two" form
+  ///  * [licensesPackageDetailTextFew], the "few" form
+  ///  * [licensesPackageDetailTextMany], the "many" form
+  ///  * [licensesPackageDetailTextOther], the "other" form
+  @protected
+  String get licensesPackageDetailTextFew => null;
+
+  /// The "other" form of [licensesPackageDetailText].
+  ///
+  /// This form is required.
+  ///
+  /// See also:
+  ///
+  ///  * [Intl.plural], to which this form is passed.
+  ///  * [licensesPackageDetailTextZero], the "zero" form
+  ///  * [licensesPackageDetailTextOne], the "one" form
+  ///  * [licensesPackageDetailTextTwo], the "two" form
+  ///  * [licensesPackageDetailTextFew], the "few" form
+  ///  * [licensesPackageDetailTextMany], the "many" form
+  ///  * [licensesPackageDetailTextOther], the "other" form
+  @protected
+  String get licensesPackageDetailTextOther;
+
+  @override
+  String licensesPackageDetailText(int licenseCount) {
+    return intl.Intl.pluralLogic(
+      licenseCount,
+      zero: licensesPackageDetailTextZero,
+      one: licensesPackageDetailTextOne,
+      two: licensesPackageDetailTextTwo,
+      many: licensesPackageDetailTextMany,
+      few: licensesPackageDetailTextFew,
+      other: licensesPackageDetailTextOther,
+      locale: _localeName,
+    ).replaceFirst(r'$licenseCount', formatDecimal(licenseCount));
   }
 
   /// The "zero" form of [remainingTextFieldCharacterCount].

@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -226,6 +227,12 @@ void main() {
           iproxyPath: mockArtifacts.getArtifactPath(Artifact.iproxy, platform: TargetPlatform.ios),
           logger: logger,
           processManager: FakeProcessManager.any(),
+          operatingSystemUtils: OperatingSystemUtils(
+            fileSystem: mockFileSystem,
+            logger: logger,
+            platform: FakePlatform(operatingSystem: 'macos'),
+            processManager: FakeProcessManager.any(),
+          ),
         );
         portForwarder.addForwardedPorts(<ForwardedPort>[forwardedPort]);
         return portForwarder;
@@ -480,6 +487,28 @@ void main() {
 
       await iosDevices.stopPolling();
       expect(rescheduledStream.hasListener, isFalse);
+    });
+
+    testWithoutContext('dispose cancels polling subscription', () async {
+      final IOSDevices iosDevices = IOSDevices(
+        platform: macPlatform,
+        xcdevice: mockXcdevice,
+        iosWorkflow: mockIosWorkflow,
+        logger: logger,
+      );
+      when(mockXcdevice.isInstalled).thenReturn(true);
+      when(mockXcdevice.getAvailableIOSDevices())
+          .thenAnswer((Invocation invocation) => Future<List<IOSDevice>>.value(<IOSDevice>[]));
+
+      final StreamController<Map<XCDeviceEvent, String>> eventStream = StreamController<Map<XCDeviceEvent, String>>();
+      when(mockXcdevice.observedDeviceEvents()).thenAnswer((_) => eventStream.stream);
+
+      await iosDevices.startPolling();
+      expect(iosDevices.deviceNotifier.items, isEmpty);
+      expect(eventStream.hasListener, isTrue);
+
+      await iosDevices.dispose();
+      expect(eventStream.hasListener, isFalse);
     });
 
     final List<Platform> unsupportedPlatforms = <Platform>[linuxPlatform, windowsPlatform];

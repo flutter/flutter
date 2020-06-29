@@ -15,6 +15,7 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/io.dart' as io;
 import '../base/signals.dart';
+import '../base/terminal.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -150,6 +151,11 @@ abstract class FlutterCommand extends Command<void> {
 
   bool get shouldUpdateCache => true;
 
+  bool get deprecated => false;
+
+  @override
+  bool get hidden => deprecated;
+
   bool _excludeDebug = false;
 
   BuildMode _defaultBuildMode;
@@ -203,7 +209,7 @@ abstract class FlutterCommand extends Command<void> {
       hide: true,
     );
     argParser.addFlag('web-enable-expression-evaluation',
-      defaultsTo: false,
+      defaultsTo: true,
       help: 'Enables expression evaluation in the debugger.',
       hide: hide,
     );
@@ -468,11 +474,15 @@ abstract class FlutterCommand extends Command<void> {
       );
   }
 
-  void addNullSafetyModeOptions() {
+  void addNullSafetyModeOptions({ @required bool hide }) {
     argParser.addFlag(FlutterOptions.kNullSafety,
-      help: 'Whether to override the default null safety setting.',
+      help:
+        'Whether to override the inferred null safety mode. This allows null-safe '
+        'libraries to depend on un-migrated (non-null safe) libraries. By default, '
+        'Flutter applications will attempt to run at the null safety level of their '
+        'entrypoint library (usually lib/main.dart).',
       defaultsTo: null,
-      hide: true,
+      hide: hide,
     );
   }
 
@@ -500,7 +510,7 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addEnableExperimentation({ bool hide = false }) {
+  void addEnableExperimentation({ @required bool hide }) {
     argParser.addMultiOption(
       FlutterOptions.kEnableExperiment,
       help:
@@ -675,6 +685,7 @@ abstract class FlutterCommand extends Command<void> {
       bundleSkSLPath: bundleSkSLPath,
       dartExperiments: experiments,
       performanceMeasurementFile: performanceMeasurementFile,
+      packagesPath: globalResults['packages'] as String ?? '.packages'
     );
   }
 
@@ -715,6 +726,7 @@ abstract class FlutterCommand extends Command<void> {
       body: () async {
         // Prints the welcome message if needed.
         globals.flutterUsage.printWelcome();
+        _printDeprecationWarning();
         final String commandPath = await usagePath;
         _registerSignalHandlers(commandPath, startTime);
         FlutterCommandResult commandResult = FlutterCommandResult.fail();
@@ -727,6 +739,14 @@ abstract class FlutterCommand extends Command<void> {
         }
       },
     );
+  }
+
+  void _printDeprecationWarning() {
+    if (deprecated) {
+      globals.printStatus('$warningMark The "$name" command is deprecated and '
+          'will be removed in a future version of Flutter.');
+      globals.printStatus('');
+    }
   }
 
   void _registerSignalHandlers(String commandPath, DateTime startTime) {
@@ -783,6 +803,10 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  List<String> get _enabledExperiments => argParser.options.containsKey(FlutterOptions.kEnableExperiment)
+    ? stringsArg(FlutterOptions.kEnableExperiment)
+    : <String>[];
+
   /// Perform validation then call [runCommand] to execute the command.
   /// Return a [Future] that completes with an exit code
   /// indicating whether execution was successful.
@@ -796,7 +820,7 @@ abstract class FlutterCommand extends Command<void> {
     // sky_engine package is available in the flutter cache for pub to find.
     if (shouldUpdateCache) {
       // First always update universal artifacts, as some of these (e.g.
-      // idevice_id on macOS) are required to determine `requiredArtifacts`.
+      // ios-deploy on macOS) are required to determine `requiredArtifacts`.
       await globals.cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal});
 
       await globals.cache.updateAll(await requiredArtifacts);
@@ -817,11 +841,11 @@ abstract class FlutterCommand extends Command<void> {
     setupApplicationPackages();
 
     if (commandPath != null) {
-      final Map<CustomDimensions, String> additionalUsageValues =
-        <CustomDimensions, String>{
+      final Map<CustomDimensions, Object> additionalUsageValues =
+        <CustomDimensions, Object>{
           ...?await usageValues,
-          CustomDimensions.commandHasTerminal:
-            globals.stdio.hasTerminal ? 'true' : 'false',
+          CustomDimensions.commandHasTerminal: globals.stdio.hasTerminal,
+          CustomDimensions.nullSafety: _enabledExperiments.contains('non-nullable'),
         };
       Usage.command(commandPath, parameters: additionalUsageValues);
     }
@@ -948,6 +972,8 @@ abstract class FlutterCommand extends Command<void> {
       description.length + 2,
     );
     final String help = <String>[
+      if (deprecated)
+        '$warningMark Deprecated. This command will be removed in a future version of Flutter.',
       description,
       '',
       'Global options:',

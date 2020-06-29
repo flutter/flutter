@@ -14,6 +14,7 @@ import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
@@ -42,11 +43,6 @@ class IOSDevices extends PollingDeviceDiscovery {
        _iosWorkflow = iosWorkflow ?? globals.iosWorkflow,
        _logger = logger ?? globals.logger,
        super('iOS devices');
-
-  @override
-  void dispose() {
-    _observedDeviceEventsSubscription?.cancel();
-  }
 
   final Platform _platform;
   final XCDevice _xcdevice;
@@ -385,7 +381,7 @@ class IOSDevice extends Device {
       if (debuggingOptions.enableSoftwareRendering) '--enable-software-rendering',
       if (debuggingOptions.skiaDeterministicRendering) '--skia-deterministic-rendering',
       if (debuggingOptions.traceSkia) '--trace-skia',
-      if (debuggingOptions.traceWhitelist != null) '--trace-whitelist="${debuggingOptions.traceWhitelist}"',
+      if (debuggingOptions.traceAllowlist != null) '--trace-allowlist="${debuggingOptions.traceAllowlist}"',
       if (debuggingOptions.endlessTraceBuffer) '--endless-trace-buffer',
       if (debuggingOptions.dumpSkpOnShaderCompilation) '--dump-skp-on-shader-compilation',
       if (debuggingOptions.verboseSystemLogs) '--verbose-logging',
@@ -498,6 +494,7 @@ class IOSDevice extends Device {
     dyLdLibEntry: globals.cache.dyLdLibEntry,
     id: id,
     iproxyPath: _iproxyPath,
+    operatingSystemUtils: globals.os,
   );
 
   @visibleForTesting
@@ -768,11 +765,13 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
     @required MapEntry<String, String> dyLdLibEntry,
     @required String id,
     @required String iproxyPath,
+    @required OperatingSystemUtils operatingSystemUtils,
   }) : _logger = logger,
        _dyLdLibEntry = dyLdLibEntry,
        _id = id,
        _iproxyPath = iproxyPath,
-       _processUtils = ProcessUtils(processManager: processManager, logger: logger);
+       _processUtils = ProcessUtils(processManager: processManager, logger: logger),
+       _operatingSystemUtils = operatingSystemUtils;
 
   /// Create a [IOSDevicePortForwarder] for testing.
   ///
@@ -784,6 +783,7 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
     @required ProcessManager processManager,
     @required Logger logger,
     String id,
+    OperatingSystemUtils operatingSystemUtils,
   }) {
     return IOSDevicePortForwarder(
       processManager: processManager,
@@ -793,6 +793,7 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
       dyLdLibEntry: const MapEntry<String, String>(
         'DYLD_LIBRARY_PATH', '/path/to/libs',
       ),
+      operatingSystemUtils: operatingSystemUtils,
     );
   }
 
@@ -801,6 +802,7 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
   final MapEntry<String, String> _dyLdLibEntry;
   final String _id;
   final String _iproxyPath;
+  final OperatingSystemUtils _operatingSystemUtils;
 
   @override
   List<ForwardedPort> forwardedPorts = <ForwardedPort>[];
@@ -816,7 +818,9 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
   Future<int> forward(int devicePort, { int hostPort }) async {
     final bool autoselect = hostPort == null || hostPort == 0;
     if (autoselect) {
-      hostPort = 1024;
+      final int freePort = await _operatingSystemUtils?.findFreePort();
+      // Dynamic port range 49152 - 65535.
+      hostPort = freePort == null || freePort == 0 ? 49152 : freePort;
     }
 
     Process process;

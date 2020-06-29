@@ -23,6 +23,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
+import '../dart/language_version.dart';
 import '../dart/pub.dart';
 import '../devfs.dart';
 import '../device.dart';
@@ -65,7 +66,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
   }
 }
 
-const String kExitMessage =  'Failed to establish connection with the application '
+const String kExitMessage = 'Failed to establish connection with the application '
   'instance in Chrome.\nThis can happen if the websocket connection used by the '
   'web tooling is unable to correctly establish a connection, for example due to a firewall.';
 
@@ -264,6 +265,30 @@ abstract class ResidentWebRunner extends ResidentRunner {
   }
 
   @override
+  Future<void> debugToggleBrightness() async {
+    try {
+      final Brightness currentBrightness = await _vmService
+        ?.flutterBrightnessOverride(
+          isolateId: null,
+        );
+      Brightness next;
+      if (currentBrightness == Brightness.light) {
+        next = Brightness.dark;
+      } else if (currentBrightness == Brightness.dark) {
+        next = Brightness.light;
+      }
+      next = await _vmService
+        ?.flutterBrightnessOverride(
+            brightness: next,
+            isolateId: null,
+          );
+      globals.logger.printStatus('Changed brightness to $next.');
+    } on vmservice.RPCError {
+      return;
+    }
+  }
+
+  @override
   Future<void> stopEchoingDeviceLog() async {
     // Do nothing for ResidentWebRunner
     await device.stopEchoingDeviceLog();
@@ -422,7 +447,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
           packagesFilePath: packagesFilePath,
           urlTunneller: urlTunneller,
           useSseForDebugProxy: debuggingOptions.webUseSseForDebugProxy,
-          buildMode: debuggingOptions.buildInfo.mode,
+          buildInfo: debuggingOptions.buildInfo,
           enableDwds: _enableDwds,
           entrypoint: globals.fs.file(target).uri,
           expressionCompiler: expressionCompiler,
@@ -544,6 +569,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
         fullRestart: true,
         reason: reason,
         overallTimeInMs: timer.elapsed.inMilliseconds,
+        nullSafety: usageNullSafety,
       ).send();
     }
     return OperationResult.ok;
@@ -581,6 +607,10 @@ class _ResidentWebRunner extends ResidentWebRunner {
       }
 
       final String entrypoint = <String>[
+        determineLanguageVersion(
+          globals.fs.file(mainUri),
+          packageConfig[flutterProject.manifest.appName],
+        ),
         '// Flutter web bootstrap script for $importedEntrypoint.',
         '',
         "import 'dart:ui' as ui;",
@@ -609,7 +639,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
     final bool rebuildBundle = assetBundle.needsBuild();
     if (rebuildBundle) {
       globals.printTrace('Updating assets');
-      final int result = await assetBundle.build();
+      final int result = await assetBundle.build(packagesPath: debuggingOptions.buildInfo.packagesPath);
       if (result != 0) {
         return UpdateFSReport(success: false);
       }

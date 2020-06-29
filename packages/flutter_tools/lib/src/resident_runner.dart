@@ -18,7 +18,6 @@ import 'base/file_system.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
 import 'base/signals.dart';
-import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
@@ -27,7 +26,6 @@ import 'bundle.dart';
 import 'cache.dart';
 import 'codegen.dart';
 import 'compile.dart';
-import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'features.dart';
@@ -61,8 +59,11 @@ class FlutterDevice {
          fileSystemScheme: fileSystemScheme,
          targetModel: targetModel,
          dartDefines: buildInfo.dartDefines,
-         packagesPath: globalPackagesPath,
+         packagesPath: buildInfo.packagesPath,
          extraFrontEndOptions: buildInfo.extraFrontEndOptions,
+         artifacts: globals.artifacts,
+         processManager: globals.processManager,
+         logger: globals.logger,
        );
 
   /// Create a [FlutterDevice] with optional code generation enabled.
@@ -99,9 +100,6 @@ class FlutterDevice {
         // Override the filesystem scheme so that the frontend_server can find
         // the generated entrypoint code.
         fileSystemScheme: 'org-dartlang-app',
-        compilerMessageConsumer:
-          (String message, {bool emphasis, TerminalColor color, }) =>
-            globals.printTrace(message),
         initializeFromDill: getDefaultCachedKernelPath(
           trackWidgetCreation: buildInfo.trackWidgetCreation,
           dartDefines: buildInfo.dartDefines,
@@ -114,7 +112,10 @@ class FlutterDevice {
         dartDefines: buildInfo.dartDefines,
         librariesSpec: globals.fs.file(globals.artifacts
           .getArtifactPath(Artifact.flutterWebLibrariesJson)).uri.toString(),
-        packagesPath: globalPackagesPath,
+        packagesPath: buildInfo.packagesPath,
+        artifacts: globals.artifacts,
+        processManager: globals.processManager,
+        logger: globals.logger,
       );
     } else {
       generator = ResidentCompiler(
@@ -134,7 +135,10 @@ class FlutterDevice {
           trackWidgetCreation: buildInfo.trackWidgetCreation,
           dartDefines: buildInfo.dartDefines,
         ),
-        packagesPath: globalPackagesPath,
+        packagesPath: buildInfo.packagesPath,
+        artifacts: globals.artifacts,
+        processManager: globals.processManager,
+        logger: globals.logger,
       );
     }
 
@@ -425,6 +429,24 @@ class FlutterDevice {
     }
   }
 
+  Future<Brightness> toggleBrightness({ Brightness current }) async {
+    final List<FlutterView> views = await vmService.getFlutterViews();
+    Brightness next;
+    if (current == Brightness.light) {
+      next = Brightness.dark;
+    } else if (current == Brightness.dark) {
+      next = Brightness.light;
+    }
+
+    for (final FlutterView view in views) {
+      next = await vmService.flutterBrightnessOverride(
+        isolateId: view.uiIsolate.id,
+        brightness: next,
+      );
+    }
+    return next;
+  }
+
   Future<String> togglePlatform({ String from }) async {
     final List<FlutterView> views = await vmService.getFlutterViews();
     final String to = nextPlatform(from, featureFlags);
@@ -660,16 +682,15 @@ abstract class ResidentRunner {
   ResidentRunner(
     this.flutterDevices, {
     this.target,
-    this.debuggingOptions,
+    @required this.debuggingOptions,
     String projectRootPath,
-    String packagesFilePath,
     this.ipv6,
     this.stayResident = true,
     this.hotMode = true,
     String dillOutputPath,
   }) : mainPath = findMainDartFile(target),
+       packagesFilePath = debuggingOptions.buildInfo.packagesPath,
        projectRootPath = projectRootPath ?? globals.fs.currentDirectory.path,
-       packagesFilePath = packagesFilePath ?? globals.fs.path.absolute(globalPackagesPath),
        _dillOutputPath = dillOutputPath,
        artifactDirectory = dillOutputPath == null
           ? globals.fs.systemTempDirectory.createTempSync('flutter_tool.')
@@ -709,6 +730,11 @@ abstract class ResidentRunner {
   bool _exited = false;
   Completer<int> _finished = Completer<int>();
   bool hotMode;
+
+  /// Whether the compiler was instructed to run with null-safety enabled.
+  @protected
+  bool get usageNullSafety => debuggingOptions?.buildInfo
+    ?.extraFrontEndOptions?.any((String option) => option.contains('non-nullable')) ?? false;
 
   /// Returns true if every device is streaming observatory URIs.
   bool get isWaitingForObservatory {
@@ -841,9 +867,14 @@ abstract class ResidentRunner {
 
   /// List the attached flutter views.
   Future<List<FlutterView>> listFlutterViews() async {
-    return (await Future.wait(
-      flutterDevices.map((FlutterDevice d) => d.vmService.getFlutterViews()))
-    ).expand((List<FlutterView> views) => views).toList();
+    final List<List<FlutterView>> views = await Future.wait(<Future<List<FlutterView>>>[
+      for (FlutterDevice device in flutterDevices)
+        if (device.vmService != null)
+          device.vmService.getFlutterViews()
+    ]);
+    return views
+      .expand((List<FlutterView> viewList) => viewList)
+      .toList();
   }
 
   /// Write the SkSL shaders to a zip file in build directory.
@@ -965,6 +996,17 @@ abstract class ResidentRunner {
   Future<void> debugToggleProfileWidgetBuilds() async {
     for (final FlutterDevice device in flutterDevices) {
       await device.toggleProfileWidgetBuilds();
+    }
+  }
+
+  Future<void> debugToggleBrightness() async {
+    final Brightness brightness = await flutterDevices.first.toggleBrightness();
+    Brightness next;
+    for (final FlutterDevice device in flutterDevices) {
+      next = await device.toggleBrightness(
+        current: brightness,
+      );
+      globals.logger.printStatus('Changed brightness to $next.');
     }
   }
 
@@ -1216,6 +1258,7 @@ abstract class ResidentRunner {
       commandHelp.s.print();
     }
     if (supportsServiceProtocol) {
+      commandHelp.b.print();
       commandHelp.w.print();
       commandHelp.t.print();
       if (isRunningDebug) {
@@ -1357,6 +1400,9 @@ class TerminalHandler {
           return true;
         }
         return false;
+      case 'b':
+        await residentRunner.debugToggleBrightness();
+        return true;
       case 'c':
         residentRunner.clearScreen();
         return true;
