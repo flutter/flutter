@@ -71,8 +71,6 @@
   "dateRangePickerHelpText": "VELG PERIODEN",
   "calendarModeButtonLabel": "Bytt til kalender",
   "inputDateModeButtonLabel": "Bytt til innskriving",
-  "licensesPackageDetailTextOne": "1 license",
-  "licensesPackageDetailTextOther": "$licenseCount licenses",
   "timePickerDialHelpText": "SELECT TIME",
   "timePickerInputHelpText": "ENTER TIME",
   "timePickerHourLabel": "Hour",

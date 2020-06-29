@@ -70,8 +70,6 @@
   "dateRangePickerHelpText": "ശ്രേണി തിരഞ്ഞെടുക്കുക",
   "calendarModeButtonLabel": "കലണ്ടറിലേക്ക് മാറുക",
   "inputDateModeButtonLabel": "ഇൻപുട്ടിലേക്ക് മാറുക",
-  "licensesPackageDetailTextOne": "1 license",
-  "licensesPackageDetailTextOther": "$licenseCount licenses",
   "timePickerDialHelpText": "SELECT TIME",
   "timePickerInputHelpText": "ENTER TIME",
   "timePickerHourLabel": "Hour",

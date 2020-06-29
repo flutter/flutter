@@ -71,8 +71,6 @@
   "dateRangePickerHelpText": "PILIH RENTANG",
   "calendarModeButtonLabel": "Beralih ke kalender",
   "inputDateModeButtonLabel": "Beralih ke masukan",
-  "licensesPackageDetailTextOne": "1 license",
-  "licensesPackageDetailTextOther": "$licenseCount licenses",
   "timePickerDialHelpText": "SELECT TIME",
   "timePickerInputHelpText": "ENTER TIME",
   "timePickerHourLabel": "Hour",

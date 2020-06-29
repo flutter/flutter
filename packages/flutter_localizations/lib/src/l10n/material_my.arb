@@ -70,8 +70,6 @@
   "dateRangePickerHelpText": "အပိုင်းအခြား ရွေးရန်",
   "calendarModeButtonLabel": "ပြက္ခဒိန်သို့ ပြောင်းရန်",
   "inputDateModeButtonLabel": "ထည့်သွင်းမှုသို့ ပြောင်းရန်",
-  "licensesPackageDetailTextOne": "1 license",
-  "licensesPackageDetailTextOther": "$licenseCount licenses",
   "timePickerDialHelpText": "SELECT TIME",
   "timePickerInputHelpText": "ENTER TIME",
   "timePickerHourLabel": "Hour",

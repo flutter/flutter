@@ -71,8 +71,6 @@
   "dateRangePickerHelpText": "TARTOMÁNY KIJELÖLÉSE",
   "calendarModeButtonLabel": "Váltás naptárra",
   "inputDateModeButtonLabel": "Váltás bevitelre",
-  "licensesPackageDetailTextOne": "1 license",
-  "licensesPackageDetailTextOther": "$licenseCount licenses",
   "timePickerDialHelpText": "SELECT TIME",
   "timePickerInputHelpText": "ENTER TIME",
   "timePickerHourLabel": "Hour",

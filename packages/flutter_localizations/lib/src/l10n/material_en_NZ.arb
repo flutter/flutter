@@ -31,8 +31,6 @@
   "showMenuTooltip": "Show menu",
   "aboutListTileTitle": "About $applicationName",
   "licensesPageTitle": "Licences",
-  "licensesPackageDetailTextOne": "1 licence",
-  "licensesPackageDetailTextOther": "$licenseCount licences",
   "pageRowsInfoTitle": "$firstRow–$lastRow of $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow of about $rowCount",
   "rowsPerPageTitle": "Rows per page:",

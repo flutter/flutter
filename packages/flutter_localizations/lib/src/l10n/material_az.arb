@@ -70,8 +70,6 @@
   "dateRangePickerHelpText": "ARALIQ SEÇİN",
   "calendarModeButtonLabel": "Təqvimə keçin",
   "inputDateModeButtonLabel": "Daxiletməyə keçin",
-  "licensesPackageDetailTextOne": "1 license",
-  "licensesPackageDetailTextOther": "$licenseCount licenses",
   "timePickerDialHelpText": "SELECT TIME",
   "timePickerInputHelpText": "ENTER TIME",
   "timePickerHourLabel": "Hour",

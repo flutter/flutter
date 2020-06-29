@@ -70,8 +70,6 @@
   "dateRangePickerHelpText": "ເລືອກໄລຍະ",
   "calendarModeButtonLabel": "ສະຫຼັບໄປປະຕິທິນ",
   "inputDateModeButtonLabel": "ສະຫຼັບໄປການປ້ອນຂໍ້ມູນ",
-  "licensesPackageDetailTextOne": "1 license",
-  "licensesPackageDetailTextOther": "$licenseCount licenses",
   "timePickerDialHelpText": "SELECT TIME",
   "timePickerInputHelpText": "ENTER TIME",
   "timePickerHourLabel": "Hour",

@@ -70,8 +70,6 @@
   "dateRangePickerHelpText": "HAUTATU BARRUTIA",
   "calendarModeButtonLabel": "Aldatu egutegiaren modura",
   "inputDateModeButtonLabel": "Aldatu datak aukeratzeko modura",
-  "licensesPackageDetailTextOne": "1 license",
-  "licensesPackageDetailTextOther": "$licenseCount licenses",
   "timePickerDialHelpText": "SELECT TIME",
   "timePickerInputHelpText": "ENTER TIME",
   "timePickerHourLabel": "Hour",

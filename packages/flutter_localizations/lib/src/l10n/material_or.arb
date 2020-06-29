@@ -70,8 +70,6 @@
   "dateRangePickerHelpText": "ସୀମା ଚୟନ କରନ୍ତୁ",
   "calendarModeButtonLabel": "କ୍ୟାଲେଣ୍ଡରକୁ ସ୍ୱିଚ୍ କରନ୍ତୁ",
   "inputDateModeButtonLabel": "ଇନପୁଟକୁ ସ୍ୱିଚ୍ କରନ୍ତୁ",
-  "licensesPackageDetailTextOne": "1 license",
-  "licensesPackageDetailTextOther": "$licenseCount licenses",
   "timePickerDialHelpText": "SELECT TIME",
   "timePickerInputHelpText": "ENTER TIME",
   "timePickerHourLabel": "Hour",

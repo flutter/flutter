@@ -75,8 +75,6 @@
   "dateRangePickerHelpText": "בחירת טווח",
   "calendarModeButtonLabel": "מעבר למצב היומן",
   "inputDateModeButtonLabel": "מעבר למצב הקלט",
-  "licensesPackageDetailTextOne": "1 license",
-  "licensesPackageDetailTextOther": "$licenseCount licenses",
   "timePickerDialHelpText": "SELECT TIME",
   "timePickerInputHelpText": "ENTER TIME",
   "timePickerHourLabel": "Hour",

@@ -73,8 +73,6 @@
   "dateRangePickerHelpText": "ODABERITE RASPON",
   "calendarModeButtonLabel": "Prebacite na kalendar",
   "inputDateModeButtonLabel": "Prebacite na unos teksta",
-  "licensesPackageDetailTextOne": "1 license",
-  "licensesPackageDetailTextOther": "$licenseCount licenses",
   "timePickerDialHelpText": "SELECT TIME",
   "timePickerInputHelpText": "ENTER TIME",
   "timePickerHourLabel": "Hour",

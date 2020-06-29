@@ -71,8 +71,6 @@
   "dateRangePickerHelpText": "ARALIK SEÇİN",
   "calendarModeButtonLabel": "Takvime geç",
   "inputDateModeButtonLabel": "Girişe geç",
-  "licensesPackageDetailTextOne": "1 license",
-  "licensesPackageDetailTextOther": "$licenseCount licenses",
   "timePickerDialHelpText": "SELECT TIME",
   "timePickerInputHelpText": "ENTER TIME",
   "timePickerHourLabel": "Hour",
