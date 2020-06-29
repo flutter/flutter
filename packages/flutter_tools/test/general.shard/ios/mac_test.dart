@@ -85,7 +85,7 @@ void main() {
           logger: logger,
         );
 
-        expect(() async => await iMobileDevice.takeScreenshot(mockOutputFile, '1234'), throwsA(anything));
+        expect(() async => await iMobileDevice.takeScreenshot(mockOutputFile), throwsA(anything));
       });
 
       testWithoutContext('idevicescreenshot captures and returns screenshot', () async {
@@ -100,8 +100,8 @@ void main() {
           logger: logger,
         );
 
-        await iMobileDevice.takeScreenshot(mockOutputFile, '1234');
-        verify(mockProcessManager.run(<String>[idevicescreenshotPath, outputPath, '--udid', '1234'],
+        await iMobileDevice.takeScreenshot(mockOutputFile);
+        verify(mockProcessManager.run(<String>[idevicescreenshotPath, outputPath],
             environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
             workingDirectory: null,
         ));
