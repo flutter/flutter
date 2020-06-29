@@ -314,6 +314,9 @@ class AnimatedBezierState extends State<AnimatedBezier>
         vsync: this, duration: const Duration(milliseconds: 1000));
     curve = CurvedAnimation(parent: controller, curve: Curves.linear)
       ..addListener(() {
+        // For App developers:
+        // This is not the suggested approach to implement animation.
+        // AnimatedBuilder is recommended instead fo this.
         setState(() {});
       })
       ..addStatusListener((AnimationStatus state) {

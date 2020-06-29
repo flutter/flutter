@@ -67,6 +67,9 @@ class _MultiWidgetConstructTableState extends State<MultiWidgetConstructTable>
                   widget.columnCount,
                   (int column) {
                     final int label = row * widget.columnCount + column;
+                    // This implementation rebuild the widget tree for every
+                    // frame, and is intentionally designed of poor performance
+                    // for benchmark purposes.
                     return counter % 2 == 0
                         ? Container(
                             // This key forces rebuilding the element
