@@ -160,11 +160,13 @@ class FormState extends State<Form> {
 
   // Called when a form field has changed. This will cause all form fields
   // to rebuild, useful if form fields have interdependencies.
-  void _fieldDidChange() {
+  void _fieldDidChange({FormFieldState<dynamic> changedFieldState}) {
     if (widget.onChanged != null)
       widget.onChanged();
-    _hasInteractedByUser = _fields
-        .any((FormFieldState<dynamic> field) => field._hasInteractedByUser);
+
+    if (changedFieldState != null) {
+      _hasInteractedByUser = changedFieldState._hasInteractedByUser;
+    }
     _forceRebuild();
   }
 
@@ -463,7 +465,7 @@ class FormFieldState<T> extends State<FormField<T>> {
       _value = value;
       _hasInteractedByUser = true;
     });
-    Form.of(context)?._fieldDidChange();
+    Form.of(context)?._fieldDidChange(changedFieldState: this);
   }
 
   /// Sets the value associated with this form field.
