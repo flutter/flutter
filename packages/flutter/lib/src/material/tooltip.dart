@@ -575,7 +575,6 @@ class _RenderTooltipSemanticsWidget extends RenderProxyBox {
     label = node.label;
   }
 
-
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);

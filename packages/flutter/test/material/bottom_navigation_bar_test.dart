@@ -1072,7 +1072,7 @@ void main() {
     await tester.longPress(find.text(label));
     expect(find.text(label), findsNWidgets(2));
     expect(tester.getSize(find.text(label).last), equals(const Size(42.0, 14.0)));
-    await tester.pumpAndSettle(const Duration(seconds: 5));
+    await tester.pumpAndSettle(const Duration(seconds: 2));
 
     await tester.pumpWidget(buildApp(textScaleFactor: 4.0));
     expect(find.text(label), findsOneWidget);
