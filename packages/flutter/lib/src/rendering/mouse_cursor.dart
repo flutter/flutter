@@ -400,7 +400,7 @@ class SystemMouseCursor extends MouseCursor {
 ///
 /// [SystemMouseCursors] is a superset of the system cursors of every platform
 /// that Flutter supports, therefore some of these objects might map to the same
-/// result, or fallback to the basic arrow. This mapping is defined by the
+/// result, or fallback to the [basic] arrow. This mapping is defined by the
 /// Flutter engine.
 ///
 /// The cursor names are chosen to reflect the cursors' use cases instead of
@@ -419,42 +419,90 @@ class SystemMouseCursors {
   /// The platform-dependent basic cursor.
   ///
   /// Typically the shape of an arrow.
+  ///
+  /// Corresponds to:
+  ///
+  ///  * Web: default
+  ///  * Android: TYPE_DEFAULT, TYPE_ARROW
+  ///  * macOS: arrow
   static const SystemMouseCursor basic = SystemMouseCursor._(kind: 'basic');
 
   /// A cursor that indicates a user interface element that is clickable, such as a hyperlink.
   ///
   /// Typically the shape of a pointing hand.
+  ///
+  /// Corresponds to:
+  ///
+  ///  * Web: pointer
+  ///  * Android: TYPE_HAND
+  ///  * macOS: pointingHand
   static const SystemMouseCursor click = SystemMouseCursor._(kind: 'click');
 
   /// A cursor that indicates selectable text.
   ///
   /// Typically the shape of a capital I.
+  ///
+  /// Corresponds to:
+  ///
+  ///  * Web: text
+  ///  * Android: TYPE_TEXT
+  ///  * macOS: iBeam
   static const SystemMouseCursor text = SystemMouseCursor._(kind: 'text');
 
   /// A cursor that indicates a forbidden action.
   ///
   /// Typically the shape of a circle with a diagonal line.
+  ///
+  /// Corresponds to:
+  ///
+  ///  * Web: not-allowed
+  ///  * Android: TYPE_NO_DROP
+  ///  * macOS: operationNotAllowed
   static const SystemMouseCursor forbidden = SystemMouseCursor._(kind: 'forbidden');
 
   /// A cursor that indicates something that can be dragged.
   ///
   /// Typically the shape of an open hand.
+  ///
+  /// Corresponds to:
+  ///
+  ///  * Web: grab
+  ///  * Android: TYPE_GRAB
+  ///  * macOS: openHand
   static const SystemMouseCursor grab = SystemMouseCursor._(kind: 'grab');
 
   /// A cursor that indicates something that is being dragged.
   ///
   /// Typically the shape of a closed hand.
+  ///
+  /// Corresponds to:
+  ///
+  ///  * Web: grabbing
+  ///  * Android: TYPE_GRABBING
+  ///  * macOS: closedHand
   static const SystemMouseCursor grabbing = SystemMouseCursor._(kind: 'grabbing');
 
   /// A cursor in the shape of a horizontal double-arrow.
   ///
   /// This cursor is typically used when moving or resizing an object, and the
   /// object can be moved left or right.
+  ///
+  /// Corresponds to:
+  ///
+  ///  * Web: ew-resize
+  ///  * Android: TYPE_HORIZONTAL_DOUBLE_ARROW
+  ///  * macOS: resizeLeftRight
   static const SystemMouseCursor horizontalDoubleArrow = SystemMouseCursor._(kind: 'horizontalDoubleArrow');
 
   /// A cursor in the shape of a vertical double-arrow.
   ///
   /// This cursor is typically used when moving or resizing an object, and the
   /// object can be moved up or down.
+  ///
+  /// Corresponds to:
+  ///
+  ///  * Web: ns-resize
+  ///  * Android: TYPE_VERTICAL_DOUBLE_ARROW
+  ///  * macOS: resizeUpDown
   static const SystemMouseCursor verticalDoubleArrow = SystemMouseCursor._(kind: 'verticalDoubleArrow');
 }
