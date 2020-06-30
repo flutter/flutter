@@ -759,7 +759,6 @@ class RestorationBucket extends ChangeNotifier {
   void _addChildData(RestorationBucket child) {
     assert(child != null);
     assert(child._parent == this);
-    // TODO(goderbauer): don't overwrite yet when unclaimed
     if (_claimedChildren.containsKey(child.id)) {
       // Delay addition until the end of the frame in the hopes that the current
       // owner of the child with the same id will have given up that child by
