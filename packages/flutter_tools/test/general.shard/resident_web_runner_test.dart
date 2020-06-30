@@ -764,7 +764,7 @@ void main() {
   testUsingContext('web resident runner can toggle CanvasKit', () async {
     final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-    final WebAssetServer webAssetServer = WebAssetServer(null, null, null, null, null);
+    final WebAssetServer webAssetServer = WebAssetServer(null, null, null, null, null, null);
     when(mockWebDevFS.webAssetServer).thenReturn(webAssetServer);
 
     expect(residentWebRunner.supportsCanvasKit, true);

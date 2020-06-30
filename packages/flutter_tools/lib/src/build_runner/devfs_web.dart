@@ -103,6 +103,7 @@ class WebAssetServer implements AssetReader {
     this.internetAddress,
     this._modules,
     this._digests,
+    this._buildInfo,
   );
 
   // Fallback to "application/octet-stream" on null which
@@ -167,6 +168,7 @@ class WebAssetServer implements AssetReader {
         address,
         modules,
         digests,
+        buildInfo,
       );
       if (testMode) {
         return server;
@@ -263,6 +265,7 @@ class WebAssetServer implements AssetReader {
     return null;
   }
 
+  final BuildInfo _buildInfo;
   final HttpServer _httpServer;
   // If holding these in memory is too much overhead, this can be switched to a
   // RandomAccessFile and read on demand.
@@ -458,50 +461,31 @@ class WebAssetServer implements AssetReader {
   /// Whether to use the cavaskit SDK for rendering.
   bool canvasKitRendering = false;
 
-  @visibleForTesting
-  final File dartSdk = globals.fs.file(globals.fs.path.join(
-    globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
-    'kernel',
-    'amd',
-    'dart_sdk.js',
-  ));
-
-  @visibleForTesting
-  final File canvasKitDartSdk = globals.fs.file(globals.fs.path.join(
-    globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
-    'kernel',
-    'amd-canvaskit',
-    'dart_sdk.js',
-  ));
-
-  @visibleForTesting
-  final File dartSdkSourcemap = globals.fs.file(globals.fs.path.join(
-    globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
-    'kernel',
-    'amd',
-    'dart_sdk.js.map',
-  ));
-
-  @visibleForTesting
-  final File canvasKitDartSdkSourcemap = globals.fs.file(globals.fs.path.join(
-    globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
-    'kernel',
-    'amd-canvaskit',
-    'dart_sdk.js.map',
-  ));
-
   // Attempt to resolve `path` to a dart file.
   File _resolveDartFile(String path) {
     // Return the actual file objects so that local engine changes are automatically picked up.
     switch (path) {
       case 'dart_sdk.js':
-        return canvasKitRendering
-          ? canvasKitDartSdk
-          : dartSdk;
+        if (_buildInfo.nullSafetyMode == NullSafetyMode.unsound) {
+          return globals.fs.file(canvasKitRendering
+            ? globals.artifacts.getArtifactPath(Artifact.webPrecompiledCanvaskitSdk)
+            : globals.artifacts.getArtifactPath(Artifact.webPrecompiledSdk));
+        } else {
+          return globals.fs.file(canvasKitRendering
+            ? globals.artifacts.getArtifactPath(Artifact.webPrecompiledCanvaskitSoundSdk)
+            : globals.artifacts.getArtifactPath(Artifact.webPrecompiledSoundSdk));
+        }
+        break;
       case 'dart_sdk.js.map':
-        return canvasKitRendering
-          ? canvasKitDartSdkSourcemap
-          : dartSdkSourcemap;
+        if (_buildInfo.nullSafetyMode == NullSafetyMode.unsound) {
+          return globals.fs.file(canvasKitRendering
+            ? globals.artifacts.getArtifactPath(Artifact.webPrecompiledCanvaskitSdkSourcemaps)
+            : globals.artifacts.getArtifactPath(Artifact.webPrecompiledSdkSourcemaps));
+        } else {
+          return globals.fs.file(canvasKitRendering
+            ? globals.artifacts.getArtifactPath(Artifact.webPrecompiledCanvaskitSoundSdkSourcemaps)
+            : globals.artifacts.getArtifactPath(Artifact.webPrecompiledSoundSdkSourcemaps));
+        }
     }
     // This is the special generated entrypoint.
     if (path == 'web_entrypoint.dart') {
