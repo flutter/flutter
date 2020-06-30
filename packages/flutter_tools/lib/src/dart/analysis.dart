@@ -171,7 +171,7 @@ class AnalysisServer {
     final List<AnalysisError> errors = errorsList
         .map<Map<String, dynamic>>(castStringKeyedMap)
         .map<AnalysisError>((Map<String, dynamic> json) {
-          return AnalysisError(json,
+          return AnalysisError(WrittenError.fromJson(json),
             fileSystem: _fileSystem,
             platform: _platform,
             terminal: _terminal,
@@ -200,21 +200,18 @@ enum _AnalysisSeverity {
 /// [AnalysisError] with command line style.
 class AnalysisError implements Comparable<AnalysisError> {
   AnalysisError(
-    this._json, {
+    this.writtenError, {
     @required Platform platform,
     @required Terminal terminal,
     @required FileSystem fileSystem,
   }) : _platform = platform,
        _terminal = terminal,
-       _fileSystem = fileSystem,
-       writtenError = WrittenError.fromJson(_json);
+       _fileSystem = fileSystem;
 
-  final Map<String, dynamic> _json;
+  final WrittenError writtenError;
   final Platform _platform;
   final Terminal _terminal;
   final FileSystem _fileSystem;
-
-  final WrittenError writtenError;
 
   String get _separator => _platform.isWindows ? '-' : '•';
 
