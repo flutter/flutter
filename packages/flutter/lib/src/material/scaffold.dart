@@ -99,7 +99,6 @@ class ScaffoldMessenger extends StatefulWidget {
 class ScaffoldMessengerState extends State<ScaffoldMessenger> {
   final Set<ScaffoldState> _scaffolds = <ScaffoldState>{};
   final Queue<ScaffoldFeatureController<SnackBar, SnackBarClosedReason>> _snackBars = Queue<ScaffoldFeatureController<SnackBar, SnackBarClosedReason>>();
-  // const String snackHeroTag = '<ScaffoldMessenger.snackBarHeroTag>';
 
   void _register(ScaffoldState scaffold) {
     // Are we in the middle of showing a SnackBar elsewhere?
@@ -1806,7 +1805,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     _snackBarController ??= SnackBar.createAnimationController(vsync: this)
       ..addStatusListener(_handleSnackBarStatusChange);
     if (listener != null) {
-      print('Adding Listener');
       _snackBarController.addStatusListener(listener);
     }
     if (_snackBars.isEmpty) {
@@ -2302,7 +2300,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   @override
   void didChangeDependencies() {
-
     final MediaQueryData mediaQuery = MediaQuery.of(context);
     // If we transition from accessible navigation to non-accessible navigation
     // and there is a SnackBar that would have timed out that has already
