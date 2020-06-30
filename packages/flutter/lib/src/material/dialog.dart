@@ -313,8 +313,8 @@ class AlertDialog extends StatelessWidget {
   ///
   /// Typically this is a list of [FlatButton] widgets. It is recommended to
   /// set the [textAlign] to [TextAlign.end] for the [Text] within the
-  /// [FlatButton], so that longer actions that result in multiline text align
-  /// with the default [ButtonBar] alignment.
+  /// [FlatButton], so that buttons whose labels wrap to an extra line align
+  /// with the overall [ButtonBar]'s alignment within the dialog.
   ///
   /// These widgets will be wrapped in a [ButtonBar], which introduces 8 pixels
   /// of padding on each side.
@@ -470,7 +470,7 @@ class AlertDialog extends StatelessWidget {
       }
     }
 
-    // The paddingScaleFactor is used to adjust the edge padding of Dialog
+    // The paddingScaleFactor is used to adjust the padding of Dialog's
     // children.
     final double paddingScaleFactor = _paddingScaleFactor(MediaQuery.of(context).textScaleFactor);
     final TextDirection textDirection = Directionality.of(context);
@@ -479,13 +479,14 @@ class AlertDialog extends StatelessWidget {
     Widget contentWidget;
     Widget actionsWidget;
     if (title != null) {
-      final EdgeInsets defaultTitlePadding = titlePadding?.resolve(textDirection) ?? EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0);
+      final EdgeInsets defaultTitlePadding = EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0);
+      final EdgeInsets effectiveTitlePadding = titlePadding?.resolve(textDirection) ?? defaultTitlePadding;
       titleWidget = Padding(
         padding: EdgeInsets.only(
-          left: defaultTitlePadding.left * paddingScaleFactor,
-          right: defaultTitlePadding.right * paddingScaleFactor,
-          top: defaultTitlePadding.top * paddingScaleFactor,
-          bottom: defaultTitlePadding.bottom,
+          left: effectiveTitlePadding.left * paddingScaleFactor,
+          right: effectiveTitlePadding.right * paddingScaleFactor,
+          top: effectiveTitlePadding.top * paddingScaleFactor,
+          bottom: effectiveTitlePadding.bottom,
         ),
         child: DefaultTextStyle(
           style: titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.headline6,
@@ -499,13 +500,13 @@ class AlertDialog extends StatelessWidget {
     }
 
     if (content != null) {
-      final EdgeInsets defaultContentPadding = contentPadding.resolve(textDirection);
+      final EdgeInsets effectiveContentPadding = contentPadding.resolve(textDirection);
       contentWidget = Padding(
         padding: EdgeInsets.only(
-          left: defaultContentPadding.left * paddingScaleFactor,
-          right: defaultContentPadding.right * paddingScaleFactor,
-          top: title == null ? defaultContentPadding.top * paddingScaleFactor : defaultContentPadding.top,
-          bottom: defaultContentPadding.bottom,
+          left: effectiveContentPadding.left * paddingScaleFactor,
+          right: effectiveContentPadding.right * paddingScaleFactor,
+          top: title == null ? effectiveContentPadding.top * paddingScaleFactor : effectiveContentPadding.top,
+          bottom: effectiveContentPadding.bottom,
         ),
         child: DefaultTextStyle(
           style: contentTextStyle ?? dialogTheme.contentTextStyle ?? theme.textTheme.subtitle1,
@@ -830,20 +831,20 @@ class SimpleDialog extends StatelessWidget {
       }
     }
 
-    // The paddingScaleFactor is used to adjust the edge padding of Dialog
+    // The paddingScaleFactor is used to adjust the padding of Dialog
     // children.
     final double paddingScaleFactor = _paddingScaleFactor(MediaQuery.of(context).textScaleFactor);
     final TextDirection textDirection = Directionality.of(context);
 
     Widget titleWidget;
     if (title != null) {
-      final EdgeInsets defaultTitlePadding = titlePadding.resolve(textDirection);
+      final EdgeInsets effectiveTitlePadding = titlePadding.resolve(textDirection);
       titleWidget = Padding(
         padding: EdgeInsets.only(
-          left: defaultTitlePadding.left * paddingScaleFactor,
-          right: defaultTitlePadding.right * paddingScaleFactor,
-          top: defaultTitlePadding.top * paddingScaleFactor,
-          bottom: children == null ? defaultTitlePadding.bottom * paddingScaleFactor : defaultTitlePadding.bottom,
+          left: effectiveTitlePadding.left * paddingScaleFactor,
+          right: effectiveTitlePadding.right * paddingScaleFactor,
+          top: effectiveTitlePadding.top * paddingScaleFactor,
+          bottom: children == null ? effectiveTitlePadding.bottom * paddingScaleFactor : effectiveTitlePadding.bottom,
         ),
         child: DefaultTextStyle(
           style: titleTextStyle ?? DialogTheme.of(context).titleTextStyle ?? theme.textTheme.headline6,
@@ -854,14 +855,14 @@ class SimpleDialog extends StatelessWidget {
 
     Widget contentWidget;
     if (children != null) {
-      final EdgeInsets defaultContentPadding = contentPadding.resolve(textDirection);
+      final EdgeInsets effectiveContentPadding = contentPadding.resolve(textDirection);
       contentWidget = Flexible(
         child: SingleChildScrollView(
           padding: EdgeInsets.only(
-            left: defaultContentPadding.left * paddingScaleFactor,
-            right: defaultContentPadding.right * paddingScaleFactor,
-            top: title == null ? defaultContentPadding.top * paddingScaleFactor : defaultContentPadding.top,
-            bottom: defaultContentPadding.bottom * paddingScaleFactor,
+            left: effectiveContentPadding.left * paddingScaleFactor,
+            right: effectiveContentPadding.right * paddingScaleFactor,
+            top: title == null ? effectiveContentPadding.top * paddingScaleFactor : effectiveContentPadding.top,
+            bottom: effectiveContentPadding.bottom * paddingScaleFactor,
           ),
           child: ListBody(children: children),
         ),
