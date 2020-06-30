@@ -201,6 +201,8 @@ class Table extends RenderObjectWidget {
   final TableCellVerticalAlignment defaultVerticalAlignment;
 
   /// The text baseline to use when aligning rows using [TableCellVerticalAlignment.baseline].
+  /// 
+  /// Defaults to [TextBaseline.alphabetic].
   final TextBaseline textBaseline;
 
   final List<Decoration> _rowDecorations;
