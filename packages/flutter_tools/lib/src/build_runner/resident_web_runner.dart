@@ -410,6 +410,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
             '\nConsider using the -t option to specify the Dart file to start.';
       }
       globals.printError(message);
+      appFailedToStart();
       return 1;
     }
     final String modeName = debuggingOptions.buildInfo.friendlyModeName;
@@ -458,6 +459,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
           final UpdateFSReport report = await _updateDevFS(fullRestart: true);
           if (!report.success) {
             globals.printError('Failed to compile application.');
+            appFailedToStart();
             return 1;
           }
           device.generator.accept();
@@ -485,13 +487,20 @@ class _ResidentWebRunner extends ResidentWebRunner {
         );
       });
     } on WebSocketException {
+      appFailedToStart();
       throwToolExit(kExitMessage);
     } on ChromeDebugException {
+      appFailedToStart();
       throwToolExit(kExitMessage);
     } on AppConnectionException {
+      appFailedToStart();
       throwToolExit(kExitMessage);
     } on SocketException {
+      appFailedToStart();
       throwToolExit(kExitMessage);
+    } on Exception {
+      appFailedToStart();
+      rethrow;
     }
     return 0;
   }
