@@ -594,8 +594,8 @@ class AppDomain extends Domain {
       enableHotReload && device.supportsHotRestart;
 
   Future<void> _inProgressHotReload;
-  final Map<String, RestartableTimer> _reloadDebounceTimers = <String, RestartableTimer>{};
-  final Map<String, Future<OperationResult>> _reloadOperationQueue = <String, Future<OperationResult>>{};
+  final Map<OperationType, RestartableTimer> _reloadDebounceTimers = <OperationType, RestartableTimer>{};
+  final Map<OperationType, Future<OperationResult>> _reloadOperationQueue = <OperationType, Future<OperationResult>>{};
   final Duration _hotReloadDebounceDuration = const Duration(milliseconds: 50);
 
   Future<OperationResult> restart(Map<String, dynamic> args) async {
@@ -612,7 +612,7 @@ class AppDomain extends Domain {
 
     return _queueAndDebounceReloadAction(
       app,
-      fullRestart ? 'restart' : 'reload',
+      fullRestart ? OperationType.restart: OperationType.reload,
       debounce,
       () {
         return app.restart(
@@ -636,7 +636,7 @@ class AppDomain extends Domain {
 
     return _queueAndDebounceReloadAction(
       app,
-      'reloadMethod',
+      OperationType.reloadMethod,
       debounce,
       () {
         return app.reloadMethod(classId: classId, libraryId: libraryId);
@@ -653,7 +653,7 @@ class AppDomain extends Domain {
   /// action completes.
   Future<OperationResult> _queueAndDebounceReloadAction(
     AppInstance app,
-    String operationType,
+    OperationType operationType,
     bool debounce,
     Future<OperationResult> Function() action,
   ) {
@@ -671,8 +671,8 @@ class AppDomain extends Domain {
       debounce ? _hotReloadDebounceDuration : Duration.zero,
       () async {
         // Remove us from the queue so we can't be reset now we've started.
-        _reloadOperationQueue[operationType] = null;
-        _reloadDebounceTimers[operationType] = null;
+        unawaited(_reloadOperationQueue.remove(operationType));
+        _reloadDebounceTimers.remove(operationType);
 
         // It's possible there are other reload types running when we get here,
         // so wait until any current async reload operations to complete.
@@ -1323,4 +1323,10 @@ class LaunchMode {
 
   @override
   String toString() => _value;
+}
+
+enum OperationType {
+  reloadMethod,
+  reload,
+  restart
 }
