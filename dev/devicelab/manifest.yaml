@@ -759,7 +759,6 @@ tasks:
       with SkSL shader warm-up.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   flutter_gallery__transition_perf_with_semantics:
     description: >

@@ -19,6 +19,6 @@
   "copyButtonLabel": "Kopioi",
   "pasteButtonLabel": "Liitä",
   "selectAllButtonLabel": "Valitse kaikki",
-  "tabSemanticsLabel": "TBD",
+  "tabSemanticsLabel": "Välilehti $tabIndex/$tabCount",
   "modalBarrierDismissLabel": "Ohita"
 }

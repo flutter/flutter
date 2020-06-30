@@ -19,6 +19,6 @@
   "copyButtonLabel": "Kopiëren",
   "pasteButtonLabel": "Plakken",
   "selectAllButtonLabel": "Alles selecteren",
-  "tabSemanticsLabel": "TBD",
+  "tabSemanticsLabel": "Tabblad $tabIndex van $tabCount",
   "modalBarrierDismissLabel": "Sluiten"
 }
