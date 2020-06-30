@@ -370,6 +370,19 @@ void main() {
       );
     });
 
+    testWithoutContext('start polling without Xcode', () async {
+      final IOSDevices iosDevices = IOSDevices(
+        platform: macPlatform,
+        xcdevice: mockXcdevice,
+        iosWorkflow: mockIosWorkflow,
+        logger: logger,
+      );
+      when(mockXcdevice.isInstalled).thenReturn(false);
+
+      await iosDevices.startPolling();
+      verifyNever(mockXcdevice.getAvailableIOSDevices());
+    });
+
     testWithoutContext('start polling', () async {
       final IOSDevices iosDevices = IOSDevices(
         platform: macPlatform,
