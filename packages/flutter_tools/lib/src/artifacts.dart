@@ -42,7 +42,7 @@ enum Artifact {
   flutterWebLibrariesJson,
   /// The summary dill for the dartdevc target.
   webPlatformKernelDill,
-  /// The summdary dill with null safety enabled for the dartdevc target.
+  /// The summary dill with null safety enabled for the dartdevc target.
   webPlatformSoundKernelDill,
   iosDeploy,
   idevicesyslog,
