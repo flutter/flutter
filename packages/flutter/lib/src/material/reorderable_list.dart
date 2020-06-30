@@ -132,7 +132,7 @@ class ReorderableListView extends StatefulWidget {
   /// simulation. The movement of the particle in the simulation is then used to
   /// determine the scroll position for the widget.
   ///
-  /// Instead of creating your own subclasses, [parent] can be used to combine
+  /// Instead of creating your own subclasses, `parent` can be used to combine
   /// [ScrollPhysics] objects of different types to get the desired scroll physics.
   /// For example:
   ///
