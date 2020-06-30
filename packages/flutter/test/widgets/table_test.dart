@@ -950,7 +950,7 @@ void main() {
           )
         )
       );
-    
+
     final RenderTable table = tester.renderObject(find.byType(Table));
     expect(table.textBaseline, TextBaseline.alphabetic);
   });
