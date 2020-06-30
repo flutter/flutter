@@ -1,4 +1,4 @@
-Signature: ad42d658649deeab8f2361f42ec2e90b
+Signature: 1415defa4477f493741bbc4955244525
 
 UNUSED LICENSES:
 
@@ -3133,10 +3133,8 @@ FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_modular/lib/src/module/view_provid
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_modular_testing/lib/src/module_interceptor.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_modular_testing/lib/src/module_with_view_provider_impl.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/component.dart
-FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/component_search.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/device.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/diagnostics.dart
-FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/launch.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/power.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/repository_manager.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/tiles.dart
