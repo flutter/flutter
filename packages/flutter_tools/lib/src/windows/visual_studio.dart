@@ -147,22 +147,6 @@ class VisualStudio {
     return '2019';
   }
 
-  /// The path to vcvars64.bat, or null if no Visual Studio installation has
-  /// the components necessary to build.
-  String get vcvarsPath {
-    final Map<String, dynamic> details = _usableVisualStudioDetails;
-    if (details.isEmpty) {
-      return null;
-    }
-    return _fileSystem.path.join(
-      _usableVisualStudioDetails[_installationPathKey] as String,
-      'VC',
-      'Auxiliary',
-      'Build',
-      'vcvars64.bat',
-    );
-  }
-
   /// The path to CMake, or null if no Visual Studio installation has
   /// the components necessary to build.
   String get cmakePath {
