@@ -328,7 +328,7 @@ void main() {
       when(mockXcdevice.isInstalled).thenReturn(false);
 
       await iosDevices.startPolling();
-      verifyNever(mockXcdevice.getAvailableIOSDevices());
+      verifyNever(mockXcdevice.getAvailableTetheredIOSDevices());
     });
 
     testWithoutContext('start polling', () async {
