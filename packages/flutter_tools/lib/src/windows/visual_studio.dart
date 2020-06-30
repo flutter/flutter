@@ -232,6 +232,8 @@ class VisualStudio {
     return <String, String>{
       // The C++ toolchain required by the template.
       'Microsoft.VisualStudio.Component.VC.Tools.x86.x64': cppToolchainDescription,
+      // CMake
+      'Microsoft.VisualStudio.Component.VC.CMake.Project': 'C++ CMake tools for Windows',
     };
   }
 
