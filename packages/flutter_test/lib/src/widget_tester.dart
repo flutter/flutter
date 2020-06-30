@@ -48,12 +48,6 @@ export 'package:test_api/test_api.dart' hide
 /// Signature for callback to [testWidgets] and [benchmarkWidgets].
 typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 
-/// The default refresh rate for continuous pumping
-const double kDefaultRefreshRate = 59.94;
-
-/// The default frame interval for continuous pumping
-const int kDefaultFrameIntervalInMicroseconds = 1E6 ~/ kDefaultRefreshRate;
-
 /// Runs the [callback] inside the Flutter test environment.
 ///
 /// Use this function for testing custom [StatelessWidget]s and
@@ -582,30 +576,47 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// the function is called, to flush any pending microtasks which may
   /// themselves schedule a frame.
   ///
-  /// `frequency` specify the frequency (in Hz) for frame requests. This is an
-  /// analog to screen refresh rate. The frequency rate will be rounded down to
-  /// integer microseconds frame interval. Default to be 59.94 Hz.
+  /// The `frameRefreshRate` specify the frequency (in Hz) for frame requests.
+  /// This is an analog to screen refresh rate on a device. The frequency rate
+  /// will be rounded down to integer microseconds frame interval.
+  /// Default to be 59.94 Hz.
   ///
-  /// This is useful when you are expecting there may be an infinite long
-  /// animations. To wait some finite animation you may want to use
-  /// [pumpAndSettle] instead.
+  /// This allows a test to pump for a period of time during an unbounded
+  /// animation. To pump to the end of a bounded animation, use [pumpAndSettle]
+  /// instead.
   ///
   /// If the function returns, it returns the number of pumps that it performed.
   /// When building and rendering frames is not expensive, the return value
   /// should be `1 + (duration.inMicroseconds / (1E6 ~/ frequency)).floor()`
   /// or `1 + (\[remaining animation time\] / (1E6 ~/ frequency)).ceil()`.
-  /// The formula may not be accurate when the division resul is very close to
-  /// an integer, due to fluctuation and/or truncation error.
+  /// When using the return number as a test result, avoid using values that
+  /// makes the devision above to be very close to an integer. This may causing
+  /// flaky result result due to time fluctuation and rounding error.
   ///
-  /// One can check if the return value from this function matches the expected
-  /// number of pumps to help cath regressions that cause loss of frame(s).
+  /// Example:
+  ///     testWidgets('pumpContinuous', (WidgetTester tester) async {
+  ///       await tester.pumpWidget(const Text(
+  ///         'foo',
+  ///         textDirection: TextDirection.ltr,
+  ///       ));
+  ///       final AnimationController test = AnimationController(
+  ///         duration: const Duration(milliseconds: 200),
+  ///         vsync: tester,
+  ///       );
+  ///       test.forward(from: 0.0);
+  ///       final int count = await tester.pumpContinuous(const Duration(milliseconds: 80));
+  ///       const int defaultFrameInterval = 1E6 ~/ 59.94;
+  ///       // ends after 80 ms
+  ///       expect(count, 1 + (80E3/defaultFrameInterval).floor());
+  ///     });
   Future<int> pumpContinuous(Duration duration, {
     EnginePhase phase = EnginePhase.sendSemanticsUpdate,
-    double frequency = kDefaultRefreshRate,
+    double frameRefreshRate = 59.94,
   }) async {
     assert(duration != null);
     assert(duration > Duration.zero);
-    assert(frequency > 0);
+    assert(frameRefreshRate != null);
+    assert(frameRefreshRate > 0);
     assert(() {
       final WidgetsBinding binding = this.binding;
       if (binding is LiveTestWidgetsFlutterBinding &&
@@ -618,7 +629,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       return true;
     }());
     int count = 0;
-    final Duration interval = Duration(microseconds: 1E6 ~/ frequency);
+    final Duration interval = Duration(microseconds: 1E6 ~/ frameRefreshRate);
     return TestAsyncUtils.guard<void>(() async {
       final DateTime endTime = binding.clock.fromNowBy(duration);
       do {
@@ -637,7 +648,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   Future<void> pumpFrames(
     Widget target,
     Duration maxDuration, [
-    Duration interval = const Duration(microseconds: kDefaultFrameIntervalInMicroseconds),
+    Duration interval = const Duration(milliseconds: 16, microseconds: 683),
   ]) {
     assert(maxDuration != null);
     // The interval following the last frame doesn't have to be within the fullDuration.
