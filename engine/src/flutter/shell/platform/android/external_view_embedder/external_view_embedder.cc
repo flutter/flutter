@@ -238,6 +238,9 @@ void AndroidExternalViewEmbedder::BeginFrame(
     double device_pixel_ratio,
     fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
   Reset();
+  if (frame_size_ != frame_size) {
+    surface_pool_->DestroyLayers(jni_facade_);
+  }
   frame_size_ = frame_size;
   device_pixel_ratio_ = device_pixel_ratio;
   // JNI method must be called on the platform thread.

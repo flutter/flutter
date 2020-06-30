@@ -402,5 +402,20 @@ TEST(AndroidExternalViewEmbedder, DoesNotCallJNIPlatformThreadOnlyMethods) {
   embedder->EndFrame(/*should_resubmit_frame=*/false, raster_thread_merger);
 }
 
+TEST(AndroidExternalViewEmbedder, DestroyOverlayLayersOnSizeChange) {
+  auto jni_mock = std::make_shared<JNIMock>();
+  auto embedder =
+      std::make_unique<AndroidExternalViewEmbedder>(nullptr, jni_mock, nullptr);
+
+  auto raster_thread_merger = GetThreadMergerFromPlatformThread();
+  ASSERT_FALSE(raster_thread_merger->IsMerged());
+
+  embedder->BeginFrame(SkISize::Make(10, 20), nullptr, 1.0,
+                       raster_thread_merger);
+  EXPECT_CALL(*jni_mock, FlutterViewDestroyOverlaySurfaces());
+  embedder->BeginFrame(SkISize::Make(30, 40), nullptr, 1.0,
+                       raster_thread_merger);
+}
+
 }  // namespace testing
 }  // namespace flutter

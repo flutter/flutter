@@ -176,6 +176,13 @@ class PlatformViewAndroidJNI {
   FlutterViewCreateOverlaySurface() = 0;
 
   //----------------------------------------------------------------------------
+  /// @brief      Destroys the overlay surfaces.
+  ///
+  /// @note       Must be called from the platform thread.
+  ///
+  virtual void FlutterViewDestroyOverlaySurfaces() = 0;
+
+  //----------------------------------------------------------------------------
   /// @brief      Computes the locale Android would select.
   ///
   virtual std::unique_ptr<std::vector<std::string>>
