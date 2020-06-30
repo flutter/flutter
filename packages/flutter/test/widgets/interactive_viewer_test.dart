@@ -422,7 +422,7 @@ void main() {
       );
 
       final Offset center = tester.getCenter(find.byType(InteractiveViewer));
-      await scrollAt(center, tester);
+      await scrollAt(center, tester, const Offset(0.0, -20.0));
       await tester.pumpAndSettle();
 
       expect(transformationController.value.getMaxScaleOnAxis(), greaterThan(1.0));
@@ -445,7 +445,7 @@ void main() {
       );
 
       final Offset center = tester.getCenter(find.byType(InteractiveViewer));
-      await scrollAt(center, tester);
+      await scrollAt(center, tester, const Offset(0.0, -20.0));
       await tester.pumpAndSettle();
 
       expect(transformationController.value.getMaxScaleOnAxis(), equals(1.0));
