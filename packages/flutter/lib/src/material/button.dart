@@ -29,6 +29,7 @@ import 'theme_data.dart';
 ///
 /// [RaisedButton] and [FlatButton] configure a [RawMaterialButton] based
 /// on the current [Theme] and [ButtonTheme].
+@Category(<String>['Material', 'Button'])
 class RawMaterialButton extends StatefulWidget {
   /// Create a button based on [Semantics], [Material], and [InkWell] widgets.
   ///
