@@ -109,7 +109,7 @@ class Table extends RenderObjectWidget {
     this.textDirection,
     this.border,
     this.defaultVerticalAlignment = TableCellVerticalAlignment.top,
-    this.textBaseline,
+    this.textBaseline = TextBaseline.alphabetic,
   }) : assert(children != null),
        assert(defaultColumnWidth != null),
        assert(defaultVerticalAlignment != null),
