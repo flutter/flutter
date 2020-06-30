@@ -410,6 +410,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
             '\nConsider using the -t option to specify the Dart file to start.';
       }
       globals.printError(message);
+      appFailedToStart();
       return 1;
     }
     final String modeName = debuggingOptions.buildInfo.friendlyModeName;
@@ -458,6 +459,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
           final UpdateFSReport report = await _updateDevFS(fullRestart: true);
           if (!report.success) {
             globals.printError('Failed to compile application.');
+            appFailedToStart();
             return 1;
           }
           device.generator.accept();

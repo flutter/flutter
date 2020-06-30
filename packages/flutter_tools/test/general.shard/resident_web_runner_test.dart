@@ -329,19 +329,54 @@ void main() {
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/60613
+  testUsingContext('ResidentWebRunner calls appFailedToStart if initial compilation fails', () async {
+    _setupMocks();
+    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
+    fileSystem.file(globals.fs.path.join('lib', 'main.dart'))
+      .createSync(recursive: true);
+    fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
+    when(mockWebDevFS.update(
+      mainUri: anyNamed('mainUri'),
+      target: anyNamed('target'),
+      bundle: anyNamed('bundle'),
+      firstBuildTime: anyNamed('firstBuildTime'),
+      bundleFirstUpload: anyNamed('bundleFirstUpload'),
+      generator: anyNamed('generator'),
+      fullRestart: anyNamed('fullRestart'),
+      dillOutputPath: anyNamed('dillOutputPath'),
+      projectRootPath: anyNamed('projectRootPath'),
+      pathToReload: anyNamed('pathToReload'),
+      invalidatedFiles: anyNamed('invalidatedFiles'),
+      trackWidgetCreation: anyNamed('trackWidgetCreation'),
+      packageConfig: anyNamed('packageConfig'),
+    )).thenAnswer((Invocation _) async {
+      return UpdateFSReport(success: false, syncedBytes: 0)..invalidatedModules = <String>[];
+    });
+
+    expect(await residentWebRunner.run(), 1);
+    // Completing this future ensures that the daemon can exit correctly.
+    expect(await residentWebRunner.waitForAppToFinish(), 1);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Pub: () => MockPub(),
+    Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
+  });
+
   testUsingContext('Can successfully run without an index.html including status warning', () async {
     fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
     _setupMocks();
     fileSystem.file(fileSystem.path.join('web', 'index.html'))
       .deleteSync();
     final ResidentWebRunner residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
-    mockFlutterDevice,
-    flutterProject: FlutterProject.current(),
-    debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-    ipv6: true,
-    stayResident: false,
-    urlTunneller: null,
-  ) as ResidentWebRunner;
+      mockFlutterDevice,
+      flutterProject: FlutterProject.current(),
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      ipv6: true,
+      stayResident: false,
+      urlTunneller: null,
+    ) as ResidentWebRunner;
 
     expect(await residentWebRunner.run(), 0);
     expect(testLogger.statusText,

@@ -1226,6 +1226,10 @@ abstract class ResidentRunner {
     _finished.complete(0);
   }
 
+  void appFailedToStart() {
+    _finished.complete(1);
+  }
+
   Future<int> waitForAppToFinish() async {
     final int exitCode = await _finished.future;
     assert(exitCode != null);

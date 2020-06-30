@@ -409,7 +409,7 @@ class DaemonDomain extends Domain {
   }
 }
 
-typedef _RunOrAttach = Future<void> Function({
+typedef _RunOrAttach = Future<int> Function({
   Completer<DebugConnectionInfo> connectionInfoCompleter,
   Completer<void> appStartedCompleter,
 });
