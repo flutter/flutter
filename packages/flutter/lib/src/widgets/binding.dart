@@ -947,6 +947,11 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 
   /// Computes the locale the current platform would resolve to.
   ///
+  /// This method is meant to be used as part of a [localeListResolutionCallback].
+  /// Since this method may return null, a Flutter/dart algorithm should still be
+  /// provided as a fallback in case a native resolved locale cannot be determined
+  /// or if the native resolved locale is undesirable.
+  ///
   /// This method may return a null [Locale] if the platform does not support
   /// native locale resolution, or if the resolution failed.
   ///
@@ -961,16 +966,13 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// of the device, either the modern (>= API 24) or legacy (< API 24) algorithm
   /// will be used.
   ///
-  /// On iOS, the results of `preferredLocalizationsFromArray` method of `NSBundle`
-  /// returned. See:
-  /// https://developer.apple.com/documentation/foundation/nsbundle/1417249-preferredlocalizationsfromarray?language=objc.
-  /// iOS treats script code as necessary for a match, so a preferred locale of `zh_Hans_CN`
-  /// may not resolve to a supported locale of `zh_CN`.
+  /// On iOS, the result of `preferredLocalizationsFromArray` method of `NSBundle`
+  /// is returned. See:
+  /// https://developer.apple.com/documentation/foundation/nsbundle/1417249-preferredlocalizationsfromarray?language=objc
+  /// for details on the used method.
   ///
-  /// This method is meant to be used as part of a [localeListResolutionCallback].
-  /// Since this method may return null, a Flutter/dart algorithm should still be
-  /// provided as a fallback in case a native resolved locale cannot be determined
-  /// or if the native resolved locale is undesirable.
+  /// iOS treats script code as necessary for a match, so a user preferred locale of
+  /// `zh_Hans_CN` will not resolve to a supported locale of `zh_CN`.
   Locale computePlatformResolvedLocale(List<Locale> supportedLocales) {
     return window.computePlatformResolvedLocale(supportedLocales);
   }
