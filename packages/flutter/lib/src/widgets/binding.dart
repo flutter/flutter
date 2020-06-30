@@ -973,6 +973,10 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///
   /// iOS treats script code as necessary for a match, so a user preferred locale of
   /// `zh_Hans_CN` will not resolve to a supported locale of `zh_CN`.
+  ///
+  /// Since implemntation may vary by platform and has potential to be heavy,
+  /// it is recommended to cache the results of this method if the value if it
+  /// is used multiple times.
   Locale computePlatformResolvedLocale(List<Locale> supportedLocales) {
     return window.computePlatformResolvedLocale(supportedLocales);
   }
