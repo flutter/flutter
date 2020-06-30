@@ -70,6 +70,13 @@ void SurfacePool::RecycleLayers() {
   available_layer_index_ = 0;
 }
 
+void SurfacePool::DestroyLayers(
+    std::shared_ptr<PlatformViewAndroidJNI> jni_facade) {
+  layers_.clear();
+  available_layer_index_ = 0;
+  jni_facade->FlutterViewDestroyOverlaySurfaces();
+}
+
 std::vector<std::shared_ptr<OverlayLayer>> SurfacePool::GetUnusedLayers() {
   std::vector<std::shared_ptr<OverlayLayer>> results;
   for (size_t i = available_layer_index_; i < layers_.size(); i++) {

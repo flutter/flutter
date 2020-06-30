@@ -10,13 +10,16 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.ColorSpace;
+import android.graphics.PixelFormat;
 import android.hardware.HardwareBuffer;
 import android.media.Image;
 import android.media.Image.Plane;
 import android.media.ImageReader;
+import android.view.Surface;
 import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.renderer.RenderSurface;
 
@@ -35,7 +38,7 @@ import io.flutter.embedding.engine.renderer.RenderSurface;
 @SuppressLint("ViewConstructor")
 @TargetApi(19)
 public class FlutterImageView extends View implements RenderSurface {
-  private final ImageReader imageReader;
+  @NonNull private ImageReader imageReader;
   @Nullable private Image nextImage;
   @Nullable private Image currentImage;
   @Nullable private Bitmap currentBitmap;
@@ -63,11 +66,37 @@ public class FlutterImageView extends View implements RenderSurface {
    * Constructs a {@code FlutterImageView} with an {@link android.media.ImageReader} that provides
    * the Flutter UI.
    */
-  public FlutterImageView(
-      @NonNull Context context, @NonNull ImageReader imageReader, SurfaceKind kind) {
+  public FlutterImageView(@NonNull Context context, int width, int height, SurfaceKind kind) {
+    super(context, null);
+    this.imageReader = createImageReader(width, height);
+    this.kind = kind;
+  }
+
+  @VisibleForTesting
+  FlutterImageView(@NonNull Context context, @NonNull ImageReader imageReader, SurfaceKind kind) {
     super(context, null);
     this.imageReader = imageReader;
     this.kind = kind;
+  }
+
+  @TargetApi(19)
+  @NonNull
+  private static ImageReader createImageReader(int width, int height) {
+    if (android.os.Build.VERSION.SDK_INT >= 29) {
+      return ImageReader.newInstance(
+          width,
+          height,
+          PixelFormat.RGBA_8888,
+          3,
+          HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE | HardwareBuffer.USAGE_GPU_COLOR_OUTPUT);
+    } else {
+      return ImageReader.newInstance(width, height, PixelFormat.RGBA_8888, 3);
+    }
+  }
+
+  @NonNull
+  public Surface getSurface() {
+    return imageReader.getSurface();
   }
 
   @Nullable
@@ -177,6 +206,17 @@ public class FlutterImageView extends View implements RenderSurface {
       }
 
       currentBitmap.copyPixelsFromBuffer(imagePlane.getBuffer());
+    }
+  }
+
+  @Override
+  protected void onSizeChanged(int width, int height, int oldWidth, int oldHeight) {
+    if (width == imageReader.getWidth() && height == imageReader.getHeight()) {
+      return;
+    }
+    if (kind == SurfaceKind.background && flutterRenderer != null) {
+      imageReader = createImageReader(width, height);
+      flutterRenderer.swapSurface(imageReader.getSurface());
     }
   }
 }

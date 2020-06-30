@@ -64,6 +64,9 @@ class SurfacePool {
   // Marks the layers in the pool as available for reuse.
   void RecycleLayers();
 
+  // Destroys all the layers in the pool.
+  void DestroyLayers(std::shared_ptr<PlatformViewAndroidJNI> jni_facade);
+
  private:
   // The index of the entry in the layers_ vector that determines the beginning
   // of the unused layers. For example, consider the following vector:

@@ -83,6 +83,8 @@ static jmethodID g_on_engine_restart_method = nullptr;
 
 static jmethodID g_create_overlay_surface_method = nullptr;
 
+static jmethodID g_destroy_overlay_surfaces_method = nullptr;
+
 static jmethodID g_on_begin_frame_method = nullptr;
 
 static jmethodID g_on_end_frame_method = nullptr;
@@ -721,6 +723,14 @@ bool RegisterApi(JNIEnv* env) {
     return false;
   }
 
+  g_destroy_overlay_surfaces_method = env->GetMethodID(
+      g_flutter_jni_class->obj(), "destroyOverlaySurfaces", "()V");
+
+  if (g_destroy_overlay_surfaces_method == nullptr) {
+    FML_LOG(ERROR) << "Could not locate destroyOverlaySurfaces method";
+    return false;
+  }
+
   fml::jni::ScopedJavaLocalRef<jclass> overlay_surface_class(
       env, env->FindClass("io/flutter/embedding/engine/FlutterOverlaySurface"));
   if (overlay_surface_class.is_null()) {
@@ -1177,6 +1187,19 @@ PlatformViewAndroidJNIImpl::FlutterViewCreateOverlaySurface() {
 
   return std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
       overlay_id, std::move(overlay_window));
+}
+
+void PlatformViewAndroidJNIImpl::FlutterViewDestroyOverlaySurfaces() {
+  JNIEnv* env = fml::jni::AttachCurrentThread();
+
+  auto java_object = java_object_.get(env);
+  if (java_object.is_null()) {
+    return;
+  }
+
+  env->CallVoidMethod(java_object.obj(), g_destroy_overlay_surfaces_method);
+
+  FML_CHECK(CheckException(env));
 }
 
 std::unique_ptr<std::vector<std::string>>

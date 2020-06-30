@@ -9,9 +9,6 @@ import static android.view.MotionEvent.PointerProperties;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.graphics.PixelFormat;
-import android.hardware.HardwareBuffer;
-import android.media.ImageReader;
 import android.os.Build;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -694,28 +691,20 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   }
 
   @TargetApi(19)
-  public static ImageReader createImageReader(int width, int height) {
-    if (android.os.Build.VERSION.SDK_INT >= 29) {
-      return ImageReader.newInstance(
-          width,
-          height,
-          PixelFormat.RGBA_8888,
-          3,
-          HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE | HardwareBuffer.USAGE_GPU_COLOR_OUTPUT);
-    } else {
-      return ImageReader.newInstance(width, height, PixelFormat.RGBA_8888, 3);
-    }
-  }
-
-  @TargetApi(19)
   public FlutterOverlaySurface createOverlaySurface() {
-    ImageReader imageReader = createImageReader(flutterView.getWidth(), flutterView.getHeight());
     FlutterImageView imageView =
         new FlutterImageView(
-            flutterView.getContext(), imageReader, FlutterImageView.SurfaceKind.overlay);
+            flutterView.getContext(),
+            flutterView.getWidth(),
+            flutterView.getHeight(),
+            FlutterImageView.SurfaceKind.overlay);
     int id = nextOverlayLayerId++;
     overlayLayerViews.put(id, imageView);
 
-    return new FlutterOverlaySurface(id, imageReader.getSurface());
+    return new FlutterOverlaySurface(id, imageView.getSurface());
+  }
+
+  public void destroyOverlaySurfaces() {
+    overlayLayerViews.clear();
   }
 }
