@@ -751,6 +751,9 @@ class RestorationBucket extends ChangeNotifier {
       return;
     }
     _childrenToAdd[child.id]?.remove(child);
+    if (_childrenToAdd[child.id]?.isEmpty == true) {
+      _childrenToAdd.remove(child.id);
+    }
   }
 
   void _addChildData(RestorationBucket child) {

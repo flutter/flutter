@@ -312,8 +312,136 @@ void main() {
     expect(manager.updateScheduled, isFalse);
   });
 
-  // rename, adapt, decommission
-  // rename, adapt: existing and unexisting
+  test('rename is no-op if same id', () {
+    final MockManager manager = MockManager();
+    final Map<String, dynamic> rawData = _createRawDataSet();
+    final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
+    
+    final RestorationBucket child = root.claimChild(const RestorationId('child1'), debugOwner: 'owner1');
+
+    expect(manager.updateScheduled, isFalse);
+    expect(child.id, const RestorationId('child1'));
+    child.rename(const RestorationId('child1'));
+    expect(manager.updateScheduled, isFalse);
+    expect(child.id, const RestorationId('child1'));
+    expect(rawData[childrenMapKey].containsKey('child1'), isTrue);
+  });
+
+  test('rename to unused id', () {
+    final MockManager manager = MockManager();
+    final Map<String, dynamic> rawData = _createRawDataSet();
+    final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
+
+    final RestorationBucket child = root.claimChild(const RestorationId('child1'), debugOwner: 'owner1');
+    final Object rawChildData = rawData[childrenMapKey]['child1'];
+    expect(rawChildData, isNotNull);
+
+    expect(manager.updateScheduled, isFalse);
+    expect(child.id, const RestorationId('child1'));
+    child.rename(const RestorationId('new-name'));
+    expect(child.id, const RestorationId('new-name'));
+
+    expect(manager.updateScheduled, isTrue);
+    manager.runFinalizers();
+    expect(manager.updateScheduled, isFalse);
+
+    expect(rawData[childrenMapKey].containsKey('child1'), isFalse);
+    expect(rawData[childrenMapKey]['new-name'], rawChildData);
+  });
+
+  test('rename to used id throws if id is not given up', () {
+    final MockManager manager = MockManager();
+    final Map<String, dynamic> rawData = _createRawDataSet();
+    final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
+
+    final RestorationBucket child1 = root.claimChild(const RestorationId('child1'), debugOwner: 'owner1');
+    final RestorationBucket child2 = root.claimChild(const RestorationId('child2'), debugOwner: 'owner1');
+    manager.runFinalizers();
+
+    expect(child1.id, const RestorationId('child1'));
+    expect(child2.id, const RestorationId('child2'));
+    child2.rename(const RestorationId('child1'));
+    expect(child2.id, const RestorationId('child1'));
+
+    expect(manager.updateScheduled, isTrue);
+    expect(() => manager.runFinalizers(), throwsFlutterError);
+  });
+
+  test('rename to used id does not throw if id is given up', () {
+    final MockManager manager = MockManager();
+    final Map<String, dynamic> rawData = _createRawDataSet();
+    final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
+
+    final RestorationBucket child1 = root.claimChild(const RestorationId('child1'), debugOwner: 'owner1');
+    final RestorationBucket child2 = root.claimChild(const RestorationId('child2'), debugOwner: 'owner1');
+    manager.runFinalizers();
+
+    final Object rawChild1Data = rawData[childrenMapKey]['child1'];
+    expect(rawChild1Data, isNotNull);
+    final Object rawChild2Data = rawData[childrenMapKey]['child2'];
+    expect(rawChild2Data, isNotNull);
+
+    expect(child1.id, const RestorationId('child1'));
+    expect(child2.id, const RestorationId('child2'));
+    child2.rename(const RestorationId('child1'));
+    expect(child2.id, const RestorationId('child1'));
+    expect(child1.id, const RestorationId('child1'));
+
+    child1.dispose();
+
+    expect(manager.updateScheduled, isTrue);
+    manager.runFinalizers();
+    expect(manager.updateScheduled, isFalse);
+
+    expect(rawData[childrenMapKey]['child1'], rawChild2Data);
+    expect(rawData[childrenMapKey].containsKey('child2'), isFalse);
+  });
+
+  test('renaming a to be added child', () {
+    final MockManager manager = MockManager();
+    final Map<String, dynamic> rawData = _createRawDataSet();
+    final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
+
+    final Object rawChild1Data = rawData[childrenMapKey]['child1'];
+    expect(rawChild1Data, isNotNull);
+
+    final RestorationBucket child1 = root.claimChild(const RestorationId('child1'), debugOwner: 'owner1');
+    final RestorationBucket child2 = root.claimChild(const RestorationId('child1'), debugOwner: 'owner1');
+    
+    child2.rename(const RestorationId('foo'));
+
+    expect(manager.updateScheduled, isTrue);
+    manager.runFinalizers();
+    expect(manager.updateScheduled, isFalse);
+
+    expect(child1.id, const RestorationId('child1'));
+    expect(child2.id, const RestorationId('foo'));
+
+    expect(rawData[childrenMapKey]['child1'], rawChild1Data);
+    expect(rawData[childrenMapKey]['foo'], isEmpty); // new bucket
+  });
+  
+  test('adopt is no-op if same parent', () {
+
+  });
+
+  test('adopt fresh child', () {
+
+  });
+
+  test('adopt child that already had a parent', () {
+
+  });
+
+  test('adopting child throws if id is already in use and not given up', () {
+
+  });
+
+  test('adopting child does not throw if id is already in use and given up', () {
+
+  });
+
+  // decommission
 }
 
 Map<String, dynamic> _createRawDataSet() {
