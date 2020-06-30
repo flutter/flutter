@@ -10,7 +10,6 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Insets;
 import android.graphics.Rect;
-import android.media.ImageReader;
 import android.os.Build;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
@@ -945,9 +944,9 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
   public void convertToImageView() {
     renderSurface.pause();
 
-    ImageReader imageReader = PlatformViewsController.createImageReader(getWidth(), getHeight());
     flutterImageView =
-        new FlutterImageView(getContext(), imageReader, FlutterImageView.SurfaceKind.background);
+        new FlutterImageView(
+            getContext(), getWidth(), getHeight(), FlutterImageView.SurfaceKind.background);
     renderSurface = flutterImageView;
     if (flutterEngine != null) {
       renderSurface.attachToRenderer(flutterEngine.getRenderer());

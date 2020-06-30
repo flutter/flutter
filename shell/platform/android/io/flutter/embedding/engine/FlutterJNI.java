@@ -855,6 +855,17 @@ public class FlutterJNI {
     }
     return platformViewsController.createOverlaySurface();
   }
+
+  @SuppressWarnings("unused")
+  @UiThread
+  public void destroyOverlaySurfaces() {
+    ensureRunningOnMainThread();
+    if (platformViewsController == null) {
+      throw new RuntimeException(
+          "platformViewsController must be set before attempting to destroy an overlay surface");
+    }
+    platformViewsController.destroyOverlaySurfaces();
+  }
   // ----- End Engine Lifecycle Support ----
 
   // ----- Start Localization Support ----
