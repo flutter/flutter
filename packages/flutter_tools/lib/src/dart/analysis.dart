@@ -258,8 +258,8 @@ class AnalysisError implements Comparable<AnalysisError> {
     final String padding = ' ' * math.max(0, 7 - writtenError.severity.length);
     return '$padding${colorSeverity.toLowerCase()} $_separator '
         '${writtenError.messageSentenceFragment} $_separator '
-        '${_fileSystem.path.relative(writtenError.file)}:$writtenError.startLine:$writtenError.startColumn $_separator '
-        '${writtenError.code}';
+        '${_fileSystem.path.relative(writtenError.file)}:${writtenError.startLine}:${writtenError.startColumn} $_separator '
+        '$code';
   }
 
   String toLegacyString() {
