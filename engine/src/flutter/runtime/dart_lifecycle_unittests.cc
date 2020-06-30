@@ -8,12 +8,12 @@
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/runtime/dart_vm_lifecycle.h"
-#include "flutter/runtime/runtime_test.h"
+#include "flutter/testing/fixture_test.h"
 
 namespace flutter {
 namespace testing {
 
-using DartLifecycleTest = RuntimeTest;
+using DartLifecycleTest = FixtureTest;
 
 TEST_F(DartLifecycleTest, CanStartAndShutdownVM) {
   auto settings = CreateSettingsForFixture();

@@ -117,8 +117,6 @@ source_set_maybe_fuchsia_legacy("runtime_unittests_common") {
     "dart_lifecycle_unittests.cc",
     "dart_service_isolate_unittests.cc",
     "dart_vm_unittests.cc",
-    "runtime_test.cc",
-    "runtime_test.h",
   ]
 
   public_deps = [
@@ -136,6 +134,7 @@ source_set_maybe_fuchsia_legacy("runtime_unittests_common") {
   deps_legacy_and_next = [
     ":runtime",
     "//flutter/testing:dart",
+    "//flutter/testing:fixture_test",
   ]
 }
 

@@ -9,17 +9,16 @@
 #include "flutter/runtime/dart_isolate.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/runtime/dart_vm_lifecycle.h"
-#include "flutter/runtime/runtime_test.h"
 #include "flutter/testing/dart_isolate_runner.h"
+#include "flutter/testing/fixture_test.h"
 #include "flutter/testing/testing.h"
-#include "flutter/testing/thread_test.h"
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/scopes/dart_isolate_scope.h"
 
 namespace flutter {
 namespace testing {
 
-using DartIsolateTest = RuntimeTest;
+using DartIsolateTest = FixtureTest;
 
 TEST_F(DartIsolateTest, RootIsolateCreationAndShutdown) {
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());

@@ -21,14 +21,18 @@ class FixtureTest : public ThreadTest {
  public:
   FixtureTest();
 
-  Settings CreateSettingsForFixture();
+  virtual Settings CreateSettingsForFixture();
+
+  void AddNativeCallback(std::string name, Dart_NativeFunction callback);
+
+ protected:
+  void SetSnapshotsAndAssets(Settings& settings);
+
+  std::shared_ptr<TestDartNativeResolver> native_resolver_;
 
  private:
-  std::shared_ptr<TestDartNativeResolver> native_resolver_;
   fml::UniqueFD assets_dir_;
   ELFAOTSymbols aot_symbols_;
-
-  void SetSnapshotsAndAssets(Settings& settings);
 
   FML_DISALLOW_COPY_AND_ASSIGN(FixtureTest);
 };

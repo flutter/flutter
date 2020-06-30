@@ -4,13 +4,13 @@
 
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/runtime/dart_vm_lifecycle.h"
-#include "flutter/runtime/runtime_test.h"
+#include "flutter/testing/fixture_test.h"
 #include "gtest/gtest.h"
 
 namespace flutter {
 namespace testing {
 
-using DartVMTest = RuntimeTest;
+using DartVMTest = FixtureTest;
 
 TEST_F(DartVMTest, SimpleInitialization) {
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());

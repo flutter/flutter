@@ -267,6 +267,7 @@ if (enable_unittests) {
       ":shell_unittests_gpu_configuration",
       "//flutter/lib/ui:ui",
       "//flutter/testing:dart",
+      "//flutter/testing:fixture_test",
     ]
   }
 
