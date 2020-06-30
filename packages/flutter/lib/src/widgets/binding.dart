@@ -977,6 +977,10 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// Since implemntation may vary by platform and has potential to be heavy,
   /// it is recommended to cache the results of this method if the value if it
   /// is used multiple times.
+  ///
+  /// Second-best (and n-best) matching locales should be obtained by calling this
+  /// method again with the matched locale of the first call omitted from
+  /// [supportedLocales].
   Locale computePlatformResolvedLocale(List<Locale> supportedLocales) {
     return window.computePlatformResolvedLocale(supportedLocales);
   }
