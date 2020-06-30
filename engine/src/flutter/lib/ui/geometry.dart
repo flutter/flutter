@@ -84,7 +84,7 @@ abstract class OffsetBase {
   /// left-hand-side operand are equal to the horizontal and vertical values of
   /// the right-hand-side operand respectively. Returns false otherwise.
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return other is OffsetBase
         && other._dx == _dx
         && other._dy == _dy;
@@ -334,7 +334,7 @@ class Offset extends OffsetBase {
 
   /// Compares two Offsets for equality.
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return other is Offset
         && other.dx == dx
         && other.dy == dy;
@@ -606,7 +606,7 @@ class Size extends OffsetBase {
   /// Compares two Sizes for equality.
   // We don't compare the runtimeType because of _DebugSize in the framework.
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return other is Size
         && other._dx == _dx
         && other._dy == _dy;
@@ -887,7 +887,7 @@ class Rect {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
     if (runtimeType != other.runtimeType)
@@ -1014,7 +1014,7 @@ class Radius {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
     if (runtimeType != other.runtimeType)
@@ -1615,7 +1615,7 @@ class RRect {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
     if (runtimeType != other.runtimeType)

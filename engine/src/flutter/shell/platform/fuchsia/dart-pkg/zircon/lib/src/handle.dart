@@ -26,8 +26,10 @@ class Handle extends NativeFieldWrapperClass2 {
   String toString() => 'Handle($handle)';
 
   @override
-  bool operator ==(Object other) =>
-      (other is Handle) && (handle == other.handle);
+  bool operator ==(Object other) {
+    return other is Handle
+        && other.handle == handle;
+  }
 
   @override
   int get hashCode => handle.hashCode;
