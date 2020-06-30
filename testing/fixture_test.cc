@@ -49,5 +49,10 @@ void FixtureTest::SetSnapshotsAndAssets(Settings& settings) {
   }
 }
 
+void FixtureTest::AddNativeCallback(std::string name,
+                                    Dart_NativeFunction callback) {
+  native_resolver_->AddNativeCallback(std::move(name), callback);
+}
+
 }  // namespace testing
 }  // namespace flutter

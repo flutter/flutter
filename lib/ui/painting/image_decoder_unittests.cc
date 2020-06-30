@@ -6,16 +6,15 @@
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/lib/ui/painting/image_decoder.h"
-#include "flutter/lib/ui/painting/image_decoder_test.h"
 #include "flutter/lib/ui/painting/multi_frame_codec.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/runtime/dart_vm_lifecycle.h"
 #include "flutter/testing/dart_isolate_runner.h"
 #include "flutter/testing/elf_loader.h"
+#include "flutter/testing/fixture_test.h"
 #include "flutter/testing/test_dart_native_resolver.h"
 #include "flutter/testing/test_gl_surface.h"
 #include "flutter/testing/testing.h"
-#include "flutter/testing/thread_test.h"
 #include "third_party/skia/include/codec/SkCodec.h"
 
 namespace flutter {
@@ -119,6 +118,8 @@ static sk_sp<SkData> OpenFixtureAsSkData(const char* name) {
   fixture_mapping.release();
   return data;
 }
+
+class ImageDecoderFixtureTest : public FixtureTest {};
 
 TEST_F(ImageDecoderFixtureTest, CanCreateImageDecoder) {
   auto loop = fml::ConcurrentMessageLoop::Create();
