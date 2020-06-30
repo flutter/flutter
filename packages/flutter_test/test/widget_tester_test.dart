@@ -327,7 +327,7 @@ void main() {
 
       test.forward(from: 0.4);
       count = await tester.pumpContinuous(const Duration(seconds: 1));
-      // remaining animation time 120 ms
+      // remaining animation time 120 ms = (1 - 0.4) * 200 ms
       expect(count, 1 + (120E3/kDefaultFrameIntervalInMicroseconds).ceil());
 
       test.dispose();
