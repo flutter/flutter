@@ -78,15 +78,15 @@ class ScaffoldMessenger extends StatefulWidget {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// ScaffoldMessages scaffoldMessages = ScaffoldMessages.of(context);
-  /// form.save();
+  /// ScaffoldMessages scaffoldMessenger = ScaffoldMessages.of(context);
+  /// scaffoldMessenger.showSnackBar(const SnackBar(content: Text('Snack-tastic'));
   /// ```
   static ScaffoldMessengerState of(BuildContext context) {
     final _ScaffoldMessengerScope scope = context.dependOnInheritedWidgetOfExactType<_ScaffoldMessengerScope>();
     return scope?._scaffoldMessengerState;
   }
 
-  /// Doc ... The widget below this widget in the tree.
+  /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.child}
   final Widget child;
@@ -98,27 +98,48 @@ class ScaffoldMessenger extends StatefulWidget {
 /// Doc
 class ScaffoldMessengerState extends State<ScaffoldMessenger> {
   final Set<ScaffoldState> _scaffolds = <ScaffoldState>{};
-//  const String snackHeroTag = '<ScaffoldMessenger.snackBarHeroTag>';
+  final Queue<ScaffoldFeatureController<SnackBar, SnackBarClosedReason>> _snackBars = Queue<ScaffoldFeatureController<SnackBar, SnackBarClosedReason>>();
+  // const String snackHeroTag = '<ScaffoldMessenger.snackBarHeroTag>';
 
   void _register(ScaffoldState scaffold) {
+    // Are we in the middle of showing a SnackBar elsewhere?
+    // If so, present on the new scaffold.
+    if (!_scaffolds.contains(scaffold) && _snackBars.isNotEmpty) {
+      scaffold.showSnackBar(_snackBars.first._widget, listener: _handleSnackBarStatusChange);
+    }
     _scaffolds.add(scaffold);
-    print('Registered $scaffold, count: ${_scaffolds.length}');
   }
 
   void _unregister(ScaffoldState scaffold) {
-    print('Unregistered $scaffold');
     _scaffolds.remove(scaffold);
+  }
+
+  void _handleSnackBarStatusChange(AnimationStatus status) {
+    switch (status) {
+      case AnimationStatus.dismissed:
+        assert(_snackBars.isNotEmpty);
+          _snackBars.removeFirst();
+        break;
+      case AnimationStatus.completed:
+      case AnimationStatus.forward:
+      case AnimationStatus.reverse:
+        break;
+    }
   }
 
   /// Doc
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(SnackBar snackbar) {
-    final Set<ScaffoldFeatureController<SnackBar, SnackBarClosedReason>> _controllers = <ScaffoldFeatureController<SnackBar, SnackBarClosedReason>>{};
-    for (final ScaffoldState scaffold in _scaffolds) {
-      print('Showing for scaffold: $scaffold');
-      _controllers.add(scaffold?.showSnackBar(snackbar));
-    }
-    //assert(_controllers.length == 1);
-    return _controllers.first;
+//    final Set<ScaffoldFeatureController<SnackBar, SnackBarClosedReason>> _controllers = <ScaffoldFeatureController<SnackBar, SnackBarClosedReason>>{};
+    for (final ScaffoldState scaffold in _scaffolds)
+      _snackBars.add(scaffold?.showSnackBar(snackbar, listener: _handleSnackBarStatusChange));
+
+    // TODO(Piinks): make sure we are returning the right controller since there
+    //  could be multiple across Scaffolds and one could have received input.
+    //  - We should track the snack bars differently:
+    //    - one object representing the SnackBars ScaffoldMessenger is currently managing
+    //    - one object representing the ScaffoldFeatureControllers generated for each SnackBar
+    //      - This will be the one that needs to return the right controller
+    return _snackBars.first;
   }
 
   /// Doc
@@ -133,6 +154,8 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> {
       scaffold.hideCurrentSnackBar(reason: reason);
   }
 
+  // TODO(Piinks): state restoration
+
   // ++ later:
   //  - openDrawer
   //  - openEndDrawer
@@ -141,7 +164,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> {
 
   // What about Dialogs and pickers?
   //  - Implement in separate AppMessenger class?
-  //  - Tie to Scaffold?
+  //  - OR, place everything in AppMessenger, managing registered Scaffolds & Navigators from one central place
 
   @override
   Widget build(BuildContext context) {
@@ -1776,9 +1799,13 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// animation), use [removeCurrentSnackBar].
   ///
   /// See [Scaffold.of] for information about how to obtain the [ScaffoldState].
-  ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(SnackBar snackbar) {
+  ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(SnackBar snackbar, {AnimationStatusListener listener}) {
     _snackBarController ??= SnackBar.createAnimationController(vsync: this)
       ..addStatusListener(_handleSnackBarStatusChange);
+    if (listener != null) {
+      print('Adding Listener');
+      _snackBarController.addStatusListener(listener);
+    }
     if (_snackBars.isEmpty) {
       assert(_snackBarController.isDismissed);
       _snackBarController.forward();
@@ -2424,7 +2451,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     final TextDirection textDirection = Directionality.of(context);
     _accessibleNavigation = mediaQuery.accessibleNavigation;
 
-    print('Asking to register: $this');
     ScaffoldMessenger.of(context)?._register(this);
 
     if (_snackBars.isNotEmpty) {

@@ -29,6 +29,7 @@ const Duration _snackBarDisplayDuration = Duration(milliseconds: 4000);
 const Curve _snackBarHeightCurve = Curves.fastOutSlowIn;
 const Curve _snackBarFadeInCurve = Interval(0.45, 1.0, curve: Curves.fastOutSlowIn);
 const Curve _snackBarFadeOutCurve = Interval(0.72, 1.0, curve: Curves.fastOutSlowIn);
+const String _snackBarHeroTag = '<SnackBar Hero Tag>';
 
 /// Specify how a [SnackBar] was closed.
 ///
@@ -375,7 +376,7 @@ class _SnackBarState extends State<SnackBar> {
       reverseCurve: const Threshold(0.0),
     );
 
-    Widget snackBar = SafeArea(
+    Widget snackBar = Hero(tag: _snackBarHeroTag, child: SafeArea(
       top: false,
       bottom: !isFloatingSnackBar,
       child: Row(
@@ -402,7 +403,7 @@ class _SnackBarState extends State<SnackBar> {
             SizedBox(width: snackBarPadding),
         ],
       ),
-    );
+    ));
 
     final double elevation = widget.elevation ?? snackBarTheme.elevation ?? 6.0;
     final Color backgroundColor = widget.backgroundColor ?? snackBarTheme.backgroundColor ?? inverseTheme.backgroundColor;
