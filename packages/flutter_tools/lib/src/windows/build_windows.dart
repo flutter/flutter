@@ -16,6 +16,11 @@ import '../plugins.dart';
 import '../project.dart';
 import 'visual_studio.dart';
 
+// From https://cmake.org/cmake/help/v3.15/manual/cmake-generators.7.html#visual-studio-generators
+// This may need to become a getter on VisualStudio in the future to support
+// future major versions of Visual Studio.
+const String _cmakeVisualStudioGeneratorIdentifier = 'Visual Studio 16 2019';
+
 /// Builds the Windows project using msbuild.
 Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   String target,
@@ -86,7 +91,7 @@ Future<void> _runCmakeGeneration(String cmakePath, Directory buildDir, Directory
         '-B',
         buildDir.path,
         '-G',
-        'Visual Studio 16 2019',
+        _cmakeVisualStudioGeneratorIdentifier,
       ],
       trace: true,
     );
