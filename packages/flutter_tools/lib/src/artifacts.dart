@@ -42,6 +42,8 @@ enum Artifact {
   flutterWebLibrariesJson,
   /// The summary dill for the dartdevc target.
   webPlatformKernelDill,
+  /// The summdary dill with null safety enabled for the dartdevc target.
+  webPlatformSoundKernelDill,
   iosDeploy,
   idevicesyslog,
   idevicescreenshot,
@@ -129,6 +131,8 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
       return 'FlutterMacOS.podspec';
     case Artifact.webPlatformKernelDill:
       return 'flutter_ddc_sdk.dill';
+    case Artifact.webPlatformSoundKernelDill:
+      return 'flutter_ddc_sdk_sound.dill';
     case Artifact.fuchsiaKernelCompiler:
       return 'kernel_compiler.snapshot';
     case Artifact.fuchsiaFlutterRunner:
@@ -348,6 +352,8 @@ class CachedArtifacts implements Artifacts {
         return _fileSystem.path.join(_getFlutterWebSdkPath(), _artifactToFileName(artifact));
       case Artifact.webPlatformKernelDill:
         return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', _artifactToFileName(artifact));
+      case Artifact.webPlatformSoundKernelDill:
+        return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', _artifactToFileName(artifact));
       case Artifact.dart2jsSnapshot:
         return _fileSystem.path.join(_dartSdkPath(_fileSystem), 'bin', 'snapshots', _artifactToFileName(artifact));
       case Artifact.dartdevcSnapshot:
@@ -541,6 +547,8 @@ class LocalEngineArtifacts implements Artifacts {
       case Artifact.flutterMacOSPodspec:
         return _fileSystem.path.join(_hostEngineOutPath, _artifactToFileName(artifact));
       case Artifact.webPlatformKernelDill:
+        return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', _artifactToFileName(artifact));
+      case Artifact.webPlatformSoundKernelDill:
         return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', _artifactToFileName(artifact));
       case Artifact.fuchsiaKernelCompiler:
         final String hostPlatform = getNameForHostPlatform(getCurrentHostPlatform());

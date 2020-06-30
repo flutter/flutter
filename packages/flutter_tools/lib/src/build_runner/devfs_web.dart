@@ -103,6 +103,7 @@ class WebAssetServer implements AssetReader {
     this.internetAddress,
     this._modules,
     this._digests,
+    this._buildInfo,
   );
 
   // Fallback to "application/octet-stream" on null which
@@ -167,6 +168,7 @@ class WebAssetServer implements AssetReader {
         address,
         modules,
         digests,
+        buildInfo,
       );
       if (testMode) {
         return server;
@@ -263,6 +265,7 @@ class WebAssetServer implements AssetReader {
     return null;
   }
 
+  final BuildInfo _buildInfo;
   final HttpServer _httpServer;
   // If holding these in memory is too much overhead, this can be switched to a
   // RandomAccessFile and read on demand.
@@ -467,10 +470,26 @@ class WebAssetServer implements AssetReader {
   ));
 
   @visibleForTesting
+  final File dartSdkSound = globals.fs.file(globals.fs.path.join(
+    globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
+    'kernel',
+    'amd-sound',
+    'dart_sdk.js',
+  ));
+
+  @visibleForTesting
   final File canvasKitDartSdk = globals.fs.file(globals.fs.path.join(
     globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
     'kernel',
     'amd-canvaskit',
+    'dart_sdk.js',
+  ));
+
+  @visibleForTesting
+  final File canvasKitDartSdkSound = globals.fs.file(globals.fs.path.join(
+    globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
+    'kernel',
+    'amd-canvaskit-sound',
     'dart_sdk.js',
   ));
 
@@ -483,10 +502,26 @@ class WebAssetServer implements AssetReader {
   ));
 
   @visibleForTesting
+  final File dartSdkSoundSourcemap = globals.fs.file(globals.fs.path.join(
+    globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
+    'kernel',
+    'amd-sound',
+    'dart_sdk.js.map',
+  ));
+
+  @visibleForTesting
   final File canvasKitDartSdkSourcemap = globals.fs.file(globals.fs.path.join(
     globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
     'kernel',
     'amd-canvaskit',
+    'dart_sdk.js.map',
+  ));
+
+  @visibleForTesting
+  final File canvasKitDartSdkSoundSourcemap = globals.fs.file(globals.fs.path.join(
+    globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
+    'kernel',
+    'amd-canvaskit-sound',
     'dart_sdk.js.map',
   ));
 
@@ -495,13 +530,26 @@ class WebAssetServer implements AssetReader {
     // Return the actual file objects so that local engine changes are automatically picked up.
     switch (path) {
       case 'dart_sdk.js':
-        return canvasKitRendering
-          ? canvasKitDartSdk
-          : dartSdk;
+        if (_buildInfo.nullSafetyMode == NullSafetyMode.unsound) {
+          return canvasKitRendering
+            ? canvasKitDartSdk
+            : dartSdk;
+        } else {
+          return canvasKitRendering
+            ? canvasKitDartSdkSound
+            : dartSdkSound;
+        }
+        break;
       case 'dart_sdk.js.map':
-        return canvasKitRendering
-          ? canvasKitDartSdkSourcemap
-          : dartSdkSourcemap;
+        if (_buildInfo.nullSafetyMode == NullSafetyMode.unsound) {
+          return canvasKitRendering
+            ? canvasKitDartSdkSourcemap
+            : dartSdkSourcemap;
+        } else {
+          return canvasKitRendering
+            ? canvasKitDartSdkSoundSourcemap
+            : dartSdkSoundSourcemap;
+        }
     }
     // This is the special generated entrypoint.
     if (path == 'web_entrypoint.dart') {
