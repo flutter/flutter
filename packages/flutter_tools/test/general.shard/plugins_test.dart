@@ -80,8 +80,8 @@ void main() {
       when(windowsProject.pluginConfigKey).thenReturn('windows');
       final Directory windowsManagedDirectory = flutterProject.directory.childDirectory('windows').childDirectory('flutter');
       when(windowsProject.managedDirectory).thenReturn(windowsManagedDirectory);
-      when(linuxProject.cmakeFile).thenReturn(windowsManagedDirectory.parent.childFile('CMakeLists.txt'));
-      when(linuxProject.generatedPluginCmakeFile).thenReturn(windowsManagedDirectory.childFile('generated_plugins.mk'));
+      when(windowsProject.cmakeFile).thenReturn(windowsManagedDirectory.parent.childFile('CMakeLists.txt'));
+      when(windowsProject.generatedPluginCmakeFile).thenReturn(windowsManagedDirectory.childFile('generated_plugins.mk'));
       when(windowsProject.pluginSymlinkDirectory).thenReturn(windowsManagedDirectory.childDirectory('ephemeral').childDirectory('.plugin_symlinks'));
       when(windowsProject.existsSync()).thenReturn(false);
       linuxProject = MockLinuxProject();
