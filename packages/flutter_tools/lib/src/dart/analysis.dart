@@ -19,7 +19,9 @@ import '../convert.dart';
 
 /// An interface to the Dart analysis server.
 class AnalysisServer {
-  AnalysisServer(this.sdkPath, this.directories, {
+  AnalysisServer(
+    this.sdkPath,
+    this.directories, {
     @required FileSystem fileSystem,
     @required ProcessManager processManager,
     @required Logger logger,
@@ -78,12 +80,14 @@ class AnalysisServer {
     // This callback hookup can't throw.
     unawaited(_process.exitCode.whenComplete(() => _process = null));
 
-    final Stream<String> errorStream =
-        _process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter());
+    final Stream<String> errorStream = _process.stderr
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter());
     errorStream.listen(_logger.printError);
 
-    final Stream<String> inStream =
-        _process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter());
+    final Stream<String> inStream = _process.stdout
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter());
     inStream.listen(_handleServerResponse);
 
     _sendCommand('server.setSubscriptions', <String, dynamic>{
@@ -95,7 +99,9 @@ class AnalysisServer {
   }
 
   bool get didServerErrorOccur => _didServerErrorOccur;
+
   Stream<bool> get onAnalyzing => _analyzingController.stream;
+
   Stream<FileAnalysisErrors> get onErrors => _errorsController.stream;
 
   Future<int> get onExit => _process.exitCode;
@@ -191,54 +197,137 @@ enum _AnalysisSeverity {
   none,
 }
 
+/// [AnalysisError] with command line style.
 class AnalysisError implements Comparable<AnalysisError> {
-  AnalysisError(this.json, {
+  AnalysisError(
+    this._json, {
     @required Platform platform,
     @required Terminal terminal,
     @required FileSystem fileSystem,
   }) : _platform = platform,
        _terminal = terminal,
-       _fileSystem = fileSystem;
+       _fileSystem = fileSystem,
+       writtenError = WrittenError.fromJson(_json);
 
+  final Map<String, dynamic> _json;
   final Platform _platform;
   final Terminal _terminal;
   final FileSystem _fileSystem;
 
-  static final Map<String, _AnalysisSeverity> _severityMap = <String, _AnalysisSeverity>{
+  final WrittenError writtenError;
+
+  String get _separator => _platform.isWindows ? '-' : '•';
+
+  String get colorSeverity {
+    switch (writtenError.severityLevel) {
+      case _AnalysisSeverity.error:
+        return _terminal.color(writtenError.severity, TerminalColor.red);
+      case _AnalysisSeverity.warning:
+        return _terminal.color(writtenError.severity, TerminalColor.yellow);
+      case _AnalysisSeverity.info:
+      case _AnalysisSeverity.none:
+        return writtenError.severity;
+    }
+    return null;
+  }
+
+  String get type => writtenError.type;
+  String get code => writtenError.code;
+
+  @override
+  int compareTo(AnalysisError other) {
+    // Sort in order of file path, error location, severity, and message.
+    if (writtenError.file != other.writtenError.file) {
+      return writtenError.file.compareTo(other.writtenError.file);
+    }
+
+    if (writtenError.offset != other.writtenError.offset) {
+      return writtenError.offset - other.writtenError.offset;
+    }
+
+    final int diff = other.writtenError.severityLevel.index -
+        writtenError.severityLevel.index;
+    if (diff != 0) {
+      return diff;
+    }
+
+    return writtenError.message.compareTo(other.writtenError.message);
+  }
+
+  @override
+  String toString() {
+    // Can't use "padLeft" because of ANSI color sequences in the colorized
+    // severity.
+    final String padding = ' ' * math.max(0, 7 - writtenError.severity.length);
+    return '$padding${colorSeverity.toLowerCase()} $_separator '
+        '${writtenError.messageSentenceFragment} $_separator '
+        '${_fileSystem.path.relative(writtenError.file)}:$writtenError.startLine:$writtenError.startColumn $_separator '
+        '${writtenError.code}';
+  }
+
+  String toLegacyString() {
+    return writtenError.toString();
+  }
+}
+
+/// [AnalysisError] in plain text content.
+class WrittenError {
+  WrittenError._({
+    @required this.severity,
+    @required this.type,
+    @required this.message,
+    @required this.code,
+    @required this.file,
+    @required this.startLine,
+    @required this.startColumn,
+    @required this.offset,
+  });
+
+  ///  {
+  ///      "severity":"INFO",
+  ///      "type":"TODO",
+  ///      "location":{
+  ///          "file":"/Users/.../lib/test.dart",
+  ///          "offset":362,
+  ///          "length":72,
+  ///          "startLine":15,
+  ///         "startColumn":4
+  ///      },
+  ///      "message":"...",
+  ///      "hasFix":false
+  ///  }
+  static WrittenError fromJson(Map<String, dynamic> json) {
+    return WrittenError._(
+      severity: json['severity'] as String,
+      type: json['type'] as String,
+      message: json['message'] as String,
+      code: json['code'] as String,
+      file: json['location']['file'] as String,
+      startLine: json['location']['startLine'] as int,
+      startColumn: json['location']['startColumn'] as int,
+      offset: json['location']['offset'] as int,
+    );
+  }
+
+  String severity;
+  String type;
+  String message;
+  String code;
+
+  String file;
+  int startLine;
+  int startColumn;
+  int offset;
+
+  static final Map<String, _AnalysisSeverity> _severityMap =
+      <String, _AnalysisSeverity>{
     'INFO': _AnalysisSeverity.info,
     'WARNING': _AnalysisSeverity.warning,
     'ERROR': _AnalysisSeverity.error,
   };
 
-  String  get _separator => _platform.isWindows ? '-' : '•';
-
-  // "severity":"INFO","type":"TODO","location":{
-  //   "file":"/Users/.../lib/test.dart","offset":362,"length":72,"startLine":15,"startColumn":4
-  // },"message":"...","hasFix":false}
-  Map<String, dynamic> json;
-
-  String get severity => json['severity'] as String;
-  String get colorSeverity {
-    switch(_severityLevel) {
-      case _AnalysisSeverity.error:
-        return _terminal.color(severity, TerminalColor.red);
-      case _AnalysisSeverity.warning:
-        return _terminal.color(severity, TerminalColor.yellow);
-      case _AnalysisSeverity.info:
-      case _AnalysisSeverity.none:
-        return severity;
-    }
-    return null;
-  }
-  _AnalysisSeverity get _severityLevel => _severityMap[severity] ?? _AnalysisSeverity.none;
-  String get type => json['type'] as String;
-  String get message => json['message'] as String;
-  String get code => json['code'] as String;
-
-  String get file => json['location']['file'] as String;
-  int get startLine => json['location']['startLine'] as int;
-  int get startColumn => json['location']['startColumn'] as int;
-  int get offset => json['location']['offset'] as int;
+  _AnalysisSeverity get severityLevel =>
+      _severityMap[severity] ?? _AnalysisSeverity.none;
 
   String get messageSentenceFragment {
     if (message.endsWith('.')) {
@@ -249,38 +338,7 @@ class AnalysisError implements Comparable<AnalysisError> {
   }
 
   @override
-  int compareTo(AnalysisError other) {
-    // Sort in order of file path, error location, severity, and message.
-    if (file != other.file) {
-      return file.compareTo(other.file);
-    }
-
-    if (offset != other.offset) {
-      return offset - other.offset;
-    }
-
-    final int diff = other._severityLevel.index - _severityLevel.index;
-    if (diff != 0) {
-      return diff;
-    }
-
-    return message.compareTo(other.message);
-  }
-
-  @override
-  String toString() {
-    // Can't use "padLeft" because of ANSI color sequences in the colorized
-    // severity.
-    final String padding = ' ' * math.max(0, 7 - severity.length);
-    return '$padding${colorSeverity.toLowerCase()} $_separator '
-        '$messageSentenceFragment $_separator '
-        '${_fileSystem.path.relative(file)}:$startLine:$startColumn $_separator '
-        '$code';
-  }
-
-  String toLegacyString() {
-    return '[${severity.toLowerCase()}] $messageSentenceFragment ($file:$startLine:$startColumn)';
-  }
+  String toString() {return '[${severity.toLowerCase()}] $messageSentenceFragment ($file:$startLine:$startColumn)';}
 }
 
 class FileAnalysisErrors {
