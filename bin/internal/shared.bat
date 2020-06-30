@@ -15,8 +15,12 @@ SETLOCAL ENABLEDELAYEDEXPANSION
 
 SET flutter_tools_dir=%FLUTTER_ROOT%\packages\flutter_tools
 SET cache_dir=%FLUTTER_ROOT%\bin\cache
+
 SET snapshot_path=%cache_dir%\flutter_tools.snapshot
 SET stamp_path=%cache_dir%\flutter_tools.stamp
+SET aot_path=%cache_dir%\flutter_tools.exe
+SET aot_stamp_path=%cache_dir%\flutter_tools_aot.stamp
+
 SET script_path=%flutter_tools_dir%\bin\flutter_tools.dart
 SET dart_sdk_path=%cache_dir%\dart-sdk
 SET engine_stamp=%cache_dir%\engine-dart-sdk.stamp
@@ -72,10 +76,19 @@ GOTO :after_subroutine
   SET /P dart_required_version=<"%engine_version_path%"
   SET /P dart_installed_version=<"%engine_stamp%"
   IF !dart_required_version! NEQ !dart_installed_version! GOTO do_sdk_update_and_snapshot
-  IF NOT EXIST "%snapshot_path%" GOTO do_snapshot
-  IF NOT EXIST "%stamp_path%" GOTO do_snapshot
-  SET /P stamp_value=<"%stamp_path%"
-  IF !stamp_value! NEQ !revision! GOTO do_snapshot
+
+  IF "%FLUTTER_AOT_TOOL%" NEQ "" (
+    IF NOT EXIST "%aot_path%" GOTO do_snapshot
+    IF NOT EXIST "%aot_stamp_path%" GOTO do_snapshot
+    SET /P stamp_value=<"%aot_stamp_path%"
+    IF !stamp_value! NEQ !revision! GOTO do_snapshot
+  ) else (
+    IF NOT EXIST "%snapshot_path%" GOTO do_snapshot
+    IF NOT EXIST "%stamp_path%" GOTO do_snapshot
+    SET /P stamp_value=<"%stamp_path%"
+    IF !stamp_value! NEQ !revision! GOTO do_snapshot
+  )
+
   SET pubspec_yaml_path=%flutter_tools_dir%\pubspec.yaml
   SET pubspec_lock_path=%flutter_tools_dir%\pubspec.lock
   FOR /F %%i IN ('DIR /B /O:D "%pubspec_yaml_path%" "%pubspec_lock_path%"') DO SET newer_file=%%i
@@ -143,7 +156,7 @@ GOTO :after_subroutine
     POPD
     IF "%FLUTTER_AOT_TOOL%" NEQ "" (
       ECHO Using dart2native...
-      CALL "%dart_sdk_path%\bin\dart2native" --packages="%flutter_tools_dir%\.packages" -o "%snapshot_path%" "%script_path%" >NUL
+      CALL "%dart_sdk_path%\bin\dart2native" --packages="%flutter_tools_dir%\.packages" -o "%aot_path%" "%script_path%" >NUL
     ) else (
       IF "%FLUTTER_TOOL_ARGS%" == "" (
         "%dart%" --snapshot="%snapshot_path%" --packages="%flutter_tools_dir%\.packages" --no-enable-mirrors "%script_path%"
@@ -156,7 +169,11 @@ GOTO :after_subroutine
       SET exit_code=%ERRORLEVEL%
       GOTO :final_exit
     )
-    >"%stamp_path%" ECHO %revision%
+    IF "%FLUTTER_AOT_TOOL%" NEQ "" (
+      >"%aot_stamp_path%" ECHO %revision%
+    ) else (
+      >"%stamp_path%" ECHO %revision%
+    )
 
   REM Exit Subroutine
   EXIT /B

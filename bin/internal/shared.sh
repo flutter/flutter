@@ -124,7 +124,17 @@ function upgrade_flutter () (
   #  * STAMP_PATH is not a file with nonzero size, or
   #  * Contents of STAMP_PATH is not our local git HEAD revision, or
   #  * pubspec.yaml last modified after pubspec.lock
-  if [[ ! -f "$SNAPSHOT_PATH" || ! -s "$STAMP_PATH" || "$(cat "$STAMP_PATH")" != "$revision" || "$FLUTTER_TOOLS_DIR/pubspec.yaml" -nt "$FLUTTER_TOOLS_DIR/pubspec.lock" ]]; then
+  local stamp_path=""
+  local snapshot_path=""
+  if [[ -n "$FLUTTER_AOT_TOOL" ]]; then
+    stamp_path="$AOT_STAMP_PATH"
+    snapshot_path="$AOT_PATH"
+  else
+    stamp_path="$STAMP_PATH"
+    snapshot_path="$SNAPSHOT_PATH"
+  fi
+
+  if [[ ! -f "$snapshot_path" || ! -s "$stamp_path" || "$(cat "$stamp_path")" != "$revision" || "$FLUTTER_TOOLS_DIR/pubspec.yaml" -nt "$FLUTTER_TOOLS_DIR/pubspec.lock" ]]; then
     rm -f "$FLUTTER_ROOT/version"
     touch "$FLUTTER_ROOT/bin/cache/.dartignore"
     "$FLUTTER_ROOT/bin/internal/update_dart_sdk.sh"
@@ -145,11 +155,11 @@ function upgrade_flutter () (
 
     if [[ -n "$FLUTTER_AOT_TOOL" ]]; then
       echo Using dart2native...
-      "$FLUTTER_ROOT/bin/cache/dart-sdk/bin/dart2native" --packages="$FLUTTER_TOOLS_DIR/.packages" -o "$SNAPSHOT_PATH" "$SCRIPT_PATH"
+      "$FLUTTER_ROOT/bin/cache/dart-sdk/bin/dart2native" --packages="$FLUTTER_TOOLS_DIR/.packages" -o "$snapshot_path" "$SCRIPT_PATH"
     else
-      "$DART" --disable-dart-dev $FLUTTER_TOOL_ARGS --snapshot="$SNAPSHOT_PATH" --packages="$FLUTTER_TOOLS_DIR/.packages" --no-enable-mirrors "$SCRIPT_PATH"
+      "$DART" --disable-dart-dev $FLUTTER_TOOL_ARGS --snapshot="$snapshot_path" --packages="$FLUTTER_TOOLS_DIR/.packages" --no-enable-mirrors "$SCRIPT_PATH"
     fi
-    echo "$revision" > "$STAMP_PATH"
+    echo "$revision" > "$stamp_path"
   fi
   # The exit here is extraneous since the function is run in a subshell, but
   # this serves as documentation that running the function in a subshell is
@@ -166,6 +176,8 @@ function shared::execute() {
   FLUTTER_TOOLS_DIR="$FLUTTER_ROOT/packages/flutter_tools"
   SNAPSHOT_PATH="$FLUTTER_ROOT/bin/cache/flutter_tools.snapshot"
   STAMP_PATH="$FLUTTER_ROOT/bin/cache/flutter_tools.stamp"
+  AOT_PATH="$FLUTTER_ROOT/bin/cache/flutter_tools"
+  AOT_STAMP_PATH="$FLUTTER_ROOT/bin/cache/flutter_tools_aot.stamp"
   SCRIPT_PATH="$FLUTTER_TOOLS_DIR/bin/flutter_tools.dart"
   DART_SDK_PATH="$FLUTTER_ROOT/bin/cache/dart-sdk"
 
@@ -217,7 +229,7 @@ function shared::execute() {
       # FLUTTER_TOOL_ARGS aren't quoted below, because it is meant to be
       # considered as separate space-separated args.
       if [[ -n "$FLUTTER_AOT_TOOL" ]]; then
-        "$SNAPSHOT_PATH" "$@"
+        "$AOT_PATH" "$@"
       else
         "$DART" --disable-dart-dev --packages="$FLUTTER_TOOLS_DIR/.packages" $FLUTTER_TOOL_ARGS "$SNAPSHOT_PATH" "$@"
       fi

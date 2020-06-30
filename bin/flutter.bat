@@ -37,6 +37,7 @@ CALL "%shared_bin%"
 SET flutter_tools_dir=%FLUTTER_ROOT%\packages\flutter_tools
 SET cache_dir=%FLUTTER_ROOT%\bin\cache
 SET snapshot_path=%cache_dir%\flutter_tools.snapshot
+SET aot_path=%cache_dir%\flutter_tools.exe
 SET dart_sdk_path=%cache_dir%\dart-sdk
 SET dart=%dart_sdk_path%\bin\dart.exe
 
@@ -52,7 +53,7 @@ REM Do not use the CALL command in the next line to execute Dart. CALL causes
 REM Windows to re-read the line from disk after the CALL command has finished
 REM regardless of the ampersand chain.
 IF "%FLUTTER_AOT_TOOL%" NEQ "" (
-  "%snapshot_path%" %* & exit /B !ERRORLEVEL!
+  "%aot_path%" %* & exit /B !ERRORLEVEL!
 ) else (
   "%dart%" --disable-dart-dev --packages="%flutter_tools_dir%\.packages" %FLUTTER_TOOL_ARGS% "%snapshot_path%" %* & exit /B !ERRORLEVEL!
 )
