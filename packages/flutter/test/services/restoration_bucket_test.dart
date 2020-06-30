@@ -481,19 +481,117 @@ void main() {
   });
 
   test('adopting child throws if id is already in use and not given up', () {
+    final MockManager manager = MockManager();
+    final Map<String, dynamic> rawData = _createRawDataSet();
+    final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
+    final RestorationBucket child = root.claimChild(const RestorationId('child1'), debugOwner: 'owner1');
+    final RestorationBucket childOfChild = child.claimChild(const RestorationId('child1'), debugOwner: 'owner2');
+    childOfChild.put<String>(const RestorationId('foo'), 'bar');
+
+    root.adoptChild(childOfChild);
+    expect(manager.updateScheduled, isTrue);
+    expect(() => manager.runFinalizers(), throwsFlutterError);
   });
 
   test('adopting child does not throw if id is already in use and given up', () {
+    final MockManager manager = MockManager();
+    final Map<String, dynamic> rawData = _createRawDataSet();
+    final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
+    final RestorationBucket child = root.claimChild(const RestorationId('child1'), debugOwner: 'owner1');
+    final RestorationBucket childOfChild = child.claimChild(const RestorationId('child1'), debugOwner: 'owner2');
+    childOfChild.put<String>(const RestorationId('foo'), 'bar');
+
+    final Object childOfChildData = rawData[childrenMapKey]['child1'][childrenMapKey]['child1'];
+    expect(childOfChildData, isNotEmpty);
+
+    expect(manager.updateScheduled, isTrue);
+    manager.runFinalizers();
+    expect(manager.updateScheduled, isFalse);
+
+    root.adoptChild(childOfChild);
+    expect(manager.updateScheduled, isTrue);
+    child.dispose();
+    manager.runFinalizers();
+    expect(manager.updateScheduled, isFalse);
+
+    expect(rawData[childrenMapKey]['child1'], childOfChildData);
   });
 
   test('adopting a to-be-added child under an already in use id', () {
+    final MockManager manager = MockManager();
+    final Map<String, dynamic> rawData = _createRawDataSet();
+    final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
+    final RestorationBucket child1 = root.claimChild(const RestorationId('child1'), debugOwner: 'owner1');
+    final RestorationBucket child2 = root.claimChild(const RestorationId('child2'), debugOwner: 'owner1');
+
+    expect(manager.updateScheduled, isTrue);
+    manager.runFinalizers();
+    expect(manager.updateScheduled, isFalse);
+
+    final RestorationBucket child1OfChild1 = child1.claimChild(const RestorationId('child2'), debugOwner: 'owner2');
+    child1OfChild1.put<String>(const RestorationId('hello'), 'world');
+    final RestorationBucket child2OfChild1 = child1.claimChild(const RestorationId('child2'), debugOwner: 'owner2');
+    child2OfChild1.put<String>(const RestorationId('foo'), 'bar');
+
+    root.adoptChild(child2OfChild1);
+    child2.dispose();
+
+    expect(manager.updateScheduled, isTrue);
+    manager.runFinalizers();
+    expect(manager.updateScheduled, isFalse);
+
+    expect(rawData[childrenMapKey]['child2'][valuesMapKey]['foo'], 'bar');
+    expect(rawData[childrenMapKey]['child1'][childrenMapKey]['child2'][valuesMapKey]['hello'], 'world');
   });
 
   test('decommission drops itself from parent and notifies all listeners', () {
+    final MockManager manager = MockManager();
+    final Map<String, dynamic> rawData = _createRawDataSet();
+    final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
+    final RestorationBucket child1 = root.claimChild(const RestorationId('child1'), debugOwner: 'owner1');
+    final RestorationBucket child2 = root.claimChild(const RestorationId('child2'), debugOwner: 'owner1');
+    final RestorationBucket childOfChild1 = child1.claimChild(const RestorationId('child1.1'), debugOwner: 'owner1');
+    final RestorationBucket childOfChildOfChild1 = childOfChild1.claimChild(const RestorationId('child1.1.1'), debugOwner: 'owner1');
+
+    expect(manager.updateScheduled, isTrue);
+    manager.runFinalizers();
+    expect(manager.updateScheduled, isFalse);
+
+    bool rootDecommissioned = false;
+    root.addListener(() {
+      rootDecommissioned = true;
+    });
+    bool child1Decommissioned = false;
+    child1.addListener(() {
+      child1Decommissioned = true;
+    });
+    bool child2Decommissioned = false;
+    child2.addListener(() {
+      child2Decommissioned = true;
+    });
+    bool childOfChild1Decommissioned = false;
+    childOfChild1.addListener(() {
+      childOfChild1Decommissioned = true;
+    });
+    bool childOfChildOfChild1Decommissioned = false;
+    childOfChildOfChild1.addListener(() {
+      childOfChildOfChild1Decommissioned = true;
+    });
+
+    expect(rawData[childrenMapKey].containsKey('child1'), isTrue);
+
+    child1.decommission();
+    expect(rootDecommissioned, isFalse);
+    expect(child2Decommissioned, isFalse);
+    expect(child1Decommissioned, isTrue);
+    expect(childOfChild1Decommissioned, isTrue);
+    expect(childOfChildOfChild1Decommissioned, isTrue);
+
+    expect(rawData[childrenMapKey].containsKey('child1'), isFalse);
   });
 }
 
@@ -538,16 +636,16 @@ class MockManager implements RestorationManager {
   }
 
   @override
-  Future<RestorationBucket> get rootBucket => throw UnimplementedError();
+  Future<RestorationBucket> get rootBucket => throw UnimplementedError('unimplemented in mock');
 
   @override
   Future<void> sendToEngine(Map<String, dynamic> rawData) {
-    throw UnimplementedError();
+    throw UnimplementedError('unimplemented in mock');
   }
 
   @override
   Future<Map<String, dynamic>> retrieveFromEngine() {
-    throw UnimplementedError();
+    throw UnimplementedError('unimplemented in mock');
   }
 
   @override

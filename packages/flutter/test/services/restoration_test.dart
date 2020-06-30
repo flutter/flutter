@@ -9,6 +9,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -249,6 +250,26 @@ void main() {
       expect(errors, hasLength(1));
       expect(errors.single.message, 'Calling scheduleUpdate from a finalizer is not allowed.');
     });
+  });
+
+  test('debugIsSerializableForRestoration', () {
+    expect(debugIsSerializableForRestoration(Object()), isFalse);
+    expect(debugIsSerializableForRestoration(Container()), isFalse);
+
+    expect(debugIsSerializableForRestoration(null), isTrue);
+    expect(debugIsSerializableForRestoration(147823), isTrue);
+    expect(debugIsSerializableForRestoration(12.43), isTrue);
+    expect(debugIsSerializableForRestoration('Hello World'), isTrue);
+    expect(debugIsSerializableForRestoration(<int>[12, 13, 14]), isTrue);
+    expect(debugIsSerializableForRestoration(<String, int>{'v1' : 10, 'v2' : 23}), isTrue);
+    expect(debugIsSerializableForRestoration(<String, dynamic>{
+      'hello': <int>[12, 12, 12],
+      'world': <int, bool>{
+        1: true,
+        2: false,
+        4: true,
+      },
+    }), isTrue);
   });
 }
 
