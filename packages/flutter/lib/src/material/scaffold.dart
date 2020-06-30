@@ -117,8 +117,11 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> {
   void _handleSnackBarStatusChange(AnimationStatus status) {
     switch (status) {
       case AnimationStatus.dismissed:
-        assert(_snackBars.isNotEmpty);
+        if (_snackBars.isNotEmpty)
           _snackBars.removeFirst();
+        // If there is another Scaffold in the stack presenting a SnackBar, we
+        // want to make sure it has been dismissed too.
+        hideCurrentSnackBar();
         break;
       case AnimationStatus.completed:
       case AnimationStatus.forward:
