@@ -1628,7 +1628,7 @@ void main() {
     )).generator as DefaultResidentCompiler;
 
     expect(residentCompiler.initializeFromDill,
-      globals.fs.path.join(getBuildDirectory(), 'cache.dill'));
+      globals.fs.path.join(getBuildDirectory(), '825b8f791aa86c5057fff6f064542c54.cache.dill'));
     expect(residentCompiler.librariesSpec,
       globals.fs.file(globals.artifacts.getArtifactPath(Artifact.flutterWebLibrariesJson))
         .uri.toString());
