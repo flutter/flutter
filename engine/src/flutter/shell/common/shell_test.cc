@@ -20,14 +20,9 @@ namespace flutter {
 namespace testing {
 
 ShellTest::ShellTest()
-    : native_resolver_(std::make_shared<TestDartNativeResolver>()),
-      thread_host_("io.flutter.test." + GetCurrentTestName() + ".",
+    : thread_host_("io.flutter.test." + GetCurrentTestName() + ".",
                    ThreadHost::Type::Platform | ThreadHost::Type::IO |
-                       ThreadHost::Type::UI | ThreadHost::Type::GPU),
-      assets_dir_(fml::OpenDirectory(GetFixturesPath(),
-                                     false,
-                                     fml::FilePermission::kRead)),
-      aot_symbols_(LoadELFSymbolFromFixturesIfNeccessary()) {}
+                       ThreadHost::Type::UI | ThreadHost::Type::GPU) {}
 
 void ShellTest::SendEnginePlatformMessage(
     Shell* shell,
@@ -42,27 +37,6 @@ void ShellTest::SendEnginePlatformMessage(
         latch.Signal();
       });
   latch.Wait();
-}
-
-void ShellTest::SetSnapshotsAndAssets(Settings& settings) {
-  if (!assets_dir_.is_valid()) {
-    return;
-  }
-
-  settings.assets_dir = assets_dir_.get();
-
-  // In JIT execution, all snapshots are present within the binary itself and
-  // don't need to be explicitly suppiled by the embedder.
-  if (DartVM::IsRunningPrecompiledCode()) {
-    PrepareSettingsForAOTWithSymbols(settings, aot_symbols_);
-  } else {
-    settings.application_kernels = [this]() {
-      std::vector<std::unique_ptr<const fml::Mapping>> kernel_mappings;
-      kernel_mappings.emplace_back(
-          fml::FileMapping::CreateReadOnly(assets_dir_, "kernel_blob.bin"));
-      return kernel_mappings;
-    };
-  }
 }
 
 void ShellTest::PlatformViewNotifyCreated(Shell* shell) {
@@ -315,11 +289,6 @@ void ShellTest::DestroyShell(std::unique_ptr<Shell> shell,
                                       latch.Signal();
                                     });
   latch.Wait();
-}
-
-void ShellTest::AddNativeCallback(std::string name,
-                                  Dart_NativeFunction callback) {
-  native_resolver_->AddNativeCallback(std::move(name), callback);
 }
 
 }  // namespace testing

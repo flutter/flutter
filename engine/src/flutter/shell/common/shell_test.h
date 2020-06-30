@@ -20,17 +20,17 @@
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/common/vsync_waiters_test.h"
 #include "flutter/testing/elf_loader.h"
+#include "flutter/testing/fixture_test.h"
 #include "flutter/testing/test_dart_native_resolver.h"
-#include "flutter/testing/thread_test.h"
 
 namespace flutter {
 namespace testing {
 
-class ShellTest : public ThreadTest {
+class ShellTest : public FixtureTest {
  public:
   ShellTest();
 
-  Settings CreateSettingsForFixture();
+  Settings CreateSettingsForFixture() override;
   std::unique_ptr<Shell> CreateShell(Settings settings,
                                      bool simulate_vsync = false);
   std::unique_ptr<Shell> CreateShell(
@@ -47,8 +47,6 @@ class ShellTest : public ThreadTest {
 
   void SendEnginePlatformMessage(Shell* shell,
                                  fml::RefPtr<PlatformMessage> message);
-
-  void AddNativeCallback(std::string name, Dart_NativeFunction callback);
 
   static void PlatformViewNotifyCreated(
       Shell* shell);  // This creates the surface
@@ -104,12 +102,7 @@ class ShellTest : public ThreadTest {
   static int UnreportedTimingsCount(Shell* shell);
 
  private:
-  void SetSnapshotsAndAssets(Settings& settings);
-
-  std::shared_ptr<TestDartNativeResolver> native_resolver_;
   ThreadHost thread_host_;
-  fml::UniqueFD assets_dir_;
-  ELFAOTSymbols aot_symbols_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ShellTest);
 };
