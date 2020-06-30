@@ -20,7 +20,6 @@ void main() {
     Directory templateDir;
     Directory intellijDir;
     Directory toolsDir;
-    Directory exampleDir;
 
     Map<String, String> _getFilesystemContents([ Directory root ]) {
       final String tempPath = tempDir.absolute.path;
@@ -116,7 +115,6 @@ void main() {
       toolsDir = packagesDir.childDirectory('flutter_tools')..createSync();
       templateDir = toolsDir.childDirectory('ide_templates')..createSync();
       intellijDir = templateDir.childDirectory('intellij')..createSync();
-      exampleDir = templateDir.childDirectory('examples')..createSync();
     });
 
     tearDown(() {
@@ -321,5 +319,6 @@ void main() {
         expectedContents: expectedContents,
       );
     });
+
   });
 }
