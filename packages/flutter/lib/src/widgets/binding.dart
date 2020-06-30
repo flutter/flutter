@@ -950,6 +950,9 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// This method may return a null [Locale] if the platform does not support
   /// native locale resolution, or if the resolution failed.
   ///
+  /// The first [supportedLocale] is treated as the default locale and will be returned
+  /// if no better match is found.
+  ///
   /// Android and iOS are currently supported.
   ///
   /// On Android, the algorithm described in
@@ -962,7 +965,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// returned. See:
   /// https://developer.apple.com/documentation/foundation/nsbundle/1417249-preferredlocalizationsfromarray?language=objc.
   /// iOS treats script code as necessary for a match, so a preferred locale of `zh_Hans_CN`
-  /// may not resolve to a supported locale of `zh_CN`
+  /// may not resolve to a supported locale of `zh_CN`.
   ///
   /// This method is meant to be used as part of a [localeListResolutionCallback].
   /// Since this method may return null, a Flutter/dart algorithm should still be
