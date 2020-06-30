@@ -1227,7 +1227,9 @@ abstract class ResidentRunner {
   }
 
   void appFailedToStart() {
-    _finished.complete(1);
+    if (!_finished.isCompleted) {
+      _finished.complete(1);
+    }
   }
 
   Future<int> waitForAppToFinish() async {
