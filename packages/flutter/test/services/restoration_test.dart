@@ -12,7 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  group('RestorationKey', () {
+  group('RestorationId', () {
     test('has good toString', () {
       expect(const RestorationId('hello').toString(), 'RestorationId(hello)');
       expect(const RestorationId('world').toString(), 'RestorationId(world)');
@@ -139,7 +139,7 @@ void main() {
       expect(newChild.get<String>(const RestorationId('bar')), 'Hello');
     });
 
-    testWidgets('scheduleUpdate runs finalizers and send data to engine', (WidgetTester tester) async {
+    testWidgets('scheduleUpdate runs finalizers and sends data to engine', (WidgetTester tester) async {
       final List<MethodCall> callsToEngine = <MethodCall>[];
       SystemChannels.restoration.setMockMethodCallHandler((MethodCall call) async {
         callsToEngine.add(call);
