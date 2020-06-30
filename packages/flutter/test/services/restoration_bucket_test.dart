@@ -422,15 +422,62 @@ void main() {
   });
   
   test('adopt is no-op if same parent', () {
+    final MockManager manager = MockManager();
+    final Map<String, dynamic> rawData = _createRawDataSet();
+    final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
+    final RestorationBucket child1 = root.claimChild(const RestorationId('child1'), debugOwner: 'owner1');
+
+    root.adoptChild(child1);
+    expect(manager.updateScheduled, isFalse);
+    expect(rawData[childrenMapKey].containsKey('child1'), isTrue);
   });
 
   test('adopt fresh child', () {
+    final MockManager manager = MockManager();
+    final Map<String, dynamic> rawData = _createRawDataSet();
+    final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
+    final RestorationBucket child = RestorationBucket.empty(id: const RestorationId('fresh-child'), debugOwner: 'owner1');
+
+    root.adoptChild(child);
+    expect(manager.updateScheduled, isTrue);
+
+    child.put(const RestorationId('value'), 22);
+
+    manager.runFinalizers();
+    expect(manager.updateScheduled, isFalse);
+
+    expect(rawData[childrenMapKey].containsKey('fresh-child'), isTrue);
+    expect(rawData[childrenMapKey]['fresh-child'][valuesMapKey]['value'], 22);
+
+    child.put(const RestorationId('bar'), 'blabla');
+    expect(manager.updateScheduled, isTrue);
   });
 
   test('adopt child that already had a parent', () {
+    final MockManager manager = MockManager();
+    final Map<String, dynamic> rawData = _createRawDataSet();
+    final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
+    final RestorationBucket child = root.claimChild(const RestorationId('child1'), debugOwner: 'owner1');
+    final RestorationBucket childOfChild = child.claimChild(const RestorationId('childOfChild'), debugOwner: 'owner2');
+    childOfChild.put<String>(const RestorationId('foo'), 'bar');
+
+    expect(manager.updateScheduled, isTrue);
+    manager.runFinalizers();
+    expect(manager.updateScheduled, isFalse);
+
+    final Object childOfChildData = rawData[childrenMapKey]['child1'][childrenMapKey]['childOfChild'];
+    expect(childOfChildData, isNotEmpty);
+
+    root.adoptChild(childOfChild);
+    expect(manager.updateScheduled, isTrue);
+    manager.runFinalizers();
+    expect(manager.updateScheduled, isFalse);
+
+    expect(rawData[childrenMapKey]['child1'].containsKey(childrenMapKey), isFalse); // child1 has no children anymore.
+    expect(rawData[childrenMapKey]['childOfChild'], childOfChildData);
   });
 
   test('adopting child throws if id is already in use and not given up', () {
@@ -441,7 +488,13 @@ void main() {
 
   });
 
-  // decommission
+  test('adopting a to-be-added child under an already in use id', () {
+
+  });
+
+  test('decommission drops itself from parent and notifies all listeners', () {
+
+  });
 }
 
 Map<String, dynamic> _createRawDataSet() {
