@@ -61,6 +61,114 @@ enum _ScaffoldSlot {
   statusBar,
 }
 
+/// Doc
+class ScaffoldMessenger extends StatefulWidget {
+  /// Doc
+  ///
+  /// The [child] argument must not be null.
+  const ScaffoldMessenger({
+    Key key,
+    @required this.child,
+  }) : assert(child != null),
+      super(key: key);
+
+  /// Returns the closest [ScaffoldMessengerState] which encloses the given
+  /// context.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// ScaffoldMessages scaffoldMessages = ScaffoldMessages.of(context);
+  /// form.save();
+  /// ```
+  static ScaffoldMessengerState of(BuildContext context) {
+    final _ScaffoldMessengerScope scope = context.dependOnInheritedWidgetOfExactType<_ScaffoldMessengerScope>();
+    return scope?._scaffoldMessengerState;
+  }
+
+  /// Doc ... The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
+  final Widget child;
+
+  @override
+  ScaffoldMessengerState createState() => ScaffoldMessengerState();
+}
+
+/// Doc
+class ScaffoldMessengerState extends State<ScaffoldMessenger> {
+  final Set<ScaffoldState> _scaffolds = <ScaffoldState>{};
+//  const String snackHeroTag = '<ScaffoldMessenger.snackBarHeroTag>';
+
+  void _register(ScaffoldState scaffold) {
+    _scaffolds.add(scaffold);
+    print('Registered $scaffold, count: ${_scaffolds.length}');
+  }
+
+  void _unregister(ScaffoldState scaffold) {
+    print('Unregistered $scaffold');
+    _scaffolds.remove(scaffold);
+  }
+
+  /// Doc
+  ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(SnackBar snackbar) {
+    final Set<ScaffoldFeatureController<SnackBar, SnackBarClosedReason>> _controllers = <ScaffoldFeatureController<SnackBar, SnackBarClosedReason>>{};
+    for (final ScaffoldState scaffold in _scaffolds) {
+      print('Showing for scaffold: $scaffold');
+      _controllers.add(scaffold?.showSnackBar(snackbar));
+    }
+    //assert(_controllers.length == 1);
+    return _controllers.first;
+  }
+
+  /// Doc
+  void removeCurrentSnackBar({ SnackBarClosedReason reason = SnackBarClosedReason.remove }) {
+    for (final ScaffoldState scaffold in _scaffolds)
+      scaffold.removeCurrentSnackBar(reason: reason);
+  }
+
+  /// Doc
+  void hideCurrentSnackBar({ SnackBarClosedReason reason = SnackBarClosedReason.hide }) {
+    for (final ScaffoldState scaffold in _scaffolds)
+      scaffold.hideCurrentSnackBar(reason: reason);
+  }
+
+  // ++ later:
+  //  - openDrawer
+  //  - openEndDrawer
+  //  - showMaterialBanner, needs Scaffold support first, https://github.com/flutter/flutter/issues/60024
+  //  - showBottomSheet
+
+  // What about Dialogs and pickers?
+  //  - Implement in separate AppMessenger class?
+  //  - Tie to Scaffold?
+
+  @override
+  Widget build(BuildContext context) {
+    return _ScaffoldMessengerScope(
+      scaffoldMessengerState: this,
+      child: widget.child,
+    );
+  }
+}
+
+class _ScaffoldMessengerScope extends InheritedWidget {
+  const _ScaffoldMessengerScope({
+    Key key,
+    Widget child,
+    ScaffoldMessengerState scaffoldMessengerState,
+  }) : _scaffoldMessengerState = scaffoldMessengerState,
+      super(key: key, child: child);
+
+  final ScaffoldMessengerState _scaffoldMessengerState;
+
+  /// Doc
+  ScaffoldMessenger get scaffoldMessenger => _scaffoldMessengerState.widget;
+
+  @override
+  bool updateShouldNotify(_ScaffoldMessengerScope old) => _scaffoldMessengerState != old._scaffoldMessengerState;
+}
+
 /// The geometry of the [Scaffold] after all its contents have been laid out
 /// except the [FloatingActionButton].
 ///
@@ -2164,6 +2272,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   @override
   void didChangeDependencies() {
+
     final MediaQueryData mediaQuery = MediaQuery.of(context);
     // If we transition from accessible navigation to non-accessible navigation
     // and there is a SnackBar that would have timed out that has already
@@ -2178,6 +2287,12 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     _accessibleNavigation = mediaQuery.accessibleNavigation;
     _maybeBuildPersistentBottomSheet();
     super.didChangeDependencies();
+  }
+
+  @override
+  void deactivate() {
+    ScaffoldMessenger.of(context)?._unregister(this);
+    super.deactivate();
   }
 
   @override
@@ -2308,6 +2423,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     final ThemeData themeData = Theme.of(context);
     final TextDirection textDirection = Directionality.of(context);
     _accessibleNavigation = mediaQuery.accessibleNavigation;
+
+    print('Asking to register: $this');
+    ScaffoldMessenger.of(context)?._register(this);
 
     if (_snackBars.isNotEmpty) {
       final ModalRoute<dynamic> route = ModalRoute.of(context);

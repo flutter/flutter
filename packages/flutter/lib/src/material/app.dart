@@ -16,6 +16,7 @@ import 'floating_action_button.dart';
 import 'icons.dart';
 import 'material_localizations.dart';
 import 'page.dart';
+import 'scaffold.dart';
 import 'theme.dart';
 
 /// [MaterialApp] uses this [TextStyle] as its [DefaultTextStyle] to encourage
@@ -607,7 +608,7 @@ class _MaterialAppState extends State<MaterialApp> {
   Widget build(BuildContext context) {
     Widget result = HeroControllerScope(
       controller: _heroController,
-      child: WidgetsApp(
+      child: ScaffoldMessenger(child: WidgetsApp(
         key: GlobalObjectKey(this),
         navigatorKey: widget.navigatorKey,
         navigatorObservers: widget.navigatorObservers,
@@ -687,6 +688,7 @@ class _MaterialAppState extends State<MaterialApp> {
         shortcuts: widget.shortcuts,
         actions: widget.actions,
       ),
+      )
     );
 
     assert(() {
