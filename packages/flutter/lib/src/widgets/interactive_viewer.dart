@@ -492,13 +492,8 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   // This value was eyeballed to give a feel similar to Google Photos.
   static const double _kDrag = 0.0000135;
 
-  // Cache the size of the child because when it changes, the boundaryRect needs
-  // to be recalculated.
-  Size _childSize;
-
   // The _boundaryRect is calculated by adding the boundaryMargin to the size of
   // the child.
-  Rect _boundaryRectCached;
   Rect get _boundaryRect {
     assert(_childKey.currentContext != null);
     assert(!widget.boundaryMargin.left.isNaN);
@@ -507,20 +502,16 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     assert(!widget.boundaryMargin.bottom.isNaN);
 
     final RenderBox childRenderBox = _childKey.currentContext.findRenderObject() as RenderBox;
-    if (childRenderBox.size == _childSize && _boundaryRectCached != null) {
-      return _boundaryRectCached;
-    }
-
-    _childSize = childRenderBox.size;
-    _boundaryRectCached = widget.boundaryMargin.inflateRect(Offset.zero & _childSize);
+    final Size childSize = childRenderBox.size;
+    final Rect boundaryRect = widget.boundaryMargin.inflateRect(Offset.zero & childSize);
     // Boundaries that are partially infinite are not allowed because Matrix4's
     // rotation and translation methods don't handle infinites well.
-    assert(_boundaryRectCached.isFinite ||
-        (_boundaryRectCached.left.isInfinite
-        && _boundaryRectCached.top.isInfinite
-        && _boundaryRectCached.right.isInfinite
-        && _boundaryRectCached.bottom.isInfinite), 'boundaryRect must either be infinite in all directions or finite in all directions.');
-    return _boundaryRectCached;
+    assert(boundaryRect.isFinite ||
+        (boundaryRect.left.isInfinite
+        && boundaryRect.top.isInfinite
+        && boundaryRect.right.isInfinite
+        && boundaryRect.bottom.isInfinite), 'boundaryRect must either be infinite in all directions or finite in all directions.');
+    return boundaryRect;
   }
 
   // The Rect representing the child's parent.
@@ -922,10 +913,6 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   @override
   void didUpdateWidget(InteractiveViewer oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.child != oldWidget.child || widget.boundaryMargin != oldWidget.boundaryMargin) {
-      _boundaryRectCached = null;
-    }
-
     // Handle all cases of needing to dispose and initialize
     // transformationControllers.
     if (oldWidget.transformationController == null) {
