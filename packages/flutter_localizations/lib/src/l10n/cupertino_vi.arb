@@ -19,6 +19,6 @@
   "copyButtonLabel": "Sao chép",
   "pasteButtonLabel": "Dán",
   "selectAllButtonLabel": "Chọn tất cả",
-  "tabSemanticsLabel": "TBD",
+  "tabSemanticsLabel": "Thẻ $tabIndex/$tabCount",
   "modalBarrierDismissLabel": "Bỏ qua"
 }
