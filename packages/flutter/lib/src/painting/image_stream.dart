@@ -20,7 +20,9 @@ class ImageInfo {
   /// Creates an [ImageInfo] object for the given [image] and [scale].
   ///
   /// Both the image and the scale must not be null.
-  const ImageInfo({ @required this.image, this.scale = 1.0 })
+  ///
+  /// The tag may be used to identify the source of this image.
+  const ImageInfo({ @required this.image, this.scale = 1.0, this.debugLabel })
     : assert(image != null),
       assert(scale != null);
 
@@ -42,11 +44,14 @@ class ImageInfo {
   /// (e.g. in the arguments given to [Canvas.drawImage]).
   final double scale;
 
-  @override
-  String toString() => '$image @ ${debugFormatDouble(scale)}x';
+  /// A string used for debugging purpopses to identify the source of this image.
+  final String debugLabel;
 
   @override
-  int get hashCode => hashValues(image, scale);
+  String toString() => '${debugLabel != null ? '$debugLabel ' : ''}$image @ ${debugFormatDouble(scale)}x';
+
+  @override
+  int get hashCode => hashValues(image, scale, debugLabel);
 
   @override
   bool operator ==(Object other) {
@@ -54,7 +59,8 @@ class ImageInfo {
       return false;
     return other is ImageInfo
         && other.image == image
-        && other.scale == scale;
+        && other.scale == scale
+        && other.debugLabel == debugLabel;
   }
 }
 
@@ -330,6 +336,9 @@ abstract class ImageStreamCompleter with Diagnosticable {
   final List<ImageStreamListener> _listeners = <ImageStreamListener>[];
   ImageInfo _currentImage;
   FlutterErrorDetails _currentError;
+
+  /// A string identifying the source of the underlying image.
+  String debugLabel;
 
   /// Whether any listeners are currently registered.
   ///
@@ -623,6 +632,9 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   /// The `scale` parameter is the linear scale factor for drawing this frames
   /// of this image at their intended size.
   ///
+  /// The `tag` parameter is passed on to created [ImageInfo] objects to
+  /// help identify the source of the image.
+  ///
   /// The `chunkEvents` parameter is an optional stream of notifications about
   /// the loading progress of the image. If this stream is provided, the events
   /// produced by the stream will be delivered to registered [ImageChunkListener]s
@@ -630,11 +642,13 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   MultiFrameImageStreamCompleter({
     @required Future<ui.Codec> codec,
     @required double scale,
+    String debugLabel,
     Stream<ImageChunkEvent> chunkEvents,
     InformationCollector informationCollector,
   }) : assert(codec != null),
        _informationCollector = informationCollector,
        _scale = scale {
+    this.debugLabel = debugLabel;
     codec.then<void>(_handleCodecReady, onError: (dynamic error, StackTrace stack) {
       reportError(
         context: ErrorDescription('resolving an image codec'),
@@ -688,7 +702,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     if (!hasListeners)
       return;
     if (_isFirstFrame() || _hasFrameDurationPassed(timestamp)) {
-      _emitFrame(ImageInfo(image: _nextFrame.image, scale: _scale));
+      _emitFrame(ImageInfo(image: _nextFrame.image, scale: _scale, debugLabel: debugLabel));
       _shownTimestamp = timestamp;
       _frameDuration = _nextFrame.duration;
       _nextFrame = null;
@@ -729,7 +743,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     if (_codec.frameCount == 1) {
       // This is not an animated image, just return it and don't schedule more
       // frames.
-      _emitFrame(ImageInfo(image: _nextFrame.image, scale: _scale));
+      _emitFrame(ImageInfo(image: _nextFrame.image, scale: _scale, debugLabel: debugLabel));
       return;
     }
     _scheduleAppFrame();

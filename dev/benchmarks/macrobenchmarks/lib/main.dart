@@ -13,6 +13,7 @@ import 'src/backdrop_filter.dart';
 import 'src/cubic_bezier.dart';
 import 'src/cull_opacity.dart';
 import 'src/filtered_child_animation.dart';
+import 'src/multi_widget_construction.dart';
 import 'src/post_backdrop_filter.dart';
 import 'src/simple_animation.dart';
 import 'src/text.dart';
@@ -43,6 +44,7 @@ class MacrobenchmarksApp extends StatelessWidget {
         kColorFilterAndFadeRouteName: (BuildContext context) => ColorFilterAndFadePage(),
         kFadingChildAnimationRouteName: (BuildContext context) => const FilteredChildAnimationPage(FilterType.opacity),
         kImageFilteredTransformAnimationRouteName: (BuildContext context) => const FilteredChildAnimationPage(FilterType.rotateFilter),
+        kMultiWidgetConstructionRouteName: (BuildContext context) => const MultiWidgetConstructTable(10, 20),
       },
     );
   }
@@ -140,6 +142,13 @@ class HomePage extends StatelessWidget {
             child: const Text('ImageFiltered Transform Animation'),
             onPressed: () {
               Navigator.pushNamed(context, kImageFilteredTransformAnimationRouteName);
+            },
+          ),
+          RaisedButton(
+            key: const Key(kMultiWidgetConstructionRouteName),
+            child: const Text('Widget Construction and Destruction'),
+            onPressed: () {
+              Navigator.pushNamed(context, kMultiWidgetConstructionRouteName);
             },
           ),
         ],

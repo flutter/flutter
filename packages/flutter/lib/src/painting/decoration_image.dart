@@ -4,14 +4,17 @@
 
 // @dart = 2.8
 
+import 'dart:developer' as developer;
 import 'dart:ui' as ui show Image;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'alignment.dart';
 import 'basic_types.dart';
 import 'borders.dart';
 import 'box_fit.dart';
+import 'debug.dart';
 import 'image_provider.dart';
 import 'image_stream.dart';
 
@@ -275,6 +278,7 @@ class DecorationImagePainter {
       canvas: canvas,
       rect: rect,
       image: _image.image,
+      debugImageLabel: _image.debugLabel,
       scale: _details.scale * _image.scale,
       colorFilter: _details.colorFilter,
       fit: _details.fit,
@@ -315,6 +319,25 @@ class DecorationImagePainter {
   String toString() {
     return '${objectRuntimeType(this, 'DecorationImagePainter')}(stream: $_imageStream, image: $_image) for $_details';
   }
+}
+
+/// Used by [paintImage] to report image sizes drawn at the end of the frame.
+Map<String, ImageSizeInfo> _pendingImageSizeInfo = <String, ImageSizeInfo>{};
+
+/// [ImageSizeInfo]s that were reported on the last frame.
+///
+/// Used to prevent duplicative reports from frame to frame.
+Set<ImageSizeInfo> _lastFrameImageSizeInfo = <ImageSizeInfo>{};
+
+/// Flushes inter-frame tracking of image size information from [paintImage].
+///
+/// Has no effect if asserts are disabled.
+@visibleForTesting
+void debugFlushLastFrameImageSizeInfo() {
+  assert(() {
+    _lastFrameImageSizeInfo = <ImageSizeInfo>{};
+    return true;
+  }());
 }
 
 /// Paints an image into the given rectangle on the canvas.
@@ -389,6 +412,7 @@ void paintImage({
   @required Canvas canvas,
   @required Rect rect,
   @required ui.Image image,
+  String debugImageLabel,
   double scale = 1.0,
   ColorFilter colorFilter,
   BoxFit fit,
@@ -431,6 +455,43 @@ void paintImage({
     // as we apply a nine-patch stretch.
     assert(sourceSize == inputSize, 'centerSlice was used with a BoxFit that does not guarantee that the image is fully visible.');
   }
+
+  // Output size is fully calculated.
+  if (!kReleaseMode) {
+    final ImageSizeInfo sizeInfo = ImageSizeInfo(
+      // Some ImageProvider implementations may not have given this.
+      source: debugImageLabel ?? '<Unknown Image(${image.width}×${image.height})>',
+      imageSize: Size(image.width.toDouble(), image.height.toDouble()),
+      displaySize: outputSize,
+    );
+    // Avoid emitting events that are the same as those emitted in the last frame.
+    if (!_lastFrameImageSizeInfo.contains(sizeInfo)) {
+      final ImageSizeInfo existingSizeInfo = _pendingImageSizeInfo[sizeInfo.source];
+      if (existingSizeInfo == null || existingSizeInfo.displaySizeInBytes < sizeInfo.displaySizeInBytes) {
+        _pendingImageSizeInfo[sizeInfo.source] = sizeInfo;
+      }
+      // _pendingImageSizeInfo.add(sizeInfo);
+      if (debugOnPaintImage != null) {
+        debugOnPaintImage(sizeInfo);
+      }
+      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+        _lastFrameImageSizeInfo = _pendingImageSizeInfo.values.toSet();
+        if (_pendingImageSizeInfo.isEmpty) {
+          return;
+        }
+        developer.postEvent(
+          'Flutter.ImageSizesForFrame',
+          <Object, Object>{
+            for (ImageSizeInfo imageSizeInfo in _pendingImageSizeInfo.values)
+              imageSizeInfo.source: imageSizeInfo.toJson()
+          },
+        );
+        _pendingImageSizeInfo = <String, ImageSizeInfo>{};
+      });
+
+    }
+  }
+
   if (repeat != ImageRepeat.noRepeat && destinationSize == outputSize) {
     // There's no need to repeat the image because we're exactly filling the
     // output rect with the image.

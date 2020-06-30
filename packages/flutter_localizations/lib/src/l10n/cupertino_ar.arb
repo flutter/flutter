@@ -39,6 +39,6 @@
   "copyButtonLabel": "نسخ",
   "pasteButtonLabel": "لصق",
   "selectAllButtonLabel": "اختيار الكل",
-  "tabSemanticsLabel": "TBD",
+  "tabSemanticsLabel": "علامة التبويب $tabIndex من $tabCount",
   "modalBarrierDismissLabel": "رفض"
 }
