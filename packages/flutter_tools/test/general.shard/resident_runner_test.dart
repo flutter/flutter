@@ -92,7 +92,8 @@ void main() {
 
   setUp(() {
     testbed = Testbed(setup: () {
-      globals.fs.file('.packages').writeAsStringSync('\n');
+      globals.fs.file('.packages')
+        .writeAsStringSync('\n');
       globals.fs.file(globals.fs.path.join('build', 'app.dill'))
         ..createSync(recursive: true)
         ..writeAsStringSync('ABC');
@@ -844,6 +845,11 @@ void main() {
       'data': <String, Object>{'A': 'B'}
     });
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  }, overrides: <Type, Generator>{
+    FileSystemUtils: () => FileSystemUtils(
+      fileSystem: globals.fs,
+      platform: globals.platform,
+    )
   }));
 
   testUsingContext('ResidentRunner can take screenshot on debug device', () => testbed.run(() async {
@@ -1116,6 +1122,7 @@ void main() {
     final FlutterDevice device = FlutterDevice(mockDevice, buildInfo: BuildInfo.debug);
     final ResidentRunner residentRunner = HotRunner(
       <FlutterDevice>[device],
+      debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug)
     );
 
     expect(await residentRunner.listFlutterViews(), isEmpty);

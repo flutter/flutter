@@ -275,6 +275,24 @@ void main() {
       }
     });
 
+    testWidgets('overlay will not apply to materials using a non-surface color', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Theme(
+          data: ThemeData(
+            applyElevationOverlayColor: true,
+            colorScheme: const ColorScheme.dark(),
+          ),
+          child: buildMaterial(
+            color: Colors.cyan,
+            elevation: 8.0,
+          ),
+        ),
+      );
+      final RenderPhysicalShape model = getModel(tester);
+      // Shouldn't change, as it is not using a ColorScheme.surface color
+      expect(model.color, equals(Colors.cyan));
+    });
+
     testWidgets('overlay will not apply to materials using a light theme', (WidgetTester tester) async {
       await tester.pumpWidget(
           Theme(

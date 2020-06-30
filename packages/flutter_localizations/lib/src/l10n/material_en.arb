@@ -272,6 +272,41 @@
     "description": "Tooltip used for the text input mode button of the date pickers."
   },
 
+  "timePickerDialHelpText": "SELECT TIME",
+  "@timePickerDialHelpText": {
+    "description": "Label used in the header of the time picker dialog when using the clock dial to select a time."
+  },
+
+  "timePickerInputHelpText": "ENTER TIME",
+  "@timePickerInputHelpText": {
+    "description": "Label used in the header of the time picker dialog when using the text input to enter a time."
+  },
+
+  "timePickerHourLabel": "Hour",
+  "@timePickerHourLabel": {
+    "description": "Label indicating the text field for inputting an hour when entering a time."
+  },
+
+  "timePickerMinuteLabel": "Minute",
+  "@timePickerMinuteLabel": {
+    "description": "Label indicating the text field for inputting a minute when entering a time."
+  },
+
+  "invalidTimeLabel": "Enter a valid time",
+  "@invalidTimeLabel": {
+    "description": "Error message displayed to the user when they have entered an invalid time."
+  },
+
+  "dialModeButtonLabel": "Switch to dial picker mode",
+  "@dialModeButtonLabel": {
+    "description": "Tooltip used for the clock dial mode button of the time picker."
+  },
+
+  "inputTimeModeButtonLabel": "Switch to text input mode",
+  "@inputTimeModeButtonLabel": {
+    "description": "Tooltip used for the text input mode button of the time picker."
+  },
+
   "signedInLabel": "Signed in",
   "@signedInLabel": {
     "description": "The accessibility label used to indicate which account is signed in, in a UserAccountsDrawerHeader, when the accessibility user navigates the UI. This phrase serves as an adjective with respect to the user. The phrase indicates that the user is currently signed in."

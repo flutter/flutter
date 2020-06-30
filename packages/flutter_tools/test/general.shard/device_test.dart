@@ -4,7 +4,9 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -17,6 +19,13 @@ import '../src/fake_devices.dart';
 import '../src/mocks.dart';
 
 void main() {
+  MockCache cache;
+
+  setUp(() {
+    cache = MockCache();
+    when(cache.dyLdLibEntry).thenReturn(const MapEntry<String, String>('foo', 'bar'));
+  });
+
   group('DeviceManager', () {
     testUsingContext('getDevices', () async {
       final FakeDevice device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
@@ -25,6 +34,9 @@ void main() {
       final List<Device> devices = <Device>[device1, device2, device3];
       final DeviceManager deviceManager = TestDeviceManager(devices);
       expect(await deviceManager.getDevices(), devices);
+    }, overrides: <Type, Generator>{
+      Artifacts: () => Artifacts.test(),
+      Cache: () => cache,
     });
 
     testUsingContext('getDeviceById', () async {
@@ -43,6 +55,9 @@ void main() {
       await expectDevice('Nexus 5', <Device>[device1]);
       await expectDevice('0553790', <Device>[device1]);
       await expectDevice('Nexus', <Device>[device1, device2]);
+    }, overrides: <Type, Generator>{
+      Artifacts: () => Artifacts.test(),
+      Cache: () => cache,
     });
 
     testUsingContext('getAllConnectedDevices caches', () async {
@@ -53,6 +68,9 @@ void main() {
       final FakeDevice device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
       deviceManager.resetDevices(<Device>[device2]);
       expect(await deviceManager.getAllConnectedDevices(), <Device>[device1]);
+    }, overrides: <Type, Generator>{
+      Artifacts: () => Artifacts.test(),
+      Cache: () => cache,
     });
 
     testUsingContext('refreshAllConnectedDevices does not cache', () async {
@@ -63,6 +81,9 @@ void main() {
       final FakeDevice device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
       deviceManager.resetDevices(<Device>[device2]);
       expect(await deviceManager.refreshAllConnectedDevices(), <Device>[device2]);
+    }, overrides: <Type, Generator>{
+      Artifacts: () => Artifacts.test(),
+      Cache: () => cache,
     });
   });
 
@@ -83,6 +104,9 @@ void main() {
         expect(pollingDeviceDiscovery.lastPollingTimeout, const Duration(seconds: 30));
         await pollingDeviceDiscovery.stopPolling();
       });
+    }, overrides: <Type, Generator>{
+      Artifacts: () => Artifacts.test(),
+      Cache: () => cache,
     });
   });
 
@@ -117,6 +141,9 @@ void main() {
       final List<Device> filtered = await deviceManager.findTargetDevices(FlutterProject.current());
 
       expect(filtered.single, ephemeral);
+    }, overrides: <Type, Generator>{
+      Artifacts: () => Artifacts.test(),
+      Cache: () => cache,
     });
 
     testUsingContext('does not remove all non-ephemeral', () async {
@@ -132,6 +159,9 @@ void main() {
         nonEphemeralOne,
         nonEphemeralTwo,
       ]);
+    }, overrides: <Type, Generator>{
+      Artifacts: () => Artifacts.test(),
+      Cache: () => cache,
     });
 
     testUsingContext('Removes a single unsupported device', () async {
@@ -143,6 +173,9 @@ void main() {
       final List<Device> filtered = await deviceManager.findTargetDevices(FlutterProject.current());
 
       expect(filtered, <Device>[]);
+    }, overrides: <Type, Generator>{
+      Artifacts: () => Artifacts.test(),
+      Cache: () => cache,
     });
 
     testUsingContext('Removes web and fuchsia from --all', () async {
@@ -156,6 +189,9 @@ void main() {
       final List<Device> filtered = await deviceManager.findTargetDevices(FlutterProject.current());
 
       expect(filtered, <Device>[]);
+    }, overrides: <Type, Generator>{
+      Artifacts: () => Artifacts.test(),
+      Cache: () => cache,
     });
 
     testUsingContext('Removes unsupported devices from --all', () async {
@@ -173,6 +209,9 @@ void main() {
         nonEphemeralOne,
         nonEphemeralTwo,
       ]);
+    }, overrides: <Type, Generator>{
+      Artifacts: () => Artifacts.test(),
+      Cache: () => cache,
     });
 
     testUsingContext('uses DeviceManager.isDeviceSupportedForProject instead of device.isSupportedForProject', () async {
@@ -187,6 +226,9 @@ void main() {
       expect(filtered, <Device>[
         unsupported,
       ]);
+    }, overrides: <Type, Generator>{
+      Artifacts: () => Artifacts.test(),
+      Cache: () => cache,
     });
   });
   group('ForwardedPort', () {
@@ -244,3 +286,4 @@ class TestDeviceManager extends DeviceManager {
 }
 
 class MockProcess extends Mock implements Process {}
+class MockCache extends Mock implements Cache {}

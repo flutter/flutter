@@ -1,4 +1,5 @@
 {
+  "tabSemanticsLabel": "$tabCount 個分頁中嘅第 $tabIndex 個",
   "datePickerHourSemanticsLabelOne": "$hour 點",
   "datePickerHourSemanticsLabelOther": "$hour 點",
   "datePickerMinuteSemanticsLabelOne": "1 分鐘",

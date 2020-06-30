@@ -120,7 +120,6 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
         earliestScrollOffset = childScrollOffset(earliestUsefulChild)) {
       // We have to add children before the earliestUsefulChild.
       earliestUsefulChild = insertAndLayoutLeadingChild(childConstraints, parentUsesSize: true);
-
       if (earliestUsefulChild == null) {
         final SliverMultiBoxAdaptorParentData childParentData = firstChild.parentData as SliverMultiBoxAdaptorParentData;
         childParentData.layoutOffset = 0.0;
@@ -148,29 +147,14 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
       final double firstChildScrollOffset = earliestScrollOffset - paintExtentOf(firstChild);
       // firstChildScrollOffset may contain double precision error
       if (firstChildScrollOffset < -precisionErrorTolerance) {
-        // The first child doesn't fit within the viewport (underflow) and
-        // there may be additional children above it. Find the real first child
-        // and then correct the scroll position so that there's room for all and
-        // so that the trailing edge of the original firstChild appears where it
-        // was before the scroll offset correction.
-        // TODO(hansmuller): do this work incrementally, instead of all at once,
-        // i.e. find a way to avoid visiting ALL of the children whose offset
-        // is < 0 before returning for the scroll correction.
-        double correction = 0.0;
-        while (earliestUsefulChild != null) {
-          assert(firstChild == earliestUsefulChild);
-          correction += paintExtentOf(firstChild);
-          earliestUsefulChild = insertAndLayoutLeadingChild(childConstraints, parentUsesSize: true);
-        }
-        earliestUsefulChild = firstChild;
-        if ((correction - earliestScrollOffset).abs() > precisionErrorTolerance) {
-          geometry = SliverGeometry(
-            scrollOffsetCorrection: correction - earliestScrollOffset,
-          );
-          final SliverMultiBoxAdaptorParentData childParentData = firstChild.parentData as SliverMultiBoxAdaptorParentData;
-          childParentData.layoutOffset = 0.0;
-          return;
-        }
+        // Let's assume there is no child before the first child. We will
+        // correct it on the next layout if it is not.
+        geometry = SliverGeometry(
+          scrollOffsetCorrection: -firstChildScrollOffset,
+        );
+        final SliverMultiBoxAdaptorParentData childParentData = firstChild.parentData as SliverMultiBoxAdaptorParentData;
+        childParentData.layoutOffset = 0.0;
+        return;
       }
 
       final SliverMultiBoxAdaptorParentData childParentData = earliestUsefulChild.parentData as SliverMultiBoxAdaptorParentData;
@@ -178,6 +162,28 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
       assert(earliestUsefulChild == firstChild);
       leadingChildWithLayout = earliestUsefulChild;
       trailingChildWithLayout ??= earliestUsefulChild;
+    }
+
+    assert(childScrollOffset(firstChild) > -precisionErrorTolerance);
+
+    // If the scroll offset is at zero, we should make sure we are
+    // actually at the beginning of the list.
+    if (scrollOffset < precisionErrorTolerance) {
+      if (indexOf(firstChild) > 0) {
+        final double earliestScrollOffset = childScrollOffset(firstChild);
+        // We correct one child at a time. If there are more children before
+        // the earliestUsefulChild, we will correct it once the scroll offset
+        // reach zero again.
+        earliestUsefulChild = insertAndLayoutLeadingChild(childConstraints, parentUsesSize: true);
+        assert(earliestUsefulChild != null);
+        final double firstChildScrollOffset = earliestScrollOffset - paintExtentOf(firstChild);
+        geometry = SliverGeometry(
+          scrollOffsetCorrection: -firstChildScrollOffset,
+        );
+        final SliverMultiBoxAdaptorParentData childParentData = firstChild.parentData as SliverMultiBoxAdaptorParentData;
+        childParentData.layoutOffset = 0.0;
+        return;
+      }
     }
 
     // At this point, earliestUsefulChild is the first child, and is a child
