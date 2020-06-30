@@ -1540,7 +1540,7 @@ void main() {
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }));
 
-  testUsingContext('FlutterDevice uses dartdevc configuration when targeting web', () => testbed.run(() async {
+  testUsingContext('FlutterDevice uses dartdevc configuration when targeting web', () async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final MockDevice mockDevice = MockDevice();
     when(mockDevice.targetPlatform).thenAnswer((Invocation invocation) async {
@@ -1549,7 +1549,12 @@ void main() {
 
     final DefaultResidentCompiler residentCompiler = (await FlutterDevice.create(
       mockDevice,
-      buildInfo: BuildInfo.debug,
+      buildInfo: const BuildInfo(
+        BuildMode.debug,
+        '',
+        treeShakeIcons: false,
+        nullSafetyMode: NullSafetyMode.unsound,
+      ),
       flutterProject: FlutterProject.current(),
       target: null,
     )).generator as DefaultResidentCompiler;
@@ -1562,12 +1567,46 @@ void main() {
     expect(residentCompiler.targetModel, TargetModel.dartdevc);
     expect(residentCompiler.sdkRoot,
       globals.artifacts.getArtifactPath(Artifact.flutterWebSdk, mode: BuildMode.debug) + '/');
-    expect(
-      residentCompiler.platformDill,
-      globals.fs.file(globals.artifacts.getArtifactPath(Artifact.webPlatformKernelDill, mode: BuildMode.debug))
-        .absolute.uri.toString(),
-    );
-  }));
+    expect(residentCompiler.platformDill, 'file:///Artifact.webPlatformKernelDill.debug');
+  }, overrides: <Type, Generator>{
+    Artifacts: () => Artifacts.test(),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('FlutterDevice uses dartdevc configuration when targeting web with null-safety autodetected', () async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+    final MockDevice mockDevice = MockDevice();
+    when(mockDevice.targetPlatform).thenAnswer((Invocation invocation) async {
+      return TargetPlatform.web_javascript;
+    });
+
+    final DefaultResidentCompiler residentCompiler = (await FlutterDevice.create(
+      mockDevice,
+      buildInfo: const BuildInfo(
+        BuildMode.debug,
+        '',
+        treeShakeIcons: false,
+        extraFrontEndOptions: <String>['--enable-experiment=non-nullable'],
+      ),
+      flutterProject: FlutterProject.current(),
+      target: null,
+    )).generator as DefaultResidentCompiler;
+
+    expect(residentCompiler.initializeFromDill,
+      globals.fs.path.join(getBuildDirectory(), 'cache.dill'));
+    expect(residentCompiler.librariesSpec,
+      globals.fs.file(globals.artifacts.getArtifactPath(Artifact.flutterWebLibrariesJson))
+        .uri.toString());
+    expect(residentCompiler.targetModel, TargetModel.dartdevc);
+    expect(residentCompiler.sdkRoot,
+      globals.artifacts.getArtifactPath(Artifact.flutterWebSdk, mode: BuildMode.debug) + '/');
+    expect(residentCompiler.platformDill, 'file:///Artifact.webPlatformSoundKernelDill.debug');
+  }, overrides: <Type, Generator>{
+    Artifacts: () => Artifacts.test(),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
   testUsingContext('connect sets up log reader', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
