@@ -487,13 +487,20 @@ class _ResidentWebRunner extends ResidentWebRunner {
         );
       });
     } on WebSocketException {
+      appFailedToStart();
       throwToolExit(kExitMessage);
     } on ChromeDebugException {
+      appFailedToStart();
       throwToolExit(kExitMessage);
     } on AppConnectionException {
+      appFailedToStart();
       throwToolExit(kExitMessage);
     } on SocketException {
+      appFailedToStart();
       throwToolExit(kExitMessage);
+    } on Exception {
+      appFailedToStart();
+      rethrow;
     }
     return 0;
   }
