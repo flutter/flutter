@@ -78,14 +78,16 @@ class BenchmarkDatapoint {
   int get hashCode => hashValues(name, value);
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return name == other.name && value == other.value;
+    return other is BenchmarkDatapoint
+        && other.name == name
+        && other.value == value;
   }
 
   @override
