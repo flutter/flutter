@@ -223,7 +223,7 @@ void main() {
       });
       testUsingContext('injects plugins for Linux', () async {
         final FlutterProject project = await someProject();
-        project.linux.managedDirectory.createSync(recursive: true);
+        project.linux.cmakeFile.createSync(recursive: true);
         await project.ensureReadyForPlatformSpecificTooling();
         expectExists(project.linux.managedDirectory.childFile('generated_plugin_registrant.h'));
         expectExists(project.linux.managedDirectory.childFile('generated_plugin_registrant.cc'));
@@ -238,7 +238,7 @@ void main() {
       });
       testUsingContext('injects plugins for Windows', () async {
         final FlutterProject project = await someProject();
-        project.windows.managedDirectory.createSync(recursive: true);
+        project.windows.cmakeFile.createSync(recursive: true);
         await project.ensureReadyForPlatformSpecificTooling();
         expectExists(project.windows.managedDirectory.childFile('generated_plugin_registrant.h'));
         expectExists(project.windows.managedDirectory.childFile('generated_plugin_registrant.cc'));
