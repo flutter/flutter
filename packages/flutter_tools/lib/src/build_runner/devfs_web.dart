@@ -461,94 +461,30 @@ class WebAssetServer implements AssetReader {
   /// Whether to use the cavaskit SDK for rendering.
   bool canvasKitRendering = false;
 
-  @visibleForTesting
-  final File dartSdk = globals.fs.file(globals.fs.path.join(
-    globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
-    'kernel',
-    'amd',
-    'dart_sdk.js',
-  ));
-
-  @visibleForTesting
-  final File dartSdkSound = globals.fs.file(globals.fs.path.join(
-    globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
-    'kernel',
-    'amd-sound',
-    'dart_sdk.js',
-  ));
-
-  @visibleForTesting
-  final File canvasKitDartSdk = globals.fs.file(globals.fs.path.join(
-    globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
-    'kernel',
-    'amd-canvaskit',
-    'dart_sdk.js',
-  ));
-
-  @visibleForTesting
-  final File canvasKitDartSdkSound = globals.fs.file(globals.fs.path.join(
-    globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
-    'kernel',
-    'amd-canvaskit-sound',
-    'dart_sdk.js',
-  ));
-
-  @visibleForTesting
-  final File dartSdkSourcemap = globals.fs.file(globals.fs.path.join(
-    globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
-    'kernel',
-    'amd',
-    'dart_sdk.js.map',
-  ));
-
-  @visibleForTesting
-  final File dartSdkSoundSourcemap = globals.fs.file(globals.fs.path.join(
-    globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
-    'kernel',
-    'amd-sound',
-    'dart_sdk.js.map',
-  ));
-
-  @visibleForTesting
-  final File canvasKitDartSdkSourcemap = globals.fs.file(globals.fs.path.join(
-    globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
-    'kernel',
-    'amd-canvaskit',
-    'dart_sdk.js.map',
-  ));
-
-  @visibleForTesting
-  final File canvasKitDartSdkSoundSourcemap = globals.fs.file(globals.fs.path.join(
-    globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
-    'kernel',
-    'amd-canvaskit-sound',
-    'dart_sdk.js.map',
-  ));
-
   // Attempt to resolve `path` to a dart file.
   File _resolveDartFile(String path) {
     // Return the actual file objects so that local engine changes are automatically picked up.
     switch (path) {
       case 'dart_sdk.js':
         if (_buildInfo.nullSafetyMode == NullSafetyMode.unsound) {
-          return canvasKitRendering
-            ? canvasKitDartSdk
-            : dartSdk;
+          return globals.fs.file(canvasKitRendering
+            ? globals.artifacts.getArtifactPath(Artifact.webPrecompiledCanvaskitSdk)
+            : globals.artifacts.getArtifactPath(Artifact.webPrecompiledSdk));
         } else {
-          return canvasKitRendering
-            ? canvasKitDartSdkSound
-            : dartSdkSound;
+          return globals.fs.file(canvasKitRendering
+            ? globals.artifacts.getArtifactPath(Artifact.webPrecompiledCanvaskitSoundSdk)
+            : globals.artifacts.getArtifactPath(Artifact.webPrecompiledSoundSdk));
         }
         break;
       case 'dart_sdk.js.map':
         if (_buildInfo.nullSafetyMode == NullSafetyMode.unsound) {
-          return canvasKitRendering
-            ? canvasKitDartSdkSourcemap
-            : dartSdkSourcemap;
+          return globals.fs.file(canvasKitRendering
+            ? globals.artifacts.getArtifactPath(Artifact.webPrecompiledCanvaskitSdkSourcemaps)
+            : globals.artifacts.getArtifactPath(Artifact.webPrecompiledSdkSourcemaps));
         } else {
-          return canvasKitRendering
-            ? canvasKitDartSdkSoundSourcemap
-            : dartSdkSoundSourcemap;
+          return globals.fs.file(canvasKitRendering
+            ? globals.artifacts.getArtifactPath(Artifact.webPrecompiledCanvaskitSoundSdkSourcemaps)
+            : globals.artifacts.getArtifactPath(Artifact.webPrecompiledSoundSdkSourcemaps));
         }
     }
     // This is the special generated entrypoint.

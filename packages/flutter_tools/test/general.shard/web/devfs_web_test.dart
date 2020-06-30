@@ -5,6 +5,7 @@
 import 'dart:io';
 
 import 'package:dwds/dwds.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -435,24 +436,31 @@ void main() {
 
     final Uri uri = await webDevFS.create();
     webDevFS.webAssetServer.entrypointCacheDirectory = globals.fs.currentDirectory;
+    final String webPrecompiledSdk = globals.artifacts
+      .getArtifactPath(Artifact.webPrecompiledSdk);
+    final String webPrecompiledSdkSourcemaps = globals.artifacts
+      .getArtifactPath(Artifact.webPrecompiledSdkSourcemaps);
+    final String webPrecompiledCanvaskitSdk = globals.artifacts
+      .getArtifactPath(Artifact.webPrecompiledCanvaskitSdk);
+    final String webPrecompiledCanvaskitSdkSourcemaps = globals.artifacts
+      .getArtifactPath(Artifact.webPrecompiledCanvaskitSdkSourcemaps);
     globals.fs.currentDirectory
       .childDirectory('lib')
       .childFile('web_entrypoint.dart')
       ..createSync(recursive: true)
       ..writeAsStringSync('GENERATED');
-    webDevFS.webAssetServer.dartSdk
+    globals.fs.file(webPrecompiledSdk)
       ..createSync(recursive: true)
       ..writeAsStringSync('HELLO');
-    webDevFS.webAssetServer.dartSdkSourcemap
+    globals.fs.file(webPrecompiledSdkSourcemaps)
       ..createSync(recursive: true)
       ..writeAsStringSync('THERE');
-    webDevFS.webAssetServer.canvasKitDartSdk
+    globals.fs.file(webPrecompiledCanvaskitSdk)
       ..createSync(recursive: true)
       ..writeAsStringSync('OL');
-    webDevFS.webAssetServer.canvasKitDartSdkSourcemap
+    globals.fs.file(webPrecompiledCanvaskitSdkSourcemaps)
       ..createSync(recursive: true)
       ..writeAsStringSync('CHUM');
-    webDevFS.webAssetServer.dartSdkSourcemap.createSync(recursive: true);
 
     await webDevFS.update(
       mainUri: globals.fs.file(globals.fs.path.join('lib', 'main.dart')).uri,
@@ -472,7 +480,7 @@ void main() {
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js.map'), 'THERE');
 
     // Update to the SDK.
-    webDevFS.webAssetServer.dartSdk.writeAsStringSync('BELLOW');
+   globals.fs.file(webPrecompiledSdk).writeAsStringSync('BELLOW');
 
     // New SDK should be visible..
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'BELLOW');
@@ -490,8 +498,9 @@ void main() {
     expect(uri, Uri.http('localhost:0', ''));
 
     await webDevFS.destroy();
+  }, overrides: <Type, Generator>{
+    Artifacts: () => Artifacts.test(),
   }));
-
 
   test('Can start web server with specified assets in sound null safety mode', () => testbed.run(() async {
     globals.fs.file('.packages').writeAsStringSync('\n');
@@ -540,19 +549,26 @@ void main() {
       .childFile('web_entrypoint.dart')
       ..createSync(recursive: true)
       ..writeAsStringSync('GENERATED');
-    webDevFS.webAssetServer.dartSdkSound
+    final String webPrecompiledSoundSdk = globals.artifacts
+      .getArtifactPath(Artifact.webPrecompiledSoundSdk);
+    final String webPrecompiledSoundSdkSourcemaps = globals.artifacts
+      .getArtifactPath(Artifact.webPrecompiledSoundSdkSourcemaps);
+    final String webPrecompiledCanvaskitSoundSdk = globals.artifacts
+      .getArtifactPath(Artifact.webPrecompiledCanvaskitSoundSdk);
+    final String webPrecompiledCanvaskitSoundSdkSourcemaps = globals.artifacts
+      .getArtifactPath(Artifact.webPrecompiledCanvaskitSoundSdkSourcemaps);
+    globals.fs.file(webPrecompiledSoundSdk)
       ..createSync(recursive: true)
       ..writeAsStringSync('HELLO');
-    webDevFS.webAssetServer.dartSdkSoundSourcemap
+    globals.fs.file(webPrecompiledSoundSdkSourcemaps)
       ..createSync(recursive: true)
       ..writeAsStringSync('THERE');
-    webDevFS.webAssetServer.canvasKitDartSdkSound
+    globals.fs.file(webPrecompiledCanvaskitSoundSdk)
       ..createSync(recursive: true)
       ..writeAsStringSync('OL');
-    webDevFS.webAssetServer.canvasKitDartSdkSoundSourcemap
+    globals.fs.file(webPrecompiledCanvaskitSoundSdkSourcemaps)
       ..createSync(recursive: true)
       ..writeAsStringSync('CHUM');
-    webDevFS.webAssetServer.dartSdkSoundSourcemap.createSync(recursive: true);
 
     await webDevFS.update(
       mainUri: globals.fs.file(globals.fs.path.join('lib', 'main.dart')).uri,
@@ -572,7 +588,7 @@ void main() {
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js.map'), 'THERE');
 
     // Update to the SDK.
-    webDevFS.webAssetServer.dartSdkSound.writeAsStringSync('BELLOW');
+    globals.fs.file(webPrecompiledSoundSdk).writeAsStringSync('BELLOW');
 
     // New SDK should be visible..
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'BELLOW');
@@ -590,6 +606,8 @@ void main() {
     expect(uri, Uri.http('localhost:0', ''));
 
     await webDevFS.destroy();
+  }, overrides: <Type, Generator>{
+    Artifacts: () => Artifacts.test(),
   }));
 
   test('Can start web server with hostname any', () => testbed.run(() async {
