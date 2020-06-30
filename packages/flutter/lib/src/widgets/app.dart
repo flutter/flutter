@@ -1397,6 +1397,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         child: result,
       );
     }
+
     final Locale appLocale = widget.locale != null
       ? _resolveLocales(<Locale>[widget.locale], widget.supportedLocales)
       : _locale;
