@@ -20,6 +20,7 @@ void main() {
     Directory templateDir;
     Directory intellijDir;
     Directory toolsDir;
+    Directory exampleDir;
 
     Map<String, String> _getFilesystemContents([ Directory root ]) {
       final String tempPath = tempDir.absolute.path;
@@ -52,6 +53,7 @@ void main() {
         globals.fs.path.join(basePath, '.idea', 'runConfigurations', 'hello_world.xml$suffix'): 'hello_world $marker',
         globals.fs.path.join(basePath, 'flutter.iml$suffix'): 'flutter $marker',
         globals.fs.path.join(basePath, 'packages', 'new', 'deep.iml$suffix'): 'deep $marker',
+        globals.fs.path.join(basePath, 'example', 'gallery', 'android.iml$suffix'): 'android $marker',
       };
     }
 
@@ -114,6 +116,7 @@ void main() {
       toolsDir = packagesDir.childDirectory('flutter_tools')..createSync();
       templateDir = toolsDir.childDirectory('ide_templates')..createSync();
       intellijDir = templateDir.childDirectory('intellij')..createSync();
+      exampleDir = templateDir.childDirectory('examples')..createSync();
     });
 
     tearDown(() {
@@ -318,6 +321,5 @@ void main() {
         expectedContents: expectedContents,
       );
     });
-
   });
 }
