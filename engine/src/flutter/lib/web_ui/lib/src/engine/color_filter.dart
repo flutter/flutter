@@ -121,20 +121,12 @@ class EngineColorFilter implements ui.ColorFilter {
   static const int _TypeSrgbToLinearGamma = 4; // MakeSRGBToLinearGamma
 
   @override
-  bool operator ==(dynamic other) {
-    if (other is! EngineColorFilter) {
-      return false;
-    }
-    final EngineColorFilter typedOther = other;
-
-    if (_type != typedOther._type) {
-      return false;
-    }
-    if (!_listEquals<double>(_matrix, typedOther._matrix)) {
-      return false;
-    }
-
-    return _color == typedOther._color && _blendMode == typedOther._blendMode;
+  bool operator ==(Object other) {
+    return other is EngineColorFilter
+        && other._type == _type
+        && _listEquals<double>(other._matrix, _matrix)
+        && other._color == _color
+        && other._blendMode == _blendMode;
   }
 
   SkColorFilter? _toSkColorFilter() {

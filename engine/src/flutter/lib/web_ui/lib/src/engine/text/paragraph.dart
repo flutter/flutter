@@ -103,27 +103,26 @@ class EngineLineMetrics implements ui.LineMetrics {
       );
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }
-
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    final EngineLineMetrics typedOther = other;
-    return displayText == typedOther.displayText &&
-        startIndex == typedOther.startIndex &&
-        endIndex == typedOther.endIndex &&
-        hardBreak == typedOther.hardBreak &&
-        ascent == typedOther.ascent &&
-        descent == typedOther.descent &&
-        unscaledAscent == typedOther.unscaledAscent &&
-        height == typedOther.height &&
-        width == typedOther.width &&
-        left == typedOther.left &&
-        baseline == typedOther.baseline &&
-        lineNumber == typedOther.lineNumber;
+    return other is EngineLineMetrics
+        && other.displayText == displayText
+        && other.startIndex == startIndex
+        && other.endIndex == endIndex
+        && other.hardBreak == hardBreak
+        && other.ascent == ascent
+        && other.descent == descent
+        && other.unscaledAscent == unscaledAscent
+        && other.height == height
+        && other.width == width
+        && other.left == left
+        && other.baseline == baseline
+        && other.lineNumber == lineNumber;
   }
 
   @override
@@ -687,25 +686,25 @@ class EngineParagraphStyle implements ui.ParagraphStyle {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    final EngineParagraphStyle typedOther = other;
-    return _textAlign == typedOther._textAlign ||
-        _textDirection == typedOther._textDirection ||
-        _fontWeight == typedOther._fontWeight ||
-        _fontStyle == typedOther._fontStyle ||
-        _maxLines == typedOther._maxLines ||
-        _fontFamily == typedOther._fontFamily ||
-        _fontSize == typedOther._fontSize ||
-        _height == typedOther._height ||
-        _textHeightBehavior == typedOther._textHeightBehavior ||
-        _ellipsis == typedOther._ellipsis ||
-        _locale == typedOther._locale;
+    return other is EngineParagraphStyle
+        && other._textAlign == _textAlign
+        && other._textDirection == _textDirection
+        && other._fontWeight == _fontWeight
+        && other._fontStyle == _fontStyle
+        && other._maxLines == _maxLines
+        && other._fontFamily == _fontFamily
+        && other._fontSize == _fontSize
+        && other._height == _height
+        && other._textHeightBehavior == _textHeightBehavior
+        && other._ellipsis == _ellipsis
+        && other._locale == _locale;
   }
 
   @override
@@ -830,32 +829,31 @@ class EngineTextStyle implements ui.TextStyle {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    final EngineTextStyle typedOther = other;
-    return _color == typedOther._color &&
-        _decoration == typedOther._decoration &&
-        _decorationColor == typedOther._decorationColor &&
-        _decorationStyle == typedOther._decorationStyle &&
-        _fontWeight == typedOther._fontWeight &&
-        _fontStyle == typedOther._fontStyle &&
-        _textBaseline == typedOther._textBaseline &&
-        _fontFamily == typedOther._fontFamily &&
-        _fontSize == typedOther._fontSize &&
-        _letterSpacing == typedOther._letterSpacing &&
-        _wordSpacing == typedOther._wordSpacing &&
-        _height == typedOther._height &&
-        _locale == typedOther._locale &&
-        _background == typedOther._background &&
-        _foreground == typedOther._foreground &&
-        _listEquals<ui.Shadow>(_shadows, typedOther._shadows) &&
-        _listEquals<String>(
-            _fontFamilyFallback, typedOther._fontFamilyFallback);
+    return other is EngineTextStyle
+        && other._color == _color
+        && other._decoration == _decoration
+        && other._decorationColor == _decorationColor
+        && other._decorationStyle == _decorationStyle
+        && other._fontWeight == _fontWeight
+        && other._fontStyle == _fontStyle
+        && other._textBaseline == _textBaseline
+        && other._fontFamily == _fontFamily
+        && other._fontSize == _fontSize
+        && other._letterSpacing == _letterSpacing
+        && other._wordSpacing == _wordSpacing
+        && other._height == _height
+        && other._locale == _locale
+        && other._background == _background
+        && other._foreground == _foreground
+        && _listEquals<ui.Shadow>(other._shadows, _shadows)
+        && _listEquals<String>(other._fontFamilyFallback, _fontFamilyFallback);
   }
 
   @override
@@ -975,23 +973,22 @@ class EngineStrutStyle implements ui.StrutStyle {
   final bool? _forceStrutHeight;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    final EngineStrutStyle typedOther = other;
-    return _fontFamily == typedOther._fontFamily &&
-        _fontSize == typedOther._fontSize &&
-        _height == typedOther._height &&
-        _leading == typedOther._leading &&
-        _fontWeight == typedOther._fontWeight &&
-        _fontStyle == typedOther._fontStyle &&
-        _forceStrutHeight == typedOther._forceStrutHeight &&
-        _listEquals<String>(
-            _fontFamilyFallback, typedOther._fontFamilyFallback);
+    return other is EngineStrutStyle
+        && other._fontFamily == _fontFamily
+        && other._fontSize == _fontSize
+        && other._height == _height
+        && other._leading == _leading
+        && other._fontWeight == _fontWeight
+        && other._fontStyle == _fontStyle
+        && other._forceStrutHeight == _forceStrutHeight
+        && _listEquals<String>(other._fontFamilyFallback, _fontFamilyFallback);
   }
 
   @override

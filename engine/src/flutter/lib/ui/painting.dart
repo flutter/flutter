@@ -324,7 +324,7 @@ class Color {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
     if (other.runtimeType != runtimeType)
@@ -2612,7 +2612,7 @@ class MaskFilter {
   static const int _TypeBlur = 1; // SkBlurMaskFilter
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return other is MaskFilter
         && other._style == _style
         && other._sigma == _sigma;
@@ -2741,7 +2741,7 @@ class ColorFilter {
   static const int _TypeSrgbToLinearGamma = 4; // MakeSRGBToLinearGamma
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return other is ColorFilter
         && other._type == _type
         && _listEquals<double>(other._matrix, _matrix)
@@ -2886,7 +2886,7 @@ class ImageFilter {
   static const int _kTypeMatrix = 1; // MakeMatrixFilterRowMajor255
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return other is ImageFilter
         && other._type == _type
         && _listEquals<double>(other._data, _data)
@@ -4398,7 +4398,7 @@ class Shadow {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
     return other is Shadow

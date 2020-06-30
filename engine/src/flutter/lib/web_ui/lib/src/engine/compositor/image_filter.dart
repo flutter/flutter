@@ -32,12 +32,10 @@ class SkImageFilter extends ResurrectableSkiaObject implements ui.ImageFilter {
       );
 
   @override
-  bool operator ==(dynamic other) {
-    if (other is! SkImageFilter) {
-      return false;
-    }
-    final SkImageFilter typedOther = other;
-    return _sigmaX == typedOther._sigmaX && _sigmaY == typedOther._sigmaY;
+  bool operator ==(Object other) {
+    return other is SkImageFilter
+        && other._sigmaX == _sigmaX
+        && other._sigmaY == _sigmaY;
   }
 
   @override

@@ -298,7 +298,7 @@ class FontFeature {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
     if (other.runtimeType != runtimeType)
@@ -389,7 +389,7 @@ class TextDecoration {
   static const TextDecoration lineThrough = TextDecoration._(0x4);
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return other is TextDecoration
         && other._mask == _mask;
   }
@@ -496,7 +496,7 @@ class TextHeightBehavior {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
     return other is TextHeightBehavior
@@ -767,7 +767,7 @@ class TextStyle {
   final List<FontFeature>? _fontFeatures;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
     return other is TextStyle
@@ -1007,7 +1007,7 @@ class ParagraphStyle {
   final Locale? _locale;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
     if (other.runtimeType != runtimeType)
@@ -1186,7 +1186,7 @@ class StrutStyle {
 
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
     if (other.runtimeType != runtimeType)
@@ -1350,7 +1350,7 @@ class TextBox {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
     if (other.runtimeType != runtimeType)
@@ -1462,7 +1462,7 @@ class TextPosition {
   final TextAffinity affinity;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
     return other is TextPosition
@@ -1546,7 +1546,7 @@ class TextRange {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
     return other is TextRange
@@ -1598,7 +1598,7 @@ class ParagraphConstraints {
   final double width;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
     return other is ParagraphConstraints

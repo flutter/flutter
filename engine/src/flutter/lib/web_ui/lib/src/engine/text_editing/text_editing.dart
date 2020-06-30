@@ -345,17 +345,17 @@ class EditingState {
   int get hashCode => ui.hashValues(text, baseOffset, extentOffset);
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }
     if (runtimeType != other.runtimeType) {
       return false;
     }
-    final EditingState typedOther = other;
-    return text == typedOther.text &&
-        baseOffset == typedOther.baseOffset &&
-        extentOffset == typedOther.extentOffset;
+    return other is EditingState
+        && other.text == text
+        && other.baseOffset == baseOffset
+        && other.extentOffset == extentOffset;
   }
 
   @override

@@ -173,8 +173,10 @@ class Line {
   int get hashCode => hashValues(text, breakType);
 
   @override
-  bool operator ==(dynamic other) {
-    return other is Line && text == other.text && breakType == other.breakType;
+  bool operator ==(Object other) {
+    return other is Line
+        && other.text == text
+        && other.breakType == breakType;
   }
 
   String get escapedText {

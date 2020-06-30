@@ -24,7 +24,7 @@ class CallbackHandle {
   int toRawHandle() => _handle;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (runtimeType != other.runtimeType)
       return false;
     return other is CallbackHandle

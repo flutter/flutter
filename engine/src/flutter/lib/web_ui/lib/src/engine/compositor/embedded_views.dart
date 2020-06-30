@@ -398,18 +398,14 @@ class EmbeddedViewParams {
   final ui.Size size;
   final MutatorsStack mutators;
 
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }
-    if (other is! EmbeddedViewParams) {
-      return false;
-    }
-
-    EmbeddedViewParams typedOther = other;
-    return offset == typedOther.offset &&
-        size == typedOther.size &&
-        mutators == typedOther.mutators;
+    return other is EmbeddedViewParams
+        && other.offset == offset
+        && other.size == size
+        && other.mutators == mutators;
   }
 
   int get hashCode => ui.hashValues(offset, size, mutators);
@@ -459,7 +455,7 @@ class Mutator {
 
   double get alphaFloat => alpha! / 255.0;
 
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -524,26 +520,12 @@ class MutatorsStack extends Iterable<Mutator> {
     _mutators.removeLast();
   }
 
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(other, this)) {
       return true;
     }
-    if (other is! MutatorsStack) {
-      return false;
-    }
-
-    final MutatorsStack typedOther = other;
-    if (_mutators.length != typedOther._mutators.length) {
-      return false;
-    }
-
-    for (int i = 0; i < _mutators.length; i++) {
-      if (_mutators[i] != typedOther._mutators[i]) {
-        return false;
-      }
-    }
-
-    return true;
+    return other is MutatorsStack
+        && _listEquals<Mutator>(other._mutators, _mutators);
   }
 
   int get hashCode => ui.hashList(_mutators);

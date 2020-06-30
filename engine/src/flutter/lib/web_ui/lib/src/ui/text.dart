@@ -280,15 +280,16 @@ class FontFeature {
   final int value;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    final FontFeature typedOther = other;
-    return feature == typedOther.feature && value == typedOther.value;
+    return other is FontFeature
+        && other.feature == feature
+        && other.value == value;
   }
 
   @override
@@ -373,12 +374,9 @@ class TextDecoration {
   static const TextDecoration lineThrough = TextDecoration._(0x4);
 
   @override
-  bool operator ==(dynamic other) {
-    if (other is! TextDecoration) {
-      return false;
-    }
-    final TextDecoration typedOther = other;
-    return _mask == typedOther._mask;
+  bool operator ==(Object other) {
+    return other is TextDecoration
+        && other._mask == _mask;
   }
 
   @override
@@ -486,7 +484,7 @@ class TextHeightBehavior {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
     return other is TextHeightBehavior
@@ -907,19 +905,19 @@ class TextBox {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    final TextBox typedOther = other;
-    return typedOther.left == left &&
-        typedOther.top == top &&
-        typedOther.right == right &&
-        typedOther.bottom == bottom &&
-        typedOther.direction == direction;
+    return other is TextBox
+        && other.left == left
+        && other.top == top
+        && other.right == right
+        && other.bottom == bottom
+        && other.direction == direction;
   }
 
   @override
@@ -1023,12 +1021,13 @@ class TextPosition {
   final TextAffinity affinity;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    final TextPosition typedOther = other;
-    return typedOther.offset == offset && typedOther.affinity == affinity;
+    return other is TextPosition
+        && other.offset == offset
+        && other.affinity == affinity;
   }
 
   @override
@@ -1104,15 +1103,13 @@ class TextRange {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }
-    if (other is! TextRange) {
-      return false;
-    }
-    final TextRange typedOther = other;
-    return typedOther.start == start && typedOther.end == end;
+    return other is TextRange
+        && other.start == start
+        && other.end == end;
   }
 
   @override
@@ -1159,12 +1156,12 @@ class ParagraphConstraints {
   final double width;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    final ParagraphConstraints typedOther = other;
-    return typedOther.width == width;
+    return other is ParagraphConstraints
+        && other.width == width;
   }
 
   @override
