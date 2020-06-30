@@ -242,9 +242,9 @@ class RestorableTextEditingController extends RestorableListenable<TextEditingCo
 
   @override
   void dispose() {
-    super.dispose();
     if (isRegistered) {
       value.dispose();
     }
+    super.dispose();
   }
 }
