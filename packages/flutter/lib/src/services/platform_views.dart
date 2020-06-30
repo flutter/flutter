@@ -875,7 +875,11 @@ class SurfaceAndroidViewController extends AndroidViewController {
         paramsByteData.lengthInBytes,
       );
     }
-    return SystemChannels.platform_views.invokeMethod<void>('create', args);
+    await SystemChannels.platform_views.invokeMethod<void>('create', args);
+    _state = _AndroidViewState.created;
+    for (final PlatformViewCreatedCallback callback in _platformViewCreatedCallbacks) {
+      callback(viewId);
+    }
   }
 
   @override
