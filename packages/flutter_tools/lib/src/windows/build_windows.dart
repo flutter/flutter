@@ -70,7 +70,6 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   } finally {
     status.cancel();
   }
-  await _runInstall(cmakePath, buildDirectory, buildModeName);
 }
 
 Future<void> _runCmakeGeneration(String cmakePath, Directory buildDir, Directory sourceDir) async {
@@ -112,9 +111,15 @@ Future<void> _runBuild(String cmakePath, Directory buildDir, String buildModeNam
         buildDir.path,
         '--config',
         toTitleCase(buildModeName),
+        '--target',
+        'INSTALL',
         if (globals.logger.isVerbose)
           '--verbose'
       ],
+      environment: <String, String>{
+        if (globals.logger.isVerbose)
+          'VERBOSE_SCRIPT_LOGGING': 'true'
+      },
       trace: true,
     );
   } on ArgumentError {
@@ -125,30 +130,6 @@ Future<void> _runBuild(String cmakePath, Directory buildDir, String buildModeNam
     throwToolExit('Build process failed.$verboseInstructions');
   }
   globals.flutterUsage.sendTiming('build', 'windows-cmake-build', Duration(milliseconds: sw.elapsedMilliseconds));
-}
-
-Future<void> _runInstall(String cmakePath, Directory buildDir, String buildModeName) async {
-  final Stopwatch sw = Stopwatch()..start();
-
-  int result;
-  try {
-    result = await processUtils.stream(
-      <String>[
-        cmakePath,
-        '--install',
-        buildDir.path,
-        '--config',
-        toTitleCase(buildModeName),
-      ],
-      trace: true,
-    );
-  } on ArgumentError {
-    throwToolExit("cmake not found. Run 'flutter doctor' for more information.");
-  }
-  if (result != 0) {
-    throwToolExit('Build process failed');
-  }
-  globals.flutterUsage.sendTiming('build', 'windows-cmake-install', Duration(milliseconds: sw.elapsedMilliseconds));
 }
 
 /// Writes the generated CMake file with the configuration for the given build.
