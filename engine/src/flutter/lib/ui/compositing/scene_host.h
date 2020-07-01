@@ -7,9 +7,9 @@
 
 #include <lib/ui/scenic/cpp/id.h>
 #include <stdint.h>
-#include <third_party/tonic/dart_library_natives.h>
-#include <third_party/tonic/dart_persistent_value.h>
 #include <zircon/types.h>
+#include "third_party/tonic/dart_library_natives.h"
+#include "third_party/tonic/dart_persistent_value.h"
 
 #include "dart-pkg/zircon/sdk_ext/handle.h"
 #include "flutter/fml/memory/ref_counted.h"

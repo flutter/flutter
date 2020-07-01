@@ -7,7 +7,7 @@
 
 #include <fuchsia/mem/cpp/fidl.h>
 #include <lib/fdio/namespace.h>
-#include <third_party/dart/runtime/bin/elf_loader.h>
+#include "third_party/dart/runtime/bin/elf_loader.h"
 
 namespace dart_utils {
 
