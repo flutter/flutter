@@ -4,8 +4,8 @@
 
 part of engine;
 
-class SkParagraphStyle implements ui.ParagraphStyle {
-  SkParagraphStyle({
+class CkParagraphStyle implements ui.ParagraphStyle {
+  CkParagraphStyle({
     ui.TextAlign? textAlign,
     ui.TextDirection? textDirection,
     int? maxLines,
@@ -19,7 +19,7 @@ class SkParagraphStyle implements ui.ParagraphStyle {
     String? ellipsis,
     ui.Locale? locale,
   }) {
-    skParagraphStyle = toSkParagraphStyle(
+    skParagraphStyle = toCkParagraphStyle(
       textAlign,
       textDirection,
       maxLines,
@@ -40,7 +40,7 @@ class SkParagraphStyle implements ui.ParagraphStyle {
   ui.TextDirection? _textDirection;
   String? _fontFamily;
 
-  static Map<String, dynamic> toSkTextStyle(
+  static Map<String, dynamic> toCkTextStyle(
     String? fontFamily,
     double? fontSize,
     ui.FontWeight? fontWeight,
@@ -67,7 +67,7 @@ class SkParagraphStyle implements ui.ParagraphStyle {
     return skTextStyle;
   }
 
-  static js.JsObject? toSkParagraphStyle(
+  static js.JsObject? toCkParagraphStyle(
     ui.TextAlign? textAlign,
     ui.TextDirection? textDirection,
     int? maxLines,
@@ -132,17 +132,17 @@ class SkParagraphStyle implements ui.ParagraphStyle {
     }
 
     skParagraphStyle['textStyle'] =
-        toSkTextStyle(fontFamily, fontSize, fontWeight, fontStyle);
+        toCkTextStyle(fontFamily, fontSize, fontWeight, fontStyle);
 
     return canvasKit.callMethod(
         'ParagraphStyle', <js.JsObject>[js.JsObject.jsify(skParagraphStyle)]);
   }
 }
 
-class SkTextStyle implements ui.TextStyle {
+class CkTextStyle implements ui.TextStyle {
   js.JsObject? skTextStyle;
 
-  SkTextStyle({
+  CkTextStyle({
     ui.Color? color,
     ui.TextDecoration? decoration,
     ui.Color? decorationColor,
@@ -158,8 +158,8 @@ class SkTextStyle implements ui.TextStyle {
     double? wordSpacing,
     double? height,
     ui.Locale? locale,
-    SkPaint? background,
-    SkPaint? foreground,
+    CkPaint? background,
+    CkPaint? foreground,
     List<ui.Shadow>? shadows,
     List<ui.FontFeature>? fontFeatures,
   }) {
@@ -282,11 +282,11 @@ Map<String, js.JsObject?> toSkFontStyle(
   return style;
 }
 
-class SkParagraph extends ResurrectableSkiaObject implements ui.Paragraph {
-  SkParagraph(
+class CkParagraph extends ResurrectableSkiaObject implements ui.Paragraph {
+  CkParagraph(
       this._initialParagraph, this._paragraphStyle, this._paragraphCommands);
 
-  /// The result of calling `build()` on the JS SkParagraphBuilder.
+  /// The result of calling `build()` on the JS CkParagraphBuilder.
   ///
   /// This may be invalidated later.
   final js.JsObject _initialParagraph;
@@ -295,7 +295,7 @@ class SkParagraph extends ResurrectableSkiaObject implements ui.Paragraph {
   ///
   /// This is used to resurrect the paragraph if the initial paragraph
   /// is deleted.
-  final SkParagraphStyle _paragraphStyle;
+  final CkParagraphStyle _paragraphStyle;
 
   /// The paragraph builder commands used to build this paragraph.
   ///
@@ -314,7 +314,7 @@ class SkParagraph extends ResurrectableSkiaObject implements ui.Paragraph {
 
   @override
   js.JsObject resurrect() {
-    final builder = SkParagraphBuilder(_paragraphStyle);
+    final builder = CkParagraphBuilder(_paragraphStyle);
     for (_ParagraphCommand command in _paragraphCommands) {
       switch (command.type) {
         case _ParagraphCommandType.addText:
@@ -329,7 +329,7 @@ class SkParagraph extends ResurrectableSkiaObject implements ui.Paragraph {
       }
     }
 
-    final js.JsObject result = builder._buildSkParagraph();
+    final js.JsObject result = builder._buildCkParagraph();
     if (_lastLayoutConstraints != null) {
       // We need to set the Skia object early so layout works.
       _skiaObject = result;
@@ -491,14 +491,14 @@ class SkParagraph extends ResurrectableSkiaObject implements ui.Paragraph {
   }
 }
 
-class SkParagraphBuilder implements ui.ParagraphBuilder {
+class CkParagraphBuilder implements ui.ParagraphBuilder {
   js.JsObject? _paragraphBuilder;
-  final SkParagraphStyle _style;
+  final CkParagraphStyle _style;
   final List<_ParagraphCommand> _commands;
 
-  SkParagraphBuilder(ui.ParagraphStyle style)
+  CkParagraphBuilder(ui.ParagraphStyle style)
       : _commands = <_ParagraphCommand>[],
-        _style = style as SkParagraphStyle {
+        _style = style as CkParagraphStyle {
     _paragraphBuilder = canvasKit['ParagraphBuilder'].callMethod(
       'Make',
       <js.JsObject?>[
@@ -529,12 +529,12 @@ class SkParagraphBuilder implements ui.ParagraphBuilder {
 
   @override
   ui.Paragraph build() {
-    final builtParagraph = _buildSkParagraph();
-    return SkParagraph(builtParagraph, _style, _commands);
+    final builtParagraph = _buildCkParagraph();
+    return CkParagraph(builtParagraph, _style, _commands);
   }
 
-  /// Builds the SkParagraph with the builder and deletes the builder.
-  js.JsObject _buildSkParagraph() {
+  /// Builds the CkParagraph with the builder and deletes the builder.
+  js.JsObject _buildCkParagraph() {
     final js.JsObject result = _paragraphBuilder!.callMethod('build');
     _paragraphBuilder!.callMethod('delete');
     _paragraphBuilder = null;
@@ -556,7 +556,7 @@ class SkParagraphBuilder implements ui.ParagraphBuilder {
 
   @override
   void pushStyle(ui.TextStyle style) {
-    final SkTextStyle skStyle = style as SkTextStyle;
+    final CkTextStyle skStyle = style as CkTextStyle;
     _commands.add(_ParagraphCommand.pushStyle(skStyle));
     _paragraphBuilder!
         .callMethod('pushStyle', <js.JsObject?>[skStyle.skTextStyle]);
@@ -566,7 +566,7 @@ class SkParagraphBuilder implements ui.ParagraphBuilder {
 class _ParagraphCommand {
   final _ParagraphCommandType type;
   final String? text;
-  final SkTextStyle? style;
+  final CkTextStyle? style;
 
   const _ParagraphCommand._(this.type, this.text, this.style);
 
@@ -575,7 +575,7 @@ class _ParagraphCommand {
 
   const _ParagraphCommand.pop() : this._(_ParagraphCommandType.pop, null, null);
 
-  const _ParagraphCommand.pushStyle(SkTextStyle style)
+  const _ParagraphCommand.pushStyle(CkTextStyle style)
       : this._(_ParagraphCommandType.pushStyle, null, style);
 }
 
