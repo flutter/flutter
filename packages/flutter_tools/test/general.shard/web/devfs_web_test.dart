@@ -486,7 +486,9 @@ void main() {
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'BELLOW');
 
     // Toggle CanvasKit
+    expect(webDevFS.webAssetServer.canvasKitRendering, false);
     webDevFS.webAssetServer.canvasKitRendering = true;
+
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'OL');
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js.map'), 'CHUM');
 
