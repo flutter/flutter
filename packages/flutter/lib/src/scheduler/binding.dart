@@ -622,7 +622,7 @@ mixin SchedulerBinding on BindingBase {
         debugPrint(
           FlutterError.defaultStackFilter(
             FlutterError.demangleStackTrace(
-              _FrameCallbackEntry.debugCurrentCallbackStack
+              _FrameCallbackEntry.debugCurrentCallbackStack,
             ).toString().trimRight().split('\n')
           ).join('\n')
         );

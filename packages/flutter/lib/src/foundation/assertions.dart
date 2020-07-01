@@ -30,6 +30,10 @@ typedef InformationCollector = Iterable<DiagnosticsNode> Function();
 
 /// Signature for a function that demangles [StackTrace] objects into a format
 /// that can be parsed by [StackFrame].
+///
+/// See also:
+///
+///   * [FlutterError.demangleStackTrace], which shows an example implementation.
 typedef StackTraceDemangler = StackTrace Function(StackTrace details);
 
 /// Partial information from a stack frame for stack filtering purposes.
@@ -877,7 +881,20 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   /// This should be set in any environment that could propagate a non-standard
   /// stack trace to the framework. Otherwise, the default behavior is to assume
   /// all stack traces are in a standard format.
-  static StackTraceDemangler demangleStackTrace = (StackTrace e) => e;
+  ///
+  /// The following example demangles package:stack_trace traces by converting
+  /// them into vm traces, which the framework is able to parse:
+  ///
+  /// ```dart
+  /// FlutterError.demangleStackTrace = (StackTrace stackTrace) {
+  ///   if (stack is stack_trace.Trace)
+  //      return stack.vmTrace;
+  //    if (stack is stack_trace.Chain)
+  //      return stack.toTrace().vmTrace;
+  //    return stack;
+  /// };
+  /// ```
+  static StackTraceDemangler demangleStackTrace = (StackTrace stackTrace) => stackTrace;
 
   /// Called whenever the Flutter framework wants to present an error to the
   /// users.
@@ -1085,8 +1102,11 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
 void debugPrintStack({StackTrace stackTrace, String label, int maxFrames}) {
   if (label != null)
     debugPrint(label);
-  stackTrace ??= StackTrace.current;
-  stackTrace = FlutterError.demangleStackTrace(stackTrace);
+  if (stackTrace == null) {
+    stackTrace = StackTrace.current;
+  } else {
+    stackTrace = FlutterError.demangleStackTrace(stackTrace);
+  }
   Iterable<String> lines = stackTrace.toString().trimRight().split('\n');
   if (kIsWeb && lines.isNotEmpty) {
     // Remove extra call to StackTrace.current for web platform.
