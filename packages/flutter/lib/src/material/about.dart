@@ -651,6 +651,9 @@ class _PackagesViewState extends State<_PackagesView> {
   }
 
   void _initDefaultDetailPage(_LicenseData data, BuildContext context) {
+    if (data.packages.isEmpty) {
+      return;
+    }
     final String packageName = data.packages[widget.selectedId.value ?? 0];
     final List<int> bindings = data.packageLicenseBindings[packageName];
     _MasterDetailFlow.of(context).setInitialDetailPage(
