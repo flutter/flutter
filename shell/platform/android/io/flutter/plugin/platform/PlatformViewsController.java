@@ -244,12 +244,11 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
         @Override
         public void onTouch(@NonNull PlatformViewsChannel.PlatformViewTouch touch) {
-          float density = context.getResources().getDisplayMetrics().density;
           PointerProperties[] pointerProperties =
               parsePointerPropertiesList(touch.rawPointerPropertiesList)
                   .toArray(new PointerProperties[touch.pointerCount]);
           PointerCoords[] pointerCoords =
-              parsePointerCoordsList(touch.rawPointerCoords, density)
+              parsePointerCoordsList(touch.rawPointerCoords, getDisplayDensity())
                   .toArray(new PointerCoords[touch.pointerCount]);
 
           if (!vdControllers.containsKey(touch.viewId)) {
@@ -569,9 +568,12 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     }
   }
 
+  private float getDisplayDensity() {
+    return context.getResources().getDisplayMetrics().density;
+  }
+
   private int toPhysicalPixels(double logicalPixels) {
-    float density = context.getResources().getDisplayMetrics().density;
-    return (int) Math.round(logicalPixels * density);
+    return (int) Math.round(logicalPixels * getDisplayDensity());
   }
 
   private void flushAllViews() {
@@ -621,8 +623,18 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
     PlatformView platformView = factory.create(context, viewId, createParams);
     View view = platformView.getView();
-    platformViews.put(viewId, view);
 
+    // Reverse scale the view based on the screen density.
+    //
+    // Flow pixels are based on the physical resolution. For example, 1000 pixels in flow equals
+    // 500 points in Android if the display density is 2.0.
+    float density = getDisplayDensity();
+    view.setPivotX(0);
+    view.setPivotY(0);
+    view.setScaleX(1 / density);
+    view.setScaleY(1 / density);
+
+    platformViews.put(viewId, view);
     ((FlutterView) flutterView).addView(view);
   }
 
