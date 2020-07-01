@@ -43,6 +43,7 @@ vars = {
   'dart_bazel_worker_tag': 'v0.1.22',
   'dart_boringssl_gen_rev': '429ccb1877f7987a6f3988228bc2440e61293499',
   'dart_boringssl_rev': '4dfd5af70191b068aebe567b8e29ce108cee85ce',
+  'dart_collection_rev': '7be42e03d427cc19571cd7f9fc628a5913a6b757',
   'dart_dart2js_info_tag': '0.6.0',
   'dart_dart_style_tag': '1.3.6',
   'dart_http_retry_tag': '0.1.1',
@@ -186,7 +187,7 @@ deps = {
    Var('dart_git') + '/cli_util.git@0.1.4',
 
   'src/third_party/dart/third_party/pkg/collection':
-   Var('dart_git') + '/collection.git@7be42e03d427cc19571cd7f9fc628a5913a6b757',
+   Var('dart_git') + '/collection.git' + '@' + Var('dart_collection_rev'),
 
   'src/third_party/dart/third_party/pkg/convert':
    Var('dart_git') + '/convert.git@49bde5b371eb5c2c8e721557cf762f17c75e49fc',
