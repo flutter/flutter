@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/assemble.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -18,6 +19,13 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/testbed.dart';
 void main() {
+  setUpAll(() {
+    Cache.disableLocking();
+  });
+
+  tearDownAll(() {
+    Cache.enableLocking();
+  });
 
   testUsingContext('flutter assemble can run a build', () async {
     final BuildSystem buildSystem = MockBuildSystem();
