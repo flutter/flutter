@@ -264,8 +264,10 @@ class _ButtonStyleState extends State<ButtonStyleButton> {
     final BorderSide resolvedSide = resolve<BorderSide>((ButtonStyle style) => style?.side);
     final OutlinedBorder resolvedShape = resolve<OutlinedBorder>((ButtonStyle style) => style?.shape);
 
-    // The InkWell's overlayColor parameter is a MaterialStatePropery that resolves against
-    // all of the states that buttons care about except MaterialState.disabled.
+    final MaterialStateMouseCursor resolvedMouseCursor = _MouseCursor(
+      (Set<MaterialState> states) => effectiveValue((ButtonStyle style) => style?.mouseCursor?.resolve(states)),
+    );
+
     final MaterialStateProperty<Color> overlayColor = MaterialStateProperty.resolveWith<Color>(
       (Set<MaterialState> states) => effectiveValue((ButtonStyle style) => style?.overlayColor?.resolve(states)),
     );
@@ -306,6 +308,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> {
           onLongPress: widget.onLongPress,
           onHighlightChanged: _handleHighlightChanged,
           onHover: _handleHoveredChanged,
+          mouseCursor: resolvedMouseCursor,
           enableFeedback: resolvedEnableFeedback,
           focusNode: widget.focusNode,
           canRequestFocus: widget.enabled,
@@ -355,6 +358,18 @@ class _ButtonStyleState extends State<ButtonStyleButton> {
       ),
     );
   }
+}
+
+class _MouseCursor extends MaterialStateMouseCursor {
+  const _MouseCursor(this.resolveCallback);
+
+  final MaterialPropertyResolver<MouseCursor> resolveCallback;
+
+  @override
+  MouseCursor resolve(Set<MaterialState> states) => resolveCallback(states);
+
+  @override
+  String get debugDescription => 'ButtonStyleButton_MouseCursor';
 }
 
 /// A widget to pad the area around a [MaterialButton]'s inner [Material].

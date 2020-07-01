@@ -354,7 +354,7 @@ class ButtonStyle with Diagnosticable {
       elevation: _lerpProperties<double>(a?.elevation, b?.elevation, t, lerpDouble),
       padding:  _lerpProperties<EdgeInsetsGeometry>(a?.padding, b?.padding, t, EdgeInsetsGeometry.lerp),
       minimumSize: _lerpProperties<Size>(a?.minimumSize, b?.minimumSize, t, Size.lerp),
-      side: _lerpProperties<BorderSide>(a?.side, b?.side, t, BorderSide.lerp),
+      side: _lerpSides(a?.side, b?.side, t),
       shape: _lerpShapes(a?.shape, b?.shape, t),
       mouseCursor: t < 0.5 ? a.mouseCursor : b.mouseCursor,
       visualDensity: t < 0.5 ? a.visualDensity : b.visualDensity,
@@ -369,6 +369,13 @@ class ButtonStyle with Diagnosticable {
     if (a == null && b == null)
       return null;
     return _LerpProperties<T>(a, b, t, lerpFunction);
+  }
+
+  // Special case because BorderSide.lerp() doesn't support null arguments
+  static MaterialStateProperty<BorderSide> _lerpSides(MaterialStateProperty<BorderSide> a, MaterialStateProperty<BorderSide> b, double t) {
+    if (a == null && b == null)
+      return null;
+    return _LerpSides(a, b, t);
   }
 
   // TODO(hansmuller): OutlinedBorder needs a lerp method - https://github.com/flutter/flutter/issues/60555.
@@ -392,6 +399,27 @@ class _LerpProperties<T> implements MaterialStateProperty<T> {
     final T resolvedA = a?.resolve(states);
     final T resolvedB = b?.resolve(states);
     return lerpFunction(resolvedA, resolvedB, t);
+  }
+}
+
+class _LerpSides implements MaterialStateProperty<BorderSide> {
+  const _LerpSides(this.a, this.b, this.t);
+
+  final MaterialStateProperty<BorderSide> a;
+  final MaterialStateProperty<BorderSide> b;
+  final double t;
+
+  @override
+  BorderSide resolve(Set<MaterialState> states) {
+    final BorderSide resolvedA = a?.resolve(states);
+    final BorderSide resolvedB = b?.resolve(states);
+    if (resolvedA == null && resolvedB == null)
+      return null;
+    if (resolvedA == null)
+      return BorderSide.lerp(BorderSide(width: 0, color: resolvedB.color.withAlpha(0)), resolvedB, t);
+    if (resolvedB == null)
+      return BorderSide.lerp(BorderSide(width: 0, color: resolvedA.color.withAlpha(0)), resolvedA, t);
+    return BorderSide.lerp(resolvedA, resolvedB, t);
   }
 }
 
