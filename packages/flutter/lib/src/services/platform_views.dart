@@ -78,7 +78,7 @@ class PlatformViewsService {
   final Map<int, VoidCallback> _focusCallbacks = <int, VoidCallback>{};
 
 
-  /// Creates a controller for a new Android view.
+  /// Creates a [TextureAndroidViewController] for a new Android view.
   ///
   /// `id` is an unused unique identifier generated with [platformViewsRegistry].
   ///
@@ -102,44 +102,76 @@ class PlatformViewsService {
   ///
   /// The `id, `viewType, and `layoutDirection` parameters must not be null.
   /// If `creationParams` is non null then `creationParamsCodec` must not be null.
-  ///
-  /// Setting [surfaceController] to `true` will return a
-  /// [SurfaceAndroidViewController] which can be used with an
-  /// [AndroidViewSurface]. Setting this to `false` will return the default
-  /// [TextureAndroidViewController].
-  static AndroidViewController initAndroidView({
+  static TextureAndroidViewController initAndroidView({
     @required int id,
     @required String viewType,
     @required TextDirection layoutDirection,
     dynamic creationParams,
     MessageCodec<dynamic> creationParamsCodec,
     VoidCallback onFocus,
-    bool surfaceController = false,
   }) {
     assert(id != null);
     assert(viewType != null);
     assert(layoutDirection != null);
     assert(creationParams == null || creationParamsCodec != null);
-    assert(surfaceController != null);
 
-    AndroidViewController controller;
-    if (surfaceController) {
-      controller = SurfaceAndroidViewController._(
-        viewId: id,
-        viewType: viewType,
-        layoutDirection: layoutDirection,
-        creationParams: creationParams,
-        creationParamsCodec: creationParamsCodec,
-      ).._sendCreateMessage();
-    } else {
-      controller = TextureAndroidViewController._(
-        viewId: id,
-        viewType: viewType,
-        layoutDirection: layoutDirection,
-        creationParams: creationParams,
-        creationParamsCodec: creationParamsCodec,
-      );
-    }
+    final TextureAndroidViewController controller = TextureAndroidViewController._(
+      viewId: id,
+      viewType: viewType,
+      layoutDirection: layoutDirection,
+      creationParams: creationParams,
+      creationParamsCodec: creationParamsCodec,
+    );
+
+    _instance._focusCallbacks[id] = onFocus ?? () {};
+    return controller;
+  }
+
+  /// Creates a [SurfaceAndroidViewController] for a new Android view.
+  ///
+  /// `id` is an unused unique identifier generated with [platformViewsRegistry].
+  ///
+  /// `viewType` is the identifier of the Android view type to be created, a
+  /// factory for this view type must have been registered on the platform side.
+  /// Platform view factories are typically registered by plugin code.
+  /// Plugins can register a platform view factory with
+  /// [PlatformViewRegistry#registerViewFactory](/javadoc/io/flutter/plugin/platform/PlatformViewRegistry.html#registerViewFactory-java.lang.String-io.flutter.plugin.platform.PlatformViewFactory-).
+  ///
+  /// `creationParams` will be passed as the args argument of [PlatformViewFactory#create](/javadoc/io/flutter/plugin/platform/PlatformViewFactory.html#create-android.content.Context-int-java.lang.Object-)
+  ///
+  /// `creationParamsCodec` is the codec used to encode `creationParams` before sending it to the
+  /// platform side. It should match the codec passed to the constructor of [PlatformViewFactory](/javadoc/io/flutter/plugin/platform/PlatformViewFactory.html#PlatformViewFactory-io.flutter.plugin.common.MessageCodec-).
+  /// This is typically one of: [StandardMessageCodec], [JSONMessageCodec], [StringCodec], or [BinaryCodec].
+  ///
+  /// `onFocus` is a callback that will be invoked when the Android View asks to get the
+  /// input focus.
+  ///
+  /// The Android view will only be created after [AndroidViewController.setSize] is called for the
+  /// first time.
+  ///
+  /// The `id, `viewType, and `layoutDirection` parameters must not be null.
+  /// If `creationParams` is non null then `creationParamsCodec` must not be null.
+  static SurfaceAndroidViewController initSurfaceAndroidView({
+    @required int id,
+    @required String viewType,
+    @required TextDirection layoutDirection,
+    dynamic creationParams,
+    MessageCodec<dynamic> creationParamsCodec,
+    VoidCallback onFocus,
+  }) {
+    assert(id != null);
+    assert(viewType != null);
+    assert(layoutDirection != null);
+    assert(creationParams == null || creationParamsCodec != null);
+
+
+    final SurfaceAndroidViewController controller = SurfaceAndroidViewController._(
+      viewId: id,
+      viewType: viewType,
+      layoutDirection: layoutDirection,
+      creationParams: creationParams,
+      creationParamsCodec: creationParamsCodec,
+    ).._sendCreateMessage();
 
     _instance._focusCallbacks[id] = onFocus ?? () {};
     return controller;
@@ -600,7 +632,6 @@ class _AndroidMotionEventConverter {
 ///
 /// Typically created with [PlatformViewsService.initAndroidView].
 // TODO(bparrishMines): Remove abstract methods that are not required by all subclasses.
-// They are currently kept only to avoid breaking changes.
 abstract class AndroidViewController extends PlatformViewController {
   AndroidViewController._({
     @required this.viewId,
@@ -903,6 +934,9 @@ class SurfaceAndroidViewController extends AndroidViewController {
 }
 
 /// Controls an Android view that is rendered to a texture.
+///
+/// This is typically used by [AndroidView] to display an Android View in a
+/// [VirtualDisplay](https://developer.android.com/reference/android/hardware/display/VirtualDisplay).
 ///
 /// Typically created with [PlatformViewsService.initAndroidView].
 class TextureAndroidViewController extends AndroidViewController {
