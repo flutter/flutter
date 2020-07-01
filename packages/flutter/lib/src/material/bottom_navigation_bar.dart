@@ -662,10 +662,10 @@ class _Label extends StatelessWidget {
     );
 
     if (item.label != null) {
+      // Do not grow text in bottom navigation bar when we can show a tooltip
+      // instead.
       final MediaQueryData mediaQueryData = MediaQuery.of(context);
       text = MediaQuery(
-        // Do not grow text in bottom navigation bar when we can show a tooltip
-        // instead.
         data: mediaQueryData.copyWith(
           textScaleFactor: math.min(1.0, mediaQueryData.textScaleFactor),
         ),
