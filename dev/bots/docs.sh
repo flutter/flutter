@@ -53,10 +53,15 @@ function create_docset() {
   # show the end of it if there was a problem.
   echo "Building Flutter docset."
   rm -rf flutter.docset
-  (dashing build --source ./doc --config ./dashing.json > /tmp/dashing.log 2>&1 || (tail -100 /tmp/dashing.log; false)) && \
+  time
+  # If dashing gets stuck, Cirrus will time out the build after an hour, and we
+  # never get to see the logs. Thus, we time it out after 30 minutes to see the
+  # logs.
+  (timeout '30m' dashing build --source ./doc --config ./dashing.json > /tmp/dashing.log 2>&1 || (tail -100 /tmp/dashing.log; false)) && \
   cp ./doc/flutter/static-assets/favicon.png ./flutter.docset/icon.png && \
   "$DART" ./dashing_postprocess.dart && \
   tar cf flutter.docset.tar.gz --use-compress-program="gzip --best" flutter.docset
+  time
 }
 
 # Move the offline archives into place, after all the processing of the doc
@@ -111,7 +116,7 @@ if [[ -d "$FLUTTER_PUB_CACHE" ]]; then
 fi
 
 # Install and activate dartdoc.
-"$PUB" global activate dartdoc 0.31.0
+"$PUB" global activate dartdoc 0.32.1
 
 # This script generates a unified doc set, and creates
 # a custom index.html, placing everything into dev/docs/doc.
