@@ -73,12 +73,6 @@ class HitTestEntry {
   Matrix4 _transform;
 }
 
-class _Ref<T> {
-  _Ref(this.value);
-
-  T value;
-}
-
 // A type of data that can be applied to a matrix by left-multiplication.
 @immutable
 abstract class _TransformPart {
@@ -86,12 +80,7 @@ abstract class _TransformPart {
 
   factory _TransformPart.matrix(Matrix4 matrix) => _MatrixTransformPart(matrix);
 
-  Matrix4 _assertMatrix() {
-    assert(false, '$this is not a Matrix transform part.');
-    throw UnimplementedError('$this is not a Matrix transform part.');
-  }
-
-  _TransformPart multiply(Matrix4 rhs);
+  Matrix4 multiply(Matrix4 rhs);
 }
 
 class _MatrixTransformPart extends _TransformPart {
@@ -100,11 +89,8 @@ class _MatrixTransformPart extends _TransformPart {
   final Matrix4 matrix;
 
   @override
-  Matrix4 _assertMatrix() => matrix;
-
-  @override
-  _TransformPart multiply(Matrix4 rhs) {
-    return _TransformPart.matrix(matrix * rhs as Matrix4);
+  Matrix4 multiply(Matrix4 rhs) {
+    return matrix * rhs as Matrix4;
   }
 }
 
@@ -114,8 +100,8 @@ class _OffsetTransformPart extends _TransformPart {
   final Offset offset;
 
   @override
-  _TransformPart multiply(Matrix4 rhs) {
-    return _TransformPart.matrix(rhs.clone()..leftTranslate(offset.dx, offset.dy));
+  Matrix4 multiply(Matrix4 rhs) {
+    return rhs.clone()..leftTranslate(offset.dx, offset.dy);
   }
 }
 
@@ -124,8 +110,8 @@ class HitTestResult {
   /// Creates an empty hit test result.
   HitTestResult()
      : _path = <HitTestEntry>[],
-       _transforms = <_TransformPart>[_TransformPart.matrix(Matrix4.identity())],
-       _globalizedTransforms = _Ref<int>(1);
+       _transforms = <Matrix4>[Matrix4.identity()],
+       _localTransforms = <_TransformPart>[];
 
   /// Wraps `result` (usually a subtype of [HitTestResult]) to create a
   /// generic [HitTestResult].
@@ -136,7 +122,7 @@ class HitTestResult {
   HitTestResult.wrap(HitTestResult result)
      : _path = result._path,
        _transforms = result._transforms,
-       _globalizedTransforms = result._globalizedTransforms;
+       _localTransforms = result._localTransforms;
 
   /// An unmodifiable list of [HitTestEntry] objects recorded during the hit test.
   ///
@@ -148,37 +134,35 @@ class HitTestResult {
 
   // A stack of transform parts.
   //
-  // Elements with index < `_globalizedTransforms` are globalized matrices,
-  // meaning they have been multiplied by the ancesters and are thus relative to
-  // the global coordinate space. The others are relative to the parent's
-  // coordinate space, which are only globalized by `_globalizeTransforms`
-  // before being used by `_lastTransform`.
-  final List<_TransformPart> _transforms;
-  // The number of elements (from the head) in `_transforms` that have been
-  // globalized.
+  // The transform part stack leading from global to the current object is stored
+  // in 2 parts:
   //
-  // The `_globalizedTransforms` is a reference of int, instead of a direct int,
-  // because a new instance created by [HitTestResult.wrap] needs to have
-  // up-to-date properties automatically.
-  final _Ref<int> _globalizedTransforms;
+  //  * `_transforms` are globalized matrices, meaning they have been multiplied
+  //    by the ancesters and are thus relative to the global coordinate space.
+  //  * `_localTransforms` are local transform parts, which are relative to the
+  //    parent's coordinate space.
+  //
+  // When new transform parts are added they're appended to `_localTransforms`,
+  // and are converted to global ones and moved to `_transforms` only when used.
+  final List<Matrix4> _transforms;
+  final List<_TransformPart> _localTransforms;
 
   // Globalize all transform parts in `_transforms`.
   void _globalizeTransforms() {
-    int globalizedTransforms = _globalizedTransforms.value;
-    if (globalizedTransforms >= _transforms.length) {
-      assert(globalizedTransforms == _transforms.length);
+    if (_localTransforms.isEmpty) {
       return;
     }
-    for (_TransformPart last = _transforms[globalizedTransforms - 1]; globalizedTransforms < _transforms.length; globalizedTransforms += 1) {
-      last = _transforms[globalizedTransforms].multiply(last._assertMatrix());
-      _transforms[globalizedTransforms] = last;
+    Matrix4 last = _transforms.last;
+    for (final _TransformPart part in _localTransforms) {
+      last = part.multiply(last);
+      _transforms.add(last);
     }
-    _globalizedTransforms.value = globalizedTransforms;
+    _localTransforms.clear();
   }
 
   Matrix4 get _lastTransform {
     _globalizeTransforms();
-    return _transforms.last._assertMatrix();
+    return _transforms.last;
   }
 
   /// Add a [HitTestEntry] to the path.
@@ -188,7 +172,7 @@ class HitTestResult {
   /// upward walk of the tree being hit tested.
   void add(HitTestEntry entry) {
     assert(entry._transform == null);
-    entry._transform = _transforms.isEmpty ? null : _lastTransform;
+    entry._transform = _lastTransform;
     _path.add(entry);
   }
 
@@ -207,7 +191,7 @@ class HitTestResult {
   /// the perspective component.
   ///
   /// If the provided `transform` is a translation matrix, it is much faster
-  /// to use [pushOffst] with the translation offset instead.
+  /// to use [pushOffset ct] with the translation offset instead.
   ///
   /// [HitTestable]s need to call this method indirectly through a convenience
   /// method defined on a subclass before hit testing a child that does not
@@ -232,7 +216,7 @@ class HitTestResult {
       'matrix through PointerEvent.removePerspectiveTransform? '
       'The provided matrix is:\n$transform'
     );
-    _transforms.add(_TransformPart.matrix(transform));
+    _localTransforms.add(_TransformPart.matrix(transform));
   }
 
   /// Pushes a new translation offset that is to be applied to all future
@@ -263,7 +247,7 @@ class HitTestResult {
   @protected
   void pushOffset(Offset offset) {
     assert(offset != null);
-    _transforms.add(_OffsetTransformPart(offset));
+    _localTransforms.add(_OffsetTransformPart(offset));
   }
 
   /// Removes the last transform added via [pushTransform] or [pushOffset].
@@ -281,10 +265,11 @@ class HitTestResult {
   ///    function pair in more details.
   @protected
   void popTransform() {
+    if (_localTransforms.isNotEmpty)
+      _localTransforms.removeLast();
+    else
+      _transforms.removeLast();
     assert(_transforms.isNotEmpty);
-    assert(_globalizedTransforms.value <= _transforms.length);
-    _transforms.removeLast();
-    _globalizedTransforms.value = min(_transforms.length, _globalizedTransforms.value);
   }
 
   bool _debugVectorMoreOrLessEquals(Vector4 a, Vector4 b, { double epsilon = precisionErrorTolerance }) {
