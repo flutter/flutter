@@ -629,8 +629,9 @@ class NavigatorObserver {
 /// will bar any navigator below its subtree from receiving this controller.
 ///
 /// The hero controller inside the [HeroControllerScope] can only subscribe to
-/// one navigator at a time. An assertion will be thrown if there are multiple
-/// parallel navigators under the same [HeroControllerScope].
+/// one navigator at a time. An assertion will be thrown if the hero controller
+/// subscribes to more than one navigators. This can happen when there are
+/// multiple navigators under the same [HeroControllerScope] in parallel.
 class HeroControllerScope extends InheritedWidget {
   /// Creates a widget to host the input [controller].
   const HeroControllerScope({
@@ -2806,15 +2807,15 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   void _updateHeroController(HeroController newHeroController) {
     if (_heroControllerFromScope != newHeroController) {
       if (newHeroController != null) {
-        // Make sure the same hero controller is not shared between two navigators.
+        // Makes sure the same hero controller is not shared between two navigators.
         assert(() {
           // It is possible that the hero controller subscribes to an existing
-          // navigator. We are fine as long as that navigator giving up the hero
+          // navigator. We are fine as long as that navigator gives up the hero
           // controller at the end of the build.
           if (newHeroController.navigator != null) {
             final NavigatorState previousOwner = newHeroController.navigator;
             ServicesBinding.instance.addPostFrameCallback((Duration timestamp) {
-              // We only check if this navigator still own the hero controller.
+              // We only check if this navigator still owns the hero controller.
               if (_heroControllerFromScope == newHeroController) {
                 assert(_heroControllerFromScope._navigator == this);
                 assert(previousOwner._heroControllerFromScope != newHeroController);
