@@ -1835,21 +1835,12 @@ void main() {
       return MaterialApp(
         home: Builder(
           builder: (BuildContext context) {
-            final ThemeData themeData = Theme.of(context);
-            return Theme(
-              data: themeData.copyWith(
-                appBarTheme: themeData.appBarTheme.copyWith(
-                  // ignore: deprecated_member_use_from_same_package
-                  shouldCapTextScaleForTitle: true,
-                ),
-              ),
-              child: MediaQuery(
-                data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
-                child: Scaffold(
-                  appBar: AppBar(
-                    centerTitle: false,
-                    title: const Text('Jumbo', style: TextStyle(fontSize: 18)),
-                  ),
+            return MediaQuery(
+              data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+              child: Scaffold(
+                appBar: AppBar(
+                  centerTitle: false,
+                  title: const Text('Jumbo', style: TextStyle(fontSize: 18)),
                 ),
               ),
             );
@@ -1884,18 +1875,18 @@ void main() {
           builder: (BuildContext context) {
             return Directionality(
               textDirection: textDirection,
-              child: MediaQuery(
-                data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
-                child: Builder(
-                  builder: (BuildContext context) {
-                    return Scaffold(
-                      appBar: AppBar(
-                        centerTitle: centerTitle,
-                        title: const Text('Jumbo'),
+              child: Builder(
+                builder: (BuildContext context) {
+                  return Scaffold(
+                    appBar: AppBar(
+                      centerTitle: centerTitle,
+                      title: MediaQuery(
+                        data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+                        child: const Text('Jumbo'),
                       ),
-                    );
-                  },
-                ),
+                    ),
+                  );
+                },
               ),
             );
           },
