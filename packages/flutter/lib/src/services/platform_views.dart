@@ -164,7 +164,6 @@ class PlatformViewsService {
     assert(layoutDirection != null);
     assert(creationParams == null || creationParamsCodec != null);
 
-
     final SurfaceAndroidViewController controller = SurfaceAndroidViewController._(
       viewId: id,
       viewType: viewType,

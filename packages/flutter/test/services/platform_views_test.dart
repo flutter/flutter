@@ -44,7 +44,7 @@ void main() {
       );
     });
 
-    test('create Texture Android views', () async {
+    test('create Android views', () async {
       viewsController.registerViewType('webview');
       PlatformViewsService.initAndroidView(id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr)
           .setSize(const Size(100.0, 100.0));
