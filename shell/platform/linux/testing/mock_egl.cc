@@ -4,8 +4,81 @@
 
 #include <EGL/egl.h>
 
-EGLBoolean eglBindAPI(EGLenum api) {
+typedef struct {
+  EGLint config_id;
+  EGLint buffer_size;
+  EGLint color_buffer_type;
+  EGLint transparent_type;
+  EGLint level;
+  EGLint red_size;
+  EGLint green_size;
+  EGLint blue_size;
+  EGLint alpha_size;
+  EGLint depth_size;
+  EGLint stencil_size;
+  EGLint samples;
+  EGLint sample_buffers;
+  EGLint native_visual_id;
+  EGLint native_visual_type;
+  EGLint native_renderable;
+  EGLint config_caveat;
+  EGLint bind_to_texture_rgb;
+  EGLint bind_to_texture_rgba;
+  EGLint renderable_type;
+  EGLint conformant;
+  EGLint surface_type;
+  EGLint max_pbuffer_width;
+  EGLint max_pbuffer_height;
+  EGLint max_pbuffer_pixels;
+  EGLint min_swap_interval;
+  EGLint max_swap_interval;
+} MockConfig;
+
+typedef struct {
+  bool initialized;
+  MockConfig config;
+} MockDisplay;
+
+static MockDisplay mock_display;
+
+static EGLint mock_error = EGL_SUCCESS;
+
+static bool check_display(EGLDisplay dpy) {
+  if (dpy == nullptr) {
+    mock_error = EGL_BAD_DISPLAY;
+    return false;
+  }
+
+  MockDisplay* display = static_cast<MockDisplay*>(dpy);
+  if (!display->initialized) {
+    mock_error = EGL_NOT_INITIALIZED;
+    return false;
+  }
+
+  return true;
+}
+
+static bool check_config(EGLConfig config) {
+  if (config == nullptr) {
+    mock_error = EGL_BAD_CONFIG;
+    return false;
+  }
+
+  return true;
+}
+
+static EGLBoolean bool_success() {
+  mock_error = EGL_SUCCESS;
   return EGL_TRUE;
+}
+
+static EGLBoolean bool_failure(EGLint error) {
+  mock_error = error;
+  return EGL_FALSE;
+}
+
+EGLBoolean eglBindAPI(EGLenum api) {
+  return bool_success();
 }
 
 EGLBoolean eglChooseConfig(EGLDisplay dpy,
@@ -13,63 +86,233 @@ EGLBoolean eglChooseConfig(EGLDisplay dpy,
                            EGLConfig* configs,
                            EGLint config_size,
                            EGLint* num_config) {
-  return EGL_TRUE;
+  MockDisplay* display = static_cast<MockDisplay*>(dpy);
+
+  if (configs == nullptr) {
+    if (num_config != nullptr)
+      *num_config = 1;
+    return bool_success();
+  }
+
+  EGLint n_returned = 0;
+  if (config_size >= 1) {
+    configs[0] = &display->config;
+  }
+
+  if (num_config != nullptr)
+    *num_config = n_returned;
+
+  return bool_success();
 }
 
 EGLContext eglCreateContext(EGLDisplay dpy,
                             EGLConfig config,
                             EGLContext share_context,
                             const EGLint* attrib_list) {
-  return nullptr;
+  if (!check_display(dpy) || !check_config(config))
+    return EGL_NO_CONTEXT;
+
+  mock_error = EGL_SUCCESS;
+  return EGL_NO_CONTEXT;
 }
 
 EGLSurface eglCreatePbufferSurface(EGLDisplay dpy,
                                    EGLConfig config,
                                    const EGLint* attrib_list) {
-  return nullptr;
+  if (!check_display(dpy) || !check_config(config))
+    return EGL_NO_SURFACE;
+
+  mock_error = EGL_SUCCESS;
+  return EGL_NO_SURFACE;
 }
 
 EGLSurface eglCreateWindowSurface(EGLDisplay dpy,
                                   EGLConfig config,
                                   EGLNativeWindowType win,
                                   const EGLint* attrib_list) {
-  return nullptr;
+  if (!check_display(dpy) || !check_config(config))
+    return EGL_NO_SURFACE;
+
+  mock_error = EGL_SUCCESS;
+  return EGL_NO_SURFACE;
+}
+
+EGLBoolean eglGetConfigAttrib(EGLDisplay dpy,
+                              EGLConfig config,
+                              EGLint attribute,
+                              EGLint* value) {
+  if (!check_display(dpy) || !check_config(config))
+    return EGL_FALSE;
+
+  MockConfig* c = static_cast<MockConfig*>(config);
+  switch (attribute) {
+    case EGL_CONFIG_ID:
+      *value = c->config_id;
+      return bool_success();
+    case EGL_BUFFER_SIZE:
+      *value = c->buffer_size;
+      return bool_success();
+    case EGL_COLOR_BUFFER_TYPE:
+      *value = c->color_buffer_type;
+      return bool_success();
+    case EGL_TRANSPARENT_TYPE:
+      *value = c->transparent_type;
+      return bool_success();
+    case EGL_LEVEL:
+      *value = c->level;
+      return bool_success();
+    case EGL_RED_SIZE:
+      *value = c->red_size;
+      return bool_success();
+    case EGL_GREEN_SIZE:
+      *value = c->green_size;
+      return bool_success();
+    case EGL_BLUE_SIZE:
+      *value = c->blue_size;
+      return bool_success();
+    case EGL_ALPHA_SIZE:
+      *value = c->alpha_size;
+      return bool_success();
+    case EGL_DEPTH_SIZE:
+      *value = c->depth_size;
+      return bool_success();
+    case EGL_STENCIL_SIZE:
+      *value = c->stencil_size;
+      return bool_success();
+    case EGL_SAMPLES:
+      *value = c->samples;
+      return bool_success();
+    case EGL_SAMPLE_BUFFERS:
+      *value = c->sample_buffers;
+      return bool_success();
+    case EGL_NATIVE_VISUAL_ID:
+      *value = c->native_visual_id;
+      return bool_success();
+    case EGL_NATIVE_VISUAL_TYPE:
+      *value = c->native_visual_type;
+      return bool_success();
+    case EGL_NATIVE_RENDERABLE:
+      *value = c->native_renderable;
+      return bool_success();
+    case EGL_CONFIG_CAVEAT:
+      *value = c->config_caveat;
+      return bool_success();
+    case EGL_BIND_TO_TEXTURE_RGB:
+      *value = c->bind_to_texture_rgb;
+      return bool_success();
+    case EGL_BIND_TO_TEXTURE_RGBA:
+      *value = c->bind_to_texture_rgba;
+      return bool_success();
+    case EGL_RENDERABLE_TYPE:
+      *value = c->renderable_type;
+      return bool_success();
+    case EGL_CONFORMANT:
+      *value = c->conformant;
+      return bool_success();
+    case EGL_SURFACE_TYPE:
+      *value = c->surface_type;
+      return bool_success();
+    case EGL_MAX_PBUFFER_WIDTH:
+      *value = c->max_pbuffer_width;
+      return bool_success();
+    case EGL_MAX_PBUFFER_HEIGHT:
+      *value = c->max_pbuffer_height;
+      return bool_success();
+    case EGL_MAX_PBUFFER_PIXELS:
+      *value = c->max_pbuffer_pixels;
+      return bool_success();
+    case EGL_MIN_SWAP_INTERVAL:
+      *value = c->min_swap_interval;
+      return bool_success();
+    case EGL_MAX_SWAP_INTERVAL:
+      *value = c->max_swap_interval;
+      return bool_success();
+    default:
+      return bool_failure(EGL_BAD_ATTRIBUTE);
+  }
 }
 
 EGLDisplay eglGetDisplay(EGLNativeDisplayType display_id) {
-  return nullptr;
+  return &mock_display;
 }
 
 EGLint eglGetError() {
-  return EGL_SUCCESS;
+  EGLint error = mock_error;
+  mock_error = EGL_SUCCESS;
+  return error;
 }
 
 void (*eglGetProcAddress(const char* procname))(void) {
+  mock_error = EGL_SUCCESS;
   return nullptr;
 }
 
 EGLBoolean eglInitialize(EGLDisplay dpy, EGLint* major, EGLint* minor) {
+  MockDisplay* display = static_cast<MockDisplay*>(dpy);
+
+  if (!display->initialized) {
+    MockConfig* c = &display->config;
+    c->config_id = 1;
+    c->buffer_size = 32;
+    c->color_buffer_type = EGL_RGB_BUFFER;
+    c->transparent_type = EGL_NONE;
+    c->level = 1;
+    c->red_size = 8;
+    c->green_size = 8;
+    c->blue_size = 8;
+    c->alpha_size = 0;
+    c->depth_size = 0;
+    c->stencil_size = 0;
+    c->samples = 0;
+    c->sample_buffers = 0;
+    c->native_visual_id = 1;
+    c->native_visual_type = 0;
+    c->native_renderable = EGL_TRUE;
+    c->config_caveat = EGL_NONE;
+    c->bind_to_texture_rgb = EGL_TRUE;
+    c->bind_to_texture_rgba = EGL_FALSE;
+    c->renderable_type = EGL_OPENGL_ES2_BIT;
+    c->conformant = EGL_OPENGL_ES2_BIT;
+    c->surface_type = EGL_WINDOW_BIT | EGL_PBUFFER_BIT;
+    c->max_pbuffer_width = 1024;
+    c->max_pbuffer_height = 1024;
+    c->max_pbuffer_pixels = 1024 * 1024;
+    c->min_swap_interval = 0;
+    c->max_swap_interval = 1000;
+    display->initialized = true;
+  }
+
   if (major != nullptr)
     *major = 1;
   if (minor != nullptr)
     *major = 5;
-  return EGL_TRUE;
+
+  return bool_success();
 }
 
 EGLBoolean eglMakeCurrent(EGLDisplay dpy,
                           EGLSurface draw,
                           EGLSurface read,
                           EGLContext ctx) {
-  return EGL_TRUE;
+  if (!check_display(dpy))
+    return EGL_FALSE;
+
+  return bool_success();
 }
 
 EGLBoolean eglQueryContext(EGLDisplay dpy,
                            EGLContext ctx,
                            EGLint attribute,
                            EGLint* value) {
-  return EGL_TRUE;
+  if (!check_display(dpy))
+    return EGL_FALSE;
+
+  return bool_success();
 }
 
 EGLBoolean eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
-  return EGL_TRUE;
+  if (!check_display(dpy))
+    return EGL_FALSE;
+
+  return bool_success();
 }
