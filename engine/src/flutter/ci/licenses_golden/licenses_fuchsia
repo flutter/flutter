@@ -1,4 +1,4 @@
-Signature: 1415defa4477f493741bbc4955244525
+Signature: 16b3fb829951f32b91db4cfdfba41ad2
 
 UNUSED LICENSES:
 
@@ -1395,7 +1395,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/privacy.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/settings.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/setup.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/system.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys.test/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/types.fidl
