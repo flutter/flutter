@@ -76,6 +76,7 @@ source_set("flutter_linux_sources") {
   configs += [ "//flutter/shell/platform/linux/config:gtk" ]
 
   sources = [
+    "egl_utils.cc",
     "fl_basic_message_channel.cc",
     "fl_binary_codec.cc",
     "fl_binary_messenger.cc",
@@ -138,6 +139,7 @@ executable("flutter_linux_unittests") {
   testonly = true
 
   sources = [
+    "egl_utils_test.cc",
     "fl_basic_message_channel_test.cc",
     "fl_binary_codec_test.cc",
     "fl_binary_messenger_test.cc",
