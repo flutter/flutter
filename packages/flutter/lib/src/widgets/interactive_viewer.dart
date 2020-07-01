@@ -848,7 +848,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     if (event is PointerScrollEvent) {
       final RenderBox childRenderBox = _childKey.currentContext.findRenderObject() as RenderBox;
       final Size childSize = childRenderBox.size;
-      final double scaleChange = 1.0 + event.scrollDelta.dy / childSize.height;
+      final double scaleChange = 1.0 - event.scrollDelta.dy / childSize.height;
       if (scaleChange == 0.0) {
         return;
       }

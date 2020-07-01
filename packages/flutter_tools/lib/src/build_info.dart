@@ -30,9 +30,15 @@ class BuildInfo {
     @required this.treeShakeIcons,
     this.performanceMeasurementFile,
     this.packagesPath = '.packages',
+    this.nullSafetyMode = NullSafetyMode.autodetect,
   });
 
   final BuildMode mode;
+
+  /// The null safety mode the application should be run in.
+  ///
+  /// If not provided, defaults to [NullSafetyMode.autodetect].
+  final NullSafetyMode nullSafetyMode;
 
   /// Whether the build should subdset icon fonts.
   final bool treeShakeIcons;
@@ -687,4 +693,11 @@ List<String> decodeDartDefines(Map<String, String> environmentDefines, String ke
     .map<Object>(Uri.decodeComponent)
     .cast<String>()
     .toList();
+}
+
+/// The null safety runtime mode the app should be built in.
+enum NullSafetyMode {
+  sound,
+  unsound,
+  autodetect,
 }
