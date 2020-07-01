@@ -195,7 +195,7 @@ class HitTestResult {
   /// the perspective component.
   ///
   /// If the provided `transform` is a translation matrix, it is much faster
-  /// to use [pushOffset ct] with the translation offset instead.
+  /// to use [pushOffset] with the translation offset instead.
   ///
   /// [HitTestable]s need to call this method indirectly through a convenience
   /// method defined on a subclass before hit testing a child that does not
