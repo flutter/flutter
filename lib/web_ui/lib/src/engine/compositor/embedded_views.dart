@@ -13,8 +13,8 @@ class HtmlViewEmbedder {
   /// for further paint commands to paint to, since the composited view will
   /// be on top of the current canvas, and we want further paint commands to
   /// be on top of the platform view.
-  final Map<int, SkPictureRecorder> _pictureRecorders =
-      <int, SkPictureRecorder>{};
+  final Map<int, CkPictureRecorder> _pictureRecorders =
+      <int, CkPictureRecorder>{};
 
   /// The most recent composition parameters for a given view id.
   ///
@@ -128,8 +128,8 @@ class HtmlViewEmbedder {
     callback(codec.encodeSuccessEnvelope(null));
   }
 
-  List<SkCanvas?> getCurrentCanvases() {
-    final List<SkCanvas?> canvases = <SkCanvas?>[];
+  List<CkCanvas?> getCurrentCanvases() {
+    final List<CkCanvas?> canvases = <CkCanvas?>[];
     for (int i = 0; i < _compositionOrder.length; i++) {
       final int viewId = _compositionOrder[i];
       canvases.add(_pictureRecorders[viewId]!.recordingCanvas);
@@ -138,7 +138,7 @@ class HtmlViewEmbedder {
   }
 
   void prerollCompositeEmbeddedView(int viewId, EmbeddedViewParams params) {
-    final pictureRecorder = SkPictureRecorder();
+    final pictureRecorder = CkPictureRecorder();
     pictureRecorder.beginRecording(ui.Offset.zero & _frameSize);
     pictureRecorder.recordingCanvas!.clear(ui.Color(0x00000000));
     _pictureRecorders[viewId] = pictureRecorder;
@@ -152,7 +152,7 @@ class HtmlViewEmbedder {
     _viewsToRecomposite.add(viewId);
   }
 
-  SkCanvas? compositeEmbeddedView(int viewId) {
+  CkCanvas? compositeEmbeddedView(int viewId) {
     // Do nothing if this view doesn't need to be composited.
     if (!_viewsToRecomposite.contains(viewId)) {
       return _pictureRecorders[viewId]!.recordingCanvas;
@@ -252,7 +252,7 @@ class HtmlViewEmbedder {
             clipView.style.clip = 'rect(${rect.top}px, ${rect.right}px, '
                 '${rect.bottom}px, ${rect.left}px)';
           } else if (mutator.rrect != null) {
-            final SkPath path = SkPath();
+            final CkPath path = CkPath();
             path.addRRect(mutator.rrect!);
             _ensureSvgPathDefs();
             html.Element pathDefs = _svgPathDefs!.querySelector('#sk_path_defs')!;
@@ -264,7 +264,7 @@ class HtmlViewEmbedder {
             pathDefs.append(newClipPath);
             clipView.style.clipPath = 'url(#svgClip$_clipPathCount)';
           } else if (mutator.path != null) {
-            final SkPath path = mutator.path as SkPath;
+            final CkPath path = mutator.path as CkPath;
             _ensureSvgPathDefs();
             html.Element pathDefs = _svgPathDefs!.querySelector('#sk_path_defs')!;
             _clipPathCount += 1;
@@ -332,7 +332,7 @@ class HtmlViewEmbedder {
       ensureOverlayInitialized(viewId);
       final SurfaceFrame frame =
           _overlays[viewId]!.surface.acquireFrame(_frameSize);
-      final SkCanvas canvas = frame.skiaCanvas;
+      final CkCanvas canvas = frame.skiaCanvas;
       canvas.drawPicture(_pictureRecorders[viewId]!.endRecording());
       frame.submit();
     }
@@ -384,7 +384,7 @@ class HtmlViewEmbedder {
       return;
     }
     Surface surface = Surface(this);
-    SkSurface? skSurface = surface.acquireRenderSurface(_frameSize);
+    CkSurface? skSurface = surface.acquireRenderSurface(_frameSize);
     _overlays[viewId] = Overlay(surface, skSurface);
   }
 }
@@ -537,7 +537,7 @@ class MutatorsStack extends Iterable<Mutator> {
 /// Represents a surface overlaying a platform view.
 class Overlay {
   final Surface surface;
-  final SkSurface? skSurface;
+  final CkSurface? skSurface;
 
   Overlay(this.surface, this.skSurface);
 }

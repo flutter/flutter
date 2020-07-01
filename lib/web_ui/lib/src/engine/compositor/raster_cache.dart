@@ -48,5 +48,5 @@ class RasterCacheResult {
   bool get isValid => false;
 
   /// Draws the rasterized picture into the [canvas].
-  void draw(SkCanvas canvas) {}
+  void draw(CkCanvas canvas) {}
 }

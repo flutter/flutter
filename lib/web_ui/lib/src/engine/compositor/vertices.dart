@@ -14,10 +14,10 @@ js.JsArray<Float32List> _encodeRawColorList(Int32List rawColors) {
   return makeColorList(colors);
 }
 
-class SkVertices implements ui.Vertices {
+class CkVertices implements ui.Vertices {
   js.JsObject? skVertices;
 
-  SkVertices(
+  CkVertices(
     ui.VertexMode mode,
     List<ui.Offset> positions, {
     List<ui.Offset>? textureCoordinates,
@@ -45,7 +45,7 @@ class SkVertices implements ui.Vertices {
       throw ArgumentError('Invalid configuration for vertices.');
   }
 
-  SkVertices.raw(
+  CkVertices.raw(
     ui.VertexMode mode,
     Float32List positions, {
     Float32List? textureCoordinates,

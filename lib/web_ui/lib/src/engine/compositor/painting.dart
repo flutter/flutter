@@ -9,8 +9,8 @@ part of engine;
 ///
 /// This class is backed by a Skia object that must be explicitly
 /// deleted to avoid a memory leak. This is done by extending [SkiaObject].
-class SkPaint extends ResurrectableSkiaObject implements ui.Paint {
-  SkPaint();
+class CkPaint extends ResurrectableSkiaObject implements ui.Paint {
+  CkPaint();
 
   static const ui.Color _defaultPaintColor = ui.Color(0xFF000000);
   static final js.JsObject? _skPaintStyleStroke =
@@ -157,12 +157,12 @@ class SkPaint extends ResurrectableSkiaObject implements ui.Paint {
   }
 
   void _syncMaskFilter(js.JsObject object) {
-    SkMaskFilter? skMaskFilter;
+    CkMaskFilter? skMaskFilter;
     if (_maskFilter != null) {
       final ui.BlurStyle blurStyle = _maskFilter!.webOnlyBlurStyle;
       final double sigma = _maskFilter!.webOnlySigma;
 
-      skMaskFilter = SkMaskFilter.blur(blurStyle, sigma);
+      skMaskFilter = CkMaskFilter.blur(blurStyle, sigma);
     }
     object.callMethod('setMaskFilter', <js.JsObject?>[skMaskFilter?.skiaObject]);
   }
@@ -209,7 +209,7 @@ class SkPaint extends ResurrectableSkiaObject implements ui.Paint {
   void _syncColorFilter(js.JsObject object) {
     js.JsObject? skColorFilterJs;
     if (_colorFilter != null) {
-      SkColorFilter? skFilter = _colorFilter!._toSkColorFilter();
+      CkColorFilter? skFilter = _colorFilter!._toCkColorFilter();
       skColorFilterJs = skFilter!.skiaObject;
     }
     object.callMethod('setColorFilter', <js.JsObject?>[skColorFilterJs]);
@@ -231,7 +231,7 @@ class SkPaint extends ResurrectableSkiaObject implements ui.Paint {
   ui.ImageFilter? get imageFilter => _imageFilter;
   @override
   set imageFilter(ui.ImageFilter? value) {
-    _imageFilter = value as SkImageFilter?;
+    _imageFilter = value as CkImageFilter?;
     _syncImageFilter(skiaObject);
   }
 
@@ -243,7 +243,7 @@ class SkPaint extends ResurrectableSkiaObject implements ui.Paint {
     object.callMethod('setImageFilter', <js.JsObject?>[imageFilterJs]);
   }
 
-  SkImageFilter? _imageFilter;
+  CkImageFilter? _imageFilter;
 
   @override
   js.JsObject createDefault() {

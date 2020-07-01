@@ -5,18 +5,18 @@
 
 part of engine;
 
-/// A [ui.ColorFilter] backed by Skia's [SkColorFilter].
-class SkColorFilter extends ResurrectableSkiaObject {
+/// A [ui.ColorFilter] backed by Skia's [CkColorFilter].
+class CkColorFilter extends ResurrectableSkiaObject {
   final EngineColorFilter _engineFilter;
 
-  SkColorFilter.mode(EngineColorFilter filter) : _engineFilter = filter;
+  CkColorFilter.mode(EngineColorFilter filter) : _engineFilter = filter;
 
-  SkColorFilter.matrix(EngineColorFilter filter) : _engineFilter = filter;
+  CkColorFilter.matrix(EngineColorFilter filter) : _engineFilter = filter;
 
-  SkColorFilter.linearToSrgbGamma(EngineColorFilter filter)
+  CkColorFilter.linearToSrgbGamma(EngineColorFilter filter)
       : _engineFilter = filter;
 
-  SkColorFilter.srgbToLinearGamma(EngineColorFilter filter)
+  CkColorFilter.srgbToLinearGamma(EngineColorFilter filter)
       : _engineFilter = filter;
 
   js.JsObject _createSkiaObjectFromFilter() {

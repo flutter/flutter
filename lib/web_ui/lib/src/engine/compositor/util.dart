@@ -313,7 +313,7 @@ js.JsArray<double> makeSkiaColorStops(List<double>? colorStops) {
 
 void drawSkShadow(
   js.JsObject skCanvas,
-  SkPath path,
+  CkPath path,
   ui.Color color,
   double elevation,
   bool transparentOccluder,
