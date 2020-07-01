@@ -947,13 +947,14 @@ void main() {
                 ],
               ),
             ],
-          )
-        )
+          ),
+        ),
       );
 
-    final RenderTable table = tester.renderObject(find.byType(Table));
-    expect(table.textBaseline, TextBaseline.alphabetic);
-  });
+      final RenderTable table = tester.renderObject(find.byType(Table));
+      expect(table.textBaseline, TextBaseline.alphabetic);
+    },
+  );
 
   // TODO(ianh): Test handling of TableCell object
 }
