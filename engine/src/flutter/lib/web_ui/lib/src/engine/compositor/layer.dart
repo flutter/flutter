@@ -48,10 +48,10 @@ class PaintContext {
   /// A multi-canvas that applies clips, transforms, and opacity
   /// operations to all canvases (root canvas and overlay canvases for the
   /// platform views).
-  SkNWayCanvas internalNodesCanvas;
+  CkNWayCanvas internalNodesCanvas;
 
   /// The canvas for leaf nodes to paint to.
-  SkCanvas? leafNodesCanvas;
+  CkCanvas? leafNodesCanvas;
 
   /// A raster cache potentially containing pre-rendered pictures.
   final RasterCache? rasterCache;
@@ -365,7 +365,7 @@ class ImageFilterLayer extends ContainerLayer implements ui.OpacityEngineLayer {
 /// A layer containing a [Picture].
 class PictureLayer extends Layer {
   /// The picture to paint into the canvas.
-  final SkPicture picture;
+  final CkPicture picture;
 
   /// The offset at which to paint the picture.
   final ui.Offset offset;
@@ -486,7 +486,7 @@ class PhysicalShapeLayer extends ContainerLayer
 
     final ui.Paint paint = ui.Paint()..color = _color!;
     if (_clipBehavior != ui.Clip.antiAliasWithSaveLayer) {
-      paintContext.leafNodesCanvas!.drawPath(_path!, paint as SkPaint);
+      paintContext.leafNodesCanvas!.drawPath(_path!, paint as CkPaint);
     }
 
     final int? saveCount = paintContext.internalNodesCanvas.save();
@@ -510,7 +510,7 @@ class PhysicalShapeLayer extends ContainerLayer
       // (https://github.com/flutter/flutter/issues/18057#issue-328003931)
       // using saveLayer, we have to call drawPaint instead of drawPath as
       // anti-aliased drawPath will always have such artifacts.
-      paintContext.leafNodesCanvas!.drawPaint(paint as SkPaint);
+      paintContext.leafNodesCanvas!.drawPaint(paint as CkPaint);
     }
 
     paintChildren(paintContext);
@@ -522,7 +522,7 @@ class PhysicalShapeLayer extends ContainerLayer
   ///
   /// The blur of the shadow is decided by the [elevation], and the
   /// shadow is painted with the given [color].
-  static void drawShadow(SkCanvas canvas, ui.Path path, ui.Color color,
+  static void drawShadow(CkCanvas canvas, ui.Path path, ui.Color color,
       double elevation, bool transparentOccluder) {
     canvas.drawShadow(path, color, elevation, transparentOccluder);
   }
@@ -552,7 +552,7 @@ class PlatformViewLayer extends Layer {
 
   @override
   void paint(PaintContext context) {
-    SkCanvas? canvas = context.viewEmbedder!.compositeEmbeddedView(viewId);
+    CkCanvas? canvas = context.viewEmbedder!.compositeEmbeddedView(viewId);
     context.leafNodesCanvas = canvas;
   }
 }

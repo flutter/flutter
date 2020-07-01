@@ -49,7 +49,7 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     bool willChangeHint = false,
   }) {
     currentLayer!.add(PictureLayer(
-        picture as SkPicture, offset, isComplexHint, willChangeHint));
+        picture as CkPicture, offset, isComplexHint, willChangeHint));
   }
 
   @override

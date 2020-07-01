@@ -7,8 +7,8 @@ part of engine;
 /// The CanvasKit implementation of [ui.ImageFilter].
 ///
 /// Currently only supports `blur`.
-class SkImageFilter extends ResurrectableSkiaObject implements ui.ImageFilter {
-  SkImageFilter.blur({double sigmaX = 0.0, double sigmaY = 0.0})
+class CkImageFilter extends ResurrectableSkiaObject implements ui.ImageFilter {
+  CkImageFilter.blur({double sigmaX = 0.0, double sigmaY = 0.0})
       : _sigmaX = sigmaX,
         _sigmaY = sigmaY;
 
@@ -33,7 +33,7 @@ class SkImageFilter extends ResurrectableSkiaObject implements ui.ImageFilter {
 
   @override
   bool operator ==(Object other) {
-    return other is SkImageFilter
+    return other is CkImageFilter
         && other._sigmaX == _sigmaX
         && other._sigmaY == _sigmaY;
   }

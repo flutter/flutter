@@ -114,7 +114,7 @@ class EngineColorFilter implements ui.ColorFilter {
   final List<double>? _matrix;
   final int _type;
 
-  // The type of SkColorFilter class to create for Skia.
+  // The type of CkColorFilter class to create for Skia.
   static const int _TypeMode = 1; // MakeModeFilter
   static const int _TypeMatrix = 2; // MakeMatrixFilterRowMajor255
   static const int _TypeLinearToSrgbGamma = 3; // MakeLinearToSRGBGamma
@@ -129,23 +129,23 @@ class EngineColorFilter implements ui.ColorFilter {
         && other._blendMode == _blendMode;
   }
 
-  SkColorFilter? _toSkColorFilter() {
+  CkColorFilter? _toCkColorFilter() {
     switch (_type) {
       case _TypeMode:
         if (_color == null || _blendMode == null) {
           return null;
         }
-        return SkColorFilter.mode(this);
+        return CkColorFilter.mode(this);
       case _TypeMatrix:
         if (_matrix == null) {
           return null;
         }
         assert(_matrix!.length == 20, 'Color Matrix must have 20 entries.');
-        return SkColorFilter.matrix(this);
+        return CkColorFilter.matrix(this);
       case _TypeLinearToSrgbGamma:
-        return SkColorFilter.linearToSrgbGamma(this);
+        return CkColorFilter.linearToSrgbGamma(this);
       case _TypeSrgbToLinearGamma:
-        return SkColorFilter.srgbToLinearGamma(this);
+        return CkColorFilter.srgbToLinearGamma(this);
       default:
         throw StateError('Unknown mode $_type for ColorFilter.');
     }

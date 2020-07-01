@@ -35,9 +35,9 @@ class LayerTree {
   /// If [ignoreRasterCache] is `true`, then the raster cache will
   /// not be used.
   void paint(Frame frame, {bool ignoreRasterCache = false}) {
-    final SkNWayCanvas internalNodesCanvas = SkNWayCanvas();
+    final CkNWayCanvas internalNodesCanvas = CkNWayCanvas();
     internalNodesCanvas.addCanvas(frame.canvas);
-    final List<SkCanvas?> overlayCanvases =
+    final List<CkCanvas?> overlayCanvases =
         frame.viewEmbedder!.getCurrentCanvases();
     for (int i = 0; i < overlayCanvases.length; i++) {
       internalNodesCanvas.addCanvas(overlayCanvases[i]);
@@ -65,7 +65,7 @@ ui.Size _computeFrameSize() {
 /// A single frame to be rendered.
 class Frame {
   /// The canvas to render this frame to.
-  final SkCanvas canvas;
+  final CkCanvas canvas;
 
   /// A cache of pre-rastered pictures.
   final RasterCache? rasterCache;
@@ -93,7 +93,7 @@ class CompositorContext {
   RasterCache? rasterCache;
 
   /// Acquire a frame using this compositor's settings.
-  Frame acquireFrame(SkCanvas canvas, HtmlViewEmbedder? viewEmbedder) {
+  Frame acquireFrame(CkCanvas canvas, HtmlViewEmbedder? viewEmbedder) {
     return Frame(canvas, rasterCache, viewEmbedder);
   }
 }

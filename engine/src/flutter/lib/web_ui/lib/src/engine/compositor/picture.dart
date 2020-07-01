@@ -4,11 +4,11 @@
 
 part of engine;
 
-class SkPicture implements ui.Picture {
+class CkPicture implements ui.Picture {
   final SkiaObject skPicture;
   final ui.Rect? cullRect;
 
-  SkPicture(this.skPicture, this.cullRect);
+  CkPicture(this.skPicture, this.cullRect);
 
   @override
   int get approximateBytesUsed => 0;

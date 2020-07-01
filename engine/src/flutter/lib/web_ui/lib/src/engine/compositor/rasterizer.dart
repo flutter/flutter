@@ -24,7 +24,7 @@ class Rasterizer {
 
       final SurfaceFrame frame = surface.acquireFrame(layerTree.frameSize);
       surface.viewEmbedder.frameSize = layerTree.frameSize;
-      final SkCanvas canvas = frame.skiaCanvas;
+      final CkCanvas canvas = frame.skiaCanvas;
       final Frame compositorFrame =
           context.acquireFrame(canvas, surface.viewEmbedder);
 

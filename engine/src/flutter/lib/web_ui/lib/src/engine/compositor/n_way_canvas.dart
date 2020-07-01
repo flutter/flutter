@@ -6,10 +6,10 @@
 part of engine;
 
 /// A virtual canvas that applies operations to multiple canvases at once.
-class SkNWayCanvas {
-  final List<SkCanvas?> _canvases = <SkCanvas?>[];
+class CkNWayCanvas {
+  final List<CkCanvas?> _canvases = <CkCanvas?>[];
 
-  void addCanvas(SkCanvas? canvas) {
+  void addCanvas(CkCanvas? canvas) {
     _canvases.add(canvas);
   }
 
@@ -25,7 +25,7 @@ class SkNWayCanvas {
   /// Calls [saveLayer] on all canvases.
   void saveLayer(ui.Rect bounds, ui.Paint? paint) {
     for (int i = 0; i < _canvases.length; i++) {
-      _canvases[i]!.saveLayer(bounds, paint as SkPaint);
+      _canvases[i]!.saveLayer(bounds, paint as CkPaint);
     }
   }
 

@@ -558,7 +558,7 @@ abstract class TextStyle {
     List<FontFeature>? fontFeatures,
   }) {
     if (engine.experimentalUseSkia) {
-      return engine.SkTextStyle(
+      return engine.CkTextStyle(
           color: color,
           decoration: decoration,
           decorationColor: decorationColor,
@@ -574,8 +574,8 @@ abstract class TextStyle {
           wordSpacing: wordSpacing,
           height: height,
           locale: locale,
-          background: background as engine.SkPaint?,
-          foreground: foreground as engine.SkPaint?,
+          background: background as engine.CkPaint?,
+          foreground: foreground as engine.CkPaint?,
           shadows: shadows,
           fontFeatures: fontFeatures,
       );
@@ -677,7 +677,7 @@ abstract class ParagraphStyle {
     Locale? locale,
   }) {
     if (engine.experimentalUseSkia) {
-      return engine.SkParagraphStyle(
+      return engine.CkParagraphStyle(
         textAlign: textAlign,
         textDirection: textDirection,
         maxLines: maxLines,
@@ -1485,7 +1485,7 @@ abstract class ParagraphBuilder {
   /// [Paragraph].
   factory ParagraphBuilder(ParagraphStyle style) {
     if (engine.experimentalUseSkia) {
-      return engine.SkParagraphBuilder(style);
+      return engine.CkParagraphBuilder(style);
     } else {
       return engine.EngineParagraphBuilder(style as engine.EngineParagraphStyle);
     }

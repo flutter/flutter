@@ -7,25 +7,25 @@ part of engine;
 
 /// An implementation of [ui.Path] which is backed by an `SkPath`.
 ///
-/// The `SkPath` is required for `SkCanvas` methods which take a path.
-class SkPath implements ui.Path {
+/// The `SkPath` is required for `CkCanvas` methods which take a path.
+class CkPath implements ui.Path {
   js.JsObject? _skPath;
 
   /// Cached constructor function for `SkPath`, so we don't have to look it up
   /// every time we construct a new path.
   static final js.JsFunction? _skPathConstructor = canvasKit['SkPath'];
 
-  SkPath() {
+  CkPath() {
     _skPath = js.JsObject(_skPathConstructor!);
     fillType = ui.PathFillType.nonZero;
   }
 
-  SkPath.from(SkPath other) {
+  CkPath.from(CkPath other) {
     _skPath = js.JsObject(_skPathConstructor!, <js.JsObject?>[other._skPath]);
     fillType = other.fillType;
   }
 
-  SkPath._fromSkPath(js.JsObject? skPath) : _skPath = skPath;
+  CkPath._fromSkPath(js.JsObject? skPath) : _skPath = skPath;
 
   late ui.PathFillType _fillType;
 
@@ -75,7 +75,7 @@ class SkPath implements ui.Path {
       skMatrix[2] += offset.dx;
       skMatrix[5] += offset.dy;
     }
-    final SkPath otherPath = path as SkPath;
+    final CkPath otherPath = path as CkPath;
     _skPath!.callMethod('addPath', <dynamic>[
       otherPath._skPath,
       skMatrix[0],
@@ -157,7 +157,7 @@ class SkPath implements ui.Path {
 
   @override
   ui.PathMetrics computeMetrics({bool forceClosed = false}) {
-    return SkPathMetrics(this, forceClosed);
+    return CkPathMetrics(this, forceClosed);
   }
 
   @override
@@ -187,7 +187,7 @@ class SkPath implements ui.Path {
       skMatrix[2] += offset.dx;
       skMatrix[5] += offset.dy;
     }
-    final SkPath otherPath = path as SkPath;
+    final CkPath otherPath = path as CkPath;
     _skPath!.callMethod('addPath', <dynamic>[
       otherPath._skPath,
       skMatrix[0],
@@ -279,16 +279,16 @@ class SkPath implements ui.Path {
     final js.JsObject newPath = _skPath!.callMethod('copy');
     newPath.callMethod('transform',
         <double>[1.0, 0.0, offset.dx, 0.0, 1.0, offset.dy, 0.0, 0.0, 0.0]);
-    return SkPath._fromSkPath(newPath);
+    return CkPath._fromSkPath(newPath);
   }
 
-  static SkPath combine(
+  static CkPath combine(
     ui.PathOperation operation,
     ui.Path uiPath1,
     ui.Path uiPath2,
   ) {
-    final SkPath path1 = uiPath1 as SkPath;
-    final SkPath path2 = uiPath2 as SkPath;
+    final CkPath path1 = uiPath1 as CkPath;
+    final CkPath path2 = uiPath2 as CkPath;
     js.JsObject? pathOp;
     switch (operation) {
       case ui.PathOperation.difference:
@@ -315,14 +315,14 @@ class SkPath implements ui.Path {
         pathOp,
       ],
     );
-    return SkPath._fromSkPath(newPath);
+    return CkPath._fromSkPath(newPath);
   }
 
   @override
   ui.Path transform(Float64List matrix4) {
     final js.JsObject newPath = _skPath!.callMethod('copy');
     newPath.callMethod('transform', <js.JsArray>[makeSkMatrixFromFloat64(matrix4)]);
-    return SkPath._fromSkPath(newPath);
+    return CkPath._fromSkPath(newPath);
   }
 
   String? toSvgString() {

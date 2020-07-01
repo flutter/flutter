@@ -77,7 +77,7 @@ class Vertices {
     List<int>? indices,
   }) {
     if (engine.experimentalUseSkia) {
-      return engine.SkVertices(mode, positions,
+      return engine.CkVertices(mode, positions,
           textureCoordinates: textureCoordinates,
           colors: colors,
           indices: indices);
@@ -113,7 +113,7 @@ class Vertices {
     Uint16List? indices,
   }) {
     if (engine.experimentalUseSkia) {
-      return engine.SkVertices.raw(mode, positions,
+      return engine.CkVertices.raw(mode, positions,
           textureCoordinates: textureCoordinates,
           colors: colors,
           indices: indices);
@@ -134,7 +134,7 @@ abstract class PictureRecorder {
   /// [Canvas] constructor.
   factory PictureRecorder() {
     if (engine.experimentalUseSkia) {
-      return engine.SkPictureRecorder();
+      return engine.CkPictureRecorder();
     } else {
       return engine.EnginePictureRecorder();
     }

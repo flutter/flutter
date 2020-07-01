@@ -18,9 +18,9 @@ void main() {
       expect(experimentalUseSkia, true);
     });
 
-    test(SkPathMetrics, () {
+    test(CkPathMetrics, () {
       final ui.Path path = ui.Path();
-      expect(path, isA<SkPath>());
+      expect(path, isA<CkPath>());
       expect(path.computeMetrics().length, 0);
 
       path.addRect(ui.Rect.fromLTRB(0, 0, 10, 10));
