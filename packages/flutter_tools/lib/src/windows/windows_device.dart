@@ -27,7 +27,7 @@ class WindowsDevice extends DesktopDevice {
   bool isSupported() => true;
 
   @override
-  String get name => 'Windows desktop';
+  String get name => 'Windows';
 
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.windows_x64;
