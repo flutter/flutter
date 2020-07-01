@@ -2,10 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/version.dart';
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/logger.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/depfile.dart';
@@ -19,7 +23,6 @@ import '../build_system/targets/web.dart';
 import '../build_system/targets/windows.dart';
 import '../cache.dart';
 import '../convert.dart';
-import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
@@ -72,7 +75,21 @@ const List<Target> _kDefaultTargets = <Target>[
 /// Assemble provides a low level API to interact with the flutter tool build
 /// system.
 class AssembleCommand extends FlutterCommand {
-  AssembleCommand() {
+  AssembleCommand({
+    @required FileSystem fileSystem,
+    @required Logger logger,
+    @required BuildSystem buildSystem,
+    @required Artifacts artifacts,
+    @required Cache cache,
+    @required FlutterVersion flutterVersion,
+    @required ProcessManager processManager,
+  }) : _fileSystem = fileSystem,
+       _artifacts = artifacts,
+       _buildSystem = buildSystem,
+       _logger = logger,
+       _cache = cache,
+       _flutterVersion = flutterVersion,
+       _processManager = processManager {
     argParser.addMultiOption(
       'define',
       abbr: 'd',
@@ -112,6 +129,14 @@ class AssembleCommand extends FlutterCommand {
       help: 'The maximum number of concurrent tasks the build system will run.',
     );
   }
+
+  final FileSystem _fileSystem;
+  final Logger _logger;
+  final BuildSystem _buildSystem;
+  final Artifacts _artifacts;
+  final Cache _cache;
+  final FlutterVersion _flutterVersion;
+  final ProcessManager _processManager;
 
   @override
   String get description => 'Assemble and build flutter resources.';
@@ -166,26 +191,26 @@ class AssembleCommand extends FlutterCommand {
       throwToolExit('--output directory is required for assemble.');
     }
     // If path is relative, make it absolute from flutter project.
-    if (globals.fs.path.isRelative(output)) {
-      output = globals.fs.path.join(flutterProject.directory.path, output);
+    if (_fileSystem.path.isRelative(output)) {
+      output = _fileSystem.path.join(flutterProject.directory.path, output);
     }
     final Environment result = Environment(
-      outputDir: globals.fs.directory(output),
+      outputDir: _fileSystem.directory(output),
       buildDir: flutterProject.directory
           .childDirectory('.dart_tool')
           .childDirectory('flutter_build'),
       projectDir: flutterProject.directory,
       defines: _parseDefines(stringsArg('define')),
       inputs: _parseDefines(stringsArg('input')),
-      cacheDir: globals.cache.getRoot(),
-      flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-      artifacts: globals.artifacts,
-      fileSystem: globals.fs,
-      logger: globals.logger,
-      processManager: globals.processManager,
-      engineVersion: globals.artifacts.isLocalEngine
+      cacheDir: _cache.getRoot(),
+      flutterRootDir: _fileSystem.directory(Cache.flutterRoot),
+      artifacts: _artifacts,
+      fileSystem: _fileSystem,
+      logger: _logger,
+      processManager: _processManager,
+      engineVersion: _artifacts.isLocalEngine
         ? null
-        : globals.flutterVersion.engineRevision
+        : _flutterVersion.engineRevision
     );
     return result;
   }
@@ -218,7 +243,7 @@ class AssembleCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     final List<Target> targets = createTargets();
     final Target target = targets.length == 1 ? targets.single : _CompositeTarget(targets);
-    final BuildResult result = await globals.buildSystem.build(
+    final BuildResult result = await _buildSystem.build(
       target,
       createEnvironment(),
       buildSystemConfig: BuildSystemConfig(
@@ -229,41 +254,41 @@ class AssembleCommand extends FlutterCommand {
       );
     if (!result.success) {
       for (final ExceptionMeasurement measurement in result.exceptions.values) {
-        if (measurement.fatal || globals.logger.isVerbose) {
-          globals.printError('Target ${measurement.target} failed: ${measurement.exception}',
+        if (measurement.fatal || _logger.isVerbose) {
+          _logger.printError('Target ${measurement.target} failed: ${measurement.exception}',
             stackTrace: measurement.stackTrace
           );
         }
       }
       throwToolExit('');
     }
-    globals.printTrace('build succeeded.');
+    _logger.printTrace('build succeeded.');
     if (argResults.wasParsed('build-inputs')) {
-      writeListIfChanged(result.inputFiles, stringArg('build-inputs'));
+      writeListIfChanged(result.inputFiles, stringArg('build-inputs'), _fileSystem);
     }
     if (argResults.wasParsed('build-outputs')) {
-      writeListIfChanged(result.outputFiles, stringArg('build-outputs'));
+      writeListIfChanged(result.outputFiles, stringArg('build-outputs'), _fileSystem);
     }
     if (argResults.wasParsed('performance-measurement-file')) {
-      final File outFile = globals.fs.file(argResults['performance-measurement-file']);
+      final File outFile = _fileSystem.file(argResults['performance-measurement-file']);
       writePerformanceData(result.performance.values, outFile);
     }
     if (argResults.wasParsed('depfile')) {
-      final File depfileFile = globals.fs.file(stringArg('depfile'));
+      final File depfileFile = _fileSystem.file(stringArg('depfile'));
       final Depfile depfile = Depfile(result.inputFiles, result.outputFiles);
       final DepfileService depfileService = DepfileService(
-        fileSystem: globals.fs,
-        logger: globals.logger,
+        fileSystem: _fileSystem,
+        logger: _logger,
       );
-      depfileService.writeToFile(depfile, globals.fs.file(depfileFile));
+      depfileService.writeToFile(depfile, _fileSystem.file(depfileFile));
     }
     return FlutterCommandResult.success();
   }
 }
 
 @visibleForTesting
-void writeListIfChanged(List<File> files, String path) {
-  final File file = globals.fs.file(path);
+void writeListIfChanged(List<File> files, String path, FileSystem fileSystem) {
+  final File file = fileSystem.file(path);
   final StringBuffer buffer = StringBuffer();
   // These files are already sorted.
   for (final File file in files) {
