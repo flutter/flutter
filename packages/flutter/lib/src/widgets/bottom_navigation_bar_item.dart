@@ -27,9 +27,11 @@ class BottomNavigationBarItem {
   const BottomNavigationBarItem({
     @required this.icon,
     this.title,
+    this.label,
     Widget activeIcon,
     this.backgroundColor,
   }) : activeIcon = activeIcon ?? icon,
+       assert(label == null || title == null),
        assert(icon != null);
 
   /// The icon of the item.
@@ -63,7 +65,15 @@ class BottomNavigationBarItem {
   final Widget activeIcon;
 
   /// The title of the item. If the title is not provided only the icon will be shown when not used in a Material Design [BottomNavigationBar].
+  @Deprecated('`title` was deprecated, use `label` instead.')
   final Widget title;
+
+  /// The text label for this [BottomNavigationBarItem].
+  ///
+  /// This will be used to create a [Text] widget to put in the bottom navigation bar,
+  /// and in Material Design [BottomNavigationBar]s, this will be used to display
+  /// a tooltip on long press of an item in the [BottomNavigationBar].
+  final String label;
 
   /// The color of the background radial animation for material [BottomNavigationBar].
   ///
@@ -79,4 +89,8 @@ class BottomNavigationBarItem {
   ///  * [Icon.color] and [ImageIcon.color] to control the foreground color of
   ///    the icons themselves.
   final Color backgroundColor;
+}
+
+bool _xor(bool a, bool b) {
+  return (a && !b) || (b && !a);
 }

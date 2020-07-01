@@ -195,8 +195,9 @@ class BottomNavigationBar extends StatefulWidget {
   }) : assert(items != null),
        assert(items.length >= 2),
        assert(
-        items.every((BottomNavigationBarItem item) => item.title != null) == true,
-        'Every item must have a non-null title',
+        items.every((BottomNavigationBarItem item) => item.title != null) ||
+        items.every((BottomNavigationBarItem item) => item.label != null),
+        'Every item must have a non-null title or label',
        ),
        assert(0 <= currentIndex && currentIndex < items.length),
        assert(elevation == null || elevation >= 0.0),
@@ -459,47 +460,54 @@ class _BottomNavigationTile extends StatelessWidget {
         break;
     }
 
-    final Widget result = MergeSemantics(
+    Widget result = InkResponse(
+      onTap: onTap,
+      mouseCursor: mouseCursor,
+      child: Padding(
+        padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            _TileIcon(
+              colorTween: colorTween,
+              animation: animation,
+              iconSize: iconSize,
+              selected: selected,
+              item: item,
+              selectedIconTheme: selectedIconTheme ?? bottomTheme.selectedIconTheme,
+              unselectedIconTheme: unselectedIconTheme ?? bottomTheme.unselectedIconTheme,
+            ),
+            _Label(
+              colorTween: colorTween,
+              animation: animation,
+              item: item,
+              selectedLabelStyle: selectedLabelStyle ?? bottomTheme.selectedLabelStyle,
+              unselectedLabelStyle: unselectedLabelStyle ?? bottomTheme.unselectedLabelStyle,
+              showSelectedLabels: showSelectedLabels ?? bottomTheme.showUnselectedLabels,
+              showUnselectedLabels: showUnselectedLabels ?? bottomTheme.showUnselectedLabels,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (item.label != null) {
+      result = Tooltip(
+        message: item.label,
+        preferBelow: false,
+        verticalOffset: selectedIconSize + selectedFontSize,
+        child: result,
+      );
+    }
+
+    result = MergeSemantics(
       child: Semantics(
         selected: selected,
         child: Stack(
           children: <Widget>[
-            Tooltip(
-              preferBelow: false,
-              verticalOffset: selectedIconSize + selectedFontSize,
-              child: InkResponse(
-                onTap: onTap,
-                mouseCursor: mouseCursor,
-                child: Padding(
-                  padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      _TileIcon(
-                        colorTween: colorTween,
-                        animation: animation,
-                        iconSize: iconSize,
-                        selected: selected,
-                        item: item,
-                        selectedIconTheme: selectedIconTheme ?? bottomTheme.selectedIconTheme,
-                        unselectedIconTheme: unselectedIconTheme ?? bottomTheme.unselectedIconTheme,
-                      ),
-                      _Label(
-                        colorTween: colorTween,
-                        animation: animation,
-                        item: item,
-                        selectedLabelStyle: selectedLabelStyle ?? bottomTheme.selectedLabelStyle,
-                        unselectedLabelStyle: unselectedLabelStyle ?? bottomTheme.unselectedLabelStyle,
-                        showSelectedLabels: showSelectedLabels ?? bottomTheme.showUnselectedLabels,
-                        showUnselectedLabels: showUnselectedLabels ?? bottomTheme.showUnselectedLabels,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+            result,
             Semantics(
               container: true,
               label: indexLabel,
@@ -620,7 +628,7 @@ class _Label extends StatelessWidget {
           ),
         ),
         alignment: Alignment.bottomCenter,
-        child: item.title,
+        child: item.title ?? Text(item.label),
       ),
     );
 
@@ -647,19 +655,25 @@ class _Label extends StatelessWidget {
       );
     }
 
-    final MediaQueryData mediaQueryData = MediaQuery.of(context);
-    return MediaQuery(
-      // Do not grow text in bottom navigation bar because there is no room,
-      // instead, properly scaled tooltips will show on long press.
-      data: mediaQueryData.copyWith(
-        textScaleFactor: math.min(1.0, mediaQueryData.textScaleFactor),
-      ),
-      child: Align(
-        alignment: Alignment.bottomCenter,
-        heightFactor: 1.0,
-        child: Container(child: text),
-      ),
+    text = Align(
+      alignment: Alignment.bottomCenter,
+      heightFactor: 1.0,
+      child: Container(child: text),
     );
+
+    if (item.label != null) {
+      final MediaQueryData mediaQueryData = MediaQuery.of(context);
+      text = MediaQuery(
+        // Do not grow text in bottom navigation bar when we can show a tooltip
+        // instead.
+        data: mediaQueryData.copyWith(
+          textScaleFactor: math.min(1.0, mediaQueryData.textScaleFactor),
+        ),
+        child: text,
+      );
+    }
+
+    return text;
   }
 }
 

@@ -48,12 +48,9 @@ class Tooltip extends StatefulWidget {
   ///
   /// All parameters that are defined in the constructor will
   /// override the default values _and_ the values in [TooltipTheme.of].
-  ///
-  /// If [message] is `null`, the semantics label of the [child] will be used as
-  /// the string in the tooltip.
   const Tooltip({
     Key key,
-    this.message,
+    @required this.message,
     this.height,
     this.padding,
     this.margin,
@@ -65,7 +62,8 @@ class Tooltip extends StatefulWidget {
     this.waitDuration,
     this.showDuration,
     this.child,
-  }) : super(key: key);
+  }) : assert(message != null),
+       super(key: key);
 
   /// The text to display in the tooltip.
   final String message;
@@ -201,7 +199,6 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   Duration waitDuration;
   bool _mouseIsConnected;
   bool _longPressActivated = false;
-  final GlobalKey _semanticsKey = GlobalKey();
 
   @override
   void initState() {
@@ -290,17 +287,13 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     final RenderBox box = context.findRenderObject() as RenderBox;
     final Offset target = box.localToGlobal(box.size.center(Offset.zero));
 
-    final String tooltipString = widget.message
-       ?? (_semanticsKey.currentContext.findRenderObject() as _RenderTooltipSemanticsWidget).label
-       ?? '';
-
     // We create this widget outside of the overlay entry's builder to prevent
     // updated values from happening to leak into the overlay when the overlay
     // rebuilds.
     final Widget overlay = Directionality(
       textDirection: Directionality.of(context),
       child: _TooltipOverlay(
-        message: tooltipString,
+        message: widget.message,
         height: height,
         padding: padding,
         margin: margin,
@@ -317,7 +310,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     );
     _entry = OverlayEntry(builder: (BuildContext context) => overlay);
     Overlay.of(context, debugRequiredFor: widget).insert(_entry);
-    SemanticsService.tooltip(tooltipString);
+    SemanticsService.tooltip(widget.message);
   }
 
   void _removeEntry() {
@@ -407,7 +400,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       onLongPress: _handleLongPress,
       excludeFromSemantics: true,
       child: Semantics(
-        label: excludeFromSemantics || widget.message == null ? null : widget.message,
+        label: excludeFromSemantics ? null : widget.message,
         child: widget.child,
       ),
     );
@@ -417,13 +410,6 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       result = MouseRegion(
         onEnter: (PointerEnterEvent event) => _showTooltip(),
         onExit: (PointerExitEvent event) => _hideTooltip(),
-        child: result,
-      );
-    }
-
-    if (widget.message == null) {
-      result = _TooltipSemanticsWidget(
-        key: _semanticsKey,
         child: result,
       );
     }
@@ -543,41 +529,5 @@ class _TooltipOverlay extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-class _TooltipSemanticsWidget extends SingleChildRenderObjectWidget {
-  const _TooltipSemanticsWidget({
-    Key key,
-    Widget child
-  }) : super(key: key, child: child);
-
-  @override
-  RenderObject createRenderObject(BuildContext context) {
-    return _RenderTooltipSemanticsWidget();
-  }
-}
-
-class _RenderTooltipSemanticsWidget extends RenderProxyBox {
-  _RenderTooltipSemanticsWidget({RenderBox child}) : super(child) {
-    markNeedsSemanticsUpdate();
-  }
-
-  String label;
-
-  @override
-  void assembleSemanticsNode(
-    SemanticsNode node,
-    SemanticsConfiguration config,
-    Iterable<SemanticsNode> children,
-  ) {
-    super.assembleSemanticsNode(node, config, children);
-    label = node.label;
-  }
-
-  @override
-  void describeSemanticsConfiguration(SemanticsConfiguration config) {
-    super.describeSemanticsConfiguration(config);
-    config.isSemanticBoundary = true;
   }
 }

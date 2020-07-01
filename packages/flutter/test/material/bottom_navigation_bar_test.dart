@@ -952,8 +952,7 @@ void main() {
     expect(builderIconSize, 12.0);
   });
 
-
-  testWidgets('BottomNavigationBar does not grow with textScaleFactor', (WidgetTester tester) async {
+  testWidgets('BottomNavigationBar responds to textScaleFactor', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -1023,10 +1022,83 @@ void main() {
     );
 
     final RenderBox box = tester.renderObject(find.byType(BottomNavigationBar));
+    expect(box.size.height, equals(66.0));
+  });
+
+  testWidgets('BottomNavigationBar does not grow with textScaleFactor when labels are provided', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                label: 'A',
+                icon: Icon(Icons.ac_unit),
+              ),
+              BottomNavigationBarItem(
+                label: 'B',
+                icon: Icon(Icons.battery_alert),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox defaultBox = tester.renderObject(find.byType(BottomNavigationBar));
+    expect(defaultBox.size.height, equals(kBottomNavigationBarHeight));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.shifting,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                label: 'A',
+                icon: Icon(Icons.ac_unit),
+              ),
+              BottomNavigationBarItem(
+                label: 'B',
+                icon: Icon(Icons.battery_alert),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox shiftingBox = tester.renderObject(find.byType(BottomNavigationBar));
+    expect(shiftingBox.size.height, equals(kBottomNavigationBarHeight));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(textScaleFactor: 2.0),
+          child: Scaffold(
+            bottomNavigationBar: BottomNavigationBar(
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(
+                  label: 'A',
+                  icon: Icon(Icons.ac_unit),
+                ),
+                BottomNavigationBarItem(
+                  label: 'B',
+                  icon: Icon(Icons.battery_alert),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox box = tester.renderObject(find.byType(BottomNavigationBar));
     expect(box.size.height, equals(kBottomNavigationBarHeight));
   });
 
-  testWidgets('BottomNavigationBar shows tool tips with text scaling on long press', (WidgetTester tester) async {
+  testWidgets('BottomNavigationBar shows tool tips with text scaling on long press when labels are provided', (WidgetTester tester) async {
     const String label = 'Foo';
 
     Widget buildApp({ double textScaleFactor }) {
@@ -1048,11 +1120,11 @@ void main() {
                         bottomNavigationBar: BottomNavigationBar(
                           items: const <BottomNavigationBarItem>[
                             BottomNavigationBarItem(
-                              title: Text(label),
+                              label: label,
                               icon: Icon(Icons.ac_unit),
                             ),
                             BottomNavigationBarItem(
-                              title: Text('B'),
+                              label: 'B',
                               icon: Icon(Icons.battery_alert),
                             ),
                           ],
