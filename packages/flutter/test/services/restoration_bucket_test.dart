@@ -68,8 +68,8 @@ void main() {
     final Object debugOwner = Object();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rootRawData);
     final RestorationBucket child = RestorationBucket.child(
-      id: const RestorationId('child1'), 
-      parent: root, 
+      id: const RestorationId('child1'),
+      parent: root,
       debugOwner: debugOwner,
     );
 
@@ -316,7 +316,7 @@ void main() {
     final MockManager manager = MockManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
-    
+
     final RestorationBucket child = root.claimChild(const RestorationId('child1'), debugOwner: 'owner1');
 
     expect(manager.updateScheduled, isFalse);
@@ -407,7 +407,7 @@ void main() {
 
     final RestorationBucket child1 = root.claimChild(const RestorationId('child1'), debugOwner: 'owner1');
     final RestorationBucket child2 = root.claimChild(const RestorationId('child1'), debugOwner: 'owner1');
-    
+
     child2.rename(const RestorationId('foo'));
 
     expect(manager.updateScheduled, isTrue);
@@ -420,7 +420,7 @@ void main() {
     expect(rawData[childrenMapKey]['child1'], rawChild1Data);
     expect(rawData[childrenMapKey]['foo'], isEmpty); // new bucket
   });
-  
+
   test('adopt is no-op if same parent', () {
     final MockManager manager = MockManager();
     final Map<String, dynamic> rawData = _createRawDataSet();

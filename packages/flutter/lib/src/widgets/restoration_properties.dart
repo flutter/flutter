@@ -10,12 +10,12 @@ import 'package:flutter/services.dart';
 import 'editable_text.dart';
 import 'restoration.dart';
 
-/// A [RestorableProperty] that makes the wrapped value accessible to the
-/// owning [State] object via the [value] getter and setter.
+/// A [RestorableProperty] that makes the wrapped value accessible to the owning
+/// [State] object via the [value] getter and setter.
 ///
-/// Whenever a new [value] is set, [didUpdateValue] is called. Subclasses
-/// should call [notifyListeners] from this method if the new value changes
-/// what [toPrimitives] returns.
+/// Whenever a new [value] is set, [didUpdateValue] is called. Subclasses should
+/// call [notifyListeners] from this method if the new value changes what
+/// [toPrimitives] returns.
 ///
 /// See also:
 ///
@@ -157,16 +157,16 @@ class RestorableBool extends _RestorablePrimitiveValue<bool> {
   RestorableBool(bool defaultValue) : super(defaultValue);
 }
 
-/// A base class for creating a [RestorableProperty] that stores and restores
-/// a [Listenable].
+/// A base class for creating a [RestorableProperty] that stores and restores a
+/// [Listenable].
 ///
 /// This class may be used to implement a [RestorableProperty] for a
 /// [Listenable], whose information it needs to store in the restoration data
 /// change whenever the [Listenable] notifies its listeners.
 ///
 /// The [RestorationMixin] this property is registered with will call
-/// [toPrimitives] whenever the wrapped [Listenable] notifies its listeners
-/// to update the information that this property has stored in the restoration
+/// [toPrimitives] whenever the wrapped [Listenable] notifies its listeners to
+/// update the information that this property has stored in the restoration
 /// data.
 abstract class RestorableListenable<T extends Listenable> extends RestorableProperty<T> {
   /// The [Listenable] stored in this property.
@@ -204,9 +204,9 @@ abstract class RestorableListenable<T extends Listenable> extends RestorableProp
 /// [TextEditingController].
 ///
 /// The [TextEditingController] is accessible via the [value] getter. During
-/// state restoration, the property will restore [TextEditingController.text]
-/// to the value it had when the restoration data it is getting restored from
-/// was collected.
+/// state restoration, the property will restore [TextEditingController.text] to
+/// the value it had when the restoration data it is getting restored from was
+/// collected.
 class RestorableTextEditingController extends RestorableListenable<TextEditingController> {
   /// Creates a [RestorableTextEditingController].
   ///

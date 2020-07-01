@@ -24,9 +24,9 @@ typedef _BucketVisitor = void Function(RestorationBucket bucket);
 /// used to restore the application to the previous state described by the
 /// serialized data. Mobile operating systems use the concept of state
 /// restoration to provide the illusion that apps continue to run in the
-/// background forever: After an app has been backgrounded, the user can
-/// always return to it and find it in the same state. In practice, the
-/// operating system may however terminate the app to free resources for other apps
+/// background forever: After an app has been backgrounded, the user can always
+/// return to it and find it in the same state. In practice, the operating
+/// system may, however, terminate the app to free resources for other apps
 /// running in the foreground. Before that happens, the app gets a chance to
 /// serialize out its restoration data. When the user navigates back to the
 /// backgrounded app, it is restarted and the serialized restoration data is
@@ -34,19 +34,19 @@ typedef _BucketVisitor = void Function(RestorationBucket bucket);
 /// to the same state it was in when the user backgrounded the app.
 ///
 /// In Flutter, restoration data is organized in a tree of [RestorationBucket]s
-/// which is rooted in the [rootBucket]. All information that the
-/// application needs to restore its current state must be stored in a bucket
-/// in this hierarchy. To store data in the hierarchy, entities (e.g. [Widget]s)
-/// must claim ownership of a child bucket from a parent bucket (which may be the
+/// which is rooted in the [rootBucket]. All information that the application
+/// needs to restore its current state must be stored in a bucket in this
+/// hierarchy. To store data in the hierarchy, entities (e.g. [Widget]s) must
+/// claim ownership of a child bucket from a parent bucket (which may be the
 /// [rootBucket] provided by this [RestorationManager]). The owner of a bucket
 /// may store arbitrary values in the bucket as long as they can be serialized
-/// with the [StandardMessageCodec]. The values are stored in the bucket under
-/// a given [RestorationId] as key. The [RestorationId]s used to store values
-/// must be unique within a given bucket. To access the stored value again
-/// during state restoration, the same [RestorationId] must be provided again.
-/// The owner of the bucket may also make the bucket available to other entities
-/// so that they can claim child buckets from it for their own restoration
-/// needs. Within a bucket, child buckets are also identified by unique
+/// with the [StandardMessageCodec]. The values are stored in the bucket under a
+/// given [RestorationId] as key. The [RestorationId]s used to store values must
+/// be unique within a given bucket. To access the stored value again during
+/// state restoration, the same [RestorationId] must be provided again. The
+/// owner of the bucket may also make the bucket available to other entities so
+/// that they can claim child buckets from it for their own restoration needs.
+/// Within a bucket, child buckets are also identified by unique
 /// [RestorationId]s. The restoration id must be provided when claiming a child
 /// bucket.
 ///
@@ -63,34 +63,36 @@ typedef _BucketVisitor = void Function(RestorationBucket bucket);
 /// provided restoration data. Buckets in the old hierarchy notify their
 /// listeners when they get decommissioned. In response to the notification,
 /// listeners must stop using the old buckets. Owners of those buckets must
-/// dispose them and claim a new child as a replacement from a parent in the
+/// dispose of them and claim a new child as a replacement from a parent in the
 /// new bucket hierarchy (that parent may be the updated [rootBucket]).
 ///
-/// The data stored in the buckets should be as minimal as possible while
-/// still allowing the app to restore its current state from it. Data that can
-/// be retrieved from other services (e.g. a database or a web server) should
-/// not be included in the restoration data. Instead, a small identifier (e.g.
-/// an ID or resource locator) should be stored that can be used to retrieve the
-/// data again from its original source during state restoration.
+/// Same platforms restrict the size of the restoration data. Therefore, the
+/// data stored in the buckets should be as minimal as possible while still
+/// allowing the app to restore its current state from it. Data that can be
+/// retrieved from other services (e.g. a database or a web server) should not
+/// be included in the restoration data. Instead, a small identifier (e.g. an ID
+/// or resource locator) should be stored that can be used to retrieve the data
+/// again from its original source during state restoration.
 ///
 /// Between frames, the [RestorationManager] sends a serialized version of the
-/// bucket hierarchy over to the engine if the data in the hierarchy or
-/// its shape has changed. The engine caches the data until the operating system
+/// bucket hierarchy over to the engine if the data in the hierarchy or its
+/// shape has changed. The engine caches the data until the operating system
 /// needs it. The application is responsible for keeping the data in the bucket
 /// always up-to-date to reflect its current state.
 ///
 /// ## Discussion
 ///
 /// Due to Flutter's threading model and restrictions in the APIs of the
-/// platforms Flutter runs on, restoration data must be stored in the buckets proactively
-/// as described above. When the operating system asks for the restoration data,
-/// it will do so on the platform thread expecting a synchronous response. To
-/// avoid the risk of deadlocks, the platform thread cannot block and call into
-/// the UI thread (where the dart code is running) to retrieve the restoration
-/// data. For this reason, the [RestorationManager] always sends the latest
-/// copy of the restoration data from the UI thread over to the platform
-/// thread whenever it changes. That way, the restoration data is always ready
-/// to go on the platform thread when the operating system needs it.
+/// platforms Flutter runs on, restoration data must be stored in the buckets
+/// proactively as described above. When the operating system asks for the
+/// restoration data, it will do so on the platform thread expecting a
+/// synchronous response. To avoid the risk of deadlocks, the platform thread
+/// cannot block and call into the UI thread (where the dart code is running) to
+/// retrieve the restoration data. For this reason, the [RestorationManager]
+/// always sends the latest copy of the restoration data from the UI thread over
+/// to the platform thread whenever it changes. That way, the restoration data
+/// is always ready to go on the platform thread when the operating system needs
+/// it.
 ///
 /// See also:
 ///
@@ -111,19 +113,19 @@ class RestorationManager {
   /// the previously stored data. Otherwise the root bucket (and all children
   /// claimed from it) will be empty.
   ///
-  /// Like any [RestorationBucket], the root bucket informs its listeners if
-  /// it has been replaced with a new root bucket. This happens when new
+  /// Like any [RestorationBucket], the root bucket informs its listeners if it
+  /// has been replaced with a new root bucket. This happens when new
   /// restoration data has been provided to the [RestorationManager] to restore
   /// the application to a different state. In response to the notification,
-  /// listeners must stop using the old root bucket and obtain the new one
-  /// via this getter ([rootBucket] will have been updated to return the new
-  /// bucket just before the old root bucket informs its listeners).
+  /// listeners must stop using the old root bucket and obtain the new one via
+  /// this getter ([rootBucket] will have been updated to return the new bucket
+  /// just before the old root bucket informs its listeners).
   ///
   /// The restoration data describing the current bucket hierarchy is retrieved
   /// asynchronously from the engine the first time the root bucket is accessed
-  /// via this getter. After the data has been copied over from the engine,
-  /// this getter will return a [SynchronousFuture], that immediately resolves
-  /// to the root [RestorationBucket].
+  /// via this getter. After the data has been copied over from the engine, this
+  /// getter will return a [SynchronousFuture], that immediately resolves to the
+  /// root [RestorationBucket].
   ///
   /// See also:
   ///
@@ -150,7 +152,8 @@ class RestorationManager {
   Future<void> _getRootBucketFromEngine() async {
     final Map<String, dynamic> data = await retrieveFromEngine();
     if (_pendingRootBucket == null) {
-      // The engine was faster in sending us the data as an update.
+      // The engine was faster in sending us the data via the 'push' method on
+      // the SystemChannel.
       return;
     }
     assert(_rootBucket == null);
@@ -194,9 +197,9 @@ class RestorationManager {
   /// The method can be overridden in tests to inject arbitrary restoration
   /// data. It is invoked the first time the [rootBucket] is accessed.
   ///
-  /// The data returned by this method must be either null (to indicate that
-  /// no data is available) or a nested map describing the entire bucket
-  /// hierarchy that makes up the restoration data:
+  /// The data returned by this method must be either null (to indicate that no
+  /// data is available) or a nested map describing the entire bucket hierarchy
+  /// that makes up the restoration data:
   ///
   /// ```
   /// {
@@ -219,8 +222,8 @@ class RestorationManager {
   /// Called by the [RestorationManager] on itself to send the provided
   /// `rawData` to the engine.
   ///
-  /// The `rawData` describes the entire bucket hierarchy that makes up the current
-  /// restoration data. The format of the data is described in
+  /// The `rawData` describes the entire bucket hierarchy that makes up the
+  /// current restoration data. The format of the data is described in
   /// [retrieveFromEngine]. The provided `rawData` can be serialized with the
   /// [StandardMessageCodec].
   ///
@@ -264,24 +267,23 @@ class RestorationManager {
   ///
   /// The task will execute between frames, see [SchedulerBinding.scheduleTask]
   /// for details. Just before the hierarchy is serialized and send over to the
-  /// engine, the optionally provided `finalizer` is called. The callback may be used
-  /// to check the integrity of the data in a given bucket. It is illegal to
-  /// call [scheduleUpdate] from within the `finalizer` callback.
+  /// engine, the optionally provided `finalizer` is called. The callback may be
+  /// used to check the integrity of the data in a given bucket. It is illegal
+  /// to call [scheduleUpdate] from within the `finalizer` callback.
   void scheduleUpdate({VoidCallback finalizer}) {
     // The concept of `finalizer` callbacks is necessary to properly use
-    // restoration buckets in the [Widget] tree because of the way
-    // widgets are disposed during the build phase: Flutter delays the disposal
-    // of widgets until the very end of the build phase. When during a build
-    // widget A is getting replaced by widget B, B will build before A is
-    // disposed. This causes a problem if both widgets want to claim a child
-    // restoration bucket with ID x. In theory,
-    // this should be allowed because since A is getting replaced by B, A will
-    // give up the bucket in its dispose method so that B can claim a bucket
-    // with the same ID when it builds. However, in reality B will claim the
-    // bucket before A has released it, which means for a very short time
-    // (until A is actually getting disposed) there will be two child buckets
-    // under the same restoration ID, which is illegal. To get
-    // around this problem, restoration buckets do actually allow claiming child
+    // restoration buckets in the [Widget] tree because of the way widgets are
+    // disposed during the build phase: Flutter delays the disposal of widgets
+    // until the very end of the build phase. When during a build widget A is
+    // getting replaced by widget B, B will build before A is disposed. This
+    // causes a problem if both widgets want to claim a child restoration bucket
+    // with ID x. In theory, this should be allowed because since A is getting
+    // replaced by B, A will give up the bucket in its dispose method so that B
+    // can claim a bucket with the same ID when it builds. However, in reality B
+    // will claim the bucket before A has released it, which means for a very
+    // short time (until A is actually getting disposed) there will be two child
+    // buckets under the same restoration ID, which is illegal. To get around
+    // this problem, restoration buckets do actually allow claiming child
     // buckets for restoration IDs that have already been claimed in the hopes
     // that the original owner will give up the bucket before the restoration
     // data is finalized and sent to the engine at the end of the frame. They
@@ -359,13 +361,13 @@ class RestorationId {
 /// [RestorationManager].
 ///
 /// [RestorationBucket]s are organized in a tree, that is rooted in
-/// [RestorationManager.rootBucket] and managed by a [RestorationManager].
-/// The tree is serializable and must contain all the data an application needs to
+/// [RestorationManager.rootBucket] and managed by a [RestorationManager]. The
+/// tree is serializable and must contain all the data an application needs to
 /// restore its current state at a later point in time.
 ///
-/// A [RestorationBucket] stores restoration data as key-value pairs. The key
-/// is a [RestorationId] that identifies a piece of data uniquely within a
-/// bucket. The value can be anything that is serializable via the
+/// A [RestorationBucket] stores restoration data as key-value pairs. The key is
+/// a [RestorationId] that identifies a piece of data uniquely within a bucket.
+/// The value can be anything that is serializable via the
 /// [StandardMessageCodec]. Furthermore, a [RestorationBucket] may have child
 /// buckets, which are identified within their parent via a unique
 /// [RestorationId] as well.
@@ -381,23 +383,24 @@ class RestorationId {
 ///
 /// A [RestorationBucket] is rarely instantiated directly via its constructors.
 /// Instead, when an entity wants to store data in or retrieve data from a
-/// restoration bucket, it must obtain a child bucket from a parent by calling
-/// [claimChild]. If no parent is available, [RestorationManager.rootBucket] may
-/// be used as a parent. When claiming a child, the claimer must provide the
-/// [RestorationId] of the child it would like to own. A child bucket with a
-/// given [RestorationId] can at most have one owner. If another owner tries to
-/// claim a bucket with the same ID from the same parent, an exception is thrown
-/// (see discussion in [claimChild]). The [RestorationId]s that a given owner
-/// uses to claim a child (and to store data in that child, see below) must be
-/// stable across app launches to ensure that after the app restarts the owner
-/// can retrieve the same data again that it stored during a previous run.
+/// restoration bucket, it typically obtains a child bucket from a parent by
+/// calling [claimChild]. If no parent is available,
+/// [RestorationManager.rootBucket] may be used as a parent. When claiming a
+/// child, the claimer must provide the [RestorationId] of the child it would
+/// like to own. A child bucket with a given [RestorationId] can at most have
+/// one owner. If another owner tries to claim a bucket with the same ID from
+/// the same parent, an exception is thrown (see discussion in [claimChild]).
+/// The [RestorationId]s that a given owner uses to claim a child (and to store
+/// data in that child, see below) must be stable across app launches to ensure
+/// that after the app restarts the owner can retrieve the same data again that
+/// it stored during a previous run.
 ///
 /// Per convention, the owner of the bucket has exclusive access to the values
-/// stored in the bucket. It can read, add, modify, and remove values via
-/// the [get], [put], and [remove] methods. In general, the owner should store
-/// all the data in the bucket that it needs to restore its current state. If
-/// its current state changes, the data in the bucket must be updated. At the
-/// same time, the data in the bucket should be kept as minimal as possible. For
+/// stored in the bucket. It can read, add, modify, and remove values via the
+/// [get], [put], and [remove] methods. In general, the owner should store all
+/// the data in the bucket that it needs to restore its current state. If its
+/// current state changes, the data in the bucket must be updated. At the same
+/// time, the data in the bucket should be kept as minimal as possible. For
 /// example, for data that can be retrieved from other sources (like a database
 /// or webservice) only enough information (e.g. an ID or resource locator) to
 /// re-obtain that data should be stored in the bucket. In addition to managing
@@ -405,35 +408,35 @@ class RestorationId {
 /// entities so they can claim child buckets from it via [claimChild] for their
 /// own restoration needs.
 ///
-/// The bucket returned by [claimChild] may either contain state information that
-/// the owner had previously (e.g. during a previous run of the application)
-/// stored in it or it may be empty. If the bucket contains data, the owner
-/// is expected to restore its state with the information previously stored in
-/// the bucket. If the bucket is empty, it may initialize itself to default
-/// values.
+/// The bucket returned by [claimChild] may either contain state information
+/// that the owner had previously (e.g. during a previous run of the
+/// application) stored in it or it may be empty. If the bucket contains data,
+/// the owner is expected to restore its state with the information previously
+/// stored in the bucket. If the bucket is empty, it may initialize itself to
+/// default values.
 ///
 /// During the lifetime of a bucket, it may notify its listeners that the bucket
 /// has been [decommission]ed. This happens when new restoration data has been
-/// provided to e.g. the [RestorationManager] to restore the application to
-/// a different state. In response to the notification, owners must dispose
-/// their current bucket and replace it with a new bucket claimed from a new
-/// parent (which will have been initialized with the new restoration data). For
+/// provided to e.g. the [RestorationManager] to restore the application to a
+/// different state. In response to the notification, owners must dispose their
+/// current bucket and replace it with a new bucket claimed from a new parent
+/// (which will have been initialized with the new restoration data). For
 /// example, if the owner previously claimed its bucket from
 /// [RestorationManager.rootBucket], it must claim its new bucket from there
-/// again. The root bucket will have been replaced with the new root bucket
-/// just before the bucket listeners are informed about the decommission. Once
-/// the new bucket is obtained, owners should restore their internal state
-/// according to the information in the new bucket.
+/// again. The root bucket will have been replaced with the new root bucket just
+/// before the bucket listeners are informed about the decommission. Once the
+/// new bucket is obtained, owners should restore their internal state according
+/// to the information in the new bucket.
 ///
 /// When the data stored in a bucket is no longer needed to restore the
-/// application to its current state (e.g. because the owner of the bucket
-/// is no longer shown on screen), the bucket must be [dispose]d. This
-/// will remove all information stored in the bucket from the app's restoration data and that
-/// information will not be available again when the application is restored to this
-/// state in the future.
+/// application to its current state (e.g. because the owner of the bucket is no
+/// longer shown on screen), the bucket must be [dispose]d. This will remove all
+/// information stored in the bucket from the app's restoration data and that
+/// information will not be available again when the application is restored to
+/// this state in the future.
 class RestorationBucket extends ChangeNotifier {
-  /// Creates an empty [RestorationBucket] to be provided to [adoptChild]
-  /// to add it to the bucket hierarchy.
+  /// Creates an empty [RestorationBucket] to be provided to [adoptChild] to add
+  /// it to the bucket hierarchy.
   ///
   /// {@template flutter.services.restoration.bucketcreation}
   /// Instantiating a bucket directly is rare, most buckets are created by
@@ -496,8 +499,8 @@ class RestorationBucket extends ChangeNotifier {
 
   final Map<String, dynamic> _rawData;
 
-  /// The owner of the bucket that was provided when the bucket was claimed
-  /// via [claimChild].
+  /// The owner of the bucket that was provided when the bucket was claimed via
+  /// [claimChild].
   ///
   /// The value is used in error messages.
   final Object debugOwner;
@@ -524,19 +527,20 @@ class RestorationBucket extends ChangeNotifier {
   /// has notified its listeners, it must not be used anymore. The bucket must
   /// be [dispose]d and replaced with a new bucket.
   ///
-  /// As an example, the [RestorationManager] calls this method on its root bucket when it has
-  /// been asked to restore a running application to a different state. At that
-  /// point, the data stored in the current bucket hierarchy is invalid and
-  /// will be replaced with a new hierarchy generated from the restoration data
-  /// describing the new state. To replace the current bucket hierarchy,
-  /// [decommission] is called on the root bucket to signal to all owners of buckets in the
-  /// hierarchy that their bucket has become invalid. In response to the
-  /// notification, bucket owners must [dispose] their buckets and claim a new
-  /// bucket from the newly created hierarchy. For example, the owner of a bucket
-  /// that was originally claimed from the [RestorationManager.rootBucket] must
-  /// dispose that bucket and claim a new bucket from the new
-  /// [RestorationManager.rootBucket]. Once the new bucket is claimed, owners
-  /// should restore their state according to the data stored in the new bucket.
+  /// As an example, the [RestorationManager] calls this method on its root
+  /// bucket when it has been asked to restore a running application to a
+  /// different state. At that point, the data stored in the current bucket
+  /// hierarchy is invalid and will be replaced with a new hierarchy generated
+  /// from the restoration data describing the new state. To replace the current
+  /// bucket hierarchy, [decommission] is called on the root bucket to signal to
+  /// all owners of buckets in the hierarchy that their bucket has become
+  /// invalid. In response to the notification, bucket owners must [dispose]
+  /// their buckets and claim a new bucket from the newly created hierarchy. For
+  /// example, the owner of a bucket that was originally claimed from the
+  /// [RestorationManager.rootBucket] must dispose that bucket and claim a new
+  /// bucket from the new [RestorationManager.rootBucket]. Once the new bucket
+  /// is claimed, owners should restore their state according to the data stored
+  /// in the new bucket.
   ///
   /// A call to [decommission] must always be followed by a call to [dispose].
   void decommission() {
@@ -575,8 +579,8 @@ class RestorationBucket extends ChangeNotifier {
   /// with the new value. The provided `value` must be serializable with the
   /// [StandardMessageCodec].
   ///
-  /// Null values will be stored in the bucket as-is. To remove a value,
-  /// use [remove].
+  /// Null values will be stored in the bucket as-is. To remove a value, use
+  /// [remove].
   ///
   /// See also:
   ///
@@ -680,11 +684,11 @@ class RestorationBucket extends ChangeNotifier {
   /// The `child` will be dropped from its old parent, if it had one.
   ///
   /// The `child` is stored under its [id] in this bucket. If this bucket
-  /// already contains a child bucket under the same id, the owner of that existing
-  /// bucket must give it up (e.g. by moving the child bucket to a different
-  /// parent or by disposing it) before the end of the current frame. Otherwise
-  /// an exception indicating the illegal use of duplicated [RestorationId]s
-  /// will trigger in debug mode.
+  /// already contains a child bucket under the same id, the owner of that
+  /// existing bucket must give it up (e.g. by moving the child bucket to a
+  /// different parent or by disposing it) before the end of the current frame.
+  /// Otherwise an exception indicating the illegal use of duplicated
+  /// [RestorationId]s will trigger in debug mode.
   ///
   /// No-op if the provided bucket is already a child of this bucket.
   void adoptChild(RestorationBucket child) {
@@ -808,11 +812,12 @@ class RestorationBucket extends ChangeNotifier {
   /// hierarchy.
   ///
   /// After [dispose] has been called, the data stored in this bucket and its
-  /// children are no longer part of the app's restoration data. The data originally
-  /// stored in the bucket will not be available again when the application is
-  /// restored to this state in the future. It is up to the owners of the
-  /// children to either move them (via [adoptChild]) to a new parent that is
-  /// still part of the bucket hierarchy or to [dispose] them as well.
+  /// children are no longer part of the app's restoration data. The data
+  /// originally stored in the bucket will not be available again when the
+  /// application is restored to this state in the future. It is up to the
+  /// owners of the children to either move them (via [adoptChild]) to a new
+  /// parent that is still part of the bucket hierarchy or to [dispose] of them
+  /// as well.
   ///
   /// This method must only be called by the object's owner.
   @override
