@@ -90,7 +90,3 @@ class BottomNavigationBarItem {
   ///    the icons themselves.
   final Color backgroundColor;
 }
-
-bool _xor(bool a, bool b) {
-  return (a && !b) || (b && !a);
-}
