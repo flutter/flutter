@@ -22,14 +22,14 @@ void main() {
     const int devicePort = 456;
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
-        command: <String>['iproxy', '49154', '456', '1234'],
+        command: <String>['iproxy', '49154:456', '--udid', '1234'],
         // iproxy does not exit with 0 when it cannot forward.
         exitCode: 0,
         stdout: null, // no stdout indicates failure.
         environment: kDyLdLibEntry,
       ),
       const FakeCommand(
-        command: <String>['iproxy', '49155', '456', '1234'],
+        command: <String>['iproxy', '49155:456', '--udid', '1234'],
         exitCode: 0,
         stdout: 'not empty',
         environment: kDyLdLibEntry,
