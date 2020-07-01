@@ -4,8 +4,6 @@
 
 // @dart = 2.8
 
-import 'dart:math' show min;
-
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -78,8 +76,14 @@ class HitTestEntry {
 abstract class _TransformPart {
   const _TransformPart();
 
-  factory _TransformPart.matrix(Matrix4 matrix) => _MatrixTransformPart(matrix);
-
+  // Apply this transform part to `rhs` from the left.
+  //
+  // This should work as if this transform part is first converted to a matrix
+  // and then left-multiplied to `rhs`.
+  //
+  // For example, if this transform part is a vector `v1`, whose corresponding
+  // matrix is `m1 = Matrix4.translation(v1)`, then the result of
+  // `_VectorTransformPart(v1).multiply(rhs)` should equal to `m1 * rhs`.
   Matrix4 multiply(Matrix4 rhs);
 }
 
@@ -138,7 +142,7 @@ class HitTestResult {
   // in 2 parts:
   //
   //  * `_transforms` are globalized matrices, meaning they have been multiplied
-  //    by the ancesters and are thus relative to the global coordinate space.
+  //    by the ancestors and are thus relative to the global coordinate space.
   //  * `_localTransforms` are local transform parts, which are relative to the
   //    parent's coordinate space.
   //
@@ -216,7 +220,7 @@ class HitTestResult {
       'matrix through PointerEvent.removePerspectiveTransform? '
       'The provided matrix is:\n$transform'
     );
-    _localTransforms.add(_TransformPart.matrix(transform));
+    _localTransforms.add(_MatrixTransformPart(transform));
   }
 
   /// Pushes a new translation offset that is to be applied to all future
