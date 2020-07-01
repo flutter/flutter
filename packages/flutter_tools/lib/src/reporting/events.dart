@@ -103,11 +103,12 @@ class DoctorResultEvent extends UsageEvent {
   DoctorResultEvent({
     @required this.validator,
     @required this.result,
+    Usage flutterUsage,
   }) : super(
     'doctor-result',
     '${validator.runtimeType}',
     label: result.typeStr,
-    flutterUsage: globals.flutterUsage,
+    flutterUsage: flutterUsage ?? globals.flutterUsage,
   );
 
   final DoctorValidator validator;
@@ -121,9 +122,12 @@ class DoctorResultEvent extends UsageEvent {
     }
     final GroupedValidator group = validator as GroupedValidator;
     for (int i = 0; i < group.subValidators.length; i++) {
+      if (group.subResults == null) {
+        continue;
+      }
       final DoctorValidator v = group.subValidators[i];
       final ValidationResult r = group.subResults[i];
-      DoctorResultEvent(validator: v, result: r).send();
+      DoctorResultEvent(validator: v, result: r, flutterUsage: flutterUsage).send();
     }
   }
 }
