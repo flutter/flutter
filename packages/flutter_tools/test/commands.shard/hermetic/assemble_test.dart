@@ -39,7 +39,7 @@ void main() {
     );
     await commandRunner.run(<String>['assemble', '-o Output', 'debug_macos_bundle_flutter_assets']);
 
-    expect(testLogger.traceText, contains('build succeeded.'));
+    expect(logger.traceText, contains('build succeeded.'));
   });
 
   testUsingContext('flutter assemble can parse defines whose values contain =', () async {
@@ -55,7 +55,7 @@ void main() {
     );
     await commandRunner.run(<String>['assemble', '-o Output', '-dFooBar=fizz=2', 'debug_macos_bundle_flutter_assets']);
 
-    expect(testLogger.traceText, contains('build succeeded.'));
+    expect(logger.traceText, contains('build succeeded.'));
   });
 
   testUsingContext('flutter assemble can parse inputs', () async {
@@ -105,6 +105,7 @@ void main() {
   testUsingContext('flutter assemble does not log stack traces during build failure', () async {
     final StackTrace testStackTrace = StackTrace.current;
     final BuildSystem buildSystem = MockBuildSystem();
+    final BufferLogger logger = BufferLogger.test();
     when(buildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
       .thenAnswer((Invocation invocation) async {
         return BuildResult(success: false, exceptions: <String, ExceptionMeasurement>{
@@ -112,13 +113,13 @@ void main() {
         });
       });
     final CommandRunner<void> commandRunner = createTestCommandRunner(
-      setUpAssembleCommand(buildSystem),
+      setUpAssembleCommand(buildSystem, logger: logger),
     );
 
     await expectLater(commandRunner.run(<String>['assemble', '-o Output', 'debug_macos_bundle_flutter_assets']),
       throwsToolExit());
-    expect(testLogger.errorText, isNot(contains('bar')));
-    expect(testLogger.errorText, isNot(contains(testStackTrace.toString())));
+    expect(logger.errorText, isNot(contains('bar')));
+    expect(logger.errorText, isNot(contains(testStackTrace.toString())));
   });
 
   testUsingContext('flutter assemble outputs JSON performance data to provided file', () async {
@@ -281,7 +282,7 @@ AssembleCommand setUpAssembleCommand(BuildSystem buildSystem, {
   return AssembleCommand(
     artifacts: artifacts ?? Artifacts.test(),
     cache: FakeCache(),
-    flutterVersion: FakeFlutterVerision(),
+    flutterVersion: MockFlutterVerision(),
     logger: logger ?? BufferLogger.test(),
     fileSystem: fileSystem ?? MemoryFileSystem.test(),
     processManager: FakeProcessManager.any(),
@@ -289,6 +290,6 @@ AssembleCommand setUpAssembleCommand(BuildSystem buildSystem, {
   );
 }
 
-class FakeFlutterVerision extends Fake implements FlutterVersion {}
+class MockFlutterVerision extends Mock implements FlutterVersion {}
 class MockBuildSystem extends Mock implements BuildSystem {}
 class MockLocalEngineArtifacts extends Mock implements LocalEngineArtifacts {}
