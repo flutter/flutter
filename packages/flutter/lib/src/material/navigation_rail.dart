@@ -166,7 +166,7 @@ class NavigationRail extends StatefulWidget {
   ///
   /// The extended state has a wider rail container, and the labels are
   /// positioned next to the icons. [minExtendedWidth] can be used to set the
-  /// the minimum width of the rail when it is in this state.
+  /// minimum width of the rail when it is in this state.
   ///
   /// The rail will implicitly animate between the extended and normal state.
   ///
