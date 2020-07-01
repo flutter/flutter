@@ -6,9 +6,9 @@
 
 #include <lib/ui/scenic/cpp/view_token_pair.h>
 #include <lib/zx/eventpair.h>
-#include <third_party/tonic/dart_args.h>
-#include <third_party/tonic/dart_binding_macros.h>
-#include <third_party/tonic/logging/dart_invoke.h>
+#include "third_party/tonic/dart_args.h"
+#include "third_party/tonic/dart_binding_macros.h"
+#include "third_party/tonic/logging/dart_invoke.h"
 
 #include "flutter/flow/view_holder.h"
 #include "flutter/fml/thread_local.h"

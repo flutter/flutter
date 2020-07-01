@@ -145,13 +145,13 @@ dart_runner:
       patches: "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/typed_data_patch.dart"
 
     fuchsia.builtin:
-      uri: "../../../../../../flutter/shell/platform/fuchsia/dart_runner/embedder/builtin.dart"
+      uri: "../embedder/builtin.dart"
 
     zircon:
-      uri: "../../../../../../flutter/shell/platform/fuchsia/dart-pkg/zircon/lib/zircon.dart"
+      uri: "../../dart-pkg/zircon/lib/zircon.dart"
 
     fuchsia:
-      uri: "../../../../../../flutter/shell/platform/fuchsia/dart-pkg/fuchsia/lib/fuchsia.dart"
+      uri: "../../dart-pkg/fuchsia/lib/fuchsia.dart"
 
     _vmservice:
       uri: "../../../../../../third_party/dart/sdk/lib/vmservice/vmservice.dart"
