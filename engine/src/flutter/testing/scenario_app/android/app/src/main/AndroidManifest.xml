@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="dev.flutter.scenarios">
-
     <application
-        android:name=".ScenarioApplication"
+        android:name="io.flutter.app.FlutterApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -18,9 +17,7 @@
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="com.google.intent.action.TEST_LOOP" />
-
                 <category android:name="android.intent.category.DEFAULT" />
-
                 <data android:mimeType="application/javascript" />
             </intent-filter>
             <intent-filter>
@@ -28,11 +25,19 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".StrictModeFlutterActivity"
+            android:launchMode="singleTop"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:hardwareAccelerated="true">
+            <intent-filter>
+                <!-- TODO: https://github.com/flutter/flutter/issues/60635 -->
+                <action android:name="dev.flutter.scenarios.STRICT_MODE" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <meta-data
             android:name="io.flutter.embedded_views_preview"
             android:value="true" />
     </application>
-
     <uses-permission android:name="android.permission.INTERNET" />
-
 </manifest>
