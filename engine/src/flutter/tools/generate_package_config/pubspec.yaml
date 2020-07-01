@@ -1,0 +1,8 @@
+name: generate_package_config
+environment:
+  sdk: ">=2.8.0 <3.0.0"
+
+dependencies:
+  yaml: any
+  pub_semver: any
+  package_config: any

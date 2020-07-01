@@ -67,10 +67,9 @@ frontend_server_files +=
 application_snapshot("frontend_server") {
   main_dart = "bin/starter.dart"
   deps = [
-    ":package_incremental_compiler",
     "//flutter/lib/snapshot:kernel_platform_files",
   ]
-  dot_packages = rebase_path(".packages")
+  dot_packages = rebase_path(".dart_tool/package_config.json")
   flutter_patched_sdk = rebase_path("$root_out_dir/flutter_patched_sdk")
   training_args = [
     "--train",
@@ -79,28 +78,4 @@ application_snapshot("frontend_server") {
   ]
 
   inputs = frontend_server_files
-}
-
-# For flutter/flutter#36738 we make the source files available so that
-# we can generate a local frontend_server snapshot in the tools cache.
-action("package_incremental_compiler") {
-  script = "//flutter/flutter_frontend_server/package_incremental.py"
-
-  inputs = frontend_server_files
-
-  outputs = [
-    "$root_gen_dir/dart-pkg/flutter_frontend_server/pubspec.yaml",
-    "$root_gen_dir/dart-pkg/vm/pubspec.yaml",
-    "$root_gen_dir/dart-pkg/build_integration/pubspec.yaml",
-    "$root_gen_dir/dart-pkg/front_end/pubspec.yaml",
-    "$root_gen_dir/dart-pkg/kernel/pubspec.yaml",
-    "$root_gen_dir/dart-pkg/dev_compiler/pubspec.yaml",
-    "$root_gen_dir/dart-pkg/frontend_server/pubspec.yaml",
-  ]
-
-  args = [
-    "--input-root=" + rebase_path("//third_party/dart/pkg"),
-    "--output-root=" + rebase_path("$root_gen_dir/dart-pkg"),
-    "--frontend-server=" + rebase_path("//flutter"),
-  ]
 }
