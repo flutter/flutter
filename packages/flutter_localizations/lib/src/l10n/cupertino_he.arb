@@ -29,6 +29,6 @@
   "copyButtonLabel": "העתקה",
   "pasteButtonLabel": "הדבקה",
   "selectAllButtonLabel": "בחירת הכול",
-  "tabSemanticsLabel": "TBD",
+  "tabSemanticsLabel": "כרטיסייה $tabIndex מתוך $tabCount",
   "modalBarrierDismissLabel": "סגירה"
 }

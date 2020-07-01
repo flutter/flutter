@@ -19,6 +19,6 @@
   "copyButtonLabel": "Kopiér",
   "pasteButtonLabel": "Sæt ind",
   "selectAllButtonLabel": "Vælg alle",
-  "tabSemanticsLabel": "TBD",
+  "tabSemanticsLabel": "Fane $tabIndex af $tabCount",
   "modalBarrierDismissLabel": "Afvis"
 }

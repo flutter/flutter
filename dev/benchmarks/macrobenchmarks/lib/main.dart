@@ -138,6 +138,13 @@ class HomePage extends StatelessWidget {
             },
           ),
           RaisedButton(
+            key: const Key(kImageFilteredTransformAnimationRouteName),
+            child: const Text('ImageFiltered Transform Animation'),
+            onPressed: () {
+              Navigator.pushNamed(context, kImageFilteredTransformAnimationRouteName);
+            },
+          ),
+          RaisedButton(
             key: const Key(kMultiWidgetConstructionRouteName),
             child: const Text('Widget Construction and Destruction'),
             onPressed: () {

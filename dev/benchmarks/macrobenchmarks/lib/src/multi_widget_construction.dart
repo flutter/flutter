@@ -5,11 +5,11 @@
 import 'package:flutter/material.dart';
 
 class MultiWidgetConstructTable extends StatefulWidget {
-  const MultiWidgetConstructTable(this.column, this.row, {Key key})
+  const MultiWidgetConstructTable(this.columnCount, this.rowCount, {Key key})
       : super(key: key);
 
-  final int column;
-  final int row;
+  final int columnCount;
+  final int rowCount;
 
   @override
   _MultiWidgetConstructTableState createState() =>
@@ -24,82 +24,76 @@ class _MultiWidgetConstructTableState extends State<MultiWidgetConstructTable>
     Colors.cyan, Colors.lightBlue, Colors.blue, Colors.indigo, Colors.purple,
   ];
   int counter = 0;
-  Color baseColor = colorList[0][900];
 
-  AnimationController controller;
-  CurvedAnimation curve;
+  AnimationController _controller;
 
   @override
   void initState() {
     super.initState();
-    controller = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 10000));
-    curve = CurvedAnimation(parent: controller, curve: Curves.linear)
-      ..addListener(() {
-        final double colorPosition = curve.value;
-        final int c1Position = (colorPosition * (colorList.length + 1)).floor();
-        final Color c1 = colorList[c1Position % colorList.length][900];
-        final Color c2 = colorList[(c1Position + 1) % colorList.length][900];
-        setState(() {
-          baseColor = Color.lerp(
-              c1, c2, colorPosition * (colorList.length + 1) - c1Position);
-        });
-      })
-      ..addStatusListener((AnimationStatus state) {
-        if (state == AnimationStatus.completed) {
-          controller.reverse();
-        } else if (state == AnimationStatus.dismissed) {
-          controller.reset();
-          controller.forward();
-        }
-      });
-
-    controller.forward();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 10000),
+      lowerBound: 0,
+      upperBound: colorList.length + 1.0,
+    )..repeat();
   }
 
   @override
   void dispose() {
-    controller.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final int totalLength = widget.row * widget.column;
-    final int widgetCounter = counter * totalLength;
-    final double height = MediaQuery.of(context).size.height / widget.column;
-    counter++;
-    return Scaffold(
-      body: Table(
-        children: List<TableRow>.generate(
-          widget.row,
-          (int row) => TableRow(
-            children: List<Widget>.generate(
-              widget.column,
-              (int column) {
-                final int label = row * widget.column + column;
-                return counter % 2 == 0
-                    ? Container(
-                        // This key forces rebuilding the element
-                        key: ValueKey<int>(widgetCounter + label),
-                        color: Color.lerp(
-                            Colors.white, baseColor, label / totalLength),
-                        child: Text('${widgetCounter + label}'),
-                        constraints: BoxConstraints.expand(height: height),
-                      )
-                    : MyContainer(
-                        // This key forces rebuilding the element
-                        key: ValueKey<int>(widgetCounter + label),
-                        color: Color.lerp(
-                            Colors.white, baseColor, label / totalLength),
-                        child: Text('${widgetCounter + label}'),
-                        constraints: BoxConstraints.expand(height: height),
-                      );
-              },
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (BuildContext context, _) {
+        final int totalLength = widget.rowCount * widget.columnCount;
+        final int widgetCounter = counter * totalLength;
+        final double height = MediaQuery.of(context).size.height / widget.rowCount;
+        final double colorPosition = _controller.value;
+        final int c1Position = colorPosition.floor();
+        final Color c1 = colorList[c1Position % colorList.length][900];
+        final Color c2 = colorList[(c1Position + 1) % colorList.length][900];
+        final Color baseColor = Color.lerp(c1, c2, colorPosition - c1Position);
+        counter++;
+        return Scaffold(
+          body: Table(
+            children: List<TableRow>.generate(
+              widget.rowCount,
+              (int row) => TableRow(
+                children: List<Widget>.generate(
+                  widget.columnCount,
+                  (int column) {
+                    final int label = row * widget.columnCount + column;
+                    // This implementation rebuild the widget tree for every
+                    // frame, and is intentionally designed of poor performance
+                    // for benchmark purposes.
+                    return counter % 2 == 0
+                        ? Container(
+                            // This key forces rebuilding the element
+                            key: ValueKey<int>(widgetCounter + label),
+                            color: Color.lerp(
+                                Colors.white, baseColor, label / totalLength),
+                            child: Text('${widgetCounter + label}'),
+                            constraints: BoxConstraints.expand(height: height),
+                          )
+                        : MyContainer(
+                            // This key forces rebuilding the element
+                            key: ValueKey<int>(widgetCounter + label),
+                            color: Color.lerp(
+                                Colors.white, baseColor, label / totalLength),
+                            child: Text('${widgetCounter + label}'),
+                            constraints: BoxConstraints.expand(height: height),
+                          );
+                  },
+                ),
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
