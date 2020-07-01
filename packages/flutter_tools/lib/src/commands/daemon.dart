@@ -432,6 +432,8 @@ class AppDomain extends Domain {
 
   final List<AppInstance> _apps = <AppInstance>[];
 
+  final DebounceOperationQueue<OperationResult, OperationType> operationQueue = DebounceOperationQueue<OperationResult, OperationType>();
+
   Future<AppInstance> startApp(
     Device device,
     String projectDirectory,
@@ -593,9 +595,6 @@ class AppDomain extends Domain {
   bool isRestartSupported(bool enableHotReload, Device device) =>
       enableHotReload && device.supportsHotRestart;
 
-  Future<void> _inProgressHotReload;
-  final Map<OperationType, RestartableTimer> _reloadDebounceTimers = <OperationType, RestartableTimer>{};
-  final Map<OperationType, Future<OperationResult>> _reloadOperationQueue = <OperationType, Future<OperationResult>>{};
   final Duration _hotReloadDebounceDuration = const Duration(milliseconds: 50);
 
   Future<OperationResult> restart(Map<String, dynamic> args) async {
@@ -657,38 +656,11 @@ class AppDomain extends Domain {
     bool debounce,
     Future<OperationResult> Function() action,
   ) {
-    // If there is already an operation of this type waiting to run, reset its
-    // debounce timer and return its future.
-    if (_reloadOperationQueue[operationType] != null) {
-      _reloadDebounceTimers[operationType]?.reset();
-      return _reloadOperationQueue[operationType];
-    }
-
-    // Otherwise, put one in the queue with a timer.
-    final Completer<OperationResult> completer = Completer<OperationResult>();
-    _reloadOperationQueue[operationType] = completer.future;
-    _reloadDebounceTimers[operationType] = RestartableTimer(
+    return operationQueue.queueAndDebounce(
+      operationType,
       debounce ? _hotReloadDebounceDuration : Duration.zero,
-      () async {
-        // Remove us from the queue so we can't be reset now we've started.
-        unawaited(_reloadOperationQueue.remove(operationType));
-        _reloadDebounceTimers.remove(operationType);
-
-        // It's possible there are other reload types running when we get here,
-        // so wait until any current async reload operations to complete.
-        while (_inProgressHotReload != null) {
-          await _inProgressHotReload;
-        }
-
-        // Now it's safe for us to run
-        _inProgressHotReload = app
-            ._runInZone<OperationResult>(this, action)
-            .then(completer.complete, onError: completer.completeError)
-            .whenComplete(() => _inProgressHotReload = null);
-      },
+      () => app._runInZone<OperationResult>(this, action),
     );
-
-    return completer.future;
   }
 
   /// Returns an error, or the service extension result (a map with two fixed
@@ -1329,4 +1301,52 @@ enum OperationType {
   reloadMethod,
   reload,
   restart
+}
+
+/// A queue that debounces operations for a period and merges operations of the same type.
+/// Only one action (or any type) will run at a time. Actions of the same type requested
+/// in quick succession will be merged together and all return the same result. If an action
+/// is requested after an identical action has already started, it will be queued
+/// and run again once the first action completes.
+class DebounceOperationQueue<T, K> {
+  final Map<K, RestartableTimer> _debounceTimers = <K, RestartableTimer>{};
+  final Map<K, Future<T>> _operationQueue = <K, Future<T>>{};
+  Future<void> _inProgressAction;
+
+  Future<T> queueAndDebounce(
+    K operationType,
+    Duration debounceDuration,
+    Future<T> Function() action,
+  ) {
+    // If there is already an operation of this type waiting to run, reset its
+    // debounce timer and return its future.
+    if (_operationQueue[operationType] != null) {
+      _debounceTimers[operationType]?.reset();
+      return _operationQueue[operationType];
+    }
+
+    // Otherwise, put one in the queue with a timer.
+    final Completer<T> completer = Completer<T>();
+    _operationQueue[operationType] = completer.future;
+    _debounceTimers[operationType] = RestartableTimer(
+      debounceDuration,
+      () async {
+        // Remove us from the queue so we can't be reset now we've started.
+        unawaited(_operationQueue.remove(operationType));
+        _debounceTimers.remove(operationType);
+
+        // No operations should be allowed to run concurrently even if they're
+        // different types.
+        while (_inProgressAction != null) {
+          await _inProgressAction;
+        }
+
+        _inProgressAction = action()
+            .then(completer.complete, onError: completer.completeError)
+            .whenComplete(() => _inProgressAction = null);
+      },
+    );
+
+    return completer.future;
+  }
 }
