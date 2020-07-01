@@ -9,32 +9,75 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
 
 Future<void> main() async {
-  // Using testWidgets allows the test binding to set FlutterError.demangleStackTrace.
-  testWidgets('FlutterErrorDetails demangles', (WidgetTester tester) async {
-    // When we call toString on a FlutterErrorDetails, it attempts to parse and
-    // filter the stack trace, which fails if demangleStackTrace returns a
-    // mangled stack trace.
-    FlutterErrorDetails(
-      exception: const CustomException(),
-      stack: await getMangledStack(),
-    ).toString();
+  // We use AutomatedTestWidgetsFlutterBinding to allow the test binding to set
+  // FlutterError.demangleStackTrace and FlutterError.onError without testWidgets.
+  final AutomatedTestWidgetsFlutterBinding binding = AutomatedTestWidgetsFlutterBinding();
 
-    // Additional logic is used to parse assertion stack traces.
-    FlutterErrorDetails(
-      exception: AssertionError('Some assertion'),
-      stack: await getMangledStack(),
-    ).toString();
+  test('FlutterErrorDetails demangles', () async {
+    await binding.runTest(() async {
+      // When we call toString on a FlutterErrorDetails, it attempts to parse and
+      // filter the stack trace, which fails if demangleStackTrace returns a
+      // mangled stack trace.
+      FlutterErrorDetails(
+        exception: const CustomException(),
+        stack: await getMangledStack(),
+      ).toString();
+
+      // Additional logic is used to parse assertion stack traces.
+      FlutterErrorDetails(
+        exception: AssertionError('Some assertion'),
+        stack: await getMangledStack(),
+      ).toString();
+    }, () {});
+    binding.postTest();
   });
 
-  testWidgets('debugPrintStack demangles', (WidgetTester tester) async {
-    final DebugPrintCallback oldDebugPrint = debugPrint;
+  test('debugPrintStack demangles', () async {
+    await binding.runTest(() async {
+      final DebugPrintCallback oldDebugPrint = debugPrint;
+      try {
+        debugPrint = (String message, {int wrapWidth}) {};
+        debugPrintStack(
+          stackTrace: await getMangledStack(),
+        );
+      } finally {
+        debugPrint = oldDebugPrint;
+      }
+    }, () {});
+    binding.postTest();
+  });
+
+  test('FlutterError.reportError demangles', () async {
+    final Completer<FlutterErrorDetails> errorCompleter = Completer<FlutterErrorDetails>();
+    final TestExceptionReporter oldReporter = reportTestException;
+    reportTestException = (FlutterErrorDetails details, String testDescription) {
+      errorCompleter.complete(details);
+      reportTestException = oldReporter;
+    };
+
     try {
-      debugPrint = (String message, {int wrapWidth}) {};
-      debugPrintStack(
-        stackTrace: await getMangledStack(),
-      );
+      await binding.runTest(() async {
+        final Completer<String> completer = Completer<String>();
+
+        completer.future.then((String value) {},
+          onError: (Object error, StackTrace stack) {
+            assert(stack is stack_trace.Chain);
+            FlutterError.reportError(FlutterErrorDetails(
+              exception: error,
+              stack: stack,
+            ));
+          }
+        );
+
+        completer.completeError(const CustomException());
+      }, () {});
+      binding.postTest();
+
+      final FlutterErrorDetails details = await errorCompleter.future;
+      expect(details, isNotNull);
+      expect(details.exception, isA<CustomException>());
     } finally {
-      debugPrint = oldDebugPrint;
+      reportTestException = oldReporter;
     }
   });
 }
