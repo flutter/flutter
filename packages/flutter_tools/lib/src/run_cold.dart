@@ -59,14 +59,21 @@ class ColdRunner extends ResidentRunner {
       }
     }
 
-    for (final FlutterDevice device in flutterDevices) {
-      final int result = await device.runCold(
-        coldRunner: this,
-        route: route,
-      );
-      if (result != 0) {
-        return result;
+    try {
+      for (final FlutterDevice device in flutterDevices) {
+        final int result = await device.runCold(
+          coldRunner: this,
+          route: route,
+        );
+        if (result != 0) {
+          appFailedToStart();
+          return result;
+        }
       }
+    } on Exception catch (err) {
+      globals.printError(err.toString());
+      appFailedToStart();
+      return 1;
     }
 
     // Connect to observatory.
@@ -75,6 +82,7 @@ class ColdRunner extends ResidentRunner {
         await connectToServiceProtocol();
       } on String catch (message) {
         globals.printError(message);
+        appFailedToStart();
         return 2;
       }
     }
