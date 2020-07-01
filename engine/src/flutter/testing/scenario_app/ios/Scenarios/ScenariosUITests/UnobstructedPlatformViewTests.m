@@ -192,28 +192,28 @@
   app.launchArguments = @[ @"--platform-view-multiple-background-foreground" ];
   [app launch];
 
-  XCUIElement* platform_view1 = app.textViews[@"platform_view[8]"];
+  XCUIElement* platform_view1 = app.textViews[@"platform_view[0]"];
   XCTAssertTrue(platform_view1.exists);
   XCTAssertEqual(platform_view1.frame.origin.x, 25);
   XCTAssertEqual(platform_view1.frame.origin.y, 325);
   XCTAssertEqual(platform_view1.frame.size.width, 250);
   XCTAssertEqual(platform_view1.frame.size.height, 250);
 
-  XCUIElement* platform_view2 = app.textViews[@"platform_view[9]"];
+  XCUIElement* platform_view2 = app.textViews[@"platform_view[1]"];
   XCTAssertTrue(platform_view2.exists);
   XCTAssertEqual(platform_view2.frame.origin.x, 25);
   XCTAssertEqual(platform_view2.frame.origin.y, 25);
   XCTAssertEqual(platform_view2.frame.size.width, 250);
   XCTAssertEqual(platform_view2.frame.size.height, 250);
 
-  XCUIElement* overlay1 = app.otherElements[@"platform_view[8].overlay[0]"];
+  XCUIElement* overlay1 = app.otherElements[@"platform_view[0].overlay[0]"];
   XCTAssertTrue(overlay1.exists);
   XCTAssertEqual(overlay1.frame.origin.x, 25);
   XCTAssertEqual(overlay1.frame.origin.y, 325);
   XCTAssertEqual(overlay1.frame.size.width, 225);
   XCTAssertEqual(overlay1.frame.size.height, 175);
 
-  XCUIElement* overlay2 = app.otherElements[@"platform_view[9].overlay[0]"];
+  XCUIElement* overlay2 = app.otherElements[@"platform_view[1].overlay[0]"];
   XCTAssertTrue(overlay2.exists);
   XCTAssertEqual(overlay2.frame.origin.x, 25);
   XCTAssertEqual(overlay2.frame.origin.y, 25);

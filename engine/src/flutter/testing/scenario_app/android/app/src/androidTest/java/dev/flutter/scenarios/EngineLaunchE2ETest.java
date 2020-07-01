@@ -41,8 +41,7 @@ public class EngineLaunchE2ETest {
     // TODO: Fix race condition between sending this over the channel and starting the entrypoint.
     // https://github.com/flutter/flutter/issues/55999
     UiThreadStatement.runOnUiThread(
-        () ->
-            engine.get().getLocalizationChannel().sendLocales(Arrays.asList(Locale.US), Locale.US));
+        () -> engine.get().getLocalizationChannel().sendLocales(Arrays.asList(Locale.US)));
 
     // The default Dart main entrypoint sends back a platform message on the "waiting_for_status"
     // channel. That will be our launch success assertion condition.

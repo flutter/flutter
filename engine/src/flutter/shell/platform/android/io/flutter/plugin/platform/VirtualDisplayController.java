@@ -111,7 +111,7 @@ class VirtualDisplayController {
     DisplayManager displayManager =
         (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
     virtualDisplay =
-        displayManager.createVirtualDisplay("flutter-vd", width, height, densityDpi, surface, 0);
+        displayManager.createVirtualDisplay("flutter-vd", width, height, 1, surface, 0);
 
     final View embeddedView = getView();
     // There's a bug in Android version older than O where view tree observer onDrawListeners don't
