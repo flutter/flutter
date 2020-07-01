@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/version.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -26,6 +25,7 @@ import '../convert.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
+import '../version.dart';
 
 /// All currently implemented targets.
 const List<Target> _kDefaultTargets = <Target>[
