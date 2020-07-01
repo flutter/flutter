@@ -48,7 +48,7 @@ void main() {
 
     expect(() => doctorResultEvent.send(), returnsNormally);
 
-    verifyNever(usage.sendEvent('doctor-result', any, label: anyNamed('label')));
+    verify(usage.sendEvent('doctor-result', any, label: anyNamed('label'))).called(1);
   });
 }
 
