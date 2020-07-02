@@ -47,12 +47,6 @@ function create_offline_zip() {
 
 # Generate the docset for Flutter docs for use with Dash, Zeal, and Velocity.
 function create_docset() {
-  # This is slow and flaky, so skip on pre-submit; see
-  # https://github.com/flutter/flutter/issues/60646
-  if [[ -n "$CIRRUS_PR" ]]; then
-    echo 'Skipping generation of docset for pre-submit.'
-    return
-  fi
   # Must be run from "$FLUTTER_ROOT/dev/docs"
   # Must have dashing installed: go get -u github.com/technosophos/dashing
   # Dashing produces a LOT of log output (~30MB), so we redirect it, and just
@@ -130,16 +124,16 @@ fi
 (cd "$FLUTTER_ROOT" && "$DART" "$FLUTTER_ROOT/dev/tools/dartdoc.dart")
 (cd "$FLUTTER_ROOT" && "$DART" "$FLUTTER_ROOT/dev/tools/java_and_objc_doc.dart")
 
-# Create offline doc archives.
-(cd "$FLUTTER_ROOT/dev/docs"; create_offline_zip)
-(cd "$FLUTTER_ROOT/dev/docs"; create_docset)
-(cd "$FLUTTER_ROOT/dev/docs"; move_offline_into_place)
-
-# Ensure google webmaster tools can verify our site.
-cp "$FLUTTER_ROOT/dev/docs/google2ed1af765c529f57.html" "$FLUTTER_ROOT/dev/docs/doc"
-
 # Upload new API docs when running on Cirrus
 if [[ -n "$CIRRUS_CI" && -z "$CIRRUS_PR" ]]; then
+  # Create offline doc archives.
+  (cd "$FLUTTER_ROOT/dev/docs"; create_offline_zip)
+  (cd "$FLUTTER_ROOT/dev/docs"; create_docset)
+  (cd "$FLUTTER_ROOT/dev/docs"; move_offline_into_place)
+
+  # Ensure google webmaster tools can verify our site.
+  cp "$FLUTTER_ROOT/dev/docs/google2ed1af765c529f57.html" "$FLUTTER_ROOT/dev/docs/doc"
+
   echo "This is not a pull request; considering whether to upload docs... (branch=$CIRRUS_BRANCH)"
   if [[ "$CIRRUS_BRANCH" == "master" ]]; then
     echo "Updating $CIRRUS_BRANCH docs: https://master-api.flutter.dev/"
