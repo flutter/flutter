@@ -34,13 +34,13 @@ G_DECLARE_FINAL_TYPE(FlRendererX11,
 FlRendererX11* fl_renderer_x11_new();
 
 /**
- * fl_renderer_x11_set_xid:
+ * fl_renderer_x11_set_window:
  * @renderer: an #FlRendererX11.
- * @xid: The X window being rendered to.
+ * @window: the X window being rendered to.
  *
  * Sets the X11 window that is being rendered to.
  */
-void fl_renderer_x11_set_xid(FlRendererX11* renderer, Window xid);
+void fl_renderer_x11_set_window(FlRendererX11* renderer, GdkX11Window* window);
 
 G_END_DECLS
 
