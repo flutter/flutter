@@ -32,6 +32,7 @@ Future<void> initializeSkia() {
     canvasKitInitPromise.callMethod('then', <dynamic>[
       (js.JsObject ck) {
         canvasKit = ck;
+        initializeCanvasKitBindings(canvasKit);
         canvasKitCompleter.complete();
       },
     ]);
