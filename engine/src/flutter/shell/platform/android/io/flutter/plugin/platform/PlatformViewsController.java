@@ -244,37 +244,18 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
         @Override
         public void onTouch(@NonNull PlatformViewsChannel.PlatformViewTouch touch) {
-          PointerProperties[] pointerProperties =
-              parsePointerPropertiesList(touch.rawPointerPropertiesList)
-                  .toArray(new PointerProperties[touch.pointerCount]);
-          PointerCoords[] pointerCoords =
-              parsePointerCoordsList(touch.rawPointerCoords, getDisplayDensity())
-                  .toArray(new PointerCoords[touch.pointerCount]);
-
-          if (!vdControllers.containsKey(touch.viewId)) {
-            throw new IllegalStateException(
-                "Sending touch to an unknown view with id: " + touch.viewId);
-          }
-
-          MotionEvent event =
-              MotionEvent.obtain(
-                  touch.downTime.longValue(),
-                  touch.eventTime.longValue(),
-                  touch.action,
-                  touch.pointerCount,
-                  pointerProperties,
-                  pointerCoords,
-                  touch.metaState,
-                  touch.buttonState,
-                  touch.xPrecision,
-                  touch.yPrecision,
-                  touch.deviceId,
-                  touch.edgeFlags,
-                  touch.source,
-                  touch.flags);
-
+          final int viewId = touch.viewId;
+          float density = context.getResources().getDisplayMetrics().density;
           ensureValidAndroidVersion(Build.VERSION_CODES.KITKAT_WATCH);
-          vdControllers.get(touch.viewId).dispatchTouchEvent(event);
+          final MotionEvent event = toMotionEvent(density, touch);
+          if (vdControllers.containsKey(viewId)) {
+            vdControllers.get(touch.viewId).dispatchTouchEvent(event);
+          } else if (platformViews.get(viewId) != null) {
+            View view = platformViews.get(touch.viewId);
+            view.dispatchTouchEvent(event);
+          } else {
+            throw new IllegalStateException("Sending touch to an unknown view with id: " + viewId);
+          }
         }
 
         @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
@@ -316,6 +297,32 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
           }
         }
       };
+
+  private static MotionEvent toMotionEvent(
+      float density, PlatformViewsChannel.PlatformViewTouch touch) {
+    PointerProperties[] pointerProperties =
+        parsePointerPropertiesList(touch.rawPointerPropertiesList)
+            .toArray(new PointerProperties[touch.pointerCount]);
+    PointerCoords[] pointerCoords =
+        parsePointerCoordsList(touch.rawPointerCoords, density)
+            .toArray(new PointerCoords[touch.pointerCount]);
+
+    return MotionEvent.obtain(
+        touch.downTime.longValue(),
+        touch.eventTime.longValue(),
+        touch.action,
+        touch.pointerCount,
+        pointerProperties,
+        pointerCoords,
+        touch.metaState,
+        touch.buttonState,
+        touch.xPrecision,
+        touch.yPrecision,
+        touch.deviceId,
+        touch.edgeFlags,
+        touch.source,
+        touch.flags);
+  }
 
   public PlatformViewsController() {
     registry = new PlatformViewRegistryImpl();
