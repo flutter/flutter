@@ -4,6 +4,7 @@
 
 // @dart = 2.8
 
+import 'dart:convert' show JsonUnsupportedObjectError;
 import 'dart:ui' show Offset, PointerDeviceKind;
 
 import 'package:flutter/foundation.dart';
@@ -232,6 +233,102 @@ abstract class PointerEvent with Diagnosticable {
   }) : localPosition = localPosition ?? position,
        localDelta = localDelta ?? delta;
 
+  /// Deserialize a PointerEvent from json
+  factory PointerEvent.fromJson(Map<String, dynamic> jsonObject) {
+    switch (jsonObject['type'] as String) {
+      case 'PointerAddedEvent':
+        return PointerAddedEvent._fromJson(jsonObject);
+      case 'PointerCancelEvent':
+        return PointerCancelEvent._fromJson(jsonObject);
+      case 'PointerDownEvent':
+        return PointerDownEvent._fromJson(jsonObject);
+      case 'PointerEnterEvent':
+        return PointerEnterEvent._fromJson(jsonObject);
+      case 'PointerExitEvent':
+        return PointerExitEvent._fromJson(jsonObject);
+      case 'PointerHoverEvent':
+        return PointerHoverEvent._fromJson(jsonObject);
+      case 'PointerMoveEvent':
+        return PointerMoveEvent._fromJson(jsonObject);
+      case 'PointerRemovedEvent':
+        return PointerRemovedEvent._fromJson(jsonObject);
+      case 'PointerScrollEvent':
+        return PointerScrollEvent._fromJson(jsonObject);
+      case 'PointerUpEvent':
+        return PointerUpEvent._fromJson(jsonObject);
+      default:
+        throw JsonUnsupportedObjectError(jsonObject);
+    }
+  }
+
+  /// Deserialize a PointerEvent from json for internal use
+  @protected
+  PointerEvent.serialize(Map<String, dynamic> jsonObject) :
+    timeStamp = Duration(microseconds: jsonObject['timeStamp'] as int ?? 0),
+    pointer = jsonObject['pointer'] as int ?? 0,
+    kind = PointerDeviceKind.values[jsonObject['kind'] as int ?? 0],
+    device = jsonObject['device'] as int ?? 0,
+    position = _deserializeOffset(jsonObject['position']),
+    localPosition = _deserializeOffset(jsonObject['localPosition'],
+      _deserializeOffset(jsonObject['position'])),
+    delta = _deserializeOffset(jsonObject['delta']),
+    localDelta = _deserializeOffset(jsonObject['localDelta'],
+      _deserializeOffset(jsonObject['delta'])),
+    buttons = jsonObject['buttons'] as int ?? 0,
+    down = jsonObject['down'] as bool ?? false,
+    obscured = jsonObject['obscured'] as bool ?? false,
+    pressure = jsonObject['pressure'] as double ?? 0.0,
+    pressureMin = jsonObject['pressureMin'] as double ?? 0.0,
+    pressureMax = jsonObject['pressureMax'] as double ?? 0.0,
+    distance = jsonObject['distance'] as double ?? 0.0,
+    distanceMax = jsonObject['distanceMax'] as double ?? 0.0,
+    size = jsonObject['size'] as double ?? 0.0,
+    radiusMajor = jsonObject['radiusMajor'] as double ?? 0.0,
+    radiusMinor = jsonObject['radiusMinor'] as double ?? 0.0,
+    radiusMin = jsonObject['radiusMin'] as double ?? 0.0,
+    radiusMax = jsonObject['radiusMax'] as double ?? 0.0,
+    orientation = jsonObject['orientation'] as double ?? 0.0,
+    tilt = jsonObject['tilt'] as double ?? 0.0,
+    platformData = jsonObject['platformData'] as int ?? 0,
+    synthesized = jsonObject['synthesized'] as bool ?? false,
+    transform = jsonObject['transform'] == null
+      ? null
+      : Matrix4.fromList(jsonObject['transform'] as List<double>),
+    original = null;
+
+  /// Serialize the event tto a json strong.
+  Map<String, dynamic> toJson () {
+    return <String,dynamic>{
+      'type': runtimeType.toString(),
+      if(timeStamp != Duration.zero) 'timeStamp': timeStamp.inMicroseconds,
+      if(pointer != 0) 'pointer': pointer,
+      if(kind != PointerDeviceKind.touch) 'kind': kind.index,
+      if(device != 0) 'device': device,
+      if(position != Offset.zero) 'position': <double>[position.dx, position.dy],
+      if(localPosition != position) 'localPosition': <double>[localPosition.dx, localPosition.dy],
+      if(delta != Offset.zero) 'delta': <double>[delta.dx, delta.dy],
+      if(localDelta != delta) 'localDelta': <double>[localDelta.dx, localDelta.dy],
+      if(buttons != 0) 'buttons': buttons,
+      if(down != false) 'down': down,
+      if(obscured != false) 'obscured': obscured,
+      if(pressure != 1.0) 'pressure': pressure,
+      if(pressureMin != 1.0) 'pressureMin': pressureMin,
+      if(pressureMax != 1.0) 'pressureMax': pressureMax,
+      if(distance != 0.0) 'distance': distance,
+      if(distanceMax != 0.0) 'distanceMax': distanceMax,
+      if(size != 0.0) 'size': size,
+      if(radiusMajor != 0.0) 'radiusMajor': radiusMajor,
+      if(radiusMinor != 0.0) 'radiusMinor': radiusMinor,
+      if(radiusMin != 0.0) 'radiusMin': radiusMin,
+      if(radiusMax != 0.0) 'radiusMax': radiusMax,
+      if(orientation != 0.0) 'orientation': orientation,
+      if(tilt != 0.0) 'tilt': tilt,
+      if(platformData != 0.0) 'platformData': platformData,
+      if(synthesized != false) 'synthesized': synthesized,
+      if(transform != null) 'transform': transform.storage,
+      // TODO(CareF): original may be replaced by an id number.
+    };
+  }
 
   /// Time of event dispatch, relative to an arbitrary timeline.
   final Duration timeStamp;
@@ -612,6 +709,8 @@ class PointerAddedEvent extends PointerEvent {
          original: original,
        );
 
+  PointerAddedEvent._fromJson(Map<String, dynamic> jsonObject) : super.serialize(jsonObject);
+
   @override
   PointerAddedEvent transformed(Matrix4 transform) {
     if (transform == null || transform == this.transform) {
@@ -676,6 +775,8 @@ class PointerRemovedEvent extends PointerEvent {
          transform: transform,
          original: original,
        );
+
+  PointerRemovedEvent._fromJson(Map<String, dynamic> jsonObject): super.serialize(jsonObject);
 
   @override
   PointerRemovedEvent transformed(Matrix4 transform) {
@@ -765,6 +866,8 @@ class PointerHoverEvent extends PointerEvent {
          transform: transform,
          original: original,
        );
+
+  PointerHoverEvent._fromJson(Map<String, dynamic> jsonObject): super.serialize(jsonObject);
 
   @override
   PointerHoverEvent transformed(Matrix4 transform) {
@@ -871,6 +974,8 @@ class PointerEnterEvent extends PointerEvent {
          transform: transform,
          original: original,
        );
+
+  PointerEnterEvent._fromJson(Map<String, dynamic> jsonObject): super.serialize(jsonObject);
 
   /// Creates an enter event from a [PointerHoverEvent].
   ///
@@ -1018,6 +1123,8 @@ class PointerExitEvent extends PointerEvent {
          original: original,
        );
 
+  PointerExitEvent._fromJson(Map<String, dynamic> jsonObject): super.serialize(jsonObject);
+
   /// Creates an exit event from a [PointerHoverEvent].
   ///
   /// Deprecated. Please use [PointerExitEvent.fromMouseEvent] instead.
@@ -1150,6 +1257,8 @@ class PointerDownEvent extends PointerEvent {
          original: original,
        );
 
+  PointerDownEvent._fromJson(Map<String, dynamic> jsonObject): super.serialize(jsonObject);
+
   @override
   PointerDownEvent transformed(Matrix4 transform) {
     if (transform == null || transform == this.transform) {
@@ -1247,6 +1356,8 @@ class PointerMoveEvent extends PointerEvent {
          transform: transform,
          original: original,
        );
+
+  PointerMoveEvent._fromJson(Map<String, dynamic> jsonObject): super.serialize(jsonObject);
 
   @override
   PointerMoveEvent transformed(Matrix4 transform) {
@@ -1346,6 +1457,8 @@ class PointerUpEvent extends PointerEvent {
          original: original,
        );
 
+  PointerUpEvent._fromJson(Map<String, dynamic> jsonObject): super.serialize(jsonObject);
+
   @override
   PointerUpEvent transformed(Matrix4 transform) {
     if (transform == null || transform == this.transform) {
@@ -1405,6 +1518,8 @@ abstract class PointerSignalEvent extends PointerEvent {
          transform: transform,
          original: original,
        );
+
+  PointerSignalEvent._fromJson(Map<String, dynamic> jsonObject): super.serialize(jsonObject);
 }
 
 /// The pointer issued a scroll event.
@@ -1438,6 +1553,17 @@ class PointerScrollEvent extends PointerSignalEvent {
          transform: transform,
          original: original,
        );
+
+  PointerScrollEvent._fromJson(Map<String, dynamic> jsonObject):
+    scrollDelta = _deserializeOffset(jsonObject['scrollDelta']),
+    super._fromJson(jsonObject);
+
+  @override
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> result = super.toJson();
+    result['scrollDelta'] = <double>[scrollDelta.dx, scrollDelta.dy];
+    return result;
+  }
 
   /// The amount to scroll, in logical pixels.
   final Offset scrollDelta;
@@ -1519,6 +1645,8 @@ class PointerCancelEvent extends PointerEvent {
          original: original,
        );
 
+  PointerCancelEvent._fromJson(Map<String, dynamic> jsonObject): super.serialize(jsonObject);
+
   @override
   PointerCancelEvent transformed(Matrix4 transform) {
     if (transform == null || transform == this.transform) {
@@ -1548,4 +1676,13 @@ class PointerCancelEvent extends PointerEvent {
       original: original as PointerCancelEvent ?? this,
     );
   }
+}
+
+Offset _deserializeOffset(dynamic value, [Offset defaultValue = Offset.zero]) {
+  if (value == null) {
+    return defaultValue;
+  }
+  final List<dynamic> coordinates = value as List<dynamic>;
+  assert(coordinates.length == 2);
+  return Offset(coordinates[0] as double, coordinates[1] as double);
 }
