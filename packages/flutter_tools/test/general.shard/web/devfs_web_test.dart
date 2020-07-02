@@ -486,7 +486,9 @@ void main() {
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'BELLOW');
 
     // Toggle CanvasKit
+    expect(webDevFS.webAssetServer.canvasKitRendering, false);
     webDevFS.webAssetServer.canvasKitRendering = true;
+
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'OL');
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js.map'), 'CHUM');
 
@@ -648,6 +650,55 @@ void main() {
     final Uri uri = await webDevFS.create();
 
     expect(uri, Uri.http('localhost:0', ''));
+    await webDevFS.destroy();
+  }));
+
+  test('Can start web server with canvaskit enabled', () => testbed.run(() async {
+    globals.fs.file('.packages').writeAsStringSync('\n');
+    final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+      ..createSync(recursive: true);
+    outputFile.parent.childFile('a.sources').writeAsStringSync('');
+    outputFile.parent.childFile('a.json').writeAsStringSync('{}');
+    outputFile.parent.childFile('a.map').writeAsStringSync('{}');
+    outputFile.parent.childFile('.packages').writeAsStringSync('\n');
+
+    final ResidentCompiler residentCompiler = MockResidentCompiler();
+    when(residentCompiler.recompile(
+      any,
+      any,
+      outputPath: anyNamed('outputPath'),
+      packageConfig: anyNamed('packageConfig'),
+    )).thenAnswer((Invocation invocation) async {
+      return const CompilerOutput('a', 0, <Uri>[]);
+    });
+
+    final WebDevFS webDevFS = WebDevFS(
+      hostname: 'localhost',
+      port: 0,
+      packagesFilePath: '.packages',
+      urlTunneller: null,
+      useSseForDebugProxy: true,
+      buildInfo: const BuildInfo(
+        BuildMode.debug,
+        '',
+        treeShakeIcons: false,
+        dartDefines: <String>[
+          'FLUTTER_WEB_USE_SKIA=true',
+        ]
+      ),
+      enableDwds: false,
+      entrypoint: Uri.base,
+      testMode: true,
+      expressionCompiler: null,
+      chromiumLauncher: null,
+    );
+    webDevFS.requireJS.createSync(recursive: true);
+    webDevFS.stackTraceMapper.createSync(recursive: true);
+
+    await webDevFS.create();
+
+    expect(webDevFS.webAssetServer.canvasKitRendering, true);
+
     await webDevFS.destroy();
   }));
 }
