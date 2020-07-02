@@ -47,6 +47,12 @@ function create_offline_zip() {
 
 # Generate the docset for Flutter docs for use with Dash, Zeal, and Velocity.
 function create_docset() {
+  # This is slow and flaky, so skip on pre-submit; see
+  # https://github.com/flutter/flutter/issues/60646
+  if [[ -n "$CIRRUS_PR" ]]; then
+    echo 'Skipping generation of docset for pre-submit.'
+    return
+  fi
   # Must be run from "$FLUTTER_ROOT/dev/docs"
   # Must have dashing installed: go get -u github.com/technosophos/dashing
   # Dashing produces a LOT of log output (~30MB), so we redirect it, and just
