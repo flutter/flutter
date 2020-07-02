@@ -1012,8 +1012,8 @@ class TextureAndroidViewController extends AndroidViewController {
 
   @override
   Future<void> _sendCreateMessage() async {
-    assert(_size != null && _size.isEmpty,
-      'trying to create $TextureAndroidViewController without setting size.');
+    assert(_size != null && !_size.isEmpty,
+      'trying to create $TextureAndroidViewController without setting a valid size.');
 
     final Map<String, dynamic> args = <String, dynamic>{
       'id': viewId,

@@ -123,7 +123,7 @@ class FakeAndroidViewController implements AndroidViewController {
   }
 
   @override
-  Future<void> create() {
+  Future<void> create() async {
     created = true;
   }
 }
