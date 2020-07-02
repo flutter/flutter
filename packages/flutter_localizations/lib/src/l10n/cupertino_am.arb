@@ -19,6 +19,6 @@
   "copyButtonLabel": "ቅዳ",
   "pasteButtonLabel": "ለጥፍ",
   "selectAllButtonLabel": "ሁሉንም ምረጥ",
-  "tabSemanticsLabel": "TBD",
+  "tabSemanticsLabel": "ትር $tabIndex ከ$tabCount",
   "modalBarrierDismissLabel": "አሰናብት"
 }

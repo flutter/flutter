@@ -53,7 +53,7 @@ Future<void> buildWeb(
         kCspMode: csp.toString(),
         kIconTreeShakerFlag: buildInfo.treeShakeIcons.toString(),
         if (buildInfo.extraFrontEndOptions?.isNotEmpty ?? false)
-          kExtraFrontEndOptions: buildInfo.extraFrontEndOptions.join(',')
+          kExtraFrontEndOptions: encodeDartDefines(buildInfo.extraFrontEndOptions),
       },
       artifacts: globals.artifacts,
       fileSystem: globals.fs,
