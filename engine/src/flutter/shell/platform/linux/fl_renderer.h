@@ -7,7 +7,7 @@
 
 #include <EGL/egl.h>
 
-#include <glib-object.h>
+#include <gtk/gtk.h>
 
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_dart_project.h"
 
@@ -35,15 +35,43 @@ G_DECLARE_DERIVABLE_TYPE(FlRenderer, fl_renderer, FL, RENDERER, GObject)
 struct _FlRendererClass {
   GObjectClass parent_class;
 
-  // Virtual method called when Flutter has set up EGL and is ready for the
-  // renderer to start.
-  gboolean (*start)(FlRenderer* renderer, GError** error);
+  // Virtual method called to get the visual that matches the given ID.
+  GdkVisual* (*get_visual)(FlRenderer* renderer,
+                           GdkScreen* screen,
+                           EGLint visual_id);
 
-  // Virtual method called when flutter needs a surface to render to.
+  // Virtual method called when Flutter needs a surface to render to.
   EGLSurface (*create_surface)(FlRenderer* renderer,
                                EGLDisplay display,
                                EGLConfig config);
 };
+
+/**
+ * fl_renderer_setup:
+ * @renderer: an #FlRenderer.
+ * @error: (allow-none): #GError location to store the error occurring, or %NULL
+ * to ignore.
+ *
+ * Set up the renderer.
+ *
+ * Returns: %TRUE if successfully setup.
+ */
+gboolean fl_renderer_setup(FlRenderer* self, GError** error);
+
+/**
+ * fl_renderer_get_visual:
+ * @renderer: an #FlRenderer.
+ * @screen: the screen being rendered on.
+ * @error: (allow-none): #GError location to store the error occurring, or %NULL
+ * to ignore.
+ *
+ * Gets the visual required to render on.
+ *
+ * Returns: a #GdkVisual.
+ */
+GdkVisual* fl_renderer_get_visual(FlRenderer* self,
+                                  GdkScreen* screen,
+                                  GError** error);
 
 /**
  * fl_renderer_start:
@@ -51,7 +79,7 @@ struct _FlRendererClass {
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
  * to ignore.
  *
- * Start the renderer. EGL must be set up before this call.
+ * Start the renderer.
  *
  * Returns: %TRUE if successfully started.
  */
