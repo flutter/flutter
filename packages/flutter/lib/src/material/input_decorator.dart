@@ -2086,9 +2086,14 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   // True if the label will be shown and the hint will not.
-  // If we're not focused, there's no value, and labelText was provided,
-  // then the label appears where the hint would.
-  bool get _hasInlineLabel => !widget._labelShouldWithdraw && decoration.labelText != null;
+  // If we're not focused, there's no value, labelText was provided, and
+  // floatingLabelBehavior isn't set to always, then the label appears where the
+  // hint would.
+  bool get _hasInlineLabel {
+    return !widget._labelShouldWithdraw
+        && decoration.labelText != null
+        && decoration.floatingLabelBehavior != FloatingLabelBehavior.always;
+  }
 
   // If the label is a floating placeholder, it's always shown.
   bool get _shouldShowLabel => _hasInlineLabel || _floatingLabelEnabled;
