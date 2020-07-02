@@ -14,6 +14,7 @@ PlatformViewLayer::PlatformViewLayer(const SkPoint& offset,
 void PlatformViewLayer::Preroll(PrerollContext* context,
                                 const SkMatrix& matrix) {
 #if defined(LEGACY_FUCHSIA_EMBEDDER)
+  context->child_scene_layer_exists_below = true;
   CheckForChildLayerBelow(context);
 #endif
 
@@ -31,10 +32,6 @@ void PlatformViewLayer::Preroll(PrerollContext* context,
                                            context->mutators_stack);
   context->view_embedder->PrerollCompositeEmbeddedView(view_id_,
                                                        std::move(params));
-#if defined(LEGACY_FUCHSIA_EMBEDDER)
-  // Set needs_system_composite flag so that rasterizer can call UpdateScene.
-  set_needs_system_composite(true);
-#endif
 }
 
 void PlatformViewLayer::Paint(PaintContext& context) const {
