@@ -151,7 +151,8 @@ class HitTestResult {
   final List<Matrix4> _transforms;
   final List<_TransformPart> _localTransforms;
 
-  // Globalize all transform parts in `_transforms`.
+  // Globalize all transform parts in `_localTransforms` and move them to
+  // _transforms.
   void _globalizeTransforms() {
     if (_localTransforms.isEmpty) {
       return;
@@ -166,6 +167,7 @@ class HitTestResult {
 
   Matrix4 get _lastTransform {
     _globalizeTransforms();
+    assert(_localTransforms.isEmpty);
     return _transforms.last;
   }
 
