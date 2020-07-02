@@ -328,8 +328,7 @@ enum Thumb {
 /// {@macro flutter.material.slider.seeAlso.rangeSliderTickMarkShape}
 @immutable
 class SliderThemeData with Diagnosticable {
-  /// Create a [SliderThemeData] given a set of exact values. All the values
-  /// must be specified.
+  /// Create a [SliderThemeData] given a set of exact values.
   ///
   /// This will rarely be used directly. It is used by [lerp] to
   /// create intermediate themes based on two themes.

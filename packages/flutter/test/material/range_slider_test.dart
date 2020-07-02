@@ -1670,7 +1670,6 @@ void main() {
       primarySwatch: Colors.blue,
       sliderTheme: const SliderThemeData(
         valueIndicatorColor: Color(0xff000001),
-        overlappingShapeStrokeColor: Color(0xff000002),
         showValueIndicator: ShowValueIndicator.onlyForContinuous,
       ),
     );
