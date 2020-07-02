@@ -23,9 +23,9 @@ TEST(EGLUtils, ErrorToStringNegative) {
 
 TEST(EGLUtils, ConfigToString) {
   EGLDisplay display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-  eglInitialize(display, nullptr, nullptr);
+  EXPECT_TRUE(eglInitialize(display, nullptr, nullptr));
   EGLConfig config;
-  eglChooseConfig(display, nullptr, &config, 1, nullptr);
+  EXPECT_TRUE(eglChooseConfig(display, nullptr, &config, 1, nullptr));
   g_autofree gchar* config_string = egl_config_to_string(display, config);
   EXPECT_STREQ(
       config_string,
@@ -46,9 +46,9 @@ TEST(EGLUtils, ConfigToString) {
 
 TEST(EGLUtils, ConfigToStringNullptr) {
   EGLDisplay display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-  eglInitialize(display, nullptr, nullptr);
+  EXPECT_TRUE(eglInitialize(display, nullptr, nullptr));
   EGLConfig config;
-  eglChooseConfig(display, nullptr, &config, 1, nullptr);
+  EXPECT_TRUE(eglChooseConfig(display, nullptr, &config, 1, nullptr));
   g_autofree gchar* config_string1 = egl_config_to_string(nullptr, config);
   EXPECT_STREQ(config_string1, "");
   g_autofree gchar* config_string2 = egl_config_to_string(display, nullptr);

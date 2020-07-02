@@ -10,13 +10,23 @@ struct _FlMockRenderer {
 
 G_DEFINE_TYPE(FlMockRenderer, fl_mock_renderer, fl_renderer_get_type())
 
-// Implements FlRenderer::start
-static gboolean fl_mock_renderer_start(FlRenderer* renderer, GError** error) {
-  return TRUE;
+// Implements FlRenderer::get_visual.
+static GdkVisual* fl_mock_renderer_get_visual(FlRenderer* renderer,
+                                              GdkScreen* screen,
+                                              EGLint visual_id) {
+  return static_cast<GdkVisual*>(g_object_new(GDK_TYPE_VISUAL, nullptr));
+}
+
+// Implements FlRenderer::create_surface.
+static EGLSurface fl_mock_renderer_create_surface(FlRenderer* renderer,
+                                                  EGLDisplay display,
+                                                  EGLConfig config) {
+  return eglCreateWindowSurface(display, config, 0, nullptr);
 }
 
 static void fl_mock_renderer_class_init(FlMockRendererClass* klass) {
-  FL_RENDERER_CLASS(klass)->start = fl_mock_renderer_start;
+  FL_RENDERER_CLASS(klass)->get_visual = fl_mock_renderer_get_visual;
+  FL_RENDERER_CLASS(klass)->create_surface = fl_mock_renderer_create_surface;
 }
 
 static void fl_mock_renderer_init(FlMockRenderer* self) {}

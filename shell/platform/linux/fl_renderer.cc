@@ -11,6 +11,7 @@ G_DEFINE_QUARK(fl_renderer_error_quark, fl_renderer_error)
 
 typedef struct {
   EGLDisplay egl_display;
+  EGLConfig egl_config;
   EGLSurface egl_surface;
   EGLContext egl_context;
 
@@ -30,7 +31,7 @@ static void create_resource_surface(FlRenderer* self, EGLConfig config) {
                                              EGL_NONE};
   priv->resource_surface = eglCreatePbufferSurface(priv->egl_display, config,
                                                    resource_context_attribs);
-  if (priv->resource_surface == nullptr) {
+  if (priv->resource_surface == EGL_NO_SURFACE) {
     g_warning("Failed to create EGL resource surface: %s",
               egl_error_to_string(eglGetError()));
     return;
@@ -38,14 +39,16 @@ static void create_resource_surface(FlRenderer* self, EGLConfig config) {
 
   priv->resource_context = eglCreateContext(
       priv->egl_display, config, priv->egl_context, context_attributes);
-  if (priv->resource_context == nullptr)
+  if (priv->resource_context == EGL_NO_CONTEXT)
     g_warning("Failed to create EGL resource context: %s",
               egl_error_to_string(eglGetError()));
 }
 
-// Default implementation for the start virtual method.
-// Provided so subclasses can chain up to here.
-static gboolean fl_renderer_real_start(FlRenderer* self, GError** error) {
+static void fl_renderer_class_init(FlRendererClass* klass) {}
+
+static void fl_renderer_init(FlRenderer* self) {}
+
+gboolean fl_renderer_setup(FlRenderer* self, GError** error) {
   FlRendererPrivate* priv =
       static_cast<FlRendererPrivate*>(fl_renderer_get_instance_private(self));
 
@@ -73,69 +76,89 @@ static gboolean fl_renderer_real_start(FlRenderer* self, GError** error) {
                          EGL_ALPHA_SIZE,
                          8,
                          EGL_NONE};
-  EGLConfig egl_config;
   EGLint n_config;
-  if (!eglChooseConfig(priv->egl_display, attributes, &egl_config, 1,
+  if (!eglChooseConfig(priv->egl_display, attributes, &priv->egl_config, 1,
                        &n_config)) {
     g_set_error(error, fl_renderer_error_quark(), FL_RENDERER_ERROR_FAILED,
                 "Failed to choose EGL config: %s",
                 egl_error_to_string(eglGetError()));
     return FALSE;
   }
+
   if (n_config == 0) {
     g_set_error(error, fl_renderer_error_quark(), FL_RENDERER_ERROR_FAILED,
                 "Failed to find appropriate EGL config: %s",
                 egl_error_to_string(eglGetError()));
     return FALSE;
   }
+
   if (!eglBindAPI(EGL_OPENGL_ES_API)) {
     g_autofree gchar* config_string =
-        egl_config_to_string(priv->egl_display, egl_config);
+        egl_config_to_string(priv->egl_display, priv->egl_config);
     g_set_error(error, fl_renderer_error_quark(), FL_RENDERER_ERROR_FAILED,
                 "Failed to bind EGL OpenGL ES API using configuration (%s): %s",
                 config_string, egl_error_to_string(eglGetError()));
     return FALSE;
   }
 
+  return TRUE;
+}
+
+GdkVisual* fl_renderer_get_visual(FlRenderer* self,
+                                  GdkScreen* screen,
+                                  GError** error) {
+  FlRendererPrivate* priv =
+      static_cast<FlRendererPrivate*>(fl_renderer_get_instance_private(self));
+
+  EGLint visual_id;
+  if (!eglGetConfigAttrib(priv->egl_display, priv->egl_config,
+                          EGL_NATIVE_VISUAL_ID, &visual_id)) {
+    g_set_error(error, fl_renderer_error_quark(), FL_RENDERER_ERROR_FAILED,
+                "Failed to determine EGL configuration visual");
+    return nullptr;
+  }
+
+  GdkVisual* visual =
+      FL_RENDERER_GET_CLASS(self)->get_visual(self, screen, visual_id);
+  if (visual == nullptr) {
+    g_set_error(error, fl_renderer_error_quark(), FL_RENDERER_ERROR_FAILED,
+                "Failed to find visual 0x%x", visual_id);
+    return nullptr;
+  }
+
+  return visual;
+}
+
+gboolean fl_renderer_start(FlRenderer* self, GError** error) {
+  FlRendererPrivate* priv =
+      static_cast<FlRendererPrivate*>(fl_renderer_get_instance_private(self));
+
   priv->egl_surface = FL_RENDERER_GET_CLASS(self)->create_surface(
-      self, priv->egl_display, egl_config);
-  if (priv->egl_surface == nullptr) {
+      self, priv->egl_display, priv->egl_config);
+  if (priv->egl_surface == EGL_NO_SURFACE) {
     g_autofree gchar* config_string =
-        egl_config_to_string(priv->egl_display, egl_config);
+        egl_config_to_string(priv->egl_display, priv->egl_config);
     g_set_error(error, fl_renderer_error_quark(), FL_RENDERER_ERROR_FAILED,
                 "Failed to create EGL surface using configuration (%s): %s",
                 config_string, egl_error_to_string(eglGetError()));
     return FALSE;
   }
+
   EGLint context_attributes[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
-  priv->egl_context = eglCreateContext(priv->egl_display, egl_config,
+  priv->egl_context = eglCreateContext(priv->egl_display, priv->egl_config,
                                        EGL_NO_CONTEXT, context_attributes);
-  if (priv->egl_context == nullptr) {
+  if (priv->egl_context == EGL_NO_CONTEXT) {
     g_autofree gchar* config_string =
-        egl_config_to_string(priv->egl_display, egl_config);
+        egl_config_to_string(priv->egl_display, priv->egl_config);
     g_set_error(error, fl_renderer_error_quark(), FL_RENDERER_ERROR_FAILED,
                 "Failed to create EGL context using configuration (%s): %s",
                 config_string, egl_error_to_string(eglGetError()));
     return FALSE;
   }
 
-  create_resource_surface(self, egl_config);
-
-  EGLint value;
-  eglQueryContext(priv->egl_display, priv->egl_context,
-                  EGL_CONTEXT_CLIENT_VERSION, &value);
+  create_resource_surface(self, priv->egl_config);
 
   return TRUE;
-}
-
-static void fl_renderer_class_init(FlRendererClass* klass) {
-  klass->start = fl_renderer_real_start;
-}
-
-static void fl_renderer_init(FlRenderer* self) {}
-
-gboolean fl_renderer_start(FlRenderer* self, GError** error) {
-  return FL_RENDERER_GET_CLASS(self)->start(self, error);
 }
 
 void* fl_renderer_get_proc_address(FlRenderer* self, const char* name) {
@@ -161,7 +184,8 @@ gboolean fl_renderer_make_resource_current(FlRenderer* self, GError** error) {
   FlRendererPrivate* priv =
       static_cast<FlRendererPrivate*>(fl_renderer_get_instance_private(self));
 
-  if (priv->resource_surface == nullptr || priv->resource_context == nullptr)
+  if (priv->resource_surface == EGL_NO_SURFACE ||
+      priv->resource_context == EGL_NO_CONTEXT)
     return FALSE;
 
   if (!eglMakeCurrent(priv->egl_display, priv->resource_surface,
