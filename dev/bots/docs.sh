@@ -53,7 +53,11 @@ function create_docset() {
   # show the end of it if there was a problem.
   echo "Building Flutter docset."
   rm -rf flutter.docset
-  (dashing build --source ./doc --config ./dashing.json > /tmp/dashing.log 2>&1 || (tail -100 /tmp/dashing.log; false)) && \
+  # If dashing gets stuck, Cirrus will time out the build after an hour, and we
+  # never get to see the logs. Thus, we time it out after 30 minutes to see the
+  # logs.
+  (timeout '30m' dashing build --source ./doc --config ./dashing.json > /tmp/dashing.log 2>&1 || \
+  (echo 'Dashing failed! Tailing last 200 lines of log...'; tail -200 /tmp/dashing.log; exit 1)) && \
   cp ./doc/flutter/static-assets/favicon.png ./flutter.docset/icon.png && \
   "$DART" ./dashing_postprocess.dart && \
   tar cf flutter.docset.tar.gz --use-compress-program="gzip --best" flutter.docset
@@ -111,7 +115,7 @@ if [[ -d "$FLUTTER_PUB_CACHE" ]]; then
 fi
 
 # Install and activate dartdoc.
-"$PUB" global activate dartdoc 0.31.0
+"$PUB" global activate dartdoc 0.32.1
 
 # This script generates a unified doc set, and creates
 # a custom index.html, placing everything into dev/docs/doc.
@@ -120,16 +124,16 @@ fi
 (cd "$FLUTTER_ROOT" && "$DART" "$FLUTTER_ROOT/dev/tools/dartdoc.dart")
 (cd "$FLUTTER_ROOT" && "$DART" "$FLUTTER_ROOT/dev/tools/java_and_objc_doc.dart")
 
-# Create offline doc archives.
-(cd "$FLUTTER_ROOT/dev/docs"; create_offline_zip)
-(cd "$FLUTTER_ROOT/dev/docs"; create_docset)
-(cd "$FLUTTER_ROOT/dev/docs"; move_offline_into_place)
-
-# Ensure google webmaster tools can verify our site.
-cp "$FLUTTER_ROOT/dev/docs/google2ed1af765c529f57.html" "$FLUTTER_ROOT/dev/docs/doc"
-
 # Upload new API docs when running on Cirrus
 if [[ -n "$CIRRUS_CI" && -z "$CIRRUS_PR" ]]; then
+  # Create offline doc archives.
+  (cd "$FLUTTER_ROOT/dev/docs"; create_offline_zip)
+  (cd "$FLUTTER_ROOT/dev/docs"; create_docset)
+  (cd "$FLUTTER_ROOT/dev/docs"; move_offline_into_place)
+
+  # Ensure google webmaster tools can verify our site.
+  cp "$FLUTTER_ROOT/dev/docs/google2ed1af765c529f57.html" "$FLUTTER_ROOT/dev/docs/doc"
+
   echo "This is not a pull request; considering whether to upload docs... (branch=$CIRRUS_BRANCH)"
   if [[ "$CIRRUS_BRANCH" == "master" ]]; then
     echo "Updating $CIRRUS_BRANCH docs: https://master-api.flutter.dev/"
