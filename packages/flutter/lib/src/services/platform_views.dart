@@ -80,6 +80,8 @@ class PlatformViewsService {
 
   /// Creates a [TextureAndroidViewController] for a new Android view.
   ///
+  /// The view is created after calling [TextureAndroidViewController.setSize].
+  ///
   /// `id` is an unused unique identifier generated with [platformViewsRegistry].
   ///
   /// `viewType` is the identifier of the Android view type to be created, a
@@ -129,6 +131,8 @@ class PlatformViewsService {
 
   /// Creates a [SurfaceAndroidViewController] for a new Android view.
   ///
+  /// The view is created after calling [AndroidViewController.create].
+  ///
   /// `id` is an unused unique identifier generated with [platformViewsRegistry].
   ///
   /// `viewType` is the identifier of the Android view type to be created, a
@@ -170,7 +174,7 @@ class PlatformViewsService {
       layoutDirection: layoutDirection,
       creationParams: creationParams,
       creationParamsCodec: creationParamsCodec,
-    ).._sendCreateMessage();
+    );
 
     _instance._focusCallbacks[id] = onFocus ?? () {};
     return controller;
@@ -725,6 +729,21 @@ abstract class AndroidViewController extends PlatformViewController {
   }
 
   Future<void> _sendDisposeMessage();
+  Future<void> _sendCreateMessage();
+
+  /// Creates the Android View.
+  ///
+  /// Throws an [AssertionError] if view was already disposed.
+  Future<void> create() async {
+    assert(_state != _AndroidViewState.disposed, 'trying to create a disposed Android view');
+
+    await _sendCreateMessage();
+
+    _state = _AndroidViewState.created;
+    for (final PlatformViewCreatedCallback callback in _platformViewCreatedCallbacks) {
+      callback(viewId);
+    }
+  }
 
   /// Sizes the Android View.
   ///
@@ -889,7 +908,8 @@ class SurfaceAndroidViewController extends AndroidViewController {
             creationParams: creationParams,
             creationParamsCodec: creationParamsCodec);
 
-  Future<void> _sendCreateMessage() async {
+  @override
+  Future<void> _sendCreateMessage() {
     final Map<String, dynamic> args = <String, dynamic>{
       'id': viewId,
       'viewType': _viewType,
@@ -905,11 +925,7 @@ class SurfaceAndroidViewController extends AndroidViewController {
         paramsByteData.lengthInBytes,
       );
     }
-    await SystemChannels.platform_views.invokeMethod<void>('create', args);
-    _state = _AndroidViewState.created;
-    for (final PlatformViewCreatedCallback callback in _platformViewCreatedCallbacks) {
-      callback(viewId);
-    }
+    return SystemChannels.platform_views.invokeMethod<void>('create', args);
   }
 
   @override
@@ -976,7 +992,7 @@ class TextureAndroidViewController extends AndroidViewController {
 
     if (_state == _AndroidViewState.waitingForSize) {
       _size = size;
-      return _sendCreateMessage();
+      return create();
     }
 
     await SystemChannels.platform_views.invokeMethod<void>('resize', <String, dynamic>{
@@ -986,7 +1002,19 @@ class TextureAndroidViewController extends AndroidViewController {
     });
   }
 
+  /// Creates the Android View.
+  ///
+  /// This should not be called before [AndroidViewController.setSize].
+  ///
+  /// Throws an [AssertionError] if view was already disposed.
+  @override
+  Future<void> create() => super.create();
+
+  @override
   Future<void> _sendCreateMessage() async {
+    assert(_size != null && _size.isEmpty,
+      'trying to create $TextureAndroidViewController without setting size.');
+
     final Map<String, dynamic> args = <String, dynamic>{
       'id': viewId,
       'viewType': _viewType,
@@ -1002,11 +1030,7 @@ class TextureAndroidViewController extends AndroidViewController {
         paramsByteData.lengthInBytes,
       );
     }
-    _textureId = await SystemChannels.platform_views.invokeMethod('create', args);
-    _state = _AndroidViewState.created;
-    for (final PlatformViewCreatedCallback callback in _platformViewCreatedCallbacks) {
-      callback(viewId);
-    }
+    _textureId = await SystemChannels.platform_views.invokeMethod<int>('create', args);
   }
 
   @override

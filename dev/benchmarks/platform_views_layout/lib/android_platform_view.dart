@@ -15,8 +15,8 @@ class AndroidPlatformView extends StatelessWidget {
   const AndroidPlatformView({
     Key key,
     @required this.viewType,
-  }) : assert(viewType != null),
-       super(key: key);
+  })  : assert(viewType != null),
+        super(key: key);
 
   /// The unique identifier for the view type to be embedded by this widget.
   ///
@@ -40,7 +40,9 @@ class AndroidPlatformView extends StatelessWidget {
           id: params.id,
           viewType: params.viewType,
           layoutDirection: TextDirection.ltr,
-        )..addOnPlatformViewCreatedListener(params.onPlatformViewCreated);
+        )
+          ..addOnPlatformViewCreatedListener(params.onPlatformViewCreated)
+          ..create();
       },
     );
   }

@@ -57,6 +57,7 @@ class FakeAndroidViewController implements AndroidViewController {
 
   bool disposed = false;
   bool focusCleared = false;
+  bool created = false;
 
   /// Events that are dispatched;
   List<PointerEvent> dispatchedPointerEvents = <PointerEvent>[];
@@ -119,6 +120,11 @@ class FakeAndroidViewController implements AndroidViewController {
   @override
   Future<void> setLayoutDirection(TextDirection layoutDirection) {
     throw UnimplementedError();
+  }
+
+  @override
+  Future<void> create() {
+    created = true;
   }
 }
 
