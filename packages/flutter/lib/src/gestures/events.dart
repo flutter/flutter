@@ -4,7 +4,7 @@
 
 // @dart = 2.8
 
-import 'dart:convert' show JsonUnsupportedObjectError;
+import 'dart:convert' show json, JsonUnsupportedObjectError;
 import 'dart:ui' show Offset, PointerDeviceKind;
 
 import 'package:flutter/foundation.dart';
@@ -234,36 +234,39 @@ abstract class PointerEvent with Diagnosticable {
        localDelta = localDelta ?? delta;
 
   /// Deserialize a PointerEvent from json
-  factory PointerEvent.fromJson(Map<String, dynamic> jsonObject) {
+  factory PointerEvent.fromJson(dynamic value) {
+    assert(value is Map<String, dynamic> || value is String);
+    final Map<String, dynamic> jsonObject = value is String
+      ? json.decode(value) as Map<String, dynamic>
+      : value as Map<String, dynamic>;
     switch (jsonObject['type'] as String) {
       case 'PointerAddedEvent':
-        return PointerAddedEvent._fromJson(jsonObject);
+        return PointerAddedEvent._deserialize(jsonObject);
       case 'PointerCancelEvent':
-        return PointerCancelEvent._fromJson(jsonObject);
+        return PointerCancelEvent._deserialize(jsonObject);
       case 'PointerDownEvent':
-        return PointerDownEvent._fromJson(jsonObject);
+        return PointerDownEvent._deserialize(jsonObject);
       case 'PointerEnterEvent':
-        return PointerEnterEvent._fromJson(jsonObject);
+        return PointerEnterEvent._deserialize(jsonObject);
       case 'PointerExitEvent':
-        return PointerExitEvent._fromJson(jsonObject);
+        return PointerExitEvent._deserialize(jsonObject);
       case 'PointerHoverEvent':
-        return PointerHoverEvent._fromJson(jsonObject);
+        return PointerHoverEvent._deserialize(jsonObject);
       case 'PointerMoveEvent':
-        return PointerMoveEvent._fromJson(jsonObject);
+        return PointerMoveEvent._deserialize(jsonObject);
       case 'PointerRemovedEvent':
-        return PointerRemovedEvent._fromJson(jsonObject);
+        return PointerRemovedEvent._deserialize(jsonObject);
       case 'PointerScrollEvent':
-        return PointerScrollEvent._fromJson(jsonObject);
+        return PointerScrollEvent._deserialize(jsonObject);
       case 'PointerUpEvent':
-        return PointerUpEvent._fromJson(jsonObject);
+        return PointerUpEvent._deserialize(jsonObject);
       default:
         throw JsonUnsupportedObjectError(jsonObject);
     }
   }
 
-  /// Deserialize a PointerEvent from json for internal use
   @protected
-  PointerEvent.serialize(Map<String, dynamic> jsonObject) :
+  PointerEvent._deserialize(Map<String, dynamic> jsonObject) :
     timeStamp = Duration(microseconds: jsonObject['timeStamp'] as int ?? 0),
     pointer = jsonObject['pointer'] as int ?? 0,
     kind = PointerDeviceKind.values[jsonObject['kind'] as int ?? 0],
@@ -296,8 +299,9 @@ abstract class PointerEvent with Diagnosticable {
       : Matrix4.fromList(jsonObject['transform'] as List<double>),
     original = null;
 
-  /// Serialize the event tto a json strong.
+  /// Serialize the event to a json object.
   Map<String, dynamic> toJson () {
+    // TODO(CareF): provide a warning message when original is not null.
     return <String,dynamic>{
       'type': runtimeType.toString(),
       if(timeStamp != Duration.zero) 'timeStamp': timeStamp.inMicroseconds,
@@ -326,7 +330,6 @@ abstract class PointerEvent with Diagnosticable {
       if(platformData != 0.0) 'platformData': platformData,
       if(synthesized != false) 'synthesized': synthesized,
       if(transform != null) 'transform': transform.storage,
-      // TODO(CareF): original may be replaced by an id number.
     };
   }
 
@@ -709,7 +712,8 @@ class PointerAddedEvent extends PointerEvent {
          original: original,
        );
 
-  PointerAddedEvent._fromJson(Map<String, dynamic> jsonObject) : super.serialize(jsonObject);
+  @override
+  PointerAddedEvent._deserialize(Map<String, dynamic> jsonObject) : super._deserialize(jsonObject);
 
   @override
   PointerAddedEvent transformed(Matrix4 transform) {
@@ -776,7 +780,8 @@ class PointerRemovedEvent extends PointerEvent {
          original: original,
        );
 
-  PointerRemovedEvent._fromJson(Map<String, dynamic> jsonObject): super.serialize(jsonObject);
+  @override
+  PointerRemovedEvent._deserialize(Map<String, dynamic> jsonObject): super._deserialize(jsonObject);
 
   @override
   PointerRemovedEvent transformed(Matrix4 transform) {
@@ -867,7 +872,8 @@ class PointerHoverEvent extends PointerEvent {
          original: original,
        );
 
-  PointerHoverEvent._fromJson(Map<String, dynamic> jsonObject): super.serialize(jsonObject);
+  @override
+  PointerHoverEvent._deserialize(Map<String, dynamic> jsonObject): super._deserialize(jsonObject);
 
   @override
   PointerHoverEvent transformed(Matrix4 transform) {
@@ -975,7 +981,8 @@ class PointerEnterEvent extends PointerEvent {
          original: original,
        );
 
-  PointerEnterEvent._fromJson(Map<String, dynamic> jsonObject): super.serialize(jsonObject);
+  @override
+  PointerEnterEvent._deserialize(Map<String, dynamic> jsonObject): super._deserialize(jsonObject);
 
   /// Creates an enter event from a [PointerHoverEvent].
   ///
@@ -1123,7 +1130,8 @@ class PointerExitEvent extends PointerEvent {
          original: original,
        );
 
-  PointerExitEvent._fromJson(Map<String, dynamic> jsonObject): super.serialize(jsonObject);
+  @override
+  PointerExitEvent._deserialize(Map<String, dynamic> jsonObject): super._deserialize(jsonObject);
 
   /// Creates an exit event from a [PointerHoverEvent].
   ///
@@ -1257,7 +1265,8 @@ class PointerDownEvent extends PointerEvent {
          original: original,
        );
 
-  PointerDownEvent._fromJson(Map<String, dynamic> jsonObject): super.serialize(jsonObject);
+  @override
+  PointerDownEvent._deserialize(Map<String, dynamic> jsonObject): super._deserialize(jsonObject);
 
   @override
   PointerDownEvent transformed(Matrix4 transform) {
@@ -1357,7 +1366,8 @@ class PointerMoveEvent extends PointerEvent {
          original: original,
        );
 
-  PointerMoveEvent._fromJson(Map<String, dynamic> jsonObject): super.serialize(jsonObject);
+  @override
+  PointerMoveEvent._deserialize(Map<String, dynamic> jsonObject): super._deserialize(jsonObject);
 
   @override
   PointerMoveEvent transformed(Matrix4 transform) {
@@ -1457,7 +1467,8 @@ class PointerUpEvent extends PointerEvent {
          original: original,
        );
 
-  PointerUpEvent._fromJson(Map<String, dynamic> jsonObject): super.serialize(jsonObject);
+  @override
+  PointerUpEvent._deserialize(Map<String, dynamic> jsonObject): super._deserialize(jsonObject);
 
   @override
   PointerUpEvent transformed(Matrix4 transform) {
@@ -1519,7 +1530,8 @@ abstract class PointerSignalEvent extends PointerEvent {
          original: original,
        );
 
-  PointerSignalEvent._fromJson(Map<String, dynamic> jsonObject): super.serialize(jsonObject);
+  @override
+  PointerSignalEvent._deserialize(Map<String, dynamic> jsonObject): super._deserialize(jsonObject);
 }
 
 /// The pointer issued a scroll event.
@@ -1554,9 +1566,10 @@ class PointerScrollEvent extends PointerSignalEvent {
          original: original,
        );
 
-  PointerScrollEvent._fromJson(Map<String, dynamic> jsonObject):
+  @override
+  PointerScrollEvent._deserialize(Map<String, dynamic> jsonObject):
     scrollDelta = _deserializeOffset(jsonObject['scrollDelta']),
-    super._fromJson(jsonObject);
+    super._deserialize(jsonObject);
 
   @override
   Map<String, dynamic> toJson() {
@@ -1645,7 +1658,8 @@ class PointerCancelEvent extends PointerEvent {
          original: original,
        );
 
-  PointerCancelEvent._fromJson(Map<String, dynamic> jsonObject): super.serialize(jsonObject);
+  @override
+  PointerCancelEvent._deserialize(Map<String, dynamic> jsonObject): super._deserialize(jsonObject);
 
   @override
   PointerCancelEvent transformed(Matrix4 transform) {

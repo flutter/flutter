@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 // @dart = 2.8
+import 'dart:convert';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -497,6 +498,66 @@ void main() {
       transform: transform,
       localPosition: localPosition,
     );
+  });
+
+  test('Serialize and deserialize PointerEvent to/from json', (){
+    const PointerMoveEvent move = PointerMoveEvent(
+      timeStamp: Duration(seconds: 2),
+      pointer: 45,
+      kind: PointerDeviceKind.mouse,
+      device: 1,
+      position: Offset(20, 30),
+      delta: Offset(5, 5),
+      buttons: 4,
+      obscured: true,
+      pressure: 34,
+      pressureMin: 10,
+      pressureMax: 60,
+      distanceMax: 24,
+      size: 10,
+      radiusMajor: 33,
+      radiusMinor: 44,
+      radiusMin: 10,
+      radiusMax: 50,
+      orientation: 2,
+      tilt: 4,
+      platformData: 10,
+      synthesized: true,
+    );
+    final PointerEvent restoredMove = PointerEvent.fromJson(json.encode(move));
+    expect(restoredMove.runtimeType, PointerMoveEvent);
+    expect(restoredMove.timeStamp,    move.timeStamp);
+    expect(restoredMove.pointer,      move.pointer);
+    expect(restoredMove.kind,         move.kind);
+    expect(restoredMove.device,       move.device);
+    expect(restoredMove.position,     move.position);
+    expect(restoredMove.delta,        move.delta);
+    expect(restoredMove.buttons,      move.buttons);
+    expect(restoredMove.down,         move.down);
+    expect(restoredMove.obscured,     move.obscured);
+    expect(restoredMove.pressure,     move.pressure);
+    expect(restoredMove.pressureMin,  move.pressureMin);
+    expect(restoredMove.pressureMax,  move.pressureMax);
+    expect(restoredMove.distance,     move.distance);
+    expect(restoredMove.distanceMax,  move.distanceMax);
+    expect(restoredMove.size,         move.size);
+    expect(restoredMove.radiusMajor,  move.radiusMajor);
+    expect(restoredMove.radiusMinor,  move.radiusMinor);
+    expect(restoredMove.radiusMin,    move.radiusMin);
+    expect(restoredMove.radiusMax,    move.radiusMax);
+    expect(restoredMove.orientation,  move.orientation);
+    expect(restoredMove.tilt,         move.tilt);
+    expect(restoredMove.platformData, move.platformData);
+    expect(restoredMove.synthesized,  move.synthesized);
+    expect(restoredMove.original, null);
+
+    const PointerScrollEvent scroll = PointerScrollEvent(
+      scrollDelta: Offset(3, 4),
+    );
+    final PointerEvent restoredEvent = PointerEvent.fromJson(json.encode(scroll));
+    expect(restoredEvent.runtimeType, PointerScrollEvent);
+    final PointerScrollEvent restoredScroll = restoredEvent as PointerScrollEvent;
+    expect(restoredScroll.scrollDelta, scroll.scrollDelta);
   });
 }
 
