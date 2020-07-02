@@ -78,9 +78,8 @@ void main() {
         layoutDirection: TextDirection.ltr,
       ).create();
       expect(
-         () {
-            PlatformViewsService.initSurfaceAndroidView(id: 1, viewType: 'web', layoutDirection: TextDirection.ltr).create();
-         },
+         () => PlatformViewsService.initSurfaceAndroidView(
+             id: 1, viewType: 'web', layoutDirection: TextDirection.ltr).create(),
          throwsA(isA<PlatformException>()));
     });
 
