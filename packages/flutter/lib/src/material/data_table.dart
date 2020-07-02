@@ -96,6 +96,7 @@ class DataRow {
     this.key,
     this.selected = false,
     this.onSelectChanged,
+    this.decoration,
     @required this.cells,
   }) : assert(cells != null);
 
@@ -107,9 +108,10 @@ class DataRow {
     int index,
     this.selected = false,
     this.onSelectChanged,
+    this.decoration,
     @required this.cells,
-  }) : assert(cells != null),
-       key = ValueKey<int>(index);
+  })  : assert(cells != null),
+        key = ValueKey<int>(index);
 
   /// A [Key] that uniquely identifies this row. This is used to
   /// ensure that if a row is added or removed, any stateful widgets
@@ -144,13 +146,20 @@ class DataRow {
   /// Otherwise, the checkbox, if present, will not be checked.
   final bool selected;
 
+  /// The decoration to paint behind the [DataRow].
+  ///
+  /// Use the [color] property to specify a simple solid color.
+  final BoxDecoration decoration;
+
   /// The data for this row.
   ///
   /// There must be exactly as many cells as there are columns in the
   /// table.
   final List<DataCell> cells;
 
-  bool get _debugInteractive => onSelectChanged != null || cells.any((DataCell cell) => cell._debugInteractive);
+  bool get _debugInteractive =>
+      onSelectChanged != null ||
+      cells.any((DataCell cell) => cell._debugInteractive);
 }
 
 /// The data for a cell of a [DataTable].
@@ -338,20 +347,21 @@ class DataTable extends StatelessWidget {
     this.showCheckboxColumn = true,
     this.dividerThickness = 1.0,
     @required this.rows,
-  }) : assert(columns != null),
-       assert(columns.isNotEmpty),
-       assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
-       assert(sortAscending != null),
-       assert(dataRowHeight != null),
-       assert(headingRowHeight != null),
-       assert(horizontalMargin != null),
-       assert(columnSpacing != null),
-       assert(showCheckboxColumn != null),
-       assert(rows != null),
-       assert(!rows.any((DataRow row) => row.cells.length != columns.length)),
-       assert(dividerThickness != null && dividerThickness >= 0),
-       _onlyTextColumn = _initOnlyTextColumn(columns),
-       super(key: key);
+  })  : assert(columns != null),
+        assert(columns.isNotEmpty),
+        assert(sortColumnIndex == null ||
+            (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
+        assert(sortAscending != null),
+        assert(dataRowHeight != null),
+        assert(headingRowHeight != null),
+        assert(horizontalMargin != null),
+        assert(columnSpacing != null),
+        assert(showCheckboxColumn != null),
+        assert(rows != null),
+        assert(!rows.any((DataRow row) => row.cells.length != columns.length)),
+        assert(dividerThickness != null && dividerThickness >= 0),
+        _onlyTextColumn = _initOnlyTextColumn(columns),
+        super(key: key);
 
   /// The configuration and labels for the columns in the table.
   final List<DataColumn> columns;
@@ -442,8 +452,7 @@ class DataTable extends StatelessWidget {
     for (int index = 0; index < columns.length; index += 1) {
       final DataColumn column = columns[index];
       if (!column.numeric) {
-        if (result != null)
-          return null;
+        if (result != null) return null;
         result = index;
       }
     }
@@ -451,8 +460,8 @@ class DataTable extends StatelessWidget {
   }
 
   bool get _debugInteractive {
-    return columns.any((DataColumn column) => column._debugInteractive)
-        || rows.any((DataRow row) => row._debugInteractive);
+    return columns.any((DataColumn column) => column._debugInteractive) ||
+        rows.any((DataRow row) => row._debugInteractive);
   }
 
   static final LocalKey _headingRowKey = UniqueKey();
@@ -470,9 +479,12 @@ class DataTable extends StatelessWidget {
 
   static const double _sortArrowPadding = 2.0;
   static const double _headingFontSize = 12.0;
-  static const Duration _sortArrowAnimationDuration = Duration(milliseconds: 150);
-  static const Color _grey100Opacity = Color(0x0A000000); // Grey 100 as opacity instead of solid color
-  static const Color _grey300Opacity = Color(0x1E000000); // Dark theme variant is just a guess.
+  static const Duration _sortArrowAnimationDuration =
+      Duration(milliseconds: 150);
+  static const Color _grey100Opacity =
+      Color(0x0A000000); // Grey 100 as opacity instead of solid color
+  static const Color _grey300Opacity =
+      Color(0x1E000000); // Dark theme variant is just a guess.
 
   /// The width of the divider that appears between [TableRow]s.
   ///
@@ -489,7 +501,8 @@ class DataTable extends StatelessWidget {
     Widget contents = Semantics(
       container: true,
       child: Padding(
-        padding: EdgeInsetsDirectional.only(start: horizontalMargin, end: horizontalMargin / 2.0),
+        padding: EdgeInsetsDirectional.only(
+            start: horizontalMargin, end: horizontalMargin / 2.0),
         child: Center(
           child: Checkbox(
             activeColor: color,
@@ -522,15 +535,18 @@ class DataTable extends StatelessWidget {
     bool ascending,
   }) {
     List<Widget> arrowWithPadding() {
-      return onSort == null ? const <Widget>[] : <Widget>[
-        _SortArrow(
-          visible: sorted,
-          down: sorted ? ascending : null,
-          duration: _sortArrowAnimationDuration,
-        ),
-        const SizedBox(width: _sortArrowPadding),
-      ];
+      return onSort == null
+          ? const <Widget>[]
+          : <Widget>[
+              _SortArrow(
+                visible: sorted,
+                down: sorted ? ascending : null,
+                duration: _sortArrowAnimationDuration,
+              ),
+              const SizedBox(width: _sortArrowPadding),
+            ];
     }
+
     label = Row(
       textDirection: numeric ? TextDirection.rtl : null,
       children: <Widget>[
@@ -541,7 +557,8 @@ class DataTable extends StatelessWidget {
     label = Container(
       padding: padding,
       height: headingRowHeight,
-      alignment: numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
+      alignment:
+          numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
       child: AnimatedDefaultTextStyle(
         style: TextStyle(
           // TODO(hansmuller): This should use the information provided by
@@ -550,8 +567,8 @@ class DataTable extends StatelessWidget {
           fontSize: _headingFontSize,
           height: math.min(1.0, headingRowHeight / _headingFontSize),
           color: (Theme.of(context).brightness == Brightness.light)
-            ? ((onSort != null && sorted) ? Colors.black87 : Colors.black54)
-            : ((onSort != null && sorted) ? Colors.white : Colors.white70),
+              ? ((onSort != null && sorted) ? Colors.black87 : Colors.black54)
+              : ((onSort != null && sorted) ? Colors.white : Colors.white70),
         ),
         softWrap: false,
         duration: _sortArrowAnimationDuration,
@@ -589,21 +606,22 @@ class DataTable extends StatelessWidget {
       label = Expanded(child: label);
       label = Row(
         textDirection: numeric ? TextDirection.rtl : null,
-        children: <Widget>[ label, icon ],
+        children: <Widget>[label, icon],
       );
     }
     label = Container(
       padding: padding,
       height: dataRowHeight,
-      alignment: numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
+      alignment:
+          numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
       child: DefaultTextStyle(
         style: TextStyle(
           // TODO(hansmuller): This should use the information provided by
           // textTheme/DataTableTheme, https://github.com/flutter/flutter/issues/56079
           fontSize: 13.0,
           color: isLightTheme
-            ? (placeholder ? Colors.black38 : Colors.black87)
-            : (placeholder ? Colors.white38 : Colors.white70),
+              ? (placeholder ? Colors.black38 : Colors.black87)
+              : (placeholder ? Colors.white38 : Colors.white70),
         ),
         child: IconTheme.merge(
           data: IconThemeData(
@@ -633,25 +651,38 @@ class DataTable extends StatelessWidget {
 
     final ThemeData theme = Theme.of(context);
     final BoxDecoration _kSelectedDecoration = BoxDecoration(
-      border: Border(bottom: Divider.createBorderSide(context, width:  dividerThickness)),
+      border: Border(
+          bottom: Divider.createBorderSide(context, width: dividerThickness)),
       // The backgroundColor has to be transparent so you can see the ink on the material
-      color: (Theme.of(context).brightness == Brightness.light) ? _grey100Opacity : _grey300Opacity,
+      color: (Theme.of(context).brightness == Brightness.light)
+          ? _grey100Opacity
+          : _grey300Opacity,
     );
     final BoxDecoration _kUnselectedDecoration = BoxDecoration(
-      border: Border(bottom: Divider.createBorderSide(context, width: dividerThickness)),
+      border: Border(
+          bottom: Divider.createBorderSide(context, width: dividerThickness)),
     );
 
-    final bool displayCheckboxColumn = showCheckboxColumn && rows.any((DataRow row) => row.onSelectChanged != null);
-    final bool allChecked = displayCheckboxColumn && !rows.any((DataRow row) => row.onSelectChanged != null && !row.selected);
+    final bool displayCheckboxColumn = showCheckboxColumn &&
+        rows.any((DataRow row) => row.onSelectChanged != null);
+    final bool allChecked = displayCheckboxColumn &&
+        !rows
+            .any((DataRow row) => row.onSelectChanged != null && !row.selected);
 
-    final List<TableColumnWidth> tableColumns = List<TableColumnWidth>(columns.length + (displayCheckboxColumn ? 1 : 0));
+    final List<TableColumnWidth> tableColumns = List<TableColumnWidth>(
+        columns.length + (displayCheckboxColumn ? 1 : 0));
     final List<TableRow> tableRows = List<TableRow>.generate(
       rows.length + 1, // the +1 is for the header row
       (int index) {
+        final rowDecoration = index > 0 && rows[index - 1].decoration != null
+            ? rows[index - 1].decoration
+            : _kUnselectedDecoration;
+
         return TableRow(
           key: index == 0 ? _headingRowKey : rows[index - 1].key,
-          decoration: index > 0 && rows[index - 1].selected ? _kSelectedDecoration
-                                                            : _kUnselectedDecoration,
+          decoration: index > 0 && rows[index - 1].selected
+              ? _kSelectedDecoration
+              : rowDecoration,
           children: List<Widget>(tableColumns.length),
         );
       },
@@ -661,7 +692,8 @@ class DataTable extends StatelessWidget {
 
     int displayColumnIndex = 0;
     if (displayCheckboxColumn) {
-      tableColumns[0] = FixedColumnWidth(horizontalMargin + Checkbox.width + horizontalMargin / 2.0);
+      tableColumns[0] = FixedColumnWidth(
+          horizontalMargin + Checkbox.width + horizontalMargin / 2.0);
       tableRows[0].children[0] = _buildCheckbox(
         color: theme.accentColor,
         checked: allChecked,
@@ -672,7 +704,9 @@ class DataTable extends StatelessWidget {
         tableRows[rowIndex].children[0] = _buildCheckbox(
           color: theme.accentColor,
           checked: row.selected,
-          onRowTap: () => row.onSelectChanged != null ? row.onSelectChanged(!row.selected) : null ,
+          onRowTap: () => row.onSelectChanged != null
+              ? row.onSelectChanged(!row.selected)
+              : null,
           onCheckboxChanged: row.onSelectChanged,
         );
         rowIndex += 1;
@@ -680,7 +714,9 @@ class DataTable extends StatelessWidget {
       displayColumnIndex += 1;
     }
 
-    for (int dataColumnIndex = 0; dataColumnIndex < columns.length; dataColumnIndex += 1) {
+    for (int dataColumnIndex = 0;
+        dataColumnIndex < columns.length;
+        dataColumnIndex += 1) {
       final DataColumn column = columns[dataColumnIndex];
 
       double paddingStart;
@@ -704,7 +740,8 @@ class DataTable extends StatelessWidget {
         end: paddingEnd,
       );
       if (dataColumnIndex == _onlyTextColumn) {
-        tableColumns[displayColumnIndex] = const IntrinsicColumnWidth(flex: 1.0);
+        tableColumns[displayColumnIndex] =
+            const IntrinsicColumnWidth(flex: 1.0);
       } else {
         tableColumns[displayColumnIndex] = const IntrinsicColumnWidth();
       }
@@ -714,7 +751,10 @@ class DataTable extends StatelessWidget {
         label: column.label,
         tooltip: column.tooltip,
         numeric: column.numeric,
-        onSort: column.onSort != null ? () => column.onSort(dataColumnIndex, sortColumnIndex != dataColumnIndex || !sortAscending) : null,
+        onSort: column.onSort != null
+            ? () => column.onSort(dataColumnIndex,
+                sortColumnIndex != dataColumnIndex || !sortAscending)
+            : null,
         sorted: dataColumnIndex == sortColumnIndex,
         ascending: sortAscending,
       );
@@ -729,7 +769,9 @@ class DataTable extends StatelessWidget {
           placeholder: cell.placeholder,
           showEditIcon: cell.showEditIcon,
           onTap: cell.onTap,
-          onSelectChanged: () => row.onSelectChanged != null ? row.onSelectChanged(!row.selected) : null,
+          onSelectChanged: () => row.onSelectChanged != null
+              ? row.onSelectChanged(!row.selected)
+              : null,
         );
         rowIndex += 1;
       }
@@ -766,15 +808,15 @@ class TableRowInkWell extends InkResponse {
     GestureLongPressCallback onLongPress,
     ValueChanged<bool> onHighlightChanged,
   }) : super(
-    key: key,
-    child: child,
-    onTap: onTap,
-    onDoubleTap: onDoubleTap,
-    onLongPress: onLongPress,
-    onHighlightChanged: onHighlightChanged,
-    containedInkWell: true,
-    highlightShape: BoxShape.rectangle,
-  );
+          key: key,
+          child: child,
+          onTap: onTap,
+          onDoubleTap: onDoubleTap,
+          onLongPress: onLongPress,
+          onHighlightChanged: onHighlightChanged,
+          containedInkWell: true,
+          highlightShape: BoxShape.rectangle,
+        );
 
   @override
   RectCallback getRectCallback(RenderBox referenceBox) {
@@ -790,15 +832,15 @@ class TableRowInkWell extends InkResponse {
         table = table.parent;
       }
       if (table is RenderTable) {
-        final TableCellParentData cellParentData = cell.parentData as TableCellParentData;
+        final TableCellParentData cellParentData =
+            cell.parentData as TableCellParentData;
         assert(cellParentData.y != null);
         final Rect rect = table.getRowBox(cellParentData.y);
         // The rect is in the table's coordinate space. We need to change it to the
         // TableRowInkWell's coordinate space.
         table.applyPaintTransform(cell, transform);
         final Offset offset = MatrixUtils.getAsTranslation(transform);
-        if (offset != null)
-          return rect.shift(-offset);
+        if (offset != null) return rect.shift(-offset);
       }
       return Rect.zero;
     };
@@ -830,7 +872,6 @@ class _SortArrow extends StatefulWidget {
 }
 
 class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
-
   AnimationController _opacityController;
   Animation<double> _opacityAnimation;
 
@@ -840,8 +881,9 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
 
   bool _down;
 
-  static final Animatable<double> _turnTween = Tween<double>(begin: 0.0, end: math.pi)
-    .chain(CurveTween(curve: Curves.easeIn));
+  static final Animatable<double> _turnTween =
+      Tween<double>(begin: 0.0, end: math.pi)
+          .chain(CurveTween(curve: Curves.easeIn));
 
   @override
   void initState() {
@@ -852,8 +894,7 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
         vsync: this,
       ),
       curve: Curves.fastOutSlowIn,
-    )
-    ..addListener(_rebuild);
+    )..addListener(_rebuild);
     _opacityController.value = widget.visible ? 1.0 : 0.0;
     _orientationController = AnimationController(
       duration: widget.duration,
@@ -862,8 +903,7 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
     _orientationAnimation = _orientationController.drive(_turnTween)
       ..addListener(_rebuild)
       ..addStatusListener(_resetOrientationAnimation);
-    if (widget.visible)
-      _orientationOffset = widget.down ? 0.0 : math.pi;
+    if (widget.visible) _orientationOffset = widget.down ? 0.0 : math.pi;
   }
 
   void _rebuild() {
@@ -876,7 +916,8 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
     if (status == AnimationStatus.completed) {
       assert(_orientationAnimation.value == math.pi);
       _orientationOffset += math.pi;
-      _orientationController.value = 0.0; // TODO(ianh): This triggers a pointless rebuild.
+      _orientationController.value =
+          0.0; // TODO(ianh): This triggers a pointless rebuild.
     }
   }
 
@@ -886,7 +927,8 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
     bool skipArrow = false;
     final bool newDown = widget.down ?? _down;
     if (oldWidget.visible != widget.visible) {
-      if (widget.visible && (_opacityController.status == AnimationStatus.dismissed)) {
+      if (widget.visible &&
+          (_opacityController.status == AnimationStatus.dismissed)) {
         _orientationController.stop();
         _orientationController.value = 0.0;
         _orientationOffset = newDown ? 0.0 : math.pi;
@@ -923,16 +965,18 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
     return Opacity(
       opacity: _opacityAnimation.value,
       child: Transform(
-        transform: Matrix4.rotationZ(_orientationOffset + _orientationAnimation.value)
-                             ..setTranslationRaw(0.0, _arrowIconBaselineOffset, 0.0),
+        transform:
+            Matrix4.rotationZ(_orientationOffset + _orientationAnimation.value)
+              ..setTranslationRaw(0.0, _arrowIconBaselineOffset, 0.0),
         alignment: Alignment.center,
         child: Icon(
           Icons.arrow_downward,
           size: _arrowIconSize,
-          color: (Theme.of(context).brightness == Brightness.light) ? Colors.black87 : Colors.white70,
+          color: (Theme.of(context).brightness == Brightness.light)
+              ? Colors.black87
+              : Colors.white70,
         ),
       ),
     );
   }
-
 }
