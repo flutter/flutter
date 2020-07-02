@@ -1034,9 +1034,8 @@ class Scaffold extends StatefulWidget {
   /// instead of only extending to the top of the [bottomNavigationBar]
   /// or the [persistentFooterButtons].
   ///
-  /// If true, a [MediaQuery] widget whose bottom padding matches the
-  /// the height of the [bottomNavigationBar] will be added above the
-  /// scaffold's [body].
+  /// If true, a [MediaQuery] widget whose bottom padding matches the height
+  /// of the [bottomNavigationBar] will be added above the scaffold's [body].
   ///
   /// This property is often useful when the [bottomNavigationBar] has
   /// a non-rectangular shape, like [CircularNotchedRectangle], which

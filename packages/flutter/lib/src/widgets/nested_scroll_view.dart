@@ -545,7 +545,7 @@ class NestedScrollViewState extends State<NestedScrollView> {
   /// See also:
   ///
   ///  * [outerController], which exposes the [ScrollController] used by the
-  ///    the sliver(s) contained in [NestedScrollView.headerSliverBuilder].
+  ///    sliver(s) contained in [NestedScrollView.headerSliverBuilder].
   ScrollController get innerController => _coordinator._innerController;
 
   /// The [ScrollController] provided to the [ScrollView] in
