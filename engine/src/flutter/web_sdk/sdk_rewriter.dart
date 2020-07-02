@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.6
+
 import 'dart:io';
 
 import 'package:args/args.dart';
@@ -33,7 +35,7 @@ export 'src/engine.dart'
     r'''
 export 'dart:_engine'
 ''',
-  ]
+  ],
 ];
 
 const List<List<String>> enginePatterns = <List<String>>[
@@ -46,7 +48,11 @@ import '../ui.dart' as ui;
     r'''
 import 'dart:ui' as ui;
 '''
-  ]
+  ],
+  <String>[
+    'import \'package:js/js.dart\'',
+    'import \'dart:_js_annotations\'',
+  ],
 ];
 
 const List<List<String>> sharedPatterns = <List<String>>[

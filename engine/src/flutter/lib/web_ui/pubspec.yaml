@@ -11,6 +11,7 @@ dev_dependencies:
   analyzer: 0.39.10
   http: 0.12.1
   image: 2.1.13
+  js: 0.6.1+1
   mockito: 4.1.1
   path: 1.7.0
   test: 1.14.3

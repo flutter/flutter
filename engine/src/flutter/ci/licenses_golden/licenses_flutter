@@ -423,6 +423,7 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/clipboard.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/color_filter.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/canvas.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/canvas_kit_canvas.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/canvaskit_api.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/color_filter.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/embedded_views.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/fonts.dart
