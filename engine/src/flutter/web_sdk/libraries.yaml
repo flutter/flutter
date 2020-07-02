@@ -98,10 +98,13 @@ dartdevc:
 
     js:
       uri: "../dart-sdk/lib/js/js.dart"
-      patches: "../dart-sdk/lib/_internal/js_dev_runtime/patch/js_patch.dart"    
+      patches: "../dart-sdk/lib/_internal/js_dev_runtime/patch/js_patch.dart"
 
     js_util:
       uri: "../dart-sdk/lib/js_util/js_util.dart"
+
+    _js_annotations:
+      uri: "../dart-sdk/lib/js/_js_annotations.dart"
 
     svg:
       uri: "../dart-sdk/lib/svg/dart2js/svg_dart2js.dart"
@@ -173,11 +176,14 @@ dart2js:
 
     js:
       uri: "../dart-sdk/lib/js/js.dart"
-      patches: "../dart-sdk/lib/_internal/js_dev_runtime/patch/js_patch.dart"    
+      patches: "../dart-sdk/lib/_internal/js_dev_runtime/patch/js_patch.dart"
 
     _js:
       uri: "../dart-sdk/lib/js/_js.dart"
       patches: "../dart-sdk/lib/js/_js_client.dart"
+
+    _js_annotations:
+      uri: "../dart-sdk/lib/js/_js_annotations.dart"
 
     js_util:
       uri: "../dart-sdk/lib/js_util/js_util.dart"

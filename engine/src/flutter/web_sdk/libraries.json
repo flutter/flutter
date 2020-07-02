@@ -88,6 +88,9 @@
         "uri": "../dart-sdk/lib/js/js.dart",
         "patches": "../dart-sdk/lib/_internal/js_dev_runtime/patch/js_patch.dart"
       },
+      "_js_annotations": {
+        "uri": "../dart-sdk/lib/js/_js_annotations.dart"
+      },
       "js_util": {
         "uri": "../dart-sdk/lib/js_util/js_util.dart"
       },
@@ -168,6 +171,9 @@
       "_js": {
         "uri": "../dart-sdk/lib/js/_js.dart",
         "patches": "../dart-sdk/lib/js/_js_client.dart"
+      },
+      "_js_annotations": {
+        "uri": "../dart-sdk/lib/js/_js_annotations.dart"
       },
       "js_util": {
         "uri": "../dart-sdk/lib/js_util/js_util.dart"

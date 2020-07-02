@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@JS()
 library engine;
 
 import 'dart:async';
@@ -15,6 +16,7 @@ import 'dart:js_util' as js_util;
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:js/js.dart';
 import 'package:meta/meta.dart';
 
 import '../ui.dart' as ui;
@@ -29,6 +31,7 @@ part 'engine/clipboard.dart';
 part 'engine/color_filter.dart';
 part 'engine/compositor/canvas.dart';
 part 'engine/compositor/canvas_kit_canvas.dart';
+part 'engine/compositor/canvaskit_api.dart';
 part 'engine/compositor/color_filter.dart';
 part 'engine/compositor/embedded_views.dart';
 part 'engine/compositor/fonts.dart';
