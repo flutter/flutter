@@ -46,7 +46,7 @@ class AppBarTheme with Diagnosticable {
       'This feature was deprecated after v1.19.0.'
     )
     // ignore: deprecated_member_use_from_same_package
-    this.shouldCapTextScaleForTitle = false,
+    this.shouldCapTextScaleForTitle = true,
   });
 
   /// Default value for [AppBar.brightness].
