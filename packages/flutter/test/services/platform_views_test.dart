@@ -33,12 +33,13 @@ void main() {
       );
 
       expect(
-            () {
-          return PlatformViewsService.initSurfaceAndroidView(
+        () async {
+          PlatformViewsService.initSurfaceAndroidView(
             id: 0,
             viewType: 'web',
             layoutDirection: TextDirection.ltr,
           );
+          await Future<void>.delayed(const Duration(seconds: 2));
         },
         throwsA(isA<PlatformException>()),
       );
@@ -56,7 +57,7 @@ void main() {
           unorderedEquals(<FakeAndroidPlatformView>[
             const FakeAndroidPlatformView(0, 'webview', Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr, null),
             const FakeAndroidPlatformView(1, 'webview', Size(200.0, 300.0), AndroidViewController.kAndroidLayoutDirectionRtl, null),
-            const FakeAndroidPlatformView(1, 'webview', null, AndroidViewController.kAndroidLayoutDirectionRtl, true),
+            const FakeAndroidPlatformView(2, 'webview', null, AndroidViewController.kAndroidLayoutDirectionRtl, true),
           ]));
     });
 
@@ -78,9 +79,11 @@ void main() {
         layoutDirection: TextDirection.ltr,
       );
       expect(
-          () => PlatformViewsService.initSurfaceAndroidView(
-              id: 1, viewType: 'web', layoutDirection: TextDirection.ltr),
-          throwsA(isA<PlatformException>()));
+         () async {
+            PlatformViewsService.initSurfaceAndroidView(id: 1, viewType: 'web', layoutDirection: TextDirection.ltr);
+            await Future<void>.delayed(const Duration(seconds: 2));
+         },
+         throwsA(isA<PlatformException>()));
     });
 
     test('dispose Android view', () async {
