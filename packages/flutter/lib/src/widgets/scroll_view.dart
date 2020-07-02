@@ -1445,15 +1445,17 @@ class ListView extends BoxScrollView {
 /// using [MediaQuery.removePadding].
 ///
 /// ```dart
-/// Widget _myListView() {
+/// Widget myWidget(BuildContext context) {
 ///   return MediaQuery.removePadding(
 ///     context: context,
 ///     removeTop: true,
 ///     child: ListView.builder(
-///       .......
+///       itemCount: 25,
+///       itemBuilder: (BuildContext context, int index) => ListTile(title: Text('item $index')),
 ///     )
 ///   );
 /// }
+/// ```
 /// {@end-tool}
 ///
 /// Once code has been ported to use [CustomScrollView], other slivers, such as
