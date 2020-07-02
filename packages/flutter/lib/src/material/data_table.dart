@@ -19,6 +19,7 @@ import 'dropdown.dart';
 import 'icons.dart';
 import 'ink_well.dart';
 import 'material.dart';
+import 'material_state.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 import 'tooltip.dart';
@@ -30,7 +31,7 @@ typedef DataColumnSortCallback = void Function(int columnIndex, bool ascending);
 ///
 /// One column configuration must be provided for each column to
 /// display in the table. The list of [DataColumn] objects is passed
-/// as the `columns` argument to the [new DataTable] constructor.
+/// as the `columns` argument to the new [DataTable] constructor.
 @immutable
 class DataColumn {
   /// Creates the configuration for a column of a [DataTable].
@@ -96,6 +97,7 @@ class DataRow {
     this.key,
     this.selected = false,
     this.onSelectChanged,
+    this.color,
     @required this.cells,
   }) : assert(cells != null);
 
@@ -107,6 +109,7 @@ class DataRow {
     int index,
     this.selected = false,
     this.onSelectChanged,
+    this.color,
     @required this.cells,
   }) : assert(cells != null),
        key = ValueKey<int>(index);
@@ -150,13 +153,37 @@ class DataRow {
   /// table.
   final List<DataCell> cells;
 
+  /// The overlay color for the row.
+  ///
+  /// Transparent colors are recommended by the Material guidelines
+  /// https://material.io/design/interaction/states.html#selected, to ensure
+  /// that any [InkRipple]s are visible when the row is touched.
+  ///
+  /// If [color] is a [MaterialStateColor] the effective color can depend on the
+  /// [MaterialState.selected] state, i.e. if the row is selected or not.
+  /// {@tool snippet}
+  /// ```dart
+  /// DataRow(
+  ///   color: MaterialStateColor.resolveWith((states) {
+  ///     if (states.contains(MaterialState.selected)) {
+  ///       return Colors.blue.withOpacity(0.08);
+  ///     }
+  ///     return Colors.transparent;
+  ///   },
+  ///)
+  /// ```
+  ///
+  /// By default the color will be transparent, with a grey overlay if selected.
+  /// {@end-tool}
+  final Color color;
+
   bool get _debugInteractive => onSelectChanged != null || cells.any((DataCell cell) => cell._debugInteractive);
 }
 
 /// The data for a cell of a [DataTable].
 ///
 /// One list of [DataCell] objects must be provided for each [DataRow]
-/// in the [DataTable], in the [new DataRow] constructor's `cells`
+/// in the [DataTable], in the new [DataRow] constructor's `cells`
 /// argument.
 @immutable
 class DataCell {
@@ -632,15 +659,16 @@ class DataTable extends StatelessWidget {
     assert(!_debugInteractive || debugCheckHasMaterial(context));
 
     final ThemeData theme = Theme.of(context);
-    final BoxDecoration _kSelectedDecoration = BoxDecoration(
-      border: Border(bottom: Divider.createBorderSide(context, width:  dividerThickness)),
-      // The backgroundColor has to be transparent so you can see the ink on the material
-      color: (Theme.of(context).brightness == Brightness.light) ? _grey100Opacity : _grey300Opacity,
-    );
-    final BoxDecoration _kUnselectedDecoration = BoxDecoration(
-      border: Border(bottom: Divider.createBorderSide(context, width: dividerThickness)),
-    );
-
+    final MaterialStateColor defaultRowColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.selected)) {
+        // TODO(per): Add theming support for DataTable, https://github.com/flutter/flutter/issues/56079.
+        // The backgroundColor has to be transparent so you can see the
+        // [InkRipples] are visible on the Material when pressed.
+        return (Theme.of(context).brightness == Brightness.light) ?
+          _grey100Opacity : _grey300Opacity;
+      }
+      return Colors.transparent;
+    });
     final bool displayCheckboxColumn = showCheckboxColumn && rows.any((DataRow row) => row.onSelectChanged != null);
     final bool allChecked = displayCheckboxColumn && !rows.any((DataRow row) => row.onSelectChanged != null && !row.selected);
 
@@ -648,10 +676,19 @@ class DataTable extends StatelessWidget {
     final List<TableRow> tableRows = List<TableRow>.generate(
       rows.length + 1, // the +1 is for the header row
       (int index) {
+        final Set<MaterialState> states = index > 0 && rows[index - 1].selected ?
+          <MaterialState>{MaterialState.selected} : <MaterialState>{};
         return TableRow(
           key: index == 0 ? _headingRowKey : rows[index - 1].key,
-          decoration: index > 0 && rows[index - 1].selected ? _kSelectedDecoration
-                                                            : _kUnselectedDecoration,
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: Divider.createBorderSide(context, width: dividerThickness),
+            ),
+            color: MaterialStateProperty.resolveAs(
+              (index > 0 ? rows[index - 1].color : null) ?? defaultRowColor,
+              states,
+            ),
+          ),
           children: List<Widget>(tableColumns.length),
         );
       },
