@@ -665,35 +665,41 @@ class DataTable extends StatelessWidget {
     assert(!_debugInteractive || debugCheckHasMaterial(context));
 
     final ThemeData theme = Theme.of(context);
-    final MaterialStateColor defaultRowColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
-        // TODO(per): Add theming support for DataTable, https://github.com/flutter/flutter/issues/56079.
-        // The backgroundColor has to be transparent so you can see the
-        // [InkRipples] are visible on the Material when pressed.
-        return (Theme.of(context).brightness == Brightness.light) ?
-          _grey100Opacity : _grey300Opacity;
-      }
-      return Colors.transparent;
-    });
-    final bool displayCheckboxColumn = showCheckboxColumn && rows.any((DataRow row) => row.onSelectChanged != null);
+    final MaterialStateProperty<Color> defaultRowColor = MaterialStateProperty.resolveWith(
+      (Set<MaterialState> states) {
+        if (states.contains(MaterialState.selected)) {
+          // TODO(per): Add theming support for DataTable, https://github.com/flutter/flutter/issues/56079.
+          // The color has to be transparent so you can see the [InkRipple]s on
+          // the [Material].
+          return (Theme.of(context).brightness == Brightness.light) ?
+            _grey100Opacity : _grey300Opacity;
+        }
+        return null;
+      },
+    );
+    final bool anyRowSelectable = rows.any((DataRow row) => row.onSelectChanged != null);
+    final bool displayCheckboxColumn = showCheckboxColumn && anyRowSelectable;
     final bool allChecked = displayCheckboxColumn && !rows.any((DataRow row) => row.onSelectChanged != null && !row.selected);
 
     final List<TableColumnWidth> tableColumns = List<TableColumnWidth>(columns.length + (displayCheckboxColumn ? 1 : 0));
     final List<TableRow> tableRows = List<TableRow>.generate(
       rows.length + 1, // the +1 is for the header row
       (int index) {
-        final Set<MaterialState> states = index > 0 && rows[index - 1].selected ?
-          <MaterialState>{MaterialState.selected} : <MaterialState>{};
+        final bool isSelected = index > 0 && rows[index - 1].selected;
+        final bool isDisabled = index > 0 && anyRowSelectable && rows[index - 1].onSelectChanged == null;
+        final Set<MaterialState> states = <MaterialState>{
+          if (isSelected)
+            MaterialState.selected,
+          if (isDisabled)
+            MaterialState.disabled,
+        };
         return TableRow(
           key: index == 0 ? _headingRowKey : rows[index - 1].key,
           decoration: BoxDecoration(
             border: Border(
               bottom: Divider.createBorderSide(context, width: dividerThickness),
             ),
-            color: MaterialStateProperty.resolveAs(
-              (index > 0 ? rows[index - 1].color.resolve(states) : null) ?? defaultRowColor,
-              states,
-            ),
+            color: (index > 0 ? rows[index - 1].color?.resolve(states) : null) ?? defaultRowColor.resolve(states),
           ),
           children: List<Widget>(tableColumns.length),
         );
