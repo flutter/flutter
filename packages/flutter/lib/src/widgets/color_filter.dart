@@ -12,6 +12,8 @@ import 'package:flutter/rendering.dart';
 import 'framework.dart';
 
 /// Applies a [ColorFilter] to its child.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=F7Cll22Dno8}
 @immutable
 class ColorFiltered extends SingleChildRenderObjectWidget {
   /// Creates a widget that applies a [ColorFilter] to its child.
