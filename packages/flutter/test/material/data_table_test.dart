@@ -336,6 +336,39 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+    testWidgets('DataTable row decoration test', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: DataTable(
+            columns: const <DataColumn>[
+              DataColumn(
+                label: Text('Dessert'),
+              ),
+            ],
+            rows: const <DataRow>[
+              DataRow(
+                decoration: BoxDecoration(
+                  color: Color(0xFF448AFF), // blueAccent
+                ),
+                cells: <DataCell>[
+                  DataCell(
+                    Text('Deco'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    DataTable table = tester.widget(find.byType(DataTable));
+    DataRow tableRow = table.rows.first;
+    BoxDecoration boxDecoration = tableRow.decoration;
+    expect(boxDecoration.color, Color(0xFF448AFF));
+  });
+
   testWidgets('DataTable custom row height', (WidgetTester tester) async {
     Widget buildCustomTable({
       int sortColumnIndex,
