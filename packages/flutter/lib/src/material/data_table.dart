@@ -156,10 +156,10 @@ class DataRow {
   /// The color for the row.
   ///
   /// The effective color can depend on the [MaterialState] state, if the
-  /// row is selected, hovered, focused, pressed, disabled or enabled. The
+  /// row is selected, pressed, hovered, focused, disabled or enabled. The
   /// color is painted as an overlay to the row. To make sure that the row's
-  /// [InkRipple]s are visible when pressed, it is recommended to use a
-  /// transparent color.
+  /// [InkWell] is visible (when pressed, hovered and focused), it is
+  /// recommended to use a transparent color.
   ///
   /// ```dart
   /// DataRow(
@@ -337,7 +337,7 @@ class DataCell {
 ///     child: DataTable(
 ///       columns: const <DataColumn>[
 ///         DataColumn(
-///           label: Text('Number'),
+///           label: const Text('Number'),
 ///         ),
 ///       ],
 ///       rows: List<DataRow>.generate(
@@ -352,17 +352,13 @@ class DataCell {
 ///               return Colors.grey.withOpacity(0.3);
 ///             return null;  // Use default value for other states and odd rows.
 ///           }),
-///           cells: [
-///             DataCell(
-///               Text('Row $index'),
-///             ),
-///           ],
+///           cells: [DataCell(Text('Row $index'))],
 ///           selected: selected[index],
 ///           onSelectChanged: (bool value) {
 ///             setState(() {
 ///               selected[index] = value;
 ///             });
-///           }
+///           },
 ///         ),
 ///       ),
 ///     ),
@@ -720,7 +716,7 @@ class DataTable extends StatelessWidget {
       (Set<MaterialState> states) {
         if (states.contains(MaterialState.selected)) {
           // TODO(per): Add theming support for DataTable, https://github.com/flutter/flutter/issues/56079.
-          // The color has to be transparent so you can see the [InkRipple]s on
+          // The color has to be transparent so you can see the ink on
           // the [Material].
           return (Theme.of(context).brightness == Brightness.light) ?
             _grey100Opacity : _grey300Opacity;
