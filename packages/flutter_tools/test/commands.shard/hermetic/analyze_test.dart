@@ -5,6 +5,7 @@
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/dart/analysis.dart';
 
 import '../../src/common.dart';
 
@@ -35,6 +36,25 @@ void main() {
     // Ensure no exceptions
     inRepo(null, fileSystem);
     inRepo(<String>[], fileSystem);
+  });
+
+  testWithoutContext('AnalysisError from json write correct', () {
+    // ignore: always_specify_types
+    final Map<String, Object> json = {
+      'severity': 'INFO',
+      'type': 'TODO',
+      'location': {
+        'file': '/Users/.../lib/test.dart',
+        'offset': 362,
+        'length': 72,
+        'startLine': 15,
+        'startColumn': 4
+      },
+      'message': 'Prefer final for variable declarations if they are not reassigned.',
+      'hasFix': false
+    };
+    expect(WrittenError.fromJson(json).toString(),
+        '[info] Prefer final for variable declarations if they are not reassigned (/Users/.../lib/test.dart:15:4)');
   });
 }
 

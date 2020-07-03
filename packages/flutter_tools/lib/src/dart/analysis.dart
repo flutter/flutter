@@ -306,18 +306,17 @@ class WrittenError {
     );
   }
 
-  String severity;
-  String type;
-  String message;
-  String code;
+  final String severity;
+  final String type;
+  final String message;
+  final String code;
 
-  String file;
-  int startLine;
-  int startColumn;
-  int offset;
+  final String file;
+  final int startLine;
+  final int startColumn;
+  final int offset;
 
-  static final Map<String, _AnalysisSeverity> _severityMap =
-      <String, _AnalysisSeverity>{
+  static final Map<String, _AnalysisSeverity> _severityMap = <String, _AnalysisSeverity>{
     'INFO': _AnalysisSeverity.info,
     'WARNING': _AnalysisSeverity.warning,
     'ERROR': _AnalysisSeverity.error,
@@ -329,13 +328,15 @@ class WrittenError {
   String get messageSentenceFragment {
     if (message.endsWith('.')) {
       return message.substring(0, message.length - 1);
-    } else {
-      return message;
     }
+    
+    return message;
   }
 
   @override
-  String toString() {return '[${severity.toLowerCase()}] $messageSentenceFragment ($file:$startLine:$startColumn)';}
+  String toString() {
+    return '[${severity.toLowerCase()}] $messageSentenceFragment ($file:$startLine:$startColumn)';
+  }
 }
 
 class FileAnalysisErrors {
