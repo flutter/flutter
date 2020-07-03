@@ -162,14 +162,14 @@ class AnalyzeOnce extends AnalyzeBase {
 
     final String seconds = (timer.elapsedMilliseconds / 1000.0).toStringAsFixed(1);
 
-    final String dartdocMessage = generateDartDocMessage(undocumentedMembers);
+    final String dartDocMessage = generateDartDocMessage(undocumentedMembers);
 
     // We consider any level of error to be an error exit (we don't report different levels).
     if (errors.isNotEmpty) {
       final int errorCount = errors.length;
       logger.printStatus('');
       if (undocumentedMembers > 0) {
-        throwToolExit('$errorCount ${pluralize('issue', errorCount)} found. (ran in ${seconds}s; $dartdocMessage)');
+        throwToolExit('$errorCount ${pluralize('issue', errorCount)} found. (ran in ${seconds}s; $dartDocMessage)');
       } else {
         throwToolExit('$errorCount ${pluralize('issue', errorCount)} found. (ran in ${seconds}s)');
       }
@@ -181,7 +181,7 @@ class AnalyzeOnce extends AnalyzeBase {
 
     if (argResults['congratulate'] as bool) {
       if (undocumentedMembers > 0) {
-        logger.printStatus('No issues found! (ran in ${seconds}s; $dartdocMessage)');
+        logger.printStatus('No issues found! (ran in ${seconds}s; $dartDocMessage)');
       } else {
         logger.printStatus('No issues found! (ran in ${seconds}s)');
       }

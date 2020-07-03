@@ -2,15 +2,32 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:args/src/arg_results.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/commands/analyze_base.dart';
+import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
 import '../../src/common.dart';
 
 const String _kFlutterRoot = '/data/flutter';
 
 void main() {
+  testWithoutContext('analyze generate correct DartDoc message', () async {
+    final MockAnalyze mockAnalyze = MockAnalyze.mock();
+
+    expect(mockAnalyze.generateDartDocMessage(0), 'all public member have documentation');
+    expect(mockAnalyze.generateDartDocMessage(1), 'one public member lacks documentation');
+    expect(mockAnalyze.generateDartDocMessage(2), '2 public members lack documentation');
+    expect(mockAnalyze.generateDartDocMessage(-1), 'unknown public member documentation');
+  });
+
   testWithoutContext('analyze inRepo', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.directory(_kFlutterRoot).createSync(recursive: true);
@@ -51,4 +68,48 @@ bool inRepo(List<String> fileList, FileSystem fileSystem) {
     }
   }
   return false;
+}
+
+class MockAnalyze extends AnalyzeBase {
+  MockAnalyze(
+    ArgResults argResults,
+    List<String> repoRoots,
+    List<Directory> repoPackages, {
+    @required FileSystem fileSystem,
+    @required Logger logger,
+    @required Platform platform,
+    @required ProcessManager processManager,
+    @required Terminal terminal,
+    @required List<String> experiments,
+    @required Artifacts artifacts,
+  }) : super(
+          argResults,
+          repoRoots: repoRoots,
+          repoPackages: repoPackages,
+          fileSystem: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+          terminal: terminal,
+          experiments: experiments,
+          artifacts: artifacts,
+        );
+
+  static MockAnalyze mock() {
+    return MockAnalyze(
+      null,
+      null,
+      null,
+      fileSystem: null,
+      logger: null,
+      platform: null,
+      processManager: null,
+      terminal: null,
+      experiments: null,
+      artifacts: null,
+    );
+  }
+
+  @override
+  Future<void> analyze() async {}
 }
