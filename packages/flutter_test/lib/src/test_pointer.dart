@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -436,4 +437,21 @@ class TestGesture {
       _result = null;
     });
   }
+}
+
+/// A pack of input PointerEvent queue.
+///
+/// [timeStamp] is used to indicate the time when the pack is received.
+///
+/// This is a simulation of how the framework is receiving input events from
+/// the engine. See [GestureBinding] and [PointerDataPacket].
+class PointerEventPack {
+  /// Creates a pack of PointerEvents.
+  PointerEventPack(this.timeStamp, this.events);
+
+  /// The time stamp of when the event happens
+  final Duration timeStamp;
+
+  /// The event.
+  final List<PointerEvent> events;
 }

@@ -400,6 +400,12 @@ abstract class WidgetController {
     });
   }
 
+  /// A simulator of how the framework handles a serials of [PointerEvent]s
+  /// received from the flutter engine.
+  ///
+  /// See [PointerEventPack].
+  Future<void> handlePointerEventPack(List<PointerEventPack> records);
+
   /// Called to indicate that time should advance.
   ///
   /// This is invoked by [flingFrom], for instance, so that the sequence of
@@ -678,5 +684,10 @@ class LiveWidgetController extends WidgetController {
       await Future<void>.delayed(duration);
     binding.scheduleFrame();
     await binding.endOfFrame;
+  }
+
+  @override
+  Future<void> handlePointerEventPack(List<PointerEventPack> records) {
+    throw UnimplementedError;
   }
 }
