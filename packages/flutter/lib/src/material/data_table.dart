@@ -153,29 +153,30 @@ class DataRow {
   /// table.
   final List<DataCell> cells;
 
-  /// The overlay color for the row.
+  /// The color for the row.
   ///
-  /// Transparent colors are recommended by the Material guidelines
-  /// https://material.io/design/interaction/states.html#selected, to ensure
-  /// that any [InkRipple]s are visible when the row is touched.
+  /// The effective color can depend on the [MaterialState] state, if the
+  /// row is selected, hovered, focused, pressed, disabled or enabled. The
+  /// color is painted as an overlay to the row. To make sure that the row's
+  /// [InkRipple]s are visible when pressed, it is recommended to use a
+  /// transparent color.
   ///
-  /// If [color] is a [MaterialStateColor] the effective color can depend on the
-  /// [MaterialState.selected] state, i.e. if the row is selected or not.
-  /// {@tool snippet}
   /// ```dart
   /// DataRow(
-  ///   color: MaterialStateColor.resolveWith((states) {
-  ///     if (states.contains(MaterialState.selected)) {
-  ///       return Colors.blue.withOpacity(0.08);
-  ///     }
-  ///     return Colors.transparent;
+  ///   color: MaterialStateProperty.resolveWith<Color>(Set<MaterialState> states) {
+  ///     if (states.contains(MaterialState.selected))
+  ///       return Theme.of(context).colorScheme.primary.withOpacity(0.08);
+  ///     return null;  // Use the default value.
   ///   },
   ///)
   /// ```
   ///
-  /// By default the color will be transparent, with a grey overlay if selected.
-  /// {@end-tool}
-  final Color color;
+  /// See also:
+  ///
+  ///  * The Material Design specification for overlay colors and how they
+  ///    to a component's state:
+  ///    <https://material.io/design/interaction/states.html#anatomy>.
+  final MaterialStateProperty<Color> color;
 
   bool get _debugInteractive => onSelectChanged != null || cells.any((DataCell cell) => cell._debugInteractive);
 }
@@ -508,10 +509,11 @@ class DataTable extends StatelessWidget {
   final double dividerThickness;
 
   Widget _buildCheckbox({
-    Color color,
+    Color checkboxColor,
     bool checked,
     VoidCallback onRowTap,
     ValueChanged<bool> onCheckboxChanged,
+    MaterialStateProperty<Color> overlayColor,
   }) {
     Widget contents = Semantics(
       container: true,
@@ -519,7 +521,7 @@ class DataTable extends StatelessWidget {
         padding: EdgeInsetsDirectional.only(start: horizontalMargin, end: horizontalMargin / 2.0),
         child: Center(
           child: Checkbox(
-            activeColor: color,
+            activeColor: checkboxColor,
             value: checked,
             onChanged: onCheckboxChanged,
           ),
@@ -530,6 +532,7 @@ class DataTable extends StatelessWidget {
       contents = TableRowInkWell(
         onTap: onRowTap,
         child: contents,
+        overlayColor: overlayColor,
       );
     }
     return TableCell(
@@ -609,6 +612,7 @@ class DataTable extends StatelessWidget {
     bool showEditIcon,
     VoidCallback onTap,
     VoidCallback onSelectChanged,
+    MaterialStateProperty<Color> overlayColor,
   }) {
     final bool isLightTheme = Theme.of(context).brightness == Brightness.light;
     if (showEditIcon) {
@@ -644,11 +648,13 @@ class DataTable extends StatelessWidget {
       label = InkWell(
         onTap: onTap,
         child: label,
+        overlayColor: overlayColor,
       );
     } else if (onSelectChanged != null) {
       label = TableRowInkWell(
         onTap: onSelectChanged,
         child: label,
+        overlayColor: overlayColor,
       );
     }
     return label;
@@ -685,7 +691,7 @@ class DataTable extends StatelessWidget {
               bottom: Divider.createBorderSide(context, width: dividerThickness),
             ),
             color: MaterialStateProperty.resolveAs(
-              (index > 0 ? rows[index - 1].color : null) ?? defaultRowColor,
+              (index > 0 ? rows[index - 1].color.resolve(states) : null) ?? defaultRowColor,
               states,
             ),
           ),
@@ -700,17 +706,18 @@ class DataTable extends StatelessWidget {
     if (displayCheckboxColumn) {
       tableColumns[0] = FixedColumnWidth(horizontalMargin + Checkbox.width + horizontalMargin / 2.0);
       tableRows[0].children[0] = _buildCheckbox(
-        color: theme.accentColor,
+        checkboxColor: theme.accentColor,
         checked: allChecked,
         onCheckboxChanged: _handleSelectAll,
       );
       rowIndex = 1;
       for (final DataRow row in rows) {
         tableRows[rowIndex].children[0] = _buildCheckbox(
-          color: theme.accentColor,
+          checkboxColor: theme.accentColor,
           checked: row.selected,
           onRowTap: () => row.onSelectChanged != null ? row.onSelectChanged(!row.selected) : null ,
           onCheckboxChanged: row.onSelectChanged,
+          overlayColor: row.color,
         );
         rowIndex += 1;
       }
@@ -767,6 +774,7 @@ class DataTable extends StatelessWidget {
           showEditIcon: cell.showEditIcon,
           onTap: cell.onTap,
           onSelectChanged: () => row.onSelectChanged != null ? row.onSelectChanged(!row.selected) : null,
+          overlayColor: row.color,
         );
         rowIndex += 1;
       }
@@ -802,6 +810,7 @@ class TableRowInkWell extends InkResponse {
     GestureTapCallback onDoubleTap,
     GestureLongPressCallback onLongPress,
     ValueChanged<bool> onHighlightChanged,
+    MaterialStateProperty<Color> overlayColor,
   }) : super(
     key: key,
     child: child,
@@ -811,6 +820,7 @@ class TableRowInkWell extends InkResponse {
     onHighlightChanged: onHighlightChanged,
     containedInkWell: true,
     highlightShape: BoxShape.rectangle,
+    overlayColor: overlayColor,
   );
 
   @override
