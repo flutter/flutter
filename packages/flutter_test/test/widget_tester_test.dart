@@ -659,8 +659,8 @@ void main() {
       final Offset location = tester.getCenter(find.text('test'));
       final List<PointerEventPack> records = <PointerEventPack>[
         PointerEventPack(Duration.zero, <PointerEvent>[
-          // Typically PointerAddedEvent is not used in testers, but on for
-          // records captured on a device it is usually what start a gesture.
+          // Typically PointerAddedEvent is not used in testers, but for records
+          // captured on a device it is usually what start a gesture.
           PointerAddedEvent(
             timeStamp: Duration.zero,
             position: location,
