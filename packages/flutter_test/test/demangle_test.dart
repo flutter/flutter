@@ -46,40 +46,6 @@ Future<void> main() async {
     }, () {});
     binding.postTest();
   });
-
-  test('FlutterError.reportError demangles', () async {
-    final Completer<FlutterErrorDetails> errorCompleter = Completer<FlutterErrorDetails>();
-    final TestExceptionReporter oldReporter = reportTestException;
-    reportTestException = (FlutterErrorDetails details, String testDescription) {
-      errorCompleter.complete(details);
-      reportTestException = oldReporter;
-    };
-
-    try {
-      await binding.runTest(() async {
-        final Completer<String> completer = Completer<String>();
-
-        completer.future.then((String value) {},
-          onError: (Object error, StackTrace stack) {
-            assert(stack is stack_trace.Chain);
-            FlutterError.reportError(FlutterErrorDetails(
-              exception: error,
-              stack: stack,
-            ));
-          }
-        );
-
-        completer.completeError(const CustomException());
-      }, () {});
-      binding.postTest();
-
-      final FlutterErrorDetails details = await errorCompleter.future;
-      expect(details, isNotNull);
-      expect(details.exception, isA<CustomException>());
-    } finally {
-      reportTestException = oldReporter;
-    }
-  });
 }
 
 Future<StackTrace> getMangledStack() {
