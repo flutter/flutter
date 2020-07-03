@@ -174,7 +174,7 @@ class DataRow {
   /// See also:
   ///
   ///  * The Material Design specification for overlay colors and how they
-  ///    to a component's state:
+  ///    match to a component's state:
   ///    <https://material.io/design/interaction/states.html#anatomy>.
   final MaterialStateProperty<Color> color;
 
@@ -318,6 +318,57 @@ class DataCell {
 /// }
 /// ```
 ///
+/// {@end-tool}
+///
+///
+/// {@tool dartpad --template=stateful_widget_scaffold}
+///
+/// This sample shows how to display a [DataTable] with alternate colors per
+/// row, and a custom color for when the row is selected.
+///
+/// ```dart
+/// static const int numItems = 10;
+/// List<bool> selected = List<bool>.generate(numItems, (index) => false);
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return SizedBox(
+///     width: double.infinity,
+///     child: DataTable(
+///       columns: const <DataColumn>[
+///         DataColumn(
+///           label: Text('Number'),
+///         ),
+///       ],
+///       rows: List<DataRow>.generate(
+///         numItems,
+///         (index) => DataRow(
+///           color: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+///             // All rows will have the same selected color.
+///             if (states.contains(MaterialState.selected))
+///               return Theme.of(context).colorScheme.primary.withOpacity(0.08);
+///             // Even rows will have a grey color.
+///             if (index % 2 == 0)
+///               return Colors.grey.withOpacity(0.3);
+///             return null;  // Use default value for other states and odd rows.
+///           }),
+///           cells: [
+///             DataCell(
+///               Text('Row $index'),
+///             ),
+///           ],
+///           selected: selected[index],
+///           onSelectChanged: (bool value) {
+///             setState(() {
+///               selected[index] = value;
+///             });
+///           }
+///         ),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
 /// {@end-tool}
 ///
 /// See also:
