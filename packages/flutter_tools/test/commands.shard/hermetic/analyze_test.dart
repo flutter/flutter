@@ -43,6 +43,7 @@ void main() {
     final Map<String, Object> json = {
       'severity': 'INFO',
       'type': 'TODO',
+      // ignore: always_specify_types
       'location': {
         'file': '/Users/.../lib/test.dart',
         'offset': 362,
