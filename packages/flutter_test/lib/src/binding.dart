@@ -256,6 +256,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   // See AutomatedTestWidgetsFlutterBinding.addTime for an actual implementation.
   void addTime(Duration duration);
 
+  /// Execute a callback in a later time for the binding.
+  ///
+  /// If the binding comes with a fake clock, this will increase the clock by
+  /// `duration` and then execute the `body`, otherwise it will wait `duration`
+  /// and then execute the `body`.
+  Future<T> executeLater<T>(Duration duration, FutureOr<T> body());
+
   /// The value to set [debugCheckIntrinsicSizes] to while tests are running.
   ///
   /// This can be used to enable additional checks. For example,
@@ -1105,6 +1112,14 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
+  Future<T> executeLater<T>(Duration duration, FutureOr<T> body()) async {
+    assert(_currentFakeAsync != null);
+    addTime(duration);
+    _currentFakeAsync.elapse(duration);
+    return await body();
+  }
+
+  @override
   Future<void> runTest(
     Future<void> testBody(),
     VoidCallback invariantTester, {
@@ -1347,6 +1362,11 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   void addTime(Duration duration) {
     // We don't support timeouts on the LiveTestWidgetsFlutterBinding.
     // See runTest().
+  }
+
+  @override
+  Future<T> executeLater<T>(Duration duration, FutureOr<T> body()) {
+    return Future<T>.delayed(duration, body);
   }
 
   @override
