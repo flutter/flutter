@@ -481,16 +481,19 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
           }
         }
         else {
-          await Future<void>.delayed(timeDiff, () async {
+          await binding.executeLater(timeDiff, () async {
             for (final PointerEvent event in pack.events) {
               await _handlePointerEvent(event, hitTestHistory);
-          }
+            }
           });
-          if (!(binding is LiveTestWidgetsFlutterBinding && (
-            binding as LiveTestWidgetsFlutterBinding).framePolicy
-              == LiveTestWidgetsFlutterBindingFramePolicy.fullyLive)) {
-            await binding.pump();
+          // TODO(CareF): delete the if sentence when
+          // https://github.com/flutter/flutter/issues/60739 is fixed
+          if (binding is LiveTestWidgetsFlutterBinding &&
+              (binding as LiveTestWidgetsFlutterBinding).framePolicy ==
+              LiveTestWidgetsFlutterBindingFramePolicy.fullyLive) {
+            continue;
           }
+          await binding.pump();
         }
       }
       assert(hitTestHistory.isEmpty);
