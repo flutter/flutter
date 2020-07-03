@@ -329,7 +329,6 @@ class WrittenError {
     if (message.endsWith('.')) {
       return message.substring(0, message.length - 1);
     }
-    
     return message;
   }
 
