@@ -169,16 +169,10 @@ if (is_fuchsia) {
       "//flutter/fml:fml_tests",
       "//flutter/runtime:runtime_tests",
       "//flutter/runtime:runtime_tests_next",
+      "//flutter/shell/common:shell_tests",
+      "//flutter/shell/common:shell_tests_next",
       "//flutter/shell/platform/fuchsia/flutter:flutter_runner_scenic_tests",
       "//flutter/shell/platform/fuchsia/flutter:flutter_runner_tests",
     ]
-
-    # TODO(fxb/55353): These break with LTO enabled
-    if (!enable_lto) {
-      deps += [
-        "//flutter/shell/common:shell_tests",
-        "//flutter/shell/common:shell_tests_next",
-      ]
-    }
   }
 }
