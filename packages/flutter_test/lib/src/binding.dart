@@ -1433,8 +1433,8 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     switch (source) {
       case TestBindingEventSource.test:
         if (!renderView._pointers.containsKey(event.pointer)) {
-          assert(event.down);
-          renderView._pointers[event.pointer] = _LiveTestPointerRecord(event.pointer, event.position);
+          if (event.down)
+            renderView._pointers[event.pointer] = _LiveTestPointerRecord(event.pointer, event.position);
         } else {
           renderView._pointers[event.pointer].position = event.position;
           if (!event.down)
@@ -1656,6 +1656,7 @@ class _LiveTestRenderView extends RenderView {
 
   final VoidCallback onNeedPaint;
 
+  // The class record pointers to draw positions of touch.
   final Map<int, _LiveTestPointerRecord> _pointers = <int, _LiveTestPointerRecord>{};
 
   TextPainter _label;
