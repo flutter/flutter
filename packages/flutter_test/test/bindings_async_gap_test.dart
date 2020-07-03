@@ -27,14 +27,14 @@ Future<void> main() async {
       final Completer<String> completer = Completer<String>();
 
       completer.future.then(
-              (String value) {},
-          onError: (dynamic error, StackTrace stack) {
-            assert(stack is stack_trace.Chain);
-            FlutterError.reportError(FlutterErrorDetails(
-              exception: error,
-              stack: stack,
-            ));
-          }
+        (String value) {},
+        onError: (dynamic error, StackTrace stack) {
+          assert(stack is stack_trace.Chain);
+          FlutterError.reportError(FlutterErrorDetails(
+            exception: error,
+            stack: stack,
+          ));
+        }
       );
 
       completer.completeError(const CustomException());
