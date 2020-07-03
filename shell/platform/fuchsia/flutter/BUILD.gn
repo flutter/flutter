@@ -207,7 +207,7 @@ flutter_runner("aot") {
   product = false
 
   if (flutter_runtime_mode == "profile") {
-    extra_defines = [ "FLUTTER_PROFILE" ]
+    extra_defines += [ "FLUTTER_PROFILE" ]
   }
 
   extra_deps = [
