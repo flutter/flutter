@@ -1,4 +1,4 @@
-Signature: 81053f50b43aec294efa9bfceba50f0b
+Signature: 1e06296ffa7be554fb1829c01ceb923d
 
 UNUSED LICENSES:
 
@@ -3306,24 +3306,20 @@ FILE: ../../../third_party/skia/modules/skottie/utils/SkottieUtils.cpp
 FILE: ../../../third_party/skia/modules/skottie/utils/SkottieUtils.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGClipEffect.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGColorFilter.h
-FILE: ../../../third_party/skia/modules/sksg/include/SkSGGeometryTransform.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGGradient.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGImage.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGMaskEffect.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGOpacityEffect.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGPlane.h
-FILE: ../../../third_party/skia/modules/sksg/include/SkSGRoundEffect.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGScene.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGText.h
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGClipEffect.cpp
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGColorFilter.cpp
-FILE: ../../../third_party/skia/modules/sksg/src/SkSGGeometryTransform.cpp
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGGradient.cpp
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGImage.cpp
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGMaskEffect.cpp
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGOpacityEffect.cpp
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGPlane.cpp
-FILE: ../../../third_party/skia/modules/sksg/src/SkSGRoundEffect.cpp
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGScene.cpp
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGText.cpp
 FILE: ../../../third_party/skia/modules/skshaper/src/SkShaper.cpp
@@ -3667,7 +3663,6 @@ FILE: ../../../third_party/skia/modules/sksg/include/SkSGPath.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGRect.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGRenderNode.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGTransform.h
-FILE: ../../../third_party/skia/modules/sksg/include/SkSGTrimEffect.h
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGDraw.cpp
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGEffectNode.cpp
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGGeometryNode.cpp
@@ -3680,7 +3675,6 @@ FILE: ../../../third_party/skia/modules/sksg/src/SkSGPath.cpp
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGRect.cpp
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGRenderNode.cpp
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGTransform.cpp
-FILE: ../../../third_party/skia/modules/sksg/src/SkSGTrimEffect.cpp
 FILE: ../../../third_party/skia/samplecode/SampleCCPRGeometry.cpp
 FILE: ../../../third_party/skia/samplecode/SampleChineseFling.cpp
 FILE: ../../../third_party/skia/samplecode/SampleCowboy.cpp
@@ -5292,8 +5286,8 @@ FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/RoundCorne
 FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/ShapeLayer.h
 FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/TrimPaths.cpp
 FILE: ../../../third_party/skia/modules/skparagraph/gm/simple_gm.cpp
-FILE: ../../../third_party/skia/modules/sksg/include/SkSGDashEffect.h
-FILE: ../../../third_party/skia/modules/sksg/src/SkSGDashEffect.cpp
+FILE: ../../../third_party/skia/modules/sksg/include/SkSGGeometryEffect.h
+FILE: ../../../third_party/skia/modules/sksg/src/SkSGGeometryEffect.cpp
 FILE: ../../../third_party/skia/modules/skshaper/src/SkShaper_coretext.cpp
 FILE: ../../../third_party/skia/samplecode/Sample3D.cpp
 FILE: ../../../third_party/skia/samplecode/SampleFitCubicToCircle.cpp
