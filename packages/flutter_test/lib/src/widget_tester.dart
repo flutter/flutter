@@ -476,13 +476,13 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
           // Flush all past events
           // maybe trigger a warning
           for (final PointerEvent event in pack.events) {
-            await _handlePointerEvent(event, hitTestHistory);
+            _handlePointerEvent(event, hitTestHistory);
           }
         }
         else {
           await binding.executeLater(timeDiff, () async {
             for (final PointerEvent event in pack.events) {
-              await _handlePointerEvent(event, hitTestHistory);
+              _handlePointerEvent(event, hitTestHistory);
             }
           });
           // TODO(CareF): delete the if sentence when
@@ -501,10 +501,10 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
   // This is a parallele implementation of [GestureBinding._handlePointerEvent]
   // to make compativle with test bindings.
-  Future<void> _handlePointerEvent(
+  void _handlePointerEvent(
     PointerEvent event,
     Map<int, HitTestResult> _hitTests
-  ) async {
+  ) {
     HitTestResult hitTestResult;
     if (event is PointerDownEvent || event is PointerSignalEvent) {
       assert(!_hitTests.containsKey(event.pointer));
@@ -537,7 +537,8 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
         event is PointerHoverEvent ||
         event is PointerAddedEvent ||
         event is PointerRemovedEvent) {
-      await sendEventToBinding(event, hitTestResult);
+      binding.dispatchEvent(
+        event, hitTestResult, source: TestBindingEventSource.test);
     }
   }
 
