@@ -660,6 +660,9 @@ class WebDevFS implements DevFS {
       expressionCompiler,
       testMode: testMode,
     );
+    if (buildInfo.dartDefines.contains('FLUTTER_WEB_USE_SKIA=true')) {
+      webAssetServer.canvasKitRendering = true;
+    }
     if (hostname == 'any') {
       _baseUri = Uri.http('localhost:$port', '');
     } else {
