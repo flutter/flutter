@@ -403,6 +403,21 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
     }
   }
 
+
+  @override
+  bool hitTest(BoxHitTestResult result, {@required Offset position}) {
+    if(child != null){
+      final BoxParentData childParentData = child.parentData as BoxParentData;
+      if ((childParentData.offset & child.size).contains(position)) {
+        if (hitTestChildren(result, position: position) || hitTestSelf(position)) {
+          result.add(BoxHitTestEntry(this, position));
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   @override
   void debugPaintSize(PaintingContext context, Offset offset) {
     super.debugPaintSize(context, offset);
