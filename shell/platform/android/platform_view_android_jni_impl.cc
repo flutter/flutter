@@ -102,11 +102,19 @@ static jmethodID g_compute_platform_resolved_locale_method = nullptr;
 // Called By Java
 static jmethodID g_on_display_platform_view_method = nullptr;
 
+// static jmethodID g_on_composite_platform_view_method = nullptr;
+
 static jmethodID g_on_display_overlay_surface_method = nullptr;
 
 static jmethodID g_overlay_surface_id_method = nullptr;
 
 static jmethodID g_overlay_surface_surface_method = nullptr;
+
+// Mutators
+static fml::jni::ScopedJavaGlobalRef<jclass>* g_mutators_stack_class = nullptr;
+static jmethodID g_mutators_stack_init_method = nullptr;
+static jmethodID g_mutators_stack_push_transform_method = nullptr;
+static jmethodID g_mutators_stack_push_cliprect_method = nullptr;
 
 // Called By Java
 static jlong AttachJNI(JNIEnv* env,
@@ -782,8 +790,42 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
     return false;
   }
 
-  g_on_display_platform_view_method = env->GetMethodID(
-      g_flutter_jni_class->obj(), "onDisplayPlatformView", "(IIIII)V");
+  g_mutators_stack_class = new fml::jni::ScopedJavaGlobalRef<jclass>(
+      env,
+      env->FindClass(
+          "io/flutter/embedding/engine/mutatorsstack/FlutterMutatorsStack"));
+  if (g_mutators_stack_class == nullptr) {
+    FML_LOG(ERROR) << "Could not locate FlutterMutatorsStack";
+    return false;
+  }
+
+  g_mutators_stack_init_method =
+      env->GetMethodID(g_mutators_stack_class->obj(), "<init>", "()V");
+  if (g_mutators_stack_init_method == nullptr) {
+    FML_LOG(ERROR) << "Could not locate FlutterMutatorsStack.init method";
+    return false;
+  }
+
+  g_mutators_stack_push_transform_method =
+      env->GetMethodID(g_mutators_stack_class->obj(), "pushTransform", "([F)V");
+  if (g_mutators_stack_push_transform_method == nullptr) {
+    FML_LOG(ERROR)
+        << "Could not locate FlutterMutatorsStack.pushTransform method";
+    return false;
+  }
+
+  g_mutators_stack_push_cliprect_method = env->GetMethodID(
+      g_mutators_stack_class->obj(), "pushClipRect", "(IIII)V");
+  if (g_mutators_stack_push_cliprect_method == nullptr) {
+    FML_LOG(ERROR)
+        << "Could not locate FlutterMutatorsStack.pushCilpRect method";
+    return false;
+  }
+
+  g_on_display_platform_view_method =
+      env->GetMethodID(g_flutter_jni_class->obj(), "onDisplayPlatformView",
+                       "(IIIIIIILio/flutter/embedding/engine/mutatorsstack/"
+                       "FlutterMutatorsStack;)V");
 
   if (g_on_display_platform_view_method == nullptr) {
     FML_LOG(ERROR) << "Could not locate onDisplayPlatformView method";
@@ -1094,20 +1136,62 @@ void PlatformViewAndroidJNIImpl::SurfaceTextureDetachFromGLContext(
   FML_CHECK(CheckException(env));
 }
 
-void PlatformViewAndroidJNIImpl::FlutterViewOnDisplayPlatformView(int view_id,
-                                                                  int x,
-                                                                  int y,
-                                                                  int width,
-                                                                  int height) {
+void PlatformViewAndroidJNIImpl::FlutterViewOnDisplayPlatformView(
+    int view_id,
+    int x,
+    int y,
+    int width,
+    int height,
+    int viewWidth,
+    int viewHeight,
+    MutatorsStack mutators_stack) {
   JNIEnv* env = fml::jni::AttachCurrentThread();
-
   auto java_object = java_object_.get(env);
   if (java_object.is_null()) {
     return;
   }
 
+  jobject mutatorsStack = env->NewObject(g_mutators_stack_class->obj(),
+                                         g_mutators_stack_init_method);
+
+  std::vector<std::shared_ptr<Mutator>>::const_iterator iter =
+      mutators_stack.Begin();
+  while (iter != mutators_stack.End()) {
+    switch ((*iter)->GetType()) {
+      case transform: {
+        const SkMatrix& matrix = (*iter)->GetMatrix();
+        SkScalar matrix_array[9];
+        matrix.get9(matrix_array);
+        fml::jni::ScopedJavaLocalRef<jfloatArray> transformMatrix(
+            env, env->NewFloatArray(9));
+
+        env->SetFloatArrayRegion(transformMatrix.obj(), 0, 9, matrix_array);
+        env->CallVoidMethod(mutatorsStack,
+                            g_mutators_stack_push_transform_method,
+                            transformMatrix.obj());
+        break;
+      }
+      case clip_rect: {
+        const SkRect& rect = (*iter)->GetRect();
+        env->CallVoidMethod(mutatorsStack,
+                            g_mutators_stack_push_cliprect_method,
+                            (int)rect.left(), (int)rect.top(),
+                            (int)rect.right(), (int)rect.bottom());
+        break;
+      }
+      // TODO(cyanglaz): Implement other mutators.
+      // https://github.com/flutter/flutter/issues/58426
+      case clip_rrect:
+      case clip_path:
+      case opacity:
+        break;
+    }
+    ++iter;
+  }
+
   env->CallVoidMethod(java_object.obj(), g_on_display_platform_view_method,
-                      view_id, x, y, width, height);
+                      view_id, x, y, width, height, viewWidth, viewHeight,
+                      mutatorsStack);
 
   FML_CHECK(CheckException(env));
 }

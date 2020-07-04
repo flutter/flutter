@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "flutter/flow/embedded_views.h"
 #include "flutter/flow/surface.h"
 #include "flutter/fml/raster_thread_merger.h"
 #include "flutter/fml/thread.h"
@@ -199,14 +200,17 @@ TEST(AndroidExternalViewEmbedder, PlatformViewRect) {
                        raster_thread_merger);
 
   MutatorsStack stack;
-  SkMatrix matrix = SkMatrix::MakeTrans(10, 20);
-  stack.PushTransform(matrix);
+  SkMatrix matrix;
+  matrix.setIdentity();
+  // The framework always push a scale matrix based on the screen ratio.
+  matrix.setConcat(matrix, SkMatrix::MakeScale(1.5, 1.5));
+  matrix.setConcat(matrix, SkMatrix::MakeTrans(10, 20));
   auto view_params =
       std::make_unique<EmbeddedViewParams>(matrix, SkSize::Make(30, 40), stack);
 
   auto view_id = 0;
   embedder->PrerollCompositeEmbeddedView(view_id, std::move(view_params));
-  ASSERT_EQ(SkRect::MakeXYWH(10, 20, 45, 60), embedder->GetViewRect(view_id));
+  ASSERT_EQ(SkRect::MakeXYWH(15, 30, 45, 60), embedder->GetViewRect(view_id));
 }
 
 TEST(AndroidExternalViewEmbedder, PlatformViewRect__ChangedParams) {
@@ -223,22 +227,27 @@ TEST(AndroidExternalViewEmbedder, PlatformViewRect__ChangedParams) {
   auto view_id = 0;
 
   MutatorsStack stack1;
-  SkMatrix matrix1 = SkMatrix::MakeTrans(10, 20);
-  stack1.PushTransform(matrix1);
+  SkMatrix matrix1;
+  matrix1.setIdentity();
+  // The framework always push a scale matrix based on the screen ratio.
+  matrix1.setConcat(SkMatrix::MakeScale(1.5, 1.5), SkMatrix::MakeTrans(10, 20));
   auto view_params_1 = std::make_unique<EmbeddedViewParams>(
       matrix1, SkSize::Make(30, 40), stack1);
 
   embedder->PrerollCompositeEmbeddedView(view_id, std::move(view_params_1));
 
   MutatorsStack stack2;
-  SkMatrix matrix2 = SkMatrix::MakeTrans(50, 60);
-  stack2.PushTransform(matrix2);
+  SkMatrix matrix2;
+  matrix2.setIdentity();
+  // The framework always push a scale matrix based on the screen ratio.
+  matrix2.setConcat(matrix2, SkMatrix::MakeScale(1.5, 1.5));
+  matrix2.setConcat(matrix2, SkMatrix::MakeTrans(50, 60));
   auto view_params_2 = std::make_unique<EmbeddedViewParams>(
       matrix2, SkSize::Make(70, 80), stack2);
 
   embedder->PrerollCompositeEmbeddedView(view_id, std::move(view_params_2));
 
-  ASSERT_EQ(SkRect::MakeXYWH(50, 60, 105, 120), embedder->GetViewRect(view_id));
+  ASSERT_EQ(SkRect::MakeXYWH(75, 90, 105, 120), embedder->GetViewRect(view_id));
 }
 
 TEST(AndroidExternalViewEmbedder, SubmitFrame__RecycleSurfaces) {
@@ -291,8 +300,13 @@ TEST(AndroidExternalViewEmbedder, SubmitFrame__RecycleSurfaces) {
 
     // Add an Android view.
     MutatorsStack stack1;
-    SkMatrix matrix1 = SkMatrix::MakeTrans(100, 100);
-    stack1.PushTransform(matrix1);
+    SkMatrix matrix1;
+    matrix1.setIdentity();
+    SkMatrix scale = SkMatrix::MakeScale(1.5, 1.5);
+    SkMatrix trans = SkMatrix::MakeTrans(100, 100);
+    matrix1.setConcat(scale, trans);
+    stack1.PushTransform(scale);
+    stack1.PushTransform(trans);
     // TODO(egarciad): Investigate why Flow applies the device pixel ratio to
     // the offsetPixels, but not the sizePoints.
     auto view_params_1 = std::make_unique<EmbeddedViewParams>(
@@ -318,8 +332,8 @@ TEST(AndroidExternalViewEmbedder, SubmitFrame__RecycleSurfaces) {
             ByMove(std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
                 0, window))));
     // The JNI call to display the Android view.
-    EXPECT_CALL(*jni_mock,
-                FlutterViewOnDisplayPlatformView(0, 100, 100, 300, 300));
+    EXPECT_CALL(*jni_mock, FlutterViewOnDisplayPlatformView(
+                               0, 150, 150, 300, 300, 300, 300, stack1));
     // The JNI call to display the overlay surface.
     EXPECT_CALL(*jni_mock,
                 FlutterViewDisplayOverlaySurface(0, 50, 50, 200, 200));
@@ -342,8 +356,13 @@ TEST(AndroidExternalViewEmbedder, SubmitFrame__RecycleSurfaces) {
 
     // Add an Android view.
     MutatorsStack stack1;
-    SkMatrix matrix1 = SkMatrix::MakeTrans(100, 100);
-    stack1.PushTransform(matrix1);
+    SkMatrix matrix1;
+    matrix1.setIdentity();
+    SkMatrix scale = SkMatrix::MakeScale(1.5, 1.5);
+    SkMatrix trans = SkMatrix::MakeTrans(100, 100);
+    matrix1.setConcat(scale, trans);
+    stack1.PushTransform(scale);
+    stack1.PushTransform(trans);
     // TODO(egarciad): Investigate why Flow applies the device pixel ratio to
     // the offsetPixels, but not the sizePoints.
     auto view_params_1 = std::make_unique<EmbeddedViewParams>(
@@ -367,8 +386,8 @@ TEST(AndroidExternalViewEmbedder, SubmitFrame__RecycleSurfaces) {
     // frame.
     EXPECT_CALL(*jni_mock, FlutterViewCreateOverlaySurface()).Times(0);
     // The JNI call to display the Android view.
-    EXPECT_CALL(*jni_mock,
-                FlutterViewOnDisplayPlatformView(0, 100, 100, 300, 300));
+    EXPECT_CALL(*jni_mock, FlutterViewOnDisplayPlatformView(
+                               0, 150, 150, 300, 300, 300, 300, stack1));
     // The JNI call to display the overlay surface.
     EXPECT_CALL(*jni_mock,
                 FlutterViewDisplayOverlaySurface(0, 50, 50, 200, 200));

@@ -138,12 +138,23 @@ class MutatorsStack {
   // and destroys it.
   void Pop();
 
-  // Returns an iterator pointing to the top of the stack.
+  // Returns a reverse iterator pointing to the top of the stack, which is the
+  // mutator that is furtherest from the leaf node.
   const std::vector<std::shared_ptr<Mutator>>::const_reverse_iterator Top()
       const;
-  // Returns an iterator pointing to the bottom of the stack.
+  // Returns a reverse iterator pointing to the bottom of the stack, which is
+  // the mutator that is closeset from the leaf node.
   const std::vector<std::shared_ptr<Mutator>>::const_reverse_iterator Bottom()
       const;
+
+  // Returns an iterator pointing to the begining of the mutator vector, which
+  // is the mutator that is furtherest from the leaf node.
+  const std::vector<std::shared_ptr<Mutator>>::const_iterator Begin() const;
+
+  // Returns an iterator pointing to the end of the mutator vector, which is the
+  // mutator that is closest from the leaf node.
+  const std::vector<std::shared_ptr<Mutator>>::const_iterator End() const;
+
   bool is_empty() const { return vector_.empty(); }
 
   bool operator==(const MutatorsStack& other) const {
@@ -196,7 +207,7 @@ class EmbeddedViewParams {
     SkRect starting_rect = SkRect::MakeSize(size_points);
     path.addRect(starting_rect);
     path.transform(matrix);
-    final_bounding_rect_ = path.computeTightBounds();
+    final_bounding_rect_ = path.getBounds();
   }
 
   EmbeddedViewParams(const EmbeddedViewParams& other) {

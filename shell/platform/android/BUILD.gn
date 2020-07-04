@@ -149,6 +149,8 @@ android_java_sources = [
   "io/flutter/embedding/engine/FlutterEnginePluginRegistry.java",
   "io/flutter/embedding/engine/FlutterJNI.java",
   "io/flutter/embedding/engine/FlutterOverlaySurface.java",
+  "io/flutter/embedding/engine/mutatorsstack/FlutterMutatorsStack.java",
+  "io/flutter/embedding/engine/mutatorsstack/FlutterMutatorView.java",
   "io/flutter/embedding/engine/FlutterShellArgs.java",
   "io/flutter/embedding/engine/dart/DartExecutor.java",
   "io/flutter/embedding/engine/dart/DartMessenger.java",

@@ -712,6 +712,8 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/dart/D
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/dart/PlatformMessageHandler.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/loader/FlutterLoader.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/loader/ResourceExtractor.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/mutatorsstack/FlutterMutatorView.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/mutatorsstack/FlutterMutatorsStack.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugins/FlutterPlugin.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugins/PluginRegistry.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugins/activity/ActivityAware.java

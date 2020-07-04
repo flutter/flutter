@@ -12,6 +12,7 @@
 #include "flutter/fml/platform/android/jni_weak_ref.h"
 #endif
 
+#include "flutter/flow/embedded_views.h"
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/shell/platform/android/surface/android_native_window.h"
 #include "third_party/skia/include/core/SkMatrix.h"
@@ -115,11 +116,15 @@ class PlatformViewAndroidJNI {
   ///
   /// @note       Must be called from the platform thread.
   ///
-  virtual void FlutterViewOnDisplayPlatformView(int view_id,
-                                                int x,
-                                                int y,
-                                                int width,
-                                                int height) = 0;
+  virtual void FlutterViewOnDisplayPlatformView(
+      int view_id,
+      int x,
+      int y,
+      int width,
+      int height,
+      int viewWidth,
+      int viewHeight,
+      MutatorsStack mutators_stack) = 0;
 
   //----------------------------------------------------------------------------
   /// @brief      Positions and sizes an overlay surface in hybrid composition.
