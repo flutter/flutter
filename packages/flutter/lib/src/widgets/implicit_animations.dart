@@ -937,14 +937,14 @@ class AnimatedAlign extends ImplicitlyAnimatedWidget {
 
 class _AnimatedAlignState extends AnimatedWidgetBaseState<AnimatedAlign> {
   AlignmentGeometryTween _alignment;
-  Tween _heightFactorTween;
-  Tween _widthFactorTween;
+  Tween<double> _heightFactorTween;
+  Tween<double> _widthFactorTween;
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
     _alignment = visitor(_alignment, widget.alignment, (dynamic value) => AlignmentGeometryTween(begin: value as AlignmentGeometry)) as AlignmentGeometryTween;
-    _heightFactorTween = visitor(_heightFactorTween, widget.heightFactor, (dynamic value) => Tween(begin: value as double));
-    _widthFactorTween = visitor(_widthFactorTween, widget.widthFactor, (dynamic value) => Tween(begin: value as double));
+    _heightFactorTween = visitor(_heightFactorTween, widget.heightFactor, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>;
+    _widthFactorTween = visitor(_widthFactorTween, widget.widthFactor, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>;
 
   }
 
