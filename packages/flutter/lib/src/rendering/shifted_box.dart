@@ -403,7 +403,6 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
     }
   }
 
-
   @override
   bool hitTest(BoxHitTestResult result, {@required Offset position}) {
     if(child != null){
