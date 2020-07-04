@@ -500,7 +500,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   }
 
   // This is a parallele implementation of [GestureBinding._handlePointerEvent]
-  // to make compativle with test bindings.
+  // to make compatible with test bindings.
   void _handlePointerEvent(
     PointerEvent event,
     Map<int, HitTestResult> _hitTests
