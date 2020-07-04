@@ -23,6 +23,7 @@ import io.flutter.embedding.android.FlutterImageView;
 import io.flutter.embedding.android.FlutterView;
 import io.flutter.embedding.engine.FlutterOverlaySurface;
 import io.flutter.embedding.engine.dart.DartExecutor;
+import io.flutter.embedding.engine.mutatorsstack.*;
 import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel;
 import io.flutter.plugin.editing.TextInputPlugin;
 import io.flutter.view.AccessibilityBridge;
@@ -75,6 +76,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
   private final SparseArray<PlatformViewsChannel.PlatformViewCreationRequest> platformViewRequests;
   private final SparseArray<View> platformViews;
+  private final SparseArray<FlutterMutatorView> mutatorViews;
 
   // Map of unique IDs to views that render overlay layers.
   private final SparseArray<FlutterImageView> overlayLayerViews;
@@ -109,8 +111,9 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
             platformViewRequests.remove(viewId);
           }
           if (platformViews.get(viewId) != null) {
-            ((FlutterView) flutterView).removeView(platformViews.get(viewId));
+            ((FlutterView) flutterView).removeView(mutatorViews.get(viewId));
             platformViews.remove(viewId);
+            mutatorViews.remove(viewId);
           }
         }
 
@@ -335,6 +338,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
     platformViewRequests = new SparseArray<>();
     platformViews = new SparseArray<>();
+    mutatorViews = new SparseArray<>();
   }
 
   /**
@@ -630,29 +634,34 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
     PlatformView platformView = factory.create(context, viewId, createParams);
     View view = platformView.getView();
-
-    // Reverse scale the view based on the screen density.
-    //
-    // Flow pixels are based on the physical resolution. For example, 1000 pixels in flow equals
-    // 500 points in Android if the display density is 2.0.
-    float density = getDisplayDensity();
-    view.setPivotX(0);
-    view.setPivotY(0);
-    view.setScaleX(1 / density);
-    view.setScaleY(1 / density);
-
     platformViews.put(viewId, view);
-    ((FlutterView) flutterView).addView(view);
+
+    FlutterMutatorView mutatorView =
+        new FlutterMutatorView(context, context.getResources().getDisplayMetrics().density);
+    mutatorViews.put(viewId, mutatorView);
+    mutatorView.addView(platformView.getView());
+    ((FlutterView) flutterView).addView(mutatorView);
   }
 
-  public void onDisplayPlatformView(int viewId, int x, int y, int width, int height) {
+  public void onDisplayPlatformView(
+      int viewId,
+      int x,
+      int y,
+      int width,
+      int height,
+      int viewWidth,
+      int ViewHeight,
+      FlutterMutatorsStack mutatorsStack) {
     initializeRootImageViewIfNeeded();
     initializePlatformViewIfNeeded(viewId);
 
+    FlutterMutatorView mutatorView = mutatorViews.get(viewId);
+    mutatorView.readyToDisplay(mutatorsStack, x, y, width, height);
+    mutatorView.setVisibility(View.VISIBLE);
+    mutatorView.bringToFront();
+
+    FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(viewWidth, ViewHeight);
     View platformView = platformViews.get(viewId);
-    FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams((int) width, (int) height);
-    layoutParams.leftMargin = (int) x;
-    layoutParams.topMargin = (int) y;
     platformView.setLayoutParams(layoutParams);
     platformView.setVisibility(View.VISIBLE);
     platformView.bringToFront();
@@ -701,6 +710,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
       int viewId = platformViews.keyAt(i);
       if (!currentFrameUsedPlatformViewIds.contains(viewId)) {
         platformViews.get(viewId).setVisibility(View.GONE);
+        mutatorViews.get(viewId).setVisibility(View.GONE);
       }
     }
     // If the background surface is still an image, then acquire the latest image.

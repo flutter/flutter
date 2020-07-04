@@ -40,6 +40,7 @@ def main():
     'io.flutter.embedding.engine',
     'io.flutter.embedding.engine.dart',
     'io.flutter.embedding.engine.loader',
+    'io.flutter.embedding.engine.mutatorsstack',
     'io.flutter.embedding.engine.plugins',
     'io.flutter.embedding.engine.plugins.activity',
     'io.flutter.embedding.engine.plugins.broadcastreceiver',

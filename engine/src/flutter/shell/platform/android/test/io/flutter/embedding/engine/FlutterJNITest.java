@@ -12,6 +12,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.LocaleList;
 import io.flutter.embedding.engine.dart.DartExecutor;
+import io.flutter.embedding.engine.mutatorsstack.FlutterMutatorsStack;
 import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
 import io.flutter.embedding.engine.systemchannels.LocalizationChannel;
 import io.flutter.plugin.localization.LocalizationPlugin;
@@ -152,15 +153,29 @@ public class FlutterJNITest {
 
     FlutterJNI flutterJNI = new FlutterJNI();
     flutterJNI.setPlatformViewsController(platformViewsController);
-
+    FlutterMutatorsStack stack = new FlutterMutatorsStack();
     // --- Execute Test ---
     flutterJNI.onDisplayPlatformView(
-        /*viewId=*/ 1, /*x=*/ 10, /*y=*/ 20, /*width=*/ 100, /*height=*/ 200);
+        /*viewId=*/ 1,
+        /*x=*/ 10,
+        /*y=*/ 20,
+        /*width=*/ 100,
+        /*height=*/ 200,
+        /*viewWidth=*/ 100,
+        /*viewHeight=*/ 200,
+        /*mutatorsStack=*/ stack);
 
     // --- Verify Results ---
     verify(platformViewsController, times(1))
         .onDisplayPlatformView(
-            /*viewId=*/ 1, /*x=*/ 10, /*y=*/ 20, /*width=*/ 100, /*height=*/ 200);
+            /*viewId=*/ 1,
+            /*x=*/ 10,
+            /*y=*/ 20,
+            /*width=*/ 100,
+            /*height=*/ 200,
+            /*viewWidth=*/ 100,
+            /*viewHeight=*/ 200,
+            /*mutatorsStack=*/ stack);
   }
 
   @Test
