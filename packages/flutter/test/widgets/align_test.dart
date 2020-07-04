@@ -4,6 +4,9 @@
 
 // @dart = 2.8
 
+import 'dart:async';
+
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -111,5 +114,54 @@ void main() {
     final Size size = alignKey.currentContext.size;
     expect(size.width, equals(800.0));
     expect(size.height, equals(10.0));
+  });
+
+  testWidgets('Hit test w/ width and height factor',
+      (WidgetTester tester) async {
+    int value = -1;
+    Widget _widget() => MaterialApp(
+          home: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List<Widget>.generate(
+              3,
+              (int index) => Align(
+                widthFactor: 0.5,
+                child: Material(
+                  key: ValueKey<int>(index),
+                  type: MaterialType.circle,
+                  clipBehavior: Clip.antiAlias,
+                  color: Colors.blue,
+                  child: InkWell(
+                    onTap: () => value = index,
+                    customBorder: const CircleBorder(),
+                    child: const SizedBox(
+                      width: 100.0,
+                      height: 100.0,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+    await tester.pumpWidget(_widget());
+
+    final Finder boxOneFinder = find.byKey(const ValueKey<int>(0));
+    final Finder boxTwoFinder = find.byKey(const ValueKey<int>(1));
+    final Finder boxThreeFinder = find.byKey(const ValueKey<int>(2));
+
+    final Offset itemOneEdge = tester.getCenter(boxOneFinder);
+    final Offset itemTwoEdge = tester.getCenter(boxTwoFinder);
+    final Offset itemThreeEdge = tester.getCenter(boxThreeFinder);
+
+    await tester.tapAt(Offset(itemOneEdge.dx - 50, itemOneEdge.dy));
+    expect(value, equals(0));
+
+    await tester.tapAt(Offset(itemTwoEdge.dx - 10, itemTwoEdge.dy));
+    expect(value, equals(1));
+
+    await tester.tapAt(Offset(itemThreeEdge.dx - 10, itemThreeEdge.dy));
+    expect(value, equals(2));
   });
 }
