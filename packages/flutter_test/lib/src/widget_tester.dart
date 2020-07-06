@@ -466,6 +466,8 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
   @override
   Future<void> handlePointerEventPack(List<PointerEventPack> records) {
+    assert(records != null);
+    assert(records.isNotEmpty);
     // hitTestHistory is an equivalence of _hitTests in [GestureBinding]
     final Map<int, HitTestResult> hitTestHistory = <int, HitTestResult>{};
     return TestAsyncUtils.guard<void>(() async {
