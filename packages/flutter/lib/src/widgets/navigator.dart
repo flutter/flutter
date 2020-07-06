@@ -2407,7 +2407,7 @@ class _RouteEntry extends RouteTransitionRecord {
     assert(
       route._navigator == null,
       'The pushed route has already been used. When pushing a route, a new '
-      'Route object should be provided.',
+      'Route object must be provided.',
     );
     final _RouteLifecycle previousState = currentState;
     route._navigator = navigator;

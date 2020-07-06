@@ -488,7 +488,6 @@ enum ListTileControlAffinity {
 ///             children: <Widget>[
 ///               Text(
 ///                 '$title',
-///                 //
 ///                 maxLines: 2,
 ///                 overflow: TextOverflow.ellipsis,
 ///                 style: const TextStyle(

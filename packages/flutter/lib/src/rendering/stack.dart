@@ -276,6 +276,8 @@ enum StackFit {
 /// visible.
 enum Overflow {
   /// Overflowing children will be visible.
+  ///
+  /// The visible overflow area will not accept hit testing.
   visible,
 
   /// Overflowing children will be clipped to the bounds of their parent.
