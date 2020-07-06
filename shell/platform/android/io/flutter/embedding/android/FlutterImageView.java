@@ -62,6 +62,9 @@ public class FlutterImageView extends View implements RenderSurface {
    */
   private int pendingImages = 0;
 
+  /** Whether the view is attached to the Flutter render. */
+  private boolean isAttachedToFlutterRenderer = false;
+
   /**
    * Constructs a {@code FlutterImageView} with an {@link android.media.ImageReader} that provides
    * the Flutter UI.
@@ -70,6 +73,7 @@ public class FlutterImageView extends View implements RenderSurface {
     super(context, null);
     this.imageReader = createImageReader(width, height);
     this.kind = kind;
+    init();
   }
 
   @VisibleForTesting
@@ -77,6 +81,11 @@ public class FlutterImageView extends View implements RenderSurface {
     super(context, null);
     this.imageReader = imageReader;
     this.kind = kind;
+    init();
+  }
+
+  private void init() {
+    setAlpha(0.0f);
   }
 
   @TargetApi(19)
@@ -111,16 +120,21 @@ public class FlutterImageView extends View implements RenderSurface {
    */
   @Override
   public void attachToRenderer(@NonNull FlutterRenderer flutterRenderer) {
-    this.flutterRenderer = flutterRenderer;
+    if (isAttachedToFlutterRenderer) {
+      return;
+    }
     switch (kind) {
       case background:
         flutterRenderer.swapSurface(imageReader.getSurface());
         break;
       case overlay:
-        // Don't do anything as this is done by the handler of
+        // Do nothing since the attachment is done by the handler of
         // `FlutterJNI#createOverlaySurface()` in the native side.
         break;
     }
+    setAlpha(1.0f);
+    this.flutterRenderer = flutterRenderer;
+    isAttachedToFlutterRenderer = true;
   }
 
   /**
@@ -128,16 +142,26 @@ public class FlutterImageView extends View implements RenderSurface {
    * Flutter UI to this {@code FlutterImageView}.
    */
   public void detachFromRenderer() {
-    switch (kind) {
-      case background:
-        // TODO: Swap the surface back to the original one.
-        // https://github.com/flutter/flutter/issues/58291
-        break;
-      case overlay:
-        // TODO: Handle this in the native side.
-        // https://github.com/flutter/flutter/issues/59904
-        break;
+    if (!isAttachedToFlutterRenderer) {
+      return;
     }
+    setAlpha(0.0f);
+    // Drop the lastest image as it shouldn't render this image if this view is
+    // attached to the renderer again.
+    acquireLatestImage();
+    // Clear drawings.
+    pendingImages = 0;
+    currentBitmap = null;
+    if (nextImage != null) {
+      nextImage.close();
+      nextImage = null;
+    }
+    if (currentImage != null) {
+      currentImage.close();
+      currentImage = null;
+    }
+    invalidate();
+    isAttachedToFlutterRenderer = false;
   }
 
   public void pause() {
@@ -146,7 +170,10 @@ public class FlutterImageView extends View implements RenderSurface {
 
   /** Acquires the next image to be drawn to the {@link android.graphics.Canvas}. */
   @TargetApi(19)
-  public void acquireLatestImage() {
+  public boolean acquireLatestImage() {
+    if (!isAttachedToFlutterRenderer) {
+      return false;
+    }
     // There's no guarantee that the image will be closed before the next call to
     // `acquireLatestImage()`. For example, the device may not produce new frames if
     // it's in sleep mode, so the calls to `invalidate()` will be queued up
@@ -162,6 +189,30 @@ public class FlutterImageView extends View implements RenderSurface {
       }
     }
     invalidate();
+    return nextImage != null;
+  }
+
+  /** Creates a new image reader with the provided size. */
+  public void resizeIfNeeded(int width, int height) {
+    if (flutterRenderer == null) {
+      return;
+    }
+    if (width == imageReader.getWidth() && height == imageReader.getHeight()) {
+      return;
+    }
+    // Close resources.
+    if (nextImage != null) {
+      nextImage.close();
+      nextImage = null;
+    }
+    if (currentImage != null) {
+      currentImage.close();
+      currentImage = null;
+    }
+    imageReader.close();
+    // Image readers cannot be resized once created.
+    imageReader = createImageReader(width, height);
+    pendingImages = 0;
   }
 
   @Override
@@ -214,8 +265,13 @@ public class FlutterImageView extends View implements RenderSurface {
     if (width == imageReader.getWidth() && height == imageReader.getHeight()) {
       return;
     }
-    if (kind == SurfaceKind.background && flutterRenderer != null) {
-      imageReader = createImageReader(width, height);
+    // `SurfaceKind.overlay` isn't resized. Instead, the `FlutterImageView` instance
+    // is destroyed. As a result, an instance with the new size is created by the surface
+    // pool in the native side.
+    if (kind == SurfaceKind.background && isAttachedToFlutterRenderer) {
+      resizeIfNeeded(width, height);
+      // Bind native window to the new surface, and create a new onscreen surface
+      // with the new size in the native side.
       flutterRenderer.swapSurface(imageReader.getSurface());
     }
   }
