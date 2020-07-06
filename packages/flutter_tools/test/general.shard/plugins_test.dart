@@ -80,10 +80,9 @@ void main() {
       when(windowsProject.pluginConfigKey).thenReturn('windows');
       final Directory windowsManagedDirectory = flutterProject.directory.childDirectory('windows').childDirectory('flutter');
       when(windowsProject.managedDirectory).thenReturn(windowsManagedDirectory);
-      when(windowsProject.vcprojFile).thenReturn(windowsManagedDirectory.parent.childFile('Runner.vcxproj'));
-      when(windowsProject.solutionFile).thenReturn(windowsManagedDirectory.parent.childFile('Runner.sln'));
+      when(windowsProject.cmakeFile).thenReturn(windowsManagedDirectory.parent.childFile('CMakeLists.txt'));
+      when(windowsProject.generatedPluginCmakeFile).thenReturn(windowsManagedDirectory.childFile('generated_plugins.mk'));
       when(windowsProject.pluginSymlinkDirectory).thenReturn(windowsManagedDirectory.childDirectory('ephemeral').childDirectory('.plugin_symlinks'));
-      when(windowsProject.generatedPluginPropertySheetFile).thenReturn(windowsManagedDirectory.childFile('GeneratedPlugins.props'));
       when(windowsProject.existsSync()).thenReturn(false);
       linuxProject = MockLinuxProject();
       when(flutterProject.linux).thenReturn(linuxProject);
@@ -321,44 +320,6 @@ dependencies:
     // given project.
     void simulatePodInstallRun(XcodeBasedProject project) {
       project.podManifestLock.createSync(recursive: true);
-    }
-
-    // Creates a Windows solution file sufficient to allow plugin injection
-    // to run without failing.
-    void createDummyWindowsSolutionFile() {
-      windowsProject.solutionFile.createSync(recursive: true);
-      // This isn't a valid solution file, but it's just enough to work with the
-      // plugin injection.
-      windowsProject.solutionFile.writeAsStringSync('''
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Runner", "Runner.vcxproj", "{3842E94C-E348-463A-ADBE-625A2B69B628}"
-	ProjectSection(ProjectDependencies) = postProject
-		{6419BF13-6ECD-4CD2-9E85-E566A1F03F8F} = {6419BF13-6ECD-4CD2-9E85-E566A1F03F8F}
-	EndProjectSection
-EndProject
-Global
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-	EndGlobalSection
-EndGlobal''');
-    }
-
-    // Creates a Windows project file for dummyPackageDirectory sufficient to
-    // allow plugin injection to run without failing.
-    void createDummyPluginWindowsProjectFile() {
-      final File projectFile = dummyPackageDirectory
-        .parent
-        .childDirectory('windows')
-        .childFile('plugin.vcxproj');
-      projectFile.createSync(recursive: true);
-      // This isn't a valid project file, but it's just enough to work with the
-      // plugin injection.
-      projectFile.writeAsStringSync('''
-<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup Label="Globals">
-    <ProjectGuid>{5919689F-A5D5-462C-AF50-D405CCEF89B8}</ProjectGuid>'}
-    <ProjectName>apackage</ProjectName>
-  </PropertyGroup>
-</Project>''');
     }
 
     group('refreshPlugins', () {
@@ -1051,8 +1012,6 @@ flutter:
         when(featureFlags.isWindowsEnabled).thenReturn(true);
         when(flutterProject.isModule).thenReturn(false);
         configureDummyPackageAsPlugin();
-        createDummyWindowsSolutionFile();
-        createDummyPluginWindowsProjectFile();
 
         await injectPlugins(flutterProject, checkProjects: true);
 
@@ -1083,9 +1042,6 @@ flutter:
         dartPluginClass: SomePlugin
     ''');
 
-        createDummyWindowsSolutionFile();
-        createDummyPluginWindowsProjectFile();
-
         await injectPlugins(flutterProject, checkProjects: true);
 
         final File registrantImpl = windowsProject.managedDirectory.childFile('generated_plugin_registrant.cc');
@@ -1114,9 +1070,6 @@ flutter:
         dartPluginClass: SomePlugin
     ''');
 
-        createDummyWindowsSolutionFile();
-        createDummyPluginWindowsProjectFile();
-
         await injectPlugins(flutterProject, checkProjects: true);
 
         final File registrantImpl = windowsProject.managedDirectory.childFile('generated_plugin_registrant.cc');
@@ -1130,39 +1083,22 @@ flutter:
         FeatureFlags: () => featureFlags,
       });
 
-      testUsingContext('Injecting creates generated Windows plugin properties', () async {
+      testUsingContext('Injecting creates generated Windows plugin CMake file', () async {
         when(windowsProject.existsSync()).thenReturn(true);
         when(featureFlags.isWindowsEnabled).thenReturn(true);
         when(flutterProject.isModule).thenReturn(false);
         configureDummyPackageAsPlugin();
-        createDummyWindowsSolutionFile();
-        createDummyPluginWindowsProjectFile();
 
         await injectPlugins(flutterProject, checkProjects: true);
 
-        final File properties = windowsProject.generatedPluginPropertySheetFile;
-        final String includePath = fs.path.join('flutter', 'ephemeral', '.plugin_symlinks', 'apackage', 'windows');
+        final File pluginMakefile = windowsProject.generatedPluginCmakeFile;
 
-        expect(properties.existsSync(), isTrue);
-        expect(properties.readAsStringSync(), contains('apackage_plugin.lib'));
-        expect(properties.readAsStringSync(), contains('>$includePath;'));
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: () => featureFlags,
-      });
-
-      testUsingContext('Injecting updates Windows solution file', () async {
-        when(windowsProject.existsSync()).thenReturn(true);
-        when(featureFlags.isWindowsEnabled).thenReturn(true);
-        when(flutterProject.isModule).thenReturn(false);
-        configureDummyPackageAsPlugin();
-        createDummyWindowsSolutionFile();
-        createDummyPluginWindowsProjectFile();
-
-        await injectPlugins(flutterProject, checkProjects: true);
-
-        expect(windowsProject.solutionFile.readAsStringSync(), contains(r'apackage\windows\plugin.vcxproj'));
+        expect(pluginMakefile.existsSync(), isTrue);
+        final String contents = pluginMakefile.readAsStringSync();
+        expect(contents, contains('apackage'));
+        expect(contents, contains('target_link_libraries(\${BINARY_NAME} PRIVATE \${plugin}_plugin)'));
+        expect(contents, contains('list(APPEND PLUGIN_BUNDLED_LIBRARIES \$<TARGET_FILE:\${plugin}_plugin>)'));
+        expect(contents, contains('list(APPEND PLUGIN_BUNDLED_LIBRARIES \${\${plugin}_bundled_libraries})'));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),

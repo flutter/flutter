@@ -932,5 +932,29 @@ void main() {
     },
   );
 
+  testWidgets(
+    'Table widget - Default textBaseline is set to TableBaseline.alphabetic',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Table(
+            defaultVerticalAlignment: TableCellVerticalAlignment.baseline,
+            children: const <TableRow>[
+              TableRow(
+                children: <Widget>[
+                  Text('Some Text'),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+
+      final RenderTable table = tester.renderObject(find.byType(Table));
+      expect(table.textBaseline, TextBaseline.alphabetic);
+    },
+  );
+
   // TODO(ianh): Test handling of TableCell object
 }

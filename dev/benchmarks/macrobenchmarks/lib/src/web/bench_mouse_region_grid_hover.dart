@@ -36,11 +36,17 @@ class _NestedMouseRegion extends StatelessWidget {
 ///
 /// Measures our ability to hit test mouse regions.
 class BenchMouseRegionGridHover extends WidgetRecorder {
-  BenchMouseRegionGridHover() : super(name: benchmarkName);
+  BenchMouseRegionGridHover() : super(name: benchmarkName) {
+    tester = _Tester(onDataPoint: handleDataPoint);
+  }
 
   static const String benchmarkName = 'bench_mouse_region_grid_hover';
 
-  final _Tester tester = _Tester();
+  _Tester tester;
+
+  void handleDataPoint(Duration duration) {
+    profile.addDataPoint('hitTestDuration', duration, reported: true);
+  }
 
   // Use a non-trivial border to force Web to switch painter
   Border _getBorder(int columnIndex, int rowIndex) {
@@ -62,6 +68,7 @@ class BenchMouseRegionGridHover extends WidgetRecorder {
       started = true;
       SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) async {
         tester.start();
+        registerDidStop(tester.stop);
       });
     }
     super.frameDidDraw();
@@ -127,6 +134,10 @@ class _UntilNextFrame {
 }
 
 class _Tester {
+  _Tester({this.onDataPoint});
+
+  final ValueSetter<Duration> onDataPoint;
+
   static const Duration hoverDuration = Duration(milliseconds: 20);
 
   bool _stopped = false;
@@ -150,7 +161,11 @@ class _Tester {
 
   Future<void> _hoverTo(Offset location, Duration duration) async {
     currentTime += duration;
+    final Stopwatch stopwatch = Stopwatch()..start();
     await gesture.moveTo(location, timeStamp: currentTime);
+    stopwatch.stop();
+    if (onDataPoint != null)
+      onDataPoint(stopwatch.elapsed);
     await _UntilNextFrame.wait();
   }
 
