@@ -1036,4 +1036,73 @@ void main() {
     // after the view is destroyed, which causes exceptions.
     await tester.pumpAndSettle(const Duration(seconds: 1));
   });
+
+  testWidgets('DataRow renders custom colors', (WidgetTester tester) async {
+    Widget buildTable() {
+      return DataTable(
+        columns: const <DataColumn>[
+          DataColumn(
+            label: Text('Column1'),
+          ),
+        ],
+        rows: <DataRow>[
+          DataRow(
+            color: MaterialStateProperty.resolveWith<Color>(
+              (Set<MaterialState> states) {
+                return Colors.red;
+              },
+            ),
+            cells: const <DataCell>[
+              DataCell(Text('Content1')),
+            ],
+          ),
+        ]
+      );
+    }
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable()),
+    ));
+
+    final Table table = tester.widget(find.byType(Table));
+    final TableRow tableRow = table.children.last;
+    final BoxDecoration boxDecoration = tableRow.decoration as BoxDecoration;
+    expect(boxDecoration.color, Colors.red);
+  });
+
+  testWidgets('DataRow renders custom colors when selected', (WidgetTester tester) async {
+    Widget buildTable({bool selected = false}) {
+      return DataTable(
+        columns: const <DataColumn>[
+          DataColumn(
+            label: Text('Column1'),
+          ),
+        ],
+        rows: <DataRow>[
+          DataRow(
+            selected: selected,
+            color: MaterialStateProperty.resolveWith<Color>(
+              (Set<MaterialState> states) {
+                if (states.contains(MaterialState.selected))
+                  return Colors.blue;
+                return Colors.red;
+              },
+            ),
+            cells: const <DataCell>[
+              DataCell(Text('Content1')),
+            ],
+          ),
+        ]
+      );
+    }
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable(selected: true)),
+    ));
+
+    final Table table = tester.widget(find.byType(Table));
+    final TableRow tableRow = table.children.last;
+    final BoxDecoration boxDecoration = tableRow.decoration as BoxDecoration;
+    expect(boxDecoration.color, Colors.blue);
+  });
 }
