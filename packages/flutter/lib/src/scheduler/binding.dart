@@ -621,9 +621,7 @@ mixin SchedulerBinding on BindingBase {
         debugPrint('When the current transient callback was registered, this was the stack:');
         debugPrint(
           FlutterError.defaultStackFilter(
-            FlutterError.demangleStackTrace(
-              _FrameCallbackEntry.debugCurrentCallbackStack,
-            ).toString().trimRight().split('\n')
+            _FrameCallbackEntry.debugCurrentCallbackStack.toString().trimRight().split('\n')
           ).join('\n')
         );
       } else {
