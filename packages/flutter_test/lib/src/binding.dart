@@ -1219,7 +1219,7 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
   fullyLive,
 
   /// Ignore any request to schedule a frame from the framework or
-  /// [WidgetTester].
+  /// [TestWidgetsFlutterBinding.pump].
   ///
   /// This is intended to be used by benchmarks (hence the name) that drive the
   /// pipeline directly. It tells the binding to entirely ignore requests for a

@@ -569,8 +569,8 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// Triggers multiple frames for `duration` amount of time or until there are
   /// no longer any frames scheduled, whichever is earlier.
   ///
-  /// This does not promise settle of the widget, and there maybe remaining
-  /// animation and therefore undisposed `Ticker`s.
+  /// This does not promise to exhaust all pending frames. There maybe remaining
+  /// animation frames and therefore undisposed `Ticker`s.
   ///
   /// This will call [pump] at least once, even if no frames are scheduled when
   /// the function is called, to flush any pending microtasks which may
@@ -579,7 +579,8 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// The `frameRefreshRate` specify the frequency (in Hz) for frame requests.
   /// This is an analog to screen refresh rate on a device. The frequency rate
   /// will be rounded down to integer microseconds frame interval.
-  /// Default to be 59.94 Hz.
+  /// Default value is 59.94 Hz, which is the real refresh rate for many devices
+  /// when it shows as 60 Hz, for historical reason.
   ///
   /// This allows a test to pump for a period of time during an unbounded
   /// animation. To pump to the end of a bounded animation, use [pumpAndSettle]
