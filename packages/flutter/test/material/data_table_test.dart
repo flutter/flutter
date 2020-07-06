@@ -1086,7 +1086,7 @@ void main() {
     expect(lastTableRowBoxDecoration().color, selectedColor);
   });
 
-  testWidgets('DataRow renders custom colors when selected', (WidgetTester tester) async {
+  testWidgets('DataRow renders custom colors when disabled', (WidgetTester tester) async {
     const Color disabledColor = Colors.grey;
     const Color defaultColor = Colors.red;
 
