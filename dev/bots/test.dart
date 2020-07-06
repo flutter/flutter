@@ -914,20 +914,60 @@ Future<void> _runFlutterWebTest(String workingDirectory, List<String> tests) asy
   await runCommand(
     flutter,
     <String>[
-      'test',
-      if (ciProvider == CiProviders.cirrus)
-        '--concurrency=1',  // do not parallelize on Cirrus, to reduce flakiness
+      'precache',
+      '--no-android',
+      '--no-ios',
+      '--web',
+    ], workingDirectory: workingDirectory,
+  );
+  await runCommand(
+    dart,
+    <String>[
+      'pub',
+      'global',
+      'activate',
+      'tester',
+      _supportedTesterVersion,
+    ],
+  );
+  await runCommand(
+    dart,
+    <String>[
+      'pub',
+      'global',
+      'run',
+      'tester',
+      '-j1',
+      // if (ciProvider == CiProviders.cirrus)
+      //   '--concurrency=1',  // do not parallelize on Cirrus, to reduce flakiness
       '-v',
-      '--platform=chrome',
+      '--platform=flutter_web',
+      '--compile-only',
       ...?flutterTestArgs,
       ...tests,
     ],
     workingDirectory: workingDirectory,
-    environment: <String, String>{
-      'FLUTTER_WEB': 'true',
-      'FLUTTER_LOW_RESOURCE_MODE': 'true',
-    },
   );
+  for (final String test in tests) {
+    await runCommand(
+      dart,
+      <String>[
+        'pub',
+        'global',
+        'run',
+        'tester',
+        '-j1',
+        // if (ciProvider == CiProviders.cirrus)
+        //   '--concurrency=1',  // do not parallelize on Cirrus, to reduce flakiness
+        '-v',
+        '--platform=flutter_web',
+        '--run-only',
+        ...?flutterTestArgs,
+        test,
+      ],
+      workingDirectory: workingDirectory,
+    );
+  }
 }
 
 const String _supportedTesterVersion = '0.0.2-dev5';
