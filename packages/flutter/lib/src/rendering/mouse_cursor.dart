@@ -444,8 +444,8 @@ class SystemMouseCursors {
 
   /// A cursor that indicates an action that will not be carried out.
   ///
-  /// Typically the shape of a circle with a diagonal line. The [forbidden] might
-  /// fall back to [noDrop].
+  /// Typically the shape of a circle with a diagonal line. May fall back to
+  /// [noDrop].
   ///
   /// Corresponds to:
   ///
@@ -479,7 +479,7 @@ class SystemMouseCursors {
   /// be interacted with.
   ///
   /// Typically the shape of an arrow with an hourglass or a watch at the corner.
-  /// The [progress] does *not* fall back to [wait] if unavailable.
+  /// Does *not* fall back to [wait] if unavailable.
   ///
   /// Corresponds to:
   ///
@@ -527,8 +527,8 @@ class SystemMouseCursors {
 
   /// A cursor that indicates selectable vertical text.
   ///
-  /// Typically the shape of a capital I rotated to be horizontal. The
-  /// [verticalText] may fall back to [text].
+  /// Typically the shape of a capital I rotated to be horizontal. May fall back
+  /// to [text].
   ///
   /// Corresponds to:
   ///
@@ -562,8 +562,7 @@ class SystemMouseCursors {
 
   /// A cursor that indicates moving something.
   ///
-  /// Typically the shape of four-way arrow. The [move] may fall back to
-  /// [allScroll].
+  /// Typically the shape of four-way arrow. May fall back to [allScroll].
   ///
   /// Corresponds to:
   ///
@@ -595,8 +594,8 @@ class SystemMouseCursors {
 
   /// A cursor that indicates somewhere that the current item may not be dropped.
   ///
-  /// Typically the shape of a hand with a [forbidden] sign at the corner. The
-  /// [noDrop] may fall back to [forbidden].
+  /// Typically the shape of a hand with a [forbidden] sign at the corner. May
+  /// fall back to [forbidden].
   ///
   /// Corresponds to:
   ///
@@ -634,8 +633,8 @@ class SystemMouseCursors {
 
   /// A cursor that indicates scrolling in any direction.
   ///
-  /// Typically the shape of a dot surrounded by 4 arrows. The [allScroll] may
-  /// fall back to [move].
+  /// Typically the shape of a dot surrounded by 4 arrows. May fall back to
+  /// [move].
   ///
   /// Corresponds to:
   ///
@@ -647,47 +646,153 @@ class SystemMouseCursors {
   ///  * [move], which indicates moving in any direction.
   static const SystemMouseCursor allScroll = SystemMouseCursor._(kind: 'allScroll');
 
-  /// A cursor that indicates moving or resizing an object horizontally.
+  /// A cursor that indicates resizing an object bidirectionally from its left or
+  /// right edge.
   ///
-  /// Typically the shape of a double-arrow towards left and right.
+  /// Typically the shape of a bidirectional arrow pointing left and right.
   ///
   /// Corresponds to:
   ///
   ///  * Android: TYPE_HORIZONTAL_DOUBLE_ARROW
   ///  * Web: ew-resize
   ///  * macOS: resizeLeftRight
-  static const SystemMouseCursor horizontalDoubleArrow = SystemMouseCursor._(kind: 'horizontalDoubleArrow');
+  static const SystemMouseCursor resizeLeftRight = SystemMouseCursor._(kind: 'resizeLeftRight');
 
-  /// A cursor that indicates moving or resizing an object vertically.
+  /// A cursor that indicates resizing an object bidirectionally from its top or
+  /// bottom edge.
   ///
-  /// Typically the shape of a double-arrow towards top and bottom.
+  /// Typically the shape of a bidirectional arrow pointing up and down.
   ///
   /// Corresponds to:
   ///
   ///  * Android: TYPE_VERTICAL_DOUBLE_ARROW
   ///  * Web: ns-resize
   ///  * macOS: resizeUpDown
-  static const SystemMouseCursor verticalDoubleArrow = SystemMouseCursor._(kind: 'verticalDoubleArrow');
+  static const SystemMouseCursor resizeUpDown = SystemMouseCursor._(kind: 'resizeUpDown');
 
-  /// A cursor that indicates resizing an object by its top left or bottom right corner.
+  /// A cursor that indicates resizing an object bidirectionally from its top left or
+  /// bottom right corner.
   ///
-  /// Typically the shape of a double-arrow towards upper left and lower right.
+  /// Typically the shape of a bidirectional arrow pointing upper left and lower right.
   ///
   /// Corresponds to:
   ///
   ///  * Android: TYPE_TOP_LEFT_DIAGONAL_DOUBLE_ARROW
   ///  * Web: nwse-resize
-  static const SystemMouseCursor upLeftDoubleArrow = SystemMouseCursor._(kind: 'upLeftDoubleArrow');
+  static const SystemMouseCursor resizeUpLeftDownRight = SystemMouseCursor._(kind: 'resizeUpLeftDownRight');
 
-  /// A cursor that indicates resizing an object by its top right or bottom left corner.
+  /// A cursor that indicates resizing an object bidirectionally from its top right or
+  /// bottom left corner.
   ///
-  /// Typically the shape of a double-arrow towards upper right and lower left.
+  /// Typically the shape of a bidirectional arrow pointing upper right and lower left.
   ///
   /// Corresponds to:
   ///
   ///  * Android: TYPE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW
   ///  * Web: nesw-resize
-  static const SystemMouseCursor upRightDoubleArrow = SystemMouseCursor._(kind: 'upRightDoubleArrow');
+  static const SystemMouseCursor resizeUpRightDownLeft = SystemMouseCursor._(kind: 'resizeUpRightDownLeft');
+
+  /// A cursor that indicates resizing an object from its top edge.
+  ///
+  /// Typically the shape of an arrow pointing up. May fallback to [resizeUpDown].
+  ///
+  /// Corresponds to:
+  ///
+  ///  * Android: TYPE_VERTICAL_DOUBLE_ARROW
+  ///  * Web: n-resize
+  static const SystemMouseCursor resizeUp = SystemMouseCursor._(kind: 'resizeUp');
+
+  /// A cursor that indicates resizing an object from its bottom edge.
+  ///
+  /// Typically the shape of an arrow pointing down. May fallback to [resizeUpDown].
+  ///
+  /// Corresponds to:
+  ///
+  ///  * Android: TYPE_VERTICAL_DOUBLE_ARROW
+  ///  * Web: s-resize
+  static const SystemMouseCursor resizeDown = SystemMouseCursor._(kind: 'resizeDown');
+
+  /// A cursor that indicates resizing an object from its left edge.
+  ///
+  /// Typically the shape of an arrow pointing left. May fallback to [resizeLeftRight].
+  ///
+  /// Corresponds to:
+  ///
+  ///  * Android: TYPE_HORIZONTAL_DOUBLE_ARROW
+  ///  * Web: w-resize
+  static const SystemMouseCursor resizeLeft = SystemMouseCursor._(kind: 'resizeLeft');
+
+  /// A cursor that indicates resizing an object from its right edge.
+  ///
+  /// Typically the shape of an arrow pointing right. May fallback to [resizeLeftRight].
+  ///
+  /// Corresponds to:
+  ///
+  ///  * Android: TYPE_HORIZONTAL_DOUBLE_ARROW
+  ///  * Web: e-resize
+  static const SystemMouseCursor resizeRight = SystemMouseCursor._(kind: 'resizeRight');
+
+  /// A cursor that indicates resizing an object from its top-left corner.
+  ///
+  /// Typically the shape of an arrow pointing upper left. May fallback to [resizeUpLeftDownRight].
+  ///
+  /// Corresponds to:
+  ///
+  ///  * Android: TYPE_TOP_LEFT_DIAGONAL_DOUBLE_ARROW
+  ///  * Web: nw-resize
+  static const SystemMouseCursor resizeUpLeft = SystemMouseCursor._(kind: 'resizeUpLeft');
+
+  /// A cursor that indicates resizing an object from its top-right corner.
+  ///
+  /// Typically the shape of an arrow pointing upper right. May fallback to [resizeUpRightDownLeft].
+  ///
+  /// Corresponds to:
+  ///
+  ///  * Android: TYPE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW
+  ///  * Web: ne-resize
+  static const SystemMouseCursor resizeUpRight = SystemMouseCursor._(kind: 'resizeUpRight');
+
+  /// A cursor that indicates resizing an object from its bottom-left corner.
+  ///
+  /// Typically the shape of an arrow pointing lower left. May fallback to [resizeUpRightDownLeft].
+  ///
+  /// Corresponds to:
+  ///
+  ///  * Android: TYPE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW
+  ///  * Web: sw-resize
+  static const SystemMouseCursor resizeDownLeft = SystemMouseCursor._(kind: 'resizeDownLeft');
+
+  /// A cursor that indicates resizing an object from its bottom-right corner.
+  ///
+  /// Typically the shape of an arrow pointing lower right. May fallback to [resizeUpLeftDownRight].
+  ///
+  /// Corresponds to:
+  ///
+  ///  * Android: TYPE_TOP_LEFT_DIAGONAL_DOUBLE_ARROW
+  ///  * Web: se-resize
+  static const SystemMouseCursor resizeDownRight = SystemMouseCursor._(kind: 'resizeDownRight');
+
+  /// A cursor that indicates resizing a column, or an item horizontally.
+  ///
+  /// Typically the shape of arrows pointing left and right with a vertical bar
+  /// separating them. May fallback to [resizeLeftRight].
+  ///
+  /// Corresponds to:
+  ///
+  ///  * Android: TYPE_HORIZONTAL_DOUBLE_ARROW
+  ///  * Web: col-resize
+  static const SystemMouseCursor resizeColumn = SystemMouseCursor._(kind: 'resizeColumn');
+
+  /// A cursor that indicates resizing a row, or an item vertically.
+  ///
+  /// Typically the shape of arrows pointing up and down with a horizontal bar
+  /// separating them. May fallback to [resizeUpDown].
+  ///
+  /// Corresponds to:
+  ///
+  ///  * Android: TYPE_VERTICAL_DOUBLE_ARROW
+  ///  * Web: row-resize
+  static const SystemMouseCursor resizeRow = SystemMouseCursor._(kind: 'resizeRow');
 
 
   //// OTHER OPERATIONS ////
