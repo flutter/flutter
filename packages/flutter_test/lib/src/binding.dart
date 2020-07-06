@@ -478,7 +478,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   /// The current client of the onscreen keyboard. Callers must pump
   /// an additional frame after setting this property to complete the
-  /// the focus change.
+  /// focus change.
   ///
   /// Instead of setting this directly, consider using
   /// [WidgetTester.showKeyboard].

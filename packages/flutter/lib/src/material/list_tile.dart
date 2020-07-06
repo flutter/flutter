@@ -946,7 +946,7 @@ class ListTile extends StatelessWidget {
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
       mouseCursor ?? MaterialStateMouseCursor.clickable,
       <MaterialState>{
-        if (!enabled) MaterialState.disabled,
+        if (!enabled || (onTap == null && onLongPress == null)) MaterialState.disabled,
         if (selected) MaterialState.selected,
       },
     );
