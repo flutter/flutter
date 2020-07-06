@@ -516,6 +516,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     return result;
   }
   FlutterExceptionHandler _oldExceptionHandler;
+  StackTraceDemangler _oldStackTraceDemangler;
   FlutterErrorDetails _pendingExceptionDetails;
 
   static const TextStyle _messageStyle = TextStyle(
@@ -579,10 +580,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       // our main future completing.
       assert(Zone.current == _parentZone);
       if (_pendingExceptionDetails != null) {
-        assert(
-          _unmangle(_pendingExceptionDetails.stack) == _pendingExceptionDetails.stack,
-          'The test binding presented an unmangled stack trace to the framework.',
-        );
         debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
         reportTestException(_pendingExceptionDetails, testDescription);
         _pendingExceptionDetails = null;
@@ -613,9 +610,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     assert(description != null);
     assert(inTest);
     _oldExceptionHandler = FlutterError.onError;
+    _oldStackTraceDemangler = FlutterError.demangleStackTrace;
     int _exceptionCount = 0; // number of un-taken exceptions
     FlutterError.onError = (FlutterErrorDetails details) {
-      details = details.copyWith(stack: _unmangle(details.stack));
       if (_pendingExceptionDetails != null) {
         debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the errors!
         if (_exceptionCount == 0) {
@@ -634,6 +631,17 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         _pendingExceptionDetails = details;
       }
     };
+    FlutterError.demangleStackTrace = (StackTrace stack) {
+      // package:stack_trace uses ZoneSpecification.errorCallback to add useful
+      // information to stack traces, in this case the Trace and Chain classes
+      // can be present. Because these StackTrace implementations do not follow
+      // the format the framework expects, we covert them to a vm trace here.
+      if (stack is stack_trace.Trace)
+        return stack.vmTrace;
+      if (stack is stack_trace.Chain)
+        return stack.toTrace().vmTrace;
+      return stack;
+    };
     final Completer<void> testCompleter = Completer<void>();
     final VoidCallback testCompletionHandler = _createTestCompletionHandler(description, testCompleter);
     void handleUncaughtError(dynamic exception, StackTrace stack) {
@@ -647,7 +655,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
         FlutterError.dumpErrorToConsole(FlutterErrorDetails(
           exception: exception,
-          stack: _unmangle(stack),
+          stack: stack,
           context: ErrorDescription('running a test (but after the test had completed)'),
           library: 'Flutter test framework',
         ), forceReport: true);
@@ -694,7 +702,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       final int stackLinesToOmit = reportExpectCall(stack, omittedFrames);
       FlutterError.reportError(FlutterErrorDetails(
         exception: exception,
-        stack: _unmangle(stack),
+        stack: stack,
         context: ErrorDescription('running a test'),
         library: 'Flutter test framework',
         stackFilter: (Iterable<String> frames) {
@@ -842,6 +850,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   void postTest() {
     assert(inTest);
     FlutterError.onError = _oldExceptionHandler;
+    FlutterError.demangleStackTrace = _oldStackTraceDemangler;
     _pendingExceptionDetails = null;
     _parentZone = null;
     buildOwner.focusManager = FocusManager();
@@ -1712,12 +1721,4 @@ class _LiveTestRenderView extends RenderView {
     }
     _label?.paint(context.canvas, offset - const Offset(0.0, 10.0));
   }
-}
-
-StackTrace _unmangle(StackTrace stack) {
-  if (stack is stack_trace.Trace)
-    return stack.vmTrace;
-  if (stack is stack_trace.Chain)
-    return stack.toTrace().vmTrace;
-  return stack;
 }
