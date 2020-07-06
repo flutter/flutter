@@ -806,6 +806,6 @@ void main() {
       expect(description.length, equals(2));
       expect(description[0], equalsIgnoringHashCodes('dispatcher: ActionDispatcher#00000'));
       expect(description[1], equalsIgnoringHashCodes('actions: {TestIntent: TestAction#00000}'));
-    }, skip: isBrowser);
+    });
   });
 }

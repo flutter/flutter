@@ -34,5 +34,5 @@ void main() {
       await tester.pump(const Duration(milliseconds: 20));
       expect(getCurrentOffset(), greaterThan(lastOffset));
     }
-  }, skip: true); // see https://github.com/flutter/flutter/issues/5339
+  }, skip: true); // https://github.com/flutter/flutter/issues/5339
 }

@@ -320,7 +320,7 @@ void main() {
      // mechanism even during testing and enable this test.
      // TODO(abarth): Test more of the real code and enable this test.
      // See https://github.com/flutter/flutter/issues/4771.
-   }, skip: true);
+   });
 
   testWidgets('popAndPushNamed', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{

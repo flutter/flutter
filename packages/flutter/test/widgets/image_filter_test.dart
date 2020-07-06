@@ -62,7 +62,7 @@ void main() {
       find.byType(ImageFiltered),
       matchesGoldenFile('image_filter_matrix.png'),
     );
-  }, skip: isBrowser);
+  });
 
   testWidgets('Image filter - reuses its layer', (WidgetTester tester) async {
     Future<void> pumpWithSigma(double sigma) async {
