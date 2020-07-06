@@ -234,7 +234,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   /// touches.
   final bool enabled;
 
-  /// The minimum height height of the menu item.
+  /// The minimum height of the menu item.
   ///
   /// Defaults to [kMinInteractiveDimension] pixels.
   @override
