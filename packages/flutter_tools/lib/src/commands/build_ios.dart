@@ -88,7 +88,8 @@ class BuildIOSCommand extends BuildSubCommand {
 
     final String logTarget = forSimulator ? 'simulator' : 'device';
 
-    final String typeName = globals.artifacts.getEngineType(TargetPlatform.ios, buildInfo.mode);
+    final String typeName = globals.artifacts.getEngineType(TargetPlatform.ios, buildInfo.mode)
+      ?? 'ios-release';
     globals.printStatus('Building $app for $logTarget ($typeName)...');
     final XcodeBuildResult result = await buildXcodeProject(
       app: app,
