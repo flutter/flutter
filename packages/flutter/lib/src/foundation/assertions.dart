@@ -28,6 +28,14 @@ typedef DiagnosticPropertiesTransformer = Iterable<DiagnosticsNode> Function(Ite
 /// and other callbacks that collect information describing an error.
 typedef InformationCollector = Iterable<DiagnosticsNode> Function();
 
+/// Signature for a function that demangles [StackTrace] objects into a format
+/// that can be parsed by [StackFrame].
+///
+/// See also:
+///
+///   * [FlutterError.demangleStackTrace], which shows an example implementation.
+typedef StackTraceDemangler = StackTrace Function(StackTrace details);
+
 /// Partial information from a stack frame for stack filtering purposes.
 ///
 /// See also:
@@ -651,7 +659,7 @@ class FlutterErrorDetails with Diagnosticable {
         // If not: Error is in user code (user violated assertion in framework).
         // If so:  Error is in Framework. We either need an assertion higher up
         //         in the stack, or we've violated our own assertions.
-        final List<StackFrame> stackFrames = StackFrame.fromStackTrace(stack)
+        final List<StackFrame> stackFrames = StackFrame.fromStackTrace(FlutterError.demangleStackTrace(stack))
                                                        .skipWhile((StackFrame frame) => frame.packageScheme == 'dart')
                                                        .toList();
         final bool ourFault =  stackFrames.length >= 2
@@ -863,6 +871,31 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   /// recommended.
   static FlutterExceptionHandler onError = (FlutterErrorDetails details) => presentError(details);
 
+  /// Called by the Flutter framework before attempting to parse a [StackTrace].
+  ///
+  /// Some [StackTrace] implementations have a different toString format from
+  /// what the framework expects, like ones from package:stack_trace. To make
+  /// sure we can still parse and filter mangled [StackTrace]s, the framework
+  /// first calls this function to demangle them.
+  ///
+  /// This should be set in any environment that could propagate a non-standard
+  /// stack trace to the framework. Otherwise, the default behavior is to assume
+  /// all stack traces are in a standard format.
+  ///
+  /// The following example demangles package:stack_trace traces by converting
+  /// them into vm traces, which the framework is able to parse:
+  ///
+  /// ```dart
+  /// FlutterError.demangleStackTrace = (StackTrace stackTrace) {
+  ///   if (stack is stack_trace.Trace)
+  //      return stack.vmTrace;
+  //    if (stack is stack_trace.Chain)
+  //      return stack.toTrace().vmTrace;
+  //    return stack;
+  /// };
+  /// ```
+  static StackTraceDemangler demangleStackTrace = (StackTrace stackTrace) => stackTrace;
+
   /// Called whenever the Flutter framework wants to present an error to the
   /// users.
   ///
@@ -1069,7 +1102,11 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
 void debugPrintStack({StackTrace stackTrace, String label, int maxFrames}) {
   if (label != null)
     debugPrint(label);
-  stackTrace ??= StackTrace.current;
+  if (stackTrace == null) {
+    stackTrace = StackTrace.current;
+  } else {
+    stackTrace = FlutterError.demangleStackTrace(stackTrace);
+  }
   Iterable<String> lines = stackTrace.toString().trimRight().split('\n');
   if (kIsWeb && lines.isNotEmpty) {
     // Remove extra call to StackTrace.current for web platform.
@@ -1105,11 +1142,7 @@ class DiagnosticsStackTrace extends DiagnosticsBlock {
   }) : super(
     name: name,
     value: stack,
-    properties: stack == null
-        ? <DiagnosticsNode>[]
-        : (stackFilter ?? FlutterError.defaultStackFilter)(stack.toString().trimRight().split('\n'))
-              .map<DiagnosticsNode>(_createStackFrame)
-              .toList(),
+    properties: _applyStackFilter(stack, stackFilter),
     style: DiagnosticsTreeStyle.flat,
     showSeparator: showSeparator,
     allowTruncate: true,
@@ -1126,6 +1159,17 @@ class DiagnosticsStackTrace extends DiagnosticsBlock {
     style: DiagnosticsTreeStyle.whitespace,
     showSeparator: showSeparator,
   );
+
+  static List<DiagnosticsNode> _applyStackFilter(
+    StackTrace stack,
+    IterableFilter<String> stackFilter,
+  ) {
+    if (stack == null)
+      return <DiagnosticsNode>[];
+    final IterableFilter<String> filter = stackFilter ?? FlutterError.defaultStackFilter;
+    final Iterable<String> frames = filter('${FlutterError.demangleStackTrace(stack)}'.trimRight().split('\n'));
+    return frames.map<DiagnosticsNode>(_createStackFrame).toList();
+  }
 
   static DiagnosticsNode _createStackFrame(String frame) {
     return DiagnosticsNode.message(frame, allowWrap: false);
