@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -378,7 +380,7 @@ void main() {
     expect(unconstrained.getMaxIntrinsicWidth(100.0), equals(200.0));
   });
 
-  test ('getMinInstrinsicWidth error handling', () {
+  test ('getMinIntrinsicWidth error handling', () {
     final RenderUnconstrainedBox unconstrained = RenderUnconstrainedBox(
       textDirection: TextDirection.ltr,
       child: RenderConstrainedBox(
@@ -668,6 +670,33 @@ void main() {
 
     expect(unconstrained.size.width, equals(200.0), reason: 'unconstrained width');
     expect(unconstrained.size.height, equals(100.0), reason: 'constrained height');
+  });
+
+  test('clipBehavior is respected', () {
+    const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
+    final TestClipPaintingContext context = TestClipPaintingContext();
+
+    // By default, clipBehavior should be Clip.none
+    final RenderUnconstrainedBox defaultBox = RenderUnconstrainedBox(
+      alignment: Alignment.center,
+      textDirection: TextDirection.ltr,
+      child: box200x200,
+    );
+    layout(defaultBox, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
+    defaultBox.paint(context, Offset.zero);
+    expect(context.clipBehavior, equals(Clip.none));
+
+    for (final Clip clip in Clip.values) {
+      final RenderUnconstrainedBox box = RenderUnconstrainedBox(
+          alignment: Alignment.center,
+          textDirection: TextDirection.ltr,
+          child: box200x200,
+          clipBehavior: clip,
+      );
+      layout(box, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
+      box.paint(context, Offset.zero);
+      expect(context.clipBehavior, equals(clip));
+    }
   });
 
   group('hit testing', () {

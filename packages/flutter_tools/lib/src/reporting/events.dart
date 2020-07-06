@@ -39,6 +39,7 @@ class HotEvent extends UsageEvent {
     @required this.sdkName,
     @required this.emulator,
     @required this.fullRestart,
+    @required this.nullSafety,
     this.reason,
     this.finalLibraryCount,
     this.syncedLibraryCount,
@@ -55,6 +56,7 @@ class HotEvent extends UsageEvent {
   final String sdkName;
   final bool emulator;
   final bool fullRestart;
+  final bool nullSafety;
   final int finalLibraryCount;
   final int syncedLibraryCount;
   final int syncedClassesCount;
@@ -89,6 +91,8 @@ class HotEvent extends UsageEvent {
         CustomDimensions.hotEventTransferTimeInMs: transferTimeInMs.toString(),
       if (overallTimeInMs != null)
         CustomDimensions.hotEventOverallTimeInMs: overallTimeInMs.toString(),
+      if (nullSafety != null)
+        CustomDimensions.nullSafety: nullSafety.toString(),
     });
     flutterUsage.sendEvent(category, parameter, parameters: parameters);
   }
@@ -99,11 +103,12 @@ class DoctorResultEvent extends UsageEvent {
   DoctorResultEvent({
     @required this.validator,
     @required this.result,
+    Usage flutterUsage,
   }) : super(
     'doctor-result',
     '${validator.runtimeType}',
     label: result.typeStr,
-    flutterUsage: globals.flutterUsage,
+    flutterUsage: flutterUsage ?? globals.flutterUsage,
   );
 
   final DoctorValidator validator;
@@ -116,10 +121,15 @@ class DoctorResultEvent extends UsageEvent {
       return;
     }
     final GroupedValidator group = validator as GroupedValidator;
+    // The validator crashed.
+    if (group.subResults == null) {
+      flutterUsage.sendEvent(category, parameter, label: label);
+      return;
+    }
     for (int i = 0; i < group.subValidators.length; i++) {
       final DoctorValidator v = group.subValidators[i];
       final ValidationResult r = group.subResults[i];
-      DoctorResultEvent(validator: v, result: r).send();
+      DoctorResultEvent(validator: v, result: r, flutterUsage: flutterUsage).send();
     }
   }
 }

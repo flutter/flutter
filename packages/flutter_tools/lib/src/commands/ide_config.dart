@@ -236,6 +236,7 @@ class IdeConfigCommand extends FlutterCommand {
     int generatedCount = 0;
     generatedCount += _renderTemplate(_ideName, dirPath, <String, dynamic>{
       'withRootModule': boolArg('with-root-module'),
+      'android': true,
     });
 
     globals.printStatus('Wrote $generatedCount files.');
@@ -247,7 +248,13 @@ class IdeConfigCommand extends FlutterCommand {
   }
 
   int _renderTemplate(String templateName, String dirPath, Map<String, dynamic> context) {
-    final Template template = Template(_templateDirectory, _templateDirectory, null, fileSystem: globals.fs);
+    final Template template = Template(
+      _templateDirectory,
+      _templateDirectory,
+      null,
+      fileSystem: globals.fs,
+      templateManifest: null,
+    );
     return template.render(
       globals.fs.directory(dirPath),
       context,

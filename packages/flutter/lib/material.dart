@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 /// Flutter widgets implementing Material Design.
 ///
 /// To use, import `package:flutter/material.dart`.
@@ -55,6 +57,7 @@ export 'src/material/divider_theme.dart';
 export 'src/material/drawer.dart';
 export 'src/material/drawer_header.dart';
 export 'src/material/dropdown.dart';
+export 'src/material/elevation_overlay.dart';
 export 'src/material/expand_icon.dart';
 export 'src/material/expansion_panel.dart';
 export 'src/material/expansion_tile.dart';
@@ -122,6 +125,7 @@ export 'src/material/theme.dart';
 export 'src/material/theme_data.dart';
 export 'src/material/time.dart';
 export 'src/material/time_picker.dart';
+export 'src/material/time_picker_theme.dart';
 export 'src/material/toggle_buttons.dart';
 export 'src/material/toggle_buttons_theme.dart';
 export 'src/material/toggleable.dart';

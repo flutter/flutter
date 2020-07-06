@@ -31,6 +31,8 @@ class UpdatePackagesCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    globals.printError('flutter update-packages is currently being moved to dev/tools.');
+    globals.printError('instead uses "dart lib/repo_tools.dart update-packages"');
     await globals.processManager.run(
       <String>[
         'dart',

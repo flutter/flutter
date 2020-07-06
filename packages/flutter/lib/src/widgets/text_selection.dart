@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -869,7 +871,7 @@ abstract class TextSelectionGestureDetectorBuilderDelegate {
 ///
 /// The class implements sensible defaults for many user interactions
 /// with an [EditableText] (see the documentation of the various gesture handler
-/// methods, e.g. [onTapDown], [onFrocePress], etc.). Subclasses of
+/// methods, e.g. [onTapDown], [onForcePress], etc.). Subclasses of
 /// [EditableTextSelectionHandlesProvider] can change the behavior performed in
 /// responds to these gesture events by overriding the corresponding handler
 /// methods of this class.
@@ -1520,6 +1522,25 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
 
   /// Check the [Clipboard] and update [value] if needed.
   void update() {
+    // iOS 14 added a notification that appears when an app accesses the
+    // clipboard. To avoid the notification, don't access the clipboard on iOS,
+    // and instead always shown the paste button, even when the clipboard is
+    // empty.
+    // TODO(justinmc): Use the new iOS 14 clipboard API method hasStrings that
+    // won't trigger the notification.
+    // https://github.com/flutter/flutter/issues/60145
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+        value = ClipboardStatus.pasteable;
+        return;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        break;
+    }
+
     Clipboard.getData(Clipboard.kTextPlain).then((ClipboardData data) {
       final ClipboardStatus clipboardStatus = data != null && data.text != null && data.text.isNotEmpty
           ? ClipboardStatus.pasteable

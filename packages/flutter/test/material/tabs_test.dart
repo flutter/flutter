@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -213,6 +215,11 @@ class TestScrollPhysics extends ScrollPhysics {
   @override
   TestScrollPhysics applyTo(ScrollPhysics ancestor) {
     return TestScrollPhysics(parent: buildParent(ancestor));
+  }
+
+  @override
+  double applyPhysicsToUserOffset(ScrollMetrics position, double offset) {
+    return offset == 10 ? 20 : offset;
   }
 
   static final SpringDescription _kDefaultSpring = SpringDescription.withDampingRatio(
@@ -1052,6 +1059,43 @@ void main() {
     expect(_mainTabController.index, 2);
   });
 
+  testWidgets('TabBarView can warp when child is kept alive and contains ink', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/57662.
+    final TabController controller = TabController(
+      vsync: const TestVSync(),
+      length: 3,
+    );
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: TabBarView(
+          controller: controller,
+          children: const <Widget>[
+            Text('Page 1'),
+            Text('Page 2'),
+            KeepAliveInk('Page 3'),
+          ],
+        ),
+      ),
+    );
+
+    expect(controller.index, equals(0));
+    expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Page 3'), findsNothing);
+
+    controller.index = 2;
+    await tester.pumpAndSettle();
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 3'), findsOneWidget);
+
+    controller.index = 0;
+    await tester.pumpAndSettle();
+    expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Page 3'), findsNothing);
+
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('TabBarView scrolls end close to a new page with custom physics', (WidgetTester tester) async {
     final TabController tabController = TabController(
       vsync: const TestVSync(),
@@ -1106,6 +1150,34 @@ void main() {
     // Left enough to get to page 0
     pageController.jumpTo(100.0);
     expect(tabController.index, 0);
+  });
+
+  testWidgets('TabBar accepts custom physics', (WidgetTester tester) async {
+    final List<Tab> tabs = List<Tab>.generate(20, (int index) {
+      return Tab(text: 'TAB #$index');
+    });
+
+    final TabController controller = TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+      initialIndex: tabs.length - 1,
+    );
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: TabBar(
+          isScrollable: true,
+          controller: controller,
+          tabs: tabs,
+          physics: const TestScrollPhysics(),
+        ),
+      ),
+    );
+
+    final TabBar tabBar = tester.widget(find.byType(TabBar));
+    final double position = tabBar.physics.applyPhysicsToUserOffset(null, 10);
+
+    expect(position, equals(20));
   });
 
   testWidgets('Scrollable TabBar with a non-zero TabController initialIndex', (WidgetTester tester) async {
@@ -2580,4 +2652,44 @@ void main() {
     await tester.pumpAndSettle();
     pageController.removeListener(pageControllerListener);
   });
+
+  testWidgets('Setting BouncingScrollPhysics on TabBarView does not include ClampingScrollPhysics', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/57708
+    await tester.pumpWidget(MaterialApp(
+      home: DefaultTabController(
+        length: 10,
+        child: Scaffold(
+          body: TabBarView(
+            physics: const BouncingScrollPhysics(),
+            children: List<Widget>.generate(10, (int i) => Center(child: Text('index $i'))),
+          ),
+        ),
+      )
+    ));
+
+    final PageView pageView = tester.widget<PageView>(find.byType(PageView));
+    expect(pageView.physics.toString().contains('ClampingScrollPhysics'), isFalse);
+  });
+}
+
+class KeepAliveInk extends StatefulWidget {
+  const KeepAliveInk(this.title, {Key key}) : super(key: key);
+  final String title;
+  @override
+  State<StatefulWidget> createState() {
+    return _KeepAliveInkState();
+  }
+}
+
+class _KeepAliveInkState extends State<KeepAliveInk> with AutomaticKeepAliveClientMixin {
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return Ink(
+      child: Text(widget.title),
+    );
+  }
+
+  @override
+  bool get wantKeepAlive => true;
 }

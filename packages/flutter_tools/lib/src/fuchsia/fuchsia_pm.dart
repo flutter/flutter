@@ -164,7 +164,7 @@ class FuchsiaPM {
 ///
 /// [FuchsiaPackageServer] takes care of initializing the package repository,
 /// spinning up the package server, publishing packages, and shutting down the
-/// the server.
+/// server.
 ///
 /// Example usage:
 /// var server = FuchsiaPackageServer(

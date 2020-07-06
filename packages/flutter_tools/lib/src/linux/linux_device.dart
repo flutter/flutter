@@ -17,7 +17,7 @@ import 'linux_workflow.dart';
 /// A device that represents a desktop Linux target.
 class LinuxDevice extends DesktopDevice {
   LinuxDevice() : super(
-      'Linux',
+      'linux',
       platformType: PlatformType.linux,
       ephemeral: false,
   );

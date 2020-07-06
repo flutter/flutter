@@ -8,7 +8,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
@@ -42,7 +41,7 @@ void main() {
 
     setUp(() {
       terminal = AnsiTerminal(
-        stdio: globals.stdio, // Danger, using real stdio.
+        stdio: Stdio(), // Danger, using real stdio.
         platform: FakePlatform()..stdoutSupportsAnsi = true,
       );
     });

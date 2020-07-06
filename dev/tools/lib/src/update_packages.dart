@@ -27,7 +27,8 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'vm_service_client': '0.2.6+2', // Final version before being marked deprecated.
   'video_player': '0.10.6', // 0.10.7 fails a gallery smoke test for toString.
   'flutter_template_images': '1.0.1', // Must always exactly match flutter_tools template.
-};
+  'shelf': '0.7.5',
+}
 
 class UpdatePackagesCommand extends Command<void> {
   UpdatePackagesCommand() {
@@ -97,7 +98,8 @@ class UpdatePackagesCommand extends Command<void> {
   @override
   final bool hidden = true;
 
-
+  /// Coverage is automatically downloaded so that contributors can be aware
+  /// of the current framework state locally.
   Future<void> _downloadCoverageData() async {
     print('Downloading lcov data for package:flutter...');
     final String urlBase = Platform.environment['FLUTTER_STORAGE_BASE_URL'] ?? 'https://storage.googleapis.com';

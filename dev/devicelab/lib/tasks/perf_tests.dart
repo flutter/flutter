@@ -7,6 +7,7 @@ import 'dart:convert' show LineSplitter, json, utf8;
 import 'dart:io';
 import 'dart:math' as math;
 
+import 'package:flutter_devicelab/tasks/track_widget_creation_enabled_task.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
@@ -82,12 +83,28 @@ TaskFunction createCubicBezierPerfTest() {
   ).run;
 }
 
+TaskFunction createCubicBezierPerfSkSLWarmupTest() {
+  return PerfTestWithSkSL(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/cubic_bezier_perf.dart',
+    'cubic_bezier_perf',
+  ).run;
+}
+
+TaskFunction createFlutterGalleryTransitionsPerfSkSLWarmupTest() {
+  return PerfTestWithSkSL(
+    '${flutterDirectory.path}/dev/integration_tests/flutter_gallery',
+    'test_driver/transitions_perf.dart',
+    'transitions',
+  ).run;
+}
+
 TaskFunction createBackdropFilterPerfTest({bool needsMeasureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/backdrop_filter_perf.dart',
     'backdrop_filter_perf',
-    needsMeasureCpuGPu: needsMeasureCpuGpu,
+    needsMeasureCpuGpu: needsMeasureCpuGpu,
   ).run;
 }
 
@@ -96,7 +113,7 @@ TaskFunction createPostBackdropFilterPerfTest({bool needsMeasureCpuGpu = false})
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/post_backdrop_filter_perf.dart',
     'post_backdrop_filter_perf',
-    needsMeasureCpuGPu: needsMeasureCpuGpu,
+    needsMeasureCpuGpu: needsMeasureCpuGpu,
   ).run;
 }
 
@@ -105,7 +122,7 @@ TaskFunction createSimpleAnimationPerfTest({bool needsMeasureCpuGpu = false}) {
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/simple_animation_perf.dart',
     'simple_animation_perf',
-    needsMeasureCpuGPu: needsMeasureCpuGpu,
+    needsMeasureCpuGpu: needsMeasureCpuGpu,
   ).run;
 }
 
@@ -114,7 +131,7 @@ TaskFunction createAnimatedPlaceholderPerfTest({bool needsMeasureCpuGpu = false}
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/animated_placeholder_perf.dart',
     'animated_placeholder_perf',
-    needsMeasureCpuGPu: needsMeasureCpuGpu,
+    needsMeasureCpuGpu: needsMeasureCpuGpu,
   ).run;
 }
 
@@ -225,6 +242,14 @@ TaskFunction createImageFilteredTransformAnimationPerfTest() {
   ).run;
 }
 
+TaskFunction createsMultiWidgetConstructPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/multi_widget_construction_perf.dart',
+    'multi_widget_construction_perf',
+  ).run;
+}
+
 /// Measure application startup performance.
 class StartupTest {
   const StartupTest(this.testDirectory, { this.reportMetrics = true });
@@ -266,7 +291,7 @@ class PerfTest {
     this.testDirectory,
     this.testTarget,
     this.timelineFileName, {
-    this.needsMeasureCpuGPu = false,
+    this.needsMeasureCpuGpu = false,
     this.testDriver,
   });
 
@@ -279,9 +304,19 @@ class PerfTest {
   /// The test file to run on the host.
   final String testDriver;
   /// Whether to collect CPU and GPU metrics.
-  final bool needsMeasureCpuGPu;
+  final bool needsMeasureCpuGpu;
 
   Future<TaskResult> run() {
+    return internalRun();
+  }
+
+  @protected
+  Future<TaskResult> internalRun({
+      bool cacheSkSL = false,
+      bool noBuild = false,
+      String existingApp,
+      String writeSkslFileName,
+  }) {
     return inDirectory<TaskResult>(testDirectory, () async {
       final Device device = await devices.workingDevice;
       await device.unlock();
@@ -290,12 +325,18 @@ class PerfTest {
 
       await flutter('drive', options: <String>[
         '-v',
+        '--verbose-system-logs',
         '--profile',
         '--trace-startup', // Enables "endless" timeline event buffering.
-        '-t',
-        testTarget,
+        '-t', testTarget,
+        if (noBuild) '--no-build',
         if (testDriver != null)
-          '--driver', testDriver,
+          ...<String>['--driver', testDriver],
+        if (existingApp != null)
+          ...<String>['--use-existing-app', existingApp],
+        if (writeSkslFileName != null)
+          ...<String>['--write-sksl-on-exit', writeSkslFileName],
+        if (cacheSkSL) '--cache-sksl',
         '-d',
         deviceId,
       ]);
@@ -310,7 +351,7 @@ class PerfTest {
         );
       }
 
-      if (needsMeasureCpuGPu) {
+      if (needsMeasureCpuGpu) {
         await inDirectory<void>('$testDirectory/build', () async {
           data.addAll(await measureIosCpuGpu(deviceId: deviceId));
         });
@@ -328,11 +369,148 @@ class PerfTest {
         'average_vsync_transitions_missed',
         '90th_percentile_vsync_transitions_missed',
         '99th_percentile_vsync_transitions_missed',
-        if (needsMeasureCpuGPu) 'cpu_percentage',
-        if (needsMeasureCpuGPu) 'gpu_percentage',
+        if (needsMeasureCpuGpu) 'cpu_percentage',
+        if (needsMeasureCpuGpu) 'gpu_percentage',
       ]);
     });
   }
+}
+
+class PerfTestWithSkSL extends PerfTest {
+  PerfTestWithSkSL(
+    String testDirectory,
+    String testTarget,
+    String timelineFileName, {
+    bool needsMeasureCpuGpu = false,
+    String testDriver,
+  }) : super(
+    testDirectory,
+    testTarget,
+    timelineFileName,
+    needsMeasureCpuGpu: needsMeasureCpuGpu,
+    testDriver: testDriver,
+  );
+
+  @override
+  Future<TaskResult> run() async {
+    return inDirectory<TaskResult>(testDirectory, () async {
+      // Some initializations
+      _device = await devices.workingDevice;
+      _flutterPath = path.join(flutterDirectory.path, 'bin', 'flutter');
+
+      // Prepare the SkSL by running the driver test.
+      await _generateSkSL();
+
+      // Build the app with SkSL artifacts and run that app
+      final String observatoryUri = await _buildAndRun();
+
+      // Attach to the running app and run the final driver test to get metrics.
+      final TaskResult result = await internalRun(
+        existingApp: observatoryUri,
+      );
+
+      _runProcess.kill();
+      await _runProcess.exitCode;
+
+      return result;
+    });
+  }
+
+  Future<void> _generateSkSL() async {
+    // `flutter drive` without `flutter run`, and `flutter drive --existing-app`
+    // with `flutter run` may generate different SkSLs. Hence we run both
+    // versions to generate as many SkSLs as possible.
+    //
+    // 1st, `flutter drive --existing-app` with `flutter run`. The
+    // `--write-sksl-on-exit` option doesn't seem to be compatible with
+    // `flutter drive --existing-app` as it will complain web socket connection
+    // issues.
+    final String observatoryUri = await _runApp(cacheSkSL: true);
+    await super.internalRun(cacheSkSL: true, existingApp: observatoryUri);
+    _runProcess.kill();
+    await _runProcess.exitCode;
+
+    // 2nd, `flutter drive` without `flutter run`. The --no-build option ensures
+    // that we won't remove the SkSLs generated earlier.
+    await super.internalRun(
+      cacheSkSL: true,
+      noBuild: true,
+      writeSkslFileName: _skslJsonFileName,
+    );
+  }
+
+  Future<String> _runApp({String appBinary, bool cacheSkSL = false}) async {
+    if (File(_vmserviceFileName).existsSync()) {
+      File(_vmserviceFileName).deleteSync();
+    }
+
+    _runProcess = await startProcess(
+      _flutterPath,
+      <String>[
+        'run',
+        '--verbose',
+        '--verbose-system-logs',
+        '--profile',
+        if (cacheSkSL) '--cache-sksl',
+        '-d', _device.deviceId,
+        '-t', testTarget,
+        '--endless-trace-buffer',
+        if (appBinary != null) ...<String>['--use-application-binary', _appBinary],
+        '--vmservice-out-file', _vmserviceFileName,
+      ],
+    );
+
+    final Stream<List<int>> broadcastOut = _runProcess.stdout.asBroadcastStream();
+    _forwardStream(broadcastOut, 'run stdout');
+    _forwardStream(_runProcess.stderr, 'run stderr');
+
+    final File file = await waitForFile(_vmserviceFileName);
+    return file.readAsStringSync();
+  }
+
+  // Return the VMService URI.
+  Future<String> _buildAndRun() async {
+    await flutter('build', options: <String>[
+      if (_isAndroid) 'apk' else 'ios',
+      '--profile',
+      '--bundle-sksl-path', _skslJsonFileName,
+      '-t', testTarget,
+    ]);
+
+    return _runApp(appBinary: _appBinary);
+  }
+
+  String get _skslJsonFileName => '$testDirectory/flutter_01.sksl.json';
+  String get _vmserviceFileName => '$testDirectory/$_kVmserviceOutFileName';
+
+  bool get _isAndroid => deviceOperatingSystem == DeviceOperatingSystem.android;
+
+  String get _appBinary {
+    if (_isAndroid) {
+      return '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
+    }
+    for (final FileSystemEntity entry in Directory('$testDirectory/build/ios/iphoneos/').listSync()) {
+      if (entry.path.endsWith('.app')) {
+        return entry.path;
+      }
+    }
+    throw 'No app found.';
+  }
+
+  Stream<String> _transform(Stream<List<int>> stream) =>
+      stream.transform<String>(utf8.decoder).transform<String>(const LineSplitter());
+
+  void _forwardStream(Stream<List<int>> stream, String label) {
+    _transform(stream).listen((String line) {
+      print('$label: $line');
+    });
+  }
+
+  String _flutterPath;
+  Device _device;
+  Process _runProcess;
+
+  static const String _kVmserviceOutFileName = 'vmservice.out';
 }
 
 /// Measures how long it takes to compile a Flutter app to JavaScript and how
@@ -487,6 +665,8 @@ class CompileTest {
         break;
       case DeviceOperatingSystem.fuchsia:
         throw Exception('Unsupported option for Fuchsia devices');
+      case DeviceOperatingSystem.fake:
+        throw Exception('Unsupported option for fake devices');
     }
 
     metrics.addAll(<String, dynamic>{
@@ -511,6 +691,8 @@ class CompileTest {
         break;
       case DeviceOperatingSystem.fuchsia:
         throw Exception('Unsupported option for Fuchsia devices');
+      case DeviceOperatingSystem.fake:
+        throw Exception('Unsupported option for fake devices');
     }
     watch.start();
     await flutter('build', options: options);

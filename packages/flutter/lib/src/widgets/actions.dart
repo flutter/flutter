@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/gestures.dart';
@@ -930,7 +932,7 @@ class FocusableActionDetector extends StatefulWidget {
   /// widget.
   ///
   /// The [cursor] defaults to [MouseCursor.defer], deferring the choice of
-  /// cursor to the next region behing it in hit-test order.
+  /// cursor to the next region behind it in hit-test order.
   final MouseCursor mouseCursor;
 
   /// The child widget for this [FocusableActionDetector] widget.
@@ -1151,3 +1153,21 @@ class SelectIntent extends Intent {}
 /// This is an abstract class that serves as a base class for actions that
 /// select something. It is not bound to any key by default.
 abstract class SelectAction extends Action<SelectIntent> {}
+
+/// An [Intent] that dismisses the currently focused widget.
+///
+/// The [WidgetsApp.defaultShortcuts] binds this intent to the
+/// [LogicalKeyboardKey.escape] and [LogicalKeyboardKey.gameButtonB] keys.
+///
+/// See also:
+///  - [ModalRoute] which listens for this intent to dismiss modal routes
+///    (dialogs, pop-up menus, drawers, etc).
+class DismissIntent extends Intent {
+  /// Creates a const [DismissIntent].
+  const DismissIntent();
+}
+
+/// An action that dismisses the focused widget.
+///
+/// This is an abstract class that serves as a base class for dismiss actions.
+abstract class DismissAction extends Action<DismissIntent> {}

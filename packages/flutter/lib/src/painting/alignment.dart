@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui' as ui show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -525,7 +527,7 @@ class AlignmentDirectional extends AlignmentGeometry {
 
   @override
   Alignment resolve(TextDirection direction) {
-    assert(direction != null);
+    assert(direction != null, 'Cannot resolve $runtimeType without a TextDirection.');
     switch (direction) {
       case TextDirection.rtl:
         return Alignment(-start, y);
@@ -621,7 +623,7 @@ class _MixedAlignment extends AlignmentGeometry {
 
   @override
   Alignment resolve(TextDirection direction) {
-    assert(direction != null);
+    assert(direction != null, 'Cannot resolve $runtimeType without a TextDirection.');
     switch (direction) {
       case TextDirection.rtl:
         return Alignment(_x - _start, _y);

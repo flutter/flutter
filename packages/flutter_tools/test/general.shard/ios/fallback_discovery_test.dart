@@ -56,7 +56,7 @@ void main() {
     });
     when(mockVmService.getIsolate(any)).thenAnswer((Invocation invocation) async {
       return Isolate.parse(<String, Object>{})
-        ..rootLib = (LibraryRef(name: 'main', uri: 'package:hello/main.dart'));
+        ..rootLib = (LibraryRef(name: 'main', uri: 'package:hello/main.dart', id: '2'));
     });
 
     expect(await fallbackDiscovery.discover(
