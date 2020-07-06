@@ -233,10 +233,10 @@ void SceneUpdateContext::UpdateScene(int64_t view_id,
   FML_DCHECK(view_holder);
 
   view_holder->SetProperties(size.width(), size.height(), 0, 0, 0, 0,
-                             view_holder->hit_testable());
+                             view_holder->focusable());
   view_holder->UpdateScene(*this, offset, size,
                            SkScalarRoundToInt(alphaf() * 255),
-                           view_holder->focusable());
+                           view_holder->hit_testable());
 }
 
 void SceneUpdateContext::CreateView(int64_t view_id,
