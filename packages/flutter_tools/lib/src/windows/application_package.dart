@@ -5,10 +5,10 @@
 import 'package:meta/meta.dart';
 
 import '../application_package.dart';
-import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../cmake.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 
@@ -55,24 +55,21 @@ class PrebuiltWindowsApp extends WindowsApp {
 class BuildableWindowsApp extends WindowsApp {
   BuildableWindowsApp({
     @required this.project,
-  }) : super(projectBundleId: project.project.manifest.appName);
+  }) : super(projectBundleId: project.parent.manifest.appName);
 
   final WindowsProject project;
 
   @override
   String executable(BuildMode buildMode) {
-    final File exeNameFile = project.nameFile;
-    if (!exeNameFile.existsSync()) {
-      throwToolExit('Failed to find Windows executable name');
-    }
+    final String binaryName = getCmakeExecutableName(project);
     return globals.fs.path.join(
         getWindowsBuildDirectory(),
-        'x64',
+        'runner',
         toTitleCase(getNameForBuildMode(buildMode)),
-        'Runner',
-        exeNameFile.readAsStringSync().trim());
+        '$binaryName.exe',
+    );
   }
 
   @override
-  String get name => project.project.manifest.appName;
+  String get name => project.parent.manifest.appName;
 }

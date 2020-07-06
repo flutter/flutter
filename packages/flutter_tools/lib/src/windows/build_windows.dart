@@ -10,18 +10,23 @@ import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../cmake.dart';
 import '../globals.dart' as globals;
 import '../plugins.dart';
 import '../project.dart';
-import 'property_sheet.dart';
 import 'visual_studio.dart';
+
+// From https://cmake.org/cmake/help/v3.15/manual/cmake-generators.7.html#visual-studio-generators
+// This may need to become a getter on VisualStudio in the future to support
+// future major versions of Visual Studio.
+const String _cmakeVisualStudioGeneratorIdentifier = 'Visual Studio 16 2019';
 
 /// Builds the Windows project using msbuild.
 Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   String target,
   VisualStudio visualStudioOverride,
 }) async {
-  if (!windowsProject.solutionFile.existsSync()) {
+  if (!windowsProject.cmakeFile.existsSync()) {
     throwToolExit(
       'No Windows desktop project configured. '
       'See https://github.com/flutter/flutter/wiki/Desktop-shells#create '
@@ -43,8 +48,8 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   }
 
   // Ensure that necessary emphemeral files are generated and up to date.
-  _writeGeneratedFlutterProperties(windowsProject, buildInfo, target);
-  createPluginSymlinks(windowsProject.project);
+  _writeGeneratedFlutterConfig(windowsProject, buildInfo, target);
+  createPluginSymlinks(windowsProject.parent);
 
   final VisualStudio visualStudio = visualStudioOverride ?? VisualStudio(
     fileSystem: globals.fs,
@@ -52,57 +57,88 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
     logger: globals.logger,
     processManager: globals.processManager,
   );
-  final String vcvarsScript = visualStudio.vcvarsPath;
-  if (vcvarsScript == null) {
+  final String cmakePath = visualStudio.cmakePath;
+  if (cmakePath == null) {
     throwToolExit('Unable to find suitable Visual Studio toolchain. '
         'Please run `flutter doctor` for more details.');
   }
 
-  final String buildScript = globals.fs.path.join(
-    Cache.flutterRoot,
-    'packages',
-    'flutter_tools',
-    'bin',
-    'vs_build.bat',
-  );
-
-  final String configuration = toTitleCase(getNameForBuildMode(buildInfo.mode ?? BuildMode.release));
-  final String solutionPath = windowsProject.solutionFile.path;
-  final Stopwatch sw = Stopwatch()..start();
+  final String buildModeName = getNameForBuildMode(buildInfo.mode ?? BuildMode.release);
+  final Directory buildDirectory = globals.fs.directory(getWindowsBuildDirectory());
   final Status status = globals.logger.startProgress(
     'Building Windows application...',
     timeout: null,
   );
+  try {
+    await _runCmakeGeneration(cmakePath, buildDirectory, windowsProject.cmakeFile.parent);
+    await _runBuild(cmakePath, buildDirectory, buildModeName);
+  } finally {
+    status.cancel();
+  }
+}
+
+Future<void> _runCmakeGeneration(String cmakePath, Directory buildDir, Directory sourceDir) async {
+  final Stopwatch sw = Stopwatch()..start();
+
+  await buildDir.create(recursive: true);
   int result;
   try {
-    // Run the script with a relative path to the project using the enclosing
-    // directory as the workingDirectory, to avoid hitting the limit on command
-    // lengths in batch scripts if the absolute path to the project is long.
     result = await processUtils.stream(
       <String>[
-        buildScript,
-        vcvarsScript,
-        globals.fs.path.basename(solutionPath),
-        configuration,
+        cmakePath,
+        '-S',
+        sourceDir.path,
+        '-B',
+        buildDir.path,
+        '-G',
+        _cmakeVisualStudioGeneratorIdentifier,
+      ],
+      trace: true,
+    );
+  } on ArgumentError {
+    throwToolExit("cmake not found. Run 'flutter doctor' for more information.");
+  }
+  if (result != 0) {
+    throwToolExit('Unable to generate build files');
+  }
+  globals.flutterUsage.sendTiming('build', 'windows-cmake-generation', Duration(milliseconds: sw.elapsedMilliseconds));
+}
+
+Future<void> _runBuild(String cmakePath, Directory buildDir, String buildModeName) async {
+  final Stopwatch sw = Stopwatch()..start();
+
+  int result;
+  try {
+    result = await processUtils.stream(
+      <String>[
+        cmakePath,
+        '--build',
+        buildDir.path,
+        '--config',
+        toTitleCase(buildModeName),
+        '--target',
+        'INSTALL',
+        if (globals.logger.isVerbose)
+          '--verbose'
       ],
       environment: <String, String>{
         if (globals.logger.isVerbose)
           'VERBOSE_SCRIPT_LOGGING': 'true'
       },
-      workingDirectory: globals.fs.path.dirname(solutionPath),
       trace: true,
     );
-  } finally {
-    status.cancel();
+  } on ArgumentError {
+    throwToolExit("cmake not found. Run 'flutter doctor' for more information.");
   }
   if (result != 0) {
-    throwToolExit('Build process failed. To view the stack trace, please run `flutter run -d windows -v`.');
+    final String verboseInstructions = globals.logger.isVerbose ? '' : ' To view the stack trace, please run `flutter run -d windows -v`.';
+    throwToolExit('Build process failed.$verboseInstructions');
   }
-  globals.flutterUsage.sendTiming('build', 'vs_build', Duration(milliseconds: sw.elapsedMilliseconds));
+  globals.flutterUsage.sendTiming('build', 'windows-cmake-build', Duration(milliseconds: sw.elapsedMilliseconds));
 }
 
-/// Writes the generatedPropertySheetFile with the configuration for the given build.
-void _writeGeneratedFlutterProperties(
+/// Writes the generated CMake file with the configuration for the given build.
+void _writeGeneratedFlutterConfig(
   WindowsProject windowsProject,
   BuildInfo buildInfo,
   String target,
@@ -110,7 +146,7 @@ void _writeGeneratedFlutterProperties(
   final Map<String, String> environment = <String, String>{
     'FLUTTER_ROOT': Cache.flutterRoot,
     'FLUTTER_EPHEMERAL_DIR': windowsProject.ephemeralDirectory.path,
-    'PROJECT_DIR': windowsProject.project.directory.path,
+    'PROJECT_DIR': windowsProject.parent.directory.path,
     if (target != null)
       'FLUTTER_TARGET': target,
     ...buildInfo.toEnvironmentConfig(),
@@ -121,10 +157,7 @@ void _writeGeneratedFlutterProperties(
     environment['FLUTTER_ENGINE'] = globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath));
     environment['LOCAL_ENGINE'] = globals.fs.path.basename(engineOutPath);
   }
-
-  final File propsFile = windowsProject.generatedPropertySheetFile;
-  propsFile.createSync(recursive: true);
-  propsFile.writeAsStringSync(PropertySheet(environmentVariables: environment).toString());
+  writeGeneratedCmakeConfig(Cache.flutterRoot, windowsProject, environment);
 }
 
 // Checks the template version of [project] against the current template
