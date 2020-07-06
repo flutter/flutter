@@ -497,6 +497,8 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
           await binding.pump();
         }
       }
+      // This make sure that a gesture is completed, with no more pointers
+      // active.
       assert(hitTestHistory.isEmpty);
     });
   }
