@@ -852,7 +852,8 @@ class TextInputConnection {
 
   /// Requests the system autofill UI to appear.
   ///
-  /// Currently only works on Android.
+  /// Currently only works on Android. Other platforms do not respond to this
+  /// message.
   ///
   /// See also:
   ///
@@ -1216,13 +1217,13 @@ class TextInput {
   }
 
   /// Finishes the current autofill context, and potentially saves the user
-  /// input for future use if [shouldSave] is true.
+  /// input for future use if `shouldSave` is true.
   ///
   /// {@template flutter.services.autofill.autofillContext}
   /// An autofill context is a collection of input fields that lives in the
   /// platform's text input plugin. The platform is encouraged to save the user
   /// input stored in the current autofill context before the context is
-  /// destroyed, when [finishAutofillContext] is called with [shouldSave] set to
+  /// destroyed, when [finishAutofillContext] is called with `shouldSave` set to
   /// true.
   ///
   /// Currently, there can only be at most one autofill context at any given
@@ -1237,7 +1238,7 @@ class TextInput {
   /// to signal the text input plugin that the user has finalized their input in
   /// the current autofill context. The platform text input plugin either
   /// encourages or discourages the platform from saving the user input based on
-  /// the value of the [shouldSave] parameter. The platform usually shows a
+  /// the value of the `shouldSave` parameter. The platform usually shows a
   /// "Save for autofill?" prompt for user confirmation.
   /// {@endtemplate}
   ///

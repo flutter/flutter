@@ -181,9 +181,9 @@ class AutofillGroup extends StatefulWidget {
   /// {@macro flutter.services.autofill.autofillContext}
   ///
   /// Defaults to [AutofillContextAction.commit], which prompts the platform to
-  /// save the user input and then destroy the current autofill context. Setting
-  /// this to null will prevent the current autofill context from being
-  /// destroyed when this [AutofillGroup] is disposed.
+  /// save the user input and destroy the current autofill context. No
+  /// autofill context related actions will be automatically taken when
+  /// [onDisposeAction] is set to null.
   final AutofillContextAction onDisposeAction;
 
   @override
@@ -235,7 +235,7 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
     _clients.putIfAbsent(client.autofillId, () => client);
   }
 
-  /// Removes an [AutofillClient] with the given [autofillId] from this
+  /// Removes an [AutofillClient] with the given `autofillId` from this
   /// [AutofillGroup].
   ///
   /// Typically, this should be called by autofillable [TextInputClient]s in
