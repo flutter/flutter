@@ -8,7 +8,6 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/time.dart';
-import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
@@ -107,7 +106,7 @@ void main() {
 
       // Set up a simple .packages file for all the tests to use, pointing to one package.
       dummyPackageDirectory = fs.directory('/pubcache/apackage/lib/');
-      packagesFile = fs.file(fs.path.join(flutterProject.directory.path, globalPackagesPath));
+      packagesFile = fs.file(fs.path.join(flutterProject.directory.path, '.packages'));
       packagesFile..createSync(recursive: true)
           ..writeAsStringSync('apackage:file://${dummyPackageDirectory.path}\n');
     });

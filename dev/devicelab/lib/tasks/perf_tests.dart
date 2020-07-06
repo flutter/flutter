@@ -242,6 +242,14 @@ TaskFunction createImageFilteredTransformAnimationPerfTest() {
   ).run;
 }
 
+TaskFunction createsMultiWidgetConstructPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/multi_widget_construction_perf.dart',
+    'multi_widget_construction_perf',
+  ).run;
+}
+
 /// Measure application startup performance.
 class StartupTest {
   const StartupTest(this.testDirectory, { this.reportMetrics = true });
@@ -657,6 +665,8 @@ class CompileTest {
         break;
       case DeviceOperatingSystem.fuchsia:
         throw Exception('Unsupported option for Fuchsia devices');
+      case DeviceOperatingSystem.fake:
+        throw Exception('Unsupported option for fake devices');
     }
 
     metrics.addAll(<String, dynamic>{
@@ -681,6 +691,8 @@ class CompileTest {
         break;
       case DeviceOperatingSystem.fuchsia:
         throw Exception('Unsupported option for Fuchsia devices');
+      case DeviceOperatingSystem.fake:
+        throw Exception('Unsupported option for fake devices');
     }
     watch.start();
     await flutter('build', options: options);

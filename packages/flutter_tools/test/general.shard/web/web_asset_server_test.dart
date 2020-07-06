@@ -10,7 +10,6 @@ import 'package:flutter_tools/src/build_runner/devfs_web.dart';
 import 'package:shelf/shelf.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 
 const List<int> kTransparentImage = <int>[
   0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D, 0x49,
@@ -45,8 +44,13 @@ void main() {
       ..writeAsBytesSync(<int>[1, 2, 3]);
   });
 
-  testUsingContext('release asset server serves correct mime type and content length for png', () async {
-    final ReleaseAssetServer assetServer = ReleaseAssetServer(Uri.base);
+  testWithoutContext('release asset server serves correct mime type and content length for png', () async {
+    final ReleaseAssetServer assetServer = ReleaseAssetServer(Uri.base,
+      fileSystem: fileSystem,
+      platform: platform,
+      flutterRoot: '/flutter',
+      webBuildDirectory: 'build/web',
+    );
     fileSystem.file('build/web/assets/foo.png')
       ..createSync(recursive: true)
       ..writeAsBytesSync(kTransparentImage);
@@ -57,14 +61,15 @@ void main() {
       'Content-Type': 'image/png',
       'content-length': '64',
     });
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    Platform: () => platform,
-    ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('release asset server serves correct mime type and content length for JavaScript', () async {
-    final ReleaseAssetServer assetServer = ReleaseAssetServer(Uri.base);
+  testWithoutContext('release asset server serves correct mime type and content length for JavaScript', () async {
+    final ReleaseAssetServer assetServer = ReleaseAssetServer(Uri.base,
+      fileSystem: fileSystem,
+      platform: platform,
+      flutterRoot: '/flutter',
+      webBuildDirectory: 'build/web',
+    );
     fileSystem.file('build/web/assets/foo.js')
       ..createSync(recursive: true)
       ..writeAsStringSync('function main() {}');
@@ -75,14 +80,15 @@ void main() {
       'Content-Type': 'application/javascript',
       'content-length': '18',
     });
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    Platform: () => platform,
-    ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('release asset server serves correct mime type and content length for html', () async {
-    final ReleaseAssetServer assetServer = ReleaseAssetServer(Uri.base);
+  testWithoutContext('release asset server serves correct mime type and content length for html', () async {
+    final ReleaseAssetServer assetServer = ReleaseAssetServer(Uri.base,
+      fileSystem: fileSystem,
+      platform: platform,
+      flutterRoot: '/flutter',
+      webBuildDirectory: 'build/web',
+    );
     fileSystem.file('build/web/assets/foo.html')
       ..createSync(recursive: true)
       ..writeAsStringSync('<!doctype html><html></html>');
@@ -93,14 +99,15 @@ void main() {
       'Content-Type': 'text/html',
       'content-length': '28',
     });
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    Platform: () => platform,
-    ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('release asset server serves content from flutter root', () async {
-    final ReleaseAssetServer assetServer = ReleaseAssetServer(Uri.base);
+  testWithoutContext('release asset server serves content from flutter root', () async {
+    final ReleaseAssetServer assetServer = ReleaseAssetServer(Uri.base,
+      fileSystem: fileSystem,
+      platform: platform,
+      flutterRoot: '/flutter',
+      webBuildDirectory: 'build/web',
+    );
     fileSystem.file('flutter/bar.dart')
       ..createSync(recursive: true)
       ..writeAsStringSync('void main() { }');
@@ -108,14 +115,15 @@ void main() {
       .handle(Request('GET', Uri.parse('http://localhost:8080/flutter/bar.dart')));
 
     expect(response.statusCode, HttpStatus.ok);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    Platform: () => platform,
-    ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('release asset server serves content from project directory', () async {
-    final ReleaseAssetServer assetServer = ReleaseAssetServer(Uri.base);
+  testWithoutContext('release asset server serves content from project directory', () async {
+    final ReleaseAssetServer assetServer = ReleaseAssetServer(Uri.base,
+      fileSystem: fileSystem,
+      platform: platform,
+      flutterRoot: '/flutter',
+      webBuildDirectory: 'build/web',
+    );
     fileSystem.file('bar.dart')
       ..createSync(recursive: true)
       ..writeAsStringSync('void main() { }');
@@ -123,9 +131,5 @@ void main() {
       .handle(Request('GET', Uri.parse('http://localhost:8080/bar.dart')));
 
     expect(response.statusCode, HttpStatus.ok);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    Platform: () => platform,
-    ProcessManager: () => FakeProcessManager.any(),
   });
 }

@@ -31,6 +31,7 @@ void main() {
     List<int> mockTimes;
 
     setUp(() {
+      Cache.disableLocking();
       cache = MockitoCache();
       usage = MockitoUsage();
       clock = MockClock();
@@ -41,6 +42,10 @@ void main() {
         (Invocation _) => DateTime.fromMillisecondsSinceEpoch(mockTimes.removeAt(0))
       );
       when(mockProcessInfo.maxRss).thenReturn(10);
+    });
+
+    tearDown(() {
+      Cache.enableLocking();
     });
 
     testUsingContext('help text contains global options', () {

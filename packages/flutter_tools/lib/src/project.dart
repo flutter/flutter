@@ -647,7 +647,7 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   }
 
   Future<void> _overwriteFromTemplate(String path, Directory target) async {
-    final Template template = await Template.fromName(path, fileSystem: globals.fs);
+    final Template template = await Template.fromName(path, fileSystem: globals.fs, templateManifest: null);
     template.render(
       target,
       <String, dynamic>{
@@ -797,7 +797,7 @@ class AndroidProject extends FlutterProjectPlatform {
   }
 
   Future<void> _overwriteFromTemplate(String path, Directory target) async {
-    final Template template = await Template.fromName(path, fileSystem: globals.fs);
+    final Template template = await Template.fromName(path, fileSystem: globals.fs, templateManifest: null);
     template.render(
       target,
       <String, dynamic>{

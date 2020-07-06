@@ -480,6 +480,8 @@ void main() {
             TestSemantics(
               children: <TestSemantics>[
                 TestSemantics(
+                  children: <TestSemantics>[
+                    TestSemantics(
                   flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                   children: <TestSemantics>[
                     TestSemantics(
@@ -507,6 +509,8 @@ void main() {
                         ),
                       ],
                     ),
+                  ],
+                ),
                   ],
                 ),
               ],
@@ -558,23 +562,27 @@ void main() {
             TestSemantics(
               children: <TestSemantics>[
                 TestSemantics(
-                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                   children: <TestSemantics>[
                     TestSemantics(
-                      label: 'Signed in',
-                      textDirection: TextDirection.ltr,
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                       children: <TestSemantics>[
                         TestSemantics(
-                          label: r'B',
+                          label: 'Signed in',
                           textDirection: TextDirection.ltr,
-                        ),
-                        TestSemantics(
-                          label: r'C',
-                          textDirection: TextDirection.ltr,
-                        ),
-                        TestSemantics(
-                          label: r'D',
-                          textDirection: TextDirection.ltr,
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              label: r'B',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              label: r'C',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              label: r'D',
+                              textDirection: TextDirection.ltr,
+                            ),
+                          ],
                         ),
                       ],
                     ),

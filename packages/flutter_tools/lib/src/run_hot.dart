@@ -26,8 +26,7 @@ import 'reporting/reporting.dart';
 import 'resident_runner.dart';
 import 'vmservice.dart';
 
-ProjectFileInvalidator get projectFileInvalidator => context.get<ProjectFileInvalidator>() ?? _defaultInvalidator;
-final ProjectFileInvalidator _defaultInvalidator = ProjectFileInvalidator(
+ProjectFileInvalidator get projectFileInvalidator => context.get<ProjectFileInvalidator>() ?? ProjectFileInvalidator(
   fileSystem: globals.fs,
   platform: globals.platform,
   logger: globals.logger,
@@ -67,12 +66,11 @@ class HotRunner extends ResidentRunner {
   HotRunner(
     List<FlutterDevice> devices, {
     String target,
-    DebuggingOptions debuggingOptions,
+    @required DebuggingOptions debuggingOptions,
     this.benchmarkMode = false,
     this.applicationBinary,
     this.hostIsIde = false,
     String projectRootPath,
-    String packagesFilePath,
     String dillOutputPath,
     bool stayResident = true,
     bool ipv6 = false,
@@ -80,7 +78,6 @@ class HotRunner extends ResidentRunner {
              target: target,
              debuggingOptions: debuggingOptions,
              projectRootPath: projectRootPath,
-             packagesFilePath: packagesFilePath,
              stayResident: stayResident,
              hotMode: true,
              dillOutputPath: dillOutputPath,
@@ -157,7 +154,7 @@ class HotRunner extends ResidentRunner {
     final UpdateFSReport results = UpdateFSReport(success: true);
     final List<Uri> invalidated =  <Uri>[Uri.parse(libraryId)];
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-      globals.fs.file(globalPackagesPath),
+      globals.fs.file(debuggingOptions.buildInfo.packagesPath),
       logger: globals.logger,
     );
     for (final FlutterDevice device in flutterDevices) {
@@ -343,7 +340,7 @@ class HotRunner extends ResidentRunner {
 
     final List<Future<bool>> startupTasks = <Future<bool>>[];
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-      globals.fs.file(globalPackagesPath),
+      globals.fs.file(debuggingOptions.buildInfo.packagesPath),
       logger: globals.logger,
     );
     for (final FlutterDevice device in flutterDevices) {
@@ -376,11 +373,13 @@ class HotRunner extends ResidentRunner {
     try {
       final List<bool> results = await Future.wait(startupTasks);
       if (!results.every((bool passed) => passed)) {
+        appFailedToStart();
         return 1;
       }
       cacheInitialDillCompilation();
     } on Exception catch (err) {
       globals.printError(err.toString());
+      appFailedToStart();
       return 1;
     }
 
@@ -407,7 +406,7 @@ class HotRunner extends ResidentRunner {
     final bool rebuildBundle = assetBundle.needsBuild();
     if (rebuildBundle) {
       globals.printTrace('Updating assets');
-      final int result = await assetBundle.build();
+      final int result = await assetBundle.build(packagesPath: '.packages');
       if (result != 0) {
         return UpdateFSReport(success: false);
       }
@@ -1289,7 +1288,7 @@ class ProjectFileInvalidator {
 
   Future<PackageConfig> _createPackageConfig(String packagesPath) {
     return loadPackageConfigWithLogging(
-      _fileSystem.file(globalPackagesPath),
+      _fileSystem.file(packagesPath),
       logger: _logger,
     );
   }

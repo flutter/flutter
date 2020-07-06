@@ -21,7 +21,13 @@ void main() {
   });
 
   test('Template.render throws ToolExit when FileSystem exception is raised', () => testbed.run(() {
-    final Template template = Template(globals.fs.directory('examples'), globals.fs.currentDirectory, null, fileSystem: globals.fs);
+    final Template template = Template(
+      globals.fs.directory('examples'),
+      globals.fs.currentDirectory,
+      null,
+      fileSystem: globals.fs,
+      templateManifest: null,
+    );
     final MockDirectory mockDirectory = MockDirectory();
     when(mockDirectory.createSync(recursive: true)).thenThrow(const FileSystemException());
 
@@ -40,7 +46,13 @@ void main() {
     sourceImage.createSync(recursive: true);
     sourceImage.writeAsStringSync('Ceci n\'est pas une pipe');
 
-    final Template template = Template(templateDir, templateDir, imageSourceDir, fileSystem: fileSystem);
+    final Template template = Template(
+      templateDir,
+      templateDir,
+      imageSourceDir,
+      fileSystem: fileSystem,
+      templateManifest: null,
+    );
     template.render(destination, <String, Object>{});
 
     final File destinationImage = destination.childFile(imageName);
@@ -52,7 +64,7 @@ void main() {
     final MemoryFileSystem fileSystem = MemoryFileSystem();
 
     // Attempting to run pub in a test throws.
-    await expectLater(Template.fromName('app', fileSystem: fileSystem),
+    await expectLater(Template.fromName('app', fileSystem: fileSystem, templateManifest: null),
       throwsUnsupportedError);
   }));
 
@@ -66,7 +78,7 @@ void main() {
     packagesFile.createSync(recursive: true);
 
     // Attempting to run pub in a test throws.
-    await expectLater(Template.fromName('app', fileSystem: fileSystem),
+    await expectLater(Template.fromName('app', fileSystem: fileSystem, templateManifest: null),
       throwsUnsupportedError);
   }));
 
@@ -88,7 +100,7 @@ void main() {
       packagesFile.writeAsStringSync('flutter_template_images:file:///flutter_template_images');
     });
 
-    await Template.fromName('app', fileSystem: fileSystem);
+    await Template.fromName('app', fileSystem: fileSystem, templateManifest: null);
   }, overrides: <Type, Generator>{
     Pub: () => MockPub(),
   }));

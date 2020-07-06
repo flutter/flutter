@@ -13,12 +13,11 @@ import 'resident_runner.dart';
 import 'tracing.dart';
 import 'vmservice.dart';
 
-// TODO(mklim): Test this, flutter/flutter#23031.
 class ColdRunner extends ResidentRunner {
   ColdRunner(
     List<FlutterDevice> devices, {
     String target,
-    DebuggingOptions debuggingOptions,
+    @required DebuggingOptions debuggingOptions,
     this.traceStartup = false,
     this.awaitFirstFrameWhenTracing = true,
     this.applicationBinary,
@@ -60,14 +59,21 @@ class ColdRunner extends ResidentRunner {
       }
     }
 
-    for (final FlutterDevice device in flutterDevices) {
-      final int result = await device.runCold(
-        coldRunner: this,
-        route: route,
-      );
-      if (result != 0) {
-        return result;
+    try {
+      for (final FlutterDevice device in flutterDevices) {
+        final int result = await device.runCold(
+          coldRunner: this,
+          route: route,
+        );
+        if (result != 0) {
+          appFailedToStart();
+          return result;
+        }
       }
+    } on Exception catch (err) {
+      globals.printError(err.toString());
+      appFailedToStart();
+      return 1;
     }
 
     // Connect to observatory.
@@ -76,6 +82,7 @@ class ColdRunner extends ResidentRunner {
         await connectToServiceProtocol();
       } on String catch (message) {
         globals.printError(message);
+        appFailedToStart();
         return 2;
       }
     }
