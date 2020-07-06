@@ -45,6 +45,7 @@ version
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
+**/generated_plugin_registrant.dart
 .packages
 .pub-cache/
 .pub/
@@ -82,6 +83,7 @@ unlinked_spec.ds
 **/ios/**/profile
 **/ios/**/xcuserdata
 **/ios/.generated/
+**/ios/Flutter/.last_build_id
 **/ios/Flutter/App.framework
 **/ios/Flutter/Flutter.framework
 **/ios/Flutter/Flutter.podspec

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -415,6 +417,7 @@ class MaterialButton extends StatelessWidget {
       animationDuration: buttonTheme.getAnimationDuration(this),
       child: child,
       materialTapTargetSize: materialTapTargetSize ?? theme.materialTapTargetSize,
+      disabledElevation: disabledElevation ?? 0.0,
     );
   }
 

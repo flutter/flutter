@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:ui' as ui;
 
@@ -52,6 +54,7 @@ class NetworkImage
         chunkEvents: chunkEvents.stream,
         codec: _loadAsync(key as NetworkImage, decode, chunkEvents),
         scale: key.scale,
+        debugLabel: key.url,
         informationCollector: _imageStreamInformationCollector(key));
   }
 

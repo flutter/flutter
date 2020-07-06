@@ -10,10 +10,10 @@ import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../cmake.dart';
 import '../globals.dart' as globals;
 import '../plugins.dart';
 import '../project.dart';
-import 'cmake.dart';
 
 /// Builds the Linux project through the Makefile.
 Future<void> buildLinux(
@@ -25,20 +25,6 @@ Future<void> buildLinux(
     throwToolExit('No Linux desktop project configured. See '
       'https://github.com/flutter/flutter/wiki/Desktop-shells#create '
       'to learn about adding Linux support to a project.');
-  }
-
-  // Check for incompatibility between the Flutter tool version and the project
-  // template version, since the tempalte isn't stable yet.
-  final int templateCompareResult = _compareTemplateVersions(linuxProject);
-  if (templateCompareResult < 0) {
-    throwToolExit('The Linux runner was created with an earlier version of the '
-      'template, which is not yet stable.\n\n'
-      'Delete the linux/ directory and re-run \'flutter create .\', '
-      're-applying any previous changes.');
-  } else if (templateCompareResult > 0) {
-    throwToolExit('The Linux runner was created with a newer version of the '
-      'template, which is not yet stable.\n\n'
-      'Upgrade Flutter and try again.');
   }
 
   // Build the environment that needs to be set for the re-entrant flutter build
@@ -53,7 +39,7 @@ Future<void> buildLinux(
   }
   writeGeneratedCmakeConfig(Cache.flutterRoot, linuxProject, environmentConfig);
 
-  createPluginSymlinks(linuxProject.project);
+  createPluginSymlinks(linuxProject.parent);
 
   final Status status = globals.logger.startProgress(
     'Building Linux application...',
@@ -126,26 +112,4 @@ Future<void> _runBuild(Directory buildDir) async {
     throwToolExit('Build process failed');
   }
   globals.flutterUsage.sendTiming('build', 'linux-ninja', Duration(milliseconds: sw.elapsedMilliseconds));
-}
-
-// Checks the template version of [project] against the current template
-// version. Returns < 0 if the project is older than the current template, > 0
-// if it's newer, and 0 if they match.
-int _compareTemplateVersions(LinuxProject project) {
-  const String projectVersionBasename = '.template_version';
-  final int expectedVersion = int.parse(globals.fs.file(globals.fs.path.join(
-    globals.fs.path.absolute(Cache.flutterRoot),
-    'packages',
-    'flutter_tools',
-    'templates',
-    'app',
-    'linux.tmpl',
-    'flutter',
-    projectVersionBasename,
-  )).readAsStringSync());
-  final File projectVersionFile = project.managedDirectory.childFile(projectVersionBasename);
-  final int version = projectVersionFile.existsSync()
-      ? int.tryParse(projectVersionFile.readAsStringSync())
-      : 0;
-  return version.compareTo(expectedVersion);
 }

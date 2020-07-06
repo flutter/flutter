@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:mockito/mockito.dart';
 import 'package:package_config/package_config.dart';
+import 'package:quiver/testing/async.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -140,21 +141,24 @@ void main() {
     );
     await devFS.create();
 
-    final UpdateFSReport report = await devFS.update(
-      mainUri: Uri.parse('lib/foo.txt'),
-      dillOutputPath: 'lib/foo.dill',
-      generator: residentCompiler,
-      pathToReload: 'lib/foo.txt.dill',
-      trackWidgetCreation: false,
-      invalidatedFiles: <Uri>[],
-      packageConfig: PackageConfig.empty,
-    );
+    FakeAsync().run((FakeAsync time) async {
+      final UpdateFSReport report = await devFS.update(
+        mainUri: Uri.parse('lib/foo.txt'),
+        dillOutputPath: 'lib/foo.dill',
+        generator: residentCompiler,
+        pathToReload: 'lib/foo.txt.dill',
+        trackWidgetCreation: false,
+        invalidatedFiles: <Uri>[],
+        packageConfig: PackageConfig.empty,
+      );
+      time.elapse(const Duration(seconds: 2));
 
-    expect(report.syncedBytes, 5);
-    expect(report.success, isTrue);
-    verify(httpClient.putUrl(any)).called(kFailedAttempts + 1);
-    verify(httpRequest.close()).called(kFailedAttempts + 1);
-    verify(osUtils.gzipLevel1Stream(any)).called(kFailedAttempts + 1);
+      expect(report.syncedBytes, 5);
+      expect(report.success, isTrue);
+      verify(httpClient.putUrl(any)).called(kFailedAttempts + 1);
+      verify(httpRequest.close()).called(kFailedAttempts + 1);
+      verify(osUtils.gzipLevel1Stream(any)).called(kFailedAttempts + 1);
+    });
   });
 
   testWithoutContext('DevFS reports unsuccessful compile when errors are returned', () async {

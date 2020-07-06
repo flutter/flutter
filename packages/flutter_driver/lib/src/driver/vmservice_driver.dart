@@ -250,6 +250,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
 
   // The additional blank line in the beginning is for _log.
   static const String _kDebugWarning = '''
+
 ┏╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍┓
 ┇ ⚠    THIS BENCHMARK IS BEING RUN IN DEBUG MODE     ⚠  ┇
 ┡╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍┦
@@ -463,9 +464,19 @@ class VMServiceFlutterDriver extends FlutterDriver {
         List<TimelineStream> streams = const <TimelineStream>[TimelineStream.all],
         bool retainPriorEvents = false,
       }) async {
-    if (!retainPriorEvents) {
-      await clearTimeline();
+    if (retainPriorEvents) {
+      await startTracing(streams: streams);
+      await action();
+
+      if (!(await _isPrecompiledMode())) {
+        _log(_kDebugWarning);
+      }
+
+      return stopTracingAndDownloadTimeline();
     }
+
+    await clearTimeline();
+
     final Map<String, Object> startTimestamp = await _getVMTimelineMicros();
     await startTracing(streams: streams);
     await action();

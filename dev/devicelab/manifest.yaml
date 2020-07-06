@@ -156,6 +156,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  multi_widget_construction_perf__timeline_summary:
+    description: >
+      Measures the runtime performance of constructing and destructing widgets on Android.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
   picture_cache_perf__timeline_summary:
     description: >
       Measures the runtime performance of raster caching many pictures on Android.
@@ -167,6 +173,21 @@ tasks:
       Measures the runtime performance of cubic bezier animations on Android.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
+
+  cubic_bezier_perf_sksl_warmup__timeline_summary:
+    description: >
+      Measures the runtime performance of cubic bezier animations on Android
+      with SkSL shader warm-up.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
+  flutter_gallery_sksl_warmup_ios32__transition_perf:
+    description: >
+      Measures the runtime performance of Flutter gallery transitions on iPhone4s
+      with SkSL shader warm-up.
+    stage: devicelab
+    required_agent_capabilities: ["mac/ios32"]
+    flaky: true
 
   backdrop_filter_perf__timeline_summary:
     description: >
@@ -732,6 +753,13 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
+  flutter_gallery_sksl_warmup__transition_perf:
+    description: >
+      Measures the runtime performance of Flutter gallery transitions on Android
+      with SkSL shader warm-up.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
   flutter_gallery__transition_perf_with_semantics:
     description: >
       Measures the delta in performance of screen transitions without and
@@ -744,14 +772,12 @@ tasks:
       Measures memory usage after repeated navigation in Gallery.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   flutter_gallery__back_button_memory:
     description: >
       Measures memory usage after Android app suspend and resume.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   flutter_gallery__image_cache_memory:
     description: >
@@ -764,6 +790,12 @@ tasks:
       Measures the performance of screen transitions in the new Flutter Gallery on Android.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
+
+  new_gallery_ios__transition_perf:
+    description: >
+      Measures the performance of screen transitions in the new Flutter Gallery on iOS.
+    stage: devicelab
+    required_agent_capabilities: ["mac/ios"]
 
   fast_scroll_large_images__memory:
     description: >

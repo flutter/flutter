@@ -18,7 +18,6 @@ import 'base/file_system.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
 import 'base/signals.dart';
-import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
@@ -27,8 +26,6 @@ import 'bundle.dart';
 import 'cache.dart';
 import 'codegen.dart';
 import 'compile.dart';
-import 'convert.dart';
-import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'features.dart';
@@ -47,8 +44,8 @@ class FlutterDevice {
     this.viewFilter,
     TargetModel targetModel = TargetModel.flutter,
     TargetPlatform targetPlatform,
-    List<String> experimentalFlags,
     ResidentCompiler generator,
+    this.userIdentifier,
   }) : assert(buildInfo.trackWidgetCreation != null),
        generator = generator ?? ResidentCompiler(
          globals.artifacts.getArtifactPath(
@@ -61,9 +58,12 @@ class FlutterDevice {
          fileSystemRoots: fileSystemRoots ?? <String>[],
          fileSystemScheme: fileSystemScheme,
          targetModel: targetModel,
-         experimentalFlags: experimentalFlags,
          dartDefines: buildInfo.dartDefines,
-         packagesPath: globalPackagesPath,
+         packagesPath: buildInfo.packagesPath,
+         extraFrontEndOptions: buildInfo.extraFrontEndOptions,
+         artifacts: globals.artifacts,
+         processManager: globals.processManager,
+         logger: globals.logger,
        );
 
   /// Create a [FlutterDevice] with optional code generation enabled.
@@ -78,6 +78,7 @@ class FlutterDevice {
     TargetModel targetModel = TargetModel.flutter,
     List<String> experimentalFlags,
     ResidentCompiler generator,
+    String userIdentifier,
   }) async {
     ResidentCompiler generator;
     final TargetPlatform targetPlatform = await device.targetPlatform;
@@ -91,6 +92,20 @@ class FlutterDevice {
     // a warning message and dump some debug information which can be
     // used to file a bug, but the compiler will still start up correctly.
     if (targetPlatform == TargetPlatform.web_javascript) {
+      Artifact platformDillArtifact;
+      List<String> extraFrontEndOptions;
+      if (buildInfo.nullSafetyMode == NullSafetyMode.unsound) {
+        platformDillArtifact = Artifact.webPlatformKernelDill;
+        extraFrontEndOptions = buildInfo.extraFrontEndOptions;
+      } else {
+        platformDillArtifact = Artifact.webPlatformSoundKernelDill;
+        extraFrontEndOptions = <String>[
+          ...?buildInfo?.extraFrontEndOptions,
+          if (!(buildInfo?.extraFrontEndOptions?.contains('--sound-null-safety') ?? false))
+            '--sound-null-safety'
+        ];
+      }
+
       generator = ResidentCompiler(
         globals.artifacts.getArtifactPath(Artifact.flutterWebSdk, mode: buildInfo.mode),
         buildMode: buildInfo.mode,
@@ -99,21 +114,23 @@ class FlutterDevice {
         // Override the filesystem scheme so that the frontend_server can find
         // the generated entrypoint code.
         fileSystemScheme: 'org-dartlang-app',
-        compilerMessageConsumer:
-          (String message, {bool emphasis, TerminalColor color, }) =>
-            globals.printTrace(message),
         initializeFromDill: getDefaultCachedKernelPath(
           trackWidgetCreation: buildInfo.trackWidgetCreation,
+          dartDefines: buildInfo.dartDefines,
+          extraFrontEndOptions: extraFrontEndOptions
         ),
         targetModel: TargetModel.dartdevc,
-        experimentalFlags: experimentalFlags,
+        extraFrontEndOptions: extraFrontEndOptions,
         platformDill: globals.fs.file(globals.artifacts
-          .getArtifactPath(Artifact.webPlatformKernelDill, mode: buildInfo.mode))
+          .getArtifactPath(platformDillArtifact, mode: buildInfo.mode))
           .absolute.uri.toString(),
         dartDefines: buildInfo.dartDefines,
         librariesSpec: globals.fs.file(globals.artifacts
           .getArtifactPath(Artifact.flutterWebLibrariesJson)).uri.toString(),
-        packagesPath: globalPackagesPath,
+        packagesPath: buildInfo.packagesPath,
+        artifacts: globals.artifacts,
+        processManager: globals.processManager,
+        logger: globals.logger,
       );
     } else {
       generator = ResidentCompiler(
@@ -127,12 +144,17 @@ class FlutterDevice {
         fileSystemRoots: fileSystemRoots,
         fileSystemScheme: fileSystemScheme,
         targetModel: targetModel,
-        experimentalFlags: experimentalFlags,
         dartDefines: buildInfo.dartDefines,
+        extraFrontEndOptions: buildInfo.extraFrontEndOptions,
         initializeFromDill: getDefaultCachedKernelPath(
           trackWidgetCreation: buildInfo.trackWidgetCreation,
+          dartDefines: buildInfo.dartDefines,
+          extraFrontEndOptions: buildInfo.extraFrontEndOptions,
         ),
-        packagesPath: globalPackagesPath,
+        packagesPath: buildInfo.packagesPath,
+        artifacts: globals.artifacts,
+        processManager: globals.processManager,
+        logger: globals.logger,
       );
     }
 
@@ -148,17 +170,18 @@ class FlutterDevice {
       fileSystemRoots: fileSystemRoots,
       fileSystemScheme:fileSystemScheme,
       viewFilter: viewFilter,
-      experimentalFlags: experimentalFlags,
       targetModel: targetModel,
       targetPlatform: targetPlatform,
       generator: generator,
       buildInfo: buildInfo,
+      userIdentifier: userIdentifier,
     );
   }
 
   final Device device;
   final ResidentCompiler generator;
   final BuildInfo buildInfo;
+  final String userIdentifier;
   Stream<Uri> observatoryUris;
   vm_service.VmService vmService;
   DevFS devFS;
@@ -187,6 +210,7 @@ class FlutterDevice {
     CompileExpression compileExpression,
     ReloadMethod reloadMethod,
     GetSkSLMethod getSkSLMethod,
+    PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
   }) {
     final Completer<void> completer = Completer<void>();
     StreamSubscription<void> subscription;
@@ -206,6 +230,7 @@ class FlutterDevice {
           compileExpression: compileExpression,
           reloadMethod: reloadMethod,
           getSkSLMethod: getSkSLMethod,
+          printStructuredErrorLogMethod: printStructuredErrorLogMethod,
           device: device,
         );
       } on Exception catch (exception) {
@@ -240,11 +265,11 @@ class FlutterDevice {
     @visibleForTesting Duration timeoutDelay = const Duration(seconds: 10),
   }) async {
     if (!device.supportsFlutterExit || vmService == null) {
-      return device.stopApp(package);
+      return device.stopApp(package, userIdentifier: userIdentifier);
     }
     final List<FlutterView> views = await vmService.getFlutterViews();
     if (views == null || views.isEmpty) {
-      return device.stopApp(package);
+      return device.stopApp(package, userIdentifier: userIdentifier);
     }
     // If any of the flutter views are paused, we might not be able to
     // cleanly exit since the service extension may not have been registered.
@@ -255,7 +280,7 @@ class FlutterDevice {
         continue;
       }
       if (isPauseEvent(isolate.pauseEvent.kind)) {
-        return device.stopApp(package);
+        return device.stopApp(package, userIdentifier: userIdentifier);
       }
     }
     for (final FlutterView view in views) {
@@ -278,7 +303,7 @@ class FlutterDevice {
         // flutter_attach_android_test. This log should help verify this
         // is where the tool is getting stuck.
         globals.logger.printTrace('error: vm service shutdown failed');
-        return device.stopApp(package);
+        return device.stopApp(package, userIdentifier: userIdentifier);
       });
   }
 
@@ -420,6 +445,24 @@ class FlutterDevice {
     }
   }
 
+  Future<Brightness> toggleBrightness({ Brightness current }) async {
+    final List<FlutterView> views = await vmService.getFlutterViews();
+    Brightness next;
+    if (current == Brightness.light) {
+      next = Brightness.dark;
+    } else if (current == Brightness.dark) {
+      next = Brightness.light;
+    }
+
+    for (final FlutterView view in views) {
+      next = await vmService.flutterBrightnessOverride(
+        isolateId: view.uiIsolate.id,
+        brightness: next,
+      );
+    }
+    return next;
+  }
+
   Future<String> togglePlatform({ String from }) async {
     final List<FlutterView> views = await vmService.getFlutterViews();
     final String to = nextPlatform(from, featureFlags);
@@ -503,6 +546,7 @@ class FlutterDevice {
       route: route,
       prebuiltApplication: prebuiltMode,
       ipv6: hotRunner.ipv6,
+      userIdentifier: userIdentifier,
     );
 
     final LaunchResult result = await futureResult;
@@ -576,6 +620,7 @@ class FlutterDevice {
       route: route,
       prebuiltApplication: prebuiltMode,
       ipv6: coldRunner.ipv6,
+      userIdentifier: userIdentifier,
     );
 
     if (!result.started) {
@@ -653,16 +698,15 @@ abstract class ResidentRunner {
   ResidentRunner(
     this.flutterDevices, {
     this.target,
-    this.debuggingOptions,
+    @required this.debuggingOptions,
     String projectRootPath,
-    String packagesFilePath,
     this.ipv6,
     this.stayResident = true,
     this.hotMode = true,
     String dillOutputPath,
   }) : mainPath = findMainDartFile(target),
+       packagesFilePath = debuggingOptions.buildInfo.packagesPath,
        projectRootPath = projectRootPath ?? globals.fs.currentDirectory.path,
-       packagesFilePath = packagesFilePath ?? globals.fs.path.absolute(globalPackagesPath),
        _dillOutputPath = dillOutputPath,
        artifactDirectory = dillOutputPath == null
           ? globals.fs.systemTempDirectory.createTempSync('flutter_tool.')
@@ -702,6 +746,11 @@ abstract class ResidentRunner {
   bool _exited = false;
   Completer<int> _finished = Completer<int>();
   bool hotMode;
+
+  /// Whether the compiler was instructed to run with null-safety enabled.
+  @protected
+  bool get usageNullSafety => debuggingOptions?.buildInfo
+    ?.extraFrontEndOptions?.any((String option) => option.contains('non-nullable')) ?? false;
 
   /// Returns true if every device is streaming observatory URIs.
   bool get isWaitingForObservatory {
@@ -834,9 +883,14 @@ abstract class ResidentRunner {
 
   /// List the attached flutter views.
   Future<List<FlutterView>> listFlutterViews() async {
-    return (await Future.wait(
-      flutterDevices.map((FlutterDevice d) => d.vmService.getFlutterViews()))
-    ).expand((List<FlutterView> views) => views).toList();
+    final List<List<FlutterView>> views = await Future.wait(<Future<List<FlutterView>>>[
+      for (FlutterDevice device in flutterDevices)
+        if (device.vmService != null)
+          device.vmService.getFlutterViews()
+    ]);
+    return views
+      .expand((List<FlutterView> viewList) => viewList)
+      .toList();
   }
 
   /// Write the SkSL shaders to a zip file in build directory.
@@ -852,43 +906,8 @@ abstract class ResidentRunner {
     final Map<String, Object> data = await flutterDevices.first.vmService.getSkSLs(
       viewId: views.first.id,
     );
-    if (data.isEmpty) {
-      globals.logger.printStatus(
-        'No data was receieved. To ensure SkSL data can be generated use a '
-        'physical device then:\n'
-        '  1. Pass "--cache-sksl" as an argument to flutter run.\n'
-        '  2. Interact with the application to force shaders to be compiled.\n'
-      );
-      return null;
-    }
-    final File outputFile = globals.fsUtils.getUniqueFile(
-      globals.fs.currentDirectory,
-      'flutter',
-      'sksl.json',
-    );
     final Device device = flutterDevices.first.device;
-
-    // Convert android sub-platforms to single target platform.
-    TargetPlatform targetPlatform = await flutterDevices.first.device.targetPlatform;
-    switch (targetPlatform) {
-      case TargetPlatform.android_arm:
-      case TargetPlatform.android_arm64:
-      case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
-        targetPlatform = TargetPlatform.android;
-        break;
-      default:
-        break;
-    }
-    final Map<String, Object> manifest = <String, Object>{
-      'platform': getNameForTargetPlatform(targetPlatform),
-      'name': device.name,
-      'engineRevision': globals.flutterVersion.engineRevision,
-      'data': data,
-    };
-    outputFile.writeAsStringSync(json.encode(manifest));
-    globals.logger.printStatus('Wrote SkSL data to ${outputFile.path}.');
-    return outputFile.path;
+    return sharedSkSlWriter(device, data);
   }
 
   /// The resident runner API for interaction with the reloadMethod vmservice
@@ -996,6 +1015,17 @@ abstract class ResidentRunner {
     }
   }
 
+  Future<void> debugToggleBrightness() async {
+    final Brightness brightness = await flutterDevices.first.toggleBrightness();
+    Brightness next;
+    for (final FlutterDevice device in flutterDevices) {
+      next = await device.toggleBrightness(
+        current: brightness,
+      );
+      globals.logger.printStatus('Changed brightness to $next.');
+    }
+  }
+
   /// Take a screenshot on the provided [device].
   ///
   /// If the device has a connected vmservice, this method will attempt to hide
@@ -1082,6 +1112,36 @@ abstract class ResidentRunner {
     );
   }
 
+  @protected
+  void cacheInitialDillCompilation() {
+    if (_dillOutputPath != null) {
+      return;
+    }
+    globals.logger.printTrace('Caching compiled dill');
+    final File outputDill = globals.fs.file(dillOutputPath);
+    if (outputDill.existsSync()) {
+      final String copyPath = getDefaultCachedKernelPath(
+        trackWidgetCreation: trackWidgetCreation,
+        dartDefines: debuggingOptions.buildInfo.dartDefines,
+        extraFrontEndOptions: debuggingOptions.buildInfo.extraFrontEndOptions,
+      );
+      globals.fs
+          .file(copyPath)
+          .parent
+          .createSync(recursive: true);
+      outputDill.copySync(copyPath);
+    }
+  }
+
+  void printStructuredErrorLog(vm_service.Event event) {
+    if (event.extensionKind == 'Flutter.Error') {
+      final Map<dynamic, dynamic> json = event.extensionData?.data;
+      if (json != null && json.containsKey('renderedErrorText')) {
+        globals.printStatus('\n${json['renderedErrorText']}');
+      }
+    }
+  }
+
   /// If the [reloadSources] parameter is not null the 'reloadSources' service
   /// will be registered.
   //
@@ -1106,7 +1166,8 @@ abstract class ResidentRunner {
         restart: restart,
         compileExpression: compileExpression,
         reloadMethod: reloadMethod,
-        getSkSLMethod: getSkSLMethod
+        getSkSLMethod: getSkSLMethod,
+        printStructuredErrorLogMethod: printStructuredErrorLog,
       );
       // This will wait for at least one flutter view before returning.
       final Status status = globals.logger.startProgress(
@@ -1182,6 +1243,12 @@ abstract class ResidentRunner {
     _finished.complete(0);
   }
 
+  void appFailedToStart() {
+    if (!_finished.isCompleted) {
+      _finished.complete(1);
+    }
+  }
+
   Future<int> waitForAppToFinish() async {
     final int exitCode = await _finished.future;
     assert(exitCode != null);
@@ -1191,14 +1258,9 @@ abstract class ResidentRunner {
 
   @mustCallSuper
   Future<void> preExit() async {
-    // If _dillOutputPath is null, we created a temporary directory for the dill.
+    // If _dillOutputPath is null, the tool created a temporary directory for
+    // the dill.
     if (_dillOutputPath == null && artifactDirectory.existsSync()) {
-      final File outputDill = globals.fs.file(dillOutputPath);
-      if (outputDill.existsSync()) {
-        outputDill.copySync(getDefaultCachedKernelPath(
-          trackWidgetCreation: trackWidgetCreation,
-        ));
-      }
       artifactDirectory.deleteSync(recursive: true);
     }
   }
@@ -1219,6 +1281,7 @@ abstract class ResidentRunner {
       commandHelp.s.print();
     }
     if (supportsServiceProtocol) {
+      commandHelp.b.print();
       commandHelp.w.print();
       commandHelp.t.print();
       if (isRunningDebug) {
@@ -1360,6 +1423,9 @@ class TerminalHandler {
           return true;
         }
         return false;
+      case 'b':
+        await residentRunner.debugToggleBrightness();
+        return true;
       case 'c':
         residentRunner.clearScreen();
         return true;

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
@@ -492,11 +494,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
   // The _boundaryRect is calculated by adding the boundaryMargin to the size of
   // the child.
-  Rect _boundaryRectCached;
   Rect get _boundaryRect {
-    if (_boundaryRectCached != null) {
-      return _boundaryRectCached;
-    }
     assert(_childKey.currentContext != null);
     assert(!widget.boundaryMargin.left.isNaN);
     assert(!widget.boundaryMargin.right.isNaN);
@@ -505,15 +503,15 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
     final RenderBox childRenderBox = _childKey.currentContext.findRenderObject() as RenderBox;
     final Size childSize = childRenderBox.size;
-    _boundaryRectCached = widget.boundaryMargin.inflateRect(Offset.zero & childSize);
+    final Rect boundaryRect = widget.boundaryMargin.inflateRect(Offset.zero & childSize);
     // Boundaries that are partially infinite are not allowed because Matrix4's
     // rotation and translation methods don't handle infinites well.
-    assert(_boundaryRectCached.isFinite ||
-        (_boundaryRectCached.left.isInfinite
-        && _boundaryRectCached.top.isInfinite
-        && _boundaryRectCached.right.isInfinite
-        && _boundaryRectCached.bottom.isInfinite), 'boundaryRect must either be infinite in all directions or finite in all directions.');
-    return _boundaryRectCached;
+    assert(boundaryRect.isFinite ||
+        (boundaryRect.left.isInfinite
+        && boundaryRect.top.isInfinite
+        && boundaryRect.right.isInfinite
+        && boundaryRect.bottom.isInfinite), 'boundaryRect must either be infinite in all directions or finite in all directions.');
+    return boundaryRect;
   }
 
   // The Rect representing the child's parent.
@@ -657,16 +655,17 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
   // Returns true iff the given _GestureType is enabled.
   bool _gestureIsSupported(_GestureType gestureType) {
-    if (_gestureType == _GestureType.pan && !widget.panEnabled) {
-      return false;
+    switch (gestureType) {
+      case _GestureType.rotate:
+        return _rotateEnabled;
+
+      case _GestureType.scale:
+        return widget.scaleEnabled;
+
+      case _GestureType.pan:
+      default:
+        return widget.panEnabled;
     }
-    if (_gestureType == _GestureType.scale && !widget.scaleEnabled) {
-      return false;
-    }
-    if (_gestureType == _GestureType.rotate && !_rotateEnabled) {
-      return false;
-    }
-    return true;
   }
 
   // Handle the start of a gesture. All of pan, scale, and rotate are handled
@@ -839,10 +838,13 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
   // Handle mousewheel scroll events.
   void _receivedPointerSignal(PointerSignalEvent event) {
+    if (!_gestureIsSupported(_GestureType.scale)) {
+      return;
+    }
     if (event is PointerScrollEvent) {
       final RenderBox childRenderBox = _childKey.currentContext.findRenderObject() as RenderBox;
       final Size childSize = childRenderBox.size;
-      final double scaleChange = 1.0 + event.scrollDelta.dy / childSize.height;
+      final double scaleChange = 1.0 - event.scrollDelta.dy / childSize.height;
       if (scaleChange == 0.0) {
         return;
       }
@@ -911,10 +913,6 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   @override
   void didUpdateWidget(InteractiveViewer oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.child != oldWidget.child || widget.boundaryMargin != oldWidget.boundaryMargin) {
-      _boundaryRectCached = null;
-    }
-
     // Handle all cases of needing to dispose and initialize
     // transformationControllers.
     if (oldWidget.transformationController == null) {

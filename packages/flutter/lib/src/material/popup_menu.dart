@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -232,7 +234,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   /// touches.
   final bool enabled;
 
-  /// The minimum height height of the menu item.
+  /// The minimum height of the menu item.
   ///
   /// Defaults to [kMinInteractiveDimension] pixels.
   @override

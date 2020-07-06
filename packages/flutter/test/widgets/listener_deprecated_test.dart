@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -10,10 +12,6 @@ import 'package:flutter/gestures.dart';
 
 // The tests in this file are moved from listener_test.dart, which tests several
 // deprecated APIs. The file should be removed once these parameters are.
-
-// ignore_for_file: deprecated_member_use_from_same_package
-// We have to ignore the lint rule here because we need to use the deprecated
-// callbacks in order to test them.
 
 class HoverClient extends StatefulWidget {
   const HoverClient({Key key, this.onHover, this.child}) : super(key: key);

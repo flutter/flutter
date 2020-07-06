@@ -6,14 +6,15 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
-import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:process/process.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../application_package.dart';
 import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
@@ -43,11 +44,6 @@ class IOSDevices extends PollingDeviceDiscovery {
        _logger = logger ?? globals.logger,
        super('iOS devices');
 
-  @override
-  void dispose() {
-    _observedDeviceEventsSubscription?.cancel();
-  }
-
   final Platform _platform;
   final XCDevice _xcdevice;
   final IOSWorkflow _iosWorkflow;
@@ -68,6 +64,9 @@ class IOSDevices extends PollingDeviceDiscovery {
         'Control of iOS devices or simulators only supported on macOS.'
       );
     }
+    if (!_xcdevice.isInstalled) {
+      return;
+    }
 
     deviceNotifier ??= ItemListNotifier<Device>();
 
@@ -76,7 +75,7 @@ class IOSDevices extends PollingDeviceDiscovery {
 
     // cancel any outstanding subscriptions.
     await _observedDeviceEventsSubscription?.cancel();
-    _observedDeviceEventsSubscription = _xcdevice.observedDeviceEvents().listen(
+    _observedDeviceEventsSubscription = _xcdevice.observedDeviceEvents()?.listen(
       _onDeviceEvent,
       onError: (dynamic error, StackTrace stack) {
         _logger.printTrace('Process exception running xcdevice observe:\n$error\n$stack');
@@ -154,6 +153,7 @@ class IOSDevice extends Device {
     @required IOSDeploy iosDeploy,
     @required IMobileDevice iMobileDevice,
     @required Logger logger,
+    @required VmServiceConnector vmServiceConnectUri,
   })
     : _sdkVersion = sdkVersion,
       _iosDeploy = iosDeploy,
@@ -161,6 +161,7 @@ class IOSDevice extends Device {
       _fileSystem = fileSystem,
       _logger = logger,
       _platform = platform,
+      _vmServiceConnectUri = vmServiceConnectUri,
         super(
           id,
           category: Category.mobile,
@@ -185,6 +186,7 @@ class IOSDevice extends Device {
   final Logger _logger;
   final Platform _platform;
   final IMobileDevice _iMobileDevice;
+  final VmServiceConnector _vmServiceConnectUri;
 
   /// May be 0 if version cannot be parsed.
   int get majorSdkVersion {
@@ -204,6 +206,9 @@ class IOSDevice extends Device {
   @override
   final String name;
 
+  @override
+  bool supportsRuntimeMode(BuildMode buildMode) => buildMode != BuildMode.jitRelease;
+
   final DarwinArch cpuArchitecture;
 
   final IOSDeviceInterface interfaceType;
@@ -222,7 +227,10 @@ class IOSDevice extends Device {
   bool get supportsStartPaused => false;
 
   @override
-  Future<bool> isAppInstalled(IOSApp app) async {
+  Future<bool> isAppInstalled(
+    IOSApp app, {
+    String userIdentifier,
+  }) async {
     bool result;
     try {
       result = await _iosDeploy.isAppInstalled(
@@ -240,7 +248,10 @@ class IOSDevice extends Device {
   Future<bool> isLatestBuildInstalled(IOSApp app) async => false;
 
   @override
-  Future<bool> installApp(IOSApp app) async {
+  Future<bool> installApp(
+    IOSApp app, {
+    String userIdentifier,
+  }) async {
     final Directory bundle = _fileSystem.directory(app.deviceBundlePath);
     if (!bundle.existsSync()) {
       _logger.printError('Could not find application bundle at ${bundle.path}; have you run "flutter build ios"?');
@@ -270,7 +281,10 @@ class IOSDevice extends Device {
   }
 
   @override
-  Future<bool> uninstallApp(IOSApp app) async {
+  Future<bool> uninstallApp(
+    IOSApp app, {
+    String userIdentifier,
+  }) async {
     int uninstallationResult;
     try {
       uninstallationResult = await _iosDeploy.uninstallApp(
@@ -301,6 +315,7 @@ class IOSDevice extends Device {
     bool prebuiltApplication = false,
     bool ipv6 = false,
     @visibleForTesting Duration fallbackPollingDelay,
+    String userIdentifier,
   }) async {
     String packageId;
 
@@ -369,7 +384,7 @@ class IOSDevice extends Device {
       if (debuggingOptions.enableSoftwareRendering) '--enable-software-rendering',
       if (debuggingOptions.skiaDeterministicRendering) '--skia-deterministic-rendering',
       if (debuggingOptions.traceSkia) '--trace-skia',
-      if (debuggingOptions.traceWhitelist != null) '--trace-whitelist="${debuggingOptions.traceWhitelist}"',
+      if (debuggingOptions.traceAllowlist != null) '--trace-allowlist="${debuggingOptions.traceAllowlist}"',
       if (debuggingOptions.endlessTraceBuffer) '--endless-trace-buffer',
       if (debuggingOptions.dumpSkpOnShaderCompilation) '--dump-skp-on-shader-compilation',
       if (debuggingOptions.verboseSystemLogs) '--verbose-logging',
@@ -418,6 +433,7 @@ class IOSDevice extends Device {
         protocolDiscovery: observatoryDiscovery,
         flutterUsage: globals.flutterUsage,
         pollingDelay: fallbackPollingDelay,
+        vmServiceConnectUri: _vmServiceConnectUri,
       );
       final Uri localUri = await fallbackDiscovery.discover(
         assumedDevicePort: assumedObservatoryPort,
@@ -440,7 +456,10 @@ class IOSDevice extends Device {
   }
 
   @override
-  Future<bool> stopApp(IOSApp app) async {
+  Future<bool> stopApp(
+    IOSApp app, {
+    String userIdentifier,
+  }) async {
     // Currently we don't have a way to stop an app running on iOS.
     return false;
   }
@@ -478,6 +497,7 @@ class IOSDevice extends Device {
     dyLdLibEntry: globals.cache.dyLdLibEntry,
     id: id,
     iproxyPath: _iproxyPath,
+    operatingSystemUtils: globals.os,
   );
 
   @visibleForTesting
@@ -489,11 +509,11 @@ class IOSDevice extends Device {
   void clearLogs() { }
 
   @override
-  bool get supportsScreenshot => _iMobileDevice.isInstalled && interfaceType == IOSDeviceInterface.usb;
+  bool get supportsScreenshot => _iMobileDevice.isInstalled;
 
   @override
   Future<void> takeScreenshot(File outputFile) async {
-    await _iMobileDevice.takeScreenshot(outputFile);
+    await _iMobileDevice.takeScreenshot(outputFile, id, interfaceType);
   }
 
   @override
@@ -748,11 +768,13 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
     @required MapEntry<String, String> dyLdLibEntry,
     @required String id,
     @required String iproxyPath,
+    @required OperatingSystemUtils operatingSystemUtils,
   }) : _logger = logger,
        _dyLdLibEntry = dyLdLibEntry,
        _id = id,
        _iproxyPath = iproxyPath,
-       _processUtils = ProcessUtils(processManager: processManager, logger: logger);
+       _processUtils = ProcessUtils(processManager: processManager, logger: logger),
+       _operatingSystemUtils = operatingSystemUtils;
 
   /// Create a [IOSDevicePortForwarder] for testing.
   ///
@@ -764,6 +786,7 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
     @required ProcessManager processManager,
     @required Logger logger,
     String id,
+    OperatingSystemUtils operatingSystemUtils,
   }) {
     return IOSDevicePortForwarder(
       processManager: processManager,
@@ -773,6 +796,7 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
       dyLdLibEntry: const MapEntry<String, String>(
         'DYLD_LIBRARY_PATH', '/path/to/libs',
       ),
+      operatingSystemUtils: operatingSystemUtils,
     );
   }
 
@@ -781,6 +805,7 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
   final MapEntry<String, String> _dyLdLibEntry;
   final String _id;
   final String _iproxyPath;
+  final OperatingSystemUtils _operatingSystemUtils;
 
   @override
   List<ForwardedPort> forwardedPorts = <ForwardedPort>[];
@@ -796,7 +821,9 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
   Future<int> forward(int devicePort, { int hostPort }) async {
     final bool autoselect = hostPort == null || hostPort == 0;
     if (autoselect) {
-      hostPort = 1024;
+      final int freePort = await _operatingSystemUtils?.findFreePort();
+      // Dynamic port range 49152 - 65535.
+      hostPort = freePort == null || freePort == 0 ? 49152 : freePort;
     }
 
     Process process;
@@ -808,8 +835,8 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
       process = await _processUtils.start(
         <String>[
           _iproxyPath,
-          hostPort.toString(),
-          devicePort.toString(),
+          '$hostPort:$devicePort',
+          '--udid',
           _id,
         ],
         environment: Map<String, String>.fromEntries(
