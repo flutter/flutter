@@ -1139,6 +1139,7 @@ void main() {
     ));
     expect(lastTableRowBoxDecoration().color, disabledColor);
   });
+
   testWidgets('DataRow renders custom colors when pressed', (WidgetTester tester) async {
     const Color pressedColor = Color(0xff4caf50);
     Widget buildTable() {
