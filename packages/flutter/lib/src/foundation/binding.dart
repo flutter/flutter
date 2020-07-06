@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert' show json;
 import 'dart:developer' as developer;
 import 'dart:io' show exit;
-import 'dart:ui' as ui show saveCompilationTrace, Window, window;
+import 'dart:ui' as ui show  Window, window, Brightness;
 // Before adding any more dart:ui imports, please read the README.
 
 import 'package:meta/meta.dart';
@@ -141,14 +143,6 @@ abstract class BindingBase {
         name: 'exit',
         callback: _exitApplication,
       );
-      registerServiceExtension(
-        name: 'saveCompilationTrace',
-        callback: (Map<String, String> parameters) async {
-          return <String, dynamic>{
-            'value': ui.saveCompilationTrace(),
-          };
-        },
-      );
     }
 
     assert(() {
@@ -190,6 +184,33 @@ abstract class BindingBase {
             'value': defaultTargetPlatform
                      .toString()
                      .substring('$TargetPlatform.'.length),
+          };
+        },
+      );
+
+      const String brightnessOverrideExtensionName = 'brightnessOverride';
+      registerServiceExtension(
+        name: brightnessOverrideExtensionName,
+        callback: (Map<String, String> parameters) async {
+          if (parameters.containsKey('value')) {
+            switch (parameters['value']) {
+              case 'Brightness.light':
+                debugBrightnessOverride = ui.Brightness.light;
+                break;
+              case 'Brightness.dark':
+                debugBrightnessOverride = ui.Brightness.dark;
+                break;
+              default:
+                debugBrightnessOverride = null;
+            }
+            _postExtensionStateChangedEvent(
+              brightnessOverrideExtensionName,
+              (debugBrightnessOverride ?? window.platformBrightness).toString(),
+            );
+            await reassembleApplication();
+          }
+          return <String, dynamic>{
+            'value': (debugBrightnessOverride ?? window.platformBrightness).toString(),
           };
         },
       );

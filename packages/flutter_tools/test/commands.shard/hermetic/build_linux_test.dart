@@ -57,29 +57,9 @@ void main() {
   }
 
   // Creates the mock files necessary to run a build.
-  void setUpMockProjectFilesForBuild({int templateVersion}) {
+  void setUpMockProjectFilesForBuild() {
     setUpMockCoreProjectFiles();
     fileSystem.file(fileSystem.path.join('linux', 'CMakeLists.txt')).createSync(recursive: true);
-
-    final String versionFileSubpath = fileSystem.path.join('flutter', '.template_version');
-    const int expectedTemplateVersion = 10;  // Arbitrary value for tests.
-    final File sourceTemplateVersionfile = fileSystem.file(fileSystem.path.join(
-      fileSystem.path.absolute(Cache.flutterRoot),
-      'packages',
-      'flutter_tools',
-      'templates',
-      'app',
-      'linux.tmpl',
-      versionFileSubpath,
-    ));
-    sourceTemplateVersionfile.createSync(recursive: true);
-    sourceTemplateVersionfile.writeAsStringSync(expectedTemplateVersion.toString());
-
-    final File projectTemplateVersionFile = fileSystem.file(
-      fileSystem.path.join('linux', versionFileSubpath));
-    templateVersion ??= expectedTemplateVersion;
-    projectTemplateVersionFile.createSync(recursive: true);
-    projectTemplateVersionFile.writeAsStringSync(templateVersion.toString());
   }
 
   // Returns the command matching the build_linux call to cmake.
@@ -141,34 +121,6 @@ void main() {
     Platform: () => notLinuxPlatform,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
-    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-  });
-
-  testUsingContext('Linux build fails with instructions when template is too old', () async {
-    final BuildCommand command = BuildCommand();
-    setUpMockProjectFilesForBuild(templateVersion: 1);
-
-    expect(createTestCommandRunner(command).run(
-      const <String>['build', 'linux', '--no-pub']
-    ), throwsToolExit(message: 'flutter create .'));
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-    Platform: () => linuxPlatform,
-    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-  });
-
-  testUsingContext('Linux build fails with instructions when template is too new', () async {
-    final BuildCommand command = BuildCommand();
-    setUpMockProjectFilesForBuild(templateVersion: 999);
-
-    expect(createTestCommandRunner(command).run(
-      const <String>['build', 'linux', '--no-pub']
-    ), throwsToolExit(message: 'Upgrade Flutter'));
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-    Platform: () => linuxPlatform,
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
   });
 
@@ -338,6 +290,7 @@ void main() {
         '--dart-define=foo.bar=2',
         '--dart-define=fizz.far=3',
         '--tree-shake-icons',
+        '--bundle-sksl-path=foo/bar.sksl.json',
       ]
     );
 
@@ -354,16 +307,17 @@ void main() {
     expect(configLines, containsAll(<String>[
       'set(FLUTTER_ROOT "$_kTestFlutterRoot")',
       'set(PROJECT_DIR "${fileSystem.currentDirectory.path}")',
-      '  "DART_DEFINES=\\"foo.bar=2,fizz.far=3\\""',
+      '  "DART_DEFINES=\\"foo.bar%3D2,fizz.far%3D3\\""',
       '  "DART_OBFUSCATION=\\"true\\""',
-      '  "EXTRA_FRONT_END_OPTIONS=\\"--enable-experiment=non-nullable\\""',
-      '  "EXTRA_GEN_SNAPSHOT_OPTIONS=\\"--enable-experiment=non-nullable\\""',
+      '  "EXTRA_FRONT_END_OPTIONS=\\"--enable-experiment%3Dnon-nullable\\""',
+      '  "EXTRA_GEN_SNAPSHOT_OPTIONS=\\"--enable-experiment%3Dnon-nullable\\""',
       '  "SPLIT_DEBUG_INFO=\\"foo/\\""',
       '  "TRACK_WIDGET_CREATION=\\"true\\""',
       '  "TREE_SHAKE_ICONS=\\"true\\""',
       '  "FLUTTER_ROOT=\\"\${FLUTTER_ROOT}\\""',
       '  "PROJECT_DIR=\\"\${PROJECT_DIR}\\""',
       '  "FLUTTER_TARGET=\\"lib/other.dart\\""',
+      '  "BUNDLE_SKSL_PATH=\\"foo/bar.sksl.json\\""',
     ]));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -399,25 +353,6 @@ set(BINARY_NAME "fizz_bar")
       throwsToolExit());
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
-  });
-
-  testUsingContext('Release build prints an under-construction warning', () async {
-    final BuildCommand command = BuildCommand();
-    setUpMockProjectFilesForBuild();
-    processManager = FakeProcessManager.list(<FakeCommand>[
-      cmakeCommand('release'),
-      ninjaCommand('release'),
-    ]);
-
-    await createTestCommandRunner(command).run(
-      const <String>['build', 'linux', '--no-pub']
-    );
-    expect(testLogger.statusText, contains('🚧'));
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-    Platform: () => linuxPlatform,
-    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
   });
 
   testUsingContext('hidden when not enabled on Linux host', () {

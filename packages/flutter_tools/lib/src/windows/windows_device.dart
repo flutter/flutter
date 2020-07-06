@@ -18,7 +18,7 @@ import 'windows_workflow.dart';
 /// A device that represents a desktop Windows target.
 class WindowsDevice extends DesktopDevice {
   WindowsDevice() : super(
-      'Windows',
+      'windows',
       platformType: PlatformType.windows,
       ephemeral: false,
   );

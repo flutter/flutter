@@ -14,7 +14,8 @@ import '../../globals.dart' as globals;
 import '../build_system.dart';
 import '../depfile.dart';
 import 'assets.dart';
-import 'dart.dart';
+import 'common.dart';
+import 'localizations.dart';
 
 /// Whether web builds should call the platform initialization logic.
 const String kInitializePlatform = 'InitializePlatform';
@@ -26,11 +27,6 @@ const String kHasWebPlugins = 'HasWebPlugins';
 ///
 /// Valid values are O1 (lowest, profile default) to O4 (highest, release default).
 const String kDart2jsOptimization = 'Dart2jsOptimization';
-
-/// Allow specifying experiments for dart2js.
-///
-/// Multiple values should be encoded as a comma-separated list.
-const String kEnableExperiment = 'EnableExperiment';
 
 /// Whether to disable dynamic generation code to satisfy csp policies.
 const String kCspMode = 'cspMode';
@@ -62,8 +58,10 @@ class WebEntrypointTarget extends Target {
     final bool shouldInitializePlatform = environment.defines[kInitializePlatform] == 'true';
     final bool hasPlugins = environment.defines[kHasWebPlugins] == 'true';
     final Uri importUri = environment.fileSystem.file(targetFile).absolute.uri;
+    // TODO(jonahwilliams): support configuration of this file.
+    const String packageFile = '.packages';
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-      environment.projectDir.childFile('.packages'),
+      environment.fileSystem.file(packageFile),
       logger: environment.logger,
     );
 
@@ -132,7 +130,8 @@ class Dart2JSTarget extends Target {
 
   @override
   List<Target> get dependencies => const <Target>[
-    WebEntrypointTarget()
+    WebEntrypointTarget(),
+    GenerateLocalizationsTarget(),
   ];
 
   @override
@@ -159,20 +158,21 @@ class Dart2JSTarget extends Target {
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final String specPath = globals.fs.path.join(
       globals.artifacts.getArtifactPath(Artifact.flutterWebSdk), 'libraries.json');
-    final String packageFile = globalPackagesPath;
+    // TODO(jonahwilliams): support configuration of this file.
+    const String packageFile = '.packages';
     final File outputKernel = environment.buildDir.childFile('app.dill');
     final File outputFile = environment.buildDir.childFile('main.dart.js');
-    final List<String> dartDefines = parseDartDefines(environment);
-    final String enabledExperiments = environment.defines[kEnableExperiment];
+    final List<String> dartDefines = decodeDartDefines(environment.defines, kDartDefines);
+    final List<String> extraFrontEndOptions = decodeDartDefines(environment.defines, kExtraFrontEndOptions);
 
     // Run the dart2js compilation in two stages, so that icon tree shaking can
     // parse the kernel file for web builds.
     final ProcessResult kernelResult = await globals.processManager.run(<String>[
       globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+      '--disable-dart-dev',
       globals.artifacts.getArtifactPath(Artifact.dart2jsSnapshot),
       '--libraries-spec=$specPath',
-      if (enabledExperiments != null)
-        '--enable-experiment=$enabledExperiments',
+      ...?extraFrontEndOptions,
       '-o',
       outputKernel.path,
       '--packages=$packageFile',
@@ -190,10 +190,10 @@ class Dart2JSTarget extends Target {
     }
     final ProcessResult javaScriptResult = await globals.processManager.run(<String>[
       globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+      '--disable-dart-dev',
       globals.artifacts.getArtifactPath(Artifact.dart2jsSnapshot),
       '--libraries-spec=$specPath',
-      if (enabledExperiments != null)
-        '--enable-experiment=$enabledExperiments',
+      ...?extraFrontEndOptions,
       if (dart2jsOptimization != null)
         '-$dart2jsOptimization'
       else
@@ -284,7 +284,11 @@ class WebReleaseBundle extends Target {
     }
     final Directory outputDirectory = environment.outputDir.childDirectory('assets');
     outputDirectory.createSync(recursive: true);
-    final Depfile depfile = await copyAssets(environment, environment.outputDir.childDirectory('assets'));
+    final Depfile depfile = await copyAssets(
+      environment,
+      environment.outputDir.childDirectory('assets'),
+      targetPlatform: TargetPlatform.web_javascript,
+    );
     final DepfileService depfileService = DepfileService(
       fileSystem: globals.fs,
       logger: globals.logger,
@@ -381,7 +385,7 @@ class WebServiceWorker extends Target {
       '/',
       'main.dart.js',
       'index.html',
-      'assets/LICENSE',
+      'assets/NOTICES',
       if (urlToHash.containsKey('assets/AssetManifest.json'))
         'assets/AssetManifest.json',
       if (urlToHash.containsKey('assets/FontManifest.json'))
@@ -499,7 +503,7 @@ self.addEventListener("fetch", (event) => {
   if (event.request.url == origin || event.request.url.startsWith(origin + '/#')) {
     key = '/';
   }
-  // If the URL is not the the RESOURCE list, skip the cache.
+  // If the URL is not the RESOURCE list, skip the cache.
   if (!RESOURCES[key]) {
     return event.respondWith(fetch(event.request));
   }
@@ -522,7 +526,7 @@ self.addEventListener("fetch", (event) => {
 self.addEventListener('message', (event) => {
   // SkipWaiting can be used to immediately activate a waiting service worker.
   // This will also require a page refresh triggered by the main worker.
-  if (event.message == 'skipWaiting') {
+  if (event.data == 'skipWaiting') {
     return self.skipWaiting();
   }
 
@@ -546,10 +550,10 @@ async function downloadOffline() {
   }
   for (var resourceKey in Object.keys(RESOURCES)) {
     if (!currentContent[resourceKey]) {
-      resources.add(resourceKey);
+      resources.push(resourceKey);
     }
   }
-  return Cache.addAll(resources);
+  return contentCache.addAll(resources);
 }
 ''';
 }

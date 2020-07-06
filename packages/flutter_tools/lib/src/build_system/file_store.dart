@@ -16,6 +16,9 @@ import '../base/utils.dart';
 import '../convert.dart';
 import 'build_system.dart';
 
+/// The default threshold for file chunking is 250 KB, or about the size of `framework.dart`.
+const int kDefaultFileChunkThresholdBytes = 250000;
+
 /// An encoded representation of all file hashes.
 class FileStorage {
   FileStorage(this.version, this.files);
@@ -91,13 +94,16 @@ class FileStore {
     @required File cacheFile,
     @required Logger logger,
     FileStoreStrategy strategy = FileStoreStrategy.hash,
+    int fileChunkThreshold = kDefaultFileChunkThresholdBytes,
   }) : _logger = logger,
        _strategy = strategy,
-       _cacheFile = cacheFile;
+       _cacheFile = cacheFile,
+       _fileChunkThreshold = fileChunkThreshold;
 
   final File _cacheFile;
   final Logger _logger;
   final FileStoreStrategy _strategy;
+  final int _fileChunkThreshold;
 
   final HashMap<String, String> previousAssetKeys = HashMap<String, String>();
   final HashMap<String, String> currentAssetKeys = HashMap<String, String>();
@@ -229,7 +235,18 @@ class FileStore {
         dirty.add(file);
         return;
       }
-      final Digest digest = md5.convert(await file.readAsBytes());
+      Digest digest;
+      final int fileBytes = file.lengthSync();
+      // For files larger than a given threshold, chunk the conversion.
+      if (fileBytes > _fileChunkThreshold) {
+        final StreamController<Digest> digests = StreamController<Digest>();
+        final ByteConversionSink inputSink = md5.startChunkedConversion(digests);
+        await file.openRead().forEach(inputSink.add);
+        inputSink.close();
+        digest = await digests.stream.last;
+      } else {
+        digest = md5.convert(await file.readAsBytes());
+      }
       final String currentHash = digest.toString();
       if (currentHash != previousHash) {
         dirty.add(file);

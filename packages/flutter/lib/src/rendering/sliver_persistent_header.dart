@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 
 import 'package:flutter/animation.dart';
@@ -642,7 +644,7 @@ abstract class RenderSliverFloatingPinnedPersistentHeader extends RenderSliverFl
       paintExtent: clampedPaintExtent,
       layoutExtent: layoutExtent.clamp(0.0, clampedPaintExtent) as double,
       maxPaintExtent: maxExtent + stretchOffset,
-      maxScrollObstructionExtent: maxExtent,
+      maxScrollObstructionExtent: minExtent,
       hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
     );
     return 0.0;

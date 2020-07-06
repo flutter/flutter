@@ -79,7 +79,9 @@ Future<T> runInContext<T>(
         processManager: globals.processManager,
         userMessages: globals.userMessages,
       ),
-      AndroidWorkflow: () => AndroidWorkflow(),
+      AndroidWorkflow: () => AndroidWorkflow(
+        androidSdk: globals.androidSdk,
+      ),
       ApplicationPackageFactory: () => ApplicationPackageFactory(),
       Artifacts: () => CachedArtifacts(
         fileSystem: globals.fs,
@@ -125,7 +127,13 @@ Future<T> runInContext<T>(
       DeviceManager: () => DeviceManager(),
       Doctor: () => Doctor(logger: globals.logger),
       DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
-      EmulatorManager: () => EmulatorManager(),
+      EmulatorManager: () => EmulatorManager(
+        androidSdk: globals.androidSdk,
+        processManager: globals.processManager,
+        logger: globals.logger,
+        fileSystem: globals.fs,
+        androidWorkflow: androidWorkflow,
+      ),
       FeatureFlags: () => const FeatureFlags(),
       FlutterVersion: () => FlutterVersion(const SystemClock()),
       FuchsiaArtifacts: () => FuchsiaArtifacts.find(),
@@ -140,7 +148,12 @@ Future<T> runInContext<T>(
         xcode: globals.xcode,
       ),
       IOSWorkflow: () => const IOSWorkflow(),
-      KernelCompilerFactory: () => const KernelCompilerFactory(),
+      KernelCompilerFactory: () => KernelCompilerFactory(
+        logger: globals.logger,
+        processManager: globals.processManager,
+        artifacts: globals.artifacts,
+        fileSystem: globals.fs,
+      ),
       Logger: () => globals.platform.isWindows
         ? WindowsStdoutLogger(
             terminal: globals.terminal,

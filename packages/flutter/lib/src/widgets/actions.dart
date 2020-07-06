@@ -2,14 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
+import 'media_query.dart';
 import 'shortcuts.dart';
 
 // BuildContext/Element doesn't have a parent accessor, but it can be
@@ -868,7 +872,7 @@ class _ActionsMarker extends InheritedWidget {
 class FocusableActionDetector extends StatefulWidget {
   /// Create a const [FocusableActionDetector].
   ///
-  /// The [enabled], [autofocus], and [child] arguments must not be null.
+  /// The [enabled], [autofocus], [mouseCursor], and [child] arguments must not be null.
   const FocusableActionDetector({
     Key key,
     this.enabled = true,
@@ -879,9 +883,11 @@ class FocusableActionDetector extends StatefulWidget {
     this.onShowFocusHighlight,
     this.onShowHoverHighlight,
     this.onFocusChange,
+    this.mouseCursor = MouseCursor.defer,
     @required this.child,
   })  : assert(enabled != null),
         assert(autofocus != null),
+        assert(mouseCursor != null),
         assert(child != null),
         super(key: key);
 
@@ -921,6 +927,13 @@ class FocusableActionDetector extends StatefulWidget {
   ///
   /// Called with true if the [focusNode] has primary focus.
   final ValueChanged<bool> onFocusChange;
+
+  /// The cursor for a mouse pointer when it enters or is hovering over the
+  /// widget.
+  ///
+  /// The [cursor] defaults to [MouseCursor.defer], deferring the choice of
+  /// cursor to the next region behind it in hit-test order.
+  final MouseCursor mouseCursor;
 
   /// The child widget for this [FocusableActionDetector] widget.
   ///
@@ -974,7 +987,6 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
 
   bool _hovering = false;
   void _handleMouseEnter(PointerEnterEvent event) {
-    assert(widget.onShowHoverHighlight != null);
     if (!_hovering) {
       _mayTriggerCallback(task: () {
         _hovering = true;
@@ -983,7 +995,6 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
   }
 
   void _handleMouseExit(PointerExitEvent event) {
-    assert(widget.onShowHoverHighlight != null);
     if (_hovering) {
       _mayTriggerCallback(task: () {
         _hovering = false;
@@ -1012,8 +1023,20 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
       return _hovering && target.enabled && _canShowHighlight;
     }
 
+    bool canRequestFocus(FocusableActionDetector target) {
+      final NavigationMode mode = MediaQuery.of(context, nullOk: true)?.navigationMode ?? NavigationMode.traditional;
+      switch (mode) {
+        case NavigationMode.traditional:
+          return target.enabled;
+        case NavigationMode.directional:
+          return true;
+      }
+      assert(false, 'Navigation mode $mode not handled');
+      return null;
+    }
+
     bool shouldShowFocusHighlight(FocusableActionDetector target) {
-      return _focused && target.enabled && _canShowHighlight;
+      return _focused && _canShowHighlight && canRequestFocus(target);
     }
 
     assert(SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks);
@@ -1043,15 +1066,28 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
     }
   }
 
+  bool get _canRequestFocus {
+    final NavigationMode mode = MediaQuery.of(context, nullOk: true)?.navigationMode ?? NavigationMode.traditional;
+    switch (mode) {
+      case NavigationMode.traditional:
+        return widget.enabled;
+      case NavigationMode.directional:
+        return true;
+    }
+    assert(false, 'NavigationMode $mode not handled.');
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget child = MouseRegion(
       onEnter: _handleMouseEnter,
       onExit: _handleMouseExit,
+      cursor: widget.mouseCursor,
       child: Focus(
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
-        canRequestFocus: widget.enabled,
+        canRequestFocus: _canRequestFocus,
         onFocusChange: _handleFocusChange,
         child: widget.child,
       ),
@@ -1117,3 +1153,21 @@ class SelectIntent extends Intent {}
 /// This is an abstract class that serves as a base class for actions that
 /// select something. It is not bound to any key by default.
 abstract class SelectAction extends Action<SelectIntent> {}
+
+/// An [Intent] that dismisses the currently focused widget.
+///
+/// The [WidgetsApp.defaultShortcuts] binds this intent to the
+/// [LogicalKeyboardKey.escape] and [LogicalKeyboardKey.gameButtonB] keys.
+///
+/// See also:
+///  - [ModalRoute] which listens for this intent to dismiss modal routes
+///    (dialogs, pop-up menus, drawers, etc).
+class DismissIntent extends Intent {
+  /// Creates a const [DismissIntent].
+  const DismissIntent();
+}
+
+/// An action that dismisses the focused widget.
+///
+/// This is an abstract class that serves as a base class for dismiss actions.
+abstract class DismissAction extends Action<DismissIntent> {}

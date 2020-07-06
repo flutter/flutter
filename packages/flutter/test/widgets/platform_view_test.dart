@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 @TestOn('!chrome')
 import 'dart:async';
 import 'dart:typed_data';
@@ -37,7 +39,7 @@ void main() {
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
           FakeAndroidPlatformView(currentViewId + 1, 'webview', const Size(200.0, 100.0),
-              AndroidViewController.kAndroidLayoutDirectionLtr),
+              AndroidViewController.kAndroidLayoutDirectionLtr, null),
         ]),
       );
     });
@@ -76,7 +78,7 @@ void main() {
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
           FakeAndroidPlatformView(currentViewId + 1, 'webview', const Size(200.0, 100.0),
-              AndroidViewController.kAndroidLayoutDirectionLtr, fakeView.creationParams),
+              AndroidViewController.kAndroidLayoutDirectionLtr, null, fakeView.creationParams),
         ]),
       );
     });
@@ -135,7 +137,7 @@ void main() {
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
           FakeAndroidPlatformView(currentViewId + 1, 'webview', const Size(200.0, 100.0),
-              AndroidViewController.kAndroidLayoutDirectionLtr),
+              AndroidViewController.kAndroidLayoutDirectionLtr, null),
         ]),
       );
 
@@ -146,7 +148,7 @@ void main() {
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
           FakeAndroidPlatformView(currentViewId + 1, 'webview', const Size(100.0, 50.0),
-              AndroidViewController.kAndroidLayoutDirectionLtr),
+              AndroidViewController.kAndroidLayoutDirectionLtr, null),
         ]),
       );
     });
@@ -180,7 +182,7 @@ void main() {
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
           FakeAndroidPlatformView(currentViewId + 2, 'maps', const Size(200.0, 100.0),
-              AndroidViewController.kAndroidLayoutDirectionLtr),
+              AndroidViewController.kAndroidLayoutDirectionLtr, null),
         ]),
       );
     });
@@ -244,7 +246,7 @@ void main() {
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
           FakeAndroidPlatformView(currentViewId + 1, 'webview', const Size(200.0, 100.0),
-              AndroidViewController.kAndroidLayoutDirectionLtr),
+              AndroidViewController.kAndroidLayoutDirectionLtr, null),
         ]),
       );
     });
@@ -469,7 +471,7 @@ void main() {
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
           FakeAndroidPlatformView(currentViewId + 1, 'maps', const Size(200.0, 100.0),
-              AndroidViewController.kAndroidLayoutDirectionRtl),
+              AndroidViewController.kAndroidLayoutDirectionRtl, null),
         ]),
       );
 
@@ -487,7 +489,7 @@ void main() {
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
           FakeAndroidPlatformView(currentViewId + 1, 'maps', const Size(200.0, 100.0),
-              AndroidViewController.kAndroidLayoutDirectionLtr),
+              AndroidViewController.kAndroidLayoutDirectionLtr, null),
         ]),
       );
     });
@@ -513,7 +515,7 @@ void main() {
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
           FakeAndroidPlatformView(currentViewId + 1, 'maps', const Size(200.0, 100.0),
-              AndroidViewController.kAndroidLayoutDirectionRtl),
+              AndroidViewController.kAndroidLayoutDirectionRtl, null),
         ]),
       );
 
@@ -534,7 +536,7 @@ void main() {
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
           FakeAndroidPlatformView(currentViewId + 1, 'maps', const Size(200.0, 100.0),
-              AndroidViewController.kAndroidLayoutDirectionLtr),
+              AndroidViewController.kAndroidLayoutDirectionLtr, null),
         ]),
       );
     });
@@ -1011,6 +1013,23 @@ void main() {
       await tester.pump();
 
       expect(viewsController.lastClearedFocusViewId, currentViewId + 1);
+    });
+  });
+
+  group('AndroidViewSurface', () {
+    FakeAndroidViewController controller;
+
+    setUp(() {
+      controller = FakeAndroidViewController(0);
+    });
+
+    testWidgets('AndroidViewSurface sets pointTransformer of view controller', (WidgetTester tester) async {
+      final AndroidViewSurface surface = AndroidViewSurface(
+        controller: controller,
+        hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+        gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},);
+      await tester.pumpWidget(surface);
+      expect(controller.pointTransformer, isNotNull);
     });
   });
 

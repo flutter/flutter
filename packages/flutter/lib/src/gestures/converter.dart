@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui' as ui show PointerData, PointerChange, PointerSignalKind;
 
 import 'events.dart';
@@ -32,7 +34,7 @@ int _synthesiseDownButtons(int buttons, PointerDeviceKind kind) {
 /// [dart:ui.Window.onPointerDataPacket], and converts them to [PointerEvent]
 /// objects.
 class PointerEventConverter {
-  // This class is not meant to be instatiated or extended; this constructor
+  // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
   // ignore: unused_element
   PointerEventConverter._();

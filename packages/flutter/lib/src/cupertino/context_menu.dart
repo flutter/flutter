@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'package:flutter/gestures.dart' show kMinFlingVelocity, kLongPressTimeout;
@@ -1091,7 +1093,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
     );
   }
 
-  // Build the animation for the overall draggable dismissable content.
+  // Build the animation for the overall draggable dismissible content.
   Widget _buildAnimation(BuildContext context, Widget child) {
     return Transform.translate(
       offset: _moveAnimation.value,

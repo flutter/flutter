@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
@@ -20,6 +22,10 @@ import 'theme_data.dart';
 /// app to navigate between a small number of views, typically between three and
 /// five.
 ///
+/// The navigation rail is meant for layouts with wide viewports, such as a
+/// desktop web or tablet landscape layout. For smaller layouts, like mobile
+/// portrait, a [BottomNavigationBar] should be used instead.
+///
 /// A navigation rail is usually used as the first or last element of a [Row]
 /// which defines the app's [Scaffold] body.
 ///
@@ -27,10 +33,6 @@ import 'theme_data.dart';
 /// specified with [NavigationRailTheme]. The default values for null theme
 /// properties are based on the [Theme]'s [ThemeData.textTheme],
 /// [ThemeData.iconTheme], and [ThemeData.colorScheme].
-//
-/// The navigation rail is meant for layouts with wide viewports, such as a
-/// desktop web or tablet landscape layout. For smaller layouts, like mobile
-/// portrait, a [BottomNavigationBar] should be used instead.
 ///
 /// Adaptive layouts can build different instances of the [Scaffold] in order to
 /// have a navigation rail for more horizontal layouts and a bottom navigation
@@ -164,7 +166,7 @@ class NavigationRail extends StatefulWidget {
   ///
   /// The extended state has a wider rail container, and the labels are
   /// positioned next to the icons. [minExtendedWidth] can be used to set the
-  /// the minimum width of the rail when it is in this state.
+  /// minimum width of the rail when it is in this state.
   ///
   /// The rail will implicitly animate between the extended and normal state.
   ///

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -70,6 +72,17 @@ Finder findBorderPainter() {
 double getBorderBottom(WidgetTester tester) {
   final RenderBox box = InputDecorator.containerOf(tester.element(findBorderPainter()));
   return box.size.height;
+}
+
+Finder findLabel() {
+  return find.descendant(
+    of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_Shaker'),
+    matching: find.byWidgetPredicate((Widget w) => w is Text),
+  );
+}
+
+Rect getLabelRect(WidgetTester tester) {
+  return tester.getRect(findLabel());
 }
 
 InputBorder getBorder(WidgetTester tester) {
@@ -2833,7 +2846,6 @@ void main() {
         isEmpty: true,
         decoration: const InputDecoration(
           border: OutlineInputBorder(borderSide: BorderSide.none),
-          // ignore: deprecated_member_use_from_same_package
           hasFloatingPlaceholder: false,
           labelText: 'label',
         ),
@@ -2858,7 +2870,6 @@ void main() {
         // isFocused: false (default)
         decoration: const InputDecoration(
           border: OutlineInputBorder(borderSide: BorderSide.none),
-          // ignore: deprecated_member_use_from_same_package
           hasFloatingPlaceholder: false,
           labelText: 'label',
         ),
@@ -3455,6 +3466,66 @@ void main() {
     expect(getBorderColor(tester), equals(disabledColor));
   });
 
+  testWidgets('InputDecorator withdraws label when not empty or focused', (WidgetTester tester) async {
+    Future<void> pumpDecorator({bool focused, bool enabled = true, bool filled = false, bool empty = true, bool directional = false}) async {
+      return await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: empty,
+          isFocused: focused,
+          decoration: InputDecoration(
+            labelText: 'Label',
+            enabled: enabled,
+            filled: filled,
+            focusedBorder: const OutlineInputBorder(),
+            disabledBorder: const OutlineInputBorder(),
+            border: const OutlineInputBorder(),
+          ),
+        ),
+      );
+    }
+
+    await pumpDecorator(focused: false, empty: true);
+    await tester.pumpAndSettle();
+    expect(getLabelRect(tester).topLeft, equals(const Offset(12, 20)));
+    expect(getLabelRect(tester).size, equals(const Size(80, 16)));
+
+    await pumpDecorator(focused: false, empty: false);
+    await tester.pumpAndSettle();
+    expect(getLabelRect(tester).topLeft, equals(const Offset(12, -4)));
+    expect(getLabelRect(tester).size, equals(const Size(80, 16)));
+
+    await pumpDecorator(focused: true, empty: true);
+    await tester.pumpAndSettle();
+    expect(getLabelRect(tester).topLeft, equals(const Offset(12, -4)));
+    expect(getLabelRect(tester).size, equals(const Size(80, 16)));
+
+    await pumpDecorator(focused: true, empty: false);
+    await tester.pumpAndSettle();
+    expect(getLabelRect(tester).topLeft, equals(const Offset(12, -4)));
+    expect(getLabelRect(tester).size, equals(const Size(80, 16)));
+
+    await pumpDecorator(focused: false, empty: true, enabled: false);
+    await tester.pumpAndSettle();
+    expect(getLabelRect(tester).topLeft, equals(const Offset(12, 20)));
+    expect(getLabelRect(tester).size, equals(const Size(80, 16)));
+
+    await pumpDecorator(focused: false, empty: false, enabled: false);
+    await tester.pumpAndSettle();
+    expect(getLabelRect(tester).topLeft, equals(const Offset(12, -4)));
+    expect(getLabelRect(tester).size, equals(const Size(80, 16)));
+
+    // Focused and disabled happens with NavigationMode.directional.
+    await pumpDecorator(focused: true, empty: true, enabled: false);
+    await tester.pumpAndSettle();
+    expect(getLabelRect(tester).topLeft, equals(const Offset(12, 20)));
+    expect(getLabelRect(tester).size, equals(const Size(80, 16)));
+
+    await pumpDecorator(focused: true, empty: false, enabled: false);
+    await tester.pumpAndSettle();
+    expect(getLabelRect(tester).topLeft, equals(const Offset(12, -4)));
+    expect(getLabelRect(tester).size, equals(const Size(80, 16)));
+  });
+
   testWidgets('InputDecorationTheme.toString()', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/19305
     expect(
@@ -3868,7 +3939,6 @@ void main() {
       helperMaxLines: 6,
       hintStyle: TextStyle(),
       errorMaxLines: 5,
-      // ignore: deprecated_member_use_from_same_package
       hasFloatingPlaceholder: false,
       floatingLabelBehavior: FloatingLabelBehavior.never,
       contentPadding: EdgeInsetsDirectional.only(start: 40.0, top: 12.0, bottom: 12.0),
@@ -3978,7 +4048,7 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    // floatingLabelGeight = 12 (ahem font size 16dps * 0.75 = 12)
+    // floatingLabelHeight = 12 (ahem font size 16dps * 0.75 = 12)
     // labelY = -floatingLabelHeight/2 + borderWidth/2
     expect(tester.getTopLeft(find.text('label')).dy, -4.0);
   });
@@ -3996,5 +4066,173 @@ void main() {
     // Passing floating behavior never results in a dy offset of 20
     // because the label is not initially floating.
     expect(tester.getTopLeft(find.text('label')).dy, 20.0);
+  });
+
+  testWidgets('InputDecorator hint is displayed when floatingLabelBehavior is always', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildInputDecorator(
+        // isFocused: false (default)
+        isEmpty: true,
+        decoration: const InputDecoration(
+          floatingLabelBehavior: FloatingLabelBehavior.always,
+          hintText: 'hint',
+          labelText: 'label',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(getOpacity(tester, 'hint'), 1.0);
+  });
+
+  testWidgets('InputDecorator floating label width scales when focused', (WidgetTester tester) async {
+    final String longStringA = String.fromCharCodes(List<int>.generate(200, (_) => 65));
+    final String longStringB = String.fromCharCodes(List<int>.generate(200, (_) => 66));
+
+    await tester.pumpWidget(
+      Center(
+        child: Container(
+          width: 100,
+          height: 100,
+          child: buildInputDecorator(
+            // isFocused: false (default)
+            isEmpty: true,
+            decoration: InputDecoration(
+              labelText: longStringA,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(longStringA),
+      paints..clipRect(rect: const Rect.fromLTWH(0, 0, 100.0, 16.0)),
+    );
+
+    await tester.pumpWidget(
+      Center(
+        child: Container(
+          width: 100,
+          height: 100,
+          child: buildInputDecorator(
+            isFocused: true,
+            isEmpty: true,
+            decoration: InputDecoration(
+              labelText: longStringB,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(longStringB),
+      // 133.3 is approximately 100 / 0.75 (_kFinalLabelScale)
+      paints..clipRect(rect: const Rect.fromLTWH(0, 0, 133.0, 16.0)),
+    );
+  }, skip: isBrowser);  // TODO(yjbanov): https://github.com/flutter/flutter/issues/44020
+
+  testWidgets('textAlignVertical can be updated', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/56933
+    const String hintText = 'hint';
+    TextAlignVertical alignment = TextAlignVertical.top;
+    StateSetter setState;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setter) {
+            setState = setter;
+            return InputDecorator(
+              textAlignVertical: alignment,
+              decoration: const InputDecoration(
+                hintText: hintText,
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final double topPosition = tester.getTopLeft(find.text(hintText)).dy;
+
+    setState(() {
+      alignment = TextAlignVertical.bottom;
+    });
+    await tester.pump();
+
+    expect(tester.getTopLeft(find.text(hintText)).dy, greaterThan(topPosition));
+
+    // Setting textAlignVertical back to null works and reverts to the default.
+    setState(() {
+      alignment = null;
+    });
+    await tester.pump();
+
+    expect(tester.getTopLeft(find.text(hintText)).dy, topPosition);
+  });
+
+  testWidgets("InputDecorator label width isn't affected by prefix or suffix", (WidgetTester tester) async {
+    const String labelText = 'My Label';
+    const String prefixText = 'The five boxing wizards jump quickly.';
+    const String suffixText = 'Suffix';
+
+    Widget getLabeledInputDecorator(bool showFix) {
+      return MaterialApp(
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return Theme(
+                data: Theme.of(context),
+                child: Align(
+                  alignment: Alignment.topLeft,
+                  child: TextField(
+                    decoration: InputDecoration(
+                      icon: const Icon(Icons.assistant),
+                      prefixText: showFix ? prefixText : null,
+                      suffixText: showFix ? suffixText : null,
+                      suffixIcon: const Icon(Icons.threesixty),
+                      labelText: labelText,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    // Build with no prefix or suffix.
+    await tester.pumpWidget(getLabeledInputDecorator(false));
+
+    // Get the width of the label when there is no prefix/suffix.
+    expect(find.text(prefixText), findsNothing);
+    expect(find.text(suffixText), findsNothing);
+    final double labelWidth = tester.getSize(find.text(labelText)).width;
+
+    // Build with a prefix and suffix.
+    await tester.pumpWidget(getLabeledInputDecorator(true));
+
+    // The prefix and suffix exist but aren't visible. They have not affected
+    // the width of the label.
+    expect(find.text(prefixText), findsOneWidget);
+    expect(getOpacity(tester, prefixText), 0.0);
+    expect(find.text(suffixText), findsOneWidget);
+    expect(getOpacity(tester, suffixText), 0.0);
+    expect(tester.getSize(find.text(labelText)).width, labelWidth);
+
+    // Tap to focus.
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    // The prefix and suffix are visible, and the label is floating and still
+    // hasn't had its width affected.
+    expect(tester.getSize(find.text(labelText)).width, labelWidth);
+    expect(getOpacity(tester, prefixText), 1.0);
   });
 }

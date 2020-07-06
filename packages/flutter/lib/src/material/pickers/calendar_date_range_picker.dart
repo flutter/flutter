@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart' show DragStartBehavior;
@@ -27,9 +29,9 @@ const double _maxCalendarWidthPortrait = 480.0;
 
 /// Displays a scrollable calendar grid that allows a user to select a range
 /// of dates.
-///
-/// Note: this is not publicly exported (see pickers.dart), as it is an
-/// internal component used by [showDateRangePicker].
+//
+// This is not publicly exported (see pickers.dart), as it is an
+// internal component used by [showDateRangePicker].
 class CalendarDateRangePicker extends StatefulWidget {
   /// Creates a scrollable calendar grid for picking date ranges.
   CalendarDateRangePicker({

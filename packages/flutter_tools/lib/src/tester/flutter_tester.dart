@@ -14,7 +14,6 @@ import '../base/io.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../convert.dart';
-import '../dart/package_map.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -70,6 +69,9 @@ class FlutterTesterDevice extends Device {
   }
 
   @override
+  bool supportsRuntimeMode(BuildMode buildMode) => buildMode == BuildMode.debug;
+
+  @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
 
   @override
@@ -87,10 +89,16 @@ class FlutterTesterDevice extends Device {
   }
 
   @override
-  Future<bool> installApp(ApplicationPackage app) async => true;
+  Future<bool> installApp(
+    ApplicationPackage app, {
+    String userIdentifier,
+  }) async => true;
 
   @override
-  Future<bool> isAppInstalled(ApplicationPackage app) async => false;
+  Future<bool> isAppInstalled(
+    ApplicationPackage app, {
+    String userIdentifier,
+  }) async => false;
 
   @override
   Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => false;
@@ -106,10 +114,11 @@ class FlutterTesterDevice extends Device {
     ApplicationPackage package, {
     @required String mainPath,
     String route,
-    @required DebuggingOptions debuggingOptions,
+    DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
     bool ipv6 = false,
+    String userIdentifier,
   }) async {
     final BuildInfo buildInfo = debuggingOptions.buildInfo;
 
@@ -128,7 +137,7 @@ class FlutterTesterDevice extends Device {
       '--run-forever',
       '--non-interactive',
       '--enable-dart-profiling',
-      '--packages=$globalPackagesPath',
+      '--packages=${debuggingOptions.buildInfo.packagesPath}',
     ];
     if (debuggingOptions.debuggingEnabled) {
       if (debuggingOptions.startPaused) {
@@ -215,14 +224,20 @@ class FlutterTesterDevice extends Device {
   }
 
   @override
-  Future<bool> stopApp(ApplicationPackage app) async {
+  Future<bool> stopApp(
+    ApplicationPackage app, {
+    String userIdentifier,
+  }) async {
     _process?.kill();
     _process = null;
     return true;
   }
 
   @override
-  Future<bool> uninstallApp(ApplicationPackage app) async => true;
+  Future<bool> uninstallApp(
+    ApplicationPackage app, {
+    String userIdentifier,
+  }) async => true;
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) => true;

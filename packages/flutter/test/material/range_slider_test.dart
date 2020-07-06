@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
@@ -251,7 +253,7 @@ void main() {
     expect(values.end.round(), equals(90));
   });
 
-  testWidgets('Range Slider thumbs can be dragged to the min and max (continous LTR)', (WidgetTester tester) async {
+  testWidgets('Range Slider thumbs can be dragged to the min and max (continuous LTR)', (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
@@ -298,7 +300,7 @@ void main() {
     expect(values.end, equals(1));
   });
 
-  testWidgets('Range Slider thumbs can be dragged to the min and max (continous RTL)', (WidgetTester tester) async {
+  testWidgets('Range Slider thumbs can be dragged to the min and max (continuous RTL)', (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
@@ -445,7 +447,7 @@ void main() {
     expect(values.start, equals(0));
   });
 
-  testWidgets('Range Slider thumbs can be dragged together and the start thumb can be dragged apart (continous LTR)', (WidgetTester tester) async {
+  testWidgets('Range Slider thumbs can be dragged together and the start thumb can be dragged apart (continuous LTR)', (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
@@ -498,7 +500,7 @@ void main() {
     expect(values.start, closeTo(0.2, 0.05));
   });
 
-  testWidgets('Range Slider thumbs can be dragged together and the start thumb can be dragged apart (continous RTL)', (WidgetTester tester) async {
+  testWidgets('Range Slider thumbs can be dragged together and the start thumb can be dragged apart (continuous RTL)', (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
@@ -663,7 +665,7 @@ void main() {
     expect(values.start, closeTo(20, 0.01));
   });
 
-  testWidgets('Range Slider thumbs can be dragged together and the end thumb can be dragged apart (continous LTR)', (WidgetTester tester) async {
+  testWidgets('Range Slider thumbs can be dragged together and the end thumb can be dragged apart (continuous LTR)', (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
@@ -716,7 +718,7 @@ void main() {
     expect(values.end, closeTo(0.8, 0.05));
   });
 
-  testWidgets('Range Slider thumbs can be dragged together and the end thumb can be dragged apart (continous RTL)', (WidgetTester tester) async {
+  testWidgets('Range Slider thumbs can be dragged together and the end thumb can be dragged apart (continuous RTL)', (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
@@ -1319,7 +1321,7 @@ void main() {
 
     await tester.pumpWidget(buildApp(divisions: 3));
 
-    final RenderBox valueIndicatorBox = tester.firstRenderObject(find.byType(Overlay));
+    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
 
     final Offset topRight = tester.getTopRight(find.byType(RangeSlider)).translate(-24, 0);
     final TestGesture gesture = await tester.startGesture(topRight);
@@ -1330,12 +1332,114 @@ void main() {
       valueIndicatorBox,
       paints
         ..path(color: sliderTheme.valueIndicatorColor)
-        ..path(color: sliderTheme.valueIndicatorColor),
+        ..paragraph()
     );
     await gesture.up();
     // Wait for value indicator animation to finish.
     await tester.pumpAndSettle();
+  });
 
+  testWidgets('Range Slider removes value indicator from overlay if Slider gets disposed without value indicator animation completing.', (WidgetTester tester) async {
+    RangeValues values = const RangeValues(0.5, 0.75);
+    const Color fillColor = Color(0xf55f5f5f);
+
+    Widget buildApp({
+      Color activeColor,
+      Color inactiveColor,
+      int divisions,
+      bool enabled = true,
+    }) {
+      final ValueChanged<RangeValues> onChanged = (RangeValues newValues) {
+        values = newValues;
+      };
+      return MaterialApp(
+        home: Scaffold(
+          // The builder is used to pass the context from the MaterialApp widget
+          // to the [Navigator]. This context is required in order for the
+          // Navigator to work.
+          body: Builder(
+            builder: (BuildContext context) {
+              return Column(
+                children: <Widget>[
+                  RangeSlider(
+                    values: values,
+                    labels: RangeLabels(
+                      values.start.toStringAsFixed(2),
+                      values.end.toStringAsFixed(2),
+                    ),
+                    divisions: divisions,
+                    onChanged: onChanged,
+                  ),
+                  RaisedButton(
+                    child: const Text('Next'),
+                    onPressed: () {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute<void>(
+                          builder: (BuildContext context) {
+                            return RaisedButton(
+                              child: const Text('Inner page'),
+                              onPressed: () { Navigator.of(context).pop(); },
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp(divisions: 3));
+
+    final RenderObject valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+    final Offset topRight = tester.getTopRight(find.byType(RangeSlider)).translate(-24, 0);
+    final TestGesture gesture = await tester.startGesture(topRight);
+    // Wait for value indicator animation to finish.
+    await tester.pumpAndSettle();
+
+    expect(
+      valueIndicatorBox,
+      paints
+      // Represents the raised button wth next text.
+      ..path(color: Colors.black)
+      ..paragraph()
+      // Represents the range slider.
+      ..path(color: fillColor)
+      ..paragraph()
+      ..path(color: fillColor)
+      ..paragraph(),
+    );
+
+    // Represents the Raised Button and Range Slider.
+    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 3));
+    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawParagraph, 3));
+
+    await tester.tap(find.text('Next'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(RangeSlider), findsNothing);
+    expect(
+      valueIndicatorBox,
+      isNot(
+       paints
+         ..path(color: fillColor)
+         ..paragraph()
+         ..path(color: fillColor)
+         ..paragraph(),
+      ),
+    );
+
+    // Represents the raised button with inner page text.
+    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 1));
+    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawParagraph, 1));
+
+    // Don't stop holding the value indicator.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgets('Range Slider top thumb gets stroked when overlapping', (WidgetTester tester) async {
@@ -1453,7 +1557,7 @@ void main() {
       ),
     );
 
-    final RenderBox valueIndicatorBox = tester.firstRenderObject(find.byType(Overlay));
+    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
 
     // Get the bounds of the track by finding the slider edges and translating
     // inwards by the overlay radius.
@@ -1477,8 +1581,7 @@ void main() {
       valueIndicatorBox,
       paints
         ..path(color: sliderTheme.valueIndicatorColor)
-        ..path(color: sliderTheme.overlappingShapeStrokeColor)
-        ..path(color: sliderTheme.valueIndicatorColor),
+        ..paragraph()
     );
 
     await gesture.up();
@@ -1529,7 +1632,7 @@ void main() {
       ),
     );
 
-    final RenderBox valueIndicatorBox = tester.firstRenderObject(find.byType(Overlay));
+    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
 
     // Get the bounds of the track by finding the slider edges and translating
     // inwards by the overlay radius.
@@ -1553,8 +1656,7 @@ void main() {
       valueIndicatorBox,
       paints
         ..path(color: sliderTheme.valueIndicatorColor)
-        ..path(color: sliderTheme.overlappingShapeStrokeColor)
-        ..path(color: sliderTheme.valueIndicatorColor),
+        ..paragraph()
     );
 
     await gesture.up();

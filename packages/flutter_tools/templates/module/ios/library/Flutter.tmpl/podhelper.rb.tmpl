@@ -99,7 +99,7 @@ def install_flutter_application_pod(flutter_application_path)
   pod '{{projectName}}', :path => relative.to_s, :inhibit_warnings => true
 
   flutter_export_environment_path = File.join('${SRCROOT}', relative, 'flutter_export_environment.sh');
-  script_phase :name => 'Run Flutter Build Script',
+  script_phase :name => 'Run Flutter Build {{projectName}} Script',
     :script => "set -e\nset -u\nsource \"#{flutter_export_environment_path}\"\n\"$FLUTTER_ROOT\"/packages/flutter_tools/bin/xcode_backend.sh build",
     :input_files => [
       File.join('${SRCROOT}', flutter_application_path, '.metadata'),

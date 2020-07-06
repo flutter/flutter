@@ -127,6 +127,34 @@ void main() {
       expect(semantics.label, 'A\nB\nC');
       semanticsHandle.dispose();
     });
+
+    testWidgets('Does not return partial semantics', (WidgetTester tester) async {
+      final SemanticsHandle semanticsHandle = tester.ensureSemantics();
+      final Key key = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MergeSemantics(
+              child: Semantics(
+                container: true,
+                label: 'A',
+                child: Semantics(
+                  container: true,
+                  key: key,
+                  label: 'B',
+                  child: Container(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final SemanticsNode node = tester.getSemantics(find.byKey(key));
+      final SemanticsData semantics = node.getSemanticsData();
+      expect(semantics.label, 'A\nB');
+      semanticsHandle.dispose();
+    });
   });
 
   group('ensureVisible', () {
@@ -773,6 +801,33 @@ void main() {
       final TargetPlatformVariant desktop = TargetPlatformVariant.all();
       final TargetPlatformVariant mobile = TargetPlatformVariant.all();
       expect(desktop.values.union(mobile.values), equals(all.values));
+    });
+  });
+
+  group('Pending timer', () {
+    TestExceptionReporter currentExceptionReporter;
+    setUp(() {
+      currentExceptionReporter = reportTestException;
+    });
+
+    tearDown(() {
+      reportTestException = currentExceptionReporter;
+    });
+
+    test('Throws assertion message without code', () async {
+      FlutterErrorDetails flutterErrorDetails;
+      reportTestException = (FlutterErrorDetails details, String testDescription) {
+        flutterErrorDetails = details;
+      };
+
+      final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
+      await binding.runTest(() async {
+        final Timer timer = Timer(const Duration(seconds: 1), () {});
+        expect(timer.isActive, true);
+      }, () {});
+
+      expect(flutterErrorDetails?.exception, isA<AssertionError>());
+      expect(flutterErrorDetails?.exception?.message, 'A Timer is still pending even after the widget tree was disposed.');
     });
   });
 }

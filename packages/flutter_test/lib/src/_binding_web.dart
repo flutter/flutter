@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
- import 'package:flutter/widgets.dart';
+import 'package:flutter/widgets.dart';
 
- import 'binding.dart';
+import 'binding.dart';
 
  /// Ensure the [WidgetsBinding] is initialized.
 WidgetsBinding ensureInitialized([@visibleForTesting Map<String, String> environment]) {

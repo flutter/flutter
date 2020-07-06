@@ -73,6 +73,14 @@ void configureProject(Project project, String outputDir) {
     }
 }
 
+void configurePlugin(Project project, String outputDir) {
+    if (!project.hasProperty("android")) {
+        // A plugin doesn't support the Android platform when this property isn't defined in the plugin.
+        return
+    }
+    configureProject(project, outputDir)
+}
+
 String getFlutterRoot(Project project) {
     if (!project.hasProperty("flutter-root")) {
         throw new GradleException("The `-Pflutter-root` flag must be specified.")
@@ -158,7 +166,7 @@ projectsEvaluated {
     // This is due to the Android Gradle Plugin expecting all library subprojects to be published
     // as Maven artifacts.
     modulePlugins.each { pluginProject ->
-        configureProject(pluginProject, moduleProject.property("output-dir"))
+        configurePlugin(pluginProject, moduleProject.property("output-dir"))
         moduleProject.android.libraryVariants.all { variant ->
             // Configure the `assembleAar<variantName>` task for each plugin's projects and make
             // the module's equivalent task depend on the plugin's task.

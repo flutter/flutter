@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
@@ -278,6 +280,15 @@ void main() {
       const UnconstrainedBox(constrainedAxis: Axis.horizontal, textDirection: TextDirection.rtl, alignment: Alignment.topRight).toString(),
       equals('UnconstrainedBox(alignment: topRight, constrainedAxis: horizontal, textDirection: rtl)'),
     );
+  });
+
+  testWidgets('UnconstrainedBox can set and update clipBehavior', (WidgetTester tester) async {
+    await tester.pumpWidget(const UnconstrainedBox());
+    final RenderUnconstrainedBox renderObject = tester.allRenderObjects.whereType<RenderUnconstrainedBox>().first;
+    expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+
+    await tester.pumpWidget(const UnconstrainedBox(clipBehavior: Clip.antiAlias));
+    expect(renderObject.clipBehavior, equals(Clip.antiAlias));
   });
 
   group('ColoredBox', () {

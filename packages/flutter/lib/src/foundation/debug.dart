@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
+import 'dart:ui' as ui show Brightness;
 
 import 'assertions.dart';
 import 'platform.dart';
@@ -25,7 +28,8 @@ bool debugAssertAllFoundationVarsUnset(String reason, { DebugPrintCallback debug
   assert(() {
     if (debugPrint != debugPrintOverride ||
         debugDefaultTargetPlatformOverride != null ||
-        debugDoublePrecision != null)
+        debugDoublePrecision != null ||
+        debugBrightnessOverride != null)
       throw FlutterError(reason);
     return true;
   }());
@@ -70,11 +74,13 @@ Future<T> debugInstrumentAction<T>(String description, Future<T> action()) {
 /// Argument passed to [Timeline] events in order to cause those events to be
 /// shown in the developer-centric version of the Observatory Timeline.
 ///
+/// Generally these indicate landmark events such as the build phase or layout.
+///
 /// See also:
 ///
 ///  * [Timeline.startSync], which typically takes this value as its `arguments`
 ///    argument.
-const Map<String, String> timelineWhitelistArguments = <String, String>{
+const Map<String, String> timelineArgumentsIndicatingLandmarkEvent = <String, String>{
   'mode': 'basic',
 };
 
@@ -95,3 +101,12 @@ String debugFormatDouble(double value) {
   }
   return value.toStringAsFixed(1);
 }
+
+/// A setting that can be used to override the platform [Brightness] exposed
+/// from [BindingBase.window].
+///
+/// See also:
+///
+///  * [WidgetsApp], which uses the [debugBrightnessOverride] setting in debug mode
+///    to construct a [MediaQueryData].
+ui.Brightness debugBrightnessOverride;

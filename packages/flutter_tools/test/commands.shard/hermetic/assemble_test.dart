@@ -96,7 +96,7 @@ void main() {
 
     await expectLater(commandRunner.run(<String>['assemble', '-o Output', 'debug_macos_bundle_flutter_assets']),
       throwsToolExit());
-    expect(testLogger.errorText, contains('bar'));
+    expect(testLogger.errorText, isNot(contains('bar')));
     expect(testLogger.errorText, isNot(contains(testStackTrace.toString())));
   });
 

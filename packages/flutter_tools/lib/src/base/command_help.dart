@@ -76,6 +76,13 @@ class CommandHelp {
     'debugProfileWidgetBuilds',
   );
 
+  CommandHelpOption _b;
+  CommandHelpOption get b => _b ??= _makeOption(
+    'b',
+    'Toggle the platform brightness setting (dark and light mode).',
+    'debugBrightnessOverride',
+  );
+
   CommandHelpOption _c;
   CommandHelpOption get c => _c ??= _makeOption(
     'c',
@@ -86,6 +93,12 @@ class CommandHelp {
   CommandHelpOption get d => _d ??= _makeOption(
     'd',
     'Detach (terminate "flutter run" but leave application running).',
+  );
+
+  CommandHelpOption _g;
+  CommandHelpOption get g => _g ??= _makeOption(
+    'g',
+    'Run source code generators.'
   );
 
   CommandHelpOption _h;

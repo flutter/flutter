@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 @TestOn('!chrome') // web has different stack traces
 
 import 'package:flutter/foundation.dart';
@@ -14,7 +16,7 @@ void main() {
     final List<String> filtered = FlutterError.defaultStackFilter(StackTrace.current.toString().trimRight().split('\n')).toList();
     expect(filtered.length, greaterThanOrEqualTo(4));
     expect(filtered[0], matches(r'^#0 +main\.<anonymous closure> \(.*stack_trace_test\.dart:[0-9]+:[0-9]+\)$'));
-    expect(filtered[1], matches(r'^#1 +Declarer\.test\.<anonymous closure>.<anonymous closure>.<anonymous closure> \(package:test_api/.+:[0-9]+:[0-9]+\)$'));
+    expect(filtered[1], matches(r'^#1 +Declarer\.test\.<anonymous closure>.<anonymous closure> \(package:test_api/.+:[0-9]+:[0-9]+\)$'));
     expect(filtered[2], equals('<asynchronous suspension>'));
   });
 

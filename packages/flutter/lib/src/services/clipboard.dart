@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -23,7 +25,7 @@ class ClipboardData {
 
 /// Utility methods for interacting with the system's clipboard.
 class Clipboard {
-  // This class is not meant to be instatiated or extended; this constructor
+  // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
   // ignore: unused_element
   Clipboard._();

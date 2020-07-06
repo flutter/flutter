@@ -135,8 +135,18 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
   }
 
   @override
+  bool checkMessageHandler(String channel, MessageHandler handler) {
+    return delegate.checkMessageHandler(channel, handler);
+  }
+
+  @override
   void setMockMessageHandler(String channel, MessageHandler handler) {
     delegate.setMockMessageHandler(channel, handler);
+  }
+
+  @override
+  bool checkMockMessageHandler(String channel, MessageHandler handler) {
+    return delegate.checkMockMessageHandler(channel, handler);
   }
 }
 
@@ -194,6 +204,27 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// always run with shadows disabled.
   @protected
   bool get disableShadows => false;
+
+  /// Determines whether the Dart [HttpClient] class should be overriden to
+  /// always return a failure response.
+  ///
+  /// By default, this value is true, so that unit tests will not become flaky
+  /// due to intermitten network errors. The value may be overriden by a binding
+  /// intended for use in integration tests that do end to end application
+  /// testing, including working with real network responses.
+  @protected
+  bool get overrideHttpClient => true;
+
+  /// Determines whether the binding automatically registers [testTextInput].
+  ///
+  /// Unit tests make use of this to mock out text input communication for
+  /// widgets. An integration test would set this to false, to test real IME
+  /// or keyboard input.
+  ///
+  /// [TestTextInput.isRegistered] reports whether the text input mock is
+  /// registered or not.
+  @protected
+  bool get registerTestTextInput => true;
 
   /// Increase the timeout for the current test by the given duration.
   ///
@@ -259,8 +290,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   void initInstances() {
     super.initInstances();
     timeDilation = 1.0; // just in case the developer has artificially changed it for development
-    binding.setupHttpOverrides();
-    _testTextInput = TestTextInput(onCleared: _resetFocusedEditable)..register();
+    if (overrideHttpClient) {
+      binding.setupHttpOverrides();
+    }
+    _testTextInput = TestTextInput(onCleared: _resetFocusedEditable);
+    if (registerTestTextInput) {
+      _testTextInput.register();
+    }
   }
 
   @override
@@ -442,7 +478,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   /// The current client of the onscreen keyboard. Callers must pump
   /// an additional frame after setting this property to complete the
-  /// the focus change.
+  /// focus change.
   ///
   /// Instead of setting this directly, consider using
   /// [WidgetTester.showKeyboard].
@@ -480,6 +516,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     return result;
   }
   FlutterExceptionHandler _oldExceptionHandler;
+  StackTraceDemangler _oldStackTraceDemangler;
   FlutterErrorDetails _pendingExceptionDetails;
 
   static const TextStyle _messageStyle = TextStyle(
@@ -573,6 +610,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     assert(description != null);
     assert(inTest);
     _oldExceptionHandler = FlutterError.onError;
+    _oldStackTraceDemangler = FlutterError.demangleStackTrace;
     int _exceptionCount = 0; // number of un-taken exceptions
     FlutterError.onError = (FlutterErrorDetails details) {
       if (_pendingExceptionDetails != null) {
@@ -593,6 +631,17 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         _pendingExceptionDetails = details;
       }
     };
+    FlutterError.demangleStackTrace = (StackTrace stack) {
+      // package:stack_trace uses ZoneSpecification.errorCallback to add useful
+      // information to stack traces, in this case the Trace and Chain classes
+      // can be present. Because these StackTrace implementations do not follow
+      // the format the framework expects, we covert them to a vm trace here.
+      if (stack is stack_trace.Trace)
+        return stack.vmTrace;
+      if (stack is stack_trace.Chain)
+        return stack.toTrace().vmTrace;
+      return stack;
+    };
     final Completer<void> testCompleter = Completer<void>();
     final VoidCallback testCompletionHandler = _createTestCompletionHandler(description, testCompleter);
     void handleUncaughtError(dynamic exception, StackTrace stack) {
@@ -606,7 +655,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
         FlutterError.dumpErrorToConsole(FlutterErrorDetails(
           exception: exception,
-          stack: _unmangle(stack),
+          stack: stack,
           context: ErrorDescription('running a test (but after the test had completed)'),
           library: 'Flutter test framework',
         ), forceReport: true);
@@ -653,7 +702,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       final int stackLinesToOmit = reportExpectCall(stack, omittedFrames);
       FlutterError.reportError(FlutterErrorDetails(
         exception: exception,
-        stack: _unmangle(stack),
+        stack: stack,
         context: ErrorDescription('running a test'),
         library: 'Flutter test framework',
         stackFilter: (Iterable<String> frames) {
@@ -801,6 +850,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   void postTest() {
     assert(inTest);
     FlutterError.onError = _oldExceptionHandler;
+    FlutterError.demangleStackTrace = _oldStackTraceDemangler;
     _pendingExceptionDetails = null;
     _parentZone = null;
     buildOwner.focusManager = FocusManager();
@@ -1116,23 +1166,20 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   void _verifyInvariants() {
     super._verifyInvariants();
 
-    assert(() {
-      if (   _currentFakeAsync.periodicTimerCount == 0
-          && _currentFakeAsync.nonPeriodicTimerCount == 0) {
-        return true;
-      }
-
-      debugPrint('Pending timers:');
-      for (final FakeTimer timer in _currentFakeAsync.pendingTimers) {
-        debugPrint(
-          'Timer (duration: ${timer.duration}, '
-          'periodic: ${timer.isPeriodic}), created:');
-        debugPrintStack(stackTrace: timer.creationStackTrace);
-        debugPrint('');
-      }
-      return false;
-    }(), 'A Timer is still pending even after the widget tree was disposed.');
-
+    bool timersPending = false;
+    if (_currentFakeAsync.periodicTimerCount != 0 ||
+        _currentFakeAsync.nonPeriodicTimerCount != 0) {
+        debugPrint('Pending timers:');
+        for (final FakeTimer timer in _currentFakeAsync.pendingTimers) {
+          debugPrint(
+            'Timer (duration: ${timer.duration}, '
+            'periodic: ${timer.isPeriodic}), created:');
+          debugPrintStack(stackTrace: timer.creationStackTrace);
+          debugPrint('');
+        }
+        timersPending = true;
+    }
+    assert(!timersPending, 'A Timer is still pending even after the widget tree was disposed.');
     assert(_currentFakeAsync.microtaskCount == 0); // Shouldn't be possible.
   }
 
@@ -1674,12 +1721,4 @@ class _LiveTestRenderView extends RenderView {
     }
     _label?.paint(context.canvas, offset - const Offset(0.0, 10.0));
   }
-}
-
-StackTrace _unmangle(StackTrace stack) {
-  if (stack is stack_trace.Trace)
-    return stack.vmTrace;
-  if (stack is stack_trace.Chain)
-    return stack.toTrace().vmTrace;
-  return stack;
 }

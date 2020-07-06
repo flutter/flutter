@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/devices.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -23,9 +24,19 @@ void main() {
       Cache.disableLocking();
     });
 
+    MockCache cache;
+
+    setUp(() {
+      cache = MockCache();
+      when(cache.dyLdLibEntry).thenReturn(const MapEntry<String, String>('foo', 'bar'));
+    });
+
     testUsingContext('returns 0 when called', () async {
       final DevicesCommand command = DevicesCommand();
       await createTestCommandRunner(command).run(<String>['devices']);
+    }, overrides: <Type, Generator>{
+      Cache: () => cache,
+      Artifacts: () => Artifacts.test(),
     });
 
     testUsingContext('no error when no connected devices', () async {
@@ -34,8 +45,22 @@ void main() {
       expect(testLogger.statusText, containsIgnoringWhitespace('No devices detected'));
     }, overrides: <Type, Generator>{
       AndroidSdk: () => null,
-      DeviceManager: () => DeviceManager(),
+      DeviceManager: () => NoDevicesManager(),
       ProcessManager: () => MockProcessManager(),
+      Cache: () => cache,
+      Artifacts: () => Artifacts.test(),
+    });
+
+    testUsingContext('get devices\' platform types', () async {
+      final List<String> platformTypes = Device.devicesPlatformTypes(
+        await deviceManager.getAllConnectedDevices(),
+      );
+      expect(platformTypes, <String>['android', 'web']);
+    }, overrides: <Type, Generator>{
+      DeviceManager: () => _FakeDeviceManager(),
+      ProcessManager: () => MockProcessManager(),
+      Cache: () => cache,
+      Artifacts: () => Artifacts.test(),
     });
 
     testUsingContext('Outputs parsable JSON with --machine flag', () async {
@@ -74,11 +99,32 @@ void main() {
               'screenshot': false,
               'fastStart': false,
               'flutterExit': true,
-              'hardwareRendering': false,
+              'hardwareRendering': true,
               'startPaused': true
             }
           }
         ]
+      );
+    }, overrides: <Type, Generator>{
+      DeviceManager: () => _FakeDeviceManager(),
+      ProcessManager: () => MockProcessManager(),
+      Cache: () => cache,
+      Artifacts: () => Artifacts.test(),
+    });
+
+    testUsingContext('available devices and diagnostics', () async {
+      final DevicesCommand command = DevicesCommand();
+      await createTestCommandRunner(command).run(<String>['devices']);
+      expect(
+        testLogger.statusText,
+        '''
+2 connected devices:
+
+ephemeral (mobile) • ephemeral • android-arm    • Test SDK (1.2.3) (emulator)
+webby (mobile)     • webby     • web-javascript • Web SDK (1.2.4) (emulator)
+
+• Cannot connect to device ABC
+'''
       );
     }, overrides: <Type, Generator>{
       DeviceManager: () => _FakeDeviceManager(),
@@ -126,4 +172,19 @@ class _FakeDeviceManager extends DeviceManager {
   Future<List<Device>> refreshAllConnectedDevices({Duration timeout}) =>
     getAllConnectedDevices();
 
+  @override
+  Future<List<String>> getDeviceDiagnostics() => Future<List<String>>.value(
+    <String>['Cannot connect to device ABC']
+  );
 }
+
+class NoDevicesManager extends DeviceManager {
+  @override
+  Future<List<Device>> getAllConnectedDevices() async => <Device>[];
+
+  @override
+  Future<List<Device>> refreshAllConnectedDevices({Duration timeout}) =>
+    getAllConnectedDevices();
+}
+
+class MockCache extends Mock implements Cache {}

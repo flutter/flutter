@@ -225,6 +225,9 @@ class FlutterProject {
 
   /// Generates project files necessary to make Gradle builds work on Android
   /// and CocoaPods+Xcode work on iOS, for app and module projects only.
+  // TODO(cyanglaz): The param `checkProjects` is confusing. We should give it a better name
+  // or add some documentation explaining what it does, or both.
+  // https://github.com/flutter/flutter/issues/60023
   Future<void> ensureReadyForPlatformSpecificTooling({bool checkProjects = false}) async {
     if (!directory.existsSync() || hasExampleApp) {
       return;
@@ -324,9 +327,6 @@ abstract class XcodeBasedProject {
 
   /// The CocoaPods 'Manifest.lock'.
   File get podManifestLock;
-
-  /// Directory containing symlinks to pub cache plugins source generated on `pod install`.
-  Directory get symlinks;
 }
 
 /// Represents the iOS sub-project of a Flutter project.
@@ -389,7 +389,6 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   /// The default 'Info.plist' file of the host app. The developer can change this location in Xcode.
   File get defaultHostInfoPlist => hostAppRoot.childDirectory(_hostAppProjectName).childFile('Info.plist');
 
-  @override
   Directory get symlinks => _flutterLibRoot.childDirectory('.symlinks');
 
   @override
@@ -648,10 +647,11 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   }
 
   Future<void> _overwriteFromTemplate(String path, Directory target) async {
-    final Template template = await Template.fromName(path, fileSystem: globals.fs);
+    final Template template = await Template.fromName(path, fileSystem: globals.fs, templateManifest: null);
     template.render(
       target,
       <String, dynamic>{
+        'ios': true,
         'projectName': parent.manifest.appName,
         'iosIdentifier': parent.manifest.iosBundleIdentifier,
       },
@@ -797,10 +797,11 @@ class AndroidProject extends FlutterProjectPlatform {
   }
 
   Future<void> _overwriteFromTemplate(String path, Directory target) async {
-    final Template template = await Template.fromName(path, fileSystem: globals.fs);
+    final Template template = await Template.fromName(path, fileSystem: globals.fs, templateManifest: null);
     template.render(
       target,
       <String, dynamic>{
+        'android': true,
         'projectName': parent.manifest.appName,
         'androidIdentifier': parent.manifest.androidPackage,
         'androidX': usesAndroidX,
@@ -969,9 +970,6 @@ class MacOSProject extends FlutterProjectPlatform implements XcodeBasedProject {
 
   @override
   Directory get xcodeWorkspace => _macOSDirectory.childDirectory('$_hostAppProjectName.xcworkspace');
-
-  @override
-  Directory get symlinks => ephemeralDirectory.childDirectory('.symlinks');
 
   /// The file where the Xcode build will write the name of the built app.
   ///

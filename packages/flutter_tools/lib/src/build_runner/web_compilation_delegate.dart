@@ -220,6 +220,7 @@ class BuildDaemonCreator {
     // STDIO.
     final List<String> args = <String>[
       globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+      '--disable-dart-dev',
       '--packages=$buildScriptPackages',
       buildScript,
       'daemon',

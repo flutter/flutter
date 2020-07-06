@@ -7,8 +7,8 @@ import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
-import 'base/async_guard.dart';
 
+import 'base/async_guard.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
@@ -26,8 +26,7 @@ import 'reporting/reporting.dart';
 import 'resident_runner.dart';
 import 'vmservice.dart';
 
-ProjectFileInvalidator get projectFileInvalidator => context.get<ProjectFileInvalidator>() ?? _defaultInvalidator;
-final ProjectFileInvalidator _defaultInvalidator = ProjectFileInvalidator(
+ProjectFileInvalidator get projectFileInvalidator => context.get<ProjectFileInvalidator>() ?? ProjectFileInvalidator(
   fileSystem: globals.fs,
   platform: globals.platform,
   logger: globals.logger,
@@ -63,17 +62,15 @@ class DeviceReloadReport {
   List<vm_service.ReloadReport> reports; // List has one report per Flutter view.
 }
 
-// TODO(mklim): Test this, flutter/flutter#23031.
 class HotRunner extends ResidentRunner {
   HotRunner(
     List<FlutterDevice> devices, {
     String target,
-    DebuggingOptions debuggingOptions,
+    @required DebuggingOptions debuggingOptions,
     this.benchmarkMode = false,
     this.applicationBinary,
     this.hostIsIde = false,
     String projectRootPath,
-    String packagesFilePath,
     String dillOutputPath,
     bool stayResident = true,
     bool ipv6 = false,
@@ -81,7 +78,6 @@ class HotRunner extends ResidentRunner {
              target: target,
              debuggingOptions: debuggingOptions,
              projectRootPath: projectRootPath,
-             packagesFilePath: packagesFilePath,
              stayResident: stayResident,
              hotMode: true,
              dillOutputPath: dillOutputPath,
@@ -158,7 +154,7 @@ class HotRunner extends ResidentRunner {
     final UpdateFSReport results = UpdateFSReport(success: true);
     final List<Uri> invalidated =  <Uri>[Uri.parse(libraryId)];
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-      globals.fs.file(globalPackagesPath),
+      globals.fs.file(debuggingOptions.buildInfo.packagesPath),
       logger: globals.logger,
     );
     for (final FlutterDevice device in flutterDevices) {
@@ -225,6 +221,7 @@ class HotRunner extends ResidentRunner {
         restart: _restartService,
         compileExpression: _compileExpressionService,
         reloadMethod: reloadMethod,
+        getSkSLMethod: writeSkSL,
       );
     // Catches all exceptions, non-Exception objects are rethrown.
     } catch (error) { // ignore: avoid_catches_without_on_clauses
@@ -232,20 +229,6 @@ class HotRunner extends ResidentRunner {
         rethrow;
       }
       globals.printError('Error connecting to the service protocol: $error');
-      // https://github.com/flutter/flutter/issues/33050
-      // TODO(blasten): Remove this check once
-      // https://issuetracker.google.com/issues/132325318 has been fixed.
-      if (await hasDeviceRunningAndroidQ(flutterDevices) &&
-          error.toString().contains(kAndroidQHttpConnectionClosedExp)) {
-        globals.printStatus(
-          '🔨 If you are using an emulator running Android Q Beta, '
-          'consider using an emulator running API level 29 or lower.',
-        );
-        globals.printStatus(
-          'Learn more about the status of this issue on '
-          'https://issuetracker.google.com/issues/132325318.',
-        );
-      }
       return 2;
     }
 
@@ -357,7 +340,7 @@ class HotRunner extends ResidentRunner {
 
     final List<Future<bool>> startupTasks = <Future<bool>>[];
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-      globals.fs.file(globalPackagesPath),
+      globals.fs.file(debuggingOptions.buildInfo.packagesPath),
       logger: globals.logger,
     );
     for (final FlutterDevice device in flutterDevices) {
@@ -365,11 +348,17 @@ class HotRunner extends ResidentRunner {
       // build, reducing overall initialization time. This is safe because the first
       // invocation of the frontend server produces a full dill file that the
       // subsequent invocation in devfs will not overwrite.
+      await runSourceGenerators();
       if (device.generator != null) {
         startupTasks.add(
           device.generator.recompile(
             globals.fs.file(mainPath).uri,
             <Uri>[],
+            // When running without a provided applicationBinary, the tool will
+            // simultaneously run the initial frontend_server compilation and
+            // the native build step. If there is a Dart compilation error, it
+            // should only be displayed once.
+            suppressErrors: applicationBinary == null,
             outputPath: dillOutputPath ??
               getDefaultApplicationKernelPath(trackWidgetCreation: debuggingOptions.buildInfo.trackWidgetCreation),
             packageConfig: packageConfig,
@@ -384,10 +373,13 @@ class HotRunner extends ResidentRunner {
     try {
       final List<bool> results = await Future.wait(startupTasks);
       if (!results.every((bool passed) => passed)) {
+        appFailedToStart();
         return 1;
       }
+      cacheInitialDillCompilation();
     } on Exception catch (err) {
       globals.printError(err.toString());
+      appFailedToStart();
       return 1;
     }
 
@@ -414,7 +406,7 @@ class HotRunner extends ResidentRunner {
     final bool rebuildBundle = assetBundle.needsBuild();
     if (rebuildBundle) {
       globals.printTrace('Updating assets');
-      final int result = await assetBundle.build();
+      final int result = await assetBundle.build(packagesPath: '.packages');
       if (result != 0) {
         return UpdateFSReport(success: false);
       }
@@ -674,6 +666,10 @@ class HotRunner extends ResidentRunner {
       emulator = false;
     }
     final Stopwatch timer = Stopwatch()..start();
+
+    // Run source generation if needed.
+    await runSourceGenerators();
+
     if (fullRestart) {
       final OperationResult result = await _fullRestartHelper(
         targetPlatform: targetPlatform,
@@ -752,6 +748,7 @@ class HotRunner extends ResidentRunner {
         sdkName: sdkName,
         emulator: emulator,
         fullRestart: true,
+        nullSafety: usageNullSafety,
         reason: reason).send();
       status?.cancel();
     }
@@ -793,7 +790,9 @@ class HotRunner extends ResidentRunner {
         sdkName: sdkName,
         emulator: emulator,
         fullRestart: false,
-        reason: reason).send();
+        nullSafety: usageNullSafety,
+        reason: reason,
+      ).send();
       return OperationResult(1, 'hot reload failed to complete', fatal: true);
     } finally {
       status.cancel();
@@ -871,6 +870,7 @@ class HotRunner extends ResidentRunner {
             emulator: emulator,
             fullRestart: false,
             reason: reason,
+            nullSafety: usageNullSafety,
           ).send();
           return OperationResult(1, 'Reload rejected');
         }
@@ -898,6 +898,7 @@ class HotRunner extends ResidentRunner {
           emulator: emulator,
           fullRestart: false,
           reason: reason,
+          nullSafety: usageNullSafety,
         ).send();
         return OperationResult(errorCode, errorMessage);
       }
@@ -1023,6 +1024,7 @@ class HotRunner extends ResidentRunner {
       syncedBytes: updatedDevFS.syncedBytes,
       invalidatedSourcesCount: updatedDevFS.invalidatedSourcesCount,
       transferTimeInMs: devFSTimer.elapsed.inMilliseconds,
+      nullSafety: usageNullSafety,
     ).send();
 
     if (shouldReportReloadTime) {
@@ -1190,7 +1192,7 @@ class ProjectFileInvalidator {
   static const String _pubCachePathWindows = 'Pub/Cache';
 
   // As of writing, Dart supports up to 32 asynchronous I/O threads per
-  // isolate.  We also want to avoid hitting platform limits on open file
+  // isolate. We also want to avoid hitting platform limits on open file
   // handles/descriptors.
   //
   // This value was chosen based on empirical tests scanning a set of
@@ -1223,7 +1225,6 @@ class ProjectFileInvalidator {
         if (_isNotInPubCache(uri)) uri,
     ];
     final List<Uri> invalidatedFiles = <Uri>[];
-
     if (asyncScanning) {
       final Pool pool = Pool(_kMaxPendingStats);
       final List<Future<void>> waitList = <Future<void>>[];
@@ -1287,7 +1288,7 @@ class ProjectFileInvalidator {
 
   Future<PackageConfig> _createPackageConfig(String packagesPath) {
     return loadPackageConfigWithLogging(
-      _fileSystem.file(globalPackagesPath),
+      _fileSystem.file(packagesPath),
       logger: _logger,
     );
   }

@@ -109,14 +109,36 @@ Future<void> main() async {
       }
       await _checkFrameworkArchs(debugAppFrameworkPath, 'Debug');
 
-      checkFileExists(path.join(
+      // Xcode changed the name of this generated directory in Xcode 12.
+      const String xcode11ArmDirectoryName = 'ios-armv7_arm64';
+      const String xcode12ArmDirectoryName = 'ios-arm64_armv7';
+
+      final String xcode11AppFrameworkDirectory = path.join(
         outputPath,
         'Debug',
         'App.xcframework',
-        'ios-armv7_arm64',
+        xcode11ArmDirectoryName,
         'App.framework',
         'App',
-      ));
+      );
+      final String xcode12AppFrameworkDirectory = path.join(
+        outputPath,
+        'Debug',
+        'App.xcframework',
+        xcode12ArmDirectoryName,
+        'App.framework',
+        'App',
+      );
+
+      // This seemed easier than an explicit Xcode version check.
+      String xcodeArmDirectoryName;
+      if (exists(File(xcode11AppFrameworkDirectory))) {
+        xcodeArmDirectoryName = xcode11ArmDirectoryName;
+      } else if (exists(File(xcode12AppFrameworkDirectory))) {
+        xcodeArmDirectoryName = xcode12ArmDirectoryName;
+      } else {
+        throw const FileSystemException('Expected App.framework binary to exist.');
+      }
 
       checkFileExists(path.join(
         outputPath,
@@ -158,7 +180,7 @@ Future<void> main() async {
           outputPath,
           mode,
           'App.xcframework',
-          'ios-armv7_arm64',
+          xcodeArmDirectoryName,
           'App.framework',
           'App',
         ));
@@ -190,7 +212,7 @@ Future<void> main() async {
           outputPath,
           mode,
           'Flutter.xcframework',
-          'ios-armv7_arm64',
+          xcodeArmDirectoryName,
           'Flutter.framework',
           'Flutter',
         ));
@@ -234,7 +256,7 @@ Future<void> main() async {
           outputPath,
           mode,
           'device_info.xcframework',
-          'ios-armv7_arm64',
+          xcodeArmDirectoryName,
           'device_info.framework',
           'device_info',
         ));
@@ -243,7 +265,7 @@ Future<void> main() async {
           outputPath,
           mode,
           'device_info.xcframework',
-          'ios-armv7_arm64',
+          xcodeArmDirectoryName,
           'device_info.framework',
           'Headers',
           'DeviceInfoPlugin.h',
@@ -301,7 +323,7 @@ Future<void> main() async {
           outputPath,
           mode,
           'FlutterPluginRegistrant.xcframework',
-          'ios-armv7_arm64',
+          xcodeArmDirectoryName,
           'FlutterPluginRegistrant.framework',
           'Headers',
           'GeneratedPluginRegistrant.h',

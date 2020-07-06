@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:typed_data';
 
@@ -46,7 +48,7 @@ class BasicMessageChannel<T> {
   final MessageCodec<T> codec;
 
   /// The messenger which sends the bytes for this channel, not null.
-  BinaryMessenger get binaryMessenger => _binaryMessenger ?? defaultBinaryMessenger; // ignore: deprecated_member_use_from_same_package
+  BinaryMessenger get binaryMessenger => _binaryMessenger ?? defaultBinaryMessenger;
   final BinaryMessenger _binaryMessenger;
 
   /// Sends the specified [message] to the platform plugins on this channel.
@@ -98,6 +100,9 @@ class BasicMessageChannel<T> {
   }
 }
 
+Expando<Object> _methodChannelHandlers = Expando<Object>();
+Expando<Object> _methodChannelMockHandlers = Expando<Object>();
+
 /// A named channel for communicating with platform plugins using asynchronous
 /// method calls.
 ///
@@ -137,7 +142,7 @@ class MethodChannel {
   /// The messenger used by this channel to send platform messages.
   ///
   /// The messenger may not be null.
-  BinaryMessenger get binaryMessenger => _binaryMessenger ?? defaultBinaryMessenger; // ignore: deprecated_member_use_from_same_package
+  BinaryMessenger get binaryMessenger => _binaryMessenger ?? defaultBinaryMessenger;
   final BinaryMessenger _binaryMessenger;
 
   @optionalTypeArgs
@@ -372,11 +377,21 @@ class MethodChannel {
   /// similarly to what happens if no method call handler has been set.
   /// Any other exception results in an error envelope being sent.
   void setMethodCallHandler(Future<dynamic> handler(MethodCall call)) {
+    _methodChannelHandlers[this] = handler;
     binaryMessenger.setMessageHandler(
       name,
-      handler == null ? null : (ByteData message) => _handleAsMethodCall(message, handler),
+      handler == null
+        ? null
+        : (ByteData message) => _handleAsMethodCall(message, handler),
     );
   }
+
+  /// Returns true if the `handler` argument matches the `handler` previously
+  /// passed to [setMethodCallHandler].
+  ///
+  /// This method is useful for tests or test harnesses that want to assert the
+  /// handler for the specified channel has not been altered by a previous test.
+  bool checkMethodCallHandler(Future<dynamic> handler(MethodCall call)) => _methodChannelHandlers[this] == handler;
 
   /// Sets a mock callback for intercepting method invocations on this channel.
   ///
@@ -397,11 +412,19 @@ class MethodChannel {
   /// [MethodCodec.encodeSuccessEnvelope], to act as if platform plugin had
   /// returned that value.
   void setMockMethodCallHandler(Future<dynamic> handler(MethodCall call)) {
+    _methodChannelMockHandlers[this] = handler;
     binaryMessenger.setMockMessageHandler(
       name,
       handler == null ? null : (ByteData message) => _handleAsMethodCall(message, handler),
     );
   }
+
+  /// Returns true if the `handler` argument matches the `handler` previously
+  /// passed to [setMockMethodCallHandler].
+  ///
+  /// This method is useful for tests or test harnesses that want to assert the
+  /// handler for the specified channel has not been altered by a previous test.
+  bool checkMockMethodCallHandler(Future<dynamic> handler(MethodCall call)) => _methodChannelMockHandlers[this] == handler;
 
   Future<ByteData> _handleAsMethodCall(ByteData message, Future<dynamic> handler(MethodCall call)) async {
     final MethodCall call = codec.decodeMethodCall(message);
@@ -483,7 +506,7 @@ class EventChannel {
   final MethodCodec codec;
 
   /// The messenger used by this channel to send platform messages, not null.
-  BinaryMessenger get binaryMessenger => _binaryMessenger ?? defaultBinaryMessenger; // ignore: deprecated_member_use_from_same_package
+  BinaryMessenger get binaryMessenger => _binaryMessenger ?? defaultBinaryMessenger;
   final BinaryMessenger _binaryMessenger;
 
   /// Sets up a broadcast stream for receiving events on this channel.

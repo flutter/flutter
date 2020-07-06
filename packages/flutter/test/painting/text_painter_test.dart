@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart';
@@ -25,7 +27,8 @@ void main() {
     caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: text.length), ui.Rect.zero);
     expect(caretOffset.dx, painter.width);
 
-    // Check that getOffsetForCaret handles a character that is encoded as a surrogate pair.
+    // Check that getOffsetForCaret handles a character that is encoded as a
+    // surrogate pair.
     text = 'A\u{1F600}';
     painter.text = TextSpan(text: text);
     painter.layout();

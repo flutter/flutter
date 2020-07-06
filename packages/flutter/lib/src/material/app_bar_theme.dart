@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -34,9 +36,17 @@ class AppBarTheme with Diagnosticable {
     this.brightness,
     this.color,
     this.elevation,
+    this.shadowColor,
     this.iconTheme,
     this.actionsIconTheme,
     this.textTheme,
+    this.centerTitle,
+    @Deprecated(
+      'Deprecated property to cap text scaling for title. '
+      'This feature was deprecated after v1.19.0.'
+    )
+    // ignore: deprecated_member_use_from_same_package
+    this.shouldCapTextScaleForTitle = true,
   });
 
   /// Default value for [AppBar.brightness].
@@ -54,6 +64,11 @@ class AppBarTheme with Diagnosticable {
   /// If null, [AppBar] uses a default value of 4.0.
   final double elevation;
 
+  /// Default value for [AppBar.shadowColor].
+  ///
+  /// If null, [AppBar] uses a default value of fully opaque black.
+  final Color shadowColor;
+
   /// Default value for [AppBar.iconTheme].
   ///
   /// If null, [AppBar] uses [ThemeData.primaryIconTheme].
@@ -69,6 +84,24 @@ class AppBarTheme with Diagnosticable {
   /// If null, [AppBar] uses [ThemeData.primaryTextTheme].
   final TextTheme textTheme;
 
+  /// Default value for [AppBar.centerTitle].
+  ///
+  /// If null, the value is adapted to current [TargetPlatform].
+  final bool centerTitle;
+
+  /// Cap text scale to a maximum for [AppBar.title].
+  ///
+  /// This flag is deprecated and caps the text scaling to a maximum for
+  /// [AppBar.title], to keep the visual hierarchy in an app with large font
+  /// sizes. It exists to provide backwards compatibility to ease migrations,
+  /// and will eventually be removed as the maximum text scale will be enabled
+  /// by default.
+  @Deprecated(
+    'Deprecated property to cap text scaling for title. '
+    'This feature was deprecated after v1.19.0.'
+  )
+  final bool shouldCapTextScaleForTitle;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   AppBarTheme copyWith({
@@ -76,16 +109,28 @@ class AppBarTheme with Diagnosticable {
     Brightness brightness,
     Color color,
     double elevation,
+    Color shadowColor,
     IconThemeData iconTheme,
     TextTheme textTheme,
+    bool centerTitle,
+    @Deprecated(
+      'Deprecated property to cap text scaling for title. '
+      'This feature was deprecated after v1.19.0.'
+    )
+    // ignore: deprecated_member_use_from_same_package
+    bool shouldCapTextScaleForTitle,
   }) {
     return AppBarTheme(
       brightness: brightness ?? this.brightness,
       color: color ?? this.color,
       elevation: elevation ?? this.elevation,
+      shadowColor: shadowColor ?? this.shadowColor,
       iconTheme: iconTheme ?? this.iconTheme,
       actionsIconTheme: actionsIconTheme ?? this.actionsIconTheme,
       textTheme: textTheme ?? this.textTheme,
+      centerTitle: centerTitle ?? this.centerTitle,
+      // ignore: deprecated_member_use_from_same_package
+      shouldCapTextScaleForTitle: shouldCapTextScaleForTitle ?? this.shouldCapTextScaleForTitle,
     );
   }
 
@@ -105,9 +150,13 @@ class AppBarTheme with Diagnosticable {
       brightness: t < 0.5 ? a?.brightness : b?.brightness,
       color: Color.lerp(a?.color, b?.color, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
+      shadowColor: Color.lerp(a?.shadowColor, b?.shadowColor, t),
       iconTheme: IconThemeData.lerp(a?.iconTheme, b?.iconTheme, t),
       actionsIconTheme: IconThemeData.lerp(a?.actionsIconTheme, b?.actionsIconTheme, t),
       textTheme: TextTheme.lerp(a?.textTheme, b?.textTheme, t),
+      centerTitle: t < 0.5 ? a?.centerTitle : b?.centerTitle,
+      // ignore: deprecated_member_use_from_same_package
+      shouldCapTextScaleForTitle: a?.shouldCapTextScaleForTitle == true || b?.shouldCapTextScaleForTitle == true,
     );
   }
 
@@ -117,9 +166,11 @@ class AppBarTheme with Diagnosticable {
       brightness,
       color,
       elevation,
+      shadowColor,
       iconTheme,
       actionsIconTheme,
       textTheme,
+      centerTitle,
     );
   }
 
@@ -133,9 +184,13 @@ class AppBarTheme with Diagnosticable {
         && other.brightness == brightness
         && other.color == color
         && other.elevation == elevation
+        && other.shadowColor == shadowColor
         && other.iconTheme == iconTheme
         && other.actionsIconTheme == actionsIconTheme
-        && other.textTheme == textTheme;
+        && other.textTheme == textTheme
+        && other.centerTitle == centerTitle
+        // ignore: deprecated_member_use_from_same_package
+        && other.shouldCapTextScaleForTitle == shouldCapTextScaleForTitle;
   }
 
   @override
@@ -144,8 +199,12 @@ class AppBarTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<Brightness>('brightness', brightness, defaultValue: null));
     properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
+    properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: null));
     properties.add(DiagnosticsProperty<IconThemeData>('iconTheme', iconTheme, defaultValue: null));
     properties.add(DiagnosticsProperty<IconThemeData>('actionsIconTheme', actionsIconTheme, defaultValue: null));
     properties.add(DiagnosticsProperty<TextTheme>('textTheme', textTheme, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('centerTitle', centerTitle, defaultValue: null));
+    // ignore: deprecated_member_use_from_same_package
+    properties.add(DiagnosticsProperty<bool>('shouldCapTextScaleForTitle', shouldCapTextScaleForTitle, defaultValue: null));
   }
 }

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:io'; // ignore: dart_io_import
 
 import 'package:file/file.dart';
@@ -82,6 +83,67 @@ void main() {
       expect(response, throwsA(const TypeMatcher<RPCError>()));
     });
 
+    test('flutterGetSkSL can be called', () async {
+      final Response response = await vmService.callMethod('s0.flutterGetSkSL');
+
+      expect(response.type, 'Success');
+    });
+
+    test('ext.flutter.brightnessOverride can toggle window brightness', () async {
+      final Isolate isolate = await waitForExtension(vmService);
+      final Response response = await vmService.callServiceExtension(
+        'ext.flutter.brightnessOverride',
+        isolateId: isolate.id,
+      );
+      expect(response.json['value'], 'Brightness.light');
+
+      final Response updateResponse = await vmService.callServiceExtension(
+        'ext.flutter.brightnessOverride',
+        isolateId: isolate.id,
+        args: <String, String>{
+          'value': 'Brightness.dark',
+        }
+      );
+      expect(updateResponse.json['value'], 'Brightness.dark');
+
+      // Change the brightness back to light
+      final Response verifyResponse = await vmService.callServiceExtension(
+        'ext.flutter.brightnessOverride',
+        isolateId: isolate.id,
+        args: <String, String>{
+          'value': 'Brightness.light',
+        }
+      );
+      expect(verifyResponse.json['value'], 'Brightness.light');
+
+      // Change with a bogus value
+      final Response bogusResponse = await vmService.callServiceExtension(
+        'ext.flutter.brightnessOverride',
+        isolateId: isolate.id,
+        args: <String, String>{
+          'value': 'dark', // Intentionally invalid value.
+        }
+      );
+      expect(bogusResponse.json['value'], 'Brightness.light');
+    });
+
     // TODO(devoncarew): These tests fail on cirrus-ci windows.
   }, skip: Platform.isWindows);
+}
+
+Future<Isolate> waitForExtension(VmService vmService) async {
+  final Completer<void> completer = Completer<void>();
+  await vmService.streamListen(EventStreams.kExtension);
+  vmService.onExtensionEvent.listen((Event event) {
+    if (event.json['extensionKind'] == 'Flutter.FrameworkInitialization') {
+      completer.complete();
+    }
+  });
+  final IsolateRef isolateRef = (await vmService.getVM()).isolates.first;
+  final Isolate isolate = await vmService.getIsolate(isolateRef.id);
+  if (isolate.extensionRPCs.contains('ext.flutter.brightnessOverride')) {
+    return isolate;
+  }
+  await completer.future;
+  return isolate;
 }
