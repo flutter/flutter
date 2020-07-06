@@ -2025,7 +2025,7 @@ void main() {
       home: CustomScrollView(
         slivers: <Widget>[
           SliverAppBar(
-            leading: Placeholder(key: key,),
+            leading: Placeholder(key: key),
             leadingWidth: 100,
             title: Text('Title'),
           ),
