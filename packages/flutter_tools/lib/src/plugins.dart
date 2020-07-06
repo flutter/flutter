@@ -214,7 +214,7 @@ class Plugin {
     }
 
     if (usesNewPluginFormat) {
-      if (yaml['platforms'] is! YamlMap) {
+      if (yaml['platforms'] != null && yaml['platforms'] is! YamlMap) {
         const String errorMessage = 'flutter.plugin.platforms should be a map with the platform name as the key';
         return <String>[errorMessage];
       }
