@@ -4068,6 +4068,23 @@ void main() {
     expect(tester.getTopLeft(find.text('label')).dy, 20.0);
   });
 
+  testWidgets('InputDecorator hint is displayed when floatingLabelBehavior is always', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildInputDecorator(
+        // isFocused: false (default)
+        isEmpty: true,
+        decoration: const InputDecoration(
+          floatingLabelBehavior: FloatingLabelBehavior.always,
+          hintText: 'hint',
+          labelText: 'label',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(getOpacity(tester, 'hint'), 1.0);
+  });
+
   testWidgets('InputDecorator floating label width scales when focused', (WidgetTester tester) async {
     final String longStringA = String.fromCharCodes(List<int>.generate(200, (_) => 65));
     final String longStringB = String.fromCharCodes(List<int>.generate(200, (_) => 66));

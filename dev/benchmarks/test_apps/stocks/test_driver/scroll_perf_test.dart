@@ -40,8 +40,8 @@ void main() {
       });
 
       final TimelineSummary summary = TimelineSummary.summarize(timeline);
-      summary.writeSummaryToFile('stocks_scroll_perf', pretty: true);
-      summary.writeTimelineToFile('stocks_scroll_perf', pretty: true);
+      await summary.writeSummaryToFile('stocks_scroll_perf', pretty: true);
+      await summary.writeTimelineToFile('stocks_scroll_perf', pretty: true);
     });
   });
 }

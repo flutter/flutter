@@ -92,6 +92,32 @@ void main() {
     )),
   }));
 
+  // Regression test for https://github.com/flutter/flutter/issues/60613
+  test('ResidentWebRunner calls appFailedToStart if initial compilation fails', () => testbed.run(() async {
+    _setupMocks();
+    when(mockBuildSystem.build(any, any)).thenAnswer((Invocation invocation) async {
+      return BuildResult(success: false);
+    });
+    expect(() async => await residentWebRunner.run(), throwsToolExit());
+    expect(await residentWebRunner.waitForAppToFinish(), 1);
+
+  }, overrides: <Type, Generator>{
+    BuildSystem: () => mockBuildSystem,
+  }));
+
+  // Regression test for https://github.com/flutter/flutter/issues/60613
+  test('ResidentWebRunner calls appFailedToStart if error is thrown during startup', () => testbed.run(() async {
+    _setupMocks();
+    when(mockBuildSystem.build(any, any)).thenAnswer((Invocation invocation) async {
+      throw Exception('foo');
+    });
+    expect(() async => await residentWebRunner.run(), throwsA(isA<Exception>()));
+    expect(await residentWebRunner.waitForAppToFinish(), 1);
+
+  }, overrides: <Type, Generator>{
+    BuildSystem: () => mockBuildSystem,
+  }));
+
   test('Can full restart after attaching', () => testbed.run(() async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();

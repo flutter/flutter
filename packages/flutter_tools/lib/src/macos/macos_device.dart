@@ -24,7 +24,7 @@ class MacOSDevice extends DesktopDevice {
   bool isSupported() => true;
 
   @override
-  String get name => 'macOS desktop';
+  String get name => 'macOS';
 
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.darwin_x64;
