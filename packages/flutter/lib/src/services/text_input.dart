@@ -714,6 +714,13 @@ class TextEditingValue {
     );
   }
 
+  /// Whether the [composing] range is a valid range within [text].
+  ///
+  /// Returns if and only if the [composing] range is normalized, its start is
+  /// greater than or equal to 0, and its end is less than or equal to [text]'s
+  /// length.
+  bool get isComposingRangeValid => composing.isValid && composing.isNormalized && composing.end <= text.length;
+
   @override
   String toString() => '${objectRuntimeType(this, 'TextEditingValue')}(text: \u2524$text\u251C, selection: $selection, composing: $composing)';
 

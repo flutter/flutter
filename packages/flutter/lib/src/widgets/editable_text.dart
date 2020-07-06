@@ -160,7 +160,12 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// By default makes text in composing range appear as underlined.
   /// Descendants can override this method to customize appearance of text.
   TextSpan buildTextSpan({TextStyle style , bool withComposing}) {
-    if (!value.composing.isValid || !withComposing) {
+    // If the composing range is invalid within the current text, ignore it to
+    // preserve the tree integrity, otherwise in release mode a RangeError will
+    // be thrown instead of the asserts, as a result this EditableText will be
+    // built with a broken subtree.
+    assert((value.composing.isValid && withComposing) && value.isComposingRangeValid);
+    if (!value.isComposingRangeValid || !withComposing) {
       return TextSpan(style: style, text: text);
     }
     final TextStyle composingStyle = style.merge(
@@ -1650,6 +1655,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   TextEditingValue get _value => widget.controller.value;
   set _value(TextEditingValue value) {
+    assert(
+      !value.composing.isValid || value.isComposingRangeValid,
+      'New TextEditingValue $value has an invalid non-empty composing range '
+      '${value.composing}. It is recommended to use a valid composing range, '
+      'even for readonly text fields',
+    );
     widget.controller.value = value;
   }
 
