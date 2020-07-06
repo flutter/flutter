@@ -930,7 +930,7 @@ Future<void> _runFlutterWebTest(String workingDirectory, List<String> tests) asy
   );
 }
 
-const String _supportedTesterVersion = '0.0.1-dev9';
+const String _supportedTesterVersion = '0.0.2-dev5';
 
 Future<void> _pubRunTester(String workingDirectory, {
   List<String> testPaths,
@@ -979,6 +979,7 @@ Future<void> _pubRunTester(String workingDirectory, {
       'run',
       'tester',
       '-j$cpus',
+      '-v',
       '--ci',
       if (perTestTimeout != null)
         '--timeout=$perTestTimeout'
