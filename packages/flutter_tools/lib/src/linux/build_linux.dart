@@ -10,10 +10,10 @@ import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../cmake.dart';
 import '../globals.dart' as globals;
 import '../plugins.dart';
 import '../project.dart';
-import 'cmake.dart';
 
 /// Builds the Linux project through the Makefile.
 Future<void> buildLinux(
@@ -39,7 +39,7 @@ Future<void> buildLinux(
   }
   writeGeneratedCmakeConfig(Cache.flutterRoot, linuxProject, environmentConfig);
 
-  createPluginSymlinks(linuxProject.project);
+  createPluginSymlinks(linuxProject.parent);
 
   final Status status = globals.logger.startProgress(
     'Building Linux application...',

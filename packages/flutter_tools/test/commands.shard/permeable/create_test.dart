@@ -777,7 +777,7 @@ void main() {
 
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
-    expect(projectDir.childDirectory('windows').childFile('Runner.sln').existsSync(), true);
+    expect(projectDir.childDirectory('windows').childFile('CMakeLists.txt').existsSync(), true);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
@@ -792,7 +792,7 @@ void main() {
 
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
-    expect(projectDir.childDirectory('windows').childFile('Runner.sln').existsSync(), false);
+    expect(projectDir.childDirectory('windows').childFile('CMakeLists.txt').existsSync(), false);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: false),
   });
@@ -807,7 +807,7 @@ void main() {
 
     await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=windows', projectDir.path]);
 
-    expect(projectDir.childDirectory('windows').childFile('plugin.vcxproj').existsSync(), true);
+    expect(projectDir.childDirectory('windows').childFile('CMakeLists.txt').existsSync(), true);
     expect(projectDir.childDirectory('example').childDirectory('windows').existsSync(), true);
     validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: const <String>[
       'windows'
@@ -827,7 +827,7 @@ void main() {
 
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
 
-    expect(projectDir.childDirectory('windows').childFile('plugin.vcxproj').existsSync(), false);
+    expect(projectDir.childDirectory('windows').childFile('CMakeLists.txt').existsSync(), false);
     expect(projectDir.childDirectory('example').childDirectory('windows').existsSync(), false);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: false),
