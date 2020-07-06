@@ -44,14 +44,14 @@ void main() {
     layout(paragraph);
 
     final TextPosition position20 = paragraph.getPositionForOffset(const Offset(20.0, 5.0));
-    expect(position20.offset, greaterThan(0.0)); // breaks here, value is 0.0
+    expect(position20.offset, greaterThan(0.0));
 
     final TextPosition position40 = paragraph.getPositionForOffset(const Offset(40.0, 5.0));
     expect(position40.offset, greaterThan(position20.offset));
 
     final TextPosition positionBelow = paragraph.getPositionForOffset(const Offset(5.0, 20.0));
     expect(positionBelow.offset, greaterThan(position40.offset));
-  }, skip: isBrowser); // Reference needed
+  });
 
   test('getBoxesForSelection control test', () {
     final RenderParagraph paragraph = RenderParagraph(
@@ -71,8 +71,8 @@ void main() {
     );
 
     expect(boxes.any((ui.TextBox box) => box.left == 250 && box.top == 0), isTrue);
-    expect(boxes.any((ui.TextBox box) => box.right == 100 && box.top == 10), isTrue); // breaks here, is false
-  }, skip: isBrowser); // Reference needed
+    expect(boxes.any((ui.TextBox box) => box.right == 100 && box.top == 10), isTrue);
+  });
 
   test('getWordBoundary control test', () {
     final RenderParagraph paragraph = RenderParagraph(
@@ -85,11 +85,11 @@ void main() {
     expect(range5.textInside(_kText), equals('polished'));
 
     final TextRange range50 = paragraph.getWordBoundary(const TextPosition(offset: 50));
-    expect(range50.textInside(_kText), equals(' ')); // breaks here, 'I '
+    expect(range50.textInside(_kText), equals(' '));
 
     final TextRange range85 = paragraph.getWordBoundary(const TextPosition(offset: 75));
     expect(range85.textInside(_kText), equals("Queen's"));
-  }, skip: isBrowser); // Reference needed
+  });
 
   test('overflow test', () {
     final RenderParagraph paragraph = RenderParagraph(
@@ -127,7 +127,7 @@ void main() {
     expect(paragraph.size.height, equals(lineHeight));
 
     relayoutWith(maxLines: 3, softWrap: true, overflow: TextOverflow.ellipsis);
-    expect(paragraph.size.height, equals(3 * lineHeight)); // breaks here, 2 istead of 30
+    expect(paragraph.size.height, equals(3 * lineHeight));
 
     // This is the one weird case. If maxLines is null, we would expect to allow
     // infinite wrapping. However, if we did, we'd never know when to append an
@@ -165,7 +165,7 @@ void main() {
 
     relayoutWith(maxLines: 100, softWrap: true, overflow: TextOverflow.fade);
     expect(paragraph.debugHasOverflowShader, isFalse);
-  }, skip: isBrowser); // Reference needed
+  });
 
   test('maxLines', () {
     final RenderParagraph paragraph = RenderParagraph(
@@ -184,7 +184,7 @@ void main() {
     }
 
     layoutAt(null);
-    expect(paragraph.size.height, 130.0); // breaks here, 132
+    expect(paragraph.size.height, 130.0);
 
     layoutAt(1);
     expect(paragraph.size.height, 10.0);
@@ -194,7 +194,7 @@ void main() {
 
     layoutAt(3);
     expect(paragraph.size.height, 30.0);
-  }, skip: isBrowser);
+  });
 
   test('changing color does not do layout', () {
     final RenderParagraph paragraph = RenderParagraph(
@@ -268,7 +268,7 @@ void main() {
           TextSelection(baseOffset: i, extentOffset: i + 1)
         ),
     ];
-    expect(boxes.length, equals(4)); // breaks here, 142
+    expect(boxes.length, equals(4));
 
     // anyOf is needed here and below because Linux and Mac have different text
     // rendering widths in tests.
@@ -281,7 +281,7 @@ void main() {
     expect(boxes[2].toRect().height, closeTo(26.0, 0.0001));
     expect(boxes[3].toRect().width, anyOf(14.0, 13.0));
     expect(boxes[3].toRect().height, closeTo(13.0, 0.0001));
-  }, skip: isBrowser); // Reference needed
+  });
 
   test('toStringDeep', () {
     final RenderParagraph paragraph = RenderParagraph(
