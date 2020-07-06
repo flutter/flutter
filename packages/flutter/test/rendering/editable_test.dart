@@ -836,7 +836,7 @@ void main() {
     await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
     await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
     expect(delegate.textEditingValue.text, '01236789');
-  }, skip: kIsWeb);
+  });
 
   test('arrow keys and delete handle grapheme clusters correctly', () async {
     final TextSelectionDelegate delegate = FakeEditableTextState();
@@ -886,7 +886,7 @@ void main() {
     await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
     await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
     expect(delegate.textEditingValue.text, '01232345');
-  }, skip: kIsWeb);
+  });
 
   test('arrow keys and delete handle surrogate pairs correctly', () async {
     final TextSelectionDelegate delegate = FakeEditableTextState();
