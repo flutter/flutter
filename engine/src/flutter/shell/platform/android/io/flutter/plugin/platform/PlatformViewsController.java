@@ -663,7 +663,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(viewWidth, ViewHeight);
     View platformView = platformViews.get(viewId);
     platformView.setLayoutParams(layoutParams);
-    platformView.setVisibility(View.VISIBLE);
     platformView.bringToFront();
     currentFrameUsedPlatformViewIds.add(viewId);
   }
@@ -691,42 +690,86 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   }
 
   public void onEndFrame() {
-    // Hide overlay surfaces that aren't rendered in the current frame.
+    // Whether the current frame was rendered using ImageReaders.
+    //
+    // Since the image readers may not have images available at this point,
+    // this becomes true if all the required surfaces have images available.
+    //
+    // This is used to decide if the platform views can be rendered in the current frame.
+    // If one of the surfaces doesn't have an image, the frame may be incomplete and must be
+    // dropped.
+    // For example, a toolbar widget painted by Flutter may not be rendered.
+    boolean isFrameRenderedUsingImageReaders = false;
+
+    if (flutterViewConvertedToImageView) {
+      FlutterView view = (FlutterView) flutterView;
+      // If there are no platform views in the current frame,
+      // then revert the image view surface and use the previous surface.
+      //
+      // Otherwise, acquire the latest image.
+      if (currentFrameUsedPlatformViewIds.isEmpty()) {
+        view.revertImageView();
+        flutterViewConvertedToImageView = false;
+      } else {
+        isFrameRenderedUsingImageReaders = view.acquireLatestImageViewFrame();
+      }
+    }
+
     for (int i = 0; i < overlayLayerViews.size(); i++) {
       int overlayId = overlayLayerViews.keyAt(i);
       FlutterImageView overlayView = overlayLayerViews.valueAt(i);
+
       if (currentFrameUsedOverlayLayerIds.contains(overlayId)) {
-        overlayView.acquireLatestImage();
+        ((FlutterView) flutterView).attachOverlaySurfaceToRender(overlayView);
+        boolean didAcquireOverlaySurfaceImage = overlayView.acquireLatestImage();
+        isFrameRenderedUsingImageReaders &= didAcquireOverlaySurfaceImage;
       } else {
+        // If the background surface isn't rendered by the image view, then the
+        // overlay surfaces can be detached from the rendered.
+        // This releases resources used by the ImageReader.
+        if (!flutterViewConvertedToImageView) {
+          overlayView.detachFromRenderer();
+        }
+        // Hide overlay surfaces that aren't rendered in the current frame.
         overlayView.setVisibility(View.GONE);
       }
     }
-    // Hide platform views that aren't rendered in the current frame.
-    // The platform view is destroyed  by the framework after the widget is disposed.
-    //
-    // The framework diposes the platform view, when its `State` object will never
-    // build again.
+
     for (int i = 0; i < platformViews.size(); i++) {
       int viewId = platformViews.keyAt(i);
-      if (!currentFrameUsedPlatformViewIds.contains(viewId)) {
-        platformViews.get(viewId).setVisibility(View.GONE);
-        mutatorViews.get(viewId).setVisibility(View.GONE);
+      View platformView = platformViews.get(viewId);
+      View mutatorView = mutatorViews.get(viewId);
+
+      // Show platform views only if the surfaces have images available in this frame,
+      // and if the platform view is rendered in this frame.
+      //
+      // Otherwise, hide the platform view, but don't remove it from the view hierarchy yet as
+      // they are removed when the framework diposes the platform view widget.
+      if (isFrameRenderedUsingImageReaders && currentFrameUsedPlatformViewIds.contains(viewId)) {
+        platformView.setVisibility(View.VISIBLE);
+        mutatorView.setVisibility(View.VISIBLE);
+      } else {
+        platformView.setVisibility(View.GONE);
+        mutatorView.setVisibility(View.GONE);
       }
-    }
-    // If the background surface is still an image, then acquire the latest image.
-    if (flutterViewConvertedToImageView) {
-      ((FlutterView) flutterView).acquireLatestImageViewFrame();
     }
   }
 
   @TargetApi(19)
   public FlutterOverlaySurface createOverlaySurface() {
+    // Overlay surfaces have the same size as the background surface.
+    //
+    // This allows to reuse these surfaces in consecutive frames even
+    // if the drawings they contain have a different tight bound.
+    //
+    // The final view size is determined when its frame is set.
     FlutterImageView imageView =
         new FlutterImageView(
             flutterView.getContext(),
             flutterView.getWidth(),
             flutterView.getHeight(),
             FlutterImageView.SurfaceKind.overlay);
+
     int id = nextOverlayLayerId++;
     overlayLayerViews.put(id, imageView);
 
@@ -734,6 +777,12 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   }
 
   public void destroyOverlaySurfaces() {
+    for (int i = 0; i < overlayLayerViews.size(); i++) {
+      int overlayId = overlayLayerViews.keyAt(i);
+      FlutterImageView overlayView = overlayLayerViews.valueAt(i);
+      overlayView.detachFromRenderer();
+      ((FlutterView) flutterView).removeView(overlayView);
+    }
     overlayLayerViews.clear();
   }
 }

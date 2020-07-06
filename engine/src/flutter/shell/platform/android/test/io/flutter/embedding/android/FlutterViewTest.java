@@ -1,6 +1,8 @@
 package io.flutter.embedding.android;
 
 import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertFalse;
+import static junit.framework.TestCase.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -385,9 +387,36 @@ public class FlutterViewTest {
                 mockReader,
                 FlutterImageView.SurfaceKind.background));
 
-    imageView.acquireLatestImage();
+    final FlutterJNI jni = mock(FlutterJNI.class);
+    imageView.attachToRenderer(new FlutterRenderer(jni));
+
+    final Image mockImage = mock(Image.class);
+    when(mockReader.acquireLatestImage()).thenReturn(mockImage);
+
+    assertTrue(imageView.acquireLatestImage());
     verify(mockReader, times(1)).acquireLatestImage();
     verify(imageView, times(1)).invalidate();
+  }
+
+  @Test
+  public void flutterImageView_acquireLatestImageReturnsFalse() {
+    final ImageReader mockReader = mock(ImageReader.class);
+    when(mockReader.getMaxImages()).thenReturn(2);
+
+    final FlutterImageView imageView =
+        spy(
+            new FlutterImageView(
+                RuntimeEnvironment.application,
+                mockReader,
+                FlutterImageView.SurfaceKind.background));
+
+    assertFalse(imageView.acquireLatestImage());
+
+    final FlutterJNI jni = mock(FlutterJNI.class);
+    imageView.attachToRenderer(new FlutterRenderer(jni));
+
+    when(mockReader.acquireLatestImage()).thenReturn(null);
+    assertFalse(imageView.acquireLatestImage());
   }
 
   @Test
@@ -405,10 +434,13 @@ public class FlutterViewTest {
                 mockReader,
                 FlutterImageView.SurfaceKind.background));
 
+    final FlutterJNI jni = mock(FlutterJNI.class);
+    imageView.attachToRenderer(new FlutterRenderer(jni));
+
     doNothing().when(imageView).invalidate();
-    imageView.acquireLatestImage();
-    imageView.acquireLatestImage();
-    imageView.acquireLatestImage();
+    assertTrue(imageView.acquireLatestImage());
+    assertTrue(imageView.acquireLatestImage());
+    assertTrue(imageView.acquireLatestImage());
 
     verify(mockReader, times(2)).acquireLatestImage();
   }
