@@ -377,12 +377,6 @@ RasterStatus Rasterizer::DrawToSurface(flutter::LayerTree& layer_tree) {
   TRACE_EVENT0("flutter", "Rasterizer::DrawToSurface");
   FML_DCHECK(surface_);
 
-  auto frame = surface_->AcquireFrame(layer_tree.frame_size());
-
-  if (frame == nullptr) {
-    return RasterStatus::kFailed;
-  }
-
   // There is no way for the compositor to know how long the layer tree
   // construction took. Fortunately, the layer tree does. Grab that time
   // for instrumentation.
@@ -396,6 +390,16 @@ RasterStatus Rasterizer::DrawToSurface(flutter::LayerTree& layer_tree) {
         layer_tree.frame_size(), surface_->GetContext(),
         layer_tree.device_pixel_ratio(), raster_thread_merger_);
     embedder_root_canvas = external_view_embedder->GetRootCanvas();
+  }
+
+  // On Android, the external view embedder deletes surfaces in `BeginFrame`.
+  //
+  // Deleting a surface also clears the GL context. Therefore, acquire the
+  // frame after calling `BeginFrame` as this operation resets the GL context.
+  auto frame = surface_->AcquireFrame(layer_tree.frame_size());
+
+  if (frame == nullptr) {
+    return RasterStatus::kFailed;
   }
 
   // If the external view embedder has specified an optional root surface, the
