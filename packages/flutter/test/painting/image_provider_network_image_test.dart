@@ -221,7 +221,7 @@ void main() {
     debugNetworkImageHttpClientProvider = null;
   }, skip: isBrowser); // Browser does not resolve images this way.
 
-  Future<Codec> _decoder(Uint8List bytes) async {
+  Future<Codec> _decoder(Uint8List bytes, {int cacheWidth, int cacheHeight, bool allowUpscaling}) async {
     return FakeCodec();
   }
 
