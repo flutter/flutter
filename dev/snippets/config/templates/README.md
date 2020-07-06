@@ -78,6 +78,10 @@ follows:
   section to import additional packages. Please only import things that are part
   of flutter or part of default dependencies for a `flutter create` project.
   It creates a `WidgetsApp` around the child stateful widget.
+  
+- [`stateful_widget_ticker`](stateful_widget_ticker.tmpl) : Identical to the
+  `stateful_widget` template, with the addition of the `TickerProviderStateMixin`
+  class, enabling easy generation of animated samples.
 
 - [`stateless_widget`](stateless_widget.tmpl) : Identical to the
   `stateful_widget` template, except that the default code block is
@@ -88,6 +92,10 @@ follows:
 - [`stateful_widget_material`](stateful_widget_material.tmpl) : Similar to
   `stateful_widget`, except that it imports the material library, and uses
   a `MaterialApp` instead of `WidgetsApp`.
+  
+- [`stateful_widget_material_ticker`](stateful_widget_material_ticker.tmpl) : Similar to
+  `stateful_widget_material`, with the addition of the `TickerProviderStateMixin`
+  class, enabling easy generation of animated samples.
 
 - [`stateless_widget_material`](stateless_widget_material.tmpl) : Similar to
   `stateless_widget`, except that it imports the material library, and uses
@@ -113,4 +121,24 @@ follows:
 - [`stateless_widget_scaffold_center`](stateless_widget_scaffold_center.tmpl) : Similar to
   `stateless_widget_scaffold`, except that it wraps the stateless widget with a
   `Scaffold` _and_ a `Center`.
+  
+- [`stateful_widget_cupertino`](stateful_widget_cupertino.tmpl) : Similar to
+  `stateful_widget`, except that it imports the cupertino library, and uses
+  a `CupertinoApp` instead of `WidgetsApp`.
+  
+- [`stateful_widget_cupertino_ticker`](stateful_widget_cupertino_ticker.tmpl) : Similar to
+  `stateful_widget_cupertino`, with the addition of the `TickerProviderStateMixin`
+  class, enabling easy generation of animated samples.
+  
+- [`stateless_widget_cupertino`](stateless_widget_cupertino.tmpl) : Similar to
+  `stateless_widget`, except that it imports the cupertino library, and uses
+  a `CupertinoApp` instead of `WidgetsApp`.
+  
+- [`stateful_widget_cupertinoPageScaffold`](stateful_widget_cupertinoPageScaffold.tmpl) : Similar to
+  `stateful_widget_cupertino`, except that it wraps the stateful widget with a
+  `CupertinoPageScaffold`.
+  
+- [`stateless_widget_cupertinoPageScaffold`](stateless_widget_cupertinoPageScaffold.tmpl) : Similar to
+  `stateless_widget_cupertino`, except that it wraps the stateless widget with a
+  `CupertinoPageScaffold`.
 
