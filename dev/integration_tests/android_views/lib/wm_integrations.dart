@@ -219,6 +219,7 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
       eventTime: 723657071,
       action: 0,
       xPrecision: 1.0,
+      motionEventId: 1,
     ),
     AndroidMotionEvent(
       downTime: 723657071,
@@ -252,6 +253,7 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
       edgeFlags: 0,
       source: 4098,
       flags: 0,
+      motionEventId: 2,
     ),
   ];
 }

@@ -51,7 +51,7 @@ class ApplicationPackageFactory {
             ? await IOSApp.fromIosProject(FlutterProject.current().ios, buildInfo)
             : IOSApp.fromPrebuiltApp(applicationBinary);
       case TargetPlatform.tester:
-        return FlutterTesterApp.fromCurrentDirectory();
+        return FlutterTesterApp.fromCurrentDirectory(globals.fs);
       case TargetPlatform.darwin_x64:
         return applicationBinary == null
             ? MacOSApp.fromMacOSProject(FlutterProject.current().macos)
