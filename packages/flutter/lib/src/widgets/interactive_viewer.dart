@@ -484,6 +484,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   final GlobalKey _parentKey = GlobalKey();
   Animation<Offset> _animation;
   AnimationController _controller;
+  Axis _panAxis;
   Offset _referenceFocalPoint; // Point where the current gesture began.
   double _scaleStart; // Scale value at start of scaling gesture.
   double _rotationStart = 0.0; // Rotation at start of rotation gesture.
@@ -528,16 +529,6 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     return Offset.zero & parentRenderBox.size;
   }
 
-  // TODO(justinmc): This works, but it's not all you need.
-  // You need to save the axis at the start of a gesture and keep all updates to
-  // the same axis. Also keep inertia animation to the same axis.
-  static Offset _alignAxis(Offset offset) {
-    if (offset.dx.abs() > offset.dy.abs()) {
-      return Offset(offset.dx, 0.0);
-    }
-    return Offset(0.0, offset.dy);
-  }
-
   // Return a new matrix representing the given matrix after applying the given
   // translation.
   Matrix4 _matrixTranslate(Matrix4 matrix, Offset translation) {
@@ -545,15 +536,15 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       return matrix.clone();
     }
 
-    final Offset alignedTranslation = widget.alignPanAxis
-      ? _alignAxis(translation)
-      : translation;
+    final Offset alignedTranslation = widget.alignPanAxis && _panAxis != null
+      && _gestureType == _GestureType.pan
+        ? _alignAxis(translation, _panAxis)
+        : translation;
 
     final Matrix4 nextMatrix = matrix.clone()..translate(
       alignedTranslation.dx,
       alignedTranslation.dy,
     );
-    print('justin translation $translation aligned $alignedTranslation');
 
     // Transform the viewport to determine where its four corners will be after
     // the child has been transformed.
@@ -705,6 +696,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     }
 
     _gestureType = null;
+    _panAxis = null;
     _scaleStart = _transformationController.value.getMaxScaleOnAxis();
     _referenceFocalPoint = _transformationController.toScene(
       details.localFocalPoint,
@@ -728,6 +720,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     final Offset focalPointScene = _transformationController.toScene(
       details.localFocalPoint,
     );
+    _panAxis ??= _getPanAxis(_referenceFocalPoint, focalPointScene);
     _gestureType ??= _getGestureType(
       !widget.scaleEnabled ? 1.0 : details.scale,
       !_rotateEnabled ? 0.0 : details.rotation,
@@ -822,11 +815,13 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     _controller.reset();
 
     if (!_gestureIsSupported(_gestureType)) {
+      _panAxis = null;
       return;
     }
 
     // If the scale ended with enough velocity, animate inertial movement.
     if (_gestureType != _GestureType.pan || details.velocity.pixelsPerSecond.distance < kMinFlingVelocity) {
+      _panAxis = null;
       return;
     }
 
@@ -893,6 +888,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   // Handle inertia drag animation.
   void _onAnimate() {
     if (!_controller.isAnimating) {
+      _panAxis = null;
       _animation?.removeListener(_onAnimate);
       _animation = null;
       _controller.reset();
@@ -1179,4 +1175,24 @@ Offset _round(Offset offset) {
     double.parse(offset.dx.toStringAsFixed(9)),
     double.parse(offset.dy.toStringAsFixed(9)),
   );
+}
+
+// Align the given offset to the given axis by allowing movement only in the
+// axis direction.
+Offset _alignAxis(Offset offset, Axis axis) {
+  switch (axis) {
+    case Axis.horizontal:
+      return Offset(offset.dx, 0.0);
+    case Axis.vertical:
+    default:
+      return Offset(0.0, offset.dy);
+  }
+}
+
+// Given two points, return the axis where the distance between the points is
+// greatest.
+Axis _getPanAxis(Offset point1, Offset point2) {
+  final double x = point2.dx - point1.dx;
+  final double y = point2.dy - point1.dy;
+  return x.abs() > y.abs() ? Axis.horizontal : Axis.vertical;
 }
