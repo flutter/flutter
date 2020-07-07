@@ -134,7 +134,7 @@ class Surface {
   }
 
   bool _presentSurface() {
-    canvasKit.callMethod('setCurrentContext', <dynamic>[_surface!.context]);
+    canvasKit.callMethod('setCurrentContext', <int>[_surface!.context]);
     _surface!.getCanvas().flush();
     return true;
   }
@@ -159,8 +159,16 @@ class CkSurface {
   int height() => _surface.callMethod('height');
 
   void dispose() {
+    if (_isDisposed) {
+      return;
+    }
+    // Only resources from the current context can be disposed.
+    canvasKit.callMethod('setCurrentContext', <int>[_glContext]);
     _surface.callMethod('dispose');
     _grContext.callMethod('releaseResourcesAndAbandonContext');
     _grContext.callMethod('delete');
+    _isDisposed = true;
   }
+
+  bool _isDisposed = false;
 }

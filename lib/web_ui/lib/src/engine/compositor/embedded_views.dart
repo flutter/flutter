@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 part of engine;
 
 /// This composites HTML views into the [ui.Scene].
@@ -255,7 +254,8 @@ class HtmlViewEmbedder {
             final CkPath path = CkPath();
             path.addRRect(mutator.rrect!);
             _ensureSvgPathDefs();
-            html.Element pathDefs = _svgPathDefs!.querySelector('#sk_path_defs')!;
+            html.Element pathDefs =
+                _svgPathDefs!.querySelector('#sk_path_defs')!;
             _clipPathCount += 1;
             html.Element newClipPath =
                 html.Element.html('<clipPath id="svgClip$_clipPathCount">'
@@ -266,7 +266,8 @@ class HtmlViewEmbedder {
           } else if (mutator.path != null) {
             final CkPath path = mutator.path as CkPath;
             _ensureSvgPathDefs();
-            html.Element pathDefs = _svgPathDefs!.querySelector('#sk_path_defs')!;
+            html.Element pathDefs =
+                _svgPathDefs!.querySelector('#sk_path_defs')!;
             _clipPathCount += 1;
             html.Element newClipPath =
                 html.Element.html('<clipPath id="svgClip$_clipPathCount">'
@@ -369,6 +370,8 @@ class HtmlViewEmbedder {
       if (_overlays[viewId] != null) {
         final Overlay overlay = _overlays[viewId]!;
         overlay.surface.htmlElement?.remove();
+        overlay.surface.htmlElement = null;
+        overlay.skSurface?.dispose();
       }
       _overlays.remove(viewId);
       _currentCompositionParams.remove(viewId);
@@ -402,10 +405,10 @@ class EmbeddedViewParams {
     if (identical(this, other)) {
       return true;
     }
-    return other is EmbeddedViewParams
-        && other.offset == offset
-        && other.size == size
-        && other.mutators == mutators;
+    return other is EmbeddedViewParams &&
+        other.offset == offset &&
+        other.size == size &&
+        other.mutators == mutators;
   }
 
   int get hashCode => ui.hashValues(offset, size, mutators);
@@ -524,8 +527,8 @@ class MutatorsStack extends Iterable<Mutator> {
     if (identical(other, this)) {
       return true;
     }
-    return other is MutatorsStack
-        && _listEquals<Mutator>(other._mutators, _mutators);
+    return other is MutatorsStack &&
+        _listEquals<Mutator>(other._mutators, _mutators);
   }
 
   int get hashCode => ui.hashList(_mutators);
