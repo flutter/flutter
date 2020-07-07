@@ -30,7 +30,8 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'vm_service_client': '0.2.6+2', // Final version before being marked deprecated.
   'video_player': '0.10.6', // 0.10.7 fails a gallery smoke test for toString.
   'flutter_template_images': '1.0.1', // Must always exactly match flutter_tools template.
-  'shelf': '0.7.5'
+  'shelf': '0.7.5',
+  'meta': '1.1.8', // until the `unawaited` export is resolved
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
