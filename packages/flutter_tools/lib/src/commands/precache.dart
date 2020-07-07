@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/version.dart';
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
@@ -14,6 +13,7 @@ import '../cache.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
+import '../version.dart';
 
 /// The flutter precache command allows downloading of cache artifacts without
 /// the use of device/artifact autodetection.
