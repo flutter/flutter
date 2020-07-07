@@ -29,4 +29,5 @@ export 'src/common/wait.dart';
 export 'src/driver/common.dart';
 export 'src/driver/driver.dart';
 export 'src/driver/timeline.dart';
+export 'src/driver/timeline_pointerdata_record.dart';
 export 'src/driver/timeline_summary.dart';
