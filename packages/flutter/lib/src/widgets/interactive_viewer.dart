@@ -1190,8 +1190,11 @@ Offset _alignAxis(Offset offset, Axis axis) {
 }
 
 // Given two points, return the axis where the distance between the points is
-// greatest.
+// greatest. If they are equal, return null.
 Axis _getPanAxis(Offset point1, Offset point2) {
+  if (point1 == point2) {
+    return null;
+  }
   final double x = point2.dx - point1.dx;
   final double y = point2.dy - point1.dy;
   return x.abs() > y.abs() ? Axis.horizontal : Axis.vertical;
