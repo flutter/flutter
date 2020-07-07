@@ -89,7 +89,8 @@ class InteractiveViewer extends StatefulWidget {
 
   /// If true, panning is only allowed in the direction of the main axes.
   ///
-  /// In other words, when this is true, diagonal panning is not allowed.
+  /// In other words, when this is true, diagonal panning is not allowed. This
+  /// is a common pattern in tables where data is displayed in columns and rows.
   final bool alignPanAxis;
 
   /// A margin for the visible boundaries of the child.
@@ -484,7 +485,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   final GlobalKey _parentKey = GlobalKey();
   Animation<Offset> _animation;
   AnimationController _controller;
-  Axis _panAxis;
+  Axis _panAxis; // Used with alignPanAxis.
   Offset _referenceFocalPoint; // Point where the current gesture began.
   double _scaleStart; // Scale value at start of scaling gesture.
   double _rotationStart = 0.0; // Rotation at start of rotation gesture.
