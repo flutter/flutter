@@ -1226,7 +1226,7 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
   /// frame to be scheduled, while still allowing frames that are pumped
   /// directly to run (either by using [WidgetTester.pumpBenchmark] or invoking
   /// [Window.onBeginFrame] and [Window.onDrawFrame]).
-  /// This is not benchmark for integration performance.
+  /// This does not mean benchmarking performance on integration tests.
   ///
   /// The [SchedulerBinding.hasScheduledFrame] property will never be true in
   /// this mode. This can cause unexpected effects. For instance,
