@@ -218,9 +218,9 @@ class FakeAndroidPlatformViewsController {
     final bool hybrid = call.arguments['hybrid'] as bool;
 
     if (hybrid && !_views[id].hybrid) {
-      throw ArgumentError('A $SurfaceAndroidViewController must pass `hybrid: true`');
-    } else if (!hybrid && _views[id].hybrid != null) {
-      throw ArgumentError('A $TextureAndroidViewController must pass `hybrid: false`');
+      throw ArgumentError('An $AndroidViewController using hybrid composition must pass `hybrid: true`');
+    } else if (!hybrid && _views[id].hybrid != null && _views[id].hybrid) {
+      throw ArgumentError('An $AndroidViewController not using hybrid composition must pass `hybrid: false`');
     }
 
     if (!_views.containsKey(id))
