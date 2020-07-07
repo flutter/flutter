@@ -10,19 +10,19 @@
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/windows/key_event_handler.h"
 #include "flutter/shell/platform/windows/keyboard_hook_handler.h"
-#include "flutter/shell/platform/windows/platform_handler.h"
 #include "flutter/shell/platform/windows/text_input_plugin.h"
+#include "flutter/shell/platform/windows/win32_platform_handler.h"
 #include "flutter/shell/platform/windows/win32_task_runner.h"
 
 namespace flutter {
-struct Win32FlutterWindow;
+struct FlutterWindowsView;
 }
 
 // Struct for storing state within an instance of the windows native (HWND or
 // CoreWindow) Window.
 struct FlutterDesktopViewControllerState {
-  // The win32 window that owns this state object.
-  std::unique_ptr<flutter::Win32FlutterWindow> view;
+  // The view that owns this state object.
+  std::unique_ptr<flutter::FlutterWindowsView> view;
 
   // The state associate with the engine backing the view.
   std::unique_ptr<FlutterDesktopEngineState> engine_state;
@@ -35,8 +35,8 @@ struct FlutterDesktopViewControllerState {
 // controller so that it can be provided to plugins without giving them access
 // to all of the controller-based functionality.
 struct FlutterDesktopView {
-  // The window that (indirectly) owns this state object.
-  flutter::Win32FlutterWindow* window;
+  // The view that (indirectly) owns this state object.
+  flutter::FlutterWindowsView* view;
 };
 
 struct AotDataDeleter {
@@ -64,8 +64,8 @@ struct FlutterDesktopPluginRegistrar {
   // The plugin messenger handle given to API clients.
   std::unique_ptr<FlutterDesktopMessenger> messenger;
 
-  // The handle for the window associated with this registrar.
-  FlutterDesktopView* window;
+  // The handle for the view associated with this registrar.
+  FlutterDesktopView* view;
 
   // Callback to be called on registrar destruction.
   FlutterDesktopOnRegistrarDestroyed destruction_handler;
