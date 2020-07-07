@@ -368,7 +368,6 @@ class AndroidMotionEvent {
     @required this.edgeFlags,
     @required this.source,
     @required this.flags,
-    @required this.motionEventId,
   }) : assert(downTime != null),
        assert(eventTime != null),
        assert(action != null),
@@ -450,9 +449,6 @@ class AndroidMotionEvent {
   /// See Android's [MotionEvent#getFlags](https://developer.android.com/reference/android/view/MotionEvent.html#getFlags()).
   final int flags;
 
-  /// Used to identify this [MotionEvent](https://developer.android.com/reference/android/view/MotionEvent.html) uniquely in the Flutter Engine.
-  final int motionEventId;
-
   List<dynamic> _asList(int viewId) {
     return <dynamic>[
       viewId,
@@ -470,7 +466,6 @@ class AndroidMotionEvent {
       edgeFlags,
       source,
       flags,
-      motionEventId,
     ];
   }
 
@@ -607,7 +602,6 @@ class _AndroidMotionEventConverter {
       edgeFlags: 0,
       source: 0,
       flags: 0,
-      motionEventId: event.embedderId,
     );
   }
 
