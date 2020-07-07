@@ -146,7 +146,8 @@ bool AndroidExternalViewEmbedder::SubmitFrame(
   // Submit the background canvas frame before switching the GL context to
   // the overlay surfaces.
   //
-  // Skip a frame if the embedding is switching surfaces.
+  // Skip a frame if the embedding is switching surfaces, and indicate in
+  // `PostPrerollAction` that this frame must be resubmitted.
   auto should_submit_current_frame =
       previous_frame_view_count_ > 0 || current_frame_view_count == 0;
   if (should_submit_current_frame) {
@@ -231,6 +232,10 @@ PostPrerollResult AndroidExternalViewEmbedder::PostPrerollAction(
       // Merge the raster and platform threads in `EndFrame`.
       should_run_rasterizer_on_platform_thread_ = true;
       CancelFrame();
+      return PostPrerollResult::kResubmitFrame;
+    }
+    // Surface switch requires to resubmit the frame.
+    if (previous_frame_view_count_ == 0) {
       return PostPrerollResult::kResubmitFrame;
     }
   }

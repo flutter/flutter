@@ -43,15 +43,19 @@ class SurfaceMock : public Surface {
               (override));
 };
 
-fml::RefPtr<fml::RasterThreadMerger> GetThreadMergerFromPlatformThread() {
-  auto rasterizer_thread = new fml::Thread("rasterizer");
-  auto rasterizer_queue_id =
-      rasterizer_thread->GetTaskRunner()->GetTaskQueueId();
-
+fml::RefPtr<fml::RasterThreadMerger> GetThreadMergerFromPlatformThread(
+    bool merged = false) {
   // Assume the current thread is the platform thread.
   fml::MessageLoop::EnsureInitializedForCurrentThread();
   auto platform_queue_id = fml::MessageLoop::GetCurrentTaskQueueId();
 
+  if (merged) {
+    return fml::MakeRefCounted<fml::RasterThreadMerger>(platform_queue_id,
+                                                        platform_queue_id);
+  }
+  auto rasterizer_thread = new fml::Thread("rasterizer");
+  auto rasterizer_queue_id =
+      rasterizer_thread->GetTaskRunner()->GetTaskQueueId();
   return fml::MakeRefCounted<fml::RasterThreadMerger>(platform_queue_id,
                                                       rasterizer_queue_id);
 }
@@ -291,7 +295,9 @@ TEST(AndroidExternalViewEmbedder, SubmitFrame) {
       };
   auto embedder = std::make_unique<AndroidExternalViewEmbedder>(
       android_context, jni_mock, surface_factory);
-  auto raster_thread_merger = GetThreadMergerFromPlatformThread();
+
+  auto raster_thread_merger =
+      GetThreadMergerFromPlatformThread(/*merged=*/true);
 
   // ------------------ First frame ------------------ //
   {
@@ -309,6 +315,9 @@ TEST(AndroidExternalViewEmbedder, SubmitFrame) {
     embedder->SubmitFrame(gr_context.get(), std::move(surface_frame));
     // Submits frame if no Android view in the current frame.
     EXPECT_TRUE(did_submit_frame);
+    // Doesn't resubmit frame.
+    auto postpreroll_result = embedder->PostPrerollAction(raster_thread_merger);
+    ASSERT_EQ(PostPrerollResult::kSuccess, postpreroll_result);
 
     EXPECT_CALL(*jni_mock, FlutterViewEndFrame());
     embedder->EndFrame(/*should_resubmit_frame=*/false, raster_thread_merger);
@@ -373,6 +382,9 @@ TEST(AndroidExternalViewEmbedder, SubmitFrame) {
     embedder->SubmitFrame(gr_context.get(), std::move(surface_frame));
     // Doesn't submit frame if there aren't Android views in the previous frame.
     EXPECT_FALSE(did_submit_frame);
+    // Resubmits frame.
+    auto postpreroll_result = embedder->PostPrerollAction(raster_thread_merger);
+    ASSERT_EQ(PostPrerollResult::kResubmitFrame, postpreroll_result);
 
     EXPECT_CALL(*jni_mock, FlutterViewEndFrame());
     embedder->EndFrame(/*should_resubmit_frame=*/false, raster_thread_merger);
@@ -434,6 +446,9 @@ TEST(AndroidExternalViewEmbedder, SubmitFrame) {
     embedder->SubmitFrame(gr_context.get(), std::move(surface_frame));
     // Submits frame if there are Android views in the previous frame.
     EXPECT_TRUE(did_submit_frame);
+    // Doesn't resubmit frame.
+    auto postpreroll_result = embedder->PostPrerollAction(raster_thread_merger);
+    ASSERT_EQ(PostPrerollResult::kSuccess, postpreroll_result);
 
     EXPECT_CALL(*jni_mock, FlutterViewEndFrame());
     embedder->EndFrame(/*should_resubmit_frame=*/false, raster_thread_merger);
