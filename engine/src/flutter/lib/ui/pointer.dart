@@ -72,6 +72,7 @@ enum PointerSignalKind {
 class PointerData {
   /// Creates an object that represents the state of a pointer.
   const PointerData({
+    this.embedderId = 0,
     this.timeStamp = Duration.zero,
     this.change = PointerChange.cancel,
     this.kind = PointerDeviceKind.touch,
@@ -101,6 +102,13 @@ class PointerData {
     this.scrollDeltaX = 0.0,
     this.scrollDeltaY = 0.0,
   });
+
+  /// Unique identifier that ties the [PointerEvent] to embedder event created it.
+  ///
+  /// No two pointer events can have the same [embedderId]. This is different from
+  /// [pointerIdentifier] - used for hit-testing, whereas [embedderId] is used to
+  /// identify the platform event.
+  final int embedderId;
 
   /// Time of event dispatch, relative to an arbitrary timeline.
   final Duration timeStamp;
@@ -263,6 +271,7 @@ class PointerData {
   /// Returns a complete textual description of the information in this object.
   String toStringFull() {
     return '$runtimeType('
+             'embedderId: $embedderId, '
              'timeStamp: $timeStamp, '
              'change: $change, '
              'kind: $kind, '
