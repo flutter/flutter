@@ -5171,34 +5171,26 @@ void main() {
     expect(renderObject.textHeightBehavior, equals(customTextHeightBehavior));
   });
 
-  testWidgets('Asserts if composing text is not valid', (WidgetTester tester) async {
-    await tester.pumpWidget(MediaQuery(
-      data: const MediaQueryData(),
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: FocusScope(
-          node: focusScopeNode,
-          child: EditableText(
-            backgroundCursorColor: Colors.grey,
-            controller: controller,
-            focusNode: focusNode,
-            style: textStyle,
-            cursorColor: cursorColor,
-          ),
-        ),
-      ),
-    ));
-
-    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
-
+  test('Asserts if composing text is not valid', () async {
     void expectToAssert(TextEditingValue value, bool shouldAssert) {
-      dynamic exception;
+      dynamic initException;
+      dynamic updateException;
+      controller = TextEditingController();
       try {
-        state.updateEditingValue(value);
+        controller = TextEditingController.fromValue(value);
       } catch (e) {
-        exception = e;
+        initException = e;
       }
-      expect(exception?.toString(), shouldAssert ? contains('composing range'): isNull);
+
+      controller = TextEditingController();
+      try {
+        controller.value = value;
+      } catch (e) {
+        updateException = e;
+      }
+
+      expect(initException?.toString(), shouldAssert ? contains('composing range'): isNull);
+      expect(updateException?.toString(), shouldAssert ? contains('composing range'): isNull);
     }
 
     expectToAssert(const TextEditingValue(text: ''), false);

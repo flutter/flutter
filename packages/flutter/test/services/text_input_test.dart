@@ -194,28 +194,21 @@ void main() {
   });
 
   test('TextEditingValue.isComposingRangeValid', () async {
-    // isValue == false.
+    // The composing range is empty.
     expect(const TextEditingValue(text: '').isComposingRangeValid, isFalse);
 
-    // isNormalized == false.
     expect(
       const TextEditingValue(text: 'test', composing: TextRange(start: 1, end: 0)).isComposingRangeValid,
       isFalse,
     );
 
-    // isNormalized == false.
-    expect(
-      const TextEditingValue(text: 'test', composing: TextRange(start: 1, end: 0)).isComposingRangeValid,
-      isFalse,
-    );
-
-    // out of range.
+    // The composing range is out of range for the text.
     expect(
       const TextEditingValue(text: 'test', composing: TextRange(start: 1, end: 5)).isComposingRangeValid,
       isFalse,
     );
 
-    // out of range.
+    // The composing range is out of range for the text.
     expect(
       const TextEditingValue(text: 'test', composing: TextRange(start: -1, end: 4)).isComposingRangeValid,
       isFalse,
