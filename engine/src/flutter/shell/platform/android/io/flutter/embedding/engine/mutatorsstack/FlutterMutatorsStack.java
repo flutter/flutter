@@ -8,6 +8,7 @@ import android.graphics.Matrix;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ import java.util.List;
  * series mutations. See {@link io.flutter.embedding.engine.mutatorsstack.Mutator} for informations
  * on Mutators.
  */
+@Keep
 public class FlutterMutatorsStack {
   /**
    * The type of a Mutator See {@link io.flutter.embedding.engine.mutatorsstack.Mutator} for
