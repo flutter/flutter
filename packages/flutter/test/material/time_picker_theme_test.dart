@@ -396,7 +396,7 @@ TimePickerThemeData _timePickerTheme({bool includeInputDecoration = false}) {
     hourMinuteShape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0))),
     dayPeriodShape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0))),
     dayPeriodBorderSide: const BorderSide(color: Colors.blueAccent),
-    inputDecorationTheme: !includeInputDecoration ? null : const InputDecorationTheme(
+    inputDecorationTheme: includeInputDecoration ? const InputDecorationTheme(
       filled: true,
       fillColor: Colors.purple,
       enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.blue)),
@@ -404,7 +404,7 @@ TimePickerThemeData _timePickerTheme({bool includeInputDecoration = false}) {
       focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.yellow)),
       focusedErrorBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.red)),
       hintStyle: TextStyle(fontSize: 8),
-    ),
+    ) : null,
   );
 }
 
