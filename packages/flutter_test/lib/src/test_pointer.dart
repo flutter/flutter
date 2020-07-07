@@ -437,3 +437,23 @@ class TestGesture {
     });
   }
 }
+
+/// A pack of input PointerEvent queue.
+///
+/// [timeStamp] is used to indicate the time when the pack is received.
+///
+/// This is a simulation of how the framework is receiving input events from
+/// the engine. See [GestureBinding] and [PointerDataPacket].
+class PointerEventPacket {
+  /// Creates a pack of PointerEvents.
+  PointerEventPacket(this.timeStamp, this.events);
+
+  /// The time stamp of when the event packet is received.
+  ///
+  /// This value is used as the time delay relative to the start of
+  /// [WidgeTester.handlePointerEventPack] call.
+  final Duration timeStamp;
+
+  /// The event.
+  final List<PointerEvent> events;
+}

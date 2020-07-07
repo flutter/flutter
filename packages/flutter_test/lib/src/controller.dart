@@ -410,8 +410,15 @@ abstract class WidgetController {
   /// A simulator of how the framework handles a serials of [PointerEvent]s
   /// received from the flutter engine.
   ///
-  /// See [PointerEventPack].
-  Future<void> handlePointerEventPack(List<PointerEventPack> records);
+  /// The [PointerEventPacket.timeStamp] is used for time delay of an event
+  /// packet relative to the starting point of the method call.
+  ///
+  /// Returns a list of the difference between [PointerEventPacket.timeStamp]
+  /// and the real timestamp when the event packet is processed. The closer
+  /// these values are to zero the more faithful it is to the `records`.
+  ///
+  /// See [PointerEventPacket].
+  Future<List<Duration>> handlePointerEventPack(List<PointerEventPacket> records);
 
   /// Called to indicate that time should advance.
   ///
@@ -694,7 +701,7 @@ class LiveWidgetController extends WidgetController {
   }
 
   @override
-  Future<void> handlePointerEventPack(List<PointerEventPack> records) {
+  Future<List<Duration>> handlePointerEventPack(List<PointerEventPacket> records) {
     throw UnimplementedError;
   }
 }
