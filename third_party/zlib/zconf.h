@@ -331,6 +331,9 @@
 #ifndef FAR
 #  define FAR
 #endif
+#ifndef far
+#  define far
+#endif
 
 #if !defined(__MACTYPES__)
 typedef unsigned char  Byte;  /* 8 bits */
