@@ -2140,6 +2140,12 @@ class _WidgetInspectorState extends State<WidgetInspector>
   void initState() {
     super.initState();
 
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Set the root render object so that the inspector
+      // layer can apply the correct transforms
+      selection.rootRenderObject = context.findRenderObject();
+    });
+
     _selectionChangedCallback = () {
       setState(() {
         // The [selection] property which the build method depends on has
@@ -2321,6 +2327,9 @@ class _WidgetInspectorState extends State<WidgetInspector>
 
 /// Mutable selection state of the inspector.
 class InspectorSelection {
+  /// Root render object in the inspector widget tree.
+  RenderObject rootRenderObject;
+
   /// Render objects that are candidates to be selected.
   ///
   /// Tools may wish to iterate through the list of candidates.
@@ -2447,9 +2456,9 @@ class _RenderInspectorOverlay extends RenderBox {
 
 @immutable
 class _TransformedRect {
-  _TransformedRect(RenderObject object)
+  _TransformedRect(RenderObject object, RenderObject ancestor)
     : rect = object.semanticBounds,
-      transform = object.getTransformTo(null);
+      transform = object.getTransformTo(ancestor);
 
   final Rect rect;
   final Matrix4 transform;
@@ -2561,12 +2570,12 @@ class _InspectorOverlayLayer extends Layer {
     for (final RenderObject candidate in selection.candidates) {
       if (candidate == selected || !candidate.attached)
         continue;
-      candidates.add(_TransformedRect(candidate));
+      candidates.add(_TransformedRect(candidate, selection.rootRenderObject));
     }
 
     final _InspectorOverlayRenderState state = _InspectorOverlayRenderState(
       overlayRect: overlayRect,
-      selected: _TransformedRect(selected),
+      selected: _TransformedRect(selected, selection.rootRenderObject),
       tooltip: selection.currentElement.toStringShort(),
       textDirection: TextDirection.ltr,
       candidates: candidates,
@@ -2583,6 +2592,9 @@ class _InspectorOverlayLayer extends Layer {
     final ui.PictureRecorder recorder = ui.PictureRecorder();
     final Canvas canvas = Canvas(recorder, state.overlayRect);
     final Size size = state.overlayRect.size;
+    // The overlay rect could have an offset if the widget inspector does
+    // not take all the screen
+    canvas.translate(state.overlayRect.left, state.overlayRect.top);
 
     final Paint fillPaint = Paint()
       ..style = PaintingStyle.fill

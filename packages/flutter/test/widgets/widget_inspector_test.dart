@@ -512,6 +512,53 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(inspectorState.selection.candidates.where((RenderObject object) => object is RenderParagraph).length, equals(2));
     });
 
+    testWidgets('WidgetInspector with Transform above', (WidgetTester tester) async {
+      final GlobalKey childKey = GlobalKey();
+      final GlobalKey inspectorKey = GlobalKey();
+
+      // State type is private, hence using dynamic.
+      dynamic getInspectorState() => inspectorKey.currentState;
+
+      final Matrix4 mainTransform = Matrix4.identity()
+          ..translate(50.0, 30.0)
+          ..scale(0.5, 0.5);
+
+      await tester.pumpWidget(
+        Transform(
+          transform: mainTransform,
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: WidgetInspector(
+              key: inspectorKey,
+              selectButtonBuilder: null,
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: Container(
+                  key: childKey,
+                  height: 100.0,
+                  width: 50.0,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final InspectorSelection selection = getInspectorState().selection as InspectorSelection;
+
+      final RenderObject childRenderObject = childKey.currentContext.findRenderObject();
+
+      // The tranform of the child with respect to the inspector selection render object
+      // should be the identity matrix
+      final Matrix4 m1 = childRenderObject.getTransformTo(selection.rootRenderObject);
+      expect(m1, Matrix4.identity());
+
+      // The tranform of the child with respect to the whole widget should be the sam
+      // matrix applied to the widget inspector inspector
+      final Matrix4 m2 = childRenderObject.getTransformTo(null);
+      expect(m2, mainTransform);
+    });
+
     test('WidgetInspectorService null id', () {
       service.disposeAllGroups();
       expect(service.toObject(null), isNull);
