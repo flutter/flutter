@@ -25,7 +25,7 @@ struct _FlView {
   FlDartProject* project;
 
   // Rendering output.
-  FlRendererX11* renderer;
+  FlRenderer* renderer;
 
   // Engine running @project.
   FlEngine* engine;
@@ -127,8 +127,8 @@ static void fl_view_plugin_registry_iface_init(
 static void fl_view_constructed(GObject* object) {
   FlView* self = FL_VIEW(object);
 
-  self->renderer = fl_renderer_x11_new();
-  self->engine = fl_engine_new(self->project, FL_RENDERER(self->renderer));
+  self->renderer = FL_RENDERER(fl_renderer_x11_new());
+  self->engine = fl_engine_new(self->project, self->renderer);
 
   // Create system channel handlers.
   FlBinaryMessenger* messenger = fl_engine_get_binary_messenger(self->engine);
@@ -203,7 +203,7 @@ static void fl_view_realize(GtkWidget* widget) {
   gtk_widget_set_realized(widget, TRUE);
 
   g_autoptr(GError) error = nullptr;
-  if (!fl_renderer_setup(FL_RENDERER(self->renderer), &error))
+  if (!fl_renderer_setup(self->renderer, &error))
     g_warning("Failed to setup renderer: %s", error->message);
 
   GtkAllocation allocation;
@@ -217,7 +217,7 @@ static void fl_view_realize(GtkWidget* widget) {
   window_attributes.height = allocation.height;
   window_attributes.wclass = GDK_INPUT_OUTPUT;
   window_attributes.visual = fl_renderer_get_visual(
-      FL_RENDERER(self->renderer), gtk_widget_get_screen(widget), nullptr);
+      self->renderer, gtk_widget_get_screen(widget), nullptr);
   window_attributes.event_mask =
       gtk_widget_get_events(widget) | GDK_EXPOSURE_MASK |
       GDK_POINTER_MOTION_MASK | GDK_BUTTON_PRESS_MASK |
@@ -233,7 +233,8 @@ static void fl_view_realize(GtkWidget* widget) {
   gtk_widget_set_window(widget, window);
 
   fl_renderer_x11_set_window(
-      self->renderer, GDK_X11_WINDOW(gtk_widget_get_window(GTK_WIDGET(self))));
+      FL_RENDERER_X11(self->renderer),
+      GDK_X11_WINDOW(gtk_widget_get_window(GTK_WIDGET(self))));
 
   if (!fl_engine_start(self->engine, &error))
     g_warning("Failed to start Flutter engine: %s", error->message);
