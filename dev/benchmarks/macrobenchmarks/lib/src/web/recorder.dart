@@ -345,8 +345,11 @@ abstract class WidgetRecorder extends Recorder implements FrameRecorder {
   /// pumping frames automatically.
   Widget createWidget();
 
+  final List<VoidCallback> _didStopCallbacks = <VoidCallback>[];
   @override
-  VoidCallback didStop;
+  void registerDidStop(VoidCallback fn) {
+    _didStopCallbacks.add(fn);
+  }
 
   @override
   Profile profile;
@@ -373,7 +376,8 @@ abstract class WidgetRecorder extends Recorder implements FrameRecorder {
     if (shouldContinue()) {
       window.scheduleFrame();
     } else {
-      didStop();
+      for (final VoidCallback fn in _didStopCallbacks)
+        fn();
       _runCompleter.complete();
     }
   }
@@ -437,8 +441,11 @@ abstract class WidgetBuildRecorder extends Recorder implements FrameRecorder {
   /// consider using [WidgetRecorder].
   Widget createWidget();
 
+  final List<VoidCallback> _didStopCallbacks = <VoidCallback>[];
   @override
-  VoidCallback didStop;
+  void registerDidStop(VoidCallback fn) {
+    _didStopCallbacks.add(fn);
+  }
 
   @override
   Profile profile;
@@ -484,7 +491,8 @@ abstract class WidgetBuildRecorder extends Recorder implements FrameRecorder {
       showWidget = !showWidget;
       _hostState._setStateTrampoline();
     } else {
-      didStop();
+      for (final VoidCallback fn in _didStopCallbacks)
+        fn();
       _runCompleter.complete();
     }
   }
@@ -942,9 +950,8 @@ String _ratioToPercent(double value) {
 /// Implemented by recorders that use [_RecordingWidgetsBinding] to receive
 /// frame life-cycle calls.
 abstract class FrameRecorder {
-  /// Called by the recorder when it stops recording and doesn't need to collect
-  /// any more data.
-  set didStop(VoidCallback cb);
+  /// Add a callback that will be called by the recorder when it stops recording.
+  void registerDidStop(VoidCallback cb);
 
   /// Called just before calling [SchedulerBinding.handleDrawFrame].
   void frameWillDraw();
@@ -998,9 +1005,9 @@ class _RecordingWidgetsBinding extends BindingBase
     }
     final FlutterExceptionHandler originalOnError = FlutterError.onError;
 
-    recorder.didStop = () {
+    recorder.registerDidStop(() {
       _benchmarkStopped = true;
-    };
+    });
 
     // Fail hard and fast on errors. Benchmarks should not have any errors.
     FlutterError.onError = (FlutterErrorDetails details) {

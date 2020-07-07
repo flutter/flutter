@@ -201,9 +201,9 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 /// account in deciding how to layout this sliver.
 ///
 /// [SliverFillRemaining] will size its [child] to fill the viewport in the
-/// main axis if that space is larger than the child's extent, and the
-/// the amount of space that has been scrolled beforehand has not exceeded the
-/// main axis extent of the viewport.
+/// main axis if that space is larger than the child's extent, and the amount
+/// of space that has been scrolled beforehand has not exceeded the main axis
+/// extent of the viewport.
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
 ///
