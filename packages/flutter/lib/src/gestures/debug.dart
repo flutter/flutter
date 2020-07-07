@@ -51,6 +51,15 @@ bool debugPrintGestureArenaDiagnostics = false;
 ///    arenas.
 bool debugPrintRecognizerCallbacksTrace = false;
 
+/// Logs all [PointerData] that the [GestureBinding] receives to the timeline.
+///
+/// This flag is bypassed in release or profile mode. Recording and dumping
+/// input events can be very slow. This flag should be avoided in any performanc
+/// sensitive situations.
+///
+/// See [serializePointerData] and [deserializePointerData].
+bool debugRecordInputs = false;
+
 /// Returns true if none of the gestures library debug variables have been changed.
 ///
 /// This function is used by the test framework to ensure that debug variables
