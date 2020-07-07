@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:meta/meta.dart';
-import 'package:xml/xml.dart';
+import 'package:xml/xml.dart' as xml;
 
 import 'android/gradle.dart';
 import 'base/common.dart';
@@ -188,10 +188,10 @@ class AndroidApk extends ApplicationPackage {
     }
 
     final String manifestString = manifest.readAsStringSync();
-    XmlDocument document;
+    xml.XmlDocument document;
     try {
-      document = XmlDocument.parse(manifestString);
-    } on XmlParserException catch (exception) {
+      document = xml.parse(manifestString);
+    } on xml.XmlParserException catch (exception) {
       String manifestLocation;
       if (androidProject.isUsingGradle) {
         manifestLocation = globals.fs.path.join(androidProject.hostAppGradleRoot.path, 'app', 'src', 'main', 'AndroidManifest.xml');
@@ -203,7 +203,7 @@ class AndroidApk extends ApplicationPackage {
       throwToolExit('XML Parser error message: ${exception.toString()}');
     }
 
-    final Iterable<XmlElement> manifests = document.findElements('manifest');
+    final Iterable<xml.XmlElement> manifests = document.findElements('manifest');
     if (manifests.isEmpty) {
       globals.printError('AndroidManifest.xml has no manifest element.');
       globals.printError('Please check ${manifest.path} for errors.');
@@ -212,20 +212,20 @@ class AndroidApk extends ApplicationPackage {
     final String packageId = manifests.first.getAttribute('package');
 
     String launchActivity;
-    for (final XmlElement activity in document.findAllElements('activity')) {
+    for (final xml.XmlElement activity in document.findAllElements('activity')) {
       final String enabled = activity.getAttribute('android:enabled');
       if (enabled != null && enabled == 'false') {
         continue;
       }
 
-      for (final XmlElement element in activity.findElements('intent-filter')) {
+      for (final xml.XmlElement element in activity.findElements('intent-filter')) {
         String actionName = '';
         String categoryName = '';
-        for (final XmlNode node in element.children) {
-          if (node is! XmlElement) {
+        for (final xml.XmlNode node in element.children) {
+          if (node is! xml.XmlElement) {
             continue;
           }
-          final XmlElement xmlElement = node as XmlElement;
+          final xml.XmlElement xmlElement = node as xml.XmlElement;
           final String name = xmlElement.getAttribute('android:name');
           if (name == 'android.intent.action.MAIN') {
             actionName = name;

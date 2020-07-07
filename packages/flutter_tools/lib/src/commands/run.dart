@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
-import 'package:meta/meta.dart';
 
 import '../android/android_device.dart';
 import '../base/common.dart';

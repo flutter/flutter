@@ -7,9 +7,9 @@ import 'dart:async';
 import 'package:flutter_tools/src/android/android_sdk.dart'
   show getEmulatorPath;
 import 'package:flutter_tools/src/android/android_emulator.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:quiver/testing/async.dart';
 
