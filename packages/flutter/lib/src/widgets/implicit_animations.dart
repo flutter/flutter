@@ -917,12 +917,12 @@ class AnimatedAlign extends ImplicitlyAnimatedWidget {
 
   /// If non-null, sets its height to the child's height multiplied by this factor.
   ///
-  /// Can be both greater and less than 1.0 but must be positive.
+  /// Must be within the range 0.0 - 1.0. Defaults to 1.0.
   final double heightFactor;
 
   /// If non-null, sets its width to the child's width multiplied by this factor.
   ///
-  /// Can be both greater and less than 1.0 but must be positive.
+  /// Must be within the range 0.0 - 1.0. Defaults to 1.0.
   final double widthFactor;
 
   @override
@@ -962,8 +962,8 @@ class _AnimatedAlignState extends AnimatedWidgetBaseState<AnimatedAlign> {
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(DiagnosticsProperty<AlignmentGeometryTween>('alignment', _alignment, defaultValue: null));
-    description.add(DiagnosticsProperty<Tween>('width factor', _widthFactorTween, defaultValue: null));
-    description.add(DiagnosticsProperty<Tween>('height factor', _heightFactorTween, defaultValue: null));
+    description.add(DiagnosticsProperty<Tween<double>>('widthFactor', _widthFactorTween, defaultValue: null));
+    description.add(DiagnosticsProperty<Tween<double>>('heightFactor', _heightFactorTween, defaultValue: null));
   }
 }
 
