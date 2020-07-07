@@ -400,6 +400,13 @@ abstract class WidgetController {
     });
   }
 
+  /// handle a series of input events using json String generated from
+  /// [flutter_driver.PointerEventRecord]
+  Future<void> handleInputEventsRecords(String jsonString) {
+    return handlePointerEventPack(pointerEventPackFromJson(jsonString,
+      binding.window.devicePixelRatio));
+  }
+
   /// A simulator of how the framework handles a serials of [PointerEvent]s
   /// received from the flutter engine.
   ///

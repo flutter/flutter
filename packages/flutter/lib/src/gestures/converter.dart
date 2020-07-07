@@ -325,3 +325,61 @@ ui.PointerData deserializePointerData(dynamic value) {
     scrollDeltaY: jsonObject['scrollDeltaY'] as double ?? 0.0,
   );
 }
+
+
+/// A pack of input PointerEvent queue.
+///
+/// [timeStamp] is used to indicate the time when the pack is received.
+///
+/// This is a simulation of how the framework is receiving input events from
+/// the engine. See [GestureBinding] and [PointerDataPacket].
+class PointerEventPack {
+  /// Creates a pack of PointerEvents.
+  PointerEventPack(this.timeStamp, this.events);
+
+  /// Deserializing a pack of PointerEvents from a json String.
+  ///
+  /// The `timeOffset` value is subtraced from the timestamps in the json
+  /// record.
+  ///
+  /// See [PointerEvent.fromJson].
+  PointerEventPack.fromJson(Map<String, dynamic> jsonObject,
+    final double devicePixelRatio, {Duration timeOffset = Duration.zero}) :
+    timeStamp = Duration(microseconds: jsonObject['ts'] as int) - timeOffset,
+    events = PointerEventConverter.expand(
+      <ui.PointerData>[
+        for (final dynamic item in jsonObject['events'] as List<dynamic>)
+          deserializePointerData(item),
+      ],
+      devicePixelRatio,
+    );
+
+  /// The time stamp of when the event happens
+  final Duration timeStamp;
+
+  /// The event.
+  final Iterable<PointerEvent> events;
+}
+
+/// Deserialize json String to a list of [PointerEventPack]. This
+///
+/// The json String can be generated from a flutter driver run with
+/// [PointerEventRecord].
+///
+/// The `timeOffset` value is subtraced from the timestamps in the json record.
+/// Default value is to make the first event with timestamp [Duration.zero].
+List<PointerEventPack> pointerEventPackFromJson(String jsonString,
+  final double devicePixelRatio, {Duration timeOffset,}) {
+  final List<Map<String, dynamic>> jsonObjects = <Map<String, dynamic>>[
+    for (final dynamic item in json.decode(jsonString) as List<dynamic>)
+      item as Map<String, dynamic>
+  ];
+  assert(jsonObjects.isNotEmpty);
+
+  timeOffset ??= Duration(microseconds: jsonObjects[0]['ts'] as int);
+  return <PointerEventPack>[
+    for (final Map<String, dynamic> jsonObject in jsonObjects)
+      PointerEventPack.fromJson(jsonObject, devicePixelRatio,
+          timeOffset: timeOffset),
+  ];
+}
