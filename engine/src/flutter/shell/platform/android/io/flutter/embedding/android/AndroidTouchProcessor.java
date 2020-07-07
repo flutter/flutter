@@ -57,7 +57,7 @@ public class AndroidTouchProcessor {
   }
 
   // Must match the unpacking code in hooks.dart.
-  private static final int POINTER_DATA_FIELD_COUNT = 28;
+  private static final int POINTER_DATA_FIELD_COUNT = 29;
   private static final int BYTES_PER_FIELD = 8;
 
   // This value must match the value in framework's platform_view.dart.
@@ -65,6 +65,7 @@ public class AndroidTouchProcessor {
   private static final int POINTER_DATA_FLAG_BATCHED = 1;
 
   @NonNull private final FlutterRenderer renderer;
+  @NonNull private final MotionEventTracker motionEventTracker;
 
   private static final int _POINTER_BUTTON_PRIMARY = 1;
 
@@ -76,6 +77,7 @@ public class AndroidTouchProcessor {
   // FlutterRenderer
   public AndroidTouchProcessor(@NonNull FlutterRenderer renderer) {
     this.renderer = renderer;
+    this.motionEventTracker = MotionEventTracker.getInstance();
   }
 
   /** Sends the given {@link MotionEvent} data to Flutter in a format that Flutter understands. */
@@ -174,6 +176,8 @@ public class AndroidTouchProcessor {
       return;
     }
 
+    MotionEventTracker.MotionEventId motionEventId = motionEventTracker.track(event);
+
     int pointerKind = getPointerDeviceTypeForToolType(event.getToolType(pointerIndex));
 
     int signalKind =
@@ -183,6 +187,7 @@ public class AndroidTouchProcessor {
 
     long timeStamp = event.getEventTime() * 1000; // Convert from milliseconds to microseconds.
 
+    packet.putLong(motionEventId.getId());
     packet.putLong(timeStamp); // time_stamp
     packet.putLong(pointerChange); // change
     packet.putLong(pointerKind); // kind

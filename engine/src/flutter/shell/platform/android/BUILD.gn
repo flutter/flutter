@@ -140,6 +140,7 @@ android_java_sources = [
   "io/flutter/embedding/android/FlutterSurfaceView.java",
   "io/flutter/embedding/android/FlutterTextureView.java",
   "io/flutter/embedding/android/FlutterView.java",
+  "io/flutter/embedding/android/MotionEventTracker.java",
   "io/flutter/embedding/android/RenderMode.java",
   "io/flutter/embedding/android/SplashScreen.java",
   "io/flutter/embedding/android/SplashScreenProvider.java",

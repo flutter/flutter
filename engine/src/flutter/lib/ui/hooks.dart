@@ -287,9 +287,9 @@ void _invoke3<A1, A2, A3>(void callback(A1 a1, A2 a2, A3 a3)?, Zone zone, A1 arg
 // If this value changes, update the encoding code in the following files:
 //
 //  * pointer_data.cc
-//  * pointers.dart
+//  * pointer.dart
 //  * AndroidTouchProcessor.java
-const int _kPointerDataFieldCount = 28;
+const int _kPointerDataFieldCount = 29;
 
 PointerDataPacket _unpackPointerDataPacket(ByteData packet) {
   const int kStride = Int64List.bytesPerElement;
@@ -300,6 +300,7 @@ PointerDataPacket _unpackPointerDataPacket(ByteData packet) {
   for (int i = 0; i < length; ++i) {
     int offset = i * _kPointerDataFieldCount;
     data.add(PointerData(
+      embedderId: packet.getInt64(kStride * offset++, _kFakeHostEndian),
       timeStamp: Duration(microseconds: packet.getInt64(kStride * offset++, _kFakeHostEndian)),
       change: PointerChange.values[packet.getInt64(kStride * offset++, _kFakeHostEndian)],
       kind: PointerDeviceKind.values[packet.getInt64(kStride * offset++, _kFakeHostEndian)],

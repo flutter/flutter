@@ -166,7 +166,8 @@ public class PlatformViewsChannel {
                   (int) args.get(11),
                   (int) args.get(12),
                   (int) args.get(13),
-                  (int) args.get(14));
+                  (int) args.get(14),
+                  ((Number) args.get(15)).longValue());
 
           try {
             handler.onTouch(touch);
@@ -380,6 +381,8 @@ public class PlatformViewsChannel {
     public final int source;
     /** TODO(mattcarroll): javadoc */
     public final int flags;
+    /** TODO(iskakaushik): javadoc */
+    public final long motionEventId;
 
     PlatformViewTouch(
         int viewId,
@@ -396,7 +399,8 @@ public class PlatformViewsChannel {
         int deviceId,
         int edgeFlags,
         int source,
-        int flags) {
+        int flags,
+        long motionEventId) {
       this.viewId = viewId;
       this.downTime = downTime;
       this.eventTime = eventTime;
@@ -412,6 +416,7 @@ public class PlatformViewsChannel {
       this.edgeFlags = edgeFlags;
       this.source = source;
       this.flags = flags;
+      this.motionEventId = motionEventId;
     }
   }
 }
