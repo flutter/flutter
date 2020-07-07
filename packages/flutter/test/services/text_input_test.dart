@@ -192,6 +192,40 @@ void main() {
       expect(client.latestMethodCall, 'showAutocorrectionPromptRect');
     });
   });
+
+  test('TextEditingValue.isComposingRangeValid', () async {
+    // isValue == false.
+    expect(const TextEditingValue(text: '').isComposingRangeValid, isFalse);
+
+    // isNormalized == false.
+    expect(
+      const TextEditingValue(text: 'test', composing: TextRange(start: 1, end: 0)).isComposingRangeValid,
+      isFalse,
+    );
+
+    // isNormalized == false.
+    expect(
+      const TextEditingValue(text: 'test', composing: TextRange(start: 1, end: 0)).isComposingRangeValid,
+      isFalse,
+    );
+
+    // out of range.
+    expect(
+      const TextEditingValue(text: 'test', composing: TextRange(start: 1, end: 5)).isComposingRangeValid,
+      isFalse,
+    );
+
+    // out of range.
+    expect(
+      const TextEditingValue(text: 'test', composing: TextRange(start: -1, end: 4)).isComposingRangeValid,
+      isFalse,
+    );
+
+    expect(
+      const TextEditingValue(text: 'test', composing: TextRange(start: 1, end: 4)).isComposingRangeValid,
+      isTrue,
+    );
+  });
 }
 
 class FakeTextInputClient implements TextInputClient {

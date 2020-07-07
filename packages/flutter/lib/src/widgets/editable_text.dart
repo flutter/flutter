@@ -164,7 +164,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
     // preserve the tree integrity, otherwise in release mode a RangeError will
     // be thrown instead of the asserts, as a result this EditableText will be
     // built with a broken subtree.
-    assert((value.composing.isValid && withComposing) && value.isComposingRangeValid);
+    assert(!(value.composing.isValid && withComposing) || value.isComposingRangeValid, '${value.composing}');
     if (!value.isComposingRangeValid || !withComposing) {
       return TextSpan(style: style, text: text);
     }
@@ -1425,6 +1425,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void didUpdateWidget(EditableText oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.controller != oldWidget.controller) {
+      _debugAssertInvalidComposingRange(widget.controller.value);
       oldWidget.controller.removeListener(_didChangeTextEditingValue);
       widget.controller.addListener(_didChangeTextEditingValue);
       _updateRemoteEditingValueIfNeeded();
@@ -1655,13 +1656,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   TextEditingValue get _value => widget.controller.value;
   set _value(TextEditingValue value) {
+    _debugAssertInvalidComposingRange(value);
+    widget.controller.value = value;
+  }
+
+  void _debugAssertInvalidComposingRange(TextEditingValue value) {
     assert(
       !value.composing.isValid || value.isComposingRangeValid,
       'New TextEditingValue $value has an invalid non-empty composing range '
       '${value.composing}. It is recommended to use a valid composing range, '
       'even for readonly text fields',
     );
-    widget.controller.value = value;
   }
 
   bool get _hasFocus => widget.focusNode.hasFocus;

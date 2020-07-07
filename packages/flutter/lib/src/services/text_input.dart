@@ -719,6 +719,9 @@ class TextEditingValue {
   /// Returns if and only if the [composing] range is normalized, its start is
   /// greater than or equal to 0, and its end is less than or equal to [text]'s
   /// length.
+  ///
+  /// If the [composing] range's `isValid` is true, this property being false
+  /// usually indicates a programming error.
   bool get isComposingRangeValid => composing.isValid && composing.isNormalized && composing.end <= text.length;
 
   @override
