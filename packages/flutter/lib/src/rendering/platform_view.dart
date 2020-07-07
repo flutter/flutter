@@ -622,7 +622,6 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
     context.addLayer(PlatformViewLayer(
       rect: offset & size,
       viewId: _controller.viewId,
-      hoverAnnotation: _hoverAnnotation,
     ));
   }
 
@@ -636,31 +635,12 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
 }
 
 /// The Mixin handling the pointer events and gestures of a platform view render box.
-mixin _PlatformViewGestureMixin on RenderBox {
+mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
 
   /// How to behave during hit testing.
   // The implicit setter is enough here as changing this value will just affect
   // any newly arriving events there's nothing we need to invalidate.
   PlatformViewHitTestBehavior hitTestBehavior;
-
-  /// [MouseTrackerAnnotation] associated with the platform view layer.
-  ///
-  /// Gesture recognizers don't receive hover events due to the performance
-  /// cost associated with hit testing a sequence of potentially thousands of
-  /// events -- move events only hit-test the down event, then cache the result
-  /// and apply it to all subsequent move events, but there is no down event
-  /// for a hover. To support native hover gesture handling by platform views,
-  /// we attach/detach this layer annotation as necessary.
-  MouseTrackerAnnotation get _hoverAnnotation {
-    return _cachedHoverAnnotation ??= MouseTrackerAnnotation(
-      onHover: (PointerHoverEvent event) {
-        if (_handlePointerEvent != null)
-          _handlePointerEvent(event);
-      },
-      cursor: MouseCursor.uncontrolled,
-    );
-  }
-  MouseTrackerAnnotation _cachedHoverAnnotation;
 
   _HandlePointerEvent _handlePointerEvent;
 
@@ -695,6 +675,22 @@ mixin _PlatformViewGestureMixin on RenderBox {
 
   @override
   bool hitTestSelf(Offset position) => hitTestBehavior != PlatformViewHitTestBehavior.transparent;
+
+  @override
+  PointerEnterEventListener get onEnter => null;
+
+  @override
+  PointerHoverEventListener get onHover => _handleHover;
+  void _handleHover(PointerHoverEvent event) {
+    if (_handlePointerEvent != null)
+      _handlePointerEvent(event);
+  }
+
+  @override
+  PointerExitEventListener get onExit => null;
+
+  @override
+  MouseCursor get cursor => MouseCursor.uncontrolled;
 
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
