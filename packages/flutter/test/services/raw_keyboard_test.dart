@@ -107,7 +107,7 @@ void main() {
           expect(RawKeyboard.instance.keysPressed, isEmpty, reason: 'on $platform');
         }
       }
-    });
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
     testWidgets('keysPressed is correct when modifier is released before key', (WidgetTester tester) async {
       for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows']) {
@@ -654,7 +654,8 @@ void main() {
       expect(data.physicalKey, equals(PhysicalKeyboardKey.escape));
       expect(data.logicalKey, equals(LogicalKeyboardKey.escape));
       expect(data.keyLabel, isNull);
-    });
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/35347
+
     test('Modifier keyboard keys are correctly translated', () {
       final RawKeyEvent shiftLeftKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
@@ -667,7 +668,7 @@ void main() {
       expect(data.physicalKey, equals(PhysicalKeyboardKey.shiftLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.shiftLeft));
       expect(data.keyLabel, isNull);
-    });
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/35347
   });
 
   group('RawKeyEventDataMacOs', () {
@@ -785,7 +786,8 @@ void main() {
       expect(data.physicalKey, equals(PhysicalKeyboardKey.escape));
       expect(data.logicalKey, equals(LogicalKeyboardKey.escape));
       expect(data.keyLabel, isNull);
-    });
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/35347
+
     test('Modifier keyboard keys are correctly translated', () {
       final RawKeyEvent shiftLeftKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
@@ -800,7 +802,8 @@ void main() {
       expect(data.physicalKey, equals(PhysicalKeyboardKey.shiftLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.shiftLeft));
       expect(data.keyLabel, isNull);
-    });
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/35347
+
     test('Unprintable keyboard keys are correctly translated', () {
       final RawKeyEvent leftArrowKey = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
@@ -815,7 +818,7 @@ void main() {
       expect(data.physicalKey, equals(PhysicalKeyboardKey.arrowLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.arrowLeft));
       expect(data.logicalKey.keyLabel, isNull);
-    });
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/35347
   });
 
   group('RawKeyEventDataWindows', () {
@@ -1114,7 +1117,8 @@ void main() {
       }
 
       expect(() => _createFailingKey(), throwsAssertionError);
-    });
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61039
+
     test('Control keyboard keys are correctly translated', () {
       final RawKeyEvent escapeKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
@@ -1297,7 +1301,8 @@ void main() {
       }
 
       expect(() => _createFailingKey(), throwsAssertionError);
-    });
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61039
+
     test('Control keyboard keys are correctly translated', () {
       final RawKeyEvent escapeKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
