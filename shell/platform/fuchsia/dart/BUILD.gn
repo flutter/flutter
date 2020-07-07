@@ -38,3 +38,14 @@ application_snapshot("kernel_compiler") {
 
   inputs = kernel_compiler_files
 }
+
+application_snapshot("list_libraries") {
+  main_dart = "//third_party/dart/pkg/vm/bin/list_libraries.dart"
+  training_args = [
+    # train against the dill file which is generated for this snapshot. If this build file
+    # changes location this path will need to be updated.
+    rebase_path(
+        root_gen_dir +
+        "/flutter/shell/platform/fuchsia/dart/list_libraries.dart.dill"),
+  ]
+}
