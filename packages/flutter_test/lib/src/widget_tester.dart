@@ -579,8 +579,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// The `frameRefreshRate` specify the frequency (in Hz) for frame requests.
   /// This is an analog to screen refresh rate on a device. The frequency rate
   /// will be rounded down to integer microseconds frame interval.
-  /// Default value is 59.94 Hz, which is the real refresh rate for many devices
-  /// when it shows as 60 Hz, for historical reason.
+  /// Default value is 60 Hz.
   ///
   /// This allows a test to pump for a period of time during an unbounded
   /// animation. To pump to the end of a bounded animation, use [pumpAndSettle]
@@ -595,6 +594,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// flaky result result due to time fluctuation and rounding error.
   ///
   /// Example:
+  ///
   ///     testWidgets('pumpContinuous', (WidgetTester tester) async {
   ///       await tester.pumpWidget(const Text(
   ///         'foo',
@@ -606,13 +606,13 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   ///       );
   ///       test.forward(from: 0.0);
   ///       final int count = await tester.pumpContinuous(const Duration(milliseconds: 80));
-  ///       const int defaultFrameInterval = 1E6 ~/ 59.94;
+  ///       const int defaultFrameInterval = 1e6 ~/ 60;
   ///       // ends after 80 ms
-  ///       expect(count, 1 + (80E3/defaultFrameInterval).floor());
+  ///       expect(count, 1 + (80e3/defaultFrameInterval).floor());
   ///     });
   Future<int> pumpContinuous(Duration duration, {
     EnginePhase phase = EnginePhase.sendSemanticsUpdate,
-    double frameRefreshRate = 59.94,
+    double frameRefreshRate = 60,
   }) async {
     assert(duration != null);
     assert(duration > Duration.zero);
@@ -645,11 +645,11 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// `interval` as many as `maxDuration` allows.
   ///
   /// The `maxDuration` argument is required. The `interval` argument defaults to
-  /// 16.683 milliseconds (59.94 FPS).
+  /// 16.667 milliseconds (60 FPS).
   Future<void> pumpFrames(
     Widget target,
     Duration maxDuration, [
-    Duration interval = const Duration(milliseconds: 16, microseconds: 683),
+    Duration interval = const Duration(milliseconds: 16, microseconds: 667),
   ]) {
     assert(maxDuration != null);
     // The interval following the last frame doesn't have to be within the fullDuration.

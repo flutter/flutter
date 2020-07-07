@@ -315,7 +315,7 @@ void main() {
         textDirection: TextDirection.ltr,
       ));
       int count;
-      const int kDefaultFrameIntervalInMicroseconds = 1E6 ~/ 59.94;
+      const int kDefaultFrameIntervalInMicroseconds = 1E6 ~/ 60;
 
       final AnimationController test = AnimationController(
         duration: const Duration(milliseconds: 200),
