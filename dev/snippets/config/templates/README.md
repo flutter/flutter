@@ -68,6 +68,9 @@ follows:
   
 ### WidgetsApp Templates
 
+These templates create a `WidgetsApp` that encloses the snippet widget. They also import the widgets
+library.
+
 - [`stateful_widget`](stateful_widget.tmpl) :
   The default code block will be placed as the body of the `State` object of a
   `StatefulWidget` subclass. Because the default code block is placed as the body
@@ -79,7 +82,6 @@ follows:
   `build()` method, and any state variables. It also has an `imports`
   section to import additional packages. Please only import things that are part
   of flutter or part of default dependencies for a `flutter create` project.
-  It creates a `WidgetsApp` around the child stateful widget.
   
 - [`stateful_widget_ticker`](stateful_widget_ticker.tmpl) : Identical to the
   `stateful_widget` template, with the addition of the `TickerProviderStateMixin`
