@@ -146,7 +146,7 @@ class CategoryView extends StatelessWidget {
 }
 
 // One BackdropPanel is visible at a time. It's stacked on top of the
-// the BackdropDemo.
+// BackdropDemo.
 class BackdropPanel extends StatelessWidget {
   const BackdropPanel({
     Key key,

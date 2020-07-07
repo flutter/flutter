@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -927,6 +929,30 @@ void main() {
 
       // Should not crash.
       expect(find.text('CRASHHH'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'Table widget - Default textBaseline is set to TableBaseline.alphabetic',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Table(
+            defaultVerticalAlignment: TableCellVerticalAlignment.baseline,
+            children: const <TableRow>[
+              TableRow(
+                children: <Widget>[
+                  Text('Some Text'),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+
+      final RenderTable table = tester.renderObject(find.byType(Table));
+      expect(table.textBaseline, TextBaseline.alphabetic);
     },
   );
 

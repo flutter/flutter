@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -155,7 +157,7 @@ void main() {
       expect(raw.disabledElevation, 0.0);
       expect(raw.constraints, defaultButtonConstraints);
       expect(raw.padding, defaultButtonPadding);
-      // animationDuration can't be configed by the theme/constructor
+      // animationDuration can't be configured by the theme/constructor
       expect(raw.materialTapTargetSize, MaterialTapTargetSize.padded);
     });
 
@@ -182,7 +184,7 @@ void main() {
       expect(raw.disabledElevation, 0.0);
       expect(raw.constraints, defaultButtonConstraints);
       expect(raw.padding, defaultButtonPadding);
-      // animationDuration can't be configed by the theme/constructor
+      // animationDuration can't be configured by the theme/constructor
       expect(raw.materialTapTargetSize, MaterialTapTargetSize.padded);
     });
 
@@ -209,7 +211,7 @@ void main() {
       expect(raw.disabledElevation, 0.0);
       expect(raw.constraints, defaultButtonConstraints);
       expect(raw.padding, defaultButtonPadding);
-      // animationDuration can't be configed by the theme/constructor
+      // animationDuration can't be configured by the theme/constructor
       expect(raw.materialTapTargetSize, MaterialTapTargetSize.padded);
     });
   });

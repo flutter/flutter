@@ -37,7 +37,7 @@ void main() {
 
     testUsingContext('nonempty', () async {
       final AssetBundle ab = AssetBundleFactory.instance.createBundle();
-      expect(await ab.build(), 0);
+      expect(await ab.build(packagesPath: '.packages'), 0);
       expect(ab.entries.length, greaterThan(0));
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
@@ -50,7 +50,7 @@ void main() {
         ..writeAsStringSync('');
 
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-      await bundle.build(manifestPath: 'pubspec.yaml');
+      await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages');
       expect(bundle.entries.length, 1);
       const String expectedAssetManifest = '{}';
       expect(
@@ -74,7 +74,7 @@ flutter:
     - assets/foo/
 ''');
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-      await bundle.build(manifestPath: 'pubspec.yaml');
+      await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages');
       // Expected assets:
       //  - asset manifest
       //  - font manifest
@@ -89,7 +89,7 @@ flutter:
         ..setLastModifiedSync(packageFile.lastModifiedSync().add(const Duration(hours: 1)));
 
       expect(bundle.needsBuild(manifestPath: 'pubspec.yaml'), true);
-      await bundle.build(manifestPath: 'pubspec.yaml');
+      await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages');
       // Expected assets:
       //  - asset manifest
       //  - font manifest
@@ -114,7 +114,7 @@ flutter:
 ''');
       globals.fs.file('.packages').createSync();
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-      await bundle.build(manifestPath: 'pubspec.yaml');
+      await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages');
       // Expected assets:
       //  - asset manifest
       //  - font manifest
@@ -140,7 +140,7 @@ name: example''')
       // asset manifest and not updated. This is due to the devfs not
       // supporting file deletion.
       expect(bundle.needsBuild(manifestPath: 'pubspec.yaml'), true);
-      await bundle.build(manifestPath: 'pubspec.yaml');
+      await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages');
       // Expected assets:
       //  - asset manifest
       //  - font manifest
@@ -168,7 +168,7 @@ flutter:
 ''');
       globals.fs.file('.packages').createSync();
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-      await bundle.build(manifestPath: 'pubspec.yaml');
+      await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages');
       // Expected assets:
       //  - asset manifest
       //  - font manifest
@@ -205,7 +205,7 @@ assets:
   - assets/foo/bar.txt
 ''');
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-    await bundle.build(manifestPath: 'pubspec.yaml');
+    await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages');
 
     final DevFSStringContent assetManifest = bundle.entries['AssetManifest.json']
       as DevFSStringContent;
@@ -214,7 +214,7 @@ assets:
     final DevFSStringContent license = bundle.entries['NOTICES']
       as DevFSStringContent;
 
-    await bundle.build(manifestPath: 'pubspec.yaml');
+    await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages');
 
     expect(assetManifest, bundle.entries['AssetManifest.json']);
     expect(fontManifest, bundle.entries['FontManifest.json']);
@@ -238,7 +238,7 @@ flutter:
 ''');
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
-    expect(await bundle.build(manifestPath: 'pubspec.yaml'), 0);
+    expect(await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages'), 0);
     expect(bundle.additionalDependencies.single.path, contains('DOES_NOT_EXIST_RERUN_FOR_WILDCARD'));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
@@ -259,7 +259,7 @@ flutter:
 ''');
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
-    expect(await bundle.build(manifestPath: 'pubspec.yaml'), 0);
+    expect(await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages'), 0);
     expect(bundle.additionalDependencies, isEmpty);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
@@ -293,7 +293,7 @@ flutter:
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
     globals.fs.file('foo/bar/fizz.txt').createSync(recursive: true);
 
-    expect(await bundle.build(manifestPath: 'pubspec.yaml'), 0);
+    expect(await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages'), 0);
     expect(bundle.additionalDependencies, isEmpty);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
@@ -327,7 +327,7 @@ flutter:
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
     globals.fs.file('foo/bar/fizz.txt').createSync(recursive: true);
 
-    await bundle.build(manifestPath: 'pubspec.yaml');
+    await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages');
 
     expect(bundle.entries, hasLength(4));
     expect(bundle.needsBuild(manifestPath: 'pubspec.yaml'), false);
@@ -369,7 +369,7 @@ flutter:
 ''');
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
-    expect(await bundle.build(manifestPath: 'pubspec.yaml'), 1);
+    expect(await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages'), 1);
     expect(testLogger.errorText, contains('This asset was included from package foo'));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
@@ -392,7 +392,7 @@ flutter:
 ''');
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
-    expect(await bundle.build(manifestPath: 'pubspec.yaml'), 1);
+    expect(await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages'), 1);
     expect(testLogger.errorText, isNot(contains('This asset was included from')));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
@@ -426,7 +426,7 @@ flutter:
 ''');
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
-    expect(await bundle.build(manifestPath: 'pubspec.yaml'), 0);
+    expect(await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages'), 0);
     expect((bundle.entries['FontManifest.json'] as DevFSStringContent).string, '[]');
     expect((bundle.entries['AssetManifest.json'] as DevFSStringContent).string, '{}');
     expect(testLogger.errorText, contains(

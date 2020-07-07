@@ -52,6 +52,41 @@ void main() {
       );
     });
 
+    testWithoutContext('precompiled web artifact paths are correct', () {
+      expect(
+        artifacts.getArtifactPath(Artifact.webPrecompiledSdk),
+        'root/bin/cache/flutter_web_sdk/kernel/amd/dart_sdk.js',
+      );
+      expect(
+        artifacts.getArtifactPath(Artifact.webPrecompiledSdkSourcemaps),
+        'root/bin/cache/flutter_web_sdk/kernel/amd/dart_sdk.js.map',
+      );
+      expect(
+        artifacts.getArtifactPath(Artifact.webPrecompiledCanvaskitSdk),
+        'root/bin/cache/flutter_web_sdk/kernel/amd-canvaskit/dart_sdk.js',
+      );
+      expect(
+        artifacts.getArtifactPath(Artifact.webPrecompiledCanvaskitSdkSourcemaps),
+        'root/bin/cache/flutter_web_sdk/kernel/amd-canvaskit/dart_sdk.js.map',
+      );
+      expect(
+        artifacts.getArtifactPath(Artifact.webPrecompiledSoundSdk),
+        'root/bin/cache/flutter_web_sdk/kernel/amd-sound/dart_sdk.js',
+      );
+      expect(
+        artifacts.getArtifactPath(Artifact.webPrecompiledSoundSdkSourcemaps),
+        'root/bin/cache/flutter_web_sdk/kernel/amd-sound/dart_sdk.js.map',
+      );
+      expect(
+        artifacts.getArtifactPath(Artifact.webPrecompiledCanvaskitSoundSdk),
+        'root/bin/cache/flutter_web_sdk/kernel/amd-canvaskit-sound/dart_sdk.js',
+      );
+      expect(
+        artifacts.getArtifactPath(Artifact.webPrecompiledCanvaskitSoundSdkSourcemaps),
+        'root/bin/cache/flutter_web_sdk/kernel/amd-canvaskit-sound/dart_sdk.js.map',
+      );
+    });
+
     testWithoutContext('getEngineType', () {
       expect(
         artifacts.getEngineType(TargetPlatform.android_arm, BuildMode.debug),

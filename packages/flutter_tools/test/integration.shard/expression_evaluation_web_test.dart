@@ -33,6 +33,14 @@ void batch1() {
     tryToDelete(tempDir);
   }
 
+  Future<void> start({bool expressionEvaluation}) {
+    // The non-test project has a loop around its breakpoints.
+    // No need to start paused as all breakpoint would be eventually reached.
+    return  _flutter.run(
+      withDebugger: true, chrome: true,
+      expressionEvaluation: expressionEvaluation);
+  }
+
   Future<void> breakInBuildMethod(FlutterTestDriver flutter) async {
     await _flutter.breakAt(
       _project.buildMethodBreakpointUri,
@@ -47,9 +55,17 @@ void batch1() {
     );
   }
 
+  test('flutter run expression evaluation - error if expression evaluation disabled', () async {
+    await initProject();
+    await start(expressionEvaluation: false);
+    await breakInTopLevelFunction(_flutter);
+    await failToEvaluateExpression(_flutter);
+    await cleanProject();
+  }, skip: 'CI not setup for web tests'); // https://github.com/flutter/flutter/issues/53779
+
  test('flutter run expression evaluation - no native javascript objects in static scope', () async {
     await initProject();
-    await _flutter.run(withDebugger: true, chrome: true);
+    await start(expressionEvaluation: true);
     await breakInTopLevelFunction(_flutter);
     await checkStaticScope(_flutter);
     await cleanProject();
@@ -57,7 +73,7 @@ void batch1() {
 
   test('flutter run expression evaluation - can handle compilation errors', () async {
     await initProject();
-    await _flutter.run(withDebugger: true, chrome: true);
+    await start(expressionEvaluation: true);
     await breakInTopLevelFunction(_flutter);
     await evaluateErrorExpressions(_flutter);
     await cleanProject();
@@ -65,7 +81,7 @@ void batch1() {
 
   test('flutter run expression evaluation - can evaluate trivial expressions in top level function', () async {
     await initProject();
-    await _flutter.run(withDebugger: true, chrome: true);
+    await start(expressionEvaluation: true);
     await breakInTopLevelFunction(_flutter);
     await evaluateTrivialExpressions(_flutter);
     await cleanProject();
@@ -73,7 +89,7 @@ void batch1() {
 
   test('flutter run expression evaluation - can evaluate trivial expressions in build method', () async {
     await initProject();
-    await _flutter.run(withDebugger: true, chrome: true);
+    await start(expressionEvaluation: true);
     await breakInBuildMethod(_flutter);
     await evaluateTrivialExpressions(_flutter);
     await cleanProject();
@@ -81,7 +97,7 @@ void batch1() {
 
   test('flutter run expression evaluation - can evaluate complex expressions in top level function', () async {
     await initProject();
-    await _flutter.run(withDebugger: true, chrome: true);
+    await start(expressionEvaluation: true);
     await breakInTopLevelFunction(_flutter);
     await evaluateComplexExpressions(_flutter);
     await cleanProject();
@@ -113,15 +129,35 @@ void batch2() {
   }
 
   Future<void> breakInMethod(FlutterTestDriver flutter) async {
-    await _flutter.breakAt(
+    await _flutter.addBreakpoint(
       _project.breakpointAppUri,
       _project.breakpointLine,
     );
+    await _flutter.resume();
+    await _flutter.waitForPause();
   }
+
+  Future<void> startPaused({bool expressionEvaluation}) {
+    // The test project does not have a loop around its breakpoints.
+    // Start paused so we can set a breakpoint before passing it
+    // in the execution.
+    return  _flutter.run(
+      withDebugger: true, chrome: true,
+      expressionEvaluation: expressionEvaluation,
+      startPaused: true, script: _project.testFilePath);
+  }
+
+  test('flutter test expression evaluation - error if expression evaluation disabled', () async {
+    await initProject();
+    await startPaused(expressionEvaluation: false);
+    await breakInMethod(_flutter);
+    await failToEvaluateExpression(_flutter);
+    await cleanProject();
+  }, skip: 'CI not setup for web tests'); // https://github.com/flutter/flutter/issues/53779
 
   test('flutter test expression evaluation - can evaluate trivial expressions in a test', () async {
     await initProject();
-    await _flutter.run(withDebugger: true, chrome: true, script: _project.testFilePath);
+    await startPaused(expressionEvaluation: true);
     await breakInMethod(_flutter);
     await evaluateTrivialExpressions(_flutter);
     await cleanProject();
@@ -129,11 +165,23 @@ void batch2() {
 
   test('flutter test expression evaluation - can evaluate complex expressions in a test', () async {
     await initProject();
-    await _flutter.run(withDebugger: true, chrome: true, script: _project.testFilePath);
+    await startPaused(expressionEvaluation: true);
     await breakInMethod(_flutter);
     await evaluateComplexExpressions(_flutter);
     await cleanProject();
   }, skip: 'CI not setup for web tests'); // https://github.com/flutter/flutter/issues/53779
+}
+
+Future<void> failToEvaluateExpression(FlutterTestDriver flutter) async {
+  ObjRef res;
+  try {
+    res = await flutter.evaluateInFrame('"test"');
+  } on RPCError catch (e) {
+    expect(e.message, contains(
+      'UnimplementedError: '
+      'Expression evaluation is not supported for this configuration'));
+  }
+  expect(res, null);
 }
 
 Future<void> checkStaticScope(FlutterTestDriver flutter) async {

@@ -26,7 +26,7 @@ void main() {
   Cache.disableLocking();
 
   Future<BuildAarCommand> runCommandIn(String target, { List<String> arguments }) async {
-    final BuildAarCommand command = BuildAarCommand();
+    final BuildAarCommand command = BuildAarCommand(verboseHelp: false);
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>[
       'aar',
@@ -266,7 +266,7 @@ void main() {
             arguments: <String>['--no-pub'],
           );
         }, throwsToolExit(
-          message: 'No Android SDK found. Try setting the ANDROID_HOME environment variable',
+          message: 'No Android SDK found. Try setting the ANDROID_SDK_ROOT environment variable',
         ));
       },
       overrides: <Type, Generator>{
@@ -282,7 +282,7 @@ Future<BuildAarCommand> runBuildAarCommand(
   String target, {
   List<String> arguments,
 }) async {
-  final BuildAarCommand command = BuildAarCommand();
+  final BuildAarCommand command = BuildAarCommand(verboseHelp: false);
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>[
     'aar',

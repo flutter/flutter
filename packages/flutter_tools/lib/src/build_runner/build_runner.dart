@@ -19,7 +19,6 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../codegen.dart';
 import '../dart/pub.dart';
-import '../dart/sdk.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 
@@ -111,7 +110,14 @@ class BuildRunner extends CodeGenerator {
       }
       scriptIdFile.writeAsBytesSync(appliedBuilderDigest);
       final ProcessResult generateResult = await globals.processManager.run(<String>[
-        sdkBinaryName('pub'), 'run', 'build_runner', 'generate-build-script',
+        globals.fs.path.join(
+          globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+          'bin',
+          (globals.platform.isWindows) ? 'pub.bat' : 'pub'
+        ),
+        'run',
+        'build_runner',
+        'generate-build-script',
       ], workingDirectory: syntheticPubspec.parent.path);
       if (generateResult.exitCode != 0) {
         throwToolExit('Error generating build_script snapshot: ${generateResult.stderr}');

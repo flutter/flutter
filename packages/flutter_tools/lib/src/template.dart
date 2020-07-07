@@ -32,7 +32,9 @@ import 'globals.dart' as globals hide fs;
 class Template {
   Template(Directory templateSource, Directory baseDir, this.imageSourceDir, {
     @required FileSystem fileSystem,
-  }) : _fileSystem = fileSystem {
+    @required Set<Uri> templateManifest,
+  }) : _fileSystem = fileSystem,
+       _templateManifest = templateManifest {
     _templateFilePaths = <String, String>{};
 
     if (!templateSource.existsSync()) {
@@ -46,10 +48,14 @@ class Template {
         // We are only interesting in template *file* URIs.
         continue;
       }
+      if (_templateManifest != null && !_templateManifest.contains(Uri.file(entity.absolute.path))) {
+        globals.logger.printTrace('Skipping ${entity.absolute.path}, missing from the template manifest.');
+        // Skip stale files in the flutter_tools directory.
+        continue;
+      }
 
       final String relativePath = fileSystem.path.relative(entity.path,
           from: baseDir.absolute.path);
-
       if (relativePath.contains(templateExtension)) {
         // If '.tmpl' appears anywhere within the path of this entity, it is
         // is a candidate for rendering. This catches cases where the folder
@@ -59,14 +65,23 @@ class Template {
     }
   }
 
-  static Future<Template> fromName(String name, { @required FileSystem fileSystem }) async {
+  static Future<Template> fromName(String name, {
+    @required FileSystem fileSystem,
+    @required Set<Uri> templateManifest,
+  }) async {
     // All named templates are placed in the 'templates' directory
     final Directory templateDir = _templateDirectoryInPackage(name, fileSystem);
     final Directory imageDir = await _templateImageDirectory(name, fileSystem);
-    return Template(templateDir, templateDir, imageDir, fileSystem: fileSystem);
+    return Template(
+      templateDir,
+      templateDir, imageDir,
+      fileSystem: fileSystem,
+      templateManifest: templateManifest,
+    );
   }
 
   final FileSystem _fileSystem;
+  final Set<Uri> _templateManifest;
   static const String templateExtension = '.tmpl';
   static const String copyTemplateExtension = '.copy.tmpl';
   static const String imageTemplateExtension = '.img.tmpl';
@@ -108,6 +123,16 @@ class Template {
         }
         relativeDestinationPath = relativeDestinationPath.replaceAll('$platform-$language.tmpl', platform);
       }
+
+      final bool android = context['android'] as bool;
+      if (relativeDestinationPath.contains('android') && !android) {
+        return null;
+      }
+
+      // TODO(cyanglaz): do not add iOS folder by default when 1.20.0 is released.
+      // Also need to update the flutter SDK min constraint in the pubspec.yaml to 1.20.0.
+      // https://github.com/flutter/flutter/issues/59787
+
       // Only build a web project if explicitly asked.
       final bool web = context['web'] as bool;
       if (relativeDestinationPath.contains('web') && !web) {
@@ -128,6 +153,7 @@ class Template {
       if (relativeDestinationPath.startsWith('windows.tmpl') && !windows) {
         return null;
       }
+
       final String projectName = context['projectName'] as String;
       final String androidIdentifier = context['androidIdentifier'] as String;
       final String pluginClass = context['pluginClass'] as String;
@@ -139,7 +165,7 @@ class Template {
         .replaceAll(imageTemplateExtension, '')
         .replaceAll(templateExtension, '');
 
-      if (androidIdentifier != null) {
+      if (android != null && android && androidIdentifier != null) {
         finalDestinationPath = finalDestinationPath
             .replaceAll('androidIdentifier', androidIdentifier.replaceAll('.', pathSeparator));
       }

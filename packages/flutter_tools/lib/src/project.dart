@@ -225,6 +225,9 @@ class FlutterProject {
 
   /// Generates project files necessary to make Gradle builds work on Android
   /// and CocoaPods+Xcode work on iOS, for app and module projects only.
+  // TODO(cyanglaz): The param `checkProjects` is confusing. We should give it a better name
+  // or add some documentation explaining what it does, or both.
+  // https://github.com/flutter/flutter/issues/60023
   Future<void> ensureReadyForPlatformSpecificTooling({bool checkProjects = false}) async {
     if (!directory.existsSync() || hasExampleApp) {
       return;
@@ -324,9 +327,27 @@ abstract class XcodeBasedProject {
 
   /// The CocoaPods 'Manifest.lock'.
   File get podManifestLock;
+}
 
-  /// Directory containing symlinks to pub cache plugins source generated on `pod install`.
-  Directory get symlinks;
+/// Represents a CMake-based sub-project.
+///
+/// This defines interfaces common to Windows and Linux projects.
+abstract class CmakeBasedProject {
+  /// The parent of this project.
+  FlutterProject get parent;
+
+  /// Whether the subproject (either Windows or Linux) exists in the Flutter project.
+  bool existsSync();
+
+  /// The native project CMake specification.
+  File get cmakeFile;
+
+  /// Contains definitions for FLUTTER_ROOT, LOCAL_ENGINE, and more flags for
+  /// the build.
+  File get generatedCmakeConfigFile;
+
+  /// Includable CMake with rules and variables for plugin builds.
+  File get generatedPluginCmakeFile;
 }
 
 /// Represents the iOS sub-project of a Flutter project.
@@ -389,7 +410,6 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   /// The default 'Info.plist' file of the host app. The developer can change this location in Xcode.
   File get defaultHostInfoPlist => hostAppRoot.childDirectory(_hostAppProjectName).childFile('Info.plist');
 
-  @override
   Directory get symlinks => _flutterLibRoot.childDirectory('.symlinks');
 
   @override
@@ -648,10 +668,11 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   }
 
   Future<void> _overwriteFromTemplate(String path, Directory target) async {
-    final Template template = await Template.fromName(path, fileSystem: globals.fs);
+    final Template template = await Template.fromName(path, fileSystem: globals.fs, templateManifest: null);
     template.render(
       target,
       <String, dynamic>{
+        'ios': true,
         'projectName': parent.manifest.appName,
         'iosIdentifier': parent.manifest.iosBundleIdentifier,
       },
@@ -797,10 +818,11 @@ class AndroidProject extends FlutterProjectPlatform {
   }
 
   Future<void> _overwriteFromTemplate(String path, Directory target) async {
-    final Template template = await Template.fromName(path, fileSystem: globals.fs);
+    final Template template = await Template.fromName(path, fileSystem: globals.fs, templateManifest: null);
     template.render(
       target,
       <String, dynamic>{
+        'android': true,
         'projectName': parent.manifest.appName,
         'androidIdentifier': parent.manifest.androidPackage,
         'androidX': usesAndroidX,
@@ -970,9 +992,6 @@ class MacOSProject extends FlutterProjectPlatform implements XcodeBasedProject {
   @override
   Directory get xcodeWorkspace => _macOSDirectory.childDirectory('$_hostAppProjectName.xcworkspace');
 
-  @override
-  Directory get symlinks => ephemeralDirectory.childDirectory('.symlinks');
-
   /// The file where the Xcode build will write the name of the built app.
   ///
   /// Ideally this will be replaced in the future with inspection of the Runner
@@ -997,18 +1016,28 @@ class MacOSProject extends FlutterProjectPlatform implements XcodeBasedProject {
 }
 
 /// The Windows sub project
-class WindowsProject extends FlutterProjectPlatform {
-  WindowsProject._(this.project);
+class WindowsProject extends FlutterProjectPlatform implements CmakeBasedProject {
+  WindowsProject._(this.parent);
 
-  final FlutterProject project;
+  @override
+  final FlutterProject parent;
 
   @override
   String get pluginConfigKey => WindowsPlugin.kConfigKey;
 
   @override
-  bool existsSync() => _editableDirectory.existsSync() && solutionFile.existsSync();
+  bool existsSync() => _editableDirectory.existsSync() && cmakeFile.existsSync();
 
-  Directory get _editableDirectory => project.directory.childDirectory('windows');
+  @override
+  File get cmakeFile => _editableDirectory.childFile('CMakeLists.txt');
+
+  @override
+  File get generatedCmakeConfigFile => ephemeralDirectory.childFile('generated_config.cmake');
+
+  @override
+  File get generatedPluginCmakeFile => managedDirectory.childFile('generated_plugins.cmake');
+
+  Directory get _editableDirectory => parent.directory.childDirectory('windows');
 
   /// The directory in the project that is managed by Flutter. As much as
   /// possible, files that are edited by Flutter tooling after initial project
@@ -1020,24 +1049,6 @@ class WindowsProject extends FlutterProjectPlatform {
   /// checked in should live here.
   Directory get ephemeralDirectory => managedDirectory.childDirectory('ephemeral');
 
-  /// Contains definitions for FLUTTER_ROOT, LOCAL_ENGINE, and more flags for
-  /// the build.
-  File get generatedPropertySheetFile => ephemeralDirectory.childFile('Generated.props');
-
-  /// Contains configuration to add plugins to the build.
-  File get generatedPluginPropertySheetFile => managedDirectory.childFile('GeneratedPlugins.props');
-
-  // The MSBuild project file.
-  File get vcprojFile => _editableDirectory.childFile('Runner.vcxproj');
-
-  // The MSBuild solution file.
-  File get solutionFile => _editableDirectory.childFile('Runner.sln');
-
-  /// The file where the VS build will write the name of the built app.
-  ///
-  /// Ideally this will be replaced in the future with inspection of the project.
-  File get nameFile => ephemeralDirectory.childFile('exe_filename');
-
   /// The directory to write plugin symlinks.
   Directory get pluginSymlinkDirectory => ephemeralDirectory.childDirectory('.plugin_symlinks');
 
@@ -1045,15 +1056,16 @@ class WindowsProject extends FlutterProjectPlatform {
 }
 
 /// The Linux sub project.
-class LinuxProject extends FlutterProjectPlatform {
-  LinuxProject._(this.project);
+class LinuxProject extends FlutterProjectPlatform implements CmakeBasedProject {
+  LinuxProject._(this.parent);
 
-  final FlutterProject project;
+  @override
+  final FlutterProject parent;
 
   @override
   String get pluginConfigKey => LinuxPlugin.kConfigKey;
 
-  Directory get _editableDirectory => project.directory.childDirectory('linux');
+  Directory get _editableDirectory => parent.directory.childDirectory('linux');
 
   /// The directory in the project that is managed by Flutter. As much as
   /// possible, files that are edited by Flutter tooling after initial project
@@ -1068,14 +1080,13 @@ class LinuxProject extends FlutterProjectPlatform {
   @override
   bool existsSync() => _editableDirectory.existsSync();
 
-  /// The Linux project CMake specification.
+  @override
   File get cmakeFile => _editableDirectory.childFile('CMakeLists.txt');
 
-  /// Contains definitions for FLUTTER_ROOT, LOCAL_ENGINE, and more flags for
-  /// the build.
+  @override
   File get generatedCmakeConfigFile => ephemeralDirectory.childFile('generated_config.cmake');
 
-  /// Includable CMake with rules and variables for plugin builds.
+  @override
   File get generatedPluginCmakeFile => managedDirectory.childFile('generated_plugins.cmake');
 
   /// The directory to write plugin symlinks.

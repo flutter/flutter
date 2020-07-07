@@ -179,10 +179,10 @@ class Daemon {
 
   void _send(Map<String, dynamic> map) => sendCommand(map);
 
-  void shutdown({ dynamic error }) {
-    _commandSubscription?.cancel();
+  Future<void> shutdown({ dynamic error }) async {
+    await _commandSubscription?.cancel();
     for (final Domain domain in _domainMap.values) {
-      domain.dispose();
+      await domain.dispose();
     }
     if (!_onExitCompleter.isCompleted) {
       if (error == null) {
@@ -273,7 +273,7 @@ abstract class Domain {
     return val as int;
   }
 
-  void dispose() { }
+  Future<void> dispose() async { }
 }
 
 /// This domain responds to methods like [version] and [shutdown].
@@ -351,8 +351,8 @@ class DaemonDomain extends Domain {
   }
 
   @override
-  void dispose() {
-    _subscription?.cancel();
+  Future<void> dispose() async {
+    await _subscription?.cancel();
   }
 
   /// Enumerates the platforms supported by the provided project.
@@ -486,7 +486,6 @@ class AppDomain extends Domain {
         debuggingOptions: options,
         applicationBinary: applicationBinary,
         projectRootPath: projectRootPath,
-        packagesFilePath: packagesFilePath,
         dillOutputPath: dillOutputPath,
         ipv6: ipv6,
         hostIsIde: true,
@@ -828,9 +827,9 @@ class DeviceDomain extends Domain {
   }
 
   @override
-  void dispose() {
+  Future<void> dispose() async {
     for (final PollingDeviceDiscovery discoverer in _discoverers) {
-      discoverer.dispose();
+      await discoverer.dispose();
     }
   }
 
@@ -918,13 +917,14 @@ dynamic _toJsonable(dynamic obj) {
 }
 
 class NotifyingLogger extends Logger {
-  NotifyingLogger({ @required this.verbose }) {
+  NotifyingLogger({ @required this.verbose, this.parent }) {
     _messageController = StreamController<LogMessage>.broadcast(
       onListen: _onListen,
     );
   }
 
   final bool verbose;
+  final Logger parent;
   final List<LogMessage> messageBuffer = <LogMessage>[];
   StreamController<LogMessage> _messageController;
 
@@ -968,7 +968,7 @@ class NotifyingLogger extends Logger {
     if (!verbose) {
       return;
     }
-    _sendMessage(LogMessage('trace', message));
+    parent?.printError(message);
   }
 
   @override

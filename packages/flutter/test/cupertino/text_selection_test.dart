@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/cupertino.dart';
@@ -174,7 +176,8 @@ void main() {
     });
   });
 
-  testWidgets('Paste only appears when clipboard has contents', (WidgetTester tester) async {
+  // TODO(justinmc): https://github.com/flutter/flutter/issues/60145
+  testWidgets('Paste always appears regardless of clipboard content on iOS', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
@@ -193,15 +196,15 @@ void main() {
     // Make sure the clipboard is empty to start.
     await Clipboard.setData(const ClipboardData(text: ''));
 
-    // Double tap to selet the first word.
+    // Double tap to select the first word.
     const int index = 4;
     await tester.tapAt(textOffsetToPosition(tester, index));
     await tester.pump(const Duration(milliseconds: 50));
     await tester.tapAt(textOffsetToPosition(tester, index));
     await tester.pumpAndSettle();
 
-    // No Paste yet, because nothing has been copied.
-    expect(find.text('Paste'), findsNothing);
+    // Paste is showing even though clipboard is empty.
+    expect(find.text('Paste'), findsOneWidget);
     expect(find.text('Copy'), findsOneWidget);
     expect(find.text('Cut'), findsOneWidget);
 
@@ -217,7 +220,7 @@ void main() {
     await tester.tapAt(textOffsetToPosition(tester, index));
     await tester.pumpAndSettle();
 
-    // Paste now shows.
+    // Paste still shows.
     expect(find.text('Paste'), findsOneWidget);
     expect(find.text('Copy'), findsOneWidget);
     expect(find.text('Cut'), findsOneWidget);

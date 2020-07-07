@@ -71,7 +71,7 @@ void main() {
       globals.fs.file('pubspec.yaml').createSync();
       globals.fs.file('.packages').createSync();
       globals.fs.directory('windows').createSync();
-      globals.fs.file(globals.fs.path.join('windows', 'Runner.sln')).createSync();
+      globals.fs.file(globals.fs.path.join('windows', 'CMakeLists.txt')).createSync();
       final FlutterProject flutterProject = FlutterProject.current();
 
       expect(WindowsDevice().isSupportedForProject(flutterProject), true);
@@ -91,7 +91,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('isSupportedForProject is false with no Runner.sln', () async {
+    testUsingContext('isSupportedForProject is false with no build file', () async {
       globals.fs.file('pubspec.yaml').createSync();
       globals.fs.file('.packages').createSync();
       globals.fs.directory('windows').createSync();

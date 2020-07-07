@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
@@ -271,6 +273,24 @@ void main() {
         final RenderPhysicalShape model = getModel(tester);
         expect(model.color, equals(test.color));
       }
+    });
+
+    testWidgets('overlay will not apply to materials using a non-surface color', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Theme(
+          data: ThemeData(
+            applyElevationOverlayColor: true,
+            colorScheme: const ColorScheme.dark(),
+          ),
+          child: buildMaterial(
+            color: Colors.cyan,
+            elevation: 8.0,
+          ),
+        ),
+      );
+      final RenderPhysicalShape model = getModel(tester);
+      // Shouldn't change, as it is not using a ColorScheme.surface color
+      expect(model.color, equals(Colors.cyan));
     });
 
     testWidgets('overlay will not apply to materials using a light theme', (WidgetTester tester) async {

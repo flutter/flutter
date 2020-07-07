@@ -362,7 +362,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// If `callback` completes with an error, the error will be caught by the
   /// Flutter framework and made available via [takeException], and this method
-  /// will return a future that completes will `null`.
+  /// will return a future that completes with `null`.
   ///
   /// Re-entrant calls to this method are not allowed; callers of this method
   /// are required to wait for the returned future to complete before calling
@@ -478,7 +478,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   /// The current client of the onscreen keyboard. Callers must pump
   /// an additional frame after setting this property to complete the
-  /// the focus change.
+  /// focus change.
   ///
   /// Instead of setting this directly, consider using
   /// [WidgetTester.showKeyboard].
@@ -579,6 +579,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       // our main future completing.
       assert(Zone.current == _parentZone);
       if (_pendingExceptionDetails != null) {
+        assert(
+          _unmangle(_pendingExceptionDetails.stack) == _pendingExceptionDetails.stack,
+          'The test binding presented an unmangled stack trace to the framework.',
+        );
         debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
         reportTestException(_pendingExceptionDetails, testDescription);
         _pendingExceptionDetails = null;
@@ -611,6 +615,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     _oldExceptionHandler = FlutterError.onError;
     int _exceptionCount = 0; // number of un-taken exceptions
     FlutterError.onError = (FlutterErrorDetails details) {
+      details = details.copyWith(stack: _unmangle(details.stack));
       if (_pendingExceptionDetails != null) {
         debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the errors!
         if (_exceptionCount == 0) {

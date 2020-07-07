@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
@@ -49,6 +51,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       codec: _loadAsync(key as NetworkImage, chunkEvents, decode),
       chunkEvents: chunkEvents.stream,
       scale: key.scale,
+      debugLabel: key.url,
       informationCollector: () {
         return <DiagnosticsNode>[
           DiagnosticsProperty<image_provider.ImageProvider>('Image provider', this),

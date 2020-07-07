@@ -22,7 +22,7 @@ void main() {
 ///
 /// Instances of this class are returned from [UndoableAction]s and placed on
 /// the undo stack when they are invoked.
-class Memento extends Object with DiagnosticableMixin implements Diagnosticable {
+class Memento extends Object with Diagnosticable {
   const Memento({
     @required this.name,
     @required this.undo,

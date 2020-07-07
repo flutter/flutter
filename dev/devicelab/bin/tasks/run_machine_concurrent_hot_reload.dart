@@ -47,7 +47,6 @@ void main() {
         <String>[
           'run',
           '--machine',
-          '--verbose',
           '--no-fast-start',
           '-d',
           device.deviceId,
@@ -73,10 +72,6 @@ void main() {
           ready.complete();
           ok ??= true;
         }
-      });
-      transformToLines(run.stderr).listen((String line) {
-        stderr.writeln('run:stderr: $line');
-        ok = false;
       });
       run.exitCode.then<void>((int exitCode) {
         ok = false;

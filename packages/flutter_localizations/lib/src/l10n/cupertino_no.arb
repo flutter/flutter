@@ -19,6 +19,6 @@
   "copyButtonLabel": "Kopiér",
   "pasteButtonLabel": "Lim inn",
   "selectAllButtonLabel": "Velg alle",
-  "tabSemanticsLabel": "TBD",
+  "tabSemanticsLabel": "Fane $tabIndex av $tabCount",
   "modalBarrierDismissLabel": "Avvis"
 }

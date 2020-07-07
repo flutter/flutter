@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
@@ -665,7 +667,7 @@ void main() {
         }
       });
 
-      test('constructur duplicate drag recognizer', () {
+      test('constructor duplicate drag recognizer', () {
         FlutterError error;
         try {
           GestureDetector(

@@ -63,6 +63,8 @@ class AttachCommand extends FlutterCommand {
     usesFuchsiaOptions(hide: !verboseHelp);
     usesDartDefineOption();
     usesDeviceUserOption();
+    addEnableExperimentation(hide: !verboseHelp);
+    addNullSafetyModeOptions(hide: !verboseHelp);
     argParser
       ..addOption(
         'debug-port',
@@ -207,7 +209,9 @@ class AttachCommand extends FlutterCommand {
       ? Daemon(
           stdinCommandStream,
           stdoutCommandResponse,
-          notifyingLogger: NotifyingLogger(verbose: globals.logger.isVerbose),
+          notifyingLogger: (globals.logger is NotifyingLogger)
+            ? globals.logger as NotifyingLogger
+            : NotifyingLogger(verbose: globals.logger.isVerbose, parent: globals.logger),
           logToStdout: true,
         )
       : null;
@@ -413,7 +417,6 @@ class HotRunnerFactory {
     applicationBinary: applicationBinary,
     hostIsIde: hostIsIde,
     projectRootPath: projectRootPath,
-    packagesFilePath: packagesFilePath,
     dillOutputPath: dillOutputPath,
     stayResident: stayResident,
     ipv6: ipv6,

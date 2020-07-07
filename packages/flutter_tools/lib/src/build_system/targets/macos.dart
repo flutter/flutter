@@ -293,7 +293,11 @@ abstract class MacOSBundleFlutterAssets extends Target {
       .childDirectory('flutter_assets');
     assetDirectory.createSync(recursive: true);
 
-    final Depfile assetDepfile = await copyAssets(environment, assetDirectory);
+    final Depfile assetDepfile = await copyAssets(
+      environment,
+      assetDirectory,
+      targetPlatform: TargetPlatform.darwin_x64,
+    );
     final DepfileService depfileService = DepfileService(
       fileSystem: globals.fs,
       logger: globals.logger,

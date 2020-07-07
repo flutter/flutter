@@ -20,7 +20,6 @@ import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/plist_parser.dart';
-import 'package:flutter_tools/src/proxy_validator.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vscode/vscode.dart';
@@ -43,6 +42,11 @@ final Generator _kNoColorOutputPlatform = () => FakePlatform(
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
   Platform: _kNoColorOutputPlatform,
 };
+
+final Platform macPlatform = FakePlatform(
+  operatingSystem: 'macos',
+  environment: <String, String>{'HOME': '/foo/bar'}
+);
 
 void main() {
   MockProcessManager mockProcessManager;
@@ -94,11 +98,14 @@ void main() {
       expect(validator.plistFile, '/path/to/app/Contents/Info.plist');
       expect(validator.pluginsPath, pluginsDirectory.path);
     }, overrides: <Type, Generator>{
-      Platform: () => FakePlatform()
-        ..environment = <String, String>{'HOME': '/foo/bar'},
+      Platform: () => macPlatform,
       PlistParser: () => mockPlistParser,
       FileSystem: () => fileSystem,
       ProcessManager: () => mockProcessManager,
+      FileSystemUtils: () => FileSystemUtils(
+        fileSystem: fileSystem,
+        platform: macPlatform,
+      )
     });
 
     testUsingContext('legacy intellij plugins path checking on mac', () async {
@@ -107,9 +114,14 @@ void main() {
       final IntelliJValidatorOnMac validator = IntelliJValidatorOnMac('Test', 'TestID', '/foo');
       expect(validator.pluginsPath, '/foo/bar/Library/Application Support/TestID2020.10');
     }, overrides: <Type, Generator>{
-      Platform: () => FakePlatform()
-        ..environment = <String, String>{'HOME': '/foo/bar'},
+      Platform: () => macPlatform,
       PlistParser: () => mockPlistParser,
+      FileSystem: () => fileSystem,
+      FileSystemUtils: () => FileSystemUtils(
+        fileSystem: fileSystem,
+        platform: macPlatform,
+      ),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('intellij plugins path checking on mac with override', () async {
@@ -119,6 +131,13 @@ void main() {
       expect(validator.pluginsPath, '/path/to/JetBrainsToolboxApp.plugins');
     }, overrides: <Type, Generator>{
       PlistParser: () => mockPlistParser,
+      Platform: () => macPlatform,
+      FileSystem: () => fileSystem,
+      FileSystemUtils: () => FileSystemUtils(
+        fileSystem: fileSystem,
+        platform: macPlatform,
+      ),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('vs code validator when both installed', () async {
@@ -168,91 +187,6 @@ void main() {
       expect(message.message, startsWith('Flutter extension not installed'));
       expect(message.isError, isTrue);
     }, overrides: noColorTerminalOverride);
-  });
-
-  group('proxy validator', () {
-    testUsingContext('does not show if HTTP_PROXY is not set', () {
-      expect(ProxyValidator.shouldShow, isFalse);
-    }, overrides: <Type, Generator>{
-      Platform: () => FakePlatform()..environment = <String, String>{},
-    });
-
-    testUsingContext('does not show if HTTP_PROXY is only whitespace', () {
-      expect(ProxyValidator.shouldShow, isFalse);
-    }, overrides: <Type, Generator>{
-      Platform: () =>
-          FakePlatform()..environment = <String, String>{'HTTP_PROXY': ' '},
-    });
-
-    testUsingContext('shows when HTTP_PROXY is set', () {
-      expect(ProxyValidator.shouldShow, isTrue);
-    }, overrides: <Type, Generator>{
-      Platform: () => FakePlatform()
-        ..environment = <String, String>{'HTTP_PROXY': 'fakeproxy.local'},
-    });
-
-    testUsingContext('shows when http_proxy is set', () {
-      expect(ProxyValidator.shouldShow, isTrue);
-    }, overrides: <Type, Generator>{
-      Platform: () => FakePlatform()
-        ..environment = <String, String>{'http_proxy': 'fakeproxy.local'},
-    });
-
-    testUsingContext('reports success when NO_PROXY is configured correctly', () async {
-      final ValidationResult results = await ProxyValidator().validate();
-      final List<ValidationMessage> issues = results.messages
-          .where((ValidationMessage msg) => msg.isError || msg.isHint)
-          .toList();
-      expect(issues, hasLength(0));
-    }, overrides: <Type, Generator>{
-      Platform: () => FakePlatform()
-        ..environment = <String, String>{
-          'HTTP_PROXY': 'fakeproxy.local',
-          'NO_PROXY': 'localhost,127.0.0.1',
-        },
-    });
-
-    testUsingContext('reports success when no_proxy is configured correctly', () async {
-      final ValidationResult results = await ProxyValidator().validate();
-      final List<ValidationMessage> issues = results.messages
-          .where((ValidationMessage msg) => msg.isError || msg.isHint)
-          .toList();
-      expect(issues, hasLength(0));
-    }, overrides: <Type, Generator>{
-      Platform: () => FakePlatform()
-        ..environment = <String, String>{
-          'http_proxy': 'fakeproxy.local',
-          'no_proxy': 'localhost,127.0.0.1',
-        },
-    });
-
-    testUsingContext('reports issues when NO_PROXY is missing localhost', () async {
-      final ValidationResult results = await ProxyValidator().validate();
-      final List<ValidationMessage> issues = results.messages
-          .where((ValidationMessage msg) => msg.isError || msg.isHint)
-          .toList();
-      expect(issues, isNot(hasLength(0)));
-    }, overrides: <Type, Generator>{
-      Platform: () => FakePlatform()
-        ..environment = <String, String>{
-          'HTTP_PROXY': 'fakeproxy.local',
-          'NO_PROXY': '127.0.0.1',
-        },
-    });
-
-    testUsingContext('reports issues when NO_PROXY is missing 127.0.0.1', () async {
-      final ValidationResult results = await ProxyValidator().validate();
-      final List<ValidationMessage> issues = results.messages
-          .where((ValidationMessage msg) => msg.isError || msg.isHint)
-          .toList();
-      expect(issues, isNot(hasLength(0)));
-    }, overrides: <Type, Generator>{
-      Platform: () => FakePlatform()
-        ..environment = <String, String>{
-          'HTTP_PROXY': 'fakeproxy.local',
-          'NO_PROXY': 'localhost',
-        },
-    });
   });
 
   group('doctor with overridden validators', () {

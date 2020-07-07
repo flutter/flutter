@@ -12,12 +12,12 @@ import 'package:webdriver/async_io.dart' as async_io;
 
 import '../android/android_device.dart';
 import '../application_package.dart';
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/process.dart';
 import '../build_info.dart';
 import '../dart/package_map.dart';
-import '../dart/sdk.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -505,11 +505,9 @@ Future<void> _runTests(List<String> testArgs, Map<String, String> environment) a
   globals.printTrace('Running driver tests.');
 
   globalPackagesPath = globals.fs.path.normalize(globals.fs.path.absolute(globalPackagesPath));
-  final String dartVmPath = globals.fs.path.join(dartSdkPath, 'bin', 'dart');
   final int result = await processUtils.stream(
     <String>[
-      dartVmPath,
-      ...dartVmFlags,
+      globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
       ...testArgs,
       '--packages=$globalPackagesPath',
       '-rexpanded',

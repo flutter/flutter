@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -27,6 +29,7 @@ import 'theme_data.dart';
 ///
 /// [RaisedButton] and [FlatButton] configure a [RawMaterialButton] based
 /// on the current [Theme] and [ButtonTheme].
+@Category(<String>['Material', 'Button'])
 class RawMaterialButton extends StatefulWidget {
   /// Create a button based on [Semantics], [Material], and [InkWell] widgets.
   ///

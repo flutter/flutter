@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
@@ -1673,7 +1675,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       _CreationLocation location = knownLocations[id];
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(53));
+      expect(location.line, equals(55));
       expect(location.column, equals(9));
       expect(count, equals(1));
 
@@ -1682,7 +1684,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       location = knownLocations[id];
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(91));
+      expect(location.line, equals(93));
       expect(location.column, equals(12));
       expect(count, equals(1));
 
@@ -1707,7 +1709,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       location = knownLocations[id];
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(53));
+      expect(location.line, equals(55));
       expect(location.column, equals(9));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
 
@@ -1716,7 +1718,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       location = knownLocations[id];
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(91));
+      expect(location.line, equals(93));
       expect(location.column, equals(12));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
 
@@ -1882,7 +1884,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
       state.updateTime(); // Triggers a rebuild.
       await tester.pump();
-      // Verify that rapint events are not fired once the extension is disabled.
+      // Verify that repaint events are not fired once the extension is disabled.
       expect(repaintEvents, isEmpty);
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
 
@@ -2254,6 +2256,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
         // Validate that we received an error count.
         expect(error['errorsSinceReload'], 0);
+        expect(
+            error['renderedErrorText'],
+            startsWith(
+                '══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞════════════'));
 
         // Send a second error.
         FlutterError.reportError(FlutterErrorDetailsForRendering(
@@ -2267,6 +2273,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         expect(flutterErrorEvents, hasLength(2));
         error = flutterErrorEvents.last;
         expect(error['errorsSinceReload'], 1);
+        expect(error['renderedErrorText'], startsWith('Another exception was thrown:'));
 
         // Reloads the app.
         final FlutterExceptionHandler oldHandler = FlutterError.onError;

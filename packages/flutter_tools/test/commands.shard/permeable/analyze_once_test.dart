@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -32,6 +34,7 @@ void main() {
   Directory tempDir;
   String projectPath;
   File libMain;
+  Artifacts artifacts;
 
   Future<void> runCommand({
     FlutterCommand command,
@@ -92,6 +95,11 @@ flutter_project:lib/
       terminal: terminal,
     );
     analyzerSeparator = platform.isWindows ? '-' : '•';
+    artifacts = CachedArtifacts(
+      cache: globals.cache,
+      fileSystem: fileSystem,
+      platform: platform,
+    );
   });
 
   setUp(() {
@@ -122,6 +130,7 @@ flutter_project:lib/
         platform: platform,
         processManager: processManager,
         terminal: terminal,
+        artifacts: artifacts,
       ),
       arguments: <String>['analyze', '--no-pub'],
       statusTextContains: <String>['No issues found!'],
@@ -137,6 +146,7 @@ flutter_project:lib/
         logger: logger,
         processManager: processManager,
         terminal: terminal,
+        artifacts: artifacts,
       ),
       arguments: <String>['analyze', '--no-pub', libMain.path],
       toolExit: true,
@@ -175,6 +185,7 @@ flutter_project:lib/
         logger: logger,
         processManager: processManager,
         terminal: terminal,
+        artifacts: artifacts,
       ),
       arguments: <String>['analyze', '--no-pub'],
       statusTextContains: <String>[
@@ -220,6 +231,7 @@ flutter_project:lib/
           logger: logger,
           processManager: processManager,
           terminal: terminal,
+          artifacts: artifacts,
         ),
         arguments: <String>['analyze', '--no-pub'],
         statusTextContains: <String>[
@@ -266,6 +278,7 @@ void bar() {
           logger: logger,
           processManager: processManager,
           terminal: terminal,
+          artifacts: artifacts,
         ),
         arguments: <String>['analyze', '--no-pub'],
         statusTextContains: <String>[
@@ -296,6 +309,7 @@ StringBuffer bar = StringBuffer('baz');
           logger: logger,
           processManager: processManager,
           terminal: terminal,
+          artifacts: artifacts,
         ),
         arguments: <String>['analyze', '--no-pub'],
         statusTextContains: <String>['No issues found!'],
@@ -322,6 +336,7 @@ int? bar;
           logger: logger,
           processManager: processManager,
           terminal: terminal,
+          artifacts: artifacts,
         ),
         arguments: <String>['analyze', '--no-pub', '--enable-experiment=non-nullable'],
         statusTextContains: <String>['No issues found!'],
@@ -349,6 +364,7 @@ StringBuffer bar = StringBuffer('baz');
           processManager: processManager,
           logger: logger,
           fileSystem: fileSystem,
+          artifacts: artifacts,
         ),
         arguments: <String>['analyze', '--no-pub'],
         statusTextContains: <String>['No issues found!'],

@@ -19,6 +19,6 @@
   "copyButtonLabel": "Afrita",
   "pasteButtonLabel": "Líma",
   "selectAllButtonLabel": "Velja allt",
-  "tabSemanticsLabel": "TBD",
+  "tabSemanticsLabel": "Flipi $tabIndex af $tabCount",
   "modalBarrierDismissLabel": "Hunsa"
 }

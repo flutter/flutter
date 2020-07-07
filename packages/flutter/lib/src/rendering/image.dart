@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui' as ui show Image;
 
 import 'box.dart';
@@ -26,6 +28,7 @@ class RenderImage extends RenderBox {
   /// [alignment] will need resolving or if [matchTextDirection] is true.
   RenderImage({
     ui.Image image,
+    this.debugImageLabel,
     double width,
     double height,
     double scale = 1.0,
@@ -91,6 +94,9 @@ class RenderImage extends RenderBox {
     if (_width == null || _height == null)
       markNeedsLayout();
   }
+
+  /// A string used to identify the source of the image.
+  String debugImageLabel;
 
   /// If non-null, requires the image to have this width.
   ///
@@ -375,6 +381,7 @@ class RenderImage extends RenderBox {
       canvas: context.canvas,
       rect: offset & size,
       image: _image,
+      debugImageLabel: debugImageLabel,
       scale: _scale,
       colorFilter: _colorFilter,
       fit: _fit,

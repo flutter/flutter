@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 
 import 'basic_types.dart';
@@ -88,7 +90,7 @@ abstract class StackFilter {
   /// A const constructor to allow subclasses to be const.
   const StackFilter();
 
-  /// Filters the list of [StackFrame]s by updating corrresponding indices in
+  /// Filters the list of [StackFrame]s by updating corresponding indices in
   /// `reasons`.
   ///
   /// To elide a frame or number of frames, set the string
@@ -115,7 +117,7 @@ class RepetitiveStackFrameFilter extends StackFilter {
   }) : assert(frames != null),
        assert(replacement != null);
 
-  /// The shape of this repetative stack pattern.
+  /// The shape of this repetitive stack pattern.
   final List<PartialStackFrame> frames;
 
   /// The number of frames in this pattern.
@@ -386,6 +388,28 @@ class FlutterErrorDetails with Diagnosticable {
     this.informationCollector,
     this.silent = false,
   });
+
+  /// Creates a copy of the error details but with the given fields replaced
+  /// with new values.
+  FlutterErrorDetails copyWith({
+    DiagnosticsNode context,
+    dynamic exception,
+    InformationCollector informationCollector,
+    String library,
+    bool silent,
+    StackTrace stack,
+    IterableFilter<String> stackFilter,
+  }) {
+    return FlutterErrorDetails(
+      context: context ?? this.context,
+      exception: exception ?? this.exception,
+      informationCollector: informationCollector ?? this.informationCollector,
+      library: library ?? this.library,
+      silent: silent ?? this.silent,
+      stack: stack ?? this.stack,
+      stackFilter: stackFilter ?? this.stackFilter,
+    );
+  }
 
   /// Transformers to transform [DiagnosticsNode] in [DiagnosticPropertiesBuilder]
   /// into a more descriptive form.

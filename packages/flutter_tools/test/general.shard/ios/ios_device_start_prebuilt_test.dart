@@ -8,6 +8,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -15,11 +16,13 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/devices.dart';
+import 'package:flutter_tools/src/ios/fallback_discovery.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -106,6 +109,12 @@ void main() {
     final IOSDevice device = setUpIOSDevice(
       processManager: processManager,
       fileSystem: fileSystem,
+      vmServiceConnector: (String string, {Log log}) async {
+        throw const io.SocketException(
+          'OS Error: Connection refused, errno = 61, address = localhost, port '
+          '= 58943',
+        );
+      },
     );
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
@@ -122,8 +131,11 @@ void main() {
     device.portForwarder = const NoOpDevicePortForwarder();
     device.setLogReader(iosApp, FakeDeviceLogReader());
 
-    when(MDnsObservatoryDiscovery.instance.getObservatoryUri(any, any, usesIpv6: anyNamed('usesIpv6')))
-      .thenAnswer((Invocation invocation) async => uri);
+    when(MDnsObservatoryDiscovery.instance.getObservatoryUri(
+      any,
+      any,
+      usesIpv6: anyNamed('usesIpv6')
+    )).thenAnswer((Invocation invocation) async => uri);
 
     final LaunchResult launchResult = await device.startApp(iosApp,
       prebuiltApplication: true,
@@ -151,6 +163,12 @@ void main() {
     final IOSDevice device = setUpIOSDevice(
       processManager: processManager,
       fileSystem: fileSystem,
+      vmServiceConnector: (String string, {Log log}) async {
+        throw const io.SocketException(
+          'OS Error: Connection refused, errno = 61, address = localhost, port '
+          '= 58943',
+        );
+      },
     );
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
@@ -198,6 +216,12 @@ void main() {
     final IOSDevice device = setUpIOSDevice(
       processManager: processManager,
       fileSystem: fileSystem,
+      vmServiceConnector: (String string, {Log log}) async {
+        throw const io.SocketException(
+          'OS Error: Connection refused, errno = 61, address = localhost, port '
+          '= 58943',
+        );
+      },
     );
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
@@ -315,6 +339,12 @@ void main() {
       sdkVersion: '13.3',
       processManager: processManager,
       fileSystem: fileSystem,
+      vmServiceConnector: (String string, {Log log}) async {
+        throw const io.SocketException(
+          'OS Error: Connection refused, errno = 61, address = localhost, port '
+          '= 58943',
+        );
+      },
     );
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
@@ -331,8 +361,11 @@ void main() {
     device.setLogReader(iosApp, FakeDeviceLogReader());
     device.portForwarder = const NoOpDevicePortForwarder();
 
-    when(MDnsObservatoryDiscovery.instance.getObservatoryUri(any, any, usesIpv6: anyNamed('usesIpv6')))
-      .thenAnswer((Invocation invocation) async => uri);
+    when(MDnsObservatoryDiscovery.instance.getObservatoryUri(
+      any,
+      any,
+      usesIpv6: anyNamed('usesIpv6'),
+    )).thenAnswer((Invocation invocation) async => uri);
 
     final LaunchResult launchResult = await device.startApp(iosApp,
       prebuiltApplication: true,
@@ -368,6 +401,7 @@ IOSDevice setUpIOSDevice({
   FileSystem fileSystem,
   Logger logger,
   ProcessManager processManager,
+  VmServiceConnector vmServiceConnector,
 }) {
   const MapEntry<String, String> dyldLibraryEntry = MapEntry<String, String>(
     'DYLD_LIBRARY_PATH',
@@ -379,6 +413,7 @@ IOSDevice setUpIOSDevice({
     operatingSystem: 'macos',
     environment: <String, String>{},
   );
+  vmServiceConnector ??= (String uri, {Log log}) async => MockVmService();
   when(cache.dyLdLibEntry).thenReturn(dyldLibraryEntry);
   when(artifacts.getArtifactPath(Artifact.iosDeploy, platform: anyNamed('platform')))
     .thenReturn('ios-deploy');
@@ -404,6 +439,7 @@ IOSDevice setUpIOSDevice({
     ),
     cpuArchitecture: DarwinArch.arm64,
     interfaceType: IOSDeviceInterface.usb,
+    vmServiceConnectUri: vmServiceConnector,
   );
 }
 
@@ -413,3 +449,4 @@ class MockUsage extends Mock implements Usage {}
 class MockMDnsObservatoryDiscovery extends Mock implements MDnsObservatoryDiscovery {}
 class MockArtifacts extends Mock implements Artifacts {}
 class MockCache extends Mock implements Cache {}
+class MockVmService extends Mock implements VmService {}

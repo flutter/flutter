@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async' show Timer;
 import 'dart:math' as math;
 
@@ -267,6 +269,9 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
       final bool isLeading = controller == _leadingController;
       if (_lastNotificationType != OverscrollNotification) {
         final OverscrollIndicatorNotification confirmationNotification = OverscrollIndicatorNotification(leading: isLeading);
+        // It is possible that the scroll extent starts at non-zero.
+        if (isLeading)
+          confirmationNotification.paintOffset = notification.metrics.minScrollExtent;
         confirmationNotification.dispatch(context);
         _accepted[isLeading] = confirmationNotification._accepted;
         if (_accepted[isLeading]) {

@@ -705,6 +705,7 @@ VMServiceConnector getFakeVmServiceFactory({
     CompileExpression compileExpression,
     ReloadMethod reloadMethod,
     GetSkSLMethod getSkSLMethod,
+    PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
     CompressionOptions compression,
     Device device,
   }) async {
@@ -781,7 +782,6 @@ class TestHotRunnerFactory extends HotRunnerFactory {
       applicationBinary: applicationBinary,
       hostIsIde: hostIsIde,
       projectRootPath: projectRootPath,
-      packagesFilePath: packagesFilePath,
       dillOutputPath: dillOutputPath,
       stayResident: stayResident,
       ipv6: ipv6,

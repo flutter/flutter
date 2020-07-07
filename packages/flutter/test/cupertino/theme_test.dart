@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
-import 'package:collection/collection.dart' show SetEquality;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/cupertino.dart';
@@ -176,7 +177,7 @@ void main() {
       .toSet();
 
     expect(
-      const SetEquality<String>().equals(
+      setEquals(
         description,
         <String>{ 'brightness',
           'primaryColor',

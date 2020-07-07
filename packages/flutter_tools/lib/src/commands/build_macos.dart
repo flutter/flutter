@@ -29,7 +29,8 @@ class BuildMacosCommand extends BuildSubCommand {
     usesBuildNameOption();
     addEnableExperimentation(hide: !verboseHelp);
     addBuildPerformanceFile(hide: !verboseHelp);
-    addNullSafetyModeOptions();
+    addBundleSkSLPathOption(hide: !verboseHelp);
+    addNullSafetyModeOptions(hide: !verboseHelp);
   }
 
   @override

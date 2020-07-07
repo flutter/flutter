@@ -92,7 +92,7 @@ void main() {
     test('flutter Linux desktop help string', () {
       expect(flutterLinuxDesktopFeature.generateHelpMessage(),
       'Enable or disable Flutter for desktop on Linux. '
-      'This setting will take effect on the master channel.');
+      'This setting will take effect on the master and dev channels.');
     });
 
     test('flutter Windows desktop help string', () {
@@ -306,18 +306,18 @@ void main() {
       expect(featureFlags.isLinuxEnabled, false);
     }));
 
-    test('flutter linux desktop not enabled with config on dev', () => testbed.run(() {
+    test('flutter linux desktop enabled with config on dev', () => testbed.run(() {
       when(mockFlutterVerion.channel).thenReturn('dev');
       when<bool>(mockFlutterConfig.getValue('enable-linux-desktop') as bool).thenReturn(true);
 
-      expect(featureFlags.isLinuxEnabled, false);
+      expect(featureFlags.isLinuxEnabled, true);
     }));
 
-    test('flutter linux desktop not enabled with environment variable on dev', () => testbed.run(() {
+    test('flutter linux desktop enabled with environment variable on dev', () => testbed.run(() {
       when(mockFlutterVerion.channel).thenReturn('dev');
       when(mockPlatform.environment).thenReturn(<String, String>{'FLUTTER_LINUX': 'true'});
 
-      expect(featureFlags.isLinuxEnabled, false);
+      expect(featureFlags.isLinuxEnabled, true);
     }));
 
     test('flutter linux desktop off by default on beta', () => testbed.run(() {

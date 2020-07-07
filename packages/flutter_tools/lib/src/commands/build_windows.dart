@@ -31,6 +31,8 @@ class BuildWindowsCommand extends BuildSubCommand {
     addEnableExperimentation(hide: !verboseHelp);
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
     addBuildPerformanceFile(hide: !verboseHelp);
+    addBundleSkSLPathOption(hide: !verboseHelp);
+    addNullSafetyModeOptions(hide: !verboseHelp);
   }
 
   @override

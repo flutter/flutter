@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/physics.dart';
 import 'package:flutter/widgets.dart';
 
@@ -39,7 +41,7 @@ void main() {
     expect(endPosition, greaterThan(startPosition));
     expect(endVelocity, lessThan(startVelocity));
 
-    // Verify that that the "through" FrictionSimulation ends up at
+    // Verify that the "through" FrictionSimulation ends up at
     // endPosition and endVelocity; implies that it computed the right
     // value for _drag.
     FrictionSimulation friction = FrictionSimulation.through(

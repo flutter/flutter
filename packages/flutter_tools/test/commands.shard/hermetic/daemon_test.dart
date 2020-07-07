@@ -21,10 +21,12 @@ import '../../src/mocks.dart';
 void main() {
   Daemon daemon;
   NotifyingLogger notifyingLogger;
+  BufferLogger bufferLogger;
 
   group('daemon', () {
     setUp(() {
-      notifyingLogger = NotifyingLogger(verbose: false);
+      bufferLogger = BufferLogger.test();
+      notifyingLogger = NotifyingLogger(verbose: false, parent: bufferLogger);
     });
 
     tearDown(() {
@@ -299,19 +301,15 @@ void main() {
   });
 
   testUsingContext('notifyingLogger outputs trace messages in verbose mode', () async {
-    final NotifyingLogger logger = NotifyingLogger(verbose: true);
+    final NotifyingLogger logger = NotifyingLogger(verbose: true, parent: bufferLogger);
 
-    final Future<LogMessage> messageResult = logger.onMessage.first;
     logger.printTrace('test');
 
-    final LogMessage message = await messageResult;
-
-    expect(message.level, 'trace');
-    expect(message.message, 'test');
+    expect(bufferLogger.errorText, contains('test'));
   });
 
   testUsingContext('notifyingLogger ignores trace messages in non-verbose mode', () async {
-    final NotifyingLogger logger = NotifyingLogger(verbose: false);
+    final NotifyingLogger logger = NotifyingLogger(verbose: false, parent: bufferLogger);
 
     final Future<LogMessage> messageResult = logger.onMessage.first;
     logger.printTrace('test');
@@ -321,10 +319,11 @@ void main() {
 
     expect(message.level, 'status');
     expect(message.message, 'hello');
+    expect(bufferLogger.errorText, contains('test'));
   });
 
   testUsingContext('notifyingLogger buffers messages sent before a subscription', () async {
-    final NotifyingLogger logger = NotifyingLogger(verbose: false);
+    final NotifyingLogger logger = NotifyingLogger(verbose: false, parent: bufferLogger);
 
     logger.printStatus('hello');
 

@@ -33,9 +33,14 @@ const String brokenCocoaPodsConsequence = '''
   This can happen if the version of Ruby that CocoaPods was installed with is different from the one being used to invoke it.
   This can usually be fixed by re-installing CocoaPods. For more info, see https://github.com/flutter/flutter/issues/14293.''';
 
-const String outOfDatePodfileConsequence = '''
+const String outOfDateFrameworksPodfileConsequence = '''
   This can cause a mismatched version of Flutter to be embedded in your app, which may result in App Store submission rejection or crashes.
   If you have local Podfile edits you would like to keep, see https://github.com/flutter/flutter/issues/24641 for instructions.''';
+
+const String outOfDatePluginsPodfileConsequence = '''
+  This can cause issues if your application depends on plugins that do not support iOS.
+  See https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms for details.
+  If you have local Podfile edits you would like to keep, see https://github.com/flutter/flutter/issues/45197 for instructions.''';
 
 const String cocoaPodsInstallInstructions = '''
   sudo gem install cocoapods''';
@@ -375,25 +380,41 @@ class CocoaPods {
     }
   }
 
-  // Previously, the Podfile created a symlink to the cached artifacts engine framework
-  // and installed the Flutter pod from that path. This could get out of sync with the copy
-  // of the Flutter engine that was copied to ios/Flutter by the xcode_backend script.
-  // It was possible for the symlink to point to a Debug version of the engine when the
-  // Xcode build configuration was Release, which caused App Store submission rejections.
-  //
-  // Warn the user if they are still symlinking to the framework.
   void _warnIfPodfileOutOfDate(XcodeBasedProject xcodeProject) {
     if (xcodeProject is! IosProject) {
       return;
     }
+
+    // Previously, the Podfile created a symlink to the cached artifacts engine framework
+    // and installed the Flutter pod from that path. This could get out of sync with the copy
+    // of the Flutter engine that was copied to ios/Flutter by the xcode_backend script.
+    // It was possible for the symlink to point to a Debug version of the engine when the
+    // Xcode build configuration was Release, which caused App Store submission rejections.
+    //
+    // Warn the user if they are still symlinking to the framework.
     final Link flutterSymlink = _fileSystem.link(_fileSystem.path.join(
-      xcodeProject.symlinks.path,
+      (xcodeProject as IosProject).symlinks.path,
       'flutter',
     ));
     if (flutterSymlink.existsSync()) {
       _logger.printError(
         'Warning: Podfile is out of date\n'
-        '$outOfDatePodfileConsequence\n'
+        '$outOfDateFrameworksPodfileConsequence\n'
+        'To regenerate the Podfile, run:\n'
+        '$podfileMigrationInstructions\n',
+        emphasis: true,
+      );
+      return;
+    }
+    // Most of the pod and plugin parsing logic was moved from the Podfile
+    // into the tool's podhelper.rb script. If the Podfile still references
+    // the old parsed .flutter-plugins file, prompt the regeneration. Old line was:
+    // plugin_pods = parse_KV_file('../.flutter-plugins')
+    if (xcodeProject.podfile.existsSync() &&
+      xcodeProject.podfile.readAsStringSync().contains('.flutter-plugins\'')) {
+      _logger.printError(
+        'Warning: Podfile is out of date\n'
+        '$outOfDatePluginsPodfileConsequence\n'
         'To regenerate the Podfile, run:\n'
         '$podfileMigrationInstructions\n',
         emphasis: true,

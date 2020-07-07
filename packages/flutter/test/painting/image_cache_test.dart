@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/painting.dart';
 import '../flutter_test_alternative.dart';
 
@@ -212,8 +214,8 @@ void main() {
         .addListener(ImageStreamListener(
           (ImageInfo image, bool synchronousCall) { },
           onError: (dynamic exception, StackTrace stackTrace) {
-            final bool evicationResult = imageCache.evict(1);
-            expect(evicationResult, isTrue);
+            final bool evictionResult = imageCache.evict(1);
+            expect(evictionResult, isTrue);
           },
         ));
   });
