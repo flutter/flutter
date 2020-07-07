@@ -85,6 +85,7 @@ class CupertinoActivityIndicator extends StatefulWidget {
   /// The style of activity indicator.
   ///
   /// Default to [CupertinoActivityIndicatorStyle.iOS13].
+  /// TODO: Change default style to iOS14 after official release.
   final CupertinoActivityIndicatorStyle style;
 
   @override
