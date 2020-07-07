@@ -1504,6 +1504,13 @@ class Navigator extends StatefulWidget {
   ///
   /// If the property is set to true, this navigator automatically sends the
   /// route update message to the engine when it detects top-most route changes.
+  /// The messages are used by the web engine to update the browser URL bar.
+  ///
+  /// If there are multiple navigators in the widget tree, at most one of them
+  /// can set this property to true (typically, the top-most one created from
+  /// the [WidgetsApp]). Otherwise, the web engine may receive multiple route
+  /// update messages from different navigators and fail to update the URL
+  /// bar.
   ///
   /// Defaults to false.
   final bool reportsRouteUpdateToEngine;
