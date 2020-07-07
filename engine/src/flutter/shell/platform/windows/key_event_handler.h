@@ -16,7 +16,7 @@
 
 namespace flutter {
 
-class Win32FlutterWindow;
+class FlutterWindowsView;
 
 // Implements a KeyboardHookHandler
 //
@@ -28,14 +28,14 @@ class KeyEventHandler : public KeyboardHookHandler {
   virtual ~KeyEventHandler();
 
   // |KeyboardHookHandler|
-  void KeyboardHook(Win32FlutterWindow* window,
+  void KeyboardHook(FlutterWindowsView* window,
                     int key,
                     int scancode,
                     int action,
                     char32_t character) override;
 
   // |KeyboardHookHandler|
-  void TextHook(Win32FlutterWindow* window,
+  void TextHook(FlutterWindowsView* window,
                 const std::u16string& text) override;
 
  private:
