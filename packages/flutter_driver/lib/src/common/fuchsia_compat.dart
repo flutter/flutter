@@ -66,7 +66,12 @@ class _DummySshCommandRunner implements SshCommandRunner {
   }
 }
 
-Future<PortForwarder> _dummyPortForwardingFunction(String address, int remotePort) async {
+Future<PortForwarder> _dummyPortForwardingFunction(
+  String address,
+  int remotePort, [
+  String interface = '',
+  String configFile,
+]) async {
   return _DummyPortForwarder(remotePort, remotePort);
 }
 
