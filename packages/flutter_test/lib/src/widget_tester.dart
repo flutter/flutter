@@ -482,21 +482,17 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
           }
         }
         else {
+          // TODO(CareF): reconsider the pumping strategy after
+          // https://github.com/flutter/flutter/issues/60739 is fixed
+          await binding.pump();
           await binding.executeLater(timeDiff, () async {
             for (final PointerEvent event in pack.events) {
               _handlePointerEvent(event, hitTestHistory);
             }
           });
-          // TODO(CareF): delete the if sentence when
-          // https://github.com/flutter/flutter/issues/60739 is fixed
-          if (binding is LiveTestWidgetsFlutterBinding &&
-              (binding as LiveTestWidgetsFlutterBinding).framePolicy ==
-              LiveTestWidgetsFlutterBindingFramePolicy.fullyLive) {
-            continue;
-          }
-          await binding.pump();
         }
       }
+      await binding.pump();
       // This make sure that a gesture is completed, with no more pointers
       // active.
       assert(hitTestHistory.isEmpty);
