@@ -313,7 +313,7 @@ void main() {
     pumpFrame();
 
     expect(editable, paintsExactlyCountTimes(#drawRRect, 0));
-  });
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61024
 
   test('text is painted above selection', () {
     final TextSelectionDelegate delegate = FakeEditableTextState();
@@ -540,7 +540,7 @@ void main() {
     expect(currentSelection.isCollapsed, false);
     expect(currentSelection.baseOffset, 5);
     expect(currentSelection.extentOffset, 9);
-  });
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61026
 
   test('selects correct place when offsets are flipped', () {
     final TextSelectionDelegate delegate = FakeEditableTextState();
@@ -633,7 +633,7 @@ void main() {
     expect(updatedSelection.baseOffset, 3);
     expect(updatedSelection.extentOffset, 5);
     expect(selectionChangedCount, 1);
-  });
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61028
 
   test('promptRect disappears when promptRectColor is set to null', () {
     const Color promptRectColor = Color(0x12345678);
@@ -737,7 +737,7 @@ void main() {
 
     editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
     expect(editable.maxScrollExtent, equals(10));
-  }, skip: isBrowser); // TODO(yjbanov): https://github.com/flutter/flutter/issues/42772
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42772
 
   test('arrow keys and delete handle simple text correctly', () async {
     final TextSelectionDelegate delegate = FakeEditableTextState();
@@ -786,7 +786,7 @@ void main() {
     await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
     await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
     expect(delegate.textEditingValue.text, 'est');
-  });
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
   test('arrow keys and delete handle surrogate pairs correctly', () async {
     final TextSelectionDelegate delegate = FakeEditableTextState();
@@ -836,7 +836,7 @@ void main() {
     await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
     await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
     expect(delegate.textEditingValue.text, '01236789');
-  });
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
   test('arrow keys and delete handle grapheme clusters correctly', () async {
     final TextSelectionDelegate delegate = FakeEditableTextState();
@@ -886,7 +886,7 @@ void main() {
     await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
     await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
     expect(delegate.textEditingValue.text, '01232345');
-  });
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
   test('arrow keys and delete handle surrogate pairs correctly', () async {
     final TextSelectionDelegate delegate = FakeEditableTextState();
@@ -935,7 +935,7 @@ void main() {
     await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
     await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
     expect(delegate.textEditingValue.text, '');
-  }, skip: isBrowser); // Key simulation doesn't work on web.
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
   test('getEndpointsForSelection handles empty characters', () {
     final TextSelectionDelegate delegate = FakeEditableTextState();
