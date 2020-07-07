@@ -427,11 +427,10 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_DEFAULT, TYPE_ARROW
   ///  * Web: default
-  ///  * macOS: arrow
+  ///  * macOS: arrowCursor
   static const SystemMouseCursor basic = SystemMouseCursor._(kind: 'basic');
 
-  /// A cursor that indicates a user interface element that is clickable, such as
-  /// a hyperlink.
+  /// A cursor that emphasizes an element being clickable, such as a hyperlink.
   ///
   /// Typically the shape of a pointing hand.
   ///
@@ -439,10 +438,10 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_HAND
   ///  * Web: pointer
-  ///  * macOS: pointingHand
+  ///  * macOS: pointingHandCursor
   static const SystemMouseCursor click = SystemMouseCursor._(kind: 'click');
 
-  /// A cursor that indicates an action that will not be carried out.
+  /// A cursor indicating an operation that will not be carried out.
   ///
   /// Typically the shape of a circle with a diagonal line. May fall back to
   /// [noDrop].
@@ -451,7 +450,7 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_NO_DROP
   ///  * Web: not-allowed
-  ///  * macOS: operationNotAllowed
+  ///  * macOS: operationNotAllowedCursor
   ///
   /// See also:
   ///
@@ -459,7 +458,7 @@ class SystemMouseCursors {
   ///    dropped.
   static const SystemMouseCursor forbidden = SystemMouseCursor._(kind: 'forbidden');
 
-  /// A cursor that indicates the status that the program is busy and therefore
+  /// A cursor indicating the status that the program is busy and therefore
   /// can not be interacted with.
   ///
   /// Typically the shape of an hourglass or a watch.
@@ -475,8 +474,8 @@ class SystemMouseCursors {
   ///    interacted with.
   static const SystemMouseCursor wait = SystemMouseCursor._(kind: 'wait');
 
-  /// A cursor that indicates the status that the program is busy but can still
-  /// be interacted with.
+  /// A cursor indicating the status that the program is busy but can still be
+  /// interacted with.
   ///
   /// Typically the shape of an arrow with an hourglass or a watch at the corner.
   /// Does *not* fall back to [wait] if unavailable.
@@ -491,7 +490,7 @@ class SystemMouseCursors {
   ///    interacted with.
   static const SystemMouseCursor progress = SystemMouseCursor._(kind: 'progress');
 
-  /// A cursor that indicates somewhere the user can trigger a context menu.
+  /// A cursor indicating somewhere the user can trigger a context menu.
   ///
   /// Typically the shape of an arrow with a small menu at the corner.
   ///
@@ -499,9 +498,10 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_CONTEXT_MENU
   ///  * Web: context-menu
+  ///  * macOS: contextualMenuCursor
   static const SystemMouseCursor contextMenu = SystemMouseCursor._(kind: 'contextMenu');
 
-  /// A cursor that indicates help information.
+  /// A cursor indicating help information.
   ///
   /// Typically the shape of a question mark, or an arrow therewith.
   ///
@@ -514,7 +514,7 @@ class SystemMouseCursors {
 
   //// SELECTION ////
 
-  /// A cursor that indicates selectable text.
+  /// A cursor indicating selectable text.
   ///
   /// Typically the shape of a capital I.
   ///
@@ -522,10 +522,10 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_TEXT
   ///  * Web: text
-  ///  * macOS: iBeam
+  ///  * macOS: IBeamCursor
   static const SystemMouseCursor text = SystemMouseCursor._(kind: 'text');
 
-  /// A cursor that indicates selectable vertical text.
+  /// A cursor indicating selectable vertical text.
   ///
   /// Typically the shape of a capital I rotated to be horizontal. May fall back
   /// to [text].
@@ -534,9 +534,10 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_VERTICAL_TEXT
   ///  * Web: vertical-text
+  ///  * macOS: IBeamCursorForVerticalLayout
   static const SystemMouseCursor verticalText = SystemMouseCursor._(kind: 'verticalText');
 
-  /// A cursor that indicates selectable table cells.
+  /// A cursor indicating selectable table cells.
   ///
   /// Typically the shape of a hollow plus sign.
   ///
@@ -546,7 +547,7 @@ class SystemMouseCursors {
   ///  * Web: cell
   static const SystemMouseCursor cell = SystemMouseCursor._(kind: 'cell');
 
-  /// A cursor that indicates precise selection, such as selecting a pixel in a
+  /// A cursor indicating precise selection, such as selecting a pixel in a
   /// bitmap.
   ///
   /// Typically the shape of a crosshair.
@@ -555,12 +556,13 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_CROSSHAIR
   ///  * Web: crosshair
+  ///  * Web: crosshairCursor
   static const SystemMouseCursor precise = SystemMouseCursor._(kind: 'precise');
 
 
   //// DRAG-AND-DROP ////
 
-  /// A cursor that indicates moving something.
+  /// A cursor indicating moving something.
   ///
   /// Typically the shape of four-way arrow. May fall back to [allScroll].
   ///
@@ -570,7 +572,7 @@ class SystemMouseCursors {
   ///  * Web: move
   static const SystemMouseCursor move = SystemMouseCursor._(kind: 'move');
 
-  /// A cursor that indicates something that can be dragged.
+  /// A cursor indicating something that can be dragged.
   ///
   /// Typically the shape of an open hand.
   ///
@@ -578,10 +580,10 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_GRAB
   ///  * Web: grab
-  ///  * macOS: openHand
+  ///  * macOS: openHandCursor
   static const SystemMouseCursor grab = SystemMouseCursor._(kind: 'grab');
 
-  /// A cursor that indicates something that is being dragged.
+  /// A cursor indicating something that is being dragged.
   ///
   /// Typically the shape of a closed hand.
   ///
@@ -589,10 +591,10 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_GRABBING
   ///  * Web: grabbing
-  ///  * macOS: closedHand
+  ///  * macOS: closedHandCursor
   static const SystemMouseCursor grabbing = SystemMouseCursor._(kind: 'grabbing');
 
-  /// A cursor that indicates somewhere that the current item may not be dropped.
+  /// A cursor indicating somewhere that the current item may not be dropped.
   ///
   /// Typically the shape of a hand with a [forbidden] sign at the corner. May
   /// fall back to [forbidden].
@@ -601,14 +603,15 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_NO_DROP
   ///  * Web: no-drop
+  ///  * macOS: operationNotAllowedCursor
   ///
   /// See also:
   ///
   ///  * [forbidden], which indicates an action that will not be carried out.
   static const SystemMouseCursor noDrop = SystemMouseCursor._(kind: 'noDrop');
 
-  /// A cursor that indicates the creation of an alias of, or a shortcut of
-  /// something.
+  /// A cursor indicating that the current operation will create an alias of, or
+  /// a shortcut of the item.
   ///
   /// Typically the shape of an arrow with a shortcut icon at the corner.
   ///
@@ -616,9 +619,10 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_ALIAS
   ///  * Web: alias
+  ///  * macOS: dragLinkCursor
   static const SystemMouseCursor alias = SystemMouseCursor._(kind: 'alias');
 
-  /// A cursor that indicates copying something.
+  /// A cursor indicating that the current operation will copy the item.
   ///
   /// Typically the shape of an arrow with a boxed plus sign at the corner.
   ///
@@ -626,12 +630,23 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_COPY
   ///  * Web: copy
+  ///  * macOS: dragCopyCursor
   static const SystemMouseCursor copy = SystemMouseCursor._(kind: 'copy');
+
+  /// A cursor indicating that the current operation will result in the
+  /// disappearance of the item.
+  ///
+  /// Typically the shape of an arrow with a cloud of smoke at the corner.
+  ///
+  /// Corresponds to:
+  ///
+  ///  * macOS: disappearingItemCursor
+  static const SystemMouseCursor disappearing = SystemMouseCursor._(kind: 'disappearing');
 
 
   //// RESIZING AND SCROLLING ////
 
-  /// A cursor that indicates scrolling in any direction.
+  /// A cursor indicating scrolling in any direction.
   ///
   /// Typically the shape of a dot surrounded by 4 arrows. May fall back to
   /// [move].
@@ -646,7 +661,7 @@ class SystemMouseCursors {
   ///  * [move], which indicates moving in any direction.
   static const SystemMouseCursor allScroll = SystemMouseCursor._(kind: 'allScroll');
 
-  /// A cursor that indicates resizing an object bidirectionally from its left or
+  /// A cursor indicating resizing an object bidirectionally from its left or
   /// right edge.
   ///
   /// Typically the shape of a bidirectional arrow pointing left and right.
@@ -655,10 +670,10 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_HORIZONTAL_DOUBLE_ARROW
   ///  * Web: ew-resize
-  ///  * macOS: resizeLeftRight
+  ///  * macOS: resizeLeftRightCursor
   static const SystemMouseCursor resizeLeftRight = SystemMouseCursor._(kind: 'resizeLeftRight');
 
-  /// A cursor that indicates resizing an object bidirectionally from its top or
+  /// A cursor indicating resizing an object bidirectionally from its top or
   /// bottom edge.
   ///
   /// Typically the shape of a bidirectional arrow pointing up and down.
@@ -667,10 +682,10 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_VERTICAL_DOUBLE_ARROW
   ///  * Web: ns-resize
-  ///  * macOS: resizeUpDown
+  ///  * macOS: resizeUpDownCursor
   static const SystemMouseCursor resizeUpDown = SystemMouseCursor._(kind: 'resizeUpDown');
 
-  /// A cursor that indicates resizing an object bidirectionally from its top left or
+  /// A cursor indicating resizing an object bidirectionally from its top left or
   /// bottom right corner.
   ///
   /// Typically the shape of a bidirectional arrow pointing upper left and lower right.
@@ -681,7 +696,7 @@ class SystemMouseCursors {
   ///  * Web: nwse-resize
   static const SystemMouseCursor resizeUpLeftDownRight = SystemMouseCursor._(kind: 'resizeUpLeftDownRight');
 
-  /// A cursor that indicates resizing an object bidirectionally from its top right or
+  /// A cursor indicating resizing an object bidirectionally from its top right or
   /// bottom left corner.
   ///
   /// Typically the shape of a bidirectional arrow pointing upper right and lower left.
@@ -692,7 +707,7 @@ class SystemMouseCursors {
   ///  * Web: nesw-resize
   static const SystemMouseCursor resizeUpRightDownLeft = SystemMouseCursor._(kind: 'resizeUpRightDownLeft');
 
-  /// A cursor that indicates resizing an object from its top edge.
+  /// A cursor indicating resizing an object from its top edge.
   ///
   /// Typically the shape of an arrow pointing up. May fallback to [resizeUpDown].
   ///
@@ -700,9 +715,10 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_VERTICAL_DOUBLE_ARROW
   ///  * Web: n-resize
+  ///  * macOS: resizeUpCursor
   static const SystemMouseCursor resizeUp = SystemMouseCursor._(kind: 'resizeUp');
 
-  /// A cursor that indicates resizing an object from its bottom edge.
+  /// A cursor indicating resizing an object from its bottom edge.
   ///
   /// Typically the shape of an arrow pointing down. May fallback to [resizeUpDown].
   ///
@@ -710,9 +726,10 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_VERTICAL_DOUBLE_ARROW
   ///  * Web: s-resize
+  ///  * macOS: resizeDownCursor
   static const SystemMouseCursor resizeDown = SystemMouseCursor._(kind: 'resizeDown');
 
-  /// A cursor that indicates resizing an object from its left edge.
+  /// A cursor indicating resizing an object from its left edge.
   ///
   /// Typically the shape of an arrow pointing left. May fallback to [resizeLeftRight].
   ///
@@ -720,9 +737,10 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_HORIZONTAL_DOUBLE_ARROW
   ///  * Web: w-resize
+  ///  * macOS: resizeLeftCursor
   static const SystemMouseCursor resizeLeft = SystemMouseCursor._(kind: 'resizeLeft');
 
-  /// A cursor that indicates resizing an object from its right edge.
+  /// A cursor indicating resizing an object from its right edge.
   ///
   /// Typically the shape of an arrow pointing right. May fallback to [resizeLeftRight].
   ///
@@ -730,9 +748,10 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_HORIZONTAL_DOUBLE_ARROW
   ///  * Web: e-resize
+  ///  * macOS: resizeRightCursor
   static const SystemMouseCursor resizeRight = SystemMouseCursor._(kind: 'resizeRight');
 
-  /// A cursor that indicates resizing an object from its top-left corner.
+  /// A cursor indicating resizing an object from its top-left corner.
   ///
   /// Typically the shape of an arrow pointing upper left. May fallback to [resizeUpLeftDownRight].
   ///
@@ -742,7 +761,7 @@ class SystemMouseCursors {
   ///  * Web: nw-resize
   static const SystemMouseCursor resizeUpLeft = SystemMouseCursor._(kind: 'resizeUpLeft');
 
-  /// A cursor that indicates resizing an object from its top-right corner.
+  /// A cursor indicating resizing an object from its top-right corner.
   ///
   /// Typically the shape of an arrow pointing upper right. May fallback to [resizeUpRightDownLeft].
   ///
@@ -752,7 +771,7 @@ class SystemMouseCursors {
   ///  * Web: ne-resize
   static const SystemMouseCursor resizeUpRight = SystemMouseCursor._(kind: 'resizeUpRight');
 
-  /// A cursor that indicates resizing an object from its bottom-left corner.
+  /// A cursor indicating resizing an object from its bottom-left corner.
   ///
   /// Typically the shape of an arrow pointing lower left. May fallback to [resizeUpRightDownLeft].
   ///
@@ -762,7 +781,7 @@ class SystemMouseCursors {
   ///  * Web: sw-resize
   static const SystemMouseCursor resizeDownLeft = SystemMouseCursor._(kind: 'resizeDownLeft');
 
-  /// A cursor that indicates resizing an object from its bottom-right corner.
+  /// A cursor indicating resizing an object from its bottom-right corner.
   ///
   /// Typically the shape of an arrow pointing lower right. May fallback to [resizeUpLeftDownRight].
   ///
@@ -772,7 +791,7 @@ class SystemMouseCursors {
   ///  * Web: se-resize
   static const SystemMouseCursor resizeDownRight = SystemMouseCursor._(kind: 'resizeDownRight');
 
-  /// A cursor that indicates resizing a column, or an item horizontally.
+  /// A cursor indicating resizing a column, or an item horizontally.
   ///
   /// Typically the shape of arrows pointing left and right with a vertical bar
   /// separating them. May fallback to [resizeLeftRight].
@@ -781,9 +800,10 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_HORIZONTAL_DOUBLE_ARROW
   ///  * Web: col-resize
+  ///  * macOS: resizeLeftRightCursor
   static const SystemMouseCursor resizeColumn = SystemMouseCursor._(kind: 'resizeColumn');
 
-  /// A cursor that indicates resizing a row, or an item vertically.
+  /// A cursor indicating resizing a row, or an item vertically.
   ///
   /// Typically the shape of arrows pointing up and down with a horizontal bar
   /// separating them. May fallback to [resizeUpDown].
@@ -792,12 +812,13 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_VERTICAL_DOUBLE_ARROW
   ///  * Web: row-resize
+  ///  * macOS: resizeUpDownCursor
   static const SystemMouseCursor resizeRow = SystemMouseCursor._(kind: 'resizeRow');
 
 
   //// OTHER OPERATIONS ////
 
-  /// A cursor that indicates zooming in.
+  /// A cursor indicating zooming in.
   ///
   /// Typically a magnifying glass with a plus sign.
   ///
@@ -807,7 +828,7 @@ class SystemMouseCursors {
   ///  * Web: zoom-in
   static const SystemMouseCursor zoomIn = SystemMouseCursor._(kind: 'zoomIn');
 
-  /// A cursor that indicates zooming out.
+  /// A cursor indicating zooming out.
   ///
   /// Typically a magnifying glass with a minus sign.
   ///
