@@ -183,6 +183,7 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
       event.edgeFlags,
       event.source,
       event.flags,
+      event.motionEventId,
     ];
   }
 
