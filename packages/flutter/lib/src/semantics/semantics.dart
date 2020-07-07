@@ -2626,7 +2626,7 @@ class SemanticsOwner extends ChangeNotifier {
           // if we're merged into our parent, make sure our parent is added to the dirty list
           if (node.parent != null && node.parent.isPartOfNodeMerging) {
             node.parent._markDirty(); // this can add the node to the dirty list
-            node._dirty = false; // We don't want to sends update for this node.
+            node._dirty = false; // We don't want to send update for this node.
           }
         }
       }

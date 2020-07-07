@@ -36,9 +36,10 @@ mixin SemanticsBinding on BindingBase {
 
   /// Generates an empty semantics update builder.
   ///
+  /// The caller is responsible for filling out the semantics node updates.
+  ///
   /// This method is used by the [SemanticsOwner] to generate builder for all
-  /// its semantics updates. The caller is responsible for filling the semantics
-  /// node updates.
+  /// its semantics updates.
   ui.SemanticsUpdateBuilder generateSemanticsUpdateBuilder() {
     return ui.SemanticsUpdateBuilder();
   }
