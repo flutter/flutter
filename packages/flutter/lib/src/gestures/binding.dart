@@ -6,7 +6,8 @@
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:ui' as ui show PointerDataPacket;
+import 'dart:developer';
+import 'dart:ui' as ui show PointerDataPacket, PointerData;
 
 import 'package:flutter/foundation.dart';
 
@@ -78,9 +79,28 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   static GestureBinding get instance => _instance;
   static GestureBinding _instance;
 
+  /// Determines whether the binding will record the input [ui.PointerData] to
+  /// the timeline.
+  ///
+  /// This flag is bypassed in release mode.
+  ///
+  /// See [serializePointerData] and [deserializePointerData].
+  bool recordInput = false;
+
   final Queue<PointerEvent> _pendingPointerEvents = Queue<PointerEvent>();
 
   void _handlePointerDataPacket(ui.PointerDataPacket packet) {
+    if (!kReleaseMode && recordInput) {
+      Timeline.instantSync(
+        'GestureBinding receive PointerEvents',
+        arguments: <String, List<Map<String, dynamic>>>{
+          'events': <Map<String, dynamic>>[
+            for(final ui.PointerData datum in packet.data)
+              serializePointerData(datum),
+          ],
+        },
+      );
+    }
     // We convert pointer data to logical pixels so that e.g. the touch slop can be
     // defined in a device-independent manner.
     _pendingPointerEvents.addAll(PointerEventConverter.expand(packet.data, window.devicePixelRatio));
