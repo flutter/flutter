@@ -888,8 +888,8 @@ class AnimatedAlign extends ImplicitlyAnimatedWidget {
     @required Duration duration,
     VoidCallback onEnd,
   }) : assert(alignment != null),
-        assert(widthFactor == null || widthFactor >= 0.0),
-        assert(heightFactor == null || heightFactor >= 0.0),
+       assert(widthFactor == null || widthFactor >= 0.0),
+       assert(heightFactor == null || heightFactor >= 0.0),
        super(key: key, curve: curve, duration: duration, onEnd: onEnd);
 
   /// How to align the child.
