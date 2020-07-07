@@ -100,7 +100,8 @@ class _SurfacePathMeasure {
       return false;
     }
     ++_subPathIndex;
-    _contours.add(_PathContourMeasure(_path.subpaths[_subPathIndex], forceClosed));
+    _contours
+        .add(_PathContourMeasure(_path.subpaths[_subPathIndex], forceClosed));
     return true;
   }
 
@@ -705,7 +706,8 @@ class SurfacePathMetric implements ui.PathMetric {
   /// `start` and `end` are pinned to legal values (0..[length])
   /// Returns null if the segment is 0 length or `start` > `stop`.
   /// Begin the segment with a moveTo if `startWithMoveTo` is true.
-  ui.Path? extractPath(double start, double end, {bool startWithMoveTo = true}) {
+  ui.Path? extractPath(double start, double end,
+      {bool startWithMoveTo = true}) {
     return _measure.extractPath(contourIndex, start, end,
         startWithMoveTo: startWithMoveTo);
   }
@@ -992,5 +994,5 @@ void _chopQuadAt(
 
 // Interpolate between two doubles (Not using lerpDouble here since it null
 // checks and treats values as 0).
-double _interpolate(double startValue, double endValue, double t)
-    => (startValue * (1 - t)) + endValue * t;
+double _interpolate(double startValue, double endValue, double t) =>
+    (startValue * (1 - t)) + endValue * t;
