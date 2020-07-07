@@ -919,6 +919,7 @@ Future<void> _runFlutterWebTest(String workingDirectory, List<String> tests) asy
       '--no-ios',
       '--web',
     ], workingDirectory: workingDirectory,
+      environment: {'FLUTTER_WEB': 'true'},
   );
   await runCommand(
     dart,
