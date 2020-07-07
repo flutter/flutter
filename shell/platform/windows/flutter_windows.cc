@@ -19,13 +19,15 @@
 #include "flutter/shell/platform/common/cpp/incoming_message_dispatcher.h"
 #include "flutter/shell/platform/common/cpp/path_utils.h"
 #include "flutter/shell/platform/embedder/embedder.h"
-#include "flutter/shell/platform/windows/dpi_utils.h"
+#include "flutter/shell/platform/windows/flutter_windows_view.h"
 #include "flutter/shell/platform/windows/key_event_handler.h"
 #include "flutter/shell/platform/windows/keyboard_hook_handler.h"
-#include "flutter/shell/platform/windows/platform_handler.h"
 #include "flutter/shell/platform/windows/text_input_plugin.h"
+#include "flutter/shell/platform/windows/win32_dpi_utils.h"
 #include "flutter/shell/platform/windows/win32_flutter_window.h"
+#include "flutter/shell/platform/windows/win32_platform_handler.h"
 #include "flutter/shell/platform/windows/win32_task_runner.h"
+#include "flutter/shell/platform/windows/window_binding_handler.h"
 #include "flutter/shell/platform/windows/window_state.h"
 
 static_assert(FLUTTER_ENGINE_VERSION == 1, "");
@@ -66,7 +68,7 @@ UniqueAotDataPtr LoadAotData(std::filesystem::path aot_data_path) {
 // Returns the state object for the engine, or null on failure to start the
 // engine.
 static std::unique_ptr<FlutterDesktopEngineState> RunFlutterEngine(
-    flutter::Win32FlutterWindow* window,
+    flutter::FlutterWindowsView* view,
     const FlutterDesktopEngineProperties& engine_properties) {
   auto state = std::make_unique<FlutterDesktopEngineState>();
 
@@ -79,22 +81,22 @@ static std::unique_ptr<FlutterDesktopEngineState> RunFlutterEngine(
                 &engine_properties.switches[engine_properties.switches_count]);
   }
 
-  window->CreateRenderSurface();
+  view->CreateRenderSurface();
 
   // Provide the necessary callbacks for rendering within a win32 child window.
   FlutterRendererConfig config = {};
   config.type = kOpenGL;
   config.open_gl.struct_size = sizeof(config.open_gl);
   config.open_gl.make_current = [](void* user_data) -> bool {
-    auto host = static_cast<flutter::Win32FlutterWindow*>(user_data);
+    auto host = static_cast<flutter::FlutterWindowsView*>(user_data);
     return host->MakeCurrent();
   };
   config.open_gl.clear_current = [](void* user_data) -> bool {
-    auto host = static_cast<flutter::Win32FlutterWindow*>(user_data);
+    auto host = static_cast<flutter::FlutterWindowsView*>(user_data);
     return host->ClearContext();
   };
   config.open_gl.present = [](void* user_data) -> bool {
-    auto host = static_cast<flutter::Win32FlutterWindow*>(user_data);
+    auto host = static_cast<flutter::FlutterWindowsView*>(user_data);
     return host->SwapBuffers();
   };
   config.open_gl.fbo_callback = [](void* user_data) -> uint32_t { return 0; };
@@ -103,7 +105,7 @@ static std::unique_ptr<FlutterDesktopEngineState> RunFlutterEngine(
     return reinterpret_cast<void*>(eglGetProcAddress(what));
   };
   config.open_gl.make_resource_current = [](void* user_data) -> bool {
-    auto host = static_cast<flutter::Win32FlutterWindow*>(user_data);
+    auto host = static_cast<flutter::FlutterWindowsView*>(user_data);
     return host->MakeResourceCurrent();
   };
 
@@ -178,7 +180,7 @@ static std::unique_ptr<FlutterDesktopEngineState> RunFlutterEngine(
   args.platform_message_callback =
       [](const FlutterPlatformMessage* engine_message,
          void* user_data) -> void {
-    auto window = reinterpret_cast<flutter::Win32FlutterWindow*>(user_data);
+    auto window = reinterpret_cast<flutter::FlutterWindowsView*>(user_data);
     return window->HandlePlatformMessage(engine_message);
   };
   args.custom_task_runners = &custom_task_runners;
@@ -188,7 +190,7 @@ static std::unique_ptr<FlutterDesktopEngineState> RunFlutterEngine(
 
   FLUTTER_API_SYMBOL(FlutterEngine) engine = nullptr;
   auto result =
-      FlutterEngineRun(FLUTTER_ENGINE_VERSION, &config, &args, window, &engine);
+      FlutterEngineRun(FLUTTER_ENGINE_VERSION, &config, &args, view, &engine);
   if (result != kSuccess || engine == nullptr) {
     std::cerr << "Failed to start Flutter engine: error " << result
               << std::endl;
@@ -202,8 +204,12 @@ FlutterDesktopViewControllerRef FlutterDesktopCreateViewController(
     int width,
     int height,
     const FlutterDesktopEngineProperties& engine_properties) {
+  std::unique_ptr<flutter::WindowBindingHandler> window_wrapper =
+      std::make_unique<flutter::Win32FlutterWindow>(width, height);
+
   FlutterDesktopViewControllerRef state =
-      flutter::Win32FlutterWindow::CreateWin32FlutterWindow(width, height);
+      flutter::FlutterWindowsView::CreateFlutterWindowsView(
+          std::move(window_wrapper));
 
   auto engine_state = RunFlutterEngine(state->view.get(), engine_properties);
 
@@ -261,8 +267,8 @@ FlutterDesktopViewRef FlutterDesktopGetView(
   return controller->view_wrapper.get();
 }
 
-HWND FlutterDesktopViewGetHWND(FlutterDesktopViewRef view) {
-  return view->window->GetWindowHandle();
+HWND FlutterDesktopViewGetHWND(FlutterDesktopViewRef view_ref) {
+  return std::get<HWND>(*view_ref->view->GetRenderTarget());
 }
 
 UINT FlutterDesktopGetDpiForHWND(HWND hwnd) {
@@ -316,7 +322,7 @@ void FlutterDesktopRegistrarSetDestructionHandler(
 
 FlutterDesktopViewRef FlutterDesktopRegistrarGetView(
     FlutterDesktopPluginRegistrarRef registrar) {
-  return registrar->window;
+  return registrar->view;
 }
 
 bool FlutterDesktopMessengerSendWithReply(FlutterDesktopMessengerRef messenger,

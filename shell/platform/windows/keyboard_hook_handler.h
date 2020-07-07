@@ -11,7 +11,7 @@
 
 namespace flutter {
 
-class Win32FlutterWindow;
+class FlutterWindowsView;
 
 // Abstract class for handling keyboard input events.
 class KeyboardHookHandler {
@@ -19,14 +19,14 @@ class KeyboardHookHandler {
   virtual ~KeyboardHookHandler() = default;
 
   // A function for hooking into keyboard input.
-  virtual void KeyboardHook(Win32FlutterWindow* window,
+  virtual void KeyboardHook(FlutterWindowsView* view,
                             int key,
                             int scancode,
                             int action,
                             char32_t character) = 0;
 
   // A function for hooking into Unicode text input.
-  virtual void TextHook(Win32FlutterWindow* window,
+  virtual void TextHook(FlutterWindowsView* view,
                         const std::u16string& text) = 0;
 };
 

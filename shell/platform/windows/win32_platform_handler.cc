@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/windows/platform_handler.h"
+#include "flutter/shell/platform/windows/win32_platform_handler.h"
 
 #include <windows.h>
 
@@ -10,8 +10,8 @@
 #include <optional>
 
 #include "flutter/shell/platform/common/cpp/json_method_codec.h"
+#include "flutter/shell/platform/windows/flutter_windows_view.h"
 #include "flutter/shell/platform/windows/string_conversion.h"
-#include "flutter/shell/platform/windows/win32_flutter_window.h"
 
 static constexpr char kChannelName[] = "flutter/platform";
 
@@ -198,12 +198,12 @@ bool ScopedClipboard::SetString(const std::wstring string) {
 }  // namespace
 
 PlatformHandler::PlatformHandler(flutter::BinaryMessenger* messenger,
-                                 Win32FlutterWindow* window)
+                                 FlutterWindowsView* view)
     : channel_(std::make_unique<flutter::MethodChannel<rapidjson::Document>>(
           messenger,
           kChannelName,
           &flutter::JsonMethodCodec::GetInstance())),
-      window_(window) {
+      view_(view) {
   channel_->SetMethodCallHandler(
       [this](
           const flutter::MethodCall<rapidjson::Document>& call,
@@ -224,9 +224,8 @@ void PlatformHandler::HandleMethodCall(
       result->Error(kClipboardError, kUnknownClipboardFormatMessage);
       return;
     }
-
     ScopedClipboard clipboard;
-    if (!clipboard.Open(window_->GetWindowHandle())) {
+    if (!clipboard.Open(std::get<HWND>(*view_->GetRenderTarget()))) {
       rapidjson::Document error_code;
       error_code.SetInt(::GetLastError());
       result->Error(kClipboardError, "Unable to open clipboard", &error_code);
@@ -263,7 +262,8 @@ void PlatformHandler::HandleMethodCall(
     }
 
     ScopedClipboard clipboard;
-    if (!clipboard.Open(window_->GetWindowHandle())) {
+
+    if (!clipboard.Open(std::get<HWND>(*view_->GetRenderTarget()))) {
       rapidjson::Document error_code;
       error_code.SetInt(::GetLastError());
       result->Error(kClipboardError, "Unable to open clipboard", &error_code);
