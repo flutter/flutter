@@ -764,11 +764,17 @@ class BoxHitTestResult extends HitTestResult {
     @required BoxHitTest hitTest,
   }) {
     assert(hitTest != null);
-    return addWithRawTransform(
-      transform: offset != null ? Matrix4.translationValues(-offset.dx, -offset.dy, 0.0) : null,
-      position: position,
-      hitTest: hitTest,
-    );
+    final Offset transformedPosition = position == null || offset == null
+        ? position
+        : position - offset;
+    if (offset != null) {
+      pushOffset(-offset);
+    }
+    final bool isHit = hitTest(this, transformedPosition);
+    if (offset != null) {
+      popTransform();
+    }
+    return isHit;
   }
 
   /// Transforms `position` to the local coordinate system of a child for
