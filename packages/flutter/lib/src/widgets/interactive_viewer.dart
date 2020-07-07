@@ -53,6 +53,7 @@ class InteractiveViewer extends StatefulWidget {
   /// The [child] parameter must not be null.
   InteractiveViewer({
     Key key,
+    this.alignPanAxis = false,
     this.boundaryMargin = EdgeInsets.zero,
     this.constrained = true,
     // These default scale values were eyeballed as reasonable limits for common
@@ -66,7 +67,8 @@ class InteractiveViewer extends StatefulWidget {
     this.scaleEnabled = true,
     this.transformationController,
     @required this.child,
-  }) : assert(child != null),
+  }) : assert(alignPanAxis != null),
+       assert(child != null),
        assert(constrained != null),
        assert(minScale != null),
        assert(minScale > 0),
@@ -84,6 +86,11 @@ class InteractiveViewer extends StatefulWidget {
            && boundaryMargin.right.isFinite && boundaryMargin.bottom.isFinite
            && boundaryMargin.left.isFinite)),
        super(key: key);
+
+  /// If true, panning is only allowed in the direction of the main axes.
+  ///
+  /// In other words, when this is true, diagonal panning is not allowed.
+  final bool alignPanAxis;
 
   /// A margin for the visible boundaries of the child.
   ///
@@ -521,6 +528,16 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     return Offset.zero & parentRenderBox.size;
   }
 
+  // TODO(justinmc): This works, but it's not all you need.
+  // You need to save the axis at the start of a gesture and keep all updates to
+  // the same axis. Also keep inertia animation to the same axis.
+  static Offset _alignAxis(Offset offset) {
+    if (offset.dx.abs() > offset.dy.abs()) {
+      return Offset(offset.dx, 0.0);
+    }
+    return Offset(0.0, offset.dy);
+  }
+
   // Return a new matrix representing the given matrix after applying the given
   // translation.
   Matrix4 _matrixTranslate(Matrix4 matrix, Offset translation) {
@@ -528,10 +545,15 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       return matrix.clone();
     }
 
+    final Offset alignedTranslation = widget.alignPanAxis
+      ? _alignAxis(translation)
+      : translation;
+
     final Matrix4 nextMatrix = matrix.clone()..translate(
-      translation.dx,
-      translation.dy,
+      alignedTranslation.dx,
+      alignedTranslation.dy,
     );
+    print('justin translation $translation aligned $alignedTranslation');
 
     // Transform the viewport to determine where its four corners will be after
     // the child has been transformed.
