@@ -104,7 +104,6 @@ Future<void> main(List<String> args) async {
       cache: globals.cache,
       logger: globals.logger,
       platform: globals.platform,
-      flutterVersion: globals.flutterVersion,
       featureFlags: featureFlags,
     ),
     RunCommand(verboseHelp: verboseHelp),

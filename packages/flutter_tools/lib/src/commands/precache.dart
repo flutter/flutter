@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/version.dart';
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
@@ -11,8 +12,8 @@ import '../base/logger.dart';
 import '../base/platform.dart';
 import '../cache.dart';
 import '../features.dart';
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
-import '../version.dart';
 
 /// The flutter precache command allows downloading of cache artifacts without
 /// the use of device/artifact autodetection.
@@ -20,15 +21,15 @@ class PrecacheCommand extends FlutterCommand {
   PrecacheCommand({
     bool verboseHelp = false,
     @required Cache cache,
-    @required FlutterVersion flutterVersion,
     @required Platform platform,
     @required Logger logger,
     @required FeatureFlags featureFlags,
+    FlutterVersion flutterVersion, // flutter version cannot be injected.
   }) : _cache = cache,
-       _flutterVersion = flutterVersion,
        _platform = platform,
        _logger = logger,
-       _featureFlags = featureFlags {
+       _featureFlags = featureFlags,
+       _flutterVersion = flutterVersion {
     argParser.addFlag('all-platforms', abbr: 'a', negatable: false,
         help: 'Precache artifacts for all host platforms.');
     argParser.addFlag('force', abbr: 'f', negatable: false,
@@ -66,10 +67,10 @@ class PrecacheCommand extends FlutterCommand {
   }
 
   final Cache _cache;
-  final FlutterVersion _flutterVersion;
   final Logger _logger;
   final Platform _platform;
   final FeatureFlags _featureFlags;
+  final FlutterVersion _flutterVersion;
 
   @override
   final String name = 'precache';
@@ -154,7 +155,7 @@ class PrecacheCommand extends FlutterCommand {
     final Set<DevelopmentArtifact> requiredArtifacts = <DevelopmentArtifact>{};
     for (final DevelopmentArtifact artifact in DevelopmentArtifact.values) {
       // Don't include unstable artifacts on stable branches.
-      if (!_flutterVersion.isMaster && artifact.unstable) {
+      if (!(_flutterVersion ?? globals.flutterVersion).isMaster && artifact.unstable) {
         continue;
       }
       if (artifact.feature != null && !_featureFlags.isEnabled(artifact.feature)) {
