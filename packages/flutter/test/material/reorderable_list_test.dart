@@ -543,45 +543,36 @@ void main() {
         });
 
         testWidgets('Default scroll physics for macOS/iOS', (WidgetTester tester) async {
-          final ScrollConfiguration configuration = ScrollConfiguration(
-           behavior: const ScrollBehavior(),
-           child: ReorderableListView(
-            scrollDirection: Axis.horizontal,
+          final ReorderableListView listView = ReorderableListView(
             children: const <Widget>[],
             onReorder: (int oldIndex, int newIndex) {},
-          ));
-
-          ScrollPhysics physics;
-          await tester.pumpWidget(
-            Builder(
-              builder: (BuildContext context) {
-                physics = configuration.behavior.getScrollPhysics(context);
-                return Container();
-              },
-            ),
+            scrollController: ScrollController(),
           );
-          expect(physics, isInstanceOf<BouncingScrollPhysics>());
+
+          await tester.pumpWidget(listView);
+          expect(listView.scrollController.position.physics, isInstanceOf<BouncingScrollPhysics>());
+        }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
+
+        testWidgets('Default scroll physics for android/fuchsia/linux/windows', (WidgetTester tester) async {
+          final ReorderableListView listView = ReorderableListView(
+            children: const <Widget>[],
+            onReorder: (int oldIndex, int newIndex) {},
+            scrollController: ScrollController(),
+          );
+
+          await tester.pumpWidget(listView);
+          expect(listView.scrollController.position.physics, isInstanceOf<BouncingScrollPhysics>());
         }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
         testWidgets('Default scroll physics for android/fuchsia/linux/windows', (WidgetTester tester) async {
-          final ScrollConfiguration configuration = ScrollConfiguration(
-           behavior: const ScrollBehavior(),
-           child: ReorderableListView(
-            scrollDirection: Axis.horizontal,
+          final ReorderableListView listView = ReorderableListView(
             children: const <Widget>[],
             onReorder: (int oldIndex, int newIndex) {},
-          ));
-
-          ScrollPhysics physics;
-          await tester.pumpWidget(
-            Builder(
-              builder: (BuildContext context) {
-                physics = configuration.behavior.getScrollPhysics(context);
-                return Container();
-              },
-            ),
+            scrollController: ScrollController(),
           );
-          expect(physics, isInstanceOf<ClampingScrollPhysics>());
+
+          await tester.pumpWidget(listView);
+          expect(listView.scrollController.position.physics, isInstanceOf<ClampingScrollPhysics>());
         }, variant: const TargetPlatformVariant(<TargetPlatform>{
             TargetPlatform.android,
             TargetPlatform.fuchsia,
