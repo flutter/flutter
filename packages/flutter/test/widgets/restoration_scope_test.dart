@@ -8,6 +8,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'restoration.dart';
+
 void main() {
   group('UnmanagedRestorationScope', () {
     testWidgets('makes bucket available to descendants', (WidgetTester tester) async {
@@ -19,11 +21,11 @@ void main() {
       await tester.pumpWidget(
         UnmanagedRestorationScope(
           bucket: bucket1,
-          child: _BucketSpy(),
+          child: const BucketSpy(),
         ),
       );
 
-      final _BucketSpyState state = tester.state(find.byType(_BucketSpy));
+      final BucketSpyState state = tester.state(find.byType(BucketSpy));
       expect(state.bucket, bucket1);
 
       // Notifies when bucket changes.
@@ -34,7 +36,7 @@ void main() {
       await tester.pumpWidget(
         UnmanagedRestorationScope(
           bucket: bucket2,
-          child: _BucketSpy(),
+          child: const BucketSpy(),
         ),
       );
       expect(state.bucket, bucket2);
@@ -42,12 +44,12 @@ void main() {
 
     testWidgets('null bucket disables restoration', (WidgetTester tester) async {
       await tester.pumpWidget(
-        UnmanagedRestorationScope(
+        const UnmanagedRestorationScope(
           bucket: null,
-          child: _BucketSpy(),
+          child: BucketSpy(),
         ),
       );
-      final _BucketSpyState state = tester.state(find.byType(_BucketSpy));
+      final BucketSpyState state = tester.state(find.byType(BucketSpy));
       expect(state.bucket, isNull);
     });
   });
@@ -55,7 +57,7 @@ void main() {
   group('RestorationScope', () {
     testWidgets('makes bucket available to descendants', (WidgetTester tester) async {
       const RestorationId id = RestorationId('hello world 1234');
-      final MockManager manager = MockManager();
+      final MockRestorationManager manager = MockRestorationManager();
       final Map<String, dynamic> rawData = <String, dynamic>{};
       final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
       expect(rawData, isEmpty);
@@ -63,56 +65,56 @@ void main() {
       await tester.pumpWidget(
         UnmanagedRestorationScope(
           bucket: root,
-          child: RestorationScope(
+          child: const RestorationScope(
             restorationId: id,
-            child: _BucketSpy(),
+            child: BucketSpy(),
           ),
         ),
       );
       manager.runFinalizers();
 
-      final _BucketSpyState state = tester.state(find.byType(_BucketSpy));
+      final BucketSpyState state = tester.state(find.byType(BucketSpy));
       expect(state.bucket.id, id);
       expect(rawData[childrenMapKey].containsKey(id.value), isTrue);
     });
 
     testWidgets('bucket for descendants contains data claimed from parent', (WidgetTester tester) async {
-      final MockManager manager = MockManager();
+      final MockRestorationManager manager = MockRestorationManager();
       final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: _createRawDataSet());
 
       await tester.pumpWidget(
         UnmanagedRestorationScope(
           bucket: root,
-          child: RestorationScope(
-            restorationId: const RestorationId('child1'),
-            child: _BucketSpy(),
+          child: const RestorationScope(
+            restorationId: RestorationId('child1'),
+            child: BucketSpy(),
           ),
         ),
       );
       manager.runFinalizers();
 
-      final _BucketSpyState state = tester.state(find.byType(_BucketSpy));
+      final BucketSpyState state = tester.state(find.byType(BucketSpy));
       expect(state.bucket.id, const RestorationId('child1'));
       expect(state.bucket.get<int>(const RestorationId('foo')), 22);
     });
 
     testWidgets('renames existing bucket when new ID is provided', (WidgetTester tester) async {
-      final MockManager manager = MockManager();
+      final MockRestorationManager manager = MockRestorationManager();
       final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: _createRawDataSet());
 
       await tester.pumpWidget(
         UnmanagedRestorationScope(
           bucket: root,
-          child: RestorationScope(
-            restorationId: const RestorationId('child1'),
-            child: _BucketSpy(),
+          child: const RestorationScope(
+            restorationId: RestorationId('child1'),
+            child: BucketSpy(),
           ),
         ),
       );
       manager.runFinalizers();
 
       // Claimed existing bucket with data.
-      final _BucketSpyState state = tester.state(find.byType(_BucketSpy));
+      final BucketSpyState state = tester.state(find.byType(BucketSpy));
       expect(state.bucket.id, const RestorationId('child1'));
       expect(state.bucket.get<int>(const RestorationId('foo')), 22);
       final RestorationBucket bucket = state.bucket;
@@ -121,9 +123,9 @@ void main() {
       await tester.pumpWidget(
         UnmanagedRestorationScope(
           bucket: root,
-          child: RestorationScope(
-            restorationId: const RestorationId('something else'),
-            child: _BucketSpy(),
+          child: const RestorationScope(
+            restorationId: RestorationId('something else'),
+            child: BucketSpy(),
           ),
         ),
       );
@@ -135,7 +137,7 @@ void main() {
     });
 
     testWidgets('Disposing a scope removes its data', (WidgetTester tester) async {
-      final MockManager manager = MockManager();
+      final MockRestorationManager manager = MockRestorationManager();
       final Map<String, dynamic> rawData = _createRawDataSet();
       final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
@@ -143,9 +145,9 @@ void main() {
       await tester.pumpWidget(
         UnmanagedRestorationScope(
           bucket: root,
-          child: RestorationScope(
-            restorationId: const RestorationId('child1'),
-            child: _BucketSpy(),
+          child: const RestorationScope(
+            restorationId: RestorationId('child1'),
+            child: BucketSpy(),
           ),
         ),
       );
@@ -164,35 +166,47 @@ void main() {
     });
 
     testWidgets('no bucket for descendants when id is null', (WidgetTester tester) async {
-      final MockManager manager = MockManager();
+      final MockRestorationManager manager = MockRestorationManager();
       final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: <String, dynamic>{});
 
       await tester.pumpWidget(
         UnmanagedRestorationScope(
           bucket: root,
-          child: RestorationScope(
+          child: const RestorationScope(
             restorationId: null,
-            child: _BucketSpy(),
+            child: BucketSpy(),
           ),
         ),
       );
-      final _BucketSpyState state = tester.state(find.byType(_BucketSpy));
+      final BucketSpyState state = tester.state(find.byType(BucketSpy));
       expect(state.bucket, isNull);
 
       // Change id to non-null.
-      // Move it under a valid scope.
       await tester.pumpWidget(
         UnmanagedRestorationScope(
           bucket: root,
-          child: RestorationScope(
-            restorationId: const RestorationId('foo'),
-            child: _BucketSpy(),
+          child: const RestorationScope(
+            restorationId: RestorationId('foo'),
+            child: BucketSpy(),
           ),
         ),
       );
       manager.runFinalizers();
       expect(state.bucket, isNotNull);
       expect(state.bucket.id, const RestorationId('foo'));
+
+      // Change id back to null.
+      await tester.pumpWidget(
+        UnmanagedRestorationScope(
+          bucket: root,
+          child: const RestorationScope(
+            restorationId: null,
+            child: BucketSpy(),
+          ),
+        ),
+      );
+      manager.runFinalizers();
+      expect(state.bucket, isNull);
     });
 
     testWidgets('no bucket for descendants when scope is null', (WidgetTester tester) async {
@@ -202,14 +216,14 @@ void main() {
         RestorationScope(
           key: scopeKey,
           restorationId: const RestorationId('foo'),
-          child: _BucketSpy(),
+          child: const BucketSpy(),
         ),
       );
-      final _BucketSpyState state = tester.state(find.byType(_BucketSpy));
+      final BucketSpyState state = tester.state(find.byType(BucketSpy));
       expect(state.bucket, isNull);
 
       // Move it under a valid scope.
-      final MockManager manager = MockManager();
+      final MockRestorationManager manager = MockRestorationManager();
       final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: <String, dynamic>{});
       await tester.pumpWidget(
         UnmanagedRestorationScope(
@@ -217,28 +231,39 @@ void main() {
           child: RestorationScope(
             key: scopeKey,
             restorationId: const RestorationId('foo'),
-            child: _BucketSpy(),
+            child: const BucketSpy(),
           ),
         ),
       );
       manager.runFinalizers();
       expect(state.bucket, isNotNull);
       expect(state.bucket.id, const RestorationId('foo'));
+
+      // Move out of scope again.
+      await tester.pumpWidget(
+        RestorationScope(
+          key: scopeKey,
+          restorationId: const RestorationId('foo'),
+          child: const BucketSpy(),
+        ),
+      );
+      manager.runFinalizers();
+      expect(state.bucket, isNull);
     });
 
     testWidgets('no bucket for descendants when scope and id are null', (WidgetTester tester) async {
       await tester.pumpWidget(
-        RestorationScope(
+        const RestorationScope(
           restorationId: null,
-          child: _BucketSpy(),
+          child: BucketSpy(),
         ),
       );
-      final _BucketSpyState state = tester.state(find.byType(_BucketSpy));
+      final BucketSpyState state = tester.state(find.byType(BucketSpy));
       expect(state.bucket, isNull);
     });
 
     testWidgets('moving scope moves its data', (WidgetTester tester) async {
-      final MockManager manager = MockManager();
+      final MockRestorationManager manager = MockRestorationManager();
       final Map<String, dynamic> rawData = <String, dynamic>{};
       final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
       final Key scopeKey = GlobalKey();
@@ -254,7 +279,7 @@ void main() {
                 child: RestorationScope(
                   key: scopeKey,
                   restorationId: const RestorationId('moving-child'),
-                  child: _BucketSpy(),
+                  child: const BucketSpy(),
                 ),
               ),
             ],
@@ -262,7 +287,7 @@ void main() {
         ),
       );
       manager.runFinalizers();
-      final _BucketSpyState state = tester.state(find.byType(_BucketSpy));
+      final BucketSpyState state = tester.state(find.byType(BucketSpy));
       expect(state.bucket.id, const RestorationId('moving-child'));
       expect(rawData[childrenMapKey]['fixed'][childrenMapKey].containsKey('moving-child'), isTrue);
       final RestorationBucket bucket = state.bucket;
@@ -284,7 +309,7 @@ void main() {
               RestorationScope(
                 key: scopeKey,
                 restorationId: const RestorationId('moving-child'),
-                child: _BucketSpy(),
+                child: const BucketSpy(),
               ),
             ],
           ),
@@ -300,20 +325,20 @@ void main() {
     });
 
     testWidgets('decommission claims new bucket with data', (WidgetTester tester) async {
-      final MockManager manager = MockManager();
+      final MockRestorationManager manager = MockRestorationManager();
       RestorationBucket root = RestorationBucket.root(manager: manager, rawData: <String, dynamic>{});
 
       await tester.pumpWidget(
         UnmanagedRestorationScope(
           bucket: root,
-          child: RestorationScope(
-            restorationId: const RestorationId('child1'),
-            child: _BucketSpy(),
+          child: const RestorationScope(
+            restorationId: RestorationId('child1'),
+            child: BucketSpy(),
           ),
         ),
       );
       manager.runFinalizers();
-      final _BucketSpyState state = tester.state(find.byType(_BucketSpy));
+      final BucketSpyState state = tester.state(find.byType(BucketSpy));
       expect(state.bucket.id, const RestorationId('child1'));
       expect(state.bucket.get<int>(const RestorationId('foo')), isNull); // Does not exist.
       final RestorationBucket bucket = state.bucket;
@@ -325,9 +350,9 @@ void main() {
       await tester.pumpWidget(
         UnmanagedRestorationScope(
           bucket: root,
-          child: RestorationScope(
-            restorationId: const RestorationId('child1'),
-            child: _BucketSpy(),
+          child: const RestorationScope(
+            restorationId: RestorationId('child1'),
+            child: BucketSpy(),
           ),
         ),
       );
@@ -339,47 +364,6 @@ void main() {
     });
   });
 }
-
-class MockManager implements RestorationManager {
-  final Set<VoidCallback> _finalizers = <VoidCallback>{};
-  bool get updateScheduled => _updateScheduled;
-  bool _updateScheduled = false;
-
-  @override
-  void scheduleUpdate({VoidCallback finalizer}) {
-    _updateScheduled = true;
-    if (finalizer != null) {
-      _finalizers.add(finalizer);
-    }
-  }
-
-  void runFinalizers() {
-    _updateScheduled = false;
-    for (final VoidCallback finalizer in _finalizers) {
-      finalizer();
-    }
-    _finalizers.clear();
-  }
-
-  @override
-  Future<RestorationBucket> get rootBucket => throw UnimplementedError('unimplemented in mock');
-
-  @override
-  Future<void> sendToEngine(Map<String, dynamic> rawData) {
-    throw UnimplementedError('unimplemented in mock');
-  }
-
-  @override
-  Future<Map<String, dynamic>> retrieveFromEngine() {
-    throw UnimplementedError('unimplemented in mock');
-  }
-
-  @override
-  String toString() => 'MockManager';
-}
-
-const String childrenMapKey = 'c';
-const String valuesMapKey = 'v';
 
 Map<String, dynamic> _createRawDataSet() {
   return <String, dynamic>{
@@ -400,24 +384,4 @@ Map<String, dynamic> _createRawDataSet() {
       },
     },
   };
-}
-
-class _BucketSpy extends StatefulWidget {
-  @override
-  State<_BucketSpy> createState() => _BucketSpyState();
-}
-
-class _BucketSpyState extends State<_BucketSpy> {
-  RestorationBucket bucket;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    bucket = RestorationScope.of(context);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container();
-  }
 }

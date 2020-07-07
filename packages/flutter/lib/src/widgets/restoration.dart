@@ -228,16 +228,11 @@ class _RootRestorationScopeState extends State<RootRestorationScope> {
   RestorationBucket _ancestorBucket;
 
   @override
-  void initState() {
-    super.initState();
-    _okToRenderBlankContainer = widget.restorationId != null;
-  }
-
-  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _ancestorBucket = RestorationScope.of(context);
     _loadRootBucketIfNecessary();
+    _okToRenderBlankContainer ??= widget.restorationId != null && _needsRootBucketInserted;
   }
 
   @override

@@ -12,6 +12,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'restoration.dart';
+
 void main() {
   group('RestorationId', () {
     test('has good toString', () {
@@ -30,7 +32,7 @@ void main() {
   });
 
   group('RestorationManager', () {
-    testWidgets('root bucket retrival', (WidgetTester tester) async {
+    testWidgets('root bucket retrieval', (WidgetTester tester) async {
       final List<MethodCall> callsToEngine = <MethodCall>[];
       final Completer<Uint8List> result = Completer<Uint8List>();
       SystemChannels.restoration.setMockMethodCallHandler((MethodCall call) {
@@ -170,8 +172,8 @@ void main() {
       final Map<String, dynamic> decodedData = castToMap<String, dynamic>(
         const StandardMessageCodec().decodeMessage(dataSendToEngine.buffer.asByteData(dataSendToEngine.offsetInBytes, dataSendToEngine.lengthInBytes)),
       );
-      expect(decodedData['v']['value1'], 10);
-      expect(decodedData['v']['value2'], 'Hello');
+      expect(decodedData[valuesMapKey]['value1'], 10);
+      expect(decodedData[valuesMapKey]['value2'], 'Hello');
 
       // Old finalizer is not invoked again.
       manager.scheduleUpdate();
@@ -283,13 +285,13 @@ Future<void> _pushDataFromEngine(Uint8List data) async {
 
 Uint8List _createEncodedRestorationData1() {
   final Map<String, dynamic> data = <String, dynamic>{
-    'v': <String, dynamic>{
+    valuesMapKey: <String, dynamic>{
       'value1' : 10,
       'value2' : 'Hello',
     },
-    'c': <String, dynamic>{
+    childrenMapKey: <String, dynamic>{
       'child1' : <String, dynamic>{
-        'v' : <String, dynamic>{
+        valuesMapKey : <String, dynamic>{
           'another value': 22,
         }
       },
@@ -301,12 +303,12 @@ Uint8List _createEncodedRestorationData1() {
 
 Uint8List _createEncodedRestorationData2() {
   final Map<String, dynamic> data = <String, dynamic>{
-    'v': <String, dynamic>{
+    valuesMapKey: <String, dynamic>{
       'foo' : 33,
     },
-    'c': <String, dynamic>{
+    childrenMapKey: <String, dynamic>{
       'childFoo' : <String, dynamic>{
-        'v' : <String, dynamic>{
+        valuesMapKey : <String, dynamic>{
           'bar': 'Hello',
         }
       },

@@ -8,9 +8,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'restoration.dart';
+
 void main() {
   test('root bucket values', () {
-    final MockManager manager = MockManager();
+    final MockRestorationManager manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket bucket = RestorationBucket.root(manager: manager, rawData: rawData);
 
@@ -62,7 +64,7 @@ void main() {
   });
 
   test('child bucket values', () {
-    final MockManager manager = MockManager();
+    final MockRestorationManager manager = MockRestorationManager();
     final Map<String, dynamic> rootRawData = _createRawDataSet();
     final Map<String, dynamic> childRawData = castToMap<String, dynamic>(rootRawData[childrenMapKey]['child1']);
     final Object debugOwner = Object();
@@ -120,7 +122,7 @@ void main() {
   });
 
   test('claim child with exisiting data', () {
-    final MockManager manager = MockManager();
+    final MockRestorationManager manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket bucket = RestorationBucket.root(manager: manager, rawData: rawData);
 
@@ -140,7 +142,7 @@ void main() {
   });
 
   test('claim child with no exisiting data', () {
-    final MockManager manager = MockManager();
+    final MockRestorationManager manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket bucket = RestorationBucket.root(manager: manager, rawData: rawData);
 
@@ -163,7 +165,7 @@ void main() {
   });
 
   test('claim child that is already claimed throws if not given up', () {
-    final MockManager manager = MockManager();
+    final MockRestorationManager manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket bucket = RestorationBucket.root(manager: manager, rawData: rawData);
 
@@ -197,7 +199,7 @@ void main() {
   });
 
   test('claim child that is already claimed does not throw if given up', () {
-    final MockManager manager = MockManager();
+    final MockRestorationManager manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket bucket = RestorationBucket.root(manager: manager, rawData: rawData);
 
@@ -224,7 +226,7 @@ void main() {
   });
 
   test('claiming a claimed child twice and only giving it up once throws', () {
-    final MockManager manager = MockManager();
+    final MockRestorationManager manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket bucket = RestorationBucket.root(manager: manager, rawData: rawData);
 
@@ -240,7 +242,7 @@ void main() {
   });
 
   test('unclaiming and then claiming same id gives fresh bucket', () {
-    final MockManager manager = MockManager();
+    final MockRestorationManager manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket bucket = RestorationBucket.root(manager: manager, rawData: rawData);
 
@@ -254,7 +256,7 @@ void main() {
   });
 
   test('cleans up raw data if last value/child is dropped', () {
-    final MockManager manager = MockManager();
+    final MockRestorationManager manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
@@ -274,7 +276,7 @@ void main() {
   });
 
   test('dispose deletes data', () {
-    final MockManager manager = MockManager();
+    final MockRestorationManager manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
@@ -313,7 +315,7 @@ void main() {
   });
 
   test('rename is no-op if same id', () {
-    final MockManager manager = MockManager();
+    final MockRestorationManager manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
@@ -328,7 +330,7 @@ void main() {
   });
 
   test('rename to unused id', () {
-    final MockManager manager = MockManager();
+    final MockRestorationManager manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
@@ -350,7 +352,7 @@ void main() {
   });
 
   test('rename to used id throws if id is not given up', () {
-    final MockManager manager = MockManager();
+    final MockRestorationManager manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
@@ -368,7 +370,7 @@ void main() {
   });
 
   test('rename to used id does not throw if id is given up', () {
-    final MockManager manager = MockManager();
+    final MockRestorationManager manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
@@ -398,7 +400,7 @@ void main() {
   });
 
   test('renaming a to be added child', () {
-    final MockManager manager = MockManager();
+    final MockRestorationManager manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
@@ -422,7 +424,7 @@ void main() {
   });
 
   test('adopt is no-op if same parent', () {
-    final MockManager manager = MockManager();
+    final MockRestorationManager manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
@@ -434,7 +436,7 @@ void main() {
   });
 
   test('adopt fresh child', () {
-    final MockManager manager = MockManager();
+    final MockRestorationManager manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
@@ -456,7 +458,7 @@ void main() {
   });
 
   test('adopt child that already had a parent', () {
-    final MockManager manager = MockManager();
+    final MockRestorationManager manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
@@ -481,7 +483,7 @@ void main() {
   });
 
   test('adopting child throws if id is already in use and not given up', () {
-    final MockManager manager = MockManager();
+    final MockRestorationManager manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
@@ -495,7 +497,7 @@ void main() {
   });
 
   test('adopting child does not throw if id is already in use and given up', () {
-    final MockManager manager = MockManager();
+    final MockRestorationManager manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
@@ -520,7 +522,7 @@ void main() {
   });
 
   test('adopting a to-be-added child under an already in use id', () {
-    final MockManager manager = MockManager();
+    final MockRestorationManager manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
@@ -548,7 +550,7 @@ void main() {
   });
 
   test('decommission drops itself from parent and notifies all listeners', () {
-    final MockManager manager = MockManager();
+    final MockRestorationManager manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
@@ -605,49 +607,8 @@ Map<String, dynamic> _createRawDataSet() {
       'child1' : <String, dynamic>{
         valuesMapKey : <String, dynamic>{
           'foo': 22,
-        }
+        },
       },
     },
   };
-}
-
-const String childrenMapKey = 'c';
-const String valuesMapKey = 'v';
-
-class MockManager implements RestorationManager {
-  final Set<VoidCallback> _finalizers = <VoidCallback>{};
-  bool get updateScheduled => _updateScheduled;
-  bool _updateScheduled = false;
-
-  @override
-  void scheduleUpdate({VoidCallback finalizer}) {
-    _updateScheduled = true;
-    if (finalizer != null) {
-      _finalizers.add(finalizer);
-    }
-  }
-
-  void runFinalizers() {
-    _updateScheduled = false;
-    for (final VoidCallback finalizer in _finalizers) {
-      finalizer();
-    }
-    _finalizers.clear();
-  }
-
-  @override
-  Future<RestorationBucket> get rootBucket => throw UnimplementedError('unimplemented in mock');
-
-  @override
-  Future<void> sendToEngine(Map<String, dynamic> rawData) {
-    throw UnimplementedError('unimplemented in mock');
-  }
-
-  @override
-  Future<Map<String, dynamic>> retrieveFromEngine() {
-    throw UnimplementedError('unimplemented in mock');
-  }
-
-  @override
-  String toString() => 'MockManager';
 }
