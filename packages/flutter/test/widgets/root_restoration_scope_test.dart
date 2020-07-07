@@ -131,7 +131,7 @@ void main() {
 
     final BucketSpyState state = tester.state(find.byType(BucketSpy));
     expect(state.bucket, isNull);
-    
+
     // Change restoration id to non-null.
     final Completer<RestorationBucket> bucketCompleter = Completer<RestorationBucket>();
     binding.restorationManager.rootBucketFuture = bucketCompleter.future;
