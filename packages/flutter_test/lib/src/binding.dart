@@ -362,7 +362,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// If `callback` completes with an error, the error will be caught by the
   /// Flutter framework and made available via [takeException], and this method
-  /// will return a future that completes will `null`.
+  /// will return a future that completes with `null`.
   ///
   /// Re-entrant calls to this method are not allowed; callers of this method
   /// are required to wait for the returned future to complete before calling
