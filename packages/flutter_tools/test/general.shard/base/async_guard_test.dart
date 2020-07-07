@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/base/async_guard.dart';
-import 'package:flutter_tools/src/base/common.dart';
+import 'package:meta/meta.dart';
 import 'package:quiver/testing/async.dart';
 
 import '../../src/common.dart';

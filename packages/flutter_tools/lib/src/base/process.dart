@@ -8,7 +8,6 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../convert.dart';
-import 'common.dart';
 import 'context.dart';
 import 'io.dart';
 import 'logger.dart';
