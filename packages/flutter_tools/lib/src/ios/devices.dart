@@ -64,6 +64,9 @@ class IOSDevices extends PollingDeviceDiscovery {
         'Control of iOS devices or simulators only supported on macOS.'
       );
     }
+    if (!_xcdevice.isInstalled) {
+      return;
+    }
 
     deviceNotifier ??= ItemListNotifier<Device>();
 
@@ -72,7 +75,7 @@ class IOSDevices extends PollingDeviceDiscovery {
 
     // cancel any outstanding subscriptions.
     await _observedDeviceEventsSubscription?.cancel();
-    _observedDeviceEventsSubscription = _xcdevice.observedDeviceEvents().listen(
+    _observedDeviceEventsSubscription = _xcdevice.observedDeviceEvents()?.listen(
       _onDeviceEvent,
       onError: (dynamic error, StackTrace stack) {
         _logger.printTrace('Process exception running xcdevice observe:\n$error\n$stack');
@@ -506,11 +509,11 @@ class IOSDevice extends Device {
   void clearLogs() { }
 
   @override
-  bool get supportsScreenshot => _iMobileDevice.isInstalled && interfaceType == IOSDeviceInterface.usb;
+  bool get supportsScreenshot => _iMobileDevice.isInstalled;
 
   @override
   Future<void> takeScreenshot(File outputFile) async {
-    await _iMobileDevice.takeScreenshot(outputFile);
+    await _iMobileDevice.takeScreenshot(outputFile, id, interfaceType);
   }
 
   @override
@@ -832,8 +835,8 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
       process = await _processUtils.start(
         <String>[
           _iproxyPath,
-          hostPort.toString(),
-          devicePort.toString(),
+          '$hostPort:$devicePort',
+          '--udid',
           _id,
         ],
         environment: Map<String, String>.fromEntries(

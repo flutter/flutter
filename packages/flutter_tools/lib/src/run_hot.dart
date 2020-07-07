@@ -373,11 +373,13 @@ class HotRunner extends ResidentRunner {
     try {
       final List<bool> results = await Future.wait(startupTasks);
       if (!results.every((bool passed) => passed)) {
+        appFailedToStart();
         return 1;
       }
       cacheInitialDillCompilation();
     } on Exception catch (err) {
       globals.printError(err.toString());
+      appFailedToStart();
       return 1;
     }
 

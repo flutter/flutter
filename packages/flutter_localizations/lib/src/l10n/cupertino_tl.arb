@@ -19,6 +19,6 @@
   "copyButtonLabel": "Kopyahin",
   "pasteButtonLabel": "I-paste",
   "selectAllButtonLabel": "Piliin Lahat",
-  "tabSemanticsLabel": "TBD",
+  "tabSemanticsLabel": "Tab $tabIndex ng $tabCount",
   "modalBarrierDismissLabel": "I-dismiss"
 }

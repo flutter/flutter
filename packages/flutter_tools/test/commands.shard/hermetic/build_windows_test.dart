@@ -9,12 +9,10 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_windows.dart';
-import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/windows/visual_studio.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
-import 'package:xml/xml.dart' as xml;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -22,9 +20,9 @@ import '../../src/mocks.dart';
 import '../../src/testbed.dart';
 
 const String flutterRoot = r'C:\flutter';
-const String solutionPath = r'C:\windows\Runner.sln';
+const String buildFilePath = r'C:\windows\CMakeLists.txt';
 const String visualStudioPath = r'C:\Program Files (x86)\Microsoft Visual Studio\2017\Community';
-const String vcvarsPath = visualStudioPath + r'\VC\Auxiliary\Build\vcvars64.bat';
+const String cmakePath = visualStudioPath + r'\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe';
 
 final Platform windowsPlatform = FakePlatform(
   operatingSystem: 'windows',
@@ -43,8 +41,7 @@ final Platform notWindowsPlatform = FakePlatform(
 void main() {
   FileSystem fileSystem;
 
-  MockProcessManager mockProcessManager;
-  MockProcess mockProcess;
+  ProcessManager processManager;
   MockVisualStudio mockVisualStudio;
 
   setUpAll(() {
@@ -54,18 +51,7 @@ void main() {
   setUp(() {
     fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
     Cache.flutterRoot = flutterRoot;
-    mockProcessManager = MockProcessManager();
-    mockProcess = MockProcess();
     mockVisualStudio = MockVisualStudio();
-    when(mockProcess.exitCode).thenAnswer((Invocation invocation) async {
-      return 0;
-    });
-    when(mockProcess.stderr).thenAnswer((Invocation invocation) {
-      return const Stream<List<int>>.empty();
-    });
-    when(mockProcess.stdout).thenAnswer((Invocation invocation) {
-      return Stream<List<int>>.fromIterable(<List<int>>[utf8.encode('STDOUT STUFF')]);
-    });
   });
 
   // Creates the mock files necessary to look like a Flutter project.
@@ -77,7 +63,7 @@ void main() {
 
   // Creates the mock files necessary to run a build.
   void setUpMockProjectFilesForBuild({int templateVersion}) {
-    fileSystem.file(solutionPath).createSync(recursive: true);
+    fileSystem.file(buildFilePath).createSync(recursive: true);
     setUpMockCoreProjectFiles();
 
     final String versionFileSubpath = fileSystem.path.join('flutter', '.template_version');
@@ -101,6 +87,50 @@ void main() {
     projectTemplateVersionFile.writeAsStringSync(templateVersion.toString());
   }
 
+  // Returns the command matching the build_windows call to generate CMake
+  // files.
+  FakeCommand cmakeGenerationCommand({void Function() onRun}) {
+    return FakeCommand(
+      command: <String>[
+        cmakePath,
+        '-S',
+        fileSystem.path.dirname(buildFilePath),
+        '-B',
+        r'build\windows',
+        '-G',
+        'Visual Studio 16 2019',
+      ],
+      onRun: onRun,
+    );
+  }
+
+  // Returns the command matching the build_windows call to build.
+  FakeCommand buildCommand(String buildMode, {
+    bool verbose = false,
+    void Function() onRun,
+    String stdout = '',
+  }) {
+    return FakeCommand(
+      command: <String>[
+        cmakePath,
+        '--build',
+        r'build\windows',
+        '--config',
+        buildMode,
+        '--target',
+        'INSTALL',
+        if (verbose)
+          '--verbose'
+      ],
+      environment: <String, String>{
+        if (verbose)
+          'VERBOSE_SCRIPT_LOGGING': 'true'
+      },
+      onRun: onRun,
+      stdout: stdout,
+    );
+  }
+
   testUsingContext('Windows build fails when there is no vcvars64.bat', () async {
     final BuildWindowsCommand command = BuildWindowsCommand()
       ..visualStudioOverride = mockVisualStudio;
@@ -122,7 +152,7 @@ void main() {
       ..visualStudioOverride = mockVisualStudio;
     applyMocksToCommand(command);
     setUpMockCoreProjectFiles();
-    when(mockVisualStudio.vcvarsPath).thenReturn(vcvarsPath);
+    when(mockVisualStudio.cmakePath).thenReturn(cmakePath);
 
     expect(createTestCommandRunner(command).run(
       const <String>['windows', '--no-pub']
@@ -139,7 +169,7 @@ void main() {
       ..visualStudioOverride = mockVisualStudio;
     applyMocksToCommand(command);
     setUpMockProjectFilesForBuild();
-    when(mockVisualStudio.vcvarsPath).thenReturn(vcvarsPath);
+    when(mockVisualStudio.cmakePath).thenReturn(cmakePath);
 
     expect(createTestCommandRunner(command).run(
       const <String>['windows', '--no-pub']
@@ -188,19 +218,14 @@ void main() {
       ..visualStudioOverride = mockVisualStudio;
     applyMocksToCommand(command);
     setUpMockProjectFilesForBuild();
-    when(mockVisualStudio.vcvarsPath).thenReturn(vcvarsPath);
+    when(mockVisualStudio.cmakePath).thenReturn(cmakePath);
 
-    when(mockProcessManager.start(<String>[
-        fileSystem.path.join(flutterRoot, 'packages', 'flutter_tools', 'bin', 'vs_build.bat'),
-        vcvarsPath,
-        fileSystem.path.basename(solutionPath),
-        'Release',
-      ],
-      environment: <String, String>{},
-      workingDirectory: fileSystem.path.dirname(solutionPath))
-    ).thenAnswer((Invocation invocation) async {
-      return mockProcess;
-    });
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      cmakeGenerationCommand(),
+      buildCommand('Release',
+        stdout: 'STDOUT STUFF',
+      ),
+    ]);
 
     await createTestCommandRunner(command).run(
       const <String>['windows', '--no-pub']
@@ -209,7 +234,7 @@ void main() {
     expect(testLogger.traceText, contains('STDOUT STUFF'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
-    ProcessManager: () => mockProcessManager,
+    ProcessManager: () => processManager,
     Platform: () => windowsPlatform,
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
@@ -219,21 +244,15 @@ void main() {
       ..visualStudioOverride = mockVisualStudio;
     applyMocksToCommand(command);
     setUpMockProjectFilesForBuild();
-    when(mockVisualStudio.vcvarsPath).thenReturn(vcvarsPath);
+    when(mockVisualStudio.cmakePath).thenReturn(cmakePath);
 
-    when(mockProcessManager.start(<String>[
-        fileSystem.path.join(flutterRoot, 'packages', 'flutter_tools', 'bin', 'vs_build.bat'),
-        vcvarsPath,
-        fileSystem.path.basename(solutionPath),
-        'Release',
-      ],
-      environment: <String, String>{
-        'VERBOSE_SCRIPT_LOGGING': 'true',
-      },
-      workingDirectory: fileSystem.path.dirname(solutionPath))
-    ).thenAnswer((Invocation invocation) async {
-      return mockProcess;
-    });
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      cmakeGenerationCommand(),
+      buildCommand('Release',
+        verbose: true,
+        stdout: 'STDOUT STUFF',
+      ),
+    ]);
 
     await createTestCommandRunner(command).run(
       const <String>['windows', '--no-pub', '-v']
@@ -242,29 +261,24 @@ void main() {
     expect(testLogger.traceText, isNot(contains('STDOUT STUFF')));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
-    ProcessManager: () => mockProcessManager,
+    ProcessManager: () => processManager,
     Platform: () => windowsPlatform,
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
 
-  testUsingContext('Windows build invokes msbuild and writes generated files', () async {
+  testUsingContext('Windows build invokes build and writes generated files', () async {
     final BuildWindowsCommand command = BuildWindowsCommand()
       ..visualStudioOverride = mockVisualStudio;
     applyMocksToCommand(command);
     setUpMockProjectFilesForBuild();
-    when(mockVisualStudio.vcvarsPath).thenReturn(vcvarsPath);
+    when(mockVisualStudio.cmakePath).thenReturn(cmakePath);
 
-    when(mockProcessManager.start(<String>[
-        fileSystem.path.join(flutterRoot, 'packages', 'flutter_tools', 'bin', 'vs_build.bat'),
-        vcvarsPath,
-        fileSystem.path.basename(solutionPath),
-        'Release',
-      ],
-      environment: <String, String>{},
-      workingDirectory: fileSystem.path.dirname(solutionPath))
-    ).thenAnswer((Invocation invocation) async {
-      return mockProcess;
-    });
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      cmakeGenerationCommand(),
+      buildCommand('Release'),
+    ]);
+    fileSystem.file(fileSystem.path.join('lib', 'other.dart'))
+      .createSync(recursive: true);
 
     await createTestCommandRunner(command).run(
       const <String>[
@@ -278,30 +292,40 @@ void main() {
         '--dart-define=foo=a',
         '--dart-define=bar=b',
         r'--bundle-sksl-path=foo\bar.sksl.json',
-        r'--target=lib\main.dart',
+        r'--target=lib\other.dart',
       ]
     );
 
-    // Spot-check important elements from the properties file.
-    final File propsFile = fileSystem.file(r'C:\windows\flutter\ephemeral\Generated.props');
-    expect(propsFile, exists);
+    final File cmakeConfig = fileSystem.currentDirectory
+      .childDirectory('windows')
+      .childDirectory('flutter')
+      .childDirectory('ephemeral')
+      .childFile('generated_config.cmake');
 
-    final xml.XmlDocument props = xml.parse(propsFile.readAsStringSync());
-    expect(props.findAllElements('PropertyGroup').first.getAttribute('Label'), 'UserMacros');
-    expect(props.findAllElements('ItemGroup').length, 1);
-    expect(props.findAllElements('FLUTTER_ROOT').first.text, flutterRoot);
-    expect(props.findAllElements('TRACK_WIDGET_CREATION').first.text, 'true');
-    expect(props.findAllElements('TREE_SHAKE_ICONS').first.text, 'true');
-    expect(props.findAllElements('EXTRA_GEN_SNAPSHOT_OPTIONS').first.text, '--enable-experiment%3Dnon-nullable');
-    expect(props.findAllElements('EXTRA_FRONT_END_OPTIONS').first.text, '--enable-experiment%3Dnon-nullable');
-    expect(props.findAllElements('DART_DEFINES').first.text, 'foo%3Da,bar%3Db');
-    expect(props.findAllElements('DART_OBFUSCATION').first.text, 'true');
-    expect(props.findAllElements('SPLIT_DEBUG_INFO').first.text, r'C:\foo\');
-    expect(props.findAllElements('FLUTTER_TARGET').first.text, r'lib\main.dart');
-    expect(props.findAllElements('BUNDLE_SKSL_PATH').first.text, r'foo\bar.sksl.json');
+    expect(cmakeConfig, exists);
+
+    final List<String> configLines = cmakeConfig.readAsLinesSync();
+
+    // Backslashes are escaped in the file, which is why this uses both raw
+    // strings and double backslashes.
+    expect(configLines, containsAll(<String>[
+      r'file(TO_CMAKE_PATH "C:\\flutter" FLUTTER_ROOT)',
+      r'file(TO_CMAKE_PATH "C:\\" PROJECT_DIR)',
+      r'  "DART_DEFINES=\"foo%3Da,bar%3Db\""',
+      r'  "DART_OBFUSCATION=\"true\""',
+      r'  "EXTRA_FRONT_END_OPTIONS=\"--enable-experiment%3Dnon-nullable\""',
+      r'  "EXTRA_GEN_SNAPSHOT_OPTIONS=\"--enable-experiment%3Dnon-nullable\""',
+      r'  "SPLIT_DEBUG_INFO=\"C:\\foo\\\""',
+      r'  "TRACK_WIDGET_CREATION=\"true\""',
+      r'  "TREE_SHAKE_ICONS=\"true\""',
+      r'  "FLUTTER_ROOT=\"C:\\flutter\""',
+      r'  "PROJECT_DIR=\"C:\\\""',
+      r'  "FLUTTER_TARGET=\"lib\\other.dart\""',
+      r'  "BUNDLE_SKSL_PATH=\"foo\\bar.sksl.json\""',
+    ]));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
-    ProcessManager: () => mockProcessManager,
+    ProcessManager: () => processManager,
     Platform: () => windowsPlatform,
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
@@ -311,26 +335,19 @@ void main() {
       ..visualStudioOverride = mockVisualStudio;
     applyMocksToCommand(command);
     setUpMockProjectFilesForBuild();
-    when(mockVisualStudio.vcvarsPath).thenReturn(vcvarsPath);
+    when(mockVisualStudio.cmakePath).thenReturn(cmakePath);
 
-    when(mockProcessManager.start(<String>[
-        fileSystem.path.join(flutterRoot, 'packages', 'flutter_tools', 'bin', 'vs_build.bat'),
-        vcvarsPath,
-        fileSystem.path.basename(solutionPath),
-        'Profile',
-      ],
-      environment: <String, String>{},
-      workingDirectory: fileSystem.path.dirname(solutionPath))
-    ).thenAnswer((Invocation invocation) async {
-      return mockProcess;
-    });
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      cmakeGenerationCommand(),
+      buildCommand('Profile'),
+    ]);
 
     await createTestCommandRunner(command).run(
       const <String>['windows', '--profile', '--no-pub']
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
-    ProcessManager: () => mockProcessManager,
+    ProcessManager: () => processManager,
     Platform: () => windowsPlatform,
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
