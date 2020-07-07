@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 part of engine;
 
 /// A complex, one-dimensional subset of a plane.
@@ -509,7 +508,8 @@ class SurfacePath implements ui.Path {
     assert(path != null); // path is checked on the engine side
     assert(offsetIsValid(offset));
     if (matrix4 != null) {
-      _addPathWithMatrix(path as SurfacePath, offset.dx, offset.dy, toMatrix32(matrix4));
+      _addPathWithMatrix(
+          path as SurfacePath, offset.dx, offset.dy, toMatrix32(matrix4));
     } else {
       _addPath(path as SurfacePath, offset.dx, offset.dy);
     }
@@ -547,7 +547,8 @@ class SurfacePath implements ui.Path {
     if (matrix4 != null) {
       final Float32List matrix32 = toMatrix32(matrix4);
       assert(matrix4IsValid(matrix32));
-      _extendWithPathAndMatrix(path as SurfacePath, offset.dx, offset.dy, matrix32);
+      _extendWithPathAndMatrix(
+          path as SurfacePath, offset.dx, offset.dy, matrix32);
     } else {
       _extendWithPath(path as SurfacePath, offset.dx, offset.dy);
     }

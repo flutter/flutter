@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 part of engine;
 
 /// Converts conic curve to a list of quadratic curves for rendering on
@@ -149,8 +148,8 @@ class Conic {
     }
     pair.first = Conic(p0x, p0y, (p0x + wp1.dx) * scale, (p0y + wp1.dy) * scale,
         m.dx, m.dy, newW);
-    pair.second = Conic(m.dx, m.dy, (p2x + wp1.dx) * scale, (p2y + wp1.dy) * scale,
-        p2x, p2y, newW);
+    pair.second = Conic(m.dx, m.dy, (p2x + wp1.dx) * scale,
+        (p2y + wp1.dy) * scale, p2x, p2y, newW);
   }
 
   /// Computes number of binary subdivisions of the curve given
