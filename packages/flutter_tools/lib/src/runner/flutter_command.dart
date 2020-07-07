@@ -479,8 +479,9 @@ abstract class FlutterCommand extends Command<void> {
       help:
         'Whether to override the inferred null safety mode. This allows null-safe '
         'libraries to depend on un-migrated (non-null safe) libraries. By default, '
-        'Flutter applications will attempt to run at the null safety level of their '
-        'entrypoint library (usually lib/main.dart).',
+        'Flutter mobile & desktop applications will attempt to run at the null safety '
+        'level of their entrypoint library (usually lib/main.dart). Flutter web '
+        'applications will default to sound null-safety, unless specifically configured.',
       defaultsTo: null,
       hide: hide,
     );
@@ -617,15 +618,20 @@ abstract class FlutterCommand extends Command<void> {
       }
     }
 
+    NullSafetyMode nullSafetyMode = NullSafetyMode.unsound;
     if (argParser.options.containsKey(FlutterOptions.kNullSafety)) {
       final bool nullSafety = boolArg(FlutterOptions.kNullSafety);
       // Explicitly check for `true` and `false` so that `null` results in not
       // passing a flag. This will use the automatically detected null-safety
       // value based on the entrypoint
       if (nullSafety == true) {
+        nullSafetyMode = NullSafetyMode.sound;
         extraFrontEndOptions.add('--sound-null-safety');
       } else if (nullSafety == false) {
+        nullSafetyMode = NullSafetyMode.unsound;
         extraFrontEndOptions.add('--no-sound-null-safety');
+      } else if (extraFrontEndOptions.contains('--enable-experiment=non-nullable')) {
+        nullSafetyMode = NullSafetyMode.autodetect;
       }
     }
 
@@ -685,7 +691,8 @@ abstract class FlutterCommand extends Command<void> {
       bundleSkSLPath: bundleSkSLPath,
       dartExperiments: experiments,
       performanceMeasurementFile: performanceMeasurementFile,
-      packagesPath: globalResults['packages'] as String ?? '.packages'
+      packagesPath: globalResults['packages'] as String ?? '.packages',
+      nullSafetyMode: nullSafetyMode,
     );
   }
 

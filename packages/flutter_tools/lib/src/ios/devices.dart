@@ -509,11 +509,11 @@ class IOSDevice extends Device {
   void clearLogs() { }
 
   @override
-  bool get supportsScreenshot => _iMobileDevice.isInstalled && interfaceType == IOSDeviceInterface.usb;
+  bool get supportsScreenshot => _iMobileDevice.isInstalled;
 
   @override
   Future<void> takeScreenshot(File outputFile) async {
-    await _iMobileDevice.takeScreenshot(outputFile);
+    await _iMobileDevice.takeScreenshot(outputFile, id, interfaceType);
   }
 
   @override
@@ -835,8 +835,8 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
       process = await _processUtils.start(
         <String>[
           _iproxyPath,
-          hostPort.toString(),
-          devicePort.toString(),
+          '$hostPort:$devicePort',
+          '--udid',
           _id,
         ],
         environment: Map<String, String>.fromEntries(

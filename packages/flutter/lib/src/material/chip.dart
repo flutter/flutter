@@ -1944,10 +1944,9 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
       ),
     );
     return Semantics(
-      button: widget.tapEnabled,
       container: true,
       selected: widget.selected,
-      enabled: widget.tapEnabled ? canTap : null,
+      enabled: canTap ? widget.isEnabled : null,
       child: result,
     );
   }
