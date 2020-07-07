@@ -1686,7 +1686,6 @@ class _LiveTestRenderView extends RenderView {
 
   final VoidCallback onNeedPaint;
 
-  // The class record pointers to draw positions of touch.
   final Map<int, _LiveTestPointerRecord> _pointers = <int, _LiveTestPointerRecord>{};
 
   TextPainter _label;

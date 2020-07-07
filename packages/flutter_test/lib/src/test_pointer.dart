@@ -444,11 +444,14 @@ class TestGesture {
 ///
 /// This is a simulation of how the framework is receiving input events from
 /// the engine. See [GestureBinding] and [PointerDataPacket].
-class PointerEventPack {
+class PointerEventPacket {
   /// Creates a pack of PointerEvents.
-  PointerEventPack(this.timeStamp, this.events);
+  PointerEventPacket(this.timeStamp, this.events);
 
-  /// The time stamp of when the event happens
+  /// The time stamp of when the event packet is received.
+  ///
+  /// This value is used as the time delay relative to the start of
+  /// [WidgeTester.handlePointerEventPack] call.
   final Duration timeStamp;
 
   /// The event.

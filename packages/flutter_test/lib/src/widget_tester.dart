@@ -465,19 +465,24 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   }
 
   @override
-  Future<void> handlePointerEventPack(List<PointerEventPack> records) {
+  Future<List<Duration>> handlePointerEventPack(List<PointerEventPacket> records) {
     assert(records != null);
     assert(records.isNotEmpty);
-    // hitTestHistory is an equivalence of _hitTests in [GestureBinding]
-    final Map<int, HitTestResult> hitTestHistory = <int, HitTestResult>{};
-    return TestAsyncUtils.guard<void>(() async {
-      final DateTime startTime = binding.clock.now();
-      for(final PointerEventPack pack in records) {
-        final Duration timeDiff = pack.timeStamp - binding.clock.now().difference(startTime);
+    return TestAsyncUtils.guard<List<Duration>>(() async {
+      // hitTestHistory is an equivalence of _hitTests in [GestureBinding]
+      final Map<int, HitTestResult> hitTestHistory = <int, HitTestResult>{};
+      final List<Duration> handleTimeStampDiff = <Duration>[];
+      DateTime startTime;
+      for(final PointerEventPacket packet in records) {
+        final DateTime now = binding.clock.now();
+        startTime ??= now;
+        // So that the first event is promised to received a zero timeDiff
+        final Duration timeDiff = packet.timeStamp - now.difference(startTime);
         if (timeDiff.isNegative) {
           // Flush all past events
           // maybe trigger a warning
-          for (final PointerEvent event in pack.events) {
+          handleTimeStampDiff.add(timeDiff);
+          for (final PointerEvent event in packet.events) {
             _handlePointerEvent(event, hitTestHistory);
           }
         }
@@ -486,7 +491,9 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
           // https://github.com/flutter/flutter/issues/60739 is fixed
           await binding.pump();
           await binding.executeLater(timeDiff, () async {
-            for (final PointerEvent event in pack.events) {
+            handleTimeStampDiff.add(
+              packet.timeStamp - binding.clock.now().difference(startTime));
+            for (final PointerEvent event in packet.events) {
               _handlePointerEvent(event, hitTestHistory);
             }
           });
@@ -496,6 +503,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       // This make sure that a gesture is completed, with no more pointers
       // active.
       assert(hitTestHistory.isEmpty);
+      return handleTimeStampDiff;
     });
   }
 
