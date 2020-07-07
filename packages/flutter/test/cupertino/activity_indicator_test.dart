@@ -77,7 +77,8 @@ void main() {
     );
   });
 
-  testWidgets('Activity indicator with new style', (WidgetTester tester) async {
+  testWidgets('Activity indicator with iOS14 style',
+      (WidgetTester tester) async {
     final Key key = UniqueKey();
     await tester.pumpWidget(
       Center(
@@ -90,7 +91,7 @@ void main() {
               child: const CupertinoActivityIndicator(
                 animating: false,
                 radius: 35,
-                useNewStyle: true,
+                style: CupertinoActivityIndicatorStyle.iOS14,
               ),
             ),
           ),
@@ -100,7 +101,7 @@ void main() {
 
     await expectLater(
       find.byKey(key),
-      matchesGoldenFile('activityIndicator.new.paused.light.png'),
+      matchesGoldenFile('activityIndicator.iOS14.paused.light.png'),
     );
 
     await tester.pumpWidget(
@@ -114,7 +115,7 @@ void main() {
               child: const CupertinoActivityIndicator(
                 animating: false,
                 radius: 35,
-                useNewStyle: true,
+                style: CupertinoActivityIndicatorStyle.iOS14,
               ),
             ),
           ),
@@ -124,7 +125,7 @@ void main() {
 
     await expectLater(
       find.byKey(key),
-      matchesGoldenFile('activityIndicator.new.paused.dark.png'),
+      matchesGoldenFile('activityIndicator.iOS14.paused.dark.png'),
     );
   });
 

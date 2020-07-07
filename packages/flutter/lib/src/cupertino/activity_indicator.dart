@@ -18,6 +18,15 @@ const Color _kActiveTickColor = CupertinoDynamicColor.withBrightness(
   darkColor: Color(0xFFEBEBF5),
 );
 
+/// Define the style of [CupertinoActivityIndicator].
+enum CupertinoActivityIndicatorStyle {
+  /// The style that used in iOS13 and earlier (12 points).
+  iOS13,
+
+  /// The style that introduced in iOS14 (8 points).
+  iOS14,
+}
+
 /// An iOS-style activity indicator that spins clockwise.
 ///
 /// See also:
@@ -29,7 +38,7 @@ class CupertinoActivityIndicator extends StatefulWidget {
     Key key,
     this.animating = true,
     this.radius = _kDefaultIndicatorRadius,
-    this.useNewStyle = false,
+    this.style = CupertinoActivityIndicatorStyle.iOS13,
   })  : assert(animating != null),
         assert(radius != null),
         assert(radius > 0.0),
@@ -46,7 +55,7 @@ class CupertinoActivityIndicator extends StatefulWidget {
     Key key,
     this.radius = _kDefaultIndicatorRadius,
     this.progress = 1.0,
-    this.useNewStyle = false,
+    this.style = CupertinoActivityIndicatorStyle.iOS13,
   })  : assert(radius != null),
         assert(radius > 0.0),
         assert(progress != null),
@@ -73,10 +82,10 @@ class CupertinoActivityIndicator extends StatefulWidget {
   /// Defaults to 1.0. Must be between 0.0 and 1.0 inclusive, and cannot be null.
   final double progress;
 
-  /// Whether to use the new style that introduced in iOS14.
+  /// The style of activity indicator.
   ///
-  /// This flag will be disabled by default until the official release of iOS 14.
-  final bool useNewStyle;
+  /// Default to [CupertinoActivityIndicatorStyle.iOS13].
+  final CupertinoActivityIndicatorStyle style;
 
   @override
   _CupertinoActivityIndicatorState createState() =>
@@ -129,7 +138,7 @@ class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator>
               CupertinoDynamicColor.resolve(_kActiveTickColor, context),
           radius: widget.radius,
           progress: widget.progress,
-          useNewStyle: widget.useNewStyle,
+          style: widget.style,
         ),
       ),
     );
@@ -139,35 +148,38 @@ class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator>
 const double _kTwoPI = math.pi * 2.0;
 
 /// Alpha values extracted from the native component (for both dark and light mode) to
-/// draw the spinning ticks. The list must have a length of _kTickCount. The order of
-/// these values is designed to match the first frame of the iOS activity indicator which
-/// has the most prominent tick at 9 o'clock.
-const List<int> _kAlphaValues = <int>[
-  47,
-  47,
-  47,
-  47,
-  64,
-  81,
-  97,
-  114,
-  131,
-  147,
-  47,
-  47
-];
+/// draw the spinning ticks.
+const Map<CupertinoActivityIndicatorStyle, List<int>> _kAlphaValuesMap =
+    <CupertinoActivityIndicatorStyle, List<int>>{
+  /// The order of these values is designed to match the first frame of the iOS activity indicator which
+  /// has the most prominent tick at 9 o'clock.
+  CupertinoActivityIndicatorStyle.iOS13: <int>[
+    47,
+    47,
+    47,
+    47,
+    64,
+    81,
+    97,
+    114,
+    131,
+    147,
+    47,
+    47
+  ],
 
-/// Alpha values for new style that introduced in iOS14.
-const List<int> _kNewAlphaValues = <int>[
-  47,
-  47,
-  47,
-  47,
-  72,
-  97,
-  122,
-  147,
-];
+  /// Alpha values for new style that introduced in iOS14.
+  CupertinoActivityIndicatorStyle.iOS14: <int>[
+    47,
+    47,
+    47,
+    47,
+    72,
+    97,
+    122,
+    147,
+  ],
+};
 
 /// The alpha value that is used to draw the partially revealed ticks.
 const int _partiallyRevealedAlpha = 147;
@@ -178,11 +190,13 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
     @required this.activeColor,
     @required this.radius,
     @required this.progress,
-    bool useNewStyle = false,
-  })  : alphaValues = useNewStyle ? _kNewAlphaValues : _kAlphaValues,
+    CupertinoActivityIndicatorStyle style =
+        CupertinoActivityIndicatorStyle.iOS13,
+  })  : alphaValues = _kAlphaValuesMap[style],
         tickFundamentalRRect = RRect.fromLTRBXY(
           -radius / _kDefaultIndicatorRadius,
-          -radius / (useNewStyle ? 3.0 : 2.0),
+          -radius /
+              (style == CupertinoActivityIndicatorStyle.iOS14 ? 3.0 : 2.0),
           radius / _kDefaultIndicatorRadius,
           -radius,
           radius / _kDefaultIndicatorRadius,
