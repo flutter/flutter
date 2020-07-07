@@ -310,7 +310,7 @@ class TestAutomatedTestWidgetsFlutterBinding extends AutomatedTestWidgetsFlutter
   @override
   MockRestorationManager get restorationManager => _restorationManager;
 
-  int _deferred  = 0;
+  int _deferred = 0;
 
   bool get firstFrameIsDeferred => _deferred > 0;
 
