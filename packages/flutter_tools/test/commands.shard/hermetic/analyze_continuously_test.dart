@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:mockito/mockito.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -18,6 +17,7 @@ import 'package:flutter_tools/src/dart/analysis.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
+import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';

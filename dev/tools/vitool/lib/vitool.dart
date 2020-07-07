@@ -8,8 +8,7 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 import 'package:vector_math/vector_math_64.dart';
-import 'package:xml/xml.dart' as xml show parse;
-import 'package:xml/xml.dart' hide parse;
+import 'package:xml/xml.dart';
 
 // String to use for a single indentation.
 const String kIndent = '  ';
@@ -190,7 +189,7 @@ class PathCommandAnimation {
 FrameData interpretSvg(String svgFilePath) {
   final File file = File(svgFilePath);
   final String fileData = file.readAsStringSync();
-  final XmlElement svgElement = _extractSvgElement(xml.parse(fileData));
+  final XmlElement svgElement = _extractSvgElement(XmlDocument.parse(fileData));
   final double width = parsePixels(_extractAttr(svgElement, 'width')).toDouble();
   final double height = parsePixels(_extractAttr(svgElement, 'height')).toDouble();
 

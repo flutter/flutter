@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import 'application_package.dart';
-import 'base/common.dart';
 import 'base/io.dart';
 import 'build_info.dart';
 import 'convert.dart';
