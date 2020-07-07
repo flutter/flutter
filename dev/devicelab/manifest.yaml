@@ -803,6 +803,14 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  fast_scroll_heavy_gridview__memory:
+    description: >
+      Measures memory usage for scrolling through a grid view of heavy memory
+      usage widgets.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
+
   animated_placeholder_perf:
     description: >
       Measures frame build and rasterizer times, as well as frame build counts
