@@ -917,12 +917,12 @@ class AnimatedAlign extends ImplicitlyAnimatedWidget {
 
   /// If non-null, sets its height to the child's height multiplied by this factor.
   ///
-  /// Must be within the range 0.0 - 1.0. Defaults to 1.0.
+  /// Can be both greater and less than 1.0 but must be positive. Defaults to 1.0.
   final double heightFactor;
 
   /// If non-null, sets its width to the child's width multiplied by this factor.
   ///
-  /// Must be within the range 0.0 - 1.0. Defaults to 1.0.
+  /// Can be both greater and less than 1.0 but must be positive. Defaults to 1.0.
   final double widthFactor;
 
   @override
