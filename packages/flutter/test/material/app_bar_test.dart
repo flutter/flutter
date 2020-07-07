@@ -1604,21 +1604,19 @@ void main() {
                       TestSemantics(
                         children: <TestSemantics>[
                           TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                             children: <TestSemantics>[
                               TestSemantics(
-                                children: <TestSemantics>[
-                                  TestSemantics(
-                                    label: 'Leading',
-                                    textDirection: TextDirection.ltr,
-                                  ),
-                                  TestSemantics(
-                                    label: 'Action 1',
-                                    textDirection: TextDirection.ltr,
-                                  ),
-                                ],
+                                label: 'Leading',
+                                textDirection: TextDirection.ltr,
+                              ),
+                              TestSemantics(
+                                label: 'Action 1',
+                                textDirection: TextDirection.ltr,
                               ),
                             ],
+                          ),
+                          TestSemantics(
+                            flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                           ),
                         ],
                       ),
