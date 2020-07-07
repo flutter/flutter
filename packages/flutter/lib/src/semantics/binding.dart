@@ -4,7 +4,7 @@
 
 // @dart = 2.8
 
-import 'dart:ui' as ui show AccessibilityFeatures;
+import 'dart:ui' as ui show AccessibilityFeatures, SemanticsUpdateBuilder;
 
 import 'package:flutter/foundation.dart';
 
@@ -32,6 +32,15 @@ mixin SemanticsBinding on BindingBase {
   @protected
   void handleAccessibilityFeaturesChanged() {
     _accessibilityFeatures = window.accessibilityFeatures;
+  }
+
+  /// Generates an empty semantics update builder.
+  ///
+  /// This method is used by the [SemanticsOwner] to generate builder for all
+  /// its semantics updates. The caller is responsible for filling the semantics
+  /// node updates.
+  ui.SemanticsUpdateBuilder generateSemanticsUpdateBuilder() {
+    return ui.SemanticsUpdateBuilder();
   }
 
   /// The currently active set of [AccessibilityFeatures].
