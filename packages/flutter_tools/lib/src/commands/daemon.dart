@@ -9,7 +9,6 @@ import 'package:uuid/uuid.dart';
 
 import '../android/android_workflow.dart';
 import '../base/common.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -1021,7 +1020,7 @@ class AppInstance {
   final ResidentRunner runner;
   final bool logToStdout;
 
-  _AppRunLogger _logger;
+  AppRunLogger _logger;
 
   Future<OperationResult> restart({ bool fullRestart = false, bool pause = false, String reason }) {
     return runner.restart(fullRestart: fullRestart, pause: pause, reason: reason);
@@ -1038,15 +1037,11 @@ class AppInstance {
     _logger.close();
   }
 
-  Future<T> _runInZone<T>(AppDomain domain, FutureOr<T> method()) {
-    _logger ??= _AppRunLogger(domain, this, parent: logToStdout ? globals.logger : null);
-
-    return context.run<T>(
-      body: method,
-      overrides: <Type, Generator>{
-        Logger: () => _logger,
-      },
-    );
+  Future<T> _runInZone<T>(AppDomain domain, FutureOr<T> method()) async {
+    final AppRunLogger logger = globals.logger as AppRunLogger;
+    logger.domain = domain;
+    logger.app = this;
+    return method();
   }
 }
 
@@ -1103,11 +1098,11 @@ class EmulatorDomain extends Domain {
 //
 // TODO(devoncarew): To simplify this code a bit, we could choose to specialize
 // this class into two, one for each of the above use cases.
-class _AppRunLogger extends Logger {
-  _AppRunLogger(this.domain, this.app, { this.parent });
+class AppRunLogger extends Logger {
+  AppRunLogger({ this.parent });
 
   AppDomain domain;
-  final AppInstance app;
+  AppInstance app;
   final Logger parent;
   int _nextProgressId = 0;
 
