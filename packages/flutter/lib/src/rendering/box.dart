@@ -1705,13 +1705,16 @@ abstract class RenderBox extends RenderObject {
       if (_size is _DebugSize) {
         assert(_size._owner == this);
         if (RenderObject.debugActiveLayout != null) {
-          // We are always allowed to access our own size (for print debugging
-          // and asserts if nothing else). Other than us, the only object that's
-          // allowed to read our size is our parent, if they've said they will.
-          // If you hit this assert trying to access a child's size, pass
-          // "parentUsesSize: true" to that child's layout().
-          assert(debugDoingThisResize || debugDoingThisLayout ||
-                 (RenderObject.debugActiveLayout == parent && _size._canBeUsedByParent));
+          assert(
+            debugDoingThisResize || debugDoingThisLayout ||
+              (RenderObject.debugActiveLayout == parent && _size._canBeUsedByParent),
+            'RenderBox.size accessed beyond the scope of resize, layout, or '
+            'permitted parent access. RenderBox can always access its own size, '
+            'otherwise, the only object that is allowed to read RenderBox.size '
+            'is its parent, if they have said they will. It you hit this assert '
+            'trying to access a child\'s size, pass "parentUsesSize: true" to '
+            'that child\'s layout().'
+          );
         }
         assert(_size == this._size);
       }

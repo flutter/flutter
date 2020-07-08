@@ -3285,6 +3285,9 @@ class Stack extends MultiChildRenderObjectWidget {
   /// Some children in a stack might overflow its box. When this flag is set to
   /// [Overflow.clip], children cannot paint outside of the stack's box.
   ///
+  /// When set to [Overflow.visible], the visible overflow area will not accept
+  /// hit testing.
+  ///
   /// This overrides [clipBehavior] for now due to a staged roll out without
   /// breaking Google. We will remove it and only use [clipBehavior] soon.
   final Overflow overflow;
