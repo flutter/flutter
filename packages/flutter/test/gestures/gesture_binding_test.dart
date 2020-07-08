@@ -337,7 +337,7 @@ void main() {
     final String defaultDataString = json.encode(
       serializePointerData(defaultData));
     expect(defaultDataString, '{}');
-    compare(defaultData, deserializePointerData(defaultDataString));
+    compare(defaultData, pointerDataFromJson(defaultDataString));
 
     const ui.PointerData customizeData = ui.PointerData(
       timeStamp: Duration(hours: 1),
@@ -367,7 +367,7 @@ void main() {
       scrollDeltaX: 273.15,
       scrollDeltaY: 195.42
     );
-    compare(customizeData, deserializePointerData(json.encode(
+    compare(customizeData, pointerDataFromJson(json.encode(
       serializePointerData(customizeData))));
   });
 }

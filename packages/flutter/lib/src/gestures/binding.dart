@@ -82,13 +82,13 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   final Queue<PointerEvent> _pendingPointerEvents = Queue<PointerEvent>();
 
   void _handlePointerDataPacket(ui.PointerDataPacket packet) {
-    assert( () {
+    assert(() {
       if (debugRecordInputs) {
         Timeline.instantSync(
           'GestureBinding receive PointerEvents',
           arguments: <String, List<Map<String, dynamic>>>{
             'events': <Map<String, dynamic>>[
-              for(final ui.PointerData datum in packet.data)
+              for (final ui.PointerData datum in packet.data)
                 serializePointerData(datum),
             ],
           },
