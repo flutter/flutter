@@ -68,8 +68,8 @@ follows:
   
 ### WidgetsApp Templates
 
-These templates create a `WidgetsApp` that encloses the snippet widget. They also import the widgets
-library.
+These templates create a `WidgetsApp` that encloses the snippet widget. These templates import
+the widgets library.
 
 - [`stateful_widget`](stateful_widget.tmpl) :
   The default code block will be placed as the body of the `State` object of a
@@ -96,7 +96,7 @@ library.
 ### MaterialApp Templates
 
 These templates follow the same conventions as the `WidgetsApp` templates above, but use a
-`MaterialApp` instead. These templates also import the  material library.
+`MaterialApp` instead. These templates import the  material library.
 
 - [`stateful_widget_material`](stateful_widget_material.tmpl)
   
@@ -126,7 +126,7 @@ These templates follow the same conventions as the `WidgetsApp` templates above,
 ### CupertinoApp Templates
 
 These templates follow the same conventions as the `WidgetsApp` templates above, but use a
-`CupertinoApp` instead. These templates also import the  cupertino library.
+`CupertinoApp` instead. These templates import the  cupertino library.
   
 - [`stateful_widget_cupertino`](stateful_widget_cupertino.tmpl)
   
@@ -141,4 +141,3 @@ These templates follow the same conventions as the `WidgetsApp` templates above,
 - [`stateless_widget_cupertinoPageScaffold`](stateless_widget_cupertino_page_scaffold.tmpl) : Similar to
   `stateless_widget_cupertino`, except that it wraps the stateless widget with a
   `CupertinoPageScaffold`.
-
