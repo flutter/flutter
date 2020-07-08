@@ -777,15 +777,15 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
   /// state, [registerForRestoration] may also be called at any time after
   /// [restoreState] has been invoked for the first time.
   @protected
-  void registerForRestoration<T>(RestorableProperty<T> property, RestorationId id) {
+  void registerForRestoration(RestorableProperty<Object> property, RestorationId id) {
     assert(property != null);
     assert(id != null);
     assert(property._id == null || (_debugDoingRestore && property._id == id),
            'Property is already registered under ${property._id}',
     );
-    final Object serializedValue = bucket?.get<Object>(id);
-    final T initialValue = serializedValue != null
-        ? property.fromPrimitives(serializedValue)
+    final bool hasSerializedValue = bucket?.containsValue(id) == true;
+    final Object initialValue = hasSerializedValue
+        ? property.fromPrimitives(bucket.get<Object>(id))
         : property.createDefaultValue();
 
     if (!property.isRegistered) {
@@ -806,7 +806,7 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
     );
 
     property.initWithValue(initialValue);
-    if (serializedValue == null && property.enabled && bucket != null) {
+    if (!hasSerializedValue && property.enabled && bucket != null) {
       _updateProperty(property);
     }
 

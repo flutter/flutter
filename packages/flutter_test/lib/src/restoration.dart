@@ -16,7 +16,7 @@ class TestRestorationManager extends RestorationManager {
   TestRestorationManager() {
     // Ensures that [rootBucket] always returns a synchronous future to avoid
     // extra pumps in tests.
-    restoreFrom(TestRestorationData._empty);
+    restoreFrom(TestRestorationData.empty);
   }
 
   @override
@@ -78,9 +78,13 @@ class TestRestorationManager extends RestorationManager {
 class TestRestorationData {
   const TestRestorationData._(this.binary);
 
-  static const TestRestorationData _empty = TestRestorationData._(null);
+  /// Empty restoration data indicating that no data is available to restore
+  /// state from.
+  static const TestRestorationData empty = TestRestorationData._(null);
 
   /// The serialized representation of the restoration data.
+  ///
+  /// Should only be accessed by the test framework.
   @protected
   final Uint8List binary;
 }

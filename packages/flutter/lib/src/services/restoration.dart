@@ -589,6 +589,8 @@ class RestorationBucket extends ChangeNotifier {
   ///
   ///  * [put], which stores a value in the bucket.
   ///  * [remove], which removes a value from the bucket.
+  ///  * [containsValue], which checks whether any value is stored under a given
+  ///    [RestorationId].
   P get<P>(RestorationId id) {
     assert(id != null);
     return _rawValues[id.value] as P;
@@ -607,6 +609,8 @@ class RestorationBucket extends ChangeNotifier {
   ///
   ///  * [get], which retrieves a stored value from the bucket.
   ///  * [remove], which removes a value from the bucket.
+  ///  * [containsValue], which checks whether any value is stored under a given
+  ///    [RestorationId].
   void put<P>(RestorationId id, P value) {
     assert(id != null);
     assert(debugIsSerializableForRestoration(value));
@@ -621,6 +625,13 @@ class RestorationBucket extends ChangeNotifier {
   ///
   /// The value removed from the bucket is returned. If no value was stored
   /// under that id, null is returned.
+  ///
+  /// See also:
+  ///
+  ///  * [get], which retrieves a stored value from the bucket.
+  ///  * [put], which stores a value in the bucket.
+  ///  * [containsValue], which checks whether any value is stored under a given
+  ///    [RestorationId].
   P remove<P>(RestorationId id) {
     assert(id != null);
     final bool needsUpdate = _rawValues.containsKey(id.value);
@@ -632,6 +643,18 @@ class RestorationBucket extends ChangeNotifier {
       _manager?.scheduleSerialization();
     }
     return result;
+  }
+
+  /// Checks whether a value stored in the bucket under the provided `id`.
+  ///
+  /// See also:
+  ///
+  ///  * [get], which retrieves a stored value from the bucket.
+  ///  * [put], which stores a value in the bucket.
+  ///  * [remove], which removes a value from the bucket.
+  bool containsValue(RestorationId id) {
+    assert(id != null);
+    return _rawValues.containsKey(id.value);
   }
 
   // Child management.
