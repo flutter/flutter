@@ -1436,7 +1436,9 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
           assert(event.down || event is PointerAddedEvent);
           if (event.down) {
             renderView._pointers[event.pointer] = _LiveTestPointerRecord(
-              event.pointer, event.position);
+              event.pointer,
+              event.position,
+            );
           }
         } else {
           renderView._pointers[event.pointer].position = event.position;
