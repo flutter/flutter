@@ -118,6 +118,11 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
                object:nil];
 
   [center addObserver:self
+             selector:@selector(applicationDidEnterBackground:)
+                 name:UIApplicationDidEnterBackgroundNotification
+               object:nil];
+
+  [center addObserver:self
              selector:@selector(applicationBecameActive:)
                  name:UIApplicationDidBecomeActiveNotification
                object:nil];
@@ -232,6 +237,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
                                                       }];
   } else {
     self.flutterViewControllerWillDeallocObserver = nil;
+    [self notifyLowMemory];
   }
 }
 
@@ -558,6 +564,13 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   return [self runWithEntrypoint:entrypoint libraryURI:nil];
 }
 
+- (void)notifyLowMemory {
+  if (_shell) {
+    _shell->NotifyLowMemoryWarning();
+  }
+  [_systemChannel sendMessage:@{@"type" : @"memoryPressure"}];
+}
+
 #pragma mark - Text input delegate
 
 - (void)updateEditingClient:(int)client withState:(NSDictionary*)state {
@@ -748,11 +761,12 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   [self setIsGpuDisabled:YES];
 }
 
+- (void)applicationDidEnterBackground:(NSNotification*)notification {
+  [self notifyLowMemory];
+}
+
 - (void)onMemoryWarning:(NSNotification*)notification {
-  if (_shell) {
-    _shell->NotifyLowMemoryWarning();
-  }
-  [_systemChannel sendMessage:@{@"type" : @"memoryPressure"}];
+  [self notifyLowMemory];
 }
 
 - (void)setIsGpuDisabled:(BOOL)value {
