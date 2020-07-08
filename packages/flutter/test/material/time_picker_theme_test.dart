@@ -342,8 +342,8 @@ void main() {
     );
   });
 
-  testWidgets('Time picker uses values from TimePickerThemeData - input mode', (WidgetTester tester) async {
-    final TimePickerThemeData timePickerTheme = _timePickerTheme();
+  testWidgets('Time picker uses values from TimePickerThemeData with InputDecorationTheme - input mode', (WidgetTester tester) async {
+    final TimePickerThemeData timePickerTheme = _timePickerTheme(includeInputDecoration: true);
     final ThemeData theme = ThemeData(timePickerTheme: timePickerTheme);
     await tester.pumpWidget(_TimePickerLauncher(themeData: theme, entryMode: TimePickerEntryMode.input));
     await tester.tap(find.text('X'));
@@ -358,12 +358,23 @@ void main() {
     expect(hourDecoration.focusedErrorBorder, timePickerTheme.inputDecorationTheme.focusedErrorBorder);
     expect(hourDecoration.hintStyle, timePickerTheme.inputDecorationTheme.hintStyle);
   });
+
+  testWidgets('Time picker uses values from TimePickerThemeData without InputDecorationTheme - input mode', (WidgetTester tester) async {
+    final TimePickerThemeData timePickerTheme = _timePickerTheme();
+    final ThemeData theme = ThemeData(timePickerTheme: timePickerTheme);
+    await tester.pumpWidget(_TimePickerLauncher(themeData: theme, entryMode: TimePickerEntryMode.input));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+
+    final InputDecoration hourDecoration = _textField(tester, '7').decoration;
+    expect(hourDecoration.fillColor, timePickerTheme.hourMinuteColor);
+  });
 }
 
 final Color _selectedColor = Colors.green[100];
 final Color _unselectedColor = Colors.green[200];
 
-TimePickerThemeData _timePickerTheme() {
+TimePickerThemeData _timePickerTheme({bool includeInputDecoration = false}) {
   Color getColor(Set<MaterialState> states) {
     return states.contains(MaterialState.selected) ? _selectedColor : _unselectedColor;
   }
@@ -385,7 +396,7 @@ TimePickerThemeData _timePickerTheme() {
     hourMinuteShape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0))),
     dayPeriodShape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0))),
     dayPeriodBorderSide: const BorderSide(color: Colors.blueAccent),
-    inputDecorationTheme: const InputDecorationTheme(
+    inputDecorationTheme: includeInputDecoration ? const InputDecorationTheme(
       filled: true,
       fillColor: Colors.purple,
       enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.blue)),
@@ -393,7 +404,7 @@ TimePickerThemeData _timePickerTheme() {
       focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.yellow)),
       focusedErrorBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.red)),
       hintStyle: TextStyle(fontSize: 8),
-    ),
+    ) : null,
   );
 }
 

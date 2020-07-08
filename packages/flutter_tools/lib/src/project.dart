@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:xml/xml.dart' as xml;
+import 'package:xml/xml.dart';
 import 'package:yaml/yaml.dart';
 
 import 'android/gradle_utils.dart' as gradle;
@@ -842,17 +842,17 @@ class AndroidProject extends FlutterProjectPlatform {
     if (appManifestFile == null || !appManifestFile.existsSync()) {
       return AndroidEmbeddingVersion.v1;
     }
-    xml.XmlDocument document;
+    XmlDocument document;
     try {
-      document = xml.parse(appManifestFile.readAsStringSync());
-    } on xml.XmlParserException {
+      document = XmlDocument.parse(appManifestFile.readAsStringSync());
+    } on XmlParserException {
       throwToolExit('Error parsing $appManifestFile '
                     'Please ensure that the android manifest is a valid XML document and try again.');
     } on FileSystemException {
       throwToolExit('Error reading $appManifestFile even though it exists. '
                     'Please ensure that you have read permission to this file and try again.');
     }
-    for (final xml.XmlElement metaData in document.findAllElements('meta-data')) {
+    for (final XmlElement metaData in document.findAllElements('meta-data')) {
       final String name = metaData.getAttribute('android:name');
       if (name == 'flutterEmbedding') {
         final String embeddingVersionString = metaData.getAttribute('android:value');
