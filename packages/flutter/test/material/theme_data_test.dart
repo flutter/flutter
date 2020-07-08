@@ -226,6 +226,7 @@ void main() {
       accentColor: Colors.black,
       accentColorBrightness: Brightness.dark,
       canvasColor: Colors.black,
+      shadowColor: Colors.black,
       scaffoldBackgroundColor: Colors.black,
       bottomAppBarColor: Colors.black,
       cardColor: Colors.black,
@@ -308,6 +309,7 @@ void main() {
       accentColor: Colors.white,
       accentColorBrightness: Brightness.light,
       canvasColor: Colors.white,
+      shadowColor: Colors.white,
       scaffoldBackgroundColor: Colors.white,
       bottomAppBarColor: Colors.white,
       cardColor: Colors.white,
@@ -376,6 +378,7 @@ void main() {
       accentColor: otherTheme.accentColor,
       accentColorBrightness: otherTheme.accentColorBrightness,
       canvasColor: otherTheme.canvasColor,
+      shadowColor: otherTheme.shadowColor,
       scaffoldBackgroundColor: otherTheme.scaffoldBackgroundColor,
       bottomAppBarColor: otherTheme.bottomAppBarColor,
       cardColor: otherTheme.cardColor,
@@ -444,9 +447,7 @@ void main() {
     expect(themeDataCopy.accentColor, equals(otherTheme.accentColor));
     expect(themeDataCopy.accentColorBrightness, equals(otherTheme.accentColorBrightness));
     expect(themeDataCopy.canvasColor, equals(otherTheme.canvasColor));
-    expect(themeDataCopy.scaffoldBackgroundColor, equals(otherTheme.scaffoldBackgroundColor));
-    expect(themeDataCopy.bottomAppBarColor, equals(otherTheme.bottomAppBarColor));
-    expect(themeDataCopy.canvasColor, equals(otherTheme.canvasColor));
+    expect(themeDataCopy.shadowColor, equals(otherTheme.shadowColor));
     expect(themeDataCopy.scaffoldBackgroundColor, equals(otherTheme.scaffoldBackgroundColor));
     expect(themeDataCopy.bottomAppBarColor, equals(otherTheme.bottomAppBarColor));
     expect(themeDataCopy.cardColor, equals(otherTheme.cardColor));

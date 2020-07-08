@@ -84,6 +84,7 @@ void main() {
     const Material(
       type: MaterialType.canvas,
       color: Color(0xFFFFFFFF),
+      shadowColor: Color(0xffff0000),
       textStyle: TextStyle(color: Color(0xff00ff00)),
       borderRadius: BorderRadiusDirectional.all(Radius.circular(10)),
     ).debugFillProperties(builder);
@@ -96,6 +97,7 @@ void main() {
     expect(description, <String>[
       'type: canvas',
       'color: Color(0xffffffff)',
+      'shadowColor: Color(0xffff0000)',
       'textStyle.inherit: true',
       'textStyle.color: Color(0xff00ff00)',
       'borderRadius: BorderRadiusDirectional.circular(10.0)',
