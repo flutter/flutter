@@ -74,6 +74,8 @@ source_set("flutter_framework_source") {
     "framework/Source/accessibility_bridge.mm",
     "framework/Source/accessibility_text_entry.h",
     "framework/Source/accessibility_text_entry.mm",
+    "framework/Source/connection_collection.cc",
+    "framework/Source/connection_collection.h",
     "framework/Source/platform_message_response_darwin.h",
     "framework/Source/platform_message_response_darwin.mm",
     "framework/Source/platform_message_router.h",
@@ -208,6 +210,7 @@ shared_library("ios_test_flutter") {
     "framework/Source/FlutterTextInputPluginTest.m",
     "framework/Source/FlutterViewControllerTest.mm",
     "framework/Source/SemanticsObjectTest.mm",
+    "framework/Source/connection_collection_test.mm",
   ]
   deps = [
     ":flutter_framework_source",

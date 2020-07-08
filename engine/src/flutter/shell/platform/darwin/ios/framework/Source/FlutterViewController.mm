@@ -1204,10 +1204,16 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   [_engine.get().binaryMessenger sendOnChannel:channel message:message binaryReply:callback];
 }
 
-- (void)setMessageHandlerOnChannel:(NSString*)channel
-              binaryMessageHandler:(FlutterBinaryMessageHandler)handler {
+- (FlutterBinaryMessengerConnection)setMessageHandlerOnChannel:(NSString*)channel
+                                          binaryMessageHandler:
+                                              (FlutterBinaryMessageHandler)handler {
   NSAssert(channel, @"The channel must not be null");
-  [_engine.get().binaryMessenger setMessageHandlerOnChannel:channel binaryMessageHandler:handler];
+  return [_engine.get().binaryMessenger setMessageHandlerOnChannel:channel
+                                              binaryMessageHandler:handler];
+}
+
+- (void)cleanupConnection:(FlutterBinaryMessengerConnection)connection {
+  [_engine.get().binaryMessenger cleanupConnection:connection];
 }
 
 #pragma mark - FlutterTextureRegistry
