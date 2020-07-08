@@ -516,6 +516,7 @@ class AppDomain extends Domain {
       enableHotReload,
       cwd,
       LaunchMode.run,
+      globals.logger as AppRunLogger,
     );
   }
 
@@ -527,9 +528,10 @@ class AppDomain extends Domain {
     bool enableHotReload,
     Directory cwd,
     LaunchMode launchMode,
+    AppRunLogger logger,
   ) async {
     final AppInstance app = AppInstance(_getNewAppId(),
-        runner: runner, logToStdout: daemon.logToStdout);
+        runner: runner, logToStdout: daemon.logToStdout, logger: logger);
     _apps.add(app);
     _sendAppEvent(app, 'start', <String, dynamic>{
       'deviceId': device.id,
@@ -1014,13 +1016,13 @@ class NotifyingLogger extends Logger {
 
 /// A running application, started by this daemon.
 class AppInstance {
-  AppInstance(this.id, { this.runner, this.logToStdout = false });
+  AppInstance(this.id, { this.runner, this.logToStdout = false, @required AppRunLogger logger })
+    : _logger = logger;
 
   final String id;
   final ResidentRunner runner;
   final bool logToStdout;
-
-  AppRunLogger _logger;
+  final AppRunLogger _logger;
 
   Future<OperationResult> restart({ bool fullRestart = false, bool pause = false, String reason }) {
     return runner.restart(fullRestart: fullRestart, pause: pause, reason: reason);
@@ -1038,10 +1040,8 @@ class AppInstance {
   }
 
   Future<T> _runInZone<T>(AppDomain domain, FutureOr<T> method()) async {
-    final AppRunLogger logger = globals.logger as AppRunLogger;
-    _logger = logger;
-    logger.domain = domain;
-    logger.app = this;
+    _logger.domain = domain;
+    _logger.app = this;
     return method();
   }
 }
