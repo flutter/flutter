@@ -13,7 +13,6 @@ import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
