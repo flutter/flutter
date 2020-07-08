@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' show InternetAddress, SocketException;
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -241,13 +242,13 @@ void main() {
     });
 
     testUsingContext('Invalid URI for FLUTTER_STORAGE_BASE_URL throws ToolExit', () async {
-      when(globals.platform.environment).thenReturn(const <String, String>{
-        'FLUTTER_STORAGE_BASE_URL': ' http://foo',
-      });
       final Cache cache = Cache();
+
       expect(() => cache.storageBaseUrl, throwsToolExit());
     }, overrides: <Type, Generator>{
-      Platform: () => MockPlatform(),
+      Platform: () => FakePlatform(environment: <String, String>{
+        'FLUTTER_STORAGE_BASE_URL': ' http://foo',
+      }),
     });
   });
 
@@ -624,6 +625,83 @@ void main() {
       contains(contains('release')),
     ]));
   });
+
+  testWithoutContext('Cache can delete stampfiles of artifacts', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final ArtifactSet artifactSet = MockIosUsbArtifacts();
+    final BufferLogger logger = BufferLogger.test();
+
+    when(artifactSet.stampName).thenReturn('STAMP');
+    final Cache cache = Cache(
+      artifacts: <ArtifactSet>[
+        artifactSet,
+      ],
+      logger: logger,
+      fileSystem: fileSystem,
+      platform: FakePlatform(),
+      osUtils: MockOperatingSystemUtils(),
+      rootOverride: fileSystem.currentDirectory,
+    );
+    final File toolStampFile = fileSystem.file('bin/cache/flutter_tools.stamp');
+    final File stampFile = cache.getStampFileFor(artifactSet.stampName);
+    stampFile.createSync(recursive: true);
+    toolStampFile.createSync(recursive: true);
+
+    cache.clearStampFiles();
+
+    expect(logger.errorText, isEmpty);
+    expect(stampFile, isNot(exists));
+    expect(toolStampFile, isNot(exists));
+  });
+
+   testWithoutContext('Cache does not attempt to delete already missing stamp files', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final ArtifactSet artifactSet = MockIosUsbArtifacts();
+    final BufferLogger logger = BufferLogger.test();
+
+    when(artifactSet.stampName).thenReturn('STAMP');
+    final Cache cache = Cache(
+      artifacts: <ArtifactSet>[
+        artifactSet,
+      ],
+      logger: logger,
+      fileSystem: fileSystem,
+      platform: FakePlatform(),
+      osUtils: MockOperatingSystemUtils(),
+      rootOverride: fileSystem.currentDirectory,
+    );
+    final File toolStampFile = fileSystem.file('bin/cache/flutter_tools.stamp');
+    final File stampFile = cache.getStampFileFor(artifactSet.stampName);
+    toolStampFile.createSync(recursive: true);
+
+    cache.clearStampFiles();
+
+    expect(logger.errorText, isEmpty);
+    expect(stampFile, isNot(exists));
+    expect(toolStampFile, isNot(exists));
+  });
+
+  testWithoutContext('Cache catches file system exception from missing tool stamp file', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final ArtifactSet artifactSet = MockIosUsbArtifacts();
+    final BufferLogger logger = BufferLogger.test();
+
+    when(artifactSet.stampName).thenReturn('STAMP');
+    final Cache cache = Cache(
+      artifacts: <ArtifactSet>[
+        artifactSet,
+      ],
+      logger: logger,
+      fileSystem: fileSystem,
+      platform: FakePlatform(),
+      osUtils: MockOperatingSystemUtils(),
+      rootOverride: fileSystem.currentDirectory,
+    );
+
+    cache.clearStampFiles();
+
+    expect(logger.errorText, contains('Failed to delete some stamp files'));
+  });
 }
 
 class FakeCachedArtifact extends EngineCachedArtifact {
@@ -689,7 +767,6 @@ class MockIosUsbArtifacts extends Mock implements IosUsbArtifacts {}
 class MockInternetAddress extends Mock implements InternetAddress {}
 class MockCache extends Mock implements Cache {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
-class MockPlatform extends Mock implements Platform {}
 class MockVersionedPackageResolver extends Mock implements VersionedPackageResolver {}
 
 class MockHttpClientRequest extends Mock implements HttpClientRequest {}

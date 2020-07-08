@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:macrobenchmarks/src/color_filter_and_fade.dart';
+import 'package:macrobenchmarks/src/heavy_grid_view.dart';
 import 'package:macrobenchmarks/src/large_images.dart';
 import 'package:macrobenchmarks/src/picture_cache.dart';
 
@@ -45,6 +46,7 @@ class MacrobenchmarksApp extends StatelessWidget {
         kFadingChildAnimationRouteName: (BuildContext context) => const FilteredChildAnimationPage(FilterType.opacity),
         kImageFilteredTransformAnimationRouteName: (BuildContext context) => const FilteredChildAnimationPage(FilterType.rotateFilter),
         kMultiWidgetConstructionRouteName: (BuildContext context) => const MultiWidgetConstructTable(10, 20),
+        kHeavyGridViewRouteName: (BuildContext context) => HeavyGridViewPage(),
       },
     );
   }
@@ -149,6 +151,13 @@ class HomePage extends StatelessWidget {
             child: const Text('Widget Construction and Destruction'),
             onPressed: () {
               Navigator.pushNamed(context, kMultiWidgetConstructionRouteName);
+            },
+          ),
+          RaisedButton(
+            key: const Key(kHeavyGridViewRouteName),
+            child: const Text('Heavy Grid View'),
+            onPressed: () {
+              Navigator.pushNamed(context, kHeavyGridViewRouteName);
             },
           ),
         ],
