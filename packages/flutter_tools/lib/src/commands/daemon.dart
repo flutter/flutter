@@ -1039,6 +1039,7 @@ class AppInstance {
 
   Future<T> _runInZone<T>(AppDomain domain, FutureOr<T> method()) async {
     final AppRunLogger logger = globals.logger as AppRunLogger;
+    _logger = logger;
     logger.domain = domain;
     logger.app = this;
     return method();
