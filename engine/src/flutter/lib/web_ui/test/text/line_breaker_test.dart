@@ -8,6 +8,8 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
 
+import 'line_breaker_test_data.dart';
+
 void main() {
   group('nextLineBreak', () {
     test('Does not go beyond the ends of a string', () {
@@ -158,6 +160,42 @@ void main() {
         Line('  ', LineBreakType.opportunity),
         Line('foo', LineBreakType.endOfText),
       ]);
+    });
+
+    test('comprehensive test', () {
+      for (int t = 0; t < data.length; t++) {
+        final TestCase testCase = data[t];
+        final String text = testCase.toText();
+
+        int lastLineBreak = 0;
+        for (int i = 0; i < testCase.signs.length; i++) {
+          final Sign sign = testCase.signs[i];
+          final LineBreakResult result = nextLineBreak(text, lastLineBreak);
+          if (sign.isBreakOpportunity) {
+            // The line break should've been found at index `i`.
+            expect(
+              result.index,
+              i,
+              reason: 'Failed at test case number $t:\n'
+                  '${testCase.toString()}\n'
+                  '"$text"\n'
+                  '\nExpected line break at {$lastLineBreak - $i} but found line break at {$lastLineBreak - ${result.index}}.',
+            );
+            lastLineBreak = i;
+          } else {
+            // This isn't a line break opportunity so the line break should be
+            // somewhere after index `i`.
+            expect(
+              result.index,
+              greaterThan(i),
+              reason: 'Failed at test case number $t:\n'
+                  '${testCase.toString()}\n'
+                  '"$text"\n'
+                  '\nUnexpected line break found at {$lastLineBreak - $i}.',
+            );
+          }
+        }
+      }
     });
   });
 }
