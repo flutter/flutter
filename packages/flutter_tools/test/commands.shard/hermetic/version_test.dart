@@ -42,7 +42,10 @@ void main() {
         'version',
         '--no-pub',
       ]);
-      expect(testLogger.statusText, equals('v10.0.0\r\nv20.0.0\r\n30.0.0-dev.0.0\r\n31.0.0-0.0.pre\n'));
+      expect(testLogger.statusText, equals(
+        '[!] The "version" command is deprecated and will be removed in a future version of Flutter.\n\n'
+        'v10.0.0\r\nv20.0.0\r\n30.0.0-dev.0.0\r\n31.0.0-0.0.pre\n'
+      ));
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
       Stdio: () => mockStdio,
@@ -204,7 +207,7 @@ void main() {
       await createTestCommandRunner(command).run(<String>[
         'version',
       ]);
-      expect(testLogger.statusText, equals('v10.0.0\r\nv20.0.0\r\n30.0.0-dev.0.0\r\n31.0.0-0.0.pre\n'));
+      expect(testLogger.statusText, contains('v10.0.0\r\nv20.0.0\r\n30.0.0-dev.0.0\r\n31.0.0-0.0.pre\n'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
       Stdio: () => mockStdio,
