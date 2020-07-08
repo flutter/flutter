@@ -76,7 +76,7 @@ enum AutofillContextAction {
 ///      children: <Widget>[
 ///        const Text('Shipping address'),
 ///        // The address fields are grouped together as some platforms are
-///        // capable of autofilling all these fields in one go.
+///        // capable of autofilling all of these fields in one go.
 ///        AutofillGroup(
 ///          child: Column(
 ///            children: <Widget>[
@@ -181,9 +181,8 @@ class AutofillGroup extends StatefulWidget {
   /// {@macro flutter.services.autofill.autofillContext}
   ///
   /// Defaults to [AutofillContextAction.commit], which prompts the platform to
-  /// save the user input and destroy the current autofill context. No
-  /// autofill context related actions will be automatically taken when
-  /// [onDisposeAction] is set to null.
+  /// save the user input and destroy the current autofill context. No action
+  /// will be taken if [onDisposeAction] is set to null.
   final AutofillContextAction onDisposeAction;
 
   @override
