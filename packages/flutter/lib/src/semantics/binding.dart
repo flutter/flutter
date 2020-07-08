@@ -34,13 +34,13 @@ mixin SemanticsBinding on BindingBase {
     _accessibilityFeatures = window.accessibilityFeatures;
   }
 
-  /// Generates an empty semantics update builder.
+  /// Creates an empty semantics update builder.
   ///
   /// The caller is responsible for filling out the semantics node updates.
   ///
-  /// This method is used by the [SemanticsOwner] to generate builder for all
-  /// its semantics updates.
-  ui.SemanticsUpdateBuilder generateSemanticsUpdateBuilder() {
+  /// This method is used by the [SemanticsOwner] to create builder for all its
+  /// semantics updates.
+  ui.SemanticsUpdateBuilder createSemanticsUpdateBuilder() {
     return ui.SemanticsUpdateBuilder();
   }
 
