@@ -470,7 +470,7 @@ class _MonthPicker extends StatefulWidget {
   final SelectableDayPredicate selectableDayPredicate;
 
   @override
-  State<StatefulWidget> createState() => _MonthPickerState();
+  _MonthPickerState createState() => _MonthPickerState();
 }
 
 class _MonthPickerState extends State<_MonthPicker> {
@@ -754,16 +754,13 @@ class _MonthPickerState extends State<_MonthPicker> {
               onFocusChange: _handleGridFocusChange,
               child: _FocusedDate(
                 date: _dayGridFocus.hasFocus ? _focusedDay : null,
-                child: Container(
-                  color: _dayGridFocus.hasFocus ? Theme.of(context).focusColor : null,
-                  child: PageView.builder(
-                    key: _pageViewKey,
-                    controller: _pageController,
-                    itemBuilder: _buildItems,
-                    itemCount: utils.monthDelta(widget.firstDate, widget.lastDate) + 1,
-                    scrollDirection: Axis.horizontal,
-                    onPageChanged: _handleMonthPageChanged,
-                  ),
+                child: PageView.builder(
+                  key: _pageViewKey,
+                  controller: _pageController,
+                  itemBuilder: _buildItems,
+                  itemCount: utils.monthDelta(widget.firstDate, widget.lastDate) + 1,
+                  scrollDirection: Axis.horizontal,
+                  onPageChanged: _handleMonthPageChanged,
                 ),
               ),
             ),

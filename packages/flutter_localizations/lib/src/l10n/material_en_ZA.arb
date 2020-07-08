@@ -37,6 +37,7 @@
   "aboutListTileTitle": "About $applicationName",
   "backButtonTooltip": "Back",
   "licensesPageTitle": "Licences",
+  "licensesPackageDetailTextZero": "No licences",
   "licensesPackageDetailTextOne": "1 licence",
   "licensesPackageDetailTextOther": "$licenseCount licences",
   "okButtonLabel": "OK",

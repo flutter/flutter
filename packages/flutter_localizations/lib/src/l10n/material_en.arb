@@ -72,10 +72,11 @@
     "description": "The title for the Flutter licenses page."
   },
 
+  "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 license",
   "licensesPackageDetailTextOther": "$licenseCount licenses",
   "@licensesPackageDetailText": {
-    "description": "The subtitle and detail text for a package displayed on the Flutter licenses page. The value of $licenseCount is an integer which indicates the number of licenses the package has. A zero value is not allowed.",
+    "description": "The subtitle and detail text for a package displayed on the Flutter licenses page. The value of $licenseCount is an integer which indicates the number of licenses the package has.",
     "plural": "licenseCount"
   },
 

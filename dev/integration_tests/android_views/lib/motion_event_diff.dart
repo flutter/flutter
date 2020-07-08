@@ -28,6 +28,7 @@ String diffMotionEvents(
     'source', // Unused by Flutter.
     'deviceId', // Android documentation says that's an arbitrary number that shouldn't be depended on.
     'action', // Compared separately.
+    'motionEventId', // TODO(kaushikiska): add support for motion event diffing, https://github.com/flutter/flutter/issues/61022.
   ]);
 
   diffActions(diff, originalEvent, synthesizedEvent);

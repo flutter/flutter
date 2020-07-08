@@ -912,12 +912,14 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String licensesPackageDetailText(int licenseCount) {
-    assert (licenseCount >= 1);
+    assert (licenseCount >= 0);
     switch (licenseCount) {
+      case 0:
+        return 'No licenses.';
       case 1:
-        return '1 license';
+        return '1 license.';
       default:
-        return '$licenseCount licenses';
+        return '$licenseCount licenses.';
     }
   }
 
