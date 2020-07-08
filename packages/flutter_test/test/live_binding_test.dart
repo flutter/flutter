@@ -12,6 +12,8 @@ void main() {
     await tester.pumpWidget(const MaterialApp(home: Text('Test')));
     await tester.pump();
     final TestGesture gesture = await tester.createGesture();
+    // This mimics the start of a gesture as seen on a device, where inputs
+    // starts with a PointerAddedEvent.
     await gesture.addPointer();
   });
 }
