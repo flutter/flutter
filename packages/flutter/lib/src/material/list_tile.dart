@@ -674,7 +674,8 @@ class ListTile extends StatelessWidget {
   ///
   /// Typically a [Text] widget.
   ///
-  /// This should not wrap.
+  /// This should not wrap. To enforce the single line limit, use
+  /// [Text.maxLines].
   final Widget title;
 
   /// Additional content displayed below the title.
@@ -684,7 +685,8 @@ class ListTile extends StatelessWidget {
   /// If [isThreeLine] is false, this should not wrap.
   ///
   /// If [isThreeLine] is true, this should be configured to take a maximum of
-  /// two lines.
+  /// two lines. For example, you can use [Text.maxLines] to enforce the number
+  /// of lines.
   final Widget subtitle;
 
   /// A widget to display after the title.
@@ -705,6 +707,9 @@ class ListTile extends StatelessWidget {
   ///
   /// If false, the list tile is treated as having one line if the subtitle is
   /// null and treated as having two lines if the subtitle is non-null.
+  ///
+  /// When using a [Text] widget for [title] and [subtitle], you can enforce
+  /// line limits using [Text.maxLines].
   final bool isThreeLine;
 
   /// Whether this list tile is part of a vertically dense list.
