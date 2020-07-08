@@ -37,6 +37,7 @@ class DevelopmentArtifact {
   /// Artifacts required for Android development.
   static const DevelopmentArtifact androidGenSnapshot = DevelopmentArtifact._('android_gen_snapshot');
   static const DevelopmentArtifact androidMaven = DevelopmentArtifact._('android_maven');
+
   // Artifacts used for internal builds.
   static const DevelopmentArtifact androidInternalBuild = DevelopmentArtifact._('android_internal_build');
 
@@ -243,8 +244,8 @@ class Cache {
 
   /// Checks if the current process owns the lock for the cache directory at
   /// this very moment; throws a [StateError] if it doesn't.
-  static void checkLockAcquired() {
-    if (_lockEnabled && _lock == null && globals.platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true') {
+  static void checkLockAcquired([Platform platform]) {
+    if (_lockEnabled && _lock == null && (platform ?? globals.platform).environment['FLUTTER_ALREADY_LOCKED'] != 'true') {
       throw StateError(
         'The current process does not own the lock for the cache directory. This is a bug in Flutter CLI tools.',
       );
@@ -370,6 +371,21 @@ class Cache {
       '$artifactName.version',
     ));
     return versionFile.existsSync() ? versionFile.readAsStringSync().trim() : null;
+  }
+
+    /// Delete all stamp files maintained by the cache.
+  void clearStampFiles() {
+    try {
+      getStampFileFor('flutter_tools').deleteSync();
+      for (final ArtifactSet artifact in _artifacts) {
+        final File file = getStampFileFor(artifact.stampName);
+        if (file.existsSync()) {
+          file.deleteSync();
+        }
+      }
+    } on FileSystemException catch (err) {
+      _logger.printError('Failed to delete some stamp files: $err');
+    }
   }
 
   String getStampFor(String artifactName) {
@@ -508,6 +524,13 @@ abstract class ArtifactSet {
 
   /// Updates the artifact.
   Future<void> update();
+
+  /// The canonical name of the artifact.
+  String get name;
+
+  // The name of the stamp file. Defaults to the same as the
+  // artifact name.
+  String get stampName => name;
 }
 
 /// An artifact set managed by the cache.
@@ -520,11 +543,10 @@ abstract class CachedArtifact extends ArtifactSet {
 
   final Cache cache;
 
-  /// The canonical name of the artifact.
+  @override
   final String name;
 
-  // The name of the stamp file. Defaults to the same as the
-  // artifact name.
+  @override
   String get stampName => name;
 
   Directory get location => cache.getArtifactDirectory(name);
@@ -1043,6 +1065,9 @@ class AndroidMavenArtifacts extends ArtifactSet {
     // Therefore, call Gradle to figure this out.
     return false;
   }
+
+  @override
+  String get name => 'android-maven-artifacts';
 }
 
 class IOSEngineArtifacts extends EngineCachedArtifact {
