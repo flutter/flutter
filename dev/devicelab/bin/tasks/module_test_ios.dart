@@ -32,11 +32,16 @@ Future<void> main() async {
       });
 
       // Copy test dart files to new module app.
-      final Directory flutterModuleLib = Directory(path.join(projectDir.path, 'lib'));
-      recursiveCopy(
-        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'ios_host_app', 'flutterapp', 'lib')),
-        flutterModuleLib,
-      );
+      final Directory flutterModuleLibSource = Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'ios_host_app', 'flutterapp', 'lib'));
+      final Directory flutterModuleLibDestination = Directory(path.join(projectDir.path, 'lib'));
+
+      // These test files don't have a .dart prefix so the analyzer will ignore them. They aren't in a
+      // package and don't work on their own outside of the test module just created.
+      final File main = File(path.join(flutterModuleLibSource.path, 'main'));
+      main.copySync(path.join(flutterModuleLibDestination.path, 'main.dart'));
+
+      final File marquee = File(path.join(flutterModuleLibSource.path, 'marquee'));
+      marquee.copySync(path.join(flutterModuleLibDestination.path, 'marquee.dart'));
 
       section('Build ephemeral host app in release mode without CocoaPods');
 
@@ -271,22 +276,6 @@ Future<void> main() async {
               'COMPILER_INDEX_STORE_ENABLE=NO',
             ],
           )
-        )
-      );
-
-      section('Clean Xcode workspace');
-
-      await inDirectory(objectiveCHostApp, () =>
-        exec(
-          'xcodebuild',
-          <String>[
-            '-workspace',
-            'Host.xcworkspace',
-            '-scheme',
-            'Host',
-            'clean',
-          ],
-          canFail: true,
         )
       );
 

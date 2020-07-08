@@ -1,5 +1,0 @@
-# These dart files are copied into a newly created project and have
-# errors outside that context.
-analyzer:
-  exclude:
-    - '**'
