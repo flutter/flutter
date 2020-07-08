@@ -39,12 +39,10 @@ void main() {
   });
 
   testWithoutContext('AnalysisError from json write correct', () {
-    // ignore: always_specify_types
-    final Map<String, Object> json = {
+    final Map<String, dynamic> json = <String, dynamic>{
       'severity': 'INFO',
       'type': 'TODO',
-      // ignore: always_specify_types
-      'location': {
+      'location': <String, dynamic>{
         'file': '/Users/.../lib/test.dart',
         'offset': 362,
         'length': 72,
