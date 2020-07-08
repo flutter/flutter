@@ -277,6 +277,12 @@ class _RootRestorationScopeState extends State<RootRestorationScope> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    _rootBucket?.removeListener(_replaceRootBucket);
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (_okToRenderBlankContainer && _isWaitingForRootBucket) {
       return Container();

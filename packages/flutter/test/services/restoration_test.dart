@@ -158,12 +158,15 @@ void main() {
       callsToEngine.clear();
 
       int finalizerRunCount = 0;
-      manager.scheduleUpdate(finalizer: () {
+      manager.scheduleSerialization(finalizer: () {
         finalizerRunCount++;
       });
+      tester.binding.scheduleFrame(); // Serialization happens post-frame.
       expect(finalizerRunCount, 0);
       expect(callsToEngine, isEmpty);
-      await tester.pump(const Duration(milliseconds: 100));
+
+      await tester.pump();
+
       expect(finalizerRunCount, 1);
       expect(callsToEngine, hasLength(1));
       expect(callsToEngine.single.method, 'put');
@@ -176,8 +179,9 @@ void main() {
       expect(decodedData[valuesMapKey]['value2'], 'Hello');
 
       // Old finalizer is not invoked again.
-      manager.scheduleUpdate();
-      await tester.pump(const Duration(milliseconds: 100));
+      manager.scheduleSerialization();
+      tester.binding.scheduleFrame();
+      await tester.pump();
       expect(finalizerRunCount, 1);
       expect(callsToEngine, hasLength(2));
       expect(callsToEngine.every((MethodCall m) => m.method == 'put'), isTrue);
@@ -207,17 +211,18 @@ void main() {
         finalizerBarCount++;
       }
 
-      manager.scheduleUpdate(finalizer: finalizerFoo);
-      manager.scheduleUpdate(finalizer: finalizerBar);
-      manager.scheduleUpdate(finalizer: finalizerFoo);
-      manager.scheduleUpdate();
-      manager.scheduleUpdate(finalizer: finalizerFoo);
+      manager.scheduleSerialization(finalizer: finalizerFoo);
+      manager.scheduleSerialization(finalizer: finalizerBar);
+      manager.scheduleSerialization(finalizer: finalizerFoo);
+      manager.scheduleSerialization();
+      manager.scheduleSerialization(finalizer: finalizerFoo);
+      tester.binding.scheduleFrame(); // Serialization happens post-frame.
 
       expect(finalizerFooCount, 0);
       expect(finalizerBarCount, 0);
       expect(callsToEngine, hasLength(0));
 
-      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump();
 
       expect(finalizerFooCount, 1);
       expect(finalizerBarCount, 1);
@@ -240,15 +245,17 @@ void main() {
       expect(rootBucket, isNotNull);
 
       final List<AssertionError> errors = <AssertionError>[];
-      manager.scheduleUpdate(finalizer: () {
+      manager.scheduleSerialization(finalizer: () {
         try {
-          manager.scheduleUpdate();
+          manager.scheduleSerialization();
         } on AssertionError catch (e) {
           errors.add(e);
         }
       });
 
-      await tester.pump(const Duration(milliseconds: 100));
+      tester.binding.scheduleFrame();
+      await tester.pump();
+
       expect(errors, hasLength(1));
       expect(errors.single.message, 'Calling scheduleUpdate from a finalizer is not allowed.');
     });

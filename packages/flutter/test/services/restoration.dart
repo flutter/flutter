@@ -6,14 +6,15 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
 
-class MockRestorationManager implements RestorationManager {
+class MockRestorationManager extends TestRestorationManager {
   final Set<VoidCallback> _finalizers = <VoidCallback>{};
   bool get updateScheduled => _updateScheduled;
   bool _updateScheduled = false;
 
   @override
-  void scheduleUpdate({VoidCallback finalizer}) {
+  void scheduleSerialization({VoidCallback finalizer}) {
     _updateScheduled = true;
     if (finalizer != null) {
       _finalizers.add(finalizer);

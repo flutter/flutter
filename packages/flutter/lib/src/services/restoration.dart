@@ -74,11 +74,11 @@ typedef _BucketVisitor = void Function(RestorationBucket bucket);
 /// or resource locator) should be stored that can be used to retrieve the data
 /// again from its original source during state restoration.
 ///
-/// Between frames, the [RestorationManager] sends a serialized version of the
-/// bucket hierarchy over to the engine if the data in the hierarchy or its
-/// shape has changed. The engine caches the data until the operating system
-/// needs it. The application is responsible for keeping the data in the bucket
-/// always up-to-date to reflect its current state.
+/// The [RestorationManager] sends a serialized version of the bucket hierarchy
+/// over to the engine at the end of a frame in which the data in the hierarchy
+/// or its shape has changed. The engine caches the data until the operating
+/// system needs it. The application is responsible for keeping the data in the
+/// bucket always up-to-date to reflect its current state.
 ///
 /// ## Discussion
 ///
@@ -173,7 +173,7 @@ class RestorationManager {
   Future<dynamic> _methodHandler(MethodCall call) {
     switch (call.method) {
       case 'push':
-        _handleRestorationDataUpdate(call.arguments as Uint8List);
+        handleRestorationDataUpdate(call.arguments as Uint8List);
         break;
       default:
         throw UnimplementedError("${call.method} was invoked but isn't implemented by $runtimeType");
@@ -181,9 +181,15 @@ class RestorationManager {
     return null;
   }
 
-  void _handleRestorationDataUpdate(Uint8List serialized) {
+  /// Called by the [RestorationManager] on itself when the engine has provided
+  /// new serialized restoration `data`.
+  ///
+  /// The method decommissions the current [rootBucket] and replaces it with
+  /// the bucket hierarchy obtained by de-serializing the provided `data`.
+  @protected
+  void handleRestorationDataUpdate(Uint8List data) {
     final RestorationBucket oldRoot = _rootBucket;
-    _setRootBucket(_decodeData(serialized));
+    _setRootBucket(decodeRestorationData(data));
     if (oldRoot != null) {
       oldRoot
         ..decommission()
@@ -216,7 +222,7 @@ class RestorationManager {
   @protected
   Future<Map<String, dynamic>> retrieveFromEngine() async {
     final Uint8List raw = await SystemChannels.restoration.invokeMethod<Uint8List>('get');
-    return _decodeData(raw);
+    return decodeRestorationData(raw);
   }
 
   /// Called by the [RestorationManager] on itself to send the provided
@@ -227,50 +233,64 @@ class RestorationManager {
   /// [retrieveFromEngine]. The provided `rawData` can be serialized with the
   /// [StandardMessageCodec].
   ///
-  /// This method is called between frames whenever the restoration data has
-  /// changed. It can be overridden in tests to capture the restoration data
+  /// This method can be overridden in tests to capture the restoration data
   /// that would have been send to the engine.
   @protected
   Future<void> sendToEngine(Map<String, dynamic> rawData) {
     assert(rawData != null);
     return SystemChannels.restoration.invokeMethod<void>(
       'put',
-      _encodeData(rawData),
+      encodeRestorationData(rawData),
     );
   }
 
-  Map<String, dynamic> _decodeData(Uint8List raw) {
-    if (raw == null) {
+  /// Called by the [RestorationManager] on itself to deserialize the
+  /// restoration `data` obtained from the engine via [retrieveFromEngine].
+  ///
+  /// See also:
+  ///
+  ///  * [encodeRestorationData], which is the opposite of this method.
+  @protected
+  Map<String, dynamic> decodeRestorationData(Uint8List data) {
+    if (data == null) {
       return null;
     }
-    final ByteData encoded = raw.buffer.asByteData(raw.offsetInBytes, raw.lengthInBytes);
+    final ByteData encoded = data.buffer.asByteData(data.offsetInBytes, data.lengthInBytes);
     return castToMap<String, dynamic>(
       const StandardMessageCodec().decodeMessage(encoded),
     );
   }
 
-  Uint8List _encodeData(Map<String, dynamic> data) {
+  /// Called by the [RestorationManager] on itself to serialized the
+  /// restoration `data` before sending it to the engine via [sendToEngine].
+  ///
+  /// See also:
+  ///
+  ///  * [decodeRestorationData], which is the opposite of this method.
+  @protected
+  Uint8List encodeRestorationData(Map<String, dynamic> data) {
     final ByteData encoded = const StandardMessageCodec().encodeMessage(data);
     return encoded.buffer.asUint8List(encoded.offsetInBytes, encoded.lengthInBytes);
   }
 
   bool _debugDoingUpdate = false;
-  bool _updateScheduled = false;
+  bool _postFrameScheduled = false;
 
   final Set<VoidCallback> _finalizers = <VoidCallback>{};
 
-  /// Schedules a task to serialize the current hierarchy of restoration buckets
-  /// and send it over to the engine.
+  /// Schedules a post frame callback to serialize the current hierarchy of
+  /// restoration buckets and send it over to the engine.
   ///
   /// Called by [RestorationBucket]s whenever the data stored in them has
   /// changed or the shape of the bucket hierarchy has been modified.
   ///
-  /// The task will execute between frames, see [SchedulerBinding.scheduleTask]
-  /// for details. Just before the hierarchy is serialized and send over to the
-  /// engine, the optionally provided `finalizer` is called. The callback may be
-  /// used to check the integrity of the data in a given bucket. It is illegal
-  /// to call [scheduleUpdate] from within the `finalizer` callback.
-  void scheduleUpdate({VoidCallback finalizer}) {
+  /// The task will execute at the end of the current frame or - if currently
+  /// not producing a frame - at the end of the next frame. Just before the
+  /// hierarchy is serialized and send over to the engine, the optionally
+  /// provided `finalizer` is called. The callback may be used to check the
+  /// integrity of the data in a given bucket. It is illegal to call
+  /// [scheduleSerialization] from within the `finalizer` callback.
+  void scheduleSerialization({VoidCallback finalizer}) {
     // The concept of `finalizer` callbacks is necessary to properly use
     // restoration buckets in the [Widget] tree because of the way widgets are
     // disposed during the build phase: Flutter delays the disposal of widgets
@@ -294,19 +314,20 @@ class RestorationManager {
     if (finalizer != null) {
       _finalizers.add(finalizer);
     }
-    if (!_updateScheduled) {
-      _updateScheduled = true;
-      SchedulerBinding.instance.scheduleTask<void>(_doProcessing, Priority.animation);
+    if (!_postFrameScheduled) {
+      _postFrameScheduled = true;
+      SchedulerBinding.instance.addPostFrameCallback((Duration _) => _doProcessing());
     }
   }
+
+  // TODO(goderbauer): Add API to request out-of-band serialization when no frame is scheduled.
 
   void _doProcessing() {
     assert(() {
       _debugDoingUpdate = true;
       return true;
     }());
-
-    _updateScheduled = false;
+    _postFrameScheduled = false;
 
     for (final VoidCallback finalizer in _finalizers) {
       finalizer();
@@ -591,7 +612,7 @@ class RestorationBucket extends ChangeNotifier {
     assert(debugIsSerializableForRestoration(value));
     if (_rawValues[id.value] != value || !_rawValues.containsKey(id.value)) {
       _rawValues[id.value] = value;
-      _manager?.scheduleUpdate();
+      _manager?.scheduleSerialization();
     }
   }
 
@@ -608,7 +629,7 @@ class RestorationBucket extends ChangeNotifier {
       _rawData.remove(_valuesMapKey);
     }
     if (needsUpdate) {
-      _manager?.scheduleUpdate();
+      _manager?.scheduleSerialization();
     }
     return result;
   }
@@ -751,7 +772,7 @@ class RestorationBucket extends ChangeNotifier {
       if (_rawChildren.isEmpty) {
         _rawData.remove(_childrenMapKey);
       }
-      _manager?.scheduleUpdate();
+      _manager?.scheduleSerialization();
       return;
     }
     _childrenToAdd[child.id]?.remove(child);
@@ -768,11 +789,11 @@ class RestorationBucket extends ChangeNotifier {
       // owner of the child with the same id will have given up that child by
       // then.
       _childrenToAdd.putIfAbsent(child.id, () => <RestorationBucket>{}).add(child);
-      _manager.scheduleUpdate(finalizer: _finalize);
+      _manager.scheduleSerialization(finalizer: _finalize);
       return;
     }
     _finalizeAddChildData(child);
-    _manager.scheduleUpdate();
+    _manager.scheduleSerialization();
   }
 
   void _finalizeAddChildData(RestorationBucket child) {
