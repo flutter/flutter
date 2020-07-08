@@ -46,9 +46,6 @@ class AnalyzeOnce extends AnalyzeBase {
 
   /// The working directory for testing analysis using dartanalyzer.
   final Directory workingDirectory;
-  final Completer<void> analysisCompleter = Completer<void>();
-  final List<AnalysisError> errors = <AnalysisError>[];
-  StreamSubscription<bool> subscription;
 
   @override
   Future<void> analyze() async {
@@ -88,6 +85,9 @@ class AnalyzeOnce extends AnalyzeBase {
       throwToolExit('Nothing to analyze.', exitCode: 0);
     }
 
+    final Completer<void> analysisCompleter = Completer<void>();
+    final List<AnalysisError> errors = <AnalysisError>[];
+
     final String sdkPath = argResults['dart-sdk'] as String ??
       artifacts.getArtifactPath(Artifact.engineDartSdkPath);
 
@@ -105,8 +105,25 @@ class AnalyzeOnce extends AnalyzeBase {
     Stopwatch timer;
     Status progress;
     try {
-      subscription = server.onAnalyzing.listen((bool isAnalyzing) => _handleAnalysisStatus(isAnalyzing));
-      server.onErrors.listen(_handleAnalysisErrors);
+      StreamSubscription<bool> subscription;
+
+      void handleAnalysisStatus(bool isAnalyzing) {
+        if (!isAnalyzing) {
+          analysisCompleter.complete();
+          subscription?.cancel();
+          subscription = null;
+        }
+      }
+
+      subscription = server.onAnalyzing.listen((bool isAnalyzing) => handleAnalysisStatus(isAnalyzing));
+
+      void handleAnalysisErrors(FileAnalysisErrors fileErrors) {
+        fileErrors.errors.removeWhere((AnalysisError error) => error.type == 'TODO');
+
+        errors.addAll(fileErrors.errors);
+      }
+
+      server.onErrors.listen(handleAnalysisErrors);
 
       await server.start();
       // Completing the future in the callback can't fail.
@@ -162,7 +179,7 @@ class AnalyzeOnce extends AnalyzeBase {
 
     final String seconds = (timer.elapsedMilliseconds / 1000.0).toStringAsFixed(1);
 
-    final String dartDocMessage = generateDartDocMessage(undocumentedMembers);
+    final String dartDocMessage = AnalyzeBase.generateDartDocMessage(undocumentedMembers);
 
     // We consider any level of error to be an error exit (we don't report different levels).
     if (errors.isNotEmpty) {
@@ -186,19 +203,5 @@ class AnalyzeOnce extends AnalyzeBase {
         logger.printStatus('No issues found! (ran in ${seconds}s)');
       }
     }
-  }
-
-  void _handleAnalysisStatus(bool isAnalyzing) {
-    if (!isAnalyzing) {
-      analysisCompleter.complete();
-      subscription?.cancel();
-      subscription = null;
-    }
-  }
-
-  void _handleAnalysisErrors(FileAnalysisErrors fileErrors) {
-    fileErrors.errors.removeWhere((AnalysisError error) => error.type == 'TODO');
-
-    errors.addAll(fileErrors.errors);
   }
 }
