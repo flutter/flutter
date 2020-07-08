@@ -2,4 +2,4 @@
 # errors outside that context.
 analyzer:
   exclude:
-    - 'flutterapp/lib/**'
+    - '**'
