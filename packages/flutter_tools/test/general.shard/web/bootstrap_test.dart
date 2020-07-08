@@ -23,9 +23,25 @@ void main() {
   test('generateMainModule embeds urls correctly', () {
     final String result = generateMainModule(
       entrypoint: 'foo/bar/main.js',
+      soundNullSafety: false,
+      nullSafety: false,
     );
     // bootstrap main module has correct defined module.
     expect(result, contains('define("main_module.bootstrap", ["foo/bar/main.js", "dart_sdk"], '
       'function(app, dart_sdk) {'));
+  });
+
+  test('generateMainModule includes null safety switches', () {
+    final String result = generateMainModule(
+      entrypoint: 'foo/bar/main.js',
+      soundNullSafety: true,
+      nullSafety: true,
+    );
+
+    expect(result, contains(
+'''  if (true) {
+    dart_sdk.dart.nullSafety(true);
+    dart_sdk.dart.weakNullSafetyWarnings(!true);
+    dart_sdk.dart.nonNullAsserts(true);'''));
   });
 }
