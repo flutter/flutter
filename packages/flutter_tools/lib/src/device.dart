@@ -67,46 +67,11 @@ class PlatformType {
 }
 
 /// A class to get all available devices.
-class DeviceManager {
+abstract class DeviceManager {
 
   /// Constructing DeviceManagers is cheap; they only do expensive work if some
   /// of their methods are called.
-  List<DeviceDiscovery> get deviceDiscoverers => _deviceDiscoverers;
-  final List<DeviceDiscovery> _deviceDiscoverers = List<DeviceDiscovery>.unmodifiable(<DeviceDiscovery>[
-    AndroidDevices(
-      logger: globals.logger,
-      androidSdk: globals.androidSdk,
-      androidWorkflow: androidWorkflow,
-      processManager: globals.processManager,
-    ),
-    IOSDevices(
-      platform: globals.platform,
-      xcdevice: globals.xcdevice,
-      iosWorkflow: globals.iosWorkflow,
-      logger: globals.logger,
-    ),
-    IOSSimulators(iosSimulatorUtils: globals.iosSimulatorUtils),
-    FuchsiaDevices(
-      fuchsiaSdk: fuchsiaSdk,
-      logger: globals.logger,
-      fuchsiaWorkflow: fuchsiaWorkflow,
-      platform: globals.platform,
-    ),
-    FlutterTesterDevices(),
-    MacOSDevices(),
-    LinuxDevices(
-      platform: globals.platform,
-      featureFlags: featureFlags,
-    ),
-    WindowsDevices(),
-    WebDevices(
-      featureFlags: featureFlags,
-      fileSystem: globals.fs,
-      platform: globals.platform,
-      processManager: globals.processManager,
-      logger: globals.logger,
-    ),
-  ]);
+  List<DeviceDiscovery> get deviceDiscoverers;
 
   String _specifiedDeviceId;
 
@@ -301,6 +266,45 @@ class DeviceManager {
   bool isDeviceSupportedForProject(Device device, FlutterProject flutterProject) {
     return device.isSupportedForProject(flutterProject);
   }
+}
+
+class FlutterDeviceManager extends DeviceManager {
+  @override
+  final List<DeviceDiscovery> deviceDiscoverers = <DeviceDiscovery>[
+    AndroidDevices(
+      logger: globals.logger,
+      androidSdk: globals.androidSdk,
+      androidWorkflow: androidWorkflow,
+      processManager: globals.processManager,
+    ),
+    IOSDevices(
+      platform: globals.platform,
+      xcdevice: globals.xcdevice,
+      iosWorkflow: globals.iosWorkflow,
+      logger: globals.logger,
+    ),
+    IOSSimulators(iosSimulatorUtils: globals.iosSimulatorUtils),
+    FuchsiaDevices(
+      fuchsiaSdk: fuchsiaSdk,
+      logger: globals.logger,
+      fuchsiaWorkflow: fuchsiaWorkflow,
+      platform: globals.platform,
+    ),
+    FlutterTesterDevices(),
+    MacOSDevices(),
+    LinuxDevices(
+      platform: globals.platform,
+      featureFlags: featureFlags,
+    ),
+    WindowsDevices(),
+    WebDevices(
+      featureFlags: featureFlags,
+      fileSystem: globals.fs,
+      platform: globals.platform,
+      processManager: globals.processManager,
+      logger: globals.logger,
+    ),
+  ];
 }
 
 /// An abstract class to discover and enumerate a specific type of devices.
