@@ -1043,7 +1043,7 @@ void main() {
     _checkPhysicalLayer(buttonElement, fillColor.withAlpha(0x00));
   });
 
-  testWidgets('OutlineButton size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
+  testWidgets('OutlineButton respects the provided materialTapTargetSize', (WidgetTester tester) async {
     final Key key1 = UniqueKey();
     await tester.pumpWidget(
       Directionality(
