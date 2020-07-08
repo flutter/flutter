@@ -581,11 +581,12 @@ class PictureLayer extends Layer {
 class TextureLayer extends Layer {
   /// Creates a texture layer bounded by [rect] and with backend texture
   /// identified by [textureId], if [freeze] is true new texture frames will not be
-  /// populated to the texture.
+  /// populated to the texture, and use [filterQuality] to set layer's [FilterQuality].
   TextureLayer({
     @required this.rect,
     @required this.textureId,
     this.freeze = false,
+    this.filterQuality = ui.FilterQuality.low,
   }) : assert(rect != null),
        assert(textureId != null);
 
@@ -604,6 +605,9 @@ class TextureLayer extends Layer {
   /// un-freezes it when it is certain that a frame with the new size is ready.
   final bool freeze;
 
+  /// {@macro FilterQuality}
+  final ui.FilterQuality filterQuality;
+
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     final Rect shiftedRect = layerOffset == Offset.zero ? rect : rect.shift(layerOffset);
@@ -613,6 +617,7 @@ class TextureLayer extends Layer {
       width: shiftedRect.width,
       height: shiftedRect.height,
       freeze: freeze,
+      filterQuality: filterQuality,
     );
   }
 
