@@ -16,6 +16,10 @@ FLUTTER_ASSERT_ARC
 - (BOOL)createShell:(NSString*)entrypoint libraryURI:(NSString*)libraryURI;
 @end
 
+@interface FlutterEngine (TestLowMemory)
+- (void)notifyLowMemory;
+@end
+
 extern NSNotificationName const FlutterViewControllerWillDealloc;
 
 /// A simple mock class for FlutterEngine.
@@ -527,6 +531,20 @@ typedef enum UIAccessibilityContrast : NSInteger {
   [[NSNotificationCenter defaultCenter] postNotificationName:FlutterViewControllerHideHomeIndicator
                                                       object:nil];
   XCTAssertTrue(realVC.prefersHomeIndicatorAutoHidden, @"");
+}
+
+- (void)testNotifyLowMemory {
+  id engine = OCMClassMock([FlutterEngine class]);
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  OCMStub([engine viewController]).andReturn(viewController);
+  id viewControllerMock = OCMPartialMock(viewController);
+  OCMStub([viewControllerMock surfaceUpdated:NO]);
+
+  [viewController beginAppearanceTransition:NO animated:NO];
+  [viewController endAppearanceTransition];
+  OCMVerify([engine notifyLowMemory]);
 }
 
 @end

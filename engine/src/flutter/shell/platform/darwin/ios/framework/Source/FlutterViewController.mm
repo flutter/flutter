@@ -557,6 +557,7 @@ static void sendFakeTouchEvent(FlutterEngine* engine,
     [self surfaceUpdated:NO];
     [[_engine.get() lifecycleChannel] sendMessage:@"AppLifecycleState.paused"];
     [self flushOngoingTouches];
+    [_engine.get() notifyLowMemory];
   }
 
   [super viewDidDisappear:animated];
