@@ -882,14 +882,10 @@ class AnimatedAlign extends ImplicitlyAnimatedWidget {
     Key key,
     @required this.alignment,
     this.child,
-    this.heightFactor = 1.0,
-    this.widthFactor = 1.0,
     Curve curve = Curves.linear,
     @required Duration duration,
     VoidCallback onEnd,
   }) : assert(alignment != null),
-       assert(widthFactor == null || widthFactor >= 0.0),
-       assert(heightFactor == null || heightFactor >= 0.0),
        super(key: key, curve: curve, duration: duration, onEnd: onEnd);
 
   /// How to align the child.
@@ -915,16 +911,6 @@ class AnimatedAlign extends ImplicitlyAnimatedWidget {
   /// {@macro flutter.widgets.child}
   final Widget child;
 
-  /// If non-null, sets its height to the child's height multiplied by this factor.
-  ///
-  /// Can be both greater and less than 1.0 but must be positive. Defaults to 1.0.
-  final double heightFactor;
-
-  /// If non-null, sets its width to the child's width multiplied by this factor.
-  ///
-  /// Can be both greater and less than 1.0 but must be positive. Defaults to 1.0.
-  final double widthFactor;
-
   @override
   _AnimatedAlignState createState() => _AnimatedAlignState();
 
@@ -937,23 +923,16 @@ class AnimatedAlign extends ImplicitlyAnimatedWidget {
 
 class _AnimatedAlignState extends AnimatedWidgetBaseState<AnimatedAlign> {
   AlignmentGeometryTween _alignment;
-  Tween<double> _heightFactorTween;
-  Tween<double> _widthFactorTween;
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
     _alignment = visitor(_alignment, widget.alignment, (dynamic value) => AlignmentGeometryTween(begin: value as AlignmentGeometry)) as AlignmentGeometryTween;
-    _heightFactorTween = visitor(_heightFactorTween, widget.heightFactor, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>;
-    _widthFactorTween = visitor(_widthFactorTween, widget.widthFactor, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>;
-
   }
 
   @override
   Widget build(BuildContext context) {
     return Align(
       alignment: _alignment.evaluate(animation),
-      heightFactor: _heightFactorTween.evaluate(animation),
-      widthFactor: _widthFactorTween.evaluate(animation),
       child: widget.child,
     );
   }
@@ -962,8 +941,6 @@ class _AnimatedAlignState extends AnimatedWidgetBaseState<AnimatedAlign> {
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(DiagnosticsProperty<AlignmentGeometryTween>('alignment', _alignment, defaultValue: null));
-    description.add(DiagnosticsProperty<Tween<double>>('widthFactor', _widthFactorTween, defaultValue: null));
-    description.add(DiagnosticsProperty<Tween<double>>('heightFactor', _heightFactorTween, defaultValue: null));
   }
 }
 
