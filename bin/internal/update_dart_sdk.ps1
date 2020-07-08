@@ -58,7 +58,7 @@ Try {
     Start-BitsTransfer -Source $dartSdkUrl -Destination $dartSdkZip
 }
 Catch {
-    Write-Host "Downloading the Dart SDK using the BITS service failed, retrying with WebRequest..."
+    Write-Error "Downloading the Dart SDK using the BITS service failed, retrying with WebRequest..."
     # Invoke-WebRequest is very slow when the progress bar is visible - a 28
     # second download can become a 33 minute download. Disable it with
     # $ProgressPreference and then restore the original value afterwards.
