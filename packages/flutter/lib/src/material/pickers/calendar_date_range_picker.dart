@@ -13,11 +13,14 @@ import 'package:flutter/widgets.dart';
 
 import '../color_scheme.dart';
 import '../divider.dart';
+import '../ink_well.dart';
 import '../material_localizations.dart';
 import '../text_theme.dart';
 import '../theme.dart';
 
 import 'date_utils.dart' as utils;
+
+const Duration _monthScrollDuration = Duration(milliseconds: 200);
 
 const double _monthItemHeaderHeight = 58.0;
 const double _monthItemFooterHeight = 12.0;
@@ -87,6 +90,7 @@ class CalendarDateRangePicker extends StatefulWidget {
 }
 
 class _CalendarDateRangePickerState extends State<CalendarDateRangePicker> {
+  final GlobalKey _scrollViewKey = GlobalKey();
   DateTime _startDate;
   DateTime _endDate;
   int _initialMonthIndex = 0;
@@ -195,32 +199,199 @@ class _CalendarDateRangePickerState extends State<CalendarDateRangePicker> {
         _DayHeaders(),
         if (_showWeekBottomDivider) const Divider(height: 0),
         Expanded(
-          // In order to prevent performance issues when displaying the
-          // correct initial month, 2 `SliverList`s are used to split the
-          // months. The first item in the second SliverList is the initial
-          // month to be displayed.
-          child: CustomScrollView(
-            controller: _controller,
-            center: sliverAfterKey,
-            slivers: <Widget>[
-              SliverList(
-                delegate: SliverChildBuilderDelegate((BuildContext context, int index) => _buildMonthItem(context, index, true),
-                  childCount: _initialMonthIndex,
+          child: _CalendarKeyboardNavigator(
+            firstDate: widget.firstDate,
+            lastDate: widget.lastDate,
+            initialFocusedDay: _startDate ?? widget.initialStartDate ?? widget.currentDate,
+            // In order to prevent performance issues when displaying the
+            // correct initial month, 2 `SliverList`s are used to split the
+            // months. The first item in the second SliverList is the initial
+            // month to be displayed.
+            child: CustomScrollView(
+              key: _scrollViewKey,
+              controller: _controller,
+              center: sliverAfterKey,
+              slivers: <Widget>[
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (BuildContext context, int index) => _buildMonthItem(context, index, true),
+                    childCount: _initialMonthIndex,
+                  ),
                 ),
-              ),
-              SliverList(
-                key: sliverAfterKey,
-                delegate: SliverChildBuilderDelegate((BuildContext context, int index) => _buildMonthItem(context, index, false),
-                  childCount: _numberOfMonths - _initialMonthIndex,
+                SliverList(
+                  key: sliverAfterKey,
+                  delegate: SliverChildBuilderDelegate(
+                    (BuildContext context, int index) => _buildMonthItem(context, index, false),
+                    childCount: _numberOfMonths - _initialMonthIndex,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ],
     );
   }
 }
+
+class _CalendarKeyboardNavigator extends StatefulWidget {
+  const _CalendarKeyboardNavigator({
+    Key key,
+    @required this.child,
+    @required this.firstDate,
+    @required this.lastDate,
+    @required this.initialFocusedDay,
+  }) : super(key: key);
+
+  final Widget child;
+  final DateTime firstDate;
+  final DateTime lastDate;
+  final DateTime initialFocusedDay;
+
+  @override
+  _CalendarKeyboardNavigatorState createState() => _CalendarKeyboardNavigatorState();
+}
+
+class _CalendarKeyboardNavigatorState extends State<_CalendarKeyboardNavigator> {
+
+  Map<LogicalKeySet, Intent> _shortcutMap;
+  Map<Type, Action<Intent>> _actionMap;
+  FocusNode _dayGridFocus;
+  TraversalDirection _dayTraversalDirection;
+  DateTime _focusedDay;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _shortcutMap = <LogicalKeySet, Intent>{
+      LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
+      LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
+      LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
+      LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
+    };
+    _actionMap = <Type, Action<Intent>>{
+      NextFocusIntent: CallbackAction<NextFocusIntent>(onInvoke: _handleGridNextFocus),
+      PreviousFocusIntent: CallbackAction<PreviousFocusIntent>(onInvoke: _handleGridPreviousFocus),
+      DirectionalFocusIntent: CallbackAction<DirectionalFocusIntent>(onInvoke: _handleDirectionFocus),
+    };
+    _dayGridFocus = FocusNode(debugLabel: 'Day Grid');
+  }
+
+  @override
+  void dispose() {
+    _dayGridFocus.dispose();
+    super.dispose();
+  }
+
+  void _handleGridFocusChange(bool focused) {
+    setState(() {
+      if (focused) {
+        _focusedDay ??= widget.initialFocusedDay;
+      }
+    });
+  }
+
+  /// Move focus to the next element after the day grid.
+  void _handleGridNextFocus(NextFocusIntent intent) {
+    _dayGridFocus.requestFocus();
+    _dayGridFocus.nextFocus();
+  }
+
+  /// Move focus to the previous element before the day grid.
+  void _handleGridPreviousFocus(PreviousFocusIntent intent) {
+    _dayGridFocus.requestFocus();
+    _dayGridFocus.previousFocus();
+  }
+
+  /// Move the internal focus date in the direction of the given intent.
+  ///
+  /// This will attempt to move the focused day to the next selectable day in
+  /// the given direction. If the new date is not in the current month, then
+  /// the page view will be scrolled to show the new date's month.
+  ///
+  /// For horizontal directions, it will move forward or backward a day (depending
+  /// on the current [TextDirection]). For vertical directions it will move up and
+  /// down a week at a time.
+  void _handleDirectionFocus(DirectionalFocusIntent intent) {
+    assert(_focusedDay != null);
+    setState(() {
+      final DateTime nextDate = _nextDateInDirection(_focusedDay, intent.direction);
+      if (nextDate != null) {
+        _focusedDay = nextDate;
+        _dayTraversalDirection = intent.direction;
+      }
+    });
+  }
+
+  static const Map<TraversalDirection, int> _directionOffset = <TraversalDirection, int>{
+    TraversalDirection.up: -DateTime.daysPerWeek,
+    TraversalDirection.right: 1,
+    TraversalDirection.down: DateTime.daysPerWeek,
+    TraversalDirection.left: -1,
+  };
+
+  int _dayDirectionOffset(TraversalDirection traversalDirection, TextDirection textDirection) {
+    // Swap left and right if the text direction if RTL
+    if (textDirection == TextDirection.rtl) {
+      if (traversalDirection == TraversalDirection.left)
+        traversalDirection = TraversalDirection.right;
+      else if (traversalDirection == TraversalDirection.right)
+        traversalDirection = TraversalDirection.left;
+    }
+    return _directionOffset[traversalDirection];
+  }
+
+  DateTime _nextDateInDirection(DateTime date, TraversalDirection direction) {
+    final TextDirection textDirection = Directionality.of(context);
+    final DateTime nextDate = utils.addDaysToDate(date, _dayDirectionOffset(direction, textDirection));
+    if (!nextDate.isBefore(widget.firstDate) && !nextDate.isAfter(widget.lastDate)) {
+      return nextDate;
+    }
+    return null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FocusableActionDetector(
+      shortcuts: _shortcutMap,
+      actions: _actionMap,
+      focusNode: _dayGridFocus,
+      onFocusChange: _handleGridFocusChange,
+      child: _FocusedDate(
+        date: _dayGridFocus.hasFocus ? _focusedDay : null,
+        scrollDirection: _dayGridFocus.hasFocus ? _dayTraversalDirection : null,
+        child: widget.child,
+      ),
+    );
+  }
+}
+
+/// InheritedWidget indicating what the current focused date is for its children.
+///
+/// This is used by the [_MonthPicker] to let its children [_DayPicker]s know
+/// what the currently focused date (if any) should be.
+class _FocusedDate extends InheritedWidget {
+  const _FocusedDate({
+    Key key,
+    Widget child,
+    this.date,
+    this.scrollDirection,
+  }) : super(key: key, child: child);
+
+  final DateTime date;
+  final TraversalDirection scrollDirection;
+
+  @override
+  bool updateShouldNotify(_FocusedDate oldWidget) {
+    return !utils.isSameDay(date, oldWidget.date) || scrollDirection != oldWidget.scrollDirection;
+  }
+
+  static _FocusedDate of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<_FocusedDate>();
+  }
+}
+
 
 class _DayHeaders extends StatelessWidget {
   /// Builds widgets showing abbreviated days of week. The first widget in the
@@ -401,7 +572,7 @@ class _MonthSliverGridLayout extends SliverGridLayout {
 ///
 /// The days are arranged in a rectangular grid with one column for each day of
 /// the week.
-class _MonthItem extends StatelessWidget {
+class _MonthItem extends StatefulWidget {
   /// Creates a month item.
   _MonthItem({
     Key key,
@@ -471,9 +642,67 @@ class _MonthItem extends StatelessWidget {
   ///    the different behaviors.
   final DragStartBehavior dragStartBehavior;
 
+  @override
+  _MonthItemState createState() => _MonthItemState();
+}
+
+class _MonthItemState extends State<_MonthItem> {
+  /// List of [FocusNode]s, one for each day of the month.
+  List<FocusNode> _dayFocusNodes;
+
+  @override
+  void initState() {
+    super.initState();
+    final int daysInMonth = utils.getDaysInMonth(widget.displayedMonth.year, widget.displayedMonth.month);
+    _dayFocusNodes = List<FocusNode>.generate(
+        daysInMonth,
+        (int index) => FocusNode(skipTraversal: true, debugLabel: 'Day ${index + 1}')
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Check to see if the focused date is in this month, if so focus it.
+    final DateTime focusedDate = _FocusedDate.of(context)?.date;
+    if (focusedDate != null && utils.isSameMonth(widget.displayedMonth, focusedDate)) {
+      _dayFocusNodes[focusedDate.day - 1].requestFocus();
+    }
+  }
+
+  @override
+  void dispose() {
+    for (final FocusNode node in _dayFocusNodes) {
+      node.dispose();
+    }
+    super.dispose();
+  }
+
   Color _highlightColor(BuildContext context) {
-    final ColorScheme colors = Theme.of(context).colorScheme;
-    return Color.alphaBlend(colors.primary.withOpacity(0.12), colors.background);
+    return Theme.of(context).colorScheme.primary.withOpacity(0.12);
+  }
+
+  void _dayFocusChanged(bool focused) {
+    if (focused) {
+      final TraversalDirection focusDirection = _FocusedDate.of(context)?.scrollDirection;
+      if (focusDirection != null) {
+        ScrollPositionAlignmentPolicy policy = ScrollPositionAlignmentPolicy.explicit;
+        switch (focusDirection) {
+          case TraversalDirection.up:
+          case TraversalDirection.left:
+            policy = ScrollPositionAlignmentPolicy.keepVisibleAtStart;
+            break;
+          case TraversalDirection.right:
+          case TraversalDirection.down:
+            policy = ScrollPositionAlignmentPolicy.keepVisibleAtEnd;
+            break;
+        }
+        Scrollable.ensureVisible(primaryFocus.context,
+          duration: _monthScrollDuration,
+          alignmentPolicy: policy,
+        );
+      }
+    }
   }
 
   Widget _buildDayItem(BuildContext context, DateTime dayToBuild, int firstDayOffset, int daysInMonth) {
@@ -485,17 +714,17 @@ class _MonthItem extends StatelessWidget {
     final Color highlightColor = _highlightColor(context);
     final int day = dayToBuild.day;
 
-    final bool isDisabled = dayToBuild.isAfter(lastDate) || dayToBuild.isBefore(firstDate);
+    final bool isDisabled = dayToBuild.isAfter(widget.lastDate) || dayToBuild.isBefore(widget.firstDate);
 
     BoxDecoration decoration;
     TextStyle itemStyle = textTheme.bodyText2;
 
-    final bool isRangeSelected = selectedDateStart != null && selectedDateEnd != null;
-    final bool isSelectedDayStart = selectedDateStart != null && dayToBuild.isAtSameMomentAs(selectedDateStart);
-    final bool isSelectedDayEnd = selectedDateEnd != null && dayToBuild.isAtSameMomentAs(selectedDateEnd);
+    final bool isRangeSelected = widget.selectedDateStart != null && widget.selectedDateEnd != null;
+    final bool isSelectedDayStart = widget.selectedDateStart != null && dayToBuild.isAtSameMomentAs(widget.selectedDateStart);
+    final bool isSelectedDayEnd = widget.selectedDateEnd != null && dayToBuild.isAtSameMomentAs(widget.selectedDateEnd);
     final bool isInRange = isRangeSelected &&
-        dayToBuild.isAfter(selectedDateStart) &&
-        dayToBuild.isBefore(selectedDateEnd);
+      dayToBuild.isAfter(widget.selectedDateStart) &&
+      dayToBuild.isBefore(widget.selectedDateEnd);
 
     _HighlightPainter highlightPainter;
 
@@ -508,7 +737,7 @@ class _MonthItem extends StatelessWidget {
         shape: BoxShape.circle,
       );
 
-      if (isRangeSelected && selectedDateStart != selectedDateEnd) {
+      if (isRangeSelected && widget.selectedDateStart != widget.selectedDateEnd) {
         final _HighlightPainterStyle style = isSelectedDayStart
           ? _HighlightPainterStyle.highlightTrailing
           : _HighlightPainterStyle.highlightLeading;
@@ -527,7 +756,7 @@ class _MonthItem extends StatelessWidget {
       );
     } else if (isDisabled) {
       itemStyle = textTheme.bodyText2?.apply(color: colorScheme.onSurface.withOpacity(0.38));
-    } else if (utils.isSameDay(currentDate, dayToBuild)) {
+    } else if (utils.isSameDay(widget.currentDate, dayToBuild)) {
       // The current day gets a different text color and a circle stroke
       // border.
       itemStyle = textTheme.bodyText2?.apply(color: colorScheme.primary);
@@ -543,12 +772,11 @@ class _MonthItem extends StatelessWidget {
     // day of month before the rest of the date, as they are looking
     // for the day of month. To do that we prepend day of month to the
     // formatted full date.
-    final String fullDate = localizations.formatFullDate(dayToBuild);
-    String semanticLabel = fullDate;
+    String semanticLabel = '${localizations.formatDecimal(day)}, ${localizations.formatFullDate(dayToBuild)}';
     if (isSelectedDayStart) {
-      semanticLabel = localizations.dateRangeStartDateSemanticLabel(fullDate);
+      semanticLabel = localizations.dateRangeStartDateSemanticLabel(semanticLabel);
     } else if (isSelectedDayEnd) {
-      semanticLabel = localizations.dateRangeEndDateSemanticLabel(fullDate);
+      semanticLabel = localizations.dateRangeEndDateSemanticLabel(semanticLabel);
     }
 
     Widget dayWidget = Container(
@@ -572,11 +800,13 @@ class _MonthItem extends StatelessWidget {
     }
 
     if (!isDisabled) {
-      dayWidget = GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () { onChanged(dayToBuild); },
+      dayWidget = InkResponse(
+        focusNode: _dayFocusNodes[day - 1],
+        onTap: () => widget.onChanged(dayToBuild),
+        radius: _monthItemRowHeight / 2 + 4,
+        splashColor: colorScheme.primary.withOpacity(0.38),
+        onFocusChange: _dayFocusChanged,
         child: dayWidget,
-        dragStartBehavior: dragStartBehavior,
       );
     }
 
@@ -592,8 +822,8 @@ class _MonthItem extends StatelessWidget {
     final ThemeData themeData = Theme.of(context);
     final TextTheme textTheme = themeData.textTheme;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final int year = displayedMonth.year;
-    final int month = displayedMonth.month;
+    final int year = widget.displayedMonth.year;
+    final int month = widget.displayedMonth.month;
     final int daysInMonth = utils.getDaysInMonth(year, month);
     final int dayOffset = utils.firstDayOffset(year, month, localizations);
     final int weeks = ((daysInMonth + dayOffset) / DateTime.daysPerWeek).ceil();
@@ -637,10 +867,10 @@ class _MonthItem extends StatelessWidget {
       // on/before the end date.
       final bool isLeadingInRange =
         !(dayOffset > 0 && i == 0) &&
-        selectedDateStart != null &&
-        selectedDateEnd != null &&
-        dateAfterLeadingPadding.isAfter(selectedDateStart) &&
-        !dateAfterLeadingPadding.isAfter(selectedDateEnd);
+        widget.selectedDateStart != null &&
+        widget.selectedDateEnd != null &&
+        dateAfterLeadingPadding.isAfter(widget.selectedDateStart) &&
+        !dateAfterLeadingPadding.isAfter(widget.selectedDateEnd);
       weekList.insert(0, _buildEdgeContainer(context, isLeadingInRange));
 
       // Only add a trailing edge container if it is for a full week and not a
@@ -651,10 +881,10 @@ class _MonthItem extends StatelessWidget {
         // Only color the edge container if it is on/after the start date and
         // before the end date.
         final bool isTrailingInRange =
-          selectedDateStart != null &&
-          selectedDateEnd != null &&
-          !dateBeforeTrailingPadding.isBefore(selectedDateStart) &&
-          dateBeforeTrailingPadding.isBefore(selectedDateEnd);
+          widget.selectedDateStart != null &&
+          widget.selectedDateEnd != null &&
+          !dateBeforeTrailingPadding.isBefore(widget.selectedDateStart) &&
+          dateBeforeTrailingPadding.isBefore(widget.selectedDateEnd);
         weekList.add(_buildEdgeContainer(context, isTrailingInRange));
       }
 
@@ -673,7 +903,7 @@ class _MonthItem extends StatelessWidget {
           alignment: AlignmentDirectional.centerStart,
           child: ExcludeSemantics(
             child: Text(
-              localizations.formatMonthYear(displayedMonth),
+              localizations.formatMonthYear(widget.displayedMonth),
               style: textTheme.bodyText2.apply(color: themeData.colorScheme.onSurface),
             ),
           ),
@@ -740,11 +970,8 @@ class _HighlightPainter extends CustomPainter {
       ..color = color
       ..style = PaintingStyle.fill;
 
-    // This ensures no gaps in the highlight track due to floating point
-    // division of the available screen width.
-    final double width = size.width + 1;
-    final Rect rectLeft = Rect.fromLTWH(0, 0, width / 2, size.height);
-    final Rect rectRight = Rect.fromLTWH(size.width / 2, 0, width / 2, size.height);
+    final Rect rectLeft = Rect.fromLTWH(0, 0, size.width / 2, size.height);
+    final Rect rectRight = Rect.fromLTWH(size.width / 2, 0, size.width / 2, size.height);
 
     switch (style) {
       case _HighlightPainterStyle.highlightTrailing:
@@ -761,7 +988,7 @@ class _HighlightPainter extends CustomPainter {
         break;
       case _HighlightPainterStyle.highlightAll:
         canvas.drawRect(
-          Rect.fromLTWH(0, 0, width, size.height),
+          Rect.fromLTWH(0, 0, size.width, size.height),
           paint,
         );
         break;
