@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
-import 'package:xml/xml.dart' as xml;
+import 'package:xml/xml.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -963,10 +963,10 @@ String _getLocalArtifactVersion(String pomPath) {
   if (!pomFile.existsSync()) {
     throwToolExit("The file $pomPath wasn't found in the local engine out directory.");
   }
-  xml.XmlDocument document;
+  XmlDocument document;
   try {
-    document = xml.parse(pomFile.readAsStringSync());
-  } on xml.XmlParserException {
+    document = XmlDocument.parse(pomFile.readAsStringSync());
+  } on XmlParserException {
     throwToolExit(
       'Error parsing $pomPath. Please ensure that this is a valid XML document.'
     );
@@ -975,9 +975,9 @@ String _getLocalArtifactVersion(String pomPath) {
       'Error reading $pomPath. Please ensure that you have read permission to this '
       'file and try again.');
   }
-  final Iterable<xml.XmlElement> project = document.findElements('project');
+  final Iterable<XmlElement> project = document.findElements('project');
   assert(project.isNotEmpty);
-  for (final xml.XmlElement versionElement in document.findAllElements('version')) {
+  for (final XmlElement versionElement in document.findAllElements('version')) {
     if (versionElement.parent == project.first) {
       return versionElement.text;
     }
