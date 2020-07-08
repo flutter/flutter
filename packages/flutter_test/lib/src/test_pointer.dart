@@ -438,7 +438,7 @@ class TestGesture {
   }
 }
 
-/// A pack of input PointerEvent queue.
+/// A packet of input PointerEvent queue.
 ///
 /// [timeStamp] is used to indicate the time when the pack is received.
 ///
@@ -451,7 +451,7 @@ class PointerEventPacket {
   /// The time stamp of when the event packet is received.
   ///
   /// This value is used as the time delay relative to the start of
-  /// [WidgeTester.handlePointerEventPack] call.
+  /// [WidgetTester.handlePointerEventPacket] call.
   final Duration timeStamp;
 
   /// The event.

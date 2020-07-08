@@ -465,22 +465,22 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   }
 
   @override
-  Future<List<Duration>> handlePointerEventPack(List<PointerEventPacket> records) {
-    assert(records != null);
-    assert(records.isNotEmpty);
+  Future<List<Duration>> handlePointerEventPacket(
+    List<PointerEventPacket> packet) {
+    assert(packet != null);
+    assert(packet.isNotEmpty);
     return TestAsyncUtils.guard<List<Duration>>(() async {
       // hitTestHistory is an equivalence of _hitTests in [GestureBinding]
       final Map<int, HitTestResult> hitTestHistory = <int, HitTestResult>{};
       final List<Duration> handleTimeStampDiff = <Duration>[];
       DateTime startTime;
-      for(final PointerEventPacket packet in records) {
+      for(final PointerEventPacket packet in packet) {
         final DateTime now = binding.clock.now();
         startTime ??= now;
         // So that the first event is promised to received a zero timeDiff
         final Duration timeDiff = packet.timeStamp - now.difference(startTime);
         if (timeDiff.isNegative) {
           // Flush all past events
-          // maybe trigger a warning
           handleTimeStampDiff.add(timeDiff);
           for (final PointerEvent event in packet.events) {
             _handlePointerEvent(event, hitTestHistory);
