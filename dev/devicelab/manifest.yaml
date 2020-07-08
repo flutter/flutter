@@ -809,7 +809,6 @@ tasks:
       usage widgets.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   animated_placeholder_perf:
     description: >
