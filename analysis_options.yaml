@@ -42,9 +42,6 @@ analyzer:
     # see https://github.com/dart-lang/sdk/issues/28463
     - "lib/i18n/messages_*.dart"
     - "lib/src/http/**"
-    # These integration test dart files are copied into a newly created project and have
-    # errors outside that context.
-    - "dev/integration_tests/ios_host_app/flutterapp/lib/"
 
 linter:
   rules:
