@@ -13,72 +13,62 @@ void main() {
 
   testWidgets('Semantics update does not send update for merged nodes.', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
+    // Pumps a placeholder to trigger the warm up frame.
     await tester.pumpWidget(
-      MaterialApp(
-        home: MergeSemantics(
-          child: Semantics(
-            label: 'outer',
-            textField: true,
-            // This merge semantics node should not be part of the semantics
-            // update because it is under another merge semantics.
-            child: MergeSemantics(
-              child: Semantics(
-                label: 'inner',
-                textField: true,
-                child: const Text('text'),
-              ),
-            ),
-          ),
-        ),
-      ),
-      null,
+      const Placeholder(),
       // Stops right after the warm up frame.
+      null,
       EnginePhase.build
     );
     // The warm up frame will send update for an empty semantics tree. We
     // ignore this one time update.
     SemanticsUpdateBuilderSpy.observations.clear();
-    // Builds the real semantics tree.
-    await tester.pump();
 
-    expect(SemanticsUpdateBuilderSpy.observations.length, 5);
+    // Builds the real widget tree.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MergeSemantics(
+          child: Semantics(
+            label: 'outer',
+            // This semantics node should not be part of the semantics update
+            // because it is under another semantics container.
+            child: Semantics(
+              label: 'inner',
+              container: true,
+              child: const Text('text'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(SemanticsUpdateBuilderSpy.observations.length, 2);
 
     expect(SemanticsUpdateBuilderSpy.observations.containsKey(0), isTrue);
     expect(SemanticsUpdateBuilderSpy.observations[0]!.childrenInTraversalOrder.length, 1);
     expect(SemanticsUpdateBuilderSpy.observations[0]!.childrenInTraversalOrder[0], 1);
 
     expect(SemanticsUpdateBuilderSpy.observations.containsKey(1), isTrue);
-    expect(SemanticsUpdateBuilderSpy.observations[1]!.childrenInTraversalOrder.length, 1);
-    expect(SemanticsUpdateBuilderSpy.observations[1]!.childrenInTraversalOrder[0], 2);
-
-    expect(SemanticsUpdateBuilderSpy.observations.containsKey(2), isTrue);
-    expect(SemanticsUpdateBuilderSpy.observations[2]!.childrenInTraversalOrder.length, 1);
-    expect(SemanticsUpdateBuilderSpy.observations[2]!.childrenInTraversalOrder[0], 3);
-
-    expect(SemanticsUpdateBuilderSpy.observations.containsKey(3), isTrue);
-    expect(SemanticsUpdateBuilderSpy.observations[3]!.childrenInTraversalOrder.length, 1);
-    expect(SemanticsUpdateBuilderSpy.observations[3]!.childrenInTraversalOrder[0], 4);
-
-    expect(SemanticsUpdateBuilderSpy.observations.containsKey(4), isTrue);
-    expect(SemanticsUpdateBuilderSpy.observations[4]!.childrenInTraversalOrder.length, 0);
-    expect(SemanticsUpdateBuilderSpy.observations[4]!.label, 'outer\ninner\ntext');
+    expect(SemanticsUpdateBuilderSpy.observations[1]!.childrenInTraversalOrder.length, 0);
+    expect(SemanticsUpdateBuilderSpy.observations[1]!.label, 'outer\ninner\ntext');
 
     SemanticsUpdateBuilderSpy.observations.clear();
 
     // Updates the inner semantics label and verifies it only sends update for
     // the merged parent.
     await tester.pumpWidget(
-      MaterialApp(
-        home: MergeSemantics(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MergeSemantics(
           child: Semantics(
             label: 'outer',
-            textField: true,
-            child: MergeSemantics(
-              child: Semantics(
-                label: 'inner-updated',
-                textField: true,
-                child: const Text('text'),
-              ),
+            // This semantics node should not be part of the semantics update
+            // because it is under another semantics container.
+            child: Semantics(
+              label: 'inner-updated',
+              container: true,
+              child: const Text('text'),
             ),
           ),
         ),
@@ -86,9 +76,9 @@ void main() {
     );
     expect(SemanticsUpdateBuilderSpy.observations.length, 1);
 
-    expect(SemanticsUpdateBuilderSpy.observations.containsKey(4), isTrue);
-    expect(SemanticsUpdateBuilderSpy.observations[4]!.childrenInTraversalOrder.length, 0);
-    expect(SemanticsUpdateBuilderSpy.observations[4]!.label, 'outer\ninner-updated\ntext');
+    expect(SemanticsUpdateBuilderSpy.observations.containsKey(1), isTrue);
+    expect(SemanticsUpdateBuilderSpy.observations[1]!.childrenInTraversalOrder.length, 0);
+    expect(SemanticsUpdateBuilderSpy.observations[1]!.label, 'outer\ninner-updated\ntext');
 
     SemanticsUpdateBuilderSpy.observations.clear();
     handle.dispose();
@@ -101,7 +91,6 @@ class SemanticsUpdateTestBinding extends AutomatedTestWidgetsFlutterBinding {
     return SemanticsUpdateBuilderSpy();
   }
 }
-
 
 class SemanticsUpdateBuilderSpy extends ui.SemanticsUpdateBuilder {
   static Map<int, SemanticsNodeUpdateObservation> observations = <int, SemanticsNodeUpdateObservation>{};
