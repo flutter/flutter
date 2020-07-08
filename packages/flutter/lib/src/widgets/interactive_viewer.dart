@@ -87,10 +87,13 @@ class InteractiveViewer extends StatefulWidget {
            && boundaryMargin.left.isFinite)),
        super(key: key);
 
-  /// If true, panning is only allowed in the direction of the main axes.
+  /// If true, panning is only allowed in the direction of the horizontal axis
+  /// or the vertical axis.
   ///
-  /// In other words, when this is true, diagonal panning is not allowed. This
-  /// is a common pattern in tables where data is displayed in columns and rows.
+  /// In other words, when this is true, diagonal panning is not allowed. A
+  /// single gesture begun along one axis cannot also cause panning along the
+  /// other axis without stopping and beginning a new gesture. This is a common
+  /// pattern in tables where data is displayed in columns and rows.
   final bool alignPanAxis;
 
   /// A margin for the visible boundaries of the child.
@@ -538,9 +541,8 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     }
 
     final Offset alignedTranslation = widget.alignPanAxis && _panAxis != null
-      && _gestureType == _GestureType.pan
-        ? _alignAxis(translation, _panAxis)
-        : translation;
+      ? _alignAxis(translation, _panAxis)
+      : translation;
 
     final Matrix4 nextMatrix = matrix.clone()..translate(
       alignedTranslation.dx,
@@ -721,11 +723,13 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     final Offset focalPointScene = _transformationController.toScene(
       details.localFocalPoint,
     );
-    _panAxis ??= _getPanAxis(_referenceFocalPoint, focalPointScene);
     _gestureType ??= _getGestureType(
       !widget.scaleEnabled ? 1.0 : details.scale,
       !_rotateEnabled ? 0.0 : details.rotation,
     );
+    if (_gestureType == _GestureType.pan) {
+      _panAxis ??= _getPanAxis(_referenceFocalPoint, focalPointScene);
+    }
 
     if (!_gestureIsSupported(_gestureType)) {
       return;
