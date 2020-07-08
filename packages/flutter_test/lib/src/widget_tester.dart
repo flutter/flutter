@@ -465,8 +465,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   }
 
   @override
-  Future<List<Duration>> handlePointerEventPacket(
-    List<PointerEventPacket> packet) {
+  Future<List<Duration>> handlePointerEventPacket(List<PointerEventPacket> packet) {
     assert(packet != null);
     assert(packet.isNotEmpty);
     return TestAsyncUtils.guard<List<Duration>>(() async {
@@ -474,7 +473,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       final Map<int, HitTestResult> hitTestHistory = <int, HitTestResult>{};
       final List<Duration> handleTimeStampDiff = <Duration>[];
       DateTime startTime;
-      for(final PointerEventPacket packet in packet) {
+      for (final PointerEventPacket packet in packet) {
         final DateTime now = binding.clock.now();
         startTime ??= now;
         // So that the first event is promised to received a zero timeDiff
@@ -485,14 +484,14 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
           for (final PointerEvent event in packet.events) {
             _handlePointerEvent(event, hitTestHistory);
           }
-        }
-        else {
+        } else {
           // TODO(CareF): reconsider the pumping strategy after
           // https://github.com/flutter/flutter/issues/60739 is fixed
           await binding.pump();
           await binding.executeLater(timeDiff, () async {
             handleTimeStampDiff.add(
-              packet.timeStamp - binding.clock.now().difference(startTime));
+              packet.timeStamp - binding.clock.now().difference(startTime),
+            );
             for (final PointerEvent event in packet.events) {
               _handlePointerEvent(event, hitTestHistory);
             }
@@ -545,8 +544,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
         event is PointerHoverEvent ||
         event is PointerAddedEvent ||
         event is PointerRemovedEvent) {
-      binding.dispatchEvent(
-        event, hitTestResult, source: TestBindingEventSource.test);
+      binding.dispatchEvent(event, hitTestResult, source: TestBindingEventSource.test);
     }
   }
 

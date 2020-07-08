@@ -400,10 +400,10 @@ abstract class WidgetController {
     });
   }
 
-  /// A simulator of how the framework handles a serials of [PointerEvent]s
-  /// received from the flutter engine.
+  /// A simulator of how the framework handles a series of [PointerEvent]s
+  /// received from the Flutter engine.
   ///
-  /// The [PointerEventPacket.timeStamp] is used for time delay of an event
+  /// The [PointerEventPacket.timeStamp] is used as the time delay of an event
   /// packet relative to the starting point of the method call.
   ///
   /// Returns a list of the difference between [PointerEventPacket.timeStamp]

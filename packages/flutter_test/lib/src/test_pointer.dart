@@ -438,14 +438,14 @@ class TestGesture {
   }
 }
 
-/// A packet of input PointerEvent queue.
+/// A packet of input [PointerEvent] queue.
 ///
-/// [timeStamp] is used to indicate the time when the pack is received.
+/// The [timeStamp] is used to indicate the time when the pack is received.
 ///
 /// This is a simulation of how the framework is receiving input events from
 /// the engine. See [GestureBinding] and [PointerDataPacket].
 class PointerEventPacket {
-  /// Creates a pack of PointerEvents.
+  /// Creates a pack of [PointerEvent]s.
   PointerEventPacket(this.timeStamp, this.events);
 
   /// The time stamp of when the event packet is received.
@@ -454,6 +454,8 @@ class PointerEventPacket {
   /// [WidgetTester.handlePointerEventPacket] call.
   final Duration timeStamp;
 
-  /// The event.
+  /// The event list that expanded from the [PointerDataPacket].
+  ///
+  /// See [PointerEventConverter.expand].
   final List<PointerEvent> events;
 }
