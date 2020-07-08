@@ -584,19 +584,16 @@ class _AppBarState extends State<AppBar> {
       // sizes. To opt out, wrap the [title] widget in a [MediaQuery] widget
       // with [MediaQueryData.textScaleFactor] set to
       // `MediaQuery.textScaleFactorOf(context)`.
-      // ignore: deprecated_member_use_from_same_package
-      if (appBarTheme?.shouldCapTextScaleForTitle == true) {
-        final MediaQueryData mediaQueryData = MediaQuery.of(context);
-        title = MediaQuery(
-          data: mediaQueryData.copyWith(
-            textScaleFactor: math.min(
-              mediaQueryData.textScaleFactor,
-              _kMaxTitleTextScaleFactor,
-            ),
+      final MediaQueryData mediaQueryData = MediaQuery.of(context);
+      title = MediaQuery(
+        data: mediaQueryData.copyWith(
+          textScaleFactor: math.min(
+            mediaQueryData.textScaleFactor,
+            _kMaxTitleTextScaleFactor,
           ),
-          child: title,
-        );
-      }
+        ),
+        child: title,
+      );
     }
 
     Widget actions;
