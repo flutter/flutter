@@ -4,6 +4,7 @@
 
 #import <XCTest/XCTest.h>
 
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterBinaryMessenger.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlatformViews.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
@@ -368,4 +369,46 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   XCTAssertEqual([accessibility_notifications count], 0ul);
 }
 
+- (void)testAccessibilityMessageAfterDeletion {
+  flutter::MockDelegate mock_delegate;
+  auto thread = std::make_unique<fml::Thread>("AccessibilityBridgeTest");
+  auto thread_task_runner = thread->GetTaskRunner();
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/thread_task_runner,
+                               /*raster=*/thread_task_runner,
+                               /*ui=*/thread_task_runner,
+                               /*io=*/thread_task_runner);
+  id messenger = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  id engine = OCMClassMock([FlutterEngine class]);
+  id flutterViewController = OCMClassMock([FlutterViewController class]);
+
+  OCMStub([flutterViewController engine]).andReturn(engine);
+  OCMStub([engine binaryMessenger]).andReturn(messenger);
+  FlutterBinaryMessengerConnection connection = 123;
+  OCMStub([messenger setMessageHandlerOnChannel:@"flutter/accessibility"
+                           binaryMessageHandler:[OCMArg any]])
+      .andReturn(connection);
+
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*task_runners=*/runners);
+  fml::AutoResetWaitableEvent latch;
+  thread_task_runner->PostTask([&] {
+    auto weakFactory =
+        std::make_unique<fml::WeakPtrFactory<FlutterViewController>>(flutterViewController);
+    platform_view->SetOwnerViewController(weakFactory->GetWeakPtr());
+    auto bridge =
+        std::make_unique<flutter::AccessibilityBridge>(/*view=*/nil,
+                                                       /*platform_view=*/platform_view.get(),
+                                                       /*platform_views_controller=*/nil);
+    XCTAssertTrue(bridge.get());
+    OCMVerify([messenger setMessageHandlerOnChannel:@"flutter/accessibility"
+                               binaryMessageHandler:[OCMArg isNotNil]]);
+    bridge.reset();
+    latch.Signal();
+  });
+  latch.Wait();
+  OCMVerify([messenger cleanupConnection:connection]);
+}
 @end

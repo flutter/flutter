@@ -447,9 +447,15 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
   }
 }
 
-- (void)setMessageHandlerOnChannel:(nonnull NSString*)channel
-              binaryMessageHandler:(nullable FlutterBinaryMessageHandler)handler {
+- (FlutterBinaryMessengerConnection)setMessageHandlerOnChannel:(nonnull NSString*)channel
+                                          binaryMessageHandler:
+                                              (nullable FlutterBinaryMessageHandler)handler {
   _messageHandlers[channel] = [handler copy];
+  return 0;
+}
+
+- (void)cleanupConnection:(FlutterBinaryMessengerConnection)connection {
+  // There hasn't been a need to implement this yet for macOS.
 }
 
 #pragma mark - FlutterPluginRegistry

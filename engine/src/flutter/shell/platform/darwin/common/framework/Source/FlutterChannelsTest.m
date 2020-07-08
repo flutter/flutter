@@ -35,10 +35,16 @@
   self.message = message;
 }
 
-- (void)setMessageHandlerOnChannel:(NSString*)channel
-              binaryMessageHandler:(FlutterBinaryMessageHandler _Nullable)handler {
+- (FlutterBinaryMessengerConnection)setMessageHandlerOnChannel:(NSString*)channel
+                                          binaryMessageHandler:
+                                              (FlutterBinaryMessageHandler _Nullable)handler {
   [self.handlers setObject:handler forKey:channel];
+  return 0;
 }
+
+- (void)cleanupConnection:(FlutterBinaryMessengerConnection)connection {
+}
+
 @end
 
 @interface FlutterChannelsTest : XCTestCase
@@ -155,6 +161,53 @@
   OCMExpect([binaryMessenger sendOnChannel:@"dev.flutter/channel-buffers" message:expectedMessage]);
   [channel resizeChannelBuffer:100];
   OCMVerifyAll(binaryMessenger);
+  [binaryMessenger stopMocking];
+}
+
+- (void)testBasicMessageChannelCleanup {
+  NSString* channelName = @"foo";
+  FlutterBinaryMessengerConnection connection = 123;
+  id binaryMessenger = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  id codec = OCMProtocolMock(@protocol(FlutterMethodCodec));
+  FlutterBasicMessageChannel* channel =
+      [[FlutterBasicMessageChannel alloc] initWithName:channelName
+                                       binaryMessenger:binaryMessenger
+                                                 codec:codec];
+  FlutterMessageHandler handler = ^(id _Nullable message, FlutterReply callback) {
+    NSLog(@"hey");
+  };
+  OCMStub([binaryMessenger setMessageHandlerOnChannel:channelName
+                                 binaryMessageHandler:[OCMArg any]])
+      .andReturn(connection);
+  [channel setMessageHandler:handler];
+  OCMVerify([binaryMessenger setMessageHandlerOnChannel:channelName
+                                   binaryMessageHandler:[OCMArg isNotNil]]);
+  [channel setMessageHandler:nil];
+  OCMVerify([binaryMessenger cleanupConnection:connection]);
+}
+
+- (void)testMethodChannelCleanup {
+  NSString* channelName = @"foo";
+  FlutterBinaryMessengerConnection connection = 123;
+  id binaryMessenger = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  id codec = OCMProtocolMock(@protocol(FlutterMethodCodec));
+  FlutterMethodChannel* channel = [[FlutterMethodChannel alloc] initWithName:channelName
+                                                             binaryMessenger:binaryMessenger
+                                                                       codec:codec];
+  XCTAssertNotNil(channel);
+
+  OCMStub([binaryMessenger setMessageHandlerOnChannel:channelName
+                                 binaryMessageHandler:[OCMArg any]])
+      .andReturn(connection);
+
+  FlutterMethodCallHandler handler =
+      ^(FlutterMethodCall* _Nonnull call, FlutterResult _Nonnull result) {
+      };
+  [channel setMethodCallHandler:handler];
+  OCMVerify([binaryMessenger setMessageHandlerOnChannel:channelName
+                                   binaryMessageHandler:[OCMArg isNotNil]]);
+  [channel setMethodCallHandler:nil];
+  OCMVerify([binaryMessenger cleanupConnection:connection]);
 }
 
 @end

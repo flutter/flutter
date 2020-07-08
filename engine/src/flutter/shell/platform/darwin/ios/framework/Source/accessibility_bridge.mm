@@ -72,6 +72,7 @@ AccessibilityBridge::AccessibilityBridge(UIView* view,
 }
 
 AccessibilityBridge::~AccessibilityBridge() {
+  [accessibility_channel_.get() setMessageHandler:nil];
   clearState();
   view_.accessibilityElements = nil;
 }

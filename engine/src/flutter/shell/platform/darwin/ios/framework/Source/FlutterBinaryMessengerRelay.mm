@@ -35,10 +35,20 @@
   }
 }
 
-- (void)setMessageHandlerOnChannel:(NSString*)channel
-              binaryMessageHandler:(FlutterBinaryMessageHandler)handler {
+- (FlutterBinaryMessengerConnection)setMessageHandlerOnChannel:(NSString*)channel
+                                          binaryMessageHandler:
+                                              (FlutterBinaryMessageHandler)handler {
   if (self.parent) {
-    [self.parent setMessageHandlerOnChannel:channel binaryMessageHandler:handler];
+    return [self.parent setMessageHandlerOnChannel:channel binaryMessageHandler:handler];
+  } else {
+    FML_LOG(WARNING) << "Communicating on a dead channel.";
+    return -1;
+  }
+}
+
+- (void)cleanupConnection:(FlutterBinaryMessengerConnection)connection {
+  if (self.parent) {
+    return [self.parent cleanupConnection:connection];
   } else {
     FML_LOG(WARNING) << "Communicating on a dead channel.";
   }
