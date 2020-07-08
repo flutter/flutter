@@ -20,6 +20,7 @@ static void ResizeChannelBuffer(NSObject<FlutterBinaryMessenger>* binaryMessenge
   NSObject<FlutterBinaryMessenger>* _messenger;
   NSString* _name;
   NSObject<FlutterMessageCodec>* _codec;
+  FlutterBinaryMessengerConnection _connection;
 }
 + (instancetype)messageChannelWithName:(NSString*)name
                        binaryMessenger:(NSObject<FlutterBinaryMessenger>*)messenger {
@@ -68,7 +69,12 @@ static void ResizeChannelBuffer(NSObject<FlutterBinaryMessenger>* binaryMessenge
 
 - (void)setMessageHandler:(FlutterMessageHandler)handler {
   if (!handler) {
-    [_messenger setMessageHandlerOnChannel:_name binaryMessageHandler:nil];
+    if (_connection > 0) {
+      [_messenger cleanupConnection:_connection];
+      _connection = 0;
+    } else {
+      [_messenger setMessageHandlerOnChannel:_name binaryMessageHandler:nil];
+    }
     return;
   }
   // Grab reference to avoid retain on self.
@@ -78,7 +84,7 @@ static void ResizeChannelBuffer(NSObject<FlutterBinaryMessenger>* binaryMessenge
       callback([codec encode:reply]);
     });
   };
-  [_messenger setMessageHandlerOnChannel:_name binaryMessageHandler:messageHandler];
+  _connection = [_messenger setMessageHandlerOnChannel:_name binaryMessageHandler:messageHandler];
 }
 
 - (void)resizeChannelBuffer:(NSInteger)newSize {
@@ -168,6 +174,7 @@ NSObject const* FlutterMethodNotImplemented = [NSObject new];
   NSObject<FlutterBinaryMessenger>* _messenger;
   NSString* _name;
   NSObject<FlutterMethodCodec>* _codec;
+  FlutterBinaryMessengerConnection _connection;
 }
 
 + (instancetype)methodChannelWithName:(NSString*)name
@@ -222,7 +229,12 @@ NSObject const* FlutterMethodNotImplemented = [NSObject new];
 
 - (void)setMethodCallHandler:(FlutterMethodCallHandler)handler {
   if (!handler) {
-    [_messenger setMessageHandlerOnChannel:_name binaryMessageHandler:nil];
+    if (_connection > 0) {
+      [_messenger cleanupConnection:_connection];
+      _connection = 0;
+    } else {
+      [_messenger setMessageHandlerOnChannel:_name binaryMessageHandler:nil];
+    }
     return;
   }
   // Make sure the block captures the codec, not self.
@@ -238,7 +250,7 @@ NSObject const* FlutterMethodNotImplemented = [NSObject new];
         callback([codec encodeSuccessEnvelope:result]);
     });
   };
-  [_messenger setMessageHandlerOnChannel:_name binaryMessageHandler:messageHandler];
+  _connection = [_messenger setMessageHandlerOnChannel:_name binaryMessageHandler:messageHandler];
 }
 
 - (void)resizeChannelBuffer:(NSInteger)newSize {
