@@ -173,6 +173,8 @@ class SnackBar extends StatefulWidget {
     @required this.content,
     this.backgroundColor,
     this.elevation,
+    this.margin,
+    this.padding,
     this.shape,
     this.behavior,
     this.action,
@@ -181,6 +183,10 @@ class SnackBar extends StatefulWidget {
     this.onVisible,
   }) : assert(elevation == null || elevation >= 0.0),
        assert(content != null),
+       assert(
+         margin == null || behavior == SnackBarBehavior.floating,
+         'Margin can only be used with floating behavior',
+       ),
        assert(duration != null),
        super(key: key);
 
@@ -189,7 +195,7 @@ class SnackBar extends StatefulWidget {
   /// Typically a [Text] widget.
   final Widget content;
 
-  /// The Snackbar's background color. If not specified it will use
+  /// The snack bar's background color. If not specified it will use
   /// [ThemeData.snackBarTheme.backgroundColor]. If that is not specified
   /// it will default to a dark variation of [ColorScheme.surface] for light
   /// themes, or [ColorScheme.onSurface] for dark themes.
@@ -203,6 +209,21 @@ class SnackBar extends StatefulWidget {
   /// If this property is null, then [ThemeData.snackBarTheme.elevation] is
   /// used, if that is also null, the default value is 6.0.
   final double elevation;
+
+  /// Empty space to surround the snack bar.
+  ///
+  /// This property is only used when [behavior] is [SnackBarBehavior.floating].
+  ///
+  /// If this property is null, then the default is
+  /// `EdgeInsets.fromLTRB(15.0, 5.0, 15.0, 10.0)`.
+  final EdgeInsetsGeometry margin;
+
+  /// The amount of horizontal space to apply to the snack bar's content and
+  /// optional action.
+  ///
+  /// If this property is null, then the default depends on the [behavior] and
+  /// the presence of an [action].
+  final EdgeInsetsGeometry padding;
 
   /// The shape of the snack bar's [Material].
   ///
@@ -272,6 +293,8 @@ class SnackBar extends StatefulWidget {
       content: content,
       backgroundColor: backgroundColor,
       elevation: elevation,
+      margin: margin,
+      padding: padding,
       shape: shape,
       behavior: behavior,
       action: action,
@@ -365,7 +388,9 @@ class _SnackBarState extends State<SnackBar> {
     final TextStyle contentTextStyle = snackBarTheme.contentTextStyle ?? inverseTheme.textTheme.subtitle1;
     final SnackBarBehavior snackBarBehavior = widget.behavior ?? snackBarTheme.behavior ?? SnackBarBehavior.fixed;
     final bool isFloatingSnackBar = snackBarBehavior == SnackBarBehavior.floating;
-    final double snackBarPadding = isFloatingSnackBar ? 16.0 : 24.0;
+    final double horizontalPadding = isFloatingSnackBar ? 16.0 : 24.0;
+    final EdgeInsetsGeometry padding = widget.padding
+      ?? EdgeInsetsDirectional.only(start: horizontalPadding, end: widget.action != null ? 0 : horizontalPadding);
 
     final CurvedAnimation heightAnimation = CurvedAnimation(parent: widget.animation, curve: _snackBarHeightCurve);
     final CurvedAnimation fadeInAnimation = CurvedAnimation(parent: widget.animation, curve: _snackBarFadeInCurve);
@@ -378,29 +403,29 @@ class _SnackBarState extends State<SnackBar> {
     Widget snackBar = SafeArea(
       top: false,
       bottom: !isFloatingSnackBar,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          SizedBox(width: snackBarPadding),
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: _singleLineVerticalPadding),
-              child: DefaultTextStyle(
-                style: contentTextStyle,
-                child: widget.content,
+      child: Padding(
+        padding: padding,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: _singleLineVerticalPadding),
+                child: DefaultTextStyle(
+                  style: contentTextStyle,
+                  child: widget.content,
+                ),
               ),
             ),
-          ),
-          if (widget.action != null)
-            ButtonTheme(
-              textTheme: ButtonTextTheme.accent,
-              minWidth: 64.0,
-              padding: EdgeInsets.symmetric(horizontal: snackBarPadding),
-              child: widget.action,
-            )
-          else
-            SizedBox(width: snackBarPadding),
-        ],
+            if (widget.action != null)
+              ButtonTheme(
+                textTheme: ButtonTextTheme.accent,
+                minWidth: 64.0,
+                padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                child: widget.action,
+              ),
+          ],
+        ),
       ),
     );
 
@@ -426,9 +451,11 @@ class _SnackBarState extends State<SnackBar> {
     );
 
     if (isFloatingSnackBar) {
-      snackBar = Padding(
-        padding: const EdgeInsets.fromLTRB(15.0, 5.0, 15.0, 10.0),
-        child: snackBar,
+      snackBar = SafeArea(
+        child: Padding(
+          padding: widget.margin ?? const EdgeInsets.fromLTRB(15.0, 5.0, 15.0, 10.0),
+          child: snackBar,
+        ),
       );
     }
 
