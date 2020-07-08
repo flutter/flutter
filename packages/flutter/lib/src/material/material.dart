@@ -238,6 +238,16 @@ class Material extends StatefulWidget {
   /// The color to paint the shadow below the material.
   ///
   /// If null, [ThemeData.shadowColor] is used, which defaults to fully opaque black.
+  ///
+  /// Shadows can be difficult to see in a dark theme, so the elevation of a
+  /// surface should be portrayed with an "overlay" in addition to the shadow.
+  /// As the elevation of the component increases, the overlay increases in
+  /// opacity.
+  ///
+  /// See also:
+  ///
+  ///  * [ThemeData.applyElevationOverlayColor], which turns elevation overlay
+  /// on or off for dark themes.
   final Color shadowColor;
 
   /// The typographical style to use for text within this material.
