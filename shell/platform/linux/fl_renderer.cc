@@ -93,11 +93,12 @@ gboolean fl_renderer_setup(FlRenderer* self, GError** error) {
   }
 
   if (!eglBindAPI(EGL_OPENGL_ES_API)) {
+    EGLint egl_error = eglGetError();  // must be before egl_config_to_string().
     g_autofree gchar* config_string =
         egl_config_to_string(priv->egl_display, priv->egl_config);
     g_set_error(error, fl_renderer_error_quark(), FL_RENDERER_ERROR_FAILED,
                 "Failed to bind EGL OpenGL ES API using configuration (%s): %s",
-                config_string, egl_error_to_string(eglGetError()));
+                config_string, egl_error_to_string(egl_error));
     return FALSE;
   }
 
@@ -136,11 +137,12 @@ gboolean fl_renderer_start(FlRenderer* self, GError** error) {
   priv->egl_surface = FL_RENDERER_GET_CLASS(self)->create_surface(
       self, priv->egl_display, priv->egl_config);
   if (priv->egl_surface == EGL_NO_SURFACE) {
+    EGLint egl_error = eglGetError();  // must be before egl_config_to_string().
     g_autofree gchar* config_string =
         egl_config_to_string(priv->egl_display, priv->egl_config);
     g_set_error(error, fl_renderer_error_quark(), FL_RENDERER_ERROR_FAILED,
                 "Failed to create EGL surface using configuration (%s): %s",
-                config_string, egl_error_to_string(eglGetError()));
+                config_string, egl_error_to_string(egl_error));
     return FALSE;
   }
 
@@ -148,11 +150,12 @@ gboolean fl_renderer_start(FlRenderer* self, GError** error) {
   priv->egl_context = eglCreateContext(priv->egl_display, priv->egl_config,
                                        EGL_NO_CONTEXT, context_attributes);
   if (priv->egl_context == EGL_NO_CONTEXT) {
+    EGLint egl_error = eglGetError();  // must be before egl_config_to_string().
     g_autofree gchar* config_string =
         egl_config_to_string(priv->egl_display, priv->egl_config);
     g_set_error(error, fl_renderer_error_quark(), FL_RENDERER_ERROR_FAILED,
                 "Failed to create EGL context using configuration (%s): %s",
-                config_string, egl_error_to_string(eglGetError()));
+                config_string, egl_error_to_string(egl_error));
     return FALSE;
   }
 
