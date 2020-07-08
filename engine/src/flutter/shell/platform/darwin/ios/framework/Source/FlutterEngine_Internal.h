@@ -45,6 +45,8 @@
 - (void)launchEngine:(NSString*)entrypoint libraryURI:(NSString*)libraryOrNil;
 - (BOOL)createShell:(NSString*)entrypoint libraryURI:(NSString*)libraryOrNil;
 - (void)attachView;
+- (void)notifyLowMemory;
+- (flutter::PlatformViewIOS*)iosPlatformView;
 
 @end
 

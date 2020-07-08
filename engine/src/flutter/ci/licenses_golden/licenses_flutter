@@ -898,6 +898,7 @@ FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterCallbac
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine.mm
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterEnginePlatformViewTest.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterEngineTest.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterHeadlessDartRunner.mm
