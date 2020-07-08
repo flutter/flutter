@@ -1264,9 +1264,8 @@ class TextInput {
   ///   topmost [AutofillGroup] is getting disposed.
   static void finishAutofillContext({ bool shouldSave = true }) {
     assert(shouldSave != null);
-    assert(TextInput._instance._currentConnection == null);
     TextInput._instance._channel.invokeMethod<void>(
-      'TextInput.FinishAutofillContext',
+      'TextInput.finishAutofillContext',
       shouldSave ,
     );
   }

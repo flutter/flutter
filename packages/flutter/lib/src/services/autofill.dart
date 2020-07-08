@@ -808,7 +808,7 @@ mixin AutofillScopeMixin implements AutofillScope {
       'Every client in AutofillScope.autofillClients must enable autofill',
     );
 
-    TextInputConfiguration inputConfiguration = _AutofillScopeTextInputConfiguration(
+    final TextInputConfiguration inputConfiguration = _AutofillScopeTextInputConfiguration(
       allConfigurations: autofillClients.map((AutofillClient client) => client.textInputConfiguration),
       currentClientConfiguration: configuration,
     );

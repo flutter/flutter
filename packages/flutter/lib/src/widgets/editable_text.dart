@@ -1737,7 +1737,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       // provide the autofillId.
       _textInputConnection = _needsAutofill && currentAutofillScope != null
         ? currentAutofillScope.attach(this, textInputConfiguration)
-        : TextInput.attach(this, _createTextInputConfiguration(_isInAutofillContext));
+        : TextInput.attach(this, _createTextInputConfiguration(_isInAutofillContext || _needsAutofill));
       _textInputConnection.show();
       _updateSizeAndTransform();
       if (_needsAutofill) {
