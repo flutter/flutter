@@ -309,12 +309,11 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     MotionEventTracker.MotionEventId motionEventId =
         MotionEventTracker.MotionEventId.from(touch.motionEventId);
     MotionEvent trackedEvent = motionEventTracker.pop(motionEventId);
-    if (trackedEvent != null) {
-      return trackedEvent;
-    }
 
-    // TODO (kaushikiska) : warn that we are potentially using an untracked
-    // event in the platform views.
+    // Pointer coordinates in the tracked events are global to FlutterView
+    // framework converts them to be local to a widget, given that
+    // motion events operate on local coords, we need to replace these in the tracked
+    // event with their local counterparts.
     PointerProperties[] pointerProperties =
         parsePointerPropertiesList(touch.rawPointerPropertiesList)
             .toArray(new PointerProperties[touch.pointerCount]);
@@ -322,6 +321,26 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         parsePointerCoordsList(touch.rawPointerCoords, density)
             .toArray(new PointerCoords[touch.pointerCount]);
 
+    if (trackedEvent != null) {
+      return MotionEvent.obtain(
+          trackedEvent.getDownTime(),
+          trackedEvent.getEventTime(),
+          trackedEvent.getAction(),
+          touch.pointerCount,
+          pointerProperties,
+          pointerCoords,
+          trackedEvent.getMetaState(),
+          trackedEvent.getButtonState(),
+          trackedEvent.getXPrecision(),
+          trackedEvent.getYPrecision(),
+          trackedEvent.getDeviceId(),
+          trackedEvent.getEdgeFlags(),
+          trackedEvent.getSource(),
+          trackedEvent.getFlags());
+    }
+
+    // TODO (kaushikiska) : warn that we are potentially using an untracked
+    // event in the platform views.
     return MotionEvent.obtain(
         touch.downTime.longValue(),
         touch.eventTime.longValue(),
