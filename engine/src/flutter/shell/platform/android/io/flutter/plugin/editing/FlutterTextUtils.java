@@ -186,4 +186,134 @@ class FlutterTextUtils {
 
     return offset - deleteCharCount;
   }
+
+  /**
+   * Gets the offset of the next character following the given offset, with consideration for
+   * multi-byte characters.
+   *
+   * @see <a target="_new"
+   *     href="https://android.googlesource.com/platform/frameworks/base/+/refs/heads/android10-s3-release/core/java/android/text/method/BaseKeyListener.java#111">https://android.googlesource.com/platform/frameworks/base/+/refs/heads/android10-s3-release/core/java/android/text/method/BaseKeyListener.java#111</a>
+   */
+  public int getOffsetAfter(CharSequence text, int offset) {
+    final int len = text.length();
+
+    if (offset >= len - 1) {
+      return len;
+    }
+
+    int codePoint = Character.codePointAt(text, offset);
+    int nextCharCount = Character.charCount(codePoint);
+    int nextOffset = offset + nextCharCount;
+
+    if (nextOffset == 0) {
+      return 0;
+    }
+
+    // Line Feed
+    if (codePoint == LINE_FEED) {
+      codePoint = Character.codePointAt(text, nextOffset);
+      if (codePoint == CARRIAGE_RETURN) {
+        ++nextCharCount;
+      }
+      return offset + nextCharCount;
+    }
+
+    // Flags
+    if (isRegionalIndicatorSymbol(codePoint)) {
+      if (nextOffset >= len - 1
+          || !isRegionalIndicatorSymbol(Character.codePointAt(text, nextOffset))) {
+        return offset + nextCharCount;
+      }
+      // In this case there are at least two regional indicator symbols ahead of
+      // offset. If those two regional indicator symbols are a pair that
+      // represent a region together, the next offset should be after both of
+      // them.
+      int regionalIndicatorSymbolCount = 0;
+      int regionOffset = offset;
+      while (regionOffset > 0
+          && isRegionalIndicatorSymbol(Character.codePointBefore(text, offset))) {
+        regionOffset -= Character.charCount(Character.codePointBefore(text, offset));
+        regionalIndicatorSymbolCount++;
+      }
+      if (regionalIndicatorSymbolCount % 2 == 0) {
+        nextCharCount += 2;
+      }
+      return offset + nextCharCount;
+    }
+
+    // Keycaps
+    if (isKeycapBase(codePoint)) {
+      nextCharCount += Character.charCount(codePoint);
+    }
+    if (codePoint == COMBINING_ENCLOSING_KEYCAP) {
+      codePoint = Character.codePointBefore(text, nextOffset);
+      nextOffset += Character.charCount(codePoint);
+      if (nextOffset < len && isVariationSelector(codePoint)) {
+        int tmpCodePoint = Character.codePointAt(text, nextOffset);
+        if (isKeycapBase(tmpCodePoint)) {
+          nextCharCount += Character.charCount(codePoint) + Character.charCount(tmpCodePoint);
+        }
+      } else if (isKeycapBase(codePoint)) {
+        nextCharCount += Character.charCount(codePoint);
+      }
+      return offset + nextCharCount;
+    }
+
+    if (isEmoji(codePoint)) {
+      boolean isZwj = false;
+      int lastSeenVariantSelectorCharCount = 0;
+      do {
+        if (isZwj) {
+          nextCharCount += Character.charCount(codePoint) + lastSeenVariantSelectorCharCount + 1;
+          isZwj = false;
+        }
+        lastSeenVariantSelectorCharCount = 0;
+        if (isEmojiModifier(codePoint)) {
+          break;
+        }
+
+        if (nextOffset < len) {
+          codePoint = Character.codePointAt(text, nextOffset);
+          nextOffset += Character.charCount(codePoint);
+          if (codePoint == COMBINING_ENCLOSING_KEYCAP) {
+            codePoint = Character.codePointBefore(text, nextOffset);
+            nextOffset += Character.charCount(codePoint);
+            if (nextOffset < len && isVariationSelector(codePoint)) {
+              int tmpCodePoint = Character.codePointAt(text, nextOffset);
+              if (isKeycapBase(tmpCodePoint)) {
+                nextCharCount += Character.charCount(codePoint) + Character.charCount(tmpCodePoint);
+              }
+            } else if (isKeycapBase(codePoint)) {
+              nextCharCount += Character.charCount(codePoint);
+            }
+            return offset + nextCharCount;
+          }
+          if (isEmojiModifier(codePoint)) {
+            nextCharCount += lastSeenVariantSelectorCharCount + Character.charCount(codePoint);
+            break;
+          }
+          if (isVariationSelector(codePoint)) {
+            nextCharCount += lastSeenVariantSelectorCharCount + Character.charCount(codePoint);
+            break;
+          }
+          if (codePoint == ZERO_WIDTH_JOINER) {
+            isZwj = true;
+            codePoint = Character.codePointAt(text, nextOffset);
+            nextOffset += Character.charCount(codePoint);
+            if (nextOffset < len && isVariationSelector(codePoint)) {
+              codePoint = Character.codePointAt(text, nextOffset);
+              lastSeenVariantSelectorCharCount = Character.charCount(codePoint);
+              nextOffset += Character.charCount(codePoint);
+            }
+          }
+        }
+
+        if (nextOffset >= len) {
+          break;
+        }
+      } while (isZwj && isEmoji(codePoint));
+    }
+
+    return offset + nextCharCount;
+  }
 }
