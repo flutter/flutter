@@ -436,7 +436,7 @@ void main() {
       events.clear();
     });
 
-    testWidgets('needsCompositing updates correctly and is respected', (WidgetTester tester) async {
+    testWidgets('needsCompositing is always false', (WidgetTester tester) async {
       // Pretend that we have a mouse connected.
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       await gesture.addPointer(location: Offset.zero);
@@ -467,22 +467,9 @@ void main() {
           ),
         ),
       );
-      expect(listener.needsCompositing, isTrue);
-      // Compositing is required, therefore a dedicated TransformLayer for
-      // `Transform.scale` is added.
-      expect(tester.layers.whereType<TransformLayer>(), hasLength(2));
-
-      await tester.pumpWidget(
-        Transform.scale(
-          scale: 2.0,
-          child: Listener(
-            onPointerDown: (PointerDownEvent _) { },
-          ),
-        ),
-      );
       expect(listener.needsCompositing, isFalse);
-      // TransformLayer for `Transform.scale` is removed again as transform is
-      // executed directly on the canvas.
+      // If compositing was required, a dedicated TransformLayer for
+      // `Transform.scale` would be added.
       expect(tester.layers.whereType<TransformLayer>(), hasLength(1));
     });
 
