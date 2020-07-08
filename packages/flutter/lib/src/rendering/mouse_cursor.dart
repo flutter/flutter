@@ -463,6 +463,10 @@ class SystemMouseCursors {
   ///
   /// Typically the shape of an hourglass or a watch.
   ///
+  /// This cursor is not available as a system cursor on macOS. Although macOS
+  /// displays a "spinning ball" cursor when busy, it's handled by the OS and not
+  /// exposed for applications to choose.
+  ///
   /// Corresponds to:
   ///
   ///  * Android: TYPE_WAIT
@@ -556,7 +560,7 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_CROSSHAIR
   ///  * Web: crosshair
-  ///  * Web: crosshairCursor
+  ///  * macOS: crosshairCursor
   static const SystemMouseCursor precise = SystemMouseCursor._(kind: 'precise');
 
 
@@ -648,8 +652,7 @@ class SystemMouseCursors {
 
   /// A cursor indicating scrolling in any direction.
   ///
-  /// Typically the shape of a dot surrounded by 4 arrows. May fall back to
-  /// [move].
+  /// Typically the shape of a dot surrounded by 4 arrows.
   ///
   /// Corresponds to:
   ///
