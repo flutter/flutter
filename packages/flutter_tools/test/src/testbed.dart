@@ -934,4 +934,7 @@ class FakeCache implements Cache {
   Future<bool> doesRemoteExist(String message, Uri url) async {
     return true;
   }
+
+  @override
+  void clearStampFiles() {}
 }

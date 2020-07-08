@@ -277,6 +277,7 @@ void main() {
     final PictureLayer pictureLayer = PictureLayer(Rect.zero);
     checkNeedsAddToScene(pictureLayer, () {
       final PictureRecorder recorder = PictureRecorder();
+      Canvas(recorder);
       pictureLayer.picture = recorder.endRecording();
     });
 
