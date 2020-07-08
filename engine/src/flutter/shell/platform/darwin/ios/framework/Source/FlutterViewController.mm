@@ -848,9 +848,15 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   [self updateViewportPadding];
   [self updateViewportMetrics];
 
+  // There is no guarantee that UIKit will layout subviews when the application is active. Creating
+  // the surface when inactive will cause GPU accesses from the background. Only wait for the first
+  // frame to render when the application is actually active.
+  bool applicationIsActive =
+      [UIApplication sharedApplication].applicationState == UIApplicationStateActive;
+
   // This must run after updateViewportMetrics so that the surface creation tasks are queued after
   // the viewport metrics update tasks.
-  if (firstViewBoundsUpdate) {
+  if (firstViewBoundsUpdate && applicationIsActive) {
     [self surfaceUpdated:YES];
 
     flutter::Shell& shell = [_engine.get() shell];
