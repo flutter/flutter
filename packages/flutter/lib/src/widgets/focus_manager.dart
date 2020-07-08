@@ -1490,14 +1490,25 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   ///
   /// If [highlightMode] returns [FocusHighlightMode.traditional], then widgets should
   /// draw their focus highlight whenever they are focused.
-  // Don't want to set _highlightMode here, since it's possible for the target
-  // platform to change (especially in tests).
-  FocusHighlightMode get highlightMode => _highlightMode ?? _defaultModeForPlatform;
-  FocusHighlightMode _highlightMode;
+  FocusHighlightMode get highlightMode => _highlightMode;
+  FocusHighlightMode _highlightMode = _defaultModeForPlatform;
 
   // If set, indicates if the last interaction detected was touch or not.
   // If null, no interactions have occurred yet.
   bool _lastInteractionWasTouch;
+
+  /// Updates initial value of highlight mode.
+  ///
+  /// It necessary when platform is changed during testing
+  /// (Since working with FocusManager is carried out using singleton pattern).
+  @visibleForTesting
+  void updateHighlightModeByPlatform() {
+    final FocusHighlightMode newMode = _defaultModeForPlatform;
+    if (_highlightMode != newMode) {
+      _highlightMode = newMode;
+      _notifyHighlightModeListeners();
+    }
+  }
 
   // Update function to be called whenever the state relating to highlightMode
   // changes.
@@ -1525,12 +1536,9 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
         newMode = FocusHighlightMode.traditional;
         break;
     }
-    // We can't just compare newMode with _highlightMode here, since
-    // _highlightMode could be null, so we want to compare with the return value
-    // for the getter, since that's what clients will be looking at.
-    final FocusHighlightMode oldMode = highlightMode;
-    _highlightMode = newMode;
-    if (highlightMode != oldMode) {
+
+    if (_highlightMode != newMode) {
+      _highlightMode = newMode;
       _notifyHighlightModeListeners();
     }
   }

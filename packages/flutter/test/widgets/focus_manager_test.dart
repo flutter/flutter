@@ -915,6 +915,8 @@ void main() {
       expect(receivedAnEvent, isEmpty);
     });
     testWidgets('Initial highlight mode guesses correctly.', (WidgetTester tester) async {
+      FocusManager.instance.updateHighlightModeByPlatform();
+
       FocusManager.instance.highlightStrategy = FocusHighlightStrategy.automatic;
       switch (defaultTargetPlatform) {
         case TargetPlatform.fuchsia:
@@ -930,6 +932,8 @@ void main() {
       }
     }, variant: TargetPlatformVariant.all());
     testWidgets('Mouse events change initial focus highlight mode on mobile.', (WidgetTester tester) async {
+      FocusManager.instance.updateHighlightModeByPlatform();
+
       expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.touch));
       RendererBinding.instance.initMouseTracker(); // Clear out the mouse state.
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 0);
@@ -938,6 +942,8 @@ void main() {
       expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
     }, variant: TargetPlatformVariant.mobile());
     testWidgets('Mouse events change initial focus highlight mode on desktop.', (WidgetTester tester) async {
+      FocusManager.instance.updateHighlightModeByPlatform();
+
       expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
       RendererBinding.instance.initMouseTracker(); // Clear out the mouse state.
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 0);
@@ -946,10 +952,14 @@ void main() {
       expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
     }, variant: TargetPlatformVariant.desktop());
     testWidgets('Keyboard events change initial focus highlight mode.', (WidgetTester tester) async {
+      FocusManager.instance.updateHighlightModeByPlatform();
+
       await tester.sendKeyEvent(LogicalKeyboardKey.enter);
       expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
     }, variant: TargetPlatformVariant.all());
     testWidgets('Events change focus highlight mode.', (WidgetTester tester) async {
+      FocusManager.instance.updateHighlightModeByPlatform();
+
       await setupWidget(tester);
       int callCount = 0;
       FocusHighlightMode lastMode;
