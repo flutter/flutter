@@ -30,7 +30,7 @@ import 'emulator.dart';
 import 'features.dart';
 import 'fuchsia/fuchsia_device.dart' show FuchsiaDeviceTools;
 import 'fuchsia/fuchsia_sdk.dart' show FuchsiaSdk, FuchsiaArtifacts;
-import 'fuchsia/fuchsia_workflow.dart' show FuchsiaWorkflow;
+import 'fuchsia/fuchsia_workflow.dart' show FuchsiaWorkflow, fuchsiaWorkflow;
 import 'globals.dart' as globals;
 import 'ios/ios_workflow.dart';
 import 'ios/simulators.dart';
@@ -124,7 +124,22 @@ Future<T> runInContext<T>(
         client: globals.httpClientFactory?.call() ?? HttpClient(),
       ),
       DevFSConfig: () => DevFSConfig(),
-      DeviceManager: () => FlutterDeviceManager(),
+      DeviceManager: () => FlutterDeviceManager(
+        logger: globals.logger,
+        processManager: globals.processManager,
+        platform: globals.platform,
+        androidSdk: globals.androidSdk,
+        iosSimulatorUtils: globals.iosSimulatorUtils,
+        featureFlags: featureFlags,
+        fileSystem: globals.fs,
+        iosWorkflow: globals.iosWorkflow,
+        artifacts: globals.artifacts,
+        flutterVersion: globals.flutterVersion,
+        androidWorkflow: androidWorkflow,
+        config: globals.config,
+        fuchsiaWorkflow: fuchsiaWorkflow,
+        xcDevice: globals.xcdevice,
+      ),
       Doctor: () => Doctor(logger: globals.logger),
       DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
       EmulatorManager: () => EmulatorManager(

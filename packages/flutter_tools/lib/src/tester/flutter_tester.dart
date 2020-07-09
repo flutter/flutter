@@ -9,6 +9,7 @@ import 'package:process/process.dart';
 
 import '../application_package.dart';
 import '../artifacts.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -16,7 +17,6 @@ import '../build_info.dart';
 import '../bundle.dart';
 import '../convert.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
 import '../project.dart';
 import '../protocol_discovery.dart';
 import '../version.dart';
@@ -253,21 +253,29 @@ class FlutterTesterDevice extends Device {
 }
 
 class FlutterTesterDevices extends PollingDeviceDiscovery {
-  FlutterTesterDevices() : super('Flutter tester');
+  FlutterTesterDevices({
+    @required FileSystem fileSystem,
+    @required Artifacts artifacts,
+    @required ProcessManager processManager,
+    @required Logger logger,
+    @required FlutterVersion flutterVersion,
+    @required Config config,
+  }) : _testerDevice = FlutterTesterDevice(
+        kTesterDeviceId,
+        fileSystem: fileSystem,
+        artifacts: artifacts,
+        processManager: processManager,
+        buildDirectory: getBuildDirectory(config, fileSystem),
+        logger: logger,
+        flutterVersion: flutterVersion,
+      ),
+       super('Flutter tester');
 
   static const String kTesterDeviceId = 'flutter-tester';
 
   static bool showFlutterTesterDevice = false;
 
-  final FlutterTesterDevice _testerDevice = FlutterTesterDevice(
-    kTesterDeviceId,
-    fileSystem: globals.fs,
-    artifacts: globals.artifacts,
-    processManager: globals.processManager,
-    buildDirectory: getBuildDirectory(),
-    logger: globals.logger,
-    flutterVersion: globals.flutterVersion,
-  );
+  final FlutterTesterDevice _testerDevice;
 
   @override
   bool get canListAnything => true;

@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -43,16 +44,16 @@ void main() {
       FlutterTesterDevices.showFlutterTesterDevice = false;
     });
 
-    testUsingContext('no device', () async {
-      final FlutterTesterDevices discoverer = FlutterTesterDevices();
+    testWithoutContext('no device', () async {
+      final FlutterTesterDevices discoverer = setUpFlutterTesterDevices();
 
       final List<Device> devices = await discoverer.devices;
       expect(devices, isEmpty);
     });
 
-    testUsingContext('has device', () async {
+    testWithoutContext('has device', () async {
       FlutterTesterDevices.showFlutterTesterDevice = true;
-      final FlutterTesterDevices discoverer = FlutterTesterDevices();
+      final FlutterTesterDevices discoverer = setUpFlutterTesterDevices();
 
       final List<Device> devices = await discoverer.devices;
       expect(devices, hasLength(1));
@@ -62,14 +63,15 @@ void main() {
       expect(device.id, 'flutter-tester');
     });
 
-    testUsingContext('discoverDevices', () async {
+    testWithoutContext('discoverDevices', () async {
       FlutterTesterDevices.showFlutterTesterDevice = true;
-      final FlutterTesterDevices discoverer = FlutterTesterDevices();
+      final FlutterTesterDevices discoverer = setUpFlutterTesterDevices();
 
       // Timeout ignored.
       final List<Device> devices = await discoverer.discoverDevices(timeout: const Duration(seconds: 10));
       expect(devices, hasLength(1));
     });
+
   });
   group('startApp', () {
     FlutterTesterDevice device;
@@ -168,6 +170,23 @@ Hello!
       expect(logLines.last, 'Hello!');
     }, overrides: startOverrides);
   });
+}
+
+FlutterTesterDevices setUpFlutterTesterDevices() {
+  final FileSystem fileSystem = MemoryFileSystem.test();
+  final Logger logger = BufferLogger.test();
+  return FlutterTesterDevices(
+    logger: logger,
+    artifacts: Artifacts.test(),
+    processManager: FakeProcessManager.any(),
+    fileSystem: MemoryFileSystem.test(),
+    config: Config.test(
+      'test',
+      directory: fileSystem.currentDirectory,
+      logger: logger,
+    ),
+    flutterVersion: null,
+  );
 }
 
 class MockBuildSystem extends Mock implements BuildSystem {}
