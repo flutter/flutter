@@ -8,6 +8,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+class _ContextFinishMatcher extends Matcher {
+  const _ContextFinishMatcher({ this.shouldSave = true })
+    : assert(shouldSave != null),
+      super();
+  final bool shouldSave;
+
+  @override
+  bool matches(covariant MethodCall methodCall, Map<dynamic, dynamic> matchState) {
+    return methodCall.method == 'TextInput.finishAutofillContext' && shouldSave == methodCall.arguments;
+  }
+
+  @override
+  Description describe(Description description) => description.add("must match MethodCall('TextInput.finishAutofillContext', $shouldSave)");
+}
+
+const _ContextFinishMatcher _matchesCommit = _ContextFinishMatcher();
+const _ContextFinishMatcher _matchesCancel = _ContextFinishMatcher(shouldSave: false);
+
 void main() {
   testWidgets('AutofillGroup has the right clients', (WidgetTester tester) async {
     const Key outerKey = Key('outer');
@@ -202,11 +220,7 @@ void main() {
 
     expect(
       tester.testTextInput.log,
-      isNot(contains('TextInput.AutofillContext.commit')),
-    );
-    expect(
-      tester.testTextInput.log,
-      isNot(contains('TextInput.AutofillContext.cancel')),
+      isNot(contains(_matchesCommit)),
     );
 
     tester.testTextInput.log.clear();
@@ -226,8 +240,8 @@ void main() {
     await tester.pump();
 
     expect(
-      tester.testTextInput.log.map((MethodCall call) => call.method),
-      <String>['TextInput.AutofillContext.commit'],
+      tester.testTextInput.log.single,
+      _matchesCommit,
     );
 
     tester.testTextInput.log.clear();
@@ -246,8 +260,8 @@ void main() {
     await tester.pump();
 
     expect(
-      tester.testTextInput.log.map((MethodCall call) => call.method),
-      <String>['TextInput.AutofillContext.cancel'],
+      tester.testTextInput.log.single,
+      _matchesCancel,
     );
 
     tester.testTextInput.log.clear();
@@ -267,11 +281,7 @@ void main() {
 
     expect(
       tester.testTextInput.log,
-      isNot(contains('TextInput.AutofillContext.commit')),
-    );
-    expect(
-      tester.testTextInput.log,
-      isNot(contains('TextInput.AutofillContext.cancel')),
+      isNot(contains('TextInput.finishAutofillContext')),
     );
 
     tester.testTextInput.log.clear();
@@ -285,8 +295,8 @@ void main() {
     await tester.pump();
 
     expect(
-      tester.testTextInput.log.map((MethodCall call) => call.method),
-      <String>['TextInput.AutofillContext.commit'],
+      tester.testTextInput.log.single,
+      _matchesCommit,
     );
   });
 }
