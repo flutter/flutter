@@ -304,6 +304,7 @@ class AttachCommand extends FlutterCommand {
             true,
             globals.fs.currentDirectory,
             LaunchMode.attach,
+            globals.logger as AppRunLogger,
           );
         } on Exception catch (error) {
           throwToolExit(error.toString());

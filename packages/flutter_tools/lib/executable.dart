@@ -66,9 +66,9 @@ Future<void> main(List<String> args) async {
       (args.isNotEmpty && args.first == 'help') || (args.length == 1 && verbose);
   final bool muteCommandLogging = help || doctor;
   final bool verboseHelp = help && verbose;
-  final bool daemon = args.contains('daemon') ||
-    (args.contains('--machine') && args.contains('run')) ||
-    (args.contains('--machine') && args.contains('attach'));
+  final bool daemon = args.contains('daemon');
+  final bool runMachine = (args.contains('--machine') && args.contains('run')) ||
+                          (args.contains('--machine') && args.contains('attach'));
 
   await runner.run(args, () => <FlutterCommand>[
     AnalyzeCommand(
@@ -146,6 +146,13 @@ Future<void> main(List<String> args) async {
         ))
        else if (verbose && !muteCommandLogging)
         Logger: () => VerboseLogger(StdoutLogger(
+          timeoutConfiguration: timeoutConfiguration,
+          stdio: globals.stdio,
+          terminal: globals.terminal,
+          outputPreferences: globals.outputPreferences,
+        ))
+      else if (runMachine)
+        Logger: () => AppRunLogger(parent: StdoutLogger(
           timeoutConfiguration: timeoutConfiguration,
           stdio: globals.stdio,
           terminal: globals.terminal,
