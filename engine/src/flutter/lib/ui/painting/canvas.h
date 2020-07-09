@@ -165,8 +165,7 @@ class Canvas : public RefCountedDartWrappable<Canvas> {
                   bool transparentOccluder);
 
   SkCanvas* canvas() const { return canvas_; }
-  void Clear();
-  bool IsRecording() const;
+  void Invalidate();
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
