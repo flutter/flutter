@@ -208,6 +208,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.toolbarOpacity = 1.0,
     this.bottomOpacity = 1.0,
     this.toolbarHeight,
+    this.leadingWidth,
   }) : assert(automaticallyImplyLeading != null),
        assert(elevation == null || elevation >= 0.0),
        assert(primary != null),
@@ -223,7 +224,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// Becomes the leading component of the [NavigationToolBar] built
   /// by this widget. The [leading] widget's width and height are constrained to
-  /// be no bigger than [kToolbarHeight] and [toolbarHeight] respectively.
+  /// be no bigger than [leadingWidth] and [toolbarHeight] respectively.
   ///
   /// If this is null and [automaticallyImplyLeading] is set to true, the
   /// [AppBar] will imply an appropriate widget. For example, if the [AppBar] is
@@ -450,6 +451,11 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// By default, the value of `toolbarHeight` is [kToolbarHeight].
   final double toolbarHeight;
 
+  /// Defines the width of [leading] widget.
+  ///
+  /// By default, the value of `leadingWidth` is 56.0.
+  final double leadingWidth;
+
   bool _getEffectiveCenterTitle(ThemeData theme) {
     if (centerTitle != null)
       return centerTitle;
@@ -543,7 +549,7 @@ class _AppBarState extends State<AppBar> {
     }
     if (leading != null) {
       leading = ConstrainedBox(
-        constraints: const BoxConstraints.tightFor(width: _kLeadingWidth),
+        constraints: BoxConstraints.tightFor(width: widget.leadingWidth ?? _kLeadingWidth),
         child: leading,
       );
     }
@@ -803,6 +809,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     @required this.stretchConfiguration,
     @required this.shape,
     @required this.toolbarHeight,
+    @required this.leadingWidth,
   }) : assert(primary || topPadding == 0.0),
        _bottomHeight = bottom?.preferredSize?.height ?? 0.0;
 
@@ -831,6 +838,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final bool pinned;
   final ShapeBorder shape;
   final double toolbarHeight;
+  final double leadingWidth;
 
   final double _bottomHeight;
 
@@ -886,6 +894,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         toolbarOpacity: toolbarOpacity,
         bottomOpacity: pinned ? 1.0 : ((visibleMainHeight / _bottomHeight).clamp(0.0, 1.0) as double),
         toolbarHeight: toolbarHeight,
+        leadingWidth: leadingWidth,
       ),
     );
     return floating ? _FloatingAppBar(child: appBar) : appBar;
@@ -917,7 +926,8 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         || snapConfiguration != oldDelegate.snapConfiguration
         || stretchConfiguration != oldDelegate.stretchConfiguration
         || forceElevated != oldDelegate.forceElevated
-        || toolbarHeight != oldDelegate.toolbarHeight;
+        || toolbarHeight != oldDelegate.toolbarHeight
+        || leadingWidth != leadingWidth;
   }
 
   @override
@@ -1039,6 +1049,7 @@ class SliverAppBar extends StatefulWidget {
     this.onStretchTrigger,
     this.shape,
     this.toolbarHeight = kToolbarHeight,
+    this.leadingWidth,
   }) : assert(automaticallyImplyLeading != null),
        assert(forceElevated != null),
        assert(primary != null),
@@ -1337,6 +1348,11 @@ class SliverAppBar extends StatefulWidget {
   /// By default, the value of `toolbarHeight` is [kToolbarHeight].
   final double toolbarHeight;
 
+  /// Defines the width of [leading] widget.
+  ///
+  /// By default, the value of `leadingWidth` is 56.0.
+  final double leadingWidth;
+
   @override
   _SliverAppBarState createState() => _SliverAppBarState();
 }
@@ -1429,6 +1445,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
           snapConfiguration: _snapConfiguration,
           stretchConfiguration: _stretchConfiguration,
           toolbarHeight: widget.toolbarHeight,
+          leadingWidth: widget.leadingWidth,
         ),
       ),
     );
