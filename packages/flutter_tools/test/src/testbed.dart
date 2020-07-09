@@ -377,6 +377,9 @@ class FakeHttpClientRequest implements HttpClientRequest {
 
   @override
   void writeln([Object obj = '']) {}
+
+  @override
+  void abort([Object exception, StackTrace stackTrace]) {}
 }
 
 class FakeHttpClientResponse implements HttpClientResponse {

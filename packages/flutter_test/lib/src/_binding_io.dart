@@ -229,6 +229,9 @@ class _MockHttpRequest extends HttpClientRequest {
   }
 
   @override
+  void abort([Object exception, StackTrace stackTrace]) {}
+
+  @override
   HttpConnectionInfo get connectionInfo => null;
 
   @override
