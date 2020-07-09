@@ -12,7 +12,6 @@
 #include <vector>
 
 #include "flutter/shell/platform/embedder/embedder.h"
-
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
 #include "flutter/shell/platform/windows/win32_window.h"
 #include "flutter/shell/platform/windows/window_binding_handler.h"
@@ -49,6 +48,9 @@ class Win32FlutterWindow : public Win32Window, public WindowBindingHandler {
   void OnPointerLeave() override;
 
   // |Win32Window|
+  void OnSetCursor() override;
+
+  // |Win32Window|
   void OnText(const std::u16string& text) override;
 
   // |Win32Window|
@@ -72,9 +74,16 @@ class Win32FlutterWindow : public Win32Window, public WindowBindingHandler {
   // |FlutterWindowBindingHandler|
   PhysicalWindowBounds GetPhysicalWindowBounds() override;
 
+  // |FlutterWindowBindingHandler|
+  void UpdateFlutterCursor(const std::string& cursor_name) override;
+
+ private:
   // A pointer to a FlutterWindowsView that can be used to update engine
   // windowing and input state.
   WindowBindingHandlerDelegate* binding_handler_delegate_;
+
+  // The last cursor set by Flutter. Defaults to the arrow cursor.
+  HCURSOR current_cursor_;
 };
 
 }  // namespace flutter

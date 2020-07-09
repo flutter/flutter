@@ -86,6 +86,9 @@ class Win32Window {
   // Called when the mouse leaves the window.
   virtual void OnPointerLeave() = 0;
 
+  // Called when the cursor should be set for the client area.
+  virtual void OnSetCursor() = 0;
+
   // Called when text input occurs.
   virtual void OnText(const std::u16string& text) = 0;
 
