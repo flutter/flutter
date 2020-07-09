@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 part of engine;
 
 /// Mixin used by surfaces that clip their contents using an overflowing DOM
@@ -261,15 +260,15 @@ class PersistedPhysicalShape extends PersistedContainerSurface
         }
         return;
       } else {
-        final Ellipse? ellipse = path.webOnlyPathAsCircle;
-        if (ellipse != null) {
-          final double rx = ellipse.radiusX;
-          final double ry = ellipse.radiusY;
+        final ui.Rect? ovalRect = path.webOnlyPathAsCircle;
+        if (ovalRect != null) {
+          final double rx = ovalRect.width / 2.0;
+          final double ry = ovalRect.height / 2.0;
           final String borderRadius =
               rx == ry ? '${rx}px ' : '${rx}px ${ry}px ';
           final html.CssStyleDeclaration style = rootElement!.style;
-          final double left = ellipse.x - rx;
-          final double top = ellipse.y - ry;
+          final double left = ovalRect.left;
+          final double top = ovalRect.top;
           style
             ..left = '${left}px'
             ..top = '${top}px'
