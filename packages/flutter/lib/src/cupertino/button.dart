@@ -23,6 +23,11 @@ const EdgeInsets _kBackgroundButtonPadding = EdgeInsets.symmetric(
 /// Takes in a text or an icon that fades out and in on touch. May optionally have a
 /// background.
 ///
+/// The [padding] defaults to 16.0 pixels. When using a [CupertinoButton] within
+/// a fixed height parent, like a [CupertinoNavigationBar], a smaller, or even
+/// [EdgeInsets.zero], should be used to prevent clipping larger [child]
+/// widgets.
+///
 /// See also:
 ///
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/controls/buttons/>

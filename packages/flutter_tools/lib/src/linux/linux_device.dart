@@ -26,7 +26,7 @@ class LinuxDevice extends DesktopDevice {
   bool isSupported() => true;
 
   @override
-  String get name => 'Linux desktop';
+  String get name => 'Linux';
 
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.linux_x64;

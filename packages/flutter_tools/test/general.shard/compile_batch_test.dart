@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
@@ -74,6 +75,7 @@ void main() {
     ProcessManager: () => mockProcessManager,
     OutputPreferences: () => OutputPreferences(showColor: false),
     Platform: kNoColorTerminalPlatform,
+    Artifacts: () => Artifacts.test(),
   });
 
   testUsingContext('passes correct AOT config to kernel compiler in aot/profile mode', () async {
@@ -108,6 +110,7 @@ void main() {
     ProcessManager: () => mockProcessManager,
     OutputPreferences: () => OutputPreferences(showColor: false),
     Platform: kNoColorTerminalPlatform,
+    Artifacts: () => Artifacts.test(),
   });
 
 
@@ -143,6 +146,7 @@ void main() {
     ProcessManager: () => mockProcessManager,
     OutputPreferences: () => OutputPreferences(showColor: false),
     Platform: kNoColorTerminalPlatform,
+    Artifacts: () => Artifacts.test(),
   });
 
   testUsingContext('batch compile single dart failed compilation', () async {
@@ -169,6 +173,7 @@ void main() {
     ProcessManager: () => mockProcessManager,
     OutputPreferences: () => OutputPreferences(showColor: false),
     Platform: kNoColorTerminalPlatform,
+    Artifacts: () => Artifacts.test(),
   });
 
   testUsingContext('batch compile single dart abnormal compiler termination', () async {
@@ -197,6 +202,7 @@ void main() {
     ProcessManager: () => mockProcessManager,
     OutputPreferences: () => OutputPreferences(showColor: false),
     Platform: kNoColorTerminalPlatform,
+    Artifacts: () => Artifacts.test(),
   });
 
   testUsingContext('passes dartDefines to the kernel compiler', () async {
@@ -220,6 +226,7 @@ void main() {
     ProcessManager: () => mockProcessManager,
     OutputPreferences: () => OutputPreferences(showColor: false),
     Platform: kNoColorTerminalPlatform,
+    Artifacts: () => Artifacts.test(),
   });
 }
 

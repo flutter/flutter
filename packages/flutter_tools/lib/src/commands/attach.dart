@@ -63,6 +63,8 @@ class AttachCommand extends FlutterCommand {
     usesFuchsiaOptions(hide: !verboseHelp);
     usesDartDefineOption();
     usesDeviceUserOption();
+    addEnableExperimentation(hide: !verboseHelp);
+    addNullSafetyModeOptions(hide: !verboseHelp);
     argParser
       ..addOption(
         'debug-port',
@@ -415,7 +417,6 @@ class HotRunnerFactory {
     applicationBinary: applicationBinary,
     hostIsIde: hostIsIde,
     projectRootPath: projectRootPath,
-    packagesFilePath: packagesFilePath,
     dillOutputPath: dillOutputPath,
     stayResident: stayResident,
     ipv6: ipv6,

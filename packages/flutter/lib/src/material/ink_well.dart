@@ -503,7 +503,7 @@ class InkResponse extends StatelessWidget {
   /// See also:
   ///
   ///  * The Material Design specification for overlay colors and how they
-  ///    to a component's state:
+  ///    match a component's state:
   ///    <https://material.io/design/interaction/states.html#anatomy>.
   final MaterialStateProperty<Color> overlayColor;
 

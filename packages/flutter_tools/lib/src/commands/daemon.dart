@@ -486,7 +486,6 @@ class AppDomain extends Domain {
         debuggingOptions: options,
         applicationBinary: applicationBinary,
         projectRootPath: projectRootPath,
-        packagesFilePath: packagesFilePath,
         dillOutputPath: dillOutputPath,
         ipv6: ipv6,
         hostIsIde: true,

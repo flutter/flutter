@@ -3,23 +3,26 @@
 // found in the LICENSE file.
 
 import 'package:args/args.dart';
-import 'package:flutter_tools/src/commands/build.dart';
+import 'package:flutter_tools/src/commands/attach.dart';
 import 'package:flutter_tools/src/commands/build_aar.dart';
 import 'package:flutter_tools/src/commands/build_apk.dart';
 import 'package:flutter_tools/src/commands/build_appbundle.dart';
 import 'package:flutter_tools/src/commands/build_fuchsia.dart';
 import 'package:flutter_tools/src/commands/build_ios.dart';
+import 'package:flutter_tools/src/commands/build_ios_framework.dart';
 import 'package:flutter_tools/src/commands/build_linux.dart';
 import 'package:flutter_tools/src/commands/build_macos.dart';
 import 'package:flutter_tools/src/commands/build_web.dart';
 import 'package:flutter_tools/src/commands/build_windows.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/runner/flutter_command.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 
 void main() {
   testUsingContext('All build commands support null safety options', () {
-    final List<BuildSubCommand> commands = <BuildSubCommand>[
+    final List<FlutterCommand> commands = <FlutterCommand>[
       BuildWindowsCommand(verboseHelp: false),
       BuildLinuxCommand(verboseHelp: false),
       BuildMacosCommand(verboseHelp: false),
@@ -29,9 +32,11 @@ void main() {
       BuildAppBundleCommand(verboseHelp: false),
       BuildFuchsiaCommand(verboseHelp: false),
       BuildAarCommand(verboseHelp: false),
+      BuildIOSFrameworkCommand(verboseHelp: false, buildSystem: globals.buildSystem),
+      AttachCommand(verboseHelp: false),
     ];
 
-    for (final BuildSubCommand command in commands) {
+    for (final FlutterCommand command in commands) {
       final ArgResults results = command.argParser.parse(<String>[
         '--sound-null-safety',
         '--enable-experiment=non-nullable',

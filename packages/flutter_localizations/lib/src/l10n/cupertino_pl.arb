@@ -29,6 +29,6 @@
   "copyButtonLabel": "Kopiuj",
   "pasteButtonLabel": "Wklej",
   "selectAllButtonLabel": "Wybierz wszystkie",
-  "tabSemanticsLabel": "TBD",
+  "tabSemanticsLabel": "Karta $tabIndex z $tabCount",
   "modalBarrierDismissLabel": "Zamknij"
 }

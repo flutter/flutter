@@ -375,7 +375,7 @@ void main() {
     testUsingContext('get fetches packages and injects plugin in plugin project', () async {
       final String projectPath = await createProject(
         tempDir,
-        arguments: <String>['--template=plugin', '--no-pub'],
+        arguments: <String>['--template=plugin', '--no-pub', '--platforms=ios,android'],
       );
       final String exampleProjectPath = globals.fs.path.join(projectPath, 'example');
       removeGeneratedFiles(projectPath);

@@ -366,6 +366,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       },
       child: _InkFeatures(
         key: _inkFeatureRenderer,
+        absorbHitTest: widget.type != MaterialType.transparency,
         color: backgroundColor,
         child: contents,
         vsync: this,
@@ -477,6 +478,7 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
   _RenderInkFeatures({
     RenderBox child,
     @required this.vsync,
+    this.absorbHitTest,
     this.color,
   }) : assert(vsync != null),
        super(child);
@@ -492,6 +494,8 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
   // MaterialState build method.
   @override
   Color color;
+
+  bool absorbHitTest;
 
   List<InkFeature> _inkFeatures;
 
@@ -517,7 +521,7 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
   }
 
   @override
-  bool hitTestSelf(Offset position) => true;
+  bool hitTestSelf(Offset position) => absorbHitTest;
 
   @override
   void paint(PaintingContext context, Offset offset) {
@@ -539,6 +543,7 @@ class _InkFeatures extends SingleChildRenderObjectWidget {
     Key key,
     this.color,
     @required this.vsync,
+    @required this.absorbHitTest,
     Widget child,
   }) : super(key: key, child: child);
 
@@ -549,17 +554,21 @@ class _InkFeatures extends SingleChildRenderObjectWidget {
 
   final TickerProvider vsync;
 
+  final bool absorbHitTest;
+
   @override
   _RenderInkFeatures createRenderObject(BuildContext context) {
     return _RenderInkFeatures(
       color: color,
+      absorbHitTest: absorbHitTest,
       vsync: vsync,
     );
   }
 
   @override
   void updateRenderObject(BuildContext context, _RenderInkFeatures renderObject) {
-    renderObject.color = color;
+    renderObject..color = color
+                ..absorbHitTest = absorbHitTest;
     assert(vsync == renderObject.vsync);
   }
 }

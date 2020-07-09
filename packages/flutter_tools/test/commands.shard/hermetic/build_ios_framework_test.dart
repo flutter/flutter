@@ -66,7 +66,8 @@ void main() {
           buildSystem: MockBuildSystem(),
           platform: fakePlatform,
           flutterVersion: mockFlutterVersion,
-          cache: mockCache
+          cache: mockCache,
+          verboseHelp: false,
         );
 
         expect(() => command.produceFlutterPodspec(BuildMode.debug, outputDirectory),
@@ -90,7 +91,8 @@ void main() {
           buildSystem: MockBuildSystem(),
           platform: fakePlatform,
           flutterVersion: mockFlutterVersion,
-          cache: mockCache
+          cache: mockCache,
+          verboseHelp: false,
         );
 
         expect(() => command.produceFlutterPodspec(BuildMode.debug, outputDirectory),
@@ -111,7 +113,8 @@ void main() {
           buildSystem: MockBuildSystem(),
           platform: fakePlatform,
           flutterVersion: mockFlutterVersion,
-          cache: mockCache
+          cache: mockCache,
+          verboseHelp: false,
         );
 
         expect(() => command.produceFlutterPodspec(BuildMode.debug, outputDirectory),
@@ -149,6 +152,7 @@ void main() {
               platform: fakePlatform,
               flutterVersion: mockFlutterVersion,
               cache: mockCache,
+              verboseHelp: false,
             );
             command.produceFlutterPodspec(BuildMode.debug, outputDirectory, force: true);
 
@@ -171,6 +175,7 @@ void main() {
               platform: fakePlatform,
               flutterVersion: mockFlutterVersion,
               cache: mockCache,
+              verboseHelp: false,
             );
             command.produceFlutterPodspec(BuildMode.debug, outputDirectory);
 
@@ -190,6 +195,7 @@ void main() {
               platform: fakePlatform,
               flutterVersion: mockFlutterVersion,
               cache: mockCache,
+              verboseHelp: false,
             );
             command.produceFlutterPodspec(BuildMode.debug, outputDirectory);
 
@@ -207,6 +213,7 @@ void main() {
               platform: fakePlatform,
               flutterVersion: mockFlutterVersion,
               cache: mockCache,
+              verboseHelp: false,
             );
             command.produceFlutterPodspec(BuildMode.profile, outputDirectory);
 
@@ -224,6 +231,7 @@ void main() {
               platform: fakePlatform,
               flutterVersion: mockFlutterVersion,
               cache: mockCache,
+              verboseHelp: false,
             );
             command.produceFlutterPodspec(BuildMode.release, outputDirectory);
 

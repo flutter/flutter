@@ -169,54 +169,58 @@ void main() {
     expect(
       semantics,
       hasSemantics(
-      TestSemantics.root(
-        children: <TestSemantics>[
-          TestSemantics(
-            children: <TestSemantics>[
-              TestSemantics(
-                flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                children: <TestSemantics>[
-                  TestSemantics(
-                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute, SemanticsFlag.namesRoute],
-                    label: 'Alert',
-                    children: <TestSemantics>[
-                      TestSemantics(
-                        flags: <SemanticsFlag>[
-                          SemanticsFlag.hasImplicitScrolling,
-                        ],
-                        children: <TestSemantics>[
-                          TestSemantics(label: 'The Title'),
-                          TestSemantics(label: 'Content'),
-                        ],
-                      ),
-                      TestSemantics(
-                        flags: <SemanticsFlag>[
-                          SemanticsFlag.hasImplicitScrolling,
-                        ],
-                        children: <TestSemantics>[
-                          TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.isButton],
-                            label: 'Cancel',
-                          ),
-                          TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.isButton],
-                            label: 'OK',
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              children: <TestSemantics>[
+                TestSemantics(
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          flags: <SemanticsFlag>[SemanticsFlag.scopesRoute, SemanticsFlag.namesRoute],
+                          label: 'Alert',
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              flags: <SemanticsFlag>[
+                                SemanticsFlag.hasImplicitScrolling,
+                              ],
+                              children: <TestSemantics>[
+                                TestSemantics(label: 'The Title'),
+                                TestSemantics(label: 'Content'),
+                              ],
+                            ),
+                            TestSemantics(
+                              flags: <SemanticsFlag>[
+                                SemanticsFlag.hasImplicitScrolling,
+                              ],
+                              children: <TestSemantics>[
+                                TestSemantics(
+                                  flags: <SemanticsFlag>[SemanticsFlag.isButton],
+                                  label: 'Cancel',
+                                ),
+                                TestSemantics(
+                                  flags: <SemanticsFlag>[SemanticsFlag.isButton],
+                                  label: 'OK',
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ]
+                )
+              ],
+            ),
+          ],
+        ),
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
       ),
-      ignoreId: true,
-      ignoreRect: true,
-      ignoreTransform: true,
-    ),
-  );
+    );
 
     semantics.dispose();
   });

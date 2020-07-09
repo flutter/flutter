@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -23,22 +24,18 @@ void main() {
   MemoryFileSystem fileSystem;
 
   setUp(() {
-    fileSystem = MemoryFileSystem();
+    fileSystem = MemoryFileSystem.test();
   });
 
-  group('FlutterTesterApp', () {
-    testUsingContext('fromCurrentDirectory', () async {
-      const String projectPath = '/home/my/projects/my_project';
-      await fileSystem.directory(projectPath).create(recursive: true);
-      fileSystem.currentDirectory = projectPath;
+  testWithoutContext('FlutterTesterApp can be created from the current directory', () async {
+    const String projectPath = '/home/my/projects/my_project';
+    await fileSystem.directory(projectPath).create(recursive: true);
+    fileSystem.currentDirectory = projectPath;
 
-      final FlutterTesterApp app = FlutterTesterApp.fromCurrentDirectory();
-      expect(app.name, 'my_project');
-      expect(app.packagesFile.path, fileSystem.path.join(projectPath, '.packages'));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-    });
+    final FlutterTesterApp app = FlutterTesterApp.fromCurrentDirectory(fileSystem);
+
+    expect(app.name, 'my_project');
+    expect(app.packagesFile.path, fileSystem.path.join(projectPath, '.packages'));
   });
 
   group('FlutterTesterDevices', () {
@@ -74,19 +71,48 @@ void main() {
       expect(devices, hasLength(1));
     });
   });
-
-  group('FlutterTesterDevice', () {
+  group('startApp', () {
     FlutterTesterDevice device;
     List<String> logLines;
+    String mainPath;
+
+    MockProcessManager mockProcessManager;
+    MockProcess mockProcess;
+    MockBuildSystem mockBuildSystem;
+
+    final Map<Type, Generator> startOverrides = <Type, Generator>{
+      Platform: () => FakePlatform(operatingSystem: 'linux'),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => mockProcessManager,
+      Artifacts: () => Artifacts.test(),
+      BuildSystem: () => mockBuildSystem,
+    };
 
     setUp(() {
-      device = FlutterTesterDevice('flutter-tester');
+      mockBuildSystem = MockBuildSystem();
+      mockProcessManager = MockProcessManager();
+      mockProcessManager.processFactory =
+          (List<String> commands) => mockProcess;
 
+      when(mockBuildSystem.build(
+        any,
+        any,
+      )).thenAnswer((_) async {
+        return BuildResult(success: true);
+      });
+      device = FlutterTesterDevice('flutter-tester',
+        fileSystem: fileSystem,
+        processManager: mockProcessManager,
+        artifacts: Artifacts.test(),
+        buildDirectory: 'build',
+        logger: BufferLogger.test(),
+        flutterVersion: MockFlutterVersion(),
+      );
       logLines = <String>[];
       device.getLogReader().logLines.listen(logLines.add);
     });
 
-    testUsingContext('getters', () async {
+    testWithoutContext('default settings', () async {
       expect(device.id, 'flutter-tester');
       expect(await device.isLocalEmulator, isFalse);
       expect(device.name, 'Flutter test device');
@@ -101,90 +127,47 @@ void main() {
       expect(device.isSupported(), isTrue);
     });
 
-    group('startApp', () {
-      String flutterRoot;
-      String flutterTesterPath;
+    testWithoutContext('does not accept profile, release, or jit-release builds', () async {
+      final LaunchResult releaseResult = await device.startApp(null,
+        mainPath: mainPath,
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+      );
+      final LaunchResult profileResult = await device.startApp(null,
+        mainPath: mainPath,
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.profile),
+      );
+      final LaunchResult jitReleaseResult = await device.startApp(null,
+        mainPath: mainPath,
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.jitRelease),
+      );
 
-      String projectPath;
-      String mainPath;
-
-      MockArtifacts mockArtifacts;
-      MockProcessManager mockProcessManager;
-      MockProcess mockProcess;
-      MockBuildSystem mockBuildSystem;
-
-      final Map<Type, Generator> startOverrides = <Type, Generator>{
-        Platform: () => FakePlatform(operatingSystem: 'linux'),
-        FileSystem: () => fileSystem,
-        ProcessManager: () => mockProcessManager,
-        Artifacts: () => mockArtifacts,
-        BuildSystem: () => mockBuildSystem,
-      };
-
-      setUp(() {
-        mockBuildSystem = MockBuildSystem();
-        flutterRoot = fileSystem.path.join('home', 'me', 'flutter');
-        flutterTesterPath = fileSystem.path.join(flutterRoot, 'bin', 'cache',
-            'artifacts', 'engine', 'linux-x64', 'flutter_tester');
-        final File flutterTesterFile = fileSystem.file(flutterTesterPath);
-        flutterTesterFile.parent.createSync(recursive: true);
-        flutterTesterFile.writeAsBytesSync(const <int>[]);
-
-        projectPath = fileSystem.path.join('home', 'me', 'hello');
-        mainPath = fileSystem.path.join(projectPath, 'lin', 'main.dart');
-
-        mockProcessManager = MockProcessManager();
-        mockProcessManager.processFactory =
-            (List<String> commands) => mockProcess;
-
-        mockArtifacts = MockArtifacts();
-        final String artifactPath = fileSystem.path.join(flutterRoot, 'artifact');
-        fileSystem.file(artifactPath).createSync(recursive: true);
-        when(mockArtifacts.getArtifactPath(
-          any,
-          mode: anyNamed('mode')
-        )).thenReturn(artifactPath);
-        when(mockArtifacts.isLocalEngine)
-          .thenReturn(false);
-
-        when(mockBuildSystem.build(
-          any,
-          any,
-        )).thenAnswer((_) async {
-          fileSystem.file('$mainPath.dill').createSync(recursive: true);
-          return BuildResult(success: true);
-        });
-      });
-
-      testUsingContext('not debug', () async {
-        final LaunchResult result = await device.startApp(null,
-            mainPath: mainPath,
-            debuggingOptions: DebuggingOptions.disabled(const BuildInfo(BuildMode.release, null, treeShakeIcons: false)));
-
-        expect(result.started, isFalse);
-      }, overrides: startOverrides);
+      expect(releaseResult.started, isFalse);
+      expect(profileResult.started, isFalse);
+      expect(jitReleaseResult.started, isFalse);
+    });
 
 
-      testUsingContext('start', () async {
-        final Uri observatoryUri = Uri.parse('http://127.0.0.1:6666/');
-        mockProcess = MockProcess(stdout: Stream<List<int>>.fromIterable(<List<int>>[
-          '''
+    testUsingContext('performs a build and starts in debug mode', () async {
+      final FlutterTesterApp app = FlutterTesterApp.fromCurrentDirectory(fileSystem);
+      final Uri observatoryUri = Uri.parse('http://127.0.0.1:6666/');
+      mockProcess = MockProcess(stdout: Stream<List<int>>.fromIterable(<List<int>>[
+        '''
 Observatory listening on $observatoryUri
 Hello!
 '''
-              .codeUnits,
-        ]));
+            .codeUnits,
+      ]));
 
-        final LaunchResult result = await device.startApp(null,
-            mainPath: mainPath,
-            debuggingOptions: DebuggingOptions.enabled(const BuildInfo(BuildMode.debug, null, treeShakeIcons: false)));
-        expect(result.started, isTrue);
-        expect(result.observatoryUri, observatoryUri);
-        expect(logLines.last, 'Hello!');
-      }, overrides: startOverrides);
-    });
+      final LaunchResult result = await device.startApp(app,
+        mainPath: mainPath,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug)
+      );
+
+      expect(result.started, isTrue);
+      expect(result.observatoryUri, observatoryUri);
+      expect(logLines.last, 'Hello!');
+    }, overrides: startOverrides);
   });
 }
 
 class MockBuildSystem extends Mock implements BuildSystem {}
-class MockArtifacts extends Mock implements Artifacts {}

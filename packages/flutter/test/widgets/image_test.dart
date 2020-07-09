@@ -1731,6 +1731,47 @@ void main() {
     // See https://github.com/flutter/flutter/issues/54292.
     skip: kIsWeb,
   );
+
+  testWidgets('Reports image size when painted', (WidgetTester tester) async {
+    ImageSizeInfo imageSizeInfo;
+    int count = 0;
+    debugOnPaintImage = (ImageSizeInfo info) {
+      count += 1;
+      imageSizeInfo = info;
+    };
+
+    final ui.Image image = await tester.runAsync(() => createTestImage(kBlueRectPng));
+    final TestImageStreamCompleter streamCompleter = TestImageStreamCompleter(
+      ImageInfo(
+        image: image,
+        scale: 1.0,
+        debugLabel: 'test.png',
+      ),
+    );
+    final TestImageProvider imageProvider = TestImageProvider(streamCompleter: streamCompleter);
+
+    await tester.pumpWidget(
+      Center(
+        child: SizedBox(
+          height: 50,
+          width: 50,
+          child: Image(image: imageProvider),
+        ),
+      ),
+    );
+
+    expect(count, 1);
+    expect(
+      imageSizeInfo,
+      const ImageSizeInfo(
+        source: 'test.png',
+        imageSize: Size(100, 100),
+        displaySize: Size(50, 50),
+      ),
+    );
+
+    debugOnPaintImage = null;
+  });
 }
 
 class ImagePainter extends CustomPainter {

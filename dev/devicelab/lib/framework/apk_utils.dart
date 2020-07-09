@@ -351,7 +351,7 @@ class FlutterPluginProject {
 
   static Future<FlutterPluginProject> create(Directory directory, String name) async {
     await inDirectory(directory, () async {
-      await flutter('create', options: <String>['--template=plugin', name]);
+      await flutter('create', options: <String>['--template=plugin', '--platforms=ios,android', name]);
     });
     return FlutterPluginProject(directory, name);
   }

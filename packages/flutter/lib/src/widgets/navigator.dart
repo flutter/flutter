@@ -2404,7 +2404,11 @@ class _RouteEntry extends RouteTransitionRecord {
     assert(currentState == _RouteLifecycle.push || currentState == _RouteLifecycle.pushReplace || currentState == _RouteLifecycle.replace);
     assert(navigator != null);
     assert(navigator._debugLocked);
-    assert(route._navigator == null);
+    assert(
+      route._navigator == null,
+      'The pushed route has already been used. When pushing a route, a new '
+      'Route object must be provided.',
+    );
     final _RouteLifecycle previousState = currentState;
     route._navigator = navigator;
     route.install();
@@ -3004,8 +3008,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         needsExplicitDecision = true;
         assert(
           newEntry.route.settings == nextPage,
-          'If a route is created from a page, its must have that page as its '
-          'settings.',
+          'The settings getter of a page-based Route must return a Page object. '
+          'Please set the settings to the Page in the Page.createRoute method.'
         );
         newHistory.add(newEntry);
       } else {

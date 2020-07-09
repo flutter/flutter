@@ -5,6 +5,7 @@
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/commands/analyze_base.dart';
 import 'package:flutter_tools/src/dart/analysis.dart';
 
 import '../../src/common.dart';
@@ -12,6 +13,12 @@ import '../../src/common.dart';
 const String _kFlutterRoot = '/data/flutter';
 
 void main() {
+  testWithoutContext('analyze generate correct DartDoc message', () async {
+    expect(AnalyzeBase.generateDartDocMessage(0), 'all public member have documentation');
+    expect(AnalyzeBase.generateDartDocMessage(1), 'one public member lacks documentation');
+    expect(AnalyzeBase.generateDartDocMessage(2), '2 public members lack documentation');
+  });
+
   testWithoutContext('analyze inRepo', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.directory(_kFlutterRoot).createSync(recursive: true);

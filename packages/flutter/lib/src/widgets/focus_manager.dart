@@ -1416,7 +1416,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   /// from the [WidgetsBinding] singleton).
   FocusManager() {
     rootScope._manager = this;
-    RawKeyboard.instance.addListener(_handleRawKeyEvent);
+    RawKeyboard.instance.keyEventHandler = _handleRawKeyEvent;
     GestureBinding.instance.pointerRouter.addGlobalRoute(_handlePointerEvent);
   }
 
@@ -1605,7 +1605,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     }
   }
 
-  void _handleRawKeyEvent(RawKeyEvent event) {
+  bool _handleRawKeyEvent(RawKeyEvent event) {
     // Update highlightMode first, since things responding to the keys might
     // look at the highlight mode, and it should be accurate.
     _lastInteractionWasTouch = false;
@@ -1616,7 +1616,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     // onKey on the way up, and if one responds that they handled it, stop.
     if (_primaryFocus == null) {
       assert(_focusDebug('No primary focus for key event, ignored: $event'));
-      return;
+      return false;
     }
     bool handled = false;
     for (final FocusNode node in <FocusNode>[_primaryFocus, ..._primaryFocus.ancestors]) {
@@ -1629,6 +1629,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     if (!handled) {
       assert(_focusDebug('Key event not handled by anyone: $event.'));
     }
+    return handled;
   }
 
   /// The node that currently has the primary focus.
