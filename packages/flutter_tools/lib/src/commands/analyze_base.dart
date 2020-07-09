@@ -17,6 +17,7 @@ import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../cache.dart';
+import '../dart/analysis.dart';
 import '../globals.dart' as globals;
 
 /// Common behavior for `flutter analyze` and `flutter analyze --watch`
@@ -84,7 +85,18 @@ abstract class AnalyzeBase {
     logger.printStatus('Analysis benchmark written to $benchmarkOut ($data).');
   }
 
+  bool get isFlutterRepo => argResults['flutter-repo'] as bool;
+  String get sdkPath => argResults['dart-sdk'] as String ?? artifacts.getArtifactPath(Artifact.engineDartSdkPath);
   bool get isBenchmarking => argResults['benchmark'] as bool;
+  bool get isDartDocs => argResults['dartdocs'] as bool;
+
+  static int countMissingDartDocs(List<AnalysisError> errors) {
+    final int undocumentedMembers = errors.where((AnalysisError error) {
+      return error.code == 'public_member_api_docs';
+    }).length;
+
+    return undocumentedMembers;
+  }
 
   static String generateDartDocMessage(int undocumentedMembers) {
     String dartDocMessage;
@@ -102,6 +114,41 @@ abstract class AnalyzeBase {
     }
 
     return dartDocMessage;
+  }
+
+  /// Print an analysis summary.
+  static String generateErrorsMessage({
+    int issueCount,
+    int issueDiff,
+    int files,
+    String seconds,
+    int undocumentedMembers,
+    String dartDocMessage,
+  }) {
+    String errorsMessage;
+    String issuesMessage = issueCount > 0
+        ? '$issueCount ${pluralize('issue', issueCount)} found.'
+        : 'No issues found!';
+
+    if (issueDiff != null && issueDiff != 0) {
+      if (issueDiff > 0) {
+        issuesMessage += ' ($issueDiff new)';
+      } else {
+        issuesMessage += ' (${-issueDiff} fixed)';
+      }
+    }
+
+    String filesMessage = '';
+    if (files != null) {
+      filesMessage = ' • analyzed $files ${pluralize('file', files)}';
+    }
+
+    if (undocumentedMembers > 0) {
+      errorsMessage = '$issuesMessage$filesMessage (ran in ${seconds}s; $dartDocMessage)';
+    } else {
+      errorsMessage = '$issuesMessage$filesMessage (ran in ${seconds}s;)';
+    }
+    return errorsMessage;
   }
 }
 
