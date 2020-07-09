@@ -590,17 +590,6 @@ void main() {
           );
 
           await tester.pumpWidget(listView);
-          expect(listView.scrollController.position.physics, isInstanceOf<BouncingScrollPhysics>());
-        }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
-
-        testWidgets('Default scroll physics for android/fuchsia/linux/windows', (WidgetTester tester) async {
-          final ReorderableListView listView = ReorderableListView(
-            children: const <Widget>[],
-            onReorder: (int oldIndex, int newIndex) {},
-            scrollController: ScrollController(),
-          );
-
-          await tester.pumpWidget(listView);
           expect(listView.scrollController.position.physics, isInstanceOf<ClampingScrollPhysics>());
         }, variant: const TargetPlatformVariant(<TargetPlatform>{
             TargetPlatform.android,
