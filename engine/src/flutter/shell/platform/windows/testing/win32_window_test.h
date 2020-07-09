@@ -42,6 +42,9 @@ class Win32WindowTest : public Win32Window {
   void OnPointerLeave() override;
 
   // |Win32Window|
+  void OnSetCursor() override;
+
+  // |Win32Window|
   void OnText(const std::u16string& text) override;
 
   // |Win32Window|

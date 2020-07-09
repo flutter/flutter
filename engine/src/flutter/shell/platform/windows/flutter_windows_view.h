@@ -14,6 +14,7 @@
 #include "flutter/shell/platform/common/cpp/incoming_message_dispatcher.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/windows/angle_surface_manager.h"
+#include "flutter/shell/platform/windows/cursor_handler.h"
 #include "flutter/shell/platform/windows/key_event_handler.h"
 #include "flutter/shell/platform/windows/keyboard_hook_handler.h"
 #include "flutter/shell/platform/windows/public/flutter_windows.h"
@@ -212,6 +213,9 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
 
   // Handler for the flutter/platform channel.
   std::unique_ptr<flutter::PlatformHandler> platform_handler_;
+
+  // Handler for cursor events.
+  std::unique_ptr<flutter::CursorHandler> cursor_handler_;
 
   // Currently configured WindowBindingHandler for view.
   std::unique_ptr<flutter::WindowBindingHandler> binding_handler_;
