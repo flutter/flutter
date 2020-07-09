@@ -695,7 +695,6 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
   /// be injected into the widget tree in the [State]'s `build` method using a
   /// [UnmanagedRestorationScope]. That allows descendants to claim child
   /// buckets from this bucket for their own restoration needs.
-  @protected
   RestorationBucket get bucket => _bucket;
   RestorationBucket _bucket;
 
@@ -781,7 +780,10 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
     assert(property != null);
     assert(id != null);
     assert(property._id == null || (_debugDoingRestore && property._id == id),
-           'Property is already registered under ${property._id}',
+           'Property is already registered under ${property._id}.',
+    );
+    assert(_debugDoingRestore || !_properties.keys.map((RestorableProperty<Object> r) => r._id).contains(id),
+           '$id is already registered to another property.'
     );
     final bool hasSerializedValue = bucket?.containsValue(id) == true;
     final Object initialValue = hasSerializedValue
@@ -898,7 +900,7 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
               'Previously registered RestorableProperties must be re-registered in "restoreState".',
             ),
             ErrorDescription(
-              'The RestorableProperties with the following IDs were not re-registerd to $this when '
+              'The RestorableProperties with the following IDs were not re-registered to $this when '
               '"restoreState" was called:',
             ),
             ..._debugPropertiesWaitingForReregistration.map((RestorableProperty<Object> property) => ErrorDescription(
