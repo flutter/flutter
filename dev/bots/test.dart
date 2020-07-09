@@ -960,22 +960,6 @@ Future<void> _runFlutterWebTest(String workingDirectory, List<String> tests) asy
       _supportedTesterVersion,
     ],
   );
-  await runCommand(
-    dart,
-    <String>[
-      'pub',
-      'global',
-      'run',
-      'tester',
-      '-j1',
-      '-v',
-      '--compile-only',
-      '--platform=flutter_web',
-      ...?flutterTestArgs,
-      ...tests,
-    ],
-    workingDirectory: workingDirectory,
-  );
   for (final String test in tests) {
     print('starting $test');
     await runCommand(
@@ -989,9 +973,7 @@ Future<void> _runFlutterWebTest(String workingDirectory, List<String> tests) asy
         '-v',
         '--ci',
         '--no-debug',
-        '--run-only',
         '--platform=flutter_web',
-        ...?flutterTestArgs,
         test,
       ],
       workingDirectory: workingDirectory,
