@@ -55,6 +55,75 @@ typedef struct {
   FlutterTask task;
 } FlutterSource;
 
+// Parse a locale into its components.
+static void parse_locale(const gchar* locale,
+                         gchar** language,
+                         gchar** territory,
+                         gchar** codeset,
+                         gchar** modifier) {
+  gchar* l = g_strdup(locale);
+
+  // Locales are in the form "language[_territory][.codeset][@modifier]"
+  gchar* match = strrchr(l, '@');
+  if (match != nullptr) {
+    *modifier = g_strdup(match + 1);
+    *match = '\0';
+  } else {
+    *modifier = nullptr;
+  }
+
+  match = strrchr(l, '.');
+  if (match != nullptr) {
+    *codeset = g_strdup(match + 1);
+    *match = '\0';
+  } else {
+    *codeset = nullptr;
+  }
+
+  match = strrchr(l, '_');
+  if (match != nullptr) {
+    *territory = g_strdup(match + 1);
+    *match = '\0';
+  } else {
+    *territory = nullptr;
+  }
+
+  *language = l;
+}
+
+// Passes locale information to the Flutter engine.
+static void setup_locales(FlEngine* self) {
+  const gchar* const* languages = g_get_language_names();
+  g_autoptr(GPtrArray) locales = g_ptr_array_new_with_free_func(g_free);
+  // Helper array to take ownership of the strings passed to Flutter.
+  g_autoptr(GPtrArray) locale_strings = g_ptr_array_new_with_free_func(g_free);
+  for (int i = 0; languages[i] != nullptr; i++) {
+    gchar *language, *territory, *codeset, *modifier;
+    parse_locale(languages[i], &language, &territory, &codeset, &modifier);
+    if (language != nullptr)
+      g_ptr_array_add(locale_strings, language);
+    if (territory != nullptr)
+      g_ptr_array_add(locale_strings, territory);
+    if (codeset != nullptr)
+      g_ptr_array_add(locale_strings, codeset);
+    if (modifier != nullptr)
+      g_ptr_array_add(locale_strings, modifier);
+
+    FlutterLocale* locale =
+        static_cast<FlutterLocale*>(g_malloc0(sizeof(FlutterLocale)));
+    g_ptr_array_add(locales, locale);
+    locale->struct_size = sizeof(FlutterLocale);
+    locale->language_code = language;
+    locale->country_code = territory;
+    locale->script_code = codeset;
+    locale->variant_code = modifier;
+  }
+  FlutterEngineResult result = FlutterEngineUpdateLocales(
+      self->engine, (const FlutterLocale**)locales->pdata, locales->len);
+  if (result != kSuccess)
+    g_warning("Failed to set up Flutter locales");
+}
+
 // Callback to run a Flutter task in the GLib main loop.
 static gboolean flutter_source_dispatch(GSource* source,
                                         GSourceFunc callback,
@@ -322,6 +391,8 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
                 "Failed to run Flutter engine");
     return FALSE;
   }
+
+  setup_locales(self);
 
   return TRUE;
 }

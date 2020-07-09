@@ -382,3 +382,10 @@ FlutterEngineResult FlutterEngineRunTask(FLUTTER_API_SYMBOL(FlutterEngine)
 bool FlutterEngineRunsAOTCompiledDartCode() {
   return false;
 }
+
+FlutterEngineResult FlutterEngineUpdateLocales(FLUTTER_API_SYMBOL(FlutterEngine)
+                                                   engine,
+                                               const FlutterLocale** locales,
+                                               size_t locales_count) {
+  return kSuccess;
+}
