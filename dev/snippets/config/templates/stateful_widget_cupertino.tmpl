@@ -1,0 +1,37 @@
+/// Flutter code sample for {{element}}
+
+{{description}}
+
+import 'package:flutter/cupertino.dart';
+
+{{code-imports}}
+
+void main() => runApp(new MyApp());
+
+/// This is the main application widget.
+class MyApp extends StatelessWidget {
+  static const String _title = 'Flutter Code Sample';
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoApp(
+      title: _title,
+      home: MyStatefulWidget(),
+    );
+  }
+}
+
+{{code-preamble}}
+
+/// This is the stateful widget that the main application instantiates.
+class MyStatefulWidget extends StatefulWidget {
+  MyStatefulWidget({Key key}) : super(key: key);
+
+  @override
+  _MyStatefulWidgetState createState() => _MyStatefulWidgetState();
+}
+
+/// This is the private State class that goes with MyStatefulWidget.
+class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+  {{code}}
+}

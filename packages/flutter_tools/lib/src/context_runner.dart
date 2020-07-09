@@ -124,7 +124,7 @@ Future<T> runInContext<T>(
         client: globals.httpClientFactory?.call() ?? HttpClient(),
       ),
       DevFSConfig: () => DevFSConfig(),
-      DeviceManager: () => DeviceManager(),
+      DeviceManager: () => FlutterDeviceManager(),
       Doctor: () => Doctor(logger: globals.logger),
       DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
       EmulatorManager: () => EmulatorManager(

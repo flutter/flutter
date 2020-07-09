@@ -449,7 +449,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(controller.selection.baseOffset, 10);
-  }, skip: isBrowser);
+  });
 
   testWidgets('Updating the floating cursor correctly moves the cursor', (WidgetTester tester) async {
     const String text = 'hello world this is fun and cool and awesome!';
@@ -505,7 +505,7 @@ void main() {
     await tester.pumpAndSettle();
     // The cursor has been set.
     expect(controller.selection.baseOffset, 10);
-  }, skip: isBrowser);
+  });
 
   testWidgets('Updating the floating cursor can end without update', (WidgetTester tester) async {
     const String text = 'hello world this is fun and cool and awesome!';
@@ -549,7 +549,7 @@ void main() {
     // The cursor did not change.
     expect(controller.selection.baseOffset, 29);
     expect(tester.takeException(), null);
-  }, skip: isBrowser);
+  });
 
   // Regression test for https://github.com/flutter/flutter/pull/30475.
   testWidgets('Trying to select with the floating cursor does not crash', (WidgetTester tester) async {
@@ -615,7 +615,7 @@ void main() {
       offset: const Offset(-250, 20)));
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
     await tester.pumpAndSettle();
-  }, skip: isBrowser);
+  });
 
   testWidgets('autofocus sets cursor to the end of text', (WidgetTester tester) async {
     const String text = 'hello world';
@@ -647,7 +647,7 @@ void main() {
     expect(focusNode.hasFocus, true);
     expect(controller.selection.isCollapsed, true);
     expect(controller.selection.baseOffset, text.length);
-  }, skip: isBrowser);
+  });
 
   testWidgets('Floating cursor is painted', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
@@ -731,7 +731,7 @@ void main() {
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
     await tester.pumpAndSettle();
     debugDefaultTargetPlatformOverride = null;
-  }, skip: isBrowser, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('cursor layout', (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();

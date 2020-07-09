@@ -2624,13 +2624,15 @@ class SemanticsOwner extends ChangeNotifier {
         if (node.isPartOfNodeMerging) {
           assert(node.mergeAllDescendantsIntoThisNode || node.parent != null);
           // if we're merged into our parent, make sure our parent is added to the dirty list
-          if (node.parent != null && node.parent.isPartOfNodeMerging)
+          if (node.parent != null && node.parent.isPartOfNodeMerging) {
             node.parent._markDirty(); // this can add the node to the dirty list
+            node._dirty = false; // We don't want to send update for this node.
+          }
         }
       }
     }
     visitedNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
-    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+    final ui.SemanticsUpdateBuilder builder = SemanticsBinding.instance.createSemanticsUpdateBuilder();
     for (final SemanticsNode node in visitedNodes) {
       assert(node.parent?._dirty != true); // could be null (no parent) or false (not dirty)
       // The _serialize() method marks the node as not dirty, and

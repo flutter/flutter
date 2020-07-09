@@ -1308,6 +1308,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
           },
         onUnknownRoute: _onUnknownRoute,
         observers: widget.navigatorObservers,
+        reportsRouteUpdateToEngine: true,
       );
     }
 

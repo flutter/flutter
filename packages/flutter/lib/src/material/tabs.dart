@@ -595,8 +595,8 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// The [indicatorPadding] parameter defaults to [EdgeInsets.zero], and must not be null.
   ///
-  /// If [indicator] is not null, then [indicatorWeight], [indicatorPadding], and
-  /// [indicatorColor] are ignored.
+  /// If [indicator] is not null or provided from [TabBarTheme],
+  /// then [indicatorWeight], [indicatorPadding], and [indicatorColor] are ignored.
   const TabBar({
     Key key,
     @required this.tabs,
@@ -647,7 +647,8 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// If this parameter is null, then the value of the Theme's indicatorColor
   /// property is used.
   ///
-  /// If [indicator] is specified, this property is ignored.
+  /// If [indicator] is specified or provided from [TabBarTheme],
+  /// this property is ignored.
   final Color indicatorColor;
 
   /// The thickness of the line that appears below the selected tab.
@@ -655,7 +656,8 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// The value of this parameter must be greater than zero and its default
   /// value is 2.0.
   ///
-  /// If [indicator] is specified, this property is ignored.
+  /// If [indicator] is specified or provided from [TabBarTheme],
+  /// this property is ignored.
   final double indicatorWeight;
 
   /// The horizontal padding for the line that appears below the selected tab.
@@ -669,13 +671,15 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// The default value of [indicatorPadding] is [EdgeInsets.zero].
   ///
-  /// If [indicator] is specified, this property is ignored.
+  /// If [indicator] is specified or provided from [TabBarTheme],
+  /// this property is ignored.
   final EdgeInsetsGeometry indicatorPadding;
 
   /// Defines the appearance of the selected tab indicator.
   ///
-  /// If [indicator] is specified, the [indicatorColor], [indicatorWeight],
-  /// and [indicatorPadding] properties are ignored.
+  /// If [indicator] is specified or provided from [TabBarTheme],
+  /// the [indicatorColor], [indicatorWeight], and [indicatorPadding]
+  /// properties are ignored.
   ///
   /// The default, underline-style, selected tab indicator can be defined with
   /// [UnderlineTabIndicator].
