@@ -314,13 +314,7 @@ void main() {
      expect(log, equals(<String>['left']));
      await gesture.up();
      expect(log, equals(<String>['left']));
-
-     // This test doesn't work because it relies on part of the pointer event
-     // dispatching mechanism that is mocked out in testing. We should use the real
-     // mechanism even during testing and enable this test.
-     // TODO(abarth): Test more of the real code and enable this test.
-     // See https://github.com/flutter/flutter/issues/4771.
-   }, skip: true);
+   }, skip: true); // https://github.com/flutter/flutter/issues/4771
 
   testWidgets('popAndPushNamed', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
