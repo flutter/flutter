@@ -356,6 +356,8 @@ void _merge<T>(
 
 /// Casts the provided `map` [Object] to a typed `Map<S, T>` where `S` is the
 /// type of the keys and `T` is the type of the values.
+///
+/// Throws if `map` cannot be casted to `Map<S, T>`.
 Map<S, T> castToMap<S, T>(Object map) {
   final Map<dynamic, dynamic> casted = map as Map<dynamic, dynamic>;
   return casted.cast<S, T>();

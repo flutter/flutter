@@ -24,7 +24,7 @@ typedef _BucketVisitor = void Function(RestorationBucket bucket);
 /// used to restore the application to the previous state described by the
 /// serialized data. Mobile operating systems use the concept of state
 /// restoration to provide the illusion that apps continue to run in the
-/// background forever: After an app has been backgrounded, the user can always
+/// background forever: after an app has been backgrounded, the user can always
 /// return to it and find it in the same state. In practice, the operating
 /// system may, however, terminate the app to free resources for other apps
 /// running in the foreground. Before that happens, the app gets a chance to
