@@ -1041,7 +1041,11 @@ class TextureAndroidViewController extends AndroidViewController {
 
   @override
   Future<void> _sendDisposeMessage() {
-    return SystemChannels.platform_views.invokeMethod<void>('dispose', viewId);
+    return SystemChannels
+        .platform_views.invokeMethod<void>('dispose', <String, dynamic>{
+      'id': viewId,
+      'hybrid': false,
+    });
   }
 }
 

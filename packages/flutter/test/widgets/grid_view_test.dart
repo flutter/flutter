@@ -566,4 +566,40 @@ void main() {
     expect(tester.getTopLeft(find.byKey(target)), const Offset(606.0, 0.0));
     expect(tester.getBottomRight(find.byKey(target)), const Offset(800.0, 194.0));
   });
+
+  testWidgets('GridView does not cache itemBuilder calls', (WidgetTester tester) async {
+    final Map<int, int> counters = <int, int>{};
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: GridView.builder(
+        itemCount: 1000,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+        itemBuilder: (BuildContext context, int index) {
+          counters[index] ??= 0;
+          counters[index] += 1;
+          return SizedBox(
+            key: ValueKey<int>(index),
+            width: 200,
+            height: 200,
+          );
+        },
+      ),
+    ));
+
+    expect(find.byKey(const ValueKey<int>(4)), findsOneWidget);
+    expect(counters[4], 1);
+
+    await tester.fling(find.byType(GridView), const Offset(0, -300), 5000);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey<int>(4)), findsNothing);
+    expect(counters[4], 1);
+
+    await tester.fling(find.byType(GridView), const Offset(0, 300), 5000);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey<int>(4)), findsOneWidget);
+    expect(counters[4], 2);
+  });
 }

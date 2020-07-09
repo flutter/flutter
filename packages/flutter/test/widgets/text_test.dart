@@ -161,7 +161,7 @@ void main() {
       ),
     );
     expect(tester.takeException(), null);
-  }, skip: isBrowser); // TODO(yjbanov): https://github.com/flutter/flutter/issues/42086
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42086
 
   testWidgets('inline widgets works with textScaleFactor', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/59316
@@ -225,7 +225,7 @@ void main() {
     renderText = tester.renderObject(find.byKey(key));
     // The RichText in the widget span should wrap into three lines.
     expect(renderText.size.height, singleLineHeight * textScaleFactor * 3);
-  }, skip: isBrowser); // TODO(yjbanov): https://github.com/flutter/flutter/issues/42086
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42086
 
   testWidgets('semanticsLabel can override text label', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -556,7 +556,7 @@ void main() {
       ),
     );
     semantics.dispose();
-  }, skip: true); // TODO(jonahwilliams): correct once https://github.com/flutter/flutter/issues/20891 is resolved.
+  }, skip: true); // https://github.com/flutter/flutter/issues/20891
 
   testWidgets('TapGesture recognizers contribute link semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -670,7 +670,7 @@ void main() {
       ),
     );
     semantics.dispose();
-  }, skip: isBrowser); // TODO(yjbanov): https://github.com/flutter/flutter/issues/42086
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42086
 
   testWidgets('inline widgets semantic nodes scale', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -750,7 +750,7 @@ void main() {
       ),
     );
     semantics.dispose();
-  }, skip: isBrowser); // TODO(yjbanov): https://github.com/flutter/flutter/issues/42086
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42086
 
   testWidgets('Overflow is clipping correctly - short text with overflow: clip', (WidgetTester tester) async {
     await _pumpTextWidget(
@@ -773,7 +773,7 @@ void main() {
       find.byType(Text),
       paints..clipRect(rect: const Rect.fromLTWH(0, 0, 50, 50)),
     );
-  }, skip: isBrowser);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33523
 
   testWidgets('Overflow is clipping correctly - short text with overflow: ellipsis', (WidgetTester tester) async {
     await _pumpTextWidget(
@@ -864,7 +864,7 @@ void main() {
     final Size textSizeLongestLine = tester.getSize(find.byType(Text));
     expect(textSizeLongestLine.width, equals(630.0));
     expect(textSizeLongestLine.height, equals(fontHeight * 2));
-  }, skip: isBrowser);  // TODO(yjbanov): https://github.com/flutter/flutter/issues/44020
+  }, skip: isBrowser);  // https://github.com/flutter/flutter/issues/44020
 
   testWidgets('textWidthBasis with textAlign still obeys parent alignment', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -914,7 +914,7 @@ void main() {
     expect(tester.getSize(find.text('RIGHT ALIGNED, PARENT')).width, lessThan(width));
     expect(tester.getSize(find.text('LEFT ALIGNED, LONGEST LINE')).width, lessThan(width));
     expect(tester.getSize(find.text('RIGHT ALIGNED, LONGEST LINE')).width, equals(width));
-  }, skip: isBrowser);  // TODO(yjbanov): https://github.com/flutter/flutter/issues/44020
+  }, skip: isBrowser);  // https://github.com/flutter/flutter/issues/44020
 
   testWidgets('Paragraph.getBoxesForRange returns nothing when selection range is zero length', (WidgetTester tester) async {
     final ui.ParagraphBuilder builder = ui.ParagraphBuilder(ui.ParagraphStyle());
