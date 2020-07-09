@@ -79,7 +79,6 @@ fml::RefPtr<Canvas> Canvas::Create(PictureRecorder* recorder,
   if (!recorder)
     Dart_ThrowException(
         ToDart("Canvas constructor called with non-genuine PictureRecorder."));
-  FML_DCHECK(!recorder->isRecording());  // verified by Dart code
   fml::RefPtr<Canvas> canvas = fml::MakeRefCounted<Canvas>(
       recorder->BeginRecording(SkRect::MakeLTRB(left, top, right, bottom)));
   recorder->set_canvas(canvas);
@@ -432,12 +431,11 @@ void Canvas::drawShadow(const CanvasPath* path,
                                           elevation, transparentOccluder, dpr);
 }
 
-void Canvas::Clear() {
+void Canvas::Invalidate() {
+  if (dart_wrapper()) {
+    ClearDartWrapper();
+  }
   canvas_ = nullptr;
-}
-
-bool Canvas::IsRecording() const {
-  return !!canvas_;
 }
 
 }  // namespace flutter
