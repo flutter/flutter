@@ -283,6 +283,9 @@ void main() {
       buttonBarTheme: const ButtonBarThemeData(alignment: MainAxisAlignment.start),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(type: BottomNavigationBarType.fixed),
       timePickerTheme: const TimePickerThemeData(backgroundColor: Colors.black),
+      textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(primary: Colors.red)),
+      containedButtonTheme: ContainedButtonThemeData(style: ContainedButton.styleFrom(primary: Colors.green)),
+      outlinedButtonTheme: OutlinedButtonThemeData(style: OutlinedButton.styleFrom(primary: Colors.blue)),
       fixTextFieldOutlineLabel: false,
     );
 
@@ -365,6 +368,9 @@ void main() {
       buttonBarTheme: const ButtonBarThemeData(alignment: MainAxisAlignment.end),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(type: BottomNavigationBarType.shifting),
       timePickerTheme: const TimePickerThemeData(backgroundColor: Colors.white),
+      textButtonTheme: const TextButtonThemeData(),
+      containedButtonTheme: const ContainedButtonThemeData(),
+      outlinedButtonTheme: const OutlinedButtonThemeData(),
       fixTextFieldOutlineLabel: true,
     );
 
@@ -433,6 +439,9 @@ void main() {
       buttonBarTheme: otherTheme.buttonBarTheme,
       bottomNavigationBarTheme: otherTheme.bottomNavigationBarTheme,
       timePickerTheme: otherTheme.timePickerTheme,
+      textButtonTheme: otherTheme.textButtonTheme,
+      containedButtonTheme: otherTheme.containedButtonTheme,
+      outlinedButtonTheme: otherTheme.outlinedButtonTheme,
       fixTextFieldOutlineLabel: otherTheme.fixTextFieldOutlineLabel,
     );
 
@@ -503,6 +512,9 @@ void main() {
     expect(themeDataCopy.buttonBarTheme, equals(otherTheme.buttonBarTheme));
     expect(themeDataCopy.bottomNavigationBarTheme, equals(otherTheme.bottomNavigationBarTheme));
     expect(themeDataCopy.timePickerTheme, equals(otherTheme.timePickerTheme));
+    expect(themeDataCopy.textButtonTheme, equals(otherTheme.textButtonTheme));
+    expect(themeDataCopy.containedButtonTheme, equals(otherTheme.containedButtonTheme));
+    expect(themeDataCopy.outlinedButtonTheme, equals(otherTheme.outlinedButtonTheme));
     expect(themeDataCopy.fixTextFieldOutlineLabel, equals(otherTheme.fixTextFieldOutlineLabel));
   });
 
