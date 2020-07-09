@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file/local.dart';
+import 'package:flutter_tools/src/base/file_system.dart' hide LocalFileSystem;
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:process/process.dart';
@@ -42,15 +44,35 @@ void main() {
   });
 
   test('flutter run --machine uses AppRunLogger', () async {
-    final String flutterBin = globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter');
-    final ProcessResult result = await const LocalProcessManager().run(<String>[
-      flutterBin,
-      'run',
-      '--machine',
-      '-v',
-    ]);
+    const FileSystem fileSystem = LocalFileSystem();
+    final Directory directory = fileSystem.systemTempDirectory
+      .createTempSync('_flutter_run_test')
+      ..createSync(recursive: true);
 
-    expect(result.stdout, isNotEmpty);
+    try {
+      directory
+        .childFile('pubspec.yaml')
+        .writeAsStringSync('name: foo');
+      directory
+        .childFile('.packages')
+        .writeAsStringSync('\n');
+      directory
+        .childDirectory('lib')
+        .childFile('main.dart')
+        .createSync(recursive: true);
+      final String flutterBin = globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter');
+      final ProcessResult result = await const LocalProcessManager().run(<String>[
+        flutterBin,
+        'run',
+        '--show-test-device', // ensure command can fail to run and hit injection of correct logger.
+        '--machine',
+        '-v',
+        '--no-resident',
+      ], workingDirectory: directory.path);
+      expect(result.stderr, isNot(contains('Oops; flutter has exited unexpectedly:')));
+    } finally {
+      directory.deleteSync(recursive: true);
+    }
   });
 
   test('flutter attach --machine uses AppRunLogger', () async {
