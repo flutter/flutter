@@ -219,6 +219,35 @@ void main() {
     expect(modelE.shadowColor, equals(const Color(0xFFFF0000)));
   });
 
+  testWidgets('Transparent material widget does not absorb hit test', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/58665.
+    bool pressed = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Stack(
+            children: <Widget>[
+              RaisedButton(
+                onPressed: () {
+                  pressed = true;
+                },
+              ),
+              Material(
+                type: MaterialType.transparency,
+                child: Container(
+                  width: 400.0,
+                  height: 500.0,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.byType(RaisedButton));
+    expect(pressed, isTrue);
+  });
+
   group('Elevation Overlay', () {
 
     testWidgets('applyElevationOverlayColor set to false does not change surface color', (WidgetTester tester) async {

@@ -681,7 +681,12 @@ class _AppBarState extends State<AppBar> {
         fit: StackFit.passthrough,
         children: <Widget>[
           widget.flexibleSpace,
-          appBar,
+          // Creates a material widget to prevent the flexibleSpace from
+          // obscuring the ink splashes produced by appBar children.
+          Material(
+            type: MaterialType.transparency,
+            child: appBar,
+          ),
         ],
       );
     }
