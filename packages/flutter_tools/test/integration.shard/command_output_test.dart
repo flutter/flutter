@@ -44,7 +44,7 @@ void main() {
   });
 
   test('flutter run --machine uses AppRunLogger', () async {
-    final Directory directory = createResolvedTempDirectorySync('flutter_run_test')
+    final Directory directory = createResolvedTempDirectorySync('flutter_run_test.')
       .createTempSync('_flutter_run_test.')
       ..createSync(recursive: true);
 
