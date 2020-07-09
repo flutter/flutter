@@ -968,7 +968,7 @@ Future<void> _runFlutterWebTest(String workingDirectory, List<String> tests) asy
   }
 }
 
-const String _supportedTesterVersion = '0.0.2-dev8';
+const String _supportedTesterVersion = '0.0.2-dev9';
 
 Future<void> _pubRunTester(String workingDirectory, {
   List<String> testPaths,
