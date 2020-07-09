@@ -20,6 +20,7 @@ import 'flutter_manifest.dart';
 import 'globals.dart' as globals;
 import 'ios/plist_parser.dart';
 import 'ios/xcodeproj.dart' as xcode;
+import 'ios/xcodeproj.dart';
 import 'platform_plugins.dart';
 import 'plugins.dart';
 import 'template.dart';
@@ -105,11 +106,16 @@ class FlutterProject {
       // Don't require iOS build info, this method is only
       // used during create as best-effort, use the
       // default target bundle identifier.
-      await ios.productBundleIdentifier(null),
-      android.applicationId,
-      android.group,
-      example.android.applicationId,
-      await example.ios.productBundleIdentifier(null),
+      if (ios.existsSync())
+        await ios.productBundleIdentifier(null),
+      if (android.existsSync()) ...<String>[
+        android.applicationId,
+        android.group,
+      ],
+      if (example.android.existsSync())
+        example.android.applicationId,
+      if (example.ios.existsSync())
+        await example.ios.productBundleIdentifier(null),
     ];
     return Set<String>.of(candidates
         .map<String>(_organizationNameFromPackageName)
@@ -434,8 +440,12 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
 
   /// The product bundle identifier of the host app, or null if not set or if
   /// iOS tooling needed to read it is not installed.
-  Future<String> productBundleIdentifier(BuildInfo buildInfo) async =>
-    _productBundleIdentifier ??= await _parseProductBundleIdentifier(buildInfo);
+  Future<String> productBundleIdentifier(BuildInfo buildInfo) async {
+    if (!existsSync()) {
+      return null;
+    }
+    return _productBundleIdentifier ??= await _parseProductBundleIdentifier(buildInfo);
+  }
   String _productBundleIdentifier;
 
   Future<String> _parseProductBundleIdentifier(BuildInfo buildInfo) async {
@@ -481,8 +491,12 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   }
 
   /// The bundle name of the host app, `My App.app`.
-  Future<String> hostAppBundleName(BuildInfo buildInfo) async =>
-    _hostAppBundleName ??= await _parseHostAppBundleName(buildInfo);
+  Future<String> hostAppBundleName(BuildInfo buildInfo) async {
+    if (!existsSync()) {
+      return null;
+    }
+    return _hostAppBundleName ??= await _parseHostAppBundleName(buildInfo);
+  }
   String _hostAppBundleName;
 
   Future<String> _parseHostAppBundleName(BuildInfo buildInfo) async {
@@ -507,11 +521,31 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   ///
   /// Returns null, if iOS tooling is unavailable.
   Future<Map<String, String>> buildSettingsForBuildInfo(BuildInfo buildInfo) async {
+    if (!existsSync()) {
+      return null;
+    }
     _buildSettingsByScheme ??= <String, Map<String, String>>{};
-    final String scheme = xcode.XcodeProjectInfo.expectedSchemeFor(buildInfo);
+    final XcodeProjectInfo info = await projectInfo();
+    if (info == null) {
+      return null;
+    }
+
+    final String scheme = info.schemeFor(buildInfo);
+    if (scheme == null) {
+      info.reportFlavorNotFoundAndExit();
+    }
+
     return _buildSettingsByScheme[scheme] ??= await _xcodeProjectBuildSettings(scheme);
   }
   Map<String, Map<String, String>> _buildSettingsByScheme;
+
+  Future<XcodeProjectInfo> projectInfo() async {
+    if (!existsSync() || !globals.xcodeProjectInterpreter.isInstalled) {
+      return null;
+    }
+    return _projectInfo ??= await globals.xcodeProjectInterpreter.getInfo(hostAppRoot.path);
+  }
+  XcodeProjectInfo _projectInfo;
 
   Future<Map<String, String>> _xcodeProjectBuildSettings(String scheme) async {
     if (!globals.xcodeProjectInterpreter.isInstalled) {
@@ -622,32 +656,6 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
       );
       podspec.copySync(engineDest.childFile('Flutter.podspec').path);
     }
-  }
-
-  Future<void> makeHostAppEditable() async {
-    assert(isModule);
-    if (_editableDirectory.existsSync()) {
-      throwToolExit('iOS host app is already editable. To start fresh, delete the ios/ folder.');
-    }
-    _deleteIfExistsSync(ephemeralDirectory);
-    await _overwriteFromTemplate(
-      globals.fs.path.join('module', 'ios', 'library'),
-      ephemeralDirectory,
-    );
-    await _overwriteFromTemplate(
-      globals.fs.path.join('module', 'ios', 'host_app_ephemeral'),
-      _editableDirectory,
-    );
-    await _overwriteFromTemplate(
-      globals.fs.path.join('module', 'ios', 'host_app_ephemeral_cocoapods'),
-      _editableDirectory,
-    );
-    await _overwriteFromTemplate(
-      globals.fs.path.join('module', 'ios', 'host_app_editable_cocoapods'),
-      _editableDirectory,
-    );
-    await _updateGeneratedXcodeConfigIfNeeded();
-    await injectPlugins(parent);
   }
 
   @override
@@ -786,20 +794,6 @@ class AndroidProject extends FlutterProjectPlatform {
       entity: ephemeralDirectory,
       referenceFile: parent.pubspecFile,
     ) || globals.cache.isOlderThanToolsStamp(ephemeralDirectory);
-  }
-
-  Future<void> makeHostAppEditable() async {
-    assert(isModule);
-    if (_editableHostAppDirectory.existsSync()) {
-      throwToolExit('Android host app is already editable. To start fresh, delete the android/ folder.');
-    }
-    await _regenerateLibrary();
-    await _overwriteFromTemplate(globals.fs.path.join('module', 'android', 'host_app_common'), _editableHostAppDirectory);
-    await _overwriteFromTemplate(globals.fs.path.join('module', 'android', 'host_app_editable'), _editableHostAppDirectory);
-    await _overwriteFromTemplate(globals.fs.path.join('module', 'android', 'gradle'), _editableHostAppDirectory);
-    gradle.gradleUtils.injectGradleWrapperIfNeeded(_editableHostAppDirectory);
-    gradle.writeLocalProperties(_editableHostAppDirectory.childFile('local.properties'));
-    await injectPlugins(parent);
   }
 
   File get localPropertiesFile => _flutterLibGradleRoot.childFile('local.properties');
