@@ -24,6 +24,6 @@
   "copyButtonLabel": "Kopēt",
   "pasteButtonLabel": "Ielīmēt",
   "selectAllButtonLabel": "Atlasīt visu",
-  "tabSemanticsLabel": "TBD",
+  "tabSemanticsLabel": "$tabIndex. cilne no $tabCount",
   "modalBarrierDismissLabel": "Nerādīt"
 }

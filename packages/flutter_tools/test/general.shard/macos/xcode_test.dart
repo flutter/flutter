@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/io.dart' show ProcessException, ProcessResult;
@@ -19,7 +21,7 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 
 void main() {
-  Logger logger;
+  BufferLogger logger;
 
   setUp(() {
     logger = BufferLogger.test();
@@ -353,6 +355,59 @@ void main() {
         });
       });
 
+      group('observe device events', () {
+        testWithoutContext('Xcode not installed', () async {
+          when(mockXcode.isInstalledAndMeetsVersionCheck).thenReturn(false);
+
+          expect(xcdevice.observedDeviceEvents(), isNull);
+          expect(logger.traceText, contains("Xcode not found. Run 'flutter doctor' for more information."));
+        });
+
+        testUsingContext('relays events', () async {
+          when(mockXcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
+          fakeProcessManager.addCommand(const FakeCommand(
+            command: <String>['xcrun', '--find', 'xcdevice'],
+            stdout: '/path/to/xcdevice',
+          ));
+
+          fakeProcessManager.addCommand(const FakeCommand(
+            command: <String>[
+              'script',
+              '-t',
+              '0',
+              '/dev/null',
+              'xcrun',
+              'xcdevice',
+              'observe',
+              '--both',
+            ], stdout: 'Attach: d83d5bc53967baa0ee18626ba87b6254b2ab5418\n'
+            'Detach: d83d5bc53967baa0ee18626ba87b6254b2ab5418',
+            stderr: 'Some error',
+          ));
+
+          final Completer<void> attach = Completer<void>();
+          final Completer<void> detach = Completer<void>();
+
+          // Attach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
+          // Detach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
+          xcdevice.observedDeviceEvents().listen((Map<XCDeviceEvent, String> event) {
+            expect(event.length, 1);
+            if (event.containsKey(XCDeviceEvent.attach)) {
+              expect(event[XCDeviceEvent.attach], 'd83d5bc53967baa0ee18626ba87b6254b2ab5418');
+              attach.complete();
+            } else if (event.containsKey(XCDeviceEvent.detach)) {
+              expect(event[XCDeviceEvent.detach], 'd83d5bc53967baa0ee18626ba87b6254b2ab5418');
+              detach.complete();
+            } else {
+              fail('Unexpected event');
+            }
+          });
+          await attach.future;
+          await detach.future;
+          expect(logger.traceText, contains('xcdevice observe error: Some error'));
+        });
+      });
+
       group('available devices', () {
         final FakePlatform macPlatform = FakePlatform(operatingSystem: 'macos');
 
@@ -483,6 +538,7 @@ void main() {
           expect(fakeProcessManager.hasRemainingExpectations, isFalse);
         }, overrides: <Type, Generator>{
           Platform: () => macPlatform,
+          Artifacts: () => Artifacts.test(),
         });
 
         testWithoutContext('uses timeout', () async {
@@ -541,6 +597,7 @@ void main() {
           expect(fakeProcessManager.hasRemainingExpectations, isFalse);
         }, overrides: <Type, Generator>{
           Platform: () => macPlatform,
+          Artifacts: () => Artifacts.test(),
         });
 
         testUsingContext('handles unknown architectures', () async {
@@ -589,6 +646,7 @@ void main() {
           expect(fakeProcessManager.hasRemainingExpectations, isFalse);
         }, overrides: <Type, Generator>{
           Platform: () => macPlatform,
+          Artifacts: () => Artifacts.test(),
         });
       });
 

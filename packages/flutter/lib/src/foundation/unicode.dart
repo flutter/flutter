@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 /// Constants for useful Unicode characters.
 ///
 /// Currently, these characters are all related to bidirectional text.
@@ -11,7 +13,7 @@
 ///  * <http://unicode.org/reports/tr9/>, which describes the Unicode
 ///    bidirectional text algorithm.
 class Unicode {
-  // This class is not meant to be instatiated or extended; this constructor
+  // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
   // ignore: unused_element
   Unicode._();

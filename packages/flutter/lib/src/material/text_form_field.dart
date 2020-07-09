@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -33,6 +35,10 @@ export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 ///
 /// Remember to [dispose] of the [TextEditingController] when it is no longer needed.
 /// This will ensure we discard any resources used by the object.
+///
+/// By default, [TextFormField.decoration] will apply the
+/// [ThemeData.inputDecorationTheme] for the current context to the
+/// [InputDecoration], see [InputDecoration.applyDefaults].
 ///
 /// For a documentation about the various parameters, see [TextField].
 ///

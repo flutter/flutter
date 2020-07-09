@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -275,6 +277,7 @@ void main() {
     final PictureLayer pictureLayer = PictureLayer(Rect.zero);
     checkNeedsAddToScene(pictureLayer, () {
       final PictureRecorder recorder = PictureRecorder();
+      Canvas(recorder);
       pictureLayer.picture = recorder.endRecording();
     });
 

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -186,7 +188,10 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 /// The [hasScrollBody] flag indicates whether the sliver's child has a
 /// scrollable body. This value is never null, and defaults to true. A common
 /// example of this use is a [NestedScrollView]. In this case, the sliver will
-/// size its child to fill the maximum available extent.
+/// size its child to fill the maximum available extent. [SliverFillRemaining]
+/// will not constrain the scrollable area, as it could potentially have an
+/// infinite depth. This is also true for use cases such as a [ScrollView] when
+/// [ScrollView.shrinkwrap] is true.
 ///
 /// ### When [SliverFillRemaining] does not have a scrollable child
 ///
@@ -196,9 +201,9 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 /// account in deciding how to layout this sliver.
 ///
 /// [SliverFillRemaining] will size its [child] to fill the viewport in the
-/// main axis if that space is larger than the child's extent, and the
-/// the amount of space that has been scrolled beforehand has not exceeded the
-/// main axis extent of the viewport.
+/// main axis if that space is larger than the child's extent, and the amount
+/// of space that has been scrolled beforehand has not exceeded the main axis
+/// extent of the viewport.
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
 ///
@@ -345,7 +350,10 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 ///     // fillOverscroll only changes the behavior of your layout when applied
 ///     // to Scrollables that allow for overscroll. BouncingScrollPhysics are
 ///     // one example, which are provided by default on the iOS platform.
-///     physics: BouncingScrollPhysics(),
+///     // BouncingScrollPhysics is combined with AlwaysScrollableScrollPhysics
+///     // to allow for the overscroll, regardless of the depth of the
+///     // scrollable.
+///     physics: BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
 ///     slivers: <Widget>[
 ///       SliverToBoxAdapter(
 ///         child: Container(

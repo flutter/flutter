@@ -127,6 +127,34 @@ void main() {
       expect(semantics.label, 'A\nB\nC');
       semanticsHandle.dispose();
     });
+
+    testWidgets('Does not return partial semantics', (WidgetTester tester) async {
+      final SemanticsHandle semanticsHandle = tester.ensureSemantics();
+      final Key key = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MergeSemantics(
+              child: Semantics(
+                container: true,
+                label: 'A',
+                child: Semantics(
+                  container: true,
+                  key: key,
+                  label: 'B',
+                  child: Container(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final SemanticsNode node = tester.getSemantics(find.byKey(key));
+      final SemanticsData semantics = node.getSemanticsData();
+      expect(semantics.label, 'A\nB');
+      semanticsHandle.dispose();
+    });
   });
 
   group('ensureVisible', () {

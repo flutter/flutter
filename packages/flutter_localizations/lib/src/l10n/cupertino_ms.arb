@@ -19,6 +19,6 @@
   "copyButtonLabel": "Salin",
   "pasteButtonLabel": "Tampal",
   "selectAllButtonLabel": "Pilih Semua",
-  "tabSemanticsLabel": "TBD",
+  "tabSemanticsLabel": "Tab $tabIndex daripada $tabCount",
   "modalBarrierDismissLabel": "Tolak"
 }

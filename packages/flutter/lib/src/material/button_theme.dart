@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -402,7 +404,7 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// If the button is in the focused, hovering, or highlighted state, then the
   /// [focusColor], [hoverColor], or [highlightColor] will take precedence over
-  /// the [focusColor].
+  /// the [buttonColor].
   ///
   /// See also:
   ///

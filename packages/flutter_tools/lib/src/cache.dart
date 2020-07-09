@@ -37,6 +37,7 @@ class DevelopmentArtifact {
   /// Artifacts required for Android development.
   static const DevelopmentArtifact androidGenSnapshot = DevelopmentArtifact._('android_gen_snapshot');
   static const DevelopmentArtifact androidMaven = DevelopmentArtifact._('android_maven');
+
   // Artifacts used for internal builds.
   static const DevelopmentArtifact androidInternalBuild = DevelopmentArtifact._('android_internal_build');
 
@@ -166,7 +167,7 @@ class Cache {
   static RandomAccessFile _lock;
   static bool _lockEnabled = true;
 
-  /// Turn off the [lock]/[releaseLockEarly] mechanism.
+  /// Turn off the [lock]/[releaseLock] mechanism.
   ///
   /// This is used by the tests since they run simultaneously and all in one
   /// process and so it would be a mess if they had to use the lock.
@@ -175,7 +176,7 @@ class Cache {
     _lockEnabled = false;
   }
 
-  /// Turn on the [lock]/[releaseLockEarly] mechanism.
+  /// Turn on the [lock]/[releaseLock] mechanism.
   ///
   /// This is used by the tests.
   @visibleForTesting
@@ -183,13 +184,20 @@ class Cache {
     _lockEnabled = true;
   }
 
+  /// Check if lock acquired, skipping FLUTTER_ALREADY_LOCKED reentrant checks.
+  ///
+  /// This is used by the tests.
+  @visibleForTesting
+  static bool isLocked() {
+    return _lock != null;
+  }
+
   /// Lock the cache directory.
   ///
-  /// This happens automatically on startup (see [FlutterCommandRunner.runCommand]).
+  /// This happens while required artifacts are updated
+  /// (see [FlutterCommandRunner.runCommand]).
   ///
-  /// Normally the lock will be held until the process exits (this uses normal
-  /// POSIX flock semantics). Long-lived commands should release the lock by
-  /// calling [Cache.releaseLockEarly] once they are no longer touching the cache.
+  /// This uses normal POSIX flock semantics.
   static Future<void> lock() async {
     if (!_lockEnabled) {
       return;
@@ -222,8 +230,11 @@ class Cache {
     }
   }
 
-  /// Releases the lock. This is not necessary unless the process is long-lived.
-  static void releaseLockEarly() {
+  /// Releases the lock.
+  ///
+  /// This happens automatically on startup (see [FlutterCommand.verifyThenRunCommand])
+  /// after the command's required artifacts are updated.
+  static void releaseLock() {
     if (!_lockEnabled || _lock == null) {
       return;
     }
@@ -233,8 +244,8 @@ class Cache {
 
   /// Checks if the current process owns the lock for the cache directory at
   /// this very moment; throws a [StateError] if it doesn't.
-  static void checkLockAcquired() {
-    if (_lockEnabled && _lock == null && globals.platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true') {
+  static void checkLockAcquired([Platform platform]) {
+    if (_lockEnabled && _lock == null && (platform ?? globals.platform).environment['FLUTTER_ALREADY_LOCKED'] != 'true') {
       throw StateError(
         'The current process does not own the lock for the cache directory. This is a bug in Flutter CLI tools.',
       );
@@ -360,6 +371,21 @@ class Cache {
       '$artifactName.version',
     ));
     return versionFile.existsSync() ? versionFile.readAsStringSync().trim() : null;
+  }
+
+    /// Delete all stamp files maintained by the cache.
+  void clearStampFiles() {
+    try {
+      getStampFileFor('flutter_tools').deleteSync();
+      for (final ArtifactSet artifact in _artifacts) {
+        final File file = getStampFileFor(artifact.stampName);
+        if (file.existsSync()) {
+          file.deleteSync();
+        }
+      }
+    } on FileSystemException catch (err) {
+      _logger.printError('Failed to delete some stamp files: $err');
+    }
   }
 
   String getStampFor(String artifactName) {
@@ -498,6 +524,13 @@ abstract class ArtifactSet {
 
   /// Updates the artifact.
   Future<void> update();
+
+  /// The canonical name of the artifact.
+  String get name;
+
+  // The name of the stamp file. Defaults to the same as the
+  // artifact name.
+  String get stampName => name;
 }
 
 /// An artifact set managed by the cache.
@@ -510,11 +543,10 @@ abstract class CachedArtifact extends ArtifactSet {
 
   final Cache cache;
 
-  /// The canonical name of the artifact.
+  @override
   final String name;
 
-  // The name of the stamp file. Defaults to the same as the
-  // artifact name.
+  @override
   String get stampName => name;
 
   Directory get location => cache.getArtifactDirectory(name);
@@ -1033,6 +1065,9 @@ class AndroidMavenArtifacts extends ArtifactSet {
     // Therefore, call Gradle to figure this out.
     return false;
   }
+
+  @override
+  String get name => 'android-maven-artifacts';
 }
 
 class IOSEngineArtifacts extends EngineCachedArtifact {
@@ -1390,9 +1425,9 @@ const List<List<String>> _windowsDesktopBinaryDirs = <List<String>>[
 ];
 
 const List<List<String>> _linuxDesktopBinaryDirs = <List<String>>[
-  <String>['linux-x64', 'linux-x64/linux-x64-flutter-glfw.zip'],
-  <String>['linux-x64', 'linux-x64/flutter-cpp-client-wrapper-glfw.zip'],
   <String>['linux-x64', 'linux-x64/linux-x64-flutter-gtk.zip'],
+  <String>['linux-x64-profile', 'linux-x64-profile/linux-x64-flutter-gtk.zip'],
+  <String>['linux-x64-release', 'linux-x64-release/linux-x64-flutter-gtk.zip'],
 ];
 
 const List<List<String>> _macOSDesktopBinaryDirs = <List<String>>[

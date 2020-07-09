@@ -37,6 +37,13 @@ class MockXcode extends Mock implements Xcode {}
 class MockSimControl extends Mock implements SimControl {}
 class MockPlistUtils extends Mock implements PlistParser {}
 
+final Platform macosPlatform = FakePlatform(
+  operatingSystem: 'macos',
+  environment: <String, String>{
+    'HOME': '/'
+  },
+);
+
 void main() {
   FakePlatform osx;
   FileSystemUtils fsUtils;
@@ -47,7 +54,7 @@ void main() {
       environment: <String, String>{},
       operatingSystem: 'macos',
     );
-    fileSystem = MemoryFileSystem();
+    fileSystem = MemoryFileSystem.test();
     fsUtils = FileSystemUtils(fileSystem: fileSystem, platform: osx);
   });
 
@@ -81,6 +88,23 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     }, testOn: 'posix');
+  });
+
+  testUsingContext('simulators only support debug mode', () async {
+    final IOSSimulator simulator = IOSSimulator(
+      '123',
+      simControl: MockSimControl(),
+      xcode: MockXcode(),
+    );
+
+    expect(simulator.supportsRuntimeMode(BuildMode.debug), true);
+    expect(simulator.supportsRuntimeMode(BuildMode.profile), false);
+    expect(simulator.supportsRuntimeMode(BuildMode.release), false);
+    expect(simulator.supportsRuntimeMode(BuildMode.jitRelease), false);
+  }, overrides: <Type, Generator>{
+    Platform: () => osx,
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   group('logFilePath', () {
@@ -441,6 +465,11 @@ void main() {
     overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       FileSystem: () => fileSystem,
+      Platform: () => macosPlatform,
+      FileSystemUtils: () => FileSystemUtils(
+        fileSystem: fileSystem,
+        platform: macosPlatform,
+      )
     });
 
     testUsingContext('unified logging with app name', () async {

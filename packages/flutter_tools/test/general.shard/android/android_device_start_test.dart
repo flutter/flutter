@@ -188,17 +188,27 @@ void main() {
       command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
     ));
     processManager.addCommand(const FakeCommand(
-      command: <String>['adb', '-s', '1234', 'shell', 'am', 'force-stop', 'FlutterApp'],
+      command: <String>['adb', '-s', '1234', 'shell', 'am', 'force-stop', '--user', '10', 'FlutterApp'],
     ));
     processManager.addCommand(const FakeCommand(
-      command: <String>['adb', '-s', '1234', 'shell', 'pm', 'list', 'packages', 'FlutterApp'],
+      command: <String>['adb', '-s', '1234', 'shell', 'pm', 'list', 'packages', '--user', '10', 'FlutterApp'],
     ));
     processManager.addCommand(kAdbVersionCommand);
     processManager.addCommand(kStartServer);
     // TODO(jonahwilliams): investigate why this doesn't work.
     // This doesn't work with the current Android log reader implementation.
     processManager.addCommand(const FakeCommand(
-      command: <String>['adb', '-s', '1234', 'install', '-t', '-r', 'app.apk'],
+      command: <String>[
+        'adb',
+        '-s',
+        '1234',
+        'install',
+        '-t',
+        '-r',
+        '--user',
+        '10',
+        'app.apk'
+      ],
       stdout: '\n\nObservatory listening on http://127.0.0.1:456\n\n',
     ));
     processManager.addCommand(kShaCommand);
@@ -207,6 +217,8 @@ void main() {
         'adb',
         '-s',
         '1234',
+        'shell',
+        '-x',
         'logcat',
         '-v',
         'time',
@@ -232,7 +244,7 @@ void main() {
         '--ez', 'enable-software-rendering', 'true',
         '--ez', 'skia-deterministic-rendering', 'true',
         '--ez', 'trace-skia', 'true',
-        '--ez', 'trace-whitelist', 'bar,baz',
+        '--ez', 'trace-allowlist', 'bar,baz',
         '--ez', 'trace-systrace', 'true',
         '--ez', 'endless-trace-buffer', 'true',
         '--ez', 'dump-skp-on-shader-compilation', 'true',
@@ -244,6 +256,7 @@ void main() {
         '--es', 'dart-flags', 'foo',
         '--ez', 'use-test-fonts', 'true',
         '--ez', 'verbose-logging', 'true',
+        '--user', '10',
         'FlutterActivity',
       ],
     ));
@@ -259,7 +272,7 @@ void main() {
         enableSoftwareRendering: true,
         skiaDeterministicRendering: true,
         traceSkia: true,
-        traceWhitelist: 'bar,baz',
+        traceAllowlist: 'bar,baz',
         traceSystrace: true,
         endlessTraceBuffer: true,
         dumpSkpOnShaderCompilation: true,
@@ -268,6 +281,7 @@ void main() {
         verboseSystemLogs: true,
       ),
       platformArgs: <String, dynamic>{},
+      userIdentifier: '10',
     );
 
     // This fails to start due to observatory discovery issues.

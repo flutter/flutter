@@ -44,6 +44,28 @@ void main() {
     });
   });
 
+  test('Outputs deprecation warning from flutter generate', () => testbed.run(() async {
+    final GenerateCommand command = GenerateCommand();
+    applyMocksToCommand(command);
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+      .createSync(recursive: true);
+    globals.fs.currentDirectory
+      .childDirectory('.dart_tool')
+      .childDirectory('build')
+      .childDirectory('abcdefg')
+      .createSync(recursive: true);
+
+    await createTestCommandRunner(command)
+      .run(const <String>['generate']);
+
+    expect(testLogger.errorText, contains(
+      '"flutter generate" is deprecated, use "dart pub run build_runner" instead.'
+    ));
+    expect(testLogger.errorText, contains(
+      'build_runner: 1.10.0'
+    ));
+  }));
+
   test('Outputs error information from flutter generate', () => testbed.run(() async {
     final GenerateCommand command = GenerateCommand();
     applyMocksToCommand(command);

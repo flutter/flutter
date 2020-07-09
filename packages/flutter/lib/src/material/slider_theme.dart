@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 import 'dart:ui' show Path, lerpDouble;
 
@@ -326,8 +328,7 @@ enum Thumb {
 /// {@macro flutter.material.slider.seeAlso.rangeSliderTickMarkShape}
 @immutable
 class SliderThemeData with Diagnosticable {
-  /// Create a [SliderThemeData] given a set of exact values. All the values
-  /// must be specified.
+  /// Create a [SliderThemeData] given a set of exact values.
   ///
   /// This will rarely be used directly. It is used by [lerp] to
   /// create intermediate themes based on two themes.
@@ -2290,7 +2291,7 @@ class _EmptySliderTickMarkShape extends SliderTickMarkShape {
 /// that will not paint any component shape. A static reference is stored in
 /// [SliderTickMarkShape.noThumb] and [SliderTickMarkShape.noOverlay]. When this value
 /// is specified for [SliderThemeData.thumbShape], the thumb painting is
-/// skipped.  When this value is specified for [SliderThemeData.overlaySHape],
+/// skipped.  When this value is specified for [SliderThemeData.overlayShape],
 /// the overlay painting is skipped.
 class _EmptySliderComponentShape extends SliderComponentShape {
   @override
@@ -2511,29 +2512,11 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
     // Add a stroke of 1dp around the circle if this thumb would overlap
     // the other thumb.
     if (isOnTop == true) {
-      bool showValueIndicator;
-      switch (sliderTheme.showValueIndicator) {
-        case ShowValueIndicator.onlyForDiscrete:
-          showValueIndicator = isDiscrete;
-          break;
-        case ShowValueIndicator.onlyForContinuous:
-          showValueIndicator = !isDiscrete;
-          break;
-        case ShowValueIndicator.always:
-          showValueIndicator = true;
-          break;
-        case ShowValueIndicator.never:
-          showValueIndicator = false;
-          break;
-      }
-
-      if (!showValueIndicator || activationAnimation.value == 0) {
-        final Paint strokePaint = Paint()
-          ..color = sliderTheme.overlappingShapeStrokeColor
-          ..strokeWidth = 1.0
-          ..style = PaintingStyle.stroke;
-        canvas.drawCircle(center, radius, strokePaint);
-      }
+      final Paint strokePaint = Paint()
+        ..color = sliderTheme.overlappingShapeStrokeColor
+        ..strokeWidth = 1.0
+        ..style = PaintingStyle.stroke;
+      canvas.drawCircle(center, radius, strokePaint);
     }
 
     final Color color = colorTween.evaluate(enableAnimation);

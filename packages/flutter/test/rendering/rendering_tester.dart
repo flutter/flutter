@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -294,3 +296,26 @@ class FakeTicker implements Ticker {
     return DiagnosticsProperty<Ticker>(name, this, style: DiagnosticsTreeStyle.errorProperty);
   }
 }
+
+class TestClipPaintingContext extends PaintingContext {
+  TestClipPaintingContext() : super(ContainerLayer(), Rect.zero);
+
+  @override
+  ClipRectLayer pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter, {Clip clipBehavior = Clip.hardEdge, ClipRectLayer oldLayer}) {
+    this.clipBehavior = clipBehavior;
+    return null;
+  }
+
+  Clip clipBehavior = Clip.none;
+}
+
+void expectOverflowedErrors() {
+  final FlutterErrorDetails errorDetails = renderer.takeFlutterErrorDetails();
+  final bool overflowed = errorDetails.toString().contains('overflowed');
+  if (!overflowed) {
+    FlutterError.reportError(errorDetails);
+  }
+}
+
+RenderConstrainedBox get box200x200 =>
+    RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(height: 200.0, width: 200.0));

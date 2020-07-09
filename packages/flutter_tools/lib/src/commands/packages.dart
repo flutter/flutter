@@ -6,7 +6,6 @@ import 'dart:async';
 
 import '../base/common.dart';
 import '../base/os.dart';
-import '../cache.dart';
 import '../dart/pub.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -163,7 +162,6 @@ class PackagesTestCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    Cache.releaseLockEarly();
     await pub.batch(<String>['run', 'test', ...argResults.rest], context: PubContext.runTest, retry: false);
     return FlutterCommandResult.success();
   }
@@ -204,7 +202,6 @@ class PackagesPublishCommand extends FlutterCommand {
       if (boolArg('dry-run')) '--dry-run',
       if (boolArg('force')) '--force',
     ];
-    Cache.releaseLockEarly();
     await pub.interactively(<String>['publish', ...args], stdio: globals.stdio);
     return FlutterCommandResult.success();
   }
@@ -235,7 +232,6 @@ class PackagesForwardCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    Cache.releaseLockEarly();
     await pub.interactively(<String>[_commandName, ...argResults.rest], stdio: globals.stdio);
     return FlutterCommandResult.success();
   }
@@ -263,7 +259,6 @@ class PackagesPassthroughCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    Cache.releaseLockEarly();
     await pub.interactively(argResults.rest, stdio: globals.stdio);
     return FlutterCommandResult.success();
   }

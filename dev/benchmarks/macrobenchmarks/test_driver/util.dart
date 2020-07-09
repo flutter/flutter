@@ -53,10 +53,10 @@ void macroPerfTest(
       await durationFuture;
     });
 
-    final TimelineSummary summary = TimelineSummary.summarize(timeline);
-    summary.writeSummaryToFile(testName, pretty: true);
-    summary.writeTimelineToFile(testName, pretty: true);
-
     driver.close();
+
+    final TimelineSummary summary = TimelineSummary.summarize(timeline);
+    await summary.writeSummaryToFile(testName, pretty: true);
+    await summary.writeTimelineToFile(testName, pretty: true);
   }, timeout: Timeout(timeout));
 }

@@ -603,12 +603,24 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   ///
   /// If [callback] completes with an error, the error will be caught by the
   /// Flutter framework and made available via [takeException], and this method
-  /// will return a future that completes will `null`.
+  /// will return a future that completes with `null`.
   ///
   /// Re-entrant calls to this method are not allowed; callers of this method
   /// are required to wait for the returned future to complete before calling
   /// this method again. Attempts to do otherwise will result in a
   /// [TestFailure] error being thrown.
+  ///
+  /// If your widget test hangs and you are using [runAsync], chances are your
+  /// code depends on the result of a task that did not complete. Fake async
+  /// environment is unable to resolve a future that was created in [runAsync].
+  /// If you observe such behavior or flakiness, you have a number of options:
+  ///
+  /// * Consider restructuring your code so you do not need [runAsync]. This is
+  ///   the optimal solution as widget tests are designed to run in fake async
+  ///   environment.
+  ///
+  /// * Expose a [Future] in your application code that signals the readiness of
+  ///   your widget tree, then await that future inside [callback].
   Future<T> runAsync<T>(
     Future<T> callback(), {
     Duration additionalTime = const Duration(milliseconds: 1000),
@@ -997,6 +1009,11 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// The ancestor's semantic data will include the child's as well as
   /// other nodes that have been merged together.
   ///
+  /// If the [SemanticsNode] of the object identified by the finder is
+  /// force-merged into an ancestor (e.g. via the [MergeSemantics] widget)
+  /// the node into which it is merged is returned. That node will include
+  /// all the semantics information of the nodes merged into it.
+  ///
   /// Will throw a [StateError] if the finder returns more than one element or
   /// if no semantics are found or are not enabled.
   SemanticsNode getSemantics(Finder finder) {
@@ -1012,7 +1029,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     final Element element = candidates.single;
     RenderObject renderObject = element.findRenderObject();
     SemanticsNode result = renderObject.debugSemantics;
-    while (renderObject != null && result == null) {
+    while (renderObject != null && (result == null || result.isMergedIntoParent)) {
       renderObject = renderObject?.parent as RenderObject;
       result = renderObject?.debugSemantics;
     }

@@ -919,9 +919,6 @@ abstract class BaseFlutterTask extends DefaultTask {
             }
             args "-dTargetPlatform=android"
             args "-dBuildMode=${buildMode}"
-            if (extraFrontEndOptions != null) {
-                args "-dExtraFrontEndOptions=${extraFrontEndOptions}"
-            }
             if (trackWidgetCreation != null) {
                 args "-dTrackWidgetCreation=${trackWidgetCreation}"
             }
@@ -942,6 +939,9 @@ abstract class BaseFlutterTask extends DefaultTask {
             }
             if (extraGenSnapshotOptions != null) {
                 args "--ExtraGenSnapshotOptions=${extraGenSnapshotOptions}"
+            }
+            if (extraFrontEndOptions != null) {
+                args "--ExtraFrontEndOptions=${extraFrontEndOptions}"
             }
             args ruleNames
         }

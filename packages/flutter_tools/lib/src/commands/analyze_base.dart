@@ -9,6 +9,7 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:yaml/yaml.dart' as yaml;
 
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -29,6 +30,7 @@ abstract class AnalyzeBase {
     @required this.processManager,
     @required this.terminal,
     @required this.experiments,
+    @required this.artifacts,
   });
 
   /// The parsed argument results for execution.
@@ -46,9 +48,11 @@ abstract class AnalyzeBase {
   @protected
   final Platform platform;
   @protected
-  final AnsiTerminal terminal;
+  final Terminal terminal;
   @protected
   final List<String> experiments;
+  @protected
+  final Artifacts artifacts;
 
   /// Called by [AnalyzeCommand] to start the analysis process.
   Future<void> analyze();
@@ -81,6 +85,24 @@ abstract class AnalyzeBase {
   }
 
   bool get isBenchmarking => argResults['benchmark'] as bool;
+
+  static String generateDartDocMessage(int undocumentedMembers) {
+    String dartDocMessage;
+
+    assert(undocumentedMembers >= 0);
+    switch (undocumentedMembers) {
+      case 0:
+        dartDocMessage = 'all public member have documentation';
+        break;
+      case 1:
+        dartDocMessage = 'one public member lacks documentation';
+        break;
+      default:
+        dartDocMessage = '$undocumentedMembers public members lack documentation';
+    }
+
+    return dartDocMessage;
+  }
 }
 
 class PackageDependency {

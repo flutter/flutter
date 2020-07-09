@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -16,9 +18,9 @@ import 'input_date_picker.dart' show DateTextInputFormatter;
 
 /// Provides a pair of text fields that allow the user to enter the start and
 /// end dates that represent a range of dates.
-///
-/// Note: this is not publicly exported (see pickers.dart), as it is just an
-/// internal component used by [showDateRangePicker].
+//
+// This is not publicly exported (see pickers.dart), as it is just an
+// internal component used by [showDateRangePicker].
 class InputDateRangePicker extends StatefulWidget {
   /// Creates a row with two text fields configured to accept the start and end dates
   /// of a date range.

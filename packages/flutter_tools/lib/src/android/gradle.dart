@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
-import 'package:xml/xml.dart' as xml;
+import 'package:xml/xml.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -171,14 +171,14 @@ void createSettingsAarGradle(Directory androidDirectory) {
       timeout: timeoutConfiguration.fastOperation);
 
   final String flutterRoot = globals.fs.path.absolute(Cache.flutterRoot);
-  final File deprecatedFile = globals.fs.file(globals.fs.path.join(flutterRoot, 'packages','flutter_tools',
-      'gradle', 'deprecated_settings.gradle'));
-  assert(deprecatedFile.existsSync());
+  final File legacySettingsDotGradleFiles = globals.fs.file(globals.fs.path.join(flutterRoot, 'packages','flutter_tools',
+      'gradle', 'settings.gradle.legacy_versions'));
+  assert(legacySettingsDotGradleFiles.existsSync());
   final String settingsAarContent = globals.fs.file(globals.fs.path.join(flutterRoot, 'packages','flutter_tools',
       'gradle', 'settings_aar.gradle.tmpl')).readAsStringSync();
 
   // Get the `settings.gradle` content variants that should be patched.
-  final List<String> existingVariants = deprecatedFile.readAsStringSync().split(';EOF');
+  final List<String> existingVariants = legacySettingsDotGradleFiles.readAsStringSync().split(';EOF');
   existingVariants.add(settingsAarContent);
 
   bool exactMatch = false;
@@ -310,10 +310,10 @@ Future<void> buildGradleApp({
   command.add('-Ptrack-widget-creation=${buildInfo.trackWidgetCreation}');
 
   if (buildInfo.extraFrontEndOptions != null) {
-    command.add('-Pextra-front-end-options=${buildInfo.extraFrontEndOptions.join(',')}');
+    command.add('-Pextra-front-end-options=${encodeDartDefines(buildInfo.extraFrontEndOptions)}');
   }
   if (buildInfo.extraGenSnapshotOptions != null) {
-    command.add('-Pextra-gen-snapshot-options=${buildInfo.extraGenSnapshotOptions.join(',')}');
+    command.add('-Pextra-gen-snapshot-options=${encodeDartDefines(buildInfo.extraGenSnapshotOptions)}');
   }
   if (buildInfo.fileSystemRoots != null && buildInfo.fileSystemRoots.isNotEmpty) {
     command.add('-Pfilesystem-roots=${buildInfo.fileSystemRoots.join('|')}');
@@ -790,6 +790,7 @@ Future<void> buildPluginsAsAar(
             BuildMode.release, // Plugins are built as release.
             null, // Plugins don't define flavors.
             treeShakeIcons: androidBuildInfo.buildInfo.treeShakeIcons,
+            packagesPath: androidBuildInfo.buildInfo.packagesPath,
           ),
         ),
         target: '',
@@ -962,10 +963,10 @@ String _getLocalArtifactVersion(String pomPath) {
   if (!pomFile.existsSync()) {
     throwToolExit("The file $pomPath wasn't found in the local engine out directory.");
   }
-  xml.XmlDocument document;
+  XmlDocument document;
   try {
-    document = xml.parse(pomFile.readAsStringSync());
-  } on xml.XmlParserException {
+    document = XmlDocument.parse(pomFile.readAsStringSync());
+  } on XmlParserException {
     throwToolExit(
       'Error parsing $pomPath. Please ensure that this is a valid XML document.'
     );
@@ -974,9 +975,9 @@ String _getLocalArtifactVersion(String pomPath) {
       'Error reading $pomPath. Please ensure that you have read permission to this '
       'file and try again.');
   }
-  final Iterable<xml.XmlElement> project = document.findElements('project');
+  final Iterable<XmlElement> project = document.findElements('project');
   assert(project.isNotEmpty);
-  for (final xml.XmlElement versionElement in document.findAllElements('version')) {
+  for (final XmlElement versionElement in document.findAllElements('version')) {
     if (versionElement.parent == project.first) {
       return versionElement.text;
     }

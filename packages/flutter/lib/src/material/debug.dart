@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -76,8 +78,8 @@ bool debugCheckHasMaterialLocalizations(BuildContext context) {
           'to be provided by a Localizations widget ancestor.'
         ),
         ErrorDescription(
-          'Localizations are used to generate many different messages, labels, '
-          'and abbreviations which are used by the material library.'
+          'The material library uses Localizations to generate messages, '
+          'labels, and abbreviations.'
         ),
         ErrorHint(
           'To introduce a MaterialLocalizations, either use a '

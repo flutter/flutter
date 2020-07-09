@@ -38,6 +38,11 @@ void main() {
       expect(await device.isLatestBuildInstalled(windowsApp), true);
       expect(await device.isAppInstalled(windowsApp), true);
       expect(device.category, Category.desktop);
+
+      expect(device.supportsRuntimeMode(BuildMode.debug), true);
+      expect(device.supportsRuntimeMode(BuildMode.profile), true);
+      expect(device.supportsRuntimeMode(BuildMode.release), true);
+      expect(device.supportsRuntimeMode(BuildMode.jitRelease), false);
     });
 
     testUsingContext('No devices listed if platform unsupported', () async {
@@ -66,7 +71,7 @@ void main() {
       globals.fs.file('pubspec.yaml').createSync();
       globals.fs.file('.packages').createSync();
       globals.fs.directory('windows').createSync();
-      globals.fs.file(globals.fs.path.join('windows', 'Runner.sln')).createSync();
+      globals.fs.file(globals.fs.path.join('windows', 'CMakeLists.txt')).createSync();
       final FlutterProject flutterProject = FlutterProject.current();
 
       expect(WindowsDevice().isSupportedForProject(flutterProject), true);
@@ -86,7 +91,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('isSupportedForProject is false with no Runner.sln', () async {
+    testUsingContext('isSupportedForProject is false with no build file', () async {
       globals.fs.file('pubspec.yaml').createSync();
       globals.fs.file('.packages').createSync();
       globals.fs.directory('windows').createSync();

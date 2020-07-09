@@ -24,6 +24,6 @@
   "copyButtonLabel": "Copiați",
   "pasteButtonLabel": "Inserați",
   "selectAllButtonLabel": "Selectați-le pe toate",
-  "tabSemanticsLabel": "TBD",
+  "tabSemanticsLabel": "Fila $tabIndex din $tabCount",
   "modalBarrierDismissLabel": "Închideți"
 }

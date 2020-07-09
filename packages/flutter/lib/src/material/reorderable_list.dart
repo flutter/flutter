@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math';
 
 import 'package:flutter/widgets.dart';
@@ -604,6 +606,11 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
           );
           break;
       }
+
+      // If the reorderable list only has one child element, reordering
+      // should not be allowed.
+      final bool hasMoreThanOneChildElement = widget.children.length > 1;
+
       return SingleChildScrollView(
         scrollDirection: widget.scrollDirection,
         padding: widget.padding,
@@ -612,10 +619,10 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
         physics: widget.physics,
         child: _buildContainerForScrollDirection(
           children: <Widget>[
-            if (widget.reverse) _wrap(finalDropArea, widget.children.length, constraints),
+            if (widget.reverse && hasMoreThanOneChildElement) _wrap(finalDropArea, widget.children.length, constraints),
             if (widget.header != null) widget.header,
             for (int i = 0; i < widget.children.length; i += 1) _wrap(widget.children[i], i, constraints),
-            if (!widget.reverse) _wrap(finalDropArea, widget.children.length, constraints),
+            if (!widget.reverse && hasMoreThanOneChildElement) _wrap(finalDropArea, widget.children.length, constraints),
           ],
         ),
       );

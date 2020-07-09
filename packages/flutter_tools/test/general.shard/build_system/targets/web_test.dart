@@ -9,9 +9,8 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/depfile.dart';
-import 'package:flutter_tools/src/build_system/targets/dart.dart';
+import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
-import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
@@ -23,6 +22,7 @@ import '../../../src/testbed.dart';
 
 const List<String> kDart2jsLinuxArgs = <String>[
   'bin/cache/dart-sdk/bin/dart',
+   '--disable-dart-dev',
   'bin/cache/dart-sdk/bin/snapshots/dart2js.dart.snapshot',
   '--libraries-spec=bin/cache/flutter_web_sdk/libraries.json',
 ];
@@ -43,10 +43,9 @@ void main() {
 
   setUp(() {
     testbed = Testbed(setup: () {
-      final File packagesFile = globals.fs.file(globals.fs.path.join('foo', '.packages'))
+      globals.fs.file('.packages')
         ..createSync(recursive: true)
-        ..writeAsStringSync('foo:lib/\n');
-      globalPackagesPath = packagesFile.path;
+        ..writeAsStringSync('foo:foo/lib/\n');
       globals.fs.currentDirectory.childDirectory('bar').createSync();
       processManager = FakeProcessManager.list(<FakeCommand>[]);
 
@@ -228,7 +227,7 @@ void main() {
         ...kDart2jsLinuxArgs,
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-        '--packages=${globals.fs.path.join('foo', '.packages')}',
+        '--packages=.packages',
         '-Ddart.vm.profile=true',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
@@ -255,14 +254,14 @@ void main() {
 
   test('Dart2JSTarget calls dart2js with expected args with enabled experiment', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'profile';
-    environment.defines[kEnableExperiment] = 'non-nullable';
+    environment.defines[kExtraFrontEndOptions] = '--enable-experiment=non-nullable';
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
         '--enable-experiment=non-nullable',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-        '--packages=${globals.fs.path.join('foo', '.packages')}',
+        '--packages=.packages',
         '-Ddart.vm.profile=true',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
@@ -293,7 +292,7 @@ void main() {
         ...kDart2jsLinuxArgs,
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-        '--packages=${globals.fs.path.join('foo', '.packages')}',
+        '--packages=.packages',
         '-Ddart.vm.profile=true',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
@@ -323,7 +322,7 @@ void main() {
         ...kDart2jsLinuxArgs,
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-        '--packages=${globals.fs.path.join('foo', '.packages')}',
+        '--packages=.packages',
         '-Ddart.vm.product=true',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
@@ -353,7 +352,7 @@ void main() {
         ...kDart2jsLinuxArgs,
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-        '--packages=${globals.fs.path.join('foo', '.packages')}',
+        '--packages=.packages',
         '-Ddart.vm.product=true',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
@@ -402,7 +401,7 @@ void main() {
         ...kDart2jsLinuxArgs,
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-        '--packages=${globals.fs.path.join('foo', '.packages')}',
+        '--packages=.packages',
         '-Ddart.vm.product=true',
         '-DFOO=bar',
         '-DBAZ=qux',
@@ -436,7 +435,7 @@ void main() {
         ...kDart2jsLinuxArgs,
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-        '--packages=${globals.fs.path.join('foo', '.packages')}',
+        '--packages=.packages',
         '-Ddart.vm.profile=true',
         '-DFOO=bar',
         '-DBAZ=qux',
@@ -487,7 +486,11 @@ void main() {
       contains('"a/a.txt": "7fc56270e7a70fa81a5935b72eacbe29"'));
     expect(environment.buildDir.childFile('service_worker.d'), exists);
     // Depends on resource file.
-    expect(environment.buildDir.childFile('service_worker.d').readAsStringSync(), contains('a/a.txt'));
+    expect(environment.buildDir.childFile('service_worker.d').readAsStringSync(),
+      contains('a/a.txt'));
+    // Contains NOTICES
+    expect(environment.outputDir.childFile('flutter_service_worker.js').readAsStringSync(),
+      contains('NOTICES'));
   }));
 
   test('WebServiceWorker contains baseUrl cache', () => testbed.run(() async {
