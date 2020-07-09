@@ -9,7 +9,7 @@ dependencies:
   flutter_test:
     sdk: flutter
   file: 5.2.1
-  meta: 1.1.8
+  meta: 1.2.2
   platform: 2.2.1
   process: 3.0.13
   flutter_goldens_client:
@@ -35,4 +35,4 @@ dependencies:
 dev_dependencies:
   mockito: 4.1.1
 
-# PUBSPEC CHECKSUM: 00fb
+# PUBSPEC CHECKSUM: c7f6
