@@ -943,17 +943,20 @@ class _AnimatedAlignState extends AnimatedWidgetBaseState<AnimatedAlign> {
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
     _alignment = visitor(_alignment, widget.alignment, (dynamic value) => AlignmentGeometryTween(begin: value as AlignmentGeometry)) as AlignmentGeometryTween;
-    _heightFactorTween = visitor(_heightFactorTween, widget.heightFactor, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>;
-    _widthFactorTween = visitor(_widthFactorTween, widget.widthFactor, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>;
-
+    if(widget.heightFactor != null) {
+      _heightFactorTween = visitor(_heightFactorTween, widget.heightFactor, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>;
+    }
+    if(widget.widthFactor != null) {
+      _widthFactorTween = visitor(_widthFactorTween, widget.widthFactor, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Align(
       alignment: _alignment.evaluate(animation),
-      heightFactor: _heightFactorTween.evaluate(animation),
-      widthFactor: _widthFactorTween.evaluate(animation),
+      heightFactor: _heightFactorTween?.evaluate(animation),
+      widthFactor: _widthFactorTween?.evaluate(animation),
       child: widget.child,
     );
   }
