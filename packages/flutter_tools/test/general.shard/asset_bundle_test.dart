@@ -437,6 +437,39 @@ flutter:
     ProcessManager: () => FakeProcessManager.any(),
     Platform: () => FakePlatform(operatingSystem: 'linux'),
   });
+
+  testUsingContext('does not include assets in project directories as asset variants', () async {
+    globals.fs.file('.packages').writeAsStringSync(r'''
+example:lib/
+''');
+    globals.fs.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync(r'''
+name: example
+
+flutter:
+  assets:
+    - foo.txt
+''');
+    globals.fs.file('assets/foo.txt').createSync(recursive: true);
+
+    // Potential build artifacts outisde of build directory.
+    globals.fs.file('linux/flutter/foo.txt').createSync(recursive: true);
+    globals.fs.file('windows/flutter/foo.txt').createSync(recursive: true);
+    globals.fs.file('windows/CMakeLists.txt').createSync();
+    globals.fs.file('macos/Flutter/foo.txt').createSync(recursive: true);
+    globals.fs.file('ios/foo.txt').createSync(recursive: true);
+    globals.fs.file('build/foo.txt').createSync(recursive: true);
+
+    final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+
+    expect(await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages'), 0);
+    expect(bundle.entries.length, 4);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+    Platform: () => FakePlatform(operatingSystem: 'linux'),
+  });
 }
 
 class MockDirectory extends Mock implements Directory {}
