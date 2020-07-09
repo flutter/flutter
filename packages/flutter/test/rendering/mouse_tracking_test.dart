@@ -14,6 +14,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 import '../flutter_test_alternative.dart';
 
@@ -66,7 +67,16 @@ void _ensureTestGestureBinding() {
   assert(GestureBinding.instance != null);
 }
 
-typedef SimpleAnnotationFinder = Iterable<MouseTrackerAnnotation> Function(Offset offset);
+@immutable
+class AnnotationEntry {
+  AnnotationEntry(this.annotation, [Matrix4 transform])
+    : transform = transform ?? Matrix4.identity();
+
+  final MouseTrackerAnnotation annotation;
+  final Matrix4 transform;
+}
+
+typedef SimpleAnnotationFinder = Iterable<AnnotationEntry> Function(Offset offset);
 
 void main() {
   void _setUpMouseAnnotationFinder(SimpleAnnotationFinder annotationFinder) {
@@ -74,7 +84,10 @@ void main() {
       GestureBinding.instance.pointerRouter,
       (Offset offset) => LinkedHashMap<MouseTrackerAnnotation, Matrix4>.fromEntries(
         annotationFinder(offset).map(
-          (MouseTrackerAnnotation annotation) => MapEntry<MouseTrackerAnnotation, Matrix4>(annotation, Matrix4.identity()),
+          (AnnotationEntry entry) => MapEntry<MouseTrackerAnnotation, Matrix4>(
+            entry.annotation,
+            entry.transform,
+          ),
         ),
       ),
     );
@@ -103,7 +116,7 @@ void main() {
     );
     _setUpMouseAnnotationFinder(
       (Offset position) sync* {
-        yield annotation;
+        yield AnnotationEntry(annotation);
       },
     );
     return annotation;
@@ -319,7 +332,7 @@ void main() {
     );
     _setUpMouseAnnotationFinder((Offset position) sync* {
       if (isInHitRegion) {
-        yield annotation;
+        yield AnnotationEntry(annotation, Matrix4.translationValues(10, 20, 0));
       }
     });
 
@@ -341,7 +354,7 @@ void main() {
 
     _binding.flushPostFrameCallbacks(Duration.zero);
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-      const PointerEnterEvent(position: Offset(0.0, 100.0)),
+      const PointerEnterEvent(position: Offset(0, 100), localPosition: Offset(10, 120)),
     ]));
     events.clear();
 
@@ -352,7 +365,7 @@ void main() {
 
     _binding.flushPostFrameCallbacks(Duration.zero);
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-      const PointerExitEvent(position: Offset(0.0, 100.0)),
+      const PointerExitEvent(position: Offset(0.0, 100.0), localPosition: Offset(10, 120)),
     ]));
     expect(_binding.postFrameCallbacks, hasLength(0));
   });
@@ -367,7 +380,7 @@ void main() {
     );
     _setUpMouseAnnotationFinder((Offset position) sync* {
       if (isInHitRegion) {
-        yield annotation;
+        yield AnnotationEntry(annotation, Matrix4.translationValues(10, 20, 0));
       }
     });
 
@@ -387,7 +400,7 @@ void main() {
 
     _binding.flushPostFrameCallbacks(Duration.zero);
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-      const PointerEnterEvent(position: Offset(0.0, 100.0)),
+      const PointerEnterEvent(position: Offset(0.0, 100.0), localPosition: Offset(10, 120)),
     ]));
     events.clear();
 
@@ -401,7 +414,7 @@ void main() {
 
     _binding.flushPostFrameCallbacks(Duration.zero);
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-      const PointerExitEvent(position: Offset(0.0, 100.0)),
+      const PointerExitEvent(position: Offset(0.0, 100.0), localPosition: Offset(10, 120)),
     ]));
     expect(_binding.postFrameCallbacks, hasLength(0));
   });
@@ -416,7 +429,7 @@ void main() {
     );
     _setUpMouseAnnotationFinder((Offset position) sync* {
       if (isInHitRegion) {
-        yield annotation;
+        yield AnnotationEntry(annotation, Matrix4.translationValues(10, 20, 0));
       }
     });
 
@@ -430,7 +443,7 @@ void main() {
 
     expect(_binding.postFrameCallbacks, hasLength(0));
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-      const PointerEnterEvent(position: Offset(0.0, 100.0)),
+      const PointerEnterEvent(position: Offset(0.0, 100.0), localPosition: Offset(10, 120)),
     ]));
     events.clear();
 
@@ -440,7 +453,7 @@ void main() {
     ]));
     expect(_binding.postFrameCallbacks, hasLength(0));
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-      const PointerExitEvent(position: Offset(0.0, 100.0)),
+      const PointerExitEvent(position: Offset(0.0, 100.0), localPosition: Offset(10, 120)),
     ]));
   });
 
@@ -454,7 +467,7 @@ void main() {
     );
     _setUpMouseAnnotationFinder((Offset position) sync* {
       if (isInHitRegion) {
-        yield annotation;
+        yield AnnotationEntry(annotation, Matrix4.translationValues(10, 20, 0));
       }
     });
 
@@ -473,8 +486,8 @@ void main() {
     ]));
     expect(_binding.postFrameCallbacks, hasLength(0));
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-      const PointerEnterEvent(position: Offset(0.0, 100.0)),
-      const PointerHoverEvent(position: Offset(0.0, 100.0)),
+      const PointerEnterEvent(position: Offset(0.0, 100.0), localPosition: Offset(10, 120)),
+      const PointerHoverEvent(position: Offset(0.0, 100.0), localPosition: Offset(10, 120)),
     ]));
     events.clear();
 
@@ -485,7 +498,7 @@ void main() {
     ]));
     expect(_binding.postFrameCallbacks, hasLength(0));
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-      const PointerExitEvent(position: Offset(200.0, 100.0)),
+      const PointerExitEvent(position: Offset(200.0, 100.0), localPosition: Offset(210, 120)),
     ]));
   });
 
@@ -513,9 +526,9 @@ void main() {
     );
     _setUpMouseAnnotationFinder((Offset position) sync* {
       if (isInHitRegionOne)
-        yield annotation1;
+        yield AnnotationEntry(annotation1);
       else if (isInHitRegionTwo)
-        yield annotation2;
+        yield AnnotationEntry(annotation2);
     });
 
     isInHitRegionOne = false;
@@ -553,8 +566,8 @@ void main() {
     _setUpMouseAnnotationFinder((Offset position) sync* {
       // Children's annotations come before parents'.
       if (isInB) {
-        yield annotationB;
-        yield annotationA;
+        yield AnnotationEntry(annotationB);
+        yield AnnotationEntry(annotationA);
       }
     });
 
@@ -605,9 +618,9 @@ void main() {
     );
     _setUpMouseAnnotationFinder((Offset position) sync* {
       if (isInA) {
-        yield annotationA;
+        yield AnnotationEntry(annotationA);
       } else if (isInB) {
-        yield annotationB;
+        yield AnnotationEntry(annotationB);
       }
     });
 
@@ -683,7 +696,8 @@ class _EventCriticalFieldsMatcher extends Matcher {
     if (!(
       _matchesField(matchState, 'kind', actual.kind, PointerDeviceKind.mouse) &&
       _matchesField(matchState, 'position', actual.position, _expected.position) &&
-      _matchesField(matchState, 'device', actual.device, _expected.device)
+      _matchesField(matchState, 'device', actual.device, _expected.device) &&
+      _matchesField(matchState, 'localPosition', actual.localPosition, _expected.localPosition)
     )) {
       return false;
     }

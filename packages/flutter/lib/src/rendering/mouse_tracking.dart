@@ -550,7 +550,7 @@ mixin _MouseTrackerEventMixin on BaseMouseTracker {
     lastAnnotations.forEach((MouseTrackerAnnotation annotation, Matrix4 transform) {
       if (!nextAnnotations.containsKey(annotation))
         if (annotation.onExit != null)
-          annotation.onExit(baseExitEvent);
+          annotation.onExit(baseExitEvent.transformed(lastAnnotations[annotation]));
     });
 
     // Send enter events to annotations that are not in last but in next, in
