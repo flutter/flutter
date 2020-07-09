@@ -45,7 +45,7 @@ void main() {
 
   test('flutter run --machine uses AppRunLogger', () async {
     final Directory directory = createResolvedTempDirectorySync('flutter_run_test')
-      .createTempSync('_flutter_run_test')
+      .createTempSync('_flutter_run_test.')
       ..createSync(recursive: true);
 
     try {
@@ -83,7 +83,7 @@ void main() {
       '-v',
     ]);
 
-    expect(result.stdout, isNotEmpty);
+    expect(result.stdout, isEmpty);
   });
 
   test('flutter build aot is deprecated', () async {
