@@ -494,6 +494,19 @@ class EngineWindow extends ui.Window {
     }
 
     switch (name) {
+      /// This should be in sync with shell/common/shell.cc
+      case 'flutter/skia':
+        const MethodCodec codec = JSONMethodCodec();
+        final MethodCall decoded = codec.decodeMethodCall(data);
+        switch (decoded.method) {
+          case 'Skia.setResourceCacheMaxBytes':
+            if (decoded.arguments is int) {
+              rasterizer?.setSkiaResourceCacheMaxBytes(decoded.arguments);
+            }
+            break;
+        }
+
+        return;
       case 'flutter/assets':
         assert(ui.webOnlyAssetManager != null); // ignore: unnecessary_null_comparison
         final String url = utf8.decode(data!.buffer.asUint8List());
