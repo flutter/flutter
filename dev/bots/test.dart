@@ -987,6 +987,7 @@ Future<void> _runFlutterWebTest(String workingDirectory, List<String> tests) asy
         'tester',
         '-j1',
         '-v',
+        '--ci',
         '--no-debug',
         '--run-only',
         '--platform=flutter_web',
