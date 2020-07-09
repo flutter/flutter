@@ -175,6 +175,7 @@ class SnackBar extends StatefulWidget {
     this.elevation,
     this.margin,
     this.padding,
+    this.width,
     this.shape,
     this.behavior,
     this.action,
@@ -186,6 +187,14 @@ class SnackBar extends StatefulWidget {
        assert(
          margin == null || behavior == SnackBarBehavior.floating,
          'Margin can only be used with floating behavior',
+       ),
+       assert(
+         width == null || behavior == SnackBarBehavior.floating,
+         'Width can only be used with floating behavior',
+       ),
+       assert(
+         width == null || margin == null,
+         'Width and margin can not be used together',
        ),
        assert(duration != null),
        super(key: key);
@@ -224,6 +233,14 @@ class SnackBar extends StatefulWidget {
   /// If this property is null, then the default depends on the [behavior] and
   /// the presence of an [action].
   final EdgeInsetsGeometry padding;
+
+  /// The width of the snack bar.
+  ///
+  /// This property is only used when [behavior] is [SnackBarBehavior.floating].
+  ///
+  /// If this property is null, then the snack bar will take up the full device
+  /// width.
+  final double width;
 
   /// The shape of the snack bar's [Material].
   ///
@@ -295,6 +312,7 @@ class SnackBar extends StatefulWidget {
       elevation: elevation,
       margin: margin,
       padding: padding,
+      width: width,
       shape: shape,
       behavior: behavior,
       action: action,
@@ -403,6 +421,8 @@ class _SnackBarState extends State<SnackBar> {
     Widget snackBar = SafeArea(
       top: false,
       bottom: !isFloatingSnackBar,
+      left: !isFloatingSnackBar,
+      right: !isFloatingSnackBar,
       child: Padding(
         padding: padding,
         child: Row(
@@ -451,11 +471,23 @@ class _SnackBarState extends State<SnackBar> {
     );
 
     if (isFloatingSnackBar) {
-      snackBar = SafeArea(
-        child: Padding(
+      // If width is provided, do not include horizontal margins.
+      if (widget.width != null) {
+        snackBar = Container(
+          margin: const EdgeInsets.only(top: 5.0, bottom: 10.0),
+          width: widget.width,
+          child: snackBar,
+        );
+      } else {
+        snackBar = Padding(
           padding: widget.margin ?? const EdgeInsets.fromLTRB(15.0, 5.0, 15.0, 10.0),
           child: snackBar,
-        ),
+        );
+      }
+      snackBar = SafeArea(
+        top: false,
+        bottom: false,
+        child: snackBar,
       );
     }
 

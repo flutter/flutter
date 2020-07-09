@@ -409,6 +409,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     @required this.floatingActionButtonMoveAnimationProgress,
     @required this.floatingActionButtonMotionAnimator,
     @required this.isSnackBarFloating,
+    @required this.snackBarWidth,
     @required this.extendBody,
     @required this.extendBodyBehindAppBar,
   }) : assert(minInsets != null),
@@ -432,6 +433,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   final FloatingActionButtonAnimator floatingActionButtonMotionAnimator;
 
   final bool isSnackBarFloating;
+  final double snackBarWidth;
 
   @override
   void performLayout(Size size) {
@@ -564,7 +566,10 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
     if (hasChild(_ScaffoldSlot.snackBar)) {
       if (snackBarSize == Size.zero) {
-        snackBarSize = layoutChild(_ScaffoldSlot.snackBar, fullWidthConstraints);
+        snackBarSize = layoutChild(
+          _ScaffoldSlot.snackBar,
+          snackBarWidth == null ? fullWidthConstraints : looseConstraints,
+        );
       }
 
       double snackBarYOffsetBase;
@@ -574,7 +579,8 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         snackBarYOffsetBase = contentBottom;
       }
 
-      positionChild(_ScaffoldSlot.snackBar, Offset(0.0, snackBarYOffsetBase - snackBarSize.height));
+      final double xOffset = snackBarWidth == null ? 0.0 : (size.width - snackBarWidth) / 2;
+      positionChild(_ScaffoldSlot.snackBar, Offset(xOffset, snackBarYOffsetBase - snackBarSize.height));
     }
 
     if (hasChild(_ScaffoldSlot.statusBar)) {
@@ -2381,11 +2387,13 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     }
 
     bool isSnackBarFloating = false;
+    double snackBarWidth;
     if (_snackBars.isNotEmpty) {
       final SnackBarBehavior snackBarBehavior = _snackBars.first._widget.behavior
         ?? themeData.snackBarTheme.behavior
         ?? SnackBarBehavior.fixed;
       isSnackBarFloating = snackBarBehavior == SnackBarBehavior.floating;
+      snackBarWidth = _snackBars.first._widget.width;
 
       _addIfNonNull(
         children,
@@ -2541,6 +2549,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
                 previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation,
                 textDirection: textDirection,
                 isSnackBarFloating: isSnackBarFloating,
+                snackBarWidth: snackBarWidth,
               ),
             );
           }),
