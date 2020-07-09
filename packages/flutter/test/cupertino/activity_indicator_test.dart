@@ -91,7 +91,8 @@ void main() {
               child: const CupertinoActivityIndicator(
                 animating: false,
                 radius: 35,
-                style: CupertinoActivityIndicatorStyle.iOS14,
+                iOSVersionStyle:
+                    CupertinoActivityIndicatorIOSVersionStyle.iOS14,
               ),
             ),
           ),
@@ -115,7 +116,8 @@ void main() {
               child: const CupertinoActivityIndicator(
                 animating: false,
                 radius: 35,
-                style: CupertinoActivityIndicatorStyle.iOS14,
+                iOSVersionStyle:
+                    CupertinoActivityIndicatorIOSVersionStyle.iOS14,
               ),
             ),
           ),
