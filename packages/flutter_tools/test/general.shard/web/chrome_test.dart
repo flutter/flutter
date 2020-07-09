@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
@@ -35,10 +34,8 @@ void main() {
   Platform platform;
   FakeProcessManager processManager;
   OperatingSystemUtils operatingSystemUtils;
-  Logger logger;
 
   setUp(() {
-    logger = BufferLogger.test();
     operatingSystemUtils = MockOperatingSystemUtils();
     when(operatingSystemUtils.findFreePort())
         .thenAnswer((Invocation invocation) async {
@@ -54,7 +51,6 @@ void main() {
       platform: platform,
       processManager: processManager,
       operatingSystemUtils: operatingSystemUtils,
-      logger: logger,
       browserFinder: findChromeExecutable,
     );
   });

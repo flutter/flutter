@@ -4,7 +4,6 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
@@ -34,7 +33,6 @@ void main() {
       platform: platform,
       processManager: processManager,
       operatingSystemUtils: null,
-      logger: BufferLogger.test(),
       browserFinder: findChromeExecutable,
     );
     webValidator = webValidator = ChromeValidator(

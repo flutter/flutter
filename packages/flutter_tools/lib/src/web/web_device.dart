@@ -305,7 +305,6 @@ class WebDevices extends PollingDeviceDiscovery {
       chromiumLauncher: ChromiumLauncher(
         browserFinder: findChromeExecutable,
         fileSystem: fileSystem,
-        logger: logger,
         platform: platform,
         processManager: processManager,
         operatingSystemUtils: operatingSystemUtils,
@@ -316,7 +315,6 @@ class WebDevices extends PollingDeviceDiscovery {
         chromiumLauncher: ChromiumLauncher(
           browserFinder: findEdgeExecutable,
           fileSystem: fileSystem,
-          logger: logger,
           platform: platform,
           processManager: processManager,
           operatingSystemUtils: operatingSystemUtils,
@@ -450,6 +448,10 @@ class WebServerDevice extends Device {
     } else {
       _logger.printStatus('$mainPath is being served at $url', emphasis: true);
     }
+    _logger.printStatus(
+      'The web-server device does not support debugging. Consider using '
+      'the Chrome or Edge devices for an improved development workflow.'
+    );
     _logger.sendEvent('app.webLaunchUrl', <String, dynamic>{'url': url, 'launched': false});
     return LaunchResult.succeeded(observatoryUri: url != null ? Uri.parse(url): null);
   }

@@ -189,7 +189,9 @@ abstract class ResidentWebRunner extends ResidentRunner {
     globals.printStatus('');
     globals.printStatus(message);
     const String quitMessage = 'To quit, press "q".';
-    globals.printStatus('For a more detailed help message, press "h". $quitMessage');
+    if (device.device is! WebServerDevice) {
+      globals.printStatus('For a more detailed help message, press "h". $quitMessage');
+    }
   }
 
   @override
