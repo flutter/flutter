@@ -17,6 +17,7 @@ import '../build_info.dart';
 import '../bundle.dart';
 import '../convert.dart';
 import '../device.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../protocol_discovery.dart';
 import '../version.dart';
@@ -47,18 +48,18 @@ class FlutterTesterApp extends ApplicationPackage {
 // TODO(scheglov): This device does not currently work with full restarts.
 class FlutterTesterDevice extends Device {
   FlutterTesterDevice(String deviceId, {
-    @required ProcessManager processManager,
-    @required FlutterVersion flutterVersion,
-    @required Logger logger,
-    @required String buildDirectory,
-    @required FileSystem fileSystem,
-    @required Artifacts artifacts,
-  }) : _processManager = processManager,
-       _flutterVersion = flutterVersion,
-       _logger = logger,
-       _buildDirectory = buildDirectory,
-       _fileSystem = fileSystem,
-       _artifacts = artifacts,
+    ProcessManager processManager,
+    FlutterVersion flutterVersion,
+    Logger logger,
+    String buildDirectory,
+    FileSystem fileSystem,
+    Artifacts artifacts,
+  }) : _processManager = processManager ?? globals.processManager, // TODO(jonahwilliams): remove after google3 roll.
+       _flutterVersion = flutterVersion ?? globals.flutterVersion,
+       _logger = logger ?? globals.logger,
+       _buildDirectory = buildDirectory ?? getBuildDirectory(),
+       _fileSystem = fileSystem ?? globals.fs,
+       _artifacts = artifacts ?? globals.artifacts,
        super(
         deviceId,
         platformType: null,
