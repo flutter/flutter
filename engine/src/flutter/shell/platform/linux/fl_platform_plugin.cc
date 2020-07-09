@@ -12,7 +12,6 @@ static constexpr char kChannelName[] = "flutter/platform";
 static constexpr char kBadArgumentsError[] = "Bad Arguments";
 static constexpr char kUnknownClipboardFormatError[] =
     "Unknown Clipboard Format";
-static constexpr char kClipboardRequestError[] = "Clipboard Request Failed";
 static constexpr char kFailedError[] = "Failed";
 static constexpr char kGetClipboardDataMethod[] = "Clipboard.getData";
 static constexpr char kSetClipboardDataMethod[] = "Clipboard.setData";
@@ -43,17 +42,14 @@ static void clipboard_text_cb(GtkClipboard* clipboard,
                               gpointer user_data) {
   g_autoptr(FlMethodCall) method_call = FL_METHOD_CALL(user_data);
 
-  g_autoptr(FlMethodResponse) response = nullptr;
+  g_autoptr(FlValue) result = nullptr;
   if (text != nullptr) {
-    g_autoptr(FlValue) result = fl_value_new_map();
+    result = fl_value_new_map();
     fl_value_set_string_take(result, kTextKey, fl_value_new_string(text));
-    response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
-  } else {
-    response = FL_METHOD_RESPONSE(fl_method_error_response_new(
-        kClipboardRequestError, "Failed to retrieve clipboard text from GTK",
-        nullptr));
   }
 
+  g_autoptr(FlMethodResponse) response =
+      FL_METHOD_RESPONSE(fl_method_success_response_new(result));
   send_response(method_call, response);
 }
 
