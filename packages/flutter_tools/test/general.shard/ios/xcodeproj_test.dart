@@ -474,7 +474,7 @@ Information about project "Runner":
     );
 
     expect(
-      () => defaultInfo.reportFlavorNotFoundAndExit(),
+      defaultInfo.reportFlavorNotFoundAndExit,
       throwsToolExit(
         message: 'The Xcode project does not define custom schemes. You cannot use the --flavor option.'
       ),
@@ -490,7 +490,7 @@ Information about project "Runner":
     );
 
     expect(
-     () => info.reportFlavorNotFoundAndExit(),
+      info.reportFlavorNotFoundAndExit,
       throwsToolExit(
         message: 'You must specify a --flavor option to select one of the available schemes.'
       ),
