@@ -139,7 +139,6 @@ abstract class ChromiumDevice extends Device {
         debugPort: debuggingOptions.webBrowserDebugPort,
       );
     }
-
     _logger.sendEvent('app.webLaunchUrl', <String, dynamic>{'url': url, 'launched': launchChrome});
     return LaunchResult.succeeded(observatoryUri: url != null ? Uri.parse(url): null);
   }

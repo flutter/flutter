@@ -18,6 +18,7 @@ import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'flutter_manifest.dart';
 import 'globals.dart' as globals;
+import 'project.dart';
 
 const AssetBundleFactory _kManifestFactory = _ManifestAssetBundleFactory();
 
@@ -127,22 +128,18 @@ class ManifestAssetBundle implements AssetBundle {
     bool reportLicensedPackages = false,
   }) async {
     assetDirPath ??= getAssetBuildDirectory();
-    FlutterManifest flutterManifest;
+    FlutterProject flutterProject;
     try {
-      flutterManifest = FlutterManifest.createFromPath(
-        manifestPath,
-        logger: globals.logger,
-        fileSystem: globals.fs,
-      );
+      flutterProject = FlutterProject.fromDirectory(globals.fs.file(manifestPath).parent);
     } on Exception catch (e) {
       globals.printStatus('Error detected in pubspec.yaml:', emphasis: true);
       globals.printError('$e');
       return 1;
     }
-    if (flutterManifest == null) {
+    if (flutterProject == null) {
       return 1;
     }
-
+    final FlutterManifest flutterManifest = flutterProject.manifest;
     // If the last build time isn't set before this early return, empty pubspecs will
     // hang on hot reload, as the incremental dill files will never be copied to the
     // device.
@@ -168,7 +165,18 @@ class ManifestAssetBundle implements AssetBundle {
       flutterManifest,
       wildcardDirectories,
       assetBasePath,
-      excludeDirs: <String>[assetDirPath, getBuildDirectory()],
+      excludeDirs: <String>[
+        assetDirPath,
+        getBuildDirectory(),
+        if (flutterProject.ios.existsSync())
+          flutterProject.ios.hostAppRoot.path,
+        if (flutterProject.macos.existsSync())
+          flutterProject.macos.managedDirectory.path,
+        if (flutterProject.windows.existsSync())
+          flutterProject.windows.managedDirectory.path,
+        if (flutterProject.linux.existsSync())
+          flutterProject.linux.managedDirectory.path,
+      ],
     );
 
     if (assetVariants == null) {
@@ -594,11 +602,12 @@ List<Map<String, dynamic>> _createFontsDescriptor(List<Font> fonts) {
 // variantsFor('assets/foo') => ['/assets/var1/foo', '/assets/var2/foo']
 // variantsFor('assets/bar') => []
 class _AssetDirectoryCache {
-  _AssetDirectoryCache(Iterable<String> excluded) {
-    _excluded = excluded.map<String>((String path) => globals.fs.path.absolute(path) + globals.fs.path.separator);
-  }
+  _AssetDirectoryCache(Iterable<String> excluded)
+    : _excluded = excluded
+        .map<String>(globals.fs.path.absolute)
+        .toList();
 
-  Iterable<String> _excluded;
+  final List<String> _excluded;
   final Map<String, Map<String, List<String>>> _cache = <String, Map<String, List<String>>>{};
 
   List<String> variantsFor(String assetPath) {
@@ -613,7 +622,9 @@ class _AssetDirectoryCache {
       final List<String> paths = <String>[];
       for (final FileSystemEntity entity in globals.fs.directory(directory).listSync(recursive: true)) {
         final String path = entity.path;
-        if (globals.fs.isFileSync(path) && !_excluded.any((String exclude) => path.startsWith(exclude))) {
+        if (globals.fs.isFileSync(path)
+          && assetPath != path
+          && !_excluded.any((String exclude) => globals.fs.path.isWithin(exclude, path))) {
           paths.add(path);
         }
       }

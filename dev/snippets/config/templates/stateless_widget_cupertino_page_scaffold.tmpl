@@ -2,7 +2,7 @@
 
 {{description}}
 
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
 {{code-imports}}
 
@@ -14,9 +14,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return CupertinoApp(
       title: _title,
-      home: MyStatelessWidget(),
+      home: CupertinoPageScaffold(
+        navigationBar: CupertinoNavigationBar(middle: const Text(_title)),
+        body: MyStatelessWidget(),
+      ),
     );
   }
 }
