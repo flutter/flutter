@@ -882,8 +882,8 @@ class AnimatedAlign extends ImplicitlyAnimatedWidget {
     Key key,
     @required this.alignment,
     this.child,
-    this.heightFactor = 1.0,
-    this.widthFactor = 1.0,
+    this.heightFactor,
+    this.widthFactor,
     Curve curve = Curves.linear,
     @required Duration duration,
     VoidCallback onEnd,
@@ -917,12 +917,12 @@ class AnimatedAlign extends ImplicitlyAnimatedWidget {
 
   /// If non-null, sets its height to the child's height multiplied by this factor.
   ///
-  /// Can be both greater and less than 1.0 but must be positive. Defaults to 1.0.
+  /// Must be greater than or equal to 0.0, defaults to null.
   final double heightFactor;
 
   /// If non-null, sets its width to the child's width multiplied by this factor.
   ///
-  /// Can be both greater and less than 1.0 but must be positive. Defaults to 1.0.
+  /// Must be greater than or equal to 0.0, defaults to null.
   final double widthFactor;
 
   @override
