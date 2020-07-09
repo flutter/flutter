@@ -14,7 +14,7 @@ import 'package:web_engine_tester/golden_tester.dart';
 void main() async {
   final Rect region = Rect.fromLTWH(8, 8, 600, 800); // Compensate for old scuba tester padding
 
-  Future<void> testPath(Path path, String scubaFileName, {Paint paint}) async {
+  Future<void> testPath(Path path, String scubaFileName, {Paint paint, double maxDiffRatePercent = null}) async {
     const Rect canvasBounds = Rect.fromLTWH(0, 0, 600, 800);
     final BitmapCanvas bitmapCanvas = BitmapCanvas(canvasBounds);
     final RecordingCanvas canvas = RecordingCanvas(canvasBounds);
@@ -40,7 +40,7 @@ void main() async {
     canvas.endRecording();
     canvas.apply(bitmapCanvas, canvasBounds);
 
-    await matchGoldenFile('$scubaFileName.png', region: region);
+    await matchGoldenFile('$scubaFileName.png', region: region, maxDiffRatePercent: maxDiffRatePercent);
 
     bitmapCanvas.rootElement.remove();
     svgElement.remove();
@@ -106,7 +106,7 @@ void main() async {
     final Path path = Path();
     path.addRect(const Rect.fromLTRB(15, 15, 60, 20));
     path.addRect(const Rect.fromLTRB(35, 160, 15, 100));
-    await testPath(path, 'svg_rect');
+    await testPath(path, 'svg_rect', maxDiffRatePercent: 1.0);
   });
 
   test('render notch', () async {

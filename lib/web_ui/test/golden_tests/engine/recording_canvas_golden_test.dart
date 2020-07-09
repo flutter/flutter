@@ -641,7 +641,7 @@ void main() async {
       await matchGoldenFile(
         'paint_spread_bounds.png',
         region: const Rect.fromLTRB(0, 0, 250, 600),
-        maxDiffRatePercent: 0.0,
+        maxDiffRatePercent: 0.01,
         pixelComparison: PixelComparison.precise,
       );
     } finally {

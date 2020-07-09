@@ -509,69 +509,47 @@ class _CanvasPool extends _SaveStackTracking {
     }
   }
 
+  // Float buffer used for path iteration.
+  static Float32List _runBuffer = Float32List(PathRefIterator.kMaxBufferSize);
+
   /// 'Runs' the given [path] by applying all of its commands to the canvas.
   void _runPath(html.CanvasRenderingContext2D ctx, SurfacePath path) {
     ctx.beginPath();
-    final List<Subpath> subpaths = path.subpaths;
-    final int subpathCount = subpaths.length;
-    for (int subPathIndex = 0; subPathIndex < subpathCount; subPathIndex++) {
-      final Subpath subpath = subpaths[subPathIndex];
-      final List<PathCommand> commands = subpath.commands;
-      final int commandCount = commands.length;
-      for (int c = 0; c < commandCount; c++) {
-        final PathCommand command = commands[c];
-        switch (command.type) {
-          case PathCommandTypes.bezierCurveTo:
-            final BezierCurveTo curve = command as BezierCurveTo;
-            ctx.bezierCurveTo(
-                curve.x1, curve.y1, curve.x2, curve.y2, curve.x3, curve.y3);
-            break;
-          case PathCommandTypes.close:
-            ctx.closePath();
-            break;
-          case PathCommandTypes.ellipse:
-            final Ellipse ellipse = command as Ellipse;
-            if (c == 0) {
-              // Ellipses that start a new path need to set start point,
-              // otherwise it incorrectly uses last point.
-              ctx.moveTo(subpath.startX, subpath.startY);
-            }
-            DomRenderer.ellipse(ctx,
-                ellipse.x,
-                ellipse.y,
-                ellipse.radiusX,
-                ellipse.radiusY,
-                ellipse.rotation,
-                ellipse.startAngle,
-                ellipse.endAngle,
-                ellipse.anticlockwise);
-            break;
-          case PathCommandTypes.lineTo:
-            final LineTo lineTo = command as LineTo;
-            ctx.lineTo(lineTo.x, lineTo.y);
-            break;
-          case PathCommandTypes.moveTo:
-            final MoveTo moveTo = command as MoveTo;
-            ctx.moveTo(moveTo.x, moveTo.y);
-            break;
-          case PathCommandTypes.rRect:
-            final RRectCommand rrectCommand = command as RRectCommand;
-            _RRectToCanvasRenderer(ctx)
-                .render(rrectCommand.rrect, startNewPath: false);
-            break;
-          case PathCommandTypes.rect:
-            final RectCommand rectCommand = command as RectCommand;
-            ctx.rect(rectCommand.x, rectCommand.y, rectCommand.width,
-                rectCommand.height);
-            break;
-          case PathCommandTypes.quadraticCurveTo:
-            final QuadraticCurveTo quadraticCurveTo = command as QuadraticCurveTo;
-            ctx.quadraticCurveTo(quadraticCurveTo.x1, quadraticCurveTo.y1,
-                quadraticCurveTo.x2, quadraticCurveTo.y2);
-            break;
-          default:
-            throw UnimplementedError('Unknown path command $command');
-        }
+    final Float32List p = _runBuffer;
+    final PathRefIterator iter = PathRefIterator(path.pathRef);
+    int verb = 0;
+    while ((verb = iter.next(p)) != SPath.kDoneVerb) {
+      switch (verb) {
+        case SPath.kMoveVerb:
+          ctx.moveTo(p[0], p[1]);
+          break;
+        case SPath.kLineVerb:
+          ctx.lineTo(p[2], p[3]);
+          break;
+        case SPath.kCubicVerb:
+          ctx.bezierCurveTo(p[2], p[3], p[4], p[5], p[6], p[7]);
+          break;
+        case SPath.kQuadVerb:
+          ctx.quadraticCurveTo(p[2], p[3], p[4], p[5]);
+          break;
+        case SPath.kConicVerb:
+          final double w = iter.conicWeight;
+          Conic conic = Conic(p[0], p[1], p[2], p[3], p[4], p[5], w);
+          List<ui.Offset> points = conic.toQuads();
+          final int len = points.length;
+          for (int i = 1; i < len; i += 2) {
+            final double p1x = points[i].dx;
+            final double p1y = points[i].dy;
+            final double p2x = points[i + 1].dx;
+            final double p2y = points[i + 1].dy;
+            ctx.quadraticCurveTo(p1x, p1y, p2x, p2y);
+          }
+          break;
+        case SPath.kCloseVerb:
+          ctx.closePath();
+          break;
+        default:
+          throw UnimplementedError('Unknown path verb $verb');
       }
     }
   }

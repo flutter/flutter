@@ -78,10 +78,6 @@ class Conic {
     return pointList;
   }
 
-  static bool _between(double a, double b, double c) {
-    return (a - b) * (c - b) <= 0;
-  }
-
   // Subdivides a conic and writes to points list.
   static void _subdivide(Conic src, int level, List<ui.Offset> pointList) {
     assert(level >= 0);
@@ -99,30 +95,30 @@ class Conic {
     final double startY = src.p0y;
     final double endY = src.p2y;
     final double cpY = src.p1y;
-    if (_between(startY, cpY, endY)) {
+    if (SPath.between(startY, cpY, endY)) {
       // Ensure that chopped conics maintain their y-order.
       final double midY = conic0.p2y;
-      if (!_between(startY, midY, endY)) {
+      if (!SPath.between(startY, midY, endY)) {
         // The computed midpoint is outside end points, move it to
         // closer one.
         final double closerY =
             (midY - startY).abs() < (midY - endY).abs() ? startY : endY;
         conic0.p2y = conic1.p0y = closerY;
       }
-      if (!_between(startY, conic0.p1y, conic0.p2y)) {
+      if (!SPath.between(startY, conic0.p1y, conic0.p2y)) {
         // First control point not between start and end points, move it
         // to start.
         conic0.p1y = startY;
       }
-      if (!_between(conic1.p0y, conic1.p1y, endY)) {
+      if (!SPath.between(conic1.p0y, conic1.p1y, endY)) {
         // Second control point not between start and end points, move it
         // to end.
         conic1.p1y = endY;
       }
       // Verify that conics points are ordered.
-      assert(_between(startY, conic0.p1y, conic0.p2y));
-      assert(_between(conic0.p1y, conic0.p2y, conic1.p1y));
-      assert(_between(conic0.p2y, conic1.p1y, endY));
+      assert(SPath.between(startY, conic0.p1y, conic0.p2y));
+      assert(SPath.between(conic0.p1y, conic0.p2y, conic1.p1y));
+      assert(SPath.between(conic0.p2y, conic1.p1y, endY));
     }
     --level;
     _subdivide(conic0, level, pointList);
@@ -150,6 +146,118 @@ class Conic {
         m.dx, m.dy, newW);
     pair.second = Conic(m.dx, m.dy, (p2x + wp1.dx) * scale,
         (p2y + wp1.dy) * scale, p2x, p2y, newW);
+  }
+
+  void chopAtYExtrema(List<Conic> dst) {
+    double? t = _findYExtrema();
+    if (t == null) {
+      dst.add(this);
+      return;
+    }
+    if (!_chopAt(t, dst, cleanupMiddle: true)) {
+      // If chop can't return finite values, don't chop.
+      dst.add(this);
+      return;
+    }
+  }
+
+  ///////////////////////////////////////////////////////////////////////////////
+  //
+  // NURB representation for conics.  Helpful explanations at:
+  //
+  // http://citeseerx.ist.psu.edu/viewdoc/
+  //   download?doi=10.1.1.44.5740&rep=rep1&type=ps
+  // and
+  // http://www.cs.mtu.edu/~shene/COURSES/cs3621/NOTES/spline/NURBS/RB-conics.html
+  //
+  // F = (A (1 - t)^2 + C t^2 + 2 B (1 - t) t w)
+  //     ------------------------------------------
+  //         ((1 - t)^2 + t^2 + 2 (1 - t) t w)
+  //
+  //   = {t^2 (P0 + P2 - 2 P1 w), t (-2 P0 + 2 P1 w), P0}
+  //     ------------------------------------------------
+  //             {t^2 (2 - 2 w), t (-2 + 2 w), 1}
+  //
+  // F' = 2 (C t (1 + t (-1 + w)) - A (-1 + t) (t (-1 + w) - w) + B (1 - 2 t) w)
+  //
+  //  t^2 : (2 P0 - 2 P2 - 2 P0 w + 2 P2 w)
+  //  t^1 : (-2 P0 + 2 P2 + 4 P0 w - 4 P1 w)
+  //  t^0 : -2 P0 w + 2 P1 w
+  //
+  //  We disregard magnitude, so we can freely ignore the denominator of F', and
+  //  divide the numerator by 2
+  //
+  //    coeff[0] for t^2
+  //    coeff[1] for t^1
+  //    coeff[2] for t^0
+  //
+  double? _findYExtrema() {
+    final double p20 = p2y - p0y;
+    final double p10 = p1y - p0y;
+    final double wP10 = fW * p10;
+    final double coeff0 = fW * p20 - p20;
+    final double coeff1 = p20 - 2 * wP10;
+    final double coeff2 = wP10;
+    final _QuadRoots quadRoots = _QuadRoots();
+    int rootCount = quadRoots.findRoots(coeff0, coeff1, coeff2);
+    assert(rootCount == 0 || rootCount == 1);
+    if (rootCount == 1) {
+      return quadRoots.root0;
+    }
+    return null;
+  }
+
+  bool _chopAt(double t, List<Conic> dst, {bool cleanupMiddle = false}) {
+    // Map conic to 3D.
+    final double tx0 = p0x;
+    final double ty0 = p0y;
+    final double tz0 = 1;
+    final double tx1 = p1x * fW;
+    final double ty1 = p1y * fW;
+    final double tz1 = fW;
+    final double tx2 = p2x;
+    final double ty2 = p2y;
+    final double tz2 = 1;
+    // Now interpolate each dimension.
+    final double dx0 = tx0 + (tx1 - tx0) * t;
+    final double dx2 = tx1 + (tx2 - tx1) * t;
+    final double dx1 = dx0 + (dx2 - dx0) * t;
+    final double dy0 = ty0 + (ty1 - ty0) * t;
+    final double dy2 = ty1 + (ty2 - ty1) * t;
+    final double dy1 = dy0 + (dy2 - dy0) * t;
+    final double dz0 = tz0 + (tz1 - tz0) * t;
+    final double dz2 = tz1 + (tz2 - tz1) * t;
+    final double dz1 = dz0 + (dz2 - dz0) * t;
+    // Compute new weights.
+    final double root = math.sqrt(dz1);
+    if (_nearlyEqual(root, 0)) {
+      return false;
+    }
+    final double w0 = dz0 / root;
+    final double w2 = dz2 / root;
+    if (_nearlyEqual(dz0, 0) || _nearlyEqual(dz1, 0) || _nearlyEqual(dz2, 0)) {
+      return false;
+    }
+    // Now we can construct the 2 conics by projecting 3D down to 2D.
+    final double chopPointX = dx1 / dz1;
+    final double chopPointY = dy1 / dz1;
+
+    double cp0y = dy0 / dz0;
+    double cp1y = dy2 / dz2;
+    if (cleanupMiddle) {
+      // Clean-up the middle, since we know t was meant to be at
+      // an Y-extrema.
+      cp0y = chopPointY;
+      cp1y = chopPointY;
+    }
+
+    final Conic conic0 =
+        Conic(p0x, p0y, dx0 / dz0, cp0y, chopPointX, chopPointY, w0);
+    final Conic conic1 =
+        Conic(chopPointX, chopPointY, dx2 / dz2, cp1y, p2x, p2y, w2);
+    dst.add(conic0);
+    dst.add(conic1);
+    return true;
   }
 
   /// Computes number of binary subdivisions of the curve given
@@ -185,6 +293,179 @@ class Conic {
       error *= 0.25;
     }
     return pow2;
+  }
+
+  ui.Offset evalTangentAt(double t) {
+    // The derivative equation returns a zero tangent vector when t is 0 or 1,
+    // and the control point is equal to the end point.
+    // In this case, use the conic endpoints to compute the tangent.
+    if ((t == 0 && p0x == p1x && p0y == p1y) ||
+        (t == 1 && p1x == p2x && p1y == p2y)) {
+      return ui.Offset(p2x - p0x, p2y - p0y);
+    }
+    double p20x = p2x - p0x;
+    double p20y = p2y - p0y;
+    double p10x = p1x - p0x;
+    double p10y = p1y - p0y;
+
+    double cx = fW * p10x;
+    double cy = fW * p10y;
+    double ax = fW * p20x - p20x;
+    double ay = fW * p20y - p20y;
+    double bx = p20x - cx - cx;
+    double by = p20y - cy - cy;
+    _SkQuadCoefficients quadC = _SkQuadCoefficients(ax, ay, bx, by, cx, cy);
+    return ui.Offset(quadC.evalX(t), quadC.evalY(t));
+  }
+}
+
+double _conicEvalNumerator(
+    double p0, double p1, double p2, double w, double t) {
+  assert(t >= 0 && t <= 1);
+  final double src2w = p1 * w;
+  final C = p0;
+  final A = p2 - 2 * src2w + C;
+  final B = 2 * (src2w - C);
+  return polyEval(A, B, C, t);
+}
+
+double _conicEvalDenominator(double w, double t) {
+  double B = 2 * (w - 1);
+  double C = 1;
+  double A = -B;
+  return polyEval(A, B, C, t);
+}
+
+class _QuadBounds {
+  double minX = 0;
+  double minY = 0;
+  double maxX = 0;
+  double maxY = 0;
+  void calculateBounds(Float32List points, int pointIndex) {
+    final double x1 = points[pointIndex++];
+    final double y1 = points[pointIndex++];
+    final double cpX = points[pointIndex++];
+    final double cpY = points[pointIndex++];
+    final double x2 = points[pointIndex++];
+    final double y2 = points[pointIndex++];
+
+    minX = math.min(x1, x2);
+    minY = math.min(y1, y2);
+    maxX = math.max(x1, x2);
+    maxY = math.max(y1, y2);
+
+    // At extrema's derivative = 0.
+    // Solve for
+    // -2x1+2tx1 + 2cpX + 4tcpX + 2tx2 = 0
+    // -2x1 + 2cpX +2t(x1 + 2cpX + x2) = 0
+    // t = (x1 - cpX) / (x1 - 2cpX + x2)
+    double denom = x1 - (2 * cpX) + x2;
+    if (denom.abs() > SPath.scalarNearlyZero) {
+      final double t1 = (x1 - cpX) / denom;
+      if ((t1 >= 0) && (t1 <= 1.0)) {
+        // Solve (x,y) for curve at t = tx to find extrema
+        final double tprime = 1.0 - t1;
+        final double extremaX =
+            (tprime * tprime * x1) + (2 * t1 * tprime * cpX) + (t1 * t1 * x2);
+        final double extremaY =
+            (tprime * tprime * y1) + (2 * t1 * tprime * cpY) + (t1 * t1 * y2);
+        // Expand bounds.
+        minX = math.min(minX, extremaX);
+        maxX = math.max(maxX, extremaX);
+        minY = math.min(minY, extremaY);
+        maxY = math.max(maxY, extremaY);
+      }
+    }
+    // Now calculate dy/dt = 0
+    denom = y1 - (2 * cpY) + y2;
+    if (denom.abs() > SPath.scalarNearlyZero) {
+      final double t2 = (y1 - cpY) / denom;
+      if ((t2 >= 0) && (t2 <= 1.0)) {
+        final double tprime2 = 1.0 - t2;
+        final double extrema2X = (tprime2 * tprime2 * x1) +
+            (2 * t2 * tprime2 * cpX) +
+            (t2 * t2 * x2);
+        final double extrema2Y = (tprime2 * tprime2 * y1) +
+            (2 * t2 * tprime2 * cpY) +
+            (t2 * t2 * y2);
+        // Expand bounds.
+        minX = math.min(minX, extrema2X);
+        maxX = math.max(maxX, extrema2X);
+        minY = math.min(minY, extrema2Y);
+        maxY = math.max(maxY, extrema2Y);
+      }
+    }
+  }
+}
+
+class _ConicBounds {
+  double minX = 0;
+  double minY = 0;
+  double maxX = 0;
+  double maxY = 0;
+  void calculateBounds(Float32List points, double w, int pointIndex) {
+    final double x1 = points[pointIndex++];
+    final double y1 = points[pointIndex++];
+    final double cpX = points[pointIndex++];
+    final double cpY = points[pointIndex++];
+    final double x2 = points[pointIndex++];
+    final double y2 = points[pointIndex++];
+
+    minX = math.min(x1, x2);
+    minY = math.min(y1, y2);
+    maxX = math.max(x1, x2);
+    maxY = math.max(y1, y2);
+
+    // {t^2 (P0 + P2 - 2 P1 w), t (-2 P0 + 2 P1 w), P0}
+    // ------------------------------------------------
+    //       {t^2 (2 - 2 w), t (-2 + 2 w), 1}
+    // Calculate coefficients and solve root.
+    _QuadRoots roots = _QuadRoots();
+    final double P20x = x2 - x1;
+    final double P10x = cpX - x1;
+    final double wP10x = w * P10x;
+    double ax = w * P20x - P20x;
+    double bx = P20x - 2 * wP10x;
+    double cx = wP10x;
+    int n = roots.findRoots(ax, bx, cx);
+    if (n != 0) {
+      final double t1 = roots.root0!;
+      if ((t1 >= 0) && (t1 <= 1.0)) {
+        final double denom = _conicEvalDenominator(w, t1);
+        double numerator = _conicEvalNumerator(x1, cpX, x2, w, t1);
+        final double extremaX = numerator / denom;
+        numerator = _conicEvalNumerator(y1, cpY, y2, w, t1);
+        final double extremaY = numerator / denom;
+        // Expand bounds.
+        minX = math.min(minX, extremaX);
+        maxX = math.max(maxX, extremaX);
+        minY = math.min(minY, extremaY);
+        maxY = math.max(maxY, extremaY);
+      }
+    }
+    final double P20y = y2 - y1;
+    final double P10y = cpY - y1;
+    final double wP10y = w * P10y;
+    double a = w * P20y - P20y;
+    double b = P20y - 2 * wP10y;
+    double c = wP10y;
+    n = roots.findRoots(a, b, c);
+
+    if (n != 0) {
+      final double t2 = roots.root0!;
+      if ((t2 >= 0) && (t2 <= 1.0)) {
+        final double denom = _conicEvalDenominator(w, t2);
+        double numerator = _conicEvalNumerator(x1, cpX, x2, w, t2);
+        final double extrema2X = numerator / denom;
+        numerator = _conicEvalNumerator(y1, cpY, y2, w, t2);
+        final double extrema2Y = numerator / denom;
+        // Expand bounds.
+        minX = math.min(minX, extrema2X);
+        maxX = math.max(maxX, extrema2X);
+        minY = math.min(minY, extrema2Y);
+        maxY = math.max(maxY, extrema2Y);
+      }
+    }
   }
 }
 
