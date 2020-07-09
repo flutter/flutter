@@ -19,6 +19,6 @@
   "copyButtonLabel": "ສຳເນົາ",
   "pasteButtonLabel": "ວາງ",
   "selectAllButtonLabel": "ເລືອກທັງໝົດ",
-  "tabSemanticsLabel": "TBD",
+  "tabSemanticsLabel": "ແຖບທີ $tabIndex ຈາກທັງໝົດ $tabCount",
   "modalBarrierDismissLabel": "ປິດໄວ້"
 }

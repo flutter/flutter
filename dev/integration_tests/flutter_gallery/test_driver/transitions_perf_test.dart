@@ -190,6 +190,7 @@ Future<void> runDemos(List<String> demos, FlutterDriver driver) async {
 }
 
 void main([List<String> args = const <String>[]]) {
+  final bool withSemantics = args.contains('--with_semantics');
   group('flutter gallery transitions', () {
     FlutterDriver driver;
     setUpAll(() async {
@@ -197,8 +198,7 @@ void main([List<String> args = const <String>[]]) {
 
       // Wait for the first frame to be rasterized.
       await driver.waitUntilFirstFrameRasterized();
-
-      if (args.contains('--with_semantics')) {
+      if (withSemantics) {
         print('Enabeling semantics...');
         await driver.setSemantics(true);
       }
@@ -213,6 +213,12 @@ void main([List<String> args = const <String>[]]) {
       if (driver != null)
         await driver.close();
     });
+
+    test('find.bySemanticsLabel', () async {
+      // Assert that we can use semantics related finders in profile mode.
+      final int id = await driver.getSemanticsId(find.bySemanticsLabel('Material'));
+      expect(id, greaterThan(-1));
+    }, skip: !withSemantics);
 
     test('all demos', () async {
       // Collect timeline data for just a limited set of demos to avoid OOMs.

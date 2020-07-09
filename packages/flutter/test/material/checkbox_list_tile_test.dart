@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
@@ -115,7 +117,7 @@ void main() {
     expect(Focus.of(childKey.currentContext, nullOk: true).hasPrimaryFocus, isFalse);
   });
 
-  testWidgets('CheckoxListTile contentPadding test', (WidgetTester tester) async {
+  testWidgets('CheckboxListTile contentPadding test', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
         child: const Center(
@@ -143,5 +145,44 @@ void main() {
     final double remainingHeight = 56 - tallerWidget.height;
     expect(paddingRect.top, tallerWidget.top - remainingHeight / 2 - 18);
     expect(paddingRect.bottom, tallerWidget.bottom + remainingHeight / 2 + 2);
+  });
+
+  testWidgets('CheckboxListTile tristate test', (WidgetTester tester) async {
+    bool _value;
+
+    await tester.pumpWidget(
+      Material(
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return wrap(
+              child: CheckboxListTile(
+                title: const Text('Title'),
+                tristate: true,
+                value: _value,
+                onChanged: (bool value) {
+                  setState(() {
+                    _value = value;
+                  });
+                },
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(tester.widget<Checkbox>(find.byType(Checkbox)).value, null);
+
+    await tester.tap(find.byType(Checkbox));
+    await tester.pumpAndSettle();
+    expect(_value, false);
+
+    await tester.tap(find.byType(Checkbox));
+    await tester.pumpAndSettle();
+    expect(_value, true);
+
+    await tester.tap(find.byType(Checkbox));
+    await tester.pumpAndSettle();
+    expect(_value, null);
   });
 }

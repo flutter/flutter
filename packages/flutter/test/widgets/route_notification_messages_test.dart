@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 @TestOn('chrome')
 
 import 'dart:ui';
@@ -99,6 +101,48 @@ void main() {
             'routeName': '/',
           },
         ));
+  });
+
+  testWidgets('Navigator does not report route name by default', (WidgetTester tester) async {
+    final List<MethodCall> log = <MethodCall>[];
+    SystemChannels.navigation.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Navigator(
+        pages: <Page<void>>[
+          TransitionBuilderPage<void>(
+            name: '/',
+            pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) => const Placeholder(),
+          ),
+        ],
+        onPopPage: (Route<void> route, void result) => false,
+      )
+    ));
+
+    expect(log, hasLength(0));
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Navigator(
+        pages: <Page<void>>[
+          TransitionBuilderPage<void>(
+            name: '/',
+            pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) => const Placeholder(),
+          ),
+          TransitionBuilderPage<void>(
+            name: '/abc',
+            pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) => const Placeholder(),
+          ),
+        ],
+        onPopPage: (Route<void> route, void result) => false,
+      )
+    ));
+
+    await tester.pumpAndSettle();
+    expect(log, hasLength(0));
   });
 
   testWidgets('Replace should send platform messages', (WidgetTester tester) async {

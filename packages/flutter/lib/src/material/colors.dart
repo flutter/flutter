@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui' show Color;
 
 import 'package:flutter/painting.dart';
@@ -192,7 +194,7 @@ class MaterialAccentColor extends ColorSwatch<int> {
 /// The [Colors.transparent] color isn't shown here because it is entirely
 /// invisible!
 class Colors {
-  // This class is not meant to be instatiated or extended; this constructor
+  // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
   // ignore: unused_element
   Colors._();

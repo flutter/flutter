@@ -19,6 +19,6 @@
   "copyButtonLabel": "පිටපත් කරන්න",
   "pasteButtonLabel": "අලවන්න",
   "selectAllButtonLabel": "සියල්ල තෝරන්න",
-  "tabSemanticsLabel": "TBD",
+  "tabSemanticsLabel": "ටැබ $tabCount න් $tabIndex",
   "modalBarrierDismissLabel": "ඉවත ලන්න"
 }

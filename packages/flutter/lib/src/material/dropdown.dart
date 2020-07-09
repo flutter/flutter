@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 import 'dart:ui' show window;
 
@@ -951,7 +953,7 @@ class DropdownButton<T> extends StatefulWidget {
   /// menu that appears when you tap the button.
   ///
   /// To use a separate text style for selected item when it's displayed within
-  /// the dropdown button,, consider using [selectedItemBuilder].
+  /// the dropdown button, consider using [selectedItemBuilder].
   ///
   /// {@tool dartpad --template=stateful_widget_scaffold}
   ///

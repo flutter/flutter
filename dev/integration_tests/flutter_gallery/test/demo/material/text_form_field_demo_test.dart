@@ -22,7 +22,7 @@ void main() {
     final Finder passwordField = find.widgetWithText(TextFormField, 'Password *');
     expect(passwordField, findsOneWidget);
 
-    // Verify the that the phone number's TextInputFormatter does what's expected.
+    // Verify that the phone number's TextInputFormatter does what's expected.
     await tester.enterText(phoneNumberField, '1234567890');
     await tester.pumpAndSettle();
     expect(find.text('(123) 456-7890'), findsOneWidget);

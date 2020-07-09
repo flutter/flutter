@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'runner.dart' as runner;
 import 'src/base/context.dart';
+import 'src/base/logger.dart';
 import 'src/base/template.dart';
 // The build_runner code generation is provided here to make it easier to
 // avoid introducing the dependency into google3. Not all build* packages
@@ -47,6 +48,7 @@ import 'src/commands/train.dart';
 import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
 import 'src/commands/version.dart';
+import 'src/features.dart';
 import 'src/globals.dart' as globals;
 import 'src/runner/flutter_command.dart';
 import 'src/web/compile.dart';
@@ -64,8 +66,11 @@ Future<void> main(List<String> args) async {
       (args.isNotEmpty && args.first == 'help') || (args.length == 1 && verbose);
   final bool muteCommandLogging = help || doctor;
   final bool verboseHelp = help && verbose;
+  final bool daemon = args.contains('daemon');
+  final bool runMachine = (args.contains('--machine') && args.contains('run')) ||
+                          (args.contains('--machine') && args.contains('attach'));
 
-  await runner.run(args, <FlutterCommand>[
+  await runner.run(args, () => <FlutterCommand>[
     AnalyzeCommand(
       verboseHelp: verboseHelp,
       fileSystem: globals.fs,
@@ -73,6 +78,7 @@ Future<void> main(List<String> args) async {
       processManager: globals.processManager,
       logger: globals.logger,
       terminal: globals.terminal,
+      artifacts: globals.artifacts,
     ),
     AssembleCommand(),
     AttachCommand(verboseHelp: verboseHelp),
@@ -93,7 +99,13 @@ Future<void> main(List<String> args) async {
     LogsCommand(),
     MakeHostAppEditableCommand(),
     PackagesCommand(),
-    PrecacheCommand(verboseHelp: verboseHelp),
+    PrecacheCommand(
+      verboseHelp: verboseHelp,
+      cache: globals.cache,
+      logger: globals.logger,
+      platform: globals.platform,
+      featureFlags: featureFlags,
+    ),
     RunCommand(verboseHelp: verboseHelp),
     ScreenshotCommand(),
     ShellCompletionCommand(),
@@ -122,5 +134,29 @@ Future<void> main(List<String> args) async {
        WebRunnerFactory: () => DwdsWebRunnerFactory(),
        // The mustache dependency is different in google3
        TemplateRenderer: () => const MustacheTemplateRenderer(),
+       if (daemon)
+        Logger: () => NotifyingLogger(
+          verbose: verbose,
+          parent: VerboseLogger(StdoutLogger(
+            timeoutConfiguration: timeoutConfiguration,
+            stdio: globals.stdio,
+            terminal: globals.terminal,
+            outputPreferences: globals.outputPreferences,
+          ),
+        ))
+       else if (verbose && !muteCommandLogging)
+        Logger: () => VerboseLogger(StdoutLogger(
+          timeoutConfiguration: timeoutConfiguration,
+          stdio: globals.stdio,
+          terminal: globals.terminal,
+          outputPreferences: globals.outputPreferences,
+        ))
+      else if (runMachine)
+        Logger: () => AppRunLogger(parent: StdoutLogger(
+          timeoutConfiguration: timeoutConfiguration,
+          stdio: globals.stdio,
+          terminal: globals.terminal,
+          outputPreferences: globals.outputPreferences,
+        ))
      });
 }

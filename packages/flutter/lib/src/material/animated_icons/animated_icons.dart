@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 part of material_animated_icons;
 
 // The code for drawing animated icons is kept in a private API, as we are not

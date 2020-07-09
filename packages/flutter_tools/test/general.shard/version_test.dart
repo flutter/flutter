@@ -573,7 +573,7 @@ void main() {
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(ProcessResult(108, 0, 'master', ''), <String>['git', 'fetch']));
     when(processUtils.runSync(
-      <String>['git', 'fetch', 'https://github.com/flutter/flutter.git', '--tags'],
+      <String>['git', 'fetch', 'https://github.com/flutter/flutter.git', '--tags', '-f'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(ProcessResult(109, 0, '', ''), <String>['git', 'fetch']));
@@ -599,7 +599,7 @@ void main() {
       environment: anyNamed('environment'),
     )).called(1);
     verify(processUtils.runSync(
-      <String>['git', 'fetch', 'https://github.com/flutter/flutter.git', '--tags'],
+      <String>['git', 'fetch', 'https://github.com/flutter/flutter.git', '--tags', '-f'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).called(1);

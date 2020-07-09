@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -243,7 +245,8 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
   // * Larger integers are encoded using 8 bytes two's complement
   //   representation.
   // * doubles are encoded using the IEEE 754 64-bit double-precision binary
-  //   format.
+  //   format. Zero bytes are added before the encoded double value to align it
+  //   to a 64 bit boundary in the full message.
   // * Strings are encoded using their UTF-8 representation. First the length
   //   of that in bytes is encoded using the expanding format, then follows the
   //   UTF-8 encoding itself.

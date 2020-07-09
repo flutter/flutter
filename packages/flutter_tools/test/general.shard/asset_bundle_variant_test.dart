@@ -72,7 +72,7 @@ flutter:
       }
 
       AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-      await bundle.build(manifestPath: 'pubspec.yaml');
+      await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages');
 
       // The main asset file, /a/b/c/foo, and its variants exist.
       for (final String asset in assets) {
@@ -82,7 +82,7 @@ flutter:
 
       globals.fs.file(fixPath('a/b/c/foo')).deleteSync();
       bundle = AssetBundleFactory.instance.createBundle();
-      await bundle.build(manifestPath: 'pubspec.yaml');
+      await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages');
 
       // Now the main asset file, /a/b/c/foo, does not exist. This is OK because
       // the /a/b/c/*/foo variants do exist.

@@ -35,10 +35,6 @@ class FormatCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final String dartBinary = globals.artifacts.getArtifactPath(Artifact.engineDartBinary);
-    globals.printError(
-      '"flutter format" is deprecated and will be removed in a'
-      ' future release, use "dart format" instead.'
-    );
     final List<String> command = <String>[
       dartBinary,
       'format',

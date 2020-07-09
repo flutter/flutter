@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'dart:ui' as ui show ImageFilter, Gradient, Image, Color;
@@ -2292,11 +2294,14 @@ class RenderFittedBox extends RenderProxyBox {
     AlignmentGeometry alignment = Alignment.center,
     TextDirection textDirection,
     RenderBox child,
+    Clip clipBehavior = Clip.none,
   }) : assert(fit != null),
        assert(alignment != null),
+       assert(clipBehavior != null),
        _fit = fit,
        _alignment = alignment,
        _textDirection = textDirection,
+       _clipBehavior = clipBehavior,
        super(child);
 
   Alignment _resolvedAlignment;
@@ -2373,6 +2378,20 @@ class RenderFittedBox extends RenderProxyBox {
   bool _hasVisualOverflow;
   Matrix4 _transform;
 
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.none], and must not be null.
+  Clip get clipBehavior => _clipBehavior;
+  Clip _clipBehavior = Clip.none;
+  set clipBehavior(Clip value) {
+    assert(value != null);
+    if (value != _clipBehavior) {
+      _clipBehavior = value;
+      markNeedsPaint();
+      markNeedsSemanticsUpdate();
+    }
+  }
+
   void _clearPaintData() {
     _hasVisualOverflow = null;
     _transform = null;
@@ -2418,9 +2437,9 @@ class RenderFittedBox extends RenderProxyBox {
       return;
     _updatePaintData();
     if (child != null) {
-      if (_hasVisualOverflow)
+      if (_hasVisualOverflow && clipBehavior != Clip.none)
         layer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintChildWithTransform,
-            oldLayer: layer is ClipRectLayer ? layer as ClipRectLayer : null);
+            oldLayer: layer is ClipRectLayer ? layer as ClipRectLayer : null, clipBehavior: clipBehavior);
       else
         layer = _paintChildWithTransform(context, offset);
     }
@@ -2701,6 +2720,15 @@ class RenderMouseRegion extends RenderProxyBox implements MouseTrackerAnnotation
        _annotationIsActive = false,
        super(child);
 
+  @protected
+  @override
+  bool hitTestSelf(Offset position) => true;
+
+  @override
+  bool hitTest(BoxHitTestResult result, { @required Offset position }) {
+    return super.hitTest(result, position: position) && _opaque;
+  }
+
   /// Whether this object should prevent [RenderMouseRegion]s visually behind it
   /// from detecting the pointer, thus affecting how their [onHover], [onEnter],
   /// and [onExit] behave.
@@ -2817,25 +2845,6 @@ class RenderMouseRegion extends RenderProxyBox implements MouseTrackerAnnotation
   void detach() {
     RendererBinding.instance.mouseTracker.removeListener(_handleUpdatedMouseIsConnected);
     super.detach();
-  }
-
-  @override
-  bool get needsCompositing => super.needsCompositing || _annotationIsActive;
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    if (_annotationIsActive) {
-      // Annotated region layers are not retained because they do not create engine layers.
-      final AnnotatedRegionLayer<MouseTrackerAnnotation> layer = AnnotatedRegionLayer<MouseTrackerAnnotation>(
-        this,
-        size: size,
-        offset: offset,
-        opaque: opaque,
-      );
-      context.pushLayer(layer, super.paint, offset);
-    } else {
-      super.paint(context, offset);
-    }
   }
 
   @override

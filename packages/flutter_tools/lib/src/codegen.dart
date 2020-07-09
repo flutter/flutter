@@ -4,8 +4,12 @@
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
+import 'package:process/process.dart';
 
+import 'artifacts.dart';
 import 'base/context.dart';
+import 'base/file_system.dart';
+import 'base/logger.dart';
 import 'build_info.dart';
 import 'compile.dart';
 import 'globals.dart' as globals;
@@ -63,10 +67,19 @@ abstract class CodegenDaemon {
 /// supported here. Using the build pipeline implies a fixed multi-root
 /// filesystem and requires a pubspec.
 class CodeGeneratingKernelCompiler implements KernelCompiler {
-  const CodeGeneratingKernelCompiler();
+  CodeGeneratingKernelCompiler({
+    @required FileSystem fileSystem,
+    @required Artifacts artifacts,
+    @required ProcessManager processManager,
+    @required Logger logger,
+  }) : _delegate = KernelCompiler(
+    logger: logger,
+    artifacts: artifacts,
+    processManager: processManager,
+    fileSystem: fileSystem,
+  );
 
-  static const KernelCompiler _delegate = KernelCompiler();
-
+  final KernelCompiler _delegate;
   @override
   Future<CompilerOutput> compile({
     String mainPath,
@@ -139,6 +152,14 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
     if (runCold) {
       return residentCompiler;
     }
+    globals.printError(<String>[
+      '"flutter generate" is deprecated, use "dart pub run build_runner" instead. ',
+      'The following dependencies must be added to dev_dependencies in pubspec.yaml:',
+      'build_runner: 1.10.0',
+      for (Object dependency in flutterProject.builders?.keys ?? const <Object>[])
+        '$dependency: ${flutterProject.builders[dependency]}'
+    ].join('\n'));
+
     final CodegenDaemon codegenDaemon = await codeGenerator.daemon(flutterProject);
     codegenDaemon.startBuild();
     final CodegenStatus status = await codegenDaemon.buildResults.firstWhere((CodegenStatus status) {
@@ -178,6 +199,7 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
     List<Uri> invalidatedFiles, {
       String outputPath,
       PackageConfig packageConfig,
+      bool suppressErrors = false,
     }) async {
     if (_codegenDaemon.lastStatus != CodegenStatus.Succeeded && _codegenDaemon.lastStatus != CodegenStatus.Failed) {
       await _codegenDaemon.buildResults.firstWhere((CodegenStatus status) {
@@ -192,6 +214,7 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
       invalidatedFiles,
       outputPath: outputPath,
       packageConfig: packageConfig,
+      suppressErrors: suppressErrors,
     );
   }
 

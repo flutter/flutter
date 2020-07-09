@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -10,7 +12,7 @@ import 'package:flutter/widgets.dart';
 void main() {
   final TestAutomatedTestWidgetsFlutterBinding binding = TestAutomatedTestWidgetsFlutterBinding();
 
-  testWidgets('Locale is available when Localizations widget stops defering frames', (WidgetTester tester) async {
+  testWidgets('Locale is available when Localizations widget stops deferring frames', (WidgetTester tester) async {
     final FakeLocalizationsDelegate delegate = FakeLocalizationsDelegate();
     await tester.pumpWidget(Localizations(
       locale: const Locale('fo'),

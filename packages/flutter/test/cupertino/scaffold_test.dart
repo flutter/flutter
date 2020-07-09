@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -159,7 +161,7 @@ void main() {
     expect(tester.getSize(find.byType(Container)).height, 600.0);
   });
 
-  testWidgets('Contents bottom padding are not consumed by viewInsets when resizeToAvoidBottomInset overriden', (WidgetTester tester) async {
+  testWidgets('Contents bottom padding are not consumed by viewInsets when resizeToAvoidBottomInset overridden', (WidgetTester tester) async {
     const Widget child = CupertinoPageScaffold(
       resizeToAvoidBottomInset: false,
       navigationBar: CupertinoNavigationBar(

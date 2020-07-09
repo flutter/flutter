@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui' show hashValues;
 
 import 'package:meta/meta.dart';
@@ -187,6 +189,13 @@ class StackFrame {
     } else if (line == '...') {
       return stackOverFlowElision;
     }
+
+    assert(
+      line != '===== asynchronous gap ===========================',
+      'Got a stack frame from package:stack_trace, where a vm or web frame was expected. '
+      'This can happen if FlutterError.demangleStackTrace was not set in an environment '
+      'that propagates non-standard stack traces to the framework, such as during tests.'
+    );
 
     // Web frames.
     if (!line.startsWith('#')) {

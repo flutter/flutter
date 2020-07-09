@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -31,7 +33,7 @@ import 'platform_channel.dart';
   'This feature was deprecated after v1.6.5.'
 )
 class BinaryMessages {
-  // This class is not meant to be instatiated or extended; this constructor
+  // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
   // ignore: unused_element
   BinaryMessages._();

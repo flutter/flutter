@@ -9,14 +9,12 @@ import 'package:uuid/uuid.dart';
 
 import '../android/android_workflow.dart';
 import '../base/common.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../emulator.dart';
@@ -53,26 +51,14 @@ class DaemonCommand extends FlutterCommand {
     globals.printStatus('Starting device daemon...');
     isRunningFromDaemon = true;
 
-    final NotifyingLogger notifyingLogger = NotifyingLogger();
-
-    Cache.releaseLockEarly();
-
-    await context.run<void>(
-      body: () async {
-        final Daemon daemon = Daemon(
-          stdinCommandStream, stdoutCommandResponse,
-          notifyingLogger: notifyingLogger,
-        );
-
-        final int code = await daemon.onExit;
-        if (code != 0) {
-          throwToolExit('Daemon exited with non-zero exit code: $code', exitCode: code);
-        }
-      },
-      overrides: <Type, Generator>{
-        Logger: () => notifyingLogger,
-      },
+    final Daemon daemon = Daemon(
+      stdinCommandStream, stdoutCommandResponse,
+      notifyingLogger: globals.logger as NotifyingLogger,
     );
+    final int code = await daemon.onExit;
+    if (code != 0) {
+      throwToolExit('Daemon exited with non-zero exit code: $code', exitCode: code);
+    }
     return FlutterCommandResult.success();
   }
 }
@@ -192,10 +178,10 @@ class Daemon {
 
   void _send(Map<String, dynamic> map) => sendCommand(map);
 
-  void shutdown({ dynamic error }) {
-    _commandSubscription?.cancel();
+  Future<void> shutdown({ dynamic error }) async {
+    await _commandSubscription?.cancel();
     for (final Domain domain in _domainMap.values) {
-      domain.dispose();
+      await domain.dispose();
     }
     if (!_onExitCompleter.isCompleted) {
       if (error == null) {
@@ -286,7 +272,7 @@ abstract class Domain {
     return val as int;
   }
 
-  void dispose() { }
+  Future<void> dispose() async { }
 }
 
 /// This domain responds to methods like [version] and [shutdown].
@@ -364,8 +350,8 @@ class DaemonDomain extends Domain {
   }
 
   @override
-  void dispose() {
-    _subscription?.cancel();
+  Future<void> dispose() async {
+    await _subscription?.cancel();
   }
 
   /// Enumerates the platforms supported by the provided project.
@@ -460,9 +446,13 @@ class AppDomain extends Domain {
     bool ipv6 = false,
     String isolateFilter,
   }) async {
-    if (await device.isLocalEmulator && !options.buildInfo.supportsEmulator) {
-      throw Exception('${toTitleCase(options.buildInfo.friendlyModeName)} mode is not supported for emulators.');
+    if (!await device.supportsRuntimeMode(options.buildInfo.mode)) {
+      throw Exception(
+        '${toTitleCase(options.buildInfo.friendlyModeName)} '
+        'mode is not supported for ${device.name}.',
+      );
     }
+
     // We change the current working directory for the duration of the `start` command.
     final Directory cwd = globals.fs.currentDirectory;
     globals.fs.currentDirectory = globals.fs.directory(projectDirectory);
@@ -495,7 +485,6 @@ class AppDomain extends Domain {
         debuggingOptions: options,
         applicationBinary: applicationBinary,
         projectRootPath: projectRootPath,
-        packagesFilePath: packagesFilePath,
         dillOutputPath: dillOutputPath,
         ipv6: ipv6,
         hostIsIde: true,
@@ -527,6 +516,7 @@ class AppDomain extends Domain {
       enableHotReload,
       cwd,
       LaunchMode.run,
+      globals.logger as AppRunLogger,
     );
   }
 
@@ -538,9 +528,10 @@ class AppDomain extends Domain {
     bool enableHotReload,
     Directory cwd,
     LaunchMode launchMode,
+    AppRunLogger logger,
   ) async {
     final AppInstance app = AppInstance(_getNewAppId(),
-        runner: runner, logToStdout: daemon.logToStdout);
+        runner: runner, logToStdout: daemon.logToStdout, logger: logger);
     _apps.add(app);
     _sendAppEvent(app, 'start', <String, dynamic>{
       'deviceId': device.id,
@@ -790,18 +781,20 @@ class DeviceDomain extends Domain {
 
   /// Enable device events.
   Future<void> enable(Map<String, dynamic> args) {
+    final List<Future<void>> calls = <Future<void>>[];
     for (final PollingDeviceDiscovery discoverer in _discoverers) {
-      discoverer.startPolling();
+      calls.add(discoverer.startPolling());
     }
-    return Future<void>.value();
+    return Future.wait<void>(calls);
   }
 
   /// Disable device events.
-  Future<void> disable(Map<String, dynamic> args) {
+  Future<void> disable(Map<String, dynamic> args) async {
+    final List<Future<void>> calls = <Future<void>>[];
     for (final PollingDeviceDiscovery discoverer in _discoverers) {
-      discoverer.stopPolling();
+      calls.add(discoverer.stopPolling());
     }
-    return Future<void>.value();
+    return Future.wait<void>(calls);
   }
 
   /// Forward a host port to a device port.
@@ -835,9 +828,9 @@ class DeviceDomain extends Domain {
   }
 
   @override
-  void dispose() {
+  Future<void> dispose() async {
     for (final PollingDeviceDiscovery discoverer in _discoverers) {
-      discoverer.dispose();
+      await discoverer.dispose();
     }
   }
 
@@ -925,7 +918,23 @@ dynamic _toJsonable(dynamic obj) {
 }
 
 class NotifyingLogger extends Logger {
-  final StreamController<LogMessage> _messageController = StreamController<LogMessage>.broadcast();
+  NotifyingLogger({ @required this.verbose, this.parent }) {
+    _messageController = StreamController<LogMessage>.broadcast(
+      onListen: _onListen,
+    );
+  }
+
+  final bool verbose;
+  final Logger parent;
+  final List<LogMessage> messageBuffer = <LogMessage>[];
+  StreamController<LogMessage> _messageController;
+
+  void _onListen() {
+    if (messageBuffer.isNotEmpty) {
+      messageBuffer.forEach(_messageController.add);
+      messageBuffer.clear();
+    }
+  }
 
   Stream<LogMessage> get onMessage => _messageController.stream;
 
@@ -939,7 +948,7 @@ class NotifyingLogger extends Logger {
     int hangingIndent,
     bool wrap,
   }) {
-    _messageController.add(LogMessage('error', message, stackTrace));
+    _sendMessage(LogMessage('error', message, stackTrace));
   }
 
   @override
@@ -952,12 +961,15 @@ class NotifyingLogger extends Logger {
     int hangingIndent,
     bool wrap,
   }) {
-    _messageController.add(LogMessage('status', message));
+    _sendMessage(LogMessage('status', message));
   }
 
   @override
   void printTrace(String message) {
-    // This is a lot of traffic to send over the wire.
+    if (!verbose) {
+      return;
+    }
+    parent?.printError(message);
   }
 
   @override
@@ -975,6 +987,13 @@ class NotifyingLogger extends Logger {
       timeoutConfiguration: timeoutConfiguration,
       stopwatch: Stopwatch(),
     );
+  }
+
+  void _sendMessage(LogMessage logMessage) {
+    if (_messageController.hasListener) {
+      return _messageController.add(logMessage);
+    }
+    messageBuffer.add(logMessage);
   }
 
   void dispose() {
@@ -997,13 +1016,13 @@ class NotifyingLogger extends Logger {
 
 /// A running application, started by this daemon.
 class AppInstance {
-  AppInstance(this.id, { this.runner, this.logToStdout = false });
+  AppInstance(this.id, { this.runner, this.logToStdout = false, @required AppRunLogger logger })
+    : _logger = logger;
 
   final String id;
   final ResidentRunner runner;
   final bool logToStdout;
-
-  _AppRunLogger _logger;
+  final AppRunLogger _logger;
 
   Future<OperationResult> restart({ bool fullRestart = false, bool pause = false, String reason }) {
     return runner.restart(fullRestart: fullRestart, pause: pause, reason: reason);
@@ -1020,15 +1039,10 @@ class AppInstance {
     _logger.close();
   }
 
-  Future<T> _runInZone<T>(AppDomain domain, FutureOr<T> method()) {
-    _logger ??= _AppRunLogger(domain, this, parent: logToStdout ? globals.logger : null);
-
-    return context.run<T>(
-      body: method,
-      overrides: <Type, Generator>{
-        Logger: () => _logger,
-      },
-    );
+  Future<T> _runInZone<T>(AppDomain domain, FutureOr<T> method()) async {
+    _logger.domain = domain;
+    _logger.app = this;
+    return method();
   }
 }
 
@@ -1085,11 +1099,11 @@ class EmulatorDomain extends Domain {
 //
 // TODO(devoncarew): To simplify this code a bit, we could choose to specialize
 // this class into two, one for each of the above use cases.
-class _AppRunLogger extends Logger {
-  _AppRunLogger(this.domain, this.app, { this.parent });
+class AppRunLogger extends Logger {
+  AppRunLogger({ this.parent });
 
   AppDomain domain;
-  final AppInstance app;
+  AppInstance app;
   final Logger parent;
   int _nextProgressId = 0;
 

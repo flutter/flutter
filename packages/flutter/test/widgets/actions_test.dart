@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -804,6 +806,6 @@ void main() {
       expect(description.length, equals(2));
       expect(description[0], equalsIgnoringHashCodes('dispatcher: ActionDispatcher#00000'));
       expect(description[1], equalsIgnoringHashCodes('actions: {TestIntent: TestAction#00000}'));
-    }, skip: isBrowser);
+    });
   });
 }

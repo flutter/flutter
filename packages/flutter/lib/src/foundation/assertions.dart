@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 
 import 'basic_types.dart';
@@ -12,6 +14,9 @@ import 'stack_frame.dart';
 
 // Examples can assume:
 // String runtimeType;
+// bool draconisAlive;
+// bool draconisAmulet;
+// Diagnosticable draconis;
 
 /// Signature for [FlutterError.onError] handler.
 typedef FlutterExceptionHandler = void Function(FlutterErrorDetails details);
@@ -22,6 +27,14 @@ typedef DiagnosticPropertiesTransformer = Iterable<DiagnosticsNode> Function(Ite
 /// Signature for [FlutterErrorDetails.informationCollector] callback
 /// and other callbacks that collect information describing an error.
 typedef InformationCollector = Iterable<DiagnosticsNode> Function();
+
+/// Signature for a function that demangles [StackTrace] objects into a format
+/// that can be parsed by [StackFrame].
+///
+/// See also:
+///
+///   * [FlutterError.demangleStackTrace], which shows an example implementation.
+typedef StackTraceDemangler = StackTrace Function(StackTrace details);
 
 /// Partial information from a stack frame for stack filtering purposes.
 ///
@@ -85,7 +98,7 @@ abstract class StackFilter {
   /// A const constructor to allow subclasses to be const.
   const StackFilter();
 
-  /// Filters the list of [StackFrame]s by updating corrresponding indices in
+  /// Filters the list of [StackFrame]s by updating corresponding indices in
   /// `reasons`.
   ///
   /// To elide a frame or number of frames, set the string
@@ -112,7 +125,7 @@ class RepetitiveStackFrameFilter extends StackFilter {
   }) : assert(frames != null),
        assert(replacement != null);
 
-  /// The shape of this repetative stack pattern.
+  /// The shape of this repetitive stack pattern.
   final List<PartialStackFrame> frames;
 
   /// The number of frames in this pattern.
@@ -170,7 +183,7 @@ abstract class _ErrorDiagnostic extends DiagnosticsProperty<List<Object>> {
        );
 
   /// In debug builds, a kernel transformer rewrites calls to the default
-  /// constructors for [ErrorSummary], [ErrorDetails], and [ErrorHint] to use
+  /// constructors for [ErrorSummary], [ErrorDescription], and [ErrorHint] to use
   /// this constructor.
   //
   // ```dart
@@ -221,6 +234,10 @@ abstract class _ErrorDiagnostic extends DiagnosticsProperty<List<Object>> {
 /// Use [ErrorDescription] for any part of an error message where neither
 /// [ErrorSummary] or [ErrorHint] is appropriate.
 ///
+/// In debug builds, values interpolated into the `message` are
+/// expanded and placed into [value], which is of type [List<Object>].
+/// This allows IDEs to examine values interpolated into error messages.
+///
 /// See also:
 ///
 ///  * [ErrorSummary], which provides a short (one line) description of the
@@ -256,6 +273,10 @@ class ErrorDescription extends _ErrorDiagnostic {
 /// A [FlutterError] must start with an [ErrorSummary] and may not contain
 /// multiple summaries.
 ///
+/// In debug builds, values interpolated into the `message` are
+/// expanded and placed into [value], which is of type [List<Object>].
+/// This allows IDEs to examine values interpolated into error messages.
+///
 /// See also:
 ///
 ///  * [ErrorDescription], which provides an explanation of the problem and its
@@ -286,6 +307,10 @@ class ErrorSummary extends _ErrorDiagnostic {
 ///
 /// If your message provides obvious advice that is always applicable, it is an
 /// [ErrorDescription] not a hint.
+///
+/// In debug builds, values interpolated into the `message` are
+/// expanded and placed into [value], which is of type [List<Object>].
+/// This allows IDEs to examine values interpolated into error messages.
 ///
 /// See also:
 ///
@@ -328,7 +353,7 @@ class ErrorSpacer extends DiagnosticsProperty<void> {
 
 /// Class for information provided to [FlutterExceptionHandler] callbacks.
 ///
-///  {@tool snippet}
+/// {@tool snippet}
 /// This is an example of using [FlutterErrorDetails] when calling
 /// [FlutterError.reportError].
 ///
@@ -371,6 +396,28 @@ class FlutterErrorDetails with Diagnosticable {
     this.informationCollector,
     this.silent = false,
   });
+
+  /// Creates a copy of the error details but with the given fields replaced
+  /// with new values.
+  FlutterErrorDetails copyWith({
+    DiagnosticsNode context,
+    dynamic exception,
+    InformationCollector informationCollector,
+    String library,
+    bool silent,
+    StackTrace stack,
+    IterableFilter<String> stackFilter,
+  }) {
+    return FlutterErrorDetails(
+      context: context ?? this.context,
+      exception: exception ?? this.exception,
+      informationCollector: informationCollector ?? this.informationCollector,
+      library: library ?? this.library,
+      silent: silent ?? this.silent,
+      stack: stack ?? this.stack,
+      stackFilter: stackFilter ?? this.stackFilter,
+    );
+  }
 
   /// Transformers to transform [DiagnosticsNode] in [DiagnosticPropertiesBuilder]
   /// into a more descriptive form.
@@ -612,7 +659,7 @@ class FlutterErrorDetails with Diagnosticable {
         // If not: Error is in user code (user violated assertion in framework).
         // If so:  Error is in Framework. We either need an assertion higher up
         //         in the stack, or we've violated our own assertions.
-        final List<StackFrame> stackFrames = StackFrame.fromStackTrace(stack)
+        final List<StackFrame> stackFrames = StackFrame.fromStackTrace(FlutterError.demangleStackTrace(stack))
                                                        .skipWhile((StackFrame frame) => frame.packageScheme == 'dart')
                                                        .toList();
         final bool ourFault =  stackFrames.length >= 2
@@ -674,7 +721,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   /// substantial additional information, ideally sufficient to develop a
   /// correct solution to the problem.
   ///
-  /// In some cases, when a FlutterError is reported to the user, only the first
+  /// In some cases, when a [FlutterError] is reported to the user, only the first
   /// line is included. For example, Flutter will typically only fully report
   /// the first exception at runtime, displaying only the first line of
   /// subsequent errors.
@@ -705,6 +752,45 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   /// be sometimes useful, but may not always apply). Other [DiagnosticsNode]
   /// subclasses, such as [DiagnosticsStackTrace], may
   /// also be used.
+  ///
+  /// When using an [ErrorSummary], [ErrorDescription]s, and [ErrorHint]s, in
+  /// debug builds, values interpolated into the `message` arguments of those
+  /// classes' constructors are expanded and placed into the
+  /// [DiagnosticsProperty.value] property of those objects (which is of type
+  /// [List<Object>]). This allows IDEs to examine values interpolated into
+  /// error messages.
+  ///
+  /// Alternatively, to include a specific [Diagnosticable] object into the
+  /// error message and have the object describe itself in detail (see
+  /// [DiagnosticsNode.toStringDeep]), consider calling
+  /// [Diagnosticable.toDiagnosticsNode] on that object and using that as one of
+  /// the values passed to this constructor.
+  ///
+  /// {@tool snippet}
+  /// In this example, an error is thrown in debug mode if certain conditions
+  /// are not met. The error message includes a description of an object that
+  /// implements the [Diagnosticable] interface, `draconis`.
+  ///
+  /// ```dart
+  /// void controlDraconis() {
+  ///   assert(() {
+  ///     if (!draconisAlive || !draconisAmulet) {
+  ///       throw FlutterError.fromParts(<DiagnosticsNode>[
+  ///         ErrorSummary('Cannot control Draconis in current state.'),
+  ///         ErrorDescription('Draconis can only be controlled while alive and while the amulet is wielded.'),
+  ///         if (!draconisAlive)
+  ///           ErrorHint('Draconis is currently not alive.'),
+  ///         if (!draconisAmulet)
+  ///           ErrorHint('The Amulet of Draconis is currently not wielded.'),
+  ///         draconis.toDiagnosticsNode(name: 'Draconis'),
+  ///       ]);
+  ///     }
+  ///     return true;
+  ///   }());
+  ///   // ...
+  /// }
+  /// ```
+  /// {@end-tool}
   FlutterError.fromParts(this.diagnostics) : assert(diagnostics.isNotEmpty, FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Empty FlutterError')])) {
     assert(
       diagnostics.first.level == DiagnosticLevel.summary,
@@ -784,6 +870,31 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   /// Set this to null to silently catch and ignore errors. This is not
   /// recommended.
   static FlutterExceptionHandler onError = (FlutterErrorDetails details) => presentError(details);
+
+  /// Called by the Flutter framework before attempting to parse a [StackTrace].
+  ///
+  /// Some [StackTrace] implementations have a different toString format from
+  /// what the framework expects, like ones from package:stack_trace. To make
+  /// sure we can still parse and filter mangled [StackTrace]s, the framework
+  /// first calls this function to demangle them.
+  ///
+  /// This should be set in any environment that could propagate a non-standard
+  /// stack trace to the framework. Otherwise, the default behavior is to assume
+  /// all stack traces are in a standard format.
+  ///
+  /// The following example demangles package:stack_trace traces by converting
+  /// them into vm traces, which the framework is able to parse:
+  ///
+  /// ```dart
+  /// FlutterError.demangleStackTrace = (StackTrace stackTrace) {
+  ///   if (stack is stack_trace.Trace)
+  //      return stack.vmTrace;
+  //    if (stack is stack_trace.Chain)
+  //      return stack.toTrace().vmTrace;
+  //    return stack;
+  /// };
+  /// ```
+  static StackTraceDemangler demangleStackTrace = (StackTrace stackTrace) => stackTrace;
 
   /// Called whenever the Flutter framework wants to present an error to the
   /// users.
@@ -991,7 +1102,11 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
 void debugPrintStack({StackTrace stackTrace, String label, int maxFrames}) {
   if (label != null)
     debugPrint(label);
-  stackTrace ??= StackTrace.current;
+  if (stackTrace == null) {
+    stackTrace = StackTrace.current;
+  } else {
+    stackTrace = FlutterError.demangleStackTrace(stackTrace);
+  }
   Iterable<String> lines = stackTrace.toString().trimRight().split('\n');
   if (kIsWeb && lines.isNotEmpty) {
     // Remove extra call to StackTrace.current for web platform.
@@ -1027,11 +1142,7 @@ class DiagnosticsStackTrace extends DiagnosticsBlock {
   }) : super(
     name: name,
     value: stack,
-    properties: stack == null
-        ? <DiagnosticsNode>[]
-        : (stackFilter ?? FlutterError.defaultStackFilter)(stack.toString().trimRight().split('\n'))
-              .map<DiagnosticsNode>(_createStackFrame)
-              .toList(),
+    properties: _applyStackFilter(stack, stackFilter),
     style: DiagnosticsTreeStyle.flat,
     showSeparator: showSeparator,
     allowTruncate: true,
@@ -1048,6 +1159,17 @@ class DiagnosticsStackTrace extends DiagnosticsBlock {
     style: DiagnosticsTreeStyle.whitespace,
     showSeparator: showSeparator,
   );
+
+  static List<DiagnosticsNode> _applyStackFilter(
+    StackTrace stack,
+    IterableFilter<String> stackFilter,
+  ) {
+    if (stack == null)
+      return <DiagnosticsNode>[];
+    final IterableFilter<String> filter = stackFilter ?? FlutterError.defaultStackFilter;
+    final Iterable<String> frames = filter('${FlutterError.demangleStackTrace(stack)}'.trimRight().split('\n'));
+    return frames.map<DiagnosticsNode>(_createStackFrame).toList();
+  }
 
   static DiagnosticsNode _createStackFrame(String frame) {
     return DiagnosticsNode.message(frame, allowWrap: false);

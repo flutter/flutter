@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:io';
 
@@ -41,7 +43,7 @@ void main() {
       });
       return client;
     });
-  }, skip: isBrowser);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/57187
 }
 
 class MockHttpClient extends Mock implements HttpClient {}

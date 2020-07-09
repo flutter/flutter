@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 // This files contains message codec tests that are supported both on the Web
 // and in the VM. For VM-only tests see message_codecs_vm_test.dart.
 

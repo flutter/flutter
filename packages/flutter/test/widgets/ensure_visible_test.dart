@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 
 import 'package:flutter_test/flutter_test.dart';
@@ -426,7 +428,7 @@ void main() {
       Scrollable.ensureVisible(findContext(2));
       await tester.pump();
       expect(getOffset(), equals(-400.0));
-    }, skip: true);
+    }, skip: true); // https://github.com/flutter/flutter/issues/7919
 
     testWidgets('ListView ensureVisible rotated child', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));

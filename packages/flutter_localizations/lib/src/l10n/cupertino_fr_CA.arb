@@ -1,4 +1,5 @@
 {
+  "tabSemanticsLabel": "Onglet $tabIndex sur $tabCount",
   "datePickerHourSemanticsLabelOne": "$hour heure",
   "datePickerHourSemanticsLabelOther": "$hour heures",
   "datePickerMinuteSemanticsLabelOne": "1 minute",

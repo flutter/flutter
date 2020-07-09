@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:ui' show Locale;
 
@@ -297,6 +299,10 @@ class _LocalizationsScope extends InheritedWidget {
 /// then widgets that have created a dependency by calling
 /// `Localizations.of(context)` will be rebuilt after the resources
 /// for the new locale have been loaded.
+///
+/// The `Localizations` widget also instantiates [Directionality] in order to
+/// support the appropriate [Directionality.textDirection] of the localized
+/// resources.
 ///
 /// {@tool snippet}
 ///

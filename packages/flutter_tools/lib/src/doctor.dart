@@ -76,6 +76,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       ...IntelliJValidator.installedValidators,
       ...VsCodeValidator.installedValidators,
     ];
+    final ProxyValidator proxyValidator = ProxyValidator(platform: globals.platform);
     _validators = <DoctorValidator>[
       FlutterValidator(),
       if (androidWorkflow.appliesToHostPlatform)
@@ -105,8 +106,8 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         ...ideValidators
       else
         NoIdeValidator(),
-      if (ProxyValidator.shouldShow)
-        ProxyValidator(),
+      if (proxyValidator.shouldShow)
+        proxyValidator,
       if (deviceManager.canListAnything)
         DeviceValidator(),
     ];

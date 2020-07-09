@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -859,7 +861,7 @@ class SliverHitTestResult extends HitTestResult {
     assert(crossAxisPosition != null);
     assert(hitTest != null);
     if (paintOffset != null) {
-      pushTransform(Matrix4.translationValues(-paintOffset.dx, -paintOffset.dy, 0));
+      pushOffset(-paintOffset);
     }
     final bool isHit = hitTest(
       this,

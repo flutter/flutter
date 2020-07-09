@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:io' show Platform;
 import 'dart:ui' show
@@ -157,14 +159,33 @@ class TextInputType {
   /// Requests a keyboard with ready access to both letters and numbers.
   static const TextInputType visiblePassword = TextInputType._(7);
 
+  /// Optimized for a person's name.
+  ///
+  /// On iOS, requests the
+  /// [UIKeyboardType.namePhonePad](https://developer.apple.com/documentation/uikit/uikeyboardtype/namephonepad)
+  /// keyboard, a keyboard optimized for entering a person’s name or phone number.
+  /// Does not support auto-capitalization.
+  ///
+  /// On Android, requests a keyboard optimized for
+  /// [TYPE_TEXT_VARIATION_PERSON_NAME](https://developer.android.com/reference/android/text/InputType#TYPE_TEXT_VARIATION_PERSON_NAME).
+  static const TextInputType name = TextInputType._(8);
+
+  /// Optimized for postal mailing addresses.
+  ///
+  /// On iOS, requests the default keyboard.
+  ///
+  /// On Android, requests a keyboard optimized for
+  /// [TYPE_TEXT_VARIATION_POSTAL_ADDRESS](https://developer.android.com/reference/android/text/InputType#TYPE_TEXT_VARIATION_POSTAL_ADDRESS).
+  static const TextInputType streetAddress = TextInputType._(9);
+
   /// All possible enum values.
   static const List<TextInputType> values = <TextInputType>[
-    text, multiline, number, phone, datetime, emailAddress, url, visiblePassword,
+    text, multiline, number, phone, datetime, emailAddress, url, visiblePassword, name, streetAddress,
   ];
 
   // Corresponding string name for each of the [values].
   static const List<String> _names = <String>[
-    'text', 'multiline', 'number', 'phone', 'datetime', 'emailAddress', 'url', 'visiblePassword',
+    'text', 'multiline', 'number', 'phone', 'datetime', 'emailAddress', 'url', 'visiblePassword', 'name', 'address',
   ];
 
   // Enum value name, this is what enum.toString() would normally return.
@@ -693,6 +714,17 @@ class TextEditingValue {
     );
   }
 
+  /// Whether the [composing] range is a valid range within [text].
+  ///
+  /// Returns true if and only if the [composing] range is normalized, its start
+  /// is greater than or equal to 0, and its end is less than or equal to
+  /// [text]'s length.
+  ///
+  /// If this property is false while the [composing] range's `isValid` is true,
+  /// it usually indicates the current [composing] range is invalid because of a
+  /// programming error.
+  bool get isComposingRangeValid => composing.isValid && composing.isNormalized && composing.end <= text.length;
+
   @override
   String toString() => '${objectRuntimeType(this, 'TextEditingValue')}(text: \u2524$text\u251C, selection: $selection, composing: $composing)';
 
@@ -928,7 +960,7 @@ TextInputAction _toTextInputAction(String action) {
       return TextInputAction.send;
     case 'TextInputAction.next':
       return TextInputAction.next;
-    case 'TextInputAction.previuos':
+    case 'TextInputAction.previous':
       return TextInputAction.previous;
     case 'TextInputAction.continue_action':
       return TextInputAction.continueAction;

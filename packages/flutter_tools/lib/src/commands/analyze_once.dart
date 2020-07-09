@@ -8,19 +8,16 @@ import 'package:args/args.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
-import '../cache.dart';
 import '../dart/analysis.dart';
-import '../dart/sdk.dart' as sdk;
-import 'analyze.dart';
 import 'analyze_base.dart';
 
-/// An aspect of the [AnalyzeCommand] to perform once time analysis.
 class AnalyzeOnce extends AnalyzeBase {
   AnalyzeOnce(
     ArgResults argResults,
@@ -30,8 +27,9 @@ class AnalyzeOnce extends AnalyzeBase {
     @required Logger logger,
     @required Platform platform,
     @required ProcessManager processManager,
-    @required AnsiTerminal terminal,
+    @required Terminal terminal,
     @required List<String> experiments,
+    @required Artifacts artifacts,
     this.workingDirectory,
   }) : super(
         argResults,
@@ -43,6 +41,7 @@ class AnalyzeOnce extends AnalyzeBase {
         processManager: processManager,
         terminal: terminal,
         experiments: experiments,
+        artifacts: artifacts,
       );
 
   /// The working directory for testing analysis using dartanalyzer.
@@ -86,11 +85,11 @@ class AnalyzeOnce extends AnalyzeBase {
       throwToolExit('Nothing to analyze.', exitCode: 0);
     }
 
-    // analyze all
     final Completer<void> analysisCompleter = Completer<void>();
     final List<AnalysisError> errors = <AnalysisError>[];
 
-    final String sdkPath = argResults['dart-sdk'] as String ?? sdk.dartSdkPath;
+    final String sdkPath = argResults['dart-sdk'] as String ??
+      artifacts.getArtifactPath(Artifact.engineDartSdkPath);
 
     final AnalysisServer server = AnalysisServer(
       sdkPath,
@@ -107,17 +106,24 @@ class AnalyzeOnce extends AnalyzeBase {
     Status progress;
     try {
       StreamSubscription<bool> subscription;
-      subscription = server.onAnalyzing.listen((bool isAnalyzing) {
+
+      void handleAnalysisStatus(bool isAnalyzing) {
         if (!isAnalyzing) {
           analysisCompleter.complete();
           subscription?.cancel();
           subscription = null;
         }
-      });
-      server.onErrors.listen((FileAnalysisErrors fileErrors) {
-        // Record the issues found (but filter out to do comments).
-        errors.addAll(fileErrors.errors.where((AnalysisError error) => error.type != 'TODO'));
-      });
+      }
+
+      subscription = server.onAnalyzing.listen((bool isAnalyzing) => handleAnalysisStatus(isAnalyzing));
+
+      void handleAnalysisErrors(FileAnalysisErrors fileErrors) {
+        fileErrors.errors.removeWhere((AnalysisError error) => error.type == 'TODO');
+
+        errors.addAll(fileErrors.errors);
+      }
+
+      server.onErrors.listen(handleAnalysisErrors);
 
       await server.start();
       // Completing the future in the callback can't fail.
@@ -126,8 +132,6 @@ class AnalyzeOnce extends AnalyzeBase {
           analysisCompleter.completeError('analysis server exited: $exitCode');
         }
       }));
-
-      Cache.releaseLockEarly();
 
       // collect results
       timer = Stopwatch()..start();
@@ -175,19 +179,14 @@ class AnalyzeOnce extends AnalyzeBase {
 
     final String seconds = (timer.elapsedMilliseconds / 1000.0).toStringAsFixed(1);
 
-    String dartdocMessage;
-    if (undocumentedMembers == 1) {
-      dartdocMessage = 'one public member lacks documentation';
-    } else {
-      dartdocMessage = '$undocumentedMembers public members lack documentation';
-    }
+    final String dartDocMessage = AnalyzeBase.generateDartDocMessage(undocumentedMembers);
 
     // We consider any level of error to be an error exit (we don't report different levels).
     if (errors.isNotEmpty) {
       final int errorCount = errors.length;
       logger.printStatus('');
       if (undocumentedMembers > 0) {
-        throwToolExit('$errorCount ${pluralize('issue', errorCount)} found. (ran in ${seconds}s; $dartdocMessage)');
+        throwToolExit('$errorCount ${pluralize('issue', errorCount)} found. (ran in ${seconds}s; $dartDocMessage)');
       } else {
         throwToolExit('$errorCount ${pluralize('issue', errorCount)} found. (ran in ${seconds}s)');
       }
@@ -199,7 +198,7 @@ class AnalyzeOnce extends AnalyzeBase {
 
     if (argResults['congratulate'] as bool) {
       if (undocumentedMembers > 0) {
-        logger.printStatus('No issues found! (ran in ${seconds}s; $dartdocMessage)');
+        logger.printStatus('No issues found! (ran in ${seconds}s; $dartDocMessage)');
       } else {
         logger.printStatus('No issues found! (ran in ${seconds}s)');
       }

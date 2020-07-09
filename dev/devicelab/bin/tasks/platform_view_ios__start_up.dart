@@ -33,19 +33,6 @@ Future<void> main() async {
       );
     });
 
-    final Directory iosDirectory = dir(
-      '$platformViewDirectoryPath/ios',
-    );
-    await inDirectory(iosDirectory, () async {
-      await exec(
-        'pod',
-        <String>['install'],
-        environment: <String, String>{
-          'LANG': 'en_US.UTF-8',
-        },
-      );
-    });
-
     final TaskFunction taskFunction = createPlatformViewStartupTest();
     return await taskFunction();
   });
