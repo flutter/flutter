@@ -1044,14 +1044,12 @@ void main() {
   });
 
   testWidgets('OutlineButton respects the provided materialTapTargetSize', (WidgetTester tester) async {
-    final Key key1 = UniqueKey();
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Material(
           child: Center(
             child: OutlineButton(
-              key: key1,
               materialTapTargetSize: MaterialTapTargetSize.padded,
               child: const SizedBox(width: 50.0, height: 8.0),
               onPressed: () { },
@@ -1061,9 +1059,9 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.byKey(key1)), const Size(88.0, 48.0));
+    // Default Width of OutlineButton with MaterialTapTargetSize (88)
+    expect(tester.getSize(find.byType(OutlineButton)), const Size(88.0, 48.0));
 
-    final Key key2 = UniqueKey();
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1071,7 +1069,6 @@ void main() {
           child: Center(
             child: OutlineButton(
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              key: key2,
               child: const SizedBox(width: 50.0, height: 8.0),
               onPressed: () { },
             ),
@@ -1080,16 +1077,15 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.byKey(key2)), const Size(88.0, 36.0));
+    // Default Width of OutlineButton with MaterialTapTargetSize (88)
+    expect(tester.getSize(find.byType(OutlineButton)), const Size(88.0, 36.0));
 
-    final Key key3 = UniqueKey();
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Material(
           child: Center(
             child: OutlineButton.icon(
-              key: key3,
               materialTapTargetSize: MaterialTapTargetSize.padded,
               icon: const Icon(Icons.add_alarm),
               label: const SizedBox(width: 50.0, height: 8.0),
@@ -1102,13 +1098,13 @@ void main() {
 
     final Size addAlarmIconSize = tester.getSize(find.byIcon(Icons.add_alarm));
 
-    // The expected size width consist out of the width of SizedBox (50),
-    // the calculated icon width and the internal sized box (8).
-    // Icon size + MaterialButtonWithIconMixin (Padding: 12 start & 16 end)
-    expect(tester.getSize(find.byKey(key3)), Size(86 + addAlarmIconSize.width,
-        48.0));
+    // The expected width is the sum of:
+    // the width of the icon
+    // the gap between the icon and the label (8)
+    // the width of the label (50)
+    // the horizontal padding: start (12), end (16)
+    expect(tester.getSize(find.byType(OutlineButton)), Size(86 + addAlarmIconSize.width, 48.0));
 
-    final Key key4 = UniqueKey();
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1116,7 +1112,6 @@ void main() {
           child: Center(
             child: OutlineButton.icon(
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              key: key4,
               icon: const Icon(Icons.add),
               label: const SizedBox(width: 50.0, height: 8.0),
               onPressed: () { },
@@ -1126,12 +1121,13 @@ void main() {
       ),
     );
 
-    // The expected size width consist out of the width of SizedBox (50),
-    // the calculated icon width and the internal sized box (8).
-    // Icon size + MaterialButtonWithIconMixin (Padding: 12 start & 16 end)
+    // The expected width is the sum of:
+    // the width of the icon
+    // the gap between the icon and the label (8)
+    // the width of the label (50)
+    // the horizontal padding: start (12), end (16)
     final Size addIconSize = tester.getSize(find.byIcon(Icons.add));
-    expect(tester.getSize(find.byKey(key4)), Size(86 + addIconSize.width,
-        36.0));
+    expect(tester.getSize(find.byType(OutlineButton)), Size(86 + addIconSize.width, 36.0));
   });
 
   testWidgets('OutlineButton onPressed and onLongPress callbacks are distinctly recognized', (WidgetTester tester) async {
