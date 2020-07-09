@@ -559,7 +559,7 @@ typedef struct {
   /// Has length `custom_accessibility_actions_count`.
   const int32_t* custom_accessibility_actions;
   /// Identifier of the platform view associated with this semantics node, or
-  /// zero if none.
+  /// -1 if none.
   FlutterPlatformViewIdentifier platform_view_id;
 } FlutterSemanticsNode;
 
