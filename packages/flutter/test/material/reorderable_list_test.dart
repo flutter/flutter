@@ -56,6 +56,33 @@ void main() {
     });
 
     group('in vertical mode', () {
+      testWidgets('reorder is not triggered when children length is less or equals to 1', (WidgetTester tester) async {
+        bool onReorderWasCalled = false;
+        final List<String> currentListItems = listItems.take(1).toList();
+        final ReorderableListView reorderableListView = ReorderableListView(
+          header: const Text('Header'),
+          children: currentListItems.map<Widget>(listItemToWidget).toList(),
+          scrollDirection: Axis.vertical,
+          onReorder: (_, __) => onReorderWasCalled = true,
+        );
+        final List<String> currentOriginalListItems = originalListItems.take(1).toList();
+        await tester.pumpWidget(MaterialApp(
+          home: SizedBox(
+            height: itemHeight * 10,
+            child: reorderableListView,
+          ),
+        ));
+        expect(currentListItems, orderedEquals(currentOriginalListItems));
+        final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('Item 1')));
+        await tester.pump(kLongPressTimeout + kPressTimeout);
+        expect(currentListItems, orderedEquals(currentOriginalListItems));
+        await drag.moveTo(tester.getBottomLeft(find.text('Item 1')) * 2);
+        expect(currentListItems, orderedEquals(currentOriginalListItems));
+        await drag.up();
+        expect(onReorderWasCalled, false);
+        expect(currentListItems, orderedEquals(<String>['Item 1']));
+      });
+
       testWidgets('reorders its contents only when a drag finishes', (WidgetTester tester) async {
         await tester.pumpWidget(build());
         expect(listItems, orderedEquals(originalListItems));
@@ -547,6 +574,33 @@ void main() {
     });
 
     group('in horizontal mode', () {
+      testWidgets('reorder is not triggered when children length is less or equals to 1', (WidgetTester tester) async {
+        bool onReorderWasCalled = false;
+        final List<String> currentListItems = listItems.take(1).toList();
+        final ReorderableListView reorderableListView = ReorderableListView(
+          header: const Text('Header'),
+          children: currentListItems.map<Widget>(listItemToWidget).toList(),
+          scrollDirection: Axis.horizontal,
+          onReorder: (_, __) => onReorderWasCalled = true,
+        );
+        final List<String> currentOriginalListItems = originalListItems.take(1).toList();
+        await tester.pumpWidget(MaterialApp(
+          home: SizedBox(
+            height: itemHeight * 10,
+            child: reorderableListView,
+          ),
+        ));
+        expect(currentListItems, orderedEquals(currentOriginalListItems));
+        final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('Item 1')));
+        await tester.pump(kLongPressTimeout + kPressTimeout);
+        expect(currentListItems, orderedEquals(currentOriginalListItems));
+        await drag.moveTo(tester.getBottomLeft(find.text('Item 1')) * 2);
+        expect(currentListItems, orderedEquals(currentOriginalListItems));
+        await drag.up();
+        expect(onReorderWasCalled, false);
+        expect(currentListItems, orderedEquals(<String>['Item 1']));
+      });
+
       testWidgets('allows reordering from the very top to the very bottom', (WidgetTester tester) async {
         await tester.pumpWidget(build(scrollDirection: Axis.horizontal));
         expect(listItems, orderedEquals(originalListItems));

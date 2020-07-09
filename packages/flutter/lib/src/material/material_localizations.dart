@@ -122,6 +122,9 @@ abstract class MaterialLocalizations {
   /// Title for the [LicensePage] widget.
   String get licensesPageTitle;
 
+  /// Subtitle for a package in the [LicensePage] widget.
+  String licensesPackageDetailText(int licenseCount);
+
   /// Title for the [PaginatedDataTable]'s row info footer.
   String pageRowsInfoTitle(int firstRow, int lastRow, int rowCount, bool rowCountIsApproximate);
 
@@ -417,6 +420,32 @@ abstract class MaterialLocalizations {
 
   /// Tooltip used for the text input mode button of the date pickers.
   String get inputDateModeButtonLabel;
+
+  /// Label used in the header of the time picker dialog created with
+  /// [showTimePicker] when in [TimePickerEntryMode.dial].
+  String get timePickerDialHelpText;
+
+  /// Label used in the header of the time picker dialog created with
+  /// [showTimePicker] when in [TimePickerEntryMode.input].
+  String get timePickerInputHelpText;
+
+  /// Label used below the hour text field of the time picker dialog created
+  /// with [showTimePicker] when in [TimePickerEntryMode.input].
+  String get timePickerHourLabel;
+
+  /// Label used below the minute text field of the time picker dialog created
+  /// with [showTimePicker] when in [TimePickerEntryMode.input].
+  String get timePickerMinuteLabel;
+
+  /// Error message for the time picker dialog created with [showTimePicker]
+  /// when in [TimePickerEntryMode.input].
+  String get invalidTimeLabel;
+
+  /// Tooltip used to put the time picker into [TimePickerEntryMode.dial].
+  String get dialModeButtonLabel;
+
+  /// Tooltip used to put the time picker into [TimePickerEntryMode.input].
+  String get inputTimeModeButtonLabel;
 
   /// The semantics label used to indicate which account is signed in in the
   /// [UserAccountsDrawerHeader] widget.
@@ -753,6 +782,27 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   @override
   String get inputDateModeButtonLabel => 'Switch to input';
 
+  @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+
   String _formatDayPeriod(TimeOfDay timeOfDay) {
     switch (timeOfDay.period) {
       case DayPeriod.am:
@@ -859,6 +909,19 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Licenses';
+
+  @override
+  String licensesPackageDetailText(int licenseCount) {
+    assert (licenseCount >= 0);
+    switch (licenseCount) {
+      case 0:
+        return 'No licenses.';
+      case 1:
+        return '1 license.';
+      default:
+        return '$licenseCount licenses.';
+    }
+  }
 
   @override
   String pageRowsInfoTitle(int firstRow, int lastRow, int rowCount, bool rowCountIsApproximate) {

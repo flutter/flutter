@@ -10,6 +10,8 @@ import 'dart:math' as math;
 import 'package:macrobenchmarks/src/web/bench_text_layout.dart';
 import 'package:macrobenchmarks/src/web/bench_text_out_of_picture_bounds.dart';
 
+import 'package:gallery/benchmarks/gallery_automator.dart' show DemoType, typeOfDemo;
+
 import 'src/web/bench_build_material_checkbox.dart';
 import 'src/web/bench_card_infinite_scroll.dart';
 import 'src/web/bench_child_layers.dart';
@@ -22,11 +24,14 @@ import 'src/web/bench_paths.dart';
 import 'src/web/bench_picture_recording.dart';
 import 'src/web/bench_simple_lazy_text_scroll.dart';
 import 'src/web/bench_text_out_of_picture_bounds.dart';
+import 'src/web/gallery/gallery_recorder.dart';
 import 'src/web/recorder.dart';
 
 typedef RecorderFactory = Recorder Function();
 
 const bool isCanvasKit = bool.fromEnvironment('FLUTTER_WEB_USE_SKIA', defaultValue: false);
+
+const String _galleryBenchmarkPrefix = 'gallery_v2';
 
 /// List of all benchmarks that run in the devicelab.
 ///
@@ -57,7 +62,16 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
     BenchTextCachedLayout.canvasBenchmarkName: () => BenchTextCachedLayout(useCanvas: true),
     BenchBuildColorsGrid.domBenchmarkName: () => BenchBuildColorsGrid.dom(),
     BenchBuildColorsGrid.canvasBenchmarkName: () => BenchBuildColorsGrid.canvas(),
-  }
+
+    // The following benchmark is for the Flutter Gallery.
+    // This benchmark is failing when run with CanvasKit, so we skip it
+    // for now.
+    // TODO(yjbanov): https://github.com/flutter/flutter/issues/59082
+    '${_galleryBenchmarkPrefix}_studies_perf': () => GalleryRecorder(
+      benchmarkName: '${_galleryBenchmarkPrefix}_studies_perf',
+      shouldRunPredicate: (String demo) => typeOfDemo(demo) == DemoType.study,
+    ),
+  },
 };
 
 final LocalBenchmarkServerClient _client = LocalBenchmarkServerClient();
@@ -83,29 +97,48 @@ Future<void> _runBenchmark(String benchmarkName) async {
     return;
   }
 
-  try {
-    final Recorder recorder = recorderFactory();
-    final Runner runner = recorder.isTracingEnabled && !_client.isInManualMode
-      ? Runner(
-          recorder: recorder,
-          setUpAllDidRun: () => _client.startPerformanceTracing(benchmarkName),
-          tearDownAllWillRun: _client.stopPerformanceTracing,
-        )
-      : Runner(recorder: recorder);
+  await runZoned<Future<void>>(
+    () async {
+      final Recorder recorder = recorderFactory();
+      final Runner runner = recorder.isTracingEnabled && !_client.isInManualMode
+          ? Runner(
+              recorder: recorder,
+              setUpAllDidRun: () => _client.startPerformanceTracing(benchmarkName),
+              tearDownAllWillRun: _client.stopPerformanceTracing,
+            )
+          : Runner(recorder: recorder);
 
-    final Profile profile = await runner.run();
-    if (!_client.isInManualMode) {
-      await _client.sendProfileData(profile);
-    } else {
-      _printResultsToScreen(profile);
-      print(profile);
-    }
-  } catch (error, stackTrace) {
-    if (_client.isInManualMode) {
-      rethrow;
-    }
-    await _client.reportError(error, stackTrace);
-  }
+      final Profile profile = await runner.run();
+      if (!_client.isInManualMode) {
+        await _client.sendProfileData(profile);
+      } else {
+        _printResultsToScreen(profile);
+        print(profile);
+      }
+    },
+    zoneSpecification: ZoneSpecification(
+      print: (Zone self, ZoneDelegate parent, Zone zone, String line) async {
+        if (_client.isInManualMode) {
+          parent.print(zone, '[$benchmarkName] $line');
+        } else {
+          await _client.printToConsole(line);
+        }
+      },
+      handleUncaughtError: (
+        Zone self,
+        ZoneDelegate parent,
+        Zone zone, Object error,
+        StackTrace stackTrace,
+      ) async {
+        if (_client.isInManualMode) {
+          parent.print(zone, '[$benchmarkName] $error, $stackTrace');
+          parent.handleUncaughtError(zone, error, stackTrace);
+        } else {
+          await _client.reportError(error, stackTrace);
+        }
+      },
+    ),
+  );
 }
 
 void _fallbackToManual(String error) {
@@ -351,6 +384,17 @@ class LocalBenchmarkServerClient {
         'error': '$error',
         'stackTrace': '$stackTrace',
       }),
+    );
+  }
+
+  /// Reports a message about the demo to the benchmark server.
+  Future<void> printToConsole(String report) async {
+    _checkNotManualMode();
+    await html.HttpRequest.request(
+      '/print-to-console',
+      method: 'POST',
+      mimeType: 'text/plain',
+      sendData: report,
     );
   }
 

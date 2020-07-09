@@ -19,6 +19,6 @@
   "copyButtonLabel": "კოპირება",
   "pasteButtonLabel": "ჩასმა",
   "selectAllButtonLabel": "ყველას არჩევა",
-  "tabSemanticsLabel": "TBD",
+  "tabSemanticsLabel": "ჩანართი $tabIndex / $tabCount-დან",
   "modalBarrierDismissLabel": "დახურვა"
 }

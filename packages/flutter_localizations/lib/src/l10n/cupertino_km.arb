@@ -19,6 +19,6 @@
   "copyButtonLabel": "ចម្លង",
   "pasteButtonLabel": "ដាក់​ចូល",
   "selectAllButtonLabel": "ជ្រើសរើស​ទាំងអស់",
-  "tabSemanticsLabel": "TBD",
+  "tabSemanticsLabel": "ផ្ទាំងទី $tabIndex នៃ $tabCount",
   "modalBarrierDismissLabel": "ច្រាន​ចោល"
 }

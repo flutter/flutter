@@ -3285,6 +3285,9 @@ class Stack extends MultiChildRenderObjectWidget {
   /// Some children in a stack might overflow its box. When this flag is set to
   /// [Overflow.clip], children cannot paint outside of the stack's box.
   ///
+  /// When set to [Overflow.visible], the visible overflow area will not accept
+  /// hit testing.
+  ///
   /// This overrides [clipBehavior] for now due to a staged roll out without
   /// breaking Google. We will remove it and only use [clipBehavior] soon.
   final Overflow overflow;
@@ -5144,6 +5147,13 @@ class RichText extends MultiChildRenderObjectWidget {
     this.strutStyle,
     this.textWidthBasis = TextWidthBasis.parent,
     this.textHeightBehavior,
+    @Deprecated(
+      'This parameter is a temporary flag to migrate the internal tests and '
+      'should not be used in other contexts. For more details, see '
+      'https://github.com/flutter/flutter/issues/59316. '
+      'This feature was deprecated after v1.19.0.'
+    )
+    bool applyTextScaleFactorToWidgetSpan = false,
   }) : assert(text != null),
        assert(textAlign != null),
        assert(softWrap != null),
@@ -5151,6 +5161,7 @@ class RichText extends MultiChildRenderObjectWidget {
        assert(textScaleFactor != null),
        assert(maxLines == null || maxLines > 0),
        assert(textWidthBasis != null),
+       _applyTextScaleFactorToWidgetSpan = applyTextScaleFactorToWidgetSpan,
        super(key: key, children: _extractChildren(text));
 
   // Traverses the InlineSpan tree and depth-first collects the list of
@@ -5228,6 +5239,8 @@ class RichText extends MultiChildRenderObjectWidget {
   /// {@macro flutter.dart:ui.textHeightBehavior}
   final ui.TextHeightBehavior textHeightBehavior;
 
+  final bool _applyTextScaleFactorToWidgetSpan;
+
   @override
   RenderParagraph createRenderObject(BuildContext context) {
     assert(textDirection != null || debugCheckHasDirectionality(context));
@@ -5241,6 +5254,7 @@ class RichText extends MultiChildRenderObjectWidget {
       strutStyle: strutStyle,
       textWidthBasis: textWidthBasis,
       textHeightBehavior: textHeightBehavior,
+      applyTextScaleFactorToWidgetSpan: _applyTextScaleFactorToWidgetSpan,
       locale: locale ?? Localizations.localeOf(context, nullOk: true),
     );
   }
@@ -5290,6 +5304,7 @@ class RawImage extends LeafRenderObjectWidget {
   const RawImage({
     Key key,
     this.image,
+    this.debugImageLabel,
     this.width,
     this.height,
     this.scale = 1.0,
@@ -5312,6 +5327,9 @@ class RawImage extends LeafRenderObjectWidget {
 
   /// The image to display.
   final ui.Image image;
+
+  /// A string identifying the source of the image.
+  final String debugImageLabel;
 
   /// If non-null, require the image to have this width.
   ///
@@ -5432,6 +5450,7 @@ class RawImage extends LeafRenderObjectWidget {
     assert((!matchTextDirection && alignment is Alignment) || debugCheckHasDirectionality(context));
     return RenderImage(
       image: image,
+      debugImageLabel: debugImageLabel,
       width: width,
       height: height,
       scale: scale,
@@ -5453,6 +5472,7 @@ class RawImage extends LeafRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderImage renderObject) {
     renderObject
       ..image = image
+      ..debugImageLabel = debugImageLabel
       ..width = width
       ..height = height
       ..scale = scale

@@ -13,13 +13,16 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
 class TestImageInfo implements ImageInfo {
-  const TestImageInfo(this.value, { this.image, this.scale = 1.0 });
+  const TestImageInfo(this.value, { this.image, this.scale = 1.0, this.debugLabel });
 
   @override
   final ui.Image image;
 
   @override
   final double scale;
+
+  @override
+  final String debugLabel;
 
   final int value;
 

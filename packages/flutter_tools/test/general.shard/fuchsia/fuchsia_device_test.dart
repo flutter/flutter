@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/fuchsia/amber_ctl.dart';
 import 'package:flutter_tools/src/fuchsia/application_package.dart';
@@ -791,28 +792,36 @@ void main() {
   });
 
   testUsingContext('Correct flutter runner', () async {
-    expect(globals.artifacts.getArtifactPath(
+    final MockCache cache = MockCache();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    when(cache.getArtifactDirectory('flutter_runner')).thenReturn(fileSystem.directory('fuchsia'));
+    final CachedArtifacts artifacts = CachedArtifacts(
+      cache: cache,
+      fileSystem: fileSystem,
+      platform: FakePlatform(operatingSystem: 'linux'),
+    );
+    expect(artifacts.getArtifactPath(
         Artifact.fuchsiaFlutterRunner,
         platform: TargetPlatform.fuchsia_x64,
         mode: BuildMode.debug,
       ),
       contains('flutter_jit_runner'),
     );
-    expect(globals.artifacts.getArtifactPath(
+    expect(artifacts.getArtifactPath(
         Artifact.fuchsiaFlutterRunner,
         platform: TargetPlatform.fuchsia_x64,
         mode: BuildMode.profile,
       ),
       contains('flutter_aot_runner'),
     );
-    expect(globals.artifacts.getArtifactPath(
+    expect(artifacts.getArtifactPath(
         Artifact.fuchsiaFlutterRunner,
         platform: TargetPlatform.fuchsia_x64,
         mode: BuildMode.release,
       ),
       contains('flutter_aot_product_runner'),
     );
-    expect(globals.artifacts.getArtifactPath(
+    expect(artifacts.getArtifactPath(
         Artifact.fuchsiaFlutterRunner,
         platform: TargetPlatform.fuchsia_x64,
         mode: BuildMode.jitRelease,
@@ -1550,3 +1559,4 @@ class MockFuchsiaSdk extends Mock implements FuchsiaSdk {
 }
 
 class MockFuchsiaWorkflow extends Mock implements FuchsiaWorkflow {}
+class MockCache extends Mock implements Cache {}

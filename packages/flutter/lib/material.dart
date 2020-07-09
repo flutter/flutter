@@ -57,6 +57,7 @@ export 'src/material/divider_theme.dart';
 export 'src/material/drawer.dart';
 export 'src/material/drawer_header.dart';
 export 'src/material/dropdown.dart';
+export 'src/material/elevation_overlay.dart';
 export 'src/material/expand_icon.dart';
 export 'src/material/expansion_panel.dart';
 export 'src/material/expansion_tile.dart';

@@ -536,7 +536,6 @@ class RunCommand extends RunCommandBase {
             ? null
             : globals.fs.file(applicationBinaryPath),
         projectRootPath: stringArg('project-root'),
-        packagesFilePath: globalResults['packages'] as String,
         dillOutputPath: stringArg('output-dill'),
         stayResident: stayResident,
         ipv6: ipv6,

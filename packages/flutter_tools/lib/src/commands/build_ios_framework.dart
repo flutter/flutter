@@ -37,6 +37,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
   BuildIOSFrameworkCommand({
     FlutterVersion flutterVersion, // Instantiating FlutterVersion kicks off networking, so delay until it's needed, but allow test injection.
     @required BuildSystem buildSystem,
+    @required bool verboseHelp,
     Cache cache,
     Platform platform
   }) : _flutterVersion = flutterVersion,
@@ -51,6 +52,9 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     addSplitDebugInfoOption();
     addDartObfuscationOption();
     usesExtraFrontendOptions();
+    addNullSafetyModeOptions(hide: !verboseHelp);
+    addEnableExperimentation(hide: !verboseHelp);
+
     argParser
       ..addFlag('debug',
         negatable: true,

@@ -1059,6 +1059,43 @@ void main() {
     expect(_mainTabController.index, 2);
   });
 
+  testWidgets('TabBarView can warp when child is kept alive and contains ink', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/57662.
+    final TabController controller = TabController(
+      vsync: const TestVSync(),
+      length: 3,
+    );
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: TabBarView(
+          controller: controller,
+          children: const <Widget>[
+            Text('Page 1'),
+            Text('Page 2'),
+            KeepAliveInk('Page 3'),
+          ],
+        ),
+      ),
+    );
+
+    expect(controller.index, equals(0));
+    expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Page 3'), findsNothing);
+
+    controller.index = 2;
+    await tester.pumpAndSettle();
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 3'), findsOneWidget);
+
+    controller.index = 0;
+    await tester.pumpAndSettle();
+    expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Page 3'), findsNothing);
+
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('TabBarView scrolls end close to a new page with custom physics', (WidgetTester tester) async {
     final TabController tabController = TabController(
       vsync: const TestVSync(),
@@ -2633,4 +2670,26 @@ void main() {
     final PageView pageView = tester.widget<PageView>(find.byType(PageView));
     expect(pageView.physics.toString().contains('ClampingScrollPhysics'), isFalse);
   });
+}
+
+class KeepAliveInk extends StatefulWidget {
+  const KeepAliveInk(this.title, {Key key}) : super(key: key);
+  final String title;
+  @override
+  State<StatefulWidget> createState() {
+    return _KeepAliveInkState();
+  }
+}
+
+class _KeepAliveInkState extends State<KeepAliveInk> with AutomaticKeepAliveClientMixin {
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return Ink(
+      child: Text(widget.title),
+    );
+  }
+
+  @override
+  bool get wantKeepAlive => true;
 }

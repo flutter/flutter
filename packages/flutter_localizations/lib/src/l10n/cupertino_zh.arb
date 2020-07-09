@@ -19,6 +19,6 @@
   "copyButtonLabel": "复制",
   "pasteButtonLabel": "粘贴",
   "selectAllButtonLabel": "全选",
-  "tabSemanticsLabel": "TBD",
+  "tabSemanticsLabel": "第 $tabIndex 个标签，共 $tabCount 个",
   "modalBarrierDismissLabel": "关闭"
 }
