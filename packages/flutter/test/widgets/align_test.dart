@@ -114,7 +114,6 @@ void main() {
   });
 
   testWidgets('Align widthFactor', (WidgetTester tester) async {
-    final GlobalKey inner = GlobalKey();
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -129,24 +128,15 @@ void main() {
                 width: 100.0,
               ),
             ),
-            Align(
-              key: inner,
-              widthFactor: 0.5,
-              child: Container(
-                height: 100.0,
-                width: 100.0,
-              ),
-            ),
           ],
         ),
       ),
     );
-    final RenderBox box = inner.currentContext.findRenderObject() as RenderBox;
+    final RenderBox box = tester.renderObject<RenderBox>(find.byType(Align));
     expect(box.size.width, equals(50.0));
   });
 
   testWidgets('Align heightFactor', (WidgetTester tester) async {
-    final GlobalKey inner = GlobalKey();
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -162,20 +152,11 @@ void main() {
                 width: 100.0,
               ),
             ),
-            Align(
-              key: inner,
-              alignment: Alignment.center,
-              heightFactor: 0.5,
-              child: Container(
-                height: 100.0,
-                width: 100.0,
-              ),
-            ),
           ],
         ),
       ),
     );
-    final RenderBox box = inner.currentContext.findRenderObject() as RenderBox;
+    final RenderBox box = tester.renderObject<RenderBox>(find.byType(Align));
     expect(box.size.height, equals(50.0));
   });
 }
