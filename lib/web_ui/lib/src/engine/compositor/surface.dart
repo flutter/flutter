@@ -38,6 +38,21 @@ class Surface {
 
   CkSurface? _surface;
   html.Element? htmlElement;
+  js.JsObject? _grContext;
+  int? _skiaCacheBytes;
+
+  /// Specify the GPU resource cache limits.
+  void setSkiaResourceCacheMaxBytes(int bytes) {
+    _skiaCacheBytes = bytes;
+    _syncCacheBytes();
+  }
+
+  void _syncCacheBytes() {
+    if(_skiaCacheBytes != null) {
+      _grContext?.callMethod('setResourceCacheLimitBytes', <dynamic>[
+        _skiaCacheBytes]);
+    }
+  }
 
   bool _addedToScene = false;
 
@@ -110,16 +125,20 @@ class Surface {
       // anti-aliased by setting their `Paint` object's `antialias` property.
       js.JsObject.jsify({'antialias': 0}),
     ]);
-    final js.JsObject? grContext =
+    _grContext =
         canvasKit.callMethod('MakeGrContext', <dynamic>[glContext]);
 
-    if (grContext == null) {
+    if (_grContext == null) {
       throw CanvasKitError('Could not create a graphics context.');
     }
 
+    // Set the cache byte limit for this grContext, if not specified it will use
+    // CanvasKit's default.
+    _syncCacheBytes();
+
     final js.JsObject? skSurface =
         canvasKit.callMethod('MakeOnScreenGLSurface', <dynamic>[
-      grContext,
+      _grContext,
       size.width,
       size.height,
       canvasKit['SkColorSpace']['SRGB'],
@@ -130,7 +149,7 @@ class Surface {
     }
 
     htmlElement = htmlCanvas;
-    return CkSurface(skSurface, grContext, glContext);
+    return CkSurface(skSurface, _grContext!, glContext);
   }
 
   bool _presentSurface() {
