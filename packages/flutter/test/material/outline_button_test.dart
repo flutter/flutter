@@ -36,7 +36,7 @@ void main() {
     expect(material.clipBehavior, Clip.none);
     expect(material.color, const Color(0x00000000));
     expect(material.elevation, 0.0);
-    expect(material.shadowColor, const Color(0xff000000));
+    expect(material.shadowColor, null);
     expect(material.textStyle.color, const Color(0xdd000000));
     expect(material.textStyle.fontFamily, 'Roboto');
     expect(material.textStyle.fontSize, 14);
@@ -55,7 +55,7 @@ void main() {
     expect(material.clipBehavior, Clip.none);
     expect(material.color, const Color(0x00000000));
     expect(material.elevation, 0.0);
-    expect(material.shadowColor, const Color(0xff000000));
+    expect(material.shadowColor, null);
     expect(material.textStyle.color, const Color(0xdd000000));
     expect(material.textStyle.fontFamily, 'Roboto');
     expect(material.textStyle.fontSize, 14);
@@ -79,7 +79,7 @@ void main() {
     expect(material.clipBehavior, Clip.none);
     expect(material.color, const Color(0x00000000));
     expect(material.elevation, 0.0);
-    expect(material.shadowColor, const Color(0xff000000));
+    expect(material.shadowColor, null);
     expect(material.textStyle.color, const Color(0x61000000));
     expect(material.textStyle.fontFamily, 'Roboto');
     expect(material.textStyle.fontSize, 14);

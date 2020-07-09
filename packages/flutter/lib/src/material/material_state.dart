@@ -362,4 +362,7 @@ class _MaterialStatePropertyAll<T> implements MaterialStateProperty<T> {
 
   @override
   T resolve(Set<MaterialState> states) => value;
+
+  @override
+  String toString() => 'MaterialStateProperty.all($value)';
 }

@@ -41,26 +41,28 @@ void main() {
     expect(result.stdout, isNot(contains('exiting with code 0')));
   });
 
-  test('flutter run --machine uses NotifyingLogger', () async {
+  test('flutter run --machine uses AppRunLogger', () async {
     final String flutterBin = globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await const LocalProcessManager().run(<String>[
       flutterBin,
       'run',
       '--machine',
+      '-v',
     ]);
 
-    expect(result.stdout, isEmpty);
+    expect(result.stdout, isNotEmpty);
   });
 
-  test('flutter attach --machine uses NotifyingLogger', () async {
+  test('flutter attach --machine uses AppRunLogger', () async {
     final String flutterBin = globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await const LocalProcessManager().run(<String>[
       flutterBin,
       'attach',
       '--machine',
+      '-v',
     ]);
 
-    expect(result.stdout, isEmpty);
+    expect(result.stdout, isNotEmpty);
   });
 
   test('flutter build aot is deprecated', () async {

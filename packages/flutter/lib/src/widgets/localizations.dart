@@ -300,6 +300,10 @@ class _LocalizationsScope extends InheritedWidget {
 /// `Localizations.of(context)` will be rebuilt after the resources
 /// for the new locale have been loaded.
 ///
+/// The `Localizations` widget also instantiates [Directionality] in order to
+/// support the appropriate [Directionality.textDirection] of the localized
+/// resources.
+///
 /// {@tool snippet}
 ///
 /// This following class is defined in terms of the

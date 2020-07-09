@@ -43,7 +43,7 @@ void main() {
       });
       return client;
     });
-  }, skip: isBrowser);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/57187
 }
 
 class MockHttpClient extends Mock implements HttpClient {}
