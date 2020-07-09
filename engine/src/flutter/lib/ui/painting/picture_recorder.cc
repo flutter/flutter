@@ -20,9 +20,7 @@ static void PictureRecorder_constructor(Dart_NativeArguments args) {
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, PictureRecorder);
 
-#define FOR_EACH_BINDING(V)       \
-  V(PictureRecorder, isRecording) \
-  V(PictureRecorder, endRecording)
+#define FOR_EACH_BINDING(V) V(PictureRecorder, endRecording)
 
 FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
 
@@ -40,16 +38,12 @@ PictureRecorder::PictureRecorder() {}
 
 PictureRecorder::~PictureRecorder() {}
 
-bool PictureRecorder::isRecording() {
-  return canvas_ && canvas_->IsRecording();
-}
-
 SkCanvas* PictureRecorder::BeginRecording(SkRect bounds) {
   return picture_recorder_.beginRecording(bounds, &rtree_factory_);
 }
 
 fml::RefPtr<Picture> PictureRecorder::endRecording(Dart_Handle dart_picture) {
-  if (!isRecording())
+  if (!canvas_)
     return nullptr;
 
   fml::RefPtr<Picture> picture =
@@ -58,8 +52,7 @@ fml::RefPtr<Picture> PictureRecorder::endRecording(Dart_Handle dart_picture) {
                           picture_recorder_.finishRecordingAsPicture()),
                       canvas_->external_allocation_size());
 
-  canvas_->Clear();
-  canvas_->ClearDartWrapper();
+  canvas_->Invalidate();
   canvas_ = nullptr;
   ClearDartWrapper();
   return picture;
