@@ -150,6 +150,14 @@ Win32Window::MessageHandler(HWND hwnd,
         // detected again.
         tracking_mouse_leave_ = false;
         break;
+      case WM_SETCURSOR: {
+        UINT hit_test_result = LOWORD(lparam);
+        if (hit_test_result == HTCLIENT) {
+          window->OnSetCursor();
+          return TRUE;
+        }
+        break;
+      }
       case WM_LBUTTONDOWN:
       case WM_RBUTTONDOWN:
       case WM_MBUTTONDOWN:

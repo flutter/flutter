@@ -1,8 +1,11 @@
 #include "flutter/shell/platform/windows/win32_flutter_window.h"
 
 #include <chrono>
+#include <map>
 
 namespace flutter {
+
+namespace {
 
 // The Windows DPI system is based on this
 // constant for machines running at 100% scaling.
@@ -12,9 +15,33 @@ constexpr int base_dpi = 96;
 // arbitrarily to get something that feels reasonable.
 constexpr int kScrollOffsetMultiplier = 20;
 
+// Maps a Flutter cursor name to an HCURSOR.
+//
+// Returns the arrow cursor for unknown constants.
+static HCURSOR GetCursorByName(const std::string& cursor_name) {
+  static auto* cursors = new std::map<std::string, const wchar_t*>{
+      {"none", nullptr},
+      {"basic", IDC_ARROW},
+      {"click", IDC_HAND},
+      {"text", IDC_IBEAM},
+      {"forbidden", IDC_NO},
+      {"horizontalDoubleArrow", IDC_SIZEWE},
+      {"verticalDoubleArrow", IDC_SIZENS},
+  };
+  const wchar_t* idc_name = IDC_ARROW;
+  auto it = cursors->find(cursor_name);
+  if (it != cursors->end()) {
+    idc_name = it->second;
+  }
+  return ::LoadCursor(nullptr, idc_name);
+}
+
+}  // namespace
+
 Win32FlutterWindow::Win32FlutterWindow(int width, int height)
     : binding_handler_delegate_(nullptr) {
   Win32Window::InitializeChild("FLUTTERVIEW", width, height);
+  current_cursor_ = ::LoadCursor(nullptr, IDC_ARROW);
 }
 
 Win32FlutterWindow::~Win32FlutterWindow() {}
@@ -33,6 +60,10 @@ float Win32FlutterWindow::GetDpiScale() {
 
 PhysicalWindowBounds Win32FlutterWindow::GetPhysicalWindowBounds() {
   return {GetCurrentWidth(), GetCurrentHeight()};
+}
+
+void Win32FlutterWindow::UpdateFlutterCursor(const std::string& cursor_name) {
+  current_cursor_ = GetCursorByName(cursor_name);
 }
 
 // Translates button codes from Win32 API to FlutterPointerMouseButtons.
@@ -88,6 +119,10 @@ void Win32FlutterWindow::OnPointerUp(double x, double y, UINT button) {
 
 void Win32FlutterWindow::OnPointerLeave() {
   binding_handler_delegate_->OnPointerLeave();
+}
+
+void Win32FlutterWindow::OnSetCursor() {
+  ::SetCursor(current_cursor_);
 }
 
 void Win32FlutterWindow::OnText(const std::u16string& text) {

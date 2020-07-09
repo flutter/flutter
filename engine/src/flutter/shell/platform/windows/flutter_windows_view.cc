@@ -65,6 +65,8 @@ void FlutterWindowsView::SetState(FLUTTER_API_SYMBOL(FlutterEngine) eng) {
       std::make_unique<flutter::TextInputPlugin>(internal_plugin_messenger));
   platform_handler_ = std::make_unique<flutter::PlatformHandler>(
       internal_plugin_messenger, this);
+  cursor_handler_ = std::make_unique<flutter::CursorHandler>(
+      internal_plugin_messenger, binding_handler_.get());
 
   PhysicalWindowBounds bounds = binding_handler_->GetPhysicalWindowBounds();
 

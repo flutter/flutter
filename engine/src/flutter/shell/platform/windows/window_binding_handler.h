@@ -5,13 +5,12 @@
 #ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_WINDOW_BINDING_HANDLER_H_
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_WINDOW_BINDING_HANDLER_H_
 
-#include "flutter/shell/platform/windows/public/flutter_windows.h"
+#include <windows.h>
 
 #include <string>
 #include <variant>
 
-#include <windows.h>
-
+#include "flutter/shell/platform/windows/public/flutter_windows.h"
 #include "flutter/shell/platform/windows/window_binding_handler_delegate.h"
 
 namespace flutter {
@@ -45,6 +44,10 @@ class WindowBindingHandler {
 
   // Returns the bounds of the backing window in physical pixels.
   virtual PhysicalWindowBounds GetPhysicalWindowBounds() = 0;
+
+  // Sets the cursor that should be used when the mouse is over the Flutter
+  // content. See mouse_cursor.dart for the values and meanings of cursor_name.
+  virtual void UpdateFlutterCursor(const std::string& cursor_name) = 0;
 };
 
 }  // namespace flutter

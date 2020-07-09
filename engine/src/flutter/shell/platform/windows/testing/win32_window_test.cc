@@ -19,6 +19,8 @@ void Win32WindowTest::OnPointerUp(double x, double y, UINT button) {}
 
 void Win32WindowTest::OnPointerLeave() {}
 
+void Win32WindowTest::OnSetCursor() {}
+
 void Win32WindowTest::OnText(const std::u16string& text) {}
 
 void Win32WindowTest::OnKey(int key,
