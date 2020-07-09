@@ -84,6 +84,35 @@ int get webShardCount => Platform.environment.containsKey('WEB_SHARD_COUNT')
 //
 // TODO(yjbanov): we're getting rid of this as part of https://github.com/flutter/flutter/projects/60
 const List<String> kWebTestFileKnownFailures = <String>[
+  // Uses 64bit integers
+  'test/foundation/constants_test.dart',
+  'test/foundation/serialization_test.dart',
+  'test/foundation/bit_field_test.dart',
+  'test/services/channel_buffers_test.dart',
+  'test/services/message_codecs_vm_test.dart',
+  // Web has different stack traces
+  'test/foundation/error_reporting_test.dart',
+  'test/foundation/stack_trace_test.dart',
+  // Web has different http client
+  'test/foundation/consolidate_response_test.dart',
+  // No isolates on the web
+  'test/foundation/isolates_test.dart',
+  // Missing web plugins support
+  'test/services/platform_messages_test.dart',
+  // Diagnostics use operating system
+  'test/widgets/keep_alive_test.dart',
+  // Undocument skip reasons
+  'test/foundation/reassemble_test.dart',
+  'test/painting/decoration_test.dart',
+  'test/material/text_field_test.dart',
+  'test/material/floating_action_button_test.dart',
+  'test/material/time_picker_test.dart',
+  'test/widgets/route_notification_messages_test.dart',
+  'test/widgets/image_resolution_test.dart',
+  'test/widgets/text_golden_test.dart',
+  'test/widgets/semantics_tester_generateTestSemanticsExpressionForCurrentSemanticsTree_test.dart',
+  // different platform view support
+  'test/widgets/platform_view_test.dart',
   // This test doesn't compile because it depends on code outside the flutter package.
   'test/examples/sector_layout_test.dart',
   // This test relies on widget tracking capability in the VM.
@@ -948,6 +977,7 @@ Future<void> _runFlutterWebTest(String workingDirectory, List<String> tests) asy
     workingDirectory: workingDirectory,
   );
   for (final String test in tests) {
+    print('starting $test');
     await runCommand(
       dart,
       <String>[
