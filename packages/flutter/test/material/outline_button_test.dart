@@ -1080,12 +1080,14 @@ void main() {
     // Default Width of OutlineButton with MaterialTapTargetSize (88)
     expect(tester.getSize(find.byType(OutlineButton)), const Size(88.0, 36.0));
 
+    final LocalKey key1 = UniqueKey();
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Material(
           child: Center(
             child: OutlineButton.icon(
+              key: key1,
               materialTapTargetSize: MaterialTapTargetSize.padded,
               icon: const Icon(Icons.add_alarm),
               label: const SizedBox(width: 50.0, height: 8.0),
@@ -1103,14 +1105,16 @@ void main() {
     // the gap between the icon and the label (8)
     // the width of the label (50)
     // the horizontal padding: start (12), end (16)
-    expect(tester.getSize(find.byType(OutlineButton)), Size(86 + addAlarmIconSize.width, 48.0));
+    expect(tester.getSize(find.byKey(key1)), Size(86 + addAlarmIconSize.width, 48.0));
 
+    final LocalKey key2 = UniqueKey();
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Material(
           child: Center(
             child: OutlineButton.icon(
+              key: key2,
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               icon: const Icon(Icons.add),
               label: const SizedBox(width: 50.0, height: 8.0),
@@ -1127,7 +1131,7 @@ void main() {
     // the width of the label (50)
     // the horizontal padding: start (12), end (16)
     final Size addIconSize = tester.getSize(find.byIcon(Icons.add));
-    expect(tester.getSize(find.byType(OutlineButton)), Size(86 + addIconSize.width, 36.0));
+    expect(tester.getSize(find.byKey(key2)), Size(86 + addIconSize.width, 36.0));
   });
 
   testWidgets('OutlineButton onPressed and onLongPress callbacks are distinctly recognized', (WidgetTester tester) async {
