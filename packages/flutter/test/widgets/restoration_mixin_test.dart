@@ -739,7 +739,7 @@ class _TestRestorableWidgetState extends State<_TestRestorableWidget> with Resto
     didUpdateRestorationId();
   }
 
-  void registerAdditionalProperty({bool reregister: true}) {
+  void registerAdditionalProperty({bool reregister = true}) {
     additionalProperty ??= _TestRestorableProperty(11);
     registerForRestoration(additionalProperty, const RestorationId('additional'));
     _rerigisterAdditionalProperty = reregister;
