@@ -4,6 +4,7 @@
 
 // @dart = 2.8
 
+import 'dart:collection' show LinkedHashMap;
 import 'dart:ui' as ui;
 import 'dart:ui' show PointerChange;
 
@@ -65,11 +66,17 @@ void _ensureTestGestureBinding() {
   assert(GestureBinding.instance != null);
 }
 
+typedef SimpleAnnotationFinder = Iterable<MouseTrackerAnnotation> Function(Offset offset);
+
 void main() {
-  void _setUpMouseAnnotationFinder(MouseDetectorAnnotationFinder annotationFinder) {
+  void _setUpMouseAnnotationFinder(SimpleAnnotationFinder annotationFinder) {
     final MouseTracker mouseTracker = MouseTracker(
       GestureBinding.instance.pointerRouter,
-      annotationFinder,
+      (Offset offset) => LinkedHashMap<MouseTrackerAnnotation, Matrix4>.fromEntries(
+        annotationFinder(offset).map(
+          (MouseTrackerAnnotation annotation) => MapEntry<MouseTrackerAnnotation, Matrix4>(annotation, Matrix4.identity()),
+        ),
+      ),
     );
     RendererBinding.instance.initMouseTracker(mouseTracker);
   }

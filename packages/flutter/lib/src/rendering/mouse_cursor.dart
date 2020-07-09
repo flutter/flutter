@@ -5,7 +5,6 @@
 // @dart = 2.8
 
 import 'dart:async';
-import 'dart:collection' show LinkedHashSet;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -52,7 +51,7 @@ mixin MouseTrackerCursorMixin on BaseMouseTracker {
   // The `annotations` is the current annotations that the device is hovering in
   // visual order from front the back.
   // The return value is never null.
-  MouseCursor _findFirstCursor(LinkedHashSet<MouseTrackerAnnotation> annotations) {
+  MouseCursor _findFirstCursor(Iterable<MouseTrackerAnnotation> annotations) {
     return _DeferringMouseCursor.firstNonDeferred(
       annotations.map((MouseTrackerAnnotation annotation) => annotation.cursor),
     ) ?? SystemMouseCursors.basic;
@@ -68,7 +67,7 @@ mixin MouseTrackerCursorMixin on BaseMouseTracker {
     }
 
     final MouseCursorSession lastSession = _lastSession[device];
-    final MouseCursor nextCursor = _findFirstCursor(details.nextAnnotations);
+    final MouseCursor nextCursor = _findFirstCursor(details.nextAnnotations.keys);
     if (lastSession?.cursor == nextCursor)
       return;
 
