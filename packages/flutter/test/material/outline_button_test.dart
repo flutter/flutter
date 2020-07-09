@@ -1051,8 +1051,8 @@ void main() {
           child: Center(
             child: OutlineButton(
               materialTapTargetSize: MaterialTapTargetSize.padded,
+              onPressed: () {},
               child: const SizedBox(width: 50.0, height: 8.0),
-              onPressed: () { },
             ),
           ),
         ),
@@ -1069,8 +1069,8 @@ void main() {
           child: Center(
             child: OutlineButton(
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              onPressed: () {},
               child: const SizedBox(width: 50.0, height: 8.0),
-              onPressed: () { },
             ),
           ),
         ),
