@@ -248,7 +248,7 @@ void main() {
     expect(move, isNull);
     expect(enter, isNotNull);
     expect(enter.position, equals(const Offset(400.0, 300.0)));
-    expect(exit.localPosition, equals(const Offset(50.0, 50.0)));
+    expect(enter.localPosition, equals(const Offset(50.0, 50.0)));
     expect(exit, isNull);
   });
 
