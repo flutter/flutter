@@ -28,25 +28,6 @@
     XCTAssertTrue([app.navigationBars[@"Flutter iOS Demos Home"] waitForExistenceWithTimeout:1.0]);
 }
 
-- (void)testFullScreenColdNavigation {
-    XCUIApplication *app = [[XCUIApplication alloc] init];
-    [app launch];
-
-    [app.buttons[@"Full Screen (Cold)"] tap];
-
-    XCTAssertTrue([app.otherElements[@"Button tapped 0 times."] waitForExistenceWithTimeout:1.0]);
-
-    XCUIElement *plusButton = app.otherElements[@"Increment via Flutter"];
-    [plusButton tap];
-    XCTAssertTrue([app.otherElements[@"Button tapped 1 time."] waitForExistenceWithTimeout:1.0]);
-
-    // Make the navigation appear by swiping down.
-    [app.otherElements[@"Fullscreen Flutter"] pressForDuration:2.0 thenDragToElement:plusButton withVelocity:XCUIGestureVelocityFast thenHoldForDuration:0.0];
-    [app.navigationBars[@"Full Screen Flutter"].buttons[@"Flutter iOS Demos Home"] tap];
-
-    XCTAssertTrue([app.navigationBars[@"Flutter iOS Demos Home"] waitForExistenceWithTimeout:1.0]);
-}
-
 - (void)testFullScreenWarm {
     XCUIApplication *app = [[XCUIApplication alloc] init];
     [app launch];
