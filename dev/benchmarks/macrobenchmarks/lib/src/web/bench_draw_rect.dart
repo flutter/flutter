@@ -13,14 +13,14 @@ class BenchDrawRect extends SceneBuilderRecorder {
   /// A variant of the benchmark that uses the same [Paint] object for all rectangles.
   ///
   /// This variant focuses on the performance of the `drawRect` method itself.
-  BenchDrawRect.staticPaint() : isVariablePaint = false, super(name: benchmarkName);
+  BenchDrawRect.staticPaint() : benchmarkPaint = false, super(name: benchmarkName);
 
   /// A variant of the benchmark that creates a unique [Paint] for each rectangle.
   ///
   /// Does not cache the [Paint] objects across frames, but generates new
   /// objects every time. This variant of the benchmark focuses on construction
   /// and transfer of paint data to the renderer.
-  BenchDrawRect.variablePaint() : isVariablePaint = true, super(name: variablePaintBenchmarkName);
+  BenchDrawRect.variablePaint() : benchmarkPaint = true, super(name: variablePaintBenchmarkName);
 
   static const String benchmarkName = 'draw_rect';
   static const String variablePaintBenchmarkName = 'draw_rect_variable_paint';
@@ -35,7 +35,7 @@ class BenchDrawRect extends SceneBuilderRecorder {
   ///
   /// This is used to benchmark the efficiency of passing a large number of
   /// paint objects to the rendering system.
-  final bool isVariablePaint;
+  final bool benchmarkPaint;
 
   /// Counter used to offset the rendered rects to make them wobble.
   ///
@@ -46,7 +46,7 @@ class BenchDrawRect extends SceneBuilderRecorder {
   static final Paint _staticPaint = Paint()..color = const Color.fromARGB(255, 255, 0, 0);
 
   Paint makePaint(int row, int col) {
-    if (isVariablePaint) {
+    if (benchmarkPaint) {
       final Paint paint = Paint();
       final double rowRatio = row / kRows;
       paint.color = Color.fromARGB(255, (255 * rowRatio).floor(), (255 * col / kColumns).floor(), 255);
