@@ -1,4 +1,4 @@
-Signature: 2677428a439c62b331af54143602c0a2
+Signature: ee2a74fc1bbe8b7b0ba6a4a1a7382d19
 
 UNUSED LICENSES:
 
@@ -3894,6 +3894,7 @@ ORIGIN: ../../../third_party/skia/bench/CreateBackendTextureBench.cpp + ../../..
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/bench/CreateBackendTextureBench.cpp
 FILE: ../../../third_party/skia/bench/GrQuadBench.cpp
+FILE: ../../../third_party/skia/bench/SkSLBench.h
 FILE: ../../../third_party/skia/experimental/skottiekit/skottiekit_bindings.cpp
 FILE: ../../../third_party/skia/gm/crbug_1041204.cpp
 FILE: ../../../third_party/skia/gm/crbug_224618.cpp
