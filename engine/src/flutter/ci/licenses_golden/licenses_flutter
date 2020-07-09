@@ -492,9 +492,14 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/offset.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/opacity.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/painting.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/path/conic.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/path/cubic.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/path/path.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/path/path_metrics.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/path/path_ref.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/path/path_to_svg.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/path/path_utils.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/path/path_windings.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/path/tangent.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/picture.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/platform_view.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/recording_canvas.dart
