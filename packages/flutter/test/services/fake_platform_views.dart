@@ -214,11 +214,15 @@ class FakeAndroidPlatformViewsController {
   }
 
   Future<dynamic> _dispose(MethodCall call) {
-    int id;
-    if (call.arguments is int) {
-      id = call.arguments as int;
-    } else if (call.arguments is Map && call.arguments['hybrid'] == true) {
-      id = call.arguments['id'] as int;
+    assert(call.arguments is Map);
+
+    final int id = call.arguments['id'] as int;
+    final bool hybrid = call.arguments['hybrid'] as bool;
+
+    if (hybrid && !_views[id].hybrid) {
+      throw ArgumentError('An $AndroidViewController using hybrid composition must pass `hybrid: true`');
+    } else if (!hybrid && _views[id].hybrid != null && _views[id].hybrid) {
+      throw ArgumentError('An $AndroidViewController not using hybrid composition must pass `hybrid: false`');
     }
 
     if (!_views.containsKey(id))

@@ -2394,7 +2394,7 @@ void main() {
         ],
     ), ignoreTransform: true, ignoreRect: true));
     semantics.dispose();
-  }, skip: isBrowser);
+  });
 }
 
 Future<void> _testLongPressDraggableHapticFeedback({ WidgetTester tester, bool hapticFeedbackOnStart, int expectedHapticFeedbackCount }) async {

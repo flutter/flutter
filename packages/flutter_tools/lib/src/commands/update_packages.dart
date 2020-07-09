@@ -662,6 +662,9 @@ class PubspecYaml {
           lastDependency._lockIsOverride = section == Section.dependencyOverrides;
           do {
             index += 1;
+            if (index == lines.length) {
+              throw StateError('Invalid pubspec.yaml: a "git" dependency section terminated early.');
+            }
             line = lines[index];
             lastDependency._lockLine += '\n$line';
           } while (line.startsWith('   '));
