@@ -83,7 +83,7 @@ void main() {
       '-v',
     ]);
 
-    expect(result.stdout, isEmpty);
+    expect(result.stderr, isEmpty);
   });
 
   test('flutter build aot is deprecated', () async {
