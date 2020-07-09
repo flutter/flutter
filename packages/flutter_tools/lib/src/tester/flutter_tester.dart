@@ -255,20 +255,20 @@ class FlutterTesterDevice extends Device {
 
 class FlutterTesterDevices extends PollingDeviceDiscovery {
   FlutterTesterDevices({
-    @required FileSystem fileSystem,
-    @required Artifacts artifacts,
-    @required ProcessManager processManager,
-    @required Logger logger,
-    @required FlutterVersion flutterVersion,
-    @required Config config,
-  }) : _testerDevice = FlutterTesterDevice(
+    FileSystem fileSystem,
+    Artifacts artifacts,
+    ProcessManager processManager,
+    Logger logger,
+    FlutterVersion flutterVersion,
+    Config config,
+  }) : _testerDevice = FlutterTesterDevice( // TODO(jonahwilliams): remove after google3 roll.
         kTesterDeviceId,
-        fileSystem: fileSystem,
-        artifacts: artifacts,
-        processManager: processManager,
-        buildDirectory: getBuildDirectory(config, fileSystem),
-        logger: logger,
-        flutterVersion: flutterVersion,
+        fileSystem: fileSystem ?? globals.fs,
+        artifacts: artifacts ?? globals.artifacts,
+        processManager: processManager ?? globals.processManager,
+        buildDirectory: getBuildDirectory(config ?? globals.config, fileSystem ?? globals.fs),
+        logger: logger ?? globals.logger,
+        flutterVersion: flutterVersion ?? globals.flutterVersion,
       ),
        super('Flutter tester');
 
