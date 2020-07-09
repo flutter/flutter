@@ -2045,4 +2045,38 @@ void main() {
       expect(error.toString(), contains('is not true'));
     }
   });
+
+  testWidgets('AppBar respects leadingWidth', (WidgetTester tester) async {
+    const Key key = Key('leading');
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          leading: const Placeholder(key: key),
+          leadingWidth: 100,
+          title: const Text('Title'),
+        ),
+      ),
+    ));
+
+    // By default toolbarHeight is 56.0.
+    expect(tester.getRect(find.byKey(key)), const Rect.fromLTRB(0, 0, 100, 56));
+  });
+
+  testWidgets('SliverAppBar respects leadingWidth', (WidgetTester tester) async {
+    const Key key = Key('leading');
+    await tester.pumpWidget( const MaterialApp(
+      home: CustomScrollView(
+        slivers: <Widget>[
+          SliverAppBar(
+            leading: Placeholder(key: key),
+            leadingWidth: 100,
+            title: Text('Title'),
+          ),
+        ],
+      )
+    ));
+
+    // By default toolbarHeight is 56.0.
+    expect(tester.getRect(find.byKey(key)), const Rect.fromLTRB(0, 0, 100, 56));
+  });
 }
