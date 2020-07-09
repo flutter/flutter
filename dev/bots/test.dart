@@ -919,7 +919,7 @@ Future<void> _runFlutterWebTest(String workingDirectory, List<String> tests) asy
       '--no-ios',
       '--web',
     ], workingDirectory: workingDirectory,
-      environment: {'FLUTTER_WEB': 'true'},
+      environment: <String, String>{'FLUTTER_WEB': 'true'},
   );
   await runCommand(
     dart,
@@ -940,15 +940,35 @@ Future<void> _runFlutterWebTest(String workingDirectory, List<String> tests) asy
       'tester',
       '-j1',
       '-v',
+      '--compile-only',
       '--platform=flutter_web',
       ...?flutterTestArgs,
       ...tests,
     ],
     workingDirectory: workingDirectory,
   );
+  for (final String test in tests) {
+    await runCommand(
+      dart,
+      <String>[
+        'pub',
+        'global',
+        'run',
+        'tester',
+        '-j1',
+        '-v',
+        '--no-debugger',
+        '--run-only',
+        '--platform=flutter_web',
+        ...?flutterTestArgs,
+        test,
+      ],
+      workingDirectory: workingDirectory,
+    );
+  }
 }
 
-const String _supportedTesterVersion = '0.0.2-dev6';
+const String _supportedTesterVersion = '0.0.2-dev8';
 
 Future<void> _pubRunTester(String workingDirectory, {
   List<String> testPaths,
