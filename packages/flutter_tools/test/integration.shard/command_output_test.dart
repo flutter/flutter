@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:file/local.dart';
-import 'package:flutter_tools/src/base/file_system.dart' hide LocalFileSystem;
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:process/process.dart';
 
 import '../src/common.dart';
+import 'test_utils.dart';
 
 void main() {
   test('All development tools and deprecated commands are hidden and help text is not verbose', () async {
@@ -44,8 +44,7 @@ void main() {
   });
 
   test('flutter run --machine uses AppRunLogger', () async {
-    const FileSystem fileSystem = LocalFileSystem();
-    final Directory directory = fileSystem.systemTempDirectory
+    final Directory directory = createResolvedTempDirectorySync('flutter_run_test')
       .createTempSync('_flutter_run_test')
       ..createSync(recursive: true);
 
