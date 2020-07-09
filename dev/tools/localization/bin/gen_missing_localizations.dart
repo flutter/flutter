@@ -6,8 +6,8 @@
 // entries that are included in the English arb files. This is useful when
 // adding new resources for localization. You can just add the appropriate
 // entries to the English arb file and then run this script. It will then check
-// all of the other language locale arb files and update them with new 'TBD'
-// entries for any missing resources. These will be picked up by the localization
+// all of the other language locale arb files and update them with the English
+// source for any missing resources. These will be picked up by the localization
 // team and then translated.
 //
 // ## Usage

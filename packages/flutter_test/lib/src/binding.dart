@@ -467,6 +467,11 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     HitTestResult hitTestResult, {
     TestBindingEventSource source = TestBindingEventSource.device,
   }) {
+    // This override disables calling this method from base class
+    // [GestureBinding] when the runtime type is [TestWidgetsFlutterBinding],
+    // while enables sub class [LiveTestWidgetsFlutterBinding] to override
+    // this behavior and use this argument to determine the souce of the event
+    // especially when the test app is running on a device.
     assert(source == TestBindingEventSource.test);
     super.dispatchEvent(event, hitTestResult);
   }
@@ -1436,7 +1441,9 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
           assert(event.down || event is PointerAddedEvent);
           if (event.down) {
             renderView._pointers[event.pointer] = _LiveTestPointerRecord(
-              event.pointer, event.position);
+              event.pointer,
+              event.position,
+            );
           }
         } else {
           renderView._pointers[event.pointer].position = event.position;

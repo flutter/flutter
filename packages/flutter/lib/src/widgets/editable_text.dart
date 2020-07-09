@@ -134,7 +134,13 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// This constructor treats a null [value] argument as if it were
   /// [TextEditingValue.empty].
   TextEditingController.fromValue(TextEditingValue value)
-    : super(value ?? TextEditingValue.empty);
+    : assert(
+        value == null || !value.composing.isValid || value.isComposingRangeValid,
+        'New TextEditingValue $value has an invalid non-empty composing range '
+        '${value.composing}. It is recommended to use a valid composing range, '
+        'even for readonly text fields',
+      ),
+      super(value ?? TextEditingValue.empty);
 
   /// The current string the user is editing.
   String get text => value.text;
@@ -155,12 +161,27 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
     );
   }
 
+  @override
+  set value(TextEditingValue newValue) {
+    assert(
+      !newValue.composing.isValid || newValue.isComposingRangeValid,
+      'New TextEditingValue $newValue has an invalid non-empty composing range '
+      '${newValue.composing}. It is recommended to use a valid composing range, '
+      'even for readonly text fields',
+    );
+    super.value = newValue;
+  }
+
   /// Builds [TextSpan] from current editing value.
   ///
-  /// By default makes text in composing range appear as underlined.
-  /// Descendants can override this method to customize appearance of text.
+  /// By default makes text in composing range appear as underlined. Descendants
+  /// can override this method to customize appearance of text.
   TextSpan buildTextSpan({TextStyle style , bool withComposing}) {
-    if (!value.composing.isValid || !withComposing) {
+    assert(!value.composing.isValid || !withComposing || value.isComposingRangeValid);
+    // If the composing range is out of range for the current text, ignore it to
+    // preserve the tree integrity, otherwise in release mode a RangeError will
+    // be thrown and this EditableText will be built with a broken subtree.
+    if (!value.isComposingRangeValid || !withComposing) {
       return TextSpan(style: style, text: text);
     }
     final TextStyle composingStyle = style.merge(

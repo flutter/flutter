@@ -172,7 +172,7 @@ class Material extends StatefulWidget {
     this.type = MaterialType.canvas,
     this.elevation = 0.0,
     this.color,
-    this.shadowColor = const Color(0xFF000000),
+    this.shadowColor,
     this.textStyle,
     this.borderRadius,
     this.shape,
@@ -182,7 +182,6 @@ class Material extends StatefulWidget {
     this.child,
   }) : assert(type != null),
        assert(elevation != null && elevation >= 0.0),
-       assert(shadowColor != null),
        assert(!(shape != null && borderRadius != null)),
        assert(animationDuration != null),
        assert(!(identical(type, MaterialType.circle) && (borderRadius != null || shape != null))),
@@ -238,7 +237,17 @@ class Material extends StatefulWidget {
 
   /// The color to paint the shadow below the material.
   ///
-  /// Defaults to fully opaque black.
+  /// If null, [ThemeData.shadowColor] is used, which defaults to fully opaque black.
+  ///
+  /// Shadows can be difficult to see in a dark theme, so the elevation of a
+  /// surface should be portrayed with an "overlay" in addition to the shadow.
+  /// As the elevation of the component increases, the overlay increases in
+  /// opacity.
+  ///
+  /// See also:
+  ///
+  ///  * [ThemeData.applyElevationOverlayColor], which turns elevation overlay
+  /// on or off for dark themes.
   final Color shadowColor;
 
   /// The typographical style to use for text within this material.
@@ -308,7 +317,7 @@ class Material extends StatefulWidget {
     properties.add(EnumProperty<MaterialType>('type', type));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: 0.0));
     properties.add(ColorProperty('color', color, defaultValue: null));
-    properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: const Color(0xFF000000)));
+    properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: null));
     textStyle?.debugFillProperties(properties, prefix: 'textStyle.');
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('borderOnForeground', borderOnForeground, defaultValue: true));
@@ -366,6 +375,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       },
       child: _InkFeatures(
         key: _inkFeatureRenderer,
+        absorbHitTest: widget.type != MaterialType.transparency,
         color: backgroundColor,
         child: contents,
         vsync: this,
@@ -390,7 +400,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
         borderRadius: BorderRadius.zero,
         elevation: widget.elevation,
         color: ElevationOverlay.applyOverlay(context, backgroundColor, widget.elevation),
-        shadowColor: widget.shadowColor,
+        shadowColor: widget.shadowColor ?? Theme.of(context).shadowColor,
         animateColor: false,
         child: contents,
       );
@@ -415,7 +425,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       clipBehavior: widget.clipBehavior,
       elevation: widget.elevation,
       color: backgroundColor,
-      shadowColor: widget.shadowColor,
+      shadowColor: widget.shadowColor ?? Theme.of(context).shadowColor,
       child: contents,
     );
   }
@@ -477,6 +487,7 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
   _RenderInkFeatures({
     RenderBox child,
     @required this.vsync,
+    this.absorbHitTest,
     this.color,
   }) : assert(vsync != null),
        super(child);
@@ -492,6 +503,8 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
   // MaterialState build method.
   @override
   Color color;
+
+  bool absorbHitTest;
 
   List<InkFeature> _inkFeatures;
 
@@ -517,7 +530,7 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
   }
 
   @override
-  bool hitTestSelf(Offset position) => true;
+  bool hitTestSelf(Offset position) => absorbHitTest;
 
   @override
   void paint(PaintingContext context, Offset offset) {
@@ -539,6 +552,7 @@ class _InkFeatures extends SingleChildRenderObjectWidget {
     Key key,
     this.color,
     @required this.vsync,
+    @required this.absorbHitTest,
     Widget child,
   }) : super(key: key, child: child);
 
@@ -549,17 +563,21 @@ class _InkFeatures extends SingleChildRenderObjectWidget {
 
   final TickerProvider vsync;
 
+  final bool absorbHitTest;
+
   @override
   _RenderInkFeatures createRenderObject(BuildContext context) {
     return _RenderInkFeatures(
       color: color,
+      absorbHitTest: absorbHitTest,
       vsync: vsync,
     );
   }
 
   @override
   void updateRenderObject(BuildContext context, _RenderInkFeatures renderObject) {
-    renderObject.color = color;
+    renderObject..color = color
+                ..absorbHitTest = absorbHitTest;
     assert(vsync == renderObject.vsync);
   }
 }

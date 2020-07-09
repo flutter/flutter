@@ -164,7 +164,7 @@ void main() {
         equals('TextInputType.text'));
     expect(tester.testTextInput.setClientArgs['inputAction'],
         equals('TextInputAction.done'));
-  }, skip: isBrowser);
+  });
 
   testWidgets('Keyboard is configured for "unspecified" action when explicitly requested', (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
@@ -196,7 +196,7 @@ void main() {
       action: TextInputAction.send,
       serializedActionName: 'TextInputAction.send',
     );
-  }, skip: isBrowser);
+  });
 
   testWidgets('Keyboard is configured for "go" action when explicitly requested', (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
@@ -220,7 +220,7 @@ void main() {
       action: TextInputAction.send,
       serializedActionName: 'TextInputAction.send',
     );
-  }, skip: isBrowser);
+  });
 
   testWidgets('Keyboard is configured for "next" action when explicitly requested', (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
@@ -228,7 +228,7 @@ void main() {
       action: TextInputAction.next,
       serializedActionName: 'TextInputAction.next',
     );
-  }, skip: isBrowser);
+  });
 
   testWidgets('Keyboard is configured for "previous" action when explicitly requested', (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
@@ -236,7 +236,7 @@ void main() {
       action: TextInputAction.previous,
       serializedActionName: 'TextInputAction.previous',
     );
-  }, skip: isBrowser);
+  });
 
   testWidgets('Keyboard is configured for "continue" action when explicitly requested', (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
@@ -244,7 +244,7 @@ void main() {
       action: TextInputAction.continueAction,
       serializedActionName: 'TextInputAction.continueAction',
     );
-  }, skip: isBrowser);
+  });
 
   testWidgets('Keyboard is configured for "join" action when explicitly requested', (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
@@ -252,7 +252,7 @@ void main() {
       action: TextInputAction.join,
       serializedActionName: 'TextInputAction.join',
     );
-  }, skip: isBrowser);
+  });
 
   testWidgets('Keyboard is configured for "route" action when explicitly requested', (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
@@ -1120,7 +1120,7 @@ void main() {
     expect(state.showToolbar(), true);
     await tester.pumpAndSettle();
     expect(find.text('Paste'), findsOneWidget);
-  }, skip: isBrowser);
+  });
 
   testWidgets('can show the toolbar after clearing all text', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/35998.
@@ -2146,7 +2146,7 @@ void main() {
     expect(controller.selection.extentOffset, 9);
 
     semantics.dispose();
-  }, skip: isBrowser);
+  });
 
   testWidgets('can extend selection with a11y means - character', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -2246,7 +2246,7 @@ void main() {
     expect(controller.selection.extentOffset, 2);
 
     semantics.dispose();
-  }, skip: isBrowser);
+  });
 
   testWidgets('can extend selection with a11y means - word', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -2347,7 +2347,7 @@ void main() {
     expect(controller.selection.extentOffset, 9);
 
     semantics.dispose();
-  }, skip: isBrowser);
+  });
 
   testWidgets('password fields have correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -3344,7 +3344,7 @@ void main() {
     // at all. Again, both handles should be invisible.
     scrollable.controller.jumpTo(0);
     await verifyVisibility(HandlePositionInViewport.rightEdge, false, HandlePositionInViewport.rightEdge, false);
-  }, skip: isBrowser);
+  });
 
   testWidgets('text selection handle visibility RTL', (WidgetTester tester) async {
     // Text with two separate words to select.
@@ -3403,7 +3403,7 @@ void main() {
     expect(state.selectionOverlay.handlesAreVisible, isTrue);
     expect(controller.selection.base.offset, 0);
     expect(controller.selection.extent.offset, 5);
-  }, skip: isBrowser);
+  });
 
   const String testText = 'Now is the time for\n'
       'all good people\n'
@@ -4179,7 +4179,7 @@ void main() {
     // at all. Again, both handles should be invisible.
     scrollable.controller.jumpTo(0);
     await verifyVisibility(HandlePositionInViewport.rightEdge, false, HandlePositionInViewport.rightEdge, false);
-  }, skip: isBrowser, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets("scrolling doesn't bounce", (WidgetTester tester) async {
     // 3 lines of text, where the last line overflows and requires scrolling.
@@ -4229,7 +4229,7 @@ void main() {
     await tester.pump();
     expect(scrollable.controller.position.pixels, equals(14));
     expect(scrollable.controller.position.pixels, equals(renderEditable.maxScrollExtent));
-  }, skip: isBrowser);
+  });
 
   testWidgets('bringIntoView brings the caret into view when in a viewport', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/55547.
@@ -4700,20 +4700,20 @@ void main() {
 
     await tester.tap(find.byType(EditableText));
     await tester.showKeyboard(find.byType(EditableText));
-    controller.text = '';
+    controller.text = 'test';
     await tester.idle();
 
     final EditableTextState state =
         tester.state<EditableTextState>(find.byType(EditableText));
-    expect(tester.testTextInput.editingState['text'], equals(''));
+    expect(tester.testTextInput.editingState['text'], equals('test'));
     expect(state.wantKeepAlive, true);
 
     expect(formatter.formatCallCount, 0);
-    state.updateEditingValue(const TextEditingValue(text: ''));
-    state.updateEditingValue(const TextEditingValue(text: '', composing: TextRange(start: 1, end: 2)));
+    state.updateEditingValue(const TextEditingValue(text: 'test'));
+    state.updateEditingValue(const TextEditingValue(text: 'test', composing: TextRange(start: 1, end: 2)));
     state.updateEditingValue(const TextEditingValue(text: '0')); // pass to formatter once to check the values.
     expect(formatter.lastOldValue.composing, const TextRange(start: 1, end: 2));
-    expect(formatter.lastOldValue.text, '');
+    expect(formatter.lastOldValue.text, 'test');
   });
 
   testWidgets('Whitespace directionality formatter input Arabic', (WidgetTester tester) async {
@@ -5169,6 +5169,34 @@ void main() {
     final RenderEditable renderObject = tester.allRenderObjects.whereType<RenderEditable>().first;
     expect(renderObject.textHeightBehavior, isNot(equals(inheritedTextHeightBehavior)));
     expect(renderObject.textHeightBehavior, equals(customTextHeightBehavior));
+  });
+
+  test('Asserts if composing text is not valid', () async {
+    void expectToAssert(TextEditingValue value, bool shouldAssert) {
+      dynamic initException;
+      dynamic updateException;
+      controller = TextEditingController();
+      try {
+        controller = TextEditingController.fromValue(value);
+      } catch (e) {
+        initException = e;
+      }
+
+      controller = TextEditingController();
+      try {
+        controller.value = value;
+      } catch (e) {
+        updateException = e;
+      }
+
+      expect(initException?.toString(), shouldAssert ? contains('composing range'): isNull);
+      expect(updateException?.toString(), shouldAssert ? contains('composing range'): isNull);
+    }
+
+    expectToAssert(const TextEditingValue(text: ''), false);
+    expectToAssert(const TextEditingValue(text: 'test', composing: TextRange(start: 1, end: 0)), true);
+    expectToAssert(const TextEditingValue(text: 'test', composing: TextRange(start: 1, end: 9)), true);
+    expectToAssert(const TextEditingValue(text: 'test', composing: TextRange(start: -1, end: 9)), false);
   });
 }
 
