@@ -82,7 +82,7 @@ void main() {
       ], workingDirectory: directory.path);
       expect(result.stderr, isNot(contains('Oops; flutter has exited unexpectedly:')));
     } finally {
-      directory.deleteSync(recursive: true);
+      tryToDelete(directory);
     }
   });
 
