@@ -96,9 +96,9 @@ class LoggerFactory {
         timeoutConfiguration: _timeoutConfiguration,
         stopwatchFactory: _stopwatchFactory
       );
-      if (verbose) {
-        logger = VerboseLogger(logger, stopwatchFactory: _stopwatchFactory);
-      }
+    }
+    if (verbose) {
+      logger = VerboseLogger(logger, stopwatchFactory: _stopwatchFactory);
     }
     if (daemon) {
       return NotifyingLogger(verbose: verbose, parent: logger);
