@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
 
 import '../base/bot_detector.dart';
@@ -16,6 +17,7 @@ import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../cache.dart';
+import '../dart/package_map.dart';
 import '../reporting/reporting.dart';
 
 /// The [Pub] instance.
@@ -35,14 +37,14 @@ typedef MessageFilter = String Function(String message);
 // DO NOT update without contacting kevmoo.
 // We have server-side tooling that assumes the values are consistent.
 class PubContext {
-  PubContext._(this._values) {
+  PubContext._(this._values) : assert(() {
     for (final String item in _values) {
       if (!_validContext.hasMatch(item)) {
-        throw ArgumentError.value(
-            _values, 'value', 'Must match RegExp ${_validContext.pattern}');
+        return false;
       }
     }
-  }
+    return true;
+  }(), 'Must match RegExp ${_validContext.pattern}');
 
   static PubContext getVerifyContext(String commandName) =>
       PubContext._(<String>['verify', commandName.replaceAll('-', '_')]);
@@ -80,6 +82,7 @@ abstract class Pub {
     @required Platform platform,
     @required BotDetector botDetector,
     @required Usage usage,
+    File toolStampFile,
   }) = _DefaultPub;
 
   /// Runs `pub get`.
@@ -139,7 +142,9 @@ class _DefaultPub implements Pub {
     @required Platform platform,
     @required BotDetector botDetector,
     @required Usage usage,
-  }) : _fileSystem = fileSystem,
+    File toolStampFile,
+  }) : _toolStampFile = toolStampFile,
+       _fileSystem = fileSystem,
        _logger = logger,
        _platform = platform,
        _botDetector = botDetector,
@@ -155,6 +160,7 @@ class _DefaultPub implements Pub {
   final Platform _platform;
   final BotDetector _botDetector;
   final Usage _usage;
+  final File _toolStampFile;
 
   @override
   Future<void> get({
@@ -173,6 +179,9 @@ class _DefaultPub implements Pub {
       _fileSystem.path.join(directory, 'pubspec.yaml'));
     final File packageConfigFile = _fileSystem.file(
       _fileSystem.path.join(directory, '.dart_tool', 'package_config.json'));
+    final Directory generatedDirectory = _fileSystem.directory(
+      _fileSystem.path.join(directory, '.dart_tool', 'flutter_gen')
+    );
 
     if (!skipPubspecYamlCheck && !pubSpecYaml.existsSync()) {
       if (!skipIfAbsent) {
@@ -242,6 +251,8 @@ class _DefaultPub implements Pub {
         'The time now is: $now'
       );
     }
+    // Insert references to synthetic flutter package.
+    await _updatePackageConfig(packageConfigFile, generatedDirectory);
   }
 
   @override
@@ -387,6 +398,12 @@ class _DefaultPub implements Pub {
     if (pubSpecYaml.lastModifiedSync().isAfter(dotPackagesLastModified)) {
       return true;
     }
+
+    if (_toolStampFile != null &&
+        _toolStampFile.existsSync() &&
+        _toolStampFile.lastModifiedSync().isAfter(dotPackagesLastModified)) {
+      return true;
+    }
     return false;
   }
 
@@ -438,5 +455,27 @@ class _DefaultPub implements Pub {
       environment[_kPubCacheEnvironmentKey] = pubCache;
     }
     return environment;
+  }
+
+  /// Insert the flutter_gen synthetic package into the package configuration file.
+  Future<void> _updatePackageConfig(File packageConfigFile, Directory generatedDirectory) async {
+    if (!packageConfigFile.existsSync()) {
+      return;
+    }
+    final PackageConfig packageConfig = await loadPackageConfigWithLogging(packageConfigFile, logger: _logger);
+    final Package flutterGen = Package('flutter_gen', generatedDirectory.uri, languageVersion: LanguageVersion(2, 8));
+    if (packageConfig.packages.any((Package package) => package.name == 'flutter_gen')) {
+      return;
+    }
+    final PackageConfig newPackageConfig = PackageConfig(
+      <Package>[
+        ...packageConfig.packages,
+        flutterGen,
+      ],
+    );
+    // There is no current API for saving a package_config without hitting the real filesystem.
+    if (packageConfigFile.fileSystem is LocalFileSystem) {
+      await savePackageConfig(newPackageConfig, packageConfigFile.parent.parent);
+    }
   }
 }

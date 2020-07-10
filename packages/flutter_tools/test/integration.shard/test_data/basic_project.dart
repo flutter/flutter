@@ -52,3 +52,29 @@ class BasicProject extends Project {
   Uri get topLevelFunctionBreakpointUri => mainDart;
   int get topLevelFunctionBreakpointLine => lineContaining(main, '// TOP LEVEL BREAKPOINT');
 }
+
+class BasicProjectWithFlutterGen extends Project {
+  @override
+  final String generatedFile = '''
+    String x = "a";
+  ''';
+
+  @override
+  final String pubspec = '''
+  name: test
+  environment:
+    sdk: ">=2.0.0-dev.68.0 <3.0.0"
+
+  dependencies:
+    flutter:
+      sdk: flutter
+  ''';
+
+  @override
+  final String main = r'''
+  import 'dart:async';
+  import 'package:flutter_gen/flutter_gen.dart';
+
+  void main() {}
+  ''';
+}
