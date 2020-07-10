@@ -179,9 +179,8 @@ class _DefaultPub implements Pub {
       _fileSystem.path.join(directory, 'pubspec.yaml'));
     final File packageConfigFile = _fileSystem.file(
       _fileSystem.path.join(directory, '.dart_tool', 'package_config.json'));
-    final Directory generatedDirectory = _fileSystem.directory(
-      _fileSystem.path.join(directory, '.dart_tool', 'flutter_gen')
-    );
+    final Directory generatedDirectory = _fileSystem.directory(_fileSystem.path.join(directory, '.dart_tool', 'flutter_gen'));
+    final File yamlConfig = _fileSystem.file(_fileSystem.path.join(directory, 'l10n.yaml'));
 
     if (!skipPubspecYamlCheck && !pubSpecYaml.existsSync()) {
       if (!skipIfAbsent) {
@@ -252,7 +251,9 @@ class _DefaultPub implements Pub {
       );
     }
     // Insert references to synthetic flutter package.
-    await _updatePackageConfig(packageConfigFile, generatedDirectory);
+    if (yamlConfig.existsSync()) {
+      await _updatePackageConfig(packageConfigFile, generatedDirectory);
+    }
   }
 
   @override
@@ -457,7 +458,8 @@ class _DefaultPub implements Pub {
     return environment;
   }
 
-  /// Insert the flutter_gen synthetic package into the package configuration file.
+  /// Insert the flutter_gen synthetic package into the package configuration file if
+  /// there is an l10n.yaml.
   Future<void> _updatePackageConfig(File packageConfigFile, Directory generatedDirectory) async {
     if (!packageConfigFile.existsSync()) {
       return;
