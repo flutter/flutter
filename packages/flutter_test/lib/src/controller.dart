@@ -403,15 +403,15 @@ abstract class WidgetController {
   /// A simulator of how the framework handles a series of [PointerEvent]s
   /// received from the Flutter engine.
   ///
-  /// The [PointerEventPacket.timeStamp] is used as the time delay of an event
-  /// packet relative to the starting point of the method call.
+  /// The [PointerEventRecord.timeStamp] is used as the time delay of the events
+  /// injection relative to the starting point of the method call.
   ///
-  /// Returns a list of the difference between [PointerEventPacket.timeStamp]
-  /// and the real timestamp when the event packet is processed. The closer
+  /// Returns a list of the difference between [PointerEventRecord.timeStamp]
+  /// and the real timestamp when the event record is processed. The closer
   /// these values are to zero the more faithful it is to the `records`.
   ///
-  /// See [PointerEventPacket].
-  Future<List<Duration>> handlePointerEventPacket(List<PointerEventPacket> packets);
+  /// See [PointerEventRecord].
+  Future<List<Duration>> handlePointerEventRecord(List<PointerEventRecord> records);
 
   /// Called to indicate that time should advance.
   ///
@@ -694,7 +694,7 @@ class LiveWidgetController extends WidgetController {
   }
 
   @override
-  Future<List<Duration>> handlePointerEventPacket(List<PointerEventPacket> packets) {
+  Future<List<Duration>> handlePointerEventRecord(List<PointerEventRecord> records) {
     // TODO(CareF): This will be implemented after we decide what should be the
     // correct pumping strategy.
     throw UnimplementedError;

@@ -465,23 +465,23 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   }
 
   @override
-  Future<List<Duration>> handlePointerEventPacket(List<PointerEventPacket> packets) {
-    assert(packets != null);
-    assert(packets.isNotEmpty);
+  Future<List<Duration>> handlePointerEventRecord(List<PointerEventRecord> records) {
+    assert(records != null);
+    assert(records.isNotEmpty);
     return TestAsyncUtils.guard<List<Duration>>(() async {
       // hitTestHistory is an equivalence of _hitTests in [GestureBinding]
       final Map<int, HitTestResult> hitTestHistory = <int, HitTestResult>{};
       final List<Duration> handleTimeStampDiff = <Duration>[];
       DateTime startTime;
-      for (final PointerEventPacket packet in packets) {
+      for (final PointerEventRecord record in records) {
         final DateTime now = binding.clock.now();
         startTime ??= now;
         // So that the first event is promised to receive a zero timeDiff
-        final Duration timeDiff = packet.timeStamp - now.difference(startTime);
+        final Duration timeDiff = record.timeStamp - now.difference(startTime);
         if (timeDiff.isNegative) {
           // Flush all past events
           handleTimeStampDiff.add(timeDiff);
-          for (final PointerEvent event in packet.events) {
+          for (final PointerEvent event in record.events) {
             _handlePointerEvent(event, hitTestHistory);
           }
         } else {
@@ -490,9 +490,9 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
           await binding.pump();
           await binding.delayed(timeDiff);
           handleTimeStampDiff.add(
-            packet.timeStamp - binding.clock.now().difference(startTime),
+            record.timeStamp - binding.clock.now().difference(startTime),
           );
-          for (final PointerEvent event in packet.events) {
+          for (final PointerEvent event in record.events) {
             _handlePointerEvent(event, hitTestHistory);
           }
         }
