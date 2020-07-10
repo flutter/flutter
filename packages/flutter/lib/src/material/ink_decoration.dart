@@ -354,7 +354,6 @@ class InkDecoration extends InkFeature {
     controller.markNeedsPaint();
   }
 
-
   /// The configuration to pass to the [BoxPainter] obtained from the
   /// [decoration], when painting.
   ///
