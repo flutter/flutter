@@ -227,8 +227,8 @@ class SnackBar extends StatefulWidget {
   /// `EdgeInsets.fromLTRB(15.0, 5.0, 15.0, 10.0)`.
   final EdgeInsetsGeometry margin;
 
-  /// The amount of horizontal space to apply to the snack bar's content and
-  /// optional action.
+  /// The amount of padding to apply to the snack bar's content and optional
+  /// action.
   ///
   /// If this property is null, then the default depends on the [behavior] and
   /// the presence of an [action]. The start padding is 24 if [behavior] is
