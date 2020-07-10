@@ -1152,6 +1152,11 @@ class TextEditingChannel {
         // Since autofill UI is a part of the browser, web engine does not need to utilize this method.
         break;
 
+      case 'TextInput.finishAutofillContext':
+        // TODO(nurhan): Handle saving autofill information on web.
+        // https://github.com/flutter/flutter/issues/59378
+        break;
+
       default:
         throw StateError(
             'Unsupported method call on the flutter/textinput channel: ${call.method}');
