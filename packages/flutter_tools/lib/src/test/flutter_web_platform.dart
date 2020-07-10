@@ -667,7 +667,7 @@ class BrowserManager {
   /// Loads [_BrowserEnvironment].
   Future<_BrowserEnvironment> _loadBrowserEnvironment() async {
     return _BrowserEnvironment(
-        this, null, null, _onRestartController.stream);
+        this, null, await _browser.debuggerUri, _onRestartController.stream);
   }
 
   /// Tells the browser to load a test suite from the URL [url].
