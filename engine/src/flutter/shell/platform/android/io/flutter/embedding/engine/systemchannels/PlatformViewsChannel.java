@@ -384,7 +384,7 @@ public class PlatformViewsChannel {
     /** TODO(iskakaushik): javadoc */
     public final long motionEventId;
 
-    PlatformViewTouch(
+    public PlatformViewTouch(
         int viewId,
         @NonNull Number downTime,
         @NonNull Number eventTime,
