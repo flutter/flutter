@@ -748,7 +748,6 @@ https://flutter.dev/docs/development/packages-and-plugins/developing-packages#pl
       'macosIdentifier': appleIdentifier,
       'description': projectDescription,
       'dartSdk': '$flutterRoot/bin/cache/dart-sdk',
-      'useAndroidEmbeddingV2': featureFlags.isAndroidEmbeddingV2Enabled,
       'androidMinApiLevel': android_common.minApiLevel,
       'androidSdkVersion': android_sdk.minimumAndroidSdkVersion,
       'withDriverTest': renderDriverTest,
