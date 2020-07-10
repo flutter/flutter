@@ -64,7 +64,7 @@ class AssetManager {
               .warn('Asset manifest does not exist at `$url` – ignoring.');
           return Uint8List.fromList(utf8.encode('{}')).buffer.asByteData();
         }
-        throw AssetManagerException(url, target.status);
+        throw AssetManagerException(url, target.status!);
       }
 
       html.window.console.warn('Caught ProgressEvent with target: $target');

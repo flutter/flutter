@@ -45,11 +45,11 @@ class Incrementable extends RoleManager {
     _element.setAttribute('role', 'slider');
 
     _element.addEventListener('change', (_) {
-      if (_element.disabled) {
+      if (_element.disabled!) {
         return;
       }
       _pendingResync = true;
-      final int newInputValue = int.parse(_element.value);
+      final int newInputValue = int.parse(_element.value!);
       if (newInputValue > _currentSurrogateValue) {
         _currentSurrogateValue += 1;
         window.invokeOnSemanticsAction(
@@ -84,7 +84,7 @@ class Incrementable extends RoleManager {
 
   void _enableBrowserGestureHandling() {
     assert(semanticsObject.owner.gestureMode == GestureMode.browserGestures);
-    if (!_element.disabled) {
+    if (!_element.disabled!) {
       return;
     }
     _element.disabled = false;
@@ -123,7 +123,7 @@ class Incrementable extends RoleManager {
   }
 
   void _disableBrowserGestureHandling() {
-    if (_element.disabled) {
+    if (_element.disabled!) {
       return;
     }
     _element.disabled = true;

@@ -364,7 +364,7 @@ class BitmapCanvas extends EngineCanvas {
   }
 
   html.ImageElement _reuseOrCreateImage(HtmlImage htmlImage) {
-    final String cacheKey = htmlImage.imgElement.src;
+    final String cacheKey = htmlImage.imgElement.src!;
     if (_elementCache != null) {
       html.ImageElement? imageElement = _elementCache!.reuse(cacheKey) as html.ImageElement?;
       if (imageElement != null) {
@@ -674,7 +674,7 @@ class BitmapCanvas extends EngineCanvas {
       for (int i = 0; i < len; i++) {
         final String char = line.displayText![i];
         ctx!.fillText(char, x, y);
-        x += letterSpacing + ctx.measureText(char).width;
+        x += letterSpacing + ctx.measureText(char).width!;
       }
     }
   }
