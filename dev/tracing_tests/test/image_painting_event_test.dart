@@ -38,6 +38,10 @@ void main() {
     await binding.endOfFrame;
   });
 
+  tearDownAll(() {
+    vmService.dispose();
+  });
+
   test('Image painting events - deduplicates across frames', () async {
     final Completer<Event> completer = Completer<Event>();
     vmService.onExtensionEvent.first.then(completer.complete);
