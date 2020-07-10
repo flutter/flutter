@@ -100,7 +100,7 @@ void main() {
       ),
     );
 
-    expect(find.byTooltip('Back'), findsNothing);
+    expect(find.byTooltip('Close'), findsNothing);
     expect(find.text('Sample Page'), findsNothing);
 
     await tester.tap(find.text('X'));
@@ -110,7 +110,7 @@ void main() {
     expect(find.text('Sample Page'), findsOneWidget);
 
     willPopValue = false;
-    await tester.tap(find.byTooltip('Back'));
+    await tester.tap(find.byTooltip('Close'));
     await tester.pump();
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
@@ -123,7 +123,7 @@ void main() {
     expect(find.text('Sample Page'), findsOneWidget);
 
     willPopValue = true;
-    await tester.tap(find.byTooltip('Back'));
+    await tester.tap(find.byTooltip('Close'));
     await tester.pump();
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
