@@ -130,7 +130,7 @@ class ElevatedButtonTheme extends InheritedTheme {
 /// Please use [ElevatedButtonTheme].
 @Deprecated(
   'This class was briefly released with the wrong name. '
-  'The correct name is ContainedButtonThemeData. '
+  'The correct name is ElevatedButtonThemeData. '
   'This feature was deprecated after v1.20.0-2.0.pre.'
 )
 @immutable
