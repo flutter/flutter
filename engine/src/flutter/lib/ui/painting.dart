@@ -1600,17 +1600,20 @@ class Image extends NativeFieldWrapperClass2 {
   /// The number of image pixels along the image's vertical axis.
   int get height native 'Image_height';
 
-  /// Converts the [Image] object into a byte array.
+  /// Converts the [Image] object into a read-only byte array.
   ///
   /// The [format] argument specifies the format in which the bytes will be
   /// returned.
   ///
   /// Returns a future that completes with the binary image data or an error
-  /// if encoding fails.
+  /// if encoding fails. Note that attempting to write to the returned
+  /// [ByteData] will result in an [UnsupportedError] exception.
   Future<ByteData?> toByteData({ImageByteFormat format = ImageByteFormat.rawRgba}) {
     return _futurize((_Callback<ByteData> callback) {
       return _toByteData(format.index, (Uint8List? encoded) {
-        callback(encoded!.buffer.asByteData());
+        // [encoded] wraps a read-only SkData buffer, so we wrap it here in
+        // an [UnmodifiableByteDataView].
+        callback(UnmodifiableByteDataView(encoded!.buffer.asByteData()));
       });
     });
   }
