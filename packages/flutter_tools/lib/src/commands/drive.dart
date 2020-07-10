@@ -244,7 +244,10 @@ class DriveCommand extends RunCommandBase {
         throwToolExit('Application failed to start. Will not run test. Quitting.', exitCode: 1);
       }
       observatoryUri = result.observatoryUri.toString();
-      await device.dds.startDartDevelopmentService(Uri.parse(observatoryUri), ipv6);
+      // TODO(bkonyi): add web support
+      if (!isWebPlatform) {
+        await device.dds.startDartDevelopmentService(Uri.parse(observatoryUri), ipv6);
+      }
     } else {
       globals.printStatus('Will connect to already running application instance.');
       observatoryUri = stringArg('use-existing-app');
