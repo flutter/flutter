@@ -228,8 +228,13 @@ class _MockHttpRequest extends HttpClientRequest {
     return Future<HttpClientResponse>.value(_MockHttpResponse());
   }
 
+  // TODO(zichangguo): Uncomment following line when abort() breaking change
+  // lands in g3.
+  // @override
+  // void abort([Object exception, StackTrace stackTrace]) {}
+
   @override
-  void abort([Object exception, StackTrace stackTrace]) {}
+  void noSuchMethod(Invocation invocation) {}
 
   @override
   HttpConnectionInfo get connectionInfo => null;

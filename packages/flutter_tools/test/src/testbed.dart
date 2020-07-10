@@ -378,8 +378,13 @@ class FakeHttpClientRequest implements HttpClientRequest {
   @override
   void writeln([Object obj = '']) {}
 
+  // TODO(zichangguo): Uncomment following line when abort() breaking change
+  // lands in g3.
+  // @override
+  // void abort([Object exception, StackTrace stackTrace]) {}
+
   @override
-  void abort([Object exception, StackTrace stackTrace]) {}
+  void noSuchMethod(Invocation invocation) {}
 }
 
 class FakeHttpClientResponse implements HttpClientResponse {
