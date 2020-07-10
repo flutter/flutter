@@ -158,7 +158,7 @@ void main() {
       .childFile('preferences');
     preferencesFile
       ..createSync(recursive: true)
-      ..writeAsStringSync('example');
+      ..writeAsStringSync('"exit_type":"Crashed"');
 
     final Directory localStorageContentsDirectory = dataDir
         .childDirectory('Default')
@@ -182,18 +182,8 @@ void main() {
       cacheDir: dataDir,
     );
 
-    // validate preferences
-    final File tempFile = fileSystem
-      .directory('.tmp_rand0/flutter_tools_chrome_device.rand0')
-      .childDirectory('Default')
-      .childFile('preferences');
-
-    expect(tempFile.existsSync(), true);
-    expect(tempFile.readAsStringSync(), 'example');
-
-    // write crash to file:
-    tempFile.writeAsStringSync('"exit_type":"Crashed"');
     exitCompleter.complete();
+    await Future<void>.delayed(const Duration(microseconds: 1));
 
     // writes non-crash back to dart_tool
     expect(preferencesFile.readAsStringSync(), '"exit_type":"Normal"');
