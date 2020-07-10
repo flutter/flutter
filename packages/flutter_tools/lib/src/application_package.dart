@@ -62,6 +62,7 @@ class ApplicationPackageFactory {
         }
         return WebApplicationPackage(FlutterProject.current());
       case TargetPlatform.linux_x64:
+      case TargetPlatform.linux_arm64:
         return applicationBinary == null
             ? LinuxApp.fromLinuxProject(FlutterProject.current().linux)
             : LinuxApp.fromPrebuiltApp(applicationBinary);
@@ -440,6 +441,7 @@ class ApplicationPackageStore {
         macOS ??= MacOSApp.fromMacOSProject(FlutterProject.current().macos);
         return macOS;
       case TargetPlatform.linux_x64:
+      case TargetPlatform.linux_arm64:
         linux ??= LinuxApp.fromLinuxProject(FlutterProject.current().linux);
         return linux;
       case TargetPlatform.windows_x64:

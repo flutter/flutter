@@ -40,6 +40,7 @@ class AotBuilder {
       case TargetPlatform.android:
       case TargetPlatform.darwin_x64:
       case TargetPlatform.linux_x64:
+      case TargetPlatform.linux_arm64:
       case TargetPlatform.windows_x64:
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.tester:

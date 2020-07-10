@@ -1076,6 +1076,7 @@ DevelopmentArtifact _artifactFromTargetPlatform(TargetPlatform targetPlatform) {
       }
       return null;
     case TargetPlatform.linux_x64:
+    case TargetPlatform.linux_arm64:
       if (featureFlags.isLinuxEnabled) {
         return DevelopmentArtifact.linux;
       }

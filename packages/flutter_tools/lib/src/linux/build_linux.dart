@@ -20,6 +20,8 @@ Future<void> buildLinux(
   LinuxProject linuxProject,
   BuildInfo buildInfo, {
     String target = 'lib/main.dart',
+    TargetPlatform targetPlatform = TargetPlatform.linux_x64,
+    String targetSysroot = '/',
   }) async {
   if (!linuxProject.cmakeFile.existsSync()) {
     throwToolExit('No Linux desktop project configured. See '
@@ -48,14 +50,15 @@ Future<void> buildLinux(
   try {
     final String buildModeName = getNameForBuildMode(buildInfo.mode ?? BuildMode.release);
     final Directory buildDirectory = globals.fs.directory(getLinuxBuildDirectory()).childDirectory(buildModeName);
-    await _runCmake(buildModeName, linuxProject.cmakeFile.parent, buildDirectory);
+    await _runCmake(buildModeName, linuxProject.cmakeFile.parent, buildDirectory, targetPlatform, targetSysroot);
     await _runBuild(buildDirectory);
   } finally {
     status.cancel();
   }
 }
 
-Future<void> _runCmake(String buildModeName, Directory sourceDir, Directory buildDir) async {
+Future<void> _runCmake(String buildModeName, Directory sourceDir,
+    Directory buildDir, TargetPlatform targetPlatform, String targetSysroot) async {
   final Stopwatch sw = Stopwatch()..start();
 
   await buildDir.create(recursive: true);
@@ -69,6 +72,13 @@ Future<void> _runCmake(String buildModeName, Directory sourceDir, Directory buil
         '-G',
         'Ninja',
         '-DCMAKE_BUILD_TYPE=$buildFlag',
+        '-D_FLUTTER_TARGET_PLATFORM=' + getNameForTargetPlatform(targetPlatform),
+        if (targetPlatform == TargetPlatform.linux_arm64)
+          '-D_FLUTTER_TARGET_PLATFORM_SYSROOT=$targetSysroot',
+        if (targetPlatform == TargetPlatform.linux_arm64)
+          '-DCMAKE_C_COMPILER_TARGET=aarch64-linux-gnu',
+        if (targetPlatform == TargetPlatform.linux_arm64)
+          '-DCMAKE_CXX_COMPILER_TARGET=aarch64-linux-gnu',
         sourceDir.path,
       ],
       workingDirectory: buildDir.path,
