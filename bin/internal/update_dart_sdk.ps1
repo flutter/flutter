@@ -10,12 +10,13 @@
 # continues to work across all platforms!
 #
 # -------------------------------------------------------------------------- #
-
+Write-Output "zzz1.1"
 $ErrorActionPreference = "Stop"
 
 $progName = Split-Path -parent $MyInvocation.MyCommand.Definition
 $flutterRoot = (Get-Item $progName).parent.parent.FullName
 
+Write-Output "zzz1.2"
 $cachePath = "$flutterRoot\bin\cache"
 $dartSdkPath = "$cachePath\dart-sdk"
 $engineStamp = "$cachePath\engine-dart-sdk.stamp"
@@ -24,6 +25,7 @@ $engineVersion = (Get-Content "$flutterRoot\bin\internal\engine.version")
 $oldDartSdkPrefix = "dart-sdk.old"
 
 # Make sure that PowerShell has expected version.
+Write-Output "zzz1.3"
 $psMajorVersionRequired = 5
 $psMajorVersionLocal = $PSVersionTable.PSVersion.Major
 if ($psMajorVersionLocal -lt $psMajorVersionRequired) {
@@ -36,6 +38,7 @@ if ((Test-Path $engineStamp) -and ($engineVersion -eq (Get-Content $engineStamp)
     return
 }
 
+Write-Output "zzz1.4"
 Write-Host "Downloading Dart SDK from Flutter engine $engineVersion..."
 $dartSdkBaseUrl = $Env:FLUTTER_STORAGE_BASE_URL
 if (-not $dartSdkBaseUrl) {
@@ -44,6 +47,7 @@ if (-not $dartSdkBaseUrl) {
 $dartZipName = "dart-sdk-windows-x64.zip"
 $dartSdkUrl = "$dartSdkBaseUrl/flutter_infra/flutter/$engineVersion/$dartZipName"
 
+Write-Output "zzz1.5"
 if (Test-Path $dartSdkPath) {
     # Move old SDK to a new location instead of deleting it in case it is still in use (e.g. by IntelliJ).
     $oldDartSdkSuffix = 1
@@ -53,9 +57,13 @@ if (Test-Path $dartSdkPath) {
 New-Item $dartSdkPath -force -type directory | Out-Null
 $dartSdkZip = "$cachePath\$dartZipName"
 
+Write-Output "zzz1.6"
 Try {
+    Write-Output "zzz1.6.1"
     Import-Module BitsTransfer
+    Write-Output "zzz1.6.2"
     Start-BitsTransfer -Source $dartSdkUrl -Destination $dartSdkZip
+    Write-Output "zzz1.6.3"
 }
 Catch {
     Write-Host "Downloading the Dart SDK using the BITS service failed, retrying with WebRequest..."
@@ -68,6 +76,7 @@ Catch {
     Invoke-WebRequest -Uri $dartSdkUrl -OutFile $dartSdkZip
     $ProgressPreference = $OriginalProgressPreference
 }
+Write-Output "zzz1.7"
 
 Write-Host "Unzipping Dart SDK..."
 If (Get-Command 7z -errorAction SilentlyContinue) {

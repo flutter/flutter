@@ -89,7 +89,9 @@ GOTO :after_subroutine
 
   :do_sdk_update_and_snapshot
     ECHO Checking Dart SDK version...
+    ECHO zzz1
     SET update_dart_bin=%FLUTTER_ROOT%/bin/internal/update_dart_sdk.ps1
+    ECHO zzz2
     REM Escape apostrophes from the executable path
     SET "update_dart_bin=!update_dart_bin:'=''!"
     %powershell_executable% -ExecutionPolicy Bypass -Command "Unblock-File -Path '%update_dart_bin%'; & '%update_dart_bin%'"
