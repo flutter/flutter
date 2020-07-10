@@ -254,10 +254,11 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
           final int viewId = touch.viewId;
           float density = context.getResources().getDisplayMetrics().density;
           ensureValidAndroidVersion(Build.VERSION_CODES.KITKAT_WATCH);
-          final MotionEvent event = toMotionEvent(density, touch);
           if (vdControllers.containsKey(viewId)) {
+            final MotionEvent event = toMotionEvent(density, touch, /*usingVirtualDiplays=*/ true);
             vdControllers.get(touch.viewId).dispatchTouchEvent(event);
           } else if (platformViews.get(viewId) != null) {
+            final MotionEvent event = toMotionEvent(density, touch, /*usingVirtualDiplays=*/ false);
             View view = platformViews.get(touch.viewId);
             view.dispatchTouchEvent(event);
           } else {
@@ -305,7 +306,9 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         }
       };
 
-  private MotionEvent toMotionEvent(float density, PlatformViewsChannel.PlatformViewTouch touch) {
+  @VisibleForTesting
+  public MotionEvent toMotionEvent(
+      float density, PlatformViewsChannel.PlatformViewTouch touch, boolean usingVirtualDiplays) {
     MotionEventTracker.MotionEventId motionEventId =
         MotionEventTracker.MotionEventId.from(touch.motionEventId);
     MotionEvent trackedEvent = motionEventTracker.pop(motionEventId);
@@ -321,7 +324,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         parsePointerCoordsList(touch.rawPointerCoords, density)
             .toArray(new PointerCoords[touch.pointerCount]);
 
-    if (trackedEvent != null) {
+    if (!usingVirtualDiplays && trackedEvent != null) {
       return MotionEvent.obtain(
           trackedEvent.getDownTime(),
           trackedEvent.getEventTime(),

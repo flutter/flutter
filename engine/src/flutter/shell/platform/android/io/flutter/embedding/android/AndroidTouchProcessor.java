@@ -176,7 +176,8 @@ public class AndroidTouchProcessor {
       return;
     }
 
-    MotionEventTracker.MotionEventId motionEventId = motionEventTracker.track(event);
+    // TODO (kaushikiska) : pass this in when we have a way to evict framework only events.
+    // MotionEventTracker.MotionEventId motionEventId = motionEventTracker.track(event);
 
     int pointerKind = getPointerDeviceTypeForToolType(event.getToolType(pointerIndex));
 
@@ -187,7 +188,7 @@ public class AndroidTouchProcessor {
 
     long timeStamp = event.getEventTime() * 1000; // Convert from milliseconds to microseconds.
 
-    packet.putLong(motionEventId.getId());
+    packet.putLong(0); // motionEventId
     packet.putLong(timeStamp); // time_stamp
     packet.putLong(pointerChange); // change
     packet.putLong(pointerKind); // kind
