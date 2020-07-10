@@ -91,10 +91,14 @@ GOTO :after_subroutine
     ECHO Checking Dart SDK version...
     ECHO zzz1
     SET update_dart_bin=%FLUTTER_ROOT%\bin\internal\update_dart_sdk.ps1
+    SET empty=%FLUTTER_ROOT%\bin\internal\empty.ps1
     ECHO zzz2
     REM Escape apostrophes from the executable path
+    SLEEP 30
     SET "update_dart_bin=!update_dart_bin:'=''!"
+    %powershell_executable% Unblock-File -Path '%empty%' -ErrorAction:stop -debug -InformationAction:stop 2>&1
     ECHO zzz3
+
     %powershell_executable% Set-PSDebug -Trace 2
     %powershell_executable% Unblock-File -Path '%update_dart_bin%' -ErrorAction:stop -debug -InformationAction:stop 2>&1
     ECHO zzz4
