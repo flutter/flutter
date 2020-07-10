@@ -3411,7 +3411,6 @@ class IndexedStack extends Stack {
     return true;
   }
 
-
   /// The index of the child to show.
   final int index;
 
