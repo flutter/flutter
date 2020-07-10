@@ -132,9 +132,8 @@ class RestorationManager {
   ///  * [RootRestorationScope], which makes the root bucket available in the
   ///    [Widget] tree.
   Future<RestorationBucket> get rootBucket {
-    if (!_isListeningForEngineUpdates) {
+    if (!SystemChannels.restoration.checkMethodCallHandler(_methodHandler)) {
       SystemChannels.restoration.setMethodCallHandler(_methodHandler);
-      _isListeningForEngineUpdates = true;
     }
     if (_rootBucket != null) {
       return SynchronousFuture<RestorationBucket>(_rootBucket);
@@ -147,10 +146,9 @@ class RestorationManager {
   }
   RestorationBucket _rootBucket;
   Completer<RestorationBucket> _pendingRootBucket;
-  bool _isListeningForEngineUpdates = false;
 
   Future<void> _getRootBucketFromEngine() async {
-    final Map<String, dynamic> data = await retrieveFromEngine();
+    final Map<dynamic, dynamic> data = await retrieveFromEngine();
     if (_pendingRootBucket == null) {
       // The engine was faster in sending us the data via the 'push' method on
       // the SystemChannel.
@@ -160,13 +158,14 @@ class RestorationManager {
     _setRootBucket(data);
   }
 
-  void _setRootBucket(Map<String, dynamic> data) {
+  void _setRootBucket(Map<dynamic, dynamic> data) {
     _rootBucket = _createRootBucket(data);
+    assert(_pendingRootBucket == null || !_pendingRootBucket.isCompleted);
     _pendingRootBucket?.complete(_rootBucket);
     _pendingRootBucket = null;
   }
 
-  RestorationBucket _createRootBucket(Map<String, dynamic> data) {
+  RestorationBucket _createRootBucket(Map<dynamic, dynamic> data) {
     return RestorationBucket.root(manager: this, rawData: data);
   }
 
@@ -220,7 +219,7 @@ class RestorationManager {
   /// }
   /// ```
   @protected
-  Future<Map<String, dynamic>> retrieveFromEngine() async {
+  Future<Map<dynamic, dynamic>> retrieveFromEngine() async {
     final Uint8List raw = await SystemChannels.restoration.invokeMethod<Uint8List>('get');
     return decodeRestorationData(raw);
   }
@@ -236,7 +235,7 @@ class RestorationManager {
   /// This method can be overridden in tests to capture the restoration data
   /// that would have been send to the engine.
   @protected
-  Future<void> sendToEngine(Map<String, dynamic> rawData) {
+  Future<void> sendToEngine(Map<dynamic, dynamic> rawData) {
     assert(rawData != null);
     return SystemChannels.restoration.invokeMethod<void>(
       'put',
@@ -251,14 +250,12 @@ class RestorationManager {
   ///
   ///  * [encodeRestorationData], which is the opposite of this method.
   @protected
-  Map<String, dynamic> decodeRestorationData(Uint8List data) {
+  Map<dynamic, dynamic> decodeRestorationData(Uint8List data) {
     if (data == null) {
       return null;
     }
     final ByteData encoded = data.buffer.asByteData(data.offsetInBytes, data.lengthInBytes);
-    return castToMap<String, dynamic>(
-      const StandardMessageCodec().decodeMessage(encoded),
-    );
+    return const StandardMessageCodec().decodeMessage(encoded) as Map<dynamic, dynamic>;
   }
 
   /// Called by the [RestorationManager] on itself to serialized the
@@ -268,7 +265,7 @@ class RestorationManager {
   ///
   ///  * [decodeRestorationData], which is the opposite of this method.
   @protected
-  Uint8List encodeRestorationData(Map<String, dynamic> data) {
+  Uint8List encodeRestorationData(Map<dynamic, dynamic> data) {
     final ByteData encoded = const StandardMessageCodec().encodeMessage(data);
     return encoded.buffer.asUint8List(encoded.offsetInBytes, encoded.lengthInBytes);
   }
@@ -320,8 +317,6 @@ class RestorationManager {
     }
   }
 
-  // TODO(goderbauer): Add API to request out-of-band serialization when no frame is scheduled.
-
   void _doProcessing() {
     assert(() {
       _debugDoingUpdate = true;
@@ -367,7 +362,7 @@ class RestorationId {
   }
 
   @override
-  int get hashCode => hashValues(runtimeType, value);
+  int get hashCode => value.hashCode;
 
   @override
   String toString() {
@@ -381,7 +376,7 @@ class RestorationId {
 /// For a general overview of how state restoration works in Flutter, see the
 /// [RestorationManager].
 ///
-/// [RestorationBucket]s are organized in a tree, that is rooted in
+/// [RestorationBucket]s are organized in a tree that is rooted in
 /// [RestorationManager.rootBucket] and managed by a [RestorationManager]. The
 /// tree is serializable and must contain all the data an application needs to
 /// restore its current state at a later point in time.
@@ -397,8 +392,8 @@ class RestorationId {
 /// [RestorationBucket] hierarchy will be made available again to the
 /// application to restore it to the state it had when the data was collected.
 /// State restoration to a previous state may happen when the app is launched
-/// (e.g. after it has been terminated while running in the background) or after
-/// the app has already been running for a while.
+/// (e.g. after it has been terminated gracefully while running in the
+/// background) or after the app has already been running for a while.
 ///
 /// ## Lifecycle
 ///
@@ -486,10 +481,10 @@ class RestorationBucket extends ChangeNotifier {
   /// The `manager` argument must not be null.
   RestorationBucket.root({
     @required RestorationManager manager,
-    @required Map<String, dynamic> rawData,
+    @required Map<dynamic, dynamic> rawData,
   }) : assert(manager != null),
        _manager = manager,
-       _rawData = rawData ?? <String, dynamic>{},
+       _rawData = rawData ?? <dynamic, dynamic>{},
        _id = const RestorationId('root'),
        debugOwner = manager;
 
@@ -512,13 +507,13 @@ class RestorationBucket extends ChangeNotifier {
        assert(parent._rawChildren[id.value] != null),
        _manager = parent._manager,
        _parent = parent,
-       _rawData = castToMap<String, dynamic>(parent._rawChildren[id.value]),
+       _rawData = parent._rawChildren[id.value] as Map<dynamic, dynamic>,
        _id = id;
 
   static const String _childrenMapKey = 'c';
   static const String _valuesMapKey = 'v';
 
-  final Map<String, dynamic> _rawData;
+  final Map<dynamic, dynamic> _rawData;
 
   /// The owner of the bucket that was provided when the bucket was claimed via
   /// [claimChild].
@@ -537,8 +532,8 @@ class RestorationBucket extends ChangeNotifier {
   RestorationId get id => _id;
   RestorationId _id;
 
-  Map<String, dynamic> get _rawChildren => castToMap<String, dynamic>(_rawData.putIfAbsent(_childrenMapKey, () => <String, dynamic>{}));
-  Map<String, dynamic> get _rawValues => castToMap<String, dynamic>(_rawData.putIfAbsent(_valuesMapKey, () => <String, dynamic>{}));
+  Map<dynamic, dynamic> get _rawChildren => _rawData.putIfAbsent(_childrenMapKey, () => <dynamic, dynamic>{}) as Map<dynamic, dynamic>;
+  Map<dynamic, dynamic> get _rawValues => _rawData.putIfAbsent(_valuesMapKey, () => <dynamic, dynamic>{}) as Map<dynamic, dynamic>;
 
   /// Called to signal that this bucket and all its descendants are no longer
   /// part of the current restoration data and must not be used anymore.

@@ -66,7 +66,6 @@ void main() {
   test('child bucket values', () {
     final MockRestorationManager manager = MockRestorationManager();
     final Map<String, dynamic> rootRawData = _createRawDataSet();
-    final Map<String, dynamic> childRawData = castToMap<String, dynamic>(rootRawData[childrenMapKey]['child1']);
     final Object debugOwner = Object();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rootRawData);
     final RestorationBucket child = RestorationBucket.child(
@@ -88,7 +87,7 @@ void main() {
     expect(manager.updateScheduled, isTrue);
     expect(child.get<int>(const RestorationId('foo')), 44);
     manager.runFinalizers();
-    expect(childRawData[valuesMapKey]['foo'], 44);
+    expect(rootRawData[childrenMapKey]['child1'][valuesMapKey]['foo'], 44);
     expect(manager.updateScheduled, isFalse);
 
     // Can add a new value.
@@ -96,7 +95,7 @@ void main() {
     expect(manager.updateScheduled, isTrue);
     expect(child.get<bool>(const RestorationId('value3')), true);
     manager.runFinalizers();
-    expect(childRawData[valuesMapKey]['value3'], true);
+    expect(rootRawData[childrenMapKey]['child1'][valuesMapKey]['value3'], true);
     expect(manager.updateScheduled, isFalse);
 
     // Can remove existing value.
@@ -104,7 +103,7 @@ void main() {
     expect(manager.updateScheduled, isTrue);
     expect(child.get<int>(const RestorationId('foo')), isNull); // Does not exist anymore.
     manager.runFinalizers();
-    expect(childRawData.containsKey('foo'), isFalse);
+    expect(rootRawData[childrenMapKey]['child1'].containsKey('foo'), isFalse);
     expect(manager.updateScheduled, isFalse);
 
     // Removing non-existing value is no-op.
@@ -116,8 +115,8 @@ void main() {
     expect(manager.updateScheduled, isTrue);
     expect(child.get<int>(const RestorationId('value4')), null);
     manager.runFinalizers();
-    expect(childRawData[valuesMapKey].containsKey('value4'), isTrue);
-    expect(childRawData[valuesMapKey]['value4'], null);
+    expect(rootRawData[childrenMapKey]['child1'][valuesMapKey].containsKey('value4'), isTrue);
+    expect(rootRawData[childrenMapKey]['child1'][valuesMapKey]['value4'], null);
     expect(manager.updateScheduled, isFalse);
   });
 

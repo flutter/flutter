@@ -56,12 +56,12 @@ class TestRestorationManager extends RestorationManager {
   }
 
   @override
-  Future<Map<String, dynamic>> retrieveFromEngine() async {
+  Future<Map<dynamic, dynamic>> retrieveFromEngine() async {
     return decodeRestorationData(_restorationData.binary);
   }
 
   @override
-  Future<void> sendToEngine(Map<String, dynamic> rawData) async {
+  Future<void> sendToEngine(Map<dynamic, dynamic> rawData) async {
     _restorationData = TestRestorationData._(encodeRestorationData(rawData));
   }
 }

@@ -39,12 +39,12 @@ class MockRestorationManager extends TestRestorationManager {
   }
 
   @override
-  Future<void> sendToEngine(Map<String, dynamic> rawData) {
+  Future<void> sendToEngine(Map<dynamic, dynamic> rawData) {
     throw UnimplementedError('unimplemented in mock');
   }
 
   @override
-  Future<Map<String, dynamic>> retrieveFromEngine() {
+  Future<Map<dynamic, dynamic>> retrieveFromEngine() {
     throw UnimplementedError('unimplemented in mock');
   }
 

@@ -7,7 +7,6 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -172,9 +171,7 @@ void main() {
       expect(callsToEngine.single.method, 'put');
 
       final Uint8List dataSendToEngine = callsToEngine.single.arguments as Uint8List;
-      final Map<String, dynamic> decodedData = castToMap<String, dynamic>(
-        const StandardMessageCodec().decodeMessage(dataSendToEngine.buffer.asByteData(dataSendToEngine.offsetInBytes, dataSendToEngine.lengthInBytes)),
-      );
+      final Map<dynamic, dynamic> decodedData = const StandardMessageCodec().decodeMessage(dataSendToEngine.buffer.asByteData(dataSendToEngine.offsetInBytes, dataSendToEngine.lengthInBytes)) as Map<dynamic, dynamic>;
       expect(decodedData[valuesMapKey]['value1'], 10);
       expect(decodedData[valuesMapKey]['value2'], 'Hello');
 
