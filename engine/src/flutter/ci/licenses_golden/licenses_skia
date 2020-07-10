@@ -1,4 +1,4 @@
-Signature: 08851211b73fff32f715fd961858f6d3
+Signature: b63f90d0cdd71df9edf7508619ff94ce
 
 UNUSED LICENSES:
 
@@ -2037,6 +2037,7 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/bench/BenchLogger.cpp
 FILE: ../../../third_party/skia/bench/BenchLogger.h
 FILE: ../../../third_party/skia/bench/ChecksumBench.cpp
+FILE: ../../../third_party/skia/bench/FilteringBench.cpp
 FILE: ../../../third_party/skia/bench/GameBench.cpp
 FILE: ../../../third_party/skia/bench/GrMemoryPoolBench.cpp
 FILE: ../../../third_party/skia/bench/LineBench.cpp
