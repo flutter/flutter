@@ -75,6 +75,21 @@ void _testMessageLength({
 void main() {
   group('CommandHelp', () {
     group('toString', () {
+      testWithoutContext('ends with a resetBold when it has parenthetical text', () {
+        final Platform platform = FakePlatform(stdoutSupportsAnsi: true);
+        final AnsiTerminal terminal = AnsiTerminal(stdio: null, platform: platform);
+
+        final CommandHelpOption commandHelpOption = CommandHelpOption(
+          'tester',
+          'for testing',
+          platform: platform,
+          outputPreferences: OutputPreferences.test(showColor: true),
+          terminal: terminal,
+          logger: BufferLogger.test(),
+          inParenthesis: 'Parenthetical',
+        );
+        expect(commandHelpOption.toString(), endsWith(AnsiTerminal.resetBold));
+      });
 
       testWithoutContext('should have a bold command key', () {
         final CommandHelp commandHelp = _createCommandHelp(
