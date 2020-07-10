@@ -537,7 +537,7 @@ void main() {
   });
 
   group('close button', () {
-    Future<void> expectCloseIcon(WidgetTester tester, PageRoute<void> routeBuilder(), String type) async {
+    Future<void> expectCloseIcon(WidgetTester tester, ModalRoute<void> routeBuilder(), String type) async {
       const IconData expectedIcon = Icons.close;
       await tester.pumpWidget(
         MaterialApp(
@@ -582,6 +582,14 @@ void main() {
       );
     }
 
+    PopupRoute<void> customPopupRouteBuilder() {
+      return _CustomPopupRoute<void>(
+        builder: (BuildContext context) {
+          return Scaffold(appBar: AppBar(), body: const Text('Page 2'));
+        },
+      );
+    }
+
     testWidgets('Close button shows correctly', (WidgetTester tester) async {
       await expectCloseIcon(tester, materialRouteBuilder, 'materialRouteBuilder');
     }, variant: TargetPlatformVariant.all());
@@ -592,6 +600,10 @@ void main() {
 
     testWidgets('Close button shows correctly with custom page route', (WidgetTester tester) async {
       await expectCloseIcon(tester, customPageRouteBuilder, 'customPageRouteBuilder');
+    }, variant: TargetPlatformVariant.all());
+
+    testWidgets('Close button shows correctly with custom PopupRoute', (WidgetTester tester) async {
+      await expectCloseIcon(tester, customPopupRouteBuilder, 'customPopupRouteBuilder');
     }, variant: TargetPlatformVariant.all());
   });
 
@@ -2116,5 +2128,32 @@ class _CustomPageRoute<T> extends PageRoute<T> {
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     return child;
+  }
+}
+
+class _CustomPopupRoute<T> extends PopupRoute<T> {
+  _CustomPopupRoute({
+    @required this.builder,
+    RouteSettings settings = const RouteSettings(),
+  }) : assert(builder != null),
+       super(settings: settings);
+
+  final WidgetBuilder builder;
+
+  @override
+  Duration get transitionDuration => const Duration(milliseconds: 200);
+
+  @override
+  bool get barrierDismissible => true;
+
+  @override
+  Color get barrierColor => null;
+
+  @override
+  String get barrierLabel => null;
+
+  @override
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+    return builder(context);
   }
 }
