@@ -657,7 +657,7 @@ void main() {
       );
 
       final Offset location = tester.getCenter(find.text('test'));
-      final List<PointerEventPacket> records = <PointerEventPacket>[
+      final List<PointerEventPacket> packets = <PointerEventPacket>[
         PointerEventPacket(Duration.zero, <PointerEvent>[
           // Typically PointerAddedEvent is not used in testers, but for records
           // captured on a device it is usually what start a gesture.
@@ -694,7 +694,11 @@ void main() {
           )
         ])
       ];
-      await tester.handlePointerEventPacket(records);
+      final List<Duration> timeDiffs = await tester.handlePointerEventPacket(packets);
+      expect(timeDiffs.length, packets.length);
+      for(final Duration diff in timeDiffs) {
+        expect(diff, Duration.zero);
+      }
 
       const String b = '$kSecondaryMouseButton';
       for(int i = 0; i < logs.length; i++) {

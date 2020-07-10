@@ -411,7 +411,7 @@ abstract class WidgetController {
   /// these values are to zero the more faithful it is to the `records`.
   ///
   /// See [PointerEventPacket].
-  Future<List<Duration>> handlePointerEventPacket(List<PointerEventPacket> packet);
+  Future<List<Duration>> handlePointerEventPacket(List<PointerEventPacket> packets);
 
   /// Called to indicate that time should advance.
   ///
@@ -694,7 +694,9 @@ class LiveWidgetController extends WidgetController {
   }
 
   @override
-  Future<List<Duration>> handlePointerEventPacket(List<PointerEventPacket> packet) {
+  Future<List<Duration>> handlePointerEventPacket(List<PointerEventPacket> packets) {
+    // TODO(CareF): This will be implemented after we decide what should be the
+    // correct pumping strategy.
     throw UnimplementedError;
   }
 }

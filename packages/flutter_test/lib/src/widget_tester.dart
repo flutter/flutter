@@ -465,18 +465,18 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   }
 
   @override
-  Future<List<Duration>> handlePointerEventPacket(List<PointerEventPacket> packet) {
-    assert(packet != null);
-    assert(packet.isNotEmpty);
+  Future<List<Duration>> handlePointerEventPacket(List<PointerEventPacket> packets) {
+    assert(packets != null);
+    assert(packets.isNotEmpty);
     return TestAsyncUtils.guard<List<Duration>>(() async {
       // hitTestHistory is an equivalence of _hitTests in [GestureBinding]
       final Map<int, HitTestResult> hitTestHistory = <int, HitTestResult>{};
       final List<Duration> handleTimeStampDiff = <Duration>[];
       DateTime startTime;
-      for (final PointerEventPacket packet in packet) {
+      for (final PointerEventPacket packet in packets) {
         final DateTime now = binding.clock.now();
         startTime ??= now;
-        // So that the first event is promised to received a zero timeDiff
+        // So that the first event is promised to receive a zero timeDiff
         final Duration timeDiff = packet.timeStamp - now.difference(startTime);
         if (timeDiff.isNegative) {
           // Flush all past events
@@ -488,18 +488,17 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
           // TODO(CareF): reconsider the pumping strategy after
           // https://github.com/flutter/flutter/issues/60739 is fixed
           await binding.pump();
-          await binding.executeLater(timeDiff, () async {
-            handleTimeStampDiff.add(
-              packet.timeStamp - binding.clock.now().difference(startTime),
-            );
-            for (final PointerEvent event in packet.events) {
-              _handlePointerEvent(event, hitTestHistory);
-            }
-          });
+          await binding.delayed(timeDiff);
+          handleTimeStampDiff.add(
+            packet.timeStamp - binding.clock.now().difference(startTime),
+          );
+          for (final PointerEvent event in packet.events) {
+            _handlePointerEvent(event, hitTestHistory);
+          }
         }
       }
       await binding.pump();
-      // This make sure that a gesture is completed, with no more pointers
+      // This makes sure that a gesture is completed, with no more pointers
       // active.
       assert(hitTestHistory.isEmpty);
       return handleTimeStampDiff;
