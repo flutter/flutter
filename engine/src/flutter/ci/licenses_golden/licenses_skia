@@ -1,4 +1,4 @@
-Signature: e49c9c554a9e530ceeb05109f84c8c7b
+Signature: 964bda7fdf8851c2cd2d8d5274171bae
 
 UNUSED LICENSES:
 
@@ -5718,6 +5718,7 @@ ORIGIN: ../../../third_party/skia/fuzz/oss_fuzz/FuzzAPISVGCanvas.cpp + ../../../
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzAPISVGCanvas.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzSVG.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzSkRuntimeEffect.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2020 Google, LLC
 
