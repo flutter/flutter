@@ -192,4 +192,3 @@ FlutterTesterDevices setUpFlutterTesterDevices() {
 
 class MockBuildSystem extends Mock implements BuildSystem {}
 class MockFlutterVersion extends Mock implements FlutterVersion {}
-
