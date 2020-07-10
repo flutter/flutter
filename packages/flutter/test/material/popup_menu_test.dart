@@ -837,6 +837,7 @@ void main() {
   });
 
   testWidgets('disabled PopupMenuItem has correct semantics', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/45044.
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       MaterialApp(
