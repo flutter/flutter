@@ -3380,7 +3380,6 @@ class IndexedStack extends Stack {
     List<Widget> children = const <Widget>[],
   }) : super(key: key, alignment: alignment, textDirection: textDirection, fit: sizing, children: _IndexedStackScope.wrapAll(children, index ?? 0));
 
-
   /// Visits the _IndexedStackScope widget ancestors of the given element and add
   /// dependencies.
   ///
