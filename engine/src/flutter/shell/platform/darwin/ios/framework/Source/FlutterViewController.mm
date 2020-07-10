@@ -111,22 +111,26 @@ typedef enum UIAccessibilityContrast : NSInteger {
   return self;
 }
 
+- (void)sharedSetupWithProject:(nullable FlutterDartProject*)project {
+  _viewOpaque = YES;
+  _weakFactory = std::make_unique<fml::WeakPtrFactory<FlutterViewController>>(self);
+  _engine.reset([[FlutterEngine alloc] initWithName:@"io.flutter"
+                                            project:project
+                             allowHeadlessExecution:self.engineAllowHeadlessExecution]);
+  _flutterView.reset([[FlutterView alloc] initWithDelegate:_engine opaque:self.isViewOpaque]);
+  [_engine.get() createShell:nil libraryURI:nil];
+  _engineNeedsLaunch = YES;
+  _ongoingTouches = [[NSMutableSet alloc] init];
+  [self loadDefaultSplashScreenView];
+  [self performCommonViewControllerInitialization];
+}
+
 - (instancetype)initWithProject:(nullable FlutterDartProject*)project
                         nibName:(nullable NSString*)nibName
                          bundle:(nullable NSBundle*)nibBundle {
   self = [super initWithNibName:nibName bundle:nibBundle];
   if (self) {
-    _viewOpaque = YES;
-    _weakFactory = std::make_unique<fml::WeakPtrFactory<FlutterViewController>>(self);
-    _engine.reset([[FlutterEngine alloc] initWithName:@"io.flutter"
-                                              project:project
-                               allowHeadlessExecution:NO]);
-    _flutterView.reset([[FlutterView alloc] initWithDelegate:_engine opaque:self.isViewOpaque]);
-    [_engine.get() createShell:nil libraryURI:nil];
-    _engineNeedsLaunch = YES;
-    _ongoingTouches = [[NSMutableSet alloc] init];
-    [self loadDefaultSplashScreenView];
-    [self performCommonViewControllerInitialization];
+    [self sharedSetupWithProject:project];
   }
 
   return self;
@@ -137,7 +141,15 @@ typedef enum UIAccessibilityContrast : NSInteger {
 }
 
 - (instancetype)initWithCoder:(NSCoder*)aDecoder {
-  return [self initWithProject:nil nibName:nil bundle:nil];
+  self = [super initWithCoder:aDecoder];
+  return self;
+}
+
+- (void)awakeFromNib {
+  [super awakeFromNib];
+  if (!_engine.get()) {
+    [self sharedSetupWithProject:nil];
+  }
 }
 
 - (instancetype)init {
