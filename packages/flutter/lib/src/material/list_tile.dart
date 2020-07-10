@@ -689,7 +689,7 @@ class ListTile extends StatelessWidget {
   /// of lines.
   ///
   /// The subtitle's default [TextStyle] depends on [TextTheme.bodyText2] except
-  /// [TextStyle.color]. The [TextStyle.color] depends on the value of [enabled],
+  /// [TextStyle.color]. The [TextStyle.color] depends on the value of [enabled]
   /// and [selected].
   ///
   /// When [enabled] is false, the text color is set to [ThemeData.disabledColor].
