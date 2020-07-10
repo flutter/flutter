@@ -441,19 +441,20 @@ class TestGesture {
 /// A record of input [PointerEvent] list with the timeStamp of when it is
 /// injected.
 ///
-/// The [timeStamp] is used to indicate the time when the pack is received.
+/// The [timeDelay] is used to indicate the time when the event packet should
+/// be sent.
 ///
 /// This is a simulation of how the framework is receiving input events from
 /// the engine. See [GestureBinding] and [PointerDataPacket].
 class PointerEventRecord {
   /// Creates a pack of [PointerEvent]s.
-  PointerEventRecord(this.timeStamp, this.events);
+  PointerEventRecord(this.timeDelay, this.events);
 
-  /// The time stamp of when the event record is received.
+  /// The time delay of when the event record should be sent.
   ///
   /// This value is used as the time delay relative to the start of
   /// [WidgetTester.handlePointerEventRecord] call.
-  final Duration timeStamp;
+  final Duration timeDelay;
 
   /// The event list of the record.
   ///

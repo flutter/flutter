@@ -403,12 +403,13 @@ abstract class WidgetController {
   /// A simulator of how the framework handles a series of [PointerEvent]s
   /// received from the Flutter engine.
   ///
-  /// The [PointerEventRecord.timeStamp] is used as the time delay of the events
+  /// The [PointerEventRecord.timeDelay] is used as the time delay of the events
   /// injection relative to the starting point of the method call.
   ///
-  /// Returns a list of the difference between [PointerEventRecord.timeStamp]
-  /// and the real timestamp when the event record is processed. The closer
-  /// these values are to zero the more faithful it is to the `records`.
+  /// Returns a list of the difference between [PointerEventRecord.timeDelay]
+  /// and the real delay time when the [PointerEventRecord.events] are processed.
+  /// The closer these values are to zero the more faithful it is to the
+  /// `records`.
   ///
   /// See [PointerEventRecord].
   Future<List<Duration>> handlePointerEventRecord(List<PointerEventRecord> records);

@@ -696,19 +696,16 @@ void main() {
       ];
       final List<Duration> timeDiffs = await tester.handlePointerEventRecord(records);
       expect(timeDiffs.length, records.length);
-      for(final Duration diff in timeDiffs) {
+      for (final Duration diff in timeDiffs) {
         expect(diff, Duration.zero);
       }
 
       const String b = '$kSecondaryMouseButton';
-      for(int i = 0; i < logs.length; i++) {
-        if (i == 0)
-          expect(logs[i], 'down $b');
-        else if (i != logs.length - 1)
-          expect(logs[i], 'move $b');
-        else
-          expect(logs[i], 'up $b');
+      expect(logs.first, 'down $b');
+      for (int i = 1; i < logs.length - 1; i++) {
+        expect(logs[i], 'move $b');
       }
+      expect(logs.last, 'up $b');
   });
 
   group('runAsync', () {

@@ -477,7 +477,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
         final DateTime now = binding.clock.now();
         startTime ??= now;
         // So that the first event is promised to receive a zero timeDiff
-        final Duration timeDiff = record.timeStamp - now.difference(startTime);
+        final Duration timeDiff = record.timeDelay - now.difference(startTime);
         if (timeDiff.isNegative) {
           // Flush all past events
           handleTimeStampDiff.add(timeDiff);
@@ -490,7 +490,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
           await binding.pump();
           await binding.delayed(timeDiff);
           handleTimeStampDiff.add(
-            record.timeStamp - binding.clock.now().difference(startTime),
+            record.timeDelay - binding.clock.now().difference(startTime),
           );
           for (final PointerEvent event in record.events) {
             _handlePointerEvent(event, hitTestHistory);
