@@ -6,15 +6,20 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'android/android_device_discovery.dart';
+import 'android/android_sdk.dart';
 import 'android/android_workflow.dart';
 import 'application_package.dart';
 import 'artifacts.dart';
+import 'base/config.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
+import 'base/logger.dart';
+import 'base/platform.dart';
 import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
@@ -24,11 +29,14 @@ import 'fuchsia/fuchsia_sdk.dart';
 import 'fuchsia/fuchsia_workflow.dart';
 import 'globals.dart' as globals;
 import 'ios/devices.dart';
+import 'ios/ios_workflow.dart';
 import 'ios/simulators.dart';
 import 'linux/linux_device.dart';
 import 'macos/macos_device.dart';
+import 'macos/xcode.dart';
 import 'project.dart';
 import 'tester/flutter_tester.dart';
+import 'version.dart';
 import 'web/web_device.dart';
 import 'windows/windows_device.dart';
 
@@ -269,42 +277,68 @@ abstract class DeviceManager {
 }
 
 class FlutterDeviceManager extends DeviceManager {
-  @override
-  final List<DeviceDiscovery> deviceDiscoverers = <DeviceDiscovery>[
+  FlutterDeviceManager({
+    @required Logger logger,
+    @required Platform platform,
+    @required ProcessManager processManager,
+    @required FileSystem fileSystem,
+    @required AndroidSdk androidSdk,
+    @required FeatureFlags featureFlags,
+    @required IOSSimulatorUtils iosSimulatorUtils,
+    @required XCDevice xcDevice,
+    @required AndroidWorkflow androidWorkflow,
+    @required IOSWorkflow iosWorkflow,
+    @required FuchsiaWorkflow fuchsiaWorkflow,
+    @required FlutterVersion flutterVersion,
+    @required Config config,
+    @required Artifacts artifacts,
+  }) : deviceDiscoverers =  <DeviceDiscovery>[
     AndroidDevices(
-      logger: globals.logger,
-      androidSdk: globals.androidSdk,
+      logger: logger,
+      androidSdk: androidSdk,
       androidWorkflow: androidWorkflow,
-      processManager: globals.processManager,
+      processManager: processManager,
     ),
     IOSDevices(
-      platform: globals.platform,
-      xcdevice: globals.xcdevice,
-      iosWorkflow: globals.iosWorkflow,
-      logger: globals.logger,
+      platform: platform,
+      xcdevice: xcDevice,
+      iosWorkflow: iosWorkflow,
+      logger: logger,
     ),
-    IOSSimulators(iosSimulatorUtils: globals.iosSimulatorUtils),
+    IOSSimulators(
+      iosSimulatorUtils: iosSimulatorUtils,
+    ),
     FuchsiaDevices(
       fuchsiaSdk: fuchsiaSdk,
-      logger: globals.logger,
+      logger: logger,
       fuchsiaWorkflow: fuchsiaWorkflow,
-      platform: globals.platform,
+      platform: platform,
     ),
-    FlutterTesterDevices(),
+    FlutterTesterDevices(
+      fileSystem: fileSystem,
+      flutterVersion: flutterVersion,
+      processManager: processManager,
+      config: config,
+      logger: logger,
+      artifacts: artifacts,
+    ),
     MacOSDevices(),
     LinuxDevices(
-      platform: globals.platform,
+      platform: platform,
       featureFlags: featureFlags,
     ),
     WindowsDevices(),
     WebDevices(
       featureFlags: featureFlags,
-      fileSystem: globals.fs,
-      platform: globals.platform,
-      processManager: globals.processManager,
-      logger: globals.logger,
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager,
+      logger: logger,
     ),
   ];
+
+  @override
+  final List<DeviceDiscovery> deviceDiscoverers;
 }
 
 /// An abstract class to discover and enumerate a specific type of devices.

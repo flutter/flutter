@@ -175,7 +175,7 @@ abstract class Logger {
 
 class StdoutLogger extends Logger {
   StdoutLogger({
-    @required AnsiTerminal terminal,
+    @required Terminal terminal,
     @required Stdio stdio,
     @required OutputPreferences outputPreferences,
     @required TimeoutConfiguration timeoutConfiguration,
@@ -188,7 +188,7 @@ class StdoutLogger extends Logger {
       _stopwatchFactory = stopwatchFactory;
 
   @override
-  final AnsiTerminal _terminal;
+  final Terminal _terminal;
   @override
   final OutputPreferences _outputPreferences;
   @override
@@ -345,7 +345,7 @@ class StdoutLogger extends Logger {
 /// they will show up as the unrepresentable character symbol '�'.
 class WindowsStdoutLogger extends StdoutLogger {
   WindowsStdoutLogger({
-    @required AnsiTerminal terminal,
+    @required Terminal terminal,
     @required Stdio stdio,
     @required OutputPreferences outputPreferences,
     @required TimeoutConfiguration timeoutConfiguration,
@@ -1006,7 +1006,7 @@ class AnsiStatus extends AnsiSpinner {
     this.padding = kDefaultStatusPadding,
     @required Duration timeout,
     @required Stopwatch stopwatch,
-    @required AnsiTerminal terminal,
+    @required Terminal terminal,
     VoidCallback onFinish,
     Stdio stdio,
     TimeoutConfiguration timeoutConfiguration,
