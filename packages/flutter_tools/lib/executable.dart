@@ -134,29 +134,19 @@ Future<void> main(List<String> args) async {
        WebRunnerFactory: () => DwdsWebRunnerFactory(),
        // The mustache dependency is different in google3
        TemplateRenderer: () => const MustacheTemplateRenderer(),
-       if (daemon)
-        Logger: () => NotifyingLogger(
+       Logger: () {
+        final LoggerFactory loggerFactory = LoggerFactory(
+          outputPreferences: globals.outputPreferences,
+          terminal: globals.terminal,
+          stdio: globals.stdio,
+          timeoutConfiguration: timeoutConfiguration,
+        );
+        return loggerFactory.createLogger(
+          daemon: daemon,
+          machine: runMachine,
           verbose: verbose,
-          parent: VerboseLogger(StdoutLogger(
-            timeoutConfiguration: timeoutConfiguration,
-            stdio: globals.stdio,
-            terminal: globals.terminal,
-            outputPreferences: globals.outputPreferences,
-          ),
-        ))
-       else if (verbose && !muteCommandLogging)
-        Logger: () => VerboseLogger(StdoutLogger(
-          timeoutConfiguration: timeoutConfiguration,
-          stdio: globals.stdio,
-          terminal: globals.terminal,
-          outputPreferences: globals.outputPreferences,
-        ))
-      else if (runMachine)
-        Logger: () => AppRunLogger(parent: StdoutLogger(
-          timeoutConfiguration: timeoutConfiguration,
-          stdio: globals.stdio,
-          terminal: globals.terminal,
-          outputPreferences: globals.outputPreferences,
-        ))
+          windows: globals.platform.isWindows,
+        );
+       }
      });
 }

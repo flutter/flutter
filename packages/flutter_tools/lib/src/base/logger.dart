@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import '../base/context.dart';
+import '../commands/daemon.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
 import 'io.dart';
@@ -48,6 +49,66 @@ class TimeoutConfiguration {
 }
 
 typedef VoidCallback = void Function();
+
+/// An abstraction for instantiation of the correct logger type.
+///
+/// Our logger class hierarchy and runtime requirements are overly complicated.
+class LoggerFactory {
+  LoggerFactory({
+    @required Terminal terminal,
+    @required Stdio stdio,
+    @required OutputPreferences outputPreferences,
+    @required TimeoutConfiguration timeoutConfiguration,
+    StopwatchFactory stopwatchFactory = const StopwatchFactory(),
+  }) : _terminal = terminal,
+       _stdio = stdio,
+       _timeoutConfiguration = timeoutConfiguration,
+       _stopwatchFactory = stopwatchFactory,
+       _outputPreferences = outputPreferences;
+
+  final Terminal _terminal;
+  final Stdio _stdio;
+  final TimeoutConfiguration _timeoutConfiguration;
+  final StopwatchFactory _stopwatchFactory;
+  final OutputPreferences _outputPreferences;
+
+  /// Create the appropriate logger for the current platform and configuration.
+  Logger createLogger({
+    @required bool verbose,
+    @required bool machine,
+    @required bool daemon,
+    @required bool windows,
+  }) {
+    Logger logger;
+    if (windows) {
+      logger = WindowsStdoutLogger(
+        terminal: _terminal,
+        stdio: _stdio,
+        outputPreferences: _outputPreferences,
+        timeoutConfiguration: _timeoutConfiguration,
+        stopwatchFactory: _stopwatchFactory,
+      );
+    } else {
+      logger = StdoutLogger(
+        terminal: _terminal,
+        stdio: _stdio,
+        outputPreferences: _outputPreferences,
+        timeoutConfiguration: _timeoutConfiguration,
+        stopwatchFactory: _stopwatchFactory
+      );
+      if (verbose) {
+        logger = VerboseLogger(logger, stopwatchFactory: _stopwatchFactory);
+      }
+    }
+    if (daemon) {
+      return NotifyingLogger(verbose: verbose, parent: logger);
+    }
+    if (machine) {
+      return AppRunLogger(parent: logger);
+    }
+    return logger;
+  }
+}
 
 abstract class Logger {
   bool get isVerbose => false;
@@ -175,7 +236,7 @@ abstract class Logger {
 
 class StdoutLogger extends Logger {
   StdoutLogger({
-    @required AnsiTerminal terminal,
+    @required Terminal terminal,
     @required Stdio stdio,
     @required OutputPreferences outputPreferences,
     @required TimeoutConfiguration timeoutConfiguration,
@@ -188,7 +249,7 @@ class StdoutLogger extends Logger {
       _stopwatchFactory = stopwatchFactory;
 
   @override
-  final AnsiTerminal _terminal;
+  final Terminal _terminal;
   @override
   final OutputPreferences _outputPreferences;
   @override
@@ -345,7 +406,7 @@ class StdoutLogger extends Logger {
 /// they will show up as the unrepresentable character symbol '�'.
 class WindowsStdoutLogger extends StdoutLogger {
   WindowsStdoutLogger({
-    @required AnsiTerminal terminal,
+    @required Terminal terminal,
     @required Stdio stdio,
     @required OutputPreferences outputPreferences,
     @required TimeoutConfiguration timeoutConfiguration,
@@ -1006,7 +1067,7 @@ class AnsiStatus extends AnsiSpinner {
     this.padding = kDefaultStatusPadding,
     @required Duration timeout,
     @required Stopwatch stopwatch,
-    @required AnsiTerminal terminal,
+    @required Terminal terminal,
     VoidCallback onFinish,
     Stdio stdio,
     TimeoutConfiguration timeoutConfiguration,
