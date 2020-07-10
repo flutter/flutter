@@ -52,41 +52,41 @@ int hashValues(
   int result = 0;
   result = _Jenkins.combine(result, arg01);
   result = _Jenkins.combine(result, arg02);
-  if (arg03 != _hashEnd) {
+  if (!identical(arg03, _hashEnd)) {
     result = _Jenkins.combine(result, arg03);
-    if (arg04 != _hashEnd) {
+    if (!identical(arg04, _hashEnd)) {
       result = _Jenkins.combine(result, arg04);
-      if (arg05 != _hashEnd) {
+      if (!identical(arg05, _hashEnd)) {
         result = _Jenkins.combine(result, arg05);
-        if (arg06 != _hashEnd) {
+        if (!identical(arg06, _hashEnd)) {
           result = _Jenkins.combine(result, arg06);
-          if (arg07 != _hashEnd) {
+          if (!identical(arg07, _hashEnd)) {
             result = _Jenkins.combine(result, arg07);
-            if (arg08 != _hashEnd) {
+            if (!identical(arg08, _hashEnd)) {
               result = _Jenkins.combine(result, arg08);
-              if (arg09 != _hashEnd) {
+              if (!identical(arg09, _hashEnd)) {
                 result = _Jenkins.combine(result, arg09);
-                if (arg10 != _hashEnd) {
+                if (!identical(arg10, _hashEnd)) {
                   result = _Jenkins.combine(result, arg10);
-                  if (arg11 != _hashEnd) {
+                  if (!identical(arg11, _hashEnd)) {
                     result = _Jenkins.combine(result, arg11);
-                    if (arg12 != _hashEnd) {
+                    if (!identical(arg12, _hashEnd)) {
                       result = _Jenkins.combine(result, arg12);
-                      if (arg13 != _hashEnd) {
+                      if (!identical(arg13, _hashEnd)) {
                         result = _Jenkins.combine(result, arg13);
-                        if (arg14 != _hashEnd) {
+                        if (!identical(arg14, _hashEnd)) {
                           result = _Jenkins.combine(result, arg14);
-                          if (arg15 != _hashEnd) {
+                          if (!identical(arg15, _hashEnd)) {
                             result = _Jenkins.combine(result, arg15);
-                            if (arg16 != _hashEnd) {
+                            if (!identical(arg16, _hashEnd)) {
                               result = _Jenkins.combine(result, arg16);
-                              if (arg17 != _hashEnd) {
+                              if (!identical(arg17, _hashEnd)) {
                                 result = _Jenkins.combine(result, arg17);
-                                if (arg18 != _hashEnd) {
+                                if (!identical(arg18, _hashEnd)) {
                                   result = _Jenkins.combine(result, arg18);
-                                  if (arg19 != _hashEnd) {
+                                  if (!identical(arg19, _hashEnd)) {
                                     result = _Jenkins.combine(result, arg19);
-                                    if (arg20 != _hashEnd) {
+                                    if (!identical(arg20, _hashEnd)) {
                                       result = _Jenkins.combine(result, arg20);
                                       // I can see my house from here!
                                     }
