@@ -56,6 +56,6 @@ source_set("wuffs") {
   ]
 
   sources = [
-    "release/c/wuffs-v0.2.c",
+    "release/c/wuffs-v0.3.c",
   ]
 }
