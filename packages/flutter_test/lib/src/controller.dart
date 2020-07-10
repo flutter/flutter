@@ -722,7 +722,8 @@ class LiveWidgetController extends WidgetController {
     assert(records != null);
     assert(records.isNotEmpty);
     return TestAsyncUtils.guard<List<Duration>>(() async {
-      // hitTestHistory is an equivalence of _hitTests in [GestureBinding]
+      // hitTestHistory is an equivalence of _hitTests in [GestureBinding],
+      // used as state for all pointers which are currently down.
       final Map<int, HitTestResult> hitTestHistory = <int, HitTestResult>{};
       final List<Duration> handleTimeStampDiff = <Duration>[];
       DateTime startTime;
@@ -732,6 +733,8 @@ class LiveWidgetController extends WidgetController {
         // So that the first event is promised to receive a zero timeDiff
         final Duration timeDiff = record.timeDelay - now.difference(startTime);
         if (timeDiff.isNegative) {
+          // This happens when something (e.g. GC) takes a long time during the
+          // processing of the events.
           // Flush all past events
           handleTimeStampDiff.add(timeDiff);
           for (final PointerEvent event in record.events) {
@@ -740,6 +743,9 @@ class LiveWidgetController extends WidgetController {
         } else {
           await Future<void>.delayed(timeDiff);
           handleTimeStampDiff.add(
+            // Recalculating the time diff for getting exact time when the event
+            // packet is sent. For a perfect Future.delayed like the one in a
+            // fake async this new diff should be zero.
             record.timeDelay - clock.now().difference(startTime),
           );
           for (final PointerEvent event in record.events) {
@@ -754,8 +760,8 @@ class LiveWidgetController extends WidgetController {
     });
   }
 
-  // This is a parallel implementation of [GestureBinding._handlePointerEvent]
-  // to make compatible with test bindings.
+  // This method is almost identical to [GestureBinding._handlePointerEvent]
+  // to replicate the bahavior of the real binding.
   void _handlePointerEvent(
     PointerEvent event,
     Map<int, HitTestResult> _hitTests
