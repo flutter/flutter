@@ -13,6 +13,8 @@ import android.view.MotionEvent;
 import java.util.HashMap;
 
 import io.flutter.embedding.android.FlutterActivity;
+import io.flutter.embedding.engine.dart.DartExecutor;
+import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugins.GeneratedPluginRegistrant;
@@ -28,14 +30,15 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
     private MethodChannel.Result permissionResult;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        getFlutterView().getPluginRegistry()
-                .registrarFor("io.flutter.integration.platform_views").platformViewRegistry()
-                .registerViewFactory("simple_view", new SimpleViewFactory(getFlutterView()));
-        mMethodChannel = new MethodChannel(this.getFlutterView(), "android_views_integration");
+    public void configureFlutterEngine(FlutterEngine flutterEngine) {
+        DartExecutor executor = flutterEngine.getDartExecutor();
+        flutterEngine
+            .getPlatformViewsController()
+            .getRegistry()
+            .registerViewFactory("simple_view", new SimpleViewFactory(executor));
+        mMethodChannel = new MethodChannel(executor, "android_views_integration");
         mMethodChannel.setMethodCallHandler(this);
-        mFlutterViewTouchPipe = new TouchPipe(mMethodChannel, getFlutterView());
+        mFlutterViewTouchPipe = new TouchPipe(mMethodChannel, findViewById(android.R.id.content));
     }
 
     @Override
@@ -67,7 +70,7 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
     @SuppressWarnings("unchecked")
     public void synthesizeEvent(MethodCall methodCall, MethodChannel.Result result) {
         MotionEvent event = MotionEventCodec.decode((HashMap<String, Object>) methodCall.arguments());
-        getFlutterView().dispatchTouchEvent(event);
+        findViewById(android.R.id.content).dispatchTouchEvent(event);
         result.success(null);
     }
 
