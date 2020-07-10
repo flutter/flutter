@@ -1,4 +1,4 @@
-@ECHO off
+@ECHO on
 REM Copyright 2014 The Flutter Authors. All rights reserved.
 REM Use of this source code is governed by a BSD-style license that can be
 REM found in the LICENSE file.
@@ -94,9 +94,11 @@ GOTO :after_subroutine
     ECHO zzz2
     REM Escape apostrophes from the executable path
     SET "update_dart_bin=!update_dart_bin:'=''!"
-    ECHO "zzz3 %powershell_executable% %update_dart_bin%"
+    ECHO zzz3
+    %powershell_executable% Set-PSDebug -Trace 2
+    ECHO "zzz4 %powershell_executable% %update_dart_bin%"
     %powershell_executable% -ExecutionPolicy Bypass -Command "Unblock-File -Path '%update_dart_bin%'; & '%update_dart_bin%'"
-    ECHO zzz4
+    ECHO zzz5
     IF "%ERRORLEVEL%" NEQ "0" (
       ECHO Error: Unable to update Dart SDK. Retrying...
       timeout /t 5 /nobreak
