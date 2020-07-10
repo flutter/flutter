@@ -482,8 +482,8 @@ void main() {
             expect(lines[1], equals(''));
 
             // Verify that stopping or canceling multiple times throws.
-            expect(() { ansiStatus.cancel(); }, throwsAssertionError);
-            expect(() { ansiStatus.stop(); }, throwsAssertionError);
+            expect(ansiStatus.cancel, throwsAssertionError);
+            expect(ansiStatus.stop, throwsAssertionError);
             done = true;
           });
           expect(done, isTrue);

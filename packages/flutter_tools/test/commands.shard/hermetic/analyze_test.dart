@@ -6,6 +6,7 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze_base.dart';
+import 'package:flutter_tools/src/dart/analysis.dart';
 
 import '../../src/common.dart';
 
@@ -42,6 +43,24 @@ void main() {
     // Ensure no exceptions
     inRepo(null, fileSystem);
     inRepo(<String>[], fileSystem);
+  });
+
+  testWithoutContext('AnalysisError from json write correct', () {
+    final Map<String, dynamic> json = <String, dynamic>{
+      'severity': 'INFO',
+      'type': 'TODO',
+      'location': <String, dynamic>{
+        'file': '/Users/.../lib/test.dart',
+        'offset': 362,
+        'length': 72,
+        'startLine': 15,
+        'startColumn': 4
+      },
+      'message': 'Prefer final for variable declarations if they are not reassigned.',
+      'hasFix': false
+    };
+    expect(WrittenError.fromJson(json).toString(),
+        '[info] Prefer final for variable declarations if they are not reassigned (/Users/.../lib/test.dart:15:4)');
   });
 }
 

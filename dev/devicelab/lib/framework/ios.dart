@@ -7,6 +7,8 @@ import 'dart:convert';
 
 import 'utils.dart';
 
+typedef SimulatorFunction = Future<void> Function(String deviceId);
+
 void _checkExitCode(int code) {
   if (code != 0) {
     throw Exception(
@@ -98,4 +100,86 @@ Future<bool> containsBitcode(String pathToBinary) async {
     }
   });
   return !emptyBitcodeMarkerFound;
+}
+
+/// Creates and boots a new simulator, passes the new simulator's identifier to
+/// `testFunction`, then shuts down and deletes simulator.
+Future<void> testWithNewiOSSimulator(
+  String deviceName,
+  SimulatorFunction testFunction, {
+  String deviceTypeId = 'com.apple.CoreSimulator.SimDeviceType.iPhone-11',
+}) async {
+  // Xcode 11.4 simctl create makes the runtime argument optional, and defaults to latest.
+  // TODO(jmagman): Remove runtime parsing when devicelab upgrades to Xcode 11.4 https://github.com/flutter/flutter/issues/54889
+  final String availableRuntimes = await eval(
+    'xcrun',
+    <String>[
+      'simctl',
+      'list',
+      'runtimes',
+    ],
+    workingDirectory: flutterDirectory.path,
+  );
+
+  String iOSSimRuntime;
+
+  final RegExp iOSRuntimePattern = RegExp(r'iOS .*\) - (.*)');
+
+  for (final String runtime in LineSplitter.split(availableRuntimes)) {
+    // These seem to be in order, so allow matching multiple lines so it grabs
+    // the last (hopefully latest) one.
+    final RegExpMatch iOSRuntimeMatch = iOSRuntimePattern.firstMatch(runtime);
+    if (iOSRuntimeMatch != null) {
+      iOSSimRuntime = iOSRuntimeMatch.group(1).trim();
+      continue;
+    }
+  }
+  if (iOSSimRuntime == null) {
+    throw 'No iOS simulator runtime found. Available runtimes:\n$availableRuntimes';
+  }
+
+  final String deviceId = await eval(
+    'xcrun',
+    <String>[
+      'simctl',
+      'create',
+      deviceName,
+      deviceTypeId,
+      iOSSimRuntime,
+    ],
+    workingDirectory: flutterDirectory.path,
+  );
+  await eval(
+    'xcrun',
+    <String>[
+      'simctl',
+      'boot',
+      deviceId,
+    ],
+    workingDirectory: flutterDirectory.path,
+  );
+
+  await testFunction(deviceId);
+
+  if (deviceId != null && deviceId != '') {
+    await eval(
+      'xcrun',
+      <String>[
+        'simctl',
+        'shutdown',
+        deviceId
+      ],
+      canFail: true,
+      workingDirectory: flutterDirectory.path,
+    );
+    await eval(
+      'xcrun',
+      <String>[
+        'simctl',
+        'delete',
+        deviceId],
+      canFail: true,
+      workingDirectory: flutterDirectory.path,
+    );
+  }
 }
