@@ -400,6 +400,20 @@ abstract class WidgetController {
     });
   }
 
+  /// A simulator of how the framework handles a series of [PointerEvent]s
+  /// received from the Flutter engine.
+  ///
+  /// The [PointerEventRecord.timeDelay] is used as the time delay of the events
+  /// injection relative to the starting point of the method call.
+  ///
+  /// Returns a list of the difference between [PointerEventRecord.timeDelay]
+  /// and the real delay time when the [PointerEventRecord.events] are processed.
+  /// The closer these values are to zero the more faithful it is to the
+  /// `records`.
+  ///
+  /// See [PointerEventRecord].
+  Future<List<Duration>> handlePointerEventRecord(List<PointerEventRecord> records);
+
   /// Called to indicate that time should advance.
   ///
   /// This is invoked by [flingFrom], for instance, so that the sequence of
@@ -678,5 +692,12 @@ class LiveWidgetController extends WidgetController {
       await Future<void>.delayed(duration);
     binding.scheduleFrame();
     await binding.endOfFrame;
+  }
+
+  @override
+  Future<List<Duration>> handlePointerEventRecord(List<PointerEventRecord> records) {
+    // TODO(CareF): This will be implemented after we decide what should be the
+    // correct pumping strategy.
+    throw UnimplementedError;
   }
 }
