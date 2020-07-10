@@ -9,14 +9,14 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Passing no ContainedButtonTheme returns defaults', (WidgetTester tester) async {
+  testWidgets('Passing no ElevatedButtonTheme returns defaults', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.from(colorScheme: colorScheme),
         home: Scaffold(
           body: Center(
-            child: ContainedButton(
+            child: ElevatedButton(
               onPressed: () { },
               child: const Text('button'),
             ),
@@ -26,7 +26,7 @@ void main() {
     );
 
     final Finder buttonMaterial = find.descendant(
-      of: find.byType(ContainedButton),
+      of: find.byType(ElevatedButton),
       matching: find.byType(Material),
     );
 
@@ -43,7 +43,7 @@ void main() {
     expect(material.textStyle.fontWeight, FontWeight.w500);
   });
 
-  group('[Theme, TextTheme, ContainedButton style overrides]', () {
+  group('[Theme, TextTheme, ElevatedButton style overrides]', () {
     const Color primaryColor = Color(0xff000001);
     const Color onSurfaceColor = Color(0xff000002);
     const Color shadowColor = Color(0xff000004);
@@ -60,7 +60,7 @@ void main() {
     const Duration animationDuration = Duration(milliseconds: 25);
     const bool enableFeedback = false;
 
-    final ButtonStyle style = ContainedButton.styleFrom(
+    final ButtonStyle style = ElevatedButton.styleFrom(
       primary: primaryColor,
       onPrimary: onPrimaryColor,
       onSurface: onSurfaceColor,
@@ -81,7 +81,7 @@ void main() {
     Widget buildFrame({ ButtonStyle buttonStyle, ButtonStyle themeStyle, ButtonStyle overallStyle }) {
       final Widget child = Builder(
         builder: (BuildContext context) {
-          return ContainedButton(
+          return ElevatedButton(
             style: buttonStyle,
             onPressed: () { },
             child: const Text('button'),
@@ -90,14 +90,14 @@ void main() {
       );
       return MaterialApp(
         theme: ThemeData.from(colorScheme: const ColorScheme.light()).copyWith(
-          containedButtonTheme: ContainedButtonThemeData(style: overallStyle),
+          elevatedButtonTheme: ElevatedButtonThemeData(style: overallStyle),
         ),
         home: Scaffold(
           body: Center(
-            // If the ContainedButtonTheme widget is present, it's used
-            // instead of the Theme's ThemeData.containedButtonTheme.
-            child: themeStyle == null ? child : ContainedButtonTheme(
-              data: ContainedButtonThemeData(style: themeStyle),
+            // If the ElevatedButtonTheme widget is present, it's used
+            // instead of the Theme's ThemeData.ElevatedButtonTheme.
+            child: themeStyle == null ? child : ElevatedButtonTheme(
+              data: ElevatedButtonThemeData(style: themeStyle),
               child: child,
             ),
           ),
@@ -106,12 +106,12 @@ void main() {
     }
 
     final Finder findMaterial = find.descendant(
-      of: find.byType(ContainedButton),
+      of: find.byType(ElevatedButton),
       matching: find.byType(Material),
     );
 
     final Finder findInkWell = find.descendant(
-      of: find.byType(ContainedButton),
+      of: find.byType(ElevatedButton),
       matching: find.byType(InkWell),
     );
 
@@ -138,7 +138,7 @@ void main() {
       expect(material.borderRadius, null);
       expect(material.shape, shape);
       expect(material.animationDuration, animationDuration);
-      expect(tester.getSize(find.byType(ContainedButton)), const Size(200, 200));
+      expect(tester.getSize(find.byType(ElevatedButton)), const Size(200, 200));
     }
 
     testWidgets('Button style overrides defaults', (WidgetTester tester) async {
