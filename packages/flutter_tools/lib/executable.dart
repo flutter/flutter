@@ -58,13 +58,14 @@ import 'src/web/web_runner.dart';
 ///
 /// This function is intended to be used from the `flutter` command line tool.
 Future<void> main(List<String> args) async {
-  final bool verbose = args.contains('-v') || args.contains('--verbose');
+  final bool veryVerbose = args.contains('-vv');
+  final bool verbose = args.contains('-v') || args.contains('--verbose') || veryVerbose;
 
   final bool doctor = (args.isNotEmpty && args.first == 'doctor') ||
       (args.length == 2 && verbose && args.last == 'doctor');
   final bool help = args.contains('-h') || args.contains('--help') ||
       (args.isNotEmpty && args.first == 'help') || (args.length == 1 && verbose);
-  final bool muteCommandLogging = help || doctor;
+  final bool muteCommandLogging = (help || doctor) && !veryVerbose;
   final bool verboseHelp = help && verbose;
   final bool daemon = args.contains('daemon');
   final bool runMachine = (args.contains('--machine') && args.contains('run')) ||
@@ -144,15 +145,22 @@ Future<void> main(List<String> args) async {
             outputPreferences: globals.outputPreferences,
           ),
         ))
-       else if (verbose && !muteCommandLogging)
-        Logger: () => VerboseLogger(StdoutLogger(
+       else if (runMachine && !verbose)
+        Logger: () => AppRunLogger(parent: StdoutLogger(
           timeoutConfiguration: timeoutConfiguration,
           stdio: globals.stdio,
           terminal: globals.terminal,
           outputPreferences: globals.outputPreferences,
         ))
-      else if (runMachine)
-        Logger: () => AppRunLogger(parent: StdoutLogger(
+       else if (runMachine && verbose)
+        Logger: () => AppRunLogger(parent: VerboseLogger(StdoutLogger(
+          timeoutConfiguration: timeoutConfiguration,
+          stdio: globals.stdio,
+          terminal: globals.terminal,
+          outputPreferences: globals.outputPreferences,
+        )))
+       else if (verbose && !muteCommandLogging)
+        Logger: () => VerboseLogger(StdoutLogger(
           timeoutConfiguration: timeoutConfiguration,
           stdio: globals.stdio,
           terminal: globals.terminal,
