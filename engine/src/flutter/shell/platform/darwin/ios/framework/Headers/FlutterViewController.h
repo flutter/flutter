@@ -79,6 +79,14 @@ FLUTTER_EXPORT
                          bundle:(nullable NSBundle*)nibBundle NS_DESIGNATED_INITIALIZER;
 
 /**
+ * Initializer that is called from loading a FlutterViewController from a XIB.
+ *
+ * See also:
+ * https://developer.apple.com/documentation/foundation/nscoding/1416145-initwithcoder?language=objc
+ */
+- (instancetype)initWithCoder:(NSCoder*)aDecoder NS_DESIGNATED_INITIALIZER;
+
+/**
  * Registers a callback that will be invoked when the Flutter view has been rendered.
  * The callback will be fired only once.
  *
@@ -193,6 +201,17 @@ FLUTTER_EXPORT
  * This is just a convenient way to get the |FlutterEngine|'s binary messenger.
  */
 @property(nonatomic, readonly) NSObject<FlutterBinaryMessenger>* binaryMessenger;
+
+/**
+ * If the `FlutterViewController` creates a `FlutterEngine`, this property
+ * determines if that `FlutterEngine` has `allowHeadlessExecution` set.
+ *
+ * The intention is that this is used with the XIB.  Otherwise, a
+ * `FlutterEngine` can just be sent to the init methods.
+ *
+ * See also: `-[FlutterEngine initWithName:project:allowHeadlessExecution:]`
+ */
+@property(nonatomic, readonly) BOOL engineAllowHeadlessExecution;
 
 @end
 
