@@ -127,6 +127,7 @@ class ElevatedButtonTheme extends InheritedTheme {
 }
 
 
+/// Please use [ElevatedButtonTheme].
 @Deprecated(
   'This class was briefly released with the wrong name. '
   'The correct name is ContainedButtonThemeData. '
@@ -134,19 +135,23 @@ class ElevatedButtonTheme extends InheritedTheme {
 )
 @immutable
 class ContainedButtonThemeData extends ElevatedButtonThemeData {
+  /// Please use [new ElevatedButtonTheme].
   const ContainedButtonThemeData({ ButtonStyle style }) : super(style: style);
 
+  /// Please use [ElevatedButtonTheme.lerp()].
   static ContainedButtonThemeData lerp(ContainedButtonThemeData a, ContainedButtonThemeData b, double t) {
     return ElevatedButtonThemeData.lerp(a, b, t) as ContainedButtonThemeData;
   }
 }
 
+/// Please use [ElevatedButtonThemeData].
 @Deprecated(
   'This class was briefly released with the wrong name. '
   'The correct name is ElevatedButtonTheme. '
   'This feature was deprecated after v1.20.0-2.0.pre.'
 )
 class ContainedButtonTheme extends ElevatedButtonTheme {
+  /// Please use [new ElevatedButtonThemeData].
   const ContainedButtonTheme({
     Key key,
     @required ContainedButtonThemeData data,

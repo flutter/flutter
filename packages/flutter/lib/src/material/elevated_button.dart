@@ -424,11 +424,13 @@ class _ElevatedButtonWithIconChild extends StatelessWidget {
   }
 }
 
+/// Please use [ElevatedButton].
 @Deprecated(
   'This class was briefly released with the wrong name. The correct name is ElevatedButton. '
   'This feature was deprecated after v1.20.0-2.0.pre.'
 )
 class ContainedButton extends ElevatedButton {
+  /// Please use [new ElevatedButton].
   const ContainedButton({
     Key key,
     @required VoidCallback onPressed,
@@ -449,6 +451,7 @@ class ContainedButton extends ElevatedButton {
     child: child,
   );
 
+  /// Please use [new ElevatedButton.icon].
   factory ContainedButton.icon({
     Key key,
     @required VoidCallback onPressed,
@@ -461,6 +464,7 @@ class ContainedButton extends ElevatedButton {
     @required Widget label,
   }) = _ContainedButtonWithIcon;
 
+  /// Please use [ElevatedButton.styleFrom].
   static ButtonStyle styleFrom({
     Color primary,
     Color onPrimary,
