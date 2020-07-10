@@ -149,7 +149,7 @@ Future<void> main(List<String> args) async {
         return loggerFactory.createLogger(
           daemon: daemon,
           machine: runMachine,
-          verbose: verbose,
+          verbose: verbose && !muteCommandLogging,
           windows: globals.platform.isWindows,
         );
        }
