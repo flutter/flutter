@@ -439,7 +439,7 @@ class FlutterDevice {
   Future<void> toggleInvertOversizedImages() async {
     final List<FlutterView> views = await vmService.getFlutterViews();
     for (final FlutterView view in views) {
-      await vmService.flutterInvertOversizedImages(
+      await vmService.flutterToggleInvertOversizedImages(
         isolateId: view.uiIsolate.id,
       );
     }
@@ -1303,8 +1303,8 @@ abstract class ResidentRunner {
         commandHelp.L.print();
         commandHelp.S.print();
         commandHelp.U.print();
-        commandHelp.exclamationPoint.print();
         commandHelp.i.print();
+        commandHelp.I.print();
         commandHelp.p.print();
         commandHelp.o.print();
         commandHelp.z.print();
@@ -1433,12 +1433,6 @@ class TerminalHandler {
   Future<bool> _commonTerminalInputHandler(String character) async {
     globals.printStatus(''); // the key the user tapped might be on this line
     switch(character) {
-      case '!':
-        if (residentRunner.supportsServiceProtocol && residentRunner.isRunningDebug) {
-          await residentRunner.debugToggleInvertOversizedImages();
-          return true;
-        }
-        return false;
       case 'a':
         if (residentRunner.supportsServiceProtocol) {
           await residentRunner.debugToggleProfileWidgetBuilds();
@@ -1465,9 +1459,14 @@ class TerminalHandler {
         residentRunner.printHelp(details: true);
         return true;
       case 'i':
-      case 'I':
         if (residentRunner.supportsServiceProtocol) {
           await residentRunner.debugToggleWidgetInspector();
+          return true;
+        }
+        return false;
+      case 'I':
+        if (residentRunner.supportsServiceProtocol && residentRunner.isRunningDebug) {
+          await residentRunner.debugToggleInvertOversizedImages();
           return true;
         }
         return false;

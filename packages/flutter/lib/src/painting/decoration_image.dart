@@ -489,23 +489,30 @@ void paintImage({
       if (debugInvertOversizedImages &&
           sizeInfo.decodedSizeInBytes > sizeInfo.displaySizeInBytes + debugImageOverheadAllowance) {
         final int overheadInKilobytes = (sizeInfo.decodedSizeInBytes - sizeInfo.displaySizeInBytes) ~/ 1024;
+        final int outputWidth = outputSize.width.toInt();
+        final int outputHeight = outputSize.height.toInt();
         FlutterError.reportError(FlutterErrorDetails(
           exception: 'Image $debugImageLabel has a display size of '
-            '${outputSize.width.toInt()}×${outputSize.height.toInt()} but a '
-            'decode size of ${image.width}×${image.height}, which '
-            'uses an additional ${overheadInKilobytes}kb.',
+            '$outputWidth×$outputHeight but a decode size of '
+            '${image.width}×${image.height}, which uses an additional '
+            '${overheadInKilobytes}kb.\n\n'
+            'Consider resizing the asset ahead of time, supplying a cacheWidth '
+            'parameter of $outputWidth, a cacheHeight parameter of '
+            '$outputHeight, or using a ResizeImage.',
           library: 'painting library',
           context: ErrorDescription('while painting an image'),
         ));
+        // Invert the colors of the canvas.
         canvas.saveLayer(
           destinationRect,
           Paint()..colorFilter = const ColorFilter.matrix(<double>[
             -1,  0,  0, 0, 255,
-            0, -1,  0, 0, 255,
-            0,  0, -1, 0, 255,
-            0,  0,  0, 1,   0,
+             0, -1,  0, 0, 255,
+             0,  0, -1, 0, 255,
+             0,  0,  0, 1,   0,
           ]),
         );
+        // Flip the canvas vertically.
         final double dy = -(rect.top + rect.height / 2.0);
         canvas.translate(0.0, -dy);
         canvas.scale(1.0, -1.0);
@@ -520,7 +527,6 @@ void paintImage({
       if (existingSizeInfo == null || existingSizeInfo.displaySizeInBytes < sizeInfo.displaySizeInBytes) {
         _pendingImageSizeInfo[sizeInfo.source] = sizeInfo;
       }
-      // _pendingImageSizeInfo.add(sizeInfo);
       if (debugOnPaintImage != null) {
         debugOnPaintImage(sizeInfo);
       }
@@ -538,7 +544,6 @@ void paintImage({
         );
         _pendingImageSizeInfo = <String, ImageSizeInfo>{};
       });
-
     }
   }
 

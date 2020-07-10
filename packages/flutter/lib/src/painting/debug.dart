@@ -129,13 +129,25 @@ PaintImageCallback debugOnPaintImage;
 
 /// If true, the framework will color invert and horizontally flip images that
 /// have been decoded to a size taking at least [debugImageOverheadAllowance]
-/// bytes more than necessary..
+/// bytes more than necessary.
 ///
-/// It will also [debugPrint] information about the image's decoded size and
-/// its display size, which can be used to apply `cacheHeight` or `cacheWidth`
-/// parameters. Developers using this flag should ensure that they are testing
-/// their application on appropriate devices and display sizes when using these
-/// parameters.
+/// It will also call [FlutterError.reportError] with information about the
+/// image's decoded size and its display size, which can be used resize the
+/// asset before shipping it, apply `cacheHeight` or `cacheWidth` parameters, or
+/// directly use a [ResizeImage]. Whenever possible, resizing the image asset
+/// itself should be preferred, to avoid unnecessary network traffic, disk space
+/// usage, and other memory overhead incurred during decoding.
+///
+/// Developers using this flag should test their application on appropriate
+/// devices and display sizes for their expected deployment targets when using
+/// these parameters. For example, an application that responsively resizes
+/// images for a desktop and mobile layout should avoid decoding all images at
+/// sizes appropriate for mobile when on desktop. Applications should also avoid
+/// animating these parameters, as each change will result in a newly decoded
+/// image. For example, an image that always grows into view should decode only
+/// at its largest size, whereas an image that normally is a thumbnail and then
+/// pops into view should be decoded at its smallest size for the thumbnail and
+/// the largest size when needed.
 ///
 /// This has no effect unless asserts are enabled.
 bool debugInvertOversizedImages = false;

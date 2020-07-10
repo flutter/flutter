@@ -36,9 +36,9 @@ class CommandHelp {
 
   final OutputPreferences _outputPreferences;
 
-  CommandHelpOption _exclamationPoint;
-  CommandHelpOption get exclamationPoint => _exclamationPoint ??= _makeOption(
-    '!',
+  CommandHelpOption _I;
+  CommandHelpOption get I => _I ??= _makeOption(
+    'I',
     'Toggle oversized image inversion $image.',
     'debugInvertOversizedImages',
   );

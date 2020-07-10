@@ -601,7 +601,7 @@ extension FlutterVmService on vm_service.VmService {
     @required String isolateId,
   }) => _flutterToggle('inspector.show', isolateId: isolateId);
 
-  Future<Map<String,dynamic>> flutterInvertOversizedImages({
+  Future<Map<String,dynamic>> flutterToggleInvertOversizedImages({
     @required String isolateId,
   }) => _flutterToggle('invertOversizedImages', isolateId: isolateId);
 

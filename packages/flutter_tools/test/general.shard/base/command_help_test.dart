@@ -51,7 +51,7 @@ void _testMessageLength({
   }
 
   expect(
-    commandHelp.exclamationPoint.toString().length,
+    commandHelp.I.toString().length,
     lessThanOrEqualTo(expectedWidth),
   );
   expect(commandHelp.L.toString().length, lessThanOrEqualTo(expectedWidth));

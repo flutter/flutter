@@ -364,6 +364,7 @@ class WindowsStdoutLogger extends StdoutLogger {
     final String windowsMessage = _terminal.supportsEmoji
       ? message
       : message.replaceAll('🔥', '')
+               .replaceAll('🖼️', '')
                .replaceAll('✗', 'X')
                .replaceAll('✓', '√')
                .replaceAll('🔨', '');

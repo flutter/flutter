@@ -355,6 +355,18 @@ abstract class ResidentWebRunner extends ResidentRunner {
   }
 
   @override
+  Future<void> debugToggleInvertOversizedImages() async {
+    try {
+      await _vmService
+        ?.flutterToggleInvertOversizedImages(
+          isolateId: null,
+        );
+    } on vmservice.RPCError {
+      return;
+    }
+  }
+
+  @override
   Future<void> debugToggleProfileWidgetBuilds() async {
     try {
       await _vmService
