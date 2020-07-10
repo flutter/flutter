@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/ios.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
@@ -29,6 +30,18 @@ Future<void> main() async {
           ],
         );
       });
+
+      // Copy test dart files to new module app.
+      final Directory flutterModuleLibSource = Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'ios_host_app', 'flutterapp', 'lib'));
+      final Directory flutterModuleLibDestination = Directory(path.join(projectDir.path, 'lib'));
+
+      // These test files don't have a .dart prefix so the analyzer will ignore them. They aren't in a
+      // package and don't work on their own outside of the test module just created.
+      final File main = File(path.join(flutterModuleLibSource.path, 'main'));
+      main.copySync(path.join(flutterModuleLibDestination.path, 'main.dart'));
+
+      final File marquee = File(path.join(flutterModuleLibSource.path, 'marquee'));
+      marquee.copySync(path.join(flutterModuleLibDestination.path, 'marquee.dart'));
 
       section('Build ephemeral host app in release mode without CocoaPods');
 
@@ -181,42 +194,6 @@ Future<void> main() async {
         return TaskResult.failure('Building ephemeral host app Podfile.lock does not contain expected pods');
       }
 
-      section('Clean build');
-
-      await inDirectory(projectDir, () async {
-        await flutter('clean');
-      });
-
-      section('Make iOS host app editable');
-
-      await inDirectory(projectDir, () async {
-        await flutter(
-          'make-host-app-editable',
-          options: <String>['ios'],
-        );
-      });
-
-      section('Build editable host app');
-
-      await inDirectory(projectDir, () async {
-        await flutter(
-          'build',
-          options: <String>['ios', '--no-codesign'],
-        );
-      });
-
-      final bool editableHostAppBuilt = exists(Directory(path.join(
-        projectDir.path,
-        'build',
-        'ios',
-        'iphoneos',
-        'Runner.app',
-      )));
-
-      if (!editableHostAppBuilt) {
-        return TaskResult.failure('Failed to build editable host .app');
-      }
-
       section('Add to existing iOS Objective-C app');
 
       final Directory objectiveCHostApp = Directory(path.join(tempDir.path, 'hello_host_app'));
@@ -277,10 +254,34 @@ Future<void> main() async {
         );
       }
 
+      section('Run platform unit tests');
+      await testWithNewiOSSimulator('TestAdd2AppSim', (String deviceId) =>
+        inDirectory(objectiveCHostApp, () =>
+          exec(
+            'xcodebuild',
+            <String>[
+              '-workspace',
+              'Host.xcworkspace',
+              '-scheme',
+              'Host',
+              '-configuration',
+              'Debug',
+              '-destination',
+              'id=$deviceId',
+              'test',
+              'CODE_SIGNING_ALLOWED=NO',
+              'CODE_SIGNING_REQUIRED=NO',
+              'CODE_SIGN_IDENTITY=-',
+              'EXPANDED_CODE_SIGN_IDENTITY=-',
+              'COMPILER_INDEX_STORE_ENABLE=NO',
+            ],
+          )
+        )
+      );
+
       section('Fail building existing Objective-C iOS app if flutter script fails');
-      int xcodebuildExitCode = 0;
-      await inDirectory(objectiveCHostApp, () async {
-        xcodebuildExitCode = await exec(
+      final int xcodebuildExitCode = await inDirectory<int>(objectiveCHostApp, () =>
+        exec(
           'xcodebuild',
           <String>[
             '-workspace',
@@ -298,8 +299,8 @@ Future<void> main() async {
             'COMPILER_INDEX_STORE_ENABLE=NO',
           ],
           canFail: true,
-        );
-      });
+        )
+      );
 
       if (xcodebuildExitCode != 65) { // 65 returned on PhaseScriptExecution failure.
         return TaskResult.failure('Host Objective-C app build succeeded though flutter script failed');

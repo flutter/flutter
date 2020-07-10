@@ -1430,8 +1430,9 @@ class _TimePickerInputState extends State<_TimePickerInput> {
                     ),
                 ],
               )),
-              Padding(
-                padding: const EdgeInsets.only(top: 20.0),
+              Container(
+                margin: const EdgeInsets.only(top: 8.0),
+                height: _kTimePickerHeaderControlHeight,
                 child: _StringFragment(timeOfDayFormat: timeOfDayFormat),
               ),
               Expanded(child: Column(
@@ -1532,17 +1533,19 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final TimePickerThemeData timePickerTheme = TimePickerTheme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
 
-    final InputDecorationTheme inputDecorationTheme = TimePickerTheme.of(context).inputDecorationTheme;
+    final InputDecorationTheme inputDecorationTheme = timePickerTheme.inputDecorationTheme;
     InputDecoration inputDecoration;
     if (inputDecorationTheme != null) {
       inputDecoration = const InputDecoration().applyDefaults(inputDecorationTheme);
     } else {
+      final Color unfocusedFillColor = timePickerTheme.hourMinuteColor ?? colorScheme.onSurface.withOpacity(0.12);
       inputDecoration = InputDecoration(
-        contentPadding: const EdgeInsetsDirectional.only(bottom: 16.0, start: 3.0),
+        contentPadding: EdgeInsets.zero,
         filled: true,
-        fillColor: focusNode.hasFocus ? colorScheme.surface : colorScheme.onSurface.withOpacity(0.12),
+        fillColor: focusNode.hasFocus ? Colors.transparent : unfocusedFillColor,
         enabledBorder: const OutlineInputBorder(
           borderSide: BorderSide(color: Colors.transparent),
         ),
@@ -1566,28 +1569,26 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> {
       hintText: focusNode.hasFocus ? null : _formattedValue,
     );
 
-    return Column(
-      children: <Widget>[
-        SizedBox(
-          height: _kTimePickerHeaderControlHeight,
-          child: MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
-            child: TextFormField(
-              focusNode: focusNode,
-              textAlign: TextAlign.center,
-              keyboardType: TextInputType.number,
-              style: widget.style.copyWith(color: colorScheme.onSurface),
-              controller: controller,
-              decoration: inputDecoration,
-              validator: widget.validator,
-              onEditingComplete: () => widget.onSavedSubmitted(controller.text),
-              onSaved: widget.onSavedSubmitted,
-              onFieldSubmitted: widget.onSavedSubmitted,
-              onChanged: widget.onChanged,
-            ),
-          ),
+    return SizedBox(
+      height: _kTimePickerHeaderControlHeight,
+      child: MediaQuery(
+        data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+        child: TextFormField(
+          expands: true,
+          maxLines: null,
+          focusNode: focusNode,
+          textAlign: TextAlign.center,
+          keyboardType: TextInputType.number,
+          style: widget.style.copyWith(color: colorScheme.onSurface),
+          controller: controller,
+          decoration: inputDecoration,
+          validator: widget.validator,
+          onEditingComplete: () => widget.onSavedSubmitted(controller.text),
+          onSaved: widget.onSavedSubmitted,
+          onFieldSubmitted: widget.onSavedSubmitted,
+          onChanged: widget.onChanged,
         ),
-      ],
+      ),
     );
   }
 }

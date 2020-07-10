@@ -176,6 +176,9 @@ class _FakeDeviceManager extends DeviceManager {
   Future<List<String>> getDeviceDiagnostics() => Future<List<String>>.value(
     <String>['Cannot connect to device ABC']
   );
+
+  @override
+  List<DeviceDiscovery> get deviceDiscoverers => <DeviceDiscovery>[];
 }
 
 class NoDevicesManager extends DeviceManager {
@@ -185,6 +188,9 @@ class NoDevicesManager extends DeviceManager {
   @override
   Future<List<Device>> refreshAllConnectedDevices({Duration timeout}) =>
     getAllConnectedDevices();
+
+@override
+  List<DeviceDiscovery> get deviceDiscoverers => <DeviceDiscovery>[];
 }
 
 class MockCache extends Mock implements Cache {}
