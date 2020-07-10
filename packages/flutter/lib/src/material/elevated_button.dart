@@ -427,6 +427,7 @@ class _ElevatedButtonWithIconChild extends StatelessWidget {
 @Deprecated(
   'This class was briefly released with the wrong name. The correct name is ElevatedButton. '
   'This class was deprecated after within 24 hours of its debut'
+  'This feature was deprecated after v1.20.0-2.0.pre.'
 )
 class ContainedButton extends ElevatedButton {
   const ContainedButton({
