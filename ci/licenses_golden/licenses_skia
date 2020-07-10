@@ -1,4 +1,4 @@
-Signature: ee2a74fc1bbe8b7b0ba6a4a1a7382d19
+Signature: 2a799019fc34e7d0a1ab20d60b9a80eb
 
 UNUSED LICENSES:
 
@@ -1927,7 +1927,6 @@ FILE: ../../../third_party/skia/src/gpu/GrRectanizerSkyline.h
 FILE: ../../../third_party/skia/src/gpu/GrResourceCache.cpp
 FILE: ../../../third_party/skia/src/gpu/GrResourceCache.h
 FILE: ../../../third_party/skia/src/gpu/GrSurfacePriv.h
-FILE: ../../../third_party/skia/src/gpu/GrTRecorder.h
 FILE: ../../../third_party/skia/src/gpu/GrTexturePriv.h
 FILE: ../../../third_party/skia/src/gpu/GrTracing.h
 FILE: ../../../third_party/skia/src/gpu/GrXferProcessor.h
@@ -2541,7 +2540,6 @@ FILE: ../../../third_party/skia/src/gpu/text/GrTextBlob.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrTextBlob.h
 FILE: ../../../third_party/skia/src/gpu/text/GrTextBlobCache.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrTextBlobCache.h
-FILE: ../../../third_party/skia/src/gpu/text/GrTextTarget.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkBuffer.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkBuffer.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkCaps.cpp
@@ -3219,7 +3217,6 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/bench/ClearBench.cpp
 FILE: ../../../third_party/skia/bench/CompositingImagesBench.cpp
 FILE: ../../../third_party/skia/bench/CubicMapBench.cpp
-FILE: ../../../third_party/skia/bench/GrCCFillGeometryBench.cpp
 FILE: ../../../third_party/skia/bench/ImageCycleBench.cpp
 FILE: ../../../third_party/skia/bench/JSONBench.cpp
 FILE: ../../../third_party/skia/bench/PathOpsBench.cpp
@@ -3934,6 +3931,8 @@ FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DCaps.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DCaps.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DCommandList.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DCommandList.h
+FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DCommandSignature.cpp
+FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DCommandSignature.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DConstantRingBuffer.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DConstantRingBuffer.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DCpuDescriptorManager.cpp
@@ -5310,6 +5309,9 @@ FILE: ../../../third_party/skia/src/gpu/GrStagingBuffer.h
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrAutoMapVertexBuffer.h
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnStagingBuffer.cpp
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnStagingBuffer.h
+FILE: ../../../third_party/skia/src/gpu/effects/GrDitherEffect.fp
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrDitherEffect.cpp
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrDitherEffect.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrSimpleMeshDrawOpHelperWithStencil.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrSimpleMeshDrawOpHelperWithStencil.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrDrawAtlasPathOp.cpp
