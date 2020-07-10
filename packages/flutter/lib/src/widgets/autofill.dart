@@ -208,6 +208,9 @@ class AutofillGroup extends StatefulWidget {
 class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
   final Map<String, AutofillClient> _clients = <String, AutofillClient>{};
 
+  // Whether this AutofillGroup widget is the topmost AutofillGroup (i.e., it
+  // has no AutofillGroup ancestor). Each topmost AutofillGroup runs its
+  // `AutofillGroup.onDisposeAction` when it gets disposed.
   bool _isTopmostAutofillGroup = false;
 
   @override
