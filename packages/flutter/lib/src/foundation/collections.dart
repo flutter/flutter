@@ -353,4 +353,3 @@ void _merge<T>(
   target[targetOffset++] = secondElement;
   target.setRange(targetOffset, targetOffset + (secondEnd - cursor2), secondList, cursor2);
 }
-
