@@ -12,6 +12,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
 import 'feedback.dart';
+import 'text_input_theme.dart';
 import 'text_selection.dart';
 import 'theme.dart';
 
@@ -560,7 +561,8 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
       'inherit false style must supply fontSize and textBaseline',
     );
 
-    final ThemeData themeData = Theme.of(context);
+    final ThemeData theme = Theme.of(context);
+    final TextInputThemeData textInputTheme = TextInputTheme.of(context);
     final FocusNode focusNode = _effectiveFocusNode;
 
     TextSelectionControls textSelectionControls;
@@ -570,7 +572,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
     Color cursorColor = widget.cursorColor;
     Radius cursorRadius = widget.cursorRadius;
 
-    switch (themeData.platform) {
+    switch (theme.platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         forcePressEnabled = true;
@@ -590,7 +592,11 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
         textSelectionControls = materialTextSelectionControls;
         paintCursorAboveText = false;
         cursorOpacityAnimates = false;
-        cursorColor ??= themeData.cursorColor;
+        if (theme.useTextInputTheme) {
+          cursorColor ??= textInputTheme.cursorColor ?? theme.colorScheme.primary;
+        } else {
+          cursorColor ??= theme.cursorColor;
+        }
         break;
     }
 
@@ -620,7 +626,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
         toolbarOptions: widget.toolbarOptions,
         minLines: widget.minLines,
         maxLines: widget.maxLines ?? defaultTextStyle.maxLines,
-        selectionColor: themeData.textSelectionColor,
+        selectionColor: theme.textSelectionColor,
         selectionControls: widget.selectionEnabled ? textSelectionControls : null,
         onSelectionChanged: _handleSelectionChanged,
         onSelectionHandleTapped: _handleSelectionHandleTapped,

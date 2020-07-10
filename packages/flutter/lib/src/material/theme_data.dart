@@ -37,6 +37,7 @@ import 'slider_theme.dart';
 import 'snack_bar_theme.dart';
 import 'tab_bar_theme.dart';
 import 'text_button_theme.dart';
+import 'text_input_theme.dart';
 import 'text_theme.dart';
 import 'time_picker_theme.dart';
 import 'toggle_buttons_theme.dart';
@@ -278,7 +279,9 @@ class ThemeData with Diagnosticable {
     TextButtonThemeData textButtonTheme,
     ContainedButtonThemeData containedButtonTheme,
     OutlinedButtonThemeData outlinedButtonTheme,
+    TextInputThemeData textInputTheme,
     bool fixTextFieldOutlineLabel,
+    bool useTextInputTheme,
   }) {
     assert(colorScheme?.brightness == null || brightness == null || colorScheme.brightness == brightness);
     final Brightness _brightness = brightness ?? colorScheme?.brightness ?? Brightness.light;
@@ -319,7 +322,6 @@ class ThemeData with Diagnosticable {
     // Spec doesn't specify a dark theme secondaryHeaderColor, this is a guess.
     secondaryHeaderColor ??= isDark ? Colors.grey[700] : primarySwatch[50];
     textSelectionColor ??= isDark ? accentColor : primarySwatch[200];
-    // TODO(hansmuller): We need a TextFieldTheme to handle this instead, https://github.com/flutter/flutter/issues/56082
     cursorColor = cursorColor ?? const Color.fromRGBO(66, 133, 244, 1.0);
     textSelectionHandleColor ??= isDark ? Colors.tealAccent[400] : primarySwatch[300];
     backgroundColor ??= isDark ? Colors.grey[700] : primarySwatch[200];
@@ -394,7 +396,10 @@ class ThemeData with Diagnosticable {
     textButtonTheme ??= const TextButtonThemeData();
     containedButtonTheme ??= const ContainedButtonThemeData();
     outlinedButtonTheme ??= const OutlinedButtonThemeData();
+    textInputTheme ??= const TextInputThemeData();
+
     fixTextFieldOutlineLabel ??= false;
+    useTextInputTheme ??= false;
 
     return ThemeData.raw(
       visualDensity: visualDensity,
@@ -466,7 +471,9 @@ class ThemeData with Diagnosticable {
       textButtonTheme: textButtonTheme,
       containedButtonTheme: containedButtonTheme,
       outlinedButtonTheme: outlinedButtonTheme,
+      textInputTheme: textInputTheme,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel,
+      useTextInputTheme: useTextInputTheme,
     );
   }
 
@@ -550,7 +557,9 @@ class ThemeData with Diagnosticable {
     @required this.textButtonTheme,
     @required this.containedButtonTheme,
     @required this.outlinedButtonTheme,
+    @required this.textInputTheme,
     @required this.fixTextFieldOutlineLabel,
+    @required this.useTextInputTheme,
   }) : assert(visualDensity != null),
        assert(primaryColor != null),
        assert(primaryColorBrightness != null),
@@ -617,7 +626,10 @@ class ThemeData with Diagnosticable {
        assert(textButtonTheme != null),
        assert(containedButtonTheme != null),
        assert(outlinedButtonTheme != null),
-       assert(fixTextFieldOutlineLabel != null);
+       assert(fixTextFieldOutlineLabel != null),
+       assert(textInputTheme != null),
+       assert(fixTextFieldOutlineLabel != null),
+       assert(useTextInputTheme != null);
 
   /// Create a [ThemeData] based on the colors in the given [colorScheme] and
   /// text styles of the optional [textTheme].
@@ -1093,6 +1105,9 @@ class ThemeData with Diagnosticable {
   /// [OutlinedButton]s.
   final OutlinedButtonThemeData outlinedButtonTheme;
 
+  /// A theme for customizing the appearance and layout of [TextField] widgets.
+  final TextInputThemeData textInputTheme;
+
   /// A temporary flag to allow apps to opt-in to a
   /// [small fix](https://github.com/flutter/flutter/issues/54028) for the Y
   /// coordinate of the floating label in a [TextField] [OutlineInputBorder].
@@ -1104,6 +1119,23 @@ class ThemeData with Diagnosticable {
   /// deprecated before the next beta release (1.18), and removed before the next
   /// stable release (1.19).
   final bool fixTextFieldOutlineLabel;
+
+  /// A temporary flag to allow apps to opt-in to the new [TextInputTheme], with
+  /// its new defaults for the [cursorColor] and [textSelectionHandleColor].
+  ///
+  /// Setting this flag to true will cause the [textInputTheme] to be used
+  /// instead of the [cursorColor] and [textSelectionHandleColor] by [TextField]
+  /// and [SelectableText] widgets. In addition, the default values of these
+  /// colors have changed to [colorScheme.primary].
+  ///
+  /// The flag is currently false by default. It will be removed after migration
+  /// to the [TextInputTheme] has been completed.
+  @Deprecated(
+    'Set useTextInputTheme to `true`. This parameter will be removed after '
+    'the migration TextInputTheme is complete. '
+    'This feature was deprecated after v1.20.0-3.0.pre.'
+  )
+  final bool useTextInputTheme;
 
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ///
@@ -1179,7 +1211,9 @@ class ThemeData with Diagnosticable {
     TextButtonThemeData textButtonTheme,
     ContainedButtonThemeData containedButtonTheme,
     OutlinedButtonThemeData outlinedButtonTheme,
+    TextInputThemeData textInputTheme,
     bool fixTextFieldOutlineLabel,
+    bool useTextInputTheme,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     return ThemeData.raw(
@@ -1252,7 +1286,9 @@ class ThemeData with Diagnosticable {
       textButtonTheme: textButtonTheme ?? this.textButtonTheme,
       containedButtonTheme: containedButtonTheme ?? this.containedButtonTheme,
       outlinedButtonTheme: outlinedButtonTheme ?? this.outlinedButtonTheme,
+      textInputTheme: textInputTheme ?? this.textInputTheme,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel ?? this.fixTextFieldOutlineLabel,
+      useTextInputTheme: useTextInputTheme ?? this.useTextInputTheme,
     );
   }
 
@@ -1403,7 +1439,9 @@ class ThemeData with Diagnosticable {
       textButtonTheme: TextButtonThemeData.lerp(a.textButtonTheme, b.textButtonTheme, t),
       containedButtonTheme: ContainedButtonThemeData.lerp(a.containedButtonTheme, b.containedButtonTheme, t),
       outlinedButtonTheme: OutlinedButtonThemeData.lerp(a.outlinedButtonTheme, b.outlinedButtonTheme, t),
+      textInputTheme: TextInputThemeData .lerp(a.textInputTheme, b.textInputTheme, t),
       fixTextFieldOutlineLabel: t < 0.5 ? a.fixTextFieldOutlineLabel : b.fixTextFieldOutlineLabel,
+      useTextInputTheme: t < 0.5 ? a.useTextInputTheme : b.useTextInputTheme,
     );
   }
 
@@ -1482,7 +1520,9 @@ class ThemeData with Diagnosticable {
         && other.textButtonTheme == textButtonTheme
         && other.containedButtonTheme == containedButtonTheme
         && other.outlinedButtonTheme == outlinedButtonTheme
-        && other.fixTextFieldOutlineLabel == fixTextFieldOutlineLabel;
+        && other.textInputTheme == textInputTheme
+        && other.fixTextFieldOutlineLabel == fixTextFieldOutlineLabel
+        && other.useTextInputTheme == useTextInputTheme;
   }
 
   @override
@@ -1560,7 +1600,9 @@ class ThemeData with Diagnosticable {
       textButtonTheme,
       containedButtonTheme,
       outlinedButtonTheme,
+      textInputTheme,
       fixTextFieldOutlineLabel,
+      useTextInputTheme,
     ];
     return hashList(values);
   }
@@ -1631,6 +1673,8 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<DividerThemeData>('dividerTheme', dividerTheme, defaultValue: defaultData.dividerTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ButtonBarThemeData>('buttonBarTheme', buttonBarTheme, defaultValue: defaultData.buttonBarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<TimePickerThemeData>('timePickerTheme', timePickerTheme, defaultValue: defaultData.timePickerTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<TextInputThemeData>('textInputTheme', textInputTheme, defaultValue: defaultData.textInputTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<TextInputThemeData>('textInputTheme', textInputTheme, defaultValue: defaultData.textInputTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<BottomNavigationBarThemeData>('bottomNavigationBarTheme', bottomNavigationBarTheme, defaultValue: defaultData.bottomNavigationBarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<TextButtonThemeData>('textButtonTheme', textButtonTheme, defaultValue: defaultData.textButtonTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ContainedButtonThemeData>('containedButtonTheme', containedButtonTheme, defaultValue: defaultData.containedButtonTheme, level: DiagnosticLevel.debug));

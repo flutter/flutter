@@ -287,7 +287,9 @@ void main() {
       textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(primary: Colors.red)),
       containedButtonTheme: ContainedButtonThemeData(style: ContainedButton.styleFrom(primary: Colors.green)),
       outlinedButtonTheme: OutlinedButtonThemeData(style: OutlinedButton.styleFrom(primary: Colors.blue)),
+      textInputTheme: const TextInputThemeData(cursorColor: Colors.black),
       fixTextFieldOutlineLabel: false,
+      useTextInputTheme: false,
     );
 
     final SliderThemeData otherSliderTheme = SliderThemeData.fromPrimaryColors(
@@ -373,7 +375,9 @@ void main() {
       textButtonTheme: const TextButtonThemeData(),
       containedButtonTheme: const ContainedButtonThemeData(),
       outlinedButtonTheme: const OutlinedButtonThemeData(),
+      textInputTheme: const TextInputThemeData(cursorColor: Colors.white),
       fixTextFieldOutlineLabel: true,
+      useTextInputTheme: true,
     );
 
     final ThemeData themeDataCopy = theme.copyWith(
@@ -445,7 +449,9 @@ void main() {
       textButtonTheme: otherTheme.textButtonTheme,
       containedButtonTheme: otherTheme.containedButtonTheme,
       outlinedButtonTheme: otherTheme.outlinedButtonTheme,
+      textInputTheme: otherTheme.textInputTheme,
       fixTextFieldOutlineLabel: otherTheme.fixTextFieldOutlineLabel,
+      useTextInputTheme: otherTheme.useTextInputTheme,
     );
 
     expect(themeDataCopy.brightness, equals(otherTheme.brightness));
@@ -516,7 +522,9 @@ void main() {
     expect(themeDataCopy.textButtonTheme, equals(otherTheme.textButtonTheme));
     expect(themeDataCopy.containedButtonTheme, equals(otherTheme.containedButtonTheme));
     expect(themeDataCopy.outlinedButtonTheme, equals(otherTheme.outlinedButtonTheme));
+    expect(themeDataCopy.textInputTheme, equals(otherTheme.textInputTheme));
     expect(themeDataCopy.fixTextFieldOutlineLabel, equals(otherTheme.fixTextFieldOutlineLabel));
+    expect(themeDataCopy.useTextInputTheme, equals(otherTheme.useTextInputTheme));
   });
 
   testWidgets('ThemeData.toString has less than 200 characters output', (WidgetTester tester) async {
