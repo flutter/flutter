@@ -875,7 +875,7 @@ void main() {
   testUsingContext('ResidentRunner does support CanvasKit', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
 
-    expect(() => residentRunner.toggleCanvaskit(),
+    expect(residentRunner.toggleCanvaskit,
       throwsA(isA<Exception>()));
   }));
 
