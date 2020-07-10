@@ -95,7 +95,7 @@ GOTO :after_subroutine
     ECHO zzz2
     REM Escape apostrophes from the executable path
     timeout 30
-    %powershell_executable% ls
+    %powershell_executable% Write-Host "Hello"
     dir %FLUTTER_ROOT%\bin\internal\
     SET "update_dart_bin=!update_dart_bin:'=''!"
     %powershell_executable% Unblock-File -Path '%empty%' -ErrorAction:stop -debug -InformationAction:stop 2>&1
