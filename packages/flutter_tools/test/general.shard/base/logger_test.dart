@@ -49,6 +49,12 @@ void main() {
       verbose: true,
       machine: false,
       daemon: false,
+      windows: true,
+    ), isA<VerboseLogger>());
+    expect(loggerFactory.createLogger(
+      verbose: true,
+      machine: false,
+      daemon: false,
       windows: false,
     ), isA<VerboseLogger>());
     expect(loggerFactory.createLogger(
