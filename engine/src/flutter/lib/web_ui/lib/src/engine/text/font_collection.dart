@@ -94,7 +94,7 @@ class FontCollection {
     _assetFontManager = null;
     _testFontManager = null;
     if (supportsFontsClearApi) {
-      html.document.fonts.clear();
+      html.document.fonts!.clear();
     }
   }
 }
@@ -178,7 +178,7 @@ class FontManager {
     try {
       final html.FontFace fontFace = html.FontFace(family, asset, descriptors);
       _fontLoadingFutures.add(fontFace.load().then((_) {
-        html.document.fonts.add(fontFace);
+        html.document.fonts!.add(fontFace);
       }, onError: (dynamic e) {
         html.window.console
             .warn('Error while trying to load font family "$family":\n$e');
@@ -195,7 +195,7 @@ class FontManager {
     // through the returned future.
     final html.FontFace fontFace = html.FontFace(family, list);
     return fontFace.load().then((_) {
-      html.document.fonts.add(fontFace);
+      html.document.fonts!.add(fontFace);
       // There might be paragraph measurements for this new font before it is
       // loaded. They were measured using fallback font, so we should clear the
       // cache.
@@ -309,4 +309,4 @@ class _PolyfillFontManager extends FontManager {
 }
 
 final bool supportsFontLoadingApi = js_util.hasProperty(html.window, 'FontFace');
-final bool supportsFontsClearApi = js_util.hasProperty(html.document, 'fonts') && js_util.hasProperty(html.document.fonts, 'clear');
+final bool supportsFontsClearApi = js_util.hasProperty(html.document, 'fonts') && js_util.hasProperty(html.document.fonts!, 'clear');

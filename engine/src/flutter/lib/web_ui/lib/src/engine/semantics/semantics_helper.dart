@@ -331,7 +331,7 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
         case 'touchstart':
         case 'touchend':
           final html.TouchEvent touch = event as html.TouchEvent;
-          activationPoint = touch.changedTouches.first.client;
+          activationPoint = touch.changedTouches!.first.client;
           break;
         default:
           // The event is not relevant, forward to framework as normal.

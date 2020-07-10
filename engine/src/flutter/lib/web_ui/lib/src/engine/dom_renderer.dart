@@ -420,7 +420,7 @@ flt-glass-pane * {
       // Firefox returns correct values for innerHeight, innerWidth.
       // Firefox also triggers html.window.onResize therefore we don't need this
       // timer setup for Firefox.
-      final int initialInnerWidth = html.window.innerWidth;
+      final int initialInnerWidth = html.window.innerWidth!;
       // Counts how many times we checked screen size. We check up to 5 times.
       int checkCount = 0;
       Timer.periodic(const Duration(milliseconds: 100), (Timer t) {
@@ -534,10 +534,10 @@ flt-glass-pane * {
   ///
   /// See w3c screen api: https://www.w3.org/TR/screen-orientation/
   Future<bool> setPreferredOrientation(List<dynamic>? orientations) {
-    final html.Screen screen = html.window.screen;
+    final html.Screen screen = html.window.screen!;
     if (!_unsafeIsNull(screen)) {
       final html.ScreenOrientation screenOrientation =
-          screen.orientation;
+          screen.orientation!;
       if (!_unsafeIsNull(screenOrientation)) {
         if (orientations!.isEmpty) {
           screenOrientation.unlock();

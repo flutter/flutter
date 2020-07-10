@@ -165,8 +165,8 @@ class TextField extends RoleManager {
     _textFieldElement.addEventListener('touchstart', (html.Event event) {
       textEditing.useCustomEditableElement(textEditingElement);
       final html.TouchEvent touchEvent = event as html.TouchEvent;
-      lastTouchStartOffsetX = touchEvent.changedTouches.last.client.x;
-      lastTouchStartOffsetY = touchEvent.changedTouches.last.client.y;
+      lastTouchStartOffsetX = touchEvent.changedTouches!.last.client.x;
+      lastTouchStartOffsetY = touchEvent.changedTouches!.last.client.y;
     }, true);
 
     _textFieldElement.addEventListener('touchend', (html.Event event) {
@@ -174,8 +174,8 @@ class TextField extends RoleManager {
 
       if (lastTouchStartOffsetX != null) {
         assert(lastTouchStartOffsetY != null);
-        final num offsetX = touchEvent.changedTouches.last.client.x;
-        final num offsetY = touchEvent.changedTouches.last.client.y;
+        final num offsetX = touchEvent.changedTouches!.last.client.x;
+        final num offsetY = touchEvent.changedTouches!.last.client.y;
 
         // This should match the similar constant define in:
         //

@@ -115,7 +115,7 @@ OperatingSystem get operatingSystem {
 OperatingSystem? debugOperatingSystemOverride;
 
 OperatingSystem _detectOperatingSystem() {
-  final String platform = html.window.navigator.platform;
+  final String platform = html.window.navigator.platform!;
   final String userAgent = html.window.navigator.userAgent;
 
   if (platform.startsWith('Mac')) {
