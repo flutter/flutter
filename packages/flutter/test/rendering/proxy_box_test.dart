@@ -493,7 +493,7 @@ void main() {
   test('RenderMouseRegion can change properties when detached', () {
     renderer.initMouseTracker(MouseTracker(
       renderer.pointerRouter,
-      (_) => (<MouseTrackerAnnotation, Matrix4>{} as LinkedHashMap<MouseTrackerAnnotation, Matrix4>),
+      (_) => <MouseTrackerAnnotation, Matrix4>{} as LinkedHashMap<MouseTrackerAnnotation, Matrix4>,
     ));
     final RenderMouseRegion object = RenderMouseRegion();
     object
