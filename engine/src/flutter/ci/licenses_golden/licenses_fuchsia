@@ -1,4 +1,4 @@
-Signature: f4bdcd1b537c4e7773d500ee172b3d61
+Signature: 973c70c3a1cc8d4864b6bcdbd14bc809
 
 UNUSED LICENSES:
 
@@ -2822,7 +2822,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/agent/agent.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/agent/agent_context.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/agent/agent_controller/agent_controller.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/component/component_context.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/config/config.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/intent/intent.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/lifecycle/lifecycle.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/module/module_data.fidl
