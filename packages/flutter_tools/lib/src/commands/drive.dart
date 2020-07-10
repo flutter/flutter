@@ -244,7 +244,7 @@ class DriveCommand extends RunCommandBase {
         throwToolExit('Application failed to start. Will not run test. Quitting.', exitCode: 1);
       }
       observatoryUri = result.observatoryUri.toString();
-      // TODO(bkonyi): add web support
+      // TODO(bkonyi): add web support (https://github.com/flutter/flutter/issues/61259)
       if (!isWebPlatform) {
         await device.dds.startDartDevelopmentService(Uri.parse(observatoryUri), ipv6);
       }

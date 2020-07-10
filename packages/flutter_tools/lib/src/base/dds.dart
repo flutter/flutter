@@ -15,10 +15,13 @@ import 'logger.dart';
 class DartDevelopmentService {
   DartDevelopmentService({@required this.logger});
 
+  final Logger logger;
+  dds.DartDevelopmentService _ddsInstance;
+
   Future<void> startDartDevelopmentService(
     Uri observatoryUri,
     bool ipv6,
-    ) async {
+  ) async {
     final Uri ddsUri = Uri(
       scheme: 'http',
       host: (ipv6 ?
@@ -29,12 +32,10 @@ class DartDevelopmentService {
     );
     logger.printTrace(
       'Launching a Dart Developer Service (DDS) instance at $ddsUri, '
-      'connecting to VM service at $observatoryUri.'
-      '\n${StackTrace.current}'
+      'connecting to VM service at $observatoryUri.',
     );
     try {
-      _ddsInstance =
-        await dds.DartDevelopmentService.startDartDevelopmentService(
+      _ddsInstance = await dds.DartDevelopmentService.startDartDevelopmentService(
           observatoryUri,
           serviceUri: ddsUri,
         );
@@ -45,7 +46,4 @@ class DartDevelopmentService {
   }
 
   Future<void> shutdown() async => await _ddsInstance?.shutdown();
-
-  final Logger logger;
-  dds.DartDevelopmentService _ddsInstance;
 }
