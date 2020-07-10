@@ -83,7 +83,7 @@ void main() {
       '-v',
     ]);
 
-    expect(result.stderr, contains('Target file "lib/main.dart" not found'));
+    expect(result.stderr, contains('Target file')); // Target file not found, but different paths on Windows and Linux/macOS.
   });
 
   test('flutter build aot is deprecated', () async {
