@@ -1560,7 +1560,7 @@ void main() {
     when(mockWebDevFS.connect(any))
       .thenThrow(const WebSocketException());
 
-    await expectLater(() => residentWebRunner.run(), throwsToolExit());
+    await expectLater(residentWebRunner.run, throwsToolExit());
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -1577,7 +1577,7 @@ void main() {
     when(mockWebDevFS.connect(any))
       .thenThrow(AppConnectionException(''));
 
-    await expectLater(() => residentWebRunner.run(), throwsToolExit());
+    await expectLater(residentWebRunner.run, throwsToolExit());
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -1594,7 +1594,7 @@ void main() {
     when(mockWebDevFS.connect(any))
       .thenThrow(ChromeDebugException(<String, dynamic>{}));
 
-    await expectLater(() => residentWebRunner.run(), throwsToolExit());
+    await expectLater(residentWebRunner.run, throwsToolExit());
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -1609,7 +1609,7 @@ void main() {
     _setupMocks();
     when(mockWebDevFS.connect(any)).thenThrow(Exception());
 
-    await expectLater(() => residentWebRunner.run(), throwsException);
+    await expectLater(residentWebRunner.run, throwsException);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -1628,7 +1628,7 @@ void main() {
 
     when(mockWebDevFS.connect(any)).thenThrow(StateError(''));
 
-    await expectLater(() => residentWebRunner.run(), throwsStateError);
+    await expectLater(residentWebRunner.run, throwsStateError);
     verify(mockStatus.stop()).called(1);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
