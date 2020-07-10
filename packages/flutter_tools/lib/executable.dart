@@ -145,15 +145,22 @@ Future<void> main(List<String> args) async {
             outputPreferences: globals.outputPreferences,
           ),
         ))
-       else if (verbose && !muteCommandLogging)
-        Logger: () => VerboseLogger(StdoutLogger(
+       else if (runMachine && !verbose)
+        Logger: () => AppRunLogger(parent: StdoutLogger(
           timeoutConfiguration: timeoutConfiguration,
           stdio: globals.stdio,
           terminal: globals.terminal,
           outputPreferences: globals.outputPreferences,
         ))
-      else if (runMachine)
-        Logger: () => AppRunLogger(parent: StdoutLogger(
+       else if (runMachine && verbose)
+        Logger: () => AppRunLogger(parent: VerboseLogger(StdoutLogger(
+          timeoutConfiguration: timeoutConfiguration,
+          stdio: globals.stdio,
+          terminal: globals.terminal,
+          outputPreferences: globals.outputPreferences,
+        )))
+       else if (verbose && !muteCommandLogging)
+        Logger: () => VerboseLogger(StdoutLogger(
           timeoutConfiguration: timeoutConfiguration,
           stdio: globals.stdio,
           terminal: globals.terminal,
