@@ -857,6 +857,7 @@ void main() {
           commandHelp.L,
           commandHelp.S,
           commandHelp.U,
+          commandHelp.exclamationPoint,
           commandHelp.i,
           commandHelp.p,
           commandHelp.o,
@@ -1281,6 +1282,36 @@ void main() {
     device.vmService = fakeVmServiceHost.vmService;
 
     expect(await device.toggleBrightness(), Brightness.dark);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  }));
+
+  testUsingContext('ResidentRunner debugToggleInvertOversizedImages calls flutter device', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+    await residentRunner.debugToggleInvertOversizedImages();
+
+    verify(mockFlutterDevice.toggleInvertOversizedImages()).called(1);
+  }));
+
+  testUsingContext('FlutterDevice.toggleInvertOversizedImages invokes correct VM service request', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      listViews,
+      const FakeVmServiceRequest(
+        method: 'ext.flutter.invertOversizedImages',
+        args: <String, Object>{
+          'isolateId': '1',
+        },
+        jsonResponse: <String, Object>{
+          'value': 'false'
+        },
+      ),
+    ]);
+    final FlutterDevice device = FlutterDevice(
+      mockDevice,
+      buildInfo: BuildInfo.debug,
+    );
+    device.vmService = fakeVmServiceHost.vmService;
+
+    await device.toggleInvertOversizedImages();
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }));
 

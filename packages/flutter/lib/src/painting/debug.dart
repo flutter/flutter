@@ -127,6 +127,25 @@ class ImageSizeInfo {
 /// time.
 PaintImageCallback debugOnPaintImage;
 
+/// If true, the framework will color invert and horizontally flip images that
+/// have been decoded to a size taking at least [debugImageOverheadAllowance]
+/// bytes more than necessary..
+///
+/// It will also [debugPrint] information about the image's decoded size and
+/// its display size, which can be used to apply `cacheHeight` or `cacheWidth`
+/// parameters. Developers using this flag should ensure that they are testing
+/// their application on appropriate devices and display sizes when using these
+/// parameters.
+///
+/// This has no effect unless asserts are enabled.
+bool debugInvertOversizedImages = false;
+
+/// The number of bytes an image must use before it triggers inversion when
+/// [debugInvertOversizedImages] is true.
+///
+/// Default is 1024 (1kb).
+int debugImageOverheadAllowance = 1024;
+
 /// Returns true if none of the painting library debug variables have been changed.
 ///
 /// This function is used by the test framework to ensure that debug variables
@@ -142,7 +161,9 @@ bool debugAssertAllPaintingVarsUnset(String reason, { bool debugDisableShadowsOv
   assert(() {
     if (debugDisableShadows != debugDisableShadowsOverride ||
         debugNetworkImageHttpClientProvider != null ||
-        debugOnPaintImage != null) {
+        debugOnPaintImage != null ||
+        debugInvertOversizedImages == true ||
+        debugImageOverheadAllowance != 1024) {
       throw FlutterError(reason);
     }
     return true;

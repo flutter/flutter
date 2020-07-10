@@ -436,6 +436,15 @@ class FlutterDevice {
     }
   }
 
+  Future<void> toggleInvertOversizedImages() async {
+    final List<FlutterView> views = await vmService.getFlutterViews();
+    for (final FlutterView view in views) {
+      await vmService.flutterInvertOversizedImages(
+        isolateId: view.uiIsolate.id,
+      );
+    }
+  }
+
   Future<void> toggleProfileWidgetBuilds() async {
     final List<FlutterView> views = await vmService.getFlutterViews();
     for (final FlutterView view in views) {
@@ -1009,6 +1018,12 @@ abstract class ResidentRunner {
     }
   }
 
+  Future<void> debugToggleInvertOversizedImages() async {
+    for (final FlutterDevice device in flutterDevices) {
+      await device.toggleInvertOversizedImages();
+    }
+  }
+
   Future<void> debugToggleProfileWidgetBuilds() async {
     for (final FlutterDevice device in flutterDevices) {
       await device.toggleProfileWidgetBuilds();
@@ -1288,6 +1303,7 @@ abstract class ResidentRunner {
         commandHelp.L.print();
         commandHelp.S.print();
         commandHelp.U.print();
+        commandHelp.exclamationPoint.print();
         commandHelp.i.print();
         commandHelp.p.print();
         commandHelp.o.print();
@@ -1417,6 +1433,12 @@ class TerminalHandler {
   Future<bool> _commonTerminalInputHandler(String character) async {
     globals.printStatus(''); // the key the user tapped might be on this line
     switch(character) {
+      case '!':
+        if (residentRunner.supportsServiceProtocol && residentRunner.isRunningDebug) {
+          await residentRunner.debugToggleInvertOversizedImages();
+          return true;
+        }
+        return false;
       case 'a':
         if (residentRunner.supportsServiceProtocol) {
           await residentRunner.debugToggleProfileWidgetBuilds();
@@ -1499,13 +1521,6 @@ class TerminalHandler {
         // exit
         await residentRunner.exit();
         return true;
-      case 's':
-        for (final FlutterDevice device in residentRunner.flutterDevices) {
-          if (device.device.supportsScreenshot) {
-            await residentRunner.screenshot(device);
-          }
-        }
-        return true;
       case 'r':
         if (!residentRunner.canHotReload) {
           return false;
@@ -1529,6 +1544,13 @@ class TerminalHandler {
         }
         if (!result.isOk) {
           globals.printStatus('Try again after fixing the above error(s).', emphasis: true);
+        }
+        return true;
+      case 's':
+        for (final FlutterDevice device in residentRunner.flutterDevices) {
+          if (device.device.supportsScreenshot) {
+            await residentRunner.screenshot(device);
+          }
         }
         return true;
       case 'S':
