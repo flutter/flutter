@@ -252,6 +252,9 @@ class _InkState extends State<Ink> {
   }
 
   Widget _build(BuildContext context, BoxConstraints constraints) {
+    // if _ink have IndexedStack ancestor(s) and not on the display path,
+    // _ink should not paint.
+    final bool inkNeedsPaint = IndexedStack.addIndexedStackScopeAncestorsDependencies(context);
     if (_ink == null) {
       _ink = InkDecoration(
         decoration: widget.decoration,
@@ -259,9 +262,11 @@ class _InkState extends State<Ink> {
         controller: Material.of(context),
         referenceBox: context.findRenderObject() as RenderBox,
         onRemoved: _handleRemoved,
+        needPaint: inkNeedsPaint,
       );
     } else {
       _ink.decoration = widget.decoration;
+      _ink.needPaint = inkNeedsPaint;
       _ink.configuration = createLocalImageConfiguration(context);
     }
     Widget current = widget.child;
@@ -311,10 +316,12 @@ class InkDecoration extends InkFeature {
     @required MaterialInkController controller,
     @required RenderBox referenceBox,
     VoidCallback onRemoved,
+    bool needPaint = true,
   }) : assert(configuration != null),
        _configuration = configuration,
        super(controller: controller, referenceBox: referenceBox, onRemoved: onRemoved) {
     this.decoration = decoration;
+    this.needPaint = needPaint;
     controller.addInkFeature(this);
   }
 
@@ -334,6 +341,19 @@ class InkDecoration extends InkFeature {
     _painter = _decoration?.createBoxPainter(_handleChanged);
     controller.markNeedsPaint();
   }
+
+  /// whether the decoration needs to paints.
+  bool get needPaint => _needPaint;
+  bool _needPaint;
+  set needPaint(bool value) {
+    if (value == _needPaint)
+      return;
+    _needPaint = value;
+    _painter?.dispose();
+    _painter = _decoration?.createBoxPainter(_handleChanged);
+    controller.markNeedsPaint();
+  }
+
 
   /// The configuration to pass to the [BoxPainter] obtained from the
   /// [decoration], when painting.
@@ -362,7 +382,7 @@ class InkDecoration extends InkFeature {
 
   @override
   void paintFeature(Canvas canvas, Matrix4 transform) {
-    if (_painter == null)
+    if (_painter == null || !needPaint)
       return;
     final Offset originOffset = MatrixUtils.getAsTranslation(transform);
     final ImageConfiguration sizedConfiguration = configuration.copyWith(

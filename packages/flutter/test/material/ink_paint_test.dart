@@ -434,4 +434,49 @@ void main() {
       throw 'Expected: paint.color.alpha == 0, found: ${paint.color.alpha}';
     }));
   });
-}
+
+  testWidgets('Does the Ink widget render anything if it have ancestor IndexedStack', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Material(
+            child: IndexedStack(
+              index: 0,
+              children: <Widget>[
+              Ink(width: 100, height: 100, decoration: const BoxDecoration(color: Colors.black)),
+              Ink(width: 50, height: 50, decoration: const BoxDecoration(color: Colors.red)),
+            ],),
+        ),
+      ),
+    );
+
+    RenderBox box = Material.of(tester.element(find.byType(IndexedStack))) as RenderBox;
+
+    expect(
+        box,
+        paints
+          ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 100.0), color: Color(Colors.black.value)));
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: IndexedStack(
+            index: 1,
+            children: <Widget>[
+              Ink(width: 100, height: 100, decoration: const BoxDecoration(color: Colors.black)),
+              Ink(width: 50, height: 50, decoration: const BoxDecoration(color: Colors.red)),
+            ],),
+        ),
+      ),
+    );
+
+    box = Material.of(tester.element(find.byType(IndexedStack))) as RenderBox;
+
+    expect(
+        box,
+        paints
+          ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 50.0, 50.0), color: Color(Colors.red.value)));
+  });
+
+  }
