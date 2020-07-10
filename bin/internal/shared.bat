@@ -97,7 +97,7 @@ GOTO :after_subroutine
     ECHO zzz3
     %powershell_executable% Set-PSDebug -Trace 2
     ECHO "zzz4 %powershell_executable% %update_dart_bin%"
-    %powershell_executable% -ExecutionPolicy Bypass -Command "Unblock-File -Path '%update_dart_bin%'; & '%update_dart_bin%'" 4>&1
+    %powershell_executable% -ExecutionPolicy Bypass -Command "Unblock-File -Path '%update_dart_bin%'; & '%update_dart_bin%'" -verbose -InformationAction:Inquire 4>&1
     ECHO zzz5
     IF "%ERRORLEVEL%" NEQ "0" (
       ECHO Error: Unable to update Dart SDK. Retrying...
