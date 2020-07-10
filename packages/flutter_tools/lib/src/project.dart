@@ -1059,7 +1059,7 @@ class LinuxProject extends FlutterProjectPlatform implements CmakeBasedProject {
   @override
   String get pluginConfigKey => LinuxPlugin.kConfigKey;
 
-  static final RegExp _applicationIdPattern = RegExp(r'''^\s*"application-id"\s*,\s*['"](.*)['"]\s*,\s*$''');
+  static final RegExp _applicationIdPattern = RegExp(r'"application-id"\s*,\s*"(.*)"\s*');
 
   Directory get _editableDirectory => parent.directory.childDirectory('linux');
 
