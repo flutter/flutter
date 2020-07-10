@@ -94,7 +94,8 @@ GOTO :after_subroutine
     SET empty=%FLUTTER_ROOT%\bin\internal\empty.ps1
     ECHO zzz2
     REM Escape apostrophes from the executable path
-    SLEEP 30
+    timeout 30
+    dir %FLUTTER_ROOT%\bin\internal\
     SET "update_dart_bin=!update_dart_bin:'=''!"
     %powershell_executable% Unblock-File -Path '%empty%' -ErrorAction:stop -debug -InformationAction:stop 2>&1
     ECHO zzz3
