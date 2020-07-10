@@ -176,10 +176,10 @@ class BrowserPlatformLocation extends PlatformLocation {
   }
 
   @override
-  String get pathname => _location.pathname;
+  String get pathname => _location.pathname!;
 
   @override
-  String get search => _location.search;
+  String get search => _location.search!;
 
   @override
   String get hash => _location.hash;

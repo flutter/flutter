@@ -690,7 +690,7 @@ double _measureSubstring(
   final String sub =
       start == 0 && end == text.length ? text : text.substring(start, end);
   final double width =
-      _canvasContext.measureText(sub).width + letterSpacing * sub.length as double;
+      _canvasContext.measureText(sub).width! + letterSpacing * sub.length as double;
 
   // What we are doing here is we are rounding to the nearest 2nd decimal
   // point. So 39.999423 becomes 40, and 11.243982 becomes 11.24.

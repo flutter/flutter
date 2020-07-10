@@ -257,13 +257,13 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
     _pointerDataConverter.convert(
       data,
       change: ui.PointerChange.hover,
-      timeStamp: _BaseAdapter._eventTimeStampToDuration(event.timeStamp),
+      timeStamp: _BaseAdapter._eventTimeStampToDuration(event.timeStamp!),
       kind: ui.PointerDeviceKind.mouse,
       signalKind: ui.PointerSignalKind.scroll,
       device: _mouseDeviceId,
       physicalX: event.client.x * ui.window.devicePixelRatio as double,
       physicalY: event.client.y * ui.window.devicePixelRatio as double,
-      buttons: event.buttons,
+      buttons: event.buttons!,
       pressure: 1.0,
       pressureMin: 0.0,
       pressureMax: 1.0,
@@ -444,23 +444,23 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
   @override
   void setup() {
     _addPointerEventListener('pointerdown', (html.PointerEvent event) {
-      final int device = event.pointerId;
+      final int device = event.pointerId!;
       final List<ui.PointerData> pointerData = <ui.PointerData>[];
       final _SanitizedDetails details =
         _ensureSanitizer(device).sanitizeDownEvent(
           button: event.button,
-          buttons: event.buttons,
+          buttons: event.buttons!,
         );
       _convertEventsToPointerData(data: pointerData, event: event, details: details);
       _callback(pointerData);
     });
 
     _addPointerEventListener('pointermove', (html.PointerEvent event) {
-      final int device = event.pointerId;
+      final int device = event.pointerId!;
       final _ButtonSanitizer sanitizer = _ensureSanitizer(device);
       final List<ui.PointerData> pointerData = <ui.PointerData>[];
       final Iterable<_SanitizedDetails> detailsList = _expandEvents(event).map(
-        (html.PointerEvent expandedEvent) => sanitizer.sanitizeMoveEvent(buttons: expandedEvent.buttons),
+        (html.PointerEvent expandedEvent) => sanitizer.sanitizeMoveEvent(buttons: expandedEvent.buttons!),
       );
       for (_SanitizedDetails details in detailsList) {
         _convertEventsToPointerData(data: pointerData, event: event, details: details);
@@ -469,7 +469,7 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
     }, acceptOutsideGlasspane: true);
 
     _addPointerEventListener('pointerup', (html.PointerEvent event) {
-      final int device = event.pointerId;
+      final int device = event.pointerId!;
       final List<ui.PointerData> pointerData = <ui.PointerData>[];
       final _SanitizedDetails? details = _getSanitizer(device).sanitizeUpEvent();
       _removePointerIfUnhoverable(event);
@@ -482,7 +482,7 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
     // A browser fires cancel event if it concludes the pointer will no longer
     // be able to generate events (example: device is deactivated)
     _addPointerEventListener('pointercancel', (html.PointerEvent event) {
-      final int device = event.pointerId;
+      final int device = event.pointerId!;
       final List<ui.PointerData> pointerData = <ui.PointerData>[];
       final _SanitizedDetails details = _getSanitizer(device).sanitizeCancelEvent();
       _removePointerIfUnhoverable(event);
@@ -512,13 +512,13 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
     assert(data != null); // ignore: unnecessary_null_comparison
     assert(event != null); // ignore: unnecessary_null_comparison
     assert(details != null); // ignore: unnecessary_null_comparison
-    final ui.PointerDeviceKind kind = _pointerTypeToDeviceKind(event.pointerType);
+    final ui.PointerDeviceKind kind = _pointerTypeToDeviceKind(event.pointerType!);
     // We force `device: _mouseDeviceId` on mouse pointers because Wheel events
     // might come before any PointerEvents, and since wheel events don't contain
     // pointerId we always assign `device: _mouseDeviceId` to them.
-    final int device = kind == ui.PointerDeviceKind.mouse ? _mouseDeviceId : event.pointerId;
+    final int device = kind == ui.PointerDeviceKind.mouse ? _mouseDeviceId : event.pointerId!;
     final double tilt = _computeHighestTilt(event);
-    final Duration timeStamp = _BaseAdapter._eventTimeStampToDuration(event.timeStamp);
+    final Duration timeStamp = _BaseAdapter._eventTimeStampToDuration(event.timeStamp!);
     _pointerDataConverter.convert(
       data,
       change: details.change,
@@ -566,7 +566,7 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
 
   /// Tilt angle is -90 to + 90. Take maximum deflection and convert to radians.
   double _computeHighestTilt(html.PointerEvent e) =>
-      (e.tiltX.abs() > e.tiltY.abs() ? e.tiltX : e.tiltY).toDouble() /
+      (e.tiltX!.abs() > e.tiltY!.abs() ? e.tiltX : e.tiltY)!.toDouble() /
       180.0 *
       math.pi;
 }
@@ -596,12 +596,12 @@ class _TouchAdapter extends _BaseAdapter {
   @override
   void setup() {
     _addTouchEventListener('touchstart', (html.TouchEvent event) {
-      final Duration timeStamp = _BaseAdapter._eventTimeStampToDuration(event.timeStamp);
+      final Duration timeStamp = _BaseAdapter._eventTimeStampToDuration(event.timeStamp!);
       final List<ui.PointerData> pointerData = <ui.PointerData>[];
-      for (html.Touch touch in event.changedTouches) {
-        final nowPressed = _isTouchPressed(touch.identifier);
+      for (html.Touch touch in event.changedTouches!) {
+        final nowPressed = _isTouchPressed(touch.identifier!);
         if (!nowPressed) {
-          _pressTouch(touch.identifier);
+          _pressTouch(touch.identifier!);
           _convertEventToPointerData(
             data: pointerData,
             change: ui.PointerChange.down,
@@ -616,10 +616,10 @@ class _TouchAdapter extends _BaseAdapter {
 
     _addTouchEventListener('touchmove', (html.TouchEvent event) {
       event.preventDefault(); // Prevents standard overscroll on iOS/Webkit.
-      final Duration timeStamp = _BaseAdapter._eventTimeStampToDuration(event.timeStamp);
+      final Duration timeStamp = _BaseAdapter._eventTimeStampToDuration(event.timeStamp!);
       final List<ui.PointerData> pointerData = <ui.PointerData>[];
-      for (html.Touch touch in event.changedTouches) {
-        final nowPressed = _isTouchPressed(touch.identifier);
+      for (html.Touch touch in event.changedTouches!) {
+        final nowPressed = _isTouchPressed(touch.identifier!);
         if (nowPressed) {
           _convertEventToPointerData(
             data: pointerData,
@@ -637,12 +637,12 @@ class _TouchAdapter extends _BaseAdapter {
       // On Safari Mobile, the keyboard does not show unless this line is
       // added.
       event.preventDefault();
-      final Duration timeStamp = _BaseAdapter._eventTimeStampToDuration(event.timeStamp);
+      final Duration timeStamp = _BaseAdapter._eventTimeStampToDuration(event.timeStamp!);
       final List<ui.PointerData> pointerData = <ui.PointerData>[];
-      for (html.Touch touch in event.changedTouches) {
-        final nowPressed = _isTouchPressed(touch.identifier);
+      for (html.Touch touch in event.changedTouches!) {
+        final nowPressed = _isTouchPressed(touch.identifier!);
         if (nowPressed) {
-          _unpressTouch(touch.identifier);
+          _unpressTouch(touch.identifier!);
           _convertEventToPointerData(
             data: pointerData,
             change: ui.PointerChange.up,
@@ -656,12 +656,12 @@ class _TouchAdapter extends _BaseAdapter {
     });
 
     _addTouchEventListener('touchcancel', (html.TouchEvent event) {
-      final Duration timeStamp = _BaseAdapter._eventTimeStampToDuration(event.timeStamp);
+      final Duration timeStamp = _BaseAdapter._eventTimeStampToDuration(event.timeStamp!);
       final List<ui.PointerData> pointerData = <ui.PointerData>[];
-      for (html.Touch touch in event.changedTouches) {
-        final nowPressed = _isTouchPressed(touch.identifier);
+      for (html.Touch touch in event.changedTouches!) {
+        final nowPressed = _isTouchPressed(touch.identifier!);
         if (nowPressed) {
-          _unpressTouch(touch.identifier);
+          _unpressTouch(touch.identifier!);
           _convertEventToPointerData(
             data: pointerData,
             change: ui.PointerChange.cancel,
@@ -688,7 +688,7 @@ class _TouchAdapter extends _BaseAdapter {
       timeStamp: timeStamp,
       kind: ui.PointerDeviceKind.touch,
       signalKind: ui.PointerSignalKind.none,
-      device: touch.identifier,
+      device: touch.identifier!,
       physicalX: touch.client.x * ui.window.devicePixelRatio as double,
       physicalY: touch.client.y * ui.window.devicePixelRatio as double,
       buttons: pressed ? _kPrimaryMouseButton : 0,
@@ -746,7 +746,7 @@ class _MouseAdapter extends _BaseAdapter with _WheelEventListenerMixin {
       final _SanitizedDetails sanitizedDetails =
         _sanitizer.sanitizeDownEvent(
           button: event.button,
-          buttons: event.buttons,
+          buttons: event.buttons!,
         );
       _convertEventsToPointerData(data: pointerData, event: event, details: sanitizedDetails);
       _callback(pointerData);
@@ -754,7 +754,7 @@ class _MouseAdapter extends _BaseAdapter with _WheelEventListenerMixin {
 
     _addMouseEventListener('mousemove', (html.MouseEvent event) {
       final List<ui.PointerData> pointerData = <ui.PointerData>[];
-      final _SanitizedDetails sanitizedDetails = _sanitizer.sanitizeMoveEvent(buttons: event.buttons);
+      final _SanitizedDetails sanitizedDetails = _sanitizer.sanitizeMoveEvent(buttons: event.buttons!);
       _convertEventsToPointerData(data: pointerData, event: event, details: sanitizedDetails);
       _callback(pointerData);
     }, acceptOutsideGlasspane: true);
@@ -764,7 +764,7 @@ class _MouseAdapter extends _BaseAdapter with _WheelEventListenerMixin {
       final bool isEndOfDrag = event.buttons == 0;
       final _SanitizedDetails sanitizedDetails = isEndOfDrag ?
         _sanitizer.sanitizeUpEvent()! :
-        _sanitizer.sanitizeMoveEvent(buttons: event.buttons);
+        _sanitizer.sanitizeMoveEvent(buttons: event.buttons!);
       _convertEventsToPointerData(data: pointerData, event: event, details: sanitizedDetails);
       _callback(pointerData);
     }, acceptOutsideGlasspane: true);
@@ -794,7 +794,7 @@ class _MouseAdapter extends _BaseAdapter with _WheelEventListenerMixin {
     _pointerDataConverter.convert(
       data,
       change: details.change,
-      timeStamp: _BaseAdapter._eventTimeStampToDuration(event.timeStamp),
+      timeStamp: _BaseAdapter._eventTimeStampToDuration(event.timeStamp!),
       kind: ui.PointerDeviceKind.mouse,
       signalKind: ui.PointerSignalKind.none,
       device: _mouseDeviceId,
