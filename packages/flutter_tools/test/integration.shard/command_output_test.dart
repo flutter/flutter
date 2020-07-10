@@ -41,6 +41,18 @@ void main() {
     expect(result.stdout, isNot(contains('exiting with code 0')));
   });
 
+  test('flutter doctor -vv super verbose', () async {
+    final String flutterBin = globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final ProcessResult result = await const LocalProcessManager().run(<String>[
+      flutterBin,
+      'doctor',
+      '-vv',
+    ]);
+
+    // Check for message only printed in verbose mode.
+    expect(result.stdout, contains('Running shutdown hooks'));
+  });
+
   test('flutter run --machine uses AppRunLogger', () async {
     final String flutterBin = globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await const LocalProcessManager().run(<String>[
