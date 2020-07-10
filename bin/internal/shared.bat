@@ -94,7 +94,7 @@ GOTO :after_subroutine
     ECHO zzz2
     REM Escape apostrophes from the executable path
     SET "update_dart_bin=!update_dart_bin:'=''!"
-    ECHO zzz3
+    ECHO "zzz3 %powershell_executable% %update_dart_bin%"
     %powershell_executable% -ExecutionPolicy Bypass -Command "Unblock-File -Path '%update_dart_bin%'; & '%update_dart_bin%'"
     ECHO zzz4
     IF "%ERRORLEVEL%" NEQ "0" (
