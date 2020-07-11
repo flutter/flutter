@@ -33,7 +33,7 @@ void main() {
   group('RestorationManager', () {
     testWidgets('root bucket retrieval', (WidgetTester tester) async {
       final List<MethodCall> callsToEngine = <MethodCall>[];
-      final Completer<Uint8List> result = Completer<Uint8List>();
+      final Completer<Map<dynamic, dynamic>> result = Completer<Map<dynamic, dynamic>>();
       SystemChannels.restoration.setMockMethodCallHandler((MethodCall call) {
         callsToEngine.add(call);
         return result.future;
@@ -63,10 +63,10 @@ void main() {
       expect(rootBucket, isNotNull);
 
       // Root bucket contains the expected data.
-      expect(rootBucket.get<int>(const RestorationId('value1')), 10);
-      expect(rootBucket.get<String>(const RestorationId('value2')), 'Hello');
+      expect(rootBucket.read<int>(const RestorationId('value1')), 10);
+      expect(rootBucket.read<String>(const RestorationId('value2')), 'Hello');
       final RestorationBucket child = rootBucket.claimChild(const RestorationId('child1'), debugOwner: null);
-      expect(child.get<int>(const RestorationId('another value')), 22);
+      expect(child.read<int>(const RestorationId('another value')), 22);
 
       // Accessing the root bucket again completes synchronously with same bucket.
       RestorationBucket synchronousBucket;
@@ -77,7 +77,7 @@ void main() {
       expect(synchronousBucket, same(rootBucket));
     });
 
-    testWidgets('root bucket received from engine before retrival', (WidgetTester tester) async {
+    testWidgets('root bucket received from engine before retrieval', (WidgetTester tester) async {
       SystemChannels.restoration.setMethodCallHandler(null);
       final List<MethodCall> callsToEngine = <MethodCall>[];
       SystemChannels.restoration.setMockMethodCallHandler((MethodCall call) {
@@ -96,6 +96,36 @@ void main() {
       expect(callsToEngine, isEmpty);
     });
 
+    testWidgets('root bucket received while engine retrieval is pending', (WidgetTester tester) async {
+      SystemChannels.restoration.setMethodCallHandler(null);
+      final List<MethodCall> callsToEngine = <MethodCall>[];
+      final Completer<Map<dynamic, dynamic>> result = Completer<Map<dynamic, dynamic>>();
+      SystemChannels.restoration.setMockMethodCallHandler((MethodCall call) {
+        callsToEngine.add(call);
+        return result.future;
+      });
+      final RestorationManager manager = RestorationManager();
+
+      RestorationBucket rootBucket;
+      manager.rootBucket.then((RestorationBucket bucket) => rootBucket = bucket);
+      expect(rootBucket, isNull);
+      expect(callsToEngine.single.method, 'get');
+
+      await _pushDataFromEngine(_createEncodedRestorationData1());
+      expect(rootBucket, isNotNull);
+      expect(rootBucket.read<int>(const RestorationId('value1')), 10);
+
+      result.complete(_createEncodedRestorationData2());
+      await tester.pump();
+
+      RestorationBucket rootBucket2;
+      manager.rootBucket.then((RestorationBucket bucket) => rootBucket2 = bucket);
+      expect(rootBucket2, isNotNull);
+      expect(rootBucket2, same(rootBucket));
+      expect(rootBucket2.read<int>(const RestorationId('value1')), 10);
+      expect(rootBucket2.contains(const RestorationId('foo')), isFalse);
+    });
+
     testWidgets('root bucket is properly replaced when new data is available', (WidgetTester tester) async {
       SystemChannels.restoration.setMockMethodCallHandler((MethodCall call) async {
         return _createEncodedRestorationData1();
@@ -107,9 +137,9 @@ void main() {
       });
       await tester.pump();
       expect(rootBucket, isNotNull);
-      expect(rootBucket.get<int>(const RestorationId('value1')), 10);
+      expect(rootBucket.read<int>(const RestorationId('value1')), 10);
       final RestorationBucket child = rootBucket.claimChild(const RestorationId('child1'), debugOwner: null);
-      expect(child.get<int>(const RestorationId('another value')), 22);
+      expect(child.read<int>(const RestorationId('another value')), 22);
 
       bool rootDecommissioned = false;
       bool childDecommissioned = false;
@@ -135,10 +165,10 @@ void main() {
 
       child.dispose();
 
-      expect(newRoot.get<int>(const RestorationId('foo')), 33);
-      expect(newRoot.get<int>(const RestorationId('value1')), null);
+      expect(newRoot.read<int>(const RestorationId('foo')), 33);
+      expect(newRoot.read<int>(const RestorationId('value1')), null);
       final RestorationBucket newChild = newRoot.claimChild(const RestorationId('childFoo'), debugOwner: null);
-      expect(newChild.get<String>(const RestorationId('bar')), 'Hello');
+      expect(newChild.read<String>(const RestorationId('bar')), 'Hello');
     });
 
     testWidgets('scheduleUpdate runs finalizers and sends data to engine', (WidgetTester tester) async {
@@ -227,11 +257,43 @@ void main() {
       expect(callsToEngine.single.method, 'put');
     });
 
-    testWidgets('cannot call scheduleUpdate from finalizer', (WidgetTester tester) async {
+    testWidgets('cannot call scheduleUpdate with finalizer from within finalizer', (WidgetTester tester) async {
       final List<MethodCall> callsToEngine = <MethodCall>[];
       SystemChannels.restoration.setMockMethodCallHandler((MethodCall call) async {
         callsToEngine.add(call);
-        return null;
+        return _createEncodedRestorationData1();
+      });
+      final RestorationManager manager = RestorationManager();
+      RestorationBucket rootBucket;
+      manager.rootBucket.then((RestorationBucket bucket) {
+        rootBucket = bucket;
+      });
+      await tester.pump();
+      expect(rootBucket, isNotNull);
+
+      final List<AssertionError> errors = <AssertionError>[];
+      manager.scheduleSerialization(finalizer: () {
+        try {
+          manager.scheduleSerialization(finalizer: () {
+            // empty
+          });
+        } on AssertionError catch (e) {
+          errors.add(e);
+        }
+      });
+
+      tester.binding.scheduleFrame();
+      await tester.pump();
+
+      expect(errors, hasLength(1));
+      expect(errors.single.message, 'Providing a finalizer from within a finalizer is not allowed.');
+    });
+
+    testWidgets('can call scheduleUpdate without finalizer from within finalizer', (WidgetTester tester) async {
+      final List<MethodCall> callsToEngine = <MethodCall>[];
+      SystemChannels.restoration.setMockMethodCallHandler((MethodCall call) async {
+        callsToEngine.add(call);
+        return _createEncodedRestorationData1();
       });
       final RestorationManager manager = RestorationManager();
       RestorationBucket rootBucket;
@@ -253,8 +315,50 @@ void main() {
       tester.binding.scheduleFrame();
       await tester.pump();
 
-      expect(errors, hasLength(1));
-      expect(errors.single.message, 'Calling scheduleUpdate from a finalizer is not allowed.');
+      expect(errors, isEmpty);
+    });
+
+    testWidgets('returns null as root bucket when restoration is disabled', (WidgetTester tester) async {
+      final List<MethodCall> callsToEngine = <MethodCall>[];
+      final Completer<Map<dynamic, dynamic>> result = Completer<Map<dynamic, dynamic>>();
+      SystemChannels.restoration.setMockMethodCallHandler((MethodCall call)  {
+        callsToEngine.add(call);
+        return result.future;
+      });
+      int listenerCount = 0;
+      final RestorationManager manager = RestorationManager()..addListener(() {
+        listenerCount++;
+      });
+      RestorationBucket rootBucket;
+      bool rootBucketResolved = false;
+      manager.rootBucket.then((RestorationBucket bucket) {
+        rootBucketResolved = true;
+        rootBucket = bucket;
+      });
+      await tester.pump();
+      expect(rootBucketResolved, isFalse);
+      expect(listenerCount, 0);
+
+      result.complete(_packageRestorationData(enabled: false));
+      await tester.pump();
+      expect(rootBucketResolved, isTrue);
+      expect(rootBucket, isNull);
+
+      // Switch to non-null.
+      await _pushDataFromEngine(_createEncodedRestorationData1());
+      expect(listenerCount, 1);
+      manager.rootBucket.then((RestorationBucket bucket) {
+        rootBucket = bucket;
+      });
+      expect(rootBucket, isNotNull);
+
+      // Switch to null again.
+      await _pushDataFromEngine(_packageRestorationData(enabled: false));
+      expect(listenerCount, 2);
+      manager.rootBucket.then((RestorationBucket bucket) {
+        rootBucket = bucket;
+      });
+      expect(rootBucket, isNull);
     });
   });
 
@@ -279,7 +383,7 @@ void main() {
   });
 }
 
-Future<void> _pushDataFromEngine(Uint8List data) async {
+Future<void> _pushDataFromEngine(Map<dynamic, dynamic> data) async {
   await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
     'flutter/restoration',
     const StandardMethodCodec().encodeMethodCall(MethodCall('push', data)),
@@ -287,7 +391,7 @@ Future<void> _pushDataFromEngine(Uint8List data) async {
   );
 }
 
-Uint8List _createEncodedRestorationData1() {
+Map<dynamic, dynamic> _createEncodedRestorationData1() {
   final Map<String, dynamic> data = <String, dynamic>{
     valuesMapKey: <String, dynamic>{
       'value1' : 10,
@@ -301,11 +405,10 @@ Uint8List _createEncodedRestorationData1() {
       },
     },
   };
-  final ByteData encoded = const StandardMessageCodec().encodeMessage(data);
-  return encoded.buffer.asUint8List(encoded.offsetInBytes, encoded.lengthInBytes);
+  return _packageRestorationData(data: data);
 }
 
-Uint8List _createEncodedRestorationData2() {
+Map<dynamic, dynamic> _createEncodedRestorationData2() {
   final Map<String, dynamic> data = <String, dynamic>{
     valuesMapKey: <String, dynamic>{
       'foo' : 33,
@@ -318,6 +421,13 @@ Uint8List _createEncodedRestorationData2() {
       },
     },
   };
+  return _packageRestorationData(data: data);
+}
+
+Map<dynamic, dynamic> _packageRestorationData({bool enabled = true, Map<dynamic, dynamic> data}) {
   final ByteData encoded = const StandardMessageCodec().encodeMessage(data);
-  return encoded.buffer.asUint8List(encoded.offsetInBytes, encoded.lengthInBytes);
+  return <dynamic, dynamic>{
+    'enabled': enabled,
+    'data': encoded == null ? null : encoded.buffer.asUint8List(encoded.offsetInBytes, encoded.lengthInBytes)
+  };
 }

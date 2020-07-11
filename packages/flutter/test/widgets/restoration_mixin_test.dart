@@ -77,7 +77,7 @@ void main() {
     // Claimed existing bucket with data.
     final _TestRestorableWidgetState state = tester.state(find.byType(_TestRestorableWidget));
     expect(state.bucket.id, const RestorationId('child1'));
-    expect(state.bucket.get<int>(const RestorationId('foo')), 22);
+    expect(state.bucket.read<int>(const RestorationId('foo')), 22);
     final RestorationBucket bucket = state.bucket;
 
     state.property.log.clear();
@@ -95,7 +95,7 @@ void main() {
     manager.runFinalizers();
 
     expect(state.bucket.id, const RestorationId('something else'));
-    expect(state.bucket.get<int>(const RestorationId('foo')), 22);
+    expect(state.bucket.read<int>(const RestorationId('foo')), 22);
     expect(state.bucket, same(bucket));
     expect(state.property.log, isEmpty);
     expect(state.restoreStateLog, isEmpty);
@@ -119,7 +119,7 @@ void main() {
     // Claimed existing bucket with data.
     final _TestRestorableWidgetState state = tester.state(find.byType(_TestRestorableWidget));
     expect(state.bucket.id, const RestorationId('child1'));
-    expect(state.bucket.get<int>(const RestorationId('foo')), 22);
+    expect(state.bucket.read<int>(const RestorationId('foo')), 22);
     final RestorationBucket bucket = state.bucket;
 
     state.property.log.clear();
@@ -130,7 +130,7 @@ void main() {
     manager.runFinalizers();
 
     expect(state.bucket.id, const RestorationId('newnewnew'));
-    expect(state.bucket.get<int>(const RestorationId('foo')), 22);
+    expect(state.bucket.read<int>(const RestorationId('foo')), 22);
     expect(state.bucket, same(bucket));
     expect(state.property.log, isEmpty);
     expect(state.restoreStateLog, isEmpty);
@@ -322,7 +322,7 @@ void main() {
     state.property.log.clear();
     state.restoreStateLog.clear();
 
-    state.bucket.put(const RestorationId('value'), 11);
+    state.bucket.write(const RestorationId('value'), 11);
     manager.runFinalizers();
 
     // Move widget.
@@ -347,7 +347,7 @@ void main() {
     manager.runFinalizers();
     expect(state.bucket.id, const RestorationId('moving-child'));
     expect(state.bucket, same(bucket));
-    expect(state.bucket.get<int>(const RestorationId('value')), 11);
+    expect(state.bucket.read<int>(const RestorationId('value')), 11);
     expect(state.property.log, isEmpty);
     expect(state.toogleBucketLog, isEmpty);
     expect(state.restoreStateLog, isEmpty);
@@ -372,7 +372,7 @@ void main() {
     final _TestRestorableWidgetState state = tester.state(find.byType(_TestRestorableWidget));
     expect(state.bucket.id, const RestorationId('child1'));
     expect(state.property.value, 10);  // Initialized to default.
-    expect(state.bucket.get<int>(const RestorationId('foo')), 10);
+    expect(state.bucket.read<int>(const RestorationId('foo')), 10);
     final RestorationBucket bucket = state.bucket;
     state.property.log.clear();
     state.restoreStateLog.clear();
@@ -394,7 +394,7 @@ void main() {
     expect(state.bucket, isNot(same(bucket)));
     expect(state.bucket.id, const RestorationId('child1'));
     expect(state.property.value, 22);  // Restored value.
-    expect(state.bucket.get<int>(const RestorationId('foo')), 22);
+    expect(state.bucket.read<int>(const RestorationId('foo')), 22);
     expect(state.restoreStateLog.single, bucket);
     expect(state.toogleBucketLog, isEmpty);
     expect(state.property.log, <String>['fromPrimitives', 'initWithValue']);
@@ -561,7 +561,7 @@ void main() {
     });
     await tester.pump();
     expect(state.property.value, 30);
-    expect(state.bucket.get<int>(const RestorationId('foo')), 30);
+    expect(state.bucket.read<int>(const RestorationId('foo')), 30);
     _clearLogs(state);
 
     state.setProperties(() {
@@ -569,14 +569,14 @@ void main() {
     });
     await tester.pump();
     expect(state.property.value, 30);
-    expect(state.bucket.containsValue(const RestorationId('foo')), isFalse);
+    expect(state.bucket.contains(const RestorationId('foo')), isFalse);
     expect(state.property.log, isEmpty);
 
     state.setProperties(() {
       state.property.value = 40;
     });
     await tester.pump();
-    expect(state.bucket.containsValue(const RestorationId('foo')), isFalse);
+    expect(state.bucket.contains(const RestorationId('foo')), isFalse);
     expect(state.property.log, isEmpty);
 
     await tester.restartAndRestore();
@@ -601,20 +601,20 @@ void main() {
       state.property.enabled = false;
     });
     await tester.pump();
-    expect(state.bucket.containsValue(const RestorationId('foo')), isFalse);
+    expect(state.bucket.contains(const RestorationId('foo')), isFalse);
     state.setProperties(() {
       state.property.value = 40;
     });
     await tester.pump();
     expect(state.property.value, 40);
-    expect(state.bucket.containsValue(const RestorationId('foo')), isFalse);
+    expect(state.bucket.contains(const RestorationId('foo')), isFalse);
     expect(state.property.log, isEmpty);
 
     state.setProperties(() {
       state.property.enabled = true;
     });
     await tester.pump();
-    expect(state.bucket.get<int>(const RestorationId('foo')), 40);
+    expect(state.bucket.read<int>(const RestorationId('foo')), 40);
     expect(state.property.log, <String>['toPrimitives']);
 
     await tester.restartAndRestore();
@@ -636,17 +636,17 @@ void main() {
     state.registerAdditionalProperty();
     await tester.pump();
     expect(state.additionalProperty.value, 11);
-    expect(state.bucket.get<int>(const RestorationId('additional')), 11);
+    expect(state.bucket.read<int>(const RestorationId('additional')), 11);
     state.unregisterAdditionalProperty();
     await tester.pump();
-    expect(state.bucket.containsValue(const RestorationId('additional')), isFalse);
+    expect(state.bucket.contains(const RestorationId('additional')), isFalse);
     expect(() => state.additionalProperty.value, throwsAssertionError); // No longer registered.
 
     // Can register the same property again.
     state.registerAdditionalProperty();
     await tester.pump();
     expect(state.additionalProperty.value, 11);
-    expect(state.bucket.get<int>(const RestorationId('additional')), 11);
+    expect(state.bucket.read<int>(const RestorationId('additional')), 11);
   });
 
   testWidgets('Disposing a property unregisters it, but keeps data', (WidgetTester tester) async {
@@ -662,11 +662,11 @@ void main() {
     state.registerAdditionalProperty();
     await tester.pump();
     expect(state.additionalProperty.value, 11);
-    expect(state.bucket.get<int>(const RestorationId('additional')), 11);
+    expect(state.bucket.read<int>(const RestorationId('additional')), 11);
 
     state.additionalProperty.dispose();
     await tester.pump();
-    expect(state.bucket.get<int>(const RestorationId('additional')), 11);
+    expect(state.bucket.read<int>(const RestorationId('additional')), 11);
 
     // Can register property under same id again.
     state.additionalProperty = _TestRestorableProperty(22);
@@ -674,7 +674,7 @@ void main() {
     await tester.pump();
 
     expect(state.additionalProperty.value, 11); // Old value restored.
-    expect(state.bucket.get<int>(const RestorationId('additional')), 11);
+    expect(state.bucket.read<int>(const RestorationId('additional')), 11);
   });
 }
 

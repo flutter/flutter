@@ -95,7 +95,7 @@ void main() {
 
       final BucketSpyState state = tester.state(find.byType(BucketSpy));
       expect(state.bucket.id, const RestorationId('child1'));
-      expect(state.bucket.get<int>(const RestorationId('foo')), 22);
+      expect(state.bucket.read<int>(const RestorationId('foo')), 22);
     });
 
     testWidgets('renames existing bucket when new ID is provided', (WidgetTester tester) async {
@@ -116,7 +116,7 @@ void main() {
       // Claimed existing bucket with data.
       final BucketSpyState state = tester.state(find.byType(BucketSpy));
       expect(state.bucket.id, const RestorationId('child1'));
-      expect(state.bucket.get<int>(const RestorationId('foo')), 22);
+      expect(state.bucket.read<int>(const RestorationId('foo')), 22);
       final RestorationBucket bucket = state.bucket;
 
       // Rename the existing bucket.
@@ -132,7 +132,7 @@ void main() {
       manager.runFinalizers();
 
       expect(state.bucket.id, const RestorationId('something else'));
-      expect(state.bucket.get<int>(const RestorationId('foo')), 22);
+      expect(state.bucket.read<int>(const RestorationId('foo')), 22);
       expect(state.bucket, same(bucket));
     });
 
@@ -292,7 +292,7 @@ void main() {
       expect(rawData[childrenMapKey]['fixed'][childrenMapKey].containsKey('moving-child'), isTrue);
       final RestorationBucket bucket = state.bucket;
 
-      state.bucket.put(const RestorationId('value'), 11);
+      state.bucket.write(const RestorationId('value'), 11);
       manager.runFinalizers();
 
       // Move scope.
@@ -318,7 +318,7 @@ void main() {
       manager.runFinalizers();
       expect(state.bucket.id, const RestorationId('moving-child'));
       expect(state.bucket, same(bucket));
-      expect(state.bucket.get<int>(const RestorationId('value')), 11);
+      expect(state.bucket.read<int>(const RestorationId('value')), 11);
 
       expect(rawData[childrenMapKey]['fixed'], isEmpty);
       expect(rawData[childrenMapKey].containsKey('moving-child'), isTrue);
@@ -340,7 +340,7 @@ void main() {
       manager.runFinalizers();
       final BucketSpyState state = tester.state(find.byType(BucketSpy));
       expect(state.bucket.id, const RestorationId('child1'));
-      expect(state.bucket.get<int>(const RestorationId('foo')), isNull); // Does not exist.
+      expect(state.bucket.read<int>(const RestorationId('foo')), isNull); // Does not exist.
       final RestorationBucket bucket = state.bucket;
 
       // Replace root bucket.
@@ -360,7 +360,7 @@ void main() {
       // Bucket has been replaced.
       expect(state.bucket, isNot(same(bucket)));
       expect(state.bucket.id, const RestorationId('child1'));
-      expect(state.bucket.get<int>(const RestorationId('foo')), 22);
+      expect(state.bucket.read<int>(const RestorationId('foo')), 22);
     });
   });
 }

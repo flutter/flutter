@@ -52,17 +52,12 @@ class TestRestorationManager extends RestorationManager {
   ///  * [WidgetTester.restoreFrom], which exposes this method to a widget test.
   void restoreFrom(TestRestorationData data) {
     _restorationData = data;
-    handleRestorationDataUpdate(data.binary);
+    handleRestorationUpdateFromEngine(enabled: true, data: data.binary);
   }
 
   @override
-  Future<Map<dynamic, dynamic>> retrieveFromEngine() async {
-    return decodeRestorationData(_restorationData.binary);
-  }
-
-  @override
-  Future<void> sendToEngine(Map<dynamic, dynamic> rawData) async {
-    _restorationData = TestRestorationData._(encodeRestorationData(rawData));
+  Future<void> sendToEngine(Uint8List encodedData) async {
+    _restorationData = TestRestorationData._(encodedData);
   }
 }
 

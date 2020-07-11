@@ -4,6 +4,8 @@
 
 // @dart = 2.8
 
+import 'dart:typed_data';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -31,20 +33,20 @@ class MockRestorationManager extends TestRestorationManager {
 
   int rootBucketAccessed = 0;
 
-  Future<RestorationBucket> rootBucketFuture;
   @override
   Future<RestorationBucket> get rootBucket {
     rootBucketAccessed++;
-    return rootBucketFuture;
+    return _rootBucket;
+  }
+  Future<RestorationBucket> _rootBucket;
+  set rootBucket(Future<RestorationBucket> value) {
+    _rootBucket = value;
+    notifyListeners();
   }
 
-  @override
-  Future<void> sendToEngine(Map<dynamic, dynamic> rawData) {
-    throw UnimplementedError('unimplemented in mock');
-  }
 
   @override
-  Future<Map<dynamic, dynamic>> retrieveFromEngine() {
+  Future<void> sendToEngine(Uint8List encodedData) {
     throw UnimplementedError('unimplemented in mock');
   }
 

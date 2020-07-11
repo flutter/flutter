@@ -52,7 +52,7 @@ void main() {
 
   testWidgets('waits for root bucket', (WidgetTester tester) async {
     final Completer<RestorationBucket> bucketCompleter = Completer<RestorationBucket>();
-    binding.restorationManager.rootBucketFuture = bucketCompleter.future;
+    binding.restorationManager.rootBucket = bucketCompleter.future;
 
     await tester.pumpWidget(
       const Directionality(
@@ -89,7 +89,7 @@ void main() {
   testWidgets('no delay when root is available synchronously', (WidgetTester tester) async {
     final Map<String, dynamic> rawData = <String, dynamic>{};
     final RestorationBucket root = RestorationBucket.root(manager: binding.restorationManager, rawData: rawData);
-    binding.restorationManager.rootBucketFuture = SynchronousFuture<RestorationBucket>(root);
+    binding.restorationManager.rootBucket = SynchronousFuture<RestorationBucket>(root);
 
     await tester.pumpWidget(
       const Directionality(
@@ -134,7 +134,7 @@ void main() {
 
     // Change restoration id to non-null.
     final Completer<RestorationBucket> bucketCompleter = Completer<RestorationBucket>();
-    binding.restorationManager.rootBucketFuture = bucketCompleter.future;
+    binding.restorationManager.rootBucket = bucketCompleter.future;
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -208,7 +208,7 @@ void main() {
 
     // Move out of scope.
     final Completer<RestorationBucket> bucketCompleter = Completer<RestorationBucket>();
-    binding.restorationManager.rootBucketFuture = bucketCompleter.future;
+    binding.restorationManager.rootBucket = bucketCompleter.future;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -263,7 +263,7 @@ void main() {
   testWidgets('injects new root when old one is decommissioned', (WidgetTester tester) async {
     final Map<String, dynamic> firstRawData = <String, dynamic>{};
     final RestorationBucket firstRoot = RestorationBucket.root(manager: binding.restorationManager, rawData: firstRawData);
-    binding.restorationManager.rootBucketFuture = SynchronousFuture<RestorationBucket>(firstRoot);
+    binding.restorationManager.rootBucket = SynchronousFuture<RestorationBucket>(firstRoot);
 
     await tester.pumpWidget(
       const Directionality(
@@ -280,7 +280,7 @@ void main() {
     expect(binding.restorationManager.rootBucketAccessed, 1);
     expect(find.text('Hello'), findsOneWidget);
     final BucketSpyState state = tester.state(find.byType(BucketSpy));
-    state.bucket.put(const RestorationId('foo'), 42);
+    state.bucket.write(const RestorationId('foo'), 42);
     expect(firstRawData[childrenMapKey]['root-child'][valuesMapKey]['foo'], 42);
     final RestorationBucket firstBucket = state.bucket;
 
@@ -295,12 +295,79 @@ void main() {
       },
     };
     final RestorationBucket secondRoot = RestorationBucket.root(manager: binding.restorationManager, rawData: secondRawData);
-    binding.restorationManager.rootBucketFuture = SynchronousFuture<RestorationBucket>(secondRoot);
+    binding.restorationManager.rootBucket = SynchronousFuture<RestorationBucket>(secondRoot);
     firstRoot..decommission()..dispose();
     await tester.pump();
 
     expect(state.bucket, isNot(same(firstBucket)));
-    expect(state.bucket.get<int>(const RestorationId('foo')), 22);
+    expect(state.bucket.read<int>(const RestorationId('foo')), 22);
+  });
+
+  testWidgets('injects null when rootBucket is null', (WidgetTester tester) async {
+    final Completer<RestorationBucket> completer = Completer<RestorationBucket>();
+    binding.restorationManager.rootBucket = completer.future;
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: RootRestorationScope(
+          restorationId: RestorationId('root-child'),
+          child: BucketSpy(
+            child: Text('Hello'),
+          ),
+        ),
+      ),
+    );
+
+    expect(binding.restorationManager.rootBucketAccessed, 1);
+    expect(find.text('Hello'), findsNothing);
+
+    completer.complete(null);
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(binding.restorationManager.rootBucketAccessed, 1);
+    expect(find.text('Hello'), findsOneWidget);
+
+    final BucketSpyState state = tester.state(find.byType(BucketSpy));
+    expect(state.bucket, isNull);
+
+    final RestorationBucket root = RestorationBucket.root(manager: binding.restorationManager, rawData: null);
+    binding.restorationManager.rootBucket = SynchronousFuture<RestorationBucket>(root);
+    await tester.pump();
+
+    expect(binding.restorationManager.rootBucketAccessed, 2);
+    expect(find.text('Hello'), findsOneWidget);
+    expect(state.bucket, isNotNull);
+  });
+
+  testWidgets('can switch to null', (WidgetTester tester) async {
+    final RestorationBucket root = RestorationBucket.root(manager: binding.restorationManager, rawData: null);
+    binding.restorationManager.rootBucket = SynchronousFuture<RestorationBucket>(root);
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: RootRestorationScope(
+          restorationId: RestorationId('root-child'),
+          child: BucketSpy(
+            child: Text('Hello'),
+          ),
+        ),
+      ),
+    );
+
+    expect(binding.restorationManager.rootBucketAccessed, 1);
+    expect(find.text('Hello'), findsOneWidget);
+    final BucketSpyState state = tester.state(find.byType(BucketSpy));
+    expect(state.bucket, isNotNull);
+
+    binding.restorationManager.rootBucket = SynchronousFuture<RestorationBucket>(null);
+    root..decommission()..dispose();
+    await tester.pump();
+
+    expect(binding.restorationManager.rootBucketAccessed, 2);
+    expect(find.text('Hello'), findsOneWidget);
+    expect(state.bucket, isNull);
   });
 }
 

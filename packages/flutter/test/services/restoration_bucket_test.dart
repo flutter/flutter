@@ -20,23 +20,23 @@ void main() {
     expect(bucket.debugOwner, manager);
 
     // Bucket contains expected values from rawData.
-    expect(bucket.get<int>(const RestorationId('value1')), 10);
-    expect(bucket.get<String>(const RestorationId('value2')), 'Hello');
-    expect(bucket.get<String>(const RestorationId('value3')), isNull); // Does not exist.
+    expect(bucket.read<int>(const RestorationId('value1')), 10);
+    expect(bucket.read<String>(const RestorationId('value2')), 'Hello');
+    expect(bucket.read<String>(const RestorationId('value3')), isNull); // Does not exist.
     expect(manager.updateScheduled, isFalse);
 
     // Can overwrite existing value.
-    bucket.put<int>(const RestorationId('value1'), 22);
+    bucket.write<int>(const RestorationId('value1'), 22);
     expect(manager.updateScheduled, isTrue);
-    expect(bucket.get<int>(const RestorationId('value1')), 22);
+    expect(bucket.read<int>(const RestorationId('value1')), 22);
     manager.runFinalizers();
     expect(rawData[valuesMapKey]['value1'], 22);
     expect(manager.updateScheduled, isFalse);
 
     // Can add a new value.
-    bucket.put<bool>(const RestorationId('value3'), true);
+    bucket.write<bool>(const RestorationId('value3'), true);
     expect(manager.updateScheduled, isTrue);
-    expect(bucket.get<bool>(const RestorationId('value3')), true);
+    expect(bucket.read<bool>(const RestorationId('value3')), true);
     manager.runFinalizers();
     expect(rawData[valuesMapKey]['value3'], true);
     expect(manager.updateScheduled, isFalse);
@@ -44,7 +44,7 @@ void main() {
     // Can remove existing value.
     expect(bucket.remove<int>(const RestorationId('value1')), 22);
     expect(manager.updateScheduled, isTrue);
-    expect(bucket.get<int>(const RestorationId('value1')), isNull); // Does not exist anymore.
+    expect(bucket.read<int>(const RestorationId('value1')), isNull); // Does not exist anymore.
     manager.runFinalizers();
     expect(rawData[valuesMapKey].containsKey('value1'), isFalse);
     expect(manager.updateScheduled, isFalse);
@@ -54,9 +54,9 @@ void main() {
     expect(manager.updateScheduled, isFalse);
 
     // Can store null.
-    bucket.put<bool>(const RestorationId('value4'), null);
+    bucket.write<bool>(const RestorationId('value4'), null);
     expect(manager.updateScheduled, isTrue);
-    expect(bucket.get<int>(const RestorationId('value4')), null);
+    expect(bucket.read<int>(const RestorationId('value4')), null);
     manager.runFinalizers();
     expect(rawData[valuesMapKey].containsKey('value4'), isTrue);
     expect(rawData[valuesMapKey]['value4'], null);
@@ -78,22 +78,22 @@ void main() {
     expect(child.debugOwner, debugOwner);
 
     // Bucket contains expected values from rawData.
-    expect(child.get<int>(const RestorationId('foo')), 22);
-    expect(child.get<String>(const RestorationId('bar')), isNull); // Does not exist.
+    expect(child.read<int>(const RestorationId('foo')), 22);
+    expect(child.read<String>(const RestorationId('bar')), isNull); // Does not exist.
     expect(manager.updateScheduled, isFalse);
 
     // Can overwrite existing value.
-    child.put<int>(const RestorationId('foo'), 44);
+    child.write<int>(const RestorationId('foo'), 44);
     expect(manager.updateScheduled, isTrue);
-    expect(child.get<int>(const RestorationId('foo')), 44);
+    expect(child.read<int>(const RestorationId('foo')), 44);
     manager.runFinalizers();
     expect(rootRawData[childrenMapKey]['child1'][valuesMapKey]['foo'], 44);
     expect(manager.updateScheduled, isFalse);
 
     // Can add a new value.
-    child.put<bool>(const RestorationId('value3'), true);
+    child.write<bool>(const RestorationId('value3'), true);
     expect(manager.updateScheduled, isTrue);
-    expect(child.get<bool>(const RestorationId('value3')), true);
+    expect(child.read<bool>(const RestorationId('value3')), true);
     manager.runFinalizers();
     expect(rootRawData[childrenMapKey]['child1'][valuesMapKey]['value3'], true);
     expect(manager.updateScheduled, isFalse);
@@ -101,7 +101,7 @@ void main() {
     // Can remove existing value.
     expect(child.remove<int>(const RestorationId('foo')), 44);
     expect(manager.updateScheduled, isTrue);
-    expect(child.get<int>(const RestorationId('foo')), isNull); // Does not exist anymore.
+    expect(child.read<int>(const RestorationId('foo')), isNull); // Does not exist anymore.
     manager.runFinalizers();
     expect(rootRawData[childrenMapKey]['child1'].containsKey('foo'), isFalse);
     expect(manager.updateScheduled, isFalse);
@@ -111,9 +111,9 @@ void main() {
     expect(manager.updateScheduled, isFalse);
 
     // Can store null.
-    child.put<bool>(const RestorationId('value4'), null);
+    child.write<bool>(const RestorationId('value4'), null);
     expect(manager.updateScheduled, isTrue);
-    expect(child.get<int>(const RestorationId('value4')), null);
+    expect(child.read<int>(const RestorationId('value4')), null);
     manager.runFinalizers();
     expect(rootRawData[childrenMapKey]['child1'][valuesMapKey].containsKey('value4'), isTrue);
     expect(rootRawData[childrenMapKey]['child1'][valuesMapKey]['value4'], null);
@@ -132,8 +132,8 @@ void main() {
     expect(child.id, const RestorationId('child1'));
     expect(child.debugOwner, debugOwner);
 
-    expect(child.get<int>(const RestorationId('foo')), 22);
-    child.put(const RestorationId('bar'), 44);
+    expect(child.read<int>(const RestorationId('foo')), 22);
+    child.write(const RestorationId('bar'), 44);
     expect(manager.updateScheduled, isTrue);
     manager.runFinalizers();
     expect(rawData[childrenMapKey]['child1'][valuesMapKey]['bar'], 44);
@@ -154,8 +154,8 @@ void main() {
     expect(child.id, const RestorationId('child2'));
     expect(child.debugOwner, debugOwner);
 
-    child.put(const RestorationId('foo'), 55);
-    expect(child.get<int>(const RestorationId('foo')), 55);
+    child.write(const RestorationId('foo'), 55);
+    expect(child.read<int>(const RestorationId('foo')), 55);
     manager.runFinalizers();
 
     expect(manager.updateScheduled, isFalse);
@@ -172,14 +172,14 @@ void main() {
 
     expect(manager.updateScheduled, isFalse);
     expect(child1.id, const RestorationId('child1'));
-    expect(child1.get<int>(const RestorationId('foo')), 22);
+    expect(child1.read<int>(const RestorationId('foo')), 22);
 
     manager.runFinalizers();
     expect(manager.updateScheduled, isFalse);
 
     final RestorationBucket child2 = bucket.claimChild(const RestorationId('child1'), debugOwner: 'SecondClaim');
     expect(child2.id, const RestorationId('child1'));
-    expect(child2.get<int>(const RestorationId('foo')), isNull); // Value does not exist in this child.
+    expect(child2.read<int>(const RestorationId('foo')), isNull); // Value does not exist in this child.
 
     // child1 is not given up before running finalizers.
     try {
@@ -206,15 +206,15 @@ void main() {
 
     expect(manager.updateScheduled, isFalse);
     expect(child1.id, const RestorationId('child1'));
-    expect(child1.get<int>(const RestorationId('foo')), 22);
+    expect(child1.read<int>(const RestorationId('foo')), 22);
 
     manager.runFinalizers();
     expect(manager.updateScheduled, isFalse);
 
     final RestorationBucket child2 = bucket.claimChild(const RestorationId('child1'), debugOwner: 'SecondClaim');
     expect(child2.id, const RestorationId('child1'));
-    expect(child2.get<int>(const RestorationId('foo')), isNull); // Value does not exist in this child.
-    child2.put<int>(const RestorationId('bar'), 55);
+    expect(child2.read<int>(const RestorationId('foo')), isNull); // Value does not exist in this child.
+    child2.write<int>(const RestorationId('bar'), 55);
 
     // give up child1.
     child1.dispose();
@@ -247,11 +247,11 @@ void main() {
 
     final RestorationBucket child1 = bucket.claimChild(const RestorationId('child1'), debugOwner: 'FirstClaim');
     expect(manager.updateScheduled, isFalse);
-    expect(child1.get<int>(const RestorationId('foo')), 22);
+    expect(child1.read<int>(const RestorationId('foo')), 22);
     child1.dispose();
     expect(manager.updateScheduled, isTrue);
     final RestorationBucket child2 = bucket.claimChild(const RestorationId('child1'), debugOwner: 'SecondClaim');
-    expect(child2.get<int>(const RestorationId('foo')), isNull);
+    expect(child2.read<int>(const RestorationId('foo')), isNull);
   });
 
   test('cleans up raw data if last value/child is dropped', () {
@@ -306,10 +306,10 @@ void main() {
     expect(rawData.containsKey(childrenMapKey), isFalse);
 
     // Children of child1 continue to function, but no longer in the tree.
-    child1OfChild1.put(const RestorationId('foo'), 10);
-    child2OfChild1.put(const RestorationId('bar'), 20);
-    expect(child1OfChild1.get<int>(const RestorationId('foo')), 10);
-    expect(child2OfChild1.get<int>(const RestorationId('bar')), 20);
+    child1OfChild1.write(const RestorationId('foo'), 10);
+    child2OfChild1.write(const RestorationId('bar'), 20);
+    expect(child1OfChild1.read<int>(const RestorationId('foo')), 10);
+    expect(child2OfChild1.read<int>(const RestorationId('bar')), 20);
     expect(manager.updateScheduled, isFalse);
   });
 
@@ -444,7 +444,7 @@ void main() {
     root.adoptChild(child);
     expect(manager.updateScheduled, isTrue);
 
-    child.put(const RestorationId('value'), 22);
+    child.write(const RestorationId('value'), 22);
 
     manager.runFinalizers();
     expect(manager.updateScheduled, isFalse);
@@ -452,7 +452,7 @@ void main() {
     expect(rawData[childrenMapKey].containsKey('fresh-child'), isTrue);
     expect(rawData[childrenMapKey]['fresh-child'][valuesMapKey]['value'], 22);
 
-    child.put(const RestorationId('bar'), 'blabla');
+    child.write(const RestorationId('bar'), 'blabla');
     expect(manager.updateScheduled, isTrue);
   });
 
@@ -463,7 +463,7 @@ void main() {
 
     final RestorationBucket child = root.claimChild(const RestorationId('child1'), debugOwner: 'owner1');
     final RestorationBucket childOfChild = child.claimChild(const RestorationId('childOfChild'), debugOwner: 'owner2');
-    childOfChild.put<String>(const RestorationId('foo'), 'bar');
+    childOfChild.write<String>(const RestorationId('foo'), 'bar');
 
     expect(manager.updateScheduled, isTrue);
     manager.runFinalizers();
@@ -488,7 +488,7 @@ void main() {
 
     final RestorationBucket child = root.claimChild(const RestorationId('child1'), debugOwner: 'owner1');
     final RestorationBucket childOfChild = child.claimChild(const RestorationId('child1'), debugOwner: 'owner2');
-    childOfChild.put<String>(const RestorationId('foo'), 'bar');
+    childOfChild.write<String>(const RestorationId('foo'), 'bar');
 
     root.adoptChild(childOfChild);
     expect(manager.updateScheduled, isTrue);
@@ -502,7 +502,7 @@ void main() {
 
     final RestorationBucket child = root.claimChild(const RestorationId('child1'), debugOwner: 'owner1');
     final RestorationBucket childOfChild = child.claimChild(const RestorationId('child1'), debugOwner: 'owner2');
-    childOfChild.put<String>(const RestorationId('foo'), 'bar');
+    childOfChild.write<String>(const RestorationId('foo'), 'bar');
 
     final Object childOfChildData = rawData[childrenMapKey]['child1'][childrenMapKey]['child1'];
     expect(childOfChildData, isNotEmpty);
@@ -533,9 +533,9 @@ void main() {
     expect(manager.updateScheduled, isFalse);
 
     final RestorationBucket child1OfChild1 = child1.claimChild(const RestorationId('child2'), debugOwner: 'owner2');
-    child1OfChild1.put<String>(const RestorationId('hello'), 'world');
+    child1OfChild1.write<String>(const RestorationId('hello'), 'world');
     final RestorationBucket child2OfChild1 = child1.claimChild(const RestorationId('child2'), debugOwner: 'owner2');
-    child2OfChild1.put<String>(const RestorationId('foo'), 'bar');
+    child2OfChild1.write<String>(const RestorationId('foo'), 'bar');
 
     root.adoptChild(child2OfChild1);
     child2.dispose();

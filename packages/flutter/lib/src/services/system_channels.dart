@@ -292,18 +292,22 @@ class SystemChannels {
   /// The following outgoing methods are defined for this channel (invoked using
   /// [OptionalMethodChannel.invokeMethod]):
   ///
-  ///  * `get`: Retrieves the current restoration data (e.g. provided by the
-  ///    operating system) from the engine. The restoration data is returned as
-  ///    [ByteData].
+  ///  * `get`: Retrieves the current restoration information (e.g. provided by
+  ///    the operating system) from the engine. The method returns a map
+  ///    containing an `enabled` boolean to indicate whether collecting
+  ///    restoration data is supported by the embedder. If `enabled` is true,
+  ///    the map may also contain restoration data stored under the `data` key
+  ///    from which the state of the framework may be restored. The restoration
+  ///    data is encoded as [Uint8List].
   ///  * `put`: Sends the current restoration data to the engine. Takes the
-  ///    restoration data encoded as [ByteData] as argument.
+  ///    restoration data encoded as [Uint8List] as argument.
   ///
   /// The following incoming methods are defined for this channel (registered
   /// using [MethodChannel.setMethodCallHandler]).
   ///
-  ///  * `push`: Called by the engine to send newly provided restoration data
-  ///    to the framework. The new restoration data is provided as an argument
-  ///    of type [ByteData].
+  ///  * `push`: Called by the engine to send newly provided restoration
+  ///    information to the framework. The argument given to this method has
+  ///    the same format as the object that the `get` method returns.
   ///
   /// See also:
   ///
