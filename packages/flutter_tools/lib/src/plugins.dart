@@ -644,6 +644,12 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
       break;
     case AndroidEmbeddingVersion.v1:
     default:
+      globals.printStatus(
+        'Your Flutter application is created using an older version of the '
+        "Android embedding. It's being deprecated in favor of Android embedding "
+        'v2. Follow the steps on https://flutter.dev/go/android-project-migration '
+        'to migrate your project.'
+      );
       for (final Map<String, dynamic> plugin in androidPlugins) {
         if (!(plugin['supportsEmbeddingV1'] as bool) && plugin['supportsEmbeddingV2'] as bool) {
           throwToolExit(
