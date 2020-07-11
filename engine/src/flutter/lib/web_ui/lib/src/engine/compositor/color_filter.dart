@@ -19,30 +19,37 @@ class CkColorFilter extends ResurrectableSkiaObject {
   CkColorFilter.srgbToLinearGamma(EngineColorFilter filter)
       : _engineFilter = filter;
 
+  SkColorFilter? _skColorFilter;
+
   js.JsObject _createSkiaObjectFromFilter() {
+    SkColorFilter skColorFilter;
     switch (_engineFilter._type) {
       case EngineColorFilter._TypeMode:
-        setSharedSkColor1(_engineFilter._color!);
-        return canvasKit['SkColorFilter'].callMethod('MakeBlend', <dynamic>[
-          sharedSkColor1,
-          makeSkBlendMode(_engineFilter._blendMode),
-        ]);
+        skColorFilter = canvasKitJs.SkColorFilter.MakeBlend(
+          toSharedSkColor1(_engineFilter._color!),
+          toSkBlendMode(_engineFilter._blendMode!),
+        );
+        break;
       case EngineColorFilter._TypeMatrix:
-        final js.JsArray<double> colorMatrix = js.JsArray<double>();
-        colorMatrix.length = 20;
+        final Float32List colorMatrix = Float32List(20);
+        final List<double> matrix = _engineFilter._matrix!;
         for (int i = 0; i < 20; i++) {
-          colorMatrix[i] = _engineFilter._matrix![i];
+          colorMatrix[i] = matrix[i];
         }
-        return canvasKit['SkColorFilter']
-            .callMethod('MakeMatrix', <js.JsArray>[colorMatrix]);
+        skColorFilter = canvasKitJs.SkColorFilter.MakeMatrix(colorMatrix);
+        break;
       case EngineColorFilter._TypeLinearToSrgbGamma:
-        return canvasKit['SkColorFilter'].callMethod('MakeLinearToSRGBGamma');
+        skColorFilter = canvasKitJs.SkColorFilter.MakeLinearToSRGBGamma();
+        break;
       case EngineColorFilter._TypeSrgbToLinearGamma:
-        return canvasKit['SkColorFilter'].callMethod('MakeSRGBToLinearGamma');
+        skColorFilter = canvasKitJs.SkColorFilter.MakeSRGBToLinearGamma();
+        break;
       default:
         throw StateError(
             'Unknown mode ${_engineFilter._type} for ColorFilter.');
     }
+    _skColorFilter = skColorFilter;
+    return _jsObjectWrapper.wrapSkColorFilter(skColorFilter);
   }
 
   @override

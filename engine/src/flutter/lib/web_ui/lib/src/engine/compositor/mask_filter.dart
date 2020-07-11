@@ -13,6 +13,8 @@ class CkMaskFilter extends ResurrectableSkiaObject {
   final ui.BlurStyle _blurStyle;
   final double _sigma;
 
+  SkMaskFilter? _skMaskFilter;
+
   @override
   js.JsObject createDefault() => _initSkiaObject();
 
@@ -20,23 +22,12 @@ class CkMaskFilter extends ResurrectableSkiaObject {
   js.JsObject resurrect() => _initSkiaObject();
 
   js.JsObject _initSkiaObject() {
-    js.JsObject skBlurStyle;
-    switch (_blurStyle) {
-      case ui.BlurStyle.normal:
-        skBlurStyle = canvasKit['BlurStyle']['Normal'];
-        break;
-      case ui.BlurStyle.solid:
-        skBlurStyle = canvasKit['BlurStyle']['Solid'];
-        break;
-      case ui.BlurStyle.outer:
-        skBlurStyle = canvasKit['BlurStyle']['Outer'];
-        break;
-      case ui.BlurStyle.inner:
-        skBlurStyle = canvasKit['BlurStyle']['Inner'];
-        break;
-    }
-
-    return canvasKit
-        .callMethod('MakeBlurMaskFilter', <dynamic>[skBlurStyle, _sigma, true]);
+    final SkMaskFilter skMaskFilter = canvasKitJs.MakeBlurMaskFilter(
+      toSkBlurStyle(_blurStyle),
+      _sigma,
+      true,
+    );
+    _skMaskFilter = skMaskFilter;
+    return _jsObjectWrapper.wrapSkMaskFilter(skMaskFilter);
   }
 }

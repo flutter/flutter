@@ -33,6 +33,11 @@ void main() {
     _maskFilterTests();
     _colorFilterTests();
     _imageFilterTests();
+    _mallocTests();
+    _sharedColorTests();
+    _toSkPointTests();
+    _toSkColorStopsTests();
+    _toSkMatrixFromFloat32Tests();
   },
       // This test failed on iOS Safari.
       // TODO: https://github.com/flutter/flutter/issues/60040
@@ -258,11 +263,20 @@ void _paintTests() {
     paint.setAntiAlias(true);
     paint.setColorInt(0x00FFCCAA);
     paint.setShader(_makeTestShader());
-    // TODO(yjbanov): paint.setMaskFilter
+    paint.setMaskFilter(canvasKitJs.MakeBlurMaskFilter(
+      canvasKitJs.BlurStyle.Outer,
+      2.0,
+      true,
+    ));
     paint.setFilterQuality(canvasKitJs.FilterQuality.High);
-    // TODO(yjbanov): paint.setColorFilter
+    paint.setColorFilter(canvasKitJs.SkColorFilter.MakeLinearToSRGBGamma());
     paint.setStrokeMiter(1.4);
-    // TODO(yjbanov): paint.setImageFilter
+    paint.setImageFilter(canvasKitJs.SkImageFilter.MakeBlur(
+      1,
+      2,
+      canvasKitJs.TileMode.Repeat,
+      null,
+    ));
   });
 }
 
@@ -327,6 +341,104 @@ void _imageFilterTests() {
         null,
       ),
       isNotNull,
+    );
+  });
+}
+
+void _mallocTests() {
+  test('SkFloat32List', () {
+    for (int size = 0; size < 1000; size++) {
+      final SkFloat32List skList = mallocFloat32List(4);
+      expect(skList, isNotNull);
+      expect(skList.toTypedArray().length, 4);
+    }
+  });
+}
+
+void _sharedColorTests() {
+  test('toSharedSkColor1', () {
+    expect(
+      toSharedSkColor1(const ui.Color(0xAABBCCDD)),
+      Float32List(4)
+        ..[0] = 0xBB / 255.0
+        ..[1] = 0xCC / 255.0
+        ..[2] = 0xDD / 255.0
+        ..[3] = 0xAA / 255.0,
+    );
+  });
+  test('toSharedSkColor2', () {
+    expect(
+      toSharedSkColor2(const ui.Color(0xAABBCCDD)),
+      Float32List(4)
+        ..[0] = 0xBB / 255.0
+        ..[1] = 0xCC / 255.0
+        ..[2] = 0xDD / 255.0
+        ..[3] = 0xAA / 255.0,
+    );
+  });
+  test('toSharedSkColor3', () {
+    expect(
+      toSharedSkColor3(const ui.Color(0xAABBCCDD)),
+      Float32List(4)
+        ..[0] = 0xBB / 255.0
+        ..[1] = 0xCC / 255.0
+        ..[2] = 0xDD / 255.0
+        ..[3] = 0xAA / 255.0,
+    );
+  });
+}
+
+void _toSkPointTests() {
+  test('toSkPoint', () {
+    expect(
+      toSkPoint(const ui.Offset(4, 5)),
+      Float32List(2)
+        ..[0] = 4.0
+        ..[1] = 5.0,
+    );
+  });
+}
+
+void _toSkColorStopsTests() {
+  test('toSkColorStops default', () {
+    expect(
+      toSkColorStops(null),
+      Float32List(2)
+        ..[0] = 0
+        ..[1] = 1,
+    );
+  });
+
+  test('toSkColorStops custom', () {
+    expect(
+      toSkColorStops(<double>[1, 2, 3, 4]),
+      Float32List(4)
+        ..[0] = 1
+        ..[1] = 2
+        ..[2] = 3
+        ..[3] = 4,
+    );
+  });
+}
+
+void _toSkMatrixFromFloat32Tests() {
+  test('toSkMatrixFromFloat32', () {
+    final Matrix4 matrix = Matrix4.identity()
+      ..translate(1, 2, 3)
+      ..rotateZ(4);
+    expect(
+      toSkMatrixFromFloat32(matrix.storage),
+      Float32List.fromList(<double>[
+        -0.6536436080932617,
+        0.756802499294281,
+        1,
+        -0.756802499294281,
+        -0.6536436080932617,
+        2,
+        -0.0,
+        0,
+        1,
+      ])
     );
   });
 }

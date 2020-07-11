@@ -15,21 +15,24 @@ class CkImageFilter extends ResurrectableSkiaObject implements ui.ImageFilter {
   final double _sigmaX;
   final double _sigmaY;
 
+  SkImageFilter? _skImageFilter;
+
   @override
   js.JsObject createDefault() => _initSkiaObject();
 
   @override
   js.JsObject resurrect() => _initSkiaObject();
 
-  js.JsObject _initSkiaObject() => canvasKit['SkImageFilter'].callMethod(
-        'MakeBlur',
-        <dynamic>[
-          _sigmaX,
-          _sigmaY,
-          canvasKit['TileMode']['Clamp'],
-          null,
-        ],
-      );
+  js.JsObject _initSkiaObject() {
+    final SkImageFilter skImageFilter = canvasKitJs.SkImageFilter.MakeBlur(
+      _sigmaX,
+      _sigmaY,
+      canvasKitJs.TileMode.Clamp,
+      null,
+    );
+    _skImageFilter = skImageFilter;
+    return _jsObjectWrapper.wrapSkImageFilter(skImageFilter);
+  }
 
   @override
   bool operator ==(Object other) {

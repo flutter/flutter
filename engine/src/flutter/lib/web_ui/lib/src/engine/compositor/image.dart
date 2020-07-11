@@ -8,8 +8,7 @@ part of engine;
 /// Instantiates a [ui.Codec] backed by an `SkImage` from Skia.
 void skiaInstantiateImageCodec(Uint8List list, Callback<ui.Codec> callback,
     [int? width, int? height, int? format, int? rowBytes]) {
-  final js.JsObject? skAnimatedImage =
-      canvasKit.callMethod('MakeAnimatedImageFromEncoded', <Uint8List>[list]);
+  final SkAnimatedImage skAnimatedImage = canvasKitJs.MakeAnimatedImageFromEncoded(list);
   final CkAnimatedImage animatedImage = CkAnimatedImage(skAnimatedImage);
   final CkAnimatedImageCodec codec = CkAnimatedImageCodec(animatedImage);
   callback(codec);
@@ -17,36 +16,34 @@ void skiaInstantiateImageCodec(Uint8List list, Callback<ui.Codec> callback,
 
 /// A wrapper for `SkAnimatedImage`.
 class CkAnimatedImage implements ui.Image {
-  final js.JsObject? _skAnimatedImage;
+  final SkAnimatedImage _skAnimatedImage;
 
   CkAnimatedImage(this._skAnimatedImage);
 
   @override
   void dispose() {
-    _skAnimatedImage!.callMethod('delete');
+    _skAnimatedImage.delete();
   }
 
-  int? get frameCount => _skAnimatedImage!.callMethod('getFrameCount');
+  int get frameCount => _skAnimatedImage.getFrameCount();
 
   /// Decodes the next frame and returns the frame duration.
   Duration decodeNextFrame() {
-    final int durationMillis = _skAnimatedImage!.callMethod('decodeNextFrame');
+    final int durationMillis = _skAnimatedImage.decodeNextFrame();
     return Duration(milliseconds: durationMillis);
   }
 
-  int? get repetitionCount => _skAnimatedImage!.callMethod('getRepetitionCount');
+  int get repetitionCount => _skAnimatedImage.getRepetitionCount();
 
   CkImage get currentFrameAsImage {
-    final js.JsObject? _currentFrame =
-        _skAnimatedImage!.callMethod('getCurrentFrame');
-    return CkImage(_currentFrame);
+    return CkImage(_skAnimatedImage.getCurrentFrame());
   }
 
   @override
-  int get width => _skAnimatedImage!.callMethod('width');
+  int get width => _skAnimatedImage.width();
 
   @override
-  int get height => _skAnimatedImage!.callMethod('height');
+  int get height => _skAnimatedImage.height();
 
   @override
   Future<ByteData> toByteData(
@@ -57,21 +54,20 @@ class CkAnimatedImage implements ui.Image {
 
 /// A [ui.Image] backed by an `SkImage` from Skia.
 class CkImage implements ui.Image {
-  js.JsObject? skImage;
+  SkImage skImage;
 
   CkImage(this.skImage);
 
   @override
   void dispose() {
-    skImage!.callMethod('delete');
-    skImage = null;
+    skImage.delete();
   }
 
   @override
-  int get width => skImage!.callMethod('width');
+  int get width => skImage.width();
 
   @override
-  int get height => skImage!.callMethod('height');
+  int get height => skImage.height();
 
   @override
   Future<ByteData> toByteData(
@@ -93,10 +89,10 @@ class CkAnimatedImageCodec implements ui.Codec {
   }
 
   @override
-  int get frameCount => animatedImage!.frameCount!;
+  int get frameCount => animatedImage!.frameCount;
 
   @override
-  int get repetitionCount => animatedImage!.repetitionCount!;
+  int get repetitionCount => animatedImage!.repetitionCount;
 
   @override
   Future<ui.FrameInfo> getNextFrame() {
