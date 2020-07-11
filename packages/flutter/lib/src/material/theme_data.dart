@@ -22,9 +22,9 @@ import 'card_theme.dart';
 import 'chip_theme.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
-import 'contained_button_theme.dart';
 import 'dialog_theme.dart';
 import 'divider_theme.dart';
+import 'elevated_button_theme.dart';
 import 'floating_action_button_theme.dart';
 import 'ink_splash.dart';
 import 'ink_well.dart' show InteractiveInkFeatureFactory;
@@ -276,7 +276,7 @@ class ThemeData with Diagnosticable {
     BottomNavigationBarThemeData bottomNavigationBarTheme,
     TimePickerThemeData timePickerTheme,
     TextButtonThemeData textButtonTheme,
-    ContainedButtonThemeData containedButtonTheme,
+    ElevatedButtonThemeData elevatedButtonTheme,
     OutlinedButtonThemeData outlinedButtonTheme,
     bool fixTextFieldOutlineLabel,
   }) {
@@ -392,7 +392,7 @@ class ThemeData with Diagnosticable {
     bottomNavigationBarTheme ??= const BottomNavigationBarThemeData();
     timePickerTheme ??= const TimePickerThemeData();
     textButtonTheme ??= const TextButtonThemeData();
-    containedButtonTheme ??= const ContainedButtonThemeData();
+    elevatedButtonTheme ??= const ElevatedButtonThemeData();
     outlinedButtonTheme ??= const OutlinedButtonThemeData();
     fixTextFieldOutlineLabel ??= false;
 
@@ -464,7 +464,7 @@ class ThemeData with Diagnosticable {
       bottomNavigationBarTheme: bottomNavigationBarTheme,
       timePickerTheme: timePickerTheme,
       textButtonTheme: textButtonTheme,
-      containedButtonTheme: containedButtonTheme,
+      elevatedButtonTheme: elevatedButtonTheme,
       outlinedButtonTheme: outlinedButtonTheme,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel,
     );
@@ -548,7 +548,7 @@ class ThemeData with Diagnosticable {
     @required this.bottomNavigationBarTheme,
     @required this.timePickerTheme,
     @required this.textButtonTheme,
-    @required this.containedButtonTheme,
+    @required this.elevatedButtonTheme,
     @required this.outlinedButtonTheme,
     @required this.fixTextFieldOutlineLabel,
   }) : assert(visualDensity != null),
@@ -615,7 +615,7 @@ class ThemeData with Diagnosticable {
        assert(bottomNavigationBarTheme != null),
        assert(timePickerTheme != null),
        assert(textButtonTheme != null),
-       assert(containedButtonTheme != null),
+       assert(elevatedButtonTheme != null),
        assert(outlinedButtonTheme != null),
        assert(fixTextFieldOutlineLabel != null);
 
@@ -1086,8 +1086,8 @@ class ThemeData with Diagnosticable {
   final TextButtonThemeData textButtonTheme;
 
   /// A theme for customizing the appearance and internal layout of
-  /// [ContainedButton]s
-  final ContainedButtonThemeData containedButtonTheme;
+  /// [ElevatedButton]s
+  final ElevatedButtonThemeData elevatedButtonTheme;
 
   /// A theme for customizing the appearance and internal layout of
   /// [OutlinedButton]s.
@@ -1177,7 +1177,7 @@ class ThemeData with Diagnosticable {
     BottomNavigationBarThemeData bottomNavigationBarTheme,
     TimePickerThemeData timePickerTheme,
     TextButtonThemeData textButtonTheme,
-    ContainedButtonThemeData containedButtonTheme,
+    ElevatedButtonThemeData elevatedButtonTheme,
     OutlinedButtonThemeData outlinedButtonTheme,
     bool fixTextFieldOutlineLabel,
   }) {
@@ -1250,7 +1250,7 @@ class ThemeData with Diagnosticable {
       bottomNavigationBarTheme: bottomNavigationBarTheme ?? this.bottomNavigationBarTheme,
       timePickerTheme: timePickerTheme ?? this.timePickerTheme,
       textButtonTheme: textButtonTheme ?? this.textButtonTheme,
-      containedButtonTheme: containedButtonTheme ?? this.containedButtonTheme,
+      elevatedButtonTheme: elevatedButtonTheme ?? this.elevatedButtonTheme,
       outlinedButtonTheme: outlinedButtonTheme ?? this.outlinedButtonTheme,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel ?? this.fixTextFieldOutlineLabel,
     );
@@ -1401,7 +1401,7 @@ class ThemeData with Diagnosticable {
       bottomNavigationBarTheme: BottomNavigationBarThemeData.lerp(a.bottomNavigationBarTheme, b.bottomNavigationBarTheme, t),
       timePickerTheme: TimePickerThemeData.lerp(a.timePickerTheme, b.timePickerTheme, t),
       textButtonTheme: TextButtonThemeData.lerp(a.textButtonTheme, b.textButtonTheme, t),
-      containedButtonTheme: ContainedButtonThemeData.lerp(a.containedButtonTheme, b.containedButtonTheme, t),
+      elevatedButtonTheme: ElevatedButtonThemeData.lerp(a.elevatedButtonTheme, b.elevatedButtonTheme, t),
       outlinedButtonTheme: OutlinedButtonThemeData.lerp(a.outlinedButtonTheme, b.outlinedButtonTheme, t),
       fixTextFieldOutlineLabel: t < 0.5 ? a.fixTextFieldOutlineLabel : b.fixTextFieldOutlineLabel,
     );
@@ -1480,7 +1480,7 @@ class ThemeData with Diagnosticable {
         && other.bottomNavigationBarTheme == bottomNavigationBarTheme
         && other.timePickerTheme == timePickerTheme
         && other.textButtonTheme == textButtonTheme
-        && other.containedButtonTheme == containedButtonTheme
+        && other.elevatedButtonTheme == elevatedButtonTheme
         && other.outlinedButtonTheme == outlinedButtonTheme
         && other.fixTextFieldOutlineLabel == fixTextFieldOutlineLabel;
   }
@@ -1558,7 +1558,7 @@ class ThemeData with Diagnosticable {
       bottomNavigationBarTheme,
       timePickerTheme,
       textButtonTheme,
-      containedButtonTheme,
+      elevatedButtonTheme,
       outlinedButtonTheme,
       fixTextFieldOutlineLabel,
     ];
@@ -1633,7 +1633,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<TimePickerThemeData>('timePickerTheme', timePickerTheme, defaultValue: defaultData.timePickerTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<BottomNavigationBarThemeData>('bottomNavigationBarTheme', bottomNavigationBarTheme, defaultValue: defaultData.bottomNavigationBarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<TextButtonThemeData>('textButtonTheme', textButtonTheme, defaultValue: defaultData.textButtonTheme, level: DiagnosticLevel.debug));
-    properties.add(DiagnosticsProperty<ContainedButtonThemeData>('containedButtonTheme', containedButtonTheme, defaultValue: defaultData.containedButtonTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<ElevatedButtonThemeData>('elevatedButtonTheme', elevatedButtonTheme, defaultValue: defaultData.elevatedButtonTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<OutlinedButtonThemeData>('outlinedButtonTheme', outlinedButtonTheme, defaultValue: defaultData.outlinedButtonTheme, level: DiagnosticLevel.debug));
   }
 }
