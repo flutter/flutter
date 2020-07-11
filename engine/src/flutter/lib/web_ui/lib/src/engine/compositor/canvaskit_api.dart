@@ -5,10 +5,65 @@
 /// Bindings for CanvasKit JavaScript API.
 part of engine;
 
+final js.JsObject _jsWindow = js.JsObject.fromBrowserObject(html.window);
+
+/// This and [_jsObjectWrapper] below are used to convert `@JS`-backed
+/// objects to [js.JsObject]s. To do that we use `@JS` to pass the object
+/// to JavaScript (see [JsObjectWrapper]), then use this variable (which
+/// uses `dart:js`) to read the value back, causing it to be wrapped in
+/// [js.JsObject].
+///
+// TODO(yjbanov): this is a temporary hack until we fully migrate to @JS.
+final js.JsObject _jsObjectWrapperLegacy = js.JsObject(js.context['Object']);
+
+@JS('window.flutter_js_object_wrapper')
+external JsObjectWrapper get _jsObjectWrapper;
+
 void initializeCanvasKitBindings(js.JsObject canvasKit) {
   // Because JsObject cannot be cast to a @JS type, we stash CanvasKit into
   // a global and use the [canvasKitJs] getter to access it.
-  js.JsObject.fromBrowserObject(html.window)['flutter_canvas_kit'] = canvasKit;
+  _jsWindow['flutter_canvas_kit'] = canvasKit;
+  _jsWindow['flutter_js_object_wrapper'] = _jsObjectWrapperLegacy;
+}
+
+@JS()
+class JsObjectWrapper {
+  external set skPaint(SkPaint? paint);
+  external set skMaskFilter(SkMaskFilter? filter);
+  external set skColorFilter(SkColorFilter? filter);
+  external set skImageFilter(SkImageFilter? filter);
+}
+
+/// Specific methods that wrap `@JS`-backed objects into a [js.JsObject]
+/// for use with legacy `dart:js` API.
+extension JsObjectWrappers on JsObjectWrapper {
+  js.JsObject wrapSkPaint(SkPaint paint) {
+    _jsObjectWrapper.skPaint = paint;
+    js.JsObject wrapped = _jsObjectWrapperLegacy['skPaint'];
+    _jsObjectWrapper.skPaint = null;
+    return wrapped;
+  }
+
+  js.JsObject wrapSkMaskFilter(SkMaskFilter filter) {
+    _jsObjectWrapper.skMaskFilter = filter;
+    js.JsObject wrapped = _jsObjectWrapperLegacy['skMaskFilter'];
+    _jsObjectWrapper.skMaskFilter = null;
+    return wrapped;
+  }
+
+  js.JsObject wrapSkColorFilter(SkColorFilter filter) {
+    _jsObjectWrapper.skColorFilter = filter;
+    js.JsObject wrapped = _jsObjectWrapperLegacy['skColorFilter'];
+    _jsObjectWrapper.skColorFilter = null;
+    return wrapped;
+  }
+
+  js.JsObject wrapSkImageFilter(SkImageFilter filter) {
+    _jsObjectWrapper.skImageFilter = filter;
+    js.JsObject wrapped = _jsObjectWrapperLegacy['skImageFilter'];
+    _jsObjectWrapper.skImageFilter = null;
+    return wrapped;
+  }
 }
 
 @JS('window.flutter_canvas_kit')
@@ -317,12 +372,12 @@ class SkPaint {
   external void setStrokeJoin(SkStrokeJoin join);
   external void setAntiAlias(bool isAntiAlias);
   external void setColorInt(int color);
-  external void setShader(SkShader shader);
-  external void setMaskFilter(SkMaskFilter maskFilter);
+  external void setShader(SkShader? shader);
+  external void setMaskFilter(SkMaskFilter? maskFilter);
   external void setFilterQuality(SkFilterQuality filterQuality);
-  external void setColorFilter(SkColorFilter colorFilter);
+  external void setColorFilter(SkColorFilter? colorFilter);
   external void setStrokeMiter(double miterLimit);
-  external void setImageFilter(SkImageFilter imageFilter);
+  external void setImageFilter(SkImageFilter? imageFilter);
 }
 
 @JS()
@@ -373,3 +428,109 @@ Float32List toSkMatrixFromFloat32(Float32List matrix4) {
   }
   return skMatrix;
 }
+
+/// Converts an [offset] into an `[x, y]` pair stored in a `Float32List`.
+///
+/// The returned list can be passed to CanvasKit API that take points.
+Float32List toSkPoint(ui.Offset offset) {
+  final Float32List point = Float32List(2);
+  point[0] = offset.dx;
+  point[1] = offset.dy;
+  return point;
+}
+
+/// Color stops used when the framework specifies `null`.
+final Float32List _kDefaultSkColorStops = Float32List(2)
+  ..[0] = 0
+  ..[1] = 1;
+
+/// Converts a list of color stops into a Skia-compatible JS array or color stops.
+///
+/// In Flutter `null` means two color stops `[0, 1]` that in Skia must be specified explicitly.
+Float32List toSkColorStops(List<double>? colorStops) {
+  if (colorStops == null) {
+    return _kDefaultSkColorStops;
+  }
+
+  final int len = colorStops.length;
+  final Float32List skColorStops = Float32List(len);
+  for (int i = 0; i < len; i++) {
+    skColorStops[i] = colorStops[i];
+  }
+  return skColorStops;
+}
+
+@JS('Float32Array')
+external _NativeFloat32ArrayType get _nativeFloat32ArrayType;
+
+@JS()
+class _NativeFloat32ArrayType {}
+
+@JS('window.flutter_canvas_kit.Malloc')
+external SkFloat32List _mallocFloat32List(
+  _NativeFloat32ArrayType float32ListType,
+  int size,
+);
+
+/// Allocates a [Float32List] backed by WASM memory, managed by
+/// a [SkFloat32List].
+SkFloat32List mallocFloat32List(int size) {
+  return _mallocFloat32List(_nativeFloat32ArrayType, size);
+}
+
+/// Wraps a [Float32List] backed by WASM memory.
+///
+/// This wrapper is necessary because the raw [Float32List] will get detached
+/// when WASM grows its memory. Call [toTypedArray] to get a new instance
+/// that's attached to the current WASM memory block.
+@JS()
+class SkFloat32List {
+  /// Returns the [Float32List] object backed by WASM memory.
+  ///
+  /// Do not reuse the returned list across multiple WASM function/method
+  /// invocations that may lead to WASM memory to grow. When WASM memory
+  /// grows the [Float32List] object becomes "detached" and is no longer
+  /// usable. Instead, call this method every time you need to read from
+  /// or write to the list.
+  external Float32List toTypedArray();
+}
+
+/// Writes [color] information into the given [skColor] buffer.
+Float32List _populateSkColor(SkFloat32List skColor, ui.Color color) {
+  final Float32List array = skColor.toTypedArray();
+  array[0] = color.red / 255.0;
+  array[1] = color.green / 255.0;
+  array[2] = color.blue / 255.0;
+  array[3] = color.alpha / 255.0;
+  return array;
+}
+
+/// Unpacks the [color] into CanvasKit-compatible representation stored
+/// in a shared memory location #1.
+///
+/// Use this only for passing transient data to CanvasKit. Because the
+/// memory is shared the value will not persist.
+Float32List toSharedSkColor1(ui.Color color) {
+  return _populateSkColor(_sharedSkColor1, color);
+}
+final SkFloat32List _sharedSkColor1 = mallocFloat32List(4);
+
+/// Unpacks the [color] into CanvasKit-compatible representation stored
+/// in a shared memory location #2.
+///
+/// Use this only for passing transient data to CanvasKit. Because the
+/// memory is shared the value will not persist.
+Float32List toSharedSkColor2(ui.Color color) {
+  return _populateSkColor(_sharedSkColor2, color);
+}
+final SkFloat32List _sharedSkColor2 = mallocFloat32List(4);
+
+/// Unpacks the [color] into CanvasKit-compatible representation stored
+/// in a shared memory location #3.
+///
+/// Use this only for passing transient data to CanvasKit. Because the
+/// memory is shared the value will not persist.
+Float32List toSharedSkColor3(ui.Color color) {
+  return _populateSkColor(_sharedSkColor3, color);
+}
+final SkFloat32List _sharedSkColor3 = mallocFloat32List(4);
