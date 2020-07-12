@@ -97,6 +97,7 @@ class UserMessages {
   String androidLicensesUnknown(Platform platform) =>
       'Android license status unknown.\n'
       'Try re-installing or updating your Android SDK Manager.\n'
+      'Maybe you can use `flutter doctor --android-licenses` to solve this problem\n'
       'See https://developer.android.com/studio/#downloads or visit '
       '${_androidSdkInstallUrl(platform)} for detailed instructions.';
   String androidSdkManagerOutdated(String managerPath) =>
