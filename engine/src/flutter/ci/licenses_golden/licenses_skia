@@ -1,4 +1,4 @@
-Signature: 964bda7fdf8851c2cd2d8d5274171bae
+Signature: a115e918edf2dcc661af8f6f74af3261
 
 UNUSED LICENSES:
 
@@ -5282,6 +5282,7 @@ FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/Gradient.c
 FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/MergePaths.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/OffsetPaths.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/Polystar.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/PuckerBloat.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/Rectangle.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/Repeater.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/RoundCorners.cpp
@@ -5310,9 +5311,15 @@ FILE: ../../../third_party/skia/src/gpu/GrStagingBuffer.h
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrAutoMapVertexBuffer.h
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnStagingBuffer.cpp
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnStagingBuffer.h
+FILE: ../../../third_party/skia/src/gpu/effects/GrArithmeticProcessor.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrDitherEffect.fp
+FILE: ../../../third_party/skia/src/gpu/effects/GrHighContrastFilterEffect.fp
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrArithmeticProcessor.cpp
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrArithmeticProcessor.h
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrDitherEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrDitherEffect.h
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrHighContrastFilterEffect.cpp
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrHighContrastFilterEffect.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrSimpleMeshDrawOpHelperWithStencil.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrSimpleMeshDrawOpHelperWithStencil.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrDrawAtlasPathOp.cpp
