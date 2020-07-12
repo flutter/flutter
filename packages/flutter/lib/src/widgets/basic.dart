@@ -3912,12 +3912,12 @@ class Flex extends MultiChildRenderObjectWidget {
   /// `start` and `end` in the horizontal direction.
   ///
   /// Defaults to the ambient [Directionality].
-  /// 
+  ///
   /// If `textDirection` is [TextDirection.rtl], then the direction in which 
   /// text flows starts from right to left. Otherwise, if `textDirection` is 
   /// [TextDirection.ltr], then the direction in which text flows starts from 
   /// left to right.
-  /// 
+  ///
   /// If the [direction] is [Axis.horizontal], this controls the order in which
   /// the children are positioned (left-to-right or right-to-left), and the
   /// meaning of the [mainAxisAlignment] property's [MainAxisAlignment.start] and
