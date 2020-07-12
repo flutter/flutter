@@ -14,7 +14,7 @@ const List<int> kPointerActions = <int>[
   6, // POINTER_UP
 ];
 
-const double kDoubleErrorMargin = precisionErrorTolerance;
+const double kDoubleErrorMargin = 1e-4;
 
 String diffMotionEvents(
   Map<String, dynamic> originalEvent,

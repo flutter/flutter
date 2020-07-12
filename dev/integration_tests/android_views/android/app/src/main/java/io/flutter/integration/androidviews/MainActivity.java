@@ -9,6 +9,8 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
 
 import java.util.HashMap;
 
@@ -29,6 +31,18 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
     // This is null when not waiting for the Android permission request;
     private MethodChannel.Result permissionResult;
 
+    private View getFlutterView() {
+        // TODO(egarciad): Set an unique ID in FlutterView, so it's easier to look it up.
+        ViewGroup root = (ViewGroup)findViewById(android.R.id.content);
+        return ((ViewGroup)root.getChildAt(0)).getChildAt(0);
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mFlutterViewTouchPipe = new TouchPipe(mMethodChannel, getFlutterView());
+    }
+
     @Override
     public void configureFlutterEngine(FlutterEngine flutterEngine) {
         DartExecutor executor = flutterEngine.getDartExecutor();
@@ -38,7 +52,6 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
             .registerViewFactory("simple_view", new SimpleViewFactory(executor));
         mMethodChannel = new MethodChannel(executor, "android_views_integration");
         mMethodChannel.setMethodCallHandler(this);
-        mFlutterViewTouchPipe = new TouchPipe(mMethodChannel, findViewById(android.R.id.content));
     }
 
     @Override
@@ -70,7 +83,7 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
     @SuppressWarnings("unchecked")
     public void synthesizeEvent(MethodCall methodCall, MethodChannel.Result result) {
         MotionEvent event = MotionEventCodec.decode((HashMap<String, Object>) methodCall.arguments());
-        findViewById(android.R.id.content).dispatchTouchEvent(event);
+        getFlutterView().dispatchTouchEvent(event);
         result.success(null);
     }
 
