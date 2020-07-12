@@ -47,7 +47,7 @@ static NSString* const kAppBundleIdentifier = @"io.flutter.flutter.app";
   if (flutterAssetsName == nil) {
     flutterAssetsName = @"flutter_assets";
   }
-  NSString* path = [_dartBundle pathForResource:flutterAssetsName ofType:@""];
+  NSString* path = [assetBundle pathForResource:flutterAssetsName ofType:@""];
   if (!path) {
     NSLog(@"Failed to find path for \"%@\"", flutterAssetsName);
   }
