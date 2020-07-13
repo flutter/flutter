@@ -541,8 +541,8 @@ linter:
     if (stderr.isNotEmpty && stderr.first == 'Building flutter tool...') {
       stderr.removeAt(0);
     }
-    if (stderr.isNotEmpty && stderr.first.startsWith('Running "flutter pub get" in ')) {
-      stderr.removeAt(0);
+    if (stdout.isNotEmpty && stdout.first.startsWith('Running "flutter pub get" in ')) {
+      stdout.removeAt(0);
     }
     if (stderr.isNotEmpty) {
       throw 'Cannot analyze dartdocs; unexpected error output:\n$stderr';
