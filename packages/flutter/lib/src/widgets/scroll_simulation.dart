@@ -44,6 +44,8 @@ class BouncingScrollSimulation extends Simulation {
        assert(leadingExtent <= trailingExtent),
        assert(spring != null),
        super(tolerance: tolerance) {
+    print('BouncingScrollSimulation, velocity: $velocity, position: $position, '
+      'leadingExtent: $leadingExtent, trailingExtent: $trailingExtent');
     if (position < leadingExtent) {
       _springSimulation = _underscrollSimulation(position, velocity);
       _springTime = double.negativeInfinity;
