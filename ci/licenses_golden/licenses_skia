@@ -1,4 +1,4 @@
-Signature: bc6519f69ce812c1867635032405d3ac
+Signature: 95df28233cb82e48bc0e4597a95ef320
 
 UNUSED LICENSES:
 
@@ -5312,12 +5312,18 @@ FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnStagingBuffer.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrArithmeticProcessor.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrDitherEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrHighContrastFilterEffect.fp
+FILE: ../../../third_party/skia/src/gpu/effects/GrModulateAlphaEffect.fp
+FILE: ../../../third_party/skia/src/gpu/effects/GrModulateRGBAEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrArithmeticProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrArithmeticProcessor.h
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrDitherEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrDitherEffect.h
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrHighContrastFilterEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrHighContrastFilterEffect.h
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrModulateAlphaEffect.cpp
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrModulateAlphaEffect.h
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrModulateRGBAEffect.cpp
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrModulateRGBAEffect.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrSimpleMeshDrawOpHelperWithStencil.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrSimpleMeshDrawOpHelperWithStencil.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrDrawAtlasPathOp.cpp
