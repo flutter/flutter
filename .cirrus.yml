@@ -272,8 +272,6 @@ task:
     - name: hostonly_devicelab_tests-3_last-linux
       << : *LINUX_SHARD_TEMPLATE
 
-    # TODO(ianh): name: add_to_app_tests-linux
-
     - name: docs-linux # linux-only
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_drive/**', 'packages/flutter_localizations/**', 'packages/flutter_goldens/**', 'bin/**') || $CIRRUS_PR == ''"
       environment:
@@ -508,8 +506,6 @@ task:
         CPU: 4
         MEMORY: 6G
 
-    # TODO(ianh): name: add_to_app_tests-windows
-
     - name: customer_testing-windows
       environment:
         # As of December 2019, the customer_testing-windows shard got faster with more CPUs up to 4
@@ -623,13 +619,6 @@ task:
 
     - name: hostonly_devicelab_tests-3_last-macos
       << : *MACOS_SHARD_TEMPLATE
-
-    - name: add_to_app_tests-macos
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
-      skip: true # https://github.com/flutter/flutter/pull/42444
-      script:
-        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-        - dart --enable-asserts dev/bots/test.dart
 
     - name: customer_testing-macos
       script:

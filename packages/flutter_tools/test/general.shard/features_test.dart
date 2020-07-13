@@ -440,36 +440,6 @@ void main() {
 
       expect(featureFlags.isWindowsEnabled, false);
     }));
-
-    group('isAndroidEmbeddingV2Enabled', () {
-      test('is enabled on beta', () => testbed.run(() {
-        when(mockFlutterVerion.channel).thenReturn('beta');
-        when<bool>(mockFlutterConfig.getValue('enable-android-embedding-v2') as bool).thenReturn(true);
-
-        expect(featureFlags.isAndroidEmbeddingV2Enabled, true);
-      }));
-
-      test('is enabled on dev', () => testbed.run(() {
-        when(mockFlutterVerion.channel).thenReturn('dev');
-        when<bool>(mockFlutterConfig.getValue('enable-android-embedding-v2') as bool).thenReturn(true);
-
-        expect(featureFlags.isAndroidEmbeddingV2Enabled, true);
-      }));
-
-      test('is enabled on master', () => testbed.run(() {
-        when(mockFlutterVerion.channel).thenReturn('master');
-        when<bool>(mockFlutterConfig.getValue('enable-android-embedding-v2') as bool).thenReturn(true);
-
-        expect(featureFlags.isAndroidEmbeddingV2Enabled, true);
-      }));
-
-      test('is enabled on stable', () => testbed.run(() {
-        when(mockFlutterVerion.channel).thenReturn('stable');
-        when<bool>(mockFlutterConfig.getValue('enable-android-embedding-v2') as bool).thenReturn(true);
-
-        expect(featureFlags.isAndroidEmbeddingV2Enabled, true);
-      }));
-    });
   });
 }
 

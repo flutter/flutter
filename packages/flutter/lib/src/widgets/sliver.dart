@@ -1052,20 +1052,11 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
       performRebuild();
   }
 
-  // We inflate widgets at two different times:
-  //  1. When we ourselves are told to rebuild (see performRebuild).
-  //  2. When our render object needs a new child (see createChild).
-  // In both cases, we cache the results of calling into our delegate to get the widget,
-  // so that if we do case 2 later, we don't call the builder again.
-  // Any time we do case 1, though, we reset the cache.
-
-  final Map<int, Widget> _childWidgets = HashMap<int, Widget>();
   final SplayTreeMap<int, Element> _childElements = SplayTreeMap<int, Element>();
   RenderBox _currentBeforeChild;
 
   @override
   void performRebuild() {
-    _childWidgets.clear(); // Reset the cache, as described above.
     super.performRebuild();
     _currentBeforeChild = null;
     assert(_currentlyUpdatingChildIndex == null);
@@ -1133,7 +1124,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   }
 
   Widget _build(int index) {
-    return _childWidgets.putIfAbsent(index, () => widget.delegate.build(this, index));
+    return widget.delegate.build(this, index);
   }
 
   @override

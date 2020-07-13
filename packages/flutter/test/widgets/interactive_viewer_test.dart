@@ -260,6 +260,86 @@ void main() {
       expect(transformationController.value.getMaxScaleOnAxis(), minScale);
     });
 
+    testWidgets('alignPanAxis allows panning in one direction only for diagonal gesture', (WidgetTester tester) async {
+      final TransformationController transformationController = TransformationController();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer(
+                alignPanAxis: true,
+                boundaryMargin: const EdgeInsets.all(double.infinity),
+                transformationController: transformationController,
+                child: Container(width: 200.0, height: 200.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(transformationController.value, equals(Matrix4.identity()));
+
+      // Perform a diagonal drag gesture.
+      final Offset childOffset = tester.getTopLeft(find.byType(Container));
+      final Offset childInterior = Offset(
+        childOffset.dx + 20.0,
+        childOffset.dy + 20.0,
+      );
+      final TestGesture gesture = await tester.startGesture(childInterior);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.moveTo(childOffset);
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // Translation has only happened along the y axis (the default axis when
+      // a gesture is perfectly at 45 degrees to the axes).
+      final Vector3 translation = transformationController.value.getTranslation();
+      expect(translation.x, 0.0);
+      expect(translation.y, childOffset.dy - childInterior.dy);
+    });
+
+    testWidgets('alignPanAxis allows panning in one direction only for horizontal leaning gesture', (WidgetTester tester) async {
+      final TransformationController transformationController = TransformationController();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer(
+                alignPanAxis: true,
+                boundaryMargin: const EdgeInsets.all(double.infinity),
+                transformationController: transformationController,
+                child: Container(width: 200.0, height: 200.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(transformationController.value, equals(Matrix4.identity()));
+
+      // Perform a horizontally leaning diagonal drag gesture.
+      final Offset childOffset = tester.getTopLeft(find.byType(Container));
+      final Offset childInterior = Offset(
+        childOffset.dx + 20.0,
+        childOffset.dy + 10.0,
+      );
+      final TestGesture gesture = await tester.startGesture(childInterior);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.moveTo(childOffset);
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // Translation happened only along the x axis because that's the axis that
+      // had the greatest movement.
+      final Vector3 translation = transformationController.value.getTranslation();
+      expect(translation.x, childOffset.dx - childInterior.dx);
+      expect(translation.y, 0.0);
+    });
+
     testWidgets('inertia fling and boundary sliding', (WidgetTester tester) async {
       final TransformationController transformationController = TransformationController();
       const double boundaryMargin = 50.0;
@@ -388,6 +468,98 @@ void main() {
       final Offset viewportFocalPoint = Offset(
         childCenter.dx - 40.0 - childOffset.dx,
         childCenter.dy - childOffset.dy,
+      );
+      final Offset sceneFocalPoint = transformationController.toScene(viewportFocalPoint);
+      gesture = await tester.createGesture();
+      gesture2 = await tester.createGesture();
+      await gesture.down(scaleStart1);
+      await gesture2.down(scaleStart2);
+      await tester.pump();
+      await gesture.moveTo(scaleEnd1);
+      await gesture2.moveTo(scaleEnd2);
+      await tester.pump();
+      await gesture.up();
+      await gesture2.up();
+      await tester.pumpAndSettle();
+      final Offset newSceneFocalPoint = transformationController.toScene(viewportFocalPoint);
+      expect(newSceneFocalPoint.dx, closeTo(sceneFocalPoint.dx, 1.0));
+      expect(newSceneFocalPoint.dy, closeTo(sceneFocalPoint.dy, 1.0));
+    });
+
+    testWidgets('Scaling automatically causes a centering translation even when alignPanAxis is set', (WidgetTester tester) async {
+      final TransformationController transformationController = TransformationController();
+      const double boundaryMargin = 50.0;
+      const double minScale = 0.1;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer(
+                alignPanAxis: true,
+                boundaryMargin: const EdgeInsets.all(boundaryMargin),
+                minScale: minScale,
+                transformationController: transformationController,
+                child: Container(width: 200.0, height: 200.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      Vector3 translation = transformationController.value.getTranslation();
+      expect(translation.x, 0.0);
+      expect(translation.y, 0.0);
+
+      // Pan into the corner of the boundaries in two gestures, since
+      // alignPanAxis prevents diagonal panning.
+      final Offset childOffset1 = tester.getTopLeft(find.byType(Container));
+      const Offset flingEnd1 = Offset(20.0, 0.0);
+      await tester.flingFrom(childOffset1, flingEnd1, 1000.0);
+      await tester.pumpAndSettle();
+      await tester.pump(const Duration(seconds: 5));
+      final Offset childOffset2 = tester.getTopLeft(find.byType(Container));
+      const Offset flingEnd2 = Offset(0.0, 15.0);
+      await tester.flingFrom(childOffset2, flingEnd2, 1000.0);
+      await tester.pumpAndSettle();
+      translation = transformationController.value.getTranslation();
+      expect(translation.x, closeTo(boundaryMargin, .000000001));
+      expect(translation.y, closeTo(boundaryMargin, .000000001));
+
+      // Zoom out so the entire child is visible. The child will also be
+      // translated in order to keep it inside the boundaries.
+      final Offset childCenter = tester.getCenter(find.byType(Container));
+      Offset scaleStart1 = Offset(childCenter.dx - 40.0, childCenter.dy);
+      Offset scaleStart2 = Offset(childCenter.dx + 40.0, childCenter.dy);
+      Offset scaleEnd1 = Offset(childCenter.dx - 10.0, childCenter.dy);
+      Offset scaleEnd2 = Offset(childCenter.dx + 10.0, childCenter.dy);
+      TestGesture gesture = await tester.createGesture();
+      TestGesture gesture2 = await tester.createGesture();
+      await gesture.down(scaleStart1);
+      await gesture2.down(scaleStart2);
+      await tester.pump();
+      await gesture.moveTo(scaleEnd1);
+      await gesture2.moveTo(scaleEnd2);
+      await tester.pump();
+      await gesture.up();
+      await gesture2.up();
+      await tester.pumpAndSettle();
+      expect(transformationController.value.getMaxScaleOnAxis(), lessThan(1.0));
+      translation = transformationController.value.getTranslation();
+      expect(translation.x, lessThan(boundaryMargin));
+      expect(translation.y, lessThan(boundaryMargin));
+      expect(translation.x, greaterThan(0.0));
+      expect(translation.y, greaterThan(0.0));
+      expect(translation.x, closeTo(translation.y, .000000001));
+
+      // Zoom in on a point that's not the center, and see that it remains at
+      // roughly the same location in the viewport after the zoom.
+      scaleStart1 = Offset(childCenter.dx - 50.0, childCenter.dy);
+      scaleStart2 = Offset(childCenter.dx - 30.0, childCenter.dy);
+      scaleEnd1 = Offset(childCenter.dx - 51.0, childCenter.dy);
+      scaleEnd2 = Offset(childCenter.dx - 29.0, childCenter.dy);
+      final Offset viewportFocalPoint = Offset(
+        childCenter.dx - 40.0 - childOffset1.dx,
+        childCenter.dy - childOffset1.dy,
       );
       final Offset sceneFocalPoint = transformationController.toScene(viewportFocalPoint);
       gesture = await tester.createGesture();

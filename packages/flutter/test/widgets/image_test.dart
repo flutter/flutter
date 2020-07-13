@@ -1213,7 +1213,7 @@ void main() {
     expect(chunkEvents.length, 4);
     expect(find.byType(Text), findsNothing);
     expect(find.byType(RawImage), findsOneWidget);
-  }, skip: isBrowser);
+  });
 
   testWidgets("Image doesn't rebuild on chunk events if loadingBuilder is null", (WidgetTester tester) async {
     final ui.Image image = await tester.runAsync(createTestImage);
@@ -1266,7 +1266,7 @@ void main() {
     expect(find.byType(RawImage), findsOneWidget);
     expect(tester.widget<Center>(find.byType(Center)).child, isA<Padding>());
     expect(tester.widget<Padding>(find.byType(Padding)).child, isA<RawImage>());
-  }, skip: isBrowser);
+  });
 
   testWidgets('Image state handles loadingBuilder update from null to non-null', (WidgetTester tester) async {
     final TestImageStreamCompleter streamCompleter = TestImageStreamCompleter();
@@ -1298,7 +1298,7 @@ void main() {
     await tester.pump();
     expect(find.byType(Center), findsOneWidget);
     expect(find.byType(RawImage), findsOneWidget);
-  }, skip: isBrowser);
+  });
 
   testWidgets('Image state handles loadingBuilder update from non-null to null', (WidgetTester tester) async {
     final TestImageStreamCompleter streamCompleter = TestImageStreamCompleter();
@@ -1331,7 +1331,7 @@ void main() {
     expect(tester.state(find.byType(Image)), same(state));
     streamCompleter.setData(chunkEvent: const ImageChunkEvent(cumulativeBytesLoaded: 10, expectedTotalBytes: 100));
     expect(tester.binding.hasScheduledFrame, isFalse);
-  }, skip: isBrowser);
+  });
 
   testWidgets('Verify Image resets its ImageListeners', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
@@ -1725,11 +1725,7 @@ void main() {
       await _testRotatedImage(tester, true);
       await _testRotatedImage(tester, false);
     },
-    // TODO(hterkelson): figure out why web timed out with `await precacheImage`
-    // so we can enable this test on web.
-    //
-    // See https://github.com/flutter/flutter/issues/54292.
-    skip: kIsWeb,
+    skip: kIsWeb, // https://github.com/flutter/flutter/issues/54292.
   );
 
   testWidgets('Reports image size when painted', (WidgetTester tester) async {

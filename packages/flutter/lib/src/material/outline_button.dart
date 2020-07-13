@@ -85,6 +85,7 @@ class OutlineButton extends MaterialButton {
     Clip clipBehavior = Clip.none,
     FocusNode focusNode,
     bool autofocus = false,
+    MaterialTapTargetSize materialTapTargetSize,
     Widget child,
   }) : assert(highlightElevation == null || highlightElevation >= 0.0),
        assert(clipBehavior != null),
@@ -108,6 +109,7 @@ class OutlineButton extends MaterialButton {
          shape: shape,
          clipBehavior: clipBehavior,
          focusNode: focusNode,
+         materialTapTargetSize: materialTapTargetSize,
          autofocus: autofocus,
          child: child,
        );
@@ -143,6 +145,7 @@ class OutlineButton extends MaterialButton {
     Clip clipBehavior,
     FocusNode focusNode,
     bool autofocus,
+    MaterialTapTargetSize materialTapTargetSize,
     @required Widget icon,
     @required Widget label,
   }) = _OutlineButtonWithIcon;
@@ -203,6 +206,7 @@ class OutlineButton extends MaterialButton {
       shape: buttonTheme.getShape(this),
       clipBehavior: clipBehavior,
       focusNode: focusNode,
+      materialTapTargetSize: materialTapTargetSize,
       child: child,
     );
   }
@@ -244,6 +248,7 @@ class _OutlineButtonWithIcon extends OutlineButton with MaterialButtonWithIconMi
     Clip clipBehavior = Clip.none,
     FocusNode focusNode,
     bool autofocus = false,
+    MaterialTapTargetSize materialTapTargetSize,
     @required Widget icon,
     @required Widget label,
   }) : assert(highlightElevation == null || highlightElevation >= 0.0),
@@ -274,6 +279,7 @@ class _OutlineButtonWithIcon extends OutlineButton with MaterialButtonWithIconMi
          clipBehavior: clipBehavior,
          focusNode: focusNode,
          autofocus: autofocus,
+         materialTapTargetSize: materialTapTargetSize,
          child: Row(
            mainAxisSize: MainAxisSize.min,
            children: <Widget>[
@@ -311,6 +317,7 @@ class _OutlineButton extends StatefulWidget {
     this.focusNode,
     this.autofocus = false,
     this.child,
+    this.materialTapTargetSize,
   }) : assert(highlightElevation != null && highlightElevation >= 0.0),
        assert(highlightedBorderColor != null),
        assert(clipBehavior != null),
@@ -340,6 +347,7 @@ class _OutlineButton extends StatefulWidget {
   final FocusNode focusNode;
   final bool autofocus;
   final Widget child;
+  final MaterialTapTargetSize materialTapTargetSize;
 
   bool get enabled => onPressed != null || onLongPress != null;
 
@@ -489,6 +497,7 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
           clipBehavior: widget.clipBehavior,
           focusNode: widget.focusNode,
           animationDuration: _kElevationDuration,
+          materialTapTargetSize: widget.materialTapTargetSize,
           child: widget.child,
         );
       },

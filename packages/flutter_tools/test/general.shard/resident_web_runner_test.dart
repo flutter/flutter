@@ -1179,6 +1179,47 @@ void main() {
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
+  testUsingContext('debugToggleInvertOversizedImagesOverride', () async {
+    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      ...kAttachExpectations,
+      const FakeVmServiceRequest(
+        method: 'ext.flutter.invertOversizedImages',
+        args: <String, Object>{
+          'isolateId': null,
+        },
+        jsonResponse: <String, Object>{
+          'enabled': 'false'
+        },
+      ),
+      const FakeVmServiceRequest(
+        method: 'ext.flutter.invertOversizedImages',
+        args: <String, Object>{
+          'isolateId': null,
+          'enabled': 'true',
+        },
+        jsonResponse: <String, Object>{
+          'enabled': 'true'
+        },
+      )
+    ]);
+    _setupMocks();
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    unawaited(residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+
+    await residentWebRunner.debugToggleInvertOversizedImages();
+
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Pub: () => MockPub(),
+    Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
+  });
+
   testUsingContext('debugToggleWidgetInspector', () async {
     final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
@@ -1560,7 +1601,7 @@ void main() {
     when(mockWebDevFS.connect(any))
       .thenThrow(const WebSocketException());
 
-    await expectLater(() => residentWebRunner.run(), throwsToolExit());
+    await expectLater(residentWebRunner.run, throwsToolExit());
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -1577,7 +1618,7 @@ void main() {
     when(mockWebDevFS.connect(any))
       .thenThrow(AppConnectionException(''));
 
-    await expectLater(() => residentWebRunner.run(), throwsToolExit());
+    await expectLater(residentWebRunner.run, throwsToolExit());
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -1594,7 +1635,7 @@ void main() {
     when(mockWebDevFS.connect(any))
       .thenThrow(ChromeDebugException(<String, dynamic>{}));
 
-    await expectLater(() => residentWebRunner.run(), throwsToolExit());
+    await expectLater(residentWebRunner.run, throwsToolExit());
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -1609,7 +1650,7 @@ void main() {
     _setupMocks();
     when(mockWebDevFS.connect(any)).thenThrow(Exception());
 
-    await expectLater(() => residentWebRunner.run(), throwsException);
+    await expectLater(residentWebRunner.run, throwsException);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -1628,7 +1669,7 @@ void main() {
 
     when(mockWebDevFS.connect(any)).thenThrow(StateError(''));
 
-    await expectLater(() => residentWebRunner.run(), throwsStateError);
+    await expectLater(residentWebRunner.run, throwsStateError);
     verify(mockStatus.stop()).called(1);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
