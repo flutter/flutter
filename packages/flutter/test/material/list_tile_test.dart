@@ -1537,8 +1537,8 @@ void main() {
 
   testWidgets('ListTile respects tileColor & selectedTileColor', (WidgetTester tester) async {
     bool isSelected = false;
-    final Color selectedTileColor = Colors.red;
-    final Color tileColor = Colors.green;
+    const Color selectedTileColor = Colors.red;
+    const Color tileColor = Colors.green;
 
     await tester.pumpWidget(
        MaterialApp(
@@ -1577,7 +1577,7 @@ void main() {
 
   testWidgets('ListTile default tile color', (WidgetTester tester) async {
     bool isSelected = false;
-    final Color defaultColor = Colors.transparent;
+    const Color defaultColor = Colors.transparent;
 
     await tester.pumpWidget(
         MaterialApp(
