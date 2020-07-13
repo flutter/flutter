@@ -3387,12 +3387,14 @@ class IndexedStack extends Stack {
   ///  IndexedStack widgets.
   static bool addIndexedStackScopeAncestorsDependencies(BuildContext context) {
     _IndexedStackScope scope;
-    final List<_IndexedStackScope> scopeList = <_IndexedStackScope>[];
+    bool result = true;
     InheritedElement scopeElement = context.getElementForInheritedWidgetOfExactType<_IndexedStackScope>();
     while (scopeElement != null) {
       scope = context.dependOnInheritedElement(scopeElement) as _IndexedStackScope;
       assert(scope != null);
-      scopeList.add(scope);
+      if (scope.stackIndex != scope.childIndex) {
+        result = false;
+      }
       // _getParent is needed here because
       // context.getElementForInheritedWidgetOfExactType will return itself if it
       // happens to be of the correct type.
@@ -3400,15 +3402,7 @@ class IndexedStack extends Stack {
       scopeElement = parent.getElementForInheritedWidgetOfExactType<_IndexedStackScope>();
     }
 
-    if (scopeList.isNotEmpty) {
-      for (int i = 0; i < scopeList.length; ++i) {
-        if (scopeList[i].childIndex != scopeList[i].stackIndex) {
-          return false;
-        }
-      }
-    }
-
-    return true;
+    return result;
   }
 
   /// The index of the child to show.
