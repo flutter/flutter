@@ -202,7 +202,7 @@ class OutlinedButton extends ButtonStyleButton {
   /// * `overlayColor`
   ///   * hovered - Theme.colorScheme.primary(0.04)
   ///   * focused or pressed - Theme.colorScheme.primary(0.12)
-  /// * `shadowColor` - Colors.black
+  /// * `shadowColor` - Theme.shadowColor
   /// * `elevation` - 0
   /// * `padding`
   ///   * `textScaleFactor <= 1` - horizontal(16)
@@ -235,7 +235,7 @@ class OutlinedButton extends ButtonStyleButton {
       primary: colorScheme.primary,
       onSurface: colorScheme.onSurface,
       backgroundColor: Colors.transparent,
-      shadowColor: Colors.black,
+      shadowColor: theme.shadowColor,
       elevation: 0,
       textStyle: theme.textTheme.button,
       padding: scaledPadding,

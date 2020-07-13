@@ -14,7 +14,6 @@ import 'package:flutter/widgets.dart';
 import 'button_style.dart';
 import 'button_style_button.dart';
 import 'color_scheme.dart';
-import 'colors.dart';
 import 'constants.dart';
 import 'elevated_button_theme.dart';
 import 'material_state.dart';
@@ -220,7 +219,7 @@ class ElevatedButton extends ButtonStyleButton {
   /// * `overlayColor`
   ///   * hovered - Theme.colorScheme.onPrimary(0.08)
   ///   * focused or pressed - Theme.colorScheme.onPrimary(0.24)
-  /// * `shadowColor` - Colors.black
+  /// * `shadowColor` - Theme.shadowColor
   /// * `elevation`
   ///   * disabled - 0
   ///   * hovered or focused - 2
@@ -264,7 +263,7 @@ class ElevatedButton extends ButtonStyleButton {
       primary: colorScheme.primary,
       onPrimary: colorScheme.onPrimary,
       onSurface: colorScheme.onSurface,
-      shadowColor: Colors.black,
+      shadowColor: theme.shadowColor,
       elevation: 2,
       textStyle: theme.textTheme.button,
       padding: scaledPadding,
