@@ -522,10 +522,10 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
 
   void _addPlatformsOptions() {
     argParser.addMultiOption('platforms',
-      help: 'the platforms supported by this project.'
-        'This argument only works when the --template is set to app or plugin.'
-        'Platform folders (e.g. android/) will be generated in the target project.'
-        'When adding platforms to a plugin project, the pubspec.yaml will be updated with the requested platform.'
+      help: 'The platforms supported by this project. '
+        'This argument only works when the --template is set to app or plugin. '
+        'Platform folders (e.g. android/) will be generated in the target project. '
+        'When adding platforms to a plugin project, the pubspec.yaml will be updated with the requested platform. '
         'Adding desktop platforms requires the corresponding desktop config setting to be enabled.',
       defaultsTo: _kAvailablePlatforms,
       allowed: _kAvailablePlatforms);
