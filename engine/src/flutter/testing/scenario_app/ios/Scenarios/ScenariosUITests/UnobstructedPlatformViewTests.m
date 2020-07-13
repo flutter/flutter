@@ -243,12 +243,8 @@
 
   XCUIElement* overlay = app.otherElements[@"platform_view[0].overlay[0]"];
   XCTAssertTrue(overlay.exists);
-  XCTAssertEqual(overlay.frame.origin.x, 75);
-  XCTAssertEqual(overlay.frame.origin.y, 85);
-  XCTAssertEqual(overlay.frame.size.width, 150);
-  XCTAssertEqual(overlay.frame.size.height, 190);
-
   XCTAssertFalse(app.otherElements[@"platform_view[0].overlay[1]"].exists);
+  XCTAssertTrue(CGRectContainsRect(platform_view.frame, overlay.frame));
 }
 
 @end
