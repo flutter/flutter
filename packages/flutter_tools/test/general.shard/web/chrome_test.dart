@@ -35,10 +35,8 @@ void main() {
   Platform platform;
   FakeProcessManager processManager;
   OperatingSystemUtils operatingSystemUtils;
-  Logger logger;
 
   setUp(() {
-    logger = BufferLogger.test();
     operatingSystemUtils = MockOperatingSystemUtils();
     when(operatingSystemUtils.findFreePort())
         .thenAnswer((Invocation invocation) async {
@@ -54,8 +52,8 @@ void main() {
       platform: platform,
       processManager: processManager,
       operatingSystemUtils: operatingSystemUtils,
-      logger: logger,
       browserFinder: findChromeExecutable,
+      logger: BufferLogger.test(),
     );
   });
 
@@ -162,7 +160,7 @@ void main() {
       .childFile('preferences');
     preferencesFile
       ..createSync(recursive: true)
-      ..writeAsStringSync('example');
+      ..writeAsStringSync('"exit_type":"Crashed"');
 
     final Directory localStorageContentsDirectory = dataDir
         .childDirectory('Default')
@@ -186,18 +184,8 @@ void main() {
       cacheDir: dataDir,
     );
 
-    // validate preferences
-    final File tempFile = fileSystem
-      .directory('.tmp_rand0/flutter_tools_chrome_device.rand0')
-      .childDirectory('Default')
-      .childFile('preferences');
-
-    expect(tempFile.existsSync(), true);
-    expect(tempFile.readAsStringSync(), 'example');
-
-    // write crash to file:
-    tempFile.writeAsStringSync('"exit_type":"Crashed"');
     exitCompleter.complete();
+    await Future<void>.delayed(const Duration(microseconds: 1));
 
     // writes non-crash back to dart_tool
     expect(preferencesFile.readAsStringSync(), '"exit_type":"Normal"');
