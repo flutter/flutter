@@ -13,10 +13,9 @@ void main() {
       <String>['analyze-sample-code.dart', 'test/analyze-sample-code-test-input'],
     );
     final List<String> stdoutLines = process.stdout.toString().split('\n');
-    final List<String> stderrLines = process.stderr.toString().split('\n')
-      ..removeWhere((String line) => line.startsWith('Analyzer output:') || line.startsWith('Building flutter tool...'));
+    final List<String> stderrLines = process.stderr.toString().split('\n');
     expect(process.exitCode, isNot(equals(0)));
-    expect(stderrLines, <String>[
+    expect(stderrLines, containsAll(<String>[
       'known_broken_documentation.dart:30:9: new Opacity(',
       '>>> Unnecessary new keyword (unnecessary_new)',
       'known_broken_documentation.dart:62:9: new Opacity(',
@@ -24,11 +23,11 @@ void main() {
       '',
       'Found 1 sample code errors.',
       '',
-    ]);
-    expect(stdoutLines, <String>[
+    ]));
+    expect(stdoutLines, containsAll(<String>[
       'Found 7 sample code sections.',
        'Starting analysis of code samples.',
       '',
-    ]);
+    ]));
   }, skip: Platform.isWindows);
 }
