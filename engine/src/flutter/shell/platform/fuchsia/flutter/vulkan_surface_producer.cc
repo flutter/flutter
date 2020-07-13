@@ -16,6 +16,7 @@
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/GrContext.h"
 #include "third_party/skia/include/gpu/vk/GrVkBackendContext.h"
+#include "third_party/skia/include/gpu/vk/GrVkExtensions.h"
 #include "third_party/skia/include/gpu/vk/GrVkTypes.h"
 
 namespace flutter_runner {
@@ -126,6 +127,16 @@ bool VulkanSurfaceProducer::Initialize(scenic::Session* scenic_session) {
   backend_context.fFeatures = skia_features;
   backend_context.fGetProc = std::move(getProc);
   backend_context.fOwnsInstanceAndDevice = false;
+  // The memory_requirements_2 extension is required on Fuchsia as the AMD
+  // memory allocator used by Skia benefit from it.
+  const char* device_extensions[] = {
+      VK_KHR_GET_MEMORY_REQUIREMENTS_2_EXTENSION_NAME,
+  };
+  GrVkExtensions vk_extensions;
+  vk_extensions.init(backend_context.fGetProc, backend_context.fInstance,
+                     backend_context.fPhysicalDevice, 0, nullptr,
+                     countof(device_extensions), device_extensions);
+  backend_context.fVkExtensions = &vk_extensions;
 
   context_ = GrContext::MakeVulkan(backend_context);
 
