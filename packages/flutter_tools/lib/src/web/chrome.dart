@@ -316,6 +316,6 @@ class Chromium {
   Future<Uri> get debuggerUri async {
     final ChromeTab tab = (await chromeConnection.getTabs())
       .firstWhere((ChromeTab tab) => !tab.isBackgroundPage && !tab.isChromeExtension);
-    return Uri.parse(tab.webSocketDebuggerUrl);
+    return Uri.parse(tab.devtoolsFrontendUrl);
   }
 }
