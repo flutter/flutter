@@ -764,19 +764,15 @@ class ThemeData with Diagnosticable {
   /// The default color of [MaterialType.canvas] [Material].
   final Color canvasColor;
 
-  /// The color that [Material] widget uses to draw elevation shadows.
+  /// The color that the [Material] widget uses to draw elevation shadows.
   ///
   /// Defaults to fully opaque black.
   ///
   /// Shadows can be difficult to see in a dark theme, so the elevation of a
-  /// surface should be portrayed with an "overlay" in addition to the shadow.
+  /// surface should be rendered with an "overlay" in addition to the shadow.
   /// As the elevation of the component increases, the overlay increases in
-  /// opacity.
-  ///
-  /// See also:
-  ///
-  ///  * [applyElevationOverlayColor], which turns elevation overlay on or off
-  /// for dark themes.
+  /// opacity. The [applyElevationOverlayColor] property turns the elevation
+  /// overlay on or off for dark themes.
   final Color shadowColor;
 
   /// The foreground color for widgets (knobs, text, overscroll edge effect, etc).
