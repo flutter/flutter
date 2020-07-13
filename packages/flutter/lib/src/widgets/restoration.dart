@@ -235,12 +235,6 @@ class _RootRestorationScopeState extends State<RootRestorationScope> {
   RestorationBucket _ancestorBucket;
 
   @override
-  void initState() {
-    super.initState();
-    ServicesBinding.instance.restorationManager.addListener(_replaceRootBucket);
-  }
-
-  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _ancestorBucket = RestorationScope.of(context);
@@ -269,6 +263,7 @@ class _RootRestorationScopeState extends State<RootRestorationScope> {
       ServicesBinding.instance.restorationManager.rootBucket.then((RestorationBucket bucket) {
         _isLoadingRootBucket = false;
         if (mounted) {
+          ServicesBinding.instance.restorationManager.addListener(_replaceRootBucket);
           setState(() {
             _rootBucket = bucket;
             _rootBucketValid = true;
@@ -283,6 +278,7 @@ class _RootRestorationScopeState extends State<RootRestorationScope> {
   void _replaceRootBucket() {
     _rootBucketValid = false;
     _rootBucket = null;
+    ServicesBinding.instance.restorationManager.removeListener(_replaceRootBucket);
     _loadRootBucketIfNecessary();
     assert(!_isWaitingForRootBucket); // Ensure that load finished synchronously.
   }

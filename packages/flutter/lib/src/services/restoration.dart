@@ -6,7 +6,6 @@
 
 import 'dart:async';
 import 'dart:typed_data';
-import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
@@ -175,7 +174,7 @@ class RestorationManager extends ChangeNotifier {
   ///
   /// The `enabled` parameter indicates whether the engine wants to receive
   /// restoration data. When `enabled` is false, state restoration is turned
-  /// off and the [rootBucket] is set to null. When `enabled` is false, the
+  /// off and the [rootBucket] is set to null. When `enabled` is true, the
   /// provided restoration `data` will be parsed into the [rootBucket]. If
   /// `data` is null, an empty [rootBucket] will be instantiated.
   ///
@@ -257,52 +256,21 @@ class RestorationManager extends ChangeNotifier {
   bool _debugDoingUpdate = false;
   bool _postFrameScheduled = false;
 
-  final Set<VoidCallback> _finalizers = <VoidCallback>{};
+  final Set<RestorationBucket> _bucketsNeedingSerialization = <RestorationBucket>{};
 
-  /// Schedules a post frame callback to serialize the current hierarchy of
-  /// restoration buckets and send it over to the engine.
-  ///
-  /// Called by [RestorationBucket]s whenever the data stored in them has
-  /// changed or the shape of the bucket hierarchy has been modified.
-  ///
-  /// The task will execute at the end of the current frame or - if currently
-  /// not producing a frame - at the end of the next frame. Just before the
-  /// hierarchy is serialized and send over to the engine, the optionally
-  /// provided `finalizer` is called. The callback may be used to check the
-  /// integrity of the data in a given bucket. To avoid infinite finalizer
-  /// loops, it is illegal to call [scheduleSerialization] and provide another
-  /// `finalizer` from within the `finalizer` callback.
-  void scheduleSerialization({VoidCallback finalizer}) {
-    // The concept of `finalizer` callbacks is necessary to properly use
-    // restoration buckets in the [Widget] tree because of the way widgets are
-    // disposed during the build phase: Flutter delays the disposal of widgets
-    // until the very end of the build phase. When during a build widget A is
-    // getting replaced by widget B, B will build before A is disposed. This
-    // causes a problem if both widgets want to claim a child restoration bucket
-    // with ID x. In theory, this should be allowed because since A is getting
-    // replaced by B, A will give up the bucket in its dispose method so that B
-    // can claim a bucket with the same ID when it builds. However, in reality B
-    // will claim the bucket before A has released it, which means for a very
-    // short time (until A is actually getting disposed) there will be two child
-    // buckets under the same restoration ID, which is illegal. To get around
-    // this problem, restoration buckets do actually allow claiming child
-    // buckets for restoration IDs that have already been claimed in the hopes
-    // that the original owner will give up the bucket before the restoration
-    // data is finalized and sent to the engine at the end of the frame. They
-    // check whether this hope became reality in a finalizer callback.
-
-    assert(_rootBucket != null);
-    assert(
-      !_debugDoingUpdate || finalizer == null,
-      'Providing a finalizer from within a finalizer is not allowed.',
-    );
-    if (finalizer != null) {
-      _finalizers.add(finalizer);
-    }
+  void _scheduleSerializationFor(RestorationBucket bucket) {
+    assert(bucket != null);
+    assert(bucket._manager == this);
+    assert(!_debugDoingUpdate);
+    _bucketsNeedingSerialization.add(bucket);
     if (!_postFrameScheduled) {
       _postFrameScheduled = true;
       SchedulerBinding.instance.addPostFrameCallback((Duration _) => _doProcessing());
     }
+  }
+
+  void _unscheduleSerializationFor(RestorationBucket bucket) {
+    _bucketsNeedingSerialization.remove(bucket);
   }
 
   void _doProcessing() {
@@ -312,10 +280,13 @@ class RestorationManager extends ChangeNotifier {
     }());
     _postFrameScheduled = false;
 
-    for (final VoidCallback finalizer in _finalizers) {
-      finalizer();
+    for (final RestorationBucket bucket in _bucketsNeedingSerialization) {
+      bucket._needsSerialization = false;
+      assert((){
+        return bucket._debugAssertIntegrity();
+      }());
     }
-    _finalizers.clear();
+    _bucketsNeedingSerialization.clear();
     sendToEngine(_encodeRestorationData(_rootBucket._rawData));
 
     assert(() {
@@ -455,6 +426,7 @@ class RestorationBucket extends ChangeNotifier {
   }) : assert(id != null),
        _id = id,
        _rawData = <String, dynamic>{} {
+    _markNeedsSerialisation();
     assert(() {
       _debugOwner = debugOwner;
       return true;
@@ -491,6 +463,9 @@ class RestorationBucket extends ChangeNotifier {
        _manager = manager,
        _rawData = rawData ?? <dynamic, dynamic>{},
        _id = const RestorationId('root') {
+    if (rawData == null) {
+      _markNeedsSerialisation();
+    }
     assert(() {
       _debugOwner = manager;
       return true;
@@ -584,7 +559,7 @@ class RestorationBucket extends ChangeNotifier {
   }
 
   void _performDecommission() {
-    _manager = null;
+    _updateManager(null);
     notifyListeners();
     _visitChildren((RestorationBucket bucket) {
       bucket._performDecommission();
@@ -629,7 +604,7 @@ class RestorationBucket extends ChangeNotifier {
     assert(debugIsSerializableForRestoration(value));
     if (_rawValues[id.value] != value || !_rawValues.containsKey(id.value)) {
       _rawValues[id.value] = value;
-      _manager?.scheduleSerialization();
+      _markNeedsSerialisation();
     }
   }
 
@@ -653,7 +628,7 @@ class RestorationBucket extends ChangeNotifier {
       _rawData.remove(_valuesMapKey);
     }
     if (needsUpdate) {
-      _manager?.scheduleSerialization();
+      _markNeedsSerialisation();
     }
     return result;
   }
@@ -675,9 +650,8 @@ class RestorationBucket extends ChangeNotifier {
   // The restoration IDs and associated buckets of children that have been
   // claimed via [claimChild].
   final Map<RestorationId, RestorationBucket> _claimedChildren = <RestorationId, RestorationBucket>{};
-  // Newly created child buckets that are scheduled to be added to [_rawChildren] in
-  // [_finalize], see comment in [claimChild] for details.
-  final Map<RestorationId, Set<RestorationBucket>> _childrenToAdd = <RestorationId, Set<RestorationBucket>>{};
+  // Newly created child buckets whose restoration id is still in use, see comment in [claimChild] for details.
+  final Map<RestorationId, List<RestorationBucket>> _childrenToAdd = <RestorationId, List<RestorationBucket>>{};
 
   /// Claims ownership of the child with the provided `id` from this bucket.
   ///
@@ -709,8 +683,8 @@ class RestorationBucket extends ChangeNotifier {
     // If an id has already been claimed (case 1) the current owner may give up
     // that id later this frame and it can be re-used. In anticipation of the
     // previous owner's surrender of the id, we return an empty bucket for this
-    // new claim and check in [_finalize] that at the end of the frame the old
-    // owner actually did surrendered the id.
+    // new claim and check in [_debugAssertIntegrity] that at the end of the
+    // frame the old owner actually did surrendered the id.
     // Case 2 also requires the creation of a new empty bucket.
     // In Case 3 we create a new bucket wrapping the existing data in
     // [_rawChildren].
@@ -768,38 +742,60 @@ class RestorationBucket extends ChangeNotifier {
     _removeChildData(child);
     child._parent = null;
     if (child._manager != null) {
-      child._manager = null;
+      _updateManager(null);
       _recursivelyUpdateManager(child);
     }
   }
 
+  bool _needsSerialization = false;
+
+  void _markNeedsSerialisation() {
+    if (_needsSerialization) {
+      return;
+    }
+    _needsSerialization = true;
+    _manager?._scheduleSerializationFor(this);
+  }
+
   void _recursivelyUpdateManager(RestorationBucket bucket) {
-    bucket._manager = _manager;
+    bucket._updateManager(_manager);
     bucket._visitChildren(_recursivelyUpdateManager);
   }
 
-  void _finalize() {
-    for (final MapEntry<RestorationId, Set<RestorationBucket>> child in _childrenToAdd.entries) {
-      final RestorationId id = child.key;
-      final Set<RestorationBucket> buckets = child.value;
-      assert(() {
-        final int claimCount = buckets.length + (_claimedChildren.containsKey(id) ? 1 : 0);
-        if (claimCount > 1) {
-          throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary('Multiple owners claimed child RestorationBuckets with the same ID.'),
-            ErrorDescription('The following owners claimed child RestorationBuckets with id "$id" from the parent $this:'),
-            ...buckets.map((RestorationBucket bucket) => ErrorDescription(
-              ' * ${bucket.debugOwner}',
-            )),
-            if (_claimedChildren.containsKey(id))
-              ErrorDescription(' * ${_claimedChildren[id].debugOwner} (current owner)'),
-          ]);
-        }
-        return true;
-      }());
-      _finalizeAddChildData(buckets.first);
+  void _updateManager(RestorationManager newManager) {
+    if (_needsSerialization) {
+      _manager?._unscheduleSerializationFor(this);
     }
-    _childrenToAdd.clear();
+    _manager = newManager;
+    if (_needsSerialization) {
+      _needsSerialization = false;
+      _markNeedsSerialisation();
+    }
+  }
+
+  bool _debugAssertIntegrity() {
+    assert(() {
+      if (_childrenToAdd.isEmpty) {
+        return true;
+      }
+      final List<DiagnosticsNode> error = <DiagnosticsNode>[
+        ErrorSummary('Multiple owners claimed child RestorationBuckets with the same IDs.'),
+        ErrorDescription('The following IDs were claimed multiple times from the parent $this:')
+      ];
+      for (final MapEntry<RestorationId, List<RestorationBucket>> child in _childrenToAdd.entries) {
+        final RestorationId id = child.key;
+        final List<RestorationBucket> buckets = child.value;
+        assert(buckets.isNotEmpty);
+        assert(_claimedChildren.containsKey(id));
+        error.addAll(<DiagnosticsNode>[
+          ErrorDescription(' * $id was claimed by:'),
+          ...buckets.map((RestorationBucket bucket) => ErrorDescription('   * ${bucket.debugOwner}')),
+          ErrorDescription(' * ${_claimedChildren[id].debugOwner} (current owner)'),
+        ]);
+      }
+      throw FlutterError.fromParts(error);
+    }());
+    return true;
   }
 
   void _removeChildData(RestorationBucket child) {
@@ -807,10 +803,18 @@ class RestorationBucket extends ChangeNotifier {
     assert(child._parent == this);
     if (_claimedChildren.remove(child.id) == child) {
       _rawChildren.remove(child.id.value);
+      final List<RestorationBucket> pendingChildren = _childrenToAdd[child.id];
+      if (pendingChildren != null) {
+        final RestorationBucket toAdd = pendingChildren.removeLast();
+        _finalizeAddChildData(toAdd);
+        if (pendingChildren.isEmpty) {
+          _childrenToAdd.remove(child.id);
+        }
+      }
       if (_rawChildren.isEmpty) {
         _rawData.remove(_childrenMapKey);
       }
-      _manager?.scheduleSerialization();
+      _markNeedsSerialisation();
       return;
     }
     _childrenToAdd[child.id]?.remove(child);
@@ -826,12 +830,12 @@ class RestorationBucket extends ChangeNotifier {
       // Delay addition until the end of the frame in the hopes that the current
       // owner of the child with the same id will have given up that child by
       // then.
-      _childrenToAdd.putIfAbsent(child.id, () => <RestorationBucket>{}).add(child);
-      _manager?.scheduleSerialization(finalizer: _finalize);
+      _childrenToAdd.putIfAbsent(child.id, () => <RestorationBucket>[]).add(child);
+      _markNeedsSerialisation();
       return;
     }
     _finalizeAddChildData(child);
-    _manager?.scheduleSerialization();
+    _markNeedsSerialisation();
   }
 
   void _finalizeAddChildData(RestorationBucket child) {
@@ -843,7 +847,7 @@ class RestorationBucket extends ChangeNotifier {
 
   void _visitChildren(_BucketVisitor visitor, {bool concurrentModification = false}) {
     Iterable<RestorationBucket> children = _claimedChildren.values
-        .followedBy(_childrenToAdd.values.expand((Set<RestorationBucket> buckets) => buckets));
+        .followedBy(_childrenToAdd.values.expand((List<RestorationBucket> buckets) => buckets));
     if (concurrentModification) {
       children = children.toList(growable: false);
     }
@@ -889,7 +893,7 @@ class RestorationBucket extends ChangeNotifier {
     // TODO(goderbauer): add asserts to ensure that object is not used after disposal.
     _parent?._removeChildData(this);
     _parent = null;
-    _manager = null;
+    _updateManager(null);
     _visitChildren(_dropChild, concurrentModification: true);
     _claimedChildren.clear();
     _childrenToAdd.clear();
