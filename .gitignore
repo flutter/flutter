@@ -2,6 +2,7 @@
 *.pyc
 *~
 .*.sw?
+.ccls-cache
 .checkstyle
 .clangd
 .classpath
@@ -15,6 +16,7 @@
 .project
 .pub
 .pydevproject
+.vscode
 compile_commands.json
 cscope.*
 Session.vim
