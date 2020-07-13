@@ -264,6 +264,19 @@ class Plugin {
 
   static List<String> _validateLegacyYaml(YamlMap yaml) {
     final List<String> errors = <String>[];
+
+      if (yaml[AndroidPlugin.kConfigKey] != null ||
+        yaml[IOSPlugin.kConfigKey] != null ||
+        yaml[LinuxPlugin.kConfigKey] != null ||
+        yaml[MacOSPlugin.kConfigKey] != null ||
+        yaml[WindowsPlugin.kConfigKey] != null) {
+      const String errorMessage =
+          'The flutter.plugin.platforms key should be added,'
+          'when specifying a plugin supported platforms\n'
+          'See: https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin';
+      return <String>[errorMessage];
+    }
+
     if (yaml['androidPackage'] != null && yaml['androidPackage'] is! String) {
       errors.add('The "androidPackage" must either be null or a string.');
     }

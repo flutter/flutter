@@ -963,6 +963,29 @@ flutter:
     expect(logger.errorText,
       contains('flutter.plugin.platforms should be a map with the platform name as the key'));
   });
+
+    testWithoutContext('FlutterManifest validates missing flutter.plugin.platforms key', () {
+    const String manifest = '''
+name: test
+flutter:
+  plugin:
+    android:
+      package: com.example
+      pluginClass: SomeClass
+    ios:
+      pluginClass: SomeClass
+''';
+    final BufferLogger logger = BufferLogger.test();
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest, null);
+    expect(logger.errorText,
+      contains('The flutter.plugin.platforms key should be added,'
+      'when specifying a plugin supported platforms'));
+  });
 }
 
 Matcher matchesManifest({
