@@ -179,4 +179,58 @@ void main() {
       checkButton(tester);
     });
   });
+
+  testWidgets('Theme shadowColor', (WidgetTester tester) async {
+    const ColorScheme colorScheme = ColorScheme.light();
+    const Color shadowColor = Color(0xff000001);
+
+    Widget buildFrame({ Color overallShadowColor, Color themeShadowColor, Color shadowColor }) {
+      return MaterialApp(
+        theme: ThemeData.from(colorScheme: colorScheme).copyWith(
+          shadowColor: overallShadowColor,
+        ),
+        home: Scaffold(
+          body: Center(
+            child: ElevatedButtonTheme(
+              data: ElevatedButtonThemeData(
+                style: ElevatedButton.styleFrom(
+                  shadowColor: themeShadowColor,
+                ),
+              ),
+              child: Builder(
+                builder: (BuildContext context) {
+                  return ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      shadowColor: shadowColor,
+                    ),
+                    onPressed: () { },
+                    child: const Text('button'),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    final Finder buttonMaterialFinder = find.descendant(
+      of: find.byType(ElevatedButton),
+      matching: find.byType(Material),
+    );
+
+    await tester.pumpWidget(buildFrame(overallShadowColor: shadowColor));
+    Material material = tester.widget<Material>(buttonMaterialFinder);
+    expect(material.shadowColor, shadowColor);
+
+    await tester.pumpWidget(buildFrame(themeShadowColor: shadowColor));
+    await tester.pumpAndSettle(); // theme animation
+    material = tester.widget<Material>(buttonMaterialFinder);
+    expect(material.shadowColor, shadowColor);
+
+    await tester.pumpWidget(buildFrame(shadowColor: shadowColor));
+    await tester.pumpAndSettle(); // theme animation
+    material = tester.widget<Material>(buttonMaterialFinder);
+    expect(material.shadowColor, shadowColor);
+  });
 }
