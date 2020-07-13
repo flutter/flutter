@@ -568,6 +568,8 @@ class _TabBarScrollController extends ScrollController {
 /// Typically created as the [AppBar.bottom] part of an [AppBar] and in
 /// conjunction with a [TabBarView].
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=POtoEH-5l40}
+///
 /// If a [TabController] is not provided, then a [DefaultTabController] ancestor
 /// must be provided instead. The tab controller's [TabController.length] must
 /// equal the length of the [tabs] list and the length of the
@@ -1143,6 +1145,8 @@ class _TabBarState extends State<TabBar> {
 /// selected tab.
 ///
 /// This widget is typically used in conjunction with a [TabBar].
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=POtoEH-5l40}
 ///
 /// If a [TabController] is not provided, then there must be a [DefaultTabController]
 /// ancestor.
