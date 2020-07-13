@@ -641,6 +641,15 @@ class EditableText extends StatefulWidget {
   /// context, the English phrase will be on the right and the Hebrew phrase on
   /// its left.
   ///
+  /// When LTR text is entered into an RTL field, or RTL text is entered into an
+  /// LTR field, [LRM](https://en.wikipedia.org/wiki/Left-to-right_mark) or
+  /// [RLM](https://en.wikipedia.org/wiki/Right-to-left_mark) characters will be
+  /// inserted alongside whitespace characters, respectively. This is to
+  /// eliminate ambiguous directionality in whitespace and ensure proper caret
+  /// placement. These characters will affect the length of the string and may
+  /// need to be parsed out when doing things like string comparison with other
+  /// text.
+  ///
   /// Defaults to the ambient [Directionality], if any.
   ///
   /// See also:
