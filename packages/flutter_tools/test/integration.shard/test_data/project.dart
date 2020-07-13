@@ -42,6 +42,7 @@ abstract class Project {
     }
     if (generatedFile != null) {
       writeFile(globals.fs.path.join(dir.path, '.dart_tool', 'flutter_gen', 'flutter_gen.dart'), generatedFile);
+      writeFile(globals.fs.path.join(dir.path, 'l10n.yaml'), '# Dummy');
     }
     writeFile(globals.fs.path.join(dir.path, 'web', 'index.html'), _kDefaultHtml);
     writePackages(dir.path);
