@@ -222,6 +222,7 @@ class SnackBar extends StatefulWidget {
   /// Empty space to surround the snack bar.
   ///
   /// This property is only used when [behavior] is [SnackBarBehavior.floating].
+  /// It can not be used if [width] is specified.
   ///
   /// If this property is null, then the default is
   /// `EdgeInsets.fromLTRB(15.0, 5.0, 15.0, 10.0)`.
@@ -238,10 +239,12 @@ class SnackBar extends StatefulWidget {
 
   /// The width of the snack bar.
   ///
-  /// This property is only used when [behavior] is [SnackBarBehavior.floating].
+  /// If width is specified, the snack bar will be centered horizontally in the
+  /// available space. This property is only used when [behavior] is
+  /// [SnackBarBehavior.floating]. It can not be used if [margin] is specified.
   ///
   /// If this property is null, then the snack bar will take up the full device
-  /// width.
+  /// width less the margin.
   final double width;
 
   /// The shape of the snack bar's [Material].

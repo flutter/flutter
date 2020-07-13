@@ -565,10 +565,11 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     }
 
     if (hasChild(_ScaffoldSlot.snackBar)) {
+      final bool hasCustomWidth = snackBarWidth != null && snackBarWidth < size.width;
       if (snackBarSize == Size.zero) {
         snackBarSize = layoutChild(
           _ScaffoldSlot.snackBar,
-          snackBarWidth == null ? fullWidthConstraints : looseConstraints,
+          hasCustomWidth ? looseConstraints : fullWidthConstraints,
         );
       }
 
@@ -579,7 +580,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         snackBarYOffsetBase = contentBottom;
       }
 
-      final double xOffset = snackBarWidth == null ? 0.0 : (size.width - snackBarWidth) / 2;
+      final double xOffset = hasCustomWidth ? (size.width - snackBarWidth) / 2 : 0.0;
       positionChild(_ScaffoldSlot.snackBar, Offset(xOffset, snackBarYOffsetBase - snackBarSize.height));
     }
 
