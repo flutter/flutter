@@ -71,7 +71,7 @@ void main() {
           ),
         ),
       );
-      manager.runFinalizers();
+      manager.doSerialization();
 
       final BucketSpyState state = tester.state(find.byType(BucketSpy));
       expect(state.bucket.id, id);
@@ -91,7 +91,7 @@ void main() {
           ),
         ),
       );
-      manager.runFinalizers();
+      manager.doSerialization();
 
       final BucketSpyState state = tester.state(find.byType(BucketSpy));
       expect(state.bucket.id, const RestorationId('child1'));
@@ -111,7 +111,7 @@ void main() {
           ),
         ),
       );
-      manager.runFinalizers();
+      manager.doSerialization();
 
       // Claimed existing bucket with data.
       final BucketSpyState state = tester.state(find.byType(BucketSpy));
@@ -129,7 +129,7 @@ void main() {
           ),
         ),
       );
-      manager.runFinalizers();
+      manager.doSerialization();
 
       expect(state.bucket.id, const RestorationId('something else'));
       expect(state.bucket.read<int>(const RestorationId('foo')), 22);
@@ -151,7 +151,7 @@ void main() {
           ),
         ),
       );
-      manager.runFinalizers();
+      manager.doSerialization();
       expect(rawData[childrenMapKey].containsKey('child1'), isTrue);
 
       await tester.pumpWidget(
@@ -160,7 +160,7 @@ void main() {
           child: Container(),
         ),
       );
-      manager.runFinalizers();
+      manager.doSerialization();
 
       expect(rawData[childrenMapKey].containsKey('child1'), isFalse);
     });
@@ -191,7 +191,7 @@ void main() {
           ),
         ),
       );
-      manager.runFinalizers();
+      manager.doSerialization();
       expect(state.bucket, isNotNull);
       expect(state.bucket.id, const RestorationId('foo'));
 
@@ -205,7 +205,7 @@ void main() {
           ),
         ),
       );
-      manager.runFinalizers();
+      manager.doSerialization();
       expect(state.bucket, isNull);
     });
 
@@ -235,7 +235,7 @@ void main() {
           ),
         ),
       );
-      manager.runFinalizers();
+      manager.doSerialization();
       expect(state.bucket, isNotNull);
       expect(state.bucket.id, const RestorationId('foo'));
 
@@ -247,7 +247,7 @@ void main() {
           child: const BucketSpy(),
         ),
       );
-      manager.runFinalizers();
+      manager.doSerialization();
       expect(state.bucket, isNull);
     });
 
@@ -286,14 +286,14 @@ void main() {
           ),
         ),
       );
-      manager.runFinalizers();
+      manager.doSerialization();
       final BucketSpyState state = tester.state(find.byType(BucketSpy));
       expect(state.bucket.id, const RestorationId('moving-child'));
       expect(rawData[childrenMapKey]['fixed'][childrenMapKey].containsKey('moving-child'), isTrue);
       final RestorationBucket bucket = state.bucket;
 
       state.bucket.write(const RestorationId('value'), 11);
-      manager.runFinalizers();
+      manager.doSerialization();
 
       // Move scope.
       await tester.pumpWidget(
@@ -315,7 +315,7 @@ void main() {
           ),
         ),
       );
-      manager.runFinalizers();
+      manager.doSerialization();
       expect(state.bucket.id, const RestorationId('moving-child'));
       expect(state.bucket, same(bucket));
       expect(state.bucket.read<int>(const RestorationId('value')), 11);
@@ -337,7 +337,7 @@ void main() {
           ),
         ),
       );
-      manager.runFinalizers();
+      manager.doSerialization();
       final BucketSpyState state = tester.state(find.byType(BucketSpy));
       expect(state.bucket.id, const RestorationId('child1'));
       expect(state.bucket.read<int>(const RestorationId('foo')), isNull); // Does not exist.

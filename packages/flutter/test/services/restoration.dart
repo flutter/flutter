@@ -6,29 +6,39 @@
 
 import 'dart:typed_data';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class MockRestorationManager extends TestRestorationManager {
-  final Set<VoidCallback> _finalizers = <VoidCallback>{};
   bool get updateScheduled => _updateScheduled;
   bool _updateScheduled = false;
 
+  final List<RestorationBucket> _buckets = <RestorationBucket>[];
+
   @override
-  void scheduleSerialization({VoidCallback finalizer}) {
+  void scheduleSerializationFor(RestorationBucket bucket) {
     _updateScheduled = true;
-    if (finalizer != null) {
-      _finalizers.add(finalizer);
-    }
+    _buckets.add(bucket);
   }
 
-  void runFinalizers() {
+  @override
+  bool unscheduleSerializationFor(RestorationBucket bucket) {
+    _updateScheduled = true;
+    return _buckets.remove(bucket);
+  }
+
+  @override
+  void doSerialization() {
     _updateScheduled = false;
-    for (final VoidCallback finalizer in _finalizers) {
-      finalizer();
+    for (final RestorationBucket bucket in _buckets) {
+      assert(bucket.debugAssertIntegrity());
     }
-    _finalizers.clear();
+    _buckets.clear();
+  }
+
+  @override
+  void restoreFrom(TestRestorationData data) {
+    // Ignore in mock.
   }
 
   int rootBucketAccessed = 0;

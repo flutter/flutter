@@ -40,7 +40,7 @@ void main() {
         ),
       ),
     );
-    manager.runFinalizers();
+    manager.doSerialization();
 
     expect(binding.restorationManager.rootBucketAccessed, 0);
     final BucketSpyState state = tester.state(find.byType(BucketSpy));

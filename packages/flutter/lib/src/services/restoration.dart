@@ -258,34 +258,58 @@ class RestorationManager extends ChangeNotifier {
 
   final Set<RestorationBucket> _bucketsNeedingSerialization = <RestorationBucket>{};
 
-  void _scheduleSerializationFor(RestorationBucket bucket) {
+  /// Called by a [RestorationBucket] to request serialization for that bucket.
+  ///
+  /// This method is called by a bucket in the hierarchy whenever the data
+  /// in it or the shape of the hierarchy has changed.
+  ///
+  /// It is exposed to allow testing of [RestorationBucket]s in isolation.
+  @protected
+  @visibleForTesting
+  void scheduleSerializationFor(RestorationBucket bucket) {
     assert(bucket != null);
     assert(bucket._manager == this);
     assert(!_debugDoingUpdate);
     _bucketsNeedingSerialization.add(bucket);
     if (!_postFrameScheduled) {
       _postFrameScheduled = true;
-      SchedulerBinding.instance.addPostFrameCallback((Duration _) => _doProcessing());
+      SchedulerBinding.instance.addPostFrameCallback((Duration _) => doSerialization());
     }
   }
 
-  void _unscheduleSerializationFor(RestorationBucket bucket) {
-    _bucketsNeedingSerialization.remove(bucket);
+  /// Called by a [RestorationBucket] to unschedule a request for serialization.
+  ///
+  /// This method is called by a bucket in the hierarchy whenever it no longer
+  /// needs to be serialized (e.g. because the bucket got disposed).
+  ///
+  /// It is exposed to allow testing of [RestorationBucket]s in isolation.
+  @protected
+  @visibleForTesting
+  bool unscheduleSerializationFor(RestorationBucket bucket) {
+    assert(bucket != null);
+    assert(bucket._manager == this);
+    assert(!_debugDoingUpdate);
+    return _bucketsNeedingSerialization.remove(bucket);
   }
 
-  void _doProcessing() {
+  /// Called by the [RestorationManager] on itself at the end of a frame to
+  /// serialize out the current bucket hierarchy.
+  ///
+  /// It is exposed to allow testing of [RestorationBucket]s in isolation.
+  @protected
+  @visibleForTesting
+  void doSerialization() {
     assert(() {
       _debugDoingUpdate = true;
       return true;
     }());
     _postFrameScheduled = false;
 
-    for (final RestorationBucket bucket in _bucketsNeedingSerialization) {
-      bucket._needsSerialization = false;
-      assert((){
-        return bucket._debugAssertIntegrity();
-      }());
-    }
+    assert((){
+      for (final RestorationBucket bucket in _bucketsNeedingSerialization) {
+          assert(bucket.debugAssertIntegrity());
+      }
+    }());
     _bucketsNeedingSerialization.clear();
     sendToEngine(_encodeRestorationData(_rootBucket._rawData));
 
@@ -426,7 +450,7 @@ class RestorationBucket extends ChangeNotifier {
   }) : assert(id != null),
        _id = id,
        _rawData = <String, dynamic>{} {
-    _markNeedsSerialisation();
+    _markNeedsSerialization();
     assert(() {
       _debugOwner = debugOwner;
       return true;
@@ -464,7 +488,7 @@ class RestorationBucket extends ChangeNotifier {
        _rawData = rawData ?? <dynamic, dynamic>{},
        _id = const RestorationId('root') {
     if (rawData == null) {
-      _markNeedsSerialisation();
+      _markNeedsSerialization();
     }
     assert(() {
       _debugOwner = manager;
@@ -604,7 +628,7 @@ class RestorationBucket extends ChangeNotifier {
     assert(debugIsSerializableForRestoration(value));
     if (_rawValues[id.value] != value || !_rawValues.containsKey(id.value)) {
       _rawValues[id.value] = value;
-      _markNeedsSerialisation();
+      _markNeedsSerialization();
     }
   }
 
@@ -628,7 +652,7 @@ class RestorationBucket extends ChangeNotifier {
       _rawData.remove(_valuesMapKey);
     }
     if (needsUpdate) {
-      _markNeedsSerialisation();
+      _markNeedsSerialization();
     }
     return result;
   }
@@ -747,14 +771,8 @@ class RestorationBucket extends ChangeNotifier {
     }
   }
 
-  bool _needsSerialization = false;
-
-  void _markNeedsSerialisation() {
-    if (_needsSerialization) {
-      return;
-    }
-    _needsSerialization = true;
-    _manager?._scheduleSerializationFor(this);
+  void _markNeedsSerialization() {
+    _manager?.scheduleSerializationFor(this);
   }
 
   void _recursivelyUpdateManager(RestorationBucket bucket) {
@@ -763,17 +781,18 @@ class RestorationBucket extends ChangeNotifier {
   }
 
   void _updateManager(RestorationManager newManager) {
-    if (_needsSerialization) {
-      _manager?._unscheduleSerializationFor(this);
-    }
+    final bool wasScheduledForSerialization = _manager?.unscheduleSerializationFor(this) == true;
     _manager = newManager;
-    if (_needsSerialization) {
-      _needsSerialization = false;
-      _markNeedsSerialisation();
+    if (wasScheduledForSerialization) {
+      _markNeedsSerialization();
     }
   }
 
-  bool _debugAssertIntegrity() {
+  /// Called by the [RestorationManager] in debug mode just before the data
+  /// stored in the bucket is serialized to ensure that the data is valid.
+  ///
+  /// Always returns true in release mode.
+  bool debugAssertIntegrity() {
     assert(() {
       if (_childrenToAdd.isEmpty) {
         return true;
@@ -790,7 +809,7 @@ class RestorationBucket extends ChangeNotifier {
         error.addAll(<DiagnosticsNode>[
           ErrorDescription(' * $id was claimed by:'),
           ...buckets.map((RestorationBucket bucket) => ErrorDescription('   * ${bucket.debugOwner}')),
-          ErrorDescription(' * ${_claimedChildren[id].debugOwner} (current owner)'),
+          ErrorDescription('   * ${_claimedChildren[id].debugOwner} (current owner)'),
         ]);
       }
       throw FlutterError.fromParts(error);
@@ -814,7 +833,7 @@ class RestorationBucket extends ChangeNotifier {
       if (_rawChildren.isEmpty) {
         _rawData.remove(_childrenMapKey);
       }
-      _markNeedsSerialisation();
+      _markNeedsSerialization();
       return;
     }
     _childrenToAdd[child.id]?.remove(child);
@@ -831,11 +850,11 @@ class RestorationBucket extends ChangeNotifier {
       // owner of the child with the same id will have given up that child by
       // then.
       _childrenToAdd.putIfAbsent(child.id, () => <RestorationBucket>[]).add(child);
-      _markNeedsSerialisation();
+      _markNeedsSerialization();
       return;
     }
     _finalizeAddChildData(child);
-    _markNeedsSerialisation();
+    _markNeedsSerialization();
   }
 
   void _finalizeAddChildData(RestorationBucket child) {

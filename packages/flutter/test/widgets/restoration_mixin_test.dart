@@ -26,7 +26,7 @@ void main() {
         ),
       ),
     );
-    manager.runFinalizers();
+    manager.doSerialization();
 
     final _TestRestorableWidgetState state = tester.state(find.byType(_TestRestorableWidget));
     expect(state.bucket.id, id);
@@ -50,7 +50,7 @@ void main() {
         ),
       ),
     );
-    manager.runFinalizers();
+    manager.doSerialization();
 
     final _TestRestorableWidgetState state = tester.state(find.byType(_TestRestorableWidget));
     expect(state.bucket.id, const RestorationId('child1'));
@@ -72,7 +72,7 @@ void main() {
         ),
       ),
     );
-    manager.runFinalizers();
+    manager.doSerialization();
 
     // Claimed existing bucket with data.
     final _TestRestorableWidgetState state = tester.state(find.byType(_TestRestorableWidget));
@@ -92,7 +92,7 @@ void main() {
         ),
       ),
     );
-    manager.runFinalizers();
+    manager.doSerialization();
 
     expect(state.bucket.id, const RestorationId('something else'));
     expect(state.bucket.read<int>(const RestorationId('foo')), 22);
@@ -114,7 +114,7 @@ void main() {
         ),
       ),
     );
-    manager.runFinalizers();
+    manager.doSerialization();
 
     // Claimed existing bucket with data.
     final _TestRestorableWidgetState state = tester.state(find.byType(_TestRestorableWidget));
@@ -127,7 +127,7 @@ void main() {
 
     // Rename the existing bucket.
     state.injectId(const RestorationId('newnewnew'));
-    manager.runFinalizers();
+    manager.doSerialization();
 
     expect(state.bucket.id, const RestorationId('newnewnew'));
     expect(state.bucket.read<int>(const RestorationId('foo')), 22);
@@ -151,7 +151,7 @@ void main() {
         ),
       ),
     );
-    manager.runFinalizers();
+    manager.doSerialization();
     expect(rawData[childrenMapKey].containsKey('child1'), isTrue);
 
     await tester.pumpWidget(
@@ -160,7 +160,7 @@ void main() {
         child: Container(),
       ),
     );
-    manager.runFinalizers();
+    manager.doSerialization();
 
     expect(rawData[childrenMapKey].containsKey('child1'), isFalse);
   });
@@ -198,7 +198,7 @@ void main() {
         ),
       ),
     );
-    manager.runFinalizers();
+    manager.doSerialization();
     expect(state.bucket, isNotNull);
     expect(state.bucket.id, const RestorationId('child1'));
     expect(state.property.value, 10);
@@ -221,7 +221,7 @@ void main() {
         ),
       ),
     );
-    manager.runFinalizers();
+    manager.doSerialization();
     expect(state.bucket, isNull);
     expect(rawData[childrenMapKey].containsKey('child1'), isFalse);
     expect(state.property.log, isEmpty);
@@ -262,7 +262,7 @@ void main() {
         ),
       ),
     );
-    manager.runFinalizers();
+    manager.doSerialization();
     expect(state.bucket, isNotNull);
     expect(state.bucket.id, const RestorationId('child1'));
     expect(state.property.value, 10);
@@ -283,7 +283,7 @@ void main() {
         restorationId: const RestorationId('child1'),
       ),
     );
-    manager.runFinalizers();
+    manager.doSerialization();
     expect(state.bucket, isNull);
     expect(rawData[childrenMapKey].containsKey('child1'), isFalse);
     expect(state.property.log, isEmpty);
@@ -314,7 +314,7 @@ void main() {
         ),
       ),
     );
-    manager.runFinalizers();
+    manager.doSerialization();
     final _TestRestorableWidgetState state = tester.state(find.byType(_TestRestorableWidget));
     expect(state.bucket.id, const RestorationId('moving-child'));
     expect(rawData[childrenMapKey]['fixed'][childrenMapKey].containsKey('moving-child'), isTrue);
@@ -323,7 +323,7 @@ void main() {
     state.restoreStateLog.clear();
 
     state.bucket.write(const RestorationId('value'), 11);
-    manager.runFinalizers();
+    manager.doSerialization();
 
     // Move widget.
     await tester.pumpWidget(
@@ -344,7 +344,7 @@ void main() {
         ),
       ),
     );
-    manager.runFinalizers();
+    manager.doSerialization();
     expect(state.bucket.id, const RestorationId('moving-child'));
     expect(state.bucket, same(bucket));
     expect(state.bucket.read<int>(const RestorationId('value')), 11);
@@ -368,7 +368,7 @@ void main() {
         ),
       ),
     );
-    manager.runFinalizers();
+    manager.doSerialization();
     final _TestRestorableWidgetState state = tester.state(find.byType(_TestRestorableWidget));
     expect(state.bucket.id, const RestorationId('child1'));
     expect(state.property.value, 10);  // Initialized to default.
