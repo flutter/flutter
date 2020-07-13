@@ -25,7 +25,7 @@
   [app launch];
 
   XCUIElement* platform_view = app.textViews[@"platform_view[0]"];
-  XCTAssertTrue(platform_view.exists);
+  XCTAssertTrue([platform_view waitForExistenceWithTimeout:1.0]);
   XCTAssertEqual(platform_view.frame.origin.x, 25);
   XCTAssertEqual(platform_view.frame.origin.y, 25);
   XCTAssertEqual(platform_view.frame.size.width, 250);
@@ -47,7 +47,7 @@
   [app launch];
 
   XCUIElement* platform_view = app.textViews[@"platform_view[0]"];
-  XCTAssertTrue(platform_view.exists);
+  XCTAssertTrue([platform_view waitForExistenceWithTimeout:1.0]);
   XCTAssertEqual(platform_view.frame.origin.x, 25);
   XCTAssertEqual(platform_view.frame.origin.y, 25);
   XCTAssertEqual(platform_view.frame.size.width, 250);
@@ -72,7 +72,7 @@
   [app launch];
 
   XCUIElement* platform_view = app.textViews[@"platform_view[0]"];
-  XCTAssertTrue(platform_view.exists);
+  XCTAssertTrue([platform_view waitForExistenceWithTimeout:1.0]);
   XCTAssertEqual(platform_view.frame.origin.x, 25);
   XCTAssertEqual(platform_view.frame.origin.y, 25);
   XCTAssertEqual(platform_view.frame.size.width, 250);
@@ -100,7 +100,7 @@
   [app launch];
 
   XCUIElement* platform_view = app.textViews[@"platform_view[0]"];
-  XCTAssertTrue(platform_view.exists);
+  XCTAssertTrue([platform_view waitForExistenceWithTimeout:1.0]);
   XCTAssertEqual(platform_view.frame.origin.x, 25);
   XCTAssertEqual(platform_view.frame.origin.y, 25);
   XCTAssertEqual(platform_view.frame.size.width, 250);
@@ -129,7 +129,7 @@
   [app launch];
 
   XCUIElement* platform_view = app.textViews[@"platform_view[0]"];
-  XCTAssertTrue(platform_view.exists);
+  XCTAssertTrue([platform_view waitForExistenceWithTimeout:1.0]);
   XCTAssertEqual(platform_view.frame.origin.x, 25);
   XCTAssertEqual(platform_view.frame.origin.y, 25);
   XCTAssertEqual(platform_view.frame.size.width, 250);
@@ -163,7 +163,7 @@
   [app launch];
 
   XCUIElement* platform_view1 = app.textViews[@"platform_view[0]"];
-  XCTAssertTrue(platform_view1.exists);
+  XCTAssertTrue([platform_view1 waitForExistenceWithTimeout:1.0]);
   XCTAssertEqual(platform_view1.frame.origin.x, 25);
   XCTAssertEqual(platform_view1.frame.origin.y, 325);
   XCTAssertEqual(platform_view1.frame.size.width, 250);
@@ -193,7 +193,7 @@
   [app launch];
 
   XCUIElement* platform_view1 = app.textViews[@"platform_view[0]"];
-  XCTAssertTrue(platform_view1.exists);
+  XCTAssertTrue([platform_view1 waitForExistenceWithTimeout:1.0]);
   XCTAssertEqual(platform_view1.frame.origin.x, 25);
   XCTAssertEqual(platform_view1.frame.origin.y, 325);
   XCTAssertEqual(platform_view1.frame.size.width, 250);
@@ -235,7 +235,7 @@
   [app launch];
 
   XCUIElement* platform_view = app.textViews[@"platform_view[0]"];
-  XCTAssertTrue(platform_view.exists);
+  XCTAssertTrue([platform_view waitForExistenceWithTimeout:1.0]);
   XCTAssertEqual(platform_view.frame.origin.x, 25);
   XCTAssertEqual(platform_view.frame.origin.y, 25);
   XCTAssertEqual(platform_view.frame.size.width, 250);
