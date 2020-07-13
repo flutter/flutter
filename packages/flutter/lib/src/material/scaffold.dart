@@ -1111,7 +1111,7 @@ class Scaffold extends StatefulWidget {
 
   /// A set of buttons that are displayed at the bottom of the scaffold.
   ///
-  /// Typically this is a list of [FlatButton] widgets. These buttons are
+  /// Typically this is a list of [TextButton] widgets. These buttons are
   /// persistently visible, even if the [body] of the scaffold scrolls.
   ///
   /// These widgets will be wrapped in a [ButtonBar].
@@ -1153,7 +1153,7 @@ class Scaffold extends StatefulWidget {
   ///     key: _scaffoldKey,
   ///     appBar: AppBar(title: const Text('Drawer Demo')),
   ///     body: Center(
-  ///       child: RaisedButton(
+  ///       child: ElevatedButton(
   ///         onPressed: _openDrawer,
   ///         child: const Text('Open Drawer'),
   ///       ),
@@ -1164,7 +1164,7 @@ class Scaffold extends StatefulWidget {
   ///           mainAxisAlignment: MainAxisAlignment.center,
   ///           children: <Widget>[
   ///             const Text('This is the Drawer'),
-  ///             RaisedButton(
+  ///             ElevatedButton(
   ///               onPressed: _closeDrawer,
   ///               child: const Text('Close Drawer'),
   ///             ),
@@ -1213,7 +1213,7 @@ class Scaffold extends StatefulWidget {
   ///     key: _scaffoldKey,
   ///     appBar: AppBar(title: Text('Drawer Demo')),
   ///     body: Center(
-  ///       child: RaisedButton(
+  ///       child: ElevatedButton(
   ///         onPressed: _openEndDrawer,
   ///         child: Text('Open End Drawer'),
   ///       ),
@@ -1224,7 +1224,7 @@ class Scaffold extends StatefulWidget {
   ///           mainAxisAlignment: MainAxisAlignment.center,
   ///           children: <Widget>[
   ///             const Text('This is the Drawer'),
-  ///             RaisedButton(
+  ///             ElevatedButton(
   ///               onPressed: _closeEndDrawer,
   ///               child: const Text('Close Drawer'),
   ///             ),
@@ -1386,7 +1386,7 @@ class Scaffold extends StatefulWidget {
   ///   @override
   ///   Widget build(BuildContext context) {
   ///     return Center(
-  ///       child: RaisedButton(
+  ///       child: ElevatedButton(
   ///         child: Text('SHOW A SNACKBAR'),
   ///         onPressed: () {
   ///           Scaffold.of(context).showSnackBar(
@@ -1421,7 +1421,7 @@ class Scaffold extends StatefulWidget {
   ///       // can refer to the Scaffold with Scaffold.of().
   ///       builder: (BuildContext context) {
   ///         return Center(
-  ///           child: RaisedButton(
+  ///           child: ElevatedButton(
   ///             child: Text('SHOW A SNACKBAR'),
   ///             onPressed: () {
   ///               Scaffold.of(context).showSnackBar(SnackBar(
@@ -1966,7 +1966,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// ```dart
   /// Widget build(BuildContext context) {
   ///   return Center(
-  ///     child: RaisedButton(
+  ///     child: ElevatedButton(
   ///       child: const Text('showBottomSheet'),
   ///       onPressed: () {
   ///         Scaffold.of(context).showBottomSheet<void>(
@@ -1980,7 +1980,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///                   mainAxisSize: MainAxisSize.min,
   ///                   children: <Widget>[
   ///                     const Text('BottomSheet'),
-  ///                     RaisedButton(
+  ///                     ElevatedButton(
   ///                       child: const Text('Close BottomSheet'),
   ///                       onPressed: () => Navigator.pop(context),
   ///                     )
