@@ -143,6 +143,8 @@ class _SnackBarActionState extends State<SnackBarAction> {
 /// A lightweight message with an optional action which briefly displays at the
 /// bottom of the screen.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=zpO6n_oZWw0}
+///
 /// To display a snack bar, call `Scaffold.of(context).showSnackBar()`, passing
 /// an instance of [SnackBar] that describes the message.
 ///

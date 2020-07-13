@@ -20,6 +20,8 @@ const Color _kActiveTickColor = CupertinoDynamicColor.withBrightness(
 
 /// An iOS-style activity indicator that spins clockwise.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=AENVH-ZqKDQ}
+///
 /// See also:
 ///
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/controls/progress-indicators/#activity-indicators>

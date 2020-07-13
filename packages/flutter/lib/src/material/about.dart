@@ -313,6 +313,8 @@ const double _textVerticalSeparation = 18.0;
 ///
 /// To show an [AboutDialog], use [showAboutDialog].
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=YFCSODyFxbE}
+///
 /// If the application has a [Drawer], the [AboutListTile] widget can make the
 /// process of showing an about dialog simpler.
 ///
