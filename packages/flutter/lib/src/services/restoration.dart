@@ -263,6 +263,9 @@ class RestorationManager extends ChangeNotifier {
   /// This method is called by a bucket in the hierarchy whenever the data
   /// in it or the shape of the hierarchy has changed.
   ///
+  /// Calling this is a no-op when the bucket is already scheduled for
+  /// serialization.
+  ///
   /// It is exposed to allow testing of [RestorationBucket]s in isolation.
   @protected
   @visibleForTesting
@@ -273,7 +276,7 @@ class RestorationManager extends ChangeNotifier {
     _bucketsNeedingSerialization.add(bucket);
     if (!_postFrameScheduled) {
       _postFrameScheduled = true;
-      SchedulerBinding.instance.addPostFrameCallback((Duration _) => doSerialization());
+      SchedulerBinding.instance.addPostFrameCallback((Duration _) => _doSerialization());
     }
   }
 
@@ -281,6 +284,10 @@ class RestorationManager extends ChangeNotifier {
   ///
   /// This method is called by a bucket in the hierarchy whenever it no longer
   /// needs to be serialized (e.g. because the bucket got disposed).
+  ///
+  /// It is safe to call this even when the bucket wasn't scheduled for
+  /// serialization before. Returns false, if the bucket wasn't scheduled for
+  /// serialization and true otherwise.
   ///
   /// It is exposed to allow testing of [RestorationBucket]s in isolation.
   @protected
@@ -292,13 +299,7 @@ class RestorationManager extends ChangeNotifier {
     return _bucketsNeedingSerialization.remove(bucket);
   }
 
-  /// Called by the [RestorationManager] on itself at the end of a frame to
-  /// serialize out the current bucket hierarchy.
-  ///
-  /// It is exposed to allow testing of [RestorationBucket]s in isolation.
-  @protected
-  @visibleForTesting
-  void doSerialization() {
+  void _doSerialization() {
     assert(() {
       _debugDoingUpdate = true;
       return true;

@@ -27,7 +27,6 @@ class MockRestorationManager extends TestRestorationManager {
     return _buckets.remove(bucket);
   }
 
-  @override
   void doSerialization() {
     _updateScheduled = false;
     for (final RestorationBucket bucket in _buckets) {
