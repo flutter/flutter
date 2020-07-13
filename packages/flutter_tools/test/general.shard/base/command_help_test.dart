@@ -50,6 +50,10 @@ void _testMessageLength({
     expectedWidth += ansiMetaCharactersLength;
   }
 
+  expect(
+    commandHelp.I.toString().length,
+    lessThanOrEqualTo(expectedWidth),
+  );
   expect(commandHelp.L.toString().length, lessThanOrEqualTo(expectedWidth));
   expect(commandHelp.P.toString().length, lessThanOrEqualTo(expectedWidth));
   expect(commandHelp.R.toString().length, lessThanOrEqualTo(expectedWidth));
