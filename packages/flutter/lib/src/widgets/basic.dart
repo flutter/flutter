@@ -269,6 +269,8 @@ class Opacity extends SingleChildRenderObjectWidget {
 /// For example, [ShaderMask] can be used to gradually fade out the edge
 /// of a child by using a [new ui.Gradient.linear] mask.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=7sUL66pTQ7Q}
+///
 /// {@tool snippet}
 ///
 /// This example makes the text look like it is on fire:
@@ -706,6 +708,8 @@ class ClipRRect extends SingleChildRenderObjectWidget {
 
 /// A widget that clips its child using an oval.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=vzWWDO6whIM}
+///
 /// By default, inscribes an axis-aligned oval into its layout dimensions and
 /// prevents its child from painting outside that oval, but the size and
 /// location of the clip oval can be customized using a custom [clipper].
@@ -774,6 +778,8 @@ class ClipOval extends SingleChildRenderObjectWidget {
 /// Calls a callback on a delegate whenever the widget is to be
 /// painted. The callback returns a path and the widget prevents the
 /// child from painting outside the path.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=oAUebVIb-7s}
 ///
 /// Clipping to a path is expensive. Certain shapes have more
 /// optimized widgets:
@@ -1575,6 +1581,8 @@ class RotatedBox extends SingleChildRenderObjectWidget {
 }
 
 /// A widget that insets its child by the given padding.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=oD5RtLhhubg}
 ///
 /// When passing layout constraints to its child, padding shrinks the
 /// constraints by the given padding, causing the child to layout at a smaller
@@ -3284,6 +3292,9 @@ class Stack extends MultiChildRenderObjectWidget {
   ///
   /// Some children in a stack might overflow its box. When this flag is set to
   /// [Overflow.clip], children cannot paint outside of the stack's box.
+  ///
+  /// When set to [Overflow.visible], the visible overflow area will not accept
+  /// hit testing.
   ///
   /// This overrides [clipBehavior] for now due to a staged roll out without
   /// breaking Google. We will remove it and only use [clipBehavior] soon.
@@ -6368,6 +6379,8 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 
 /// A widget that is invisible during hit testing.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=qV9pqHWxYgI}
+///
 /// When [ignoring] is true, this widget (and its subtree) is invisible
 /// to hit testing. It still consumes space during layout and paints its child
 /// as usual. It just cannot be the target of located events, because it returns
@@ -7088,6 +7101,8 @@ class KeyedSubtree extends StatelessWidget {
 }
 
 /// A platonic widget that calls a closure to obtain its child widget.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=xXNOkIuSYuA}
 ///
 /// See also:
 ///

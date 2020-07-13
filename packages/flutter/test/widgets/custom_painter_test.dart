@@ -502,7 +502,7 @@ void _defineTests() {
     );
     expect(semantics, hasSemantics(expectedSemantics, ignoreRect: true, ignoreTransform: true));
     semantics.dispose();
-  }, skip: isBrowser);
+  });
 
   group('diffing', () {
     testWidgets('complains about duplicate keys', (WidgetTester tester) async {

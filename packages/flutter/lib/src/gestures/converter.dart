@@ -74,6 +74,7 @@ class PointerEventConverter {
               radiusMax: radiusMax,
               orientation: datum.orientation,
               tilt: datum.tilt,
+              embedderId: datum.embedderId,
             );
             break;
           case ui.PointerChange.hover:
@@ -97,6 +98,7 @@ class PointerEventConverter {
               orientation: datum.orientation,
               tilt: datum.tilt,
               synthesized: datum.synthesized,
+              embedderId: datum.embedderId,
             );
             break;
           case ui.PointerChange.down:
@@ -119,6 +121,7 @@ class PointerEventConverter {
               radiusMax: radiusMax,
               orientation: datum.orientation,
               tilt: datum.tilt,
+              embedderId: datum.embedderId,
             );
             break;
           case ui.PointerChange.move:
@@ -144,6 +147,7 @@ class PointerEventConverter {
               tilt: datum.tilt,
               platformData: datum.platformData,
               synthesized: datum.synthesized,
+              embedderId: datum.embedderId,
             );
             break;
           case ui.PointerChange.up:
@@ -167,6 +171,7 @@ class PointerEventConverter {
               radiusMax: radiusMax,
               orientation: datum.orientation,
               tilt: datum.tilt,
+              embedderId: datum.embedderId,
             );
             break;
           case ui.PointerChange.cancel:
@@ -189,6 +194,7 @@ class PointerEventConverter {
               radiusMax: radiusMax,
               orientation: datum.orientation,
               tilt: datum.tilt,
+              embedderId: datum.embedderId,
             );
             break;
           case ui.PointerChange.remove:
@@ -203,6 +209,7 @@ class PointerEventConverter {
               distanceMax: datum.distanceMax,
               radiusMin: radiusMin,
               radiusMax: radiusMax,
+              embedderId: datum.embedderId,
             );
             break;
         }
@@ -217,6 +224,7 @@ class PointerEventConverter {
               device: datum.device,
               position: position,
               scrollDelta: scrollDelta,
+              embedderId: datum.embedderId,
             );
             break;
           case ui.PointerSignalKind.none:

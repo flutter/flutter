@@ -43,12 +43,7 @@ class BenchMouseRegionGridScroll extends WidgetRecorder {
       started = true;
       SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) async {
         tester.start();
-        final VoidCallback localDidStop = didStop;
-        didStop = () {
-          if (localDidStop != null)
-            localDidStop();
-          tester.stop();
-        };
+        registerDidStop(tester.stop);
       });
     }
     super.frameDidDraw();

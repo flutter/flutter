@@ -17,7 +17,7 @@ import '../../src/mocks.dart';
 
 const String programFilesPath = r'C:\Program Files (x86)';
 const String visualStudioPath = programFilesPath + r'\Microsoft Visual Studio\2017\Community';
-const String vcvarsPath = visualStudioPath + r'\VC\Auxiliary\Build\vcvars64.bat';
+const String cmakePath = visualStudioPath + r'\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe';
 const String vswherePath = programFilesPath + r'\Microsoft Visual Studio\Installer\vswhere.exe';
 
 final Platform windowsPlatform = FakePlatform(
@@ -71,6 +71,7 @@ const Map<String, dynamic> _missingStatusResponse = <String, dynamic>{
 const List<String> _requirements = <String>[
   'Microsoft.VisualStudio.Workload.NativeDesktop',
   'Microsoft.VisualStudio.Component.VC.Tools.x86.x64',
+  'Microsoft.VisualStudio.Component.VC.CMake.Project',
 ];
 
 // Sets up the mock environment so that searching for Visual Studio with
@@ -85,7 +86,7 @@ void setMockVswhereResponse(
   String responseOverride,
 ]) {
   fileSystem.file(vswherePath).createSync(recursive: true);
-  fileSystem.file(vcvarsPath).createSync(recursive: true);
+  fileSystem.file(cmakePath).createSync(recursive: true);
   final String finalResponse = responseOverride
     ?? json.encode(<Map<String, dynamic>>[response]);
   final List<String> requirementArguments = requiredComponents == null
@@ -249,7 +250,7 @@ void main() {
       expect(visualStudio.isInstalled, false);
     });
 
-    testWithoutContext('vcvarsPath returns null when vswhere is missing', () {
+    testWithoutContext('cmakePath returns null when vswhere is missing', () {
       final MockProcessManager mockProcessManager = MockProcessManager();
       when(mockProcessManager.runSync(
         any,
@@ -265,7 +266,7 @@ void main() {
         processManager: mockProcessManager,
       );
 
-      expect(visualStudio.vcvarsPath, isNull);
+      expect(visualStudio.cmakePath, isNull);
     });
 
     testWithoutContext(
@@ -587,7 +588,7 @@ void main() {
       expect(visualStudio.hasNecessaryComponents, false);
     });
 
-    testWithoutContext('vcvarsPath returns null when VS is present but missing components', () {
+    testWithoutContext('cmakePath returns null when VS is present but missing components', () {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
@@ -607,10 +608,10 @@ void main() {
         fixture.processManager,
       );
 
-      expect(visualStudio.vcvarsPath, isNull);
+      expect(visualStudio.cmakePath, isNull);
     });
 
-    testWithoutContext('vcvarsPath returns null when VS is present but with require components but installation is faulty', () {
+    testWithoutContext('cmakePath returns null when VS is present but with require components but installation is faulty', () {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
@@ -627,7 +628,7 @@ void main() {
         fixture.processManager,
       );
 
-      expect(visualStudio.vcvarsPath, isNull);
+      expect(visualStudio.cmakePath, isNull);
     });
 
     testWithoutContext('hasNecessaryComponents returns false when VS is present with required components but installation is faulty', () {
@@ -676,7 +677,7 @@ void main() {
       expect(visualStudio.fullVersion, equals('16.2.29306.81'));
     });
 
-    testWithoutContext('vcvarsPath returns null when VS is present but when vswhere returns invalid JSON', () {
+    testWithoutContext('cmakePath returns null when VS is present but when vswhere returns invalid JSON', () {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
@@ -696,7 +697,7 @@ void main() {
         fixture.processManager,
       );
 
-      expect(visualStudio.vcvarsPath, isNull);
+      expect(visualStudio.cmakePath, isNull);
     });
 
     testWithoutContext('Everything returns good values when VS is present with all components', () {
@@ -722,7 +723,7 @@ void main() {
       expect(visualStudio.isInstalled, true);
       expect(visualStudio.isAtLeastMinimumVersion, true);
       expect(visualStudio.hasNecessaryComponents, true);
-      expect(visualStudio.vcvarsPath, equals(vcvarsPath));
+      expect(visualStudio.cmakePath, equals(cmakePath));
     });
 
     testWithoutContext('Metadata is for compatible version when latest is missing components', () {

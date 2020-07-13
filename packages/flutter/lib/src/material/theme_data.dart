@@ -24,16 +24,19 @@ import 'color_scheme.dart';
 import 'colors.dart';
 import 'dialog_theme.dart';
 import 'divider_theme.dart';
+import 'elevated_button_theme.dart';
 import 'floating_action_button_theme.dart';
 import 'ink_splash.dart';
 import 'ink_well.dart' show InteractiveInkFeatureFactory;
 import 'input_decorator.dart';
 import 'navigation_rail_theme.dart';
+import 'outlined_button_theme.dart';
 import 'page_transitions_theme.dart';
 import 'popup_menu_theme.dart';
 import 'slider_theme.dart';
 import 'snack_bar_theme.dart';
 import 'tab_bar_theme.dart';
+import 'text_button_theme.dart';
 import 'text_theme.dart';
 import 'time_picker_theme.dart';
 import 'toggle_buttons_theme.dart';
@@ -213,6 +216,7 @@ class ThemeData with Diagnosticable {
     Color accentColor,
     Brightness accentColorBrightness,
     Color canvasColor,
+    Color shadowColor,
     Color scaffoldBackgroundColor,
     Color bottomAppBarColor,
     Color cardColor,
@@ -271,6 +275,9 @@ class ThemeData with Diagnosticable {
     ButtonBarThemeData buttonBarTheme,
     BottomNavigationBarThemeData bottomNavigationBarTheme,
     TimePickerThemeData timePickerTheme,
+    TextButtonThemeData textButtonTheme,
+    ElevatedButtonThemeData elevatedButtonTheme,
+    OutlinedButtonThemeData outlinedButtonTheme,
     bool fixTextFieldOutlineLabel,
   }) {
     assert(colorScheme?.brightness == null || brightness == null || colorScheme.brightness == brightness);
@@ -288,6 +295,7 @@ class ThemeData with Diagnosticable {
     accentColorBrightness ??= estimateBrightnessForColor(accentColor);
     final bool accentIsDark = accentColorBrightness == Brightness.dark;
     canvasColor ??= isDark ? Colors.grey[850] : Colors.grey[50];
+    shadowColor ??= Colors.black;
     scaffoldBackgroundColor ??= canvasColor;
     bottomAppBarColor ??= isDark ? Colors.grey[800] : Colors.white;
     cardColor ??= isDark ? Colors.grey[800] : Colors.white;
@@ -383,7 +391,9 @@ class ThemeData with Diagnosticable {
     buttonBarTheme ??= const ButtonBarThemeData();
     bottomNavigationBarTheme ??= const BottomNavigationBarThemeData();
     timePickerTheme ??= const TimePickerThemeData();
-
+    textButtonTheme ??= const TextButtonThemeData();
+    elevatedButtonTheme ??= const ElevatedButtonThemeData();
+    outlinedButtonTheme ??= const OutlinedButtonThemeData();
     fixTextFieldOutlineLabel ??= false;
 
     return ThemeData.raw(
@@ -395,6 +405,7 @@ class ThemeData with Diagnosticable {
       accentColor: accentColor,
       accentColorBrightness: accentColorBrightness,
       canvasColor: canvasColor,
+      shadowColor: shadowColor,
       scaffoldBackgroundColor: scaffoldBackgroundColor,
       bottomAppBarColor: bottomAppBarColor,
       cardColor: cardColor,
@@ -452,6 +463,9 @@ class ThemeData with Diagnosticable {
       buttonBarTheme: buttonBarTheme,
       bottomNavigationBarTheme: bottomNavigationBarTheme,
       timePickerTheme: timePickerTheme,
+      textButtonTheme: textButtonTheme,
+      elevatedButtonTheme: elevatedButtonTheme,
+      outlinedButtonTheme: outlinedButtonTheme,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel,
     );
   }
@@ -473,6 +487,7 @@ class ThemeData with Diagnosticable {
     @required this.primaryColorLight,
     @required this.primaryColorDark,
     @required this.canvasColor,
+    @required this.shadowColor,
     @required this.accentColor,
     @required this.accentColorBrightness,
     @required this.scaffoldBackgroundColor,
@@ -532,6 +547,9 @@ class ThemeData with Diagnosticable {
     @required this.buttonBarTheme,
     @required this.bottomNavigationBarTheme,
     @required this.timePickerTheme,
+    @required this.textButtonTheme,
+    @required this.elevatedButtonTheme,
+    @required this.outlinedButtonTheme,
     @required this.fixTextFieldOutlineLabel,
   }) : assert(visualDensity != null),
        assert(primaryColor != null),
@@ -541,6 +559,7 @@ class ThemeData with Diagnosticable {
        assert(accentColor != null),
        assert(accentColorBrightness != null),
        assert(canvasColor != null),
+       assert(shadowColor != null),
        assert(scaffoldBackgroundColor != null),
        assert(bottomAppBarColor != null),
        assert(cardColor != null),
@@ -595,6 +614,9 @@ class ThemeData with Diagnosticable {
        assert(buttonBarTheme != null),
        assert(bottomNavigationBarTheme != null),
        assert(timePickerTheme != null),
+       assert(textButtonTheme != null),
+       assert(elevatedButtonTheme != null),
+       assert(outlinedButtonTheme != null),
        assert(fixTextFieldOutlineLabel != null);
 
   /// Create a [ThemeData] based on the colors in the given [colorScheme] and
@@ -741,6 +763,17 @@ class ThemeData with Diagnosticable {
 
   /// The default color of [MaterialType.canvas] [Material].
   final Color canvasColor;
+
+  /// The color that the [Material] widget uses to draw elevation shadows.
+  ///
+  /// Defaults to fully opaque black.
+  ///
+  /// Shadows can be difficult to see in a dark theme, so the elevation of a
+  /// surface should be rendered with an "overlay" in addition to the shadow.
+  /// As the elevation of the component increases, the overlay increases in
+  /// opacity. The [applyElevationOverlayColor] property turns the elevation
+  /// overlay on or off for dark themes.
+  final Color shadowColor;
 
   /// The foreground color for widgets (knobs, text, overscroll edge effect, etc).
   ///
@@ -1044,6 +1077,18 @@ class ThemeData with Diagnosticable {
   /// A theme for customizing the appearance and layout of time picker widgets.
   final TimePickerThemeData timePickerTheme;
 
+  /// A theme for customizing the appearance and internal layout of
+  /// [TextButton]s.
+  final TextButtonThemeData textButtonTheme;
+
+  /// A theme for customizing the appearance and internal layout of
+  /// [ElevatedButton]s
+  final ElevatedButtonThemeData elevatedButtonTheme;
+
+  /// A theme for customizing the appearance and internal layout of
+  /// [OutlinedButton]s.
+  final OutlinedButtonThemeData outlinedButtonTheme;
+
   /// A temporary flag to allow apps to opt-in to a
   /// [small fix](https://github.com/flutter/flutter/issues/54028) for the Y
   /// coordinate of the floating label in a [TextField] [OutlineInputBorder].
@@ -1069,6 +1114,7 @@ class ThemeData with Diagnosticable {
     Color accentColor,
     Brightness accentColorBrightness,
     Color canvasColor,
+    Color shadowColor,
     Color scaffoldBackgroundColor,
     Color bottomAppBarColor,
     Color cardColor,
@@ -1126,6 +1172,9 @@ class ThemeData with Diagnosticable {
     ButtonBarThemeData buttonBarTheme,
     BottomNavigationBarThemeData bottomNavigationBarTheme,
     TimePickerThemeData timePickerTheme,
+    TextButtonThemeData textButtonTheme,
+    ElevatedButtonThemeData elevatedButtonTheme,
+    OutlinedButtonThemeData outlinedButtonTheme,
     bool fixTextFieldOutlineLabel,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
@@ -1138,6 +1187,7 @@ class ThemeData with Diagnosticable {
       accentColor: accentColor ?? this.accentColor,
       accentColorBrightness: accentColorBrightness ?? this.accentColorBrightness,
       canvasColor: canvasColor ?? this.canvasColor,
+      shadowColor: shadowColor ?? this.shadowColor,
       scaffoldBackgroundColor: scaffoldBackgroundColor ?? this.scaffoldBackgroundColor,
       bottomAppBarColor: bottomAppBarColor ?? this.bottomAppBarColor,
       cardColor: cardColor ?? this.cardColor,
@@ -1195,6 +1245,9 @@ class ThemeData with Diagnosticable {
       buttonBarTheme: buttonBarTheme ?? this.buttonBarTheme,
       bottomNavigationBarTheme: bottomNavigationBarTheme ?? this.bottomNavigationBarTheme,
       timePickerTheme: timePickerTheme ?? this.timePickerTheme,
+      textButtonTheme: textButtonTheme ?? this.textButtonTheme,
+      elevatedButtonTheme: elevatedButtonTheme ?? this.elevatedButtonTheme,
+      outlinedButtonTheme: outlinedButtonTheme ?? this.outlinedButtonTheme,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel ?? this.fixTextFieldOutlineLabel,
     );
   }
@@ -1283,6 +1336,7 @@ class ThemeData with Diagnosticable {
       primaryColorLight: Color.lerp(a.primaryColorLight, b.primaryColorLight, t),
       primaryColorDark: Color.lerp(a.primaryColorDark, b.primaryColorDark, t),
       canvasColor: Color.lerp(a.canvasColor, b.canvasColor, t),
+      shadowColor: Color.lerp(a.shadowColor, b.shadowColor, t),
       accentColor: Color.lerp(a.accentColor, b.accentColor, t),
       accentColorBrightness: t < 0.5 ? a.accentColorBrightness : b.accentColorBrightness,
       scaffoldBackgroundColor: Color.lerp(a.scaffoldBackgroundColor, b.scaffoldBackgroundColor, t),
@@ -1342,6 +1396,9 @@ class ThemeData with Diagnosticable {
       buttonBarTheme: ButtonBarThemeData.lerp(a.buttonBarTheme, b.buttonBarTheme, t),
       bottomNavigationBarTheme: BottomNavigationBarThemeData.lerp(a.bottomNavigationBarTheme, b.bottomNavigationBarTheme, t),
       timePickerTheme: TimePickerThemeData.lerp(a.timePickerTheme, b.timePickerTheme, t),
+      textButtonTheme: TextButtonThemeData.lerp(a.textButtonTheme, b.textButtonTheme, t),
+      elevatedButtonTheme: ElevatedButtonThemeData.lerp(a.elevatedButtonTheme, b.elevatedButtonTheme, t),
+      outlinedButtonTheme: OutlinedButtonThemeData.lerp(a.outlinedButtonTheme, b.outlinedButtonTheme, t),
       fixTextFieldOutlineLabel: t < 0.5 ? a.fixTextFieldOutlineLabel : b.fixTextFieldOutlineLabel,
     );
   }
@@ -1365,6 +1422,7 @@ class ThemeData with Diagnosticable {
         && other.scaffoldBackgroundColor == scaffoldBackgroundColor
         && other.bottomAppBarColor == bottomAppBarColor
         && other.cardColor == cardColor
+        && other.shadowColor == shadowColor
         && other.dividerColor == dividerColor
         && other.highlightColor == highlightColor
         && other.splashColor == splashColor
@@ -1417,6 +1475,9 @@ class ThemeData with Diagnosticable {
         && other.buttonBarTheme == buttonBarTheme
         && other.bottomNavigationBarTheme == bottomNavigationBarTheme
         && other.timePickerTheme == timePickerTheme
+        && other.textButtonTheme == textButtonTheme
+        && other.elevatedButtonTheme == elevatedButtonTheme
+        && other.outlinedButtonTheme == outlinedButtonTheme
         && other.fixTextFieldOutlineLabel == fixTextFieldOutlineLabel;
   }
 
@@ -1434,6 +1495,7 @@ class ThemeData with Diagnosticable {
       accentColor,
       accentColorBrightness,
       canvasColor,
+      shadowColor,
       scaffoldBackgroundColor,
       bottomAppBarColor,
       cardColor,
@@ -1491,6 +1553,9 @@ class ThemeData with Diagnosticable {
       buttonBarTheme,
       bottomNavigationBarTheme,
       timePickerTheme,
+      textButtonTheme,
+      elevatedButtonTheme,
+      outlinedButtonTheme,
       fixTextFieldOutlineLabel,
     ];
     return hashList(values);
@@ -1507,6 +1572,7 @@ class ThemeData with Diagnosticable {
     properties.add(ColorProperty('accentColor', accentColor, defaultValue: defaultData.accentColor, level: DiagnosticLevel.debug));
     properties.add(EnumProperty<Brightness>('accentColorBrightness', accentColorBrightness, defaultValue: defaultData.accentColorBrightness, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('canvasColor', canvasColor, defaultValue: defaultData.canvasColor, level: DiagnosticLevel.debug));
+    properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: defaultData.shadowColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('scaffoldBackgroundColor', scaffoldBackgroundColor, defaultValue: defaultData.scaffoldBackgroundColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('bottomAppBarColor', bottomAppBarColor, defaultValue: defaultData.bottomAppBarColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('cardColor', cardColor, defaultValue: defaultData.cardColor, level: DiagnosticLevel.debug));
@@ -1562,6 +1628,9 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<ButtonBarThemeData>('buttonBarTheme', buttonBarTheme, defaultValue: defaultData.buttonBarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<TimePickerThemeData>('timePickerTheme', timePickerTheme, defaultValue: defaultData.timePickerTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<BottomNavigationBarThemeData>('bottomNavigationBarTheme', bottomNavigationBarTheme, defaultValue: defaultData.bottomNavigationBarTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<TextButtonThemeData>('textButtonTheme', textButtonTheme, defaultValue: defaultData.textButtonTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<ElevatedButtonThemeData>('elevatedButtonTheme', elevatedButtonTheme, defaultValue: defaultData.elevatedButtonTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<OutlinedButtonThemeData>('outlinedButtonTheme', outlinedButtonTheme, defaultValue: defaultData.outlinedButtonTheme, level: DiagnosticLevel.debug));
   }
 }
 

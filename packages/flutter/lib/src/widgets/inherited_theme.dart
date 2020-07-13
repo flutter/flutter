@@ -123,7 +123,7 @@ abstract class InheritedTheme extends InheritedWidget {
         final Type themeType = theme.runtimeType;
         // Only remember the first theme of any type. This assumes
         // that inherited themes completely shadow ancestors of the
-        // the same type.
+        // same type.
         if (!themeTypes.contains(themeType)) {
           themeTypes.add(themeType);
           themes.add(theme);

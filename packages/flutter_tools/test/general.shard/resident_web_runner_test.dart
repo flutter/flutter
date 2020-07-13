@@ -329,19 +329,54 @@ void main() {
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/60613
+  testUsingContext('ResidentWebRunner calls appFailedToStart if initial compilation fails', () async {
+    _setupMocks();
+    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
+    fileSystem.file(globals.fs.path.join('lib', 'main.dart'))
+      .createSync(recursive: true);
+    fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
+    when(mockWebDevFS.update(
+      mainUri: anyNamed('mainUri'),
+      target: anyNamed('target'),
+      bundle: anyNamed('bundle'),
+      firstBuildTime: anyNamed('firstBuildTime'),
+      bundleFirstUpload: anyNamed('bundleFirstUpload'),
+      generator: anyNamed('generator'),
+      fullRestart: anyNamed('fullRestart'),
+      dillOutputPath: anyNamed('dillOutputPath'),
+      projectRootPath: anyNamed('projectRootPath'),
+      pathToReload: anyNamed('pathToReload'),
+      invalidatedFiles: anyNamed('invalidatedFiles'),
+      trackWidgetCreation: anyNamed('trackWidgetCreation'),
+      packageConfig: anyNamed('packageConfig'),
+    )).thenAnswer((Invocation _) async {
+      return UpdateFSReport(success: false, syncedBytes: 0)..invalidatedModules = <String>[];
+    });
+
+    expect(await residentWebRunner.run(), 1);
+    // Completing this future ensures that the daemon can exit correctly.
+    expect(await residentWebRunner.waitForAppToFinish(), 1);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Pub: () => MockPub(),
+    Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
+  });
+
   testUsingContext('Can successfully run without an index.html including status warning', () async {
     fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
     _setupMocks();
     fileSystem.file(fileSystem.path.join('web', 'index.html'))
       .deleteSync();
     final ResidentWebRunner residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
-    mockFlutterDevice,
-    flutterProject: FlutterProject.current(),
-    debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-    ipv6: true,
-    stayResident: false,
-    urlTunneller: null,
-  ) as ResidentWebRunner;
+      mockFlutterDevice,
+      flutterProject: FlutterProject.current(),
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      ipv6: true,
+      stayResident: false,
+      urlTunneller: null,
+    ) as ResidentWebRunner;
 
     expect(await residentWebRunner.run(), 0);
     expect(testLogger.statusText,
@@ -729,7 +764,7 @@ void main() {
   testUsingContext('web resident runner can toggle CanvasKit', () async {
     final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-    final WebAssetServer webAssetServer = WebAssetServer(null, null, null, null, null);
+    final WebAssetServer webAssetServer = WebAssetServer(null, null, null, null, null, null);
     when(mockWebDevFS.webAssetServer).thenReturn(webAssetServer);
 
     expect(residentWebRunner.supportsCanvasKit, true);
@@ -1525,7 +1560,7 @@ void main() {
     when(mockWebDevFS.connect(any))
       .thenThrow(const WebSocketException());
 
-    await expectLater(() => residentWebRunner.run(), throwsToolExit());
+    await expectLater(residentWebRunner.run, throwsToolExit());
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -1542,7 +1577,7 @@ void main() {
     when(mockWebDevFS.connect(any))
       .thenThrow(AppConnectionException(''));
 
-    await expectLater(() => residentWebRunner.run(), throwsToolExit());
+    await expectLater(residentWebRunner.run, throwsToolExit());
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -1559,7 +1594,7 @@ void main() {
     when(mockWebDevFS.connect(any))
       .thenThrow(ChromeDebugException(<String, dynamic>{}));
 
-    await expectLater(() => residentWebRunner.run(), throwsToolExit());
+    await expectLater(residentWebRunner.run, throwsToolExit());
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -1574,7 +1609,7 @@ void main() {
     _setupMocks();
     when(mockWebDevFS.connect(any)).thenThrow(Exception());
 
-    await expectLater(() => residentWebRunner.run(), throwsException);
+    await expectLater(residentWebRunner.run, throwsException);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -1593,7 +1628,7 @@ void main() {
 
     when(mockWebDevFS.connect(any)).thenThrow(StateError(''));
 
-    await expectLater(() => residentWebRunner.run(), throwsStateError);
+    await expectLater(residentWebRunner.run, throwsStateError);
     verify(mockStatus.stop()).called(1);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{

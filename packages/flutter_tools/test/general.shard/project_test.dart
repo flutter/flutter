@@ -9,6 +9,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
@@ -109,52 +110,6 @@ void main() {
       });
     });
 
-    group('editable Android host app', () {
-      _testInMemory('fails on non-module', () async {
-        final FlutterProject project = await someProject();
-        await expectLater(
-          project.android.makeHostAppEditable(),
-          throwsAssertionError,
-        );
-      });
-      _testInMemory('exits on already editable module', () async {
-        final FlutterProject project = await aModuleProject();
-        await project.android.makeHostAppEditable();
-        return expectToolExitLater(project.android.makeHostAppEditable(), contains('already editable'));
-      });
-      _testInMemory('creates android/app folder in place of .android/app', () async {
-        final FlutterProject project = await aModuleProject();
-        await project.android.makeHostAppEditable();
-        expectNotExists(project.directory.childDirectory('.android').childDirectory('app'));
-        expect(
-          project.directory.childDirectory('.android').childFile('settings.gradle').readAsStringSync(),
-          isNot(contains("include ':app'")),
-        );
-        expectExists(project.directory.childDirectory('android').childDirectory('app'));
-        expectExists(project.directory.childDirectory('android').childFile('local.properties'));
-        expect(
-          project.directory.childDirectory('android').childFile('settings.gradle').readAsStringSync(),
-          contains("include ':app'"),
-        );
-      });
-      _testInMemory('retains .android/Flutter folder and references it', () async {
-        final FlutterProject project = await aModuleProject();
-        await project.android.makeHostAppEditable();
-        expectExists(project.directory.childDirectory('.android').childDirectory('Flutter'));
-        expect(
-          project.directory.childDirectory('android').childFile('settings.gradle').readAsStringSync(),
-          contains("new File(settingsDir.parentFile, '.android/include_flutter.groovy')"),
-        );
-      });
-      _testInMemory('can be redone after deletion', () async {
-        final FlutterProject project = await aModuleProject();
-        await project.android.makeHostAppEditable();
-        project.directory.childDirectory('android').deleteSync(recursive: true);
-        await project.android.makeHostAppEditable();
-        expectExists(project.directory.childDirectory('android').childDirectory('app'));
-      });
-    });
-
     group('ensure ready for platform-specific tooling', () {
       _testInMemory('does nothing, if project is not created', () async {
         final FlutterProject project = FlutterProject(
@@ -223,7 +178,7 @@ void main() {
       });
       testUsingContext('injects plugins for Linux', () async {
         final FlutterProject project = await someProject();
-        project.linux.managedDirectory.createSync(recursive: true);
+        project.linux.cmakeFile.createSync(recursive: true);
         await project.ensureReadyForPlatformSpecificTooling();
         expectExists(project.linux.managedDirectory.childFile('generated_plugin_registrant.h'));
         expectExists(project.linux.managedDirectory.childFile('generated_plugin_registrant.cc'));
@@ -238,21 +193,7 @@ void main() {
       });
       testUsingContext('injects plugins for Windows', () async {
         final FlutterProject project = await someProject();
-        project.windows.managedDirectory.createSync(recursive: true);
-        project.windows.solutionFile.createSync(recursive: true);
-        // Just enough solution file to allow injection to pass.
-        // TODO(stuartmorgan): Consider allowing injecting a mock solution util
-        // class into the test environment instead.
-        project.windows.solutionFile.writeAsStringSync('''
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Runner", "Runner.vcxproj", "{3842E94C-E348-463A-ADBE-625A2B69B628}"
-	ProjectSection(ProjectDependencies) = postProject
-		{6419BF13-6ECD-4CD2-9E85-E566A1F03F8F} = {6419BF13-6ECD-4CD2-9E85-E566A1F03F8F}
-	EndProjectSection
-EndProject
-Global
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-	EndGlobalSection
-EndGlobal''');
+        project.windows.cmakeFile.createSync(recursive: true);
         await project.ensureReadyForPlatformSpecificTooling();
         expectExists(project.windows.managedDirectory.childFile('generated_plugin_registrant.h'));
         expectExists(project.windows.managedDirectory.childFile('generated_plugin_registrant.cc'));
@@ -398,6 +339,9 @@ apply plugin: 'kotlin-android'
               });
             }
         );
+        when(mockXcodeProjectInterpreter.getInfo(any, projectFilename: anyNamed('projectFilename'))).thenAnswer( (_) {
+          return Future<XcodeProjectInfo>.value(XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger));
+        });
         expect(await project.ios.productBundleIdentifier(null), 'io.flutter.someProject');
       });
 
@@ -425,6 +369,10 @@ apply plugin: 'kotlin-android'
               });
             }
         );
+        when(mockXcodeProjectInterpreter.getInfo(any, projectFilename: anyNamed('projectFilename'))).thenAnswer( (_) {
+          return Future<XcodeProjectInfo>.value(XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger));
+        });
+
         when(mockPlistUtils.getValueFromFile(any, any)).thenReturn(r'$(PRODUCT_BUNDLE_IDENTIFIER)');
         expect(await project.ios.productBundleIdentifier(null), 'io.flutter.someProject');
       });
@@ -440,9 +388,55 @@ apply plugin: 'kotlin-android'
             });
           }
         );
+        when(mockXcodeProjectInterpreter.getInfo(any, projectFilename: anyNamed('projectFilename'))).thenAnswer( (_) {
+          return Future<XcodeProjectInfo>.value(XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger));
+        });
+
         when(mockPlistUtils.getValueFromFile(any, any)).thenReturn(r'$(PRODUCT_BUNDLE_IDENTIFIER).$(SUFFIX)');
         expect(await project.ios.productBundleIdentifier(null), 'io.flutter.someProject.suffix');
       });
+
+      testWithMocks('fails with no flavor and defined schemes', () async {
+        final FlutterProject project = await someProject();
+        when(mockXcodeProjectInterpreter.getInfo(any, projectFilename: anyNamed('projectFilename'))).thenAnswer( (_) {
+          return Future<XcodeProjectInfo>.value(XcodeProjectInfo(<String>[], <String>[], <String>['free', 'paid'], logger));
+        });
+        await expectToolExitLater(
+          project.ios.productBundleIdentifier(null),
+          contains('You must specify a --flavor option to select one of the available schemes.')
+        );
+      });
+
+      testWithMocks('handles case insensitive flavor', () async {
+        final FlutterProject project = await someProject();
+        when(mockXcodeProjectInterpreter.getBuildSettings(any, scheme: anyNamed('scheme'))).thenAnswer(
+                (_) {
+              return Future<Map<String,String>>.value(<String, String>{
+                'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
+              });
+            }
+        );
+        when(mockXcodeProjectInterpreter.getInfo(any, projectFilename: anyNamed('projectFilename'))).thenAnswer( (_) {
+          return Future<XcodeProjectInfo>.value(XcodeProjectInfo(<String>[], <String>[], <String>['Free'], logger));
+        });
+
+        const BuildInfo buildInfo = BuildInfo(BuildMode.debug, 'free', treeShakeIcons: false);
+        expect(await project.ios.productBundleIdentifier(buildInfo), 'io.flutter.someProject');
+      });
+
+      testWithMocks('fails with flavor and default schemes', () async {
+        final FlutterProject project = await someProject();
+        when(mockXcodeProjectInterpreter.getInfo(any, projectFilename: anyNamed('projectFilename'))).thenAnswer( (_) {
+          return Future<XcodeProjectInfo>.value(XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger));
+        });
+
+        const BuildInfo buildInfo = BuildInfo(BuildMode.debug, 'free', treeShakeIcons: false);
+        await expectToolExitLater(
+          project.ios.productBundleIdentifier(buildInfo),
+          contains('The Xcode project does not define custom schemes. You cannot use the --flavor option.')
+        );
+      });
+
       testWithMocks('empty surrounded by quotes', () async {
         final FlutterProject project = await someProject();
         addIosProjectFile(project.directory, projectFileContent: () {
@@ -489,6 +483,9 @@ apply plugin: 'kotlin-android'
           return Future<Map<String,String>>.value(<String, String>{
             'FULL_PRODUCT_NAME': 'My App.app'
           });
+        });
+        when(mockXcodeProjectInterpreter.getInfo(any, projectFilename: anyNamed('projectFilename'))).thenAnswer( (_) {
+          return Future<XcodeProjectInfo>.value(XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger));
         });
 
         expect(await project.ios.hostAppBundleName(null), 'My App.app');
@@ -648,6 +645,9 @@ name: foo_bar
             });
           }
         );
+        when(mockXcodeProjectInterpreter.getInfo(any, projectFilename: anyNamed('projectFilename'))).thenAnswer( (_) {
+          return Future<XcodeProjectInfo>.value(XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger));
+        });
       });
 
       testUsingContext('no Info.plist in target', () async {

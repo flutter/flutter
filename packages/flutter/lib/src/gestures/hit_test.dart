@@ -4,8 +4,6 @@
 
 // @dart = 2.8
 
-import 'dart:collection';
-
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -73,12 +71,51 @@ class HitTestEntry {
   Matrix4 _transform;
 }
 
+// A type of data that can be applied to a matrix by left-multiplication.
+@immutable
+abstract class _TransformPart {
+  const _TransformPart();
+
+  // Apply this transform part to `rhs` from the left.
+  //
+  // This should work as if this transform part is first converted to a matrix
+  // and then left-multiplied to `rhs`.
+  //
+  // For example, if this transform part is a vector `v1`, whose corresponding
+  // matrix is `m1 = Matrix4.translation(v1)`, then the result of
+  // `_VectorTransformPart(v1).multiply(rhs)` should equal to `m1 * rhs`.
+  Matrix4 multiply(Matrix4 rhs);
+}
+
+class _MatrixTransformPart extends _TransformPart {
+  const _MatrixTransformPart(this.matrix);
+
+  final Matrix4 matrix;
+
+  @override
+  Matrix4 multiply(Matrix4 rhs) {
+    return matrix * rhs as Matrix4;
+  }
+}
+
+class _OffsetTransformPart extends _TransformPart {
+  const _OffsetTransformPart(this.offset);
+
+  final Offset offset;
+
+  @override
+  Matrix4 multiply(Matrix4 rhs) {
+    return rhs.clone()..leftTranslate(offset.dx, offset.dy);
+  }
+}
+
 /// The result of performing a hit test.
 class HitTestResult {
   /// Creates an empty hit test result.
   HitTestResult()
      : _path = <HitTestEntry>[],
-       _transforms = Queue<Matrix4>();
+       _transforms = <Matrix4>[Matrix4.identity()],
+       _localTransforms = <_TransformPart>[];
 
   /// Wraps `result` (usually a subtype of [HitTestResult]) to create a
   /// generic [HitTestResult].
@@ -88,7 +125,8 @@ class HitTestResult {
   /// structure to store [HitTestEntry]s).
   HitTestResult.wrap(HitTestResult result)
      : _path = result._path,
-       _transforms = result._transforms;
+       _transforms = result._transforms,
+       _localTransforms = result._localTransforms;
 
   /// An unmodifiable list of [HitTestEntry] objects recorded during the hit test.
   ///
@@ -98,7 +136,40 @@ class HitTestResult {
   Iterable<HitTestEntry> get path => _path;
   final List<HitTestEntry> _path;
 
-  final Queue<Matrix4> _transforms;
+  // A stack of transform parts.
+  //
+  // The transform part stack leading from global to the current object is stored
+  // in 2 parts:
+  //
+  //  * `_transforms` are globalized matrices, meaning they have been multiplied
+  //    by the ancestors and are thus relative to the global coordinate space.
+  //  * `_localTransforms` are local transform parts, which are relative to the
+  //    parent's coordinate space.
+  //
+  // When new transform parts are added they're appended to `_localTransforms`,
+  // and are converted to global ones and moved to `_transforms` only when used.
+  final List<Matrix4> _transforms;
+  final List<_TransformPart> _localTransforms;
+
+  // Globalize all transform parts in `_localTransforms` and move them to
+  // _transforms.
+  void _globalizeTransforms() {
+    if (_localTransforms.isEmpty) {
+      return;
+    }
+    Matrix4 last = _transforms.last;
+    for (final _TransformPart part in _localTransforms) {
+      last = part.multiply(last);
+      _transforms.add(last);
+    }
+    _localTransforms.clear();
+  }
+
+  Matrix4 get _lastTransform {
+    _globalizeTransforms();
+    assert(_localTransforms.isEmpty);
+    return _transforms.last;
+  }
 
   /// Add a [HitTestEntry] to the path.
   ///
@@ -107,7 +178,7 @@ class HitTestResult {
   /// upward walk of the tree being hit tested.
   void add(HitTestEntry entry) {
     assert(entry._transform == null);
-    entry._transform = _transforms.isEmpty ? null : _transforms.last;
+    entry._transform = _lastTransform;
     _path.add(entry);
   }
 
@@ -125,6 +196,9 @@ class HitTestResult {
   /// through [PointerEvent.removePerspectiveTransform] to remove
   /// the perspective component.
   ///
+  /// If the provided `transform` is a translation matrix, it is much faster
+  /// to use [pushOffset] with the translation offset instead.
+  ///
   /// [HitTestable]s need to call this method indirectly through a convenience
   /// method defined on a subclass before hit testing a child that does not
   /// have the same origin as the parent. After hit testing the child,
@@ -132,10 +206,10 @@ class HitTestResult {
   ///
   /// See also:
   ///
+  ///  * [pushOffset], which is similar to [pushTransform] but is limited to
+  ///    translations, and is faster in such cases.
   ///  * [BoxHitTestResult.addWithPaintTransform], which is a public wrapper
   ///    around this function for hit testing on [RenderBox]s.
-  ///  * [SliverHitTestResult.addWithAxisOffset], which is a public wrapper
-  ///    around this function for hit testing on [RenderSliver]s.
   @protected
   void pushTransform(Matrix4 transform) {
     assert(transform != null);
@@ -148,26 +222,60 @@ class HitTestResult {
       'matrix through PointerEvent.removePerspectiveTransform? '
       'The provided matrix is:\n$transform'
     );
-    _transforms.add(_transforms.isEmpty ? transform : (transform * _transforms.last as Matrix4));
+    _localTransforms.add(_MatrixTransformPart(transform));
   }
 
-  /// Removes the last transform added via [pushTransform].
+  /// Pushes a new translation offset that is to be applied to all future
+  /// [HitTestEntry]s added via [add] until it is removed via [popTransform].
+  ///
+  /// This method is only to be used by subclasses, which must provide
+  /// coordinate space specific public wrappers around this function for their
+  /// users (see [BoxHitTestResult.addWithPaintOffset] for such an example).
+  ///
+  /// The provided `offset` should describe how to transform [PointerEvent]s from
+  /// the coordinate space of the method caller to the coordinate space of its
+  /// children. Usually `offset` is the inverse of the offset of the child
+  /// relative to the parent.
+  ///
+  /// [HitTestable]s need to call this method indirectly through a convenience
+  /// method defined on a subclass before hit testing a child that does not
+  /// have the same origin as the parent. After hit testing the child,
+  /// [popTransform] has to be called to remove the child-specific `transform`.
+  ///
+  /// See also:
+  ///
+  ///  * [pushTransform], which is similar to [pushOffset] but allows general
+  ///    transform besides translation.
+  ///  * [BoxHitTestResult.addWithPaintOffset], which is a public wrapper
+  ///    around this function for hit testing on [RenderBox]s.
+  ///  * [SliverHitTestResult.addWithAxisOffset], which is a public wrapper
+  ///    around this function for hit testing on [RenderSliver]s.
+  @protected
+  void pushOffset(Offset offset) {
+    assert(offset != null);
+    _localTransforms.add(_OffsetTransformPart(offset));
+  }
+
+  /// Removes the last transform added via [pushTransform] or [pushOffset].
   ///
   /// This method is only to be used by subclasses, which must provide
   /// coordinate space specific public wrappers around this function for their
   /// users (see [BoxHitTestResult.addWithPaintTransform] for such an example).
   ///
   /// This method must be called after hit testing is done on a child that
-  /// required a call to [pushTransform].
+  /// required a call to [pushTransform] or [pushOffset].
   ///
   /// See also:
   ///
-  ///  * [pushTransform], which describes the use case of this function pair in
-  ///    more details.
+  ///  * [pushTransform] and [pushOffset], which describes the use case of this
+  ///    function pair in more details.
   @protected
   void popTransform() {
+    if (_localTransforms.isNotEmpty)
+      _localTransforms.removeLast();
+    else
+      _transforms.removeLast();
     assert(_transforms.isNotEmpty);
-    _transforms.removeLast();
   }
 
   bool _debugVectorMoreOrLessEquals(Vector4 a, Vector4 b, { double epsilon = precisionErrorTolerance }) {

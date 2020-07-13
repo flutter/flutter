@@ -19,6 +19,7 @@ import 'dropdown.dart';
 import 'icons.dart';
 import 'ink_well.dart';
 import 'material.dart';
+import 'material_state.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 import 'tooltip.dart';
@@ -96,6 +97,7 @@ class DataRow {
     this.key,
     this.selected = false,
     this.onSelectChanged,
+    this.color,
     @required this.cells,
   }) : assert(cells != null);
 
@@ -107,6 +109,7 @@ class DataRow {
     int index,
     this.selected = false,
     this.onSelectChanged,
+    this.color,
     @required this.cells,
   }) : assert(cells != null),
        key = ValueKey<int>(index);
@@ -150,13 +153,41 @@ class DataRow {
   /// table.
   final List<DataCell> cells;
 
+  /// The color for the row.
+  ///
+  /// By default, the color is transparent unless selected. Selected rows has
+  /// a grey translucent color.
+  ///
+  /// The effective color can depend on the [MaterialState] state, if the
+  /// row is selected, pressed, hovered, focused, disabled or enabled. The
+  /// color is painted as an overlay to the row. To make sure that the row's
+  /// [InkWell] is visible (when pressed, hovered and focused), it is
+  /// recommended to use a translucent color.
+  ///
+  /// ```dart
+  /// DataRow(
+  ///   color: MaterialStateProperty.resolveWith<Color>(Set<MaterialState> states) {
+  ///     if (states.contains(MaterialState.selected))
+  ///       return Theme.of(context).colorScheme.primary.withOpacity(0.08);
+  ///     return null;  // Use the default value.
+  ///   },
+  ///)
+  /// ```
+  ///
+  /// See also:
+  ///
+  ///  * The Material Design specification for overlay colors and how they
+  ///    match a component's state:
+  ///    <https://material.io/design/interaction/states.html#anatomy>.
+  final MaterialStateProperty<Color> color;
+
   bool get _debugInteractive => onSelectChanged != null || cells.any((DataCell cell) => cell._debugInteractive);
 }
 
 /// The data for a cell of a [DataTable].
 ///
 /// One list of [DataCell] objects must be provided for each [DataRow]
-/// in the [DataTable], in the [new DataRow] constructor's `cells`
+/// in the [DataTable], in the new [DataRow] constructor's `cells`
 /// argument.
 @immutable
 class DataCell {
@@ -290,6 +321,53 @@ class DataCell {
 /// }
 /// ```
 ///
+/// {@end-tool}
+///
+///
+/// {@tool dartpad --template=stateful_widget_scaffold}
+///
+/// This sample shows how to display a [DataTable] with alternate colors per
+/// row, and a custom color for when the row is selected.
+///
+/// ```dart
+/// static const int numItems = 10;
+/// List<bool> selected = List<bool>.generate(numItems, (index) => false);
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return SizedBox(
+///     width: double.infinity,
+///     child: DataTable(
+///       columns: const <DataColumn>[
+///         DataColumn(
+///           label: const Text('Number'),
+///         ),
+///       ],
+///       rows: List<DataRow>.generate(
+///         numItems,
+///         (index) => DataRow(
+///           color: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+///             // All rows will have the same selected color.
+///             if (states.contains(MaterialState.selected))
+///               return Theme.of(context).colorScheme.primary.withOpacity(0.08);
+///             // Even rows will have a grey color.
+///             if (index % 2 == 0)
+///               return Colors.grey.withOpacity(0.3);
+///             return null;  // Use default value for other states and odd rows.
+///           }),
+///           cells: [DataCell(Text('Row $index'))],
+///           selected: selected[index],
+///           onSelectChanged: (bool value) {
+///             setState(() {
+///               selected[index] = value;
+///             });
+///           },
+///         ),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
 /// {@end-tool}
 ///
 /// See also:
@@ -481,10 +559,11 @@ class DataTable extends StatelessWidget {
   final double dividerThickness;
 
   Widget _buildCheckbox({
-    Color color,
+    Color activeColor,
     bool checked,
     VoidCallback onRowTap,
     ValueChanged<bool> onCheckboxChanged,
+    MaterialStateProperty<Color> overlayColor,
   }) {
     Widget contents = Semantics(
       container: true,
@@ -492,7 +571,7 @@ class DataTable extends StatelessWidget {
         padding: EdgeInsetsDirectional.only(start: horizontalMargin, end: horizontalMargin / 2.0),
         child: Center(
           child: Checkbox(
-            activeColor: color,
+            activeColor: activeColor,
             value: checked,
             onChanged: onCheckboxChanged,
           ),
@@ -503,6 +582,7 @@ class DataTable extends StatelessWidget {
       contents = TableRowInkWell(
         onTap: onRowTap,
         child: contents,
+        overlayColor: overlayColor,
       );
     }
     return TableCell(
@@ -582,6 +662,7 @@ class DataTable extends StatelessWidget {
     bool showEditIcon,
     VoidCallback onTap,
     VoidCallback onSelectChanged,
+    MaterialStateProperty<Color> overlayColor,
   }) {
     final bool isLightTheme = Theme.of(context).brightness == Brightness.light;
     if (showEditIcon) {
@@ -617,11 +698,13 @@ class DataTable extends StatelessWidget {
       label = InkWell(
         onTap: onTap,
         child: label,
+        overlayColor: overlayColor,
       );
     } else if (onSelectChanged != null) {
       label = TableRowInkWell(
         onTap: onSelectChanged,
         child: label,
+        overlayColor: overlayColor,
       );
     }
     return label;
@@ -632,26 +715,43 @@ class DataTable extends StatelessWidget {
     assert(!_debugInteractive || debugCheckHasMaterial(context));
 
     final ThemeData theme = Theme.of(context);
-    final BoxDecoration _kSelectedDecoration = BoxDecoration(
-      border: Border(bottom: Divider.createBorderSide(context, width:  dividerThickness)),
-      // The backgroundColor has to be transparent so you can see the ink on the material
-      color: (Theme.of(context).brightness == Brightness.light) ? _grey100Opacity : _grey300Opacity,
+    final MaterialStateProperty<Color> defaultRowColor = MaterialStateProperty.resolveWith(
+      (Set<MaterialState> states) {
+        if (states.contains(MaterialState.selected)) {
+          // TODO(per): Add theming support for DataTable, https://github.com/flutter/flutter/issues/56079.
+          // The color has to be transparent so you can see the ink on
+          // the [Material].
+          return (Theme.of(context).brightness == Brightness.light) ?
+            _grey100Opacity : _grey300Opacity;
+        }
+        return null;
+      },
     );
-    final BoxDecoration _kUnselectedDecoration = BoxDecoration(
-      border: Border(bottom: Divider.createBorderSide(context, width: dividerThickness)),
-    );
-
-    final bool displayCheckboxColumn = showCheckboxColumn && rows.any((DataRow row) => row.onSelectChanged != null);
+    final bool anyRowSelectable = rows.any((DataRow row) => row.onSelectChanged != null);
+    final bool displayCheckboxColumn = showCheckboxColumn && anyRowSelectable;
     final bool allChecked = displayCheckboxColumn && !rows.any((DataRow row) => row.onSelectChanged != null && !row.selected);
 
     final List<TableColumnWidth> tableColumns = List<TableColumnWidth>(columns.length + (displayCheckboxColumn ? 1 : 0));
     final List<TableRow> tableRows = List<TableRow>.generate(
       rows.length + 1, // the +1 is for the header row
       (int index) {
+        final bool isSelected = index > 0 && rows[index - 1].selected;
+        final bool isDisabled = index > 0 && anyRowSelectable && rows[index - 1].onSelectChanged == null;
+        final Set<MaterialState> states = <MaterialState>{
+          if (isSelected)
+            MaterialState.selected,
+          if (isDisabled)
+            MaterialState.disabled,
+        };
+        final Color rowColor = index > 0 ? rows[index - 1].color?.resolve(states) : null;
         return TableRow(
           key: index == 0 ? _headingRowKey : rows[index - 1].key,
-          decoration: index > 0 && rows[index - 1].selected ? _kSelectedDecoration
-                                                            : _kUnselectedDecoration,
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: Divider.createBorderSide(context, width: dividerThickness),
+            ),
+            color: rowColor ?? defaultRowColor.resolve(states),
+          ),
           children: List<Widget>(tableColumns.length),
         );
       },
@@ -663,17 +763,18 @@ class DataTable extends StatelessWidget {
     if (displayCheckboxColumn) {
       tableColumns[0] = FixedColumnWidth(horizontalMargin + Checkbox.width + horizontalMargin / 2.0);
       tableRows[0].children[0] = _buildCheckbox(
-        color: theme.accentColor,
+        activeColor: theme.accentColor,
         checked: allChecked,
         onCheckboxChanged: _handleSelectAll,
       );
       rowIndex = 1;
       for (final DataRow row in rows) {
         tableRows[rowIndex].children[0] = _buildCheckbox(
-          color: theme.accentColor,
+          activeColor: theme.accentColor,
           checked: row.selected,
           onRowTap: () => row.onSelectChanged != null ? row.onSelectChanged(!row.selected) : null ,
           onCheckboxChanged: row.onSelectChanged,
+          overlayColor: row.color,
         );
         rowIndex += 1;
       }
@@ -730,6 +831,7 @@ class DataTable extends StatelessWidget {
           showEditIcon: cell.showEditIcon,
           onTap: cell.onTap,
           onSelectChanged: () => row.onSelectChanged != null ? row.onSelectChanged(!row.selected) : null,
+          overlayColor: row.color,
         );
         rowIndex += 1;
       }
@@ -765,6 +867,7 @@ class TableRowInkWell extends InkResponse {
     GestureTapCallback onDoubleTap,
     GestureLongPressCallback onLongPress,
     ValueChanged<bool> onHighlightChanged,
+    MaterialStateProperty<Color> overlayColor,
   }) : super(
     key: key,
     child: child,
@@ -774,6 +877,7 @@ class TableRowInkWell extends InkResponse {
     onHighlightChanged: onHighlightChanged,
     containedInkWell: true,
     highlightShape: BoxShape.rectangle,
+    overlayColor: overlayColor,
   );
 
   @override
