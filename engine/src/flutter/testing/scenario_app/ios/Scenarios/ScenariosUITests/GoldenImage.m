@@ -6,6 +6,8 @@
 #import <XCTest/XCTest.h>
 #include <sys/sysctl.h>
 
+static const double kRmseThreshold = 0.5;
+
 @interface GoldenImage ()
 
 @end
@@ -67,8 +69,24 @@
   CGContextDrawImage(contextB, CGRectMake(0, 0, widthA, heightA), imageRefB);
   CGContextRelease(contextB);
 
-  BOOL isSame = memcmp(rawA.mutableBytes, rawB.mutableBytes, size) == 0;
-  return isSame;
+  const char* apos = rawA.mutableBytes;
+  const char* bpos = rawB.mutableBytes;
+  double sum = 0.0;
+  for (size_t i = 0; i < size; ++i, ++apos, ++bpos) {
+    // Skip transparent pixels.
+    if (*apos == 0 && *bpos == 0 && i % 4 == 0) {
+      i += 3;
+      apos += 3;
+      bpos += 3;
+    } else {
+      double aval = *apos;
+      double bval = *bpos;
+      double diff = aval - bval;
+      sum += diff * diff;
+    }
+  }
+  double rmse = sqrt(sum / size);
+  return rmse <= kRmseThreshold;
 }
 
 NS_INLINE NSString* _platformName() {
