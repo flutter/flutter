@@ -35,7 +35,7 @@ void main() {
     expect(material.borderRadius, null);
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
-    expect(material.shadowColor, const Color(0xff000000));
+    expect(material.shadowColor, Colors.black);
     expect(material.shape, RoundedRectangleBorder(
       side: BorderSide(width: 1, color: colorScheme.onSurface.withOpacity(0.12)),
       borderRadius: BorderRadius.circular(4.0),
@@ -184,6 +184,7 @@ void main() {
   testWidgets('Theme shadowColor', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
     const Color shadowColor = Color(0xff000001);
+    const Color overiddenColor = Color(0xff000002);
 
     Widget buildFrame({ Color overallShadowColor, Color themeShadowColor, Color shadowColor }) {
       return MaterialApp(
@@ -220,8 +221,13 @@ void main() {
       matching: find.byType(Material),
     );
 
-    await tester.pumpWidget(buildFrame(overallShadowColor: shadowColor));
+    await tester.pumpWidget(buildFrame());
     Material material = tester.widget<Material>(buttonMaterialFinder);
+    expect(material.shadowColor, Colors.black); //default
+
+    await tester.pumpWidget(buildFrame(overallShadowColor: shadowColor));
+    await tester.pumpAndSettle(); // theme animation
+    material = tester.widget<Material>(buttonMaterialFinder);
     expect(material.shadowColor, shadowColor);
 
     await tester.pumpWidget(buildFrame(themeShadowColor: shadowColor));
@@ -230,6 +236,16 @@ void main() {
     expect(material.shadowColor, shadowColor);
 
     await tester.pumpWidget(buildFrame(shadowColor: shadowColor));
+    await tester.pumpAndSettle(); // theme animation
+    material = tester.widget<Material>(buttonMaterialFinder);
+    expect(material.shadowColor, shadowColor);
+
+    await tester.pumpWidget(buildFrame(overallShadowColor: overiddenColor, themeShadowColor: shadowColor));
+    await tester.pumpAndSettle(); // theme animation
+    material = tester.widget<Material>(buttonMaterialFinder);
+    expect(material.shadowColor, shadowColor);
+
+    await tester.pumpWidget(buildFrame(themeShadowColor: overiddenColor, shadowColor: shadowColor));
     await tester.pumpAndSettle(); // theme animation
     material = tester.widget<Material>(buttonMaterialFinder);
     expect(material.shadowColor, shadowColor);
