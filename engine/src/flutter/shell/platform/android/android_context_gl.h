@@ -21,7 +21,7 @@ namespace flutter {
 ///
 ///
 /// This can be used in conjuction to unique_ptr to provide better guarantees
-/// about the lifespam of the `EGLSurface` object.
+/// about the lifespan of the `EGLSurface` object.
 ///
 class AndroidEGLSurface {
  public:
