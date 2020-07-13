@@ -286,17 +286,16 @@ class RestorationManager extends ChangeNotifier {
   /// needs to be serialized (e.g. because the bucket got disposed).
   ///
   /// It is safe to call this even when the bucket wasn't scheduled for
-  /// serialization before. Returns false, if the bucket wasn't scheduled for
-  /// serialization and true otherwise.
+  /// serialization before.
   ///
   /// It is exposed to allow testing of [RestorationBucket]s in isolation.
   @protected
   @visibleForTesting
-  bool unscheduleSerializationFor(RestorationBucket bucket) {
+  void unscheduleSerializationFor(RestorationBucket bucket) {
     assert(bucket != null);
     assert(bucket._manager == this);
     assert(!_debugDoingUpdate);
-    return _bucketsNeedingSerialization.remove(bucket);
+    _bucketsNeedingSerialization.remove(bucket);
   }
 
   void _doSerialization() {
@@ -306,11 +305,9 @@ class RestorationManager extends ChangeNotifier {
     }());
     _postFrameScheduled = false;
 
-    assert((){
-      for (final RestorationBucket bucket in _bucketsNeedingSerialization) {
-          assert(bucket.debugAssertIntegrity());
-      }
-    }());
+    for (final RestorationBucket bucket in _bucketsNeedingSerialization) {
+      bucket.finalize();
+    }
     _bucketsNeedingSerialization.clear();
     sendToEngine(_encodeRestorationData(_rootBucket._rawData));
 
@@ -785,8 +782,24 @@ class RestorationBucket extends ChangeNotifier {
     }
   }
 
+  bool _needsSerialization = false;
   void _markNeedsSerialization() {
-    _manager?.scheduleSerializationFor(this);
+    if (!_needsSerialization) {
+      _needsSerialization = true;
+      _manager?.scheduleSerializationFor(this);
+    }
+  }
+
+  /// Called by the [RestorationManager] just before the data of the bucket
+  /// is serialized and send to the engine.
+  ///
+  /// It is exposed to allow testing of [RestorationBucket]s in isolation.
+  @visibleForTesting
+  void finalize() {
+    assert(_debugAssertNotDisposed());
+    assert(_needsSerialization);
+    _needsSerialization = false;
+    assert(_debugAssertIntegrity());
   }
 
   void _recursivelyUpdateManager(RestorationBucket bucket) {
@@ -795,18 +808,19 @@ class RestorationBucket extends ChangeNotifier {
   }
 
   void _updateManager(RestorationManager newManager) {
-    final bool wasScheduledForSerialization = _manager?.unscheduleSerializationFor(this) == true;
-    _manager = newManager;
-    if (wasScheduledForSerialization) {
-      _markNeedsSerialization();
+    if (_manager == newManager) {
+      return;
     }
+    if (_needsSerialization) {
+      _manager?.unscheduleSerializationFor(this);
+    }
+    _manager = newManager;
+    // Force serialization of this bucket with the new manager.
+    _needsSerialization = false;
+    _markNeedsSerialization();
   }
 
-  /// Called by the [RestorationManager] in debug mode just before the data
-  /// stored in the bucket is serialized to ensure that the data is valid.
-  ///
-  /// Always returns true in release mode.
-  bool debugAssertIntegrity() {
+  bool _debugAssertIntegrity() {
     assert(() {
       if (_childrenToAdd.isEmpty) {
         return true;

@@ -30,7 +30,7 @@ class MockRestorationManager extends TestRestorationManager {
   void doSerialization() {
     _updateScheduled = false;
     for (final RestorationBucket bucket in _buckets) {
-      assert(bucket.debugAssertIntegrity());
+      bucket.finalize();
     }
     _buckets.clear();
   }
