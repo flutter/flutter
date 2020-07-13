@@ -256,6 +256,17 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   // See AutomatedTestWidgetsFlutterBinding.addTime for an actual implementation.
   void addTime(Duration duration);
 
+  /// Delay for `duration` of time.
+  ///
+  /// In the automated test environment ([AutomatedTestWidgetsFlutterBinding],
+  /// typically used in `flutter test`), this advances the fake [clock] for the
+  /// period and also increases timeout (see [addTime]).
+  ///
+  /// In the live test environemnt ([LiveTestWidgetsFlutterBinding], typically
+  /// used for `flutter run` and for [e2e](https://pub.dev/packages/e2e)), it is
+  /// equivalent as [Future.delayed].
+  Future<void> delayed(Duration duration);
+
   /// The value to set [debugCheckIntrinsicSizes] to while tests are running.
   ///
   /// This can be used to enable additional checks. For example,
@@ -1110,6 +1121,14 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
+  Future<void> delayed(Duration duration) {
+    assert(_currentFakeAsync != null);
+    addTime(duration);
+    _currentFakeAsync.elapse(duration);
+    return Future<void>.value();
+  }
+
+  @override
   Future<void> runTest(
     Future<void> testBody(),
     VoidCallback invariantTester, {
@@ -1201,7 +1220,6 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     _timeoutStopwatch = null;
     _timeout = null;
   }
-
 }
 
 /// Available policies for how a [LiveTestWidgetsFlutterBinding] should paint
@@ -1352,6 +1370,11 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   void addTime(Duration duration) {
     // We don't support timeouts on the LiveTestWidgetsFlutterBinding.
     // See runTest().
+  }
+
+  @override
+  Future<void> delayed(Duration duration) {
+    return Future<void>.delayed(duration);
   }
 
   @override

@@ -54,7 +54,7 @@ import 'theme_data.dart';
 /// See also:
 ///
 ///  * [OutlinedButton], a [TextButton] with a border outline.
-///  * [ContainedButton], a filled button whose material elevates when pressed.
+///  * [ElevatedButton], a filled button whose material elevates when pressed.
 ///  * <https://material.io/design/components/buttons.html>
 class TextButton extends ButtonStyleButton {
   /// Create a TextButton.

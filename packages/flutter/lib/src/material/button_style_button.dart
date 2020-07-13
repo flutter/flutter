@@ -27,7 +27,7 @@ import 'theme_data.dart';
 /// See also:
 ///
 ///  * [TextButton], a simple ButtonStyleButton without a shadow.
-///  * [ContainedButton], a filled ButtonStyleButton whose material elevates when pressed.
+///  * [ElevatedButton], a filled ButtonStyleButton whose material elevates when pressed.
 ///  * [OutlinedButton], similar to [TextButton], but with an outline.
 abstract class ButtonStyleButton extends StatefulWidget {
   /// Create a [ButtonStyleButton].
@@ -177,7 +177,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
 ///
 ///  * [ButtonStyleButton], the [StatefulWidget] subclass for which this class is the [State].
 ///  * [TextButton], a simple button without a shadow.
-///  * [ContainedButton], a filled button whose material elevates when pressed.
+///  * [ElevatedButton], a filled button whose material elevates when pressed.
 ///  * [OutlinedButton], similar to [TextButton], but with an outline.
 class _ButtonStyleState extends State<ButtonStyleButton> {
   final Set<MaterialState> _states = <MaterialState>{};
