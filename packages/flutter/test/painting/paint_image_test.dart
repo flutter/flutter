@@ -8,6 +8,7 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/painting.dart';
 
@@ -62,6 +63,66 @@ void main() {
     expect(command.positionalArguments[0], equals(image));
     expect(command.positionalArguments[1], equals(const Rect.fromLTWH(0.0, 75.0, 300.0, 150.0)));
     expect(command.positionalArguments[2], equals(const Rect.fromLTWH(50.0, 75.0, 200.0, 100.0)));
+  });
+
+  test('debugInvertOversizedImages', () {
+    debugInvertOversizedImages = true;
+    final FlutterExceptionHandler oldFlutterError = FlutterError.onError;
+
+    final List<String> messages = <String>[];
+    FlutterError.onError = (FlutterErrorDetails details) {
+      messages.add(details.exceptionAsString());
+    };
+
+    final TestImage image = TestImage(width: 300, height: 300);
+    final TestCanvas canvas = TestCanvas();
+    const Rect rect = Rect.fromLTWH(50.0, 50.0, 200.0, 100.0);
+
+    paintImage(
+      canvas: canvas,
+      rect: rect,
+      image: image,
+      debugImageLabel: 'TestImage',
+      fit: BoxFit.fill,
+    );
+
+    final List<Invocation> commands = canvas.invocations
+      .skipWhile((Invocation invocation) => invocation.memberName != #saveLayer)
+      .take(4)
+      .toList();
+
+    expect(commands[0].positionalArguments[0], rect);
+    final Paint paint = commands[0].positionalArguments[1] as Paint;
+    expect(
+      paint.colorFilter,
+      const ColorFilter.matrix(<double>[
+        -1,  0,  0, 0, 255,
+         0, -1,  0, 0, 255,
+         0,  0, -1, 0, 255,
+         0,  0,  0, 1,   0,
+      ]),
+    );
+    expect(commands[1].memberName, #translate);
+    expect(commands[1].positionalArguments[0], 0.0);
+    expect(commands[1].positionalArguments[1], 100.0);
+
+    expect(commands[2].memberName, #scale);
+    expect(commands[2].positionalArguments[0], 1.0);
+    expect(commands[2].positionalArguments[1], -1.0);
+
+
+    expect(commands[3].memberName, #translate);
+    expect(commands[3].positionalArguments[0], 0.0);
+    expect(commands[3].positionalArguments[1], -100.0);
+
+    expect(
+      messages.single,
+      'Image TestImage has a display size of 200×100 but a decode size of 300×300, which uses an additional 364kb.\n\n'
+      'Consider resizing the asset ahead of time, supplying a cacheWidth parameter of 200, a cacheHeight parameter of 100, or using a ResizeImage.',
+    );
+
+    debugInvertOversizedImages = false;
+    FlutterError.onError = oldFlutterError;
   });
 
   testWidgets('Reports Image painting', (WidgetTester tester) async {
