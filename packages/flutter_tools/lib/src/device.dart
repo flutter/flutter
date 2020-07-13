@@ -738,6 +738,7 @@ class DebuggingOptions {
     this.port,
     this.webEnableExposeUrl,
     this.webUseSseForDebugProxy = true,
+    this.webUseSseForDebugBackend = true,
     this.webRunHeadless = false,
     this.webBrowserDebugPort,
     this.webEnableExpressionEvaluation = false,
@@ -751,6 +752,7 @@ class DebuggingOptions {
       this.hostname,
       this.webEnableExposeUrl,
       this.webUseSseForDebugProxy = true,
+      this.webUseSseForDebugBackend = true,
       this.webRunHeadless = false,
       this.webBrowserDebugPort,
       this.cacheSkSL = false,
@@ -797,6 +799,7 @@ class DebuggingOptions {
   final String hostname;
   final bool webEnableExposeUrl;
   final bool webUseSseForDebugProxy;
+  final bool webUseSseForDebugBackend;
 
   /// Whether to run the browser in headless mode.
   ///
