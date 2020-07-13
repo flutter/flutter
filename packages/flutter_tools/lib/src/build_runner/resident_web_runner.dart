@@ -448,6 +448,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
           packagesFilePath: packagesFilePath,
           urlTunneller: urlTunneller,
           useSseForDebugProxy: debuggingOptions.webUseSseForDebugProxy,
+          useSseForDebugBackend: debuggingOptions.webUseSseForDebugBackend,
           buildInfo: debuggingOptions.buildInfo,
           enableDwds: _enableDwds,
           entrypoint: globals.fs.file(target).uri,
