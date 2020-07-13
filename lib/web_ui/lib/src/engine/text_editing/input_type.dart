@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 part of engine;
 
 /// Various types of inputs used in text fields.
@@ -14,10 +13,10 @@ part of engine;
 abstract class EngineInputType {
   const EngineInputType();
 
-  static EngineInputType fromName(String name) {
+  static EngineInputType fromName(String name, {bool isDecimal = false}) {
     switch (name) {
       case 'TextInputType.number':
-        return number;
+        return isDecimal ? decimal : number;
       case 'TextInputType.phone':
         return phone;
       case 'TextInputType.emailAddress':
@@ -37,6 +36,9 @@ abstract class EngineInputType {
 
   /// Numeric input type.
   static const NumberInputType number = NumberInputType();
+
+  /// Decimal input type.
+  static const DecimalInputType decimal = DecimalInputType();
 
   /// Phone number input type.
   static const PhoneInputType phone = PhoneInputType();
@@ -89,11 +91,24 @@ class TextInputType extends EngineInputType {
 }
 
 /// Numeric input type.
+///
+/// Input keyboard with only the digits 0–9.
 class NumberInputType extends EngineInputType {
   const NumberInputType();
 
   @override
   final String inputmodeAttribute = 'numeric';
+}
+
+/// Decimal input type.
+///
+/// Input keyboard with containing the digits 0–9 and a decimal separator.
+/// Seperator can be `.`, `,` depending on the locale.
+class DecimalInputType extends EngineInputType {
+  const DecimalInputType();
+
+  @override
+  final String inputmodeAttribute = 'decimal';
 }
 
 /// Phone number input type.
