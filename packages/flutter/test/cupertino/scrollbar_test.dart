@@ -19,6 +19,7 @@ void main() {
   const Duration _kScrollbarTimeToFade = Duration(milliseconds: 1200);
   const Duration _kScrollbarFadeDuration = Duration(milliseconds: 250);
   const Duration _kScrollbarResizeDuration = Duration(milliseconds: 100);
+  const Duration _kLongPressDuration = Duration(milliseconds: 100);
 
   testWidgets('Scrollbar never goes away until finger lift', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -137,10 +138,10 @@ void main() {
       }
     });
 
-    // Longpress on the scrollbar thumb and expect a vibration after it resizes.
+    // Long press on the scrollbar thumb and expect a vibration after it resizes.
     expect(hapticFeedbackCalls, 0);
     final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(796.0, 50.0));
-    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(_kLongPressDuration);
     expect(hapticFeedbackCalls, 0);
     await tester.pump(_kScrollbarResizeDuration);
     // Allow the haptic feedback some slack.
@@ -162,6 +163,63 @@ void main() {
     ));
 
     // Let the thumb fade out so all timers have resolved.
+    await tester.pump(_kScrollbarTimeToFade);
+    await tester.pump(_kScrollbarFadeDuration);
+  });
+
+  testWidgets('Scrollbar changes thickness and radius when dragged', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: PrimaryScrollController(
+            controller: scrollController,
+            child: const CupertinoScrollbar(
+              thickness: 20,
+              thicknessWhileDragging: 40,
+              radius: Radius.circular(10),
+              radiusWhileDragging: Radius.circular(20),
+              child: SingleChildScrollView(child: SizedBox(width: 1600, height: 1200)),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(scrollController.offset, 0.0);
+
+    // Scroll a bit to cause the scrollbar thumb to be shown;
+    // undo the scroll to put the thumb back at the top.
+    const double scrollAmount = 10.0;
+    final TestGesture scrollGesture = await tester.startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
+    await scrollGesture.moveBy(const Offset(0.0, -scrollAmount));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    await scrollGesture.moveBy(const Offset(0.0, scrollAmount));
+    await tester.pump();
+    await scrollGesture.up();
+    await tester.pump();
+
+    // Long press on the scrollbar thumb and expect it to grow
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(780.0, 50.0));
+    await tester.pump(_kLongPressDuration);
+    expect(find.byType(CupertinoScrollbar), paints..rrect(
+      rrect: RRect.fromRectAndRadius(const Rect.fromLTWH(777, 3, 20, 297), const Radius.circular(10)),
+    ));
+    await tester.pump(_kScrollbarResizeDuration ~/ 2);
+    expect(find.byType(CupertinoScrollbar), paints..rrect(
+      rrect: RRect.fromRectAndRadius(const Rect.fromLTWH(767, 3, 30, 297), const Radius.circular(15)),
+    ));
+    await tester.pump(_kScrollbarResizeDuration ~/ 2);
+    expect(find.byType(CupertinoScrollbar), paints..rrect(
+      rrect: RRect.fromRectAndRadius(const Rect.fromLTWH(757, 3, 40, 297), const Radius.circular(20)),
+    ));
+
+    // Let the thumb fade out so all timers have resolved.
+    await dragScrollbarGesture.up();
+    await tester.pumpAndSettle();
     await tester.pump(_kScrollbarTimeToFade);
     await tester.pump(_kScrollbarFadeDuration);
   });
