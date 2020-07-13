@@ -459,7 +459,7 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
 
   @override
   void dispose() {
-    // TODO(goderbauer): add asserts to ensure that object is not used after disposal.
+    assert(_debugAssertNotDisposed());
     _owner?._unregister(this);
     super.dispose();
     _disposed = true;
@@ -469,23 +469,44 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
   RestorationId _id;
   RestorationMixin _owner;
   void _register(RestorationId id, RestorationMixin owner) {
+    assert(_debugAssertNotDisposed());
     assert(id != null);
     assert(owner != null);
     _id = id;
     _owner = owner;
   }
   void _unregister() {
+    assert(_debugAssertNotDisposed());
     _id = null;
     _owner = null;
   }
 
   /// The [State] object that this property is registered with.
   @protected
-  State get state => _owner;
+  State get state {
+    assert(_debugAssertNotDisposed());
+    return _owner;
+  }
 
   /// Whether this property is currently registered with a [RestorationMixin].
   @protected
-  bool get isRegistered => _id != null;
+  bool get isRegistered {
+    assert(_debugAssertNotDisposed());
+    return _id != null;
+  }
+
+  bool _debugAssertNotDisposed() {
+    assert(() {
+      if (_disposed == null) {
+        throw FlutterError(
+            'A $runtimeType was used after being disposed.\n'
+                'Once you have called dispose() on a $runtimeType, it can no longer be used.'
+        );
+      }
+      return true;
+    }());
+    return true;
+  }
 }
 
 /// Manages the restoration data for a [State] object of a [StatefulWidget].

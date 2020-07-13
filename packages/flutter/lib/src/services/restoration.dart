@@ -534,7 +534,10 @@ class RestorationBucket extends ChangeNotifier {
   ///
   /// The value is used in error messages. Accessing the value is only valid
   /// in debug mode, otherwise it will return null.
-  Object get debugOwner => _debugOwner;
+  Object get debugOwner {
+    assert(_debugAssertNotDisposed());
+    return _debugOwner;
+  }
   Object _debugOwner;
 
   RestorationManager _manager;
@@ -545,7 +548,10 @@ class RestorationBucket extends ChangeNotifier {
   /// parent-less).
   ///
   /// This value is never null.
-  RestorationId get id => _id;
+  RestorationId get id {
+    assert(_debugAssertNotDisposed());
+    return _id;
+  }
   RestorationId _id;
 
   Map<dynamic, dynamic> get _rawChildren => _rawData.putIfAbsent(_childrenMapKey, () => <dynamic, dynamic>{}) as Map<dynamic, dynamic>;
@@ -576,6 +582,7 @@ class RestorationBucket extends ChangeNotifier {
   ///
   /// A call to [decommission] must always be followed by a call to [dispose].
   void decommission() {
+    assert(_debugAssertNotDisposed());
     if (_parent != null) {
       _parent._dropChild(this);
       _parent = null;
@@ -605,6 +612,7 @@ class RestorationBucket extends ChangeNotifier {
   ///  * [contains], which checks whether any value is stored under a given
   ///    [RestorationId].
   P read<P>(RestorationId id) {
+    assert(_debugAssertNotDisposed());
     assert(id != null);
     return _rawValues[id.value] as P;
   }
@@ -625,6 +633,7 @@ class RestorationBucket extends ChangeNotifier {
   ///  * [contains], which checks whether any value is stored under a given
   ///    [RestorationId].
   void write<P>(RestorationId id, P value) {
+    assert(_debugAssertNotDisposed());
     assert(id != null);
     assert(debugIsSerializableForRestoration(value));
     if (_rawValues[id.value] != value || !_rawValues.containsKey(id.value)) {
@@ -646,6 +655,7 @@ class RestorationBucket extends ChangeNotifier {
   ///  * [contains], which checks whether any value is stored under a given
   ///    [RestorationId].
   P remove<P>(RestorationId id) {
+    assert(_debugAssertNotDisposed());
     assert(id != null);
     final bool needsUpdate = _rawValues.containsKey(id.value);
     final P result = _rawValues.remove(id.value) as P;
@@ -666,6 +676,7 @@ class RestorationBucket extends ChangeNotifier {
   ///  * [write], which stores a value in the bucket.
   ///  * [remove], which removes a value from the bucket.
   bool contains(RestorationId id) {
+    assert(_debugAssertNotDisposed());
     assert(id != null);
     return _rawValues.containsKey(id.value);
   }
@@ -699,6 +710,7 @@ class RestorationBucket extends ChangeNotifier {
   /// When the returned bucket is no longer needed, it must be [dispose]d to
   /// delete the information stored in it from the app's restoration data.
   RestorationBucket claimChild(RestorationId id, {@required Object debugOwner}) {
+    assert(_debugAssertNotDisposed());
     assert(id != null);
     // There are three cases to consider:
     // 1. Claiming an id that has already been claimed.
@@ -748,6 +760,7 @@ class RestorationBucket extends ChangeNotifier {
   ///
   /// No-op if the provided bucket is already a child of this bucket.
   void adoptChild(RestorationBucket child) {
+    assert(_debugAssertNotDisposed());
     assert(child != null);
     if (child._parent != this) {
       child._parent?._removeChildData(child);
@@ -886,6 +899,7 @@ class RestorationBucket extends ChangeNotifier {
   /// owner has deleted its bucket by calling [dispose], [rename]ed it using
   /// another ID, or has moved it to a new parent via [adoptChild].
   void rename(RestorationId newId) {
+    assert(_debugAssertNotDisposed());
     assert(newId != null);
     assert(_parent != null);
     if (newId == id) {
@@ -910,7 +924,8 @@ class RestorationBucket extends ChangeNotifier {
   /// This method must only be called by the object's owner.
   @override
   void dispose() {
-    // TODO(goderbauer): add asserts to ensure that object is not used after disposal.
+    assert(_debugAssertNotDisposed());
+    _debugDisposed = true;
     _parent?._removeChildData(this);
     _parent = null;
     _updateManager(null);
@@ -922,6 +937,20 @@ class RestorationBucket extends ChangeNotifier {
 
   @override
   String toString() => '${objectRuntimeType(this, 'RestorationBucket')}(id: $id, owner: $debugOwner)';
+
+  bool _debugDisposed = false;
+  bool _debugAssertNotDisposed() {
+    assert(() {
+      if (_debugDisposed == null) {
+        throw FlutterError(
+            'A $runtimeType was used after being disposed.\n'
+            'Once you have called dispose() on a $runtimeType, it can no longer be used.'
+        );
+      }
+      return true;
+    }());
+    return true;
+  }
 }
 
 /// Returns true when the provided `object` is serializable for state
