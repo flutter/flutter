@@ -34,8 +34,8 @@ void main() {
       platform: platform,
       processManager: processManager,
       operatingSystemUtils: null,
-      logger: BufferLogger.test(),
       browserFinder: findChromeExecutable,
+      logger: BufferLogger.test(),
     );
     webValidator = webValidator = ChromeValidator(
       platform: platform,

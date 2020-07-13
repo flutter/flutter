@@ -628,9 +628,9 @@ class BrowserManager {
       browserFinder: findChromeExecutable,
       fileSystem: globals.fs,
       operatingSystemUtils: globals.os,
-      logger: globals.logger,
       platform: globals.platform,
       processManager: globals.processManager,
+      logger: globals.logger,
     );
     final Chromium chrome =
       await chromiumLauncher.launch(url.toString(), headless: headless);
@@ -668,7 +668,7 @@ class BrowserManager {
   /// Loads [_BrowserEnvironment].
   Future<_BrowserEnvironment> _loadBrowserEnvironment() async {
     return _BrowserEnvironment(
-        this, null, _browser.remoteDebuggerUri, _onRestartController.stream);
+        this, null, _browser.chromeConnection.url, _onRestartController.stream);
   }
 
   /// Tells the browser to load a test suite from the URL [url].
