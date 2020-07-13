@@ -308,6 +308,7 @@ class WebDevices extends PollingDeviceDiscovery {
         platform: platform,
         processManager: processManager,
         operatingSystemUtils: operatingSystemUtils,
+        logger: logger,
       ),
     );
     if (platform.isWindows) {
@@ -318,6 +319,7 @@ class WebDevices extends PollingDeviceDiscovery {
           platform: platform,
           processManager: processManager,
           operatingSystemUtils: operatingSystemUtils,
+          logger: logger,
         ),
         processManager: processManager,
         logger: logger,

@@ -91,6 +91,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
             operatingSystemUtils: globals.os,
             platform:  globals.platform,
             processManager: globals.processManager,
+            logger: globals.logger,
           ),
           platform: globals.platform,
         ),

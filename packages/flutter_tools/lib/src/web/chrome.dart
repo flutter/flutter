@@ -11,8 +11,10 @@ import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
+import '../convert.dart';
 
 /// An environment variable used to override the location of Google Chrome.
 const String kChromeEnvironment = 'CHROME_EXECUTABLE';
@@ -103,11 +105,13 @@ class ChromiumLauncher {
     @required ProcessManager processManager,
     @required OperatingSystemUtils operatingSystemUtils,
     @required BrowserFinder browserFinder,
+    @required Logger logger,
   }) : _fileSystem = fileSystem,
        _platform = platform,
        _processManager = processManager,
        _operatingSystemUtils = operatingSystemUtils,
        _browserFinder = browserFinder,
+       _logger = logger,
        _fileSystemUtils = FileSystemUtils(
          fileSystem: fileSystem,
          platform: platform,
@@ -119,6 +123,7 @@ class ChromiumLauncher {
   final OperatingSystemUtils _operatingSystemUtils;
   final BrowserFinder _browserFinder;
   final FileSystemUtils _fileSystemUtils;
+  final Logger _logger;
 
   bool get hasChromeInstance => _currentCompleter.isCompleted;
 
@@ -199,6 +204,26 @@ class ChromiumLauncher {
     ];
 
     final Process process = await _processManager.start(args);
+
+    process.stdout
+      .transform(utf8.decoder)
+      .transform(const LineSplitter())
+      .listen((String line) {
+        _logger.printTrace('[CHROME]: $line');
+      });
+
+    // Wait until the DevTools are listening before trying to connect. This is
+    // only required for flutter_test --platform=chrome and not flutter run.
+    await process.stderr
+      .transform(utf8.decoder)
+      .transform(const LineSplitter())
+      .map((String line) {
+        _logger.printTrace('[CHROME]:$line');
+        return line;
+      })
+      .firstWhere((String line) => line.startsWith('DevTools listening'), orElse: () {
+        return 'Failed to spawn stderr';
+      });
 
     // When the process exits, copy the user settings back to the provided data-dir.
     if (cacheDir != null) {

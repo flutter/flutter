@@ -630,6 +630,7 @@ class BrowserManager {
       operatingSystemUtils: globals.os,
       platform: globals.platform,
       processManager: globals.processManager,
+      logger: globals.logger,
     );
     final Chromium chrome =
       await chromiumLauncher.launch(url.toString(), headless: headless);

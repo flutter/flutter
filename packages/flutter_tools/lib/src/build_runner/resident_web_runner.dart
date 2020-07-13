@@ -633,8 +633,8 @@ class _ResidentWebRunner extends ResidentWebRunner {
         if (hasWebPlugins)
           "import '$generatedImport';",
         '',
-        'typedef _UnaryFunction = Function(List<String> args);',
-        'typedef _NullaryFunction = Function();',
+        'typedef _UnaryFunction = dynamic Function(List<String> args);',
+        'typedef _NullaryFunction = dynamic Function();',
         'Future<void> main() async {',
         if (hasWebPlugins)
           '  registerPlugins(webPluginRegistry);',

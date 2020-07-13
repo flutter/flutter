@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
@@ -52,6 +53,7 @@ void main() {
       processManager: processManager,
       operatingSystemUtils: operatingSystemUtils,
       browserFinder: findChromeExecutable,
+      logger: BufferLogger.test(),
     );
   });
 
