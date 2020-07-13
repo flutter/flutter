@@ -250,6 +250,7 @@ class Switch extends StatefulWidget {
 
 class _SwitchState extends State<Switch> with TickerProviderStateMixin {
   Map<Type, Action<Intent>> _actionMap;
+  final GlobalKey materialRenderSwitchKey = GlobalKey();
 
   @override
   void initState() {
@@ -343,6 +344,10 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
       child: Builder(
         builder: (BuildContext context) {
           return _SwitchRenderObjectWidget(
+            // FocusableActionDetector changes the shape of the tree when the
+            // value of `enabled` changes. Use a GlobalKey to force it to reuse
+            // the existing _RenderSwitch.
+            key: materialRenderSwitchKey,
             dragStartBehavior: widget.dragStartBehavior,
             value: widget.value,
             activeColor: activeThumbColor,
