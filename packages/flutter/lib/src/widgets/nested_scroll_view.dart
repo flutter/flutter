@@ -918,7 +918,9 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   ScrollActivity createInnerBallisticScrollActivity(_NestedScrollPosition position, double velocity) {
     return position.createBallisticScrollActivity(
       position.physics.createBallisticSimulation(
-        _getMetrics(position, velocity),
+        velocity == 0
+          ? position as ScrollMetrics
+          : _getMetrics(position, velocity),
         velocity,
       ),
       mode: _NestedBallisticScrollActivityMode.inner,
@@ -927,8 +929,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
 
   _NestedScrollMetrics _getMetrics(_NestedScrollPosition innerPosition, double velocity) {
     assert(innerPosition != null);
-    double pixels, minRange, maxRange, correctionOffset;
-    double extra = 0.0;
+    double pixels, minRange, maxRange, correctionOffset, extra;
     if (innerPosition.pixels == innerPosition.minScrollExtent) {
       pixels = _outerPosition.pixels.clamp(
         _outerPosition.minScrollExtent,
@@ -973,7 +974,8 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
         if (velocity > 0.0) {
           // shrinking
           extra = _outerPosition.minScrollExtent - _outerPosition.pixels;
-        } else if (velocity < 0.0){
+        } else {
+          assert(velocity < 0.0);
           // growing
           extra = _outerPosition.pixels - (_outerPosition.maxScrollExtent - _outerPosition.minScrollExtent);
         }
