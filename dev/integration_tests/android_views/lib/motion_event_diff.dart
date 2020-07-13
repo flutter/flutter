@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:collection/collection.dart';
-import 'package:flutter/foundation.dart';
 
 // Android MotionEvent actions for which a pointer index is encoded in the
 // unmasked action code.
