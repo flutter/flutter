@@ -516,17 +516,9 @@ void main() {
       ),
     );
 
-    dynamic error;
-
-    try {
-      controller.index = 2;
-      await tester.pumpAndSettle();
-    } catch (e){
-      error = e;
-    }
-
-    expect(error, isNull);
-
+    // This test should finish without crashing.
+    controller.index = 2;
+    await tester.pumpAndSettle();
   });
 
   testWidgets('replaceNamed replaces', (WidgetTester tester) async {
