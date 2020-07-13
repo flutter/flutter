@@ -27,5 +27,5 @@ void main() {
 
   test('flutter run works on web devices with a unary main function', () async {
     await flutter.run(chrome: true);
-  });
+  }, skip: 'Web CI skipped');
 }
