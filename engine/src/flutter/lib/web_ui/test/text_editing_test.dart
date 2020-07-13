@@ -572,12 +572,14 @@ void main() {
     /// the keyboard.
     ///
     /// Returns the `clientId` used in the platform message.
-    int showKeyboard({String inputType, String inputAction}) {
+    int showKeyboard(
+        {String inputType, String inputAction, bool decimal = false}) {
       final MethodCall setClient = MethodCall(
         'TextInput.setClient',
         <dynamic>[
           ++clientId,
-          createFlutterConfig(inputType, inputAction: inputAction),
+          createFlutterConfig(inputType,
+              inputAction: inputAction, decimal: decimal),
         ],
       );
       sendFrameworkMessage(codec.encodeMethodCall(setClient));
@@ -867,8 +869,7 @@ void main() {
       expect(document.getElementsByTagName('form'), isEmpty);
     });
 
-    test(
-        'No capitilization: setClient, setEditingState, show', () {
+    test('No capitilization: setClient, setEditingState, show', () {
       // Create a configuration with an AutofillGroup of four text fields.
       final Map<String, dynamic> capitilizeWordsConfig = createFlutterConfig(
           'text',
@@ -908,8 +909,7 @@ void main() {
       hideKeyboard();
     });
 
-    test(
-        'All characters capitilization: setClient, setEditingState, show', () {
+    test('All characters capitilization: setClient, setEditingState, show', () {
       // Create a configuration with an AutofillGroup of four text fields.
       final Map<String, dynamic> capitilizeWordsConfig = createFlutterConfig(
           'text',
@@ -1356,6 +1356,12 @@ void main() {
       showKeyboard(inputType: 'number');
       expect(getEditingInputMode(), 'numeric');
 
+      showKeyboard(inputType: 'number', decimal: false);
+      expect(getEditingInputMode(), 'numeric');
+
+      showKeyboard(inputType: 'number', decimal: true);
+      expect(getEditingInputMode(), 'decimal');
+
       showKeyboard(inputType: 'phone');
       expect(getEditingInputMode(), 'tel');
 
@@ -1369,29 +1375,36 @@ void main() {
     });
 
     test('sets correct input type in iOS', () {
-      debugOperatingSystemOverride = OperatingSystem.iOs;
-      debugBrowserEngineOverride = BrowserEngine.webkit;
+      // Test on ios-safari only.
+      if (browserEngine == BrowserEngine.webkit &&
+          operatingSystem == OperatingSystem.iOs) {
+        /// During initialization [HybridTextEditing] will pick the correct
+        /// text editing strategy for [OperatingSystem.iOs].
+        textEditing = HybridTextEditing();
 
-      /// During initialization [HybridTextEditing] will pick the correct
-      /// text editing strategy for [OperatingSystem.iOs].
-      textEditing = HybridTextEditing();
+        showKeyboard(inputType: 'text');
+        expect(getEditingInputMode(), 'text');
 
-      showKeyboard(inputType: 'text');
-      expect(getEditingInputMode(), 'text');
+        showKeyboard(inputType: 'number');
+        expect(getEditingInputMode(), 'numeric');
 
-      showKeyboard(inputType: 'number');
-      expect(getEditingInputMode(), 'numeric');
+        showKeyboard(inputType: 'number', decimal: false);
+        expect(getEditingInputMode(), 'numeric');
 
-      showKeyboard(inputType: 'phone');
-      expect(getEditingInputMode(), 'tel');
+        showKeyboard(inputType: 'number', decimal: true);
+        expect(getEditingInputMode(), 'decimal');
 
-      showKeyboard(inputType: 'emailAddress');
-      expect(getEditingInputMode(), 'email');
+        showKeyboard(inputType: 'phone');
+        expect(getEditingInputMode(), 'tel');
 
-      showKeyboard(inputType: 'url');
-      expect(getEditingInputMode(), 'url');
+        showKeyboard(inputType: 'emailAddress');
+        expect(getEditingInputMode(), 'email');
 
-      hideKeyboard();
+        showKeyboard(inputType: 'url');
+        expect(getEditingInputMode(), 'url');
+
+        hideKeyboard();
+      }
     });
 
     test('sends the correct input action as a platform message', () {
@@ -1798,10 +1811,12 @@ Map<String, dynamic> createFlutterConfig(
   String inputAction,
   String autofillHint,
   List<String> autofillHintsForFields,
+  bool decimal = false,
 }) {
   return <String, dynamic>{
-    'inputType': <String, String>{
+    'inputType': <String, dynamic>{
       'name': 'TextInputType.$inputType',
+      if (decimal) 'decimal': true,
     },
     'obscureText': obscureText,
     'autocorrect': autocorrect,

@@ -435,7 +435,9 @@ class InputConfiguration {
   InputConfiguration.fromFrameworkMessage(
       Map<String, dynamic> flutterInputConfiguration)
       : inputType = EngineInputType.fromName(
-            flutterInputConfiguration['inputType']['name']),
+            flutterInputConfiguration['inputType']['name'],
+            isDecimal:
+                flutterInputConfiguration['inputType']['decimal'] ?? false),
         inputAction = flutterInputConfiguration['inputAction'],
         obscureText = flutterInputConfiguration['obscureText'],
         autocorrect = flutterInputConfiguration['autocorrect'],
