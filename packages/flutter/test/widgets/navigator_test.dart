@@ -489,6 +489,38 @@ void main() {
     expect(observations[2].previous, '/A');
   });
 
+  testWidgets('Route didAdd and dispose in same frame work', (WidgetTester tester) async {
+    // Regression Test for https://github.com/flutter/flutter/issues/61346.
+    Widget buildNavigator() {
+      return Navigator(
+        pages: <Page<void>>[
+          MaterialPage<void>(
+            builder: (BuildContext context) => const Placeholder(),
+          )
+        ],
+        onPopPage: (Route<dynamic> route, dynamic result) => false,
+      );
+    }
+    final TabController controller = TabController(length: 3, vsync: tester);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: TabBarView(
+          controller: controller,
+          children: <Widget>[
+            buildNavigator(),
+            buildNavigator(),
+            buildNavigator(),
+          ],
+        )
+      ),
+    );
+
+    // This test should finish without crashing.
+    controller.index = 2;
+    await tester.pumpAndSettle();
+  });
+
   testWidgets('replaceNamed replaces', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/' : (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushReplacementNamed(context, '/A'); }),

@@ -213,7 +213,11 @@ abstract class Route<T> {
     // focused child can only be attached to navigator after initState which
     // will be guarded by the asynchronous gap.
     TickerFuture.complete().then<void>((void _) {
-      navigator.focusScopeNode.requestFocus();
+      // The route can be disposed before the ticker future completes. This can
+      // happen when the navigator is under a TabView that does a warping. The
+      // navigator will be null in this case, and we have to do a null-safe
+      // operation.
+      navigator?.focusScopeNode?.requestFocus();
     });
   }
 
