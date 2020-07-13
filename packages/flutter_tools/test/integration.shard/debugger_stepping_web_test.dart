@@ -47,7 +47,7 @@ void main() {
         reason: 'After $i steps, debugger should stop at $expectedLine but stopped at $actualLine'
       );
     }
-  }, skip: true); // This test is incredibly flaky on Cirrus
+  }, skip: !Platform.isLinux);
 
   tearDown(() async {
     await flutter.stop();

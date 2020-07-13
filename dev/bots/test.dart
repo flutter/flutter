@@ -331,6 +331,7 @@ Future<void> _runToolTests() async {
           toolsPath,
           testPaths: <String>[path.join(kTest, '$subshard$kDotShard', suffix)],
           enableFlutterToolAsserts: true,
+          forceSingleCore: subshard == 'integration' && Platform.isLinux,
         );
       }
     },
