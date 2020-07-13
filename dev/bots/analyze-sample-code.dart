@@ -538,7 +538,7 @@ linter:
         stderr.removeLast();
       }
     }
-    if (stderr.isNotEmpty && stdout.first == 'Building flutter tool...') {
+    if (stderr.isNotEmpty && stderr.first == 'Building flutter tool...') {
       stderr.removeAt(0);
     }
     if (stderr.isNotEmpty && stderr.first.startsWith('Running "flutter pub get" in ')) {
