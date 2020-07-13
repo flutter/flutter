@@ -544,9 +544,6 @@ linter:
     if (stdout.isNotEmpty && stdout.first.startsWith('Running "flutter pub get" in ')) {
       stdout.removeAt(0);
     }
-    if (stderr.isNotEmpty) {
-      throw 'Cannot analyze dartdocs; unexpected error output:\n$stderr';
-    }
     _exitCode = result.exitCode;
     return stdout;
   }
