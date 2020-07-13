@@ -666,16 +666,8 @@ class BrowserManager {
 
   /// Loads [_BrowserEnvironment].
   Future<_BrowserEnvironment> _loadBrowserEnvironment() async {
-    final Uri debugUri = await _browser.debuggerUri;
-    final Uri uri =  Uri(
-      scheme: 'http',
-      host: debugUri.host,
-      port: debugUri.port,
-      path: '/devtools/inspector',
-      query: 'ws=${debugUri.host}:${debugUri.port}${debugUri.path}',
-    );
     return _BrowserEnvironment(
-        this, null, uri, _onRestartController.stream);
+        this, null, _browser.chromeConnection.url, _onRestartController.stream);
   }
 
   /// Tells the browser to load a test suite from the URL [url].
