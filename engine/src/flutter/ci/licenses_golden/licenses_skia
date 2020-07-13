@@ -1,4 +1,4 @@
-Signature: 0aa7cb5daa8f645a0a833f1f1ab94c18
+Signature: 4459bbc572fdff16340868bbea18eb1d
 
 UNUSED LICENSES:
 
@@ -4134,7 +4134,6 @@ FILE: ../../../third_party/skia/docs/examples/Bitmap_installPixels_3.cpp
 FILE: ../../../third_party/skia/docs/examples/Bitmap_isImmutable.cpp
 FILE: ../../../third_party/skia/docs/examples/Bitmap_isNull.cpp
 FILE: ../../../third_party/skia/docs/examples/Bitmap_isOpaque.cpp
-FILE: ../../../third_party/skia/docs/examples/Bitmap_isVolatile.cpp
 FILE: ../../../third_party/skia/docs/examples/Bitmap_move_SkBitmap.cpp
 FILE: ../../../third_party/skia/docs/examples/Bitmap_move_operator.cpp
 FILE: ../../../third_party/skia/docs/examples/Bitmap_notifyPixelsChanged.cpp
@@ -4153,7 +4152,6 @@ FILE: ../../../third_party/skia/docs/examples/Bitmap_rowBytesAsPixels.cpp
 FILE: ../../../third_party/skia/docs/examples/Bitmap_setAlphaType.cpp
 FILE: ../../../third_party/skia/docs/examples/Bitmap_setImmutable.cpp
 FILE: ../../../third_party/skia/docs/examples/Bitmap_setInfo.cpp
-FILE: ../../../third_party/skia/docs/examples/Bitmap_setIsVolatile.cpp
 FILE: ../../../third_party/skia/docs/examples/Bitmap_setPixelRef.cpp
 FILE: ../../../third_party/skia/docs/examples/Bitmap_setPixels.cpp
 FILE: ../../../third_party/skia/docs/examples/Bitmap_shiftPerPixel.cpp
