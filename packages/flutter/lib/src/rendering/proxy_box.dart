@@ -638,7 +638,7 @@ class RenderIntrinsicWidth extends RenderProxyBox {
   @override
   void performLayout() {
     if (child != null) {
-      BoxConstraints childConstraints = constraints;
+      BoxConstraints childConstraints = constraints.copyWith(minWidth: 0);
       if (!childConstraints.hasTightWidth) {
         final double width = child.getMaxIntrinsicWidth(childConstraints.maxHeight);
         assert(width.isFinite);
@@ -650,7 +650,7 @@ class RenderIntrinsicWidth extends RenderProxyBox {
         childConstraints = childConstraints.tighten(height: _applyStep(height, _stepHeight));
       }
       child.layout(childConstraints, parentUsesSize: true);
-      size = child.size;
+      size = constraints.constrain(child.size);
     } else {
       performResize();
     }
@@ -708,14 +708,14 @@ class RenderIntrinsicHeight extends RenderProxyBox {
   @override
   void performLayout() {
     if (child != null) {
-      BoxConstraints childConstraints = constraints;
+      BoxConstraints childConstraints = constraints.copyWith(minHeight: 0);
       if (!childConstraints.hasTightHeight) {
         final double height = child.getMaxIntrinsicHeight(childConstraints.maxWidth);
         assert(height.isFinite);
         childConstraints = childConstraints.tighten(height: height);
       }
       child.layout(childConstraints, parentUsesSize: true);
-      size = child.size;
+      size = constraints.constrain(child.size);
     } else {
       performResize();
     }
