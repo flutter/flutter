@@ -194,6 +194,7 @@ echo "$(date) START:flutter_runner_tests ----------------------------"
     -f flutter_aot_runner-0.far    \
     -f flutter_runner_scenic_tests-0.far  \
     -t flutter_runner_scenic_tests \
+    -a "--gtest_filter=-SessionConnectionTest.*:CalculateNextLatchPointTest.*" \
     --identity-file $pkey \
     --timeout-seconds $test_timeout_seconds \
     --packages-directory packages
