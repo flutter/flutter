@@ -340,7 +340,7 @@ void drawSkShadow(
       canvasKit.callMethod('computeTonalColors', <js.JsObject>[inTonalColors]);
 
   skCanvas.callMethod('drawShadow', <dynamic>[
-    path._skPath,
+    path._legacyJsObject,
     js.JsArray<double>.from(<double>[0, 0, devicePixelRatio * elevation]),
     js.JsArray<double>.from(
         <double>[shadowX, shadowY, devicePixelRatio * kLightHeight]),
