@@ -48,7 +48,7 @@ void main() {
     // the default to ensure the hot reloads that are supposed to arrive within the
     // debounce period will even on slower CI machines.
     const int hotReloadDebounceOverrideMs = 250;
-    const Duration delay = Duration(milliseconds: hotReloadDebounceOverrideMs + 10);
+    const Duration delay = Duration(milliseconds: hotReloadDebounceOverrideMs * 2);
 
     Future<void> doReload([void _]) =>
         _flutter.hotReload(debounce: true, debounceDurationOverrideMs: hotReloadDebounceOverrideMs);
