@@ -54,19 +54,6 @@ void main() {
     expect(find.text('Delete'), findsNothing);
   });
 
-  testWidgets('Alert dialog Default actions test', (WidgetTester tester) async {
-
-    await tester.pumpWidget(
-      createAppWithButtonThatLaunchesDialog(
-        dialogBuilder: (BuildContext context) {
-          return const CupertinoAlertDialog(
-            title: Text('The title'),
-            content: Text('The content'),
-          );
-        },
-      ),
-    );
-  });
 
   testWidgets('Dialog not barrier dismissible by default', (WidgetTester tester) async {
     await tester.pumpWidget(createAppWithCenteredButton(const Text('Go')));
@@ -496,7 +483,7 @@ void main() {
         equals(tester.getSize(find.widgetWithText(CupertinoDialogAction, 'Two')).height));
   });
 
-  testWidgets('Button section is empty, Title section is not empty.', (WidgetTester tester) async {
+  testWidgets('Button section is not empty, Title section is not empty.', (WidgetTester tester) async {
     const double textScaleFactor = 1.0;
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
@@ -518,23 +505,9 @@ void main() {
 
     await tester.pump();
 
-    // Check that there's no button action section.
-    expect(scrollController.offset, 0.0);
-    expect(find.widgetWithText(CupertinoDialogAction, 'One'), findsNothing);
+    // Check that there's a button action section. By default OK button is created
+    expect(find.widgetWithText(CupertinoDialogAction, 'OK'),findsOneWidget);
 
-    // Check that the dialog size is the same as the content section size. This
-    // ensures that an empty button section doesn't accidentally render some
-    // empty space in the dialog.
-    final Finder contentSectionFinder = find.byElementPredicate((Element element) {
-      return element.widget.runtimeType.toString() == '_CupertinoAlertContentSection';
-    });
-
-    final Finder modalBoundaryFinder = find.byType(ClipRRect);
-
-    expect(
-      tester.getSize(contentSectionFinder),
-      tester.getSize(modalBoundaryFinder),
-    );
   });
 
   testWidgets('Actions section height for 1 button is height of button.', (WidgetTester tester) async {
