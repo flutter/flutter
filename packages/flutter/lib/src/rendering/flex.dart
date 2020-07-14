@@ -185,8 +185,16 @@ enum CrossAxisAlignment {
 
   /// Place the children along the cross axis such that their baselines match.
   ///
-  /// If the main axis is vertical, then this value is treated like [start]
-  /// (since baselines are always horizontal).
+  /// Because baselines are always horizontal, this alignment is intended for
+  /// horizontal main axes. If the main axis is vertical, then this value is
+  /// treated like [start].
+  ///
+  /// For horizontal main axes, if the minimum height constraint passed to the
+  /// flex layout exceeds the intrinsic height of the cross axis, children will
+  /// be aligned as close to the top as they can be while honoring the baseline
+  /// alignment. In other words, the extra space will be below all the children.
+  ///
+  /// Children who report no baseline will be top-aligned.
   baseline,
 }
 
@@ -744,12 +752,10 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
         if (crossAxisAlignment == CrossAxisAlignment.stretch) {
           switch (_direction) {
             case Axis.horizontal:
-              innerConstraints = BoxConstraints(minHeight: constraints.maxHeight,
-                                                    maxHeight: constraints.maxHeight);
+              innerConstraints = BoxConstraints.tightFor(height: constraints.maxHeight);
               break;
             case Axis.vertical:
-              innerConstraints = BoxConstraints(minWidth: constraints.maxWidth,
-                                                    maxWidth: constraints.maxWidth);
+              innerConstraints = BoxConstraints.tightFor(width: constraints.maxWidth);
               break;
           }
         } else {

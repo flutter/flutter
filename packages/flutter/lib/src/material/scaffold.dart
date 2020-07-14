@@ -1674,6 +1674,26 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// animation), use [removeCurrentSnackBar].
   ///
   /// See [Scaffold.of] for information about how to obtain the [ScaffoldState].
+  ///
+  /// {@tool dartpad --template=stateless_widget_scaffold_center}
+  ///
+  /// Here is an example of showing a [SnackBar] when the user presses a button.
+  ///
+  /// ```dart
+  ///   Widget build(BuildContext context) {
+  ///     return OutlineButton(
+  ///       onPressed: () {
+  ///         Scaffold.of(context).showSnackBar(
+  ///           SnackBar(
+  ///             content: Text('A SnackBar has been shown.'),
+  ///           ),
+  ///         );
+  ///       },
+  ///       child: Text('Show SnackBar'),
+  ///     );
+  ///   }
+  /// ```
+  /// {@end-tool}
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(SnackBar snackbar) {
     _snackBarController ??= SnackBar.createAnimationController(vsync: this)
       ..addStatusListener(_handleSnackBarStatusChange);
