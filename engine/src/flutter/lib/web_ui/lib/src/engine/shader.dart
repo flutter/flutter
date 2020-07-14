@@ -158,11 +158,10 @@ class GradientLinear extends EngineGradient {
   SkShader createSkiaShader() {
     assert(experimentalUseSkia);
 
-    var jsColors = makeColorList(colors);
     return canvasKitJs.SkShader.MakeLinearGradient(
       toSkPoint(from),
       toSkPoint(to),
-      jsColors,
+      toSkIntColorList(colors),
       toSkColorStops(colorStops),
       toSkTileMode(tileMode),
     );

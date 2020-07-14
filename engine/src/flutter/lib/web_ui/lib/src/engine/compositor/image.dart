@@ -54,7 +54,8 @@ class CkAnimatedImage implements ui.Image {
 
 /// A [ui.Image] backed by an `SkImage` from Skia.
 class CkImage implements ui.Image {
-  SkImage skImage;
+  final SkImage skImage;
+  late final js.JsObject legacyJsObject = _jsObjectWrapper.wrapSkImage(skImage);
 
   CkImage(this.skImage);
 
