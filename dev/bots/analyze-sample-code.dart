@@ -538,11 +538,8 @@ linter:
         stderr.removeLast();
       }
     }
-    if (stderr.isNotEmpty) {
-      throw 'Cannot analyze dartdocs; unexpected error output:\n$stderr';
-    }
-    if (stdout.isNotEmpty && stdout.first == 'Building flutter tool...') {
-      stdout.removeAt(0);
+    if (stderr.isNotEmpty && stderr.first == 'Building flutter tool...') {
+      stderr.removeAt(0);
     }
     if (stdout.isNotEmpty && stdout.first.startsWith('Running "flutter pub get" in ')) {
       stdout.removeAt(0);
