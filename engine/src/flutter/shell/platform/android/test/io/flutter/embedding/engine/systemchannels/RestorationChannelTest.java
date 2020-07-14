@@ -11,6 +11,8 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import android.annotation.TargetApi;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
+import java.util.HashMap;
+import java.util.Map;
 import org.json.JSONException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,12 +53,15 @@ public class RestorationChannelTest {
 
     restorationChannel.setRestorationData(data);
     verify(rawChannel, times(0)).invokeMethod(any(), any());
-    verify(result).success(data);
+    Map<String, Object> expected = new HashMap<>();
+    expected.put("enabled", true);
+    expected.put("data", data);
+    verify(result).success(expected);
 
     // Next get request is answered right away.
     MethodChannel.Result result2 = mock(MethodChannel.Result.class);
     argumentCaptor.getValue().onMethodCall(new MethodCall("get", null), result2);
-    verify(result2).success(data);
+    verify(result2).success(expected);
   }
 
   @Test
@@ -72,14 +77,20 @@ public class RestorationChannelTest {
 
     MethodChannel.Result result = mock(MethodChannel.Result.class);
     argumentCaptor.getValue().onMethodCall(new MethodCall("get", null), result);
-    verify(result).success(null);
+    Map<String, Object> expected = new HashMap<>();
+    expected.put("enabled", true);
+    expected.put("data", null);
+    verify(result).success(expected);
 
     restorationChannel.setRestorationData(data);
     assertEquals(restorationChannel.getRestorationData(), null);
 
     ArgumentCaptor<MethodChannel.Result> resultCapture =
         ArgumentCaptor.forClass(MethodChannel.Result.class);
-    verify(rawChannel).invokeMethod(eq("push"), eq(data), resultCapture.capture());
+    Map<String, Object> expected2 = new HashMap<>();
+    expected2.put("enabled", true);
+    expected2.put("data", data);
+    verify(rawChannel).invokeMethod(eq("push"), eq(expected2), resultCapture.capture());
     resultCapture.getValue().success(null);
     assertEquals(restorationChannel.getRestorationData(), data);
   }
