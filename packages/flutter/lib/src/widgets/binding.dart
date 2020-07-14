@@ -419,6 +419,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         name: 'fastReassemble',
         callback: (Map<String, Object> params) async {
           final FastReassemblePredicate fastReassemblePredicate = _debugFastReassembleMethod;
+          _debugFastReassembleMethod = null;
           if (fastReassemblePredicate == null) {
             throw FlutterError('debugFastReassembleMethod must be set to use fastReassemble.');
           }
@@ -433,7 +434,6 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
           }
           markElementsDirty(renderViewElement);
           await endOfFrame;
-          _debugFastReassembleMethod = null;
           return <String, String>{'type': 'Success'};
         },
       );
