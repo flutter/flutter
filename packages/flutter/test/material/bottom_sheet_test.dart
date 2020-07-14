@@ -696,6 +696,38 @@ void main() {
     // the BottomNavigationBar.
     expect(tester.getBottomLeft(find.byType(BottomSheet)).dy, 600.0);
   });
+
+  testWidgets('Verify that route settings can be set in the showModalBottomSheet',
+      (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    const RouteSettings routeSettings =
+        RouteSettings(name: 'route_name', arguments: 'route_argument');
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        key: scaffoldKey,
+        body: const Center(child: Text('body')),
+      ),
+    ));
+
+    RouteSettings retrievedRouteSettings;
+
+    showModalBottomSheet<void>(
+      context: scaffoldKey.currentContext,
+      routeSettings: routeSettings,
+      builder: (BuildContext context) {
+        retrievedRouteSettings = ModalRoute.of(context).settings;
+        return Container(
+          child: const Text('BottomSheet'),
+        );
+      },
+    );
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(retrievedRouteSettings, routeSettings);
+  });
 }
 
 class _TestPage extends StatelessWidget {
