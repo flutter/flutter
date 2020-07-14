@@ -742,6 +742,6 @@ void main() {
   });
 
   test('Service extensions - fastReassemble', () async {
-    expect(binding.testExtension('fastReassemble', <String, String>{'class': 'Foo'}), throwsA(isA<FlutterError>()));
+    expect(binding.testExtension('fastReassemble', <String, String>{}), throwsA(isA<FlutterError>()));
   });
 }

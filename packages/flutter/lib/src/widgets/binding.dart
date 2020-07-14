@@ -22,12 +22,6 @@ import 'widget_inspector.dart';
 
 export 'dart:ui' show AppLifecycleState, Locale;
 
-/// Debug-only functionality used to perform faster hot reloads.
-///
-/// This field is set by expression evaluation in the flutter tool and is
-/// used to invalidate specific types of elements.
-bool Function(Object) _debugFastReassembleMethod;
-
 /// Interface for classes that register with the Widgets layer binding.
 ///
 /// When used as a mixin, provides no-op method implementations.
@@ -438,6 +432,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
           }
           markElementsDirty(renderViewElement);
           await endOfFrame;
+          _debugFastReassembleMethod = null;
           return <String, String>{'type': 'Success'};
         },
       );
@@ -1032,6 +1027,18 @@ void runApp(Widget app) {
     ..scheduleAttachRootWidget(app)
     ..scheduleWarmUpFrame();
 }
+
+/// Debug-only functionality used to perform faster hot reloads.
+///
+/// This field is set by expression evaluation in the flutter tool and is
+/// used to invalidate specific types of elements.
+set debugFastReassembleMethod(bool Function(Object) cb) {
+  assert(() {
+    _debugFastReassembleMethod = cb;
+    return true;
+  }());
+}
+bool Function(Object) _debugFastReassembleMethod;
 
 /// Print a string representation of the currently running app.
 void debugDumpApp() {

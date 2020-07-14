@@ -60,22 +60,42 @@ void main() {
       // Since the single-widget reload feature is not yet implemented, manually
       // evaluate the expression for the reload.
       final Isolate isolate = await waitForExtension(vmService);
-      final LibraryRef actualRef = isolate.libraries.firstWhere((LibraryRef libraryRef) {
-        return libraryRef.uri == 'package:flutter/src/widgets/binding.dart';
+      final LibraryRef targetRef = isolate.libraries.firstWhere((LibraryRef libraryRef) {
+        return libraryRef.uri == 'package:test/main.dart';
       });
-      final Response response = await vmService.evaluate(
+      await vmService.evaluate(
         isolate.id,
-        actualRef.id,
-        '((){_debugFastReassembleMethod=(Object _) => _ is MyApp})()',
+        targetRef.id,
+        '((){debugFastReassembleMethod=(Object _) => _ is MyApp})()',
       );
-      // null indicates success.
-      expect(response, null);
 
-      final Response fastReassemble = await vmService
+      final Response fastReassemble1 = await vmService
         .callServiceExtension('ext.flutter.fastReassemble', isolateId: isolate.id);
 
       // _extensionType indicates success.
-      expect(fastReassemble.type, '_extensionType');
+      expect(fastReassemble1.type, '_extensionType');
+      expect(stdout.toString(), contains('(((TICK 2))))'));
+
+      // verify evaluation did not produce invalidate type by checking with dart:core
+      // type.
+      await vmService.evaluate(
+        isolate.id,
+        targetRef.id,
+        '((){debugFastReassembleMethod=(Object _) => _ is bool})()',
+      );
+
+      final Response fastReassemble2 = await vmService
+        .callServiceExtension('ext.flutter.fastReassemble', isolateId: isolate.id);
+
+      // _extensionType indicates success.
+      expect(fastReassemble2.type, '_extensionType');
+      expect(stdout.toString(), isNot(contains('(((TICK 3))))')));
+
+      // Invocation without evaluation leads to runtime error.
+      expect(vmService
+        .callServiceExtension('ext.flutter.fastReassemble', isolateId: isolate.id),
+        throwsA(isA<Exception>())
+      );
     } finally {
       await subscription.cancel();
     }
