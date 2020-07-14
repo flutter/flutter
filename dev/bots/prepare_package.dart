@@ -347,7 +347,6 @@ class ArchiveCreator {
   /// is configured for the user to begin working.
   Future<void> _populateCaches() async {
     await _runFlutter(<String>['doctor']);
-    await _runFlutter(<String>['update-packages']);
     await _runFlutter(<String>['precache']);
     await _runFlutter(<String>['ide-config']);
 
