@@ -218,7 +218,7 @@ abstract class Route<T> {
       // another, non-adjacent tab, with an animation. The TabView reorders its
       // children before and after the warping completes, and that causes its
       // children to be built and disposed within the same frame. If one of its
-      // children contains a navigator, the routes in that navigator is also
+      // children contains a navigator, the routes in that navigator are also
       // added and disposed within that frame.
       //
       // Since the reference to the navigator will be set to null after it is
