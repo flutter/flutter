@@ -355,21 +355,6 @@ void main() {
       queue = DebounceOperationQueue<int, String>();
     });
 
-    /// Runs a callback using FakeAsync.run while continually pumping the
-    /// microtask queue. This avoids a deadlock when tests `await` a Future
-    /// which queues a microtask that will not be processed unless the queue
-    /// is flushed.
-    Future<T> runFakeAsync<T>(Future<T> Function(FakeAsync time) f) async {
-      return FakeAsync().run((FakeAsync time) async {
-        bool pump = true;
-        final Future<T> future = f(time).whenComplete(() => pump = false);
-        while (pump) {
-          time.flushMicrotasks();
-        }
-        return future;
-      }) as Future<T>;
-    }
-
     testWithoutContext(
         'debounces/merges same operation type and returns same result',
         () async {
