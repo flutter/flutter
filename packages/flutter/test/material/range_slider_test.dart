@@ -13,6 +13,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
+import '../widgets/semantics_tester.dart';
 
 void main() {
   testWidgets('Range Slider can move when tapped (continuous LTR)', (WidgetTester tester) async {
@@ -1739,6 +1740,86 @@ void main() {
           ..circle()
           ..circle(color: sliderTheme.overlappingShapeStrokeColor)
           ..circle()
+    );
+  });
+
+  testWidgets('Range Slider Semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+        MaterialApp(
+          home: Theme(
+            data: ThemeData.light(),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: MediaQuery(
+                data: MediaQueryData.fromWindow(window),
+                child: Material(
+                  child: RangeSlider(
+                    values: const RangeValues(10.0, 100.0),
+                    min: 0.0,
+                    max: 100.0,
+                    onChanged: (RangeValues v) { },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        )
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              id: 3,
+              textDirection: TextDirection.ltr,
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 4,
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      id: 5,
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          id: 6,
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              id: 1,
+                              flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled],
+                              actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
+                              value: '10%',
+                              increasedValue: '15%',
+                              decreasedValue: '5%',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              id: 2,
+                              flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled],
+                              actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
+                              value: '100%',
+                              increasedValue: '100%',
+                              decreasedValue: '95%',
+                              textDirection: TextDirection.ltr,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
     );
   });
 

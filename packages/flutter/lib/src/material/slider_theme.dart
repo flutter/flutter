@@ -3307,12 +3307,13 @@ class _PaddleSliderValueIndicatorPathPainter {
   }
 }
 
-/// A callback that formats the numeric values from a [RangeSlider] widget.
+/// A callback that formats a numeric value from a [Slider] or [RangerSlider] widget.
 ///
 /// See also:
 ///
+///  * [Slider.semanticFormatterCallback], which shows an example use case.
 ///  * [RangeSlider.semanticFormatterCallback], which shows an example use case.
-typedef RangeSemanticFormatterCallback = String Function(RangeValues values);
+typedef SemanticFormatterCallback = String Function(double value);
 
 /// Decides which thumbs (if any) should be selected.
 ///

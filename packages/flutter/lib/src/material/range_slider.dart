@@ -365,13 +365,13 @@ class RangeSlider extends StatefulWidget {
   ///       _dollarsRange = newValues;
   ///     });
   ///   },
-  ///   semanticFormatterCallback: (RangeValues rangeValues) {
-  ///     return '${rangeValues.start.round()} - ${rangeValues.end.round()} dollars';
+  ///   semanticFormatterCallback: (double newValue) {
+  ///     return '${newValue.round()} dollars';
   ///   }
   ///  )
   /// ```
   /// {@end-tool}
-  final RangeSemanticFormatterCallback semanticFormatterCallback;
+  final SemanticFormatterCallback semanticFormatterCallback;
 
   // Touch width for the tap boundary of the slider thumbs.
   static const double _minTouchTargetWidth = kMinInteractiveDimension;
@@ -394,7 +394,7 @@ class RangeSlider extends StatefulWidget {
     properties.add(StringProperty('labelEnd', labels?.end));
     properties.add(ColorProperty('activeColor', activeColor));
     properties.add(ColorProperty('inactiveColor', inactiveColor));
-    properties.add(ObjectFlagProperty<ValueChanged<RangeValues>>.has('semanticFormatterCallback', semanticFormatterCallback));
+    properties.add(ObjectFlagProperty<ValueChanged<double>>.has('semanticFormatterCallback', semanticFormatterCallback));
   }
 }
 
@@ -703,7 +703,7 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
   final ValueChanged<RangeValues> onChanged;
   final ValueChanged<RangeValues> onChangeStart;
   final ValueChanged<RangeValues> onChangeEnd;
-  final RangeSemanticFormatterCallback semanticFormatterCallback;
+  final SemanticFormatterCallback semanticFormatterCallback;
   final _RangeSliderState state;
 
   @override
@@ -756,7 +756,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     Size screenSize,
     TargetPlatform platform,
     ValueChanged<RangeValues> onChanged,
-    RangeSemanticFormatterCallback semanticFormatterCallback,
+    SemanticFormatterCallback semanticFormatterCallback,
     this.onChangeStart,
     this.onChangeEnd,
     @required _RangeSliderState state,
@@ -858,6 +858,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
 
   bool get isDiscrete => divisions != null && divisions > 0;
 
+  double get minThumbSeparationValue => isDiscrete ? 0 : sliderTheme.minThumbSeparation / _trackRect.width;
+
   RangeValues get values => _values;
   RangeValues _values;
   set values(RangeValues newValues) {
@@ -897,9 +899,9 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     markNeedsSemanticsUpdate();
   }
 
-  RangeSemanticFormatterCallback _semanticFormatterCallback;
-  RangeSemanticFormatterCallback get semanticFormatterCallback => _semanticFormatterCallback;
-  set semanticFormatterCallback(RangeSemanticFormatterCallback value) {
+  SemanticFormatterCallback _semanticFormatterCallback;
+  SemanticFormatterCallback get semanticFormatterCallback => _semanticFormatterCallback;
+  set semanticFormatterCallback(SemanticFormatterCallback value) {
     if (_semanticFormatterCallback == value)
       return;
     _semanticFormatterCallback = value;
@@ -1189,7 +1191,6 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       }
       final double currentDragValue = _discretize(dragValue);
 
-      final double minThumbSeparationValue = isDiscrete ? 0 : sliderTheme.minThumbSeparation / _trackRect.width;
       if (_lastThumbSelection == Thumb.start) {
         _newValues = RangeValues(math.min(currentDragValue, currentValues.end - minThumbSeparationValue), currentValues.end);
       } else if (_lastThumbSelection == Thumb.end) {
@@ -1513,37 +1514,93 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     );
   }
 
+  /// Describe the semantics of the start thumb.
+  SemanticsNode _startSemanticsNode = SemanticsNode();
+
+  /// Describe the semantics of the end thumb.
+  SemanticsNode _endSemanticsNode = SemanticsNode();
+
+  // Create the semantics configuration for a single value.
+  SemanticsConfiguration _createSemanticsConfiguration(
+      double value,
+      String label,
+      VoidCallback increaseAction,
+      VoidCallback decreaseAction,
+  ) {
+    final SemanticsConfiguration config = SemanticsConfiguration();
+    config.isEnabled = isEnabled;
+    config.textDirection = textDirection;
+    if (isEnabled) {
+      config.onIncrease = increaseAction;
+      config.onDecrease = decreaseAction;
+    }
+    config.label = label ?? '';
+    if (semanticFormatterCallback != null) {
+      config.value = semanticFormatterCallback(_state._lerp(value));
+      config.increasedValue = semanticFormatterCallback(_state._lerp((value + _semanticActionUnit).clamp(0.0, 1.0) as double));
+      config.decreasedValue = semanticFormatterCallback(_state._lerp((value - _semanticActionUnit).clamp(0.0, 1.0) as double));
+    } else {
+      config.value = '${(value * 100).round()}%';
+      config.increasedValue = '${((value + _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%';
+      config.decreasedValue = '${((value - _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%';
+    }
+
+    return config;
+  }
+
+  @override
+  void assembleSemanticsNode(
+      SemanticsNode node,
+      SemanticsConfiguration config,
+      Iterable<SemanticsNode> children,
+  ) {
+    final SemanticsConfiguration startSemanticsConfiguration = _createSemanticsConfiguration(
+        values.start,
+        labels?.start,
+        _increaseStartAction,
+        _decreaseStartAction,
+    );
+    final SemanticsConfiguration endSemanticsConfiguration = _createSemanticsConfiguration(
+        values.end,
+        labels?.end,
+        _increaseEndAction,
+        _decreaseEndAction,
+    );
+
+    // Split the semantics node area between the start and end nodes.
+    _startSemanticsNode.rect = Rect.fromPoints(node.rect.topLeft, node.rect.bottomCenter);
+    _endSemanticsNode.rect = Rect.fromPoints(node.rect.topCenter, node.rect.bottomRight);
+
+    _startSemanticsNode.updateWith(config: startSemanticsConfiguration);
+    _endSemanticsNode.updateWith(config: endSemanticsConfiguration);
+
+    final List<SemanticsNode> finalChildren = <SemanticsNode>[
+      _startSemanticsNode,
+      _endSemanticsNode,
+    ];
+
+    node.updateWith(config: config, childrenInInversePaintOrder: finalChildren);
+  }
+
+  @override
+  void clearSemantics() {
+    super.clearSemantics();
+    _startSemanticsNode = null;
+    _endSemanticsNode = null;
+  }
+
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
 
     config.isSemanticBoundary = isEnabled;
-    if (isEnabled) {
-      config.textDirection = textDirection;
-      config.customSemanticsActions = <CustomSemanticsAction, VoidCallback>{
-        _decreaseStart: _decreaseStartAction,
-        _increaseStart: _increaseStartAction,
-        _decreaseEnd: _decreaseEndAction,
-        _increaseEnd: _increaseEndAction,
-      };
-      if (semanticFormatterCallback != null) {
-        config.value = semanticFormatterCallback(_state._lerpRangeValues(values));
-      } else {
-        config.value = values.toString();
-      }
-    }
   }
-
-  final CustomSemanticsAction _decreaseStart = const CustomSemanticsAction(label: 'Decrease Min');
-  final CustomSemanticsAction _increaseStart = const CustomSemanticsAction(label: 'Increase Min');
-  final CustomSemanticsAction _decreaseEnd = const CustomSemanticsAction(label: 'Decrease Max');
-  final CustomSemanticsAction _increaseEnd = const CustomSemanticsAction(label: 'Increase Max');
 
   double get _semanticActionUnit => divisions != null ? 1.0 / divisions : _adjustmentUnit;
 
   void _increaseStartAction() {
     if (isEnabled) {
-      onChanged(RangeValues(_increaseValue(values.start), values.end));
+      onChanged(RangeValues(math.min(_increaseValue(values.start), values.end - minThumbSeparationValue), values.end));
     }
   }
 
@@ -1561,7 +1618,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
 
   void _decreaseEndAction() {
     if (isEnabled) {
-      onChanged(RangeValues(values.start, _decreaseValue(values.end)));
+      onChanged(RangeValues(values.start, math.max(_decreaseValue(values.end), values.start + minThumbSeparationValue)));
     }
   }
 
