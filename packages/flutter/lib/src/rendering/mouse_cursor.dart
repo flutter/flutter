@@ -403,9 +403,9 @@ class SystemMouseCursor extends MouseCursor {
 /// result, or fallback to the [basic] arrow. This mapping is defined by the
 /// Flutter engine.
 ///
-/// The cursor names are based on the cursors' use cases instead of their shapes,
-/// because different platforms might (although not commonly) use different shapes
-/// for the same use case.
+/// The cursors should be named based on the cursors' use cases instead of their
+/// appearance, because different platforms might (although not commonly) use
+/// different shapes for the same use case.
 class SystemMouseCursors {
   // This class only contains static members, and should not be instantiated or
   // extended.
