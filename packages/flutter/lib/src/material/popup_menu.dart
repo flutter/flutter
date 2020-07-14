@@ -178,7 +178,7 @@ class _RenderMenuItem extends RenderShiftedBox {
 ///
 /// Typically the [child] of a [PopupMenuItem] is a [Text] widget. More
 /// elaborate menus with icons can use a [ListTile]. By default, a
-/// [PopupMenuItem] is kMinInteractiveDimension pixels high. If you use a widget
+/// [PopupMenuItem] is [kMinInteractiveDimension] pixels high. If you use a widget
 /// with a different height, it must be specified in the [height] property.
 ///
 /// {@tool snippet}
