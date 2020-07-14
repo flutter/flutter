@@ -48,22 +48,26 @@ static const NSInteger kSecondsToWaitForPlatformView = 30;
   GoldenImage* golden = self.manager.goldenImage;
 
   XCUIScreenshot* screenshot = [[XCUIScreen mainScreen] screenshot];
-  XCTAttachment* attachment = [XCTAttachment attachmentWithScreenshot:screenshot];
-  attachment.name = @"new_golden";
-  attachment.lifetime = XCTAttachmentLifetimeKeepAlways;
-  [self addAttachment:attachment];
-
-  if (golden.image) {
-    XCTAttachment* goldenAttachment = [XCTAttachment attachmentWithImage:golden.image];
-    attachment.name = @"current_golden";
-    goldenAttachment.lifetime = XCTAttachmentLifetimeKeepAlways;
-    [self addAttachment:goldenAttachment];
-  } else {
+  if (!golden.image) {
+    XCTAttachment* attachment = [XCTAttachment attachmentWithScreenshot:screenshot];
+    attachment.name = @"new_golden";
+    attachment.lifetime = XCTAttachmentLifetimeKeepAlways;
+    [self addAttachment:attachment];
     XCTFail(@"This test will fail - no golden named %@ found. Follow the steps in the "
             @"README to add a new golden.",
             golden.goldenName);
   }
 
-  XCTAssertTrue([golden compareGoldenToImage:screenshot.image]);
+  if (![golden compareGoldenToImage:screenshot.image]) {
+    XCTAttachment* goldenAttachment;
+    goldenAttachment = [XCTAttachment attachmentWithImage:golden.image];
+    goldenAttachment.name = @"current_golden";
+    goldenAttachment.lifetime = XCTAttachmentLifetimeKeepAlways;
+    [self addAttachment:goldenAttachment];
+
+    XCTFail(@"Goldens to not match. Follow the steps in the "
+            @"README to update golden named %@ if needed.",
+            golden.goldenName);
+  }
 }
 @end
