@@ -54,6 +54,20 @@ void main() {
     expect(find.text('Delete'), findsNothing);
   });
 
+  testWidgets('Alert dialog Default actions test', (WidgetTester tester) async {
+
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesDialog(
+        dialogBuilder: (BuildContext context) {
+          return const CupertinoAlertDialog(
+            title: Text('The title'),
+            content: Text('The content'),
+          );
+        },
+      ),
+    );
+  });
+
   testWidgets('Dialog not barrier dismissible by default', (WidgetTester tester) async {
     await tester.pumpWidget(createAppWithCenteredButton(const Text('Go')));
 

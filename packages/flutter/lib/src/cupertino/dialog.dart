@@ -128,13 +128,12 @@ class CupertinoAlertDialog extends StatelessWidget {
     Key key,
     this.title,
     this.content,
-    this.actions = const <Widget>[],
+    this.actions,
     this.scrollController,
     this.actionScrollController,
     this.insetAnimationDuration = const Duration(milliseconds: 100),
     this.insetAnimationCurve = Curves.decelerate,
-  }) : assert(actions != null),
-       super(key: key);
+  }) : super(key: key);
 
   /// The (optional) title of the dialog is displayed in a large font at the top
   /// of the dialog.
@@ -206,16 +205,47 @@ class CupertinoAlertDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildActions() {
+  /// Create a default [CupertinoDialogAction] with OK Text
+  /// NOTE :: OK text should be kept in localization for different lang
+  List<Widget> _defaultActions(BuildContext context){
+    return <Widget>[
+      CupertinoDialogAction(
+          child: const Text('OK'),
+          onPressed: () => Navigator.pop(context),
+        )
+    ];
+  }
+
+  /// Create a default [_CupertinoAlertActionSection]
+  Widget _cupertinoDefaultAlertActionSection(BuildContext context){
+    return _CupertinoAlertActionSection(
+      children: _defaultActions(context),
+      scrollController: actionScrollController,
+    );
+  }
+
+
+
+
+
+
+  Widget _buildActions(BuildContext context) {
     Widget actionSection = Container(
       height: 0.0,
     );
-    if (actions.isNotEmpty) {
-      actionSection = _CupertinoAlertActionSection(
-        children: actions,
-        scrollController: actionScrollController,
-      );
+    if(actions != null){
+      if (actions.isNotEmpty) {
+        actionSection = _CupertinoAlertActionSection(
+          children: actions,
+          scrollController: actionScrollController,
+        );
+      } else {
+        actionSection = _cupertinoDefaultAlertActionSection(context);
+      }
+    } else {
+      actionSection = _cupertinoDefaultAlertActionSection(context);
     }
+
 
     return actionSection;
   }
@@ -260,7 +290,7 @@ class CupertinoAlertDialog extends StatelessWidget {
                         label: localizations.alertDialogLabel,
                         child: _CupertinoDialogRenderWidget(
                           contentSection: _buildContent(context),
-                          actionsSection: _buildActions(),
+                          actionsSection: _buildActions(context),
                         ),
                       ),
                     ),
