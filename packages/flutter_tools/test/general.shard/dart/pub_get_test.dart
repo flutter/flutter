@@ -211,6 +211,7 @@ void main() {
         }
       ),
     );
+    fileSystem.file('pubspec.yaml').createSync();
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2,"packages": []}');
