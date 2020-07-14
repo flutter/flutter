@@ -1534,4 +1534,80 @@ void main() {
 
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
+
+  testWidgets('ListTile respects tileColor & selectedTileColor', (WidgetTester tester) async {
+    bool isSelected = false;
+    const Color selectedTileColor = Colors.red;
+    const Color tileColor = Colors.green;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return ListTile(
+                  selected: isSelected,
+                  selectedTileColor: selectedTileColor,
+                  tileColor: tileColor,
+                  onTap: () {
+                    setState(()=> isSelected = !isSelected);
+                  },
+                  title: const Text('Title'),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Initially, when isSelected is false, the ListTile should respect tileColor.
+    ColoredBox coloredBox = tester.widget(find.byType(ColoredBox));
+    expect(coloredBox.color, tileColor);
+
+    // Tap on tile to change isSelected.
+    await tester.tap(find.byType(ListTile));
+    await tester.pumpAndSettle();
+
+    // When isSelected is true, the ListTile should respect selectedTileColor.
+    coloredBox = tester.widget(find.byType(ColoredBox));
+    expect(coloredBox.color, selectedTileColor);
+  });
+
+  testWidgets('ListTile default tile color', (WidgetTester tester) async {
+    bool isSelected = false;
+    const Color defaultColor = Colors.transparent;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return ListTile(
+                  selected: isSelected,
+                  onTap: () {
+                    setState(()=> isSelected = !isSelected);
+                  },
+                  title: const Text('Title'),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    ColoredBox coloredBox = tester.widget(find.byType(ColoredBox));
+    expect(coloredBox.color, defaultColor);
+
+    // Tap on tile to change isSelected.
+    await tester.tap(find.byType(ListTile));
+    await tester.pumpAndSettle();
+
+    coloredBox = tester.widget(find.byType(ColoredBox));
+    expect(isSelected, isTrue);
+    expect(coloredBox.color, defaultColor);
+  });
 }

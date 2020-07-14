@@ -658,6 +658,8 @@ class ListTile extends StatelessWidget {
     this.hoverColor,
     this.focusNode,
     this.autofocus = false,
+    this.tileColor,
+    this.selectedTileColor,
   }) : assert(isThreeLine != null),
        assert(enabled != null),
        assert(selected != null),
@@ -808,6 +810,16 @@ class ListTile extends StatelessWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
+  /// Defines the background color of `ListTile when [selected] is false.
+  ///
+  /// By default, the value of `tileColor` is [Colors.transparent].
+  final Color tileColor;
+
+  /// Defines the background color of `ListTile` when [selected] is true.
+  ///
+  /// By default, the value of `selectedListColor` is [Colors.transparent].
+  final Color selectedTileColor;
+
   /// Add a one pixel border in between each tile. If color isn't specified the
   /// [ThemeData.dividerColor] of the context's [Theme] is used.
   ///
@@ -913,6 +925,16 @@ class ListTile extends StatelessWidget {
       : style.copyWith(color: color);
   }
 
+  Color _tileBackgroundColor() {
+    if (!selected && tileColor != null)
+      return tileColor;
+
+    if (selected && selectedTileColor != null)
+      return selectedTileColor;
+
+    return Colors.transparent;
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -984,21 +1006,24 @@ class ListTile extends StatelessWidget {
       child: Semantics(
         selected: selected,
         enabled: enabled,
-        child: SafeArea(
-          top: false,
-          bottom: false,
-          minimum: resolvedContentPadding,
-          child: _ListTile(
-            leading: leadingIcon,
-            title: titleText,
-            subtitle: subtitleText,
-            trailing: trailingIcon,
-            isDense: _isDenseLayout(tileTheme),
-            visualDensity: visualDensity ?? theme.visualDensity,
-            isThreeLine: isThreeLine,
-            textDirection: textDirection,
-            titleBaselineType: titleStyle.textBaseline,
-            subtitleBaselineType: subtitleStyle?.textBaseline,
+        child: ColoredBox(
+          color: _tileBackgroundColor(),
+          child: SafeArea(
+            top: false,
+            bottom: false,
+            minimum: resolvedContentPadding,
+            child: _ListTile(
+              leading: leadingIcon,
+              title: titleText,
+              subtitle: subtitleText,
+              trailing: trailingIcon,
+              isDense: _isDenseLayout(tileTheme),
+              visualDensity: visualDensity ?? theme.visualDensity,
+              isThreeLine: isThreeLine,
+              textDirection: textDirection,
+              titleBaselineType: titleStyle.textBaseline,
+              subtitleBaselineType: subtitleStyle?.textBaseline,
+            ),
           ),
         ),
       ),
