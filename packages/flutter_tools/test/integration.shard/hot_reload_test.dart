@@ -66,7 +66,7 @@ void main() {
       await vmService.evaluate(
         isolate.id,
         targetRef.id,
-        '((){debugFastReassembleMethod=(Object _) => _ is MyApp})()',
+        '((){debugFastReassembleMethod=(Object x) => x is MyApp})()',
       );
 
       final Response fastReassemble1 = await vmService
@@ -76,12 +76,12 @@ void main() {
       expect(fastReassemble1.type, '_extensionType');
       expect(stdout.toString(), contains('(((TICK 2))))'));
 
-      // verify evaluation did not produce invalidate type by checking with dart:core
+      // verify evaluation did not produce invalidat type by checking with dart:core
       // type.
       await vmService.evaluate(
         isolate.id,
         targetRef.id,
-        '((){debugFastReassembleMethod=(Object _) => _ is bool})()',
+        '((){debugFastReassembleMethod=(Object x) => x is bool})()',
       );
 
       final Response fastReassemble2 = await vmService
