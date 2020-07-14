@@ -268,7 +268,7 @@ action("copy_framework_info_plist") {
   args = [
     rebase_path(sources[0]),
     rebase_path(outputs[0]),
-    "--bitcode=$flutter_enable_bitcode",
+    "--bitcode=$enable_bitcode",
   ]
 }
 

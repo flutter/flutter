@@ -2,10 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-if (is_fuchsia) {
-  import("//build/fuchsia/sdk.gni")
-  import("//flutter/tools/fuchsia/fuchsia_archive.gni")
-}
+import("//build/fuchsia/sdk.gni")
+import("//flutter/common/config.gni")
 import("//flutter/testing/testing.gni")
 
 source_set("fml") {
@@ -224,80 +222,73 @@ source_set("fml") {
   }
 }
 
-test_fixtures("fml_fixtures") {
-  fixtures = []
-}
+if (enable_unittests) {
+  test_fixtures("fml_fixtures") {
+    fixtures = []
+  }
 
-executable("fml_unittests") {
-  testonly = true
+  executable("fml_benchmarks") {
+    testonly = true
 
-  sources = [
-    "ascii_trie_unittests.cc",
-    "backtrace_unittests.cc",
-    "base32_unittest.cc",
-    "command_line_unittest.cc",
-    "file_unittest.cc",
-    "hash_combine_unittests.cc",
-    "memory/ref_counted_unittest.cc",
-    "memory/task_runner_checker_unittest.cc",
-    "memory/weak_ptr_unittest.cc",
-    "message_loop_task_queues_merge_unmerge_unittests.cc",
-    "message_loop_task_queues_unittests.cc",
-    "message_loop_unittests.cc",
-    "message_unittests.cc",
-    "paths_unittests.cc",
-    "raster_thread_merger_unittests.cc",
-    "synchronization/count_down_latch_unittests.cc",
-    "synchronization/semaphore_unittest.cc",
-    "synchronization/sync_switch_unittest.cc",
-    "synchronization/waitable_event_unittest.cc",
-    "thread_local_unittests.cc",
-    "thread_unittests.cc",
-    "time/time_delta_unittest.cc",
-    "time/time_point_unittest.cc",
-    "time/time_unittest.cc",
-  ]
-
-  if (is_mac) {
-    sources += [
-      "platform/darwin/cf_utils_unittests.mm",
-      "platform/darwin/string_range_sanitization_unittests.mm",
+    sources = [
+      "message_loop_task_queues_benchmark.cc",
     ]
-  }
 
-  deps = [
-    ":fml_fixtures",
-    "//flutter/fml",
-    "//flutter/fml/dart",
-    "//flutter/runtime:libdart",
-    "//flutter/testing",
-  ]
-
-  if (is_fuchsia) {
-    libs = [ "${fuchsia_sdk_path}/arch/${target_cpu}/sysroot/lib/libzircon.so" ]
-  }
-}
-
-if (is_fuchsia) {
-  fuchsia_test_archive("fml_tests") {
     deps = [
-      ":fml_unittests",
+      "//flutter/benchmarking",
+      "//flutter/fml",
+      "//flutter/runtime:libdart",
+    ]
+  }
+
+  executable("fml_unittests") {
+    testonly = true
+
+    sources = [
+      "ascii_trie_unittests.cc",
+      "backtrace_unittests.cc",
+      "base32_unittest.cc",
+      "command_line_unittest.cc",
+      "file_unittest.cc",
+      "hash_combine_unittests.cc",
+      "memory/ref_counted_unittest.cc",
+      "memory/task_runner_checker_unittest.cc",
+      "memory/weak_ptr_unittest.cc",
+      "message_loop_task_queues_merge_unmerge_unittests.cc",
+      "message_loop_task_queues_unittests.cc",
+      "message_loop_unittests.cc",
+      "message_unittests.cc",
+      "paths_unittests.cc",
+      "raster_thread_merger_unittests.cc",
+      "synchronization/count_down_latch_unittests.cc",
+      "synchronization/semaphore_unittest.cc",
+      "synchronization/sync_switch_unittest.cc",
+      "synchronization/waitable_event_unittest.cc",
+      "thread_local_unittests.cc",
+      "thread_unittests.cc",
+      "time/time_delta_unittest.cc",
+      "time/time_point_unittest.cc",
+      "time/time_unittest.cc",
     ]
 
-    binary = "fml_unittests"
+    if (is_mac) {
+      sources += [
+        "platform/darwin/cf_utils_unittests.mm",
+        "platform/darwin/string_range_sanitization_unittests.mm",
+      ]
+    }
+
+    deps = [
+      ":fml_fixtures",
+      "//flutter/fml",
+      "//flutter/fml/dart",
+      "//flutter/runtime:libdart",
+      "//flutter/testing",
+    ]
+
+    if (is_fuchsia) {
+      libs =
+          [ "${fuchsia_sdk_path}/arch/${target_cpu}/sysroot/lib/libzircon.so" ]
+    }
   }
-}
-
-executable("fml_benchmarks") {
-  testonly = true
-
-  sources = [
-    "message_loop_task_queues_benchmark.cc",
-  ]
-
-  deps = [
-    "//flutter/benchmarking",
-    "//flutter/fml",
-    "//flutter/runtime:libdart",
-  ]
 }

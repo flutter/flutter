@@ -366,77 +366,6 @@ executable("flutter_runner_tzdata_unittests") {
   ]
 }
 
-fuchsia_archive("flutter_runner_tests") {
-  testonly = true
-
-  deps = [
-    ":flutter_runner_unittests",
-  ]
-
-  binary = "$target_name"
-
-  resources = [
-    {
-      path = rebase_path("//third_party/icu/common/icudtl.dat")
-      dest = "icudtl.dat"
-    },
-    {
-      path = rebase_path(
-              "//flutter/shell/platform/fuchsia/flutter/tests/tzdata/2019a/44/le/metaZones.res")
-      dest = "tzdata/metaZones.res"
-    },
-    {
-      path = rebase_path(
-              "//flutter/shell/platform/fuchsia/flutter/tests/tzdata/2019a/44/le/timezoneTypes.res")
-      dest = "tzdata/timezoneTypes.res"
-    },
-    {
-      path = rebase_path(
-              "//flutter/shell/platform/fuchsia/flutter/tests/tzdata/2019a/44/le/zoneinfo64.res")
-      dest = "tzdata/zoneinfo64.res"
-    },
-  ]
-
-  meta_dir = "//flutter/shell/platform/fuchsia/flutter/meta"
-
-  libraries = common_libs
-
-  meta = [
-    {
-      path = rebase_path("meta/$target_name.cmx")
-      dest = "$target_name.cmx"
-    },
-  ]
-}
-
-fuchsia_archive("flutter_runner_tzdata_tests") {
-  testonly = true
-
-  deps = [
-    ":flutter_runner_tzdata_unittests",
-  ]
-
-  binary = "$target_name"
-
-  resources = [
-    {
-      path = rebase_path("//third_party/icu/common/icudtl.dat")
-      dest = "icudtl.dat"
-    },
-  ]
-
-  meta_dir = "//flutter/shell/platform/fuchsia/flutter/meta"
-
-  libraries = common_libs
-
-  meta = [
-    {
-      path = rebase_path("meta/$target_name.cmx")
-      dest = "$target_name.cmx"
-    },
-  ]
-}
-
 executable("flutter_runner_scenic_unittests") {
   testonly = true
 
@@ -520,6 +449,79 @@ executable("flutter_runner_scenic_unittests") {
   ]
 }
 
+# When adding a new dep here, please also ensure the dep is added to
+# testing/fuchsia/run_tests.sh and testing/fuchsia/test_fars
+fuchsia_archive("flutter_runner_tests") {
+  testonly = true
+
+  deps = [
+    ":flutter_runner_unittests",
+  ]
+
+  binary = "$target_name"
+
+  resources = [
+    {
+      path = rebase_path("//third_party/icu/common/icudtl.dat")
+      dest = "icudtl.dat"
+    },
+    {
+      path = rebase_path(
+              "//flutter/shell/platform/fuchsia/flutter/tests/tzdata/2019a/44/le/metaZones.res")
+      dest = "tzdata/metaZones.res"
+    },
+    {
+      path = rebase_path(
+              "//flutter/shell/platform/fuchsia/flutter/tests/tzdata/2019a/44/le/timezoneTypes.res")
+      dest = "tzdata/timezoneTypes.res"
+    },
+    {
+      path = rebase_path(
+              "//flutter/shell/platform/fuchsia/flutter/tests/tzdata/2019a/44/le/zoneinfo64.res")
+      dest = "tzdata/zoneinfo64.res"
+    },
+  ]
+
+  meta_dir = "//flutter/shell/platform/fuchsia/flutter/meta"
+
+  libraries = common_libs
+
+  meta = [
+    {
+      path = rebase_path("meta/$target_name.cmx")
+      dest = "$target_name.cmx"
+    },
+  ]
+}
+
+fuchsia_archive("flutter_runner_tzdata_tests") {
+  testonly = true
+
+  deps = [
+    ":flutter_runner_tzdata_unittests",
+  ]
+
+  binary = "$target_name"
+
+  resources = [
+    {
+      path = rebase_path("//third_party/icu/common/icudtl.dat")
+      dest = "icudtl.dat"
+    },
+  ]
+
+  meta_dir = "//flutter/shell/platform/fuchsia/flutter/meta"
+
+  libraries = common_libs
+
+  meta = [
+    {
+      path = rebase_path("meta/$target_name.cmx")
+      dest = "$target_name.cmx"
+    },
+  ]
+}
+
 fuchsia_archive("flutter_runner_scenic_tests") {
   testonly = true
 
@@ -545,5 +547,289 @@ fuchsia_archive("flutter_runner_scenic_tests") {
       path = rebase_path("meta/$target_name.cmx")
       dest = "$target_name.cmx"
     },
+  ]
+}
+
+fuchsia_test_archive("fml_tests") {
+  deps = [
+    "//flutter/fml:fml_unittests",
+  ]
+
+  binary = "fml_unittests"
+}
+
+fuchsia_test_archive("flow_tests") {
+  deps = [
+    "//flutter/flow:flow_unittests",
+  ]
+
+  binary = "flow_unittests"
+
+  resources = [
+    {
+      path = rebase_path(
+              "//flutter/testing/resources/performance_overlay_gold_60fps.png")
+      dest = "flutter/testing/resources/performance_overlay_gold_60fps.png"
+    },
+    {
+      path = rebase_path(
+              "//flutter/testing/resources/performance_overlay_gold_90fps.png")
+      dest = "flutter/testing/resources/performance_overlay_gold_90fps.png"
+    },
+    {
+      path = rebase_path(
+              "//flutter/testing/resources/performance_overlay_gold_120fps.png")
+      dest = "flutter/testing/resources/performance_overlay_gold_120fps.png"
+    },
+  ]
+}
+
+fuchsia_test_archive("flow_tests_next") {
+  deps = [
+    "//flutter/flow:flow_unittests_next",
+  ]
+
+  binary = "flow_unittests_next"
+
+  resources = [
+    {
+      path = rebase_path(
+              "//flutter/testing/resources/performance_overlay_gold_60fps.png")
+      dest = "flutter/testing/resources/performance_overlay_gold_60fps.png"
+    },
+    {
+      path = rebase_path(
+              "//flutter/testing/resources/performance_overlay_gold_90fps.png")
+      dest = "flutter/testing/resources/performance_overlay_gold_90fps.png"
+    },
+    {
+      path = rebase_path(
+              "//flutter/testing/resources/performance_overlay_gold_120fps.png")
+      dest = "flutter/testing/resources/performance_overlay_gold_120fps.png"
+    },
+  ]
+}
+
+fuchsia_test_archive("runtime_tests") {
+  deps = [
+    "//flutter/runtime:runtime_fixtures",
+    "//flutter/runtime:runtime_unittests",
+  ]
+
+  binary = "runtime_unittests"
+
+  # TODO(gw280): https://github.com/flutter/flutter/issues/50294
+  # Right now we need to manually specify all the fixtures that are
+  # declared in the test_fixtures() call above.
+  resources = [
+    {
+      path = "$root_gen_dir/flutter/runtime/assets/kernel_blob.bin"
+      dest = "assets/kernel_blob.bin"
+    },
+  ]
+}
+
+fuchsia_test_archive("runtime_tests_next") {
+  deps = [
+    "//flutter/runtime:runtime_fixtures",
+    "//flutter/runtime:runtime_unittests_next",
+  ]
+
+  binary = "runtime_unittests_next"
+
+  # TODO(gw280): https://github.com/flutter/flutter/issues/50294
+  # Right now we need to manually specify all the fixtures that are
+  # declared in the test_fixtures() call above.
+  resources = [
+    {
+      path = "$root_gen_dir/flutter/runtime/assets/kernel_blob.bin"
+      dest = "assets/kernel_blob.bin"
+    },
+  ]
+}
+
+fuchsia_test_archive("shell_tests") {
+  deps = [
+    "//flutter/shell/common:shell_unittests",
+    "//flutter/shell/common:shell_unittests_fixtures",
+  ]
+
+  binary = "shell_unittests"
+
+  # TODO(gw280): https://github.com/flutter/flutter/issues/50294
+  # Right now we need to manually specify all the fixtures that are
+  # declared in the test_fixtures() call above.
+  resources = [
+    {
+      path = "$root_gen_dir/flutter/shell/common/assets/kernel_blob.bin"
+      dest = "assets/kernel_blob.bin"
+    },
+    {
+      path =
+          "$root_gen_dir/flutter/shell/common/assets/shelltest_screenshot.png"
+      dest = "assets/shelltest_screenshot.png"
+    },
+  ]
+
+  libraries = vulkan_validation_libs
+  resources += vulkan_icds
+}
+
+fuchsia_test_archive("shell_tests_next") {
+  deps = [
+    "//flutter/shell/common:shell_unittests_fixtures",
+    "//flutter/shell/common:shell_unittests_next",
+  ]
+
+  binary = "shell_unittests_next"
+
+  # TODO(gw280): https://github.com/flutter/flutter/issues/50294
+  # Right now we need to manually specify all the fixtures that are
+  # declared in the test_fixtures() call above.
+  resources = [
+    {
+      path = "$root_gen_dir/flutter/shell/common/assets/kernel_blob.bin"
+      dest = "assets/kernel_blob.bin"
+    },
+    {
+      path =
+          "$root_gen_dir/flutter/shell/common/assets/shelltest_screenshot.png"
+      dest = "assets/shelltest_screenshot.png"
+    },
+  ]
+
+  libraries = vulkan_validation_libs
+  resources += vulkan_icds
+}
+
+fuchsia_test_archive("testing_tests") {
+  deps = [
+    "//flutter/testing:testing_unittests",
+  ]
+
+  binary = "testing_unittests"
+}
+
+fuchsia_test_archive("txt_tests") {
+  deps = [
+    "//flutter/third_party/txt:txt_unittests",
+  ]
+
+  binary = "txt_unittests"
+
+  resources = [
+    {
+      path = rebase_path("//third_party/icu/common/icudtl.dat")
+      dest = "icudtl.dat"
+    },
+    {
+      path = rebase_path("//third_party/icu/common/icudtl.dat")
+      dest = "icudtl2.dat"
+    },
+  ]
+}
+
+fuchsia_test_archive("ui_tests") {
+  deps = [
+    "//flutter/lib/ui:ui_unittests",
+    "//flutter/lib/ui:ui_unittests_fixtures",
+  ]
+
+  binary = "ui_unittests"
+
+  # TODO(gw280): https://github.com/flutter/flutter/issues/50294
+  # Right now we need to manually specify all the fixtures that are
+  # declared in the test_fixtures() call above.
+  resources = [
+    {
+      path = "$root_gen_dir/flutter/lib/ui/assets/kernel_blob.bin"
+      dest = "assets/kernel_blob.bin"
+    },
+    {
+      path = "$root_gen_dir/flutter/lib/ui/assets/DashInNooglerHat.jpg"
+      dest = "assets/DashInNooglerHat.jpg"
+    },
+    {
+      path = "$root_gen_dir/flutter/lib/ui/assets/Horizontal.jpg"
+      dest = "assets/Horizontal.jpg"
+    },
+    {
+      path = "$root_gen_dir/flutter/lib/ui/assets/Horizontal.png"
+      dest = "assets/Horizontal.png"
+    },
+    {
+      path = "$root_gen_dir/flutter/lib/ui/assets/hello_loop_2.gif"
+      dest = "assets/hello_loop_2.gif"
+    },
+    {
+      path = "$root_gen_dir/flutter/lib/ui/assets/hello_loop_2.webp"
+      dest = "assets/hello_loop_2.webp"
+    },
+  ]
+
+  libraries = vulkan_validation_libs
+  resources += vulkan_icds
+}
+
+fuchsia_test_archive("ui_tests_next") {
+  deps = [
+    "//flutter/lib/ui:ui_unittests_fixtures",
+    "//flutter/lib/ui:ui_unittests_next",
+  ]
+
+  binary = "ui_unittests_next"
+
+  # TODO(gw280): https://github.com/flutter/flutter/issues/50294
+  # Right now we need to manually specify all the fixtures that are
+  # declared in the test_fixtures() call above.
+  resources = [
+    {
+      path = "$root_gen_dir/flutter/lib/ui/assets/kernel_blob.bin"
+      dest = "assets/kernel_blob.bin"
+    },
+    {
+      path = "$root_gen_dir/flutter/lib/ui/assets/DashInNooglerHat.jpg"
+      dest = "assets/DashInNooglerHat.jpg"
+    },
+    {
+      path = "$root_gen_dir/flutter/lib/ui/assets/Horizontal.jpg"
+      dest = "assets/Horizontal.jpg"
+    },
+    {
+      path = "$root_gen_dir/flutter/lib/ui/assets/Horizontal.png"
+      dest = "assets/Horizontal.png"
+    },
+    {
+      path = "$root_gen_dir/flutter/lib/ui/assets/hello_loop_2.gif"
+      dest = "assets/hello_loop_2.gif"
+    },
+    {
+      path = "$root_gen_dir/flutter/lib/ui/assets/hello_loop_2.webp"
+      dest = "assets/hello_loop_2.webp"
+    },
+  ]
+
+  libraries = vulkan_validation_libs
+  resources += vulkan_icds
+}
+
+group("tests") {
+  testonly = true
+
+  deps = [
+    ":flow_tests",
+    ":flow_tests_next",
+    ":flutter_runner_scenic_tests",
+    ":flutter_runner_tests",
+    ":flutter_runner_tzdata_tests",
+    ":fml_tests",
+    ":runtime_tests",
+    ":runtime_tests_next",
+    ":shell_tests",
+    ":shell_tests_next",
+    ":testing_tests",
+    ":txt_tests",
+    ":ui_tests",
+    ":ui_tests_next",
   ]
 }

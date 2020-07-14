@@ -6,14 +6,8 @@ if (is_android) {
   import("//build/config/android/config.gni")
 }
 
-import("//build/fuchsia/sdk.gni")
-
 if (target_cpu == "arm" || target_cpu == "arm64") {
   import("//build/config/arm.gni")
-}
-
-if (is_fuchsia) {
-  import("//build/toolchain/clang.gni")
 }
 
 declare_args() {
@@ -22,11 +16,6 @@ declare_args() {
 
   # Whether to use the Skia text shaper module
   flutter_enable_skshaper = false
-
-  # A copy of the enable_bitcode flag from build/toolchain/clang.gni.
-  # This needs to be mirrored here because build/toolchain/clang.gni does
-  # not exist in the Fuchsia source tree.
-  flutter_enable_bitcode = false
 }
 
 # feature_defines_list ---------------------------------------------------------
@@ -58,15 +47,6 @@ if (flutter_runtime_mode == "debug") {
   ]
 } else {
   feature_defines_list += [ "FLUTTER_RUNTIME_MODE=0" ]
-}
-
-if (is_fuchsia) {
-  # TODO(chinmaygarde): This is always set. The macro may now be removed.
-  feature_defines_list += [ "FUCHSIA_SDK=1" ]
-}
-
-if ((is_ios || is_mac) && defined(enable_bitcode)) {
-  flutter_enable_bitcode = enable_bitcode
 }
 
 if (is_ios || is_mac) {

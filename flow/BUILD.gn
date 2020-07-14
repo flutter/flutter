@@ -2,12 +2,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//build/fuchsia/sdk.gni")
 import("//flutter/common/config.gni")
 import("//flutter/testing/testing.gni")
-if (is_fuchsia) {
-  import("//build/fuchsia/sdk.gni")
-  import("//flutter/tools/fuchsia/fuchsia_archive.gni")
-}
 
 source_set_maybe_fuchsia_legacy("flow") {
   sources = [
@@ -97,179 +94,113 @@ source_set_maybe_fuchsia_legacy("flow") {
   ]
 }
 
-test_fixtures("flow_fixtures") {
-  fixtures = []
-}
-
-source_set_maybe_fuchsia_legacy("flow_testing") {
-  testonly = true
-
-  sources = [
-    "testing/gl_context_switch_test.cc",
-    "testing/gl_context_switch_test.h",
-    "testing/layer_test.h",
-    "testing/mock_layer.cc",
-    "testing/mock_layer.h",
-    "testing/mock_raster_cache.cc",
-    "testing/mock_raster_cache.h",
-    "testing/mock_texture.cc",
-    "testing/mock_texture.h",
-    "testing/skia_gpu_object_layer_test.cc",
-    "testing/skia_gpu_object_layer_test.h",
-  ]
-
-  public_deps = [
-    "//flutter/testing:skia",
-    "//third_party/googletest:gtest",
-  ]
-
-  deps_legacy_and_next = [ ":flow" ]
-}
-
-source_set_maybe_fuchsia_legacy("flow_unittests_common") {
-  testonly = true
-
-  sources = [
-    "embedded_view_params_unittests.cc",
-    "flow_run_all_unittests.cc",
-    "flow_test_utils.cc",
-    "flow_test_utils.h",
-    "gl_context_switch_unittests.cc",
-    "layers/backdrop_filter_layer_unittests.cc",
-    "layers/clip_path_layer_unittests.cc",
-    "layers/clip_rect_layer_unittests.cc",
-    "layers/clip_rrect_layer_unittests.cc",
-    "layers/color_filter_layer_unittests.cc",
-    "layers/container_layer_unittests.cc",
-    "layers/image_filter_layer_unittests.cc",
-    "layers/layer_tree_unittests.cc",
-    "layers/opacity_layer_unittests.cc",
-    "layers/performance_overlay_layer_unittests.cc",
-    "layers/physical_shape_layer_unittests.cc",
-    "layers/picture_layer_unittests.cc",
-    "layers/platform_view_layer_unittests.cc",
-    "layers/shader_mask_layer_unittests.cc",
-    "layers/texture_layer_unittests.cc",
-    "layers/transform_layer_unittests.cc",
-    "matrix_decomposition_unittests.cc",
-    "mutators_stack_unittests.cc",
-    "raster_cache_unittests.cc",
-    "rtree_unittests.cc",
-    "skia_gpu_object_unittests.cc",
-    "testing/mock_layer_unittests.cc",
-    "testing/mock_texture_unittests.cc",
-    "texture_unittests.cc",
-  ]
-
-  deps = [
-    ":flow_fixtures",
-    "//flutter/fml",
-    "//flutter/testing:skia",
-    "//flutter/testing:testing_lib",
-    "//third_party/dart/runtime:libdart_jit",  # for tracing
-    "//third_party/googletest:gtest",
-    "//third_party/skia",
-  ]
-
-  sources_legacy = [ "layers/fuchsia_layer_unittests.cc" ]
-
-  deps_legacy = [ "//build/fuchsia/pkg:sys_cpp_testing" ]
-
-  deps_legacy_and_next = [
-    ":flow",
-    ":flow_testing",
-  ]
-}
-
-if (is_fuchsia) {
-  executable("flow_unittests") {
-    testonly = true
-
-    deps = [
-      ":flow_unittests_common_fuchsia_legacy",
-    ]
+if (enable_unittests) {
+  test_fixtures("flow_fixtures") {
+    fixtures = []
   }
-  executable("flow_unittests_next") {
+
+  source_set_maybe_fuchsia_legacy("flow_testing") {
     testonly = true
 
-    deps = [
-      ":flow_unittests_common",
+    sources = [
+      "testing/gl_context_switch_test.cc",
+      "testing/gl_context_switch_test.h",
+      "testing/layer_test.h",
+      "testing/mock_layer.cc",
+      "testing/mock_layer.h",
+      "testing/mock_raster_cache.cc",
+      "testing/mock_raster_cache.h",
+      "testing/mock_texture.cc",
+      "testing/mock_texture.h",
+      "testing/skia_gpu_object_layer_test.cc",
+      "testing/skia_gpu_object_layer_test.h",
     ]
+
+    public_deps = [
+      "//flutter/testing:skia",
+      "//third_party/googletest:gtest",
+    ]
+
+    deps_legacy_and_next = [ ":flow" ]
   }
-} else {
-  executable("flow_unittests") {
+
+  source_set_maybe_fuchsia_legacy("flow_unittests_common") {
     testonly = true
 
-    deps = [
-      ":flow_unittests_common",
+    sources = [
+      "embedded_view_params_unittests.cc",
+      "flow_run_all_unittests.cc",
+      "flow_test_utils.cc",
+      "flow_test_utils.h",
+      "gl_context_switch_unittests.cc",
+      "layers/backdrop_filter_layer_unittests.cc",
+      "layers/clip_path_layer_unittests.cc",
+      "layers/clip_rect_layer_unittests.cc",
+      "layers/clip_rrect_layer_unittests.cc",
+      "layers/color_filter_layer_unittests.cc",
+      "layers/container_layer_unittests.cc",
+      "layers/image_filter_layer_unittests.cc",
+      "layers/layer_tree_unittests.cc",
+      "layers/opacity_layer_unittests.cc",
+      "layers/performance_overlay_layer_unittests.cc",
+      "layers/physical_shape_layer_unittests.cc",
+      "layers/picture_layer_unittests.cc",
+      "layers/platform_view_layer_unittests.cc",
+      "layers/shader_mask_layer_unittests.cc",
+      "layers/texture_layer_unittests.cc",
+      "layers/transform_layer_unittests.cc",
+      "matrix_decomposition_unittests.cc",
+      "mutators_stack_unittests.cc",
+      "raster_cache_unittests.cc",
+      "rtree_unittests.cc",
+      "skia_gpu_object_unittests.cc",
+      "testing/mock_layer_unittests.cc",
+      "testing/mock_texture_unittests.cc",
+      "texture_unittests.cc",
     ]
-  }
-}
-
-if (is_fuchsia) {
-  fuchsia_archive("flow_tests") {
-    testonly = true
 
     deps = [
-      ":flow_unittests",
+      ":flow_fixtures",
+      "//flutter/fml",
+      "//flutter/testing:skia",
+      "//flutter/testing:testing_lib",
+      "//third_party/dart/runtime:libdart_jit",  # for tracing
+      "//third_party/googletest:gtest",
+      "//third_party/skia",
     ]
 
-    binary = "flow_unittests"
+    sources_legacy = [ "layers/fuchsia_layer_unittests.cc" ]
 
-    libraries = common_libs
+    deps_legacy = [ "//build/fuchsia/pkg:sys_cpp_testing" ]
 
-    meta_dir = "//flutter/testing/fuchsia/meta"
-    cmx_file = "$meta_dir/fuchsia_test.cmx"
-
-    resources = [
-      {
-        path = rebase_path(
-                "//flutter/testing/resources/performance_overlay_gold_60fps.png")
-        dest = "flutter/testing/resources/performance_overlay_gold_60fps.png"
-      },
-      {
-        path = rebase_path(
-                "//flutter/testing/resources/performance_overlay_gold_90fps.png")
-        dest = "flutter/testing/resources/performance_overlay_gold_90fps.png"
-      },
-      {
-        path = rebase_path(
-                "//flutter/testing/resources/performance_overlay_gold_120fps.png")
-        dest = "flutter/testing/resources/performance_overlay_gold_120fps.png"
-      },
+    deps_legacy_and_next = [
+      ":flow",
+      ":flow_testing",
     ]
   }
 
-  fuchsia_archive("flow_tests_next") {
-    testonly = true
+  if (is_fuchsia) {
+    executable("flow_unittests") {
+      testonly = true
 
-    deps = [
-      ":flow_unittests_next",
-    ]
+      deps = [
+        ":flow_unittests_common_fuchsia_legacy",
+      ]
+    }
+    executable("flow_unittests_next") {
+      testonly = true
 
-    binary = "flow_unittests_next"
+      deps = [
+        ":flow_unittests_common",
+      ]
+    }
+  } else {
+    executable("flow_unittests") {
+      testonly = true
 
-    libraries = common_libs
-
-    meta_dir = "//flutter/testing/fuchsia/meta"
-    cmx_file = "$meta_dir/fuchsia_test.cmx"
-
-    resources = [
-      {
-        path = rebase_path(
-                "//flutter/testing/resources/performance_overlay_gold_60fps.png")
-        dest = "flutter/testing/resources/performance_overlay_gold_60fps.png"
-      },
-      {
-        path = rebase_path(
-                "//flutter/testing/resources/performance_overlay_gold_90fps.png")
-        dest = "flutter/testing/resources/performance_overlay_gold_90fps.png"
-      },
-      {
-        path = rebase_path(
-                "//flutter/testing/resources/performance_overlay_gold_120fps.png")
-        dest = "flutter/testing/resources/performance_overlay_gold_120fps.png"
-      },
-    ]
+      deps = [
+        ":flow_unittests_common",
+      ]
+    }
   }
 }
