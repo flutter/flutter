@@ -50,7 +50,7 @@ const Duration _kElevationDuration = Duration(milliseconds: 75);
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold_center}
 ///
-/// Here is an example of a basic `OutlineButton`.
+/// Here is an example of a basic [OutlineButton].
 ///
 /// ```dart
 ///   Widget build(BuildContext context) {

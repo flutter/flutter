@@ -1452,8 +1452,8 @@ abstract class RenderBox extends RenderObject {
   ///
   /// See also:
   ///
-  ///  * [computeMaxIntrinsicWidth], which computes smallest width beyond which
-  ///    increasing the width never decreases the preferred height.
+  ///  * [computeMaxIntrinsicWidth], which computes the smallest width beyond
+  ///    which increasing the width never decreases the preferred height.
   @protected
   double computeMinIntrinsicWidth(double height) {
     return 0.0;
@@ -1609,7 +1609,7 @@ abstract class RenderBox extends RenderObject {
   /// See also:
   ///
   ///  * [computeMinIntrinsicWidth], which has usage examples.
-  ///  * [computeMaxIntrinsicHeight], which computes smallest height beyond
+  ///  * [computeMaxIntrinsicHeight], which computes the smallest height beyond
   ///    which increasing the height never decreases the preferred width.
   @protected
   double computeMinIntrinsicHeight(double width) {
