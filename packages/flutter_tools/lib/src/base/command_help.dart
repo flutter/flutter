@@ -13,6 +13,7 @@ import 'terminal.dart';
 // ignore_for_file: non_constant_identifier_names
 
 const String fire = '🔥';
+const String image = '🖼️';
 const int maxLineWidth = 84;
 
 /// Encapsulates the help text construction and printing.
@@ -34,6 +35,13 @@ class CommandHelp {
   final Platform _platform;
 
   final OutputPreferences _outputPreferences;
+
+  CommandHelpOption _I;
+  CommandHelpOption get I => _I ??= _makeOption(
+    'I',
+    'Toggle oversized image inversion $image.',
+    'debugInvertOversizedImages',
+  );
 
   CommandHelpOption _L;
   CommandHelpOption get L => _L ??= _makeOption(
