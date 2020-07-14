@@ -175,12 +175,16 @@ class _MaterialStateColor extends MaterialStateColor {
 /// To use a [MaterialStateMouseCursor], you should create a subclass of
 /// [MaterialStateMouseCursor] and implement the abstract `resolve` method.
 ///
-/// {@tool snippet}
+/// {@tool dartpad --template=stateless_widget_scaffold_center}
 ///
 /// This example defines a mouse cursor that resolves to
 /// [SystemMouseCursors.forbidden] when its widget is disabled.
 ///
-/// ```dart
+/// ```dart imports
+/// import 'package:flutter/rendering.dart';
+/// ```
+///
+/// ```dart preamble
 /// class ListTileCursor extends MaterialStateMouseCursor {
 ///   @override
 ///   MouseCursor resolve(Set<MaterialState> states) {
@@ -189,13 +193,19 @@ class _MaterialStateColor extends MaterialStateColor {
 ///     }
 ///     return SystemMouseCursors.click;
 ///   }
+///   @override
+///   String get debugDescription => 'ListTileCursor()';
 /// }
+/// ```
 ///
-/// ListTile (
-///   title: Text('Disabled ListTile'),
-///   enabled: false,
-///   mouseCursor: ListTileCursor(),
-/// )
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return ListTile(
+///     title: Text('Disabled ListTile'),
+///     enabled: false,
+///     mouseCursor: ListTileCursor(),
+///   );
+/// }
 /// ```
 /// {@end-tool}
 ///
@@ -292,34 +302,35 @@ class _EnabledAndDisabledMouseCursor extends MaterialStateMouseCursor {
 /// of their current material state and [resolve] the button style's
 /// material state properties when their value is needed.
 ///
-/// {@tool snippet}
+/// {@tool dartpad --template=stateless_widget_scaffold_center}
 ///
 /// This example shows how you can override the default text and icon
-/// color of a [TextButton] with a [MaterialStateProperty]. In this
-/// example, the text color will be `Colors.blue` when the button
-/// is being pressed, hovered, or focused. Otherwise, the text color
-/// will be `Colors.red`.
+/// color (the "foreground color") of a [TextButton] with a
+/// [MaterialStateProperty]. In this example, the button's text color
+/// will be `Colors.blue` when the button is being pressed, hovered,
+/// or focused. Otherwise, the text color will be `Colors.red`.
 ///
 /// ```dart
-/// Color getTextColor(Set<MaterialState> states) {
-///   const Set<MaterialState> interactiveStates = <MaterialState>{
-///     MaterialState.pressed,
-///     MaterialState.hovered,
-///     MaterialState.focused,
-///   };
-///   if (states.any(interactiveStates.contains)) {
-///     return Colors.blue;
+/// Widget build(BuildContext context) {
+///   Color getColor(Set<MaterialState> states) {
+///     const Set<MaterialState> interactiveStates = <MaterialState>{
+///       MaterialState.pressed,
+///       MaterialState.hovered,
+///       MaterialState.focused,
+///     };
+///     if (states.any(interactiveStates.contains)) {
+///       return Colors.blue;
+///     }
+///     return Colors.red;
 ///   }
-///   return Colors.red;
+///   return TextButton(
+///     style: ButtonStyle(
+///       foregroundColor: MaterialStateProperty.resolveWith(getColor),
+///     ),
+///     onPressed: () {},
+///     child: Text('TextButton'),
+///   );
 /// }
-///
-/// TextButton(
-///   style: ButtonStyle(
-///     textColor: MaterialStateProperty.resolveWith(getTextColor),
-///   ),
-///   onPressed: () {},
-///   child: Text('TextButton'),
-/// )
 /// ```
 /// {@end-tool}
 ///
