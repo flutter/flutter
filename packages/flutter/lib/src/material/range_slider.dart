@@ -1593,7 +1593,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
 
-    config.isSemanticBoundary = isEnabled;
+    config.isSemanticBoundary = true;
   }
 
   double get _semanticActionUnit => divisions != null ? 1.0 / divisions : _adjustmentUnit;
