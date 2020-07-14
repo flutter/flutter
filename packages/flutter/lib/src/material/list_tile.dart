@@ -796,6 +796,35 @@ class ListTile extends StatelessWidget {
   ///
   /// By default the selected color is the theme's primary color. The selected color
   /// can be overridden with a [ListTileTheme].
+  ///
+  /// {@tool dartpad --template=stateful_widget_scaffold}
+  ///
+  /// Here is an example of using a [StatefulWidget] to keep track of the
+  /// selected index, and using that to set the `selected` property on the
+  /// corresponding [ListTile].
+  ///
+  /// ```dart
+  ///   int _selectedIndex;
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return ListView.builder(
+  ///       itemCount: 10,
+  ///       itemBuilder: (BuildContext context, int index) {
+  ///         return ListTile(
+  ///           title: Text('Item $index'),
+  ///           selected: index == _selectedIndex,
+  ///           onTap: () {
+  ///             setState(() {
+  ///               _selectedIndex = index;
+  ///             });
+  ///           },
+  ///         );
+  ///       },
+  ///     );
+  ///   }
+  /// ```
+  /// {@end-tool}
   final bool selected;
 
   /// The color for the tile's [Material] when it has the input focus.
