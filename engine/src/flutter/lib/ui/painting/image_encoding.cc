@@ -35,13 +35,6 @@ enum ImageByteFormat {
   kPNG,
 };
 
-void FinalizeSkData(void* isolate_callback_data,
-                    Dart_WeakPersistentHandle handle,
-                    void* peer) {
-  SkData* buffer = reinterpret_cast<SkData*>(peer);
-  buffer->unref();
-}
-
 void InvokeDataCallback(std::unique_ptr<DartPersistentValue> callback,
                         sk_sp<SkData> buffer) {
   std::shared_ptr<tonic::DartState> dart_state = callback->dart_state().lock();
@@ -51,15 +44,11 @@ void InvokeDataCallback(std::unique_ptr<DartPersistentValue> callback,
   tonic::DartState::Scope scope(dart_state);
   if (!buffer) {
     DartInvoke(callback->value(), {Dart_Null()});
-    return;
+  } else {
+    Dart_Handle dart_data = tonic::DartConverter<tonic::Uint8List>::ToDart(
+        buffer->bytes(), buffer->size());
+    DartInvoke(callback->value(), {dart_data});
   }
-  // SkData are generally read-only.
-  void* bytes = const_cast<void*>(buffer->data());
-  const intptr_t length = buffer->size();
-  void* peer = reinterpret_cast<void*>(buffer.release());
-  Dart_Handle dart_data = Dart_NewExternalTypedDataWithFinalizer(
-      Dart_TypedData_kUint8, bytes, length, peer, length, FinalizeSkData);
-  DartInvoke(callback->value(), {dart_data});
 }
 
 sk_sp<SkImage> ConvertToRasterUsingResourceContext(
@@ -233,10 +222,9 @@ void EncodeImageAndInvokeDataCallback(
   auto encode_task = [callback_task = std::move(callback_task), format,
                       ui_task_runner](sk_sp<SkImage> raster_image) {
     sk_sp<SkData> encoded = EncodeImage(std::move(raster_image), format);
-    ui_task_runner->PostTask([callback_task = std::move(callback_task),
-                              encoded = std::move(encoded)]() mutable {
-      callback_task(std::move(encoded));
-    });
+    ui_task_runner->PostTask(
+        [callback_task = std::move(callback_task),
+         encoded = std::move(encoded)] { callback_task(encoded); });
   };
 
   ConvertImageToRaster(std::move(image), encode_task, raster_task_runner,
