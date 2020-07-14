@@ -5,6 +5,7 @@
 assert(is_ios)
 
 import("//build/config/ios/ios_sdk.gni")
+import("//build/toolchain/clang.gni")
 import("//flutter/common/config.gni")
 import("//flutter/shell/gpu/gpu.gni")
 import("//flutter/shell/platform/darwin/common/framework_shared.gni")
