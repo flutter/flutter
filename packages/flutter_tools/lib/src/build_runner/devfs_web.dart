@@ -793,7 +793,6 @@ class WebDevFS implements DevFS {
           entrypoint: entrypoint,
           nullSafety: buildInfo.extraFrontEndOptions
             ?.contains('--enable-experiment=non-nullable') ?? false,
-          soundNullSafety: buildInfo.nullSafetyMode != NullSafetyMode.unsound,
         ),
       );
       // TODO(jonahwilliams): refactor the asset code in this and the regular devfs to

@@ -51,7 +51,6 @@ document.head.appendChild(requireEl);
 String generateMainModule({
   @required String entrypoint,
   @required bool nullSafety,
-  @required bool soundNullSafety,
 }) {
   return '''/* ENTRYPOINT_EXTENTION_MARKER */
 // Create the main module loaded below.
@@ -59,8 +58,6 @@ define("main_module.bootstrap", ["$entrypoint", "dart_sdk"], function(app, dart_
   dart_sdk.dart.setStartAsyncSynchronously(true);
   dart_sdk._debugger.registerDevtoolsFormatter();
   if ($nullSafety) {
-    dart_sdk.dart.nullSafety($soundNullSafety);
-    dart_sdk.dart.weakNullSafetyWarnings(!$soundNullSafety);
     dart_sdk.dart.nonNullAsserts(true);
   }
 
