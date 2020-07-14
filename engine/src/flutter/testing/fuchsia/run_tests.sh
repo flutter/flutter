@@ -6,7 +6,7 @@
 # The first and only parameter should be the path to the Fuchsia system image
 # tarball, e.g. `./fuchsia-test.sh generic-x64.tgz`.
 #
-# This script expects `pm`, `dev_finder`, and `fuchsia_ctl` to all be in the
+# This script expects `pm`, `device-finder`, and `fuchsia_ctl` to all be in the
 # same directory as the script, as well as the `flutter_aot_runner-0.far` and
 # the `flutter_runner_tests-0.far`. It is written to be run from its own
 # directory, and will fail if run from other directories or via sym-links.
