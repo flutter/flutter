@@ -39,8 +39,9 @@ typedef MessageFilter = String Function(String message);
 class PubContext {
   PubContext._(this._values) {
     for (final String item in _values) {
-      if (!_valudContext.hasMatch(item)) {
-        throw ArgumentError.value(_values, 'value', 'Must match RegExp ${_validContext.pattern}');
+      if (!_validContext.hasMatch(item)) {
+        throw ArgumentError.value(
+          _values, 'value', 'Must match RegExp ${_validContext.pattern}');
       }
     }
   }
