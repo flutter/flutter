@@ -114,6 +114,15 @@ class Table extends RenderObjectWidget {
        assert(defaultColumnWidth != null),
        assert(defaultVerticalAlignment != null),
        assert(() {
+         if (children.any((TableRow row) => row.children == null)) {
+           throw FlutterError(
+             'One of the rows of the table had null children.\n'
+             'The children property of TableRow must not be null.'
+           );
+         }
+         return true;
+       }()),
+       assert(() {
          if (children.any((TableRow row) => row.children.any((Widget cell) => cell == null))) {
            throw FlutterError(
              'One of the children of one of the rows of the table was null.\n'
