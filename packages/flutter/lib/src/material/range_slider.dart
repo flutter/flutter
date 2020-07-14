@@ -858,7 +858,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
 
   bool get isDiscrete => divisions != null && divisions > 0;
 
-  double get minThumbSeparationValue => isDiscrete ? 0 : sliderTheme.minThumbSeparation / _trackRect.width;
+  double get _minThumbSeparationValue => isDiscrete ? 0 : sliderTheme.minThumbSeparation / _trackRect.width;
 
   RangeValues get values => _values;
   RangeValues _values;
@@ -1192,9 +1192,9 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       final double currentDragValue = _discretize(dragValue);
 
       if (_lastThumbSelection == Thumb.start) {
-        _newValues = RangeValues(math.min(currentDragValue, currentValues.end - minThumbSeparationValue), currentValues.end);
+        _newValues = RangeValues(math.min(currentDragValue, currentValues.end - _minThumbSeparationValue), currentValues.end);
       } else if (_lastThumbSelection == Thumb.end) {
-        _newValues = RangeValues(currentValues.start, math.max(currentDragValue, currentValues.start + minThumbSeparationValue));
+        _newValues = RangeValues(currentValues.start, math.max(currentDragValue, currentValues.start + _minThumbSeparationValue));
       }
       onChanged(_newValues);
     }
@@ -1592,7 +1592,6 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
-
     config.isSemanticBoundary = true;
   }
 
@@ -1600,7 +1599,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
 
   void _increaseStartAction() {
     if (isEnabled) {
-      onChanged(RangeValues(math.min(_increaseValue(values.start), values.end - minThumbSeparationValue), values.end));
+      onChanged(RangeValues(math.min(_increaseValue(values.start), values.end - _minThumbSeparationValue), values.end));
     }
   }
 
@@ -1618,7 +1617,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
 
   void _decreaseEndAction() {
     if (isEnabled) {
-      onChanged(RangeValues(values.start, math.max(_decreaseValue(values.end), values.start + minThumbSeparationValue)));
+      onChanged(RangeValues(values.start, math.max(_decreaseValue(values.end), values.start + _minThumbSeparationValue)));
     }
   }
 
