@@ -378,13 +378,10 @@ class FakeHttpClientRequest implements HttpClientRequest {
   @override
   void writeln([Object obj = '']) {}
 
-  // TODO(zichangguo): Uncomment following line when abort() breaking change
-  // lands in g3.
-  // @override
-  // void abort([Object exception, StackTrace stackTrace]) {}
-
+  // TODO(zichangguo): remove the ignore after the change in dart:io lands.
   @override
-  void noSuchMethod(Invocation invocation) {}
+  // ignore: override_on_non_overriding_member
+  void abort([Object exception, StackTrace stackTrace]) {}
 }
 
 class FakeHttpClientResponse implements HttpClientResponse {

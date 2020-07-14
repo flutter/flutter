@@ -228,13 +228,10 @@ class _MockHttpRequest extends HttpClientRequest {
     return Future<HttpClientResponse>.value(_MockHttpResponse());
   }
 
-  // TODO(zichangguo): Uncomment following line when abort() breaking change
-  // lands in g3.
-  // @override
-  // void abort([Object exception, StackTrace stackTrace]) {}
-
+  // TODO(zichangguo): remove the ignore after the change in dart:io lands.
   @override
-  void noSuchMethod(Invocation invocation) {}
+  // ignore: override_on_non_overriding_member
+  void abort([Object exception, StackTrace stackTrace]) {}
 
   @override
   HttpConnectionInfo get connectionInfo => null;
