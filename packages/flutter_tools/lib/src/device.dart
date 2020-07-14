@@ -6,15 +6,20 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'android/android_device_discovery.dart';
+import 'android/android_sdk.dart';
 import 'android/android_workflow.dart';
 import 'application_package.dart';
 import 'artifacts.dart';
+import 'base/config.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
+import 'base/logger.dart';
+import 'base/platform.dart';
 import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
@@ -24,11 +29,14 @@ import 'fuchsia/fuchsia_sdk.dart';
 import 'fuchsia/fuchsia_workflow.dart';
 import 'globals.dart' as globals;
 import 'ios/devices.dart';
+import 'ios/ios_workflow.dart';
 import 'ios/simulators.dart';
 import 'linux/linux_device.dart';
 import 'macos/macos_device.dart';
+import 'macos/xcode.dart';
 import 'project.dart';
 import 'tester/flutter_tester.dart';
+import 'version.dart';
 import 'web/web_device.dart';
 import 'windows/windows_device.dart';
 
@@ -67,46 +75,11 @@ class PlatformType {
 }
 
 /// A class to get all available devices.
-class DeviceManager {
+abstract class DeviceManager {
 
   /// Constructing DeviceManagers is cheap; they only do expensive work if some
   /// of their methods are called.
-  List<DeviceDiscovery> get deviceDiscoverers => _deviceDiscoverers;
-  final List<DeviceDiscovery> _deviceDiscoverers = List<DeviceDiscovery>.unmodifiable(<DeviceDiscovery>[
-    AndroidDevices(
-      logger: globals.logger,
-      androidSdk: globals.androidSdk,
-      androidWorkflow: androidWorkflow,
-      processManager: globals.processManager,
-    ),
-    IOSDevices(
-      platform: globals.platform,
-      xcdevice: globals.xcdevice,
-      iosWorkflow: globals.iosWorkflow,
-      logger: globals.logger,
-    ),
-    IOSSimulators(iosSimulatorUtils: globals.iosSimulatorUtils),
-    FuchsiaDevices(
-      fuchsiaSdk: fuchsiaSdk,
-      logger: globals.logger,
-      fuchsiaWorkflow: fuchsiaWorkflow,
-      platform: globals.platform,
-    ),
-    FlutterTesterDevices(),
-    MacOSDevices(),
-    LinuxDevices(
-      platform: globals.platform,
-      featureFlags: featureFlags,
-    ),
-    WindowsDevices(),
-    WebDevices(
-      featureFlags: featureFlags,
-      fileSystem: globals.fs,
-      platform: globals.platform,
-      processManager: globals.processManager,
-      logger: globals.logger,
-    ),
-  ]);
+  List<DeviceDiscovery> get deviceDiscoverers;
 
   String _specifiedDeviceId;
 
@@ -301,6 +274,71 @@ class DeviceManager {
   bool isDeviceSupportedForProject(Device device, FlutterProject flutterProject) {
     return device.isSupportedForProject(flutterProject);
   }
+}
+
+class FlutterDeviceManager extends DeviceManager {
+  FlutterDeviceManager({
+    @required Logger logger,
+    @required Platform platform,
+    @required ProcessManager processManager,
+    @required FileSystem fileSystem,
+    @required AndroidSdk androidSdk,
+    @required FeatureFlags featureFlags,
+    @required IOSSimulatorUtils iosSimulatorUtils,
+    @required XCDevice xcDevice,
+    @required AndroidWorkflow androidWorkflow,
+    @required IOSWorkflow iosWorkflow,
+    @required FuchsiaWorkflow fuchsiaWorkflow,
+    @required FlutterVersion flutterVersion,
+    @required Config config,
+    @required Artifacts artifacts,
+  }) : deviceDiscoverers =  <DeviceDiscovery>[
+    AndroidDevices(
+      logger: logger,
+      androidSdk: androidSdk,
+      androidWorkflow: androidWorkflow,
+      processManager: processManager,
+    ),
+    IOSDevices(
+      platform: platform,
+      xcdevice: xcDevice,
+      iosWorkflow: iosWorkflow,
+      logger: logger,
+    ),
+    IOSSimulators(
+      iosSimulatorUtils: iosSimulatorUtils,
+    ),
+    FuchsiaDevices(
+      fuchsiaSdk: fuchsiaSdk,
+      logger: logger,
+      fuchsiaWorkflow: fuchsiaWorkflow,
+      platform: platform,
+    ),
+    FlutterTesterDevices(
+      fileSystem: fileSystem,
+      flutterVersion: flutterVersion,
+      processManager: processManager,
+      config: config,
+      logger: logger,
+      artifacts: artifacts,
+    ),
+    MacOSDevices(),
+    LinuxDevices(
+      platform: platform,
+      featureFlags: featureFlags,
+    ),
+    WindowsDevices(),
+    WebDevices(
+      featureFlags: featureFlags,
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager,
+      logger: logger,
+    ),
+  ];
+
+  @override
+  final List<DeviceDiscovery> deviceDiscoverers;
 }
 
 /// An abstract class to discover and enumerate a specific type of devices.
@@ -700,6 +738,7 @@ class DebuggingOptions {
     this.port,
     this.webEnableExposeUrl,
     this.webUseSseForDebugProxy = true,
+    this.webUseSseForDebugBackend = true,
     this.webRunHeadless = false,
     this.webBrowserDebugPort,
     this.webEnableExpressionEvaluation = false,
@@ -713,6 +752,7 @@ class DebuggingOptions {
       this.hostname,
       this.webEnableExposeUrl,
       this.webUseSseForDebugProxy = true,
+      this.webUseSseForDebugBackend = true,
       this.webRunHeadless = false,
       this.webBrowserDebugPort,
       this.cacheSkSL = false,
@@ -759,6 +799,7 @@ class DebuggingOptions {
   final String hostname;
   final bool webEnableExposeUrl;
   final bool webUseSseForDebugProxy;
+  final bool webUseSseForDebugBackend;
 
   /// Whether to run the browser in headless mode.
   ///

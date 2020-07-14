@@ -854,7 +854,6 @@ class WidgetsApp extends StatefulWidget {
 
     // Dismissal
     LogicalKeySet(LogicalKeyboardKey.escape): const DismissIntent(),
-    LogicalKeySet(LogicalKeyboardKey.gameButtonB): const ActivateIntent(),
 
     // Keyboard traversal.
     LogicalKeySet(LogicalKeyboardKey.tab): const NextFocusIntent(),
@@ -1308,6 +1307,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
           },
         onUnknownRoute: _onUnknownRoute,
         observers: widget.navigatorObservers,
+        reportsRouteUpdateToEngine: true,
       );
     }
 

@@ -583,6 +583,10 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 /// parameters can be passed in to customize the appearance and behavior of
 /// modal bottom sheets.
 ///
+/// The optional `routeSettings` parameter sets the [RouteSettings] of the modal bottom sheet
+/// sheet. This is particularly useful in the case that a user wants to observe
+/// [PopupRoute]s within a [NavigatorObserver].
+///
 /// Returns a `Future` that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the modal bottom sheet was closed.
 ///
@@ -648,6 +652,7 @@ Future<T> showModalBottomSheet<T>({
   bool useRootNavigator = false,
   bool isDismissible = true,
   bool enableDrag = true,
+  RouteSettings routeSettings,
 }) {
   assert(context != null);
   assert(builder != null);
@@ -670,6 +675,7 @@ Future<T> showModalBottomSheet<T>({
     isDismissible: isDismissible,
     modalBarrierColor: barrierColor,
     enableDrag: enableDrag,
+    settings: routeSettings,
   ));
 }
 

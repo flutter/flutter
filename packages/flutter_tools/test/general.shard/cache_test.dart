@@ -48,7 +48,7 @@ void main() {
     });
 
     test('should throw when locking is not acquired', () {
-      expect(() => Cache.checkLockAcquired(), throwsStateError);
+      expect(Cache.checkLockAcquired, throwsStateError);
     });
 
     test('should not throw when locking is disabled', () {
@@ -547,7 +547,7 @@ void main() {
     final MockCache mockCache = MockCache();
     final FontSubsetArtifacts artifacts = FontSubsetArtifacts(mockCache);
     when(mockCache.includeAllPlatforms).thenReturn(false);
-    expect(() => artifacts.getBinaryDirs(), throwsToolExit(message: 'Unsupported operating system: ${globals.platform.operatingSystem}'));
+    expect(artifacts.getBinaryDirs, throwsToolExit(message: 'Unsupported operating system: ${globals.platform.operatingSystem}'));
   }, overrides: <Type, Generator> {
     Platform: () => FakePlatform(operatingSystem: 'fuchsia'),
   });
