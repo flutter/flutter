@@ -4,6 +4,7 @@
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:process/process.dart';
 
@@ -53,6 +54,20 @@ void main() {
 
     // Check for message only printed in verbose mode.
     expect(result.stdout, contains('Running shutdown hooks'));
+  });
+
+  test('flutter config contains all features', () async {
+    final String flutterBin = globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final ProcessResult result = await const LocalProcessManager().run(<String>[
+      flutterBin,
+      'config',
+    ]);
+
+    // contains all of the experiments in features.dart
+    expect(result.stdout.split('\n'), containsAll(<Matcher>[
+      for (final Feature feature in allFeatures)
+        contains(feature.configSetting),
+    ]));
   });
 
   test('flutter run --machine uses AppRunLogger', () async {
