@@ -130,20 +130,3 @@ void main() {
     // TODO(devoncarew): These tests fail on cirrus-ci windows.
   }, skip: Platform.isWindows);
 }
-
-Future<Isolate> waitForExtension(VmService vmService) async {
-  final Completer<void> completer = Completer<void>();
-  await vmService.streamListen(EventStreams.kExtension);
-  vmService.onExtensionEvent.listen((Event event) {
-    if (event.json['extensionKind'] == 'Flutter.FrameworkInitialization') {
-      completer.complete();
-    }
-  });
-  final IsolateRef isolateRef = (await vmService.getVM()).isolates.first;
-  final Isolate isolate = await vmService.getIsolate(isolateRef.id);
-  if (isolate.extensionRPCs.contains('ext.flutter.brightnessOverride')) {
-    return isolate;
-  }
-  await completer.future;
-  return isolate;
-}

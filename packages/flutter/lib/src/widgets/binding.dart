@@ -415,24 +415,26 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         },
       );
 
-      // Register the ability to quickly mark elements as dirty.
-      // The performance of this method may be improved with additional
-      // information from https://github.com/flutter/flutter/issues/46195.
       registerServiceExtension(
         name: 'fastReassemble',
         callback: (Map<String, Object> params) async {
-          final String className = params['class'] as String;
+          final FastReassemblePredicate fastReassemblePredicate = _debugFastReassembleMethod;
+          _debugFastReassembleMethod = null;
+          if (fastReassemblePredicate == null) {
+            throw FlutterError('debugFastReassembleMethod must be set to use fastReassemble.');
+          }
           void markElementsDirty(Element element) {
             if (element == null) {
               return;
             }
-            if (element.widget?.runtimeType?.toString()?.startsWith(className) ?? false) {
+            if (fastReassemblePredicate(element.widget)) {
               element.markNeedsBuild();
             }
             element.visitChildElements(markElementsDirty);
           }
           markElementsDirty(renderViewElement);
-          return <String, String>{'Success': 'true'};
+          await endOfFrame;
+          return <String, String>{'type': 'Success'};
         },
       );
 
@@ -1026,6 +1028,35 @@ void runApp(Widget app) {
     ..scheduleAttachRootWidget(app)
     ..scheduleWarmUpFrame();
 }
+
+/// A function that should validate that the provided object is assignable to a
+/// given type.
+typedef FastReassemblePredicate = bool Function(Object);
+
+/// Debug-only functionality used to perform faster hot reloads.
+///
+/// This field is set by expression evaluation in the flutter tool and is
+/// used to invalidate specific types of [Element]s. This setter
+/// should not be referenced in user code and is only public so that expression
+/// evaluation can be done in the context of an almost-arbitrary Dart library.
+///
+/// For example, expression evaluation might be performed with the following code:
+///
+/// ```dart
+/// (debugFastReassembleMethod=(Object x) => x is Foo)()
+/// ```
+///
+/// And then followed by a call to `ext.flutter.fastReassemble`. This will read
+/// the provided predicate and use it to mark specific elements dirty wherever
+/// [Element.widget] is a `Foo`. Afterwards, the internal field will be nulled
+/// out.
+set debugFastReassembleMethod(FastReassemblePredicate fastReassemblePredicate) {
+  assert(() {
+    _debugFastReassembleMethod = fastReassemblePredicate;
+    return true;
+  }());
+}
+FastReassemblePredicate _debugFastReassembleMethod;
 
 /// Print a string representation of the currently running app.
 void debugDumpApp() {
