@@ -13,7 +13,8 @@ application_snapshot("kernel_compiler") {
     "../flutter/kernel:kernel_platform_files($host_toolchain)",
   ]
 
-  dot_packages = rebase_path("//third_party/dart/.packages")
+  dot_packages =
+      rebase_path("//third_party/dart/.dart_tool/package_config.json")
 
   training_args = [
     "--train",
