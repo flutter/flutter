@@ -153,39 +153,4 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
     });
   }
 
-
-  static List<double> _pointerCoordsAsList(AndroidPointerCoords coords) {
-    return <double>[
-      coords.orientation,
-      coords.pressure,
-      coords.size,
-      coords.toolMajor,
-      coords.toolMinor,
-      coords.touchMajor,
-      coords.touchMinor,
-      coords.x,
-      coords.y,
-    ];
-  }
-
-  static List<dynamic> _motionEventasList(AndroidMotionEvent event, int viewId) {
-    return <dynamic>[
-      viewId,
-      event.downTime,
-      event.eventTime,
-      event.action,
-      event.pointerCount,
-      event.pointerProperties.map<List<int>>((AndroidPointerProperties p) => <int> [p.id, p.toolType]).toList(),
-      event.pointerCoords.map<List<double>>((AndroidPointerCoords p) => _pointerCoordsAsList(p)).toList(),
-      event.metaState,
-      event.buttonState,
-      event.xPrecision,
-      event.yPrecision,
-      event.deviceId,
-      event.edgeFlags,
-      event.source,
-      event.flags,
-      event.motionEventId,
-    ];
-  }
 }
