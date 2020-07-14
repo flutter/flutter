@@ -117,7 +117,6 @@ abstract class MaterialInkController {
 /// and [ShapeBorder.lerp] between the previous and next [shape] values is
 /// supported. Shape changes are also animated for [animationDuration].
 ///
-///
 /// ## Shape
 ///
 /// The shape for material is determined by [shape], [type], and [borderRadius].
@@ -149,6 +148,16 @@ abstract class MaterialInkController {
 /// widgets that use the [InkFeature] mechanism. Otherwise, in-progress ink
 /// features (e.g., ink splashes and ink highlights) won't move to account for
 /// the new layout.
+///
+/// ## Painting over the material
+///
+/// Material widgets will often trigger reactions on their nearest material
+/// ancestor. For example, [ListTile.hoverColor] triggers a reaction on the
+/// tile's material when a pointer is hovering over it. These reactions will be
+/// obscured if any widget in between them and the material paints in such a
+/// way as to obscure the material (such as setting a [BoxDecoration.color] on
+/// a [DecoratedBox]). To avoid this behavior, use [InkDecoration] to decorate
+/// the material itself.
 ///
 /// See also:
 ///

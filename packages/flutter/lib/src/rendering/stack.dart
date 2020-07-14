@@ -71,12 +71,12 @@ class RelativeRect {
 
   /// Distance from the right side of the container to the right side of this rectangle.
   ///
-  /// May be negative if the right side of the rectangle is outside of the container.
+  /// May be positive if the right side of the rectangle is outside of the container.
   final double right;
 
   /// Distance from the bottom side of the container to the bottom side of this rectangle.
   ///
-  /// May be negative if the bottom side of the rectangle is outside of the container.
+  /// May be positive if the bottom side of the rectangle is outside of the container.
   final double bottom;
 
   /// Returns whether any of the values are greater than zero.

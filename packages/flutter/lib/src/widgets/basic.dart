@@ -5801,6 +5801,11 @@ class Listener extends StatelessWidget {
   final PointerCancelEventListener onPointerCancel;
 
   /// Called when a pointer signal occurs over this object.
+  ///
+  /// See also:
+  ///
+  ///  * [PointerSignalEvent], which goes into more detail on pointer signal
+  ///    events.
   final PointerSignalEventListener onPointerSignal;
 
   /// How to behave during hit testing.
@@ -5975,7 +5980,7 @@ class _PointerListener extends SingleChildRenderObjectWidget {
 /// See also:
 ///
 ///  * [Listener], a similar widget that tracks pointer events when the pointer
-///    have buttons pressed.
+///    has buttons pressed.
 class MouseRegion extends StatefulWidget {
   /// Creates a widget that forwards mouse events to callbacks.
   ///

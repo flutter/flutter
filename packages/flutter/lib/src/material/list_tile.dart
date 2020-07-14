@@ -658,6 +658,8 @@ class ListTile extends StatelessWidget {
     this.hoverColor,
     this.focusNode,
     this.autofocus = false,
+    this.tileColor,
+    this.selectedTileColor,
   }) : assert(isThreeLine != null),
        assert(enabled != null),
        assert(selected != null),
@@ -794,6 +796,35 @@ class ListTile extends StatelessWidget {
   ///
   /// By default the selected color is the theme's primary color. The selected color
   /// can be overridden with a [ListTileTheme].
+  ///
+  /// {@tool dartpad --template=stateful_widget_scaffold}
+  ///
+  /// Here is an example of using a [StatefulWidget] to keep track of the
+  /// selected index, and using that to set the `selected` property on the
+  /// corresponding [ListTile].
+  ///
+  /// ```dart
+  ///   int _selectedIndex;
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return ListView.builder(
+  ///       itemCount: 10,
+  ///       itemBuilder: (BuildContext context, int index) {
+  ///         return ListTile(
+  ///           title: Text('Item $index'),
+  ///           selected: index == _selectedIndex,
+  ///           onTap: () {
+  ///             setState(() {
+  ///               _selectedIndex = index;
+  ///             });
+  ///           },
+  ///         );
+  ///       },
+  ///     );
+  ///   }
+  /// ```
+  /// {@end-tool}
   final bool selected;
 
   /// The color for the tile's [Material] when it has the input focus.
@@ -807,6 +838,16 @@ class ListTile extends StatelessWidget {
 
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
+
+  /// Defines the background color of `ListTile when [selected] is false.
+  ///
+  /// By default, the value of `tileColor` is [Colors.transparent].
+  final Color tileColor;
+
+  /// Defines the background color of `ListTile` when [selected] is true.
+  ///
+  /// By default, the value of `selectedListColor` is [Colors.transparent].
+  final Color selectedTileColor;
 
   /// Add a one pixel border in between each tile. If color isn't specified the
   /// [ThemeData.dividerColor] of the context's [Theme] is used.
@@ -913,6 +954,16 @@ class ListTile extends StatelessWidget {
       : style.copyWith(color: color);
   }
 
+  Color _tileBackgroundColor() {
+    if (!selected && tileColor != null)
+      return tileColor;
+
+    if (selected && selectedTileColor != null)
+      return selectedTileColor;
+
+    return Colors.transparent;
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -984,21 +1035,24 @@ class ListTile extends StatelessWidget {
       child: Semantics(
         selected: selected,
         enabled: enabled,
-        child: SafeArea(
-          top: false,
-          bottom: false,
-          minimum: resolvedContentPadding,
-          child: _ListTile(
-            leading: leadingIcon,
-            title: titleText,
-            subtitle: subtitleText,
-            trailing: trailingIcon,
-            isDense: _isDenseLayout(tileTheme),
-            visualDensity: visualDensity ?? theme.visualDensity,
-            isThreeLine: isThreeLine,
-            textDirection: textDirection,
-            titleBaselineType: titleStyle.textBaseline,
-            subtitleBaselineType: subtitleStyle?.textBaseline,
+        child: ColoredBox(
+          color: _tileBackgroundColor(),
+          child: SafeArea(
+            top: false,
+            bottom: false,
+            minimum: resolvedContentPadding,
+            child: _ListTile(
+              leading: leadingIcon,
+              title: titleText,
+              subtitle: subtitleText,
+              trailing: trailingIcon,
+              isDense: _isDenseLayout(tileTheme),
+              visualDensity: visualDensity ?? theme.visualDensity,
+              isThreeLine: isThreeLine,
+              textDirection: textDirection,
+              titleBaselineType: titleStyle.textBaseline,
+              subtitleBaselineType: subtitleStyle?.textBaseline,
+            ),
           ),
         ),
       ),

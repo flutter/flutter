@@ -968,6 +968,12 @@ abstract class BoxScrollView extends ScrollView {
 /// ```
 /// {@end-tool}
 ///
+/// ## Selection of list items
+///
+/// `ListView` has no built-in notion of a selected item or items. For a small
+/// example of how a caller might wire up basic item selection, see
+/// [ListTile.selected].
+///
 /// See also:
 ///
 ///  * [SingleChildScrollView], which is a scrollable widget that has a single
