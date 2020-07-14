@@ -350,7 +350,8 @@ class _SystemMouseCursorSession extends MouseCursorSession {
 /// that represents the same concept, such as being text text, being clickable,
 /// or being a forbidden operation. Since the set of system cursors supported by
 /// each platform varies, multiple instances can correspond to the same system
-/// cursor.
+/// cursor. If a cursor is not supported on the platform that the application
+/// is running on, it falls back to [basic].
 ///
 /// [SystemMouseCursors] enumerates the complete set of system cursors supported
 /// by Flutter, which are hard-coded in the engine. Therefore, manually
@@ -402,7 +403,9 @@ class SystemMouseCursor extends MouseCursor {
 /// result, or fallback to the [basic] arrow. This mapping is defined by the
 /// Flutter engine.
 ///
-/// The cursor names are based on the cursors' use cases instead of their shapes.
+/// The cursor names are based on the cursors' use cases instead of their shapes,
+/// because different platforms might (although not commonly) use different shapes
+/// for the same use case.
 class SystemMouseCursors {
   // This class only contains static members, and should not be instantiated or
   // extended.
