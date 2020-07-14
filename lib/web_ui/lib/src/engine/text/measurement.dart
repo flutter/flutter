@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 part of engine;
 
 // TODO(yjbanov): this is a hack we use to compute ideographic baseline; this
@@ -21,13 +20,14 @@ bool _whitespacePredicate(int char) {
       _normalizeLineProperty(lineLookup.findForChar(char));
   return prop == LineCharProperty.SP ||
       prop == LineCharProperty.BK ||
+      prop == LineCharProperty.LF ||
       prop == LineCharProperty.CR;
 }
 
 bool _newlinePredicate(int char) {
   final LineCharProperty? prop =
       _normalizeLineProperty(lineLookup.findForChar(char));
-  return prop == LineCharProperty.BK || prop == LineCharProperty.CR;
+  return prop == LineCharProperty.BK || prop == LineCharProperty.LF || prop == LineCharProperty.CR;
 }
 
 /// Manages [ParagraphRuler] instances and caches them per unique
