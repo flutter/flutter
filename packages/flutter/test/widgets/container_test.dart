@@ -7,7 +7,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
-import 'package:mockito/mockito.dart';
 
 import '../rendering/mock_canvas.dart';
 
@@ -439,11 +438,9 @@ void main() {
     );
 
     final RenderBox decoratedBox = tester.renderObject(find.byType(DecoratedBox).last);
-    final PaintingContext context = _MockPaintingContext();
-    final Canvas canvas = _MockCanvas();
-    int saveCount = 0;
-    when(canvas.getSaveCount()).thenAnswer((_) => saveCount++);
-    when(context.canvas).thenReturn(canvas);
+    final _MockPaintingContext context = _MockPaintingContext();
+    final _MockCanvas canvas = _MockCanvas();
+    context.canvas = canvas;
     FlutterError error;
     try {
       decoratedBox.paint(context, const Offset(0, 0));
@@ -561,5 +558,26 @@ void main() {
   });
 }
 
-class _MockPaintingContext extends Mock implements PaintingContext {}
-class _MockCanvas extends Mock implements Canvas {}
+class _MockPaintingContext implements PaintingContext {
+  @override
+  Canvas canvas;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    throw Exception('Unmocked method ${invocation.memberName}');
+  }
+}
+class _MockCanvas implements Canvas {
+  int saveCount = 0;
+
+  @override
+  int getSaveCount() => saveCount++;
+
+  @override
+  void drawRect(Rect rect, Paint paint) {}
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    throw Exception('Unmocked method ${invocation.memberName}');
+  }
+}

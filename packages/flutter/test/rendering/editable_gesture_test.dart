@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 
 void main() {
   setUp(() => _GestureBindingSpy());
@@ -58,7 +57,13 @@ class _GestureBindingSpy extends AutomatedTestWidgetsFlutterBinding {
   PointerRouter get pointerRouter => _testPointerRouter;
 }
 
-class FakeEditableTextState extends TextSelectionDelegate with Mock { }
+class FakeEditableTextState extends TextSelectionDelegate {
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    throw Exception('unmocked method ${invocation.memberName}');
+  }
+}
 
 class _PointerRouterSpy extends PointerRouter {
   int routeCount = 0;

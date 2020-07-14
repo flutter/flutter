@@ -7,7 +7,6 @@
 import 'package:flutter/src/physics/utils.dart' show nearEqual;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 
 const Color _kScrollbarColor = Color(0xFF123456);
 const double _kThickness = 2.5;
@@ -39,12 +38,24 @@ ScrollbarPainter _buildPainter({
   )..update(scrollMetrics, scrollMetrics.axisDirection);
 }
 
-class _DrawRectOnceCanvas extends Mock implements Canvas { }
+class _DrawRectOnceCanvas implements Canvas {
+  Rect lastRect;
+
+  @override
+  void drawRect(Rect rect, Paint paint) {
+    lastRect = rect;
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    throw Exception('Unmocked method ${invocation.memberName}');
+  }
+}
 
 void main() {
   final _DrawRectOnceCanvas testCanvas = _DrawRectOnceCanvas();
   ScrollbarPainter painter;
-  Rect captureRect() => verify(testCanvas.drawRect(captureAny, any)).captured.single as Rect;
+  Rect captureRect() => testCanvas.lastRect;
 
   tearDown(() => painter = null);
 
