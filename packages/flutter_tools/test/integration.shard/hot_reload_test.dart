@@ -44,13 +44,23 @@ void main() {
         .where(_isHotReloadCompletionEvent)
         .listen((_) => numReloads++);
 
+    // To reduce tests flaking, override the debounce timer to something higher than
+    // the default to ensure the hot reloads that are supposed to arrive within the
+    // debounce period will even on slower CI machines.
+    const int hotReloadDebounceOverrideMs = 250;
+    const Duration delay = Duration(milliseconds: hotReloadDebounceOverrideMs + 10);
+
+    Future<void> doReload([void _]) =>
+        _flutter.hotReload(debounce: true, debounceDurationOverrideMs: hotReloadDebounceOverrideMs);
+
     try {
       await Future.wait<void>(<Future<void>>[
-        _flutter.hotReload(debounce: true),
-        _flutter.hotReload(debounce: true),
-        Future<void>.delayed(const Duration(milliseconds: 60)).then((_) => _flutter.hotReload(debounce: true)),
-        Future<void>.delayed(const Duration(milliseconds: 60)).then((_) => _flutter.hotReload(debounce: true)),
+        doReload(),
+        doReload(),
+        Future<void>.delayed(delay).then(doReload),
+        Future<void>.delayed(delay).then(doReload),
       ]);
+
       // We should only get two reloads, as the first two will have been
       // merged together by the debounce, and the second two also.
       expect(numReloads, equals(2));

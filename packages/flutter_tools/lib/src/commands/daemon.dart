@@ -595,7 +595,7 @@ class AppDomain extends Domain {
   bool isRestartSupported(bool enableHotReload, Device device) =>
       enableHotReload && device.supportsHotRestart;
 
-  final Duration _hotReloadDebounceDuration = const Duration(milliseconds: 50);
+  final int _hotReloadDebounceDurationMs = 50;
 
   Future<OperationResult> restart(Map<String, dynamic> args) async {
     final String appId = _getStringArg(args, 'appId', required: true);
@@ -603,6 +603,8 @@ class AppDomain extends Domain {
     final bool pauseAfterRestart = _getBoolArg(args, 'pause') ?? false;
     final String restartReason = _getStringArg(args, 'reason');
     final bool debounce = _getBoolArg(args, 'debounce') ?? false;
+    // This is an undocumented parameter used for integration tests.
+    final int debounceDurationOverrideMs = _getIntArg(args, 'debounceDurationOverrideMs');
 
     final AppInstance app = _getApp(appId);
     if (app == null) {
@@ -613,6 +615,7 @@ class AppDomain extends Domain {
       app,
       fullRestart ? OperationType.restart: OperationType.reload,
       debounce,
+      debounceDurationOverrideMs,
       () {
         return app.restart(
             fullRestart: fullRestart,
@@ -637,6 +640,7 @@ class AppDomain extends Domain {
       app,
       OperationType.reloadMethod,
       debounce,
+      null,
       () {
         return app.reloadMethod(classId: classId, libraryId: libraryId);
       },
@@ -654,11 +658,16 @@ class AppDomain extends Domain {
     AppInstance app,
     OperationType operationType,
     bool debounce,
+    int debounceDurationOverrideMs,
     Future<OperationResult> Function() action,
   ) {
+    final Duration debounceDuration = debounce
+        ? Duration(milliseconds: debounceDurationOverrideMs ?? _hotReloadDebounceDurationMs)
+        : Duration.zero;
+
     return operationQueue.queueAndDebounce(
       operationType,
-      debounce ? _hotReloadDebounceDuration : Duration.zero,
+      debounceDuration,
       () => app._runInZone<OperationResult>(this, action),
     );
   }
