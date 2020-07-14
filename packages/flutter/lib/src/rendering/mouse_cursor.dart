@@ -352,6 +352,14 @@ class _SystemMouseCursorSession extends MouseCursorSession {
 /// each platform varies, multiple instances can correspond to the same system
 /// cursor.
 ///
+/// Each cursor is noted with its corresponding native cursors on each platform:
+///
+///  * Android: API name in Java
+///  * Web: CSS cursor
+///  * Windows: Win32 API
+///  * Linux: GDK, `gdk_cursor_new_from_name`
+///  * macOS: AppKit, API name in Objective C
+///
 /// If the platform that the application is running on is not listed for a cursor,
 /// using this cursor falls back to [basic].
 ///
