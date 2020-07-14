@@ -214,9 +214,16 @@ abstract class Route<T> {
     // will be guarded by the asynchronous gap.
     TickerFuture.complete().then<void>((void _) {
       // The route can be disposed before the ticker future completes. This can
-      // happen when the navigator is under a TabView that does a warping. The
-      // navigator will be null in this case, and we have to do a null-safe
-      // operation.
+      // happen when the navigator is under a TabView that warps from one tab to
+      // another, non-adjacent tab, with an animation. The TabView reorders its
+      // children before and after the warping completes, and that causes its
+      // children to be built and disposed within the same frame. If one of its
+      // children contains a navigator, the routes in that navigator are also
+      // added and disposed within that frame.
+      //
+      // Since the reference to the navigator will be set to null after it is
+      // disposed, we have to do a null-safe operation in case that happens
+      // within the same frame when it is added.
       navigator?.focusScopeNode?.requestFocus();
     });
   }
