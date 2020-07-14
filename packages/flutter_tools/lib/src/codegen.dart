@@ -4,8 +4,12 @@
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
+import 'package:process/process.dart';
 
+import 'artifacts.dart';
 import 'base/context.dart';
+import 'base/file_system.dart';
+import 'base/logger.dart';
 import 'build_info.dart';
 import 'compile.dart';
 import 'globals.dart' as globals;
@@ -63,10 +67,19 @@ abstract class CodegenDaemon {
 /// supported here. Using the build pipeline implies a fixed multi-root
 /// filesystem and requires a pubspec.
 class CodeGeneratingKernelCompiler implements KernelCompiler {
-  const CodeGeneratingKernelCompiler();
+  CodeGeneratingKernelCompiler({
+    @required FileSystem fileSystem,
+    @required Artifacts artifacts,
+    @required ProcessManager processManager,
+    @required Logger logger,
+  }) : _delegate = KernelCompiler(
+    logger: logger,
+    artifacts: artifacts,
+    processManager: processManager,
+    fileSystem: fileSystem,
+  );
 
-  static const KernelCompiler _delegate = KernelCompiler();
-
+  final KernelCompiler _delegate;
   @override
   Future<CompilerOutput> compile({
     String mainPath,

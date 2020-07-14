@@ -43,8 +43,14 @@ function follow_links() (
   echo "$file"
 )
 
-PROG_NAME="$(follow_links "$BASH_SOURCE")"
+PROG_NAME="$(follow_links "${BASH_SOURCE[0]}")"
 BIN_DIR="$(cd "${PROG_NAME%/*}" ; pwd -P)"
+OS="$(uname -s)"
+
+if [[ $OS =~ MINGW.* ]]; then
+  # If we're on Windows, invoke the batch script instead, to get proper locking.
+  exec "${BIN_DIR}/dart.bat" "$@"
+fi
 
 # To define `shared::execute()` function
 source "$BIN_DIR/internal/shared.sh"

@@ -14,7 +14,6 @@ import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
-import 'mouse_tracking.dart';
 
 /// Information collected for an annotation that is found in the layer tree.
 ///
@@ -582,11 +581,12 @@ class PictureLayer extends Layer {
 class TextureLayer extends Layer {
   /// Creates a texture layer bounded by [rect] and with backend texture
   /// identified by [textureId], if [freeze] is true new texture frames will not be
-  /// populated to the texture.
+  /// populated to the texture, and use [filterQuality] to set layer's [FilterQuality].
   TextureLayer({
     @required this.rect,
     @required this.textureId,
     this.freeze = false,
+    this.filterQuality = ui.FilterQuality.low,
   }) : assert(rect != null),
        assert(textureId != null);
 
@@ -605,6 +605,9 @@ class TextureLayer extends Layer {
   /// un-freezes it when it is certain that a frame with the new size is ready.
   final bool freeze;
 
+  /// {@macro FilterQuality}
+  final ui.FilterQuality filterQuality;
+
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     final Rect shiftedRect = layerOffset == Offset.zero ? rect : rect.shift(layerOffset);
@@ -614,6 +617,7 @@ class TextureLayer extends Layer {
       width: shiftedRect.width,
       height: shiftedRect.height,
       freeze: freeze,
+      filterQuality: filterQuality,
     );
   }
 
@@ -633,7 +637,6 @@ class PlatformViewLayer extends Layer {
   PlatformViewLayer({
     @required this.rect,
     @required this.viewId,
-    this.hoverAnnotation,
   }) : assert(rect != null),
        assert(viewId != null);
 
@@ -645,25 +648,6 @@ class PlatformViewLayer extends Layer {
   /// A UIView with this identifier must have been created by [PlatformViewsServices.initUiKitView].
   final int viewId;
 
-  /// [MouseTrackerAnnotation] that handles mouse events for this layer.
-  ///
-  /// If [hoverAnnotation] is non-null, [PlatformViewLayer] will annotate the
-  /// region of this platform view such that annotation callbacks will receive
-  /// mouse events, including mouse enter, exit, and hover, but not including
-  /// mouse down, move, and up. The layer will be treated as opaque during an
-  /// annotation search, which will prevent layers behind it from receiving
-  /// these events.
-  ///
-  /// By default, [hoverAnnotation] is null, and [PlatformViewLayer] will not
-  /// receive mouse events, and will therefore appear translucent during the
-  /// annotation search.
-  ///
-  /// See also:
-  ///
-  ///  * [MouseRegion], which explains more about the mouse events and opacity
-  ///    during annotation search.
-  final MouseTrackerAnnotation hoverAnnotation;
-
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     final Rect shiftedRect = layerOffset == Offset.zero ? rect : rect.shift(layerOffset);
@@ -673,24 +657,6 @@ class PlatformViewLayer extends Layer {
       width: shiftedRect.width,
       height: shiftedRect.height,
     );
-  }
-
-  @override
-  @protected
-  bool findAnnotations<S>(AnnotationResult<S> result, Offset localPosition, { @required bool onlyFirst }) {
-    if (hoverAnnotation == null || !rect.contains(localPosition)) {
-      return false;
-    }
-    if (S == MouseTrackerAnnotation) {
-      final Object untypedValue = hoverAnnotation;
-      final S typedValue = untypedValue as S;
-      result.add(AnnotationEntry<S>(
-        annotation: typedValue,
-        localPosition: localPosition,
-      ));
-      return true;
-    }
-    return false;
   }
 }
 

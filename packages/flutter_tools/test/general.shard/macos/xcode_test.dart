@@ -538,6 +538,7 @@ void main() {
           expect(fakeProcessManager.hasRemainingExpectations, isFalse);
         }, overrides: <Type, Generator>{
           Platform: () => macPlatform,
+          Artifacts: () => Artifacts.test(),
         });
 
         testWithoutContext('uses timeout', () async {
@@ -596,6 +597,7 @@ void main() {
           expect(fakeProcessManager.hasRemainingExpectations, isFalse);
         }, overrides: <Type, Generator>{
           Platform: () => macPlatform,
+          Artifacts: () => Artifacts.test(),
         });
 
         testUsingContext('handles unknown architectures', () async {
@@ -644,6 +646,7 @@ void main() {
           expect(fakeProcessManager.hasRemainingExpectations, isFalse);
         }, overrides: <Type, Generator>{
           Platform: () => macPlatform,
+          Artifacts: () => Artifacts.test(),
         });
       });
 

@@ -19,6 +19,6 @@
   "copyButtonLabel": "ਕਾਪੀ ਕਰੋ",
   "pasteButtonLabel": "ਪੇਸਟ ਕਰੋ",
   "selectAllButtonLabel": "ਸਭ ਚੁਣੋ",
-  "tabSemanticsLabel": "TBD",
+  "tabSemanticsLabel": "$tabCount ਵਿੱਚੋਂ $tabIndex ਟੈਬ",
   "modalBarrierDismissLabel": "ਖਾਰਜ ਕਰੋ"
 }

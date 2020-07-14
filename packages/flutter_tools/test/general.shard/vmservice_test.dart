@@ -395,6 +395,13 @@ void main() {
     );
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   });
+
+  testWithoutContext('expandos are null safe', () {
+    vm_service.VmService vmService;
+
+    expect(vmService.httpAddress, null);
+    expect(vmService.wsAddress, null);
+  });
 }
 
 class MockDevice extends Mock implements Device {}

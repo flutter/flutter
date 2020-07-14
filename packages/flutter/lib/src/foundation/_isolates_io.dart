@@ -18,6 +18,7 @@ Future<R> compute<Q, R>(isolates.ComputeCallback<Q, R> callback, Q message, { St
   final Flow flow = Flow.begin();
   Timeline.startSync('$debugLabel: start', flow: flow);
   final ReceivePort resultPort = ReceivePort();
+  final ReceivePort exitPort = ReceivePort();
   final ReceivePort errorPort = ReceivePort();
   Timeline.finishSync();
   final Isolate isolate = await Isolate.spawn<_IsolateConfiguration<Q, FutureOr<R>>>(
@@ -30,7 +31,7 @@ Future<R> compute<Q, R>(isolates.ComputeCallback<Q, R> callback, Q message, { St
       flow.id,
     ),
     errorsAreFatal: true,
-    onExit: resultPort.sendPort,
+    onExit: exitPort.sendPort,
     onError: errorPort.sendPort,
   );
   final Completer<R> result = Completer<R>();
@@ -45,8 +46,13 @@ Future<R> compute<Q, R>(isolates.ComputeCallback<Q, R> callback, Q message, { St
       result.completeError(exception, stack);
     }
   });
+  exitPort.listen((dynamic exitData) {
+    if (!result.isCompleted) {
+      result.completeError(Exception('Isolate exited without result or error.'));
+    }
+  });
   resultPort.listen((dynamic resultData) {
-    assert(resultData == null || resultData is R);
+    assert(resultData is R);
     if (!result.isCompleted)
       result.complete(resultData as R);
   });
@@ -78,12 +84,11 @@ class _IsolateConfiguration<Q, R> {
 }
 
 Future<void> _spawn<Q, R>(_IsolateConfiguration<Q, FutureOr<R>> configuration) async {
-  R result;
-  await Timeline.timeSync(
+  final R result = await Timeline.timeSync(
     configuration.debugLabel,
     () async {
       final FutureOr<R> applicationResult = await configuration.apply();
-      result = await applicationResult;
+      return await applicationResult;
     },
     flow: Flow.step(configuration.flowId),
   );

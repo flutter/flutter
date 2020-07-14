@@ -77,7 +77,10 @@ void main() {
       final MockFlutterDevice mockFlutterDevice = MockFlutterDevice();
       when(mockFlutterDevice.device).thenReturn(mockDevice);
       final List<FlutterDevice> devices = <FlutterDevice>[mockFlutterDevice];
-      final int result = await ColdRunner(devices).run();
+      final int result = await ColdRunner(
+        devices,
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+      ).run();
 
       expect(result, 1);
       expect(testLogger.errorText, matches(r'Tried to run .*, but that file does not exist\.'));

@@ -378,6 +378,15 @@ void main() {
     expect(renderBox.size.height, equals(12.0));
   });
 
+  testWidgets('Can set and update clipBehavior', (WidgetTester tester) async {
+    await tester.pumpWidget(Stack(textDirection: TextDirection.ltr));
+    final RenderStack renderObject = tester.allRenderObjects.whereType<RenderStack>().first;
+    expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+
+    await tester.pumpWidget(Stack(textDirection: TextDirection.ltr, clipBehavior: Clip.hardEdge));
+    expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+  });
+
   testWidgets('IndexedStack with null index', (WidgetTester tester) async {
     bool tapped;
 
@@ -414,6 +423,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Center(
           child: Stack(
+            clipBehavior: Clip.hardEdge,
             children: const <Widget>[
               SizedBox(
                 width: 100.0,
@@ -444,6 +454,7 @@ void main() {
         child: Center(
           child: Stack(
             overflow: Overflow.visible,
+            clipBehavior: Clip.none,
             children: const <Widget>[
               SizedBox(
                 width: 100.0,

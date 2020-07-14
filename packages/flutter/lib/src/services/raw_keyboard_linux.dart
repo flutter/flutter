@@ -19,7 +19,7 @@ import 'raw_keyboard.dart';
 ///
 ///  * [RawKeyboard], which uses this interface to expose key data.
 class RawKeyEventDataLinux extends RawKeyEventData {
-  /// Creates a key event data structure specific for macOS.
+  /// Creates a key event data structure specific for Linux.
   ///
   /// The [toolkit], [scanCode], [unicodeScalarValues], [keyCode], and [modifiers],
   /// arguments must not be null.
@@ -145,6 +145,8 @@ abstract class KeyHelper {
   factory KeyHelper(String toolkit) {
     if (toolkit == 'glfw') {
       return GLFWKeyHelper();
+    } else if (toolkit == 'gtk') {
+      return GtkKeyHelper();
     } else {
       throw FlutterError('Window toolkit not recognized: $toolkit');
     }
@@ -312,5 +314,151 @@ class GLFWKeyHelper with KeyHelper {
   @override
   LogicalKeyboardKey logicalKey(int keyCode) {
     return kGlfwToLogicalKey[keyCode];
+  }
+}
+
+/// Helper class that uses GTK-specific key mappings.
+class GtkKeyHelper with KeyHelper {
+  /// This mask is used to check the [modifiers] field to test whether one of the
+  /// SHIFT modifier keys is pressed.
+  ///
+  /// {@template flutter.services.gtkKeyHelper.modifiers}
+  /// Use this value if you need to decode the [modifiers] field yourself, but
+  /// it's much easier to use [isModifierPressed] if you just want to know if a
+  /// modifier is pressed. This is especially true on GTK, since its modifiers
+  /// don't include the effects of the current key event.
+  /// {@endtemplate}
+  static const int modifierShift = 1 << 0;
+
+  /// This mask is used to check the [modifiers] field to test whether the CAPS
+  /// LOCK modifier key is on.
+  /// {@macro flutter.services.gtkKeyHelper.modifiers}
+  static const int modifierCapsLock = 1 << 1;
+
+  /// This mask is used to check the [modifiers] field to test whether one of the
+  /// CTRL modifier keys is pressed.
+  /// {@macro flutter.services.gtkKeyHelper.modifiers}
+  static const int modifierControl = 1 << 2;
+
+  /// This mask is used to check the [modifiers] field to test whether the first
+  /// modifier key is pressed (usually mapped to alt).
+  /// {@macro flutter.services.gtkKeyHelper.modifiers}
+  static const int modifierMod1 = 1 << 3;
+
+  /// This mask is used to check the [modifiers] field to test whether the second
+  /// modifier key is pressed (assumed to be mapped to num lock).
+  /// {@macro flutter.services.gtkKeyHelper.modifiers}
+  static const int modifierMod2 = 1 << 4;
+
+  /// This mask is used to check the [modifiers] field to test whether one of the
+  /// Meta(SUPER) modifier keys is pressed.
+  /// {@macro flutter.services.gtkKeyHelper.modifiers}
+  static const int modifierMeta = 1 << 28;
+
+  int _mergeModifiers({int modifiers, int keyCode, bool isDown}) {
+    // GTK Key codes for modifier keys.
+    const int shiftLeftKeyCode = 0xffe1;
+    const int shiftRightKeyCode = 0xffe2;
+    const int controlLeftKeyCode = 0xffe3;
+    const int controlRightKeyCode = 0xffe4;
+    const int capsLockKeyCode = 0xffe5;
+    const int shiftLockKeyCode = 0xffe6;
+    const int metaLeftKeyCode = 0xffe7;
+    const int metaRightKeyCode = 0xffe8;
+    const int altLeftKeyCode = 0xffe9;
+    const int altRightKeyCode = 0xffea;
+    const int numLockKeyCode = 0xff7f;
+
+    // On GTK, the "modifiers" bitfield is the state as it is BEFORE this event
+    // happened, not AFTER, like every other platform. Consequently, if this is
+    // a key down, then we need to add the correct modifier bits, and if it's a
+    // key up, we need to remove them.
+
+    int modifierChange = 0;
+    switch (keyCode) {
+      case shiftLeftKeyCode:
+      case shiftRightKeyCode:
+        modifierChange = modifierShift;
+        break;
+      case controlLeftKeyCode:
+      case controlRightKeyCode:
+        modifierChange = modifierControl;
+        break;
+      case altLeftKeyCode:
+      case altRightKeyCode:
+        modifierChange = modifierMod1;
+        break;
+      case metaLeftKeyCode:
+      case metaRightKeyCode:
+        modifierChange = modifierMeta;
+        break;
+      case capsLockKeyCode:
+      case shiftLockKeyCode:
+        modifierChange = modifierCapsLock;
+        break;
+      case numLockKeyCode:
+        modifierChange = modifierMod2;
+        break;
+      default:
+        break;
+    }
+
+    return isDown ? modifiers | modifierChange : modifiers & ~modifierChange;
+  }
+
+  @override
+  bool isModifierPressed(ModifierKey key, int modifiers, {KeyboardSide side = KeyboardSide.any, int keyCode, bool isDown}) {
+    modifiers = _mergeModifiers(modifiers: modifiers, keyCode: keyCode, isDown: isDown);
+    switch (key) {
+      case ModifierKey.controlModifier:
+        return modifiers & modifierControl != 0;
+      case ModifierKey.shiftModifier:
+        return modifiers & modifierShift != 0;
+      case ModifierKey.altModifier:
+        return modifiers & modifierMod1 != 0;
+      case ModifierKey.metaModifier:
+        return modifiers & modifierMeta != 0;
+      case ModifierKey.capsLockModifier:
+        return modifiers & modifierCapsLock != 0;
+      case ModifierKey.numLockModifier:
+        return modifiers & modifierMod2 != 0;
+      case ModifierKey.functionModifier:
+      case ModifierKey.symbolModifier:
+      case ModifierKey.scrollLockModifier:
+        // These are not used in GTK keyboards.
+        return false;
+    }
+    return false;
+  }
+
+  @override
+  KeyboardSide getModifierSide(ModifierKey key) {
+    switch (key) {
+      case ModifierKey.controlModifier:
+      case ModifierKey.shiftModifier:
+      case ModifierKey.altModifier:
+      case ModifierKey.metaModifier:
+        // Neither GTK or X11 provide a distinction between left and right modifiers, so defaults to KeyboardSide.any.
+        // https://code.woboq.org/qt5/include/X11/X.h.html#_M/ShiftMask
+        return KeyboardSide.any;
+      case ModifierKey.capsLockModifier:
+      case ModifierKey.numLockModifier:
+      case ModifierKey.functionModifier:
+      case ModifierKey.symbolModifier:
+      case ModifierKey.scrollLockModifier:
+        return KeyboardSide.all;
+    }
+    assert(false, 'Not handling $key type properly.');
+    return null;
+  }
+
+  @override
+  LogicalKeyboardKey numpadKey(int keyCode) {
+    return kGtkNumpadMap[keyCode];
+  }
+
+  @override
+  LogicalKeyboardKey logicalKey(int keyCode) {
+    return kGtkToLogicalKey[keyCode];
   }
 }

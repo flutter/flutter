@@ -1205,6 +1205,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
 
     Widget result = RawImage(
       image: _imageInfo?.image,
+      debugImageLabel: _imageInfo?.debugLabel,
       width: widget.width,
       height: widget.height,
       scale: _imageInfo?.scale ?? 1.0,

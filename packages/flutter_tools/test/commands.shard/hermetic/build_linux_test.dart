@@ -9,10 +9,10 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/cmake.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_linux.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/linux/cmake.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:process/process.dart';
 
@@ -57,29 +57,9 @@ void main() {
   }
 
   // Creates the mock files necessary to run a build.
-  void setUpMockProjectFilesForBuild({int templateVersion}) {
+  void setUpMockProjectFilesForBuild() {
     setUpMockCoreProjectFiles();
     fileSystem.file(fileSystem.path.join('linux', 'CMakeLists.txt')).createSync(recursive: true);
-
-    final String versionFileSubpath = fileSystem.path.join('flutter', '.template_version');
-    const int expectedTemplateVersion = 10;  // Arbitrary value for tests.
-    final File sourceTemplateVersionfile = fileSystem.file(fileSystem.path.join(
-      fileSystem.path.absolute(Cache.flutterRoot),
-      'packages',
-      'flutter_tools',
-      'templates',
-      'app',
-      'linux.tmpl',
-      versionFileSubpath,
-    ));
-    sourceTemplateVersionfile.createSync(recursive: true);
-    sourceTemplateVersionfile.writeAsStringSync(expectedTemplateVersion.toString());
-
-    final File projectTemplateVersionFile = fileSystem.file(
-      fileSystem.path.join('linux', versionFileSubpath));
-    templateVersion ??= expectedTemplateVersion;
-    projectTemplateVersionFile.createSync(recursive: true);
-    projectTemplateVersionFile.writeAsStringSync(templateVersion.toString());
   }
 
   // Returns the command matching the build_linux call to cmake.
@@ -141,34 +121,6 @@ void main() {
     Platform: () => notLinuxPlatform,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
-    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-  });
-
-  testUsingContext('Linux build fails with instructions when template is too old', () async {
-    final BuildCommand command = BuildCommand();
-    setUpMockProjectFilesForBuild(templateVersion: 1);
-
-    expect(createTestCommandRunner(command).run(
-      const <String>['build', 'linux', '--no-pub']
-    ), throwsToolExit(message: 'flutter create .'));
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-    Platform: () => linuxPlatform,
-    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-  });
-
-  testUsingContext('Linux build fails with instructions when template is too new', () async {
-    final BuildCommand command = BuildCommand();
-    setUpMockProjectFilesForBuild(templateVersion: 999);
-
-    expect(createTestCommandRunner(command).run(
-      const <String>['build', 'linux', '--no-pub']
-    ), throwsToolExit(message: 'Upgrade Flutter'));
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-    Platform: () => linuxPlatform,
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
   });
 
@@ -315,7 +267,7 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
   });
 
-  testUsingContext('Linux build configures Makefile exports', () async {
+  testUsingContext('Linux build configures CMake exports', () async {
     final BuildCommand command = BuildCommand();
     setUpMockProjectFilesForBuild();
     processManager = FakeProcessManager.list(<FakeCommand>[
@@ -353,8 +305,8 @@ void main() {
     final List<String> configLines = cmakeConfig.readAsLinesSync();
 
     expect(configLines, containsAll(<String>[
-      'set(FLUTTER_ROOT "$_kTestFlutterRoot")',
-      'set(PROJECT_DIR "${fileSystem.currentDirectory.path}")',
+      'file(TO_CMAKE_PATH "$_kTestFlutterRoot" FLUTTER_ROOT)',
+      'file(TO_CMAKE_PATH "${fileSystem.currentDirectory.path}" PROJECT_DIR)',
       '  "DART_DEFINES=\\"foo.bar%3D2,fizz.far%3D3\\""',
       '  "DART_OBFUSCATION=\\"true\\""',
       '  "EXTRA_FRONT_END_OPTIONS=\\"--enable-experiment%3Dnon-nullable\\""',
@@ -362,8 +314,8 @@ void main() {
       '  "SPLIT_DEBUG_INFO=\\"foo/\\""',
       '  "TRACK_WIDGET_CREATION=\\"true\\""',
       '  "TREE_SHAKE_ICONS=\\"true\\""',
-      '  "FLUTTER_ROOT=\\"\${FLUTTER_ROOT}\\""',
-      '  "PROJECT_DIR=\\"\${PROJECT_DIR}\\""',
+      '  "FLUTTER_ROOT=\\"$_kTestFlutterRoot\\""',
+      '  "PROJECT_DIR=\\"${fileSystem.currentDirectory.path}\\""',
       '  "FLUTTER_TARGET=\\"lib/other.dart\\""',
       '  "BUNDLE_SKSL_PATH=\\"foo/bar.sksl.json\\""',
     ]));

@@ -10,6 +10,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/rendering.dart';
 
+import '../rendering/rendering_tester.dart';
+
 class _CustomPhysics extends ClampingScrollPhysics {
   const _CustomPhysics({ ScrollPhysics parent }) : super(parent: parent);
 
@@ -120,6 +122,55 @@ Widget buildTest({
 }
 
 void main() {
+  testWidgets('NestedScrollView respects clipBehavior', (WidgetTester tester) async {
+    Widget build(NestedScrollView nestedScrollView) {
+      return Localizations(
+        locale: const Locale('en', 'US'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultMaterialLocalizations.delegate,
+          DefaultWidgetsLocalizations.delegate,
+        ],
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(),
+            child: nestedScrollView,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(build(
+      NestedScrollView(
+        headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) => <Widget>[const SliverAppBar()],
+        body: Container(height: 2000.0),
+      )
+    ));
+
+    // 1st, check that the render object has received the default clip behavior.
+    final RenderNestedScrollViewViewport renderObject = tester.allRenderObjects.whereType<RenderNestedScrollViewViewport>().first;
+    expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+
+    // 2nd, check that the painting context has received the default clip behavior.
+    final TestClipPaintingContext context = TestClipPaintingContext();
+    renderObject.paint(context, Offset.zero);
+    expect(context.clipBehavior, equals(Clip.hardEdge));
+
+    // 3rd, pump a new widget to check that the render object can update its clip behavior.
+    await tester.pumpWidget(build(
+        NestedScrollView(
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) => <Widget>[const SliverAppBar()],
+          body: Container(height: 2000.0),
+          clipBehavior: Clip.antiAlias,
+        )
+    ));
+    expect(renderObject.clipBehavior, equals(Clip.antiAlias));
+
+    // 4th, check that a non-default clip behavior can be sent to the painting context.
+    renderObject.paint(context, Offset.zero);
+    expect(context.clipBehavior, equals(Clip.antiAlias));
+  });
+
   testWidgets('NestedScrollView overscroll and release and hold', (WidgetTester tester) async {
     await tester.pumpWidget(buildTest());
     expect(find.text('aaa2'), findsOneWidget);

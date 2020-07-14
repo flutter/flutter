@@ -114,6 +114,10 @@ const Feature flutterLinuxDesktopFeature = Feature(
     available: true,
     enabledByDefault: false,
   ),
+  dev: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  ),
 );
 
 /// The [Feature] for Windows desktop.

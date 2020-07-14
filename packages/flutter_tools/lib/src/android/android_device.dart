@@ -644,8 +644,8 @@ class AndroidDevice extends Device {
         ...<String>['--ez', 'skia-deterministic-rendering', 'true'],
       if (debuggingOptions.traceSkia)
         ...<String>['--ez', 'trace-skia', 'true'],
-      if (debuggingOptions.traceWhitelist != null)
-        ...<String>['--ez', 'trace-whitelist', debuggingOptions.traceWhitelist],
+      if (debuggingOptions.traceAllowlist != null)
+        ...<String>['--ez', 'trace-allowlist', debuggingOptions.traceAllowlist],
       if (debuggingOptions.traceSystrace)
         ...<String>['--ez', 'trace-systrace', 'true'],
       if (debuggingOptions.endlessTraceBuffer)

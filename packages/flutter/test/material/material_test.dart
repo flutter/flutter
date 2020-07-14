@@ -219,6 +219,35 @@ void main() {
     expect(modelE.shadowColor, equals(const Color(0xFFFF0000)));
   });
 
+  testWidgets('Transparent material widget does not absorb hit test', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/58665.
+    bool pressed = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Stack(
+            children: <Widget>[
+              RaisedButton(
+                onPressed: () {
+                  pressed = true;
+                },
+              ),
+              Material(
+                type: MaterialType.transparency,
+                child: Container(
+                  width: 400.0,
+                  height: 500.0,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.byType(RaisedButton));
+    expect(pressed, isTrue);
+  });
+
   group('Elevation Overlay', () {
 
     testWidgets('applyElevationOverlayColor set to false does not change surface color', (WidgetTester tester) async {
@@ -273,6 +302,24 @@ void main() {
         final RenderPhysicalShape model = getModel(tester);
         expect(model.color, equals(test.color));
       }
+    });
+
+    testWidgets('overlay will not apply to materials using a non-surface color', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Theme(
+          data: ThemeData(
+            applyElevationOverlayColor: true,
+            colorScheme: const ColorScheme.dark(),
+          ),
+          child: buildMaterial(
+            color: Colors.cyan,
+            elevation: 8.0,
+          ),
+        ),
+      );
+      final RenderPhysicalShape model = getModel(tester);
+      // Shouldn't change, as it is not using a ColorScheme.surface color
+      expect(model.color, equals(Colors.cyan));
     });
 
     testWidgets('overlay will not apply to materials using a light theme', (WidgetTester tester) async {

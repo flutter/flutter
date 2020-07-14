@@ -433,6 +433,7 @@ void main() {
     _testLayerReuse<ClipRectLayer>(RenderFittedBox(
       alignment: Alignment.center,
       fit: BoxFit.cover,
+      clipBehavior: Clip.hardEdge,
       // Inject opacity under the clip to force compositing.
       child: RenderOpacity(
         opacity: 0.5,
@@ -468,6 +469,24 @@ void main() {
     _testFittedBoxWithTransformLayer();
     // transform -> clip
     _testFittedBoxWithClipRectLayer();
+  });
+
+  test('RenderFittedBox respects clipBehavior', () {
+    const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
+    final TestClipPaintingContext context = TestClipPaintingContext();
+
+    // By default, clipBehavior should be Clip.none
+    final RenderFittedBox defaultBox = RenderFittedBox(child: box200x200, fit: BoxFit.none);
+    layout(defaultBox, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
+    defaultBox.paint(context, Offset.zero);
+    expect(context.clipBehavior, equals(Clip.none));
+
+    for (final Clip clip in Clip.values) {
+      final RenderFittedBox box = RenderFittedBox(child: box200x200, fit: BoxFit.none, clipBehavior: clip);
+      layout(box, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
+      box.paint(context, Offset.zero);
+      expect(context.clipBehavior, equals(clip));
+    }
   });
 
   test('RenderMouseRegion can change properties when detached', () {

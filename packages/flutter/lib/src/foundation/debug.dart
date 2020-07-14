@@ -5,6 +5,7 @@
 // @dart = 2.8
 
 import 'dart:async';
+import 'dart:ui' as ui show Brightness;
 
 import 'assertions.dart';
 import 'platform.dart';
@@ -27,7 +28,8 @@ bool debugAssertAllFoundationVarsUnset(String reason, { DebugPrintCallback debug
   assert(() {
     if (debugPrint != debugPrintOverride ||
         debugDefaultTargetPlatformOverride != null ||
-        debugDoublePrecision != null)
+        debugDoublePrecision != null ||
+        debugBrightnessOverride != null)
       throw FlutterError(reason);
     return true;
   }());
@@ -99,3 +101,12 @@ String debugFormatDouble(double value) {
   }
   return value.toStringAsFixed(1);
 }
+
+/// A setting that can be used to override the platform [Brightness] exposed
+/// from [BindingBase.window].
+///
+/// See also:
+///
+///  * [WidgetsApp], which uses the [debugBrightnessOverride] setting in debug mode
+///    to construct a [MediaQueryData].
+ui.Brightness debugBrightnessOverride;
