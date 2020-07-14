@@ -22,6 +22,12 @@ import 'widget_inspector.dart';
 
 export 'dart:ui' show AppLifecycleState, Locale;
 
+/// Debug-only functionality used to perform faster hot reloads.
+///
+/// This field is set by expression evaluation in the flutter tool and is
+/// used to invalidate specific types of elements.
+bool Function(Object) _debugFastReassembleMethod;
+
 /// Interface for classes that register with the Widgets layer binding.
 ///
 /// When used as a mixin, provides no-op method implementations.
@@ -415,24 +421,24 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         },
       );
 
-      // Register the ability to quickly mark elements as dirty.
-      // The performance of this method may be improved with additional
-      // information from https://github.com/flutter/flutter/issues/46195.
       registerServiceExtension(
         name: 'fastReassemble',
         callback: (Map<String, Object> params) async {
-          final String className = params['class'] as String;
           void markElementsDirty(Element element) {
             if (element == null) {
               return;
             }
-            if (element.widget?.runtimeType?.toString()?.startsWith(className) ?? false) {
+            if (_debugFastReassembleMethod(element.widget)) {
               element.markNeedsBuild();
             }
             element.visitChildElements(markElementsDirty);
           }
+          if (_debugFastReassembleMethod == null) {
+            throw FlutterError('_debugFastReassembleMethod was unexpectedly null.');
+          }
           markElementsDirty(renderViewElement);
-          return <String, String>{'Success': 'true'};
+          await endOfFrame;
+          return <String, String>{'type': 'Success'};
         },
       );
 
