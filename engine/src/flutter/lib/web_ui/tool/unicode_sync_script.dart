@@ -254,7 +254,7 @@ class LineBreakPropertiesSyncer extends PropertiesSyncer {
 
   final String prefix = 'Line';
   final String enumDocLink =
-      'https://unicode.org/reports/tr14/#DescriptionOfProperties';
+      'https://www.unicode.org/reports/tr14/tr14-45.html#DescriptionOfProperties';
 }
 
 /// Holds the collection of properties parsed from the unicode spec file.
