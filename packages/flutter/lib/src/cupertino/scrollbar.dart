@@ -73,9 +73,16 @@ class CupertinoScrollbar extends StatefulWidget {
        assert(!isAlwaysShown || controller != null, 'When isAlwaysShown is true, must pass a controller that is attached to a scroll view'),
        super(key: key);
 
+  /// Default value for [thickness] if it's not specified in [new CupertinoScrollbar].
   static const double defaultThickness = 3;
+
+  /// Default value for [thicknessWhileDragging] if it's not specified in [new CupertinoScrollbar].
   static const double defaultThicknessWhileDragging = 8.0;
+
+  /// Default value for [radius] if it's not specified in [new CupertinoScrollbar].
   static const Radius defaultRadius = Radius.circular(1.5);
+
+  /// Default value for [radiusWhileDragging] if it's not specified in [new CupertinoScrollbar].
   static const Radius defaultRadiusWhileDragging = Radius.circular(4.0);
 
   /// The subtree to place inside the [CupertinoScrollbar].
