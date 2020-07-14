@@ -4,5 +4,5 @@
 
 declare_args() {
   # Whether or not to include desktop embedding targets in the build.
-  enable_desktop_embeddings = !is_fuchsia_host
+  enable_desktop_embeddings = true
 }

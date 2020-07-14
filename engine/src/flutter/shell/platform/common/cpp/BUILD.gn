@@ -30,6 +30,13 @@ source_set("common_cpp_library_headers") {
   configs += [ ":desktop_library_implementation" ]
 }
 
+copy("publish_headers") {
+  sources = _public_headers
+  outputs = [
+    "$root_out_dir/{{source_file_part}}",
+  ]
+}
+
 source_set("common_cpp_input") {
   public = [
     "text_input_model.h",
@@ -90,55 +97,50 @@ source_set("common_cpp_core") {
   ]
 }
 
-test_fixtures("common_cpp_core_fixtures") {
-  fixtures = []
-}
+if (enable_unittests) {
+  test_fixtures("common_cpp_core_fixtures") {
+    fixtures = []
+  }
 
-executable("common_cpp_core_unittests") {
-  testonly = true
+  executable("common_cpp_core_unittests") {
+    testonly = true
 
-  sources = [
-    "path_utils_unittests.cc",
-  ]
+    sources = [
+      "path_utils_unittests.cc",
+    ]
 
-  deps = [
-    ":common_cpp_core",
-    ":common_cpp_core_fixtures",
-    "//flutter/testing",
-    "//third_party/dart/runtime:libdart_jit",
-  ]
+    deps = [
+      ":common_cpp_core",
+      ":common_cpp_core_fixtures",
+      "//flutter/testing",
+      "//third_party/dart/runtime:libdart_jit",
+    ]
 
-  public_configs = [ "//flutter:config" ]
-}
+    public_configs = [ "//flutter:config" ]
+  }
 
-test_fixtures("common_cpp_fixtures") {
-  fixtures = []
-}
+  test_fixtures("common_cpp_fixtures") {
+    fixtures = []
+  }
 
-executable("common_cpp_unittests") {
-  testonly = true
+  executable("common_cpp_unittests") {
+    testonly = true
 
-  sources = [
-    "json_message_codec_unittests.cc",
-    "json_method_codec_unittests.cc",
-    "text_input_model_unittests.cc",
-  ]
+    sources = [
+      "json_message_codec_unittests.cc",
+      "json_method_codec_unittests.cc",
+      "text_input_model_unittests.cc",
+    ]
 
-  deps = [
-    ":common_cpp",
-    ":common_cpp_fixtures",
-    ":common_cpp_input",
-    "//flutter/shell/platform/common/cpp/client_wrapper:client_wrapper",
-    "//flutter/shell/platform/common/cpp/client_wrapper:client_wrapper_library_stubs",
-    "//flutter/testing",
-  ]
+    deps = [
+      ":common_cpp",
+      ":common_cpp_fixtures",
+      ":common_cpp_input",
+      "//flutter/shell/platform/common/cpp/client_wrapper:client_wrapper",
+      "//flutter/shell/platform/common/cpp/client_wrapper:client_wrapper_library_stubs",
+      "//flutter/testing",
+    ]
 
-  public_configs = [ "//flutter:config" ]
-}
-
-copy("publish_headers") {
-  sources = _public_headers
-  outputs = [
-    "$root_out_dir/{{source_file_part}}",
-  ]
+    public_configs = [ "//flutter:config" ]
+  }
 }
