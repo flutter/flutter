@@ -2232,16 +2232,15 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       return;
     assert(() {
       if (_needsCompositingBitsUpdate) {
-        final RenderObject parent = this.parent as RenderObject;
         if (parent is RenderObject) {
-          bool isChildOfParent = false;
+          final RenderObject parent = this.parent as RenderObject;
+          bool visitedByParent = false;
           parent.visitChildren((RenderObject child) {
-            assert(!isChildOfParent);
             if (child == this) {
-              isChildOfParent = true;
+              visitedByParent = true;
             }
           });
-          if (!isChildOfParent) {
+          if (!visitedByParent) {
             throw FlutterError.fromParts(<DiagnosticsNode>[
               ErrorSummary(
                 "A RenderObject was not visited by the parent's visitChildren "
@@ -2255,7 +2254,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
               ),
               ErrorDescription(
                 'A RenderObject with children must implement visitChildren and '
-                'call the visitor exactly once for each child, it also should not '
+                'call the visitor exactly once for each child; it also should not '
                 'paint children that were removed with dropChild.'
               ),
               ErrorHint(
