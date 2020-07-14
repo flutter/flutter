@@ -37,14 +37,13 @@ typedef MessageFilter = String Function(String message);
 // DO NOT update without contacting kevmoo.
 // We have server-side tooling that assumes the values are consistent.
 class PubContext {
-  PubContext._(this._values) : assert(() {
+  PubContext._(this._values) {
     for (final String item in _values) {
-      if (!_validContext.hasMatch(item)) {
-        return false;
+      if (!_valudContext.hasMatch(item)) {
+        throw ArgumentError.value(_values, 'value', 'Must match RegExp ${_validContext.pattern}');
       }
     }
-    return true;
-  }(), 'Must match RegExp ${_validContext.pattern}');
+  }
 
   static PubContext getVerifyContext(String commandName) =>
       PubContext._(<String>['verify', commandName.replaceAll('-', '_')]);
