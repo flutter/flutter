@@ -106,7 +106,9 @@ void CompositorContext::OnDestroyView(int64_t view_id) {
   session_connection_.scene_update_context().DestroyView(view_id);
 }
 
-CompositorContext::~CompositorContext() = default;
+CompositorContext::~CompositorContext() {
+  OnGrContextDestroyed();
+}
 
 std::unique_ptr<flutter::CompositorContext::ScopedFrame>
 CompositorContext::AcquireFrame(
