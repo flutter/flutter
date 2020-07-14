@@ -448,7 +448,6 @@ class RestorationBucket extends ChangeNotifier {
   }) : assert(id != null),
        _id = id,
        _rawData = <String, dynamic>{} {
-    _markNeedsSerialization();
     assert(() {
       _debugOwner = debugOwner;
       return true;
@@ -485,9 +484,6 @@ class RestorationBucket extends ChangeNotifier {
        _manager = manager,
        _rawData = rawData ?? <dynamic, dynamic>{},
        _id = const RestorationId('root') {
-    if (rawData == null) {
-      _markNeedsSerialization();
-    }
     assert(() {
       _debugOwner = manager;
       return true;
@@ -815,9 +811,10 @@ class RestorationBucket extends ChangeNotifier {
       _manager?.unscheduleSerializationFor(this);
     }
     _manager = newManager;
-    // Force serialization of this bucket with the new manager.
-    _needsSerialization = false;
-    _markNeedsSerialization();
+    if (_needsSerialization) {
+      _needsSerialization = false;
+      _markNeedsSerialization();
+    }
   }
 
   bool _debugAssertIntegrity() {
