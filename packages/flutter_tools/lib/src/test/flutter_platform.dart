@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:dds/dds.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:stream_channel/stream_channel.dart';
@@ -515,7 +514,7 @@ class FlutterPlatform extends PlatformPlugin {
       Uri processObservatoryUri;
       _pipeStandardStreamsToConsole(
         process,
-        reportObservatoryUri: (Uri detectedUri) async {
+        reportObservatoryUri: (Uri detectedUri) {
           assert(processObservatoryUri == null);
           assert(explicitObservatoryPort == null ||
               explicitObservatoryPort == detectedUri.port);
@@ -528,14 +527,13 @@ class FlutterPlatform extends PlatformPlugin {
             globals.printTrace('test $ourTestCount: using observatory uri $detectedUri from pid ${process.pid}');
           }
           processObservatoryUri = detectedUri;
-          await DartDevelopmentService.startDartDevelopmentService(processObservatoryUri);
           {
             globals.printTrace('Connecting to service protocol: $processObservatoryUri');
             final Future<vm_service.VmService> localVmService = connectToVmService(processObservatoryUri,
               compileExpression: _compileExpressionService);
-            unawaited(localVmService.then((vm_service.VmService vmservice) {
+            localVmService.then((vm_service.VmService vmservice) {
               globals.printTrace('Successfully connected to service protocol: $processObservatoryUri');
-            }));
+            });
           }
           gotProcessObservatoryUri.complete();
           watcher?.handleStartedProcess(
@@ -872,9 +870,8 @@ class FlutterPlatform extends PlatformPlugin {
   void _pipeStandardStreamsToConsole(
     Process process, {
     void startTimeoutTimer(),
-    Future<void> reportObservatoryUri(Uri uri),
+    void reportObservatoryUri(Uri uri),
   }) {
-
     const String observatoryString = 'Observatory listening on ';
     for (final Stream<List<int>> stream in <Stream<List<int>>>[
       process.stderr,
@@ -884,7 +881,7 @@ class FlutterPlatform extends PlatformPlugin {
           .transform<String>(utf8.decoder)
           .transform<String>(const LineSplitter())
           .listen(
-        (String line) async {
+        (String line) {
           if (line == _kStartTimeoutTimerMessage) {
             if (startTimeoutTimer != null) {
               startTimeoutTimer();
@@ -897,7 +894,7 @@ class FlutterPlatform extends PlatformPlugin {
             try {
               final Uri uri = Uri.parse(line.substring(observatoryString.length));
               if (reportObservatoryUri != null) {
-                await reportObservatoryUri(uri);
+                reportObservatoryUri(uri);
               }
             } on Exception catch (error) {
               globals.printError('Could not parse shell observatory port message: $error');

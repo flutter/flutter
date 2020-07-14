@@ -67,7 +67,7 @@ class FallbackDiscovery {
   Future<Uri> discover({
     @required int assumedDevicePort,
     @required String packageId,
-    @required Device device,
+    @required Device deivce,
     @required bool usesIpv6,
     @required int hostVmservicePort,
     @required String packageName,
@@ -84,7 +84,7 @@ class FallbackDiscovery {
     try {
       final Uri result = await _mDnsObservatoryDiscovery.getObservatoryUri(
         packageId,
-        device,
+        deivce,
         usesIpv6: usesIpv6,
         hostVmservicePort: hostVmservicePort,
       );
