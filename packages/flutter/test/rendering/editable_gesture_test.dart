@@ -58,7 +58,6 @@ class _GestureBindingSpy extends AutomatedTestWidgetsFlutterBinding {
 }
 
 class FakeEditableTextState extends TextSelectionDelegate {
-
   @override
   dynamic noSuchMethod(Invocation invocation) {
     throw Exception('unmocked method ${invocation.memberName}');
