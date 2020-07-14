@@ -213,7 +213,11 @@ abstract class Route<T> {
     // focused child can only be attached to navigator after initState which
     // will be guarded by the asynchronous gap.
     TickerFuture.complete().then<void>((void _) {
-      navigator.focusScopeNode.requestFocus();
+      // The route can be disposed before the ticker future completes. This can
+      // happen when the navigator is under a TabView that does a warping. The
+      // navigator will be null in this case, and we have to do a null-safe
+      // operation.
+      navigator?.focusScopeNode?.requestFocus();
     });
   }
 
@@ -1397,11 +1401,13 @@ class Navigator extends StatefulWidget {
     this.onGenerateRoute,
     this.onUnknownRoute,
     this.transitionDelegate = const DefaultTransitionDelegate<dynamic>(),
+    this.reportsRouteUpdateToEngine = false,
     this.observers = const <NavigatorObserver>[],
   }) : assert(pages != null),
        assert(onGenerateInitialRoutes != null),
        assert(transitionDelegate != null),
        assert(observers != null),
+       assert(reportsRouteUpdateToEngine != null),
        super(key: key);
 
   /// The list of pages with which to populate the history.
@@ -1496,6 +1502,22 @@ class Navigator extends StatefulWidget {
   /// The callback must return a list of [Route] objects with which the history
   /// will be primed.
   final RouteListFactory onGenerateInitialRoutes;
+
+  /// Whether this navigator should report route update message back to the
+  /// engine when the top-most route changes.
+  ///
+  /// If the property is set to true, this navigator automatically sends the
+  /// route update message to the engine when it detects top-most route changes.
+  /// The messages are used by the web engine to update the browser URL bar.
+  ///
+  /// If there are multiple navigators in the widget tree, at most one of them
+  /// can set this property to true (typically, the top-most one created from
+  /// the [WidgetsApp]). Otherwise, the web engine may receive multiple route
+  /// update messages from different navigators and fail to update the URL
+  /// bar.
+  ///
+  /// Defaults to false.
+  final bool reportsRouteUpdateToEngine;
 
   /// Push a named route onto the navigator that most tightly encloses the given
   /// context.
@@ -2404,7 +2426,11 @@ class _RouteEntry extends RouteTransitionRecord {
     assert(currentState == _RouteLifecycle.push || currentState == _RouteLifecycle.pushReplace || currentState == _RouteLifecycle.replace);
     assert(navigator != null);
     assert(navigator._debugLocked);
-    assert(route._navigator == null);
+    assert(
+      route._navigator == null,
+      'The pushed route has already been used. When pushing a route, a new '
+      'Route object must be provided.',
+    );
     final _RouteLifecycle previousState = currentState;
     route._navigator = navigator;
     route.install();
@@ -3240,11 +3266,15 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     _flushRouteAnnouncement();
 
     // Announces route name changes.
-    final _RouteEntry lastEntry = _history.lastWhere(_RouteEntry.isPresentPredicate, orElse: () => null);
-    final String routeName = lastEntry?.route?.settings?.name;
-    if (routeName != _lastAnnouncedRouteName) {
-      RouteNotificationMessages.maybeNotifyRouteChange(routeName, _lastAnnouncedRouteName);
-      _lastAnnouncedRouteName = routeName;
+    if (widget.reportsRouteUpdateToEngine) {
+      final _RouteEntry lastEntry = _history.lastWhere(
+        _RouteEntry.isPresentPredicate, orElse: () => null);
+      final String routeName = lastEntry?.route?.settings?.name;
+      if (routeName != _lastAnnouncedRouteName) {
+        RouteNotificationMessages.maybeNotifyRouteChange(
+          routeName, _lastAnnouncedRouteName);
+        _lastAnnouncedRouteName = routeName;
+      }
     }
 
     // Lastly, removes the overlay entries of all marked entries and disposes

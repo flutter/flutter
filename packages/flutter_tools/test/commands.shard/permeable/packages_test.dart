@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:process/process.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -293,13 +292,21 @@ void main() {
         arguments: <String>['--no-pub']);
       removeGeneratedFiles(projectPath);
 
+      final File androidManifest = globals.fs.file(globals.fs.path.join(
+        projectPath,
+        'android/app/src/main/AndroidManifest.xml',
+      ));
+      final String updatedAndroidManifestString =
+          androidManifest.readAsStringSync().replaceAll('android:value="2"', 'android:value="1"');
+
+      androidManifest.writeAsStringSync(updatedAndroidManifestString);
+
       final PackagesCommand command = await runCommandIn(projectPath, 'get');
       final PackagesGetCommand getCommand = command.subcommands['get'] as PackagesGetCommand;
 
       expect(await getCommand.usageValues,
              containsPair(CustomDimensions.commandPackagesAndroidEmbeddingVersion, 'v1'));
     }, overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isAndroidEmbeddingV2Enabled: false),
       Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -321,7 +328,6 @@ void main() {
       expect(await getCommand.usageValues,
              containsPair(CustomDimensions.commandPackagesAndroidEmbeddingVersion, 'v2'));
     }, overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isAndroidEmbeddingV2Enabled: true),
       Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,

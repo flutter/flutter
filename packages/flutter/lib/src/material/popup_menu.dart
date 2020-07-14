@@ -234,7 +234,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   /// touches.
   final bool enabled;
 
-  /// The minimum height height of the menu item.
+  /// The minimum height of the menu item.
   ///
   /// Defaults to [kMinInteractiveDimension] pixels.
   @override
@@ -342,11 +342,15 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
       },
     );
 
-    return InkWell(
-      onTap: widget.enabled ? handleTap : null,
-      canRequestFocus: widget.enabled,
-      mouseCursor: effectiveMouseCursor,
-      child: item,
+    return Semantics(
+      enabled: widget.enabled,
+      button: true,
+      child: InkWell(
+        onTap: widget.enabled ? handleTap : null,
+        canRequestFocus: widget.enabled,
+        mouseCursor: effectiveMouseCursor,
+        child: item,
+      ),
     );
   }
 }

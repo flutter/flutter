@@ -19563,7 +19563,7 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'بنده';
 
   @override
-  String get collapsedIconTapHint => 'TBD';
+  String get collapsedIconTapHint => 'Expand';
 
   @override
   String get continueButtonLabel => 'منځپانګې';
@@ -19617,7 +19617,7 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get drawerLabel => 'د نیویگیشن مینو';
 
   @override
-  String get expandedIconTapHint => 'TBD';
+  String get expandedIconTapHint => 'Collapse';
 
   @override
   String get hideAccountsLabel => 'حسابونه پټ کړئ';
@@ -19653,7 +19653,7 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get modalBarrierDismissLabel => 'رد کړه';
 
   @override
-  String get moreButtonTooltip => 'TBD';
+  String get moreButtonTooltip => 'More';
 
   @override
   String get nextMonthTooltip => 'بله میاشت';
@@ -19689,7 +19689,7 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get previousPageTooltip => 'مخکینی مخ';
 
   @override
-  String get refreshIndicatorSemanticLabel => 'TBD';
+  String get refreshIndicatorSemanticLabel => 'Refresh';
 
   @override
   String get remainingTextFieldCharacterCountFew => null;
@@ -19698,34 +19698,34 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => 'TBD';
+  String get remainingTextFieldCharacterCountOne => '1 character remaining';
 
   @override
-  String get remainingTextFieldCharacterCountOther => 'TBD';
+  String get remainingTextFieldCharacterCountOther => '\$remainingCount characters remaining';
 
   @override
   String get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
+  String get remainingTextFieldCharacterCountZero => 'No characters remaining';
 
   @override
-  String get reorderItemDown => 'TBD';
+  String get reorderItemDown => 'Move down';
 
   @override
-  String get reorderItemLeft => 'TBD';
+  String get reorderItemLeft => 'Move left';
 
   @override
-  String get reorderItemRight => 'TBD';
+  String get reorderItemRight => 'Move right';
 
   @override
-  String get reorderItemToEnd => 'TBD';
+  String get reorderItemToEnd => 'Move to the end';
 
   @override
-  String get reorderItemToStart => 'TBD';
+  String get reorderItemToStart => 'Move to the start';
 
   @override
-  String get reorderItemUp => 'TBD';
+  String get reorderItemUp => 'Move up';
 
   @override
   String get rowsPerPageTitle => 'د هرې پاڼې پاڼې:';
