@@ -17,7 +17,7 @@ part of engine;
 
 /// For an explanation of these enum values, see:
 ///
-/// * https://unicode.org/reports/tr14/#DescriptionOfProperties
+/// * https://www.unicode.org/reports/tr14/tr14-45.html#DescriptionOfProperties
 enum LineCharProperty {
   CM, // serialized as "A"
   BA, // serialized as "B"
