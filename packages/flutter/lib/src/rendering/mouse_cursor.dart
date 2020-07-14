@@ -350,8 +350,10 @@ class _SystemMouseCursorSession extends MouseCursorSession {
 /// that represents the same concept, such as being text text, being clickable,
 /// or being a forbidden operation. Since the set of system cursors supported by
 /// each platform varies, multiple instances can correspond to the same system
-/// cursor. If a cursor is not supported on the platform that the application
-/// is running on, it falls back to [basic].
+/// cursor.
+///
+/// If the platform that the application is running on is not listed for a cursor,
+/// using this cursor falls back to [basic].
 ///
 /// [SystemMouseCursors] enumerates the complete set of system cursors supported
 /// by Flutter, which are hard-coded in the engine. Therefore, manually
