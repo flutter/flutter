@@ -42,7 +42,6 @@ void main() {
     final PrecacheCommand command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
-      flutterVersion: flutterVersion,
       platform: platform,
       featureFlags: TestFeatureFlags(),
     );
@@ -65,7 +64,6 @@ void main() {
     final PrecacheCommand command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
-      flutterVersion: flutterVersion,
       featureFlags: TestFeatureFlags(),
       platform: platform,
     );
@@ -81,7 +79,6 @@ void main() {
     final PrecacheCommand command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
-      flutterVersion: flutterVersion,
       featureFlags: TestFeatureFlags(isWebEnabled: true),
       platform: FakePlatform(environment: <String, String>{}),
     );
@@ -98,7 +95,6 @@ void main() {
     final PrecacheCommand command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
-      flutterVersion: flutterVersion,
       featureFlags: TestFeatureFlags(isWebEnabled: false),
       platform: FakePlatform(environment: <String, String>{}),
     );
@@ -114,7 +110,6 @@ void main() {
     final PrecacheCommand command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
-      flutterVersion: flutterVersion,
       featureFlags: TestFeatureFlags(isMacOSEnabled: true),
       platform: FakePlatform(environment: <String, String>{}),
     );
@@ -131,7 +126,6 @@ void main() {
     final PrecacheCommand command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
-      flutterVersion: flutterVersion,
       featureFlags: TestFeatureFlags(isMacOSEnabled: false),
       platform: FakePlatform(environment: <String, String>{}),
     );
@@ -147,7 +141,6 @@ void main() {
     final PrecacheCommand command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
-      flutterVersion: flutterVersion,
       featureFlags: TestFeatureFlags(isWindowsEnabled: true),
       platform: FakePlatform(environment: <String, String>{}),
     );
@@ -164,7 +157,6 @@ void main() {
     final PrecacheCommand command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
-      flutterVersion: flutterVersion,
       featureFlags: TestFeatureFlags(isWindowsEnabled: false),
       platform: FakePlatform(environment: <String, String>{}),
     );
@@ -180,7 +172,6 @@ void main() {
     final PrecacheCommand command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
-      flutterVersion: flutterVersion,
       featureFlags: TestFeatureFlags(isLinuxEnabled: true),
       platform: FakePlatform(environment: <String, String>{}),
     );
@@ -197,7 +188,6 @@ void main() {
     final PrecacheCommand command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
-      flutterVersion: flutterVersion,
       featureFlags: TestFeatureFlags(isLinuxEnabled: false),
       platform: FakePlatform(environment: <String, String>{}),
     );
@@ -213,7 +203,6 @@ void main() {
     final PrecacheCommand command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
-      flutterVersion: flutterVersion,
       featureFlags: TestFeatureFlags(isWebEnabled: false),
       platform: FakePlatform(environment: <String, String>{}),
     );
@@ -229,7 +218,6 @@ void main() {
     final PrecacheCommand command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
-      flutterVersion: masterFlutterVersion,
       featureFlags: TestFeatureFlags(
         isWebEnabled: true,
         isLinuxEnabled: true,
@@ -271,7 +259,6 @@ void main() {
     final PrecacheCommand command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
-      flutterVersion: flutterVersion,
       featureFlags: TestFeatureFlags(),
       platform: FakePlatform(environment: <String, String>{}),
     );
@@ -295,7 +282,6 @@ void main() {
     final PrecacheCommand command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
-      flutterVersion: flutterVersion,
       featureFlags: TestFeatureFlags(),
       platform: FakePlatform(environment: <String, String>{}),
     );
@@ -321,7 +307,6 @@ void main() {
     final PrecacheCommand command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
-      flutterVersion: flutterVersion,
       featureFlags: TestFeatureFlags(),
       platform: FakePlatform(environment: <String, String>{}),
     );
@@ -354,7 +339,6 @@ void main() {
     final PrecacheCommand command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
-      flutterVersion: flutterVersion,
       featureFlags: TestFeatureFlags(),
       platform: FakePlatform(environment: <String, String>{}),
     );
@@ -379,7 +363,6 @@ void main() {
     final PrecacheCommand command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
-      flutterVersion: masterFlutterVersion,
       featureFlags: TestFeatureFlags(
         isWebEnabled: true,
         isLinuxEnabled: true,
@@ -416,7 +399,6 @@ void main() {
     final PrecacheCommand command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
-      flutterVersion: masterFlutterVersion,
       featureFlags: TestFeatureFlags(),
       platform: FakePlatform(environment: <String, String>{}),
     );
@@ -435,7 +417,6 @@ void main() {
     final PrecacheCommand command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
-      flutterVersion: masterFlutterVersion,
         featureFlags: TestFeatureFlags(
         isMacOSEnabled: true,
       ),
@@ -470,7 +451,6 @@ void main() {
     final PrecacheCommand command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
-      flutterVersion: flutterVersion,
       featureFlags: TestFeatureFlags(
         isMacOSEnabled: true,
       ),

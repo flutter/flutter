@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/features.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -46,12 +47,15 @@ final RegExp licenseAccepted = RegExp(r'All SDK package licenses accepted.');
 class AndroidWorkflow implements Workflow {
   AndroidWorkflow({
     @required AndroidSdk androidSdk,
-  }) : _androidSdk = androidSdk;
+    @required FeatureFlags featureFlags,
+  }) : _androidSdk = androidSdk,
+       _featureFlags = featureFlags;
 
   final AndroidSdk _androidSdk;
+  final FeatureFlags _featureFlags;
 
   @override
-  bool get appliesToHostPlatform => true;
+  bool get appliesToHostPlatform => _featureFlags.isAndroidEnabled;
 
   @override
   bool get canListDevices => getAdbPath(_androidSdk) != null;

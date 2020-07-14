@@ -14,6 +14,7 @@ import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/testbed.dart';
 
 void main() {
   testWithoutContext('AndroidDevices returns empty device list on null adb', () async {
@@ -22,6 +23,7 @@ void main() {
       logger: BufferLogger.test(),
       androidWorkflow: AndroidWorkflow(
         androidSdk: MockAndroidSdk(null),
+        featureFlags: TestFeatureFlags(),
       ),
       processManager: FakeProcessManager.list(<FakeCommand>[]),
     );
@@ -43,6 +45,7 @@ void main() {
       logger: BufferLogger.test(),
       androidWorkflow: AndroidWorkflow(
         androidSdk: MockAndroidSdk(),
+        featureFlags: TestFeatureFlags(),
       ),
       processManager: processManager,
     );
@@ -63,6 +66,7 @@ void main() {
       logger: BufferLogger.test(),
       androidWorkflow: AndroidWorkflow(
         androidSdk: MockAndroidSdk(),
+        featureFlags: TestFeatureFlags(),
       ),
       processManager: processManager,
     );
