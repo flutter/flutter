@@ -34,6 +34,9 @@ class FeatureFlags {
   /// Whether flutter desktop for Windows is enabled.
   bool get isWindowsEnabled => isEnabled(flutterWindowsDesktopFeature);
 
+  /// Whether fast single widget reloads are enabled.
+  bool get isSingleWidgetReloadEnabled => isEnabled(singleWidgetReload);
+
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
@@ -65,6 +68,7 @@ const List<Feature> allFeatures = <Feature>[
   flutterLinuxDesktopFeature,
   flutterMacOSDesktopFeature,
   flutterWindowsDesktopFeature,
+  singleWidgetReload,
 ];
 
 /// The [Feature] for flutter web.
@@ -122,6 +126,28 @@ const Feature flutterWindowsDesktopFeature = Feature(
   configSetting: 'enable-windows-desktop',
   environmentOverride: 'FLUTTER_WINDOWS',
   master: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  ),
+);
+
+/// The fast hot reload feature for https://github.com/flutter/flutter/issues/61407.
+const Feature singleWidgetReload = Feature(
+  name: 'Hot reload optimization for changes to class body of a single widget',
+  configSetting: 'single-widget-reload-optimization',
+  master: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  ),
+  dev: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  ),
+  beta: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  ),
+  stable: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,
   ),

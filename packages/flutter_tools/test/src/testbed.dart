@@ -724,6 +724,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isMacOSEnabled = false,
     this.isWebEnabled = false,
     this.isWindowsEnabled = false,
+    this.isSingleWidgetReloadEnabled = false,
 });
 
   @override
@@ -737,6 +738,9 @@ class TestFeatureFlags implements FeatureFlags {
 
   @override
   final bool isWindowsEnabled;
+
+  @override
+  final bool isSingleWidgetReloadEnabled;
 
   @override
   bool isEnabled(Feature feature) {
