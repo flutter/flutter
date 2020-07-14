@@ -7,7 +7,6 @@ import 'dart:io';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
-import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -72,7 +71,6 @@ void main() {
 
       FakeDeviceLogReader mockLogReader;
       MockPortForwarder portForwarder;
-      MockDartDevelopmentService mockDds;
       MockAndroidDevice device;
       MockHttpClient httpClient;
 
@@ -80,7 +78,6 @@ void main() {
         mockLogReader = FakeDeviceLogReader();
         portForwarder = MockPortForwarder();
         device = MockAndroidDevice();
-        mockDds = MockDartDevelopmentService();
         when(device.portForwarder)
           .thenReturn(portForwarder);
         when(portForwarder.forward(devicePort, hostPort: anyNamed('hostPort')))
@@ -89,8 +86,6 @@ void main() {
           .thenReturn(<ForwardedPort>[ForwardedPort(hostPort, devicePort)]);
         when(portForwarder.unforward(any))
           .thenAnswer((_) async => null);
-        when(device.dds).thenReturn(mockDds);
-        when(mockDds.startDartDevelopmentService(any, false)).thenReturn(null);
 
         final HttpClientRequest httpClientRequest = MockHttpClientRequest();
         httpClient = MockHttpClient();
@@ -291,14 +286,11 @@ void main() {
       const int hostPort = 42;
       final FakeDeviceLogReader mockLogReader = FakeDeviceLogReader();
       final MockPortForwarder portForwarder = MockPortForwarder();
-      final MockDartDevelopmentService mockDds = MockDartDevelopmentService();
       final MockAndroidDevice device = MockAndroidDevice();
       final MockHotRunner mockHotRunner = MockHotRunner();
       final MockHotRunnerFactory mockHotRunnerFactory = MockHotRunnerFactory();
       when(device.portForwarder)
         .thenReturn(portForwarder);
-      when(device.dds)
-        .thenReturn(mockDds);
       when(portForwarder.forward(devicePort, hostPort: anyNamed('hostPort')))
         .thenAnswer((_) async => hostPort);
       when(portForwarder.forwardedPorts)
@@ -317,7 +309,6 @@ void main() {
       )).thenReturn(mockHotRunner);
       when(mockHotRunner.exited).thenReturn(false);
       when(mockHotRunner.isWaitingForObservatory).thenReturn(false);
-      when(mockDds.startDartDevelopmentService(any, false)).thenReturn(null);
 
       testDeviceManager.addDevice(device);
       when(device.getLogReader(includePastLogs: anyNamed('includePastLogs')))
@@ -368,14 +359,10 @@ void main() {
       const int hostPort = 42;
       final FakeDeviceLogReader mockLogReader = FakeDeviceLogReader();
       final MockPortForwarder portForwarder = MockPortForwarder();
-      final MockDartDevelopmentService mockDds = MockDartDevelopmentService();
       final MockIOSDevice device = MockIOSDevice();
       final MockHotRunner mockHotRunner = MockHotRunner();
       final MockHotRunnerFactory mockHotRunnerFactory = MockHotRunnerFactory();
-      when(device.portForwarder)
-        .thenReturn(portForwarder);
-      when(device.dds)
-        .thenReturn(mockDds);
+      when(device.portForwarder).thenReturn(portForwarder);
       when(device.getLogReader(includePastLogs: anyNamed('includePastLogs')))
         .thenAnswer((_) => mockLogReader);
       when(portForwarder.forward(devicePort, hostPort: anyNamed('hostPort')))
@@ -396,7 +383,6 @@ void main() {
       )).thenReturn(mockHotRunner);
       when(mockHotRunner.exited).thenReturn(false);
       when(mockHotRunner.isWaitingForObservatory).thenReturn(false);
-      when(mockDds.startDartDevelopmentService(any, false)).thenReturn(null);
 
       testDeviceManager.addDevice(device);
 
@@ -429,7 +415,6 @@ void main() {
 
       setUp(() {
         portForwarder = MockPortForwarder();
-        final MockDartDevelopmentService mockDds = MockDartDevelopmentService();
         device = MockAndroidDevice();
 
         when(device.portForwarder)
@@ -440,10 +425,6 @@ void main() {
           .thenReturn(<ForwardedPort>[ForwardedPort(hostPort, devicePort)]);
         when(portForwarder.unforward(any))
           .thenAnswer((_) async => null);
-        when(device.dds)
-          .thenReturn(mockDds);
-        when(mockDds.startDartDevelopmentService(any, any))
-          .thenReturn(null);
       });
 
       testUsingContext('succeeds in ipv4 mode', () async {
@@ -814,7 +795,6 @@ class TestHotRunnerFactory extends HotRunnerFactory {
   }
 }
 
-class MockDartDevelopmentService extends Mock implements DartDevelopmentService {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockProcess extends Mock implements Process {}
 class MockHttpClientRequest extends Mock implements HttpClientRequest {}
