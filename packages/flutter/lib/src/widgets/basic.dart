@@ -3955,6 +3955,8 @@ class Flex extends MultiChildRenderObjectWidget {
   final VerticalDirection verticalDirection;
 
   /// If aligning items according to their baseline, which baseline to use.
+  ///
+  /// Defaults to [TextBaseline.alphabetic].
   final TextBaseline textBaseline;
 
   // TODO(liyuqian): defaults to [Clip.none] once Google references are updated.
