@@ -402,13 +402,21 @@ class SystemMouseCursor extends MouseCursor {
 /// result, or fallback to the [basic] arrow. This mapping is defined by the
 /// Flutter engine.
 ///
-/// The cursor names are chosen to reflect the cursors' use cases instead of
-/// their shapes, because different platforms might (although not commonly) use
-/// different shapes for the same use case.
+/// The cursor names are based on the cursors' use cases instead of their shapes.
 class SystemMouseCursors {
   // This class only contains static members, and should not be instantiated or
   // extended.
   factory SystemMouseCursors._() => null;
+
+  // The mapping in this class must be kept in sync with the following files in
+  // the engine:
+  //
+  // * Android: shell/platform/android/io/flutter/plugin/mouse/MouseCursorPlugin.java
+  // * Web: lib/web_ui/lib/src/engine/mouse_cursor.dart
+  // * Windows: shell/platform/windows/win32_flutter_window.cc
+  // * Linux: shell/platform/linux/fl_mouse_cursor_plugin.cc
+  // * macOS: shell/platform/darwin/macos/framework/Source/FlutterMouseCursorPlugin.mm
+
 
   /// Hide the cursor.
   ///
