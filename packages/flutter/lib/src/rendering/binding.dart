@@ -16,6 +16,7 @@ import 'package:flutter/services.dart';
 
 import 'box.dart';
 import 'debug.dart';
+import 'layer.dart';
 import 'mouse_tracking.dart';
 import 'object.dart';
 import 'view.dart';
@@ -137,6 +138,22 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
         },
       );
     }
+  }
+
+  /// Creates a fresh [PaintingContext] into which [RenderObject]s may paint.
+  ///
+  /// The `layer` argument specifies the compositing layer into which draw
+  /// operations will be recorded.
+  ///
+  /// The `paintBounds` argument specifies an estimate of the bounds within
+  /// which the painting context's [canvas] will record painting commands.
+  /// This can be useful for debugging.
+  ///
+  /// See also:
+  ///
+  ///  * [PaintingContext.createChildContext]
+  PaintingContext createPaintingContext({ContainerLayer layer, Rect paintBounds}) {
+    return PaintingContext(layer, paintBounds);
   }
 
   /// Creates a [RenderView] object to be the root of the

@@ -136,7 +136,7 @@ void main() {
     );
     editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
     expect(
-      (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
+      (Canvas canvas) => editable.paint(LegacyTestRecordingPaintingContext(canvas), Offset.zero),
       paints..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 1000.0, 10.0)),
     );
   });
@@ -657,7 +657,7 @@ void main() {
     editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
 
     expect(
-      (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
+      (Canvas canvas) => editable.paint(LegacyTestRecordingPaintingContext(canvas), Offset.zero),
       paints..rect(color: promptRectColor),
     );
 
@@ -668,7 +668,7 @@ void main() {
 
     expect(editable.promptRectColor, promptRectColor);
     expect(
-      (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
+      (Canvas canvas) => editable.paint(LegacyTestRecordingPaintingContext(canvas), Offset.zero),
       isNot(paints..rect(color: promptRectColor)),
     );
   });

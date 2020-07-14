@@ -26,6 +26,7 @@ import 'platform.dart';
 import 'stack_manipulation.dart';
 import 'test_async_utils.dart';
 import 'test_exception_reporter.dart';
+import 'test_painting.dart' as test_painting;
 import 'test_text_input.dart';
 
 /// Phases that can be reached by [WidgetTester.pumpWidget] and
@@ -320,6 +321,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   @override
   BinaryMessenger createBinaryMessenger() {
     return TestDefaultBinaryMessenger(super.createBinaryMessenger());
+  }
+
+  @override
+  PaintingContext createPaintingContext({ContainerLayer layer, Rect paintBounds}) {
+    if (test_painting.createPaintingContext != null)
+      return test_painting.createPaintingContext(layer: layer, paintBounds: paintBounds);
+    return super.createPaintingContext(layer: layer, paintBounds: paintBounds);
   }
 
   /// Whether there is currently a test executing.
@@ -763,6 +771,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     final bool autoUpdateGoldensBeforeTest = autoUpdateGoldenFiles && !isBrowser;
     final TestExceptionReporter reportTestExceptionBeforeTest = reportTestException;
     final ErrorWidgetBuilder errorWidgetBuilderBeforeTest = ErrorWidget.builder;
+    final test_painting.PaintingContextFactory createPaintingContextBeforeTest = test_painting.createPaintingContext;
 
     // run the test
     await testBody();
@@ -778,6 +787,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       _verifyAutoUpdateGoldensUnset(autoUpdateGoldensBeforeTest && !isBrowser);
       _verifyReportTestExceptionUnset(reportTestExceptionBeforeTest);
       _verifyErrorWidgetBuilderUnset(errorWidgetBuilderBeforeTest);
+      _verifyCreatePaintingContextUnset(createPaintingContextBeforeTest);
       _verifyInvariants();
     }
 
@@ -853,6 +863,21 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         FlutterError.reportError(FlutterErrorDetails(
           exception: FlutterError(
               'The value of ErrorWidget.builder was changed by the test.',
+          ),
+          stack: StackTrace.current,
+          library: 'Flutter test framework',
+        ));
+      }
+      return true;
+    }());
+  }
+
+  void _verifyCreatePaintingContextUnset(test_painting.PaintingContextFactory valueBeforeTest) {
+    assert(() {
+      if (test_painting.createPaintingContext != valueBeforeTest) {
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: FlutterError(
+            'The value of createPaintingContext was changed by the test.',
           ),
           stack: StackTrace.current,
           library: 'Flutter test framework',

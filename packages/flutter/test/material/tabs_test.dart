@@ -202,6 +202,7 @@ class TabIndicatorRecordingCanvas extends TestRecordingCanvas {
 
   @override
   void drawLine(Offset p1, Offset p2, Paint paint) {
+    super.drawLine(p1, p2, paint);
     // Assuming that the indicatorWeight is 2.0, the default.
     const double indicatorWeight = 2.0;
     if (paint.color == indicatorColor)
@@ -900,13 +901,12 @@ void main() {
     final List<String> tabs = <String>['A', 'B'];
 
     const Color indicatorColor = Color(0xFFFF0000);
+    final TabIndicatorRecordingCanvas canvas = TabIndicatorRecordingCanvas(indicatorColor);
+    createPaintingContext = ({ContainerLayer layer, Rect paintBounds}) {
+      return TestRecordingPaintingContext<TabIndicatorRecordingCanvas>(layer, paintBounds, canvas);
+    };
     await tester.pumpWidget(buildFrame(tabs: tabs, value: 'A', indicatorColor: indicatorColor));
 
-    final RenderBox box = tester.renderObject(find.byType(TabBar));
-    final TabIndicatorRecordingCanvas canvas = TabIndicatorRecordingCanvas(indicatorColor);
-    final TestRecordingPaintingContext context = TestRecordingPaintingContext(canvas);
-
-    box.paint(context, Offset.zero);
     final Rect indicatorRect0 = canvas.indicatorRect;
     expect(indicatorRect0.left, 0.0);
     expect(indicatorRect0.width, 400.0);
@@ -915,18 +915,18 @@ void main() {
     await tester.tap(find.text('B'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
-    box.paint(context, Offset.zero);
     final Rect indicatorRect1 = canvas.indicatorRect;
     expect(indicatorRect1.left, greaterThan(indicatorRect0.left));
     expect(indicatorRect1.right, lessThan(800.0));
     expect(indicatorRect1.height, 2.0);
 
     await tester.pump(const Duration(milliseconds: 300));
-    box.paint(context, Offset.zero);
     final Rect indicatorRect2 = canvas.indicatorRect;
     expect(indicatorRect2.left, 400.0);
     expect(indicatorRect2.width, 400.0);
     expect(indicatorRect2.height, 2.0);
+
+    createPaintingContext = null;
   });
 
   testWidgets('TabBarView child disposed during animation', (WidgetTester tester) async {
@@ -2616,17 +2616,17 @@ void main() {
       );
     }
 
+    final TabIndicatorRecordingCanvas canvas = TabIndicatorRecordingCanvas(indicatorColor);
+    createPaintingContext = ({ContainerLayer layer, Rect paintBounds}) {
+      return TestRecordingPaintingContext<TabIndicatorRecordingCanvas>(layer, paintBounds, canvas);
+    };
+
     await tester.pumpWidget(TabControllerFrame(
       builder: buildTabControllerFrame,
       length: tabs.length,
       initialIndex: 0,
     ));
 
-    final RenderBox box = tester.renderObject(find.byType(TabBar));
-    final TabIndicatorRecordingCanvas canvas = TabIndicatorRecordingCanvas(indicatorColor);
-    final TestRecordingPaintingContext context = TestRecordingPaintingContext(canvas);
-
-    box.paint(context, Offset.zero);
     double expectedIndicatorLeft = canvas.indicatorRect.left;
 
     final PageView pageView = tester.widget(find.byType(PageView));
@@ -2634,23 +2634,24 @@ void main() {
     void pageControllerListener() {
       // Whenever TabBarView scrolls due to changing TabController's index,
       // check if indicator stays idle in its expectedIndicatorLeft
-      box.paint(context, Offset.zero);
       expect(canvas.indicatorRect.left, expectedIndicatorLeft);
     }
 
     // Moving from index 0 to 2 (distanced tabs)
     tabController.index = 2;
-    box.paint(context, Offset.zero);
+    await tester.pump();
     expectedIndicatorLeft = canvas.indicatorRect.left;
     pageController.addListener(pageControllerListener);
     await tester.pumpAndSettle();
 
     // Moving from index 2 to 1 (neighboring tabs)
     tabController.index = 1;
-    box.paint(context, Offset.zero);
+    await tester.pump();
     expectedIndicatorLeft = canvas.indicatorRect.left;
     await tester.pumpAndSettle();
     pageController.removeListener(pageControllerListener);
+
+    createPaintingContext = null;
   });
 
   testWidgets('Setting BouncingScrollPhysics on TabBarView does not include ClampingScrollPhysics', (WidgetTester tester) async {

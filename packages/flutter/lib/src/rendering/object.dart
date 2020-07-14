@@ -133,7 +133,10 @@ class PaintingContext extends ClipContext {
       child._layer.debugCreator = child.debugCreator ?? child.runtimeType;
       return true;
     }());
-    childContext ??= PaintingContext(child._layer, child.paintBounds);
+    childContext ??= RendererBinding.instance.createPaintingContext(
+      layer: child._layer,
+      paintBounds: child.paintBounds,
+    );
     child._paintWithContext(childContext, Offset.zero);
 
     // Double-check that the paint method did not replace the layer (the first
@@ -272,9 +275,16 @@ class PaintingContext extends ClipContext {
     assert(!_isRecording);
     _currentLayer = PictureLayer(estimatedBounds);
     _recorder = ui.PictureRecorder();
-    _canvas = Canvas(_recorder);
+    _canvas = createCanvas(_recorder);
     _containerLayer.append(_currentLayer);
   }
+
+  /// Creates a canvas for recording graphical operations into the
+  /// given picture recorder.
+  ///
+  /// This is used to create [canvas].
+  @protected
+  Canvas createCanvas(ui.PictureRecorder recorder) => Canvas(recorder);
 
   /// Stop recording to a canvas if recording has started.
   ///
@@ -2304,6 +2314,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// given context), the current canvas held by the context might change
   /// because draw operations before and after painting children might need to
   /// be recorded on separate compositing layers.
+  @protected
   void paint(PaintingContext context, Offset offset) { }
 
   /// Applies the transform that would be applied when painting the given child

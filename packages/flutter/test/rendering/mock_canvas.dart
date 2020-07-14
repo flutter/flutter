@@ -527,7 +527,7 @@ abstract class _TestRecordingCanvasMatcher extends Matcher {
   @override
   bool matches(Object object, Map<dynamic, dynamic> matchState) {
     final TestRecordingCanvas canvas = TestRecordingCanvas();
-    final TestRecordingPaintingContext context = TestRecordingPaintingContext(canvas);
+    final LegacyTestRecordingPaintingContext context = LegacyTestRecordingPaintingContext(canvas);
     final StringBuffer description = StringBuffer();
     String prefixMessage = 'unexpectedly failed.';
     bool result = false;
@@ -632,7 +632,7 @@ class _TestRecordingCanvasPaintsAssertionMatcher extends Matcher {
   @override
   bool matches(Object object, Map<dynamic, dynamic> matchState) {
     final TestRecordingCanvas canvas = TestRecordingCanvas();
-    final TestRecordingPaintingContext context = TestRecordingPaintingContext(canvas);
+    final LegacyTestRecordingPaintingContext context = LegacyTestRecordingPaintingContext(canvas);
     final StringBuffer description = StringBuffer();
     String prefixMessage = 'unexpectedly failed.';
     bool result = false;
