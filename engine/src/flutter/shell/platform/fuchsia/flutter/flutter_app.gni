@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-assert(is_fuchsia || is_fuchsia_host)
+assert(is_fuchsia)
 
 import("//build/package.gni")
 import("//build/tools/json_merge/json_merge.gni")

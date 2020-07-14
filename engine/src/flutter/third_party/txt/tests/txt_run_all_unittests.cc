@@ -32,7 +32,11 @@ int main(int argc, char** argv) {
     return EXIT_FAILURE;
   }
   FML_DCHECK(txt::GetFontDir().length() > 0);
+#if defined(OS_FUCHSIA)
+  fml::icu::InitializeICU("/pkg/data/icudtl.dat");
+#else
   fml::icu::InitializeICU("icudtl.dat");
+#endif
   SkGraphics::Init();
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

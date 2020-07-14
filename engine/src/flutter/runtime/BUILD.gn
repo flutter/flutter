@@ -4,9 +4,6 @@
 
 import("//flutter/common/config.gni")
 import("//flutter/testing/testing.gni")
-if (is_fuchsia) {
-  import("//flutter/tools/fuchsia/fuchsia_archive.gni")
-}
 
 source_set("test_font") {
   sources = [
@@ -105,107 +102,65 @@ source_set_maybe_fuchsia_legacy("runtime") {
   ]
 }
 
-test_fixtures("runtime_fixtures") {
-  dart_main = "fixtures/runtime_test.dart"
-}
-
-source_set_maybe_fuchsia_legacy("runtime_unittests_common") {
-  testonly = true
-
-  sources = [
-    "dart_isolate_unittests.cc",
-    "dart_lifecycle_unittests.cc",
-    "dart_service_isolate_unittests.cc",
-    "dart_vm_unittests.cc",
-  ]
-
-  public_deps = [
-    ":libdart",
-    ":runtime_fixtures",
-    "//flutter/common",
-    "//flutter/fml",
-    "//flutter/lib/snapshot",
-    "//flutter/testing",
-    "//flutter/third_party/tonic",
-    "//third_party/dart/runtime/bin:elf_loader",
-    "//third_party/skia",
-  ]
-
-  deps_legacy_and_next = [
-    ":runtime",
-    "//flutter/testing:dart",
-    "//flutter/testing:fixture_test",
-  ]
-}
-
-if (is_fuchsia) {
-  executable("runtime_unittests") {
-    testonly = true
-
-    configs += [ "//flutter:export_dynamic_symbols" ]
-
-    deps = [
-      ":runtime_unittests_common_fuchsia_legacy",
-    ]
+if (enable_unittests) {
+  test_fixtures("runtime_fixtures") {
+    dart_main = "fixtures/runtime_test.dart"
   }
 
-  executable("runtime_unittests_next") {
+  source_set_maybe_fuchsia_legacy("runtime_unittests_common") {
     testonly = true
 
-    configs += [ "//flutter:export_dynamic_symbols" ]
-
-    deps = [
-      ":runtime_unittests_common",
+    sources = [
+      "dart_isolate_unittests.cc",
+      "dart_lifecycle_unittests.cc",
+      "dart_service_isolate_unittests.cc",
+      "dart_vm_unittests.cc",
     ]
-  }
-} else {
-  executable("runtime_unittests") {
-    testonly = true
 
-    configs += [ "//flutter:export_dynamic_symbols" ]
+    public_configs = [ "//flutter:export_dynamic_symbols" ]
 
-    deps = [
-      ":runtime_unittests_common",
-    ]
-  }
-}
-
-if (is_fuchsia) {
-  fuchsia_test_archive("runtime_tests") {
-    deps = [
+    public_deps = [
+      ":libdart",
       ":runtime_fixtures",
-      ":runtime_unittests",
+      "//flutter/common",
+      "//flutter/fml",
+      "//flutter/lib/snapshot",
+      "//flutter/testing",
+      "//flutter/third_party/tonic",
+      "//third_party/dart/runtime/bin:elf_loader",
+      "//third_party/skia",
     ]
 
-    binary = "runtime_unittests"
-
-    # TODO(gw280): https://github.com/flutter/flutter/issues/50294
-    # Right now we need to manually specify all the fixtures that are
-    # declared in the test_fixtures() call above.
-    resources = [
-      {
-        path = "$target_gen_dir/assets/kernel_blob.bin"
-        dest = "assets/kernel_blob.bin"
-      },
+    deps_legacy_and_next = [
+      ":runtime",
+      "//flutter/testing:dart",
+      "//flutter/testing:fixture_test",
     ]
   }
 
-  fuchsia_test_archive("runtime_tests_next") {
-    deps = [
-      ":runtime_fixtures",
-      ":runtime_unittests_next",
-    ]
+  if (is_fuchsia) {
+    executable("runtime_unittests") {
+      testonly = true
 
-    binary = "runtime_unittests_next"
+      deps = [
+        ":runtime_unittests_common_fuchsia_legacy",
+      ]
+    }
 
-    # TODO(gw280): https://github.com/flutter/flutter/issues/50294
-    # Right now we need to manually specify all the fixtures that are
-    # declared in the test_fixtures() call above.
-    resources = [
-      {
-        path = "$target_gen_dir/assets/kernel_blob.bin"
-        dest = "assets/kernel_blob.bin"
-      },
-    ]
+    executable("runtime_unittests_next") {
+      testonly = true
+
+      deps = [
+        ":runtime_unittests_common",
+      ]
+    }
+  } else {
+    executable("runtime_unittests") {
+      testonly = true
+
+      deps = [
+        ":runtime_unittests_common",
+      ]
+    }
   }
 }

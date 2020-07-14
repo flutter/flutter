@@ -21,11 +21,6 @@
 #include "third_party/tonic/dart_binding_macros.h"
 #include "third_party/tonic/dart_class_library.h"
 
-#if !defined(FUCHSIA_SDK)
-#include <fuchsia/device/manager/cpp/fidl.h>
-#include "lib/fsl/io/fd.h"
-#endif  // !defined(FUCHSIA_SDK)
-
 using tonic::ToDart;
 
 namespace zircon {

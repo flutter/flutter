@@ -2,27 +2,10 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//build/fuchsia/sdk.gni")
 import("//flutter/common/config.gni")
 import("//flutter/shell/gpu/gpu.gni")
 import("//flutter/testing/testing.gni")
-import("//flutter/vulkan/config.gni")
-
-if (is_fuchsia) {
-  import("//build/fuchsia/sdk.gni")
-  import("//flutter/tools/fuchsia/fuchsia_archive.gni")
-}
-
-config("vulkan_config") {
-  if (is_fuchsia) {
-    include_dirs = [ "$fuchsia_sdk_root/vulkan/include" ]
-  } else {
-    include_dirs = [ "//third_party/vulkan/src" ]
-  }
-
-  if (is_fuchsia) {
-    defines = [ "VK_USE_PLATFORM_FUCHSIA=1" ]
-  }
-}
 
 # Template to generate a dart embedder resource.cc file.
 # Required invoker inputs:
@@ -167,25 +150,6 @@ template("shell_host_executable") {
   }
 }
 
-test_fixtures("shell_unittests_fixtures") {
-  dart_main = "fixtures/shell_test.dart"
-
-  fixtures = [ "fixtures/shelltest_screenshot.png" ]
-}
-
-shell_host_executable("shell_benchmarks") {
-  sources = [
-    "shell_benchmarks.cc",
-  ]
-
-  deps = [
-    ":shell_unittests_fixtures",
-    "//flutter/benchmarking",
-    "//flutter/testing:dart",
-    "//flutter/testing:testing_lib",
-  ]
-}
-
 if (enable_unittests) {
   declare_args() {
     test_enable_vulkan = is_fuchsia
@@ -199,6 +163,25 @@ if (enable_unittests) {
     enable_vulkan = test_enable_vulkan
     enable_gl = test_enable_gl
     enable_metal = test_enable_metal
+  }
+
+  test_fixtures("shell_unittests_fixtures") {
+    dart_main = "fixtures/shell_test.dart"
+
+    fixtures = [ "fixtures/shelltest_screenshot.png" ]
+  }
+
+  shell_host_executable("shell_benchmarks") {
+    sources = [
+      "shell_benchmarks.cc",
+    ]
+
+    deps = [
+      ":shell_unittests_fixtures",
+      "//flutter/benchmarking",
+      "//flutter/testing:dart",
+      "//flutter/testing:testing_lib",
+    ]
   }
 
   source_set_maybe_fuchsia_legacy("shell_test_fixture_sources") {
@@ -313,64 +296,6 @@ if (enable_unittests) {
         ":shell_unittests_common",
         ":shell_unittests_fixtures",
       ]
-    }
-  }
-
-  if (is_fuchsia) {
-    fuchsia_test_archive("shell_tests") {
-      deps = [
-        ":shell_unittests",
-        ":shell_unittests_fixtures",
-      ]
-
-      binary = "shell_unittests"
-
-      # TODO(gw280): https://github.com/flutter/flutter/issues/50294
-      # Right now we need to manually specify all the fixtures that are
-      # declared in the test_fixtures() call above.
-      resources = [
-        {
-          path = "$target_gen_dir/assets/kernel_blob.bin"
-          dest = "assets/kernel_blob.bin"
-        },
-        {
-          path = "$target_gen_dir/assets/shelltest_screenshot.png"
-          dest = "assets/shelltest_screenshot.png"
-        },
-      ]
-
-      if (test_enable_vulkan) {
-        libraries = vulkan_validation_libs
-        resources += vulkan_icds
-      }
-    }
-
-    fuchsia_test_archive("shell_tests_next") {
-      deps = [
-        ":shell_unittests_fixtures",
-        ":shell_unittests_next",
-      ]
-
-      binary = "shell_unittests_next"
-
-      # TODO(gw280): https://github.com/flutter/flutter/issues/50294
-      # Right now we need to manually specify all the fixtures that are
-      # declared in the test_fixtures() call above.
-      resources = [
-        {
-          path = "$target_gen_dir/assets/kernel_blob.bin"
-          dest = "assets/kernel_blob.bin"
-        },
-        {
-          path = "$target_gen_dir/assets/shelltest_screenshot.png"
-          dest = "assets/shelltest_screenshot.png"
-        },
-      ]
-
-      if (test_enable_vulkan) {
-        libraries = vulkan_validation_libs
-        resources += vulkan_icds
-      }
     }
   }
 }

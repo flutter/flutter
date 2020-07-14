@@ -229,7 +229,7 @@ if (is_mac && !embedder_for_target) {
     args = [
       rebase_path(sources[0]),
       rebase_path(outputs[0]),
-      "--bitcode=$flutter_enable_bitcode",
+      "--bitcode=$enable_bitcode",
     ]
   }
 

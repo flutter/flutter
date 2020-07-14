@@ -142,7 +142,7 @@ source_set_maybe_fuchsia_legacy("ui") {
   deps_legacy_and_next = [ "//flutter/flow:flow" ]
 }
 
-if (current_toolchain == host_toolchain) {
+if (enable_unittests) {
   test_fixtures("ui_unittests_fixtures") {
     dart_main = "fixtures/ui_test.dart"
     fixtures = [
@@ -154,36 +154,10 @@ if (current_toolchain == host_toolchain) {
     ]
   }
 
-  executable("ui_unittests") {
-    testonly = true
-
-    configs += [ "//flutter:export_dynamic_symbols" ]
-
-    sources = [
-      "painting/image_decoder_unittests.cc",
-      "painting/image_encoding_unittests.cc",
-      "painting/vertices_unittests.cc",
-      "window/pointer_data_packet_converter_unittests.cc",
-    ]
-
-    deps = [
-      ":ui",
-      ":ui_unittests_fixtures",
-      "//flutter/common",
-      "//flutter/shell/common:shell_test_fixture_sources",
-      "//flutter/testing",
-      "//flutter/testing:dart",
-      "//flutter/testing:fixture_test",
-      "//flutter/testing:opengl",
-      "//flutter/third_party/tonic",
-      "//third_party/dart/runtime/bin:elf_loader",
-    ]
-  }
-
   executable("ui_benchmarks") {
     testonly = true
 
-    configs += [ "//flutter:export_dynamic_symbols" ]
+    public_configs = [ "//flutter:export_dynamic_symbols" ]
 
     sources = [
       "ui_benchmarks.cc",
@@ -193,8 +167,67 @@ if (current_toolchain == host_toolchain) {
       ":ui",
       ":ui_unittests_fixtures",
       "//flutter/benchmarking",
-      "//flutter/shell/common:common",
+      "//flutter/shell/common",
       "//flutter/testing:fixture_test",
     ]
+  }
+
+  source_set_maybe_fuchsia_legacy("ui_unittests_common") {
+    testonly = true
+
+    public_configs = [ "//flutter:export_dynamic_symbols" ]
+
+    sources = [
+      "painting/image_encoding_unittests.cc",
+      "painting/vertices_unittests.cc",
+      "window/pointer_data_packet_converter_unittests.cc",
+    ]
+
+    deps = [
+      ":ui_unittests_fixtures",
+      "//flutter/common",
+      "//flutter/testing",
+      "//flutter/third_party/tonic",
+      "//third_party/dart/runtime/bin:elf_loader",
+    ]
+
+    # TODO(): This test is hard-coded to use a TestGLSurface so it cannot run on fuchsia.
+    if (!is_fuchsia) {
+      sources += [ "painting/image_decoder_unittests.cc" ]
+
+      deps += [ "//flutter/testing:opengl" ]
+    }
+
+    deps_legacy_and_next = [
+      ":ui",
+      "//flutter/shell/common:shell_test_fixture_sources",
+      "//flutter/testing:dart",
+      "//flutter/testing:fixture_test",
+    ]
+  }
+
+  if (is_fuchsia) {
+    executable("ui_unittests") {
+      testonly = true
+
+      deps = [
+        ":ui_unittests_common_fuchsia_legacy",
+      ]
+    }
+    executable("ui_unittests_next") {
+      testonly = true
+
+      deps = [
+        ":ui_unittests_common",
+      ]
+    }
+  } else {
+    executable("ui_unittests") {
+      testonly = true
+
+      deps = [
+        ":ui_unittests_common",
+      ]
+    }
   }
 }
