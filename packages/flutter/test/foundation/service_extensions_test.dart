@@ -742,9 +742,6 @@ void main() {
   });
 
   test('Service extensions - fastReassemble', () async {
-    Map<String, dynamic> result;
-    result = await binding.testExtension('fastReassemble', <String, String>{'class': 'Foo'});
-
-    expect(result, containsPair('Success', 'true'));
+    expect(binding.testExtension('fastReassemble', <String, String>{}), throwsA(isA<FlutterError>()));
   });
 }
