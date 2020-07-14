@@ -1541,7 +1541,7 @@ void main() {
     const Color tileColor = Colors.green;
 
     await tester.pumpWidget(
-       MaterialApp(
+      MaterialApp(
         home: Material(
           child: Center(
             child: StatefulBuilder(
@@ -1559,7 +1559,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     // Initially, when isSelected is false, the ListTile should respect tileColor.
@@ -1580,23 +1580,23 @@ void main() {
     const Color defaultColor = Colors.transparent;
 
     await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: Center(
-              child: StatefulBuilder(
-                builder: (BuildContext context, StateSetter setState) {
-                  return ListTile(
-                    selected: isSelected,
-                    onTap: () {
-                      setState(()=> isSelected = !isSelected);
-                    },
-                    title: const Text('Title'),
-                  );
-                },
-              ),
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return ListTile(
+                  selected: isSelected,
+                  onTap: () {
+                    setState(()=> isSelected = !isSelected);
+                  },
+                  title: const Text('Title'),
+                );
+              },
             ),
           ),
-        )
+        ),
+      ),
     );
 
     ColoredBox coloredBox = tester.widget(find.byType(ColoredBox));

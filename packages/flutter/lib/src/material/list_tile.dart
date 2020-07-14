@@ -810,7 +810,7 @@ class ListTile extends StatelessWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
-  /// Defines the background color of `ListTile.
+  /// Defines the background color of `ListTile when [selected] is false.
   ///
   /// By default, the value of `tileColor` is [Colors.transparent].
   final Color tileColor;
