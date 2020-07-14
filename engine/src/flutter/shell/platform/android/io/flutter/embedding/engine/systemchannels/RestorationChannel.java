@@ -10,6 +10,8 @@ import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.StandardMethodCodec;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * System channel to exchange restoration data between framework and engine.
@@ -79,7 +81,7 @@ public class RestorationChannel {
     engineHasProvidedData = true;
     if (pendingFrameworkRestorationChannelRequest != null) {
       // If their is a pending request from the framework, answer it.
-      pendingFrameworkRestorationChannelRequest.success(data);
+      pendingFrameworkRestorationChannelRequest.success(packageData(data));
       pendingFrameworkRestorationChannelRequest = null;
       restorationData = data;
     } else if (frameworkHasRequestedData) {
@@ -90,7 +92,7 @@ public class RestorationChannel {
       // e.g. when the engine is attached to a new activity.
       channel.invokeMethod(
           "push",
-          data,
+          packageData(data),
           new MethodChannel.Result() {
             @Override
             public void success(Object result) {
@@ -142,7 +144,7 @@ public class RestorationChannel {
             case "get":
               frameworkHasRequestedData = true;
               if (engineHasProvidedData || !waitForRestorationData) {
-                result.success(restorationData);
+                result.success(packageData(restorationData));
                 // Do not delete the restoration data on the engine side after sending it to the
                 // framework. We may need to hand this data back to the operating system if the
                 // framework never modifies the data (and thus doesn't send us any
@@ -157,4 +159,11 @@ public class RestorationChannel {
           }
         }
       };
+
+  private Map<String, Object> packageData(byte[] data) {
+    final Map<String, Object> packaged = new HashMap<String, Object>();
+    packaged.put("enabled", true); // Android supports state restoration.
+    packaged.put("data", data);
+    return packaged;
+  }
 }
