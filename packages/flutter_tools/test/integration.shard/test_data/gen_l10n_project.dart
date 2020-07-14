@@ -16,8 +16,7 @@ class GenL10nProject extends Project {
   @override
   Future<void> setUpIn(Directory dir, {
     bool useDeferredLoading = false,
-  }) async {
-    await super.setUpIn(dir);
+  }) {
     this.dir = dir;
     writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_en.arb'), appEn);
     writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_en_CA.arb'), appEnCa);
@@ -29,6 +28,7 @@ class GenL10nProject extends Project {
     writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hans.arb'), appZhHans);
     writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hant_TW.arb'), appZhHantTw);
     writeFile(globals.fs.path.join(dir.path, 'l10n.yaml'), l10nYaml(useDeferredLoading: useDeferredLoading));
+    return super.setUpIn(dir);
   }
 
   @override

@@ -97,6 +97,7 @@ abstract class Pub {
     bool offline = false,
     bool checkLastModified = true,
     bool skipPubspecYamlCheck = false,
+    bool generateSyntheticPackage = false,
     String flutterRootOverride,
   });
 
@@ -171,6 +172,7 @@ class _DefaultPub implements Pub {
     bool offline = false,
     bool checkLastModified = true,
     bool skipPubspecYamlCheck = false,
+    bool generateSyntheticPackage = false,
     String flutterRootOverride,
   }) async {
     directory ??= _fileSystem.currentDirectory.path;
@@ -180,7 +182,6 @@ class _DefaultPub implements Pub {
     final File packageConfigFile = _fileSystem.file(
       _fileSystem.path.join(directory, '.dart_tool', 'package_config.json'));
     final Directory generatedDirectory = _fileSystem.directory(_fileSystem.path.join(directory, '.dart_tool', 'flutter_gen'));
-    final File yamlConfig = _fileSystem.file(_fileSystem.path.join(directory, 'l10n.yaml'));
 
     if (!skipPubspecYamlCheck && !pubSpecYaml.existsSync()) {
       if (!skipIfAbsent) {
@@ -251,7 +252,7 @@ class _DefaultPub implements Pub {
       );
     }
     // Insert references to synthetic flutter package.
-    if (yamlConfig.existsSync()) {
+    if (generateSyntheticPackage) {
       await _updatePackageConfig(packageConfigFile, generatedDirectory);
     }
   }

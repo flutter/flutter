@@ -68,6 +68,9 @@ class BasicProjectWithFlutterGen extends Project {
   dependencies:
     flutter:
       sdk: flutter
+
+  flutter:
+    generate: true
   ''';
 
   @override
@@ -76,5 +79,43 @@ class BasicProjectWithFlutterGen extends Project {
   import 'package:flutter_gen/flutter_gen.dart';
 
   void main() {}
+  ''';
+}
+
+class BasicProjectWithUnaryMain extends Project {
+
+  @override
+  final String pubspec = '''
+  name: test
+  environment:
+    sdk: ">=2.0.0-dev.68.0 <3.0.0"
+  dependencies:
+    flutter:
+      sdk: flutter
+  ''';
+
+  @override
+  final String main = r'''
+  import 'dart:async';
+  import 'package:flutter/material.dart';
+  Future<void> main(List<String> args) async {
+    while (true) {
+      runApp(new MyApp());
+      await Future.delayed(const Duration(milliseconds: 50));
+    }
+  }
+  class MyApp extends StatelessWidget {
+    @override
+    Widget build(BuildContext context) {
+      topLevelFunction();
+      return new MaterialApp( // BUILD BREAKPOINT
+        title: 'Flutter Demo',
+        home: new Container(),
+      );
+    }
+  }
+  topLevelFunction() {
+    print("topLevelFunction"); // TOP LEVEL BREAKPOINT
+  }
   ''';
 }

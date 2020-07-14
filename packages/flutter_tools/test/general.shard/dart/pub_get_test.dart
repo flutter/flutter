@@ -211,12 +211,15 @@ void main() {
         }
       ),
     );
-    fileSystem.file('pubspec.yaml').writeAsStringSync('name: foo');
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2,"packages": []}');
 
-    await pub.get(context: PubContext.flutterTests, checkLastModified: false);
+    await pub.get(
+      context: PubContext.flutterTests,
+      generateSyntheticPackage: true,
+      checkLastModified: false,
+    );
 
     verify(usage.sendEvent('pub-result', 'flutter-tests', label: 'success')).called(1);
   });
