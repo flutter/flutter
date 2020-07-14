@@ -1568,8 +1568,18 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     );
 
     // Split the semantics node area between the start and end nodes.
-    _startSemanticsNode.rect = Rect.fromPoints(node.rect.topLeft, node.rect.bottomCenter);
-    _endSemanticsNode.rect = Rect.fromPoints(node.rect.topCenter, node.rect.bottomRight);
+    final Rect leftRect = Rect.fromPoints(node.rect.topLeft, node.rect.bottomCenter);
+    final Rect rightRect = Rect.fromPoints(node.rect.topCenter, node.rect.bottomRight);
+    switch (textDirection) {
+      case TextDirection.ltr:
+        _startSemanticsNode.rect = leftRect;
+        _endSemanticsNode.rect = rightRect;
+        break;
+      case TextDirection.rtl:
+        _startSemanticsNode.rect = rightRect;
+        _endSemanticsNode.rect = leftRect;
+        break;
+    }
 
     _startSemanticsNode.updateWith(config: startSemanticsConfiguration);
     _endSemanticsNode.updateWith(config: endSemanticsConfiguration);
