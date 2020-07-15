@@ -448,7 +448,8 @@ class _ResidentWebRunner extends ResidentWebRunner {
         // This will result in a NoSuchMethodError thrown by injected_handler.darts
         await pub.get(
           context: PubContext.pubGet,
-          directory: globals.fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools')
+          directory: globals.fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools'),
+          generateSyntheticPackage: false,
         );
 
         final ExpressionCompiler expressionCompiler =

@@ -543,6 +543,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
         context: PubContext.create,
         directory: directory.path,
         offline: boolArg('offline'),
+        generateSyntheticPackage: false,
       );
       final FlutterProject project = FlutterProject.fromDirectory(directory);
       await project.ensureReadyForPlatformSpecificTooling(checkProjects: false);
@@ -562,6 +563,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
         context: PubContext.createPackage,
         directory: directory.path,
         offline: boolArg('offline'),
+        generateSyntheticPackage: false,
       );
     }
     return generatedCount;
@@ -606,6 +608,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
         context: PubContext.createPlugin,
         directory: directory.path,
         offline: boolArg('offline'),
+        generateSyntheticPackage: false,
       );
     }
 
@@ -674,7 +677,12 @@ https://flutter.dev/docs/development/packages-and-plugins/developing-packages#pl
     }
 
     if (boolArg('pub')) {
-      await pub.get(context: PubContext.create, directory: directory.path, offline: boolArg('offline'));
+      await pub.get(
+        context: PubContext.create,
+        directory: directory.path,
+        offline: boolArg('offline'),
+        generateSyntheticPackage: false,
+      );
       await project.ensureReadyForPlatformSpecificTooling(checkProjects: pluginExampleApp);
     }
     if (templateContext['android'] == true) {

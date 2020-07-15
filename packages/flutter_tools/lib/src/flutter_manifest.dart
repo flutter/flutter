@@ -279,6 +279,26 @@ class FlutterManifest {
     }
     return fonts;
   }
+
+  /// Whether a synthetic flutter_gen package should be generated.
+  ///
+  /// This can be provided to the [Pub] interface to inject a new entry
+  /// into the package_config.json file which points to `.dart_tool/flutter_gen`.
+  ///
+  /// This allows generated source code to be imported using a package
+  /// alias.
+  bool get generateSyntheticPackage => _generateSyntheticPackage ??= _computeGenerateSyntheticPackage();
+  bool _generateSyntheticPackage;
+  bool _computeGenerateSyntheticPackage() {
+    if (!_flutterDescriptor.containsKey('generate')) {
+      return false;
+    }
+    final Object value = _flutterDescriptor['generate'];
+    if (value is! bool) {
+      return false;
+    }
+    return value as bool;
+  }
 }
 
 class Font {
@@ -437,6 +457,8 @@ void _validateFlutter(YamlMap yaml, List<String> errors) {
         }
         final List<String> pluginErrors = Plugin.validatePluginYaml(kvp.value as YamlMap);
         errors.addAll(pluginErrors);
+        break;
+      case 'generate':
         break;
       default:
         errors.add('Unexpected child "${kvp.key}" found under "flutter".');
