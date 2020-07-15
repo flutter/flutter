@@ -2,7 +2,7 @@
 
 This directory contains a keycode generator that can generate Dart code for
 the `LogicalKeyboardKey` and `PhysicalKeyboardKey` classes. It draws information
-from both the Chromium and Android source bases, and incorporates the
+from both the Chromium and Android source bases and incorporates the
 information it finds in those sources into a single key database in JSON form.
 
 It then generates `keyboard_key.dart` (containing the `LogicalKeyboardKey` and
@@ -11,7 +11,7 @@ platform-specific immutable maps for translating platform keycodes and
 information into the pre-defined key values in the `LogicalKeyboardKey` and
 `PhysicalKeyboardKey` classes.
 
-The `data` subdirectory contains both some local data files, and the templates
+The `data` subdirectory contains both some local data files and the templates
 used to generate the source files.
 
  - `data/key_data.json`: contains the merged data from all the other sources.
@@ -28,7 +28,7 @@ used to generate the source files.
  - `data/printable.json`: contains a mapping between Flutter key name and its
    printable character. This character is used as the key label.
  - `data/synonyms.json`: contains a mapping between pseudo-keys that represent
-   other keys, and the sets of keys they represent. For example, this contains
+   other keys and the sets of keys they represent. For example, this contains
    the "shift" key that represents either a "shiftLeft" or "shiftRight" key.
 
  ## Running the tool
@@ -59,14 +59,14 @@ checked in.
 
 ## Key Code ID Scheme
 
-In order to provide logical keys with unique ID codes, Flutter uses a scheme
-to assign logical key codes which keeps us out of the business of minting new
+To provide logical keys with unique ID codes, Flutter uses a scheme
+to assign logical keycodes which keeps us out of the business of minting new
 codes ourselves. This only applies to logical key codes: Flutter's
 physical key codes are just defined as USB HID codes.
 
 The logical codes are meant to be opaque to the user, and should never be
-unpacked for meaning, since the code scheme could change at any time, and the
-meaning is likely to be retrievable in a more reliable and correct manner from
+unpacked for meaning, since the coding scheme could change at any time and the
+meaning is likely to be retrievable more reliably and correctly from
 the API.
 
 However, if you are porting Flutter to a new platform, you should follow the
@@ -79,10 +79,10 @@ define. It has values in the following ranges.
     characters when pressed (this includes dead keys, but not e.g. function keys
     or shift keys), the logical key code is the Unicode code point corresponding
     to the representation of the key in the current keyboard mapping. The
-    Unicode code point might not actually match the string that is generated for
-    an unshifted key press of that key, for example we would use U+0034 for the
+    Unicode code point might not match the string that is generated for
+    an unshifted keypress of that key, for example, we would use U+0034 for the
     “4 $” key in the US layout, and also the “4 ;” key in the Russian layout,
-    and also, maybe less intuitively, for the “' 4 {“ in French layout (where in
+    and also, maybe less intuitively, for the “' 4 {“ in French layout (wherein
     the latter case, an unshifted press gets you a ', not a 4). Similarly, the Q
     key in the US layout outputs a q in normal usage, but its code would be 0x0
     0000 0051 (U+00051 being the code for the uppercase Q).
@@ -127,8 +127,7 @@ define. It has values in the following ranges.
 
   - **0x100 0000 0000 - 0x1FF FFFF FFFF**: For keys that have no definition yet in
     Flutter, but that are encountered in the field, this range is used to embed
-    the platform-specific keycode in an ID that must be tested for in a platform
-    specific way. For instance, if a platform generates a new USB HID code 0x07
+    the platform-specific keycode in an ID that must be tested for in a platform-specific way. For instance, if a platform generates a new USB HID code 0x07
     00E8 that a Flutter app wasn’t compiled with, then it would appear in the
     app as 0x100 0007 00E8, and the app could test against that code. Yes, this
     also means that once they recompile with a version of Flutter that supports
@@ -164,7 +163,7 @@ UP, code 0x0000000059 (Y UP)<br>
 UP, code 0x01000700E1 (LEFT SHIFT UP)<br>
 
 Here's another example. On a German keyboard layout, you press ^e (the ^ key is
-at the top left of the keyboard and is a dead key) to produce a “ê”:
+at the top left of the keyboard and is a dead key) to produce an “ê”:
 
 DOWN, code 0x0000000302 (CIRCUMFLEX DOWN) It produces no string, because it's a dead
 key. The key code is for "Combining circumflex accent U+0302" in Unicode.<br>
@@ -175,6 +174,6 @@ UP, code 0x0000000065. (E UP).<br>
 It is an important point that even though we’re representing many keys with USB
 HID codes, these are not necessarily the same HID codes produced by the hardware
 and presented to the driver, since on most platforms we have to map the platform
-representation back to a HID code because we don’t have access to the original
+representation back to an HID code because we don’t have access to the original
 HID code. USB HID is simply a conveniently well-defined standard that includes
 many of the keys we would want.
