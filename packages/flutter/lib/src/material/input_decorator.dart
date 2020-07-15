@@ -2020,7 +2020,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
           return themeData.primaryColor;
       }
     }
-
     return themeData.hintColor;
   }
 
