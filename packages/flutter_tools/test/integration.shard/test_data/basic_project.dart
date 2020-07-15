@@ -53,7 +53,11 @@ class BasicProject extends Project {
   int get topLevelFunctionBreakpointLine => lineContaining(main, '// TOP LEVEL BREAKPOINT');
 }
 
-class BasicProjectWithUnaryMain extends Project {
+class BasicProjectWithFlutterGen extends Project {
+  @override
+  final String generatedFile = '''
+    String x = "a";
+  ''';
 
   @override
   final String pubspec = '''
@@ -64,21 +68,42 @@ class BasicProjectWithUnaryMain extends Project {
   dependencies:
     flutter:
       sdk: flutter
+
+  flutter:
+    generate: true
   ''';
 
   @override
   final String main = r'''
   import 'dart:async';
+  import 'package:flutter_gen/flutter_gen.dart';
 
+  void main() {}
+  ''';
+}
+
+class BasicProjectWithUnaryMain extends Project {
+
+  @override
+  final String pubspec = '''
+  name: test
+  environment:
+    sdk: ">=2.0.0-dev.68.0 <3.0.0"
+  dependencies:
+    flutter:
+      sdk: flutter
+  ''';
+
+  @override
+  final String main = r'''
+  import 'dart:async';
   import 'package:flutter/material.dart';
-
   Future<void> main(List<String> args) async {
     while (true) {
       runApp(new MyApp());
       await Future.delayed(const Duration(milliseconds: 50));
     }
   }
-
   class MyApp extends StatelessWidget {
     @override
     Widget build(BuildContext context) {
@@ -89,7 +114,6 @@ class BasicProjectWithUnaryMain extends Project {
       );
     }
   }
-
   topLevelFunction() {
     print("topLevelFunction"); // TOP LEVEL BREAKPOINT
   }
