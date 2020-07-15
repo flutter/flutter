@@ -52,6 +52,8 @@ class ListTileTheme extends InheritedTheme {
     this.iconColor,
     this.textColor,
     this.contentPadding,
+    this.tileColor,
+    this.selectedTileColor,
     Widget child,
   }) : super(key: key, child: child);
 
@@ -68,6 +70,8 @@ class ListTileTheme extends InheritedTheme {
     Color iconColor,
     Color textColor,
     EdgeInsetsGeometry contentPadding,
+    Color tileColor,
+    Color selectedTileColor,
     @required Widget child,
   }) {
     assert(child != null);
@@ -83,6 +87,8 @@ class ListTileTheme extends InheritedTheme {
           iconColor: iconColor ?? parent.iconColor,
           textColor: textColor ?? parent.textColor,
           contentPadding: contentPadding ?? parent.contentPadding,
+          tileColor: tileColor ?? parent.tileColor,
+          selectedTileColor: selectedTileColor ?? parent.selectedTileColor,
           child: child,
         );
       },
@@ -113,6 +119,18 @@ class ListTileTheme extends InheritedTheme {
   /// and [trailing] widgets.
   final EdgeInsetsGeometry contentPadding;
 
+  /// If specified, defines the background color for `ListTile` when
+  /// [ListTile.selected] is false.
+  ///
+  /// If [ListTile.tileColor] is provided, [tileColor] is ignored.
+  final Color tileColor;
+
+  /// If specified, defines the background color for `ListTile` when
+  /// [ListTile.selected] is true.
+  ///
+  /// If [ListTile.selectedTileColor] is provided, [selectedTileColor] is ignored.
+  final Color selectedTileColor;
+
   /// The closest instance of this class that encloses the given context.
   ///
   /// Typical usage is as follows:
@@ -136,6 +154,8 @@ class ListTileTheme extends InheritedTheme {
       iconColor: iconColor,
       textColor: textColor,
       contentPadding: contentPadding,
+      tileColor: tileColor,
+      selectedTileColor: selectedTileColor,
       child: child,
     );
   }
@@ -148,7 +168,9 @@ class ListTileTheme extends InheritedTheme {
         || selectedColor != oldWidget.selectedColor
         || iconColor != oldWidget.iconColor
         || textColor != oldWidget.textColor
-        || contentPadding != oldWidget.contentPadding;
+        || contentPadding != oldWidget.contentPadding
+        || tileColor != oldWidget.tileColor
+        || selectedTileColor != oldWidget.selectedTileColor;
   }
 }
 
@@ -839,14 +861,16 @@ class ListTile extends StatelessWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
-  /// Defines the background color of `ListTile when [selected] is false.
+  /// Defines the background color of `ListTile` when [selected] is false.
   ///
-  /// By default, the value of `tileColor` is [Colors.transparent].
+  /// When the value is null, the `tileColor` is set to [ListTileTheme.tileColor]
+  /// if it's not null and to [Colors.transparent] if it's null.
   final Color tileColor;
 
   /// Defines the background color of `ListTile` when [selected] is true.
   ///
-  /// By default, the value of `selectedListColor` is [Colors.transparent].
+  /// When the value if null, the `selectedTileColor` is set to [ListTileTheme.selectedTileColor]
+  /// if it's not null and to [Colors.transparent] if it's null.
   final Color selectedTileColor;
 
   /// Add a one pixel border in between each tile. If color isn't specified the
@@ -954,12 +978,20 @@ class ListTile extends StatelessWidget {
       : style.copyWith(color: color);
   }
 
-  Color _tileBackgroundColor() {
-    if (!selected && tileColor != null)
-      return tileColor;
+  Color _tileBackgroundColor(ListTileTheme tileTheme) {
+    if (!selected) {
+      if (tileColor != null)
+        return tileColor;
+      if (tileTheme?.tileColor != null)
+        return tileTheme.tileColor;
+    }
 
-    if (selected && selectedTileColor != null)
-      return selectedTileColor;
+    if (selected) {
+      if (selectedTileColor != null)
+        return selectedTileColor;
+      if (tileTheme?.selectedTileColor != null)
+        return tileTheme.selectedTileColor;
+    }
 
     return Colors.transparent;
   }
@@ -1036,7 +1068,7 @@ class ListTile extends StatelessWidget {
         selected: selected,
         enabled: enabled,
         child: ColoredBox(
-          color: _tileBackgroundColor(),
+          color: _tileBackgroundColor(tileTheme),
           child: SafeArea(
             top: false,
             bottom: false,
