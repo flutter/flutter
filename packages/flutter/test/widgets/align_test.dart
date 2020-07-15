@@ -112,4 +112,51 @@ void main() {
     expect(size.width, equals(800.0));
     expect(size.height, equals(10.0));
   });
+
+  testWidgets('Align widthFactor', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Align(
+              widthFactor: 0.5,
+              child: Container(
+                height: 100.0,
+                width: 100.0,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    final RenderBox box = tester.renderObject<RenderBox>(find.byType(Align));
+    expect(box.size.width, equals(50.0));
+  });
+
+  testWidgets('Align heightFactor', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Align(
+              alignment: Alignment.center,
+              heightFactor: 0.5,
+              child: Container(
+                height: 100.0,
+                width: 100.0,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    final RenderBox box = tester.renderObject<RenderBox>(find.byType(Align));
+    expect(box.size.height, equals(50.0));
+  });
 }
