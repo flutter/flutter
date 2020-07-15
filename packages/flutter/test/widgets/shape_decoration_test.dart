@@ -115,4 +115,15 @@ Future<void> main() async {
       ],
     );
   });
+
+  test('ShapeDecoration equality', () {
+    // ignore: prefer_const_constructors, prefer_const_literals_to_create_immutables
+    final ShapeDecoration a = ShapeDecoration(color: Color(0xFFFFFFFF), shadows: <BoxShadow>[BoxShadow()], shape: Border());
+
+    // ignore: prefer_const_constructors, prefer_const_literals_to_create_immutables
+    final ShapeDecoration b = ShapeDecoration(color: Color(0xFFFFFFFF), shadows: <BoxShadow>[BoxShadow()], shape: Border());
+
+    expect(a.hashCode, equals(b.hashCode));
+    expect(a, equals(b));
+  });
 }
