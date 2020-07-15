@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/features.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -21,6 +20,7 @@ import '../base/utils.dart';
 import '../base/version.dart';
 import '../convert.dart';
 import '../doctor.dart';
+import '../features.dart';
 import '../globals.dart' as globals;
 import 'android_sdk.dart';
 import 'android_studio.dart';
