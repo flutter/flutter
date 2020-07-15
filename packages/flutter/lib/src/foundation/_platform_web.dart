@@ -17,7 +17,7 @@ platform.TargetPlatform get defaultTargetPlatform {
 }
 
 platform.TargetPlatform _browserPlatform() {
-  final String navigatorPlatform = html.window.navigator.platform.toLowerCase();
+  final String navigatorPlatform = html.window.navigator.platform?.toLowerCase() ?? '';
   if (navigatorPlatform.startsWith('mac')) {
     return platform.TargetPlatform.macOS;
   }
