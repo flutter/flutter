@@ -127,11 +127,15 @@ void main() {
   });
 
   test('Decoration equality', () {
-    // ignore: prefer_const_constructors, prefer_const_literals_to_create_immutables
-    final BoxDecoration a = BoxDecoration(color: Color(0xFFFFFFFF), boxShadow: <BoxShadow>[BoxShadow()]);
+    const BoxDecoration a = BoxDecoration(
+      color: Color(0xFFFFFFFF),
+      boxShadow: <BoxShadow>[BoxShadow()],
+    );
 
-    // ignore: prefer_const_constructors, prefer_const_literals_to_create_immutables
-    final BoxDecoration b = BoxDecoration(color: Color(0xFFFFFFFF), boxShadow: <BoxShadow>[BoxShadow()]);
+    const BoxDecoration b = BoxDecoration(
+      color: Color(0xFFFFFFFF),
+      boxShadow: <BoxShadow>[BoxShadow()],
+    );
 
     expect(a.hashCode, equals(b.hashCode));
     expect(a, equals(b));
