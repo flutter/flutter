@@ -75,6 +75,22 @@ void main() {
       throwsToolExit(message: RegExp('Unable to run "adb"')));
   });
 
+  testWithoutContext('AndroidDevices is disabled if feature is disabled', () {
+    final AndroidDevices androidDevices = AndroidDevices(
+      androidSdk: MockAndroidSdk(),
+      logger: BufferLogger.test(),
+      androidWorkflow: AndroidWorkflow(
+        androidSdk: MockAndroidSdk(),
+        featureFlags: TestFeatureFlags(
+          isAndroidEnabled: false,
+        ),
+      ),
+      processManager: FakeProcessManager.any(),
+    );
+
+    expect(androidDevices.supportsPlatform, false);
+  });
+
   testWithoutContext('physical devices', () {
     final List<AndroidDevice> devices = <AndroidDevice>[];
     AndroidDevices.parseADBDeviceOutput('''
