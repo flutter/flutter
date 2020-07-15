@@ -938,7 +938,6 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
       maxRange = _outerPosition.maxScrollExtent;
       assert(minRange <= maxRange);
       correctionOffset = 0.0;
-      extra = 0.0;
     } else {
       assert(innerPosition.pixels != innerPosition.minScrollExtent);
       if (innerPosition.pixels < innerPosition.minScrollExtent) {
@@ -973,7 +972,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
         if (velocity > 0.0) {
           // shrinking
           extra = _outerPosition.minScrollExtent - _outerPosition.pixels;
-        } else if (velocity < 0.0){
+        } else if (velocity < 0.0) {
           // growing
           extra = _outerPosition.pixels - (_outerPosition.maxScrollExtent - _outerPosition.minScrollExtent);
         }
