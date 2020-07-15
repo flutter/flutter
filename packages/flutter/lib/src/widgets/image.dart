@@ -233,6 +233,8 @@ typedef ImageErrorWidgetBuilder = Widget Function(
 
 /// A widget that displays an image.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=7oIAs-0G4mw}
+///
 /// Several constructors are provided for the various ways that an image can be
 /// specified:
 ///
@@ -1205,6 +1207,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
 
     Widget result = RawImage(
       image: _imageInfo?.image,
+      debugImageLabel: _imageInfo?.debugLabel,
       width: widget.width,
       height: widget.height,
       scale: _imageInfo?.scale ?? 1.0,

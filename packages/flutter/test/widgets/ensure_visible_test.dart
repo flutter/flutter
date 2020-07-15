@@ -428,7 +428,7 @@ void main() {
       Scrollable.ensureVisible(findContext(2));
       await tester.pump();
       expect(getOffset(), equals(-400.0));
-    }, skip: true);
+    }, skip: true); // https://github.com/flutter/flutter/issues/7919
 
     testWidgets('ListView ensureVisible rotated child', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));

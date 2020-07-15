@@ -448,12 +448,25 @@ class RangeMaintainingScrollPhysics extends ScrollPhysics {
 ///
 /// This is the behavior typically seen on iOS.
 ///
+/// [BouncingScrollPhysics] by itself will not create an overscroll effect if
+/// the contents of the scroll view do not extend beyond the size of the
+/// viewport. To create the overscroll and bounce effect regardless of the
+/// length of your scroll view, combine with [AlwaysScrollableScrollPhysics].
+///
+/// {@tool snippet}
+/// ```dart
+/// BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics())
+/// ```
+/// (@end-tool}
+///
 /// See also:
 ///
 ///  * [ScrollConfiguration], which uses this to provide the default
 ///    scroll behavior on iOS.
 ///  * [ClampingScrollPhysics], which is the analogous physics for Android's
 ///    clamping behavior.
+///  * [ScrollPhysics], for more examples of combining [ScrollPhysics] objects
+///    of different types to get the desired scroll physics.
 class BouncingScrollPhysics extends ScrollPhysics {
   /// Creates scroll physics that bounce back from the edge.
   const BouncingScrollPhysics({ ScrollPhysics parent }) : super(parent: parent);

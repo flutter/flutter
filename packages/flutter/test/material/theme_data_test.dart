@@ -226,6 +226,7 @@ void main() {
       accentColor: Colors.black,
       accentColorBrightness: Brightness.dark,
       canvasColor: Colors.black,
+      shadowColor: Colors.black,
       scaffoldBackgroundColor: Colors.black,
       bottomAppBarColor: Colors.black,
       cardColor: Colors.black,
@@ -282,6 +283,10 @@ void main() {
       dividerTheme: const DividerThemeData(color: Colors.black),
       buttonBarTheme: const ButtonBarThemeData(alignment: MainAxisAlignment.start),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(type: BottomNavigationBarType.fixed),
+      timePickerTheme: const TimePickerThemeData(backgroundColor: Colors.black),
+      textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(primary: Colors.red)),
+      elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButton.styleFrom(primary: Colors.green)),
+      outlinedButtonTheme: OutlinedButtonThemeData(style: OutlinedButton.styleFrom(primary: Colors.blue)),
       fixTextFieldOutlineLabel: false,
     );
 
@@ -307,6 +312,7 @@ void main() {
       accentColor: Colors.white,
       accentColorBrightness: Brightness.light,
       canvasColor: Colors.white,
+      shadowColor: Colors.white,
       scaffoldBackgroundColor: Colors.white,
       bottomAppBarColor: Colors.white,
       cardColor: Colors.white,
@@ -363,6 +369,10 @@ void main() {
       dividerTheme: const DividerThemeData(color: Colors.white),
       buttonBarTheme: const ButtonBarThemeData(alignment: MainAxisAlignment.end),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(type: BottomNavigationBarType.shifting),
+      timePickerTheme: const TimePickerThemeData(backgroundColor: Colors.white),
+      textButtonTheme: const TextButtonThemeData(),
+      elevatedButtonTheme: const ElevatedButtonThemeData(),
+      outlinedButtonTheme: const OutlinedButtonThemeData(),
       fixTextFieldOutlineLabel: true,
     );
 
@@ -374,6 +384,7 @@ void main() {
       accentColor: otherTheme.accentColor,
       accentColorBrightness: otherTheme.accentColorBrightness,
       canvasColor: otherTheme.canvasColor,
+      shadowColor: otherTheme.shadowColor,
       scaffoldBackgroundColor: otherTheme.scaffoldBackgroundColor,
       bottomAppBarColor: otherTheme.bottomAppBarColor,
       cardColor: otherTheme.cardColor,
@@ -430,6 +441,10 @@ void main() {
       dividerTheme: otherTheme.dividerTheme,
       buttonBarTheme: otherTheme.buttonBarTheme,
       bottomNavigationBarTheme: otherTheme.bottomNavigationBarTheme,
+      timePickerTheme: otherTheme.timePickerTheme,
+      textButtonTheme: otherTheme.textButtonTheme,
+      elevatedButtonTheme: otherTheme.elevatedButtonTheme,
+      outlinedButtonTheme: otherTheme.outlinedButtonTheme,
       fixTextFieldOutlineLabel: otherTheme.fixTextFieldOutlineLabel,
     );
 
@@ -441,9 +456,7 @@ void main() {
     expect(themeDataCopy.accentColor, equals(otherTheme.accentColor));
     expect(themeDataCopy.accentColorBrightness, equals(otherTheme.accentColorBrightness));
     expect(themeDataCopy.canvasColor, equals(otherTheme.canvasColor));
-    expect(themeDataCopy.scaffoldBackgroundColor, equals(otherTheme.scaffoldBackgroundColor));
-    expect(themeDataCopy.bottomAppBarColor, equals(otherTheme.bottomAppBarColor));
-    expect(themeDataCopy.canvasColor, equals(otherTheme.canvasColor));
+    expect(themeDataCopy.shadowColor, equals(otherTheme.shadowColor));
     expect(themeDataCopy.scaffoldBackgroundColor, equals(otherTheme.scaffoldBackgroundColor));
     expect(themeDataCopy.bottomAppBarColor, equals(otherTheme.bottomAppBarColor));
     expect(themeDataCopy.cardColor, equals(otherTheme.cardColor));
@@ -499,6 +512,10 @@ void main() {
     expect(themeDataCopy.dividerTheme, equals(otherTheme.dividerTheme));
     expect(themeDataCopy.buttonBarTheme, equals(otherTheme.buttonBarTheme));
     expect(themeDataCopy.bottomNavigationBarTheme, equals(otherTheme.bottomNavigationBarTheme));
+    expect(themeDataCopy.timePickerTheme, equals(otherTheme.timePickerTheme));
+    expect(themeDataCopy.textButtonTheme, equals(otherTheme.textButtonTheme));
+    expect(themeDataCopy.elevatedButtonTheme, equals(otherTheme.elevatedButtonTheme));
+    expect(themeDataCopy.outlinedButtonTheme, equals(otherTheme.outlinedButtonTheme));
     expect(themeDataCopy.fixTextFieldOutlineLabel, equals(otherTheme.fixTextFieldOutlineLabel));
   });
 

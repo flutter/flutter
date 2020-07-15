@@ -109,10 +109,19 @@ class Table extends RenderObjectWidget {
     this.textDirection,
     this.border,
     this.defaultVerticalAlignment = TableCellVerticalAlignment.top,
-    this.textBaseline,
+    this.textBaseline = TextBaseline.alphabetic,
   }) : assert(children != null),
        assert(defaultColumnWidth != null),
        assert(defaultVerticalAlignment != null),
+       assert(() {
+         if (children.any((TableRow row) => row.children == null)) {
+           throw FlutterError(
+             'One of the rows of the table had null children.\n'
+             'The children property of TableRow must not be null.'
+           );
+         }
+         return true;
+       }()),
        assert(() {
          if (children.any((TableRow row) => row.children.any((Widget cell) => cell == null))) {
            throw FlutterError(
@@ -181,6 +190,8 @@ class Table extends RenderObjectWidget {
   /// sizing algorithms are used here. In particular, [IntrinsicColumnWidth] is
   /// quite expensive because it needs to measure each cell in the column to
   /// determine the intrinsic size of the column.
+  ///
+  /// The keys of this map (column indexes) are zero-based.
   final Map<int, TableColumnWidth> columnWidths;
 
   /// How to determine with widths of columns that don't have an explicit sizing algorithm.
@@ -198,9 +209,14 @@ class Table extends RenderObjectWidget {
   final TableBorder border;
 
   /// How cells that do not explicitly specify a vertical alignment are aligned vertically.
+  ///
+  /// Cells may specify a vertical alignment by wrapping their contents in a
+  /// [TableCell] widget.
   final TableCellVerticalAlignment defaultVerticalAlignment;
 
   /// The text baseline to use when aligning rows using [TableCellVerticalAlignment.baseline].
+  ///
+  /// Defaults to [TextBaseline.alphabetic].
   final TextBaseline textBaseline;
 
   final List<Decoration> _rowDecorations;

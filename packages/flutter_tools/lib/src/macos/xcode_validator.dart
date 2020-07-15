@@ -39,7 +39,7 @@ class XcodeValidator extends DoctorValidator {
       if (!_xcode.isInstalledAndMeetsVersionCheck) {
         xcodeStatus = ValidationType.partial;
         messages.add(ValidationMessage.error(
-          _userMessages.xcodeOutdated(kXcodeRequiredVersionMajor, kXcodeRequiredVersionMinor)
+          _userMessages.xcodeOutdated(kXcodeRequiredVersionMajor, kXcodeRequiredVersionMinor, kXcodeRequiredVersionPatch)
         ));
       }
 

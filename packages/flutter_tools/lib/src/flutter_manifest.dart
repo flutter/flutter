@@ -163,17 +163,16 @@ class FlutterManifest {
     if (isModule) {
       return _flutterDescriptor['module']['androidPackage'] as String;
     }
-    if (isPlugin) {
-      final YamlMap plugin = _flutterDescriptor['plugin'] as YamlMap;
-      if (plugin.containsKey('platforms')) {
-        final YamlMap platforms = plugin['platforms'] as YamlMap;
-
-        if (platforms.containsKey('android')) {
-          return platforms['android']['package'] as String;
-        }
-      } else {
+    if (supportedPlatforms == null) {
+      // Pre-multi-platform plugin format
+      if (isPlugin) {
+        final YamlMap plugin = _flutterDescriptor['plugin'] as YamlMap;
         return plugin['androidPackage'] as String;
       }
+      return null;
+    }
+    if (supportedPlatforms.containsKey('android')) {
+       return supportedPlatforms['android']['package'] as String;
     }
     return null;
   }
@@ -183,6 +182,20 @@ class FlutterManifest {
   String get iosBundleIdentifier {
     if (isModule) {
       return _flutterDescriptor['module']['iosBundleIdentifier'] as String;
+    }
+    return null;
+  }
+
+  /// Gets the supported platforms. This only supports the new `platforms` format.
+  ///
+  /// If the plugin uses the legacy pubspec format, this method returns null.
+  Map<String, dynamic> get supportedPlatforms {
+    if (isPlugin) {
+      final YamlMap plugin = _flutterDescriptor['plugin'] as YamlMap;
+      if (plugin.containsKey('platforms')) {
+        final YamlMap platformsMap = plugin['platforms'] as YamlMap;
+        return platformsMap.value.cast<String, dynamic>();
+      }
     }
     return null;
   }
@@ -265,6 +278,26 @@ class FlutterManifest {
       }
     }
     return fonts;
+  }
+
+  /// Whether a synthetic flutter_gen package should be generated.
+  ///
+  /// This can be provided to the [Pub] interface to inject a new entry
+  /// into the package_config.json file which points to `.dart_tool/flutter_gen`.
+  ///
+  /// This allows generated source code to be imported using a package
+  /// alias.
+  bool get generateSyntheticPackage => _generateSyntheticPackage ??= _computeGenerateSyntheticPackage();
+  bool _generateSyntheticPackage;
+  bool _computeGenerateSyntheticPackage() {
+    if (!_flutterDescriptor.containsKey('generate')) {
+      return false;
+    }
+    final Object value = _flutterDescriptor['generate'];
+    if (value is! bool) {
+      return false;
+    }
+    return value as bool;
   }
 }
 
@@ -424,6 +457,8 @@ void _validateFlutter(YamlMap yaml, List<String> errors) {
         }
         final List<String> pluginErrors = Plugin.validatePluginYaml(kvp.value as YamlMap);
         errors.addAll(pluginErrors);
+        break;
+      case 'generate':
         break;
       default:
         errors.add('Unexpected child "${kvp.key}" found under "flutter".');

@@ -8,6 +8,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -127,29 +128,33 @@ void main() {
       expect(semantics.label, 'A\nB\nC');
       semanticsHandle.dispose();
     });
-  });
 
-  group('ensureVisible', () {
-    testWidgets('scrolls to make widget visible', (WidgetTester tester) async {
+    testWidgets('Does not return partial semantics', (WidgetTester tester) async {
+      final SemanticsHandle semanticsHandle = tester.ensureSemantics();
+      final Key key = UniqueKey();
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: ListView.builder(
-              itemCount: 20,
-              shrinkWrap: true,
-              itemBuilder: (BuildContext context, int i) => ListTile(title: Text('Item $i')),
-           ),
-         ),
+            body: MergeSemantics(
+              child: Semantics(
+                container: true,
+                label: 'A',
+                child: Semantics(
+                  container: true,
+                  key: key,
+                  label: 'B',
+                  child: Container(),
+                ),
+              ),
+            ),
+          ),
         ),
       );
 
-      // Make sure widget isn't on screen
-      expect(find.text('Item 15', skipOffstage: true), findsNothing);
-
-      await tester.ensureVisible(find.text('Item 15', skipOffstage: false));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Item 15', skipOffstage: true), findsOneWidget);
+      final SemanticsNode node = tester.getSemantics(find.byKey(key));
+      final SemanticsData semantics = node.getSemanticsData();
+      expect(semantics.label, 'A\nB');
+      semanticsHandle.dispose();
     });
   });
 
@@ -610,6 +615,73 @@ void main() {
     controller.duration = const Duration(seconds: 1);
     controller.forward();
     expect(await tester.pumpAndSettle(const Duration(milliseconds: 300)), 5); // 0, 300, 600, 900, 1200ms
+  });
+
+  testWidgets('Input event array', (WidgetTester tester) async {
+      final List<String> logs = <String>[];
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Listener(
+            onPointerDown: (PointerDownEvent event) => logs.add('down ${event.buttons}'),
+            onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
+            onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
+            child: const Text('test'),
+          ),
+        ),
+      );
+
+      final Offset location = tester.getCenter(find.text('test'));
+      final List<PointerEventRecord> records = <PointerEventRecord>[
+        PointerEventRecord(Duration.zero, <PointerEvent>[
+          // Typically PointerAddedEvent is not used in testers, but for records
+          // captured on a device it is usually what start a gesture.
+          PointerAddedEvent(
+            timeStamp: Duration.zero,
+            position: location,
+          ),
+          PointerDownEvent(
+            timeStamp: Duration.zero,
+            position: location,
+            buttons: kSecondaryMouseButton,
+            pointer: 1,
+          ),
+        ]),
+        ...<PointerEventRecord>[
+          for (Duration t = const Duration(milliseconds: 5);
+               t < const Duration(milliseconds: 80);
+               t += const Duration(milliseconds: 16))
+            PointerEventRecord(t, <PointerEvent>[
+              PointerMoveEvent(
+                timeStamp: t - const Duration(milliseconds: 1),
+                position: location,
+                buttons: kSecondaryMouseButton,
+                pointer: 1,
+              )
+            ])
+        ],
+        PointerEventRecord(const Duration(milliseconds: 80), <PointerEvent>[
+          PointerUpEvent(
+            timeStamp: const Duration(milliseconds: 79),
+            position: location,
+            buttons: kSecondaryMouseButton,
+            pointer: 1,
+          )
+        ])
+      ];
+      final List<Duration> timeDiffs = await tester.handlePointerEventRecord(records);
+      expect(timeDiffs.length, records.length);
+      for (final Duration diff in timeDiffs) {
+        expect(diff, Duration.zero);
+      }
+
+      const String b = '$kSecondaryMouseButton';
+      expect(logs.first, 'down $b');
+      for (int i = 1; i < logs.length - 1; i++) {
+        expect(logs[i], 'move $b');
+      }
+      expect(logs.last, 'up $b');
   });
 
   group('runAsync', () {

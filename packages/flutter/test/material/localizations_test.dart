@@ -58,6 +58,13 @@ void main() {
     expect(localizations.dateRangePickerHelpText, isNotNull);
     expect(localizations.calendarModeButtonLabel, isNotNull);
     expect(localizations.inputDateModeButtonLabel, isNotNull);
+    expect(localizations.timePickerDialHelpText, isNotNull);
+    expect(localizations.timePickerInputHelpText, isNotNull);
+    expect(localizations.timePickerHourLabel, isNotNull);
+    expect(localizations.timePickerMinuteLabel, isNotNull);
+    expect(localizations.invalidTimeLabel, isNotNull);
+    expect(localizations.dialModeButtonLabel, isNotNull);
+    expect(localizations.inputTimeModeButtonLabel, isNotNull);
     expect(localizations.signedInLabel, isNotNull);
     expect(localizations.hideAccountsLabel, isNotNull);
     expect(localizations.showAccountsLabel, isNotNull);
@@ -88,5 +95,13 @@ void main() {
     expect(localizations.pageRowsInfoTitle(1, 10, 100, false).contains(r'$firstRow'), isFalse);
     expect(localizations.pageRowsInfoTitle(1, 10, 100, false).contains(r'$lastRow'), isFalse);
     expect(localizations.pageRowsInfoTitle(1, 10, 100, false).contains(r'$rowCount'), isFalse);
+
+    expect(localizations.licensesPackageDetailText(0), isNotNull);
+    expect(localizations.licensesPackageDetailText(1), isNotNull);
+    expect(localizations.licensesPackageDetailText(2), isNotNull);
+    expect(localizations.licensesPackageDetailText(100), isNotNull);
+    expect(localizations.licensesPackageDetailText(1).contains(r'$licensesCount'), isFalse);
+    expect(localizations.licensesPackageDetailText(2).contains(r'$licensesCount'), isFalse);
+    expect(localizations.licensesPackageDetailText(100).contains(r'$licensesCount'), isFalse);
   });
 }

@@ -953,7 +953,7 @@ class DropdownButton<T> extends StatefulWidget {
   /// menu that appears when you tap the button.
   ///
   /// To use a separate text style for selected item when it's displayed within
-  /// the dropdown button,, consider using [selectedItemBuilder].
+  /// the dropdown button, consider using [selectedItemBuilder].
   ///
   /// {@tool dartpad --template=stateful_widget_scaffold}
   ///

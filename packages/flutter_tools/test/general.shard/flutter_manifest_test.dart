@@ -82,6 +82,60 @@ flutter:
     expect(flutterManifest.usesMaterialDesign, true);
   });
 
+  testWithoutContext('FlutterManifest knows if generate is provided', () async {
+    const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  generate: true
+''';
+    final BufferLogger logger = BufferLogger.test();
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest.generateSyntheticPackage, true);
+  });
+
+  testWithoutContext('FlutterManifest can parse invalid generate key', () async {
+    const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  generate: "invalid"
+''';
+    final BufferLogger logger = BufferLogger.test();
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest.generateSyntheticPackage, false);
+  });
+
+  testWithoutContext('FlutterManifest knows if generate is disabled', () async {
+    const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  generate: false
+''';
+    final BufferLogger logger = BufferLogger.test();
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest.generateSyntheticPackage, false);
+  });
+
   testWithoutContext('FlutterManifest has two assets', () async {
     const String manifest = '''
 name: test
@@ -899,6 +953,69 @@ flutter:
     );
 
     expect(flutterManifest.isEmpty, false);
+  });
+
+  testWithoutContext('FlutterManifest getSupportedPlatforms return null if runs on legacy format', () {
+    const String manifest = '''
+name: test
+flutter:
+  plugin:
+    androidPackage: com.example
+''';
+    final BufferLogger logger = BufferLogger.test();
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest.isPlugin, true);
+    expect(flutterManifest.supportedPlatforms, null);
+  });
+
+  testWithoutContext('FlutterManifest getSupportedPlatforms returns valid platforms.', () {
+    const String manifest = '''
+name: test
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.example
+        pluginClass: SomeClass
+      ios:
+        pluginClass: SomeClass
+''';
+    final BufferLogger logger = BufferLogger.test();
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest.isPlugin, true);
+    expect(flutterManifest.supportedPlatforms['ios'],
+                              <String, dynamic>{'pluginClass': 'SomeClass'});
+    expect(flutterManifest.supportedPlatforms['android'],
+                              <String, dynamic>{'pluginClass': 'SomeClass',
+                                                'package': 'com.example'});
+  });
+
+  testWithoutContext('FlutterManifest validates a platform section that is a list '
+    'instead of a map', () {
+    const String manifest = '''
+name: test
+flutter:
+    plugin:
+      platforms:
+        - android
+''';
+    final BufferLogger logger = BufferLogger.test();
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest, null);
+    expect(logger.errorText,
+      contains('flutter.plugin.platforms should be a map with the platform name as the key'));
   });
 }
 

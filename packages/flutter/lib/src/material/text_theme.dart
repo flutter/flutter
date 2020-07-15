@@ -9,10 +9,6 @@ import 'package:flutter/painting.dart';
 
 import 'typography.dart';
 
-// Eventually we'll get rid of the deprecated members, but for now, we have to use them
-// in order to implement them.
-// ignore_for_file: deprecated_member_use_from_same_package
-
 /// Material design text theme.
 ///
 /// Definitions for the various typographical styles found in Material Design

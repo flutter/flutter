@@ -25,7 +25,7 @@ class BuildWebCommand extends BuildSubCommand {
     addBuildModeFlags(excludeDebug: true);
     usesDartDefineOption();
     addEnableExperimentation(hide: !verboseHelp);
-    addNullSafetyModeOptions();
+    addNullSafetyModeOptions(hide: !verboseHelp);
     argParser.addFlag('web-initialize-platform',
         defaultsTo: true,
         negatable: true,

@@ -203,8 +203,8 @@ class DefaultTextStyle extends InheritedTheme {
   }
 }
 
-/// The [TextHeightBehavior] that will apply to descendant [Text] widgets which
-/// have not explicitly set [Text.textHeightBehavior].
+/// The [TextHeightBehavior] that will apply to descendant [Text] and [EditableText]
+/// widgets which have not explicitly set [Text.textHeightBehavior].
 ///
 /// If there is a [DefaultTextStyle] with a non-null [DefaultTextStyle.textHeightBehavior]
 /// below this widget, the [DefaultTextStyle.textHeightBehavior] will be used
@@ -361,6 +361,7 @@ class Text extends StatelessWidget {
          'A non-null String must be provided to a Text widget.',
        ),
        textSpan = null,
+       _applyTextScaleFactorToWidgetSpan = true,
        super(key: key);
 
   /// Creates a text widget with a [InlineSpan].
@@ -388,11 +389,19 @@ class Text extends StatelessWidget {
     this.semanticsLabel,
     this.textWidthBasis,
     this.textHeightBehavior,
+    @Deprecated(
+      'This parameter is a temporary flag to migrate the internal tests and '
+      'should not be used in other contexts. For more details, please check '
+      'https://github.com/flutter/flutter/issues/59316. '
+      'This feature was deprecated after v1.19.0.'
+    )
+    bool applyTextScaleFactorToWidgetSpan = false,
   }) : assert(
          textSpan != null,
          'A non-null TextSpan must be provided to a Text.rich widget.',
        ),
        data = null,
+       _applyTextScaleFactorToWidgetSpan = applyTextScaleFactorToWidgetSpan,
        super(key: key);
 
   /// The text to display.
@@ -448,6 +457,8 @@ class Text extends StatelessWidget {
   final bool softWrap;
 
   /// How visual overflow should be handled.
+  ///
+  /// Defaults to retrieving the value from the nearest [DefaultTextStyle] ancestor.
   final TextOverflow overflow;
 
   /// The number of font pixels for each logical pixel.
@@ -493,6 +504,8 @@ class Text extends StatelessWidget {
   /// {@macro flutter.dart:ui.textHeightBehavior}
   final ui.TextHeightBehavior textHeightBehavior;
 
+  final bool _applyTextScaleFactorToWidgetSpan;
+
   @override
   Widget build(BuildContext context) {
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(context);
@@ -512,6 +525,7 @@ class Text extends StatelessWidget {
       strutStyle: strutStyle,
       textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
       textHeightBehavior: textHeightBehavior ?? defaultTextStyle.textHeightBehavior ?? DefaultTextHeightBehavior.of(context),
+      applyTextScaleFactorToWidgetSpan: _applyTextScaleFactorToWidgetSpan,
       text: TextSpan(
         style: effectiveTextStyle,
         text: data,

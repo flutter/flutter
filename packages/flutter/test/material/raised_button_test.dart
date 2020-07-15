@@ -36,7 +36,7 @@ void main() {
     expect(material.clipBehavior, Clip.none);
     expect(material.color, const Color(0xffe0e0e0));
     expect(material.elevation, 2.0);
-    expect(material.shadowColor, const Color(0xff000000));
+    expect(material.shadowColor, null);
     expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)));
     expect(material.textStyle.color, const Color(0xdd000000));
     expect(material.textStyle.fontFamily, 'Roboto');
@@ -56,7 +56,7 @@ void main() {
     expect(material.clipBehavior, Clip.none);
     expect(material.color, const Color(0xffe0e0e0));
     expect(material.elevation, 8.0);
-    expect(material.shadowColor, const Color(0xff000000));
+    expect(material.shadowColor, null);
     expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)));
     expect(material.textStyle.color, const Color(0xdd000000));
     expect(material.textStyle.fontFamily, 'Roboto');
@@ -81,7 +81,7 @@ void main() {
     expect(material.clipBehavior, Clip.none);
     expect(material.color, const Color(0x61000000));
     expect(material.elevation, 0.0);
-    expect(material.shadowColor, const Color(0xff000000));
+    expect(material.shadowColor, null);
     expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)));
     expect(material.textStyle.color, const Color(0x61000000));
     expect(material.textStyle.fontFamily, 'Roboto');

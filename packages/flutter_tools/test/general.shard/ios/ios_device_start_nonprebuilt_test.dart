@@ -87,11 +87,15 @@ void main() {
             <String>['Runner'],
             <String>['Debug', 'Release'],
             <String>['Runner'],
+            logger,
           ));
         }
       );
       mockXcode = MockXcode();
       when(mockXcode.isVersionSatisfactory).thenReturn(true);
+      fileSystem.file('foo/.packages')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('\n');
     });
 
     testUsingContext('with buildable app', () async {

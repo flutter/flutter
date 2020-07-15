@@ -73,6 +73,16 @@ void main() {
   }, skip: isBrowser); // The VM test harness can handle a stack overflow, but
   // the browser cannot - running this test in a browser will cause it to become
   // unresponsive.
+
+  test('Traces from package:stack_trace throw assertion', () {
+    try {
+      StackFrame.fromStackString(mangledStackString);
+      assert(false, 'StackFrame.fromStackString did not throw on a mangled stack trace');
+    } catch (e) {
+      expect(e, isA<AssertionError>());
+      expect('$e', contains('Got a stack frame from package:stack_trace'));
+    }
+  });
 }
 
 const String stackString = '''
@@ -151,6 +161,21 @@ const String asyncStackString = '''
 #36     _runMainZoned.<anonymous closure> (dart:ui/hooks.dart:231:5)
 #37     _startIsolate.<anonymous closure> (dart:isolate-patch/isolate_patch.dart:307:19)
 #38     _RawReceivePortImpl._handleMessage (dart:isolate-patch/isolate_patch.dart:174:12)''';
+
+const String mangledStackString = '''
+dart:async/future_impl.dart 23:44                              _Completer.completeError
+test\\bindings_async_gap_test.dart 42:17                        main.<fn>.<fn>
+package:flutter_test/src/binding.dart 744:19                   TestWidgetsFlutterBinding._runTestBody
+===== asynchronous gap ===========================
+dart:async/zone.dart 1121:19                                   _CustomZone.registerUnaryCallback
+dart:async-patch/async_patch.dart 83:23                        _asyncThenWrapperHelper
+dart:async/zone.dart 1222:13                                   _rootRunBinary
+dart:async/zone.dart 1107:19                                   _CustomZone.runBinary
+package:flutter_test/src/binding.dart 724:14                   TestWidgetsFlutterBinding._runTest
+package:flutter_test/src/binding.dart 1124:24                  AutomatedTestWidgetsFlutterBinding.runTest.<fn>
+package:fake_async/fake_async.dart 177:54                      FakeAsync.run.<fn>.<fn>
+dart:async/zone.dart 1190:13                                   _rootRun
+''';
 
 const List<StackFrame> asyncStackFrames = <StackFrame>[
   StackFrame(number: 0,  className: '',                    method: 'getSampleStack', packageScheme: 'file',    package: '<unknown>',       packagePath: '/path/to/flutter/packages/flutter/test/foundation/error_reporting_test.dart', line: 40,   column: 57, source: '#0      getSampleStack.<anonymous closure> (file:///path/to/flutter/packages/flutter/test/foundation/error_reporting_test.dart:40:57)'),

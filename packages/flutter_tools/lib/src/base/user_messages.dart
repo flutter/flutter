@@ -138,8 +138,8 @@ class UserMessages {
 
   // Messages used in XcodeValidator
   String xcodeLocation(String location) => 'Xcode at $location';
-  String xcodeOutdated(int versionMajor, int versionMinor) =>
-      'Flutter requires a minimum Xcode version of $versionMajor.$versionMinor.0.\n'
+  String xcodeOutdated(int versionMajor, int versionMinor, int versionPatch) =>
+      'Flutter requires a minimum Xcode version of $versionMajor.$versionMinor.$versionPatch.\n'
       'Download the latest version or update via the Mac App Store.';
   String get xcodeEula => "Xcode end user license agreement not signed; open Xcode or run the command 'sudo xcodebuild -license'.";
   String get xcodeMissingSimct =>
@@ -253,6 +253,9 @@ class UserMessages {
   String get flutterFoundButUnsupportedDevices => 'The following devices were found, but are not supported by this project:';
   String flutterFoundSpecifiedDevices(int count, String deviceId) =>
       'Found $count devices with name or id matching $deviceId:';
+  String get flutterMultipleDevicesFound => 'Multiple devices found:';
+  String flutterChooseDevice(int option, String name, String deviceId) => '[$option]: $name ($deviceId)';
+  String get flutterChooseOne => 'Please choose one:';
   String get flutterSpecifyDeviceWithAllOption =>
       'More than one device connected; please specify a device with '
       "the '-d <deviceId>' flag, or use '-d all' to act on all devices.";

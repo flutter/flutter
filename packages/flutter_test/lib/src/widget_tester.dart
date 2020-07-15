@@ -25,6 +25,7 @@ import 'finders.dart';
 import 'matchers.dart';
 import 'test_async_utils.dart';
 import 'test_compat.dart';
+import 'test_pointer.dart';
 import 'test_text_input.dart';
 
 /// Keep users from needing multiple imports to test semantics.
@@ -463,6 +464,89 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     });
   }
 
+  @override
+  Future<List<Duration>> handlePointerEventRecord(List<PointerEventRecord> records) {
+    assert(records != null);
+    assert(records.isNotEmpty);
+    return TestAsyncUtils.guard<List<Duration>>(() async {
+      // hitTestHistory is an equivalence of _hitTests in [GestureBinding]
+      final Map<int, HitTestResult> hitTestHistory = <int, HitTestResult>{};
+      final List<Duration> handleTimeStampDiff = <Duration>[];
+      DateTime startTime;
+      for (final PointerEventRecord record in records) {
+        final DateTime now = binding.clock.now();
+        startTime ??= now;
+        // So that the first event is promised to receive a zero timeDiff
+        final Duration timeDiff = record.timeDelay - now.difference(startTime);
+        if (timeDiff.isNegative) {
+          // Flush all past events
+          handleTimeStampDiff.add(timeDiff);
+          for (final PointerEvent event in record.events) {
+            _handlePointerEvent(event, hitTestHistory);
+          }
+        } else {
+          // TODO(CareF): reconsider the pumping strategy after
+          // https://github.com/flutter/flutter/issues/60739 is fixed
+          await binding.pump();
+          await binding.delayed(timeDiff);
+          handleTimeStampDiff.add(
+            record.timeDelay - binding.clock.now().difference(startTime),
+          );
+          for (final PointerEvent event in record.events) {
+            _handlePointerEvent(event, hitTestHistory);
+          }
+        }
+      }
+      await binding.pump();
+      // This makes sure that a gesture is completed, with no more pointers
+      // active.
+      assert(hitTestHistory.isEmpty);
+      return handleTimeStampDiff;
+    });
+  }
+
+  // This is a parallel implementation of [GestureBinding._handlePointerEvent]
+  // to make compatible with test bindings.
+  void _handlePointerEvent(
+    PointerEvent event,
+    Map<int, HitTestResult> _hitTests
+  ) {
+    HitTestResult hitTestResult;
+    if (event is PointerDownEvent || event is PointerSignalEvent) {
+      assert(!_hitTests.containsKey(event.pointer));
+      hitTestResult = HitTestResult();
+      binding.hitTest(hitTestResult, event.position);
+      if (event is PointerDownEvent) {
+        _hitTests[event.pointer] = hitTestResult;
+      }
+      assert(() {
+        if (debugPrintHitTestResults)
+          debugPrint('$event: $hitTestResult');
+        return true;
+      }());
+    } else if (event is PointerUpEvent || event is PointerCancelEvent) {
+      hitTestResult = _hitTests.remove(event.pointer);
+    } else if (event.down) {
+      // Because events that occur with the pointer down (like
+      // PointerMoveEvents) should be dispatched to the same place that their
+      // initial PointerDownEvent was, we want to re-use the path we found when
+      // the pointer went down, rather than do hit detection each time we get
+      // such an event.
+      hitTestResult = _hitTests[event.pointer];
+    }
+    assert(() {
+      if (debugPrintMouseHoverEvents && event is PointerHoverEvent)
+        debugPrint('$event');
+      return true;
+    }());
+    if (hitTestResult != null ||
+        event is PointerHoverEvent ||
+        event is PointerAddedEvent ||
+        event is PointerRemovedEvent) {
+      binding.dispatchEvent(event, hitTestResult, source: TestBindingEventSource.test);
+    }
+  }
+
   /// Triggers a frame after `duration` amount of time.
   ///
   /// This makes the framework act as if the application had janked (missed
@@ -603,12 +687,24 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   ///
   /// If [callback] completes with an error, the error will be caught by the
   /// Flutter framework and made available via [takeException], and this method
-  /// will return a future that completes will `null`.
+  /// will return a future that completes with `null`.
   ///
   /// Re-entrant calls to this method are not allowed; callers of this method
   /// are required to wait for the returned future to complete before calling
   /// this method again. Attempts to do otherwise will result in a
   /// [TestFailure] error being thrown.
+  ///
+  /// If your widget test hangs and you are using [runAsync], chances are your
+  /// code depends on the result of a task that did not complete. Fake async
+  /// environment is unable to resolve a future that was created in [runAsync].
+  /// If you observe such behavior or flakiness, you have a number of options:
+  ///
+  /// * Consider restructuring your code so you do not need [runAsync]. This is
+  ///   the optimal solution as widget tests are designed to run in fake async
+  ///   environment.
+  ///
+  /// * Expose a [Future] in your application code that signals the readiness of
+  ///   your widget tree, then await that future inside [callback].
   Future<T> runAsync<T>(
     Future<T> callback(), {
     Duration additionalTime = const Duration(milliseconds: 1000),
@@ -997,6 +1093,11 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// The ancestor's semantic data will include the child's as well as
   /// other nodes that have been merged together.
   ///
+  /// If the [SemanticsNode] of the object identified by the finder is
+  /// force-merged into an ancestor (e.g. via the [MergeSemantics] widget)
+  /// the node into which it is merged is returned. That node will include
+  /// all the semantics information of the nodes merged into it.
+  ///
   /// Will throw a [StateError] if the finder returns more than one element or
   /// if no semantics are found or are not enabled.
   SemanticsNode getSemantics(Finder finder) {
@@ -1012,7 +1113,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     final Element element = candidates.single;
     RenderObject renderObject = element.findRenderObject();
     SemanticsNode result = renderObject.debugSemantics;
-    while (renderObject != null && result == null) {
+    while (renderObject != null && (result == null || result.isMergedIntoParent)) {
       renderObject = renderObject?.parent as RenderObject;
       result = renderObject?.debugSemantics;
     }
@@ -1027,12 +1128,6 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   SemanticsHandle ensureSemantics() {
     return binding.pipelineOwner.ensureSemantics();
   }
-
-  /// Given a widget `W` specified by [finder] and a [Scrollable] widget `S` in
-  /// its ancestry tree, this scrolls `S` so as to make `W` visible.
-  ///
-  /// Shorthand for `Scrollable.ensureVisible(tester.element(finder))`
-  Future<void> ensureVisible(Finder finder) => Scrollable.ensureVisible(element(finder));
 }
 
 typedef _TickerDisposeCallback = void Function(_TestTicker ticker);

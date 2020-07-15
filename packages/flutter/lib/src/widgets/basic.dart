@@ -269,6 +269,8 @@ class Opacity extends SingleChildRenderObjectWidget {
 /// For example, [ShaderMask] can be used to gradually fade out the edge
 /// of a child by using a [new ui.Gradient.linear] mask.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=7sUL66pTQ7Q}
+///
 /// {@tool snippet}
 ///
 /// This example makes the text look like it is on fire:
@@ -706,6 +708,8 @@ class ClipRRect extends SingleChildRenderObjectWidget {
 
 /// A widget that clips its child using an oval.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=vzWWDO6whIM}
+///
 /// By default, inscribes an axis-aligned oval into its layout dimensions and
 /// prevents its child from painting outside that oval, but the size and
 /// location of the clip oval can be customized using a custom [clipper].
@@ -774,6 +778,8 @@ class ClipOval extends SingleChildRenderObjectWidget {
 /// Calls a callback on a delegate whenever the widget is to be
 /// painted. The callback returns a path and the widget prevents the
 /// child from painting outside the path.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=oAUebVIb-7s}
 ///
 /// Clipping to a path is expensive. Certain shapes have more
 /// optimized widgets:
@@ -1575,6 +1581,8 @@ class RotatedBox extends SingleChildRenderObjectWidget {
 }
 
 /// A widget that insets its child by the given padding.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=oD5RtLhhubg}
 ///
 /// When passing layout constraints to its child, padding shrinks the
 /// constraints by the given padding, causing the child to layout at a smaller
@@ -2785,16 +2793,22 @@ class AspectRatio extends SingleChildRenderObjectWidget {
   }
 }
 
-/// A widget that sizes its child to the child's intrinsic width.
-///
-/// Sizes its child's width to the child's maximum intrinsic width. If
-/// [stepWidth] is non-null, the child's width will be snapped to a multiple of
-/// the [stepWidth]. Similarly, if [stepHeight] is non-null, the child's height
-/// will be snapped to a multiple of the [stepHeight].
+/// A widget that sizes its child to the child's maximum intrinsic width.
 ///
 /// This class is useful, for example, when unlimited width is available and
 /// you would like a child that would otherwise attempt to expand infinitely to
 /// instead size itself to a more reasonable width.
+///
+/// The constraints that this widget passes to its child will adhere to the
+/// parent's constraints, so if the constraints are not large enough to satisfy
+/// the child's maximum intrinsic width, then the child will get less width
+/// than it otherwise would. Likewise, if the minimum width constraint is
+/// larger than the child's maximum intrinsic width, the child will be given
+/// more width than it otherwise would.
+///
+/// If [stepWidth] is non-null, the child's width will be snapped to a multiple
+/// of the [stepWidth]. Similarly, if [stepHeight] is non-null, the child's
+/// height will be snapped to a multiple of the [stepHeight].
 ///
 /// This class is relatively expensive, because it adds a speculative layout
 /// pass before the final layout phase. Avoid using it where possible. In the
@@ -2803,6 +2817,14 @@ class AspectRatio extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
+///  * [Align], a widget that aligns its child within itself. This can be used
+///    to loosen the constraints passed to the [RenderIntrinsicWidth],
+///    allowing the [RenderIntrinsicWidth]'s child to be smaller than that of
+///    its parent.
+///  * [Row], which when used with [CrossAxisAlignment.stretch] can be used
+///    to loosen just the width constraints that are passed to the
+///    [RenderIntrinsicWidth], allowing the [RenderIntrinsicWidth]'s child's
+///    width to be smaller than that of its parent.
 ///  * [The catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class IntrinsicWidth extends SingleChildRenderObjectWidget {
   /// Creates a widget that sizes its child to the child's intrinsic width.
@@ -2855,6 +2877,13 @@ class IntrinsicWidth extends SingleChildRenderObjectWidget {
 /// you would like a child that would otherwise attempt to expand infinitely to
 /// instead size itself to a more reasonable height.
 ///
+/// The constraints that this widget passes to its child will adhere to the
+/// parent's constraints, so if the constraints are not large enough to satisfy
+/// the child's maximum intrinsic height, then the child will get less height
+/// than it otherwise would. Likewise, if the minimum height constraint is
+/// larger than the child's maximum intrinsic height, the child will be given
+/// more height than it otherwise would.
+///
 /// This class is relatively expensive, because it adds a speculative layout
 /// pass before the final layout phase. Avoid using it where possible. In the
 /// worst case, this widget can result in a layout that is O(N²) in the depth of
@@ -2862,6 +2891,14 @@ class IntrinsicWidth extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
+///  * [Align], a widget that aligns its child within itself. This can be used
+///    to loosen the constraints passed to the [RenderIntrinsicHeight],
+///    allowing the [RenderIntrinsicHeight]'s child to be smaller than that of
+///    its parent.
+///  * [Column], which when used with [CrossAxisAlignment.stretch] can be used
+///    to loosen just the height constraints that are passed to the
+///    [RenderIntrinsicHeight], allowing the [RenderIntrinsicHeight]'s child's
+///    height to be smaller than that of its parent.
 ///  * [The catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class IntrinsicHeight extends SingleChildRenderObjectWidget {
   /// Creates a widget that sizes its child to the child's intrinsic height.
@@ -3284,6 +3321,9 @@ class Stack extends MultiChildRenderObjectWidget {
   ///
   /// Some children in a stack might overflow its box. When this flag is set to
   /// [Overflow.clip], children cannot paint outside of the stack's box.
+  ///
+  /// When set to [Overflow.visible], the visible overflow area will not accept
+  /// hit testing.
   ///
   /// This overrides [clipBehavior] for now due to a staged roll out without
   /// breaking Google. We will remove it and only use [clipBehavior] soon.
@@ -3860,7 +3900,7 @@ class Flex extends MultiChildRenderObjectWidget {
     this.crossAxisAlignment = CrossAxisAlignment.center,
     this.textDirection,
     this.verticalDirection = VerticalDirection.down,
-    this.textBaseline,
+    this.textBaseline = TextBaseline.alphabetic,
     this.clipBehavior = Clip.hardEdge,
     List<Widget> children = const <Widget>[],
   }) : assert(direction != null),
@@ -3952,6 +3992,8 @@ class Flex extends MultiChildRenderObjectWidget {
   final VerticalDirection verticalDirection;
 
   /// If aligning items according to their baseline, which baseline to use.
+  ///
+  /// Defaults to [TextBaseline.alphabetic].
   final TextBaseline textBaseline;
 
   // TODO(liyuqian): defaults to [Clip.none] once Google references are updated.
@@ -4208,7 +4250,7 @@ class Row extends Flex {
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
     TextDirection textDirection,
     VerticalDirection verticalDirection = VerticalDirection.down,
-    TextBaseline textBaseline,
+    TextBaseline textBaseline = TextBaseline.alphabetic,
     List<Widget> children = const <Widget>[],
   }) : super(
     children: children,
@@ -5144,6 +5186,13 @@ class RichText extends MultiChildRenderObjectWidget {
     this.strutStyle,
     this.textWidthBasis = TextWidthBasis.parent,
     this.textHeightBehavior,
+    @Deprecated(
+      'This parameter is a temporary flag to migrate the internal tests and '
+      'should not be used in other contexts. For more details, see '
+      'https://github.com/flutter/flutter/issues/59316. '
+      'This feature was deprecated after v1.19.0.'
+    )
+    bool applyTextScaleFactorToWidgetSpan = false,
   }) : assert(text != null),
        assert(textAlign != null),
        assert(softWrap != null),
@@ -5151,6 +5200,7 @@ class RichText extends MultiChildRenderObjectWidget {
        assert(textScaleFactor != null),
        assert(maxLines == null || maxLines > 0),
        assert(textWidthBasis != null),
+       _applyTextScaleFactorToWidgetSpan = applyTextScaleFactorToWidgetSpan,
        super(key: key, children: _extractChildren(text));
 
   // Traverses the InlineSpan tree and depth-first collects the list of
@@ -5228,6 +5278,8 @@ class RichText extends MultiChildRenderObjectWidget {
   /// {@macro flutter.dart:ui.textHeightBehavior}
   final ui.TextHeightBehavior textHeightBehavior;
 
+  final bool _applyTextScaleFactorToWidgetSpan;
+
   @override
   RenderParagraph createRenderObject(BuildContext context) {
     assert(textDirection != null || debugCheckHasDirectionality(context));
@@ -5241,6 +5293,7 @@ class RichText extends MultiChildRenderObjectWidget {
       strutStyle: strutStyle,
       textWidthBasis: textWidthBasis,
       textHeightBehavior: textHeightBehavior,
+      applyTextScaleFactorToWidgetSpan: _applyTextScaleFactorToWidgetSpan,
       locale: locale ?? Localizations.localeOf(context, nullOk: true),
     );
   }
@@ -5290,6 +5343,7 @@ class RawImage extends LeafRenderObjectWidget {
   const RawImage({
     Key key,
     this.image,
+    this.debugImageLabel,
     this.width,
     this.height,
     this.scale = 1.0,
@@ -5312,6 +5366,9 @@ class RawImage extends LeafRenderObjectWidget {
 
   /// The image to display.
   final ui.Image image;
+
+  /// A string identifying the source of the image.
+  final String debugImageLabel;
 
   /// If non-null, require the image to have this width.
   ///
@@ -5432,6 +5489,7 @@ class RawImage extends LeafRenderObjectWidget {
     assert((!matchTextDirection && alignment is Alignment) || debugCheckHasDirectionality(context));
     return RenderImage(
       image: image,
+      debugImageLabel: debugImageLabel,
       width: width,
       height: height,
       scale: scale,
@@ -5453,6 +5511,7 @@ class RawImage extends LeafRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderImage renderObject) {
     renderObject
       ..image = image
+      ..debugImageLabel = debugImageLabel
       ..width = width
       ..height = height
       ..scale = scale
@@ -5709,17 +5768,17 @@ class Listener extends StatelessWidget {
       'Use MouseRegion.onEnter instead. See MouseRegion.opaque for behavioral difference. '
       'This feature was deprecated after v1.10.14.'
     )
-    this.onPointerEnter, // ignore: deprecated_member_use_from_same_package
+    this.onPointerEnter,
     @Deprecated(
       'Use MouseRegion.onExit instead. See MouseRegion.opaque for behavioral difference. '
       'This feature was deprecated after v1.10.14.'
     )
-    this.onPointerExit, // ignore: deprecated_member_use_from_same_package
+    this.onPointerExit,
     @Deprecated(
       'Use MouseRegion.onHover instead. See MouseRegion.opaque for behavioral difference. '
       'This feature was deprecated after v1.10.14.'
     )
-    this.onPointerHover, // ignore: deprecated_member_use_from_same_package
+    this.onPointerHover,
     this.onPointerUp,
     this.onPointerCancel,
     this.onPointerSignal,
@@ -5773,6 +5832,11 @@ class Listener extends StatelessWidget {
   final PointerCancelEventListener onPointerCancel;
 
   /// Called when a pointer signal occurs over this object.
+  ///
+  /// See also:
+  ///
+  ///  * [PointerSignalEvent], which goes into more detail on pointer signal
+  ///    events.
   final PointerSignalEventListener onPointerSignal;
 
   /// How to behave during hit testing.
@@ -5947,7 +6011,7 @@ class _PointerListener extends SingleChildRenderObjectWidget {
 /// See also:
 ///
 ///  * [Listener], a similar widget that tracks pointer events when the pointer
-///    have buttons pressed.
+///    has buttons pressed.
 class MouseRegion extends StatefulWidget {
   /// Creates a widget that forwards mouse events to callbacks.
   ///
@@ -6350,6 +6414,8 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 }
 
 /// A widget that is invisible during hit testing.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=qV9pqHWxYgI}
 ///
 /// When [ignoring] is true, this widget (and its subtree) is invisible
 /// to hit testing. It still consumes space during layout and paints its child
@@ -7071,6 +7137,8 @@ class KeyedSubtree extends StatelessWidget {
 }
 
 /// A platonic widget that calls a closure to obtain its child widget.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=xXNOkIuSYuA}
 ///
 /// See also:
 ///

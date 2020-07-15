@@ -31,7 +31,7 @@ class TestCommand extends FlutterCommand {
   }) : assert(testWrapper != null) {
     requiresPubspecYaml();
     usesPubOption();
-    addNullSafetyModeOptions();
+    addNullSafetyModeOptions(hide: !verboseHelp);
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
     argParser
@@ -163,15 +163,19 @@ class TestCommand extends FlutterCommand {
         "called *_test.dart and must reside in the package's 'test' "
         'directory (or one of its subdirectories).');
     }
+    final FlutterProject flutterProject = FlutterProject.current();
     if (shouldRunPub) {
-      await pub.get(context: PubContext.getVerifyContext(name), skipPubspecYamlCheck: true);
+      await pub.get(
+        context: PubContext.getVerifyContext(name),
+        skipPubspecYamlCheck: true,
+        generateSyntheticPackage: flutterProject.manifest.generateSyntheticPackage,
+      );
     }
     final bool buildTestAssets = boolArg('test-assets');
     final List<String> names = stringsArg('name');
     final List<String> plainNames = stringsArg('plain-name');
     final String tags = stringArg('tags');
     final String excludeTags = stringArg('exclude-tags');
-    final FlutterProject flutterProject = FlutterProject.current();
 
     if (buildTestAssets && flutterProject.manifest.assets.isNotEmpty) {
       await _buildTestAsset();
@@ -222,7 +226,7 @@ class TestCommand extends FlutterCommand {
     final bool machine = boolArg('machine');
     CoverageCollector collector;
     if (boolArg('coverage') || boolArg('merge-coverage')) {
-      final String projectName = FlutterProject.current().manifest.appName;
+      final String projectName = flutterProject.manifest.appName;
       collector = CoverageCollector(
         verbose: !machine,
         libraryPredicate: (String libraryName) => libraryName.contains(projectName),
@@ -296,7 +300,7 @@ class TestCommand extends FlutterCommand {
 
   Future<void> _buildTestAsset() async {
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
-    final int build = await assetBundle.build();
+    final int build = await assetBundle.build(packagesPath: '.packages');
     if (build != 0) {
       throwToolExit('Error: Failed to build asset bundle');
     }

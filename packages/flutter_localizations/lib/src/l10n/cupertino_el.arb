@@ -19,6 +19,6 @@
   "copyButtonLabel": "Αντιγραφή",
   "pasteButtonLabel": "Επικόλληση",
   "selectAllButtonLabel": "Επιλογή όλων",
-  "tabSemanticsLabel": "TBD",
+  "tabSemanticsLabel": "Καρτέλα $tabIndex από $tabCount",
   "modalBarrierDismissLabel": "Παράβλεψη"
 }
