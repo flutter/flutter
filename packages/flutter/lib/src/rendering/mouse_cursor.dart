@@ -352,6 +352,17 @@ class _SystemMouseCursorSession extends MouseCursorSession {
 /// each platform varies, multiple instances can correspond to the same system
 /// cursor.
 ///
+/// Each cursor is noted with its corresponding native cursors on each platform:
+///
+///  * Android: API name in Java
+///  * Web: CSS cursor
+///  * Windows: Win32 API
+///  * Linux: GDK, `gdk_cursor_new_from_name`
+///  * macOS: API name in Objective C
+///
+/// If the platform that the application is running on is not listed for a cursor,
+/// using this cursor falls back to [basic].
+///
 /// [SystemMouseCursors] enumerates the complete set of system cursors supported
 /// by Flutter, which are hard-coded in the engine. Therefore, manually
 /// instantiating this class is not supported.
@@ -402,13 +413,23 @@ class SystemMouseCursor extends MouseCursor {
 /// result, or fallback to the [basic] arrow. This mapping is defined by the
 /// Flutter engine.
 ///
-/// The cursor names are chosen to reflect the cursors' use cases instead of
-/// their shapes, because different platforms might (although not commonly) use
+/// The cursors should be named based on the cursors' use cases instead of their
+/// appearance, because different platforms might (although not commonly) use
 /// different shapes for the same use case.
 class SystemMouseCursors {
   // This class only contains static members, and should not be instantiated or
   // extended.
   factory SystemMouseCursors._() => null;
+
+  // The mapping in this class must be kept in sync with the following files in
+  // the engine:
+  //
+  // * Android: shell/platform/android/io/flutter/plugin/mouse/MouseCursorPlugin.java
+  // * Web: lib/web_ui/lib/src/engine/mouse_cursor.dart
+  // * Windows: shell/platform/windows/win32_flutter_window.cc
+  // * Linux: shell/platform/linux/fl_mouse_cursor_plugin.cc
+  // * macOS: shell/platform/darwin/macos/framework/Source/FlutterMouseCursorPlugin.mm
+
 
   /// Hide the cursor.
   ///
@@ -426,6 +447,8 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_DEFAULT, TYPE_ARROW
   ///  * Web: default
+  ///  * Windows: IDC_ARROW
+  ///  * Linux: default
   ///  * macOS: arrowCursor
   static const SystemMouseCursor basic = SystemMouseCursor._(kind: 'basic');
 
@@ -437,6 +460,8 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_HAND
   ///  * Web: pointer
+  ///  * Windows: IDC_HAND
+  ///  * Linux: pointer
   ///  * macOS: pointingHandCursor
   static const SystemMouseCursor click = SystemMouseCursor._(kind: 'click');
 
@@ -449,6 +474,8 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_NO_DROP
   ///  * Web: not-allowed
+  ///  * Windows: IDC_NO
+  ///  * Linux: not-allowed
   ///  * macOS: operationNotAllowedCursor
   ///
   /// See also:
@@ -469,7 +496,9 @@ class SystemMouseCursors {
   /// Corresponds to:
   ///
   ///  * Android: TYPE_WAIT
+  ///  * Windows: IDC_WAIT
   ///  * Web: wait
+  ///  * Linux: wait
   ///
   /// See also:
   ///
@@ -486,6 +515,8 @@ class SystemMouseCursors {
   /// Corresponds to:
   ///
   ///  * Web: progress
+  ///  * Windows: IDC_APPSTARTING
+  ///  * Linux: progress
   ///
   /// See also:
   ///
@@ -501,6 +532,7 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_CONTEXT_MENU
   ///  * Web: context-menu
+  ///  * Linux: context-menu
   ///  * macOS: contextualMenuCursor
   static const SystemMouseCursor contextMenu = SystemMouseCursor._(kind: 'contextMenu');
 
@@ -511,7 +543,9 @@ class SystemMouseCursors {
   /// Corresponds to:
   ///
   ///  * Android: TYPE_HELP
+  ///  * Windows: IDC_HELP
   ///  * Web: help
+  ///  * Linux: help
   static const SystemMouseCursor help = SystemMouseCursor._(kind: 'help');
 
 
@@ -525,6 +559,8 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_TEXT
   ///  * Web: text
+  ///  * Windows: IDC_IBEAM
+  ///  * Linux: text
   ///  * macOS: IBeamCursor
   static const SystemMouseCursor text = SystemMouseCursor._(kind: 'text');
 
@@ -537,6 +573,7 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_VERTICAL_TEXT
   ///  * Web: vertical-text
+  ///  * Linux: vertical-text
   ///  * macOS: IBeamCursorForVerticalLayout
   static const SystemMouseCursor verticalText = SystemMouseCursor._(kind: 'verticalText');
 
@@ -548,6 +585,7 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_CELL
   ///  * Web: cell
+  ///  * Linux: cell
   static const SystemMouseCursor cell = SystemMouseCursor._(kind: 'cell');
 
   /// A cursor indicating precise selection, such as selecting a pixel in a
@@ -559,6 +597,8 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_CROSSHAIR
   ///  * Web: crosshair
+  ///  * Windows: IDC_CROSS
+  ///  * Linux: crosshair
   ///  * macOS: crosshairCursor
   static const SystemMouseCursor precise = SystemMouseCursor._(kind: 'precise');
 
@@ -572,7 +612,9 @@ class SystemMouseCursors {
   /// Corresponds to:
   ///
   ///  * Android: TYPE_ALL_SCROLL
+  ///  * Windows: IDC_SIZEALL
   ///  * Web: move
+  ///  * Linux: move
   static const SystemMouseCursor move = SystemMouseCursor._(kind: 'move');
 
   /// A cursor indicating something that can be dragged.
@@ -583,6 +625,7 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_GRAB
   ///  * Web: grab
+  ///  * Linux: grab
   ///  * macOS: openHandCursor
   static const SystemMouseCursor grab = SystemMouseCursor._(kind: 'grab');
 
@@ -594,6 +637,7 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_GRABBING
   ///  * Web: grabbing
+  ///  * Linux: grabbing
   ///  * macOS: closedHandCursor
   static const SystemMouseCursor grabbing = SystemMouseCursor._(kind: 'grabbing');
 
@@ -606,6 +650,8 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_NO_DROP
   ///  * Web: no-drop
+  ///  * Windows: IDC_NO
+  ///  * Linux: no-drop
   ///  * macOS: operationNotAllowedCursor
   ///
   /// See also:
@@ -622,6 +668,7 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_ALIAS
   ///  * Web: alias
+  ///  * Linux: alias
   ///  * macOS: dragLinkCursor
   static const SystemMouseCursor alias = SystemMouseCursor._(kind: 'alias');
 
@@ -633,6 +680,7 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_COPY
   ///  * Web: copy
+  ///  * Linux: copy
   ///  * macOS: dragCopyCursor
   static const SystemMouseCursor copy = SystemMouseCursor._(kind: 'copy');
 
@@ -656,7 +704,9 @@ class SystemMouseCursors {
   /// Corresponds to:
   ///
   ///  * Android: TYPE_ALL_SCROLL
+  ///  * Windows: IDC_SIZEALL
   ///  * Web: all-scroll
+  ///  * Linux: all-scroll
   ///
   /// See also:
   ///
@@ -672,6 +722,8 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_HORIZONTAL_DOUBLE_ARROW
   ///  * Web: ew-resize
+  ///  * Windows: IDC_SIZEWE
+  ///  * Linux: ew-resize
   ///  * macOS: resizeLeftRightCursor
   static const SystemMouseCursor resizeLeftRight = SystemMouseCursor._(kind: 'resizeLeftRight');
 
@@ -684,6 +736,8 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_VERTICAL_DOUBLE_ARROW
   ///  * Web: ns-resize
+  ///  * Windows: IDC_SIZENS
+  ///  * Linux: ns-resize
   ///  * macOS: resizeUpDownCursor
   static const SystemMouseCursor resizeUpDown = SystemMouseCursor._(kind: 'resizeUpDown');
 
@@ -696,6 +750,8 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_TOP_LEFT_DIAGONAL_DOUBLE_ARROW
   ///  * Web: nwse-resize
+  ///  * Windows: IDC_SIZENWSE
+  ///  * Linux: nwse-resize
   static const SystemMouseCursor resizeUpLeftDownRight = SystemMouseCursor._(kind: 'resizeUpLeftDownRight');
 
   /// A cursor indicating resizing an object bidirectionally from its top right or
@@ -706,7 +762,9 @@ class SystemMouseCursors {
   /// Corresponds to:
   ///
   ///  * Android: TYPE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW
+  ///  * Windows: IDC_SIZENESW
   ///  * Web: nesw-resize
+  ///  * Linux: nesw-resize
   static const SystemMouseCursor resizeUpRightDownLeft = SystemMouseCursor._(kind: 'resizeUpRightDownLeft');
 
   /// A cursor indicating resizing an object from its top edge.
@@ -717,6 +775,8 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_VERTICAL_DOUBLE_ARROW
   ///  * Web: n-resize
+  ///  * Windows: IDC_SIZENS
+  ///  * Linux: n-resize
   ///  * macOS: resizeUpCursor
   static const SystemMouseCursor resizeUp = SystemMouseCursor._(kind: 'resizeUp');
 
@@ -728,6 +788,8 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_VERTICAL_DOUBLE_ARROW
   ///  * Web: s-resize
+  ///  * Windows: IDC_SIZENS
+  ///  * Linux: s-resize
   ///  * macOS: resizeDownCursor
   static const SystemMouseCursor resizeDown = SystemMouseCursor._(kind: 'resizeDown');
 
@@ -739,6 +801,8 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_HORIZONTAL_DOUBLE_ARROW
   ///  * Web: w-resize
+  ///  * Windows: IDC_SIZEWE
+  ///  * Linux: w-resize
   ///  * macOS: resizeLeftCursor
   static const SystemMouseCursor resizeLeft = SystemMouseCursor._(kind: 'resizeLeft');
 
@@ -750,6 +814,8 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_HORIZONTAL_DOUBLE_ARROW
   ///  * Web: e-resize
+  ///  * Windows: IDC_SIZEWE
+  ///  * Linux: e-resize
   ///  * macOS: resizeRightCursor
   static const SystemMouseCursor resizeRight = SystemMouseCursor._(kind: 'resizeRight');
 
@@ -761,6 +827,8 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_TOP_LEFT_DIAGONAL_DOUBLE_ARROW
   ///  * Web: nw-resize
+  ///  * Windows: IDC_SIZENWSE
+  ///  * Linux: nw-resize
   static const SystemMouseCursor resizeUpLeft = SystemMouseCursor._(kind: 'resizeUpLeft');
 
   /// A cursor indicating resizing an object from its top-right corner.
@@ -771,6 +839,8 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW
   ///  * Web: ne-resize
+  ///  * Windows: IDC_SIZENESW
+  ///  * Linux: ne-resize
   static const SystemMouseCursor resizeUpRight = SystemMouseCursor._(kind: 'resizeUpRight');
 
   /// A cursor indicating resizing an object from its bottom-left corner.
@@ -781,6 +851,8 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW
   ///  * Web: sw-resize
+  ///  * Windows: IDC_SIZENESW
+  ///  * Linux: sw-resize
   static const SystemMouseCursor resizeDownLeft = SystemMouseCursor._(kind: 'resizeDownLeft');
 
   /// A cursor indicating resizing an object from its bottom-right corner.
@@ -791,6 +863,8 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_TOP_LEFT_DIAGONAL_DOUBLE_ARROW
   ///  * Web: se-resize
+  ///  * Windows: IDC_SIZENWSE
+  ///  * Linux: se-resize
   static const SystemMouseCursor resizeDownRight = SystemMouseCursor._(kind: 'resizeDownRight');
 
   /// A cursor indicating resizing a column, or an item horizontally.
@@ -802,6 +876,8 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_HORIZONTAL_DOUBLE_ARROW
   ///  * Web: col-resize
+  ///  * Windows: IDC_SIZEWE
+  ///  * Linux: col-resize
   ///  * macOS: resizeLeftRightCursor
   static const SystemMouseCursor resizeColumn = SystemMouseCursor._(kind: 'resizeColumn');
 
@@ -814,6 +890,8 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_VERTICAL_DOUBLE_ARROW
   ///  * Web: row-resize
+  ///  * Windows: IDC_SIZENS
+  ///  * Linux: row-resize
   ///  * macOS: resizeUpDownCursor
   static const SystemMouseCursor resizeRow = SystemMouseCursor._(kind: 'resizeRow');
 
@@ -828,6 +906,7 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_ZOOM_IN
   ///  * Web: zoom-in
+  ///  * Linux: zoom-in
   static const SystemMouseCursor zoomIn = SystemMouseCursor._(kind: 'zoomIn');
 
   /// A cursor indicating zooming out.
@@ -838,5 +917,6 @@ class SystemMouseCursors {
   ///
   ///  * Android: TYPE_ZOOM_OUT
   ///  * Web: zoom-out
+  ///  * Linux: zoom-out
   static const SystemMouseCursor zoomOut = SystemMouseCursor._(kind: 'zoomOut');
 }
