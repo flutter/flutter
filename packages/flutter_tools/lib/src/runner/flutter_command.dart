@@ -845,10 +845,13 @@ abstract class FlutterCommand extends Command<void> {
     await validateCommand();
 
     if (shouldRunPub) {
-      await pub.get(context: PubContext.getVerifyContext(name));
+      final FlutterProject project = FlutterProject.current();
+      await pub.get(
+        context: PubContext.getVerifyContext(name),
+        generateSyntheticPackage: project.manifest.generateSyntheticPackage,
+      );
       // All done updating dependencies. Release the cache lock.
       Cache.releaseLock();
-      final FlutterProject project = FlutterProject.current();
       await project.ensureReadyForPlatformSpecificTooling(checkProjects: true);
     } else {
       Cache.releaseLock();

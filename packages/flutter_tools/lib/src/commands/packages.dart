@@ -88,7 +88,7 @@ class PackagesGetCommand extends FlutterCommand {
     return usageValues;
   }
 
-  Future<void> _runPubGet(String directory) async {
+  Future<void> _runPubGet(String directory, FlutterProject flutterProject) async {
     final Stopwatch pubGetTimer = Stopwatch()..start();
     try {
       await pub.get(context: PubContext.pubGet,
@@ -96,6 +96,7 @@ class PackagesGetCommand extends FlutterCommand {
         upgrade: upgrade ,
         offline: boolArg('offline'),
         checkLastModified: false,
+        generateSyntheticPackage: flutterProject.manifest.generateSyntheticPackage,
       );
       pubGetTimer.stop();
       globals.flutterUsage.sendTiming('pub', 'get', pubGetTimer.elapsed, label: 'success');
@@ -121,15 +122,15 @@ class PackagesGetCommand extends FlutterCommand {
        '${ workingDirectory ?? "current working directory" }.'
       );
     }
-
-    await _runPubGet(target);
     final FlutterProject rootProject = FlutterProject.fromPath(target);
+
+    await _runPubGet(target, rootProject);
     await rootProject.ensureReadyForPlatformSpecificTooling(checkProjects: true);
 
     // Get/upgrade packages in example app as well
     if (rootProject.hasExampleApp) {
       final FlutterProject exampleProject = rootProject.example;
-      await _runPubGet(exampleProject.directory.path);
+      await _runPubGet(exampleProject.directory.path, exampleProject);
       await exampleProject.ensureReadyForPlatformSpecificTooling(checkProjects: true);
     }
 

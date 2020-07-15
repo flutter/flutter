@@ -297,6 +297,7 @@ void main() {
     verify(pub.get(
       context: PubContext.pubGet,
       directory: anyNamed('directory'),
+      generateSyntheticPackage: false,
     )).called(1);
 
     expect(bufferLogger.statusText, contains('Debug service listening on ws://127.0.0.1/abcd/'));
