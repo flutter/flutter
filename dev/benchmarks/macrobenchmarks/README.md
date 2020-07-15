@@ -65,7 +65,7 @@ Choose one of the two benchmark types:
 
 * A "raw benchmark" records performance metrics from direct interactions with
   `dart:ui` with no framework. This kind of benchmark is good for benchmarking
-  low-level engine primitives, such as a layer, picture, and semantics performance.
+  low-level engine primitives, such as layer, picture, and semantics performance.
 * A "widget benchmark" records performance metrics using a widget. This kind of
   benchmark is good for measuring the performance of widgets, often together with
   engine work that widget-under-test incurs.
