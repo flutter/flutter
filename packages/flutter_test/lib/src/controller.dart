@@ -688,7 +688,7 @@ abstract class WidgetController {
   /// dispalyed part does not have a cached element yet. See
   /// https://github.com/flutter/flutter/issues/61458
   ///
-  /// Shorthand for `Scrollable.ensureVisible(tester.element(finder))`
+  /// Shorthand for `Scrollable.ensureVisible(element(finder))`
   Future<void> ensureVisible(Finder finder) => Scrollable.ensureVisible(element(finder));
 }
 
