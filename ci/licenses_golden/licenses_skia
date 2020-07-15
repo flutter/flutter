@@ -1,4 +1,4 @@
-Signature: 9967a634a2157647bd74abaa86fc3af0
+Signature: ec27fa9549fc5eed57debe00b4d99df2
 
 UNUSED LICENSES:
 
@@ -3921,6 +3921,8 @@ FILE: ../../../third_party/skia/src/gpu/GrBlockAllocator.h
 FILE: ../../../third_party/skia/src/gpu/GrManagedResource.cpp
 FILE: ../../../third_party/skia/src/gpu/GrRingBuffer.cpp
 FILE: ../../../third_party/skia/src/gpu/GrRingBuffer.h
+FILE: ../../../third_party/skia/src/gpu/GrStagingBufferManager.cpp
+FILE: ../../../third_party/skia/src/gpu/GrStagingBufferManager.h
 FILE: ../../../third_party/skia/src/gpu/GrStencilMaskHelper.cpp
 FILE: ../../../third_party/skia/src/gpu/GrStencilMaskHelper.h
 FILE: ../../../third_party/skia/src/gpu/GrUniformDataManager.cpp
@@ -5304,11 +5306,7 @@ FILE: ../../../third_party/skia/src/gpu/GrDynamicAtlas.h
 FILE: ../../../third_party/skia/src/gpu/GrEagerVertexAllocator.h
 FILE: ../../../third_party/skia/src/gpu/GrHashMapWithCache.h
 FILE: ../../../third_party/skia/src/gpu/GrSTArenaList.h
-FILE: ../../../third_party/skia/src/gpu/GrStagingBuffer.cpp
-FILE: ../../../third_party/skia/src/gpu/GrStagingBuffer.h
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrAutoMapVertexBuffer.h
-FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnStagingBuffer.cpp
-FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnStagingBuffer.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrArithmeticProcessor.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrDitherEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrHighContrastFilterEffect.fp
