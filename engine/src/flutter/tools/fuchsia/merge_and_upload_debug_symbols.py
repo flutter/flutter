@@ -52,34 +52,9 @@ def WriteCIPDDefinition(target_arch, out_dir, symbol_dirs):
   return yaml_file
 
 
-def CheckCIPDPackageExists(package_name, tag):
-  '''Check to see if the current package/tag combo has been published'''
-  command = [
-    'cipd',
-    'search',
-    package_name,
-    '-tag',
-    tag,
-  ]
-  stdout = subprocess.check_output(command)
-  match = re.search(r'No matching instances\.', stdout)
-  if match:
-    return False
-  else:
-    return True
-
-
 def ProcessCIPDPackage(upload, cipd_yaml, engine_version, out_dir, target_arch):
   _packaging_dir = GetPackagingDir(out_dir)
-  tag = 'git_revision:%s' % engine_version
-  package_name = 'flutter/fuchsia-debug-symbols-%s' % target_arch
-  already_exists = CheckCIPDPackageExists(
-    package_name,
-    tag)
-  if already_exists:
-    print('CIPD package %s tag %s already exists!' % (package_name, tag))
-
-  if upload and IsLinux() and not already_exists:
+  if upload and IsLinux():
     command = [
         'cipd', 'create', '-pkg-def', cipd_yaml, '-ref', 'latest', '-tag',
         'git_revision:%s' % engine_version
