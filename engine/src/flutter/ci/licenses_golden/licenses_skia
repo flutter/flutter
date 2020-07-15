@@ -1,4 +1,4 @@
-Signature: 5fd7049adf1849d87b3e515fc3b6fea0
+Signature: 9967a634a2157647bd74abaa86fc3af0
 
 UNUSED LICENSES:
 
@@ -423,7 +423,7 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/bench/AndroidCodecBench.cpp
 FILE: ../../../third_party/skia/bench/AndroidCodecBench.h
 FILE: ../../../third_party/skia/bench/EncodeBench.cpp
-FILE: ../../../third_party/skia/bench/GrMipMapBench.cpp
+FILE: ../../../third_party/skia/bench/GrMipmapBench.cpp
 FILE: ../../../third_party/skia/bench/HardStopGradientBench_ScaleNumColors.cpp
 FILE: ../../../third_party/skia/bench/HardStopGradientBench_ScaleNumHardStops.cpp
 FILE: ../../../third_party/skia/bench/HardStopGradientBench_SpecialHardStops.cpp
@@ -2263,7 +2263,7 @@ FILE: ../../../third_party/skia/bench/DrawBitmapAABench.cpp
 FILE: ../../../third_party/skia/bench/ImageBench.cpp
 FILE: ../../../third_party/skia/bench/InterpBench.cpp
 FILE: ../../../third_party/skia/bench/MathBench.cpp
-FILE: ../../../third_party/skia/bench/MipMapBench.cpp
+FILE: ../../../third_party/skia/bench/MipmapBench.cpp
 FILE: ../../../third_party/skia/bench/PictureOverheadBench.cpp
 FILE: ../../../third_party/skia/bench/SKPAnimationBench.cpp
 FILE: ../../../third_party/skia/bench/SKPAnimationBench.h
@@ -2773,8 +2773,8 @@ FILE: ../../../third_party/skia/src/core/SkGpuBlurUtils.h
 FILE: ../../../third_party/skia/src/core/SkLegacyGpuBlurUtils.cpp
 FILE: ../../../third_party/skia/src/core/SkMatrixUtils.h
 FILE: ../../../third_party/skia/src/core/SkMessageBus.h
-FILE: ../../../third_party/skia/src/core/SkMipMap.cpp
-FILE: ../../../third_party/skia/src/core/SkMipMap.h
+FILE: ../../../third_party/skia/src/core/SkMipmap.cpp
+FILE: ../../../third_party/skia/src/core/SkMipmap.h
 FILE: ../../../third_party/skia/src/core/SkPaintPriv.cpp
 FILE: ../../../third_party/skia/src/core/SkPaintPriv.h
 FILE: ../../../third_party/skia/src/core/SkPathRef.cpp
