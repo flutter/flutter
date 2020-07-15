@@ -21,7 +21,8 @@ template("dart_kernel") {
     gen_kernel_script = "//third_party/dart/pkg/vm/bin/gen_kernel.dart"
     platform_dill = "$root_out_dir/dart_runner_patched_sdk/platform_strong.dill"
 
-    dot_packages = rebase_path("//third_party/dart/.packages")
+    dot_packages =
+        rebase_path("//third_party/dart/.dart_tool/package_config.json")
 
     inputs = [
       platform_dill,

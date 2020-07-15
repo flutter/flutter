@@ -23,7 +23,7 @@ template("generate_dart_profiler_symbols") {
 
     script = "dart_profiler_symbols.dart"
 
-    packages = rebase_path("//third_party/dart/.packages")
+    packages = rebase_path("//third_party/dart/.dart_tool/package_config.json")
 
     args = [
       "--nm",
