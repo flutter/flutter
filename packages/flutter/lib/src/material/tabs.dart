@@ -946,7 +946,7 @@ class _TabBarState extends State<TabBar> {
 
   void _scrollToCurrentIndex() {
     final double offset = _tabCenteredScrollOffset(_currentIndex);
-    _scrollController.animateTo(offset, duration: _controller.lastDuration, curve: _controller.lastCurve);
+    _scrollController.animateTo(offset, duration: _controller.ongoingAnimationDuration ?? kTabScrollDuration, curve: _controller.ongoingAnimationCurve ?? Curves.ease);
   }
 
   void _scrollToControllerValue() {
@@ -1297,7 +1297,7 @@ class _TabBarViewState extends State<TabBarView> {
       setState(() {
         _warpUnderwayCount += 1;
       });
-      await _pageController.animateToPage(_currentIndex, duration: _controller.lastDuration, curve: _controller.lastCurve);
+      await _pageController.animateToPage(_currentIndex, duration: _controller.ongoingAnimationDuration ?? kTabScrollDuration, curve: _controller.ongoingAnimationCurve ?? Curves.ease);
       if (!mounted)
         return Future<void>.value();
       setState(() {
@@ -1320,7 +1320,7 @@ class _TabBarViewState extends State<TabBarView> {
     });
     _pageController.jumpToPage(initialPage);
 
-    await _pageController.animateToPage(_currentIndex, duration: _controller.lastDuration, curve: _controller.lastCurve);
+    await _pageController.animateToPage(_currentIndex, duration: _controller.ongoingAnimationDuration ?? kTabScrollDuration, curve: _controller.ongoingAnimationCurve ?? Curves.ease);
     if (!mounted)
       return Future<void>.value();
     setState(() {

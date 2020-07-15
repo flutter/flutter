@@ -205,17 +205,17 @@ class TabController extends ChangeNotifier {
   /// [TabBarView.children]'s length.
   final int length;
 
-  /// The last duration used to change index.
+  /// The duration given to [animateTo].
   ///
-  /// Defaults to [kTabScrollDuration].
-  Duration get lastDuration => _lastDuration;
-  Duration _lastDuration = kTabScrollDuration;
+  /// Only valid while animation is running, null otherwise.
+  Duration get ongoingAnimationDuration => _ongoingAnimationDuration;
+  Duration _ongoingAnimationDuration;
 
-  /// The last curve used to change index.
+  /// The curve given to [animateTo].
   ///
-  /// Defaults to [Curves.ease].
-  Curve get lastCurve => _lastCurve;
-  Curve _lastCurve = Curves.ease;
+  /// Only valid while animation is running, null otherwise.
+  Curve get ongoingAnimationCurve => _ongoingAnimationCurve;
+  Curve _ongoingAnimationCurve;
 
   void _changeIndex(int value, { Duration duration, Curve curve }) {
     assert(value != null);
@@ -226,8 +226,8 @@ class TabController extends ChangeNotifier {
       return;
     _previousIndex = index;
     _index = value;
-    _lastDuration = duration ?? kTabScrollDuration;
-    _lastCurve = curve ?? Curves.ease;
+    _ongoingAnimationDuration = duration;
+    _ongoingAnimationCurve = curve;
     if (duration != null) {
       _indexIsChangingCount += 1;
       notifyListeners(); // Because the value of indexIsChanging may have changed.
@@ -235,6 +235,8 @@ class TabController extends ChangeNotifier {
         .animateTo(_index.toDouble(), duration: duration, curve: curve)
         .whenCompleteOrCancel(() {
           _indexIsChangingCount -= 1;
+          _ongoingAnimationDuration = null;
+          _ongoingAnimationCurve = null;
           notifyListeners();
         });
     } else {
