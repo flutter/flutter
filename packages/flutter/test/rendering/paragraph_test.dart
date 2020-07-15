@@ -370,7 +370,7 @@ void main() {
     // intrinsicHeight = singleLineHeight * textScaleFactor * two lines.
     expect(maxIntrinsicHeight, singleLineHeight * 2.0 * 2);
     expect(maxIntrinsicHeight, minIntrinsicHeight);
-  });
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
 
   test('can compute IntrinsicWidth for widget span', () {
     // Regression test for https://github.com/flutter/flutter/issues/59316
@@ -415,7 +415,7 @@ void main() {
     final double maxIntrinsicWidth = paragraph.computeMaxIntrinsicWidth(fixedHeight);
     // maxIntrinsicWidth = widthForOneLine * textScaleFactor
     expect(maxIntrinsicWidth, widthForOneLine * 2.0);
-  });
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
 
   test('inline widgets test', () {
     const TextSpan text = TextSpan(
