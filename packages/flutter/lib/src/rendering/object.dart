@@ -1319,16 +1319,16 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   dynamic debugCreator;
 
   void _debugReportException(String method, dynamic exception, StackTrace stack) {
-    FlutterError.reportError(FlutterErrorDetailsForRendering(
+    FlutterError.reportError(FlutterErrorDetails(
       exception: exception,
       stack: stack,
       library: 'rendering library',
       context: ErrorDescription('during $method()'),
-      renderObject: this,
       informationCollector: () sync* {
         if (debugCreator != null)
           yield DiagnosticsDebugCreator(debugCreator);
         yield describeForError('The following RenderObject was being processed when the exception was fired');
+        yield DiagnosticsProperty<RenderObject>('RenderObject', this, style: DiagnosticsTreeStyle.errorProperty);
         // TODO(jacobr): this error message has a code smell. Consider whether
         // displaying the truncated children is really useful for command line
         // users. Inspector users can see the full tree by clicking on the
@@ -3382,35 +3382,6 @@ mixin RelayoutWhenSystemFontsChangeMixin on RenderObject {
     PaintingBinding.instance.systemFonts.removeListener(systemFontsDidChange);
     super.detach();
   }
-}
-
-/// Variant of [FlutterErrorDetails] with extra fields for the rendering
-/// library.
-class FlutterErrorDetailsForRendering extends FlutterErrorDetails {
-  /// Creates a [FlutterErrorDetailsForRendering] object with the given
-  /// arguments setting the object's properties.
-  ///
-  /// The rendering library calls this constructor when catching an exception
-  /// that will subsequently be reported using [FlutterError.onError].
-  const FlutterErrorDetailsForRendering({
-    dynamic exception,
-    StackTrace stack,
-    String library,
-    DiagnosticsNode context,
-    this.renderObject,
-    InformationCollector informationCollector,
-    bool silent = false,
-  }) : super(
-    exception: exception,
-    stack: stack,
-    library: library,
-    context: context,
-    informationCollector: informationCollector,
-    silent: silent,
-  );
-
-  /// The RenderObject that was being processed when the exception was caught.
-  final RenderObject renderObject;
 }
 
 /// Describes the semantics information a [RenderObject] wants to add to its
