@@ -892,7 +892,7 @@ abstract class FlutterCommand extends Command<void> {
       globals.printError(userMessages.flutterNoDevelopmentDevice);
       return null;
     }
-
+    final DeviceManager deviceManager = globals.deviceManager;
     List<Device> devices = await deviceManager.findTargetDevices(FlutterProject.current());
 
     if (devices.isEmpty && deviceManager.hasSpecifiedDeviceId) {
@@ -946,7 +946,7 @@ abstract class FlutterCommand extends Command<void> {
     }
     if (deviceList.length > 1) {
       globals.printStatus(userMessages.flutterSpecifyDevice);
-      deviceList = await deviceManager.getAllConnectedDevices();
+      deviceList = await globals.deviceManager.getAllConnectedDevices();
       globals.printStatus('');
       await Device.printDevices(deviceList);
       return null;
@@ -1023,7 +1023,7 @@ mixin DeviceBasedDevelopmentArtifacts on FlutterCommand {
     // If there are no attached devices, use the default configuration.
     // Otherwise, only add development artifacts which correspond to a
     // connected device.
-    final List<Device> devices = await deviceManager.getDevices();
+    final List<Device> devices = await globals.deviceManager.getDevices();
     if (devices.isEmpty) {
       return super.requiredArtifacts;
     }

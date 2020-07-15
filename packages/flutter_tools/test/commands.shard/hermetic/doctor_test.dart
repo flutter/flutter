@@ -14,8 +14,10 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/doctor.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -187,6 +189,66 @@ void main() {
       expect(message.message, startsWith('Flutter extension not installed'));
       expect(message.isError, isTrue);
     }, overrides: noColorTerminalOverride);
+
+    group('device validator', () {
+      testWithoutContext('no devices', () async {
+        final MockDeviceManager mockDeviceManager = MockDeviceManager();
+
+        when(mockDeviceManager.getAllConnectedDevices()).thenAnswer(
+          (Invocation invocation) => Future<List<Device>>.value(<Device>[])
+        );
+        when(mockDeviceManager.getDeviceDiagnostics()).thenAnswer(
+          (Invocation invocation) => Future<List<String>>.value(<String>[])
+        );
+
+        final DeviceValidator deviceValidator = DeviceValidator(mockDeviceManager, UserMessages());
+        final ValidationResult result = await deviceValidator.validate();
+        expect(result.type, ValidationType.notAvailable);
+        expect(result.messages.single.message, 'No devices available');
+        expect(result.messages.single.type, ValidationMessageType.hint);
+        expect(result.statusInfo, isNull);
+      });
+
+      testWithoutContext('diagnostic message', () async {
+        final MockDeviceManager mockDeviceManager = MockDeviceManager();
+
+        when(mockDeviceManager.getAllConnectedDevices()).thenAnswer(
+          (Invocation invocation) => Future<List<Device>>.value(<Device>[])
+        );
+        when(mockDeviceManager.getDeviceDiagnostics()).thenAnswer(
+          (Invocation invocation) => Future<List<String>>.value(<String>['Device locked'])
+        );
+
+        final DeviceValidator deviceValidator = DeviceValidator(mockDeviceManager, UserMessages());
+        final ValidationResult result = await deviceValidator.validate();
+        expect(result.type, ValidationType.notAvailable);
+        expect(result.messages.single.message, 'Device locked');
+        expect(result.messages.single.type, ValidationMessageType.hint);
+        expect(result.statusInfo, isNull);
+      });
+
+      testWithoutContext('diagnostic message and devices', () async {
+        final MockDeviceManager mockDeviceManager = MockDeviceManager();
+        final MockDevice mockDevice = MockDevice();
+
+        when(mockDeviceManager.getAllConnectedDevices()).thenAnswer(
+          (_) => Future<List<Device>>.value(<Device>[mockDevice])
+        );
+        when(mockDeviceManager.getDeviceDiagnostics()).thenAnswer(
+          (_) => Future<List<String>>.value(<String>['Device locked'])
+        );
+
+        final DeviceValidator deviceValidator = DeviceValidator(mockDeviceManager, UserMessages());
+        final ValidationResult result = await deviceValidator.validate();
+        expect(result.type, ValidationType.installed);
+        expect(result.messages.length, 2);
+        expect(result.messages.first.message, contains (mockDevice.id));
+        expect(result.messages.first.type, ValidationMessageType.information);
+        expect(result.messages[1].message, 'Device locked');
+        expect(result.messages[1].type, ValidationMessageType.hint);
+        expect(result.statusInfo, '1 available');
+      });
+    });
   });
 
   group('doctor with overridden validators', () {
@@ -1154,3 +1216,12 @@ class VsCodeValidatorTestTargets extends VsCodeValidator {
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockArtifacts extends Mock implements Artifacts {}
 class MockPlistParser extends Mock implements PlistParser {}
+class MockDeviceManager extends Mock implements DeviceManager {}
+class MockDevice extends Mock implements Device {
+  MockDevice() {
+    when(isSupported()).thenReturn(true);
+    when(id).thenReturn('device-id');
+    when(isLocalEmulator).thenAnswer((_) => Future<bool>.value(false));
+    when(targetPlatform).thenAnswer((_) => Future<TargetPlatform>.value(TargetPlatform.android));
+  }
+}

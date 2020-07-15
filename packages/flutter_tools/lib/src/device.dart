@@ -15,7 +15,6 @@ import 'android/android_workflow.dart';
 import 'application_package.dart';
 import 'artifacts.dart';
 import 'base/config.dart';
-import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
@@ -39,8 +38,6 @@ import 'tester/flutter_tester.dart';
 import 'version.dart';
 import 'web/web_device.dart';
 import 'windows/windows_device.dart';
-
-DeviceManager get deviceManager => context.get<DeviceManager>();
 
 /// A description of the kind of workflow the device supports.
 class Category {
@@ -238,7 +235,7 @@ abstract class DeviceManager {
         globals.printStatus(globals.userMessages.flutterMultipleDevicesFound);
         await Device.printDevices(devices);
         final Device chosenDevice = await _chooseOneOfAvailableDevices(devices);
-        deviceManager.specifiedDeviceId = chosenDevice.id;
+        globals.deviceManager.specifiedDeviceId = chosenDevice.id;
         devices = <Device>[chosenDevice];
       }
     }
