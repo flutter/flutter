@@ -102,7 +102,7 @@ You can find where your Android SDK is using `flutter doctor`.
 
 ## Warnings
 
-Running a devicelab will do things to your environment.
+Running the devicelab will do things to your environment.
 
 Notably, it will start and stop Gradle, for instance.
 
