@@ -583,7 +583,10 @@ class RestorationBucket extends ChangeNotifier {
     _performDecommission();
   }
 
+  bool _decommissioned = false;
+
   void _performDecommission() {
+    _decommissioned = true;
     _updateManager(null);
     notifyListeners();
     _visitChildren((RestorationBucket bucket) {
@@ -773,17 +776,17 @@ class RestorationBucket extends ChangeNotifier {
     _removeChildData(child);
     child._parent = null;
     if (child._manager != null) {
-      _updateManager(null);
-      _recursivelyUpdateManager(child);
+      child._updateManager(null);
+      child._visitChildren(_recursivelyUpdateManager);
     }
   }
 
   bool _needsSerialization = false;
   void _markNeedsSerialization() {
-    assert(_manager != null);
+    assert(_manager != null || _decommissioned);
     if (!_needsSerialization) {
       _needsSerialization = true;
-      _manager.scheduleSerializationFor(this);
+      _manager?.scheduleSerializationFor(this);
     }
   }
 
@@ -812,7 +815,7 @@ class RestorationBucket extends ChangeNotifier {
       _manager?.unscheduleSerializationFor(this);
     }
     _manager = newManager;
-    if (_needsSerialization) {
+    if (_needsSerialization && _manager != null) {
       _needsSerialization = false;
       _markNeedsSerialization();
     }
@@ -937,14 +940,14 @@ class RestorationBucket extends ChangeNotifier {
   @override
   void dispose() {
     assert(_debugAssertNotDisposed());
-    _debugDisposed = true;
-    _parent?._removeChildData(this);
-    _parent = null;
-    _updateManager(null);
     _visitChildren(_dropChild, concurrentModification: true);
     _claimedChildren.clear();
     _childrenToAdd.clear();
+    _parent?._removeChildData(this);
+    _parent = null;
+    _updateManager(null);
     super.dispose();
+    _debugDisposed = true;
   }
 
   @override

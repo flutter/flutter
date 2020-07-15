@@ -304,13 +304,6 @@ void main() {
     expect(manager.updateScheduled, isFalse);
 
     expect(rawData.containsKey(childrenMapKey), isFalse);
-
-    // Children of child1 continue to function, but no longer in the tree.
-    child1OfChild1.write(const RestorationId('foo'), 10);
-    child2OfChild1.write(const RestorationId('bar'), 20);
-    expect(child1OfChild1.read<int>(const RestorationId('foo')), 10);
-    expect(child2OfChild1.read<int>(const RestorationId('bar')), 20);
-    expect(manager.updateScheduled, isFalse);
   });
 
   test('rename is no-op if same id', () {
