@@ -1449,6 +1449,23 @@ void main() {
     expect(tester.getTopRight(find.text('text')).dx, lessThanOrEqualTo(tester.getTopLeft(find.byIcon(Icons.satellite)).dx));
   });
 
+  testWidgets('InputDecorator should take iconColor into account', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildInputDecorator(
+        decoration: const InputDecoration(
+          icon: Icon(Icons.do_not_disturb),
+          iconColor: Color(0xFF654321),
+        )
+      )
+    );
+
+    final IconTheme iconTheme = tester.firstWidget(find.ancestor(
+            of: find.byIcon(Icons.do_not_disturb),
+            matching: find.byType(IconTheme))) as IconTheme;
+
+    expect(iconTheme.data.color, const Color(0xFF654321));
+  });
+
   testWidgets('InputDecorator prefixIconConstraints/suffixIconConstraints', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildInputDecorator(

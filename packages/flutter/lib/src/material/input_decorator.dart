@@ -2020,6 +2020,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
           return themeData.primaryColor;
       }
     }
+
     return themeData.hintColor;
   }
 
@@ -2072,8 +2073,9 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   Color _getDefaultIconColor(ThemeData themeData) {
-    if (!decoration.enabled && !isFocused)
-      return themeData.disabledColor;
+    if(decoration.iconColor != null){
+      return decoration.iconColor;
+    }
 
     switch (themeData.brightness) {
       case Brightness.dark:
@@ -2513,6 +2515,7 @@ class InputDecoration {
   /// Similarly, only one of [suffix] and [suffixText] can be specified.
   const InputDecoration({
     this.icon,
+    this.iconColor,
     this.labelText,
     this.labelStyle,
     this.helperText,
@@ -2587,6 +2590,7 @@ class InputDecoration {
        assert(!(!hasFloatingPlaceholder && identical(floatingLabelBehavior, FloatingLabelBehavior.always)),
               'hasFloatingPlaceholder=false conflicts with FloatingLabelBehavior.always'),
        icon = null,
+       iconColor = null,
        labelText = null,
        labelStyle = null,
        helperText = null,
@@ -2636,6 +2640,9 @@ class InputDecoration {
   ///
   /// See [Icon], [ImageIcon].
   final Widget icon;
+
+  /// If specified, the icon color used for the default [icon] color
+  final Color iconColor;
 
   /// Text that describes the input field.
   ///
@@ -3322,6 +3329,7 @@ class InputDecoration {
   /// by the new values.
   InputDecoration copyWith({
     Widget icon,
+    Color iconColor,
     String labelText,
     TextStyle labelStyle,
     String helperText,
@@ -3367,6 +3375,7 @@ class InputDecoration {
   }) {
     return InputDecoration(
       icon: icon ?? this.icon,
+      iconColor: iconColor ?? this.iconColor,
       labelText: labelText ?? this.labelText,
       labelStyle: labelStyle ?? this.labelStyle,
       helperText: helperText ?? this.helperText,
@@ -3455,6 +3464,7 @@ class InputDecoration {
       return false;
     return other is InputDecoration
         && other.icon == icon
+        && other.iconColor == iconColor
         && other.labelText == labelText
         && other.labelStyle == labelStyle
         && other.helperText == helperText
@@ -3503,6 +3513,7 @@ class InputDecoration {
   int get hashCode {
     final List<Object> values = <Object>[
       icon,
+      iconColor,
       labelText,
       labelStyle,
       helperText,
@@ -3555,6 +3566,7 @@ class InputDecoration {
   String toString() {
     final List<String> description = <String>[
       if (icon != null) 'icon: $icon',
+      if (iconColor != null) 'iconColor: $iconColor',
       if (labelText != null) 'labelText: "$labelText"',
       if (helperText != null) 'helperText: "$helperText"',
       if (helperMaxLines != null) 'helperMaxLines: "$helperMaxLines"',
