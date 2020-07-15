@@ -1729,13 +1729,11 @@ class _Decorator extends RenderObjectWidget {
 
 class _AffixText extends StatelessWidget {
   const _AffixText({
-    this.labelIsFloating,
     this.text,
     this.style,
     this.child,
   });
 
-  final bool labelIsFloating;
   final String text;
   final TextStyle style;
   final Widget child;
@@ -1744,12 +1742,7 @@ class _AffixText extends StatelessWidget {
   Widget build(BuildContext context) {
     return DefaultTextStyle.merge(
       style: style,
-      child: AnimatedOpacity(
-        duration: _kTransitionDuration,
-        curve: _kTransitionCurve,
-        opacity: labelIsFloating ? 1.0 : 0.0,
-        child: child ?? Text(text, style: style,),
-      ),
+      child: child ?? Text(text, style: style,),
     );
   }
 }
@@ -2228,7 +2221,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
     final Widget prefix = decoration.prefix == null && decoration.prefixText == null ? null :
       _AffixText(
-        labelIsFloating: widget._labelShouldWithdraw,
         text: decoration.prefixText,
         style: decoration.prefixStyle ?? hintStyle,
         child: decoration.prefix,
@@ -2236,7 +2228,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
     final Widget suffix = decoration.suffix == null && decoration.suffixText == null ? null :
       _AffixText(
-        labelIsFloating: widget._labelShouldWithdraw,
         text: decoration.suffixText,
         style: decoration.suffixStyle ?? hintStyle,
         child: decoration.suffix,
