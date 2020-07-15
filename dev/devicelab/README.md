@@ -144,7 +144,6 @@ To run tests from a specific stage, use option `-s` (`--stage`).
 Currently, there are only three stages defined, `devicelab`,
 `devicelab_ios` and `devicelab_win`.
 
-
 ```sh
 ../../bin/cache/dart-sdk/bin/dart bin/run.dart -s {NAME_OF_STAGE}
 ```
@@ -195,13 +194,13 @@ A/B can run exactly one task. Multiple tasks are not supported.
 Example output:
 
 ```
-Score Average A (noise) Average B (noise) Speed-up
-bench_card_infinite_scroll.canvaskit.drawFrameDuration.average  2900.20 (8.44%) 2426.70 (8.94%) 1.20x
-bench_card_infinite_scroll.canvaskit.totalUiFrame.average 4964.00 (6.29%) 4098.00 (8.03%) 1.21x
-draw_rect.canvaskit.windowRenderDuration.average  1959.45 (16.56%)  2286.65 (0.61%) 0.86x
-draw_rect.canvaskit.sceneBuildDuration.average  1969.45 (16.37%)  2294.90 (0.58%) 0.86x
-draw_rect.canvaskit.drawFrameDuration.average 5335.20 (17.59%)  6437.60 (0.59%) 0.83x
-draw_rect.canvaskit.totalUiFrame.average  6832.00 (13.16%)  7932.00 (0.34%) 0.86x
+Score	Average A (noise)	Average B (noise)	Speed-up
+bench_card_infinite_scroll.canvaskit.drawFrameDuration.average	2900.20 (8.44%)	2426.70 (8.94%)	1.20x
+bench_card_infinite_scroll.canvaskit.totalUiFrame.average	4964.00 (6.29%)	4098.00 (8.03%)	1.21x
+draw_rect.canvaskit.windowRenderDuration.average	1959.45 (16.56%)	2286.65 (0.61%)	0.86x
+draw_rect.canvaskit.sceneBuildDuration.average	1969.45 (16.37%)	2294.90 (0.58%)	0.86x
+draw_rect.canvaskit.drawFrameDuration.average	5335.20 (17.59%)	6437.60 (0.59%)	0.83x
+draw_rect.canvaskit.totalUiFrame.average	6832.00 (13.16%)	7932.00 (0.34%)	0.86x
 ```
 
 The output contains averages and noises for each score. More importantly, it
@@ -286,17 +285,17 @@ your test edit `manifest.yaml` and add the following in the "tasks" dictionary:
 
 Where:
 
- - `{NAME_OF_TEST}` is the name of your test that also matches the name of the
- file in `bin/tasks` without the `.dart` extension.
- - `{DESCRIPTION}` is the plain English description of your test that helps
- others understand what this test is testing.
- - `{STAGE}` is `devicelab` if you want to run on Android, or `devicelab_ios` if
- you want to run on iOS.
- - `{CAPABILITIES}` is an array that lists the capabilities required of
- the test agent (the computer that runs the test) to run your test. As of writing,
- the available  capabilities are: `linux`, `linux/android`, `linux-vm`,
-`mac`, `mac/ios`, `mac/iphonexs`, `mac/ios32`, `mac-catalina/ios`,
-`mac-catalina/android`, `ios/gl-render-image`, `windows`, `windows/android`.
+- `{NAME_OF_TEST}` is the name of your test that also matches the name of the
+  file in `bin/tasks` without the `.dart` extension.
+- `{DESCRIPTION}` is the plain English description of your test that helps
+  others understand what this test is testing.
+- `{STAGE}` is `devicelab` if you want to run on Android, or `devicelab_ios` if
+  you want to run on iOS.
+- `{CAPABILITIES}` is an array that lists the capabilities required of
+  the test agent (the computer that runs the test) to run your test. As of writing,
+  the available capabilities are: `linux`, `linux/android`, `linux-vm`,
+  `mac`, `mac/ios`, `mac/iphonexs`, `mac/ios32`, `mac-catalina/ios`,
+  `mac-catalina/android`, `ios/gl-render-image`, `windows`, `windows/android`.
 
 If your test needs to run on multiple operating systems, create a separate test
 for each operating system.
