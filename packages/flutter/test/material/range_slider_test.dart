@@ -1744,8 +1744,6 @@ void main() {
   });
 
   testWidgets('Range Slider Semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-
     await tester.pumpWidget(
         MaterialApp(
           home: Theme(
@@ -1769,56 +1767,35 @@ void main() {
     );
 
     await tester.pumpAndSettle();
-
+    
     expect(
-      semantics,
-      hasSemantics(
-        TestSemantics.root(
-          children: <TestSemantics>[
-            TestSemantics(
-              id: 3,
-              textDirection: TextDirection.ltr,
-              children: <TestSemantics>[
-                TestSemantics(
-                  id: 4,
-                  children: <TestSemantics>[
-                    TestSemantics(
-                      id: 5,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                      children: <TestSemantics>[
-                        TestSemantics(
-                          id: 6,
-                          children: <TestSemantics>[
-                            TestSemantics(
-                              id: 1,
-                              flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled],
-                              actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
-                              value: '10%',
-                              increasedValue: '15%',
-                              decreasedValue: '5%',
-                              textDirection: TextDirection.ltr,
-                            ),
-                            TestSemantics(
-                              id: 2,
-                              flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled],
-                              actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
-                              value: '100%',
-                              increasedValue: '100%',
-                              decreasedValue: '95%',
-                              textDirection: TextDirection.ltr,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
-        ignoreRect: true,
-        ignoreTransform: true,
+      tester.getSemantics(find.byType(RangeSlider)),
+      matchesSemantics(
+        scopesRoute: true,
+        children:<Matcher>[
+          matchesSemantics(
+            children:  <Matcher>[
+              matchesSemantics(
+                isEnabled: true,
+                hasEnabledState: true,
+                hasIncreaseAction: true,
+                hasDecreaseAction: true,
+                value: '10%',
+                increasedValue: '15%',
+                decreasedValue: '5%',
+              ),
+              matchesSemantics(
+                isEnabled: true,
+                hasEnabledState: true,
+                hasIncreaseAction: true,
+                hasDecreaseAction: true,
+                value: '100%',
+                increasedValue: '100%',
+                decreasedValue: '95%',
+              ),
+            ],
+          ),
+        ],
       ),
     );
   });
