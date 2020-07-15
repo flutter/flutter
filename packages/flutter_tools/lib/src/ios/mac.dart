@@ -320,7 +320,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   buildCommands.addAll(environmentVariablesAsXcodeBuildSettings(globals.platform));
 
   final Stopwatch sw = Stopwatch()..start();
-  initialBuildStatus = globals.logger.startProgress('Running Xcode build...', timeout: timeoutConfiguration.fastOperation);
+  initialBuildStatus = globals.logger.startProgress('Running Xcode build...', timeout: timeoutConfiguration.slowOperation);
 
   final RunResult buildResult = await _runBuildWithRetries(buildCommands, app);
 
