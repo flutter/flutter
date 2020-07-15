@@ -3871,7 +3871,7 @@ class Flex extends MultiChildRenderObjectWidget {
     this.crossAxisAlignment = CrossAxisAlignment.center,
     this.textDirection,
     this.verticalDirection = VerticalDirection.down,
-    this.textBaseline,
+    this.textBaseline = TextBaseline.alphabetic,
     this.clipBehavior = Clip.hardEdge,
     List<Widget> children = const <Widget>[],
   }) : assert(direction != null),
@@ -3963,6 +3963,8 @@ class Flex extends MultiChildRenderObjectWidget {
   final VerticalDirection verticalDirection;
 
   /// If aligning items according to their baseline, which baseline to use.
+  ///
+  /// Defaults to [TextBaseline.alphabetic].
   final TextBaseline textBaseline;
 
   // TODO(liyuqian): defaults to [Clip.none] once Google references are updated.
@@ -4219,7 +4221,7 @@ class Row extends Flex {
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
     TextDirection textDirection,
     VerticalDirection verticalDirection = VerticalDirection.down,
-    TextBaseline textBaseline,
+    TextBaseline textBaseline = TextBaseline.alphabetic,
     List<Widget> children = const <Widget>[],
   }) : super(
     children: children,
