@@ -53,9 +53,9 @@ Future<void> main() async {
     });
 
     test('Child view can handle touches', () async {
-      final SerializableFinder AddChildView = find.byValueKey('AddChildView');
-      await driver.waitFor(AddChildView);
-      await driver.tap(AddChildView);
+      final SerializableFinder addChildView = find.byValueKey('AddChildView');
+      await driver.waitFor(addChildView);
+      await driver.tap(addChildView);
       final SerializableFinder tapChildView = find.byValueKey('TapChildView');
       await driver.tap(tapChildView);
       final String nestedViewClickCount = await driver.getText(find.byValueKey('NestedViewClickCount'));
