@@ -6,10 +6,12 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
+import 'package:flutter_driver/driver_extension.dart';
 
 import 'android_platform_view.dart';
 
 void main() {
+  enableFlutterDriverExtension();
   runApp(
     const PlatformViewApp()
   );
@@ -94,6 +96,7 @@ class DummyPlatformView extends StatelessWidget {
     return Container(
       color: Colors.purple,
       height: 200.0,
+      width: 300.0,
       child: nativeView,
     );
   }
