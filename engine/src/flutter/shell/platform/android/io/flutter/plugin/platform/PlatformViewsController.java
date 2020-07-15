@@ -19,12 +19,14 @@ import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.UiThread;
 import androidx.annotation.VisibleForTesting;
+import io.flutter.embedding.android.AndroidTouchProcessor;
 import io.flutter.embedding.android.FlutterImageView;
 import io.flutter.embedding.android.FlutterView;
 import io.flutter.embedding.android.MotionEventTracker;
 import io.flutter.embedding.engine.FlutterOverlaySurface;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.mutatorsstack.*;
+import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel;
 import io.flutter.plugin.editing.TextInputPlugin;
 import io.flutter.view.AccessibilityBridge;
@@ -44,6 +46,8 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   private static final String TAG = "PlatformViewsController";
 
   private final PlatformViewRegistryImpl registry;
+
+  private AndroidTouchProcessor androidTouchProcessor;
 
   // The context of the Activity or Fragment hosting the render target for the Flutter engine.
   private Context context;
@@ -673,10 +677,15 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     platformViews.put(viewId, view);
 
     FlutterMutatorView mutatorView =
-        new FlutterMutatorView(context, context.getResources().getDisplayMetrics().density);
+        new FlutterMutatorView(
+            context, context.getResources().getDisplayMetrics().density, androidTouchProcessor);
     mutatorViews.put(viewId, mutatorView);
     mutatorView.addView(platformView.getView());
     ((FlutterView) flutterView).addView(mutatorView);
+  }
+
+  public void attachToFlutterRenderer(FlutterRenderer flutterRenderer) {
+    androidTouchProcessor = new AndroidTouchProcessor(flutterRenderer, /*trackMotionEvents=*/ true);
   }
 
   public void onDisplayPlatformView(

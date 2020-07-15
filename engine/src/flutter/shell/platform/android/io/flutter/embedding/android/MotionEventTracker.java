@@ -50,7 +50,7 @@ public final class MotionEventTracker {
   /** Tracks the event and returns a unique MotionEventId identifying the event. */
   public MotionEventId track(MotionEvent event) {
     MotionEventId eventId = MotionEventId.createUnique();
-    eventById.put(eventId.id, event);
+    eventById.put(eventId.id, MotionEvent.obtain(event));
     unusedEvents.add(eventId.id);
     return eventId;
   }

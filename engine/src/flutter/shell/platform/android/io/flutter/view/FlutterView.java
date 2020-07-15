@@ -232,7 +232,9 @@ public class FlutterView extends SurfaceView
     }
     mLocalizationPlugin = new LocalizationPlugin(context, localizationChannel);
     androidKeyProcessor = new AndroidKeyProcessor(keyEventChannel, mTextInputPlugin);
-    androidTouchProcessor = new AndroidTouchProcessor(flutterRenderer);
+    androidTouchProcessor =
+        new AndroidTouchProcessor(flutterRenderer, /*trackMotionEvents=*/ false);
+    platformViewsController.attachToFlutterRenderer(flutterRenderer);
     mNativeView
         .getPluginRegistry()
         .getPlatformViewsController()
