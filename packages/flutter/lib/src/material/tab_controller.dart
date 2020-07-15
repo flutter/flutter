@@ -296,6 +296,7 @@ class TabController extends ChangeNotifier {
   set offset(double value) {
     assert(value != null);
     assert(value >= -1.0 && value <= 1.0);
+    assert(!indexIsChanging);
     if (value == offset)
       return;
     _animationController.value = value + _index.toDouble();

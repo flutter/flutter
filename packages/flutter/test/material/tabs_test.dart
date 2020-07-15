@@ -2685,7 +2685,7 @@ void main() {
     expect(pageView.physics.toString().contains('ClampingScrollPhysics'), isFalse);
   });
 
-  testWidgets('TabController animation stops immediately when user starts dragging TabBarView', (WidgetTester tester) async {
+  testWidgets('TabController animation should not get interrupted when user drags TabBarView', (WidgetTester tester) async {
     const List<Tab> tabs = <Tab>[
       Tab(text: 'A'), Tab(text: 'B'), Tab(text: 'C')
     ];
@@ -2717,20 +2717,17 @@ void main() {
       initialIndex: 0,
     ));
 
-    final PageView pageView = tester.widget(find.byType(PageView));
-    final PageController pageController = pageView.controller;
-
     expect(tabController.index, 0);
-    tabController.animateTo(2, duration: const Duration(seconds: 1));
+    tabController.animateTo(2, duration: const Duration(seconds: 1), curve: Curves.linear);
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 500));
 
     // Drag the TabBarView while tabController is in animation
-    // and check if its value immediately starts following TarBarView's page value
+    // and check if it didn't get interrupted
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(PageView)));
     await gesture.moveBy(const Offset(1.0, 0.0));
-    expect(tabController.animation.value, pageController.page);
-    expect(tabController.indexIsChanging, false);
+    expect(tabController.animation.value, 1.0);
+    expect(tabController.indexIsChanging, true);
 
     await tester.pumpAndSettle();
   });

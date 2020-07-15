@@ -7,9 +7,9 @@
 import 'dart:async';
 import 'dart:ui' show lerpDouble;
 
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'app_bar.dart';
 import 'colors.dart';
@@ -1294,9 +1294,15 @@ class _TabBarViewState extends State<TabBarView> {
 
     final int previousIndex = _controller.previousIndex;
     if ((_currentIndex - previousIndex).abs() == 1) {
-      _warpUnderwayCount += 1;
+      setState(() {
+        _warpUnderwayCount += 1;
+      });
       await _pageController.animateToPage(_currentIndex, duration: _controller.lastDuration, curve: _controller.lastCurve);
-      _warpUnderwayCount -= 1;
+      if (!mounted)
+        return Future<void>.value();
+      setState(() {
+        _warpUnderwayCount -= 1;
+      });
       return Future<void>.value();
     }
 
@@ -1336,7 +1342,7 @@ class _TabBarViewState extends State<TabBarView> {
       return false;
 
     _warpUnderwayCount += 1;
-    if (notification is ScrollUpdateNotification && _controller.index == _currentIndex) {
+    if (notification is ScrollUpdateNotification && !_controller.indexIsChanging) {
       if ((_pageController.page - _controller.index).abs() > 1.0) {
         _controller.index = _pageController.page.round();
         _currentIndex =_controller.index;
@@ -1362,15 +1368,18 @@ class _TabBarViewState extends State<TabBarView> {
       }
       return true;
     }());
-    return NotificationListener<ScrollNotification>(
-      onNotification: _handleScrollNotification,
-      child: PageView(
-        dragStartBehavior: widget.dragStartBehavior,
-        controller: _pageController,
-        physics: widget.physics == null
-          ? _kTabBarViewPhysics.applyTo(const ClampingScrollPhysics())
-          : _kTabBarViewPhysics.applyTo(widget.physics),
-        children: _childrenWithKey,
+    return IgnorePointer(
+      ignoring: _warpUnderwayCount > 0,
+      child: NotificationListener<ScrollNotification>(
+        onNotification: _handleScrollNotification,
+        child: PageView(
+          dragStartBehavior: widget.dragStartBehavior,
+          controller: _pageController,
+          physics: widget.physics == null
+            ? _kTabBarViewPhysics.applyTo(const ClampingScrollPhysics())
+            : _kTabBarViewPhysics.applyTo(widget.physics),
+          children: _childrenWithKey,
+        ),
       ),
     );
   }
