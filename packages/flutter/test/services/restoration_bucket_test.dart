@@ -594,6 +594,24 @@ void main() {
 
     expect(rawData[childrenMapKey].containsKey('child1'), isFalse);
   });
+
+  test('throws when used after dispose', () {
+    final RestorationBucket bucket = RestorationBucket.empty(id: const RestorationId('foo'), debugOwner: null);
+    bucket.dispose();
+
+    expect(() => bucket.debugOwner, throwsFlutterError);
+    expect(() => bucket.id, throwsFlutterError);
+    expect(() => bucket.decommission(), throwsFlutterError);
+    expect(() => bucket.read<int>(const RestorationId('foo')), throwsFlutterError);
+    expect(() => bucket.write(const RestorationId('foo'), 10), throwsFlutterError);
+    expect(() => bucket.remove<int>(const RestorationId('foo')), throwsFlutterError);
+    expect(() => bucket.contains(const RestorationId('foo')), throwsFlutterError);
+    expect(() => bucket.claimChild(const RestorationId('child'), debugOwner: null), throwsFlutterError);
+    final RestorationBucket child = RestorationBucket.empty(id: const RestorationId('child'), debugOwner: null);
+    expect(() => bucket.adoptChild(child), throwsFlutterError);
+    expect(() => bucket.rename(const RestorationId('bar')), throwsFlutterError);
+    expect(() => bucket.dispose(), throwsFlutterError);
+  });
 }
 
 Map<String, dynamic> _createRawDataSet() {

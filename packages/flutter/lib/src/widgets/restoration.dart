@@ -497,10 +497,10 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
 
   bool _debugAssertNotDisposed() {
     assert(() {
-      if (_disposed == null) {
+      if (_disposed) {
         throw FlutterError(
-            'A $runtimeType was used after being disposed.\n'
-                'Once you have called dispose() on a $runtimeType, it can no longer be used.'
+          'A $runtimeType was used after being disposed.\n'
+          'Once you have called dispose() on a $runtimeType, it can no longer be used.'
         );
       }
       return true;

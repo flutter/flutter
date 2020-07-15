@@ -952,7 +952,7 @@ class RestorationBucket extends ChangeNotifier {
   bool _debugDisposed = false;
   bool _debugAssertNotDisposed() {
     assert(() {
-      if (_debugDisposed == null) {
+      if (_debugDisposed) {
         throw FlutterError(
             'A $runtimeType was used after being disposed.\n'
             'Once you have called dispose() on a $runtimeType, it can no longer be used.'

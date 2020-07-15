@@ -676,6 +676,12 @@ void main() {
     expect(state.additionalProperty.value, 11); // Old value restored.
     expect(state.bucket.read<int>(const RestorationId('additional')), 11);
   });
+
+  test('RestorableProperty throws after disposed', () {
+    final RestorableProperty<Object> property = _TestRestorableProperty(10);
+    property.dispose();
+    expect(() => property.dispose(), throwsFlutterError);
+  });
 }
 
 void _clearLogs(_TestRestorableWidgetState state) {
