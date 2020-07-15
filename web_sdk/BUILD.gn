@@ -9,6 +9,8 @@ sdk_dill = "$root_out_dir/flutter_web_sdk/kernel/flutter_ddc_sdk.dill"
 sdk_dill_sound =
     "$root_out_dir/flutter_web_sdk/kernel/flutter_ddc_sdk_sound.dill"
 
+dart_sdk_package_config = "//third_party/dart/.dart_tool/package_config.json"
+
 web_ui_sources = exec_script("//third_party/dart/tools/list_dart_files.py",
                              [
                                "absolute",
@@ -45,7 +47,7 @@ group("web_sdk") {
 prebuilt_dart_action("web_ui_sources") {
   inputs = web_ui_sources + [ "sdk_rewriter.dart" ]
 
-  packages = "//third_party/dart/.packages"
+  packages = dart_sdk_package_config
   script = "sdk_rewriter.dart"
   output_dir = rebase_path("$root_out_dir/flutter_web_sdk/lib/ui/")
   input_dir = rebase_path("//flutter/lib/web_ui/lib/")
@@ -71,7 +73,7 @@ prebuilt_dart_action("web_ui_sources") {
 prebuilt_dart_action("web_engine_sources") {
   inputs = web_engine_sources + [ "sdk_rewriter.dart" ]
 
-  packages = "//third_party/dart/.packages"
+  packages = dart_sdk_package_config
   script = "sdk_rewriter.dart"
   output_dir = rebase_path("$root_out_dir/flutter_web_sdk/lib/_engine/")
   input_dir = rebase_path("//flutter/lib/web_ui/lib/src/")
@@ -127,7 +129,7 @@ prebuilt_dart_action("flutter_dartdevc_kernel_sdk_outline") {
     "--target",
     "ddc",
     "--packages-file",
-    "file:///" + rebase_path("//third_party/dart/.packages"),
+    "file:///" + rebase_path(dart_sdk_package_config),
     "--multi-root-scheme",
     "org-dartlang-sdk",
     "--multi-root",
@@ -158,7 +160,7 @@ prebuilt_dart_action("flutter_dartdevc_kernel_sdk") {
 
   inputs = [ "sdk_rewriter.dart" ] + web_ui_sources + web_engine_sources
 
-  packages = "//third_party/dart/.packages"
+  packages = dart_sdk_package_config
 
   script = "//third_party/dart/pkg/dev_compiler/bin/dartdevc.dart"
 
@@ -177,7 +179,7 @@ prebuilt_dart_action("flutter_dartdevc_kernel_sdk") {
     "dart:_engine",
     "--no-summarize",
     "--packages",
-    "file:///" + rebase_path("//third_party/dart/.packages"),
+    "file:///" + rebase_path(dart_sdk_package_config),
     "--multi-root-scheme",
     "org-dartlang-sdk",
     "--multi-root",
@@ -209,7 +211,7 @@ prebuilt_dart_action("flutter_dartdevc_canvaskit_kernel_sdk") {
 
   inputs = [ "sdk_rewriter.dart" ] + web_ui_sources + web_engine_sources
 
-  packages = "//third_party/dart/.packages"
+  packages = dart_sdk_package_config
 
   script = "//third_party/dart/pkg/dev_compiler/bin/dartdevc.dart"
 
@@ -228,7 +230,7 @@ prebuilt_dart_action("flutter_dartdevc_canvaskit_kernel_sdk") {
     "dart:_engine",
     "--no-summarize",
     "--packages",
-    "file:///" + rebase_path("//third_party/dart/.packages"),
+    "file:///" + rebase_path(dart_sdk_package_config),
     "--multi-root-scheme",
     "org-dartlang-sdk",
     "--multi-root",
@@ -263,7 +265,7 @@ prebuilt_dart_action("flutter_dartdevc_canvaskit_kernel_sdk_sound") {
 
   inputs = [ "sdk_rewriter.dart" ] + web_ui_sources + web_engine_sources
 
-  packages = "//third_party/dart/.packages"
+  packages = dart_sdk_package_config
 
   script = "//third_party/dart/pkg/dev_compiler/bin/dartdevc.dart"
 
@@ -283,7 +285,7 @@ prebuilt_dart_action("flutter_dartdevc_canvaskit_kernel_sdk_sound") {
     "dart:_engine",
     "--no-summarize",
     "--packages",
-    "file:///" + rebase_path("//third_party/dart/.packages"),
+    "file:///" + rebase_path(dart_sdk_package_config),
     "--multi-root-scheme",
     "org-dartlang-sdk",
     "--multi-root",
@@ -318,7 +320,7 @@ prebuilt_dart_action("flutter_dartdevc_kernel_sdk_sound") {
 
   inputs = [ "sdk_rewriter.dart" ] + web_ui_sources + web_engine_sources
 
-  packages = "//third_party/dart/.packages"
+  packages = dart_sdk_package_config
 
   script = "//third_party/dart/pkg/dev_compiler/bin/dartdevc.dart"
 
@@ -338,7 +340,7 @@ prebuilt_dart_action("flutter_dartdevc_kernel_sdk_sound") {
     "dart:_engine",
     "--no-summarize",
     "--packages",
-    "file:///" + rebase_path("//third_party/dart/.packages"),
+    "file:///" + rebase_path(dart_sdk_package_config),
     "--multi-root-scheme",
     "org-dartlang-sdk",
     "--multi-root",
@@ -384,7 +386,7 @@ prebuilt_dart_action("flutter_dartdevc_kernel_sdk_outline_sound") {
     "--target",
     "ddc",
     "--packages-file",
-    "file:///" + rebase_path("//third_party/dart/.packages"),
+    "file:///" + rebase_path(dart_sdk_package_config),
     "--multi-root-scheme",
     "org-dartlang-sdk",
     "--multi-root",
