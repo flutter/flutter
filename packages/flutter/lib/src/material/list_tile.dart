@@ -121,10 +121,14 @@ class ListTileTheme extends InheritedTheme {
 
   /// If specified, defines the background color for `ListTile` when
   /// [ListTile.selected] is false.
+  ///
+  /// If [ListTile.tileColor] is provided, [tileColor] is ignored.
   final Color tileColor;
 
   /// If specified, defines the background color for `ListTile` when
   /// [ListTile.selected] is true.
+  ///
+  /// If [ListTile.selectedTileColor] is provided, [selectedTileColor] is ignored.
   final Color selectedTileColor;
 
   /// The closest instance of this class that encloses the given context.
@@ -859,12 +863,14 @@ class ListTile extends StatelessWidget {
 
   /// Defines the background color of `ListTile` when [selected] is false.
   ///
-  /// By default, the value of `tileColor` is [Colors.transparent].
+  /// When the value is null, the `tileColor` is set to [ListTileTheme.tileColor]
+  /// if it's not null and to [Colors.transparent] if it's null.
   final Color tileColor;
 
   /// Defines the background color of `ListTile` when [selected] is true.
   ///
-  /// By default, the value of `selectedListColor` is [Colors.transparent].
+  /// When the value if null, the `selectedTileColor` is set to [ListTileTheme.selectedTileColor]
+  /// if it's not null and to [Colors.transparent] if it's null.
   final Color selectedTileColor;
 
   /// Add a one pixel border in between each tile. If color isn't specified the
