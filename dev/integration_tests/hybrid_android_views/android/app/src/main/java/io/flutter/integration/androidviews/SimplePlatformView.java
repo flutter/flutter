@@ -13,6 +13,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import io.flutter.plugin.common.MethodCall;
@@ -20,21 +21,24 @@ import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.platform.PlatformView;
 
 public class SimplePlatformView implements PlatformView, MethodChannel.MethodCallHandler {
-    private final TextView view;
+    private final FrameLayout view;
     private final MethodChannel methodChannel;
     private final io.flutter.integration.platformviews.TouchPipe touchPipe;
 
     SimplePlatformView(Context context, MethodChannel methodChannel) {
         this.methodChannel = methodChannel;
-        view = new TextView(context) {
+        view = new FrameLayout(context) {
             @Override
             public boolean onTouchEvent(MotionEvent event) {
                 return true;
             }
         };
-        view.setTextSize(72);
-        view.setBackgroundColor(0xff0000ff);
-        view.setText("Hello from Android view");
+        TextView textView = new TextView(context);
+        textView.setTextSize(50);
+        textView.setTextColor(0xffffffff);
+        textView.setBackgroundColor(0xff0000ff);
+        textView.setText("Hello from Android view and hybrid composition");
+        view.addView(textView);
         this.methodChannel.setMethodCallHandler(this);
         touchPipe = new io.flutter.integration.platformviews.TouchPipe(this.methodChannel, view);
     }
@@ -89,13 +93,10 @@ public class SimplePlatformView implements PlatformView, MethodChannel.MethodCal
     private void addWindow(final MethodChannel.Result result) {
         Context context = view.getContext();
         final Button button = new Button(context);
-        button.setText("This view is added as a window");
-        final WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY, 0, PixelFormat.OPAQUE);
-        layoutParams.gravity = Gravity.FILL;
-        windowManager.addView(button, layoutParams);
+        button.setText("This view was added to the Android view");
+        view.addView(button);
         button.setOnClickListener(v -> {
-            windowManager.removeView(button);
+            view.removeView(button);
             result.success(null);
         });
     }

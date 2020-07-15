@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'android_platform_view.dart';
 import 'page.dart';
 
 class WindowManagerIntegrationsPage extends PageWidget {
@@ -48,7 +49,7 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
         children: <Widget>[
           SizedBox(
             height: 300,
-            child: AndroidView(
+            child: AndroidPlatformView(
               viewType: 'simple_view',
               onPlatformViewCreated: onPlatformViewCreated,
             ),

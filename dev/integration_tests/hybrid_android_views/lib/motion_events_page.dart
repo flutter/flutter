@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_driver/driver_extension.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'android_platform_view.dart';
 import 'motion_event_diff.dart';
 import 'page.dart';
 
@@ -66,10 +67,11 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
       children: <Widget>[
         SizedBox(
           height: 300.0,
-          child: AndroidView(
-              key: const ValueKey<String>('PlatformView'),
-              viewType: 'simple_view',
-              onPlatformViewCreated: onPlatformViewCreated),
+          child: AndroidPlatformView(
+            key: const ValueKey<String>('PlatformView'),
+            viewType: 'simple_view',
+            onPlatformViewCreated: onPlatformViewCreated,
+          ),
         ),
         Expanded(
           child: ListView.builder(
