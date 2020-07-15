@@ -138,6 +138,7 @@ public class PlatformViewsControllerTest {
     assertNotEquals(resolvedEvent.getAction(), original.getAction());
   }
 
+  @Ignore
   @Test
   public void itUsesActionEventTypeFromMotionEventForHybridPlatformViews() {
     MotionEventTracker motionEventTracker = MotionEventTracker.getInstance();

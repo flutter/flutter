@@ -1,11 +1,14 @@
 package io.flutter.embedding.engine.mutatorsstack;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Path;
+import android.view.MotionEvent;
 import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
+import io.flutter.embedding.android.AndroidTouchProcessor;
 
 /**
  * A view that applies the {@link io.flutter.embedding.engine.mutatorsstack.MutatorsStack} to its
@@ -17,19 +20,26 @@ public class FlutterMutatorView extends FrameLayout {
   private int left;
   private int top;
 
+  private final AndroidTouchProcessor androidTouchProcessor;
+
   /**
    * Initialize the FlutterMutatorView. Use this to set the screenDensity, which will be used to
    * correct the final transform matrix.
    */
-  public FlutterMutatorView(@NonNull Context context, float screenDensity) {
+  public FlutterMutatorView(
+      @NonNull Context context,
+      float screenDensity,
+      @NonNull AndroidTouchProcessor androidTouchProcessor) {
     super(context, null);
     this.screenDensity = screenDensity;
+    this.androidTouchProcessor = androidTouchProcessor;
   }
 
   /** Initialize the FlutterMutatorView. */
   public FlutterMutatorView(@NonNull Context context) {
     super(context, null);
     this.screenDensity = 1;
+    this.androidTouchProcessor = null;
   }
 
   /**
@@ -71,7 +81,14 @@ public class FlutterMutatorView extends FrameLayout {
     // Apply all the transforms on the child canvas.
     canvas.save();
 
+    canvas.concat(getPlatformViewMatrix());
+    super.dispatchDraw(canvas);
+    canvas.restore();
+  }
+
+  private Matrix getPlatformViewMatrix() {
     Matrix finalMatrix = new Matrix(mutatorsStack.getFinalMatrix());
+
     // Reverse scale based on screen scale.
     //
     // The Android frame is set based on the logical resolution instead of physical.
@@ -80,6 +97,7 @@ public class FlutterMutatorView extends FrameLayout {
     // 500 points in Android. And until this point, we did all the calculation based on the flow
     // resolution. So we need to scale down to match Android's logical resolution.
     finalMatrix.preScale(1 / screenDensity, 1 / screenDensity);
+
     // Reverse the current offset.
     //
     // The frame of this view includes the final offset of the bounding rect.
@@ -88,8 +106,27 @@ public class FlutterMutatorView extends FrameLayout {
     // all the clipping paths
     finalMatrix.postTranslate(-left, -top);
 
-    canvas.concat(finalMatrix);
-    super.dispatchDraw(canvas);
-    canvas.restore();
+    return finalMatrix;
+  }
+
+  /** Intercept the events here and do not propagate them to the child platform views. */
+  @Override
+  public boolean onInterceptTouchEvent(MotionEvent event) {
+    return true;
+  }
+
+  @Override
+  @SuppressLint("ClickableViewAccessibility")
+  public boolean onTouchEvent(MotionEvent event) {
+    if (androidTouchProcessor == null) {
+      return super.onTouchEvent(event);
+    }
+
+    // Mutator view itself doesn't rotate, scale, skew, etc.
+    // we only need to account for translation.
+    Matrix screenMatrix = new Matrix();
+    screenMatrix.postTranslate(left, top);
+
+    return androidTouchProcessor.onTouchEvent(event, screenMatrix);
   }
 }
