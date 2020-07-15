@@ -341,11 +341,17 @@ void main() {
 
   testWidgets('Dropdown button control test', (WidgetTester tester) async {
     String value = 'one';
+    StateSetter setState;
     void didChangeValue(String newValue) {
-      value = newValue;
+      setState(() {
+        value = newValue;
+      });
     }
 
-    Widget build() => buildFrame(value: value, onChanged: didChangeValue);
+    Widget build() => StatefulBuilder(builder: (BuildContext context, StateSetter setter) {
+      setState = setter;
+      return buildFrame(value: value, onChanged: didChangeValue);
+    },);
 
     await tester.pumpWidget(build());
 
@@ -361,10 +367,6 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // finish the menu animation
 
     expect(value, equals('three'));
-
-    // Once the value of DropdownButton change, need rebuilding
-    // to update RenderIndexStack.
-    await tester.pumpWidget(build());
 
     await tester.tap(find.text('three'));
     await tester.pump();
@@ -384,11 +386,15 @@ void main() {
 
   testWidgets('Dropdown button with no app', (WidgetTester tester) async {
     String value = 'one';
+    StateSetter setState;
     void didChangeValue(String newValue) {
-      value = newValue;
+      setState(() {
+        value = newValue;
+      });
     }
 
-    Widget build() {
+    Widget build() => StatefulBuilder(builder: (BuildContext context, StateSetter setter) {
+      setState = setter;
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Navigator(
@@ -405,7 +411,7 @@ void main() {
           },
         ),
       );
-    }
+    },);
 
     await tester.pumpWidget(build());
 
@@ -422,15 +428,13 @@ void main() {
 
     expect(value, equals('three'));
 
-    // Once the value of DropdownButton change, need rebuilding
-    // to update RenderIndexStack.
-    await tester.pumpWidget(build());
-
     await tester.tap(find.text('three'));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the menu animation
 
     expect(value, equals('three'));
+
+    await tester.pumpWidget(build());
 
     await tester.tap(find.text('two').last);
 
@@ -2492,15 +2496,20 @@ void main() {
   testWidgets('DropdownButton onTap callback is called when defined', (WidgetTester tester) async {
     int dropdownButtonTapCounter = 0;
     String value = 'one';
+    StateSetter setState;
 
-    void onChanged(String newValue) { value = newValue; }
+    void onChanged(String newValue) {
+      setState(() {
+        value = newValue;
+      });
+    }
     void onTap() { dropdownButtonTapCounter += 1; }
 
-    Widget build() => buildFrame(
-      value: value,
-      onChanged: onChanged,
-      onTap: onTap,
-    );
+    Widget build() => StatefulBuilder(builder: (BuildContext context, StateSetter setter) {
+      setState = setter;
+      return buildFrame(value: value, onChanged: onChanged, onTap: onTap,);
+    },);
+
     await tester.pumpWidget(build());
 
     expect(dropdownButtonTapCounter, 0);
@@ -2519,10 +2528,6 @@ void main() {
     expect(value, equals('three'));
     expect(dropdownButtonTapCounter, 1); // Should not change.
 
-    // Once the value of DropdownButton change, need rebuilding
-    // to update RenderIndexStack.
-    await tester.pumpWidget(build());
-
     // Tap dropdown button again.
     await tester.tap(find.text('three'));
     await tester.pumpAndSettle();
@@ -2540,8 +2545,15 @@ void main() {
 
   testWidgets('DropdownMenuItem onTap callback is called when defined', (WidgetTester tester) async {
     String value = 'one';
+    int currentIndex = -1;
+    StateSetter setState;
+    void onChanged(String newValue) {
+      setState(() {
+        currentIndex = -1;
+        value = newValue;
+      });
+    }
     final List<int> menuItemTapCounters = <int>[0, 0, 0, 0];
-    void onChanged(String newValue) { value = newValue; }
 
     final List<VoidCallback> onTapCallbacks = <VoidCallback>[
       () { menuItemTapCounters[0] += 1; },
@@ -2550,27 +2562,28 @@ void main() {
       () { menuItemTapCounters[3] += 1; },
     ];
 
-    int currentIndex = -1;
-
-    Widget build() => TestApp(
-      textDirection: TextDirection.ltr,
-      child: Material(
-        child: RepaintBoundary(
-          child: DropdownButton<String>(
-            value: value,
-            onChanged: onChanged,
-            items: menuItems.map<DropdownMenuItem<String>>((String item) {
-              currentIndex += 1;
-              return DropdownMenuItem<String>(
-                value: item,
-                onTap: onTapCallbacks[currentIndex],
-                child: Text(item),
-              );
-            }).toList(),
+    Widget build() => StatefulBuilder(builder: (BuildContext context, StateSetter setter) {
+      setState = setter;
+      return TestApp(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: RepaintBoundary(
+            child: DropdownButton<String>(
+              value: value,
+              onChanged: onChanged,
+              items: menuItems.map<DropdownMenuItem<String>>((String item) {
+                currentIndex += 1;
+                return DropdownMenuItem<String>(
+                  value: item,
+                  onTap: onTapCallbacks[currentIndex],
+                  child: Text(item),
+                );
+              }).toList(),
+            ),
           ),
         ),
-      ),
-    );
+      );
+    });
 
     await tester.pumpWidget(build());
 
@@ -2590,11 +2603,6 @@ void main() {
     expect(value, equals('three'));
     expect(menuItemTapCounters, <int>[0, 0, 1, 0]);
 
-    // Once the value of DropdownButton change, need rebuilding
-    // to update RenderIndexStack.
-    currentIndex = -1;
-    await tester.pumpWidget(build());
-
     // Tap dropdown button again.
     await tester.tap(find.text('three'));
     await tester.pumpAndSettle();
@@ -2610,11 +2618,6 @@ void main() {
     // Should update the counter for the second item (first index).
     expect(value, equals('two'));
     expect(menuItemTapCounters, <int>[0, 1, 1, 0]);
-
-    // Once the value of DropdownButton change, need rebuilding
-    // to update RenderIndexStack.
-    currentIndex = -1;
-    await tester.pumpWidget(build());
 
     // Tap dropdown button again.
     await tester.tap(find.text('two'));

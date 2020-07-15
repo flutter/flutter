@@ -714,8 +714,8 @@ class RenderIndexedStack extends RenderStack {
       return;
     final RenderBox childAtIndex = _childAtIndex();
     if (child != childAtIndex)
-      // It is possible that widgets do not at index want to paint
-      // themselves. For example, the Material widget tries to paint all
+      // It is possible that the offstage widgets want to paint themselves.
+      // For example, the Material widget tries to paint all
       // InkFeatures under its subtree as long as they are not disposed. In
       // such case, we give it a zero transform to prevent them from painting.
       // https://github.com/flutter/flutter/issues/59963
