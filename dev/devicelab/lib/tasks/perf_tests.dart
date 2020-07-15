@@ -76,6 +76,13 @@ TaskFunction createCullOpacityPerfTest() {
   ).run;
 }
 
+TaskFunction createCullOpacityPerfE2ETest() {
+  return E2EPerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/cull_opacity_perf_e2e.dart',
+  ).run;
+}
+
 TaskFunction createCubicBezierPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -426,6 +433,72 @@ class PerfTest {
         '99th_percentile_vsync_transitions_missed',
         if (needsMeasureCpuGpu) 'cpu_percentage',
         if (needsMeasureCpuGpu) 'gpu_percentage',
+      ]);
+    });
+  }
+}
+
+class E2EPerfTest extends PerfTest {
+  const E2EPerfTest(
+    String testDirectory,
+    String testTarget,
+  ) : super(
+    testDirectory,
+    testTarget,
+    'e2e',
+    testDriver: 'test_driver/e2e_test.dart',
+  );
+
+  @override
+  Future<TaskResult> internalRun({
+      bool cacheSkSL = false,
+      bool noBuild = false,
+      String existingApp,
+      String writeSkslFileName,
+  }) {
+    return inDirectory<TaskResult>(testDirectory, () async {
+      final Device device = await devices.workingDevice;
+      await device.unlock();
+      final String deviceId = device.deviceId;
+      await flutter('packages', options: <String>['get']);
+
+      await flutter('drive', options: <String>[
+        '-v',
+        '--verbose-system-logs',
+        '--profile',
+        '--trace-startup', // Enables "endless" timeline event buffering.
+        '-t', testTarget,
+        if (noBuild) '--no-build',
+        if (testDriver != null)
+          ...<String>['--driver', testDriver],
+        if (existingApp != null)
+          ...<String>['--use-existing-app', existingApp],
+        if (writeSkslFileName != null)
+          ...<String>['--write-sksl-on-exit', writeSkslFileName],
+        if (cacheSkSL) '--cache-sksl',
+        '-d',
+        deviceId,
+      ]);
+      final Map<String, dynamic> data = json.decode(
+        file('$testDirectory/build/$timelineFileName.timeline_summary.json').readAsStringSync(),
+      ) as Map<String, dynamic>;
+
+      if (data['frame_count'] as int < 5) {
+        return TaskResult.failure(
+          'Timeline contains too few frames: ${data['frame_count']}. Possibly '
+          'trace events are not being captured.',
+        );
+      }
+
+      return TaskResult.success(data, benchmarkScoreKeys: <String>[
+        'average_frame_build_time_millis',
+        'worst_frame_build_time_millis',
+        '90th_percentile_frame_build_time_millis',
+        '99th_percentile_frame_build_time_millis',
+        'average_frame_rasterizer_time_millis',
+        'worst_frame_rasterizer_time_millis',
+        '90th_percentile_frame_rasterizer_time_millis',
+        '99th_percentile_frame_rasterizer_time_millis',
       ]);
     });
   }
