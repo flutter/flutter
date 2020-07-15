@@ -782,11 +782,6 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
     }
   }
 
-  @Override
-  public boolean onInterceptTouchEvent(MotionEvent ev) {
-    return true;
-  }
-
   // TODO(mattcarroll): Confer with Ian as to why we need this method. Delete if possible, otherwise
   // add comments.
   private void resetWillNotDraw(boolean isAccessibilityEnabled, boolean isTouchExplorationEnabled) {
@@ -857,7 +852,8 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
     localizationPlugin = this.flutterEngine.getLocalizationPlugin();
     androidKeyProcessor =
         new AndroidKeyProcessor(this.flutterEngine.getKeyEventChannel(), textInputPlugin);
-    androidTouchProcessor = new AndroidTouchProcessor(this.flutterEngine.getRenderer());
+    androidTouchProcessor =
+        new AndroidTouchProcessor(this.flutterEngine.getRenderer(), /*trackMotionEvents=*/ false);
     accessibilityBridge =
         new AccessibilityBridge(
             this,
@@ -873,6 +869,9 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
     // Connect AccessibilityBridge to the PlatformViewsController within the FlutterEngine.
     // This allows platform Views to hook into Flutter's overall accessibility system.
     this.flutterEngine.getPlatformViewsController().attachAccessibilityBridge(accessibilityBridge);
+    this.flutterEngine
+        .getPlatformViewsController()
+        .attachToFlutterRenderer(this.flutterEngine.getRenderer());
 
     // Inform the Android framework that it should retrieve a new InputConnection
     // now that an engine is attached.
