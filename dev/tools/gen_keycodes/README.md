@@ -127,14 +127,16 @@ define. It has values in the following ranges.
 
   - **0x100 0000 0000 - 0x1FF FFFF FFFF**: For keys that have no definition yet in
     Flutter, but that are encountered in the field, this range is used to embed
-    the platform-specific keycode in an ID that must be tested for in a platform-specific way. For instance, if a platform generates a new USB HID code 0x07
-    00E8 that a Flutter app wasn’t compiled with, then it would appear in the
-    app as 0x100 0007 00E8, and the app could test against that code. Yes, this
-    also means that once they recompile with a version of Flutter that supports
-    this new HID code, apps looking for this code will break. This situation is
-    only meant to provide a fallback ability for apps to handle esoteric codes
-    that their version of Flutter doesn’t support yet. The prefix for this code
-    is the platform prefix from the previous sections, plus 0x100.
+    the platform-specific keycode in an ID that must be tested for in a 
+    platform-specific way. For instance, if a platform generates a new USB
+    HID code 0x07 00E8 that a Flutter app wasn’t compiled with, then it would 
+    appear in the app as 0x100 0007 00E8, and the app could test against that 
+    code. Yes, this also means that once they recompile with a version of
+    Flutter that supports this new HID code, apps looking for this code will
+    break. This situation is only meant to provide a fallback ability for apps
+    to handle esoteric codes that their version of Flutter doesn’t support yet.
+    The prefix for this code is the platform prefix from the previous sections,
+    plus 0x100.
 
   - **0x200 0000 0000 - 0x2FF FFFF FFFF**: For pseudo-keys which represent
     combinations of other keys, and conceptual keys which don't have a physical
