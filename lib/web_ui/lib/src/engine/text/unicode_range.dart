@@ -57,6 +57,44 @@ class UnicodeRange<P> {
   }
 }
 
+/// Checks whether the given char code is a UTF-16 surrogate.
+///
+/// See:
+/// - http://www.unicode.org/faq//utf_bom.html#utf16-2
+bool isUtf16Surrogate(int char) {
+  return char & 0xF800 == 0xD800;
+}
+
+/// Combines a pair of UTF-16 surrogate into a single character code point.
+///
+/// The surrogate pair is expected to start at [index] in the [text].
+///
+/// See:
+/// - http://www.unicode.org/faq//utf_bom.html#utf16-3
+int combineSurrogatePair(String text, int index) {
+  final int hi = text.codeUnitAt(index);
+  final int lo = text.codeUnitAt(index + 1);
+
+  int x = (hi & ((1 << 6) - 1)) << 10 | lo & ((1 << 10) - 1);
+  int w = (hi >> 6) & ((1 << 5) - 1);
+  int u = w + 1;
+  return u << 16 | x;
+}
+
+/// Returns the code point from [text] at [index] and handles surrogate pairs
+/// for cases that involve two UTF-16 codes.
+int? getCodePoint(String text, int index) {
+  if (index < 0 || index >= text.length) {
+    return null;
+  }
+
+  final int char = text.codeUnitAt(index);
+  if (isUtf16Surrogate(char) && index < text.length - 1) {
+    return combineSurrogatePair(text, index);
+  }
+  return char;
+}
+
 /// Given a list of [UnicodeRange]s, this class performs efficient lookup
 /// to find which range a value falls into.
 ///
@@ -88,11 +126,9 @@ class UnicodePropertyLookup<P> {
   /// located at that [index].
   ///
   /// If the [index] is out of range, null will be returned.
-  P? find(String? text, int index) {
-    if (index < 0 || index >= text!.length) {
-      return null;
-    }
-    return findForChar(text.codeUnitAt(index));
+  P? find(String text, int index) {
+    final int? codePoint = getCodePoint(text, index);
+    return codePoint == null ? null : findForChar(codePoint);
   }
 
   /// Takes one character as an integer code unit and returns its property.
