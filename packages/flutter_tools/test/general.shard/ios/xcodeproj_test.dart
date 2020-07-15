@@ -136,49 +136,38 @@ void main() {
     expect(fakeProcessManager.hasRemainingExpectations, isFalse);
   });
 
-  testWithoutContext('xcodebuild majorVersion returns major version', () {
+  testWithoutContext('xcodebuild version parts can be parsed', () {
     fakeProcessManager.addCommand(const FakeCommand(
       command: <String>[xcodebuild, '-version'],
       stdout: 'Xcode 11.4.1\nBuild version 11N111s',
     ));
 
     expect(xcodeProjectInterpreter.majorVersion, 11);
+    expect(xcodeProjectInterpreter.minorVersion, 4);
+    expect(xcodeProjectInterpreter.patchVersion, 1);
     expect(fakeProcessManager.hasRemainingExpectations, isFalse);
   });
 
-  testWithoutContext('xcodebuild majorVersion is null when version has unexpected format', () {
+  testWithoutContext('xcodebuild minor and patch version default to 0', () {
+    fakeProcessManager.addCommand(const FakeCommand(
+      command: <String>[xcodebuild, '-version'],
+      stdout: 'Xcode 11\nBuild version 11N111s',
+    ));
+
+    expect(xcodeProjectInterpreter.majorVersion, 11);
+    expect(xcodeProjectInterpreter.minorVersion, 0);
+    expect(xcodeProjectInterpreter.patchVersion, 0);
+    expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+  });
+
+  testWithoutContext('xcodebuild version parts is null when version has unexpected format', () {
     fakeProcessManager.addCommand(const FakeCommand(
       command: <String>[xcodebuild, '-version'],
       stdout: 'Xcode Ultra5000\nBuild version 8E3004b',
     ));
     expect(xcodeProjectInterpreter.majorVersion, isNull);
-    expect(fakeProcessManager.hasRemainingExpectations, isFalse);
-  });
-
-  testWithoutContext('xcodebuild minorVersion returns minor version', () {
-    fakeProcessManager.addCommand(const FakeCommand(
-      command: <String>[xcodebuild, '-version'],
-      stdout: 'Xcode 8.3.3\nBuild version 8E3004b',
-    ));
-    expect(xcodeProjectInterpreter.minorVersion, 3);
-    expect(fakeProcessManager.hasRemainingExpectations, isFalse);
-  });
-
-  testWithoutContext('xcodebuild minorVersion returns 0 when minor version is unspecified', () {
-    fakeProcessManager.addCommand(const FakeCommand(
-      command: <String>[xcodebuild, '-version'],
-      stdout: 'Xcode 8\nBuild version 8E3004b',
-    ));
-    expect(xcodeProjectInterpreter.minorVersion, 0);
-    expect(fakeProcessManager.hasRemainingExpectations, isFalse);
-  });
-
-  testWithoutContext('xcodebuild minorVersion is null when version has unexpected format', () {
-    fakeProcessManager.addCommand(const FakeCommand(
-      command: <String>[xcodebuild, '-version'],
-      stdout: 'Xcode Ultra5000\nBuild version 8E3004b',
-    ));
     expect(xcodeProjectInterpreter.minorVersion, isNull);
+    expect(xcodeProjectInterpreter.patchVersion, isNull);
     expect(fakeProcessManager.hasRemainingExpectations, isFalse);
   });
 
