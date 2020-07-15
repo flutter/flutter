@@ -1648,7 +1648,6 @@ void main() {
     await tester.pumpAndSettle();
 
     coloredBox = tester.widget(find.byType(ColoredBox));
-    expect(isSelected, isTrue);
     expect(coloredBox.color, theme.selectedTileColor);
   });
 
@@ -1691,7 +1690,6 @@ void main() {
     await tester.pumpAndSettle();
 
     coloredBox = tester.widget(find.byType(ColoredBox));
-    expect(isSelected, isTrue);
     expect(coloredBox.color, selectedTileColor);
   });
 }
