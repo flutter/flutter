@@ -1328,7 +1328,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         if (debugCreator != null)
           yield DiagnosticsDebugCreator(debugCreator);
         yield describeForError('The following RenderObject was being processed when the exception was fired');
-        yield DiagnosticsProperty<RenderObject>('RenderObject', this, style: DiagnosticsTreeStyle.errorProperty);
         // TODO(jacobr): this error message has a code smell. Consider whether
         // displaying the truncated children is really useful for command line
         // users. Inspector users can see the full tree by clicking on the
