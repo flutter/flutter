@@ -676,6 +676,20 @@ abstract class WidgetController {
   /// Returns the rect of the given widget. This is only valid once
   /// the widget's render object has been laid out at least once.
   Rect getRect(Finder finder) => getTopLeft(finder) & getSize(finder);
+
+  /// Given a widget `W` specified by [finder] and a [Scrollable] widget `S` in
+  /// its ancestry tree, this scrolls `S` so as to make `W` visible.
+  ///
+  /// Usually the `finder` for this method should be labeled
+  /// `skipOffstage: false`, so that [Finder] deals with widgets that's out of
+  /// the screen correctly.
+  ///
+  /// This does not work when the `S` is long and `W` far away from the
+  /// dispalyed part does not have a cached element yet. See
+  /// https://github.com/flutter/flutter/issues/61458
+  ///
+  /// Shorthand for `Scrollable.ensureVisible(element(finder))`
+  Future<void> ensureVisible(Finder finder) => Scrollable.ensureVisible(element(finder));
 }
 
 /// Variant of [WidgetController] that can be used in tests running
