@@ -313,6 +313,8 @@ const double _textVerticalSeparation = 18.0;
 ///
 /// To show an [AboutDialog], use [showAboutDialog].
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=YFCSODyFxbE}
+///
 /// If the application has a [Drawer], the [AboutListTile] widget can make the
 /// process of showing an about dialog simpler.
 ///
@@ -1632,38 +1634,32 @@ class _DetailView extends StatelessWidget {
     final double screenHeight = MediaQuery.of(context).size.height;
     final double minHeight = (screenHeight - kToolbarHeight) / screenHeight;
 
-    return GestureDetector(
-      onTap: () {
-        print('draggable');
-      },
-      behavior: HitTestBehavior.deferToChild,
-      child: DraggableScrollableSheet(
-        initialChildSize: minHeight,
-        minChildSize: minHeight,
-        maxChildSize: 1,
-        expand: false,
-        builder: (BuildContext context, ScrollController controller) {
-          return MouseRegion(
-            // TODO(TonicArtos): Remove MouseRegion workaround for pointer hover events passing through DraggableScrollableSheet once https://github.com/flutter/flutter/issues/59741 is resolved.
-            child: Card(
-              color: Theme.of(context).cardColor,
-              elevation: _kCardElevation,
-              clipBehavior: Clip.antiAlias,
-              margin: const EdgeInsets.fromLTRB(
-                  _kCardElevation, 0.0, _kCardElevation, 0.0),
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(3.0), bottom: Radius.zero),
-              ),
-              child: _builder(
-                context,
-                _arguments,
-                controller,
-              ),
+    return DraggableScrollableSheet(
+      initialChildSize: minHeight,
+      minChildSize: minHeight,
+      maxChildSize: 1,
+      expand: false,
+      builder: (BuildContext context, ScrollController controller) {
+        return MouseRegion(
+          // TODO(TonicArtos): Remove MouseRegion workaround for pointer hover events passing through DraggableScrollableSheet once https://github.com/flutter/flutter/issues/59741 is resolved.
+          child: Card(
+            color: Theme.of(context).cardColor,
+            elevation: _kCardElevation,
+            clipBehavior: Clip.antiAlias,
+            margin: const EdgeInsets.fromLTRB(
+                _kCardElevation, 0.0, _kCardElevation, 0.0),
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(3.0), bottom: Radius.zero),
             ),
-          );
-        },
-      ),
+            child: _builder(
+              context,
+              _arguments,
+              controller,
+            ),
+          ),
+        );
+      },
     );
   }
 }

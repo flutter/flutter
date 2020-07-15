@@ -943,6 +943,26 @@ flutter:
                               <String, dynamic>{'pluginClass': 'SomeClass',
                                                 'package': 'com.example'});
   });
+
+  testWithoutContext('FlutterManifest validates a platform section that is a list '
+    'instead of a map', () {
+    const String manifest = '''
+name: test
+flutter:
+    plugin:
+      platforms:
+        - android
+''';
+    final BufferLogger logger = BufferLogger.test();
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest, null);
+    expect(logger.errorText,
+      contains('flutter.plugin.platforms should be a map with the platform name as the key'));
+  });
 }
 
 Matcher matchesManifest({

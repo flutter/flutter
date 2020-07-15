@@ -53,6 +53,7 @@ class InteractiveViewer extends StatefulWidget {
   /// The [child] parameter must not be null.
   InteractiveViewer({
     Key key,
+    this.alignPanAxis = false,
     this.boundaryMargin = EdgeInsets.zero,
     this.constrained = true,
     // These default scale values were eyeballed as reasonable limits for common
@@ -66,7 +67,8 @@ class InteractiveViewer extends StatefulWidget {
     this.scaleEnabled = true,
     this.transformationController,
     @required this.child,
-  }) : assert(child != null),
+  }) : assert(alignPanAxis != null),
+       assert(child != null),
        assert(constrained != null),
        assert(minScale != null),
        assert(minScale > 0),
@@ -84,6 +86,15 @@ class InteractiveViewer extends StatefulWidget {
            && boundaryMargin.right.isFinite && boundaryMargin.bottom.isFinite
            && boundaryMargin.left.isFinite)),
        super(key: key);
+
+  /// If true, panning is only allowed in the direction of the horizontal axis
+  /// or the vertical axis.
+  ///
+  /// In other words, when this is true, diagonal panning is not allowed. A
+  /// single gesture begun along one axis cannot also cause panning along the
+  /// other axis without stopping and beginning a new gesture. This is a common
+  /// pattern in tables where data is displayed in columns and rows.
+  final bool alignPanAxis;
 
   /// A margin for the visible boundaries of the child.
   ///
@@ -477,6 +488,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   final GlobalKey _parentKey = GlobalKey();
   Animation<Offset> _animation;
   AnimationController _controller;
+  Axis _panAxis; // Used with alignPanAxis.
   Offset _referenceFocalPoint; // Point where the current gesture began.
   double _scaleStart; // Scale value at start of scaling gesture.
   double _rotationStart = 0.0; // Rotation at start of rotation gesture.
@@ -528,9 +540,13 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       return matrix.clone();
     }
 
+    final Offset alignedTranslation = widget.alignPanAxis && _panAxis != null
+      ? _alignAxis(translation, _panAxis)
+      : translation;
+
     final Matrix4 nextMatrix = matrix.clone()..translate(
-      translation.dx,
-      translation.dy,
+      alignedTranslation.dx,
+      alignedTranslation.dy,
     );
 
     // Transform the viewport to determine where its four corners will be after
@@ -683,6 +699,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     }
 
     _gestureType = null;
+    _panAxis = null;
     _scaleStart = _transformationController.value.getMaxScaleOnAxis();
     _referenceFocalPoint = _transformationController.toScene(
       details.localFocalPoint,
@@ -710,6 +727,9 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       !widget.scaleEnabled ? 1.0 : details.scale,
       !_rotateEnabled ? 0.0 : details.rotation,
     );
+    if (_gestureType == _GestureType.pan) {
+      _panAxis ??= _getPanAxis(_referenceFocalPoint, focalPointScene);
+    }
 
     if (!_gestureIsSupported(_gestureType)) {
       return;
@@ -800,11 +820,13 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     _controller.reset();
 
     if (!_gestureIsSupported(_gestureType)) {
+      _panAxis = null;
       return;
     }
 
     // If the scale ended with enough velocity, animate inertial movement.
     if (_gestureType != _GestureType.pan || details.velocity.pixelsPerSecond.distance < kMinFlingVelocity) {
+      _panAxis = null;
       return;
     }
 
@@ -871,6 +893,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   // Handle inertia drag animation.
   void _onAnimate() {
     if (!_controller.isAnimating) {
+      _panAxis = null;
       _animation?.removeListener(_onAnimate);
       _animation = null;
       _controller.reset();
@@ -1157,4 +1180,27 @@ Offset _round(Offset offset) {
     double.parse(offset.dx.toStringAsFixed(9)),
     double.parse(offset.dy.toStringAsFixed(9)),
   );
+}
+
+// Align the given offset to the given axis by allowing movement only in the
+// axis direction.
+Offset _alignAxis(Offset offset, Axis axis) {
+  switch (axis) {
+    case Axis.horizontal:
+      return Offset(offset.dx, 0.0);
+    case Axis.vertical:
+    default:
+      return Offset(0.0, offset.dy);
+  }
+}
+
+// Given two points, return the axis where the distance between the points is
+// greatest. If they are equal, return null.
+Axis _getPanAxis(Offset point1, Offset point2) {
+  if (point1 == point2) {
+    return null;
+  }
+  final double x = point2.dx - point1.dx;
+  final double y = point2.dy - point1.dy;
+  return x.abs() > y.abs() ? Axis.horizontal : Axis.vertical;
 }

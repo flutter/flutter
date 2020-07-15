@@ -724,7 +724,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isMacOSEnabled = false,
     this.isWebEnabled = false,
     this.isWindowsEnabled = false,
-    this.isAndroidEmbeddingV2Enabled = false,
+    this.isSingleWidgetReloadEnabled = false,
 });
 
   @override
@@ -740,7 +740,7 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isWindowsEnabled;
 
   @override
-  final bool isAndroidEmbeddingV2Enabled;
+  final bool isSingleWidgetReloadEnabled;
 
   @override
   bool isEnabled(Feature feature) {
@@ -753,8 +753,6 @@ class TestFeatureFlags implements FeatureFlags {
         return isMacOSEnabled;
       case flutterWindowsDesktopFeature:
         return isWindowsEnabled;
-      case flutterAndroidEmbeddingV2Feature:
-        return isAndroidEmbeddingV2Enabled;
     }
     return false;
   }
@@ -934,4 +932,7 @@ class FakeCache implements Cache {
   Future<bool> doesRemoteExist(String message, Uri url) async {
     return true;
   }
+
+  @override
+  void clearStampFiles() {}
 }

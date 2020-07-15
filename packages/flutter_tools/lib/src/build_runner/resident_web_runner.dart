@@ -189,7 +189,9 @@ abstract class ResidentWebRunner extends ResidentRunner {
     globals.printStatus('');
     globals.printStatus(message);
     const String quitMessage = 'To quit, press "q".';
-    globals.printStatus('For a more detailed help message, press "h". $quitMessage');
+    if (device.device is! WebServerDevice) {
+      globals.printStatus('For a more detailed help message, press "h". $quitMessage');
+    }
   }
 
   @override
@@ -355,6 +357,18 @@ abstract class ResidentWebRunner extends ResidentRunner {
   }
 
   @override
+  Future<void> debugToggleInvertOversizedImages() async {
+    try {
+      await _vmService
+        ?.flutterToggleInvertOversizedImages(
+          isolateId: null,
+        );
+    } on vmservice.RPCError {
+      return;
+    }
+  }
+
+  @override
   Future<void> debugToggleProfileWidgetBuilds() async {
     try {
       await _vmService
@@ -448,6 +462,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
           packagesFilePath: packagesFilePath,
           urlTunneller: urlTunneller,
           useSseForDebugProxy: debuggingOptions.webUseSseForDebugProxy,
+          useSseForDebugBackend: debuggingOptions.webUseSseForDebugBackend,
           buildInfo: debuggingOptions.buildInfo,
           enableDwds: _enableDwds,
           entrypoint: globals.fs.file(target).uri,
@@ -623,6 +638,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
         '// Flutter web bootstrap script for $importedEntrypoint.',
         '',
         "import 'dart:ui' as ui;",
+        "import 'dart:async';",
         '',
         "import '$importedEntrypoint' as entrypoint;",
         if (hasWebPlugins)
@@ -630,11 +646,16 @@ class _ResidentWebRunner extends ResidentWebRunner {
         if (hasWebPlugins)
           "import '$generatedImport';",
         '',
+        'typedef _UnaryFunction = dynamic Function(List<String> args);',
+        'typedef _NullaryFunction = dynamic Function();',
         'Future<void> main() async {',
         if (hasWebPlugins)
           '  registerPlugins(webPluginRegistry);',
         '  await ui.webOnlyInitializePlatform();',
-        '  entrypoint.main();',
+        '  if (entrypoint.main is _UnaryFunction) {',
+        '    return (entrypoint.main as _UnaryFunction)(<String>[]);',
+        '  }',
+        '  return (entrypoint.main as _NullaryFunction)();',
         '}',
         '',
       ].join('\n');

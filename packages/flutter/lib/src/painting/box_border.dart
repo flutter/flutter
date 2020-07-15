@@ -331,15 +331,28 @@ class Border extends BoxBorder {
   /// Creates a border with symmetrical vertical and horizontal sides.
   ///
   /// All arguments default to [BorderSide.none] and must not be null.
+  ///
+  /// Currently, the `vertical` argument will apply to the top and bottom
+  /// borders, and the `horizontal` argument will apply to the left and right
+  /// borders. This is not consistent with the use of "vertical" and
+  /// "horizontal" elsewhere in the framework, so the
+  /// `invertMeaningOfVerticalAndHorizontal` argument exists to facilitate
+  /// the transition of this constructor to using the correct semantics of
+  /// these arguments. Callers are encouraged to pass false to that argument
+  /// to get the correct semantics. In a future change, the default value of
+  /// the argument will be changed to false, followed by the removal of the
+  /// argument altogether.
   const Border.symmetric({
     BorderSide vertical = BorderSide.none,
     BorderSide horizontal = BorderSide.none,
+    bool invertMeaningOfVerticalAndHorizontal = true,
   }) : assert(vertical != null),
        assert(horizontal != null),
-       left = horizontal,
-       top = vertical,
-       right = horizontal,
-       bottom = vertical;
+       assert(invertMeaningOfVerticalAndHorizontal != null),
+       left = invertMeaningOfVerticalAndHorizontal ? horizontal : vertical,
+       top = invertMeaningOfVerticalAndHorizontal ? vertical : horizontal,
+       right = invertMeaningOfVerticalAndHorizontal ? horizontal : vertical,
+       bottom = invertMeaningOfVerticalAndHorizontal ? vertical : horizontal;
 
   /// A uniform border with all sides the same color and width.
   ///
@@ -393,26 +406,21 @@ class Border extends BoxBorder {
   }
 
   @override
-  bool get isUniform {
+  bool get isUniform => _colorIsUniform && _widthIsUniform && _styleIsUniform;
+
+  bool get _colorIsUniform {
     final Color topColor = top.color;
-    if (right.color != topColor ||
-        bottom.color != topColor ||
-        left.color != topColor)
-      return false;
+    return right.color == topColor && bottom.color == topColor && left.color == topColor;
+  }
 
+  bool get _widthIsUniform {
     final double topWidth = top.width;
-    if (right.width != topWidth ||
-        bottom.width != topWidth ||
-        left.width != topWidth)
-      return false;
+    return right.width == topWidth && bottom.width == topWidth && left.width == topWidth;
+  }
 
+  bool get _styleIsUniform {
     final BorderStyle topStyle = top.style;
-    if (right.style != topStyle ||
-        bottom.style != topStyle ||
-        left.style != topStyle)
-      return false;
-
-    return true;
+    return right.style == topStyle && bottom.style == topStyle && left.style == topStyle;
   }
 
   @override
@@ -522,8 +530,30 @@ class Border extends BoxBorder {
       }
     }
 
-    assert(borderRadius == null, 'A borderRadius can only be given for uniform borders.');
-    assert(shape == BoxShape.rectangle, 'A border can only be drawn as a circle if it is uniform.');
+    assert(() {
+      if (borderRadius != null) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('A borderRadius can only be given for a uniform Border.'),
+          ErrorDescription('The following is not uniform:'),
+          if (!_colorIsUniform) ErrorDescription('BorderSide.color'),
+          if (!_widthIsUniform) ErrorDescription('BorderSide.width'),
+          if (!_styleIsUniform) ErrorDescription('BorderSide.style'),
+        ]);
+      }
+      return true;
+    }());
+    assert(() {
+      if (shape != BoxShape.rectangle) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('A Border can only be drawn as a circle if it is uniform'),
+          ErrorDescription('The following is not uniform:'),
+          if (!_colorIsUniform) ErrorDescription('BorderSide.color'),
+          if (!_widthIsUniform) ErrorDescription('BorderSide.width'),
+          if (!_styleIsUniform) ErrorDescription('BorderSide.style'),
+        ]);
+      }
+      return true;
+    }());
 
     paintBorder(canvas, rect, top: top, right: right, bottom: bottom, left: left);
   }

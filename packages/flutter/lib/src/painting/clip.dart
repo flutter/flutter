@@ -43,7 +43,7 @@ abstract class ClipContext {
     _clipAndPaint((bool doAntiAias) => canvas.clipPath(path, doAntiAlias: doAntiAias), clipBehavior, bounds, painter);
   }
 
-  /// Clip [canvas] with [Path] according to [RRect] and then paint. [canvas] is
+  /// Clip [canvas] with [Path] according to `rrect` and then paint. [canvas] is
   /// restored to the pre-clip status afterwards.
   ///
   /// `bounds` is the saveLayer bounds used for [Clip.antiAliasWithSaveLayer].
@@ -51,7 +51,7 @@ abstract class ClipContext {
     _clipAndPaint((bool doAntiAias) => canvas.clipRRect(rrect, doAntiAlias: doAntiAias), clipBehavior, bounds, painter);
   }
 
-  /// Clip [canvas] with [Path] according to [Rect] and then paint. [canvas] is
+  /// Clip [canvas] with [Path] according to `rect` and then paint. [canvas] is
   /// restored to the pre-clip status afterwards.
   ///
   /// `bounds` is the saveLayer bounds used for [Clip.antiAliasWithSaveLayer].
