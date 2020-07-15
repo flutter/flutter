@@ -184,8 +184,8 @@ be interpolated into the template. It doesn't use the mustache
 package since these are simple string substitutions, but it uses the same
 syntax.
 
-The code block generation tools process the source input and emit HTML for
-output, which dartdoc places back into the documentation. Any options are given to
+The code block generation tools that process the source input and emit HTML for
+output, which dartdoc places back into the documentation. Any options given to
 the `{@tool ...}` directive are passed on verbatim to the tool.
 
 The `snippets` tool renders these examples through a combination of markdown
