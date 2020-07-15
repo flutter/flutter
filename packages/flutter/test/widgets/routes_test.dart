@@ -1041,6 +1041,41 @@ void main() {
       expect(nestedObserver.dialogCount, 1);
     });
 
+    testWidgets('showGeneralDialog default argument values', (WidgetTester tester) async {
+      final DialogObserver rootObserver = DialogObserver();
+
+      await tester.pumpWidget(MaterialApp(
+        navigatorObservers: <NavigatorObserver>[rootObserver],
+        home: Navigator(
+          onGenerateRoute: (RouteSettings settings) {
+            return MaterialPageRoute<dynamic>(
+              builder: (BuildContext context) {
+                return RaisedButton(
+                  onPressed: () {
+                    showGeneralDialog<void>(
+                      context: context,
+                      pageBuilder: (BuildContext innerContext, _, __) {
+                        return const SizedBox();
+                      },
+                    );
+                  },
+                  child: const Text('Show Dialog'),
+                );
+              },
+            );
+          },
+        ),
+      ));
+
+      // Open the dialog.
+      await tester.tap(find.byType(RaisedButton));
+      expect(rootObserver.dialogRoutes.length, equals(1));
+      final ModalRoute<dynamic> route = rootObserver.dialogRoutes.last;
+      expect(route.barrierDismissible, isNotNull);
+      expect(route.barrierColor, isNotNull);
+      expect(route.transitionDuration, isNotNull);
+    });
+
     testWidgets('reverseTransitionDuration defaults to transitionDuration', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
 
@@ -1598,14 +1633,25 @@ class TestPageRouteBuilder extends PageRouteBuilder<void> {
 }
 
 class DialogObserver extends NavigatorObserver {
+  final List<ModalRoute<dynamic>> dialogRoutes = <ModalRoute<dynamic>>[];
   int dialogCount = 0;
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
     if (route.toString().contains('_DialogRoute')) {
+      dialogRoutes.add(route as ModalRoute<dynamic>);
       dialogCount++;
     }
     super.didPush(route, previousRoute);
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic> previousRoute) {
+    if (route.toString().contains('_DialogRoute')) {
+      dialogRoutes.removeLast();
+      dialogCount--;
+    }
+    super.didPop(route, previousRoute);
   }
 }
 
