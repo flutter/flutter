@@ -1767,7 +1767,7 @@ void main() {
     );
 
     await tester.pumpAndSettle();
-    
+
     expect(
       tester.getSemantics(find.byType(RangeSlider)),
       matchesSemantics(
