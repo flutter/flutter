@@ -19,6 +19,7 @@ import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:meta/meta.dart';
+import 'package:quiver/testing/async.dart';
 import 'package:test_api/test_api.dart' as test_package show TypeMatcher, test; // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf; // ignore: deprecated_member_use
 // ignore: deprecated_member_use
@@ -209,6 +210,21 @@ void testWithoutContext(String description, FutureOr<void> body(), {
     retry: retry,
     testOn: testOn,
   );
+}
+
+/// Runs a callback using FakeAsync.run while continually pumping the
+/// microtask queue. This avoids a deadlock when tests `await` a Future
+/// which queues a microtask that will not be processed unless the queue
+/// is flushed.
+Future<T> runFakeAsync<T>(Future<T> Function(FakeAsync time) f) async {
+  return FakeAsync().run((FakeAsync time) async {
+    bool pump = true;
+    final Future<T> future = f(time).whenComplete(() => pump = false);
+    while (pump) {
+      time.flushMicrotasks();
+    }
+    return future;
+  }) as Future<T>;
 }
 
 /// An implementation of [AppContext] that throws if context.get is called in the test.
