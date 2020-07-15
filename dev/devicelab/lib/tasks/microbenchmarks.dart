@@ -61,7 +61,6 @@ TaskFunction createMicrobenchmarkTask() {
 }
 
 Future<Process> _startFlutter({
-  String command = 'run',
   List<String> options = const <String>[],
   bool canFail = false,
   Map<String, String> environment,
