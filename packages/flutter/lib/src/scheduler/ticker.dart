@@ -439,7 +439,7 @@ class TickerFuture implements Future<void> {
   }
 
   @override
-  Future<void> timeout(Duration timeLimit, {FutureOr<void> onTimeout()?}) {
+  Future<void> timeout(Duration timeLimit, { FutureOr<void> Function()? onTimeout }) {
     return _primaryCompleter.future.timeout(timeLimit, onTimeout: onTimeout);
   }
 

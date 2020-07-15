@@ -63,7 +63,6 @@ class _TaskEntry<T> {
       debugStack = StackTrace.current;
       return true;
     }());
-    completer = Completer<T>();
   }
   final TaskCallback<T> task;
   final int priority;
@@ -71,7 +70,7 @@ class _TaskEntry<T> {
   final Flow? flow;
 
   late StackTrace debugStack;
-  late Completer<T> completer;
+  final Completer<T> completer = Completer<T>();
 
   void run() {
     if (!kReleaseMode) {
