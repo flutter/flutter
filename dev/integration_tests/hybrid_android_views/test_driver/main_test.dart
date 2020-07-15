@@ -30,11 +30,11 @@ Future<void> main() async {
     await driver.tap(backButton);
   });
 
-  group('WindowManager', ()
+  group('Nested View Event', ()
   {
     setUpAll(() async {
       final SerializableFinder wmListTile =
-      find.byValueKey('WmIntegrationsListTile');
+      find.byValueKey('NestedViewEventTile');
       await driver.tap(wmListTile);
     });
 
@@ -52,14 +52,14 @@ Future<void> main() async {
       expect(status, 'Success');
     });
 
-    test('Child windows can handle touches', () async {
-      final SerializableFinder addWindow = find.byValueKey('AddWindow');
-      await driver.waitFor(addWindow);
-      await driver.tap(addWindow);
-      final SerializableFinder tapWindow = find.byValueKey('TapWindow');
-      await driver.tap(tapWindow);
-      final String windowClickCount = await driver.getText(find.byValueKey('WindowClickCount'));
-      expect(windowClickCount, 'Click count: 1');
+    test('Child view can handle touches', () async {
+      final SerializableFinder AddChildView = find.byValueKey('AddChildView');
+      await driver.waitFor(AddChildView);
+      await driver.tap(AddChildView);
+      final SerializableFinder tapChildView = find.byValueKey('TapChildView');
+      await driver.tap(tapChildView);
+      final String nestedViewClickCount = await driver.getText(find.byValueKey('NestedViewClickCount'));
+      expect(nestedViewClickCount, 'Click count: 1');
     });
   });
 }

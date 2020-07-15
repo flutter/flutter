@@ -6,12 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_driver/driver_extension.dart';
 
 import 'motion_events_page.dart';
+import 'nested_view_event.dart';
 import 'page.dart';
-import 'wm_integrations.dart';
 
 final List<PageWidget> _allPages = <PageWidget>[
   const MotionEventsPage(),
-  const WindowManagerIntegrationsPage(),
+  const NestedViewEventPage(),
 ];
 
 void main() {

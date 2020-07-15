@@ -12,17 +12,17 @@ import 'package:flutter/widgets.dart';
 import 'android_platform_view.dart';
 import 'page.dart';
 
-class WindowManagerIntegrationsPage extends PageWidget {
-  const WindowManagerIntegrationsPage()
-      : super('Window Manager Integrations Tests', const ValueKey<String>('WmIntegrationsListTile'));
+class NestedViewEventPage extends PageWidget {
+  const NestedViewEventPage()
+      : super('Nested View Event Tests', const ValueKey<String>('NestedViewEventTile'));
 
   @override
-  Widget build(BuildContext context) => WindowManagerBody();
+  Widget build(BuildContext context) => NestedViewEventBody();
 }
 
-class WindowManagerBody extends StatefulWidget {
+class NestedViewEventBody extends StatefulWidget {
   @override
-  State<WindowManagerBody> createState() => WindowManagerBodyState();
+  State<NestedViewEventBody> createState() => NestedViewEventBodyState();
 }
 
 enum _LastTestStatus {
@@ -31,19 +31,19 @@ enum _LastTestStatus {
   error
 }
 
-class WindowManagerBodyState extends State<WindowManagerBody> {
+class NestedViewEventBodyState extends State<NestedViewEventBody> {
 
   MethodChannel viewChannel;
   _LastTestStatus lastTestStatus = _LastTestStatus.pending;
   String lastError;
   int id;
-  int windowClickCount = 0;
+  int nestedViewClickCount = 0;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Window Manager Integrations'),
+        title: const Text('Nested view event'),
       ),
       body: Column(
         children: <Widget>[
@@ -64,19 +64,19 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
             Row(
               children: <Widget>[
                 RaisedButton(
-                  key: const ValueKey<String>('AddWindow'),
-                  child: const Text('ADD WINDOW'),
-                  onPressed: onAddWindowPressed,
+                  key: const ValueKey<String>('AddChildView'),
+                  child: const Text('ADD CHILD VIEW'),
+                  onPressed: onChildViewPressed,
                 ),
                 RaisedButton(
-                  key: const ValueKey<String>('TapWindow'),
-                  child: const Text('TAP WINDOW'),
-                  onPressed: onTapWindowPressed,
+                  key: const ValueKey<String>('TapChildView'),
+                  child: const Text('TAP CHILD VIEW'),
+                  onPressed: onTapChildViewPressed,
                 ),
-                if (windowClickCount > 0)
+                if (nestedViewClickCount > 0)
                   Text(
-                      'Click count: $windowClickCount',
-                      key: const ValueKey<String>('WindowClickCount'),
+                      'Click count: $nestedViewClickCount',
+                      key: const ValueKey<String>('NestedViewClickCount'),
                   ),
               ],
             ),
@@ -120,11 +120,11 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
     }
   }
 
-  Future<void> onAddWindowPressed() async {
+  Future<void> onChildViewPressed() async {
     try {
-      await viewChannel.invokeMethod<void>('addWindowAndWaitForClick');
+      await viewChannel.invokeMethod<void>('addChildViewAndWaitForClick');
       setState(() {
-        windowClickCount++;
+        nestedViewClickCount++;
       });
     } catch(e) {
       setState(() {
@@ -134,7 +134,7 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
     }
   }
 
-  Future<void> onTapWindowPressed() async {
+  Future<void> onTapChildViewPressed() async {
     await Future<void>.delayed(const Duration(seconds: 1));
 
     // Dispatch a tap event on the child view inside the platform view.

@@ -66,7 +66,7 @@ public class SimplePlatformView implements PlatformView, MethodChannel.MethodCal
             case "showAndHideAlertDialog":
                 showAndHideAlertDialog(result);
                 return;
-            case "addWindowAndWaitForClick":
+            case "addChildViewAndWaitForClick":
                 addWindow(result);
                 return;
 
