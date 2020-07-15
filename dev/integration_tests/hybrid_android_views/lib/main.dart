@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_driver/driver_extension.dart';
 
 import 'motion_events_page.dart';
-import 'nested_view_event.dart';
+import 'nested_view_event_page.dart';
 import 'page.dart';
 
 final List<PageWidget> _allPages = <PageWidget>[
