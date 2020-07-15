@@ -109,9 +109,9 @@ class StackFrame {
     final RegExp parser = hasPackage
         ? RegExp(r'^(package.+) (\d+):(\d+)\s+(.+)$')
         : RegExp(r'^(.+) (\d+):(\d+)\s+(.+)$');
-    final Match? match = parser.firstMatch(line);
+    Match? match = parser.firstMatch(line);
     assert(match != null, 'Expected $line to match $parser.');
-    promote(match as Match);
+    match = match!;
 
     String package = '<unknown>';
     String packageScheme = '<unknown>';
@@ -202,9 +202,9 @@ class StackFrame {
     }
 
     final RegExp parser = RegExp(r'^#(\d+) +(.+) \((.+?):?(\d+){0,1}:?(\d+){0,1}\)$');
-    final Match? match = parser.firstMatch(line);
+    Match? match = parser.firstMatch(line);
     assert(match != null, 'Expected $line to match $parser.');
-    promote(match as Match);
+    match = match!;
 
     bool isConstructor = false;
     String className = '';

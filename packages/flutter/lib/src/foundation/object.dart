@@ -16,12 +16,3 @@ String objectRuntimeType(Object? object, String optimizedValue) {
   }());
   return optimizedValue;
 }
-
-/// Allows promotion of a variable to another type.
-///
-/// ```dart
-/// num n = 42;
-/// promote(n as int);
-/// n.isEven;
-/// ```
-void promote(Object? object) { }

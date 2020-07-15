@@ -117,8 +117,7 @@ Iterable<String> debugWordWrap(String message, int width, { String wrapIndent = 
   bool addPrefix = false;
   int index = prefix.length;
   _WordWrapParseMode mode = _WordWrapParseMode.inSpace;
-  // TODO(a14n): use `late int lastWordStart;`
-  int? lastWordStart;
+  late int lastWordStart;
   int? lastWordEnd;
   while (true) {
     switch (mode) {
@@ -159,8 +158,8 @@ Iterable<String> debugWordWrap(String message, int width, { String wrapIndent = 
             mode = _WordWrapParseMode.inWord;
           } else {
             // we broke at the previous break point, and we're at the start of a new one
-            assert(lastWordStart! > lastWordEnd);
-            start = lastWordStart!;
+            assert(lastWordStart > lastWordEnd);
+            start = lastWordStart;
             mode = _WordWrapParseMode.atBreak;
           }
           startForLengthCalculations = start - prefix.length;
