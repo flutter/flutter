@@ -1,6 +1,8 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 import 'dart:ui' show Brightness;
 import 'package:flutter/foundation.dart';
@@ -23,9 +25,9 @@ void main() {
     final dynamic exception = tester.takeException();
     expect(exception, isNotNull);
     expect(exception ,isFlutterError);
-    final FlutterError error = exception;
+    final FlutterError error = exception as FlutterError;
     expect(error.diagnostics.length, 3);
-    expect(error.diagnostics.last, isInstanceOf<DiagnosticsProperty<Element>>());
+    expect(error.diagnostics.last, isA<DiagnosticsProperty<Element>>());
     expect(
       error.toStringDeep(),
       equalsIgnoringHashCodes(
@@ -67,8 +69,8 @@ void main() {
     expect(data.invertColors, false);
     expect(data.disableAnimations, false);
     expect(data.boldText, false);
+    expect(data.highContrast, false);
     expect(data.platformBrightness, Brightness.light);
-    expect(data.physicalDepth, equals(WidgetsBinding.instance.window.physicalDepth));
   });
 
   testWidgets('MediaQueryData.copyWith defaults to source', (WidgetTester tester) async {
@@ -81,12 +83,12 @@ void main() {
     expect(copied.viewPadding, data.viewPadding);
     expect(copied.viewInsets, data.viewInsets);
     expect(copied.systemGestureInsets, data.systemGestureInsets);
-    expect(copied.physicalDepth, data.physicalDepth);
     expect(copied.alwaysUse24HourFormat, data.alwaysUse24HourFormat);
     expect(copied.accessibleNavigation, data.accessibleNavigation);
     expect(copied.invertColors, data.invertColors);
     expect(copied.disableAnimations, data.disableAnimations);
     expect(copied.boldText, data.boldText);
+    expect(copied.highContrast, data.highContrast);
     expect(copied.platformBrightness, data.platformBrightness);
   });
 
@@ -100,7 +102,6 @@ void main() {
     const EdgeInsets customViewPadding = EdgeInsets.all(11.24031);
     const EdgeInsets customViewInsets = EdgeInsets.all(1.67262);
     const EdgeInsets customSystemGestureInsets = EdgeInsets.all(1.5556);
-    const double customPhysicalDepth = 120.0;
 
     final MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
     final MediaQueryData copied = data.copyWith(
@@ -111,12 +112,12 @@ void main() {
       viewPadding: customViewPadding,
       viewInsets: customViewInsets,
       systemGestureInsets: customSystemGestureInsets,
-      physicalDepth: customPhysicalDepth,
       alwaysUse24HourFormat: true,
       accessibleNavigation: true,
       invertColors: true,
       disableAnimations: true,
       boldText: true,
+      highContrast: true,
       platformBrightness: Brightness.dark,
     );
     expect(copied.size, customSize);
@@ -126,12 +127,12 @@ void main() {
     expect(copied.viewPadding, customViewPadding);
     expect(copied.viewInsets, customViewInsets);
     expect(copied.systemGestureInsets, customSystemGestureInsets);
-    expect(copied.physicalDepth, customPhysicalDepth);
     expect(copied.alwaysUse24HourFormat, true);
     expect(copied.accessibleNavigation, true);
     expect(copied.invertColors, true);
     expect(copied.disableAnimations, true);
     expect(copied.boldText, true);
+    expect(copied.highContrast, true);
     expect(copied.platformBrightness, Brightness.dark);
   });
 
@@ -158,6 +159,7 @@ void main() {
           invertColors: true,
           disableAnimations: true,
           boldText: true,
+          highContrast: true,
         ),
         child: Builder(
           builder: (BuildContext context) {
@@ -190,6 +192,7 @@ void main() {
     expect(unpadded.invertColors, true);
     expect(unpadded.disableAnimations, true);
     expect(unpadded.boldText, true);
+    expect(unpadded.highContrast, true);
   });
 
   testWidgets('MediaQuery.removePadding only removes specified padding', (WidgetTester tester) async {
@@ -215,6 +218,7 @@ void main() {
           invertColors: true,
           disableAnimations: true,
           boldText: true,
+          highContrast: true,
         ),
         child: Builder(
           builder: (BuildContext context) {
@@ -244,6 +248,7 @@ void main() {
     expect(unpadded.invertColors, true);
     expect(unpadded.disableAnimations, true);
     expect(unpadded.boldText, true);
+    expect(unpadded.highContrast, true);
   });
 
   testWidgets('MediaQuery.removeViewInsets removes specified viewInsets', (WidgetTester tester) async {
@@ -269,6 +274,7 @@ void main() {
           invertColors: true,
           disableAnimations: true,
           boldText: true,
+          highContrast: true,
         ),
         child: Builder(
           builder: (BuildContext context) {
@@ -301,6 +307,7 @@ void main() {
     expect(unpadded.invertColors, true);
     expect(unpadded.disableAnimations, true);
     expect(unpadded.boldText, true);
+    expect(unpadded.highContrast, true);
   });
 
   testWidgets('MediaQuery.removeViewInsets removes only specified viewInsets', (WidgetTester tester) async {
@@ -326,6 +333,7 @@ void main() {
           invertColors: true,
           disableAnimations: true,
           boldText: true,
+          highContrast: true,
         ),
         child: Builder(
           builder: (BuildContext context) {
@@ -355,6 +363,7 @@ void main() {
     expect(unpadded.invertColors, true);
     expect(unpadded.disableAnimations, true);
     expect(unpadded.boldText, true);
+    expect(unpadded.highContrast, true);
   });
 
   testWidgets('MediaQuery.removeViewPadding removes specified viewPadding', (WidgetTester tester) async {
@@ -380,6 +389,7 @@ void main() {
           invertColors: true,
           disableAnimations: true,
           boldText: true,
+          highContrast: true,
         ),
         child: Builder(
           builder: (BuildContext context) {
@@ -412,6 +422,7 @@ void main() {
     expect(unpadded.invertColors, true);
     expect(unpadded.disableAnimations, true);
     expect(unpadded.boldText, true);
+    expect(unpadded.highContrast, true);
   });
 
   testWidgets('MediaQuery.removeViewPadding removes only specified viewPadding', (WidgetTester tester) async {
@@ -437,6 +448,7 @@ void main() {
           invertColors: true,
           disableAnimations: true,
           boldText: true,
+          highContrast: true,
         ),
         child: Builder(
           builder: (BuildContext context) {
@@ -466,6 +478,7 @@ void main() {
     expect(unpadded.invertColors, true);
     expect(unpadded.disableAnimations, true);
     expect(unpadded.boldText, true);
+    expect(unpadded.highContrast, true);
   });
 
   testWidgets('MediaQuery.textScaleFactorOf', (WidgetTester tester) async {
@@ -548,4 +561,159 @@ void main() {
     expect(outsideBoldTextOverride, false);
     expect(insideBoldTextOverride, true);
   });
+
+  test('size parameter in MediaQueryData cannot be null', () {
+    try {
+      MediaQueryData(size: null);
+    } on AssertionError catch (error) {
+      expect(error.toString(), contains('size != null'));
+      expect(error.toString(), contains('is not true'));
+      return;
+    }
+    fail('The assert was never called when it should have been');
+  });
+
+  test('devicePixelRatio parameter in MediaQueryData cannot be null', () {
+    try {
+      MediaQueryData(devicePixelRatio: null);
+    } on AssertionError catch (error) {
+      expect(error.toString(), contains('devicePixelRatio != null'));
+      expect(error.toString(), contains('is not true'));
+      return;
+    }
+    fail('The assert was never called when it should have been');
+  });
+
+  test('textScaleFactor parameter in MediaQueryData cannot be null', () {
+    try {
+      MediaQueryData(textScaleFactor: null);
+    } on AssertionError catch (error) {
+      expect(error.toString(), contains('textScaleFactor != null'));
+      expect(error.toString(), contains('is not true'));
+      return;
+    }
+    fail('The assert was never called when it should have been');
+  });
+
+  test('platformBrightness parameter in MediaQueryData cannot be null', () {
+    try {
+      MediaQueryData(platformBrightness: null);
+    } on AssertionError catch (error) {
+      expect(error.toString(), contains('platformBrightness != null'));
+      expect(error.toString(), contains('is not true'));
+      return;
+    }
+    fail('The assert was never called when it should have been');
+  });
+
+  test('padding parameter in MediaQueryData cannot be null', () {
+    try {
+      MediaQueryData(padding: null);
+    } on AssertionError catch (error) {
+      expect(error.toString(), contains('padding != null'));
+      expect(error.toString(), contains('is not true'));
+      return;
+    }
+    fail('The assert was never called when it should have been');
+  });
+
+  test('viewInsets parameter in MediaQueryData cannot be null', () {
+    try {
+      MediaQueryData(viewInsets: null);
+    } on AssertionError catch (error) {
+      expect(error.toString(), contains('viewInsets != null'));
+      expect(error.toString(), contains('is not true'));
+      return;
+    }
+    fail('The assert was never called when it should have been');
+  });
+
+  test('systemGestureInsets parameter in MediaQueryData cannot be null', () {
+    try {
+      MediaQueryData(systemGestureInsets: null);
+    } on AssertionError catch (error) {
+      expect(error.toString(), contains('systemGestureInsets != null'));
+      expect(error.toString(), contains('is not true'));
+      return;
+    }
+    fail('The assert was never called when it should have been');
+  });
+
+  test('viewPadding parameter in MediaQueryData cannot be null', () {
+    try {
+      MediaQueryData(viewPadding: null);
+    } on AssertionError catch (error) {
+      expect(error.toString(), contains('viewPadding != null'));
+      expect(error.toString(), contains('is not true'));
+      return;
+    }
+    fail('The assert was never called when it should have been');
+  });
+
+  test('alwaysUse24HourFormat parameter in MediaQueryData cannot be null', () {
+    try {
+      MediaQueryData(alwaysUse24HourFormat: null);
+    } on AssertionError catch (error) {
+      expect(error.toString(), contains('alwaysUse24HourFormat != null'));
+      expect(error.toString(), contains('is not true'));
+      return;
+    }
+    fail('The assert was never called when it should have been');
+  });
+
+  test('accessibleNavigation parameter in MediaQueryData cannot be null', () {
+    try {
+      MediaQueryData(accessibleNavigation: null);
+    } on AssertionError catch (error) {
+      expect(error.toString(), contains('accessibleNavigation != null'));
+      expect(error.toString(), contains('is not true'));
+      return;
+    }
+    fail('The assert was never called when it should have been');
+  });
+
+  test('invertColors parameter in MediaQueryData cannot be null', () {
+    try {
+      MediaQueryData(invertColors: null);
+    } on AssertionError catch (error) {
+      expect(error.toString(), contains('invertColors != null'));
+      expect(error.toString(), contains('is not true'));
+      return;
+    }
+    fail('The assert was never called when it should have been');
+  });
+
+  test('highContrast parameter in MediaQueryData cannot be null', () {
+    try {
+      MediaQueryData(highContrast: null);
+    } on AssertionError catch (error) {
+      expect(error.toString(), contains('highContrast != null'));
+      expect(error.toString(), contains('is not true'));
+      return;
+    }
+    fail('The assert was never called when it should have been');
+  });
+
+  test('disableAnimations parameter in MediaQueryData cannot be null', () {
+    try {
+      MediaQueryData(disableAnimations: null);
+    } on AssertionError catch (error) {
+      expect(error.toString(), contains('disableAnimations != null'));
+      expect(error.toString(), contains('is not true'));
+      return;
+    }
+    fail('The assert was never called when it should have been');
+  });
+
+  test('boldText parameter in MediaQueryData cannot be null', () {
+    try {
+      MediaQueryData(boldText: null);
+    } on AssertionError catch (error) {
+      expect(error.toString(), contains('boldText != null'));
+      expect(error.toString(), contains('is not true'));
+      return;
+    }
+    fail('The assert was never called when it should have been');
+  });
+
 }

@@ -1,4 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# Copyright 2014 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
 set -e
 
 function deploy {
@@ -6,7 +10,7 @@ function deploy {
   local remaining_tries=$(($total_tries - 1))
   shift
   while [[ "$remaining_tries" > 0 ]]; do
-    (cd "$FLUTTER_ROOT/dev/docs" && firebase deploy --token "$FIREBASE_TOKEN" --project "$@") && break
+    (cd "$FLUTTER_ROOT/dev/docs" && firebase --debug deploy --token "$FIREBASE_TOKEN" --project "$@") && break
     remaining_tries=$(($remaining_tries - 1))
     echo "Error: Unable to deploy documentation to Firebase. Retrying in five seconds... ($remaining_tries tries left)"
     sleep 5
@@ -14,7 +18,10 @@ function deploy {
 
   [[ "$remaining_tries" == 0 ]] && {
     echo "Command still failed after $total_tries tries: '$@'"
-    return 1
+    cat firebase-debug.log || echo "Unable to show contents of firebase-debug.log."
+    # TODO(jackson): Return an error here when the Firebase service is more reliable.
+    # https://github.com/flutter/flutter/issues/44452
+    return 0
   }
   return 0
 }
@@ -46,7 +53,11 @@ function create_docset() {
   # show the end of it if there was a problem.
   echo "Building Flutter docset."
   rm -rf flutter.docset
-  (dashing build --source ./doc --config ./dashing.json > /tmp/dashing.log 2>&1 || (tail -100 /tmp/dashing.log; false)) && \
+  # If dashing gets stuck, Cirrus will time out the build after an hour, and we
+  # never get to see the logs. Thus, we time it out after 30 minutes to see the
+  # logs.
+  (timeout '30m' dashing build --source ./doc --config ./dashing.json > /tmp/dashing.log 2>&1 || \
+  (echo 'Dashing failed! Tailing last 200 lines of log...'; tail -200 /tmp/dashing.log; exit 1)) && \
   cp ./doc/flutter/static-assets/favicon.png ./flutter.docset/icon.png && \
   "$DART" ./dashing_postprocess.dart && \
   tar cf flutter.docset.tar.gz --use-compress-program="gzip --best" flutter.docset
@@ -104,7 +115,7 @@ if [[ -d "$FLUTTER_PUB_CACHE" ]]; then
 fi
 
 # Install and activate dartdoc.
-"$PUB" global activate dartdoc 0.28.8
+"$PUB" global activate dartdoc 0.32.1
 
 # This script generates a unified doc set, and creates
 # a custom index.html, placing everything into dev/docs/doc.
@@ -113,16 +124,16 @@ fi
 (cd "$FLUTTER_ROOT" && "$DART" "$FLUTTER_ROOT/dev/tools/dartdoc.dart")
 (cd "$FLUTTER_ROOT" && "$DART" "$FLUTTER_ROOT/dev/tools/java_and_objc_doc.dart")
 
-# Create offline doc archives.
-(cd "$FLUTTER_ROOT/dev/docs"; create_offline_zip)
-(cd "$FLUTTER_ROOT/dev/docs"; create_docset)
-(cd "$FLUTTER_ROOT/dev/docs"; move_offline_into_place)
-
-# Ensure google webmaster tools can verify our site.
-cp "$FLUTTER_ROOT/dev/docs/google2ed1af765c529f57.html" "$FLUTTER_ROOT/dev/docs/doc"
-
 # Upload new API docs when running on Cirrus
 if [[ -n "$CIRRUS_CI" && -z "$CIRRUS_PR" ]]; then
+  # Create offline doc archives.
+  (cd "$FLUTTER_ROOT/dev/docs"; create_offline_zip)
+  (cd "$FLUTTER_ROOT/dev/docs"; create_docset)
+  (cd "$FLUTTER_ROOT/dev/docs"; move_offline_into_place)
+
+  # Ensure google webmaster tools can verify our site.
+  cp "$FLUTTER_ROOT/dev/docs/google2ed1af765c529f57.html" "$FLUTTER_ROOT/dev/docs/doc"
+
   echo "This is not a pull request; considering whether to upload docs... (branch=$CIRRUS_BRANCH)"
   if [[ "$CIRRUS_BRANCH" == "master" ]]; then
     echo "Updating $CIRRUS_BRANCH docs: https://master-api.flutter.dev/"
@@ -142,4 +153,3 @@ if [[ -n "$CIRRUS_CI" && -z "$CIRRUS_PR" ]]; then
     deploy 5 docs-flutter-dev
   fi
 fi
-

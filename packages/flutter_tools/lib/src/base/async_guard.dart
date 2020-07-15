@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -26,8 +26,7 @@ import 'dart:async';
 /// completed with its result when passed the error object and stack trace.
 ///
 /// After the returned [Future] is completed, whether it be with a value or an
-/// error, all further errors resulting from the execution of [fn] both
-/// synchronous and asynchronous are ignored.
+/// error, all further errors resulting from the execution of [fn] are ignored.
 ///
 /// Rationale:
 ///
@@ -100,10 +99,10 @@ Future<T> asyncGuard<T>(
       completer.completeError(e, s);
       return;
     }
-    if (onError is _UnaryOnError) {
-      completer.complete(onError(e));
-    } else if (onError is _BinaryOnError) {
+    if (onError is _BinaryOnError<T>) {
       completer.complete(onError(e, s));
+    } else if (onError is _UnaryOnError<T>) {
+      completer.complete(onError(e));
     }
   }
 
@@ -113,10 +112,12 @@ Future<T> asyncGuard<T>(
       if (!completer.isCompleted) {
         completer.complete(result);
       }
-    } catch (e, s) {
+    // This catches all exceptions so that they can be propagated to the
+    // caller-supplied error handling or the completer.
+    } catch (e, s) { // ignore: avoid_catches_without_on_clauses
       handleError(e, s);
     }
-  }, onError: (Object e, StackTrace s) {
+  }, onError: (Object e, StackTrace s) { // ignore: deprecated_member_use
     handleError(e, s);
   });
 

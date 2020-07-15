@@ -1,6 +1,8 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 import 'dart:math' as math;
 
@@ -22,6 +24,8 @@ import 'toggle_buttons_theme.dart';
 /// if a button is in an unselected or selected state. They are both
 /// correlated by their index in the list. The length of [isSelected] has to
 /// match the length of the [children] list.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=kVEguaQWGAY}
 ///
 /// ## Customizing toggle buttons
 /// Each toggle's behavior can be configured by the [onPressed] callback, which
@@ -166,6 +170,7 @@ class ToggleButtons extends StatelessWidget {
     @required this.children,
     @required this.isSelected,
     this.onPressed,
+    this.mouseCursor,
     this.textStyle,
     this.constraints,
     this.color,
@@ -217,6 +222,9 @@ class ToggleButtons extends StatelessWidget {
   ///
   /// When the callback is null, all toggle buttons will be disabled.
   final void Function(int index) onPressed;
+
+  /// {@macro flutter.material.button.mouseCursor}
+  final MouseCursor mouseCursor;
 
   /// The [TextStyle] to apply to any text in these toggle buttons.
   ///
@@ -566,7 +574,7 @@ class ToggleButtons extends StatelessWidget {
         return true;
       }(),
       'focusNodes.length must match children.length.\n'
-      'There are ${focusNodes.length} focus nodes, while'
+      'There are ${focusNodes.length} focus nodes, while '
       'there are ${children.length} children.'
     );
     final ThemeData theme = Theme.of(context);
@@ -601,6 +609,7 @@ class ToggleButtons extends StatelessWidget {
             onPressed: onPressed != null
               ? () { onPressed(index); }
               : null,
+            mouseCursor: mouseCursor,
             leadingBorderSide: leadingBorderSide,
             horizontalBorderSide: horizontalBorderSide,
             trailingBorderSide: trailingBorderSide,
@@ -667,6 +676,7 @@ class _ToggleButton extends StatelessWidget {
     this.splashColor,
     this.focusNode,
     this.onPressed,
+    this.mouseCursor,
     this.leadingBorderSide,
     this.horizontalBorderSide,
     this.trailingBorderSide,
@@ -725,6 +735,9 @@ class _ToggleButton extends StatelessWidget {
   ///
   /// If this is null, the button will be disabled, see [enabled].
   final VoidCallback onPressed;
+
+  /// {@macro flutter.material.button.mouseCursor}
+  final MouseCursor mouseCursor;
 
   /// The width and color of the button's leading side border.
   final BorderSide leadingBorderSide;
@@ -800,7 +813,7 @@ class _ToggleButton extends StatelessWidget {
       currentFillColor = theme.colorScheme.surface.withOpacity(0.0);
     }
 
-    final TextStyle currentTextStyle = textStyle ?? toggleButtonsTheme.textStyle ?? theme.textTheme.body1;
+    final TextStyle currentTextStyle = textStyle ?? toggleButtonsTheme.textStyle ?? theme.textTheme.bodyText2;
     final BoxConstraints currentConstraints = constraints ?? toggleButtonsTheme.constraints ?? const BoxConstraints(minWidth: kMinInteractiveDimension, minHeight: kMinInteractiveDimension);
 
     final Widget result = ClipRRect(
@@ -821,6 +834,7 @@ class _ToggleButton extends StatelessWidget {
         focusNode: focusNode,
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         onPressed: onPressed,
+        mouseCursor: mouseCursor,
         child: child,
       ),
     );
@@ -1061,7 +1075,7 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
         );
 
         child.layout(innerConstraints, parentUsesSize: true);
-        final BoxParentData childParentData = child.parentData;
+        final BoxParentData childParentData = child.parentData as BoxParentData;
         childParentData.offset = Offset(leadingBorderSide.width, leadingBorderSide.width);
 
         size = constraints.constrain(Size(
@@ -1083,7 +1097,7 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
         );
 
         child.layout(innerConstraints, parentUsesSize: true);
-        final BoxParentData childParentData = child.parentData;
+        final BoxParentData childParentData = child.parentData as BoxParentData;
 
         if (isLastButton) {
           childParentData.offset = Offset(trailingBorderOffset, trailingBorderOffset);

@@ -1,6 +1,8 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
@@ -73,7 +75,7 @@ void main() {
     );
   });
 
-  testWidgets('Doesn\'t overflow because of floating point accumulated error', (WidgetTester tester) async {
+  testWidgets("Doesn't overflow because of floating point accumulated error", (WidgetTester tester) async {
     // both of these cases have failed in the past due to floating point issues
     await tester.pumpWidget(
       Center(
@@ -139,5 +141,14 @@ void main() {
     );
     final String message = tester.takeException().toString();
     expect(message, contains('\nSee also:'));
+  });
+
+  testWidgets('Can set and update clipBehavior', (WidgetTester tester) async {
+    await tester.pumpWidget(Flex(direction: Axis.vertical));
+    final RenderFlex renderObject = tester.allRenderObjects.whereType<RenderFlex>().first;
+    expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+
+    await tester.pumpWidget(Flex(direction: Axis.vertical, clipBehavior: Clip.antiAlias));
+    expect(renderObject.clipBehavior, equals(Clip.antiAlias));
   });
 }

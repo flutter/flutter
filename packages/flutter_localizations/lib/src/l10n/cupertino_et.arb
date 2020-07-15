@@ -18,5 +18,7 @@
   "cutButtonLabel": "Lõika",
   "copyButtonLabel": "Kopeeri",
   "pasteButtonLabel": "Kleebi",
-  "selectAllButtonLabel": "Vali kõik"
+  "selectAllButtonLabel": "Vali kõik",
+  "tabSemanticsLabel": "$tabIndex. vaheleht $tabCount-st",
+  "modalBarrierDismissLabel": "Loobu"
 }

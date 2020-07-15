@@ -1,6 +1,8 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 /// Flutter widgets implementing Material Design.
 ///
@@ -28,11 +30,14 @@ export 'src/material/banner_theme.dart';
 export 'src/material/bottom_app_bar.dart';
 export 'src/material/bottom_app_bar_theme.dart';
 export 'src/material/bottom_navigation_bar.dart';
+export 'src/material/bottom_navigation_bar_theme.dart';
 export 'src/material/bottom_sheet.dart';
 export 'src/material/bottom_sheet_theme.dart';
 export 'src/material/button.dart';
 export 'src/material/button_bar.dart';
 export 'src/material/button_bar_theme.dart';
+export 'src/material/button_style.dart';
+export 'src/material/button_style_button.dart';
 export 'src/material/button_theme.dart';
 export 'src/material/card.dart';
 export 'src/material/card_theme.dart';
@@ -46,7 +51,6 @@ export 'src/material/colors.dart';
 export 'src/material/constants.dart';
 export 'src/material/data_table.dart';
 export 'src/material/data_table_source.dart';
-export 'src/material/date_picker.dart';
 export 'src/material/debug.dart';
 export 'src/material/dialog.dart';
 export 'src/material/dialog_theme.dart';
@@ -55,6 +59,9 @@ export 'src/material/divider_theme.dart';
 export 'src/material/drawer.dart';
 export 'src/material/drawer_header.dart';
 export 'src/material/dropdown.dart';
+export 'src/material/elevated_button.dart';
+export 'src/material/elevated_button_theme.dart';
+export 'src/material/elevation_overlay.dart';
 export 'src/material/expand_icon.dart';
 export 'src/material/expansion_panel.dart';
 export 'src/material/expansion_tile.dart';
@@ -82,10 +89,15 @@ export 'src/material/material_button.dart';
 export 'src/material/material_localizations.dart';
 export 'src/material/material_state.dart';
 export 'src/material/mergeable_material.dart';
+export 'src/material/navigation_rail.dart';
+export 'src/material/navigation_rail_theme.dart';
 export 'src/material/outline_button.dart';
+export 'src/material/outlined_button.dart';
+export 'src/material/outlined_button_theme.dart';
 export 'src/material/page.dart';
 export 'src/material/page_transitions_theme.dart';
 export 'src/material/paginated_data_table.dart';
+export 'src/material/pickers/pickers.dart';
 export 'src/material/popup_menu.dart';
 export 'src/material/popup_menu_theme.dart';
 export 'src/material/progress_indicator.dart';
@@ -111,6 +123,8 @@ export 'src/material/tab_bar_theme.dart';
 export 'src/material/tab_controller.dart';
 export 'src/material/tab_indicator.dart';
 export 'src/material/tabs.dart';
+export 'src/material/text_button.dart';
+export 'src/material/text_button_theme.dart';
 export 'src/material/text_field.dart';
 export 'src/material/text_form_field.dart';
 export 'src/material/text_selection.dart';
@@ -119,6 +133,7 @@ export 'src/material/theme.dart';
 export 'src/material/theme_data.dart';
 export 'src/material/time.dart';
 export 'src/material/time_picker.dart';
+export 'src/material/time_picker_theme.dart';
 export 'src/material/toggle_buttons.dart';
 export 'src/material/toggle_buttons_theme.dart';
 export 'src/material/toggleable.dart';

@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -82,6 +82,7 @@ class _PlatformBinaryMessenger extends BinaryMessenger {
         response = await handler(data);
       } else {
         ui.channelBuffers.push(channel, data, callback);
+        callback = null;
       }
     } catch (exception, stack) {
       FlutterError.reportError(FlutterErrorDetails(
@@ -91,7 +92,9 @@ class _PlatformBinaryMessenger extends BinaryMessenger {
         context: ErrorDescription('during a plugin platform message call'),
       ));
     } finally {
-      callback(response);
+      if (callback != null) {
+        callback(response);
+      }
     }
   }
 
@@ -115,8 +118,7 @@ class _PlatformBinaryMessenger extends BinaryMessenger {
   }
 
   @override
-  void setMessageHandler(
-      String channel, Future<ByteData> Function(ByteData message) handler) {
+  void setMessageHandler(String channel, MessageHandler handler) {
     if (handler == null)
       _handlers.remove(channel);
     else
@@ -127,8 +129,17 @@ class _PlatformBinaryMessenger extends BinaryMessenger {
   }
 
   @override
+  bool checkMessageHandler(String channel, MessageHandler handler) => _handlers[channel] == handler;
+
+  @override
   void setMockMessageHandler(
       String channel, Future<ByteData> Function(ByteData message) handler) {
+    throw FlutterError(
+        'Setting mock handlers is not supported on the platform side.');
+  }
+
+  @override
+  bool checkMockMessageHandler(String channel, MessageHandler handler) {
     throw FlutterError(
         'Setting mock handlers is not supported on the platform side.');
   }

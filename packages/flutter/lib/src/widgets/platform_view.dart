@@ -1,6 +1,8 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -81,7 +83,9 @@ class AndroidView extends StatefulWidget {
   /// A [PlatformViewFactory](/javadoc/io/flutter/plugin/platform/PlatformViewFactory.html)
   /// for this type must have been registered.
   ///
-  /// See also: [AndroidView] for an example of registering a platform view factory.
+  /// See also:
+  ///
+  ///  * [AndroidView] for an example of registering a platform view factory.
   final String viewType;
 
   /// {@template flutter.widgets.platformViews.createdParam}
@@ -394,22 +398,21 @@ class _HtmlElementViewController extends PlatformViewController {
   }
 
   @override
-  void clearFocus() {
+  Future<void> clearFocus() async {
     // Currently this does nothing on Flutter Web.
     // TODO(het): Implement this. See https://github.com/flutter/flutter/issues/39496
   }
 
   @override
-  void dispatchPointerEvent(PointerEvent event) {
+  Future<void> dispatchPointerEvent(PointerEvent event) async {
     // We do not dispatch pointer events to HTML views because they may contain
     // cross-origin iframes, which only accept user-generated events.
   }
 
   @override
-  void dispose() {
+  Future<void> dispose() async {
     if (_initialized) {
-      // Asynchronously dispose this view.
-      SystemChannels.platform_views.invokeMethod<void>('dispose', viewId);
+      await SystemChannels.platform_views.invokeMethod<void>('dispose', viewId);
     }
   }
 }
@@ -701,7 +704,9 @@ class _UiKitPlatformView extends LeafRenderObjectWidget {
 
 /// The parameters used to create a [PlatformViewController].
 ///
-/// See also [CreatePlatformViewCallback] which uses this object to create a [PlatformViewController].
+/// See also:
+///
+///  * [CreatePlatformViewCallback] which uses this object to create a [PlatformViewController].
 class PlatformViewCreationParams {
 
   const PlatformViewCreationParams._({
@@ -737,7 +742,8 @@ class PlatformViewCreationParams {
 /// The returned widget should present the platform view associated with `controller`.
 ///
 /// See also:
-/// * [PlatformViewSurface], a common widget for presenting platform views.
+///
+///  * [PlatformViewSurface], a common widget for presenting platform views.
 typedef PlatformViewSurfaceFactory = Widget Function(BuildContext context, PlatformViewController controller);
 
 /// Constructs a [PlatformViewController].
@@ -745,7 +751,9 @@ typedef PlatformViewSurfaceFactory = Widget Function(BuildContext context, Platf
 /// The [PlatformViewController.id] field of the created controller must match the value of the
 /// params [PlatformViewCreationParams.id] field.
 ///
-/// See also [PlatformViewLink.onCreate].
+/// See also:
+///
+///  * [PlatformViewLink], which links a platform view with the Flutter framework.
 typedef CreatePlatformViewCallback = PlatformViewController Function(PlatformViewCreationParams params);
 
 /// Links a platform view with the Flutter framework.
@@ -785,8 +793,9 @@ class PlatformViewLink extends StatefulWidget {
   /// The `surfaceFactory` and the `onCreatePlatformView` must not be null.
   ///
   /// See also:
-  /// * [PlatformViewSurface] for details on the widget returned by `surfaceFactory`.
-  /// * [PlatformViewCreationParams] for how each parameter can be used when implementing `createPlatformView`.
+  ///
+  ///  * [PlatformViewSurface] for details on the widget returned by `surfaceFactory`.
+  ///  * [PlatformViewCreationParams] for how each parameter can be used when implementing `createPlatformView`.
   const PlatformViewLink({
     Key key,
     @required PlatformViewSurfaceFactory surfaceFactory,
@@ -894,8 +903,9 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
 
 /// Integrates a platform view with Flutter's compositor, touch, and semantics subsystems.
 ///
-/// The compositor integration is done by adding a [PlatformViewLayer] to the layer tree. [PlatformViewLayer]
-/// isn't supported on all platforms (e.g on Android platform views are composited using a [TextureLayer]).
+/// The compositor integration is done by adding a [PlatformViewLayer] to the layer tree. [PlatformViewSurface]
+/// isn't supported on all platforms (e.g on Android platform views can be composited by using a [TextureLayer] or
+/// [AndroidViewSurface]).
 /// Custom Flutter embedders can support [PlatformViewLayer]s by implementing a SystemCompositor.
 ///
 /// The widget fills all available space, the parent of this object must provide bounded layout
@@ -904,8 +914,9 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
 /// If the associated platform view is not created the [PlatformViewSurface] does not paint any contents.
 ///
 /// See also:
-/// * [AndroidView] which embeds an Android platform view in the widget hierarchy.
-/// * [UIKitView] which embeds an iOS platform view in the widget hierarchy.
+///
+///  * [AndroidView] which embeds an Android platform view in the widget hierarchy using a [TextureLayer].
+///  * [UIKitView] which embeds an iOS platform view in the widget hierarchy.
 // TODO(amirh): Link to the embedder's system compositor documentation once available.
 class PlatformViewSurface extends LeafRenderObjectWidget {
 
@@ -913,12 +924,14 @@ class PlatformViewSurface extends LeafRenderObjectWidget {
   ///
   /// The [controller] must not be null.
   const PlatformViewSurface({
+    Key key,
     @required this.controller,
     @required this.hitTestBehavior,
     @required this.gestureRecognizers,
   }) : assert(controller != null),
        assert(hitTestBehavior != null),
-       assert(gestureRecognizers != null);
+       assert(gestureRecognizers != null),
+       super(key: key);
 
   /// The controller for the platform view integrated by this [PlatformViewSurface].
   ///
@@ -981,5 +994,48 @@ class PlatformViewSurface extends LeafRenderObjectWidget {
       ..controller = controller
       ..hitTestBehavior = hitTestBehavior
       ..updateGestureRecognizers(gestureRecognizers);
+  }
+}
+
+/// Integrates an Android view with Flutter's compositor, touch, and semantics subsystems.
+///
+/// The compositor integration is done by adding a [PlatformViewLayer] to the layer tree. [PlatformViewLayer]
+/// isn't supported on all platforms. Custom Flutter embedders can support
+/// [PlatformViewLayer]s by implementing a SystemCompositor.
+///
+/// The widget fills all available space, the parent of this object must provide bounded layout
+/// constraints.
+///
+/// If the associated platform view is not created, the [AndroidViewSurface] does not paint any contents.
+///
+/// See also:
+///
+///  * [AndroidView] which embeds an Android platform view in the widget hierarchy using a [TextureLayer].
+///  * [UIKitView] which embeds an iOS platform view in the widget hierarchy.
+class AndroidViewSurface extends PlatformViewSurface {
+  /// Construct an `AndroidPlatformViewSurface`.
+  const AndroidViewSurface({
+    Key key,
+    @required AndroidViewController controller,
+    @required PlatformViewHitTestBehavior hitTestBehavior,
+    @required Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers,
+  }) : assert(controller != null),
+       assert(hitTestBehavior != null),
+       assert(gestureRecognizers != null),
+       super(
+          key: key,
+          controller: controller,
+          hitTestBehavior: hitTestBehavior,
+          gestureRecognizers: gestureRecognizers);
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    final PlatformViewRenderBox renderBox =
+        super.createRenderObject(context) as PlatformViewRenderBox;
+
+    (controller as AndroidViewController).pointTransformer =
+        (Offset position) => renderBox.globalToLocal(position);
+
+    return renderBox;
   }
 }

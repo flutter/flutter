@@ -1,6 +1,8 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -18,6 +20,7 @@ void main() {
     expect(buttonBarTheme.buttonPadding, null);
     expect(buttonBarTheme.buttonAlignedDropdown, null);
     expect(buttonBarTheme.layoutBehavior, null);
+    expect(buttonBarTheme.overflowDirection, null);
   });
 
   test('ThemeData uses default ButtonBarThemeData', () {
@@ -39,6 +42,7 @@ void main() {
       buttonPadding: EdgeInsets.symmetric(vertical: 5.0),
       buttonAlignedDropdown: false,
       layoutBehavior: ButtonBarLayoutBehavior.padded,
+      overflowDirection: VerticalDirection.down,
     );
     const ButtonBarThemeData barThemeAccent = ButtonBarThemeData(
       alignment: MainAxisAlignment.center,
@@ -49,6 +53,7 @@ void main() {
       buttonPadding: EdgeInsets.symmetric(horizontal: 10.0),
       buttonAlignedDropdown: true,
       layoutBehavior: ButtonBarLayoutBehavior.constrained,
+      overflowDirection: VerticalDirection.up,
     );
 
     final ButtonBarThemeData lerp = ButtonBarThemeData.lerp(barThemePrimary, barThemeAccent, 0.5);
@@ -60,6 +65,7 @@ void main() {
     expect(lerp.buttonPadding, equals(const EdgeInsets.fromLTRB(5.0, 2.5, 5.0, 2.5)));
     expect(lerp.buttonAlignedDropdown, isTrue);
     expect(lerp.layoutBehavior, equals(ButtonBarLayoutBehavior.constrained));
+    expect(lerp.overflowDirection, equals(VerticalDirection.up));
   });
 
   testWidgets('Default ButtonBarThemeData debugFillProperties', (WidgetTester tester) async {
@@ -85,6 +91,7 @@ void main() {
       buttonPadding: EdgeInsets.symmetric(horizontal: 7.3),
       buttonAlignedDropdown: true,
       layoutBehavior: ButtonBarLayoutBehavior.constrained,
+      overflowDirection: VerticalDirection.up,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -101,6 +108,7 @@ void main() {
       'padding: EdgeInsets(7.3, 0.0, 7.3, 0.0)',
       'dropdown width matches button',
       'layoutBehavior: ButtonBarLayoutBehavior.constrained',
+      'overflowDirection: VerticalDirection.up',
     ]);
   });
 

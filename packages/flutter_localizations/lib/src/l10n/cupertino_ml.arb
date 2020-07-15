@@ -18,5 +18,7 @@
   "cutButtonLabel": "മുറിക്കുക",
   "copyButtonLabel": "പകർത്തുക",
   "pasteButtonLabel": "ഒട്ടിക്കുക",
-  "selectAllButtonLabel": "എല്ലാം തിരഞ്ഞെടുക്കുക"
+  "selectAllButtonLabel": "എല്ലാം തിരഞ്ഞെടുക്കുക",
+  "tabSemanticsLabel": "$tabCount ടാബിൽ $tabIndex-ാമത്തേത്",
+  "modalBarrierDismissLabel": "നിരസിക്കുക"
 }

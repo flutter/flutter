@@ -18,5 +18,7 @@
   "cutButtonLabel": "Kəsin",
   "copyButtonLabel": "Kopyalayın",
   "pasteButtonLabel": "Yerləşdirin",
-  "selectAllButtonLabel": "Hamısını seçin"
+  "selectAllButtonLabel": "Hamısını seçin",
+  "tabSemanticsLabel": "Tab $tabIndex/$tabCount",
+  "modalBarrierDismissLabel": "İmtina edin"
 }

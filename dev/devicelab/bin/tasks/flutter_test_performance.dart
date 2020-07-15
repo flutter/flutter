@@ -1,4 +1,4 @@
-// Copyright (c) 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -49,7 +49,7 @@ Future<int> runTest({bool coverage = false}) async {
   );
   int badLines = 0;
   TestStep step = TestStep.starting;
-  await for (String entry in analysis.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter())) {
+  await for (final String entry in analysis.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter())) {
     print('test stdout ($step): $entry');
     if (step == TestStep.starting && entry == 'Building flutter tool...') {
       // ignore this line
@@ -59,7 +59,7 @@ Future<int> runTest({bool coverage = false}) async {
     } else if (step.index < TestStep.runningPubGet.index && entry == 'Running "flutter pub get" in automated_tests...') {
       // ignore this line
       step = TestStep.runningPubGet;
-    } else if (step.index < TestStep.testWritesFirstCarriageReturn.index && entry == '') {
+    } else if (step.index <= TestStep.testWritesFirstCarriageReturn.index && entry.trim() == '') {
       // we have a blank line at the start
       step = TestStep.testWritesFirstCarriageReturn;
     } else {
@@ -82,7 +82,7 @@ Future<int> runTest({bool coverage = false}) async {
       }
     }
   }
-  await for (String entry in analysis.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter())) {
+  await for (final String entry in analysis.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter())) {
     print('test stderr: $entry');
     badLines += 1;
   }

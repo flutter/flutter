@@ -1,22 +1,24 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 
-import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'asset.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
+import 'base/logger.dart';
+import 'base/net.dart';
+import 'base/os.dart';
 import 'build_info.dart';
 import 'bundle.dart';
 import 'compile.dart';
 import 'convert.dart' show base64, utf8;
-import 'dart/package_map.dart';
-import 'globals.dart';
 import 'vmservice.dart';
 
 class DevFSConfig {
@@ -45,12 +47,11 @@ abstract class DevFSContent {
 
   Stream<List<int>> contentsAsStream();
 
-  Stream<List<int>> contentsAsCompressedStream() {
-    return contentsAsStream().cast<List<int>>().transform<List<int>>(gzip.encoder);
+  Stream<List<int>> contentsAsCompressedStream(
+    OperatingSystemUtils osUtils,
+  ) {
+    return osUtils.gzipLevel1Stream(contentsAsStream());
   }
-
-  /// Return the list of files this content depends on.
-  List<String> get fileDependencies => <String>[];
 }
 
 // File content to be copied to the device.
@@ -58,7 +59,7 @@ class DevFSFileContent extends DevFSContent {
   DevFSFileContent(this.file);
 
   final FileSystemEntity file;
-  FileSystemEntity _linkTarget;
+  File _linkTarget;
   FileStat _fileStat;
 
   File _getFile() {
@@ -67,9 +68,9 @@ class DevFSFileContent extends DevFSContent {
     }
     if (file is Link) {
       // The link target.
-      return fs.file(file.resolveSymbolicLinksSync());
+      return file.fileSystem.file(file.resolveSymbolicLinksSync());
     }
-    return file;
+    return file as File;
   }
 
   void _stat() {
@@ -88,7 +89,7 @@ class DevFSFileContent extends DevFSContent {
     if (_fileStat != null && _fileStat.type == FileSystemEntityType.link) {
       // Resolve, stat, and maybe cache the symlink target.
       final String resolved = file.resolveSymbolicLinksSync();
-      final FileSystemEntity linkTarget = fs.file(resolved);
+      final File linkTarget = file.fileSystem.file(resolved);
       // Stat the link target.
       final FileStat fileStat = linkTarget.statSync();
       if (fileStat.type == FileSystemEntityType.notFound) {
@@ -98,13 +99,7 @@ class DevFSFileContent extends DevFSContent {
         _linkTarget = linkTarget;
       }
     }
-    if (_fileStat == null) {
-      printError('Unable to get status of file "${file.path}": file not found.');
-    }
   }
-
-  @override
-  List<String> get fileDependencies => <String>[_getFile().path];
 
   @override
   bool get isModified {
@@ -207,55 +202,6 @@ class DevFSStringContent extends DevFSByteContent {
   }
 }
 
-/// Abstract DevFS operations interface.
-abstract class DevFSOperations {
-  Future<Uri> create(String fsName);
-  Future<dynamic> destroy(String fsName);
-  Future<dynamic> writeFile(String fsName, Uri deviceUri, DevFSContent content);
-}
-
-/// An implementation of [DevFSOperations] that speaks to the
-/// vm service.
-class ServiceProtocolDevFSOperations implements DevFSOperations {
-  ServiceProtocolDevFSOperations(this.vmService);
-
-  final VMService vmService;
-
-  @override
-  Future<Uri> create(String fsName) async {
-    final Map<String, dynamic> response = await vmService.vm.createDevFS(fsName);
-    return Uri.parse(response['uri']);
-  }
-
-  @override
-  Future<dynamic> destroy(String fsName) async {
-    await vmService.vm.deleteDevFS(fsName);
-  }
-
-  @override
-  Future<dynamic> writeFile(String fsName, Uri deviceUri, DevFSContent content) async {
-    List<int> bytes;
-    try {
-      bytes = await content.contentsAsBytes();
-    } catch (e) {
-      return e;
-    }
-    final String fileContents = base64.encode(bytes);
-    try {
-      return await vmService.vm.invokeRpcRaw(
-        '_writeDevFSFile',
-        params: <String, dynamic>{
-          'fsName': fsName,
-          'uri': deviceUri.toString(),
-          'fileContents': fileContents,
-        },
-      );
-    } catch (error) {
-      printTrace('DevFS: Failed to write $deviceUri: $error');
-    }
-  }
-}
-
 class DevFSException implements Exception {
   DevFSException(this.message, [this.error, this.stackTrace]);
   final String message;
@@ -264,8 +210,21 @@ class DevFSException implements Exception {
 }
 
 class _DevFSHttpWriter {
-  _DevFSHttpWriter(this.fsName, VMService serviceProtocol)
-    : httpAddress = serviceProtocol.httpAddress;
+  _DevFSHttpWriter(
+    this.fsName,
+    vm_service.VmService serviceProtocol, {
+    @required OperatingSystemUtils osUtils,
+    @required HttpClient httpClient,
+    @required Logger logger,
+  })
+    : httpAddress = serviceProtocol.httpAddress,
+      _client = httpClient,
+      _osUtils = osUtils,
+      _logger = logger;
+
+  final HttpClient _client;
+  final OperatingSystemUtils _osUtils;
+  final Logger _logger;
 
   final String fsName;
   final Uri httpAddress;
@@ -275,12 +234,11 @@ class _DevFSHttpWriter {
   int _inFlight = 0;
   Map<Uri, DevFSContent> _outstanding;
   Completer<void> _completer;
-  final HttpClient _client = HttpClient();
 
   Future<void> write(Map<Uri, DevFSContent> entries) async {
     _client.maxConnectionsPerHost = kMaxInFlight;
     _completer = Completer<void>();
-    _outstanding = Map<Uri, DevFSContent>.from(entries);
+    _outstanding = Map<Uri, DevFSContent>.of(entries);
     _scheduleWrites();
     await _completer.future;
   }
@@ -308,19 +266,24 @@ class _DevFSHttpWriter {
         request.headers.removeAll(HttpHeaders.acceptEncodingHeader);
         request.headers.add('dev_fs_name', fsName);
         request.headers.add('dev_fs_uri_b64', base64.encode(utf8.encode('$deviceUri')));
-        final Stream<List<int>> contents = content.contentsAsCompressedStream();
+        final Stream<List<int>> contents = content.contentsAsCompressedStream(
+          _osUtils,
+        );
         await request.addStream(contents);
         final HttpClientResponse response = await request.close();
         response.listen((_) => null,
-            onError: (dynamic error) { printTrace('error: $error'); },
-            cancelOnError: true);
+          onError: (dynamic error) {
+            _logger.printTrace('error: $error');
+          },
+          cancelOnError: true,
+        );
         break;
-      } catch (error, trace) {
+      } on Exception catch (error, trace) {
         if (!_completer.isCompleted) {
-          printTrace('Error writing "$deviceUri" to DevFS: $error');
+          _logger.printTrace('Error writing "$deviceUri" to DevFS: $error');
           if (retry > 0) {
             retry--;
-            printTrace('trying again in a few - $retry more attempts left');
+            _logger.printTrace('trying again in a few - $retry more attempts left');
             await Future<void>.delayed(const Duration(milliseconds: 500));
             continue;
           }
@@ -349,12 +312,19 @@ class UpdateFSReport {
   int get invalidatedSourcesCount => _invalidatedSourcesCount;
   int get syncedBytes => _syncedBytes;
 
+  /// JavaScript modules produced by the incremental compiler in `dartdevc`
+  /// mode.
+  ///
+  /// Only used for JavaScript compilation.
+  List<String> invalidatedModules;
+
   void incorporateResults(UpdateFSReport report) {
     if (!report._success) {
       _success = false;
     }
     _invalidatedSourcesCount += report._invalidatedSourcesCount;
     _syncedBytes += report._syncedBytes;
+    invalidatedModules ??= report.invalidatedModules;
   }
 
   bool _success;
@@ -365,30 +335,38 @@ class UpdateFSReport {
 class DevFS {
   /// Create a [DevFS] named [fsName] for the local files in [rootDirectory].
   DevFS(
-    VMService serviceProtocol,
+    vm_service.VmService serviceProtocol,
     this.fsName,
     this.rootDirectory, {
-    String packagesFilePath,
-  }) : _operations = ServiceProtocolDevFSOperations(serviceProtocol),
-       _httpWriter = _DevFSHttpWriter(fsName, serviceProtocol),
-       _packagesFilePath = packagesFilePath ?? fs.path.join(rootDirectory.path, kPackagesFileName);
+    @required OperatingSystemUtils osUtils,
+    @required Logger logger,
+    @required FileSystem fileSystem,
+    HttpClient httpClient,
+  }) : _vmService = serviceProtocol,
+       _logger = logger,
+       _fileSystem = fileSystem,
+       _httpWriter = _DevFSHttpWriter(
+        fsName,
+        serviceProtocol,
+        osUtils: osUtils,
+        logger: logger,
+        httpClient: httpClient ?? ((context.get<HttpClientFactory>() == null)
+          ? HttpClient()
+          : context.get<HttpClientFactory>()())
+      );
 
-  DevFS.operations(
-    this._operations,
-    this.fsName,
-    this.rootDirectory, {
-    String packagesFilePath,
-  }) : _httpWriter = null,
-       _packagesFilePath = packagesFilePath ?? fs.path.join(rootDirectory.path, kPackagesFileName);
-
-  final DevFSOperations _operations;
+  final vm_service.VmService _vmService;
   final _DevFSHttpWriter _httpWriter;
+  final Logger _logger;
+  final FileSystem _fileSystem;
+
   final String fsName;
   final Directory rootDirectory;
-  final String _packagesFilePath;
   final Set<String> assetPathsToEvict = <String>{};
+
   List<Uri> sources = <Uri>[];
   DateTime lastCompiled;
+  PackageConfig lastPackageConfig;
 
   Uri _baseUri;
   Uri get baseUri => _baseUri;
@@ -404,61 +382,66 @@ class DevFS {
   }
 
   Future<Uri> create() async {
-    printTrace('DevFS: Creating new filesystem on the device ($_baseUri)');
+    _logger.printTrace('DevFS: Creating new filesystem on the device ($_baseUri)');
     try {
-      _baseUri = await _operations.create(fsName);
-    } on rpc.RpcException catch (rpcException) {
+      final vm_service.Response response = await _vmService.createDevFS(fsName);
+      _baseUri = Uri.parse(response.json['uri'] as String);
+    } on vm_service.RPCError catch (rpcException) {
       // 1001 is kFileSystemAlreadyExists in //dart/runtime/vm/json_stream.h
       if (rpcException.code != 1001) {
         rethrow;
       }
-      printTrace('DevFS: Creating failed. Destroying and trying again');
+      _logger.printTrace('DevFS: Creating failed. Destroying and trying again');
       await destroy();
-      _baseUri = await _operations.create(fsName);
+      final vm_service.Response response = await _vmService.createDevFS(fsName);
+      _baseUri = Uri.parse(response.json['uri'] as String);
     }
-    printTrace('DevFS: Created new filesystem on the device ($_baseUri)');
+    _logger.printTrace('DevFS: Created new filesystem on the device ($_baseUri)');
     return _baseUri;
   }
 
   Future<void> destroy() async {
-    printTrace('DevFS: Deleting filesystem on the device ($_baseUri)');
-    await _operations.destroy(fsName);
-    printTrace('DevFS: Deleted filesystem on the device ($_baseUri)');
+    _logger.printTrace('DevFS: Deleting filesystem on the device ($_baseUri)');
+    await _vmService.deleteDevFS(fsName);
+    _logger.printTrace('DevFS: Deleted filesystem on the device ($_baseUri)');
   }
 
   /// Updates files on the device.
   ///
   /// Returns the number of bytes synced.
   Future<UpdateFSReport> update({
-    @required String mainPath,
+    @required Uri mainUri,
+    @required ResidentCompiler generator,
+    @required bool trackWidgetCreation,
+    @required String pathToReload,
+    @required List<Uri> invalidatedFiles,
+    @required PackageConfig packageConfig,
     String target,
     AssetBundle bundle,
     DateTime firstBuildTime,
     bool bundleFirstUpload = false,
-    @required ResidentCompiler generator,
     String dillOutputPath,
-    @required bool trackWidgetCreation,
     bool fullRestart = false,
     String projectRootPath,
-    @required String pathToReload,
-    @required List<Uri> invalidatedFiles,
+    bool skipAssets = false,
   }) async {
     assert(trackWidgetCreation != null);
     assert(generator != null);
     final DateTime candidateCompileTime = DateTime.now();
+    lastPackageConfig = packageConfig;
 
     // Update modified files
-    final String assetBuildDirPrefix = _asUriPath(getAssetBuildDirectory());
     final Map<Uri, DevFSContent> dirtyEntries = <Uri, DevFSContent>{};
 
     int syncedBytes = 0;
-    if (bundle != null) {
-      printTrace('Scanning asset files');
+    if (bundle != null && !skipAssets) {
+      _logger.printTrace('Scanning asset files');
+      final String assetBuildDirPrefix = _asUriPath(getAssetBuildDirectory());
       // We write the assets into the AssetBundle working dir so that they
       // are in the same location in DevFS and the iOS simulator.
       final String assetDirectory = getAssetBuildDirectory();
       bundle.entries.forEach((String archivePath, DevFSContent content) {
-        final Uri deviceUri = fs.path.toUri(fs.path.join(assetDirectory, archivePath));
+        final Uri deviceUri = _fileSystem.path.toUri(_fileSystem.path.join(assetDirectory, archivePath));
         if (deviceUri.path.startsWith(assetBuildDirPrefix)) {
           archivePath = deviceUri.path.substring(assetBuildDirPrefix.length);
         }
@@ -476,12 +459,15 @@ class DevFS {
     if (fullRestart) {
       generator.reset();
     }
-    printTrace('Compiling dart to kernel with ${invalidatedFiles.length} updated files');
+    // On a full restart, or on an initial compile for the attach based workflow,
+    // this will produce a full dill. Subsequent invocations will produce incremental
+    // dill files that depend on the invalidated files.
+    _logger.printTrace('Compiling dart to kernel with ${invalidatedFiles.length} updated files');
     final CompilerOutput compilerOutput = await generator.recompile(
-      mainPath,
+      mainUri,
       invalidatedFiles,
-      outputPath:  dillOutputPath ?? getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation),
-      packagesFilePath : _packagesFilePath,
+      outputPath: dillOutputPath ?? getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation),
+      packageConfig: packageConfig,
     );
     if (compilerOutput == null || compilerOutput.errorCount > 0) {
       return UpdateFSReport(success: false);
@@ -496,32 +482,32 @@ class DevFS {
     if (!bundleFirstUpload) {
       final String compiledBinary = compilerOutput?.outputFilename;
       if (compiledBinary != null && compiledBinary.isNotEmpty) {
-        final Uri entryUri = fs.path.toUri(projectRootPath != null
-          ? fs.path.relative(pathToReload, from: projectRootPath)
+        final Uri entryUri = _fileSystem.path.toUri(projectRootPath != null
+          ? _fileSystem.path.relative(pathToReload, from: projectRootPath)
           : pathToReload,
         );
-        final DevFSFileContent content = DevFSFileContent(fs.file(compiledBinary));
+        final DevFSFileContent content = DevFSFileContent(_fileSystem.file(compiledBinary));
         syncedBytes += content.size;
         dirtyEntries[entryUri] = content;
       }
     }
-    printTrace('Updating files');
+    _logger.printTrace('Updating files');
     if (dirtyEntries.isNotEmpty) {
       try {
         await _httpWriter.write(dirtyEntries);
       } on SocketException catch (socketException, stackTrace) {
-        printTrace('DevFS sync failed. Lost connection to device: $socketException');
+        _logger.printTrace('DevFS sync failed. Lost connection to device: $socketException');
         throw DevFSException('Lost connection to device.', socketException, stackTrace);
-      } catch (exception, stackTrace) {
-        printError('Could not update files on device: $exception');
+      } on Exception catch (exception, stackTrace) {
+        _logger.printError('Could not update files on device: $exception');
         throw DevFSException('Sync failed', exception, stackTrace);
       }
     }
-    printTrace('DevFS: Sync finished');
+    _logger.printTrace('DevFS: Sync finished');
     return UpdateFSReport(success: true, syncedBytes: syncedBytes,
          invalidatedSourcesCount: invalidatedFiles.length);
   }
-}
 
-/// Converts a platform-specific file path to a platform-independent Uri path.
-String _asUriPath(String filePath) => fs.path.toUri(filePath).path + '/';
+  /// Converts a platform-specific file path to a platform-independent URL path.
+  String _asUriPath(String filePath) => _fileSystem.path.toUri(filePath).path + '/';
+}

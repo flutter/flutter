@@ -1,6 +1,8 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
@@ -20,7 +22,7 @@ void main() {
               top: 456.0,
               child: CompositedTransformTarget(
                 link: link,
-                child: Container(height: 10.0, width: 10.0),
+                child: const SizedBox(height: 10.0, width: 10.0),
               ),
             ),
             Positioned(
@@ -35,7 +37,7 @@ void main() {
         ),
       ),
     );
-    final RenderBox box = key.currentContext.findRenderObject();
+    final RenderBox box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(Offset.zero), const Offset(123.0, 456.0));
   });
 
@@ -74,8 +76,8 @@ void main() {
         ),
       ),
     );
-    final RenderBox box1 = key1.currentContext.findRenderObject();
-    final RenderBox box2 = key2.currentContext.findRenderObject();
+    final RenderBox box1 = key1.currentContext.findRenderObject() as RenderBox;
+    final RenderBox box2 = key2.currentContext.findRenderObject() as RenderBox;
     final Offset position1 = box1.localToGlobal(Offset.zero);
     final Offset position2 = box2.localToGlobal(Offset.zero);
     expect(position1.dx, moreOrLessEquals(position2.dx));
@@ -129,8 +131,8 @@ void main() {
         ),
       ),
     );
-    final RenderBox box1 = key1.currentContext.findRenderObject();
-    final RenderBox box2 = key2.currentContext.findRenderObject();
+    final RenderBox box1 = key1.currentContext.findRenderObject() as RenderBox;
+    final RenderBox box2 = key2.currentContext.findRenderObject() as RenderBox;
     final Offset position1 = box1.localToGlobal(Offset.zero);
     final Offset position2 = box2.localToGlobal(Offset.zero);
     expect(position1.dx, moreOrLessEquals(position2.dx));
@@ -169,7 +171,7 @@ void main() {
         ),
       ),
     );
-    final RenderBox box2 = key2.currentContext.findRenderObject();
+    final RenderBox box2 = key2.currentContext.findRenderObject() as RenderBox;
     expect(box2.size, const Size(10.0, 10.0));
     expect(_tapped, isFalse);
     await tester.tap(find.byKey(key1));

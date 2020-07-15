@@ -1,13 +1,16 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/gestures.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
@@ -204,8 +207,9 @@ void main() {
     // just set the start position.
     await gesture.moveBy(const Offset(20.0, 0.0));
     await gesture.moveBy(const Offset(20.0, 0.0));
-    expect(value, isTrue);
+    expect(value, isFalse);
     await gesture.up();
+    expect(value, isTrue);
     await tester.pump();
 
     gesture = await tester.startGesture(switchRect.center);
@@ -213,11 +217,14 @@ void main() {
     await gesture.moveBy(const Offset(20.0, 0.0));
     expect(value, isTrue);
     await gesture.up();
+    expect(value, isTrue);
     await tester.pump();
 
     gesture = await tester.startGesture(switchRect.center);
     await gesture.moveBy(const Offset(-20.0, 0.0));
     await gesture.moveBy(const Offset(-20.0, 0.0));
+    expect(value, isTrue);
+    await gesture.up();
     expect(value, isFalse);
   });
 
@@ -488,6 +495,84 @@ void main() {
     expect(tester.hasRunningAnimations, false);
   });
 
+  testWidgets('can veto switch dragging result', (WidgetTester tester) async {
+    bool value = false;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Material(
+              child: Center(
+                child: Switch(
+                  dragStartBehavior: DragStartBehavior.down,
+                  value: value,
+                  onChanged: (bool newValue) {
+                    setState(() {
+                      value = value || newValue;
+                    });
+                  },
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    // Move a little to the right, not past the middle.
+    TestGesture gesture = await tester.startGesture(tester.getRect(find.byType(Switch)).center);
+    await gesture.moveBy(const Offset(kTouchSlop + 0.1, 0.0));
+    await tester.pump();
+    await gesture.moveBy(const Offset(-kTouchSlop + 5.1, 0.0));
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+    expect(value, isFalse);
+    final RenderToggleable renderObject = tester.renderObject<RenderToggleable>(
+      find.descendant(
+        of: find.byType(Switch),
+        matching: find.byWidgetPredicate(
+          (Widget widget) => widget.runtimeType.toString() == '_SwitchRenderObjectWidget',
+        ),
+      ),
+    );
+    expect(renderObject.position.value, lessThan(0.5));
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(value, isFalse);
+    expect(renderObject.position.value, 0);
+
+    // Move past the middle.
+    gesture = await tester.startGesture(tester.getRect(find.byType(Switch)).center);
+    await gesture.moveBy(const Offset(kTouchSlop + 0.1, 0.0));
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+    expect(value, isTrue);
+    expect(renderObject.position.value, greaterThan(0.5));
+
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(value, isTrue);
+    expect(renderObject.position.value, 1.0);
+
+    // Now move back to the left, the revert animation should play.
+    gesture = await tester.startGesture(tester.getRect(find.byType(Switch)).center);
+    await gesture.moveBy(const Offset(-kTouchSlop - 0.1, 0.0));
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+    expect(value, isTrue);
+    expect(renderObject.position.value, lessThan(0.5));
+
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(value, isTrue);
+    expect(renderObject.position.value, 1.0);
+  });
+
   testWidgets('switch has semantic events', (WidgetTester tester) async {
     dynamic semanticEvent;
     bool value = false;
@@ -518,7 +603,7 @@ void main() {
       ),
     );
     await tester.tap(find.byType(Switch));
-    final RenderObject object = tester.firstRenderObject(find.byType(Switch));
+    final RenderObject object = tester.firstRenderObject(find.byType(Focus));
 
     expect(value, true);
     expect(semanticEvent, <String, dynamic>{
@@ -584,6 +669,7 @@ void main() {
 
   testWidgets('Switch.adaptive', (WidgetTester tester) async {
     bool value = false;
+    const Color inactiveTrackColor = Colors.pink;
 
     Widget buildFrame(TargetPlatform platform) {
       return MaterialApp(
@@ -594,6 +680,7 @@ void main() {
               child: Center(
                 child: Switch.adaptive(
                   value: value,
+                  inactiveTrackColor: inactiveTrackColor,
                   onChanged: (bool newValue) {
                     setState(() {
                       value = newValue;
@@ -607,20 +694,325 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildFrame(TargetPlatform.iOS));
-    expect(find.byType(CupertinoSwitch), findsOneWidget);
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
+      value = false;
+      await tester.pumpWidget(buildFrame(platform));
+      expect(find.byType(CupertinoSwitch), findsOneWidget, reason: 'on ${describeEnum(platform)}');
 
-    expect(value, isFalse);
-    await tester.tap(find.byType(Switch));
-    expect(value, isTrue);
+      final CupertinoSwitch adaptiveSwitch = tester.widget(find.byType(CupertinoSwitch));
+      expect(adaptiveSwitch.trackColor, inactiveTrackColor, reason: 'on ${describeEnum(platform)}');
 
-    await tester.pumpWidget(buildFrame(TargetPlatform.android));
-    await tester.pumpAndSettle(); // Finish the theme change animation.
-    expect(find.byType(CupertinoSwitch), findsNothing);
-    expect(value, isTrue);
-    await tester.tap(find.byType(Switch));
-    expect(value, isFalse);
+      expect(value, isFalse, reason: 'on ${describeEnum(platform)}');
+      await tester.tap(find.byType(Switch));
+      expect(value, isTrue, reason: 'on ${describeEnum(platform)}');
+    }
 
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows ]) {
+      value = false;
+      await tester.pumpWidget(buildFrame(platform));
+      await tester.pumpAndSettle(); // Finish the theme change animation.
+      expect(find.byType(CupertinoSwitch), findsNothing);
+      expect(value, isFalse, reason: 'on ${describeEnum(platform)}');
+      await tester.tap(find.byType(Switch));
+      expect(value, isTrue, reason: 'on ${describeEnum(platform)}');
+    }
   });
 
+  testWidgets('Switch is focusable and has correct focus color', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'Switch');
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    bool value = true;
+    Widget buildApp({bool enabled = true}) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return Switch(
+                value: value,
+                onChanged: enabled ? (bool newValue) {
+                  setState(() {
+                    value = newValue;
+                  });
+                } : null,
+                focusColor: Colors.orange[500],
+                autofocus: true,
+                focusNode: focusNode,
+              );
+            }),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildApp());
+
+    await tester.pumpAndSettle();
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(
+            color: const Color(0x801e88e5),
+            rrect: RRect.fromLTRBR(
+                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+        ..circle(color: Colors.orange[500])
+        ..circle(color: const Color(0x33000000))
+        ..circle(color: const Color(0x24000000))
+        ..circle(color: const Color(0x1f000000))
+        ..circle(color: const Color(0xff1e88e5)),
+    );
+
+    // Check the false value.
+    value = false;
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(
+            color: const Color(0x52000000),
+            rrect: RRect.fromLTRBR(
+                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+        ..circle(color: Colors.orange[500])
+        ..circle(color: const Color(0x33000000))
+        ..circle(color: const Color(0x24000000))
+        ..circle(color: const Color(0x1f000000))
+        ..circle(color: const Color(0xfffafafa)),
+    );
+
+    // Check what happens when disabled.
+    value = false;
+    await tester.pumpWidget(buildApp(enabled: false));
+    await tester.pumpAndSettle();
+    expect(focusNode.hasPrimaryFocus, isFalse);
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(
+            color: const Color(0x1f000000),
+            rrect: RRect.fromLTRBR(
+                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+        ..circle(color: const Color(0x33000000))
+        ..circle(color: const Color(0x24000000))
+        ..circle(color: const Color(0x1f000000))
+        ..circle(color: const Color(0xffbdbdbd)),
+    );
+  });
+
+  testWidgets('Switch can be hovered and has correct hover color', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    bool value = true;
+    Widget buildApp({bool enabled = true}) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return Switch(
+                value: value,
+                onChanged: enabled ? (bool newValue) {
+                  setState(() {
+                    value = newValue;
+                  });
+                } : null,
+                hoverColor: Colors.orange[500],
+              );
+            }),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(
+            color: const Color(0x801e88e5),
+            rrect: RRect.fromLTRBR(
+                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+        ..circle(color: const Color(0x33000000))
+        ..circle(color: const Color(0x24000000))
+        ..circle(color: const Color(0x1f000000))
+        ..circle(color: const Color(0xff1e88e5)),
+    );
+
+    // Start hovering
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(tester.getCenter(find.byType(Switch)));
+
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(
+            color: const Color(0x801e88e5),
+            rrect: RRect.fromLTRBR(
+                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+        ..circle(color: Colors.orange[500])
+        ..circle(color: const Color(0x33000000))
+        ..circle(color: const Color(0x24000000))
+        ..circle(color: const Color(0x1f000000))
+        ..circle(color: const Color(0xff1e88e5)),
+    );
+
+    // Check what happens when disabled.
+    await tester.pumpWidget(buildApp(enabled: false));
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(
+            color: const Color(0x1f000000),
+            rrect: RRect.fromLTRBR(
+                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+        ..circle(color: const Color(0x33000000))
+        ..circle(color: const Color(0x24000000))
+        ..circle(color: const Color(0x1f000000))
+        ..circle(color: const Color(0xffbdbdbd)),
+    );
+  });
+
+  testWidgets('Switch can be toggled by keyboard shortcuts', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    bool value = true;
+    Widget buildApp({bool enabled = true}) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return Switch(
+                value: value,
+                onChanged: enabled ? (bool newValue) {
+                  setState(() {
+                    value = newValue;
+                  });
+                } : null,
+                focusColor: Colors.orange[500],
+                autofocus: true,
+              );
+            }),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+    // On web, switches don't respond to the enter key.
+    expect(value, kIsWeb ? isTrue : isFalse);
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+    expect(value, isTrue);
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pumpAndSettle();
+    expect(value, isFalse);
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pumpAndSettle();
+    expect(value, isTrue);
+  });
+
+  testWidgets('Switch changes mouse cursor when hovered', (WidgetTester tester) async {
+    // Test Switch.adaptive() constructor
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: Material(
+              child: MouseRegion(
+                cursor: SystemMouseCursors.forbidden,
+                child: Switch.adaptive(
+                  mouseCursor: SystemMouseCursors.text,
+                  value: true,
+                  onChanged: (_) {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(Switch)));
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    // Test Switch() constructor
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: Material(
+              child: MouseRegion(
+                cursor: SystemMouseCursors.forbidden,
+                child: Switch(
+                  mouseCursor: SystemMouseCursors.text,
+                  value: true,
+                  onChanged: (_) {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await gesture.moveTo(tester.getCenter(find.byType(Switch)));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    // Test default cursor
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: Material(
+              child: MouseRegion(
+                cursor: SystemMouseCursors.forbidden,
+                child: Switch(
+                  value: true,
+                  onChanged: (_) {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    // Test default cursor when disabled
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: Material(
+              child: MouseRegion(
+                cursor: SystemMouseCursors.forbidden,
+                child: Switch(
+                  value: true,
+                  onChanged: null,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    await tester.pumpAndSettle();
+  });
 }

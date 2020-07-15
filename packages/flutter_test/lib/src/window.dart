@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -83,22 +83,6 @@ class TestWindow implements Window {
   /// physical size.
   void clearPhysicalSizeTestValue() {
     _physicalSizeTestValue = null;
-    onMetricsChanged();
-  }
-
-  @override
-  double get physicalDepth => _physicalDepthTestValue ?? _window.physicalDepth;
-  double _physicalDepthTestValue;
-  /// Hides the real physical depth and reports the given
-  /// [physicalDepthTestValue] instead.
-  set physicalDepthTestValue (double physicalDepthTestValue) {
-    _physicalDepthTestValue = physicalDepthTestValue;
-    onMetricsChanged();
-  }
-  /// Deletes any existing test physical depth and returns to using the real
-  /// physical depth.
-  void clearPhysicalDepthTestValue() {
-    _physicalDepthTestValue = null;
     onMetricsChanged();
   }
 
@@ -286,13 +270,9 @@ class TestWindow implements Window {
   }
 
   @override
-  // use frameTimings. https://github.com/flutter/flutter/issues/38838
-  // ignore: deprecated_member_use
   TimingsCallback get onReportTimings => _window.onReportTimings;
   @override
   set onReportTimings(TimingsCallback callback) {
-    // use frameTimings. https://github.com/flutter/flutter/issues/38838
-    // ignore: deprecated_member_use
     _window.onReportTimings = callback;
   }
 
@@ -422,7 +402,6 @@ class TestWindow implements Window {
     clearLocalesTestValue();
     clearPaddingTestValue();
     clearPhysicalSizeTestValue();
-    clearPhysicalDepthTestValue();
     clearSemanticsEnabledTestValue();
     clearTextScaleFactorTestValue();
     clearViewInsetsTestValue();

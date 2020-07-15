@@ -18,5 +18,7 @@
   "cutButtonLabel": "ຕັດ",
   "copyButtonLabel": "ສຳເນົາ",
   "pasteButtonLabel": "ວາງ",
-  "selectAllButtonLabel": "ເລືອກທັງໝົດ"
+  "selectAllButtonLabel": "ເລືອກທັງໝົດ",
+  "tabSemanticsLabel": "ແຖບທີ $tabIndex ຈາກທັງໝົດ $tabCount",
+  "modalBarrierDismissLabel": "ປິດໄວ້"
 }

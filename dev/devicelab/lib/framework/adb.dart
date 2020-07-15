@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -12,11 +12,47 @@ import 'package:path/path.dart' as path;
 
 import 'utils.dart';
 
+const String DeviceIdEnvName = 'FLUTTER_DEVICELAB_DEVICEID';
+
+class DeviceException implements Exception {
+  const DeviceException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => message == null ? '$DeviceException' : '$DeviceException: $message';
+}
+
+/// Gets the artifact path relative to the current directory.
+String getArtifactPath() {
+  return path.normalize(
+      path.join(
+        path.current,
+        '../../bin/cache/artifacts',
+      )
+    );
+}
+
+/// Return the item is in idList if find a match, otherwise return null
+String _findMatchId(List<String> idList, String idPattern) {
+  String candidate;
+  idPattern = idPattern.toLowerCase();
+  for(final String id in idList) {
+    if (id.toLowerCase() == idPattern) {
+      return id;
+    }
+    if (id.toLowerCase().startsWith(idPattern)) {
+      candidate ??= id;
+    }
+  }
+  return candidate;
+}
+
 /// The root of the API for controlling devices.
 DeviceDiscovery get devices => DeviceDiscovery();
 
 /// Device operating system the test is configured to test.
-enum DeviceOperatingSystem { android, ios }
+enum DeviceOperatingSystem { android, ios, fuchsia, fake }
 
 /// Device OS to test on.
 DeviceOperatingSystem deviceOperatingSystem = DeviceOperatingSystem.android;
@@ -29,8 +65,14 @@ abstract class DeviceDiscovery {
         return AndroidDeviceDiscovery();
       case DeviceOperatingSystem.ios:
         return IosDeviceDiscovery();
+      case DeviceOperatingSystem.fuchsia:
+        return FuchsiaDeviceDiscovery();
+      case DeviceOperatingSystem.fake:
+        print('Looking for fake devices!'
+              'You should not see this in release builds.');
+        return FakeDeviceDiscovery();
       default:
-        throw StateError('Unsupported device operating system: {config.deviceOperatingSystem}');
+        throw DeviceException('Unsupported device operating system: $deviceOperatingSystem');
     }
   }
 
@@ -40,6 +82,9 @@ abstract class DeviceDiscovery {
   /// Calling this method does not guarantee that the same device will be
   /// returned. For such behavior see [workingDevice].
   Future<void> chooseWorkingDevice();
+
+  /// Select the device with ID strati with deviceId, return the device.
+  Future<void> chooseWorkingDeviceById(String deviceId);
 
   /// A device to work with.
   ///
@@ -60,6 +105,9 @@ abstract class DeviceDiscovery {
 
 /// A proxy for one specific device.
 abstract class Device {
+  // Const constructor so subclasses may be const.
+  const Device();
+
   /// A unique device identifier.
   String get deviceId;
 
@@ -97,6 +145,11 @@ abstract class Device {
 
   /// Stop a process.
   Future<void> stop(String packageName);
+
+  @override
+  String toString() {
+    return 'device: $deviceId';
+  }
 }
 
 class AndroidDeviceDiscovery implements DeviceDiscovery {
@@ -118,6 +171,11 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
   @override
   Future<AndroidDevice> get workingDevice async {
     if (_workingDevice == null) {
+      if (Platform.environment.containsKey(DeviceIdEnvName)) {
+        final String deviceId = Platform.environment[DeviceIdEnvName];
+        await chooseWorkingDeviceById(deviceId);
+        return _workingDevice;
+      }
       await chooseWorkingDevice();
     }
 
@@ -128,15 +186,30 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
   /// [workingDevice].
   @override
   Future<void> chooseWorkingDevice() async {
-    final List<Device> allDevices = (await discoverDevices())
-      .map<Device>((String id) => AndroidDevice(deviceId: id))
+    final List<AndroidDevice> allDevices = (await discoverDevices())
+      .map<AndroidDevice>((String id) => AndroidDevice(deviceId: id))
       .toList();
 
     if (allDevices.isEmpty)
-      throw 'No Android devices detected';
+      throw const DeviceException('No Android devices detected');
 
     // TODO(yjbanov): filter out and warn about those with low battery level
     _workingDevice = allDevices[math.Random().nextInt(allDevices.length)];
+    print('Device chosen: $_workingDevice');
+  }
+
+  @override
+  Future<void> chooseWorkingDeviceById(String deviceId) async {
+    final String matchedId = _findMatchId(await discoverDevices(), deviceId);
+    if (matchedId != null) {
+      _workingDevice = AndroidDevice(deviceId: matchedId);
+      print('Choose device by ID: $matchedId');
+      return;
+    }
+    throw DeviceException(
+      'Device with ID $deviceId is not found for operating system: '
+      '$deviceOperatingSystem'
+      );
   }
 
   @override
@@ -144,7 +217,7 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
     final List<String> output = (await eval(adbPath, <String>['devices', '-l'], canFail: false))
         .trim().split('\n');
     final List<String> results = <String>[];
-    for (String line in output) {
+    for (final String line in output) {
       // Skip lines like: * daemon started successfully *
       if (line.startsWith('* daemon '))
         continue;
@@ -162,7 +235,7 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
           results.add(deviceID);
         }
       } else {
-        throw 'Failed to parse device from adb output: "$line"';
+        throw FormatException('Failed to parse device from adb output: "$line"');
       }
     }
 
@@ -172,14 +245,14 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
   @override
   Future<Map<String, HealthCheckResult>> checkDevices() async {
     final Map<String, HealthCheckResult> results = <String, HealthCheckResult>{};
-    for (String deviceId in await discoverDevices()) {
+    for (final String deviceId in await discoverDevices()) {
       try {
         final AndroidDevice device = AndroidDevice(deviceId: deviceId);
         // Just a smoke test that we can read wakefulness state
         // TODO(yjbanov): check battery level
         await device._getWakefulness();
         results['android-device-$deviceId'] = HealthCheckResult.success();
-      } catch (e, s) {
+      } on Exception catch (e, s) {
         results['android-device-$deviceId'] = HealthCheckResult.error(e, s);
       }
     }
@@ -198,11 +271,119 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
   }
 }
 
-class AndroidDevice implements Device {
-  AndroidDevice({@required this.deviceId});
+class FuchsiaDeviceDiscovery implements DeviceDiscovery {
+  factory FuchsiaDeviceDiscovery() {
+    return _instance ??= FuchsiaDeviceDiscovery._();
+  }
+
+  FuchsiaDeviceDiscovery._();
+
+  static FuchsiaDeviceDiscovery _instance;
+
+ FuchsiaDevice _workingDevice;
+
+ String get _devFinder {
+    final String devFinder = path.join(getArtifactPath(), 'fuchsia', 'tools', 'device-finder');
+    if (!File(devFinder).existsSync()) {
+      throw FileSystemException("Couldn't find device-finder at location $devFinder");
+    }
+    return devFinder;
+ }
+
+  @override
+  Future<FuchsiaDevice> get workingDevice async {
+    if (_workingDevice == null) {
+      if (Platform.environment.containsKey(DeviceIdEnvName)) {
+        final String deviceId = Platform.environment[DeviceIdEnvName];
+        await chooseWorkingDeviceById(deviceId);
+        return _workingDevice;
+      }
+      await chooseWorkingDevice();
+    }
+    return _workingDevice;
+  }
+
+  /// Picks the first connected Fuchsia device.
+  @override
+  Future<void> chooseWorkingDevice() async {
+    final List<FuchsiaDevice> allDevices = (await discoverDevices())
+      .map<FuchsiaDevice>((String id) => FuchsiaDevice(deviceId: id))
+      .toList();
+
+    if (allDevices.isEmpty) {
+      throw const DeviceException('No Fuchsia devices detected');
+    }
+    _workingDevice = allDevices.first;
+    print('Device chosen: $_workingDevice');
+  }
+
+  @override
+  Future<void> chooseWorkingDeviceById(String deviceId) async {
+    final String matchedId = _findMatchId(await discoverDevices(), deviceId);
+    if (deviceId != null) {
+      _workingDevice = FuchsiaDevice(deviceId: matchedId);
+      print('Choose device by ID: $matchedId');
+      return;
+    }
+    throw DeviceException(
+      'Device with ID $deviceId is not found for operating system: '
+      '$deviceOperatingSystem'
+      );
+  }
+
+  @override
+  Future<List<String>> discoverDevices() async {
+    final List<String> output = (await eval(_devFinder, <String>['list', '-full']))
+      .trim()
+      .split('\n');
+
+    final List<String> devices = <String>[];
+    for (final String line in output) {
+      final List<String> parts = line.split(' ');
+      assert(parts.length == 2);
+      devices.add(parts.last); // The device id.
+    }
+    return devices;
+  }
+
+  @override
+  Future<Map<String, HealthCheckResult>> checkDevices() async {
+    final Map<String, HealthCheckResult> results = <String, HealthCheckResult>{};
+    for (final String deviceId in await discoverDevices()) {
+      try {
+        final int resolveResult = await exec(
+          _devFinder,
+          <String>[
+            'resolve',
+            '-device-limit',
+            '1',
+            deviceId,
+          ]
+        );
+        if (resolveResult == 0) {
+          results['fuchsia-device-$deviceId'] = HealthCheckResult.success();
+        } else {
+          results['fuchsia-device-$deviceId'] = HealthCheckResult.failure('Cannot resolve device $deviceId');
+        }
+      } on Exception catch (error, stacktrace) {
+        results['fuchsia-device-$deviceId'] = HealthCheckResult.error(error, stacktrace);
+      }
+    }
+    return results;
+  }
+
+  @override
+  Future<void> performPreflightTasks() async {}
+}
+
+class AndroidDevice extends Device {
+  AndroidDevice({@required this.deviceId}) {
+    _updateDeviceInfo();
+  }
 
   @override
   final String deviceId;
+  String deviceInfo = '';
 
   /// Whether the device is awake.
   @override
@@ -260,19 +441,53 @@ class AndroidDevice implements Device {
     return wakefulness;
   }
 
+  Future<void> _updateDeviceInfo() async {
+    String info;
+    try {
+      info = await shellEval(
+        'getprop',
+        <String>[
+          'ro.bootimage.build.fingerprint', ';',
+          'getprop', 'ro.build.version.release', ';',
+          'getprop', 'ro.build.version.sdk',
+        ],
+        silent: true,
+      );
+    } on IOException {
+      info = '';
+    }
+    final List<String> list = info.split('\n');
+    if (list.length == 3) {
+      deviceInfo = 'fingerprint: ${list[0]} os: ${list[1]}  api-level: ${list[2]}';
+    } else {
+      deviceInfo = '';
+    }
+  }
+
   /// Executes [command] on `adb shell` and returns its exit code.
-  Future<void> shellExec(String command, List<String> arguments, { Map<String, String> environment }) async {
-    await adb(<String>['shell', command, ...arguments], environment: environment);
+  Future<void> shellExec(String command, List<String> arguments, { Map<String, String> environment, bool silent = false }) async {
+    await adb(<String>['shell', command, ...arguments], environment: environment, silent: silent);
   }
 
   /// Executes [command] on `adb shell` and returns its standard output as a [String].
-  Future<String> shellEval(String command, List<String> arguments, { Map<String, String> environment }) {
-    return adb(<String>['shell', command, ...arguments], environment: environment);
+  Future<String> shellEval(String command, List<String> arguments, { Map<String, String> environment, bool silent = false }) {
+    return adb(<String>['shell', command, ...arguments], environment: environment, silent: silent);
   }
 
   /// Runs `adb` with the given [arguments], selecting this device.
-  Future<String> adb(List<String> arguments, { Map<String, String> environment }) {
-    return eval(adbPath, <String>['-s', deviceId, ...arguments], environment: environment, canFail: false);
+  Future<String> adb(
+      List<String> arguments, {
+      Map<String, String> environment,
+      bool silent = false,
+    }) {
+    return eval(
+      adbPath,
+      <String>['-s', deviceId, ...arguments],
+      environment: environment,
+      canFail: false,
+      printStdout: !silent,
+      printStderr: !silent,
+    );
   }
 
   @override
@@ -355,6 +570,11 @@ class AndroidDevice implements Device {
   Future<void> stop(String packageName) async {
     return shellExec('am', <String>['force-stop', packageName]);
   }
+
+  @override
+  String toString() {
+    return '$deviceId $deviceInfo';
+  }
 }
 
 class IosDeviceDiscovery implements DeviceDiscovery {
@@ -371,6 +591,11 @@ class IosDeviceDiscovery implements DeviceDiscovery {
   @override
   Future<IosDevice> get workingDevice async {
     if (_workingDevice == null) {
+      if (Platform.environment.containsKey(DeviceIdEnvName)) {
+        final String deviceId = Platform.environment[DeviceIdEnvName];
+        await chooseWorkingDeviceById(deviceId);
+        return _workingDevice;
+      }
       await chooseWorkingDevice();
     }
 
@@ -386,52 +611,76 @@ class IosDeviceDiscovery implements DeviceDiscovery {
       .toList();
 
     if (allDevices.isEmpty)
-      throw 'No iOS devices detected';
+      throw const DeviceException('No iOS devices detected');
 
     // TODO(yjbanov): filter out and warn about those with low battery level
     _workingDevice = allDevices[math.Random().nextInt(allDevices.length)];
+    print('Device chosen: $_workingDevice');
   }
 
-  // Returns the path to cached binaries relative to devicelab directory
-  String get _artifactDirPath {
-    return path.normalize(
-      path.join(
-        path.current,
-        '../../bin/cache/artifacts',
-      )
-    );
-  }
-
-  // Returns a colon-separated environment variable that contains the paths
-  // of linked libraries for idevice_id
-  Map<String, String> get _ideviceIdEnvironment {
-    final String libPath = const <String>[
-      'libimobiledevice',
-      'usbmuxd',
-      'libplist',
-      'openssl',
-      'ideviceinstaller',
-      'ios-deploy',
-    ].map((String packageName) => path.join(_artifactDirPath, packageName)).join(':');
-    return <String, String>{'DYLD_LIBRARY_PATH': libPath};
+  @override
+  Future<void> chooseWorkingDeviceById(String deviceId) async {
+    final String matchedId = _findMatchId(await discoverDevices(), deviceId);
+    if (matchedId != null) {
+      _workingDevice = IosDevice(deviceId: matchedId);
+      print('Choose device by ID: $matchedId');
+      return;
+    }
+    throw DeviceException(
+      'Device with ID $deviceId is not found for operating system: '
+      '$deviceOperatingSystem'
+      );
   }
 
   @override
   Future<List<String>> discoverDevices() async {
-    final String ideviceIdPath = path.join(_artifactDirPath, 'libimobiledevice', 'idevice_id');
-    final List<String> iosDeviceIDs = LineSplitter.split(await eval(ideviceIdPath, <String>['-l'], environment: _ideviceIdEnvironment))
-      .map<String>((String line) => line.trim())
-      .where((String line) => line.isNotEmpty)
-      .toList();
-    if (iosDeviceIDs.isEmpty)
-      throw 'No connected iOS devices found.';
-    return iosDeviceIDs;
+    final List<dynamic> results = json.decode(await eval(
+      path.join(flutterDirectory.path, 'bin', 'flutter'),
+      <String>['devices', '--machine', '--suppress-analytics'],
+    )) as List<dynamic>;
+
+    // [
+    //   {
+    //     "name": "Flutter's iPhone",
+    //     "id": "00008020-00017DA80CC1002E",
+    //     "isSupported": true,
+    //     "targetPlatform": "ios",
+    //     "emulator": false,
+    //     "sdk": "iOS 13.2",
+    //     "capabilities": {
+    //       "hotReload": true,
+    //       "hotRestart": true,
+    //       "screenshot": true,
+    //       "fastStart": false,
+    //       "flutterExit": true,
+    //       "hardwareRendering": false,
+    //       "startPaused": false
+    //     }
+    //   }
+    // ]
+
+    final List<String> deviceIds = <String>[];
+
+    for (final dynamic result in results) {
+      final Map<String, dynamic> device = result as Map<String, dynamic>;
+      if (device['targetPlatform'] == 'ios' &&
+          device['id'] != null &&
+          device['emulator'] != true &&
+          device['isSupported'] == true) {
+        deviceIds.add(device['id'] as String);
+      }
+    }
+
+    if (deviceIds.isEmpty) {
+      throw const DeviceException('No connected iOS devices found.');
+    }
+    return deviceIds;
   }
 
   @override
   Future<Map<String, HealthCheckResult>> checkDevices() async {
     final Map<String, HealthCheckResult> results = <String, HealthCheckResult>{};
-    for (String deviceId in await discoverDevices()) {
+    for (final String deviceId in await discoverDevices()) {
       // TODO(ianh): do a more meaningful connectivity check than just recording the ID
       results['ios-device-$deviceId'] = HealthCheckResult.success();
     }
@@ -445,7 +694,7 @@ class IosDeviceDiscovery implements DeviceDiscovery {
 }
 
 /// iOS device.
-class IosDevice implements Device {
+class IosDevice extends Device {
   const IosDevice({ @required this.deviceId });
 
   @override
@@ -476,36 +725,189 @@ class IosDevice implements Device {
 
   @override
   Future<void> tap(int x, int y) async {
-    throw 'Not implemented';
+    throw UnimplementedError();
   }
 
   @override
   Future<Map<String, dynamic>> getMemoryStats(String packageName) async {
-    throw 'Not implemented';
+    throw UnimplementedError();
   }
 
   @override
   Stream<String> get logcat {
-    throw 'Not implemented';
+    throw UnimplementedError();
   }
 
   @override
   Future<void> stop(String packageName) async {}
 }
 
+/// Fuchsia device.
+class FuchsiaDevice extends Device {
+  const FuchsiaDevice({ @required this.deviceId });
+
+  @override
+  final String deviceId;
+
+  // TODO(egarciad): Implement these for Fuchsia.
+  @override
+  Future<bool> isAwake() async => true;
+
+  @override
+  Future<bool> isAsleep() async => false;
+
+  @override
+  Future<void> wakeUp() async {}
+
+  @override
+  Future<void> sendToSleep() async {}
+
+  @override
+  Future<void> togglePower() async {}
+
+  @override
+  Future<void> unlock() async {}
+
+  @override
+  Future<void> tap(int x, int y) async {}
+
+  @override
+  Future<void> stop(String packageName) async {}
+
+  @override
+  Future<Map<String, dynamic>> getMemoryStats(String packageName) async {
+    throw UnimplementedError();
+  }
+
+  @override
+  Stream<String> get logcat {
+    throw UnimplementedError();
+  }
+}
+
 /// Path to the `adb` executable.
 String get adbPath {
   final String androidHome = Platform.environment['ANDROID_HOME'] ?? Platform.environment['ANDROID_SDK_ROOT'];
 
-  if (androidHome == null)
-    throw 'The ANDROID_SDK_ROOT and ANDROID_HOME environment variables are '
-        'missing. At least one of these variables must point to the Android '
-        'SDK directory containing platform-tools.';
+  if (androidHome == null) {
+    throw const DeviceException(
+      'The ANDROID_SDK_ROOT environment variable is '
+      'missing. The variable must point to the Android '
+      'SDK directory containing platform-tools.'
+    );
+  }
 
   final String adbPath = path.join(androidHome, 'platform-tools/adb');
 
   if (!canRun(adbPath))
-    throw 'adb not found at: $adbPath';
+    throw DeviceException('adb not found at: $adbPath');
 
   return path.absolute(adbPath);
+}
+
+class FakeDevice extends Device {
+  const FakeDevice({ @required this.deviceId });
+
+  @override
+  final String deviceId;
+
+  @override
+  Future<bool> isAwake() async => true;
+
+  @override
+  Future<bool> isAsleep() async => false;
+
+  @override
+  Future<void> wakeUp() async {}
+
+  @override
+  Future<void> sendToSleep() async {}
+
+  @override
+  Future<void> togglePower() async {}
+
+  @override
+  Future<void> unlock() async {}
+
+  @override
+  Future<void> tap(int x, int y) async {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Map<String, dynamic>> getMemoryStats(String packageName) async {
+    throw UnimplementedError();
+  }
+
+  @override
+  Stream<String> get logcat {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> stop(String packageName) async {}
+}
+
+class FakeDeviceDiscovery implements DeviceDiscovery {
+  factory FakeDeviceDiscovery() {
+    return _instance ??= FakeDeviceDiscovery._();
+  }
+
+  FakeDeviceDiscovery._();
+
+  static FakeDeviceDiscovery _instance;
+
+  FakeDevice _workingDevice;
+
+  @override
+  Future<FakeDevice> get workingDevice async {
+    if (_workingDevice == null) {
+      if (Platform.environment.containsKey(DeviceIdEnvName)) {
+        final String deviceId = Platform.environment[DeviceIdEnvName];
+        await chooseWorkingDeviceById(deviceId);
+        return _workingDevice;
+      }
+      await chooseWorkingDevice();
+    }
+
+    return _workingDevice;
+  }
+
+  /// The Fake is only available for by ID device discovery.
+  @override
+  Future<void> chooseWorkingDevice() async {
+    throw const DeviceException('No fake devices detected');
+  }
+
+  @override
+  Future<void> chooseWorkingDeviceById(String deviceId) async {
+    final String matchedId = _findMatchId(await discoverDevices(), deviceId);
+    if (matchedId != null) {
+      _workingDevice = FakeDevice(deviceId: matchedId);
+      print('Choose device by ID: $matchedId');
+      return;
+    }
+    throw DeviceException(
+      'Device with ID $deviceId is not found for operating system: '
+      '$deviceOperatingSystem'
+      );
+  }
+
+  @override
+  Future<List<String>> discoverDevices() async {
+    return <String>['FAKE_SUCCESS', 'THIS_IS_A_FAKE'];
+  }
+
+  @override
+  Future<Map<String, HealthCheckResult>> checkDevices() async {
+    final Map<String, HealthCheckResult> results = <String, HealthCheckResult>{};
+    for (final String deviceId in await discoverDevices()) {
+      results['fake-device-$deviceId'] = HealthCheckResult.success();
+    }
+    return results;
+  }
+
+  @override
+  Future<void> performPreflightTasks() async {
+  }
 }

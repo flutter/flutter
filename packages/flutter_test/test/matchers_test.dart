@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -240,27 +240,27 @@ void main() {
   test('isSameColorAs', () {
     expect(
       const Color(0x87654321),
-      isSameColorAs(_CustomColor(0x87654321)),
+      isSameColorAs(const _CustomColor(0x87654321)),
     );
 
     expect(
-      _CustomColor(0x87654321),
+      const _CustomColor(0x87654321),
       isSameColorAs(const Color(0x87654321)),
     );
 
     expect(
       const Color(0x12345678),
-      isNot(isSameColorAs(_CustomColor(0x87654321))),
+      isNot(isSameColorAs(const _CustomColor(0x87654321))),
     );
 
     expect(
-      _CustomColor(0x87654321),
+      const _CustomColor(0x87654321),
       isNot(isSameColorAs(const Color(0x12345678))),
     );
 
     expect(
-      _CustomColor(0xFF123456),
-      isSameColorAs(_CustomColor(0xFF123456)..isEqual = false),
+      const _CustomColor(0xFF123456),
+      isSameColorAs(const _CustomColor(0xFF123456, isEqual: false)),
     );
   });
 
@@ -530,9 +530,9 @@ void main() {
       int actions = 0;
       int flags = 0;
       const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');
-      for (int index in SemanticsAction.values.keys)
+      for (final int index in SemanticsAction.values.keys)
         actions |= index;
-      for (int index in SemanticsFlag.values.keys)
+      for (final int index in SemanticsFlag.values.keys)
         // TODO(mdebbar): Remove this if after https://github.com/flutter/engine/pull/9894
         if (SemanticsFlag.values[index] != SemanticsFlag.isMultiline)
           flags |= index;
@@ -704,12 +704,13 @@ class _FakeSemanticsNode extends SemanticsNode {
   SemanticsData getSemanticsData() => data;
 }
 
+@immutable
 class _CustomColor extends Color {
-  _CustomColor(int value) : super(value);
-  bool isEqual;
+  const _CustomColor(int value, {this.isEqual}) : super(value);
+  final bool isEqual;
 
   @override
-  bool operator ==(dynamic other) => isEqual ?? super == other;
+  bool operator ==(Object other) => isEqual ?? super == other;
 
   @override
   int get hashCode => hashValues(super.hashCode, isEqual);

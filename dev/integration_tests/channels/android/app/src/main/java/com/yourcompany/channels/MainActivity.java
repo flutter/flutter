@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -11,16 +11,16 @@ import java.util.Date;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 
-import dev.flutter.plugins.GeneratedPluginRegistrant;
 import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.plugin.common.*;
+import io.flutter.plugins.GeneratedPluginRegistrant;
 
 public class MainActivity extends FlutterActivity {
   @Override
   public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
-    GeneratedPluginRegistrant.registerWith(flutterEngine);
+    super.configureFlutterEngine(flutterEngine);
 
     DartExecutor dartExecutor = flutterEngine.getDartExecutor();
     setupMessageHandshake(new BasicMessageChannel<>(dartExecutor, "binary-msg", BinaryCodec.INSTANCE));

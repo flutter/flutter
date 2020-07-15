@@ -1,6 +1,8 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 import 'dart:ui';
 
@@ -113,15 +115,15 @@ void main() {
     b.append(f);
     c.append(g);
 
-    for (ContainerLayer layer in allLayers) {
+    for (final ContainerLayer layer in allLayers) {
       expect(layer.debugSubtreeNeedsAddToScene, true);
     }
 
-    for (ContainerLayer layer in allLayers) {
+    for (final ContainerLayer layer in allLayers) {
       layer.debugMarkClean();
     }
 
-    for (ContainerLayer layer in allLayers) {
+    for (final ContainerLayer layer in allLayers) {
       expect(layer.debugSubtreeNeedsAddToScene, false);
     }
 
@@ -148,7 +150,7 @@ void main() {
     expect(g.debugSubtreeNeedsAddToScene, true);
 
     a.buildScene(SceneBuilder());
-    for (ContainerLayer layer in allLayers) {
+    for (final ContainerLayer layer in allLayers) {
       expect(layer.debugSubtreeNeedsAddToScene, false);
     }
   });
@@ -224,10 +226,58 @@ void main() {
     expect(layer.debugSubtreeNeedsAddToScene, true);
   }
 
+  List<String> _getDebugInfo(Layer layer) {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    layer.debugFillProperties(builder);
+    return builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString()).toList();
+  }
+
+  test('ClipRectLayer prints clipBehavior in debug info', () {
+    expect(_getDebugInfo(ClipRectLayer()), contains('clipBehavior: Clip.hardEdge'));
+    expect(
+      _getDebugInfo(ClipRectLayer(clipBehavior: Clip.antiAliasWithSaveLayer)),
+      contains('clipBehavior: Clip.antiAliasWithSaveLayer'),
+    );
+  });
+
+  test('ClipRRectLayer prints clipBehavior in debug info', () {
+    expect(_getDebugInfo(ClipRRectLayer()), contains('clipBehavior: Clip.antiAlias'));
+    expect(
+      _getDebugInfo(ClipRRectLayer(clipBehavior: Clip.antiAliasWithSaveLayer)),
+      contains('clipBehavior: Clip.antiAliasWithSaveLayer'),
+    );
+  });
+
+  test('ClipPathLayer prints clipBehavior in debug info', () {
+    expect(_getDebugInfo(ClipPathLayer()), contains('clipBehavior: Clip.antiAlias'));
+    expect(
+      _getDebugInfo(ClipPathLayer(clipBehavior: Clip.antiAliasWithSaveLayer)),
+      contains('clipBehavior: Clip.antiAliasWithSaveLayer'),
+    );
+  });
+
+  test('PictureLayer prints picture, engine layer, and raster cache hints in debug info', () {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    canvas.drawPaint(Paint());
+    final Picture picture = recorder.endRecording();
+    final PictureLayer layer = PictureLayer(const Rect.fromLTRB(0, 0, 1, 1));
+    layer.picture = picture;
+    layer.isComplexHint = true;
+    layer.willChangeHint = false;
+    final List<String> info = _getDebugInfo(layer);
+    expect(info, contains('picture: ${describeIdentity(picture)}'));
+    expect(info, contains('engine layer: ${describeIdentity(null)}'));
+    expect(info, contains('raster cache hints: isComplex = true, willChange = false'));
+  });
+
   test('mutating PictureLayer fields triggers needsAddToScene', () {
     final PictureLayer pictureLayer = PictureLayer(Rect.zero);
     checkNeedsAddToScene(pictureLayer, () {
       final PictureRecorder recorder = PictureRecorder();
+      Canvas(recorder);
       pictureLayer.picture = recorder.endRecording();
     });
 
@@ -401,7 +451,7 @@ void main() {
         shadowColor: const Color(0x00000000),
       );
       _testConflicts(layerA, layerB, expectedErrorCount: 1);
-    });
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44572
 
     // Tests:
     //
@@ -447,7 +497,7 @@ void main() {
         shadowColor: const Color(0x00000000),
       );
       _testConflicts(layerA, layerB, expectedErrorCount: 0);
-    });
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44572
 
     // Tests:
     //
@@ -479,7 +529,7 @@ void main() {
         shadowColor: const Color(0x00000000),
       );
       _testConflicts(layerA, layerB, expectedErrorCount: 0);
-    });
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44572
 
     // Tests:
     //
@@ -515,8 +565,8 @@ void main() {
       );
 
       _testConflicts(layerA, layerB, expectedErrorCount: 1);
-    });
-  }, skip: isBrowser);
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44572
+  });
 
   test('ContainerLayer.toImage can render interior layer', () {
     final OffsetLayer parent = OffsetLayer();

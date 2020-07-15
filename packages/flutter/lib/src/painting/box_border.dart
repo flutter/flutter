@@ -1,6 +1,8 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 import 'package:flutter/foundation.dart';
 
@@ -105,9 +107,9 @@ abstract class BoxBorder extends ShapeBorder {
   static BoxBorder lerp(BoxBorder a, BoxBorder b, double t) {
     assert(t != null);
     if ((a is Border || a == null) && (b is Border || b == null))
-      return Border.lerp(a, b, t);
+      return Border.lerp(a as Border, b as Border, t);
     if ((a is BorderDirectional || a == null) && (b is BorderDirectional || b == null))
-      return BorderDirectional.lerp(a, b, t);
+      return BorderDirectional.lerp(a as BorderDirectional, b as BorderDirectional, t);
     if (b is Border && a is BorderDirectional) {
       final BoxBorder c = b;
       b = a;
@@ -243,7 +245,7 @@ abstract class BoxBorder extends ShapeBorder {
 ///
 /// The sides are represented by [BorderSide] objects.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// All four borders the same, two-pixel wide solid white:
 ///
@@ -251,7 +253,7 @@ abstract class BoxBorder extends ShapeBorder {
 /// Border.all(width: 2.0, color: const Color(0xFFFFFFFF))
 /// ```
 /// {@end-tool}
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// The border for a material design divider:
 ///
@@ -259,7 +261,7 @@ abstract class BoxBorder extends ShapeBorder {
 /// Border(bottom: BorderSide(color: Theme.of(context).dividerColor))
 /// ```
 /// {@end-tool}
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// A 1990s-era "OK" button:
 ///
@@ -326,6 +328,32 @@ class Border extends BoxBorder {
         bottom = side,
         left = side;
 
+  /// Creates a border with symmetrical vertical and horizontal sides.
+  ///
+  /// All arguments default to [BorderSide.none] and must not be null.
+  ///
+  /// Currently, the `vertical` argument will apply to the top and bottom
+  /// borders, and the `horizontal` argument will apply to the left and right
+  /// borders. This is not consistent with the use of "vertical" and
+  /// "horizontal" elsewhere in the framework, so the
+  /// `invertMeaningOfVerticalAndHorizontal` argument exists to facilitate
+  /// the transition of this constructor to using the correct semantics of
+  /// these arguments. Callers are encouraged to pass false to that argument
+  /// to get the correct semantics. In a future change, the default value of
+  /// the argument will be changed to false, followed by the removal of the
+  /// argument altogether.
+  const Border.symmetric({
+    BorderSide vertical = BorderSide.none,
+    BorderSide horizontal = BorderSide.none,
+    bool invertMeaningOfVerticalAndHorizontal = true,
+  }) : assert(vertical != null),
+       assert(horizontal != null),
+       assert(invertMeaningOfVerticalAndHorizontal != null),
+       left = invertMeaningOfVerticalAndHorizontal ? horizontal : vertical,
+       top = invertMeaningOfVerticalAndHorizontal ? vertical : horizontal,
+       right = invertMeaningOfVerticalAndHorizontal ? horizontal : vertical,
+       bottom = invertMeaningOfVerticalAndHorizontal ? vertical : horizontal;
+
   /// A uniform border with all sides the same color and width.
   ///
   /// The sides default to black solid borders, one logical pixel wide.
@@ -378,38 +406,31 @@ class Border extends BoxBorder {
   }
 
   @override
-  bool get isUniform {
+  bool get isUniform => _colorIsUniform && _widthIsUniform && _styleIsUniform;
+
+  bool get _colorIsUniform {
     final Color topColor = top.color;
-    if (right.color != topColor ||
-        bottom.color != topColor ||
-        left.color != topColor)
-      return false;
+    return right.color == topColor && bottom.color == topColor && left.color == topColor;
+  }
 
+  bool get _widthIsUniform {
     final double topWidth = top.width;
-    if (right.width != topWidth ||
-        bottom.width != topWidth ||
-        left.width != topWidth)
-      return false;
+    return right.width == topWidth && bottom.width == topWidth && left.width == topWidth;
+  }
 
+  bool get _styleIsUniform {
     final BorderStyle topStyle = top.style;
-    if (right.style != topStyle ||
-        bottom.style != topStyle ||
-        left.style != topStyle)
-      return false;
-
-    return true;
+    return right.style == topStyle && bottom.style == topStyle && left.style == topStyle;
   }
 
   @override
   Border add(ShapeBorder other, { bool reversed = false }) {
-    if (other is! Border)
-      return null;
-    final Border typedOther = other;
-    if (BorderSide.canMerge(top, typedOther.top) &&
-        BorderSide.canMerge(right, typedOther.right) &&
-        BorderSide.canMerge(bottom, typedOther.bottom) &&
-        BorderSide.canMerge(left, typedOther.left)) {
-      return Border.merge(this, typedOther);
+    if (other is Border &&
+        BorderSide.canMerge(top, other.top) &&
+        BorderSide.canMerge(right, other.right) &&
+        BorderSide.canMerge(bottom, other.bottom) &&
+        BorderSide.canMerge(left, other.left)) {
+      return Border.merge(this, other);
     }
     return null;
   }
@@ -509,23 +530,45 @@ class Border extends BoxBorder {
       }
     }
 
-    assert(borderRadius == null, 'A borderRadius can only be given for uniform borders.');
-    assert(shape == BoxShape.rectangle, 'A border can only be drawn as a circle if it is uniform.');
+    assert(() {
+      if (borderRadius != null) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('A borderRadius can only be given for a uniform Border.'),
+          ErrorDescription('The following is not uniform:'),
+          if (!_colorIsUniform) ErrorDescription('BorderSide.color'),
+          if (!_widthIsUniform) ErrorDescription('BorderSide.width'),
+          if (!_styleIsUniform) ErrorDescription('BorderSide.style'),
+        ]);
+      }
+      return true;
+    }());
+    assert(() {
+      if (shape != BoxShape.rectangle) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('A Border can only be drawn as a circle if it is uniform'),
+          ErrorDescription('The following is not uniform:'),
+          if (!_colorIsUniform) ErrorDescription('BorderSide.color'),
+          if (!_widthIsUniform) ErrorDescription('BorderSide.width'),
+          if (!_styleIsUniform) ErrorDescription('BorderSide.style'),
+        ]);
+      }
+      return true;
+    }());
 
     paintBorder(canvas, rect, top: top, right: right, bottom: bottom, left: left);
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
-    final Border typedOther = other;
-    return top == typedOther.top &&
-           right == typedOther.right &&
-           bottom == typedOther.bottom &&
-           left == typedOther.left;
+    return other is Border
+        && other.top == top
+        && other.right == right
+        && other.bottom == bottom
+        && other.left == left;
   }
 
   @override
@@ -534,14 +577,14 @@ class Border extends BoxBorder {
   @override
   String toString() {
     if (isUniform)
-      return '$runtimeType.all($top)';
+      return '${objectRuntimeType(this, 'Border')}.all($top)';
     final List<String> arguments = <String>[
       if (top != BorderSide.none) 'top: $top',
       if (right != BorderSide.none) 'right: $right',
       if (bottom != BorderSide.none) 'bottom: $bottom',
       if (left != BorderSide.none) 'left: $left',
     ];
-    return '$runtimeType(${arguments.join(", ")})';
+    return '${objectRuntimeType(this, 'Border')}(${arguments.join(", ")})';
   }
 }
 
@@ -820,16 +863,16 @@ class BorderDirectional extends BoxBorder {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
-    final BorderDirectional typedOther = other;
-    return top == typedOther.top &&
-           start == typedOther.start &&
-           end == typedOther.end &&
-           bottom == typedOther.bottom;
+    return other is BorderDirectional
+        && other.top == top
+        && other.start == start
+        && other.end == end
+        && other.bottom == bottom;
   }
 
   @override
@@ -843,6 +886,6 @@ class BorderDirectional extends BoxBorder {
       if (end != BorderSide.none) 'end: $end',
       if (bottom != BorderSide.none) 'bottom: $bottom',
     ];
-    return '$runtimeType(${arguments.join(", ")})';
+    return '${objectRuntimeType(this, 'BorderDirectional')}(${arguments.join(", ")})';
   }
 }

@@ -1,6 +1,8 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
@@ -8,7 +10,7 @@ import 'package:flutter/widgets.dart';
 ChangerState changer;
 
 class Changer extends StatefulWidget {
-  const Changer(this.child);
+  const Changer(this.child, { Key key }) : super(key: key);
 
   final Widget child;
 
@@ -32,7 +34,7 @@ class ChangerState extends State<Changer> {
 }
 
 class Wrapper extends StatelessWidget {
-  const Wrapper(this.child);
+  const Wrapper(this.child, { Key key }) : super(key: key);
 
   final Widget child;
 
@@ -41,6 +43,7 @@ class Wrapper extends StatelessWidget {
 }
 
 class Leaf extends StatefulWidget {
+  const Leaf({ Key key }) : super(key: key);
   @override
   LeafState createState() => LeafState();
 }
@@ -52,8 +55,8 @@ class LeafState extends State<Leaf> {
 
 void main() {
   testWidgets('three-way setState() smoke test', (WidgetTester tester) async {
-    await tester.pumpWidget(Changer(Wrapper(Leaf())));
-    await tester.pumpWidget(Changer(Wrapper(Leaf())));
+    await tester.pumpWidget(const Changer(Wrapper(Leaf())));
+    await tester.pumpWidget(const Changer(Wrapper(Leaf())));
     changer.test();
     await tester.pump();
   });

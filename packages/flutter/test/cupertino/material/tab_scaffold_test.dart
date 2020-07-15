@@ -1,6 +1,8 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -131,7 +133,7 @@ void main() {
     BoxDecoration tabDecoration = tester.widget<DecoratedBox>(find.descendant(
       of: find.byType(CupertinoTabBar),
       matching: find.byType(DecoratedBox),
-    )).decoration;
+    )).decoration as BoxDecoration;
 
     expect(tabDecoration.color, isSameColorAs(const Color(0xF0F9F9F9))); // Inherited from theme.
 
@@ -157,7 +159,7 @@ void main() {
     tabDecoration = tester.widget<DecoratedBox>(find.descendant(
       of: find.byType(CupertinoTabBar),
       matching: find.byType(DecoratedBox),
-    )).decoration;
+    )).decoration as BoxDecoration;
 
     expect(tabDecoration.color, isSameColorAs(const Color(0xF01D1D1D)));
 
@@ -199,7 +201,7 @@ void main() {
         of: find.byType(CupertinoTabScaffold),
         matching: find.byType(DecoratedBox),
       )
-    ).decoration;
+    ).decoration as BoxDecoration;
 
     expect(tabDecoration.color.value, backgroundColor.color.value);
 
@@ -222,7 +224,7 @@ void main() {
         of: find.byType(CupertinoTabScaffold),
         matching: find.byType(DecoratedBox),
       )
-    ).decoration;
+    ).decoration as BoxDecoration;
 
     expect(tabDecoration.color.value, backgroundColor.darkColor.value);
   });

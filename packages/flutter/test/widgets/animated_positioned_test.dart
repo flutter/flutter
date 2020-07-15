@@ -1,6 +1,8 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
@@ -41,12 +43,12 @@ void main() {
       ),
     );
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
 
     await tester.pumpWidget(
@@ -68,17 +70,17 @@ void main() {
     const Offset first = Offset(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0);
     const Offset last = Offset(37.0 + 59.0 / 2.0, 31.0 + 71.0 / 2.0);
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(first));
 
     await tester.pump(const Duration(seconds: 1));
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(Offset.lerp(first, last, 0.5)));
 
     await tester.pump(const Duration(seconds: 1));
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(last));
 
     expect(box, hasAGoodToStringDeep);
@@ -125,12 +127,12 @@ void main() {
       ),
     );
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
 
     await tester.pumpWidget(
@@ -154,17 +156,17 @@ void main() {
     const Offset first = Offset(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0);
     const Offset last = Offset(37.0 + 59.0 / 2.0, 31.0 + 71.0 / 2.0);
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(first));
 
     await tester.pump(const Duration(seconds: 1));
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(Offset.lerp(first, last, 0.5)));
 
     await tester.pump(const Duration(seconds: 1));
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(last));
 
     expect(box, hasAGoodToStringDeep);
@@ -211,12 +213,12 @@ void main() {
       ),
     );
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(800.0 - 50.0 - 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(800.0 - 50.0 - 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
 
     await tester.pumpWidget(
@@ -240,17 +242,17 @@ void main() {
     const Offset first = Offset(800.0 - 50.0 - 70.0 / 2.0, 30.0 + 110.0 / 2.0);
     const Offset last = Offset(800.0 - 37.0 - 59.0 / 2.0, 31.0 + 71.0 / 2.0);
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(first));
 
     await tester.pump(const Duration(seconds: 1));
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(Offset.lerp(first, last, 0.5)));
 
     await tester.pump(const Duration(seconds: 1));
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(last));
 
     expect(box, hasAGoodToStringDeep);
@@ -295,12 +297,12 @@ void main() {
       ),
     );
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0, 50.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0, 50.0)));
 
     await tester.pumpWidget(
@@ -319,12 +321,12 @@ void main() {
       ),
     );
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0, 50.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(100.0, 100.0)));
 
     await tester.pumpWidget(
@@ -343,17 +345,17 @@ void main() {
       ),
     );
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(100.0, 100.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(150.0, 150.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(200.0, 200.0)));
   });
 
@@ -378,12 +380,12 @@ void main() {
       ),
     );
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0, 50.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0, 50.0)));
 
     await tester.pumpWidget(
@@ -402,17 +404,17 @@ void main() {
       ),
     );
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(350.0, 50.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(350.0, 100.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(350.0, 150.0)));
   });
 
@@ -439,12 +441,12 @@ void main() {
       ),
     );
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0, 50.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0, 50.0)));
 
     await tester.pumpWidget(
@@ -465,12 +467,12 @@ void main() {
       ),
     );
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0, 50.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(100.0, 100.0)));
 
     await tester.pumpWidget(
@@ -491,17 +493,17 @@ void main() {
       ),
     );
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(100.0, 100.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(150.0, 150.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(200.0, 200.0)));
   });
 
@@ -528,12 +530,12 @@ void main() {
       ),
     );
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0, 50.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0, 50.0)));
 
     await tester.pumpWidget(
@@ -554,17 +556,17 @@ void main() {
       ),
     );
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(350.0, 50.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(350.0, 100.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(350.0, 150.0)));
   });
 
@@ -591,12 +593,12 @@ void main() {
       ),
     );
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(750.0, 50.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(750.0, 50.0)));
 
     await tester.pumpWidget(
@@ -617,12 +619,12 @@ void main() {
       ),
     );
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(750.0, 50.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(700.0, 100.0)));
 
     await tester.pumpWidget(
@@ -643,17 +645,17 @@ void main() {
       ),
     );
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(700.0, 100.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(650.0, 150.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(600.0, 200.0)));
   });
 
@@ -680,12 +682,12 @@ void main() {
       ),
     );
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(750.0, 50.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(750.0, 50.0)));
 
     await tester.pumpWidget(
@@ -706,17 +708,17 @@ void main() {
       ),
     );
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(450.0, 50.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(450.0, 100.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
-    box = key.currentContext.findRenderObject();
+    box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(450.0, 150.0)));
   });
 

@@ -1,6 +1,8 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 import 'dart:math' as math;
 
@@ -13,12 +15,14 @@ import 'constants.dart';
 import 'debug.dart';
 import 'divider.dart';
 import 'ink_well.dart';
+import 'material_state.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 /// Defines the title font used for [ListTile] descendants of a [ListTileTheme].
 ///
-/// List tiles that appear in a [Drawer] use the theme's [TextTheme.body2]
-/// text style, which is a little smaller than the theme's [TextTheme.subhead]
+/// List tiles that appear in a [Drawer] use the theme's [TextTheme.bodyText1]
+/// text style, which is a little smaller than the theme's [TextTheme.subtitle1]
 /// text style, which is used by default.
 enum ListTileStyle {
   /// Use a title font that's appropriate for a [ListTile] in a list.
@@ -42,11 +46,14 @@ class ListTileTheme extends InheritedTheme {
   const ListTileTheme({
     Key key,
     this.dense = false,
+    this.shape,
     this.style = ListTileStyle.list,
     this.selectedColor,
     this.iconColor,
     this.textColor,
     this.contentPadding,
+    this.tileColor,
+    this.selectedTileColor,
     Widget child,
   }) : super(key: key, child: child);
 
@@ -57,11 +64,14 @@ class ListTileTheme extends InheritedTheme {
   static Widget merge({
     Key key,
     bool dense,
+    ShapeBorder shape,
     ListTileStyle style,
     Color selectedColor,
     Color iconColor,
     Color textColor,
     EdgeInsetsGeometry contentPadding,
+    Color tileColor,
+    Color selectedTileColor,
     @required Widget child,
   }) {
     assert(child != null);
@@ -71,11 +81,14 @@ class ListTileTheme extends InheritedTheme {
         return ListTileTheme(
           key: key,
           dense: dense ?? parent.dense,
+          shape: shape ?? parent.shape,
           style: style ?? parent.style,
           selectedColor: selectedColor ?? parent.selectedColor,
           iconColor: iconColor ?? parent.iconColor,
           textColor: textColor ?? parent.textColor,
           contentPadding: contentPadding ?? parent.contentPadding,
+          tileColor: tileColor ?? parent.tileColor,
+          selectedTileColor: selectedTileColor ?? parent.selectedTileColor,
           child: child,
         );
       },
@@ -84,6 +97,9 @@ class ListTileTheme extends InheritedTheme {
 
   /// If true then [ListTile]s will have the vertically dense layout.
   final bool dense;
+
+  /// If specified, [shape] defines the shape of the [ListTile]'s [InkWell] border.
+  final ShapeBorder shape;
 
   /// If specified, [style] defines the font used for [ListTile] titles.
   final ListTileStyle style;
@@ -103,6 +119,18 @@ class ListTileTheme extends InheritedTheme {
   /// and [trailing] widgets.
   final EdgeInsetsGeometry contentPadding;
 
+  /// If specified, defines the background color for `ListTile` when
+  /// [ListTile.selected] is false.
+  ///
+  /// If [ListTile.tileColor] is provided, [tileColor] is ignored.
+  final Color tileColor;
+
+  /// If specified, defines the background color for `ListTile` when
+  /// [ListTile.selected] is true.
+  ///
+  /// If [ListTile.selectedTileColor] is provided, [selectedTileColor] is ignored.
+  final Color selectedTileColor;
+
   /// The closest instance of this class that encloses the given context.
   ///
   /// Typical usage is as follows:
@@ -111,20 +139,23 @@ class ListTileTheme extends InheritedTheme {
   /// ListTileTheme theme = ListTileTheme.of(context);
   /// ```
   static ListTileTheme of(BuildContext context) {
-    final ListTileTheme result = context.inheritFromWidgetOfExactType(ListTileTheme);
+    final ListTileTheme result = context.dependOnInheritedWidgetOfExactType<ListTileTheme>();
     return result ?? const ListTileTheme();
   }
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final ListTileTheme ancestorTheme = context.ancestorWidgetOfExactType(ListTileTheme);
+    final ListTileTheme ancestorTheme = context.findAncestorWidgetOfExactType<ListTileTheme>();
     return identical(this, ancestorTheme) ? child : ListTileTheme(
       dense: dense,
+      shape: shape,
       style: style,
       selectedColor: selectedColor,
       iconColor: iconColor,
       textColor: textColor,
       contentPadding: contentPadding,
+      tileColor: tileColor,
+      selectedTileColor: selectedTileColor,
       child: child,
     );
   }
@@ -132,11 +163,14 @@ class ListTileTheme extends InheritedTheme {
   @override
   bool updateShouldNotify(ListTileTheme oldWidget) {
     return dense != oldWidget.dense
+        || shape != oldWidget.shape
         || style != oldWidget.style
         || selectedColor != oldWidget.selectedColor
         || iconColor != oldWidget.iconColor
         || textColor != oldWidget.textColor
-        || contentPadding != oldWidget.contentPadding;
+        || contentPadding != oldWidget.contentPadding
+        || tileColor != oldWidget.tileColor
+        || selectedTileColor != oldWidget.selectedTileColor;
   }
 }
 
@@ -147,6 +181,7 @@ class ListTileTheme extends InheritedTheme {
 ///
 ///  * [CheckboxListTile], which combines a [ListTile] with a [Checkbox].
 ///  * [RadioListTile], which combines a [ListTile] with a [Radio] button.
+///  * [SwitchListTile], which combines a [ListTile] with a [Switch].
 enum ListTileControlAffinity {
   /// Position the control on the leading edge, and the secondary widget, if
   /// any, on the trailing edge.
@@ -164,6 +199,8 @@ enum ListTileControlAffinity {
 
 /// A single fixed-height row that typically contains some text as well as
 /// a leading or trailing icon.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=l8dj0yPBvgQ}
 ///
 /// A list tile contains one to three lines of text optionally flanked by icons or
 /// other widgets, such as check boxes. The icons (or other widgets) for the
@@ -193,7 +230,7 @@ enum ListTileControlAffinity {
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example uses a [ListView] to demonstrate different configurations of
 /// [ListTile]s in [Card]s.
@@ -252,7 +289,7 @@ enum ListTileControlAffinity {
 /// )
 /// ```
 /// {@end-tool}
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// Tiles can be much more elaborate. Here is a tile which can be tapped, but
 /// which is disabled when the `_act` variable is not 2. When the tile is
@@ -263,7 +300,7 @@ enum ListTileControlAffinity {
 /// // ...
 /// ListTile(
 ///   leading: const Icon(Icons.flight_land),
-///   title: const Text('Trix\'s airplane'),
+///   title: const Text("Trix's airplane"),
 ///   subtitle: _act != 2 ? const Text('The airplane is only in Act II.') : null,
 ///   enabled: _act == 2,
 ///   onTap: () { /* react to the tile being tapped */ }
@@ -283,7 +320,7 @@ enum ListTileControlAffinity {
 /// that are large enough, but it is up to the developer to ensure that
 /// their widgets follow the Material spec.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// Here is an example of a one-line, non-[dense] ListTile with a
 /// tappable leading widget that adheres to accessibility requirements and
@@ -315,7 +352,7 @@ enum ListTileControlAffinity {
 /// you're looking for, it's easy to create custom list items with a
 /// combination of other widgets, such as [Row]s and [Column]s.
 ///
-/// {@tool snippet --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// Here is an example of a custom list item that resembles a Youtube related
 /// video list item created with [Expanded] and [Container] widgets.
@@ -436,9 +473,9 @@ enum ListTileControlAffinity {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool snippet --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=stateless_widget_scaffold}
 ///
-/// Here is an example of an article list item with multi-line titles and
+/// Here is an example of an article list item with multiline titles and
 /// subtitles. It utilizes [Row]s and [Column]s, as well as [Expanded] and
 /// [AspectRatio] widgets to organize its layout.
 ///
@@ -467,7 +504,7 @@ enum ListTileControlAffinity {
 ///       crossAxisAlignment: CrossAxisAlignment.start,
 ///       children: <Widget>[
 ///         Expanded(
-///           flex: 2,
+///           flex: 1,
 ///           child: Column(
 ///             crossAxisAlignment: CrossAxisAlignment.start,
 ///             children: <Widget>[
@@ -506,7 +543,7 @@ enum ListTileControlAffinity {
 ///                 ),
 ///               ),
 ///               Text(
-///                 '$publishDate · $readDuration ★',
+///                 '$publishDate - $readDuration',
 ///                 style: const TextStyle(
 ///                   fontSize: 12.0,
 ///                   color: Colors.black54,
@@ -631,14 +668,24 @@ class ListTile extends StatelessWidget {
     this.trailing,
     this.isThreeLine = false,
     this.dense,
+    this.visualDensity,
+    this.shape,
     this.contentPadding,
     this.enabled = true,
     this.onTap,
     this.onLongPress,
+    this.mouseCursor,
     this.selected = false,
+    this.focusColor,
+    this.hoverColor,
+    this.focusNode,
+    this.autofocus = false,
+    this.tileColor,
+    this.selectedTileColor,
   }) : assert(isThreeLine != null),
        assert(enabled != null),
        assert(selected != null),
+       assert(autofocus != null),
        assert(!isThreeLine || subtitle != null),
        super(key: key);
 
@@ -651,7 +698,8 @@ class ListTile extends StatelessWidget {
   ///
   /// Typically a [Text] widget.
   ///
-  /// This should not wrap.
+  /// This should not wrap. To enforce the single line limit, use
+  /// [Text.maxLines].
   final Widget title;
 
   /// Additional content displayed below the title.
@@ -661,7 +709,23 @@ class ListTile extends StatelessWidget {
   /// If [isThreeLine] is false, this should not wrap.
   ///
   /// If [isThreeLine] is true, this should be configured to take a maximum of
-  /// two lines.
+  /// two lines. For example, you can use [Text.maxLines] to enforce the number
+  /// of lines.
+  ///
+  /// The subtitle's default [TextStyle] depends on [TextTheme.bodyText2] except
+  /// [TextStyle.color]. The [TextStyle.color] depends on the value of [enabled]
+  /// and [selected].
+  ///
+  /// When [enabled] is false, the text color is set to [ThemeData.disabledColor].
+  ///
+  /// When [selected] is true, the text color is set to [ListTileTheme.selectedColor]
+  /// if it's not null. If [ListTileTheme.selectedColor] is null, the text color
+  /// is set to [ThemeData.primaryColor] when [ThemeData.brightness] is
+  /// [Brightness.light] and to [ThemeData.accentColor] when it is [Brightness.dark].
+  ///
+  /// When [selected] is false, the text color is set to [ListTileTheme.textColor]
+  /// if it's not null and to [TextTheme.caption]'s color if [ListTileTheme.textColor]
+  /// is null.
   final Widget subtitle;
 
   /// A widget to display after the title.
@@ -682,6 +746,9 @@ class ListTile extends StatelessWidget {
   ///
   /// If false, the list tile is treated as having one line if the subtitle is
   /// null and treated as having two lines if the subtitle is non-null.
+  ///
+  /// When using a [Text] widget for [title] and [subtitle], you can enforce
+  /// line limits using [Text.maxLines].
   final bool isThreeLine;
 
   /// Whether this list tile is part of a vertically dense list.
@@ -690,6 +757,25 @@ class ListTile extends StatelessWidget {
   ///
   /// Dense list tiles default to a smaller height.
   final bool dense;
+
+  /// Defines how compact the list tile's layout will be.
+  ///
+  /// {@macro flutter.material.themedata.visualDensity}
+  ///
+  /// See also:
+  ///
+  ///  * [ThemeData.visualDensity], which specifies the [density] for all widgets
+  ///    within a [Theme].
+  final VisualDensity visualDensity;
+
+  /// The shape of the tile's [InkWell].
+  ///
+  /// Defines the tile's [InkWell.customBorder].
+  ///
+  /// If this property is null then [ThemeData.cardTheme.shape] is used.
+  /// If that's null then the shape will be a [RoundedRectangleBorder] with a
+  /// circular corner radius of 4.0.
+  final ShapeBorder shape;
 
   /// The tile's internal padding.
   ///
@@ -716,11 +802,76 @@ class ListTile extends StatelessWidget {
   /// Inoperative if [enabled] is false.
   final GestureLongPressCallback onLongPress;
 
+  /// The cursor for a mouse pointer when it enters or is hovering over the
+  /// widget.
+  ///
+  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
+  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  ///
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.disabled].
+  ///
+  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
+  final MouseCursor mouseCursor;
+
   /// If this tile is also [enabled] then icons and text are rendered with the same color.
   ///
   /// By default the selected color is the theme's primary color. The selected color
   /// can be overridden with a [ListTileTheme].
+  ///
+  /// {@tool dartpad --template=stateful_widget_scaffold}
+  ///
+  /// Here is an example of using a [StatefulWidget] to keep track of the
+  /// selected index, and using that to set the `selected` property on the
+  /// corresponding [ListTile].
+  ///
+  /// ```dart
+  ///   int _selectedIndex;
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return ListView.builder(
+  ///       itemCount: 10,
+  ///       itemBuilder: (BuildContext context, int index) {
+  ///         return ListTile(
+  ///           title: Text('Item $index'),
+  ///           selected: index == _selectedIndex,
+  ///           onTap: () {
+  ///             setState(() {
+  ///               _selectedIndex = index;
+  ///             });
+  ///           },
+  ///         );
+  ///       },
+  ///     );
+  ///   }
+  /// ```
+  /// {@end-tool}
   final bool selected;
+
+  /// The color for the tile's [Material] when it has the input focus.
+  final Color focusColor;
+
+  /// The color for the tile's [Material] when a pointer is hovering over it.
+  final Color hoverColor;
+
+  /// {@macro flutter.widgets.Focus.focusNode}
+  final FocusNode focusNode;
+
+  /// {@macro flutter.widgets.Focus.autofocus}
+  final bool autofocus;
+
+  /// Defines the background color of `ListTile` when [selected] is false.
+  ///
+  /// When the value is null, the `tileColor` is set to [ListTileTheme.tileColor]
+  /// if it's not null and to [Colors.transparent] if it's null.
+  final Color tileColor;
+
+  /// Defines the background color of `ListTile` when [selected] is true.
+  ///
+  /// When the value if null, the `selectedTileColor` is set to [ListTileTheme.selectedTileColor]
+  /// if it's not null and to [Colors.transparent] if it's null.
+  final Color selectedTileColor;
 
   /// Add a one pixel border in between each tile. If color isn't specified the
   /// [ThemeData.dividerColor] of the context's [Theme] is used.
@@ -804,14 +955,14 @@ class ListTile extends StatelessWidget {
     if (tileTheme != null) {
       switch (tileTheme.style) {
         case ListTileStyle.drawer:
-          style = theme.textTheme.body2;
+          style = theme.textTheme.bodyText1;
           break;
         case ListTileStyle.list:
-          style = theme.textTheme.subhead;
+          style = theme.textTheme.subtitle1;
           break;
       }
     } else {
-      style = theme.textTheme.subhead;
+      style = theme.textTheme.subtitle1;
     }
     final Color color = _textColor(theme, tileTheme, style.color);
     return _isDenseLayout(tileTheme)
@@ -820,11 +971,29 @@ class ListTile extends StatelessWidget {
   }
 
   TextStyle _subtitleTextStyle(ThemeData theme, ListTileTheme tileTheme) {
-    final TextStyle style = theme.textTheme.body1;
+    final TextStyle style = theme.textTheme.bodyText2;
     final Color color = _textColor(theme, tileTheme, theme.textTheme.caption.color);
     return _isDenseLayout(tileTheme)
       ? style.copyWith(color: color, fontSize: 12.0)
       : style.copyWith(color: color);
+  }
+
+  Color _tileBackgroundColor(ListTileTheme tileTheme) {
+    if (!selected) {
+      if (tileColor != null)
+        return tileColor;
+      if (tileTheme?.tileColor != null)
+        return tileTheme.tileColor;
+    }
+
+    if (selected) {
+      if (selectedTileColor != null)
+        return selectedTileColor;
+      if (tileTheme?.selectedTileColor != null)
+        return tileTheme.selectedTileColor;
+    }
+
+    return Colors.transparent;
   }
 
   @override
@@ -877,26 +1046,45 @@ class ListTile extends StatelessWidget {
       ?? tileTheme?.contentPadding?.resolve(textDirection)
       ?? _defaultContentPadding;
 
+    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
+      mouseCursor ?? MaterialStateMouseCursor.clickable,
+      <MaterialState>{
+        if (!enabled || (onTap == null && onLongPress == null)) MaterialState.disabled,
+        if (selected) MaterialState.selected,
+      },
+    );
+
     return InkWell(
+      customBorder: shape ?? tileTheme.shape,
       onTap: enabled ? onTap : null,
       onLongPress: enabled ? onLongPress : null,
+      mouseCursor: effectiveMouseCursor,
+      canRequestFocus: enabled,
+      focusNode: focusNode,
+      focusColor: focusColor,
+      hoverColor: hoverColor,
+      autofocus: autofocus,
       child: Semantics(
         selected: selected,
         enabled: enabled,
-        child: SafeArea(
-          top: false,
-          bottom: false,
-          minimum: resolvedContentPadding,
-          child: _ListTile(
-            leading: leadingIcon,
-            title: titleText,
-            subtitle: subtitleText,
-            trailing: trailingIcon,
-            isDense: _isDenseLayout(tileTheme),
-            isThreeLine: isThreeLine,
-            textDirection: textDirection,
-            titleBaselineType: titleStyle.textBaseline,
-            subtitleBaselineType: subtitleStyle?.textBaseline,
+        child: ColoredBox(
+          color: _tileBackgroundColor(tileTheme),
+          child: SafeArea(
+            top: false,
+            bottom: false,
+            minimum: resolvedContentPadding,
+            child: _ListTile(
+              leading: leadingIcon,
+              title: titleText,
+              subtitle: subtitleText,
+              trailing: trailingIcon,
+              isDense: _isDenseLayout(tileTheme),
+              visualDensity: visualDensity ?? theme.visualDensity,
+              isThreeLine: isThreeLine,
+              textDirection: textDirection,
+              titleBaselineType: titleStyle.textBaseline,
+              subtitleBaselineType: subtitleStyle?.textBaseline,
+            ),
           ),
         ),
       ),
@@ -921,11 +1109,13 @@ class _ListTile extends RenderObjectWidget {
     this.trailing,
     @required this.isThreeLine,
     @required this.isDense,
+    @required this.visualDensity,
     @required this.textDirection,
     @required this.titleBaselineType,
     this.subtitleBaselineType,
   }) : assert(isThreeLine != null),
        assert(isDense != null),
+       assert(visualDensity != null),
        assert(textDirection != null),
        assert(titleBaselineType != null),
        super(key: key);
@@ -936,6 +1126,7 @@ class _ListTile extends RenderObjectWidget {
   final Widget trailing;
   final bool isThreeLine;
   final bool isDense;
+  final VisualDensity visualDensity;
   final TextDirection textDirection;
   final TextBaseline titleBaselineType;
   final TextBaseline subtitleBaselineType;
@@ -948,6 +1139,7 @@ class _ListTile extends RenderObjectWidget {
     return _RenderListTile(
       isThreeLine: isThreeLine,
       isDense: isDense,
+      visualDensity: visualDensity,
       textDirection: textDirection,
       titleBaselineType: titleBaselineType,
       subtitleBaselineType: subtitleBaselineType,
@@ -959,6 +1151,7 @@ class _ListTile extends RenderObjectWidget {
     renderObject
       ..isThreeLine = isThreeLine
       ..isDense = isDense
+      ..visualDensity = visualDensity
       ..textDirection = textDirection
       ..titleBaselineType = titleBaselineType
       ..subtitleBaselineType = subtitleBaselineType;
@@ -972,10 +1165,10 @@ class _ListTileElement extends RenderObjectElement {
   final Map<Element, _ListTileSlot> childToSlot = <Element, _ListTileSlot>{};
 
   @override
-  _ListTile get widget => super.widget;
+  _ListTile get widget => super.widget as _ListTile;
 
   @override
-  _RenderListTile get renderObject => super.renderObject;
+  _RenderListTile get renderObject => super.renderObject as _RenderListTile;
 
   @override
   void visitChildren(ElementVisitor visitor) {
@@ -989,6 +1182,7 @@ class _ListTileElement extends RenderObjectElement {
     final _ListTileSlot slot = childToSlot[child];
     childToSlot.remove(child);
     slotToChild.remove(slot);
+    super.forgetChild(child);
   }
 
   void _mountChild(Widget widget, _ListTileSlot slot) {
@@ -1036,7 +1230,7 @@ class _ListTileElement extends RenderObjectElement {
     _updateChild(widget.trailing, _ListTileSlot.trailing);
   }
 
-  void _updateRenderObject(RenderObject child, _ListTileSlot slot) {
+  void _updateRenderObject(RenderBox child, _ListTileSlot slot) {
     switch (slot) {
       case _ListTileSlot.leading:
         renderObject.leading = child;
@@ -1057,8 +1251,8 @@ class _ListTileElement extends RenderObjectElement {
   void insertChildRenderObject(RenderObject child, dynamic slotValue) {
     assert(child is RenderBox);
     assert(slotValue is _ListTileSlot);
-    final _ListTileSlot slot = slotValue;
-    _updateRenderObject(child, slot);
+    final _ListTileSlot slot = slotValue as _ListTileSlot;
+    _updateRenderObject(child as RenderBox, slot);
     assert(renderObject.childToSlot.keys.contains(child));
     assert(renderObject.slotToChild.keys.contains(slot));
   }
@@ -1081,15 +1275,18 @@ class _ListTileElement extends RenderObjectElement {
 class _RenderListTile extends RenderBox {
   _RenderListTile({
     @required bool isDense,
+    @required VisualDensity visualDensity,
     @required bool isThreeLine,
     @required TextDirection textDirection,
     @required TextBaseline titleBaselineType,
     TextBaseline subtitleBaselineType,
   }) : assert(isDense != null),
+       assert(visualDensity != null),
        assert(isThreeLine != null),
        assert(textDirection != null),
        assert(titleBaselineType != null),
        _isDense = isDense,
+       _visualDensity = visualDensity,
        _isThreeLine = isThreeLine,
        _textDirection = textDirection,
        _titleBaselineType = titleBaselineType,
@@ -1097,7 +1294,7 @@ class _RenderListTile extends RenderBox {
 
   static const double _minLeadingWidth = 40.0;
   // The horizontal gap between the titles and the leading/trailing widgets
-  static const double _horizontalTitleGap = 16.0;
+  double get _horizontalTitleGap => 16.0 + visualDensity.horizontal * 2.0;
   // The minimum padding on the top and bottom of the title and subtitle widgets.
   static const double _minVerticalPadding = 4.0;
 
@@ -1164,6 +1361,16 @@ class _RenderListTile extends RenderBox {
     markNeedsLayout();
   }
 
+  VisualDensity get visualDensity => _visualDensity;
+  VisualDensity _visualDensity;
+  set visualDensity(VisualDensity value) {
+    assert(value != null);
+    if (_visualDensity == value)
+      return;
+    _visualDensity = value;
+    markNeedsLayout();
+  }
+
   bool get isThreeLine => _isThreeLine;
   bool _isThreeLine;
   set isThreeLine(bool value) {
@@ -1206,14 +1413,14 @@ class _RenderListTile extends RenderBox {
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    for (RenderBox child in _children)
+    for (final RenderBox child in _children)
       child.attach(owner);
   }
 
   @override
   void detach() {
     super.detach();
-    for (RenderBox child in _children)
+    for (final RenderBox child in _children)
       child.detach();
   }
 
@@ -1277,11 +1484,12 @@ class _RenderListTile extends RenderBox {
     final bool isTwoLine = !isThreeLine && hasSubtitle;
     final bool isOneLine = !isThreeLine && !hasSubtitle;
 
+    final Offset baseDensity = visualDensity.baseSizeAdjustment;
     if (isOneLine)
-      return isDense ? 48.0 : 56.0;
+      return (isDense ? 48.0 : 56.0) + baseDensity.dy;
     if (isTwoLine)
-      return isDense ? 64.0 : 72.0;
-    return isDense ? 76.0 : 88.0;
+      return (isDense ? 64.0 : 72.0) + baseDensity.dy;
+    return (isDense ? 76.0 : 88.0) + baseDensity.dy;
   }
 
   @override
@@ -1300,7 +1508,7 @@ class _RenderListTile extends RenderBox {
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     assert(title != null);
-    final BoxParentData parentData = title.parentData;
+    final BoxParentData parentData = title.parentData as BoxParentData;
     return parentData.offset.dy + title.getDistanceToActualBaseline(baseline);
   }
 
@@ -1316,7 +1524,7 @@ class _RenderListTile extends RenderBox {
   }
 
   static void _positionBox(RenderBox box, Offset offset) {
-    final BoxParentData parentData = box.parentData;
+    final BoxParentData parentData = box.parentData as BoxParentData;
     parentData.offset = offset;
   }
 
@@ -1324,11 +1532,13 @@ class _RenderListTile extends RenderBox {
   // https://material.io/design/components/lists.html#specs
   @override
   void performLayout() {
+    final BoxConstraints constraints = this.constraints;
     final bool hasLeading = leading != null;
     final bool hasSubtitle = subtitle != null;
     final bool hasTrailing = trailing != null;
     final bool isTwoLine = !isThreeLine && hasSubtitle;
     final bool isOneLine = !isThreeLine && !hasSubtitle;
+    final Offset densityAdjustment = visualDensity.baseSizeAdjustment;
 
     final BoxConstraints maxIconHeightConstraint = BoxConstraints(
       // One-line trailing and leading widget heights do not follow
@@ -1336,7 +1546,7 @@ class _RenderListTile extends RenderBox {
       // to accessibility requirements for smallest tappable widget.
       // Two- and three-line trailing widget heights are constrained
       // properly according to the Material spec.
-      maxHeight: isDense ? 48.0 : 56.0,
+      maxHeight: (isDense ? 48.0 : 56.0) + densityAdjustment.dy,
     );
     final BoxConstraints looseConstraints = constraints.loosen();
     final BoxConstraints iconConstraints = looseConstraints.enforce(maxIconHeightConstraint);
@@ -1346,18 +1556,25 @@ class _RenderListTile extends RenderBox {
     final Size trailingSize = _layoutBox(trailing, iconConstraints);
     assert(
       tileWidth != leadingSize.width,
-      'Leading widget consumes entire tile width. Please use a sized widget.'
+      'Leading widget consumes entire tile width. Please use a sized widget, '
+      'or consider replacing ListTile with a custom widget '
+      '(see https://api.flutter.dev/flutter/material/ListTile-class.html#material.ListTile.4)'
     );
     assert(
       tileWidth != trailingSize.width,
-      'Trailing widget consumes entire tile width. Please use a sized widget.'
+      'Trailing widget consumes entire tile width. Please use a sized widget, '
+      'or consider replacing ListTile with a custom widget '
+      '(see https://api.flutter.dev/flutter/material/ListTile-class.html#material.ListTile.4)'
     );
 
     final double titleStart = hasLeading
       ? math.max(_minLeadingWidth, leadingSize.width) + _horizontalTitleGap
       : 0.0;
+    final double adjustedTrailingWidth = hasTrailing
+        ? math.max(trailingSize.width + _horizontalTitleGap, 32.0)
+        : 0.0;
     final BoxConstraints textConstraints = looseConstraints.tighten(
-      width: tileWidth - titleStart - (hasTrailing ? trailingSize.width + _horizontalTitleGap : 0.0),
+      width: tileWidth - titleStart - adjustedTrailingWidth,
     );
     final Size titleSize = _layoutBox(title, textConstraints);
     final Size subtitleSize = _layoutBox(subtitle, textConstraints);
@@ -1385,7 +1602,7 @@ class _RenderListTile extends RenderBox {
     } else {
       assert(subtitleBaselineType != null);
       titleY = titleBaseline - _boxBaseline(title, titleBaselineType);
-      subtitleY = subtitleBaseline - _boxBaseline(subtitle, subtitleBaselineType);
+      subtitleY = subtitleBaseline - _boxBaseline(subtitle, subtitleBaselineType) + visualDensity.vertical * 2.0;
       tileHeight = defaultTileHeight;
 
       // If the title and subtitle overlap, move the title upwards by half
@@ -1411,7 +1628,7 @@ class _RenderListTile extends RenderBox {
     // This attempts to implement the redlines for the vertical position of the
     // leading and trailing icons on the spec page:
     //   https://material.io/design/components/lists.html#specs
-    // The interpretation for these red lines is as follows:
+    // The interpretation for these redlines is as follows:
     //  - For large tiles (> 72dp), both leading and trailing controls should be
     //    a fixed distance from top. As per guidelines this is set to 16dp.
     //  - For smaller tiles, trailing should always be centered. Leading can be
@@ -1431,10 +1648,9 @@ class _RenderListTile extends RenderBox {
       case TextDirection.rtl: {
         if (hasLeading)
           _positionBox(leading, Offset(tileWidth - leadingSize.width, leadingY));
-        final double titleX = hasTrailing ? trailingSize.width + _horizontalTitleGap : 0.0;
-        _positionBox(title, Offset(titleX, titleY));
+        _positionBox(title, Offset(adjustedTrailingWidth, titleY));
         if (hasSubtitle)
-          _positionBox(subtitle, Offset(titleX, subtitleY));
+          _positionBox(subtitle, Offset(adjustedTrailingWidth, subtitleY));
         if (hasTrailing)
           _positionBox(trailing, Offset(0.0, trailingY));
         break;
@@ -1460,7 +1676,7 @@ class _RenderListTile extends RenderBox {
   void paint(PaintingContext context, Offset offset) {
     void doPaint(RenderBox child) {
       if (child != null) {
-        final BoxParentData parentData = child.parentData;
+        final BoxParentData parentData = child.parentData as BoxParentData;
         context.paintChild(child, parentData.offset + offset);
       }
     }
@@ -1476,8 +1692,8 @@ class _RenderListTile extends RenderBox {
   @override
   bool hitTestChildren(BoxHitTestResult result, { @required Offset position }) {
     assert(position != null);
-    for (RenderBox child in _children) {
-      final BoxParentData parentData = child.parentData;
+    for (final RenderBox child in _children) {
+      final BoxParentData parentData = child.parentData as BoxParentData;
       final bool isHit = result.addWithPaintOffset(
         offset: parentData.offset,
         position: position,

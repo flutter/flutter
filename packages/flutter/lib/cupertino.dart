@@ -1,6 +1,8 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 /// Flutter widgets implementing the current iOS design language.
 ///
@@ -15,6 +17,8 @@ export 'src/cupertino/app.dart';
 export 'src/cupertino/bottom_tab_bar.dart';
 export 'src/cupertino/button.dart';
 export 'src/cupertino/colors.dart';
+export 'src/cupertino/context_menu.dart';
+export 'src/cupertino/context_menu_action.dart';
 export 'src/cupertino/date_picker.dart';
 export 'src/cupertino/dialog.dart';
 export 'src/cupertino/icon_theme_data.dart';
@@ -29,6 +33,7 @@ export 'src/cupertino/route.dart';
 export 'src/cupertino/scrollbar.dart';
 export 'src/cupertino/segmented_control.dart';
 export 'src/cupertino/slider.dart';
+export 'src/cupertino/sliding_segmented_control.dart';
 export 'src/cupertino/switch.dart';
 export 'src/cupertino/tab_scaffold.dart';
 export 'src/cupertino/tab_view.dart';

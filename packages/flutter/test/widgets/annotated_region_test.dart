@@ -1,6 +1,8 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 import 'dart:ui' show window;
 
@@ -17,8 +19,7 @@ void main() {
       ),
     );
     final List<Layer> layers = tester.layers;
-    final AnnotatedRegionLayer<int> layer =
-        layers.firstWhere((Layer layer) => layer is AnnotatedRegionLayer<int>);
+    final AnnotatedRegionLayer<int> layer = layers.whereType<AnnotatedRegionLayer<int>>().first;
     expect(layer.value, 1);
   });
   testWidgets('provides a value to the layer tree in a particular region', (WidgetTester tester) async {

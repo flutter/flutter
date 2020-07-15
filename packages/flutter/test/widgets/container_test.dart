@@ -1,7 +1,10 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 import 'package:mockito/mockito.dart';
@@ -77,15 +80,11 @@ void main() {
         '     │   PlatformAssetBundle#00000(), devicePixelRatio: 1.0, platform:\n'
         '     │   android)\n'
         '     │\n'
-        '     └─child: RenderDecoratedBox#00000\n'
+        '     └─child: _RenderColoredBox#00000\n'
         '       │ parentData: <none> (can use size)\n'
         '       │ constraints: BoxConstraints(w=53.0, h=78.0)\n'
         '       │ size: Size(53.0, 78.0)\n'
-        '       │ decoration: BoxDecoration:\n'
-        '       │   color: Color(0xff00ff00)\n'
-        '       │ configuration: ImageConfiguration(bundle:\n'
-        '       │   PlatformAssetBundle#00000(), devicePixelRatio: 1.0, platform:\n'
-        '       │   android)\n'
+        '       │ behavior: opaque\n'
         '       │\n'
         '       └─child: RenderPadding#00000\n'
         '         │ parentData: <none> (can use size)\n'
@@ -148,20 +147,16 @@ void main() {
         '     │   PlatformAssetBundle#00000(), devicePixelRatio: 1.0, platform:\n'
         '     │   android)\n'
         '     │\n'
-        '     └─child: RenderDecoratedBox#00000\n'
-        '       │ creator: DecoratedBox ← DecoratedBox ← ConstrainedBox ← Padding ←\n'
+        '     └─child: _RenderColoredBox#00000\n'
+        '       │ creator: ColoredBox ← DecoratedBox ← ConstrainedBox ← Padding ←\n'
         '       │   Container ← Align ← [root]\n'
         '       │ parentData: <none> (can use size)\n'
         '       │ constraints: BoxConstraints(w=53.0, h=78.0)\n'
         '       │ size: Size(53.0, 78.0)\n'
-        '       │ decoration: BoxDecoration:\n'
-        '       │   color: Color(0xff00ff00)\n'
-        '       │ configuration: ImageConfiguration(bundle:\n'
-        '       │   PlatformAssetBundle#00000(), devicePixelRatio: 1.0, platform:\n'
-        '       │   android)\n'
+        '       │ behavior: opaque\n'
         '       │\n'
         '       └─child: RenderPadding#00000\n'
-        '         │ creator: Padding ← DecoratedBox ← DecoratedBox ← ConstrainedBox ←\n'
+        '         │ creator: Padding ← ColoredBox ← DecoratedBox ← ConstrainedBox ←\n'
         '         │   Padding ← Container ← Align ← [root]\n'
         '         │ parentData: <none> (can use size)\n'
         '         │ constraints: BoxConstraints(w=53.0, h=78.0)\n'
@@ -169,7 +164,7 @@ void main() {
         '         │ padding: EdgeInsets.all(7.0)\n'
         '         │\n'
         '         └─child: RenderPositionedBox#00000\n'
-        '           │ creator: Align ← Padding ← DecoratedBox ← DecoratedBox ←\n'
+        '           │ creator: Align ← Padding ← ColoredBox ← DecoratedBox ←\n'
         '           │   ConstrainedBox ← Padding ← Container ← Align ← [root]\n'
         '           │ parentData: offset=Offset(7.0, 7.0) (can use size)\n'
         '           │ constraints: BoxConstraints(w=39.0, h=64.0)\n'
@@ -179,16 +174,16 @@ void main() {
         '           │ heightFactor: expand\n'
         '           │\n'
         '           └─child: RenderConstrainedBox#00000 relayoutBoundary=up1\n'
-        '             │ creator: SizedBox ← Align ← Padding ← DecoratedBox ← DecoratedBox\n'
-        '             │   ← ConstrainedBox ← Padding ← Container ← Align ← [root]\n'
+        '             │ creator: SizedBox ← Align ← Padding ← ColoredBox ← DecoratedBox ←\n'
+        '             │   ConstrainedBox ← Padding ← Container ← Align ← [root]\n'
         '             │ parentData: offset=Offset(14.0, 31.0) (can use size)\n'
         '             │ constraints: BoxConstraints(0.0<=w<=39.0, 0.0<=h<=64.0)\n'
         '             │ size: Size(25.0, 33.0)\n'
         '             │ additionalConstraints: BoxConstraints(w=25.0, h=33.0)\n'
         '             │\n'
         '             └─child: RenderDecoratedBox#00000\n'
-        '                 creator: DecoratedBox ← SizedBox ← Align ← Padding ← DecoratedBox\n'
-        '                   ← DecoratedBox ← ConstrainedBox ← Padding ← Container ← Align ←\n'
+        '                 creator: DecoratedBox ← SizedBox ← Align ← Padding ← ColoredBox ←\n'
+        '                   DecoratedBox ← ConstrainedBox ← Padding ← Container ← Align ←\n'
         '                   [root]\n'
         '                 parentData: <none> (can use size)\n'
         '                 constraints: BoxConstraints(w=25.0, h=33.0)\n'
@@ -197,7 +192,7 @@ void main() {
         '                   color: Color(0xffffff00)\n'
         '                 configuration: ImageConfiguration(bundle:\n'
         '                   PlatformAssetBundle#00000(), devicePixelRatio: 1.0, platform:\n'
-        '                   android)\n',
+        '                   android)\n'
       ),
     );
 
@@ -243,28 +238,18 @@ void main() {
         '     │   PlatformAssetBundle#00000(), devicePixelRatio: 1.0, platform:\n'
         '     │   android)\n'
         '     │\n'
-        '     └─child: RenderDecoratedBox#00000\n'
-        '       │ creator: DecoratedBox ← DecoratedBox ← ConstrainedBox ← Padding ←\n'
+        '     └─child: _RenderColoredBox#00000\n'
+        '       │ creator: ColoredBox ← DecoratedBox ← ConstrainedBox ← Padding ←\n'
         '       │   Container ← Align ← [root]\n'
         '       │ parentData: <none> (can use size)\n'
         '       │ constraints: BoxConstraints(w=53.0, h=78.0)\n'
         '       │ layer: null\n'
         '       │ semantics node: null\n'
         '       │ size: Size(53.0, 78.0)\n'
-        '       │ decoration: BoxDecoration:\n'
-        '       │   color: Color(0xff00ff00)\n'
-        '       │   image: null\n'
-        '       │   border: null\n'
-        '       │   borderRadius: null\n'
-        '       │   boxShadow: null\n'
-        '       │   gradient: null\n'
-        '       │   shape: rectangle\n'
-        '       │ configuration: ImageConfiguration(bundle:\n'
-        '       │   PlatformAssetBundle#00000(), devicePixelRatio: 1.0, platform:\n'
-        '       │   android)\n'
+        '       │ behavior: opaque\n'
         '       │\n'
         '       └─child: RenderPadding#00000\n'
-        '         │ creator: Padding ← DecoratedBox ← DecoratedBox ← ConstrainedBox ←\n'
+        '         │ creator: Padding ← ColoredBox ← DecoratedBox ← ConstrainedBox ←\n'
         '         │   Padding ← Container ← Align ← [root]\n'
         '         │ parentData: <none> (can use size)\n'
         '         │ constraints: BoxConstraints(w=53.0, h=78.0)\n'
@@ -275,7 +260,7 @@ void main() {
         '         │ textDirection: null\n'
         '         │\n'
         '         └─child: RenderPositionedBox#00000\n'
-        '           │ creator: Align ← Padding ← DecoratedBox ← DecoratedBox ←\n'
+        '           │ creator: Align ← Padding ← ColoredBox ← DecoratedBox ←\n'
         '           │   ConstrainedBox ← Padding ← Container ← Align ← [root]\n'
         '           │ parentData: offset=Offset(7.0, 7.0) (can use size)\n'
         '           │ constraints: BoxConstraints(w=39.0, h=64.0)\n'
@@ -288,8 +273,8 @@ void main() {
         '           │ heightFactor: expand\n'
         '           │\n'
         '           └─child: RenderConstrainedBox#00000 relayoutBoundary=up1\n'
-        '             │ creator: SizedBox ← Align ← Padding ← DecoratedBox ← DecoratedBox\n'
-        '             │   ← ConstrainedBox ← Padding ← Container ← Align ← [root]\n'
+        '             │ creator: SizedBox ← Align ← Padding ← ColoredBox ← DecoratedBox ←\n'
+        '             │   ConstrainedBox ← Padding ← Container ← Align ← [root]\n'
         '             │ parentData: offset=Offset(14.0, 31.0) (can use size)\n'
         '             │ constraints: BoxConstraints(0.0<=w<=39.0, 0.0<=h<=64.0)\n'
         '             │ layer: null\n'
@@ -298,8 +283,8 @@ void main() {
         '             │ additionalConstraints: BoxConstraints(w=25.0, h=33.0)\n'
         '             │\n'
         '             └─child: RenderDecoratedBox#00000\n'
-        '                 creator: DecoratedBox ← SizedBox ← Align ← Padding ← DecoratedBox\n'
-        '                   ← DecoratedBox ← ConstrainedBox ← Padding ← Container ← Align ←\n'
+        '                 creator: DecoratedBox ← SizedBox ← Align ← Padding ← ColoredBox ←\n'
+        '                   DecoratedBox ← ConstrainedBox ← Padding ← Container ← Align ←\n'
         '                   [root]\n'
         '                 parentData: <none> (can use size)\n'
         '                 constraints: BoxConstraints(w=25.0, h=33.0)\n'
@@ -316,7 +301,7 @@ void main() {
         '                   shape: rectangle\n'
         '                 configuration: ImageConfiguration(bundle:\n'
         '                   PlatformAssetBundle#00000(), devicePixelRatio: 1.0, platform:\n'
-        '                   android)\n',
+        '                   android)\n'
       ),
     );
 
@@ -371,9 +356,9 @@ void main() {
         '     │   PlatformAssetBundle#00000(), devicePixelRatio: 1.0, platform:\n'
         '     │   android)\n'
         '     │\n'
-        '     └─child: RenderDecoratedBox#00000\n'
+        '     └─child: _RenderColoredBox#00000\n'
         '       │ needsCompositing: false\n'
-        '       │ creator: DecoratedBox ← DecoratedBox ← ConstrainedBox ← Padding ←\n'
+        '       │ creator: ColoredBox ← DecoratedBox ← ConstrainedBox ← Padding ←\n'
         '       │   Container ← Align ← [root]\n'
         '       │ parentData: <none> (can use size)\n'
         '       │ constraints: BoxConstraints(w=53.0, h=78.0)\n'
@@ -382,21 +367,11 @@ void main() {
         '       │ isBlockingSemanticsOfPreviouslyPaintedNodes: false\n'
         '       │ isSemanticBoundary: false\n'
         '       │ size: Size(53.0, 78.0)\n'
-        '       │ decoration: BoxDecoration:\n'
-        '       │   color: Color(0xff00ff00)\n'
-        '       │   image: null\n'
-        '       │   border: null\n'
-        '       │   borderRadius: null\n'
-        '       │   boxShadow: null\n'
-        '       │   gradient: null\n'
-        '       │   shape: rectangle\n'
-        '       │ configuration: ImageConfiguration(bundle:\n'
-        '       │   PlatformAssetBundle#00000(), devicePixelRatio: 1.0, platform:\n'
-        '       │   android)\n'
+        '       │ behavior: opaque\n'
         '       │\n'
         '       └─child: RenderPadding#00000\n'
         '         │ needsCompositing: false\n'
-        '         │ creator: Padding ← DecoratedBox ← DecoratedBox ← ConstrainedBox ←\n'
+        '         │ creator: Padding ← ColoredBox ← DecoratedBox ← ConstrainedBox ←\n'
         '         │   Padding ← Container ← Align ← [root]\n'
         '         │ parentData: <none> (can use size)\n'
         '         │ constraints: BoxConstraints(w=53.0, h=78.0)\n'
@@ -410,7 +385,7 @@ void main() {
         '         │\n'
         '         └─child: RenderPositionedBox#00000\n'
         '           │ needsCompositing: false\n'
-        '           │ creator: Align ← Padding ← DecoratedBox ← DecoratedBox ←\n'
+        '           │ creator: Align ← Padding ← ColoredBox ← DecoratedBox ←\n'
         '           │   ConstrainedBox ← Padding ← Container ← Align ← [root]\n'
         '           │ parentData: offset=Offset(7.0, 7.0) (can use size)\n'
         '           │ constraints: BoxConstraints(w=39.0, h=64.0)\n'
@@ -426,8 +401,8 @@ void main() {
         '           │\n'
         '           └─child: RenderConstrainedBox#00000 relayoutBoundary=up1\n'
         '             │ needsCompositing: false\n'
-        '             │ creator: SizedBox ← Align ← Padding ← DecoratedBox ← DecoratedBox\n'
-        '             │   ← ConstrainedBox ← Padding ← Container ← Align ← [root]\n'
+        '             │ creator: SizedBox ← Align ← Padding ← ColoredBox ← DecoratedBox ←\n'
+        '             │   ConstrainedBox ← Padding ← Container ← Align ← [root]\n'
         '             │ parentData: offset=Offset(14.0, 31.0) (can use size)\n'
         '             │ constraints: BoxConstraints(0.0<=w<=39.0, 0.0<=h<=64.0)\n'
         '             │ layer: null\n'
@@ -439,8 +414,8 @@ void main() {
         '             │\n'
         '             └─child: RenderDecoratedBox#00000\n'
         '                 needsCompositing: false\n'
-        '                 creator: DecoratedBox ← SizedBox ← Align ← Padding ← DecoratedBox\n'
-        '                   ← DecoratedBox ← ConstrainedBox ← Padding ← Container ← Align ←\n'
+        '                 creator: DecoratedBox ← SizedBox ← Align ← Padding ← ColoredBox ←\n'
+        '                   DecoratedBox ← ConstrainedBox ← Padding ← Container ← Align ←\n'
         '                   [root]\n'
         '                 parentData: <none> (can use size)\n'
         '                 constraints: BoxConstraints(w=25.0, h=33.0)\n'
@@ -497,6 +472,92 @@ void main() {
         child: ListView(children: <Widget>[Container()]),
       ),
     );
+  });
+
+  testWidgets('giving clipBehaviour Clip.None, will not add a ClipPath to the tree', (WidgetTester tester) async {
+    await tester.pumpWidget(Container(
+      clipBehavior: Clip.none,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(1),
+      ),
+      child: const SizedBox(),
+    ));
+
+    expect(
+      find.byType(ClipPath),
+      findsNothing,
+    );
+  });
+
+  testWidgets('giving clipBehaviour not a Clip.None, will add a ClipPath to the tree', (WidgetTester tester) async {
+    final Container container = Container(
+      clipBehavior: Clip.hardEdge,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(1),
+      ),
+      child: const SizedBox(),
+    );
+
+    await tester.pumpWidget(container);
+
+    expect(
+      find.byType(ClipPath),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('Container is hittable only when having decorations', (WidgetTester tester) async {
+    bool tapped = false;
+    await tester.pumpWidget(GestureDetector(
+      onTap: () { tapped = true; },
+      child: Container(
+        decoration: const BoxDecoration(color: Colors.black),
+      ),
+    ));
+
+    await tester.tap(find.byType(Container));
+    expect(tapped, true);
+    tapped = false;
+
+    await tester.pumpWidget(GestureDetector(
+      onTap: () { tapped = true; },
+      child: Container(
+        foregroundDecoration: const BoxDecoration(color: Colors.black),
+      ),
+    ));
+
+    await tester.tap(find.byType(Container));
+    expect(tapped, true);
+    tapped = false;
+
+    await tester.pumpWidget(GestureDetector(
+      onTap: () { tapped = true; },
+      child: Container(
+        color: Colors.black,
+      ),
+    ));
+
+    await tester.tap(find.byType(Container));
+    expect(tapped, true);
+    tapped = false;
+
+    // Everything but color or decorations
+    await tester.pumpWidget(GestureDetector(
+      onTap: () { tapped = true; },
+      child: Center(
+        child: Container(
+          alignment: Alignment.bottomRight,
+          padding: const EdgeInsets.all(2),
+          width: 50,
+          height: 50,
+          margin: const EdgeInsets.all(2),
+          transform: Matrix4.rotationZ(1),
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byType(Container));
+    expect(tapped, false);
   });
 }
 

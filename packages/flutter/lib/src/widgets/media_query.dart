@@ -1,6 +1,8 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 import 'dart:math' as math;
 import 'dart:ui' as ui;
@@ -77,9 +79,9 @@ enum Orientation {
 ///
 /// See also:
 ///
-/// * [Scaffold], [SafeArea], [CupertinoTabScaffold], and
-/// [CupertinoPageScaffold], all of which are informed by [padding],
-/// [viewPadding], and [viewInsets].
+///  * [Scaffold], [SafeArea], [CupertinoTabScaffold], and
+///    [CupertinoPageScaffold], all of which are informed by [padding],
+///    [viewPadding], and [viewInsets].
 @immutable
 class MediaQueryData {
   /// Creates data for a media query with explicit values.
@@ -95,14 +97,28 @@ class MediaQueryData {
     this.viewInsets = EdgeInsets.zero,
     this.systemGestureInsets = EdgeInsets.zero,
     this.viewPadding = EdgeInsets.zero,
-    this.physicalDepth = double.maxFinite,
     this.alwaysUse24HourFormat = false,
     this.accessibleNavigation = false,
     this.invertColors = false,
     this.highContrast = false,
     this.disableAnimations = false,
     this.boldText = false,
-  });
+    this.navigationMode = NavigationMode.traditional,
+  }) : assert(size != null),
+       assert(devicePixelRatio != null),
+       assert(textScaleFactor != null),
+       assert(platformBrightness != null),
+       assert(padding != null),
+       assert(viewInsets != null),
+       assert(systemGestureInsets != null),
+       assert(viewPadding != null),
+       assert(alwaysUse24HourFormat != null),
+       assert(accessibleNavigation != null),
+       assert(invertColors != null),
+       assert(highContrast != null),
+       assert(disableAnimations != null),
+       assert(boldText != null),
+       assert(navigationMode != null);
 
   /// Creates data for a media query based on the given window.
   ///
@@ -119,13 +135,13 @@ class MediaQueryData {
       viewPadding = EdgeInsets.fromWindowPadding(window.viewPadding, window.devicePixelRatio),
       viewInsets = EdgeInsets.fromWindowPadding(window.viewInsets, window.devicePixelRatio),
       systemGestureInsets = EdgeInsets.fromWindowPadding(window.systemGestureInsets, window.devicePixelRatio),
-      physicalDepth = window.physicalDepth,
       accessibleNavigation = window.accessibilityFeatures.accessibleNavigation,
       invertColors = window.accessibilityFeatures.invertColors,
       disableAnimations = window.accessibilityFeatures.disableAnimations,
       boldText = window.accessibilityFeatures.boldText,
-      highContrast = false,
-      alwaysUse24HourFormat = window.alwaysUse24HourFormat;
+      highContrast = window.accessibilityFeatures.highContrast,
+      alwaysUse24HourFormat = window.alwaysUse24HourFormat,
+      navigationMode = NavigationMode.traditional;
 
   /// The size of the media in logical pixels (e.g, the size of the screen).
   ///
@@ -174,8 +190,8 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  /// * [ui.window], which provides some additional detail about this property
-  ///   and how it relates to [padding] and [viewPadding].
+  ///  * [ui.window], which provides some additional detail about this property
+  ///    and how it relates to [padding] and [viewPadding].
   final EdgeInsets viewInsets;
 
   /// The parts of the display that are partially obscured by system UI,
@@ -187,7 +203,7 @@ class MediaQueryData {
   /// for subsequent descendants in the widget tree by inserting a new
   /// [MediaQuery] widget using the [MediaQuery.removePadding] factory.
   ///
-  /// Padding is derived from the values of viewInsets and viewPadding.
+  /// Padding is derived from the values of [viewInsets] and [viewPadding].
   ///
   /// See also:
   ///
@@ -213,8 +229,8 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  /// * [ui.window], which provides some additional detail about this
-  ///   property and how it relates to [padding] and [viewInsets].
+  ///  * [ui.window], which provides some additional detail about this
+  ///    property and how it relates to [padding] and [viewInsets].
   final EdgeInsets viewPadding;
 
   /// The areas along the edges of the display where the system consumes
@@ -234,7 +250,7 @@ class MediaQueryData {
   /// This property is currently only expected to be set to a non-default value
   /// on Android starting with version Q.
   ///
-  /// {@tool snippet --template=stateful_widget_material}
+  /// {@tool dartpad --template=stateful_widget_material}
   ///
   /// For apps that might be deployed on Android Q devices with full gesture
   /// navigation enabled, use [MediaQuery.systemGestureInsets] with [Padding]
@@ -271,19 +287,6 @@ class MediaQueryData {
   /// ```
   /// {@end-tool}
   final EdgeInsets systemGestureInsets;
-
-  /// The physical depth is the maximum elevation that the Window allows.
-  ///
-  /// Physical layers drawn at or above this elevation will have their elevation
-  /// clamped to this value. This can happen if the physical layer itself has
-  /// an elevation larger than the available depth, or if some ancestor of the
-  /// layer causes it to have a cumulative elevation that is larger than the
-  /// available depth.
-  ///
-  /// The default value is [double.maxFinite], which is used for platforms that
-  /// do not specify a maximum elevation. This property is currently only
-  /// expected to be set to a non-default value on Fuchsia.
-  final double physicalDepth;
 
   /// Whether to use 24-hour format when formatting time.
   ///
@@ -341,6 +344,23 @@ class MediaQueryData {
   ///  * [Window.AccessibilityFeatures], where the setting originates.
   final bool boldText;
 
+  /// Describes the navigation mode requested by the platform.
+  ///
+  /// Some user interfaces are better navigated using a directional pad (DPAD)
+  /// or arrow keys, and for those interfaces, some widgets need to handle these
+  /// directional events differently. In order to know when to do that, these
+  /// widgets will look for the navigation mode in effect for their context.
+  ///
+  /// For instance, in a television interface, [NavigationMode.directional]
+  /// should be set, so that directional navigation is used to navigate away
+  /// from a text field using the DPAD. In contrast, on a regular desktop
+  /// application with the `navigationMode` set to [NavigationMode.traditional],
+  /// the arrow keys are used to move the cursor instead of navigating away.
+  ///
+  /// The [NavigationMode] values indicate the type of navigation to be used in
+  /// a widget subtree for those widgets sensitive to it.
+  final NavigationMode navigationMode;
+
   /// The orientation of the media (e.g., whether the device is in landscape or
   /// portrait mode).
   Orientation get orientation {
@@ -358,13 +378,13 @@ class MediaQueryData {
     EdgeInsets viewPadding,
     EdgeInsets viewInsets,
     EdgeInsets systemGestureInsets,
-    double physicalDepth,
     bool alwaysUse24HourFormat,
     bool highContrast,
     bool disableAnimations,
     bool invertColors,
     bool accessibleNavigation,
     bool boldText,
+    NavigationMode navigationMode,
   }) {
     return MediaQueryData(
       size: size ?? this.size,
@@ -375,13 +395,13 @@ class MediaQueryData {
       viewPadding: viewPadding ?? this.viewPadding,
       viewInsets: viewInsets ?? this.viewInsets,
       systemGestureInsets: systemGestureInsets ?? this.systemGestureInsets,
-      physicalDepth: physicalDepth ?? this.physicalDepth,
       alwaysUse24HourFormat: alwaysUse24HourFormat ?? this.alwaysUse24HourFormat,
       invertColors: invertColors ?? this.invertColors,
       highContrast: highContrast ?? this.highContrast,
       disableAnimations: disableAnimations ?? this.disableAnimations,
       accessibleNavigation: accessibleNavigation ?? this.accessibleNavigation,
       boldText: boldText ?? this.boldText,
+      navigationMode: navigationMode ?? this.navigationMode,
     );
   }
 
@@ -535,21 +555,21 @@ class MediaQueryData {
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final MediaQueryData typedOther = other;
-    return typedOther.size == size
-        && typedOther.devicePixelRatio == devicePixelRatio
-        && typedOther.textScaleFactor == textScaleFactor
-        && typedOther.platformBrightness == platformBrightness
-        && typedOther.padding == padding
-        && typedOther.viewPadding == viewPadding
-        && typedOther.viewInsets == viewInsets
-        && typedOther.physicalDepth == physicalDepth
-        && typedOther.alwaysUse24HourFormat == alwaysUse24HourFormat
-        && typedOther.highContrast == highContrast
-        && typedOther.disableAnimations == disableAnimations
-        && typedOther.invertColors == invertColors
-        && typedOther.accessibleNavigation == accessibleNavigation
-        && typedOther.boldText == boldText;
+    return other is MediaQueryData
+        && other.size == size
+        && other.devicePixelRatio == devicePixelRatio
+        && other.textScaleFactor == textScaleFactor
+        && other.platformBrightness == platformBrightness
+        && other.padding == padding
+        && other.viewPadding == viewPadding
+        && other.viewInsets == viewInsets
+        && other.alwaysUse24HourFormat == alwaysUse24HourFormat
+        && other.highContrast == highContrast
+        && other.disableAnimations == disableAnimations
+        && other.invertColors == invertColors
+        && other.accessibleNavigation == accessibleNavigation
+        && other.boldText == boldText
+        && other.navigationMode == navigationMode;
   }
 
   @override
@@ -562,34 +582,35 @@ class MediaQueryData {
       padding,
       viewPadding,
       viewInsets,
-      physicalDepth,
       alwaysUse24HourFormat,
       highContrast,
       disableAnimations,
       invertColors,
       accessibleNavigation,
       boldText,
+      navigationMode,
     );
   }
 
   @override
   String toString() {
-    return '$runtimeType('
-             'size: $size, '
-             'devicePixelRatio: ${devicePixelRatio.toStringAsFixed(1)}, '
-             'textScaleFactor: ${textScaleFactor.toStringAsFixed(1)}, '
-             'platformBrightness: $platformBrightness, '
-             'padding: $padding, '
-             'viewPadding: $viewPadding, '
-             'viewInsets: $viewInsets, '
-             'physicalDepth: $physicalDepth, '
-             'alwaysUse24HourFormat: $alwaysUse24HourFormat, '
-             'accessibleNavigation: $accessibleNavigation, '
-             'highContrast: $highContrast,'
-             'disableAnimations: $disableAnimations, '
-             'invertColors: $invertColors, '
-             'boldText: $boldText'
-           ')';
+    final List<String> properties = <String>[
+      'size: $size',
+      'devicePixelRatio: ${devicePixelRatio.toStringAsFixed(1)}',
+      'textScaleFactor: ${textScaleFactor.toStringAsFixed(1)}',
+      'platformBrightness: $platformBrightness',
+      'padding: $padding',
+      'viewPadding: $viewPadding',
+      'viewInsets: $viewInsets',
+      'alwaysUse24HourFormat: $alwaysUse24HourFormat',
+      'accessibleNavigation: $accessibleNavigation',
+      'highContrast: $highContrast',
+      'disableAnimations: $disableAnimations',
+      'invertColors: $invertColors',
+      'boldText: $boldText',
+      'navigationMode: ${describeEnum(navigationMode)}',
+    ];
+    return '${objectRuntimeType(this, 'MediaQueryData')}(${properties.join(', ')})';
   }
 }
 
@@ -739,7 +760,7 @@ class MediaQuery extends InheritedWidget {
   /// See also:
   ///
   ///  * [MediaQueryData.viewPadding], the affected property of the
-  ///  [MediaQueryData].
+  ///    [MediaQueryData].
   ///  * [removePadding], the same thing but for [MediaQueryData.padding].
   ///  * [removeViewInsets], the same thing but for [MediaQueryData.viewInsets].
   factory MediaQuery.removeViewPadding({
@@ -790,7 +811,7 @@ class MediaQuery extends InheritedWidget {
   static MediaQueryData of(BuildContext context, { bool nullOk = false }) {
     assert(context != null);
     assert(nullOk != null);
-    final MediaQuery query = context.inheritFromWidgetOfExactType(MediaQuery);
+    final MediaQuery query = context.dependOnInheritedWidgetOfExactType<MediaQuery>();
     if (query != null)
       return query.data;
     if (nullOk)
@@ -836,4 +857,32 @@ class MediaQuery extends InheritedWidget {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<MediaQueryData>('data', data, showName: false));
   }
+}
+
+/// Describes the navigation mode to be set by a [MediaQuery] widget
+///
+/// The different modes indicate the type of navigation to be used in a widget
+/// subtree for those widgets sensitive to it.
+///
+/// Use `MediaQuery.of(context).navigationMode` to determine the navigation mode
+/// in effect for the given context. Use a [MediaQuery] widget to set the
+/// navigation mode for its descendant widgets.
+enum NavigationMode {
+  /// This indicates a traditional keyboard-and-mouse navigation modality.
+  ///
+  /// This navigation mode is where the arrow keys can be used for secondary
+  /// modification operations, like moving sliders or cursors, and disabled
+  /// controls will lose focus and not be traversable.
+  traditional,
+
+  /// This indicates a directional-based navigation mode.
+  ///
+  /// This navigation mode indicates that arrow keys should be reserved for
+  /// navigation operations, and secondary modifications operations, like moving
+  /// sliders or cursors, will use alternative bindings or be disabled.
+  ///
+  /// Some behaviors are also affected by this mode. For instance, disabled
+  /// controls will retain focus when disabled, and will be able to receive
+  /// focus (although they remain disabled) when traversed.
+  directional,
 }

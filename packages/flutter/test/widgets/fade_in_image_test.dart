@@ -1,6 +1,8 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 import 'dart:async';
 import 'dart:typed_data';
@@ -27,7 +29,7 @@ class FadeInImageParts {
     StatefulElement animatedFadeOutFadeInElement;
     fadeInImageElement.visitChildren((Element child) {
       expect(animatedFadeOutFadeInElement, isNull);
-      animatedFadeOutFadeInElement = child;
+      animatedFadeOutFadeInElement = child as StatefulElement;
     });
     expect(animatedFadeOutFadeInElement, isNotNull);
     return animatedFadeOutFadeInElement.state;
@@ -49,8 +51,8 @@ class FadeInImageElements {
   final Element rawImageElement;
   final Element fadeTransitionElement;
 
-  RawImage get rawImage => rawImageElement.widget;
-  FadeTransition get fadeTransition => fadeTransitionElement?.widget;
+  RawImage get rawImage => rawImageElement.widget as RawImage;
+  FadeTransition get fadeTransition => fadeTransitionElement?.widget as FadeTransition;
   double get opacity => fadeTransition == null ? 1 : fadeTransition.opacity.value;
 }
 
@@ -78,14 +80,14 @@ FadeInImageParts findFadeInImage(WidgetTester tester) {
   final List<FadeInImageElements> elements = <FadeInImageElements>[];
   final Iterable<Element> rawImageElements = tester.elementList(find.byType(RawImage));
   ComponentElement fadeInImageElement;
-  for (Element rawImageElement in rawImageElements) {
+  for (final Element rawImageElement in rawImageElements) {
     Element fadeTransitionElement;
     rawImageElement.visitAncestorElements((Element ancestor) {
       if (ancestor.widget is FadeTransition) {
         fadeTransitionElement = ancestor;
       } else if (ancestor.widget is FadeInImage) {
         if (fadeInImageElement == null) {
-          fadeInImageElement = ancestor;
+          fadeInImageElement = ancestor as ComponentElement;
         } else {
           expect(fadeInImageElement, same(ancestor));
         }
@@ -209,6 +211,28 @@ Future<void> main() async {
       expect(findFadeInImage(tester).state, same(state));
     });
 
+    testWidgets('does not keep the placeholder in the tree if it is invisible', (WidgetTester tester) async {
+      final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
+      final TestImageProvider imageProvider = TestImageProvider(targetImage);
+
+      await tester.pumpWidget(FadeInImage(
+        placeholder: placeholderProvider,
+        image: imageProvider,
+        fadeOutDuration: animationDuration,
+        fadeInDuration: animationDuration,
+        excludeFromSemantics: true,
+      ));
+
+      placeholderProvider.complete();
+      await tester.pumpAndSettle();
+
+      expect(find.byType(Image), findsNWidgets(2));
+
+      imageProvider.complete();
+      await tester.pumpAndSettle();
+      expect(find.byType(Image), findsOneWidget);
+    });
+
     testWidgets('re-fades in the image when the target image is updated', (WidgetTester tester) async {
       final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
       final TestImageProvider imageProvider = TestImageProvider(targetImage);
@@ -251,7 +275,7 @@ Future<void> main() async {
       expect(findFadeInImage(tester).target.opacity, moreOrLessEquals(1));
     });
 
-    testWidgets('doesn\'t interrupt in-progress animation when animation values are updated', (WidgetTester tester) async {
+    testWidgets("doesn't interrupt in-progress animation when animation values are updated", (WidgetTester tester) async {
       final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
       final TestImageProvider imageProvider = TestImageProvider(targetImage);
 
@@ -285,7 +309,7 @@ Future<void> main() async {
       expect(findFadeInImage(tester).target.opacity, moreOrLessEquals(1));
     });
 
-    group(ImageProvider, () {
+    group('ImageProvider', () {
 
       testWidgets('memory placeholder cacheWidth and cacheHeight is passed through', (WidgetTester tester) async {
         final Uint8List testBytes = Uint8List.fromList(kTransparentImage);
@@ -299,11 +323,12 @@ Future<void> main() async {
         );
 
         bool called = false;
-        final DecoderCallback decode = (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
+        final DecoderCallback decode = (Uint8List bytes, {int cacheWidth, int cacheHeight, bool allowUpscaling}) {
           expect(cacheWidth, 20);
           expect(cacheHeight, 30);
+          expect(allowUpscaling, false);
           called = true;
-          return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight);
+          return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling);
         };
         final ImageProvider resizeImage = image.placeholder;
         expect(image.placeholder, isA<ResizeImage>());
@@ -321,9 +346,10 @@ Future<void> main() async {
         );
 
         bool called = false;
-        final DecoderCallback decode = (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
+        final DecoderCallback decode = (Uint8List bytes, {int cacheWidth, int cacheHeight, bool allowUpscaling}) {
           expect(cacheWidth, null);
           expect(cacheHeight, null);
+          expect(allowUpscaling, null);
           called = true;
           return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight);
         };

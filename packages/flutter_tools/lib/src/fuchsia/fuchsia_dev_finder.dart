@@ -1,13 +1,16 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+import 'package:process/process.dart';
+
 import '../base/common.dart';
+import '../base/logger.dart';
 import '../base/process.dart';
-import '../globals.dart';
 import 'fuchsia_sdk.dart';
 
-// Usage: dev_finder <flags> <subcommand> <subcommand args>
+// Usage: device-finder <flags> <subcommand> <subcommand args>
 //
 // Subcommands:
 //   commands         list all command names
@@ -17,49 +20,71 @@ import 'fuchsia_sdk.dart';
 //   resolve          attempts to resolve all passed Fuchsia domain names on the
 //                    network
 
-/// A simple wrapper for the Fuchsia SDK's 'dev_finder' tool.
+/// A simple wrapper for the Fuchsia SDK's 'device-finder' tool.
 class FuchsiaDevFinder {
+  FuchsiaDevFinder({
+    @required FuchsiaArtifacts fuchsiaArtifacts,
+    @required Logger logger,
+    @required ProcessManager processManager,
+  })
+    : _fuchsiaArtifacts = fuchsiaArtifacts,
+      _logger = logger,
+      _processUtils = ProcessUtils(logger: logger, processManager: processManager);
+
+
+  final FuchsiaArtifacts _fuchsiaArtifacts;
+  final Logger _logger;
+  final ProcessUtils _processUtils;
+
   /// Returns a list of attached devices as a list of strings with entries
   /// formatted as follows:
   /// 192.168.42.172 scare-cable-skip-joy
-  Future<List<String>> list() async {
-    if (fuchsiaArtifacts.devFinder == null ||
-        !fuchsiaArtifacts.devFinder.existsSync()) {
-      throwToolExit('Fuchsia dev_finder tool not found.');
+  Future<List<String>> list({ Duration timeout }) async {
+    if (_fuchsiaArtifacts.devFinder == null ||
+        !_fuchsiaArtifacts.devFinder.existsSync()) {
+      throwToolExit('Fuchsia device-finder tool not found.');
     }
     final List<String> command = <String>[
-      fuchsiaArtifacts.devFinder.path,
+      _fuchsiaArtifacts.devFinder.path,
       'list',
       '-full',
+      if (timeout != null)
+        ...<String>['-timeout', '${timeout.inMilliseconds}ms']
     ];
-    final RunResult result = await processUtils.run(command);
+    final RunResult result = await _processUtils.run(command);
     if (result.exitCode != 0) {
-      printError('dev_finder failed: ${result.stderr}');
+      // No devices returns error code 1.
+      // https://bugs.fuchsia.dev/p/fuchsia/issues/detail?id=48563
+      if (!result.stderr.contains('no devices found')) {
+        _logger.printError('device-finder failed: ${result.stderr}');
+      }
       return null;
     }
     return result.stdout.split('\n');
   }
 
-  /// Returns the host address by which the device [deviceName] should use for
-  /// the host.
+  /// Returns the address of the named device.
+  ///
+  /// If local is true, then gives the address by which the device reaches the
+  /// host.
   ///
   /// The string [deviceName] should be the name of the device from the
   /// 'list' command, e.g. 'scare-cable-skip-joy'.
-  Future<String> resolve(String deviceName) async {
-    if (fuchsiaArtifacts.devFinder == null ||
-        !fuchsiaArtifacts.devFinder.existsSync()) {
-      throwToolExit('Fuchsia dev_finder tool not found.');
+  Future<String> resolve(String deviceName, {bool local = false}) async {
+    if (_fuchsiaArtifacts.devFinder == null ||
+        !_fuchsiaArtifacts.devFinder.existsSync()) {
+      throwToolExit('Fuchsia device-finder tool not found.');
     }
     final List<String> command = <String>[
-      fuchsiaArtifacts.devFinder.path,
+      _fuchsiaArtifacts.devFinder.path,
       'resolve',
-      '-local',
+      if (local) '-local',
       '-device-limit', '1',
       deviceName,
     ];
-    final RunResult result = await processUtils.run(command);
+    final RunResult result = await _processUtils.run(command);
     if (result.exitCode != 0) {
-      printError('dev_finder failed: ${result.stderr}');
+      _logger.printError('device-finder failed: ${result.stderr}');
       return null;
     }
     return result.stdout.trim();

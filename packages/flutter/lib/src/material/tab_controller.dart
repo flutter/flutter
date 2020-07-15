@@ -1,12 +1,17 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
+
+// Examples can assume:
+// BuildContext context;
 
 /// Coordinates tab selection between a [TabBar] and a [TabBarView].
 ///
@@ -23,7 +28,7 @@ import 'constants.dart';
 ///
 /// {@animation 700 540 https://flutter.github.io/assets-for-api-docs/assets/material/tabs.mp4}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This widget introduces a [Scaffold] with an [AppBar] and a [TabBar].
 ///
@@ -80,6 +85,59 @@ import 'constants.dart';
 /// }
 /// ```
 /// {@end-tool}
+///
+/// {@tool dartpad --template=stateless_widget_material}
+///
+/// This example shows how to listen to page updates in [TabBar] and [TabBarView]
+/// when using [DefaultTabController].
+///
+/// ```dart preamble
+/// final List<Tab> tabs = <Tab>[
+///   Tab(text: 'Zeroth'),
+///   Tab(text: 'First'),
+///   Tab(text: 'Second'),
+/// ];
+/// ```
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return DefaultTabController(
+///     length: tabs.length,
+///     // The Builder widget is used to have a different BuildContext to access
+///     // closest DefaultTabController.
+///     child: Builder(
+///       builder: (BuildContext context) {
+///         final TabController tabController = DefaultTabController.of(context);
+///         tabController.addListener(() {
+///           if (!tabController.indexIsChanging) {
+///             // Your code goes here.
+///             // To get index of current tab use tabController.index
+///           }
+///         });
+///         return Scaffold(
+///           appBar: AppBar(
+///             bottom: TabBar(
+///               tabs: tabs,
+///             ),
+///           ),
+///           body: TabBarView(
+///             children: tabs.map((Tab tab){
+///               return Center(
+///                 child: Text(
+///                   tab.text + ' Tab',
+///                   style: Theme.of(context).textTheme.headline5,
+///                 ),
+///               );
+///             }).toList(),
+///           ),
+///         );
+///       }
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 class TabController extends ChangeNotifier {
   /// Creates an object that manages the state required by [TabBar] and a
   /// [TabBarView].
@@ -258,6 +316,8 @@ class _TabControllerScope extends InheritedWidget {
 /// The [TabController] for descendant widgets that don't specify one
 /// explicitly.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=POtoEH-5l40}
+///
 /// [DefaultTabController] is an inherited widget that is used to share a
 /// [TabController] with a [TabBar] or a [TabBarView]. It's used when sharing an
 /// explicitly created [TabController] isn't convenient because the tab bar
@@ -336,13 +396,15 @@ class DefaultTabController extends StatefulWidget {
 
   /// The closest instance of this class that encloses the given context.
   ///
-  /// Typical usage:
+  /// {@tool snippet}
+  /// Typical usage is as follows:
   ///
   /// ```dart
-  /// TabController controller = DefaultTabBarController.of(context);
+  /// TabController controller = DefaultTabController.of(context);
   /// ```
+  /// {@end-tool}
   static TabController of(BuildContext context) {
-    final _TabControllerScope scope = context.inheritFromWidgetOfExactType(_TabControllerScope);
+    final _TabControllerScope scope = context.dependOnInheritedWidgetOfExactType<_TabControllerScope>();
     return scope?.controller;
   }
 

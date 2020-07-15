@@ -1,6 +1,8 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble, hashValues;
@@ -69,12 +71,12 @@ class RelativeRect {
 
   /// Distance from the right side of the container to the right side of this rectangle.
   ///
-  /// May be negative if the right side of the rectangle is outside of the container.
+  /// May be positive if the right side of the rectangle is outside of the container.
   final double right;
 
   /// Distance from the bottom side of the container to the bottom side of this rectangle.
   ///
-  /// May be negative if the bottom side of the rectangle is outside of the container.
+  /// May be positive if the bottom side of the rectangle is outside of the container.
   final double bottom;
 
   /// Returns whether any of the values are greater than zero.
@@ -151,16 +153,14 @@ class RelativeRect {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
-    if (other is! RelativeRect)
-      return false;
-    final RelativeRect typedOther = other;
-    return left == typedOther.left &&
-           top == typedOther.top &&
-           right == typedOther.right &&
-           bottom == typedOther.bottom;
+    return other is RelativeRect
+        && other.left == left
+        && other.top == top
+        && other.right == right
+        && other.bottom == bottom;
   }
 
   @override
@@ -270,10 +270,14 @@ enum StackFit {
   passthrough,
 }
 
+// TODO(liyuqian): Deprecate and remove `Overflow` once its usages are removed from Google.
+
 /// Whether overflowing children should be clipped, or their overflow be
 /// visible.
 enum Overflow {
   /// Overflowing children will be visible.
+  ///
+  /// The visible overflow area will not accept hit testing.
   visible,
 
   /// Overflowing children will be clipped to the bounds of their parent.
@@ -328,14 +332,14 @@ class RenderStack extends RenderBox
     AlignmentGeometry alignment = AlignmentDirectional.topStart,
     TextDirection textDirection,
     StackFit fit = StackFit.loose,
-    Overflow overflow = Overflow.clip,
+    Clip clipBehavior = Clip.hardEdge,
   }) : assert(alignment != null),
        assert(fit != null),
-       assert(overflow != null),
+       assert(clipBehavior != null),
        _alignment = alignment,
        _textDirection = textDirection,
        _fit = fit,
-       _overflow = overflow {
+       _clipBehavior = clipBehavior {
     addAll(children);
   }
 
@@ -413,25 +417,26 @@ class RenderStack extends RenderBox
     }
   }
 
-  /// Whether overflowing children should be clipped. See [Overflow].
+  /// {@macro flutter.widgets.Clip}
   ///
-  /// Some children in a stack might overflow its box. When this flag is set to
-  /// [Overflow.clip], children cannot paint outside of the stack's box.
-  Overflow get overflow => _overflow;
-  Overflow _overflow;
-  set overflow(Overflow value) {
+  /// Defaults to [Clip.hardEdge], and must not be null.
+  Clip get clipBehavior => _clipBehavior;
+  Clip _clipBehavior = Clip.hardEdge;
+  set clipBehavior(Clip value) {
     assert(value != null);
-    if (_overflow != value) {
-      _overflow = value;
+    if (value != _clipBehavior) {
+      _clipBehavior = value;
       markNeedsPaint();
+      markNeedsSemanticsUpdate();
     }
   }
 
-  double _getIntrinsicDimension(double mainChildSizeGetter(RenderBox child)) {
+  /// Helper function for calculating the intrinsics metrics of a Stack.
+  static double getIntrinsicDimension(RenderBox firstChild, double mainChildSizeGetter(RenderBox child)) {
     double extent = 0.0;
     RenderBox child = firstChild;
     while (child != null) {
-      final StackParentData childParentData = child.parentData;
+      final StackParentData childParentData = child.parentData as StackParentData;
       if (!childParentData.isPositioned)
         extent = math.max(extent, mainChildSizeGetter(child));
       assert(child.parentData == childParentData);
@@ -442,22 +447,22 @@ class RenderStack extends RenderBox
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    return _getIntrinsicDimension((RenderBox child) => child.getMinIntrinsicWidth(height));
+    return getIntrinsicDimension(firstChild, (RenderBox child) => child.getMinIntrinsicWidth(height));
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    return _getIntrinsicDimension((RenderBox child) => child.getMaxIntrinsicWidth(height));
+    return getIntrinsicDimension(firstChild, (RenderBox child) => child.getMaxIntrinsicWidth(height));
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    return _getIntrinsicDimension((RenderBox child) => child.getMinIntrinsicHeight(width));
+    return getIntrinsicDimension(firstChild, (RenderBox child) => child.getMinIntrinsicHeight(width));
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    return _getIntrinsicDimension((RenderBox child) => child.getMaxIntrinsicHeight(width));
+    return getIntrinsicDimension(firstChild, (RenderBox child) => child.getMaxIntrinsicHeight(width));
   }
 
   @override
@@ -465,8 +470,60 @@ class RenderStack extends RenderBox
     return defaultComputeDistanceToHighestActualBaseline(baseline);
   }
 
+  /// Lays out the positioned `child` according to `alignment` within a Stack of `size`.
+  ///
+  /// Returns true when the child has visual overflow.
+  static bool layoutPositionedChild(RenderBox child, StackParentData childParentData, Size size, Alignment alignment) {
+    assert(childParentData.isPositioned);
+    assert(child.parentData == childParentData);
+
+    bool hasVisualOverflow = false;
+    BoxConstraints childConstraints = const BoxConstraints();
+
+    if (childParentData.left != null && childParentData.right != null)
+      childConstraints = childConstraints.tighten(width: size.width - childParentData.right - childParentData.left);
+    else if (childParentData.width != null)
+      childConstraints = childConstraints.tighten(width: childParentData.width);
+
+    if (childParentData.top != null && childParentData.bottom != null)
+      childConstraints = childConstraints.tighten(height: size.height - childParentData.bottom - childParentData.top);
+    else if (childParentData.height != null)
+      childConstraints = childConstraints.tighten(height: childParentData.height);
+
+    child.layout(childConstraints, parentUsesSize: true);
+
+    double x;
+    if (childParentData.left != null) {
+      x = childParentData.left;
+    } else if (childParentData.right != null) {
+      x = size.width - childParentData.right - child.size.width;
+    } else {
+      x = alignment.alongOffset(size - child.size as Offset).dx;
+    }
+
+    if (x < 0.0 || x + child.size.width > size.width)
+      hasVisualOverflow = true;
+
+    double y;
+    if (childParentData.top != null) {
+      y = childParentData.top;
+    } else if (childParentData.bottom != null) {
+      y = size.height - childParentData.bottom - child.size.height;
+    } else {
+      y = alignment.alongOffset(size - child.size as Offset).dy;
+    }
+
+    if (y < 0.0 || y + child.size.height > size.height)
+      hasVisualOverflow = true;
+
+    childParentData.offset = Offset(x, y);
+
+    return hasVisualOverflow;
+  }
+
   @override
   void performLayout() {
+    final BoxConstraints constraints = this.constraints;
     _resolve();
     assert(_resolvedAlignment != null);
     _hasVisualOverflow = false;
@@ -497,7 +554,7 @@ class RenderStack extends RenderBox
 
     RenderBox child = firstChild;
     while (child != null) {
-      final StackParentData childParentData = child.parentData;
+      final StackParentData childParentData = child.parentData as StackParentData;
 
       if (!childParentData.isPositioned) {
         hasNonPositionedChildren = true;
@@ -524,50 +581,12 @@ class RenderStack extends RenderBox
 
     child = firstChild;
     while (child != null) {
-      final StackParentData childParentData = child.parentData;
+      final StackParentData childParentData = child.parentData as StackParentData;
 
       if (!childParentData.isPositioned) {
-        childParentData.offset = _resolvedAlignment.alongOffset(size - child.size);
+        childParentData.offset = _resolvedAlignment.alongOffset(size - child.size as Offset);
       } else {
-        BoxConstraints childConstraints = const BoxConstraints();
-
-        if (childParentData.left != null && childParentData.right != null)
-          childConstraints = childConstraints.tighten(width: size.width - childParentData.right - childParentData.left);
-        else if (childParentData.width != null)
-          childConstraints = childConstraints.tighten(width: childParentData.width);
-
-        if (childParentData.top != null && childParentData.bottom != null)
-          childConstraints = childConstraints.tighten(height: size.height - childParentData.bottom - childParentData.top);
-        else if (childParentData.height != null)
-          childConstraints = childConstraints.tighten(height: childParentData.height);
-
-        child.layout(childConstraints, parentUsesSize: true);
-
-        double x;
-        if (childParentData.left != null) {
-          x = childParentData.left;
-        } else if (childParentData.right != null) {
-          x = size.width - childParentData.right - child.size.width;
-        } else {
-          x = _resolvedAlignment.alongOffset(size - child.size).dx;
-        }
-
-        if (x < 0.0 || x + child.size.width > size.width)
-          _hasVisualOverflow = true;
-
-        double y;
-        if (childParentData.top != null) {
-          y = childParentData.top;
-        } else if (childParentData.bottom != null) {
-          y = size.height - childParentData.bottom - child.size.height;
-        } else {
-          y = _resolvedAlignment.alongOffset(size - child.size).dy;
-        }
-
-        if (y < 0.0 || y + child.size.height > size.height)
-          _hasVisualOverflow = true;
-
-        childParentData.offset = Offset(x, y);
+        _hasVisualOverflow = layoutPositionedChild(child, childParentData, size, _resolvedAlignment) || _hasVisualOverflow;
       }
 
       assert(child.parentData == childParentData);
@@ -591,8 +610,8 @@ class RenderStack extends RenderBox
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_overflow == Overflow.clip && _hasVisualOverflow) {
-      context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintStack);
+    if (clipBehavior != Clip.none && _hasVisualOverflow) {
+      context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintStack, clipBehavior: clipBehavior);
     } else {
       paintStack(context, offset);
     }
@@ -607,7 +626,7 @@ class RenderStack extends RenderBox
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection));
     properties.add(EnumProperty<StackFit>('fit', fit));
-    properties.add(EnumProperty<Overflow>('overflow', overflow));
+    properties.add(EnumProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.hardEdge));
   }
 }
 
@@ -653,7 +672,7 @@ class RenderIndexedStack extends RenderStack {
     RenderBox child = firstChild;
     int i = 0;
     while (child != null && i < index) {
-      final StackParentData childParentData = child.parentData;
+      final StackParentData childParentData = child.parentData as StackParentData;
       child = childParentData.nextSibling;
       i += 1;
     }
@@ -668,7 +687,7 @@ class RenderIndexedStack extends RenderStack {
       return false;
     assert(position != null);
     final RenderBox child = _childAtIndex();
-    final StackParentData childParentData = child.parentData;
+    final StackParentData childParentData = child.parentData as StackParentData;
     return result.addWithPaintOffset(
       offset: childParentData.offset,
       position: position,
@@ -684,7 +703,7 @@ class RenderIndexedStack extends RenderStack {
     if (firstChild == null || index == null)
       return;
     final RenderBox child = _childAtIndex();
-    final StackParentData childParentData = child.parentData;
+    final StackParentData childParentData = child.parentData as StackParentData;
     context.paintChild(child, childParentData.offset + offset);
   }
 

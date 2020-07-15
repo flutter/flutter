@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/material.dart';
 
 class CullOpacityPage extends StatefulWidget {
@@ -14,6 +18,10 @@ class _CullOpacityPageState extends State<CullOpacityPage> with SingleTickerProv
     super.initState();
 
     _controller = AnimationController(vsync: this, duration: const Duration(seconds: 2));
+    // Animations are typically implemented using the AnimatedBuilder widget.
+    // This code uses a manual listener for historical reasons and will remain
+    // in order to preserve compatibility with the history of measurements for
+    // this benchmark.
     _offsetY = Tween<double>(begin: 0, end: -1000.0).animate(_controller)..addListener((){
       setState(() {});
     });

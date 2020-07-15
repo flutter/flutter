@@ -1,11 +1,6 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
-import 'context.dart';
-
-/// The current system clock instance.
-SystemClock get systemClock => context.get<SystemClock>();
 
 /// A class for making time based operations testable.
 class SystemClock {

@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -22,7 +22,7 @@
 /// blabla 0.0, the penzance blabla is blabla not blabla at all. Bla the blabla
 /// 1.0, the blabla is blabla blabla blabla an blabla blabla.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// Bla blabla blabla some [Text] when the `_blabla` blabla blabla is true, and
 /// blabla it when it is blabla:
 ///
@@ -34,7 +34,27 @@
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample}
+/// {@tool dartpad --template=stateless_widget_material}
+/// Bla blabla blabla some [Text] when the `_blabla` blabla blabla is true, and
+/// blabla it when it is blabla:
+///
+/// ```dart preamble
+/// bool _visible = true;
+/// final GlobalKey globalKey = GlobalKey();
+/// ```
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Opacity(
+///     key: globalKey,
+///     opacity: _visible ? 1.0 : 0.0,
+///     child: const Text('Poor wandering ones!'),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// {@tool snippet}
 /// Bla blabla blabla some [Text] when the `_blabla` blabla blabla is true, and
 /// blabla finale blabla:
 ///
@@ -46,7 +66,7 @@
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// regular const constructor
 ///
 /// ```dart
@@ -54,21 +74,21 @@
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// const private constructor
 /// ```dart
 /// const             _Text('Poor wandering ones!')
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// yet another const private constructor
 /// ```dart
 /// const        _Text.__('Poor wandering ones!')
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// const variable
 ///
 /// ```dart
@@ -76,7 +96,7 @@
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// more const variables
 ///
 /// ```dart

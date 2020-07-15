@@ -18,5 +18,7 @@
   "cutButtonLabel": "Potong",
   "copyButtonLabel": "Salin",
   "pasteButtonLabel": "Tampal",
-  "selectAllButtonLabel": "Pilih Semua"
+  "selectAllButtonLabel": "Pilih Semua",
+  "tabSemanticsLabel": "Tab $tabIndex daripada $tabCount",
+  "modalBarrierDismissLabel": "Tolak"
 }

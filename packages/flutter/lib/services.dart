@@ -1,6 +1,8 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 /// Platform services exposed to Flutter apps.
 ///
@@ -11,6 +13,7 @@
 library services;
 
 export 'src/services/asset_bundle.dart';
+export 'src/services/autofill.dart';
 export 'src/services/binary_messenger.dart';
 export 'src/services/binding.dart';
 export 'src/services/clipboard.dart';
@@ -29,6 +32,7 @@ export 'src/services/raw_keyboard_fuchsia.dart';
 export 'src/services/raw_keyboard_linux.dart';
 export 'src/services/raw_keyboard_macos.dart';
 export 'src/services/raw_keyboard_web.dart';
+export 'src/services/raw_keyboard_windows.dart';
 export 'src/services/system_channels.dart';
 export 'src/services/system_chrome.dart';
 export 'src/services/system_navigator.dart';

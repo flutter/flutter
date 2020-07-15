@@ -1,6 +1,8 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
@@ -49,6 +51,27 @@ void main() {
     handle.dispose();
   });
 
+  testWidgets('LinearProgressIndicator custom minHeight', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            width: 200.0,
+            child: LinearProgressIndicator(value: 0.25, minHeight: 2.0),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.byType(LinearProgressIndicator),
+      paints
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 2.0))
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 50.0, 2.0)),
+    );
+  });
+
   testWidgets('LinearProgressIndicator paint (LTR)', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
@@ -65,8 +88,8 @@ void main() {
     expect(
       find.byType(LinearProgressIndicator),
       paints
-        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
-        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 50.0, 6.0)),
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 4.0))
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 50.0, 4.0)),
     );
 
     expect(tester.binding.transientCallbackCount, 0);
@@ -88,8 +111,8 @@ void main() {
     expect(
       find.byType(LinearProgressIndicator),
       paints
-        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
-        ..rect(rect: const Rect.fromLTRB(150.0, 0.0, 200.0, 6.0)),
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 4.0))
+        ..rect(rect: const Rect.fromLTRB(150.0, 0.0, 200.0, 4.0)),
     );
 
     expect(tester.binding.transientCallbackCount, 0);
@@ -115,8 +138,8 @@ void main() {
     expect(
       find.byType(LinearProgressIndicator),
       paints
-        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
-        ..rect(rect: Rect.fromLTRB(0.0, 0.0, animationValue * 200.0, 6.0)),
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 4.0))
+        ..rect(rect: Rect.fromLTRB(0.0, 0.0, animationValue * 200.0, 4.0)),
     );
 
     expect(tester.binding.transientCallbackCount, 1);
@@ -142,8 +165,8 @@ void main() {
     expect(
       find.byType(LinearProgressIndicator),
       paints
-        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
-        ..rect(rect: Rect.fromLTRB(200.0 - animationValue * 200.0, 0.0, 200.0, 6.0)),
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 4.0))
+        ..rect(rect: Rect.fromLTRB(200.0 - animationValue * 200.0, 0.0, 200.0, 4.0)),
     );
 
     expect(tester.binding.transientCallbackCount, 1);
@@ -169,8 +192,8 @@ void main() {
     expect(
       find.byType(LinearProgressIndicator),
       paints
-        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
-        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 50.0, 6.0), color: Colors.white),
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 4.0))
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 50.0, 4.0), color: Colors.white),
     );
   });
 
@@ -323,7 +346,7 @@ void main() {
     expect(tester.binding.transientCallbackCount, 0);
   });
 
-  testWidgets('LinearProgressIndicator with a height less than the minumum', (WidgetTester tester) async {
+  testWidgets('LinearProgressIndicator with a height less than the minimum', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -509,4 +532,28 @@ void main() {
 
     handle.dispose();
   });
+
+  testWidgets('Indeterminate CircularProgressIndicator uses expected animation', (WidgetTester tester) async {
+    final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(40, 40));
+
+    await tester.pumpFrames(animationSheet.record(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Padding(
+          padding: EdgeInsets.all(4),
+          child: CircularProgressIndicator(),
+        ),
+      ),
+    ), const Duration(seconds: 2));
+
+    tester.binding.setSurfaceSize(animationSheet.sheetSize());
+
+    final Widget display = await animationSheet.display();
+    await tester.pumpWidget(display);
+
+    await expectLater(
+      find.byWidget(display),
+      matchesGoldenFile('material.circular_progress_indicator.indeterminate.png'),
+    );
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42767
 }

@@ -1,6 +1,8 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 import 'dart:async';
 import 'dart:collection';
@@ -32,7 +34,7 @@ typedef RecognizerCallback<T> = T Function();
 ///
 /// See also:
 ///
-///   * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
+///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
 enum DragStartBehavior {
   /// Set the initial offset, at the position where the first down event was
   /// detected.
@@ -181,15 +183,20 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
       }());
       result = callback();
     } catch (exception, stack) {
+      InformationCollector collector;
+      assert(() {
+        collector = () sync* {
+          yield StringProperty('Handler', name);
+          yield DiagnosticsProperty<GestureRecognizer>('Recognizer', this, style: DiagnosticsTreeStyle.errorProperty);
+        };
+        return true;
+      }());
       FlutterError.reportError(FlutterErrorDetails(
         exception: exception,
         stack: stack,
         library: 'gesture',
         context: ErrorDescription('while handling a gesture'),
-        informationCollector: () sync* {
-          yield StringProperty('Handler', name);
-          yield DiagnosticsProperty<GestureRecognizer>('Recognizer', this, style: DiagnosticsTreeStyle.errorProperty);
-        },
+        informationCollector: collector
       ));
     }
     return result;
@@ -251,7 +258,7 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   void resolve(GestureDisposition disposition) {
     final List<GestureArenaEntry> localEntries = List<GestureArenaEntry>.from(_entries.values);
     _entries.clear();
-    for (GestureArenaEntry entry in localEntries)
+    for (final GestureArenaEntry entry in localEntries)
       entry.resolve(disposition);
   }
 
@@ -270,7 +277,7 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   @override
   void dispose() {
     resolve(GestureDisposition.rejected);
-    for (int pointer in _trackedPointers)
+    for (final int pointer in _trackedPointers)
       GestureBinding.instance.pointerRouter.removeRoute(pointer, handleEvent);
     _trackedPointers.clear();
     assert(_entries.isEmpty);
@@ -398,6 +405,9 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
 
   /// If non-null, the recognizer will call [didExceedDeadline] after this
   /// amount of time has elapsed since starting to track the primary pointer.
+  ///
+  /// The [didExceedDeadline] will not be called if the primary pointer is
+  /// accepted, rejected, or all pointers are up or canceled before [deadline].
   final Duration deadline;
 
   /// The maximum distance in logical pixels the gesture is allowed to drift
@@ -495,7 +505,10 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
 
   @override
   void acceptGesture(int pointer) {
-    _gestureAccepted = true;
+    if (pointer == primaryPointer) {
+      _stopTimer();
+      _gestureAccepted = true;
+    }
   }
 
   @override
@@ -589,5 +602,5 @@ class OffsetPair {
   }
 
   @override
-  String toString() => '$runtimeType(local: $local, global: $global)';
+  String toString() => '${objectRuntimeType(this, 'OffsetPair')}(local: $local, global: $global)';
 }

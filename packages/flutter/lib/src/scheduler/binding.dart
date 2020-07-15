@@ -1,20 +1,21 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 import 'dart:async';
 import 'dart:collection';
 import 'dart:developer' show Flow, Timeline;
-import 'dart:ui' show AppLifecycleState, FramePhase, FrameTiming;
+import 'dart:ui' show AppLifecycleState, FramePhase, FrameTiming, TimingsCallback;
 
 import 'package:collection/collection.dart' show PriorityQueue, HeapPriorityQueue;
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 
 import 'debug.dart';
 import 'priority.dart';
 
-export 'dart:ui' show AppLifecycleState, VoidCallback;
+export 'dart:ui' show AppLifecycleState, VoidCallback, FrameTiming;
 
 /// Slows down animations by this factor to help in development.
 double get timeDilation => _timeDilation;
@@ -50,15 +51,16 @@ typedef TaskCallback<T> = T Function();
 /// whenever the system needs to decide whether a task at a given
 /// priority needs to be run.
 ///
-/// Return true if a task with the given priority should be executed
-/// at this time, false otherwise.
+/// Return true if a task with the given priority should be executed at this
+/// time, false otherwise.
 ///
-/// See also [defaultSchedulingStrategy].
+/// See also:
+///
+///  * [defaultSchedulingStrategy], the default [SchedulingStrategy] for [SchedulerBinding.schedulingStrategy].
 typedef SchedulingStrategy = bool Function({ int priority, SchedulerBinding scheduler });
 
 class _TaskEntry<T> {
   _TaskEntry(this.task, this.priority, this.debugLabel, this.flow) {
-    // ignore: prefer_asserts_in_initializer_lists
     assert(() {
       debugStack = StackTrace.current;
       return true;
@@ -133,7 +135,10 @@ class _FrameCallbackEntry {
 /// The values of this enum are ordered in the same order as the phases occur,
 /// so their relative index values can be compared to each other.
 ///
-/// See also the discussion at [WidgetsBinding.drawFrame].
+/// See also:
+///
+///  * [WidgetsBinding.drawFrame], which pumps the build and rendering pipeline
+///    to generate a frame.
 enum SchedulerPhase {
   /// No frame is being processed. Tasks (scheduled by
   /// [WidgetsBinding.scheduleTask]), microtasks (scheduled by
@@ -193,25 +198,118 @@ enum SchedulerPhase {
 /// * Non-rendering tasks, to be run between frames. These are given a
 ///   priority and are executed in priority order according to a
 ///   [schedulingStrategy].
-mixin SchedulerBinding on BindingBase, ServicesBinding {
+mixin SchedulerBinding on BindingBase {
   @override
   void initInstances() {
     super.initInstances();
     _instance = this;
-    SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
-    readInitialLifecycleStateFromNativeWindow();
 
     if (!kReleaseMode) {
       int frameNumber = 0;
-
-      // use frameTimings. https://github.com/flutter/flutter/issues/38838
-      // ignore: deprecated_member_use
-      window.onReportTimings = (List<FrameTiming> timings) {
-        for (FrameTiming frameTiming in timings) {
+      addTimingsCallback((List<FrameTiming> timings) {
+        for (final FrameTiming frameTiming in timings) {
           frameNumber += 1;
           _profileFramePostEvent(frameNumber, frameTiming);
         }
-      };
+      });
+    }
+  }
+
+  final List<TimingsCallback> _timingsCallbacks = <TimingsCallback>[];
+
+  /// Add a [TimingsCallback] that receives [FrameTiming] sent from
+  /// the engine.
+  ///
+  /// This API enables applications to monitor their graphics
+  /// performance. Data from the engine is batched into lists of
+  /// [FrameTiming] objects which are reported approximately once a
+  /// second in release mode and approximately once every 100ms in
+  /// debug and profile builds. The list is sorted in ascending
+  /// chronological order (earliest frame first). The timing of the
+  /// first frame is sent immediately without batching.
+  ///
+  /// The data returned can be used to catch missed frames (by seeing
+  /// if [FrameTiming.buildDuration] or [FrameTiming.rasterDuration]
+  /// exceed the frame budget, e.g. 16ms at 60Hz), and to catch high
+  /// latency (by seeing if [FrameTiming.totalSpan] exceeds the frame
+  /// budget). It is possible for no frames to be missed but for the
+  /// latency to be more than one frame in the case where the Flutter
+  /// engine is pipelining the graphics updates, e.g. because the sum
+  /// of the [FrameTiming.buildDuration] and the
+  /// [FrameTiming.rasterDuration] together exceed the frame budget.
+  /// In those cases, animations will be smooth but touch input will
+  /// feel more sluggish.
+  ///
+  /// Using [addTimingsCallback] is preferred over using
+  /// [Window.onReportTimings] directly because the
+  /// [Window.onReportTimings] API only allows one callback, which
+  /// prevents multiple libraries from registering listeners
+  /// simultaneously, while this API allows multiple callbacks to be
+  /// registered independently.
+  ///
+  /// This API is implemented in terms of [Window.onReportTimings]. In
+  /// release builds, when no libraries have registered with this API,
+  /// the [Window.onReportTimings] callback is not set, which disables
+  /// the performance tracking and reduces the runtime overhead to
+  /// approximately zero. The performance overhead of the performance
+  /// tracking when one or more callbacks are registered (i.e. when it
+  /// is enabled) is very approximately 0.01% CPU usage per second
+  /// (measured on an iPhone 6s).
+  ///
+  /// In debug and profile builds, the [SchedulerBinding] itself
+  /// registers a timings callback to update the [Timeline].
+  ///
+  /// If the same callback is added twice, it will be executed twice.
+  ///
+  /// See also:
+  ///
+  ///  * [removeTimingsCallback], which can be used to remove a callback
+  ///    added using this method.
+  void addTimingsCallback(TimingsCallback callback) {
+    _timingsCallbacks.add(callback);
+    if (_timingsCallbacks.length == 1) {
+      assert(window.onReportTimings == null);
+      window.onReportTimings = _executeTimingsCallbacks;
+    }
+    assert(window.onReportTimings == _executeTimingsCallbacks);
+  }
+
+  /// Removes a callback that was earlier added by [addTimingsCallback].
+  void removeTimingsCallback(TimingsCallback callback) {
+    assert(_timingsCallbacks.contains(callback));
+    _timingsCallbacks.remove(callback);
+    if (_timingsCallbacks.isEmpty) {
+      window.onReportTimings = null;
+    }
+  }
+
+  void _executeTimingsCallbacks(List<FrameTiming> timings) {
+    final List<TimingsCallback> clonedCallbacks =
+        List<TimingsCallback>.from(_timingsCallbacks);
+    for (final TimingsCallback callback in clonedCallbacks) {
+      try {
+        if (_timingsCallbacks.contains(callback)) {
+          callback(timings);
+        }
+      } catch (exception, stack) {
+        InformationCollector collector;
+        assert(() {
+          collector = () sync* {
+            yield DiagnosticsProperty<TimingsCallback>(
+              'The TimingsCallback that gets executed was',
+              callback,
+              style: DiagnosticsTreeStyle.errorProperty,
+            );
+          };
+          return true;
+        }());
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          context: ErrorDescription('while executing callbacks for FrameTiming'),
+          informationCollector: collector
+        ));
+      }
     }
   }
 
@@ -245,23 +343,6 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   AppLifecycleState get lifecycleState => _lifecycleState;
   AppLifecycleState _lifecycleState;
 
-  /// Initializes the [lifecycleState] with the [initialLifecycleState] from the
-  /// window.
-  ///
-  /// Once the [lifecycleState] is populated through any means (including this
-  /// method), this method will do nothing. This is because the
-  /// [initialLifecycleState] may already be stale and it no longer makes sense
-  /// to use the initial state at dart vm startup as the current state anymore.
-  ///
-  /// The latest state should be obtained by subscribing to
-  /// [WidgetsBindingObserver.didChangeAppLifecycleState].
-  @protected
-  void readInitialLifecycleStateFromNativeWindow() {
-    if (_lifecycleState == null && _parseAppLifecycleMessage(window.initialLifecycleState) != null) {
-      _handleLifecycleMessage(window.initialLifecycleState);
-    }
-  }
-
   /// Called when the application lifecycle state changes.
   ///
   /// Notifies all the observers using
@@ -279,29 +360,10 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
         _setFramesEnabledState(true);
         break;
       case AppLifecycleState.paused:
-      case AppLifecycleState.suspending:
+      case AppLifecycleState.detached:
         _setFramesEnabledState(false);
         break;
     }
-  }
-
-  Future<String> _handleLifecycleMessage(String message) async {
-    handleAppLifecycleStateChanged(_parseAppLifecycleMessage(message));
-    return null;
-  }
-
-  static AppLifecycleState _parseAppLifecycleMessage(String message) {
-    switch (message) {
-      case 'AppLifecycleState.paused':
-        return AppLifecycleState.paused;
-      case 'AppLifecycleState.resumed':
-        return AppLifecycleState.resumed;
-      case 'AppLifecycleState.inactive':
-        return AppLifecycleState.inactive;
-      case 'AppLifecycleState.suspending':
-        return AppLifecycleState.suspending;
-    }
-    return null;
   }
 
   /// The strategy to use when deciding whether to run a task or not.
@@ -362,7 +424,8 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   // Whether this scheduler already requested to be called from the event loop.
   bool _hasRequestedAnEventLoopCallback = false;
 
-  // Ensures that the scheduler services a task scheduled by [scheduleTask].
+  // Ensures that the scheduler services a task scheduled by
+  // [SchedulerBinding.scheduleTask].
   void _ensureEventLoopCallback() {
     assert(!locked);
     assert(_taskQueue.isNotEmpty);
@@ -521,7 +584,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
                 'The stack traces for when they were registered are as follows:'
               );
             }
-            for (int id in callbacks.keys) {
+            for (final int id in callbacks.keys) {
               final _FrameCallbackEntry entry = callbacks[id];
               yield DiagnosticsStackTrace('── callback $id ──', entry.debugStack, showSeparator: false);
             }
@@ -558,7 +621,9 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
         debugPrint('When the current transient callback was registered, this was the stack:');
         debugPrint(
           FlutterError.defaultStackFilter(
-            _FrameCallbackEntry.debugCurrentCallbackStack.toString().trimRight().split('\n')
+            FlutterError.demangleStackTrace(
+              _FrameCallbackEntry.debugCurrentCallbackStack,
+            ).toString().trimRight().split('\n')
           ).join('\n')
         );
       } else {
@@ -718,7 +783,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   ///  * [scheduleWarmUpFrame], which ignores the "Vsync" signal entirely and
   ///    triggers a frame immediately.
   void scheduleFrame() {
-    if (_hasScheduledFrame || !_framesEnabled)
+    if (_hasScheduledFrame || !framesEnabled)
       return;
     assert(() {
       if (debugPrintScheduleFrameStacks)
@@ -750,6 +815,11 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   /// Consider using [scheduleWarmUpFrame] instead if the goal is to update the
   /// rendering as soon as possible (e.g. at application startup).
   void scheduleForcedFrame() {
+    // TODO(chunhtai): Removes the if case once the issue is fixed
+    // https://github.com/flutter/flutter/issues/45131
+    if (!framesEnabled)
+      return;
+
     if (_hasScheduledFrame)
       return;
     assert(() {
@@ -926,7 +996,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   /// statements printed during a frame from those printed between frames (e.g.
   /// in response to events or timers).
   void handleBeginFrame(Duration rawTimeStamp) {
-    Timeline.startSync('Frame', arguments: timelineWhitelistArguments);
+    Timeline.startSync('Frame', arguments: timelineArgumentsIndicatingLandmarkEvent);
     _firstRawTimeStampInEpoch ??= rawTimeStamp;
     _currentFrameTimeStamp = _adjustForEpoch(rawTimeStamp ?? _lastRawTimeStamp);
     if (rawTimeStamp != null)
@@ -953,7 +1023,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
     _hasScheduledFrame = false;
     try {
       // TRANSIENT FRAME CALLBACKS
-      Timeline.startSync('Animate', arguments: timelineWhitelistArguments);
+      Timeline.startSync('Animate', arguments: timelineArgumentsIndicatingLandmarkEvent);
       _schedulerPhase = SchedulerPhase.transientCallbacks;
       final Map<int, _FrameCallbackEntry> callbacks = _transientCallbacks;
       _transientCallbacks = <int, _FrameCallbackEntry>{};
@@ -982,7 +1052,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
     try {
       // PERSISTENT FRAME CALLBACKS
       _schedulerPhase = SchedulerPhase.persistentCallbacks;
-      for (FrameCallback callback in _persistentCallbacks)
+      for (final FrameCallback callback in _persistentCallbacks)
         _invokeFrameCallback(callback, _currentFrameTimeStamp);
 
       // POST-FRAME CALLBACKS
@@ -990,7 +1060,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
       final List<FrameCallback> localPostFrameCallbacks =
           List<FrameCallback>.from(_postFrameCallbacks);
       _postFrameCallbacks.clear();
-      for (FrameCallback callback in localPostFrameCallbacks)
+      for (final FrameCallback callback in localPostFrameCallbacks)
         _invokeFrameCallback(callback, _currentFrameTimeStamp);
     } finally {
       _schedulerPhase = SchedulerPhase.idle;

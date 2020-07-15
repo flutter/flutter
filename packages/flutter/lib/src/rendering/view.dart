@@ -1,13 +1,16 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
+import 'dart:collection' show LinkedHashMap;
 import 'dart:developer';
 import 'dart:io' show Platform;
 import 'dart:ui' as ui show Scene, SceneBuilder, Window;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart' show MouseTrackerAnnotation;
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -15,6 +18,7 @@ import 'binding.dart';
 import 'box.dart';
 import 'debug.dart';
 import 'layer.dart';
+import 'mouse_tracking.dart';
 import 'object.dart';
 
 /// The layout constraints for the root render object.
@@ -112,7 +116,10 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ///
   /// Deprecated. Call [prepareInitialFrame] followed by a call to
   /// [PipelineOwner.requestVisualUpdate] on [owner] instead.
-  @Deprecated('Call prepareInitialFrame followed by owner.requestVisualUpdate() instead.')
+  @Deprecated(
+    'Call prepareInitialFrame followed by owner.requestVisualUpdate() instead. '
+    'This feature was deprecated after v1.10.0.'
+  )
   void scheduleInitialFrame() {
     prepareInitialFrame();
     owner.requestVisualUpdate();
@@ -136,9 +143,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 
   Matrix4 _rootTransform;
 
-  Layer _updateMatricesAndCreateNewRootLayer() {
+  TransformLayer _updateMatricesAndCreateNewRootLayer() {
     _rootTransform = configuration.toMatrix();
-    final ContainerLayer rootLayer = TransformLayer(transform: _rootTransform);
+    final TransformLayer rootLayer = TransformLayer(transform: _rootTransform);
     rootLayer.attach(this);
     assert(_rootTransform != null);
     return rootLayer;
@@ -190,15 +197,24 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ///
   /// See also:
   ///
-  /// * [Layer.findAllAnnotations], which is used by this method to find all
-  ///   [AnnotatedRegionLayer]s annotated for mouse tracking.
-  Iterable<MouseTrackerAnnotation> hitTestMouseTrackers(Offset position) {
+  ///  * [Layer.findAllAnnotations], which is used by this method to find all
+  ///    [AnnotatedRegionLayer]s annotated for mouse tracking.
+  LinkedHashMap<MouseTrackerAnnotation, Matrix4> hitTestMouseTrackers(Offset position) {
     // Layer hit testing is done using device pixels, so we have to convert
     // the logical coordinates of the event location back to device pixels
     // here.
-    return layer.findAllAnnotations<MouseTrackerAnnotation>(
-      position * configuration.devicePixelRatio
-    ).annotations;
+    final BoxHitTestResult result = BoxHitTestResult();
+    if (child != null)
+      child.hitTest(result, position: position);
+    result.add(HitTestEntry(this));
+    final LinkedHashMap<MouseTrackerAnnotation, Matrix4> annotations = <MouseTrackerAnnotation, Matrix4>{}
+        as LinkedHashMap<MouseTrackerAnnotation, Matrix4>;
+    for (final HitTestEntry entry in result.path) {
+      if (entry.target is MouseTrackerAnnotation) {
+        annotations[entry.target as MouseTrackerAnnotation] = entry.transform;
+      }
+    }
+    return annotations;
   }
 
   @override
@@ -221,7 +237,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ///
   /// Actually causes the output of the rendering pipeline to appear on screen.
   void compositeFrame() {
-    Timeline.startSync('Compositing', arguments: timelineWhitelistArguments);
+    Timeline.startSync('Compositing', arguments: timelineArgumentsIndicatingLandmarkEvent);
     try {
       final ui.SceneBuilder builder = ui.SceneBuilder();
       final ui.Scene scene = layer.buildScene(builder);
@@ -250,8 +266,11 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       case TargetPlatform.android:
         lowerOverlayStyle = layer.find<SystemUiOverlayStyle>(bottom);
         break;
-      case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
         break;
     }
     // If there are no overlay styles in the UI don't bother updating.
@@ -278,7 +297,6 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   }
 
   @override
-  // ignore: MUST_CALL_SUPER
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     // call to ${super.debugFillProperties(description)} is omitted because the
     // root superclasses don't include any interesting information for this

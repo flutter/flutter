@@ -28,5 +28,7 @@
   "cutButtonLabel": "Iškirpti",
   "copyButtonLabel": "Kopijuoti",
   "pasteButtonLabel": "Įklijuoti",
-  "selectAllButtonLabel": "Pasirinkti viską"
+  "selectAllButtonLabel": "Pasirinkti viską",
+  "tabSemanticsLabel": "$tabIndex skirtukas iš $tabCount",
+  "modalBarrierDismissLabel": "Atsisakyti"
 }

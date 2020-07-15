@@ -1,6 +1,8 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 import 'dart:async';
 import 'dart:convert';
@@ -115,7 +117,7 @@ class _OutputBuffer extends ByteConversionSinkBase {
     }
     _bytes = Uint8List(_contentLength);
     int offset = 0;
-    for (List<int> chunk in _chunks) {
+    for (final List<int> chunk in _chunks) {
       _bytes.setRange(offset, offset + chunk.length, chunk);
       offset += chunk.length;
     }

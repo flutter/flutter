@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -23,7 +23,7 @@ class TestDragData {
 
 void main() {
   testWidgets(
-    'WidgetTester.drag must break the offset into multiple parallel components if'
+    'WidgetTester.drag must break the offset into multiple parallel components if '
     'the drag goes outside the touch slop values',
     (WidgetTester tester) async {
       // This test checks to make sure that the total drag will be correctly split into

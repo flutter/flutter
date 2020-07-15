@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -20,45 +20,30 @@ class Timeline {
   final Map<String, dynamic> json;
 
   /// List of all timeline events.
+  ///
+  /// This is parsed from "traceEvents" data within [json] and sorted by
+  /// timestamp. Anything without a valid timestamp is put in the beginning.
   final List<TimelineEvent> events;
 }
 
 /// A single timeline event.
 class TimelineEvent {
   /// Creates a timeline event given JSON-encoded event data.
-  factory TimelineEvent(Map<String, dynamic> json) {
-    return TimelineEvent._(
-      json,
-      json['name'],
-      json['cat'],
-      json['ph'],
-      json['pid'],
-      json['tid'],
-      json['dur'] != null
-        ? Duration(microseconds: json['dur'])
-        : null,
-      json['tdur'] != null
-        ? Duration(microseconds: json['tdur'])
-        : null,
-      json['ts'],
-      json['tts'],
-      json['args'],
-    );
-  }
-
-  TimelineEvent._(
-    this.json,
-    this.name,
-    this.category,
-    this.phase,
-    this.processId,
-    this.threadId,
-    this.duration,
-    this.threadDuration,
-    this.timestampMicros,
-    this.threadTimestampMicros,
-    this.arguments,
-  );
+  TimelineEvent(this.json)
+      : name = json['name'] as String,
+        category = json['cat'] as String,
+        phase = json['ph'] as String,
+        processId = json['pid'] as int,
+        threadId = json['tid'] as int,
+        duration = json['dur'] != null
+            ? Duration(microseconds: json['dur'] as int)
+            : null,
+        threadDuration = json['tdur'] != null
+            ? Duration(microseconds: json['tdur'] as int)
+            : null,
+        timestampMicros = json['ts'] as int,
+        threadTimestampMicros = json['tts'] as int,
+        arguments = json['args'] as Map<String, dynamic>;
 
   /// The original event JSON.
   final Map<String, dynamic> json;
@@ -122,13 +107,34 @@ class TimelineEvent {
 }
 
 List<TimelineEvent> _parseEvents(Map<String, dynamic> json) {
-  final List<dynamic> jsonEvents = json['traceEvents'];
+  final List<dynamic> jsonEvents = json['traceEvents'] as List<dynamic>;
 
-  if (jsonEvents == null)
+  if (jsonEvents == null) {
     return null;
+  }
 
   // TODO(vegorov): use instance method version of castFrom when it is available.
-  return Iterable.castFrom<dynamic, Map<String, dynamic>>(jsonEvents)
-    .map<TimelineEvent>((Map<String, dynamic> eventJson) => TimelineEvent(eventJson))
-    .toList();
+  final List<TimelineEvent> timelineEvents =
+      Iterable.castFrom<dynamic, Map<String, dynamic>>(jsonEvents)
+          .map<TimelineEvent>(
+              (Map<String, dynamic> eventJson) => TimelineEvent(eventJson))
+          .toList();
+
+  timelineEvents.sort((TimelineEvent e1, TimelineEvent e2) {
+    final int ts1 = e1.timestampMicros;
+    final int ts2 = e2.timestampMicros;
+    if (ts1 == null) {
+      if (ts2 == null) {
+        return 0;
+      } else {
+        return -1;
+      }
+    } else if (ts2 == null) {
+      return 1;
+    } else {
+      return ts1.compareTo(ts2);
+    }
+  });
+
+  return timelineEvents;
 }

@@ -18,5 +18,7 @@
   "cutButtonLabel": "Klip",
   "copyButtonLabel": "Kopiér",
   "pasteButtonLabel": "Sæt ind",
-  "selectAllButtonLabel": "Vælg alle"
+  "selectAllButtonLabel": "Vælg alle",
+  "tabSemanticsLabel": "Fane $tabIndex af $tabCount",
+  "modalBarrierDismissLabel": "Afvis"
 }

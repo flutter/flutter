@@ -1,6 +1,8 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 import 'package:flutter/widgets.dart';
 
@@ -8,7 +10,8 @@ import 'card_theme.dart';
 import 'material.dart';
 import 'theme.dart';
 
-/// A material design card. A card has slightly rounded corners and a shadow.
+/// A material design card: a panel with slightly rounded corners and an
+/// elevation shadow.
 ///
 /// A card is a sheet of [Material] used to represent some related information,
 /// for example an album, a geographical location, a meal, contact details, etc.
@@ -19,7 +22,7 @@ import 'theme.dart';
 /// some text describing a musical, and the other with buttons for buying
 /// tickets or listening to the show.](https://flutter.github.io/assets-for-api-docs/assets/material/card.png)
 ///
-/// {@tool snippet --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// This sample shows creation of a [Card] widget that shows album information
 /// and two actions.
@@ -36,16 +39,19 @@ import 'theme.dart';
 ///             title: Text('The Enchanted Nightingale'),
 ///             subtitle: Text('Music by Julie Gable. Lyrics by Sidney Stein.'),
 ///           ),
-///           ButtonBar(
+///           Row(
+///             mainAxisAlignment: MainAxisAlignment.end,
 ///             children: <Widget>[
-///               FlatButton(
+///               TextButton(
 ///                 child: const Text('BUY TICKETS'),
 ///                 onPressed: () { /* ... */ },
 ///               ),
-///               FlatButton(
+///               const SizedBox(width: 8),
+///               TextButton(
 ///                 child: const Text('LISTEN'),
 ///                 onPressed: () { /* ... */ },
 ///               ),
+///               const SizedBox(width: 8),
 ///             ],
 ///           ),
 ///         ],
@@ -59,7 +65,7 @@ import 'theme.dart';
 /// Sometimes the primary action area of a card is the card itself. Cards can be
 /// one large touch target that shows a detail screen when tapped.
 ///
-/// {@tool snippet --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// This sample shows creation of a [Card] widget that can be tapped. When
 /// tapped this [Card]'s [InkWell] displays an "ink splash" that fills the
@@ -90,7 +96,6 @@ import 'theme.dart';
 /// See also:
 ///
 ///  * [ListTile], to display icons and text in a card.
-///  * [ButtonBar], to display buttons at the bottom of a card.
 ///  * [showDialog], to display a modal card.
 ///  * <https://material.io/design/components/cards.html>
 class Card extends StatelessWidget {
@@ -101,6 +106,7 @@ class Card extends StatelessWidget {
   const Card({
     Key key,
     this.color,
+    this.shadowColor,
     this.elevation,
     this.shape,
     this.borderOnForeground = true,
@@ -119,6 +125,13 @@ class Card extends StatelessWidget {
   /// If this property is null then [ThemeData.cardTheme.color] is used,
   /// if that's null then [ThemeData.cardColor] is used.
   final Color color;
+
+  /// The color to paint the shadow below the card.
+  ///
+  /// If null then the ambient [CardTheme]'s shadowColor is used.
+  /// If that's null too, then the overall theme's [ThemeData.shadowColor]
+  /// (default black) is used.
+  final Color shadowColor;
 
   /// The z-coordinate at which to place this card. This controls the size of
   /// the shadow below the card.
@@ -181,6 +194,7 @@ class Card extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
     final CardTheme cardTheme = CardTheme.of(context);
 
     return Semantics(
@@ -189,7 +203,8 @@ class Card extends StatelessWidget {
         margin: margin ?? cardTheme.margin ?? const EdgeInsets.all(4.0),
         child: Material(
           type: MaterialType.card,
-          color: color ?? cardTheme.color ?? Theme.of(context).cardColor,
+          shadowColor: shadowColor ?? cardTheme.shadowColor ?? theme.shadowColor,
+          color: color ?? cardTheme.color ?? theme.cardColor,
           elevation: elevation ?? cardTheme.elevation ?? _defaultElevation,
           shape: shape ?? cardTheme.shape ?? const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(4.0)),

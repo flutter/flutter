@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,6 +10,7 @@ import 'package:path/path.dart' as path;
 import 'package:vm_service_client/vm_service_client.dart';
 
 import 'package:flutter_devicelab/framework/utils.dart';
+import 'package:flutter_devicelab/framework/adb.dart' show DeviceIdEnvName;
 
 /// Runs a task in a separate Dart VM and collects the result using the VM
 /// service protocol.
@@ -24,19 +25,27 @@ Future<Map<String, dynamic>> runTask(
   bool silent = false,
   String localEngine,
   String localEngineSrcPath,
+  String deviceId,
 }) async {
   final String taskExecutable = 'bin/tasks/$taskName.dart';
 
   if (!file(taskExecutable).existsSync())
     throw 'Executable Dart file not found: $taskExecutable';
 
-  final Process runner = await startProcess(dartBin, <String>[
-    '--enable-vm-service=0', // zero causes the system to choose a free port
-    '--no-pause-isolates-on-exit',
-    if (localEngine != null) '-DlocalEngine=$localEngine',
-    if (localEngineSrcPath != null) '-DlocalEngineSrcPath=$localEngineSrcPath',
-    taskExecutable,
-  ]);
+  final Process runner = await startProcess(
+    dartBin,
+    <String>[
+      '--enable-vm-service=0', // zero causes the system to choose a free port
+      '--no-pause-isolates-on-exit',
+      if (localEngine != null) '-DlocalEngine=$localEngine',
+      if (localEngineSrcPath != null) '-DlocalEngineSrcPath=$localEngineSrcPath',
+      taskExecutable,
+    ],
+    environment: <String, String>{
+      if (deviceId != null)
+        DeviceIdEnvName: deviceId,
+    },
+  );
 
   bool runnerFinished = false;
 
@@ -69,7 +78,7 @@ Future<Map<String, dynamic>> runTask(
 
   try {
     final VMIsolateRef isolate = await _connectToRunnerIsolate(await uri.future);
-    final Map<String, dynamic> taskResult = await isolate.invokeExtension('ext.cocoonRunTask');
+    final Map<String, dynamic> taskResult = await isolate.invokeExtension('ext.cocoonRunTask') as Map<String, dynamic>;
     await runner.exitCode;
     return taskResult;
   } finally {
@@ -100,7 +109,7 @@ Future<VMIsolateRef> _connectToRunnerIsolate(Uri vmServiceUri) async {
       final VMServiceClient client = VMServiceClient.connect(url);
       final VM vm = await client.getVM();
       final VMIsolateRef isolate = vm.isolates.single;
-      final String response = await isolate.invokeExtension('ext.cocoonRunnerReady');
+      final String response = await isolate.invokeExtension('ext.cocoonRunnerReady') as String;
       if (response != 'ready')
         throw 'not ready yet';
       return isolate;

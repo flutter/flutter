@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -26,6 +26,10 @@ class ContextDependencyCycleException implements Exception {
   String toString() => 'Dependency cycle detected: ${cycle.join(' -> ')}';
 }
 
+/// The Zone key used to look up the [AppContext].
+@visibleForTesting
+const Object contextKey = _Key.key;
+
 /// The current [AppContext], as determined by the [Zone] hierarchy.
 ///
 /// This will be the first context found as we scan up the zone hierarchy, or
@@ -33,7 +37,7 @@ class ContextDependencyCycleException implements Exception {
 /// context will not have any values associated with it.
 ///
 /// This is guaranteed to never return `null`.
-AppContext get context => Zone.current[_Key.key] as AppContext ?? AppContext._root;
+AppContext get context => Zone.current[contextKey] as AppContext ?? AppContext._root;
 
 /// A lookup table (mapping types to values) and an implied scope, in which
 /// code is run.
@@ -115,17 +119,6 @@ class AppContext {
       value = _parent.get<T>();
     }
     return _unboxNull(value ?? _generateIfNecessary(T, _fallbacks)) as T;
-  }
-
-  /// Gets the value associated with the specified [type], or `null` if no
-  /// such value has been associated.
-  @Deprecated('use get<T> instead for type safety.')
-  Object operator [](Type type) {
-    dynamic value = _generateIfNecessary(type, _overrides);
-    if (value == null && _parent != null) {
-      value = _parent[type];
-    }
-    return _unboxNull(value ?? _generateIfNecessary(type, _fallbacks));
   }
 
   /// Runs [body] in a child context and returns the value returned by [body].

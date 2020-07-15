@@ -1,12 +1,13 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:mockito/mockito.dart';
 
 class StateMarker extends StatefulWidget {
   const StateMarker({ Key key, this.child }) : super(key: key);
@@ -241,10 +242,10 @@ void main() {
       ),
     );
 
-    expect(find.text('route "/"'), findsOneWidget);
+    expect(find.text('route "/"', skipOffstage: false), findsOneWidget);
     expect(find.text('route "/a"'), findsOneWidget);
-    expect(find.text('route "/a/b"'), findsNothing);
-    expect(find.text('route "/b"'), findsNothing);
+    expect(find.text('route "/a/b"', skipOffstage: false), findsNothing);
+    expect(find.text('route "/b"', skipOffstage: false), findsNothing);
   });
 
   testWidgets('Return value from pop is correct', (WidgetTester tester) async {
@@ -301,10 +302,10 @@ void main() {
         routes: routes,
       ),
     );
-    expect(find.text('route "/"'), findsOneWidget);
-    expect(find.text('route "/a"'), findsOneWidget);
+    expect(find.text('route "/"', skipOffstage: false), findsOneWidget);
+    expect(find.text('route "/a"', skipOffstage: false), findsOneWidget);
     expect(find.text('route "/a/b"'), findsOneWidget);
-    expect(find.text('route "/b"'), findsNothing);
+    expect(find.text('route "/b"', skipOffstage: false), findsNothing);
   });
 
   testWidgets('Initial route with missing step', (WidgetTester tester) async {
@@ -322,7 +323,7 @@ void main() {
       ),
     );
     final dynamic exception = tester.takeException();
-    expect(exception is String, isTrue);
+    expect(exception, isA<String>());
     expect(exception.startsWith('Could not navigate to initial route.'), isTrue);
     expect(find.text('route "/"'), findsOneWidget);
     expect(find.text('route "/a"'), findsNothing);
@@ -343,9 +344,9 @@ void main() {
         routes: routes,
       ),
     );
-    expect(find.text('route "/"'), findsOneWidget);
+    expect(find.text('route "/"', skipOffstage: false), findsOneWidget);
     expect(find.text('route "/a"'), findsOneWidget);
-    expect(find.text('route "/b"'), findsNothing);
+    expect(find.text('route "/b"', skipOffstage: false), findsNothing);
 
     // changing initialRoute has no effect
     await tester.pumpWidget(
@@ -354,15 +355,15 @@ void main() {
         routes: routes,
       ),
     );
-    expect(find.text('route "/"'), findsOneWidget);
+    expect(find.text('route "/"', skipOffstage: false), findsOneWidget);
     expect(find.text('route "/a"'), findsOneWidget);
-    expect(find.text('route "/b"'), findsNothing);
+    expect(find.text('route "/b"', skipOffstage: false), findsNothing);
 
     // removing it has no effect
     await tester.pumpWidget(MaterialApp(routes: routes));
-    expect(find.text('route "/"'), findsOneWidget);
+    expect(find.text('route "/"', skipOffstage: false), findsOneWidget);
     expect(find.text('route "/a"'), findsOneWidget);
-    expect(find.text('route "/b"'), findsNothing);
+    expect(find.text('route "/b"', skipOffstage: false), findsNothing);
   });
 
   testWidgets('onGenerateRoute / onUnknownRoute', (WidgetTester tester) async {
@@ -474,7 +475,7 @@ void main() {
       color: const Color(0xFF112233),
       home: const Placeholder(),
     ));
-    expect(key.currentState, isInstanceOf<NavigatorState>());
+    expect(key.currentState, isA<NavigatorState>());
     await tester.pumpWidget(const MaterialApp(
       color: Color(0xFF112233),
       home: Placeholder(),
@@ -485,7 +486,7 @@ void main() {
       color: const Color(0xFF112233),
       home: const Placeholder(),
     ));
-    expect(key.currentState, isInstanceOf<NavigatorState>());
+    expect(key.currentState, isA<NavigatorState>());
   });
 
   testWidgets('Has default material and cupertino localizations', (WidgetTester tester) async {
@@ -505,7 +506,7 @@ void main() {
     );
 
     // Default US "select all" text.
-    expect(find.text('SELECT ALL'), findsOneWidget);
+    expect(find.text('Select all'), findsOneWidget);
     // Default Cupertino US "select all" text.
     expect(find.text('Select All'), findsOneWidget);
   });
@@ -788,6 +789,69 @@ void main() {
     expect(themeBeforeBrightnessChange.brightness, Brightness.light);
     expect(themeAfterBrightnessChange.brightness, Brightness.dark);
   });
+
+  testWidgets('MaterialApp can customize initial routes', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigatorKey,
+        onGenerateInitialRoutes: (String initialRoute) {
+          expect(initialRoute, '/abc');
+          return <Route<void>>[
+            PageRouteBuilder<void>(
+              pageBuilder: (
+                BuildContext context,
+                Animation<double> animation,
+                Animation<double> secondaryAnimation) {
+                return const Text('non-regular page one');
+              }
+            ),
+            PageRouteBuilder<void>(
+              pageBuilder: (
+                BuildContext context,
+                Animation<double> animation,
+                Animation<double> secondaryAnimation) {
+                return const Text('non-regular page two');
+              }
+            ),
+          ];
+        },
+        initialRoute: '/abc',
+        routes: <String, WidgetBuilder>{
+          '/': (BuildContext context) => const Text('regular page one'),
+          '/abc': (BuildContext context) => const Text('regular page two'),
+        },
+      )
+    );
+    expect(find.text('non-regular page two'), findsOneWidget);
+    expect(find.text('non-regular page one'), findsNothing);
+    expect(find.text('regular page one'), findsNothing);
+    expect(find.text('regular page two'), findsNothing);
+    navigatorKey.currentState.pop();
+    await tester.pumpAndSettle();
+    expect(find.text('non-regular page two'), findsNothing);
+    expect(find.text('non-regular page one'), findsOneWidget);
+    expect(find.text('regular page one'), findsNothing);
+    expect(find.text('regular page two'), findsNothing);
+  });
 }
 
-class MockAccessibilityFeature extends Mock implements AccessibilityFeatures {}
+class MockAccessibilityFeature implements AccessibilityFeatures {
+  @override
+  bool get accessibleNavigation => true;
+
+  @override
+  bool get boldText => true;
+
+  @override
+  bool get disableAnimations => true;
+
+  @override
+  bool get highContrast => true;
+
+  @override
+  bool get invertColors => true;
+
+  @override
+  bool get reduceMotion => true;
+}

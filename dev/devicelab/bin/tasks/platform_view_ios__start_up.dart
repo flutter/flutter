@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -19,12 +19,18 @@ Future<void> main() async {
     );
     await inDirectory(platformViewDirectory, () async {
       await flutter('pub', options: <String>['get']);
-    });
-    final Directory iosDirectory = dir(
-      '$platformViewDirectoryPath/ios',
-    );
-    await inDirectory(iosDirectory, () async {
-      await exec('pod', <String>['install']);
+      // Pre-cache the iOS artifacts; this may be the first test run on this machine.
+      await flutter(
+        'precache',
+        options: <String>[
+          '--no-android',
+          '--no-fuchsia',
+          '--no-linux',
+          '--no-macos',
+          '--no-web',
+          '--no-windows',
+        ],
+      );
     });
 
     final TaskFunction taskFunction = createPlatformViewStartupTest();

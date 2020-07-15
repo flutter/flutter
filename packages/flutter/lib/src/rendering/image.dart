@@ -1,6 +1,8 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 import 'dart:ui' as ui show Image;
 
@@ -26,6 +28,7 @@ class RenderImage extends RenderBox {
   /// [alignment] will need resolving or if [matchTextDirection] is true.
   RenderImage({
     ui.Image image,
+    this.debugImageLabel,
     double width,
     double height,
     double scale = 1.0,
@@ -38,12 +41,14 @@ class RenderImage extends RenderBox {
     bool matchTextDirection = false,
     TextDirection textDirection,
     bool invertColors = false,
+    bool isAntiAlias = false,
     FilterQuality filterQuality = FilterQuality.low,
   }) : assert(scale != null),
        assert(repeat != null),
        assert(alignment != null),
        assert(filterQuality != null),
        assert(matchTextDirection != null),
+       assert(isAntiAlias != null),
        _image = image,
        _width = width,
        _height = height,
@@ -57,6 +62,7 @@ class RenderImage extends RenderBox {
        _matchTextDirection = matchTextDirection,
        _invertColors = invertColors,
        _textDirection = textDirection,
+       _isAntiAlias = isAntiAlias,
        _filterQuality = filterQuality {
     _updateColorFilter();
   }
@@ -88,6 +94,9 @@ class RenderImage extends RenderBox {
     if (_width == null || _height == null)
       markNeedsLayout();
   }
+
+  /// A string used to identify the source of the image.
+  String debugImageLabel;
 
   /// If non-null, requires the image to have this width.
   ///
@@ -287,6 +296,20 @@ class RenderImage extends RenderBox {
     _markNeedResolution();
   }
 
+  /// Whether to paint the image with anti-aliasing.
+  ///
+  /// Anti-aliasing alleviates the sawtooth artifact when the image is rotated.
+  bool get isAntiAlias => _isAntiAlias;
+  bool _isAntiAlias;
+  set isAntiAlias(bool value) {
+    if (_isAntiAlias == value) {
+      return;
+    }
+    assert(value != null);
+    _isAntiAlias = value;
+    markNeedsPaint();
+  }
+
   /// Find a size for the render image within the given constraints.
   ///
   ///  - The dimensions of the RenderImage must fit within the constraints.
@@ -358,6 +381,7 @@ class RenderImage extends RenderBox {
       canvas: context.canvas,
       rect: offset & size,
       image: _image,
+      debugImageLabel: debugImageLabel,
       scale: _scale,
       colorFilter: _colorFilter,
       fit: _fit,
@@ -367,6 +391,7 @@ class RenderImage extends RenderBox {
       flipHorizontally: _flipHorizontally,
       invertColors: invertColors,
       filterQuality: _filterQuality,
+      isAntiAlias: _isAntiAlias,
     );
   }
 

@@ -1,6 +1,8 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -19,6 +21,12 @@ const TextStyle textStyle = TextStyle();
 const Color cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
 
 void main() {
+  setUp(() async {
+    // Fill the clipboard so that the Paste option is available in the text
+    // selection menu.
+    await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
+  });
+
   testWidgets('cursor has expected width and radius', (WidgetTester tester) async {
     await tester.pumpWidget(
         MediaQuery(data: const MediaQueryData(devicePixelRatio: 1.0),
@@ -39,7 +47,6 @@ void main() {
     expect(editableText.cursorRadius.x, 2.0);
   });
 
-
   testWidgets('cursor layout has correct width', (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
 
@@ -52,7 +59,7 @@ void main() {
           key: editableTextKey,
           controller: TextEditingController(),
           focusNode: FocusNode(),
-          style: Typography(platform: TargetPlatform.android).black.subhead,
+          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
           cursorColor: Colors.blue,
           selectionControls: materialTextSelectionControls,
           keyboardType: TextInputType.text,
@@ -81,7 +88,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     await tester.pump(const Duration(milliseconds: 500));
 
-    await tester.tap(find.text('PASTE'));
+    await tester.tap(find.text('Paste'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
     await tester.pump(const Duration(milliseconds: 500));
@@ -106,7 +113,7 @@ void main() {
           key: editableTextKey,
           controller: TextEditingController(),
           focusNode: FocusNode(),
-          style: Typography(platform: TargetPlatform.android).black.subhead,
+          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
           cursorColor: Colors.blue,
           selectionControls: materialTextSelectionControls,
           keyboardType: TextInputType.text,
@@ -132,9 +139,9 @@ void main() {
     final Finder textFinder = find.byKey(editableTextKey);
     await tester.longPress(textFinder);
     tester.state<EditableTextState>(textFinder).showToolbar();
-    await tester.pump();
+    await tester.pumpAndSettle();
 
-    await tester.tap(find.text('PASTE'));
+    await tester.tap(find.text('Paste'));
     await tester.pump();
 
     expect(changedValue, clipboardContent);
@@ -145,10 +152,9 @@ void main() {
     );
   });
 
-  testWidgets('Cursor animates on iOS', (WidgetTester tester) async {
-    final Widget widget = MaterialApp(
-      theme: ThemeData(platform: TargetPlatform.iOS),
-      home: const Material(
+  testWidgets('Cursor animates', (WidgetTester tester) async {
+    const Widget widget = MaterialApp(
+      home: Material(
         child: TextField(
           maxLines: 3,
         ),
@@ -200,7 +206,7 @@ void main() {
     // Cursor starts coming back.
     expect(renderEditable.cursorColor.alpha, 79);
     expect(renderEditable, paints..rrect(color: const Color(0x4f2196f3)));
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('Cursor does not animate on Android', (WidgetTester tester) async {
     const Widget widget = MaterialApp(
@@ -241,11 +247,10 @@ void main() {
     expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
   });
 
-  testWidgets('Cursor does not animates on iOS when debugDeterministicCursor is set', (WidgetTester tester) async {
+  testWidgets('Cursor does not animates when debugDeterministicCursor is set', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
-    final Widget widget = MaterialApp(
-      theme: ThemeData(platform: TargetPlatform.iOS),
-      home: const Material(
+    const Widget widget = MaterialApp(
+      home: Material(
         child: TextField(
           maxLines: 3,
         ),
@@ -277,7 +282,7 @@ void main() {
     expect(renderEditable, paints..rrect(color: const Color(0xff2196f3)));
 
     EditableText.debugDeterministicCursor = false;
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('Cursor does not animate on Android when debugDeterministicCursor is set', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
@@ -346,10 +351,9 @@ void main() {
     expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
   });
 
-  testWidgets('Cursor radius is 2.0 on iOS', (WidgetTester tester) async {
-    final Widget widget = MaterialApp(
-      theme: ThemeData(platform: TargetPlatform.iOS),
-      home: const Material(
+  testWidgets('Cursor radius is 2.0', (WidgetTester tester) async {
+    const Widget widget = MaterialApp(
+      home: Material(
         child: TextField(
           maxLines: 3,
         ),
@@ -361,7 +365,7 @@ void main() {
     final RenderEditable renderEditable = editableTextState.renderEditable;
 
     expect(renderEditable.cursorRadius, const Radius.circular(2.0));
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('Cursor gets placed correctly after going out of bounds', (WidgetTester tester) async {
     const String text = 'hello world this is fun and cool and awesome!';
@@ -445,7 +449,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(controller.selection.baseOffset, 10);
-  }, skip: isBrowser);
+  });
 
   testWidgets('Updating the floating cursor correctly moves the cursor', (WidgetTester tester) async {
     const String text = 'hello world this is fun and cool and awesome!';
@@ -501,7 +505,7 @@ void main() {
     await tester.pumpAndSettle();
     // The cursor has been set.
     expect(controller.selection.baseOffset, 10);
-  }, skip: isBrowser);
+  });
 
   testWidgets('Updating the floating cursor can end without update', (WidgetTester tester) async {
     const String text = 'hello world this is fun and cool and awesome!';
@@ -545,7 +549,7 @@ void main() {
     // The cursor did not change.
     expect(controller.selection.baseOffset, 29);
     expect(tester.takeException(), null);
-  }, skip: isBrowser);
+  });
 
   // Regression test for https://github.com/flutter/flutter/pull/30475.
   testWidgets('Trying to select with the floating cursor does not crash', (WidgetTester tester) async {
@@ -611,7 +615,7 @@ void main() {
       offset: const Offset(-250, 20)));
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
     await tester.pumpAndSettle();
-  }, skip: isBrowser);
+  });
 
   testWidgets('autofocus sets cursor to the end of text', (WidgetTester tester) async {
     const String text = 'hello world';
@@ -643,11 +647,9 @@ void main() {
     expect(focusNode.hasFocus, true);
     expect(controller.selection.isCollapsed, true);
     expect(controller.selection.baseOffset, text.length);
-  }, skip: isBrowser);
+  });
 
-  testWidgets('Floating cursor is painted on iOS', (WidgetTester tester) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-
+  testWidgets('Floating cursor is painted', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
     const TextStyle textStyle = TextStyle();
     const String text = 'hello world this is fun and cool and awesome!';
@@ -656,7 +658,6 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(platform: TargetPlatform.iOS),
         home: Padding(
           padding: const EdgeInsets.only(top: 0.25),
           child: Material(
@@ -664,7 +665,6 @@ void main() {
               controller: controller,
               focusNode: focusNode,
               style: textStyle,
-              strutStyle: StrutStyle.disabled,
             ),
           ),
         ),
@@ -731,16 +731,13 @@ void main() {
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
     await tester.pumpAndSettle();
     debugDefaultTargetPlatformOverride = null;
-  }, skip: isBrowser);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('cursor layout iOS', (WidgetTester tester) async {
+  testWidgets('cursor layout', (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
-
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
     String changedValue;
     final Widget widget = MaterialApp(
-      theme: ThemeData(platform: TargetPlatform.iOS),
       home: RepaintBoundary(
         key: const ValueKey<int>(1),
         child: Column(
@@ -751,7 +748,7 @@ void main() {
               key: editableTextKey,
               controller: TextEditingController(),
               focusNode: FocusNode(),
-              style: Typography(platform: TargetPlatform.iOS).black.subhead,
+              style: Typography.material2018(platform: TargetPlatform.iOS).black.subtitle1,
               cursorColor: Colors.blue,
               selectionControls: materialTextSelectionControls,
               keyboardType: TextInputType.text,
@@ -782,7 +779,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     await tester.pump(const Duration(milliseconds: 500));
 
-    await tester.tap(find.text('PASTE'));
+    await tester.tap(find.text('Paste'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
     await tester.pump(const Duration(milliseconds: 500));
@@ -793,6 +790,5 @@ void main() {
       find.byKey(const ValueKey<int>(1)),
       matchesGoldenFile('editable_text_test.2.png'),
     );
-    debugDefaultTargetPlatformOverride = null;
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 }

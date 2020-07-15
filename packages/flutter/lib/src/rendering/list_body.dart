@@ -1,6 +1,8 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 import 'dart:math' as math;
 
@@ -63,6 +65,7 @@ class RenderListBody extends RenderBox
 
   @override
   void performLayout() {
+    final BoxConstraints constraints = this.constraints;
     assert(() {
       switch (mainAxis) {
         case Axis.horizontal:
@@ -104,7 +107,7 @@ class RenderListBody extends RenderBox
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('RenderListBody must have a bounded constraint for its cross axis.'),
         ErrorDescription(
-          'RenderListBody forces its children to expand to fit the RenderListBody\'s container, '
+          "RenderListBody forces its children to expand to fit the RenderListBody's container, "
           'so it must be placed in a parent that constrains the cross '
           'axis to a finite dimension.'
         ),
@@ -126,7 +129,7 @@ class RenderListBody extends RenderBox
         final BoxConstraints innerConstraints = BoxConstraints.tightFor(height: constraints.maxHeight);
         while (child != null) {
           child.layout(innerConstraints, parentUsesSize: true);
-          final ListBodyParentData childParentData = child.parentData;
+          final ListBodyParentData childParentData = child.parentData as ListBodyParentData;
           childParentData.offset = Offset(mainAxisExtent, 0.0);
           mainAxisExtent += child.size.width;
           assert(child.parentData == childParentData);
@@ -138,7 +141,7 @@ class RenderListBody extends RenderBox
         final BoxConstraints innerConstraints = BoxConstraints.tightFor(height: constraints.maxHeight);
         while (child != null) {
           child.layout(innerConstraints, parentUsesSize: true);
-          final ListBodyParentData childParentData = child.parentData;
+          final ListBodyParentData childParentData = child.parentData as ListBodyParentData;
           mainAxisExtent += child.size.width;
           assert(child.parentData == childParentData);
           child = childParentData.nextSibling;
@@ -146,7 +149,7 @@ class RenderListBody extends RenderBox
         double position = 0.0;
         child = firstChild;
         while (child != null) {
-          final ListBodyParentData childParentData = child.parentData;
+          final ListBodyParentData childParentData = child.parentData as ListBodyParentData;
           position += child.size.width;
           childParentData.offset = Offset(mainAxisExtent - position, 0.0);
           assert(child.parentData == childParentData);
@@ -158,7 +161,7 @@ class RenderListBody extends RenderBox
         final BoxConstraints innerConstraints = BoxConstraints.tightFor(width: constraints.maxWidth);
         while (child != null) {
           child.layout(innerConstraints, parentUsesSize: true);
-          final ListBodyParentData childParentData = child.parentData;
+          final ListBodyParentData childParentData = child.parentData as ListBodyParentData;
           childParentData.offset = Offset(0.0, mainAxisExtent);
           mainAxisExtent += child.size.height;
           assert(child.parentData == childParentData);
@@ -170,7 +173,7 @@ class RenderListBody extends RenderBox
         final BoxConstraints innerConstraints = BoxConstraints.tightFor(width: constraints.maxWidth);
         while (child != null) {
           child.layout(innerConstraints, parentUsesSize: true);
-          final ListBodyParentData childParentData = child.parentData;
+          final ListBodyParentData childParentData = child.parentData as ListBodyParentData;
           mainAxisExtent += child.size.height;
           assert(child.parentData == childParentData);
           child = childParentData.nextSibling;
@@ -178,7 +181,7 @@ class RenderListBody extends RenderBox
         double position = 0.0;
         child = firstChild;
         while (child != null) {
-          final ListBodyParentData childParentData = child.parentData;
+          final ListBodyParentData childParentData = child.parentData as ListBodyParentData;
           position += child.size.height;
           childParentData.offset = Offset(0.0, mainAxisExtent - position);
           assert(child.parentData == childParentData);
@@ -201,7 +204,7 @@ class RenderListBody extends RenderBox
     RenderBox child = firstChild;
     while (child != null) {
       extent = math.max(extent, childSize(child));
-      final ListBodyParentData childParentData = child.parentData;
+      final ListBodyParentData childParentData = child.parentData as ListBodyParentData;
       child = childParentData.nextSibling;
     }
     return extent;
@@ -212,7 +215,7 @@ class RenderListBody extends RenderBox
     RenderBox child = firstChild;
     while (child != null) {
       extent += childSize(child);
-      final ListBodyParentData childParentData = child.parentData;
+      final ListBodyParentData childParentData = child.parentData as ListBodyParentData;
       child = childParentData.nextSibling;
     }
     return extent;

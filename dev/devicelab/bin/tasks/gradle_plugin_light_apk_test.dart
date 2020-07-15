@@ -1,4 +1,4 @@
-// Copyright (c) 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -19,7 +19,7 @@ Future<void> main() async {
 
         final Iterable<String> apkFiles = await getFilesInApk(pluginProject.debugApkPath);
 
-        checkItContains<String>(<String>[
+        checkCollectionContains<String>(<String>[
           ...flutterAssets,
           ...debugAssets,
           ...baseApkFiles,
@@ -29,7 +29,7 @@ Future<void> main() async {
           'lib/x86_64/libflutter.so',
         ], apkFiles);
 
-        checkItDoesNotContain<String>(<String>[
+        checkCollectionDoesNotContain<String>(<String>[
           'lib/arm64-v8a/libapp.so',
           'lib/armeabi-v7a/libapp.so',
           'lib/x86/libapp.so',
@@ -45,7 +45,7 @@ Future<void> main() async {
 
         final Iterable<String> apkFiles = await getFilesInApk(pluginProject.debugApkPath);
 
-        checkItContains<String>(<String>[
+        checkCollectionContains<String>(<String>[
           ...flutterAssets,
           ...debugAssets,
           ...baseApkFiles,
@@ -54,7 +54,7 @@ Future<void> main() async {
           'lib/x86_64/libflutter.so',
         ], apkFiles);
 
-        checkItDoesNotContain<String>(<String>[
+        checkCollectionDoesNotContain<String>(<String>[
           'lib/armeabi-v7a/libapp.so',
           'lib/x86/libapp.so',
           'lib/x86_64/libapp.so',
@@ -69,7 +69,7 @@ Future<void> main() async {
 
         final Iterable<String> apkFiles = await getFilesInApk(pluginProject.debugApkPath);
 
-        checkItContains<String>(<String>[
+        checkCollectionContains<String>(<String>[
           ...flutterAssets,
           ...debugAssets,
           ...baseApkFiles,
@@ -78,7 +78,7 @@ Future<void> main() async {
           'lib/x86_64/libflutter.so',
         ], apkFiles);
 
-        checkItDoesNotContain<String>(<String>[
+        checkCollectionDoesNotContain<String>(<String>[
           'lib/armeabi-v7a/libapp.so',
           'lib/x86/libapp.so',
           'lib/x86_64/libapp.so',
@@ -92,14 +92,14 @@ Future<void> main() async {
 
         final Iterable<String> apkFiles = await getFilesInApk(pluginProject.releaseApkPath);
 
-        checkItContains<String>(<String>[
+        checkCollectionContains<String>(<String>[
           ...flutterAssets,
           ...baseApkFiles,
           'lib/armeabi-v7a/libflutter.so',
           'lib/armeabi-v7a/libapp.so',
         ], apkFiles);
 
-        checkItDoesNotContain<String>(<String>[
+        checkCollectionDoesNotContain<String>(<String>[
           ...debugAssets,
           'lib/arm64-v8a/libflutter.so',
           'lib/arm64-v8a/libapp.so',
@@ -113,14 +113,14 @@ Future<void> main() async {
 
         final Iterable<String> apkFiles = await getFilesInApk(pluginProject.releaseApkPath);
 
-        checkItContains<String>(<String>[
+        checkCollectionContains<String>(<String>[
           ...flutterAssets,
           ...baseApkFiles,
           'lib/arm64-v8a/libflutter.so',
           'lib/arm64-v8a/libapp.so',
         ], apkFiles);
 
-        checkItDoesNotContain<String>(<String>[
+        checkCollectionDoesNotContain<String>(<String>[
           ...debugAssets,
           'lib/armeabi-v7a/libflutter.so',
           'lib/armeabi-v7a/libapp.so',
@@ -178,7 +178,7 @@ Future<void> main() async {
         if (result.exitCode == 0)
           throw failure(
               'Gradle did not exit with error as expected', result);
-        final String output = result.stdout + '\n' + result.stderr;
+        final String output = '${result.stdout}\n${result.stderr}';
         if (output.contains('GradleException') ||
             output.contains('Failed to notify') ||
             output.contains('at org.gradle'))
@@ -191,13 +191,26 @@ Future<void> main() async {
       });
 
       await runProjectTest((FlutterProject project) async {
+        section('gradlew assembleDebug forwards stderr');
+        await project.introducePubspecError();
+                final ProcessResult result =
+            await project.resultOfGradleTask('assembleRelease');
+        if (result.exitCode == 0)
+          throw failure(
+              'Gradle did not exit with error as expected', result);
+        final String output = '${result.stdout}\n${result.stderr}';
+        if (!output.contains('No file or variants found for asset: lib/gallery/example_code.dart.'))
+          throw failure(output, result);
+      });
+
+      await runProjectTest((FlutterProject project) async {
         section('flutter build apk on build script with error');
         await project.introduceError();
         final ProcessResult result = await project.resultOfFlutterCommand('build', <String>['apk']);
         if (result.exitCode == 0)
           throw failure(
               'flutter build apk should fail when Gradle does', result);
-        final String output = result.stdout + '\n' + result.stderr;
+        final String output = '${result.stdout}\n${result.stderr}';
         if (!output.contains('Build failed') || !output.contains('builTypes'))
           throw failure(
               'flutter build apk output should contain a readable Gradle error message',

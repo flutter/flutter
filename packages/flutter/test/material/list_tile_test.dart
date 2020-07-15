@@ -1,13 +1,19 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
+// @dart = 2.8
 
+import 'dart:math' as math;
+import 'dart:ui';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 class TestIcon extends StatefulWidget {
@@ -190,7 +196,7 @@ void main() {
     testChildren();
     testHorizontalGeometry();
     testVerticalGeometry(128.0);
-  }, skip: isBrowser);
+  });
 
   testWidgets('ListTile geometry (RTL)', (WidgetTester tester) async {
     const double leftPadding = 10.0;
@@ -259,6 +265,7 @@ void main() {
       bool enabled = true,
       bool dense = false,
       bool selected = false,
+      ShapeBorder shape,
       Color selectedColor,
       Color iconColor,
       Color textColor,
@@ -268,6 +275,7 @@ void main() {
           child: Center(
             child: ListTileTheme(
               dense: dense,
+              shape: shape,
               selectedColor: selectedColor,
               iconColor: iconColor,
               textColor: textColor,
@@ -292,9 +300,13 @@ void main() {
 
     const Color green = Color(0xFF00FF00);
     const Color red = Color(0xFFFF0000);
+    const ShapeBorder roundedShape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(4.0)),
+    );
 
     Color iconColor(Key key) => tester.state<TestIconState>(find.byKey(key)).iconTheme.color;
     Color textColor(Key key) => tester.state<TestTextState>(find.byKey(key)).textStyle.color;
+    ShapeBorder inkWellBorder() => tester.widget<InkWell>(find.descendant(of: find.byType(ListTile), matching: find.byType(InkWell))).customBorder;
 
     // A selected ListTile's leading, trailing, and text get the primary color by default
     await tester.pumpWidget(buildFrame(selected: true));
@@ -337,6 +349,10 @@ void main() {
     expect(iconColor(trailingKey), theme.disabledColor);
     expect(textColor(titleKey), theme.disabledColor);
     expect(textColor(subtitleKey), theme.disabledColor);
+
+    // A selected ListTile's InkWell gets the ListTileTheme's shape
+    await tester.pumpWidget(buildFrame(selected: true, shape: roundedShape));
+    expect(inkWellBorder(), roundedShape);
   });
 
   testWidgets('ListTile semantics', (WidgetTester tester) async {
@@ -349,16 +365,20 @@ void main() {
           child: MediaQuery(
             data: const MediaQueryData(),
             child: Column(
-              children: const <Widget>[
-                ListTile(
+              children: <Widget>[
+                const ListTile(
                   title: Text('one'),
                 ),
                 ListTile(
-                  title: Text('two'),
+                  title: const Text('two'),
+                  onTap: () {},
+                ),
+                const ListTile(
+                  title: Text('three'),
                   selected: true,
                 ),
-                ListTile(
-                  title: Text('three'),
+                const ListTile(
+                  title: Text('four'),
                   enabled: false,
                 ),
               ],
@@ -377,25 +397,31 @@ void main() {
               flags: <SemanticsFlag>[
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
-                SemanticsFlag.isFocusable,
               ],
               label: 'one',
+            ),
+            TestSemantics.rootChild(
+              flags: <SemanticsFlag>[
+                SemanticsFlag.hasEnabledState,
+                SemanticsFlag.isEnabled,
+                SemanticsFlag.isFocusable,
+              ],
+              actions: <SemanticsAction>[SemanticsAction.tap],
+              label: 'two',
             ),
             TestSemantics.rootChild(
               flags: <SemanticsFlag>[
                 SemanticsFlag.isSelected,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
-                SemanticsFlag.isFocusable,
               ],
-              label: 'two',
+              label: 'three',
             ),
             TestSemantics.rootChild(
               flags: <SemanticsFlag>[
                 SemanticsFlag.hasEnabledState,
-                SemanticsFlag.isFocusable,
               ],
-              label: 'three',
+              label: 'four',
             ),
           ],
         ),
@@ -792,7 +818,7 @@ void main() {
     expect(tester.getRect(find.byType(ListTile).at(1)),     const Rect.fromLTWH(                0.0, 216.0       , 800.0,  56.0));
     expect(tester.getRect(find.byType(Placeholder).at(2)),  const Rect.fromLTWH(               16.0, 216.0 + 16.0,  24.0,  12.0));
     expect(tester.getRect(find.byType(Placeholder).at(3)),  const Rect.fromLTWH(800.0 - 24.0 - 16.0, 216.0 + 16.0,  24.0,  24.0));
-  }, skip: isBrowser);
+  });
 
   testWidgets('ListTile leading icon height does not exceed ListTile height', (WidgetTester tester) async {
     // regression test for https://github.com/flutter/flutter/issues/28765
@@ -1126,5 +1152,544 @@ void main() {
 
     expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(800.0 - 16.0 - 24.0,        16.0, 24.0, 56.0));
     expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(800.0 - 16.0 - 24.0, 88.0 + 16.0, 24.0, 56.0));
+  });
+
+  testWidgets('ListTile only accepts focus when enabled', (WidgetTester tester) async {
+    final GlobalKey childKey = GlobalKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: <Widget>[
+              ListTile(
+                title: Text('A', key: childKey),
+                dense: true,
+                enabled: true,
+                onTap: () {},
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pump(); // Let the focus take effect.
+
+    final FocusNode tileNode = Focus.of(childKey.currentContext);
+    tileNode.requestFocus();
+    await tester.pump(); // Let the focus take effect.
+    expect(Focus.of(childKey.currentContext, nullOk: true).hasPrimaryFocus, isTrue);
+
+    expect(tileNode.hasPrimaryFocus, isTrue);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: <Widget>[
+              ListTile(
+                title: Text('A', key: childKey),
+                dense: true,
+                enabled: false,
+                onTap: () {},
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.binding.focusManager.primaryFocus, isNot(equals(tileNode)));
+    expect(Focus.of(childKey.currentContext, nullOk: true).hasPrimaryFocus, isFalse);
+  });
+
+  testWidgets('ListTile can autofocus unless disabled.', (WidgetTester tester) async {
+    final GlobalKey childKey = GlobalKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: <Widget>[
+              ListTile(
+                title: Text('A', key: childKey),
+                dense: true,
+                enabled: true,
+                autofocus: true,
+                onTap: () {},
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(Focus.of(childKey.currentContext, nullOk: true).hasPrimaryFocus, isTrue);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: <Widget>[
+              ListTile(
+                title: Text('A', key: childKey),
+                dense: true,
+                enabled: false,
+                autofocus: true,
+                onTap: () {},
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(Focus.of(childKey.currentContext, nullOk: true).hasPrimaryFocus, isFalse);
+  });
+
+  testWidgets('ListTile is focusable and has correct focus color', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'ListTile');
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    const Key tileKey = Key('listTile');
+    Widget buildApp({bool enabled = true}) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return Container(
+                width: 100,
+                height: 100,
+                color: Colors.white,
+                child: ListTile(
+                  key: tileKey,
+                  onTap: enabled ? () {} : null,
+                  focusColor: Colors.orange[500],
+                  autofocus: true,
+                  focusNode: focusNode,
+                ),
+              );
+            }),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildApp());
+
+    await tester.pumpAndSettle();
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    expect(
+      Material.of(tester.element(find.byKey(tileKey))),
+      paints
+        ..rect(
+          color: Colors.orange[500],
+          rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+        )
+        ..rect(
+          color: const Color(0xffffffff),
+          rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+        ),
+    );
+
+    // Check when the list tile is disabled.
+    await tester.pumpWidget(buildApp(enabled: false));
+    await tester.pumpAndSettle();
+    expect(focusNode.hasPrimaryFocus, isFalse);
+    expect(
+      Material.of(tester.element(find.byKey(tileKey))),
+      paints
+        ..rect(
+            color: const Color(0xffffffff),
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0)),
+    );
+  });
+
+  testWidgets('ListTile can be hovered and has correct hover color', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    const Key tileKey = Key('ListTile');
+    Widget buildApp({bool enabled = true}) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return Container(
+                width: 100,
+                height: 100,
+                color: Colors.white,
+                child: ListTile(
+                  key: tileKey,
+                  onTap: enabled ? () {} : null,
+                  hoverColor: Colors.orange[500],
+                  autofocus: true,
+                ),
+              );
+            }),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildApp());
+
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byKey(tileKey))),
+      paints
+        ..rect(
+            color: const Color(0x1f000000),
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
+        ..rect(
+            color: const Color(0xffffffff),
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0)),
+    );
+
+    // Start hovering
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(tester.getCenter(find.byKey(tileKey)));
+
+    await tester.pumpWidget(buildApp());
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(
+        Material.of(tester.element(find.byKey(tileKey))),
+        paints
+          ..rect(
+              color: const Color(0x1f000000),
+              rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
+          ..rect(
+              color: Colors.orange[500],
+              rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
+          ..rect(
+              color: const Color(0xffffffff),
+              rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0)),
+    );
+
+    await tester.pumpWidget(buildApp(enabled: false));
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byKey(tileKey))),
+      paints
+        ..rect(
+            color: Colors.orange[500],
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
+        ..rect(
+            color: const Color(0xffffffff),
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0)),
+    );
+  });
+
+  testWidgets('ListTile can be triggered by keyboard shortcuts', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    const Key tileKey = Key('ListTile');
+    bool tapped = false;
+    Widget buildApp({bool enabled = true}) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return Container(
+                width: 200,
+                height: 100,
+                color: Colors.white,
+                child: ListTile(
+                  key: tileKey,
+                  onTap: enabled ? () {
+                    setState((){
+                      tapped = true;
+                    });
+                  } : null,
+                  hoverColor: Colors.orange[500],
+                  autofocus: true,
+                ),
+              );
+            }),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pumpAndSettle();
+
+    expect(tapped, isTrue);
+  });
+
+  testWidgets('ListTile responds to density changes.', (WidgetTester tester) async {
+    const Key key = Key('test');
+    Future<void> buildTest(VisualDensity visualDensity) async {
+      return await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: ListTile(
+                key: key,
+                onTap: () {},
+                autofocus: true,
+                visualDensity: visualDensity,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await buildTest(const VisualDensity());
+    final RenderBox box = tester.renderObject(find.byKey(key));
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(800, 56)));
+
+    await buildTest(const VisualDensity(horizontal: 3.0, vertical: 3.0));
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(800, 68)));
+
+    await buildTest(const VisualDensity(horizontal: -3.0, vertical: -3.0));
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(800, 44)));
+
+    await buildTest(const VisualDensity(horizontal: 3.0, vertical: -3.0));
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(800, 44)));
+  });
+
+  testWidgets('ListTile changes mouse cursor when hovered', (WidgetTester tester) async {
+    // Test ListTile() constructor
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: MouseRegion(
+              cursor: SystemMouseCursors.forbidden,
+              child: ListTile(
+                onTap: () {},
+                mouseCursor: SystemMouseCursors.text,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(ListTile)));
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    // Test default cursor
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: MouseRegion(
+              cursor: SystemMouseCursors.forbidden,
+              child: ListTile(
+                onTap: () {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    // Test default cursor when disabled
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Center(
+            child: MouseRegion(
+              cursor: SystemMouseCursors.forbidden,
+              child: ListTile(
+                enabled: false,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    // Test default cursor when onTap or onLongPress is null
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Center(
+            child: MouseRegion(
+              cursor: SystemMouseCursors.forbidden,
+              child: ListTile(),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+  });
+
+  testWidgets('ListTile respects tileColor & selectedTileColor', (WidgetTester tester) async {
+    bool isSelected = false;
+    const Color selectedTileColor = Colors.red;
+    const Color tileColor = Colors.green;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return ListTile(
+                  selected: isSelected,
+                  selectedTileColor: selectedTileColor,
+                  tileColor: tileColor,
+                  onTap: () {
+                    setState(()=> isSelected = !isSelected);
+                  },
+                  title: const Text('Title'),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Initially, when isSelected is false, the ListTile should respect tileColor.
+    ColoredBox coloredBox = tester.widget(find.byType(ColoredBox));
+    expect(coloredBox.color, tileColor);
+
+    // Tap on tile to change isSelected.
+    await tester.tap(find.byType(ListTile));
+    await tester.pumpAndSettle();
+
+    // When isSelected is true, the ListTile should respect selectedTileColor.
+    coloredBox = tester.widget(find.byType(ColoredBox));
+    expect(coloredBox.color, selectedTileColor);
+  });
+
+  testWidgets('ListTile default tile color', (WidgetTester tester) async {
+    bool isSelected = false;
+    const Color defaultColor = Colors.transparent;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return ListTile(
+                  selected: isSelected,
+                  onTap: () {
+                    setState(()=> isSelected = !isSelected);
+                  },
+                  title: const Text('Title'),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    ColoredBox coloredBox = tester.widget(find.byType(ColoredBox));
+    expect(coloredBox.color, defaultColor);
+
+    // Tap on tile to change isSelected.
+    await tester.tap(find.byType(ListTile));
+    await tester.pumpAndSettle();
+
+    coloredBox = tester.widget(find.byType(ColoredBox));
+    expect(isSelected, isTrue);
+    expect(coloredBox.color, defaultColor);
+  });
+
+  testWidgets('ListTile respects ListTileTheme\'s tileColor & selectedTileColor', (WidgetTester tester) async {
+    ListTileTheme theme;
+    bool isSelected = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListTileTheme(
+            selectedTileColor: Colors.green,
+            tileColor: Colors.red,
+            child: Center(
+              child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  theme = ListTileTheme.of(context);
+                  return ListTile(
+                    selected: isSelected,
+                    onTap: () {
+                      setState(()=> isSelected = !isSelected);
+                    },
+                    title: const Text('Title'),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    ColoredBox coloredBox = tester.widget(find.byType(ColoredBox));
+    expect(coloredBox.color, theme.tileColor);
+
+    // Tap on tile to change isSelected.
+    await tester.tap(find.byType(ListTile));
+    await tester.pumpAndSettle();
+
+    coloredBox = tester.widget(find.byType(ColoredBox));
+    expect(coloredBox.color, theme.selectedTileColor);
+  });
+
+  testWidgets('ListTileTheme\'s tileColor & selectedTileColor are overridden by ListTile properties', (WidgetTester tester) async {
+    bool isSelected = false;
+    const Color tileColor = Colors.brown;
+    const Color selectedTileColor = Colors.purple;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListTileTheme(
+            selectedTileColor: Colors.green,
+            tileColor: Colors.red,
+            child: Center(
+              child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  return ListTile(
+                    tileColor: tileColor,
+                    selectedTileColor: selectedTileColor,
+                    selected: isSelected,
+                    onTap: () {
+                      setState(()=> isSelected = !isSelected);
+                    },
+                    title: const Text('Title'),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    ColoredBox coloredBox = tester.widget(find.byType(ColoredBox));
+    expect(coloredBox.color, tileColor);
+
+    // Tap on tile to change isSelected.
+    await tester.tap(find.byType(ListTile));
+    await tester.pumpAndSettle();
+
+    coloredBox = tester.widget(find.byType(ColoredBox));
+    expect(coloredBox.color, selectedTileColor);
   });
 }

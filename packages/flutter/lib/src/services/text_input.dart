@@ -1,6 +1,8 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 import 'dart:async';
 import 'dart:io' show Platform;
@@ -16,15 +18,62 @@ import 'dart:ui' show
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
+import 'autofill.dart';
 import 'message_codec.dart';
+import 'platform_channel.dart';
 import 'system_channels.dart';
 import 'system_chrome.dart';
 import 'text_editing.dart';
 
 export 'dart:ui' show TextAffinity;
 
-// Whether we're compiled to JavaScript in a web browser.
-const bool _kIsBrowser = identical(0, 0.0);
+/// Indicates how to handle the intelligent replacement of dashes in text input.
+///
+/// See also:
+///
+///  * [TextField.smartDashesType]
+///  * [TextFormField.smartDashesType]
+///  * [CupertinoTextField.smartDashesType]
+///  * [EditableText.smartDashesType]
+///  * [SmartQuotesType]
+///  * <https://developer.apple.com/documentation/uikit/uitextinputtraits>
+enum SmartDashesType {
+  /// Smart dashes is disabled.
+  ///
+  /// This corresponds to the
+  /// ["no" value of UITextSmartDashesType](https://developer.apple.com/documentation/uikit/uitextsmartdashestype/no).
+  disabled,
+
+  /// Smart dashes is enabled.
+  ///
+  /// This corresponds to the
+  /// ["yes" value of UITextSmartDashesType](https://developer.apple.com/documentation/uikit/uitextsmartdashestype/yes).
+  enabled,
+}
+
+/// Indicates how to handle the intelligent replacement of quotes in text input.
+///
+/// See also:
+///
+///  * [TextField.smartQuotesType]
+///  * [TextFormField.smartQuotesType]
+///  * [CupertinoTextField.smartQuotesType]
+///  * [EditableText.smartQuotesType]
+///  * [SmartDashesType]
+///  * <https://developer.apple.com/documentation/uikit/uitextinputtraits>
+enum SmartQuotesType {
+  /// Smart quotes is disabled.
+  ///
+  /// This corresponds to the
+  /// ["no" value of UITextSmartQuotesType](https://developer.apple.com/documentation/uikit/uitextsmartquotestype/no).
+  disabled,
+
+  /// Smart quotes is enabled.
+  ///
+  /// This corresponds to the
+  /// ["yes" value of UITextSmartQuotesType](https://developer.apple.com/documentation/uikit/uitextsmartquotestype/yes).
+  enabled,
+}
 
 /// The type of information for which to optimize the text input control.
 ///
@@ -33,6 +82,7 @@ const bool _kIsBrowser = identical(0, 0.0);
 /// This class stays as close to [Enum] interface as possible, and allows
 /// for additional flags for some input types. For example, numeric input
 /// can specify whether it supports decimal numbers and/or signed numbers.
+@immutable
 class TextInputType {
   const TextInputType._(this.index)
     : signed = null,
@@ -67,10 +117,10 @@ class TextInputType {
   /// Requests the default platform keyboard.
   static const TextInputType text = TextInputType._(0);
 
-  /// Optimize for multi-line textual information.
+  /// Optimize for multiline textual information.
   ///
   /// Requests the default platform keyboard, but accepts newlines when the
-  /// enter key is pressed. This is the input type used for all multi-line text
+  /// enter key is pressed. This is the input type used for all multiline text
   /// fields.
   static const TextInputType multiline = TextInputType._(1);
 
@@ -109,14 +159,33 @@ class TextInputType {
   /// Requests a keyboard with ready access to both letters and numbers.
   static const TextInputType visiblePassword = TextInputType._(7);
 
+  /// Optimized for a person's name.
+  ///
+  /// On iOS, requests the
+  /// [UIKeyboardType.namePhonePad](https://developer.apple.com/documentation/uikit/uikeyboardtype/namephonepad)
+  /// keyboard, a keyboard optimized for entering a person’s name or phone number.
+  /// Does not support auto-capitalization.
+  ///
+  /// On Android, requests a keyboard optimized for
+  /// [TYPE_TEXT_VARIATION_PERSON_NAME](https://developer.android.com/reference/android/text/InputType#TYPE_TEXT_VARIATION_PERSON_NAME).
+  static const TextInputType name = TextInputType._(8);
+
+  /// Optimized for postal mailing addresses.
+  ///
+  /// On iOS, requests the default keyboard.
+  ///
+  /// On Android, requests a keyboard optimized for
+  /// [TYPE_TEXT_VARIATION_POSTAL_ADDRESS](https://developer.android.com/reference/android/text/InputType#TYPE_TEXT_VARIATION_POSTAL_ADDRESS).
+  static const TextInputType streetAddress = TextInputType._(9);
+
   /// All possible enum values.
   static const List<TextInputType> values = <TextInputType>[
-    text, multiline, number, phone, datetime, emailAddress, url, visiblePassword,
+    text, multiline, number, phone, datetime, emailAddress, url, visiblePassword, name, streetAddress,
   ];
 
   // Corresponding string name for each of the [values].
   static const List<String> _names = <String>[
-    'text', 'multiline', 'number', 'phone', 'datetime', 'emailAddress', 'url', 'visiblePassword',
+    'text', 'multiline', 'number', 'phone', 'datetime', 'emailAddress', 'url', 'visiblePassword', 'name', 'address',
   ];
 
   // Enum value name, this is what enum.toString() would normally return.
@@ -133,20 +202,18 @@ class TextInputType {
 
   @override
   String toString() {
-    return '$runtimeType('
+    return '${objectRuntimeType(this, 'TextInputType')}('
         'name: $_name, '
         'signed: $signed, '
         'decimal: $decimal)';
   }
 
   @override
-  bool operator ==(dynamic other) {
-    if (other is! TextInputType)
-      return false;
-    final TextInputType typedOther = other;
-    return typedOther.index == index
-        && typedOther.signed == signed
-        && typedOther.decimal == decimal;
+  bool operator ==(Object other) {
+    return other is TextInputType
+        && other.index == index
+        && other.signed == signed
+        && other.decimal == decimal;
   }
 
   @override
@@ -386,13 +453,18 @@ class TextInputConfiguration {
     this.inputType = TextInputType.text,
     this.obscureText = false,
     this.autocorrect = true,
+    SmartDashesType smartDashesType,
+    SmartQuotesType smartQuotesType,
     this.enableSuggestions = true,
     this.actionLabel,
     this.inputAction = TextInputAction.done,
     this.keyboardAppearance = Brightness.light,
     this.textCapitalization = TextCapitalization.none,
+    this.autofillConfiguration,
   }) : assert(inputType != null),
        assert(obscureText != null),
+       smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
+       smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
        assert(autocorrect != null),
        assert(enableSuggestions != null),
        assert(keyboardAppearance != null),
@@ -407,10 +479,68 @@ class TextInputConfiguration {
   /// Defaults to false.
   final bool obscureText;
 
-  /// Whether to enable auto-correction.
+  /// Whether to enable autocorrection.
   ///
   /// Defaults to true.
   final bool autocorrect;
+
+  /// The configuration to use for autofill.
+  ///
+  /// Defaults to null, in which case no autofill information will be provided
+  /// to the platform. This will prevent the corresponding input field from
+  /// participating in autofills triggered by other fields. Additionally, on
+  /// Android and web, setting [autofillConfiguration] to null disables autofill.
+  final AutofillConfiguration autofillConfiguration;
+
+  /// {@template flutter.services.textInput.smartDashesType}
+  /// Whether to allow the platform to automatically format dashes.
+  ///
+  /// This flag only affects iOS versions 11 and above. It sets
+  /// [`UITextSmartDashesType`](https://developer.apple.com/documentation/uikit/uitextsmartdashestype?language=objc)
+  /// in the engine. When true, it passes
+  /// [`UITextSmartDashesTypeYes`](https://developer.apple.com/documentation/uikit/uitextsmartdashestype/uitextsmartdashestypeyes?language=objc),
+  /// and when false, it passes
+  /// [`UITextSmartDashesTypeNo`](https://developer.apple.com/documentation/uikit/uitextsmartdashestype/uitextsmartdashestypeno?language=objc).
+  ///
+  /// As an example of what this does, two consecutive hyphen characters will be
+  /// automatically replaced with one en dash, and three consecutive hyphens
+  /// will become one em dash.
+  ///
+  /// Defaults to true, unless [obscureText] is true, when it defaults to false.
+  /// This is to avoid the problem where password fields receive autoformatted
+  /// characters.
+  ///
+  /// See also:
+  ///
+  ///  * [smartQuotesType]
+  ///  * <https://developer.apple.com/documentation/uikit/uitextinputtraits>
+  /// {@endtemplate}
+  final SmartDashesType smartDashesType;
+
+  /// {@template flutter.services.textInput.smartQuotesType}
+  /// Whether to allow the platform to automatically format quotes.
+  ///
+  /// This flag only affects iOS. It sets
+  /// [`UITextSmartQuotesType`](https://developer.apple.com/documentation/uikit/uitextsmartquotestype?language=objc)
+  /// in the engine. When true, it passes
+  /// [`UITextSmartQuotesTypeYes`](https://developer.apple.com/documentation/uikit/uitextsmartquotestype/uitextsmartquotestypeyes?language=objc),
+  /// and when false, it passes
+  /// [`UITextSmartQuotesTypeNo`](https://developer.apple.com/documentation/uikit/uitextsmartquotestype/uitextsmartquotestypeno?language=objc).
+  ///
+  /// As an example of what this does, a standard vertical double quote
+  /// character will be automatically replaced by a left or right double quote
+  /// depending on its position in a word.
+  ///
+  /// Defaults to true, unless [obscureText] is true, when it defaults to false.
+  /// This is to avoid the problem where password fields receive autoformatted
+  /// characters.
+  ///
+  /// See also:
+  ///
+  ///  * [smartDashesType]
+  ///  * <https://developer.apple.com/documentation/uikit/uitextinputtraits>
+  /// {@endtemplate}
+  final SmartQuotesType smartQuotesType;
 
   /// {@template flutter.services.textInput.enableSuggestions}
   /// Whether to show input suggestions as the user types.
@@ -422,6 +552,7 @@ class TextInputConfiguration {
   /// Defaults to true. Cannot be null.
   ///
   /// See also:
+  ///
   ///  * <https://developer.android.com/reference/android/text/InputType.html#TYPE_TEXT_FLAG_NO_SUGGESTIONS>
   /// {@endtemplate}
   final bool enableSuggestions;
@@ -455,11 +586,14 @@ class TextInputConfiguration {
       'inputType': inputType.toJson(),
       'obscureText': obscureText,
       'autocorrect': autocorrect,
+      'smartDashesType': smartDashesType.index.toString(),
+      'smartQuotesType': smartQuotesType.index.toString(),
       'enableSuggestions': enableSuggestions,
       'actionLabel': actionLabel,
       'inputAction': inputAction.toString(),
       'textCapitalization': textCapitalization.toString(),
       'keyboardAppearance': keyboardAppearance.toString(),
+      if (autofillConfiguration != null) 'autofill': autofillConfiguration.toJson(),
     };
   }
 }
@@ -528,16 +662,16 @@ class TextEditingValue {
   /// Creates an instance of this class from a JSON object.
   factory TextEditingValue.fromJSON(Map<String, dynamic> encoded) {
     return TextEditingValue(
-      text: encoded['text'],
+      text: encoded['text'] as String,
       selection: TextSelection(
-        baseOffset: encoded['selectionBase'] ?? -1,
-        extentOffset: encoded['selectionExtent'] ?? -1,
-        affinity: _toTextAffinity(encoded['selectionAffinity']) ?? TextAffinity.downstream,
-        isDirectional: encoded['selectionIsDirectional'] ?? false,
+        baseOffset: encoded['selectionBase'] as int ?? -1,
+        extentOffset: encoded['selectionExtent'] as int ?? -1,
+        affinity: _toTextAffinity(encoded['selectionAffinity'] as String) ?? TextAffinity.downstream,
+        isDirectional: encoded['selectionIsDirectional'] as bool ?? false,
       ),
       composing: TextRange(
-        start: encoded['composingBase'] ?? -1,
-        end: encoded['composingExtent'] ?? -1,
+        start: encoded['composingBase'] as int ?? -1,
+        end: encoded['composingExtent'] as int ?? -1,
       ),
     );
   }
@@ -580,19 +714,28 @@ class TextEditingValue {
     );
   }
 
-  @override
-  String toString() => '$runtimeType(text: \u2524$text\u251C, selection: $selection, composing: $composing)';
+  /// Whether the [composing] range is a valid range within [text].
+  ///
+  /// Returns true if and only if the [composing] range is normalized, its start
+  /// is greater than or equal to 0, and its end is less than or equal to
+  /// [text]'s length.
+  ///
+  /// If this property is false while the [composing] range's `isValid` is true,
+  /// it usually indicates the current [composing] range is invalid because of a
+  /// programming error.
+  bool get isComposingRangeValid => composing.isValid && composing.isNormalized && composing.end <= text.length;
 
   @override
-  bool operator ==(dynamic other) {
+  String toString() => '${objectRuntimeType(this, 'TextEditingValue')}(text: \u2524$text\u251C, selection: $selection, composing: $composing)';
+
+  @override
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
-    if (other is! TextEditingValue)
-      return false;
-    final TextEditingValue typedOther = other;
-    return typedOther.text == text
-        && typedOther.selection == selection
-        && typedOther.composing == composing;
+    return other is TextEditingValue
+        && other.text == text
+        && other.selection == selection
+        && other.composing == composing;
   }
 
   @override
@@ -642,6 +785,21 @@ abstract class TextInputClient {
   /// const constructors so that they can be used in const expressions.
   const TextInputClient();
 
+  /// The current state of the [TextEditingValue] held by this client.
+  TextEditingValue get currentTextEditingValue;
+
+  /// The [AutofillScope] this [TextInputClient] belongs to, if any.
+  ///
+  /// It should return null if this [TextInputClient] does not need autofill
+  /// support. For a [TextInputClient] that supports autofill, returning null
+  /// causes it to participate in autofill alone.
+  ///
+  /// See also:
+  ///
+  /// * [AutofillGroup], a widget that creates an [AutofillScope] for its
+  ///   descendent autofillable [TextInputClient]s.
+  AutofillScope get currentAutofillScope;
+
   /// Requests that this client update its editing state to the given value.
   void updateEditingValue(TextEditingValue value);
 
@@ -650,6 +808,17 @@ abstract class TextInputClient {
 
   /// Updates the floating cursor position and state.
   void updateFloatingCursor(RawFloatingCursorPoint point);
+
+  /// Requests that this client display a prompt rectangle for the given text range,
+  /// to indicate the range of text that will be changed by a pending autocorrection.
+  ///
+  /// This method will only be called on iOS.
+  void showAutocorrectionPromptRect(int start, int end);
+
+  /// Platform notified framework of closed connection.
+  ///
+  /// [TextInputClient] should cleanup its connection and finalize editing.
+  void connectionClosed();
 }
 
 /// An interface for interacting with a text input control.
@@ -668,24 +837,45 @@ class TextInputConnection {
   static int _nextId = 1;
   final int _id;
 
+  /// Resets the internal ID counter for testing purposes.
+  ///
+  /// This call has no effect when asserts are disabled. Calling it from
+  /// application code will likely break text input for the application.
+  @visibleForTesting
+  static void debugResetId({int to = 1}) {
+    assert(to != null);
+    assert(() {
+      _nextId = to;
+      return true;
+    }());
+  }
+
   final TextInputClient _client;
 
   /// Whether this connection is currently interacting with the text input control.
-  bool get attached => _clientHandler._currentConnection == this;
+  bool get attached => TextInput._instance._currentConnection == this;
 
   /// Requests that the text input control become visible.
   void show() {
     assert(attached);
-    SystemChannels.textInput.invokeMethod<void>('TextInput.show');
+    TextInput._instance._show();
+  }
+
+  /// Requests the platform autofill UI to appear.
+  ///
+  /// The call has no effect unless the currently attached client supports
+  /// autofill, and the platform has a standalone autofill UI (for example, this
+  /// call has no effect on iOS since its autofill UI is part of the software
+  /// keyboard).
+  void requestAutofill() {
+    assert(attached);
+    TextInput._instance._requestAutofill();
   }
 
   /// Requests that the text input control change its internal state to match the given state.
   void setEditingState(TextEditingValue value) {
     assert(attached);
-    SystemChannels.textInput.invokeMethod<void>(
-      'TextInput.setEditingState',
-      value.toJSON(),
-    );
+    TextInput._instance._setEditingState(value);
   }
 
   /// Send the size and transform of the editable text to engine.
@@ -701,8 +891,7 @@ class TextInputConnection {
     if (editableBoxSize != _cachedSize || transform != _cachedTransform) {
       _cachedSize = editableBoxSize;
       _cachedTransform = transform;
-      SystemChannels.textInput.invokeMethod<void>(
-        'TextInput.setEditableSizeAndTransform',
+      TextInput._instance._setEditableSizeAndTransform(
         <String, dynamic>{
           'width': editableBoxSize.width,
           'height': editableBoxSize.height,
@@ -726,8 +915,7 @@ class TextInputConnection {
   }) {
     assert(attached);
 
-    SystemChannels.textInput.invokeMethod<void>(
-      'TextInput.setStyle',
+    TextInput._instance._setStyle(
       <String, dynamic>{
         'fontFamily': fontFamily,
         'fontSize': fontSize,
@@ -744,11 +932,16 @@ class TextInputConnection {
   /// other client attaches to it within this animation frame.
   void close() {
     if (attached) {
-      SystemChannels.textInput.invokeMethod<void>('TextInput.clearClient');
-      _clientHandler
-        .._currentConnection = null
-        .._scheduleHide();
+      TextInput._instance._clearClient();
     }
+    assert(!attached);
+  }
+
+  /// Platform sent a notification informing the connection is closed.
+  ///
+  /// [TextInputConnection] should clean current client connection.
+  void connectionClosedReceived() {
+    TextInput._instance._currentConnection = null;
     assert(!attached);
   }
 }
@@ -767,7 +960,7 @@ TextInputAction _toTextInputAction(String action) {
       return TextInputAction.send;
     case 'TextInputAction.next':
       return TextInputAction.next;
-    case 'TextInputAction.previuos':
+    case 'TextInputAction.previous':
       return TextInputAction.previous;
     case 'TextInputAction.continue_action':
       return TextInputAction.continueAction;
@@ -801,64 +994,38 @@ RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, d
   assert(state != null, 'You must provide a state to set a new editing point.');
   assert(encoded['X'] != null, 'You must provide a value for the horizontal location of the floating cursor.');
   assert(encoded['Y'] != null, 'You must provide a value for the vertical location of the floating cursor.');
-  final Offset offset = state == FloatingCursorDragState.Update ? Offset(encoded['X'], encoded['Y']) : const Offset(0, 0);
+  final Offset offset = state == FloatingCursorDragState.Update
+    ? Offset(encoded['X'] as double, encoded['Y'] as double)
+    : const Offset(0, 0);
   return RawFloatingCursorPoint(offset: offset, state: state);
 }
 
-class _TextInputClientHandler {
-  _TextInputClientHandler() {
-    SystemChannels.textInput.setMethodCallHandler(_handleTextInputInvocation);
-  }
-
-  TextInputConnection _currentConnection;
-
-  Future<dynamic> _handleTextInputInvocation(MethodCall methodCall) async {
-    if (_currentConnection == null)
-      return;
-    final String method = methodCall.method;
-    final List<dynamic> args = methodCall.arguments;
-    final int client = args[0];
-    // The incoming message was for a different client.
-    if (client != _currentConnection._id)
-      return;
-    switch (method) {
-      case 'TextInputClient.updateEditingState':
-        _currentConnection._client.updateEditingValue(TextEditingValue.fromJSON(args[1]));
-        break;
-      case 'TextInputClient.performAction':
-        _currentConnection._client.performAction(_toTextInputAction(args[1]));
-        break;
-      case 'TextInputClient.updateFloatingCursor':
-        _currentConnection._client.updateFloatingCursor(_toTextPoint(_toTextCursorAction(args[1]), args[2]));
-        break;
-      default:
-        throw MissingPluginException();
-    }
-  }
-
-  bool _hidePending = false;
-
-  void _scheduleHide() {
-    if (_hidePending)
-      return;
-    _hidePending = true;
-
-    // Schedule a deferred task that hides the text input. If someone else
-    // shows the keyboard during this update cycle, then the task will do
-    // nothing.
-    scheduleMicrotask(() {
-      _hidePending = false;
-      if (_currentConnection == null)
-        SystemChannels.textInput.invokeMethod<void>('TextInput.hide');
-    });
-  }
-}
-
-final _TextInputClientHandler _clientHandler = _TextInputClientHandler();
-
-/// An interface to the system's text input control.
+/// An low-level interface to the system's text input control.
+///
+/// See also:
+///
+///  * [TextField], a widget in which the user may enter text.
 class TextInput {
-  TextInput._();
+  TextInput._() {
+    _channel = SystemChannels.textInput;
+    _channel.setMethodCallHandler(_handleTextInputInvocation);
+  }
+
+  /// Set the [MethodChannel] used to communicate with the system's text input
+  /// control.
+  ///
+  /// This is only meant for testing within the Flutter SDK. Changing this
+  /// will break the ability to input text. This has no effect if asserts are
+  /// disabled.
+  @visibleForTesting
+  static void setChannel(MethodChannel newChannel) {
+    assert(() {
+      _instance._channel = newChannel..setMethodCallHandler(_instance._handleTextInputInvocation);
+      return true;
+    }());
+  }
+
+  static final TextInput _instance = TextInput._();
 
   static const List<TextInputAction> _androidSupportedInputActions = <TextInputAction>[
     TextInputAction.none,
@@ -899,19 +1066,30 @@ class TextInput {
   static TextInputConnection attach(TextInputClient client, TextInputConfiguration configuration) {
     assert(client != null);
     assert(configuration != null);
-    assert(_debugEnsureInputActionWorksOnPlatform(configuration.inputAction));
     final TextInputConnection connection = TextInputConnection._(client);
-    _clientHandler._currentConnection = connection;
-    SystemChannels.textInput.invokeMethod<void>(
+    _instance._attach(connection, configuration);
+    return connection;
+  }
+
+  /// This method actually notifies the embedding of the client. It is utilized
+  /// by [attach] and by [_handleTextInputInvocation] for the
+  /// `TextInputClient.requestExistingInputState` method.
+  void _attach(TextInputConnection connection, TextInputConfiguration configuration) {
+    assert(connection != null);
+    assert(connection._client != null);
+    assert(configuration != null);
+    assert(_debugEnsureInputActionWorksOnPlatform(configuration.inputAction));
+    _channel.invokeMethod<void>(
       'TextInput.setClient',
       <dynamic>[ connection._id, configuration.toJson() ],
     );
-    return connection;
+    _currentConnection = connection;
+    _currentConfiguration = configuration;
   }
 
   static bool _debugEnsureInputActionWorksOnPlatform(TextInputAction inputAction) {
     assert(() {
-      if (_kIsBrowser) {
+      if (kIsWeb) {
         // TODO(flutterweb): what makes sense here?
         return true;
       }
@@ -929,5 +1107,125 @@ class TextInput {
       return true;
     }());
     return true;
+  }
+
+  MethodChannel _channel;
+
+  TextInputConnection _currentConnection;
+  TextInputConfiguration _currentConfiguration;
+
+  Future<dynamic> _handleTextInputInvocation(MethodCall methodCall) async {
+    if (_currentConnection == null)
+      return;
+    final String method = methodCall.method;
+
+    // The requestExistingInputState request needs to be handled regardless of
+    // the client ID, as long as we have a _currentConnection.
+    if (method == 'TextInputClient.requestExistingInputState') {
+      assert(_currentConnection._client != null);
+      _attach(_currentConnection, _currentConfiguration);
+      final TextEditingValue editingValue = _currentConnection._client.currentTextEditingValue;
+      if (editingValue != null) {
+        _setEditingState(editingValue);
+      }
+      return;
+    }
+
+    final List<dynamic> args = methodCall.arguments as List<dynamic>;
+
+    if (method == 'TextInputClient.updateEditingStateWithTag') {
+      final TextInputClient client = _currentConnection._client;
+      assert(client != null);
+      final AutofillScope scope = client.currentAutofillScope;
+      final Map<String, dynamic> editingValue = args[1] as Map<String, dynamic>;
+      for (final String tag in editingValue.keys) {
+        final TextEditingValue textEditingValue = TextEditingValue.fromJSON(
+          editingValue[tag] as Map<String, dynamic>,
+        );
+        scope?.getAutofillClient(tag)?.updateEditingValue(textEditingValue);
+      }
+
+      return;
+    }
+
+    final int client = args[0] as int;
+    // The incoming message was for a different client.
+    if (client != _currentConnection._id)
+      return;
+    switch (method) {
+      case 'TextInputClient.updateEditingState':
+        _currentConnection._client.updateEditingValue(TextEditingValue.fromJSON(args[1] as Map<String, dynamic>));
+        break;
+      case 'TextInputClient.performAction':
+        _currentConnection._client.performAction(_toTextInputAction(args[1] as String));
+        break;
+      case 'TextInputClient.updateFloatingCursor':
+        _currentConnection._client.updateFloatingCursor(_toTextPoint(
+          _toTextCursorAction(args[1] as String),
+          args[2] as Map<String, dynamic>,
+        ));
+        break;
+      case 'TextInputClient.onConnectionClosed':
+        _currentConnection._client.connectionClosed();
+        break;
+      case 'TextInputClient.showAutocorrectionPromptRect':
+        _currentConnection._client.showAutocorrectionPromptRect(args[1] as int, args[2] as int);
+        break;
+      default:
+        throw MissingPluginException();
+    }
+  }
+
+  bool _hidePending = false;
+
+  void _scheduleHide() {
+    if (_hidePending)
+      return;
+    _hidePending = true;
+
+    // Schedule a deferred task that hides the text input. If someone else
+    // shows the keyboard during this update cycle, then the task will do
+    // nothing.
+    scheduleMicrotask(() {
+      _hidePending = false;
+      if (_currentConnection == null)
+        _channel.invokeMethod<void>('TextInput.hide');
+    });
+  }
+
+  void _clearClient() {
+    _channel.invokeMethod<void>('TextInput.clearClient');
+    _currentConnection = null;
+    _scheduleHide();
+  }
+
+  void _setEditingState(TextEditingValue value) {
+    assert(value != null);
+    _channel.invokeMethod<void>(
+      'TextInput.setEditingState',
+      value.toJSON(),
+    );
+  }
+
+  void _show() {
+    _channel.invokeMethod<void>('TextInput.show');
+  }
+
+  void _requestAutofill() {
+    _channel.invokeMethod<void>('TextInput.requestAutofill');
+  }
+
+  void _setEditableSizeAndTransform(Map<String, dynamic> args) {
+    _channel.invokeMethod<void>(
+      'TextInput.setEditableSizeAndTransform',
+      args,
+    );
+  }
+
+  void _setStyle(Map<String, dynamic> args) {
+    _channel.invokeMethod<void>(
+      'TextInput.setStyle',
+      args,
+    );
   }
 }

@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,22 +6,22 @@ package io.flutter.integration.platformviews;
 
 import android.content.Context;
 
-import io.flutter.plugin.common.BinaryMessenger;
+import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.platform.PlatformView;
 import io.flutter.plugin.platform.PlatformViewFactory;
 
 public class SimpleViewFactory extends PlatformViewFactory {
-    final BinaryMessenger messenger;
+    final DartExecutor executor;
 
-    public SimpleViewFactory(BinaryMessenger messenger) {
+    public SimpleViewFactory(DartExecutor executor) {
         super(null);
-        this.messenger = messenger;
+        this.executor = executor;
     }
 
     @Override
     public PlatformView create(Context context, int id, Object params) {
-        MethodChannel methodChannel = new MethodChannel(messenger, "simple_view/" + id);
+        MethodChannel methodChannel = new MethodChannel(executor, "simple_view/" + id);
         return new SimplePlatformView(context, methodChannel);
     }
 }

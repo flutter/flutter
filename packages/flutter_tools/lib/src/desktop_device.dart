@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,13 +9,10 @@ import 'package:meta/meta.dart';
 import 'application_package.dart';
 import 'base/common.dart';
 import 'base/io.dart';
-import 'base/os.dart';
-import 'base/process_manager.dart';
 import 'build_info.dart';
-import 'cache.dart';
 import 'convert.dart';
 import 'device.dart';
-import 'globals.dart';
+import 'globals.dart' as globals;
 import 'protocol_discovery.dart';
 
 /// A partial implementation of Device for desktop-class devices to inherit
@@ -35,7 +32,10 @@ abstract class DesktopDevice extends Device {
   // Since the host and target devices are the same, no work needs to be done
   // to install the application.
   @override
-  Future<bool> isAppInstalled(ApplicationPackage app) async => true;
+  Future<bool> isAppInstalled(
+    ApplicationPackage app, {
+    String userIdentifier,
+  }) async => true;
 
   // Since the host and target devices are the same, no work needs to be done
   // to install the application.
@@ -45,12 +45,18 @@ abstract class DesktopDevice extends Device {
   // Since the host and target devices are the same, no work needs to be done
   // to install the application.
   @override
-  Future<bool> installApp(ApplicationPackage app) async => true;
+  Future<bool> installApp(
+    ApplicationPackage app, {
+    String userIdentifier,
+  }) async => true;
 
   // Since the host and target devices are the same, no work needs to be done
   // to uninstall the application.
   @override
-  Future<bool> uninstallApp(ApplicationPackage app) async => true;
+  Future<bool> uninstallApp(
+    ApplicationPackage app, {
+    String userIdentifier,
+  }) async => true;
 
   @override
   Future<bool> get isLocalEmulator async => false;
@@ -62,10 +68,17 @@ abstract class DesktopDevice extends Device {
   DevicePortForwarder get portForwarder => const NoOpDevicePortForwarder();
 
   @override
-  Future<String> get sdkNameAndVersion async => os.name;
+  Future<String> get sdkNameAndVersion async => globals.os.name;
 
   @override
-  DeviceLogReader getLogReader({ ApplicationPackage app }) {
+  bool supportsRuntimeMode(BuildMode buildMode) => buildMode != BuildMode.jitRelease;
+
+  @override
+  DeviceLogReader getLogReader({
+    ApplicationPackage app,
+    bool includePastLogs = false,
+  }) {
+    assert(!includePastLogs, 'Past log reading not supported on desktop.');
     return _deviceLogReader;
   }
 
@@ -81,9 +94,9 @@ abstract class DesktopDevice extends Device {
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
     bool ipv6 = false,
+    String userIdentifier,
   }) async {
     if (!prebuiltApplication) {
-      Cache.releaseLockEarly();
       await buildForDevice(
         package,
         buildInfo: debuggingOptions?.buildInfo,
@@ -95,11 +108,11 @@ abstract class DesktopDevice extends Device {
     final BuildMode buildMode = debuggingOptions?.buildInfo?.mode;
     final String executable = executablePathForDevice(package, buildMode);
     if (executable == null) {
-      printError('Unable to find executable to run');
+      globals.printError('Unable to find executable to run');
       return LaunchResult.failed();
     }
 
-    final Process process = await processManager.start(<String>[
+    final Process process = await globals.processManager.start(<String>[
       executable,
     ]);
     _runningProcesses.add(process);
@@ -109,28 +122,46 @@ abstract class DesktopDevice extends Device {
       return LaunchResult.succeeded();
     }
     _deviceLogReader.initializeProcess(process);
-    final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(_deviceLogReader);
+    final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(_deviceLogReader,
+      devicePort: debuggingOptions?.deviceVmServicePort,
+      hostPort: debuggingOptions?.hostVmServicePort,
+      ipv6: ipv6,
+    );
     try {
       final Uri observatoryUri = await observatoryDiscovery.uri;
-      onAttached(package, buildMode, process);
-      return LaunchResult.succeeded(observatoryUri: observatoryUri);
-    } catch (error) {
-      printError('Error waiting for a debug connection: $error');
-      return LaunchResult.failed();
+      if (observatoryUri != null) {
+        onAttached(package, buildMode, process);
+        return LaunchResult.succeeded(observatoryUri: observatoryUri);
+      }
+      globals.printError(
+        'Error waiting for a debug connection: '
+        'The log reader stopped unexpectedly.',
+      );
+    } on Exception catch (error) {
+      globals.printError('Error waiting for a debug connection: $error');
     } finally {
       await observatoryDiscovery.cancel();
     }
+    return LaunchResult.failed();
   }
 
   @override
-  Future<bool> stopApp(ApplicationPackage app) async {
+  Future<bool> stopApp(
+    ApplicationPackage app, {
+    String userIdentifier,
+  }) async {
     bool succeeded = true;
     // Walk a copy of _runningProcesses, since the exit handler removes from the
     // set.
-    for (Process process in Set<Process>.from(_runningProcesses)) {
+    for (final Process process in Set<Process>.of(_runningProcesses)) {
       succeeded &= process.kill();
     }
     return succeeded;
+  }
+
+  @override
+  Future<void> dispose() async {
+    await portForwarder?.dispose();
   }
 
   /// Builds the current project for this device, with the given options.
@@ -169,4 +200,9 @@ class DesktopLogReader extends DeviceLogReader {
 
   @override
   String get name => 'desktop';
+
+  @override
+  void dispose() {
+    // Nothing to dispose.
+  }
 }

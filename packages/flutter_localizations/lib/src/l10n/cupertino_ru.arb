@@ -28,5 +28,7 @@
   "cutButtonLabel": "Вырезать",
   "copyButtonLabel": "Копировать",
   "pasteButtonLabel": "Вставить",
-  "selectAllButtonLabel": "Выбрать все"
+  "selectAllButtonLabel": "Выбрать все",
+  "tabSemanticsLabel": "Вкладка $tabIndex из $tabCount",
+  "modalBarrierDismissLabel": "Закрыть"
 }

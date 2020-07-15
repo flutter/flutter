@@ -1,6 +1,8 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 import 'dart:ui' show Offset;
 
@@ -11,6 +13,7 @@ import 'lsq_solver.dart';
 export 'dart:ui' show Offset;
 
 /// A velocity in two dimensions.
+@immutable
 class Velocity {
   /// Creates a velocity.
   ///
@@ -62,11 +65,9 @@ class Velocity {
   }
 
   @override
-  bool operator ==(dynamic other) {
-    if (other is! Velocity)
-      return false;
-    final Velocity typedOther = other;
-    return pixelsPerSecond == typedOther.pixelsPerSecond;
+  bool operator ==(Object other) {
+    return other is Velocity
+        && other.pixelsPerSecond == pixelsPerSecond;
   }
 
   @override

@@ -1,6 +1,8 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart';
@@ -218,7 +220,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         return false;
       }
     }
-    return super.isPointerAllowed(event);
+    return super.isPointerAllowed(event as PointerDownEvent);
   }
 
   @override
@@ -412,7 +414,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     assert(tracker != null);
 
     DragEndDetails details;
-    void Function() debugReport;
+    String Function() debugReport;
 
     final VelocityEstimate estimate = tracker.getVelocityEstimate();
     if (estimate != null && isFlingGesture(estimate)) {

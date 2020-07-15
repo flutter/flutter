@@ -1,6 +1,8 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -66,7 +68,7 @@ void main() {
     await tester.pump(); // start gesture
     await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
 
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as dynamic;
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
     expect(
       box,
       paints
@@ -118,7 +120,7 @@ void main() {
     await tester.tapAt(tapDownOffset);
     await tester.pump(); // start gesture
 
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as dynamic;
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
 
     bool offsetsAreClose(Offset a, Offset b) => (a - b).distance < 1.0;
     bool radiiAreClose(double a, double b) => (a - b).abs() < 1.0;
@@ -130,9 +132,9 @@ void main() {
         ..something((Symbol method, List<dynamic> arguments) {
           if (method != #drawCircle)
             return false;
-          final Offset center = arguments[0];
-          final double radius = arguments[1];
-          final Paint paint = arguments[2];
+          final Offset center = arguments[0] as Offset;
+          final double radius = arguments[1] as double;
+          final Paint paint = arguments[2] as Paint;
           if (offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius) && paint.color.alpha == expectedAlpha)
             return true;
           throw '''
@@ -194,7 +196,7 @@ void main() {
     await tester.pump(); // start gesture
     await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
 
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as dynamic;
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
     expect(
       box,
       paints
@@ -250,53 +252,50 @@ void main() {
     expect(box, isNot(paints..circle()));
 
     await gesture.up();
-  }, skip: isBrowser);
+  });
 
-  testWidgets('The InkWell widget renders an ActivateAction-induced ink ripple', (WidgetTester tester) async {
+  testWidgets('The InkWell widget renders an SelectAction or ActivateAction-induced ink ripple', (WidgetTester tester) async {
     const Color highlightColor = Color(0xAAFF0000);
     const Color splashColor = Color(0xB40000FF);
     final BorderRadius borderRadius = BorderRadius.circular(6.0);
 
     final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
-    await tester.pumpWidget(
-      Shortcuts(
-        shortcuts: <LogicalKeySet, Intent>{
-          LogicalKeySet(LogicalKeyboardKey.enter): const Intent(ActivateAction.key),
-        },
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Material(
-            child: Center(
-              child: Container(
-                width: 100.0,
-                height: 100.0,
-                child: InkWell(
-                  borderRadius: borderRadius,
-                  highlightColor: highlightColor,
-                  splashColor: splashColor,
-                  focusNode: focusNode,
-                  onTap: () { },
-                  radius: 100.0,
-                  splashFactory: InkRipple.splashFactory,
+    Future<void> buildTest(Intent intent) async {
+      return await tester.pumpWidget(
+        Shortcuts(
+          shortcuts: <LogicalKeySet, Intent>{
+            LogicalKeySet(LogicalKeyboardKey.space): intent,
+          },
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Material(
+              child: Center(
+                child: Container(
+                  width: 100.0,
+                  height: 100.0,
+                  child: InkWell(
+                    borderRadius: borderRadius,
+                    highlightColor: highlightColor,
+                    splashColor: splashColor,
+                    focusNode: focusNode,
+                    onTap: () { },
+                    radius: 100.0,
+                    splashFactory: InkRipple.splashFactory,
+                  ),
                 ),
               ),
             ),
           ),
         ),
-      ),
-    );
+      );
+    }
 
-    final Offset topLeft = tester.getTopLeft(find.byType(InkWell));
-    final Offset inkWellCenter = tester.getCenter(find.byType(InkWell)) - topLeft;
-
-    // Now activate it with a keypress.
+    await buildTest(const ActivateIntent());
     focusNode.requestFocus();
     await tester.pumpAndSettle();
 
-    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-    await tester.pump();
-
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as dynamic;
+    final Offset topLeft = tester.getTopLeft(find.byType(InkWell));
+    final Offset inkWellCenter = tester.getCenter(find.byType(InkWell)) - topLeft;
 
     bool offsetsAreClose(Offset a, Offset b) => (a - b).distance < 1.0;
     bool radiiAreClose(double a, double b) => (a - b).abs() < 1.0;
@@ -309,9 +308,9 @@ void main() {
           if (method != #drawCircle) {
             return false;
           }
-          final Offset center = arguments[0];
-          final double radius = arguments[1];
-          final Paint paint = arguments[2];
+          final Offset center = arguments[0] as Offset;
+          final double radius = arguments[1] as double;
+          final Paint paint = arguments[2] as Paint;
           if (offsetsAreClose(center, inkWellCenter) &&
               radiiAreClose(radius, expectedRadius) &&
               paint.color.alpha == expectedAlpha) {
@@ -323,6 +322,13 @@ void main() {
         },
         );
     }
+
+    await buildTest(const ActivateIntent());
+    await tester.pumpAndSettle();
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pump();
+
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
 
     // ripplePattern always add a translation of topLeft.
     expect(box, ripplePattern(30.0, 0));
@@ -418,11 +424,11 @@ void main() {
     await gesture.moveTo(const Offset(0.0, 0.0));
     await gesture.up(); // generates a tap cancel
 
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as dynamic;
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
     expect(box, paints..everything((Symbol method, List<dynamic> arguments) {
       if (method != #drawCircle)
         return true;
-      final Paint paint = arguments[2];
+      final Paint paint = arguments[2] as Paint;
       if (paint.color.alpha == 0)
         return true;
       throw 'Expected: paint.color.alpha == 0, found: ${paint.color.alpha}';

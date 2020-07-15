@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,8 +6,8 @@ import 'dart:async';
 
 import '../base/common.dart';
 import '../base/os.dart';
-import '../cache.dart';
 import '../dart/pub.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
@@ -25,6 +25,7 @@ class PackagesCommand extends FlutterCommand {
     addSubcommand(PackagesForwardCommand('version', 'Print Pub version'));
     addSubcommand(PackagesForwardCommand('uploader', 'Manage uploaders for a package on pub.dev'));
     addSubcommand(PackagesForwardCommand('global', 'Work with Pub global packages'));
+    addSubcommand(PackagesForwardCommand('outdated', 'Analyze dependencies to find which ones can be upgraded', requiresPubspec: true));
     addSubcommand(PackagesPassthroughCommand());
   }
 
@@ -36,11 +37,6 @@ class PackagesCommand extends FlutterCommand {
 
   @override
   final String description = 'Commands for managing Flutter packages.';
-
-  @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
-    DevelopmentArtifact.universal,
-  };
 
   @override
   Future<FlutterCommandResult> runCommand() async => null;
@@ -87,6 +83,8 @@ class PackagesGetCommand extends FlutterCommand {
       usageValues[CustomDimensions.commandPackagesNumberPlugins] = '0';
     }
     usageValues[CustomDimensions.commandPackagesProjectModule] = '${rootProject.isModule}';
+    usageValues[CustomDimensions.commandPackagesAndroidEmbeddingVersion] =
+        rootProject.android.getEmbeddingVersion().toString().split('.').last;
     return usageValues;
   }
 
@@ -96,14 +94,15 @@ class PackagesGetCommand extends FlutterCommand {
       await pub.get(context: PubContext.pubGet,
         directory: directory,
         upgrade: upgrade ,
-        offline: argResults['offline'],
+        offline: boolArg('offline'),
         checkLastModified: false,
       );
       pubGetTimer.stop();
-      flutterUsage.sendTiming('pub', 'get', pubGetTimer.elapsed, label: 'success');
-    } catch (_) {
+      globals.flutterUsage.sendTiming('pub', 'get', pubGetTimer.elapsed, label: 'success');
+    // Not limiting to catching Exception because the exception is rethrown.
+    } catch (_) { // ignore: avoid_catches_without_on_clauses
       pubGetTimer.stop();
-      flutterUsage.sendTiming('pub', 'get', pubGetTimer.elapsed, label: 'failure');
+      globals.flutterUsage.sendTiming('pub', 'get', pubGetTimer.elapsed, label: 'failure');
       rethrow;
     }
   }
@@ -134,7 +133,7 @@ class PackagesGetCommand extends FlutterCommand {
       await exampleProject.ensureReadyForPlatformSpecificTooling(checkProjects: true);
     }
 
-    return null;
+    return FlutterCommandResult.success();
   }
 }
 
@@ -163,9 +162,8 @@ class PackagesTestCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    Cache.releaseLockEarly();
     await pub.batch(<String>['run', 'test', ...argResults.rest], context: PubContext.runTest, retry: false);
-    return null;
+    return FlutterCommandResult.success();
   }
 }
 
@@ -201,12 +199,11 @@ class PackagesPublishCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     final List<String> args = <String>[
       ...argResults.rest,
-      if (argResults['dry-run']) '--dry-run',
-      if (argResults['force']) '--force',
+      if (boolArg('dry-run')) '--dry-run',
+      if (boolArg('force')) '--force',
     ];
-    Cache.releaseLockEarly();
-    await pub.interactively(<String>['publish', ...args]);
-    return null;
+    await pub.interactively(<String>['publish', ...args], stdio: globals.stdio);
+    return FlutterCommandResult.success();
   }
 }
 
@@ -235,9 +232,8 @@ class PackagesForwardCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    Cache.releaseLockEarly();
-    await pub.interactively(<String>[_commandName, ...argResults.rest]);
-    return null;
+    await pub.interactively(<String>[_commandName, ...argResults.rest], stdio: globals.stdio);
+    return FlutterCommandResult.success();
   }
 
 }
@@ -263,8 +259,7 @@ class PackagesPassthroughCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    Cache.releaseLockEarly();
-    await pub.interactively(argResults.rest);
-    return null;
+    await pub.interactively(argResults.rest, stdio: globals.stdio);
+    return FlutterCommandResult.success();
   }
 }

@@ -1,6 +1,8 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 import 'dart:async';
 import 'dart:convert';
@@ -40,7 +42,7 @@ void main() {
 
     expect(bundle.loadCallCount['one'], 1);
 
-    FlutterError loadException;
+    Object loadException;
     try {
       await bundle.loadString('foo');
     } catch (e) {
@@ -68,12 +70,12 @@ void main() {
     }
     expect(error, isNotNull);
     expect(error.diagnostics.length, 2);
-    expect(error.diagnostics.last, isInstanceOf<IntProperty>());
+    expect(error.diagnostics.last, isA<IntProperty>());
     expect(
       error.toStringDeep(),
       'FlutterError\n'
       '   Unable to load asset: key\n'
       '   HTTP status code: 404\n',
     );
-  }, skip: true);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
 }

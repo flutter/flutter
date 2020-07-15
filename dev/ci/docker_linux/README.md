@@ -10,4 +10,3 @@ After setup,
 * run `./docker_build.sh` to build the container image.
 * run `./docker_push.sh` to push the image to google cloud registry. This will
   affect our CI tests.
-

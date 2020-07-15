@@ -97,6 +97,10 @@ code {
   padding-right: 0;
 }
 
+.markdown.desc {
+  max-width: inherit;
+}
+
 #search-box {
   color: #555;
   background-color: #fff;

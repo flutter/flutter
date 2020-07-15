@@ -1,6 +1,8 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 import 'dart:async';
 
@@ -15,6 +17,9 @@ enum SystemSoundType {
 /// Provides access to the library of short system specific sounds for common
 /// tasks.
 class SystemSound {
+  // This class is not meant to be instantiated or extended; this constructor
+  // prevents instantiation and extension.
+  // ignore: unused_element
   SystemSound._();
 
   /// Play the specified system sound. If that sound is not present on the

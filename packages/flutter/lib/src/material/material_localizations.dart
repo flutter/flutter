@@ -1,6 +1,8 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 import 'dart:async';
 
@@ -27,19 +29,53 @@ import 'typography.dart';
 //
 // 4. Update the flutter_localizations package. To add a new string to the
 //    flutter_localizations package, you must first add it to the English
-//    translations (lib/src/l10n/material_en.arb), including a description, then
-//    you must add it to every other language (all the other *.arb files in that
-//    same directory), listing the translation as `TBD`. After that you have to
-//    re-generate lib/src/l10n/localizations.dart by running
-//    `dart dev/tools/localization/gen_localizations.dart --overwrite`. There is
-//    a README file with further information in the lib/src/l10n/ directory.
+//    translations (lib/src/l10n/material_en.arb), including a description.
+//
+//    Then you need to add new entries for the string to all of the other
+//    language locale files by running:
+//    ```
+//    dart dev/tools/localization/bin/gen_missing_localizations.dart
+//    ```
+//    Which will copy the english strings into the other locales as placeholders
+//    until they can be translated.
+//
+//    Finally you need to re-generate lib/src/l10n/localizations.dart by running:
+//    ```
+//    dart dev/tools/localization/bin/gen_localizations.dart --overwrite
+//    ```
+//
+//    There is a README file with further information in the lib/src/l10n/
+//    directory.
 //
 // 5. If you are a Google employee, you should then also follow the instructions
 //    at go/flutter-l10n. If you're not, don't worry about it.
 //
-// 6. If you're adding a String for the sake of Flutter, not for an app-specific
-//    version of this interface, you are making a breaking API change. See
-//    https://github.com/flutter/flutter/wiki/Tree-hygiene#handling-breaking-changes.
+// UPDATING AN EXISTING STRING
+//
+// If you (someone contributing to the Flutter framework) want to modify an
+// existing string in the MaterialLocalizations objects, follow these steps:
+//
+// 1. Modify the default value of the relevant getter(s) in
+//    DefaultMaterialLocalizations below.
+//
+// 2. Update the flutter_localizations package. Modify the out-of-date English
+//    strings in lib/src/l10n/material_en.arb.
+//
+//    You also need to re-generate lib/src/l10n/localizations.dart by running:
+//    ```
+//    dart dev/tools/localization/bin/gen_localizations.dart --overwrite
+//    ```
+//
+//    This script may result in your updated getters being created in newer
+//    locales and set to the old value of the strings. This is to be expected.
+//    Leave them as they were generated, and they will be picked up for
+//    translation.
+//
+//    There is a README file with further information in the lib/src/l10n/
+//    directory.
+//
+// 3. If you are a Google employee, you should then also follow the instructions
+//    at go/flutter-l10n. If you're not, don't worry about it.
 
 /// Defines the localized resource values used by the Material widgets.
 ///
@@ -62,6 +98,9 @@ abstract class MaterialLocalizations {
   /// The tooltip for the delete button on a [Chip].
   String get deleteButtonTooltip;
 
+  /// The tooltip for the more button on an overflowing text selection menu.
+  String get moreButtonTooltip;
+
   /// The tooltip for the [MonthPicker]'s "next month" button.
   String get nextMonthTooltip;
 
@@ -82,6 +121,9 @@ abstract class MaterialLocalizations {
 
   /// Title for the [LicensePage] widget.
   String get licensesPageTitle;
+
+  /// Subtitle for a package in the [LicensePage] widget.
+  String licensesPackageDetailText(int licenseCount);
 
   /// Title for the [PaginatedDataTable]'s row info footer.
   String pageRowsInfoTitle(int firstRow, int lastRow, int rowCount, bool rowCountIsApproximate);
@@ -177,7 +219,7 @@ abstract class MaterialLocalizations {
   /// Defines the localized [TextStyle] geometry for [ThemeData.textTheme].
   ///
   /// The [scriptCategory] defines the overall geometry of a [TextTheme] for
-  /// the static [MaterialTextGeometry.localizedFor] method in terms of the
+  /// the [Typography.geometryThemeFor] method in terms of the
   /// three language categories defined in https://material.io/go/design-typography.
   ///
   /// Generally speaking, font sizes for [ScriptCategory.tall] and
@@ -212,6 +254,29 @@ abstract class MaterialLocalizations {
   /// Full unabbreviated year format, e.g. 2017 rather than 17.
   String formatYear(DateTime date);
 
+  /// Formats the date in a compact format.
+  ///
+  /// Usually just the numeric values for the for day, month and year are used.
+  ///
+  /// Examples:
+  ///
+  /// - US English: 02/21/2019
+  /// - Russian: 21.02.2019
+  ///
+  /// See also:
+  ///   * [parseCompactDate], which will convert a compact date string to a [DateTime].
+  String formatCompactDate(DateTime date);
+
+  /// Formats the date using a short-width format.
+  ///
+  /// Includes the abbreviation of the month, the day and year.
+  ///
+  /// Examples:
+  ///
+  /// - US English: Feb 21, 2019
+  /// - Russian: 21 февр. 2019 г.
+  String formatShortDate(DateTime date);
+
   /// Formats the date using a medium-width format.
   ///
   /// Abbreviates month and days of week. This appears in the header of the date
@@ -240,6 +305,24 @@ abstract class MaterialLocalizations {
   /// in the date picker invoked using [showDatePicker].
   String formatMonthYear(DateTime date);
 
+  /// Formats the month and day of the given [date].
+  ///
+  /// Examples:
+  ///
+  /// - US English: Feb 21
+  /// - Russian: 21 февр.
+  String formatShortMonthDay(DateTime date);
+
+  /// Converts the given compact date formatted string into a [DateTime].
+  ///
+  /// The format of the string must be a valid compact date format for the
+  /// given locale. If the text doesn't represent a valid date, `null` will be
+  /// returned.
+  ///
+  /// See also:
+  ///   * [formatCompactDate], which will convert a [DateTime] into a string in the compact format.
+  DateTime parseCompactDate(String inputString);
+
   /// List of week day names in narrow format, usually 1- or 2-letter
   /// abbreviations of full names.
   ///
@@ -265,6 +348,104 @@ abstract class MaterialLocalizations {
   /// var firstDayOfWeek = localizations.narrowWeekdays[localizations.firstDayOfWeekIndex];
   /// ```
   int get firstDayOfWeekIndex;
+
+  /// The character string used to separate the parts of a compact date format
+  /// (i.e. mm/dd/yyyy has a separator of '/').
+  String get dateSeparator;
+
+  /// The help text used on an empty [InputDatePickerFormField] to indicate
+  /// to the user the date format being asked for.
+  String get dateHelpText;
+
+  /// The semantic label used to announce when the user has entered the year
+  /// selection mode of the [CalendarDatePicker] which is used in the data picker
+  /// dialog created with [showDatePicker].
+  String get selectYearSemanticsLabel;
+
+  /// The label used to indicate a date that has not been entered or selected
+  /// yet in the date picker.
+  String get unspecifiedDate;
+
+  /// The label used to indicate a date range that has not been entered or
+  /// selected yet in the date range picker.
+  String get unspecifiedDateRange;
+
+  /// The label used to describe the text field used in an [InputDatePickerFormField].
+  String get dateInputLabel;
+
+  /// The label used for the starting date input field in the date range picker
+  /// created with [showDateRangePicker].
+  String get dateRangeStartLabel;
+
+  /// The label used for the ending date input field in the date range picker
+  /// created with [showDateRangePicker].
+  String get dateRangeEndLabel;
+
+  /// The semantics label used for the selected start date in the date range
+  /// picker's day grid.
+  String dateRangeStartDateSemanticLabel(String formattedDate);
+
+  /// The semantics label used for the selected end date in the date range
+  /// picker's day grid.
+  String dateRangeEndDateSemanticLabel(String formattedDate);
+
+  /// Error message displayed to the user when they have entered a text string
+  /// in an [InputDatePickerFormField] that is not in a valid date format.
+  String get invalidDateFormatLabel;
+
+  /// Error message displayed to the user when they have entered an invalid
+  /// date range in the input mode of the date range picker created with
+  /// [showDateRangePicker].
+  String get invalidDateRangeLabel;
+
+  /// Error message displayed to the user when they have entered a date that
+  /// is outside the valid range for the date picker.
+  /// [showDateRangePicker].
+  String get dateOutOfRangeLabel;
+
+  /// Label for a 'SAVE' button. Currently used by the full screen mode of the
+  /// date range picker.
+  String get saveButtonLabel;
+
+  /// Label used in the header of the date picker dialog created with
+  /// [showDatePicker].
+  String get datePickerHelpText;
+
+  /// Label used in the header of the date range picker dialog created with
+  /// [showDateRangePicker].
+  String get dateRangePickerHelpText;
+
+  /// Tooltip used for the calendar mode button of the date pickers.
+  String get calendarModeButtonLabel;
+
+  /// Tooltip used for the text input mode button of the date pickers.
+  String get inputDateModeButtonLabel;
+
+  /// Label used in the header of the time picker dialog created with
+  /// [showTimePicker] when in [TimePickerEntryMode.dial].
+  String get timePickerDialHelpText;
+
+  /// Label used in the header of the time picker dialog created with
+  /// [showTimePicker] when in [TimePickerEntryMode.input].
+  String get timePickerInputHelpText;
+
+  /// Label used below the hour text field of the time picker dialog created
+  /// with [showTimePicker] when in [TimePickerEntryMode.input].
+  String get timePickerHourLabel;
+
+  /// Label used below the minute text field of the time picker dialog created
+  /// with [showTimePicker] when in [TimePickerEntryMode.input].
+  String get timePickerMinuteLabel;
+
+  /// Error message for the time picker dialog created with [showTimePicker]
+  /// when in [TimePickerEntryMode.input].
+  String get invalidTimeLabel;
+
+  /// Tooltip used to put the time picker into [TimePickerEntryMode.dial].
+  String get dialModeButtonLabel;
+
+  /// Tooltip used to put the time picker into [TimePickerEntryMode.input].
+  String get inputTimeModeButtonLabel;
 
   /// The semantics label used to indicate which account is signed in in the
   /// [UserAccountsDrawerHeader] widget.
@@ -353,7 +534,7 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
 ///
 ///  * [GlobalMaterialLocalizations], which provides material localizations for
 ///    many languages.
-///  * [MaterialApp.delegates], which automatically includes
+///  * [MaterialApp.localizationsDelegates], which automatically includes
 ///    [DefaultMaterialLocalizations.delegate] by default.
 class DefaultMaterialLocalizations implements MaterialLocalizations {
   /// Constructs an object that defines the material widgets' localized strings
@@ -425,6 +606,23 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     'December',
   ];
 
+  /// Returns the number of days in a month, according to the proleptic
+  /// Gregorian calendar.
+  ///
+  /// This applies the leap year logic introduced by the Gregorian reforms of
+  /// 1582. It will not give valid results for dates prior to that time.
+  int _getDaysInMonth(int year, int month) {
+    if (month == DateTime.february) {
+      final bool isLeapYear = (year % 4 == 0) && (year % 100 != 0) ||
+          (year % 400 == 0);
+      if (isLeapYear)
+        return 29;
+      return 28;
+    }
+    const List<int> daysInMonth = <int>[31, -1, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    return daysInMonth[month - 1];
+  }
+
   @override
   String formatHour(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat = false }) {
     final TimeOfDayFormat format = timeOfDayFormat(alwaysUse24HourFormat: alwaysUse24HourFormat);
@@ -459,6 +657,21 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String formatYear(DateTime date) => date.year.toString();
 
   @override
+  String formatCompactDate(DateTime date) {
+    // Assumes US mm/dd/yyyy format
+    final String month = _formatTwoDigitZeroPad(date.month);
+    final String day = _formatTwoDigitZeroPad(date.day);
+    final String year = date.year.toString().padLeft(4, '0');
+    return '$month/$day/$year';
+  }
+
+  @override
+  String formatShortDate(DateTime date) {
+    final String month = _shortMonths[date.month - DateTime.january];
+    return '$month ${date.day}, ${date.year}';
+  }
+
+  @override
   String formatMediumDate(DateTime date) {
     final String day = _shortWeekdays[date.weekday - DateTime.monday];
     final String month = _shortMonths[date.month - DateTime.january];
@@ -479,10 +692,116 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   }
 
   @override
+  String formatShortMonthDay(DateTime date) {
+    final String month = _shortMonths[date.month - DateTime.january];
+    return '$month ${date.day}';
+  }
+
+  @override
+  DateTime parseCompactDate(String inputString) {
+    // Assumes US mm/dd/yyyy format
+    final List<String> inputParts = inputString.split('/');
+    if (inputParts.length != 3) {
+      return null;
+    }
+
+    final int year = int.tryParse(inputParts[2], radix: 10);
+    if (year == null || year < 1) {
+      return null;
+    }
+
+    final int month = int.tryParse(inputParts[0], radix: 10);
+    if (month == null || month < 1 || month > 12) {
+      return null;
+    }
+
+    final int day = int.tryParse(inputParts[1], radix: 10);
+    if (day == null || day < 1 || day > _getDaysInMonth(year, month)) {
+      return null;
+    }
+    return DateTime(year, month, day);
+  }
+
+  @override
   List<String> get narrowWeekdays => _narrowWeekdays;
 
   @override
   int get firstDayOfWeekIndex => 0; // narrowWeekdays[0] is 'S' for Sunday
+
+  @override
+  String get dateSeparator => '/';
+
+  @override
+  String get dateHelpText => 'mm/dd/yyyy';
+
+  @override
+  String get selectYearSemanticsLabel => 'Select year';
+
+  @override
+  String get unspecifiedDate => 'Date';
+
+  @override
+  String get unspecifiedDateRange => 'Date Range';
+
+  @override
+  String get dateInputLabel => 'Enter Date';
+
+  @override
+  String get dateRangeStartLabel => 'Start Date';
+
+  @override
+  String get dateRangeEndLabel => 'End Date';
+
+  @override
+  String dateRangeStartDateSemanticLabel(String fullDate) => 'Start date $fullDate';
+
+  @override
+  String dateRangeEndDateSemanticLabel(String fullDate) => 'End date $fullDate';
+
+  @override
+  String get invalidDateFormatLabel => 'Invalid format.';
+
+  @override
+  String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get dateOutOfRangeLabel => 'Out of range.';
+
+  @override
+  String get saveButtonLabel => 'SAVE';
+
+  @override
+  String get datePickerHelpText => 'SELECT DATE';
+
+  @override
+  String get dateRangePickerHelpText => 'SELECT RANGE';
+
+  @override
+  String get calendarModeButtonLabel => 'Switch to calendar';
+
+  @override
+  String get inputDateModeButtonLabel => 'Switch to input';
+
+  @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
+  String get timePickerHourLabel => 'Hour';
+
+  @override
+  String get timePickerMinuteLabel => 'Minute';
+
+  @override
+  String get invalidTimeLabel => 'Enter a valid time';
+
+  @override
+  String get dialModeButtonLabel => 'Switch to dial picker mode';
+
+  @override
+  String get inputTimeModeButtonLabel => 'Switch to text input mode';
 
   String _formatDayPeriod(TimeOfDay timeOfDay) {
     switch (timeOfDay.period) {
@@ -553,6 +872,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get deleteButtonTooltip => 'Delete';
 
   @override
+  String get moreButtonTooltip => 'More';
+
+  @override
   String get nextMonthTooltip => 'Next month';
 
   @override
@@ -587,6 +909,19 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Licenses';
+
+  @override
+  String licensesPackageDetailText(int licenseCount) {
+    assert (licenseCount >= 0);
+    switch (licenseCount) {
+      case 0:
+        return 'No licenses.';
+      case 1:
+        return '1 license.';
+      default:
+        return '$licenseCount licenses.';
+    }
+  }
 
   @override
   String pageRowsInfoTitle(int firstRow, int lastRow, int rowCount, bool rowCountIsApproximate) {
@@ -627,19 +962,19 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get continueButtonLabel => 'CONTINUE';
 
   @override
-  String get copyButtonLabel => 'COPY';
+  String get copyButtonLabel => 'Copy';
 
   @override
-  String get cutButtonLabel => 'CUT';
+  String get cutButtonLabel => 'Cut';
 
   @override
   String get okButtonLabel => 'OK';
 
   @override
-  String get pasteButtonLabel => 'PASTE';
+  String get pasteButtonLabel => 'Paste';
 
   @override
-  String get selectAllButtonLabel => 'SELECT ALL';
+  String get selectAllButtonLabel => 'Select all';
 
   @override
   String get viewLicensesButtonLabel => 'VIEW LICENSES';

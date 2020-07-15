@@ -1,6 +1,8 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 import 'dart:ui' show Offset, PointerDeviceKind;
 
@@ -12,7 +14,7 @@ export 'dart:ui' show Offset, PointerDeviceKind;
 /// The bit of [PointerEvent.buttons] that corresponds to a cross-device
 /// behavior of "primary operation".
 ///
-/// More specifially, it includes:
+/// More specifically, it includes:
 ///
 ///  * [kTouchContact]: The pointer contacts the touch screen.
 ///  * [kStylusContact]: The stylus contacts the screen.
@@ -30,7 +32,7 @@ const int kPrimaryButton = 0x01;
 /// It is equivalent to:
 ///
 ///  * [kPrimaryStylusButton]: The stylus contacts the screen.
-///  * [kSecondaryMouseButton]: The primary mouse button.
+///  * [kSecondaryMouseButton]: The secondary mouse button.
 ///
 /// See also:
 ///
@@ -135,7 +137,7 @@ int nthStylusButton(int number) => (kPrimaryStylusButton << (number - 1)) & kMax
 
 /// Returns the button of `buttons` with the smallest integer.
 ///
-/// The `buttons` parameter is a bitfield where each set bit represents a button.
+/// The `buttons` parameter is a bit field where each set bit represents a button.
 /// This function returns the set bit closest to the least significant bit.
 ///
 /// It returns zero when `buttons` is zero.
@@ -150,12 +152,12 @@ int nthStylusButton(int number) => (kPrimaryStylusButton << (number - 1)) & kMax
 ///
 /// See also:
 ///
-///   * [isSingleButton], which checks if a `buttons` contains exactly one button.
+///  * [isSingleButton], which checks if a `buttons` contains exactly one button.
 int smallestButton(int buttons) => buttons & (-buttons);
 
 /// Returns whether `buttons` contains one and only one button.
 ///
-/// The `buttons` parameter is a bitfield where each set bit represents a button.
+/// The `buttons` parameter is a bit field where each set bit represents a button.
 /// This function returns whether there is only one set bit in the given integer.
 ///
 /// It returns false when `buttons` is zero.
@@ -170,8 +172,8 @@ int smallestButton(int buttons) => buttons & (-buttons);
 ///
 /// See also:
 ///
-///   * [smallestButton], which returns the button in a `buttons` bitfield with
-///     the smallest integer button.
+///  * [smallestButton], which returns the button in a `buttons` bit field with
+///    the smallest integer button.
 bool isSingleButton(int buttons) => buttons != 0 && (smallestButton(buttons) == buttons);
 
 /// Base class for touch, stylus, or mouse events.
@@ -195,11 +197,14 @@ bool isSingleButton(int buttons) => buttons != 0 && (smallestButton(buttons) == 
 /// See also:
 ///
 ///  * [Window.devicePixelRatio], which defines the device's current resolution.
+///  * [Listener], a widget that calls callbacks in response to common pointer
+///    events.
 @immutable
-abstract class PointerEvent extends Diagnosticable {
+abstract class PointerEvent with Diagnosticable {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const PointerEvent({
+    this.embedderId = 0,
     this.timeStamp = Duration.zero,
     this.pointer = 0,
     this.kind = PointerDeviceKind.touch,
@@ -230,6 +235,14 @@ abstract class PointerEvent extends Diagnosticable {
   }) : localPosition = localPosition ?? position,
        localDelta = localDelta ?? delta;
 
+  /// Unique identifier that ties the [PointerEvent] to the embedder event that created it.
+  ///
+  /// No two pointer events can have the same [embedderId] on platforms that set it.
+  /// This is different from [pointer] identifier - used for hit-testing,
+  /// whereas [embedderId] is used to identify the platform event.
+  ///
+  /// On Android this is ID of the underlying [MotionEvent](https://developer.android.com/reference/android/view/MotionEvent).
+  final int embedderId;
 
   /// Time of event dispatch, relative to an arbitrary timeline.
   final Duration timeStamp;
@@ -257,11 +270,10 @@ abstract class PointerEvent extends Diagnosticable {
   /// system according to [transform].
   ///
   /// If this event has not been transformed, [position] is returned as-is.
-  ///
   /// See also:
   ///
-  ///  * [globalPosition], which is the position in the global coordinate
-  ///    system of the screen.
+  ///  * [position], which is the position in the global coordinate system of
+  ///    the screen.
   final Offset localPosition;
 
   /// Distance in logical pixels that the pointer moved since the last
@@ -367,7 +379,7 @@ abstract class PointerEvent extends Diagnosticable {
   /// for this pointer, in logical pixels.
   final double radiusMin;
 
-  /// The minimum value that could be reported for [radiusMajor] and [radiusMinor]
+  /// The maximum value that could be reported for [radiusMajor] and [radiusMinor]
   /// for this pointer, in logical pixels.
   final double radiusMax;
 
@@ -420,7 +432,7 @@ abstract class PointerEvent extends Diagnosticable {
   /// Set if the event was synthesized by Flutter.
   ///
   /// We occasionally synthesize PointerEvents that aren't exact translations
-  /// of [ui.PointerData] from the engine to cover small cross-OS discrepancies
+  /// of [PointerData] from the engine to cover small cross-OS discrepancies
   /// in pointer behaviors.
   ///
   /// For instance, on end events, Android always drops any location changes
@@ -503,6 +515,7 @@ abstract class PointerEvent extends Diagnosticable {
     properties.add(IntProperty('platformData', platformData, defaultValue: 0, level: DiagnosticLevel.debug));
     properties.add(FlagProperty('obscured', value: obscured, ifTrue: 'obscured', level: DiagnosticLevel.debug));
     properties.add(FlagProperty('synthesized', value: synthesized, ifTrue: 'synthesized', level: DiagnosticLevel.debug));
+    properties.add(IntProperty('embedderId', embedderId, defaultValue: 0, level: DiagnosticLevel.debug));
   }
 
   /// Returns a complete textual description of this event.
@@ -591,6 +604,7 @@ class PointerAddedEvent extends PointerEvent {
     double tilt = 0.0,
     Matrix4 transform,
     PointerAddedEvent original,
+    int embedderId = 0,
   }) : super(
          timeStamp: timeStamp,
          kind: kind,
@@ -609,6 +623,7 @@ class PointerAddedEvent extends PointerEvent {
          tilt: tilt,
          transform: transform,
          original: original,
+         embedderId: embedderId,
        );
 
   @override
@@ -632,7 +647,8 @@ class PointerAddedEvent extends PointerEvent {
       orientation: orientation,
       tilt: tilt,
       transform: transform,
-      original: original ?? this,
+      original: original as PointerAddedEvent ?? this,
+      embedderId: embedderId,
     );
   }
 }
@@ -659,6 +675,7 @@ class PointerRemovedEvent extends PointerEvent {
     double radiusMax = 0.0,
     Matrix4 transform,
     PointerRemovedEvent original,
+    int embedderId = 0,
   }) : super(
          timeStamp: timeStamp,
          kind: kind,
@@ -674,6 +691,7 @@ class PointerRemovedEvent extends PointerEvent {
          radiusMax: radiusMax,
          transform: transform,
          original: original,
+         embedderId: embedderId,
        );
 
   @override
@@ -694,7 +712,8 @@ class PointerRemovedEvent extends PointerEvent {
       radiusMin: radiusMin,
       radiusMax: radiusMax,
       transform: transform,
-      original: original ?? this,
+      original: original as PointerRemovedEvent ?? this,
+      embedderId: embedderId,
     );
   }
 }
@@ -709,6 +728,8 @@ class PointerRemovedEvent extends PointerEvent {
 ///  * [PointerExitEvent], which reports when the pointer has left an object.
 ///  * [PointerMoveEvent], which reports movement while the pointer is in
 ///    contact with the device.
+///  * [Listener.onPointerHover], which allows callers to be notified of these
+///    events in a widget tree.
 class PointerHoverEvent extends PointerEvent {
   /// Creates a pointer hover event.
   ///
@@ -737,6 +758,7 @@ class PointerHoverEvent extends PointerEvent {
     bool synthesized = false,
     Matrix4 transform,
     PointerHoverEvent original,
+    int embedderId = 0,
   }) : super(
          timeStamp: timeStamp,
          kind: kind,
@@ -763,6 +785,7 @@ class PointerHoverEvent extends PointerEvent {
          synthesized: synthesized,
          transform: transform,
          original: original,
+         embedderId: embedderId,
        );
 
   @override
@@ -799,7 +822,8 @@ class PointerHoverEvent extends PointerEvent {
       tilt: tilt,
       synthesized: synthesized,
       transform: transform,
-      original: original ?? this,
+      original: original as PointerHoverEvent ?? this,
+      embedderId: embedderId,
     );
   }
 }
@@ -814,6 +838,8 @@ class PointerHoverEvent extends PointerEvent {
 ///  * [PointerExitEvent], which reports when the pointer has left an object.
 ///  * [PointerMoveEvent], which reports movement while the pointer is in
 ///    contact with the device.
+///  * [Listener.onPointerEnter], which allows callers to be notified of these
+///    events in a widget tree.
 class PointerEnterEvent extends PointerEvent {
   /// Creates a pointer enter event.
   ///
@@ -843,6 +869,7 @@ class PointerEnterEvent extends PointerEvent {
     bool synthesized = false,
     Matrix4 transform,
     PointerEnterEvent original,
+    int embedderId = 0,
   }) : super(
          timeStamp: timeStamp,
          kind: kind,
@@ -869,12 +896,16 @@ class PointerEnterEvent extends PointerEvent {
          synthesized: synthesized,
          transform: transform,
          original: original,
+         embedderId: embedderId,
        );
 
   /// Creates an enter event from a [PointerHoverEvent].
   ///
   /// Deprecated. Please use [PointerEnterEvent.fromMouseEvent] instead.
-  @Deprecated('use PointerEnterEvent.fromMouseEvent instead')
+  @Deprecated(
+    'Use PointerEnterEvent.fromMouseEvent instead. '
+    'This feature was deprecated after v1.4.3.'
+  )
   PointerEnterEvent.fromHoverEvent(PointerHoverEvent event) : this.fromMouseEvent(event);
 
   /// Creates an enter event from a [PointerEvent].
@@ -904,7 +935,7 @@ class PointerEnterEvent extends PointerEvent {
     down: event?.down,
     synthesized: event?.synthesized,
     transform: event?.transform,
-    original: event?.original,
+    original: null,
   );
 
   @override
@@ -942,7 +973,8 @@ class PointerEnterEvent extends PointerEvent {
       down: down,
       synthesized: synthesized,
       transform: transform,
-      original: original ?? this,
+      original: original as PointerEnterEvent ?? this,
+      embedderId: embedderId,
     );
   }
 }
@@ -957,6 +989,8 @@ class PointerEnterEvent extends PointerEvent {
 ///  * [PointerEnterEvent], which reports when the pointer has entered an object.
 ///  * [PointerMoveEvent], which reports movement while the pointer is in
 ///    contact with the device.
+///  * [Listener.onPointerExit], which allows callers to be notified of these
+///    events in a widget tree.
 class PointerExitEvent extends PointerEvent {
   /// Creates a pointer exit event.
   ///
@@ -986,6 +1020,7 @@ class PointerExitEvent extends PointerEvent {
     bool synthesized = false,
     Matrix4 transform,
     PointerExitEvent original,
+    int embedderId = 0,
   }) : super(
          timeStamp: timeStamp,
          kind: kind,
@@ -1012,12 +1047,16 @@ class PointerExitEvent extends PointerEvent {
          synthesized: synthesized,
          transform: transform,
          original: original,
+         embedderId: embedderId,
        );
 
   /// Creates an exit event from a [PointerHoverEvent].
   ///
   /// Deprecated. Please use [PointerExitEvent.fromMouseEvent] instead.
-  @Deprecated('use PointerExitEvent.fromMouseEvent instead')
+  @Deprecated(
+    'Use PointerExitEvent.fromMouseEvent instead. '
+    'This feature was deprecated after v1.4.3.'
+  )
   PointerExitEvent.fromHoverEvent(PointerHoverEvent event) : this.fromMouseEvent(event);
 
   /// Creates an exit event from a [PointerEvent].
@@ -1047,7 +1086,7 @@ class PointerExitEvent extends PointerEvent {
     down: event?.down,
     synthesized: event?.synthesized,
     transform: event?.transform,
-    original: event?.original,
+    original: null,
   );
 
   @override
@@ -1085,12 +1124,18 @@ class PointerExitEvent extends PointerEvent {
       down: down,
       synthesized: synthesized,
       transform: transform,
-      original: original ?? this,
+      original: original as PointerExitEvent ?? this,
+      embedderId: embedderId,
     );
   }
 }
 
 /// The pointer has made contact with the device.
+///
+/// See also:
+///
+///  * [Listener.onPointerDown], which allows callers to be notified of these
+///    events in a widget tree.
 class PointerDownEvent extends PointerEvent {
   /// Creates a pointer down event.
   ///
@@ -1117,6 +1162,7 @@ class PointerDownEvent extends PointerEvent {
     double tilt = 0.0,
     Matrix4 transform,
     PointerDownEvent original,
+    int embedderId = 0,
   }) : super(
          timeStamp: timeStamp,
          pointer: pointer,
@@ -1141,6 +1187,7 @@ class PointerDownEvent extends PointerEvent {
          tilt: tilt,
          transform: transform,
          original: original,
+         embedderId: embedderId,
        );
 
   @override
@@ -1169,7 +1216,8 @@ class PointerDownEvent extends PointerEvent {
       orientation: orientation,
       tilt: tilt,
       transform: transform,
-      original: original ?? this,
+      original: original as PointerDownEvent ?? this,
+      embedderId: embedderId,
     );
   }
 }
@@ -1181,6 +1229,8 @@ class PointerDownEvent extends PointerEvent {
 ///
 ///  * [PointerHoverEvent], which reports movement while the pointer is not in
 ///    contact with the device.
+///  * [Listener.onPointerMove], which allows callers to be notified of these
+///    events in a widget tree.
 class PointerMoveEvent extends PointerEvent {
   /// Creates a pointer move event.
   ///
@@ -1211,6 +1261,7 @@ class PointerMoveEvent extends PointerEvent {
     bool synthesized = false,
     Matrix4 transform,
     PointerMoveEvent original,
+    int embedderId = 0,
   }) : super(
          timeStamp: timeStamp,
          pointer: pointer,
@@ -1239,6 +1290,7 @@ class PointerMoveEvent extends PointerEvent {
          synthesized: synthesized,
          transform: transform,
          original: original,
+         embedderId: embedderId,
        );
 
   @override
@@ -1278,12 +1330,18 @@ class PointerMoveEvent extends PointerEvent {
       platformData: platformData,
       synthesized: synthesized,
       transform: transform,
-      original: original ?? this,
+      original: original as PointerMoveEvent ?? this,
+      embedderId: embedderId,
     );
   }
 }
 
 /// The pointer has stopped making contact with the device.
+///
+/// See also:
+///
+///  * [Listener.onPointerUp], which allows callers to be notified of these
+///    events in a widget tree.
 class PointerUpEvent extends PointerEvent {
   /// Creates a pointer up event.
   ///
@@ -1313,6 +1371,7 @@ class PointerUpEvent extends PointerEvent {
     double tilt = 0.0,
     Matrix4 transform,
     PointerUpEvent original,
+    int embedderId = 0,
   }) : super(
          timeStamp: timeStamp,
          pointer: pointer,
@@ -1337,6 +1396,7 @@ class PointerUpEvent extends PointerEvent {
          tilt: tilt,
          transform: transform,
          original: original,
+         embedderId: embedderId,
        );
 
   @override
@@ -1366,7 +1426,8 @@ class PointerUpEvent extends PointerEvent {
       orientation: orientation,
       tilt: tilt,
       transform: transform,
-      original: original ?? this,
+      original: original as PointerUpEvent ?? this,
+      embedderId: embedderId,
     );
   }
 }
@@ -1376,6 +1437,11 @@ class PointerUpEvent extends PointerEvent {
 /// Pointer signals are events that originate from the pointer but don't change
 /// the state of the pointer itself, and are discrete rather than needing to be
 /// interpreted in the context of a series of events.
+///
+/// See also:
+///
+///  * [Listener.onPointerSignal], which allows callers to be notified of these
+///    events in a widget tree.
 abstract class PointerSignalEvent extends PointerEvent {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -1388,6 +1454,7 @@ abstract class PointerSignalEvent extends PointerEvent {
     Offset localPosition,
     Matrix4 transform,
     PointerSignalEvent original,
+    int embedderId = 0,
   }) : super(
          timeStamp: timeStamp,
          pointer: pointer,
@@ -1397,6 +1464,7 @@ abstract class PointerSignalEvent extends PointerEvent {
          localPosition: localPosition,
          transform: transform,
          original: original,
+         embedderId: embedderId,
        );
 }
 
@@ -1404,6 +1472,11 @@ abstract class PointerSignalEvent extends PointerEvent {
 ///
 /// Scrolling the scroll wheel on a mouse is an example of an event that
 /// would create a [PointerScrollEvent].
+///
+/// See also:
+///
+///  * [Listener.onPointerSignal], which allows callers to be notified of these
+///    events in a widget tree.
 class PointerScrollEvent extends PointerSignalEvent {
   /// Creates a pointer scroll event.
   ///
@@ -1417,6 +1490,7 @@ class PointerScrollEvent extends PointerSignalEvent {
     this.scrollDelta = Offset.zero,
     Matrix4 transform,
     PointerScrollEvent original,
+    int embedderId = 0,
   }) : assert(timeStamp != null),
        assert(kind != null),
        assert(device != null),
@@ -1430,6 +1504,7 @@ class PointerScrollEvent extends PointerSignalEvent {
          localPosition: localPosition,
          transform: transform,
          original: original,
+         embedderId: embedderId,
        );
 
   /// The amount to scroll, in logical pixels.
@@ -1448,7 +1523,8 @@ class PointerScrollEvent extends PointerSignalEvent {
       localPosition: PointerEvent.transformPosition(transform, position),
       scrollDelta: scrollDelta,
       transform: transform,
-      original: original ?? this,
+      original: original as PointerScrollEvent ?? this,
+      embedderId: embedderId,
     );
   }
 
@@ -1460,6 +1536,11 @@ class PointerScrollEvent extends PointerSignalEvent {
 }
 
 /// The input from the pointer is no longer directed towards this receiver.
+///
+/// See also:
+///
+///  * [Listener.onPointerCancel], which allows callers to be notified of these
+///    events in a widget tree.
 class PointerCancelEvent extends PointerEvent {
   /// Creates a pointer cancel event.
   ///
@@ -1486,6 +1567,7 @@ class PointerCancelEvent extends PointerEvent {
     double tilt = 0.0,
     Matrix4 transform,
     PointerCancelEvent original,
+    int embedderId = 0,
   }) : super(
          timeStamp: timeStamp,
          pointer: pointer,
@@ -1510,6 +1592,7 @@ class PointerCancelEvent extends PointerEvent {
          tilt: tilt,
          transform: transform,
          original: original,
+         embedderId: embedderId,
        );
 
   @override
@@ -1538,7 +1621,8 @@ class PointerCancelEvent extends PointerEvent {
       orientation: orientation,
       tilt: tilt,
       transform: transform,
-      original: original ?? this,
+      original: original as PointerCancelEvent ?? this,
+      embedderId: embedderId,
     );
   }
 }

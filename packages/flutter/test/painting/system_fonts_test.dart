@@ -1,6 +1,8 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -77,7 +79,7 @@ void main() {
       ),
     );
     final dynamic state = tester.state(find.byType(CupertinoDatePicker));
-    final Map<int, double> cache = state.estimatedColumnWidths;
+    final Map<int, double> cache = state.estimatedColumnWidths as Map<int, double>;
     expect(cache.isNotEmpty, isTrue);
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
@@ -103,7 +105,7 @@ void main() {
       ),
     );
     final dynamic state = tester.state(find.byType(CupertinoDatePicker));
-    final Map<int, double> cache = state.estimatedColumnWidths;
+    final Map<int, double> cache = state.estimatedColumnWidths as Map<int, double>;
     // Simulates font missing.
     cache.clear();
     const Map<String, dynamic> data = <String, dynamic>{
@@ -169,7 +171,10 @@ void main() {
         (ByteData data) { },
     );
     final RenderObject renderObject = tester.renderObject(find.byType(RangeSlider));
-    expect(renderObject.debugNeedsLayout, isTrue);
+
+    bool sliderBoxNeedsLayout;
+    renderObject.visitChildren((RenderObject child) {sliderBoxNeedsLayout = child.debugNeedsLayout;});
+    expect(sliderBoxNeedsLayout, isTrue);
   });
 
   testWidgets('Slider relayout upon system fonts changes', (WidgetTester tester) async {
@@ -191,7 +196,8 @@ void main() {
       SystemChannels.system.codec.encodeMessage(data),
         (ByteData data) { },
     );
-    final RenderObject renderObject = tester.renderObject(find.byType(Slider));
+    // _RenderSlider is the last render object in the tree.
+    final RenderObject renderObject = tester.allRenderObjects.last;
     expect(renderObject.debugNeedsLayout, isTrue);
   });
 

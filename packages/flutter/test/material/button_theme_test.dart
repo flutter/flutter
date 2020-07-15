@@ -1,6 +1,8 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -52,7 +54,7 @@ void main() {
             final ButtonThemeData theme = ButtonTheme.of(context);
             textTheme = theme.textTheme;
             constraints = theme.constraints;
-            padding = theme.padding;
+            padding = theme.padding as EdgeInsets;
             shape = theme.shape;
             layoutBehavior = theme.layoutBehavior;
             colorScheme = theme.colorScheme;
@@ -143,7 +145,7 @@ void main() {
             final ButtonThemeData theme = ButtonTheme.of(context);
             textTheme = theme.textTheme;
             constraints = theme.constraints;
-            padding = theme.padding;
+            padding = theme.padding as EdgeInsets;
             shape = theme.shape;
             return Container(
               alignment: Alignment.topLeft,
@@ -170,7 +172,7 @@ void main() {
     expect(tester.widget<Material>(find.byType(Material)).shape, shape);
     expect(tester.widget<Material>(find.byType(Material)).color, disabledColor);
     expect(tester.getSize(find.byType(Material)), const Size(88.0, 48.0));
-  }, skip: isBrowser);
+  });
 
   testWidgets('Theme buttonTheme ButtonTheme overrides', (WidgetTester tester) async {
     ButtonTextTheme textTheme;
@@ -195,7 +197,7 @@ void main() {
               final ButtonThemeData theme = ButtonTheme.of(context);
               textTheme = theme.textTheme;
               constraints = theme.constraints;
-              padding = theme.padding;
+              padding = theme.padding as EdgeInsets;
               shape = theme.shape;
               return Container(
                 alignment: Alignment.topLeft,
@@ -314,7 +316,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(menu, findsNothing);
 
-    // Same test as above execpt RTL
+    // Same test as above except RTL
     await tester.pumpWidget(
       buildFrame(
         alignedDropdown: true,

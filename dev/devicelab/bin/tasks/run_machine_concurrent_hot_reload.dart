@@ -1,4 +1,4 @@
-// Copyright (c) 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -17,7 +17,7 @@ void main() {
   Map<String, dynamic> parseFlutterResponse(String line) {
     if (line.startsWith('[') && line.endsWith(']')) {
       try {
-        return json.decode(line)[0];
+        return json.decode(line)[0] as Map<String, dynamic>;
       } catch (e) {
         // Not valid JSON, so likely some other output that was surrounded by [brackets]
         return null;
@@ -47,7 +47,7 @@ void main() {
         <String>[
           'run',
           '--machine',
-          '--verbose',
+          '--no-fast-start',
           '-d',
           device.deviceId,
           'lib/commands.dart',
@@ -60,10 +60,10 @@ void main() {
         final dynamic json = parseFlutterResponse(line);
         if (json != null) {
           if (json['event'] == 'app.debugPort') {
-            vmServiceUri = Uri.parse(json['params']['wsUri']);
+            vmServiceUri = Uri.parse(json['params']['wsUri'] as String);
             print('service protocol connection available at $vmServiceUri');
           } else if (json['event'] == 'app.started') {
-            appId = json['params']['appId'];
+            appId = json['params']['appId'] as String;
             print('application identifier is $appId');
           }
         }
@@ -72,10 +72,6 @@ void main() {
           ready.complete();
           ok ??= true;
         }
-      });
-      transformToLines(run.stderr).listen((String line) {
-        stderr.writeln('run:stderr: $line');
-        ok = false;
       });
       run.exitCode.then<void>((int exitCode) {
         ok = false;
@@ -129,7 +125,7 @@ void main() {
       if (!ok)
         throw 'App failed or crashed during hot reloads.';
 
-      final List<dynamic> responses = results;
+      final List<dynamic> responses = results as List<dynamic>;
       final List<dynamic> errorResponses = responses.where(
         (dynamic r) => r['error'] != null
       ).toList();
@@ -141,7 +137,7 @@ void main() {
 
       if (errorResponses.length != 1)
         throw 'Did not receive the expected (exactly one) hot reload error response.';
-      final String errorMessage = errorResponses.first['error'];
+      final String errorMessage = (errorResponses.first as Map<String, dynamic>)['error'] as String;
       if (!errorMessage.contains('in progress'))
         throw 'Error response was not that hot reload was in progress.';
       if (successResponses.length != 1)

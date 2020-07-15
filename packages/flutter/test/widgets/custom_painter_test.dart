@@ -1,6 +1,8 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 import 'dart:async';
 import 'dart:ui';
@@ -374,7 +376,7 @@ void _defineTests() {
     // Do the actions work?
     final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner;
     int expectedLength = 1;
-    for (SemanticsAction action in allActions) {
+    for (final SemanticsAction action in allActions) {
       switch (action) {
         case SemanticsAction.moveCursorBackwardByCharacter:
         case SemanticsAction.moveCursorForwardByCharacter:
@@ -432,7 +434,6 @@ void _defineTests() {
       ),
     ));
     List<SemanticsFlag> flags = SemanticsFlag.values.values.toList();
-    print('flags: $flags');
     // [SemanticsFlag.hasImplicitScrolling] isn't part of [SemanticsProperties]
     // therefore it has to be removed.
     flags.remove(SemanticsFlag.hasImplicitScrolling);
@@ -501,7 +502,7 @@ void _defineTests() {
     );
     expect(semantics, hasSemantics(expectedSemantics, ignoreRect: true, ignoreTransform: true));
     semantics.dispose();
-  }, skip: isBrowser);
+  });
 
   group('diffing', () {
     testWidgets('complains about duplicate keys', (WidgetTester tester) async {
@@ -717,7 +718,7 @@ class _DiffTester {
           TestSemantics.rootChild(
             rect: TestSemantics.fullScreen,
             children: <TestSemantics>[
-              for (String label in labels)
+              for (final String label in labels)
                 TestSemantics(
                   rect: const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
                   label: label,
@@ -784,7 +785,7 @@ class _SemanticsDiffTest extends CustomPainter {
 
   List<CustomPainterSemantics> buildSemantics(Size size) {
     final List<CustomPainterSemantics> semantics = <CustomPainterSemantics>[];
-    for (String label in data) {
+    for (final String label in data) {
       Key key;
       if (label.endsWith('-k')) {
         key = ValueKey<String>(label);

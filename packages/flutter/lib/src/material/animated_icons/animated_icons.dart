@@ -1,6 +1,8 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 part of material_animated_icons;
 
@@ -18,7 +20,7 @@ part of material_animated_icons;
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=pJcbh8pbvJs}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ```dart
 /// AnimatedIcon(
@@ -104,7 +106,7 @@ class AnimatedIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _AnimatedIconData iconData = icon;
+    final _AnimatedIconData iconData = icon as _AnimatedIconData;
     final IconThemeData iconTheme = IconTheme.of(context);
     final double iconSize = size ?? iconTheme.size;
     final TextDirection textDirection = this.textDirection ?? Directionality.of(context);
@@ -161,8 +163,8 @@ class _AnimatedIconPainter extends CustomPainter {
       canvas.translate(-size.width, -size.height);
     }
 
-    final double clampedProgress = progress.value.clamp(0.0, 1.0);
-    for (_PathFrames path in paths)
+    final double clampedProgress = progress.value.clamp(0.0, 1.0) as double;
+    for (final _PathFrames path in paths)
       path.paint(canvas, color, uiPathFactory, clampedProgress);
   }
 
@@ -203,7 +205,7 @@ class _PathFrames {
       ..style = PaintingStyle.fill
       ..color = color.withOpacity(color.opacity * opacity);
     final ui.Path path = uiPathFactory();
-    for (_PathCommand command in commands)
+    for (final _PathCommand command in commands)
       command.apply(path, progress);
     canvas.drawPath(path, paint);
   }

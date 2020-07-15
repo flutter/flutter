@@ -1,6 +1,8 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 /// Constants for useful Unicode characters.
 ///
@@ -11,6 +13,9 @@
 ///  * <http://unicode.org/reports/tr9/>, which describes the Unicode
 ///    bidirectional text algorithm.
 class Unicode {
+  // This class is not meant to be instantiated or extended; this constructor
+  // prevents instantiation and extension.
+  // ignore: unused_element
   Unicode._();
   /// U+202A LEFT-TO-RIGHT EMBEDDING
   ///

@@ -18,5 +18,7 @@
   "cutButtonLabel": "Klippa",
   "copyButtonLabel": "Afrita",
   "pasteButtonLabel": "Líma",
-  "selectAllButtonLabel": "Velja allt"
+  "selectAllButtonLabel": "Velja allt",
+  "tabSemanticsLabel": "Flipi $tabIndex af $tabCount",
+  "modalBarrierDismissLabel": "Hunsa"
 }

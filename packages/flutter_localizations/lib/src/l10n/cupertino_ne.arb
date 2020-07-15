@@ -18,5 +18,7 @@
   "cutButtonLabel": "काट्नुहोस्",
   "copyButtonLabel": "प्रतिलिपि गर्नुहोस्",
   "pasteButtonLabel": "टाँस्नुहोस्",
-  "selectAllButtonLabel": "सबै चयन गर्नुहोस्"
+  "selectAllButtonLabel": "सबै चयन गर्नुहोस्",
+  "tabSemanticsLabel": "$tabCount मध्ये $tabIndex ट्याब",
+  "modalBarrierDismissLabel": "खारेज गर्नुहोस्"
 }

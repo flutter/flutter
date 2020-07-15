@@ -1,16 +1,15 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/compile.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 
 void main() {
-  testUsingContext('StdOutHandler test', () async {
-    final StdoutHandler stdoutHandler = StdoutHandler();
+  testWithoutContext('StdoutHandler can produce output message', () async {
+    final StdoutHandler stdoutHandler = StdoutHandler(logger: BufferLogger.test());
     stdoutHandler.handler('result 12345');
     expect(stdoutHandler.boundaryKey, '12345');
     stdoutHandler.handler('12345');
@@ -20,15 +19,7 @@ void main() {
     expect(output.outputFilename, 'message');
   });
 
-  testUsingContext('StdOutHandler crash test', () async {
-    final StdoutHandler stdoutHandler = StdoutHandler();
-    final Future<CompilerOutput> output = stdoutHandler.compilerOutput.future;
-    stdoutHandler.handler('message with no result');
-
-    expect(output, throwsA(isInstanceOf<ToolExit>()));
-  });
-
-  test('TargetModel values', () {
+  testWithoutContext('TargetModel values', () {
     expect(TargetModel('vm'), TargetModel.vm);
     expect(TargetModel.vm.toString(), 'vm');
 
@@ -41,6 +32,6 @@ void main() {
     expect(TargetModel('dartdevc'), TargetModel.dartdevc);
     expect(TargetModel.dartdevc.toString(), 'dartdevc');
 
-    expect(() => TargetModel('foobar'), throwsA(isInstanceOf<AssertionError>()));
+    expect(() => TargetModel('foobar'), throwsAssertionError);
   });
 }

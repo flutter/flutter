@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -18,19 +18,25 @@ void main() {
       final Future<List<String>> removedStreamItems = list.onRemoved.toList();
 
       list.updateWithNewList(<String>['aaa']);
-      list.updateWithNewList(<String>['aaa', 'bbb']);
-      list.updateWithNewList(<String>['bbb']);
+      list.removeItem('bogus');
+      list.updateWithNewList(<String>['aaa', 'bbb', 'ccc']);
+      list.updateWithNewList(<String>['bbb', 'ccc']);
+      list.removeItem('bbb');
+
+      expect(list.items, <String>['ccc']);
       list.dispose();
 
       final List<String> addedItems = await addedStreamItems;
       final List<String> removedItems = await removedStreamItems;
 
-      expect(addedItems.length, 2);
+      expect(addedItems.length, 3);
       expect(addedItems.first, 'aaa');
       expect(addedItems[1], 'bbb');
+      expect(addedItems[2], 'ccc');
 
-      expect(removedItems.length, 1);
+      expect(removedItems.length, 2);
       expect(removedItems.first, 'aaa');
+      expect(removedItems[1], 'bbb');
     });
   });
 }

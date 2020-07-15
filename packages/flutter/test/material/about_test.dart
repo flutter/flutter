@@ -1,6 +1,8 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 import 'dart:async';
 
@@ -90,8 +92,10 @@ void main() {
       find.text('I am the very model of a modern major general.'),
       findsOneWidget,
     );
+    await tester.tap(find.text('Pirate package '));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
     expect(find.text('Pirate license'), findsOneWidget);
-  }, skip: isBrowser);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/54385
 
   testWidgets('About box logic defaults to executable name for app name', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -134,11 +138,25 @@ void main() {
 
     await tester.pumpAndSettle();
 
+    // Check for packages.
     expect(find.text('AAA'), findsOneWidget);
-    expect(find.text('BBB'), findsOneWidget);
     expect(find.text('Another package'), findsOneWidget);
+
+    // Check license is displayed after entering into license page for 'AAA'.
+    await tester.tap(find.text('AAA'));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+    expect(find.text('BBB'), findsOneWidget);
+
+    /// Go back to list of packages.
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+
+    /// Check license is displayed after entering into license page for
+    /// 'Another package'.
+    await tester.tap(find.text('Another package'));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
     expect(find.text('Another license'), findsOneWidget);
-  }, skip: isBrowser);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/54385
 
   testWidgets('LicensePage control test with all properties', (WidgetTester tester) async {
     const FlutterLogo logo = FlutterLogo();
@@ -195,11 +213,26 @@ void main() {
       find.text('I am the very model of a modern major general.'),
       findsOneWidget,
     );
+
+    // Check for packages.
     expect(find.text('AAA'), findsOneWidget);
-    expect(find.text('BBB'), findsOneWidget);
     expect(find.text('Another package'), findsOneWidget);
+
+    // Check license is displayed after entering into license page for 'AAA'.
+    await tester.tap(find.text('AAA'));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+    expect(find.text('BBB'), findsOneWidget);
+
+    /// Go back to list of packages.
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+
+    /// Check license is displayed after entering into license page for
+    /// 'Another package'.
+    await tester.tap(find.text('Another package'));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
     expect(find.text('Another license'), findsOneWidget);
-  }, skip: isBrowser);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/54385
 
   testWidgets('LicensePage respects the notch', (WidgetTester tester) async {
     const double safeareaPadding = 27.0;
@@ -223,8 +256,13 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(tester.getTopLeft(find.text('DEF')), const Offset(8.0 + safeareaPadding, 287.0));
-  }, skip: isBrowser);
+    // The position of the top left of app bar title should indicate whether
+    // the safe area is sufficiently respected.
+    expect(
+      tester.getTopLeft(find.text('Licenses')),
+      const Offset(16.0 + safeareaPadding, 18.0 + safeareaPadding),
+    );
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/54385
 
   testWidgets('LicensePage returns early if unmounted', (WidgetTester tester) async {
     final Completer<LicenseEntry> licenseCompleter = Completer<LicenseEntry>();
@@ -248,8 +286,8 @@ void main() {
     await tester.pumpAndSettle();
     final FakeLicenseEntry licenseEntry = FakeLicenseEntry();
     licenseCompleter.complete(licenseEntry);
-    expect(licenseEntry.paragraphsCalled, false);
-  }, skip: isBrowser);
+    expect(licenseEntry.packagesCalled, false);
+  });
 
   testWidgets('LicensePage returns late if unmounted', (WidgetTester tester) async {
     final Completer<LicenseEntry> licenseCompleter = Completer<LicenseEntry>();
@@ -273,8 +311,8 @@ void main() {
     );
 
     await tester.pumpAndSettle();
-    expect(licenseEntry.paragraphsCalled, true);
-  }, skip: isBrowser);
+    expect(licenseEntry.packagesCalled, true);
+  });
 
   testWidgets('LicensePage logic defaults to executable name for app name', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -305,20 +343,256 @@ void main() {
     tileRect = tester.getRect(find.byType(AboutListTile));
     expect(tileRect.height, 48.0);
   });
+
+  testWidgets('showLicensePage uses nested navigator by default', (WidgetTester tester) async {
+    final LicensePageObserver rootObserver = LicensePageObserver();
+    final LicensePageObserver nestedObserver = LicensePageObserver();
+
+    await tester.pumpWidget(MaterialApp(
+      navigatorObservers: <NavigatorObserver>[rootObserver],
+      initialRoute: '/',
+      onGenerateRoute: (_) {
+        return PageRouteBuilder<dynamic>(
+          pageBuilder: (_, __, ___) => Navigator(
+            observers: <NavigatorObserver>[nestedObserver],
+            onGenerateRoute: (RouteSettings settings) {
+              return PageRouteBuilder<dynamic>(
+                pageBuilder: (BuildContext context, _, __) {
+                  return RaisedButton(
+                    onPressed: () {
+                      showLicensePage(
+                        context: context,
+                        applicationName: 'A',
+                      );
+                    },
+                    child: const Text('Show License Page'),
+                  );
+                },
+              );
+            },
+          ),
+        );
+      },
+    ));
+
+    // Open the dialog.
+    await tester.tap(find.byType(RaisedButton));
+
+    expect(rootObserver.licensePageCount, 0);
+    expect(nestedObserver.licensePageCount, 1);
+  });
+
+  testWidgets('showLicensePage uses root navigator if useRootNavigator is true', (WidgetTester tester) async {
+    final LicensePageObserver rootObserver = LicensePageObserver();
+    final LicensePageObserver nestedObserver = LicensePageObserver();
+
+    await tester.pumpWidget(MaterialApp(
+      navigatorObservers: <NavigatorObserver>[rootObserver],
+      initialRoute: '/',
+      onGenerateRoute: (_) {
+        return PageRouteBuilder<dynamic>(
+          pageBuilder: (_, __, ___) => Navigator(
+            observers: <NavigatorObserver>[nestedObserver],
+            onGenerateRoute: (RouteSettings settings) {
+              return PageRouteBuilder<dynamic>(
+                pageBuilder: (BuildContext context, _, __) {
+                  return RaisedButton(
+                    onPressed: () {
+                      showLicensePage(
+                        context: context,
+                        useRootNavigator: true,
+                        applicationName: 'A',
+                      );
+                    },
+                    child: const Text('Show License Page'),
+                  );
+                },
+              );
+            },
+          ),
+        );
+      },
+    ));
+
+    // Open the dialog.
+    await tester.tap(find.byType(RaisedButton));
+
+    expect(rootObserver.licensePageCount, 1);
+    expect(nestedObserver.licensePageCount, 0);
+  });
+
+  testWidgets('showAboutDialog uses root navigator by default', (WidgetTester tester) async {
+    final AboutDialogObserver rootObserver = AboutDialogObserver();
+    final AboutDialogObserver nestedObserver = AboutDialogObserver();
+
+    await tester.pumpWidget(MaterialApp(
+      navigatorObservers: <NavigatorObserver>[rootObserver],
+      home: Navigator(
+        observers: <NavigatorObserver>[nestedObserver],
+        onGenerateRoute: (RouteSettings settings) {
+          return MaterialPageRoute<dynamic>(
+            builder: (BuildContext context) {
+              return RaisedButton(
+                onPressed: () {
+                  showAboutDialog(
+                    context: context,
+                    applicationName: 'A',
+                  );
+                },
+                child: const Text('Show About Dialog'),
+              );
+            },
+          );
+        },
+      ),
+    ));
+
+    // Open the dialog.
+    await tester.tap(find.byType(RaisedButton));
+
+    expect(rootObserver.dialogCount, 1);
+    expect(nestedObserver.dialogCount, 0);
+  });
+
+  testWidgets('showAboutDialog uses nested navigator if useRootNavigator is false', (WidgetTester tester) async {
+    final AboutDialogObserver rootObserver = AboutDialogObserver();
+    final AboutDialogObserver nestedObserver = AboutDialogObserver();
+
+    await tester.pumpWidget(MaterialApp(
+      navigatorObservers: <NavigatorObserver>[rootObserver],
+      home: Navigator(
+        observers: <NavigatorObserver>[nestedObserver],
+        onGenerateRoute: (RouteSettings settings) {
+          return MaterialPageRoute<dynamic>(
+            builder: (BuildContext context) {
+              return RaisedButton(
+                onPressed: () {
+                  showAboutDialog(
+                    context: context,
+                    useRootNavigator: false,
+                    applicationName: 'A',
+                  );
+                },
+                child: const Text('Show About Dialog'),
+              );
+            },
+          );
+        },
+      ),
+    ));
+
+    // Open the dialog.
+    await tester.tap(find.byType(RaisedButton));
+
+    expect(rootObserver.dialogCount, 0);
+    expect(nestedObserver.dialogCount, 1);
+  });
+
+  testWidgets("AboutListTile's child should not be offset when the icon is not specified.", (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: AboutListTile(
+            child: Text('About'),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.descendant(
+        of: find.byType(AboutListTile),
+        matching: find.byType(Icon),
+      ),
+      findsNothing,
+    );
+  });
+
+  testWidgets("AboutDialog's contents are scrollable", (WidgetTester tester) async {
+    final Key contentKey = UniqueKey();
+    await tester.pumpWidget(MaterialApp(
+      home: Navigator(
+        onGenerateRoute: (RouteSettings settings) {
+          return MaterialPageRoute<dynamic>(
+            builder: (BuildContext context) {
+              return RaisedButton(
+                onPressed: () {
+                  showAboutDialog(
+                    context: context,
+                    useRootNavigator: false,
+                    applicationName: 'A',
+                    children: <Widget>[
+                      Container(
+                        key: contentKey,
+                        color: Colors.orange,
+                        height: 500,
+                      ),
+                    ],
+                  );
+                },
+                child: const Text('Show About Dialog'),
+              );
+            },
+          );
+        },
+      ),
+    ));
+
+    await tester.tap(find.text('Show About Dialog'));
+    await tester.pumpAndSettle();
+
+    // Try dragging by the [AboutDialog]'s title.
+    RenderBox box = tester.renderObject(find.text('A'));
+    Offset originalOffset = box.localToGlobal(Offset.zero);
+    await tester.drag(find.byKey(contentKey), const Offset(0.0, -20.0));
+
+    expect(box.localToGlobal(Offset.zero), equals(originalOffset.translate(0.0, -20.0)));
+
+    // Try dragging by the additional children in contents.
+    box = tester.renderObject(find.byKey(contentKey));
+    originalOffset = box.localToGlobal(Offset.zero);
+    await tester.drag(find.byKey(contentKey), const Offset(0.0, -20.0));
+
+    expect(box.localToGlobal(Offset.zero), equals(originalOffset.translate(0.0, -20.0)));
+  });
 }
 
 class FakeLicenseEntry extends LicenseEntry {
   FakeLicenseEntry();
 
-  bool get paragraphsCalled => _paragraphsCalled;
-  bool _paragraphsCalled = false;
+  bool get packagesCalled => _packagesCalled;
+  bool _packagesCalled = false;
 
   @override
-  Iterable<String> packages = <String>[];
+  Iterable<LicenseParagraph> paragraphs = <LicenseParagraph>[];
 
   @override
-  Iterable<LicenseParagraph> get paragraphs {
-    _paragraphsCalled = true;
-    return <LicenseParagraph>[];
+  Iterable<String> get packages {
+    _packagesCalled = true;
+    return <String>[];
+  }
+}
+
+class LicensePageObserver extends NavigatorObserver {
+  int licensePageCount = 0;
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
+    if (route is MaterialPageRoute<dynamic>) {
+      licensePageCount++;
+    }
+    super.didPush(route, previousRoute);
+  }
+}
+
+class AboutDialogObserver extends NavigatorObserver {
+  int dialogCount = 0;
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
+    if (route.toString().contains('_DialogRoute')) {
+      dialogCount++;
+    }
+    super.didPush(route, previousRoute);
   }
 }

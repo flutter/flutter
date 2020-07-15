@@ -1,6 +1,8 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 import 'dart:typed_data';
 
@@ -25,8 +27,8 @@ void main() {
 
     final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
     expect(box.size, equals(const Size(100.0, 100.0)));
-    final RenderDecoratedBox child = box.child;
-    final BoxDecoration decoration = child.decoration;
+    final RenderDecoratedBox child = box.child as RenderDecoratedBox;
+    final BoxDecoration decoration = child.decoration as BoxDecoration;
     expect(decoration.color, equals(backgroundColor));
 
     final RenderParagraph paragraph = tester.renderObject(find.text('Z'));
@@ -47,8 +49,8 @@ void main() {
 
     final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
     expect(box.size, equals(const Size(100.0, 100.0)));
-    final RenderDecoratedBox child = box.child;
-    final BoxDecoration decoration = child.decoration;
+    final RenderDecoratedBox child = box.child as RenderDecoratedBox;
+    final BoxDecoration decoration = child.decoration as BoxDecoration;
     expect(decoration.color, equals(backgroundColor));
 
     final RenderParagraph paragraph = tester.renderObject(find.text('Z'));
@@ -67,8 +69,8 @@ void main() {
 
     final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
     expect(box.size, equals(const Size(100.0, 100.0)));
-    final RenderDecoratedBox child = box.child;
-    final BoxDecoration decoration = child.decoration;
+    final RenderDecoratedBox child = box.child as RenderDecoratedBox;
+    final BoxDecoration decoration = child.decoration as BoxDecoration;
     expect(decoration.image.fit, equals(BoxFit.cover));
   });
 
@@ -87,8 +89,8 @@ void main() {
 
     final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
     expect(box.size, equals(const Size(40.0, 40.0)));
-    final RenderDecoratedBox child = box.child;
-    final BoxDecoration decoration = child.decoration;
+    final RenderDecoratedBox child = box.child as RenderDecoratedBox;
+    final BoxDecoration decoration = child.decoration as BoxDecoration;
     expect(decoration.color, equals(fallback.primaryColorDark));
 
     final RenderParagraph paragraph = tester.renderObject(find.text('Z'));
@@ -112,12 +114,12 @@ void main() {
     );
 
     final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
-    final RenderDecoratedBox child = box.child;
-    final BoxDecoration decoration = child.decoration;
+    final RenderDecoratedBox child = box.child as RenderDecoratedBox;
+    final BoxDecoration decoration = child.decoration as BoxDecoration;
     expect(decoration.color, equals(theme.primaryColorLight));
 
     final RenderParagraph paragraph = tester.renderObject(find.text('Z'));
-    expect(paragraph.text.style.color, equals(theme.primaryTextTheme.title.color));
+    expect(paragraph.text.style.color, equals(theme.primaryTextTheme.headline6.color));
   });
 
   testWidgets('CircleAvatar with dark theme', (WidgetTester tester) async {
@@ -137,12 +139,12 @@ void main() {
     );
 
     final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
-    final RenderDecoratedBox child = box.child;
-    final BoxDecoration decoration = child.decoration;
+    final RenderDecoratedBox child = box.child as RenderDecoratedBox;
+    final BoxDecoration decoration = child.decoration as BoxDecoration;
     expect(decoration.color, equals(theme.primaryColorDark));
 
     final RenderParagraph paragraph = tester.renderObject(find.text('Z'));
-    expect(paragraph.text.style.color, equals(theme.primaryTextTheme.title.color));
+    expect(paragraph.text.style.color, equals(theme.primaryTextTheme.headline6.color));
   });
 
   testWidgets('CircleAvatar text does not expand with textScaleFactor', (WidgetTester tester) async {
@@ -186,7 +188,7 @@ void main() {
       ),
     );
     expect(tester.getSize(find.text('Z')), equals(const Size(16.0, 16.0)));
-  }, skip: isBrowser);
+  });
 
   testWidgets('CircleAvatar respects minRadius', (WidgetTester tester) async {
     final Color backgroundColor = Colors.blue.shade900;
@@ -204,8 +206,8 @@ void main() {
 
     final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
     expect(box.size, equals(const Size(100.0, 100.0)));
-    final RenderDecoratedBox child = box.child;
-    final BoxDecoration decoration = child.decoration;
+    final RenderDecoratedBox child = box.child as RenderDecoratedBox;
+    final BoxDecoration decoration = child.decoration as BoxDecoration;
     expect(decoration.color, equals(backgroundColor));
 
     final RenderParagraph paragraph = tester.renderObject(find.text('Z'));
@@ -226,8 +228,8 @@ void main() {
 
     final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
     expect(box.size, equals(const Size(100.0, 100.0)));
-    final RenderDecoratedBox child = box.child;
-    final BoxDecoration decoration = child.decoration;
+    final RenderDecoratedBox child = box.child as RenderDecoratedBox;
+    final BoxDecoration decoration = child.decoration as BoxDecoration;
     expect(decoration.color, equals(backgroundColor));
 
     final RenderParagraph paragraph = tester.renderObject(find.text('Z'));
@@ -249,8 +251,8 @@ void main() {
 
     final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
     expect(box.size, equals(const Size(100.0, 100.0)));
-    final RenderDecoratedBox child = box.child;
-    final BoxDecoration decoration = child.decoration;
+    final RenderDecoratedBox child = box.child as RenderDecoratedBox;
+    final BoxDecoration decoration = child.decoration as BoxDecoration;
     expect(decoration.color, equals(backgroundColor));
 
     final RenderParagraph paragraph = tester.renderObject(find.text('Z'));

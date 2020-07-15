@@ -1,6 +1,8 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -24,14 +26,14 @@ import 'scaffold.dart' show Scaffold;
 /// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasMaterial(BuildContext context) {
   assert(() {
-    if (context.widget is! Material && context.ancestorWidgetOfExactType(Material) == null) {
+    if (context.widget is! Material && context.findAncestorWidgetOfExactType<Material>() == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('No Material widget found.'),
         ErrorDescription(
           '${context.widget.runtimeType} widgets require a Material '
           'widget ancestor.\n'
           'In material design, most widgets are conceptually "printed" on '
-          'a sheet of material. In Flutter\'s material library, that '
+          "a sheet of material. In Flutter's material library, that "
           'material is represented by the Material widget. It is the '
           'Material widget that renders ink splashes, for instance. '
           'Because of this, many material library widgets require that '
@@ -76,8 +78,8 @@ bool debugCheckHasMaterialLocalizations(BuildContext context) {
           'to be provided by a Localizations widget ancestor.'
         ),
         ErrorDescription(
-          'Localizations are used to generate many different messages, labels,'
-          'and abbreviations which are used by the material library.'
+          'The material library uses Localizations to generate messages, '
+          'labels, and abbreviations.'
         ),
         ErrorHint(
           'To introduce a MaterialLocalizations, either use a '
@@ -108,7 +110,7 @@ bool debugCheckHasMaterialLocalizations(BuildContext context) {
 /// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasScaffold(BuildContext context) {
   assert(() {
-    if (context.widget is! Scaffold && context.ancestorWidgetOfExactType(Scaffold) == null) {
+    if (context.widget is! Scaffold && context.findAncestorWidgetOfExactType<Scaffold>() == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('No Scaffold widget found.'),
         ErrorDescription('${context.widget.runtimeType} widgets require a Scaffold widget ancestor.'),

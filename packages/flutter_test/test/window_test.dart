@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -39,20 +39,6 @@ void main() {
       },
       propertyFaker: (TestWidgetsFlutterBinding binding, Size fakeValue) {
         binding.window.physicalSizeTestValue = fakeValue;
-      },
-    );
-  });
-
-  testWidgets('TestWindow can fake physical depth', (WidgetTester tester) async {
-    verifyThatTestWindowCanFakeProperty<double>(
-      tester: tester,
-      realValue: ui.window.physicalDepth,
-      fakeValue: 120.0,
-      propertyRetriever: () {
-        return WidgetsBinding.instance.window.physicalDepth;
-      },
-      propertyFaker: (TestWidgetsFlutterBinding binding, double fakeValue) {
-        binding.window.physicalDepthTestValue = fakeValue;
       },
     );
   });
@@ -224,7 +210,7 @@ void verifyThatTestWindowCanFakeProperty<WindowPropertyType>({
 TestWidgetsFlutterBinding retrieveTestBinding(WidgetTester tester) {
   final WidgetsBinding binding = tester.binding;
   assert(binding is TestWidgetsFlutterBinding);
-  final TestWidgetsFlutterBinding testBinding = binding;
+  final TestWidgetsFlutterBinding testBinding = binding as TestWidgetsFlutterBinding;
   return testBinding;
 }
 
@@ -256,6 +242,7 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
     this.disableAnimations = false,
     this.boldText = false,
     this.reduceMotion = false,
+    this.highContrast = false,
   });
 
   @override
@@ -272,4 +259,18 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
 
   @override
   final bool reduceMotion;
+
+  @override
+  final bool highContrast;
+
+  /// This gives us some grace time when the dart:ui side adds something to
+  /// [AccessibilityFeatures], and makes things easier when we do rolls to
+  /// give us time to catch up.
+  ///
+  /// If you would like to add to this class, changes must first be made in the
+  /// engine, followed by the framework.
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    return null;
+  }
 }

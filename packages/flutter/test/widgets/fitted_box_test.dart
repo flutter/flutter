@@ -1,6 +1,8 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart = 2.8
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
@@ -77,7 +79,7 @@ void main() {
     expect(insidePoint, equals(outsidePoint));
   });
 
-  testWidgets('Child can conver', (WidgetTester tester) async {
+  testWidgets('Child can cover', (WidgetTester tester) async {
     final Key outside = UniqueKey();
     final Key inside = UniqueKey();
 
@@ -369,6 +371,7 @@ void main() {
           height: 10.0,
           child: FittedBox(
             fit: BoxFit.cover,
+            clipBehavior: Clip.hardEdge,
             child: SizedBox(
               width: 10.0,
               height: 50.0,
@@ -391,6 +394,7 @@ void main() {
           height: 100.0,
           child: FittedBox(
             fit: BoxFit.cover,
+            clipBehavior: Clip.hardEdge,
             child: SizedBox(
               width: 50.0,
               height: 10.0,
@@ -407,10 +411,10 @@ void main() {
 
   testWidgets('FittedBox layers - none - clip', (WidgetTester tester) async {
     final List<double> values = <double>[10.0, 50.0, 100.0];
-    for (double a in values) {
-      for (double b in values) {
-        for (double c in values) {
-          for (double d in values) {
+    for (final double a in values) {
+      for (final double b in values) {
+        for (final double c in values) {
+          for (final double d in values) {
             await tester.pumpWidget(
               Center(
                 child: SizedBox(
@@ -418,6 +422,7 @@ void main() {
                   height: b,
                   child: FittedBox(
                     fit: BoxFit.none,
+                    clipBehavior: Clip.hardEdge,
                     child: SizedBox(
                       width: c,
                       height: d,
@@ -472,13 +477,22 @@ void main() {
     await tester.tap(find.byKey(key1));
     expect(_pointerDown, isTrue);
   });
+
+  testWidgets('Can set and update clipBehavior', (WidgetTester tester) async {
+    await tester.pumpWidget(FittedBox(fit: BoxFit.none, child: Container()));
+    final RenderFittedBox renderObject = tester.allRenderObjects.whereType<RenderFittedBox>().first;
+    expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+
+    await tester.pumpWidget(FittedBox(fit: BoxFit.none, child: Container(), clipBehavior: Clip.antiAlias));
+    expect(renderObject.clipBehavior, equals(Clip.antiAlias));
+  });
 }
 
 List<Type> getLayers() {
   final List<Type> layers = <Type>[];
   Layer layer = RendererBinding.instance.renderView.debugLayer;
   while (layer is ContainerLayer) {
-    final ContainerLayer container = layer;
+    final ContainerLayer container = layer as ContainerLayer;
     layers.add(container.runtimeType);
     expect(container.firstChild, same(container.lastChild));
     layer = container.firstChild;
