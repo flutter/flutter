@@ -46,13 +46,41 @@ static bool define_system_cursor(GHashTable* table,
 static void populate_system_cursor_table(GHashTable* table) {
   // The following mapping must be kept in sync with Flutter framework's
   // mouse_cursor.dart.
-  define_system_cursor(table, "none", "none");
+  define_system_cursor(table, "alias", "alias");
+  define_system_cursor(table, "allScroll", "all-scroll");
+  define_system_cursor(table, "basic", "default");
+  define_system_cursor(table, "cell", "cell");
   define_system_cursor(table, "click", "pointer");
-  define_system_cursor(table, "text", "text");
+  define_system_cursor(table, "contextMenu", "context-menu");
+  define_system_cursor(table, "copy", "copy");
   define_system_cursor(table, "forbidden", "not-allowed");
-  define_system_cursor(table, "grab", "grabbing");
+  define_system_cursor(table, "grab", "grab");
+  define_system_cursor(table, "grabbing", "grabbing");
+  define_system_cursor(table, "help", "help");
+  define_system_cursor(table, "move", "move");
+  define_system_cursor(table, "none", "none");
+  define_system_cursor(table, "noDrop", "no-drop");
+  define_system_cursor(table, "precise", "crosshair");
+  define_system_cursor(table, "progress", "progress");
+  define_system_cursor(table, "text", "text");
+  define_system_cursor(table, "resizeColumn", "col-resize");
+  define_system_cursor(table, "resizeDown", "s-resize");
+  define_system_cursor(table, "resizeDownLeft", "sw-resize");
+  define_system_cursor(table, "resizeDownRight", "se-resize");
+  define_system_cursor(table, "resizeLeft", "w-resize");
   define_system_cursor(table, "resizeLeftRight", "ew-resize");
+  define_system_cursor(table, "resizeRight", "e-resize");
+  define_system_cursor(table, "resizeRow", "row-resize");
+  define_system_cursor(table, "resizeUp", "n-resize");
   define_system_cursor(table, "resizeUpDown", "ns-resize");
+  define_system_cursor(table, "resizeUpLeft", "nw-resize");
+  define_system_cursor(table, "resizeUpRight", "ne-resize");
+  define_system_cursor(table, "resizeUpLeftDownRight", "nwse-resize");
+  define_system_cursor(table, "resizeUpRightDownLeft", "nesw-resize");
+  define_system_cursor(table, "verticalText", "vertical-text");
+  define_system_cursor(table, "wait", "wait");
+  define_system_cursor(table, "zoomIn", "zoom-in");
+  define_system_cursor(table, "zoomOut", "zoom-out");
 }
 
 // Sets the mouse cursor.

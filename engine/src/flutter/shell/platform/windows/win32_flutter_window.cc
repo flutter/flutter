@@ -18,15 +18,37 @@ constexpr int kScrollOffsetMultiplier = 20;
 // Maps a Flutter cursor name to an HCURSOR.
 //
 // Returns the arrow cursor for unknown constants.
+//
+// This map must be kept in sync with Flutter framework's
+// rendering/mouse_cursor.dart.
 static HCURSOR GetCursorByName(const std::string& cursor_name) {
   static auto* cursors = new std::map<std::string, const wchar_t*>{
-      {"none", nullptr},
+      {"allScroll", IDC_SIZEALL},
       {"basic", IDC_ARROW},
       {"click", IDC_HAND},
-      {"text", IDC_IBEAM},
       {"forbidden", IDC_NO},
-      {"horizontalDoubleArrow", IDC_SIZEWE},
-      {"verticalDoubleArrow", IDC_SIZENS},
+      {"help", IDC_HELP},
+      {"move", IDC_SIZEALL},
+      {"none", nullptr},
+      {"noDrop", IDC_NO},
+      {"precise", IDC_CROSS},
+      {"progress", IDC_APPSTARTING},
+      {"text", IDC_IBEAM},
+      {"resizeColumn", IDC_SIZEWE},
+      {"resizeDown", IDC_SIZENS},
+      {"resizeDownLeft", IDC_SIZENESW},
+      {"resizeDownRight", IDC_SIZENWSE},
+      {"resizeLeft", IDC_SIZEWE},
+      {"resizeLeftRight", IDC_SIZEWE},
+      {"resizeRight", IDC_SIZEWE},
+      {"resizeRow", IDC_SIZENS},
+      {"resizeUp", IDC_SIZENS},
+      {"resizeUpDown", IDC_SIZENS},
+      {"resizeUpLeft", IDC_SIZENWSE},
+      {"resizeUpRight", IDC_SIZENESW},
+      {"resizeUpLeftDownRight", IDC_SIZENWSE},
+      {"resizeUpRightDownLeft", IDC_SIZENESW},
+      {"wait", IDC_WAIT},
   };
   const wchar_t* idc_name = IDC_ARROW;
   auto it = cursors->find(cursor_name);

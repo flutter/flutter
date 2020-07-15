@@ -14,6 +14,8 @@ static NSString* const kKindKey = @"kind";
 
 static NSString* const kKindValueNone = @"none";
 
+static NSDictionary* systemCursors;
+
 /**
  * Maps a Flutter's constant to a platform's cursor object.
  *
@@ -22,24 +24,36 @@ static NSString* const kKindValueNone = @"none";
 static NSCursor* GetCursorForKind(NSString* kind) {
   // The following mapping must be kept in sync with Flutter framework's
   // mouse_cursor.dart
-  if ([kind isEqualToString:@"basic"])
+
+  if (systemCursors == nil) {
+    systemCursors = @{
+      @"alias" : [NSCursor dragLinkCursor],
+      @"basic" : [NSCursor arrowCursor],
+      @"click" : [NSCursor pointingHandCursor],
+      @"contextMenu" : [NSCursor contextualMenuCursor],
+      @"copy" : [NSCursor dragCopyCursor],
+      @"disappearing" : [NSCursor disappearingItemCursor],
+      @"forbidden" : [NSCursor operationNotAllowedCursor],
+      @"grab" : [NSCursor openHandCursor],
+      @"grabbing" : [NSCursor closedHandCursor],
+      @"noDrop" : [NSCursor operationNotAllowedCursor],
+      @"precise" : [NSCursor crosshairCursor],
+      @"text" : [NSCursor IBeamCursor],
+      @"resizeColumn" : [NSCursor resizeLeftRightCursor],
+      @"resizeDown" : [NSCursor resizeDownCursor],
+      @"resizeLeft" : [NSCursor resizeLeftCursor],
+      @"resizeLeftRight" : [NSCursor resizeLeftRightCursor],
+      @"resizeRight" : [NSCursor resizeRightCursor],
+      @"resizeRow" : [NSCursor resizeUpDownCursor],
+      @"resizeUp" : [NSCursor resizeUpCursor],
+      @"resizeUpDown" : [NSCursor resizeUpDownCursor],
+      @"verticalText" : [NSCursor IBeamCursorForVerticalLayout],
+    };
+  }
+  NSCursor* result = [systemCursors objectForKey:kind];
+  if (result == nil)
     return [NSCursor arrowCursor];
-  else if ([kind isEqualToString:@"click"])
-    return [NSCursor pointingHandCursor];
-  else if ([kind isEqualToString:@"text"])
-    return [NSCursor IBeamCursor];
-  else if ([kind isEqualToString:@"forbidden"])
-    return [NSCursor operationNotAllowedCursor];
-  else if ([kind isEqualToString:@"grab"])
-    return [NSCursor openHandCursor];
-  else if ([kind isEqualToString:@"grabbing"])
-    return [NSCursor closedHandCursor];
-  else if ([kind isEqualToString:@"horizontalDoubleArrow"])
-    return [NSCursor resizeLeftRightCursor];
-  else if ([kind isEqualToString:@"verticalDoubleArrow"])
-    return [NSCursor resizeUpDownCursor];
-  else
-    return [NSCursor arrowCursor];
+  return result;
 }
 
 @interface FlutterMouseCursorPlugin ()
