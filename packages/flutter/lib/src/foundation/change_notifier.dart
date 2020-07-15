@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:meta/meta.dart';
 
 import 'assertions.dart';
@@ -65,7 +63,7 @@ abstract class Listenable {
   /// will lead to memory leaks or exceptions.
   ///
   /// The list may contain nulls; they are ignored.
-  factory Listenable.merge(List<Listenable> listenables) = _MergingListenable;
+  factory Listenable.merge(List<Listenable?> listenables) = _MergingListenable;
 
   /// Register a closure to be called when the object notifies its listeners.
   void addListener(VoidCallback listener);
@@ -100,7 +98,7 @@ abstract class ValueListenable<T> extends Listenable {
 ///
 ///  * [ValueNotifier], which is a [ChangeNotifier] that wraps a single value.
 class ChangeNotifier implements Listenable {
-  ObserverList<VoidCallback> _listeners = ObserverList<VoidCallback>();
+  ObserverList<VoidCallback>? _listeners = ObserverList<VoidCallback>();
 
   bool _debugAssertNotDisposed() {
     assert(() {
@@ -133,7 +131,7 @@ class ChangeNotifier implements Listenable {
   @protected
   bool get hasListeners {
     assert(_debugAssertNotDisposed());
-    return _listeners.isNotEmpty;
+    return _listeners!.isNotEmpty;
   }
 
   /// Register a closure to be called when the object changes.
@@ -142,7 +140,7 @@ class ChangeNotifier implements Listenable {
   @override
   void addListener(VoidCallback listener) {
     assert(_debugAssertNotDisposed());
-    _listeners.add(listener);
+    _listeners!.add(listener);
   }
 
   /// Remove a previously registered closure from the list of closures that are
@@ -167,7 +165,7 @@ class ChangeNotifier implements Listenable {
   @override
   void removeListener(VoidCallback listener) {
     assert(_debugAssertNotDisposed());
-    _listeners.remove(listener);
+    _listeners!.remove(listener);
   }
 
   /// Discards any resources used by the object. After this is called, the
@@ -202,10 +200,10 @@ class ChangeNotifier implements Listenable {
   void notifyListeners() {
     assert(_debugAssertNotDisposed());
     if (_listeners != null) {
-      final List<VoidCallback> localListeners = List<VoidCallback>.from(_listeners);
+      final List<VoidCallback> localListeners = List<VoidCallback>.from(_listeners!);
       for (final VoidCallback listener in localListeners) {
         try {
-          if (_listeners.contains(listener))
+          if (_listeners!.contains(listener))
             listener();
         } catch (exception, stack) {
           FlutterError.reportError(FlutterErrorDetails(
@@ -230,18 +228,18 @@ class ChangeNotifier implements Listenable {
 class _MergingListenable extends Listenable {
   _MergingListenable(this._children);
 
-  final List<Listenable> _children;
+  final List<Listenable?> _children;
 
   @override
   void addListener(VoidCallback listener) {
-    for (final Listenable child in _children) {
+    for (final Listenable? child in _children) {
       child?.addListener(listener);
     }
   }
 
   @override
   void removeListener(VoidCallback listener) {
-    for (final Listenable child in _children) {
+    for (final Listenable? child in _children) {
       child?.removeListener(listener);
     }
   }

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 // TODO(ianh): These should be on the Set and List classes themselves.
 
 /// Compares two sets for deep equality.
@@ -21,7 +19,7 @@
 ///
 ///  * [listEquals], which does something similar for lists.
 ///  * [mapEquals], which does something similar for maps.
-bool setEquals<T>(Set<T> a, Set<T> b) {
+bool setEquals<T>(Set<T>? a, Set<T>? b) {
   if (a == null)
     return b == null;
   if (b == null || a.length != b.length)
@@ -50,7 +48,7 @@ bool setEquals<T>(Set<T> a, Set<T> b) {
 ///
 ///  * [setEquals], which does something similar for sets.
 ///  * [mapEquals], which does something similar for maps.
-bool listEquals<T>(List<T> a, List<T> b) {
+bool listEquals<T>(List<T>? a, List<T>? b) {
   if (a == null)
     return b == null;
   if (b == null || a.length != b.length)
@@ -79,7 +77,7 @@ bool listEquals<T>(List<T> a, List<T> b) {
 ///
 ///  * [setEquals], which does something similar for sets.
 ///  * [listEquals], which does something similar for lists.
-bool mapEquals<T, U>(Map<T, U> a, Map<T, U> b) {
+bool mapEquals<T, U>(Map<T, U>? a, Map<T, U>? b) {
   if (a == null)
     return b == null;
   if (b == null || a.length != b.length)
@@ -145,8 +143,8 @@ const int _kMergeSortLimit = 32;
 void mergeSort<T>(
   List<T> list, {
   int start = 0,
-  int end,
-  int Function(T, T) compare,
+  int? end,
+  int Function(T, T)? compare,
 }) {
   end ??= list.length;
   compare ??= _defaultCompare<T>();
@@ -156,7 +154,7 @@ void mergeSort<T>(
     return;
   }
   if (length < _kMergeSortLimit) {
-    _insertionSort(list, compare: compare, start: start, end: end);
+    _insertionSort<T>(list, compare: compare, start: start, end: end);
     return;
   }
   // Special case the first split instead of directly calling _mergeSort,
@@ -168,11 +166,11 @@ void mergeSort<T>(
   final int firstLength = middle - start;
   final int secondLength = end - middle;
   // secondLength is always the same as firstLength, or one greater.
-  final List<T> scratchSpace = List<T>(secondLength);
-  _mergeSort(list, compare, middle, end, scratchSpace, 0);
+  final List<T?> scratchSpace = List<T?>.filled(secondLength, null, growable: false);
+  _mergeSort<T>(list, compare, middle, end, scratchSpace, 0);
   final int firstTarget = end - firstLength;
-  _mergeSort(list, compare, start, middle, list, firstTarget);
-  _merge(compare, list, firstTarget, end, scratchSpace, 0, secondLength, list, start);
+  _mergeSort<T>(list, compare, start, middle, list, firstTarget);
+  _merge<T>(compare, list, firstTarget, end, scratchSpace, 0, secondLength, list, start);
 }
 
 /// Returns a [Comparator] that asserts that its first argument is comparable.
@@ -202,9 +200,9 @@ Comparator<T> _defaultCompare<T>() {
 /// they started in.
 void _insertionSort<T>(
   List<T> list, {
-  int Function(T, T) compare,
+  int Function(T, T)? compare,
   int start = 0,
-  int end,
+  int? end,
 }) {
   // If the same method could have both positional and named optional
   // parameters, this should be (list, [start, end], {compare}).
@@ -238,7 +236,7 @@ void _movingInsertionSort<T>(
   int Function(T, T) compare,
   int start,
   int end,
-  List<T> target,
+  List<T?> target,
   int targetOffset,
 ) {
   final int length = end - start;
@@ -252,7 +250,7 @@ void _movingInsertionSort<T>(
     int max = targetOffset + i;
     while (min < max) {
       final int mid = min + ((max - min) >> 1);
-      if (compare(element, target[mid]) < 0) {
+      if (compare(element, target[mid] as T) < 0) {
         max = mid;
       } else {
         min = mid + 1;
@@ -275,12 +273,12 @@ void _mergeSort<T>(
     int Function(T, T) compare,
     int start,
     int end,
-    List<T> target,
+    List<T?> target,
     int targetOffset,
     ) {
   final int length = end - start;
   if (length < _kMergeSortLimit) {
-    _movingInsertionSort(list, compare, start, end, target, targetOffset);
+    _movingInsertionSort<T>(list, compare, start, end, target, targetOffset);
     return;
   }
   final int middle = start + (length >> 1);
@@ -289,11 +287,11 @@ void _mergeSort<T>(
   // Here secondLength >= firstLength (differs by at most one).
   final int targetMiddle = targetOffset + firstLength;
   // Sort the second half into the end of the target area.
-  _mergeSort(list, compare, middle, end, target, targetMiddle);
+  _mergeSort<T>(list, compare, middle, end, target, targetMiddle);
   // Sort the first half into the end of the source area.
-  _mergeSort(list, compare, start, middle, list, middle);
+  _mergeSort<T>(list, compare, start, middle, list, middle);
   // Merge the two parts into the target area.
-  _merge(
+  _merge<T>(
     compare,
     list,
     middle,
@@ -318,10 +316,10 @@ void _merge<T>(
   List<T> firstList,
   int firstStart,
   int firstEnd,
-  List<T> secondList,
+  List<T?> secondList,
   int secondStart,
   int secondEnd,
-  List<T> target,
+  List<T?> target,
   int targetOffset,
 ) {
   // No empty lists reaches here.
@@ -330,7 +328,7 @@ void _merge<T>(
   int cursor1 = firstStart;
   int cursor2 = secondStart;
   T firstElement = firstList[cursor1++];
-  T secondElement = secondList[cursor2++];
+  T secondElement = secondList[cursor2++] as T;
   while (true) {
     if (compare(firstElement, secondElement) <= 0) {
       target[targetOffset++] = firstElement;
@@ -342,7 +340,7 @@ void _merge<T>(
     } else {
       target[targetOffset++] = secondElement;
       if (cursor2 != secondEnd) {
-        secondElement = secondList[cursor2++];
+        secondElement = secondList[cursor2++] as T;
         continue;
       }
       // Second list empties first. Flushing first list here.
