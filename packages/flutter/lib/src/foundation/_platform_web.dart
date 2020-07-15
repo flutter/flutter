@@ -17,14 +17,19 @@ platform.TargetPlatform get defaultTargetPlatform {
 }
 
 platform.TargetPlatform _browserPlatform() {
-  final String navigatorPlatform = html.window.navigator.platform?.toLowerCase() ?? '';
-  if (navigatorPlatform.startsWith('mac')) {
-    return platform.TargetPlatform.macOS;
+  final String? platformName = html.window.navigator.platform;
+  if (platformName != null) {
+    final String navigatorPlatform = platformName.toLowerCase();
+    if (navigatorPlatform.startsWith('mac')) {
+      return platform.TargetPlatform.macOS;
+    }
+    if (navigatorPlatform.contains('iphone') ||
+        navigatorPlatform.contains('ipad') ||
+        navigatorPlatform.contains('ipod')) {
+      return platform.TargetPlatform.iOS;
+    }
+    return platform.TargetPlatform.android;
+  } else {
+    return platform.TargetPlatform.android;
   }
-  if (navigatorPlatform.contains('iphone') ||
-      navigatorPlatform.contains('ipad') ||
-      navigatorPlatform.contains('ipod')) {
-    return platform.TargetPlatform.iOS;
-  }
-  return platform.TargetPlatform.android;
 }
