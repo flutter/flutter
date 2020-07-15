@@ -780,9 +780,10 @@ class RestorationBucket extends ChangeNotifier {
 
   bool _needsSerialization = false;
   void _markNeedsSerialization() {
+    assert(_manager != null);
     if (!_needsSerialization) {
       _needsSerialization = true;
-      _manager?.scheduleSerializationFor(this);
+      _manager.scheduleSerializationFor(this);
     }
   }
 

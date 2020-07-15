@@ -612,6 +612,11 @@ void main() {
     expect(() => bucket.rename(const RestorationId('bar')), throwsFlutterError);
     expect(() => bucket.dispose(), throwsFlutterError);
   });
+
+  test('cannot serialize without manager', () {
+    final RestorationBucket bucket = RestorationBucket.empty(id: const RestorationId('foo'), debugOwner: null);
+    expect(() => bucket.write(const RestorationId('foo'), 10), throwsAssertionError);
+  });
 }
 
 Map<String, dynamic> _createRawDataSet() {
