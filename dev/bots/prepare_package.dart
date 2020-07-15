@@ -347,6 +347,7 @@ class ArchiveCreator {
   /// is configured for the user to begin working.
   Future<void> _populateCaches() async {
     await _runFlutter(<String>['doctor']);
+    await _runFlutter(<String>['update-packages']);
     await _runFlutter(<String>['precache']);
     await _runFlutter(<String>['ide-config']);
 
@@ -369,6 +370,12 @@ class ArchiveCreator {
     await _runGit(<String>['clean', '-f', '-X', '**/.packages']);
     /// Remove package_config files and any contents in .dart_tool
     await _runGit(<String>['clean', '-f', '-X', '**/.dart_tool']);
+    /// Remove git subfolder from .pub-cache, this contains the flutter goldens
+    /// and new flutter_gallery.
+    final Directory gitCache = Directory(path.join(flutterRoot.absolute.path, '.pub-cache', 'git'));
+    if (gitCache.existsSync()) {
+      gitCache.deleteSync(recursive: true);
+    }
   }
 
   /// Write the archive to the given output file.
