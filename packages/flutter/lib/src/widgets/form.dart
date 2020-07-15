@@ -433,6 +433,7 @@ class FormFieldState<T> extends State<FormField<T>> {
       _hasInteractedByUser = false;
       _errorText = null;
     });
+    Form.of(context)?._fieldDidChange();
   }
 
   /// Calls [FormField.validator] to set the [errorText]. Returns true if there
