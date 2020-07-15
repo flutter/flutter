@@ -27,7 +27,7 @@ assignees: ''
      a new feature.
 
      Is your feature request related to a problem? Please give a clear and
-     a concise description of what the problem is.
+     concise description of what the problem is.
 
      Describe the alternative solutions you've considered. Is there a package
      on pub.dev/flutter that already solves this?
