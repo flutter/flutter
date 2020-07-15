@@ -346,12 +346,6 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
-  run_machine_concurrent_hot_reload:
-    description: >
-      Runs tests of concurrent hot reload commands via flutter run --machine.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-
   service_extensions_test:
     description: >
       Validates our service protocol extensions.
