@@ -18,7 +18,7 @@ More detailed logs should be in `build/cull_opacity_perf.timeline.json`.
 
 ### Cubic bezier benchmark
 
-To run the cubic bezier benchmark on a device:
+To run the cubic-bezier benchmark on a device:
 
 ```
 flutter drive --profile test_driver/cubic_bezier_perf.dart
@@ -54,7 +54,7 @@ More detailed logs should be in `build/post_backdrop_filter_perf.timeline.json`.
 
 ## Web benchmarks
 
-Web benchmarks are compiled from the same entrypoint in `lib/web_benchmarks.dart`.
+Web benchmarks are compiled from the same entry point in `lib/web_benchmarks.dart`.
 
 ### How to write a web benchmark
 
@@ -65,7 +65,7 @@ Choose one of the two benchmark types:
 
 * A "raw benchmark" records performance metrics from direct interactions with
   `dart:ui` with no framework. This kind of benchmark is good for benchmarking
-  low-level engine primitives, such as layer, picture, and semantics performance.
+  low-level engine primitives, such as a layer, picture, and semantics performance.
 * A "widget benchmark" records performance metrics using a widget. This kind of
   benchmark is good for measuring the performance of widgets, often together with
   engine work that widget-under-test incurs.
@@ -107,7 +107,7 @@ flutter run --profile -d web-server lib/web_benchmarks.dart
 flutter run --dart-define=FLUTTER_WEB_USE_SKIA=true --profile -d web-server lib/web_benchmarks.dart
 ```
 
-You can also run all benchmarks exactly like the devicelab runs them:
+You can also run all benchmarks exactly as the devicelab runs them:
 
 ```
 cd dev/devicelab
