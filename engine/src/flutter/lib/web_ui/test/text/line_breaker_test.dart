@@ -168,8 +168,16 @@ void main() {
         final String text = testCase.toText();
 
         int lastLineBreak = 0;
-        for (int i = 0; i < testCase.signs.length; i++) {
-          final Sign sign = testCase.signs[i];
+        int surrogateCount = 0;
+        // `s` is the index in the `testCase.signs` list.
+        for (int s = 0; s < testCase.signs.length; s++) {
+          // `i` is the index in the `text`.
+          final int i = s + surrogateCount;
+          if (s < testCase.chars.length && testCase.chars[s].isSurrogatePair) {
+            surrogateCount++;
+          }
+
+          final Sign sign = testCase.signs[s];
           final LineBreakResult result = nextLineBreak(text, lastLineBreak);
           if (sign.isBreakOpportunity) {
             // The line break should've been found at index `i`.

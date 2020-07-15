@@ -16,8 +16,7 @@ const double _baselineRatioHack = 1.1662499904632568;
 typedef CharPredicate = bool Function(int char);
 
 bool _whitespacePredicate(int char) {
-  final LineCharProperty? prop =
-      _normalizeLineProperty(lineLookup.findForChar(char));
+  final LineCharProperty? prop = _normalizeLineProperty(char);
   return prop == LineCharProperty.SP ||
       prop == LineCharProperty.BK ||
       prop == LineCharProperty.LF ||
@@ -25,8 +24,7 @@ bool _whitespacePredicate(int char) {
 }
 
 bool _newlinePredicate(int char) {
-  final LineCharProperty? prop =
-      _normalizeLineProperty(lineLookup.findForChar(char));
+  final LineCharProperty? prop = _normalizeLineProperty(char);
   return prop == LineCharProperty.BK || prop == LineCharProperty.LF || prop == LineCharProperty.CR;
 }
 
