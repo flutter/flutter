@@ -1554,6 +1554,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       SemanticsConfiguration config,
       Iterable<SemanticsNode> children,
   ) {
+    assert(children.isEmpty);
+
     final SemanticsConfiguration startSemanticsConfiguration = _createSemanticsConfiguration(
         values.start,
         labels?.start,
