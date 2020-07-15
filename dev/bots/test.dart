@@ -746,6 +746,7 @@ Future<void> _runWebIntegrationTests() async {
   await _runWebDebugTest('lib/stack_trace.dart');
   await _runWebDebugTest('lib/web_directory_loading.dart');
   await _runWebDebugTest('test/test.dart');
+  await _runWebDebugTest('lib/null_assert_main.dart', enableNullSafety: true);
   await _runWebDebugTest('lib/null_safe_main.dart', enableNullSafety: true);
   await _runWebDebugTest('lib/web_define_loading.dart',
     additionalArguments: <String>[

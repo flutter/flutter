@@ -377,6 +377,11 @@ class FakeHttpClientRequest implements HttpClientRequest {
 
   @override
   void writeln([Object obj = '']) {}
+
+  // TODO(zichangguo): remove the ignore after the change in dart:io lands.
+  @override
+  // ignore: override_on_non_overriding_member
+  void abort([Object exception, StackTrace stackTrace]) {}
 }
 
 class FakeHttpClientResponse implements HttpClientResponse {
@@ -724,6 +729,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isMacOSEnabled = false,
     this.isWebEnabled = false,
     this.isWindowsEnabled = false,
+    this.isSingleWidgetReloadEnabled = false,
 });
 
   @override
@@ -737,6 +743,9 @@ class TestFeatureFlags implements FeatureFlags {
 
   @override
   final bool isWindowsEnabled;
+
+  @override
+  final bool isSingleWidgetReloadEnabled;
 
   @override
   bool isEnabled(Feature feature) {
