@@ -681,7 +681,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   }
 
   /// Simulates restoring the state of the widget tree after the application
-  /// restarted.
+  /// is restarted.
   ///
   /// The method grabs the current serialized restoration data from the
   /// [RestorationManager], takes down the widget tree to destroy all in-memory

@@ -66,7 +66,7 @@ typedef _BucketVisitor = void Function(RestorationBucket bucket);
 /// new bucket hierarchy (that parent may be the updated [rootBucket]).
 ///
 /// Same platforms restrict the size of the restoration data. Therefore, the
-/// data stored in the buckets should be as minimal as possible while still
+/// data stored in the buckets should be as small as possible while still
 /// allowing the app to restore its current state from it. Data that can be
 /// retrieved from other services (e.g. a database or a web server) should not
 /// be included in the restoration data. Instead, a small identifier (e.g. an ID
@@ -394,12 +394,12 @@ class RestorationId {
 ///
 /// Per convention, the owner of the bucket has exclusive access to the values
 /// stored in the bucket. It can read, add, modify, and remove values via the
-/// [read], [write], and [remove] methods. In general, the owner should store all
-/// the data in the bucket that it needs to restore its current state. If its
-/// current state changes, the data in the bucket must be updated. At the same
-/// time, the data in the bucket should be kept as minimal as possible. For
-/// example, for data that can be retrieved from other sources (like a database
-/// or webservice) only enough information (e.g. an ID or resource locator) to
+/// [read], [write], and [remove] methods. In general, the owner should store
+/// all the data in the bucket that it needs to restore its current state. If
+/// its current state changes, the data in the bucket must be updated. At the
+/// same time, the data in the bucket should be kept to a minimum. For example,
+/// for data that can be retrieved from other sources (like a database or
+/// webservice) only enough information (e.g. an ID or resource locator) to
 /// re-obtain that data should be stored in the bucket. In addition to managing
 /// the data in a bucket, an owner may also make the bucket available to other
 /// entities so they can claim child buckets from it via [claimChild] for their
@@ -414,11 +414,11 @@ class RestorationId {
 ///
 /// During the lifetime of a bucket, it may notify its listeners that the bucket
 /// has been [decommission]ed. This happens when new restoration data has been
-/// provided to e.g. the [RestorationManager] to restore the application to a
-/// different state. In response to the notification, owners must dispose their
-/// current bucket and replace it with a new bucket claimed from a new parent
-/// (which will have been initialized with the new restoration data). For
-/// example, if the owner previously claimed its bucket from
+/// provided to, for example, the [RestorationManager] to restore the
+/// application to a different state. In response to the notification, owners
+/// must dispose their current bucket and replace it with a new bucket claimed
+/// from a new parent (which will have been initialized with the new restoration
+/// data). For example, if the owner previously claimed its bucket from
 /// [RestorationManager.rootBucket], it must claim its new bucket from there
 /// again. The root bucket will have been replaced with the new root bucket just
 /// before the bucket listeners are informed about the decommission. Once the
@@ -547,7 +547,9 @@ class RestorationBucket extends ChangeNotifier {
   }
   RestorationId _id;
 
+  // Maps a restoration ID to the raw map representation of a child bucket.
   Map<dynamic, dynamic> get _rawChildren => _rawData.putIfAbsent(_childrenMapKey, () => <dynamic, dynamic>{}) as Map<dynamic, dynamic>;
+  // Maps a restoration ID to a value that is stored in this bucket.
   Map<dynamic, dynamic> get _rawValues => _rawData.putIfAbsent(_valuesMapKey, () => <dynamic, dynamic>{}) as Map<dynamic, dynamic>;
 
   /// Called to signal that this bucket and all its descendants are no longer
@@ -555,8 +557,9 @@ class RestorationBucket extends ChangeNotifier {
   ///
   /// Calling this method will drop this bucket from its parent and notify all
   /// its listeners as well as all listeners of its descendants. Once a bucket
-  /// has notified its listeners, it must not be used anymore. The bucket must
-  /// be [dispose]d and replaced with a new bucket.
+  /// has notified its listeners, it must not be used anymore. During the next
+  /// frame following the notification, the bucket must be disposed and replaced
+  /// with a new bucket.
   ///
   /// As an example, the [RestorationManager] calls this method on its root
   /// bucket when it has been asked to restore a running application to a
@@ -572,8 +575,6 @@ class RestorationBucket extends ChangeNotifier {
   /// bucket from the new [RestorationManager.rootBucket]. Once the new bucket
   /// is claimed, owners should restore their state according to the data stored
   /// in the new bucket.
-  ///
-  /// A call to [decommission] must always be followed by a call to [dispose].
   void decommission() {
     assert(_debugAssertNotDisposed());
     if (_parent != null) {
@@ -682,7 +683,8 @@ class RestorationBucket extends ChangeNotifier {
   // The restoration IDs and associated buckets of children that have been
   // claimed via [claimChild].
   final Map<RestorationId, RestorationBucket> _claimedChildren = <RestorationId, RestorationBucket>{};
-  // Newly created child buckets whose restoration id is still in use, see comment in [claimChild] for details.
+  // Newly created child buckets whose restoration id is still in use, see
+  // comment in [claimChild] for details.
   final Map<RestorationId, List<RestorationBucket>> _childrenToAdd = <RestorationId, List<RestorationBucket>>{};
 
   /// Claims ownership of the child with the provided `id` from this bucket.
@@ -694,7 +696,7 @@ class RestorationBucket extends ChangeNotifier {
   /// The claimer of the bucket is expected to use the data stored in the bucket
   /// to restore itself to its previous state described by the data in the
   /// bucket. If the bucket is empty, it should initialize itself to default
-  /// values. Whenever the information, that the claimer needs to restore its
+  /// values. Whenever the information that the claimer needs to restore its
   /// state changes, the data in the bucket should be updated to reflect that.
   ///
   /// A child bucket with a given `id` can only have one owner. If another owner
