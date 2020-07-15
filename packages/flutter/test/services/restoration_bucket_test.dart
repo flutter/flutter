@@ -280,8 +280,8 @@ void main() {
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
     final RestorationBucket child1 = root.claimChild(const RestorationId('child1'), debugOwner: 'owner1');
-    final RestorationBucket child1OfChild1 = child1.claimChild(const RestorationId('child1OfChild1'), debugOwner: 'owner1.1');
-    final RestorationBucket child2OfChild1 = child1.claimChild(const RestorationId('child2OfChild1'), debugOwner: 'owner1.2');
+    child1.claimChild(const RestorationId('child1OfChild1'), debugOwner: 'owner1.1');
+    child1.claimChild(const RestorationId('child2OfChild1'), debugOwner: 'owner1.2');
     final RestorationBucket child2 = root.claimChild(const RestorationId('child2'), debugOwner: 'owner2');
 
     expect(manager.updateScheduled, isTrue);
