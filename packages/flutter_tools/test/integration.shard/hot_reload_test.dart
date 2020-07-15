@@ -36,6 +36,40 @@ void main() {
     await flutter.hotReload();
   });
 
+  test('multiple overlapping hot reload are debounced and queued', () async {
+    await _flutter.run();
+    // Capture how many *real* hot reloads occur.
+    int numReloads = 0;
+    final StreamSubscription<void> subscription = _flutter.stdout
+        .map(parseFlutterResponse)
+        .where(_isHotReloadCompletionEvent)
+        .listen((_) => numReloads++);
+
+    // To reduce tests flaking, override the debounce timer to something higher than
+    // the default to ensure the hot reloads that are supposed to arrive within the
+    // debounce period will even on slower CI machines.
+    const int hotReloadDebounceOverrideMs = 250;
+    const Duration delay = Duration(milliseconds: hotReloadDebounceOverrideMs * 2);
+
+    Future<void> doReload([void _]) =>
+        _flutter.hotReload(debounce: true, debounceDurationOverrideMs: hotReloadDebounceOverrideMs);
+
+    try {
+      await Future.wait<void>(<Future<void>>[
+        doReload(),
+        doReload(),
+        Future<void>.delayed(delay).then(doReload),
+        Future<void>.delayed(delay).then(doReload),
+      ]);
+
+      // We should only get two reloads, as the first two will have been
+      // merged together by the debounce, and the second two also.
+      expect(numReloads, equals(2));
+    } finally {
+      await subscription.cancel();
+    }
+  });
+
   test('newly added code executes during hot reload', () async {
     final StringBuffer stdout = StringBuffer();
     final StreamSubscription<String> subscription = flutter.stdout.listen(stdout.writeln);
@@ -202,4 +236,12 @@ void main() {
     await flutter.resume();
     await subscription.cancel();
   });
+}
+
+bool _isHotReloadCompletionEvent(Map<String, dynamic> event) {
+  return event != null &&
+      event['event'] == 'app.progress' &&
+      event['params'] != null &&
+      event['params']['progressId'] == 'hot.reload' &&
+      event['params']['finished'] == true;
 }
