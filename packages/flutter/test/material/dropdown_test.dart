@@ -362,6 +362,10 @@ void main() {
 
     expect(value, equals('three'));
 
+    // Once the value of DropdownButton change, need rebuilding
+    // to update RenderIndexStack.
+    await tester.pumpWidget(build());
+
     await tester.tap(find.text('three'));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the menu animation
@@ -394,7 +398,7 @@ void main() {
               settings: settings,
               builder: (BuildContext context) {
                 return Material(
-                  child: buildFrame(value: 'one', onChanged: didChangeValue),
+                  child: buildFrame(value: value, onChanged: didChangeValue),
                 );
               },
             );
@@ -418,13 +422,15 @@ void main() {
 
     expect(value, equals('three'));
 
+    // Once the value of DropdownButton change, need rebuilding
+    // to update RenderIndexStack.
+    await tester.pumpWidget(build());
+
     await tester.tap(find.text('three'));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the menu animation
 
     expect(value, equals('three'));
-
-    await tester.pumpWidget(build());
 
     await tester.tap(find.text('two').last);
 
@@ -2169,6 +2175,7 @@ void main() {
                       icon: Container(),
                       items: itemValues.map<DropdownMenuItem<String>>((String value) {
                         return DropdownMenuItem<String>(
+                          value: value,
                           child: Text(value),
                         );
                       }).toList(),
@@ -2512,6 +2519,10 @@ void main() {
     expect(value, equals('three'));
     expect(dropdownButtonTapCounter, 1); // Should not change.
 
+    // Once the value of DropdownButton change, need rebuilding
+    // to update RenderIndexStack.
+    await tester.pumpWidget(build());
+
     // Tap dropdown button again.
     await tester.tap(find.text('three'));
     await tester.pumpAndSettle();
@@ -2540,27 +2551,28 @@ void main() {
     ];
 
     int currentIndex = -1;
-    await tester.pumpWidget(
-      TestApp(
-        textDirection: TextDirection.ltr,
-        child: Material(
-          child: RepaintBoundary(
-            child: DropdownButton<String>(
-              value: value,
-              onChanged: onChanged,
-              items: menuItems.map<DropdownMenuItem<String>>((String item) {
-                currentIndex += 1;
-                return DropdownMenuItem<String>(
-                  value: item,
-                  onTap: onTapCallbacks[currentIndex],
-                  child: Text(item),
-                );
-              }).toList(),
-            ),
+
+    Widget build() => TestApp(
+      textDirection: TextDirection.ltr,
+      child: Material(
+        child: RepaintBoundary(
+          child: DropdownButton<String>(
+            value: value,
+            onChanged: onChanged,
+            items: menuItems.map<DropdownMenuItem<String>>((String item) {
+              currentIndex += 1;
+              return DropdownMenuItem<String>(
+                value: item,
+                onTap: onTapCallbacks[currentIndex],
+                child: Text(item),
+              );
+            }).toList(),
           ),
         ),
       ),
     );
+
+    await tester.pumpWidget(build());
 
     // Tap dropdown button.
     await tester.tap(find.text('one'));
@@ -2578,6 +2590,11 @@ void main() {
     expect(value, equals('three'));
     expect(menuItemTapCounters, <int>[0, 0, 1, 0]);
 
+    // Once the value of DropdownButton change, need rebuilding
+    // to update RenderIndexStack.
+    currentIndex = -1;
+    await tester.pumpWidget(build());
+
     // Tap dropdown button again.
     await tester.tap(find.text('three'));
     await tester.pumpAndSettle();
@@ -2593,6 +2610,11 @@ void main() {
     // Should update the counter for the second item (first index).
     expect(value, equals('two'));
     expect(menuItemTapCounters, <int>[0, 1, 1, 0]);
+
+    // Once the value of DropdownButton change, need rebuilding
+    // to update RenderIndexStack.
+    currentIndex = -1;
+    await tester.pumpWidget(build());
 
     // Tap dropdown button again.
     await tester.tap(find.text('two'));

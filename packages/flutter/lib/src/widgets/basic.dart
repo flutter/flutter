@@ -3340,20 +3340,6 @@ class Stack extends MultiChildRenderObjectWidget {
   }
 }
 
-// BuildContext/Element doesn't have a parent accessor, but it can be
-// simulated with visitAncestorElements. _getParent is needed because
-// context.getElementForInheritedWidgetOfExactType will return itself if it
-// happens to be of the correct type. getParent should be O(1), since we
-// always return false at the first ancestor.
-BuildContext _getParent(BuildContext context) {
-  BuildContext parent;
-  context.visitAncestorElements((Element ancestor) {
-    parent = ancestor;
-    return false;
-  });
-  return parent;
-}
-
 /// A [Stack] that shows a single child from a list of children.
 ///
 /// The displayed child is the one with the given [index]. The stack is
@@ -3378,32 +3364,7 @@ class IndexedStack extends Stack {
     StackFit sizing = StackFit.loose,
     this.index = 0,
     List<Widget> children = const <Widget>[],
-  }) : super(key: key, alignment: alignment, textDirection: textDirection, fit: sizing, children: _IndexedStackScope.wrapAll(children, index ?? 0));
-
-  /// Visits the _IndexedStackScope widget ancestors of the given element and add
-  /// dependencies.
-  ///
-  ///  Returns true if the element on the display path of all the ancestor
-  ///  IndexedStack widgets.
-  static bool addIndexedStackScopeAncestorsDependencies(BuildContext context) {
-    _IndexedStackScope scope;
-    bool result = true;
-    InheritedElement scopeElement = context.getElementForInheritedWidgetOfExactType<_IndexedStackScope>();
-    while (scopeElement != null) {
-      scope = context.dependOnInheritedElement(scopeElement) as _IndexedStackScope;
-      assert(scope != null);
-      if (scope.stackIndex != scope.childIndex) {
-        result = false;
-      }
-      // _getParent is needed here because
-      // context.getElementForInheritedWidgetOfExactType will return itself if it
-      // happens to be of the correct type.
-      final BuildContext parent = _getParent(scopeElement);
-      scopeElement = parent.getElementForInheritedWidgetOfExactType<_IndexedStackScope>();
-    }
-
-    return result;
-  }
+  }) : super(key: key, alignment: alignment, textDirection: textDirection, fit: sizing, children: children);
 
   /// The index of the child to show.
   final int index;
@@ -3425,43 +3386,6 @@ class IndexedStack extends Stack {
       ..index = index
       ..alignment = alignment
       ..textDirection = textDirection ?? Directionality.of(context);
-  }
-}
-
-class _IndexedStackScope extends InheritedWidget {
-  const _IndexedStackScope({
-    Key key,
-    @required this.stackIndex,
-    @required this.childIndex,
-    Widget child,
-  })  : assert(stackIndex != null),
-        assert(childIndex != null),
-        super(key: key, child: child);
-
-  // Wraps the given child in a [_IndexedStackScope].
-  factory _IndexedStackScope.wrap(Widget child, int stackIndex, int childIndex) {
-    assert(child != null);
-    return _IndexedStackScope(stackIndex: stackIndex, childIndex: childIndex, child: child);
-  }
-
-  // Wraps each of the given children in [_IndexedStackScope]s.
-  //
-  // The key for each [_IndexedStackScope] is derived either from the wrapped
-  // child's key (if the wrapped child has a non-null key) or from the wrapped
-  // child's index in the list.
-  static List<_IndexedStackScope> wrapAll(List<Widget> widgets, int stackIndex) {
-    final List<_IndexedStackScope> result = List<_IndexedStackScope>(widgets.length);
-    for (int i = 0; i < result.length; ++i)
-      result[i] = _IndexedStackScope.wrap(widgets[i], stackIndex, i);
-    return result;
-  }
-
-  final int stackIndex;
-  final int childIndex;
-
-  @override
-  bool updateShouldNotify(_IndexedStackScope oldWidget) {
-    return childIndex != oldWidget.childIndex || stackIndex != oldWidget.stackIndex;
   }
 }
 
