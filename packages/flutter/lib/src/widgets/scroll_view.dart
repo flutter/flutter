@@ -968,6 +968,12 @@ abstract class BoxScrollView extends ScrollView {
 /// ```
 /// {@end-tool}
 ///
+/// ## Selection of list items
+///
+/// `ListView` has no built-in notion of a selected item or items. For a small
+/// example of how a caller might wire up basic item selection, see
+/// [ListTile.selected].
+///
 /// See also:
 ///
 ///  * [SingleChildScrollView], which is a scrollable widget that has a single
@@ -1051,12 +1057,13 @@ class ListView extends BoxScrollView {
   /// The `itemBuilder` callback will be called only with indices greater than
   /// or equal to zero and less than `itemCount`.
   ///
-  /// The `itemBuilder` should actually create the widget instances when called.
-  /// Avoid using a builder that returns a previously-constructed widget; if the
-  /// list view's children are created in advance, or all at once when the
-  /// [ListView] itself is created, it is more efficient to use the [ListView]
-  /// constructor. Even more efficient, however, is to create the instances on
-  /// demand using this constructor's `itemBuilder` callback.
+  /// The `itemBuilder` should always return a non-null widget, and actually
+  /// create the widget instances when called. Avoid using a builder that
+  /// returns a previously-constructed widget; if the list view's children are
+  /// created in advance, or all at once when the [ListView] itself is created,
+  /// it is more efficient to use the [ListView] constructor. Even more
+  /// efficient, however, is to create the instances on demand using this
+  /// constructor's `itemBuilder` callback.
   ///
   /// The `addAutomaticKeepAlives` argument corresponds to the
   /// [SliverChildBuilderDelegate.addAutomaticKeepAlives] property. The
@@ -1128,11 +1135,11 @@ class ListView extends BoxScrollView {
   /// The `separatorBuilder` callback will be called with indices greater than
   /// or equal to zero and less than `itemCount - 1`.
   ///
-  /// The `itemBuilder` and `separatorBuilder` callbacks should actually create
-  /// widget instances when called. Avoid using a builder that returns a
-  /// previously-constructed widget; if the list view's children are created in
-  /// advance, or all at once when the [ListView] itself is created, it is more
-  /// efficient to use the [ListView] constructor.
+  /// The `itemBuilder` and `separatorBuilder` callbacks should always return a
+  /// non-null widget, and actually create widget instances when called. Avoid
+  /// using a builder that returns a previously-constructed widget; if the list
+  /// view's children are created in advance, or all at once when the [ListView]
+  /// itself is created, it is more efficient to use the [ListView] constructor.
   ///
   /// {@tool snippet}
   ///
@@ -1438,6 +1445,24 @@ class ListView extends BoxScrollView {
 /// By default, [ListView] will automatically pad the list's scrollable
 /// extremities to avoid partial obstructions indicated by [MediaQuery]'s
 /// padding. To avoid this behavior, override with a zero [padding] property.
+///
+/// {@tool snippet}
+/// The following example demonstrates how to override the default top padding
+/// using [MediaQuery.removePadding].
+///
+/// ```dart
+/// Widget myWidget(BuildContext context) {
+///   return MediaQuery.removePadding(
+///     context: context,
+///     removeTop: true,
+///     child: ListView.builder(
+///       itemCount: 25,
+///       itemBuilder: (BuildContext context, int index) => ListTile(title: Text('item $index')),
+///     )
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// Once code has been ported to use [CustomScrollView], other slivers, such as
 /// [SliverList] or [SliverAppBar], can be put in the [CustomScrollView.slivers]

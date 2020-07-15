@@ -504,19 +504,24 @@ void main() {
         TestSemantics.rootChild(
           children: <TestSemantics>[
             TestSemantics(
-              label: 'Dialog',
-              textDirection: TextDirection.ltr,
-              flags: <SemanticsFlag>[
-                SemanticsFlag.scopesRoute,
-                SemanticsFlag.namesRoute,
-              ],
               children: <TestSemantics>[
                 TestSemantics(
-                  label: 'BottomSheet',
+                  label: 'Dialog',
                   textDirection: TextDirection.ltr,
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.scopesRoute,
+                    SemanticsFlag.namesRoute,
+                  ],
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      label: 'BottomSheet',
+                      textDirection: TextDirection.ltr,
+                    ),
+                  ],
                 ),
               ],
             ),
+            TestSemantics(),
           ],
         ),
       ],
@@ -603,25 +608,30 @@ void main() {
         TestSemantics.rootChild(
           children: <TestSemantics>[
             TestSemantics(
-              label: 'Dialog',
-              textDirection: TextDirection.ltr,
-              flags: <SemanticsFlag>[
-                SemanticsFlag.scopesRoute,
-                SemanticsFlag.namesRoute,
-              ],
               children: <TestSemantics>[
                 TestSemantics(
-                  flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
-                  actions: <SemanticsAction>[SemanticsAction.scrollDown, SemanticsAction.scrollUp],
+                  label: 'Dialog',
+                  textDirection: TextDirection.ltr,
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.scopesRoute,
+                    SemanticsFlag.namesRoute,
+                  ],
                   children: <TestSemantics>[
                     TestSemantics(
-                      label: 'BottomSheet',
-                      textDirection: TextDirection.ltr,
+                      flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                      actions: <SemanticsAction>[SemanticsAction.scrollDown, SemanticsAction.scrollUp],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          label: 'BottomSheet',
+                          textDirection: TextDirection.ltr,
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ],
             ),
+            TestSemantics(),
           ],
         ),
       ],
@@ -685,6 +695,38 @@ void main() {
     // Bottom sheet is displayed in correct position above all content including
     // the BottomNavigationBar.
     expect(tester.getBottomLeft(find.byType(BottomSheet)).dy, 600.0);
+  });
+
+  testWidgets('Verify that route settings can be set in the showModalBottomSheet',
+      (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    const RouteSettings routeSettings =
+        RouteSettings(name: 'route_name', arguments: 'route_argument');
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        key: scaffoldKey,
+        body: const Center(child: Text('body')),
+      ),
+    ));
+
+    RouteSettings retrievedRouteSettings;
+
+    showModalBottomSheet<void>(
+      context: scaffoldKey.currentContext,
+      routeSettings: routeSettings,
+      builder: (BuildContext context) {
+        retrievedRouteSettings = ModalRoute.of(context).settings;
+        return Container(
+          child: const Text('BottomSheet'),
+        );
+      },
+    );
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(retrievedRouteSettings, routeSettings);
   });
 }
 

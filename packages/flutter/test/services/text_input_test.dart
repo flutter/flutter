@@ -192,6 +192,33 @@ void main() {
       expect(client.latestMethodCall, 'showAutocorrectionPromptRect');
     });
   });
+
+  test('TextEditingValue.isComposingRangeValid', () async {
+    // The composing range is empty.
+    expect(const TextEditingValue(text: '').isComposingRangeValid, isFalse);
+
+    expect(
+      const TextEditingValue(text: 'test', composing: TextRange(start: 1, end: 0)).isComposingRangeValid,
+      isFalse,
+    );
+
+    // The composing range is out of range for the text.
+    expect(
+      const TextEditingValue(text: 'test', composing: TextRange(start: 1, end: 5)).isComposingRangeValid,
+      isFalse,
+    );
+
+    // The composing range is out of range for the text.
+    expect(
+      const TextEditingValue(text: 'test', composing: TextRange(start: -1, end: 4)).isComposingRangeValid,
+      isFalse,
+    );
+
+    expect(
+      const TextEditingValue(text: 'test', composing: TextRange(start: 1, end: 4)).isComposingRangeValid,
+      isTrue,
+    );
+  });
 }
 
 class FakeTextInputClient implements TextInputClient {

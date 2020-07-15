@@ -170,7 +170,7 @@ function shared::execute() {
   # If running over git-bash, overrides the default UNIX executables with win32
   # executables
   case "$(uname -s)" in
-    MINGW32*)
+    MINGW*)
       DART="$DART.exe"
       PUB="$PUB.bat"
       ;;

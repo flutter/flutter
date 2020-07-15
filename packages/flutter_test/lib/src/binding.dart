@@ -256,6 +256,17 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   // See AutomatedTestWidgetsFlutterBinding.addTime for an actual implementation.
   void addTime(Duration duration);
 
+  /// Delay for `duration` of time.
+  ///
+  /// In the automated test environment ([AutomatedTestWidgetsFlutterBinding],
+  /// typically used in `flutter test`), this advances the fake [clock] for the
+  /// period and also increases timeout (see [addTime]).
+  ///
+  /// In the live test environemnt ([LiveTestWidgetsFlutterBinding], typically
+  /// used for `flutter run` and for [e2e](https://pub.dev/packages/e2e)), it is
+  /// equivalent as [Future.delayed].
+  Future<void> delayed(Duration duration);
+
   /// The value to set [debugCheckIntrinsicSizes] to while tests are running.
   ///
   /// This can be used to enable additional checks. For example,
@@ -362,7 +373,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// If `callback` completes with an error, the error will be caught by the
   /// Flutter framework and made available via [takeException], and this method
-  /// will return a future that completes will `null`.
+  /// will return a future that completes with `null`.
   ///
   /// Re-entrant calls to this method are not allowed; callers of this method
   /// are required to wait for the returned future to complete before calling
@@ -467,6 +478,11 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     HitTestResult hitTestResult, {
     TestBindingEventSource source = TestBindingEventSource.device,
   }) {
+    // This override disables calling this method from base class
+    // [GestureBinding] when the runtime type is [TestWidgetsFlutterBinding],
+    // while enables sub class [LiveTestWidgetsFlutterBinding] to override
+    // this behavior and use this argument to determine the souce of the event
+    // especially when the test app is running on a device.
     assert(source == TestBindingEventSource.test);
     super.dispatchEvent(event, hitTestResult);
   }
@@ -478,7 +494,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   /// The current client of the onscreen keyboard. Callers must pump
   /// an additional frame after setting this property to complete the
-  /// the focus change.
+  /// focus change.
   ///
   /// Instead of setting this directly, consider using
   /// [WidgetTester.showKeyboard].
@@ -516,6 +532,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     return result;
   }
   FlutterExceptionHandler _oldExceptionHandler;
+  StackTraceDemangler _oldStackTraceDemangler;
   FlutterErrorDetails _pendingExceptionDetails;
 
   static const TextStyle _messageStyle = TextStyle(
@@ -609,6 +626,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     assert(description != null);
     assert(inTest);
     _oldExceptionHandler = FlutterError.onError;
+    _oldStackTraceDemangler = FlutterError.demangleStackTrace;
     int _exceptionCount = 0; // number of un-taken exceptions
     FlutterError.onError = (FlutterErrorDetails details) {
       if (_pendingExceptionDetails != null) {
@@ -629,6 +647,17 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         _pendingExceptionDetails = details;
       }
     };
+    FlutterError.demangleStackTrace = (StackTrace stack) {
+      // package:stack_trace uses ZoneSpecification.errorCallback to add useful
+      // information to stack traces, in this case the Trace and Chain classes
+      // can be present. Because these StackTrace implementations do not follow
+      // the format the framework expects, we covert them to a vm trace here.
+      if (stack is stack_trace.Trace)
+        return stack.vmTrace;
+      if (stack is stack_trace.Chain)
+        return stack.toTrace().vmTrace;
+      return stack;
+    };
     final Completer<void> testCompleter = Completer<void>();
     final VoidCallback testCompletionHandler = _createTestCompletionHandler(description, testCompleter);
     void handleUncaughtError(dynamic exception, StackTrace stack) {
@@ -642,7 +671,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
         FlutterError.dumpErrorToConsole(FlutterErrorDetails(
           exception: exception,
-          stack: _unmangle(stack),
+          stack: stack,
           context: ErrorDescription('running a test (but after the test had completed)'),
           library: 'Flutter test framework',
         ), forceReport: true);
@@ -689,7 +718,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       final int stackLinesToOmit = reportExpectCall(stack, omittedFrames);
       FlutterError.reportError(FlutterErrorDetails(
         exception: exception,
-        stack: _unmangle(stack),
+        stack: stack,
         context: ErrorDescription('running a test'),
         library: 'Flutter test framework',
         stackFilter: (Iterable<String> frames) {
@@ -837,6 +866,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   void postTest() {
     assert(inTest);
     FlutterError.onError = _oldExceptionHandler;
+    FlutterError.demangleStackTrace = _oldStackTraceDemangler;
     _pendingExceptionDetails = null;
     _parentZone = null;
     buildOwner.focusManager = FocusManager();
@@ -1091,6 +1121,14 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
+  Future<void> delayed(Duration duration) {
+    assert(_currentFakeAsync != null);
+    addTime(duration);
+    _currentFakeAsync.elapse(duration);
+    return Future<void>.value();
+  }
+
+  @override
   Future<void> runTest(
     Future<void> testBody(),
     VoidCallback invariantTester, {
@@ -1182,7 +1220,6 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     _timeoutStopwatch = null;
     _timeout = null;
   }
-
 }
 
 /// Available policies for how a [LiveTestWidgetsFlutterBinding] should paint
@@ -1336,6 +1373,11 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
+  Future<void> delayed(Duration duration) {
+    return Future<void>.delayed(duration);
+  }
+
+  @override
   void scheduleFrame() {
     if (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark)
       return; // In benchmark mode, don't actually schedule any engine frames.
@@ -1419,8 +1461,13 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     switch (source) {
       case TestBindingEventSource.test:
         if (!renderView._pointers.containsKey(event.pointer)) {
-          assert(event.down);
-          renderView._pointers[event.pointer] = _LiveTestPointerRecord(event.pointer, event.position);
+          assert(event.down || event is PointerAddedEvent);
+          if (event.down) {
+            renderView._pointers[event.pointer] = _LiveTestPointerRecord(
+              event.pointer,
+              event.position,
+            );
+          }
         } else {
           renderView._pointers[event.pointer].position = event.position;
           if (!event.down)
@@ -1707,12 +1754,4 @@ class _LiveTestRenderView extends RenderView {
     }
     _label?.paint(context.canvas, offset - const Offset(0.0, 10.0));
   }
-}
-
-StackTrace _unmangle(StackTrace stack) {
-  if (stack is stack_trace.Trace)
-    return stack.vmTrace;
-  if (stack is stack_trace.Chain)
-    return stack.toTrace().vmTrace;
-  return stack;
 }

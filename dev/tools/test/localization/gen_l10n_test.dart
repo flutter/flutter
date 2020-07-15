@@ -308,6 +308,61 @@ void main() {
     expect(generator.header, '/// Sample header in a text file');
   });
 
+  test('sets templateArbFileName with more than one underscore correctly', () {
+    final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+      ..createSync(recursive: true);
+    l10nDirectory.childFile('app_localizations_en.arb')
+      .writeAsStringSync(singleMessageArbFileString);
+    l10nDirectory.childFile('app_localizations_es.arb')
+      .writeAsStringSync(singleEsMessageArbFileString);
+    LocalizationsGenerator generator;
+    try {
+      generator = LocalizationsGenerator(fs);
+      generator
+        ..initialize(
+          inputPathString: defaultL10nPathString,
+          templateArbFileName: 'app_localizations_en.arb',
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        )
+        ..loadResources()
+        ..writeOutputFiles();
+    } on L10nException catch (e) {
+      fail('Generating output should not fail: \n${e.message}');
+    }
+
+    final Directory outputDirectory = fs.directory('lib').childDirectory('l10n');
+    expect(outputDirectory.childFile('output-localization-file.dart').existsSync(), isTrue);
+    expect(outputDirectory.childFile('output-localization-file_en.dart').existsSync(), isTrue);
+    expect(outputDirectory.childFile('output-localization-file_es.dart').existsSync(), isTrue);
+  });
+
+  test('filenames with invalid locales should not be recognized', () {
+    final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+      ..createSync(recursive: true);
+    l10nDirectory.childFile('app_localizations_en.arb')
+      .writeAsStringSync(singleMessageArbFileString);
+    l10nDirectory.childFile('app_localizations_en_CA_foo.arb')
+      .writeAsStringSync(singleMessageArbFileString);
+    LocalizationsGenerator generator;
+    try {
+      generator = LocalizationsGenerator(fs);
+      generator
+        ..initialize(
+          inputPathString: defaultL10nPathString,
+          templateArbFileName: 'app_localizations_en.arb',
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        )
+        ..loadResources();
+    } on L10nException catch (e) {
+      expect(e.message, contains('The following .arb file\'s locale could not be determined'));
+      return;
+    }
+
+    fail('Using app_en_CA_foo.arb should fail as it is not a valid locale.');
+  });
+
   test('correctly creates an unimplemented messages file', () {
     fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
       ..createSync(recursive: true)
@@ -799,7 +854,7 @@ void main() {
       expect(generator.supportedLocales.contains(LocaleInfo.fromString('zh')), true);
     });
 
-    test('correctly prioritizes @@locale property in arb file over filename', () {
+    test('correctly requires @@locale property in arb file to match the filename locale suffix', () {
       const String arbFileWithEnLocale = '''
 {
   "@@locale": "en",
@@ -837,15 +892,14 @@ void main() {
         );
         generator.loadResources();
       } on L10nException catch (e) {
-        fail('Setting language and locales should not fail: \n${e.message}');
+        expect(e.message, contains('The locale specified in @@locale and the arb filename do not match.'));
+        return;
       }
 
-      // @@locale property should hold higher priority
-      expect(generator.supportedLocales.contains(LocaleInfo.fromString('en')), true);
-      expect(generator.supportedLocales.contains(LocaleInfo.fromString('zh')), true);
-      // filename should not be used since @@locale is specified
-      expect(generator.supportedLocales.contains(LocaleInfo.fromString('es')), false);
-      expect(generator.supportedLocales.contains(LocaleInfo.fromString('am')), false);
+      fail(
+        'An exception should occur if the @@locale and the filename extensions are '
+        'defined but not matching.'
+      );
     });
 
     test("throws when arb file's locale could not be determined", () {

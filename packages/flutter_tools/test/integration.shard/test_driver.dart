@@ -437,6 +437,8 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     bool startPaused = false,
     bool pauseOnExceptions = false,
     bool chrome = false,
+    bool expressionEvaluation = true,
+    bool structuredErrors = false,
     File pidFile,
     String script,
   }) async {
@@ -448,9 +450,15 @@ class FlutterRunTestDriver extends FlutterTestDriver {
         '--machine',
         '-d',
         if (chrome)
-          ...<String>['chrome', '--web-run-headless', '--web-enable-expression-evaluation']
+          ...<String>[
+            'chrome',
+            '--web-run-headless',
+            if (!expressionEvaluation) '--no-web-enable-expression-evaluation'
+          ]
         else
           'flutter-tester',
+        if (structuredErrors)
+          '--dart-define=flutter.inspector.structuredErrors=true',
       ],
       withDebugger: withDebugger,
       startPaused: startPaused,
@@ -546,8 +554,9 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     return prematureExitGuard.future;
   }
 
-  Future<void> hotRestart({ bool pause = false }) => _restart(fullRestart: true, pause: pause);
-  Future<void> hotReload() => _restart(fullRestart: false);
+  Future<void> hotRestart({ bool pause = false, bool debounce = false}) => _restart(fullRestart: true, pause: pause);
+  Future<void> hotReload({ bool debounce = false, int debounceDurationOverrideMs }) =>
+      _restart(fullRestart: false, debounce: debounce, debounceDurationOverrideMs: debounceDurationOverrideMs);
 
   Future<void> scheduleFrame() async {
     if (_currentRunningAppId == null) {
@@ -572,7 +581,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     }
   }
 
-  Future<void> _restart({ bool fullRestart = false, bool pause = false }) async {
+  Future<void> _restart({ bool fullRestart = false, bool pause = false, bool debounce = false, int debounceDurationOverrideMs }) async {
     if (_currentRunningAppId == null) {
       throw Exception('App has not started yet');
     }
@@ -580,7 +589,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     _debugPrint('Performing ${ pause ? "paused " : "" }${ fullRestart ? "hot restart" : "hot reload" }...');
     final dynamic hotReloadResponse = await _sendRequest(
       'app.restart',
-      <String, dynamic>{'appId': _currentRunningAppId, 'fullRestart': fullRestart, 'pause': pause},
+      <String, dynamic>{'appId': _currentRunningAppId, 'fullRestart': fullRestart, 'pause': pause, 'debounce': debounce, 'debounceDurationOverrideMs': debounceDurationOverrideMs},
     );
     _debugPrint('${fullRestart ? "Hot restart" : "Hot reload"} complete.');
 
@@ -797,4 +806,21 @@ class SourcePosition {
 
   final int line;
   final int column;
+}
+
+Future<Isolate> waitForExtension(VmService vmService) async {
+  final Completer<void> completer = Completer<void>();
+  await vmService.streamListen(EventStreams.kExtension);
+  vmService.onExtensionEvent.listen((Event event) {
+    if (event.json['extensionKind'] == 'Flutter.FrameworkInitialization') {
+      completer.complete();
+    }
+  });
+  final IsolateRef isolateRef = (await vmService.getVM()).isolates.first;
+  final Isolate isolate = await vmService.getIsolate(isolateRef.id);
+  if (isolate.extensionRPCs.contains('ext.flutter.brightnessOverride')) {
+    return isolate;
+  }
+  await completer.future;
+  return isolate;
 }

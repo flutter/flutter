@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/fuchsia/fuchsia_workflow.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:quiver/testing/async.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -21,10 +22,12 @@ import '../../src/mocks.dart';
 void main() {
   Daemon daemon;
   NotifyingLogger notifyingLogger;
+  BufferLogger bufferLogger;
 
   group('daemon', () {
     setUp(() {
-      notifyingLogger = NotifyingLogger(verbose: false);
+      bufferLogger = BufferLogger.test();
+      notifyingLogger = NotifyingLogger(verbose: false, parent: bufferLogger);
     });
 
     tearDown(() {
@@ -299,19 +302,15 @@ void main() {
   });
 
   testUsingContext('notifyingLogger outputs trace messages in verbose mode', () async {
-    final NotifyingLogger logger = NotifyingLogger(verbose: true);
+    final NotifyingLogger logger = NotifyingLogger(verbose: true, parent: bufferLogger);
 
-    final Future<LogMessage> messageResult = logger.onMessage.first;
     logger.printTrace('test');
 
-    final LogMessage message = await messageResult;
-
-    expect(message.level, 'trace');
-    expect(message.message, 'test');
+    expect(bufferLogger.errorText, contains('test'));
   });
 
   testUsingContext('notifyingLogger ignores trace messages in non-verbose mode', () async {
-    final NotifyingLogger logger = NotifyingLogger(verbose: false);
+    final NotifyingLogger logger = NotifyingLogger(verbose: false, parent: bufferLogger);
 
     final Future<LogMessage> messageResult = logger.onMessage.first;
     logger.printTrace('test');
@@ -321,10 +320,11 @@ void main() {
 
     expect(message.level, 'status');
     expect(message.message, 'hello');
+    expect(bufferLogger.errorText, contains('test'));
   });
 
   testUsingContext('notifyingLogger buffers messages sent before a subscription', () async {
-    final NotifyingLogger logger = NotifyingLogger(verbose: false);
+    final NotifyingLogger logger = NotifyingLogger(verbose: false, parent: bufferLogger);
 
     logger.printStatus('hello');
 
@@ -344,6 +344,89 @@ void main() {
         jsonEncodeObject(OperationResult(1, 'foo')),
         '{"code":1,"message":"foo"}',
       );
+    });
+  });
+
+  group('daemon queue', () {
+    DebounceOperationQueue<int, String> queue;
+    const Duration debounceDuration = Duration(seconds: 1);
+
+    setUp(() {
+      queue = DebounceOperationQueue<int, String>();
+    });
+
+    testWithoutContext(
+        'debounces/merges same operation type and returns same result',
+        () async {
+      await runFakeAsync((FakeAsync time) async {
+        final List<Future<int>> operations = <Future<int>>[
+          queue.queueAndDebounce('OP1', debounceDuration, () async => 1),
+          queue.queueAndDebounce('OP1', debounceDuration, () async => 2),
+        ];
+
+        time.elapse(debounceDuration * 5);
+        final List<int> results = await Future.wait(operations);
+
+        expect(results, orderedEquals(<int>[1, 1]));
+      });
+    });
+
+    testWithoutContext('does not merge results outside of the debounce duration',
+        () async {
+      await runFakeAsync((FakeAsync time) async {
+        final List<Future<int>> operations = <Future<int>>[
+          queue.queueAndDebounce('OP1', debounceDuration, () async => 1),
+          Future<int>.delayed(debounceDuration * 2).then((_) =>
+              queue.queueAndDebounce('OP1', debounceDuration, () async => 2)),
+        ];
+
+        time.elapse(debounceDuration * 5);
+        final List<int> results = await Future.wait(operations);
+
+        expect(results, orderedEquals(<int>[1, 2]));
+      });
+    });
+
+    testWithoutContext('does not merge results of different operations',
+        () async {
+      await runFakeAsync((FakeAsync time) async {
+        final List<Future<int>> operations = <Future<int>>[
+          queue.queueAndDebounce('OP1', debounceDuration, () async => 1),
+          queue.queueAndDebounce('OP2', debounceDuration, () async => 2),
+        ];
+
+        time.elapse(debounceDuration * 5);
+        final List<int> results = await Future.wait(operations);
+
+        expect(results, orderedEquals(<int>[1, 2]));
+      });
+    });
+
+    testWithoutContext('does not run any operations concurrently', () async {
+      // Crete a function thats slow, but throws if another instance of the
+      // function is running.
+      bool isRunning = false;
+      Future<int> f(int ret) async {
+        if (isRunning) {
+          throw 'Functions ran concurrently!';
+        }
+        isRunning = true;
+        await Future<void>.delayed(debounceDuration * 2);
+        isRunning = false;
+        return ret;
+      }
+
+      await runFakeAsync((FakeAsync time) async {
+        final List<Future<int>> operations = <Future<int>>[
+          queue.queueAndDebounce('OP1', debounceDuration, () => f(1)),
+          queue.queueAndDebounce('OP2', debounceDuration, () => f(2)),
+        ];
+
+        time.elapse(debounceDuration * 5);
+        final List<int> results = await Future.wait(operations);
+
+        expect(results, orderedEquals(<int>[1, 2]));
+      });
     });
   });
 }

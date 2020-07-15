@@ -29,7 +29,7 @@ class BuildLinuxCommand extends BuildSubCommand {
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
     addBuildPerformanceFile(hide: !verboseHelp);
     addBundleSkSLPathOption(hide: !verboseHelp);
-    addNullSafetyModeOptions();
+    addNullSafetyModeOptions(hide: !verboseHelp);
   }
 
   @override

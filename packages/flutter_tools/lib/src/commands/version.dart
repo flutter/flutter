@@ -30,6 +30,9 @@ class VersionCommand extends FlutterCommand {
   }
 
   @override
+  bool get deprecated => true;
+
+  @override
   final String name = 'version';
 
   @override
@@ -151,6 +154,7 @@ class VersionCommand extends FlutterCommand {
         directory: projectRoot,
         upgrade: true,
         checkLastModified: false,
+        generateSyntheticPackage: false,
       );
     }
 

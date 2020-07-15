@@ -852,6 +852,9 @@ class WidgetsApp extends StatefulWidget {
     LogicalKeySet(LogicalKeyboardKey.space): const ActivateIntent(),
     LogicalKeySet(LogicalKeyboardKey.gameButtonA): const ActivateIntent(),
 
+    // Dismissal
+    LogicalKeySet(LogicalKeyboardKey.escape): const DismissIntent(),
+
     // Keyboard traversal.
     LogicalKeySet(LogicalKeyboardKey.tab): const NextFocusIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const PreviousFocusIntent(),
@@ -874,6 +877,9 @@ class WidgetsApp extends StatefulWidget {
     // Activation
     LogicalKeySet(LogicalKeyboardKey.space): const ActivateIntent(),
 
+    // Dismissal
+    LogicalKeySet(LogicalKeyboardKey.escape): const DismissIntent(),
+
     // Keyboard traversal.
     LogicalKeySet(LogicalKeyboardKey.tab): const NextFocusIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const PreviousFocusIntent(),
@@ -892,6 +898,9 @@ class WidgetsApp extends StatefulWidget {
     // Activation
     LogicalKeySet(LogicalKeyboardKey.enter): const ActivateIntent(),
     LogicalKeySet(LogicalKeyboardKey.space): const ActivateIntent(),
+
+    // Dismissal
+    LogicalKeySet(LogicalKeyboardKey.escape): const DismissIntent(),
 
     // Keyboard traversal
     LogicalKeySet(LogicalKeyboardKey.tab): const NextFocusIntent(),
@@ -1298,6 +1307,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
           },
         onUnknownRoute: _onUnknownRoute,
         observers: widget.navigatorObservers,
+        reportsRouteUpdateToEngine: true,
       );
     }
 
@@ -1474,8 +1484,12 @@ class _MediaQueryFromWindowsState extends State<_MediaQueryFromWindow> with Widg
 
   @override
   Widget build(BuildContext context) {
+    MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
+    if (!kReleaseMode) {
+      data = data.copyWith(platformBrightness: debugBrightnessOverride);
+    }
     return MediaQuery(
-      data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+      data: data,
       child: widget.child,
     );
   }

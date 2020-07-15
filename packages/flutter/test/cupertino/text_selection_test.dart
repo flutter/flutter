@@ -176,7 +176,8 @@ void main() {
     });
   });
 
-  testWidgets('Paste only appears when clipboard has contents', (WidgetTester tester) async {
+  // TODO(justinmc): https://github.com/flutter/flutter/issues/60145
+  testWidgets('Paste always appears regardless of clipboard content on iOS', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
@@ -202,8 +203,8 @@ void main() {
     await tester.tapAt(textOffsetToPosition(tester, index));
     await tester.pumpAndSettle();
 
-    // No Paste yet, because nothing has been copied.
-    expect(find.text('Paste'), findsNothing);
+    // Paste is showing even though clipboard is empty.
+    expect(find.text('Paste'), findsOneWidget);
     expect(find.text('Copy'), findsOneWidget);
     expect(find.text('Cut'), findsOneWidget);
 
@@ -219,11 +220,14 @@ void main() {
     await tester.tapAt(textOffsetToPosition(tester, index));
     await tester.pumpAndSettle();
 
-    // Paste now shows.
+    // Paste still shows.
     expect(find.text('Paste'), findsOneWidget);
     expect(find.text('Copy'), findsOneWidget);
     expect(find.text('Cut'), findsOneWidget);
-  }, skip: isBrowser, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+  },
+    skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+  );
 
   group('Text selection menu overflow (iOS)', () {
     testWidgets('All menu items show when they fit.', (WidgetTester tester) async {
@@ -274,7 +278,10 @@ void main() {
       expect(find.text('Select All'), findsNothing);
       expect(find.text('◀'), findsNothing);
       expect(find.text('▶'), findsNothing);
-    }, skip: isBrowser, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+    },
+      skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+    );
 
     testWidgets('When a menu item doesn\'t fit, a second page is used.', (WidgetTester tester) async {
       // Set the screen size to more narrow, so that Paste can't fit.
@@ -342,7 +349,10 @@ void main() {
       expect(find.text('◀'), findsNothing);
       expect(find.text('▶'), findsOneWidget);
       expect(appearsEnabled(tester, '▶'), true);
-    }, skip: isBrowser, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+    },
+      skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+    );
 
     testWidgets('A smaller menu puts each button on its own page.', (WidgetTester tester) async {
       // Set the screen size to more narrow, so that two buttons can't fit on
@@ -441,7 +451,10 @@ void main() {
       expect(find.text('◀'), findsNothing);
       expect(find.text('▶'), findsOneWidget);
       expect(appearsEnabled(tester, '▶'), true);
-    }, skip: isBrowser, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+    },
+      skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+    );
 
     testWidgets('Handles very long locale strings', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(text: 'abc def ghi');
@@ -556,6 +569,9 @@ void main() {
       expect(find.text('◀'), findsNothing);
       expect(find.text('▶'), findsOneWidget);
       expect(appearsEnabled(tester, '▶'), true);
-    }, skip: isBrowser, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+    },
+      skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+    );
   });
 }

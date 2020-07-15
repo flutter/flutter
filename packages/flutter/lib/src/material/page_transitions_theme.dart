@@ -536,7 +536,7 @@ class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    return CupertinoPageRoute.buildPageTransitions<T>(route, context, animation, secondaryAnimation, child);
+    return CupertinoRouteTransitionMixin.buildPageTransitions<T>(route, context, animation, secondaryAnimation, child);
   }
 }
 
@@ -593,7 +593,7 @@ class PageTransitionsTheme with Diagnosticable {
   ) {
     TargetPlatform platform = Theme.of(context).platform;
 
-    if (CupertinoPageRoute.isPopGestureInProgress(route))
+    if (CupertinoRouteTransitionMixin.isPopGestureInProgress(route))
       platform = TargetPlatform.iOS;
 
     final PageTransitionsBuilder matchingBuilder =

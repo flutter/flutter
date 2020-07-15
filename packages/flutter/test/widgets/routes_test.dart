@@ -8,9 +8,12 @@ import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+
+import 'semantics_tester.dart';
 
 final List<String> results = <String>[];
 
@@ -535,6 +538,142 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isTrue);
   });
 
+  testWidgets('TransitionBuilderPage works', (WidgetTester tester) async {
+    final LocalKey pageKey = UniqueKey();
+    final TransitionDetector detector = TransitionDetector();
+    List<Page<void>> myPages = <Page<void>>[
+      TransitionBuilderPage<void>(
+        key: pageKey,
+        pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+          return const Text('first');
+        },
+      )
+    ];
+    await tester.pumpWidget(
+      buildNavigator(
+        pages: myPages,
+        onPopPage: (Route<dynamic> route, dynamic result) => null,
+        transitionDelegate: detector,
+      )
+    );
+
+    expect(detector.hasTransition, isFalse);
+    expect(find.text('first'), findsOneWidget);
+
+    myPages = <Page<void>>[
+      TransitionBuilderPage<void>(
+        key: pageKey,
+        pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+          return const Text('second');
+        },
+      )
+    ];
+
+    await tester.pumpWidget(
+      buildNavigator(
+        pages: myPages,
+        onPopPage: (Route<dynamic> route, dynamic result) => null,
+        transitionDelegate: detector,
+      )
+    );
+    // There should be no transition because the page has the same key.
+    expect(detector.hasTransition, isFalse);
+    // The content does update.
+    expect(find.text('first'), findsNothing);
+    expect(find.text('second'), findsOneWidget);
+
+    myPages = <Page<void>>[
+      TransitionBuilderPage<void>(
+        key: pageKey,
+        pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+          return const Text('dummy');
+        },
+        transitionsBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+          // Purposely discard the input child.
+          return const Text('third');
+        }
+      )
+    ];
+
+    await tester.pumpWidget(
+      buildNavigator(
+        pages: myPages,
+        onPopPage: (Route<dynamic> route, dynamic result) => null,
+        transitionDelegate: detector,
+      )
+    );
+
+    // There should be no transition because the page has the same key.
+    expect(detector.hasTransition, isFalse);
+    // Makes sure transitionsBuilder works.
+    expect(find.text('second'), findsNothing);
+    expect(find.text('dummy'), findsNothing);
+    expect(find.text('third'), findsOneWidget);
+  });
+
+  testWidgets('TransitionBuilderPage can toggle MaintainState', (WidgetTester tester) async {
+    final LocalKey pageKeyOne = UniqueKey();
+    final LocalKey pageKeyTwo = UniqueKey();
+    final TransitionDetector detector = TransitionDetector();
+    List<Page<void>> myPages = <Page<void>>[
+      TransitionBuilderPage<void>(
+        key: pageKeyOne,
+        maintainState: false,
+        pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+          return const Text('first');
+        },
+      ),
+      TransitionBuilderPage<void>(
+        key: pageKeyTwo,
+        pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+          return const Text('second');
+        },
+      )
+    ];
+    await tester.pumpWidget(
+      buildNavigator(
+        pages: myPages,
+        onPopPage: (Route<dynamic> route, dynamic result) => null,
+        transitionDelegate: detector,
+      )
+    );
+
+    expect(detector.hasTransition, isFalse);
+    // Page one does not maintain state.
+    expect(find.text('first', skipOffstage: false), findsNothing);
+    expect(find.text('second'), findsOneWidget);
+
+    myPages = <Page<void>>[
+      TransitionBuilderPage<void>(
+        key: pageKeyOne,
+        maintainState: true,
+        pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+          return const Text('first');
+        },
+      ),
+      TransitionBuilderPage<void>(
+        key: pageKeyTwo,
+        pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+          return const Text('second');
+        },
+      )
+    ];
+
+    await tester.pumpWidget(
+      buildNavigator(
+        pages: myPages,
+        onPopPage: (Route<dynamic> route, dynamic result) => null,
+        transitionDelegate: detector,
+      )
+    );
+    // There should be no transition because the page has the same key.
+    expect(detector.hasTransition, isFalse);
+    // Page one sets the maintain state to be true, its widget tree should be
+    // built.
+    expect(find.text('first', skipOffstage: false), findsOneWidget);
+    expect(find.text('second'), findsOneWidget);
+  });
+
   group('TransitionRoute', () {
     testWidgets('secondary animation is kDismissed when next route finishes pop', (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
@@ -902,6 +1041,41 @@ void main() {
       expect(nestedObserver.dialogCount, 1);
     });
 
+    testWidgets('showGeneralDialog default argument values', (WidgetTester tester) async {
+      final DialogObserver rootObserver = DialogObserver();
+
+      await tester.pumpWidget(MaterialApp(
+        navigatorObservers: <NavigatorObserver>[rootObserver],
+        home: Navigator(
+          onGenerateRoute: (RouteSettings settings) {
+            return MaterialPageRoute<dynamic>(
+              builder: (BuildContext context) {
+                return RaisedButton(
+                  onPressed: () {
+                    showGeneralDialog<void>(
+                      context: context,
+                      pageBuilder: (BuildContext innerContext, _, __) {
+                        return const SizedBox();
+                      },
+                    );
+                  },
+                  child: const Text('Show Dialog'),
+                );
+              },
+            );
+          },
+        ),
+      ));
+
+      // Open the dialog.
+      await tester.tap(find.byType(RaisedButton));
+      expect(rootObserver.dialogRoutes.length, equals(1));
+      final ModalRoute<dynamic> route = rootObserver.dialogRoutes.last;
+      expect(route.barrierDismissible, isNotNull);
+      expect(route.barrierColor, isNotNull);
+      expect(route.transitionDuration, isNotNull);
+    });
+
     testWidgets('reverseTransitionDuration defaults to transitionDuration', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
 
@@ -1199,6 +1373,79 @@ void main() {
       expect(modalBarrierAnimation.value, Colors.black);
     });
 
+    testWidgets('modal route semantics order', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/46625.
+      final SemanticsTester semantics = SemanticsTester(tester);
+      await tester.pumpWidget(MaterialApp(
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return Center(
+                child: RaisedButton(
+                  child: const Text('X'),
+                  onPressed: () {
+                    Navigator.of(context).push<void>(
+                      _TestDialogRouteWithCustomBarrierCurve<void>(
+                        child: const Text('Hello World'),
+                        barrierLabel: 'test label',
+                        barrierCurve: Curves.linear,
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+      ));
+
+      await tester.tap(find.text('X'));
+      await tester.pumpAndSettle();
+      expect(find.text('Hello World'), findsOneWidget);
+
+      final TestSemantics expectedSemantics = TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics.rootChild(
+            id: 1,
+            rect: TestSemantics.fullScreen,
+            children: <TestSemantics>[
+              TestSemantics(
+                id: 6,
+                rect: TestSemantics.fullScreen,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    id: 7,
+                    rect: TestSemantics.fullScreen,
+                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        id: 8,
+                        label: 'Hello World',
+                        rect: TestSemantics.fullScreen,
+                        textDirection: TextDirection.ltr,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              // Modal barrier is put after modal scope
+              TestSemantics(
+                id: 5,
+                rect: TestSemantics.fullScreen,
+                actions: <SemanticsAction>[SemanticsAction.tap],
+                label: 'test label',
+                textDirection: TextDirection.ltr,
+              ),
+            ],
+          ),
+        ],
+      )
+      ;
+
+      expect(semantics, hasSemantics(expectedSemantics));
+      semantics.dispose();
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}));
+
     testWidgets('focus traverse correct when pop multiple page simultaneously', (WidgetTester tester) async {
       // Regression test: https://github.com/flutter/flutter/issues/48903
       final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -1319,6 +1566,28 @@ void main() {
       expect(tester.takeException(), null);
     });
   });
+
+  testWidgets('can be dismissed with escape keyboard shortcut', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(MaterialApp(
+      navigatorKey: navigatorKey,
+      home: const Text('dummy1'),
+    ));
+    final Element textOnPageOne = tester.element(find.text('dummy1'));
+
+    // Show a simple dialog
+    showDialog<void>(
+      context: textOnPageOne,
+      builder: (BuildContext context) => const Text('dialog1'),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('dialog1'), findsOneWidget);
+
+    // Try to dismiss the dialog with the shortcut key
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    expect(find.text('dialog1'), findsNothing);
+  });
 }
 
 double _getOpacity(GlobalKey key, WidgetTester tester) {
@@ -1364,20 +1633,32 @@ class TestPageRouteBuilder extends PageRouteBuilder<void> {
 }
 
 class DialogObserver extends NavigatorObserver {
+  final List<ModalRoute<dynamic>> dialogRoutes = <ModalRoute<dynamic>>[];
   int dialogCount = 0;
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
     if (route.toString().contains('_DialogRoute')) {
+      dialogRoutes.add(route as ModalRoute<dynamic>);
       dialogCount++;
     }
     super.didPush(route, previousRoute);
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic> previousRoute) {
+    if (route.toString().contains('_DialogRoute')) {
+      dialogRoutes.removeLast();
+      dialogCount--;
+    }
+    super.didPop(route, previousRoute);
   }
 }
 
 class _TestDialogRouteWithCustomBarrierCurve<T> extends PopupRoute<T> {
   _TestDialogRouteWithCustomBarrierCurve({
     @required Widget child,
+    this.barrierLabel,
     Curve barrierCurve,
   }) : _barrierCurve = barrierCurve,
        _child = child;
@@ -1388,7 +1669,7 @@ class _TestDialogRouteWithCustomBarrierCurve<T> extends PopupRoute<T> {
   bool get barrierDismissible => true;
 
   @override
-  String get barrierLabel => null;
+  final String barrierLabel;
 
   @override
   Color get barrierColor => Colors.black; // easier value to test against
@@ -1439,4 +1720,48 @@ class WidgetWithLocalHistoryState extends State<WidgetWithLocalHistory> {
   Widget build(BuildContext context) {
     return const Text('dummy');
   }
+}
+
+class TransitionDetector extends DefaultTransitionDelegate<void> {
+  bool hasTransition = false;
+  @override
+  Iterable<RouteTransitionRecord> resolve({
+    List<RouteTransitionRecord> newPageRouteHistory,
+    Map<RouteTransitionRecord, RouteTransitionRecord> locationToExitingPageRoute,
+    Map<RouteTransitionRecord, List<RouteTransitionRecord>> pageRouteToPagelessRoutes
+  }) {
+    hasTransition = true;
+    return super.resolve(
+      newPageRouteHistory: newPageRouteHistory,
+      locationToExitingPageRoute: locationToExitingPageRoute,
+      pageRouteToPagelessRoutes: pageRouteToPagelessRoutes
+    );
+  }
+}
+
+Widget buildNavigator({
+  List<Page<dynamic>> pages,
+  PopPageCallback onPopPage,
+  GlobalKey<NavigatorState> key,
+  TransitionDelegate<dynamic> transitionDelegate
+}) {
+  return MediaQuery(
+    data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+    child: Localizations(
+      locale: const Locale('en', 'US'),
+      delegates: const <LocalizationsDelegate<dynamic>>[
+        DefaultMaterialLocalizations.delegate,
+        DefaultWidgetsLocalizations.delegate
+      ],
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Navigator(
+          key: key,
+          pages: pages,
+          onPopPage: onPopPage,
+          transitionDelegate: transitionDelegate ?? const DefaultTransitionDelegate<dynamic>(),
+        ),
+      ),
+    ),
+  );
 }

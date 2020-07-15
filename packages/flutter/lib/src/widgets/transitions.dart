@@ -18,6 +18,8 @@ export 'package:flutter/rendering.dart' show RelativeRect;
 
 /// A widget that rebuilds when the given [Listenable] changes value.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=LKKgYpC-EPQ}
+///
 /// [AnimatedWidget] is most commonly used with [Animation] objects, which are
 /// [Listenable], but it can be used with any [Listenable], including
 /// [ChangeNotifier] and [ValueNotifier].

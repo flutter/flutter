@@ -84,9 +84,9 @@ void main() {
         await Future<void>.delayed(const Duration(milliseconds: 50));
         await driver.tap(normalTextField);
         await Future<void>.delayed(const Duration(milliseconds: 500));
-        await driver.tap(find.text('SELECT ALL'));
+        await driver.tap(find.text('Select all'));
         await Future<void>.delayed(const Duration(milliseconds: 500));
-        await driver.tap(find.text('COPY'));
+        await driver.tap(find.text('Copy'));
         await Future<void>.delayed(const Duration(milliseconds: 50));
         await driver.enterText('');
         await Future<void>.delayed(const Duration(milliseconds: 500));
@@ -435,7 +435,7 @@ void main() {
             expect(
                 await getSemantics(find.byValueKey('$popupKeyValue.$item')),
                 hasAndroidSemantics(
-                  className: AndroidClassName.view,
+                  className: AndroidClassName.button,
                   isChecked: false,
                   isCheckable: false,
                   isEnabled: true,
@@ -459,7 +459,7 @@ void main() {
             expect(
                 await getSemantics(find.byValueKey('$popupKeyValue.$item')),
                 hasAndroidSemantics(
-                  className: AndroidClassName.view,
+                  className: AndroidClassName.button,
                   isChecked: false,
                   isCheckable: false,
                   isEnabled: true,

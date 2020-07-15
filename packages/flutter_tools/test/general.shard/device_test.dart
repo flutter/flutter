@@ -4,12 +4,16 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:quiver/testing/async.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -17,6 +21,13 @@ import '../src/fake_devices.dart';
 import '../src/mocks.dart';
 
 void main() {
+  MockCache cache;
+
+  setUp(() {
+    cache = MockCache();
+    when(cache.dyLdLibEntry).thenReturn(const MapEntry<String, String>('foo', 'bar'));
+  });
+
   group('DeviceManager', () {
     testUsingContext('getDevices', () async {
       final FakeDevice device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
@@ -25,6 +36,9 @@ void main() {
       final List<Device> devices = <Device>[device1, device2, device3];
       final DeviceManager deviceManager = TestDeviceManager(devices);
       expect(await deviceManager.getDevices(), devices);
+    }, overrides: <Type, Generator>{
+      Artifacts: () => Artifacts.test(),
+      Cache: () => cache,
     });
 
     testUsingContext('getDeviceById', () async {
@@ -43,6 +57,9 @@ void main() {
       await expectDevice('Nexus 5', <Device>[device1]);
       await expectDevice('0553790', <Device>[device1]);
       await expectDevice('Nexus', <Device>[device1, device2]);
+    }, overrides: <Type, Generator>{
+      Artifacts: () => Artifacts.test(),
+      Cache: () => cache,
     });
 
     testUsingContext('getAllConnectedDevices caches', () async {
@@ -53,6 +70,9 @@ void main() {
       final FakeDevice device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
       deviceManager.resetDevices(<Device>[device2]);
       expect(await deviceManager.getAllConnectedDevices(), <Device>[device1]);
+    }, overrides: <Type, Generator>{
+      Artifacts: () => Artifacts.test(),
+      Cache: () => cache,
     });
 
     testUsingContext('refreshAllConnectedDevices does not cache', () async {
@@ -63,6 +83,9 @@ void main() {
       final FakeDevice device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
       deviceManager.resetDevices(<Device>[device2]);
       expect(await deviceManager.refreshAllConnectedDevices(), <Device>[device2]);
+    }, overrides: <Type, Generator>{
+      Artifacts: () => Artifacts.test(),
+      Cache: () => cache,
     });
   });
 
@@ -83,19 +106,25 @@ void main() {
         expect(pollingDeviceDiscovery.lastPollingTimeout, const Duration(seconds: 30));
         await pollingDeviceDiscovery.stopPolling();
       });
+    }, overrides: <Type, Generator>{
+      Artifacts: () => Artifacts.test(),
+      Cache: () => cache,
     });
   });
 
   group('Filter devices', () {
-    FakeDevice ephemeral;
+    FakeDevice ephemeralOne;
+    FakeDevice ephemeralTwo;
     FakeDevice nonEphemeralOne;
     FakeDevice nonEphemeralTwo;
     FakeDevice unsupported;
     FakeDevice webDevice;
     FakeDevice fuchsiaDevice;
+    MockStdio mockStdio;
 
     setUp(() {
-      ephemeral = FakeDevice('ephemeral', 'ephemeral', true);
+      ephemeralOne = FakeDevice('ephemeralOne', 'ephemeralOne', true);
+      ephemeralTwo = FakeDevice('ephemeralTwo', 'ephemeralTwo', true);
       nonEphemeralOne = FakeDevice('nonEphemeralOne', 'nonEphemeralOne', false);
       nonEphemeralTwo = FakeDevice('nonEphemeralTwo', 'nonEphemeralTwo', false);
       unsupported = FakeDevice('unsupported', 'unsupported', true, false);
@@ -103,11 +132,12 @@ void main() {
         ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.web_javascript);
       fuchsiaDevice = FakeDevice('fuchsiay', 'fuchsiay')
         ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.fuchsia_x64);
+      mockStdio = MockStdio();
     });
 
     testUsingContext('chooses ephemeral device', () async {
       final List<Device> devices = <Device>[
-        ephemeral,
+        ephemeralOne,
         nonEphemeralOne,
         nonEphemeralTwo,
         unsupported,
@@ -116,22 +146,134 @@ void main() {
       final DeviceManager deviceManager = TestDeviceManager(devices);
       final List<Device> filtered = await deviceManager.findTargetDevices(FlutterProject.current());
 
-      expect(filtered.single, ephemeral);
+      expect(filtered.single, ephemeralOne);
+    }, overrides: <Type, Generator>{
+      Artifacts: () => Artifacts.test(),
+      Cache: () => cache,
     });
 
-    testUsingContext('does not remove all non-ephemeral', () async {
+    testUsingContext('choose first non-ephemeral device', () async {
       final List<Device> devices = <Device>[
         nonEphemeralOne,
         nonEphemeralTwo,
       ];
 
+      when(mockStdio.stdinHasTerminal).thenReturn(true);
+      when(globals.terminal.promptForCharInput(<String>['0', '1'],
+      logger: globals.logger,
+      prompt: globals.userMessages.flutterChooseOne)
+      ).thenAnswer((Invocation invocation) async => '0');
+
       final DeviceManager deviceManager = TestDeviceManager(devices);
       final List<Device> filtered = await deviceManager.findTargetDevices(FlutterProject.current());
 
       expect(filtered, <Device>[
+        nonEphemeralOne
+      ]);
+    }, overrides: <Type, Generator>{
+      Artifacts: () => Artifacts.test(),
+      Stdio: () => mockStdio,
+      AnsiTerminal: () => MockTerminal(),
+    });
+
+    testUsingContext('choose second non-ephemeral device', () async {
+      final List<Device> devices = <Device>[
         nonEphemeralOne,
         nonEphemeralTwo,
+      ];
+
+      when(mockStdio.stdinHasTerminal).thenReturn(true);
+      when(globals.terminal.promptForCharInput(<String>['0', '1'],
+      logger: globals.logger,
+      prompt: globals.userMessages.flutterChooseOne)
+      ).thenAnswer((Invocation invocation) async => '1');
+
+      final DeviceManager deviceManager = TestDeviceManager(devices);
+      final List<Device> filtered = await deviceManager.findTargetDevices(FlutterProject.current());
+
+      expect(filtered, <Device>[
+        nonEphemeralTwo
       ]);
+    }, overrides: <Type, Generator>{
+      Artifacts: () => Artifacts.test(),
+      Stdio: () => mockStdio,
+      AnsiTerminal: () => MockTerminal(),
+    });
+
+    testUsingContext('choose first ephemeral device', () async {
+      final List<Device> devices = <Device>[
+        ephemeralOne,
+        ephemeralTwo,
+      ];
+
+      when(mockStdio.stdinHasTerminal).thenReturn(true);
+      when(globals.terminal.promptForCharInput(<String>['0', '1'],
+        logger: globals.logger,
+        prompt: globals.userMessages.flutterChooseOne)
+      ).thenAnswer((Invocation invocation) async => '0');
+
+      final DeviceManager deviceManager = TestDeviceManager(devices);
+      final List<Device> filtered = await deviceManager.findTargetDevices(FlutterProject.current());
+
+      expect(filtered, <Device>[
+        ephemeralOne
+      ]);
+    }, overrides: <Type, Generator>{
+      Artifacts: () => Artifacts.test(),
+      Stdio: () => mockStdio,
+      AnsiTerminal: () => MockTerminal(),
+    });
+
+    testUsingContext('choose second ephemeral device', () async {
+      final List<Device> devices = <Device>[
+        ephemeralOne,
+        ephemeralTwo,
+      ];
+
+      when(mockStdio.stdinHasTerminal).thenReturn(true);
+      when(globals.terminal.promptForCharInput(<String>['0', '1'],
+        logger: globals.logger,
+        prompt: globals.userMessages.flutterChooseOne)
+      ).thenAnswer((Invocation invocation) async => '1');
+
+      final DeviceManager deviceManager = TestDeviceManager(devices);
+      final List<Device> filtered = await deviceManager.findTargetDevices(FlutterProject.current());
+
+      expect(filtered, <Device>[
+        ephemeralTwo
+      ]);
+    }, overrides: <Type, Generator>{
+      Stdio: () => mockStdio,
+      AnsiTerminal: () => MockTerminal(),
+      Artifacts: () => Artifacts.test(),
+      Cache: () => cache,
+    });
+
+    testUsingContext('choose non-ephemeral device', () async {
+      final List<Device> devices = <Device>[
+        ephemeralOne,
+        ephemeralTwo,
+        nonEphemeralOne,
+        nonEphemeralTwo,
+      ];
+
+      when(mockStdio.stdinHasTerminal).thenReturn(true);
+      when(globals.terminal.promptForCharInput(<String>['0', '1', '2', '3'],
+        logger: globals.logger,
+        prompt: globals.userMessages.flutterChooseOne)
+      ).thenAnswer((Invocation invocation) async => '2');
+
+      final DeviceManager deviceManager = TestDeviceManager(devices);
+      final List<Device> filtered = await deviceManager.findTargetDevices(FlutterProject.current());
+
+      expect(filtered, <Device>[
+        nonEphemeralOne
+      ]);
+    }, overrides: <Type, Generator>{
+      Stdio: () => mockStdio,
+      AnsiTerminal: () => MockTerminal(),
+      Artifacts: () => Artifacts.test(),
+      Cache: () => cache,
     });
 
     testUsingContext('Removes a single unsupported device', () async {
@@ -143,6 +285,9 @@ void main() {
       final List<Device> filtered = await deviceManager.findTargetDevices(FlutterProject.current());
 
       expect(filtered, <Device>[]);
+    }, overrides: <Type, Generator>{
+      Artifacts: () => Artifacts.test(),
+      Cache: () => cache,
     });
 
     testUsingContext('Removes web and fuchsia from --all', () async {
@@ -156,6 +301,9 @@ void main() {
       final List<Device> filtered = await deviceManager.findTargetDevices(FlutterProject.current());
 
       expect(filtered, <Device>[]);
+    }, overrides: <Type, Generator>{
+      Artifacts: () => Artifacts.test(),
+      Cache: () => cache,
     });
 
     testUsingContext('Removes unsupported devices from --all', () async {
@@ -173,6 +321,9 @@ void main() {
         nonEphemeralOne,
         nonEphemeralTwo,
       ]);
+    }, overrides: <Type, Generator>{
+      Artifacts: () => Artifacts.test(),
+      Cache: () => cache,
     });
 
     testUsingContext('uses DeviceManager.isDeviceSupportedForProject instead of device.isSupportedForProject', () async {
@@ -187,6 +338,9 @@ void main() {
       expect(filtered, <Device>[
         unsupported,
       ]);
+    }, overrides: <Type, Generator>{
+      Artifacts: () => Artifacts.test(),
+      Cache: () => cache,
     });
   });
   group('ForwardedPort', () {
@@ -244,3 +398,6 @@ class TestDeviceManager extends DeviceManager {
 }
 
 class MockProcess extends Mock implements Process {}
+class MockTerminal extends Mock implements AnsiTerminal {}
+class MockStdio extends Mock implements Stdio {}
+class MockCache extends Mock implements Cache {}

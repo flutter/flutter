@@ -30,6 +30,10 @@
 #       on should be hidden because they just cause confusion otherwise.
 # * timeout_in_minutes: integer
 #       a custom task timeout, specified in minutes.
+# * on_luci: boolean true or false
+#       whether the task runs on LUCI builders. Tests will be gradually marked on_luci during the
+#       devicelab to LUCI migration. And when the migration is complete, on_luci flag will be
+#       removed.
 
 tasks:
   # Tests of compiling in a variety of modes
@@ -96,6 +100,7 @@ tasks:
       Gallery for iOS from Mac.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
+    on_luci: true
 
   flutter_gallery_win__compile:
     description: >
@@ -156,6 +161,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  multi_widget_construction_perf__timeline_summary:
+    description: >
+      Measures the runtime performance of constructing and destructing widgets on Android.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
   picture_cache_perf__timeline_summary:
     description: >
       Measures the runtime performance of raster caching many pictures on Android.
@@ -174,6 +185,14 @@ tasks:
       with SkSL shader warm-up.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
+
+  flutter_gallery_sksl_warmup_ios32__transition_perf:
+    description: >
+      Measures the runtime performance of Flutter gallery transitions on iPhone4s
+      with SkSL shader warm-up.
+    stage: devicelab
+    required_agent_capabilities: ["mac/ios32"]
+    flaky: true
 
   backdrop_filter_perf__timeline_summary:
     description: >
@@ -210,6 +229,7 @@ tasks:
       Checks that flavored builds work on Android.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
+    on_luci: true
 
   channels_integration_test:
     description: >
@@ -355,6 +375,7 @@ tasks:
       Builds an APK with a --dart-define and verifies it can be used as a constant
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+    on_luci: true
 
   android_obfuscate_test:
     description: >
@@ -739,6 +760,13 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
+  flutter_gallery_sksl_warmup__transition_perf:
+    description: >
+      Measures the runtime performance of Flutter gallery transitions on Android
+      with SkSL shader warm-up.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
   flutter_gallery__transition_perf_with_semantics:
     description: >
       Measures the delta in performance of screen transitions without and
@@ -781,6 +809,13 @@ tasks:
       Measures memory usage for scrolling through a list of large images.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
+
+  fast_scroll_heavy_gridview__memory:
+    description: >
+      Measures memory usage for scrolling through a grid view of heavy memory
+      usage widgets.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
 
   animated_placeholder_perf:
     description: >

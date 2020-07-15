@@ -65,6 +65,11 @@ follows:
   This is a simple template for which you provide everything.  It has no code of
   its own, just the sections for `imports`, `main`, and `preamble`. You must
   provide the `main` section in order to have a `main()`.
+  
+### WidgetsApp Templates
+
+These templates create a `WidgetsApp` that encloses the snippet widget. These templates import
+the widgets library.
 
 - [`stateful_widget`](stateful_widget.tmpl) :
   The default code block will be placed as the body of the `State` object of a
@@ -77,7 +82,10 @@ follows:
   `build()` method, and any state variables. It also has an `imports`
   section to import additional packages. Please only import things that are part
   of flutter or part of default dependencies for a `flutter create` project.
-  It creates a `WidgetsApp` around the child stateful widget.
+  
+- [`stateful_widget_ticker`](stateful_widget_ticker.tmpl) : Identical to the
+  `stateful_widget` template, with the addition of the `TickerProviderStateMixin`
+  class, enabling easy generation of animated samples.
 
 - [`stateless_widget`](stateless_widget.tmpl) : Identical to the
   `stateful_widget` template, except that the default code block is
@@ -85,21 +93,23 @@ follows:
   `StatelessWidget`. The `@override` before the build method is added by
   the template, so must be omitted from the sample code.
 
-- [`stateful_widget_material`](stateful_widget_material.tmpl) : Similar to
-  `stateful_widget`, except that it imports the material library, and uses
-  a `MaterialApp` instead of `WidgetsApp`.
+### MaterialApp Templates
 
-- [`stateless_widget_material`](stateless_widget_material.tmpl) : Similar to
-  `stateless_widget`, except that it imports the material library, and uses
-  a `MaterialApp` instead of `WidgetsApp`.
+These templates follow the same conventions as the `WidgetsApp` templates above, but use a
+`MaterialApp` instead. These templates import the  material library.
 
-- [`stateful_widget_scaffold`](stateful_widget_scaffold.tmpl) : Similar to
-  `stateful_widget_material`, except that it wraps the stateful widget with a
-  `Scaffold`.
+- [`stateful_widget_material`](stateful_widget_material.tmpl)
+  
+- [`stateful_widget_material_ticker`](stateful_widget_material_ticker.tmpl)
+
+- [`stateless_widget_material`](stateless_widget_material.tmpl)
+
+- [`stateful_widget_scaffold`](stateful_widget_scaffold.tmpl) : Adds a `Scaffold` widget as the home
+  of the enclosing `MaterialApp` to wrap the stateful widget snippet. The `Scaffold` widget contains
+  an `AppBar`.
 
 - [`stateful_widget_scaffold_center`](stateful_widget_scaffold_center.tmpl) : Similar to
-  `stateful_widget_scaffold`, except that it wraps the stateful widget with a
-  `Scaffold` _and_ a `Center`.
+  `stateful_widget_scaffold`, except that it wraps the stateful widget with a `Center`.
 
 - [`stateful_widget_scaffold_center_freeform_state`](stateful_widget_scaffold_center_freeform_state.tmpl) :
   Similar to `stateful_widget_scaffold_center` except that the code block has
@@ -111,6 +121,23 @@ follows:
   `Scaffold`.
 
 - [`stateless_widget_scaffold_center`](stateless_widget_scaffold_center.tmpl) : Similar to
-  `stateless_widget_scaffold`, except that it wraps the stateless widget with a
-  `Scaffold` _and_ a `Center`.
+  `stateless_widget_scaffold`, except that it wraps the stateless widget with a `Center`.
 
+### CupertinoApp Templates
+
+These templates follow the same conventions as the `WidgetsApp` templates above, but use a
+`CupertinoApp` instead. These templates import the  cupertino library.
+  
+- [`stateful_widget_cupertino`](stateful_widget_cupertino.tmpl)
+  
+- [`stateful_widget_cupertino_ticker`](stateful_widget_cupertino_ticker.tmpl)
+  
+- [`stateless_widget_cupertino`](stateless_widget_cupertino.tmpl)
+  
+- [`stateful_widget_cupertinoPageScaffold`](stateful_widget_cupertino_page_scaffold.tmpl) : Similar to
+  `stateful_widget_cupertino`, except that it wraps the stateful widget with a
+  `CupertinoPageScaffold`.
+  
+- [`stateless_widget_cupertinoPageScaffold`](stateless_widget_cupertino_page_scaffold.tmpl) : Similar to
+  `stateless_widget_cupertino`, except that it wraps the stateless widget with a
+  `CupertinoPageScaffold`.

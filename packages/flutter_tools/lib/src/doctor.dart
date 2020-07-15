@@ -88,10 +88,10 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
           chromiumLauncher: ChromiumLauncher(
             browserFinder: findChromeExecutable,
             fileSystem: globals.fs,
-            logger: globals.logger,
             operatingSystemUtils: globals.os,
             platform:  globals.platform,
             processManager: globals.processManager,
+            logger: globals.logger,
           ),
           platform: globals.platform,
         ),

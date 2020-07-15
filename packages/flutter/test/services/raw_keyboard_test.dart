@@ -4,8 +4,8 @@
 
 // @dart = 2.8
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class _ModifierCheck {
@@ -106,7 +106,7 @@ void main() {
           expect(RawKeyboard.instance.keysPressed, isEmpty, reason: 'on $platform');
         }
       }
-    }, skip: kIsWeb);
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
     testWidgets('keysPressed is correct when modifier is released before key', (WidgetTester tester) async {
       for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows']) {
@@ -151,7 +151,7 @@ void main() {
         await simulateKeyUpEvent(LogicalKeyboardKey.keyA, platform: platform, physicalKey: PhysicalKeyboardKey.keyA);
         expect(RawKeyboard.instance.keysPressed, isEmpty, reason: 'on $platform');
       }
-    }, skip: kIsWeb);
+    });
 
     testWidgets('keysPressed modifiers are synchronized with key events on macOS', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
@@ -508,6 +508,48 @@ void main() {
       final RawKeyEventDataAndroid data = repeatCountEvent.data as RawKeyEventDataAndroid;
       expect(data.repeatCount, equals(42));
     });
+    testWidgets('Key events are responded to correctly.', (WidgetTester tester) async {
+      expect(RawKeyboard.instance.keysPressed, isEmpty);
+      // Generate the data for a regular key down event.
+      final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
+        LogicalKeyboardKey.keyA,
+        platform: 'android',
+        isDown: true,
+      );
+      Map<String, dynamic> message;
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.keyEvent.name,
+        SystemChannels.keyEvent.codec.encodeMessage(data),
+        (ByteData data) {
+          message = SystemChannels.keyEvent.codec.decodeMessage(data) as Map<String, dynamic>;
+        },
+      );
+      expect(message, equals(<String, dynamic>{ 'handled': false }));
+
+      // Set up a widget that will receive focused text events.
+      final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
+      await tester.pumpWidget(
+        Focus(
+          focusNode: focusNode,
+          onKey: (FocusNode node, RawKeyEvent event) {
+            return true; // handle all events.
+          },
+          child: const SizedBox(),
+        ),
+      );
+      focusNode.requestFocus();
+      await tester.pump();
+
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.keyEvent.name,
+        SystemChannels.keyEvent.codec.encodeMessage(data),
+        (ByteData data) {
+          message = SystemChannels.keyEvent.codec.decodeMessage(data) as Map<String, dynamic>;
+        },
+      );
+      expect(message, equals(<String, dynamic>{ 'handled': true }));
+      ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler(SystemChannels.keyEvent.name, null);
+    });
   });
   group('RawKeyEventDataFuchsia', () {
     const Map<int, _ModifierCheck> modifierTests = <int, _ModifierCheck>{
@@ -611,7 +653,8 @@ void main() {
       expect(data.physicalKey, equals(PhysicalKeyboardKey.escape));
       expect(data.logicalKey, equals(LogicalKeyboardKey.escape));
       expect(data.keyLabel, isNull);
-    });
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/35347
+
     test('Modifier keyboard keys are correctly translated', () {
       final RawKeyEvent shiftLeftKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
@@ -624,8 +667,9 @@ void main() {
       expect(data.physicalKey, equals(PhysicalKeyboardKey.shiftLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.shiftLeft));
       expect(data.keyLabel, isNull);
-    });
-  }, skip: isBrowser);
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/35347
+  });
+
   group('RawKeyEventDataMacOs', () {
     const Map<int, _ModifierCheck> modifierTests = <int, _ModifierCheck>{
       RawKeyEventDataMacOs.modifierOption | RawKeyEventDataMacOs.modifierLeftOption: _ModifierCheck(ModifierKey.altModifier, KeyboardSide.left),
@@ -741,7 +785,8 @@ void main() {
       expect(data.physicalKey, equals(PhysicalKeyboardKey.escape));
       expect(data.logicalKey, equals(LogicalKeyboardKey.escape));
       expect(data.keyLabel, isNull);
-    });
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/35347
+
     test('Modifier keyboard keys are correctly translated', () {
       final RawKeyEvent shiftLeftKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
@@ -756,7 +801,8 @@ void main() {
       expect(data.physicalKey, equals(PhysicalKeyboardKey.shiftLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.shiftLeft));
       expect(data.keyLabel, isNull);
-    });
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/35347
+
     test('Unprintable keyboard keys are correctly translated', () {
       final RawKeyEvent leftArrowKey = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
@@ -771,8 +817,8 @@ void main() {
       expect(data.physicalKey, equals(PhysicalKeyboardKey.arrowLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.arrowLeft));
       expect(data.logicalKey.keyLabel, isNull);
-    });
-  }, skip: isBrowser);
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/35347
+  });
 
   group('RawKeyEventDataWindows', () {
     const Map<int, _ModifierCheck> modifierTests = <int, _ModifierCheck>{
@@ -917,7 +963,8 @@ void main() {
       expect(data.logicalKey, equals(LogicalKeyboardKey.arrowLeft));
       expect(data.logicalKey.keyLabel, isNull);
     });
-  }, skip: isBrowser);
+  });
+
   group('RawKeyEventDataLinux-GFLW', () {
     const Map<int, _ModifierCheck> modifierTests = <int, _ModifierCheck>{
       GLFWKeyHelper.modifierAlt: _ModifierCheck(ModifierKey.altModifier, KeyboardSide.any),
@@ -1069,7 +1116,8 @@ void main() {
       }
 
       expect(() => _createFailingKey(), throwsAssertionError);
-    });
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61039
+
     test('Control keyboard keys are correctly translated', () {
       final RawKeyEvent escapeKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
@@ -1099,7 +1147,191 @@ void main() {
       expect(data.logicalKey, equals(LogicalKeyboardKey.shiftLeft));
       expect(data.keyLabel, isNull);
     });
-  }, skip: isBrowser);
+  });
+
+  group('RawKeyEventDataLinux-GTK', () {
+    const Map<int, _ModifierCheck> modifierTests = <int, _ModifierCheck>{
+      GtkKeyHelper.modifierMod1: _ModifierCheck(ModifierKey.altModifier, KeyboardSide.any),
+      GtkKeyHelper.modifierShift: _ModifierCheck(ModifierKey.shiftModifier, KeyboardSide.any),
+      GtkKeyHelper.modifierControl: _ModifierCheck(ModifierKey.controlModifier, KeyboardSide.any),
+      GtkKeyHelper.modifierMeta: _ModifierCheck(ModifierKey.metaModifier, KeyboardSide.any),
+      GtkKeyHelper.modifierMod2: _ModifierCheck(ModifierKey.numLockModifier, KeyboardSide.all),
+      GtkKeyHelper.modifierCapsLock: _ModifierCheck(ModifierKey.capsLockModifier, KeyboardSide.all),
+    };
+
+    // How modifiers are interpreted depends upon the keyCode for GTK.
+    int keyCodeForModifier(int modifier, {bool isLeft}) {
+      switch (modifier) {
+        case GtkKeyHelper.modifierMod1:
+          return isLeft ? 65513 : 65513;
+        case GtkKeyHelper.modifierShift:
+          return isLeft ? 65505 : 65506;
+        case GtkKeyHelper.modifierControl:
+          return isLeft ? 65507 : 65508;
+        case GtkKeyHelper.modifierMeta:
+          return isLeft ? 65511 : 65512;
+        case GtkKeyHelper.modifierMod2:
+          return 65407;
+        case GtkKeyHelper.modifierCapsLock:
+          return 65509;
+        default:
+          return 65; // keyA
+      }
+    }
+
+    test('modifier keys are recognized individually', () {
+      for (final int modifier in modifierTests.keys) {
+        for (final bool isDown in <bool>[true, false]) {
+          for (final bool isLeft in <bool>[true, false]) {
+            final RawKeyEvent event = RawKeyEvent.fromMessage(<String, dynamic>{
+              'type': isDown ? 'keydown' : 'keyup',
+              'keymap': 'linux',
+              'toolkit': 'gtk',
+              'keyCode': keyCodeForModifier(modifier, isLeft: isLeft),
+              'scanCode': 0x00000026,
+              'unicodeScalarValues': 97,
+              // GTK modifiers don't include the current key event.
+              'modifiers': isDown ? 0 : modifier,
+            });
+            final RawKeyEventDataLinux data = event.data as RawKeyEventDataLinux;
+            for (final ModifierKey key in ModifierKey.values) {
+              if (modifierTests[modifier].key == key) {
+                expect(
+                  data.isModifierPressed(key, side: modifierTests[modifier].side),
+                  isDown ? isTrue : isFalse,
+                  reason: "${isLeft ? 'left' : 'right'} $key ${isDown ? 'should' : 'should not'} be pressed with metaState $modifier, when key is ${isDown ? 'down' : 'up'}, but isn't.",
+                );
+                expect(data.getModifierSide(key), equals(modifierTests[modifier].side));
+              } else {
+                expect(
+                  data.isModifierPressed(key, side: modifierTests[modifier].side),
+                  isFalse,
+                  reason: "${isLeft ? 'left' : 'right'} $key should not be pressed with metaState $modifier, wwhen key is ${isDown ? 'down' : 'up'}, but is.",
+                );
+              }
+            }
+          }
+        }
+      }
+    });
+    test('modifier keys are recognized when combined', () {
+      for (final int modifier in modifierTests.keys) {
+        if (modifier == GtkKeyHelper.modifierControl) {
+          // No need to combine CTRL key with itself.
+          continue;
+        }
+        final RawKeyEvent event = RawKeyEvent.fromMessage(<String, dynamic>{
+          'type': 'keydown',
+          'keymap': 'linux',
+          'toolkit': 'gtk',
+          'keyCode': 65,
+          'scanCode': 0x00000026,
+          'unicodeScalarValues': 97,
+          'modifiers': modifier | GtkKeyHelper.modifierControl,
+        });
+        final RawKeyEventDataLinux data = event.data as RawKeyEventDataLinux;
+        for (final ModifierKey key in ModifierKey.values) {
+          if (modifierTests[modifier].key == key || key == ModifierKey.controlModifier) {
+            expect(
+              data.isModifierPressed(key, side: modifierTests[modifier].side),
+              isTrue,
+              reason: '$key should be pressed with metaState $modifier '
+                  "and additional key ${GtkKeyHelper.modifierControl}, but isn't.",
+            );
+            if (key != ModifierKey.controlModifier) {
+              expect(data.getModifierSide(key), equals(modifierTests[modifier].side));
+            } else {
+              expect(data.getModifierSide(key), equals(KeyboardSide.any));
+            }
+          } else {
+            expect(
+              data.isModifierPressed(key, side: modifierTests[modifier].side),
+              isFalse,
+              reason: '$key should not be pressed with metaState $modifier '
+                  'and additional key ${GtkKeyHelper.modifierControl}.',
+            );
+          }
+        }
+      }
+    });
+    test('Printable keyboard keys are correctly translated', () {
+      final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'linux',
+        'toolkit': 'gtk',
+        'keyCode': 65,
+        'scanCode': 0x00000026,
+        'unicodeScalarValues': 113,
+        'modifiers': 0x0,
+      });
+      final RawKeyEventDataLinux data = keyAEvent.data as RawKeyEventDataLinux;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.keyQ));
+      expect(data.keyLabel, equals('q'));
+    });
+    test('Code points with two Unicode scalar values are allowed', () {
+      final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'linux',
+        'toolkit': 'gtk',
+        'keyCode': 65,
+        'scanCode': 0x00000026,
+        'unicodeScalarValues': 0x10FFFF,
+        'modifiers': 0x0,
+      });
+      final RawKeyEventDataLinux data = keyAEvent.data as RawKeyEventDataLinux;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
+      expect(data.logicalKey.keyId, equals(0x10FFFF));
+      expect(data.keyLabel, equals('􏿿'));
+    });
+
+    test('Code points with more than three Unicode scalar values are not allowed', () {
+      // |keyCode| and |scanCode| are arbitrary values. This test should fail due to an invalid |unicodeScalarValues|.
+      void _createFailingKey() {
+        RawKeyEvent.fromMessage(const <String, dynamic>{
+          'type': 'keydown',
+          'keymap': 'linux',
+          'toolkit': 'gtk',
+          'keyCode': 65,
+          'scanCode': 0x00000026,
+          'unicodeScalarValues': 0x1F00000000,
+          'modifiers': 0x0,
+        });
+      }
+
+      expect(() => _createFailingKey(), throwsAssertionError);
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61039
+
+    test('Control keyboard keys are correctly translated', () {
+      final RawKeyEvent escapeKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'linux',
+        'toolkit': 'gtk',
+        'keyCode': 65307,
+        'scanCode': 0x00000009,
+        'unicodeScalarValues': 0,
+        'modifiers': 0x0,
+      });
+      final RawKeyEventDataLinux data = escapeKeyEvent.data as RawKeyEventDataLinux;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.escape));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.escape));
+      expect(data.keyLabel, isNull);
+    });
+    test('Modifier keyboard keys are correctly translated', () {
+      final RawKeyEvent shiftLeftKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'linux',
+        'toolkit': 'gtk',
+        'keyCode': 65505,
+        'scanCode': 0x00000032,
+        'unicodeScalarValues': 0,
+      });
+      final RawKeyEventDataLinux data = shiftLeftKeyEvent.data as RawKeyEventDataLinux;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.shiftLeft));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.shiftLeft));
+      expect(data.keyLabel, isNull);
+    });
+  });
 
   group('RawKeyEventDataWeb', () {
     const Map<int, ModifierKey> modifierTests = <int, ModifierKey>{

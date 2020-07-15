@@ -212,7 +212,7 @@ void main() {
             arguments: <String>['--no-pub'],
           );
         }, throwsToolExit(
-          message: 'No Android SDK found. Try setting the ANDROID_HOME environment variable',
+          message: 'No Android SDK found. Try setting the ANDROID_SDK_ROOT environment variable',
         ));
       },
       overrides: <Type, Generator>{

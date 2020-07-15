@@ -36,6 +36,10 @@ export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 /// Remember to [dispose] of the [TextEditingController] when it is no longer needed.
 /// This will ensure we discard any resources used by the object.
 ///
+/// By default, [TextFormField.decoration] will apply the
+/// [ThemeData.inputDecorationTheme] for the current context to the
+/// [InputDecoration], see [InputDecoration.applyDefaults].
+///
 /// For a documentation about the various parameters, see [TextField].
 ///
 /// {@tool snippet}
@@ -78,9 +82,8 @@ export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 ///     child: Center(
 ///       child: Shortcuts(
 ///         shortcuts: <LogicalKeySet, Intent>{
-///           // Pressing enter on the field will now move to the next field.
-///           LogicalKeySet(LogicalKeyboardKey.enter):
-///               NextFocusIntent(),
+///           // Pressing space in the field will now move to the next field.
+///           LogicalKeySet(LogicalKeyboardKey.space): const NextFocusIntent(),
 ///         },
 ///         child: FocusTraversalGroup(
 ///           child: Form(
@@ -93,7 +96,7 @@ export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 ///                 return Padding(
 ///                   padding: const EdgeInsets.all(8.0),
 ///                   child: ConstrainedBox(
-///                     constraints: BoxConstraints.tight(Size(200, 50)),
+///                     constraints: BoxConstraints.tight(const Size(200, 50)),
 ///                     child: TextFormField(
 ///                       onSaved: (String value) {
 ///                         print('Value for field $index saved as "$value"');

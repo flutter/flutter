@@ -4,7 +4,9 @@
 
 import 'package:meta/meta.dart';
 
+import 'base/config.dart';
 import 'base/context.dart';
+import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
 import 'build_system/targets/icon_tree_shaker.dart';
@@ -29,9 +31,16 @@ class BuildInfo {
     this.dartExperiments = const <String>[],
     @required this.treeShakeIcons,
     this.performanceMeasurementFile,
+    this.packagesPath = '.packages',
+    this.nullSafetyMode = NullSafetyMode.autodetect,
   });
 
   final BuildMode mode;
+
+  /// The null safety mode the application should be run in.
+  ///
+  /// If not provided, defaults to [NullSafetyMode.autodetect].
+  final NullSafetyMode nullSafetyMode;
 
   /// Whether the build should subdset icon fonts.
   final bool treeShakeIcons;
@@ -43,6 +52,12 @@ class BuildInfo {
   /// `assemblePaidRelease`), and the Xcode build configuration will be
   /// Mode-Flavor (e.g. Release-Paid).
   final String flavor;
+
+  /// The path to the .packages file to use for compilation.
+  ///
+  /// This is used by package:package_config to locate the actual package_config.json
+  /// file. If not provded, defaults to `.packages`.
+  final String packagesPath;
 
   final List<String> fileSystemRoots;
   final String fileSystemScheme;
@@ -156,6 +171,8 @@ class BuildInfo {
         'PERFORMANCE_MEASUREMENT_FILE': performanceMeasurementFile,
       if (bundleSkSLPath != null)
         'BUNDLE_SKSL_PATH': bundleSkSLPath,
+      if (packagesPath != null)
+        'PACKAGE_CONFIG': packagesPath,
     };
   }
 }
@@ -597,15 +614,20 @@ HostPlatform getCurrentHostPlatform() {
 }
 
 /// Returns the top-level build output directory.
-String getBuildDirectory() {
+String getBuildDirectory([Config config, FileSystem fileSystem]) {
   // TODO(johnmccutchan): Stop calling this function as part of setting
   // up command line argument processing.
-  if (context == null || globals.config == null) {
+  if (context == null) {
+    return 'build';
+  }
+  final Config localConfig = config ?? globals.config;
+  final FileSystem localFilesystem = fileSystem ?? globals.fs;
+  if (localConfig == null) {
     return 'build';
   }
 
-  final String buildDir = globals.config.getValue('build-dir') as String ?? 'build';
-  if (globals.fs.path.isAbsolute(buildDir)) {
+  final String buildDir = localConfig.getValue('build-dir') as String ?? 'build';
+  if (localFilesystem.path.isAbsolute(buildDir)) {
     throw Exception(
         'build-dir config setting in ${globals.config.configPath} must be relative');
   }
@@ -678,4 +700,11 @@ List<String> decodeDartDefines(Map<String, String> environmentDefines, String ke
     .map<Object>(Uri.decodeComponent)
     .cast<String>()
     .toList();
+}
+
+/// The null safety runtime mode the app should be built in.
+enum NullSafetyMode {
+  sound,
+  unsound,
+  autodetect,
 }

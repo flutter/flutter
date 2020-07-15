@@ -112,8 +112,10 @@ void main() {
     await gesture.moveTo(const Offset(400.0, 300.0));
     expect(move, isNotNull);
     expect(move.position, equals(const Offset(400.0, 300.0)));
+    expect(move.localPosition, equals(const Offset(50.0, 50.0)));
     expect(enter, isNotNull);
     expect(enter.position, equals(const Offset(400.0, 300.0)));
+    expect(enter.localPosition, equals(const Offset(50.0, 50.0)));
     expect(exit, isNull);
   });
 
@@ -145,6 +147,7 @@ void main() {
     expect(enter, isNull);
     expect(exit, isNotNull);
     expect(exit.position, equals(const Offset(1.0, 1.0)));
+    expect(exit.localPosition, equals(const Offset(-349.0, -249.0)));
   });
 
   testWidgets('triggers pointer enter when a mouse is connected', (WidgetTester tester) async {
@@ -168,12 +171,9 @@ void main() {
     await gesture.addPointer(location: const Offset(400, 300));
     addTearDown(gesture.removePointer);
     expect(move, isNull);
-    expect(enter, isNull);
-    expect(exit, isNull);
-    await tester.pump();
-    expect(move, isNull);
     expect(enter, isNotNull);
     expect(enter.position, equals(const Offset(400.0, 300.0)));
+    expect(enter.localPosition, equals(const Offset(50.0, 50.0)));
     expect(exit, isNull);
   });
 
@@ -207,6 +207,7 @@ void main() {
     expect(enter, isNull);
     expect(exit, isNotNull);
     expect(exit.position, equals(const Offset(400.0, 300.0)));
+    expect(exit.localPosition, equals(const Offset(50.0, 50.0)));
     exit = null;
     await tester.pump();
     expect(move, isNull);
@@ -247,6 +248,7 @@ void main() {
     expect(move, isNull);
     expect(enter, isNotNull);
     expect(enter.position, equals(const Offset(400.0, 300.0)));
+    expect(enter.localPosition, equals(const Offset(50.0, 50.0)));
     expect(exit, isNull);
   });
 
@@ -289,7 +291,7 @@ void main() {
     PointerHoverEvent move;
     PointerExitEvent exit;
     await tester.pumpWidget(Container(
-      alignment: Alignment.center,
+      alignment: Alignment.topLeft,
       child: MouseRegion(
         child: const SizedBox(
           width: 100.0,
@@ -301,14 +303,14 @@ void main() {
       ),
     ));
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    await gesture.addPointer(location: const Offset(1.0, 1.0));
+    await gesture.addPointer(location: const Offset(401.0, 301.0));
     addTearDown(gesture.removePointer);
     await tester.pump();
     expect(enter, isNull);
     expect(move, isNull);
     expect(exit, isNull);
     await tester.pumpWidget(Container(
-      alignment: Alignment.topLeft,
+      alignment: Alignment.center,
       child: MouseRegion(
         child: const SizedBox(
           width: 100.0,
@@ -321,7 +323,8 @@ void main() {
     ));
     await tester.pump();
     expect(enter, isNotNull);
-    expect(enter.position, equals(const Offset(1.0, 1.0)));
+    expect(enter.position, equals(const Offset(401.0, 301.0)));
+    expect(enter.localPosition, equals(const Offset(51.0, 51.0)));
     expect(move, isNull);
     expect(exit, isNull);
   });
@@ -366,6 +369,7 @@ void main() {
     expect(move, isNull);
     expect(exit, isNotNull);
     expect(exit.position, equals(const Offset(400, 300)));
+    expect(exit.localPosition, equals(const Offset(50, 50)));
   });
 
   testWidgets('Hover works with nested listeners', (WidgetTester tester) async {
@@ -585,13 +589,13 @@ void main() {
     }
 
     await tester.pumpWidget(hoverableContainer(
-      onEnter: (PointerEnterEvent details) => logs.add('enter1'),
-      onHover: (PointerHoverEvent details) => logs.add('hover1'),
-      onExit: (PointerExitEvent details) => logs.add('exit1'),
+      onEnter: (PointerEnterEvent details) { logs.add('enter1'); },
+      onHover: (PointerHoverEvent details) { logs.add('hover1'); },
+      onExit: (PointerExitEvent details) { logs.add('exit1'); },
     ));
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    await gesture.addPointer();
+    await gesture.addPointer(location: const Offset(150.0, 150.0));
     addTearDown(gesture.removePointer);
 
     // Start outside, move inside, then move outside
@@ -709,7 +713,7 @@ void main() {
     events.clear();
   });
 
-  testWidgets('needsCompositing updates correctly and is respected', (WidgetTester tester) async {
+  testWidgets('needsCompositing is always false', (WidgetTester tester) async {
     // Pretend that we have a mouse connected.
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
@@ -729,7 +733,7 @@ void main() {
     // transform.)
     expect(tester.layers.whereType<TransformLayer>(), hasLength(1));
 
-    // Test that needsCompositing updates correctly with callback change
+    // Test that needsCompositing stays false with callback change
     await tester.pumpWidget(
       Transform.scale(
         scale: 2.0,
@@ -739,35 +743,10 @@ void main() {
         ),
       ),
     );
-    expect(mouseRegion.needsCompositing, isTrue);
-    // Compositing is required, therefore a dedicated TransformLayer for
-    // `Transform.scale` is added.
-    expect(tester.layers.whereType<TransformLayer>(), hasLength(2));
-
-    await tester.pumpWidget(
-      Transform.scale(
-        scale: 2.0,
-        child: const MouseRegion(opaque: false),
-      ),
-    );
     expect(mouseRegion.needsCompositing, isFalse);
-    // TransformLayer for `Transform.scale` is removed again as transform is
-    // executed directly on the canvas.
+    // If compositing was required, a dedicated TransformLayer for
+    // `Transform.scale` would be added.
     expect(tester.layers.whereType<TransformLayer>(), hasLength(1));
-
-    // Test that needsCompositing updates correctly with `opaque` change
-    await tester.pumpWidget(
-      Transform.scale(
-        scale: 2.0,
-        child: const MouseRegion(
-          opaque: true,
-        ),
-      ),
-    );
-    expect(mouseRegion.needsCompositing, isTrue);
-    // Compositing is required, therefore a dedicated TransformLayer for
-    // `Transform.scale` is added.
-    expect(tester.layers.whereType<TransformLayer>(), hasLength(2));
   });
 
   testWidgets("Callbacks aren't called during build", (WidgetTester tester) async {

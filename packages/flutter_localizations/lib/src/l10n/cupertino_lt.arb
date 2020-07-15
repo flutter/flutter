@@ -29,6 +29,6 @@
   "copyButtonLabel": "Kopijuoti",
   "pasteButtonLabel": "Įklijuoti",
   "selectAllButtonLabel": "Pasirinkti viską",
-  "tabSemanticsLabel": "TBD",
+  "tabSemanticsLabel": "$tabIndex skirtukas iš $tabCount",
   "modalBarrierDismissLabel": "Atsisakyti"
 }

@@ -314,13 +314,7 @@ void main() {
      expect(log, equals(<String>['left']));
      await gesture.up();
      expect(log, equals(<String>['left']));
-
-     // This test doesn't work because it relies on part of the pointer event
-     // dispatching mechanism that is mocked out in testing. We should use the real
-     // mechanism even during testing and enable this test.
-     // TODO(abarth): Test more of the real code and enable this test.
-     // See https://github.com/flutter/flutter/issues/4771.
-   }, skip: true);
+   }, skip: true); // https://github.com/flutter/flutter/issues/4771
 
   testWidgets('popAndPushNamed', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -493,6 +487,38 @@ void main() {
     expect(observations[2].operation, 'push');
     expect(observations[2].current, '/A/B');
     expect(observations[2].previous, '/A');
+  });
+
+  testWidgets('Route didAdd and dispose in same frame work', (WidgetTester tester) async {
+    // Regression Test for https://github.com/flutter/flutter/issues/61346.
+    Widget buildNavigator() {
+      return Navigator(
+        pages: <Page<void>>[
+          MaterialPage<void>(
+            builder: (BuildContext context) => const Placeholder(),
+          )
+        ],
+        onPopPage: (Route<dynamic> route, dynamic result) => false,
+      );
+    }
+    final TabController controller = TabController(length: 3, vsync: tester);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: TabBarView(
+          controller: controller,
+          children: <Widget>[
+            buildNavigator(),
+            buildNavigator(),
+            buildNavigator(),
+          ],
+        )
+      ),
+    );
+
+    // This test should finish without crashing.
+    controller.index = 2;
+    await tester.pumpAndSettle();
   });
 
   testWidgets('replaceNamed replaces', (WidgetTester tester) async {

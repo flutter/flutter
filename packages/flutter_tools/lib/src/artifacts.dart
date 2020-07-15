@@ -39,9 +39,22 @@ enum Artifact {
   kernelWorkerSnapshot,
   /// The root of the web implementation of the dart SDK.
   flutterWebSdk,
+  /// The libraries JSON file for web release builds.
   flutterWebLibrariesJson,
   /// The summary dill for the dartdevc target.
   webPlatformKernelDill,
+  /// The summary dill with null safety enabled for the dartdevc target.
+  webPlatformSoundKernelDill,
+  /// The precompiled SDKs and sourcemaps for web debug builds.
+  webPrecompiledSdk,
+  webPrecompiledSdkSourcemaps,
+  webPrecompiledCanvaskitSdk,
+  webPrecompiledCanvaskitSdkSourcemaps,
+  webPrecompiledSoundSdk,
+  webPrecompiledSoundSdkSourcemaps,
+  webPrecompiledCanvaskitSoundSdk,
+  webPrecompiledCanvaskitSoundSdkSourcemaps,
+
   iosDeploy,
   idevicesyslog,
   idevicescreenshot,
@@ -129,6 +142,8 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
       return 'FlutterMacOS.podspec';
     case Artifact.webPlatformKernelDill:
       return 'flutter_ddc_sdk.dill';
+    case Artifact.webPlatformSoundKernelDill:
+      return 'flutter_ddc_sdk_sound.dill';
     case Artifact.fuchsiaKernelCompiler:
       return 'kernel_compiler.snapshot';
     case Artifact.fuchsiaFlutterRunner:
@@ -141,6 +156,16 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
       return 'const_finder.dart.snapshot';
     case Artifact.flutterWebLibrariesJson:
       return 'libraries.json';
+    case Artifact.webPrecompiledSdk:
+    case Artifact.webPrecompiledCanvaskitSdk:
+    case Artifact.webPrecompiledSoundSdk:
+    case Artifact.webPrecompiledCanvaskitSoundSdk:
+      return 'dart_sdk.js';
+    case Artifact.webPrecompiledSdkSourcemaps:
+    case Artifact.webPrecompiledCanvaskitSdkSourcemaps:
+    case Artifact.webPrecompiledSoundSdkSourcemaps:
+    case Artifact.webPrecompiledCanvaskitSoundSdkSourcemaps:
+      return 'dart_sdk.js.map';
   }
   assert(false, 'Invalid artifact $artifact.');
   return null;
@@ -159,6 +184,11 @@ class EngineBuildPaths {
 
 // Manages the engine artifacts of Flutter.
 abstract class Artifacts {
+  /// A test-specific implementation of artifacts that returns stable paths for
+  /// all artifacts.
+  @visibleForTesting
+  factory Artifacts.test() = _TestArtifacts;
+
   static LocalEngineArtifacts getLocalEngine(EngineBuildPaths engineBuildPaths) {
     return LocalEngineArtifacts(
       engineBuildPaths.targetEngine,
@@ -183,7 +213,7 @@ abstract class Artifacts {
 
 
 /// Manages the engine artifacts downloaded to the local cache.
-class CachedArtifacts extends Artifacts {
+class CachedArtifacts implements Artifacts {
   CachedArtifacts({
     @required FileSystem fileSystem,
     @required Platform platform,
@@ -343,6 +373,8 @@ class CachedArtifacts extends Artifacts {
         return _fileSystem.path.join(_getFlutterWebSdkPath(), _artifactToFileName(artifact));
       case Artifact.webPlatformKernelDill:
         return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', _artifactToFileName(artifact));
+      case Artifact.webPlatformSoundKernelDill:
+        return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', _artifactToFileName(artifact));
       case Artifact.dart2jsSnapshot:
         return _fileSystem.path.join(_dartSdkPath(_fileSystem), 'bin', 'snapshots', _artifactToFileName(artifact));
       case Artifact.dartdevcSnapshot:
@@ -375,6 +407,22 @@ class CachedArtifacts extends Artifacts {
                      .childDirectory(getNameForTargetPlatform(platform))
                      .childFile(_artifactToFileName(artifact, platform, mode))
                      .path;
+      case Artifact.webPrecompiledSdk:
+        return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd', _artifactToFileName(artifact, platform, mode));
+      case Artifact.webPrecompiledSdkSourcemaps:
+        return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd', _artifactToFileName(artifact, platform, mode));
+      case Artifact.webPrecompiledCanvaskitSdk:
+        return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit', _artifactToFileName(artifact, platform, mode));
+      case Artifact.webPrecompiledCanvaskitSdkSourcemaps:
+        return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit', _artifactToFileName(artifact, platform, mode));
+      case Artifact.webPrecompiledSoundSdk:
+        return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-sound', _artifactToFileName(artifact, platform, mode));
+      case Artifact.webPrecompiledSoundSdkSourcemaps:
+        return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-sound', _artifactToFileName(artifact, platform, mode));
+      case Artifact.webPrecompiledCanvaskitSoundSdk:
+        return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit-sound', _artifactToFileName(artifact, platform, mode));
+      case Artifact.webPrecompiledCanvaskitSoundSdkSourcemaps:
+        return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit-sound', _artifactToFileName(artifact, platform, mode));
       default:
         assert(false, 'Artifact $artifact not available for platform $platform.');
         return null;
@@ -449,7 +497,7 @@ HostPlatform _currentHostPlatformAsHost(Platform platform) {
 }
 
 /// Manages the artifacts of a locally built engine.
-class LocalEngineArtifacts extends Artifacts {
+class LocalEngineArtifacts implements Artifacts {
   LocalEngineArtifacts(
     this.engineOutPath,
     this._hostEngineOutPath, {
@@ -537,6 +585,8 @@ class LocalEngineArtifacts extends Artifacts {
         return _fileSystem.path.join(_hostEngineOutPath, _artifactToFileName(artifact));
       case Artifact.webPlatformKernelDill:
         return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', _artifactToFileName(artifact));
+      case Artifact.webPlatformSoundKernelDill:
+        return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', _artifactToFileName(artifact));
       case Artifact.fuchsiaKernelCompiler:
         final String hostPlatform = getNameForHostPlatform(getCurrentHostPlatform());
         final String modeName = mode.isRelease ? 'release' : mode.toString();
@@ -552,6 +602,22 @@ class LocalEngineArtifacts extends Artifacts {
         return _fileSystem.path.join(_hostEngineOutPath, 'gen', artifactFileName);
       case Artifact.flutterWebLibrariesJson:
         return _fileSystem.path.join(_getFlutterWebSdkPath(), artifactFileName);
+      case Artifact.webPrecompiledSdk:
+        return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd', artifactFileName);
+      case Artifact.webPrecompiledSdkSourcemaps:
+        return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd', artifactFileName);
+      case Artifact.webPrecompiledCanvaskitSdk:
+        return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit', artifactFileName);
+      case Artifact.webPrecompiledCanvaskitSdkSourcemaps:
+        return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit', artifactFileName);
+      case Artifact.webPrecompiledSoundSdk:
+        return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-sound', artifactFileName);
+      case Artifact.webPrecompiledSoundSdkSourcemaps:
+        return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-sound', artifactFileName);
+      case Artifact.webPrecompiledCanvaskitSoundSdk:
+        return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit-sound', artifactFileName);
+      case Artifact.webPrecompiledCanvaskitSoundSdkSourcemaps:
+        return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit-sound', artifactFileName);
     }
     assert(false, 'Invalid artifact $artifact.');
     return null;
@@ -647,4 +713,27 @@ class OverrideArtifacts implements Artifacts {
 /// Locate the Dart SDK.
 String _dartSdkPath(FileSystem fileSystem) {
   return fileSystem.path.join(Cache.flutterRoot, 'bin', 'cache', 'dart-sdk');
+}
+
+class _TestArtifacts implements Artifacts {
+  @override
+  String getArtifactPath(Artifact artifact, {TargetPlatform platform, BuildMode mode}) {
+    final StringBuffer buffer = StringBuffer();
+    buffer.write(artifact);
+    if (platform != null) {
+      buffer.write('.$platform');
+    }
+    if (mode != null) {
+      buffer.write('.$mode');
+    }
+    return buffer.toString();
+  }
+
+  @override
+  String getEngineType(TargetPlatform platform, [ BuildMode mode ]) {
+    return 'test-engine';
+  }
+
+  @override
+  bool get isLocalEngine => false;
 }

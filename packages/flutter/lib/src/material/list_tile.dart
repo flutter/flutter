@@ -52,6 +52,8 @@ class ListTileTheme extends InheritedTheme {
     this.iconColor,
     this.textColor,
     this.contentPadding,
+    this.tileColor,
+    this.selectedTileColor,
     Widget child,
   }) : super(key: key, child: child);
 
@@ -68,6 +70,8 @@ class ListTileTheme extends InheritedTheme {
     Color iconColor,
     Color textColor,
     EdgeInsetsGeometry contentPadding,
+    Color tileColor,
+    Color selectedTileColor,
     @required Widget child,
   }) {
     assert(child != null);
@@ -83,6 +87,8 @@ class ListTileTheme extends InheritedTheme {
           iconColor: iconColor ?? parent.iconColor,
           textColor: textColor ?? parent.textColor,
           contentPadding: contentPadding ?? parent.contentPadding,
+          tileColor: tileColor ?? parent.tileColor,
+          selectedTileColor: selectedTileColor ?? parent.selectedTileColor,
           child: child,
         );
       },
@@ -113,6 +119,18 @@ class ListTileTheme extends InheritedTheme {
   /// and [trailing] widgets.
   final EdgeInsetsGeometry contentPadding;
 
+  /// If specified, defines the background color for `ListTile` when
+  /// [ListTile.selected] is false.
+  ///
+  /// If [ListTile.tileColor] is provided, [tileColor] is ignored.
+  final Color tileColor;
+
+  /// If specified, defines the background color for `ListTile` when
+  /// [ListTile.selected] is true.
+  ///
+  /// If [ListTile.selectedTileColor] is provided, [selectedTileColor] is ignored.
+  final Color selectedTileColor;
+
   /// The closest instance of this class that encloses the given context.
   ///
   /// Typical usage is as follows:
@@ -136,6 +154,8 @@ class ListTileTheme extends InheritedTheme {
       iconColor: iconColor,
       textColor: textColor,
       contentPadding: contentPadding,
+      tileColor: tileColor,
+      selectedTileColor: selectedTileColor,
       child: child,
     );
   }
@@ -148,7 +168,9 @@ class ListTileTheme extends InheritedTheme {
         || selectedColor != oldWidget.selectedColor
         || iconColor != oldWidget.iconColor
         || textColor != oldWidget.textColor
-        || contentPadding != oldWidget.contentPadding;
+        || contentPadding != oldWidget.contentPadding
+        || tileColor != oldWidget.tileColor
+        || selectedTileColor != oldWidget.selectedTileColor;
   }
 }
 
@@ -658,6 +680,8 @@ class ListTile extends StatelessWidget {
     this.hoverColor,
     this.focusNode,
     this.autofocus = false,
+    this.tileColor,
+    this.selectedTileColor,
   }) : assert(isThreeLine != null),
        assert(enabled != null),
        assert(selected != null),
@@ -674,7 +698,8 @@ class ListTile extends StatelessWidget {
   ///
   /// Typically a [Text] widget.
   ///
-  /// This should not wrap.
+  /// This should not wrap. To enforce the single line limit, use
+  /// [Text.maxLines].
   final Widget title;
 
   /// Additional content displayed below the title.
@@ -684,7 +709,23 @@ class ListTile extends StatelessWidget {
   /// If [isThreeLine] is false, this should not wrap.
   ///
   /// If [isThreeLine] is true, this should be configured to take a maximum of
-  /// two lines.
+  /// two lines. For example, you can use [Text.maxLines] to enforce the number
+  /// of lines.
+  ///
+  /// The subtitle's default [TextStyle] depends on [TextTheme.bodyText2] except
+  /// [TextStyle.color]. The [TextStyle.color] depends on the value of [enabled]
+  /// and [selected].
+  ///
+  /// When [enabled] is false, the text color is set to [ThemeData.disabledColor].
+  ///
+  /// When [selected] is true, the text color is set to [ListTileTheme.selectedColor]
+  /// if it's not null. If [ListTileTheme.selectedColor] is null, the text color
+  /// is set to [ThemeData.primaryColor] when [ThemeData.brightness] is
+  /// [Brightness.light] and to [ThemeData.accentColor] when it is [Brightness.dark].
+  ///
+  /// When [selected] is false, the text color is set to [ListTileTheme.textColor]
+  /// if it's not null and to [TextTheme.caption]'s color if [ListTileTheme.textColor]
+  /// is null.
   final Widget subtitle;
 
   /// A widget to display after the title.
@@ -705,6 +746,9 @@ class ListTile extends StatelessWidget {
   ///
   /// If false, the list tile is treated as having one line if the subtitle is
   /// null and treated as having two lines if the subtitle is non-null.
+  ///
+  /// When using a [Text] widget for [title] and [subtitle], you can enforce
+  /// line limits using [Text.maxLines].
   final bool isThreeLine;
 
   /// Whether this list tile is part of a vertically dense list.
@@ -774,6 +818,35 @@ class ListTile extends StatelessWidget {
   ///
   /// By default the selected color is the theme's primary color. The selected color
   /// can be overridden with a [ListTileTheme].
+  ///
+  /// {@tool dartpad --template=stateful_widget_scaffold}
+  ///
+  /// Here is an example of using a [StatefulWidget] to keep track of the
+  /// selected index, and using that to set the `selected` property on the
+  /// corresponding [ListTile].
+  ///
+  /// ```dart
+  ///   int _selectedIndex;
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return ListView.builder(
+  ///       itemCount: 10,
+  ///       itemBuilder: (BuildContext context, int index) {
+  ///         return ListTile(
+  ///           title: Text('Item $index'),
+  ///           selected: index == _selectedIndex,
+  ///           onTap: () {
+  ///             setState(() {
+  ///               _selectedIndex = index;
+  ///             });
+  ///           },
+  ///         );
+  ///       },
+  ///     );
+  ///   }
+  /// ```
+  /// {@end-tool}
   final bool selected;
 
   /// The color for the tile's [Material] when it has the input focus.
@@ -787,6 +860,18 @@ class ListTile extends StatelessWidget {
 
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
+
+  /// Defines the background color of `ListTile` when [selected] is false.
+  ///
+  /// When the value is null, the `tileColor` is set to [ListTileTheme.tileColor]
+  /// if it's not null and to [Colors.transparent] if it's null.
+  final Color tileColor;
+
+  /// Defines the background color of `ListTile` when [selected] is true.
+  ///
+  /// When the value if null, the `selectedTileColor` is set to [ListTileTheme.selectedTileColor]
+  /// if it's not null and to [Colors.transparent] if it's null.
+  final Color selectedTileColor;
 
   /// Add a one pixel border in between each tile. If color isn't specified the
   /// [ThemeData.dividerColor] of the context's [Theme] is used.
@@ -893,6 +978,24 @@ class ListTile extends StatelessWidget {
       : style.copyWith(color: color);
   }
 
+  Color _tileBackgroundColor(ListTileTheme tileTheme) {
+    if (!selected) {
+      if (tileColor != null)
+        return tileColor;
+      if (tileTheme?.tileColor != null)
+        return tileTheme.tileColor;
+    }
+
+    if (selected) {
+      if (selectedTileColor != null)
+        return selectedTileColor;
+      if (tileTheme?.selectedTileColor != null)
+        return tileTheme.selectedTileColor;
+    }
+
+    return Colors.transparent;
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -946,7 +1049,7 @@ class ListTile extends StatelessWidget {
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
       mouseCursor ?? MaterialStateMouseCursor.clickable,
       <MaterialState>{
-        if (!enabled) MaterialState.disabled,
+        if (!enabled || (onTap == null && onLongPress == null)) MaterialState.disabled,
         if (selected) MaterialState.selected,
       },
     );
@@ -964,21 +1067,24 @@ class ListTile extends StatelessWidget {
       child: Semantics(
         selected: selected,
         enabled: enabled,
-        child: SafeArea(
-          top: false,
-          bottom: false,
-          minimum: resolvedContentPadding,
-          child: _ListTile(
-            leading: leadingIcon,
-            title: titleText,
-            subtitle: subtitleText,
-            trailing: trailingIcon,
-            isDense: _isDenseLayout(tileTheme),
-            visualDensity: visualDensity ?? theme.visualDensity,
-            isThreeLine: isThreeLine,
-            textDirection: textDirection,
-            titleBaselineType: titleStyle.textBaseline,
-            subtitleBaselineType: subtitleStyle?.textBaseline,
+        child: ColoredBox(
+          color: _tileBackgroundColor(tileTheme),
+          child: SafeArea(
+            top: false,
+            bottom: false,
+            minimum: resolvedContentPadding,
+            child: _ListTile(
+              leading: leadingIcon,
+              title: titleText,
+              subtitle: subtitleText,
+              trailing: trailingIcon,
+              isDense: _isDenseLayout(tileTheme),
+              visualDensity: visualDensity ?? theme.visualDensity,
+              isThreeLine: isThreeLine,
+              textDirection: textDirection,
+              titleBaselineType: titleStyle.textBaseline,
+              subtitleBaselineType: subtitleStyle?.textBaseline,
+            ),
           ),
         ),
       ),
