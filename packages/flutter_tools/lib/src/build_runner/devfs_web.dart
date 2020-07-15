@@ -791,6 +791,8 @@ class WebDevFS implements DevFS {
         'main_module.bootstrap.js',
         generateMainModule(
           entrypoint: entrypoint,
+          nullSafety: buildInfo.extraFrontEndOptions
+            ?.contains('--enable-experiment=non-nullable') ?? false,
         ),
       );
       // TODO(jonahwilliams): refactor the asset code in this and the regular devfs to
