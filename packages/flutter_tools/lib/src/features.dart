@@ -33,9 +33,6 @@ abstract class FeatureFlags {
   /// Whether flutter desktop for Windows is enabled.
   bool get isWindowsEnabled => false;
 
-  /// Whether fast single widget reloads are enabled.
-  bool get isSingleWidgetReloadEnabled => false;
-
   /// Whether android is enabled.
   bool get isAndroidEnabled => true;
 
@@ -44,6 +41,9 @@ abstract class FeatureFlags {
 
   /// Whether fuchsia is enabled.
   bool get isFuchsiaEnabled => true;
+
+  /// Whether fast single widget reloads are enabled.
+  bool get isSingleWidgetReloadEnabled => false;
 
   /// Whether a particular feature is enabled for the current channel.
   ///
@@ -67,9 +67,6 @@ class FlutterFeatureFlags implements FeatureFlags {
   bool get isWindowsEnabled => isEnabled(flutterWindowsDesktopFeature);
 
   @override
-  bool get isSingleWidgetReloadEnabled => isEnabled(singleWidgetReload);
-
-  @override
   bool get isAndroidEnabled => isEnabled(flutterAndroidFeature);
 
   @override
@@ -77,6 +74,9 @@ class FlutterFeatureFlags implements FeatureFlags {
 
   @override
   bool get isFuchsiaEnabled => isEnabled(flutterFuchsiaFeature);
+
+  @override
+  bool get isSingleWidgetReloadEnabled => isEnabled(singleWidgetReload);
 
   @override
   bool isEnabled(Feature feature) {
