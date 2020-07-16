@@ -7,7 +7,7 @@ Performance benchmarks use either flutter drive or the web benchmark harness.
 To run a mobile benchmark on a device:
 
 ```
-flutter drive --profile -t run_app.dart --driver test_driver/[test_name]_test.dart
+flutter drive --profile -t test_driver/run_app.dart --driver test_driver/[test_name]_test.dart
 ```
 
 Results should be in the file `build/[test_name].timeline_summary.json`.
@@ -26,9 +26,10 @@ The key `[test_name]` can be:
 - `post_backdrop_filter_perf`
 - `simple_animation_perf`
 - `textfield_perf`
+- `cubic_bezier_perf`
 
-`cubic_bezier_perf` is a special case for SkSL shader warm-up, which has its own
-test app code, and should be run by:
+`cubic_bezier_perf` is a special case for SkSL shader warm-up, which also has
+its own test app code for performing warm-up, which should be run by:
 
 ```
 flutter drive --profile -t test_driver/cubic_bezier_perf.dart
