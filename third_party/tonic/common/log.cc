@@ -22,8 +22,9 @@ void Log(const char* format, ...) {
   int result = vsnprintf(nullptr, 0, format, ap);
   va_end(ap);
 
-  if (result < 0)
+  if (result < 0) {
     return;
+  }
 
   int size = result + 1;
   std::unique_ptr<char[]> message(new char[size]);
@@ -31,8 +32,9 @@ void Log(const char* format, ...) {
   result = vsnprintf(message.get(), size, format, ap);
   va_end(ap);
 
-  if (result < 0)
+  if (result < 0) {
     return;
+  }
 
   if (log_handler) {
     log_handler(message.get());

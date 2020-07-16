@@ -16,6 +16,7 @@ source_set("logging") {
 
   deps = [
     "../common",
+    "../converter",
   ]
 
   public_deps = [
