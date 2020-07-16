@@ -48,7 +48,12 @@ const int kScrollableSemanticsActions =
     static_cast<int32_t>(SemanticsAction::kScrollUp) |
     static_cast<int32_t>(SemanticsAction::kScrollDown);
 
-// Must match the SemanticsFlags enum in semantics.dart.
+/// C/C++ representation of `SemanticsFlags` defined in
+/// `lib/ui/semantics.dart`.
+///\warning This must match the `SemanticsFlags` enum in
+///         `lib/ui/semantics.dart`.
+/// See also:
+///   - file://./../../../lib/ui/semantics.dart
 enum class SemanticsFlags : int32_t {
   kHasCheckedState = 1 << 0,
   kIsChecked = 1 << 1,
