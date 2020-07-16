@@ -137,14 +137,12 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
           .cast<Map<dynamic, dynamic>>()
           .map<Map<String, dynamic>>((Map<dynamic, dynamic> e) =>e.cast<String, dynamic>())
           .toList();
-      await channel.invokeMethod<void>('pipeFlutterViewEvents');
       await viewChannel.invokeMethod<void>('pipeTouchEvents');
       print('replaying ${recordedEvents.length} motion events');
       for (final Map<String, dynamic> event in recordedEvents.reversed) {
         await channel.invokeMethod<void>('synthesizeEvent', event);
       }
 
-      await channel.invokeMethod<void>('stopFlutterViewEvents');
       await viewChannel.invokeMethod<void>('stopTouchEvents');
 
       if (flutterViewEvents.length != embeddedViewEvents.length)
@@ -202,10 +200,8 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
   }
 
   void listenToFlutterViewEvents() {
-    channel.invokeMethod<void>('pipeFlutterViewEvents');
     viewChannel.invokeMethod<void>('pipeTouchEvents');
     Timer(const Duration(seconds: 3), () {
-      channel.invokeMethod<void>('stopFlutterViewEvents');
       viewChannel.invokeMethod<void>('stopTouchEvents');
     });
   }

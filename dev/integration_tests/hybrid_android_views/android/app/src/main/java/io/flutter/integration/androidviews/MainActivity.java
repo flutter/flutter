@@ -25,7 +25,6 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
     final static int STORAGE_PERMISSION_CODE = 1;
 
     MethodChannel mMethodChannel;
-    TouchPipe mFlutterViewTouchPipe;
 
     // The method result to complete with the Android permission request result.
     // This is null when not waiting for the Android permission request;
@@ -40,7 +39,6 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mFlutterViewTouchPipe = new TouchPipe(mMethodChannel, getFlutterView());
     }
 
     @Override
@@ -58,14 +56,6 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
     @Override
     public void onMethodCall(MethodCall methodCall, MethodChannel.Result result) {
         switch(methodCall.method) {
-            case "pipeFlutterViewEvents":
-                mFlutterViewTouchPipe.enable();
-                result.success(null);
-                return;
-            case "stopFlutterViewEvents":
-                mFlutterViewTouchPipe.disable();
-                result.success(null);
-                return;
             case "getStoragePermission":
                 if (permissionResult != null) {
                     result.error("error", "already waiting for permissions", null);
@@ -85,6 +75,8 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
     public void synthesizeEvent(MethodCall methodCall, MethodChannel.Result result) {
         MotionEvent event = MotionEventCodec.decode((HashMap<String, Object>) methodCall.arguments());
         getFlutterView().dispatchTouchEvent(event);
+        // TODO(egarciad): This can be cleaned up.
+        mMethodChannel.invokeMethod("onTouch", MotionEventCodec.encode(event));
         result.success(null);
     }
 

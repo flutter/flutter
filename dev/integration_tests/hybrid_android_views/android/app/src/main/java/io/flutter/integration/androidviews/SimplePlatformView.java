@@ -27,20 +27,17 @@ public class SimplePlatformView implements PlatformView, MethodChannel.MethodCal
 
     SimplePlatformView(Context context, MethodChannel methodChannel) {
         this.methodChannel = methodChannel;
+        this.methodChannel.setMethodCallHandler(this);
+
         view = new FrameLayout(context) {
             @Override
             public boolean onTouchEvent(MotionEvent event) {
                 return true;
             }
         };
-        TextView textView = new TextView(context);
-        textView.setTextSize(50);
-        textView.setTextColor(0xffffffff);
-        textView.setBackgroundColor(0xff0000ff);
-        textView.setText("Hello from Android view and hybrid composition");
-        view.addView(textView);
-        this.methodChannel.setMethodCallHandler(this);
-        touchPipe = new io.flutter.integration.platformviews.TouchPipe(this.methodChannel, view);
+        view.setBackgroundColor(0xff0000ff);
+
+        touchPipe = new TouchPipe(this.methodChannel, view);
     }
 
     @Override
@@ -49,8 +46,7 @@ public class SimplePlatformView implements PlatformView, MethodChannel.MethodCal
     }
 
     @Override
-    public void dispose() {
-    }
+    public void dispose() {}
 
     @Override
     public void onMethodCall(MethodCall methodCall, MethodChannel.Result result) {
@@ -100,5 +96,4 @@ public class SimplePlatformView implements PlatformView, MethodChannel.MethodCal
             result.success(null);
         });
     }
-
 }
