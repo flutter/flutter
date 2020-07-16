@@ -174,8 +174,8 @@ task:
         CPU: 4
         MEMORY: 10G
       script:
-        - cd packages/flutter_tools
-        - pub get
+        - (cd packages/flutter_tools; pub get)
+        - (cd dev/bots; pub get)
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: tool_tests-commands-linux
