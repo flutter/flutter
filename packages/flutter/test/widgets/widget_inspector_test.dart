@@ -514,26 +514,35 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
     testWidgets('WidgetInspector with Transform above', (WidgetTester tester) async {
       final GlobalKey childKey = GlobalKey();
-      final GlobalKey inspectorKey = GlobalKey();
+      final GlobalKey repaintBoundaryKey = GlobalKey();
 
       final Matrix4 mainTransform = Matrix4.identity()
           ..translate(50.0, 30.0)
-          ..scale(0.5, 0.5);
+          ..scale(0.8, 0.8)
+          ..translate(100.0, 50.0);
 
       await tester.pumpWidget(
-        Transform(
-          transform: mainTransform,
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: WidgetInspector(
-              key: inspectorKey,
-              selectButtonBuilder: null,
-              child: Align(
-                alignment: Alignment.topLeft,
-                child: Container(
-                  key: childKey,
-                  height: 100.0,
-                  width: 50.0,
+        RepaintBoundary(
+          key: repaintBoundaryKey,
+          child: Container(
+            color: Colors.grey,
+            child: Transform(
+              transform: mainTransform,
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: WidgetInspector(
+                  selectButtonBuilder: null,
+                  child: Container(
+                    color: Colors.white,
+                    child: Center(
+                      child: Container(
+                        key: childKey,
+                        height: 100.0,
+                        width: 50.0,
+                        color: Colors.red,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -541,11 +550,13 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         ),
       );
 
-      final RenderObject childRenderObject = childKey.currentContext.findRenderObject();
+      await tester.tap(find.byKey(childKey));
+      await tester.pump();
 
-      // The tranform of the child with respect to the whole widget should be the same
-      // matrix applied to the widget inspector inspector.
-      expect(childRenderObject.getTransformTo(null), mainTransform);
+      await expectLater(
+        find.byKey(repaintBoundaryKey),
+        matchesGoldenFile('inspector.overlay_positioning_with_transform.png'),
+      );
     });
 
     testWidgets('Multiple widget inspectors', (WidgetTester tester) async {
