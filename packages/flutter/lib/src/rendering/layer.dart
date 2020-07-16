@@ -531,6 +531,7 @@ class PictureLayer extends Layer {
 
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    assert(picture != null);
     builder.addPicture(layerOffset, picture, isComplexHint: isComplexHint, willChangeHint: willChangeHint);
   }
 
