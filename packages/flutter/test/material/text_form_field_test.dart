@@ -191,7 +191,7 @@ void main() {
     expect(_value, 'Soup');
   });
 
-  testWidgets('autovalidate is passed to super', (WidgetTester tester) async {
+  testWidgets('autovalidateMode is passed to super', (WidgetTester tester) async {
     int _validateCalled = 0;
 
     await tester.pumpWidget(
@@ -199,7 +199,7 @@ void main() {
         home: Material(
           child: Center(
             child: TextFormField(
-              autovalidate: true,
+              autovalidateMode: AutovalidateMode.always,
               validator: (String value) {
                 _validateCalled++;
                 return null;
@@ -225,7 +225,7 @@ void main() {
           child: Center(
             child: TextFormField(
               enabled: true,
-              autovalidate: true,
+              autovalidateMode: AutovalidateMode.always,
               validator: (String value) {
                 _validateCalled += 1;
                 return null;
@@ -443,5 +443,47 @@ void main() {
 
     final TextField widget = tester.widget(find.byType(TextField));
     expect(widget.autofillHints, equals(const <String>[AutofillHints.countryName]));
+  });
+
+  testWidgets('autovalidateMode is passed to super', (WidgetTester tester) async {
+    int _validateCalled = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Scaffold(
+            body: TextFormField(
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              validator: (String value) {
+                _validateCalled++;
+                return null;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(_validateCalled, 0);
+    await tester.enterText(find.byType(TextField), 'a');
+    await tester.pump();
+    expect(_validateCalled, 1);
+  });
+
+  testWidgets('autovalidateMode and autovalidate should not be used at the same time', (WidgetTester tester) async {
+    expect(() async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Scaffold(
+              body: TextFormField(
+                autovalidate: true,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+              ),
+            ),
+          ),
+        ),
+      );
+      }, throwsAssertionError);
   });
 }
