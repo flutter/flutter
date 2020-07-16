@@ -70,7 +70,7 @@ TaskFunction createHomeScrollPerfTest() {
 TaskFunction createCullOpacityPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/runapp.dart',
+    'test_driver/run_app.dart',
     'cull_opacity_perf',
     testDriver: 'test_driver/cull_opacity_perf_test.dart',
   ).run;
@@ -103,7 +103,7 @@ TaskFunction createFlutterGalleryTransitionsPerfSkSLWarmupTest() {
 TaskFunction createBackdropFilterPerfTest({bool needsMeasureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/runapp.dart',
+    'test_driver/run_app.dart',
     'backdrop_filter_perf',
     needsMeasureCpuGpu: needsMeasureCpuGpu,
     testDriver: 'test_driver/backdrop_filter_perf_test.dart',
@@ -113,7 +113,7 @@ TaskFunction createBackdropFilterPerfTest({bool needsMeasureCpuGpu = false}) {
 TaskFunction createPostBackdropFilterPerfTest({bool needsMeasureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/runapp.dart',
+    'test_driver/run_app.dart',
     'post_backdrop_filter_perf',
     needsMeasureCpuGpu: needsMeasureCpuGpu,
     testDriver: 'test_driver/post_backdrop_filter_perf_test.dart',
@@ -123,7 +123,7 @@ TaskFunction createPostBackdropFilterPerfTest({bool needsMeasureCpuGpu = false})
 TaskFunction createSimpleAnimationPerfTest({bool needsMeasureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/runapp.dart',
+    'test_driver/run_app.dart',
     'simple_animation_perf',
     needsMeasureCpuGpu: needsMeasureCpuGpu,
     testDriver: 'test_driver/simple_animation_perf_test.dart',
@@ -133,7 +133,7 @@ TaskFunction createSimpleAnimationPerfTest({bool needsMeasureCpuGpu = false}) {
 TaskFunction createAnimatedPlaceholderPerfTest({bool needsMeasureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/runapp.dart',
+    'test_driver/run_app.dart',
     'animated_placeholder_perf',
     needsMeasureCpuGpu: needsMeasureCpuGpu,
     testDriver: 'test_driver/animated_placeholder_perf_test.dart',
@@ -143,7 +143,7 @@ TaskFunction createAnimatedPlaceholderPerfTest({bool needsMeasureCpuGpu = false}
 TaskFunction createPictureCachePerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/runapp.dart',
+    'test_driver/run_app.dart',
     'picture_cache_perf',
     testDriver: 'test_driver/picture_cache_perf_test.dart',
   ).run;
@@ -219,7 +219,7 @@ TaskFunction createBasicMaterialCompileTest() {
 TaskFunction createTextfieldPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/runapp.dart',
+    'test_driver/run_app.dart',
     'textfield_perf',
     testDriver: 'test_driver/textfield_perf_test.dart',
   ).run;
@@ -228,7 +228,7 @@ TaskFunction createTextfieldPerfTest() {
 TaskFunction createColorFilterAndFadePerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/runapp.dart',
+    'test_driver/run_app.dart',
     'color_filter_and_fade_perf',
     testDriver: 'test_driver/color_filter_and_fade_perf_test.dart',
   ).run;
@@ -237,7 +237,7 @@ TaskFunction createColorFilterAndFadePerfTest() {
 TaskFunction createFadingChildAnimationPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/runapp.dart',
+    'test_driver/run_app.dart',
     'fading_child_animation_perf',
     testDriver: 'test_driver/fading_child_animation_perf_test.dart',
   ).run;
@@ -246,7 +246,7 @@ TaskFunction createFadingChildAnimationPerfTest() {
 TaskFunction createImageFilteredTransformAnimationPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/runapp.dart',
+    'test_driver/run_app.dart',
     'imagefiltered_transform_animation_perf',
     testDriver: 'test_driver/imagefiltered_transform_animation_perf_test.dart',
   ).run;
@@ -255,7 +255,7 @@ TaskFunction createImageFilteredTransformAnimationPerfTest() {
 TaskFunction createsMultiWidgetConstructPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/runapp.dart',
+    'test_driver/run_app.dart',
     'multi_widget_construction_perf',
     testDriver: 'test_driver/multi_widget_construction_perf_test.dart',
   ).run;
