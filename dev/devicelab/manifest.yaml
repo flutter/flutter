@@ -249,6 +249,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  hybrid_android_views_integration_test:
+    description: >
+      Tests hybrid Android views.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
   android_semantics_integration_test:
     description: >
       Tests that the Android accessibility bridge produces correct semantics.
