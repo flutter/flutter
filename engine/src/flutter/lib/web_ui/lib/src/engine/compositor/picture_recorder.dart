@@ -6,32 +6,33 @@ part of engine;
 
 class CkPictureRecorder implements ui.PictureRecorder {
   ui.Rect? _cullRect;
-  js.JsObject? _recorder;
+  SkPictureRecorder? _skRecorder;
   CkCanvas? _recordingCanvas;
 
-  CkCanvas? beginRecording(ui.Rect bounds) {
+  CkCanvas beginRecording(ui.Rect bounds) {
     _cullRect = bounds;
-    _recorder = js.JsObject(canvasKit['SkPictureRecorder']);
-    final js.JsObject skRect = js.JsObject(canvasKit['LTRBRect'],
-        <double>[bounds.left, bounds.top, bounds.right, bounds.bottom]);
-    final js.JsObject skCanvas =
-        _recorder!.callMethod('beginRecording', <js.JsObject>[skRect]);
-    _recordingCanvas = CkCanvas(skCanvas);
-    return _recordingCanvas;
+    final SkPictureRecorder recorder = _skRecorder = SkPictureRecorder();
+    final SkRect skRect = toSkRect(bounds);
+    final SkCanvas skCanvas = recorder.beginRecording(skRect);
+    return _recordingCanvas = CkCanvas(skCanvas);
   }
 
   CkCanvas? get recordingCanvas => _recordingCanvas;
 
   @override
   ui.Picture endRecording() {
-    final js.JsObject? skPicture =
-        _recorder!.callMethod('finishRecordingAsPicture');
-    _recorder!.callMethod('delete');
-    _recorder = null;
+    final SkPictureRecorder? recorder = _skRecorder;
 
-    return CkPicture(OneShotSkiaObject(skPicture), _cullRect);
+    if (recorder == null) {
+      throw StateError('PictureRecorder is not recording');
+    }
+
+    final SkPicture skPicture = recorder.finishRecordingAsPicture();
+    recorder.delete();
+    _skRecorder = null;
+    return CkPicture(skPicture, _cullRect);
   }
 
   @override
-  bool get isRecording => _recorder != null;
+  bool get isRecording => _skRecorder != null;
 }

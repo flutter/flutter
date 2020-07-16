@@ -169,7 +169,9 @@ class CkSurface {
 
   CkCanvas getCanvas() {
     final js.JsObject skCanvas = _surface.callMethod('getCanvas');
-    return CkCanvas(skCanvas);
+    return CkCanvas(
+      _jsObjectWrapper.unwrapSkCanvas(skCanvas),
+    );
   }
 
   int get context => _glContext;

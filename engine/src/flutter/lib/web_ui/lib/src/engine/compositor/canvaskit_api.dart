@@ -3,6 +3,9 @@
 // found in the LICENSE file.
 
 /// Bindings for CanvasKit JavaScript API.
+///
+/// Prefer keeping the originl CanvasKit names so it is easier to locate
+/// the API behind these bindings in the Skia source code.
 part of engine;
 
 final js.JsObject _jsWindow = js.JsObject.fromBrowserObject(html.window);
@@ -37,11 +40,25 @@ class JsObjectWrapper {
   external set skImageFilter(SkImageFilter? filter);
   external set skPath(SkPath? path);
   external set skImage(SkImage? image);
+  external SkCanvas? get skCanvas;
+  external set skCanvas(SkCanvas? canvas);
+  external SkPicture? get skPicture;
+  external set skPicture(SkPicture? picture);
+  external SkParagraph? get skParagraph;
+  external set skParagraph(SkParagraph? paragraph);
 }
 
 /// Reads [JsObjectWrapper.skPath] as [SkPathArcToPointOverload].
 @JS('window.flutter_js_object_wrapper.skPath')
 external SkPathArcToPointOverload get _skPathArcToPointOverload;
+
+/// Reads [JsObjectWrapper.skCanvas] as [SkCanvasSaveLayerWithoutBoundsOverride].
+@JS('window.flutter_js_object_wrapper.skCanvas')
+external SkCanvasSaveLayerWithoutBoundsOverride get _skCanvasSaveLayerWithoutBoundsOverride;
+
+/// Reads [JsObjectWrapper.skCanvas] as [SkCanvasSaveLayerWithFilterOverride].
+@JS('window.flutter_js_object_wrapper.skCanvas')
+external SkCanvasSaveLayerWithFilterOverride get _skCanvasSaveLayerWithFilterOverride;
 
 /// Specific methods that wrap `@JS`-backed objects into a [js.JsObject]
 /// for use with legacy `dart:js` API.
@@ -88,10 +105,59 @@ extension JsObjectWrappers on JsObjectWrapper {
     return wrapped;
   }
 
+  js.JsObject wrapSkPicture(SkPicture picture) {
+    _jsObjectWrapper.skPicture = picture;
+    js.JsObject wrapped = _jsObjectWrapperLegacy['skPicture'];
+    _jsObjectWrapper.skPicture = null;
+    return wrapped;
+  }
+
+  SkPicture unwrapSkPicture(js.JsObject wrapped) {
+    _jsObjectWrapperLegacy['skPicture'] = wrapped;
+    final SkPicture unwrapped = _jsObjectWrapper.skPicture!;
+    _jsObjectWrapper.skPicture = null;
+    return unwrapped;
+  }
+
+  js.JsObject wrapSkParagraph(SkParagraph paragraph) {
+    _jsObjectWrapper.skParagraph = paragraph;
+    js.JsObject wrapped = _jsObjectWrapperLegacy['skParagraph'];
+    _jsObjectWrapper.skParagraph = null;
+    return wrapped;
+  }
+
+  SkParagraph unwrapSkParagraph(js.JsObject wrapped) {
+    _jsObjectWrapperLegacy['skParagraph'] = wrapped;
+    final SkParagraph unwrapped = _jsObjectWrapper.skParagraph!;
+    _jsObjectWrapper.skParagraph = null;
+    return unwrapped;
+  }
+
+  SkCanvas unwrapSkCanvas(js.JsObject wrapped) {
+    _jsObjectWrapperLegacy['skCanvas'] = wrapped;
+    final SkCanvas unwrapped = _jsObjectWrapper.skCanvas!;
+    _jsObjectWrapper.skCanvas = null;
+    return unwrapped;
+  }
+
   SkPathArcToPointOverload castToSkPathArcToPointOverload(SkPath path) {
     _jsObjectWrapper.skPath = path;
     final SkPathArcToPointOverload overload = _skPathArcToPointOverload;
     _jsObjectWrapper.skPath = null;
+    return overload;
+  }
+
+  SkCanvasSaveLayerWithoutBoundsOverride castToSkCanvasSaveLayerWithoutBoundsOverride(SkCanvas canvas) {
+    _jsObjectWrapper.skCanvas = canvas;
+    final SkCanvasSaveLayerWithoutBoundsOverride overload = _skCanvasSaveLayerWithoutBoundsOverride;
+    _jsObjectWrapper.skCanvas = null;
+    return overload;
+  }
+
+  SkCanvasSaveLayerWithFilterOverride castToSkCanvasSaveLayerWithFilterOverride(SkCanvas canvas) {
+    _jsObjectWrapper.skCanvas = canvas;
+    final SkCanvasSaveLayerWithFilterOverride overload = _skCanvasSaveLayerWithFilterOverride;
+    _jsObjectWrapper.skCanvas = null;
     return overload;
   }
 }
@@ -110,12 +176,274 @@ class CanvasKit {
   external SkTileModeEnum get TileMode;
   external SkFillTypeEnum get FillType;
   external SkPathOpEnum get PathOp;
+  external SkClipOpEnum get ClipOp;
+  external SkPointModeEnum get PointMode;
+  external SkVertexModeEnum get VertexMode;
+  external SkRectHeightStyleEnum get RectHeightStyle;
+  external SkRectWidthStyleEnum get RectWidthStyle;
+  external SkAffinityEnum get Affinity;
+  external SkTextAlignEnum get TextAlign;
+  external SkTextDirectionEnum get TextDirection;
+  external SkFontWeightEnum get FontWeight;
+  external SkFontSlantEnum get FontSlant;
   external SkAnimatedImage MakeAnimatedImageFromEncoded(Uint8List imageData);
   external SkShaderNamespace get SkShader;
   external SkMaskFilter MakeBlurMaskFilter(SkBlurStyle blurStyle, double sigma, bool respectCTM);
   external SkColorFilterNamespace get SkColorFilter;
   external SkImageFilterNamespace get SkImageFilter;
   external SkPath MakePathFromOp(SkPath path1, SkPath path2, SkPathOp pathOp);
+  external SkTonalColors computeTonalColors(SkTonalColors inTonalColors);
+  external SkVertices MakeSkVertices(
+    SkVertexMode mode,
+    List<Float32List> positions,
+    List<Float32List>? textureCoordinates,
+    // TODO(yjbanov): make this Uint32Array when CanvasKit supports it.
+    List<Float32List>? colors,
+    Uint16List? indices,
+  );
+  external SkParagraphBuilderNamespace get ParagraphBuilder;
+  external SkParagraphStyle ParagraphStyle(SkParagraphStyleProperties properties);
+  external SkTextStyle TextStyle(SkTextStyleProperties properties);
+
+  // Text decoration enum is embedded in the CanvasKit object itself.
+  external int get NoDecoration;
+  external int get UnderlineDecoration;
+  external int get OverlineDecoration;
+  external int get LineThroughDecoration;
+  // End of text decoration enum.
+
+  external SkFontMgrNamespace get SkFontMgr;
+}
+
+@JS()
+class SkFontSlantEnum {
+  external SkFontSlant get Upright;
+  external SkFontSlant get Italic;
+}
+
+@JS()
+class SkFontSlant {
+  external int get value;
+}
+
+final List<SkFontSlant> _skFontSlants = <SkFontSlant>[
+  canvasKitJs.FontSlant.Upright,
+  canvasKitJs.FontSlant.Italic,
+];
+
+SkFontSlant toSkFontSlant(ui.FontStyle style) {
+  return _skFontSlants[style.index];
+}
+
+@JS()
+class SkFontWeightEnum {
+  external SkFontWeight get Thin;
+  external SkFontWeight get ExtraLight;
+  external SkFontWeight get Light;
+  external SkFontWeight get Normal;
+  external SkFontWeight get Medium;
+  external SkFontWeight get SemiBold;
+  external SkFontWeight get Bold;
+  external SkFontWeight get ExtraBold;
+  external SkFontWeight get ExtraBlack;
+}
+
+@JS()
+class SkFontWeight {
+  external int get value;
+}
+
+final List<SkFontWeight> _skFontWeights = <SkFontWeight>[
+  canvasKitJs.FontWeight.Thin,
+  canvasKitJs.FontWeight.ExtraLight,
+  canvasKitJs.FontWeight.Light,
+  canvasKitJs.FontWeight.Normal,
+  canvasKitJs.FontWeight.Medium,
+  canvasKitJs.FontWeight.SemiBold,
+  canvasKitJs.FontWeight.Bold,
+  canvasKitJs.FontWeight.ExtraBold,
+  canvasKitJs.FontWeight.ExtraBlack,
+];
+
+SkFontWeight toSkFontWeight(ui.FontWeight weight) {
+  return _skFontWeights[weight.index];
+}
+
+@JS()
+class SkAffinityEnum {
+  external SkAffinity get Upstream;
+  external SkAffinity get Downstream;
+}
+
+@JS()
+class SkAffinity {
+  external int get value;
+}
+
+final List<SkAffinity> _skAffinitys = <SkAffinity>[
+  canvasKitJs.Affinity.Upstream,
+  canvasKitJs.Affinity.Downstream,
+];
+
+SkAffinity toSkAffinity(ui.TextAffinity affinity) {
+  return _skAffinitys[affinity.index];
+}
+
+@JS()
+class SkTextDirectionEnum {
+  external SkTextDirection get RTL;
+  external SkTextDirection get LTR;
+}
+
+@JS()
+class SkTextDirection {
+  external int get value;
+}
+
+// Flutter enumerates text directions as RTL, LTR, while CanvasKit
+// enumerates them LTR, RTL.
+final List<SkTextDirection> _skTextDirections = <SkTextDirection>[
+  canvasKitJs.TextDirection.RTL,
+  canvasKitJs.TextDirection.LTR,
+];
+
+SkTextDirection toSkTextDirection(ui.TextDirection direction) {
+  return _skTextDirections[direction.index];
+}
+
+@JS()
+class SkTextAlignEnum {
+  external SkTextAlign get Left;
+  external SkTextAlign get Right;
+  external SkTextAlign get Center;
+  external SkTextAlign get Justify;
+  external SkTextAlign get Start;
+  external SkTextAlign get End;
+}
+
+@JS()
+class SkTextAlign {
+  external int get value;
+}
+
+final List<SkTextAlign> _skTextAligns = <SkTextAlign>[
+  canvasKitJs.TextAlign.Left,
+  canvasKitJs.TextAlign.Right,
+  canvasKitJs.TextAlign.Center,
+  canvasKitJs.TextAlign.Justify,
+  canvasKitJs.TextAlign.Start,
+  canvasKitJs.TextAlign.End,
+];
+
+SkTextAlign toSkTextAlign(ui.TextAlign align) {
+  return _skTextAligns[align.index];
+}
+
+@JS()
+class SkRectHeightStyleEnum {
+  // TODO(yjbanov): support all styles
+  external SkRectHeightStyle get Tight;
+  external SkRectHeightStyle get Max;
+}
+
+@JS()
+class SkRectHeightStyle {
+  external int get value;
+}
+
+final List<SkRectHeightStyle> _skRectHeightStyles = <SkRectHeightStyle>[
+  canvasKitJs.RectHeightStyle.Tight,
+  canvasKitJs.RectHeightStyle.Max,
+];
+
+SkRectHeightStyle toSkRectHeightStyle(ui.BoxHeightStyle style) {
+  final int index = style.index;
+  return _skRectHeightStyles[index < 2 ? index : 0];
+}
+
+@JS()
+class SkRectWidthStyleEnum {
+  external SkRectWidthStyle get Tight;
+  external SkRectWidthStyle get Max;
+}
+
+@JS()
+class SkRectWidthStyle {
+  external int get value;
+}
+
+final List<SkRectWidthStyle> _skRectWidthStyles = <SkRectWidthStyle>[
+  canvasKitJs.RectWidthStyle.Tight,
+  canvasKitJs.RectWidthStyle.Max,
+];
+
+SkRectWidthStyle toSkRectWidthStyle(ui.BoxWidthStyle style) {
+  final int index = style.index;
+  return _skRectWidthStyles[index < 2 ? index : 0];
+}
+
+@JS()
+class SkVertexModeEnum {
+  external SkVertexMode get Triangles;
+  external SkVertexMode get TrianglesStrip;
+  external SkVertexMode get TriangleFan;
+}
+
+@JS()
+class SkVertexMode {
+  external int get value;
+}
+
+final List<SkVertexMode> _skVertexModes = <SkVertexMode>[
+  canvasKitJs.VertexMode.Triangles,
+  canvasKitJs.VertexMode.TrianglesStrip,
+  canvasKitJs.VertexMode.TriangleFan,
+];
+
+SkVertexMode toSkVertexMode(ui.VertexMode mode) {
+  return _skVertexModes[mode.index];
+}
+
+@JS()
+class SkPointModeEnum {
+  external SkPointMode get Points;
+  external SkPointMode get Lines;
+  external SkPointMode get Polygon;
+}
+
+@JS()
+class SkPointMode {
+  external int get value;
+}
+
+final List<SkPointMode> _skPointModes = <SkPointMode>[
+  canvasKitJs.PointMode.Points,
+  canvasKitJs.PointMode.Lines,
+  canvasKitJs.PointMode.Polygon,
+];
+
+SkPointMode toSkPointMode(ui.PointMode mode) {
+  return _skPointModes[mode.index];
+}
+
+@JS()
+class SkClipOpEnum {
+  external SkClipOp get Difference;
+  external SkClipOp get Intersect;
+}
+
+@JS()
+class SkClipOp {
+  external int get value;
+}
+
+final List<SkClipOp> _skClipOps = <SkClipOp>[
+  canvasKitJs.ClipOp.Difference,
+  canvasKitJs.ClipOp.Intersect,
+];
+
+SkClipOp toSkClipOp(ui.ClipOp clipOp) {
+  return _skClipOps[clipOp.index];
 }
 
 @JS()
@@ -184,8 +512,8 @@ final List<SkBlurStyle> _skBlurStyles = <SkBlurStyle>[
   canvasKitJs.BlurStyle.Inner,
 ];
 
-SkBlurStyle toSkBlurStyle(ui.BlurStyle strokeCap) {
-  return _skBlurStyles[strokeCap.index];
+SkBlurStyle toSkBlurStyle(ui.BlurStyle style) {
+  return _skBlurStyles[style.index];
 }
 
 @JS()
@@ -370,8 +698,8 @@ final List<SkTileMode> _skTileModes = <SkTileMode>[
   canvasKitJs.TileMode.Mirror,
 ];
 
-SkTileMode toSkTileMode(ui.TileMode filterQuality) {
-  return _skTileModes[filterQuality.index];
+SkTileMode toSkTileMode(ui.TileMode mode) {
+  return _skTileModes[mode.index];
 }
 
 @JS()
@@ -403,7 +731,7 @@ class SkShaderNamespace {
   external SkShader MakeLinearGradient(
     Float32List from, // 2-element array
     Float32List to, // 2-element array
-    Uint32List colors,
+    List<Float32List> colors,
     Float32List colorStops,
     SkTileMode tileMode,
   );
@@ -457,10 +785,13 @@ class SkPaint {
   external void setColorFilter(SkColorFilter? colorFilter);
   external void setStrokeMiter(double miterLimit);
   external void setImageFilter(SkImageFilter? imageFilter);
+  external void delete();
 }
 
 @JS()
-class SkMaskFilter {}
+class SkMaskFilter {
+  external void delete();
+}
 
 @JS()
 class SkColorFilterNamespace {
@@ -473,7 +804,9 @@ class SkColorFilterNamespace {
 }
 
 @JS()
-class SkColorFilter {}
+class SkColorFilter {
+  external void delete();
+}
 
 @JS()
 class SkImageFilterNamespace {
@@ -492,7 +825,9 @@ class SkImageFilterNamespace {
 }
 
 @JS()
-class SkImageFilter {}
+class SkImageFilter {
+  external void delete();
+}
 
 /// Converts a 4x4 Flutter matrix (represented as a [Float32List]) to an
 /// SkMatrix, which is a 3x3 transform matrix.
@@ -645,6 +980,30 @@ Uint32List toSkIntColorList(List<ui.Color> colors) {
     result[i] = colors[i].value;
   }
   return result;
+}
+
+List<Float32List> toSkFloatColorList(List<ui.Color> colors) {
+  final int len = colors.length;
+  final List<Float32List> result = <Float32List>[];
+  for (int i = 0; i < len; i++) {
+    final Float32List array = Float32List(4);
+    final ui.Color color = colors[i];
+    array[0] = color.red / 255.0;
+    array[1] = color.green / 255.0;
+    array[2] = color.blue / 255.0;
+    array[3] = color.alpha / 255.0;
+    result.add(array);
+  }
+  return result;
+}
+
+List<Float32List> encodeRawColorList(Int32List rawColors) {
+  final int colorCount = rawColors.length;
+  final List<ui.Color> colors = <ui.Color>[];
+  for (int i = 0; i < colorCount; ++i) {
+    colors.add(ui.Color(rawColors[i]));
+  }
+  return toSkFloatColorList(colors);
 }
 
 @JS('window.flutter_canvas_kit.SkPath')
@@ -834,6 +1193,46 @@ SkRect toSkRect(ui.Rect rect) {
   );
 }
 
+@JS()
+@anonymous
+class SkRRect {
+  external factory SkRRect({
+    required SkRect rect,
+    required double rx1,
+    required double ry1,
+    required double rx2,
+    required double ry2,
+    required double rx3,
+    required double ry3,
+    required double rx4,
+    required double ry4,
+  });
+
+  external SkRect get rect;
+  external double get rx1;
+  external double get ry1;
+  external double get rx2;
+  external double get ry2;
+  external double get rx3;
+  external double get ry3;
+  external double get rx4;
+  external double get ry4;
+}
+
+SkRRect toSkRRect(ui.RRect rrect) {
+  return SkRRect(
+    rect: toOuterSkRect(rrect),
+    rx1: rrect.tlRadiusX,
+    ry1: rrect.tlRadiusY,
+    rx2: rrect.trRadiusX,
+    ry2: rrect.trRadiusY,
+    rx3: rrect.brRadiusX,
+    ry3: rrect.brRadiusY,
+    rx4: rrect.blRadiusX,
+    ry4: rrect.blRadiusY,
+  );
+}
+
 SkRect toOuterSkRect(ui.RRect rrect) {
   return SkRect(
     fLeft: rrect.left,
@@ -858,4 +1257,360 @@ SkFloat32List toMallocedSkPoints(List<ui.Offset> points) {
     list[2 * i + 1] = points[i].dy;
   }
   return skPoints;
+}
+
+// TODO(yjbanov): this is inefficient. We should be able to pass points
+//                as Float32List without a conversion.
+List<Float32List> rawPointsToSkPoints2d(Float32List points) {
+  assert(points.length % 2 == 0);
+  final int pointLength = points.length ~/ 2;
+  final List<Float32List> result = <Float32List>[];
+  for (var i = 0; i < pointLength; i++) {
+    var x = i * 2;
+    var y = x + 1;
+    final Float32List skPoint = Float32List(2);
+    skPoint[0] = points[x];
+    skPoint[1] = points[y];
+    result.add(skPoint);
+  }
+  return result;
+}
+
+List<Float32List> toSkPoints2d(List<ui.Offset> offsets) {
+  final int len = offsets.length;
+  final List<Float32List> result = <Float32List>[];
+  for (var i = 0; i < len; i++) {
+    final ui.Offset offset = offsets[i];
+    final Float32List skPoint = Float32List(2);
+    skPoint[0] = offset.dx;
+    skPoint[1] = offset.dy;
+    result.add(skPoint);
+  }
+  return result;
+}
+
+Uint16List toUint16List(List<int> ints) {
+  final int len = ints.length;
+  final Uint16List result = Uint16List(len);
+  for (int i = 0; i < len; i++) {
+    result[i] = ints[i];
+  }
+  return result;
+}
+
+@JS('window.flutter_canvas_kit.SkPictureRecorder')
+class SkPictureRecorder {
+  external SkPictureRecorder();
+  external SkCanvas beginRecording(SkRect bounds);
+  external SkPicture finishRecordingAsPicture();
+  external void delete();
+}
+
+@JS()
+class SkCanvas {
+  external void clear(Float32List color);
+  external void clipPath(
+    SkPath path,
+    SkClipOp clipOp,
+    bool doAntiAlias,
+  );
+  external void clipRRect(
+    SkRRect rrect,
+    SkClipOp clipOp,
+    bool doAntiAlias,
+  );
+  external void clipRect(
+    SkRect rrect,
+    SkClipOp clipOp,
+    bool doAntiAlias,
+  );
+  external void drawArc(
+    SkRect oval,
+    double startAngleDegrees,
+    double sweepAngleDegrees,
+    bool useCenter,
+    SkPaint paint,
+  );
+  external void drawAtlas(
+    SkImage image,
+    Float32List rects,
+    Float32List rstTransforms,
+    SkPaint paint,
+    SkBlendMode blendMode,
+    List<Float32List>? colors,
+  );
+  external void drawCircle(
+    double x,
+    double y,
+    double radius,
+    SkPaint paint,
+  );
+  external void drawColorInt(
+    int color,
+    SkBlendMode blendMode,
+  );
+  external void drawDRRect(
+    SkRRect outer,
+    SkRRect inner,
+    SkPaint paint,
+  );
+  external void drawImage(
+    SkImage image,
+    double x,
+    double y,
+    SkPaint paint,
+  );
+  external void drawImageRect(
+    SkImage image,
+    SkRect src,
+    SkRect dst,
+    SkPaint paint,
+    bool fastSample,
+  );
+  external void drawImageNine(
+    SkImage image,
+    SkRect center,
+    SkRect dst,
+    SkPaint paint,
+  );
+  external void drawLine(
+    double x1,
+    double y1,
+    double x2,
+    double y2,
+    SkPaint paint,
+  );
+  external void drawOval(
+    SkRect rect,
+    SkPaint paint,
+  );
+  external void drawPaint(
+    SkPaint paint,
+  );
+  external void drawPath(
+    SkPath path,
+    SkPaint paint,
+  );
+  external void drawPoints(
+    SkPointMode pointMode,
+    Float32List points,
+    SkPaint paint,
+  );
+  external void drawRRect(
+    SkRRect rrect,
+    SkPaint paint,
+  );
+  external void drawRect(
+    SkRect rrect,
+    SkPaint paint,
+  );
+  external void drawShadow(
+    SkPath path,
+    Float32List zPlaneParams,
+    Float32List lightPos,
+    double lightRadius,
+    Float32List ambientColor,
+    Float32List spotColor,
+    int flags,
+  );
+  external void drawVertices(
+    SkVertices vertices,
+    SkBlendMode blendMode,
+    SkPaint paint,
+  );
+  external int save();
+  external int getSaveCount();
+  external void saveLayer(
+    SkRect bounds,
+    SkPaint paint,
+  );
+  external void restore();
+  external void restoreToCount(int count);
+  external void rotate(
+    double angleDegrees,
+    double px,
+    double py,
+  );
+  external void scale(double x, double y);
+  external void skew(double x, double y);
+  external void concat(Float32List matrix);
+  external void translate(double x, double y);
+  external void flush();
+  external void drawPicture(SkPicture picture);
+  external void drawParagraph(
+    SkParagraph paragraph,
+    double x,
+    double y,
+  );
+}
+
+@JS()
+class SkCanvasSaveLayerWithoutBoundsOverride {
+  external void saveLayer(SkPaint paint);
+}
+
+@JS()
+class SkCanvasSaveLayerWithFilterOverride {
+  external void saveLayer(
+    SkPaint? paint,
+    SkImageFilter? imageFilter,
+    int flags,
+    SkRect rect,
+  );
+}
+
+@JS()
+class SkPicture {
+  external void delete();
+}
+
+@JS()
+class SkParagraphBuilderNamespace {
+  external SkParagraphBuilder Make(
+    SkParagraphStyle paragraphStyle,
+    SkFontMgr? fontManager,
+  );
+}
+
+@JS()
+class SkParagraphBuilder {
+  external void addText(String text);
+  external void pushStyle(SkTextStyle textStyle);
+  external void pop();
+  external SkParagraph build();
+  external void delete();
+}
+
+@JS()
+class SkParagraphStyle {
+}
+
+@JS()
+@anonymous
+class SkParagraphStyleProperties {
+  external SkTextAlign? get textAlign;
+  external set textAlign(SkTextAlign? value);
+
+  external SkTextDirection? get textDirection;
+  external set textDirection(SkTextDirection? value);
+
+  external double? get heightMultiplier;
+  external set heightMultiplier(double? value);
+
+  external int? get textHeightBehavior;
+  external set textHeightBehavior(int? value);
+
+  external int? get maxLines;
+  external set maxLines(int? value);
+
+  external String? get ellipsis;
+  external set ellipsis(String? value);
+
+  external SkTextStyleProperties? get textStyle;
+  external set textStyle(SkTextStyleProperties? value);
+}
+
+@JS()
+class SkTextStyle {
+
+}
+
+@JS()
+@anonymous
+class SkTextStyleProperties {
+  external Float32List? get backgroundColor;
+  external set backgroundColor(Float32List? value);
+
+  external Float32List? get color;
+  external set color(Float32List? value);
+
+  external Float32List? get foregroundColor;
+  external set foregroundColor(Float32List? value);
+
+  external int? get decoration;
+  external set decoration(int? value);
+
+  external double? get decorationThickness;
+  external set decorationThickness(double? value);
+
+  external double? get fontSize;
+  external set fontSize(double? value);
+
+  external List<String>? get fontFamilies;
+  external set fontFamilies(List<String>? value);
+
+  external SkFontStyle? get fontStyle;
+  external set fontStyle(SkFontStyle? value);
+}
+
+@JS()
+@anonymous
+class SkFontStyle {
+  external SkFontWeight? get weight;
+  external set weight(SkFontWeight? value);
+
+  external SkFontSlant? get slant;
+  external set slant(SkFontSlant? value);
+}
+
+@JS()
+class SkFontMgr {
+
+}
+
+@JS()
+class SkParagraph {
+  external double getAlphabeticBaseline();
+  external bool didExceedMaxLines();
+  external double getHeight();
+  external double getIdeographicBaseline();
+  external double getLongestLine();
+  external double getMaxIntrinsicWidth();
+  external double getMinIntrinsicWidth();
+  external double getMaxWidth();
+  external List<SkRect> getRectsForRange(
+    int start,
+    int end,
+    SkRectHeightStyle heightStyle,
+    SkRectWidthStyle widthStyle,
+  );
+  external SkTextPosition getGlyphPositionAtCoordinate(
+    double x,
+    double y,
+  );
+  external SkTextRange getWordBoundary(int position);
+  external void layout(double width);
+  external void delete();
+}
+
+@JS()
+class SkTextPosition {
+  external SkAffinity get affinity;
+  external int get pos;
+}
+
+@JS()
+class SkTextRange {
+  external int get start;
+  external int get end;
+}
+
+@JS()
+class SkVertices { }
+
+@JS()
+@anonymous
+class SkTonalColors {
+  external factory SkTonalColors({
+    required Float32List ambient,
+    required Float32List spot,
+  });
+  external Float32List get ambient;
+  external Float32List get spot;
+}
+
+@JS()
+class SkFontMgrNamespace {
+  // TODO(yjbanov): can this be made non-null? It returns null in our unit-tests right now.
+  external SkFontMgr? FromData(List<Uint8List> fonts);
 }

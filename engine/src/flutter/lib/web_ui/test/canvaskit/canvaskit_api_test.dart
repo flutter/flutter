@@ -10,6 +10,8 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
+import 'common.dart';
+
 void main() {
   group('CanvasKit API', () {
     setUpAll(() async {
@@ -27,6 +29,11 @@ void main() {
     _filterQualityTests();
     _blurStyleTests();
     _tileModeTests();
+    _fillTypeTests();
+    _pathOpTests();
+    _clipOpTests();
+    _pointModeTests();
+    _vertexModeTests();
     _imageTests();
     _shaderTests();
     _paintTests();
@@ -39,14 +46,15 @@ void main() {
     _toSkColorStopsTests();
     _toSkMatrixFromFloat32Tests();
     _skSkRectTests();
+    _skVerticesTests();
     group('SkPath', () {
       _pathTests();
     });
-  },
-      // This test failed on iOS Safari.
-      // TODO: https://github.com/flutter/flutter/issues/60040
-      skip: (browserEngine == BrowserEngine.webkit &&
-          operatingSystem == OperatingSystem.iOs));
+    group('SkCanvas', () {
+      _canvasTests();
+    });
+  // TODO: https://github.com/flutter/flutter/issues/60040
+  }, skip: isIosSafari);
 }
 
 void _blendModeTests() {
@@ -174,6 +182,77 @@ void _tileModeTests() {
   });
 }
 
+void _fillTypeTests() {
+  test('fill type mapping is correct', () {
+    expect(canvasKitJs.FillType.Winding.value, ui.PathFillType.nonZero.index);
+    expect(canvasKitJs.FillType.EvenOdd.value, ui.PathFillType.evenOdd.index);
+  });
+
+  test('ui.PathFillType converts to SkFillType', () {
+    for (ui.PathFillType type in ui.PathFillType.values) {
+      expect(toSkFillType(type).value, type.index);
+    }
+  });
+}
+
+void _pathOpTests() {
+  // TODO(yjbanov): https://github.com/flutter/flutter/issues/61403
+  // test('path op mapping is correct', () {
+  //   expect(canvasKitJs.PathOp.Difference.value, ui.PathOperation.difference.index);
+  //   expect(canvasKitJs.PathOp.Intersect.value, ui.PathOperation.intersect.index);
+  //   expect(canvasKitJs.PathOp.Union.value, ui.PathOperation.union.index);
+  //   expect(canvasKitJs.PathOp.XOR.value, ui.PathOperation.xor.index);
+  //   expect(canvasKitJs.PathOp.ReverseDifference, ui.PathOperation.reverseDifference.index);
+  // });
+
+  // test('ui.PathOperation converts to SkPathOp', () {
+  //   for (ui.PathOperation op in ui.PathOperation.values) {
+  //     expect(toSkPathOp(op).value, op.index);
+  //   }
+  // });
+}
+
+void _clipOpTests() {
+  test('clip op mapping is correct', () {
+    expect(canvasKitJs.ClipOp.Difference.value, ui.ClipOp.difference.index);
+    expect(canvasKitJs.ClipOp.Intersect.value, ui.ClipOp.intersect.index);
+  });
+
+  test('ui.ClipOp converts to SkClipOp', () {
+    for (ui.ClipOp op in ui.ClipOp.values) {
+      expect(toSkClipOp(op).value, op.index);
+    }
+  });
+}
+
+void _pointModeTests() {
+  test('point mode mapping is correct', () {
+    expect(canvasKitJs.PointMode.Points.value, ui.PointMode.points.index);
+    expect(canvasKitJs.PointMode.Lines.value, ui.PointMode.lines.index);
+    expect(canvasKitJs.PointMode.Polygon.value, ui.PointMode.polygon.index);
+  });
+
+  test('ui.PointMode converts to SkPointMode', () {
+    for (ui.PointMode op in ui.PointMode.values) {
+      expect(toSkPointMode(op).value, op.index);
+    }
+  });
+}
+
+void _vertexModeTests() {
+  test('vertex mode mapping is correct', () {
+    expect(canvasKitJs.VertexMode.Triangles.value, ui.VertexMode.triangles.index);
+    expect(canvasKitJs.VertexMode.TrianglesStrip.value, ui.VertexMode.triangleStrip.index);
+    expect(canvasKitJs.VertexMode.TriangleFan.value, ui.VertexMode.triangleFan.index);
+  });
+
+  test('ui.VertexMode converts to SkVertexMode', () {
+    for (ui.VertexMode op in ui.VertexMode.values) {
+      expect(toSkVertexMode(op).value, op.index);
+    }
+  });
+}
+
 void _imageTests() {
   test('MakeAnimatedImageFromEncoded makes a non-animated image', () {
     final SkAnimatedImage nonAnimated = canvasKitJs.MakeAnimatedImageFromEncoded(kTransparentImage);
@@ -247,7 +326,9 @@ SkShader _makeTestShader() {
   return canvasKitJs.SkShader.MakeLinearGradient(
     Float32List.fromList([0, 0]),
     Float32List.fromList([1, 1]),
-    Uint32List.fromList(<int>[0x000000FF]),
+    [
+      Float32List.fromList([255, 0, 0, 255]),
+    ],
     Float32List.fromList([0, 1]),
     canvasKitJs.TileMode.Repeat,
   );
@@ -444,6 +525,15 @@ void _toSkMatrixFromFloat32Tests() {
   });
 }
 
+SkPath _testClosedSkPath() {
+  return SkPath()
+    ..moveTo(10, 10)
+    ..lineTo(20, 10)
+    ..lineTo(20, 20)
+    ..lineTo(10, 20)
+    ..close();
+}
+
 void _pathTests() {
   SkPath path;
 
@@ -470,15 +560,6 @@ void _pathTests() {
       1,
     );
   });
-
-  SkPath _testClosedSkPath() {
-    return SkPath()
-      ..moveTo(10, 10)
-      ..lineTo(20, 10)
-      ..lineTo(20, 20)
-      ..lineTo(10, 20)
-      ..close();
-  }
 
   test('addPath', () {
     path.addPath(_testClosedSkPath(), 1, 0, 0, 0, 1, 0, 0, 0, 0, false);
@@ -689,6 +770,411 @@ void _skSkRectTests() {
     expect(uiRect.top, 2);
     expect(uiRect.right, 3);
     expect(uiRect.bottom, 4);
+  });
+}
+
+SkVertices _testVertices() {
+  return canvasKitJs.MakeSkVertices(
+    canvasKitJs.VertexMode.Triangles,
+    [
+      Float32List.fromList([0, 0]),
+      Float32List.fromList([10, 10]),
+      Float32List.fromList([0, 20]),
+    ],
+    [
+      Float32List.fromList([0, 0]),
+      Float32List.fromList([10, 10]),
+      Float32List.fromList([0, 20]),
+    ],
+    [
+      Float32List.fromList([255, 0, 0, 255]),
+      Float32List.fromList([0, 255, 0, 255]),
+      Float32List.fromList([0, 0, 255, 255]),
+    ],
+    Uint16List.fromList([0, 1, 2]),
+  );
+}
+
+void _skVerticesTests() {
+  test('SkVertices', () {
+    expect(_testVertices(), isNotNull);
+  });
+}
+
+void _canvasTests() {
+  SkPictureRecorder recorder;
+  SkCanvas canvas;
+
+  setUp(() {
+    recorder = SkPictureRecorder();
+    canvas = recorder.beginRecording(SkRect(
+      fLeft: 0,
+      fTop: 0,
+      fRight: 100,
+      fBottom: 100,
+    ));
+  });
+
+  tearDown(() {
+    expect(recorder.finishRecordingAsPicture(), isNotNull);
+  });
+
+  test('save/getSaveCount/restore/restoreToCount', () {
+    expect(canvas.save(), 1);
+    expect(canvas.save(), 2);
+    expect(canvas.save(), 3);
+    expect(canvas.save(), 4);
+    expect(canvas.getSaveCount(), 5);
+    canvas.restoreToCount(2);
+    expect(canvas.getSaveCount(), 2);
+    canvas.restore();
+    expect(canvas.getSaveCount(), 1);
+  });
+
+  test('saveLayer', () {
+    canvas.saveLayer(
+      SkRect(
+        fLeft: 0,
+        fTop: 0,
+        fRight: 100,
+        fBottom: 100,
+      ),
+      SkPaint(),
+    );
+  });
+
+  test('SkCanvasSaveLayerWithoutBoundsOverride.saveLayer', () {
+    final SkCanvasSaveLayerWithoutBoundsOverride override = debugJsObjectWrapper.castToSkCanvasSaveLayerWithoutBoundsOverride(canvas);
+    override.saveLayer(SkPaint());
+  });
+
+  test('SkCanvasSaveLayerWithFilterOverride.saveLayer', () {
+    final SkCanvasSaveLayerWithFilterOverride override = debugJsObjectWrapper.castToSkCanvasSaveLayerWithFilterOverride(canvas);
+    override.saveLayer(
+      SkPaint(),
+      canvasKitJs.SkImageFilter.MakeBlur(1, 2, canvasKitJs.TileMode.Repeat, null),
+      0,
+      SkRect(
+        fLeft: 0,
+        fTop: 0,
+        fRight: 100,
+        fBottom: 100,
+      ),
+    );
+  });
+
+  test('clear', () {
+    canvas.clear(Float32List.fromList([0, 0, 0, 0]));
+  });
+
+  test('clipPath', () {
+    canvas.clipPath(
+      _testClosedSkPath(),
+      canvasKitJs.ClipOp.Intersect,
+      true,
+    );
+  });
+
+  test('clipRRect', () {
+    canvas.clipRRect(
+      SkRRect(
+        rect: SkRect(
+          fLeft: 0,
+          fTop: 0,
+          fRight: 100,
+          fBottom: 100,
+        ),
+        rx1: 1,
+        ry1: 2,
+        rx2: 3,
+        ry2: 4,
+        rx3: 5,
+        ry3: 6,
+        rx4: 7,
+        ry4: 8,
+      ),
+      canvasKitJs.ClipOp.Intersect,
+      true,
+    );
+  });
+
+  test('clipRect', () {
+    canvas.clipRect(
+      SkRect(
+        fLeft: 0,
+        fTop: 0,
+        fRight: 100,
+        fBottom: 100,
+      ),
+      canvasKitJs.ClipOp.Intersect,
+      true,
+    );
+  });
+
+  test('drawArc', () {
+    canvas.drawArc(
+      SkRect(
+        fLeft: 0,
+        fTop: 0,
+        fRight: 100,
+        fBottom: 50,
+      ),
+      0,
+      100,
+      true,
+      SkPaint(),
+    );
+  });
+
+  test('drawAtlas', () {
+    final SkAnimatedImage image = canvasKitJs.MakeAnimatedImageFromEncoded(kTransparentImage);
+    canvas.drawAtlas(
+      image.getCurrentFrame(),
+      Float32List.fromList([0, 0, 1, 1]),
+      Float32List.fromList([1, 0, 2, 3]),
+      SkPaint(),
+      canvasKitJs.BlendMode.SrcOver,
+      [
+        Float32List.fromList([0, 0, 0, 1]),
+        Float32List.fromList([1, 1, 1, 1]),
+      ],
+    );
+  });
+
+  test('drawCircle', () {
+    canvas.drawCircle(1, 2, 3, SkPaint());
+  });
+
+  test('drawColorInt', () {
+    canvas.drawColorInt(0xFFFFFFFF, canvasKitJs.BlendMode.SoftLight);
+  });
+
+  test('drawDRRect', () {
+    canvas.drawDRRect(
+      SkRRect(
+        rect: SkRect(
+          fLeft: 0,
+          fTop: 0,
+          fRight: 100,
+          fBottom: 100,
+        ),
+        rx1: 1,
+        ry1: 2,
+        rx2: 3,
+        ry2: 4,
+        rx3: 5,
+        ry3: 6,
+        rx4: 7,
+        ry4: 8,
+      ),
+      SkRRect(
+        rect: SkRect(
+          fLeft: 20,
+          fTop: 20,
+          fRight: 80,
+          fBottom: 80,
+        ),
+        rx1: 1,
+        ry1: 2,
+        rx2: 3,
+        ry2: 4,
+        rx3: 5,
+        ry3: 6,
+        rx4: 7,
+        ry4: 8,
+      ),
+      SkPaint(),
+    );
+  });
+
+  test('drawImage', () {
+    final SkAnimatedImage image = canvasKitJs.MakeAnimatedImageFromEncoded(kTransparentImage);
+    canvas.drawImage(
+      image.getCurrentFrame(),
+      10,
+      20,
+      SkPaint(),
+    );
+  });
+
+  test('drawImageRect', () {
+    final SkAnimatedImage image = canvasKitJs.MakeAnimatedImageFromEncoded(kTransparentImage);
+    canvas.drawImageRect(
+      image.getCurrentFrame(),
+      SkRect(fLeft: 0, fTop: 0, fRight: 1, fBottom: 1),
+      SkRect(fLeft: 0, fTop: 0, fRight: 1, fBottom: 1),
+      SkPaint(),
+      false,
+    );
+  });
+
+  test('drawImageNine', () {
+    final SkAnimatedImage image = canvasKitJs.MakeAnimatedImageFromEncoded(kTransparentImage);
+    canvas.drawImageNine(
+      image.getCurrentFrame(),
+      SkRect(fLeft: 0, fTop: 0, fRight: 1, fBottom: 1),
+      SkRect(fLeft: 0, fTop: 0, fRight: 1, fBottom: 1),
+      SkPaint(),
+    );
+  });
+
+  test('drawLine', () {
+    canvas.drawLine(0, 1, 2, 3, SkPaint());
+  });
+
+  test('drawOval', () {
+    canvas.drawOval(SkRect(fLeft: 0, fTop: 0, fRight: 1, fBottom: 1), SkPaint());
+  });
+
+  test('drawPaint', () {
+    canvas.drawPaint(SkPaint());
+  });
+
+  test('drawPath', () {
+    canvas.drawPath(
+      _testClosedSkPath(),
+      SkPaint(),
+    );
+  });
+
+  test('drawPoints', () {
+    canvas.drawPoints(
+      canvasKitJs.PointMode.Lines,
+      Float32List.fromList([0, 0, 10, 10, 0, 10]),
+      SkPaint(),
+    );
+  });
+
+  test('drawRRect', () {
+    canvas.drawRRect(
+      SkRRect(
+        rect: SkRect(
+          fLeft: 0,
+          fTop: 0,
+          fRight: 100,
+          fBottom: 100,
+        ),
+        rx1: 1,
+        ry1: 2,
+        rx2: 3,
+        ry2: 4,
+        rx3: 5,
+        ry3: 6,
+        rx4: 7,
+        ry4: 8,
+      ),
+      SkPaint(),
+    );
+  });
+
+  test('drawRect', () {
+    canvas.drawRect(
+      SkRect(
+        fLeft: 0,
+        fTop: 0,
+        fRight: 100,
+        fBottom: 100,
+      ),
+      SkPaint(),
+    );
+  });
+
+  test('drawShadow', () {
+    for (int flags in const <int>[0x01, 0x00]) {
+      const double devicePixelRatio = 2.0;
+      const double elevation = 4.0;
+      const double ambientAlpha = 0.039;
+      const double spotAlpha = 0.25;
+
+      final SkPath path = _testClosedSkPath();
+      final ui.Rect bounds = path.getBounds().toRect();
+      final double shadowX = (bounds.left + bounds.right) / 2.0;
+      final double shadowY = bounds.top - 600.0;
+
+      const ui.Color color = ui.Color(0xAABBCCDD);
+      ui.Color inAmbient = color.withAlpha((color.alpha * ambientAlpha).round());
+      ui.Color inSpot = color.withAlpha((color.alpha * spotAlpha).round());
+
+      final SkTonalColors inTonalColors = SkTonalColors(
+        ambient: makeFreshSkColor(inAmbient),
+        spot: makeFreshSkColor(inSpot),
+      );
+
+      final SkTonalColors tonalColors =
+          canvasKitJs.computeTonalColors(inTonalColors);
+
+      canvas.drawShadow(
+        path,
+        Float32List(3)
+          ..[2] = devicePixelRatio * elevation,
+        Float32List(3)
+          ..[0] = shadowX
+          ..[1] = shadowY
+          ..[2] = devicePixelRatio * kLightHeight,
+        devicePixelRatio * kLightRadius,
+        tonalColors.ambient,
+        tonalColors.spot,
+        flags,
+      );
+    }
+  });
+
+  test('drawVertices', () {
+    canvas.drawVertices(
+      _testVertices(),
+      canvasKitJs.BlendMode.SrcOver,
+      SkPaint(),
+    );
+  });
+
+  test('rotate', () {
+    canvas.rotate(5, 10, 20);
+  });
+
+  test('scale', () {
+    canvas.scale(2, 3);
+  });
+
+  test('skew', () {
+    canvas.skew(4, 5);
+  });
+
+  test('concat', () {
+    canvas.concat(toSkMatrixFromFloat32(Matrix4.identity().storage));
+  });
+
+  test('translate', () {
+    canvas.translate(4, 5);
+  });
+
+  test('flush', () {
+    canvas.flush();
+  });
+
+  test('drawPicture', () {
+    final SkPictureRecorder otherRecorder = SkPictureRecorder();
+    final SkCanvas otherCanvas = otherRecorder.beginRecording(SkRect(
+      fLeft: 0,
+      fTop: 0,
+      fRight: 100,
+      fBottom: 100,
+    ));
+    otherCanvas.drawLine(0, 0, 10, 10, SkPaint());
+    canvas.drawPicture(otherRecorder.finishRecordingAsPicture());
+  });
+
+  test('drawParagraph', () {
+    final CkParagraphBuilder builder = CkParagraphBuilder(
+      CkParagraphStyle(),
+    );
+    builder.addText('Hello');
+    final CkParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: 100));
+    canvas.drawParagraph(
+      debugJsObjectWrapper.unwrapSkParagraph(paragraph.legacySkiaObject),
+      10,
+      20,
+    );
   });
 }
 
