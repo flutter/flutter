@@ -1,4 +1,4 @@
-Signature: 16d2a900a80330c3af68e9d91eaca584
+Signature: 2bcc15c0c00f4cc4fa8945c902e0d2e7
 
 UNUSED LICENSES:
 
@@ -5305,6 +5305,7 @@ FILE: ../../../third_party/skia/src/gpu/GrDynamicAtlas.cpp
 FILE: ../../../third_party/skia/src/gpu/GrDynamicAtlas.h
 FILE: ../../../third_party/skia/src/gpu/GrEagerVertexAllocator.h
 FILE: ../../../third_party/skia/src/gpu/GrHashMapWithCache.h
+FILE: ../../../third_party/skia/src/gpu/GrRecordingContextPriv.cpp
 FILE: ../../../third_party/skia/src/gpu/GrSTArenaList.h
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrAutoMapVertexBuffer.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrArithmeticProcessor.fp
