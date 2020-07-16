@@ -401,14 +401,14 @@ class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
     team.captain = this;
     _gestureRecognizers = gestureRecognizerFactories.map(
       (Factory<OneSequenceGestureRecognizer> recognizerFactory) {
-        OneSequenceGestureRecognizer gestureRecognizer = recognizerFactory.constructor();
+        final OneSequenceGestureRecognizer gestureRecognizer = recognizerFactory.constructor();
         gestureRecognizer.team = team;
         if (gestureRecognizer is LongPressGestureRecognizer) {
-          (gestureRecognizer as LongPressGestureRecognizer).onLongPress ??= (){};
+          gestureRecognizer.onLongPress ??= (){};
         } else if (gestureRecognizer is DragGestureRecognizer) {
-          (gestureRecognizer as DragGestureRecognizer).onDown ??= (_){};
+          gestureRecognizer.onDown ??= (_){};
         } else if (gestureRecognizer is TapGestureRecognizer) {
-          (gestureRecognizer as TapGestureRecognizer).onTapDown ??= (_){};
+          gestureRecognizer.onTapDown ??= (_){};
         }
         return gestureRecognizer;
       },
@@ -476,14 +476,14 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
     team.captain = this;
     _gestureRecognizers = gestureRecognizerFactories.map(
       (Factory<OneSequenceGestureRecognizer> recognizerFactory) {
-        OneSequenceGestureRecognizer gestureRecognizer = recognizerFactory.constructor();
+        final OneSequenceGestureRecognizer gestureRecognizer = recognizerFactory.constructor();
         gestureRecognizer.team = team;
         if (gestureRecognizer is LongPressGestureRecognizer) {
-          (gestureRecognizer as LongPressGestureRecognizer).onLongPress ??= (){};
+          gestureRecognizer.onLongPress ??= (){};
         } else if (gestureRecognizer is DragGestureRecognizer) {
-          (gestureRecognizer as DragGestureRecognizer).onDown ??= (_){};
+          gestureRecognizer.onDown ??= (_){};
         } else if (gestureRecognizer is TapGestureRecognizer) {
-          (gestureRecognizer as TapGestureRecognizer).onTapDown ??= (_){};
+          gestureRecognizer.onTapDown ??= (_){};
         }
         return gestureRecognizer;
       },
