@@ -2140,12 +2140,6 @@ class _WidgetInspectorState extends State<WidgetInspector>
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Set the root render object so that the inspector
-      // layer can apply the correct transforms
-      selection.rootRenderObject = context.findRenderObject();
-    });
-
     _selectionChangedCallback = () {
       setState(() {
         // The [selection] property which the build method depends on has
@@ -2327,9 +2321,6 @@ class _WidgetInspectorState extends State<WidgetInspector>
 
 /// Mutable selection state of the inspector.
 class InspectorSelection {
-  /// Root render object in the inspector widget tree.
-  RenderObject rootRenderObject;
-
   /// Render objects that are candidates to be selected.
   ///
   /// Tools may wish to iterate through the list of candidates.
@@ -2450,6 +2441,7 @@ class _RenderInspectorOverlay extends RenderBox {
     context.addLayer(_InspectorOverlayLayer(
       overlayRect: Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
       selection: selection,
+      rootRenderObject: parent as RenderObject,
     ));
   }
 }
@@ -2526,6 +2518,7 @@ class _InspectorOverlayLayer extends Layer {
   _InspectorOverlayLayer({
     @required this.overlayRect,
     @required this.selection,
+    @required this.rootRenderObject,
   }) : assert(overlayRect != null),
        assert(selection != null) {
     bool inDebugMode = false;
@@ -2552,6 +2545,10 @@ class _InspectorOverlayLayer extends Layer {
   /// (as described at [Layer]).
   final Rect overlayRect;
 
+  /// Widget inspector root render object. The selection overlay will be painted
+  /// with transforms relative to this render object.
+  final RenderObject rootRenderObject;
+
   _InspectorOverlayRenderState _lastState;
 
   /// Picture generated from _lastState.
@@ -2566,16 +2563,21 @@ class _InspectorOverlayLayer extends Layer {
       return;
 
     final RenderObject selected = selection.current;
+
+    if (!_isInInspectorRenderObjectTree(selected))
+      return;
+
     final List<_TransformedRect> candidates = <_TransformedRect>[];
     for (final RenderObject candidate in selection.candidates) {
-      if (candidate == selected || !candidate.attached)
+      if (candidate == selected || !candidate.attached
+          || !_isInInspectorRenderObjectTree(candidate))
         continue;
-      candidates.add(_TransformedRect(candidate, selection.rootRenderObject));
+      candidates.add(_TransformedRect(candidate, rootRenderObject));
     }
 
     final _InspectorOverlayRenderState state = _InspectorOverlayRenderState(
       overlayRect: overlayRect,
-      selected: _TransformedRect(selected, selection.rootRenderObject),
+      selected: _TransformedRect(selected, rootRenderObject),
       tooltip: selection.currentElement.toStringShort(),
       textDirection: TextDirection.ltr,
       candidates: candidates,
@@ -2705,6 +2707,25 @@ class _InspectorOverlayLayer extends Layer {
     Offset localPosition, {
     bool onlyFirst,
   }) {
+    return false;
+  }
+
+  /// Return whether or not a render object belongs to this inspector widget
+  /// tree.
+  /// The inspector selection is static, so if there are multiple inspector
+  /// overlays in the same app (i.e. an storyboard), a selected or candidate
+  /// render object may not belong to this tree.
+  bool _isInInspectorRenderObjectTree(RenderObject child) {
+    RenderObject inspectorRoot;
+    RenderObject current = child.parent as RenderObject;
+    while (current != null && inspectorRoot == null) {
+      // We found the widget inspector render object.
+      if (current is RenderStack
+          && current.lastChild is _RenderInspectorOverlay) {
+        return rootRenderObject == current;
+      }
+      current = current.parent as RenderObject;
+    }
     return false;
   }
 }

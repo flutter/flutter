@@ -516,9 +516,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final GlobalKey childKey = GlobalKey();
       final GlobalKey inspectorKey = GlobalKey();
 
-      // State type is private, hence using dynamic.
-      dynamic getInspectorState() => inspectorKey.currentState;
-
       final Matrix4 mainTransform = Matrix4.identity()
           ..translate(50.0, 30.0)
           ..scale(0.5, 0.5);
@@ -544,19 +541,80 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         ),
       );
 
-      final InspectorSelection selection = getInspectorState().selection as InspectorSelection;
-
       final RenderObject childRenderObject = childKey.currentContext.findRenderObject();
 
-      // The tranform of the child with respect to the inspector selection render object
-      // should be the identity matrix
-      final Matrix4 m1 = childRenderObject.getTransformTo(selection.rootRenderObject);
-      expect(m1, Matrix4.identity());
-
       // The tranform of the child with respect to the whole widget should be the sam
-      // matrix applied to the widget inspector inspector
-      final Matrix4 m2 = childRenderObject.getTransformTo(null);
-      expect(m2, mainTransform);
+      // matrix applied to the widget inspector inspector.
+      expect(childRenderObject.getTransformTo(null), mainTransform);
+    });
+
+    testWidgets('Multiple widget inspectors', (WidgetTester tester) async {
+      // This test verifies that interacting with different inspectors
+      // works correctly. This use case may be an app that displays multiple
+      // apps inside (i.e. a storyboard).
+      final GlobalKey selectButton1Key = GlobalKey();
+      final GlobalKey selectButton2Key = GlobalKey();
+
+      final GlobalKey inspector1Key = GlobalKey();
+      final GlobalKey inspector2Key = GlobalKey();
+
+      final GlobalKey child1Key = GlobalKey();
+      final GlobalKey child2Key = GlobalKey();
+
+      InspectorSelectButtonBuilder selectButtonBuilder(Key key) {
+        return (BuildContext context, VoidCallback onPressed) {
+          return Material(child: RaisedButton(onPressed: onPressed, key: key));
+        };
+      }
+
+      // State type is private, hence using dynamic.
+      // The inspector state is static, so it's enough with reading one of them
+      dynamic getInspectorState() => inspector1Key.currentState;
+      String paragraphText(RenderParagraph paragraph) {
+        final TextSpan textSpan = paragraph.text as TextSpan;
+        return textSpan.text;
+      }
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Row(
+            children: <Widget>[
+              Flexible(
+                child: WidgetInspector(
+                  key: inspector1Key,
+                  selectButtonBuilder: selectButtonBuilder(selectButton1Key),
+                  child: Container(
+                    key: child1Key,
+                    child: const Text('Child 1'),
+                  ),
+                ),
+              ),
+              Flexible(
+                child: WidgetInspector(
+                  key: inspector2Key,
+                  selectButtonBuilder: selectButtonBuilder(selectButton2Key),
+                  child: Container(
+                    key: child2Key,
+                    child: const Text('Child 2'),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      final InspectorSelection selection = getInspectorState().selection as InspectorSelection;
+      expect(selection.current, isNull);
+
+      await tester.tap(find.text('Child 1'));
+      await tester.pump();
+      expect(paragraphText(selection.current as RenderParagraph), equals('Child 1'));
+
+      await tester.tap(find.text('Child 2'));
+      await tester.pump();
+      expect(paragraphText(selection.current as RenderParagraph), equals('Child 2'));
     });
 
     test('WidgetInspectorService null id', () {
