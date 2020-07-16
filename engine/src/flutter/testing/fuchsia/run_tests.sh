@@ -37,14 +37,18 @@ else
 fi
 
 reboot() {
-  # TODO come up with better log collection strategy.
-  # https://github.com/flutter/flutter/issues/57273
-  # echo "Dumping system logs..."
-
-  # ./fuchsia_ctl -d $device_name ssh \
-  #     -c "log_listener --dump_logs yes" \
-  #     --timeout-seconds $ssh_timeout_seconds \
-  #     --identity-file $pkey
+  ./fuchsia_ctl -d $device_name ssh \
+       -c "log_listener --dump_logs yes --file /tmp/log.txt" \
+       --timeout-seconds $ssh_timeout_seconds \
+       --identity-file $pkey
+  # As we are not using recipes we don't have a way to know the location
+  # to upload the log to isolated. We are saving the log to a file to avoid dart
+  # hanging when running the process and then just using printing the content to
+  # the console.
+  ./fuchsia_ctl -d $device_name ssh \
+       -c "cat /tmp/log.txt" \
+       --timeout-seconds $ssh_timeout_seconds \
+       --identity-file $pkey
 
   echo "$(date) START:REBOOT ------------------------------------------"
   # note: this will set an exit code of 255, which we can ignore.
