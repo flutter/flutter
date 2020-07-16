@@ -452,7 +452,7 @@ class _DefaultProcessUtils implements ProcessUtils {
 
     if (failedExitCode && throwOnError) {
       String message = 'The command failed';
-      if (throwOnError) {
+      if (verboseExceptions) {
         message = 'The command failed\nStdout:\n${runResult.stdout}\n'
             'Stderr:\n${runResult.stderr}';
       }
