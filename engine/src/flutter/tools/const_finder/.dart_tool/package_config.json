@@ -2,34 +2,37 @@
   "configVersion": 2,
   "packages": [
     {
-      "name": "const_finder",
-      "rootUri": "../",
-      "packageUri": "lib",
-      "languageVersion": "2.4"
+      "name": "args",
+      "rootUri": "../../../../third_party/dart/third_party/pkg/args",
+      "packageUri": "lib/",
+      "languageVersion": "2.3"
     },
     {
       "name": "kernel",
       "rootUri": "../../../../third_party/dart/pkg/kernel",
-      "packageUri": "lib",
+      "packageUri": "lib/",
       "languageVersion": "2.2"
     },
     {
       "name": "meta",
       "rootUri": "../../../../third_party/dart/pkg/meta",
-      "packageUri": "lib",
+      "packageUri": "lib/",
       "languageVersion": "2.9"
-    },
-    {
-      "name": "args",
-      "rootUri": "../../../../third_party/dart/third_party/pkg/args",
-      "packageUri": "lib",
-      "languageVersion": "2.3"
     },
     {
       "name": "path",
       "rootUri": "../../../../third_party/dart/third_party/pkg/path",
-      "packageUri": "lib",
+      "packageUri": "lib/",
       "languageVersion": "2.0"
+    },
+    {
+      "name": "const_finder",
+      "rootUri": "../",
+      "packageUri": "lib/",
+      "languageVersion": "2.4"
     }
-  ]
+  ],
+  "generated": "2020-07-16T17:06:29.414763Z",
+  "generator": "pub",
+  "generatorVersion": "2.9.0-21.0.dev.flutter-89fe12b12a"
 }

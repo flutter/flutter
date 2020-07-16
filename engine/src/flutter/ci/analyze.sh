@@ -21,7 +21,7 @@ fi
 
 echo "Analyzing flutter_frontend_server..."
 RESULTS=`dartanalyzer                                                          \
-  --packages=flutter/flutter_frontend_server/.packages                         \
+  --packages=flutter/flutter_frontend_server/.dart_tool/package_config.json    \
   --options flutter/analysis_options.yaml                                      \
   flutter/flutter_frontend_server                                              \
   2>&1                                                                         \
@@ -36,7 +36,7 @@ fi
 echo "Analyzing tools/licenses..."
 (cd flutter/tools/licenses && pub get)
 RESULTS=`dartanalyzer                                                          \
-  --packages=flutter/tools/licenses/.packages                                  \
+  --packages=flutter/tools/licenses/.dart_tool/package_config.json             \
   --options flutter/tools/licenses/analysis_options.yaml                       \
   flutter/tools/licenses                                                       \
   2>&1                                                                         \
@@ -53,7 +53,7 @@ flutter/tools/gn --unoptimized
 ninja -C out/host_debug_unopt sky_engine sky_services
 (cd flutter/testing/dart && pub get)
 RESULTS=`dartanalyzer                                                          \
-  --packages=flutter/testing/dart/.packages                                    \
+  --packages=flutter/testing/dart/.dart_tool/package_config.json               \
   --options flutter/analysis_options.yaml                                      \
   flutter/testing/dart                                                         \
   2>&1                                                                         \
@@ -68,7 +68,7 @@ fi
 echo "Analyzing testing/scenario_app..."
 (cd flutter/testing/scenario_app && pub get)
 RESULTS=`dartanalyzer                                                          \
-  --packages=flutter/testing/scenario_app/.packages                            \
+  --packages=flutter/testing/scenario_app/.dart_tool/package_config.json       \
   --options flutter/analysis_options.yaml                                      \
   flutter/testing/scenario_app                                                 \
   2>&1                                                                         \
