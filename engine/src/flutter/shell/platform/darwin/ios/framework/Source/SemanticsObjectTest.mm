@@ -8,16 +8,33 @@ FLUTTER_ASSERT_ARC
 
 namespace flutter {
 namespace {
+
+class SemanticsActionObservation {
+ public:
+  SemanticsActionObservation(int32_t observed_id, SemanticsAction observed_action)
+      : id(observed_id), action(observed_action) {}
+
+  int32_t id;
+  SemanticsAction action;
+};
+
 class MockAccessibilityBridge : public AccessibilityBridgeIos {
  public:
-  MockAccessibilityBridge() { view_ = [[UIView alloc] init]; }
+  MockAccessibilityBridge() : observations({}) { view_ = [[UIView alloc] init]; }
   UIView* view() const override { return view_; }
   UIView<UITextInput>* textInputView() override { return nil; }
-  void DispatchSemanticsAction(int32_t id, SemanticsAction action) override {}
+  void DispatchSemanticsAction(int32_t id, SemanticsAction action) override {
+    SemanticsActionObservation observation(id, action);
+    observations.push_back(observation);
+  }
   void DispatchSemanticsAction(int32_t id,
                                SemanticsAction action,
-                               std::vector<uint8_t> args) override {}
+                               std::vector<uint8_t> args) override {
+    SemanticsActionObservation observation(id, action);
+    observations.push_back(observation);
+  }
   FlutterPlatformViewsController* GetPlatformViewsController() const override { return nil; }
+  std::vector<SemanticsActionObservation> observations;
 
  private:
   UIView* view_;
@@ -100,6 +117,48 @@ class MockAccessibilityBridge : public AccessibilityBridgeIos {
   updatedNode.label = "foo";
   [object setSemanticsNode:&updatedNode];
   XCTAssertTrue([object nodeShouldTriggerAnnouncement:&node]);
+}
+
+- (void)testShouldDispatchShowOnScreenActionForHeader {
+  fml::WeakPtrFactory<flutter::MockAccessibilityBridge> factory(
+      new flutter::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::MockAccessibilityBridge> bridge = factory.GetWeakPtr();
+  SemanticsObject* object = [[SemanticsObject alloc] initWithBridge:bridge uid:1];
+
+  // Handle initial setting of node with header.
+  flutter::SemanticsNode node;
+  node.flags = static_cast<int32_t>(flutter::SemanticsFlags::kIsHeader);
+  node.label = "foo";
+
+  [object setSemanticsNode:&node];
+
+  // Simulate accessibility focus.
+  [object accessibilityElementDidBecomeFocused];
+
+  XCTAssertTrue(bridge->observations.size() == 1);
+  XCTAssertTrue(bridge->observations[0].id == 1);
+  XCTAssertTrue(bridge->observations[0].action == flutter::SemanticsAction::kShowOnScreen);
+}
+
+- (void)testShouldDispatchShowOnScreenActionForHidden {
+  fml::WeakPtrFactory<flutter::MockAccessibilityBridge> factory(
+      new flutter::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::MockAccessibilityBridge> bridge = factory.GetWeakPtr();
+  SemanticsObject* object = [[SemanticsObject alloc] initWithBridge:bridge uid:1];
+
+  // Handle initial setting of node with hidden.
+  flutter::SemanticsNode node;
+  node.flags = static_cast<int32_t>(flutter::SemanticsFlags::kIsHidden);
+  node.label = "foo";
+
+  [object setSemanticsNode:&node];
+
+  // Simulate accessibility focus.
+  [object accessibilityElementDidBecomeFocused];
+
+  XCTAssertTrue(bridge->observations.size() == 1);
+  XCTAssertTrue(bridge->observations[0].id == 1);
+  XCTAssertTrue(bridge->observations[0].action == flutter::SemanticsAction::kShowOnScreen);
 }
 
 @end
