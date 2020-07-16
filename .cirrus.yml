@@ -350,7 +350,7 @@ task:
     CIRRUS_WORKING_DIR: "C:\\Windows\\Temp\\$FLUTTER_SDK_PATH_WITH_SPACE"
     PATH: "$CIRRUS_WORKING_DIR/bin;$CIRRUS_WORKING_DIR/bin/cache/dart-sdk/bin;$PATH"
   pub_cache:
-    folder: $APPDATA\Pub\Cache
+    folder: $LOCALAPPDATA\Pub\Cache
     fingerprint_script:
       - ps: $Environment:OS; Get-ChildItem -Path "$Environment:CIRRUS_WORKING_DIR" pubspec.yaml -Recurse | Select-String -Pattern "PUBSPEC CHECKSUM" -SimpleMatch
     reupload_on_changes: false
