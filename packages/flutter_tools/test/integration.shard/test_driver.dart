@@ -428,6 +428,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
   FlutterRunTestDriver(
     Directory projectFolder, {
     String logPrefix,
+    this.spawnDdsInstance = true,
   }) : super(projectFolder, logPrefix: logPrefix);
 
   String _currentRunningAppId;
@@ -447,6 +448,8 @@ class FlutterRunTestDriver extends FlutterTestDriver {
         'run',
         if (!chrome)
           '--disable-service-auth-codes',
+        if (!spawnDdsInstance)
+          '--disable-dds',
         '--machine',
         '-d',
         if (chrome)
@@ -479,6 +482,8 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       <String>[
         'attach',
         '--machine',
+        if (!spawnDdsInstance)
+          '--disable-dds',
         '-d',
         'flutter-tester',
         '--debug-port',
@@ -681,6 +686,8 @@ class FlutterRunTestDriver extends FlutterTestDriver {
   void _throwErrorResponse(String message) {
     throw '$message\n\n$_lastResponse\n\n${_errorBuffer.toString()}'.trim();
   }
+
+  final bool spawnDdsInstance;
 }
 
 class FlutterTestTestDriver extends FlutterTestDriver {
