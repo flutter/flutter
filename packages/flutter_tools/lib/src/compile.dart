@@ -16,7 +16,6 @@ import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
 import 'build_info.dart';
-import 'codegen.dart';
 import 'convert.dart';
 import 'globals.dart' as globals;
 import 'project.dart';
@@ -40,15 +39,7 @@ class KernelCompilerFactory {
   final FileSystem _fileSystem;
 
   Future<KernelCompiler> create(FlutterProject flutterProject) async {
-    if (flutterProject == null || !flutterProject.hasBuilders) {
-      return KernelCompiler(
-        logger: _logger,
-        artifacts: _artifacts,
-        fileSystem: _fileSystem,
-        processManager: _processManager,
-      );
-    }
-    return CodeGeneratingKernelCompiler(
+    return KernelCompiler(
       logger: _logger,
       artifacts: _artifacts,
       fileSystem: _fileSystem,

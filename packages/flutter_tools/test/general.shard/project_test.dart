@@ -568,48 +568,6 @@ apply plugin: 'kotlin-android'
       });
     });
   });
-
-  group('Regression test for invalid pubspec', () {
-    Testbed testbed;
-    FlutterProjectFactory flutterProjectFactory;
-
-    setUp(() {
-      testbed = Testbed(setup: () {
-        flutterProjectFactory = FlutterProjectFactory(
-          fileSystem: globals.fs,
-          logger: globals.logger,
-        );
-      });
-    });
-
-    test('Handles asking for builders from an invalid pubspec', () => testbed.run(() {
-      globals.fs.file('pubspec.yaml')
-        ..createSync()
-        ..writeAsStringSync(r'''
-# Hello, World
-''');
-      final FlutterProject flutterProject = FlutterProject.current();
-
-      expect(flutterProject.builders, null);
-    }, overrides: <Type, Generator>{
-      FlutterProjectFactory: () => flutterProjectFactory,
-    }));
-
-    test('Handles asking for builders from a trivial pubspec', () => testbed.run(() {
-      globals.fs.file('pubspec.yaml')
-        ..createSync()
-        ..writeAsStringSync(r'''
-# Hello, World
-name: foo_bar
-''');
-      final FlutterProject flutterProject = FlutterProject.current();
-
-      expect(flutterProject.builders, null);
-    }, overrides: <Type, Generator>{
-      FlutterProjectFactory: () => flutterProjectFactory,
-    }));
-  });
-
   group('watch companion', () {
     MemoryFileSystem fs;
     MockPlistUtils mockPlistUtils;

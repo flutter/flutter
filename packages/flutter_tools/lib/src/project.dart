@@ -262,25 +262,6 @@ class FlutterProject {
     }
     await injectPlugins(this, checkProjects: checkProjects);
   }
-
-  /// Return the set of builders used by this package.
-  YamlMap get builders {
-    if (!pubspecFile.existsSync()) {
-      return null;
-    }
-    final YamlMap pubspec = loadYaml(pubspecFile.readAsStringSync()) as YamlMap;
-    // If the pubspec file is empty, this will be null.
-    if (pubspec == null) {
-      return null;
-    }
-    return pubspec['builders'] as YamlMap;
-  }
-
-  /// Whether there are any builders used by this package.
-  bool get hasBuilders {
-    final YamlMap result = builders;
-    return result != null && result.isNotEmpty;
-  }
 }
 
 /// Base class for projects per platform.
