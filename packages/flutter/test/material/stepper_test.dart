@@ -663,4 +663,32 @@ void main() {
     await tester.pump();
     expect(disabledNode.hasPrimaryFocus, isFalse);
   });
+
+  testWidgets('Stepper title should not overflow', (WidgetTester tester) async {
+    const String longTitle = 'A long long long long long long long long long long long long title';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: <Widget>[
+              Stepper(
+                steps: const <Step>[
+                  Step(
+                      title: Text(longTitle),
+                      content: Text('Text content')),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    expect(
+        find.text(longTitle),
+        findsNWidgets(1));
+  });
 }
