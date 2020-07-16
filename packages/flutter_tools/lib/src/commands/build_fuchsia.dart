@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/features.dart';
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
@@ -59,6 +60,12 @@ class BuildFuchsiaCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    if (!featureFlags.isFuchsiaEnabled) {
+      throwToolExit(
+        '"build fuchsia" is currently disabled. See "flutter config" for more '
+        'information.'
+      );
+    }
     final BuildInfo buildInfo = getBuildInfo();
     final FlutterProject flutterProject = FlutterProject.current();
     if (!globals.platform.isLinux && !globals.platform.isMacOS) {
