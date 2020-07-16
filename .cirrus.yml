@@ -13,6 +13,7 @@ web_shard_template: &WEB_SHARD_TEMPLATE
     CHROME_NO_SANDBOX: true
     GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
   script:
+    - flutter update-packages
     - dart --enable-asserts ./dev/bots/test.dart
 
 linux_shard_template: &LINUX_SHARD_TEMPLATE
@@ -23,6 +24,7 @@ linux_shard_template: &LINUX_SHARD_TEMPLATE
     CPU: 4
     MEMORY: 16G
   script:
+    - flutter update-packages
     - dart --enable-asserts ./dev/bots/test.dart
 
 windows_shard_template: &WINDOWS_SHARD_TEMPLATE
@@ -46,6 +48,7 @@ firebase_shard_template: &FIREBASE_SHARD_TEMPLATE
     CLOUDSDK_CORE_DISABLE_PROMPTS: 1
     GCLOUD_FIREBASE_TESTLAB_KEY: ENCRYPTED[1c140257edc48f5578fa5a0e5038b84c8e53270c405efa5a8e35ea303a4e0d135853989f448f72136206de854d17fbec]
   script:
+    - flutter update-packages
     - dart --enable-asserts ./dev/bots/test.dart
 
 use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
@@ -105,7 +108,6 @@ task:
     - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
     - flutter config --no-analytics
     - flutter doctor -v
-    - flutter update-packages
     - ./dev/bots/accept_android_sdk_licenses.sh
     - date
   on_failure:
@@ -120,12 +122,14 @@ task:
         CPU: 1
         MEMORY: 8G
       script:
+        - flutter update-packages
         - dart --enable-asserts ./dev/bots/analyze.dart
 
     - name: fuchsia_precache-linux # linux-only
       # Skip on release branches
       only_if: "changesInclude('.cirrus.yml', 'bin/internal/engine.version') && ($CIRRUS_BASE_BRANCH == 'master' || $CIRRUS_BRANCH == 'master')"
       script:
+        - flutter update-packages
         - flutter precache --fuchsia --no-android --no-ios
         - flutter precache --flutter_runner --no-android --no-ios
 
@@ -137,6 +141,7 @@ task:
         CPU: 3
         GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
       script:
+        - flutter update-packages
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: framework_tests-libraries-linux
@@ -148,6 +153,7 @@ task:
         CPU: 3
         GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
       script:
+        - flutter update-packages
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: framework_tests-misc-linux
@@ -158,6 +164,7 @@ task:
         # running fast enough that it is not the long pole, as of October 2019.
         CPU: 3
       script:
+        - flutter update-packages
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: tool_tests-general-linux
@@ -168,6 +175,7 @@ task:
         CPU: 4
         MEMORY: 10G
       script:
+        - (cd packages/flutter_tools; pub get)
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: tool_tests-commands-linux
@@ -179,6 +187,7 @@ task:
         CPU: 6
         MEMORY: 10G
       script:
+        - (cd packages/flutter_tools; pub get)
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: tool_tests-integration-linux
@@ -190,6 +199,7 @@ task:
         MEMORY: 8G
         CHROME_NO_SANDBOX: true
       script:
+        - (cd packages/flutter_tools; pub get)
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: tool_coverage-linux # linux-only
@@ -202,6 +212,7 @@ task:
         MEMORY: 24G
         CODECOV_TOKEN: ENCRYPTED[7c76a7f8c9264f3b7f3fd63fcf186f93c62c4dfe43ec288861c2f506d456681032b89efe7b7a139c82156350ca2c752c]
       script:
+        - (cd packages/flutter_tools; pub get)
         - dart --enable-asserts ./dev/bots/test.dart
         - bash <(curl -s https://codecov.io/bash) -c -f packages/flutter_tools/coverage/lcov.info -F flutter_tool
 
@@ -214,6 +225,7 @@ task:
         CHROME_NO_SANDBOX: true
         GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
       script:
+        - flutter update-packages
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: web_tests-0-linux
@@ -248,6 +260,7 @@ task:
         CPU: 2
         MEMORY: 6G
       script:
+        - flutter update-packages
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: build_tests-1_last-linux
@@ -258,6 +271,7 @@ task:
         CPU: 2
         MEMORY: 6G
       script:
+        - flutter update-packages
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-0-linux
@@ -283,6 +297,7 @@ task:
         # For uploading beta docs to Firebase public live site
         FIREBASE_PUBLIC_TOKEN: ENCRYPTED[37e8b82f167864cae9a3f4d2cf3f37dea331d9375c295327c45de524f6c588fa6f6d63e5784f10f6d43ce29689f36c92]
       script:
+        - flutter update-packages
         - ./dev/bots/docs.sh
 
     - name: customer_testing-linux
@@ -290,6 +305,7 @@ task:
         # Empirically, this shard runs fine at 1 CPU and 4G RAM as of October 2019. We will probably
         # want to grow this container when we invite people to add their tests in large numbers.
       script:
+        - flutter update-packages
         - rm -rf bin/cache/pkg/tests
         - git clone https://github.com/flutter/tests.git bin/cache/pkg/tests
         - dart --enable-asserts dev/customer_testing/run_tests.dart --skip-on-fetch-failure --skip-template bin/cache/pkg/tests/registry/*.test
@@ -312,6 +328,7 @@ task:
         MEMORY: 2G
         CHROME_NO_SANDBOX: true
       script:
+        - flutter update-packages
         - flutter config --enable-web
         - git clone https://github.com/flutter/web_installers.git
         - cd web_installers/packages/web_drivers/
@@ -335,6 +352,7 @@ task:
         GOOGLE_DEVELOPER_SERVICE_ACCOUNT_ACTOR_FASTLANE: ENCRYPTED[d9ac1462c3c556fc2f8165c9d5566a16497d8ebc38a50357f7f3abf136b7f83e1d1d76dde36fee356cb0f9ebf7a89346]
         ANDROID_GALLERY_UPLOAD_KEY: ENCRYPTED[0f2aca35f05b26add5d9edea2a7449341269a2b7e22d5c667f876996e2e8bc44ff1369431ebf73b7c5581fd95d0e5902]
       script:
+        - flutter update-packages
         - ./dev/bots/deploy_gallery.sh
 
 # WINDOWS SHARDS
