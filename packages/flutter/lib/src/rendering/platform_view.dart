@@ -401,7 +401,16 @@ class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
     team.captain = this;
     _gestureRecognizers = gestureRecognizerFactories.map(
       (Factory<OneSequenceGestureRecognizer> recognizerFactory) {
-        return recognizerFactory.constructor()..team = team;
+        OneSequenceGestureRecognizer gestureRecognizer = recognizerFactory.constructor();
+        gestureRecognizer.team = team;
+        if (gestureRecognizer is LongPressGestureRecognizer) {
+          (gestureRecognizer as LongPressGestureRecognizer).onLongPress ??= (){};
+        } else if (gestureRecognizer is DragGestureRecognizer) {
+          (gestureRecognizer as DragGestureRecognizer).onDown ??= (_){};
+        } else if (gestureRecognizer is TapGestureRecognizer) {
+          (gestureRecognizer as TapGestureRecognizer).onTapDown ??= (_){};
+        }
+        return gestureRecognizer;
       },
     ).toSet();
   }
@@ -467,7 +476,16 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
     team.captain = this;
     _gestureRecognizers = gestureRecognizerFactories.map(
       (Factory<OneSequenceGestureRecognizer> recognizerFactory) {
-        return recognizerFactory.constructor()..team = team;
+        OneSequenceGestureRecognizer gestureRecognizer = recognizerFactory.constructor();
+        gestureRecognizer.team = team;
+        if (gestureRecognizer is LongPressGestureRecognizer) {
+          (gestureRecognizer as LongPressGestureRecognizer).onLongPress ??= (){};
+        } else if (gestureRecognizer is DragGestureRecognizer) {
+          (gestureRecognizer as DragGestureRecognizer).onDown ??= (_){};
+        } else if (gestureRecognizer is TapGestureRecognizer) {
+          (gestureRecognizer as TapGestureRecognizer).onTapDown ??= (_){};
+        }
+        return gestureRecognizer;
       },
     ).toSet();
     _handlePointerEvent = handlePointerEvent;
@@ -654,6 +672,7 @@ mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
     _factoriesTypeSet(gestureRecognizers).length == gestureRecognizers.length,
     'There were multiple gesture recognizer factories for the same type, there must only be a single '
         'gesture recognizer factory for each gesture recognizer type.',);
+
     if (_factoryTypesSetEquals(gestureRecognizers, _gestureRecognizer?.gestureRecognizerFactories)) {
       return;
     }
