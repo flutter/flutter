@@ -1437,7 +1437,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
   /// Creates a [DropdownButton] widget that is a [FormField], wrapped in an
   /// [InputDecorator].
   ///
-  /// For a description of the `onSaved`, `validator`, or `autovalidate`
+  /// For a description of the `onSaved`, `validator`, or `autovalidateMode`
   /// parameters, see [FormField]. For the rest (other than [decoration]), see
   /// [DropdownButton].
   ///
@@ -1469,6 +1469,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
     FormFieldSetter<T> onSaved,
     FormFieldValidator<T> validator,
     bool autovalidate = false,
+    AutovalidateMode autovalidateMode,
   }) : assert(items == null || items.isEmpty || value == null ||
               items.where((DropdownMenuItem<T> item) {
                 return item.value == value;
@@ -1484,13 +1485,21 @@ class DropdownButtonFormField<T> extends FormField<T> {
        assert(isExpanded != null),
        assert(itemHeight == null || itemHeight >= kMinInteractiveDimension),
        assert(autofocus != null),
+       assert(autovalidate != null),
+       assert(
+         autovalidate == false ||
+         autovalidate == true && autovalidateMode == null,
+         'autovalidate and autovalidateMode should not be used together.'
+       ),
        decoration = decoration ?? InputDecoration(focusColor: focusColor),
        super(
          key: key,
          onSaved: onSaved,
          initialValue: value,
          validator: validator,
-         autovalidate: autovalidate,
+         autovalidateMode: autovalidate
+             ? AutovalidateMode.always
+             : (autovalidateMode ?? AutovalidateMode.disabled),
          builder: (FormFieldState<T> field) {
            final _DropdownButtonFormFieldState<T> state = field as _DropdownButtonFormFieldState<T>;
            final InputDecoration decorationArg =  decoration ?? InputDecoration(focusColor: focusColor);
