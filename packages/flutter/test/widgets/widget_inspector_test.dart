@@ -543,7 +543,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
       final RenderObject childRenderObject = childKey.currentContext.findRenderObject();
 
-      // The tranform of the child with respect to the whole widget should be the sam
+      // The tranform of the child with respect to the whole widget should be the same
       // matrix applied to the widget inspector inspector.
       expect(childRenderObject.getTransformTo(null), mainTransform);
     });
@@ -568,7 +568,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       }
 
       // State type is private, hence using dynamic.
-      // The inspector state is static, so it's enough with reading one of them
+      // The inspector state is static, so it's enough with reading one of them.
       dynamic getInspectorState() => inspector1Key.currentState;
       String paragraphText(RenderParagraph paragraph) {
         final TextSpan textSpan = paragraph.text as TextSpan;

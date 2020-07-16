@@ -2595,7 +2595,7 @@ class _InspectorOverlayLayer extends Layer {
     final Canvas canvas = Canvas(recorder, state.overlayRect);
     final Size size = state.overlayRect.size;
     // The overlay rect could have an offset if the widget inspector does
-    // not take all the screen
+    // not take all the screen.
     canvas.translate(state.overlayRect.left, state.overlayRect.top);
 
     final Paint fillPaint = Paint()
