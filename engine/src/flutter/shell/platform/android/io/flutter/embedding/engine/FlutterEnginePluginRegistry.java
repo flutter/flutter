@@ -686,7 +686,7 @@ class FlutterEnginePluginRegistry
     boolean onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
       boolean didConsumeResult = false;
       for (io.flutter.plugin.common.PluginRegistry.ActivityResultListener listener :
-          onActivityResultListeners) {
+          new HashSet<>(onActivityResultListeners)) {
         didConsumeResult =
             listener.onActivityResult(requestCode, resultCode, data) || didConsumeResult;
       }
