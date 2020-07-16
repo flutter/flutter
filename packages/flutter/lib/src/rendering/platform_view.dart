@@ -672,7 +672,6 @@ mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
     _factoriesTypeSet(gestureRecognizers).length == gestureRecognizers.length,
     'There were multiple gesture recognizer factories for the same type, there must only be a single '
         'gesture recognizer factory for each gesture recognizer type.',);
-
     if (_factoryTypesSetEquals(gestureRecognizers, _gestureRecognizer?.gestureRecognizerFactories)) {
       return;
     }
