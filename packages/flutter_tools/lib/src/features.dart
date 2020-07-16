@@ -20,6 +20,8 @@ FeatureFlags get featureFlags => context.get<FeatureFlags>();
 /// use this class should extent instead of implement, so that new flags are
 /// picked up automatically.
 abstract class FeatureFlags {
+  /// const constructor so that subclasses can be const.
+  const FeatureFlags()
 
   /// Whether flutter desktop for linux is enabled.
   bool get isLinuxEnabled => false;
