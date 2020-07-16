@@ -89,10 +89,8 @@ task:
     CIRRUS_DOCKER_CONTEXT: "dev/"
     PATH: "$CIRRUS_WORKING_DIR/bin:$CIRRUS_WORKING_DIR/bin/cache/dart-sdk/bin:$PATH"
     ANDROID_SDK_ROOT: "/opt/android_sdk"
-  pub_cache:
-    folder: $HOME/.pub-cache
-    fingerprint_script: echo $OS; grep -r --include=pubspec.yaml 'PUBSPEC CHECKSUM' "$CIRRUS_WORKING_DIR"
-    reupload_on_changes: false
+  # It's actually slower to download the cache than to just populate it directly
+  #pub_cache:
   flutter_pkg_cache:
     folder: bin/cache/pkg
     fingerprint_script: echo $OS; cat bin/internal/*.version
@@ -102,6 +100,7 @@ task:
     fingerprint_script: echo $OS; cat bin/internal/*.version
     reupload_on_changes: false
   setup_script:
+    - pwd
     - date
     - git clean -xffd --exclude=bin/cache/
     - git fetch origin
@@ -175,7 +174,8 @@ task:
         CPU: 4
         MEMORY: 10G
       script:
-        - (cd packages/flutter_tools; pub get)
+        - cd packages/flutter_tools
+        - pub get
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: tool_tests-commands-linux
