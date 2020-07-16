@@ -203,8 +203,6 @@ class FlutterDevice {
     ReloadMethod reloadMethod,
     GetSkSLMethod getSkSLMethod,
     PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
-    bool disableDds = false,
-    bool ipv6 = false,
   }) {
     final Completer<void> completer = Completer<void>();
     StreamSubscription<void> subscription;
@@ -215,12 +213,7 @@ class FlutterDevice {
       globals.printTrace('Connecting to service protocol: $observatoryUri');
       isWaitingForVm = true;
       vm_service.VmService service;
-      if (!disableDds) {
-        await device.dds.startDartDevelopmentService(
-          observatoryUri,
-          ipv6,
-        );
-      }
+
       try {
         service = await connectToVmService(
           observatoryUri,
@@ -954,14 +947,12 @@ abstract class ResidentRunner {
     await stopEchoingDeviceLog();
     await preExit();
     await exitApp();
-    await shutdownDartDevelopmentService();
   }
 
   Future<void> detach() async {
     await shutdownDevtools();
     await stopEchoingDeviceLog();
     await preExit();
-    await shutdownDartDevelopmentService();
     appFinished();
   }
 
@@ -1128,14 +1119,6 @@ abstract class ResidentRunner {
     );
   }
 
-  Future<void> shutdownDartDevelopmentService() async {
-    await Future.wait<void>(
-      flutterDevices.map<Future<void>>(
-        (FlutterDevice device) => device.device?.dds?.shutdown()
-      ).where((Future<void> element) => element != null)
-    );
-  }
-
   @protected
   void cacheInitialDillCompilation() {
     if (_dillOutputPath != null) {
@@ -1189,11 +1172,9 @@ abstract class ResidentRunner {
         reloadSources: reloadSources,
         restart: restart,
         compileExpression: compileExpression,
-        disableDds: debuggingOptions.disableDds,
         reloadMethod: reloadMethod,
         getSkSLMethod: getSkSLMethod,
         printStructuredErrorLogMethod: printStructuredErrorLog,
-        ipv6: ipv6,
       );
       // This will wait for at least one flutter view before returning.
       final Status status = globals.logger.startProgress(
