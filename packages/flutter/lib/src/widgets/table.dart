@@ -87,8 +87,17 @@ class _TableElementRow {
 /// have one column, the [SliverList] or [Column] widgets will be more
 /// appropriate.
 ///
-/// Rows size vertically based on their contents. To control the column widths,
-/// use the [columnWidths] property.
+/// Rows size vertically based on their contents. To control the individual
+/// column widths, use the [columnWidths] property to specify a
+/// [TableColumnWidth] for each column. If [columnWidths] is null, or there is a
+/// null entry for a given column in [columnWidths], the table uses the
+/// [defaultColumnWidth] instead.
+///
+/// By default, [defaultColumnWidth] is a [FlexColumnWidth]. This
+/// [TableColumnWidth] divides up the remaining space in the horizontal axis to
+/// determine the column width. If wrapping a [Table] in a horizontal
+/// [ScrollView], choose a different [TableColumnWidth], such as
+/// [FixedColumnWidth].
 ///
 /// For more details about the table layout algorithm, see [RenderTable].
 /// To control the alignment of children, see [TableCell].
@@ -194,10 +203,16 @@ class Table extends RenderObjectWidget {
   /// The keys of this map (column indexes) are zero-based.
   final Map<int, TableColumnWidth> columnWidths;
 
-  /// How to determine with widths of columns that don't have an explicit sizing algorithm.
+  /// How to determine with widths of columns that don't have an explicit sizing
+  /// algorithm.
   ///
   /// Specifically, the [defaultColumnWidth] is used for column `i` if
-  /// `columnWidths[i]` is null.
+  /// `columnWidths[i]` is null. Defaults to [FlexColumnWidth], which will
+  /// divide the remaining horizontal space up evenly between columns of the
+  /// same type [TableColumnWidth].
+  ///
+  /// A [Table] in a horizontal [ScrollView] must use a [FixedColumnWidth], or
+  /// an [IntrinsicColumnWidth] as the horizontal space is infinite.
   final TableColumnWidth defaultColumnWidth;
 
   /// The direction in which the columns are ordered.
