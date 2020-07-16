@@ -9,6 +9,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
@@ -638,9 +639,14 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
 mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
 
   /// How to behave during hit testing.
-  // The implicit setter is enough here as changing this value will just affect
-  // any newly arriving events there's nothing we need to invalidate.
-  PlatformViewHitTestBehavior hitTestBehavior;
+  // Changing _hitTestBehavior might affect which objects are considered hovered over.
+  set hitTestBehavior(PlatformViewHitTestBehavior value) {
+    if (value != _hitTestBehavior) {
+      _hitTestBehavior = value;
+      RendererBinding.instance.mouseTracker.schedulePostFrameCheck();
+    }
+  }
+  PlatformViewHitTestBehavior _hitTestBehavior;
 
   _HandlePointerEvent _handlePointerEvent;
 
@@ -666,15 +672,15 @@ mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
 
   @override
   bool hitTest(BoxHitTestResult result, { Offset position }) {
-    if (hitTestBehavior == PlatformViewHitTestBehavior.transparent || !size.contains(position)) {
+    if (_hitTestBehavior == PlatformViewHitTestBehavior.transparent || !size.contains(position)) {
       return false;
     }
     result.add(BoxHitTestEntry(this, position));
-    return hitTestBehavior == PlatformViewHitTestBehavior.opaque;
+    return _hitTestBehavior == PlatformViewHitTestBehavior.opaque;
   }
 
   @override
-  bool hitTestSelf(Offset position) => hitTestBehavior != PlatformViewHitTestBehavior.transparent;
+  bool hitTestSelf(Offset position) => _hitTestBehavior != PlatformViewHitTestBehavior.transparent;
 
   @override
   PointerEnterEventListener get onEnter => null;
