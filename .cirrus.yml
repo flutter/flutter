@@ -204,6 +204,7 @@ task:
       script:
         - (cd packages/flutter_tools; pub get)
         - (cd dev/bots; pub get)
+        - (cd dev/tools; pub get)
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: tool_coverage-linux # linux-only
