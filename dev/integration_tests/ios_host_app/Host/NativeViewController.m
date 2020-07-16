@@ -5,18 +5,16 @@
 #import "NativeViewController.h"
 
 @interface NativeViewController ()
-
+@property NSUInteger counter;
+@property UILabel* incrementLabel;
 @end
 
-@implementation NativeViewController {
-  int _counter;
-  UILabel* _incrementLabel;
-}
+@implementation NativeViewController
 
-- (instancetype)initWithDelegate:(id<NativeViewControllerDelegate>)delegate {
+- (instancetype)initWithDelegate:(nullable id<NativeViewControllerDelegate>)delegate {
   self = [super initWithNibName:nil bundle:nil];
   if (self) {
-    self.delegate = delegate;
+    _delegate = delegate;
   }
   return self;
 }
@@ -25,47 +23,43 @@
   return [self initWithDelegate:nil];
 }
 
--(instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
-   return [self initWithDelegate:nil];
+- (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
+  return [self initWithDelegate:nil];
 }
 
 - (void)viewDidLoad {
-    [super viewDidLoad];
-
-    self.title = @"Native iOS View";
-    self.view.backgroundColor = UIColor.lightGrayColor;
-    self.navigationItem.backBarButtonItem = [[UIBarButtonItem alloc]
-                                                initWithTitle:@"Back"
-                                                        style:UIBarButtonItemStylePlain
-                                                       target:nil
-                                                       action:nil];
-
-    _incrementLabel = [self addIncrementLabel];
-    UIStackView* footer = [self addFooter];
-
-    _incrementLabel.translatesAutoresizingMaskIntoConstraints = false;
-    footer.translatesAutoresizingMaskIntoConstraints = false;
-    UILayoutGuide* marginsGuide = self.view.layoutMarginsGuide;
-    NSMutableArray* array = [[NSMutableArray alloc] init];
-    [array addObject:[_incrementLabel.centerXAnchor
-                         constraintEqualToAnchor:self.view.centerXAnchor]];
-    [array addObject:[_incrementLabel.centerYAnchor
-                         constraintEqualToAnchor:self.view.centerYAnchor]];
-    [array addObject:[footer.centerXAnchor
-                         constraintEqualToAnchor:self.view.centerXAnchor]];
-    [array addObject:[footer.widthAnchor
-                         constraintEqualToAnchor:marginsGuide.widthAnchor]];
-    [array addObject:[footer.bottomAnchor
-                         constraintEqualToAnchor:marginsGuide.bottomAnchor]];
-
-    [NSLayoutConstraint activateConstraints:array];
-    [self updateIncrementLabel];
+  [super viewDidLoad];
+  
+  self.title = @"Native iOS View";
+  self.view.backgroundColor = UIColor.lightGrayColor;
+  self.navigationItem.backBarButtonItem = [[UIBarButtonItem alloc]
+                                           initWithTitle:@"Back"
+                                           style:UIBarButtonItemStylePlain
+                                           target:nil
+                                           action:nil];
+  
+  self.incrementLabel = [self addIncrementLabel];
+  UIStackView* footer = [self addFooter];
+  
+  self.incrementLabel.translatesAutoresizingMaskIntoConstraints = false;
+  footer.translatesAutoresizingMaskIntoConstraints = false;
+  UILayoutGuide* marginsGuide = self.view.layoutMarginsGuide;
+  NSArray<NSLayoutConstraint*>* constraints = @[
+    [self.incrementLabel.centerXAnchor constraintEqualToAnchor:self.view.centerXAnchor],
+    [self.incrementLabel.centerYAnchor constraintEqualToAnchor:self.view.centerYAnchor],
+    [footer.centerXAnchor constraintEqualToAnchor:self.view.centerXAnchor],
+    [footer.widthAnchor constraintEqualToAnchor:marginsGuide.widthAnchor],
+    [footer.bottomAnchor constraintEqualToAnchor:marginsGuide.bottomAnchor]
+  ];
+  
+  [NSLayoutConstraint activateConstraints:constraints];
+  [self updateIncrementLabel];
 }
 
 /// Adds a label to the view that will contain the counter text.
 ///
 /// - Returns: The new label.
--(UILabel*) addIncrementLabel {
+- (UILabel*)addIncrementLabel {
   UILabel* incrementLabel = [[UILabel alloc] init];
   incrementLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
   incrementLabel.textColor = UIColor.blackColor;
@@ -77,7 +71,7 @@
 /// Adds a horizontal stack to the view, anchored to the bottom.
 ///
 /// - Returns: The new stack.
--(UIStackView*) addFooter {
+- (UIStackView*)addFooter {
   UILabel* mainLabel = [self createMainLabel];
   UIButton* incrementButton = [self createIncrementButton];
   UIStackView* stackView = [[UIStackView alloc] initWithFrame:self.view.frame];
@@ -92,7 +86,7 @@
 /// Creates a label identifying this view.  Does not add it to the view.
 ///
 /// - Returns: The new label.
--(UILabel*) createMainLabel {
+- (UILabel*)createMainLabel {
   UILabel* mainLabel = [[UILabel alloc] init];
   mainLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleTitle1];
   mainLabel.textColor = UIColor.blackColor;
@@ -103,7 +97,7 @@
 /// Creates a button that will increment a counter.  Does not add it to the view.
 ///
 /// - Returns: The new button.
--(UIButton*) createIncrementButton {
+- (UIButton*)createIncrementButton {
   UIButton *incrementButton = [UIButton buttonWithType:UIButtonTypeSystem];
   incrementButton.titleLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleTitle2];
   [incrementButton setTitle:@"Add" forState:UIControlStateNormal];
@@ -119,7 +113,7 @@
 
 /// Action triggered from tapping on the increment button.  Triggers a corresponding event in the
 /// delegate if one is available, otherwise increments our internal counter.
--(void) handleIncrement:(UIButton*)sender {
+- (void)handleIncrement:(UIButton*)sender {
   if (self.delegate) {
     [self.delegate didTapIncrementButton];
   } else {
@@ -128,16 +122,16 @@
 }
 
 /// Updates the increment label text to match the increment counter.
--(void) updateIncrementLabel {
-  _incrementLabel.text = [NSString
-      stringWithFormat:@"%@ tapped %d %@.",
-                       self.delegate == nil ? @"Button" : @"Flutter button",
-                       _counter, _counter == 1 ? @"time" : @"times"];
+- (void)updateIncrementLabel {
+  self.incrementLabel.text = [NSString
+                              stringWithFormat:@"%@ tapped %lu %@.",
+                              self.delegate == nil ? @"Button" : @"Flutter button",
+                              self.counter, self.counter == 1 ? @"time" : @"times"];
 }
 
 /// Increments our internal counter and updates the view.
--(void) didReceiveIncrement {
-  _counter += 1;
+- (void)didReceiveIncrement {
+  self.counter += 1;
   [self updateIncrementLabel];
 }
 

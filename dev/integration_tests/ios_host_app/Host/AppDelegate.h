@@ -2,12 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#import <UIKit/UIKit.h>
-#import <Flutter/Flutter.h>
+@import UIKit;
+@import Flutter;
+
+NS_ASSUME_NONNULL_BEGIN
 
 @interface AppDelegate : FlutterAppDelegate
 
-@property(nonatomic, strong) FlutterEngine* engine;
-@property(nonatomic, strong) FlutterBasicMessageChannel* reloadMessageChannel;
+@property(readonly, nullable) FlutterEngine* engine;
+@property(readonly, nullable) FlutterBasicMessageChannel* reloadMessageChannel;
 
 @end
+
+NS_ASSUME_NONNULL_END

@@ -6,43 +6,31 @@
 #import "MainViewController.h"
 
 @interface AppDelegate ()
-
+@property(readwrite) FlutterEngine* engine;
+@property(readwrite) FlutterBasicMessageChannel* reloadMessageChannel;
+@property(nullable) MainViewController* mainViewController;
+@property(nullable) UINavigationController* navigationController;
 @end
 
-static NSString *_kReloadChannelName = @"reload";
+@implementation AppDelegate
 
-@implementation AppDelegate {
-  MainViewController *_mainViewController;
-  UINavigationController *_navigationController;
-  FlutterEngine *_engine;
-  FlutterBasicMessageChannel *_reloadMessageChannel;
-}
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(nullable NSDictionary<UIApplicationLaunchOptionsKey, id> *)launchOptions {
+  self.window = [[UIWindow alloc] initWithFrame:UIScreen.mainScreen.bounds];
+  
+  self.mainViewController = [[MainViewController alloc] init];
+  self.navigationController = [[UINavigationController alloc]
+                               initWithRootViewController:_mainViewController];
 
-- (FlutterEngine *)engine {
-  return _engine;
-}
+  self.navigationController.navigationBar.translucent = NO;
 
-- (FlutterBasicMessageChannel *)reloadMessabeChannel {
-  return _reloadMessageChannel;
-}
-
-- (BOOL)application:(UIApplication *)application
-    didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-  self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-
-  _mainViewController = [[MainViewController alloc] init];
-  _navigationController = [[UINavigationController alloc]
-      initWithRootViewController:_mainViewController];
-
-  _navigationController.navigationBar.translucent = NO;
-
-  _engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
-  [_engine runWithEntrypoint:nil];
-
-  _reloadMessageChannel = [[FlutterBasicMessageChannel alloc]
-         initWithName:_kReloadChannelName
-      binaryMessenger:_engine.binaryMessenger
-                codec:[FlutterStringCodec sharedInstance]];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
+  self.engine = engine;
+  [engine runWithEntrypoint:nil];
+  
+  self.reloadMessageChannel = [[FlutterBasicMessageChannel alloc]
+                               initWithName:@"reload"
+                               binaryMessenger:engine.binaryMessenger
+                               codec:[FlutterStringCodec sharedInstance]];
 
   self.window.rootViewController = _navigationController;
   [self.window makeKeyAndVisible];

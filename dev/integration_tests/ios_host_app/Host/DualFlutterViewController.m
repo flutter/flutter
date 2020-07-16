@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#import <Flutter/Flutter.h>
+@import Flutter;
 
 #import "DualFlutterViewController.h"
 
 @interface DualFlutterViewController ()
-
+@property (readwrite) FlutterViewController* topFlutterViewController;
+@property (readwrite) FlutterViewController* bottomFlutterViewController;
 @end
 
 @implementation DualFlutterViewController
@@ -16,10 +17,10 @@
   [super viewDidLoad];
   self.title = @"Dual Flutter Views";
   self.navigationItem.backBarButtonItem = [[UIBarButtonItem alloc]
-                                              initWithTitle:@"Back"
-                                                      style:UIBarButtonItemStylePlain
-                                                     target:nil
-                                                     action:nil];
+                                           initWithTitle:@"Back"
+                                           style:UIBarButtonItemStylePlain
+                                           target:nil
+                                           action:nil];
 
   UIStackView* stackView = [[UIStackView alloc] initWithFrame:self.view.frame];
   stackView.axis = UILayoutConstraintAxisVertical;
@@ -28,18 +29,18 @@
   stackView.layoutMarginsRelativeArrangement = YES;
   [self.view addSubview:stackView];
 
-  _topFlutterViewController = [[FlutterViewController alloc] init];
-  _bottomFlutterViewController= [[FlutterViewController alloc] init];
+  self.topFlutterViewController = [[FlutterViewController alloc] init];
+  self.bottomFlutterViewController= [[FlutterViewController alloc] init];
 
-  [_topFlutterViewController setInitialRoute:@"marquee_green"];
+  [self.topFlutterViewController setInitialRoute:@"marquee_green"];
   [self addChildViewController:_topFlutterViewController];
   [stackView addArrangedSubview:_topFlutterViewController.view];
-  [_topFlutterViewController didMoveToParentViewController:self];
+  [self.topFlutterViewController didMoveToParentViewController:self];
 
-  [_bottomFlutterViewController setInitialRoute:@"marquee_purple"];
+  [self.bottomFlutterViewController setInitialRoute:@"marquee_purple"];
   [self addChildViewController:_bottomFlutterViewController];
   [stackView addArrangedSubview:_bottomFlutterViewController.view];
-  [_bottomFlutterViewController didMoveToParentViewController:self];
+  [self.bottomFlutterViewController didMoveToParentViewController:self];
 }
 
 @end

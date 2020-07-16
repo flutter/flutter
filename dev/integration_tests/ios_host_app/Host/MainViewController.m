@@ -11,13 +11,12 @@
 #import "NativeViewController.h"
 
 @interface MainViewController ()
-
+@property UIStackView *stackView;
+@property(readonly) FlutterEngine *engine;
+@property(readonly) FlutterBasicMessageChannel *reloadMessageChannel;
 @end
 
-
-@implementation MainViewController {
-  UIStackView *_stackView;
-}
+@implementation MainViewController
 
 - (void)viewDidLoad {
   [super viewDidLoad];
@@ -26,15 +25,15 @@
   self.title = @"Flutter iOS Demos Home";
   self.view.backgroundColor = UIColor.whiteColor;
 
-  _stackView = [[UIStackView alloc] initWithFrame:self.view.frame];
-  _stackView.axis = UILayoutConstraintAxisVertical;
-  _stackView.distribution = UIStackViewDistributionEqualSpacing;
-  _stackView.alignment = UIStackViewAlignmentCenter;
-  _stackView.autoresizingMask =
-      UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-  _stackView.layoutMargins = UIEdgeInsetsMake(0, 0, 50, 0);
-  _stackView.layoutMarginsRelativeArrangement = YES;
-  [self.view addSubview:_stackView];
+  UIStackView *stackView = [[UIStackView alloc] initWithFrame:self.view.frame];
+  self.stackView = stackView;
+  stackView.axis = UILayoutConstraintAxisVertical;
+  stackView.distribution = UIStackViewDistributionEqualSpacing;
+  stackView.alignment = UIStackViewAlignmentCenter;
+  stackView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+  stackView.layoutMargins = UIEdgeInsetsMake(0, 0, 50, 0);
+  stackView.layoutMarginsRelativeArrangement = YES;
+  [self.view addSubview:self.stackView];
 
   [self addButton:@"Native iOS View" action:@selector(showNative)];
   [self addButton:@"Full Screen (Cold)" action:@selector(showFullScreenCold)];
@@ -53,61 +52,54 @@
 }
 
 - (void)showDualView {
-  DualFlutterViewController *dualViewController =
-      [[DualFlutterViewController alloc] init];
+  DualFlutterViewController *dualViewController = [[DualFlutterViewController alloc] init];
   [self.navigationController pushViewController:dualViewController
                                        animated:YES];
 }
 
 - (void)showHybridView {
-  HybridViewController *hybridViewController =
-      [[HybridViewController alloc] init];
+  HybridViewController *hybridViewController = [[HybridViewController alloc] init];
   [self.navigationController pushViewController:hybridViewController
                                        animated:YES];
 }
 - (void)showNative {
-  NativeViewController *nativeViewController =
-      [[NativeViewController alloc] init];
+  NativeViewController *nativeViewController = [[NativeViewController alloc] init];
   [self.navigationController pushViewController:nativeViewController
                                        animated:YES];
 }
 
 - (void)showFullScreenCold {
-  FullScreenViewController *flutterViewController =
-      [[FullScreenViewController alloc] init];
+  FullScreenViewController *flutterViewController = [[FullScreenViewController alloc] init];
   [flutterViewController setInitialRoute:@"full"];
-  [[self reloadMessageChannel] sendMessage:@"full"];
-  [self.navigationController
-      pushViewController:flutterViewController
-                animated:NO]; // Animating this is janky because of
-                              // transitions with header on the native side.
-                              // It's especially bad with a cold engine.
+  [self.reloadMessageChannel sendMessage:@"full"];
+
+  // Animating this is janky because of transitions with header on the native side.
+  // It's especially bad with a cold engine.
+  [self.navigationController pushViewController:flutterViewController animated:NO];
 }
 
 - (void)showFullScreenWarm {
-  [[self engine].navigationChannel invokeMethod:@"setInitialRoute"
-                                      arguments:@"full"];
-  [[self reloadMessageChannel] sendMessage:@"full"];
+  [self.engine.navigationChannel invokeMethod:@"setInitialRoute"
+                                    arguments:@"full"];
+  [self.reloadMessageChannel sendMessage:@"full"];
 
   FullScreenViewController *flutterViewController =
-      [[FullScreenViewController alloc] initWithEngine:[self engine]
-                                               nibName:nil
-                                                bundle:nil];
-  [self.navigationController
-      pushViewController:flutterViewController
-                animated:NO]; // Animating this is problematic.
+  [[FullScreenViewController alloc] initWithEngine:self.engine
+                                           nibName:nil
+                                            bundle:nil];
+  // Animating this is problematic.
+  [self.navigationController pushViewController:flutterViewController animated:NO];
 }
 
 - (void)showFlutterViewWarm {
-  [[self engine].navigationChannel invokeMethod:@"setInitialRoute"
-                                      arguments:@"/"];
-  [[self reloadMessageChannel] sendMessage:@"/"];
-
+  [self.engine.navigationChannel invokeMethod:@"setInitialRoute"
+                                    arguments:@"/"];
+  [self.reloadMessageChannel sendMessage:@"/"];
 
   FlutterViewController *flutterViewController =
-      [[FlutterViewController alloc] initWithEngine:[self engine]
-                                            nibName:nil
-                                             bundle:nil];
+  [[FlutterViewController alloc] initWithEngine:self.engine
+                                        nibName:nil
+                                         bundle:nil];
   [self.navigationController pushViewController:flutterViewController
                                        animated:YES];
 }
@@ -115,10 +107,8 @@
 - (void)addButton:(NSString *)title action:(SEL)action {
   UIButton *button = [UIButton buttonWithType:UIButtonTypeSystem];
   [button setTitle:title forState:UIControlStateNormal];
-  [button addTarget:self
-                action:action
-      forControlEvents:UIControlEventTouchUpInside];
-  [_stackView addArrangedSubview:button];
+  [button addTarget:self action:action forControlEvents:UIControlEventTouchUpInside];
+  [self.stackView addArrangedSubview:button];
 }
 
 @end

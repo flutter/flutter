@@ -5,19 +5,18 @@
 #import "FullScreenViewController.h"
 
 @interface FullScreenViewController ()
-
 @end
 
 @implementation FullScreenViewController
 
--(void)viewWillAppear:(BOOL)animated {
+- (void)viewWillAppear:(BOOL)animated {
   [super viewWillAppear:animated];
   self.title = @"Full Screen Flutter";
   self.navigationController.navigationBarHidden = YES;
   self.navigationController.hidesBarsOnSwipe = YES;
 }
 
--(void)viewWillDisappear:(BOOL)animated {
+- (void)viewWillDisappear:(BOOL)animated {
   [super viewWillDisappear:animated];
   self.navigationController.navigationBarHidden = NO;
   self.navigationController.hidesBarsOnSwipe = NO;
@@ -28,11 +27,11 @@
     // just going back to the navigation controller.
     // If we needed Flutter to tell us when we could actually go away,
     // we'd need to communicate over a method channel with it.
-    [self.engine setViewController:nil];
+    self.engine.viewController = nil;
   }
 }
 
--(BOOL)prefersStatusBarHidden {
+- (BOOL)prefersStatusBarHidden {
   return true;
 }
 

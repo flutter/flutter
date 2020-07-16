@@ -2,21 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#import <Flutter/Flutter.h>
+@import Flutter;
 
 #import "AppDelegate.h"
 #import "HybridViewController.h"
 
 @interface HybridViewController ()
-
+@property FlutterBasicMessageChannel* messageChannel;
+@property(readonly) FlutterEngine *engine;
+@property(readonly) FlutterBasicMessageChannel *reloadMessageChannel;
+@property FlutterViewController* flutterViewController;
 @end
 
-static NSString *_kChannel = @"increment";
-static NSString *_kPing = @"ping";
-
-@implementation HybridViewController {
-  FlutterBasicMessageChannel *_messageChannel;
-}
+@implementation HybridViewController
 
 - (FlutterEngine *)engine {
   return [(AppDelegate *)[[UIApplication sharedApplication] delegate] engine];
@@ -37,40 +35,40 @@ static NSString *_kPing = @"ping";
   stackView.layoutMarginsRelativeArrangement = YES;
   [self.view addSubview:stackView];
   self.navigationItem.backBarButtonItem = [[UIBarButtonItem alloc]
-                                              initWithTitle:@"Back"
-                                                      style:UIBarButtonItemStylePlain
-                                                     target:nil
-                                                     action:nil];
+                                           initWithTitle:@"Back"
+                                           style:UIBarButtonItemStylePlain
+                                           target:nil
+                                           action:nil];
 
   NativeViewController *nativeViewController =
-      [[NativeViewController alloc] initWithDelegate:self];
+  [[NativeViewController alloc] initWithDelegate:self];
   [self addChildViewController:nativeViewController];
   [stackView addArrangedSubview:nativeViewController.view];
   [nativeViewController didMoveToParentViewController:self];
 
-  _flutterViewController =
-      [[FlutterViewController alloc] initWithEngine:[self engine]
-                                            nibName:nil
-                                             bundle:nil];
-  [[self reloadMessageChannel] sendMessage:@"hybrid"];
+  self.flutterViewController =
+  [[FlutterViewController alloc] initWithEngine:self.engine
+                                        nibName:nil
+                                         bundle:nil];
+  [self.reloadMessageChannel sendMessage:@"hybrid"];
 
-  _messageChannel = [[FlutterBasicMessageChannel alloc]
-         initWithName:_kChannel
-      binaryMessenger:_flutterViewController.binaryMessenger
-                codec:[FlutterStringCodec sharedInstance]];
-  [self addChildViewController:_flutterViewController];
-  [stackView addArrangedSubview:_flutterViewController.view];
-  [_flutterViewController didMoveToParentViewController:self];
-
+  self.messageChannel = [[FlutterBasicMessageChannel alloc]
+                         initWithName:@"increment"
+                         binaryMessenger:self.flutterViewController.binaryMessenger
+                         codec:[FlutterStringCodec sharedInstance]];
+  [self addChildViewController:self.flutterViewController];
+  [stackView addArrangedSubview:self.flutterViewController.view];
+  [self.flutterViewController didMoveToParentViewController:self];
+  
   __weak NativeViewController *weakNativeViewController = nativeViewController;
-  [_messageChannel setMessageHandler:^(id message, FlutterReply reply) {
+  [self.messageChannel setMessageHandler:^(id message, FlutterReply reply) {
     [weakNativeViewController didReceiveIncrement];
     reply(@"");
   }];
 }
 
 - (void)didTapIncrementButton {
-  [_messageChannel sendMessage:_kPing];
+  [self.messageChannel sendMessage:@"ping"];
 }
 
 @end

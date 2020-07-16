@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#import <UIKit/UIKit.h>
+@import UIKit;
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface DualFlutterViewController : UIViewController
 
-@property (readonly, strong, nonatomic) FlutterViewController* topFlutterViewController;
-@property (readonly, strong, nonatomic) FlutterViewController* bottomFlutterViewController;
+@property (readonly) FlutterViewController* topFlutterViewController;
+@property (readonly) FlutterViewController* bottomFlutterViewController;
 
 @end
 
