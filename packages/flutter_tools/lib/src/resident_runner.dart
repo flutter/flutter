@@ -959,17 +959,17 @@ abstract class ResidentRunner {
   Future<void> exit() async {
     _exited = true;
     await shutdownDevtools();
-    await shutdownDartDevelopmentService();
     await stopEchoingDeviceLog();
     await preExit();
     await exitApp();
+    await shutdownDartDevelopmentService();
   }
 
   Future<void> detach() async {
     await shutdownDevtools();
-    await shutdownDartDevelopmentService();
     await stopEchoingDeviceLog();
     await preExit();
+    await shutdownDartDevelopmentService();
     appFinished();
   }
 
