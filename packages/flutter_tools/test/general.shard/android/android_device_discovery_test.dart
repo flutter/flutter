@@ -163,6 +163,11 @@ Use the 'android' tool to install them:
 ''', devices: devices,
      diagnostics: diagnostics,
      timeoutConfiguration: const TimeoutConfiguration(),
+     processManager: FakeProcessManager.any(),
+     platform: FakePlatform(),
+     logger: BufferLogger.test(),
+     fileSystem: MemoryFileSystem.test(),
+     androidSdk: MockAndroidSdk(),
     );
 
     expect(devices, isEmpty);
