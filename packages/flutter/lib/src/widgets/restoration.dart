@@ -23,7 +23,7 @@ export 'package:flutter/services.dart' show RestorationBucket, RestorationId;
 /// descendant widgets should consider storing their own restoration data in a
 /// child bucket claimed with [RestorationBucket.claimChild] from the bucket
 /// provided by this scope.
-/// {@endtempalte}
+/// {@endtemplate}
 ///
 /// The bucket inserted into the widget tree by this scope has been claimed from
 /// the surrounding [RestorationScope] using the provided [restorationId]. If

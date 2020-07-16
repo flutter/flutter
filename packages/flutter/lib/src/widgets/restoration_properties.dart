@@ -101,7 +101,7 @@ class _RestorablePrimitiveValue<T> extends RestorableValue<T> {
 ///
 /// If no restoration data is available, [value] is initialized to the
 /// `defaultValue` given in the constructor.
-/// {@endtempalte}
+/// {@endtemplate}
 ///
 /// See also:
 ///
