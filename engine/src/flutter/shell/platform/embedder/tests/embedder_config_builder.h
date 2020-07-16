@@ -59,6 +59,8 @@ class EmbedderConfigBuilder {
 
   void SetSemanticsCallbackHooks();
 
+  void SetLocalizationCallbackHooks();
+
   void SetDartEntrypoint(std::string entrypoint);
 
   void AddCommandLineArgument(std::string arg);

@@ -5,6 +5,7 @@
 #define FML_USED_ON_EMBEDDER
 
 #include <string>
+#include <vector>
 
 #include "embedder.h"
 #include "embedder_engine.h"
@@ -2887,6 +2888,33 @@ TEST_F(EmbedderTest, CanUpdateLocales) {
       kSuccess);
 
   check_latch.Wait();
+}
+
+TEST_F(EmbedderTest, LocalizationCallbacksCalled) {
+  auto& context = GetEmbedderContext();
+  fml::AutoResetWaitableEvent latch;
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+  EmbedderConfigBuilder builder(context);
+  builder.SetSoftwareRendererConfig();
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  // Wait for the root isolate to launch.
+  latch.Wait();
+
+  flutter::Shell& shell = ToEmbedderEngine(engine.get())->GetShell();
+  std::vector<std::string> supported_locales;
+  supported_locales.push_back("es");
+  supported_locales.push_back("MX");
+  supported_locales.push_back("");
+  auto result = shell.GetPlatformView()->ComputePlatformResolvedLocales(
+      supported_locales);
+
+  ASSERT_EQ((*result).size(), supported_locales.size());  // 3
+  ASSERT_EQ((*result)[0], supported_locales[0]);
+  ASSERT_EQ((*result)[1], supported_locales[1]);
+  ASSERT_EQ((*result)[2], supported_locales[2]);
+
+  engine.reset();
 }
 
 TEST_F(EmbedderTest, CanQueryDartAOTMode) {
