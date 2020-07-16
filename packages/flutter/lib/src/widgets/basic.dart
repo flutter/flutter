@@ -4149,6 +4149,31 @@ class Flex extends MultiChildRenderObjectWidget {
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/widgets/row_fixed.png)
 ///
+/// Now suppose you want to render children in different direction, this can be
+/// done by setting [textDirection] property.
+/// [TextDirection.ltr] is the default rendering of children of row so the first
+/// child is the `start` of row i.e. left and and moving to right last child is
+/// the `end` of row i.e. right. But, if you want to render it in opposite
+/// direction i.e. right to left, then [textDirection] can be set to
+/// [TextDirection.rtl] and this will render children starting from right to
+/// left. So the first child will become `end` of row starting from right and
+/// moving to left the last child is the `start` of row.
+///
+/// ```dart
+/// Row(
+///   textDirection: TextDirection.rtl,
+///   children: <Widget>[
+///     const FlutterLogo(),
+///     const Expanded(
+///       child: Text("Flutter's hot reload helps you quickly and easily experiment, build UIs, add features, and fix bug faster. Experience sub-second reload times, without losing state, on emulators, simulators, and hardware for iOS and Android."),
+///     ),
+///     const Icon(Icons.sentiment_very_satisfied),
+///   ],
+/// )
+/// ```
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/widgets/row_textDirection.png)
+///
 /// ## Layout algorithm
 ///
 /// _This section describes how a [Row] is rendered by the framework._
