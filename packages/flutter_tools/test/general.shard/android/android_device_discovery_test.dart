@@ -27,7 +27,7 @@ void main() {
       ),
       processManager: FakeProcessManager.list(<FakeCommand>[]),
       fileSystem: MemoryFileSystem.test(),
-      platform: FakePlaatform(),
+      platform: FakePlatform(),
     );
 
     expect(await androidDevices.pollingGetDevices(), isEmpty);
