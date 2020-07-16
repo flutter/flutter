@@ -41,7 +41,7 @@ class SkiaFontCollection {
     final List<Uint8List> fontBuffers =
         _registeredFonts.map<Uint8List>((f) => f!.bytes).toList();
 
-    skFontMgr = canvasKit['SkFontMgr'].callMethod('FromData', fontBuffers);
+    skFontMgr = canvasKitJs.SkFontMgr.FromData(fontBuffers);
   }
 
   /// Loads all of the unloaded fonts in [_unloadedFonts] and adds them
@@ -178,7 +178,7 @@ class SkiaFontCollection {
         .then<ByteBuffer>((dynamic x) => x as ByteBuffer);
   }
 
-  js.JsObject? skFontMgr;
+  SkFontMgr? skFontMgr;
 }
 
 /// Represents a font that has been registered.

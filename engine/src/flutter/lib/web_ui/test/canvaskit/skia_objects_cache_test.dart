@@ -8,10 +8,25 @@ import 'dart:js';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
+import 'package:ui/ui.dart' as ui;
 import 'package:ui/src/engine.dart';
 
+import 'common.dart';
+
 void main() {
+  group('skia_objects_cache', () {
+    _tests();
+    // TODO: https://github.com/flutter/flutter/issues/60040
+  }, skip: isIosSafari);
+}
+
+void _tests() {
   SkiaObjects.maximumCacheSize = 4;
+
+  setUpAll(() async {
+    await ui.webOnlyInitializePlatform();
+  });
+
   group(ResurrectableSkiaObject, () {
     test('implements create, cache, delete, resurrect, delete lifecycle', () {
       int addPostFrameCallbackCount = 0;
@@ -30,7 +45,7 @@ void main() {
       expect(testObject.deleteCount, 0);
 
       // Check that the getter does not have side-effects
-      final JsObject skiaObject1 = testObject.skiaObject;
+      final JsObject skiaObject1 = testObject.legacySkiaObject;
       expect(skiaObject1, isNotNull);
       expect(SkiaObjects.resurrectableObjects.single, testObject);
       expect(testObject.createDefaultCount, 1);
@@ -46,7 +61,7 @@ void main() {
       expect(testObject.deleteCount, 1);
 
       // Trigger resurrect
-      final JsObject skiaObject2 = testObject.skiaObject;
+      final JsObject skiaObject2 = testObject.legacySkiaObject;
       expect(skiaObject2, isNotNull);
       expect(skiaObject2, isNot(same(skiaObject1)));
       expect(SkiaObjects.resurrectableObjects.single, testObject);
@@ -96,20 +111,12 @@ void main() {
 
   group(OneShotSkiaObject, () {
     test('is added to SkiaObjects cache', () {
-      int deleteCount = 0;
-      JsObject _makeJsObject() {
-        return JsObject.jsify({
-          'delete': allowInterop(() {
-            deleteCount++;
-          }),
-        });
-      }
-
-      OneShotSkiaObject object1 = OneShotSkiaObject(_makeJsObject());
+      TestOneShotSkiaObject.deleteCount = 0;
+      OneShotSkiaObject object1 = TestOneShotSkiaObject();
       expect(SkiaObjects.oneShotCache.length, 1);
       expect(SkiaObjects.oneShotCache.debugContains(object1), isTrue);
 
-      OneShotSkiaObject object2 = OneShotSkiaObject(_makeJsObject());
+      OneShotSkiaObject object2 = TestOneShotSkiaObject();
       expect(SkiaObjects.oneShotCache.length, 2);
       expect(SkiaObjects.oneShotCache.debugContains(object2), isTrue);
 
@@ -119,14 +126,14 @@ void main() {
       expect(SkiaObjects.oneShotCache.debugContains(object2), isTrue);
 
       // Add 3 more objects to the cache to overflow it.
-      OneShotSkiaObject(_makeJsObject());
-      OneShotSkiaObject(_makeJsObject());
-      OneShotSkiaObject(_makeJsObject());
+      TestOneShotSkiaObject();
+      TestOneShotSkiaObject();
+      TestOneShotSkiaObject();
       expect(SkiaObjects.oneShotCache.length, 5);
       expect(SkiaObjects.cachesToResize.length, 1);
 
       SkiaObjects.postFrameCleanUp();
-      expect(deleteCount, 2);
+      expect(TestOneShotSkiaObject.deleteCount, 2);
       expect(SkiaObjects.oneShotCache.length, 3);
       expect(SkiaObjects.oneShotCache.debugContains(object1), isFalse);
       expect(SkiaObjects.oneShotCache.debugContains(object2), isFalse);
@@ -134,7 +141,22 @@ void main() {
   });
 }
 
-class TestSkiaObject extends ResurrectableSkiaObject {
+class TestOneShotSkiaObject extends OneShotSkiaObject<SkPaint> {
+  static int deleteCount = 0;
+
+  TestOneShotSkiaObject() : super(SkPaint());
+
+  @override
+  JsObject get legacySkiaObject => debugJsObjectWrapper.wrapSkPaint(skiaObject);
+
+  @override
+  void delete() {
+    rawSkiaObject?.delete();
+    deleteCount++;
+  }
+}
+
+class TestSkiaObject extends ResurrectableSkiaObject<SkPaint> {
   int createDefaultCount = 0;
   int resurrectCount = 0;
   int deleteCount = 0;
@@ -143,25 +165,26 @@ class TestSkiaObject extends ResurrectableSkiaObject {
 
   TestSkiaObject({this.isExpensive = false});
 
-  JsObject _makeJsObject() {
-    return JsObject.jsify({
-      'delete': allowInterop(() {
-        deleteCount++;
-      }),
-    });
-  }
-
   @override
-  JsObject createDefault() {
+  SkPaint createDefault() {
     createDefaultCount++;
-    return _makeJsObject();
+    return SkPaint();
   }
 
   @override
-  JsObject resurrect() {
+  SkPaint resurrect() {
     resurrectCount++;
-    return _makeJsObject();
+    return SkPaint();
   }
+
+  @override
+  void delete() {
+    rawSkiaObject?.delete();
+    deleteCount++;
+  }
+
+  @override
+  JsObject get legacySkiaObject => debugJsObjectWrapper.wrapSkPaint(skiaObject);
 
   @override
   bool get isResurrectionExpensive => isExpensive;

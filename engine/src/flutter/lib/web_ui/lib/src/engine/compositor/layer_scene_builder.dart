@@ -185,8 +185,13 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     ui.Clip clipBehavior = ui.Clip.none,
     ui.EngineLayer? oldLayer,
   }) {
-    final PhysicalShapeLayer layer =
-        PhysicalShapeLayer(elevation, color, shadowColor, path, clipBehavior);
+    final PhysicalShapeLayer layer = PhysicalShapeLayer(
+      elevation,
+      color,
+      shadowColor,
+      path as CkPath,
+      clipBehavior,
+    );
     pushLayer(layer);
     return layer;
   }

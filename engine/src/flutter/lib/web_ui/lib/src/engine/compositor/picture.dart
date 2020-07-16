@@ -5,21 +5,36 @@
 part of engine;
 
 class CkPicture implements ui.Picture {
-  final SkiaObject skPicture;
+  final SkPicture _skPicture;
+  final SkiaObject skiaObject;
   final ui.Rect? cullRect;
 
-  CkPicture(this.skPicture, this.cullRect);
+  CkPicture(SkPicture picture, this.cullRect)
+    : _skPicture = picture,
+      skiaObject = SkPictureSkiaObject(picture);
 
   @override
   int get approximateBytesUsed => 0;
 
   @override
   void dispose() {
-    skPicture.delete();
+    skiaObject.delete();
   }
 
   @override
   Future<ui.Image> toImage(int width, int height) {
     throw UnsupportedError('Picture.toImage not yet implemented for CanvasKit and HTML');
+  }
+}
+
+class SkPictureSkiaObject extends OneShotSkiaObject<SkPicture> {
+  SkPictureSkiaObject(SkPicture picture) : super(picture);
+
+  @override
+  js.JsObject get legacySkiaObject => _jsObjectWrapper.wrapSkPicture(skiaObject);
+
+  @override
+  void delete() {
+    rawSkiaObject?.delete();
   }
 }

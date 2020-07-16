@@ -8,7 +8,7 @@ part of engine;
 ///
 /// This class is backed by a Skia object that must be explicitly
 /// deleted to avoid a memory leak. This is done by extending [SkiaObject].
-class CkPaint extends ResurrectableSkiaObject implements ui.Paint {
+class CkPaint extends ResurrectableSkiaObject<SkPaint> implements ui.Paint {
   CkPaint();
 
   static const ui.Color _defaultPaintColor = ui.Color(0xFF000000);
@@ -21,7 +21,7 @@ class CkPaint extends ResurrectableSkiaObject implements ui.Paint {
       return;
     }
     _blendMode = value;
-    _skPaint.setBlendMode(toSkBlendMode(value));
+    skiaObject.setBlendMode(toSkBlendMode(value));
   }
 
   ui.BlendMode _blendMode = ui.BlendMode.srcOver;
@@ -35,7 +35,7 @@ class CkPaint extends ResurrectableSkiaObject implements ui.Paint {
       return;
     }
     _style = value;
-    _skPaint.setStyle(toSkPaintStyle(value));
+    skiaObject.setStyle(toSkPaintStyle(value));
   }
 
   ui.PaintingStyle _style = ui.PaintingStyle.fill;
@@ -48,7 +48,7 @@ class CkPaint extends ResurrectableSkiaObject implements ui.Paint {
       return;
     }
     _strokeWidth = value;
-    _skPaint.setStrokeWidth(value);
+    skiaObject.setStrokeWidth(value);
   }
 
   double _strokeWidth = 0.0;
@@ -61,7 +61,7 @@ class CkPaint extends ResurrectableSkiaObject implements ui.Paint {
       return;
     }
     _strokeCap = value;
-    _skPaint.setStrokeCap(toSkStrokeCap(value));
+    skiaObject.setStrokeCap(toSkStrokeCap(value));
   }
 
   ui.StrokeCap _strokeCap = ui.StrokeCap.butt;
@@ -74,7 +74,7 @@ class CkPaint extends ResurrectableSkiaObject implements ui.Paint {
       return;
     }
     _strokeJoin = value;
-    _skPaint.setStrokeJoin(toSkStrokeJoin(value));
+    skiaObject.setStrokeJoin(toSkStrokeJoin(value));
   }
 
   ui.StrokeJoin _strokeJoin = ui.StrokeJoin.miter;
@@ -87,7 +87,7 @@ class CkPaint extends ResurrectableSkiaObject implements ui.Paint {
       return;
     }
     _isAntiAlias = value;
-    _skPaint.setAntiAlias(value);
+    skiaObject.setAntiAlias(value);
   }
 
   bool _isAntiAlias = true;
@@ -100,7 +100,7 @@ class CkPaint extends ResurrectableSkiaObject implements ui.Paint {
       return;
     }
     _color = value;
-    _skPaint.setColorInt(value.value);
+    skiaObject.setColorInt(value.value);
   }
 
   ui.Color _color = _defaultPaintColor;
@@ -123,7 +123,7 @@ class CkPaint extends ResurrectableSkiaObject implements ui.Paint {
       return;
     }
     _shader = value as EngineShader?;
-    _skPaint.setShader(_shader?.createSkiaShader());
+    skiaObject.setShader(_shader?.createSkiaShader());
   }
 
   EngineShader? _shader;
@@ -144,7 +144,7 @@ class CkPaint extends ResurrectableSkiaObject implements ui.Paint {
     } else {
       _ckMaskFilter = null;
     }
-    _skPaint.setMaskFilter(_ckMaskFilter?._skMaskFilter);
+    skiaObject.setMaskFilter(_ckMaskFilter?.skiaObject);
   }
 
   ui.MaskFilter? _maskFilter;
@@ -158,7 +158,7 @@ class CkPaint extends ResurrectableSkiaObject implements ui.Paint {
       return;
     }
     _filterQuality = value;
-    _skPaint.setFilterQuality(toSkFilterQuality(value));
+    skiaObject.setFilterQuality(toSkFilterQuality(value));
   }
 
   ui.FilterQuality _filterQuality = ui.FilterQuality.none;
@@ -173,7 +173,7 @@ class CkPaint extends ResurrectableSkiaObject implements ui.Paint {
     final EngineColorFilter? engineValue = value as EngineColorFilter?;
     _colorFilter = engineValue;
     _ckColorFilter = engineValue?._toCkColorFilter();
-    _skPaint.setColorFilter(_ckColorFilter?._skColorFilter);
+    skiaObject.setColorFilter(_ckColorFilter?.skiaObject);
   }
 
   EngineColorFilter? _colorFilter;
@@ -187,7 +187,7 @@ class CkPaint extends ResurrectableSkiaObject implements ui.Paint {
       return;
     }
     _strokeMiterLimit = value;
-    _skPaint.setStrokeMiter(value);
+    skiaObject.setStrokeMiter(value);
   }
 
   double _strokeMiterLimit = 0.0;
@@ -200,34 +200,40 @@ class CkPaint extends ResurrectableSkiaObject implements ui.Paint {
       return;
     }
     _imageFilter = value as CkImageFilter?;
-    _skPaint.setImageFilter(_imageFilter?._skImageFilter);
+    skiaObject.setImageFilter(_imageFilter?.skiaObject);
   }
 
   CkImageFilter? _imageFilter;
 
-  late SkPaint _skPaint;
-
   @override
-  js.JsObject createDefault() {
-    _skPaint = SkPaint();
-    _skPaint.setAntiAlias(_isAntiAlias);
-    _skPaint.setColorInt(_color.value);
-    return _jsObjectWrapper.wrapSkPaint(_skPaint);
+  SkPaint createDefault() {
+    final SkPaint paint = SkPaint();
+    paint.setAntiAlias(_isAntiAlias);
+    paint.setColorInt(_color.value);
+    return paint;
   }
 
   @override
-  js.JsObject resurrect() {
-    _skPaint = SkPaint();
-    _skPaint.setBlendMode(toSkBlendMode(_blendMode));
-    _skPaint.setStyle(toSkPaintStyle(_style));
-    _skPaint.setStrokeWidth(_strokeWidth);
-    _skPaint.setAntiAlias(_isAntiAlias);
-    _skPaint.setColorInt(_color.value);
-    _skPaint.setShader(_shader?.createSkiaShader());
-    _skPaint.setMaskFilter(_ckMaskFilter?._skMaskFilter);
-    _skPaint.setColorFilter(_ckColorFilter?._skColorFilter);
-    _skPaint.setImageFilter(_imageFilter?._skImageFilter);
-    _skPaint.setFilterQuality(toSkFilterQuality(_filterQuality));
-    return _jsObjectWrapper.wrapSkPaint(_skPaint);
+  SkPaint resurrect() {
+    final SkPaint paint = SkPaint();
+    paint.setBlendMode(toSkBlendMode(_blendMode));
+    paint.setStyle(toSkPaintStyle(_style));
+    paint.setStrokeWidth(_strokeWidth);
+    paint.setAntiAlias(_isAntiAlias);
+    paint.setColorInt(_color.value);
+    paint.setShader(_shader?.createSkiaShader());
+    paint.setMaskFilter(_ckMaskFilter?.skiaObject);
+    paint.setColorFilter(_ckColorFilter?.skiaObject);
+    paint.setImageFilter(_imageFilter?.skiaObject);
+    paint.setFilterQuality(toSkFilterQuality(_filterQuality));
+    return paint;
   }
+
+  @override
+  void delete() {
+    rawSkiaObject?.delete();
+  }
+
+  @override
+  js.JsObject get legacySkiaObject => _jsObjectWrapper.wrapSkPaint(skiaObject);
 }

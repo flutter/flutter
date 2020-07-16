@@ -15,22 +15,6 @@ class CanvasKitError extends Error {
   String toString() => 'CanvasKitError: $message';
 }
 
-/// Converts a list of [ui.Color] into the 2d array expected by CanvasKit.
-js.JsArray<Float32List> makeColorList(List<ui.Color> colors) {
-  var result = js.JsArray<Float32List>();
-  result.length = colors.length;
-  for (var i = 0; i < colors.length; i++) {
-    var color = colors[i];
-    var jsColor = Float32List(4);
-    jsColor[0] = color.red / 255.0;
-    jsColor[1] = color.green / 255.0;
-    jsColor[2] = color.blue / 255.0;
-    jsColor[3] = color.alpha / 255.0;
-    result[i] = jsColor;
-  }
-  return result;
-}
-
 js.JsObject _mallocColorArray() {
   return canvasKit
       .callMethod('Malloc', <dynamic>[js.context['Float32Array'], 4]);
@@ -107,20 +91,12 @@ ui.Rect fromSkRect(js.JsObject skRect) {
   );
 }
 
-ui.TextPosition fromPositionWithAffinity(js.JsObject positionWithAffinity) {
-  if (positionWithAffinity['affinity'] == canvasKit['Affinity']['Upstream']) {
-    return ui.TextPosition(
-      offset: positionWithAffinity['pos'],
-      affinity: ui.TextAffinity.upstream,
-    );
-  } else {
-    assert(positionWithAffinity['affinity'] ==
-        canvasKit['Affinity']['Downstream']);
-    return ui.TextPosition(
-      offset: positionWithAffinity['pos'],
-      affinity: ui.TextAffinity.downstream,
-    );
-  }
+ui.TextPosition fromPositionWithAffinity(SkTextPosition positionWithAffinity) {
+  final ui.TextAffinity affinity = ui.TextAffinity.values[positionWithAffinity.affinity.value];
+  return ui.TextPosition(
+    offset: positionWithAffinity.pos,
+    affinity: affinity,
+  );
 }
 
 js.JsArray<double> makeSkPoint(ui.Offset point) {
@@ -312,7 +288,7 @@ js.JsArray<double> makeSkiaColorStops(List<double>? colorStops) {
 }
 
 void drawSkShadow(
-  js.JsObject skCanvas,
+  SkCanvas skCanvas,
   CkPath path,
   ui.Color color,
   double elevation,
@@ -331,22 +307,25 @@ void drawSkShadow(
   ui.Color inAmbient = color.withAlpha((color.alpha * ambientAlpha).round());
   ui.Color inSpot = color.withAlpha((color.alpha * spotAlpha).round());
 
-  final js.JsObject inTonalColors = js.JsObject.jsify(<String, Float32List>{
-    'ambient': makeFreshSkColor(inAmbient),
-    'spot': makeFreshSkColor(inSpot),
-  });
+  final SkTonalColors inTonalColors = SkTonalColors(
+    ambient: makeFreshSkColor(inAmbient),
+    spot: makeFreshSkColor(inSpot),
+  );
 
-  final js.JsObject tonalColors =
-      canvasKit.callMethod('computeTonalColors', <js.JsObject>[inTonalColors]);
+  final SkTonalColors tonalColors =
+      canvasKitJs.computeTonalColors(inTonalColors);
 
-  skCanvas.callMethod('drawShadow', <dynamic>[
-    path._legacyJsObject,
-    js.JsArray<double>.from(<double>[0, 0, devicePixelRatio * elevation]),
-    js.JsArray<double>.from(
-        <double>[shadowX, shadowY, devicePixelRatio * kLightHeight]),
+  skCanvas.drawShadow(
+    path._skPath,
+    Float32List(3)
+      ..[2] = devicePixelRatio * elevation,
+    Float32List(3)
+      ..[0] = shadowX
+      ..[1] = shadowY
+      ..[2] = devicePixelRatio * kLightHeight,
     devicePixelRatio * kLightRadius,
-    tonalColors['ambient'],
-    tonalColors['spot'],
+    tonalColors.ambient,
+    tonalColors.spot,
     flags,
-  ]);
+  );
 }

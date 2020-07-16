@@ -8,6 +8,8 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
+import 'common.dart';
+
 void main() {
   group('Path Metrics', () {
     setUpAll(() async {
@@ -65,9 +67,5 @@ void main() {
       expect(() => iter1.current, throwsRangeError);
       expect(() => iter2.current, throwsRangeError);
     });
-  },
-      // This test failed on iOS Safari.
-      // TODO: https://github.com/flutter/flutter/issues/60040
-      skip: (browserEngine == BrowserEngine.webkit &&
-          operatingSystem == OperatingSystem.iOs));
+  }, skip: isIosSafari); // TODO: https://github.com/flutter/flutter/issues/60040
 }

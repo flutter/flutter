@@ -6,7 +6,7 @@
 part of engine;
 
 /// A [ui.ColorFilter] backed by Skia's [CkColorFilter].
-class CkColorFilter extends ResurrectableSkiaObject {
+class CkColorFilter extends ResurrectableSkiaObject<SkColorFilter> {
   final EngineColorFilter _engineFilter;
 
   CkColorFilter.mode(EngineColorFilter filter) : _engineFilter = filter;
@@ -19,9 +19,7 @@ class CkColorFilter extends ResurrectableSkiaObject {
   CkColorFilter.srgbToLinearGamma(EngineColorFilter filter)
       : _engineFilter = filter;
 
-  SkColorFilter? _skColorFilter;
-
-  js.JsObject _createSkiaObjectFromFilter() {
+  SkColorFilter _createSkiaObjectFromFilter() {
     SkColorFilter skColorFilter;
     switch (_engineFilter._type) {
       case EngineColorFilter._TypeMode:
@@ -48,17 +46,24 @@ class CkColorFilter extends ResurrectableSkiaObject {
         throw StateError(
             'Unknown mode ${_engineFilter._type} for ColorFilter.');
     }
-    _skColorFilter = skColorFilter;
-    return _jsObjectWrapper.wrapSkColorFilter(skColorFilter);
+    return skColorFilter;
   }
 
   @override
-  js.JsObject createDefault() {
+  js.JsObject get legacySkiaObject => _jsObjectWrapper.wrapSkColorFilter(skiaObject);
+
+  @override
+  SkColorFilter createDefault() {
     return _createSkiaObjectFromFilter();
   }
 
   @override
-  js.JsObject resurrect() {
+  SkColorFilter resurrect() {
     return _createSkiaObjectFromFilter();
+  }
+
+  @override
+  void delete() {
+    rawSkiaObject?.delete();
   }
 }
