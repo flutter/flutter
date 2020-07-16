@@ -4,12 +4,12 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/features.dart';
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../features.dart';
 import '../fuchsia/fuchsia_build.dart';
 import '../fuchsia/fuchsia_pm.dart';
 import '../globals.dart' as globals;
