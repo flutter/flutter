@@ -26,6 +26,7 @@ void main() {
         featureFlags: TestFeatureFlags(),
       ),
       processManager: FakeProcessManager.list(<FakeCommand>[]),
+      fileSystem: MemoryFileSystem.test(),
     );
 
     expect(await androidDevices.pollingGetDevices(), isEmpty);
@@ -48,6 +49,7 @@ void main() {
         featureFlags: TestFeatureFlags(),
       ),
       processManager: processManager,
+      fileSystem: MemoryFileSystem.test(),
     );
 
     expect(androidDevices.pollingGetDevices(),
@@ -69,6 +71,7 @@ void main() {
         featureFlags: TestFeatureFlags(),
       ),
       processManager: processManager,
+      fileSystem: MemoryFileSystem.test(),
     );
 
     expect(androidDevices.pollingGetDevices(),
@@ -86,6 +89,7 @@ void main() {
         ),
       ),
       processManager: FakeProcessManager.any(),
+      fileSystem: MemoryFileSystem.test(),
     );
 
     expect(androidDevices.supportsPlatform, false);
