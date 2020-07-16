@@ -25,7 +25,6 @@ void main() {
   });
 
   tearDown(() async {
-    await _flutter.stop();
     tryToDelete(tempDir);
   });
 
@@ -51,7 +50,6 @@ void main() {
       // Complete anyway in case we don't see the 'Another exception' line.
       completer.complete();
     });
-
     await _flutter.stop();
 
     expect(stdout.toString(), contains(_exceptionStart));
@@ -62,7 +60,6 @@ void main() {
 
     await _flutter.run(startPaused: true, withDebugger: true, structuredErrors: true, chrome: true);
     await _flutter.resume();
-
     final Completer<void> completer = Completer<void>();
     bool lineFound = false;
 
