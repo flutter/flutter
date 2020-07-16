@@ -231,7 +231,7 @@ void main() {
       }, overrides: <Type, Generator>{
         FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => FakeProcessManager.any(),
-        DeviceManager: () => MockDeviceManager(),
+        DeviceManager: () => mockDeviceManager,
         Stdio: () => MockStdio(),
       });
 
