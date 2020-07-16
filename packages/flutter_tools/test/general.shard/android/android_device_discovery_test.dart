@@ -27,6 +27,7 @@ void main() {
       ),
       processManager: FakeProcessManager.list(<FakeCommand>[]),
       fileSystem: MemoryFileSystem.test(),
+      platform: FakePlaatform(),
     );
 
     expect(await androidDevices.pollingGetDevices(), isEmpty);
@@ -50,6 +51,7 @@ void main() {
       ),
       processManager: processManager,
       fileSystem: MemoryFileSystem.test(),
+      platform: FakePlaatform(),
     );
 
     expect(androidDevices.pollingGetDevices(),
@@ -72,6 +74,7 @@ void main() {
       ),
       processManager: processManager,
       fileSystem: MemoryFileSystem.test(),
+      platform: FakePlaatform(),
     );
 
     expect(androidDevices.pollingGetDevices(),
@@ -90,6 +93,7 @@ void main() {
       ),
       processManager: FakeProcessManager.any(),
       fileSystem: MemoryFileSystem.test(),
+      platform: FakePlaatform(),
     );
 
     expect(androidDevices.supportsPlatform, false);
