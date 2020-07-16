@@ -861,6 +861,10 @@ typedef struct {
   const char* variant_code;
 } FlutterLocale;
 
+typedef const FlutterLocale* (*FlutterComputePlatformResolvedLocaleCallback)(
+    const FlutterLocale** /* supported_locales*/,
+    size_t /* Number of locales*/);
+
 typedef int64_t FlutterEngineDartPort;
 
 typedef enum {
@@ -1205,6 +1209,17 @@ typedef struct {
   ///
   /// Embedders can provide either snapshot buffers or aot_data, but not both.
   FlutterEngineAOTData aot_data;
+
+  /// A callback that computes the locale the platform would natively resolve
+  /// to.
+  ///
+  /// The input parameter is an array of FlutterLocales which represent the
+  /// locales supported by the app. One of the input supported locales should
+  /// be selected and returned to best match with the user/device's preferred
+  /// locale. The implementation should produce a result that as closely
+  /// matches what the platform would natively resolve to as possible.
+  FlutterComputePlatformResolvedLocaleCallback
+      compute_platform_resolved_locale_callback;
 } FlutterProjectArgs;
 
 //------------------------------------------------------------------------------

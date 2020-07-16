@@ -6,6 +6,9 @@
 #define RAPIDJSON_HAS_STDSTRING 1
 
 #include <iostream>
+#include <memory>
+#include <string>
+#include <vector>
 
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/closure.h"
@@ -910,6 +913,54 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
     };
   }
 
+  flutter::PlatformViewEmbedder::ComputePlatformResolvedLocaleCallback
+      compute_platform_resolved_locale_callback = nullptr;
+  if (SAFE_ACCESS(args, compute_platform_resolved_locale_callback, nullptr) !=
+      nullptr) {
+    compute_platform_resolved_locale_callback =
+        [ptr = args->compute_platform_resolved_locale_callback](
+            const std::vector<std::string>& supported_locales_data) {
+          const size_t number_of_strings_per_locale = 3;
+          size_t locale_count =
+              supported_locales_data.size() / number_of_strings_per_locale;
+          std::vector<FlutterLocale> supported_locales;
+          std::vector<const FlutterLocale*> supported_locales_ptr;
+          for (size_t i = 0; i < locale_count; ++i) {
+            supported_locales.push_back(
+                {.struct_size = sizeof(FlutterLocale),
+                 .language_code =
+                     supported_locales_data[i * number_of_strings_per_locale +
+                                            0]
+                         .c_str(),
+                 .country_code =
+                     supported_locales_data[i * number_of_strings_per_locale +
+                                            1]
+                         .c_str(),
+                 .script_code =
+                     supported_locales_data[i * number_of_strings_per_locale +
+                                            2]
+                         .c_str(),
+                 .variant_code = nullptr});
+            supported_locales_ptr.push_back(&supported_locales[i]);
+          }
+
+          const FlutterLocale* result =
+              ptr(supported_locales_ptr.data(), locale_count);
+
+          std::unique_ptr<std::vector<std::string>> out =
+              std::make_unique<std::vector<std::string>>();
+          if (result) {
+            std::string language_code(SAFE_ACCESS(result, language_code, ""));
+            if (language_code != "") {
+              out->push_back(language_code);
+              out->emplace_back(SAFE_ACCESS(result, country_code, ""));
+              out->emplace_back(SAFE_ACCESS(result, script_code, ""));
+            }
+          }
+          return out;
+        };
+  }
+
   auto external_view_embedder_result =
       InferExternalViewEmbedderFromArgs(SAFE_ACCESS(args, compositor, nullptr));
   if (external_view_embedder_result.second) {
@@ -919,10 +970,11 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
 
   flutter::PlatformViewEmbedder::PlatformDispatchTable platform_dispatch_table =
       {
-          update_semantics_nodes_callback,           //
-          update_semantics_custom_actions_callback,  //
-          platform_message_response_callback,        //
-          vsync_callback,                            //
+          update_semantics_nodes_callback,            //
+          update_semantics_custom_actions_callback,   //
+          platform_message_response_callback,         //
+          vsync_callback,                             //
+          compute_platform_resolved_locale_callback,  //
       };
 
   auto on_create_platform_view = InferPlatformViewCreationCallback(
@@ -1058,17 +1110,17 @@ FlutterEngineResult FlutterEngineRunInitialized(
 
   auto embedder_engine = reinterpret_cast<flutter::EmbedderEngine*>(engine);
 
-  // The engine must not already be running. Initialize may only be called once
-  // on an engine instance.
+  // The engine must not already be running. Initialize may only be called
+  // once on an engine instance.
   if (embedder_engine->IsValid()) {
     return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
   }
 
   // Step 1: Launch the shell.
   if (!embedder_engine->LaunchShell()) {
-    return LOG_EMBEDDER_ERROR(
-        kInvalidArguments,
-        "Could not launch the engine using supplied initialization arguments.");
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Could not launch the engine using supplied "
+                              "initialization arguments.");
   }
 
   // Step 2: Tell the platform view to initialize itself.
@@ -1193,8 +1245,8 @@ inline int64_t PointerDataButtonsForLegacyEvent(
   switch (change) {
     case flutter::PointerData::Change::kDown:
     case flutter::PointerData::Change::kMove:
-      // These kinds of change must have a non-zero `buttons`, otherwise gesture
-      // recognizers will ignore these events.
+      // These kinds of change must have a non-zero `buttons`, otherwise
+      // gesture recognizers will ignore these events.
       return flutter::kPointerButtonMousePrimary;
     case flutter::PointerData::Change::kCancel:
     case flutter::PointerData::Change::kAdd:
@@ -1236,16 +1288,17 @@ FlutterEngineResult FlutterEngineSendPointerEvent(
     pointer_data.physical_delta_x = 0.0;
     pointer_data.physical_delta_y = 0.0;
     pointer_data.device = SAFE_ACCESS(current, device, 0);
-    // Pointer identifier will be generated in pointer_data_packet_converter.cc.
+    // Pointer identifier will be generated in
+    // pointer_data_packet_converter.cc.
     pointer_data.pointer_identifier = 0;
     pointer_data.signal_kind = ToPointerDataSignalKind(
         SAFE_ACCESS(current, signal_kind, kFlutterPointerSignalKindNone));
     pointer_data.scroll_delta_x = SAFE_ACCESS(current, scroll_delta_x, 0.0);
     pointer_data.scroll_delta_y = SAFE_ACCESS(current, scroll_delta_y, 0.0);
     FlutterPointerDeviceKind device_kind = SAFE_ACCESS(current, device_kind, 0);
-    // For backwards compatibility with embedders written before the device kind
-    // and buttons were exposed, if the device kind is not set treat it as a
-    // mouse, with a synthesized primary button state based on the phase.
+    // For backwards compatibility with embedders written before the device
+    // kind and buttons were exposed, if the device kind is not set treat it
+    // as a mouse, with a synthesized primary button state based on the phase.
     if (device_kind == 0) {
       pointer_data.kind = flutter::PointerData::DeviceKind::kMouse;
       pointer_data.buttons =
@@ -1356,9 +1409,9 @@ FlutterEngineResult FlutterPlatformMessageCreateResponseHandle(
   auto handle = new FlutterPlatformMessageResponseHandle();
 
   handle->message = fml::MakeRefCounted<flutter::PlatformMessage>(
-      "",  // The channel is empty and unused as the response handle is going to
-           // referenced directly in the |FlutterEngineSendPlatformMessage| with
-           // the container message discarded.
+      "",  // The channel is empty and unused as the response handle is going
+           // to referenced directly in the |FlutterEngineSendPlatformMessage|
+           // with the container message discarded.
       fml::MakeRefCounted<flutter::EmbedderPlatformMessageResponse>(
           std::move(platform_task_runner), response_callback));
   *response_out = handle;
@@ -1791,14 +1844,14 @@ FlutterEngineResult FlutterEnginePostDartObject(
         peer->trampoline = callback;
         // This finalizer is set so that in case of failure of the
         // Dart_PostCObject below, we collect the peer. The embedder is still
-        // responsible for collecting the buffer in case of non-kSuccess returns
-        // from this method. This finalizer must be released in case of kSuccess
-        // returns from this method.
+        // responsible for collecting the buffer in case of non-kSuccess
+        // returns from this method. This finalizer must be released in case
+        // of kSuccess returns from this method.
         typed_data_finalizer.SetClosure([peer]() {
-          // This is the tiny object we use as the peer to the Dart call so that
-          // we can attach the a trampoline to the embedder supplied callback.
-          // In case of error, we need to collect this object lest we introduce
-          // a tiny leak.
+          // This is the tiny object we use as the peer to the Dart call so
+          // that we can attach the a trampoline to the embedder supplied
+          // callback. In case of error, we need to collect this object lest
+          // we introduce a tiny leak.
           delete peer;
         });
         dart_object.type = Dart_CObject_kExternalTypedData;

@@ -80,6 +80,7 @@ EmbedderConfigBuilder::EmbedderConfigBuilder(
     SetAssetsPath();
     SetIsolateCreateCallbackHook();
     SetSemanticsCallbackHooks();
+    SetLocalizationCallbackHooks();
     AddCommandLineArgument("--disable-observatory");
 
     if (preference == InitializationPreference::kSnapshotsInitialize ||
@@ -155,6 +156,11 @@ void EmbedderConfigBuilder::SetSemanticsCallbackHooks() {
       EmbedderTestContext::GetUpdateSemanticsNodeCallbackHook();
   project_args_.update_semantics_custom_action_callback =
       EmbedderTestContext::GetUpdateSemanticsCustomActionCallbackHook();
+}
+
+void EmbedderConfigBuilder::SetLocalizationCallbackHooks() {
+  project_args_.compute_platform_resolved_locale_callback =
+      EmbedderTestContext::GetComputePlatformResolvedLocaleCallbackHook();
 }
 
 void EmbedderConfigBuilder::SetDartEntrypoint(std::string entrypoint) {

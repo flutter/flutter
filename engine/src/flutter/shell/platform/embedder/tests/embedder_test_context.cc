@@ -160,6 +160,14 @@ EmbedderTestContext::GetUpdateSemanticsCustomActionCallbackHook() {
   };
 }
 
+FlutterComputePlatformResolvedLocaleCallback
+EmbedderTestContext::GetComputePlatformResolvedLocaleCallbackHook() {
+  return [](const FlutterLocale** supported_locales,
+            size_t length) -> const FlutterLocale* {
+    return supported_locales[0];
+  };
+}
+
 void EmbedderTestContext::SetupOpenGLSurface(SkISize surface_size) {
   FML_CHECK(!gl_surface_);
   gl_surface_ = std::make_unique<TestGLSurface>(surface_size);
