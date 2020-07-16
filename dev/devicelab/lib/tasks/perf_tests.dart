@@ -44,7 +44,7 @@ TaskFunction createUiKitViewScrollPerfTest() {
 TaskFunction createAndroidTextureScrollPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
-    'test_driver/android_texture_scroll_perf.dart',
+    'test_driver/android_view_scroll_perf.dart',
     'platform_views_scroll_perf',
     testDriver: 'test_driver/scroll_perf_test.dart',
   ).run;
@@ -52,7 +52,7 @@ TaskFunction createAndroidTextureScrollPerfTest() {
 
 TaskFunction createAndroidViewScrollPerfTest() {
   return PerfTest(
-    '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
+    '${flutterDirectory.path}/dev/benchmarks/platform_views_layout_hybrid_composition',
     'test_driver/android_view_scroll_perf.dart',
     'platform_views_scroll_perf',
     testDriver: 'test_driver/scroll_perf_test.dart',
