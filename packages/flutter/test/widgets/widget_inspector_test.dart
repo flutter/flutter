@@ -606,7 +606,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       );
 
       final InspectorSelection selection = getInspectorState().selection as InspectorSelection;
-      expect(selection.current, isNull);
+      // The selection is static, so it may be initialized from previous tests.
+      selection?.clear();
 
       await tester.tap(find.text('Child 1'));
       await tester.pump();
