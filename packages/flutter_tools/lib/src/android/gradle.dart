@@ -19,6 +19,7 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../convert.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -524,7 +525,16 @@ Future<void> buildGradleApp({
   );
 
   if (buildInfo.analyzeAotSize) {
-    SizeAnalyzer().analyzeApkSize(apk: apkFile, aotSizeJson: aotSizeJsonFile);
+    final Map<String, dynamic> apkAnalysisJson = SizeAnalyzer().analyzeApkSize(
+      apk: apkFile,
+      aotSizeJson: aotSizeJsonFile,
+    );
+    final File apkAnalysisFile = apkDirectory.childFile('apk-analysis.json');
+    apkAnalysisFile.writeAsStringSync(json.encode(apkAnalysisJson));
+    // TODO(peterdjlee); Output a clickable link that launches devtools and automatically loads the data from analyze.json.
+    globals.printStatus(
+      'A summary of your APK analysis can be found at ${globals.fs.path.relative(apkAnalysisFile.path)}',
+    );
   }
 }
 
