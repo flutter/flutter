@@ -11,7 +11,6 @@ import 'package:flutter/services.dart';
 class AndroidPlatformView extends StatelessWidget {
   /// Creates a platform view for Android, which is rendered as a
   /// native view.
-  /// `viewType` identifies the type of Android view to create.
   const AndroidPlatformView({
     Key key,
     @required this.viewType,
@@ -36,10 +35,12 @@ class AndroidPlatformView extends StatelessWidget {
         );
       },
       onCreatePlatformView: (PlatformViewCreationParams params) {
-        return PlatformViewsService.initAndroidView(
+        return PlatformViewsService.initSurfaceAndroidView(
           id: params.id,
-          viewType: params.viewType,
+          viewType: viewType,
           layoutDirection: TextDirection.ltr,
+          creationParams: null,
+          creationParamsCodec: const StandardMessageCodec(),
         )
           ..addOnPlatformViewCreatedListener(params.onPlatformViewCreated)
           ..create();
