@@ -466,7 +466,6 @@ class E2EPerfTest extends PerfTest {
         '-v',
         '--verbose-system-logs',
         '--profile',
-        '--trace-startup', // Enables "endless" timeline event buffering.
         '-t', testTarget,
         if (noBuild) '--no-build',
         if (testDriver != null)
@@ -480,7 +479,7 @@ class E2EPerfTest extends PerfTest {
         deviceId,
       ]);
       final Map<String, dynamic> data = json.decode(
-        file('$testDirectory/build/$timelineFileName.timeline_summary.json').readAsStringSync(),
+        file('$testDirectory/build/$timelineFileName.e2e_perf_summary.json').readAsStringSync(),
       ) as Map<String, dynamic>;
 
       if (data['frame_count'] as int < 5) {

@@ -20,6 +20,8 @@ const JsonEncoder _prettyEncoder = JsonEncoder.withIndent('  ');
 /// unset.
 String testOutputsDirectory = Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'] ?? 'build';
 
+String testOutputFilename = 'e2e';
+
 Future<void> main() async {
   final FlutterDriver driver = await FlutterDriver.connect();
   final String jsonResult =
@@ -31,7 +33,10 @@ Future<void> main() async {
     print('All tests passed.');
 
     await fs.directory(testOutputsDirectory).create(recursive: true);
-    final File file = fs.file(path.join(testOutputsDirectory, 'e2e.timeline_summary.json'));
+    final File file = fs.file(path.join(
+      testOutputsDirectory,
+      '$testOutputFilename.e2e_perf_summary.json'
+    ));
     await file.writeAsString(_encodeJson(
       response.data['performance'] as Map<String, dynamic>,
       true,
