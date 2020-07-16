@@ -12,7 +12,6 @@
 // # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 // # For terms of use, see http://www.unicode.org/terms_of_use.html
 
-
 part of engine;
 
 /// For an explanation of these enum values, see:
@@ -37,6 +36,7 @@ enum WordCharProperty {
   ExtendNumLet, // serialized as "P"
   ZWJ, // serialized as "Q"
   WSegSpace, // serialized as "R"
+  Unknown, // serialized as "S"
 }
 
 const String _packedWordBreakProperties =
@@ -48,4 +48,5 @@ UnicodePropertyLookup<WordCharProperty> wordLookup =
   _packedWordBreakProperties,
   231,
   WordCharProperty.values,
+  WordCharProperty.Unknown,
 );

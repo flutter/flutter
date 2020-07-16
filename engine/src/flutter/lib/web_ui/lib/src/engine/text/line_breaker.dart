@@ -27,39 +27,8 @@ class LineBreakResult {
   final LineBreakType type;
 }
 
-/// Normalizes properties that behave the same way into one common property.
-LineCharProperty _normalizeLineProperty(int? codePoint) {
-  if (codePoint == null) {
-    return LineCharProperty.AL;
-  }
-
-  final LineCharProperty? prop = lineLookup.findForChar(codePoint);
-  // NL behaves exactly the same as BK.
-  // See: https://www.unicode.org/reports/tr14/tr14-45.html#NL
-  if (prop == LineCharProperty.NL) {
-    return LineCharProperty.BK;
-  }
-  // In the absence of extra data (ICU data and language dictionaries), the
-  // following properties will be treated as AL (alphabetic): AI, SA, SG and XX.
-  // See LB1: https://www.unicode.org/reports/tr14/tr14-45.html#LB1
-  if (prop == null ||
-      prop == LineCharProperty.AI ||
-      prop == LineCharProperty.SA ||
-      prop == LineCharProperty.SG ||
-      prop == LineCharProperty.XX) {
-    return LineCharProperty.AL;
-  }
-
-  if (prop == LineCharProperty.CJ) {
-    return LineCharProperty.NS;
-  }
-
-  return prop;
-}
-
 bool _isHardBreak(LineCharProperty? prop) {
-  // No need to check for NL because it should've been normalized to BK already
-  // by [_normalizeLineProperty].
+  // No need to check for NL because it's already normalized to BK.
   return prop == LineCharProperty.LF || prop == LineCharProperty.BK;
 }
 
@@ -98,7 +67,7 @@ bool _hasEastAsianWidthFWH(int charCode) {
 /// * https://www.unicode.org/Public/11.0.0/ucd/LineBreak.txt
 LineBreakResult nextLineBreak(String text, int index) {
   int? codePoint = getCodePoint(text, index);
-  LineCharProperty curr = _normalizeLineProperty(codePoint);
+  LineCharProperty curr = lineLookup.findForChar(codePoint);
 
   LineCharProperty? prev1;
 
@@ -153,7 +122,7 @@ LineBreakResult nextLineBreak(String text, int index) {
     }
 
     codePoint = getCodePoint(text, index);
-    curr = _normalizeLineProperty(codePoint);
+    curr = lineLookup.findForChar(codePoint);
 
     isCurrZWJ = curr == LineCharProperty.ZWJ;
 
