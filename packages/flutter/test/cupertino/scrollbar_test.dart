@@ -5,6 +5,7 @@
 // @dart = 2.8
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -168,6 +169,15 @@ void main() {
   });
 
   testWidgets('Scrollbar changes thickness and radius when dragged', (WidgetTester tester) async {
+    const double thickness = 20;
+    const double thicknessWhileDragging = 40;
+    const double radius = 10;
+    const double radiusWhileDragging = 20;
+
+    const double inset = 3;
+    const double scaleFactor = 2;
+    final Size screenSize = tester.binding.window.physicalSize / tester.binding.window.devicePixelRatio;
+
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       Directionality(
@@ -176,12 +186,17 @@ void main() {
           data: const MediaQueryData(),
           child: PrimaryScrollController(
             controller: scrollController,
-            child: const CupertinoScrollbar(
-              thickness: 20,
-              thicknessWhileDragging: 40,
-              radius: Radius.circular(10),
-              radiusWhileDragging: Radius.circular(20),
-              child: SingleChildScrollView(child: SizedBox(width: 1600, height: 1200)),
+            child: CupertinoScrollbar(
+              thickness: thickness,
+              thicknessWhileDragging: thicknessWhileDragging,
+              radius: const Radius.circular(radius),
+              radiusWhileDragging: const Radius.circular(radiusWhileDragging),
+              child: SingleChildScrollView(
+                child: SizedBox(
+                  width: screenSize.width * scaleFactor,
+                  height: screenSize.height * scaleFactor,
+                ),
+              ),
             ),
           ),
         ),
@@ -206,15 +221,41 @@ void main() {
     final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(780.0, 50.0));
     await tester.pump(_kLongPressDuration);
     expect(find.byType(CupertinoScrollbar), paints..rrect(
-      rrect: RRect.fromRectAndRadius(const Rect.fromLTWH(777, 3, 20, 297), const Radius.circular(10)),
+      rrect: RRect.fromRectAndRadius(
+        Rect.fromLTWH(
+          screenSize.width - inset - thickness,
+          inset,
+          thickness,
+          (screenSize.height - 2 * inset) / scaleFactor,
+        ),
+        const Radius.circular(radius),
+      ),
+    ));
+    await tester.pump(_kScrollbarResizeDuration ~/ 2);
+    const double midpointThickness = (thickness + thicknessWhileDragging) / 2;
+    const double midpointRadius = (radius + radiusWhileDragging) / 2;
+    expect(find.byType(CupertinoScrollbar), paints..rrect(
+      rrect: RRect.fromRectAndRadius(
+        Rect.fromLTWH(
+          screenSize.width - inset - midpointThickness,
+          inset,
+          midpointThickness,
+          (screenSize.height - 2 * inset) / scaleFactor,
+        ),
+        const Radius.circular(midpointRadius),
+      ),
     ));
     await tester.pump(_kScrollbarResizeDuration ~/ 2);
     expect(find.byType(CupertinoScrollbar), paints..rrect(
-      rrect: RRect.fromRectAndRadius(const Rect.fromLTWH(767, 3, 30, 297), const Radius.circular(15)),
-    ));
-    await tester.pump(_kScrollbarResizeDuration ~/ 2);
-    expect(find.byType(CupertinoScrollbar), paints..rrect(
-      rrect: RRect.fromRectAndRadius(const Rect.fromLTWH(757, 3, 40, 297), const Radius.circular(20)),
+      rrect: RRect.fromRectAndRadius(
+        Rect.fromLTWH(
+          screenSize.width - inset - thicknessWhileDragging,
+          inset,
+          thicknessWhileDragging,
+          (screenSize.height - 2 * inset) / scaleFactor,
+        ),
+        const Radius.circular(radiusWhileDragging),
+      ),
     ));
 
     // Let the thumb fade out so all timers have resolved.
