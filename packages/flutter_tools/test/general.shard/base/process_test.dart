@@ -297,7 +297,6 @@ void main() {
       } on ProcessException catch (e) {
         expect(e, isA<ProcessException>());
         expect(e.message.contains(stderr), false);
-        //print(e.message);
       }
     });
 
