@@ -1,4 +1,4 @@
-Signature: 899b6139478da01a4386b5d7ff9474b0
+Signature: c926df598126892250c21245b2beab86
 
 UNUSED LICENSES:
 
@@ -1054,7 +1054,7 @@ FILE: ../../../third_party/skia/infra/bots/assets/valgrind/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/win_ninja/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/win_toolchain/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/xcode-11.4.1/VERSION
-FILE: ../../../third_party/skia/infra/bots/canary_g3_framework.isolate
+FILE: ../../../third_party/skia/infra/bots/canary.isolate
 FILE: ../../../third_party/skia/infra/bots/canvaskit.isolate
 FILE: ../../../third_party/skia/infra/bots/cfg.json
 FILE: ../../../third_party/skia/infra/bots/compile.isolate
@@ -5292,8 +5292,6 @@ FILE: ../../../third_party/skia/modules/skparagraph/gm/simple_gm.cpp
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGGeometryEffect.h
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGGeometryEffect.cpp
 FILE: ../../../third_party/skia/modules/skshaper/src/SkShaper_coretext.cpp
-FILE: ../../../third_party/skia/modules/skshaper/src/SkUnicode.h
-FILE: ../../../third_party/skia/modules/skshaper/src/SkUnicode_icu.cpp
 FILE: ../../../third_party/skia/samplecode/Sample3D.cpp
 FILE: ../../../third_party/skia/samplecode/SampleFitCubicToCircle.cpp
 FILE: ../../../third_party/skia/src/core/SkColorFilterPriv.h
@@ -6428,6 +6426,7 @@ FILE: ../../../third_party/skia/infra/bots/gen_tasks_logic/job_builder.go
 FILE: ../../../third_party/skia/infra/bots/gen_tasks_logic/nano_flags.go
 FILE: ../../../third_party/skia/infra/bots/gen_tasks_logic/schema.go
 FILE: ../../../third_party/skia/infra/bots/gen_tasks_logic/task_builder.go
+FILE: ../../../third_party/skia/infra/bots/task_drivers/canary/canary.go
 FILE: ../../../third_party/skia/infra/bots/task_drivers/fm_driver/fm_driver.go
 FILE: ../../../third_party/skia/infra/bots/task_drivers/perf_puppeteer_render_skps/perf_puppeteer_render_skps.go
 FILE: ../../../third_party/skia/infra/bots/task_drivers/perf_puppeteer_render_skps/perf_puppeteer_render_skps_test.go
