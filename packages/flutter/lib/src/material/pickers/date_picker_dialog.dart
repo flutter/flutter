@@ -14,9 +14,9 @@ import '../button_theme.dart';
 import '../color_scheme.dart';
 import '../debug.dart';
 import '../dialog.dart';
-import '../flat_button.dart';
 import '../icons.dart';
 import '../material_localizations.dart';
+import '../text_button.dart';
 import '../text_theme.dart';
 import '../theme.dart';
 
@@ -387,11 +387,11 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
       buttonTextTheme: ButtonTextTheme.primary,
       layoutBehavior: ButtonBarLayoutBehavior.constrained,
       children: <Widget>[
-        FlatButton(
+        TextButton(
           child: Text(widget.cancelText ?? localizations.cancelButtonLabel),
           onPressed: _handleCancel,
         ),
-        FlatButton(
+        TextButton(
           child: Text(widget.confirmText ?? localizations.okButtonLabel),
           onPressed: _handleOk,
         ),

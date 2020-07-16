@@ -18,11 +18,11 @@ import '../color_scheme.dart';
 import '../debug.dart';
 import '../dialog.dart';
 import '../dialog_theme.dart';
-import '../flat_button.dart';
 import '../icon_button.dart';
 import '../icons.dart';
 import '../material_localizations.dart';
 import '../scaffold.dart';
+import '../text_button.dart';
 import '../text_theme.dart';
 import '../theme.dart';
 
@@ -512,7 +512,7 @@ class _CalendarRangePickerDialog extends StatelessWidget {
             if (orientation == Orientation.landscape) entryModeIcon,
             ButtonTheme(
               minWidth: 64,
-              child: FlatButton(
+              child: TextButton(
                 onPressed: onConfirm,
                 child: Text(confirmText, style: saveButtonStyle),
               ),
@@ -659,11 +659,11 @@ class _InputDateRangePickerDialog extends StatelessWidget {
       buttonTextTheme: ButtonTextTheme.primary,
       layoutBehavior: ButtonBarLayoutBehavior.constrained,
       children: <Widget>[
-        FlatButton(
+        TextButton(
           child: Text(cancelText ?? localizations.cancelButtonLabel),
           onPressed: onCancel,
         ),
-        FlatButton(
+        TextButton(
           child: Text(confirmText ?? localizations.okButtonLabel),
           onPressed: onConfirm,
         ),
