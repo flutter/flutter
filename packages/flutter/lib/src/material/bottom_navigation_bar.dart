@@ -502,18 +502,16 @@ class _BottomNavigationTile extends StatelessWidget {
       );
     }
 
-    result = MergeSemantics(
-      child: Semantics(
-        selected: selected,
-        child: Stack(
-          children: <Widget>[
-            result,
-            Semantics(
-              container: true,
-              label: indexLabel,
-            ),
-          ],
-        ),
+    result = Semantics(
+      selected: selected,
+      container: true,
+      child: Stack(
+        children: <Widget>[
+          result,
+          Semantics(
+            label: indexLabel,
+          ),
+        ],
       ),
     );
 
