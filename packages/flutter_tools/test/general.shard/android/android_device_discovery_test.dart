@@ -51,7 +51,7 @@ void main() {
       ),
       processManager: processManager,
       fileSystem: MemoryFileSystem.test(),
-      platform: FakePlaatform(),
+      platform: FakePlatform(),
     );
 
     expect(androidDevices.pollingGetDevices(),
@@ -74,7 +74,7 @@ void main() {
       ),
       processManager: processManager,
       fileSystem: MemoryFileSystem.test(),
-      platform: FakePlaatform(),
+      platform: FakePlatform(),
     );
 
     expect(androidDevices.pollingGetDevices(),
@@ -93,7 +93,7 @@ void main() {
       ),
       processManager: FakeProcessManager.any(),
       fileSystem: MemoryFileSystem.test(),
-      platform: FakePlaatform(),
+      platform: FakePlatform(),
     );
 
     expect(androidDevices.supportsPlatform, false);
