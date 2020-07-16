@@ -18,41 +18,40 @@ class CkParagraphStyle implements ui.ParagraphStyle {
     ui.StrutStyle? strutStyle,
     String? ellipsis,
     ui.Locale? locale,
-  }) {
-    skParagraphStyle = toCkParagraphStyle(
-      textAlign,
-      textDirection,
-      maxLines,
-      fontFamily,
-      fontSize,
-      height,
-      textHeightBehavior,
-      fontWeight,
-      fontStyle,
-      ellipsis,
-    );
+  }) : skParagraphStyle = toSkParagraphStyle(
+    textAlign,
+    textDirection,
+    maxLines,
+    fontFamily,
+    fontSize,
+    height,
+    textHeightBehavior,
+    fontWeight,
+    fontStyle,
+    ellipsis,
+  ) {
     assert(skParagraphStyle != null);
     _textDirection = textDirection ?? ui.TextDirection.ltr;
     _fontFamily = fontFamily;
   }
 
-  js.JsObject? skParagraphStyle;
+  SkParagraphStyle skParagraphStyle;
   ui.TextDirection? _textDirection;
   String? _fontFamily;
 
-  static Map<String, dynamic> toCkTextStyle(
+  static SkTextStyleProperties toSkTextStyleProperties(
     String? fontFamily,
     double? fontSize,
     ui.FontWeight? fontWeight,
     ui.FontStyle? fontStyle,
   ) {
-    final Map<String, dynamic> skTextStyle = <String, dynamic>{};
+    final SkTextStyleProperties skTextStyle = SkTextStyleProperties();
     if (fontWeight != null || fontStyle != null) {
-      skTextStyle['fontStyle'] = toSkFontStyle(fontWeight, fontStyle);
+      skTextStyle.fontStyle = toSkFontStyle(fontWeight, fontStyle);
     }
 
     if (fontSize != null) {
-      skTextStyle['fontSize'] = fontSize;
+      skTextStyle.fontSize = fontSize;
     }
 
     if (fontFamily == null ||
@@ -60,14 +59,14 @@ class CkParagraphStyle implements ui.ParagraphStyle {
       fontFamily = 'Roboto';
     }
     if (skiaFontCollection.fontFamilyOverrides.containsKey(fontFamily)) {
-      fontFamily = skiaFontCollection.fontFamilyOverrides[fontFamily];
+      fontFamily = skiaFontCollection.fontFamilyOverrides[fontFamily]!;
     }
-    skTextStyle['fontFamilies'] = [fontFamily];
+    skTextStyle.fontFamilies = [fontFamily];
 
     return skTextStyle;
   }
 
-  static js.JsObject? toCkParagraphStyle(
+  static SkParagraphStyle toSkParagraphStyle(
     ui.TextAlign? textAlign,
     ui.TextDirection? textDirection,
     int? maxLines,
@@ -79,70 +78,43 @@ class CkParagraphStyle implements ui.ParagraphStyle {
     ui.FontStyle? fontStyle,
     String? ellipsis,
   ) {
-    final Map<String, dynamic> skParagraphStyle = <String, dynamic>{};
+    final SkParagraphStyleProperties properties = SkParagraphStyleProperties();
 
     if (textAlign != null) {
-      switch (textAlign) {
-        case ui.TextAlign.left:
-          skParagraphStyle['textAlign'] = canvasKit['TextAlign']['Left'];
-          break;
-        case ui.TextAlign.right:
-          skParagraphStyle['textAlign'] = canvasKit['TextAlign']['Right'];
-          break;
-        case ui.TextAlign.center:
-          skParagraphStyle['textAlign'] = canvasKit['TextAlign']['Center'];
-          break;
-        case ui.TextAlign.justify:
-          skParagraphStyle['textAlign'] = canvasKit['TextAlign']['Justify'];
-          break;
-        case ui.TextAlign.start:
-          skParagraphStyle['textAlign'] = canvasKit['TextAlign']['Start'];
-          break;
-        case ui.TextAlign.end:
-          skParagraphStyle['textAlign'] = canvasKit['TextAlign']['End'];
-          break;
-      }
+      properties.textAlign = toSkTextAlign(textAlign);
     }
 
     if (textDirection != null) {
-      switch (textDirection) {
-        case ui.TextDirection.ltr:
-          skParagraphStyle['textDirection'] = canvasKit['TextDirection']['LTR'];
-          break;
-        case ui.TextDirection.rtl:
-          skParagraphStyle['textDirection'] = canvasKit['TextDirection']['RTL'];
-          break;
-      }
+      properties.textDirection = toSkTextDirection(textDirection);
     }
 
     if (height != null) {
-      skParagraphStyle['heightMultiplier'] = height;
+      properties.heightMultiplier = height;
     }
 
     if (textHeightBehavior != null) {
-      skParagraphStyle['textHeightBehavior'] = textHeightBehavior.encode();
+      properties.textHeightBehavior = textHeightBehavior.encode();
     }
 
     if (maxLines != null) {
-      skParagraphStyle['maxLines'] = maxLines;
+      properties.maxLines = maxLines;
     }
 
     if (ellipsis != null) {
-      skParagraphStyle['ellipsis'] = ellipsis;
+      properties.ellipsis = ellipsis;
     }
 
-    skParagraphStyle['textStyle'] =
-        toCkTextStyle(fontFamily, fontSize, fontWeight, fontStyle);
+    properties.textStyle =
+        toSkTextStyleProperties(fontFamily, fontSize, fontWeight, fontStyle);
 
-    return canvasKit.callMethod(
-        'ParagraphStyle', <js.JsObject>[js.JsObject.jsify(skParagraphStyle)]);
+    return canvasKitJs.ParagraphStyle(properties);
   }
 }
 
 class CkTextStyle implements ui.TextStyle {
-  js.JsObject? skTextStyle;
+  SkTextStyle skTextStyle;
 
-  CkTextStyle({
+  factory CkTextStyle({
     ui.Color? color,
     ui.TextDecoration? decoration,
     ui.Color? decorationColor,
@@ -163,36 +135,36 @@ class CkTextStyle implements ui.TextStyle {
     List<ui.Shadow>? shadows,
     List<ui.FontFeature>? fontFeatures,
   }) {
-    final js.JsObject style = js.JsObject(js.context['Object']);
+    final SkTextStyleProperties properties = SkTextStyleProperties();
 
     if (background != null) {
-      style['backgroundColor'] = makeFreshSkColor(background.color);
+      properties.backgroundColor = makeFreshSkColor(background.color);
     }
 
     if (color != null) {
-      style['color'] = makeFreshSkColor(color);
+      properties.color = makeFreshSkColor(color);
     }
 
     if (decoration != null) {
-      int decorationValue = canvasKit['NoDecoration'];
+      int decorationValue = canvasKitJs.NoDecoration;
       if (decoration.contains(ui.TextDecoration.underline)) {
-        decorationValue |= canvasKit['UnderlineDecoration'];
+        decorationValue |= canvasKitJs.UnderlineDecoration;
       }
       if (decoration.contains(ui.TextDecoration.overline)) {
-        decorationValue |= canvasKit['OverlineDecoration'];
+        decorationValue |= canvasKitJs.OverlineDecoration;
       }
       if (decoration.contains(ui.TextDecoration.lineThrough)) {
-        decorationValue |= canvasKit['LineThroughDecoration'];
+        decorationValue |= canvasKitJs.LineThroughDecoration;
       }
-      style['decoration'] = decorationValue;
+      properties.decoration = decorationValue;
     }
 
     if (decorationThickness != null) {
-      style['decorationThickness'] = decorationThickness;
+      properties.decorationThickness = decorationThickness;
     }
 
     if (fontSize != null) {
-      style['fontSize'] = fontSize;
+      properties.fontSize = fontSize;
     }
 
     if (fontFamily == null ||
@@ -201,22 +173,22 @@ class CkTextStyle implements ui.TextStyle {
     }
 
     if (skiaFontCollection.fontFamilyOverrides.containsKey(fontFamily)) {
-      fontFamily = skiaFontCollection.fontFamilyOverrides[fontFamily];
+      fontFamily = skiaFontCollection.fontFamilyOverrides[fontFamily]!;
     }
-    List<String?> fontFamilies = <String?>[fontFamily];
+    List<String> fontFamilies = <String>[fontFamily];
     if (fontFamilyFallback != null &&
         !fontFamilyFallback.every((font) => fontFamily == font)) {
       fontFamilies.addAll(fontFamilyFallback);
     }
 
-    style['fontFamilies'] = js.JsArray.from(fontFamilies);
+    properties.fontFamilies = fontFamilies;
 
     if (fontWeight != null || fontStyle != null) {
-      style['fontStyle'] = toSkFontStyle(fontWeight, fontStyle);
+      properties.fontStyle = toSkFontStyle(fontWeight, fontStyle);
     }
 
     if (foreground != null) {
-      style['foregroundColor'] = makeFreshSkColor(foreground.color);
+      properties.foregroundColor = makeFreshSkColor(foreground.color);
     }
 
     // TODO(hterkelsen): Add support for
@@ -229,67 +201,32 @@ class CkTextStyle implements ui.TextStyle {
     //   - locale
     //   - shadows
     //   - fontFeatures
-    skTextStyle = canvasKit.callMethod('TextStyle', <js.JsObject>[style]);
-    assert(skTextStyle != null);
+    return CkTextStyle._(canvasKitJs.TextStyle(properties));
   }
+
+  CkTextStyle._(this.skTextStyle);
 }
 
-Map<String, js.JsObject?> toSkFontStyle(
+SkFontStyle toSkFontStyle(
     ui.FontWeight? fontWeight, ui.FontStyle? fontStyle) {
-  Map<String, js.JsObject?> style = <String, js.JsObject?>{};
+  final style = SkFontStyle();
   if (fontWeight != null) {
-    switch (fontWeight) {
-      case ui.FontWeight.w100:
-        style['weight'] = canvasKit['FontWeight']['Thin'];
-        break;
-      case ui.FontWeight.w200:
-        style['weight'] = canvasKit['FontWeight']['ExtraLight'];
-        break;
-      case ui.FontWeight.w300:
-        style['weight'] = canvasKit['FontWeight']['Light'];
-        break;
-      case ui.FontWeight.w400:
-        style['weight'] = canvasKit['FontWeight']['Normal'];
-        break;
-      case ui.FontWeight.w500:
-        style['weight'] = canvasKit['FontWeight']['Medium'];
-        break;
-      case ui.FontWeight.w600:
-        style['weight'] = canvasKit['FontWeight']['SemiBold'];
-        break;
-      case ui.FontWeight.w700:
-        style['weight'] = canvasKit['FontWeight']['Bold'];
-        break;
-      case ui.FontWeight.w800:
-        style['weight'] = canvasKit['FontWeight']['ExtraBold'];
-        break;
-      case ui.FontWeight.w900:
-        style['weight'] = canvasKit['FontWeight']['ExtraBlack'];
-        break;
-    }
+    style.weight = toSkFontWeight(fontWeight);
   }
-
   if (fontStyle != null) {
-    switch (fontStyle) {
-      case ui.FontStyle.normal:
-        style['slant'] = canvasKit['FontSlant']['Upright'];
-        break;
-      case ui.FontStyle.italic:
-        style['slant'] = canvasKit['FontSlant']['Italic'];
-        break;
-    }
+    style.slant = toSkFontSlant(fontStyle);
   }
   return style;
 }
 
-class CkParagraph extends ResurrectableSkiaObject implements ui.Paragraph {
+class CkParagraph extends ResurrectableSkiaObject<SkParagraph> implements ui.Paragraph {
   CkParagraph(
       this._initialParagraph, this._paragraphStyle, this._paragraphCommands);
 
   /// The result of calling `build()` on the JS CkParagraphBuilder.
   ///
   /// This may be invalidated later.
-  final js.JsObject _initialParagraph;
+  final SkParagraph _initialParagraph;
 
   /// The paragraph style used to build this paragraph.
   ///
@@ -310,10 +247,10 @@ class CkParagraph extends ResurrectableSkiaObject implements ui.Paragraph {
   ui.ParagraphConstraints? _lastLayoutConstraints;
 
   @override
-  js.JsObject createDefault() => _initialParagraph;
+  SkParagraph createDefault() => _initialParagraph;
 
   @override
-  js.JsObject resurrect() {
+  SkParagraph resurrect() {
     final builder = CkParagraphBuilder(_paragraphStyle);
     for (_ParagraphCommand command in _paragraphCommands) {
       switch (command.type) {
@@ -329,43 +266,51 @@ class CkParagraph extends ResurrectableSkiaObject implements ui.Paragraph {
       }
     }
 
-    final js.JsObject result = builder._buildCkParagraph();
+    final SkParagraph result = builder._buildCkParagraph();
     if (_lastLayoutConstraints != null) {
       // We need to set the Skia object early so layout works.
-      _skiaObject = result;
+      rawSkiaObject = result;
       this.layout(_lastLayoutConstraints!);
     }
     return result;
   }
 
   @override
+  void delete() {
+    rawSkiaObject?.delete();
+  }
+
+  @override
+  js.JsObject get legacySkiaObject => _jsObjectWrapper.wrapSkParagraph(skiaObject);
+
+  @override
   bool get isResurrectionExpensive => true;
 
   @override
   double get alphabeticBaseline =>
-      skiaObject.callMethod('getAlphabeticBaseline');
+      skiaObject.getAlphabeticBaseline();
 
   @override
-  bool get didExceedMaxLines => skiaObject.callMethod('didExceedMaxLines');
+  bool get didExceedMaxLines => skiaObject.didExceedMaxLines();
 
   @override
-  double get height => skiaObject.callMethod('getHeight');
+  double get height => skiaObject.getHeight();
 
   @override
   double get ideographicBaseline =>
-      skiaObject.callMethod('getIdeographicBaseline');
+      skiaObject.getIdeographicBaseline();
 
   @override
-  double get longestLine => skiaObject.callMethod('getLongestLine');
+  double get longestLine => skiaObject.getLongestLine();
 
   @override
-  double get maxIntrinsicWidth => skiaObject.callMethod('getMaxIntrinsicWidth');
+  double get maxIntrinsicWidth => skiaObject.getMaxIntrinsicWidth();
 
   @override
-  double get minIntrinsicWidth => skiaObject.callMethod('getMinIntrinsicWidth');
+  double get minIntrinsicWidth => skiaObject.getMinIntrinsicWidth();
 
   @override
-  double get width => skiaObject.callMethod('getMaxWidth');
+  double get width => skiaObject.getMaxWidth();
 
   // TODO(hterkelsen): Implement placeholders once it's in CanvasKit
   @override
@@ -384,49 +329,22 @@ class CkParagraph extends ResurrectableSkiaObject implements ui.Paragraph {
       return const <ui.TextBox>[];
     }
 
-    js.JsObject? heightStyle;
-    switch (boxHeightStyle) {
-      case ui.BoxHeightStyle.tight:
-        heightStyle = canvasKit['RectHeightStyle']['Tight'];
-        break;
-      case ui.BoxHeightStyle.max:
-        heightStyle = canvasKit['RectHeightStyle']['Max'];
-        break;
-      default:
-        // TODO(hterkelsen): Support all height styles
-        html.window.console.warn(
-            'We do not support $boxHeightStyle. Defaulting to BoxHeightStyle.tight');
-        heightStyle = canvasKit['RectHeightStyle']['Tight'];
-        break;
-    }
-
-    js.JsObject? widthStyle;
-    switch (boxWidthStyle) {
-      case ui.BoxWidthStyle.tight:
-        widthStyle = canvasKit['RectWidthStyle']['Tight'];
-        break;
-      case ui.BoxWidthStyle.max:
-        widthStyle = canvasKit['RectWidthStyle']['Max'];
-        break;
-    }
-
-    List<js.JsObject> skRects =
-        skiaObject.callMethod('getRectsForRange', <dynamic>[
+    List<SkRect> skRects = skiaObject.getRectsForRange(
       start,
       end,
-      heightStyle,
-      widthStyle,
-    ]);
+      toSkRectHeightStyle(boxHeightStyle),
+      toSkRectWidthStyle(boxWidthStyle),
+    );
 
     List<ui.TextBox> result = <ui.TextBox>[];
 
     for (int i = 0; i < skRects.length; i++) {
-      final js.JsObject rect = skRects[i];
+      final SkRect rect = skRects[i];
       result.add(ui.TextBox.fromLTRBD(
-        rect['fLeft'],
-        rect['fTop'],
-        rect['fRight'],
-        rect['fBottom'],
+        rect.fLeft,
+        rect.fTop,
+        rect.fRight,
+        rect.fBottom,
         _paragraphStyle._textDirection!,
       ));
     }
@@ -436,19 +354,18 @@ class CkParagraph extends ResurrectableSkiaObject implements ui.Paragraph {
 
   @override
   ui.TextPosition getPositionForOffset(ui.Offset offset) {
-    js.JsObject positionWithAffinity =
-        skiaObject.callMethod('getGlyphPositionAtCoordinate', <double>[
+    final SkTextPosition positionWithAffinity =
+        skiaObject.getGlyphPositionAtCoordinate(
       offset.dx,
       offset.dy,
-    ]);
+    );
     return fromPositionWithAffinity(positionWithAffinity);
   }
 
   @override
   ui.TextRange getWordBoundary(ui.TextPosition position) {
-    js.JsObject skRange =
-        skiaObject.callMethod('getWordBoundary', <int>[position.offset]);
-    return ui.TextRange(start: skRange['start'], end: skRange['end']);
+    final SkTextRange skRange = skiaObject.getWordBoundary(position.offset);
+    return ui.TextRange(start: skRange.start, end: skRange.end);
   }
 
   @override
@@ -469,7 +386,7 @@ class CkParagraph extends ResurrectableSkiaObject implements ui.Paragraph {
     // TODO(het): CanvasKit throws an exception when laid out with
     // a font that wasn't registered.
     try {
-      skiaObject.callMethod('layout', <double>[width]);
+      skiaObject.layout(width);
     } catch (e) {
       html.window.console.warn('CanvasKit threw an exception while laying '
           'out the paragraph. The font was "${_paragraphStyle._fontFamily}". '
@@ -492,21 +409,17 @@ class CkParagraph extends ResurrectableSkiaObject implements ui.Paragraph {
 }
 
 class CkParagraphBuilder implements ui.ParagraphBuilder {
-  js.JsObject? _paragraphBuilder;
+  final SkParagraphBuilder _paragraphBuilder;
   final CkParagraphStyle _style;
   final List<_ParagraphCommand> _commands;
 
   CkParagraphBuilder(ui.ParagraphStyle style)
       : _commands = <_ParagraphCommand>[],
-        _style = style as CkParagraphStyle {
-    _paragraphBuilder = canvasKit['ParagraphBuilder'].callMethod(
-      'Make',
-      <js.JsObject?>[
-        _style.skParagraphStyle,
-        skiaFontCollection.skFontMgr,
-      ],
-    );
-  }
+        _style = style as CkParagraphStyle,
+        _paragraphBuilder = canvasKitJs.ParagraphBuilder.Make(
+          style.skParagraphStyle,
+          skiaFontCollection.skFontMgr,
+        );
 
   // TODO(hterkelsen): Implement placeholders.
   @override
@@ -524,7 +437,7 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
   @override
   void addText(String text) {
     _commands.add(_ParagraphCommand.addText(text));
-    _paragraphBuilder!.callMethod('addText', <String>[text]);
+    _paragraphBuilder.addText(text);
   }
 
   @override
@@ -534,10 +447,9 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
   }
 
   /// Builds the CkParagraph with the builder and deletes the builder.
-  js.JsObject _buildCkParagraph() {
-    final js.JsObject result = _paragraphBuilder!.callMethod('build');
-    _paragraphBuilder!.callMethod('delete');
-    _paragraphBuilder = null;
+  SkParagraph _buildCkParagraph() {
+    final SkParagraph result = _paragraphBuilder.build();
+    _paragraphBuilder.delete();
     return result;
   }
 
@@ -551,15 +463,14 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
   @override
   void pop() {
     _commands.add(const _ParagraphCommand.pop());
-    _paragraphBuilder!.callMethod('pop');
+    _paragraphBuilder.pop();
   }
 
   @override
   void pushStyle(ui.TextStyle style) {
     final CkTextStyle skStyle = style as CkTextStyle;
     _commands.add(_ParagraphCommand.pushStyle(skStyle));
-    _paragraphBuilder!
-        .callMethod('pushStyle', <js.JsObject?>[skStyle.skTextStyle]);
+    _paragraphBuilder.pushStyle(skStyle.skTextStyle);
   }
 }
 

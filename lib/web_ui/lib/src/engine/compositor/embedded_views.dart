@@ -334,7 +334,9 @@ class HtmlViewEmbedder {
       final SurfaceFrame frame =
           _overlays[viewId]!.surface.acquireFrame(_frameSize);
       final CkCanvas canvas = frame.skiaCanvas;
-      canvas.drawPicture(_pictureRecorders[viewId]!.endRecording());
+      canvas.drawPicture(
+        _pictureRecorders[viewId]!.endRecording() as CkPicture,
+      );
       frame.submit();
     }
     _pictureRecorders.clear();

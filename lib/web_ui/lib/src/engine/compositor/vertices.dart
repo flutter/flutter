@@ -5,17 +5,8 @@
 
 part of engine;
 
-js.JsArray<Float32List> _encodeRawColorList(Int32List rawColors) {
-  final int colorCount = rawColors.length;
-  final List<ui.Color> colors = <ui.Color>[];
-  for (int i = 0; i < colorCount; ++i) {
-    colors.add(ui.Color(rawColors[i]));
-  }
-  return makeColorList(colors);
-}
-
 class CkVertices implements ui.Vertices {
-  js.JsObject? skVertices;
+  late SkVertices skVertices;
 
   CkVertices(
     ui.VertexMode mode,
@@ -36,13 +27,13 @@ class CkVertices implements ui.Vertices {
       throw ArgumentError(
           '"indices" values must be valid indices in the positions list.');
 
-    final js.JsArray<js.JsArray<double>>? encodedPositions = encodePointList(positions);
-    final js.JsArray<js.JsArray<double>>? encodedTextures =
-        encodePointList(textureCoordinates);
-    final js.JsArray<Float32List>? encodedColors =
-        colors != null ? makeColorList(colors) : null;
-    if (!_init(mode, encodedPositions, encodedTextures, encodedColors, indices))
-      throw ArgumentError('Invalid configuration for vertices.');
+    skVertices = canvasKitJs.MakeSkVertices(
+      toSkVertexMode(mode),
+      toSkPoints2d(positions),
+      textureCoordinates != null ? toSkPoints2d(textureCoordinates) : null,
+      colors != null ? toSkFloatColorList(colors) : null,
+      indices != null ? toUint16List(indices) : null,
+    );
   }
 
   CkVertices.raw(
@@ -64,50 +55,12 @@ class CkVertices implements ui.Vertices {
       throw ArgumentError(
           '"indices" values must be valid indices in the positions list.');
 
-    if (!_init(
-      mode,
-      encodeRawPointList(positions) as js.JsArray<js.JsArray<double>>?,
-      encodeRawPointList(textureCoordinates) as js.JsArray<js.JsArray<double>>?,
-      colors != null ? _encodeRawColorList(colors) : null,
+    skVertices = canvasKitJs.MakeSkVertices(
+      toSkVertexMode(mode),
+      rawPointsToSkPoints2d(positions),
+      textureCoordinates != null ? rawPointsToSkPoints2d(textureCoordinates) : null,
+      colors != null ? encodeRawColorList(colors) : null,
       indices,
-    )) {
-      throw ArgumentError('Invalid configuration for vertices.');
-    }
-  }
-
-  bool _init(
-      ui.VertexMode mode,
-      js.JsArray<js.JsArray<double>>? positions,
-      js.JsArray<js.JsArray<double>>? textureCoordinates,
-      js.JsArray<Float32List>? colors,
-      List<int>? indices) {
-    js.JsObject? skVertexMode;
-    switch (mode) {
-      case ui.VertexMode.triangles:
-        skVertexMode = canvasKit['VertexMode']['Triangles'];
-        break;
-      case ui.VertexMode.triangleStrip:
-        skVertexMode = canvasKit['VertexMode']['TrianglesStrip'];
-        break;
-      case ui.VertexMode.triangleFan:
-        skVertexMode = canvasKit['VertexMode']['TriangleFan'];
-        break;
-    }
-
-    final js.JsObject? vertices =
-        canvasKit.callMethod('MakeSkVertices', <dynamic>[
-      skVertexMode,
-      positions,
-      textureCoordinates,
-      colors,
-      indices,
-    ]);
-
-    if (vertices != null) {
-      skVertices = vertices;
-      return true;
-    } else {
-      return false;
-    }
+    );
   }
 }

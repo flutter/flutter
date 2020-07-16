@@ -10,9 +10,6 @@ part of engine;
 class CkPath implements ui.Path {
   final SkPath _skPath;
 
-  // TODO(yjbanov): remove this once we're fully @JS-ified.
-  late final js.JsObject _legacyJsObject = _jsObjectWrapper.wrapSkPath(_skPath);
-
   CkPath() : _skPath = SkPath(), _fillType = ui.PathFillType.nonZero {
     _skPath.setFillType(toSkFillType(_fillType));
   }
