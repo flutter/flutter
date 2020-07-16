@@ -348,10 +348,12 @@ void main() {
       });
     }
 
-    Widget build() => StatefulBuilder(builder: (BuildContext context, StateSetter setter) {
-      setState = setter;
-      return buildFrame(value: value, onChanged: didChangeValue);
-    },);
+    Widget build() {
+      return StatefulBuilder(builder: (BuildContext context, StateSetter setter) {
+        setState = setter;
+        return buildFrame(value: value, onChanged: didChangeValue);
+      },);
+    }
 
     await tester.pumpWidget(build());
 
@@ -393,25 +395,27 @@ void main() {
       });
     }
 
-    Widget build() => StatefulBuilder(builder: (BuildContext context, StateSetter setter) {
-      setState = setter;
-      return Directionality(
-        textDirection: TextDirection.ltr,
-        child: Navigator(
-          initialRoute: '/',
-          onGenerateRoute: (RouteSettings settings) {
-            return MaterialPageRoute<void>(
-              settings: settings,
-              builder: (BuildContext context) {
-                return Material(
-                  child: buildFrame(value: value, onChanged: didChangeValue),
-                );
-              },
-            );
-          },
-        ),
-      );
-    },);
+    Widget build() {
+      return StatefulBuilder(builder: (BuildContext context, StateSetter setter) {
+        setState = setter;
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: Navigator(
+            initialRoute: '/',
+            onGenerateRoute: (RouteSettings settings) {
+              return MaterialPageRoute<void>(
+                settings: settings,
+                builder: (BuildContext context) {
+                  return Material(
+                    child: buildFrame(value: value, onChanged: didChangeValue),
+                  );
+                },
+              );
+            },
+          ),
+        );
+      },);
+    }
 
     await tester.pumpWidget(build());
 
@@ -2505,10 +2509,12 @@ void main() {
     }
     void onTap() { dropdownButtonTapCounter += 1; }
 
-    Widget build() => StatefulBuilder(builder: (BuildContext context, StateSetter setter) {
-      setState = setter;
-      return buildFrame(value: value, onChanged: onChanged, onTap: onTap,);
-    },);
+    Widget build() {
+      return StatefulBuilder(builder: (BuildContext context, StateSetter setter) {
+        setState = setter;
+        return buildFrame(value: value, onChanged: onChanged, onTap: onTap,);
+      },);
+    }
 
     await tester.pumpWidget(build());
 
@@ -2562,28 +2568,30 @@ void main() {
       () { menuItemTapCounters[3] += 1; },
     ];
 
-    Widget build() => StatefulBuilder(builder: (BuildContext context, StateSetter setter) {
-      setState = setter;
-      return TestApp(
-        textDirection: TextDirection.ltr,
-        child: Material(
-          child: RepaintBoundary(
-            child: DropdownButton<String>(
-              value: value,
-              onChanged: onChanged,
-              items: menuItems.map<DropdownMenuItem<String>>((String item) {
-                currentIndex += 1;
-                return DropdownMenuItem<String>(
-                  value: item,
-                  onTap: onTapCallbacks[currentIndex],
-                  child: Text(item),
-                );
-              }).toList(),
+    Widget build() {
+      return StatefulBuilder(builder: (BuildContext context, StateSetter setter) {
+        setState = setter;
+        return TestApp(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: RepaintBoundary(
+              child: DropdownButton<String>(
+                value: value,
+                onChanged: onChanged,
+                items: menuItems.map<DropdownMenuItem<String>>((String item) {
+                  currentIndex += 1;
+                  return DropdownMenuItem<String>(
+                    value: item,
+                    onTap: onTapCallbacks[currentIndex],
+                    child: Text(item),
+                  );
+                }).toList(),
+              ),
             ),
           ),
-        ),
-      );
-    });
+        );
+      });
+    }
 
     await tester.pumpWidget(build());
 

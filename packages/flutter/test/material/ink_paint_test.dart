@@ -436,6 +436,7 @@ void main() {
   });
 
   testWidgets('Does the Ink widget render anything if it have ancestor IndexedStack', (WidgetTester tester) async {
+    // Regressing test for https://github.com/flutter/flutter/issues/59963
     int index = 0;
     Widget build() => Directionality(
       textDirection: TextDirection.ltr,
@@ -464,5 +465,4 @@ void main() {
       matrix4: equals(<dynamic>[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]),
     ));
   });
-
-  }
+}
