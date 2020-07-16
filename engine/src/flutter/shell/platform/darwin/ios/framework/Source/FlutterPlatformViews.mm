@@ -122,15 +122,6 @@ void FlutterPlatformViewsController::OnMethodCall(FlutterMethodCall* call, Flutt
 }
 
 void FlutterPlatformViewsController::OnCreate(FlutterMethodCall* call, FlutterResult& result) {
-  if (!flutter_view_.get()) {
-    // Right now we assume we have a reference to FlutterView when creating a new view.
-    // TODO(amirh): support this by setting the reference to FlutterView when it becomes available.
-    // https://github.com/flutter/flutter/issues/23787
-    result([FlutterError errorWithCode:@"create_failed"
-                               message:@"can't create a view on a headless engine"
-                               details:nil]);
-    return;
-  }
   NSDictionary<NSString*, id>* args = [call arguments];
 
   long viewId = [args[@"id"] longValue];
@@ -407,6 +398,7 @@ void FlutterPlatformViewsController::ApplyMutators(const MutatorsStack& mutators
 
 void FlutterPlatformViewsController::CompositeWithParams(int view_id,
                                                          const EmbeddedViewParams& params) {
+  FML_DCHECK(flutter_view_);
   CGRect frame = CGRectMake(0, 0, params.sizePoints().width(), params.sizePoints().height());
   UIView* touchInterceptor = touch_interceptors_[view_id].get();
   touchInterceptor.layer.transform = CATransform3DIdentity;
@@ -429,6 +421,7 @@ void FlutterPlatformViewsController::CompositeWithParams(int view_id,
 }
 
 SkCanvas* FlutterPlatformViewsController::CompositeEmbeddedView(int view_id) {
+  FML_DCHECK(flutter_view_);
   // TODO(amirh): assert that this is running on the platform thread once we support the iOS
   // embedded views thread configuration.
 
@@ -472,6 +465,7 @@ SkRect FlutterPlatformViewsController::GetPlatformViewRect(int view_id) {
 bool FlutterPlatformViewsController::SubmitFrame(GrContext* gr_context,
                                                  std::shared_ptr<IOSContext> ios_context,
                                                  std::unique_ptr<SurfaceFrame> frame) {
+  FML_DCHECK(flutter_view_);
   if (merge_threads_) {
     // Threads are about to be merged, we drop everything from this frame
     // and possibly resubmit the same layer tree in the next frame.
@@ -578,6 +572,7 @@ bool FlutterPlatformViewsController::SubmitFrame(GrContext* gr_context,
 }
 
 void FlutterPlatformViewsController::BringLayersIntoView(LayersMap layer_map) {
+  FML_DCHECK(flutter_view_);
   UIView* flutter_view = flutter_view_.get();
   auto zIndex = 0;
   // Clear the `active_composition_order_`, which will be populated down below.
@@ -619,6 +614,7 @@ std::shared_ptr<FlutterPlatformViewLayer> FlutterPlatformViewsController::GetLay
     SkRect rect,
     int64_t view_id,
     int64_t overlay_id) {
+  FML_DCHECK(flutter_view_);
   std::shared_ptr<FlutterPlatformViewLayer> layer = layer_pool_->GetLayer(gr_context, ios_context);
 
   UIView* overlay_view_wrapper = layer->overlay_view_wrapper.get();
