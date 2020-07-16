@@ -207,8 +207,9 @@ void main() {
         );
         final ValidationResult result = await deviceValidator.validate();
         expect(result.type, ValidationType.notAvailable);
-        expect(result.messages.single.message, 'No devices available');
-        expect(result.messages.single.type, ValidationMessageType.hint);
+        expect(result.messages, const <ValidationMessage>[
+          ValidationMessage.hint('No devices available'),
+        ]);
         expect(result.statusInfo, isNull);
       });
 
@@ -228,8 +229,9 @@ void main() {
         );
         final ValidationResult result = await deviceValidator.validate();
         expect(result.type, ValidationType.notAvailable);
-        expect(result.messages.single.message, 'Device locked');
-        expect(result.messages.single.type, ValidationMessageType.hint);
+        expect(result.messages, const <ValidationMessage>[
+          ValidationMessage.hint('Device locked'),
+        ]);
         expect(result.statusInfo, isNull);
       });
 
@@ -250,11 +252,10 @@ void main() {
         );
         final ValidationResult result = await deviceValidator.validate();
         expect(result.type, ValidationType.installed);
-        expect(result.messages.length, 2);
-        expect(result.messages.first.message, contains (mockDevice.id));
-        expect(result.messages.first.type, ValidationMessageType.information);
-        expect(result.messages[1].message, 'Device locked');
-        expect(result.messages[1].type, ValidationMessageType.hint);
+        expect(result.messages, const <ValidationMessage>[
+          ValidationMessage('null (null) • device-id • android • null'),
+          ValidationMessage.hint('Device locked'),
+        ]);
         expect(result.statusInfo, '1 available');
       });
     });
