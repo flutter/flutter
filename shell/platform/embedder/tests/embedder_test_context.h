@@ -112,6 +112,9 @@ class EmbedderTestContext {
   static FlutterUpdateSemanticsCustomActionCallback
   GetUpdateSemanticsCustomActionCallbackHook();
 
+  static FlutterComputePlatformResolvedLocaleCallback
+  GetComputePlatformResolvedLocaleCallbackHook();
+
   void SetupAOTMappingsIfNecessary();
 
   void SetupAOTDataIfNecessary();

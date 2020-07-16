@@ -25,6 +25,9 @@ class PlatformViewEmbedder final : public PlatformView {
       std::function<void(flutter::CustomAccessibilityActionUpdates actions)>;
   using PlatformMessageResponseCallback =
       std::function<void(fml::RefPtr<flutter::PlatformMessage>)>;
+  using ComputePlatformResolvedLocaleCallback =
+      std::function<std::unique_ptr<std::vector<std::string>>(
+          const std::vector<std::string>& supported_locale_data)>;
 
   struct PlatformDispatchTable {
     UpdateSemanticsNodesCallback update_semantics_nodes_callback;  // optional
@@ -33,6 +36,8 @@ class PlatformViewEmbedder final : public PlatformView {
     PlatformMessageResponseCallback
         platform_message_response_callback;             // optional
     VsyncWaiterEmbedder::VsyncCallback vsync_callback;  // optional
+    ComputePlatformResolvedLocaleCallback
+        compute_platform_resolved_locale_callback;
   };
 
   // Creates a platform view that sets up an OpenGL rasterizer.
