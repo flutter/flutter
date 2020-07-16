@@ -2293,6 +2293,9 @@ class _WidgetInspectorState extends State<WidgetInspector>
 
   @override
   Widget build(BuildContext context) {
+    // Caution changing this Stack widget. The _InspectorOverlayLayer
+    // assumes the root RenderObject for the WidgetInspector will be
+    // a RenderStack with a _RenderInspectorOverlay as last child.
     return Stack(children: <Widget>[
       GestureDetector(
         onTap: _handleTap,
@@ -2441,7 +2444,7 @@ class _RenderInspectorOverlay extends RenderBox {
     context.addLayer(_InspectorOverlayLayer(
       overlayRect: Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
       selection: selection,
-      rootRenderObject: parent as RenderObject,
+      rootRenderObject: parent is RenderObject ? parent as RenderObject : null,
     ));
   }
 }
@@ -2716,9 +2719,8 @@ class _InspectorOverlayLayer extends Layer {
   /// overlays in the same app (i.e. an storyboard), a selected or candidate
   /// render object may not belong to this tree.
   bool _isInInspectorRenderObjectTree(RenderObject child) {
-    RenderObject inspectorRoot;
     RenderObject current = child.parent as RenderObject;
-    while (current != null && inspectorRoot == null) {
+    while (current != null) {
       // We found the widget inspector render object.
       if (current is RenderStack
           && current.lastChild is _RenderInspectorOverlay) {
