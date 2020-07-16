@@ -43,6 +43,7 @@ void main() {
     List<String> errorTextContains,
     bool toolExit = false,
     String exitMessageContains,
+    int exitCode,
   }) async {
     try {
       arguments.insert(0, '--flutter-root=${Cache.flutterRoot}');
@@ -55,6 +56,7 @@ void main() {
       }
       if (exitMessageContains != null) {
         expect(e.message, contains(exitMessageContains));
+        expect(e.exitCode ?? 0, exitCode ?? 0);
       }
     }
     assertContains(logger.statusText, statusTextContains);
@@ -373,12 +375,141 @@ StringBuffer bar = StringBuffer('baz');
       tryToDelete(tempDir);
     }
   });
+
+  testUsingContext('analyze once info issue exit code 0.', () async {
+    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_analyze_once_info_issue_exit_code_0.');
+    _createDotPackages(tempDir.path);
+
+    const String infoSourceCode = '''
+int analyze() {}
+''';
+
+    tempDir.childFile('main.dart').writeAsStringSync(infoSourceCode);
+    try {
+      await runCommand(
+        command: AnalyzeCommand(
+          workingDirectory: fileSystem.directory(tempDir),
+          platform: _kNoColorTerminalPlatform,
+          terminal: terminal,
+          processManager: processManager,
+          logger: logger,
+          fileSystem: fileSystem,
+          artifacts: artifacts,
+        ),
+        arguments: <String>['analyze', '--no-pub'],
+        statusTextContains: <String>['info'],
+        exitMessageContains: '1 issue found.',
+        toolExit: true,
+        exitCode: 0,
+      );
+    } finally {
+      tryToDelete(tempDir);
+    }
+  });
+
+  testUsingContext('analyze once info issue exit code 1 with options fatal-infos.', () async {
+    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_analyze_once_info_issue_exit_code_1_fatal_infos.');
+    _createDotPackages(tempDir.path);
+
+    const String infoSourceCode = '''
+int analyze() {}
+''';
+
+    tempDir.childFile('main.dart').writeAsStringSync(infoSourceCode);
+    try {
+      await runCommand(
+        command: AnalyzeCommand(
+          workingDirectory: fileSystem.directory(tempDir),
+          platform: _kNoColorTerminalPlatform,
+          terminal: terminal,
+          processManager: processManager,
+          logger: logger,
+          fileSystem: fileSystem,
+          artifacts: artifacts,
+        ),
+        arguments: <String>['analyze', '--no-pub', '--fatal-infos'],
+        statusTextContains: <String>['info'],
+        exitMessageContains: '1 issue found.',
+        toolExit: true,
+        exitCode: 1,
+      );
+    } finally {
+      tryToDelete(tempDir);
+    }
+  });
+
+  testUsingContext('analyze once info issue exit code 0 with options fatal-warnings.', () async {
+    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_analyze_once_info_exit_code_0_fatal_warnings.');
+    _createDotPackages(tempDir.path);
+
+    const String infoSourceCode = '''
+int analyze() {}
+''';
+
+    tempDir.childFile('main.dart').writeAsStringSync(infoSourceCode);
+    try {
+      await runCommand(
+        command: AnalyzeCommand(
+          workingDirectory: fileSystem.directory(tempDir),
+          platform: _kNoColorTerminalPlatform,
+          terminal: terminal,
+          processManager: processManager,
+          logger: logger,
+          fileSystem: fileSystem,
+          artifacts: artifacts,
+        ),
+        arguments: <String>['analyze', '--no-pub', '--fatal-warnings'],
+        statusTextContains: <String>['info'],
+        exitMessageContains: '1 issue found.',
+        toolExit: true,
+        exitCode: 0,
+      );
+    } finally {
+      tryToDelete(tempDir);
+    }
+  });
+
+  testUsingContext('analyze once warning issue exit code 1 with options fatal-infos.', () async {
+    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_analyze_once_warning_issue_exit_code_1_fatal_infos.');
+    _createDotPackages(tempDir.path);
+
+    const String warningSourceCode = '''
+int analyze() {}
+''';
+
+    final File optionsFile = fileSystem.file(fileSystem.path.join(tempDir.path, 'analysis_options.yaml'));
+    optionsFile.writeAsStringSync('''
+analyzer:
+  errors:
+    missing_return: warning
+  ''');
+
+    tempDir.childFile('main.dart').writeAsStringSync(warningSourceCode);
+    try {
+      await runCommand(
+        command: AnalyzeCommand(
+          workingDirectory: fileSystem.directory(tempDir),
+          platform: _kNoColorTerminalPlatform,
+          terminal: terminal,
+          processManager: processManager,
+          logger: logger,
+          fileSystem: fileSystem,
+          artifacts: artifacts,
+        ),
+        arguments: <String>['analyze','--no-pub', '--fatal-infos'],
+        statusTextContains: <String>['warning'],
+        exitMessageContains: '1 issue found.',
+        toolExit: true,
+        exitCode: 1,
+      );
+    } finally {
+      tryToDelete(tempDir);
+    }
+  });
 }
 
 void assertContains(String text, List<String> patterns) {
-  if (patterns == null) {
-    expect(text, isEmpty);
-  } else {
+  if (patterns != null) {
     for (final String pattern in patterns) {
       expect(text, contains(pattern));
     }
