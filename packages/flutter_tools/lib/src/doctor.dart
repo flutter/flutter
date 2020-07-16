@@ -109,7 +109,10 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       if (proxyValidator.shouldShow)
         proxyValidator,
       if (globals.deviceManager.canListAnything)
-        DeviceValidator(globals.deviceManager, globals.userMessages),
+        DeviceValidator(
+          deviceManager: globals.deviceManager,
+          userMessages: globals.userMessages,
+        ),
     ];
     return _validators;
   }
@@ -948,10 +951,13 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
 }
 
 class DeviceValidator extends DoctorValidator {
-  DeviceValidator(DeviceManager deviceManager, UserMessages userMessages)
-    : _deviceManager = deviceManager,
-      _userMessages = userMessages,
-      super('Connected device');
+  // TODO(jmagman): Make required once g3 rolls and is updated.
+  DeviceValidator({
+    DeviceManager deviceManager,
+    UserMessages userMessages,
+  }) : _deviceManager = deviceManager ?? globals.deviceManager,
+       _userMessages = userMessages ?? globals.userMessages,
+       super('Connected device');
 
   final DeviceManager _deviceManager;
   final UserMessages _userMessages;

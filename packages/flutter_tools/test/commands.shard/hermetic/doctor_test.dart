@@ -201,7 +201,10 @@ void main() {
           (Invocation invocation) => Future<List<String>>.value(<String>[])
         );
 
-        final DeviceValidator deviceValidator = DeviceValidator(mockDeviceManager, UserMessages());
+        final DeviceValidator deviceValidator = DeviceValidator(
+          deviceManager: mockDeviceManager,
+          userMessages: UserMessages(),
+        );
         final ValidationResult result = await deviceValidator.validate();
         expect(result.type, ValidationType.notAvailable);
         expect(result.messages.single.message, 'No devices available');
@@ -219,7 +222,10 @@ void main() {
           (Invocation invocation) => Future<List<String>>.value(<String>['Device locked'])
         );
 
-        final DeviceValidator deviceValidator = DeviceValidator(mockDeviceManager, UserMessages());
+        final DeviceValidator deviceValidator = DeviceValidator(
+          deviceManager: mockDeviceManager,
+          userMessages: UserMessages(),
+        );
         final ValidationResult result = await deviceValidator.validate();
         expect(result.type, ValidationType.notAvailable);
         expect(result.messages.single.message, 'Device locked');
@@ -238,7 +244,10 @@ void main() {
           (_) => Future<List<String>>.value(<String>['Device locked'])
         );
 
-        final DeviceValidator deviceValidator = DeviceValidator(mockDeviceManager, UserMessages());
+        final DeviceValidator deviceValidator = DeviceValidator(
+          deviceManager: mockDeviceManager,
+          userMessages: UserMessages(),
+        );
         final ValidationResult result = await deviceValidator.validate();
         expect(result.type, ValidationType.installed);
         expect(result.messages.length, 2);
