@@ -81,6 +81,7 @@ Future<T> runInContext<T>(
       ),
       AndroidWorkflow: () => AndroidWorkflow(
         androidSdk: globals.androidSdk,
+        featureFlags: featureFlags,
       ),
       ApplicationPackageFactory: () => ApplicationPackageFactory(),
       Artifacts: () => CachedArtifacts(
@@ -149,12 +150,16 @@ Future<T> runInContext<T>(
         fileSystem: globals.fs,
         androidWorkflow: androidWorkflow,
       ),
-      FeatureFlags: () => const FeatureFlags(),
+      FeatureFlags: () => const FlutterFeatureFlags(),
       FlutterVersion: () => FlutterVersion(const SystemClock()),
       FuchsiaArtifacts: () => FuchsiaArtifacts.find(),
       FuchsiaDeviceTools: () => FuchsiaDeviceTools(),
       FuchsiaSdk: () => FuchsiaSdk(),
-      FuchsiaWorkflow: () => FuchsiaWorkflow(),
+      FuchsiaWorkflow: () => FuchsiaWorkflow(
+        featureFlags: featureFlags,
+        platform: globals.platform,
+        fuchsiaArtifacts: globals.fuchsiaArtifacts,
+      ),
       GradleUtils: () => GradleUtils(),
       HotRunnerConfig: () => HotRunnerConfig(),
       IOSSimulatorUtils: () => IOSSimulatorUtils(
@@ -162,7 +167,11 @@ Future<T> runInContext<T>(
         processManager: globals.processManager,
         xcode: globals.xcode,
       ),
-      IOSWorkflow: () => const IOSWorkflow(),
+      IOSWorkflow: () => IOSWorkflow(
+        featureFlags: featureFlags,
+        xcode: globals.xcode,
+        platform: globals.platform,
+      ),
       KernelCompilerFactory: () => KernelCompilerFactory(
         logger: globals.logger,
         processManager: globals.processManager,
