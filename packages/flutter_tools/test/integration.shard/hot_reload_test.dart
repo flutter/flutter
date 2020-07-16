@@ -37,10 +37,10 @@ void main() {
   });
 
   test('multiple overlapping hot reload are debounced and queued', () async {
-    await _flutter.run();
+    await flutter.run();
     // Capture how many *real* hot reloads occur.
     int numReloads = 0;
-    final StreamSubscription<void> subscription = _flutter.stdout
+    final StreamSubscription<void> subscription = flutter.stdout
         .map(parseFlutterResponse)
         .where(_isHotReloadCompletionEvent)
         .listen((_) => numReloads++);
@@ -52,7 +52,7 @@ void main() {
     const Duration delay = Duration(milliseconds: hotReloadDebounceOverrideMs * 2);
 
     Future<void> doReload([void _]) =>
-        _flutter.hotReload(debounce: true, debounceDurationOverrideMs: hotReloadDebounceOverrideMs);
+        flutter.hotReload(debounce: true, debounceDurationOverrideMs: hotReloadDebounceOverrideMs);
 
     try {
       await Future.wait<void>(<Future<void>>[

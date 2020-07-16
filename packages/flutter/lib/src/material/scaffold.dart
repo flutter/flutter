@@ -1681,7 +1681,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///
   /// ```dart
   ///   Widget build(BuildContext context) {
-  ///     return OutlineButton(
+  ///     return OutlinedButton(
   ///       onPressed: () {
   ///         Scaffold.of(context).showSnackBar(
   ///           SnackBar(

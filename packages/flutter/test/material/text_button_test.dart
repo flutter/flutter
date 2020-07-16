@@ -50,9 +50,14 @@ void main() {
     expect(material.type, MaterialType.button);
 
     final Offset center = tester.getCenter(find.byType(TextButton));
-    await tester.startGesture(center);
-    await tester.pumpAndSettle();
+    final TestGesture gesture = await tester.startGesture(center);
+    await tester.pump(); // start the splash animation
+    await tester.pump(const Duration(milliseconds: 100)); // splash is underway
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paints..circle(color: colorScheme.primary.withAlpha(0x1f))); // splash color is primary(0.12)
 
+    await gesture.up();
+    await tester.pumpAndSettle();
     material = tester.widget<Material>(buttonMaterial);
     // No change vs enabled and not pressed.
     expect(material.animationDuration, const Duration(milliseconds: 200));
@@ -969,6 +974,7 @@ void main() {
     );
     expect(paddingWidget.padding, const EdgeInsets.all(22));
   });
+
 }
 
 
