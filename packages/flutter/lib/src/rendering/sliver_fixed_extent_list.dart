@@ -170,8 +170,6 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     childManager.didStartLayout();
     childManager.setDidUnderflow(false);
 
-    final double itemExtent = this.itemExtent;
-
     final double scrollOffset = constraints.scrollOffset + constraints.cacheOrigin;
     assert(scrollOffset >= 0.0);
     final double remainingExtent = constraints.remainingCacheExtent;
@@ -179,8 +177,8 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     final double targetEndScrollOffset = scrollOffset + remainingExtent;
 
     final BoxConstraints childConstraints = constraints.asBoxConstraints(
-      minExtent: itemExtent,
-      maxExtent: itemExtent,
+      minExtent: itemExtent?? 0,
+      maxExtent: itemExtent?? computeMaxScrollOffset(constraints, itemExtent),
     );
 
     final int firstIndex = getMinChildIndexForScrollOffset(scrollOffset, itemExtent);
@@ -321,6 +319,74 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     if (estimatedMaxScrollOffset == trailingScrollOffset)
       childManager.setDidUnderflow(true);
     childManager.didFinishLayout();
+  }
+}
+
+/// Test
+class RenderSliverFixedVariableExtentList extends RenderSliverFixedExtentBoxAdaptor{
+  /// Test
+  RenderSliverFixedVariableExtentList({
+    @required RenderSliverBoxChildManager childManager,
+    List<double> itemExtents,
+  }) : super(childManager: childManager) {
+    this.itemExtents = itemExtents;
+  }
+
+  /// Test
+  List<double> get itemExtents => _itemExtents;
+  List<double> _itemExtents;
+  set itemExtents(List<double> value) {
+    assert(value != null);
+    if (_itemExtents == value)
+      return;
+    _itemExtents = value;
+    _preparePrefixSums();
+    markNeedsLayout();
+  }
+
+  void _preparePrefixSums() {
+    _prefixSums = <double>[];
+    _prefixSums.add(0);
+    for (final double extent in itemExtents) {
+      _prefixSums.add(_prefixSums.last + extent);
+    }
+  }
+
+  List<double> _prefixSums;
+
+  @override
+  double get itemExtent => null;
+
+  @override
+  double computeMaxScrollOffset(SliverConstraints constraints, double itemExtent) {
+    return _prefixSums.last;
+  }
+
+  @override
+  int getMaxChildIndexForScrollOffset(double scrollOffset, double itemExtent) {
+    // Binary search can speed this up.
+    for (int i = itemExtents.length - 1; i >= 0; i -= 1) {
+      if (_prefixSums[i] < scrollOffset) {
+        return i;
+      }
+    }
+    return 0;
+  }
+
+  @override
+  int getMinChildIndexForScrollOffset(double scrollOffset, double itemExtent) {
+    // Binary search can speed this up.
+    for (int i = 0; i < itemExtents.length; i += 1) {
+      if (_prefixSums[i + 1] > scrollOffset) {
+        return i;
+      }
+    }
+    return itemExtents.length - 1;
+  }
+
+  @override
+  double indexToLayoutOffset(double itemExtent, int index) {
+    return _prefixSums[index];
   }
 }
 

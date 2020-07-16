@@ -890,6 +890,30 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
   }
 }
 
+/// TEST
+class SliverFixedVariableExtentList extends SliverMultiBoxAdaptorWidget {
+  /// TEST
+  const SliverFixedVariableExtentList({
+    Key key,
+    @required SliverChildDelegate delegate,
+    @required this.itemExtents,
+  }) : super(key: key, delegate: delegate);
+
+  /// TEST
+  final List<double> itemExtents;
+
+  @override
+  RenderSliverFixedVariableExtentList createRenderObject(BuildContext context) {
+    final SliverMultiBoxAdaptorElement element = context as SliverMultiBoxAdaptorElement;
+    return RenderSliverFixedVariableExtentList(childManager: element, itemExtents: itemExtents);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderSliverFixedVariableExtentList renderObject) {
+    renderObject.itemExtents = itemExtents;
+  }
+}
+
 /// A sliver that places multiple box children in a two dimensional arrangement.
 ///
 /// [SliverGrid] places its children in arbitrary positions determined by

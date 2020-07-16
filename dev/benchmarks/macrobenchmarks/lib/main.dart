@@ -14,6 +14,7 @@ import 'src/backdrop_filter.dart';
 import 'src/cubic_bezier.dart';
 import 'src/cull_opacity.dart';
 import 'src/filtered_child_animation.dart';
+import 'src/long_list_variable_extent.dart';
 import 'src/multi_widget_construction.dart';
 import 'src/post_backdrop_filter.dart';
 import 'src/simple_animation.dart';
@@ -47,6 +48,7 @@ class MacrobenchmarksApp extends StatelessWidget {
         kImageFilteredTransformAnimationRouteName: (BuildContext context) => const FilteredChildAnimationPage(FilterType.rotateFilter),
         kMultiWidgetConstructionRouteName: (BuildContext context) => const MultiWidgetConstructTable(10, 20),
         kHeavyGridViewRouteName: (BuildContext context) => HeavyGridViewPage(),
+        kLongListWithVariableExtentItems: (BuildContext context) => LongListVariableExtent(),
       },
     );
   }
@@ -158,6 +160,13 @@ class HomePage extends StatelessWidget {
             child: const Text('Heavy Grid View'),
             onPressed: () {
               Navigator.pushNamed(context, kHeavyGridViewRouteName);
+            },
+          ),
+          RaisedButton(
+            key: const Key(kLongListWithVariableExtentItems),
+            child: const Text('Long List with Variable-Extent Items'),
+            onPressed: () {
+              Navigator.pushNamed(context, kLongListWithVariableExtentItems);
             },
           ),
         ],

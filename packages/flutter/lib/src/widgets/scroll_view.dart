@@ -1010,6 +1010,7 @@ class ListView extends BoxScrollView {
     bool shrinkWrap = false,
     EdgeInsetsGeometry padding,
     this.itemExtent,
+    this.itemExtents,
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
@@ -1080,6 +1081,7 @@ class ListView extends BoxScrollView {
     bool shrinkWrap = false,
     EdgeInsetsGeometry padding,
     this.itemExtent,
+    this.itemExtents,
     @required IndexedWidgetBuilder itemBuilder,
     int itemCount,
     bool addAutomaticKeepAlives = true,
@@ -1182,6 +1184,7 @@ class ListView extends BoxScrollView {
        assert(separatorBuilder != null),
        assert(itemCount != null && itemCount >= 0),
        itemExtent = null,
+       itemExtents = null,
        childrenDelegate = SliverChildBuilderDelegate(
          (BuildContext context, int index) {
            final int itemIndex = index ~/ 2;
@@ -1314,6 +1317,7 @@ class ListView extends BoxScrollView {
     bool shrinkWrap = false,
     EdgeInsetsGeometry padding,
     this.itemExtent,
+    this.itemExtents,
     @required this.childrenDelegate,
     double cacheExtent,
     int semanticChildCount,
@@ -1344,6 +1348,9 @@ class ListView extends BoxScrollView {
   /// the scroll position changes drastically.
   final double itemExtent;
 
+  /// TEST
+  final List<double> itemExtents;
+
   /// A delegate that provides the children for the [ListView].
   ///
   /// The [ListView.custom] constructor lets you specify this delegate
@@ -1358,6 +1365,12 @@ class ListView extends BoxScrollView {
       return SliverFixedExtentList(
         delegate: childrenDelegate,
         itemExtent: itemExtent,
+      );
+    }
+    if (itemExtents != null) {
+      return SliverFixedVariableExtentList(
+        delegate: childrenDelegate,
+        itemExtents: itemExtents,
       );
     }
     return SliverList(delegate: childrenDelegate);
