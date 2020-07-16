@@ -2263,7 +2263,7 @@ void main() {
     });
   });
 
-  testWidgets('PlatformViewRenderBox reconstructed with same gestureRecognizers', (WidgetTester tester) async {
+  testWidgets('Platform views respect hitTestBehavior', (WidgetTester tester) async {
     final FakePlatformViewController controller = FakePlatformViewController(0);
 
     final List<String> logs = <String>[];
