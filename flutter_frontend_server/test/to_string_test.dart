@@ -246,7 +246,7 @@ void main(List<String> args) async {
     final String basePath = path.canonicalize(path.join(path.dirname(Platform.script.path), '..'));
     final String fixtures = path.join(basePath, 'test', 'fixtures');
     final String mainDart = path.join(fixtures, 'lib', 'main.dart');
-    final String dotPackages = path.join(fixtures, '.packages');
+    final String packageConfig = path.join(fixtures, '.dart_tool', 'package_config.json');
     final String regularDill = path.join(fixtures, 'toString.dill');
     final String transformedDill = path.join(fixtures, 'toStringTransformed.dill');
 
@@ -264,7 +264,7 @@ void main(List<String> args) async {
         frontendServer,
         '--sdk-root=$sdkRoot',
         '--target=flutter',
-        '--packages=$dotPackages',
+        '--packages=$packageConfig',
         '--output-dill=$regularDill',
         mainDart,
       ]));
@@ -288,7 +288,7 @@ void main(List<String> args) async {
         frontendServer,
         '--sdk-root=$sdkRoot',
         '--target=flutter',
-        '--packages=$dotPackages',
+        '--packages=$packageConfig',
         '--output-dill=$transformedDill',
         '--delete-tostring-package-uri', 'dart:ui',
         '--delete-tostring-package-uri', 'package:flutter_frontend_fixtures',
