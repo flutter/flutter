@@ -332,20 +332,16 @@ class Border extends BoxBorder {
   ///
   /// All arguments default to [BorderSide.none] and must not be null.
   ///
-  /// Currently, the `vertical` argument will apply to the top and bottom
-  /// borders, and the `horizontal` argument will apply to the left and right
-  /// borders. This is not consistent with the use of "vertical" and
-  /// "horizontal" elsewhere in the framework, so the
-  /// `invertMeaningOfVerticalAndHorizontal` argument exists to facilitate
-  /// the transition of this constructor to using the correct semantics of
-  /// these arguments. Callers are encouraged to pass false to that argument
-  /// to get the correct semantics. In a future change, the default value of
-  /// the argument will be changed to false, followed by the removal of the
-  /// argument altogether.
+  /// If the `invertMeaningOfVerticalAndHorizontal` argument is set to true,
+  /// then the `vertical` argument will apply to the top and bottom borders, and
+  /// the `horizontal` argument will apply to the left and right borders. This
+  /// is not consistent with the use of "vertical" and "horizontal" elsewhere in
+  /// the framework, so callers are discouraged from overriding the default
+  /// value of that argument. In a future change, the argument will be removed.
   const Border.symmetric({
     BorderSide vertical = BorderSide.none,
     BorderSide horizontal = BorderSide.none,
-    bool invertMeaningOfVerticalAndHorizontal = true,
+    bool invertMeaningOfVerticalAndHorizontal = false,
   }) : assert(vertical != null),
        assert(horizontal != null),
        assert(invertMeaningOfVerticalAndHorizontal != null),

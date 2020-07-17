@@ -31,19 +31,19 @@ void main() {
     const BorderSide side1 = BorderSide(color: Color(0xFFFFFFFF));
     const BorderSide side2 = BorderSide(color: Color(0xFF000000));
     const Border border = Border.symmetric(vertical: side1, horizontal: side2);
-    expect(border.left, same(side2));
-    expect(border.top, same(side1));
-    expect(border.right, same(side2));
-    expect(border.bottom, same(side1));
+    expect(border.left, same(side1));
+    expect(border.top, same(side2));
+    expect(border.right, same(side1));
+    expect(border.bottom, same(side2));
     const Border border2 = Border.symmetric(
       vertical: side1,
       horizontal: side2,
-      invertMeaningOfVerticalAndHorizontal: false,
+      invertMeaningOfVerticalAndHorizontal: true,
     );
-    expect(border2.left, same(side1));
-    expect(border2.top, same(side2));
-    expect(border2.right, same(side1));
-    expect(border2.bottom, same(side2));
+    expect(border2.left, same(side2));
+    expect(border2.top, same(side1));
+    expect(border2.right, same(side2));
+    expect(border2.bottom, same(side1));
   });
 
   test('Border.merge', () {
