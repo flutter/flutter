@@ -111,14 +111,7 @@ task:
     - name: web_tests-3_last-linux # last Web shard must end with _last
       << : *WEB_SHARD_TEMPLATE
 
-    - name: format_and_dart_test
-      format_script: |
-        cd $ENGINE_PATH/src/flutter
-        ./ci/format.sh
+    - name: build_test
       build_script: |
         cd $ENGINE_PATH/src/flutter
         ./ci/build.sh
-    - name: lint_test
-      lint_script: |
-        cd $ENGINE_PATH/src
-        ./flutter/ci/lint.sh
