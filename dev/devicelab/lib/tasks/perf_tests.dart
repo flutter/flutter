@@ -441,13 +441,18 @@ class PerfTest {
 class E2EPerfTest extends PerfTest {
   const E2EPerfTest(
     String testDirectory,
-    String testTarget,
+    String testTarget, {
+    String summaryFilename,
+    this.benchmarkScoreKeys,
+    }
   ) : super(
     testDirectory,
     testTarget,
-    'e2e',
+    summaryFilename,
     testDriver: 'test_driver/e2e_test.dart',
   );
+
+  final List<String> benchmarkScoreKeys;
 
   @override
   Future<TaskResult> internalRun({
@@ -478,8 +483,10 @@ class E2EPerfTest extends PerfTest {
         '-d',
         deviceId,
       ]);
+
+      final String resultFilename = timelineFileName ?? 'e2e_perf_summary';
       final Map<String, dynamic> data = json.decode(
-        file('$testDirectory/build/$timelineFileName.e2e_perf_summary.json').readAsStringSync(),
+        file('$testDirectory/build/$resultFilename.json').readAsStringSync(),
       ) as Map<String, dynamic>;
 
       if (data['frame_count'] as int < 5) {
@@ -489,7 +496,9 @@ class E2EPerfTest extends PerfTest {
         );
       }
 
-      return TaskResult.success(data, benchmarkScoreKeys: <String>[
+      return TaskResult.success(
+        data,
+        benchmarkScoreKeys: benchmarkScoreKeys ?? <String>[
         'average_frame_build_time_millis',
         'worst_frame_build_time_millis',
         '90th_percentile_frame_build_time_millis',
@@ -498,7 +507,8 @@ class E2EPerfTest extends PerfTest {
         'worst_frame_rasterizer_time_millis',
         '90th_percentile_frame_rasterizer_time_millis',
         '99th_percentile_frame_rasterizer_time_millis',
-      ]);
+        ],
+      );
     });
   }
 }
