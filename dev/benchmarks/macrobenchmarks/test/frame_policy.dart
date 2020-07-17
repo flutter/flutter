@@ -85,7 +85,7 @@ void main() {
 void _reportResult(String eventName, int frameCount, List<Duration> delays) {
   assert(delays.length > 1);
   final List<int> delayedInMicro = delays.map<int>(
-    (Duration delay) => -delay.inMicroseconds,
+    (Duration delay) => delay.inMicroseconds,
   ).toList();
   final List<int> delayedInMicroSorted = List<int>.from(delayedInMicro)..sort();
   final int index90th = (delayedInMicroSorted.length * 0.90).round();

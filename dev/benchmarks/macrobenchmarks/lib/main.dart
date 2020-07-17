@@ -48,7 +48,6 @@ class MacrobenchmarksApp extends StatelessWidget {
         kImageFilteredTransformAnimationRouteName: (BuildContext context) => const FilteredChildAnimationPage(FilterType.rotateFilter),
         kMultiWidgetConstructionRouteName: (BuildContext context) => const MultiWidgetConstructTable(10, 20),
         kHeavyGridViewRouteName: (BuildContext context) => HeavyGridViewPage(),
-        // This page is currently not used for frame benchmarking
         kSimpleScrollRouteName: (BuildContext context) => SimpleScroll(),
       },
     );

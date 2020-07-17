@@ -1265,7 +1265,8 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
   /// application has "settled".
   benchmark,
 
-  /// Ignore any request from pump.
+  /// Ignore any request from pump but respect other requests to schedule a
+  /// frame.
   ///
   /// This is used for running the test on a device, where scheduling of new
   /// frames respects what the engine and the device needed.
