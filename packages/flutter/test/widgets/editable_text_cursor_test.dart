@@ -27,7 +27,7 @@ void main() {
     await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
   });
 
-  testWidgets('cursor has expected width and radius', (WidgetTester tester) async {
+  testWidgets('cursor has expected width, height, and radius', (WidgetTester tester) async {
     await tester.pumpWidget(
         MediaQuery(data: const MediaQueryData(devicePixelRatio: 1.0),
         child: Directionality(
@@ -39,11 +39,13 @@ void main() {
           style: textStyle,
           cursorColor: cursorColor,
           cursorWidth: 10.0,
+          cursorHeight: 10.0,
           cursorRadius: const Radius.circular(2.0),
         ))));
 
     final EditableText editableText = tester.firstWidget(find.byType(EditableText));
     expect(editableText.cursorWidth, 10.0);
+    expect(editableText.cursorHeight, 10.0);
     expect(editableText.cursorRadius.x, 2.0);
   });
 
