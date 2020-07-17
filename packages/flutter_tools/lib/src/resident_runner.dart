@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:devtools_server/devtools_server.dart' as devtools_server;
-import 'package:flutter_tools/src/widget_cache.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -34,6 +33,7 @@ import 'project.dart';
 import 'run_cold.dart';
 import 'run_hot.dart';
 import 'vmservice.dart';
+import 'widget_cache.dart';
 
 class FlutterDevice {
   FlutterDevice(
