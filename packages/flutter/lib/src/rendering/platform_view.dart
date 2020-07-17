@@ -403,6 +403,9 @@ class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
       (Factory<OneSequenceGestureRecognizer> recognizerFactory) {
         final OneSequenceGestureRecognizer gestureRecognizer = recognizerFactory.constructor();
         gestureRecognizer.team = team;
+        // The below gesture recognizers requires at least one non-empty callback to
+        // compete in the gesture arena.
+        // https://github.com/flutter/flutter/issues/35394#issuecomment-562285087
         if (gestureRecognizer is LongPressGestureRecognizer) {
           gestureRecognizer.onLongPress ??= (){};
         } else if (gestureRecognizer is DragGestureRecognizer) {
@@ -478,6 +481,9 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
       (Factory<OneSequenceGestureRecognizer> recognizerFactory) {
         final OneSequenceGestureRecognizer gestureRecognizer = recognizerFactory.constructor();
         gestureRecognizer.team = team;
+        // The below gesture recognizers requires at least one non-empty callback to
+        // compete in the gesture arena.
+        // https://github.com/flutter/flutter/issues/35394#issuecomment-562285087
         if (gestureRecognizer is LongPressGestureRecognizer) {
           gestureRecognizer.onLongPress ??= (){};
         } else if (gestureRecognizer is DragGestureRecognizer) {
