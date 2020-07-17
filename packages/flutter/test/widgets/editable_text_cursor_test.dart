@@ -791,4 +791,64 @@ void main() {
       matchesGoldenFile('editable_text_test.2.png'),
     );
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+  testWidgets('cursor layout has correct height', (WidgetTester tester) async {
+    final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
+
+    String changedValue;
+    final Widget widget = MaterialApp(
+      home: RepaintBoundary(
+        key: const ValueKey<int>(1),
+        child: Column(
+          children: <Widget>[
+            const SizedBox(width: 10, height: 10),
+            EditableText(
+              backgroundCursorColor: Colors.grey,
+              key: editableTextKey,
+              controller: TextEditingController(),
+              focusNode: FocusNode(),
+              style: Typography.material2018(platform: TargetPlatform.iOS).black.subtitle1,
+              cursorColor: Colors.blue,
+              selectionControls: materialTextSelectionControls,
+              keyboardType: TextInputType.text,
+              onChanged: (String value) {
+                changedValue = value;
+              },
+              cursorWidth: 15.0,
+              cursorHeight: 30.0,
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    // Populate a fake clipboard.
+    const String clipboardContent = 'Hello world!';
+    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+      if (methodCall.method == 'Clipboard.getData')
+        return const <String, dynamic>{'text': clipboardContent};
+      return null;
+    });
+
+    // Long-press to bring up the text editing controls.
+    final Finder textFinder = find.byKey(editableTextKey);
+    await tester.longPress(textFinder);
+    tester.state<EditableTextState>(textFinder).showToolbar();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 500));
+
+    await tester.tap(find.text('Paste'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(changedValue, clipboardContent);
+
+    await expectLater(
+      find.byKey(const ValueKey<int>(1)),
+      matchesGoldenFile('editable_text_test.3.png'),
+    );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 }
