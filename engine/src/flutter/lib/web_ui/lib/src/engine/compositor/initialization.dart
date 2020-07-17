@@ -9,6 +9,10 @@ part of engine;
 const bool experimentalUseSkia =
     bool.fromEnvironment('FLUTTER_WEB_USE_SKIA', defaultValue: false);
 
+// If set to true, forces CPU-only rendering (i.e. no WebGL).
+const bool canvasKitForceCpuOnly =
+    bool.fromEnvironment('FLUTTER_WEB_CANVASKIT_FORCE_CPU_ONLY', defaultValue: false);
+
 /// The URL to use when downloading the CanvasKit script and associated wasm.
 ///
 /// When CanvasKit pushes a new release to NPM, update this URL to reflect the
