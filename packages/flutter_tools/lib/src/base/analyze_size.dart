@@ -1,79 +1,91 @@
-import 'dart:convert';
+// Copyright 2020 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
-import 'package:vm_snapshot_analysis/treemap.dart';
 
 import '../base/file_system.dart';
+import '../convert.dart';
 import '../globals.dart' as globals;
 
-// This file can be in devtools_shared
 class SizeAnalyzer {
-  static const String kAotSizeJson = 'aot-size.json';
+  static const String aotSizeFileName = 'aot-size.json';
 
-  static String getAotSizeAnalysisJsonFile(String aotOutputPath) {
-    return globals.fs.path.join(aotOutputPath, kAotSizeJson);
+  static String aotSizeAnalysisJsonFile(String aotOutputPath) {
+    return globals.fs.path.join(aotOutputPath, aotSizeFileName);
   }
 
-  static String getAotSizeAnalysisExtraGenSnapshotOption(String aotOutputPath) {
-    return '--print-instructions-sizes-to=${getAotSizeAnalysisJsonFile(aotOutputPath)}';
+  static String aotSizeAnalysisExtraGenSnapshotOption(String aotOutputPath) {
+    return '--print-instructions-sizes-to=${aotSizeAnalysisJsonFile(aotOutputPath)}';
   }
 
-  // Parse the output of unzip -v which shows the zip's contents' compressed sizes.
-  final RegExp _kGetUnzipOutput =
-      RegExp(r'^\s*\d+\s+[\w|:]+\s+(\d+)\s+.*  (.+)$');
+  static const int tableWidth = 80;
 
-  Map<String, dynamic> analyzeApkSize(
-      {@required File apk, @required File aotSizeJson}) {
-    globals.printStatus('▒' * 80);
+  Map<String, dynamic> analyzeApkSize({
+    @required File apk,
+    @required File aotSizeJson,
+  }) {
+    globals.printStatus('▒' * tableWidth);
     _printEntitySize(
       '${apk.basename} (total compressed)',
-      apk.lengthSync() ~/ 1024,
+      apk.lengthSync(),
       0,
+      showColor: false,
     );
-    globals.printStatus('━' * 80);
+    globals.printStatus('━' * tableWidth);
     final Directory tempApkContent = globals.fs.systemTempDirectory.createTempSync('flutter_tools.');
     // TODO: implement Windows.
-    final String unzipOut = processUtils.runSync(<String>[
-      'unzip',
-      '-o',
-      '-v',
-      apk.path,
-      '-d',
-      tempApkContent.path
-    ]).stdout;
-    // We just want the the stdout printout. We don't need the files.
-    tempApkContent.deleteSync(recursive: true);
+    String unzipOut;
+    try {
+      unzipOut = processUtils.runSync(<String>[
+        'unzip',
+        '-o',
+        '-v',
+        apk.path,
+        '-d',
+        tempApkContent.path
+      ]).stdout;
+    } on Exception catch (e) {
+      print(e);
+    } finally {
+      // We just want the the stdout printout. We don't need the files.
+      tempApkContent.deleteSync(recursive: true);
+    }
 
-    final Map<String, dynamic> apkAnalysisJson = _parseUnzipFile(
+    final SymbolNode apkAnalysisRoot = _parseUnzipFile(
       unzipOut,
       json.decode(aotSizeJson.readAsStringSync()) as List<dynamic>,
     );
 
-    final List<Map<String, dynamic>> firstLevelPaths = apkAnalysisJson['children'] as List<Map<String, dynamic>>;
-
-    // Print all first level paths and their total sizes.
-    // Expand 'lib' path to print a level deeper.
-    for (final Map<String, dynamic> firstLevelPath in firstLevelPaths) {
-      final String name = firstLevelPath['n'] as String;
+    for (final SymbolNode firstLevelPath in apkAnalysisRoot.children) {
       _printEntitySize(
-        name,
-        (firstLevelPath['value'] as int) ~/ 1024,
+        firstLevelPath.name,
+        firstLevelPath.value,
         1,
       );
-      if (name == 'lib') {
+      if (firstLevelPath.name == 'lib') {
         _printLibDetails(firstLevelPath, '', aotSizeJson);
       }
     }
 
-    globals.printStatus('▒' * 80);
-
-    return apkAnalysisJson;
+    globals.printStatus('▒' * tableWidth);
+    
+    return apkAnalysisRoot.toJson();
   }
 
-  Map<String, dynamic> _parseUnzipFile(
+  // Parse the output of unzip -v which shows the zip's contents' compressed sizes.
+  // Example output of unzip -v:
+  //  Length   Method    Size  Cmpr    Date    Time   CRC-32   Name
+  // --------  ------  ------- ---- ---------- ----- --------  ----
+  //    11708  Defl:N     2592  78% 00-00-1980 00:00 07733eef  AndroidManifest.xml
+  //     1399  Defl:N     1092  22% 00-00-1980 00:00 f53d952a  META-INF/CERT.RSA
+  //    46298  Defl:N    14530  69% 00-00-1980 00:00 17df02b8  META-INF/CERT.SF
+
+  final RegExp _parseUnzipOutput = RegExp(r'^\s*\d+\s+[\w|:]+\s+(\d+)\s+.*  (.+)$');
+
+  SymbolNode _parseUnzipFile(
     String unzipOut,
     List<dynamic> aotSizeJson,
   ) {
@@ -84,73 +96,58 @@ class SizeAnalyzer {
     // For example:
     // 'path/to/file' where file = 1500 => pathsToSize[['path', 'to', 'file']] = 1500
     for (final String line in const LineSplitter().convert(unzipOut)) {
-      final RegExpMatch match = _kGetUnzipOutput.firstMatch(line);
+      final RegExpMatch match = _parseUnzipOutput.firstMatch(line);
       if (match == null) {
         continue;
       }
       pathsToSize[match.group(2).split('/')] = int.parse(match.group(1));
     }
 
-    final Map<String, dynamic> root = <String, dynamic>{'n': '', 'type': 'apk'};
+    final SymbolNode rootNode = SymbolNode('Root');
 
-    Map<String, dynamic> currentLevel = root;
-    // Parse through pathsToSize to create a map object with tree-like structure.
+    SymbolNode currentNode = rootNode;
     for (final List<String> paths in pathsToSize.keys) {
       for (final String path in paths) {
-        if (!currentLevel.containsKey('children')) {
-          currentLevel['children'] = <Map<String, dynamic>>[];
-        }
-
-        // TODO(peterdjlee): Optimize children look up time to O(1) by using a
-        // set instead of a list for children field.
-        Map<String, dynamic> childWithPathAsName =
-            currentLevel['children'].firstWhere(
-          (Map<String, dynamic> child) => child['n'] == path,
-          orElse: () => null,
-        ) as Map<String, dynamic>;
+        SymbolNode childWithPathAsName = currentNode.childByName(path);
 
         if (childWithPathAsName == null) {
-          childWithPathAsName = <String, dynamic>{'n': path, 'value': 0};
+          childWithPathAsName = SymbolNode(path);
 
           if (path.endsWith('libapp.so')) {
-            childWithPathAsName['n'] += ' (Dart AOT)';
+            childWithPathAsName.name += ' (Dart AOT)';
           } else if (path.endsWith('libflutter.so')) {
-            childWithPathAsName['n'] += ' (Flutter Engine)';
+            childWithPathAsName.name += ' (Flutter Engine)';
           }
-
-          // TODO(peterdjlee): Include corresponding aot size data for all 3 platforms.
-          // Convert aotSizeJson to a tree-like structure and include it as children of libapp.so.
-          if (paths.contains('arm64-v8a') && path == 'libapp.so') {
-            childWithPathAsName['children'] = treemapFromJson(aotSizeJson)['children'];
-          }
-          currentLevel['children'].add(childWithPathAsName);
+          currentNode.addChild(childWithPathAsName);
         }
-        childWithPathAsName['value'] += pathsToSize[paths];
-        currentLevel = childWithPathAsName;
+        childWithPathAsName.addValue(pathsToSize[paths]);
+        currentNode = childWithPathAsName;
       }
-      currentLevel = root;
+      currentNode = rootNode;
     }
-    return root;
+
+    return rootNode;
   }
 
   // Prints all the paths from level to
   void _printLibDetails(
-    Map<String, dynamic> currentPath,
+    SymbolNode currentPath,
     String totalPath,
     File aotSizeJson,
   ) {
-    final String name = currentPath['n'] as String;
-    totalPath += name;
+    totalPath += currentPath.name;
 
-    if (currentPath.containsKey('children') && !name.contains('libapp.so')) {
-      for (final Map<String, dynamic> child
-          in currentPath['children'] as List<Map<String, dynamic>>) {
+    if (currentPath.children.isNotEmpty && !currentPath.name.contains('libapp.so')) {
+      for (final SymbolNode child in currentPath.children) {
         _printLibDetails(child, totalPath + '/', aotSizeJson);
       }
     } else {
       // Print total path and size if currentPath does not have any chilren.
-      _printEntitySize(totalPath, (currentPath['value'] as int) ~/ 1024, 2);
-      if (totalPath.contains('lib/arm64-v8a/libapp.so')) {
+      _printEntitySize(totalPath, currentPath.value, 2);
+
+      const String libappPath = 'lib/arm64-v8a/libapp.so';
+      // TODO(peterdjlee): Analyze aot size for all platforms.
+      if (totalPath.contains(libappPath)) {
         _analyzeAotSize(aotSizeJson);
       }
     }
@@ -170,31 +167,30 @@ class SizeAnalyzer {
 
     _printEntitySize(
       'Dart AOT symbols accounted decompressed size',
-      totalSymbolSize ~/ 1024,
+      totalSymbolSize,
       3,
     );
 
     final List<SymbolNode> sortedSymbols = root.children.toList()
       ..sort((SymbolNode a, SymbolNode b) => b.value.compareTo(a.value));
     for (final SymbolNode node in sortedSymbols.take(10)) {
-      _printEntitySize(node.name, node.value ~/ 1024, 4);
+      _printEntitySize(node.name, node.value, 4);
     }
   }
 
-  final NumberFormat numberFormat = NumberFormat('#,###,###');
-
   // A pretty printer for an entity with a size.
-  void _printEntitySize(String entityName, int sizeInKb, int level) {
-    const int tableWidth = 80;
+  void _printEntitySize(String entityName, int numBytes, int level,
+      {bool showColor = true}) {
     final bool emphasis = level <= 1;
-    final TerminalColor color = level == 0
-        ? null
-        : level == 1
-            ? TerminalColor.blue
-            : level == 2
-                ? TerminalColor.green
-                : level == 3 ? TerminalColor.red : TerminalColor.yellow;
-    final String formattedSize = '${numberFormat.format(sizeInKb)}kB';
+    final String formattedSize = _prettyPrintBytes(numBytes);
+
+    TerminalColor color = TerminalColor.green;
+    if (formattedSize.endsWith('MB')) {
+      color = TerminalColor.red;
+    } else if (formattedSize.endsWith('KB')) {
+      color = TerminalColor.yellow;
+    }
+
     final int spaceInBetween = tableWidth - level * 2 - entityName.length - formattedSize.length;
     globals.printStatus(
       entityName + ' ' * spaceInBetween,
@@ -202,7 +198,19 @@ class SizeAnalyzer {
       emphasis: emphasis,
       indent: level * 2,
     );
-    globals.printStatus(formattedSize, color: color);
+    globals.printStatus(formattedSize, color: showColor ? color : null);
+  }
+
+  String _prettyPrintBytes(int numBytes) {
+    const int kB = 1024;
+    const int mB = kB * 1024;
+    if (numBytes < kB) {
+      return '$numBytes B';
+    } else if (numBytes < mB) {
+      return '${(numBytes / kB).round()} KB';
+    } else {
+      return '${(numBytes / mB).round()} MB';
+    }
   }
 }
 
@@ -216,7 +224,7 @@ class SymbolNode {
         _value = value;
 
   /// The human friendly identifier for this node.
-  final String name;
+  String name;
 
   int _value;
   int get value {
@@ -227,12 +235,15 @@ class SymbolNode {
     return _value;
   }
 
-  SymbolNode _parent;
-  SymbolNode get parent => _parent;
+  void addValue(int valueToBeAdded) {
+    _value += valueToBeAdded;
+  }
 
-  final Map<String, SymbolNode> _children;
+  SymbolNode get parent => _parent;
+  SymbolNode _parent;
 
   Iterable<SymbolNode> get children => _children.values;
+  final Map<String, SymbolNode> _children;
 
   SymbolNode childByName(String name) => _children[name];
 
@@ -274,6 +285,21 @@ class SymbolNode {
       }
     }
     return result;
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> json = <String, dynamic>{
+      'n': name,
+      'value': _value
+    };
+    final List<Map<String, dynamic>> childrenAsJson = <Map<String, dynamic>>[];
+    for (final SymbolNode child in children) {
+      childrenAsJson.add(child.toJson());
+    }
+    if (childrenAsJson.isNotEmpty) {
+      json['children'] = childrenAsJson;
+    }
+    return json;
   }
 }
 
@@ -329,7 +355,7 @@ class Symbol {
   List<String> get parts {
     return <String>[
       if (libraryUri != null) ...libraryUri.split('/') else '@stubs',
-      if (className != null && className.isNotEmpty) className,
+      if (className?.isNotEmpty ?? false) className,
       name,
     ];
   }

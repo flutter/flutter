@@ -78,7 +78,7 @@ class AotBuilder {
 
     List<String> extraGenSnapshotOptions;
     if (buildInfo?.analyzeAotSize ?? false) {
-      extraGenSnapshotOptions = <String>[SizeAnalyzer.getAotSizeAnalysisExtraGenSnapshotOption(outputPath)];
+      extraGenSnapshotOptions = <String>[SizeAnalyzer.aotSizeAnalysisExtraGenSnapshotOption(outputPath)];
     }
     if (buildInfo?.extraGenSnapshotOptions?.isNotEmpty ?? false) {
       extraGenSnapshotOptions?.addAll(buildInfo.extraGenSnapshotOptions);

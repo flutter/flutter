@@ -318,14 +318,12 @@ Future<void> buildGradleApp({
   List<String> extraGenSnapShotOptions;
   String aotSizeJson;
 
-  if (buildInfo.extraGenSnapshotOptions != null) {
-    extraGenSnapShotOptions = buildInfo.extraGenSnapshotOptions;
-  }
+  extraGenSnapShotOptions = buildInfo.extraGenSnapshotOptions;
 
   if (buildInfo.analyzeAotSize) {
-    aotSizeJson = SizeAnalyzer.getAotSizeAnalysisJsonFile(getApkDirectory(project).absolute.path);
+    aotSizeJson = SizeAnalyzer.aotSizeAnalysisJsonFile(getApkDirectory(project).absolute.path);
     (extraGenSnapShotOptions ??= <String>[])
-        .add(SizeAnalyzer.getAotSizeAnalysisExtraGenSnapshotOption(getApkDirectory(project).absolute.path));
+        .add(SizeAnalyzer.aotSizeAnalysisExtraGenSnapshotOption(getApkDirectory(project).absolute.path));
   }
 
   if (extraGenSnapShotOptions != null) {
@@ -531,7 +529,7 @@ Future<void> buildGradleApp({
     );
     final File apkAnalysisFile = apkDirectory.childFile('apk-analysis.json');
     apkAnalysisFile.writeAsStringSync(json.encode(apkAnalysisJson));
-    // TODO(peterdjlee); Output a clickable link that launches devtools and automatically loads the data from analyze.json.
+    // TODO(peterdjlee); Add a flag for this tool to launch devtools and load apk-analysis.json automatically.
     globals.printStatus(
       'A summary of your APK analysis can be found at ${globals.fs.path.relative(apkAnalysisFile.path)}',
     );
