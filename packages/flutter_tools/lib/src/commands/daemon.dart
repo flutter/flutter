@@ -770,7 +770,7 @@ class DeviceDomain extends Domain {
 
     // Use the device manager discovery so that client provided device types
     // are usable via the daemon protocol.
-    deviceManager.deviceDiscoverers.forEach(addDeviceDiscoverer);
+    globals.deviceManager.deviceDiscoverers.forEach(addDeviceDiscoverer);
   }
 
   void addDeviceDiscoverer(DeviceDiscovery discoverer) {

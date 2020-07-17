@@ -21,7 +21,6 @@ import '../base/utils.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
-import '../device.dart';
 import '../globals.dart' as globals;
 import '../tester/flutter_tester.dart';
 
@@ -311,7 +310,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         }
 
         // See if the user specified a specific device.
-        deviceManager.specifiedDeviceId = topLevelResults['device-id'] as String;
+        globals.deviceManager.specifiedDeviceId = topLevelResults['device-id'] as String;
 
         if (topLevelResults['version'] as bool) {
           globals.flutterUsage.sendCommand('version');

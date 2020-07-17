@@ -342,7 +342,7 @@ class RunCommand extends RunCommandBase {
     if (devices == null) {
       throwToolExit(null);
     }
-    if (deviceManager.hasSpecifiedAllDevices && runningWithPrebuiltApplication) {
+    if (globals.deviceManager.hasSpecifiedAllDevices && runningWithPrebuiltApplication) {
       throwToolExit('Using -d all with --use-application-binary is not supported');
     }
 
