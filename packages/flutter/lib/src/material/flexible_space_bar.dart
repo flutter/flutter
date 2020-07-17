@@ -41,11 +41,14 @@ enum StretchMode {
 /// The part of a material design [AppBar] that expands, collapses, and
 /// stretches.
 ///
-/// Most commonly used in in the [SliverAppBar.flexibleSpace] field, a flexible
+/// Most commonly used in the [SliverAppBar.flexibleSpace] field, a flexible
 /// space bar expands and contracts as the app scrolls so that the [AppBar]
 /// reaches from the top of the app to the top of the scrolling contents of the
-/// app. Furthermore is included functionality for stretch behavior. When
-/// [SliverAppBar.stretch] is true, and your [ScrollPhysics] allow for
+/// app. Also, while including [SliverAppBar.flexibleSpace] it is important to
+/// mention [expandedHeight] property because if a [flexibleSpace] widget is
+/// specified [expandedHeight] should be big enough to accommodate whatever that
+/// widget contains. Furthermore is included functionality for stretch behavior.
+/// When [SliverAppBar.stretch] is true, and your [ScrollPhysics] allow for
 /// overscroll, this space will stretch with the overscroll.
 ///
 /// The widget that sizes the [AppBar] must wrap it in the widget returned by
