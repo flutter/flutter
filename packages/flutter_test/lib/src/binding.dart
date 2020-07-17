@@ -1268,7 +1268,15 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
   /// Ignore any request from pump.
   ///
   /// This is used for running the test on a device, where scheduling of new
-  /// frames respect what the engine and the device needed.
+  /// frames respects what the engine and the device needed.
+  ///
+  /// Compared to `fullyLive` this policy ignores the frame requests from pump
+  /// of the test code so that the frame scheduling respects the situation of
+  /// that for the real environment, and avoids waiting for the new frame beyond
+  /// the expected time.
+  ///
+  /// Compared to `benchmark` this policy can be used for capturing the
+  /// animation frames requested by the framework.
   benchmarkLive,
 }
 
