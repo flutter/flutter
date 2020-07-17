@@ -192,7 +192,7 @@ class SizeAnalyzer {
     while (path.isNotEmpty) {
       final List<Map<String, dynamic>> children = currentLevel['children'] as List<Map<String, dynamic>>;
       final Map<String, dynamic> childWithPathAsName = children.firstWhere(
-        (Map<String, dynamic> child) => (child['n'] as String).contains(path.first),
+        (Map<String, dynamic> child) => child['n'] as String == path.first,
       );
       path.removeAt(0);
       currentLevel = childWithPathAsName;
@@ -213,7 +213,7 @@ class SizeAnalyzer {
 
     TerminalColor color = TerminalColor.green;
     if (formattedSize.endsWith('MB')) {
-      color = TerminalColor.red;
+      color = TerminalColor.cyan;
     } else if (formattedSize.endsWith('KB')) {
       color = TerminalColor.yellow;
     }
