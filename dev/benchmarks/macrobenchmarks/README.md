@@ -28,13 +28,6 @@ The key `[test_name]` can be:
 - `textfield_perf`
 - `cubic_bezier_perf`
 
-`cubic_bezier_perf` is a special case for SkSL shader warm-up, which also has
-its own test app code for performing warm-up, which should be run by:
-
-```
-flutter drive --profile -t test_driver/cubic_bezier_perf.dart
-```
-
 ## Web benchmarks
 
 Web benchmarks are compiled from the same entrypoint in `lib/web_benchmarks.dart`.
