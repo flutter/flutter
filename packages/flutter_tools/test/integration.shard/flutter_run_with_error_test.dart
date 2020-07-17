@@ -36,7 +36,10 @@ void main() {
 
   test('flutter run in non-machine mode reports an early error in an application', () async {
     final String flutterBin = globals.fs.path.join(
-        getFlutterRoot(), 'bin', 'flutter');
+      getFlutterRoot(),
+      'bin',
+      'flutter',
+    );
 
     final StringBuffer stdout = StringBuffer();
 

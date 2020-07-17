@@ -448,7 +448,7 @@ class AppDomain extends Domain {
     String dillOutputPath,
     bool ipv6 = false,
     String isolateFilter,
-    bool machine = false,
+    bool machine = true,
   }) async {
     if (!await device.supportsRuntimeMode(options.buildInfo.mode)) {
       throw Exception(
