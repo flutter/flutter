@@ -37,8 +37,8 @@ void macroPerfTest(
   Duration pageDelay,
   Duration duration = const Duration(seconds: 3),
   Duration timeout = const Duration(seconds: 30),
-  Future<void> driverOps(WidgetTester tester),
-  Future<void> setupOps(WidgetTester tester),
+  Future<void> driverOps(WidgetController controller),
+  Future<void> setupOps(WidgetController controller),
 }) {
   assert(() {
     debugPrint(_kDebugWarning);
