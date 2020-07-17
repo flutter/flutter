@@ -11,6 +11,9 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 
+/// Wraps iproxy command line tool port forwarding.
+///
+/// See https://github.com/libimobiledevice/libusbmuxd.
 class IProxy {
   IProxy({
     @required String iproxyPath,
@@ -43,7 +46,7 @@ class IProxy {
   final ProcessUtils _processUtils;
   final MapEntry<String, String> _dyLdLibEntry;
 
-  Future<Process> forward(int devicePort, int hostPort, String deviceId) async {
+  Future<Process> forward(int devicePort, int hostPort, String deviceId) {
     // Usage: iproxy LOCAL_PORT:DEVICE_PORT --udid UDID
     return _processUtils.start(
       <String>[
