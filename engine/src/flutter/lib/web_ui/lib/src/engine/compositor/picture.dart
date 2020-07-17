@@ -31,9 +31,6 @@ class SkPictureSkiaObject extends OneShotSkiaObject<SkPicture> {
   SkPictureSkiaObject(SkPicture picture) : super(picture);
 
   @override
-  js.JsObject get legacySkiaObject => _jsObjectWrapper.wrapSkPicture(skiaObject);
-
-  @override
   void delete() {
     rawSkiaObject?.delete();
   }

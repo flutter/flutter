@@ -59,35 +59,35 @@ void main() {
 
 void _blendModeTests() {
   test('blend mode mapping is correct', () {
-    expect(canvasKitJs.BlendMode.Clear.value, ui.BlendMode.clear.index);
-    expect(canvasKitJs.BlendMode.Src.value, ui.BlendMode.src.index);
-    expect(canvasKitJs.BlendMode.Dst.value, ui.BlendMode.dst.index);
-    expect(canvasKitJs.BlendMode.SrcOver.value, ui.BlendMode.srcOver.index);
-    expect(canvasKitJs.BlendMode.DstOver.value, ui.BlendMode.dstOver.index);
-    expect(canvasKitJs.BlendMode.SrcIn.value, ui.BlendMode.srcIn.index);
-    expect(canvasKitJs.BlendMode.DstIn.value, ui.BlendMode.dstIn.index);
-    expect(canvasKitJs.BlendMode.SrcOut.value, ui.BlendMode.srcOut.index);
-    expect(canvasKitJs.BlendMode.DstOut.value, ui.BlendMode.dstOut.index);
-    expect(canvasKitJs.BlendMode.SrcATop.value, ui.BlendMode.srcATop.index);
-    expect(canvasKitJs.BlendMode.DstATop.value, ui.BlendMode.dstATop.index);
-    expect(canvasKitJs.BlendMode.Xor.value, ui.BlendMode.xor.index);
-    expect(canvasKitJs.BlendMode.Plus.value, ui.BlendMode.plus.index);
-    expect(canvasKitJs.BlendMode.Modulate.value, ui.BlendMode.modulate.index);
-    expect(canvasKitJs.BlendMode.Screen.value, ui.BlendMode.screen.index);
-    expect(canvasKitJs.BlendMode.Overlay.value, ui.BlendMode.overlay.index);
-    expect(canvasKitJs.BlendMode.Darken.value, ui.BlendMode.darken.index);
-    expect(canvasKitJs.BlendMode.Lighten.value, ui.BlendMode.lighten.index);
-    expect(canvasKitJs.BlendMode.ColorDodge.value, ui.BlendMode.colorDodge.index);
-    expect(canvasKitJs.BlendMode.ColorBurn.value, ui.BlendMode.colorBurn.index);
-    expect(canvasKitJs.BlendMode.HardLight.value, ui.BlendMode.hardLight.index);
-    expect(canvasKitJs.BlendMode.SoftLight.value, ui.BlendMode.softLight.index);
-    expect(canvasKitJs.BlendMode.Difference.value, ui.BlendMode.difference.index);
-    expect(canvasKitJs.BlendMode.Exclusion.value, ui.BlendMode.exclusion.index);
-    expect(canvasKitJs.BlendMode.Multiply.value, ui.BlendMode.multiply.index);
-    expect(canvasKitJs.BlendMode.Hue.value, ui.BlendMode.hue.index);
-    expect(canvasKitJs.BlendMode.Saturation.value, ui.BlendMode.saturation.index);
-    expect(canvasKitJs.BlendMode.Color.value, ui.BlendMode.color.index);
-    expect(canvasKitJs.BlendMode.Luminosity.value, ui.BlendMode.luminosity.index);
+    expect(canvasKit.BlendMode.Clear.value, ui.BlendMode.clear.index);
+    expect(canvasKit.BlendMode.Src.value, ui.BlendMode.src.index);
+    expect(canvasKit.BlendMode.Dst.value, ui.BlendMode.dst.index);
+    expect(canvasKit.BlendMode.SrcOver.value, ui.BlendMode.srcOver.index);
+    expect(canvasKit.BlendMode.DstOver.value, ui.BlendMode.dstOver.index);
+    expect(canvasKit.BlendMode.SrcIn.value, ui.BlendMode.srcIn.index);
+    expect(canvasKit.BlendMode.DstIn.value, ui.BlendMode.dstIn.index);
+    expect(canvasKit.BlendMode.SrcOut.value, ui.BlendMode.srcOut.index);
+    expect(canvasKit.BlendMode.DstOut.value, ui.BlendMode.dstOut.index);
+    expect(canvasKit.BlendMode.SrcATop.value, ui.BlendMode.srcATop.index);
+    expect(canvasKit.BlendMode.DstATop.value, ui.BlendMode.dstATop.index);
+    expect(canvasKit.BlendMode.Xor.value, ui.BlendMode.xor.index);
+    expect(canvasKit.BlendMode.Plus.value, ui.BlendMode.plus.index);
+    expect(canvasKit.BlendMode.Modulate.value, ui.BlendMode.modulate.index);
+    expect(canvasKit.BlendMode.Screen.value, ui.BlendMode.screen.index);
+    expect(canvasKit.BlendMode.Overlay.value, ui.BlendMode.overlay.index);
+    expect(canvasKit.BlendMode.Darken.value, ui.BlendMode.darken.index);
+    expect(canvasKit.BlendMode.Lighten.value, ui.BlendMode.lighten.index);
+    expect(canvasKit.BlendMode.ColorDodge.value, ui.BlendMode.colorDodge.index);
+    expect(canvasKit.BlendMode.ColorBurn.value, ui.BlendMode.colorBurn.index);
+    expect(canvasKit.BlendMode.HardLight.value, ui.BlendMode.hardLight.index);
+    expect(canvasKit.BlendMode.SoftLight.value, ui.BlendMode.softLight.index);
+    expect(canvasKit.BlendMode.Difference.value, ui.BlendMode.difference.index);
+    expect(canvasKit.BlendMode.Exclusion.value, ui.BlendMode.exclusion.index);
+    expect(canvasKit.BlendMode.Multiply.value, ui.BlendMode.multiply.index);
+    expect(canvasKit.BlendMode.Hue.value, ui.BlendMode.hue.index);
+    expect(canvasKit.BlendMode.Saturation.value, ui.BlendMode.saturation.index);
+    expect(canvasKit.BlendMode.Color.value, ui.BlendMode.color.index);
+    expect(canvasKit.BlendMode.Luminosity.value, ui.BlendMode.luminosity.index);
   });
 
   test('ui.BlendMode converts to SkBlendMode', () {
@@ -99,8 +99,8 @@ void _blendModeTests() {
 
 void _paintStyleTests() {
   test('paint style mapping is correct', () {
-    expect(canvasKitJs.PaintStyle.Fill.value, ui.PaintingStyle.fill.index);
-    expect(canvasKitJs.PaintStyle.Stroke.value, ui.PaintingStyle.stroke.index);
+    expect(canvasKit.PaintStyle.Fill.value, ui.PaintingStyle.fill.index);
+    expect(canvasKit.PaintStyle.Stroke.value, ui.PaintingStyle.stroke.index);
   });
 
   test('ui.PaintingStyle converts to SkPaintStyle', () {
@@ -112,9 +112,9 @@ void _paintStyleTests() {
 
 void _strokeCapTests() {
   test('stroke cap mapping is correct', () {
-    expect(canvasKitJs.StrokeCap.Butt.value, ui.StrokeCap.butt.index);
-    expect(canvasKitJs.StrokeCap.Round.value, ui.StrokeCap.round.index);
-    expect(canvasKitJs.StrokeCap.Square.value, ui.StrokeCap.square.index);
+    expect(canvasKit.StrokeCap.Butt.value, ui.StrokeCap.butt.index);
+    expect(canvasKit.StrokeCap.Round.value, ui.StrokeCap.round.index);
+    expect(canvasKit.StrokeCap.Square.value, ui.StrokeCap.square.index);
   });
 
   test('ui.StrokeCap converts to SkStrokeCap', () {
@@ -126,9 +126,9 @@ void _strokeCapTests() {
 
 void _strokeJoinTests() {
   test('stroke cap mapping is correct', () {
-    expect(canvasKitJs.StrokeJoin.Miter.value, ui.StrokeJoin.miter.index);
-    expect(canvasKitJs.StrokeJoin.Round.value, ui.StrokeJoin.round.index);
-    expect(canvasKitJs.StrokeJoin.Bevel.value, ui.StrokeJoin.bevel.index);
+    expect(canvasKit.StrokeJoin.Miter.value, ui.StrokeJoin.miter.index);
+    expect(canvasKit.StrokeJoin.Round.value, ui.StrokeJoin.round.index);
+    expect(canvasKit.StrokeJoin.Bevel.value, ui.StrokeJoin.bevel.index);
   });
 
   test('ui.StrokeJoin converts to SkStrokeJoin', () {
@@ -140,10 +140,10 @@ void _strokeJoinTests() {
 
 void _filterQualityTests() {
   test('filter quality mapping is correct', () {
-    expect(canvasKitJs.FilterQuality.None.value, ui.FilterQuality.none.index);
-    expect(canvasKitJs.FilterQuality.Low.value, ui.FilterQuality.low.index);
-    expect(canvasKitJs.FilterQuality.Medium.value, ui.FilterQuality.medium.index);
-    expect(canvasKitJs.FilterQuality.High.value, ui.FilterQuality.high.index);
+    expect(canvasKit.FilterQuality.None.value, ui.FilterQuality.none.index);
+    expect(canvasKit.FilterQuality.Low.value, ui.FilterQuality.low.index);
+    expect(canvasKit.FilterQuality.Medium.value, ui.FilterQuality.medium.index);
+    expect(canvasKit.FilterQuality.High.value, ui.FilterQuality.high.index);
   });
 
   test('ui.FilterQuality converts to SkFilterQuality', () {
@@ -155,10 +155,10 @@ void _filterQualityTests() {
 
 void _blurStyleTests() {
   test('blur style mapping is correct', () {
-    expect(canvasKitJs.BlurStyle.Normal.value, ui.BlurStyle.normal.index);
-    expect(canvasKitJs.BlurStyle.Solid.value, ui.BlurStyle.solid.index);
-    expect(canvasKitJs.BlurStyle.Outer.value, ui.BlurStyle.outer.index);
-    expect(canvasKitJs.BlurStyle.Inner.value, ui.BlurStyle.inner.index);
+    expect(canvasKit.BlurStyle.Normal.value, ui.BlurStyle.normal.index);
+    expect(canvasKit.BlurStyle.Solid.value, ui.BlurStyle.solid.index);
+    expect(canvasKit.BlurStyle.Outer.value, ui.BlurStyle.outer.index);
+    expect(canvasKit.BlurStyle.Inner.value, ui.BlurStyle.inner.index);
   });
 
   test('ui.BlurStyle converts to SkBlurStyle', () {
@@ -170,9 +170,9 @@ void _blurStyleTests() {
 
 void _tileModeTests() {
   test('tile mode mapping is correct', () {
-    expect(canvasKitJs.TileMode.Clamp.value, ui.TileMode.clamp.index);
-    expect(canvasKitJs.TileMode.Repeat.value, ui.TileMode.repeated.index);
-    expect(canvasKitJs.TileMode.Mirror.value, ui.TileMode.mirror.index);
+    expect(canvasKit.TileMode.Clamp.value, ui.TileMode.clamp.index);
+    expect(canvasKit.TileMode.Repeat.value, ui.TileMode.repeated.index);
+    expect(canvasKit.TileMode.Mirror.value, ui.TileMode.mirror.index);
   });
 
   test('ui.TileMode converts to SkTileMode', () {
@@ -184,8 +184,8 @@ void _tileModeTests() {
 
 void _fillTypeTests() {
   test('fill type mapping is correct', () {
-    expect(canvasKitJs.FillType.Winding.value, ui.PathFillType.nonZero.index);
-    expect(canvasKitJs.FillType.EvenOdd.value, ui.PathFillType.evenOdd.index);
+    expect(canvasKit.FillType.Winding.value, ui.PathFillType.nonZero.index);
+    expect(canvasKit.FillType.EvenOdd.value, ui.PathFillType.evenOdd.index);
   });
 
   test('ui.PathFillType converts to SkFillType', () {
@@ -198,11 +198,11 @@ void _fillTypeTests() {
 void _pathOpTests() {
   // TODO(yjbanov): https://github.com/flutter/flutter/issues/61403
   // test('path op mapping is correct', () {
-  //   expect(canvasKitJs.PathOp.Difference.value, ui.PathOperation.difference.index);
-  //   expect(canvasKitJs.PathOp.Intersect.value, ui.PathOperation.intersect.index);
-  //   expect(canvasKitJs.PathOp.Union.value, ui.PathOperation.union.index);
-  //   expect(canvasKitJs.PathOp.XOR.value, ui.PathOperation.xor.index);
-  //   expect(canvasKitJs.PathOp.ReverseDifference, ui.PathOperation.reverseDifference.index);
+  //   expect(canvasKit.PathOp.Difference.value, ui.PathOperation.difference.index);
+  //   expect(canvasKit.PathOp.Intersect.value, ui.PathOperation.intersect.index);
+  //   expect(canvasKit.PathOp.Union.value, ui.PathOperation.union.index);
+  //   expect(canvasKit.PathOp.XOR.value, ui.PathOperation.xor.index);
+  //   expect(canvasKit.PathOp.ReverseDifference, ui.PathOperation.reverseDifference.index);
   // });
 
   // test('ui.PathOperation converts to SkPathOp', () {
@@ -214,8 +214,8 @@ void _pathOpTests() {
 
 void _clipOpTests() {
   test('clip op mapping is correct', () {
-    expect(canvasKitJs.ClipOp.Difference.value, ui.ClipOp.difference.index);
-    expect(canvasKitJs.ClipOp.Intersect.value, ui.ClipOp.intersect.index);
+    expect(canvasKit.ClipOp.Difference.value, ui.ClipOp.difference.index);
+    expect(canvasKit.ClipOp.Intersect.value, ui.ClipOp.intersect.index);
   });
 
   test('ui.ClipOp converts to SkClipOp', () {
@@ -227,9 +227,9 @@ void _clipOpTests() {
 
 void _pointModeTests() {
   test('point mode mapping is correct', () {
-    expect(canvasKitJs.PointMode.Points.value, ui.PointMode.points.index);
-    expect(canvasKitJs.PointMode.Lines.value, ui.PointMode.lines.index);
-    expect(canvasKitJs.PointMode.Polygon.value, ui.PointMode.polygon.index);
+    expect(canvasKit.PointMode.Points.value, ui.PointMode.points.index);
+    expect(canvasKit.PointMode.Lines.value, ui.PointMode.lines.index);
+    expect(canvasKit.PointMode.Polygon.value, ui.PointMode.polygon.index);
   });
 
   test('ui.PointMode converts to SkPointMode', () {
@@ -241,9 +241,9 @@ void _pointModeTests() {
 
 void _vertexModeTests() {
   test('vertex mode mapping is correct', () {
-    expect(canvasKitJs.VertexMode.Triangles.value, ui.VertexMode.triangles.index);
-    expect(canvasKitJs.VertexMode.TrianglesStrip.value, ui.VertexMode.triangleStrip.index);
-    expect(canvasKitJs.VertexMode.TriangleFan.value, ui.VertexMode.triangleFan.index);
+    expect(canvasKit.VertexMode.Triangles.value, ui.VertexMode.triangles.index);
+    expect(canvasKit.VertexMode.TrianglesStrip.value, ui.VertexMode.triangleStrip.index);
+    expect(canvasKit.VertexMode.TriangleFan.value, ui.VertexMode.triangleFan.index);
   });
 
   test('ui.VertexMode converts to SkVertexMode', () {
@@ -255,7 +255,7 @@ void _vertexModeTests() {
 
 void _imageTests() {
   test('MakeAnimatedImageFromEncoded makes a non-animated image', () {
-    final SkAnimatedImage nonAnimated = canvasKitJs.MakeAnimatedImageFromEncoded(kTransparentImage);
+    final SkAnimatedImage nonAnimated = canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage);
     expect(nonAnimated.getFrameCount(), 1);
     expect(nonAnimated.getRepetitionCount(), 0);
     expect(nonAnimated.width(), 1);
@@ -266,11 +266,11 @@ void _imageTests() {
     expect(frame.height(), 1);
 
     expect(nonAnimated.decodeNextFrame(), -1);
-    expect(frame.makeShader(canvasKitJs.TileMode.Repeat, canvasKitJs.TileMode.Mirror), isNotNull);
+    expect(frame.makeShader(canvasKit.TileMode.Repeat, canvasKit.TileMode.Mirror), isNotNull);
   });
 
   test('MakeAnimatedImageFromEncoded makes an animated image', () {
-    final SkAnimatedImage animated = canvasKitJs.MakeAnimatedImageFromEncoded(kAnimatedGif);
+    final SkAnimatedImage animated = canvasKit.MakeAnimatedImageFromEncoded(kAnimatedGif);
     expect(animated.getFrameCount(), 3);
     expect(animated.getRepetitionCount(), -1);  // animates forever
     expect(animated.width(), 1);
@@ -290,7 +290,7 @@ void _shaderTests() {
   });
 
   test('MakeRadialGradient', () {
-    expect(canvasKitJs.SkShader.MakeRadialGradient(
+    expect(canvasKit.SkShader.MakeRadialGradient(
       Float32List.fromList([1, 1]),
       10.0,
       <Float32List>[
@@ -298,14 +298,14 @@ void _shaderTests() {
         Float32List.fromList([1, 1, 1, 1]),
       ],
       Float32List.fromList([0, 1]),
-      canvasKitJs.TileMode.Repeat,
+      canvasKit.TileMode.Repeat,
       toSkMatrixFromFloat32(Matrix4.identity().storage),
       0,
     ), isNotNull);
   });
 
   test('MakeTwoPointConicalGradient', () {
-    expect(canvasKitJs.SkShader.MakeTwoPointConicalGradient(
+    expect(canvasKit.SkShader.MakeTwoPointConicalGradient(
       Float32List.fromList([1, 1]),
       10.0,
       Float32List.fromList([1, 1]),
@@ -315,7 +315,7 @@ void _shaderTests() {
         Float32List.fromList([1, 1, 1, 1]),
       ],
       Float32List.fromList([0, 1]),
-      canvasKitJs.TileMode.Repeat,
+      canvasKit.TileMode.Repeat,
       toSkMatrixFromFloat32(Matrix4.identity().storage),
       0,
     ), isNotNull);
@@ -323,40 +323,40 @@ void _shaderTests() {
 }
 
 SkShader _makeTestShader() {
-  return canvasKitJs.SkShader.MakeLinearGradient(
+  return canvasKit.SkShader.MakeLinearGradient(
     Float32List.fromList([0, 0]),
     Float32List.fromList([1, 1]),
     [
       Float32List.fromList([255, 0, 0, 255]),
     ],
     Float32List.fromList([0, 1]),
-    canvasKitJs.TileMode.Repeat,
+    canvasKit.TileMode.Repeat,
   );
 }
 
 void _paintTests() {
   test('can make SkPaint', () async {
     final SkPaint paint = SkPaint();
-    paint.setBlendMode(canvasKitJs.BlendMode.SrcOut);
-    paint.setStyle(canvasKitJs.PaintStyle.Stroke);
+    paint.setBlendMode(canvasKit.BlendMode.SrcOut);
+    paint.setStyle(canvasKit.PaintStyle.Stroke);
     paint.setStrokeWidth(3.0);
-    paint.setStrokeCap(canvasKitJs.StrokeCap.Round);
-    paint.setStrokeJoin(canvasKitJs.StrokeJoin.Bevel);
+    paint.setStrokeCap(canvasKit.StrokeCap.Round);
+    paint.setStrokeJoin(canvasKit.StrokeJoin.Bevel);
     paint.setAntiAlias(true);
     paint.setColorInt(0x00FFCCAA);
     paint.setShader(_makeTestShader());
-    paint.setMaskFilter(canvasKitJs.MakeBlurMaskFilter(
-      canvasKitJs.BlurStyle.Outer,
+    paint.setMaskFilter(canvasKit.MakeBlurMaskFilter(
+      canvasKit.BlurStyle.Outer,
       2.0,
       true,
     ));
-    paint.setFilterQuality(canvasKitJs.FilterQuality.High);
-    paint.setColorFilter(canvasKitJs.SkColorFilter.MakeLinearToSRGBGamma());
+    paint.setFilterQuality(canvasKit.FilterQuality.High);
+    paint.setColorFilter(canvasKit.SkColorFilter.MakeLinearToSRGBGamma());
     paint.setStrokeMiter(1.4);
-    paint.setImageFilter(canvasKitJs.SkImageFilter.MakeBlur(
+    paint.setImageFilter(canvasKit.SkImageFilter.MakeBlur(
       1,
       2,
-      canvasKitJs.TileMode.Repeat,
+      canvasKit.TileMode.Repeat,
       null,
     ));
   });
@@ -364,8 +364,8 @@ void _paintTests() {
 
 void _maskFilterTests() {
   test('MakeBlurMaskFilter', () {
-    expect(canvasKitJs.MakeBlurMaskFilter(
-      canvasKitJs.BlurStyle.Outer,
+    expect(canvasKit.MakeBlurMaskFilter(
+      canvasKit.BlurStyle.Outer,
       5.0,
       false,
     ), isNotNull);
@@ -375,9 +375,9 @@ void _maskFilterTests() {
 void _colorFilterTests() {
   test('MakeBlend', () {
     expect(
-      canvasKitJs.SkColorFilter.MakeBlend(
+      canvasKit.SkColorFilter.MakeBlend(
         Float32List.fromList([0, 0, 0, 1]),
-        canvasKitJs.BlendMode.SrcATop,
+        canvasKit.BlendMode.SrcATop,
       ),
       isNotNull,
     );
@@ -385,7 +385,7 @@ void _colorFilterTests() {
 
   test('MakeMatrix', () {
     expect(
-      canvasKitJs.SkColorFilter.MakeMatrix(
+      canvasKit.SkColorFilter.MakeMatrix(
         Float32List(20),
       ),
       isNotNull,
@@ -394,14 +394,14 @@ void _colorFilterTests() {
 
   test('MakeSRGBToLinearGamma', () {
     expect(
-      canvasKitJs.SkColorFilter.MakeSRGBToLinearGamma(),
+      canvasKit.SkColorFilter.MakeSRGBToLinearGamma(),
       isNotNull,
     );
   });
 
   test('MakeLinearToSRGBGamma', () {
     expect(
-      canvasKitJs.SkColorFilter.MakeLinearToSRGBGamma(),
+      canvasKit.SkColorFilter.MakeLinearToSRGBGamma(),
       isNotNull,
     );
   });
@@ -410,16 +410,16 @@ void _colorFilterTests() {
 void _imageFilterTests() {
   test('MakeBlur', () {
     expect(
-      canvasKitJs.SkImageFilter.MakeBlur(1, 2, canvasKitJs.TileMode.Repeat, null),
+      canvasKit.SkImageFilter.MakeBlur(1, 2, canvasKit.TileMode.Repeat, null),
       isNotNull,
     );
   });
 
   test('MakeMatrixTransform', () {
     expect(
-      canvasKitJs.SkImageFilter.MakeMatrixTransform(
+      canvasKit.SkImageFilter.MakeMatrixTransform(
         toSkMatrixFromFloat32(Matrix4.identity().storage),
-        canvasKitJs.FilterQuality.Medium,
+        canvasKit.FilterQuality.Medium,
         null,
       ),
       isNotNull,
@@ -542,7 +542,7 @@ void _pathTests() {
   });
 
   test('setFillType', () {
-    path.setFillType(canvasKitJs.FillType.Winding);
+    path.setFillType(canvasKit.FillType.Winding);
   });
 
   test('addArc', () {
@@ -611,8 +611,7 @@ void _pathTests() {
   });
 
   test('overloaded arcTo (used for arcToPoint)', () {
-    final SkPathArcToPointOverload overload = debugJsObjectWrapper.castToSkPathArcToPointOverload(path);
-    overload.arcTo(
+    (path as SkPathArcToPointOverload).arcTo(
       1,
       2,
       3,
@@ -774,8 +773,8 @@ void _skSkRectTests() {
 }
 
 SkVertices _testVertices() {
-  return canvasKitJs.MakeSkVertices(
-    canvasKitJs.VertexMode.Triangles,
+  return canvasKit.MakeSkVertices(
+    canvasKit.VertexMode.Triangles,
     [
       Float32List.fromList([0, 0]),
       Float32List.fromList([10, 10]),
@@ -843,16 +842,16 @@ void _canvasTests() {
     );
   });
 
-  test('SkCanvasSaveLayerWithoutBoundsOverride.saveLayer', () {
-    final SkCanvasSaveLayerWithoutBoundsOverride override = debugJsObjectWrapper.castToSkCanvasSaveLayerWithoutBoundsOverride(canvas);
+  test('SkCanvasSaveLayerWithoutBoundsOverload.saveLayer', () {
+    final SkCanvasSaveLayerWithoutBoundsOverload override = canvas as SkCanvasSaveLayerWithoutBoundsOverload;
     override.saveLayer(SkPaint());
   });
 
-  test('SkCanvasSaveLayerWithFilterOverride.saveLayer', () {
-    final SkCanvasSaveLayerWithFilterOverride override = debugJsObjectWrapper.castToSkCanvasSaveLayerWithFilterOverride(canvas);
+  test('SkCanvasSaveLayerWithFilterOverload.saveLayer', () {
+    final SkCanvasSaveLayerWithFilterOverload override = canvas as SkCanvasSaveLayerWithFilterOverload;
     override.saveLayer(
       SkPaint(),
-      canvasKitJs.SkImageFilter.MakeBlur(1, 2, canvasKitJs.TileMode.Repeat, null),
+      canvasKit.SkImageFilter.MakeBlur(1, 2, canvasKit.TileMode.Repeat, null),
       0,
       SkRect(
         fLeft: 0,
@@ -870,7 +869,7 @@ void _canvasTests() {
   test('clipPath', () {
     canvas.clipPath(
       _testClosedSkPath(),
-      canvasKitJs.ClipOp.Intersect,
+      canvasKit.ClipOp.Intersect,
       true,
     );
   });
@@ -893,7 +892,7 @@ void _canvasTests() {
         rx4: 7,
         ry4: 8,
       ),
-      canvasKitJs.ClipOp.Intersect,
+      canvasKit.ClipOp.Intersect,
       true,
     );
   });
@@ -906,7 +905,7 @@ void _canvasTests() {
         fRight: 100,
         fBottom: 100,
       ),
-      canvasKitJs.ClipOp.Intersect,
+      canvasKit.ClipOp.Intersect,
       true,
     );
   });
@@ -927,13 +926,13 @@ void _canvasTests() {
   });
 
   test('drawAtlas', () {
-    final SkAnimatedImage image = canvasKitJs.MakeAnimatedImageFromEncoded(kTransparentImage);
+    final SkAnimatedImage image = canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage);
     canvas.drawAtlas(
       image.getCurrentFrame(),
       Float32List.fromList([0, 0, 1, 1]),
       Float32List.fromList([1, 0, 2, 3]),
       SkPaint(),
-      canvasKitJs.BlendMode.SrcOver,
+      canvasKit.BlendMode.SrcOver,
       [
         Float32List.fromList([0, 0, 0, 1]),
         Float32List.fromList([1, 1, 1, 1]),
@@ -946,7 +945,7 @@ void _canvasTests() {
   });
 
   test('drawColorInt', () {
-    canvas.drawColorInt(0xFFFFFFFF, canvasKitJs.BlendMode.SoftLight);
+    canvas.drawColorInt(0xFFFFFFFF, canvasKit.BlendMode.SoftLight);
   });
 
   test('drawDRRect', () {
@@ -988,7 +987,7 @@ void _canvasTests() {
   });
 
   test('drawImage', () {
-    final SkAnimatedImage image = canvasKitJs.MakeAnimatedImageFromEncoded(kTransparentImage);
+    final SkAnimatedImage image = canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage);
     canvas.drawImage(
       image.getCurrentFrame(),
       10,
@@ -998,7 +997,7 @@ void _canvasTests() {
   });
 
   test('drawImageRect', () {
-    final SkAnimatedImage image = canvasKitJs.MakeAnimatedImageFromEncoded(kTransparentImage);
+    final SkAnimatedImage image = canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage);
     canvas.drawImageRect(
       image.getCurrentFrame(),
       SkRect(fLeft: 0, fTop: 0, fRight: 1, fBottom: 1),
@@ -1009,7 +1008,7 @@ void _canvasTests() {
   });
 
   test('drawImageNine', () {
-    final SkAnimatedImage image = canvasKitJs.MakeAnimatedImageFromEncoded(kTransparentImage);
+    final SkAnimatedImage image = canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage);
     canvas.drawImageNine(
       image.getCurrentFrame(),
       SkRect(fLeft: 0, fTop: 0, fRight: 1, fBottom: 1),
@@ -1039,7 +1038,7 @@ void _canvasTests() {
 
   test('drawPoints', () {
     canvas.drawPoints(
-      canvasKitJs.PointMode.Lines,
+      canvasKit.PointMode.Lines,
       Float32List.fromList([0, 0, 10, 10, 0, 10]),
       SkPaint(),
     );
@@ -1101,7 +1100,7 @@ void _canvasTests() {
       );
 
       final SkTonalColors tonalColors =
-          canvasKitJs.computeTonalColors(inTonalColors);
+          canvasKit.computeTonalColors(inTonalColors);
 
       canvas.drawShadow(
         path,
@@ -1122,7 +1121,7 @@ void _canvasTests() {
   test('drawVertices', () {
     canvas.drawVertices(
       _testVertices(),
-      canvasKitJs.BlendMode.SrcOver,
+      canvasKit.BlendMode.SrcOver,
       SkPaint(),
     );
   });
@@ -1171,7 +1170,7 @@ void _canvasTests() {
     final CkParagraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: 100));
     canvas.drawParagraph(
-      debugJsObjectWrapper.unwrapSkParagraph(paragraph.legacySkiaObject),
+      paragraph.skiaObject,
       10,
       20,
     );

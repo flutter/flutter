@@ -31,7 +31,7 @@ Future<void> _initializePlatform({
   // This needs to be after `webOnlyInitializeEngine` because that is where the
   // canvaskit script is added to the page.
   if (engine.experimentalUseSkia) {
-    await engine.initializeSkia();
+    await engine.initializeCanvasKit();
   }
 
   assetManager ??= const engine.AssetManager();
