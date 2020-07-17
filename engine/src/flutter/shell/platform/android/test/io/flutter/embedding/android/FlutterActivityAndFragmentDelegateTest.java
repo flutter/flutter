@@ -25,6 +25,7 @@ import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.plugins.activity.ActivityControlSurface;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
+import io.flutter.embedding.engine.systemchannels.KeyEventChannel;
 import io.flutter.embedding.engine.systemchannels.LifecycleChannel;
 import io.flutter.embedding.engine.systemchannels.LocalizationChannel;
 import io.flutter.embedding.engine.systemchannels.MouseCursorChannel;
@@ -615,19 +616,20 @@ public class FlutterActivityAndFragmentDelegateTest {
 
     // Mock FlutterEngine and all of its required direct calls.
     FlutterEngine engine = mock(FlutterEngine.class);
-    when(engine.getDartExecutor()).thenReturn(mock(DartExecutor.class));
-    when(engine.getRenderer()).thenReturn(mock(FlutterRenderer.class));
-    when(engine.getPlatformViewsController()).thenReturn(mock(PlatformViewsController.class));
     when(engine.getAccessibilityChannel()).thenReturn(mock(AccessibilityChannel.class));
-    when(engine.getSettingsChannel()).thenReturn(fakeSettingsChannel);
-    when(engine.getLocalizationChannel()).thenReturn(mock(LocalizationChannel.class));
+    when(engine.getActivityControlSurface()).thenReturn(mock(ActivityControlSurface.class));
+    when(engine.getDartExecutor()).thenReturn(mock(DartExecutor.class));
+    when(engine.getKeyEventChannel()).thenReturn(mock(KeyEventChannel.class));
     when(engine.getLifecycleChannel()).thenReturn(mock(LifecycleChannel.class));
+    when(engine.getLocalizationChannel()).thenReturn(mock(LocalizationChannel.class));
+    when(engine.getLocalizationPlugin()).thenReturn(mock(LocalizationPlugin.class));
+    when(engine.getMouseCursorChannel()).thenReturn(mock(MouseCursorChannel.class));
     when(engine.getNavigationChannel()).thenReturn(mock(NavigationChannel.class));
+    when(engine.getPlatformViewsController()).thenReturn(mock(PlatformViewsController.class));
+    when(engine.getRenderer()).thenReturn(mock(FlutterRenderer.class));
+    when(engine.getSettingsChannel()).thenReturn(fakeSettingsChannel);
     when(engine.getSystemChannel()).thenReturn(mock(SystemChannel.class));
     when(engine.getTextInputChannel()).thenReturn(mock(TextInputChannel.class));
-    when(engine.getMouseCursorChannel()).thenReturn(mock(MouseCursorChannel.class));
-    when(engine.getActivityControlSurface()).thenReturn(mock(ActivityControlSurface.class));
-    when(engine.getLocalizationPlugin()).thenReturn(mock(LocalizationPlugin.class));
 
     return engine;
   }

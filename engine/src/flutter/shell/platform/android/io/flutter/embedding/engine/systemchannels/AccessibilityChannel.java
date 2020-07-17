@@ -73,6 +73,7 @@ public class AccessibilityChannel {
                 break;
               }
           }
+          reply.reply(null);
         }
       };
 
