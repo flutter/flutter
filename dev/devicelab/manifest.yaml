@@ -491,6 +491,7 @@ tasks:
       32-bit iOS (iPhone 4S).
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios32"]
+    flaky: true
 
   flavors_test_ios:
     description: >
