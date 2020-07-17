@@ -964,7 +964,7 @@ flutter:
       contains('flutter.plugin.platforms should be a map with the platform name as the key'));
   });
 
-    testWithoutContext('FlutterManifest validates missing flutter.plugin.platforms key', () {
+    testWithoutContext('FlutterManifest validates plugin format not support.', () {
     const String manifest = '''
 name: test
 flutter:
@@ -983,8 +983,7 @@ flutter:
 
     expect(flutterManifest, null);
     expect(logger.errorText,
-      contains('The flutter.plugin.platforms key should be added,'
-      'when specifying a plugin supported platforms'));
+      contains('Cannot find the `flutter.plugin.platforms` key in the `pubspec.yaml` file. '));
   });
 }
 
