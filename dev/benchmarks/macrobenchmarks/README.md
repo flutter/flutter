@@ -4,53 +4,29 @@ Performance benchmarks use either flutter drive or the web benchmark harness.
 
 ## Mobile benchmarks
 
-### Cull opacity benchmark
-
-To run the cull opacity benchmark on a device:
+To run a mobile benchmark on a device:
 
 ```
-flutter drive --profile test_driver/cull_opacity_perf.dart
+flutter drive --profile -t test_driver/run_app.dart --driver test_driver/[test_name]_test.dart
 ```
 
-Results should be in the file `build/cull_opacity_perf.timeline_summary.json`.
+Results should be in the file `build/[test_name].timeline_summary.json`.
 
-More detailed logs should be in `build/cull_opacity_perf.timeline.json`.
+More detailed logs should be in `build/[test_name].timeline.json`.
 
-### Cubic bezier benchmark
+The key `[test_name]` can be:
 
-To run the cubic bezier benchmark on a device:
-
-```
-flutter drive --profile test_driver/cubic_bezier_perf.dart
-```
-
-Results should be in the file `build/cubic_bezier_perf.timeline_summary.json`.
-
-More detailed logs should be in `build/cubic_bezier_perf.timeline.json`.
-
-### Backdrop filter benchmark
-
-To run the backdrop filter benchmark on a device:
-
-```
-flutter drive --profile test_driver/backdrop_filter_perf.dart
-```
-
-Results should be in the file `build/backdrop_filter_perf.timeline_summary.json`.
-
-More detailed logs should be in `build/backdrop_filter_perf.timeline.json`.
-
-### Post Backdrop filter benchmark
-
-To run the post-backdrop filter benchmark on a device:
-
-```
-flutter drive --profile test_driver/post_backdrop_filter_perf.dart
-```
-
-Results should be in the file `build/post_backdrop_filter_perf.timeline_summary.json`.
-
-More detailed logs should be in `build/post_backdrop_filter_perf.timeline.json`.
+- `animated_placeholder_perf`
+- `backdrop_filter_perf`
+- `cull_opacity_perf`
+- `fading_child_animation_perf`
+- `imagefiltered_transform_animation_perf`
+- `multi_widget_construction_perf`
+- `picture_cache_perf`
+- `post_backdrop_filter_perf`
+- `simple_animation_perf`
+- `textfield_perf`
+- `cubic_bezier_perf`
 
 ## Web benchmarks
 
