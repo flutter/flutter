@@ -271,7 +271,7 @@ class _DevFSHttpWriter {
         );
         await request.addStream(contents);
         final HttpClientResponse response = await request.close();
-        response.listen((_) => null,
+        response.listen((_) {},
           onError: (dynamic error) {
             _logger.printTrace('error: $error');
           },

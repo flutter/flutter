@@ -655,7 +655,7 @@ void fakeData(
 
     if (expectSetStamp) {
       stamp = VersionCheckStamp.fromJson(castStringKeyedMap(json.decode(invocation.positionalArguments[1] as String)));
-      return null;
+      return;
     }
 
     throw StateError('Unexpected call to Cache.setStampFor(${invocation.positionalArguments}, ${invocation.namedArguments})');

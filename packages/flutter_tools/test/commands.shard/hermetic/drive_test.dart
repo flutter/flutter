@@ -202,7 +202,6 @@ void main() {
         expect(environment, <String, String>{
           'VM_SERVICE_URL': 'null',
         });
-        return null;
       });
       appStopper = expectAsync1((DriveCommand command) async {
         return true;
