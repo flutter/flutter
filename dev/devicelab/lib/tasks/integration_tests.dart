@@ -60,13 +60,6 @@ TaskFunction createEmbeddedAndroidViewsIntegrationTest() {
   );
 }
 
-TaskFunction createHybridAndroidViewsIntegrationTest() {
-  return DriverTest(
-    '${flutterDirectory.path}/dev/integration_tests/hybrid_android_views',
-    'lib/main.dart',
-  );
-}
-
 TaskFunction createAndroidSemanticsIntegrationTest() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/android_semantics_testing',
