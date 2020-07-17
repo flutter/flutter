@@ -16,7 +16,7 @@ class CkCanvas {
     skCanvas.clear(toSharedSkColor1(color));
   }
 
-  static final SkClipOp _clipOpIntersect = canvasKitJs.ClipOp.Intersect;
+  static final SkClipOp _clipOpIntersect = canvasKit.ClipOp.Intersect;
 
   void clipPath(ui.Path path, bool doAntiAlias) {
     final CkPath ckPath = path as CkPath;
@@ -158,7 +158,7 @@ class CkCanvas {
 
   void drawParagraph(CkParagraph paragraph, ui.Offset offset) {
     skCanvas.drawParagraph(
-      _jsObjectWrapper.unwrapSkParagraph(paragraph.legacySkiaObject),
+      paragraph.skiaObject,
       offset.dx,
       offset.dy,
     );
@@ -232,12 +232,12 @@ class CkCanvas {
   }
 
   void saveLayerWithoutBounds(CkPaint paint) {
-    final SkCanvasSaveLayerWithoutBoundsOverride override = _jsObjectWrapper.castToSkCanvasSaveLayerWithoutBoundsOverride(skCanvas);
+    final SkCanvasSaveLayerWithoutBoundsOverload override = skCanvas as SkCanvasSaveLayerWithoutBoundsOverload;
     override.saveLayer(paint.skiaObject);
   }
 
   void saveLayerWithFilter(ui.Rect bounds, ui.ImageFilter filter) {
-    final SkCanvasSaveLayerWithFilterOverride override = _jsObjectWrapper.castToSkCanvasSaveLayerWithFilterOverride(skCanvas);
+    final SkCanvasSaveLayerWithFilterOverload override = skCanvas as SkCanvasSaveLayerWithFilterOverload;
     final CkImageFilter skImageFilter = filter as CkImageFilter;
     return override.saveLayer(
       null,

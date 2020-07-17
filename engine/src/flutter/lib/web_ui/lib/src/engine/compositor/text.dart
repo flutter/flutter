@@ -107,7 +107,7 @@ class CkParagraphStyle implements ui.ParagraphStyle {
     properties.textStyle =
         toSkTextStyleProperties(fontFamily, fontSize, fontWeight, fontStyle);
 
-    return canvasKitJs.ParagraphStyle(properties);
+    return canvasKit.ParagraphStyle(properties);
   }
 }
 
@@ -146,15 +146,15 @@ class CkTextStyle implements ui.TextStyle {
     }
 
     if (decoration != null) {
-      int decorationValue = canvasKitJs.NoDecoration;
+      int decorationValue = canvasKit.NoDecoration;
       if (decoration.contains(ui.TextDecoration.underline)) {
-        decorationValue |= canvasKitJs.UnderlineDecoration;
+        decorationValue |= canvasKit.UnderlineDecoration;
       }
       if (decoration.contains(ui.TextDecoration.overline)) {
-        decorationValue |= canvasKitJs.OverlineDecoration;
+        decorationValue |= canvasKit.OverlineDecoration;
       }
       if (decoration.contains(ui.TextDecoration.lineThrough)) {
-        decorationValue |= canvasKitJs.LineThroughDecoration;
+        decorationValue |= canvasKit.LineThroughDecoration;
       }
       properties.decoration = decorationValue;
     }
@@ -201,7 +201,7 @@ class CkTextStyle implements ui.TextStyle {
     //   - locale
     //   - shadows
     //   - fontFeatures
-    return CkTextStyle._(canvasKitJs.TextStyle(properties));
+    return CkTextStyle._(canvasKit.TextStyle(properties));
   }
 
   CkTextStyle._(this.skTextStyle);
@@ -279,9 +279,6 @@ class CkParagraph extends ResurrectableSkiaObject<SkParagraph> implements ui.Par
   void delete() {
     rawSkiaObject?.delete();
   }
-
-  @override
-  js.JsObject get legacySkiaObject => _jsObjectWrapper.wrapSkParagraph(skiaObject);
 
   @override
   bool get isResurrectionExpensive => true;
@@ -416,7 +413,7 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
   CkParagraphBuilder(ui.ParagraphStyle style)
       : _commands = <_ParagraphCommand>[],
         _style = style as CkParagraphStyle,
-        _paragraphBuilder = canvasKitJs.ParagraphBuilder.Make(
+        _paragraphBuilder = canvasKit.ParagraphBuilder.Make(
           style.skParagraphStyle,
           skiaFontCollection.skFontMgr,
         );

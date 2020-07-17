@@ -41,7 +41,7 @@ class SkiaFontCollection {
     final List<Uint8List> fontBuffers =
         _registeredFonts.map<Uint8List>((f) => f!.bytes).toList();
 
-    skFontMgr = canvasKitJs.SkFontMgr.FromData(fontBuffers);
+    skFontMgr = canvasKit.SkFontMgr.FromData(fontBuffers);
   }
 
   /// Loads all of the unloaded fonts in [_unloadedFonts] and adds them
@@ -164,10 +164,9 @@ class SkiaFontCollection {
   }
 
   String? _readActualFamilyName(Uint8List bytes) {
-    final js.JsObject tmpFontMgr =
-        canvasKit['SkFontMgr'].callMethod('FromData', <Uint8List>[bytes]);
-    String? actualFamily = tmpFontMgr.callMethod('getFamilyName', <int>[0]);
-    tmpFontMgr.callMethod('delete');
+    final SkFontMgr tmpFontMgr = canvasKit.SkFontMgr.FromData([bytes])!;
+    String? actualFamily = tmpFontMgr.getFamilyName(0);
+    tmpFontMgr.delete();
     return actualFamily;
   }
 

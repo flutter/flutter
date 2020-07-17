@@ -89,10 +89,6 @@ abstract class SkiaObject<T> {
   /// The JavaScript object that's mapped onto a Skia C++ object in the WebAssembly heap.
   T get skiaObject;
 
-  /// The legacy view on the [skiaObject].
-  // TODO(yjbanov): remove this after completing JS-interop migration.
-  js.JsObject? get legacySkiaObject;
-
   /// Deletes the associated C++ object from the WebAssembly heap.
   void delete();
 

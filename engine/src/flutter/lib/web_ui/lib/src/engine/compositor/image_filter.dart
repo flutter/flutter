@@ -26,14 +26,11 @@ class CkImageFilter extends ResurrectableSkiaObject<SkImageFilter> implements ui
     rawSkiaObject?.delete();
   }
 
-  @override
-  js.JsObject get legacySkiaObject => _jsObjectWrapper.wrapSkImageFilter(skiaObject);
-
   SkImageFilter _initSkiaObject() {
-    return canvasKitJs.SkImageFilter.MakeBlur(
+    return canvasKit.SkImageFilter.MakeBlur(
       _sigmaX,
       _sigmaY,
-      canvasKitJs.TileMode.Clamp,
+      canvasKit.TileMode.Clamp,
       null,
     );
   }

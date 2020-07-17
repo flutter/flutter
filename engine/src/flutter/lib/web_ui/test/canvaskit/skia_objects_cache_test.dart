@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 // @dart = 2.6
-import 'dart:js';
 
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
@@ -45,7 +44,7 @@ void _tests() {
       expect(testObject.deleteCount, 0);
 
       // Check that the getter does not have side-effects
-      final JsObject skiaObject1 = testObject.legacySkiaObject;
+      final SkPaint skiaObject1 = testObject.skiaObject;
       expect(skiaObject1, isNotNull);
       expect(SkiaObjects.resurrectableObjects.single, testObject);
       expect(testObject.createDefaultCount, 1);
@@ -61,7 +60,7 @@ void _tests() {
       expect(testObject.deleteCount, 1);
 
       // Trigger resurrect
-      final JsObject skiaObject2 = testObject.legacySkiaObject;
+      final SkPaint skiaObject2 = testObject.skiaObject;
       expect(skiaObject2, isNotNull);
       expect(skiaObject2, isNot(same(skiaObject1)));
       expect(SkiaObjects.resurrectableObjects.single, testObject);
@@ -147,9 +146,6 @@ class TestOneShotSkiaObject extends OneShotSkiaObject<SkPaint> {
   TestOneShotSkiaObject() : super(SkPaint());
 
   @override
-  JsObject get legacySkiaObject => debugJsObjectWrapper.wrapSkPaint(skiaObject);
-
-  @override
   void delete() {
     rawSkiaObject?.delete();
     deleteCount++;
@@ -182,9 +178,6 @@ class TestSkiaObject extends ResurrectableSkiaObject<SkPaint> {
     rawSkiaObject?.delete();
     deleteCount++;
   }
-
-  @override
-  JsObject get legacySkiaObject => debugJsObjectWrapper.wrapSkPaint(skiaObject);
 
   @override
   bool get isResurrectionExpensive => isExpensive;

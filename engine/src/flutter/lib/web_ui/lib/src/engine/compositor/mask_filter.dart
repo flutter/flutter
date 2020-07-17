@@ -20,15 +20,12 @@ class CkMaskFilter extends ResurrectableSkiaObject<SkMaskFilter> {
   SkMaskFilter resurrect() => _initSkiaObject();
 
   SkMaskFilter _initSkiaObject() {
-    return canvasKitJs.MakeBlurMaskFilter(
+    return canvasKit.MakeBlurMaskFilter(
       toSkBlurStyle(_blurStyle),
       _sigma,
       true,
     );
   }
-
-  @override
-  js.JsObject get legacySkiaObject => _jsObjectWrapper.wrapSkMaskFilter(skiaObject);
 
   @override
   void delete() {
