@@ -649,7 +649,6 @@ class FlutterDevice {
   /// Validates whether this hot reload is a candidate for a fast reassemble.
   Future<bool> _attemptFastReassembleCheck(List<Uri> invalidatedFiles, PackageConfig packageConfig) async {
     if (invalidatedFiles.length != 1 || widgetCache == null) {
-      print('wrong files');
       return false;
     }
     final List<FlutterView> views = await vmService.getFlutterViews();
