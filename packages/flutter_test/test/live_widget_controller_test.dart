@@ -70,7 +70,8 @@ Future<void> main() async {
     expect(timeDiffs.length, records.length);
     for (final Duration diff in timeDiffs) {
       // Allow some freedom of time delay in real world.
-      assert(diff.inMicroseconds.abs() < 1000);
+      assert(diff.inMilliseconds > -1);
+      assert(diff.inMilliseconds < 50);
     }
 
     const String b = '$kSecondaryMouseButton';
