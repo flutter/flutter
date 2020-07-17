@@ -27,7 +27,7 @@ class CkVertices implements ui.Vertices {
       throw ArgumentError(
           '"indices" values must be valid indices in the positions list.');
 
-    skVertices = canvasKitJs.MakeSkVertices(
+    skVertices = canvasKit.MakeSkVertices(
       toSkVertexMode(mode),
       toSkPoints2d(positions),
       textureCoordinates != null ? toSkPoints2d(textureCoordinates) : null,
@@ -55,7 +55,7 @@ class CkVertices implements ui.Vertices {
       throw ArgumentError(
           '"indices" values must be valid indices in the positions list.');
 
-    skVertices = canvasKitJs.MakeSkVertices(
+    skVertices = canvasKit.MakeSkVertices(
       toSkVertexMode(mode),
       rawPointsToSkPoints2d(positions),
       textureCoordinates != null ? rawPointsToSkPoints2d(textureCoordinates) : null,

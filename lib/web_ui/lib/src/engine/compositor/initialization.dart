@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 part of engine;
 
 /// EXPERIMENTAL: Enable the Skia-based rendering backend.
@@ -20,26 +19,22 @@ const bool canvasKitForceCpuOnly =
 /// NPM, update this URL to `https://unpkg.com/canvaskit-wasm@0.34.0/bin/`.
 const String canvasKitBaseUrl = 'https://unpkg.com/canvaskit-wasm@0.16.2/bin/';
 
-/// Initialize the Skia backend.
+/// Initialize CanvasKit.
 ///
 /// This calls `CanvasKitInit` and assigns the global [canvasKit] object.
-Future<void> initializeSkia() {
+Future<void> initializeCanvasKit() {
   final Completer<void> canvasKitCompleter = Completer<void>();
   late StreamSubscription<html.Event> loadSubscription;
   loadSubscription = domRenderer.canvasKitScript!.onLoad.listen((_) {
     loadSubscription.cancel();
-    final js.JsObject canvasKitInitArgs = js.JsObject.jsify(<String, dynamic>{
-      'locateFile': (String file, String unusedBase) => canvasKitBaseUrl + file,
-    });
-    final js.JsObject canvasKitInitPromise =
-        js.JsObject(js.context['CanvasKitInit'], <dynamic>[canvasKitInitArgs]);
-    canvasKitInitPromise.callMethod('then', <dynamic>[
-      (js.JsObject ck) {
-        canvasKit = ck;
-        initializeCanvasKitBindings(canvasKit);
-        canvasKitCompleter.complete();
-      },
-    ]);
+    final CanvasKitInitPromise canvasKitInitPromise = CanvasKitInit(CanvasKitInitOptions(
+      locateFile: js.allowInterop((String file, String unusedBase) => canvasKitBaseUrl + file),
+    ));
+    canvasKitInitPromise.then(js.allowInterop((CanvasKit ck) {
+      canvasKit = ck;
+      windowFlutterCanvasKit = canvasKit;
+      canvasKitCompleter.complete();
+    }));
   });
 
   /// Add a Skia scene host.
@@ -47,11 +42,6 @@ Future<void> initializeSkia() {
   domRenderer.renderScene(skiaSceneHost);
   return canvasKitCompleter.future;
 }
-
-/// The entrypoint into all CanvasKit functions and classes.
-///
-/// This is created by [initializeSkia].
-late js.JsObject canvasKit;
 
 /// The Skia font collection.
 SkiaFontCollection get skiaFontCollection => _skiaFontCollection!;

@@ -233,7 +233,4 @@ class CkPaint extends ResurrectableSkiaObject<SkPaint> implements ui.Paint {
   void delete() {
     rawSkiaObject?.delete();
   }
-
-  @override
-  js.JsObject get legacySkiaObject => _jsObjectWrapper.wrapSkPaint(skiaObject);
 }

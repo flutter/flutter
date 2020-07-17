@@ -8,7 +8,7 @@ part of engine;
 /// Instantiates a [ui.Codec] backed by an `SkImage` from Skia.
 void skiaInstantiateImageCodec(Uint8List list, Callback<ui.Codec> callback,
     [int? width, int? height, int? format, int? rowBytes]) {
-  final SkAnimatedImage skAnimatedImage = canvasKitJs.MakeAnimatedImageFromEncoded(list);
+  final SkAnimatedImage skAnimatedImage = canvasKit.MakeAnimatedImageFromEncoded(list);
   final CkAnimatedImage animatedImage = CkAnimatedImage(skAnimatedImage);
   final CkAnimatedImageCodec codec = CkAnimatedImageCodec(animatedImage);
   callback(codec);
@@ -55,7 +55,6 @@ class CkAnimatedImage implements ui.Image {
 /// A [ui.Image] backed by an `SkImage` from Skia.
 class CkImage implements ui.Image {
   final SkImage skImage;
-  late final js.JsObject legacyJsObject = _jsObjectWrapper.wrapSkImage(skImage);
 
   CkImage(this.skImage);
 
