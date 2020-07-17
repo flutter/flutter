@@ -107,7 +107,7 @@ int? getCodePoint(String text, int index) {
 /// has. The properties are then used to decide word boundaries, line break
 /// opportunities, etc.
 class UnicodePropertyLookup<P> {
-  const UnicodePropertyLookup(this.ranges, this.defaultProperty);
+  UnicodePropertyLookup(this.ranges, this.defaultProperty);
 
   /// Creates a [UnicodePropertyLookup] from packed line break data.
   factory UnicodePropertyLookup.fromPackedData(
@@ -129,6 +129,9 @@ class UnicodePropertyLookup<P> {
   /// known range.
   final P defaultProperty;
 
+  /// Cache for lookup results.
+  final Map<int, P> _cache = <int, P>{};
+
   /// Take a [text] and an [index], and returns the property of the character
   /// located at that [index].
   ///
@@ -147,8 +150,16 @@ class UnicodePropertyLookup<P> {
       return defaultProperty;
     }
 
+    final P? cacheHit = _cache[char];
+    if (cacheHit != null) {
+      return cacheHit;
+    }
+
     final int rangeIndex = _binarySearch(char);
-    return rangeIndex == -1 ? defaultProperty : ranges[rangeIndex].property;
+    final P result = rangeIndex == -1 ? defaultProperty : ranges[rangeIndex].property;
+    // Cache the result.
+    _cache[char] = result;
+    return result;
   }
 
   int _binarySearch(int value) {
