@@ -5,6 +5,7 @@
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:meta/meta.dart';
+import 'package:vm_snapshot_analysis/treemap.dart';
 
 import '../base/file_system.dart';
 import '../convert.dart';
@@ -54,10 +55,7 @@ class SizeAnalyzer {
       tempApkContent.deleteSync(recursive: true);
     }
 
-    final SymbolNode apkAnalysisRoot = _parseUnzipFile(
-      unzipOut,
-      json.decode(aotSizeJson.readAsStringSync()) as List<dynamic>,
-    );
+    final SymbolNode apkAnalysisRoot = _parseUnzipFile(unzipOut);
 
     for (final SymbolNode firstLevelPath in apkAnalysisRoot.children) {
       _printEntitySize(
@@ -72,7 +70,16 @@ class SizeAnalyzer {
 
     globals.printStatus('▒' * tableWidth);
     
-    return apkAnalysisRoot.toJson();
+    Map<String, dynamic> apkAnalysisJson = apkAnalysisRoot.toJson();
+    
+    // TODO(peterdjlee): Add aot size for all platforms.
+    apkAnalysisJson = addAotSizeDataToJson(
+      apkAnalysisJson,
+      'lib/arm64-v8a/libapp.so (Dart AOT)'.split('/'), 
+      json.decode(aotSizeJson.readAsStringSync()) as List<dynamic>,
+    );
+
+    return apkAnalysisJson;
   }
 
   // Parse the output of unzip -v which shows the zip's contents' compressed sizes.
@@ -85,10 +92,7 @@ class SizeAnalyzer {
 
   final RegExp _parseUnzipOutput = RegExp(r'^\s*\d+\s+[\w|:]+\s+(\d+)\s+.*  (.+)$');
 
-  SymbolNode _parseUnzipFile(
-    String unzipOut,
-    List<dynamic> aotSizeJson,
-  ) {
+  SymbolNode _parseUnzipFile(String unzipOut) {
     final Map<List<String>, int> pathsToSize = <List<String>, int>{};
 
     // Parse each path into pathsToSize so that the key is a list of
@@ -129,33 +133,33 @@ class SizeAnalyzer {
     return rootNode;
   }
 
-  // Prints all the paths from level to
+  /// Prints the paths from currentNode all leaf nodes.
   void _printLibDetails(
-    SymbolNode currentPath,
+    SymbolNode currentNode,
     String totalPath,
     File aotSizeJson,
   ) {
-    totalPath += currentPath.name;
+    totalPath += currentNode.name;
 
-    if (currentPath.children.isNotEmpty && !currentPath.name.contains('libapp.so')) {
-      for (final SymbolNode child in currentPath.children) {
+    if (currentNode.children.isNotEmpty && !currentNode.name.contains('libapp.so')) {
+      for (final SymbolNode child in currentNode.children) {
         _printLibDetails(child, totalPath + '/', aotSizeJson);
       }
     } else {
       // Print total path and size if currentPath does not have any chilren.
-      _printEntitySize(totalPath, currentPath.value, 2);
+      _printEntitySize(totalPath, currentNode.value, 2);
 
       const String libappPath = 'lib/arm64-v8a/libapp.so';
       // TODO(peterdjlee): Analyze aot size for all platforms.
       if (totalPath.contains(libappPath)) {
-        _analyzeAotSize(aotSizeJson);
+        _printAotSizeDetails(aotSizeJson);
       }
     }
   }
 
-  // Go through the AOT gen snapshot size JSON and print out a collapsed summary
-  // for the first package level.
-  void _analyzeAotSize(File aotSizeJson) {
+  /// Go through the AOT gen snapshot size JSON and print out a collapsed summary
+  /// for the first package level.
+  void _printAotSizeDetails(File aotSizeJson) {
     final SymbolNode root = _parseSymbols(
       json.decode(aotSizeJson.readAsStringSync()) as List<dynamic>,
     );
@@ -178,9 +182,32 @@ class SizeAnalyzer {
     }
   }
 
-  // A pretty printer for an entity with a size.
-  void _printEntitySize(String entityName, int numBytes, int level,
-      {bool showColor = true}) {
+  /// Adds breakdown of aot size data as the children of the node at the given path.
+  Map<String, dynamic> addAotSizeDataToJson(
+    Map<String, dynamic> apkAnalysisJson,
+    List<String> path, 
+    List<dynamic> aotSizeJson,
+  ) {
+    Map<String, dynamic> currentLevel = apkAnalysisJson;
+    while (path.isNotEmpty) {
+      final List<Map<String, dynamic>> children = currentLevel['children'] as List<Map<String, dynamic>>;
+      final Map<String, dynamic> childWithPathAsName = children.firstWhere(
+        (Map<String, dynamic> child) => (child['n'] as String).contains(path.first),
+      );
+      path.removeAt(0);
+      currentLevel = childWithPathAsName;
+    }
+    currentLevel['children'] = treemapFromJson(aotSizeJson)['children'];
+    return apkAnalysisJson;
+  }
+
+  /// A pretty printer for an entity with a size.
+  void _printEntitySize(
+    String entityName,
+    int numBytes,
+    int level, {
+    bool showColor = true,
+    }) {
     final bool emphasis = level <= 1;
     final String formattedSize = _prettyPrintBytes(numBytes);
 
