@@ -262,6 +262,49 @@ TaskFunction createsMultiWidgetConstructPerfTest() {
   ).run;
 }
 
+TaskFunction createFramePolicyIntegrationTest() {
+  final String testDirectory =
+      '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks';
+  const String testTarget = 'test/frame_policy.dart';
+  return () {
+    return inDirectory<TaskResult>(testDirectory, () async {
+      final Device device = await devices.workingDevice;
+      await device.unlock();
+      final String deviceId = device.deviceId;
+      await flutter('packages', options: <String>['get']);
+
+      await flutter('drive', options: <String>[
+        '-v',
+        '--verbose-system-logs',
+        '--profile',
+        '-t', testTarget,
+        '-d',
+        deviceId,
+      ]);
+      final Map<String, dynamic> data = json.decode(
+        file('$testDirectory/build/frame_policy_event_delay.json').readAsStringSync(),
+      ) as Map<String, dynamic>;
+      final Map<String, dynamic> fullLiveData = data['fullyLive'] as Map<String, dynamic>;
+      final Map<String, dynamic> benchmarkLiveData = data['benchmarkLive'] as Map<String, dynamic>;
+      final Map<String, dynamic> dataFormated = <String, dynamic>{
+        'average_delay_fullyLive_millis':
+          fullLiveData['average_delay_millis'],
+        'average_delay_benchmarkLive_millis':
+          benchmarkLiveData['average_delay_millis'],
+        '90th_percentile_delay_fullyLive_millis':
+          fullLiveData['90th_percentile_delay_millis'],
+        '90th_percentile_delay_benchmarkLive_millis':
+          benchmarkLiveData['90th_percentile_delay_millis'],
+      };
+
+      return TaskResult.success(
+        dataFormated,
+        benchmarkScoreKeys: dataFormated.keys.toList(),
+      );
+    });
+  };
+}
+
 /// Measure application startup performance.
 class StartupTest {
   const StartupTest(this.testDirectory, { this.reportMetrics = true });

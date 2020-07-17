@@ -406,9 +406,17 @@ abstract class WidgetController {
   /// The [PointerEventRecord.timeDelay] is used as the time delay of the events
   /// injection relative to the starting point of the method call.
   ///
-  /// Returns a list of the difference between [PointerEventRecord.timeDelay]
-  /// and the real delay time when the [PointerEventRecord.events] are processed.
-  /// The closer these values are to zero the more faithful it is to the
+  /// Returns a list of the difference between the real delay time when the
+  /// [PointerEventRecord.events] are processed and
+  /// [PointerEventRecord.timeDelay].
+  /// - For [AutomatedTestWidgetsFlutterBinding] where the clock is fake, the
+  ///   return value should be exact zeros.
+  /// - For [LiveTestWidgetsFlutterBinding], the values are typically small
+  /// positives, meaning the event happens a little later than the set time,
+  /// but a very small portion may have a tiny negatvie value for about tens of
+  /// microseconds. This is due to the nature of [Future.delayed].
+  ///
+  /// The closer the return values are to zero the more faithful it is to the
   /// `records`.
   ///
   /// See [PointerEventRecord].
