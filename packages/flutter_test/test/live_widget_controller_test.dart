@@ -10,7 +10,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Future<void> main() async {
-  test('Input events on LiveWidgetController', () async {
+  test('Input event array on LiveWidgetController', () async {
     final List<String> logs = <String>[];
     runApp(
       MaterialApp(
@@ -70,7 +70,7 @@ Future<void> main() async {
     expect(timeDiffs.length, records.length);
     for (final Duration diff in timeDiffs) {
       // Allow some freedom of time delay in real world.
-      assert(diff.inMicroseconds < 1000);
+      assert(diff.inMicroseconds.abs() < 1000);
     }
 
     const String b = '$kSecondaryMouseButton';

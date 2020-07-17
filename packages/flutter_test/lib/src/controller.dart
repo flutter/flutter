@@ -736,7 +736,7 @@ class LiveWidgetController extends WidgetController {
           // This happens when something (e.g. GC) takes a long time during the
           // processing of the events.
           // Flush all past events
-          handleTimeStampDiff.add(timeDiff);
+          handleTimeStampDiff.add(-timeDiff);
           for (final PointerEvent event in record.events) {
             _handlePointerEvent(event, hitTestHistory);
           }
@@ -746,7 +746,7 @@ class LiveWidgetController extends WidgetController {
             // Recalculating the time diff for getting exact time when the event
             // packet is sent. For a perfect Future.delayed like the one in a
             // fake async this new diff should be zero.
-            record.timeDelay - clock.now().difference(startTime),
+            clock.now().difference(startTime) - record.timeDelay,
           );
           for (final PointerEvent event in record.events) {
             _handlePointerEvent(event, hitTestHistory);
