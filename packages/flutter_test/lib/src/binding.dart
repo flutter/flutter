@@ -1227,15 +1227,28 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 ///
 /// These values are set on the binding's
 /// [LiveTestWidgetsFlutterBinding.framePolicy] property. The default is
-/// [fadePointers].
+/// [fadePointers]. To do set a value while still allowing the test file to
+/// work as a normal test, add the following code to your test file at the
+/// top of your `void main() { }` function, before calls to
+/// [testWidgets]:
+///
+/// ```dart
+/// TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+/// if (binding is LiveTestWidgetsFlutterBinding)
+///   binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.[thePolicy];
+/// ```
 enum LiveTestWidgetsFlutterBindingFramePolicy {
   /// Strictly show only frames that are explicitly pumped. This most closely
-  /// matches the behavior of tests when run under `flutter test`.
+  /// matches the [AutomatedTestWidgetsFlutterBinding] (the defualt binding for
+  /// `flutter test`) behavior.
   onlyPumps,
 
   /// Show pumped frames, and additionally schedule and run frames to fade
   /// out the pointer crosshairs and other debugging information shown by
   /// the binding.
+  ///
+  /// This will schedule frames when pumped or when there has been some
+  /// activity with [TestPointer]s.
   ///
   /// This can result in additional frames being pumped beyond those that
   /// the test itself requests, which can cause differences in behavior.
@@ -1243,6 +1256,9 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
 
   /// Show every frame that the framework requests, even if the frames are not
   /// explicitly pumped.
+  ///
+  /// The major difference with [benchmarkLive] is the latter ignores frame
+  /// requests by [pump].
   ///
   /// This can help with orienting the developer when looking at
   /// heavily-animated situations, and will almost certainly result in
@@ -1258,6 +1274,12 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
   /// directly to run (either by using [WidgetTester.pumpBenchmark] or invoking
   /// [Window.onBeginFrame] and [Window.onDrawFrame]).
   ///
+  /// This allows all frame requests from the engine to be serviced, and allows
+  /// all frame requests that are artificially triggered to be serviced, but
+  /// prevents the framework from requesting any frames from the engine itself.
+  /// Therefore any animation will not run for this mode as animation is
+  /// implemented by constantly requesting new frames from the framework.
+  ///
   /// The [SchedulerBinding.hasScheduledFrame] property will never be true in
   /// this mode. This can cause unexpected effects. For instance,
   /// [WidgetTester.pumpAndSettle] does not function in this mode, as it relies
@@ -1271,12 +1293,13 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
   /// This is used for running the test on a device, where scheduling of new
   /// frames respects what the engine and the device needed.
   ///
-  /// Compared to `fullyLive` this policy ignores the frame requests from pump
+  /// Compared to [fullyLive] this policy ignores the frame requests from pump
   /// of the test code so that the frame scheduling respects the situation of
-  /// that for the real environment, and avoids waiting for the new frame beyond
-  /// the expected time.
+  /// that for the real environment, and avoids waiting for the new frame when
+  /// driving the test in methods like [WidgetTester.handlePointerEventRecord]
+  /// or [WidgetTester.fling].
   ///
-  /// Compared to `benchmark` this policy can be used for capturing the
+  /// Compared to [benchmark] this policy can be used for capturing the
   /// animation frames requested by the framework.
   benchmarkLive,
 }
@@ -1339,39 +1362,21 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   /// asynchronous pause in the test (as would normally happen when
   /// running an application with [WidgetsFlutterBinding]).
   ///
-  /// * [LiveTestWidgetsFlutterBindingFramePolicy.fadePointers] is the default
-  ///   behavior, which is to only pump once, except when there has been some
-  ///   activity with [TestPointer]s, in which case those are shown and may pump
-  ///   additional frames.
+  /// The default behavior is
+  /// [LiveTestWidgetsFlutterBindingFramePolicy.fadePointers].
   ///
-  /// * [LiveTestWidgetsFlutterBindingFramePolicy.onlyPumps] is the strictest
-  ///   behavior, which is to only pump once. This most closely matches the
-  ///   [AutomatedTestWidgetsFlutterBinding] (`flutter test`) behavior.
-  ///
-  /// * [LiveTestWidgetsFlutterBindingFramePolicy.fullyLive] allows all frame
-  ///   requests from the engine to be serviced, even those the test did not
-  ///   explicitly pump.
-  ///
-  /// * [LiveTestWidgetsFlutterBindingFramePolicy.benchmark] allows all frame
-  ///   requests from the engine to be serviced, and allows all frame requests
-  ///   that are artificially triggered to be serviced, but prevents the
-  ///   framework from requesting any frames from the engine itself. The
-  ///   [SchedulerBinding.hasScheduledFrame] property will never be true in this
-  ///   mode. This can cause unexpected effects. For instance,
-  ///   [WidgetTester.pumpAndSettle] does not function in this mode, as it
-  ///   relies on the [SchedulerBinding.hasScheduledFrame] property to determine
-  ///   when the application has "settled".
+  /// See [LiveTestWidgetsFlutterBindingFramePolicy].
   ///
   /// Setting this to anything other than
   /// [LiveTestWidgetsFlutterBindingFramePolicy.onlyPumps] means pumping extra
   /// frames, which might involve calling builders more, or calling paint
   /// callbacks more, etc, which might interfere with the test. If you know your
   /// test file wouldn't be affected by this, you can set it to
-  /// [LiveTestWidgetsFlutterBindingFramePolicy.fullyLive] persistently in that
-  /// particular test file. To set this to
-  /// [LiveTestWidgetsFlutterBindingFramePolicy.fullyLive] while still allowing
-  /// the test file to work as a normal test, add the following code to your
-  /// test file at the top of your `void main() { }` function, before calls to
+  /// [LiveTestWidgetsFlutterBindingFramePolicy.fullyLive] or
+  /// [LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive] persistently in
+  /// that particular test file. To do so while still allowing the test file to
+  /// work as a normal test, add the following code to your test file at the
+  /// top of your `void main() { }` function, before calls to
   /// [testWidgets]:
   ///
   /// ```dart
