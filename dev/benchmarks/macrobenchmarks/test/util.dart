@@ -96,7 +96,7 @@ Future<void> watchPerformance(
 ) async {
   // This method might be good as part of e2e,
   // so is the helper `PerformanceWatcher` class.
-  final PerformanceWatcher frameTimes = PerformanceWatcher();
+  final FrameTimingSummarizer frameTimes = FrameTimingSummarizer();
   final TimingsCallback watcher = frameTimes.addData;
   binding.addTimingsCallback(watcher);
   await action();
@@ -105,8 +105,8 @@ Future<void> watchPerformance(
   binding.reportData = <String, dynamic>{'performance': frameTimes.summary};
 }
 
-class PerformanceWatcher {
-  PerformanceWatcher({this.data}) {
+class FrameTimingSummarizer {
+  FrameTimingSummarizer({this.data}) {
     data ??= <FrameTiming>[];
   }
 
