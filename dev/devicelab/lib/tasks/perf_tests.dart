@@ -277,7 +277,6 @@ TaskFunction createFramePolicyIntegrationTest() {
         '-v',
         '--verbose-system-logs',
         '--profile',
-        '--trace-startup', // Enables "endless" timeline event buffering.
         '-t', testTarget,
         '-d',
         deviceId,

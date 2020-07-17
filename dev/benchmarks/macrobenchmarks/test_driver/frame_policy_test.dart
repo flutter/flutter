@@ -17,17 +17,13 @@ Future<void> main() async {
 
   final FlutterDriver driver = await FlutterDriver.connect();
   String jsonResult;
-  final Timeline timeline = await driver.traceAction(() async {
-    jsonResult = await driver.requestData(null, timeout: timeout);
-  });
+  jsonResult = await driver.requestData(null, timeout: timeout);
   final e2e.Response response = e2e.Response.fromJson(jsonResult);
   await driver.close();
-  final Map<String, dynamic> benchmarkLiveResult = timeline.events.firstWhere(
-    (TimelineEvent event) => event.name == 'Test Event Delay:benchmarkLive',
-  ).arguments;
-  final Map<String, dynamic> fullyLiveResult = timeline.events.firstWhere(
-    (TimelineEvent event) => event.name == 'Test Event Delay:fullyLive',
-  ).arguments;
+  final Map<String, dynamic> benchmarkLiveResult =
+      response.data['benchmarkLive'] as Map<String,dynamic>;
+  final Map<String, dynamic> fullyLiveResult =
+      response.data['fullyLive'] as Map<String,dynamic>;
 
   if (response.allTestsPassed) {
     if(benchmarkLiveResult['frame_count'] as int < 10

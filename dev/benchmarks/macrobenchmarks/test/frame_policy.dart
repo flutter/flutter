@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:developer';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
@@ -68,7 +66,9 @@ void main() {
       binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive;
       List<Duration> delays = await tester.handlePointerEventRecord(records);
       await tester.pumpAndSettle();
-      _reportResult('Test Event Delay:benchmarkLive', frameCount, delays);
+      binding.reportData = <String, dynamic>{
+        'benchmarkLive': _summarizeResult(frameCount, delays),
+      };
       await tester.idle();
       await tester.binding.delayed(const Duration(milliseconds: 250));
 
@@ -76,13 +76,16 @@ void main() {
       frameCount = 0;
       delays = await tester.handlePointerEventRecord(records);
       await tester.pumpAndSettle();
-      _reportResult('Test Event Delay:fullyLive', frameCount, delays);
+      binding.reportData['fullyLive'] = _summarizeResult(frameCount, delays);
       await tester.idle();
     },
   );
 }
 
-void _reportResult(String eventName, int frameCount, List<Duration> delays) {
+Map<String, dynamic> _summarizeResult(
+  final int frameCount,
+  final List<Duration> delays,
+) {
   assert(delays.length > 1);
   final List<int> delayedInMicro = delays.map<int>(
     (Duration delay) => delay.inMicroseconds,
@@ -92,14 +95,11 @@ void _reportResult(String eventName, int frameCount, List<Duration> delays) {
   final int percentile90th = delayedInMicroSorted[index90th];
   final int sum = delayedInMicroSorted.reduce((int a, int b) => a + b);
   final double averageDelay = sum.toDouble() / delayedInMicroSorted.length;
-  Timeline.instantSync(
-    eventName,
-    arguments: <String, dynamic>{
-      'frame_count': frameCount,
-      'average_delay_millis': averageDelay / 1E3,
-      '90th_percentile_delay_millis': percentile90th / 1E3,
-      if (kDebugMode)
-      'delaysInMicro': delayedInMicro,
-    },
-  );
+  return <String, dynamic>{
+    'frame_count': frameCount,
+    'average_delay_millis': averageDelay / 1E3,
+    '90th_percentile_delay_millis': percentile90th / 1E3,
+    if (kDebugMode)
+    'delaysInMicro': delayedInMicro,
+  };
 }
