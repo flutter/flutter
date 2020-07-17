@@ -687,9 +687,7 @@ void main() {
       ),
     );
 
-    await tester.pump();
-
-    expect(find.text(longText), findsNWidgets(1));
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('Stepper header subtitle should not overflow', (WidgetTester tester) async {
@@ -716,8 +714,6 @@ void main() {
       ),
     );
 
-    await tester.pump();
-
-    expect(find.text(longText), findsNWidgets(1));
+    expect(tester.takeException(), isNull);
   });
 }
