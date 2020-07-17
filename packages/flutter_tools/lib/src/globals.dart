@@ -28,6 +28,7 @@ import 'device.dart';
 import 'doctor.dart';
 import 'fuchsia/fuchsia_sdk.dart';
 import 'ios/ios_workflow.dart';
+import 'ios/iproxy.dart';
 import 'ios/plist_parser.dart';
 import 'ios/simulators.dart';
 import 'ios/xcodeproj.dart';
@@ -51,6 +52,7 @@ PersistentToolState get persistentToolState => PersistentToolState.instance;
 Signals get signals => context.get<Signals>() ?? LocalSignals.instance;
 Usage get flutterUsage => context.get<Usage>();
 DeviceManager get deviceManager => context.get<DeviceManager>();
+IProxy get iproxy => context.get<IProxy>();
 
 FlutterProjectFactory get projectFactory {
   return context.get<FlutterProjectFactory>() ?? FlutterProjectFactory(

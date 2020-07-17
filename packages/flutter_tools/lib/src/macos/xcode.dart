@@ -500,7 +500,7 @@ class XCDevice {
         cpuArchitecture: _cpuArchitecture(deviceProperties),
         interfaceType: interface,
         sdkVersion: _sdkVersion(deviceProperties),
-        artifacts: globals.artifacts,
+        iProxy: globals.iproxy,
         fileSystem: globals.fs,
         logger: globals.logger,
         iosDeploy: _iosDeploy,
