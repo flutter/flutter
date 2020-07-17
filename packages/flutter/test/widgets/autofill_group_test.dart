@@ -8,23 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class _ContextFinishMatcher extends Matcher {
-  const _ContextFinishMatcher({ this.shouldSave = true })
-    : assert(shouldSave != null),
-      super();
-  final bool shouldSave;
-
-  @override
-  bool matches(covariant MethodCall methodCall, Map<dynamic, dynamic> matchState) {
-    return methodCall.method == 'TextInput.finishAutofillContext' && shouldSave == methodCall.arguments;
-  }
-
-  @override
-  Description describe(Description description) => description.add("must match MethodCall('TextInput.finishAutofillContext', $shouldSave)");
-}
-
-const _ContextFinishMatcher _matchesCommit = _ContextFinishMatcher();
-const _ContextFinishMatcher _matchesCancel = _ContextFinishMatcher(shouldSave: false);
+final Matcher _matchesCommit = isMethodCall('TextInput.finishAutofillContext', arguments: true);
+final Matcher _matchesCancel = isMethodCall('TextInput.finishAutofillContext', arguments: false);
 
 void main() {
   testWidgets('AutofillGroup has the right clients', (WidgetTester tester) async {
