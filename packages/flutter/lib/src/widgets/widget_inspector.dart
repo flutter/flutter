@@ -2293,9 +2293,9 @@ class _WidgetInspectorState extends State<WidgetInspector>
 
   @override
   Widget build(BuildContext context) {
-    // Caution changing this Stack widget. The _InspectorOverlayLayer
+    // Be careful changing this build method. The _InspectorOverlayLayer
     // assumes the root RenderObject for the WidgetInspector will be
-    // a RenderStack with a _RenderInspectorOverlay as last child.
+    // a RenderStack with a _RenderInspectorOverlay as the last child.
     return Stack(children: <Widget>[
       GestureDetector(
         onTap: _handleTap,
