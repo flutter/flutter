@@ -208,17 +208,17 @@ void main() {
         globals.fs.file('.packages').writeAsStringSync('\n');
         globals.fs.file('lib/main.dart').createSync(recursive: true);
         final FakeDevice device = FakeDevice(isLocalEmulator: true);
-        when(deviceManager.getAllConnectedDevices()).thenAnswer((Invocation invocation) async {
+        when(mockDeviceManager.getAllConnectedDevices()).thenAnswer((Invocation invocation) async {
           return <Device>[device];
         });
-        when(deviceManager.getDevices()).thenAnswer((Invocation invocation) async {
+        when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) async {
           return <Device>[device];
         });
-        when(deviceManager.findTargetDevices(any)).thenAnswer((Invocation invocation) async {
+        when(mockDeviceManager.findTargetDevices(any)).thenAnswer((Invocation invocation) async {
           return <Device>[device];
         });
-        when(deviceManager.hasSpecifiedAllDevices).thenReturn(false);
-        when(deviceManager.deviceDiscoverers).thenReturn(<DeviceDiscovery>[]);
+        when(mockDeviceManager.hasSpecifiedAllDevices).thenReturn(false);
+        when(mockDeviceManager.deviceDiscoverers).thenReturn(<DeviceDiscovery>[]);
 
         final RunCommand command = RunCommand();
         applyMocksToCommand(command);
@@ -231,7 +231,7 @@ void main() {
       }, overrides: <Type, Generator>{
         FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => FakeProcessManager.any(),
-        DeviceManager: () => MockDeviceManager(),
+        DeviceManager: () => mockDeviceManager,
         Stdio: () => MockStdio(),
       });
 
@@ -557,7 +557,7 @@ class TestRunCommand extends RunCommand {
   @override
   // ignore: must_call_super
   Future<void> validateCommand() async {
-    devices = await deviceManager.getDevices();
+    devices = await globals.deviceManager.getDevices();
   }
 }
 
