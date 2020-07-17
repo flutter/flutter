@@ -768,7 +768,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     Platform: () => FakePlatform(operatingSystem: 'linux'),
-    ProjectFileInvalidator: () => const FakeProjectFileInvalidator(),
+    ProjectFileInvalidator: () => FakeProjectFileInvalidator(),
   }));
 
   testUsingContext('ResidentRunner bails out of fast reassemble if evaluation fails', () => testbed.run(() async {
@@ -895,7 +895,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     Platform: () => FakePlatform(operatingSystem: 'linux'),
-    ProjectFileInvalidator: () => const FakeProjectFileInvalidator(),
+    ProjectFileInvalidator: () => FakeProjectFileInvalidator(),
   }));
 
 
