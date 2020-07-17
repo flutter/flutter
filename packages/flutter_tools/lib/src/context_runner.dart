@@ -174,15 +174,6 @@ Future<T> runInContext<T>(
         xcode: globals.xcode,
         platform: globals.platform,
       ),
-      IProxy: () => IProxy(
-        iproxyPath: globals.artifacts.getArtifactPath(
-          Artifact.iproxy,
-          platform: TargetPlatform.ios,
-        ),
-        logger: globals.logger,
-        processManager: globals.processManager,
-        dyLdLibEntry: globals.cache.dyLdLibEntry,
-      ),
       KernelCompilerFactory: () => KernelCompilerFactory(
         logger: globals.logger,
         processManager: globals.processManager,
@@ -265,6 +256,15 @@ Future<T> runInContext<T>(
         cache: globals.cache,
         platform: globals.platform,
         xcode: globals.xcode,
+        iproxy: IProxy(
+          iproxyPath: globals.artifacts.getArtifactPath(
+            Artifact.iproxy,
+            platform: TargetPlatform.ios,
+          ),
+          logger: globals.logger,
+          processManager: globals.processManager,
+          dyLdLibEntry: globals.cache.dyLdLibEntry,
+        ),
       ),
       XcodeProjectInterpreter: () => XcodeProjectInterpreter(
         logger: globals.logger,
