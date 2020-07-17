@@ -834,6 +834,15 @@ void main() {
     expect(find.text('regular page one'), findsNothing);
     expect(find.text('regular page two'), findsNothing);
   });
+
+  testWidgets('MaterialApp does create HeroController with the MaterialRectArcTween', (WidgetTester tester) async {
+    final HeroController controller = MaterialApp.createMaterialHeroController();
+    final Tween<Rect> tween = controller.createRectTween(
+      const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+      const Rect.fromLTRB(0.0, 0.0, 20.0, 20.0)
+    );
+    expect(tween, isA<MaterialRectArcTween>());
+  });
 }
 
 class MockAccessibilityFeature implements AccessibilityFeatures {
