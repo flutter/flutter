@@ -91,11 +91,9 @@ abstract class AnalyzeBase {
   bool get isDartDocs => argResults['dartdocs'] as bool;
 
   static int countMissingDartDocs(List<AnalysisError> errors) {
-    final int undocumentedMembers = errors.where((AnalysisError error) {
+    return errors.where((AnalysisError error) {
       return error.code == 'public_member_api_docs';
     }).length;
-
-    return undocumentedMembers;
   }
 
   static String generateDartDocMessage(int undocumentedMembers) {
@@ -118,23 +116,23 @@ abstract class AnalyzeBase {
 
   /// Print an analysis summary.
   static String generateErrorsMessage({
-    int issueCount,
+    @required int issueCount,
     int issueDiff,
     int files,
-    String seconds,
-    int undocumentedMembers,
-    String dartDocMessage,
+    @required String seconds,
+    int undocumentedMembers = 0,
+    String dartDocMessage = '',
   }) {
     String errorsMessage;
-    String issuesMessage = issueCount > 0
-        ? '$issueCount ${pluralize('issue', issueCount)} found.'
-        : 'No issues found!';
+    final StringBuffer issuesMessage = StringBuffer(issueCount > 0
+      ? '$issueCount ${pluralize('issue', issueCount)} found.'
+      : 'No issues found!');
 
-    if (issueDiff != null && issueDiff != 0) {
+    if (issueDiff != null) {
       if (issueDiff > 0) {
-        issuesMessage += ' ($issueDiff new)';
-      } else {
-        issuesMessage += ' (${-issueDiff} fixed)';
+        issuesMessage.write(' ($issueDiff new)');
+      } else if (issueDiff < 0) {
+        issuesMessage.write(' (${-issueDiff} fixed)');
       }
     }
 
