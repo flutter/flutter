@@ -14,6 +14,7 @@ import 'android/android_sdk.dart';
 import 'android/android_workflow.dart';
 import 'application_package.dart';
 import 'artifacts.dart';
+import 'base/common.dart';
 import 'base/config.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
@@ -103,7 +104,6 @@ abstract class DeviceManager {
   bool get hasSpecifiedAllDevices => _specifiedDeviceId == 'all';
 
   Future<List<Device>> getDevicesById(String deviceId) async {
-    final List<Device> devices = await getAllConnectedDevices();
     deviceId = deviceId.toLowerCase();
     bool exactlyMatchesDeviceId(Device device) =>
         device.id.toLowerCase() == deviceId ||
@@ -112,14 +112,48 @@ abstract class DeviceManager {
         device.id.toLowerCase().startsWith(deviceId) ||
         device.name.toLowerCase().startsWith(deviceId);
 
-    final Device exactMatch = devices.firstWhere(
-        exactlyMatchesDeviceId, orElse: () => null);
-    if (exactMatch != null) {
-      return <Device>[exactMatch];
+    // Some discoverers have hard-coded device IDs and return quickly, and others
+    // shell out to other processes and can take longer.
+    // Process discoverers as they can return results, so if an exact match is
+    // found quickly, we don't wait for all the discoverers to complete.
+    final List<Device> prefixMatches = <Device>[];
+    final Completer<Device> exactMatchCompleter = Completer<Device>();
+    final List<StreamSubscription<List<Device>>> futureDevices = <StreamSubscription<List<Device>>>[];
+    for (final DeviceDiscovery discoverer in _platformDiscoverers) {
+      futureDevices.add(
+        discoverer
+        .devices
+        .asStream()
+        .listen((List<Device> devices) {
+          for (final Device device in devices) {
+            if (exactlyMatchesDeviceId(device)) {
+              exactMatchCompleter.complete(device);
+              return;
+            }
+            if (startsWithDeviceId(device)) {
+              prefixMatches.add(device);
+            }
+          }
+        }));
     }
 
-    // Match on a id or name starting with [deviceId].
-    return devices.where(startsWithDeviceId).toList();
+    // When an exact match is found, bail early and ignore all other discoverers.
+    unawaited(exactMatchCompleter.future.whenComplete(() {
+      for (final StreamSubscription<List<Device>> subscription in futureDevices) {
+        subscription.cancel();
+      }
+    }));
+
+    // Wait for an exact match, or for all discoverers to return results.
+    await Future.any<dynamic>(<Future<dynamic>>[
+      exactMatchCompleter.future,
+      Future.wait<Device>(futureDevices.map((StreamSubscription<List<Device>> subscription) => subscription.asFuture()))]
+    );
+
+    if (exactMatchCompleter.isCompleted) {
+      return <Device>[await exactMatchCompleter.future];
+    }
+    return prefixMatches;
   }
 
   /// Returns the list of connected devices, filtered by any user-specified device id.
