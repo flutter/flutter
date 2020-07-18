@@ -174,10 +174,10 @@ class AnalyzeOnce extends AnalyzeBase {
     final String seconds = (timer.elapsedMilliseconds / 1000.0).toStringAsFixed(1);
     final String dartDocMessage = AnalyzeBase.generateDartDocMessage(undocumentedMembers);
     final String errorsMessage = AnalyzeBase.generateErrorsMessage(
-        issueCount: errorCount,
-        seconds: seconds,
-        undocumentedMembers: undocumentedMembers,
-        dartDocMessage: dartDocMessage);
+      issueCount: errorCount,
+      seconds: seconds,
+      undocumentedMembers: undocumentedMembers,
+      dartDocMessage: dartDocMessage);
 
     if (errorCount > 0) {
       logger.printStatus('');
