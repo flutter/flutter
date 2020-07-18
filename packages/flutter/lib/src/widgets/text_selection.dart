@@ -1513,6 +1513,9 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
 
   /// Check the [Clipboard] and update [value] if needed.
   Future<void> update() async {
+    if (_disposed) {
+      return;
+    }
     // iOS 14 added a notification that appears when an app accesses the
     // clipboard. To avoid the notification, don't access the clipboard on iOS,
     // and instead always shown the paste button, even when the clipboard is
@@ -1521,37 +1524,44 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
     // won't trigger the notification.
     // https://github.com/flutter/flutter/issues/60145
     switch (defaultTargetPlatform) {
+      // iOS 14 added a notification that appears when an app accesses the
+      // clipboard. To avoid the notification, don't access the clipboard on iOS,
+      // and instead always show the paste button, even when the clipboard is
+      // empty.
       case TargetPlatform.iOS:
-        value = ClipboardStatus.pasteable;
-        return;
+      case TargetPlatform.macOS:
+        Clipboard.hasStrings().then((bool hasStrings) {
+          value = hasStrings
+            ? ClipboardStatus.pasteable
+            : ClipboardStatus.notPasteable;
+        });
+        break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
-      case TargetPlatform.macOS:
       case TargetPlatform.windows:
+        ClipboardData data;
+        try {
+          data = await Clipboard.getData(Clipboard.kTextPlain);
+        } catch (stacktrace) {
+          // In the case of an error from the Clipboard API, set the value to
+          // unknown so that it will try to update again later.
+          if (_disposed || value == ClipboardStatus.unknown) {
+            return;
+          }
+          value = ClipboardStatus.unknown;
+          return;
+        }
+
+        final ClipboardStatus clipboardStatus = data != null && data.text != null && data.text.isNotEmpty
+            ? ClipboardStatus.pasteable
+            : ClipboardStatus.notPasteable;
+        if (_disposed || clipboardStatus == value) {
+          return;
+        }
+        value = clipboardStatus;
         break;
     }
-
-    ClipboardData data;
-    try {
-      data = await Clipboard.getData(Clipboard.kTextPlain);
-    } catch (stacktrace) {
-      // In the case of an error from the Clipboard API, set the value to
-      // unknown so that it will try to update again later.
-      if (_disposed || value == ClipboardStatus.unknown) {
-        return;
-      }
-      value = ClipboardStatus.unknown;
-      return;
-    }
-
-    final ClipboardStatus clipboardStatus = data != null && data.text != null && data.text.isNotEmpty
-        ? ClipboardStatus.pasteable
-        : ClipboardStatus.notPasteable;
-    if (_disposed || clipboardStatus == value) {
-      return;
-    }
-    value = clipboardStatus;
   }
 
   @override
