@@ -372,9 +372,9 @@ void main() {
       }));
     }
 
-    await tester.pumpWidget(buildFrame(checkColor: const Color(0xFFFFFFFF)));
+    await tester.pumpWidget(buildFrame(checkColor: const Color(0xFFFAFAFA)));
     await tester.pumpAndSettle();
-    expect(getCheckboxRenderer(), paints..path(color: const Color(0xFFFFFFFF))); // paints's color is 0xFFFFFFFF (default color)
+    expect(getCheckboxRenderer(), paints..path(color: const Color(0xFFFAFAFA))); // paints's color is 0xFFFAFAFA (light theme default)
 
     await tester.pumpWidget(buildFrame(checkColor: const Color(0xFF000000)));
     await tester.pumpAndSettle();
@@ -426,7 +426,7 @@ void main() {
             color: const Color(0xff1e88e5),
             rrect: RRect.fromLTRBR(
                 391.0, 291.0, 409.0, 309.0, const Radius.circular(1.0)))
-        ..path(color: Colors.white),
+        ..path(color: Colors.grey[50]),
     );
 
     // Check the false value.
@@ -494,7 +494,7 @@ void main() {
             color: const Color(0xff1e88e5),
             rrect: RRect.fromLTRBR(
                 391.0, 291.0, 409.0, 309.0, const Radius.circular(1.0)))
-        ..path(color: const Color(0xffffffff), style: PaintingStyle.stroke, strokeWidth: 2.0),
+        ..path(color: const Color(0xfffafafa), style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
 
     // Start hovering
@@ -511,7 +511,7 @@ void main() {
             color: const Color(0xff1e88e5),
             rrect: RRect.fromLTRBR(
                 391.0, 291.0, 409.0, 309.0, const Radius.circular(1.0)))
-        ..path(color: const Color(0xffffffff), style: PaintingStyle.stroke, strokeWidth: 2.0),
+        ..path(color: const Color(0xfffafafa), style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
 
     // Check what happens when disabled.
@@ -524,7 +524,7 @@ void main() {
             color: const Color(0x61000000),
             rrect: RRect.fromLTRBR(
                 391.0, 291.0, 409.0, 309.0, const Radius.circular(1.0)))
-        ..path(color: const Color(0xffffffff), style: PaintingStyle.stroke, strokeWidth: 2.0),
+        ..path(color: const Color(0xfffafafa), style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
   });
 

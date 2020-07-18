@@ -320,8 +320,8 @@ class ThemeData with Diagnosticable {
     secondaryHeaderColor ??= isDark ? Colors.grey[700] : primarySwatch[50];
     textSelectionColor ??= isDark ? accentColor : primarySwatch[200];
     // TODO(hansmuller): We need a TextFieldTheme to handle this instead, https://github.com/flutter/flutter/issues/56082
-    cursorColor = cursorColor ?? const Color.fromRGBO(66, 133, 244, 1.0);
-    textSelectionHandleColor ??= isDark ? Colors.tealAccent[400] : primarySwatch[300];
+    cursorColor ??= isDark ? Colors.tealAccent[200] : primarySwatch;
+    textSelectionHandleColor ??= isDark ? Colors.tealAccent[200] : primarySwatch[300];
     backgroundColor ??= isDark ? Colors.grey[700] : primarySwatch[200];
     dialogBackgroundColor ??= isDark ? Colors.grey[800] : Colors.white;
     indicatorColor ??= accentColor == primaryColor ? Colors.white : accentColor;

@@ -226,12 +226,12 @@ void main() {
 
     await tester.pump();
     expect(renderEditable.cursorColor.alpha, 255);
-    expect(renderEditable, paints..rect(color: const Color(0xff4285f4)));
+    expect(renderEditable, paints..rect(color: const Color(0xff2196f3)));
 
     // Android cursor goes from exactly on to exactly off on the 500ms dot.
     await tester.pump(const Duration(milliseconds: 499));
     expect(renderEditable.cursorColor.alpha, 255);
-    expect(renderEditable, paints..rect(color: const Color(0xff4285f4)));
+    expect(renderEditable, paints..rect(color: const Color(0xff2196f3)));
 
     await tester.pump(const Duration(milliseconds: 1));
     expect(renderEditable.cursorColor.alpha, 0);
@@ -240,7 +240,7 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 500));
     expect(renderEditable.cursorColor.alpha, 255);
-    expect(renderEditable, paints..rect(color: const Color(0xff4285f4)));
+    expect(renderEditable, paints..rect(color: const Color(0xff2196f3)));
 
     await tester.pump(const Duration(milliseconds: 500));
     expect(renderEditable.cursorColor.alpha, 0);
@@ -304,21 +304,21 @@ void main() {
 
     await tester.pump();
     expect(renderEditable.cursorColor.alpha, 255);
-    expect(renderEditable, paints..rect(color: const Color(0xff4285f4)));
+    expect(renderEditable, paints..rect(color: const Color(0xff2196f3)));
 
     await tester.pump(const Duration(milliseconds: 500));
     expect(renderEditable.cursorColor.alpha, 255);
-    expect(renderEditable, paints..rect(color: const Color(0xff4285f4)));
+    expect(renderEditable, paints..rect(color: const Color(0xff2196f3)));
 
     // Cursor draw never changes.
     await tester.pump(const Duration(milliseconds: 500));
     expect(renderEditable.cursorColor.alpha, 255);
-    expect(renderEditable, paints..rect(color: const Color(0xff4285f4)));
+    expect(renderEditable, paints..rect(color: const Color(0xff2196f3)));
 
     // No more transient calls.
     await tester.pumpAndSettle();
     expect(renderEditable.cursorColor.alpha, 255);
-    expect(renderEditable, paints..rect(color: const Color(0xff4285f4)));
+    expect(renderEditable, paints..rect(color: const Color(0xff2196f3)));
 
     EditableText.debugDeterministicCursor = false;
   });

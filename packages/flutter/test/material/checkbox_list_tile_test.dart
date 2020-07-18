@@ -52,7 +52,7 @@ void main() {
 
     await tester.pumpWidget(buildFrame(null));
     await tester.pumpAndSettle();
-    expect(getCheckboxListTileRenderer(), paints..path(color: const Color(0xFFFFFFFF))); // paints's color is 0xFFFFFFFF (default color)
+    expect(getCheckboxListTileRenderer(), paints..path(color: const Color(0xFFFAFAFA))); // paints's color is 0xFFFAFAFA (light theme default)
 
     await tester.pumpWidget(buildFrame(const Color(0xFF000000)));
     await tester.pumpAndSettle();
@@ -80,9 +80,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(getCheckboxListTileRenderer(), paints..rrect(color: const Color(0xFF000000))); // paints's color is 0xFF000000 (theme)
 
-    await tester.pumpWidget(buildFrame(const Color(0xFF000000), const Color(0xFFFFFFFF)));
+    await tester.pumpWidget(buildFrame(const Color(0xFF000000), const Color(0xFFFAFAFA)));
     await tester.pumpAndSettle();
-    expect(getCheckboxListTileRenderer(), paints..rrect(color: const Color(0xFFFFFFFF))); // paints's color is 0xFFFFFFFF (params)
+    expect(getCheckboxListTileRenderer(), paints..rrect(color: const Color(0xFFFAFAFA))); // paints's color is 0xFFFAFAFA (params)
   });
 
   testWidgets('CheckboxListTile can autofocus unless disabled.', (WidgetTester tester) async {

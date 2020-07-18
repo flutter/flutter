@@ -135,7 +135,7 @@ class Checkbox extends StatefulWidget {
 
   /// The color to use for the check icon when this checkbox is checked.
   ///
-  /// Defaults to Color(0xFFFFFFFF)
+  /// Defaults to [ThemeData.canvasColor].
   final Color checkColor;
 
   /// If true the checkbox's [value] can be true, false, or null.
@@ -271,7 +271,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
             value: widget.value,
             tristate: widget.tristate,
             activeColor: widget.activeColor ?? themeData.toggleableActiveColor,
-            checkColor: widget.checkColor ?? const Color(0xFFFFFFFF),
+            checkColor: widget.checkColor ?? themeData.canvasColor,
             inactiveColor: enabled ? themeData.unselectedWidgetColor : themeData.disabledColor,
             focusColor: widget.focusColor ?? themeData.focusColor,
             hoverColor: widget.hoverColor ?? themeData.hoverColor,
