@@ -3,16 +3,30 @@ package io.flutter.plugin.platform;
 import static io.flutter.embedding.engine.systemchannels.PlatformViewsChannel.PlatformViewTouch;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import android.content.Context;
+import android.content.res.AssetManager;
 import android.view.MotionEvent;
 import android.view.View;
+import io.flutter.embedding.android.FlutterView;
 import io.flutter.embedding.android.MotionEventTracker;
+import io.flutter.embedding.engine.FlutterJNI;
+import io.flutter.embedding.engine.dart.DartExecutor;
+import io.flutter.plugin.common.MethodCall;
+import io.flutter.plugin.common.StandardMethodCodec;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -185,5 +199,55 @@ public class PlatformViewsControllerTest {
 
     assertNotEquals(resolvedEvent.getAction(), frameWorkTouch.action);
     assertEquals(resolvedEvent.getAction(), original.getAction());
+  }
+
+  @Test
+  public void getPlatformViewById__hybridComposition() {
+    PlatformViewsController platformViewsController = new PlatformViewsController();
+
+    int platformViewId = 0;
+    assertNull(platformViewsController.getPlatformViewById(platformViewId));
+
+    FlutterJNI jni = new FlutterJNI();
+    AssetManager assetManager = mock(AssetManager.class);
+    Context context = RuntimeEnvironment.application.getApplicationContext();
+
+    DartExecutor executor = new DartExecutor(jni, assetManager);
+    executor.onAttachedToJNI();
+    platformViewsController.attach(context, null, executor);
+    platformViewsController.attachToView(mock(FlutterView.class));
+
+    PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
+    PlatformView platformView = mock(PlatformView.class);
+    View androidView = mock(View.class);
+    when(platformView.getView()).thenReturn(androidView);
+    when(viewFactory.create(any(), eq(platformViewId), any())).thenReturn(platformView);
+
+    platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
+
+    // Simulate create call from the framework.
+    Map<String, Object> platformViewCreateArguments = new HashMap<>();
+    platformViewCreateArguments.put("hybrid", true);
+    platformViewCreateArguments.put("id", platformViewId);
+    platformViewCreateArguments.put("viewType", "testType");
+    platformViewCreateArguments.put("direction", 0);
+    MethodCall platformCreateMethodCall = new MethodCall("create", platformViewCreateArguments);
+
+    jni.handlePlatformMessage(
+        "flutter/platform_views", encodeMethodCall(platformCreateMethodCall), /*replyId=*/ 0);
+
+    platformViewsController.initializePlatformViewIfNeeded(platformViewId);
+
+    View resultAndroidView = platformViewsController.getPlatformViewById(platformViewId);
+    assertNotNull(resultAndroidView);
+    assertEquals(resultAndroidView, androidView);
+  }
+
+  private static byte[] encodeMethodCall(MethodCall call) {
+    ByteBuffer buffer = StandardMethodCodec.INSTANCE.encodeMethodCall(call);
+    buffer.rewind();
+    byte[] dest = new byte[buffer.remaining()];
+    buffer.get(dest);
+    return dest;
   }
 }
