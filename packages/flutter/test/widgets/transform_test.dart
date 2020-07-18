@@ -385,11 +385,7 @@ void main() {
         final ui.Image imageWithCompositing = await layer.toImage(renderBox.paintBounds);
 
         await tester.pumpWidget(RepaintBoundary(child: _generateTransform(false, angle)));
-        try {
-          await expectLater(find.byType(RepaintBoundary).first, matchesReferenceImage(imageWithCompositing));
-        } catch (e) {
-          print(angle);
-        }
+        await expectLater(find.byType(RepaintBoundary).first, matchesReferenceImage(imageWithCompositing));
       }
     },
   );
