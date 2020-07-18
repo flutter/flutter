@@ -167,17 +167,13 @@ void main(List<String> args) {
   final File newCodepointsFile = File(path.absolute(
       path.normalize(argResults[_newCodepointsPathOption] as String)));
   if (!newCodepointsFile.existsSync()) {
-    stderr.writeln(
-      'Error: New codepoints file not found: ${newCodepointsFile.path}',
-    );
+    stderr.writeln('Error: New codepoints file not found: ${newCodepointsFile.path}');
     exit(1);
   }
   final File oldCodepointsFile =
       File(path.absolute(argResults[_oldCodepointsPathOption] as String));
   if (!oldCodepointsFile.existsSync()) {
-    stderr.writeln(
-      'Error: Old codepoints file not found: ${oldCodepointsFile.path}',
-    );
+    stderr.writeln('Error: Old codepoints file not found: ${oldCodepointsFile.path}');
     exit(1);
   }
 
