@@ -676,7 +676,8 @@ public class FlutterJNI {
   // Called by native.
   // TODO(mattcarroll): determine if message is nonull or nullable
   @SuppressWarnings("unused")
-  private void handlePlatformMessage(
+  @VisibleForTesting
+  public void handlePlatformMessage(
       @NonNull final String channel, byte[] message, final int replyId) {
     if (platformMessageHandler != null) {
       platformMessageHandler.handleMessageFromDart(channel, message, replyId);
