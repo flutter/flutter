@@ -198,12 +198,12 @@ class AnalyzeOnce extends AnalyzeBase {
       final AnalysisSeverity severityLevel = error.writtenError.severityLevel;
       if (severityLevel == AnalysisSeverity.error) {
         return true;
-      } else if (severityLevel == AnalysisSeverity.warning &&
-          (argResults['fatal-warnings'] as bool ||
-              argResults['fatal-infos'] as bool)) {
+      }
+      if (severityLevel == AnalysisSeverity.warning &&
+        (argResults['fatal-warnings'] as bool || argResults['fatal-infos'] as bool)) {
         return true;
-      } else if (severityLevel == AnalysisSeverity.info &&
-          argResults['fatal-infos'] as bool) {
+      }
+      if (severityLevel == AnalysisSeverity.info && argResults['fatal-infos'] as bool) {
         return true;
       }
     }
