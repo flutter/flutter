@@ -524,6 +524,10 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
   @Override
   public View getPlatformViewById(Integer id) {
+    // Hybrid composition.
+    if (platformViews.get(id) != null) {
+      return platformViews.get(id);
+    }
     VirtualDisplayController controller = vdControllers.get(id);
     if (controller == null) {
       return null;
@@ -641,7 +645,8 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     }
   }
 
-  private void initializePlatformViewIfNeeded(int viewId) {
+  @VisibleForTesting
+  void initializePlatformViewIfNeeded(int viewId) {
     if (platformViews.get(viewId) != null) {
       return;
     }
