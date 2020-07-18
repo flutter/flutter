@@ -498,7 +498,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   // TODO(justinmc): Add rotateEnabled parameter to the widget and remove this
   // hardcoded value when the rotation feature is implemented.
   // https://github.com/flutter/flutter/issues/57698
-  final bool _rotateEnabled = false;
+  final bool _rotateEnabled = true;
 
   // Used as the coefficient of friction in the inertial translation animation.
   // This value was eyeballed to give a feel similar to Google Photos.
@@ -710,6 +710,11 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   // Handle an update to an ongoing gesture. All of pan, scale, and rotate are
   // handled with GestureDetector's scale gesture.
   void _onScaleUpdate(ScaleUpdateDetails details) {
+    // Rotation is often 0.0 for the first call of _onScaleUpdate. Skip this
+    // event in order to get a fair comparison of scale and rotation.
+    if ((details.scale != 1.0 || details.rotation != 0.0) && (details.scale == 1.0 || details.rotation == 0.0)) {
+      return;
+    }
     final double scale = _transformationController.value.getMaxScaleOnAxis();
     if (widget.onInteractionUpdate != null) {
       widget.onInteractionUpdate(ScaleUpdateDetails(
@@ -1089,7 +1094,7 @@ double _getFinalTime(double velocity, double drag) {
 _GestureType _getGestureType(double scale, double rotation) {
   if ((scale - 1).abs() > rotation.abs()) {
     return _GestureType.scale;
-  } else if (rotation != 0) {
+  } else if (rotation != 0.0) {
     return _GestureType.rotate;
   } else {
     return _GestureType.pan;
