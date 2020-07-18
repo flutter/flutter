@@ -91,11 +91,9 @@ abstract class AnalyzeBase {
   bool get isDartDocs => argResults['dartdocs'] as bool;
 
   static int countMissingDartDocs(List<AnalysisError> errors) {
-    final int undocumentedMembers = errors.where((AnalysisError error) {
+    return errors.where((AnalysisError error) {
       return error.code == 'public_member_api_docs';
     }).length;
-
-    return undocumentedMembers;
   }
 
   static String generateDartDocMessage(int undocumentedMembers) {
@@ -116,39 +114,39 @@ abstract class AnalyzeBase {
     return dartDocMessage;
   }
 
-  /// Print an analysis summary.
+  /// Generate an analysis summary for both [AnalyzeOnce], [AnalyzeContinuously].
   static String generateErrorsMessage({
-    int issueCount,
+    @required int issueCount,
     int issueDiff,
     int files,
-    String seconds,
-    int undocumentedMembers,
-    String dartDocMessage,
+    @required String seconds,
+    int undocumentedMembers = 0,
+    String dartDocMessage = '',
   }) {
-    String errorsMessage;
-    String issuesMessage = issueCount > 0
-        ? '$issueCount ${pluralize('issue', issueCount)} found.'
-        : 'No issues found!';
+    final StringBuffer errorsMessage = StringBuffer(issueCount > 0
+      ? '$issueCount ${pluralize('issue', issueCount)} found.'
+      : 'No issues found!');
 
-    if (issueDiff != null && issueDiff != 0) {
+    // Only [AnalyzeContinuously] has issueDiff message.
+    if (issueDiff != null) {
       if (issueDiff > 0) {
-        issuesMessage += ' ($issueDiff new)';
-      } else {
-        issuesMessage += ' (${-issueDiff} fixed)';
+        errorsMessage.write(' ($issueDiff new)');
+      } else if (issueDiff < 0) {
+        errorsMessage.write(' (${-issueDiff} fixed)');
       }
     }
 
-    String filesMessage = '';
+    // Only [AnalyzeContinuously] has files message.
     if (files != null) {
-      filesMessage = ' • analyzed $files ${pluralize('file', files)}';
+      errorsMessage.write(' • analyzed $files ${pluralize('file', files)}');
     }
 
     if (undocumentedMembers > 0) {
-      errorsMessage = '$issuesMessage$filesMessage (ran in ${seconds}s; $dartDocMessage)';
+      errorsMessage.write(' (ran in ${seconds}s; $dartDocMessage)');
     } else {
-      errorsMessage = '$issuesMessage$filesMessage (ran in ${seconds}s;)';
+      errorsMessage.write(' (ran in ${seconds}s;)');
     }
-    return errorsMessage;
+    return errorsMessage.toString();
   }
 }
 
