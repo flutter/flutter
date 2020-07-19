@@ -781,7 +781,7 @@ class EditableText extends StatefulWidget {
   /// These apply equally to `TextField`, `TextFormField`, and
   /// `EditableText`.
   ///
-  /// Input that always occupies atleast 2 lines and has an infinite max.
+  /// Input that always occupies at least 2 lines and has an infinite max.
   /// After reaching the horizontal specified limit, expands vertically as needed.
   /// ```dart
   /// TextField(minLines: 2)
