@@ -259,7 +259,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
 │  enabled will not accurately reflect the performance  │
 │  that will be experienced by end users using release  ╎
 │  builds. Benchmarks should be run using this command  ┆
-│  line:  flutter drive --profile test_perf.dart        ┊
+│  line:  flutter drive --profile -t test_perf.dart     ┊
 │                                                       ┊
 └─────────────────────────────────────────────────╌┄┈  🐢
 ''';
