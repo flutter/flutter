@@ -24,9 +24,8 @@ void main() {
     await tester.pump();
     final TestGesture gesture = await tester.createGesture(
        kind: PointerDeviceKind.mouse);
-    // This mimics the start of a gesture as seen on a device, where inputs
-    // starts with a PointerAddedEvent.
     final Offset location = tester.getCenter(find.text('Test'));
+    // for moust input without a down, the moveTo generate a hover event
     await gesture.moveTo(location);
     await gesture.removePointer();
   });
