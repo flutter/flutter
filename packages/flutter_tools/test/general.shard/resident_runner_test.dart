@@ -2043,8 +2043,8 @@ class FakeFlutterDevice extends FlutterDevice {
   Future<void> connect({
     ReloadSources reloadSources,
     Restart restart,
-    bool disableDds,
-    bool ipv6,
+    bool disableDds = false,
+    bool ipv6 = false,
     CompileExpression compileExpression,
     ReloadMethod reloadMethod,
     GetSkSLMethod getSkSLMethod,
