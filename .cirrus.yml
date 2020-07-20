@@ -717,4 +717,3 @@ docker_builder:
     - cd "$CIRRUS_WORKING_DIR/dev/ci/docker_linux"
     - ./docker_build.sh
     - ./docker_login.sh
-    - ./docker_push.sh
