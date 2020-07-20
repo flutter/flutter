@@ -118,10 +118,10 @@ abstract class DesktopDevice extends Device {
     _runningProcesses.add(process);
     unawaited(process.exitCode.then((_) => _runningProcesses.remove(process)));
 
+    _deviceLogReader.initializeProcess(process);
     if (debuggingOptions?.buildInfo?.isRelease == true) {
       return LaunchResult.succeeded();
     }
-    _deviceLogReader.initializeProcess(process);
     final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(_deviceLogReader,
       devicePort: debuggingOptions?.deviceVmServicePort,
       hostPort: debuggingOptions?.hostVmServicePort,

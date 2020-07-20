@@ -48,15 +48,18 @@ class WidgetCache {
     final WidgetBuildCollector collector = WidgetBuildCollector();
     final Token endToken = Parser(collector).parseUnit(firstToken);
 
-    final _TokenCache tokenCache = _cache[uri];
+    final _TokenCache tokenCache = _cache.remove(uri);
     if (tokenCache == null) {
-       // Ensure that the cache does not grow beyond [_kCacheSize].
-      while (_cache.length >= _kCacheSize) {
-        final Uri keyToRemove = _cache.keys.last;
+       // Ensure that the cache does not grow beyond `_kCacheSize`.
+      while (_cache.length + 1 > _kCacheSize) {
+        final Uri keyToRemove = _cache.keys.first;
         _cache.remove(keyToRemove);
       }
       _cache[uri] = _TokenCache(firstToken, endToken);
       return null;
+    } else {
+      // preserve LRU behavior.
+      _cache[uri] = tokenCache;
     }
 
     Token current = firstToken;
@@ -64,6 +67,9 @@ class WidgetCache {
 
     // Walk forward through the token stream until the first difference is found.
     while (current != null && currentPrev != null && !current.isEof && !currentPrev.isEof) {
+      if (current.type == TokenType.BAD_INPUT || currentPrev.type == TokenType.BAD_INPUT) {
+        break;
+      }
       if (current.lexeme != currentPrev.lexeme) {
         break;
       }
@@ -76,11 +82,24 @@ class WidgetCache {
 
     // Walk background through the token stream until the first difference is found.
     while (currentEnd != current && currentPrevEnd != currentPrev) {
+      if (current.type == TokenType.BAD_INPUT || currentPrev.type == TokenType.BAD_INPUT) {
+        break;
+      }
       if (currentEnd.lexeme != currentPrevEnd.lexeme) {
         break;
       }
       currentEnd = currentEnd.previous;
       currentPrevEnd = currentPrevEnd.previous;
+    }
+
+    // If either the beginning or end tokens are invalid, ensure that a full
+    // reload is performed.
+    if (current.type == TokenType.BAD_INPUT ||
+        currentPrev.type == TokenType.BAD_INPUT ||
+        currentEnd.type == TokenType.BAD_INPUT ||
+        currentPrevEnd.type == TokenType.BAD_INPUT) {
+      _cache.remove(uri);
+      return null;
     }
 
     // If the beginning and end tokens are the same, there is no difference in

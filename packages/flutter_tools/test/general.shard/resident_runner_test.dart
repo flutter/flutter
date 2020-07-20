@@ -667,7 +667,7 @@ void main() {
         args: <String, String>{
           'isolateId': '1',
           'targetId': '1',
-          'expression': '((){debugFastReassembleMethod=(Object _fastReassembleParam) => _fastReassembleParam is FakeWidget})()',
+          'expression': '((){debugFastReassembleMethod=(Object _fastReassembleParam) => _fastReassembleParam is FakeWidget;})()',
         }
       ),
       listViews,
@@ -793,7 +793,7 @@ void main() {
         args: <String, String>{
           'isolateId': '1',
           'targetId': '1',
-          'expression': '((){debugFastReassembleMethod=(Object _fastReassembleParam) => _fastReassembleParam is FakeWidget})()',
+          'expression': '((){debugFastReassembleMethod=(Object _fastReassembleParam) => _fastReassembleParam is FakeWidget;})()',
         },
         errorCode: 500,
       ),
