@@ -355,6 +355,8 @@ class PerfTest {
     this.timelineFileName, {
     this.needsMeasureCpuGpu = false,
     this.testDriver,
+    this.needsFullTimeline = true,
+    this.benchmarkScoreKeys,
   });
 
   /// The directory where the app under test is defined.
@@ -364,9 +366,14 @@ class PerfTest {
   // The prefix name of the filename such as `<timelineFileName>.timeline_summary.json`.
   final String timelineFileName;
   /// The test file to run on the host.
+  String get resultFilename => '$timelineFileName.timeline_summary';
   final String testDriver;
   /// Whether to collect CPU and GPU metrics.
   final bool needsMeasureCpuGpu;
+  /// Whether to collect full timeline, meaning if `--trace-startup` flag is needed.
+  final bool needsFullTimeline;
+  /// The keys of the values that needs to be reported.
+  final List<String> benchmarkScoreKeys;
 
   Future<TaskResult> run() {
     return internalRun();
@@ -389,7 +396,8 @@ class PerfTest {
         '-v',
         '--verbose-system-logs',
         '--profile',
-        '--trace-startup', // Enables "endless" timeline event buffering.
+        if (needsFullTimeline)
+          '--trace-startup', // Enables "endless" timeline event buffering.
         '-t', testTarget,
         if (noBuild) '--no-build',
         if (testDriver != null)
@@ -403,7 +411,7 @@ class PerfTest {
         deviceId,
       ]);
       final Map<String, dynamic> data = json.decode(
-        file('$testDirectory/build/$timelineFileName.timeline_summary.json').readAsStringSync(),
+        file('$testDirectory/build/$resultFilename.json').readAsStringSync(),
       ) as Map<String, dynamic>;
 
       if (data['frame_count'] as int < 5) {
@@ -419,21 +427,24 @@ class PerfTest {
         });
       }
 
-      return TaskResult.success(data, benchmarkScoreKeys: <String>[
-        'average_frame_build_time_millis',
-        'worst_frame_build_time_millis',
-        '90th_percentile_frame_build_time_millis',
-        '99th_percentile_frame_build_time_millis',
-        'average_frame_rasterizer_time_millis',
-        'worst_frame_rasterizer_time_millis',
-        '90th_percentile_frame_rasterizer_time_millis',
-        '99th_percentile_frame_rasterizer_time_millis',
-        'average_vsync_transitions_missed',
-        '90th_percentile_vsync_transitions_missed',
-        '99th_percentile_vsync_transitions_missed',
-        if (needsMeasureCpuGpu) 'cpu_percentage',
-        if (needsMeasureCpuGpu) 'gpu_percentage',
-      ]);
+      return TaskResult.success(
+        data,
+        benchmarkScoreKeys: benchmarkScoreKeys ?? <String>[
+          'average_frame_build_time_millis',
+          'worst_frame_build_time_millis',
+          '90th_percentile_frame_build_time_millis',
+          '99th_percentile_frame_build_time_millis',
+          'average_frame_rasterizer_time_millis',
+          'worst_frame_rasterizer_time_millis',
+          '90th_percentile_frame_rasterizer_time_millis',
+          '99th_percentile_frame_rasterizer_time_millis',
+          'average_vsync_transitions_missed',
+          '90th_percentile_vsync_transitions_missed',
+          '99th_percentile_vsync_transitions_missed',
+          if (needsMeasureCpuGpu) 'cpu_percentage',
+          if (needsMeasureCpuGpu) 'gpu_percentage',
+        ],
+      );
     });
   }
 }
@@ -443,74 +454,28 @@ class E2EPerfTest extends PerfTest {
     String testDirectory,
     String testTarget, {
     String summaryFilename,
-    this.benchmarkScoreKeys,
+    List<String> benchmarkScoreKeys,
     }
   ) : super(
     testDirectory,
     testTarget,
     summaryFilename,
     testDriver: 'test_driver/e2e_test.dart',
+    needsFullTimeline: false,
+    benchmarkScoreKeys: benchmarkScoreKeys ?? const <String>[
+      'average_frame_build_time_millis',
+      'worst_frame_build_time_millis',
+      '90th_percentile_frame_build_time_millis',
+      '99th_percentile_frame_build_time_millis',
+      'average_frame_rasterizer_time_millis',
+      'worst_frame_rasterizer_time_millis',
+      '90th_percentile_frame_rasterizer_time_millis',
+      '99th_percentile_frame_rasterizer_time_millis',
+      ],
   );
 
-  final List<String> benchmarkScoreKeys;
-
   @override
-  Future<TaskResult> internalRun({
-      bool cacheSkSL = false,
-      bool noBuild = false,
-      String existingApp,
-      String writeSkslFileName,
-  }) {
-    return inDirectory<TaskResult>(testDirectory, () async {
-      final Device device = await devices.workingDevice;
-      await device.unlock();
-      final String deviceId = device.deviceId;
-      await flutter('packages', options: <String>['get']);
-
-      await flutter('drive', options: <String>[
-        '-v',
-        '--verbose-system-logs',
-        '--profile',
-        '-t', testTarget,
-        if (noBuild) '--no-build',
-        if (testDriver != null)
-          ...<String>['--driver', testDriver],
-        if (existingApp != null)
-          ...<String>['--use-existing-app', existingApp],
-        if (writeSkslFileName != null)
-          ...<String>['--write-sksl-on-exit', writeSkslFileName],
-        if (cacheSkSL) '--cache-sksl',
-        '-d',
-        deviceId,
-      ]);
-
-      final String resultFilename = timelineFileName ?? 'e2e_perf_summary';
-      final Map<String, dynamic> data = json.decode(
-        file('$testDirectory/build/$resultFilename.json').readAsStringSync(),
-      ) as Map<String, dynamic>;
-
-      if (data['frame_count'] as int < 5) {
-        return TaskResult.failure(
-          'Timeline contains too few frames: ${data['frame_count']}. Possibly '
-          'trace events are not being captured.',
-        );
-      }
-
-      return TaskResult.success(
-        data,
-        benchmarkScoreKeys: benchmarkScoreKeys ?? <String>[
-        'average_frame_build_time_millis',
-        'worst_frame_build_time_millis',
-        '90th_percentile_frame_build_time_millis',
-        '99th_percentile_frame_build_time_millis',
-        'average_frame_rasterizer_time_millis',
-        'worst_frame_rasterizer_time_millis',
-        '90th_percentile_frame_rasterizer_time_millis',
-        '99th_percentile_frame_rasterizer_time_millis',
-        ],
-      );
-    });
-  }
+  String get resultFilename => timelineFileName ?? 'e2e_perf_summary';
 }
 
 class PerfTestWithSkSL extends PerfTest {
