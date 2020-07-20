@@ -371,7 +371,10 @@ class AttachCommand extends FlutterCommand {
       targetModel: TargetModel(stringArg('target-model')),
       buildInfo: getBuildInfo(),
       userIdentifier: userIdentifier,
-      widgetCache: WidgetCache(featureFlags: featureFlags),
+      widgetCache: WidgetCache(
+        featureFlags: featureFlags,
+        fileSystem: globals.fs,
+      ),
     );
     flutterDevice.observatoryUris = observatoryUris;
     final List<FlutterDevice> flutterDevices =  <FlutterDevice>[flutterDevice];

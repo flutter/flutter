@@ -470,7 +470,10 @@ class AppDomain extends Domain {
       viewFilter: isolateFilter,
       target: target,
       buildInfo: options.buildInfo,
-      widgetCache: WidgetCache(featureFlags: featureFlags),
+      widgetCache: WidgetCache(
+        featureFlags: featureFlags,
+        fileSystem: globals.fs,
+      ),
     );
 
     ResidentRunner runner;

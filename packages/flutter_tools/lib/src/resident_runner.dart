@@ -674,13 +674,14 @@ class FlutterDevice {
         await vmService.evaluate(
           view.uiIsolate.id,
           targetLibrary.id,
-          '((){debugFastReassembleMethod=(Object _fastReassembleParam) => _fastReassembleParam is $widgetName})()',
+          '((){debugFastReassembleMethod=(Object _fastReassembleParam) => _fastReassembleParam is $widgetName;})()',
         );
       } on Exception catch (err) {
         globals.printTrace(err.toString());
         return false;
       }
     }
+    globals.printTrace('attempting fast reassemble for $widgetName');
     return true;
   }
 
