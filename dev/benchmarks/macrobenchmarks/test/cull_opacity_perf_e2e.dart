@@ -10,7 +10,7 @@ import 'package:macrobenchmarks/common.dart';
 import 'util.dart';
 
 Future<void> main() async {
-  macroPerfTest(
+  macroPerfTestE2E(
     'cull_opacity_perf',
     kCullOpacityRouteName,
     pageDelay: const Duration(seconds: 1),
