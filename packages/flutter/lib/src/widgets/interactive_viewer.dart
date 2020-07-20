@@ -427,6 +427,26 @@ class InteractiveViewer extends StatefulWidget {
     return closestOverall;
   }
 
+
+  @visibleForTesting
+  static Quad getAxisAlignedBoundingBoxWithRotation(Rect rect, double rotation) {
+    // TODO(justinmc): Hardcode Quad same as rect if no rotation.
+    // TODO(justinmc): Might have to mod rotation by 90deg.
+    final double hypotenuse = rect.width * math.sin(rotation);
+    final double a = hypotenuse * math.sin(rotation);
+    final double b = math.sqrt(math.pow(hypotenuse, 2) - math.pow(a, 2));
+
+    final Quad value = Quad.points(
+      Vector3(rect.left + a, rect.top - b, 0),
+      Vector3(rect.right + b, rect.top + a, 0),
+      Vector3(rect.right - a, rect.bottom + b, 0),
+      Vector3(rect.left - b, rect.bottom - a, 0),
+    );
+
+    //print('justin for $rect and $rotation, hypotenuse is $hypotenuse, a is $a, b is $b. aabb is ${_stringifyQuad(value)}');
+    return value;
+  }
+
   @override _InteractiveViewerState createState() => _InteractiveViewerState();
 }
 
@@ -512,7 +532,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     // mismatch in orientation between the viewport and boundaries effectively
     // limits translation. With this approach, all points that are visible with
     // no rotation are visible after rotation.
-    final Quad boundariesAabbQuad = _getAxisAlignedBoundingBoxWithRotation(
+    final Quad boundariesAabbQuad = InteractiveViewer.getAxisAlignedBoundingBoxWithRotation(
       _boundaryRect,
       _getMatrixRotation(nextMatrix),
     );
@@ -527,7 +547,8 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     // TODO(justinmc): It's correct up to here (except that it seems off by a
     // few pixels, I can't quite see the corner of the child).
     // Next, get the code working that finds the nearest point that doesn't
-    // exceed. And test _getAxisAlignedBoundingBoxWithRotation!
+    // exceed. And test getAxisAlignedBoundingBoxWithRotation! And check why the
+    // existing tests are failing.
 
     // Desired translation goes out of bounds, so translate to the nearest
     // in-bounds point instead.
@@ -977,11 +998,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 ///
 ///  * [InteractiveViewer.transformationController] for detailed documentation
 ///    on how to use TransformationController with [InteractiveViewer].
-class TransformationController extends ValueNotifier<Matrix4> {
-  /// Create an instance of [TransformationController].
-  ///
-  /// The [value] defaults to the identity matrix, which corresponds to no
-  /// transformation.
+class TransformationController extends ValueNotifier<Matrix4> { /// Create an instance of [TransformationController].  The [value] defaults to the identity matrix, which corresponds to no transformation.
   TransformationController([Matrix4 value]) : super(value ?? Matrix4.identity());
 
   /// Return the scene point at the given viewport point.
@@ -1102,24 +1119,6 @@ Quad _transformViewport(Matrix4 matrix, Rect viewport) {
 // TODO(justinmc): Remove.
 String _stringifyQuad(Quad quad) {
   return '${quad.point0} ${quad.point1} ${quad.point2} ${quad.point3}';
-}
-
-Quad _getAxisAlignedBoundingBoxWithRotation(Rect rect, double rotation) {
-  // TODO(justinmc): Hardcode Quad same as rect if no rotation.
-  // TODO(justinmc): Might have to mod rotation by 90deg.
-  final double hypotenuse = rect.width * math.sin(rotation);
-  final double a = hypotenuse * math.sin(rotation);
-  final double b = math.sqrt(math.pow(hypotenuse, 2) - math.pow(a, 2));
-
-  final Quad value = Quad.points(
-    Vector3(rect.left + a, rect.top - b, 0),
-    Vector3(rect.right + b, rect.top + a, 0),
-    Vector3(rect.right - a, rect.bottom + b, 0),
-    Vector3(rect.left - b, rect.bottom - a, 0),
-  );
-
-  //print('justin for $rect and $rotation, hypotenuse is $hypotenuse, a is $a, b is $b. aabb is ${_stringifyQuad(value)}');
-  return value;
 }
 
 // Return the amount that viewport lies outside of boundary. If the viewport

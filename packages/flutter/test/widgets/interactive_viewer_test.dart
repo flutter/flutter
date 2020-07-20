@@ -4,6 +4,8 @@
 
 // @dart = 2.8
 
+import 'dart:math' as math;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -13,6 +15,14 @@ import 'package:vector_math/vector_math_64.dart' show Quad, Vector3, Matrix4;
 import 'gesture_utils.dart';
 
 void main() {
+  // Helper function for comparing all dimensions of a Vector3 with some
+  // precision.
+  void expectCloseToVector3(Vector3 a, Vector3 b, double precision) {
+    expect(a.x, closeTo(b.x, precision));
+    expect(a.y, closeTo(b.y, precision));
+    expect(a.z, closeTo(b.z, precision));
+  }
+
   group('InteractiveViewer', () {
     testWidgets('child fits in viewport', (WidgetTester tester) async {
       final TransformationController transformationController = TransformationController();
@@ -732,8 +742,25 @@ void main() {
     });
   });
 
+  group('getAxisAlignedBoundingBoxWithRotation', () {
+    test('45 degrees', () {
+      const Rect rect = Rect.fromLTRB(0.0, 0.0, 300.0, 300.0);
+
+      final Quad aabb = InteractiveViewer.getAxisAlignedBoundingBoxWithRotation(rect, math.pi/4);
+
+      final double xy = rect.width / 2;
+
+      const double precision = 0.0000000000001;
+      expectCloseToVector3(aabb.point0, Vector3(xy, -xy, 0.0), precision);
+      expectCloseToVector3(aabb.point1, Vector3(rect.width + xy, xy, 0.0), precision);
+      expectCloseToVector3(aabb.point2, Vector3(xy, rect.height + xy, 0.0), precision);
+      expectCloseToVector3(aabb.point3, Vector3(-xy, xy, 0.0), precision);
+    });
+  });
+
   // TODO(justinmc): Repurpose these tests for _getAxisAlignedBoundingBoxWithRotation?
   // It needs to be tested somehow, if not from these.
+  /*
   group('getAxisAlignedBoundingBox', () {
     test('rectangle already axis aligned returns the rectangle', () {
       final Quad quad = Quad.points(
@@ -799,6 +826,7 @@ void main() {
       expect(aabb.point3, Vector3(-462.7, 938.6, 0.0));
     });
   });
+  */
 
   group('pointIsInside', () {
     test('inside', () {
