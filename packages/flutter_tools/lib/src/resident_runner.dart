@@ -33,6 +33,7 @@ import 'project.dart';
 import 'run_cold.dart';
 import 'run_hot.dart';
 import 'vmservice.dart';
+import 'widget_cache.dart';
 
 class FlutterDevice {
   FlutterDevice(
@@ -45,6 +46,7 @@ class FlutterDevice {
     TargetPlatform targetPlatform,
     ResidentCompiler generator,
     this.userIdentifier,
+    this.widgetCache,
   }) : assert(buildInfo.trackWidgetCreation != null),
        generator = generator ?? ResidentCompiler(
          globals.artifacts.getArtifactPath(
@@ -78,6 +80,7 @@ class FlutterDevice {
     List<String> experimentalFlags,
     ResidentCompiler generator,
     String userIdentifier,
+    WidgetCache widgetCache,
   }) async {
     ResidentCompiler generator;
     final TargetPlatform targetPlatform = await device.targetPlatform;
@@ -167,6 +170,7 @@ class FlutterDevice {
       generator: generator,
       buildInfo: buildInfo,
       userIdentifier: userIdentifier,
+      widgetCache: widgetCache,
     );
   }
 
@@ -174,6 +178,7 @@ class FlutterDevice {
   final ResidentCompiler generator;
   final BuildInfo buildInfo;
   final String userIdentifier;
+  final WidgetCache widgetCache;
   Stream<Uri> observatoryUris;
   vm_service.VmService vmService;
   DevFS devFS;
@@ -641,6 +646,44 @@ class FlutterDevice {
     return 0;
   }
 
+  /// Validates whether this hot reload is a candidate for a fast reassemble.
+  Future<bool> _attemptFastReassembleCheck(List<Uri> invalidatedFiles, PackageConfig packageConfig) async {
+    if (invalidatedFiles.length != 1 || widgetCache == null) {
+      return false;
+    }
+    final List<FlutterView> views = await vmService.getFlutterViews();
+    final String widgetName = await widgetCache?.validateLibrary(invalidatedFiles.single);
+    if (widgetName == null) {
+      return false;
+    }
+    final String packageUri = packageConfig.toPackageUri(invalidatedFiles.single)?.toString()
+      ?? invalidatedFiles.single.toString();
+    for (final FlutterView view in views) {
+      final vm_service.Isolate isolate = await vmService.getIsolateOrNull(view.uiIsolate.id);
+      final vm_service.LibraryRef targetLibrary = isolate.libraries
+        .firstWhere(
+          (vm_service.LibraryRef libraryRef) => libraryRef.uri == packageUri,
+          orElse: () => null,
+        );
+      if (targetLibrary == null) {
+        return false;
+      }
+      try {
+        // Evaluate an expression to allow type checking for that invalidated widget
+        // name. For more information, see `debugFastReassembleMethod` in flutter/src/widgets/binding.dart
+        await vmService.evaluate(
+          view.uiIsolate.id,
+          targetLibrary.id,
+          '((){debugFastReassembleMethod=(Object _fastReassembleParam) => _fastReassembleParam is $widgetName})()',
+        );
+      } on Exception catch (err) {
+        globals.printTrace(err.toString());
+        return false;
+      }
+    }
+    return true;
+  }
+
   Future<UpdateFSReport> updateDevFS({
     Uri mainUri,
     String target,
@@ -660,22 +703,34 @@ class FlutterDevice {
       timeout: timeoutConfiguration.fastOperation,
     );
     UpdateFSReport report;
+    bool fastReassemble = false;
     try {
-      report = await devFS.update(
-        mainUri: mainUri,
-        target: target,
-        bundle: bundle,
-        firstBuildTime: firstBuildTime,
-        bundleFirstUpload: bundleFirstUpload,
-        generator: generator,
-        fullRestart: fullRestart,
-        dillOutputPath: dillOutputPath,
-        trackWidgetCreation: buildInfo.trackWidgetCreation,
-        projectRootPath: projectRootPath,
-        pathToReload: pathToReload,
-        invalidatedFiles: invalidatedFiles,
-        packageConfig: packageConfig,
-      );
+      await Future.wait(<Future<void>>[
+        devFS.update(
+          mainUri: mainUri,
+          target: target,
+          bundle: bundle,
+          firstBuildTime: firstBuildTime,
+          bundleFirstUpload: bundleFirstUpload,
+          generator: generator,
+          fullRestart: fullRestart,
+          dillOutputPath: dillOutputPath,
+          trackWidgetCreation: buildInfo.trackWidgetCreation,
+          projectRootPath: projectRootPath,
+          pathToReload: pathToReload,
+          invalidatedFiles: invalidatedFiles,
+          packageConfig: packageConfig,
+        ).then((UpdateFSReport newReport) => report = newReport),
+        if (!fullRestart)
+          _attemptFastReassembleCheck(
+            invalidatedFiles,
+            packageConfig,
+          ).then((bool newFastReassemble) => fastReassemble = newFastReassemble)
+      ]);
+      if (fastReassemble) {
+        globals.logger.printTrace('Attempting fast reassemble.');
+      }
+      report.fastReassemble = fastReassemble;
     } on DevFSException {
       devFSStatus.cancel();
       return UpdateFSReport(success: false);
