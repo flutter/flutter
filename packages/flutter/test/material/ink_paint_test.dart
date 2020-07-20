@@ -446,7 +446,8 @@ void main() {
           children: <Widget>[
             Ink(width: 100, height: 100, decoration: const BoxDecoration(color: Colors.black)),
             Ink(width: 50, height: 50, decoration: const BoxDecoration(color: Colors.red)),
-          ],),
+          ],
+        ),
       ),
     );
 
