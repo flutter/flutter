@@ -25,7 +25,7 @@ Future<void> _runAndroidPackagingTests() async {
   final String commit = (await (runAndGetStdout('git', <String>[
     'rev-parse',
     'HEAD'
-  ], workingDirectory: '')).join()).trim();
+  ])).join()).trim();
 
   // Step 1: Prepare zip packaging.
   await runCommand(dart, <String>[
