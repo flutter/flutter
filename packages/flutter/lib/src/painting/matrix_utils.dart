@@ -127,6 +127,12 @@ class MatrixUtils {
   ///
   /// This function assumes the given point has a z-coordinate of 0.0. The
   /// z-coordinate of the result is ignored.
+  ///
+  /// While not common, this method may return [Offset.infinite] if `offset`
+  /// results in a point at infinity in homogeneous coordinates, after applying
+  /// `transform`. For example, a render object may set its transform to the
+  /// zero matrix to indicate its content should not be made visible. Trying to
+  /// convert an `Offset` to its coordinate space always results in (NaN, NaN).
   static Offset transformPoint(Matrix4 transform, Offset point) {
     final Float64List storage = transform.storage;
     final double x = point.dx;

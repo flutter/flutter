@@ -2699,6 +2699,8 @@ class SemanticsOwner extends ChangeNotifier {
       if (inverse.copyInverse(node.transform) == 0.0)
         return null;
       position = MatrixUtils.transformPoint(inverse, position);
+      if (position.isInfinite)
+        return null;
     }
     if (!node.rect.contains(position))
       return null;
