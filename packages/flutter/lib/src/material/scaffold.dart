@@ -95,64 +95,77 @@ class ScaffoldMessenger extends StatefulWidget {
 
 /// Doc
 class ScaffoldMessengerState extends State<ScaffoldMessenger> {
-  final Set<ScaffoldState> _scaffolds = <ScaffoldState>{};
-  final Queue<ScaffoldFeatureController<SnackBar,
-    SnackBarClosedReason>> _snackBars = Queue<
-    ScaffoldFeatureController<SnackBar, SnackBarClosedReason>>();
+  final LinkedHashSet<ScaffoldState> _scaffolds = LinkedHashSet<ScaffoldState>();
+  final Queue<SnackBar> _snackBars = Queue<SnackBar>();
+  final Map<String, List<ScaffoldFeatureController<SnackBar, SnackBarClosedReason>>> _snackBarControllers = <String, List<ScaffoldFeatureController<SnackBar, SnackBarClosedReason>>>{};
 
   void _register(ScaffoldState scaffold) {
     // Are we in the middle of showing a SnackBar elsewhere?
-    // If so, present on the new scaffold.
+    // If so, present on this newly registered scaffold.
     if (!_scaffolds.contains(scaffold) && _snackBars.isNotEmpty) {
-      _snackBars.add(scaffold.showSnackBar(_snackBars.first._widget));
+      final SnackBar snackbar = _snackBars.first;
+      final ScaffoldFeatureController<SnackBar, SnackBarClosedReason> controller = scaffold.showSnackBar(snackbar);
+      controller.closed.then((SnackBarClosedReason reason) {
+        _handleSnackBarStatusChange(snackbar, reason);
+      });
+      _snackBarControllers[snackbar.hashCode].add(controller);
     }
     _scaffolds.add(scaffold);
   }
 
   void _unregister(ScaffoldState scaffold) {
+    // TODO(Piinks): What happens if a snackbar is showing while a scaffold is
+    // disposed and unregistered? How is that completed?
     _scaffolds.remove(scaffold);
   }
 
-  void _handleSnackBarStatusChange(AnimationStatus status) {
-    switch (status) {
-      case AnimationStatus.dismissed:
-        if (_snackBars.isNotEmpty)
-          _snackBars.removeFirst();
-        // If there is another Scaffold in the stack presenting a SnackBar, we
-        // want to make sure it has been dismissed too.
-        hideCurrentSnackBar();
-        break;
-      case AnimationStatus.completed:
-      case AnimationStatus.forward:
-      case AnimationStatus.reverse:
-        break;
+  void _handleSnackBarStatusChange(SnackBar snackbar, SnackBarClosedReason reason) {
+    // We may have multiple controllers for the same snackbar across multiple
+    // Scaffolds, one of them has completed so the rest should be completed
+    // with the same SnackBarClosedReason.
+    for (final ScaffoldFeatureController<SnackBar, SnackBarClosedReason> controller in _snackBarControllers[snackbar.hashCode]) {
+      controller._completer.complete(reason);
     }
+    // The SnackBar has been delivered and dismissed, remove along with
+    // associated controllers.
+    _snackBarControllers.remove(snackbar.hashCode);
+    // Make sure we are getting rid of the right one, queue is being respected
+    assert(snackbar == _snackBars.first);
+    _snackBars.removeFirst();
   }
 
   /// Doc
-  ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(
-    SnackBar snackbar) {
-    for (final ScaffoldState scaffold in _scaffolds)
-      _snackBars.add(scaffold?.showSnackBar(snackbar));
-    return _snackBars.first;
+  ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(SnackBar snackbar) {
+    // Keep track of the snackbar we are propagating across scaffolds.
+    _snackBars.add(snackbar);
+    ScaffoldFeatureController<SnackBar, SnackBarClosedReason> controller;
+    for (final ScaffoldState scaffold in _scaffolds) {
+      controller = scaffold.showSnackBar(snackbar);
+      controller.closed.then((SnackBarClosedReason reason) {
+        _handleSnackBarStatusChange(snackbar, reason);
+      });
+      _snackBarControllers[snackbar.hashCode].add(controller);
+    }
+    // Return the last controller, which is for the most recently registered
+    // Scaffold. Controllers for all of the Scaffolds will be completed with the
+    // same SnackBarClosedReason.
+    return controller;
   }
 
   /// Doc
-  void removeCurrentSnackBar(
-    { SnackBarClosedReason reason = SnackBarClosedReason.remove }) {
+  void removeCurrentSnackBar({ SnackBarClosedReason reason = SnackBarClosedReason.remove }) {
     for (final ScaffoldState scaffold in _scaffolds)
       scaffold.removeCurrentSnackBar(reason: reason);
   }
 
   /// Doc
-  void hideCurrentSnackBar(
-    { SnackBarClosedReason reason = SnackBarClosedReason.hide }) {
+  void hideCurrentSnackBar({ SnackBarClosedReason reason = SnackBarClosedReason.hide }) {
     for (final ScaffoldState scaffold in _scaffolds)
       scaffold.hideCurrentSnackBar(reason: reason);
   }
 
-  // TODO(Piinks): state restoration
-
+  // TODO(Piinks): how might state restoration need to be considered?
+  // Test with mix of global and local snackbars
   // ++ later:
   //  - openDrawer?
   //  - openEndDrawer?
@@ -1787,6 +1800,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   AnimationController _snackBarController;
   Timer _snackBarTimer;
   bool _accessibleNavigation;
+  ScaffoldMessengerState _scaffoldMessenger;
 
   /// Shows a [SnackBar] at the bottom of the scaffold.
   ///
@@ -1824,6 +1838,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// ```
   /// {@end-tool}
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(SnackBar snackbar) {
+    print('Scaffold.showSnackBar, showing: $snackbar in $this');
     _snackBarController ??= SnackBar.createAnimationController(vsync: this)
       ..addStatusListener(_handleSnackBarStatusChange);
     if (_snackBars.isEmpty) {
@@ -2332,8 +2347,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     }
     _accessibleNavigation = mediaQuery.accessibleNavigation;
     _maybeBuildPersistentBottomSheet();
-    if (widget.registerMessenger)
-      ScaffoldMessenger.of(context)?._register(this);
+    if (widget.registerMessenger) {
+      _scaffoldMessenger = ScaffoldMessenger.of(context);
+      _scaffoldMessenger?._register(this);
+    }
     super.didChangeDependencies();
   }
 
@@ -2351,7 +2368,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     }
     _floatingActionButtonMoveController.dispose();
     _floatingActionButtonVisibilityController.dispose();
-    ScaffoldMessenger.of(context)?._unregister(this);
+    _scaffoldMessenger?._unregister(this);
     super.dispose();
   }
 
