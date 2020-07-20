@@ -19,6 +19,7 @@ import 'base/os.dart';
 import 'base/process.dart';
 import 'base/time.dart';
 import 'base/user_messages.dart';
+import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'cache.dart';
 import 'compile.dart';
@@ -33,6 +34,7 @@ import 'fuchsia/fuchsia_sdk.dart' show FuchsiaSdk, FuchsiaArtifacts;
 import 'fuchsia/fuchsia_workflow.dart' show FuchsiaWorkflow, fuchsiaWorkflow;
 import 'globals.dart' as globals;
 import 'ios/ios_workflow.dart';
+import 'ios/iproxy.dart';
 import 'ios/simulators.dart';
 import 'ios/xcodeproj.dart';
 import 'macos/cocoapods.dart';
@@ -254,6 +256,15 @@ Future<T> runInContext<T>(
         cache: globals.cache,
         platform: globals.platform,
         xcode: globals.xcode,
+        iproxy: IProxy(
+          iproxyPath: globals.artifacts.getArtifactPath(
+            Artifact.iproxy,
+            platform: TargetPlatform.ios,
+          ),
+          logger: globals.logger,
+          processManager: globals.processManager,
+          dyLdLibEntry: globals.cache.dyLdLibEntry,
+        ),
       ),
       XcodeProjectInterpreter: () => XcodeProjectInterpreter(
         logger: globals.logger,
