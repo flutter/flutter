@@ -19,6 +19,7 @@ import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../emulator.dart';
+import '../features.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../resident_runner.dart';
@@ -26,6 +27,7 @@ import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../web/web_runner.dart';
+import '../widget_cache.dart';
 
 const String protocolVersion = '0.6.0';
 
@@ -468,6 +470,7 @@ class AppDomain extends Domain {
       viewFilter: isolateFilter,
       target: target,
       buildInfo: options.buildInfo,
+      widgetCache: WidgetCache(featureFlags: featureFlags),
     );
 
     ResidentRunner runner;

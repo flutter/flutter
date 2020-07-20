@@ -15,6 +15,7 @@ import '../base/io.dart';
 import '../commands/daemon.dart';
 import '../compile.dart';
 import '../device.dart';
+import '../features.dart';
 import '../fuchsia/fuchsia_device.dart';
 import '../globals.dart' as globals;
 import '../ios/devices.dart';
@@ -26,6 +27,7 @@ import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
+import '../widget_cache.dart';
 
 /// A Flutter-command that attaches to applications that have been launched
 /// without `flutter run`.
@@ -369,6 +371,7 @@ class AttachCommand extends FlutterCommand {
       targetModel: TargetModel(stringArg('target-model')),
       buildInfo: getBuildInfo(),
       userIdentifier: userIdentifier,
+      widgetCache: WidgetCache(featureFlags: featureFlags),
     );
     flutterDevice.observatoryUris = observatoryUris;
     final List<FlutterDevice> flutterDevices =  <FlutterDevice>[flutterDevice];
