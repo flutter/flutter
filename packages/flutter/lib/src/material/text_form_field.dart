@@ -87,7 +87,7 @@ export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 ///         },
 ///         child: FocusTraversalGroup(
 ///           child: Form(
-///             autovalidate: true,
+///             autoValidate: true,
 ///             onChanged: () {
 ///               Form.of(primaryFocus.context).save();
 ///             },
@@ -153,11 +153,11 @@ class TextFormField extends FormField<String> {
     bool showCursor,
     String obscuringCharacter = '•',
     bool obscureText = false,
-    bool autocorrect = true,
+    bool autoCorrect = true,
     SmartDashesType smartDashesType,
     SmartQuotesType smartQuotesType,
     bool enableSuggestions = true,
-    bool autovalidate = false,
+    bool autoValidate = false,
     bool maxLengthEnforced = true,
     int maxLines = 1,
     int minLines,
@@ -180,20 +180,20 @@ class TextFormField extends FormField<String> {
     InputCounterWidgetBuilder buildCounter,
     ScrollPhysics scrollPhysics,
     Iterable<String> autofillHints,
-    AutovalidateMode autovalidateMode,
+    AutoValidateMode autoValidateMode,
   }) : assert(initialValue == null || controller == null),
        assert(textAlign != null),
        assert(autofocus != null),
        assert(readOnly != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
        assert(obscureText != null),
-       assert(autocorrect != null),
+       assert(autoCorrect != null),
        assert(enableSuggestions != null),
-       assert(autovalidate != null),
+       assert(autoValidate != null),
        assert(
-         autovalidate == false ||
-         autovalidate == true && autovalidateMode == null,
-         'autovalidate and autovalidateMode should not be used together.'
+         autoValidate == false ||
+         autoValidate == true && autoValidateMode == null,
+         'autoValidate and autoValidateMode should not be used together.'
        ),
        assert(maxLengthEnforced != null),
        assert(scrollPadding != null),
@@ -217,9 +217,9 @@ class TextFormField extends FormField<String> {
        onSaved: onSaved,
        validator: validator,
        enabled: enabled ?? decoration?.enabled ?? true,
-       autovalidateMode: autovalidate
-           ? AutovalidateMode.always
-           : (autovalidateMode ?? AutovalidateMode.disabled),
+       autoValidateMode: autoValidate
+           ? AutoValidateMode.always
+           : (autoValidateMode ?? AutoValidateMode.disabled),
        builder: (FormFieldState<String> field) {
          final _TextFormFieldState state = field as _TextFormFieldState;
          final InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
@@ -248,7 +248,7 @@ class TextFormField extends FormField<String> {
            showCursor: showCursor,
            obscuringCharacter: obscuringCharacter,
            obscureText: obscureText,
-           autocorrect: autocorrect,
+           autoCorrect: autoCorrect,
            smartDashesType: smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
            smartQuotesType: smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
            enableSuggestions: enableSuggestions,
