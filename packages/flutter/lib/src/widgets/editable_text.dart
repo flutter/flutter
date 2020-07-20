@@ -769,20 +769,21 @@ class EditableText extends StatefulWidget {
   /// for one line and grows to accommodate additional lines as they are entered.
   ///
   /// This can be used in combination with [maxLines] for a varying set of behaviors.
-  /// If the value is set, it must be greater than zero.
-  /// If the value is greater than 1, [maxLines] should also be set to either
-  /// null or greater than this value.
+  ///
+  /// If the value is set, it must be greater than zero. If the value is greater
+  /// than 1, [maxLines] should also be set to either null or greater than
+  /// this value.
   ///
   /// When [maxLines] is set as well, the height will grow between the indicated
   /// range of lines. When [maxLines] is null, it will grow as high as needed,
   /// starting from [minLines].
   ///
   /// A few examples of behaviors possible with [minLines] and [maxLines] are as follows.
-  /// These apply equally to `TextField`, `TextFormField`, and
-  /// `EditableText`.
+  /// These apply equally to `TextField`, `TextFormField`, `CupertinoTextField`,
+  /// and `EditableText`.
   ///
   /// Input that always occupies at least 2 lines and has an infinite max.
-  /// After reaching the horizontal specified limit, expands vertically as needed.
+  /// Expands vertically as needed.
   /// ```dart
   /// TextField(minLines: 2)
   /// ```
