@@ -676,7 +676,6 @@ void main() {
 
   group('PageRouteBuilder', () {
     testWidgets('reverseTransitionDuration defaults to 300ms', (WidgetTester tester) async {
-
       // Default PageRouteBuilder reverse transition duration should be 300ms.
       await tester.pumpWidget(
         MaterialApp(
@@ -728,7 +727,6 @@ void main() {
     });
 
     testWidgets('reverseTransitionDuration can be customized', (WidgetTester tester) async {
-
       await tester.pumpWidget(MaterialApp(
         onGenerateRoute: (RouteSettings settings) {
           return MaterialPageRoute<dynamic>(
