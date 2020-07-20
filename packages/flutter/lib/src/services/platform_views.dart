@@ -495,6 +495,7 @@ class _AndroidMotionEventConverter {
       <int, AndroidPointerCoords>{};
   final Map<int, AndroidPointerProperties> pointerProperties =
       <int, AndroidPointerProperties>{};
+  final Set<int> usedAndroidPointerIds = <int>{};
 
   Offset Function(Offset position) _pointTransformer;
 
@@ -503,14 +504,18 @@ class _AndroidMotionEventConverter {
     _pointTransformer = transformer;
   }
 
-  int nextPointerId = 0;
   int downTimeMillis;
 
   void handlePointerDownEvent(PointerDownEvent event) {
-    if (nextPointerId == 0) {
+    if (pointerProperties.isEmpty) {
       downTimeMillis = event.timeStamp.inMilliseconds;
     }
-    pointerProperties[event.pointer] = propertiesFor(event, nextPointerId++);
+    int androidPointerId = 0;
+    while (usedAndroidPointerIds.contains(androidPointerId)) {
+      androidPointerId++;
+    }
+    usedAndroidPointerIds.add(androidPointerId);
+    pointerProperties[event.pointer] = propertiesFor(event, androidPointerId);
   }
 
   void updatePointerPositions(PointerEvent event) {
@@ -531,9 +536,9 @@ class _AndroidMotionEventConverter {
 
   void handlePointerUpEvent(PointerUpEvent event) {
     pointerPositions.remove(event.pointer);
+    usedAndroidPointerIds.remove(pointerProperties[event.pointer].id);
     pointerProperties.remove(event.pointer);
     if (pointerProperties.isEmpty) {
-      nextPointerId = 0;
       downTimeMillis = null;
     }
   }
@@ -541,7 +546,7 @@ class _AndroidMotionEventConverter {
   void handlePointerCancelEvent(PointerCancelEvent event) {
     pointerPositions.clear();
     pointerProperties.clear();
-    nextPointerId = 0;
+    usedAndroidPointerIds.clear();
     downTimeMillis = null;
   }
 
