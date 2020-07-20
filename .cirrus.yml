@@ -35,6 +35,7 @@ windows_shard_template: &WINDOWS_SHARD_TEMPLATE
 macos_shard_template: &MACOS_SHARD_TEMPLATE
   only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
   script:
+    - flutter update-packages
     - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
     - dart --enable-asserts ./dev/bots/test.dart
 
@@ -570,7 +571,6 @@ task:
     - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
     - flutter config --no-analytics
     - flutter doctor -v
-    - flutter update-packages
     - date
     - which flutter
   on_failure:
@@ -584,6 +584,7 @@ task:
         GOLDCTL: "$CIRRUS_WORKING_DIR/depot_tools/goldctl"
         GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
       script:
+        - flutter update-packages
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
         - ./dev/bots/download_goldctl.sh
         - dart --enable-asserts dev/bots/test.dart
@@ -594,6 +595,7 @@ task:
         GOLDCTL: "$CIRRUS_WORKING_DIR/depot_tools/goldctl"
         GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
       script:
+        - flutter update-packages
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
         - ./dev/bots/download_goldctl.sh
         - dart --enable-asserts dev/bots/test.dart
@@ -602,6 +604,7 @@ task:
       # this includes the tests for directories in dev/
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_goldens/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/**') || $CIRRUS_PR == ''"
       script:
+        - flutter update-packages
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
         - dart --enable-asserts dev/bots/test.dart
 
@@ -609,18 +612,27 @@ task:
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/**') || $CIRRUS_PR == ''"
       script:
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+        - (cd packages/flutter_tools; pub get)
+        - (cd packages/flutter_tools/test/data/asset_test/main; pub get)
+        - (cd packages/flutter_tools/test/data/asset_test/font; pub get)
+        - (cd dev/bots; pub get)
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: tool_tests-commands-macos
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/**') || $CIRRUS_PR == ''"
       script:
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+        - (cd packages/flutter_tools; pub get)
+        - (cd dev/bots; pub get)
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: tool_tests-integration-macos
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/**') || $CIRRUS_PR == ''"
       script:
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+        - (cd packages/flutter_tools; pub get)
+        - (cd dev/bots; pub get)
+        - (cd dev/tools; pub get)
         - dart --enable-asserts ./dev/bots/test.dart
 
     # TODO(ianh): Enable Web tests on macOS.
@@ -628,11 +640,13 @@ task:
     - name: build_tests-0-macos
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
       script:
+        - flutter update-packages
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: build_tests-1_last-macos
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
       script:
+        - flutter update-packages
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-0-macos
@@ -650,6 +664,7 @@ task:
     - name: customer_testing-macos
       script:
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+        - flutter update-packages
         - rm -rf bin/cache/pkg/tests
         - git clone https://github.com/flutter/tests.git bin/cache/pkg/tests
         - dart --enable-asserts dev/customer_testing/run_tests.dart --skip-on-fetch-failure --skip-template bin/cache/pkg/tests/registry/*.test
@@ -670,6 +685,7 @@ task:
         MATCH_PASSWORD: ENCRYPTED[db07f252234397090e3ec59152d9ec1831f5ecd0ef97d247b1dca757bbb9ef9b7c832a39bce2caf1949ccdf097e59a73]
       script:
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+        - flutter update-packages
         - ./dev/bots/deploy_gallery.sh
 
     - name: verify_binaries_codesigned-macos # macos-only
@@ -680,6 +696,7 @@ task:
         - analyze-linux
       script:
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+        - flutter update-packages
         - dart --enable-asserts ./dev/bots/codesign.dart
 
 docker_builder:
