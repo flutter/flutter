@@ -1640,7 +1640,9 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   }
 
   double get _increasedStartValue {
-    final double increasedStartValue = values.start + _semanticActionUnit;
+    // Due to floating-point operations, this value can actually be greater than
+    // expected (e.g. 0.4 + 0.2 = 0.600000000001), so we limit to 2 decimal points.
+    final double increasedStartValue = double.parse((values.start + _semanticActionUnit).toStringAsFixed(2));
     return increasedStartValue <= values.end - _minThumbSeparationValue ? increasedStartValue : values.start;
   }
 
