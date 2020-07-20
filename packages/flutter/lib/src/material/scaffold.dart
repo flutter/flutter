@@ -61,6 +61,130 @@ enum _ScaffoldSlot {
   statusBar,
 }
 
+/// Doc
+class ScaffoldMessenger extends StatefulWidget {
+  /// Doc
+  const ScaffoldMessenger({
+    Key key,
+    @required this.child,
+  }) : assert(child != null),
+       super(key: key);
+
+  /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
+  final Widget child;
+
+  /// Returns the closest [ScaffoldMessengerState] which encloses the given
+  /// context.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// ScaffoldMessages scaffoldMessenger = ScaffoldMessages.of(context);
+  /// scaffoldMessenger.showSnackBar(const SnackBar(content: Text('Snack-tastic'));
+  /// ```
+  static ScaffoldMessengerState of(BuildContext context) {
+    final _ScaffoldMessengerScope scope = context.dependOnInheritedWidgetOfExactType<_ScaffoldMessengerScope>();
+    return scope?._scaffoldMessengerState;
+  }
+
+  @override
+  ScaffoldMessengerState createState() => ScaffoldMessengerState();
+}
+
+/// Doc
+class ScaffoldMessengerState extends State<ScaffoldMessenger> {
+  final Set<ScaffoldState> _scaffolds = <ScaffoldState>{};
+  final Queue<ScaffoldFeatureController<SnackBar,
+    SnackBarClosedReason>> _snackBars = Queue<
+    ScaffoldFeatureController<SnackBar, SnackBarClosedReason>>();
+
+  void _register(ScaffoldState scaffold) {
+    // Are we in the middle of showing a SnackBar elsewhere?
+    // If so, present on the new scaffold.
+    if (!_scaffolds.contains(scaffold) && _snackBars.isNotEmpty) {
+      _snackBars.add(scaffold.showSnackBar(_snackBars.first._widget));
+    }
+    _scaffolds.add(scaffold);
+  }
+
+  void _unregister(ScaffoldState scaffold) {
+    _scaffolds.remove(scaffold);
+  }
+
+  void _handleSnackBarStatusChange(AnimationStatus status) {
+    switch (status) {
+      case AnimationStatus.dismissed:
+        if (_snackBars.isNotEmpty)
+          _snackBars.removeFirst();
+        // If there is another Scaffold in the stack presenting a SnackBar, we
+        // want to make sure it has been dismissed too.
+        hideCurrentSnackBar();
+        break;
+      case AnimationStatus.completed:
+      case AnimationStatus.forward:
+      case AnimationStatus.reverse:
+        break;
+    }
+  }
+
+  /// Doc
+  ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(
+    SnackBar snackbar) {
+    for (final ScaffoldState scaffold in _scaffolds)
+      _snackBars.add(scaffold?.showSnackBar(snackbar));
+    return _snackBars.first;
+  }
+
+  /// Doc
+  void removeCurrentSnackBar(
+    { SnackBarClosedReason reason = SnackBarClosedReason.remove }) {
+    for (final ScaffoldState scaffold in _scaffolds)
+      scaffold.removeCurrentSnackBar(reason: reason);
+  }
+
+  /// Doc
+  void hideCurrentSnackBar(
+    { SnackBarClosedReason reason = SnackBarClosedReason.hide }) {
+    for (final ScaffoldState scaffold in _scaffolds)
+      scaffold.hideCurrentSnackBar(reason: reason);
+  }
+
+  // TODO(Piinks): state restoration
+
+  // ++ later:
+  //  - openDrawer?
+  //  - openEndDrawer?
+  //  - showMaterialBanner, needs Scaffold support first, https://github.com/flutter/flutter/issues/60024
+  //  - showBottomSheet?
+
+  @override
+  Widget build(BuildContext context) {
+    return _ScaffoldMessengerScope(
+      scaffoldMessengerState: this,
+      child: widget.child,
+    );
+  }
+}
+
+class _ScaffoldMessengerScope extends InheritedWidget {
+  const _ScaffoldMessengerScope({
+    Key key,
+    Widget child,
+    ScaffoldMessengerState scaffoldMessengerState,
+  }) : _scaffoldMessengerState = scaffoldMessengerState,
+      super(key: key, child: child);
+
+  final ScaffoldMessengerState _scaffoldMessengerState;
+
+  /// Doc
+  ScaffoldMessenger get scaffoldMessenger => _scaffoldMessengerState.widget;
+
+  @override
+  bool updateShouldNotify(_ScaffoldMessengerScope old) => _scaffoldMessengerState != old._scaffoldMessengerState;
+}
+
 /// The geometry of the [Scaffold] after all its contents have been laid out
 /// except the [FloatingActionButton].
 ///
@@ -1030,10 +1154,12 @@ class Scaffold extends StatefulWidget {
     this.drawerEdgeDragWidth,
     this.drawerEnableOpenDragGesture = true,
     this.endDrawerEnableOpenDragGesture = true,
+    this.registerMessenger = true,
   }) : assert(primary != null),
        assert(extendBody != null),
        assert(extendBodyBehindAppBar != null),
        assert(drawerDragStartBehavior != null),
+       assert(registerMessenger != null),
        super(key: key);
 
   /// If true, and [bottomNavigationBar] or [persistentFooterButtons]
@@ -1346,6 +1472,9 @@ class Scaffold extends StatefulWidget {
   ///
   /// By default, the drag gesture is enabled.
   final bool endDrawerEnableOpenDragGesture;
+
+  /// Doc
+  final bool registerMessenger;
 
   /// The state from the closest instance of this class that encloses the given context.
   ///
@@ -2203,6 +2332,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     }
     _accessibleNavigation = mediaQuery.accessibleNavigation;
     _maybeBuildPersistentBottomSheet();
+    if (widget.registerMessenger)
+      ScaffoldMessenger.of(context)?._register(this);
     super.didChangeDependencies();
   }
 
@@ -2220,6 +2351,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     }
     _floatingActionButtonMoveController.dispose();
     _floatingActionButtonVisibilityController.dispose();
+    ScaffoldMessenger.of(context)?._unregister(this);
     super.dispose();
   }
 

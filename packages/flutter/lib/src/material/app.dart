@@ -16,6 +16,7 @@ import 'floating_action_button.dart';
 import 'icons.dart';
 import 'material_localizations.dart';
 import 'page.dart';
+import 'scaffold.dart';
 import 'theme.dart';
 
 /// [MaterialApp] uses this [TextStyle] as its [DefaultTextStyle] to encourage
@@ -607,85 +608,87 @@ class _MaterialAppState extends State<MaterialApp> {
   Widget build(BuildContext context) {
     Widget result = HeroControllerScope(
       controller: _heroController,
-      child: WidgetsApp(
-        key: GlobalObjectKey(this),
-        navigatorKey: widget.navigatorKey,
-        navigatorObservers: widget.navigatorObservers,
-        pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
-          return MaterialPageRoute<T>(settings: settings, builder: builder);
-        },
-        home: widget.home,
-        routes: widget.routes,
-        initialRoute: widget.initialRoute,
-        onGenerateRoute: widget.onGenerateRoute,
-        onGenerateInitialRoutes: widget.onGenerateInitialRoutes,
-        onUnknownRoute: widget.onUnknownRoute,
-        builder: (BuildContext context, Widget child) {
-          // Use a light theme, dark theme, or fallback theme.
-          final ThemeMode mode = widget.themeMode ?? ThemeMode.system;
-          ThemeData theme;
-          if (widget.darkTheme != null) {
-            final ui.Brightness platformBrightness = MediaQuery.platformBrightnessOf(context);
-            if (mode == ThemeMode.dark ||
-              (mode == ThemeMode.system && platformBrightness == ui.Brightness.dark)) {
-              theme = widget.darkTheme;
+      child: ScaffoldMessenger(
+        child: WidgetsApp(
+          key: GlobalObjectKey(this),
+          navigatorKey: widget.navigatorKey,
+          navigatorObservers: widget.navigatorObservers,
+          pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
+            return MaterialPageRoute<T>(settings: settings, builder: builder);
+          },
+          home: widget.home,
+          routes: widget.routes,
+          initialRoute: widget.initialRoute,
+          onGenerateRoute: widget.onGenerateRoute,
+          onGenerateInitialRoutes: widget.onGenerateInitialRoutes,
+          onUnknownRoute: widget.onUnknownRoute,
+          builder: (BuildContext context, Widget child) {
+            // Use a light theme, dark theme, or fallback theme.
+            final ThemeMode mode = widget.themeMode ?? ThemeMode.system;
+            ThemeData theme;
+            if (widget.darkTheme != null) {
+              final ui.Brightness platformBrightness = MediaQuery.platformBrightnessOf(context);
+              if (mode == ThemeMode.dark ||
+                (mode == ThemeMode.system && platformBrightness == ui.Brightness.dark)) {
+                theme = widget.darkTheme;
+              }
             }
-          }
-          theme ??= widget.theme ?? ThemeData.fallback();
+            theme ??= widget.theme ?? ThemeData.fallback();
 
-          return AnimatedTheme(
-            data: theme,
-            isMaterialAppTheme: true,
-            child: widget.builder != null
-              ? Builder(
-                  builder: (BuildContext context) {
-                    // Why are we surrounding a builder with a builder?
-                    //
-                    // The widget.builder may contain code that invokes
-                    // Theme.of(), which should return the theme we selected
-                    // above in AnimatedTheme. However, if we invoke
-                    // widget.builder() directly as the child of AnimatedTheme
-                    // then there is no Context separating them, and the
-                    // widget.builder() will not find the theme. Therefore, we
-                    // surround widget.builder with yet another builder so that
-                    // a context separates them and Theme.of() correctly
-                    // resolves to the theme we passed to AnimatedTheme.
-                    return widget.builder(context, child);
-                  },
-                )
-              : child,
-          );
-        },
-        title: widget.title,
-        onGenerateTitle: widget.onGenerateTitle,
-        textStyle: _errorTextStyle,
-        // The color property is always pulled from the light theme, even if dark
-        // mode is activated. This was done to simplify the technical details
-        // of switching themes and it was deemed acceptable because this color
-        // property is only used on old Android OSes to color the app bar in
-        // Android's switcher UI.
-        //
-        // blue is the primary color of the default theme
-        color: widget.color ?? widget.theme?.primaryColor ?? Colors.blue,
-        locale: widget.locale,
-        localizationsDelegates: _localizationsDelegates,
-        localeResolutionCallback: widget.localeResolutionCallback,
-        localeListResolutionCallback: widget.localeListResolutionCallback,
-        supportedLocales: widget.supportedLocales,
-        showPerformanceOverlay: widget.showPerformanceOverlay,
-        checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
-        checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
-        showSemanticsDebugger: widget.showSemanticsDebugger,
-        debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
-        inspectorSelectButtonBuilder: (BuildContext context, VoidCallback onPressed) {
-          return FloatingActionButton(
-            child: const Icon(Icons.search),
-            onPressed: onPressed,
-            mini: true,
-          );
-        },
-        shortcuts: widget.shortcuts,
-        actions: widget.actions,
+            return AnimatedTheme(
+              data: theme,
+              isMaterialAppTheme: true,
+              child: widget.builder != null
+                ? Builder(
+                    builder: (BuildContext context) {
+                      // Why are we surrounding a builder with a builder?
+                      //
+                      // The widget.builder may contain code that invokes
+                      // Theme.of(), which should return the theme we selected
+                      // above in AnimatedTheme. However, if we invoke
+                      // widget.builder() directly as the child of AnimatedTheme
+                      // then there is no Context separating them, and the
+                      // widget.builder() will not find the theme. Therefore, we
+                      // surround widget.builder with yet another builder so that
+                      // a context separates them and Theme.of() correctly
+                      // resolves to the theme we passed to AnimatedTheme.
+                      return widget.builder(context, child);
+                    },
+                  )
+                : child,
+            );
+          },
+          title: widget.title,
+          onGenerateTitle: widget.onGenerateTitle,
+          textStyle: _errorTextStyle,
+          // The color property is always pulled from the light theme, even if dark
+          // mode is activated. This was done to simplify the technical details
+          // of switching themes and it was deemed acceptable because this color
+          // property is only used on old Android OSes to color the app bar in
+          // Android's switcher UI.
+          //
+          // blue is the primary color of the default theme
+          color: widget.color ?? widget.theme?.primaryColor ?? Colors.blue,
+          locale: widget.locale,
+          localizationsDelegates: _localizationsDelegates,
+          localeResolutionCallback: widget.localeResolutionCallback,
+          localeListResolutionCallback: widget.localeListResolutionCallback,
+          supportedLocales: widget.supportedLocales,
+          showPerformanceOverlay: widget.showPerformanceOverlay,
+          checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
+          checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
+          showSemanticsDebugger: widget.showSemanticsDebugger,
+          debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
+          inspectorSelectButtonBuilder: (BuildContext context, VoidCallback onPressed) {
+            return FloatingActionButton(
+              child: const Icon(Icons.search),
+              onPressed: onPressed,
+              mini: true,
+            );
+          },
+          shortcuts: widget.shortcuts,
+          actions: widget.actions,
+        ),
       ),
     );
 
