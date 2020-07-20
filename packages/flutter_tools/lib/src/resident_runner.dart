@@ -705,6 +705,7 @@ abstract class ResidentRunner {
     this.stayResident = true,
     this.hotMode = true,
     String dillOutputPath,
+    this.machine = false,
   }) : mainPath = findMainDartFile(target),
        packagesFilePath = debuggingOptions.buildInfo.packagesPath,
        projectRootPath = projectRootPath ?? globals.fs.currentDirectory.path,
@@ -741,6 +742,7 @@ abstract class ResidentRunner {
   final AssetBundle assetBundle;
 
   final CommandHelp commandHelp;
+  final bool machine;
 
   io.HttpServer _devtoolsServer;
 
@@ -1141,7 +1143,7 @@ abstract class ResidentRunner {
   }
 
   void printStructuredErrorLog(vm_service.Event event) {
-    if (event.extensionKind == 'Flutter.Error') {
+    if (event.extensionKind == 'Flutter.Error' && !machine) {
       final Map<dynamic, dynamic> json = event.extensionData?.data;
       if (json != null && json.containsKey('renderedErrorText')) {
         globals.printStatus('\n${json['renderedErrorText']}');
