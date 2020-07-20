@@ -22,10 +22,7 @@ Future<void> main() async {
 /// This uses cgroups to block internet access, and will only work on Linux
 /// machines, though similar techniques could be used for macOS and Windows.
 Future<void> _runAndroidPackagingTests() async {
-  final String commit = (await (runAndGetStdout('git', <String>[
-    'rev-parse',
-    'HEAD'
-  ])).join()).trim();
+  final String commit = '895b7ef6faf4e9c6ad641ad556855ff38fbd04bb';
 
   // Step 1: Prepare zip packaging.
   await runCommand(dart, <String>[
