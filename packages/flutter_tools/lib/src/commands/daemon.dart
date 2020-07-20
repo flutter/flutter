@@ -448,6 +448,7 @@ class AppDomain extends Domain {
     String dillOutputPath,
     bool ipv6 = false,
     String isolateFilter,
+    bool machine = true,
   }) async {
     if (!await device.supportsRuntimeMode(options.buildInfo.mode)) {
       throw Exception(
@@ -480,6 +481,7 @@ class AppDomain extends Domain {
         ipv6: ipv6,
         stayResident: true,
         urlTunneller: options.webEnableExposeUrl ? daemon.daemonDomain.exposeUrl : null,
+        machine: machine,
       );
     } else if (enableHotReload) {
       runner = HotRunner(
@@ -491,6 +493,7 @@ class AppDomain extends Domain {
         dillOutputPath: dillOutputPath,
         ipv6: ipv6,
         hostIsIde: true,
+        machine: machine,
       );
     } else {
       runner = ColdRunner(
@@ -499,6 +502,7 @@ class AppDomain extends Domain {
         debuggingOptions: options,
         applicationBinary: applicationBinary,
         ipv6: ipv6,
+        machine: machine,
       );
     }
 
