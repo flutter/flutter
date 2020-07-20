@@ -155,32 +155,27 @@ class Dart2JSTarget extends Target {
   Future<void> build(Environment environment) async {
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
 
-    List<String> initCommand() {
-      return <String>[
-        globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
-        '--disable-dart-dev',
-        globals.artifacts.getArtifactPath(Artifact.dart2jsSnapshot),
-        '--libraries-spec=${globals.fs.path.join(globals.artifacts.getArtifactPath(Artifact.flutterWebSdk), 'libraries.json')}',
-        ...?decodeDartDefines(environment.defines, kExtraFrontEndOptions),
-        if (buildMode == BuildMode.profile)
-          '-Ddart.vm.profile=true'
-        else
-          '-Ddart.vm.product=true',
-        for (final String dartDefine
-            in decodeDartDefines(environment.defines, kDartDefines))
-          '-D$dartDefine',
-      ];
-    }
-
-    List<String> setOutputFile(String output) {
-      return <String>['-o', output];
-    }
+    final List<String> initCommand = <String>[
+      globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+      '--disable-dart-dev',
+      globals.artifacts.getArtifactPath(Artifact.dart2jsSnapshot),
+      '--libraries-spec=${globals.fs.path.join(globals.artifacts.getArtifactPath(Artifact.flutterWebSdk), 'libraries.json')}',
+      ...?decodeDartDefines(environment.defines, kExtraFrontEndOptions),
+      if (buildMode == BuildMode.profile)
+        '-Ddart.vm.profile=true'
+      else
+        '-Ddart.vm.product=true',
+      for (final String dartDefine
+          in decodeDartDefines(environment.defines, kDartDefines))
+        '-D$dartDefine',
+    ];
 
     // Run the dart2js compilation in two stages, so that icon tree shaking can
     // parse the kernel file for web builds.
     final ProcessResult kernelResult = await globals.processManager.run(<String>[
-      ...initCommand(),
-      ...setOutputFile(environment.buildDir.childFile('app.dill').path),
+      ...initCommand,
+      '-o',
+      environment.buildDir.childFile('app.dill').path,
       '--packages=.packages',
       '--cfe-only',
       environment.buildDir.childFile('main.dart').path, // dartfile
@@ -194,11 +189,12 @@ class Dart2JSTarget extends Target {
     final bool csp = environment.defines[kCspMode] == 'true';
 
     final ProcessResult javaScriptResult = await globals.processManager.run(<String>[
-      ...initCommand(),
+      ...initCommand,
       if (dart2jsOptimization != null) '-$dart2jsOptimization' else '-O4',
       if (buildMode == BuildMode.profile) '--no-minify',
       if (csp) '--csp',
-      ...setOutputFile(outputJSFile.path),
+      '-o',
+      outputJSFile.path,
       environment.buildDir.childFile('app.dill').path, // dartfile
     ]);
     if (javaScriptResult.exitCode != 0) {
