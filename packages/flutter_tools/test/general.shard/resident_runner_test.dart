@@ -2044,6 +2044,7 @@ class FakeFlutterDevice extends FlutterDevice {
     ReloadSources reloadSources,
     Restart restart,
     bool disableDds,
+    bool ipv6,
     CompileExpression compileExpression,
     ReloadMethod reloadMethod,
     GetSkSLMethod getSkSLMethod,
