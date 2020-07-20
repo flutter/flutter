@@ -20,8 +20,7 @@ void main() async {
   // Commit a recording canvas to a bitmap, and compare with the expected
   Future<void> _checkScreenshot(RecordingCanvas rc, String fileName,
       {Rect region = const Rect.fromLTWH(0, 0, 500, 500),
-      double maxDiffRatePercent = null,
-      bool write = false}) async {
+      double maxDiffRatePercent = null}) async {
     final EngineCanvas engineCanvas = BitmapCanvas(screenRect);
     rc.endRecording();
     rc.apply(engineCanvas, screenRect);
