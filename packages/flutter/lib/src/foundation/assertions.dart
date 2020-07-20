@@ -868,7 +868,10 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   ///
   /// If the error handler throws an exception, it will not be caught by the
   /// Flutter framework.
-  static FlutterExceptionHandler onError = (FlutterErrorDetails details) => presentError(details);
+  ///
+  /// Set this to null to silently catch and ignore errors. This is not
+  /// recommended.
+  static FlutterExceptionHandler? onError = (FlutterErrorDetails details) => presentError(details);
 
   /// Called by the Flutter framework before attempting to parse a [StackTrace].
   ///
@@ -1078,11 +1081,13 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
     return diagnostics.map((DiagnosticsNode node) => renderer.render(node).trimRight()).join('\n');
   }
 
-  /// Calls [onError] with the given details.
+  /// Calls [onError] with the given details, unless it is null.
   static void reportError(FlutterErrorDetails details) {
     assert(details != null);
     assert(details.exception != null);
-    onError(details);
+    if (onError != null) {
+      onError!(details);
+    }
   }
 }
 
