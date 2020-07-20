@@ -22,21 +22,22 @@ Future<void> main() async {
 /// This uses cgroups to block internet access, and will only work on Linux
 /// machines, though similar techniques could be used for macOS and Windows.
 Future<void> _runAndroidPackagingTests() async {
+  final String zipLocation = path.join(flutterRoot, 'flutter_zip');
   final String commit = '895b7ef6faf4e9c6ad641ad556855ff38fbd04bb';
 
   // Step 1: Prepare zip packaging.
   await runCommand(dart, <String>[
-    'dev/bots/prepare_package.dart',
+    path.join(flutterRoot, 'dev/bots/prepare_package.dart'),
     '--branch=master',
-    '--output=flutter_zip',
+    '--output=$zipLocation',
     '--revision=$commit',
-  ], workingDirectory: '');
+  ]);
   await runCommand('unzip', <String>[
     '*.zip'
-  ], workingDirectory: 'flutter_zip');
+  ], workingDirectory: zipLocation);
 
   // Step 2: Invoke precache using zip packaged flutter
-  await runCommand('flutter_zip/flutter/bin/flutter', <String>[
+  await runCommand(path.join(zipLocation, 'flutter/bin/flutter', <String>[
     'precache',
     '--android',
   ]);
@@ -60,9 +61,8 @@ Future<void> _runAndroidPackagingTests() async {
   // Step 4: flutter build apk without internet.
   await runCommand('sg', <String>[
     'no-internet',
-    'flutter_zip/bin/flutter',
+    'path.join(zipLocation, 'flutter/bin/flutter'),
     'build',
     'apk'
-  ], workingDirectory: 'flutter_zip/created_example');
+  ], workingDirectory: path.join(zipLocation, 'flutter/examples/hello_world');
 }
-
