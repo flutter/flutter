@@ -302,34 +302,32 @@ class UpdateFSReport {
     bool success = false,
     int invalidatedSourcesCount = 0,
     int syncedBytes = 0,
-  }) {
-    _success = success;
-    _invalidatedSourcesCount = invalidatedSourcesCount;
-    _syncedBytes = syncedBytes;
-  }
+    this.fastReassemble,
+  }) : _success = success,
+       _invalidatedSourcesCount = invalidatedSourcesCount,
+       _syncedBytes = syncedBytes;
 
   bool get success => _success;
   int get invalidatedSourcesCount => _invalidatedSourcesCount;
   int get syncedBytes => _syncedBytes;
 
-  /// JavaScript modules produced by the incremental compiler in `dartdevc`
-  /// mode.
-  ///
-  /// Only used for JavaScript compilation.
-  List<String> invalidatedModules;
+  bool _success;
+  bool fastReassemble;
+  int _invalidatedSourcesCount;
+  int _syncedBytes;
 
   void incorporateResults(UpdateFSReport report) {
     if (!report._success) {
       _success = false;
     }
+    if (report.fastReassemble != null && fastReassemble != null) {
+      fastReassemble &= report.fastReassemble;
+    } else if (report.fastReassemble != null) {
+      fastReassemble = report.fastReassemble;
+    }
     _invalidatedSourcesCount += report._invalidatedSourcesCount;
     _syncedBytes += report._syncedBytes;
-    invalidatedModules ??= report.invalidatedModules;
   }
-
-  bool _success;
-  int _invalidatedSourcesCount;
-  int _syncedBytes;
 }
 
 class DevFS {

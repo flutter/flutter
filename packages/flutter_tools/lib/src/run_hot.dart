@@ -154,62 +154,15 @@ class HotRunner extends ResidentRunner {
 
   @override
   Future<OperationResult> reloadMethod({ String libraryId, String classId }) async {
-    final Stopwatch stopwatch = Stopwatch()..start();
-    final UpdateFSReport results = UpdateFSReport(success: true);
-    final List<Uri> invalidated =  <Uri>[Uri.parse(libraryId)];
-    final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-      globals.fs.file(debuggingOptions.buildInfo.packagesPath),
-      logger: globals.logger,
-    );
-    for (final FlutterDevice device in flutterDevices) {
-      results.incorporateResults(await device.updateDevFS(
-        mainUri: globals.fs.file(mainPath).absolute.uri,
-        target: target,
-        bundle: assetBundle,
-        firstBuildTime: firstBuildTime,
-        bundleFirstUpload: false,
-        bundleDirty: false,
-        fullRestart: false,
-        projectRootPath: projectRootPath,
-        pathToReload: getReloadPath(fullRestart: false),
-        invalidatedFiles: invalidated,
-        packageConfig: packageConfig,
-        dillOutputPath: dillOutputPath,
-      ));
-    }
-    if (!results.success) {
-      return OperationResult(1, 'Failed to compile');
-    }
-    try {
-      final String entryPath = globals.fs.path.relative(
-        getReloadPath(fullRestart: false),
-        from: projectRootPath,
+    final OperationResult result = await restart(pause: false);
+    if (!result.isOk) {
+      throw vm_service.RPCError(
+        'Unable to reload sources',
+        RPCErrorCodes.kInternalError,
+        '',
       );
-      for (final FlutterDevice device in flutterDevices) {
-        final List<Future<vm_service.ReloadReport>> reportFutures = await device.reloadSources(
-          entryPath, pause: false,
-        );
-        final List<vm_service.ReloadReport> reports = await Future.wait(reportFutures);
-        final vm_service.ReloadReport firstReport = reports.first;
-        await device.updateReloadStatus(validateReloadReport(firstReport.json, printErrors: false));
-      }
-    } on Exception catch (error) {
-      return OperationResult(1, error.toString());
     }
-
-    for (final FlutterDevice device in flutterDevices) {
-      final List<FlutterView> views = await device.vmService.getFlutterViews();
-      for (final FlutterView view in views) {
-        await device.vmService.flutterFastReassemble(
-          classId,
-          isolateId: view.uiIsolate.id,
-        );
-      }
-    }
-
-    globals.printStatus('reloadMethod took ${stopwatch.elapsedMilliseconds}');
-    globals.flutterUsage.sendTiming('hot', 'ui', stopwatch.elapsed);
-    return OperationResult.ok;
+    return result;
   }
 
   // Returns the exit code of the flutter tool process, like [run].
@@ -942,9 +895,19 @@ class HotRunner extends ResidentRunner {
           }
         } else {
           reassembleViews[view] = device.vmService;
-          reassembleFutures.add(device.vmService.flutterReassemble(
-            isolateId: view.uiIsolate.id,
-          ).catchError((dynamic error) {
+          // If the tool identified a change in a single widget, do a fast instead
+          // of a full reassemble.
+          Future<void> reassembleWork;
+          if (updatedDevFS.fastReassemble == true) {
+            reassembleWork = device.vmService.flutterFastReassemble(
+              isolateId: view.uiIsolate.id,
+            );
+          } else {
+            reassembleWork = device.vmService.flutterReassemble(
+              isolateId: view.uiIsolate.id,
+            );
+          }
+          reassembleFutures.add(reassembleWork.catchError((dynamic error) {
             failedReassemble = true;
             globals.printError('Reassembling ${view.uiIsolate.name} failed: $error');
           }, test: (dynamic error) => error is Exception));
