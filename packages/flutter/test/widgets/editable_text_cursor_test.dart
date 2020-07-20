@@ -837,9 +837,7 @@ void main() {
     final Finder textFinder = find.byKey(editableTextKey);
     await tester.longPress(textFinder);
     tester.state<EditableTextState>(textFinder).showToolbar();
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pumpAndSettle();
 
     await tester.tap(find.text('Paste'));
     await tester.pump();
