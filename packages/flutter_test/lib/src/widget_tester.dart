@@ -480,7 +480,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
         final Duration timeDiff = record.timeDelay - now.difference(startTime);
         if (timeDiff.isNegative) {
           // Flush all past events
-          handleTimeStampDiff.add(timeDiff);
+          handleTimeStampDiff.add(-timeDiff);
           for (final PointerEvent event in record.events) {
             _handlePointerEvent(event, hitTestHistory);
           }
@@ -490,7 +490,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
           await binding.pump();
           await binding.delayed(timeDiff);
           handleTimeStampDiff.add(
-            record.timeDelay - binding.clock.now().difference(startTime),
+            binding.clock.now().difference(startTime) - record.timeDelay,
           );
           for (final PointerEvent event in record.events) {
             _handlePointerEvent(event, hitTestHistory);
@@ -1128,12 +1128,6 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   SemanticsHandle ensureSemantics() {
     return binding.pipelineOwner.ensureSemantics();
   }
-
-  /// Given a widget `W` specified by [finder] and a [Scrollable] widget `S` in
-  /// its ancestry tree, this scrolls `S` so as to make `W` visible.
-  ///
-  /// Shorthand for `Scrollable.ensureVisible(tester.element(finder))`
-  Future<void> ensureVisible(Finder finder) => Scrollable.ensureVisible(element(finder));
 }
 
 typedef _TickerDisposeCallback = void Function(_TestTicker ticker);

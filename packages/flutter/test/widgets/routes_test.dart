@@ -966,6 +966,76 @@ void main() {
       expect(secondaryAnimationOfRouteOne.value, primaryAnimationOfRouteTwo.value);
     });
 
+    testWidgets('showGeneralDialog handles transparent barrier color', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return RaisedButton(
+              onPressed: () {
+                showGeneralDialog<void>(
+                  context: context,
+                  barrierDismissible: true,
+                  barrierLabel: 'barrier_label',
+                  barrierColor: const Color(0x00000000),
+                  transitionDuration: Duration.zero,
+                  pageBuilder: (BuildContext innerContext, _, __) {
+                    return const SizedBox();
+                  },
+                );
+              },
+              child: const Text('Show Dialog'),
+            );
+          },
+        ),
+      ));
+
+      // Open the dialog.
+      await tester.tap(find.byType(RaisedButton));
+      await tester.pump();
+      expect(find.byType(ModalBarrier), findsNWidgets(2));
+
+      // Close the dialog.
+      await tester.tapAt(Offset.zero);
+      await tester.pump();
+      expect(find.byType(ModalBarrier), findsNWidgets(1));
+    });
+
+    testWidgets('showGeneralDialog adds non-dismissable barrier when barrierDismissable is false', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return RaisedButton(
+              onPressed: () {
+                showGeneralDialog<void>(
+                  context: context,
+                  barrierDismissible: false,
+                  transitionDuration: Duration.zero,
+                  pageBuilder: (BuildContext innerContext, _, __) {
+                    return const SizedBox();
+                  },
+                );
+              },
+              child: const Text('Show Dialog'),
+            );
+          },
+        ),
+      ));
+
+      // Open the dialog.
+      await tester.tap(find.byType(RaisedButton));
+      await tester.pump();
+      expect(find.byType(ModalBarrier), findsNWidgets(2));
+      final ModalBarrier barrier = find.byType(ModalBarrier).evaluate().last.widget as ModalBarrier;
+      expect(barrier.dismissible, isFalse);
+
+      // Close the dialog.
+      final StatefulElement navigatorElement = find.byType(Navigator).evaluate().last as StatefulElement;
+      final NavigatorState navigatorState = navigatorElement.state as NavigatorState;
+      navigatorState.pop();
+      await tester.pumpAndSettle();
+      expect(find.byType(ModalBarrier), findsNWidgets(1));
+    });
+
     testWidgets('showGeneralDialog uses root navigator by default', (WidgetTester tester) async {
       final DialogObserver rootObserver = DialogObserver();
       final DialogObserver nestedObserver = DialogObserver();
@@ -1039,6 +1109,41 @@ void main() {
 
       expect(rootObserver.dialogCount, 0);
       expect(nestedObserver.dialogCount, 1);
+    });
+
+    testWidgets('showGeneralDialog default argument values', (WidgetTester tester) async {
+      final DialogObserver rootObserver = DialogObserver();
+
+      await tester.pumpWidget(MaterialApp(
+        navigatorObservers: <NavigatorObserver>[rootObserver],
+        home: Navigator(
+          onGenerateRoute: (RouteSettings settings) {
+            return MaterialPageRoute<dynamic>(
+              builder: (BuildContext context) {
+                return RaisedButton(
+                  onPressed: () {
+                    showGeneralDialog<void>(
+                      context: context,
+                      pageBuilder: (BuildContext innerContext, _, __) {
+                        return const SizedBox();
+                      },
+                    );
+                  },
+                  child: const Text('Show Dialog'),
+                );
+              },
+            );
+          },
+        ),
+      ));
+
+      // Open the dialog.
+      await tester.tap(find.byType(RaisedButton));
+      expect(rootObserver.dialogRoutes.length, equals(1));
+      final ModalRoute<dynamic> route = rootObserver.dialogRoutes.last;
+      expect(route.barrierDismissible, isNotNull);
+      expect(route.barrierColor, isNotNull);
+      expect(route.transitionDuration, isNotNull);
     });
 
     testWidgets('reverseTransitionDuration defaults to transitionDuration', (WidgetTester tester) async {
@@ -1598,14 +1703,25 @@ class TestPageRouteBuilder extends PageRouteBuilder<void> {
 }
 
 class DialogObserver extends NavigatorObserver {
+  final List<ModalRoute<dynamic>> dialogRoutes = <ModalRoute<dynamic>>[];
   int dialogCount = 0;
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
     if (route.toString().contains('_DialogRoute')) {
+      dialogRoutes.add(route as ModalRoute<dynamic>);
       dialogCount++;
     }
     super.didPush(route, previousRoute);
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic> previousRoute) {
+    if (route.toString().contains('_DialogRoute')) {
+      dialogRoutes.removeLast();
+      dialogCount--;
+    }
+    super.didPop(route, previousRoute);
   }
 }
 

@@ -31,6 +31,7 @@ More detailed logs should be in `build/cubic_bezier_perf.timeline.json`.
 ### Backdrop filter benchmark
 
 To run the backdrop filter benchmark on a device:
+To run a mobile benchmark on a device:
 
 ```
 flutter drive --profile -t test_driver/run_app.dart --driver test_driver/[test_name]_test.dart

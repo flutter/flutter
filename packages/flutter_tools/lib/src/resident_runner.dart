@@ -24,7 +24,6 @@ import 'build_system/build_system.dart';
 import 'build_system/targets/localizations.dart';
 import 'bundle.dart';
 import 'cache.dart';
-import 'codegen.dart';
 import 'compile.dart';
 import 'devfs.dart';
 import 'device.dart';
@@ -155,13 +154,6 @@ class FlutterDevice {
         artifacts: globals.artifacts,
         processManager: globals.processManager,
         logger: globals.logger,
-      );
-    }
-
-    if (flutterProject.hasBuilders) {
-      generator = await CodeGeneratingResidentCompiler.create(
-        residentCompiler: generator,
-        flutterProject: flutterProject,
       );
     }
 
@@ -713,6 +705,7 @@ abstract class ResidentRunner {
     this.stayResident = true,
     this.hotMode = true,
     String dillOutputPath,
+    this.machine = false,
   }) : mainPath = findMainDartFile(target),
        packagesFilePath = debuggingOptions.buildInfo.packagesPath,
        projectRootPath = projectRootPath ?? globals.fs.currentDirectory.path,
@@ -749,6 +742,7 @@ abstract class ResidentRunner {
   final AssetBundle assetBundle;
 
   final CommandHelp commandHelp;
+  final bool machine;
 
   io.HttpServer _devtoolsServer;
 
@@ -1149,7 +1143,7 @@ abstract class ResidentRunner {
   }
 
   void printStructuredErrorLog(vm_service.Event event) {
-    if (event.extensionKind == 'Flutter.Error') {
+    if (event.extensionKind == 'Flutter.Error' && !machine) {
       final Map<dynamic, dynamic> json = event.extensionData?.data;
       if (json != null && json.containsKey('renderedErrorText')) {
         globals.printStatus('\n${json['renderedErrorText']}');
