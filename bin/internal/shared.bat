@@ -157,4 +157,7 @@ GOTO :after_subroutine
   REM Exit Subroutine
   EXIT /B
 
+:final_exit
+  EXIT /B %exit_code%
+
 :after_subroutine
