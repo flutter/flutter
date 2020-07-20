@@ -1523,6 +1523,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   // Create the semantics configuration for a single value.
   SemanticsConfiguration _createSemanticsConfiguration(
       double value,
+      double increasedValue,
+      double decreasedValue,
       String label,
       VoidCallback increaseAction,
       VoidCallback decreaseAction,
@@ -1537,12 +1539,12 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     config.label = label ?? '';
     if (semanticFormatterCallback != null) {
       config.value = semanticFormatterCallback(_state._lerp(value));
-      config.increasedValue = semanticFormatterCallback(_state._lerp((value + _semanticActionUnit).clamp(0.0, 1.0) as double));
-      config.decreasedValue = semanticFormatterCallback(_state._lerp((value - _semanticActionUnit).clamp(0.0, 1.0) as double));
+      config.increasedValue = semanticFormatterCallback(_state._lerp(increasedValue));
+      config.decreasedValue = semanticFormatterCallback(_state._lerp(decreasedValue));
     } else {
       config.value = '${(value * 100).round()}%';
-      config.increasedValue = '${((value + _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%';
-      config.decreasedValue = '${((value - _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%';
+      config.increasedValue = '${(increasedValue * 100).round()}%';
+      config.decreasedValue = '${(decreasedValue * 100).round()}%';
     }
 
     return config;
@@ -1557,16 +1559,20 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     assert(children.isEmpty);
 
     final SemanticsConfiguration startSemanticsConfiguration = _createSemanticsConfiguration(
-        values.start,
-        labels?.start,
-        _increaseStartAction,
-        _decreaseStartAction,
+      values.start,
+      _increasedStartValue,
+      _decreasedStartValue,
+      labels?.start,
+      _increaseStartAction,
+      _decreaseStartAction,
     );
     final SemanticsConfiguration endSemanticsConfiguration = _createSemanticsConfiguration(
-        values.end,
-        labels?.end,
-        _increaseEndAction,
-        _decreaseEndAction,
+      values.end,
+      _increasedEndValue,
+      _decreasedEndValue,
+      labels?.end,
+      _increaseEndAction,
+      _decreaseEndAction,
     );
 
     // Split the semantics node area between the start and end nodes.
@@ -1611,34 +1617,44 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
 
   void _increaseStartAction() {
     if (isEnabled) {
-      onChanged(RangeValues(math.min(_increaseValue(values.start), values.end - _minThumbSeparationValue), values.end));
+        onChanged(RangeValues(_increasedStartValue, values.end));
     }
   }
 
   void _decreaseStartAction() {
     if (isEnabled) {
-      onChanged(RangeValues(_decreaseValue(values.start), values.end));
+      onChanged(RangeValues(_decreasedStartValue, values.end));
     }
   }
 
   void _increaseEndAction() {
     if (isEnabled) {
-      onChanged(RangeValues(values.start, _increaseValue(values.end)));
+      onChanged(RangeValues(values.start, _increasedEndValue));
     }
   }
 
   void _decreaseEndAction() {
     if (isEnabled) {
-      onChanged(RangeValues(values.start, math.max(_decreaseValue(values.end), values.start + _minThumbSeparationValue)));
+      onChanged(RangeValues(values.start, _decreasedEndValue));
     }
   }
 
-  double _increaseValue(double value) {
-    return (value + _semanticActionUnit).clamp(0.0, 1.0) as double;
+  double get _increasedStartValue {
+    final double increasedStartValue = values.start + _semanticActionUnit;
+    return increasedStartValue <= values.end - _minThumbSeparationValue ? increasedStartValue : values.start;
   }
 
-  double _decreaseValue(double value) {
-    return (value - _semanticActionUnit).clamp(0.0, 1.0) as double;
+  double get _decreasedStartValue {
+    return (values.start - _semanticActionUnit).clamp(0.0, 1.0) as double;
+  }
+
+  double get _increasedEndValue {
+    return (values.end + _semanticActionUnit).clamp(0.0, 1.0) as double;
+  }
+
+  double get _decreasedEndValue {
+    final double decreasedEndValue = values.end - _semanticActionUnit;
+    return decreasedEndValue >= values.start + _minThumbSeparationValue ? decreasedEndValue : values.end;
   }
 }
 
