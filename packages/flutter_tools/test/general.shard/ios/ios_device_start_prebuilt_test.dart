@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/fallback_discovery.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
+import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
@@ -422,7 +423,7 @@ IOSDevice setUpIOSDevice({
     sdkVersion: sdkVersion,
     fileSystem: fileSystem ?? MemoryFileSystem.test(),
     platform: macPlatform,
-    artifacts: artifacts,
+    iProxy: IProxy.test(logger: logger, processManager: processManager ?? FakeProcessManager.any()),
     logger: BufferLogger.test(),
     iosDeploy: IOSDeploy(
       logger: logger ?? BufferLogger.test(),

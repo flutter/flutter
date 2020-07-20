@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
+import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:mockito/mockito.dart';
@@ -80,6 +81,7 @@ void main() {
           platform: null,
           artifacts: MockArtifacts(),
           cache: MockCache(),
+          iproxy: IProxy.test(logger: logger, processManager: processManager),
         );
       });
 
@@ -350,6 +352,7 @@ void main() {
           platform: null,
           artifacts: mockArtifacts,
           cache: mockCache,
+          iproxy: IProxy.test(logger: logger, processManager: fakeProcessManager),
         );
       });
 
