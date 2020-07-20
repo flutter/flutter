@@ -28,6 +28,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     super.initInstances();
     _instance = this;
     _defaultBinaryMessenger = createBinaryMessenger();
+    _restorationManager = createRestorationManager();
     window.onPlatformMessage = defaultBinaryMessenger.handlePlatformMessage;
     initLicenses();
     SystemChannels.system.setMessageHandler(handleSystemMessage);
@@ -211,7 +212,17 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   ///
   /// See the docs for [RestorationManager] for a discussion of restoration
   /// state and how it is organized in Flutter.
-  final RestorationManager restorationManager = RestorationManager();
+  RestorationManager get restorationManager => _restorationManager;
+  RestorationManager _restorationManager;
+
+  /// Creates the [RestorationManager] instance available via
+  /// [restorationManager].
+  ///
+  /// Can be overriden in subclasses to create a different [RestorationManager].
+  @protected
+  RestorationManager createRestorationManager() {
+    return RestorationManager();
+  }
 }
 
 /// The default implementation of [BinaryMessenger].

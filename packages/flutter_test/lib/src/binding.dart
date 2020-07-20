@@ -195,7 +195,12 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// Called by the test framework at the beginning of a widget test to
   /// prepare the binding for the next test.
   void reset() {
-    _restorationManager = TestRestorationManager();
+    _restorationManager = createRestorationManager();
+  }
+
+  @override
+  TestRestorationManager createRestorationManager() {
+    return TestRestorationManager();
   }
 
   /// The value to set [debugPrint] to while tests are running.

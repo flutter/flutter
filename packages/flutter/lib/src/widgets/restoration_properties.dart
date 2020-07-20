@@ -110,7 +110,7 @@ class _RestorablePrimitiveValue<T> extends RestorableValue<T> {
 class RestorableNum<T extends num> extends _RestorablePrimitiveValue<T> {
   /// Creates a [RestorableNum].
   ///
-  /// {@tempalte flutter.widgets.restoration.primitivevalue.constructor}
+  /// {@template flutter.widgets.restoration.primitivevalue.constructor}
   /// If no restoration data is available to restore the value in this property
   /// from, the property will be initialized with the provided `defaultValue`.
   /// {@endtemplate}
