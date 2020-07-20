@@ -25,7 +25,7 @@ void main() {
     final TestGesture gesture = await tester.createGesture(
        kind: PointerDeviceKind.mouse);
     final Offset location = tester.getCenter(find.text('Test'));
-    // for moust input without a down, the moveTo generate a hover event
+    // for mouse input without a down event, moveTo generates a hover event
     await gesture.moveTo(location);
     await gesture.removePointer();
   });
