@@ -1753,7 +1753,7 @@ void main() {
                 data: MediaQueryData.fromWindow(window),
                 child: Material(
                   child: RangeSlider(
-                    values: const RangeValues(10.0, 100.0),
+                    values: const RangeValues(10.0, 12.0),
                     min: 0.0,
                     max: 100.0,
                     onChanged: (RangeValues v) { },
@@ -1780,7 +1780,7 @@ void main() {
                 hasIncreaseAction: true,
                 hasDecreaseAction: true,
                 value: '10%',
-                increasedValue: '15%',
+                increasedValue: '10%',
                 decreasedValue: '5%',
               ),
               matchesSemantics(
@@ -1788,9 +1788,9 @@ void main() {
                 hasEnabledState: true,
                 hasIncreaseAction: true,
                 hasDecreaseAction: true,
-                value: '100%',
-                increasedValue: '100%',
-                decreasedValue: '95%',
+                value: '12%',
+                increasedValue: '17%',
+                decreasedValue: '12%',
               ),
             ],
           ),
