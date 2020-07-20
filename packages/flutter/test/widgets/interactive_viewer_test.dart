@@ -732,6 +732,8 @@ void main() {
     });
   });
 
+  // TODO(justinmc): Repurpose these tests for _getAxisAlignedBoundingBoxWithRotation?
+  // It needs to be tested somehow, if not from these.
   group('getAxisAlignedBoundingBox', () {
     test('rectangle already axis aligned returns the rectangle', () {
       final Quad quad = Quad.points(

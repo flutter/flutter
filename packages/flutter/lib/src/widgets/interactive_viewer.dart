@@ -8,7 +8,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
-import 'package:vector_math/vector_math_64.dart' show Quad, Vector3, Matrix4;
+import 'package:vector_math/vector_math_64.dart' show Quad, Vector3, Matrix4, Matrix3;
 
 import 'basic.dart';
 import 'framework.dart';
@@ -379,57 +379,6 @@ class InteractiveViewer extends StatefulWidget {
     return l1 + l1L2 * fraction;
   }
 
-  /// Given a quad, return its axis aligned bounding box.
-  @visibleForTesting
-  static Quad getAxisAlignedBoundingBox(Quad quad) {
-    final double minX = math.min(
-      quad.point0.x,
-      math.min(
-        quad.point1.x,
-        math.min(
-          quad.point2.x,
-          quad.point3.x,
-        ),
-      ),
-    );
-    final double minY = math.min(
-      quad.point0.y,
-      math.min(
-        quad.point1.y,
-        math.min(
-          quad.point2.y,
-          quad.point3.y,
-        ),
-      ),
-    );
-    final double maxX = math.max(
-      quad.point0.x,
-      math.max(
-        quad.point1.x,
-        math.max(
-          quad.point2.x,
-          quad.point3.x,
-        ),
-      ),
-    );
-    final double maxY = math.max(
-      quad.point0.y,
-      math.max(
-        quad.point1.y,
-        math.max(
-          quad.point2.y,
-          quad.point3.y,
-        ),
-      ),
-    );
-    return Quad.points(
-      Vector3(minX, minY, 0),
-      Vector3(maxX, minY, 0),
-      Vector3(maxX, maxY, 0),
-      Vector3(minX, maxY, 0),
-    );
-  }
-
   /// Returns true iff the point is inside the rectangle given by the Quad,
   /// inclusively.
   /// Algorithm from https://math.stackexchange.com/a/190373.
@@ -492,7 +441,6 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   Offset _referenceFocalPoint; // Point where the current gesture began.
   double _scaleStart; // Scale value at start of scaling gesture.
   double _rotationStart = 0.0; // Rotation at start of rotation gesture.
-  double _currentRotation = 0.0; // Rotation of _transformationController.value.
   _GestureType _gestureType;
 
   // TODO(justinmc): Add rotateEnabled parameter to the widget and remove this
@@ -549,15 +497,16 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       alignedTranslation.dy,
     );
 
-    // Transform the viewport to determine where its four corners will be after
-    // the child has been transformed.
-    final Quad nextViewport = _transformViewport(nextMatrix, _viewport);
-
     // If the boundaries are infinite, then no need to check if the translation
     // fits within them.
     if (_boundaryRect.isInfinite) {
       return nextMatrix;
     }
+
+    // Transform the viewport to determine where its four corners will be after
+    // the child has been transformed.
+    final Quad nextViewport = _transformViewport(nextMatrix, _viewport);
+    //print('justin _viewport is $_viewport and next viewport is ${_stringifyQuad(nextViewport)}');
 
     // Expand the boundaries with rotation. This prevents the problem where a
     // mismatch in orientation between the viewport and boundaries effectively
@@ -565,14 +514,20 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     // no rotation are visible after rotation.
     final Quad boundariesAabbQuad = _getAxisAlignedBoundingBoxWithRotation(
       _boundaryRect,
-      _currentRotation,
+      _getMatrixRotation(nextMatrix),
     );
 
     // If the given translation fits completely within the boundaries, allow it.
     final Offset offendingDistance = _exceedsBy(boundariesAabbQuad, nextViewport);
+    //print('justin ${_stringifyQuad(nextViewport)} exceeds ${_stringifyQuad(boundariesAabbQuad)} by $offendingDistance');
     if (offendingDistance == Offset.zero) {
       return nextMatrix;
     }
+
+    // TODO(justinmc): It's correct up to here (except that it seems off by a
+    // few pixels, I can't quite see the corner of the child).
+    // Next, get the code working that finds the nearest point that doesn't
+    // exceed. And test _getAxisAlignedBoundingBoxWithRotation!
 
     // Desired translation goes out of bounds, so translate to the nearest
     // in-bounds point instead.
@@ -582,6 +537,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       nextTotalTranslation.dx - offendingDistance.dx * currentScale,
       nextTotalTranslation.dy - offendingDistance.dy * currentScale,
     );
+    //print('justin translation $nextTotalTranslation goes out of bounds by $offendingDistance, so correct it to $correctedTotalTranslation');
     // TODO(justinmc): This needs some work to handle rotation properly. The
     // idea is that the boundaries are axis aligned (boundariesAabbQuad), but
     // calculating the translation to put the viewport inside that Quad is more
@@ -704,7 +660,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     _referenceFocalPoint = _transformationController.toScene(
       details.localFocalPoint,
     );
-    _rotationStart = _currentRotation;
+    _rotationStart = _getMatrixRotation(_transformationController.value);
   }
 
   // Handle an update to an ongoing gesture. All of pan, scale, and rotate are
@@ -787,10 +743,9 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         final double desiredRotation = _rotationStart + details.rotation;
         _transformationController.value = _matrixRotate(
           _transformationController.value,
-          _currentRotation - desiredRotation,
+          _getMatrixRotation(_transformationController.value) - desiredRotation,
           details.localFocalPoint,
         );
-        _currentRotation = desiredRotation;
         return;
 
       case _GestureType.pan:
@@ -1107,12 +1062,19 @@ Offset _getMatrixTranslation(Matrix4 matrix) {
   return Offset(nextTranslation.x, nextTranslation.y);
 }
 
+// TODO(justinmc): Consider caching this.
+// Returns the rotation about the z axis in radians of the given Matrix4.
+double _getMatrixRotation(Matrix4 matrix) {
+  final Matrix3 rotationMatrix = matrix.getRotation();
+  return math.atan2(rotationMatrix.row1.x, rotationMatrix.row0.x);
+}
+
 // Transform the four corners of the viewport by the inverse of the given
 // matrix. This gives the viewport after the child has been transformed by the
 // given matrix. The viewport transforms as the inverse of the child (i.e.
 // moving the child left is equivalent to moving the viewport right).
 Quad _transformViewport(Matrix4 matrix, Rect viewport) {
-  final Matrix4 inverseMatrix = matrix.clone()..invert();
+  final Matrix4 inverseMatrix = Matrix4.inverted(matrix);
   return Quad.points(
     inverseMatrix.transform3(Vector3(
       viewport.topLeft.dx,
@@ -1137,20 +1099,27 @@ Quad _transformViewport(Matrix4 matrix, Rect viewport) {
   );
 }
 
-// Find the axis aligned bounding box for the rect rotated about its center by
-// the given amount.
+// TODO(justinmc): Remove.
+String _stringifyQuad(Quad quad) {
+  return '${quad.point0} ${quad.point1} ${quad.point2} ${quad.point3}';
+}
+
 Quad _getAxisAlignedBoundingBoxWithRotation(Rect rect, double rotation) {
-  final Matrix4 rotationMatrix = Matrix4.identity()
-      ..translate(rect.size.width / 2, rect.size.height / 2)
-      ..rotateZ(rotation)
-      ..translate(-rect.size.width / 2, -rect.size.height / 2);
-  final Quad boundariesRotated = Quad.points(
-    rotationMatrix.transform3(Vector3(rect.left, rect.top, 0.0)),
-    rotationMatrix.transform3(Vector3(rect.right, rect.top, 0.0)),
-    rotationMatrix.transform3(Vector3(rect.right, rect.bottom, 0.0)),
-    rotationMatrix.transform3(Vector3(rect.left, rect.bottom, 0.0)),
+  // TODO(justinmc): Hardcode Quad same as rect if no rotation.
+  // TODO(justinmc): Might have to mod rotation by 90deg.
+  final double hypotenuse = rect.width * math.sin(rotation);
+  final double a = hypotenuse * math.sin(rotation);
+  final double b = math.sqrt(math.pow(hypotenuse, 2) - math.pow(a, 2));
+
+  final Quad value = Quad.points(
+    Vector3(rect.left + a, rect.top - b, 0),
+    Vector3(rect.right + b, rect.top + a, 0),
+    Vector3(rect.right - a, rect.bottom + b, 0),
+    Vector3(rect.left - b, rect.bottom - a, 0),
   );
-  return InteractiveViewer.getAxisAlignedBoundingBox(boundariesRotated);
+
+  //print('justin for $rect and $rotation, hypotenuse is $hypotenuse, a is $a, b is $b. aabb is ${_stringifyQuad(value)}');
+  return value;
 }
 
 // Return the amount that viewport lies outside of boundary. If the viewport
