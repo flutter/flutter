@@ -47,6 +47,9 @@ void main() {
       mockIsolate = MockIsolate();
       mockPeer = MockPeer();
       when(mockClient.getVM()).thenAnswer((_) => Future<MockVM>.value(mockVM));
+      when(mockClient.onIsolateRunnable).thenAnswer((Invocation invocation) {
+        return Stream<VMIsolateRef>.fromIterable([]);
+      });
       when(mockVM.isolates).thenReturn(<VMRunnableIsolate>[mockIsolate]);
       when(mockIsolate.loadRunnable()).thenAnswer((_) => Future<MockIsolate>.value(mockIsolate));
       when(mockIsolate.extensionRpcs).thenReturn(<String>[]);
