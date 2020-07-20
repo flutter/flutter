@@ -450,6 +450,7 @@ class RunCommand extends RunCommandBase {
           packagesFilePath: globalResults['packages'] as String,
           dillOutputPath: stringArg('output-dill'),
           ipv6: ipv6,
+          machine: true,
         );
       } on Exception catch (error) {
         throwToolExit(error.toString());

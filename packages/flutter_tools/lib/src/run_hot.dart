@@ -74,14 +74,18 @@ class HotRunner extends ResidentRunner {
     String dillOutputPath,
     bool stayResident = true,
     bool ipv6 = false,
-  }) : super(devices,
-             target: target,
-             debuggingOptions: debuggingOptions,
-             projectRootPath: projectRootPath,
-             stayResident: stayResident,
-             hotMode: true,
-             dillOutputPath: dillOutputPath,
-             ipv6: ipv6);
+    bool machine = false,
+  }) : super(
+          devices,
+          target: target,
+          debuggingOptions: debuggingOptions,
+          projectRootPath: projectRootPath,
+          stayResident: stayResident,
+          hotMode: true,
+          dillOutputPath: dillOutputPath,
+          ipv6: ipv6,
+          machine: machine,
+        );
 
   final bool benchmarkMode;
   final File applicationBinary;

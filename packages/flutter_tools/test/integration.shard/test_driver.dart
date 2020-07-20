@@ -439,6 +439,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     bool chrome = false,
     bool expressionEvaluation = true,
     bool structuredErrors = false,
+    bool machine = true,
     File pidFile,
     String script,
   }) async {
@@ -447,7 +448,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
         'run',
         if (!chrome)
           '--disable-service-auth-codes',
-        '--machine',
+        if (machine) '--machine',
         '-d',
         if (chrome)
           ...<String>[
