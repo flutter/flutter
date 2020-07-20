@@ -218,7 +218,7 @@ task:
 
     - name: android_packaging_tests-linux
       script:
-        - dart --enable-asserts ./dev/bots/test.dart
+        - dart --enable-asserts ./dev/bots/offline_test.dart
 
 #     - name: web_tests-0-linux
 #       << : *WEB_SHARD_TEMPLATE
