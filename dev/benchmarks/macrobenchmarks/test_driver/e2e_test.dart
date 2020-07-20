@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(CareF): replace the following part after flutter/plugins#2859 is landed
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';

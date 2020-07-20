@@ -15,7 +15,10 @@ import 'package:macrobenchmarks/main.dart' as app;
 
 /// The maximum amount of time considered safe to spend for a frame's build
 /// phase. Anything past that is in the danger of missing the frame as 60FPS.
-Duration kBuildBudget = const Duration(milliseconds: 16);
+Duration get kBuildBudget => _kBuildBudget;
+Duration _kBuildBudget = const Duration(milliseconds: 16);
+
+typedef DriveCallback = Future<void> Function(WidgetController controller);
 
 const String _kDebugWarning = '''
 ┏╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍┓
@@ -31,14 +34,14 @@ const String _kDebugWarning = '''
 └─────────────────────────────────────────────────╌┄┈  🐢
 ''';
 
-void macroPerfTest(
+void macroPerfTestE2E(
   String testName,
   String routeName, {
   Duration pageDelay,
   Duration duration = const Duration(seconds: 3),
   Duration timeout = const Duration(seconds: 30),
-  Future<void> driverOps(WidgetController controller),
-  Future<void> setupOps(WidgetController controller),
+  DriveCallback body,
+  DriveCallback setup,
 }) {
   assert(() {
     debugPrint(_kDebugWarning);
@@ -47,7 +50,7 @@ void macroPerfTest(
   final WidgetsBinding _binding = E2EWidgetsFlutterBinding.ensureInitialized();
   assert(_binding is E2EWidgetsFlutterBinding);
   final E2EWidgetsFlutterBinding binding = _binding as E2EWidgetsFlutterBinding;
-  binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
+  binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive;
 
   testWidgets(testName, (WidgetTester tester) async {
     assert((tester.binding as LiveTestWidgetsFlutterBinding).framePolicy ==
@@ -76,14 +79,14 @@ void macroPerfTest(
       await tester.binding.delayed(pageDelay);
     }
 
-    if (setupOps != null) {
-      await setupOps(tester);
+    if (setup != null) {
+      await setup(tester);
     }
 
     await watchPerformance(binding, () async {
       final Future<void> durationFuture = tester.binding.delayed(duration);
-      if (driverOps != null) {
-        await driverOps(tester);
+      if (body != null) {
+        await body(tester);
       }
       await durationFuture;
     });
@@ -108,9 +111,79 @@ Future<void> watchPerformance(
 class FrameTimingSummarizer {
   FrameTimingSummarizer({this.data}) {
     data ??= <FrameTiming>[];
+
+    _frameBuildTimeMicros = data.map<int>(
+      (FrameTiming datum) => datum.buildDuration.inMicroseconds,
+    ).toList();
+    final List<int> frameBuildTimeMicrosSorted = List<int>.from(frameBuildTimeMicros)..sort();
+    _averageFrameBuildTime = frameBuildTimeMicros.reduce((int a, int b) => a+b) / 1E3 / data.length;
+    _percentileFrameBuildTime90 = _findPercentile(frameBuildTimeMicrosSorted, 0.90) / 1E3;
+    _percentileFrameBuildTime99 = _findPercentile(frameBuildTimeMicrosSorted, 0.99) / 1E3;
+    _worstFrameBuildTime = frameBuildTimeMicrosSorted.last / 1E3;
+    _missedFrameBuildBudget = _countExceed(frameBuildTimeMicrosSorted, kBuildBudget.inMicroseconds);
+
+    _frameRasterizerTimeMicros = data.map<int>(
+      (FrameTiming datum) => datum.rasterDuration.inMicroseconds,
+    ).toList();
+    final List<int> frameRasterizerTimeMicrosSorted = List<int>.from(frameBuildTimeMicros)..sort();
+    _averageFrameRasterizerTime = frameRasterizerTimeMicros.reduce((int a, int b) => a+b) / 1E3 / data.length;
+    _percentileFrameRasterizerTime90 = _findPercentile(frameRasterizerTimeMicrosSorted, 0.90) / 1E3;
+    _percentileFrameRasterizerTime99 = _findPercentile(frameRasterizerTimeMicrosSorted, 0.90) / 1E3;
+    _worstFrameRasterizerTime = frameRasterizerTimeMicrosSorted.last / 1E3;
+    _missedFrameRasterizerBudget = _countExceed(frameRasterizerTimeMicrosSorted, kBuildBudget.inMicroseconds);
   }
 
+  /// Collected raw data.
   List<FrameTiming> data;
+
+  /// List of frame build time in microseconds
+  List<int> get frameBuildTimeMicros => _frameBuildTimeMicros;
+  List<int> _frameBuildTimeMicros;
+
+  /// List of frame rasterizer time in microseconds
+  List<int> get frameRasterizerTimeMicros => _frameRasterizerTimeMicros;
+  List<int> _frameRasterizerTimeMicros;
+
+  /// The average value of [frameBuildTimeMicros] in milliseconds.
+  double get averageFrameBuildTime => _averageFrameBuildTime;
+  double _averageFrameBuildTime;
+
+  /// The 90-th percentile value of [frameBuildTimeMicros] in milliseconds
+  double get percentileFrameBuildTime90 => _percentileFrameBuildTime90;
+  double _percentileFrameBuildTime90;
+
+  /// The 99-th percentile value of [frameBuildTimeMicros] in milliseconds
+  double get percentileFrameBuildTime99 => _percentileFrameBuildTime99;
+  double _percentileFrameBuildTime99;
+
+  /// The largest value of [frameBuildTimeMicros] in milliseconds
+  double get worstFrameBuildTime => _worstFrameBuildTime;
+  double _worstFrameBuildTime;
+
+  /// Number of items in [frameBuildTimeMicros] that's greater than [kBuildBudget]
+  int get missedFrameBuildBudget => _missedFrameBuildBudget;
+  int _missedFrameBuildBudget;
+
+  /// The average value of [frameRasterizerTimeMicros] in milliseconds.
+  double get averageFrameRasterizerTime => _averageFrameRasterizerTime;
+  double  _averageFrameRasterizerTime;
+
+  /// The 90-th percentile value of [frameRasterizerTimeMicros] in milliseconds.
+  double get percentileFrameRasterizerTime90 => _percentileFrameRasterizerTime90;
+  double _percentileFrameRasterizerTime90;
+
+  /// The 99-th percentile value of [frameRasterizerTimeMicros] in milliseconds.
+  double get percentileFrameRasterizerTime99 => _percentileFrameRasterizerTime99;
+  double _percentileFrameRasterizerTime99;
+
+  /// The largest value of [frameRasterizerTimeMicros] in milliseconds.
+  double get worstFrameRasterizerTime => _worstFrameRasterizerTime;
+  double _worstFrameRasterizerTime;
+
+  /// The largest value of [frameRasterizerTimeMicros] in milliseconds.
+  int get missedFrameRasterizerBudget => _missedFrameRasterizerBudget;
+  int _missedFrameRasterizerBudget;
+
 
   void addData(List<FrameTiming> timings) {
     data += timings;
@@ -120,35 +193,6 @@ class FrameTimingSummarizer {
     if (data.isEmpty) {
       throw ArgumentError('durations is empty!');
     }
-    final List<int> frameBuildTimeMicros = data.map<int>(
-      (FrameTiming datum) => datum.buildDuration.inMicroseconds,
-    ).toList();
-    final double averageFrameBuildTime =
-        frameBuildTimeMicros.reduce((int a, int b) => a+b) / 1E3 / data.length;
-    final List<int> frameBuildTimeMicrosSorted =
-        List<int>.from(frameBuildTimeMicros)..sort();
-    final double percentileFrameBuildTime90 =
-        _findPercentile(frameBuildTimeMicrosSorted, 0.90) / 1E3;
-    final double percentileFrameBuildTime99 =
-        _findPercentile(frameBuildTimeMicrosSorted, 0.99) / 1E3;
-    final double worstFrameBuildTime = frameBuildTimeMicrosSorted.last / 1E3;
-    final int missedFrameBuildBudget =
-        _countExceed(frameBuildTimeMicrosSorted, kBuildBudget.inMicroseconds);
-
-    final List<int> frameRasterizerTimeMicros = data.map<int>(
-      (FrameTiming datum) => datum.rasterDuration.inMicroseconds,
-    ).toList();
-    final double averageFrameRasterizerTime =
-        frameRasterizerTimeMicros.reduce((int a, int b) => a+b) / 1E3 / data.length;
-    final List<int> frameRasterizerTimeMicrosSorted =
-        List<int>.from(frameBuildTimeMicros)..sort();
-    final double percentileFrameRasterizerTime90 =
-        _findPercentile(frameRasterizerTimeMicrosSorted, 0.90) / 1E3;
-    final double percentileFrameRasterizerTime99 =
-        _findPercentile(frameRasterizerTimeMicrosSorted, 0.90) / 1E3;
-    final double worstFrameRasterizerTime = frameRasterizerTimeMicrosSorted.last / 1E3;
-    final double missedFrameRasterizerTime =
-        _countExceed(frameRasterizerTimeMicrosSorted, kBuildBudget.inMicroseconds) / 1E3;
 
     return <String, dynamic>{
       'average_frame_build_time_millis': averageFrameBuildTime,
@@ -160,7 +204,7 @@ class FrameTimingSummarizer {
       '90th_percentile_frame_rasterizer_time_millis': percentileFrameRasterizerTime90,
       '99th_percentile_frame_rasterizer_time_millis': percentileFrameRasterizerTime99,
       'worst_frame_rasterizer_time_millis': worstFrameRasterizerTime,
-      'missed_frame_rasterizer_budget_count': missedFrameRasterizerTime,
+      'missed_frame_rasterizer_budget_count': missedFrameRasterizerBudget,
       'frame_count': data.length,
       'frame_build_times': frameBuildTimeMicros,
       'frame_rasterizer_times': frameRasterizerTimeMicros,
@@ -178,15 +222,5 @@ T _findPercentile<T extends num>(List<T> data, double p) {
 
 // return the number of items in data that > threshold
 int _countExceed<T extends num>(List<T> data, T threshold) {
-  int lo = 0;
-  int hi = data.length;
-  while (lo < hi) {
-    final int mid = (lo + hi) ~/ 2;
-    if (data[mid] <= threshold) {
-      lo = mid +1;
-    } else {
-      hi = mid;
-    }
-  }
-  return data.length - lo;
+  return data.length - data.indexWhere((T data) => data > threshold);
 }
