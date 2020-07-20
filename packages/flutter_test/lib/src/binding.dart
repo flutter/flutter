@@ -1264,6 +1264,21 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
   /// on the [SchedulerBinding.hasScheduledFrame] property to determine when the
   /// application has "settled".
   benchmark,
+
+  /// Ignore any request from pump but respect other requests to schedule a
+  /// frame.
+  ///
+  /// This is used for running the test on a device, where scheduling of new
+  /// frames respects what the engine and the device needed.
+  ///
+  /// Compared to `fullyLive` this policy ignores the frame requests from pump
+  /// of the test code so that the frame scheduling respects the situation of
+  /// that for the real environment, and avoids waiting for the new frame beyond
+  /// the expected time.
+  ///
+  /// Compared to `benchmark` this policy can be used for capturing the
+  /// animation frames requested by the framework.
+  benchmarkLive,
 }
 
 /// A variant of [TestWidgetsFlutterBinding] for executing tests in
@@ -1398,6 +1413,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     assert(_doDrawThisFrame == null);
     if (_expectingFrame ||
         (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.fullyLive) ||
+        (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive) ||
         (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark) ||
         (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.fadePointers && _viewNeedsPaint)) {
       _doDrawThisFrame = true;
@@ -1489,6 +1505,10 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     assert(inTest);
     assert(!_expectingFrame);
     assert(_pendingFrame == null);
+    if (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive) {
+      // Ignore all pumps and just wait.
+      return delayed(duration ?? Duration.zero);
+    }
     return TestAsyncUtils.guard<void>(() {
       if (duration != null) {
         Timer(duration, () {

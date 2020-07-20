@@ -167,6 +167,13 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
+  frame_policy_delay_test_android:
+    description: >
+      Tests the effect of LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
+
   picture_cache_perf__timeline_summary:
     description: >
       Measures the runtime performance of raster caching many pictures on Android.
@@ -246,6 +253,12 @@ tasks:
   embedded_android_views_integration_test:
     description: >
       Tests embedded Android views.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
+  hybrid_android_views_integration_test:
+    description: >
+      Tests hybrid Android views.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
@@ -485,6 +498,7 @@ tasks:
       32-bit iOS (iPhone 4S).
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios32"]
+    flaky: true
 
   flavors_test_ios:
     description: >
@@ -643,6 +657,7 @@ tasks:
       A smoke test that runs on macOS Catalina, which is a clone of the Gallery startup latency test.
     stage: devicelab_ios
     required_agent_capabilities: ["mac-catalina/ios"]
+    flaky: true
 
   smoke_catalina_hot_mode_dev_cycle_ios__benchmark:
     description: >
