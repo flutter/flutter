@@ -155,7 +155,7 @@ class Dart2JSTarget extends Target {
   Future<void> build(Environment environment) async {
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
 
-    final List<String> initCommand = <String>[
+    final List<String> sharedCommandOptions = <String>[
       globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
       '--disable-dart-dev',
       globals.artifacts.getArtifactPath(Artifact.dart2jsSnapshot),
@@ -165,15 +165,14 @@ class Dart2JSTarget extends Target {
         '-Ddart.vm.profile=true'
       else
         '-Ddart.vm.product=true',
-      for (final String dartDefine
-          in decodeDartDefines(environment.defines, kDartDefines))
+      for (final String dartDefine in decodeDartDefines(environment.defines, kDartDefines))
         '-D$dartDefine',
     ];
 
     // Run the dart2js compilation in two stages, so that icon tree shaking can
     // parse the kernel file for web builds.
     final ProcessResult kernelResult = await globals.processManager.run(<String>[
-      ...initCommand,
+      ...sharedCommandOptions,
       '-o',
       environment.buildDir.childFile('app.dill').path,
       '--packages=.packages',
@@ -189,7 +188,7 @@ class Dart2JSTarget extends Target {
     final bool csp = environment.defines[kCspMode] == 'true';
 
     final ProcessResult javaScriptResult = await globals.processManager.run(<String>[
-      ...initCommand,
+      ...sharedCommandOptions,
       if (dart2jsOptimization != null) '-$dart2jsOptimization' else '-O4',
       if (buildMode == BuildMode.profile) '--no-minify',
       if (csp) '--csp',
