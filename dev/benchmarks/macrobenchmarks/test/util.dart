@@ -28,8 +28,9 @@ const String _kDebugWarning = '''
 │  Numbers obtained from a benchmark while asserts are  │
 │  enabled will not accurately reflect the performance  │
 │  that will be experienced by end users using release  ╎
-│  builds. Benchmarks should be run using this command  ┆
-│  line:  flutter drive --profile test_perf.dart        ┊
+│  builds. Benchmarks should be run using this command  ╎
+│  line:  "flutter run --profile test_perf_e2e.dart"    ┊
+│  or "flutter drive --profile -t test_perf_e2e.dart".  ┊
 │                                                       ┊
 └─────────────────────────────────────────────────╌┄┈  🐢
 ''';
