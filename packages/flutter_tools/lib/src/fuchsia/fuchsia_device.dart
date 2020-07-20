@@ -52,13 +52,6 @@ Future<vm_service.VmService> _kDefaultFuchsiaIsolateDiscoveryConnector(Uri uri) 
   return connectToVmService(uri);
 }
 
-Future<void> _kDefaultDartDevelopmentServiceStarter(
-  Device device,
-  Uri observatoryUri,
-) async {
-  await device.dds.startDartDevelopmentService(observatoryUri, true);
-}
-
 /// Read the log for a particular device.
 class _FuchsiaLogReader extends DeviceLogReader {
   _FuchsiaLogReader(this._device, this._systemClock, [this._app]);
@@ -702,7 +695,6 @@ class FuchsiaIsolateDiscoveryProtocol {
     this._device,
     this._isolateName, [
     this._vmServiceConnector = _kDefaultFuchsiaIsolateDiscoveryConnector,
-    this._ddsStarter = _kDefaultDartDevelopmentServiceStarter,
     this._pollOnce = false,
   ]);
 
@@ -712,7 +704,6 @@ class FuchsiaIsolateDiscoveryProtocol {
   final String _isolateName;
   final Completer<Uri> _foundUri = Completer<Uri>();
   final Future<vm_service.VmService> Function(Uri) _vmServiceConnector;
-  final Future<void> Function(Device, Uri) _ddsStarter;
   // whether to only poll once.
   final bool _pollOnce;
   Timer _pollingTimer;
@@ -755,7 +746,6 @@ class FuchsiaIsolateDiscoveryProtocol {
         final int localPort = await _device.portForwarder.forward(port);
         try {
           final Uri uri = Uri.parse('http://[$_ipv6Loopback]:$localPort');
-          await _ddsStarter(_device, uri);
           service = await _vmServiceConnector(uri);
           _ports[port] = service;
         } on SocketException catch (err) {
