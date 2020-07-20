@@ -4,7 +4,11 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/widget_cache.dart';
+import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -40,7 +44,13 @@ final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   ),
   breakpoints: <vm_service.Breakpoint>[],
   exceptionPauseMode: null,
-  libraries: <vm_service.LibraryRef>[],
+  libraries: <vm_service.LibraryRef>[
+    vm_service.LibraryRef(
+      id: '1',
+      uri: 'file:///hello_world/main.dart',
+      name: '',
+    ),
+  ],
   livePorts: 0,
   name: 'test',
   number: '1',
@@ -64,6 +74,19 @@ final vm_service.Isolate fakePausedIsolate = vm_service.Isolate(
   pauseOnExit: false,
   runnable: true,
   startTime: 0,
+);
+
+final vm_service.VM fakeVM = vm_service.VM(
+  isolates: <vm_service.IsolateRef>[fakeUnpausedIsolate],
+  pid: 1,
+  hostCPU: '',
+  isolateGroups: <vm_service.IsolateGroupRef>[],
+  targetCPU: '',
+  startTime: 0,
+  name: 'dart',
+  architectureBits: 64,
+  operatingSystem: '',
+  version: '',
 );
 
 final FlutterView fakeFlutterView = FlutterView(
@@ -621,6 +644,260 @@ void main() {
   }, overrides: <Type, Generator>{
     Usage: () => MockUsage(),
   }));
+
+  testUsingContext('ResidentRunner can perform fast reassemble', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      listViews,
+      FakeVmServiceRequest(
+        method: 'getVM',
+        jsonResponse: fakeVM.toJson(),
+      ),
+      listViews,
+      listViews,
+      listViews,
+      FakeVmServiceRequest(
+        method: 'getIsolate',
+        args: <String, Object>{
+          'isolateId': '1',
+        },
+        jsonResponse: fakeUnpausedIsolate.toJson(),
+      ),
+      const FakeVmServiceRequest(
+        method: 'evaluate',
+        args: <String, String>{
+          'isolateId': '1',
+          'targetId': '1',
+          'expression': '((){debugFastReassembleMethod=(Object _fastReassembleParam) => _fastReassembleParam is FakeWidget})()',
+        }
+      ),
+      listViews,
+      const FakeVmServiceRequest(
+        method: '_flutter.setAssetBundlePath',
+        args: <String, Object>{
+          'viewId': 'a',
+          'assetDirectory': 'build/flutter_assets',
+          'isolateId': '1',
+        }
+      ),
+      FakeVmServiceRequest(
+        method: 'getVM',
+        jsonResponse: fakeVM.toJson(),
+      ),
+      const FakeVmServiceRequest(
+        method: 'reloadSources',
+        args: <String, Object>{
+          'isolateId': '1',
+          'pause': false,
+          'rootLibUri': 'lib/main.dart.incremental.dill',
+        },
+        jsonResponse: <String, Object>{
+          'type': 'ReloadReport',
+          'success': true,
+          'details': <String, Object>{
+            'loadedLibraryCount': 1,
+          },
+        },
+      ),
+      listViews,
+      FakeVmServiceRequest(
+        method: 'getIsolate',
+        args: <String, Object>{
+          'isolateId': '1',
+        },
+        jsonResponse: fakeUnpausedIsolate.toJson(),
+      ),
+      FakeVmServiceRequest(
+        method: 'ext.flutter.fastReassemble',
+        args: <String, Object>{
+          'isolateId': fakeUnpausedIsolate.id,
+        },
+      ),
+    ]);
+    final FakeFlutterDevice flutterDevice =  FakeFlutterDevice(
+      mockDevice,
+      BuildInfo.debug,
+      FakeWidgetCache(),
+      FakeResidentCompiler(),
+      mockDevFS,
+    )..vmService = fakeVmServiceHost.vmService;
+    residentRunner = HotRunner(
+      <FlutterDevice>[
+        flutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+    );
+    when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation invocation) async {
+      return 'Example';
+    });
+    when(mockDevice.targetPlatform).thenAnswer((Invocation invocation) async {
+      return TargetPlatform.android_arm;
+    });
+    when(mockDevice.isLocalEmulator).thenAnswer((Invocation invocation) async {
+      return false;
+    });
+    when(mockDevice.getLogReader(app: anyNamed('app'))).thenReturn(NoOpDeviceLogReader('test'));
+    when(mockDevFS.update(
+      mainUri: anyNamed('mainUri'),
+      target: anyNamed('target'),
+      bundle: anyNamed('bundle'),
+      firstBuildTime: anyNamed('firstBuildTime'),
+      bundleFirstUpload: anyNamed('bundleFirstUpload'),
+      generator: anyNamed('generator'),
+      fullRestart: anyNamed('fullRestart'),
+      dillOutputPath: anyNamed('dillOutputPath'),
+      trackWidgetCreation: anyNamed('trackWidgetCreation'),
+      projectRootPath: anyNamed('projectRootPath'),
+      pathToReload: anyNamed('pathToReload'),
+      invalidatedFiles: anyNamed('invalidatedFiles'),
+      packageConfig: anyNamed('packageConfig'),
+    )).thenAnswer((Invocation invocation) async {
+      return UpdateFSReport(success: true);
+    });
+
+    final Completer<DebugConnectionInfo> onConnectionInfo = Completer<DebugConnectionInfo>.sync();
+    final Completer<void> onAppStart = Completer<void>.sync();
+    unawaited(residentRunner.attach(
+      appStartedCompleter: onAppStart,
+      connectionInfoCompleter: onConnectionInfo,
+    ));
+
+    final OperationResult result = await residentRunner.restart(fullRestart: false);
+    expect(result.fatal, false);
+    expect(result.code, 0);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem.test(),
+    Platform: () => FakePlatform(operatingSystem: 'linux'),
+    ProjectFileInvalidator: () => FakeProjectFileInvalidator(),
+  }));
+
+  testUsingContext('ResidentRunner bails out of fast reassemble if evaluation fails', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      listViews,
+      FakeVmServiceRequest(
+        method: 'getVM',
+        jsonResponse: fakeVM.toJson(),
+      ),
+      listViews,
+      listViews,
+      listViews,
+      FakeVmServiceRequest(
+        method: 'getIsolate',
+        args: <String, Object>{
+          'isolateId': '1',
+        },
+        jsonResponse: fakeUnpausedIsolate.toJson(),
+      ),
+      const FakeVmServiceRequest(
+        method: 'evaluate',
+        args: <String, String>{
+          'isolateId': '1',
+          'targetId': '1',
+          'expression': '((){debugFastReassembleMethod=(Object _fastReassembleParam) => _fastReassembleParam is FakeWidget})()',
+        },
+        errorCode: 500,
+      ),
+      listViews,
+      const FakeVmServiceRequest(
+        method: '_flutter.setAssetBundlePath',
+        args: <String, Object>{
+          'viewId': 'a',
+          'assetDirectory': 'build/flutter_assets',
+          'isolateId': '1',
+        }
+      ),
+      FakeVmServiceRequest(
+        method: 'getVM',
+        jsonResponse: fakeVM.toJson(),
+      ),
+      const FakeVmServiceRequest(
+        method: 'reloadSources',
+        args: <String, Object>{
+          'isolateId': '1',
+          'pause': false,
+          'rootLibUri': 'lib/main.dart.incremental.dill',
+        },
+        jsonResponse: <String, Object>{
+          'type': 'ReloadReport',
+          'success': true,
+          'details': <String, Object>{
+            'loadedLibraryCount': 1,
+          },
+        },
+      ),
+      listViews,
+      FakeVmServiceRequest(
+        method: 'getIsolate',
+        args: <String, Object>{
+          'isolateId': '1',
+        },
+        jsonResponse: fakeUnpausedIsolate.toJson(),
+      ),
+      FakeVmServiceRequest(
+        method: 'ext.flutter.reassemble',
+        args: <String, Object>{
+          'isolateId': fakeUnpausedIsolate.id,
+        },
+      ),
+    ]);
+    final FakeFlutterDevice flutterDevice =  FakeFlutterDevice(
+      mockDevice,
+      BuildInfo.debug,
+      FakeWidgetCache(),
+      FakeResidentCompiler(),
+      mockDevFS,
+    )..vmService = fakeVmServiceHost.vmService;
+    residentRunner = HotRunner(
+      <FlutterDevice>[
+        flutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+    );
+    when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation invocation) async {
+      return 'Example';
+    });
+    when(mockDevice.targetPlatform).thenAnswer((Invocation invocation) async {
+      return TargetPlatform.android_arm;
+    });
+    when(mockDevice.isLocalEmulator).thenAnswer((Invocation invocation) async {
+      return false;
+    });
+    when(mockDevice.getLogReader(app: anyNamed('app'))).thenReturn(NoOpDeviceLogReader('test'));
+    when(mockDevFS.update(
+      mainUri: anyNamed('mainUri'),
+      target: anyNamed('target'),
+      bundle: anyNamed('bundle'),
+      firstBuildTime: anyNamed('firstBuildTime'),
+      bundleFirstUpload: anyNamed('bundleFirstUpload'),
+      generator: anyNamed('generator'),
+      fullRestart: anyNamed('fullRestart'),
+      dillOutputPath: anyNamed('dillOutputPath'),
+      trackWidgetCreation: anyNamed('trackWidgetCreation'),
+      projectRootPath: anyNamed('projectRootPath'),
+      pathToReload: anyNamed('pathToReload'),
+      invalidatedFiles: anyNamed('invalidatedFiles'),
+      packageConfig: anyNamed('packageConfig'),
+    )).thenAnswer((Invocation invocation) async {
+      return UpdateFSReport(success: true);
+    });
+
+    final Completer<DebugConnectionInfo> onConnectionInfo = Completer<DebugConnectionInfo>.sync();
+    final Completer<void> onAppStart = Completer<void>.sync();
+    unawaited(residentRunner.attach(
+      appStartedCompleter: onAppStart,
+      connectionInfoCompleter: onConnectionInfo,
+    ));
+
+    final OperationResult result = await residentRunner.restart(fullRestart: false);
+    expect(result.fatal, false);
+    expect(result.code, 0);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem.test(),
+    Platform: () => FakePlatform(operatingSystem: 'linux'),
+    ProjectFileInvalidator: () => FakeProjectFileInvalidator(),
+  }));
+
 
   testUsingContext('ResidentRunner can send target platform to analytics from full restart', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
@@ -1738,5 +2015,76 @@ class ThrowingForwardingFileSystem extends ForwardingFileSystem {
       throw const FileSystemException();
     }
     return delegate.file(path);
+  }
+}
+
+class FakeWidgetCache implements WidgetCache {
+  @override
+  Future<String> validateLibrary(Uri libraryUri) async {
+    return 'FakeWidget';
+  }
+}
+
+class FakeFlutterDevice extends FlutterDevice {
+  FakeFlutterDevice(
+    Device device,
+    BuildInfo buildInfo,
+    WidgetCache widgetCache,
+    ResidentCompiler residentCompiler,
+    this.fakeDevFS,
+  ) : super(device, buildInfo: buildInfo, widgetCache:widgetCache, generator: residentCompiler);
+
+  @override
+  Future<void> connect({
+    ReloadSources reloadSources,
+    Restart restart,
+    CompileExpression compileExpression,
+    ReloadMethod reloadMethod,
+    GetSkSLMethod getSkSLMethod,
+    PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
+  }) async { }
+
+
+  final DevFS fakeDevFS;
+
+  @override
+  DevFS get devFS => fakeDevFS;
+
+  @override
+  set devFS(DevFS value) {}
+}
+
+class FakeResidentCompiler extends Fake implements ResidentCompiler {
+  @override
+  Future<CompilerOutput> recompile(
+    Uri mainUri,
+    List<Uri> invalidatedFiles, {
+    @required String outputPath,
+    @required PackageConfig packageConfig,
+    bool suppressErrors = false,
+  }) async {
+    return const CompilerOutput('foo.dill', 0, <Uri>[]);
+  }
+
+  @override
+  void accept() { }
+
+  @override
+  void reset() { }
+}
+
+class FakeProjectFileInvalidator extends Fake implements ProjectFileInvalidator {
+  @override
+  Future<InvalidationResult> findInvalidated({
+    @required DateTime lastCompiled,
+    @required List<Uri> urisToMonitor,
+    @required String packagesPath,
+    @required PackageConfig packageConfig,
+    bool asyncScanning = false,
+  }) async {
+    return InvalidationResult(
+      packageConfig: packageConfig ?? PackageConfig.empty,
+      uris: <Uri>[Uri.parse('file:///hello_world/main.dart'),
+    ]);
   }
 }
