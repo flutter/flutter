@@ -47,7 +47,7 @@ class PreparePackageException implements Exception {
   }
 }
 
-enum Branch { dev, beta, stable }
+enum Branch { dev, beta, stable, master }
 
 String getBranchName(Branch branch) {
   switch (branch) {
@@ -57,6 +57,8 @@ String getBranchName(Branch branch) {
       return 'dev';
     case Branch.stable:
       return 'stable';
+    case Branch.master:
+      return 'master';
   }
   return null;
 }
@@ -69,6 +71,8 @@ Branch fromBranchName(String name) {
       return Branch.dev;
     case 'stable':
       return Branch.stable;
+    case 'master':
+      return Branch.master;
     default:
       throw ArgumentError('Invalid branch name.');
   }
