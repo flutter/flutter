@@ -102,7 +102,6 @@ task:
     fingerprint_script: echo $OS; cat bin/internal/*.version
     reupload_on_changes: false
   setup_script:
-    - pwd
     - date
     - git clean -xffd --exclude=bin/cache/
     - git fetch origin
