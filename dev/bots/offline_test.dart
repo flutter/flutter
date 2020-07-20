@@ -26,10 +26,6 @@ Future<void> _runAndroidPackagingTests() async {
     'rev-parse',
     'HEAD'
   ], workingDirectory: '')).join()).trim();
-  await runCommand(dart, <String>[
-    'pub',
-    'get',
-  ], workingDirectory: 'dev/bots');
 
   // Step 1: Prepare zip packaging.
   await runCommand(dart, <String>[

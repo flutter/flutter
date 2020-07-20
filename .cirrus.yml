@@ -104,10 +104,10 @@ task:
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
     - flutter config --no-analytics
-    # - flutter doctor -v
-    # - flutter update-packages
-    # - ./dev/bots/accept_android_sdk_licenses.sh
-    # - date
+    - flutter doctor -v
+    - flutter update-packages
+    - ./dev/bots/accept_android_sdk_licenses.sh
+    - date
   on_failure:
     failure_script:
       - date
@@ -218,7 +218,7 @@ task:
 
     - name: android_packaging_tests-linux
       script:
-        - dart --enable-asserts ./dev/bots/offline_test.dart
+        - dart --enable-asserts ./dev/bots/test.dart
 
 #     - name: web_tests-0-linux
 #       << : *WEB_SHARD_TEMPLATE
