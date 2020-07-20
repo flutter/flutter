@@ -269,11 +269,10 @@ class BlacklistingTextInputFormatter extends FilteringTextInputFormatter {
 }
 
 /// Old name for [FilteringTextInputFormatter.allow].
-// TODO(ianh): Deprecate these once the samples are migrated.
-// at-Deprecated(
-//   'Use FilteringTextInputFormatter.allow instead. '
-//   'This feature was deprecated after v1.20.0-1.0.pre.'
-// )
+@Deprecated(
+  'Use FilteringTextInputFormatter.allow instead. '
+  'This feature was deprecated after v1.20.0-1.0.pre.'
+)
 class WhitelistingTextInputFormatter extends FilteringTextInputFormatter {
   /// Old name for [FilteringTextInputFormatter.allow].
   @Deprecated(
@@ -292,11 +291,10 @@ class WhitelistingTextInputFormatter extends FilteringTextInputFormatter {
   Pattern get whitelistedPattern => filterPattern;
 
   /// Old name for [FilteringTextInputFormatter.digitsOnly].
-  // TODO(ianh): Deprecate these once the samples are migrated.
-  // at-Deprecated(
-  //   'Use FilteringTextInputFormatter.digitsOnly instead. '
-  //   'This feature was deprecated after v1.20.0-1.0.pre.'
-  // )
+  @Deprecated(
+    'Use FilteringTextInputFormatter.digitsOnly instead. '
+    'This feature was deprecated after v1.20.0-1.0.pre.'
+  )
   static final WhitelistingTextInputFormatter digitsOnly
       = WhitelistingTextInputFormatter(RegExp(r'\d+'));
 }
