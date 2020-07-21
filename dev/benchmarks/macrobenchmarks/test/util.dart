@@ -111,37 +111,37 @@ class FrameTimingSummarizer {
     final List<Duration> frameRasterizerTimeSorted = List<Duration>.from(frameBuildTime)..sort();
     final Duration Function(Duration, Duration) add = (Duration a, Duration b) => a + b;
     return FrameTimingSummarizer._(
-      frameBuildTime,
-      frameRasterizerTime,
+      frameBuildTime: frameBuildTime,
+      frameRasterizerTime: frameRasterizerTime,
       // This avarage calculation is microsecond precision, which is fine
       // because typical values of these times are milliseconds.
-      frameBuildTime.reduce(add) ~/ data.length,
-      _findPercentile(frameBuildTimeSorted, 0.90),
-      _findPercentile(frameBuildTimeSorted, 0.99),
-      frameBuildTimeSorted.last,
-      _countExceed(frameBuildTimeSorted, kBuildBudget),
-      frameRasterizerTime.reduce(add) ~/ data.length,
-      _findPercentile(frameRasterizerTimeSorted, 0.90),
-      _findPercentile(frameRasterizerTimeSorted, 0.90),
-      frameRasterizerTimeSorted.last,
-      _countExceed(frameRasterizerTimeSorted, kBuildBudget),
+      averageFrameBuildTime: frameBuildTime.reduce(add) ~/ data.length,
+      percentileFrameBuildTime90: _findPercentile(frameBuildTimeSorted, 0.90),
+      percentileFrameBuildTime99: _findPercentile(frameBuildTimeSorted, 0.99),
+      worstFrameBuildTime: frameBuildTimeSorted.last,
+      missedFrameBuildBudget: _countExceed(frameBuildTimeSorted, kBuildBudget),
+      averageFrameRasterizerTime: frameRasterizerTime.reduce(add) ~/ data.length,
+      percentileFrameRasterizerTime90: _findPercentile(frameRasterizerTimeSorted, 0.90),
+      percentileFrameRasterizerTime99: _findPercentile(frameRasterizerTimeSorted, 0.90),
+      worstFrameRasterizerTime: frameRasterizerTimeSorted.last,
+      missedFrameRasterizerBudget: _countExceed(frameRasterizerTimeSorted, kBuildBudget),
     );
   }
 
-  const FrameTimingSummarizer._(
-    this.frameBuildTime,
-    this.frameRasterizerTime,
-    this.averageFrameBuildTime,
-    this.percentileFrameBuildTime90,
-    this.percentileFrameBuildTime99,
-    this.worstFrameBuildTime,
-    this.missedFrameBuildBudget,
-    this.averageFrameRasterizerTime,
-    this.percentileFrameRasterizerTime90,
-    this.percentileFrameRasterizerTime99,
-    this.worstFrameRasterizerTime,
-    this.missedFrameRasterizerBudget
-  );
+  const FrameTimingSummarizer._({
+    @required this.frameBuildTime,
+    @required this.frameRasterizerTime,
+    @required this.averageFrameBuildTime,
+    @required this.percentileFrameBuildTime90,
+    @required this.percentileFrameBuildTime99,
+    @required this.worstFrameBuildTime,
+    @required this.missedFrameBuildBudget,
+    @required this.averageFrameRasterizerTime,
+    @required this.percentileFrameRasterizerTime90,
+    @required this.percentileFrameRasterizerTime99,
+    @required this.worstFrameRasterizerTime,
+    @required this.missedFrameRasterizerBudget
+  });
 
   /// List of frame build time in microseconds
   final List<Duration> frameBuildTime;
