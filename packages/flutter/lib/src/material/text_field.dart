@@ -339,6 +339,7 @@ class TextField extends StatefulWidget {
     this.inputFormatters,
     this.enabled,
     this.cursorWidth = 2.0,
+    this.cursorHeight,
     this.cursorRadius,
     this.cursorColor,
     this.selectionHeightStyle = ui.BoxHeightStyle.tight,
@@ -628,6 +629,9 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.cursorWidth}
   final double cursorWidth;
 
+  /// {@macro flutter.widgets.editableText.cursorHeight}
+  final double cursorHeight;
+
   /// {@macro flutter.widgets.editableText.cursorRadius}
   final Radius cursorRadius;
 
@@ -779,6 +783,7 @@ class TextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<TextAlignVertical>('textAlignVertical', textAlignVertical, defaultValue: null));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(DoubleProperty('cursorWidth', cursorWidth, defaultValue: 2.0));
+    properties.add(DoubleProperty('cursorHeight', cursorHeight, defaultValue: null));
     properties.add(DiagnosticsProperty<Radius>('cursorRadius', cursorRadius, defaultValue: null));
     properties.add(ColorProperty('cursorColor', cursorColor, defaultValue: null));
     properties.add(DiagnosticsProperty<Brightness>('keyboardAppearance', keyboardAppearance, defaultValue: null));
@@ -1100,6 +1105,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
         rendererIgnoresPointer: true,
         mouseCursor: MouseCursor.defer, // TextField will handle the cursor
         cursorWidth: widget.cursorWidth,
+        cursorHeight: widget.cursorHeight,
         cursorRadius: cursorRadius,
         cursorColor: cursorColor,
         selectionHeightStyle: widget.selectionHeightStyle,

@@ -419,6 +419,7 @@ class EditableText extends StatefulWidget {
     this.mouseCursor,
     this.rendererIgnoresPointer = false,
     this.cursorWidth = 2.0,
+    this.cursorHeight,
     this.cursorRadius,
     this.cursorOpacityAnimates = false,
     this.cursorOffset,
@@ -1049,6 +1050,13 @@ class EditableText extends StatefulWidget {
   /// to reverse this behavior.
   /// {@endtemplate}
   final double cursorWidth;
+
+  /// {@template flutter.widgets.editableText.cursorHeight}
+  /// How tall the cursor will be.
+  ///
+  /// If this property is null, [RenderEditable.preferredLineHeight] will be used.
+  /// {@endtemplate}
+  final double cursorHeight;
 
   /// {@template flutter.widgets.editableText.cursorRadius}
   /// How rounded the corners of the cursor should be.
@@ -2297,6 +2305,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                 onCaretChanged: _handleCaretChanged,
                 rendererIgnoresPointer: widget.rendererIgnoresPointer,
                 cursorWidth: widget.cursorWidth,
+                cursorHeight: widget.cursorHeight,
                 cursorRadius: widget.cursorRadius,
                 cursorOffset: widget.cursorOffset,
                 selectionHeightStyle: widget.selectionHeightStyle,
@@ -2379,6 +2388,7 @@ class _Editable extends LeafRenderObjectWidget {
     this.onCaretChanged,
     this.rendererIgnoresPointer = false,
     this.cursorWidth,
+    this.cursorHeight,
     this.cursorRadius,
     this.cursorOffset,
     this.paintCursorAboveText,
@@ -2426,6 +2436,7 @@ class _Editable extends LeafRenderObjectWidget {
   final CaretChangedHandler onCaretChanged;
   final bool rendererIgnoresPointer;
   final double cursorWidth;
+  final double cursorHeight;
   final Radius cursorRadius;
   final Offset cursorOffset;
   final bool paintCursorAboveText;
@@ -2469,6 +2480,7 @@ class _Editable extends LeafRenderObjectWidget {
       textHeightBehavior: textHeightBehavior,
       textWidthBasis: textWidthBasis,
       cursorWidth: cursorWidth,
+      cursorHeight: cursorHeight,
       cursorRadius: cursorRadius,
       cursorOffset: cursorOffset,
       paintCursorAboveText: paintCursorAboveText,
@@ -2513,6 +2525,7 @@ class _Editable extends LeafRenderObjectWidget {
       ..obscuringCharacter = obscuringCharacter
       ..obscureText = obscureText
       ..cursorWidth = cursorWidth
+      ..cursorHeight = cursorHeight
       ..cursorRadius = cursorRadius
       ..cursorOffset = cursorOffset
       ..selectionHeightStyle = selectionHeightStyle
