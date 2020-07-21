@@ -116,13 +116,13 @@ class FrameTimingSummarizer {
       // This avarage calculation is microsecond precision, which is fine
       // because typical values of these times are milliseconds.
       averageFrameBuildTime: frameBuildTime.reduce(add) ~/ data.length,
-      percentileFrameBuildTime90: _findPercentile(frameBuildTimeSorted, 0.90),
-      percentileFrameBuildTime99: _findPercentile(frameBuildTimeSorted, 0.99),
+      p90FrameBuildTime: _findPercentile(frameBuildTimeSorted, 0.90),
+      p99FrameBuildTime: _findPercentile(frameBuildTimeSorted, 0.99),
       worstFrameBuildTime: frameBuildTimeSorted.last,
       missedFrameBuildBudget: _countExceed(frameBuildTimeSorted, kBuildBudget),
       averageFrameRasterizerTime: frameRasterizerTime.reduce(add) ~/ data.length,
-      percentileFrameRasterizerTime90: _findPercentile(frameRasterizerTimeSorted, 0.90),
-      percentileFrameRasterizerTime99: _findPercentile(frameRasterizerTimeSorted, 0.90),
+      p90FrameRasterizerTime: _findPercentile(frameRasterizerTimeSorted, 0.90),
+      p99FrameRasterizerTime: _findPercentile(frameRasterizerTimeSorted, 0.90),
       worstFrameRasterizerTime: frameRasterizerTimeSorted.last,
       missedFrameRasterizerBudget: _countExceed(frameRasterizerTimeSorted, kBuildBudget),
     );
@@ -132,13 +132,13 @@ class FrameTimingSummarizer {
     @required this.frameBuildTime,
     @required this.frameRasterizerTime,
     @required this.averageFrameBuildTime,
-    @required this.percentileFrameBuildTime90,
-    @required this.percentileFrameBuildTime99,
+    @required this.p90FrameBuildTime,
+    @required this.p99FrameBuildTime,
     @required this.worstFrameBuildTime,
     @required this.missedFrameBuildBudget,
     @required this.averageFrameRasterizerTime,
-    @required this.percentileFrameRasterizerTime90,
-    @required this.percentileFrameRasterizerTime99,
+    @required this.p90FrameRasterizerTime,
+    @required this.p99FrameRasterizerTime,
     @required this.worstFrameRasterizerTime,
     @required this.missedFrameRasterizerBudget
   });
@@ -153,10 +153,10 @@ class FrameTimingSummarizer {
   final Duration averageFrameBuildTime;
 
   /// The 90-th percentile value of [frameBuildTime] in milliseconds
-  final Duration percentileFrameBuildTime90;
+  final Duration p90FrameBuildTime;
 
   /// The 99-th percentile value of [frameBuildTime] in milliseconds
-  final Duration percentileFrameBuildTime99;
+  final Duration p99FrameBuildTime;
 
   /// The largest value of [frameBuildTime] in milliseconds
   final Duration worstFrameBuildTime;
@@ -168,10 +168,10 @@ class FrameTimingSummarizer {
   final Duration averageFrameRasterizerTime;
 
   /// The 90-th percentile value of [frameRasterizerTime] in milliseconds.
-  final Duration percentileFrameRasterizerTime90;
+  final Duration p90FrameRasterizerTime;
 
   /// The 99-th percentile value of [frameRasterizerTime] in milliseconds.
-  final Duration percentileFrameRasterizerTime99;
+  final Duration p99FrameRasterizerTime;
 
   /// The largest value of [frameRasterizerTime] in milliseconds.
   final Duration worstFrameRasterizerTime;
@@ -183,18 +183,18 @@ class FrameTimingSummarizer {
     'average_frame_build_time_millis':
         averageFrameBuildTime.inMicroseconds / 1E3,
     '90th_percentile_frame_build_time_millis':
-        percentileFrameBuildTime90.inMicroseconds / 1E3,
+        p90FrameBuildTime.inMicroseconds / 1E3,
     '99th_percentile_frame_build_time_millis':
-        percentileFrameBuildTime99.inMicroseconds / 1E3,
+        p99FrameBuildTime.inMicroseconds / 1E3,
     'worst_frame_build_time_millis':
         worstFrameBuildTime.inMicroseconds / 1E3,
     'missed_frame_build_budget_count': missedFrameBuildBudget,
     'average_frame_rasterizer_time_millis':
         averageFrameRasterizerTime.inMicroseconds / 1E3,
     '90th_percentile_frame_rasterizer_time_millis':
-        percentileFrameRasterizerTime90.inMicroseconds / 1E3,
+        p90FrameRasterizerTime.inMicroseconds / 1E3,
     '99th_percentile_frame_rasterizer_time_millis':
-        percentileFrameRasterizerTime99.inMicroseconds / 1E3,
+        p99FrameRasterizerTime.inMicroseconds / 1E3,
     'worst_frame_rasterizer_time_millis':
         worstFrameRasterizerTime.inMicroseconds / 1E3,
     'missed_frame_rasterizer_budget_count': missedFrameRasterizerBudget,
