@@ -453,7 +453,14 @@ task:
         CPU: 4
         MEMORY: 8G
       script:
-        - dart --enable-asserts ./dev/bots/test.dart
+        - cd %CIRRUS_WORKING_DIR%\packages\flutter_tools
+        - pub get
+        - cd %CIRRUS_WORKING_DIR%\packages\flutter_tools\test\data\asset_test\main
+        - pub get
+        - cd %CIRRUS_WORKING_DIR%\packages\flutter_tools\test\data\asset_test\font
+        - pub get
+        - cd %CIRRUS_WORKING_DIR%
+        - dart --enable-asserts dev\bots\test.dart
 
     - name: tool_tests-commands-windows
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/**') || $CIRRUS_PR == ''"
@@ -464,6 +471,11 @@ task:
         CPU: 4
         MEMORY: 8G
       script:
+        - cd %CIRRUS_WORKING_DIR%\packages\flutter_tools
+        - pub get
+        - cd %CIRRUS_WORKING_DIR%\dev\bots
+        - pub get
+        - cd %CIRRUS_WORKING_DIR%
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: tool_tests-integration-windows
@@ -475,6 +487,12 @@ task:
         CPU: 4
         MEMORY: 10G
       script:
+        - cd %CIRRUS_WORKING_DIR%\packages\flutter_tools
+        - pub get
+        - cd %CIRRUS_WORKING_DIR%\dev\bots
+        - pub get
+        - cd %CIRRUS_WORKING_DIR%\dev\tools
+        - pub get
         - dart --enable-asserts ./dev/bots/test.dart
 
     # TODO(ianh): Enable Web tests on Windows
