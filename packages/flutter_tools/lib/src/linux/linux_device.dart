@@ -12,6 +12,7 @@ import '../desktop_device.dart';
 import '../device.dart';
 import '../features.dart';
 import '../project.dart';
+import '../globals.dart' as globals;
 import 'application_package.dart';
 import 'build_linux.dart';
 import 'linux_workflow.dart';
@@ -66,15 +67,15 @@ class LinuxDevices extends PollingDeviceDiscovery {
   LinuxDevices({
     @required Platform platform,
     @required FeatureFlags featureFlags,
-    @required ProcessManager processManager,
-    @required Logger logger,
-  }) : _platform = platform,
+    processManager processManager,
+    Logger logger,
+  }) : _platform = platform ?? globals.platform, // TODO(jonahwilliams): remove after google3 roll
        _linuxWorkflow = LinuxWorkflow(
           platform: platform,
           featureFlags: featureFlags,
        ),
        _logger = logger,
-       _processManager = processManager,
+       _processManager = processManager ?? globals.processManager,
        super('linux devices');
 
   final Platform _platform;
