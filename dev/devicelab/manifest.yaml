@@ -172,7 +172,6 @@ tasks:
       Tests the effect of LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   picture_cache_perf__timeline_summary:
     description: >
