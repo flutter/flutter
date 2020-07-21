@@ -732,7 +732,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isSingleWidgetReloadEnabled = false,
     this.isAndroidEnabled = true,
     this.isIOSEnabled = true,
-    this.isFuchsiaEnabled = true,
+    this.isFuchsiaEnabled = false,
 });
 
   @override
