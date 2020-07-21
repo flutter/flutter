@@ -20,7 +20,7 @@ import 'package:macrobenchmarks/main.dart' as app;
 Duration kBuildBudget = const Duration(milliseconds: 16);
 // TODO(CareF): Automatically calculate the refresh budget (#61958)
 
-typedef DriveCallback = Future<void> Function(WidgetController controller);
+typedef ControlCallback = Future<void> Function(WidgetController controller);
 
 void macroPerfTestE2E(
   String testName,
@@ -28,8 +28,8 @@ void macroPerfTestE2E(
   Duration pageDelay,
   Duration duration = const Duration(seconds: 3),
   Duration timeout = const Duration(seconds: 30),
-  DriveCallback body,
-  DriveCallback setup,
+  ControlCallback body,
+  ControlCallback setup,
 }) {
   assert(() {
     debugPrint(kDebugWarning);
