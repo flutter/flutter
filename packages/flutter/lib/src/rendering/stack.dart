@@ -8,6 +8,7 @@ import 'dart:math' as math;
 import 'dart:ui' show lerpDouble, hashValues;
 
 import 'package:flutter/foundation.dart';
+import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'box.dart';
 import 'object.dart';
@@ -705,6 +706,22 @@ class RenderIndexedStack extends RenderStack {
     final RenderBox child = _childAtIndex();
     final StackParentData childParentData = child.parentData as StackParentData;
     context.paintChild(child, childParentData.offset + offset);
+  }
+
+  @override
+  void applyPaintTransform(RenderObject child, Matrix4 transform) {
+    if (firstChild == null || index == null)
+      return;
+    final RenderBox childAtIndex = _childAtIndex();
+    if (child != childAtIndex)
+      // It is possible that the offstage widgets want to paint themselves.
+      // For example, the Material widget tries to paint all
+      // InkFeatures under its subtree as long as they are not disposed. In
+      // such case, we give it a zero transform to prevent them from painting.
+      // https://github.com/flutter/flutter/issues/59963
+      transform.setZero();
+    else
+      super.applyPaintTransform(child, transform);
   }
 
   @override

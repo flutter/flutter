@@ -341,11 +341,19 @@ void main() {
 
   testWidgets('Dropdown button control test', (WidgetTester tester) async {
     String value = 'one';
+    StateSetter setState;
     void didChangeValue(String newValue) {
-      value = newValue;
+      setState(() {
+        value = newValue;
+      });
     }
 
-    Widget build() => buildFrame(value: value, onChanged: didChangeValue);
+    Widget build() {
+      return StatefulBuilder(builder: (BuildContext context, StateSetter setter) {
+        setState = setter;
+        return buildFrame(value: value, onChanged: didChangeValue);
+      },);
+    }
 
     await tester.pumpWidget(build());
 
@@ -380,27 +388,33 @@ void main() {
 
   testWidgets('Dropdown button with no app', (WidgetTester tester) async {
     String value = 'one';
+    StateSetter setState;
     void didChangeValue(String newValue) {
-      value = newValue;
+      setState(() {
+        value = newValue;
+      });
     }
 
     Widget build() {
-      return Directionality(
-        textDirection: TextDirection.ltr,
-        child: Navigator(
-          initialRoute: '/',
-          onGenerateRoute: (RouteSettings settings) {
-            return MaterialPageRoute<void>(
-              settings: settings,
-              builder: (BuildContext context) {
-                return Material(
-                  child: buildFrame(value: 'one', onChanged: didChangeValue),
-                );
-              },
-            );
-          },
-        ),
-      );
+      return StatefulBuilder(builder: (BuildContext context, StateSetter setter) {
+        setState = setter;
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: Navigator(
+            initialRoute: '/',
+            onGenerateRoute: (RouteSettings settings) {
+              return MaterialPageRoute<void>(
+                settings: settings,
+                builder: (BuildContext context) {
+                  return Material(
+                    child: buildFrame(value: value, onChanged: didChangeValue),
+                  );
+                },
+              );
+            },
+          ),
+        );
+      },);
     }
 
     await tester.pumpWidget(build());
@@ -2486,15 +2500,22 @@ void main() {
   testWidgets('DropdownButton onTap callback is called when defined', (WidgetTester tester) async {
     int dropdownButtonTapCounter = 0;
     String value = 'one';
+    StateSetter setState;
 
-    void onChanged(String newValue) { value = newValue; }
+    void onChanged(String newValue) {
+      setState(() {
+        value = newValue;
+      });
+    }
     void onTap() { dropdownButtonTapCounter += 1; }
 
-    Widget build() => buildFrame(
-      value: value,
-      onChanged: onChanged,
-      onTap: onTap,
-    );
+    Widget build() {
+      return StatefulBuilder(builder: (BuildContext context, StateSetter setter) {
+        setState = setter;
+        return buildFrame(value: value, onChanged: onChanged, onTap: onTap,);
+      },);
+    }
+
     await tester.pumpWidget(build());
 
     expect(dropdownButtonTapCounter, 0);
@@ -2530,8 +2551,15 @@ void main() {
 
   testWidgets('DropdownMenuItem onTap callback is called when defined', (WidgetTester tester) async {
     String value = 'one';
+    int currentIndex = -1;
+    StateSetter setState;
+    void onChanged(String newValue) {
+      setState(() {
+        currentIndex = -1;
+        value = newValue;
+      });
+    }
     final List<int> menuItemTapCounters = <int>[0, 0, 0, 0];
-    void onChanged(String newValue) { value = newValue; }
 
     final List<VoidCallback> onTapCallbacks = <VoidCallback>[
       () { menuItemTapCounters[0] += 1; },
@@ -2540,28 +2568,32 @@ void main() {
       () { menuItemTapCounters[3] += 1; },
     ];
 
-    int currentIndex = -1;
-    await tester.pumpWidget(
-      TestApp(
-        textDirection: TextDirection.ltr,
-        child: Material(
-          child: RepaintBoundary(
-            child: DropdownButton<String>(
-              value: value,
-              onChanged: onChanged,
-              items: menuItems.map<DropdownMenuItem<String>>((String item) {
-                currentIndex += 1;
-                return DropdownMenuItem<String>(
-                  value: item,
-                  onTap: onTapCallbacks[currentIndex],
-                  child: Text(item),
-                );
-              }).toList(),
+    Widget build() {
+      return StatefulBuilder(builder: (BuildContext context, StateSetter setter) {
+        setState = setter;
+        return TestApp(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: RepaintBoundary(
+              child: DropdownButton<String>(
+                value: value,
+                onChanged: onChanged,
+                items: menuItems.map<DropdownMenuItem<String>>((String item) {
+                  currentIndex += 1;
+                  return DropdownMenuItem<String>(
+                    value: item,
+                    onTap: onTapCallbacks[currentIndex],
+                    child: Text(item),
+                  );
+                }).toList(),
+              ),
             ),
           ),
-        ),
-      ),
-    );
+        );
+      });
+    }
+
+    await tester.pumpWidget(build());
 
     // Tap dropdown button.
     await tester.tap(find.text('one'));
