@@ -259,7 +259,7 @@ class FlutterVersion {
         branch: '$_versionCheckRemote/$branch',
         lenient: false,
       );
-    } on VersionCheckError catch(error) {
+    } on VersionCheckError catch (error) {
       if (globals.platform.environment.containsKey('FLUTTER_GIT_URL')) {
         globals.logger.printError('Warning: the Flutter git upstream was overriden '
         'by the environment variable FLUTTER_GIT_URL = $_flutterGit');
