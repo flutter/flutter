@@ -1155,6 +1155,8 @@ Iterable<File> _allFiles(String workingDirectory, String extension, { @required 
         continue;
       if (path.basename(entity.path) == '.dart_tool')
         continue;
+      if (path.basename(entity.path) == '.idea')
+        continue;
       if (path.basename(entity.path) == 'build')
         continue;
       pending.addAll(entity.listSync());
