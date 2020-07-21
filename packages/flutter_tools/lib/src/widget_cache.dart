@@ -197,11 +197,14 @@ class WidgetBuildCollector extends Listener {
         currentDeclaration.isStatelessWidget = true;
         currentDeclaration.widgetName = currentDeclaration.name;
       } else if (extendsKeyword?.next?.lexeme == 'State') {
-        // next token is `<`
-        // token following is the widget name.
+        // If next token is `<`, then token following is the widget name.
+        // Otherwise the State class is for a dynamic widget and it might
+        // not be safe to perform a fast reassemble.
+        if (extendsKeyword?.next?.next?.lexeme != '<') {
+          return;
+        }
         currentDeclaration.isStatefulWidget = true;
         currentDeclaration.widgetName = extendsKeyword?.next?.next?.next?.lexeme;
-      } else {
       }
     }
   }

@@ -117,6 +117,22 @@ void main() {
     expect(await widgetCache.validateLibrary(Uri.parse('a.dart')), 'FooWidget');
   });
 
+  testWithoutContext('widget cache does not return widget name on stateful widget '
+    'without a generic type', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final WidgetCache widgetCache = WidgetCache(
+      featureFlags: TestFeatureFlags(isSingleWidgetReloadEnabled: true),
+      fileSystem: fileSystem,
+    );
+    fileSystem.file('a.dart').writeAsStringSync('class FooWidget extends State {}');
+
+    expect(await widgetCache.validateLibrary(Uri.parse('a.dart')), null);
+
+    fileSystem.file('a.dart').writeAsStringSync('class FooWidget extends State { Widget build() {} }');
+
+    expect(await widgetCache.validateLibrary(Uri.parse('a.dart')), null);
+  });
+
   testWithoutContext('widget cache does not return widget name on name change', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final WidgetCache widgetCache = WidgetCache(
