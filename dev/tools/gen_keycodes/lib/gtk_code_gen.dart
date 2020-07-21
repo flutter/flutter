@@ -12,7 +12,7 @@ import 'utils.dart';
 
 /// Generates the keyboard_keys.dart and keyboard_maps.dart files, based on the
 /// information in the key data structure given to it.
-class GtkCodeGenerator extends BaseCodeGenerator {
+class GtkCodeGenerator extends PlatformCodeGenerator {
   GtkCodeGenerator(KeyData keyData) : super(keyData);
 
   /// This generates the map of XKB scan codes to USB HID codes.

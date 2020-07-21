@@ -12,7 +12,7 @@ import 'utils.dart';
 
 /// Generates the keyboard_keys.dart and keyboard_maps.dart files, based on the
 /// information in the key data structure given to it.
-class WindowsCodeGenerator extends BaseCodeGenerator {
+class WindowsCodeGenerator extends PlatformCodeGenerator {
   WindowsCodeGenerator(KeyData keyData) : super(keyData);
 
   /// This generates the map of Windows scan codes to physical keys.

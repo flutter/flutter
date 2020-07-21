@@ -12,7 +12,7 @@ import 'utils.dart';
 
 /// Generates the keyboard_keys.dart and keyboard_maps.dart files, based on the
 /// information in the key data structure given to it.
-class WebCodeGenerator extends BaseCodeGenerator {
+class WebCodeGenerator extends PlatformCodeGenerator {
   WebCodeGenerator(KeyData keyData) : super(keyData);
 
   /// This generates the map of Web KeyboardEvent codes to logical key ids.

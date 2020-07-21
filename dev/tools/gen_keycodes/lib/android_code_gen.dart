@@ -12,7 +12,7 @@ import 'utils.dart';
 
 /// Generates the keyboard_keys.dart and keyboard_maps.dart files, based on the
 /// information in the key data structure given to it.
-class AndroidCodeGenerator extends BaseCodeGenerator {
+class AndroidCodeGenerator extends PlatformCodeGenerator {
   AndroidCodeGenerator(KeyData keyData) : super(keyData);
 
   /// This generates the map of Android key codes to logical keys.

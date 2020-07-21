@@ -31,8 +31,6 @@ abstract class BaseCodeGenerator {
 
   Map<String, String> mappings();
 
-  String outputPath(String platform) => path.join(flutterRoot.path, '..', path.join('engine', 'src', 'flutter', 'shell', 'platform', platform, 'keycodes', 'keyboard_map_$platform.h'));
-
   /// Substitutes the various platform specific maps into the template file for
   /// keyboard_maps.dart.
   String generate() {
@@ -42,4 +40,10 @@ abstract class BaseCodeGenerator {
 
   /// The database of keys loaded from disk.
   final KeyData keyData;
+}
+
+abstract class PlatformCodeGenerator extends BaseCodeGenerator {
+  PlatformCodeGenerator(KeyData keyData) : super(keyData);
+
+  String outputPath(String platform) => path.join(flutterRoot.path, '..', path.join('engine', 'src', 'flutter', 'shell', 'platform', platform, 'keycodes', 'keyboard_map_$platform.h'));
 }

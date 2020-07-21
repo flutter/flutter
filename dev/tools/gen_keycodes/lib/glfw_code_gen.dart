@@ -12,7 +12,7 @@ import 'utils.dart';
 
 /// Generates the keyboard_keys.dart and keyboard_maps.dart files, based on the
 /// information in the key data structure given to it.
-class GlfwCodeGenerator extends BaseCodeGenerator {
+class GlfwCodeGenerator extends PlatformCodeGenerator {
   GlfwCodeGenerator(KeyData keyData) : super(keyData);
 
   /// This generates the map of GLFW number pad key codes to logical keys.

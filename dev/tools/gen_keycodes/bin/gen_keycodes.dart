@@ -243,17 +243,18 @@ Future<void> main(List<String> rawArguments) async {
   if (!codeFile.existsSync()) {
     codeFile.createSync(recursive: true);
   }
+  print('Writing ${'key codes'.padRight(15)}${codeFile.absolute}');
+  await codeFile.writeAsString(KeyboardKeysCodeGenerator(data).generate());
 
   final File mapsFile = File(parsedArguments['maps'] as String);
   if (!mapsFile.existsSync()) {
     mapsFile.createSync(recursive: true);
   }
-
-  await codeFile.writeAsString(KeyboardKeysCodeGenerator(data).generate());
+  print('Writing ${'key maps'.padRight(15)}${mapsFile.absolute}');
   await mapsFile.writeAsString(KeyboardMapsCodeGenerator(data).generate());
 
   for (final String platform in <String>['android', 'darwin', 'glfw', 'fuchsia', 'linux', 'windows', 'web']) {
-    BaseCodeGenerator codeGenerator;
+    PlatformCodeGenerator codeGenerator;
     switch (platform) {
       case 'glfw':
         codeGenerator = GlfwCodeGenerator(data);
@@ -284,7 +285,7 @@ Future<void> main(List<String> rawArguments) async {
     if (!platformFile.existsSync()) {
       platformFile.createSync(recursive: true);
     }
-    print('Writing map ${platformFile.absolute}');
+    print('Writing ${'$platform map'.padRight(15)}${platformFile.absolute}');
     await platformFile.writeAsString(codeGenerator.generate());
   }
 }
