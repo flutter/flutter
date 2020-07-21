@@ -1468,6 +1468,11 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   /// Events dispatched by [TestGesture] are not affected by this.
   HitTestDispatcher deviceEventDispatcher;
 
+
+  /// Dispatch an event to a hit test result's path.
+  ///
+  /// Apart from forwarding the event to [GestureBinding.dispatchEvent],
+  /// This also paint all events that's down on the screen.
   @override
   void dispatchEvent(
     PointerEvent event,
@@ -1476,20 +1481,19 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }) {
     switch (source) {
       case TestBindingEventSource.test:
-        if (!renderView._pointers.containsKey(event.pointer)) {
-          assert(event.down || event is PointerAddedEvent);
-          if (event.down) {
-            renderView._pointers[event.pointer] = _LiveTestPointerRecord(
-              event.pointer,
-              event.position,
-            );
-          }
-        } else {
+        if (renderView._pointers.containsKey(event.pointer)) {
           renderView._pointers[event.pointer].position = event.position;
           if (!event.down)
             renderView._pointers[event.pointer].decay = _kPointerDecay;
+          _handleViewNeedsPaint();
+        } else if (event.down) {
+          assert(event is PointerDownEvent);
+          renderView._pointers[event.pointer] = _LiveTestPointerRecord(
+            event.pointer,
+            event.position,
+          );
+          _handleViewNeedsPaint();
         }
-        _handleViewNeedsPaint();
         super.dispatchEvent(event, hitTestResult, source: source);
         break;
       case TestBindingEventSource.device:
