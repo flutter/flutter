@@ -60,7 +60,7 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
         return "View";
     }
 
-    private void getViewHierarchy(View current, String padding, StringBuilder builder) {
+    private void recurseViewHierarchy(View current, String padding, StringBuilder builder) {
         if (current.getVisibility() != View.VISIBLE || current.getAlpha() == 0) {
             return;
         }
@@ -82,7 +82,7 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
         if (current instanceof ViewGroup) {
             ViewGroup viewGroup = (ViewGroup) current;
             for (int index = 0; index < viewGroup.getChildCount(); index++) {
-                getViewHierarchy(viewGroup.getChildAt(index), padding + "  ", builder);
+                recurseViewHierarchy(viewGroup.getChildAt(index), padding + "  ", builder);
             }
         }
     }
@@ -102,9 +102,9 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
      */
     private String getSerializedViewHierarchy() {
         View root = getFlutterView();
-        StringBuilder buider = new StringBuilder();
-        getViewHierarchy(root, "", buider);
-        return buider.toString();
+        StringBuilder builder = new StringBuilder();
+        recurseViewHierarchy(root, "", builder);
+        return builder.toString();
     }
 
     @Override
