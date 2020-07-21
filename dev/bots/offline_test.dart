@@ -23,7 +23,7 @@ Future<void> main() async {
 /// machines, though similar techniques could be used for macOS and Windows.
 Future<void> _runAndroidPackagingTests() async {
   final String zipLocation = path.join(flutterRoot, 'flutter_zip');
-  final String commit = '895b7ef6faf4e9c6ad641ad556855ff38fbd04bb';
+  const String commit = '895b7ef6faf4e9c6ad641ad556855ff38fbd04bb';
 
   // Step 1: Prepare zip packaging.
   await runCommand(dart, <String>[
@@ -37,7 +37,7 @@ Future<void> _runAndroidPackagingTests() async {
   ], workingDirectory: zipLocation);
 
   // Step 2: Invoke precache using zip packaged flutter
-  await runCommand(path.join(zipLocation, 'flutter/bin/flutter', <String>[
+  await runCommand(path.join(zipLocation, 'flutter/bin/flutter'), <String>[
     'precache',
     '--android',
   ]);
@@ -61,8 +61,8 @@ Future<void> _runAndroidPackagingTests() async {
   // Step 4: flutter build apk without internet.
   await runCommand('sg', <String>[
     'no-internet',
-    'path.join(zipLocation, 'flutter/bin/flutter'),
+    path.join(zipLocation, 'flutter/bin/flutter'),
     'build',
     'apk'
-  ], workingDirectory: path.join(zipLocation, 'flutter/examples/hello_world');
+  ], workingDirectory: path.join(zipLocation, 'flutter/examples/hello_world'));
 }
