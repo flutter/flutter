@@ -122,6 +122,7 @@ void main() {
 
   testWidgets('Passes cursor attributes to underlying TextField', (WidgetTester tester) async {
     const double cursorWidth = 3.14;
+    const double cursorHeight = 6.28;
     const Radius cursorRadius = Radius.circular(4);
     const Color cursorColor = Colors.purple;
 
@@ -131,6 +132,7 @@ void main() {
           child: Center(
             child: TextFormField(
               cursorWidth: cursorWidth,
+              cursorHeight: cursorHeight,
               cursorRadius: cursorRadius,
               cursorColor: cursorColor,
             ),
@@ -144,6 +146,7 @@ void main() {
 
     final TextField textFieldWidget = tester.widget(textFieldFinder);
     expect(textFieldWidget.cursorWidth, cursorWidth);
+    expect(textFieldWidget.cursorHeight, cursorHeight);
     expect(textFieldWidget.cursorRadius, cursorRadius);
     expect(textFieldWidget.cursorColor, cursorColor);
   });

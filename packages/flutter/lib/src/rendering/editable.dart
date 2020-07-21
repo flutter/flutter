@@ -209,6 +209,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     bool obscureText = false,
     Locale locale,
     double cursorWidth = 1.0,
+    double cursorHeight,
     Radius cursorRadius,
     bool paintCursorAboveText = false,
     Offset cursorOffset,
@@ -245,6 +246,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        assert(obscureText != null),
        assert(textSelectionDelegate != null),
        assert(cursorWidth != null && cursorWidth >= 0.0),
+       assert(cursorHeight == null || cursorHeight >= 0.0),
        assert(readOnly != null),
        assert(forceLine != null),
        assert(devicePixelRatio != null),
@@ -271,6 +273,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        _selection = selection,
        _offset = offset,
        _cursorWidth = cursorWidth,
+       _cursorHeight = cursorHeight,
        _cursorRadius = cursorRadius,
        _paintCursorOnTop = paintCursorAboveText,
        _cursorOffset = cursorOffset,
@@ -1107,6 +1110,16 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     markNeedsLayout();
   }
 
+  /// How tall the cursor will be.
+  double get cursorHeight => _cursorHeight ?? preferredLineHeight;
+  double _cursorHeight;
+  set cursorHeight(double value) {
+    if (_cursorHeight == value)
+      return;
+    _cursorHeight = value;
+    markNeedsLayout();
+  }
+
   /// {@template flutter.rendering.editable.paintCursorOnTop}
   /// If the cursor should be painted on top of the text or underneath it.
   ///
@@ -1563,7 +1576,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
     final Offset caretOffset = _textPainter.getOffsetForCaret(caretPosition, _caretPrototype);
     // This rect is the same as _caretPrototype but without the vertical padding.
-    Rect rect = Rect.fromLTWH(0.0, 0.0, cursorWidth, preferredLineHeight).shift(caretOffset + _paintOffset);
+    Rect rect = Rect.fromLTWH(0.0, 0.0, cursorWidth, cursorHeight).shift(caretOffset + _paintOffset);
     // Add additional cursor offset (generally only if on iOS).
     if (_cursorOffset != null)
       rect = rect.shift(_cursorOffset);
@@ -1887,12 +1900,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        return Rect.fromLTWH(0.0, 0.0, cursorWidth, preferredLineHeight + 2);
+        return Rect.fromLTWH(0.0, 0.0, cursorWidth, cursorHeight + 2);
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        return Rect.fromLTWH(0.0, _kCaretHeightOffset, cursorWidth, preferredLineHeight - 2.0 * _kCaretHeightOffset);
+        return Rect.fromLTWH(0.0, _kCaretHeightOffset, cursorWidth, cursorHeight - 2.0 * _kCaretHeightOffset);
     }
     return null;
   }
