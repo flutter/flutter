@@ -1,4 +1,4 @@
-Signature: d0114fede7784404fc958ac5dda7c4f9
+Signature: 867978927bfbac7cdd5845cc9ea1a162
 
 UNUSED LICENSES:
 
@@ -997,6 +997,7 @@ FILE: ../../../third_party/skia/experimental/skottiekit/interface.js
 FILE: ../../../third_party/skia/experimental/skottiekit/postamble.js
 FILE: ../../../third_party/skia/experimental/skottiekit/preamble.js
 FILE: ../../../third_party/skia/experimental/skottiekit/release.js
+FILE: ../../../third_party/skia/experimental/skottiekit/skottiekit/package.json
 FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/cpu.js
 FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/debugger/anim.mskp
 FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/debugger/index.html
