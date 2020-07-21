@@ -169,7 +169,7 @@ class CkCanvas {
   }
 
   void drawPicture(CkPicture picture) {
-    skCanvas.drawPicture(picture._skPicture);
+    skCanvas.drawPicture(picture.skiaObject.skiaObject);
   }
 
   void drawPoints(CkPaint paint, ui.PointMode pointMode,
