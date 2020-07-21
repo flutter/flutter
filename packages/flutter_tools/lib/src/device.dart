@@ -333,6 +333,8 @@ class FlutterDeviceManager extends DeviceManager {
     LinuxDevices(
       platform: platform,
       featureFlags: featureFlags,
+      processManager: processManager,
+      logger: logger,
     ),
     WindowsDevices(),
     WebDevices(
