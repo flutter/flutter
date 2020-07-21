@@ -22,12 +22,6 @@ class Tracing {
   Tracing(this.vmService);
 
   static const String firstUsefulFrameEventName = kFirstFrameRasterizedEventName;
-
-  static Future<Tracing> connect(Uri uri) async {
-    final vm_service.VmService observatory = await connectToVmService(uri);
-    return Tracing(observatory);
-  }
-
   final vm_service.VmService vmService;
 
   Future<void> startTracing() async {
