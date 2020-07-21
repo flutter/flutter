@@ -365,8 +365,8 @@ class PerfTest {
   final String testTarget;
   // The prefix name of the filename such as `<timelineFileName>.timeline_summary.json`.
   final String timelineFileName;
-  /// The test file to run on the host.
   String get resultFilename => '$timelineFileName.timeline_summary';
+  /// The test file to run on the host.
   final String testDriver;
   /// Whether to collect CPU and GPU metrics.
   final bool needsMeasureCpuGpu;
