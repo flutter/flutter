@@ -395,7 +395,6 @@ task:
     - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
     - flutter config --no-analytics
     - flutter doctor -v
-    - flutter update-packages
     - git fetch origin master
   matrix:
     - name: framework_tests-widgets-windows
@@ -410,6 +409,7 @@ task:
         GOLDCTL: "C:\\Windows\\Temp\\depot_tools\\goldctl.exe"
         GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
       script:
+        - flutter update-packages
         - powershell dev\bots\download_goldctl.ps1
         - dart --enable-asserts dev\bots\test.dart
 
@@ -425,6 +425,7 @@ task:
         GOLDCTL: "C:\\Windows\\Temp\\depot_tools\\goldctl.exe"
         GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
       script:
+        - flutter update-packages
         - powershell dev\bots\download_goldctl.ps1
         - dart --enable-asserts dev\bots\test.dart
 
@@ -438,6 +439,7 @@ task:
         CPU: 4
         MEMORY: 4G
       script:
+        - flutter update-packages
         - dart --enable-asserts dev\bots\test.dart
 
     - name: tool_tests-general-windows
