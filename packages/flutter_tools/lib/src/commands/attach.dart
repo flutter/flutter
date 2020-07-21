@@ -102,7 +102,6 @@ class AttachCommand extends FlutterCommand {
               'and progress in machine friendly format.',
       );
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
-    addDdsOptions(verboseHelp: verboseHelp);
     hotRunnerFactory ??= HotRunnerFactory();
   }
 
@@ -376,7 +375,7 @@ class AttachCommand extends FlutterCommand {
     );
     flutterDevice.observatoryUris = observatoryUris;
     final List<FlutterDevice> flutterDevices =  <FlutterDevice>[flutterDevice];
-    final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(getBuildInfo(), disableDds: boolArg('disable-dds'));
+    final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(getBuildInfo());
 
     return getBuildInfo().isDebug
       ? hotRunnerFactory.build(

@@ -30,6 +30,7 @@ void main() {
   });
 
   tearDown(() async {
+    await _flutter.stop();
     tryToDelete(tempDir);
   });
 
@@ -100,6 +101,7 @@ void main() {
       // We don't expect to see any output but want to write to stdout anyway.
       completer.complete();
     });
+
     await _flutter.stop();
 
     expect(stdout.toString(), isNot(contains(_exceptionStart)));
@@ -116,6 +118,7 @@ void main() {
       machine: false,
     );
     await _flutter.resume();
+
     final Completer<void> completer = Completer<void>();
     bool lineFound = false;
 

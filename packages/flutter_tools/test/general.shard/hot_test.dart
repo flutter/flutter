@@ -578,8 +578,6 @@ class TestFlutterDevice extends FlutterDevice {
     ReloadMethod reloadMethod,
     GetSkSLMethod getSkSLMethod,
     PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
-    bool disableDds = false,
-    bool ipv6 = false,
   }) async {
     throw exception;
   }
