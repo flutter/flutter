@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:ui' show Color, Size, Rect;
 
@@ -209,25 +208,28 @@ class _ChainedEvaluation<T> extends Animatable<T> {
 /// [Tween]s that use dedicated `lerp` methods instead of merely relying on the
 /// operators (in particular, this allows them to handle null values in a more
 /// useful manner).
-class Tween<T extends dynamic> extends Animatable<T> {
+class Tween<T extends Object> extends Animatable<T> {
   /// Creates a tween.
   ///
   /// The [begin] and [end] properties must be non-null before the tween is
   /// first used, but the arguments can be null if the values are going to be
   /// filled in later.
-  Tween({ this.begin, this.end });
+  Tween({
+    this.begin,
+    this.end,
+  });
 
   /// The value this variable has at the beginning of the animation.
   ///
   /// See the constructor for details about whether this property may be null
   /// (it varies from subclass to subclass).
-  T begin;
+  T? begin;
 
   /// The value this variable has at the end of the animation.
   ///
   /// See the constructor for details about whether this property may be null
   /// (it varies from subclass to subclass).
-  T end;
+  T? end;
 
   /// Returns the value this variable has at the given animation clock value.
   ///
@@ -238,7 +240,7 @@ class Tween<T extends dynamic> extends Animatable<T> {
   T lerp(double t) {
     assert(begin != null);
     assert(end != null);
-    return begin + (end - begin) * t as T;
+    return (begin as dynamic) + ((end as dynamic) - begin) * t as T;
   }
 
   /// Returns the interpolated value for the current value of the given animation.
@@ -256,9 +258,9 @@ class Tween<T extends dynamic> extends Animatable<T> {
   @override
   T transform(double t) {
     if (t == 0.0)
-      return begin;
+      return begin as T;
     if (t == 1.0)
-      return end;
+      return end as T;
     return lerp(t);
   }
 
@@ -267,7 +269,7 @@ class Tween<T extends dynamic> extends Animatable<T> {
 }
 
 /// A [Tween] that evaluates its [parent] in reverse.
-class ReverseTween<T> extends Tween<T> {
+class ReverseTween<T extends Object> extends Tween<T> {
   /// Construct a [Tween] that evaluates its [parent] in reverse.
   ReverseTween(this.parent)
     : assert(parent != null),
@@ -300,11 +302,11 @@ class ColorTween extends Tween<Color> {
   /// or [end] if you want the effect of fading in or out of transparent.
   /// Instead prefer null. [Colors.transparent] refers to black transparent and
   /// thus will fade out of or into black which is likely unwanted.
-  ColorTween({ Color begin, Color end }) : super(begin: begin, end: end);
+  ColorTween({ Color? begin, Color? end }) : super(begin: begin, end: end);
 
   /// Returns the value this variable has at the given animation clock value.
   @override
-  Color lerp(double t) => Color.lerp(begin, end, t);
+  Color lerp(double t) => Color.lerp(begin, end, t)!;
 }
 
 /// An interpolation between two sizes.
@@ -318,11 +320,11 @@ class SizeTween extends Tween<Size> {
   ///
   /// The [begin] and [end] properties may be null; the null value
   /// is treated as an empty size.
-  SizeTween({ Size begin, Size end }) : super(begin: begin, end: end);
+  SizeTween({ Size? begin, Size? end }) : super(begin: begin, end: end);
 
   /// Returns the value this variable has at the given animation clock value.
   @override
-  Size lerp(double t) => Size.lerp(begin, end, t);
+  Size lerp(double t) => Size.lerp(begin, end, t)!;
 }
 
 /// An interpolation between two rectangles.
@@ -336,11 +338,11 @@ class RectTween extends Tween<Rect> {
   ///
   /// The [begin] and [end] properties may be null; the null value
   /// is treated as an empty rect at the top left corner.
-  RectTween({ Rect begin, Rect end }) : super(begin: begin, end: end);
+  RectTween({ Rect? begin, Rect? end }) : super(begin: begin, end: end);
 
   /// Returns the value this variable has at the given animation clock value.
   @override
-  Rect lerp(double t) => Rect.lerp(begin, end, t);
+  Rect lerp(double t) => Rect.lerp(begin, end, t)!;
 }
 
 /// An interpolation between two integers that rounds.
@@ -360,12 +362,12 @@ class IntTween extends Tween<int> {
   /// The [begin] and [end] properties must be non-null before the tween is
   /// first used, but the arguments can be null if the values are going to be
   /// filled in later.
-  IntTween({ int begin, int end }) : super(begin: begin, end: end);
+  IntTween({ int? begin, int? end }) : super(begin: begin, end: end);
 
   // The inherited lerp() function doesn't work with ints because it multiplies
   // the begin and end types by a double, and int * double returns a double.
   @override
-  int lerp(double t) => (begin + (end - begin) * t).round();
+  int lerp(double t) => (begin! + (end! - begin!) * t).round();
 }
 
 /// An interpolation between two integers that floors.
@@ -385,22 +387,22 @@ class StepTween extends Tween<int> {
   /// The [begin] and [end] properties must be non-null before the tween is
   /// first used, but the arguments can be null if the values are going to be
   /// filled in later.
-  StepTween({ int begin, int end }) : super(begin: begin, end: end);
+  StepTween({ int? begin, int? end }) : super(begin: begin, end: end);
 
   // The inherited lerp() function doesn't work with ints because it multiplies
   // the begin and end types by a double, and int * double returns a double.
   @override
-  int lerp(double t) => (begin + (end - begin) * t).floor();
+  int lerp(double t) => (begin! + (end! - begin!) * t).floor();
 }
 
 /// A tween with a constant value.
-class ConstantTween<T> extends Tween<T> {
+class ConstantTween<T extends Object> extends Tween<T> {
   /// Create a tween whose [begin] and [end] values equal [value].
   ConstantTween(T value) : super(begin: value, end: value);
 
   /// This tween doesn't interpolate, it always returns the same value.
   @override
-  T lerp(double t) => begin;
+  T lerp(double t) => begin as T;
 
   @override
   String toString() => '${objectRuntimeType(this, 'ReverseTween')}(value: $begin)';
@@ -436,7 +438,7 @@ class CurveTween extends Animatable<double> {
   /// Creates a curve tween.
   ///
   /// The [curve] argument must not be null.
-  CurveTween({ @required this.curve })
+  CurveTween({ required this.curve })
     : assert(curve != null);
 
   /// The curve to use when transforming the value of the animation.
