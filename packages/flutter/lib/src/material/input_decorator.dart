@@ -2072,6 +2072,9 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   Color _getDefaultIconColor(ThemeData themeData) {
+    if (!decoration.enabled && !isFocused)
+      return themeData.disabledColor;
+
     if(decoration.iconColor != null){
       return decoration.iconColor;
     }

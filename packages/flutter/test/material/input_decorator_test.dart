@@ -20,6 +20,7 @@ Widget buildInputDecorator({
   bool isEmpty = false,
   bool isFocused = false,
   bool isHovering = false,
+  Color disabledColor = const Color(0xFF616161),
   TextStyle baseStyle,
   TextAlignVertical textAlignVertical,
   VisualDensity visualDensity,
@@ -35,6 +36,7 @@ Widget buildInputDecorator({
         builder: (BuildContext context) {
           return Theme(
             data: Theme.of(context).copyWith(
+              disabledColor: disabledColor,
               inputDecorationTheme: inputDecorationTheme,
               visualDensity: visualDensity,
               fixTextFieldOutlineLabel: fixTextFieldOutlineLabel,
@@ -1447,6 +1449,29 @@ void main() {
     expect(tester.getTopLeft(find.byIcon(Icons.pages)).dx, 0.0);
     expect(tester.getTopRight(find.byIcon(Icons.pages)).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('text')).dx));
     expect(tester.getTopRight(find.text('text')).dx, lessThanOrEqualTo(tester.getTopLeft(find.byIcon(Icons.satellite)).dx));
+  });
+
+  testWidgets('InputDecorator disabledColor should be set', (WidgetTester tester) async {
+    const Color expectedColor = Color(0xFF123456);
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        disabledColor: expectedColor,
+        isFocused: false,
+        decoration: const InputDecoration(
+          icon: Icon(Icons.add_circle),
+          enabled: false,
+        )
+      )
+    );
+
+    final IconTheme iconTheme = tester.firstWidget(
+        find.ancestor(
+          of: find.byIcon(Icons.add_circle),
+          matching: find.byType(IconTheme),
+        )) as IconTheme;
+
+    expect(iconTheme.data.color, expectedColor);
   });
 
   testWidgets('InputDecorator should take iconColor into account', (WidgetTester tester) async {
