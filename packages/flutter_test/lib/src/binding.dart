@@ -1227,15 +1227,16 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 ///
 /// These values are set on the binding's
 /// [LiveTestWidgetsFlutterBinding.framePolicy] property. The default is
-/// [fadePointers]. To do set a value while still allowing the test file to
+/// [fadePointers]. To set a value while still allowing the test file to
 /// work as a normal test, add the following code to your test file at the
 /// top of your `void main() { }` function, before calls to
 /// [testWidgets]:
 ///
 /// ```dart
 /// TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
-/// if (binding is LiveTestWidgetsFlutterBinding)
+/// if (binding is LiveTestWidgetsFlutterBinding) {
 ///   binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.[thePolicy];
+/// }
 /// ```
 enum LiveTestWidgetsFlutterBindingFramePolicy {
   /// Strictly show only frames that are explicitly pumped. This most closely
@@ -1355,6 +1356,8 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   bool _viewNeedsPaint = false;
   bool _runningAsyncTasks = false;
 
+  /// The strategy for [pump]ing and for requesting new frames.
+  ///
   /// Whether to have [pump] with a duration only pump a single frame
   /// (as would happen in a normal test environment using
   /// [AutomatedTestWidgetsFlutterBinding]), or whether to instead
