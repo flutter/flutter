@@ -169,8 +169,7 @@ void main() {
 
   test('pixels: large negative dimensions', () async {
     final BlackSquare blackSquare = BlackSquare.create();
-    final Image resized =
-        await blackSquare.resize(targetHeight: -100, targetWidth: -99999);
+    final Image resized = await blackSquare.resize(targetHeight: -100, targetWidth: -99999);
     expect(resized.height, 2);
     expect(resized.width, 2);
   });

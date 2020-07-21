@@ -10,8 +10,13 @@
 
 namespace flutter {
 
-SingleFrameCodec::SingleFrameCodec(ImageDecoder::ImageDescriptor descriptor)
-    : status_(Status::kNew), descriptor_(std::move(descriptor)) {}
+SingleFrameCodec::SingleFrameCodec(fml::RefPtr<ImageDescriptor> descriptor,
+                                   uint32_t target_width,
+                                   uint32_t target_height)
+    : status_(Status::kNew),
+      descriptor_(std::move(descriptor)),
+      target_width_(target_width),
+      target_height_(target_height) {}
 
 SingleFrameCodec::~SingleFrameCodec() = default;
 
@@ -57,44 +62,45 @@ Dart_Handle SingleFrameCodec::getNextFrame(Dart_Handle callback_handle) {
   fml::RefPtr<SingleFrameCodec>* raw_codec_ref =
       new fml::RefPtr<SingleFrameCodec>(this);
 
-  decoder->Decode(descriptor_, [raw_codec_ref](auto image) {
-    std::unique_ptr<fml::RefPtr<SingleFrameCodec>> codec_ref(raw_codec_ref);
-    fml::RefPtr<SingleFrameCodec> codec(std::move(*codec_ref));
+  decoder->Decode(
+      descriptor_, target_width_, target_height_, [raw_codec_ref](auto image) {
+        std::unique_ptr<fml::RefPtr<SingleFrameCodec>> codec_ref(raw_codec_ref);
+        fml::RefPtr<SingleFrameCodec> codec(std::move(*codec_ref));
 
-    auto state = codec->pending_callbacks_.front().dart_state().lock();
+        auto state = codec->pending_callbacks_.front().dart_state().lock();
 
-    if (!state) {
-      // This is probably because the isolate has been terminated before the
-      // image could be decoded.
+        if (!state) {
+          // This is probably because the isolate has been terminated before the
+          // image could be decoded.
 
-      return;
-    }
+          return;
+        }
 
-    tonic::DartState::Scope scope(state.get());
+        tonic::DartState::Scope scope(state.get());
 
-    if (image.get()) {
-      auto canvas_image = fml::MakeRefCounted<CanvasImage>();
-      canvas_image->set_image(std::move(image));
+        if (image.get()) {
+          auto canvas_image = fml::MakeRefCounted<CanvasImage>();
+          canvas_image->set_image(std::move(image));
 
-      codec->cached_frame_ = fml::MakeRefCounted<FrameInfo>(
-          std::move(canvas_image), 0 /* duration */);
-    }
+          codec->cached_frame_ = fml::MakeRefCounted<FrameInfo>(
+              std::move(canvas_image), 0 /* duration */);
+        }
 
-    // The cached frame is now available and should be returned to any future
-    // callers.
-    codec->status_ = Status::kComplete;
+        // The cached frame is now available and should be returned to any
+        // future callers.
+        codec->status_ = Status::kComplete;
 
-    // Invoke any callbacks that were provided before the frame was decoded.
-    Dart_Handle frame = tonic::ToDart(codec->cached_frame_);
-    for (const DartPersistentValue& callback : codec->pending_callbacks_) {
-      tonic::DartInvoke(callback.value(), {frame});
-    }
-    codec->pending_callbacks_.clear();
-  });
+        // Invoke any callbacks that were provided before the frame was decoded.
+        Dart_Handle frame = tonic::ToDart(codec->cached_frame_);
+        for (const DartPersistentValue& callback : codec->pending_callbacks_) {
+          tonic::DartInvoke(callback.value(), {frame});
+        }
+        codec->pending_callbacks_.clear();
+      });
 
   // The encoded data is no longer needed now that it has been handed off
   // to the decoder.
-  descriptor_.data.reset();
+  descriptor_ = nullptr;
 
   status_ = Status::kInProgress;
 
@@ -102,12 +108,11 @@ Dart_Handle SingleFrameCodec::getNextFrame(Dart_Handle callback_handle) {
 }
 
 size_t SingleFrameCodec::GetAllocationSize() const {
-  const auto& data = descriptor_.data;
-  const auto data_byte_size = data ? data->size() : 0;
+  const auto& data_size = descriptor_->GetAllocationSize();
   const auto frame_byte_size = (cached_frame_ && cached_frame_->image())
                                    ? cached_frame_->image()->GetAllocationSize()
                                    : 0;
-  return data_byte_size + frame_byte_size + sizeof(this);
+  return data_size + frame_byte_size + sizeof(this);
 }
 
 }  // namespace flutter
