@@ -375,7 +375,7 @@ class PerfTest {
 
   /// The keys of the values that need to be reported.
   ///
-  /// If it's `null`, than report:
+  /// If it's `null`, then report:
   /// ```Dart
   /// <String>[
   ///   'average_frame_build_time_millis',
