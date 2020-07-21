@@ -4320,6 +4320,33 @@ void main() {
     expect(scrollController.offset, 0);
   });
 
+  testWidgets('getLocalRectForCaret does not throw when it sees an infinite point', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SkipPainting(
+          child: Transform(
+            transform: Matrix4.zero(),
+            child: EditableText(
+              controller: TextEditingController(),
+              focusNode: FocusNode(),
+              style: textStyle,
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    try {
+      final Rect rect = state.renderEditable.getLocalRectForCaret(const TextPosition(offset: 0));
+      expect(rect.isFinite, false);
+    } catch (e) {
+      expect(e, isNull);
+    }
+  });
+
   testWidgets('obscured multiline fields throw an exception', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
     expect(
@@ -5348,4 +5375,16 @@ class NoImplicitScrollPhysics extends AlwaysScrollableScrollPhysics {
   NoImplicitScrollPhysics applyTo(ScrollPhysics ancestor) {
     return NoImplicitScrollPhysics(parent: buildParent(ancestor));
   }
+}
+
+class SkipPainting extends SingleChildRenderObjectWidget {
+  const SkipPainting({ Key key, Widget child }): super(key: key, child: child);
+
+  @override
+  SkipPaintingRenderObject createRenderObject(BuildContext context) => SkipPaintingRenderObject();
+}
+
+class SkipPaintingRenderObject extends RenderProxyBox {
+  @override
+  void paint(PaintingContext context, Offset offset) { }
 }

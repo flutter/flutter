@@ -1923,12 +1923,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   Offset _getPixelPerfectCursorOffset(Rect caretRect) {
     final Offset caretPosition = localToGlobal(caretRect.topLeft);
     final double pixelMultiple = 1.0 / _devicePixelRatio;
-    final double pixelPerfectOffsetX = caretPosition.dx.isNaN
-      ? caretPosition.dx
-      : (caretPosition.dx / pixelMultiple).round() * pixelMultiple - caretPosition.dx;
-    final double pixelPerfectOffsetY = caretPosition.dy.isNaN
-      ? caretPosition.dy
-      : (caretPosition.dy / pixelMultiple).round() * pixelMultiple - caretPosition.dy;
+    final double pixelPerfectOffsetX = caretPosition.dx.isFinite
+      ? (caretPosition.dx / pixelMultiple).round() * pixelMultiple - caretPosition.dx
+      : caretPosition.dx;
+    final double pixelPerfectOffsetY = caretPosition.dy.isFinite
+      ? (caretPosition.dy / pixelMultiple).round() * pixelMultiple - caretPosition.dy
+      : caretPosition.dy;
     return Offset(pixelPerfectOffsetX, pixelPerfectOffsetY);
   }
 
