@@ -434,36 +434,4 @@ void main() {
       throw 'Expected: paint.color.alpha == 0, found: ${paint.color.alpha}';
     }));
   });
-
-  testWidgets('Does the Ink widget render anything if it have ancestor IndexedStack', (WidgetTester tester) async {
-    // Regressing test for https://github.com/flutter/flutter/issues/59963
-    int index = 0;
-    Widget build() => Directionality(
-      textDirection: TextDirection.ltr,
-      child: Material(
-        child: IndexedStack(
-          index: index,
-          children: <Widget>[
-            Ink(width: 100, height: 100, decoration: const BoxDecoration(color: Colors.black)),
-            Ink(width: 50, height: 50, decoration: const BoxDecoration(color: Colors.red)),
-          ],
-        ),
-      ),
-    );
-
-    await tester.pumpWidget(build());
-
-    final RenderBox box = Material.of(tester.element(find.byType(IndexedStack))) as RenderBox;
-
-    expect(box, paints..rect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 100.0), color: Color(Colors.black.value)));
-
-    // update index, child do not at index should not be painted by have a zero
-    // transform.
-    index = 1;
-    await tester.pumpWidget(build());
-
-    expect(box, paints..transform(
-      matrix4: equals(<dynamic>[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]),
-    ));
-  });
 }
