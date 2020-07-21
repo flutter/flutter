@@ -98,7 +98,7 @@ Future<void> watchPerformance(
 /// This class and summarizes a list of [FrameTiming] for the performance
 /// metrics.
 class FrameTimingSummarizer {
-  factory FrameTimingSummarizer(List<FrameTiming>data) {
+  factory FrameTimingSummarizer(List<FrameTiming> data) {
     assert(data != null);
     assert(data.isNotEmpty);
     final List<Duration> frameBuildTime = List<Duration>.unmodifiable(

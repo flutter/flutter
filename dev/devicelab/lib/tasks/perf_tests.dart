@@ -373,7 +373,7 @@ class PerfTest {
   /// Whether to collect full timeline, meaning if `--trace-startup` flag is needed.
   final bool needsFullTimeline;
 
-  /// The keys of the values that needs to be reported.
+  /// The keys of the values that need to be reported.
   ///
   /// If it's `null`, than report:
   /// ```Dart
