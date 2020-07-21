@@ -17,8 +17,7 @@ const String _iconsClassPathOption = 'icons';
 const String _dryRunOption = 'dry-run';
 
 const String _defaultNewCodepointsPath = 'codepoints';
-const String _defaultOldCodepointsPath =
-    'bin/cache/artifacts/material_fonts/codepoints';
+const String _defaultOldCodepointsPath = 'bin/cache/artifacts/material_fonts/codepoints';
 const String _defaultIconsPath = 'packages/flutter/lib/src/material/icons.dart';
 
 const String _beginGeneratedMark = '// BEGIN GENERATED';
