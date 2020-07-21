@@ -38,6 +38,8 @@ Future<void> main() async {
     const Offset totalMove = Offset(0, -400);
     final Offset location = tester.getCenter(scrollerFinder) - totalMove / 2;
     const int totalTime = 2000;
+    // The issue is about 120Hz input on 90Hz refresh rate device.
+    // We test 90Hz input on 60Hz device here, which shows similar pattern.
     const int intervalCount = totalTime * 90 ~/ 1000; // 90Hz
     final Offset movePerEvent = totalMove / intervalCount.toDouble();
     final List<PointerEventRecord> records = <PointerEventRecord>[
@@ -82,26 +84,34 @@ Future<void> main() async {
       delays += await tester.handlePointerEventRecord(records);
     }
 
-    // Jerk is considerred a good metric for smoothness.
-    // See go/tq-smooth-scrolling-experiments and
-    // https://en.wikipedia.org/wiki/Jerk_(physics)
-    double jerksq = 0;
-    int count = 0;
+    double jankyCount = 0;
+    double jerkAvg = 0;
+    int lostFrame = 0;
     for (int i = 1; i < scrollOffset.length-1; i += 1) {
       if (frameTimestamp[i+1] - frameTimestamp[i-1] > 40E3
           || delays[i] > const Duration(milliseconds: 16)) {
         // filter datapoints from slow frame building or input simulation artifact
+        lostFrame += 1;
         continue;
       }
-      jerksq += _sq(scrollOffset[i-1] + scrollOffset[i+1] - 2*scrollOffset[i]);
-      count += 1;
+      // Using abs rather than square because square (2-norm) amplifies the
+      // effect of the data point that's relatively large, but in this metric
+      // we prefer smaller data point to have similiar effect.
+      // This is also why we count the number of data that's larger than a
+      // threshold (and the result is tested not sensitive to this threshold),
+      // which is effectly a 0-norm.
+      final double jerk = (scrollOffset[i-1] + scrollOffset[i+1] - 2*scrollOffset[i]).abs();
+      jerkAvg += jerk;
+      if (jerk > 0.5)
+        jankyCount += 1;
     }
-    expect(count > 0, true);
-    jerksq /= count;
+    // expect(lostFrame < 0.1 * frameTimestamp.length, true);
+    jerkAvg /= frameTimestamp.length - lostFrame;
 
     binding.reportData = <String, dynamic>{
-      'average_jerk_square': jerksq,
-      'droped_frame_count': frameTimestamp.length - count,
+      'janky_count': jankyCount,
+      'average_abs_jerk': jerkAvg,
+      'droped_frame_count': lostFrame,
       'frame_timestamp': frameTimestamp,
       'scroll_offset': scrollOffset,
       'input_delay': delays.map<int>((Duration data) => data.inMicroseconds).toList(),

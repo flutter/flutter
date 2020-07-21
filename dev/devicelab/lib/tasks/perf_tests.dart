@@ -323,7 +323,11 @@ TaskFunction createsScrollSmoothnessPerfTest() {
 
       return TaskResult.success(
         data,
-        benchmarkScoreKeys: <String>['average_jerk_square'],
+        benchmarkScoreKeys: <String>[
+          'janky_count',
+          'average_abs_jerk',
+          'droped_frame_count'
+        ],
       );
     });
   };
