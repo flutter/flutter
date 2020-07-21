@@ -296,51 +296,22 @@ class _FlutterLogoPainter extends BoxPainter {
 
     // Set up the styles.
     final Paint lightPaint = Paint()
-      ..color = _config.lightColor.withOpacity(0.8);
+      ..color = const Color(0xFF54C5F8); // _config.lightColor.withOpacity(0.8);
     final Paint mediumPaint = Paint()
-      ..color = _config.lightColor;
+      ..color = const Color(0xFF29B6F6); // _config.lightColor;
     final Paint darkPaint = Paint()
-      ..color = _config.darkColor;
+      ..color = const Color(0xFF01579B); // _config.darkColor;
 
     final ui.Gradient triangleGradient = ui.Gradient.linear(
       const Offset(87.2623 + 37.9092, 28.8384 + 123.4389),
       const Offset(42.9205 + 37.9092, 35.0952 + 123.4389),
       <Color>[
-        const Color(0xBFFFFFFF),
-        const Color(0xBFFCFCFC),
-        const Color(0xBFF4F4F4),
-        const Color(0xBFE5E5E5),
-        const Color(0xBFD1D1D1),
-        const Color(0xBFB6B6B6),
-        const Color(0xBF959595),
-        const Color(0xBF6E6E6E),
-        const Color(0xBF616161),
+        const Color(0x001A237E),
+        const Color(0x661A237E),
       ],
-      <double>[ 0.2690, 0.4093, 0.4972, 0.5708, 0.6364, 0.6968, 0.7533, 0.8058, 0.8219 ],
     );
     final Paint trianglePaint = Paint()
-      ..shader = triangleGradient
-      ..blendMode = BlendMode.multiply;
-
-    final ui.Gradient rectangleGradient = ui.Gradient.linear(
-      const Offset(62.3643 + 37.9092, 40.135 + 123.4389),
-      const Offset(54.0376 + 37.9092, 31.8083 + 123.4389),
-      <Color>[
-        const Color(0x80FFFFFF),
-        const Color(0x80FCFCFC),
-        const Color(0x80F4F4F4),
-        const Color(0x80E5E5E5),
-        const Color(0x80D1D1D1),
-        const Color(0x80B6B6B6),
-        const Color(0x80959595),
-        const Color(0x806E6E6E),
-        const Color(0x80616161),
-      ],
-      <double>[ 0.4588, 0.5509, 0.6087, 0.6570, 0.7001, 0.7397, 0.7768, 0.8113, 0.8219 ],
-    );
-    final Paint rectanglePaint = Paint()
-      ..shader = rectangleGradient
-      ..blendMode = BlendMode.multiply;
+      ..shader = triangleGradient;
 
     // Draw the basic shape.
     final Path topBeam = Path()
@@ -353,18 +324,18 @@ class _FlutterLogoPainter extends BoxPainter {
     final Path middleBeam = Path()
       ..moveTo(156.2, 94.0)
       ..lineTo(100.4, 94.0)
-      ..lineTo(79.5, 114.9)
-      ..lineTo(107.4, 142.8);
+      ..lineTo(78.5, 115.9)
+      ..lineTo(106.4, 143.8);
     canvas.drawPath(middleBeam, lightPaint);
 
     final Path bottomBeam = Path()
       ..moveTo(79.5, 170.7)
       ..lineTo(100.4, 191.6)
       ..lineTo(156.2, 191.6)
-      ..lineTo(156.2, 191.6)
       ..lineTo(107.4, 142.8);
     canvas.drawPath(bottomBeam, darkPaint);
 
+    // The overlap between middle and bottom beam.
     canvas.save();
     canvas.transform(Float64List.fromList(const <double>[
       // careful, this is in _column_-major order
@@ -382,13 +353,6 @@ class _FlutterLogoPainter extends BoxPainter {
       ..lineTo(120.9, 156.4)
       ..lineTo(107.4, 142.8);
     canvas.drawPath(triangle, trianglePaint);
-
-    final Path rectangle = Path()
-      ..moveTo(107.4, 142.8)
-      ..lineTo(79.5, 170.7)
-      ..lineTo(86.1, 177.3)
-      ..lineTo(114.0, 149.4);
-    canvas.drawPath(rectangle, rectanglePaint);
 
     canvas.restore();
   }
