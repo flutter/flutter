@@ -12,14 +12,14 @@
 
 # Note: updating past stretch (Debian 9) will bump Java past version 8,
 # which will break the Android SDK.
-FROM debian:stretch
+FROM debian:10.4
 MAINTAINER Flutter Developers <flutter-dev@googlegroups.com>
 
-RUN apt-get update -y
-RUN apt-get upgrade -y
-
+# software-properties-common: needed to add a custom repo
 # Install basics
-RUN apt-get install -y --no-install-recommends \
+RUN apt-get update -y && \
+  apt-get upgrade -y && \
+  apt-get install -y --no-install-recommends \
   git \
   wget \
   curl \
@@ -27,7 +27,9 @@ RUN apt-get install -y --no-install-recommends \
   unzip \
   apt-transport-https \
   ca-certificates \
-  gnupg
+  software-properties-common \
+  gnupg && \
+  apt-get clean
 
 # Add repo for chrome stable
 RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
@@ -39,6 +41,10 @@ RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.
 
 RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | \
     apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+
+# Add openjdk 8 repo
+RUN wget -qO - https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | apt-key add -
+RUN add-apt-repository --yes https://adoptopenjdk.jfrog.io/adoptopenjdk/deb/
 
 RUN apt-get update && apt-get install -y google-cloud-sdk && \
     gcloud config set core/disable_usage_reporting true && \
@@ -61,8 +67,13 @@ RUN apt-get install -y --no-install-recommends \
   libstdc++6 \
   libglu1-mesa \
   build-essential \
-  default-jdk-headless \
-  google-chrome-stable
+  google-chrome-stable \
+  adoptopenjdk-8-hotspot && \
+  apt-get clean
+
+# Add npm to path.
+ENV PATH="/usr/bin:${PATH}"
+RUN dpkg-query -L nodejs
 
 # Install the Android SDK Dependency.
 ENV ANDROID_SDK_URL="https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip"
@@ -76,23 +87,16 @@ RUN wget --progress=dot:giga "${ANDROID_SDK_URL}" -O "${ANDROID_SDK_ARCHIVE}"
 RUN unzip -q -d "${ANDROID_TOOLS_ROOT}" "${ANDROID_SDK_ARCHIVE}"
 # Suppressing output of sdkmanager to keep log size down
 # (it prints install progress WAY too often).
-RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "tools" > /dev/null
-RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "build-tools;28.0.3" > /dev/null
-RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "platforms;android-28" > /dev/null
-RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "platform-tools" > /dev/null
-RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "extras;android;m2repository" > /dev/null
-RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "extras;google;m2repository" > /dev/null
-RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "patcher;v4" > /dev/null
-RUN rm "${ANDROID_SDK_ARCHIVE}"
-ENV PATH="${ANDROID_TOOLS_ROOT}/tools:${PATH}"
-ENV PATH="${ANDROID_TOOLS_ROOT}/tools/bin:${PATH}"
-# Silence warnings when accepting android licenses.
-RUN mkdir -p ~/.android
-RUN touch ~/.android/repositories.cfg
+RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "tools" >/dev/null &&\
+  yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "build-tools;28.0.3" >/dev/null &&\
+  yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "platforms;android-28" >/dev/null &&\
+  yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "platform-tools" >/dev/null &&\
+  yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "extras;android;m2repository" >/dev/null &&\
+  yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "extras;google;m2repository" >/dev/null &&\
+  yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "patcher;v4" >/dev/null &&\
+  rm "${ANDROID_SDK_ARCHIVE}"
+ENV PATH="${ANDROID_TOOLS_ROOT}/tools/bin:${ANDROID_TOOLS_ROOT}/tools:${PATH}"
 
-# Add npm to path.
-ENV PATH="/usr/bin:${PATH}"
-RUN dpkg-query -L nodejs
 # Install Firebase
 # This is why we need nodejs installed.
 RUN /usr/bin/npm --verbose install -g firebase-tools
