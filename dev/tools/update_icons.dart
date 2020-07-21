@@ -158,40 +158,34 @@ void main(List<String> args) {
 
   final ArgResults argResults = _handleArguments(args);
 
-  final File iconClassFile = File(path
-      .normalize(path.absolute(argResults[_iconsClassPathOption] as String)));
+  final File iconClassFile = File(path.normalize(path.absolute(argResults[_iconsClassPathOption] as String)));
   if (!iconClassFile.existsSync()) {
     stderr.writeln('Error: Icons file not found: ${iconClassFile.path}');
     exit(1);
   }
-  final File newCodepointsFile = File(path.absolute(
-      path.normalize(argResults[_newCodepointsPathOption] as String)));
+  final File newCodepointsFile = File(path.absolute(path.normalize(argResults[_newCodepointsPathOption] as String)));
   if (!newCodepointsFile.existsSync()) {
     stderr.writeln('Error: New codepoints file not found: ${newCodepointsFile.path}');
     exit(1);
   }
-  final File oldCodepointsFile =
-      File(path.absolute(argResults[_oldCodepointsPathOption] as String));
+  final File oldCodepointsFile = File(path.absolute(argResults[_oldCodepointsPathOption] as String));
   if (!oldCodepointsFile.existsSync()) {
     stderr.writeln('Error: Old codepoints file not found: ${oldCodepointsFile.path}');
     exit(1);
   }
 
   final String newCodepointsString = newCodepointsFile.readAsStringSync();
-  final Map<String, String> newTokenPairMap =
-      _stringToTokenPairMap(newCodepointsString);
+  final Map<String, String> newTokenPairMap = _stringToTokenPairMap(newCodepointsString);
 
   final String oldCodepointsString = oldCodepointsFile.readAsStringSync();
-  final Map<String, String> oldTokenPairMap =
-      _stringToTokenPairMap(oldCodepointsString);
+  final Map<String, String> oldTokenPairMap = _stringToTokenPairMap(oldCodepointsString);
 
   _testIsMapSuperset(newTokenPairMap, oldTokenPairMap);
 
   final String iconClassFileData = iconClassFile.readAsStringSync();
 
   stderr.writeln('Generating new token pairs.');
-  final String newIconData =
-      _regenerateIconsFile(iconClassFileData, newTokenPairMap);
+  final String newIconData = _regenerateIconsFile(iconClassFileData, newTokenPairMap);
 
   if (argResults[_dryRunOption] as bool) {
     stdout.writeln(newIconData);
@@ -253,8 +247,7 @@ String _regenerateIconsFile(String iconData, Map<String, String> tokenPairMap) {
   return buf.toString();
 }
 
-void _testIsMapSuperset(
-    Map<String, String> newCodepoints, Map<String, String> oldCodepoints) {
+void _testIsMapSuperset(Map<String, String> newCodepoints, Map<String, String> oldCodepoints) {
   final Set<String> newCodepointsSet = newCodepoints.keys.toSet();
   final Set<String> oldCodepointsSet = oldCodepoints.keys.toSet();
 
