@@ -68,15 +68,6 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
         builder.append(padding);
         builder.append("|-");
         builder.append(name);
-        builder.append("[");
-        builder.append(current.getLeft());
-        builder.append(", ");
-        builder.append(current.getTop());
-        builder.append(", ");
-        builder.append(current.getWidth());
-        builder.append(", ");
-        builder.append(current.getHeight());
-        builder.append("]");
         builder.append("\n");
 
         if (current instanceof ViewGroup) {
@@ -91,14 +82,14 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
      * Serializes the view hierarchy, so it can be sent to Dart over the method channel.
      *
      * Notation:
-     * |- <view-name>[<left>, <top>, <width>, <height>]
+     * |- <view-name>
      *   |- ... child view ordered by z order.
      *
      * Example output:
-     * |- FlutterView[0, 0, 1024, 4080]
-     *   |- FlutterImageView[0, 0, 1024, 4080]
-     *      |- ViewGroup[100, 160, 50, 150]
-     *        |- View[100, 160, 50, 150]
+     * |- FlutterView
+     *   |- FlutterImageView
+     *      |- ViewGroup
+     *        |- View
      */
     private String getSerializedViewHierarchy() {
         View root = getFlutterView();

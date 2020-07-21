@@ -76,12 +76,12 @@ Future<void> main() async {
 
       expect(
         await driver.requestData('hierarchy'),
-        '|-FlutterView[0, 0, 1080, 2236]\n'
-        '  |-FlutterSurfaceView[0, 0, 1080, 2236]\n' // Flutter UI (hidden)
-        '  |-FlutterImageView[0, 0, 1080, 2236]\n' // Flutter UI (background surface)
-        '  |-ViewGroup[0, 391, 1080, 825]\n' // Platform View
-        '    |-ViewGroup[0, 0, 1079, 825]\n'
-        '  |-FlutterImageView[0, 0, 1080, 416]\n' // Flutter UI (overlay surface)
+        '|-FlutterView\n'
+        '  |-FlutterSurfaceView\n'  // Flutter UI (hidden)
+        '  |-FlutterImageView\n' // Flutter UI (background surface)
+        '  |-ViewGroup\n'  // Platform View
+        '    |-ViewGroup\n'
+        '  |-FlutterImageView\n'  // Flutter UI (overlay surface)
       );
 
       // Hide platform view.
@@ -91,8 +91,8 @@ Future<void> main() async {
 
       expect(
         await driver.requestData('hierarchy'),
-        '|-FlutterView[0, 0, 1080, 2236]\n'
-        '  |-FlutterSurfaceView[0, 0, 1080, 2236]\n' // Just the Flutter UI
+        '|-FlutterView\n'
+        '  |-FlutterSurfaceView\n' // Just the Flutter UI
       );
 
       // Show platform view again.
@@ -101,12 +101,12 @@ Future<void> main() async {
 
       expect(
         await driver.requestData('hierarchy'),
-        '|-FlutterView[0, 0, 1080, 2236]\n'
-        '  |-FlutterSurfaceView[0, 0, 1080, 2236]\n' // Flutter UI (hidden)
-        '  |-FlutterImageView[0, 0, 1080, 2236]\n' // Flutter UI (background surface)
-        '  |-ViewGroup[0, 391, 1080, 825]\n' // Platform View
-        '    |-ViewGroup[0, 0, 1079, 825]\n'
-        '  |-FlutterImageView[0, 0, 1080, 416]\n' // Flutter UI (overlay surface)
+        '|-FlutterView\n'
+        '  |-FlutterSurfaceView\n' // Flutter UI (hidden)
+        '  |-FlutterImageView\n' // Flutter UI (background surface)
+        '  |-ViewGroup\n' // Platform View
+        '    |-ViewGroup\n'
+        '  |-FlutterImageView\n' // Flutter UI (overlay surface)
       );
     });
   });
