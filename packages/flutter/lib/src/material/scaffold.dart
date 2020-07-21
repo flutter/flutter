@@ -97,7 +97,7 @@ class ScaffoldMessenger extends StatefulWidget {
 class ScaffoldMessengerState extends State<ScaffoldMessenger> {
   final LinkedHashSet<ScaffoldState> _scaffolds = LinkedHashSet<ScaffoldState>();
   final Queue<SnackBar> _snackBars = Queue<SnackBar>();
-  final Map<String, List<ScaffoldFeatureController<SnackBar, SnackBarClosedReason>>> _snackBarControllers = <String, List<ScaffoldFeatureController<SnackBar, SnackBarClosedReason>>>{};
+  final Map<int, List<ScaffoldFeatureController<SnackBar, SnackBarClosedReason>>> _snackBarControllers = <int, List<ScaffoldFeatureController<SnackBar, SnackBarClosedReason>>>{};
 
   void _register(ScaffoldState scaffold) {
     // Are we in the middle of showing a SnackBar elsewhere?
@@ -120,17 +120,23 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> {
   }
 
   void _handleSnackBarStatusChange(SnackBar snackbar, SnackBarClosedReason reason) {
-    // We may have multiple controllers for the same snackbar across multiple
-    // Scaffolds, one of them has completed so the rest should be completed
-    // with the same SnackBarClosedReason.
+    // We've already completed and popped the finished snackbar, we're here due to
+    // the subsequent completions, so get out.
+    if (_snackBars.isEmpty || snackbar != _snackBars.first)
+      return;
+    // There may be multiple controllers handling the same snackbar across
+    // multiple Scaffolds, one of them has completed so the rest should be
+    // completed with the same SnackBarClosedReason.
     for (final ScaffoldFeatureController<SnackBar, SnackBarClosedReason> controller in _snackBarControllers[snackbar.hashCode]) {
-      controller._completer.complete(reason);
+      if (!controller._completer.isCompleted) {
+        print('completing with $reason');
+        controller._completer.complete(reason);
+      }
     }
     // The SnackBar has been delivered and dismissed, remove along with
     // associated controllers.
     _snackBarControllers.remove(snackbar.hashCode);
-    // Make sure we are getting rid of the right one, queue is being respected
-    assert(snackbar == _snackBars.first);
+//    assert(snackbar == _snackBars.first);
     _snackBars.removeFirst();
   }
 
@@ -138,14 +144,17 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> {
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(SnackBar snackbar) {
     // Keep track of the snackbar we are propagating across scaffolds.
     _snackBars.add(snackbar);
+    final List<ScaffoldFeatureController<SnackBar, SnackBarClosedReason>> controllers = <ScaffoldFeatureController<SnackBar, SnackBarClosedReason>>[];
     ScaffoldFeatureController<SnackBar, SnackBarClosedReason> controller;
     for (final ScaffoldState scaffold in _scaffolds) {
       controller = scaffold.showSnackBar(snackbar);
-      controller.closed.then((SnackBarClosedReason reason) {
-        _handleSnackBarStatusChange(snackbar, reason);
-      });
-      _snackBarControllers[snackbar.hashCode].add(controller);
+//      controller.closed.then((SnackBarClosedReason reason) {
+//        _handleSnackBarStatusChange(snackbar, reason);
+//        print('closed');
+//      });
+      controllers.add(controller);
     }
+    _snackBarControllers[snackbar.hashCode] = controllers;
     // Return the last controller, which is for the most recently registered
     // Scaffold. Controllers for all of the Scaffolds will be completed with the
     // same SnackBarClosedReason.
@@ -1853,6 +1862,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       snackbar.withAnimation(_snackBarController, fallbackKey: UniqueKey()),
       Completer<SnackBarClosedReason>(),
       () {
+        print('in completer');
         assert(_snackBars.first == controller);
         hideCurrentSnackBar(reason: SnackBarClosedReason.hide);
       },
@@ -1906,6 +1916,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///
   /// The closed completer is called after the animation is complete.
   void hideCurrentSnackBar({ SnackBarClosedReason reason = SnackBarClosedReason.hide }) {
+    print('hideCurrentSnackBar');
     assert(reason != null);
     if (_snackBars.isEmpty || _snackBarController.status == AnimationStatus.dismissed)
       return;
@@ -2343,6 +2354,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       && !mediaQuery.accessibleNavigation
       && _snackBarTimer != null
       && !_snackBarTimer.isActive) {
+      print('didChangeDependencies');
       hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);
     }
     _accessibleNavigation = mediaQuery.accessibleNavigation;
@@ -2496,6 +2508,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
             final MediaQueryData mediaQuery = MediaQuery.of(context);
             if (mediaQuery.accessibleNavigation && snackBar.action != null)
               return;
+            print('build');
             hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);
           });
         }
