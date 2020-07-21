@@ -176,7 +176,7 @@ class FrameTimingSummarizer {
   /// The largest value of [frameRasterizerTime] in milliseconds.
   final Duration worstFrameRasterizerTime;
 
-  /// The largest value of [frameRasterizerTime] in milliseconds.
+  /// Number of items in [frameRasterizerTime] that's greater than [kBuildBudget]
   final int missedFrameRasterizerBudget;
 
   Map<String, dynamic> get summary => <String, dynamic>{
