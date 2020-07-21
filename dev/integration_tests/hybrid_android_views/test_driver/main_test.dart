@@ -19,8 +19,7 @@ Future<void> main() async {
 
   // Each test below must return back to the home page after finishing.
   test('MotionEvent recomposition', () async {
-    final SerializableFinder motionEventsListTile =
-      find.byValueKey('MotionEventsListTile');
+    final SerializableFinder motionEventsListTile = find.byValueKey('MotionEventsListTile');
     await driver.tap(motionEventsListTile);
     await driver.waitFor(find.byValueKey('PlatformView'));
     final String errorMessage = await driver.requestData('run test');
@@ -42,8 +41,7 @@ Future<void> main() async {
     });
 
     test('AlertDialog from platform view context', () async {
-      final SerializableFinder showAlertDialog = find.byValueKey(
-          'ShowAlertDialog');
+      final SerializableFinder showAlertDialog = find.byValueKey('ShowAlertDialog');
       await driver.waitFor(showAlertDialog);
       await driver.tap(showAlertDialog);
       final String status = await driver.getText(find.byValueKey('Status'));
@@ -56,15 +54,15 @@ Future<void> main() async {
       await driver.tap(addChildView);
       final SerializableFinder tapChildView = find.byValueKey('TapChildView');
       await driver.tap(tapChildView);
-      final String nestedViewClickCount = await driver.getText(find.byValueKey('NestedViewClickCount'));
+      final String nestedViewClickCount =
+        await driver.getText(find.byValueKey('NestedViewClickCount'));
       expect(nestedViewClickCount, 'Click count: 1');
     });
   });
 
   group('Flutter surface switch', () {
     setUpAll(() async {
-      final SerializableFinder wmListTile =
-      find.byValueKey('NestedViewEventTile');
+      final SerializableFinder wmListTile = find.byValueKey('NestedViewEventTile');
       await driver.tap(wmListTile);
     });
 
