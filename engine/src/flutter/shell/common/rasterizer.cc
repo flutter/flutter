@@ -9,6 +9,7 @@
 #include "flutter/fml/time/time_delta.h"
 #include "flutter/fml/time/time_point.h"
 #include "flutter/shell/common/persistent_cache.h"
+#include "flutter/shell/common/serialization_callbacks.h"
 #include "third_party/skia/include/core/SkEncodedImageFormat.h"
 #include "third_party/skia/include/core/SkImageEncoder.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
@@ -447,10 +448,6 @@ RasterStatus Rasterizer::DrawToSurface(flutter::LayerTree& layer_tree) {
   return RasterStatus::kFailed;
 }
 
-static sk_sp<SkData> SerializeTypeface(SkTypeface* typeface, void* ctx) {
-  return typeface->serialize(SkTypeface::SerializeBehavior::kDoIncludeData);
-}
-
 static sk_sp<SkData> ScreenshotLayerTreeAsPicture(
     flutter::LayerTree* tree,
     flutter::CompositorContext& compositor_context) {
@@ -462,16 +459,30 @@ static sk_sp<SkData> ScreenshotLayerTreeAsPicture(
   SkMatrix root_surface_transformation;
   root_surface_transformation.reset();
 
+#if defined(LEGACY_FUCHSIA_EMBEDDER)
+  // TODO(arbreng: fxb/55805) Our ScopedFrame implementation doesnt do the
+  // right thing here so initialize the base class directly. This wont be
+  // needed after we move to using the embedder API on Fuchsia.
+  auto frame = std::make_unique<flutter::CompositorContext::ScopedFrame>(
+      compositor_context, nullptr, recorder.getRecordingCanvas(), nullptr,
+      root_surface_transformation, false, true, nullptr);
+#else
   // TODO(amirh): figure out how to take a screenshot with embedded UIView.
   // https://github.com/flutter/flutter/issues/23435
   auto frame = compositor_context.AcquireFrame(
       nullptr, recorder.getRecordingCanvas(), nullptr,
       root_surface_transformation, false, true, nullptr);
+#endif  // defined(LEGACY_FUCHSIA_EMBEDDER)
 
   frame->Raster(*tree, true);
 
+#if defined(OS_FUCHSIA)
   SkSerialProcs procs = {0};
-  procs.fTypefaceProc = SerializeTypeface;
+  procs.fImageProc = SerializeImageWithoutData;
+#else
+  SkSerialProcs procs = {0};
+  procs.fTypefaceProc = SerializeTypefaceWithData;
+#endif
 
   return recorder.finishRecordingAsPicture()->serialize(&procs);
 }
