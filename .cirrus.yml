@@ -30,6 +30,7 @@ linux_shard_template: &LINUX_SHARD_TEMPLATE
 windows_shard_template: &WINDOWS_SHARD_TEMPLATE
   only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
   script:
+    - flutter update-packages
     - dart --enable-asserts ./dev/bots/test.dart
 
 macos_shard_template: &MACOS_SHARD_TEMPLATE
@@ -487,6 +488,7 @@ task:
         CPU: 6
         MEMORY: 10G
       script:
+        - flutter update-packages
         - dart --enable-asserts dev\bots\test.dart
 
     - name: build_tests-1_last-windows
@@ -498,6 +500,7 @@ task:
         CPU: 6
         MEMORY: 10G
       script:
+        - flutter update-packages
         - dart --enable-asserts dev\bots\test.dart
 
     - name: hostonly_devicelab_tests-0-windows
@@ -543,6 +546,7 @@ task:
         CPU: 4
         MEMORY: 4G
       script:
+        - flutter update-packages
         - CMD /S /C "IF EXIST "bin\cache\pkg\tests\" RMDIR /S /Q bin\cache\pkg\tests"
         - git clone https://github.com/flutter/tests.git bin\cache\pkg\tests
         - dart --enable-asserts dev\customer_testing\run_tests.dart --skip-on-fetch-failure --skip-template bin/cache/pkg/tests/registry/*.test
