@@ -4339,12 +4339,9 @@ void main() {
     );
 
     final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
-    try {
-      final Rect rect = state.renderEditable.getLocalRectForCaret(const TextPosition(offset: 0));
-      expect(rect.isFinite, false);
-    } catch (e) {
-      expect(e, isNull);
-    }
+    final Rect rect = state.renderEditable.getLocalRectForCaret(const TextPosition(offset: 0));
+    expect(rect.isFinite, false);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('obscured multiline fields throw an exception', (WidgetTester tester) async {
