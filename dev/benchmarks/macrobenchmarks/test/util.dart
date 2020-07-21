@@ -85,8 +85,6 @@ Future<void> watchPerformance(
   E2EWidgetsFlutterBinding binding,
   Future<void> action(),
 ) async {
-  // This method might be good as part of e2e,
-  // so is the helper `PerformanceWatcher` class.
   final List<FrameTiming> frameTimings = <FrameTiming>[];
   final TimingsCallback watcher = frameTimings.addAll;
   binding.addTimingsCallback(watcher);
@@ -97,9 +95,8 @@ Future<void> watchPerformance(
   binding.reportData = <String, dynamic>{'performance': frameTimes.summary};
 }
 
-/// This class records [FrameTiming] and summarizes the building statistics.
-///
-/// Without otherwise noticed, all time in this class is in unit microseconds.
+/// This class and summarizes a list of [FrameTiming] for the performance
+/// metrics.
 class FrameTimingSummarizer {
   factory FrameTimingSummarizer(List<FrameTiming>data) {
     assert(data != null);
