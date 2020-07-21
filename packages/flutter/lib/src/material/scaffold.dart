@@ -66,12 +66,18 @@ class _MultiScaffoldSnackBar {
   _MultiScaffoldSnackBar(this.snackbar);
 
   final SnackBar snackbar;
+  final Map<ScaffoldState, ScaffoldFeatureController<SnackBar, SnackBarClosedReason>> _controllerForScaffold = <ScaffoldState, ScaffoldFeatureController<SnackBar, SnackBarClosedReason>>{};
 
-  Map<ScaffoldState, ScaffoldFeatureController<SnackBar, SnackBarClosedReason>> get connectedScaffolds => _connectedScaffolds;
-  final Map<ScaffoldState, ScaffoldFeatureController<SnackBar, SnackBarClosedReason>> _connectedScaffolds = <ScaffoldState, ScaffoldFeatureController<SnackBar, SnackBarClosedReason>>{};
+  void addControllerForScaffold(ScaffoldState scaffold, ScaffoldFeatureController<SnackBar, SnackBarClosedReason> controller) {
+    _controllerForScaffold[scaffold] = controller;
+  }
 
-  void addConnectedScaffold(ScaffoldState scaffold, ScaffoldFeatureController<SnackBar, SnackBarClosedReason> controller) {
-    _connectedScaffolds[scaffold] = controller;
+  void removeControllerForScaffold(ScaffoldState scaffold) {
+    _controllerForScaffold.remove(scaffold);
+  }
+  
+  void dismissFromScaffold(ScaffoldState scaffold, SnackBarClosedReason reason) {
+    scaffold._removeSnackBar(_controllerForScaffold[scaffold], reason);
   }
 }
 
@@ -111,19 +117,18 @@ class ScaffoldMessenger extends StatefulWidget {
 /// Doc
 class ScaffoldMessengerState extends State<ScaffoldMessenger> {
   final LinkedHashSet<ScaffoldState> _scaffolds = LinkedHashSet<ScaffoldState>();
-  final Queue<SnackBar> _snackBars = Queue<SnackBar>();
-  final Map<int, Map<ScaffoldState, ScaffoldFeatureController<SnackBar, SnackBarClosedReason>>> _snackBarControllers = <int, Map<ScaffoldState, ScaffoldFeatureController<SnackBar, SnackBarClosedReason>>>{};
+  final Queue<_MultiScaffoldSnackBar> _multiSnackBars = Queue<_MultiScaffoldSnackBar>();
 
   void _register(ScaffoldState scaffold) {
-    // Are we in the middle of showing a SnackBar elsewhere?
-    // If so, present on this newly registered scaffold.
-    if (!_scaffolds.contains(scaffold) && _snackBars.isNotEmpty) {
-      final SnackBar snackbar = _snackBars.first;
-      final ScaffoldFeatureController<SnackBar, SnackBarClosedReason> controller = scaffold.showSnackBar(snackbar);
-      controller.closed.then((SnackBarClosedReason reason) {
-        _handleSnackBarStatusChange(snackbar, reason);
-      });
-      _snackBarControllers[snackbar.hashCode][scaffold] = controller;
+    // Do we have SnackBars to send to this new Scaffold's queue?
+    if (!_scaffolds.contains(scaffold) && _multiSnackBars.isNotEmpty) {
+      for (final _MultiScaffoldSnackBar multiSnackBar in _multiSnackBars) {
+        final ScaffoldFeatureController<SnackBar, SnackBarClosedReason> controller = scaffold.showSnackBar(multiSnackBar.snackbar);
+        controller.closed.then((SnackBarClosedReason reason) {
+          _handleSnackBarStatusChange(multiSnackBar.snackbar, reason);
+        });
+        multiSnackBar.addControllerForScaffold(scaffold, controller);
+      }
     }
     _scaffolds.add(scaffold);
   }
@@ -132,9 +137,9 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> {
     _scaffolds.remove(scaffold);
     // We may also have a reference to this Scaffold for the SnackBars we are
     // currently broadcasting.
-    if (_snackBars.isNotEmpty) {
-      for (final SnackBar snackbar in _snackBars) {
-        _snackBarControllers[snackbar.hashCode].remove(scaffold);
+    if (_multiSnackBars.isNotEmpty) {
+      for (final _MultiScaffoldSnackBar multiSnackbar in _multiSnackBars) {
+        multiSnackbar.removeControllerForScaffold(scaffold);
       }
     }
   }
@@ -142,36 +147,33 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> {
   void _handleSnackBarStatusChange(SnackBar snackbar, SnackBarClosedReason reason) {
     // We've already completed and popped the finished snackbar, we're here due
     // to the subsequent completions of propagated snackbars, so get out.
-    if (_snackBars.isEmpty || snackbar != _snackBars.first) {
+    if (_multiSnackBars.isEmpty || snackbar != _multiSnackBars.first.snackbar) {
       return;
     }
     // We're respecting the ScaffoldMessenger snackbar queue.
-    assert(snackbar == _snackBars.first);
+    assert(snackbar == _multiSnackBars.first.snackbar);
 
     // Dismiss snackbar across Scaffolds/remove from local Scaffold queue if
     // not yet presented.
     for (final ScaffoldState scaffold in _scaffolds) {
-      // Get the controller for this SnackBar, for this ScaffoldState.
-      final ScaffoldFeatureController<SnackBar, SnackBarClosedReason> controller = _snackBarControllers[snackbar.hashCode][scaffold];
-      scaffold._removeSnackBar(controller, reason);
+      _multiSnackBars.first.dismissFromScaffold(scaffold, reason);
     }
     // This SnackBar is done.
-    _snackBars.removeFirst();
+    _multiSnackBars.removeFirst();
   }
 
   /// Doc
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(SnackBar snackbar) {
-    // Keep track of the snackbar we are propagating across scaffolds.
-    _snackBars.add(snackbar);
+    final _MultiScaffoldSnackBar _multiSnackBar = _MultiScaffoldSnackBar(snackbar);
     ScaffoldFeatureController<SnackBar, SnackBarClosedReason> controller;
     for (final ScaffoldState scaffold in _scaffolds) {
       controller = scaffold.showSnackBar(snackbar);
       controller.closed.then((SnackBarClosedReason reason) {
         _handleSnackBarStatusChange(snackbar, reason);
       });
-      print('$_snackBarControllers, $snackbar, ${snackbar.hashCode}, $scaffold, $controller');
-      _snackBarControllers[snackbar.hashCode][scaffold] = controller;
+      _multiSnackBar.addControllerForScaffold(scaffold, controller);
     }
+    _multiSnackBars.add(_multiSnackBar);
     // Return the last controller, which is from the most recently registered
     // Scaffold. Regardless of which we return, the controllers for all of the
     // Scaffolds will be completed with the same SnackBarClosedReason once the
@@ -2371,7 +2373,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       && !mediaQuery.accessibleNavigation
       && _snackBarTimer != null
       && !_snackBarTimer.isActive) {
-      print('didChangeDependencies');
       hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);
     }
     _accessibleNavigation = mediaQuery.accessibleNavigation;
@@ -2525,7 +2526,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
             final MediaQueryData mediaQuery = MediaQuery.of(context);
             if (mediaQuery.accessibleNavigation && snackBar.action != null)
               return;
-            print('build');
             hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);
           });
         }
