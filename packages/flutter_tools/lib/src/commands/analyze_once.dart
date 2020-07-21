@@ -177,7 +177,8 @@ class AnalyzeOnce extends AnalyzeBase {
       issueCount: errorCount,
       seconds: seconds,
       undocumentedMembers: undocumentedMembers,
-      dartDocMessage: dartDocMessage);
+      dartDocMessage: dartDocMessage,
+    );
 
     if (errorCount > 0) {
       logger.printStatus('');

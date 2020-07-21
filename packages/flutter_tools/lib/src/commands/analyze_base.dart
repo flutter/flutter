@@ -114,7 +114,7 @@ abstract class AnalyzeBase {
     return dartDocMessage;
   }
 
-  /// Print an analysis summary.
+  /// Generate an analysis summary for both [AnalyzeOnce], [AnalyzeContinuously].
   static String generateErrorsMessage({
     @required int issueCount,
     int issueDiff,
@@ -123,30 +123,30 @@ abstract class AnalyzeBase {
     int undocumentedMembers = 0,
     String dartDocMessage = '',
   }) {
-    String errorsMessage;
-    final StringBuffer issuesMessage = StringBuffer(issueCount > 0
+    final StringBuffer errorsMessage = StringBuffer(issueCount > 0
       ? '$issueCount ${pluralize('issue', issueCount)} found.'
       : 'No issues found!');
 
+    // Only [AnalyzeContinuously] has issueDiff message.
     if (issueDiff != null) {
       if (issueDiff > 0) {
-        issuesMessage.write(' ($issueDiff new)');
+        errorsMessage.write(' ($issueDiff new)');
       } else if (issueDiff < 0) {
-        issuesMessage.write(' (${-issueDiff} fixed)');
+        errorsMessage.write(' (${-issueDiff} fixed)');
       }
     }
 
-    String filesMessage = '';
+    // Only [AnalyzeContinuously] has files message.
     if (files != null) {
-      filesMessage = ' • analyzed $files ${pluralize('file', files)}';
+      errorsMessage.write(' • analyzed $files ${pluralize('file', files)}');
     }
 
     if (undocumentedMembers > 0) {
-      errorsMessage = '$issuesMessage$filesMessage (ran in ${seconds}s; $dartDocMessage)';
+      errorsMessage.write(' (ran in ${seconds}s; $dartDocMessage)');
     } else {
-      errorsMessage = '$issuesMessage$filesMessage (ran in ${seconds}s;)';
+      errorsMessage.write(' (ran in ${seconds}s;)');
     }
-    return errorsMessage;
+    return errorsMessage.toString();
   }
 }
 
