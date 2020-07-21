@@ -7,12 +7,17 @@ import 'dart:convert';
 import 'dart:io' hide Platform;
 
 import 'package:args/args.dart';
-import 'package:gen_keycodes/cc_code_gen.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 
 import 'package:gen_keycodes/dart_code_gen.dart';
+import 'package:gen_keycodes/android_code_gen.dart';
+import 'package:gen_keycodes/base_code_gen.dart';
 import 'package:gen_keycodes/macos_code_gen.dart';
+import 'package:gen_keycodes/fuchsia_code_gen.dart';
+import 'package:gen_keycodes/glfw_code_gen.dart';
+import 'package:gen_keycodes/gtk_code_gen.dart';
+import 'package:gen_keycodes/windows_code_gen.dart';
 import 'package:gen_keycodes/key_data.dart';
 import 'package:gen_keycodes/utils.dart';
 
@@ -246,19 +251,37 @@ Future<void> main(List<String> rawArguments) async {
   await codeFile.writeAsString(generator.generateKeyboardKeys());
   await mapsFile.writeAsString(generator.generateKeyboardMaps());
 
-  final CcCodeGenerator ccCodeGenerator = CcCodeGenerator(data);
-  final MacOsCodeGenerator macOsCodeGenerator = MacOsCodeGenerator(data);
-  for (final String platform in <String>['android', 'darwin', 'glfw', 'gtk', 'fuchsia', 'linux', 'windows']) {
-    final File platformFile = File(path.join(flutterRoot.path, '..', path.join('engine', 'src', 'flutter', 'shell', 'platform', platform, 'keycodes', 'keyboard_map_$platform.h')));
+  for (final String platform in <String>['android', 'darwin', 'glfw', 'fuchsia', 'linux', 'windows']) {
+    BaseCodeGenerator codeGenerator;
+    switch (platform) {
+      case 'glfw':
+        codeGenerator = GlfwCodeGenerator(data);
+        break;
+      case 'fuchsia':
+        codeGenerator = FuchsiaCodeGenerator(data);
+        break;
+      case 'android':
+        codeGenerator = AndroidCodeGenerator(data);
+        break;
+      case 'darwin':
+        codeGenerator = MacOsCodeGenerator(data);
+        break;
+      case 'windows':
+        codeGenerator = WindowsCodeGenerator(data);
+        break;
+      case 'linux':
+        codeGenerator = GtkCodeGenerator(data);
+        break;
+      default:
+        assert(false);
+    }
+
+    final File platformFile = File(codeGenerator.outputPath(platform));
     if (!platformFile.existsSync()) {
       platformFile.createSync(recursive: true);
     }
     print('Writing map ${platformFile.absolute}');
-    if (platform == 'darwin') {
-      await platformFile.writeAsString(macOsCodeGenerator.generateKeyboardMaps(platform));
-    } else {
-      await platformFile.writeAsString(ccCodeGenerator.generateKeyboardMaps(platform));
-    }
+    await platformFile.writeAsString(codeGenerator.generateKeyboardMaps(platform));
   }
 
   final File webPlatformFile = File(path.join(flutterRoot.path, '..', 'engine', 'src', 'flutter', path.join('lib', 'web_ui', 'lib', 'src', 'engine', 'keycodes', 'keyboard_map_web.dart')));
