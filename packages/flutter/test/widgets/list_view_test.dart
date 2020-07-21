@@ -539,6 +539,7 @@ void main() {
   });
 
   testWidgets('Updates viewport dimensions when scroll direction changes', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/43380.
     final ScrollController controller = ScrollController();
 
     Widget buildListView({@required Axis scrollDirection}) {
