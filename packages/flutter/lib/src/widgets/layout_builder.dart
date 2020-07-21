@@ -247,6 +247,23 @@ mixin RenderConstrainedLayoutBuilder<ConstraintType extends Constraints, ChildTy
 /// in an [Align] widget. If the child might want to be bigger, consider
 /// wrapping it in a [SingleChildScrollView] or [OverflowBox].
 ///
+/// {@tool snippet}
+///
+/// This example shows using LayoutBuilder that gets parent widget's size.
+///
+/// ```dart
+/// LayoutBuilder(
+///   builder: (BuildContext context, BoxConstraints constraints) {
+///       if(constraints.maxWidth > 600) {
+///           return _buildWideLayout();
+///       } else {
+///           return _buildNormalLayout();
+///       }
+///   },
+/// );
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [SliverLayoutBuilder], the sliver counterpart of this widget.
