@@ -15,25 +15,12 @@ import 'package:macrobenchmarks/main.dart' as app;
 
 /// The maximum amount of time considered safe to spend for a frame's build
 /// phase. Anything past that is in the danger of missing the frame as 60FPS.
-Duration get kBuildBudget => _kBuildBudget;
-Duration _kBuildBudget = const Duration(milliseconds: 16);
+///
+/// Changing this doesn't re-evaluate existing summary.
+Duration kBuildBudget = const Duration(milliseconds: 16);
+// TODO(CareF): Automatically calculate the refresh budget
 
 typedef DriveCallback = Future<void> Function(WidgetController controller);
-
-const String _kDebugWarning = '''
-┏╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍┓
-┇ ⚠    THIS BENCHMARK IS BEING RUN IN DEBUG MODE     ⚠  ┇
-┡╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍┦
-│                                                       │
-│  Numbers obtained from a benchmark while asserts are  │
-│  enabled will not accurately reflect the performance  │
-│  that will be experienced by end users using release  ╎
-│  builds. Benchmarks should be run using this command  ╎
-│  line:  "flutter run --profile test_perf_e2e.dart"    ┊
-│  or "flutter drive --profile -t test_perf_e2e.dart".  ┊
-│                                                       ┊
-└─────────────────────────────────────────────────╌┄┈  🐢
-''';
 
 void macroPerfTestE2E(
   String testName,
@@ -45,7 +32,7 @@ void macroPerfTestE2E(
   DriveCallback setup,
 }) {
   assert(() {
-    debugPrint(_kDebugWarning);
+    debugPrint(kDebugWarning);
     return true;
   }());
   final WidgetsBinding _binding = E2EWidgetsFlutterBinding.ensureInitialized();
@@ -100,117 +87,114 @@ Future<void> watchPerformance(
 ) async {
   // This method might be good as part of e2e,
   // so is the helper `PerformanceWatcher` class.
-  final FrameTimingSummarizer frameTimes = FrameTimingSummarizer();
-  final TimingsCallback watcher = frameTimes.addData;
+  final List<FrameTiming> frameTimings = <FrameTiming>[];
+  final TimingsCallback watcher = frameTimings.addAll;
   binding.addTimingsCallback(watcher);
   await action();
   binding.removeTimingsCallback(watcher);
   // TODO(CareF): determine if it's running on firebase and report metric online
+  final FrameTimingSummarizer frameTimes = FrameTimingSummarizer(frameTimings);
   binding.reportData = <String, dynamic>{'performance': frameTimes.summary};
 }
 
+/// This class records [FrameTiming] and summarizes the building statistics.
+///
+/// Without otherwise noticed, all time in this class is in unit microseconds.
 class FrameTimingSummarizer {
-  FrameTimingSummarizer({this.data}) {
-    data ??= <FrameTiming>[];
-
-    _frameBuildTimeMicros = data.map<int>(
-      (FrameTiming datum) => datum.buildDuration.inMicroseconds,
-    ).toList();
+  factory FrameTimingSummarizer(List<FrameTiming>data) {
+    assert(data != null);
+    assert(data.isNotEmpty);
+    final List<int> frameBuildTimeMicros = List<int>.unmodifiable(
+      data.map<int>((FrameTiming datum) => datum.buildDuration.inMicroseconds),
+    );
     final List<int> frameBuildTimeMicrosSorted = List<int>.from(frameBuildTimeMicros)..sort();
-    _averageFrameBuildTime = frameBuildTimeMicros.reduce((int a, int b) => a+b) / 1E3 / data.length;
-    _percentileFrameBuildTime90 = _findPercentile(frameBuildTimeMicrosSorted, 0.90) / 1E3;
-    _percentileFrameBuildTime99 = _findPercentile(frameBuildTimeMicrosSorted, 0.99) / 1E3;
-    _worstFrameBuildTime = frameBuildTimeMicrosSorted.last / 1E3;
-    _missedFrameBuildBudget = _countExceed(frameBuildTimeMicrosSorted, kBuildBudget.inMicroseconds);
-
-    _frameRasterizerTimeMicros = data.map<int>(
-      (FrameTiming datum) => datum.rasterDuration.inMicroseconds,
-    ).toList();
+    final List<int> frameRasterizerTimeMicros = List<int>.unmodifiable(
+      data.map<int>((FrameTiming datum) => datum.rasterDuration.inMicroseconds),
+    );
     final List<int> frameRasterizerTimeMicrosSorted = List<int>.from(frameBuildTimeMicros)..sort();
-    _averageFrameRasterizerTime = frameRasterizerTimeMicros.reduce((int a, int b) => a+b) / 1E3 / data.length;
-    _percentileFrameRasterizerTime90 = _findPercentile(frameRasterizerTimeMicrosSorted, 0.90) / 1E3;
-    _percentileFrameRasterizerTime99 = _findPercentile(frameRasterizerTimeMicrosSorted, 0.90) / 1E3;
-    _worstFrameRasterizerTime = frameRasterizerTimeMicrosSorted.last / 1E3;
-    _missedFrameRasterizerBudget = _countExceed(frameRasterizerTimeMicrosSorted, kBuildBudget.inMicroseconds);
+    final int Function(int, int) add = (int a, int b) => a + b;
+    return FrameTimingSummarizer._(
+      frameBuildTimeMicros,
+      frameRasterizerTimeMicros,
+      frameBuildTimeMicros.reduce(add) / 1E3 / data.length,
+      _findPercentile(frameBuildTimeMicrosSorted, 0.90) / 1E3,
+      _findPercentile(frameBuildTimeMicrosSorted, 0.99) / 1E3,
+      frameBuildTimeMicrosSorted.last / 1E3,
+      _countExceed(frameBuildTimeMicrosSorted, kBuildBudget.inMicroseconds),
+      frameRasterizerTimeMicros.reduce(add) / 1E3 / data.length,
+      _findPercentile(frameRasterizerTimeMicrosSorted, 0.90) / 1E3,
+      _findPercentile(frameRasterizerTimeMicrosSorted, 0.90) / 1E3,
+      frameRasterizerTimeMicrosSorted.last / 1E3,
+      _countExceed(frameRasterizerTimeMicrosSorted, kBuildBudget.inMicroseconds),
+    );
   }
 
-  /// Collected raw data.
-  List<FrameTiming> data;
+  const FrameTimingSummarizer._(
+    this.frameBuildTimeMicros,
+    this.frameRasterizerTimeMicros,
+    this.averageFrameBuildTime,
+    this.percentileFrameBuildTime90,
+    this.percentileFrameBuildTime99,
+    this.worstFrameBuildTime,
+    this.missedFrameBuildBudget,
+    this.averageFrameRasterizerTime,
+    this.percentileFrameRasterizerTime90,
+    this.percentileFrameRasterizerTime99,
+    this.worstFrameRasterizerTime,
+    this.missedFrameRasterizerBudget
+  );
 
   /// List of frame build time in microseconds
-  List<int> get frameBuildTimeMicros => _frameBuildTimeMicros;
-  List<int> _frameBuildTimeMicros;
+  final List<int> frameBuildTimeMicros;
 
   /// List of frame rasterizer time in microseconds
-  List<int> get frameRasterizerTimeMicros => _frameRasterizerTimeMicros;
-  List<int> _frameRasterizerTimeMicros;
+  final List<int> frameRasterizerTimeMicros;
 
   /// The average value of [frameBuildTimeMicros] in milliseconds.
-  double get averageFrameBuildTime => _averageFrameBuildTime;
-  double _averageFrameBuildTime;
+  final double averageFrameBuildTime;
 
   /// The 90-th percentile value of [frameBuildTimeMicros] in milliseconds
-  double get percentileFrameBuildTime90 => _percentileFrameBuildTime90;
-  double _percentileFrameBuildTime90;
+  final double percentileFrameBuildTime90;
 
   /// The 99-th percentile value of [frameBuildTimeMicros] in milliseconds
-  double get percentileFrameBuildTime99 => _percentileFrameBuildTime99;
-  double _percentileFrameBuildTime99;
+  final double percentileFrameBuildTime99;
 
   /// The largest value of [frameBuildTimeMicros] in milliseconds
-  double get worstFrameBuildTime => _worstFrameBuildTime;
-  double _worstFrameBuildTime;
+  final double worstFrameBuildTime;
 
   /// Number of items in [frameBuildTimeMicros] that's greater than [kBuildBudget]
-  int get missedFrameBuildBudget => _missedFrameBuildBudget;
-  int _missedFrameBuildBudget;
+  final int missedFrameBuildBudget;
 
   /// The average value of [frameRasterizerTimeMicros] in milliseconds.
-  double get averageFrameRasterizerTime => _averageFrameRasterizerTime;
-  double  _averageFrameRasterizerTime;
+  final double averageFrameRasterizerTime;
 
   /// The 90-th percentile value of [frameRasterizerTimeMicros] in milliseconds.
-  double get percentileFrameRasterizerTime90 => _percentileFrameRasterizerTime90;
-  double _percentileFrameRasterizerTime90;
+  final double percentileFrameRasterizerTime90;
 
   /// The 99-th percentile value of [frameRasterizerTimeMicros] in milliseconds.
-  double get percentileFrameRasterizerTime99 => _percentileFrameRasterizerTime99;
-  double _percentileFrameRasterizerTime99;
+  final double percentileFrameRasterizerTime99;
 
   /// The largest value of [frameRasterizerTimeMicros] in milliseconds.
-  double get worstFrameRasterizerTime => _worstFrameRasterizerTime;
-  double _worstFrameRasterizerTime;
+  final double worstFrameRasterizerTime;
 
   /// The largest value of [frameRasterizerTimeMicros] in milliseconds.
-  int get missedFrameRasterizerBudget => _missedFrameRasterizerBudget;
-  int _missedFrameRasterizerBudget;
+  final int missedFrameRasterizerBudget;
 
-
-  void addData(List<FrameTiming> timings) {
-    data += timings;
-  }
-
-  Map<String, dynamic> get summary {
-    if (data.isEmpty) {
-      throw ArgumentError('durations is empty!');
-    }
-
-    return <String, dynamic>{
-      'average_frame_build_time_millis': averageFrameBuildTime,
-      '90th_percentile_frame_build_time_millis': percentileFrameBuildTime90,
-      '99th_percentile_frame_build_time_millis': percentileFrameBuildTime99,
-      'worst_frame_build_time_millis': worstFrameBuildTime,
-      'missed_frame_build_budget_count': missedFrameBuildBudget,
-      'average_frame_rasterizer_time_millis': averageFrameRasterizerTime,
-      '90th_percentile_frame_rasterizer_time_millis': percentileFrameRasterizerTime90,
-      '99th_percentile_frame_rasterizer_time_millis': percentileFrameRasterizerTime99,
-      'worst_frame_rasterizer_time_millis': worstFrameRasterizerTime,
-      'missed_frame_rasterizer_budget_count': missedFrameRasterizerBudget,
-      'frame_count': data.length,
-      'frame_build_times': frameBuildTimeMicros,
-      'frame_rasterizer_times': frameRasterizerTimeMicros,
-    };
-  }
+  Map<String, dynamic> get summary => <String, dynamic>{
+    'average_frame_build_time_millis': averageFrameBuildTime,
+    '90th_percentile_frame_build_time_millis': percentileFrameBuildTime90,
+    '99th_percentile_frame_build_time_millis': percentileFrameBuildTime99,
+    'worst_frame_build_time_millis': worstFrameBuildTime,
+    'missed_frame_build_budget_count': missedFrameBuildBudget,
+    'average_frame_rasterizer_time_millis': averageFrameRasterizerTime,
+    '90th_percentile_frame_rasterizer_time_millis': percentileFrameRasterizerTime90,
+    '99th_percentile_frame_rasterizer_time_millis': percentileFrameRasterizerTime99,
+    'worst_frame_rasterizer_time_millis': worstFrameRasterizerTime,
+    'missed_frame_rasterizer_budget_count': missedFrameRasterizerBudget,
+    'frame_count': frameBuildTimeMicros.length,
+    'frame_build_times': frameBuildTimeMicros,
+    'frame_rasterizer_times': frameRasterizerTimeMicros,
+  };
 }
 
 // The following helper functions require data sorted

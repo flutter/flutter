@@ -37,10 +37,11 @@ Future<void> main() async {
       testOutputsDirectory,
       '$testOutputFilename.json'
     ));
-    await file.writeAsString(_encodeJson(
+    final String resultString = _encodeJson(
       response.data['performance'] as Map<String, dynamic>,
       true,
-    ));
+    );
+    await file.writeAsString(resultString);
 
     exit(0);
   } else {
