@@ -372,7 +372,27 @@ class PerfTest {
   final bool needsMeasureCpuGpu;
   /// Whether to collect full timeline, meaning if `--trace-startup` flag is needed.
   final bool needsFullTimeline;
+
   /// The keys of the values that needs to be reported.
+  ///
+  /// If it's `null`, than report:
+  /// ```Dart
+  /// <String>[
+  ///   'average_frame_build_time_millis',
+  ///   'worst_frame_build_time_millis',
+  ///   '90th_percentile_frame_build_time_millis',
+  ///   '99th_percentile_frame_build_time_millis',
+  ///   'average_frame_rasterizer_time_millis',
+  ///   'worst_frame_rasterizer_time_millis',
+  ///   '90th_percentile_frame_rasterizer_time_millis',
+  ///   '99th_percentile_frame_rasterizer_time_millis',
+  ///   'average_vsync_transitions_missed',
+  ///   '90th_percentile_vsync_transitions_missed',
+  ///   '99th_percentile_vsync_transitions_missed',
+  ///   if (needsMeasureCpuGpu) 'cpu_percentage',
+  ///   if (needsMeasureCpuGpu) 'gpu_percentage',
+  /// ]
+  /// ```
   final List<String> benchmarkScoreKeys;
 
   Future<TaskResult> run() {
