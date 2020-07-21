@@ -11,15 +11,16 @@
 
 namespace flutter {
 
-MultiFrameCodec::MultiFrameCodec(std::unique_ptr<SkCodec> codec)
-    : state_(new State(std::move(codec))) {}
+MultiFrameCodec::MultiFrameCodec(
+    std::shared_ptr<SkCodecImageGenerator> generator)
+    : state_(new State(std::move(generator))) {}
 
 MultiFrameCodec::~MultiFrameCodec() = default;
 
-MultiFrameCodec::State::State(std::unique_ptr<SkCodec> codec)
-    : codec_(std::move(codec)),
-      frameCount_(codec_->getFrameCount()),
-      repetitionCount_(codec_->getRepetitionCount()),
+MultiFrameCodec::State::State(std::shared_ptr<SkCodecImageGenerator> generator)
+    : generator_(std::move(generator)),
+      frameCount_(generator_->getFrameCount()),
+      repetitionCount_(generator_->getRepetitionCount()),
       nextFrameIndex_(0) {}
 
 static void InvokeNextFrameCallback(
@@ -76,7 +77,7 @@ static bool CopyToBitmap(SkBitmap* dst,
 sk_sp<SkImage> MultiFrameCodec::State::GetNextFrameImage(
     fml::WeakPtr<GrContext> resourceContext) {
   SkBitmap bitmap = SkBitmap();
-  SkImageInfo info = codec_->getInfo().makeColorType(kN32_SkColorType);
+  SkImageInfo info = generator_->getInfo().makeColorType(kN32_SkColorType);
   if (info.alphaType() == kUnpremul_SkAlphaType) {
     info = info.makeAlphaType(kPremul_SkAlphaType);
   }
@@ -85,7 +86,7 @@ sk_sp<SkImage> MultiFrameCodec::State::GetNextFrameImage(
   SkCodec::Options options;
   options.fFrameIndex = nextFrameIndex_;
   SkCodec::FrameInfo frameInfo;
-  codec_->getFrameInfo(nextFrameIndex_, &frameInfo);
+  generator_->getFrameInfo(nextFrameIndex_, &frameInfo);
   const int requiredFrameIndex = frameInfo.fRequiredFrame;
   if (requiredFrameIndex != SkCodec::kNoFrame) {
     if (lastRequiredFrame_ == nullptr) {
@@ -106,8 +107,8 @@ sk_sp<SkImage> MultiFrameCodec::State::GetNextFrameImage(
     }
   }
 
-  if (SkCodec::kSuccess != codec_->getPixels(info, bitmap.getPixels(),
-                                             bitmap.rowBytes(), &options)) {
+  if (!generator_->getPixels(info, bitmap.getPixels(), bitmap.rowBytes(),
+                             &options)) {
     FML_LOG(ERROR) << "Could not getPixels for frame " << nextFrameIndex_;
     return nullptr;
   }
@@ -143,7 +144,7 @@ void MultiFrameCodec::State::GetNextFrameAndInvokeCallback(
     fml::RefPtr<CanvasImage> image = CanvasImage::Create();
     image->set_image({skImage, std::move(unref_queue)});
     SkCodec::FrameInfo skFrameInfo;
-    codec_->getFrameInfo(nextFrameIndex_, &skFrameInfo);
+    generator_->getFrameInfo(nextFrameIndex_, &skFrameInfo);
     frameInfo =
         fml::MakeRefCounted<FrameInfo>(std::move(image), skFrameInfo.fDuration);
   }

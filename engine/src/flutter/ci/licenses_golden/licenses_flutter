@@ -335,12 +335,16 @@ FILE: ../../../flutter/lib/ui/painting/image.h
 FILE: ../../../flutter/lib/ui/painting/image_decoder.cc
 FILE: ../../../flutter/lib/ui/painting/image_decoder.h
 FILE: ../../../flutter/lib/ui/painting/image_decoder_unittests.cc
+FILE: ../../../flutter/lib/ui/painting/image_descriptor.cc
+FILE: ../../../flutter/lib/ui/painting/image_descriptor.h
 FILE: ../../../flutter/lib/ui/painting/image_encoding.cc
 FILE: ../../../flutter/lib/ui/painting/image_encoding.h
 FILE: ../../../flutter/lib/ui/painting/image_filter.cc
 FILE: ../../../flutter/lib/ui/painting/image_filter.h
 FILE: ../../../flutter/lib/ui/painting/image_shader.cc
 FILE: ../../../flutter/lib/ui/painting/image_shader.h
+FILE: ../../../flutter/lib/ui/painting/immutable_buffer.cc
+FILE: ../../../flutter/lib/ui/painting/immutable_buffer.h
 FILE: ../../../flutter/lib/ui/painting/matrix.cc
 FILE: ../../../flutter/lib/ui/painting/matrix.h
 FILE: ../../../flutter/lib/ui/painting/multi_frame_codec.cc

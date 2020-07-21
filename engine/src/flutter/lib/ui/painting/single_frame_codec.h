@@ -9,12 +9,15 @@
 #include "flutter/lib/ui/painting/codec.h"
 #include "flutter/lib/ui/painting/frame_info.h"
 #include "flutter/lib/ui/painting/image_decoder.h"
+#include "flutter/lib/ui/painting/image_descriptor.h"
 
 namespace flutter {
 
 class SingleFrameCodec : public Codec {
  public:
-  SingleFrameCodec(ImageDecoder::ImageDescriptor descriptor);
+  SingleFrameCodec(fml::RefPtr<ImageDescriptor> descriptor,
+                   uint32_t target_width,
+                   uint32_t target_height);
 
   ~SingleFrameCodec() override;
 
@@ -33,7 +36,9 @@ class SingleFrameCodec : public Codec {
  private:
   enum class Status { kNew, kInProgress, kComplete };
   Status status_;
-  ImageDecoder::ImageDescriptor descriptor_;
+  fml::RefPtr<ImageDescriptor> descriptor_;
+  uint32_t target_width_;
+  uint32_t target_height_;
   fml::RefPtr<FrameInfo> cached_frame_;
   std::vector<DartPersistentValue> pending_callbacks_;
 
