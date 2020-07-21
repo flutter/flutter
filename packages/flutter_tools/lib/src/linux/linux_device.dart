@@ -67,7 +67,7 @@ class LinuxDevices extends PollingDeviceDiscovery {
   LinuxDevices({
     @required Platform platform,
     @required FeatureFlags featureFlags,
-    processManager processManager,
+    ProcessManager processManager,
     Logger logger,
   }) : _platform = platform ?? globals.platform, // TODO(jonahwilliams): remove after google3 roll
        _linuxWorkflow = LinuxWorkflow(
