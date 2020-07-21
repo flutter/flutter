@@ -284,7 +284,6 @@ String _generateIdentifier(String rawIdentifier) {
 
 // Replace the old codepoints file with the new.
 void _cleanUpFiles(File newCodepointsFile, File oldCodepointsFile) {
-  stderr
-      .writeln('\nMoving new codepoints file to ${oldCodepointsFile.path}.\n');
+  stderr.writeln('\nMoving new codepoints file to ${oldCodepointsFile.path}.\n');
   newCodepointsFile.renameSync(oldCodepointsFile.path);
 }
