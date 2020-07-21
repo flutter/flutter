@@ -8,7 +8,6 @@ import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/base/common.dart';
-import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -67,12 +66,6 @@ void main() {
       restoreTestRunner();
       tryToDelete(tempDir);
     });
-
-    void applyDdsMocks(Device device) {
-      final MockDartDevelopmentService mockDds = MockDartDevelopmentService();
-      when(device.dds).thenReturn(mockDds);
-      when(mockDds.startDartDevelopmentService(any, any)).thenReturn(null);
-    }
 
     testUsingContext('returns 1 when test file is not found', () async {
       testDeviceManager.addDevice(MockDevice());
@@ -195,9 +188,7 @@ void main() {
     });
 
     testUsingContext('returns 0 when test ends successfully', () async {
-      final MockAndroidDevice mockDevice = MockAndroidDevice();
-      applyDdsMocks(mockDevice);
-      testDeviceManager.addDevice(mockDevice);
+      testDeviceManager.addDevice(MockAndroidDevice());
 
       final String testApp = globals.fs.path.join(tempDir.path, 'test', 'e2e.dart');
       final String testFile = globals.fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
@@ -235,9 +226,7 @@ void main() {
     });
 
     testUsingContext('returns exitCode set by test runner', () async {
-      final MockDevice mockDevice = MockDevice();
-      applyDdsMocks(mockDevice);
-      testDeviceManager.addDevice(mockDevice);
+      testDeviceManager.addDevice(MockDevice());
 
       final String testApp = globals.fs.path.join(tempDir.path, 'test', 'e2e.dart');
       final String testFile = globals.fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
@@ -384,7 +373,6 @@ void main() {
 
       Future<Device> appStarterSetup() async {
         final Device mockDevice = MockDevice();
-        applyDdsMocks(mockDevice);
         testDeviceManager.addDevice(mockDevice);
 
         final FakeDeviceLogReader mockDeviceLogReader = FakeDeviceLogReader();
@@ -520,7 +508,6 @@ void main() {
 
       Future<Device> appStarterSetup() async {
         final Device mockDevice = MockDevice();
-        applyDdsMocks(mockDevice);
         testDeviceManager.addDevice(mockDevice);
 
         final FakeDeviceLogReader mockDeviceLogReader = FakeDeviceLogReader();
@@ -804,5 +791,5 @@ class MockDevice extends Mock implements Device {
 }
 
 class MockAndroidDevice extends Mock implements AndroidDevice { }
-class MockDartDevelopmentService extends Mock implements DartDevelopmentService { }
+
 class MockLaunchResult extends Mock implements LaunchResult { }
