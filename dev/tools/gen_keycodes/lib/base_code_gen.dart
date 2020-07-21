@@ -35,7 +35,7 @@ abstract class BaseCodeGenerator {
 
   /// Substitutes the various platform specific maps into the template file for
   /// keyboard_maps.dart.
-  String generateKeyboardMaps(String platform) {
+  String generate() {
     final String template = File(templatePath).readAsStringSync();
     return injectDictionary(template, mappings());
   }
