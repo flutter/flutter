@@ -10,8 +10,8 @@ import 'key_data.dart';
 import 'utils.dart';
 
 
-/// Generates the keyboard_keys.dart and keyboard_maps.dart files, based on the
-/// information in the key data structure given to it.
+/// Generates the keyboard_maps.dart files, based on the information in the key
+/// data structure given to it.
 class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   KeyboardMapsCodeGenerator(KeyData keyData) : super(keyData);
 

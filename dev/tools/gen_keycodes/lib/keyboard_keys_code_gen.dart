@@ -9,13 +9,29 @@ import 'base_code_gen.dart';
 import 'key_data.dart';
 import 'utils.dart';
 
-
-String wrapDartDoc(String source) {
-  return wrapString(source, prefix: '  /// ');
+/// Given an [input] string, wraps the text at 80 characters and prepends each
+/// line with the [prefix] string. Use for generated comments.
+String _wrapString(String input, {String prefix = '  /// '}) {
+  final int wrapWidth = 80 - prefix.length;
+  final StringBuffer result = StringBuffer();
+  final List<String> words = input.split(RegExp(r'\s+'));
+  String currentLine = words.removeAt(0);
+  for (final String word in words) {
+    if ((currentLine.length + word.length) < wrapWidth) {
+      currentLine += ' $word';
+    } else {
+      result.writeln('$prefix$currentLine');
+      currentLine = word;
+    }
+  }
+  if (currentLine.isNotEmpty) {
+    result.writeln('$prefix$currentLine');
+  }
+  return result.toString();
 }
 
-/// Generates the keyboard_keys.dart and keyboard_maps.dart files, based on the
-/// information in the key data structure given to it.
+/// Generates the keyboard_keys.dart based on the information in the key data
+/// structure given to it.
 class KeyboardKeysCodeGenerator extends BaseCodeGenerator {
   KeyboardKeysCodeGenerator(KeyData keyData) : super(keyData);
 
@@ -23,9 +39,9 @@ class KeyboardKeysCodeGenerator extends BaseCodeGenerator {
   String get _physicalDefinitions {
     final StringBuffer definitions = StringBuffer();
     for (final Key entry in keyData.data) {
-      final String firstComment = wrapDartDoc('Represents the location of the '
+      final String firstComment = _wrapString('Represents the location of the '
         '"${entry.commentName}" key on a generalized keyboard.');
-      final String otherComments = wrapDartDoc('See the function '
+      final String otherComments = _wrapString('See the function '
         '[RawKeyEvent.physicalKey] for more information.');
       definitions.write('''
 
@@ -41,8 +57,8 @@ $otherComments  static const PhysicalKeyboardKey ${entry.constantName} = Physica
     String escapeLabel(String label) => label.contains("'") ? 'r"$label"' : "r'$label'";
     final StringBuffer definitions = StringBuffer();
     void printKey(int flutterId, String keyLabel, String constantName, String commentName, {String otherComments}) {
-      final String firstComment = wrapDartDoc('Represents the logical "$commentName" key on the keyboard.');
-      otherComments ??= wrapDartDoc('See the function [RawKeyEvent.logicalKey] for more information.');
+      final String firstComment = _wrapString('Represents the logical "$commentName" key on the keyboard.');
+      otherComments ??= _wrapString('See the function [RawKeyEvent.logicalKey] for more information.');
       if (keyLabel == null) {
         definitions.write('''
 
@@ -75,7 +91,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
         return upperCamelToLowerCamel(name as String);
       }).toSet();
       printKey(Key.synonymPlane | entry.flutterId, entry.keyLabel, name, Key.getCommentName(name),
-          otherComments: wrapDartDoc('This key represents the union of the keys '
+          otherComments: _wrapString('This key represents the union of the keys '
               '$unionNames when comparing keys. This key will never be generated '
               'directly, its main use is in defining key maps.'));
     }

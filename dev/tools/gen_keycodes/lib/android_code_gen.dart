@@ -10,8 +10,8 @@ import 'key_data.dart';
 import 'utils.dart';
 
 
-/// Generates the keyboard_keys.dart and keyboard_maps.dart files, based on the
-/// information in the key data structure given to it.
+/// Generates the key mapping of Android, based on the information in the key
+/// data structure given to it.
 class AndroidCodeGenerator extends PlatformCodeGenerator {
   AndroidCodeGenerator(KeyData keyData) : super(keyData);
 
