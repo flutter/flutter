@@ -12,8 +12,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
-import 'box.dart';
 import 'binding.dart';
+import 'box.dart';
 import 'layer.dart';
 import 'mouse_cursor.dart';
 import 'mouse_tracking.dart';
