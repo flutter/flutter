@@ -318,7 +318,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
           String status;
           if (machineFlag) {
             final Map<String, Object> jsonOut = globals.flutterVersion.toJson();
-            jsonOut['flutterRoot'] = Cache.flutterRoot;
+            if (jsonOut != null) {
+              jsonOut['flutterRoot'] = Cache.flutterRoot;
+            }
             status = const JsonEncoder.withIndent('  ').convert(jsonOut);
           } else {
             status = globals.flutterVersion.toString();
