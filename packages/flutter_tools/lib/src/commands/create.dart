@@ -522,10 +522,10 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
 
   void _addPlatformsOptions() {
     argParser.addMultiOption('platforms',
-      help: 'the platforms supported by this project.'
-        'This argument only works when the --template is set to app or plugin.'
-        'Platform folders (e.g. android/) will be generated in the target project.'
-        'When adding platforms to a plugin project, the pubspec.yaml will be updated with the requested platform.'
+      help: 'The platforms supported by this project. '
+        'This argument only works when the --template is set to app or plugin. '
+        'Platform folders (e.g. android/) will be generated in the target project. '
+        'When adding platforms to a plugin project, the pubspec.yaml will be updated with the requested platform. '
         'Adding desktop platforms requires the corresponding desktop config setting to be enabled.',
       defaultsTo: _kAvailablePlatforms,
       allowed: _kAvailablePlatforms);
@@ -543,6 +543,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
         context: PubContext.create,
         directory: directory.path,
         offline: boolArg('offline'),
+        generateSyntheticPackage: false,
       );
       final FlutterProject project = FlutterProject.fromDirectory(directory);
       await project.ensureReadyForPlatformSpecificTooling(checkProjects: false);
@@ -562,6 +563,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
         context: PubContext.createPackage,
         directory: directory.path,
         offline: boolArg('offline'),
+        generateSyntheticPackage: false,
       );
     }
     return generatedCount;
@@ -606,6 +608,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
         context: PubContext.createPlugin,
         directory: directory.path,
         offline: boolArg('offline'),
+        generateSyntheticPackage: false,
       );
     }
 
@@ -674,7 +677,12 @@ https://flutter.dev/docs/development/packages-and-plugins/developing-packages#pl
     }
 
     if (boolArg('pub')) {
-      await pub.get(context: PubContext.create, directory: directory.path, offline: boolArg('offline'));
+      await pub.get(
+        context: PubContext.create,
+        directory: directory.path,
+        offline: boolArg('offline'),
+        generateSyntheticPackage: false,
+      );
       await project.ensureReadyForPlatformSpecificTooling(checkProjects: pluginExampleApp);
     }
     if (templateContext['android'] == true) {
@@ -748,7 +756,6 @@ https://flutter.dev/docs/development/packages-and-plugins/developing-packages#pl
       'macosIdentifier': appleIdentifier,
       'description': projectDescription,
       'dartSdk': '$flutterRoot/bin/cache/dart-sdk',
-      'useAndroidEmbeddingV2': featureFlags.isAndroidEmbeddingV2Enabled,
       'androidMinApiLevel': android_common.minApiLevel,
       'androidSdkVersion': android_sdk.minimumAndroidSdkVersion,
       'withDriverTest': renderDriverTest,

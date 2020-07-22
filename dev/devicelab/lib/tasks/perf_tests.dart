@@ -7,14 +7,14 @@ import 'dart:convert' show LineSplitter, json, utf8;
 import 'dart:io';
 import 'dart:math' as math;
 
-import 'package:flutter_devicelab/tasks/track_widget_creation_enabled_task.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
-import '../framework/adb.dart';
-import '../framework/framework.dart';
-import '../framework/ios.dart';
-import '../framework/utils.dart';
+import 'package:flutter_devicelab/framework/adb.dart';
+import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/ios.dart';
+import 'package:flutter_devicelab/framework/utils.dart';
+import 'package:flutter_devicelab/tasks/track_widget_creation_enabled_task.dart';
 
 TaskFunction createComplexLayoutScrollPerfTest() {
   return PerfTest(
@@ -70,16 +70,18 @@ TaskFunction createHomeScrollPerfTest() {
 TaskFunction createCullOpacityPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/cull_opacity_perf.dart',
+    'test_driver/run_app.dart',
     'cull_opacity_perf',
+    testDriver: 'test_driver/cull_opacity_perf_test.dart',
   ).run;
 }
 
 TaskFunction createCubicBezierPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/cubic_bezier_perf.dart',
+    'test_driver/run_app.dart',
     'cubic_bezier_perf',
+    testDriver: 'test_driver/cubic_bezier_perf_test.dart',
   ).run;
 }
 
@@ -102,44 +104,49 @@ TaskFunction createFlutterGalleryTransitionsPerfSkSLWarmupTest() {
 TaskFunction createBackdropFilterPerfTest({bool needsMeasureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/backdrop_filter_perf.dart',
+    'test_driver/run_app.dart',
     'backdrop_filter_perf',
     needsMeasureCpuGpu: needsMeasureCpuGpu,
+    testDriver: 'test_driver/backdrop_filter_perf_test.dart',
   ).run;
 }
 
 TaskFunction createPostBackdropFilterPerfTest({bool needsMeasureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/post_backdrop_filter_perf.dart',
+    'test_driver/run_app.dart',
     'post_backdrop_filter_perf',
     needsMeasureCpuGpu: needsMeasureCpuGpu,
+    testDriver: 'test_driver/post_backdrop_filter_perf_test.dart',
   ).run;
 }
 
 TaskFunction createSimpleAnimationPerfTest({bool needsMeasureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/simple_animation_perf.dart',
+    'test_driver/run_app.dart',
     'simple_animation_perf',
     needsMeasureCpuGpu: needsMeasureCpuGpu,
+    testDriver: 'test_driver/simple_animation_perf_test.dart',
   ).run;
 }
 
 TaskFunction createAnimatedPlaceholderPerfTest({bool needsMeasureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/animated_placeholder_perf.dart',
+    'test_driver/run_app.dart',
     'animated_placeholder_perf',
     needsMeasureCpuGpu: needsMeasureCpuGpu,
+    testDriver: 'test_driver/animated_placeholder_perf_test.dart',
   ).run;
 }
 
 TaskFunction createPictureCachePerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/picture_cache_perf.dart',
+    'test_driver/run_app.dart',
     'picture_cache_perf',
+    testDriver: 'test_driver/picture_cache_perf_test.dart',
   ).run;
 }
 
@@ -213,41 +220,89 @@ TaskFunction createBasicMaterialCompileTest() {
 TaskFunction createTextfieldPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/textfield_perf.dart',
+    'test_driver/run_app.dart',
     'textfield_perf',
+    testDriver: 'test_driver/textfield_perf_test.dart',
   ).run;
 }
 
 TaskFunction createColorFilterAndFadePerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/color_filter_and_fade_perf.dart',
+    'test_driver/run_app.dart',
     'color_filter_and_fade_perf',
+    testDriver: 'test_driver/color_filter_and_fade_perf_test.dart',
   ).run;
 }
 
 TaskFunction createFadingChildAnimationPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/fading_child_animation_perf.dart',
+    'test_driver/run_app.dart',
     'fading_child_animation_perf',
+    testDriver: 'test_driver/fading_child_animation_perf_test.dart',
   ).run;
 }
 
 TaskFunction createImageFilteredTransformAnimationPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/imagefiltered_transform_animation_perf.dart',
+    'test_driver/run_app.dart',
     'imagefiltered_transform_animation_perf',
+    testDriver: 'test_driver/imagefiltered_transform_animation_perf_test.dart',
   ).run;
 }
 
 TaskFunction createsMultiWidgetConstructPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/multi_widget_construction_perf.dart',
+    'test_driver/run_app.dart',
     'multi_widget_construction_perf',
+    testDriver: 'test_driver/multi_widget_construction_perf_test.dart',
   ).run;
+}
+
+TaskFunction createFramePolicyIntegrationTest() {
+  final String testDirectory =
+      '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks';
+  const String testTarget = 'test/frame_policy.dart';
+  return () {
+    return inDirectory<TaskResult>(testDirectory, () async {
+      final Device device = await devices.workingDevice;
+      await device.unlock();
+      final String deviceId = device.deviceId;
+      await flutter('packages', options: <String>['get']);
+
+      await flutter('drive', options: <String>[
+        '-v',
+        '--verbose-system-logs',
+        '--profile',
+        '-t', testTarget,
+        '-d',
+        deviceId,
+      ]);
+      final Map<String, dynamic> data = json.decode(
+        file('$testDirectory/build/frame_policy_event_delay.json').readAsStringSync(),
+      ) as Map<String, dynamic>;
+      final Map<String, dynamic> fullLiveData = data['fullyLive'] as Map<String, dynamic>;
+      final Map<String, dynamic> benchmarkLiveData = data['benchmarkLive'] as Map<String, dynamic>;
+      final Map<String, dynamic> dataFormated = <String, dynamic>{
+        'average_delay_fullyLive_millis':
+          fullLiveData['average_delay_millis'],
+        'average_delay_benchmarkLive_millis':
+          benchmarkLiveData['average_delay_millis'],
+        '90th_percentile_delay_fullyLive_millis':
+          fullLiveData['90th_percentile_delay_millis'],
+        '90th_percentile_delay_benchmarkLive_millis':
+          benchmarkLiveData['90th_percentile_delay_millis'],
+      };
+
+      return TaskResult.success(
+        dataFormated,
+        benchmarkScoreKeys: dataFormated.keys.toList(),
+      );
+    });
+  };
 }
 
 /// Measure application startup performance.

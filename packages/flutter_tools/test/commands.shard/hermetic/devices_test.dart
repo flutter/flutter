@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/devices.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
@@ -53,7 +54,7 @@ void main() {
 
     testUsingContext('get devices\' platform types', () async {
       final List<String> platformTypes = Device.devicesPlatformTypes(
-        await deviceManager.getAllConnectedDevices(),
+        await globals.deviceManager.getAllConnectedDevices(),
       );
       expect(platformTypes, <String>['android', 'web']);
     }, overrides: <Type, Generator>{

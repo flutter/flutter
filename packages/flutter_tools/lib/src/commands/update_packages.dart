@@ -31,7 +31,12 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'video_player': '0.10.6', // 0.10.7 fails a gallery smoke test for toString.
   'flutter_template_images': '1.0.1', // Must always exactly match flutter_tools template.
   'shelf': '0.7.5',
-  'meta': '1.1.8', // until the `unawaited` export is resolved
+  // nnbd
+  'characters': '1.1.0-nullsafety',
+  'collection': '1.15.0-nullsafety',
+  'meta': '1.3.0-nullsafety',
+  'typed_data': '1.3.0-nullsafety',
+  'vector_math': '2.1.0-nullsafety',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -303,6 +308,7 @@ class UpdatePackagesCommand extends FlutterCommand {
           flutterRootOverride: upgrade
             ? temporaryFlutterSdk.path
             : null,
+          generateSyntheticPackage: false,
         );
         // Cleanup the temporary SDK
         try {
@@ -382,6 +388,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         directory: dir.path,
         checkLastModified: false,
         offline: offline,
+        generateSyntheticPackage: false,
       );
       count += 1;
     }

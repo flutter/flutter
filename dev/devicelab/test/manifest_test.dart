@@ -103,7 +103,7 @@ tasks:
 
     testManifestError(
       'invalid task property',
-      'Unrecognized property "bar" in Value of task "foo". Allowed properties: description, stage, required_agent_capabilities, flaky, timeout_in_minutes',
+      'Unrecognized property "bar" in Value of task "foo". Allowed properties: description, stage, required_agent_capabilities, flaky, timeout_in_minutes, on_luci',
       '''
       tasks:
         foo:

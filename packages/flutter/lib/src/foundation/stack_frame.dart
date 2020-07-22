@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' show hashValues;
 
 import 'package:meta/meta.dart';
@@ -29,16 +27,16 @@ class StackFrame {
   /// All parameters must not be null. The [className] may be the empty string
   /// if there is no class (e.g. for a top level library method).
   const StackFrame({
-    @required this.number,
-    @required this.column,
-    @required this.line,
-    @required this.packageScheme,
-    @required this.package,
-    @required this.packagePath,
+    required this.number,
+    required this.column,
+    required this.line,
+    required this.packageScheme,
+    required this.package,
+    required this.packagePath,
     this.className = '',
-    @required this.method,
+    required this.method,
     this.isConstructor = false,
-    @required this.source,
+    required this.source,
   })  : assert(number != null),
         assert(column != null),
         assert(line != null),
@@ -92,11 +90,11 @@ class StackFrame {
         // On the Web in non-debug builds the stack trace includes the exception
         // message that precedes the stack trace itself. fromStackTraceLine will
         // return null in that case. We will skip it here.
-        .skipWhile((StackFrame frame) => frame == null)
+        .whereType<StackFrame>()
         .toList();
   }
 
-  static StackFrame _parseWebFrame(String line) {
+  static StackFrame? _parseWebFrame(String line) {
     if (kDebugMode) {
       return _parseWebDebugFrame(line);
     } else {
@@ -111,15 +109,16 @@ class StackFrame {
     final RegExp parser = hasPackage
         ? RegExp(r'^(package.+) (\d+):(\d+)\s+(.+)$')
         : RegExp(r'^(.+) (\d+):(\d+)\s+(.+)$');
-    final Match match = parser.firstMatch(line);
+    Match? match = parser.firstMatch(line);
     assert(match != null, 'Expected $line to match $parser.');
+    match = match!;
 
     String package = '<unknown>';
     String packageScheme = '<unknown>';
     String packagePath = '<unknown>';
     if (hasPackage) {
       packageScheme = 'package';
-      final Uri packageUri = Uri.parse(match.group(1));
+      final Uri packageUri = Uri.parse(match.group(1)!);
       package = packageUri.pathSegments[0];
       packagePath = packageUri.path.replaceFirst(packageUri.pathSegments[0] + '/', '');
     }
@@ -129,10 +128,10 @@ class StackFrame {
       packageScheme: packageScheme,
       package: package,
       packagePath: packagePath,
-      line: int.parse(match.group(2)),
-      column: int.parse(match.group(3)),
+      line: int.parse(match.group(2)!),
+      column: int.parse(match.group(3)!),
       className: '<unknown>',
-      method: match.group(4),
+      method: match.group(4)!,
       source: line,
     );
   }
@@ -145,8 +144,8 @@ class StackFrame {
 
   // Parses `line` as a stack frame in profile and release Web builds. If not
   // recognized as a stack frame, returns null.
-  static StackFrame _parseWebNonDebugFrame(String line) {
-    final Match match = _webNonDebugFramePattern.firstMatch(line);
+  static StackFrame? _parseWebNonDebugFrame(String line) {
+    final Match? match = _webNonDebugFramePattern.firstMatch(line);
     if (match == null) {
       // On the Web in non-debug builds the stack trace includes the exception
       // message that precedes the stack trace itself. Example:
@@ -162,7 +161,7 @@ class StackFrame {
       return null;
     }
 
-    final List<String> classAndMethod = match.group(1).split('.');
+    final List<String> classAndMethod = match.group(1)!.split('.');
     final String className = classAndMethod.length > 1 ? classAndMethod.first : '<unknown>';
     final String method = classAndMethod.length > 1
       ? classAndMethod.skip(1).join('.')
@@ -182,7 +181,7 @@ class StackFrame {
   }
 
   /// Parses a single [StackFrame] from a single line of a [StackTrace].
-  static StackFrame fromStackTraceLine(String line) {
+  static StackFrame? fromStackTraceLine(String line) {
     assert(line != null);
     if (line == '<asynchronous suspension>') {
       return asynchronousSuspension;
@@ -203,12 +202,13 @@ class StackFrame {
     }
 
     final RegExp parser = RegExp(r'^#(\d+) +(.+) \((.+?):?(\d+){0,1}:?(\d+){0,1}\)$');
-    final Match match = parser.firstMatch(line);
+    Match? match = parser.firstMatch(line);
     assert(match != null, 'Expected $line to match $parser.');
+    match = match!;
 
     bool isConstructor = false;
     String className = '';
-    String method = match.group(2).replaceAll('.<anonymous closure>', '');
+    String method = match.group(2)!.replaceAll('.<anonymous closure>', '');
     if (method.startsWith('new')) {
       className = method.split(' ')[1];
       method = '';
@@ -224,7 +224,7 @@ class StackFrame {
       method = parts[1];
     }
 
-    final Uri packageUri = Uri.parse(match.group(3));
+    final Uri packageUri = Uri.parse(match.group(3)!);
     String package = '<unknown>';
     String packagePath = packageUri.path;
     if (packageUri.scheme == 'dart' || packageUri.scheme == 'package') {
@@ -233,14 +233,14 @@ class StackFrame {
     }
 
     return StackFrame(
-      number: int.parse(match.group(1)),
+      number: int.parse(match.group(1)!),
       className: className,
       method: method,
       packageScheme: packageUri.scheme,
       package: package,
       packagePath: packagePath,
-      line: match.group(4) == null ? -1 : int.parse(match.group(4)),
-      column: match.group(5) == null ? -1 : int.parse(match.group(5)),
+      line: match.group(4) == null ? -1 : int.parse(match.group(4)!),
+      column: match.group(5) == null ? -1 : int.parse(match.group(5)!),
       isConstructor: isConstructor,
       source: line,
     );

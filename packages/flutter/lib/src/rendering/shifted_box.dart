@@ -395,11 +395,11 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
     if (child != null) {
       child.layout(constraints.loosen(), parentUsesSize: true);
       size = constraints.constrain(Size(shrinkWrapWidth ? child.size.width * (_widthFactor ?? 1.0) : double.infinity,
-                                            shrinkWrapHeight ? child.size.height * (_heightFactor ?? 1.0) : double.infinity));
+                                        shrinkWrapHeight ? child.size.height * (_heightFactor ?? 1.0) : double.infinity));
       alignChild();
     } else {
       size = constraints.constrain(Size(shrinkWrapWidth ? 0.0 : double.infinity,
-                                            shrinkWrapHeight ? 0.0 : double.infinity));
+                                        shrinkWrapHeight ? 0.0 : double.infinity));
     }
   }
 

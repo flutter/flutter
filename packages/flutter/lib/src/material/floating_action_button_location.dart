@@ -443,12 +443,13 @@ mixin FabFloatOffsetY on StandardFabLocation {
   @override
   double getOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
     final double contentBottom = scaffoldGeometry.contentBottom;
+    final double bottomContentHeight = scaffoldGeometry.scaffoldSize.height - contentBottom;
     final double bottomSheetHeight = scaffoldGeometry.bottomSheetSize.height;
     final double fabHeight = scaffoldGeometry.floatingActionButtonSize.height;
     final double snackBarHeight = scaffoldGeometry.snackBarSize.height;
     final double safeMargin = math.max(
       kFloatingActionButtonMargin,
-      scaffoldGeometry.minViewPadding.bottom,
+      scaffoldGeometry.minViewPadding.bottom - bottomContentHeight,
     );
 
     double fabY = contentBottom - fabHeight - safeMargin;
