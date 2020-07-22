@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
-import 'package:flutter/foundation.dart';
 import 'box.dart';
 import 'layer.dart';
 import 'object.dart';
@@ -40,7 +38,7 @@ class TextureBox extends RenderBox {
   /// Creates a box backed by the texture identified by [textureId], and use
   /// [filterQuality] to set texture's [FilterQuality].
   TextureBox({
-    @required int textureId,
+    required int textureId,
     FilterQuality filterQuality = FilterQuality.low,
   }) : assert(textureId != null),
       _textureId = textureId,
@@ -79,7 +77,7 @@ class TextureBox extends RenderBox {
 
   @override
   void performResize() {
-    size = constraints.biggest;
+    size = constraints!.biggest;
   }
 
   @override

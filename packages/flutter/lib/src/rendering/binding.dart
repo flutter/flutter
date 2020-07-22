@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:async';
 import 'dart:developer';
@@ -50,8 +49,8 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   }
 
   /// The current [RendererBinding], if one has been created.
-  static RendererBinding get instance => _instance;
-  static RendererBinding _instance;
+  static RendererBinding? get instance => _instance;
+  static RendererBinding? _instance;
 
   @override
   void initServiceExtensions() {
@@ -147,24 +146,24 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   void initRenderView() {
     assert(renderView == null);
     renderView = RenderView(configuration: createViewConfiguration(), window: window);
-    renderView.prepareInitialFrame();
+    renderView!.prepareInitialFrame();
   }
 
   /// The object that manages state about currently connected mice, for hover
   /// notification.
-  MouseTracker get mouseTracker => _mouseTracker;
-  MouseTracker _mouseTracker;
+  MouseTracker get mouseTracker => _mouseTracker!;
+  MouseTracker? _mouseTracker;
 
   /// The render tree's owner, which maintains dirty state for layout,
   /// composite, paint, and accessibility semantics.
   PipelineOwner get pipelineOwner => _pipelineOwner;
-  PipelineOwner _pipelineOwner;
+  late PipelineOwner _pipelineOwner;
 
   /// The render tree that's attached to the output surface.
-  RenderView get renderView => _pipelineOwner.rootNode as RenderView;
+  RenderView? get renderView => _pipelineOwner.rootNode as RenderView?;
   /// Sets the given [RenderView] object (which must not be null), and its tree, to
   /// be the new render tree to display. The previous tree, if any, is detached.
-  set renderView(RenderView value) {
+  set renderView(RenderView? value) {
     assert(value != null);
     _pipelineOwner.rootNode = value;
   }
@@ -175,7 +174,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   @protected
   void handleMetricsChanged() {
     assert(renderView != null);
-    renderView.configuration = createViewConfiguration();
+    renderView!.configuration = createViewConfiguration();
     scheduleForcedFrame();
   }
 
@@ -239,16 +238,16 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     );
   }
 
-  SemanticsHandle _semanticsHandle;
+  SemanticsHandle? _semanticsHandle;
 
   /// Creates a [MouseTracker] which manages state about currently connected
   /// mice, for hover notification.
   ///
   /// Used by testing framework to reinitialize the mouse tracker between tests.
   @visibleForTesting
-  void initMouseTracker([MouseTracker tracker]) {
+  void initMouseTracker([MouseTracker? tracker]) {
     _mouseTracker?.dispose();
-    _mouseTracker = tracker ?? MouseTracker(pointerRouter, renderView.hitTestMouseTrackers);
+    _mouseTracker = tracker ?? MouseTracker(pointerRouter, renderView!.hitTestMouseTrackers);
   }
 
   void _handleSemanticsEnabledChanged() {
@@ -266,7 +265,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     }
   }
 
-  void _handleSemanticsAction(int id, SemanticsAction action, ByteData args) {
+  void _handleSemanticsAction(int id, SemanticsAction action, ByteData? args) {
     _pipelineOwner.semanticsOwner?.performAction(
       id,
       action,
@@ -275,16 +274,16 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   }
 
   void _handleSemanticsOwnerCreated() {
-    renderView.scheduleInitialSemantics();
+    renderView!.scheduleInitialSemantics();
   }
 
   void _handleSemanticsOwnerDisposed() {
-    renderView.clearSemantics();
+    renderView!.clearSemantics();
   }
 
   void _handlePersistentFrameCallback(Duration timeStamp) {
     drawFrame();
-    _mouseTracker.schedulePostFrameCheck();
+    _mouseTracker!.schedulePostFrameCheck();
   }
 
   int _firstFrameDeferredCount = 0;
@@ -404,7 +403,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     pipelineOwner.flushCompositingBits();
     pipelineOwner.flushPaint();
     if (sendFramesToEngine) {
-      renderView.compositeFrame(); // this sends the bits to the GPU
+      renderView!.compositeFrame(); // this sends the bits to the GPU
       pipelineOwner.flushSemantics(); // this also sends the semantics to the OS.
       _firstFrameSent = true;
     }
@@ -415,7 +414,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     await super.performReassemble();
     Timeline.startSync('Dirty Render Tree', arguments: timelineArgumentsIndicatingLandmarkEvent);
     try {
-      renderView.reassemble();
+      renderView!.reassemble();
     } finally {
       Timeline.finishSync();
     }
@@ -426,12 +425,12 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   @override
   void hitTest(HitTestResult result, Offset position) {
     assert(renderView != null);
-    renderView.hitTest(result, position: position);
+    renderView!.hitTest(result, position: position);
     super.hitTest(result, position);
   }
 
   Future<void> _forceRepaint() {
-    RenderObjectVisitor visitor;
+    late RenderObjectVisitor visitor;
     visitor = (RenderObject child) {
       child.markNeedsPaint();
       child.visitChildren(visitor);
@@ -473,8 +472,8 @@ class RenderingFlutterBinding extends BindingBase with GestureBinding, Scheduler
   ///
   /// The `root` render box is attached directly to the [renderView] and is
   /// given constraints that require it to fill the window.
-  RenderingFlutterBinding({ RenderBox root }) {
+  RenderingFlutterBinding({ RenderBox? root }) {
     assert(renderView != null);
-    renderView.child = root;
+    renderView!.child = root;
   }
 }

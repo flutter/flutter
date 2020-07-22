@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:async';
 
@@ -27,8 +26,8 @@ mixin MouseTrackerCursorMixin on BaseMouseTracker {
   /// Only valid when asserts are enabled. In release builds, always returns
   /// null.
   @visibleForTesting
-  MouseCursor debugDeviceActiveCursor(int device) {
-    MouseCursor result;
+  MouseCursor? debugDeviceActiveCursor(int device) {
+    MouseCursor? result;
     assert(() {
       result = _lastSession[device]?.cursor;
       return true;
@@ -66,7 +65,7 @@ mixin MouseTrackerCursorMixin on BaseMouseTracker {
       return;
     }
 
-    final MouseCursorSession lastSession = _lastSession[device];
+    final MouseCursorSession? lastSession = _lastSession[device];
     final MouseCursor nextCursor = _findFirstCursor(details.nextAnnotations.keys);
     if (lastSession?.cursor == nextCursor)
       return;
@@ -273,7 +272,7 @@ class _DeferringMouseCursor extends MouseCursor {
   String get debugDescription => 'defer';
 
   /// Returns the first cursor that is not a [MouseCursor.defer].
-  static MouseCursor firstNonDeferred(Iterable<MouseCursor> cursors) {
+  static MouseCursor? firstNonDeferred(Iterable<MouseCursor> cursors) {
     for (final MouseCursor cursor in cursors) {
       assert(cursor != null);
       if (cursor != MouseCursor.defer)
@@ -370,7 +369,7 @@ class SystemMouseCursor extends MouseCursor {
   // Application code shouldn't directly instantiate system mouse cursors, since
   // the supported system cursors are enumerated in [SystemMouseCursors].
   const SystemMouseCursor._({
-    @required this.kind,
+    required this.kind,
   }) : assert(kind != null);
 
   /// A string that identifies the kind of the cursor.
@@ -386,7 +385,7 @@ class SystemMouseCursor extends MouseCursor {
   _SystemMouseCursorSession createSession(int device) => _SystemMouseCursorSession(this, device);
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
     return other is SystemMouseCursor
@@ -419,7 +418,7 @@ class SystemMouseCursor extends MouseCursor {
 class SystemMouseCursors {
   // This class only contains static members, and should not be instantiated or
   // extended.
-  factory SystemMouseCursors._() => null;
+  factory SystemMouseCursors._() => throw Error();
 
   // The mapping in this class must be kept in sync with the following files in
   // the engine:

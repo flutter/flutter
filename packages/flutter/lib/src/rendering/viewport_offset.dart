@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:async';
 
@@ -51,7 +50,6 @@ ScrollDirection flipScrollDirection(ScrollDirection direction) {
     case ScrollDirection.reverse:
       return ScrollDirection.forward;
   }
-  return null;
 }
 
 /// Which part of the content inside the viewport should be visible.
@@ -95,7 +93,7 @@ abstract class ViewportOffset extends ChangeNotifier {
   ///
   /// This object notifies its listeners when this value changes (except when
   /// the value changes due to [correctBy]).
-  double get pixels;
+  double? get pixels;
 
   /// Called when the viewport's extents are established.
   ///
@@ -181,8 +179,8 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// animation, use [jumpTo].
   Future<void> animateTo(
     double to, {
-    @required Duration duration,
-    @required Curve curve,
+    required Duration duration,
+    required Curve curve,
   });
 
   /// Calls [jumpTo] if duration is null or [Duration.zero], otherwise
@@ -194,9 +192,9 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// underscroll.
   Future<void> moveTo(
     double to, {
-    Duration duration,
-    Curve curve,
-    bool clamp,
+    Duration? duration,
+    Curve? curve,
+    bool? clamp,
   }) {
     assert(to != null);
     if (duration == null || duration == Duration.zero) {
@@ -280,8 +278,8 @@ class _FixedViewportOffset extends ViewportOffset {
   @override
   Future<void> animateTo(
     double to, {
-    @required Duration duration,
-    @required Curve curve,
+    required Duration duration,
+    required Curve curve,
   }) async { }
 
   @override
