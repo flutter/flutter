@@ -317,7 +317,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
           globals.flutterVersion.fetchTagsAndUpdate();
           String status;
           if (machineFlag) {
-            status = const JsonEncoder.withIndent('  ').convert(globals.flutterVersion.toJson());
+            final Map<String, Object> jsonOut = globals.flutterVersion.toJson();
+            jsonOut['flutterRoot'] = Cache.flutterRoot;
+            status = const JsonEncoder.withIndent('  ').convert(jsonOut);
           } else {
             status = globals.flutterVersion.toString();
           }
