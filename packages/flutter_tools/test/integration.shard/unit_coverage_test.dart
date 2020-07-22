@@ -60,9 +60,9 @@ end_of_record
     ]);
 
     // May contain other output if building flutter tool.
-    expect(result.stdout.toString().split('\n'), containsAll(<String>[
-      'lib/src/artifacts.dart: 81.82%',
-      'lib/src/base/common.dart: 100.00%',
+    expect(result.stdout.toString().split('\n'), containsAll(<Matcher>[
+      contains('lib/src/artifacts.dart: 81.82%'),
+      contains('lib/src/base/common.dart: 100.00%'),
     ]));
   });
 }
