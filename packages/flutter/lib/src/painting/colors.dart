@@ -5,7 +5,6 @@
 
 import 'dart:math' as math;
 import 'dart:ui' show Color, lerpDouble, hashValues;
-import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 
 double _getHue(double red, double green, double blue, double max, double delta) {
@@ -450,7 +449,7 @@ class ColorSwatch<T> extends Color {
       return false;
     return super == other
         && other is ColorSwatch<T>
-        && MapEquality<T, Color>().equals(other._swatch, _swatch);
+        && mapEquals<T, Color>(other._swatch, _swatch);
   }
 
   @override
