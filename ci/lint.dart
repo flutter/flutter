@@ -14,8 +14,16 @@ import 'dart:io'
         Directory,
         FileSystemEntity,
         Platform;
-import 'dart:convert' show jsonDecode, utf8;
+import 'dart:convert' show jsonDecode, utf8, LineSplitter;
 import 'dart:async' show Completer;
+
+String _linterOutputHeader = '''┌──────────────────────────┐
+│ Engine Clang Tidy Linter │
+└──────────────────────────┘
+The following errors have been reported by the Engine Clang Tidy Linter.  For
+more information on addressing these issues please see:
+https://github.com/flutter/flutter/wiki/Engine-Clang-Tidy-Linter
+''';
 
 class Command {
   String directory;
@@ -65,8 +73,13 @@ List<String> getListOfChangedFiles(String repoPath) {
       'git', ['diff', '--cached', '--name-only'],
       workingDirectory: repoPath);
 
+  final ProcessResult fetchResult =
+      Process.runSync('git', ['fetch', 'upstream', 'master']);
+  if (fetchResult.exitCode != 0) {
+    Process.runSync('git', ['fetch', 'origin', 'master']);
+  }
   final ProcessResult mergeBaseResult = Process.runSync(
-      'git', ['merge-base', 'master', 'HEAD'],
+      'git', ['merge-base', '--fork-point', 'FETCH_HEAD', 'HEAD'],
       workingDirectory: repoPath);
   final String mergeBase = mergeBaseResult.stdout.trim();
   final ProcessResult masterResult = Process.runSync(
@@ -89,6 +102,27 @@ Future<List<String>> dirContents(String repoPath) {
   return completer.future;
 }
 
+Future<bool> shouldIgnoreFile(String path) async {
+  if (path.contains('/third_party/')) {
+    return true;
+  } else {
+    final RegExp exp = RegExp(r'//.*FLUTTER_NOLINT');
+    await for (String line in File(path.substring(6))
+        .openRead()
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())) {
+      if (exp.hasMatch(line)) {
+        return true;
+      } else if (line.length > 0 && line[0] != '\n' && line[0] != '/') {
+        // Quick out once we find a line that isn't empty or a comment.  The
+        // FLUTTER_NOLINT must show up before the first real code.
+        return false;
+      }
+    }
+    return false;
+  }
+}
+
 void main(List<String> arguments) async {
   final String buildCommandsPath = arguments[0];
   final String repoPath = arguments[1];
@@ -98,6 +132,8 @@ void main(List<String> arguments) async {
       Platform.environment['FLUTTER_LINT_ALL'] != null
           ? await dirContents(repoPath)
           : getListOfChangedFiles(repoPath);
+  /// TODO(gaaclarke): Convert FLUTTER_LINT_ALL to a command-line flag and add
+  /// `--verbose` flag.
 
   final List<dynamic> buildCommandMaps =
       jsonDecode(await new File(buildCommandsPath).readAsString());
@@ -108,20 +144,25 @@ void main(List<String> arguments) async {
   final List<Command> changedFileBuildCommands =
       buildCommands.where((x) => containsAny(x.file, changedFiles)).toList();
 
+  print(_linterOutputHeader);
   int exitCode = 0;
   //TODO(aaclarke): Coalesce this into one call using the `-p` arguement.
   for (Command command in changedFileBuildCommands) {
-    final String tidyArgs = calcTidyArgs(command);
-    final List<String> args = [command.file, checks, '--'];
-    args.addAll(tidyArgs.split(' '));
-    print('# linting ${command.file}');
-    final Process process = await Process.start(tidyPath, args,
-        workingDirectory: command.directory, runInShell: false);
-    process.stdout.transform(utf8.decoder).listen((data) {
-      print(data);
-      exitCode = 1;
-    });
-    await process.exitCode;
+    if (!(await shouldIgnoreFile(command.file))) {
+      final String tidyArgs = calcTidyArgs(command);
+      final List<String> args = [command.file, checks, '--'];
+      args.addAll(tidyArgs.split(' '));
+      print('🔶 linting ${command.file}');
+      final Process process = await Process.start(tidyPath, args,
+          workingDirectory: command.directory, runInShell: false);
+      process.stdout.transform(utf8.decoder).listen((data) {
+        print(data);
+        exitCode = 1;
+      });
+      await process.exitCode;
+    } else {
+      print('🔷 ignoring ${command.file}');
+    }
   }
   exit(exitCode);
 }
