@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
@@ -174,7 +172,7 @@ bool debugProfileLayoutsEnabled = false;
 bool debugProfilePaintsEnabled = false;
 
 /// Signature for [debugOnProfilePaint] implementations.
-typedef ProfilePaintCallback = void Function(RenderObject/*!*/ renderObject);
+typedef ProfilePaintCallback = void Function(RenderObject renderObject);
 
 /// Callback invoked for every [RenderObject] painted each frame.
 ///
@@ -190,7 +188,7 @@ typedef ProfilePaintCallback = void Function(RenderObject/*!*/ renderObject);
 ///    callback to generate aggregate profile statistics describing what paints
 ///    occurred when the `ext.flutter.inspector.trackRepaintWidgets` service
 ///    extension is enabled.
-ProfilePaintCallback debugOnProfilePaint;
+ProfilePaintCallback? debugOnProfilePaint;
 
 /// Setting to true will cause all clipping effects from the layer tree to be
 /// ignored.
@@ -243,7 +241,7 @@ void _debugDrawDoubleRect(Canvas canvas, Rect outerRect, Rect innerRect, Color c
 ///
 /// Called by [RenderPadding.debugPaintSize] when [debugPaintSizeEnabled] is
 /// true.
-void debugPaintPadding(Canvas canvas, Rect outerRect, Rect innerRect, { double outlineWidth = 2.0 }) {
+void debugPaintPadding(Canvas canvas, Rect outerRect, Rect? innerRect, { double outlineWidth = 2.0 }) {
   assert(() {
     if (innerRect != null && !innerRect.isEmpty) {
       _debugDrawDoubleRect(canvas, outerRect, innerRect, const Color(0x900090FF));

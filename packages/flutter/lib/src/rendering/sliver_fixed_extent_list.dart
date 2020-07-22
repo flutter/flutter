@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -42,7 +40,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
   ///
   /// The [childManager] argument must not be null.
   RenderSliverFixedExtentBoxAdaptor({
-    @required RenderSliverBoxChildManager childManager,
+    required RenderSliverBoxChildManager childManager,
   }) : super(childManager: childManager);
 
   /// The main-axis extent of each item.
@@ -105,10 +103,10 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
   @protected
   double estimateMaxScrollOffset(
     SliverConstraints constraints, {
-    int firstIndex,
-    int lastIndex,
-    double leadingScrollOffset,
-    double trailingScrollOffset,
+    int? firstIndex,
+    int? lastIndex,
+    double? leadingScrollOffset,
+    double? trailingScrollOffset,
   }) {
     return childManager.estimateMaxScrollOffset(
       constraints,
@@ -141,11 +139,11 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
   ///    values.
   @protected
   double computeMaxScrollOffset(SliverConstraints constraints, double itemExtent) {
-    return childManager.childCount * itemExtent;
+    return childManager.childCount! * itemExtent;
   }
 
   int _calculateLeadingGarbage(int firstIndex) {
-    RenderBox walker = firstChild;
+    RenderBox? walker = firstChild;
     int leadingGarbage = 0;
     while(walker != null && indexOf(walker) < firstIndex){
       leadingGarbage += 1;
@@ -155,7 +153,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
   }
 
   int _calculateTrailingGarbage(int targetLastIndex) {
-    RenderBox walker = lastChild;
+    RenderBox? walker = lastChild;
     int trailingGarbage = 0;
     while(walker != null && indexOf(walker) > targetLastIndex){
       trailingGarbage += 1;
@@ -184,12 +182,12 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     );
 
     final int firstIndex = getMinChildIndexForScrollOffset(scrollOffset, itemExtent);
-    final int targetLastIndex = targetEndScrollOffset.isFinite ?
+    final int? targetLastIndex = targetEndScrollOffset.isFinite ?
         getMaxChildIndexForScrollOffset(targetEndScrollOffset, itemExtent) : null;
 
     if (firstChild != null) {
       final int leadingGarbage = _calculateLeadingGarbage(firstIndex);
-      final int trailingGarbage = _calculateTrailingGarbage(targetLastIndex);
+      final int trailingGarbage = _calculateTrailingGarbage(targetLastIndex!);
       collectGarbage(leadingGarbage, trailingGarbage);
     } else {
       collectGarbage(0, 0);
@@ -227,10 +225,10 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
       }
     }
 
-    RenderBox trailingChildWithLayout;
+    RenderBox? trailingChildWithLayout;
 
-    for (int index = indexOf(firstChild) - 1; index >= firstIndex; --index) {
-      final RenderBox child = insertAndLayoutLeadingChild(childConstraints);
+    for (int index = indexOf(firstChild!) - 1; index >= firstIndex; --index) {
+      final RenderBox? child = insertAndLayoutLeadingChild(childConstraints);
       if (child == null) {
         // Items before the previously first child are no longer present.
         // Reset the scroll offset to offset all items prior and up to the
@@ -245,15 +243,15 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     }
 
     if (trailingChildWithLayout == null) {
-      firstChild.layout(childConstraints);
-      final SliverMultiBoxAdaptorParentData childParentData = firstChild.parentData as SliverMultiBoxAdaptorParentData;
+      firstChild!.layout(childConstraints);
+      final SliverMultiBoxAdaptorParentData childParentData = firstChild!.parentData as SliverMultiBoxAdaptorParentData;
       childParentData.layoutOffset = indexToLayoutOffset(itemExtent, firstIndex);
       trailingChildWithLayout = firstChild;
     }
 
     double estimatedMaxScrollOffset = double.infinity;
-    for (int index = indexOf(trailingChildWithLayout) + 1; targetLastIndex == null || index <= targetLastIndex; ++index) {
-      RenderBox child = childAfter(trailingChildWithLayout);
+    for (int index = indexOf(trailingChildWithLayout!) + 1; targetLastIndex == null || index <= targetLastIndex; ++index) {
+      RenderBox? child = childAfter(trailingChildWithLayout!);
       if (child == null || indexOf(child) != index) {
         child = insertAndLayoutChild(childConstraints, after: trailingChildWithLayout);
         if (child == null) {
@@ -268,16 +266,16 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
       assert(child != null);
       final SliverMultiBoxAdaptorParentData childParentData = child.parentData as SliverMultiBoxAdaptorParentData;
       assert(childParentData.index == index);
-      childParentData.layoutOffset = indexToLayoutOffset(itemExtent, childParentData.index);
+      childParentData.layoutOffset = indexToLayoutOffset(itemExtent, childParentData.index!);
     }
 
-    final int lastIndex = indexOf(lastChild);
+    final int lastIndex = indexOf(lastChild!);
     final double leadingScrollOffset = indexToLayoutOffset(itemExtent, firstIndex);
     final double trailingScrollOffset = indexToLayoutOffset(itemExtent, lastIndex + 1);
 
-    assert(firstIndex == 0 || childScrollOffset(firstChild) - scrollOffset <= precisionErrorTolerance);
+    assert(firstIndex == 0 || childScrollOffset(firstChild!)! - scrollOffset <= precisionErrorTolerance);
     assert(debugAssertChildListIsNonEmptyAndContiguous());
-    assert(indexOf(firstChild) == firstIndex);
+    assert(indexOf(firstChild!) == firstIndex);
     assert(targetLastIndex == null || lastIndex <= targetLastIndex);
 
     estimatedMaxScrollOffset = math.min(
@@ -304,7 +302,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     );
 
     final double targetEndScrollOffsetForPaint = constraints.scrollOffset + constraints.remainingPaintExtent;
-    final int targetLastIndexForPaint = targetEndScrollOffsetForPaint.isFinite ?
+    final int? targetLastIndexForPaint = targetEndScrollOffsetForPaint.isFinite ?
         getMaxChildIndexForScrollOffset(targetEndScrollOffsetForPaint, itemExtent) : null;
     geometry = SliverGeometry(
       scrollExtent: estimatedMaxScrollOffset,
@@ -350,14 +348,14 @@ class RenderSliverFixedExtentList extends RenderSliverFixedExtentBoxAdaptor {
   ///
   /// The [childManager] argument must not be null.
   RenderSliverFixedExtentList({
-    @required RenderSliverBoxChildManager childManager,
-    double itemExtent,
+    required RenderSliverBoxChildManager childManager,
+    double? itemExtent,
   }) : _itemExtent = itemExtent,
        super(childManager: childManager);
 
   @override
-  double get itemExtent => _itemExtent;
-  double _itemExtent;
+  double get itemExtent => _itemExtent!;
+  double? _itemExtent;
   set itemExtent(double value) {
     assert(value != null);
     if (_itemExtent == value)

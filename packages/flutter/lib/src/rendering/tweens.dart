@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/animation.dart';
 import 'package:flutter/painting.dart';
 
@@ -22,12 +20,12 @@ class FractionalOffsetTween extends Tween<FractionalOffset> {
   ///
   /// The [begin] and [end] properties may be null; the null value
   /// is treated as meaning the center.
-  FractionalOffsetTween({ FractionalOffset begin, FractionalOffset end })
+  FractionalOffsetTween({ FractionalOffset? begin, FractionalOffset? end })
     : super(begin: begin, end: end);
 
   /// Returns the value this variable has at the given animation clock value.
   @override
-  FractionalOffset lerp(double t) => FractionalOffset.lerp(begin, end, t);
+  FractionalOffset lerp(double t) => FractionalOffset.lerp(begin, end, t)!;
 }
 
 /// An interpolation between two alignments.
@@ -46,12 +44,12 @@ class AlignmentTween extends Tween<Alignment> {
   ///
   /// The [begin] and [end] properties may be null; the null value
   /// is treated as meaning the center.
-  AlignmentTween({ Alignment begin, Alignment end })
+  AlignmentTween({ Alignment? begin, Alignment? end })
     : super(begin: begin, end: end);
 
   /// Returns the value this variable has at the given animation clock value.
   @override
-  Alignment lerp(double t) => Alignment.lerp(begin, end, t);
+  Alignment lerp(double t) => Alignment.lerp(begin, end, t)!;
 }
 
 /// An interpolation between two [AlignmentGeometry].
@@ -70,11 +68,11 @@ class AlignmentGeometryTween extends Tween<AlignmentGeometry> {
   /// The [begin] and [end] properties may be null; the null value
   /// is treated as meaning the center.
   AlignmentGeometryTween({
-    AlignmentGeometry begin,
-    AlignmentGeometry end,
+    AlignmentGeometry? begin,
+    AlignmentGeometry? end,
   }) : super(begin: begin, end: end);
 
   /// Returns the value this variable has at the given animation clock value.
   @override
-  AlignmentGeometry lerp(double t) => AlignmentGeometry.lerp(begin, end, t);
+  AlignmentGeometry lerp(double t) => AlignmentGeometry.lerp(begin, end, t)!;
 }
