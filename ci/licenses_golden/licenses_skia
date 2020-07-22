@@ -1,4 +1,4 @@
-Signature: 272d4d328f5c701669ce5c3f9cbfb112
+Signature: 193646a04cb05d915bf2a7d261b06f27
 
 UNUSED LICENSES:
 
@@ -5671,30 +5671,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
-ORIGIN: ../../../third_party/skia/fuzz/oss_fuzz/FuzzAPIImageFilter.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/fuzz/oss_fuzz/FuzzAPICreateDDL.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../third_party/skia/fuzz/FuzzCommon.h
-FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzAPIImageFilter.cpp
-FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzAndroidCodec.cpp
-FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzAnimatedImage.cpp
-FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzDrawFunctions.cpp
-FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzGradients.cpp
-FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzImage.cpp
-FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzIncrementalImage.cpp
-FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzJPEGEncoder.cpp
-FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzJSON.cpp
-FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzMockGPUCanvas.cpp
-FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzNullCanvas.cpp
-FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzPNGEncoder.cpp
-FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzPathMeasure.cpp
-FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzPathop.cpp
-FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzPolyUtils.cpp
-FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzRasterN32Canvas.cpp
-FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzTextBlobDeserialize.cpp
-FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzWEBPEncoder.cpp
-FILE: ../../../third_party/skia/modules/skottie/fuzz/FuzzSkottieJSON.cpp
+FILE: ../../../third_party/skia/fuzz/FuzzCreateDDL.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzAPICreateDDL.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzAPISVGCanvas.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzSVG.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzSkRuntimeEffect.cpp
 ----------------------------------------------------------------------------------------------------
-Copyright 2018 Google, LLC
+Copyright 2020 Google, LLC
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -5727,13 +5712,30 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
-ORIGIN: ../../../third_party/skia/fuzz/oss_fuzz/FuzzAPISVGCanvas.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/fuzz/oss_fuzz/FuzzAPIImageFilter.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzAPISVGCanvas.cpp
-FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzSVG.cpp
-FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzSkRuntimeEffect.cpp
+FILE: ../../../third_party/skia/fuzz/FuzzCommon.h
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzAPIImageFilter.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzAndroidCodec.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzAnimatedImage.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzDrawFunctions.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzGradients.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzImage.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzIncrementalImage.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzJPEGEncoder.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzJSON.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzMockGPUCanvas.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzNullCanvas.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzPNGEncoder.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzPathMeasure.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzPathop.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzPolyUtils.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzRasterN32Canvas.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzTextBlobDeserialize.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzWEBPEncoder.cpp
+FILE: ../../../third_party/skia/modules/skottie/fuzz/FuzzSkottieJSON.cpp
 ----------------------------------------------------------------------------------------------------
-Copyright 2020 Google, LLC
+Copyright 2018 Google, LLC
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
