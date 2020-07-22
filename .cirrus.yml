@@ -105,7 +105,7 @@ task:
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
     - flutter config --no-analytics
-    - [[ "$SHOULD_UPDATE_PACKAGES" == 'TRUE' ]] && flutter update-packages
+    - [ "$SHOULD_UPDATE_PACKAGES" == 'TRUE' ] && flutter update-packages
     - flutter doctor -v
     - ./dev/bots/accept_android_sdk_licenses.sh
     - date
@@ -587,7 +587,7 @@ task:
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
     - flutter config --no-analytics
-    - [[ "$SHOULD_UPDATE_PACKAGES" == 'TRUE' ]] && flutter update-packages
+    - [ "$SHOULD_UPDATE_PACKAGES" == 'TRUE' ] && flutter update-packages
     - flutter doctor -v
     - date
     - which flutter
