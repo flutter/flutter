@@ -14,7 +14,6 @@ import 'android/android_sdk.dart';
 import 'android/android_workflow.dart';
 import 'application_package.dart';
 import 'artifacts.dart';
-import 'base/common.dart';
 import 'base/config.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
@@ -118,37 +117,31 @@ abstract class DeviceManager {
     // found quickly, we don't wait for all the discoverers to complete.
     final List<Device> prefixMatches = <Device>[];
     final Completer<Device> exactMatchCompleter = Completer<Device>();
-    final List<StreamSubscription<List<Device>>> futureDevices = <StreamSubscription<List<Device>>>[];
+    final List<Future<List<Device>>> futureDevices = <Future<List<Device>>>[];
     for (final DeviceDiscovery discoverer in _platformDiscoverers) {
       futureDevices.add(
         discoverer
         .devices
-        .asStream()
-        .listen((List<Device> devices) {
+        .then((List<Device> devices) {
           for (final Device device in devices) {
             if (exactlyMatchesDeviceId(device)) {
               exactMatchCompleter.complete(device);
-              return;
+              return null;
             }
             if (startsWithDeviceId(device)) {
               prefixMatches.add(device);
             }
           }
-        }));
+          return null;
+        })
+      );
     }
-
-    // When an exact match is found, bail early and ignore all other discoverers.
-    unawaited(exactMatchCompleter.future.whenComplete(() {
-      for (final StreamSubscription<List<Device>> subscription in futureDevices) {
-        subscription.cancel();
-      }
-    }));
 
     // Wait for an exact match, or for all discoverers to return results.
     await Future.any<dynamic>(<Future<dynamic>>[
       exactMatchCompleter.future,
-      Future.wait<Device>(futureDevices.map((StreamSubscription<List<Device>> subscription) => subscription.asFuture()))]
-    );
+      Future.wait<List<Device>>(futureDevices),
+    ]);
 
     if (exactMatchCompleter.isCompleted) {
       return <Device>[await exactMatchCompleter.future];

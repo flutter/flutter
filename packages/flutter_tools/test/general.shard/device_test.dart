@@ -41,7 +41,31 @@ void main() {
       Cache: () => cache,
     });
 
-    testUsingContext('getDeviceById', () async {
+    testUsingContext('getDeviceById exact matcher', () async {
+      final FakeDevice device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
+      final FakeDevice device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
+      final FakeDevice device3 = FakeDevice('iPod touch', '82564b38861a9a5');
+      final List<Device> devices = <Device>[device1, device2, device3];
+
+      // Include device discovery that never completes to prove the first exact
+      // match is returned quickly.
+      final DeviceManager deviceManager = TestDeviceManager(
+        devices,
+        testLongPollingDeviceDiscovery: true,
+      );
+
+      Future<void> expectDevice(String id, List<Device> expected) async {
+        expect(await deviceManager.getDevicesById(id), expected);
+      }
+      await expectDevice('01abfc49119c410e', <Device>[device2]);
+      await expectDevice('Nexus 5X', <Device>[device2]);
+      await expectDevice('0553790d0a4e726f', <Device>[device1]);
+    }, overrides: <Type, Generator>{
+      Artifacts: () => Artifacts.test(),
+      Cache: () => cache,
+    });
+
+    testUsingContext('getDeviceById prefix matcher', () async {
       final FakeDevice device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
       final FakeDevice device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
       final FakeDevice device3 = FakeDevice('iPod touch', '82564b38861a9a5');
@@ -51,9 +75,6 @@ void main() {
       Future<void> expectDevice(String id, List<Device> expected) async {
         expect(await deviceManager.getDevicesById(id), expected);
       }
-      await expectDevice('01abfc49119c410e', <Device>[device2]);
-      await expectDevice('Nexus 5X', <Device>[device2]);
-      await expectDevice('0553790d0a4e726f', <Device>[device1]);
       await expectDevice('Nexus 5', <Device>[device1]);
       await expectDevice('0553790', <Device>[device1]);
       await expectDevice('Nexus', <Device>[device1, device2]);
@@ -374,16 +395,24 @@ void main() {
 }
 
 class TestDeviceManager extends DeviceManager {
-  TestDeviceManager(List<Device> allDevices) {
-    _deviceDiscoverer = FakePollingDeviceDiscovery();
+    TestDeviceManager(List<Device> allDevices, {
+    bool testLongPollingDeviceDiscovery = false,
+  }) {
+    _fakeDeviceDiscoverer = FakePollingDeviceDiscovery();
+    _deviceDiscoverers = <DeviceDiscovery>[
+      if (testLongPollingDeviceDiscovery)
+        LongPollingDeviceDiscovery(),
+      _fakeDeviceDiscoverer,
+    ];
     resetDevices(allDevices);
   }
   @override
-  List<DeviceDiscovery> get deviceDiscoverers => <DeviceDiscovery>[_deviceDiscoverer];
-  FakePollingDeviceDiscovery _deviceDiscoverer;
+  List<DeviceDiscovery> get deviceDiscoverers => _deviceDiscoverers;
+  List<DeviceDiscovery> _deviceDiscoverers;
+  FakePollingDeviceDiscovery _fakeDeviceDiscoverer;
 
   void resetDevices(List<Device> allDevices) {
-    _deviceDiscoverer.setDevices(allDevices);
+    _fakeDeviceDiscoverer.setDevices(allDevices);
   }
 
   bool isAlwaysSupportedOverride;
