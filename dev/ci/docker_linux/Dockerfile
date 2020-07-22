@@ -123,7 +123,7 @@ RUN bundle config set system 'true' && \
   bundle install --system
 
 # Install goldctl, for Golden testing
-# Last updated 2020-02-04 (update to rebuild Dockerfile with latest goldctl)
+# Last updated 2020-07-22 (update to rebuild Dockerfile with latest goldctl)
 COPY bots/download_goldctl.sh /download_goldctl.sh
 ENV GOLDCTL '/depot_tools/goldctl'
 RUN /download_goldctl.sh
