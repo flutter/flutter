@@ -38,53 +38,91 @@ enum FlutterLogoStyle {
 class FlutterLogoDecoration extends Decoration {
   /// Creates a decoration that knows how to paint Flutter's logo.
   ///
-  /// The [lightColor] and [darkColor] are used to fill the logo. The [style]
-  /// controls whether and where to draw the "Flutter" label. If one is shown,
-  /// the [textColor] controls the color of the label.
+  /// The [lightColor], [mediumColor], and [darkColor] are used to fill the
+  /// logo. The [style] controls whether and where to draw the "Flutter" label.
+  /// If one is shown, the [textColor] controls the color of the label.
   ///
-  /// The [lightColor], [darkColor], [textColor], [style], and [margin]
-  /// arguments must not be null.
+  /// The [lightColor], [mediumColor], [darkColor], [textColor], [style], and
+  /// [margin] arguments must not be null.
   const FlutterLogoDecoration({
-    this.lightColor = const Color(0xFF42A5F5), // Colors.blue[400]
-    this.darkColor = const Color(0xFF0D47A1), // Colors.blue[900]
-    this.textColor = const Color(0xFF616161),
+    this.lightColor = defaultLightColor,
+    this.mediumColor = defaultMediumColor,
+    this.darkColor = defaultDarkColor,
+    this.textColor = defaultTextColor,
     this.style = FlutterLogoStyle.markOnly,
     this.margin = EdgeInsets.zero,
   }) : assert(lightColor != null),
+       assert(mediumColor != null),
        assert(darkColor != null),
        assert(textColor != null),
        assert(style != null),
        assert(margin != null),
        _position = identical(style, FlutterLogoStyle.markOnly) ? 0.0 : identical(style, FlutterLogoStyle.horizontal) ? 1.0 : -1.0,
-       // (see https://github.com/dart-lang/sdk/issues/26980 for details about that ignore statement)
        _opacity = 1.0;
 
-  const FlutterLogoDecoration._(this.lightColor, this.darkColor, this.textColor, this.style, this.margin, this._position, this._opacity);
+  const FlutterLogoDecoration._(this.lightColor, this.mediumColor, this.darkColor, this.textColor, this.style, this.margin, this._position, this._opacity);
 
-  /// The lighter of the two colors used to paint the logo.
+  // Colors lifted from the logo SVG: https://drive.google.com/file/d/1tYx3BPqoi1sIX4eUiqrMTVz8zluu-Tp2/view.
+
+  /// The default color used to paint the top and middle beam of the "F" logo.
   ///
-  /// If possible, the default should be used. It corresponds to the 400 and 900
-  /// values of [material.Colors.blue] from the Material library.
+  /// See also:
   ///
-  /// If for some reason that color scheme is impractical, the same entries from
-  /// [material.Colors.amber], [material.Colors.red], or
-  /// [material.Colors.indigo] colors can be used. These are Flutter's secondary
-  /// colors.
+  ///  * [lightColor], for which this is the default value.
+  static const Color defaultLightColor = Color(0xFF54C5F8);
+
+  /// The default color used to paint the intersection of the middle and
+  /// the bottom beam of the "F" logo.
   ///
-  /// In extreme cases where none of those four color schemes will work,
-  /// [material.Colors.pink], [material.Colors.purple], or
-  /// [material.Colors.cyan] can be used. These are Flutter's tertiary colors.
+  /// See also:
+  ///
+  ///  * [mediumColor], for which this is the default value.
+  static const Color defaultMediumColor = Color(0xFF29B6F6);
+
+  /// The default color used to paint the bottom beam of the "F" logo.
+  ///
+  /// See also:
+  ///
+  ///  * [darkColor], for which this is the default value.
+  static const Color defaultDarkColor = Color(0xFF01579B);
+
+  /// The default color used to paint the "Flutter" text on the logo.
+  ///
+  /// See also:
+  ///
+  ///  * [textColor], for which this is the default value.
+  static const Color defaultTextColor = Color(0xFF757575);
+
+  /// The lightest of the three colors used to paint the logo.
+  ///
+  /// This color is used to paint the top and middle beam of the Flutter "F"
+  /// logo.
+  ///
+  /// If possible, the default ([defaultLightColor]) should be used.
   final Color lightColor;
 
-  /// The darker of the two colors used to paint the logo.
+  /// A color in between the [lightColor] and the [darkColor] used to paint
+  /// the logo.
   ///
-  /// See [lightColor] for more information about selecting the logo's colors.
+  /// This color is used to paint the intersection of the middle and bottom beam
+  /// of the Flutter "F" logo.
+  ///
+  /// If possible, the default ([defaultMediumColor]) should be used.
+  final Color mediumColor;
+
+  /// The darkest of the three colors used to paint the logo.
+  ///
+  /// This color is used to paint the bottom beam of the Flutter "F"
+  /// logo.
+  ///
+  /// If possible, the default ([defaultDarkColor]) should be used.
   final Color darkColor;
 
   /// The color used to paint the "Flutter" text on the logo, if [style] is
-  /// [FlutterLogoStyle.horizontal] or [FlutterLogoStyle.stacked]. The
-  /// appropriate color is `const Color(0xFF616161)` (a medium gray), against a
-  /// white background.
+  /// [FlutterLogoStyle.horizontal] or [FlutterLogoStyle.stacked].
+  ///
+  /// If possible, the default ([defaultTextColor], a medium grey) should be
+  /// used against a white background.
   final Color textColor;
 
   /// Whether and where to draw the "Flutter" text. By default, only the logo
@@ -143,6 +181,7 @@ class FlutterLogoDecoration extends Decoration {
     if (a == null) {
       return FlutterLogoDecoration._(
         b.lightColor,
+        b.mediumColor,
         b.darkColor,
         b.textColor,
         b.style,
@@ -154,6 +193,7 @@ class FlutterLogoDecoration extends Decoration {
     if (b == null) {
       return FlutterLogoDecoration._(
         a.lightColor,
+        a.mediumColor,
         a.darkColor,
         a.textColor,
         a.style,
@@ -168,6 +208,7 @@ class FlutterLogoDecoration extends Decoration {
       return b;
     return FlutterLogoDecoration._(
       Color.lerp(a.lightColor, b.lightColor, t),
+      Color.lerp(a.mediumColor, b.mediumColor, t),
       Color.lerp(a.darkColor, b.darkColor, t),
       Color.lerp(a.textColor, b.textColor, t),
       t < 0.5 ? a.style : b.style,
@@ -296,11 +337,11 @@ class _FlutterLogoPainter extends BoxPainter {
 
     // Set up the styles.
     final Paint lightPaint = Paint()
-      ..color = const Color(0xFF54C5F8); // _config.lightColor.withOpacity(0.8);
+      ..color = _config.lightColor;
     final Paint mediumPaint = Paint()
-      ..color = const Color(0xFF29B6F6); // _config.lightColor;
+      ..color = _config.mediumColor;
     final Paint darkPaint = Paint()
-      ..color = const Color(0xFF01579B); // _config.darkColor;
+      ..color = _config.darkColor;
 
     final ui.Gradient triangleGradient = ui.Gradient.linear(
       const Offset(87.2623 + 37.9092, 28.8384 + 123.4389),
@@ -347,7 +388,7 @@ class _FlutterLogoPainter extends BoxPainter {
     canvas.drawRect(const Rect.fromLTWH(59.8, 123.1, 39.4, 39.4), mediumPaint);
     canvas.restore();
 
-    // The two gradients.
+    // The gradients below the middle beam on top of the bottom beam.
     final Path triangle = Path()
       ..moveTo(79.5, 170.7)
       ..lineTo(120.9, 156.4)
