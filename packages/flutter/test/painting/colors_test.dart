@@ -7,6 +7,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
 
 const double _doubleColorPrecision = 0.01;
 
@@ -439,5 +440,14 @@ void main() {
     property = ColorProperty('foo', null);
     final Map<String, Object> json = property.toJsonMap(const DiagnosticsSerializationDelegate());
     expect(json.containsKey('valueProperties'), isFalse);
+  });
+
+  test('MaterialColor swatch comparison', () {
+    Map<int, Color> sampleMap = {0: Colors.lightBlue, 1: Colors.deepOrange, 2: Colors.blueGrey};
+    MaterialColor first = new MaterialColor(0, sampleMap);
+    MaterialColor second = new MaterialColor(0, sampleMap);
+    MaterialColor third = new MaterialColor(0, {0: Colors.lightBlue, 1: Colors.deepOrange, 2:Colors.blueGrey});
+    expect((first == second), true);
+    expect((first == third), true);
   });
 }
