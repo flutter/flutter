@@ -227,7 +227,7 @@ abstract class CustomPainter extends Listenable {
   /// that in most cases semantics change when something new is drawn.
   bool shouldRebuildSemantics(covariant CustomPainter oldDelegate) => shouldRepaint(oldDelegate);
 
-  /// Called whenever a new instance of the custom clipper delegate class is
+  /// Called whenever a new instance of the custom painter delegate class is
   /// provided to the [RenderCustomPaint] object, or any time that a new
   /// [CustomPaint] object is created with a new instance of the custom painter
   /// delegate class (which amounts to the same thing, because the latter is
