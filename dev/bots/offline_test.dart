@@ -33,7 +33,7 @@ Future<void> _runAndroidPackagingTests() async {
     '--revision=$commit',
   ]);
   await runCommand('unzip', <String>[
-    '*.zip'
+    '*.tar.xz'
   ], workingDirectory: zipLocation);
 
   // Step 2: Invoke precache using zip packaged flutter
