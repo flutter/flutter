@@ -589,25 +589,26 @@ class SurfacePath implements ui.Path {
         ++conicCount;
       }
     }
+
     // Any points we generate based on unit vectors cos/sinStart , cos/sinStop
     // we rotate to start vector, scale by rect.width/2 rect.height/2 and
     // then translate to center point.
     final double scaleX = rect.width / 2;
-    final double scaleY =
-        dir == SPathDirection.kCCW ? -rect.height / 2 : rect.height / 2;
+    final bool ccw = dir == SPathDirection.kCCW;
+    final double scaleY = rect.height / 2;
     final double centerX = rect.center.dx;
     final double centerY = rect.center.dy;
     for (Conic conic in conics) {
       double x = conic.p0x;
-      double y = conic.p0y;
+      double y = ccw ? -conic.p0y : conic.p0y;
       conic.p0x = (cosStart * x - sinStart * y) * scaleX + centerX;
       conic.p0y = (cosStart * y + sinStart * x) * scaleY + centerY;
       x = conic.p1x;
-      y = conic.p1y;
+      y = ccw ? -conic.p1y : conic.p1y;
       conic.p1x = (cosStart * x - sinStart * y) * scaleX + centerX;
       conic.p1y = (cosStart * y + sinStart * x) * scaleY + centerY;
       x = conic.p2x;
-      y = conic.p2y;
+      y = ccw ? -conic.p2y : conic.p2y;
       conic.p2x = (cosStart * x - sinStart * y) * scaleX + centerX;
       conic.p2y = (cosStart * y + sinStart * x) * scaleY + centerY;
     }
