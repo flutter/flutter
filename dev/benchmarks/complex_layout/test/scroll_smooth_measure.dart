@@ -1,6 +1,6 @@
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file
+// found in the LICENSE file.
 
 // This test is a use case of flutter/flutter#60796
 // the test should be run as:
@@ -120,5 +120,3 @@ Future<void> main() async {
     await tester.idle();
   }, semanticsEnabled: false);
 }
-
-double _sq(double value) => value * value;
