@@ -459,6 +459,8 @@ task:
         - pub get
         - cd %CIRRUS_WORKING_DIR%\packages\flutter_tools\test\data\asset_test\font
         - pub get
+        - cd %CIRRUS_WORKING_DIR%\dev\bots
+        - pub get
         - cd %CIRRUS_WORKING_DIR%
         - dart --enable-asserts dev\bots\test.dart
 
@@ -493,6 +495,7 @@ task:
         - pub get
         - cd %CIRRUS_WORKING_DIR%\dev\tools
         - pub get
+        - cd %CIRRUS_WORKING_DIR%
         - dart --enable-asserts ./dev/bots/test.dart
 
     # TODO(ianh): Enable Web tests on Windows
