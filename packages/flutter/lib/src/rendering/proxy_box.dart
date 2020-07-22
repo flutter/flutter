@@ -866,8 +866,7 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
   int _alpha;
 
   @override
-  bool get alwaysNeedsCompositing => child != null && _currentlyNeedsCompositing;
-  bool _currentlyNeedsCompositing;
+  bool get alwaysNeedsCompositing => child != null && _alpha != 0;
 
   /// The animation that drives this render object's opacity.
   ///
@@ -919,11 +918,10 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
 
   void _updateOpacity() {
     final int oldAlpha = _alpha;
+    final bool didNeedCompositing = alwaysNeedsCompositing;
     _alpha = ui.Color.getAlphaFromOpacity(_opacity.value);
     if (oldAlpha != _alpha) {
-      final bool didNeedCompositing = _currentlyNeedsCompositing;
-      _currentlyNeedsCompositing = _alpha > 0 && _alpha < 255;
-      if (child != null && didNeedCompositing != _currentlyNeedsCompositing)
+      if (child != null && didNeedCompositing != alwaysNeedsCompositing)
         markNeedsCompositingBitsUpdate();
       markNeedsPaint();
       if (oldAlpha == 0 || _alpha == 0)

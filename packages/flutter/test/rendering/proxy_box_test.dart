@@ -305,7 +305,7 @@ void main() {
     expect(renderAnimatedOpacity.needsCompositing, false);
   });
 
-  test('RenderAnimatedOpacity does not composite if it is opaque', () {
+  test('RenderAnimatedOpacity does composite if it is opaque', () {
     final Animation<double> opacityAnimation = AnimationController(
       vsync: FakeTickerProvider(),
     )..value = 1.0;
@@ -317,7 +317,7 @@ void main() {
     );
 
     layout(renderAnimatedOpacity, phase: EnginePhase.composite);
-    expect(renderAnimatedOpacity.needsCompositing, false);
+    expect(renderAnimatedOpacity.needsCompositing, true);
   });
 
   test('RenderAnimatedOpacity reuses its layer', () {
