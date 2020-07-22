@@ -187,6 +187,14 @@ void main() {
     expect(mockCanvas.methodCallLog[2].methodName, 'restore');
     expect(mockCanvas.methodCallLog[3].methodName, 'endOfPaint');
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/61697.
+  test('Allows restore calls after recording has ended', () {
+    final RecordingCanvas rc = RecordingCanvas(Rect.fromLTRB(0, 0, 200, 400));
+    rc.endRecording();
+    // Should not throw exception on restore.
+    expect(() => rc.restore(), returnsNormally);
+  });
 }
 
 // Expect a drawDRRect call to be registered in the mock call log, with the expectedArguments

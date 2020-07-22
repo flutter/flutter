@@ -814,7 +814,6 @@ class BitmapCanvas extends EngineCanvas {
 
   @override
   void endOfPaint() {
-    assert(_saveCount == 0);
     _canvasPool.endOfPaint();
     _elementCache?.commitFrame();
   }
