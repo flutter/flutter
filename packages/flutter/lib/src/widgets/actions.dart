@@ -588,8 +588,6 @@ class Actions extends StatefulWidget {
   ///
   /// Setting `nullOk` to true means that if no ambient [Actions] widget is
   /// found, then this method will return false instead of throwing.
-  ///
-  /// Returns the result of invoking the action's [Action.invoke] method.
   static Object invoke<T extends Intent>(
     BuildContext context,
     T intent, {
