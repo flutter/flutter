@@ -804,7 +804,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       rectLocal = rect;
     } else {
       assert(rect != null);
-      return RevealedOffset(offset: offset.pixels, rect: rect!);
+      return RevealedOffset(offset: offset.pixels!, rect: rect!);
     }
 
     assert(pivotExtent != null);
@@ -888,7 +888,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     }
 
     final double targetOffset = leadingScrollOffset - (mainAxisExtent - targetMainAxisExtent) * alignment;
-    final double offsetDifference = offset.pixels - targetOffset;
+    final double offsetDifference = offset.pixels! - targetOffset;
 
     switch (axisDirection) {
       case AxisDirection.down:
@@ -1145,7 +1145,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     }
     final RevealedOffset leadingEdgeOffset = viewport.getOffsetToReveal(descendant, 0.0, rect: rect);
     final RevealedOffset trailingEdgeOffset = viewport.getOffsetToReveal(descendant, 1.0, rect: rect);
-    final double currentOffset = offset.pixels;
+    final double currentOffset = offset.pixels!;
 
     //           scrollOffset
     //                       0 +---------+
@@ -1172,8 +1172,8 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     if (leadingEdgeOffset.offset < trailingEdgeOffset.offset) {
       // `descendant` is too big to be visible on screen in its entirety. Let's
       // align it with the edge that requires the least amount of scrolling.
-      final double leadingEdgeDiff = (offset.pixels - leadingEdgeOffset.offset).abs();
-      final double trailingEdgeDiff = (offset.pixels - trailingEdgeOffset.offset).abs();
+      final double leadingEdgeDiff = (offset.pixels! - leadingEdgeOffset.offset).abs();
+      final double trailingEdgeDiff = (offset.pixels! - trailingEdgeOffset.offset).abs();
       targetOffset = leadingEdgeDiff < trailingEdgeDiff ? leadingEdgeOffset : trailingEdgeOffset;
     } else if (currentOffset > leadingEdgeOffset.offset) {
       // `descendant` currently starts above the leading edge and can be shown
@@ -1467,7 +1467,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
     int count = 0;
     do {
       assert(offset.pixels != null);
-      correction = _attemptLayout(mainAxisExtent, crossAxisExtent, offset.pixels + centerOffsetAdjustment);
+      correction = _attemptLayout(mainAxisExtent, crossAxisExtent, offset.pixels! + centerOffsetAdjustment);
       if (correction != 0.0) {
         offset.correctBy(correction);
       } else {
@@ -1859,7 +1859,7 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
     double effectiveExtent;
     do {
       assert(offset.pixels != null);
-      correction = _attemptLayout(mainAxisExtent, crossAxisExtent, offset.pixels);
+      correction = _attemptLayout(mainAxisExtent, crossAxisExtent, offset.pixels!);
       if (correction != 0.0) {
         offset.correctBy(correction);
       } else {

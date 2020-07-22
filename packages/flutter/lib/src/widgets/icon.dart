@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'package:flutter/rendering.dart';
 
@@ -71,7 +70,7 @@ class Icon extends StatelessWidget {
   /// The [size] and [color] default to the value given by the current [IconTheme].
   const Icon(
     this.icon, {
-    Key key,
+    Key? key,
     this.size,
     this.color,
     this.semanticLabel,
@@ -82,7 +81,7 @@ class Icon extends StatelessWidget {
   ///
   /// The icon can be null, in which case the widget will render as an empty
   /// space of the specified [size].
-  final IconData icon;
+  final IconData? icon;
 
   /// The size of the icon in logical pixels.
   ///
@@ -96,7 +95,7 @@ class Icon extends StatelessWidget {
   /// [IconButton.iconSize] instead, so that the [IconButton] can make the splash
   /// area the appropriate size as well. The [IconButton] uses an [IconTheme] to
   /// pass down the size to the [Icon].
-  final double size;
+  final double? size;
 
   /// The color to use when drawing the icon.
   ///
@@ -125,7 +124,7 @@ class Icon extends StatelessWidget {
   /// )
   /// ```
   /// {@end-tool}
-  final Color color;
+  final Color? color;
 
   /// Semantic label for the icon.
   ///
@@ -134,7 +133,7 @@ class Icon extends StatelessWidget {
   ///
   ///  * [SemanticsProperties.label], which is set to [semanticLabel] in the
   ///    underlying	 [Semantics] widget.
-  final String semanticLabel;
+  final String? semanticLabel;
 
   /// The text direction to use for rendering the icon.
   ///
@@ -149,16 +148,16 @@ class Icon extends StatelessWidget {
   /// This property has no effect if the [icon]'s [IconData.matchTextDirection]
   /// field is false, but for consistency a text direction value must always be
   /// specified, either directly using this property or using [Directionality].
-  final TextDirection textDirection;
+  final TextDirection? textDirection;
 
   @override
   Widget build(BuildContext context) {
     assert(this.textDirection != null || debugCheckHasDirectionality(context));
-    final TextDirection textDirection = this.textDirection ?? Directionality.of(context);
+    final TextDirection? textDirection = this.textDirection ?? Directionality.of(context);
 
     final IconThemeData iconTheme = IconTheme.of(context);
 
-    final double iconSize = size ?? iconTheme.size;
+    final double? iconSize = size ?? iconTheme.size;
 
     if (icon == null) {
       return Semantics(
@@ -167,8 +166,8 @@ class Icon extends StatelessWidget {
       );
     }
 
-    final double iconOpacity = iconTheme.opacity;
-    Color iconColor = color ?? iconTheme.color;
+    final double iconOpacity = iconTheme.opacity!;
+    Color iconColor = color ?? iconTheme.color!;
     if (iconOpacity != 1.0)
       iconColor = iconColor.withOpacity(iconColor.opacity * iconOpacity);
 
@@ -176,18 +175,18 @@ class Icon extends StatelessWidget {
       overflow: TextOverflow.visible, // Never clip.
       textDirection: textDirection, // Since we already fetched it for the assert...
       text: TextSpan(
-        text: String.fromCharCode(icon.codePoint),
+        text: String.fromCharCode(icon!.codePoint),
         style: TextStyle(
           inherit: false,
           color: iconColor,
           fontSize: iconSize,
-          fontFamily: icon.fontFamily,
-          package: icon.fontPackage,
+          fontFamily: icon!.fontFamily,
+          package: icon!.fontPackage,
         ),
       ),
     );
 
-    if (icon.matchTextDirection) {
+    if (icon!.matchTextDirection) {
       switch (textDirection) {
         case TextDirection.rtl:
           iconWidget = Transform(
@@ -198,6 +197,8 @@ class Icon extends StatelessWidget {
           );
           break;
         case TextDirection.ltr:
+          break;
+        case null:
           break;
       }
     }

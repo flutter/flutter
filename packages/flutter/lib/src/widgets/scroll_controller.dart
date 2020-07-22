@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:async';
 
@@ -86,7 +85,7 @@ class ScrollController extends ChangeNotifier {
 
   /// A label that is used in the [toString] output. Intended to aid with
   /// identifying scroll controller instances in debug output.
-  final String debugLabel;
+  final String? debugLabel;
 
   /// The currently attached positions.
   ///
@@ -117,7 +116,7 @@ class ScrollController extends ChangeNotifier {
   /// The current scroll offset of the scrollable widget.
   ///
   /// Requires the controller to be controlling exactly one scrollable widget.
-  double get offset => position.pixels;
+  double get offset => position.pixels!;
 
   /// Animates the position from its current value to the given value.
   ///
@@ -150,14 +149,13 @@ class ScrollController extends ChangeNotifier {
   /// [WidgetTester.pumpAndSettle].
   Future<void> animateTo(
     double offset, {
-    @required Duration duration,
-    @required Curve curve,
-  }) {
+    required Duration duration,
+    required Curve curve,
+  }) async {
     assert(_positions.isNotEmpty, 'ScrollController not attached to any scroll views.');
-    final List<Future<void>> animations = List<Future<void>>(_positions.length);
-    for (int i = 0; i < _positions.length; i += 1)
-      animations[i] = _positions[i].animateTo(offset, duration: duration, curve: curve);
-    return Future.wait<void>(animations).then<void>((List<void> _) => null);
+    await Future.wait<void>(<Future<void>>[
+      for (int i = 0; i < _positions.length; i += 1) _positions[i].animateTo(offset, duration: duration, curve: curve),
+    ]);
   }
 
   /// Jumps the scroll position from its current value to the given value,
@@ -234,7 +232,7 @@ class ScrollController extends ChangeNotifier {
   ScrollPosition createScrollPosition(
     ScrollPhysics physics,
     ScrollContext context,
-    ScrollPosition oldPosition,
+    ScrollPosition? oldPosition,
   ) {
     return ScrollPositionWithSingleContext(
       physics: physics,
@@ -265,14 +263,14 @@ class ScrollController extends ChangeNotifier {
   @mustCallSuper
   void debugFillDescription(List<String> description) {
     if (debugLabel != null)
-      description.add(debugLabel);
+      description.add(debugLabel!);
     if (initialScrollOffset != 0.0)
       description.add('initialScrollOffset: ${initialScrollOffset.toStringAsFixed(1)}, ');
     if (_positions.isEmpty) {
       description.add('no clients');
     } else if (_positions.length == 1) {
       // Don't actually list the client itself, since its toString may refer to us.
-      description.add('one client, offset ${offset?.toStringAsFixed(1)}');
+      description.add('one client, offset ${offset.toStringAsFixed(1)}');
     } else {
       description.add('${_positions.length} clients');
     }
@@ -325,19 +323,19 @@ class TrackingScrollController extends ScrollController {
   TrackingScrollController({
     double initialScrollOffset = 0.0,
     bool keepScrollOffset = true,
-    String debugLabel,
+    String? debugLabel,
   }) : super(initialScrollOffset: initialScrollOffset,
              keepScrollOffset: keepScrollOffset,
              debugLabel: debugLabel);
 
   final Map<ScrollPosition, VoidCallback> _positionToListener = <ScrollPosition, VoidCallback>{};
-  ScrollPosition _lastUpdated;
-  double _lastUpdatedOffset;
+  ScrollPosition? _lastUpdated;
+  double? _lastUpdatedOffset;
 
   /// The last [ScrollPosition] to change. Returns null if there aren't any
   /// attached scroll positions, or there hasn't been any scrolling yet, or the
   /// last [ScrollPosition] to change has since been removed.
-  ScrollPosition get mostRecentlyUpdatedPosition => _lastUpdated;
+  ScrollPosition? get mostRecentlyUpdatedPosition => _lastUpdated;
 
   /// Returns the scroll offset of the [mostRecentlyUpdatedPosition] or, if that
   /// is null, the initial scroll offset provided to the constructor.
@@ -356,14 +354,14 @@ class TrackingScrollController extends ScrollController {
       _lastUpdated = position;
       _lastUpdatedOffset = position.pixels;
     };
-    position.addListener(_positionToListener[position]);
+    position.addListener(_positionToListener[position]!);
   }
 
   @override
   void detach(ScrollPosition position) {
     super.detach(position);
     assert(_positionToListener.containsKey(position));
-    position.removeListener(_positionToListener[position]);
+    position.removeListener(_positionToListener[position]!);
     _positionToListener.remove(position);
     if (_lastUpdated == position)
       _lastUpdated = null;
@@ -375,7 +373,7 @@ class TrackingScrollController extends ScrollController {
   void dispose() {
     for (final ScrollPosition position in positions) {
       assert(_positionToListener.containsKey(position));
-      position.removeListener(_positionToListener[position]);
+      position.removeListener(_positionToListener[position]!);
     }
     super.dispose();
   }

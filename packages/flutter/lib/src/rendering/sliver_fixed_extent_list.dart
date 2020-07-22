@@ -139,7 +139,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
   ///    values.
   @protected
   double computeMaxScrollOffset(SliverConstraints constraints, double itemExtent) {
-    return childManager.childCount * itemExtent;
+    return childManager.childCount! * itemExtent;
   }
 
   int _calculateLeadingGarbage(int firstIndex) {

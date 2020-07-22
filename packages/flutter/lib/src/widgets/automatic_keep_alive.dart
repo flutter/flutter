@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:async';
 
@@ -29,22 +28,22 @@ class AutomaticKeepAlive extends StatefulWidget {
   /// Creates a widget that listens to [KeepAliveNotification]s and maintains a
   /// [KeepAlive] widget appropriately.
   const AutomaticKeepAlive({
-    Key key,
+    Key? key,
     this.child,
   }) : super(key: key);
 
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.child}
-  final Widget child;
+  final Widget? child;
 
   @override
   _AutomaticKeepAliveState createState() => _AutomaticKeepAliveState();
 }
 
 class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
-  Map<Listenable, VoidCallback> _handles;
-  Widget _child;
+  Map<Listenable, VoidCallback>? _handles;
+  Widget? _child;
   bool _keepingAlive = false;
 
   @override
@@ -62,15 +61,15 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
   void _updateChild() {
     _child = NotificationListener<KeepAliveNotification>(
       onNotification: _addClient,
-      child: widget.child,
+      child: widget.child!,
     );
   }
 
   @override
   void dispose() {
     if (_handles != null) {
-      for (final Listenable handle in _handles.keys)
-        handle.removeListener(_handles[handle]);
+      for (final Listenable handle in _handles!.keys)
+        handle.removeListener(_handles![handle]!);
     }
     super.dispose();
   }
@@ -78,12 +77,12 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
   bool _addClient(KeepAliveNotification notification) {
     final Listenable handle = notification.handle;
     _handles ??= <Listenable, VoidCallback>{};
-    assert(!_handles.containsKey(handle));
-    _handles[handle] = _createCallback(handle);
-    handle.addListener(_handles[handle]);
+    assert(!_handles!.containsKey(handle));
+    _handles![handle] = _createCallback(handle);
+    handle.addListener(_handles![handle]!);
     if (!_keepingAlive) {
       _keepingAlive = true;
-      final ParentDataElement<KeepAliveParentDataMixin> childElement = _getChildElement();
+      final ParentDataElement<KeepAliveParentDataMixin>? childElement = _getChildElement();
       if (childElement != null) {
         // If the child already exists, update it synchronously.
         _updateParentDataOfChild(childElement);
@@ -91,13 +90,13 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
         // If the child doesn't exist yet, we got called during the very first
         // build of this subtree. Wait until the end of the frame to update
         // the child when the child is guaranteed to be present.
-        SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+        SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) {
           if (!mounted) {
             return;
           }
-          final ParentDataElement<KeepAliveParentDataMixin> childElement = _getChildElement();
+          final ParentDataElement<KeepAliveParentDataMixin>? childElement = _getChildElement();
           assert(childElement != null);
-          _updateParentDataOfChild(childElement);
+          _updateParentDataOfChild(childElement!);
         });
       }
     }
@@ -108,10 +107,10 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
   ///
   /// While this widget is guaranteed to have a child, this may return null if
   /// the first build of that child has not completed yet.
-  ParentDataElement<KeepAliveParentDataMixin> _getChildElement() {
+  ParentDataElement<KeepAliveParentDataMixin>? _getChildElement() {
     assert(mounted);
     final Element element = context as Element;
-    Element childElement;
+    Element? childElement;
     // We use Element.visitChildren rather than context.visitChildElements
     // because we might be called during build, and context.visitChildElements
     // verifies that it is not called during build. Element.visitChildren does
@@ -135,11 +134,11 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
       childElement = child;
     });
     assert(childElement == null || childElement is ParentDataElement<KeepAliveParentDataMixin>);
-    return childElement as ParentDataElement<KeepAliveParentDataMixin>;
+    return childElement as ParentDataElement<KeepAliveParentDataMixin>?;
   }
 
   void _updateParentDataOfChild(ParentDataElement<KeepAliveParentDataMixin> childElement) {
-    childElement.applyWidgetOutOfTurn(build(context) as ParentDataWidget<KeepAliveParentDataMixin>);
+    childElement.applyWidgetOutOfTurn(build(context!) as ParentDataWidget<KeepAliveParentDataMixin>);
   }
 
   VoidCallback _createCallback(Listenable handle) {
@@ -155,9 +154,9 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
         }
         return true;
       }());
-      _handles.remove(handle);
-      if (_handles.isEmpty) {
-        if (SchedulerBinding.instance.schedulerPhase.index < SchedulerPhase.persistentCallbacks.index) {
+      _handles!.remove(handle);
+      if (_handles!.isEmpty) {
+        if (SchedulerBinding.instance!.schedulerPhase.index < SchedulerPhase.persistentCallbacks.index) {
           // Build/layout haven't started yet so let's just schedule this for
           // the next frame.
           setState(() { _keepingAlive = false; });
@@ -213,7 +212,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
           // avoid it if possible.
           _keepingAlive = false;
           scheduleMicrotask(() {
-            if (mounted && _handles.isEmpty) {
+            if (mounted && _handles!.isEmpty) {
               // If mounted is false, we went away as well, so there's nothing to do.
               // If _handles is no longer empty, then another client (or the same
               // client in a new place) registered itself before we had a chance to
@@ -233,7 +232,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
     assert(_child != null);
     return KeepAlive(
       keepAlive: _keepingAlive,
-      child: _child,
+      child: _child!,
     );
   }
 
@@ -246,7 +245,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
       'handles',
       _handles,
       description: _handles != null ?
-        '${_handles.length} active client${ _handles.length == 1 ? "" : "s" }' :
+        '${_handles!.length} active client${ _handles!.length == 1 ? "" : "s" }' :
         null,
       ifNull: 'no notifications ever received',
     ));
@@ -345,16 +344,16 @@ class KeepAliveHandle extends ChangeNotifier {
 ///  * [KeepAliveNotification], the notifications sent by this mixin.
 @optionalTypeArgs
 mixin AutomaticKeepAliveClientMixin<T extends StatefulWidget> on State<T> {
-  KeepAliveHandle _keepAliveHandle;
+  KeepAliveHandle? _keepAliveHandle;
 
   void _ensureKeepAlive() {
     assert(_keepAliveHandle == null);
     _keepAliveHandle = KeepAliveHandle();
-    KeepAliveNotification(_keepAliveHandle).dispatch(context);
+    KeepAliveNotification(_keepAliveHandle!).dispatch(context);
   }
 
   void _releaseKeepAlive() {
-    _keepAliveHandle.release();
+    _keepAliveHandle!.release();
     _keepAliveHandle = null;
   }
 
@@ -394,7 +393,7 @@ mixin AutomaticKeepAliveClientMixin<T extends StatefulWidget> on State<T> {
 
   @mustCallSuper
   @override
-  Widget build(BuildContext context) {
+  Widget? build(BuildContext context) {
     if (wantKeepAlive && _keepAliveHandle == null)
       _ensureKeepAlive();
     return null;

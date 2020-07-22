@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:async';
 
@@ -43,7 +42,7 @@ import 'scrollable.dart';
 /// overutilization of resources for images that would never appear on screen or
 /// only be visible for a very brief period.
 @optionalTypeArgs
-class ScrollAwareImageProvider<T> extends ImageProvider<T> {
+class ScrollAwareImageProvider<T extends Object> extends ImageProvider<T> {
   /// Creates a [ScrollAwareImageProvider].
   ///
   /// The [context] object is the [BuildContext] of the [State] using this
@@ -54,8 +53,8 @@ class ScrollAwareImageProvider<T> extends ImageProvider<T> {
   /// not be null, and is assumed to interact with the cache in the normal way
   /// that [ImageProvider.resolveStreamForKey] does.
   const ScrollAwareImageProvider({
-    @required this.context,
-    @required this.imageProvider,
+    required this.context,
+    required this.imageProvider,
   }) : assert(context != null),
        assert(imageProvider != null);
 
@@ -85,7 +84,7 @@ class ScrollAwareImageProvider<T> extends ImageProvider<T> {
     // Do this before checking scrolling, so that if the bytes are available we
     // render them even though we're scrolling fast - there's no additional
     // allocations to do for texture memory, it's already there.
-    if (stream.completer != null || PaintingBinding.instance.imageCache.containsKey(key)) {
+    if (stream.completer != null || PaintingBinding.instance!.imageCache!.containsKey(key)) {
       imageProvider.resolveStreamForKey(configuration, stream, key, handleError);
       return;
     }
@@ -97,8 +96,8 @@ class ScrollAwareImageProvider<T> extends ImageProvider<T> {
     // too fast before scheduling work that might never show on screen.
     // Try to get to end of the frame callbacks of the next frame, and then
     // check again.
-    if (Scrollable.recommendDeferredLoadingForContext(context.context)) {
-        SchedulerBinding.instance.scheduleFrameCallback((_) {
+    if (Scrollable.recommendDeferredLoadingForContext(context.context!)) {
+        SchedulerBinding.instance!.scheduleFrameCallback((_) {
           scheduleMicrotask(() => resolveStreamForKey(configuration, stream, key, handleError));
         });
         return;

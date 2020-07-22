@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'package:flutter/foundation.dart';
 
@@ -20,9 +19,9 @@ class IconTheme extends InheritedTheme {
   ///
   /// Both [data] and [child] arguments must not be null.
   const IconTheme({
-    Key key,
-    @required this.data,
-    @required Widget child,
+    Key? key,
+    required this.data,
+    required Widget child,
   }) : assert(data != null),
        assert(child != null),
        super(key: key, child: child);
@@ -32,9 +31,9 @@ class IconTheme extends InheritedTheme {
   ///
   /// The [data] and [child] arguments must not be null.
   static Widget merge({
-    Key key,
-    @required IconThemeData data,
-    @required Widget child,
+    Key? key,
+    required IconThemeData data,
+    required Widget child,
   }) {
     return Builder(
       builder: (BuildContext context) {
@@ -72,7 +71,7 @@ class IconTheme extends InheritedTheme {
   }
 
   static IconThemeData _getInheritedIconThemeData(BuildContext context) {
-    final IconTheme iconTheme = context.dependOnInheritedWidgetOfExactType<IconTheme>();
+    final IconTheme? iconTheme = context.dependOnInheritedWidgetOfExactType<IconTheme>();
     return iconTheme?.data ?? const IconThemeData.fallback();
   }
 
@@ -81,7 +80,7 @@ class IconTheme extends InheritedTheme {
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final IconTheme iconTheme = context.findAncestorWidgetOfExactType<IconTheme>();
+    final IconTheme? iconTheme = context.findAncestorWidgetOfExactType<IconTheme>();
     return identical(this, iconTheme) ? child : IconTheme(data: data, child: child);
   }
 

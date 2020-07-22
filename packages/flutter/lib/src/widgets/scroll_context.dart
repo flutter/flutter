@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/rendering.dart';
@@ -27,7 +26,7 @@ abstract class ScrollContext {
   /// widget itself. For example, [Scrollable] uses a context outside the
   /// [Viewport] but inside the widgets created by
   /// [ScrollBehavior.buildViewportChrome].
-  BuildContext get notificationContext;
+  BuildContext? get notificationContext;
 
   /// The [BuildContext] that should be used when searching for a [PageStorage].
   ///

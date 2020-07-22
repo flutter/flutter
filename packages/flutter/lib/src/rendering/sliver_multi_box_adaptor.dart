@@ -78,7 +78,7 @@ abstract class RenderSliverBoxChildManager {
   /// accurate and precise non-null value. It will not be called if
   /// [createChild] is always able to create a child (e.g. for an infinite
   /// list).
-  int get childCount;
+  int? get childCount;
 
   /// Called during [RenderSliverMultiBoxAdaptor.adoptChild] or
   /// [RenderSliverMultiBoxAdaptor.move].

@@ -1521,9 +1521,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   Offset get _paintOffset {
     switch (_viewportAxis) {
       case Axis.horizontal:
-        return Offset(-offset.pixels, 0.0);
+        return Offset(-offset.pixels!, 0.0);
       case Axis.vertical:
-        return Offset(0.0, -offset.pixels);
+        return Offset(0.0, -offset.pixels!);
     }
   }
 

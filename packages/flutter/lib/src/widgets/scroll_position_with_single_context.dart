@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:async';
 
@@ -50,12 +49,12 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   /// saved with [PageStorage] and restored it if this scroll position's scrollable
   /// is recreated.
   ScrollPositionWithSingleContext({
-    @required ScrollPhysics physics,
-    @required ScrollContext context,
-    double initialPixels = 0.0,
+    required ScrollPhysics physics,
+    required ScrollContext context,
+    double? initialPixels = 0.0,
     bool keepScrollOffset = true,
-    ScrollPosition oldPosition,
-    String debugLabel,
+    ScrollPosition? oldPosition,
+    String? debugLabel,
   }) : super(
          physics: physics,
          context: context,
@@ -81,7 +80,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
 
   @override
   double setPixels(double newPixels) {
-    assert(activity.isScrolling);
+    assert(activity!.isScrolling);
     return super.setPixels(newPixels);
   }
 
@@ -92,14 +91,13 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
       goIdle();
       return;
     }
-    activity.updateDelegate(this);
-    final ScrollPositionWithSingleContext typedOther = other as ScrollPositionWithSingleContext;
-    _userScrollDirection = typedOther._userScrollDirection;
+    activity!.updateDelegate(this);
+    _userScrollDirection = other._userScrollDirection;
     assert(_currentDrag == null);
-    if (typedOther._currentDrag != null) {
-      _currentDrag = typedOther._currentDrag;
-      _currentDrag.updateDelegate(this);
-      typedOther._currentDrag = null;
+    if (other._currentDrag != null) {
+      _currentDrag = other._currentDrag;
+      _currentDrag!.updateDelegate(this);
+      other._currentDrag = null;
     }
   }
 
@@ -110,7 +108,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   }
 
   @override
-  void beginActivity(ScrollActivity newActivity) {
+  void beginActivity(ScrollActivity? newActivity) {
     _heldPreviousVelocity = 0.0;
     if (newActivity == null)
       return;
@@ -118,14 +116,14 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     super.beginActivity(newActivity);
     _currentDrag?.dispose();
     _currentDrag = null;
-    if (!activity.isScrolling)
+    if (!activity!.isScrolling)
       updateUserScrollDirection(ScrollDirection.idle);
   }
 
   @override
   void applyUserOffset(double delta) {
     updateUserScrollDirection(delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse);
-    setPixels(pixels - physics.applyPhysicsToUserOffset(this, delta));
+    setPixels(pixels! - physics.applyPhysicsToUserOffset(this, delta));
   }
 
   @override
@@ -145,7 +143,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   @override
   void goBallistic(double velocity) {
     assert(pixels != null);
-    final Simulation simulation = physics.createBallisticSimulation(this, velocity);
+    final Simulation? simulation = physics.createBallisticSimulation(this, velocity);
     if (simulation != null) {
       beginActivity(BallisticScrollActivity(this, simulation, context.vsync));
     } else {
@@ -173,8 +171,8 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   @override
   Future<void> animateTo(
     double to, {
-    @required Duration duration,
-    @required Curve curve,
+    required Duration duration,
+    required Curve curve,
   }) {
     if (nearEqual(to, pixels, physics.tolerance.distance)) {
       // Skip the animation, go straight to the position as we are already close.
@@ -184,7 +182,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
 
     final DrivenScrollActivity activity = DrivenScrollActivity(
       this,
-      from: pixels,
+      from: pixels!,
       to: to,
       duration: duration,
       curve: curve,
@@ -198,10 +196,10 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   void jumpTo(double value) {
     goIdle();
     if (pixels != value) {
-      final double oldPixels = pixels;
+      final double oldPixels = pixels!;
       forcePixels(value);
       didStartScroll();
-      didUpdateScrollPositionBy(pixels - oldPixels);
+      didUpdateScrollPositionBy(pixels! - oldPixels);
       didEndScroll();
     }
     goBallistic(0.0);
@@ -212,17 +210,17 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   void jumpToWithoutSettling(double value) {
     goIdle();
     if (pixels != value) {
-      final double oldPixels = pixels;
+      final double oldPixels = pixels!;
       forcePixels(value);
       didStartScroll();
-      didUpdateScrollPositionBy(pixels - oldPixels);
+      didUpdateScrollPositionBy(pixels! - oldPixels);
       didEndScroll();
     }
   }
 
   @override
   ScrollHoldController hold(VoidCallback holdCancelCallback) {
-    final double previousVelocity = activity.velocity;
+    final double previousVelocity = activity!.velocity;
     final HoldScrollActivity holdActivity = HoldScrollActivity(
       delegate: this,
       onHoldCanceled: holdCancelCallback,
@@ -232,7 +230,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     return holdActivity;
   }
 
-  ScrollDragController _currentDrag;
+  ScrollDragController? _currentDrag;
 
   @override
   Drag drag(DragStartDetails details, VoidCallback dragCancelCallback) {
