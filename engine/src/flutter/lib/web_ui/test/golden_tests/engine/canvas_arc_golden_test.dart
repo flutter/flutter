@@ -61,6 +61,24 @@ void main() async {
     html.document.body.append(canvas.rootElement);
     await matchGoldenFile('canvas_addarc.png', region: region);
   });
+
+  test('Should render counter clockwise arcs', () async {
+    final Path path = Path();
+    path.moveTo(149.999999999999997, 50);
+    path.lineTo(149.999999999999997, 20);
+    path.arcTo(Rect.fromLTRB(20, 20, 280, 280), 4.71238898038469,
+        5.759586531581287 - 4.71238898038469, true);
+    path.lineTo(236.60254037844385, 99.99999999999999);
+    path.arcTo(Rect.fromLTRB(50, 50, 250, 250), 5.759586531581287,
+        4.71238898038469 - 5.759586531581287, true);
+    path.lineTo(149.999999999999997, 20);
+    canvas.drawPath(path, SurfacePaintData()
+      ..color = Color(0xFFFF9800) // orange
+      ..style = PaintingStyle.fill);
+
+    html.document.body.append(canvas.rootElement);
+    await matchGoldenFile('canvas_addarc_ccw.png', region: region);
+  });
 }
 
 void paintArc(BitmapCanvas canvas, Offset offset,
