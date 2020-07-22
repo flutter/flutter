@@ -443,11 +443,11 @@ void main() {
   });
 
   test('MaterialColor swatch comparison', () {
-    Map<int, Color> sampleMap = {0: Colors.lightBlue, 1: Colors.deepOrange, 2: Colors.blueGrey};
-    MaterialColor first = new MaterialColor(0, sampleMap);
-    MaterialColor second = new MaterialColor(0, sampleMap);
-    MaterialColor third = new MaterialColor(0, {0: Colors.lightBlue, 1: Colors.deepOrange, 2:Colors.blueGrey});
-    expect((first == second), true);
-    expect((first == third), true);
+    const Map<int, MaterialColor> sampleMap = {0: Colors.lightBlue, 1: Colors.deepOrange, 2: Colors.blueGrey};
+    const MaterialColor first = MaterialColor(0, sampleMap);
+    const MaterialColor second = MaterialColor(0, sampleMap);
+    const MaterialColor third = MaterialColor(0, {0: Colors.lightBlue, 1: Colors.deepOrange, 2:Colors.blueGrey});
+    expect(first == second, true);
+    expect(first == third, true);
   });
 }
