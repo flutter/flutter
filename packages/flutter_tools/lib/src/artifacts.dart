@@ -262,11 +262,15 @@ class CachedArtifacts implements Artifacts {
     @required Cache cache,
   }) : _fileSystem = fileSystem,
        _platform = platform,
-       _cache = cache;
+       _cache = cache,
+       _processUtils = ProcessUtils(processManager: globals.processManager, logger: globals.logger);
 
   final FileSystem _fileSystem;
   final Platform _platform;
   final Cache _cache;
+
+  @override
+  final ProcessUtils _processUtils;
 
   @override
   String getArtifactPath(Artifact artifact, { TargetPlatform platform, BuildMode mode }) {
