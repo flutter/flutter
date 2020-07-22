@@ -4,6 +4,7 @@
 
 // @dart = 2.8
 
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/painting.dart';
 
@@ -83,6 +84,19 @@ void main() {
       equals(
         'FlutterLogoDecoration(Color(0xffffffff)/Color(0xff000000) on Color(0xff81d4fa), style: stacked, transition -1.0:0.5)',
       ),
+    );
+  });
+
+  testWidgets('Flutter Logo golden test', (WidgetTester tester) async {
+    final Key logo = UniqueKey();
+    await tester.pumpWidget(Container(
+      key: logo,
+      decoration: const FlutterLogoDecoration(),
+    ));
+
+    await expectLater(
+      find.byKey(logo),
+      matchesGoldenFile('flutter_logo.png'),
     );
   });
 }
