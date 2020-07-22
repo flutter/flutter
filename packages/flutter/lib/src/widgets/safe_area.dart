@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:math' as math;
 
@@ -41,14 +40,14 @@ class SafeArea extends StatelessWidget {
   /// The [left], [top], [right], [bottom], and [minimum] arguments must not be
   /// null.
   const SafeArea({
-    Key key,
+    Key? key,
     this.left = true,
     this.top = true,
     this.right = true,
     this.bottom = true,
     this.minimum = EdgeInsets.zero,
     this.maintainBottomViewPadding = false,
-    @required this.child,
+    required this.child,
   }) : assert(left != null),
        assert(top != null),
        assert(right != null),
@@ -97,7 +96,7 @@ class SafeArea extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final MediaQueryData data = MediaQuery.of(context);
+    final MediaQueryData data = MediaQuery.of(context)!;
     EdgeInsets padding = data.padding;
     // Bottom padding has been consumed - i.e. by the keyboard
     if (data.padding.bottom == 0.0 && data.viewInsets.bottom != 0.0 && maintainBottomViewPadding)
@@ -156,13 +155,13 @@ class SliverSafeArea extends StatelessWidget {
   ///
   /// The [left], [top], [right], [bottom], and [minimum] arguments must not be null.
   const SliverSafeArea({
-    Key key,
+    Key? key,
     this.left = true,
     this.top = true,
     this.right = true,
     this.bottom = true,
     this.minimum = EdgeInsets.zero,
-    @required this.sliver,
+    required this.sliver,
   }) : assert(left != null),
        assert(top != null),
        assert(right != null),
@@ -196,7 +195,7 @@ class SliverSafeArea extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final EdgeInsets padding = MediaQuery.of(context).padding;
+    final EdgeInsets padding = MediaQuery.of(context)!.padding;
     return SliverPadding(
       padding: EdgeInsets.only(
         left: math.max(left ? padding.left : 0.0, minimum.left),

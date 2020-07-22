@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:ui';
 
@@ -19,7 +18,7 @@ class ColorFiltered extends SingleChildRenderObjectWidget {
   /// Creates a widget that applies a [ColorFilter] to its child.
   ///
   /// The [colorFilter] must not be null.
-  const ColorFiltered({@required this.colorFilter, Widget child, Key key})
+  const ColorFiltered({required this.colorFilter, Widget? child, Key? key})
       : assert(colorFilter != null),
         super(key: key, child: child);
 
