@@ -1,4 +1,4 @@
-Signature: 13533e287ae6bc3542ef265bd5f0b4a6
+Signature: fcaa53f277f0ddded95b2933ab710311
 
 UNUSED LICENSES:
 
@@ -1038,6 +1038,8 @@ FILE: ../../../third_party/skia/infra/bots/assets/ios-dev-image-11.4/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/ios-dev-image-12.4/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/ios-dev-image-13.3/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/ios-dev-image-13.4/VERSION
+FILE: ../../../third_party/skia/infra/bots/assets/ios-dev-image-13.5/VERSION
+FILE: ../../../third_party/skia/infra/bots/assets/ios-dev-image-13.6/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/linux_vulkan_sdk/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/lottie-samples/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/mesa_intel_driver_linux/VERSION
