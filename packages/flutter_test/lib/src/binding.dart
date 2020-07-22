@@ -1264,6 +1264,21 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
   /// on the [SchedulerBinding.hasScheduledFrame] property to determine when the
   /// application has "settled".
   benchmark,
+
+  /// Ignore any request from pump but respect other requests to schedule a
+  /// frame.
+  ///
+  /// This is used for running the test on a device, where scheduling of new
+  /// frames respects what the engine and the device needed.
+  ///
+  /// Compared to `fullyLive` this policy ignores the frame requests from pump
+  /// of the test code so that the frame scheduling respects the situation of
+  /// that for the real environment, and avoids waiting for the new frame beyond
+  /// the expected time.
+  ///
+  /// Compared to `benchmark` this policy can be used for capturing the
+  /// animation frames requested by the framework.
+  benchmarkLive,
 }
 
 /// A variant of [TestWidgetsFlutterBinding] for executing tests in
@@ -1398,6 +1413,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     assert(_doDrawThisFrame == null);
     if (_expectingFrame ||
         (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.fullyLive) ||
+        (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive) ||
         (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark) ||
         (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.fadePointers && _viewNeedsPaint)) {
       _doDrawThisFrame = true;
@@ -1452,6 +1468,11 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   /// Events dispatched by [TestGesture] are not affected by this.
   HitTestDispatcher deviceEventDispatcher;
 
+
+  /// Dispatch an event to a hit test result's path.
+  ///
+  /// Apart from forwarding the event to [GestureBinding.dispatchEvent],
+  /// This also paint all events that's down on the screen.
   @override
   void dispatchEvent(
     PointerEvent event,
@@ -1460,20 +1481,19 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }) {
     switch (source) {
       case TestBindingEventSource.test:
-        if (!renderView._pointers.containsKey(event.pointer)) {
-          assert(event.down || event is PointerAddedEvent);
-          if (event.down) {
-            renderView._pointers[event.pointer] = _LiveTestPointerRecord(
-              event.pointer,
-              event.position,
-            );
-          }
-        } else {
+        if (renderView._pointers.containsKey(event.pointer)) {
           renderView._pointers[event.pointer].position = event.position;
           if (!event.down)
             renderView._pointers[event.pointer].decay = _kPointerDecay;
+          _handleViewNeedsPaint();
+        } else if (event.down) {
+          assert(event is PointerDownEvent);
+          renderView._pointers[event.pointer] = _LiveTestPointerRecord(
+            event.pointer,
+            event.position,
+          );
+          _handleViewNeedsPaint();
         }
-        _handleViewNeedsPaint();
         super.dispatchEvent(event, hitTestResult, source: source);
         break;
       case TestBindingEventSource.device:
@@ -1489,6 +1509,10 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     assert(inTest);
     assert(!_expectingFrame);
     assert(_pendingFrame == null);
+    if (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive) {
+      // Ignore all pumps and just wait.
+      return delayed(duration ?? Duration.zero);
+    }
     return TestAsyncUtils.guard<void>(() {
       if (duration != null) {
         Timer(duration, () {

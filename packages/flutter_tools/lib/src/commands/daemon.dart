@@ -19,6 +19,7 @@ import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../emulator.dart';
+import '../features.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../resident_runner.dart';
@@ -26,6 +27,7 @@ import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../web/web_runner.dart';
+import '../widget_cache.dart';
 
 const String protocolVersion = '0.6.0';
 
@@ -448,6 +450,7 @@ class AppDomain extends Domain {
     String dillOutputPath,
     bool ipv6 = false,
     String isolateFilter,
+    bool machine = true,
   }) async {
     if (!await device.supportsRuntimeMode(options.buildInfo.mode)) {
       throw Exception(
@@ -467,6 +470,7 @@ class AppDomain extends Domain {
       viewFilter: isolateFilter,
       target: target,
       buildInfo: options.buildInfo,
+      widgetCache: WidgetCache(featureFlags: featureFlags),
     );
 
     ResidentRunner runner;
@@ -480,6 +484,7 @@ class AppDomain extends Domain {
         ipv6: ipv6,
         stayResident: true,
         urlTunneller: options.webEnableExposeUrl ? daemon.daemonDomain.exposeUrl : null,
+        machine: machine,
       );
     } else if (enableHotReload) {
       runner = HotRunner(
@@ -491,6 +496,7 @@ class AppDomain extends Domain {
         dillOutputPath: dillOutputPath,
         ipv6: ipv6,
         hostIsIde: true,
+        machine: machine,
       );
     } else {
       runner = ColdRunner(
@@ -499,6 +505,7 @@ class AppDomain extends Domain {
         debuggingOptions: options,
         applicationBinary: applicationBinary,
         ipv6: ipv6,
+        machine: machine,
       );
     }
 
@@ -770,7 +777,7 @@ class DeviceDomain extends Domain {
 
     // Use the device manager discovery so that client provided device types
     // are usable via the daemon protocol.
-    deviceManager.deviceDiscoverers.forEach(addDeviceDiscoverer);
+    globals.deviceManager.deviceDiscoverers.forEach(addDeviceDiscoverer);
   }
 
   void addDeviceDiscoverer(DeviceDiscovery discoverer) {

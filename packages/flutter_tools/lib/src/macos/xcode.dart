@@ -21,6 +21,7 @@ import '../convert.dart';
 import '../globals.dart' as globals;
 import '../ios/devices.dart';
 import '../ios/ios_deploy.dart';
+import '../ios/iproxy.dart';
 import '../ios/mac.dart';
 import '../ios/xcodeproj.dart';
 import '../reporting/reporting.dart';
@@ -213,6 +214,7 @@ class XCDevice {
     @required Logger logger,
     @required Xcode xcode,
     @required Platform platform,
+    @required IProxy iproxy,
   }) : _processUtils = ProcessUtils(logger: logger, processManager: processManager),
       _logger = logger,
       _iMobileDevice = IMobileDevice(
@@ -228,6 +230,7 @@ class XCDevice {
         platform: platform,
         processManager: processManager,
       ),
+      _iProxy = iproxy,
       _xcode = xcode {
 
     _setupDeviceIdentifierByEventStream();
@@ -242,6 +245,7 @@ class XCDevice {
   final IMobileDevice _iMobileDevice;
   final IOSDeploy _iosDeploy;
   final Xcode _xcode;
+  final IProxy _iProxy;
 
   List<dynamic> _cachedListResults;
   Process _deviceObservationProcess;
@@ -500,9 +504,9 @@ class XCDevice {
         cpuArchitecture: _cpuArchitecture(deviceProperties),
         interfaceType: interface,
         sdkVersion: _sdkVersion(deviceProperties),
-        artifacts: globals.artifacts,
+        iProxy: _iProxy,
         fileSystem: globals.fs,
-        logger: globals.logger,
+        logger: _logger,
         iosDeploy: _iosDeploy,
         iMobileDevice: _iMobileDevice,
         platform: globals.platform,

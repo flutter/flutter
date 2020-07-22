@@ -238,7 +238,7 @@ abstract class DeviceManager {
         globals.printStatus(globals.userMessages.flutterMultipleDevicesFound);
         await Device.printDevices(devices);
         final Device chosenDevice = await _chooseOneOfAvailableDevices(devices);
-        deviceManager.specifiedDeviceId = chosenDevice.id;
+        globals.deviceManager.specifiedDeviceId = chosenDevice.id;
         devices = <Device>[chosenDevice];
       }
     }

@@ -40,6 +40,8 @@ class Scrollbar extends StatefulWidget {
     @required this.child,
     this.controller,
     this.isAlwaysShown = false,
+    this.thickness,
+    this.radius,
   }) : assert(!isAlwaysShown || controller != null, 'When isAlwaysShown is true, must pass a controller that is attached to a scroll view'),
        super(key: key);
 
@@ -56,6 +58,26 @@ class Scrollbar extends StatefulWidget {
 
   /// {@macro flutter.cupertino.cupertinoScrollbar.isAlwaysShown}
   final bool isAlwaysShown;
+
+  /// The thickness of the scrollbar.
+  ///
+  /// If this is non-null, it will be used as the thickness of the scrollbar on
+  /// all platforms, whether the scrollbar is being dragged by the user or not.
+  /// By default (if this is left null), each platform will get a thickness
+  /// that matches the look and feel of the platform, and the thickness may
+  /// grow while the scrollbar is being dragged if the platform look and feel
+  /// calls for such behavior.
+  final double thickness;
+
+  /// The radius of the corners of the scrollbar.
+  ///
+  /// If this is non-null, it will be used as the fixed radius of the scrollbar
+  /// on all platforms, whether the scrollbar is being dragged by the user or
+  /// not. By default (if this is left null), each platform will get a radius
+  /// that matches the look and feel of the platform, and the radius may
+  /// change while the scrollbar is being dragged if the platform look and feel
+  /// calls for such behavior.
+  final Radius radius;
 
   @override
   _ScrollbarState createState() => _ScrollbarState();
@@ -126,6 +148,12 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
         _fadeoutAnimationController.animateTo(1.0);
       }
     }
+    if (!_useCupertinoScrollbar) {
+      assert(_materialPainter != null);
+      _materialPainter
+        ..thickness = widget.thickness ?? _kScrollbarThickness
+        ..radius = widget.radius;
+    }
   }
 
   // Wait one frame and cause an empty scroll event.  This allows the thumb to
@@ -144,7 +172,8 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
     return ScrollbarPainter(
       color: _themeColor,
       textDirection: _textDirection,
-      thickness: _kScrollbarThickness,
+      thickness: widget.thickness ?? _kScrollbarThickness,
+      radius: widget.radius,
       fadeoutOpacityAnimation: _fadeoutOpacityAnimation,
       padding: MediaQuery.of(context).padding,
     );
@@ -194,6 +223,10 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
       return CupertinoScrollbar(
         child: widget.child,
         isAlwaysShown: widget.isAlwaysShown,
+        thickness: widget.thickness ?? CupertinoScrollbar.defaultThickness,
+        thicknessWhileDragging: widget.thickness ?? CupertinoScrollbar.defaultThicknessWhileDragging,
+        radius: widget.radius ?? CupertinoScrollbar.defaultRadius,
+        radiusWhileDragging: widget.radius ?? CupertinoScrollbar.defaultRadiusWhileDragging,
         controller: widget.controller,
       );
     }

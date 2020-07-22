@@ -13,7 +13,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/process.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
@@ -106,15 +106,17 @@ Matcher throwsToolExit({ int exitCode, Pattern message }) {
 /// Matcher for [ToolExit]s.
 final test_package.TypeMatcher<ToolExit> isToolExit = isA<ToolExit>();
 
-/// Matcher for functions that throw [ProcessExit].
-Matcher throwsProcessExit([ dynamic exitCode ]) {
-  return exitCode == null
-      ? throwsA(isProcessExit)
-      : throwsA(allOf(isProcessExit, (ProcessExit e) => e.exitCode == exitCode));
+/// Matcher for functions that throw [ProcessException].
+Matcher throwsProcessException({ Pattern message }) {
+  Matcher matcher = isProcessException;
+  if (message != null) {
+    matcher = allOf(matcher, (ProcessException e) => e.message?.contains(message));
+  }
+  return throwsA(matcher);
 }
 
-/// Matcher for [ProcessExit]s.
-final test_package.TypeMatcher<ProcessExit> isProcessExit = isA<ProcessExit>();
+/// Matcher for [ProcessException]s.
+final test_package.TypeMatcher<ProcessException> isProcessException = isA<ProcessException>();
 
 /// Creates a flutter project in the [temp] directory using the
 /// [arguments] list if specified, or `--no-pub` if not.
