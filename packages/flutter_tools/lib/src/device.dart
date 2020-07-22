@@ -117,9 +117,8 @@ abstract class DeviceManager {
     // found quickly, we don't wait for all the discoverers to complete.
     final List<Device> prefixMatches = <Device>[];
     final Completer<Device> exactMatchCompleter = Completer<Device>();
-    final List<Future<List<Device>>> futureDevices = <Future<List<Device>>>[];
-    for (final DeviceDiscovery discoverer in _platformDiscoverers) {
-      futureDevices.add(
+    final List<Future<List<Device>>> futureDevices = <Future<List<Device>>>[
+      for (final DeviceDiscovery discoverer in _platformDiscoverers)
         discoverer
         .devices
         .then((List<Device> devices) {
@@ -134,8 +133,7 @@ abstract class DeviceManager {
           }
           return null;
         })
-      );
-    }
+    ];
 
     // Wait for an exact match, or for all discoverers to return results.
     await Future.any<dynamic>(<Future<dynamic>>[
