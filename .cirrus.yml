@@ -577,7 +577,6 @@ task:
     MEMORY: 8G
     SHOULD_UPDATE_PACKAGES: 'TRUE'
   setup_script:
-    - exit 1
     - date
     - which flutter
     - bundle --version
