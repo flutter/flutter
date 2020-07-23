@@ -28,13 +28,6 @@ import 'theme.dart';
 // int _duelCommandment = 1;
 // void setState(VoidCallback fn) { }
 
-/// A callback that formats a numeric value from a [Slider] widget.
-///
-/// See also:
-///
-///  * [Slider.semanticFormatterCallback], which shows an example use case.
-typedef SemanticFormatterCallback = String Function(double value);
-
 /// [Slider] uses this callback to paint the value indicator on the overlay.
 ///
 /// Since the value indicator is painted on the Overlay; this method paints the
