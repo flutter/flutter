@@ -674,6 +674,109 @@ void main() {
     expect(find.text('second'), findsOneWidget);
   });
 
+  group('PageRouteBuilder', () {
+    testWidgets('reverseTransitionDuration defaults to 300ms', (WidgetTester tester) async {
+      // Default PageRouteBuilder reverse transition duration should be 300ms.
+      await tester.pumpWidget(
+        MaterialApp(
+          onGenerateRoute: (RouteSettings settings) {
+            return MaterialPageRoute<dynamic>(
+              builder: (BuildContext context) {
+                return RaisedButton(
+                  onPressed: () {
+                    Navigator.of(context).push<void>(
+                      PageRouteBuilder<void>(
+                        settings: settings,
+                        pageBuilder: (BuildContext context, Animation<double> input, Animation<double> out) {
+                          return const Text('Page Two');
+                        },
+                      )
+                    );
+                  },
+                  child: const Text('Open page'),
+                );
+              },
+            );
+          },
+        )
+      );
+
+      // Open the new route.
+      await tester.tap(find.byType(RaisedButton));
+      await tester.pumpAndSettle();
+      expect(find.text('Open page'), findsNothing);
+      expect(find.text('Page Two'), findsOneWidget);
+
+      // Pop the new route.
+      tester.state<NavigatorState>(find.byType(Navigator)).pop();
+      await tester.pump();
+      expect(find.text('Page Two'), findsOneWidget);
+
+      // Text('Page Two') should be present halfway through the reverse transition.
+      await tester.pump(const Duration(milliseconds: 150));
+      expect(find.text('Page Two'), findsOneWidget);
+
+      // Text('Page Two') should be present at the very end of the reverse transition.
+      await tester.pump(const Duration(milliseconds: 150));
+      expect(find.text('Page Two'), findsOneWidget);
+
+      // Text('Page Two') have transitioned out after 300ms.
+      await tester.pump(const Duration(milliseconds: 1));
+      expect(find.text('Page Two'), findsNothing);
+      expect(find.text('Open page'), findsOneWidget);
+    });
+
+    testWidgets('reverseTransitionDuration can be customized', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        onGenerateRoute: (RouteSettings settings) {
+          return MaterialPageRoute<dynamic>(
+            builder: (BuildContext context) {
+              return RaisedButton(
+                onPressed: () {
+                  Navigator.of(context).push<void>(
+                    PageRouteBuilder<void>(
+                      settings: settings,
+                      pageBuilder: (BuildContext context, Animation<double> input, Animation<double> out) {
+                        return const Text('Page Two');
+                      },
+                      // modified value, default PageRouteBuilder reverse transition duration should be 300ms.
+                      reverseTransitionDuration: const Duration(milliseconds: 150),
+                    )
+                  );
+                },
+                child: const Text('Open page'),
+              );
+            },
+          );
+        })
+      );
+
+      // Open the new route.
+      await tester.tap(find.byType(RaisedButton));
+      await tester.pumpAndSettle();
+      expect(find.text('Open page'), findsNothing);
+      expect(find.text('Page Two'), findsOneWidget);
+
+      // Pop the new route.
+      tester.state<NavigatorState>(find.byType(Navigator)).pop();
+      await tester.pump();
+      expect(find.text('Page Two'), findsOneWidget);
+
+      // Text('Page Two') should be present halfway through the reverse transition.
+      await tester.pump(const Duration(milliseconds: 75));
+      expect(find.text('Page Two'), findsOneWidget);
+
+      // Text('Page Two') should be present at the very end of the reverse transition.
+      await tester.pump(const Duration(milliseconds: 75));
+      expect(find.text('Page Two'), findsOneWidget);
+
+      // Text('Page Two') have transitioned out after 500ms.
+      await tester.pump(const Duration(milliseconds: 1));
+      expect(find.text('Page Two'), findsNothing);
+      expect(find.text('Open page'), findsOneWidget);
+    });
+  });
+
   group('TransitionRoute', () {
     testWidgets('secondary animation is kDismissed when next route finishes pop', (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
