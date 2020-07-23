@@ -249,16 +249,16 @@ mixin RenderConstrainedLayoutBuilder<ConstraintType extends Constraints, ChildTy
 ///
 /// {@tool snippet}
 ///
-/// This example shows using LayoutBuilder that gets parent widget's size.
+/// This example uses a [LayoutBuilder] to build a different widget depending on the available width.
 ///
 /// ```dart
 /// LayoutBuilder(
 ///   builder: (BuildContext context, BoxConstraints constraints) {
-///       if(constraints.maxWidth > 600) {
-///           return _buildWideLayout();
-///       } else {
-///           return _buildNormalLayout();
-///       }
+///     if (constraints.maxWidth > 600) {
+///       return _buildWideLayout();
+///     } else {
+///       return _buildNormalLayout();
+///     }
 ///   },
 /// );
 /// ```
