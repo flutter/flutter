@@ -4,6 +4,33 @@ Performance benchmarks use either flutter drive or the web benchmark harness.
 
 ## Mobile benchmarks
 
+### Cull opacity benchmark
+
+To run the cull opacity benchmark on a device:
+
+```
+flutter drive --profile test_driver/cull_opacity_perf.dart
+```
+
+Results should be in the file `build/cull_opacity_perf.timeline_summary.json`.
+
+More detailed logs should be in `build/cull_opacity_perf.timeline.json`.
+
+### Cubic bezier benchmark
+
+To run the cubic-bezier benchmark on a device:
+
+```
+flutter drive --profile test_driver/cubic_bezier_perf.dart
+```
+
+Results should be in the file `build/cubic_bezier_perf.timeline_summary.json`.
+
+More detailed logs should be in `build/cubic_bezier_perf.timeline.json`.
+
+### Backdrop filter benchmark
+
+To run the backdrop filter benchmark on a device:
 To run a mobile benchmark on a device:
 
 ```
@@ -30,7 +57,7 @@ The key `[test_name]` can be:
 
 ## Web benchmarks
 
-Web benchmarks are compiled from the same entrypoint in `lib/web_benchmarks.dart`.
+Web benchmarks are compiled from the same entry point in `lib/web_benchmarks.dart`.
 
 ### How to write a web benchmark
 
@@ -39,13 +66,13 @@ as an example.
 
 Choose one of the two benchmark types:
 
-* A "raw benchmark" records performance metrics from direct interactions with
+- A "raw benchmark" records performance metrics from direct interactions with
   `dart:ui` with no framework. This kind of benchmark is good for benchmarking
   low-level engine primitives, such as layer, picture, and semantics performance.
-* A "widget benchmark" records performance metrics using a widget. This kind of
+- A "widget benchmark" records performance metrics using a widget. This kind of
   benchmark is good for measuring the performance of widgets, often together with
   engine work that widget-under-test incurs.
-* A "widget build benchmark" records the cost of building a widget from nothing.
+- A "widget build benchmark" records the cost of building a widget from nothing.
   This is different from the "widget benchmark" because typically the latter
   only performs incremental UI updates, such as an animation. In contrast, this
   benchmark pumps an empty frame to clear all previously built widgets and
@@ -83,7 +110,7 @@ flutter run --profile -d web-server lib/web_benchmarks.dart
 flutter run --dart-define=FLUTTER_WEB_USE_SKIA=true --profile -d web-server lib/web_benchmarks.dart
 ```
 
-You can also run all benchmarks exactly like the devicelab runs them:
+You can also run all benchmarks exactly as the devicelab runs them:
 
 ```
 cd dev/devicelab
