@@ -578,6 +578,8 @@ tasks:
       iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
+    # https://github.com/flutter/flutter/issues/62081
+    flaky: true
 
   hello_world_ios__compile:
     description: >
