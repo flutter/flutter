@@ -523,7 +523,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   ///           children: <Widget>[
   ///             Text('HomePage'),
   ///             // Press this button to open the SecondPage.
-  ///             RaisedButton(
+  ///             ElevatedButton(
   ///               child: Text('Second Page >'),
   ///               onPressed: () {
   ///                 Navigator.pushNamed(context, '/second_page');
@@ -568,7 +568,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   ///           height: 100.0,
   ///           color: Colors.red,
   ///         )
-  ///       : RaisedButton(
+  ///       : ElevatedButton(
   ///           child: Text('Show Rectangle'),
   ///           onPressed: _navigateLocallyToShowRectangle,
   ///         );
@@ -579,7 +579,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   ///           mainAxisAlignment: MainAxisAlignment.center,
   ///           children: <Widget>[
   ///             localNavContent,
-  ///             RaisedButton(
+  ///             ElevatedButton(
   ///               child: Text('< Back'),
   ///               onPressed: () {
   ///                 // Pop a route. If this is pressed while the red rectangle is

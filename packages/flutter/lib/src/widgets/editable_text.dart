@@ -926,7 +926,7 @@ class EditableText extends StatefulWidget {
   ///                   title: const Text('Thats correct!'),
   ///                   content: Text ('13 is the right answer.'),
   ///                   actions: <Widget>[
-  ///                     FlatButton(
+  ///                     TextButton(
   ///                       onPressed: () { Navigator.pop(context); },
   ///                       child: const Text('OK'),
   ///                     ),
