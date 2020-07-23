@@ -131,7 +131,7 @@ static FlutterBackingStoreConfig MakeBackingStoreConfig(
 }
 
 // |ExternalViewEmbedder|
-bool EmbedderExternalViewEmbedder::SubmitFrame(
+void EmbedderExternalViewEmbedder::SubmitFrame(
     GrContext* context,
     std::unique_ptr<SurfaceFrame> frame) {
   auto [matched_render_targets, pending_keys] =
@@ -185,7 +185,7 @@ bool EmbedderExternalViewEmbedder::SubmitFrame(
 
     if (!render_target) {
       FML_LOG(ERROR) << "Embedder did not return a valid render target.";
-      return false;
+      return;
     }
     matched_render_targets[pending_key] = std::move(render_target);
   }
@@ -204,7 +204,7 @@ bool EmbedderExternalViewEmbedder::SubmitFrame(
              ->Render(*render_target.second)) {
       FML_LOG(ERROR)
           << "Could not render into the embedder supplied render target.";
-      return false;
+      return;
     }
   }
 
@@ -266,7 +266,7 @@ bool EmbedderExternalViewEmbedder::SubmitFrame(
                                            std::move(render_target.second));
   }
 
-  return frame->Submit();
+  frame->Submit();
 }
 
 }  // namespace flutter

@@ -295,7 +295,7 @@ class ExternalViewEmbedder {
   // This method can mutate the root Skia canvas before submitting the frame.
   //
   // It can also allocate frames for overlay surfaces to compose hybrid views.
-  virtual bool SubmitFrame(GrContext* context,
+  virtual void SubmitFrame(GrContext* context,
                            std::unique_ptr<SurfaceFrame> frame);
 
   // This method provides the embedder a way to do additional tasks after
