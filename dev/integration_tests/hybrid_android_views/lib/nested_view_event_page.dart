@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'android_platform_view.dart';
+import 'future_data_handler.dart';
 import 'page.dart';
 
 class NestedViewEventPage extends PageWidget {
@@ -38,6 +39,7 @@ class NestedViewEventBodyState extends State<NestedViewEventBody> {
   String lastError;
   int id;
   int nestedViewClickCount = 0;
+  bool showPlatformView = true;
 
   @override
   Widget build(BuildContext context) {
@@ -49,10 +51,12 @@ class NestedViewEventBodyState extends State<NestedViewEventBody> {
         children: <Widget>[
           SizedBox(
             height: 300,
-            child: AndroidPlatformView(
-              viewType: 'simple_view',
-              onPlatformViewCreated: onPlatformViewCreated,
-            ),
+              child: showPlatformView ?
+                AndroidPlatformView(
+                  key: const ValueKey<String>('PlatformView'),
+                  viewType: 'simple_view',
+                  onPlatformViewCreated: onPlatformViewCreated,
+                ) : null,
           ),
           if (lastTestStatus != _LastTestStatus.pending) _statusWidget(),
           if (viewChannel != null) ... <Widget>[
@@ -60,6 +64,11 @@ class NestedViewEventBodyState extends State<NestedViewEventBody> {
               key: const ValueKey<String>('ShowAlertDialog'),
               child: const Text('SHOW ALERT DIALOG'),
               onPressed: onShowAlertDialogPressed,
+            ),
+            RaisedButton(
+              key: const ValueKey<String>('TogglePlatformView'),
+              child: const Text('TOGGLE PLATFORM VIEW'),
+              onPressed: onTogglePlatformView,
             ),
             Row(
               children: <Widget>[
@@ -120,6 +129,12 @@ class NestedViewEventBodyState extends State<NestedViewEventBody> {
     }
   }
 
+  Future<void> onTogglePlatformView() async {
+    setState(() {
+      showPlatformView = !showPlatformView;
+    });
+  }
+
   Future<void> onChildViewPressed() async {
     try {
       await viewChannel.invokeMethod<void>('addChildViewAndWaitForClick');
@@ -152,5 +167,7 @@ class NestedViewEventBodyState extends State<NestedViewEventBody> {
     setState(() {
       viewChannel = MethodChannel('simple_view/$id');
     });
+    driverDataHandler.registerHandler('hierarchy')
+      .complete(() => channel.invokeMethod<String>('getViewHierarchy'));
   }
 }
