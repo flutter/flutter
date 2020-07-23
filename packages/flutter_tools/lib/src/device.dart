@@ -33,6 +33,7 @@ import 'ios/ios_workflow.dart';
 import 'ios/simulators.dart';
 import 'linux/linux_device.dart';
 import 'macos/macos_device.dart';
+import 'macos/macos_workflow.dart';
 import 'macos/xcode.dart';
 import 'project.dart';
 import 'tester/flutter_tester.dart';
@@ -292,6 +293,7 @@ class FlutterDeviceManager extends DeviceManager {
     @required FlutterVersion flutterVersion,
     @required Config config,
     @required Artifacts artifacts,
+    @required MacOSWorkflow macOSWorkflow,
   }) : deviceDiscoverers =  <DeviceDiscovery>[
     AndroidDevices(
       logger: logger,
@@ -322,10 +324,17 @@ class FlutterDeviceManager extends DeviceManager {
       logger: logger,
       artifacts: artifacts,
     ),
-    MacOSDevices(),
+    MacOSDevices(
+      processManager: processManager,
+      macOSWorkflow: macOSWorkflow,
+      logger: logger,
+      platform: platform,
+    ),
     LinuxDevices(
       platform: platform,
       featureFlags: featureFlags,
+      processManager: processManager,
+      logger: logger,
     ),
     WindowsDevices(),
     WebDevices(
