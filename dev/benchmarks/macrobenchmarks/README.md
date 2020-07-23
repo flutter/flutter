@@ -33,7 +33,7 @@ More detailed logs should be in `build/cubic_bezier_perf.timeline.json`.
 To run the backdrop filter benchmark on a device:
 To run a mobile benchmark on a device:
 
-```
+```bash
 flutter drive --profile -t test_driver/run_app.dart --driver test_driver/[test_name]_test.dart
 ```
 
@@ -54,6 +54,21 @@ The key `[test_name]` can be:
 - `simple_animation_perf`
 - `textfield_perf`
 - `cubic_bezier_perf`
+
+### E2E benchmarks
+
+(On-going work)
+
+[E2E](https://pub.dev/packages/e2e)-based tests are driven independent of the
+host machine. The following tests are E2E:
+
+- `cull_opacity_perf.dart`
+
+These tests should be run by:
+
+```bash
+flutter drive --profile -t test/[test_name]_e2e.dart --driver test_driver/e2e_test.dart
+```
 
 ## Web benchmarks
 
@@ -121,3 +136,10 @@ cd dev/devicelab
 # Runs using the CanvasKit renderer
 ../../bin/cache/dart-sdk/bin/dart bin/run.dart -t bin/tasks/web_benchmarks_canvaskit.dart
 ```
+
+## Frame policy test
+
+File `test/frame_policy.dart` and its driving script `test_driver/frame_policy_test.dart`
+are used for testing [`fullyLive`](https://api.flutter.dev/flutter/flutter_test/LiveTestWidgetsFlutterBindingFramePolicy-class.html)
+and [`benchmarkLive`](https://api.flutter.dev/flutter/flutter_test/LiveTestWidgetsFlutterBindingFramePolicy-class.html)
+policies in terms of its effect on [`WidgetTester.handlePointerEventRecord`](https://master-api.flutter.dev/flutter/flutter_test/WidgetTester/handlePointerEventRecord.html).

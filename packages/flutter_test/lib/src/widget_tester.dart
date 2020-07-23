@@ -270,6 +270,22 @@ class TargetPlatformVariant extends TestVariant<TargetPlatform> {
   }
 }
 
+/// The warning message to show when a benchmark is performed with assert on.
+const String kDebugWarning = '''
+┏╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍┓
+┇ ⚠    THIS BENCHMARK IS BEING RUN IN DEBUG MODE     ⚠  ┇
+┡╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍┦
+│                                                       │
+│  Numbers obtained from a benchmark while asserts are  │
+│  enabled will not accurately reflect the performance  │
+│  that will be experienced by end users using release  ╎
+│  builds. Benchmarks should be run using this command  ╎
+│  line:  "flutter run --profile test.dart" or          ┊
+│  or "flutter drive --profile -t test.dart".           ┊
+│                                                       ┊
+└─────────────────────────────────────────────────╌┄┈  🐢
+''';
+
 /// Runs the [callback] inside the Flutter benchmark environment.
 ///
 /// Use this function for benchmarking custom [StatelessWidget]s and
@@ -320,18 +336,7 @@ Future<void> benchmarkWidgets(
   assert(() {
     if (mayRunWithAsserts)
       return true;
-
-    print('┏╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍┓');
-    print('┇ ⚠ THIS BENCHMARK IS BEING RUN WITH ASSERTS ENABLED ⚠  ┇');
-    print('┡╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍┦');
-    print('│                                                       │');
-    print('│  Numbers obtained from a benchmark while asserts are  │');
-    print('│  enabled will not accurately reflect the performance  │');
-    print('│  that will be experienced by end users using release  ╎');
-    print('│  builds. Benchmarks should be run using this command  ┆');
-    print('│  line:  flutter run --release benchmark.dart          ┊');
-    print('│                                                        ');
-    print('└─────────────────────────────────────────────────╌┄┈  🐢');
+    print(kDebugWarning);
     return true;
   }());
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
