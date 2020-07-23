@@ -718,6 +718,9 @@ abstract class WidgetController {
       Duration duration = const Duration(milliseconds: 50),
     }
   ) async {
+    assert(finder != null);
+    assert(scrollable != null);
+    assert(scrollable.evaluate().isNotEmpty);
     assert(timeout > 0);
     Offset moveStep;
     switch(widget<Scrollable>(scrollable).axisDirection) {
