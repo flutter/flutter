@@ -1321,16 +1321,6 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
       return true;
     }());
     size = constraints.biggest;
-    // We ignore the return value of applyViewportDimension below because we are
-    // going to go through performLayout next regardless.
-    switch (axis) {
-      case Axis.vertical:
-        offset.applyViewportDimension(size.height);
-        break;
-      case Axis.horizontal:
-        offset.applyViewportDimension(size.width);
-        break;
-    }
   }
 
   static const int _maxLayoutCycles = 10;
@@ -1342,6 +1332,17 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
 
   @override
   void performLayout() {
+    // Ignore the return value of applyViewportDimension because we are
+    // doing a layout regardless.
+    switch (axis) {
+      case Axis.vertical:
+        offset.applyViewportDimension(size.height);
+        break;
+      case Axis.horizontal:
+        offset.applyViewportDimension(size.width);
+        break;
+    }
+
     if (center == null) {
       assert(firstChild == null);
       _minScrollExtent = 0.0;
