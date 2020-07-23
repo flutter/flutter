@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:clock/clock.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -718,8 +719,86 @@ class LiveWidgetController extends WidgetController {
 
   @override
   Future<List<Duration>> handlePointerEventRecord(List<PointerEventRecord> records) {
-    // TODO(CareF): This will be implemented after we decide what should be the
-    // correct pumping strategy.
-    throw UnimplementedError;
+    assert(records != null);
+    assert(records.isNotEmpty);
+    return TestAsyncUtils.guard<List<Duration>>(() async {
+      // hitTestHistory is an equivalence of _hitTests in [GestureBinding],
+      // used as state for all pointers which are currently down.
+      final Map<int, HitTestResult> hitTestHistory = <int, HitTestResult>{};
+      final List<Duration> handleTimeStampDiff = <Duration>[];
+      DateTime startTime;
+      for (final PointerEventRecord record in records) {
+        final DateTime now = clock.now();
+        startTime ??= now;
+        // So that the first event is promised to receive a zero timeDiff
+        final Duration timeDiff = record.timeDelay - now.difference(startTime);
+        if (timeDiff.isNegative) {
+          // This happens when something (e.g. GC) takes a long time during the
+          // processing of the events.
+          // Flush all past events
+          handleTimeStampDiff.add(-timeDiff);
+          for (final PointerEvent event in record.events) {
+            _handlePointerEvent(event, hitTestHistory);
+          }
+        } else {
+          await Future<void>.delayed(timeDiff);
+          handleTimeStampDiff.add(
+            // Recalculating the time diff for getting exact time when the event
+            // packet is sent. For a perfect Future.delayed like the one in a
+            // fake async this new diff should be zero.
+            clock.now().difference(startTime) - record.timeDelay,
+          );
+          for (final PointerEvent event in record.events) {
+            _handlePointerEvent(event, hitTestHistory);
+          }
+        }
+      }
+      // This makes sure that a gesture is completed, with no more pointers
+      // active.
+      assert(hitTestHistory.isEmpty);
+      return handleTimeStampDiff;
+    });
+  }
+
+  // This method is almost identical to [GestureBinding._handlePointerEvent]
+  // to replicate the bahavior of the real binding.
+  void _handlePointerEvent(
+    PointerEvent event,
+    Map<int, HitTestResult> _hitTests
+  ) {
+    HitTestResult hitTestResult;
+    if (event is PointerDownEvent || event is PointerSignalEvent) {
+      assert(!_hitTests.containsKey(event.pointer));
+      hitTestResult = HitTestResult();
+      binding.hitTest(hitTestResult, event.position);
+      if (event is PointerDownEvent) {
+        _hitTests[event.pointer] = hitTestResult;
+      }
+      assert(() {
+        if (debugPrintHitTestResults)
+          debugPrint('$event: $hitTestResult');
+        return true;
+      }());
+    } else if (event is PointerUpEvent || event is PointerCancelEvent) {
+      hitTestResult = _hitTests.remove(event.pointer);
+    } else if (event.down) {
+      // Because events that occur with the pointer down (like
+      // PointerMoveEvents) should be dispatched to the same place that their
+      // initial PointerDownEvent was, we want to re-use the path we found when
+      // the pointer went down, rather than do hit detection each time we get
+      // such an event.
+      hitTestResult = _hitTests[event.pointer];
+    }
+    assert(() {
+      if (debugPrintMouseHoverEvents && event is PointerHoverEvent)
+        debugPrint('$event');
+      return true;
+    }());
+    if (hitTestResult != null ||
+        event is PointerHoverEvent ||
+        event is PointerAddedEvent ||
+        event is PointerRemovedEvent) {
+      binding.dispatchEvent(event, hitTestResult);
+    }
   }
 }
