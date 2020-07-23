@@ -58,15 +58,8 @@ The key `[test_name]` can be:
 
 ### E2E benchmarks
 
-(On-going work)
-
 [E2E](https://pub.dev/packages/e2e)-based tests are driven independent of the
-host machine. The following tests are E2E:
-
-- `cull_opacity_perf.dart`
-- `multi_widget_construction_perf`
-
-These tests should be run by:
+host machine. The above tests can also run as E2E test by running:
 
 ```bash
 flutter drive --profile -t test/[test_name]_e2e.dart --driver test_driver/e2e_test.dart

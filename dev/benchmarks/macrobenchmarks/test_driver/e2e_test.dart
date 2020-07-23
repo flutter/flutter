@@ -41,6 +41,7 @@ Future<void> main() async {
       response.data['performance'] as Map<String, dynamic>,
       true,
     );
+    // print(resultString);
     await file.writeAsString(resultString);
 
     exit(0);
