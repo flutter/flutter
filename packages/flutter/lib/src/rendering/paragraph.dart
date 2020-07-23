@@ -269,7 +269,7 @@ class RenderParagraph extends RenderBox
     markNeedsLayout();
   }
 
-  /// {@macro flutter.widgets.basic.TextWidthBasis}
+  /// {@macro flutter.painting.textPainter.textWidthBasis}
   TextWidthBasis get textWidthBasis => _textPainter.textWidthBasis;
   set textWidthBasis(TextWidthBasis value) {
     assert(value != null);
