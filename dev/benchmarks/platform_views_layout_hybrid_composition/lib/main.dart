@@ -6,8 +6,12 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
+import 'package:flutter_driver/driver_extension.dart';
+
+import 'android_platform_view.dart';
 
 void main() {
+  enableFlutterDriverExtension();
   runApp(
     const PlatformViewApp()
   );
@@ -76,14 +80,14 @@ class DummyPlatformView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const String viewType = 'benchmarks/platform_views_layout/DummyPlatformView';
+    const String viewType = 'benchmarks/platform_views_layout_hybrid_composition/DummyPlatformView';
     Widget nativeView;
     if (Platform.isIOS) {
       nativeView = const UiKitView(
         viewType: viewType,
       );
     } else if (Platform.isAndroid) {
-      nativeView = const AndroidView(
+      nativeView = const AndroidPlatformView(
         viewType: viewType,
       );
     } else {
@@ -92,6 +96,7 @@ class DummyPlatformView extends StatelessWidget {
     return Container(
       color: Colors.purple,
       height: 200.0,
+      width: 300.0,
       child: nativeView,
     );
   }
