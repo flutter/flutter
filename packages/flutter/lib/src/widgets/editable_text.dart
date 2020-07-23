@@ -767,10 +767,36 @@ class EditableText extends StatefulWidget {
 
   /// {@template flutter.widgets.editableText.minLines}
   /// The minimum number of lines to occupy when the content spans fewer lines.
-
+  ///
+  /// If this is null (default), text container starts with enough vertical space
+  /// for one line and grows to accommodate additional lines as they are entered.
+  ///
+  /// This can be used in combination with [maxLines] for a varying set of behaviors.
+  ///
+  /// If the value is set, it must be greater than zero. If the value is greater
+  /// than 1, [maxLines] should also be set to either null or greater than
+  /// this value.
+  ///
   /// When [maxLines] is set as well, the height will grow between the indicated
   /// range of lines. When [maxLines] is null, it will grow as high as needed,
   /// starting from [minLines].
+  ///
+  /// A few examples of behaviors possible with [minLines] and [maxLines] are as follows.
+  /// These apply equally to `TextField`, `TextFormField`, `CupertinoTextField`,
+  /// and `EditableText`.
+  ///
+  /// Input that always occupies at least 2 lines and has an infinite max.
+  /// Expands vertically as needed.
+  /// ```dart
+  /// TextField(minLines: 2)
+  /// ```
+  ///
+  /// Input whose height starts from 2 lines and grows up to 4 lines at which
+  /// point the height limit is reached. If additional lines are entered it will
+  /// scroll vertically.
+  /// ```dart
+  /// TextField(minLines:2, maxLines: 4)
+  /// ```
   ///
   /// See the examples in [maxLines] for the complete picture of how [maxLines]
   /// and [minLines] interact to produce various behaviors.
