@@ -118,8 +118,12 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
           if (platformViewRequests.get(viewId) != null) {
             platformViewRequests.remove(viewId);
           }
-          if (platformViews.get(viewId) != null) {
-            ((FlutterView) flutterView).removeView(mutatorViews.get(viewId));
+
+          final View platformView = platformViews.get(viewId);
+          if (platformView != null) {
+            final FlutterMutatorView mutatorView = mutatorViews.get(viewId);
+            mutatorView.removeView(platformView);
+            ((FlutterView) flutterView).removeView(mutatorView);
             platformViews.remove(viewId);
             mutatorViews.remove(viewId);
           }
@@ -679,13 +683,22 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
     PlatformView platformView = factory.create(context, viewId, createParams);
     View view = platformView.getView();
+
+    if (view == null) {
+      throw new IllegalStateException(
+          "PlatformView#getView() returned null, but an Android view reference was expected.");
+    }
+    if (view.getParent() != null) {
+      throw new IllegalStateException(
+          "The Android view returned from PlatformView#getView() was already added to a parent view.");
+    }
     platformViews.put(viewId, view);
 
     FlutterMutatorView mutatorView =
         new FlutterMutatorView(
             context, context.getResources().getDisplayMetrics().density, androidTouchProcessor);
     mutatorViews.put(viewId, mutatorView);
-    mutatorView.addView(platformView.getView());
+    mutatorView.addView(view);
     ((FlutterView) flutterView).addView(mutatorView);
   }
 
