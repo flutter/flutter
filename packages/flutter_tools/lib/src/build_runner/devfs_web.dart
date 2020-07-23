@@ -176,7 +176,12 @@ class WebAssetServer implements AssetReader {
       if (testMode) {
         return server;
       }
-
+      
+      // In debug and profile builds allow rendering in a frame.
+      if (!buildInfo.mode.isRelease) {
+        httpServer.defaultResponseHeaders
+            .remove('x-frame-options', 'SAMEORIGIN');
+      }
       // In release builds deploy a simpler proxy server.
       if (buildInfo.mode != BuildMode.debug) {
         final ReleaseAssetServer releaseAssetServer = ReleaseAssetServer(
