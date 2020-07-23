@@ -638,7 +638,8 @@ class HeroControllerScope extends InheritedWidget {
     Key key,
     this.controller,
     Widget child,
-  }) : super(key: key, child: child);
+  }) : assert(controller != null),
+       super(key: key, child: child);
 
   /// Creates a widget to prevent the subtree from receiving the hero controller
   /// above.
