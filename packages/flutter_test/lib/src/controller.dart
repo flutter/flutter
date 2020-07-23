@@ -700,19 +700,19 @@ abstract class WidgetController {
   /// Shorthand for `Scrollable.ensureVisible(element(finder))`
   Future<void> ensureVisible(Finder finder) => Scrollable.ensureVisible(element(finder));
 
-  /// Repeatedly scrolls the `scrollable` by `dScroll` until `finder` and
+  /// Repeatedly scrolls the `scrollable` by `delta` in the
+  /// [Scrpllable.axisDirection] until `finder` is visible or
   /// throws if `finder` is not found for maximum `timeout` times.
   ///
   /// Between each scroll, wait for `duration` time for settling.
   ///
   /// This is different from [ensureVisible] in that this allows looking for
-  /// `finder` that is not built yet, but requires to specify the scrollable.
-  ///
-  /// If the `scrollable` is infinite and `dScroll`
+  /// `finder` that is not built yet, but the caller must specify the scrollable
+  /// that builds child specified by finder.
   Future<void> scrollUntilVisible(
     Finder finder,
     Finder scrollable,
-    double dScroll, {
+    double delta, {
       int timeout = 50,
       Duration duration = const Duration(milliseconds: 50),
     }
@@ -721,16 +721,16 @@ abstract class WidgetController {
     Offset moveStep;
     switch(widget<Scrollable>(scrollable).axisDirection) {
       case AxisDirection.up:
-        moveStep = Offset(0, dScroll);
+        moveStep = Offset(0, delta);
         break;
       case AxisDirection.down:
-        moveStep = Offset(0, -dScroll);
+        moveStep = Offset(0, -delta);
         break;
       case AxisDirection.left:
-        moveStep = Offset(dScroll, 0);
+        moveStep = Offset(delta, 0);
         break;
       case AxisDirection.right:
-        moveStep = Offset(-dScroll, 0);
+        moveStep = Offset(-delta, 0);
         break;
     }
     while(timeout > 0 && finder.evaluate().isEmpty) {

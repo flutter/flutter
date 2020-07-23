@@ -502,5 +502,32 @@ void main() {
         expect(find.text('Item 45', skipOffstage: true), findsOneWidget);
       },
     );
+
+    testWidgets(
+      'Fail',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: ListView.builder(
+                itemCount: 50,
+                shrinkWrap: true,
+                itemBuilder: (BuildContext context, int i) => ListTile(title: Text('Item $i')),
+              ),
+            ),
+          ),
+        );
+
+        try {
+          await tester.scrollUntilVisible(
+            find.text('Item 55', skipOffstage: false),
+            find.byType(Scrollable),
+            100,
+          );
+        } on StateError catch (e) {
+          expect(e.message, 'No element');
+        }
+      },
+    );
   });
 }
