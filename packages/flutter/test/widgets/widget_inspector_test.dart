@@ -512,6 +512,123 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(inspectorState.selection.candidates.where((RenderObject object) => object is RenderParagraph).length, equals(2));
     });
 
+    testWidgets('WidgetInspector with Transform above', (WidgetTester tester) async {
+      final GlobalKey childKey = GlobalKey();
+      final GlobalKey repaintBoundaryKey = GlobalKey();
+
+      final Matrix4 mainTransform = Matrix4.identity()
+          ..translate(50.0, 30.0)
+          ..scale(0.8, 0.8)
+          ..translate(100.0, 50.0);
+
+      await tester.pumpWidget(
+        RepaintBoundary(
+          key: repaintBoundaryKey,
+          child: Container(
+            color: Colors.grey,
+            child: Transform(
+              transform: mainTransform,
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: WidgetInspector(
+                  selectButtonBuilder: null,
+                  child: Container(
+                    color: Colors.white,
+                    child: Center(
+                      child: Container(
+                        key: childKey,
+                        height: 100.0,
+                        width: 50.0,
+                        color: Colors.red,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byKey(childKey));
+      await tester.pump();
+
+      await expectLater(
+        find.byKey(repaintBoundaryKey),
+        matchesGoldenFile('inspector.overlay_positioning_with_transform.png'),
+      );
+    });
+
+    testWidgets('Multiple widget inspectors', (WidgetTester tester) async {
+      // This test verifies that interacting with different inspectors
+      // works correctly. This use case may be an app that displays multiple
+      // apps inside (i.e. a storyboard).
+      final GlobalKey selectButton1Key = GlobalKey();
+      final GlobalKey selectButton2Key = GlobalKey();
+
+      final GlobalKey inspector1Key = GlobalKey();
+      final GlobalKey inspector2Key = GlobalKey();
+
+      final GlobalKey child1Key = GlobalKey();
+      final GlobalKey child2Key = GlobalKey();
+
+      InspectorSelectButtonBuilder selectButtonBuilder(Key key) {
+        return (BuildContext context, VoidCallback onPressed) {
+          return Material(child: RaisedButton(onPressed: onPressed, key: key));
+        };
+      }
+
+      // State type is private, hence using dynamic.
+      // The inspector state is static, so it's enough with reading one of them.
+      dynamic getInspectorState() => inspector1Key.currentState;
+      String paragraphText(RenderParagraph paragraph) {
+        final TextSpan textSpan = paragraph.text as TextSpan;
+        return textSpan.text;
+      }
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Row(
+            children: <Widget>[
+              Flexible(
+                child: WidgetInspector(
+                  key: inspector1Key,
+                  selectButtonBuilder: selectButtonBuilder(selectButton1Key),
+                  child: Container(
+                    key: child1Key,
+                    child: const Text('Child 1'),
+                  ),
+                ),
+              ),
+              Flexible(
+                child: WidgetInspector(
+                  key: inspector2Key,
+                  selectButtonBuilder: selectButtonBuilder(selectButton2Key),
+                  child: Container(
+                    key: child2Key,
+                    child: const Text('Child 2'),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      final InspectorSelection selection = getInspectorState().selection as InspectorSelection;
+      // The selection is static, so it may be initialized from previous tests.
+      selection?.clear();
+
+      await tester.tap(find.text('Child 1'));
+      await tester.pump();
+      expect(paragraphText(selection.current as RenderParagraph), equals('Child 1'));
+
+      await tester.tap(find.text('Child 2'));
+      await tester.pump();
+      expect(paragraphText(selection.current as RenderParagraph), equals('Child 2'));
+    });
+
     test('WidgetInspectorService null id', () {
       service.disposeAllGroups();
       expect(service.toObject(null), isNull);
