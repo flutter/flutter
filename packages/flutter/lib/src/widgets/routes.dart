@@ -103,10 +103,12 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// {@endtemplate}
   Duration get transitionDuration;
 
+  /// {@template flutter.widgets.transitionRoute.reverseTransitionDuration}
   /// The duration the transition going in reverse.
   ///
   /// By default, the reverse transition duration is set to the value of
   /// the forwards [transitionDuration].
+  /// {@endtemplate}
   Duration get reverseTransitionDuration => transitionDuration;
 
   /// {@template flutter.widgets.transitionRoute.opaque}
