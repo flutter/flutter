@@ -1017,7 +1017,7 @@ void main() {
           child: Center(
             child: Builder(
               builder: (BuildContext context) {
-                return RaisedButton(
+                return ElevatedButton(
                   onPressed: () {
                     // Ensure showMenu throws an assertion without a position
                     expect(() {
@@ -1356,7 +1356,7 @@ void main() {
         onGenerateRoute: (RouteSettings settings) {
           return MaterialPageRoute<dynamic>(
             builder: (BuildContext context) {
-              return RaisedButton(
+              return ElevatedButton(
                 onPressed: () {
                   showMenu<int>(
                     context: context,
@@ -1377,7 +1377,7 @@ void main() {
     ));
 
     // Open the dialog.
-    await tester.tap(find.byType(RaisedButton));
+    await tester.tap(find.byType(ElevatedButton));
 
     expect(rootObserver.menuCount, 0);
     expect(nestedObserver.menuCount, 1);
@@ -1394,7 +1394,7 @@ void main() {
         onGenerateRoute: (RouteSettings settings) {
           return MaterialPageRoute<dynamic>(
             builder: (BuildContext context) {
-              return RaisedButton(
+              return ElevatedButton(
                 onPressed: () {
                   showMenu<int>(
                     context: context,
@@ -1416,7 +1416,7 @@ void main() {
     ));
 
     // Open the dialog.
-    await tester.tap(find.byType(RaisedButton));
+    await tester.tap(find.byType(ElevatedButton));
 
     expect(rootObserver.menuCount, 1);
     expect(nestedObserver.menuCount, 0);
