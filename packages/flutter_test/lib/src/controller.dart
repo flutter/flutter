@@ -705,7 +705,8 @@ abstract class WidgetController {
   ///
   /// Between each scroll, wait for `duration` time for settling.
   ///
-  /// Throws a [StateError] if `finder` is not found for maximum `timeout` times.
+  /// Throws a [StateError] if `finder` is not found for maximum `maxScrolls`
+  /// times.
   ///
   /// This is different from [ensureVisible] in that this allows looking for
   /// `finder` that is not built yet, but the caller must specify the scrollable
@@ -714,14 +715,14 @@ abstract class WidgetController {
     Finder finder,
     Finder scrollable,
     double delta, {
-      int timeout = 50,
+      int maxScrolls = 50,
       Duration duration = const Duration(milliseconds: 50),
     }
   ) async {
     assert(finder != null);
     assert(scrollable != null);
     assert(scrollable.evaluate().isNotEmpty);
-    assert(timeout > 0);
+    assert(maxScrolls > 0);
     Offset moveStep;
     switch(widget<Scrollable>(scrollable).axisDirection) {
       case AxisDirection.up:
@@ -737,10 +738,10 @@ abstract class WidgetController {
         moveStep = Offset(-delta, 0);
         break;
     }
-    while(timeout > 0 && finder.evaluate().isEmpty) {
+    while(maxScrolls > 0 && finder.evaluate().isEmpty) {
       await drag(scrollable, moveStep);
       await pump(duration);
-      timeout -= 1;
+      maxScrolls -= 1;
     }
     await Scrollable.ensureVisible(element(finder));
   }
