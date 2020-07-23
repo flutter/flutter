@@ -581,7 +581,13 @@ class Actions extends StatefulWidget {
   /// that are found.
   ///
   /// Setting `nullOk` to true means that if no ambient [Actions] widget is
-  /// found, then this method will return false instead of throwing.
+  /// found, then this method will return null instead of throwing.
+  ///
+  /// Returns the result of invoking the action's [Action.invoke] method. If
+  /// no action mapping was found for the specified intent, or if the action
+  /// that was found was disabled, then this returns null. Callers can detect
+  /// whether or not the action is available (found, and not disabled) using
+  /// [Actions.find] with its `nullOk` argument set to true.
   static Object invoke<T extends Intent>(
     BuildContext context,
     T intent, {
@@ -624,7 +630,7 @@ class Actions extends StatefulWidget {
     }());
     // Invoke the action we found using the relevant dispatcher from the Actions
     // Element we found.
-    return actionElement != null ? _findDispatcher(actionElement).invokeAction(action, intent, context) != null : null;
+    return actionElement != null ? _findDispatcher(actionElement).invokeAction(action, intent, context) : null;
   }
 
   @override
