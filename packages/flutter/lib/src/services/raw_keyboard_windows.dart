@@ -210,11 +210,7 @@ class RawKeyEventDataWindows extends RawKeyEventData {
   /// This mask is used to check the [modifiers] field to test whether one of the
   /// SHIFT modifier keys is pressed.
   ///
-  /// {@template flutter.services.rawKeyEventDataWindows.modifiers}
-  /// Use this value if you need to decode the [modifiers] field yourself, but
-  /// it's much easier to use [isModifierPressed] if you just want to know if
-  /// a modifier is pressed.
-  /// {@endtemplate}
+  /// {@macro flutter.services.rawKeyEventDataWindows.modifiers}
   static const int modifierShift = 1 << 0;
 
   /// This mask is used to check the [modifiers] field to test whether the left
