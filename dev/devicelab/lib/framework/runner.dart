@@ -37,6 +37,7 @@ Future<Map<String, dynamic>> runTask(
     <String>[
       '--enable-vm-service=0', // zero causes the system to choose a free port
       '--no-pause-isolates-on-exit',
+      '--disable-dart-dev',
       if (localEngine != null) '-DlocalEngine=$localEngine',
       if (localEngineSrcPath != null) '-DlocalEngineSrcPath=$localEngineSrcPath',
       taskExecutable,
