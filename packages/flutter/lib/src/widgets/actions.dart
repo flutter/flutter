@@ -30,11 +30,17 @@ BuildContext _getParent(BuildContext context) {
   return parent;
 }
 
-/// A class representing a particular configuration of an action.
+/// A class representing a particular configuration of an [Action].
 ///
 /// This class is what a key map in a [ShortcutMap] has as values, and is used
 /// by an [ActionDispatcher] to look up an action and invoke it, giving it this
 /// object to extract configuration information from.
+///
+/// See also:
+///
+///  * [Actions.invoke], which invokes the action associated with a specified
+///    [Intent] using the [Actions] widget that most tightly encloses the given
+///    [BuildContext].
 @immutable
 class Intent with Diagnosticable {
   /// A const constructor for an [Intent].
