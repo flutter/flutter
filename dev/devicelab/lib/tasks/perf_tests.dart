@@ -92,6 +92,13 @@ TaskFunction createCubicBezierPerfTest() {
   ).run;
 }
 
+TaskFunction createCubicBezierPerfE2ETest() {
+  return E2EPerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/cubic_bezier_perf_e2e.dart',
+  ).run;
+}
+
 TaskFunction createCubicBezierPerfSkSLWarmupTest() {
   return PerfTestWithSkSL(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -119,6 +126,13 @@ TaskFunction createBackdropFilterPerfTest({bool needsMeasureCpuGpu = false}) {
   ).run;
 }
 
+TaskFunction createBackdropFilterPerfE2ETest() {
+  return E2EPerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/backdrop_filter_perf_e2e.dart',
+  ).run;
+}
+
 TaskFunction createPostBackdropFilterPerfTest({bool needsMeasureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -126,6 +140,13 @@ TaskFunction createPostBackdropFilterPerfTest({bool needsMeasureCpuGpu = false})
     'post_backdrop_filter_perf',
     needsMeasureCpuGpu: needsMeasureCpuGpu,
     testDriver: 'test_driver/post_backdrop_filter_perf_test.dart',
+  ).run;
+}
+
+TaskFunction createPostBackdropFilterPerfE2ETest() {
+  return E2EPerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/post_backdrop_filter_perf_e2e.dart',
   ).run;
 }
 
@@ -139,6 +160,13 @@ TaskFunction createSimpleAnimationPerfTest({bool needsMeasureCpuGpu = false}) {
   ).run;
 }
 
+TaskFunction createSimpleAnimationPerfE2ETest() {
+  return E2EPerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/simple_animation_perf_e2e.dart',
+  ).run;
+}
+
 TaskFunction createAnimatedPlaceholderPerfTest({bool needsMeasureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -146,6 +174,13 @@ TaskFunction createAnimatedPlaceholderPerfTest({bool needsMeasureCpuGpu = false}
     'animated_placeholder_perf',
     needsMeasureCpuGpu: needsMeasureCpuGpu,
     testDriver: 'test_driver/animated_placeholder_perf_test.dart',
+  ).run;
+}
+
+TaskFunction createAnimatedPlaceholderPerfE2ETest() {
+  return E2EPerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/animated_placeholder_perf_e2e.dart',
   ).run;
 }
 
@@ -241,12 +276,26 @@ TaskFunction createTextfieldPerfTest() {
   ).run;
 }
 
+TaskFunction createTextfieldPerfE2ETest() {
+  return E2EPerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/textfield_perf_e2e.dart',
+  ).run;
+}
+
 TaskFunction createColorFilterAndFadePerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
     'color_filter_and_fade_perf',
     testDriver: 'test_driver/color_filter_and_fade_perf_test.dart',
+  ).run;
+}
+
+TaskFunction createColorFilterAndFadePerfE2ETest() {
+  return E2EPerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/color_filter_and_fade_perf_e2e.dart',
   ).run;
 }
 
@@ -259,12 +308,26 @@ TaskFunction createFadingChildAnimationPerfTest() {
   ).run;
 }
 
+TaskFunction createFadingChildAnimationPerfE2ETest() {
+  return E2EPerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/fading_child_animation_perf_e2e.dart',
+  ).run;
+}
+
 TaskFunction createImageFilteredTransformAnimationPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
     'imagefiltered_transform_animation_perf',
     testDriver: 'test_driver/imagefiltered_transform_animation_perf_test.dart',
+  ).run;
+}
+
+TaskFunction createImageFilteredTransformAnimationPerfE2ETest() {
+  return E2EPerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/imagefiltered_transform_animation_perf_e2e.dart',
   ).run;
 }
 
