@@ -173,6 +173,10 @@ class FallbackDiscovery {
               'success',
               flutterUsage: _flutterUsage,
             ).send();
+
+            // We absolutely must dispose this vmService instance, otherwise
+            // DDS will fail to start.
+            vmService.dispose();
             return Uri.parse('http://localhost:$hostPort');
           }
         }
