@@ -107,9 +107,13 @@ class ObjectKey extends LocalKey {
 /// in the same animation frame in which it was removed from its old location in
 /// the tree.
 ///
-/// Global keys are relatively expensive. If you don't need any of the features
-/// listed above, consider using a [Key], [ValueKey], [ObjectKey], or
-/// [UniqueKey] instead.
+/// Reparenting an [Element] using a global key is relatively expensive, as
+/// this operation will trigger a call to [State.deactivate] on the associated
+/// [State] and all of its descendants; then force all widgets that depends
+/// on an [InheritedWidget] to rebuild.
+///
+/// If you don't need any of the features listed above, consider using a [Key],
+/// [ValueKey], [ObjectKey], or [UniqueKey] instead.
 ///
 /// You cannot simultaneously include two widgets in the tree with the same
 /// global key. Attempting to do so will assert at runtime.
