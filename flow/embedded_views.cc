@@ -6,9 +6,9 @@
 
 namespace flutter {
 
-bool ExternalViewEmbedder::SubmitFrame(GrContext* context,
+void ExternalViewEmbedder::SubmitFrame(GrContext* context,
                                        std::unique_ptr<SurfaceFrame> frame) {
-  return frame->Submit();
+  frame->Submit();
 };
 
 void MutatorsStack::PushClipRect(const SkRect& rect) {

@@ -161,7 +161,6 @@ TEST(AndroidExternalViewEmbedder, RasterizerRunsOnPlatformThread) {
 
   auto postpreroll_result = embedder->PostPrerollAction(raster_thread_merger);
   ASSERT_EQ(PostPrerollResult::kResubmitFrame, postpreroll_result);
-  ASSERT_TRUE(embedder->SubmitFrame(nullptr, nullptr));
 
   EXPECT_CALL(*jni_mock, FlutterViewEndFrame());
   embedder->EndFrame(/*should_resubmit_frame=*/true, raster_thread_merger);
