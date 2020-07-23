@@ -518,7 +518,7 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.dart:ui.textHeightBehavior},
   final TextHeightBehavior textHeightBehavior;
 
-  /// {@macro flutter.widgets.text.DefaultTextStyle.textWidthBasis}
+  /// {@macro flutter.painting.textPainter.textWidthBasis}
   final TextWidthBasis textWidthBasis;
 
   /// {@template flutter.widgets.editableText.readOnly}
@@ -685,6 +685,7 @@ class EditableText extends StatefulWidget {
   /// See [RenderEditable.locale] for more information.
   final Locale locale;
 
+  /// {@template flutter.widgets.editableText.textScaleFactor}
   /// The number of font pixels for each logical pixel.
   ///
   /// For example, if the text scale factor is 1.5, text will be 50% larger than
@@ -692,6 +693,7 @@ class EditableText extends StatefulWidget {
   ///
   /// Defaults to the [MediaQueryData.textScaleFactor] obtained from the ambient
   /// [MediaQuery], or 1.0 if there is no [MediaQuery] in scope.
+  /// {@endtemplate}
   final double textScaleFactor;
 
   /// The color to use when painting the cursor.

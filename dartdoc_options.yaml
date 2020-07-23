@@ -12,3 +12,10 @@ dartdoc:
     dartpad:
       command: ["dev/snippets/lib/main.dart", "--type=sample", "--dartpad"]
       description: "Creates full application sample code documentation output from embedded documentation samples and displays it in an embedded DartPad."
+  errors:
+    - tool-error  # enabled by default
+    - duplicate-file  # enabled by default
+    - invalid-parameter  # enabled by default
+    - unresolved-export  # enabled by default
+    - unknown-macro  # a {@macro foo} reference cannot be resolved
+    - invalid-parameter  # an invalid parameter is passed to a {@foo x y} directive

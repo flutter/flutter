@@ -685,7 +685,7 @@ class TextTheme with Diagnosticable {
 
   /// Linearly interpolate between two text themes.
   ///
-  /// {@macro flutter.material.themeData.lerp}
+  /// {@macro dart.ui.shadow.lerp}
   static TextTheme lerp(TextTheme a, TextTheme b, double t) {
     assert(t != null);
     return TextTheme(
