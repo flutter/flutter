@@ -3908,7 +3908,7 @@ class Flex extends MultiChildRenderObjectWidget {
        assert(mainAxisSize != null),
        assert(crossAxisAlignment != null),
        assert(verticalDirection != null),
-       assert(crossAxisAlignment != CrossAxisAlignment.baseline || textBaseline != null),
+       assert(crossAxisAlignment != CrossAxisAlignment.baseline || textBaseline != null, 'textBaseline is required if you specify the crossAxisAlignment with CrossAxisAlignment.baseline'),
        assert(clipBehavior != null),
        super(key: key, children: children);
 
@@ -5200,6 +5200,7 @@ class RichText extends MultiChildRenderObjectWidget {
        assert(textScaleFactor != null),
        assert(maxLines == null || maxLines > 0),
        assert(textWidthBasis != null),
+       _applyTextScaleFactorToWidgetSpan = applyTextScaleFactorToWidgetSpan,
        super(key: key, children: _extractChildren(text));
 
   // Traverses the InlineSpan tree and depth-first collects the list of
@@ -5271,11 +5272,13 @@ class RichText extends MultiChildRenderObjectWidget {
   /// {@macro flutter.painting.textPainter.strutStyle}
   final StrutStyle strutStyle;
 
-  /// {@macro flutter.widgets.text.DefaultTextStyle.textWidthBasis}
+  /// {@macro flutter.painting.textPainter.textWidthBasis}
   final TextWidthBasis textWidthBasis;
 
   /// {@macro flutter.dart:ui.textHeightBehavior}
   final ui.TextHeightBehavior textHeightBehavior;
+
+  final bool _applyTextScaleFactorToWidgetSpan;
 
   @override
   RenderParagraph createRenderObject(BuildContext context) {
@@ -5290,6 +5293,7 @@ class RichText extends MultiChildRenderObjectWidget {
       strutStyle: strutStyle,
       textWidthBasis: textWidthBasis,
       textHeightBehavior: textHeightBehavior,
+      applyTextScaleFactorToWidgetSpan: _applyTextScaleFactorToWidgetSpan,
       locale: locale ?? Localizations.localeOf(context, nullOk: true),
     );
   }
