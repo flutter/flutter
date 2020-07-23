@@ -11,7 +11,7 @@ This is what the app looks like:
 
 ![android_views test app](https://flutter.github.io/assets-for-api-docs/assets/readme-assets/android_views_test.png)
 
-The blue part is the embedded Android view, because it is positioned at the top
+The blue part is the embedded Android view because it is positioned at the top
 left corner, the coordinate systems for FlutterView and for the embedded view's
 virtual display has the same origin (this makes the MotionEvent comparison
 easier as we don't need to translate the coordinates).

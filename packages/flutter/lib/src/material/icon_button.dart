@@ -278,7 +278,7 @@ class IconButton extends StatelessWidget {
   /// If this is set to null, the button will be disabled.
   final VoidCallback onPressed;
 
-  /// {@macro flutter.material.inkwell.mousecursor}
+  /// {@macro flutter.material.button.mouseCursor}
   ///
   /// Defaults to [SystemMouseCursors.click].
   final MouseCursor mouseCursor;

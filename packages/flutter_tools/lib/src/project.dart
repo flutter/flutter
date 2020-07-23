@@ -521,7 +521,7 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   Map<String, Map<String, String>> _buildSettingsByScheme;
 
   Future<XcodeProjectInfo> projectInfo() async {
-    if (!existsSync() || !globals.xcodeProjectInterpreter.isInstalled) {
+    if (!xcodeProject.existsSync() || !globals.xcodeProjectInterpreter.isInstalled) {
       return null;
     }
     return _projectInfo ??= await globals.xcodeProjectInterpreter.getInfo(hostAppRoot.path);

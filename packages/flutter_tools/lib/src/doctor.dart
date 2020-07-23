@@ -65,6 +65,11 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
     featureFlags: featureFlags,
   );
 
+  final MacOSWorkflow macOSWorkflow = MacOSWorkflow(
+    platform: globals.platform,
+    featureFlags: featureFlags,
+  );
+
   @override
   List<DoctorValidator> get validators {
     if (_validators != null) {
