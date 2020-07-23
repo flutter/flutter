@@ -701,14 +701,15 @@ abstract class WidgetController {
   Future<void> ensureVisible(Finder finder) => Scrollable.ensureVisible(element(finder));
 
   /// Repeatedly scrolls the `scrollable` by `delta` in the
-  /// [Scrpllable.axisDirection] until `finder` is visible or
-  /// throws if `finder` is not found for maximum `timeout` times.
+  /// [Scrpllable.axisDirection] until `finder` is visible.
   ///
   /// Between each scroll, wait for `duration` time for settling.
   ///
+  /// Throws a [StateError] if `finder` is not found for maximum `timeout` times.
+  ///
   /// This is different from [ensureVisible] in that this allows looking for
   /// `finder` that is not built yet, but the caller must specify the scrollable
-  /// that builds child specified by finder.
+  /// that will build child specified by `finder`.
   Future<void> scrollUntilVisible(
     Finder finder,
     Finder scrollable,
