@@ -126,7 +126,7 @@ class ScaffoldPrelayoutGeometry {
   /// The minimum padding to inset the [FloatingActionButton] by for it
   /// to remain visible.
   ///
-  /// This value is the result of calling [MediaQuery.padding] in the
+  /// This value is the result of calling [MediaQueryData.padding] in the
   /// [Scaffold]'s [BuildContext],
   /// and is useful for insetting the [FloatingActionButton] to avoid features like
   /// the system status bar or the keyboard.

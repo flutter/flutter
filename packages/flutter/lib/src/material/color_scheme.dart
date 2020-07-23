@@ -245,7 +245,7 @@ class ColorScheme with Diagnosticable {
 
   /// Linearly interpolate between two [ColorScheme] objects.
   ///
-  /// {@macro flutter.material.themeData.lerp}
+  /// {@macro dart.ui.shadow.lerp}
   static ColorScheme lerp(ColorScheme a, ColorScheme b, double t) {
     return ColorScheme(
       primary: Color.lerp(a.primary, b.primary, t),

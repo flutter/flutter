@@ -15,121 +15,6 @@ import 'colors.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
-/// {@template flutter.material.slider.seeAlso.sliderComponentShape}
-///  * [SliderComponentShape], which can be used to create custom shapes for
-///    the [Slider]'s thumb, overlay, and value indicator and the
-///    [RangeSlider]'s overlay.
-/// {@endtemplate}
-///
-/// {@template flutter.material.slider.seeAlso.sliderTrackShape}
-///  * [SliderTrackShape], which can be used to create custom shapes for the
-///    [Slider]'s track.
-/// {@endtemplate}
-///
-/// {@template flutter.material.slider.seeAlso.sliderTickMarkShape}
-///  * [SliderTickMarkShape], which can be used to create custom shapes for the
-///    [Slider]'s tick marks.
-/// {@endtemplate}
-///
-/// {@template flutter.material.slider.seeAlso.rangeSliderThumbShape}
-///  * [RangeSliderThumbShape], which can be used to create custom shapes for
-///    the [RangeSlider]'s thumb.
-/// {@endtemplate}
-///
-/// {@template flutter.material.slider.seeAlso.rangeSliderValueIndicatorShape}
-///  * [RangeSliderValueIndicatorShape], which can be used to create custom
-///    shapes for the [RangeSlider]'s value indicator.
-/// {@endtemplate}
-///
-/// {@template flutter.material.slider.seeAlso.rangeSliderTrackShape}
-///  * [RangeSliderTrackShape], which can be used to create custom shapes for
-///    the [RangeSlider]'s track.
-/// {@endtemplate}
-///
-/// {@template flutter.material.slider.seeAlso.rangeSliderTickMarkShape}
-///  * [RangeSliderTickMarkShape], which can be used to create custom shapes for
-///    the [RangeSlider]'s tick marks.
-/// {@endtemplate}
-///
-/// {@template flutter.material.slider.seeAlso.roundSliderThumbShape}
-///  * [RoundSliderThumbShape], which is the default [Slider]'s thumb shape that
-///     paints a solid circle.
-/// {@endtemplate}
-///
-/// {@template flutter.material.slider.seeAlso.roundSliderOverlayShape}
-///  * [RoundSliderOverlayShape], which is the default [Slider] and
-///   [RangeSlider]'s overlay shape that paints a transparent circle.
-/// {@endtemplate}
-///
-/// {@template flutter.material.slider.seeAlso.paddleSliderValueIndicatorShape}
-///  * [PaddleSliderValueIndicatorShape], which is the default [Slider]'s value
-///    indicator shape that paints a custom path with text in it.
-/// {@endtemplate}
-///
-/// {@template flutter.material.slider.seeAlso.roundSliderTickMarkShape}
-///  * [RoundSliderTickMarkShape], which is the default [Slider]'s tick mark
-///    shape that paints a solid circle.
-/// {@endtemplate}
-///
-/// {@template flutter.material.slider.seeAlso.roundedRectSliderTrackShape}
-///  * [RoundedRectSliderTrackShape] for the default [Slider]'s track shape that
-///  paints a stadium-like track.
-/// {@endtemplate}
-///
-/// {@template flutter.material.slider.seeAlso.roundRangeSliderThumbShape}
-///  * [RoundRangeSliderThumbShape] for the default [RangeSlider]'s thumb shape
-///    that paints a solid circle.
-/// {@endtemplate}
-///
-/// {@template flutter.material.slider.seeAlso.paddleRangeSliderValueIndicatorShape}
-///  * [PaddleRangeSliderValueIndicatorShape] for the default [RangeSlider]'s
-///     value indicator shape that paints a custom path with text in it.
-/// {@endtemplate}
-///
-/// {@template flutter.material.slider.seeAlso.roundRangeSliderTickMarkShape}
-///  * [RoundRangeSliderTickMarkShape] for the default [RangeSlider]'s tick mark
-///    shape that paints a solid circle.
-/// {@endtemplate}
-///
-/// {@template flutter.material.slider.seeAlso.roundedRectRangeSliderTrackShape}
-///  * [RoundedRectRangeSliderTrackShape] for the default [RangeSlider]'s track
-///     shape that paints a stadium-like track.
-/// {@endtemplate}
-///
-/// {@template flutter.material.slider.trackSegment}
-/// The track segment between the start of the slider and the thumb is the
-/// active track segment. The track segment between the thumb and the end of the
-/// slider is the inactive track segment. In [TextDirection.ltr], the start of
-/// the slider is on the left, and in [TextDirection.rtl], the start of the
-/// slider is on the right.
-/// {@endtemplate}
-///
-/// {@template flutter.material.rangeSlider.trackSegment}
-/// The track segment between the two thumbs is the active track segment. The
-/// track segments between the thumb and each end of the slider are the inactive
-/// track segments. In [TextDirection.ltr], the start of the slider is on the
-/// left, and in [TextDirection.rtl], the start of the slider is on the right.
-/// {@endtemplate}
-///
-/// This is a temporary flag for migrating the slider from v1 to v2. To avoid
-/// unexpected breaking changes, this value should be set to true. Setting
-/// this to false is considered deprecated.
-/// {@endtemplate}
-///
-/// {@template flutter.material.slider.shape.textScaleFactor}
-/// Can be used to determine whether the component should
-/// paint larger or smaller, depending on whether [textScaleFactor] is greater
-/// than 1 for larger, and between 0 and 1 for smaller. It usually comes from
-/// [MediaQueryData.textScaleFactor].
-/// {@endtemplate}
-///
-/// {@template flutter.material.rangeSlider.shape.sizeWithOverflow}
-/// Can be used to determine the bounds the drawing of the
-/// components that are outside of the regular slider bounds. It's the size of
-/// the box, whose center is aligned with the slider's bounds, that the value
-/// indicators must be drawn within. Typically, it is bigger than the slider.
-/// {@endtemplate}
-
 /// Applies a slider theme to descendant [Slider] widgets.
 ///
 /// A slider theme describes the colors and shape choices of the slider
@@ -148,13 +33,35 @@ import 'theme_data.dart';
 ///
 ///  * [SliderThemeData], which describes the actual configuration of a slider
 ///    theme.
-/// {@macro flutter.material.slider.seeAlso.sliderComponentShape}
-/// {@macro flutter.material.slider.seeAlso.sliderTrackShape}
-/// {@macro flutter.material.slider.seeAlso.sliderTickMarkShape}
-/// {@macro flutter.material.slider.seeAlso.rangeSliderThumbShape}
-/// {@macro flutter.material.slider.seeAlso.rangeSliderValueIndicatorShape}
-/// {@macro flutter.material.slider.seeAlso.rangeSliderTrackShape}
-/// {@macro flutter.material.slider.seeAlso.rangeSliderTickMarkShape}
+/// {@template flutter.material.slider.seeAlso.sliderComponentShape}
+///  * [SliderComponentShape], which can be used to create custom shapes for
+///    the [Slider]'s thumb, overlay, and value indicator and the
+///    [RangeSlider]'s overlay.
+/// {@endtemplate}
+/// {@template flutter.material.slider.seeAlso.sliderTrackShape}
+///  * [SliderTrackShape], which can be used to create custom shapes for the
+///    [Slider]'s track.
+/// {@endtemplate}
+/// {@template flutter.material.slider.seeAlso.sliderTickMarkShape}
+///  * [SliderTickMarkShape], which can be used to create custom shapes for the
+///    [Slider]'s tick marks.
+/// {@endtemplate}
+/// {@template flutter.material.slider.seeAlso.rangeSliderThumbShape}
+///  * [RangeSliderThumbShape], which can be used to create custom shapes for
+///    the [RangeSlider]'s thumb.
+/// {@endtemplate}
+/// {@template flutter.material.slider.seeAlso.rangeSliderValueIndicatorShape}
+///  * [RangeSliderValueIndicatorShape], which can be used to create custom
+///    shapes for the [RangeSlider]'s value indicator.
+/// {@endtemplate}
+/// {@template flutter.material.slider.seeAlso.rangeSliderTrackShape}
+///  * [RangeSliderTrackShape], which can be used to create custom shapes for
+///    the [RangeSlider]'s track.
+/// {@endtemplate}
+/// {@template flutter.material.slider.seeAlso.rangeSliderTickMarkShape}
+///  * [RangeSliderTickMarkShape], which can be used to create custom shapes for
+///    the [RangeSlider]'s tick marks.
+/// {@endtemplate}
 class SliderTheme extends InheritedTheme {
   /// Applies the given theme [data] to [child].
   ///
@@ -961,9 +868,18 @@ class SliderThemeData with Diagnosticable {
 ///
 /// See also:
 ///
-/// {@macro flutter.material.slider.seeAlso.roundSliderThumbShape}
-/// {@macro flutter.material.slider.seeAlso.roundSliderOverlayShape}
-/// {@macro flutter.material.slider.seeAlso.paddleSliderValueIndicatorShape}
+/// {@template flutter.material.slider.seeAlso.roundSliderThumbShape}
+///  * [RoundSliderThumbShape], which is the default [Slider]'s thumb shape that
+///    paints a solid circle.
+/// {@endtemplate}
+/// {@template flutter.material.slider.seeAlso.roundSliderOverlayShape}
+///  * [RoundSliderOverlayShape], which is the default [Slider] and
+///   [RangeSlider]'s overlay shape that paints a transparent circle.
+/// {@endtemplate}
+/// {@template flutter.material.slider.seeAlso.paddleSliderValueIndicatorShape}
+///  * [PaddleSliderValueIndicatorShape], which is the default [Slider]'s value
+///    indicator shape that paints a custom path with text in it.
+/// {@endtemplate}
 abstract class SliderComponentShape {
   /// This abstract const constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -1000,9 +916,19 @@ abstract class SliderComponentShape {
   ///
   /// [value] is the current parametric value (from 0.0 to 1.0) of the slider.
   ///
-  /// {@macro flutter.material.slider.shape.textScaleFactor}
+  /// {@template flutter.material.slider.shape.textScaleFactor}
+  /// Can be used to determine whether the component should
+  /// paint larger or smaller, depending on whether [textScaleFactor] is greater
+  /// than 1 for larger, and between 0 and 1 for smaller. It usually comes from
+  /// [MediaQueryData.textScaleFactor].
+  /// {@endtemplate}
   ///
-  /// {@macro flutter.material.slider.shape.sizeWithOverflow}
+  /// {@template flutter.material.slider.shape.sizeWithOverflow}
+  /// Can be used to determine the bounds the drawing of the
+  /// components that are outside of the regular slider bounds. It's the size of
+  /// the box, whose center is aligned with the slider's bounds, that the value
+  /// indicators must be drawn within. Typically, it is bigger than the slider.
+  /// {@endtemplate}
   void paint(
     PaintingContext context,
     Offset center, {
@@ -1044,7 +970,10 @@ abstract class SliderComponentShape {
 ///
 /// See also:
 ///
-/// {@macro flutter.material.slider.seeAlso.roundSliderTickMarkShape}
+/// {@template flutter.material.slider.seeAlso.roundSliderTickMarkShape}
+///  * [RoundSliderTickMarkShape], which is the default [Slider]'s tick mark
+///    shape that paints a solid circle.
+/// {@endtemplate}
 /// {@macro flutter.material.slider.seeAlso.sliderTrackShape}
 /// {@macro flutter.material.slider.seeAlso.sliderComponentShape}
 abstract class SliderTickMarkShape {
@@ -1116,7 +1045,8 @@ abstract class SliderTickMarkShape {
 ///
 /// See also:
 ///
-/// {@macro flutter.material.slider.seeAlso.roundedRectSliderTrackShape}
+///  * [RoundedRectSliderTrackShape] for the default [Slider]'s track shape that
+///    paints a stadium-like track.
 /// {@macro flutter.material.slider.seeAlso.sliderTickMarkShape}
 /// {@macro flutter.material.slider.seeAlso.sliderComponentShape}
 abstract class SliderTrackShape {
@@ -1172,7 +1102,14 @@ abstract class SliderTrackShape {
   ///
   /// The [textDirection] argument can be used to determine how the track segments are
   /// painted depending on whether they are active or not.
-  /// {@macro flutter.material.slider.trackSegment}
+  ///
+  /// {@template flutter.material.slider.trackSegment}
+  /// The track segment between the start of the slider and the thumb is the
+  /// active track segment. The track segment between the thumb and the end of the
+  /// slider is the inactive track segment. In [TextDirection.ltr], the start of
+  /// the slider is on the left, and in [TextDirection.rtl], the start of the
+  /// slider is on the right.
+  /// {@endtemplate}
   void paint(
     PaintingContext context,
     Offset offset, {
@@ -1190,7 +1127,10 @@ abstract class SliderTrackShape {
 ///
 /// See also:
 ///
-/// {@macro flutter.material.slider.seeAlso.roundRangeSliderThumbShape}
+/// {@template flutter.material.slider.seeAlso.roundRangeSliderThumbShape}
+///  * [RoundRangeSliderThumbShape] for the default [RangeSlider]'s thumb shape
+///    that paints a solid circle.
+/// {@endtemplate}
 /// {@macro flutter.material.slider.seeAlso.rangeSliderTickMarkShape}
 /// {@macro flutter.material.slider.seeAlso.rangeSliderTrackShape}
 /// {@macro flutter.material.slider.seeAlso.rangeSliderValueIndicatorShape}
@@ -1253,7 +1193,10 @@ abstract class RangeSliderThumbShape {
 ///
 /// See also:
 ///
-/// {@macro flutter.material.slider.seeAlso.paddleRangeSliderValueIndicatorShape}
+/// {@template flutter.material.slider.seeAlso.paddleRangeSliderValueIndicatorShape}
+///  * [PaddleRangeSliderValueIndicatorShape] for the default [RangeSlider]'s
+///    value indicator shape that paints a custom path with text in it.
+/// {@endtemplate}
 /// {@macro flutter.material.slider.seeAlso.rangeSliderTickMarkShape}
 /// {@macro flutter.material.slider.seeAlso.rangeSliderThumbShape}
 /// {@macro flutter.material.slider.seeAlso.rangeSliderTrackShape}
@@ -1352,7 +1295,10 @@ abstract class RangeSliderValueIndicatorShape {
 ///
 /// See also:
 ///
-/// {@macro flutter.material.slider.seeAlso.roundRangeSliderTickMarkShape}
+/// {@template flutter.material.slider.seeAlso.roundRangeSliderTickMarkShape}
+///  * [RoundRangeSliderTickMarkShape] for the default [RangeSlider]'s tick mark
+///    shape that paints a solid circle.
+/// {@endtemplate}
 /// {@macro flutter.material.slider.seeAlso.rangeSliderThumbShape}
 /// {@macro flutter.material.slider.seeAlso.rangeSliderTrackShape}
 /// {@macro flutter.material.slider.seeAlso.rangeSliderValueIndicatorShape}
@@ -1390,7 +1336,13 @@ abstract class RangeSliderTickMarkShape {
   ///
   /// The [textDirection] argument can be used to determine how the tick marks are painted
   /// depending on whether they are on an active track segment or not.
-  /// {@macro flutter.material.rangeSlider.trackSegment}
+  ///
+  /// {@template flutter.material.rangeSlider.trackSegment}
+  /// The track segment between the two thumbs is the active track segment. The
+  /// track segments between the thumb and each end of the slider are the inactive
+  /// track segments. In [TextDirection.ltr], the start of the slider is on the
+  /// left, and in [TextDirection.rtl], the start of the slider is on the right.
+  /// {@endtemplate}
   void paint(
     PaintingContext context,
     Offset center, {
@@ -1415,7 +1367,10 @@ abstract class RangeSliderTickMarkShape {
 ///
 /// See also:
 ///
-/// {@macro flutter.material.slider.seeAlso.roundedRectRangeSliderTrackShape}
+/// {@template flutter.material.slider.seeAlso.roundedRectRangeSliderTrackShape}
+///  * [RoundedRectRangeSliderTrackShape] for the default [RangeSlider]'s track
+///    shape that paints a stadium-like track.
+/// {@endtemplate}
 /// {@macro flutter.material.slider.seeAlso.rangeSliderTickMarkShape}
 /// {@macro flutter.material.slider.seeAlso.rangeSliderThumbShape}
 /// {@macro flutter.material.slider.seeAlso.rangeSliderValueIndicatorShape}
