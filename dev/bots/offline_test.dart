@@ -32,7 +32,8 @@ Future<void> _runAndroidPackagingTests() async {
     '--output=$zipLocation',
     '--revision=$commit',
   ]);
-  await runCommand('unzip', <String>[
+  await runCommand('tar', <String>[
+    '-xf',
     '*.tar.xz'
   ], workingDirectory: zipLocation);
 
