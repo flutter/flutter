@@ -14,7 +14,7 @@ A set of `flutter daemon` commands/events are also exposed via `flutter run --ma
 
 ## Protocol
 
-The daemon speaks [JSON-RPC](http://json-rpc.org/) to clients. It uses stdin and stdout as the protocol transport. To send a command to the server, create your command as a JSON-RPC message, encode it to json, surround the encoded text with square brackets, and write it as one line of text to the stdin of the process:
+The daemon speaks [JSON-RPC](http://json-rpc.org/) to clients. It uses stdin and stdout as the transport protocol. To send a command to the server, create your command as a JSON-RPC message, encode it to JSON, surround the encoded text with square brackets, and write it as one line of text to the stdin of the process:
 
 ```
 [{"method":"daemon.version","id":0}]
@@ -32,7 +32,7 @@ All requests and responses should be wrapped in square brackets. This ensures th
 
 Each command should have a `method` field. This is in the form '`domain.command`'.
 
-Any params for that command should be passed in through a `params` field. Here's a example request/response for the `device.getDevices` method:
+Any params for that command should be passed in through a `params` field. Here's an example request/response for the `device.getDevices` method:
 
 ```
 [{"method":"device.getDevices","id":2}]
@@ -86,13 +86,13 @@ This is sent when user-facing output is received. The `params` field will be a m
 
 #### daemon.showMessage
 
-The `daemon.showMessage` event is sent by the daemon when some if would be useful to show a message to the user. This could be an error notification or a notification that some development tools are not configured or not installed. The JSON message will contain an `event` field with the value `daemon.showMessage`, and an `params` field containing a map with `level`, `title`, and `message` fields. The valid options for `level` are `info`, `warning`, and `error`.
+The `daemon.showMessage` event is sent by the daemon when some if would be useful to show a message to the user. This could be an error notification or a notification that some development tools are not configured or not installed. The JSON message will contain an `event` field with the value `daemon.showMessage`, and a `params` field containing a map with `level`, `title`, and `message` fields. The valid options for `level` are `info`, `warning`, and `error`.
 
-It is up to the client to decide how best to display the message; for some clients, it may map well to a toast style notification. There is an implicit contract that the daemon will not send too many messages over some reasonable period of time.
+It is up to the client to decide how best to display the message; for some clients, it may map well to a toast style notification. There is an implicit contract that the daemon will not send too many messages over a reasonable period of time.
 
 #### daemon.logMessage
 
-The `daemon.logMessage` event is sent whenever a log message is created - either a status level message or an error. The JSON message will contain an `event` field with the value `daemon.logMessage`, and an `params` field containing a map with `level`, `message`, and (optionally) `stackTrace` fields.
+The `daemon.logMessage` event is sent whenever a log message is created - either a status level message or an error. The JSON message will contain an `event` field with the value `daemon.logMessage`, and a `params` field containing a map with `level`, `message`, and (optionally) `stackTrace` fields.
 
 Generally, clients won't display content from `daemon.logMessage` events unless they're set to a more verbose output mode.
 
@@ -146,7 +146,7 @@ This is sent when an app is starting. The `params` field will be a map with the 
 
 #### app.debugPort
 
-This is sent when an observatory port is available for a started app. The `params` field will be a map with the fields `appId`, `port`, and `wsUri`. Clients should prefer using the `wsUri` field in preference to synthesizing a uri using the `port` field. An optional field, `baseUri`, is populated if a path prefix is required for setting breakpoints on the target device.
+This is sent when an observatory port is available for a started app. The `params` field will be a map with the fields `appId`, `port`, and `wsUri`. Clients should prefer using the `wsUri` field in preference to synthesizing a URI using the `port` field. An optional field, `baseUri`, is populated if a path prefix is required for setting breakpoints on the target device.
 
 #### app.started
 
@@ -176,7 +176,7 @@ These requests come _from_ the Flutter daemon and should be responded to by the 
 
 This request is enabled only if `flutter run` is run with the `--web-allow-expose-url` flag.
 
-This request is sent by the server when it has a local URL that needs to be exposed to the end user. This is to support running on a remote machine where a URL (for example `http://localhost:1234`) may not be directly accessible to the end user. With this URL clients can perform tunnelling and then provide the tunneled URL back to Flutter so that it can be used in code that will be executed on the end users machine (for example wehen a web application needs to be able to connect back to a service like the DWDS debugging service).
+This request is sent by the server when it has a local URL that needs to be exposed to the end-user. This is to support running on a remote machine where a URL (for example `http://localhost:1234`) may not be directly accessible to the end-user. With this URL clients can perform tunneling and then provide the tunneled URL back to Flutter so that it can be used in code that will be executed on the end-users machine (for example when a web application needs to be able to connect back to a service like the DWDS debugging service).
 
 This request will only be sent if a web application was run in a mode that requires mapped URLs (such as using `--no-web-browser-launch` for browser devices or the headless `web-server` device when debugging).
 
@@ -190,7 +190,7 @@ The response should be sent using the same `id` as the request with a `result` m
 
 Return a list of all connected devices. The `params` field will be a List; each item is a map with the fields `id`, `name`, `platform`, `category`, `platformType`, `ephemeral`, `emulator` (a boolean) and `emulatorId`.
 
-`category` is string description of the kind of workflow the device supports. The current categories are "mobile", "web" and "desktop", or null if none.
+`category` is a string description of the kind of workflow the device supports. The current categories are "mobile", "web" and "desktop", or null if none.
 
 `platformType` is a string description of the platform sub-folder the device
 supports. The current catgetories are "android", "ios", "linux", "macos",
@@ -198,7 +198,7 @@ supports. The current catgetories are "android", "ios", "linux", "macos",
 
 `ephemeral` is a boolean which indicates where the device needs to be manually connected to a development machine. For example, a physical Android device is ephemeral, but the "web" device (that is always present) is not.
 
-`emulatorId` is an string ID that matches the ID from `getEmulators` to allow clients to match running devices to the emulators that started them (for example to hide emulators that are already running). This field is not guaranteed to be populated even if a device was spawned from an emulator as it may require a successful connection to the device to retrieve it. In the case of a failed connection or the device is not an emulator, this field will be null.
+`emulatorId` is a string ID that matches the ID from `getEmulators` to allow clients to match running devices to the emulators that started them (for example to hide emulators that are already running). This field is not guaranteed to be populated even if a device was spawned from an emulator as it may require a successful connection to the device to retrieve it. In the case of a failed connection or the device is not an emulator, this field will be null.
 
 #### device.enable
 
@@ -212,7 +212,7 @@ Turn off device polling.
 
 Forward a host port to a device port. This call takes two required arguments, `deviceId` and `devicePort`, and one optional argument, `hostPort`. If `hostPort` is not specified, the host port will be any available port.
 
-This method returns a map with a `hostPort` field set.
+This method returns a map with a `hostPort` fieldset.
 
 #### device.unforward
 
