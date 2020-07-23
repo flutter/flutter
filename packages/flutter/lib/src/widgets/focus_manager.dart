@@ -515,6 +515,9 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///
   /// Does not affect the value of [canRequestFocus] on the descendants.
   ///
+  /// If a descendant node loses focus when this value is changed, the focus
+  /// will move to the scope enclosing this node.
+  ///
   /// See also:
   ///
   ///  * [ExcludeFocus], a widget that uses this property to conditionally
@@ -531,12 +534,12 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     if (value == _descendantsAreFocusable) {
       return;
     }
-    if (!value && hasFocus) {
-      for (final FocusNode child in children) {
-        child.unfocus(disposition: UnfocusDisposition.previouslyFocusedChild);
-      }
-    }
+    // Set _descendantsAreFocusable before unfocusing, so the scope won't try
+    // and focus any of the children here again if it is false.
     _descendantsAreFocusable = value;
+    if (!value && hasFocus) {
+      unfocus(disposition: UnfocusDisposition.previouslyFocusedChild);
+    }
     _manager?._markPropertiesChanged(this);
   }
 
