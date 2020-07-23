@@ -553,6 +553,21 @@ class LongPollingDeviceDiscovery extends PollingDeviceDiscovery {
   bool get canListAnything => true;
 }
 
+class ThrowingPollingDeviceDiscovery extends PollingDeviceDiscovery {
+  ThrowingPollingDeviceDiscovery() : super('throw');
+
+  @override
+  Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
+    throw const ProcessException('fake-discovery', <String>[]);
+  }
+
+  @override
+  bool get supportsPlatform => true;
+
+  @override
+  bool get canListAnything => true;
+}
+
 class MockIosProject extends Mock implements IosProject {
   static const String bundleId = 'com.example.test';
   static const String appBundleName = 'My Super Awesome App.app';

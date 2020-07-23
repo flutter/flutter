@@ -103,13 +103,13 @@ abstract class DeviceManager {
   bool get hasSpecifiedAllDevices => _specifiedDeviceId == 'all';
 
   Future<List<Device>> getDevicesById(String deviceId) async {
-    deviceId = deviceId.toLowerCase();
+    final String lowerDeviceId = deviceId.toLowerCase();
     bool exactlyMatchesDeviceId(Device device) =>
-        device.id.toLowerCase() == deviceId ||
-        device.name.toLowerCase() == deviceId;
+        device.id.toLowerCase() == lowerDeviceId ||
+        device.name.toLowerCase() == lowerDeviceId;
     bool startsWithDeviceId(Device device) =>
-        device.id.toLowerCase().startsWith(deviceId) ||
-        device.name.toLowerCase().startsWith(deviceId);
+        device.id.toLowerCase().startsWith(lowerDeviceId) ||
+        device.name.toLowerCase().startsWith(lowerDeviceId);
 
     // Some discoverers have hard-coded device IDs and return quickly, and others
     // shell out to other processes and can take longer.
@@ -132,6 +132,9 @@ abstract class DeviceManager {
             }
           }
           return null;
+        }, onError: (dynamic error, StackTrace stackTrace) {
+          // Return matches from other discoverers even if one fails.
+          globals.printTrace('Ignored error discovering $deviceId: $error');
         })
     ];
 

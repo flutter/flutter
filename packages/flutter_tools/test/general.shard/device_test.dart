@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -22,9 +23,11 @@ import '../src/mocks.dart';
 
 void main() {
   MockCache cache;
+  BufferLogger logger;
 
   setUp(() {
     cache = MockCache();
+    logger = BufferLogger.test();
     when(cache.dyLdLibEntry).thenReturn(const MapEntry<String, String>('foo', 'bar'));
   });
 
@@ -47,22 +50,31 @@ void main() {
       final FakeDevice device3 = FakeDevice('iPod touch', '82564b38861a9a5');
       final List<Device> devices = <Device>[device1, device2, device3];
 
-      // Include device discovery that never completes to prove the first exact
-      // match is returned quickly.
+      // Include different device discoveries:
+      // 1. One that never completes to prove the first exact match is
+      // returned quickly.
+      // 2. One that throws, to prove matches can return when some succeed
+      // and others fail.
+      // 3. A device discoverer that succeeds.
       final DeviceManager deviceManager = TestDeviceManager(
         devices,
         testLongPollingDeviceDiscovery: true,
+        testThrowingDeviceDiscovery: true,
       );
 
       Future<void> expectDevice(String id, List<Device> expected) async {
         expect(await deviceManager.getDevicesById(id), expected);
       }
       await expectDevice('01abfc49119c410e', <Device>[device2]);
+      expect(logger.traceText, contains('Ignored error discovering 01abfc49119c410e'));
       await expectDevice('Nexus 5X', <Device>[device2]);
+      expect(logger.traceText, contains('Ignored error discovering Nexus 5X'));
       await expectDevice('0553790d0a4e726f', <Device>[device1]);
+      expect(logger.traceText, contains('Ignored error discovering 0553790d0a4e726f'));
     }, overrides: <Type, Generator>{
       Artifacts: () => Artifacts.test(),
       Cache: () => cache,
+      Logger: () => logger,
     });
 
     testUsingContext('getDeviceById prefix matcher', () async {
@@ -70,17 +82,29 @@ void main() {
       final FakeDevice device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
       final FakeDevice device3 = FakeDevice('iPod touch', '82564b38861a9a5');
       final List<Device> devices = <Device>[device1, device2, device3];
-      final DeviceManager deviceManager = TestDeviceManager(devices);
+
+      // Include different device discoveries:
+      // 1. One that throws, to prove matches can return when some succeed
+      // and others fail.
+      // 2. A device discoverer that succeeds.
+      final DeviceManager deviceManager = TestDeviceManager(
+        devices,
+        testThrowingDeviceDiscovery: true
+      );
 
       Future<void> expectDevice(String id, List<Device> expected) async {
         expect(await deviceManager.getDevicesById(id), expected);
       }
       await expectDevice('Nexus 5', <Device>[device1]);
+      expect(logger.traceText, contains('Ignored error discovering Nexus 5'));
       await expectDevice('0553790', <Device>[device1]);
+      expect(logger.traceText, contains('Ignored error discovering 0553790'));
       await expectDevice('Nexus', <Device>[device1, device2]);
+      expect(logger.traceText, contains('Ignored error discovering Nexus'));
     }, overrides: <Type, Generator>{
       Artifacts: () => Artifacts.test(),
       Cache: () => cache,
+      Logger: () => logger,
     });
 
     testUsingContext('getAllConnectedDevices caches', () async {
@@ -397,11 +421,14 @@ void main() {
 class TestDeviceManager extends DeviceManager {
     TestDeviceManager(List<Device> allDevices, {
     bool testLongPollingDeviceDiscovery = false,
+    bool testThrowingDeviceDiscovery = false,
   }) {
     _fakeDeviceDiscoverer = FakePollingDeviceDiscovery();
     _deviceDiscoverers = <DeviceDiscovery>[
       if (testLongPollingDeviceDiscovery)
         LongPollingDeviceDiscovery(),
+      if (testThrowingDeviceDiscovery)
+        ThrowingPollingDeviceDiscovery(),
       _fakeDeviceDiscoverer,
     ];
     resetDevices(allDevices);
