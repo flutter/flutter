@@ -3908,7 +3908,7 @@ class Flex extends MultiChildRenderObjectWidget {
        assert(mainAxisSize != null),
        assert(crossAxisAlignment != null),
        assert(verticalDirection != null),
-       assert(crossAxisAlignment != CrossAxisAlignment.baseline || textBaseline != null),
+       assert(crossAxisAlignment != CrossAxisAlignment.baseline || textBaseline != null, 'textBaseline is required if you specify the crossAxisAlignment with CrossAxisAlignment.baseline'),
        assert(clipBehavior != null),
        super(key: key, children: children);
 
