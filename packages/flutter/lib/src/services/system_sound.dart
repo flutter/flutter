@@ -9,9 +9,14 @@ import 'dart:async';
 import 'system_channels.dart';
 
 /// A sound provided by the system.
+///
+/// These sounds may be played with [SystemSound.play].
 enum SystemSoundType {
   /// A short indication that a button was pressed.
   click,
+
+  /// A short system alert sound indicating the need for user attention.
+  alert,
 }
 
 /// Provides access to the library of short system specific sounds for common
