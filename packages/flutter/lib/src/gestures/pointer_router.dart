@@ -80,9 +80,9 @@ class PointerRouter {
       InformationCollector collector;
       assert(() {
         collector = () sync* {
-          yield DiagnosticsProperty<PointerRouter>('PointerRouter', this, style: DiagnosticsTreeStyle.errorProperty);
-          yield DiagnosticsProperty<PointerRoute>('PointerRoute', route, style: DiagnosticsTreeStyle.errorProperty);
-          yield DiagnosticsProperty<PointerEvent>('PointerEvent', event, style: DiagnosticsTreeStyle.errorProperty);
+          yield DiagnosticsProperty<PointerRouter>('router', this, level: DiagnosticLevel.debug);
+          yield DiagnosticsProperty<PointerRoute>('route', route, level: DiagnosticLevel.debug);
+          yield DiagnosticsProperty<PointerEvent>('event', event, level: DiagnosticLevel.debug);
         };
         return true;
       }());

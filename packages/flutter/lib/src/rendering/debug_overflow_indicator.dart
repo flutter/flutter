@@ -249,7 +249,6 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
         informationCollector: () sync* {
           if (debugCreator != null)
             yield DiagnosticsDebugCreator(debugCreator);
-          yield DiagnosticsProperty<RenderObject>('RenderObject', this, style: DiagnosticsTreeStyle.errorProperty);
           yield* overflowHints;
           yield describeForError('The specific $runtimeType in question is');
           // TODO(jacobr): this line is ascii art that it would be nice to
