@@ -2293,7 +2293,9 @@ abstract class RenderBox extends RenderObject {
   /// coordinate system of `ancestor` (which must be an ancestor of this render
   /// object) instead of to the global coordinate system.
   ///
-  /// This method is implemented in terms of [getTransformTo].
+  /// This method is implemented in terms of [getTransformTo]. If the transform
+  /// matrix puts the given `point` on the line at infinity (for instance, when
+  /// the transform matrix is the zero matrix), this method returns (NaN, NaN).
   Offset localToGlobal(Offset point, { RenderObject ancestor }) {
     return MatrixUtils.transformPoint(getTransformTo(ancestor), point);
   }
