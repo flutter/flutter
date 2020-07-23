@@ -44,6 +44,8 @@ void checkForUnresolvedDirectives(String htmlOutputPath) {
     'Canvas-class.html',
   ];
 
+  print('Scanning for unresolved dartdoc directives...');
+
   final List<FileSystemEntity> toScan = dartDocDir.listSync();
   int count = 0;
 
