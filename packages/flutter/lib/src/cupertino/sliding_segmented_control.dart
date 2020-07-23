@@ -18,6 +18,9 @@ import 'colors.dart';
 
 // Minimum padding from edges of the segmented control to edges of
 // encompassing widget.
+const EdgeInsetsGeometry _kHorizontalSegmentedControlPadding = EdgeInsets.symmetric(horizontal: 16);
+
+// Padding from edges of the thumb to to edges of the segmented control
 const EdgeInsetsGeometry _kHorizontalItemPadding = EdgeInsets.symmetric(vertical: 2, horizontal: 3);
 
 // The corner radius of the thumb.
@@ -145,11 +148,10 @@ class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
     @required this.onValueChanged,
     this.groupValue,
     this.thumbColor = _kThumbColor,
-    this.padding = _kHorizontalItemPadding,
+    this.padding,
     this.backgroundColor = CupertinoColors.tertiarySystemFill,
   }) : assert(children != null),
        assert(children.length >= 2),
-       assert(padding != null),
        assert(onValueChanged != null),
        assert(
          groupValue == null || children.keys.contains(groupValue),
@@ -230,9 +232,9 @@ class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
   /// mode and becomes a gray color in dark mode.
   final Color thumbColor;
 
-  /// The amount of space by which to inset the [children].
+  /// The [CupertinoSlidingSegmentedControl] will be placed inside this padding
   ///
-  /// Must not be null. Defaults to EdgeInsets.symmetric(vertical: 2, horizontal: 3).
+  /// Defaults to EdgeInsets.symmetric(horizontal: 16.0)
   final EdgeInsetsGeometry padding;
 
   @override
@@ -455,7 +457,9 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
         return UnconstrainedBox(
           constrainedAxis: Axis.horizontal,
           child: Container(
-            padding: widget.padding.resolve(Directionality.of(context)),
+            width: double.infinity,
+            margin: widget.padding ?? _kHorizontalSegmentedControlPadding,
+            padding: _kHorizontalItemPadding.resolve(Directionality.of(context)),
             decoration: BoxDecoration(
               borderRadius: const BorderRadius.all(Radius.circular(_kCornerRadius)),
               color: CupertinoDynamicColor.resolve(widget.backgroundColor, context),
