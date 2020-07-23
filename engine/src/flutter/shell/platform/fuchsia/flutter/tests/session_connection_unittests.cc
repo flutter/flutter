@@ -34,9 +34,21 @@ class SessionConnectionTest : public ::testing::Test {
     view_token_ = std::move(view_token);
 
     scenic_->CreateSession(session_.NewRequest(), session_listener_.Bind());
-    presenter_->PresentView(std::move(view_holder_token), nullptr);
+    presenter_->PresentOrReplaceView(std::move(view_holder_token), nullptr);
 
     FML_CHECK(zx::event::create(0, &vsync_event_) == ZX_OK);
+
+    // Ensure Scenic has had time to wake up before the test logic begins.
+    // TODO(61768) Find a better solution than sleeping periodically checking a
+    // condition.
+    int scenic_initialized = false;
+    scenic_->GetDisplayInfo(
+        [&scenic_initialized](fuchsia::ui::gfx::DisplayInfo display_info) {
+          scenic_initialized = true;
+        });
+    while (!scenic_initialized) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
   }
   // Warning: Initialization order matters here. |loop_| must be initialized
   // before |SetUp()| so that we have a dispatcher already initialized.
