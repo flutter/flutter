@@ -5,6 +5,7 @@
 
 import 'dart:math' as math;
 import 'dart:ui' show Color, lerpDouble, hashValues;
+
 import 'package:flutter/foundation.dart';
 
 double _getHue(double red, double green, double blue, double max, double delta) {
