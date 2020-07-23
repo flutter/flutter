@@ -5200,6 +5200,7 @@ class RichText extends MultiChildRenderObjectWidget {
        assert(textScaleFactor != null),
        assert(maxLines == null || maxLines > 0),
        assert(textWidthBasis != null),
+       _applyTextScaleFactorToWidgetSpan = applyTextScaleFactorToWidgetSpan,
        super(key: key, children: _extractChildren(text));
 
   // Traverses the InlineSpan tree and depth-first collects the list of
@@ -5277,6 +5278,8 @@ class RichText extends MultiChildRenderObjectWidget {
   /// {@macro flutter.dart:ui.textHeightBehavior}
   final ui.TextHeightBehavior textHeightBehavior;
 
+  final bool _applyTextScaleFactorToWidgetSpan;
+
   @override
   RenderParagraph createRenderObject(BuildContext context) {
     assert(textDirection != null || debugCheckHasDirectionality(context));
@@ -5290,6 +5293,7 @@ class RichText extends MultiChildRenderObjectWidget {
       strutStyle: strutStyle,
       textWidthBasis: textWidthBasis,
       textHeightBehavior: textHeightBehavior,
+      applyTextScaleFactorToWidgetSpan: _applyTextScaleFactorToWidgetSpan,
       locale: locale ?? Localizations.localeOf(context, nullOk: true),
     );
   }
