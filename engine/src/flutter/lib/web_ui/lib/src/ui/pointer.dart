@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.9
+// @dart = 2.10
 part of ui;
 
 /// How the pointer has changed since the last report.

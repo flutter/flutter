@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 // Synced 2019-05-30T14:20:57.833907.
 
-// @dart = 2.9
+// @dart = 2.10
 part of ui;
 
 /// Whether to slant the glyphs in the font

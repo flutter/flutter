@@ -172,9 +172,6 @@ class _RepositoryGeneralSingleLicenseFile extends _RepositorySingleLicenseFile {
   _RepositoryGeneralSingleLicenseFile(_RepositoryDirectory parent, fs.TextFile io)
     : super(parent, io, License.fromBodyAndName(io.readString(), io.name, origin: io.fullName));
 
-  _RepositoryGeneralSingleLicenseFile.fromLicense(_RepositoryDirectory parent, fs.TextFile io, License license)
-    : super(parent, io, license);
-
   @override
   License licenseOfType(LicenseType type) {
     if (type == license.type)
