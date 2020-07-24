@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'package:collection/collection.dart' show ListEquality;
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/base/utils.dart';
@@ -608,6 +609,45 @@ void main() {
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).called(1);
+  });
+
+  testUsingContext('determine uses overridden git url', () {
+    final MockProcessUtils processUtils = MockProcessUtils();
+    when(processUtils.runSync(
+      <String>['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+      workingDirectory: anyNamed('workingDirectory'),
+      environment: anyNamed('environment'),
+    )).thenReturn(RunResult(ProcessResult(108, 0, 'master', ''), <String>['git', 'fetch']));
+    when(processUtils.runSync(
+      <String>['git', 'fetch', 'https://githubmirror.com/flutter.git', '--tags', '-f'],
+      workingDirectory: anyNamed('workingDirectory'),
+      environment: anyNamed('environment'),
+    )).thenReturn(RunResult(ProcessResult(109, 0, '', ''), <String>['git', 'fetch']));
+    when(processUtils.runSync(
+      <String>['git', 'tag', '--contains', 'HEAD'],
+      workingDirectory: anyNamed('workingDirectory'),
+      environment: anyNamed('environment'),
+    )).thenReturn(
+      RunResult(ProcessResult(110, 0, '', ''),
+      <String>['git', 'tag', '--contains', 'HEAD'],
+    ));
+    when(processUtils.runSync(
+      <String>['git', 'describe', '--match', '*.*.*-*.*.pre', '--first-parent', '--long', '--tags'],
+      workingDirectory: anyNamed('workingDirectory'),
+      environment: anyNamed('environment'),
+    )).thenReturn(RunResult(ProcessResult(111, 0, 'v0.1.2-3-1234abcd', ''), <String>['git', 'describe']));
+
+    GitTagVersion.determine(processUtils, workingDirectory: '.', fetchTags: true);
+
+    verify(processUtils.runSync(
+      <String>['git', 'fetch', 'https://githubmirror.com/flutter.git', '--tags', '-f'],
+      workingDirectory: anyNamed('workingDirectory'),
+      environment: anyNamed('environment'),
+    )).called(1);
+  }, overrides: <Type, Generator>{
+    Platform: () => FakePlatform(environment: <String, String>{
+      'FLUTTER_GIT_URL': 'https://githubmirror.com/flutter.git',
+    }),
   });
 }
 
