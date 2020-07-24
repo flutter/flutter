@@ -12,7 +12,7 @@ import 'package:flutter_devicelab/framework/utils.dart';
 final List<String> flutterAssets = <String>[
   'assets/flutter_assets/AssetManifest.json',
   'assets/flutter_assets/NOTICES',
-  'assets/flutter_assets/fonts/MaterialIcons-Regular.ttf',
+  'assets/flutter_assets/fonts/MaterialIcons-Regular.otf',
   'assets/flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf',
 ];
 

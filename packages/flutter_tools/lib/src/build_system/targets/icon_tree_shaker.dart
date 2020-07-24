@@ -69,6 +69,10 @@ class IconTreeShaker {
   /// The MIME type for ttf fonts.
   static const Set<String> kTtfMimeTypes = <String>{
     'font/ttf', // based on internet search
+    'font/opentype',
+    'font/otf',
+    'application/x-font-opentype',
+    'application/x-font-otf',
     'application/x-font-ttf', // based on running locally.
   };
 
