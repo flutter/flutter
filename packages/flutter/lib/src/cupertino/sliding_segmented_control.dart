@@ -111,7 +111,7 @@ class _FontWeightTween extends Tween<FontWeight> {
 /// tallest widget provided as a value in the [Map] of [children].
 /// The width of each child in the segmented control will be equal to the width
 /// of widest child, unless the combined width of the children is wider than
-/// the available horizontal space. In this case, the available horizontal space
+/// the available horizontal space or shrinkWrap is true. In this case, the available horizontal space
 /// is divided by the number of provided [children] to determine the width of
 /// each widget. The selection area for each of the widgets in the [Map] of
 /// [children] will then be expanded to fill the calculated space, so each
@@ -123,8 +123,8 @@ class _FontWeightTween extends Tween<FontWeight> {
 ///
 /// See also:
 ///
-///  * [CupertinoSlidingSegmentedControl], a segmented control widget in the
-///    style introduced in iOS 13.
+///  * [CupertinoSegmentedControl], a segmented control widget previously
+///    introduced in iOS.
 ///  * <https://developer.apple.com/design/human-interface-guidelines/ios/controls/segmented-controls/>
 class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
   /// Creates an iOS-style segmented control bar.
@@ -149,10 +149,12 @@ class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
     this.groupValue,
     this.thumbColor = _kThumbColor,
     this.padding = _kHorizontalSegmentedControlPadding,
+    this.shrinkWrap = false,
     this.backgroundColor = CupertinoColors.tertiarySystemFill,
   }) : assert(children != null),
        assert(children.length >= 2),
        assert(padding != null),
+       assert(shrinkWrap != null),
        assert(onValueChanged != null),
        assert(
          groupValue == null || children.keys.contains(groupValue),
@@ -237,6 +239,13 @@ class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
   ///
   /// Defaults to EdgeInsets.symmetric(horizontal: 16.0)
   final EdgeInsetsGeometry padding;
+
+  /// Whether the extent of the [CupertinoSlidingSegmentedControl] should be determined by the contents being viewed.
+  ///
+  /// If the [CupertinoSlidingSegmentedControl] does not shrink wrap, then the [CupertinoSlidingSegmentedControl] will expand to the maximum allowed size in the horizontal axis. If this has unbounded constraints, then shrinkWrap must be true.
+  ///
+  // Defaults to false.
+  final bool shrinkWrap;
 
   @override
   _SegmentedControlState<T> createState() => _SegmentedControlState<T>();
@@ -458,7 +467,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
         return UnconstrainedBox(
           constrainedAxis: Axis.horizontal,
           child: Container(
-            width: double.infinity,
+            width: widget.shrinkWrap ? null : double.infinity,
             margin: widget.padding.resolve(Directionality.of(context)),
             padding: _kHorizontalItemPadding,
             decoration: BoxDecoration(
