@@ -108,7 +108,7 @@ int _scanFile(File file) {
 // inside <code> sections. Since we currently don't do that, doing the matching
 // with a regex is a lot faster than using an HTML parser to strip out the
 // <code> sections.
-final RegExp _pattern = RegExp('({@[^}\n]*}?)(?![^<>]*<\/code)');
+final RegExp _pattern = RegExp(r'({@[^}\n]*}?)(?![^<>]*</code)');
 
 // Usually, the checker is invoked directly from `dartdoc.dart`. Main method
 // is included for convenient local runs without having to regenerate
