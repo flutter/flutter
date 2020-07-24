@@ -45,10 +45,10 @@ class FlutterLogoDecoration extends Decoration {
   /// The [lightColor], [mediumColor], [darkColor], [textColor], [style], and
   /// [margin] arguments must not be null.
   const FlutterLogoDecoration({
-    this.lightColor = defaultLightColor,
-    this.mediumColor = defaultMediumColor,
-    this.darkColor = defaultDarkColor,
-    this.textColor = defaultTextColor,
+    this.lightColor = const Color(0xFF54C5F8),
+    this.mediumColor = const Color(0xFF29B6F6),
+    this.darkColor = const Color(0xFF01579B),
+    this.textColor = const Color(0xFF757575),
     this.style = FlutterLogoStyle.markOnly,
     this.margin = EdgeInsets.zero,
   }) : assert(lightColor != null),
@@ -62,43 +62,10 @@ class FlutterLogoDecoration extends Decoration {
 
   const FlutterLogoDecoration._(this.lightColor, this.mediumColor, this.darkColor, this.textColor, this.style, this.margin, this._position, this._opacity);
 
-  // Colors lifted from the logo SVG: https://drive.google.com/file/d/1tYx3BPqoi1sIX4eUiqrMTVz8zluu-Tp2/view.
-
-  /// The default color used to paint the top and middle beam of the "F" logo.
-  ///
-  /// See also:
-  ///
-  ///  * [lightColor], for which this is the default value.
-  static const Color defaultLightColor = Color(0xFF54C5F8);
-
-  /// The default color used to paint the intersection of the middle and
-  /// the bottom beam of the "F" logo.
-  ///
-  /// See also:
-  ///
-  ///  * [mediumColor], for which this is the default value.
-  static const Color defaultMediumColor = Color(0xFF29B6F6);
-
-  /// The default color used to paint the bottom beam of the "F" logo.
-  ///
-  /// See also:
-  ///
-  ///  * [darkColor], for which this is the default value.
-  static const Color defaultDarkColor = Color(0xFF01579B);
-
-  /// The default color used to paint the "Flutter" text on the logo.
-  ///
-  /// See also:
-  ///
-  ///  * [textColor], for which this is the default value.
-  static const Color defaultTextColor = Color(0xFF757575);
-
   /// The lightest of the three colors used to paint the logo.
   ///
   /// This color is used to paint the top and middle beam of the Flutter "F"
   /// logo.
-  ///
-  /// If possible, the default ([defaultLightColor]) should be used.
   final Color lightColor;
 
   /// A color in between the [lightColor] and the [darkColor] used to paint
@@ -106,23 +73,19 @@ class FlutterLogoDecoration extends Decoration {
   ///
   /// This color is used to paint the intersection of the middle and bottom beam
   /// of the Flutter "F" logo.
-  ///
-  /// If possible, the default ([defaultMediumColor]) should be used.
   final Color mediumColor;
 
   /// The darkest of the three colors used to paint the logo.
   ///
   /// This color is used to paint the bottom beam of the Flutter "F"
   /// logo.
-  ///
-  /// If possible, the default ([defaultDarkColor]) should be used.
   final Color darkColor;
 
   /// The color used to paint the "Flutter" text on the logo, if [style] is
   /// [FlutterLogoStyle.horizontal] or [FlutterLogoStyle.stacked].
   ///
-  /// If possible, the default ([defaultTextColor], a medium grey) should be
-  /// used against a white background.
+  /// If possible, the default (a medium grey) should be used against a white
+  /// background.
   final Color textColor;
 
   /// Whether and where to draw the "Flutter" text. By default, only the logo

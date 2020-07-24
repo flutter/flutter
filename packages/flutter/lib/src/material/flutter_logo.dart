@@ -6,8 +6,6 @@
 
 import 'package:flutter/widgets.dart';
 
-import 'colors.dart';
-
 /// The Flutter logo, in widget form. This widget respects the [IconTheme].
 /// For guidelines on using the Flutter logo, visit https://flutter.dev/brand.
 ///
@@ -26,17 +24,11 @@ class FlutterLogo extends StatelessWidget {
   const FlutterLogo({
     Key key,
     this.size,
-    this.lightColor = FlutterLogoDecoration.defaultLightColor,
-    this.mediumColor = FlutterLogoDecoration.defaultMediumColor,
-    this.darkColor = FlutterLogoDecoration.defaultDarkColor,
-    this.textColor = FlutterLogoDecoration.defaultTextColor,
+    this.textColor = const Color(0xFF757575),
     this.style = FlutterLogoStyle.markOnly,
     this.duration = const Duration(milliseconds: 750),
     this.curve = Curves.fastOutSlowIn,
-  }) : assert(lightColor != null),
-       assert(mediumColor != null),
-       assert(darkColor != null),
-       assert(textColor != null),
+  }) : assert(textColor != null),
        assert(style != null),
        assert(duration != null),
        assert(curve != null),
@@ -51,39 +43,11 @@ class FlutterLogo extends StatelessWidget {
   /// 24.0.
   final double size;
 
-  /// The lightest of the three colors used to paint the logo.
-  ///
-  /// This color is used to paint the top and middle beam of the Flutter "F"
-  /// logo.
-  ///
-  /// If possible, the default ([FlutterLogoDecoration.defaultLightColor])
-  /// should be used.
-  final Color lightColor;
-
-  /// A color in between the [lightColor] and the [darColor] used to paint
-  /// the logo.
-  ///
-  /// This color is used to paint the intersection of the middle and bottom beam
-  /// of the Flutter "F" logo.
-  ///
-  /// If possible, the default ([FlutterLogoDecoration.defaultMediumColor])
-  /// should be used.
-  final Color mediumColor;
-
-  /// The darkest of the three colors used to paint the logo.
-  ///
-  /// This color is used to paint the bottom beam of the Flutter "F"
-  /// logo.
-  ///
-  /// If possible, the default ([FlutterLogoDecoration.defaultDarkColor]) should
-  /// be used.
-  final Color darkColor;
-
   /// The color used to paint the "Flutter" text on the logo, if [style] is
   /// [FlutterLogoStyle.horizontal] or [FlutterLogoStyle.stacked].
   ///
-  /// If possible, the default ([FlutterLogoDecoration.defaultTextColor], a
-  /// medium grey) should be used against a white background.
+  /// If possible, the default (a medium grey) should be used against a white
+  /// background.
   final Color textColor;
 
   /// Whether and where to draw the "Flutter" text. By default, only the logo
@@ -108,9 +72,6 @@ class FlutterLogo extends StatelessWidget {
       duration: duration,
       curve: curve,
       decoration: FlutterLogoDecoration(
-        lightColor: lightColor,
-        mediumColor: mediumColor,
-        darkColor: darkColor,
         textColor: textColor,
         style: style,
       ),
