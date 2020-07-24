@@ -49,15 +49,15 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
           child: Container(height: 100.0, width: 100.0, key: firstKey),
         )),
         const SizedBox(height: 100.0, width: 100.0),
-        FlatButton(
+        TextButton(
           child: const Text('two'),
           onPressed: () { Navigator.pushNamed(context, '/two'); },
         ),
-        FlatButton(
+        TextButton(
           child: const Text('twoInset'),
           onPressed: () { Navigator.pushNamed(context, '/twoInset'); },
         ),
-        FlatButton(
+        TextButton(
           child: const Text('simple'),
           onPressed: () { Navigator.pushNamed(context, '/simple'); },
         ),
@@ -68,7 +68,7 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
     child: ListView(
       key: routeTwoKey,
       children: <Widget>[
-        FlatButton(
+        TextButton(
           child: const Text('pop'),
           onPressed: () { Navigator.pop(context); },
         ),
@@ -79,7 +79,7 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
           child: Container(height: 150.0, width: 150.0, key: secondKey),
         )),
         const SizedBox(height: 150.0, width: 150.0),
-        FlatButton(
+        TextButton(
           child: const Text('three'),
           onPressed: () { Navigator.push(context, ThreeRoute()); },
         ),
@@ -94,7 +94,7 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
     child: ListView(
       key: routeTwoKey,
       children: <Widget>[
-        FlatButton(
+        TextButton(
           child: const Text('pop'),
           onPressed: () { Navigator.pop(context); },
         ),
@@ -110,7 +110,7 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
           ),
         ),
         const SizedBox(height: 150.0, width: 150.0),
-        FlatButton(
+        TextButton(
           child: const Text('three'),
           onPressed: () { Navigator.push(context, ThreeRoute()); },
         ),
@@ -336,7 +336,7 @@ Future<void> main() async {
           children: <Widget>[
             const Hero(tag: 'a', child: Text('foo')),
             Builder(builder: (BuildContext context) {
-              return FlatButton(child: const Text('two'), onPressed: () => Navigator.push(context, route));
+              return TextButton(child: const Text('two'), onPressed: () => Navigator.push(context, route));
             }),
           ],
         ),
@@ -521,7 +521,7 @@ Future<void> main() async {
             const Hero(tag: 'a', child: Text('a too')),
             Builder(
               builder: (BuildContext context) {
-                return FlatButton(
+                return TextButton(
                   child: const Text('push'),
                   onPressed: () {
                     Navigator.push(context, PageRouteBuilder<void>(
@@ -724,7 +724,7 @@ Future<void> main() async {
                   );
                 },
               ),
-              FlatButton(
+              TextButton(
                 child: const Text('POP'),
                 onPressed: () { Navigator.pop(context); },
               ),
@@ -745,7 +745,7 @@ Future<void> main() async {
                   Card(
                     child: Hero(tag: 'H', child: Container(key: homeHeroKey, height: 100.0, width: 100.0)),
                   ),
-                  FlatButton(
+                  TextButton(
                     child: const Text('PUSH'),
                     onPressed: () { Navigator.push(context, route); },
                   ),
@@ -822,7 +822,7 @@ Future<void> main() async {
                 key: routeContainerKey,
                 child: Hero(tag: 'H', child: Container(key: routeHeroKey, height: 200.0, width: 200.0)),
               ),
-              FlatButton(
+              TextButton(
                 child: const Text('POP'),
                 onPressed: () { Navigator.pop(context); },
               ),
@@ -853,7 +853,7 @@ Future<void> main() async {
                   Container(
                     child: Hero(tag: 'H', child: Container(key: homeHeroKey, height: 100.0, width: 100.0)),
                   ),
-                  FlatButton(
+                  TextButton(
                     child: const Text('PUSH'),
                     onPressed: () { Navigator.push(context, route); },
                   ),
@@ -932,7 +932,7 @@ Future<void> main() async {
                   Container(
                     child: Hero(tag: 'H', child: Container(key: homeHeroKey, height: 100.0, width: 100.0)),
                   ),
-                  FlatButton(
+                  TextButton(
                     child: const Text('PUSH'),
                     onPressed: () { Navigator.push(context, route); },
                   ),
@@ -1020,7 +1020,7 @@ Future<void> main() async {
                   ),
                 ),
               ),
-              FlatButton(
+              TextButton(
                 child: const Text('PUSH C'),
                 onPressed: () { Navigator.push(context, routeC); },
               ),
@@ -1060,7 +1060,7 @@ Future<void> main() async {
                       ),
                     ),
                   ),
-                  FlatButton(
+                  TextButton(
                     child: const Text('PUSH B'),
                     onPressed: () { Navigator.push(context, routeB); },
                   ),
@@ -1133,7 +1133,7 @@ Future<void> main() async {
                   ),
                 ),
               ),
-              FlatButton(
+              TextButton(
                 child: const Text('POP'),
                 onPressed: () { Navigator.pop(context); },
               ),
@@ -1159,7 +1159,7 @@ Future<void> main() async {
                       ),
                     ),
                   ),
-                  FlatButton(
+                  TextButton(
                     child: const Text('PUSH'),
                     onPressed: () { Navigator.push(context, route); },
                   ),
@@ -1217,7 +1217,7 @@ Future<void> main() async {
               createRectTween: createRectTween,
               child: Container(height: 100.0, width: 100.0, key: firstKey),
             ),
-            FlatButton(
+            TextButton(
               child: const Text('two'),
               onPressed: () { Navigator.pushNamed(context, '/two'); },
             ),
@@ -1230,7 +1230,7 @@ Future<void> main() async {
           children: <Widget>[
             SizedBox(
               height: 200.0,
-              child: FlatButton(
+              child: TextButton(
                 child: const Text('pop'),
                 onPressed: () { Navigator.pop(context); },
               ),
@@ -1332,7 +1332,7 @@ Future<void> main() async {
               createRectTween: createRectTween,
               child: Container(height: 100.0, width: 100.0, key: firstKey),
             ),
-            FlatButton(
+            TextButton(
               child: const Text('two'),
               onPressed: () { Navigator.pushNamed(context, '/two'); },
             ),
@@ -1345,7 +1345,7 @@ Future<void> main() async {
           children: <Widget>[
             SizedBox(
               height: 200.0,
-              child: FlatButton(
+              child: TextButton(
                 child: const Text('pop'),
                 onPressed: () { Navigator.pop(context); },
               ),
@@ -1537,7 +1537,7 @@ Future<void> main() async {
           children: <Widget>[
             const Hero(tag: 'a', child: Text('foo')),
             Builder(builder: (BuildContext context) {
-              return FlatButton(
+              return TextButton(
                 child: const Text('two'),
                 onPressed: () => Navigator.push<void>(context, MaterialPageRoute<void>(
                   builder: (BuildContext context) {
@@ -1587,7 +1587,7 @@ Future<void> main() async {
               },
             ),
             Builder(builder: (BuildContext context) {
-              return FlatButton(
+              return TextButton(
                 child: const Text('two'),
                 onPressed: () => Navigator.push<void>(context, MaterialPageRoute<void>(
                   builder: (BuildContext context) {

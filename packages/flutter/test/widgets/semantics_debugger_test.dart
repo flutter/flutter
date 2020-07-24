@@ -161,13 +161,13 @@ void main() {
           child: Material(
             child: ListView(
               children: <Widget>[
-                RaisedButton(
+                ElevatedButton(
                   onPressed: () {
                     log.add('top');
                   },
                   child: const Text('TOP'),
                 ),
-                RaisedButton(
+                ElevatedButton(
                   onPressed: () {
                     log.add('bottom');
                   },
@@ -199,14 +199,14 @@ void main() {
           child: Material(
             child: ListView(
               children: <Widget>[
-                RaisedButton(
+                ElevatedButton(
                   onPressed: () {
                     log.add('top');
                   },
                   child: const Text('TOP', textDirection: TextDirection.ltr),
                 ),
                 ExcludeSemantics(
-                  child: RaisedButton(
+                  child: ElevatedButton(
                     onPressed: () {
                       log.add('bottom');
                     },

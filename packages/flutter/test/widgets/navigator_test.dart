@@ -203,13 +203,13 @@ void main() {
                   if (settings.name == '/') {
                     return MaterialPageRoute<void>(
                       builder: (BuildContext context) {
-                        return RaisedButton(
+                        return ElevatedButton(
                           child: const Text('Next'),
                           onPressed: () {
                             Navigator.of(context).push(
                               MaterialPageRoute<void>(
                                 builder: (BuildContext context) {
-                                  return RaisedButton(
+                                  return ElevatedButton(
                                     child: const Text('Inner page'),
                                     onPressed: () {
                                       Navigator.of(context, rootNavigator: true).push(
@@ -1063,19 +1063,19 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       navigatorKey: key,
       navigatorObservers: <NavigatorObserver>[observer],
-      home: FlatButton(
+      home: TextButton(
         child: const Text('A'),
         onPressed: () {
           key.currentState.push<void>(routeB = MaterialPageRoute<void>(
             settings: const RouteSettings(name: 'B'),
             builder: (BuildContext context) {
-              return FlatButton(
+              return TextButton(
                 child: const Text('B'),
                 onPressed: () {
                   key.currentState.push<void>(MaterialPageRoute<int>(
                     settings: const RouteSettings(name: 'C'),
                     builder: (BuildContext context) {
-                      return FlatButton(
+                      return TextButton(
                         child: const Text('C'),
                         onPressed: () {
                           key.currentState.replace(
@@ -1157,14 +1157,14 @@ void main() {
           },
         ),
       ),
-      home: FlatButton(
+      home: TextButton(
         child: const Text('A'),
         onPressed: () {
           key.currentState.push<void>(routeB = MaterialPageRoute<void>(
             settings: const RouteSettings(name: 'B'),
             builder: (BuildContext context) {
               log.add('building B');
-              return FlatButton(
+              return TextButton(
                 child: const Text('B'),
                 onPressed: () {
                   key.currentState.push<void>(MaterialPageRoute<int>(
@@ -1172,7 +1172,7 @@ void main() {
                     builder: (BuildContext context) {
                       log.add('building C');
                       log.add('found ${ModalRoute.of(context).settings.name}');
-                      return FlatButton(
+                      return TextButton(
                         child: const Text('C'),
                         onPressed: () {
                           key.currentState.replace(
