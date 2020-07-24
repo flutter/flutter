@@ -8,13 +8,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
-import 'container.dart';
+import 'basic.dart';
 import 'framework.dart';
 
 export 'package:flutter/services.dart' show RestorationBucket, RestorationId;
 
-/// Creates a new scope  for [RestorationId]s used by descendant widgets to
-/// claim [RestorationBucket]s.
+/// Creates a new scope for [RestorationId]s used by descendant widgets to claim
+/// [RestorationBucket]s.
 ///
 /// {@template flutter.widgets.restoration.scope}
 /// A restoration scope inserts a [RestorationBucket] into the widget tree,
@@ -53,19 +53,26 @@ export 'package:flutter/services.dart' show RestorationBucket, RestorationId;
 ///    restoration in Flutter.
 class RestorationScope extends StatefulWidget {
   /// Creates a [RestorationScope].
+  ///
+  /// Providing null as the [restorationId] turns off state restoration for
+  /// the [child] and its descendants.
+  ///
+  /// The [child] must not be null.
   const RestorationScope({
     Key key,
     @required this.restorationId,
-    this.child,
-  }) : super(key: key);
+    @required this.child,
+  }) : assert(child != null),
+       super(key: key);
 
   /// Returns the [RestorationBucket] inserted into the widget tree by the
   /// closest ancestor [RestorationScope] of `context`.
   ///
-  /// Per convention, data should not be stored directly in the bucket returned
-  /// by this method. Instead, consider claiming a child bucket from the
-  /// returned bucket (via [RestorationBucket.claimChild]) and store the
-  /// restoration data in that child.
+  /// To avoid accidentally overwriting data already stored in the bucket by its
+  /// owner, data should not be stored directly in the bucket returned by this
+  /// method. Instead, consider claiming a child bucket from the returned bucket
+  /// (via [RestorationBucket.claimChild]) and store the restoration data in
+  /// that child.
   ///
   /// This method returns null if state restoration is turned off for this
   /// subtree.
@@ -85,7 +92,7 @@ class RestorationScope extends StatefulWidget {
   /// descendant widgets via [RestorationScope.of].
   ///
   /// If this is null, [RestorationScope.of] invoked by descendants will return
-  /// null which is effectively turning off state restoration for this subtree.
+  /// null which effectively turns off state restoration for this subtree.
   final RestorationId restorationId;
 
   @override
@@ -136,11 +143,17 @@ class _RestorationScopeState extends State<RestorationScope> with RestorationMix
 ///    restoration in Flutter.
 class UnmanagedRestorationScope extends InheritedWidget {
   /// Creates an [UnmanagedRestorationScope].
+  ///
+  /// When [bucket] is null state restoration is turned off for the [child] and
+  /// its descendants.
+  ///
+  /// The [child] must not be null.
   const UnmanagedRestorationScope({
     Key key,
     this.bucket,
-    Widget child,
-  }) : super(key: key, child: child);
+    @required Widget child,
+  }) : assert(child != null),
+       super(key: key, child: child);
 
   /// The [RestorationBucket] that this widget will insert into the widget tree.
   ///
@@ -160,7 +173,16 @@ class UnmanagedRestorationScope extends InheritedWidget {
 /// state restoration functionality for the application. For all other use
 /// cases, consider using a regular [RestorationScope] instead.
 ///
-/// {@macro flutter.widgets.restoration.scope}
+/// The root restoration bucket can only be retrieved asynchronously from the
+/// [RestorationManager]. To ensure that the provided [child] has its
+/// restoration data available the first time it builds, the
+/// [RootRestorationScope] will build an empty [Container] instead of the actual
+/// [child] until the root bucket is available. To hide the empty container from
+/// the eyes of users, the [RootRestorationScope] also delays rendering the
+/// first frame while the container is shown. On platforms that show a splash
+/// screen on app launch the splash screen is kept up (hiding the empty
+/// container) until the bucket is available and the [child] is ready to be
+/// build.
 ///
 /// The exact behavior of this widget depends on its ancestors: When the
 /// [RootRestorationScope] does not find an ancestor restoration bucket via
@@ -176,21 +198,10 @@ class UnmanagedRestorationScope extends InheritedWidget {
 /// guarantee that descendants have a bucket available for storing restoration
 /// data as long as [restorationId] is not null and [RestorationManager] is
 /// able to provide a root bucket. In other words, it will force-enable
-/// state restoration for the subtree.
+/// state restoration for the subtree if [restorationId] is not null.
 ///
 /// If [restorationId] is null, no bucket is made available to descendants,
 /// which effectively turns off state restoration for this subtree.
-///
-/// The root restoration bucket can only be retrieved asynchronously from the
-/// [RestorationManager]. To ensure that the provided [child] has its
-/// restoration data available the first time it builds, the
-/// [RootRestorationScope] will build an empty [Container] instead of the actual
-/// [child] until the root bucket is available. To hide the empty container from
-/// the eyes of users, the [RootRestorationScope] also delays rendering the
-/// first frame while the container is shown. On platforms that show a splash
-/// screen on app launch the splash screen is kept up (hiding the empty
-/// container) until the bucket is available and the [child] is ready to be
-/// build.
 ///
 /// See also:
 ///
@@ -207,11 +218,17 @@ class UnmanagedRestorationScope extends InheritedWidget {
 ///    restoration in Flutter.
 class RootRestorationScope extends StatefulWidget {
   /// Creates a [RootRestorationScope].
+  ///
+  /// Providing null as the [restorationId] turns off state restoration for
+  /// the [child] and its descendants.
+  ///
+  /// The [child] must not be null.
   const RootRestorationScope({
     Key key,
     @required this.restorationId,
-    this.child,
-  }) : super(key: key);
+    @required this.child,
+  }) : assert(child != null),
+       super(key: key);
 
   /// The widget below this widget in the tree.
   ///
@@ -293,7 +310,7 @@ class _RootRestorationScopeState extends State<RootRestorationScope> {
   @override
   Widget build(BuildContext context) {
     if (_okToRenderBlankContainer && _isWaitingForRootBucket) {
-      return Container();
+      return const SizedBox.shrink();
     }
 
     return UnmanagedRestorationScope(
@@ -335,10 +352,10 @@ class _RootRestorationScopeState extends State<RootRestorationScope> {
 /// property in its [RestorationBucket] to the latest information returned by
 /// [toPrimitives].
 ///
-/// When the property is registered with the [RestorationMixin] the mixin checks
-/// whether there is any restoration data available for the property. If data is
-/// available, the mixin calls [fromPrimitives] on the property, which must
-/// return an object that matches the object the property wrapped when the
+/// When the property is registered with the [RestorationMixin], the mixin
+/// checks whether there is any restoration data available for the property. If
+/// data is available, the mixin calls [fromPrimitives] on the property, which
+/// must return an object that matches the object the property wrapped when the
 /// provided restoration data was obtained from [toPrimitives]. If no
 /// restoration data is available to restore the property's wrapped object from,
 /// the mixin calls [createDefaultValue]. The value returned by either of those
@@ -384,6 +401,34 @@ class _RootRestorationScopeState extends State<RootRestorationScope> {
 ///  * [RestorationManager], which describes how state restoration works in
 ///    Flutter.
 abstract class RestorableProperty<T> extends ChangeNotifier {
+  /// Called by the [RestorationMixin] if no restoration data is available to
+  /// restore the value of the property from to obtain the default value for the
+  /// property.
+  ///
+  /// The method returns the default value that the property should wrap if no
+  /// restoration data is available. After this is called, [initWithValue] will
+  /// be called with this method's return value.
+  ///
+  /// The method may be called multiple times throughout the life of the
+  /// [RestorableProperty]. Whenever new restoration data has been provided to
+  /// the [RestorationMixin] the property is registered to, either this method
+  /// or [fromPrimitives] is called before [initWithValue] is invoked.
+  T createDefaultValue();
+
+  /// Called by the [RestorationMixin] to convert the `data` previously
+  /// retrieved from [toPrimitives] back into an object of type `T` that this
+  /// property should wrap.
+  ///
+  /// The object returned by this method is passed to [initWithValue] to restore
+  /// the value that this property is wrapping to the value described by the
+  /// provided `data`.
+  ///
+  /// The method may be called multiple times throughout the life of the
+  /// [RestorableProperty]. Whenever new restoration data has been provided to
+  /// the [RestorationMixin] the property is registered to, either this method
+  /// or [createDefaultValue] is called before [initWithValue] is invoked.
+  T fromPrimitives(Object data);
+
   /// Called by the [RestorationMixin] with the `value` returned by either
   /// [createDefaultValue] or [fromPrimitives] to set the value that this
   /// property currently wraps.
@@ -394,20 +439,6 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
   /// [initWithValue] is called, the property should forget its previous value
   /// and re-initialize itself to the newly provided `value`.
   void initWithValue(T value);
-
-  /// Called by the [RestorationMixin] if no restoration data is available to
-  /// restore the value of the property from to obtain the default value for the
-  /// property.
-  ///
-  /// The method returns the default value that the property should wrap if no
-  /// restoration data is available. After this method has been called,
-  /// [initWithValue] will be invoked with the returned value.
-  ///
-  /// The method may be called multiple times throughout the life of the
-  /// [RestorableProperty]. Whenever new restoration data has been provided to
-  /// the [RestorationMixin] the property is registered to, either this method
-  /// or [fromPrimitives] is called before [initWithValue] is invoked.
-  T createDefaultValue();
 
   /// Called by the [RestorationMixin] to retrieve the information that this
   /// property wants to store in the restoration data.
@@ -425,20 +456,6 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
   /// [notifyListeners]. The [RestorationMixin] will invoke this method whenever
   /// the property's listeners are notified.
   Object toPrimitives();
-
-  /// Called by the [RestorationMixin] to convert the `data` previously
-  /// retrieved from [toPrimitives] back into an object of type `T` that this
-  /// property should wrap.
-  ///
-  /// The object returned by this method is passed to [initWithValue] to restore
-  /// the value that this property is wrapping to the value described by the
-  /// provided `data`.
-  ///
-  /// The method may be called multiple times throughout the life of the
-  /// [RestorableProperty]. Whenever new restoration data has been provided to
-  /// the [RestorationMixin] the property is registered to, either this method
-  /// or [createDefaultValue] is called before [initWithValue] is invoked.
-  T fromPrimitives(Object data);
 
   /// Whether the object currently returned by [toPrimitives] should be included
   /// in the restoration state.
@@ -477,6 +494,8 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
   }
   void _unregister() {
     assert(_debugAssertNotDisposed());
+    assert(_id != null);
+    assert(_owner != null);
     _id = null;
     _owner = null;
   }
@@ -562,7 +581,7 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
 /// via the [bucket] getter. Interacting directly with the bucket is uncommon,
 /// but the [State] object may make this bucket available for its descendants to
 /// claim child buckets from. For that, the [bucket] is injected into the widget
-/// tree in [State.build] with the help of a [UnmanagedRestorationScope].
+/// tree in [State.build] with the help of an [UnmanagedRestorationScope].
 ///
 /// The [bucket] getter returns null if state restoration is turned off. If
 /// state restoration is turned on or off during the lifetime of the widget
@@ -592,7 +611,7 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
 /// class RestorationExampleApp extends StatelessWidget {
 ///   @override
 ///   Widget build(BuildContext context) {
-///     // TODO(goderbauer): remove the [RootRestorationScope] once it is part of [MaterialApp]. // ignore: flutter_style_todos
+// TODO(goderbauer): remove the [RootRestorationScope] once it is part of [MaterialApp].
 ///     return RootRestorationScope(
 ///       restorationId: const RestorationId('root'),
 ///       child: MaterialApp(
@@ -635,7 +654,6 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
 ///     // initialized to its default value.
 ///     registerForRestoration(_counter, const RestorationId('count'));
 ///   }
-///
 ///
 ///   void _incrementCounter() {
 ///     setState(() {
@@ -721,7 +739,7 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
   /// [didToggleBucket] is called.
   ///
   /// Interacting directly with this bucket is uncommon. However, the bucket may
-  /// be injected into the widget tree in the [State]'s `build` method using a
+  /// be injected into the widget tree in the [State]'s `build` method using an
   /// [UnmanagedRestorationScope]. That allows descendants to claim child
   /// buckets from this bucket for their own restoration needs.
   RestorationBucket get bucket => _bucket;
@@ -801,9 +819,13 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
   ///
   /// Typically, this method is called from within [restoreState] to register
   /// all restorable properties of the owning [State] object. However, if a
-  /// given [RestorableProperty] is only needed when the [State] is in a certain
-  /// state, [registerForRestoration] may also be called at any time after
-  /// [restoreState] has been invoked for the first time.
+  /// given [RestorableProperty] is only needed when certain conditions are met
+  /// within the [State], [registerForRestoration] may also be called at any
+  /// time after [restoreState] has been invoked for the first time.
+  ///
+  /// A property that has been registered outside of [restoreState] must be
+  /// re-registered within [restoreState] the next time that method is called
+  /// unless it has been unregistered with [unregisterFromRestoration].
   @protected
   void registerForRestoration(RestorableProperty<Object> property, RestorationId id) {
     assert(property != null);
@@ -858,7 +880,7 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
   /// restore the internal state of a [State] object, it may be removed from the
   /// restoration data by calling this method.
   @protected
-  void unregisterFromRestoration<T>(RestorableProperty<T> property) {
+  void unregisterFromRestoration(RestorableProperty<Object> property) {
     assert(property != null);
     assert(property._owner == this);
     _bucket?.remove<Object>(property._id);

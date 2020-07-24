@@ -212,6 +212,10 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   ///
   /// See the docs for [RestorationManager] for a discussion of restoration
   /// state and how it is organized in Flutter.
+  ///
+  /// To use a different [RestorationManager] subclasses can override
+  /// [createRestorationManager], which is called to create the instance
+  /// returned by this getter.
   RestorationManager get restorationManager => _restorationManager;
   RestorationManager _restorationManager;
 

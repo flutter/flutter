@@ -103,10 +103,9 @@ class _RestorablePrimitiveValue<T> extends RestorableValue<T> {
 /// `defaultValue` given in the constructor.
 /// {@endtemplate}
 ///
-/// See also:
-///
-///  * [RestorableDouble], which can store and restore a [double].
-///  * [RestorableInt], which can store and restore an [int].
+/// Instead of using the more generic [RestorableNum] directly, consider using
+/// one of the more specific subclasses (e.g. [RestorableDouble] to store a
+/// [double] and [RestorableInt] to store an [int]).
 class RestorableNum<T extends num> extends _RestorablePrimitiveValue<T> {
   /// Creates a [RestorableNum].
   ///

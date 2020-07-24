@@ -46,32 +46,34 @@ typedef _BucketVisitor = void Function(RestorationBucket bucket);
 /// owner of the bucket may also make the bucket available to other entities so
 /// that they can claim child buckets from it for their own restoration needs.
 /// Within a bucket, child buckets are also identified by unique
-/// [RestorationId]s. The restoration id must be provided when claiming a child
+/// [RestorationId]s. The restoration ID must be provided when claiming a child
 /// bucket.
 ///
 /// When restoration data is provided to the [RestorationManager] (e.g. after
 /// the application relaunched when foregrounded again), the bucket hierarchy
 /// with all the data stored in it is restored. Entities can retrieve the data
-/// again by using the same restoration ids that they originally used to store
+/// again by using the same restoration IDs that they originally used to store
 /// the data.
 ///
 /// In addition to providing restoration data when the app is launched,
 /// restoration data may also be provided to a running app to restore it to a
-/// previous state. When this happens, the current bucket hierarchy is
-/// decommissioned and replaced with the hierarchy deserialized from the newly
-/// provided restoration data. Buckets in the old hierarchy notify their
-/// listeners when they get decommissioned. In response to the notification,
-/// listeners must stop using the old buckets. Owners of those buckets must
-/// dispose of them and claim a new child as a replacement from a parent in the
-/// new bucket hierarchy (that parent may be the updated [rootBucket]).
+/// previous state (e.g. when the user hits the back/forward button in the web
+/// browser). When this happens, the current bucket hierarchy is decommissioned
+/// and replaced with the hierarchy deserialized from the newly provided
+/// restoration data. Buckets in the old hierarchy notify their listeners when
+/// they get decommissioned. In response to the notification, listeners must
+/// stop using the old buckets. Owners of those buckets must dispose of them and
+/// claim a new child as a replacement from a parent in the new bucket hierarchy
+/// (that parent may be the updated [rootBucket]).
 ///
 /// Same platforms restrict the size of the restoration data. Therefore, the
 /// data stored in the buckets should be as small as possible while still
 /// allowing the app to restore its current state from it. Data that can be
 /// retrieved from other services (e.g. a database or a web server) should not
-/// be included in the restoration data. Instead, a small identifier (e.g. an ID
-/// or resource locator) should be stored that can be used to retrieve the data
-/// again from its original source during state restoration.
+/// be included in the restoration data. Instead, a small identifier (e.g. a
+/// UUID, database record number, or resource locator) should be stored that can
+/// be used to retrieve the data again from its original source during state
+/// restoration.
 ///
 /// The [RestorationManager] sends a serialized version of the bucket hierarchy
 /// over to the engine at the end of a frame in which the data in the hierarchy
@@ -415,10 +417,11 @@ class RestorationId {
 /// During the lifetime of a bucket, it may notify its listeners that the bucket
 /// has been [decommission]ed. This happens when new restoration data has been
 /// provided to, for example, the [RestorationManager] to restore the
-/// application to a different state. In response to the notification, owners
-/// must dispose their current bucket and replace it with a new bucket claimed
-/// from a new parent (which will have been initialized with the new restoration
-/// data). For example, if the owner previously claimed its bucket from
+/// application to a different state (e.g. when the user hits the back/forward
+/// button in the web browser). In response to the notification, owners must
+/// dispose their current bucket and replace it with a new bucket claimed from a
+/// new parent (which will have been initialized with the new restoration data).
+/// For example, if the owner previously claimed its bucket from
 /// [RestorationManager.rootBucket], it must claim its new bucket from there
 /// again. The root bucket will have been replaced with the new root bucket just
 /// before the bucket listeners are informed about the decommission. Once the
@@ -461,7 +464,7 @@ class RestorationBucket extends ChangeNotifier {
   /// instantiated) or it must be a nested map describing the entire bucket
   /// hierarchy in the following format:
   ///
-  /// ```
+  /// ```javascript
   /// {
   ///  'v': {  // key-value pairs
   ///     // * key is the string representation of a [RestorationID]
@@ -597,10 +600,11 @@ class RestorationBucket extends ChangeNotifier {
 
   // Get and store values.
 
-  /// Returns the value that is currently stored in the bucket under the
-  /// provided `id`.
+  /// Returns the value of type `P` that is currently stored in the bucket under
+  /// the provided `id`.
   ///
-  /// Returns null if nothing is stored under that id.
+  /// Returns null if nothing is stored under that id. Throws, if the value
+  /// stored under the ID is not of type `P`.
   ///
   /// See also:
   ///
@@ -614,9 +618,10 @@ class RestorationBucket extends ChangeNotifier {
     return _rawValues[id.value] as P;
   }
 
-  /// Stores the provided `value` under the provided `id` in the bucket.
+  /// Stores the provided `value` of type `P` under the provided `id` in the
+  /// bucket.
   ///
-  /// Any value that has previously been stored under that id is overwritten
+  /// Any value that has previously been stored under that ID is overwritten
   /// with the new value. The provided `value` must be serializable with the
   /// [StandardMessageCodec].
   ///
@@ -642,8 +647,8 @@ class RestorationBucket extends ChangeNotifier {
   /// Deletes the value currently stored under the provided `id` from the
   /// bucket.
   ///
-  /// The value removed from the bucket is returned. If no value was stored
-  /// under that id, null is returned.
+  /// The value removed from the bucket is casted to `P` and returned. If no
+  /// value was stored under that id, null is returned.
   ///
   /// See also:
   ///
@@ -683,7 +688,7 @@ class RestorationBucket extends ChangeNotifier {
   // The restoration IDs and associated buckets of children that have been
   // claimed via [claimChild].
   final Map<RestorationId, RestorationBucket> _claimedChildren = <RestorationId, RestorationBucket>{};
-  // Newly created child buckets whose restoration id is still in use, see
+  // Newly created child buckets whose restoration ID is still in use, see
   // comment in [claimChild] for details.
   final Map<RestorationId, List<RestorationBucket>> _childrenToAdd = <RestorationId, List<RestorationBucket>>{};
 
@@ -711,12 +716,12 @@ class RestorationBucket extends ChangeNotifier {
     assert(_debugAssertNotDisposed());
     assert(id != null);
     // There are three cases to consider:
-    // 1. Claiming an id that has already been claimed.
-    // 2. Claiming an id that doesn't yet exist in [_rawChildren].
-    // 3. Claiming an id that does exist in [_rawChildren] and hasn't been
+    // 1. Claiming an ID that has already been claimed.
+    // 2. Claiming an ID that doesn't yet exist in [_rawChildren].
+    // 3. Claiming an ID that does exist in [_rawChildren] and hasn't been
     //    claimed yet.
-    // If an id has already been claimed (case 1) the current owner may give up
-    // that id later this frame and it can be re-used. In anticipation of the
+    // If an ID has already been claimed (case 1) the current owner may give up
+    // that ID later this frame and it can be re-used. In anticipation of the
     // previous owner's surrender of the id, we return an empty bucket for this
     // new claim and check in [_debugAssertIntegrity] that at the end of the
     // frame the old owner actually did surrendered the id.
@@ -878,7 +883,7 @@ class RestorationBucket extends ChangeNotifier {
     assert(child._parent == this);
     if (_claimedChildren.containsKey(child.id)) {
       // Delay addition until the end of the frame in the hopes that the current
-      // owner of the child with the same id will have given up that child by
+      // owner of the child with the same ID will have given up that child by
       // then.
       _childrenToAdd.putIfAbsent(child.id, () => <RestorationBucket>[]).add(child);
       _markNeedsSerialization();
@@ -973,12 +978,20 @@ class RestorationBucket extends ChangeNotifier {
 /// Returns true when the provided `object` is serializable for state
 /// restoration.
 ///
-/// Should only be called from within asserts.
+/// Should only be called from within asserts. Always returns false outside
+/// of debug builds.
 bool debugIsSerializableForRestoration(Object object) {
-  try {
-    const StandardMessageCodec().encodeMessage(object);
+  bool result = false;
+
+  assert(() {
+    try {
+      const StandardMessageCodec().encodeMessage(object);
+      result = true;
+    } catch (_) {
+      result = false;
+    }
     return true;
-  } catch (_) {
-    return false;
-  }
+  }());
+
+  return result;
 }
