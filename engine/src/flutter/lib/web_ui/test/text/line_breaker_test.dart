@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+// @dart = 2.10
 import 'package:test/test.dart';
 
 import 'package:ui/src/engine.dart';
@@ -246,7 +246,7 @@ List<Line> split(String text) {
   final List<Line> lines = <Line>[];
 
   int i = 0;
-  LineBreakType breakType;
+  LineBreakType? breakType;
   while (breakType != LineBreakType.endOfText) {
     final LineBreakResult result = nextLineBreak(text, i);
     lines.add(Line(text.substring(i, result.index), result.type));
