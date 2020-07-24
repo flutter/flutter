@@ -382,9 +382,9 @@ class IOSDevice extends Device {
       if (debuggingOptions.traceAllowlist != null) '--trace-allowlist="${debuggingOptions.traceAllowlist}"',
       if (debuggingOptions.endlessTraceBuffer) '--endless-trace-buffer',
       if (debuggingOptions.dumpSkpOnShaderCompilation) '--dump-skp-on-shader-compilation',
-      if (debuggingOptions.purgePersistentCache) '--purge-persistent-cache',
       if (debuggingOptions.verboseSystemLogs) '--verbose-logging',
       if (debuggingOptions.cacheSkSL) '--cache-sksl',
+      if (debuggingOptions.purgePersistentCache) '--purge-persistent-cache',
       if (platformArgs['trace-startup'] as bool ?? false) '--trace-startup',
     ];
 
