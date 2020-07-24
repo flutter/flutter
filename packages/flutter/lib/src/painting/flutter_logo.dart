@@ -9,6 +9,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui show Gradient, TextBox, lerpDouble;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart';
 
 import 'alignment.dart';
 import 'basic_types.dart';
