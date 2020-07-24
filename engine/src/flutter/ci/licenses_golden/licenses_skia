@@ -1,4 +1,4 @@
-Signature: c69daafddf5321a5cfe8f5ecd6291748
+Signature: e358f67df3bec8657baccaf2b831741a
 
 UNUSED LICENSES:
 
@@ -2490,8 +2490,6 @@ FILE: ../../../third_party/skia/src/gpu/GrTestUtils.h
 FILE: ../../../third_party/skia/src/gpu/GrTriangulator.cpp
 FILE: ../../../third_party/skia/src/gpu/GrTriangulator.h
 FILE: ../../../third_party/skia/src/gpu/GrXferProcessor.cpp
-FILE: ../../../third_party/skia/src/gpu/GrYUVProvider.cpp
-FILE: ../../../third_party/skia/src/gpu/GrYUVProvider.h
 FILE: ../../../third_party/skia/src/gpu/SkGpuDevice_drawTexture.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrBlendFragmentProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrBlendFragmentProcessor.h
