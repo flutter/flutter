@@ -82,7 +82,6 @@ class _MultiScaffoldSnackBar {
   }
 }
 
-
 /// Dispatches feature events to registered [Scaffold]s.
 class ScaffoldMessenger extends StatefulWidget {
   /// Creates a widget that provides [Scaffold] feature events to its registered
@@ -1193,12 +1192,12 @@ class Scaffold extends StatefulWidget {
     this.drawerEdgeDragWidth,
     this.drawerEnableOpenDragGesture = true,
     this.endDrawerEnableOpenDragGesture = true,
-    this.registerMessenger = true,
+    this.registerForMessages = true,
   }) : assert(primary != null),
        assert(extendBody != null),
        assert(extendBodyBehindAppBar != null),
        assert(drawerDragStartBehavior != null),
-       assert(registerMessenger != null),
+       assert(registerForMessages != null),
        super(key: key);
 
   /// If true, and [bottomNavigationBar] or [persistentFooterButtons]
@@ -1512,8 +1511,13 @@ class Scaffold extends StatefulWidget {
   /// By default, the drag gesture is enabled.
   final bool endDrawerEnableOpenDragGesture;
 
-  /// Doc
-  final bool registerMessenger;
+  /// Determines if the [Scaffold] should register with a [ScaffoldMessenger],
+  /// which will dispatch feature events to this [Scaffold].
+  /// 
+  /// If nesting [Scaffold]s, set to false to prevent duplicate notifications.
+  /// 
+  /// Defaults to true, cannot be null.
+  final bool registerForMessages;
 
   /// The state from the closest instance of this class that encloses the given context.
   ///
@@ -1950,20 +1954,20 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     _snackBarTimer = null;
   }
 
-  void _removeSnackBar(ScaffoldFeatureController<SnackBar, SnackBarClosedReason> snackbar, SnackBarClosedReason reason) {
+  void _removeSnackBar(ScaffoldFeatureController<SnackBar, SnackBarClosedReason> snackBar, SnackBarClosedReason reason) {
     // This one has already completed.
-    if (snackbar._completer.isCompleted)
+    if (snackBar._completer.isCompleted)
       return;
     // If we are already showing the SnackBar propagated by ScaffoldMessenger,
     // remove gracefully.
-    if (snackbar == _snackBars.first)
+    if (snackBar == _snackBars.first)
       hideCurrentSnackBar(reason: reason);
     else {
       // Even if the SnackBar was not viewed on this Scaffold, we should still
       // complete it with the same information as the one that was seen and
       // dismissed.
-      snackbar._completer.complete(reason);
-      _snackBars.remove(snackbar);
+      snackBar._completer.complete(reason);
+      _snackBars.remove(snackBar);
     }
   }
 
@@ -2389,7 +2393,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     }
     _accessibleNavigation = mediaQuery.accessibleNavigation;
     _maybeBuildPersistentBottomSheet();
-    if (widget.registerMessenger) {
+    if (widget.registerForMessages) {
       _scaffoldMessenger = ScaffoldMessenger.of(context);
       _scaffoldMessenger?._register(this);
     }
