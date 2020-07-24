@@ -209,9 +209,10 @@ void main() {
 
   test('Cannot use a disposed ChangeNotifier', () {
     final TestNotifier source = TestNotifier();
+    void callback() {}
     source.dispose();
-    expect(() { source.addListener(null); }, throwsFlutterError);
-    expect(() { source.removeListener(null); }, throwsFlutterError);
+    expect(() { source.addListener(callback); }, throwsFlutterError);
+    expect(() { source.removeListener(callback); }, throwsFlutterError);
     expect(() { source.dispose(); }, throwsFlutterError);
     expect(() { source.notify(); }, throwsFlutterError);
   });

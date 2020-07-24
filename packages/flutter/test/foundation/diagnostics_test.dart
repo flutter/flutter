@@ -1144,11 +1144,6 @@ void main() {
     validateDoublePropertyJsonSerialization(complexPercentProperty);
 
     expect(
-      PercentProperty('name', null, unit: 'invisible', tooltip: '!').toString(),
-      equals('name: null (!)'),
-    );
-
-    expect(
       PercentProperty('name', 0.4).value,
       0.4,
     );
