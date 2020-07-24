@@ -54,11 +54,10 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       )
       ..addFlag('purge-persistent-cache',
         negatable: false,
-        help: 'Remove all existing persistent cache. The persistent cache is '
-            'mainly used to mitigate the shader compilation jank. To reliably '
-            'reproduce such jank, or to test some other shader compilation jank'
-            'fixes (e.g., shader warm-up) without being affected by previous '
-            'cache, use this flag.',
+        help: 'Removes all existing persistent caches. This allows reproducing '
+            'shader compilation jank that normally only happens the first time '
+            'an app is run, or for reliable testing of compilation jank fixes '
+            '(e.g. shader warm-up).',
       )
       ..addOption('route',
         help: 'Which route to load when running the app.',
