@@ -1,4 +1,4 @@
-Signature: 6fa97ccf305b88851475e533352abcb9
+Signature: 82d781b5d3880be38be80e0c671c293c
 
 UNUSED LICENSES:
 
@@ -2493,10 +2493,10 @@ FILE: ../../../third_party/skia/src/gpu/GrXferProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/GrYUVProvider.cpp
 FILE: ../../../third_party/skia/src/gpu/GrYUVProvider.h
 FILE: ../../../third_party/skia/src/gpu/SkGpuDevice_drawTexture.cpp
+FILE: ../../../third_party/skia/src/gpu/effects/GrBlendFragmentProcessor.cpp
+FILE: ../../../third_party/skia/src/gpu/effects/GrBlendFragmentProcessor.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrCustomXfermode.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrCustomXfermode.h
-FILE: ../../../third_party/skia/src/gpu/effects/GrXfermodeFragmentProcessor.cpp
-FILE: ../../../third_party/skia/src/gpu/effects/GrXfermodeFragmentProcessor.h
 FILE: ../../../third_party/skia/src/gpu/geometry/GrQuad.h
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLTextureRenderTarget.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLUniformHandler.cpp
@@ -3940,6 +3940,8 @@ FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DCommandList.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DCommandList.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DCommandSignature.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DCommandSignature.h
+FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DConstantRingBuffer.cpp
+FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DConstantRingBuffer.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DCpuDescriptorManager.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DCpuDescriptorManager.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DDescriptorHeap.cpp
