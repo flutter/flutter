@@ -1227,7 +1227,6 @@ Future<void> _runHostOnlyDeviceLabTests() async {
     if (Platform.isMacOS) () => _runDevicelabTest('plugin_lint_mac'),
     () => _runDevicelabTest('plugin_test', environment: gradleEnvironment),
     if (Platform.isLinux) () => _runDevicelabTest('web_benchmarks_html', environment: kChromeVariables),
-    if (Platform.isLinux) () => _runDevicelabTest('web_benchmarks_canvaskit', environment: kChromeVariables),
   ]..shuffle(math.Random(0));
 
   await _selectIndexedSubshard(tests, kDeviceLabShardCount);
