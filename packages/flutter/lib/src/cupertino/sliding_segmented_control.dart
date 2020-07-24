@@ -148,10 +148,11 @@ class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
     @required this.onValueChanged,
     this.groupValue,
     this.thumbColor = _kThumbColor,
-    this.padding,
+    this.padding = _kHorizontalSegmentedControlPadding,
     this.backgroundColor = CupertinoColors.tertiarySystemFill,
   }) : assert(children != null),
        assert(children.length >= 2),
+       assert(padding != null),
        assert(onValueChanged != null),
        assert(
          groupValue == null || children.keys.contains(groupValue),
@@ -458,8 +459,8 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
           constrainedAxis: Axis.horizontal,
           child: Container(
             width: double.infinity,
-            margin: widget.padding ?? _kHorizontalSegmentedControlPadding,
-            padding: _kHorizontalItemPadding.resolve(Directionality.of(context)),
+            margin: widget.padding.resolve(Directionality.of(context)),
+            padding: _kHorizontalItemPadding,
             decoration: BoxDecoration(
               borderRadius: const BorderRadius.all(Radius.circular(_kCornerRadius)),
               color: CupertinoDynamicColor.resolve(widget.backgroundColor, context),
