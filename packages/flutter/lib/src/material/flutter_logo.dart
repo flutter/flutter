@@ -19,8 +19,8 @@ class FlutterLogo extends StatelessWidget {
   ///
   /// The [size] defaults to the value given by the current [IconTheme].
   ///
-  /// The [lightColor], [mediumColor], [darkColor], [textColor], [style],
-  /// [duration], and [curve] arguments must not be null.
+  /// The [textColor], [style], [duration], and [curve] arguments must not be
+  /// null.
   const FlutterLogo({
     Key key,
     this.size,
@@ -72,8 +72,8 @@ class FlutterLogo extends StatelessWidget {
       duration: duration,
       curve: curve,
       decoration: FlutterLogoDecoration(
-        textColor: textColor,
         style: style,
+        textColor: textColor,
       ),
     );
   }
