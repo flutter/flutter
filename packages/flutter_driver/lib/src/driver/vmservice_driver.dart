@@ -127,27 +127,6 @@ class VMServiceFlutterDriver extends FlutterDriver {
 
     driver._dartVmReconnectUrl = dartVmServiceUrl;
 
-    // Attempts to resume the isolate, but does not crash if it fails because
-    // the isolate is already resumed. There could be a race with other tools,
-    // such as a debugger, any of which could have resumed the isolate.
-    Future<dynamic> resumeLeniently() {
-      _log('Attempting to resume isolate');
-      return isolate.resume().catchError((dynamic e) {
-        const int vmMustBePausedCode = 101;
-        if (e is rpc.RpcException && e.code == vmMustBePausedCode) {
-          // No biggie; something else must have resumed the isolate
-          _log(
-              'Attempted to resume an already resumed isolate. This may happen '
-                  'when we lose a race with another tool (usually a debugger) that '
-                  'is connected to the same isolate.'
-          );
-        } else {
-          // Failed to resume due to another reason. Fail hard.
-          throw e;
-        }
-      });
-    }
-
     /// Waits for a signal from the VM service that the extension is registered.
     ///
     /// Looks at the list of loaded extensions for the current [isolateRef], as
@@ -195,11 +174,18 @@ class VMServiceFlutterDriver extends FlutterDriver {
       });
     }
 
+    // The Dart VM may be running with --pause-isolates-on-start.
+    // Set a listener to unpause new isolates as they are ready to run,
+    // otherwise they'll hang indefinitely.
+    client.onIsolateRunnable.listen((VMIsolateRef isolateRef) async {
+      _resumeLeniently(await isolateRef.load());
+    });
+
     // Attempt to resume isolate if it was paused
     if (isolate.pauseEvent is VMPauseStartEvent) {
       _log('Isolate is paused at start.');
 
-      await resumeLeniently();
+      await _resumeLeniently(isolate);
     } else if (isolate.pauseEvent is VMPauseExitEvent ||
         isolate.pauseEvent is VMPauseBreakpointEvent ||
         isolate.pauseEvent is VMPauseExceptionEvent ||
@@ -207,7 +193,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
       // If the isolate is paused for any other reason, assume the extension is
       // already there.
       _log('Isolate is paused mid-flight.');
-      await resumeLeniently();
+      await _resumeLeniently(isolate);
     } else if (isolate.pauseEvent is VMResumeEvent) {
       _log('Isolate is not paused. Assuming application is ready.');
     } else {
@@ -238,6 +224,27 @@ class VMServiceFlutterDriver extends FlutterDriver {
 
     _log('Connected to Flutter application.');
     return driver;
+  }
+
+  /// Attempts to resume the isolate, but does not crash if it fails because
+  /// the isolate is already resumed. There could be a race with other tools,
+  /// such as a debugger, any of which could have resumed the isolate.
+  static Future<dynamic> _resumeLeniently(VMIsolate isolate) {
+    _log('Attempting to resume isolate');
+    return isolate.resume().catchError((dynamic e) {
+      const int vmMustBePausedCode = 101;
+      if (e is rpc.RpcException && e.code == vmMustBePausedCode) {
+        // No biggie; something else must have resumed the isolate
+        _log(
+            'Attempted to resume an already resumed isolate. This may happen '
+                'when we lose a race with another tool (usually a debugger) that '
+                'is connected to the same isolate.'
+        );
+      } else {
+        // Failed to resume due to another reason. Fail hard.
+        throw e;
+      }
+    });
   }
 
   static int _nextDriverId = 0;
