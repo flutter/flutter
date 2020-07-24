@@ -42,44 +42,18 @@ class FlutterLogoDecoration extends Decoration {
   /// logo. The [style] controls whether and where to draw the "Flutter" label.
   /// If one is shown, the [textColor] controls the color of the label.
   ///
-  /// The [lightColor], [mediumColor], [darkColor], [textColor], [style], and
-  /// [margin] arguments must not be null.
+  /// The [textColor], [style], and [margin] arguments must not be null.
   const FlutterLogoDecoration({
-    this.lightColor = const Color(0xFF54C5F8),
-    this.mediumColor = const Color(0xFF29B6F6),
-    this.darkColor = const Color(0xFF01579B),
     this.textColor = const Color(0xFF757575),
     this.style = FlutterLogoStyle.markOnly,
     this.margin = EdgeInsets.zero,
-  }) : assert(lightColor != null),
-       assert(mediumColor != null),
-       assert(darkColor != null),
-       assert(textColor != null),
+  }) : assert(textColor != null),
        assert(style != null),
        assert(margin != null),
        _position = identical(style, FlutterLogoStyle.markOnly) ? 0.0 : identical(style, FlutterLogoStyle.horizontal) ? 1.0 : -1.0,
        _opacity = 1.0;
 
-  const FlutterLogoDecoration._(this.lightColor, this.mediumColor, this.darkColor, this.textColor, this.style, this.margin, this._position, this._opacity);
-
-  /// The lightest of the three colors used to paint the logo.
-  ///
-  /// This color is used to paint the top and middle beam of the Flutter "F"
-  /// logo.
-  final Color lightColor;
-
-  /// A color in between the [lightColor] and the [darkColor] used to paint
-  /// the logo.
-  ///
-  /// This color is used to paint the intersection of the middle and bottom beam
-  /// of the Flutter "F" logo.
-  final Color mediumColor;
-
-  /// The darkest of the three colors used to paint the logo.
-  ///
-  /// This color is used to paint the bottom beam of the Flutter "F"
-  /// logo.
-  final Color darkColor;
+  const FlutterLogoDecoration._(this.textColor, this.style, this.margin, this._position, this._opacity);
 
   /// The color used to paint the "Flutter" text on the logo, if [style] is
   /// [FlutterLogoStyle.horizontal] or [FlutterLogoStyle.stacked].
@@ -106,9 +80,7 @@ class FlutterLogoDecoration extends Decoration {
 
   @override
   bool debugAssertIsValid() {
-    assert(lightColor != null
-        && darkColor != null
-        && textColor != null
+    assert(textColor != null
         && style != null
         && margin != null
         && _position != null
@@ -143,9 +115,6 @@ class FlutterLogoDecoration extends Decoration {
       return null;
     if (a == null) {
       return FlutterLogoDecoration._(
-        b.lightColor,
-        b.mediumColor,
-        b.darkColor,
         b.textColor,
         b.style,
         b.margin * t,
@@ -155,9 +124,6 @@ class FlutterLogoDecoration extends Decoration {
     }
     if (b == null) {
       return FlutterLogoDecoration._(
-        a.lightColor,
-        a.mediumColor,
-        a.darkColor,
         a.textColor,
         a.style,
         a.margin * t,
@@ -170,9 +136,6 @@ class FlutterLogoDecoration extends Decoration {
     if (t == 1.0)
       return b;
     return FlutterLogoDecoration._(
-      Color.lerp(a.lightColor, b.lightColor, t),
-      Color.lerp(a.mediumColor, b.mediumColor, t),
-      Color.lerp(a.darkColor, b.darkColor, t),
       Color.lerp(a.textColor, b.textColor, t),
       t < 0.5 ? a.style : b.style,
       EdgeInsets.lerp(a.margin, b.margin, t),
@@ -217,8 +180,6 @@ class FlutterLogoDecoration extends Decoration {
     if (identical(this, other))
       return true;
     return other is FlutterLogoDecoration
-        && other.lightColor == lightColor
-        && other.darkColor == darkColor
         && other.textColor == textColor
         && other._position == _position
         && other._opacity == _opacity;
@@ -228,8 +189,6 @@ class FlutterLogoDecoration extends Decoration {
   int get hashCode {
     assert(debugAssertIsValid());
     return hashValues(
-      lightColor,
-      darkColor,
       textColor,
       _position,
       _opacity,
@@ -239,7 +198,7 @@ class FlutterLogoDecoration extends Decoration {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsNode.message('$lightColor/$darkColor on $textColor'));
+    properties.add(ColorProperty('textColor', textColor));
     properties.add(EnumProperty<FlutterLogoStyle>('style', style));
     if (_inTransition)
       properties.add(DiagnosticsNode.message('transition ${debugFormatDouble(_position)}:${debugFormatDouble(_opacity)}'));
@@ -300,11 +259,11 @@ class _FlutterLogoPainter extends BoxPainter {
 
     // Set up the styles.
     final Paint lightPaint = Paint()
-      ..color = _config.lightColor;
+      ..color = const Color(0xFF54C5F8);
     final Paint mediumPaint = Paint()
-      ..color = _config.mediumColor;
+      ..color = const Color(0xFF29B6F6);
     final Paint darkPaint = Paint()
-      ..color = _config.darkColor;
+      ..color = const Color(0xFF01579B);
 
     final ui.Gradient triangleGradient = ui.Gradient.linear(
       const Offset(87.2623 + 37.9092, 28.8384 + 123.4389),
