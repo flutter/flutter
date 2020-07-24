@@ -8,6 +8,7 @@
 // - evaluate using stylesheets for static CSS properties
 // - evaluate reusing houdini canvases
 
+// @dart = 2.10
 part of engine;
 
 /// A canvas that renders to a combination of HTML DOM and CSS Custom Paint API.
