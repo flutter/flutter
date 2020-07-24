@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart' show kSecondaryButton, PointerDeviceKind;
 
@@ -163,6 +164,32 @@ void main() {
     expect(hovered, isTrue,
       reason: 'because the hover is prevented by ModalBarrier');
     hovered = false;
+  });
+
+  testWidgets('ModalBarrier plays system alert sound when user tries to dismiss it', (WidgetTester tester) async {
+    final List<String> playedSystemSounds = <String>[];
+    try {
+      SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+        if (methodCall.method == 'SystemSound.play')
+          playedSystemSounds.add(methodCall.arguments as String);
+      });
+
+      final Widget subject = Stack(
+        textDirection: TextDirection.ltr,
+        children: <Widget>[
+          tapTarget,
+          const ModalBarrier(dismissible: false),
+        ],
+      );
+
+      await tester.pumpWidget(subject);
+      await tester.tap(find.text('target'));
+      await tester.pumpWidget(subject);
+    } finally {
+      SystemChannels.platform.setMockMethodCallHandler(null);
+    }
+    expect(playedSystemSounds, hasLength(1));
+    expect(playedSystemSounds[0], SystemSoundType.alert.toString());
   });
 
   testWidgets('ModalBarrier pops the Navigator when dismissed by primary tap', (WidgetTester tester) async {
