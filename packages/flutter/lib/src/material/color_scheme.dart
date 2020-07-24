@@ -108,6 +108,67 @@ class ColorScheme with Diagnosticable {
        assert(onError != null),
        assert(brightness != null);
 
+
+  /// Create a high contrast ColorScheme based on a purple primary color that
+  /// matches the [baseline Material color scheme](https://material.io/design/color/the-color-system.html#color-theme-creation).
+  const ColorScheme.highContrastLight({
+    this.primary = const Color(0xff0000ba),
+    this.primaryVariant = const Color(0xff000088),
+    this.secondary = const Color(0xff66fff9),
+    this.secondaryVariant = const Color(0xff018786),
+    this.surface = Colors.white,
+    this.background = Colors.white,
+    this.error = const Color(0xff790000),
+    this.onPrimary = Colors.white,
+    this.onSecondary = Colors.black,
+    this.onSurface = Colors.black,
+    this.onBackground = Colors.black,
+    this.onError = Colors.white,
+    this.brightness = Brightness.light,
+  }) : assert(primary != null),
+        assert(primaryVariant != null),
+        assert(secondary != null),
+        assert(secondaryVariant != null),
+        assert(surface != null),
+        assert(background != null),
+        assert(error != null),
+        assert(onPrimary != null),
+        assert(onSecondary != null),
+        assert(onSurface != null),
+        assert(onBackground != null),
+        assert(onError != null),
+        assert(brightness != null);
+
+  /// Create a high contrast ColorScheme based on the dark
+  /// [baseline Material color scheme](https://material.io/design/color/dark-theme.html#ui-application).
+  const ColorScheme.highContrastDark({
+    this.primary = const Color(0xffefb7ff),
+    this.primaryVariant = const Color(0xffbe9eff),
+    this.secondary = const Color(0xff66fff9),
+    this.secondaryVariant = const Color(0xff66fff9),
+    this.surface = const Color(0xff121212),
+    this.background = const Color(0xff121212),
+    this.error = const Color(0xff9b374d),
+    this.onPrimary = Colors.black,
+    this.onSecondary = Colors.black,
+    this.onSurface = Colors.white,
+    this.onBackground = Colors.white,
+    this.onError = Colors.black,
+    this.brightness = Brightness.dark,
+  }) : assert(primary != null),
+        assert(primaryVariant != null),
+        assert(secondary != null),
+        assert(secondaryVariant != null),
+        assert(surface != null),
+        assert(background != null),
+        assert(error != null),
+        assert(onPrimary != null),
+        assert(onSecondary != null),
+        assert(onSurface != null),
+        assert(onBackground != null),
+        assert(onError != null),
+        assert(brightness != null);
+
   /// Create a color scheme from a [MaterialColor] swatch.
   ///
   /// This constructor is used by [ThemeData] to create its default

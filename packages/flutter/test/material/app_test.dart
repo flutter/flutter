@@ -752,6 +752,32 @@ void main() {
     expect(appliedTheme.brightness, Brightness.dark);
   });
 
+  testWidgets('MaterialApp uses high contrast theme when appropriate', (WidgetTester tester) async {
+    // TODO: Fake the high contrast somehow?.
+    tester.binding.window.platformBrightnessTestValue = Brightness.light;
+
+    ThemeData appliedTheme;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          primaryColor: Colors.lightBlue,
+        ),
+        highContrastTheme: ThemeData(
+          primaryColor: Colors.blue,
+        ),
+        home: Builder(
+          builder: (BuildContext context) {
+            appliedTheme = Theme.of(context);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    expect(appliedTheme.primaryColor, Colors.blue);
+  });
+
   testWidgets('MaterialApp switches themes when the Window platformBrightness changes.', (WidgetTester tester) async {
     // Mock the Window to explicitly report a light platformBrightness.
     final TestWidgetsFlutterBinding binding = tester.binding;
