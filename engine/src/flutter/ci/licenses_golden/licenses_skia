@@ -1,4 +1,4 @@
-Signature: 0510abef966148a75bdddbd1f615bb6d
+Signature: 6fa97ccf305b88851475e533352abcb9
 
 UNUSED LICENSES:
 
@@ -1933,7 +1933,6 @@ FILE: ../../../third_party/skia/src/gpu/GrRectanizerSkyline.h
 FILE: ../../../third_party/skia/src/gpu/GrResourceCache.cpp
 FILE: ../../../third_party/skia/src/gpu/GrResourceCache.h
 FILE: ../../../third_party/skia/src/gpu/GrSurfacePriv.h
-FILE: ../../../third_party/skia/src/gpu/GrTexturePriv.h
 FILE: ../../../third_party/skia/src/gpu/GrTracing.h
 FILE: ../../../third_party/skia/src/gpu/GrXferProcessor.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrBicubicEffect.cpp
@@ -3941,8 +3940,6 @@ FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DCommandList.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DCommandList.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DCommandSignature.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DCommandSignature.h
-FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DConstantRingBuffer.cpp
-FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DConstantRingBuffer.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DCpuDescriptorManager.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DCpuDescriptorManager.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DDescriptorHeap.cpp
@@ -5296,6 +5293,8 @@ FILE: ../../../third_party/skia/modules/skparagraph/gm/simple_gm.cpp
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGGeometryEffect.h
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGGeometryEffect.cpp
 FILE: ../../../third_party/skia/modules/skshaper/src/SkShaper_coretext.cpp
+FILE: ../../../third_party/skia/modules/skshaper/src/SkUnicode.h
+FILE: ../../../third_party/skia/modules/skshaper/src/SkUnicode_icu.cpp
 FILE: ../../../third_party/skia/samplecode/Sample3D.cpp
 FILE: ../../../third_party/skia/samplecode/SampleFitCubicToCircle.cpp
 FILE: ../../../third_party/skia/samplecode/SampleSimpleStroker.cpp
