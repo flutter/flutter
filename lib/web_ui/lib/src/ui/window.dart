@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 // Synced 2019-05-30T14:20:57.841444.
 
-// @dart = 2.9
+// @dart = 2.10
 part of ui;
 
 /// Signature of callbacks that have no arguments and return no data.
