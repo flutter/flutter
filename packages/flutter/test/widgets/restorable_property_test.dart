@@ -58,7 +58,7 @@ void main() {
 
   testWidgets('restart and restore', (WidgetTester tester) async {
     await tester.pumpWidget(const RootRestorationScope(
-      restorationId: RestorationId('root-child'),
+      restorationId: 'root-child',
       child: _RestorableWidget(),
     ));
 
@@ -113,7 +113,7 @@ void main() {
 
   testWidgets('restore to null', (WidgetTester tester) async {
     await tester.pumpWidget(const RootRestorationScope(
-      restorationId: RestorationId('root-child'),
+      restorationId: 'root-child',
       child: _RestorableWidget(),
     ));
 
@@ -149,7 +149,7 @@ void main() {
 
   testWidgets('restore to older state', (WidgetTester tester) async {
     await tester.pumpWidget(const RootRestorationScope(
-      restorationId: RestorationId('root-child'),
+      restorationId: 'root-child',
       child: _RestorableWidget(),
     ));
 
@@ -211,7 +211,7 @@ void main() {
 
   testWidgets('call notifiers when value changes', (WidgetTester tester) async {
     await tester.pumpWidget(const RootRestorationScope(
-      restorationId: RestorationId('root-child'),
+      restorationId: 'root-child',
       child: _RestorableWidget(),
     ));
 
@@ -300,7 +300,7 @@ void main() {
 
   testWidgets('RestorableValue calls didUpdateValue', (WidgetTester tester) async {
     await tester.pumpWidget(const RootRestorationScope(
-      restorationId: RestorationId('root-child'),
+      restorationId: 'root-child',
       child: _RestorableWidget(),
     ));
 
@@ -366,13 +366,13 @@ class _RestorableWidgetState extends State<_RestorableWidget> with RestorationMi
 
   @override
   void restoreState(RestorationBucket oldBucket) {
-    registerForRestoration(numValue, const RestorationId('num'));
-    registerForRestoration(doubleValue, const RestorationId('double'));
-    registerForRestoration(intValue, const RestorationId('int'));
-    registerForRestoration(stringValue, const RestorationId('string'));
-    registerForRestoration(boolValue, const RestorationId('bool'));
-    registerForRestoration(controllerValue, const RestorationId('controller'));
-    registerForRestoration(objectValue, const RestorationId('object'));
+    registerForRestoration(numValue, 'num');
+    registerForRestoration(doubleValue, 'double');
+    registerForRestoration(intValue, 'int');
+    registerForRestoration(stringValue, 'string');
+    registerForRestoration(boolValue,'bool');
+    registerForRestoration(controllerValue, 'controller');
+    registerForRestoration(objectValue, 'object');
   }
 
   void setProperties(VoidCallback callback) {
@@ -385,5 +385,5 @@ class _RestorableWidgetState extends State<_RestorableWidget> with RestorationMi
   }
 
   @override
-  RestorationId get restorationId => const RestorationId('widget');
+  String get restorationId => 'widget';
 }

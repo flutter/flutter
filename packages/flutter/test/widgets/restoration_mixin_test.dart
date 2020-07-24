@@ -12,7 +12,7 @@ import 'restoration.dart';
 
 void main() {
   testWidgets('claims bucket', (WidgetTester tester) async {
-    const RestorationId id = RestorationId('hello world 1234');
+    const String id = 'hello world 1234';
     final MockRestorationManager manager = MockRestorationManager();
     final Map<String, dynamic> rawData = <String, dynamic>{};
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
@@ -29,10 +29,10 @@ void main() {
     manager.doSerialization();
 
     final _TestRestorableWidgetState state = tester.state(find.byType(_TestRestorableWidget));
-    expect(state.bucket.id, id);
-    expect(rawData[childrenMapKey].containsKey(id.value), isTrue);
+    expect(state.bucket.restorationId, id);
+    expect(rawData[childrenMapKey].containsKey(id), isTrue);
     expect(state.property.value, 10);
-    expect(rawData[childrenMapKey][id.value][valuesMapKey]['foo'], 10);
+    expect(rawData[childrenMapKey][id][valuesMapKey]['foo'], 10);
     expect(state.property.log, <String>['createDefaultValue', 'initWithValue', 'toPrimitives']);
     expect(state.toogleBucketLog, isEmpty);
     expect(state.restoreStateLog.single, isNull);
@@ -46,14 +46,14 @@ void main() {
       UnmanagedRestorationScope(
         bucket: root,
         child: const _TestRestorableWidget(
-          restorationId: RestorationId('child1'),
+          restorationId: 'child1',
         ),
       ),
     );
     manager.doSerialization();
 
     final _TestRestorableWidgetState state = tester.state(find.byType(_TestRestorableWidget));
-    expect(state.bucket.id, const RestorationId('child1'));
+    expect(state.bucket.restorationId, 'child1');
     expect(state.property.value, 22);
     expect(state.property.log, <String>['fromPrimitives', 'initWithValue']);
     expect(state.toogleBucketLog, isEmpty);
@@ -68,7 +68,7 @@ void main() {
       UnmanagedRestorationScope(
         bucket: root,
         child: const _TestRestorableWidget(
-          restorationId: RestorationId('child1'),
+          restorationId: 'child1',
         ),
       ),
     );
@@ -76,8 +76,8 @@ void main() {
 
     // Claimed existing bucket with data.
     final _TestRestorableWidgetState state = tester.state(find.byType(_TestRestorableWidget));
-    expect(state.bucket.id, const RestorationId('child1'));
-    expect(state.bucket.read<int>(const RestorationId('foo')), 22);
+    expect(state.bucket.restorationId, 'child1');
+    expect(state.bucket.read<int>('foo'), 22);
     final RestorationBucket bucket = state.bucket;
 
     state.property.log.clear();
@@ -88,14 +88,14 @@ void main() {
       UnmanagedRestorationScope(
         bucket: root,
         child: const _TestRestorableWidget(
-          restorationId: RestorationId('something else'),
+          restorationId: 'something else',
         ),
       ),
     );
     manager.doSerialization();
 
-    expect(state.bucket.id, const RestorationId('something else'));
-    expect(state.bucket.read<int>(const RestorationId('foo')), 22);
+    expect(state.bucket.restorationId, 'something else');
+    expect(state.bucket.read<int>('foo'), 22);
     expect(state.bucket, same(bucket));
     expect(state.property.log, isEmpty);
     expect(state.restoreStateLog, isEmpty);
@@ -110,7 +110,7 @@ void main() {
       UnmanagedRestorationScope(
         bucket: root,
         child: const _TestRestorableWidget(
-          restorationId: RestorationId('child1'),
+          restorationId: 'child1',
         ),
       ),
     );
@@ -118,19 +118,19 @@ void main() {
 
     // Claimed existing bucket with data.
     final _TestRestorableWidgetState state = tester.state(find.byType(_TestRestorableWidget));
-    expect(state.bucket.id, const RestorationId('child1'));
-    expect(state.bucket.read<int>(const RestorationId('foo')), 22);
+    expect(state.bucket.restorationId, 'child1');
+    expect(state.bucket.read<int>('foo'), 22);
     final RestorationBucket bucket = state.bucket;
 
     state.property.log.clear();
     state.restoreStateLog.clear();
 
     // Rename the existing bucket.
-    state.injectId(const RestorationId('newnewnew'));
+    state.injectId('newnewnew');
     manager.doSerialization();
 
-    expect(state.bucket.id, const RestorationId('newnewnew'));
-    expect(state.bucket.read<int>(const RestorationId('foo')), 22);
+    expect(state.bucket.restorationId, 'newnewnew');
+    expect(state.bucket.read<int>('foo'), 22);
     expect(state.bucket, same(bucket));
     expect(state.property.log, isEmpty);
     expect(state.restoreStateLog, isEmpty);
@@ -147,7 +147,7 @@ void main() {
       UnmanagedRestorationScope(
         bucket: root,
         child: const _TestRestorableWidget(
-          restorationId: RestorationId('child1'),
+          restorationId: 'child1',
         ),
       ),
     );
@@ -194,13 +194,13 @@ void main() {
       UnmanagedRestorationScope(
         bucket: root,
         child: const _TestRestorableWidget(
-          restorationId: RestorationId('child1'),
+          restorationId: 'child1',
         ),
       ),
     );
     manager.doSerialization();
     expect(state.bucket, isNotNull);
-    expect(state.bucket.id, const RestorationId('child1'));
+    expect(state.bucket.restorationId, 'child1');
     expect(state.property.value, 10);
     expect(rawData[childrenMapKey]['child1'][valuesMapKey]['foo'], 10);
     expect(state.property.log, <String>['toPrimitives']);
@@ -238,7 +238,7 @@ void main() {
     await tester.pumpWidget(
       _TestRestorableWidget(
         key: key,
-        restorationId: const RestorationId('child1'),
+        restorationId: 'child1',
       ),
     );
     final _TestRestorableWidgetState state = tester.state(find.byType(_TestRestorableWidget));
@@ -258,13 +258,13 @@ void main() {
         bucket: root,
         child: _TestRestorableWidget(
           key: key,
-          restorationId: const RestorationId('child1'),
+          restorationId: 'child1',
         ),
       ),
     );
     manager.doSerialization();
     expect(state.bucket, isNotNull);
-    expect(state.bucket.id, const RestorationId('child1'));
+    expect(state.bucket.restorationId, 'child1');
     expect(state.property.value, 10);
     expect(rawData[childrenMapKey]['child1'][valuesMapKey]['foo'], 10);
     expect(state.property.log, <String>['toPrimitives']);
@@ -280,7 +280,7 @@ void main() {
     await tester.pumpWidget(
       _TestRestorableWidget(
         key: key,
-        restorationId: const RestorationId('child1'),
+        restorationId: 'child1',
       ),
     );
     manager.doSerialization();
@@ -304,10 +304,10 @@ void main() {
           textDirection: TextDirection.ltr,
           children: <Widget>[
             RestorationScope(
-              restorationId: const RestorationId('fixed'),
+              restorationId: 'fixed',
               child: _TestRestorableWidget(
                 key: key,
-                restorationId: const RestorationId('moving-child'),
+                restorationId: 'moving-child',
               ),
             ),
           ],
@@ -316,13 +316,13 @@ void main() {
     );
     manager.doSerialization();
     final _TestRestorableWidgetState state = tester.state(find.byType(_TestRestorableWidget));
-    expect(state.bucket.id, const RestorationId('moving-child'));
+    expect(state.bucket.restorationId, 'moving-child');
     expect(rawData[childrenMapKey]['fixed'][childrenMapKey].containsKey('moving-child'), isTrue);
     final RestorationBucket bucket = state.bucket;
     state.property.log.clear();
     state.restoreStateLog.clear();
 
-    state.bucket.write(const RestorationId('value'), 11);
+    state.bucket.write('value', 11);
     manager.doSerialization();
 
     // Move widget.
@@ -333,21 +333,21 @@ void main() {
           textDirection: TextDirection.ltr,
           children: <Widget>[
             RestorationScope(
-              restorationId: const RestorationId('fixed'),
+              restorationId: 'fixed',
               child: Container(),
             ),
             _TestRestorableWidget(
               key: key,
-              restorationId: const RestorationId('moving-child'),
+              restorationId: 'moving-child',
             ),
           ],
         ),
       ),
     );
     manager.doSerialization();
-    expect(state.bucket.id, const RestorationId('moving-child'));
+    expect(state.bucket.restorationId, 'moving-child');
     expect(state.bucket, same(bucket));
-    expect(state.bucket.read<int>(const RestorationId('value')), 11);
+    expect(state.bucket.read<int>('value'), 11);
     expect(state.property.log, isEmpty);
     expect(state.toogleBucketLog, isEmpty);
     expect(state.restoreStateLog, isEmpty);
@@ -364,15 +364,15 @@ void main() {
       UnmanagedRestorationScope(
         bucket: root,
         child: const _TestRestorableWidget(
-          restorationId: RestorationId('child1'),
+          restorationId: 'child1',
         ),
       ),
     );
     manager.doSerialization();
     final _TestRestorableWidgetState state = tester.state(find.byType(_TestRestorableWidget));
-    expect(state.bucket.id, const RestorationId('child1'));
+    expect(state.bucket.restorationId, 'child1');
     expect(state.property.value, 10);  // Initialized to default.
-    expect(state.bucket.read<int>(const RestorationId('foo')), 10);
+    expect(state.bucket.read<int>('foo'), 10);
     final RestorationBucket bucket = state.bucket;
     state.property.log.clear();
     state.restoreStateLog.clear();
@@ -385,16 +385,16 @@ void main() {
       UnmanagedRestorationScope(
         bucket: root,
         child: const _TestRestorableWidget(
-          restorationId: RestorationId('child1'),
+          restorationId: 'child1',
         ),
       ),
     );
 
     // Bucket has been replaced.
     expect(state.bucket, isNot(same(bucket)));
-    expect(state.bucket.id, const RestorationId('child1'));
+    expect(state.bucket.restorationId, 'child1');
     expect(state.property.value, 22);  // Restored value.
-    expect(state.bucket.read<int>(const RestorationId('foo')), 22);
+    expect(state.bucket.read<int>('foo'), 22);
     expect(state.restoreStateLog.single, bucket);
     expect(state.toogleBucketLog, isEmpty);
     expect(state.property.log, <String>['fromPrimitives', 'initWithValue']);
@@ -403,9 +403,9 @@ void main() {
   testWidgets('restartAndRestore', (WidgetTester tester) async {
     await tester.pumpWidget(
       const RootRestorationScope(
-        restorationId: RestorationId('root-child'),
+        restorationId: 'root-child',
         child: _TestRestorableWidget(
-          restorationId: RestorationId('widget'),
+          restorationId: 'widget',
         ),
       )
     );
@@ -442,9 +442,9 @@ void main() {
   testWidgets('restore while running', (WidgetTester tester) async {
     await tester.pumpWidget(
       const RootRestorationScope(
-        restorationId: RestorationId('root-child'),
+        restorationId: 'root-child',
         child: _TestRestorableWidget(
-          restorationId: RestorationId('widget'),
+          restorationId: 'widget',
         ),
       ),
     );
@@ -481,9 +481,9 @@ void main() {
   testWidgets('can register additional property outside of restoreState', (WidgetTester tester) async {
     await tester.pumpWidget(
       const RootRestorationScope(
-        restorationId: RestorationId('root-child'),
+        restorationId: 'root-child',
         child: _TestRestorableWidget(
-          restorationId: RestorationId('widget'),
+          restorationId: 'widget',
         ),
       ),
     );
@@ -518,9 +518,9 @@ void main() {
   testWidgets('cannot register same property twice', (WidgetTester tester) async {
     await tester.pumpWidget(
       const RootRestorationScope(
-        restorationId: RestorationId('root-child'),
+        restorationId: 'root-child',
         child: _TestRestorableWidget(
-          restorationId: RestorationId('widget'),
+          restorationId: 'widget',
         ),
       ),
     );
@@ -534,9 +534,9 @@ void main() {
   testWidgets('cannot register under ID that is already in use', (WidgetTester tester) async {
     await tester.pumpWidget(
       const RootRestorationScope(
-        restorationId: RestorationId('root-child'),
+        restorationId: 'root-child',
         child: _TestRestorableWidget(
-          restorationId: RestorationId('widget'),
+          restorationId: 'widget',
         ),
       ),
     );
@@ -548,9 +548,9 @@ void main() {
   testWidgets('data of disabled property is not stored', (WidgetTester tester) async {
     await tester.pumpWidget(
       const RootRestorationScope(
-        restorationId: RestorationId('root-child'),
+        restorationId: 'root-child',
         child: _TestRestorableWidget(
-          restorationId: RestorationId('widget'),
+          restorationId: 'widget',
         ),
       ),
     );
@@ -561,7 +561,7 @@ void main() {
     });
     await tester.pump();
     expect(state.property.value, 30);
-    expect(state.bucket.read<int>(const RestorationId('foo')), 30);
+    expect(state.bucket.read<int>('foo'), 30);
     _clearLogs(state);
 
     state.setProperties(() {
@@ -569,14 +569,14 @@ void main() {
     });
     await tester.pump();
     expect(state.property.value, 30);
-    expect(state.bucket.contains(const RestorationId('foo')), isFalse);
+    expect(state.bucket.contains('foo'), isFalse);
     expect(state.property.log, isEmpty);
 
     state.setProperties(() {
       state.property.value = 40;
     });
     await tester.pump();
-    expect(state.bucket.contains(const RestorationId('foo')), isFalse);
+    expect(state.bucket.contains('foo'), isFalse);
     expect(state.property.log, isEmpty);
 
     await tester.restartAndRestore();
@@ -588,9 +588,9 @@ void main() {
   testWidgets('Enabling property stores its data again', (WidgetTester tester) async {
     await tester.pumpWidget(
       const RootRestorationScope(
-        restorationId: RestorationId('root-child'),
+        restorationId: 'root-child',
         child: _TestRestorableWidget(
-          restorationId: RestorationId('widget'),
+          restorationId: 'widget',
         ),
       ),
     );
@@ -601,20 +601,20 @@ void main() {
       state.property.enabled = false;
     });
     await tester.pump();
-    expect(state.bucket.contains(const RestorationId('foo')), isFalse);
+    expect(state.bucket.contains('foo'), isFalse);
     state.setProperties(() {
       state.property.value = 40;
     });
     await tester.pump();
     expect(state.property.value, 40);
-    expect(state.bucket.contains(const RestorationId('foo')), isFalse);
+    expect(state.bucket.contains('foo'), isFalse);
     expect(state.property.log, isEmpty);
 
     state.setProperties(() {
       state.property.enabled = true;
     });
     await tester.pump();
-    expect(state.bucket.read<int>(const RestorationId('foo')), 40);
+    expect(state.bucket.read<int>('foo'), 40);
     expect(state.property.log, <String>['toPrimitives']);
 
     await tester.restartAndRestore();
@@ -626,9 +626,9 @@ void main() {
   testWidgets('Unregistering a property removes its data', (WidgetTester tester) async {
     await tester.pumpWidget(
       const RootRestorationScope(
-        restorationId: RestorationId('root-child'),
+        restorationId: 'root-child',
         child: _TestRestorableWidget(
-          restorationId: RestorationId('widget'),
+          restorationId: 'widget',
         ),
       ),
     );
@@ -636,25 +636,25 @@ void main() {
     state.registerAdditionalProperty();
     await tester.pump();
     expect(state.additionalProperty.value, 11);
-    expect(state.bucket.read<int>(const RestorationId('additional')), 11);
+    expect(state.bucket.read<int>('additional'), 11);
     state.unregisterAdditionalProperty();
     await tester.pump();
-    expect(state.bucket.contains(const RestorationId('additional')), isFalse);
+    expect(state.bucket.contains('additional'), isFalse);
     expect(() => state.additionalProperty.value, throwsAssertionError); // No longer registered.
 
     // Can register the same property again.
     state.registerAdditionalProperty();
     await tester.pump();
     expect(state.additionalProperty.value, 11);
-    expect(state.bucket.read<int>(const RestorationId('additional')), 11);
+    expect(state.bucket.read<int>('additional'), 11);
   });
 
   testWidgets('Disposing a property unregisters it, but keeps data', (WidgetTester tester) async {
     await tester.pumpWidget(
       const RootRestorationScope(
-        restorationId: RestorationId('root-child'),
+        restorationId: 'root-child',
         child: _TestRestorableWidget(
-          restorationId: RestorationId('widget'),
+          restorationId: 'widget',
         ),
       ),
     );
@@ -662,11 +662,11 @@ void main() {
     state.registerAdditionalProperty();
     await tester.pump();
     expect(state.additionalProperty.value, 11);
-    expect(state.bucket.read<int>(const RestorationId('additional')), 11);
+    expect(state.bucket.read<int>('additional'), 11);
 
     state.additionalProperty.dispose();
     await tester.pump();
-    expect(state.bucket.read<int>(const RestorationId('additional')), 11);
+    expect(state.bucket.read<int>('additional'), 11);
 
     // Can register property under same id again.
     state.additionalProperty = _TestRestorableProperty(22);
@@ -674,7 +674,7 @@ void main() {
     await tester.pump();
 
     expect(state.additionalProperty.value, 11); // Old value restored.
-    expect(state.bucket.read<int>(const RestorationId('additional')), 11);
+    expect(state.bucket.read<int>('additional'), 11);
   });
 
   test('RestorableProperty throws after disposed', () {
@@ -695,7 +695,7 @@ class _TestRestorableWidget extends StatefulWidget {
 
   const _TestRestorableWidget({Key key, this.restorationId}) : super(key: key);
 
-  final RestorationId restorationId;
+  final String restorationId;
 
   @override
   State<_TestRestorableWidget> createState() => _TestRestorableWidgetState();
@@ -713,9 +713,9 @@ class _TestRestorableWidgetState extends State<_TestRestorableWidget> with Resto
   @override
   void restoreState(RestorationBucket oldBucket) {
     restoreStateLog.add(oldBucket);
-    registerForRestoration(property, const RestorationId('foo'));
+    registerForRestoration(property, 'foo');
     if (_rerigisterAdditionalProperty && additionalProperty != null) {
-      registerForRestoration(additionalProperty, const RestorationId('additional'));
+      registerForRestoration(additionalProperty, 'additional');
     }
   }
 
@@ -739,15 +739,15 @@ class _TestRestorableWidgetState extends State<_TestRestorableWidget> with Resto
 
   void setProperties(VoidCallback fn) => setState(fn);
 
-  RestorationId _injectedId;
-  void injectId(RestorationId id) {
+  String _injectedId;
+  void injectId(String id) {
     _injectedId = id;
     didUpdateRestorationId();
   }
 
   void registerAdditionalProperty({bool reregister = true}) {
     additionalProperty ??= _TestRestorableProperty(11);
-    registerForRestoration(additionalProperty, const RestorationId('additional'));
+    registerForRestoration(additionalProperty, 'additional');
     _rerigisterAdditionalProperty = reregister;
   }
 
@@ -756,11 +756,11 @@ class _TestRestorableWidgetState extends State<_TestRestorableWidget> with Resto
   }
 
   void registerPropertyUnderSameId() {
-    registerForRestoration(_TestRestorableProperty(11), const RestorationId('foo'));
+    registerForRestoration(_TestRestorableProperty(11), 'foo');
   }
 
   @override
-  RestorationId get restorationId => _injectedId ?? widget.restorationId;
+  String get restorationId => _injectedId ?? widget.restorationId;
 }
 
 Map<String, dynamic> _createRawDataSet() {

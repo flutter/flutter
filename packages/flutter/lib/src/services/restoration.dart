@@ -40,14 +40,13 @@ typedef _BucketVisitor = void Function(RestorationBucket bucket);
 /// [rootBucket] provided by this [RestorationManager]). The owner of a bucket
 /// may store arbitrary values in the bucket as long as they can be serialized
 /// with the [StandardMessageCodec]. The values are stored in the bucket under a
-/// given [RestorationId] as key. The [RestorationId]s used to store values must
-/// be unique within a given bucket. To access the stored value again during
-/// state restoration, the same [RestorationId] must be provided again. The
-/// owner of the bucket may also make the bucket available to other entities so
-/// that they can claim child buckets from it for their own restoration needs.
-/// Within a bucket, child buckets are also identified by unique
-/// [RestorationId]s. The restoration ID must be provided when claiming a child
-/// bucket.
+/// given restoration ID as key. A restoration ID is a [Sting] that must be
+/// unique within a given bucket. To access the stored value again during state
+/// restoration, the same restoration ID must be provided again. The owner of
+/// the bucket may also make the bucket available to other entities so that they
+/// can claim child buckets from it for their own restoration needs. Within a
+/// bucket, child buckets are also identified by unique restoration IDs. The
+/// restoration ID must be provided when claiming a child bucket.
 ///
 /// When restoration data is provided to the [RestorationManager] (e.g. after
 /// the application relaunched when foregrounded again), the bucket hierarchy
@@ -100,8 +99,6 @@ typedef _BucketVisitor = void Function(RestorationBucket bucket);
 ///  * [ServicesBinding.restorationManager], which holds the singleton instance
 ///    of the [RestorationManager] for the currently running application.
 ///  * [RestorationBucket], which make up the restoration data hierarchy.
-///  * [RestorationId], which identifies a value or a child uniquely within a
-///    [RestorationBucket].
 ///  * [RestorationMixin], which uses [RestorationBucket]s behind the scenes
 ///    to make [State] objects of [StatefulWidget]s restorable.
 class RestorationManager extends ChangeNotifier {
@@ -320,39 +317,6 @@ class RestorationManager extends ChangeNotifier {
   }
 }
 
-/// Identifies a piece of data within or a child of a [RestorationBucket].
-///
-/// The [value] of a [RestorationId]s must be unique within a given
-/// [RestorationBucket]. [RestorationId] objects with the same [value] are
-/// considered equal.
-@immutable
-class RestorationId {
-  /// Creates a [RestorationId].
-  ///
-  /// The provided `value` must not be null.
-  const RestorationId(this.value) : assert(value != null);
-
-  /// The value of the [RestorationId].
-  ///
-  /// Two [RestorationId] objects with the same [value] are considered equal.
-  final String value;
-
-  @override
-  bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
-      return false;
-    return other is RestorationId && other.value == value;
-  }
-
-  @override
-  int get hashCode => value.hashCode;
-
-  @override
-  String toString() {
-    return '${objectRuntimeType(this, 'RestorationId')}($value)';
-  }
-}
-
 /// A [RestorationBucket] holds pieces of the restoration data that a part of
 /// the application needs to restore its state.
 ///
@@ -365,11 +329,11 @@ class RestorationId {
 /// restore its current state at a later point in time.
 ///
 /// A [RestorationBucket] stores restoration data as key-value pairs. The key is
-/// a [RestorationId] that identifies a piece of data uniquely within a bucket.
-/// The value can be anything that is serializable via the
-/// [StandardMessageCodec]. Furthermore, a [RestorationBucket] may have child
-/// buckets, which are identified within their parent via a unique
-/// [RestorationId] as well.
+/// a [String] representing a restoration ID that identifies a piece of data
+/// uniquely within a bucket. The value can be anything that is serializable via
+/// the [StandardMessageCodec]. Furthermore, a [RestorationBucket] may have
+/// child buckets, which are identified within their parent via a unique
+/// restoration ID as well.
 ///
 /// During state restoration, the data previously stored in the
 /// [RestorationBucket] hierarchy will be made available again to the
@@ -385,11 +349,11 @@ class RestorationId {
 /// restoration bucket, it typically obtains a child bucket from a parent by
 /// calling [claimChild]. If no parent is available,
 /// [RestorationManager.rootBucket] may be used as a parent. When claiming a
-/// child, the claimer must provide the [RestorationId] of the child it would
-/// like to own. A child bucket with a given [RestorationId] can at most have
+/// child, the claimer must provide the restoration ID of the child it would
+/// like to own. A child bucket with a given restoration ID can at most have
 /// one owner. If another owner tries to claim a bucket with the same ID from
 /// the same parent, an exception is thrown (see discussion in [claimChild]).
-/// The [RestorationId]s that a given owner uses to claim a child (and to store
+/// The restoration IDs that a given owner uses to claim a child (and to store
 /// data in that child, see below) must be stable across app launches to ensure
 /// that after the app restarts the owner can retrieve the same data again that
 /// it stored during a previous run.
@@ -444,12 +408,12 @@ class RestorationBucket extends ChangeNotifier {
   /// available, [RestorationManager.rootBucket] may be used as a parent.
   /// {@endtemplate}
   ///
-  /// The restoration `id` must not be null.
+  /// The `restorationId` must not be null.
   RestorationBucket.empty({
-    @required RestorationId id,
+    @required String restorationId,
     @required Object debugOwner,
-  }) : assert(id != null),
-       _id = id,
+  }) : assert(restorationId != null),
+       _restorationId = restorationId,
        _rawData = <String, dynamic>{} {
     assert(() {
       _debugOwner = debugOwner;
@@ -467,7 +431,7 @@ class RestorationBucket extends ChangeNotifier {
   /// ```javascript
   /// {
   ///  'v': {  // key-value pairs
-  ///     // * key is the string representation of a [RestorationID]
+  ///     // * key is a string representation a restoration ID
   ///     // * value is any primitive that can be encoded with [StandardMessageCodec]
   ///    '<restoration-id>: <Object>,
   ///   },
@@ -486,7 +450,7 @@ class RestorationBucket extends ChangeNotifier {
   }) : assert(manager != null),
        _manager = manager,
        _rawData = rawData ?? <dynamic, dynamic>{},
-       _id = const RestorationId('root') {
+       _restorationId = 'root' {
     assert(() {
       _debugOwner = manager;
       return true;
@@ -502,18 +466,18 @@ class RestorationBucket extends ChangeNotifier {
   ///
   /// {@macro flutter.services.restoration.bucketcreation}
   ///
-  /// The `id` and `parent` argument must not be null.
+  /// The `restorationId` and `parent` argument must not be null.
   RestorationBucket.child({
-    @required RestorationId id,
+    @required String restorationId,
     @required RestorationBucket parent,
     @required Object debugOwner,
-  }) : assert(id != null),
+  }) : assert(restorationId != null),
        assert(parent != null),
-       assert(parent._rawChildren[id.value] != null),
+       assert(parent._rawChildren[restorationId] != null),
        _manager = parent._manager,
        _parent = parent,
-       _rawData = parent._rawChildren[id.value] as Map<dynamic, dynamic>,
-       _id = id {
+       _rawData = parent._rawChildren[restorationId] as Map<dynamic, dynamic>,
+       _restorationId = restorationId {
     assert(() {
       _debugOwner = debugOwner;
       return true;
@@ -539,16 +503,16 @@ class RestorationBucket extends ChangeNotifier {
   RestorationManager _manager;
   RestorationBucket _parent;
 
-  /// The [RestorationId] under which the bucket is currently stored in the
+  /// The restoration ID under which the bucket is currently stored in the
   /// parent of this bucket (or wants to be stored if it is currently
   /// parent-less).
   ///
   /// This value is never null.
-  RestorationId get id {
+  String get restorationId {
     assert(_debugAssertNotDisposed());
-    return _id;
+    return _restorationId;
   }
-  RestorationId _id;
+  String _restorationId;
 
   // Maps a restoration ID to the raw map representation of a child bucket.
   Map<dynamic, dynamic> get _rawChildren => _rawData.putIfAbsent(_childrenMapKey, () => <dynamic, dynamic>{}) as Map<dynamic, dynamic>;
@@ -601,7 +565,7 @@ class RestorationBucket extends ChangeNotifier {
   // Get and store values.
 
   /// Returns the value of type `P` that is currently stored in the bucket under
-  /// the provided `id`.
+  /// the provided `restorationId`.
   ///
   /// Returns null if nothing is stored under that id. Throws, if the value
   /// stored under the ID is not of type `P`.
@@ -611,15 +575,15 @@ class RestorationBucket extends ChangeNotifier {
   ///  * [write], which stores a value in the bucket.
   ///  * [remove], which removes a value from the bucket.
   ///  * [contains], which checks whether any value is stored under a given
-  ///    [RestorationId].
-  P read<P>(RestorationId id) {
+  ///    restoration ID.
+  P read<P>(String restorationId) {
     assert(_debugAssertNotDisposed());
-    assert(id != null);
-    return _rawValues[id.value] as P;
+    assert(restorationId != null);
+    return _rawValues[restorationId] as P;
   }
 
-  /// Stores the provided `value` of type `P` under the provided `id` in the
-  /// bucket.
+  /// Stores the provided `value` of type `P` under the provided `restorationId`
+  /// in the bucket.
   ///
   /// Any value that has previously been stored under that ID is overwritten
   /// with the new value. The provided `value` must be serializable with the
@@ -633,19 +597,19 @@ class RestorationBucket extends ChangeNotifier {
   ///  * [read], which retrieves a stored value from the bucket.
   ///  * [remove], which removes a value from the bucket.
   ///  * [contains], which checks whether any value is stored under a given
-  ///    [RestorationId].
-  void write<P>(RestorationId id, P value) {
+  ///    restoration ID.
+  void write<P>(String restorationId, P value) {
     assert(_debugAssertNotDisposed());
-    assert(id != null);
+    assert(restorationId != null);
     assert(debugIsSerializableForRestoration(value));
-    if (_rawValues[id.value] != value || !_rawValues.containsKey(id.value)) {
-      _rawValues[id.value] = value;
+    if (_rawValues[restorationId] != value || !_rawValues.containsKey(restorationId)) {
+      _rawValues[restorationId] = value;
       _markNeedsSerialization();
     }
   }
 
-  /// Deletes the value currently stored under the provided `id` from the
-  /// bucket.
+  /// Deletes the value currently stored under the provided `restorationId` from
+  /// the bucket.
   ///
   /// The value removed from the bucket is casted to `P` and returned. If no
   /// value was stored under that id, null is returned.
@@ -655,12 +619,12 @@ class RestorationBucket extends ChangeNotifier {
   ///  * [read], which retrieves a stored value from the bucket.
   ///  * [write], which stores a value in the bucket.
   ///  * [contains], which checks whether any value is stored under a given
-  ///    [RestorationId].
-  P remove<P>(RestorationId id) {
+  ///    restoration ID.
+  P remove<P>(String restorationId) {
     assert(_debugAssertNotDisposed());
-    assert(id != null);
-    final bool needsUpdate = _rawValues.containsKey(id.value);
-    final P result = _rawValues.remove(id.value) as P;
+    assert(restorationId != null);
+    final bool needsUpdate = _rawValues.containsKey(restorationId);
+    final P result = _rawValues.remove(restorationId) as P;
     if (_rawValues.isEmpty) {
       _rawData.remove(_valuesMapKey);
     }
@@ -670,29 +634,31 @@ class RestorationBucket extends ChangeNotifier {
     return result;
   }
 
-  /// Checks whether a value stored in the bucket under the provided `id`.
+  /// Checks whether a value stored in the bucket under the provided
+  /// `restorationId`.
   ///
   /// See also:
   ///
   ///  * [read], which retrieves a stored value from the bucket.
   ///  * [write], which stores a value in the bucket.
   ///  * [remove], which removes a value from the bucket.
-  bool contains(RestorationId id) {
+  bool contains(String restorationId) {
     assert(_debugAssertNotDisposed());
-    assert(id != null);
-    return _rawValues.containsKey(id.value);
+    assert(restorationId != null);
+    return _rawValues.containsKey(restorationId);
   }
 
   // Child management.
 
   // The restoration IDs and associated buckets of children that have been
   // claimed via [claimChild].
-  final Map<RestorationId, RestorationBucket> _claimedChildren = <RestorationId, RestorationBucket>{};
+  final Map<String, RestorationBucket> _claimedChildren = <String, RestorationBucket>{};
   // Newly created child buckets whose restoration ID is still in use, see
   // comment in [claimChild] for details.
-  final Map<RestorationId, List<RestorationBucket>> _childrenToAdd = <RestorationId, List<RestorationBucket>>{};
+  final Map<String, List<RestorationBucket>> _childrenToAdd = <String, List<RestorationBucket>>{};
 
-  /// Claims ownership of the child with the provided `id` from this bucket.
+  /// Claims ownership of the child with the provided `restorationId` from this
+  /// bucket.
   ///
   /// If the application is getting restored to a previous state, the bucket
   /// will contain all the data that was previously stored in the bucket.
@@ -704,17 +670,17 @@ class RestorationBucket extends ChangeNotifier {
   /// values. Whenever the information that the claimer needs to restore its
   /// state changes, the data in the bucket should be updated to reflect that.
   ///
-  /// A child bucket with a given `id` can only have one owner. If another owner
-  /// claims a child bucket with the same `id` an exception will be thrown at
-  /// the end of the current frame unless the previous owner has either deleted
-  /// its bucket by calling [dispose] or has moved it to a new parent via
-  /// [adoptChild].
+  /// A child bucket with a given `restorationId` can only have one owner. If
+  /// another owner claims a child bucket with the same `restorationId` an
+  /// exception will be thrown at the end of the current frame unless the
+  /// previous owner has either deleted its bucket by calling [dispose] or has
+  /// moved it to a new parent via [adoptChild].
   ///
   /// When the returned bucket is no longer needed, it must be [dispose]d to
   /// delete the information stored in it from the app's restoration data.
-  RestorationBucket claimChild(RestorationId id, {@required Object debugOwner}) {
+  RestorationBucket claimChild(String restorationId, {@required Object debugOwner}) {
     assert(_debugAssertNotDisposed());
-    assert(id != null);
+    assert(restorationId != null);
     // There are three cases to consider:
     // 1. Claiming an ID that has already been claimed.
     // 2. Claiming an ID that doesn't yet exist in [_rawChildren].
@@ -730,23 +696,23 @@ class RestorationBucket extends ChangeNotifier {
     // [_rawChildren].
 
     // Case 1+2: Adopt and return an empty bucket.
-    if (_claimedChildren.containsKey(id) || !_rawChildren.containsKey(id.value)) {
+    if (_claimedChildren.containsKey(restorationId) || !_rawChildren.containsKey(restorationId)) {
       final RestorationBucket child = RestorationBucket.empty(
         debugOwner: debugOwner,
-        id: id,
+        restorationId: restorationId,
       );
       adoptChild(child);
       return child;
     }
 
     // Case 3: Return bucket wrapping the existing data.
-    assert(_rawChildren[id.value] != null);
+    assert(_rawChildren[restorationId] != null);
     final RestorationBucket child = RestorationBucket.child(
-      id: id,
+      restorationId: restorationId,
       parent: this,
       debugOwner: debugOwner,
     );
-    _claimedChildren[id] = child;
+    _claimedChildren[restorationId] = child;
     return child;
   }
 
@@ -759,7 +725,7 @@ class RestorationBucket extends ChangeNotifier {
   /// existing bucket must give it up (e.g. by moving the child bucket to a
   /// different parent or by disposing it) before the end of the current frame.
   /// Otherwise an exception indicating the illegal use of duplicated
-  /// [RestorationId]s will trigger in debug mode.
+  /// restoration IDs will trigger in debug mode.
   ///
   /// No-op if the provided bucket is already a child of this bucket.
   void adoptChild(RestorationBucket child) {
@@ -837,13 +803,13 @@ class RestorationBucket extends ChangeNotifier {
         ErrorSummary('Multiple owners claimed child RestorationBuckets with the same IDs.'),
         ErrorDescription('The following IDs were claimed multiple times from the parent $this:')
       ];
-      for (final MapEntry<RestorationId, List<RestorationBucket>> child in _childrenToAdd.entries) {
-        final RestorationId id = child.key;
+      for (final MapEntry<String, List<RestorationBucket>> child in _childrenToAdd.entries) {
+        final String id = child.key;
         final List<RestorationBucket> buckets = child.value;
         assert(buckets.isNotEmpty);
         assert(_claimedChildren.containsKey(id));
         error.addAll(<DiagnosticsNode>[
-          ErrorDescription(' * $id was claimed by:'),
+          ErrorDescription(' * "$id" was claimed by:'),
           ...buckets.map((RestorationBucket bucket) => ErrorDescription('   * ${bucket.debugOwner}')),
           ErrorDescription('   * ${_claimedChildren[id].debugOwner} (current owner)'),
         ]);
@@ -856,14 +822,14 @@ class RestorationBucket extends ChangeNotifier {
   void _removeChildData(RestorationBucket child) {
     assert(child != null);
     assert(child._parent == this);
-    if (_claimedChildren.remove(child.id) == child) {
-      _rawChildren.remove(child.id.value);
-      final List<RestorationBucket> pendingChildren = _childrenToAdd[child.id];
+    if (_claimedChildren.remove(child.restorationId) == child) {
+      _rawChildren.remove(child.restorationId);
+      final List<RestorationBucket> pendingChildren = _childrenToAdd[child.restorationId];
       if (pendingChildren != null) {
         final RestorationBucket toAdd = pendingChildren.removeLast();
         _finalizeAddChildData(toAdd);
         if (pendingChildren.isEmpty) {
-          _childrenToAdd.remove(child.id);
+          _childrenToAdd.remove(child.restorationId);
         }
       }
       if (_rawChildren.isEmpty) {
@@ -872,20 +838,20 @@ class RestorationBucket extends ChangeNotifier {
       _markNeedsSerialization();
       return;
     }
-    _childrenToAdd[child.id]?.remove(child);
-    if (_childrenToAdd[child.id]?.isEmpty == true) {
-      _childrenToAdd.remove(child.id);
+    _childrenToAdd[child.restorationId]?.remove(child);
+    if (_childrenToAdd[child.restorationId]?.isEmpty == true) {
+      _childrenToAdd.remove(child.restorationId);
     }
   }
 
   void _addChildData(RestorationBucket child) {
     assert(child != null);
     assert(child._parent == this);
-    if (_claimedChildren.containsKey(child.id)) {
+    if (_claimedChildren.containsKey(child.restorationId)) {
       // Delay addition until the end of the frame in the hopes that the current
       // owner of the child with the same ID will have given up that child by
       // then.
-      _childrenToAdd.putIfAbsent(child.id, () => <RestorationBucket>[]).add(child);
+      _childrenToAdd.putIfAbsent(child.restorationId, () => <RestorationBucket>[]).add(child);
       _markNeedsSerialization();
       return;
     }
@@ -894,10 +860,10 @@ class RestorationBucket extends ChangeNotifier {
   }
 
   void _finalizeAddChildData(RestorationBucket child) {
-    assert(_claimedChildren[child.id] == null);
-    assert(_rawChildren[child.id.value] == null);
-    _claimedChildren[child.id] = child;
-    _rawChildren[child.id.value] = child._rawData;
+    assert(_claimedChildren[child.restorationId] == null);
+    assert(_rawChildren[child.restorationId] == null);
+    _claimedChildren[child.restorationId] = child;
+    _rawChildren[child.restorationId] = child._rawData;
   }
 
   void _visitChildren(_BucketVisitor visitor, {bool concurrentModification = false}) {
@@ -911,8 +877,8 @@ class RestorationBucket extends ChangeNotifier {
 
   // Bucket management
 
-  /// Changes the [RestorationId] under which the bucket is stored in its parent
-  /// to `newId`.
+  /// Changes the restoration ID under which the bucket is stored in its parent
+  /// to `newRestorationId`.
   ///
   /// No-op if the bucket is already stored under the provided id.
   ///
@@ -920,15 +886,15 @@ class RestorationBucket extends ChangeNotifier {
   /// exception will be thrown at the end of the current frame unless the other
   /// owner has deleted its bucket by calling [dispose], [rename]ed it using
   /// another ID, or has moved it to a new parent via [adoptChild].
-  void rename(RestorationId newId) {
+  void rename(String newRestorationId) {
     assert(_debugAssertNotDisposed());
-    assert(newId != null);
+    assert(newRestorationId != null);
     assert(_parent != null);
-    if (newId == id) {
+    if (newRestorationId == restorationId) {
       return;
     }
     _parent._removeChildData(this);
-    _id = newId;
+    _restorationId = newRestorationId;
     _parent._addChildData(this);
   }
 
@@ -958,7 +924,7 @@ class RestorationBucket extends ChangeNotifier {
   }
 
   @override
-  String toString() => '${objectRuntimeType(this, 'RestorationBucket')}(id: $id, owner: $debugOwner)';
+  String toString() => '${objectRuntimeType(this, 'RestorationBucket')}(restorationId: $restorationId, owner: $debugOwner)';
 
   bool _debugDisposed = false;
   bool _debugAssertNotDisposed() {

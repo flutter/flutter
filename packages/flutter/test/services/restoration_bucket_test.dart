@@ -16,47 +16,47 @@ void main() {
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket bucket = RestorationBucket.root(manager: manager, rawData: rawData);
 
-    expect(bucket.id, const RestorationId('root'));
+    expect(bucket.restorationId, 'root');
     expect(bucket.debugOwner, manager);
 
     // Bucket contains expected values from rawData.
-    expect(bucket.read<int>(const RestorationId('value1')), 10);
-    expect(bucket.read<String>(const RestorationId('value2')), 'Hello');
-    expect(bucket.read<String>(const RestorationId('value3')), isNull); // Does not exist.
+    expect(bucket.read<int>('value1'), 10);
+    expect(bucket.read<String>('value2'), 'Hello');
+    expect(bucket.read<String>('value3'), isNull); // Does not exist.
     expect(manager.updateScheduled, isFalse);
 
     // Can overwrite existing value.
-    bucket.write<int>(const RestorationId('value1'), 22);
+    bucket.write<int>('value1', 22);
     expect(manager.updateScheduled, isTrue);
-    expect(bucket.read<int>(const RestorationId('value1')), 22);
+    expect(bucket.read<int>('value1'), 22);
     manager.doSerialization();
     expect(rawData[valuesMapKey]['value1'], 22);
     expect(manager.updateScheduled, isFalse);
 
     // Can add a new value.
-    bucket.write<bool>(const RestorationId('value3'), true);
+    bucket.write<bool>('value3', true);
     expect(manager.updateScheduled, isTrue);
-    expect(bucket.read<bool>(const RestorationId('value3')), true);
+    expect(bucket.read<bool>('value3'), true);
     manager.doSerialization();
     expect(rawData[valuesMapKey]['value3'], true);
     expect(manager.updateScheduled, isFalse);
 
     // Can remove existing value.
-    expect(bucket.remove<int>(const RestorationId('value1')), 22);
+    expect(bucket.remove<int>('value1'), 22);
     expect(manager.updateScheduled, isTrue);
-    expect(bucket.read<int>(const RestorationId('value1')), isNull); // Does not exist anymore.
+    expect(bucket.read<int>('value1'), isNull); // Does not exist anymore.
     manager.doSerialization();
     expect(rawData[valuesMapKey].containsKey('value1'), isFalse);
     expect(manager.updateScheduled, isFalse);
 
     // Removing non-existing value is no-op.
-    expect(bucket.remove<Object>(const RestorationId('value4')), isNull);
+    expect(bucket.remove<Object>('value4'), isNull);
     expect(manager.updateScheduled, isFalse);
 
     // Can store null.
-    bucket.write<bool>(const RestorationId('value4'), null);
+    bucket.write<bool>('value4', null);
     expect(manager.updateScheduled, isTrue);
-    expect(bucket.read<int>(const RestorationId('value4')), null);
+    expect(bucket.read<int>('value4'), null);
     manager.doSerialization();
     expect(rawData[valuesMapKey].containsKey('value4'), isTrue);
     expect(rawData[valuesMapKey]['value4'], null);
@@ -69,51 +69,51 @@ void main() {
     final Object debugOwner = Object();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rootRawData);
     final RestorationBucket child = RestorationBucket.child(
-      id: const RestorationId('child1'),
+      restorationId: 'child1',
       parent: root,
       debugOwner: debugOwner,
     );
 
-    expect(child.id, const RestorationId('child1'));
+    expect(child.restorationId, 'child1');
     expect(child.debugOwner, debugOwner);
 
     // Bucket contains expected values from rawData.
-    expect(child.read<int>(const RestorationId('foo')), 22);
-    expect(child.read<String>(const RestorationId('bar')), isNull); // Does not exist.
+    expect(child.read<int>('foo'), 22);
+    expect(child.read<String>('bar'), isNull); // Does not exist.
     expect(manager.updateScheduled, isFalse);
 
     // Can overwrite existing value.
-    child.write<int>(const RestorationId('foo'), 44);
+    child.write<int>('foo', 44);
     expect(manager.updateScheduled, isTrue);
-    expect(child.read<int>(const RestorationId('foo')), 44);
+    expect(child.read<int>('foo'), 44);
     manager.doSerialization();
     expect(rootRawData[childrenMapKey]['child1'][valuesMapKey]['foo'], 44);
     expect(manager.updateScheduled, isFalse);
 
     // Can add a new value.
-    child.write<bool>(const RestorationId('value3'), true);
+    child.write<bool>('value3', true);
     expect(manager.updateScheduled, isTrue);
-    expect(child.read<bool>(const RestorationId('value3')), true);
+    expect(child.read<bool>('value3'), true);
     manager.doSerialization();
     expect(rootRawData[childrenMapKey]['child1'][valuesMapKey]['value3'], true);
     expect(manager.updateScheduled, isFalse);
 
     // Can remove existing value.
-    expect(child.remove<int>(const RestorationId('foo')), 44);
+    expect(child.remove<int>('foo'), 44);
     expect(manager.updateScheduled, isTrue);
-    expect(child.read<int>(const RestorationId('foo')), isNull); // Does not exist anymore.
+    expect(child.read<int>('foo'), isNull); // Does not exist anymore.
     manager.doSerialization();
     expect(rootRawData[childrenMapKey]['child1'].containsKey('foo'), isFalse);
     expect(manager.updateScheduled, isFalse);
 
     // Removing non-existing value is no-op.
-    expect(child.remove<Object>(const RestorationId('value4')), isNull);
+    expect(child.remove<Object>('value4'), isNull);
     expect(manager.updateScheduled, isFalse);
 
     // Can store null.
-    child.write<bool>(const RestorationId('value4'), null);
+    child.write<bool>('value4', null);
     expect(manager.updateScheduled, isTrue);
-    expect(child.read<int>(const RestorationId('value4')), null);
+    expect(child.read<int>('value4'), null);
     manager.doSerialization();
     expect(rootRawData[childrenMapKey]['child1'][valuesMapKey].containsKey('value4'), isTrue);
     expect(rootRawData[childrenMapKey]['child1'][valuesMapKey]['value4'], null);
@@ -126,14 +126,14 @@ void main() {
     final RestorationBucket bucket = RestorationBucket.root(manager: manager, rawData: rawData);
 
     final Object debugOwner = Object();
-    final RestorationBucket child = bucket.claimChild(const RestorationId('child1'), debugOwner: debugOwner);
+    final RestorationBucket child = bucket.claimChild('child1', debugOwner: debugOwner);
 
     expect(manager.updateScheduled, isFalse);
-    expect(child.id, const RestorationId('child1'));
+    expect(child.restorationId, 'child1');
     expect(child.debugOwner, debugOwner);
 
-    expect(child.read<int>(const RestorationId('foo')), 22);
-    child.write(const RestorationId('bar'), 44);
+    expect(child.read<int>('foo'), 22);
+    child.write('bar', 44);
     expect(manager.updateScheduled, isTrue);
     manager.doSerialization();
     expect(rawData[childrenMapKey]['child1'][valuesMapKey]['bar'], 44);
@@ -148,14 +148,14 @@ void main() {
     expect(rawData[childrenMapKey].containsKey('child2'), isFalse);
 
     final Object debugOwner = Object();
-    final RestorationBucket child = bucket.claimChild(const RestorationId('child2'), debugOwner: debugOwner);
+    final RestorationBucket child = bucket.claimChild('child2', debugOwner: debugOwner);
 
     expect(manager.updateScheduled, isTrue);
-    expect(child.id, const RestorationId('child2'));
+    expect(child.restorationId, 'child2');
     expect(child.debugOwner, debugOwner);
 
-    child.write(const RestorationId('foo'), 55);
-    expect(child.read<int>(const RestorationId('foo')), 55);
+    child.write('foo', 55);
+    expect(child.read<int>('foo'), 55);
     manager.doSerialization();
 
     expect(manager.updateScheduled, isFalse);
@@ -168,18 +168,18 @@ void main() {
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket bucket = RestorationBucket.root(manager: manager, rawData: rawData);
 
-    final RestorationBucket child1 = bucket.claimChild(const RestorationId('child1'), debugOwner: 'FirstClaim');
+    final RestorationBucket child1 = bucket.claimChild('child1', debugOwner: 'FirstClaim');
 
     expect(manager.updateScheduled, isFalse);
-    expect(child1.id, const RestorationId('child1'));
-    expect(child1.read<int>(const RestorationId('foo')), 22);
+    expect(child1.restorationId, 'child1');
+    expect(child1.read<int>('foo'), 22);
 
     manager.doSerialization();
     expect(manager.updateScheduled, isFalse);
 
-    final RestorationBucket child2 = bucket.claimChild(const RestorationId('child1'), debugOwner: 'SecondClaim');
-    expect(child2.id, const RestorationId('child1'));
-    expect(child2.read<int>(const RestorationId('foo')), isNull); // Value does not exist in this child.
+    final RestorationBucket child2 = bucket.claimChild('child1', debugOwner: 'SecondClaim');
+    expect(child2.restorationId, 'child1');
+    expect(child2.read<int>('foo'), isNull); // Value does not exist in this child.
 
     // child1 is not given up before running finalizers.
     try {
@@ -189,8 +189,8 @@ void main() {
       expect(
         e.message,
         'Multiple owners claimed child RestorationBuckets with the same IDs.\n'
-        'The following IDs were claimed multiple times from the parent RestorationBucket(id: RestorationId(root), owner: MockManager):\n'
-        ' * RestorationId(child1) was claimed by:\n'
+        'The following IDs were claimed multiple times from the parent RestorationBucket(restorationId: root, owner: MockManager):\n'
+        ' * "child1" was claimed by:\n'
         '   * SecondClaim\n'
         '   * FirstClaim (current owner)'
       );
@@ -202,19 +202,19 @@ void main() {
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket bucket = RestorationBucket.root(manager: manager, rawData: rawData);
 
-    final RestorationBucket child1 = bucket.claimChild(const RestorationId('child1'), debugOwner: 'FirstClaim');
+    final RestorationBucket child1 = bucket.claimChild('child1', debugOwner: 'FirstClaim');
 
     expect(manager.updateScheduled, isFalse);
-    expect(child1.id, const RestorationId('child1'));
-    expect(child1.read<int>(const RestorationId('foo')), 22);
+    expect(child1.restorationId, 'child1');
+    expect(child1.read<int>('foo'), 22);
 
     manager.doSerialization();
     expect(manager.updateScheduled, isFalse);
 
-    final RestorationBucket child2 = bucket.claimChild(const RestorationId('child1'), debugOwner: 'SecondClaim');
-    expect(child2.id, const RestorationId('child1'));
-    expect(child2.read<int>(const RestorationId('foo')), isNull); // Value does not exist in this child.
-    child2.write<int>(const RestorationId('bar'), 55);
+    final RestorationBucket child2 = bucket.claimChild('child1', debugOwner: 'SecondClaim');
+    expect(child2.restorationId, 'child1');
+    expect(child2.read<int>('foo'), isNull); // Value does not exist in this child.
+    child2.write<int>('bar', 55);
 
     // give up child1.
     child1.dispose();
@@ -229,13 +229,13 @@ void main() {
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket bucket = RestorationBucket.root(manager: manager, rawData: rawData);
 
-    final RestorationBucket child1 = bucket.claimChild(const RestorationId('child1'), debugOwner: 'FirstClaim');
-    expect(child1.id, const RestorationId('child1'));
-    final RestorationBucket child2 = bucket.claimChild(const RestorationId('child1'), debugOwner: 'SecondClaim');
-    expect(child2.id, const RestorationId('child1'));
+    final RestorationBucket child1 = bucket.claimChild('child1', debugOwner: 'FirstClaim');
+    expect(child1.restorationId, 'child1');
+    final RestorationBucket child2 = bucket.claimChild('child1', debugOwner: 'SecondClaim');
+    expect(child2.restorationId, 'child1');
     child1.dispose();
-    final RestorationBucket child3 = bucket.claimChild(const RestorationId('child1'), debugOwner: 'ThirdClaim');
-    expect(child3.id, const RestorationId('child1'));
+    final RestorationBucket child3 = bucket.claimChild('child1', debugOwner: 'ThirdClaim');
+    expect(child3.restorationId, 'child1');
     expect(manager.updateScheduled, isTrue);
     expect(() => manager.doSerialization(), throwsFlutterError);
   });
@@ -245,13 +245,13 @@ void main() {
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket bucket = RestorationBucket.root(manager: manager, rawData: rawData);
 
-    final RestorationBucket child1 = bucket.claimChild(const RestorationId('child1'), debugOwner: 'FirstClaim');
+    final RestorationBucket child1 = bucket.claimChild('child1', debugOwner: 'FirstClaim');
     expect(manager.updateScheduled, isFalse);
-    expect(child1.read<int>(const RestorationId('foo')), 22);
+    expect(child1.read<int>('foo'), 22);
     child1.dispose();
     expect(manager.updateScheduled, isTrue);
-    final RestorationBucket child2 = bucket.claimChild(const RestorationId('child1'), debugOwner: 'SecondClaim');
-    expect(child2.read<int>(const RestorationId('foo')), isNull);
+    final RestorationBucket child2 = bucket.claimChild('child1', debugOwner: 'SecondClaim');
+    expect(child2.read<int>('foo'), isNull);
   });
 
   test('cleans up raw data if last value/child is dropped', () {
@@ -260,15 +260,15 @@ void main() {
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
     expect(rawData.containsKey(childrenMapKey), isTrue);
-    final RestorationBucket child = root.claimChild(const RestorationId('child1'), debugOwner: 'owner');
+    final RestorationBucket child = root.claimChild('child1', debugOwner: 'owner');
     child.dispose();
     expect(manager.updateScheduled, isTrue);
     manager.doSerialization();
     expect(rawData.containsKey(childrenMapKey), isFalse);
 
     expect(rawData.containsKey(valuesMapKey), isTrue);
-    expect(root.remove<int>(const RestorationId('value1')), 10);
-    expect(root.remove<String>(const RestorationId('value2')), 'Hello');
+    expect(root.remove<int>('value1'), 10);
+    expect(root.remove<String>('value2'), 'Hello');
     expect(manager.updateScheduled, isTrue);
     manager.doSerialization();
     expect(rawData.containsKey(valuesMapKey), isFalse);
@@ -279,10 +279,10 @@ void main() {
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
-    final RestorationBucket child1 = root.claimChild(const RestorationId('child1'), debugOwner: 'owner1');
-    child1.claimChild(const RestorationId('child1OfChild1'), debugOwner: 'owner1.1');
-    child1.claimChild(const RestorationId('child2OfChild1'), debugOwner: 'owner1.2');
-    final RestorationBucket child2 = root.claimChild(const RestorationId('child2'), debugOwner: 'owner2');
+    final RestorationBucket child1 = root.claimChild('child1', debugOwner: 'owner1');
+    child1.claimChild('child1OfChild1', debugOwner: 'owner1.1');
+    child1.claimChild('child2OfChild1', debugOwner: 'owner1.2');
+    final RestorationBucket child2 = root.claimChild('child2', debugOwner: 'owner2');
 
     expect(manager.updateScheduled, isTrue);
     manager.doSerialization();
@@ -311,13 +311,13 @@ void main() {
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
-    final RestorationBucket child = root.claimChild(const RestorationId('child1'), debugOwner: 'owner1');
+    final RestorationBucket child = root.claimChild('child1', debugOwner: 'owner1');
 
     expect(manager.updateScheduled, isFalse);
-    expect(child.id, const RestorationId('child1'));
-    child.rename(const RestorationId('child1'));
+    expect(child.restorationId, 'child1');
+    child.rename('child1');
     expect(manager.updateScheduled, isFalse);
-    expect(child.id, const RestorationId('child1'));
+    expect(child.restorationId, 'child1');
     expect(rawData[childrenMapKey].containsKey('child1'), isTrue);
   });
 
@@ -326,14 +326,14 @@ void main() {
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
-    final RestorationBucket child = root.claimChild(const RestorationId('child1'), debugOwner: 'owner1');
+    final RestorationBucket child = root.claimChild('child1', debugOwner: 'owner1');
     final Object rawChildData = rawData[childrenMapKey]['child1'];
     expect(rawChildData, isNotNull);
 
     expect(manager.updateScheduled, isFalse);
-    expect(child.id, const RestorationId('child1'));
-    child.rename(const RestorationId('new-name'));
-    expect(child.id, const RestorationId('new-name'));
+    expect(child.restorationId, 'child1');
+    child.rename('new-name');
+    expect(child.restorationId, 'new-name');
 
     expect(manager.updateScheduled, isTrue);
     manager.doSerialization();
@@ -348,14 +348,14 @@ void main() {
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
-    final RestorationBucket child1 = root.claimChild(const RestorationId('child1'), debugOwner: 'owner1');
-    final RestorationBucket child2 = root.claimChild(const RestorationId('child2'), debugOwner: 'owner1');
+    final RestorationBucket child1 = root.claimChild('child1', debugOwner: 'owner1');
+    final RestorationBucket child2 = root.claimChild('child2', debugOwner: 'owner1');
     manager.doSerialization();
 
-    expect(child1.id, const RestorationId('child1'));
-    expect(child2.id, const RestorationId('child2'));
-    child2.rename(const RestorationId('child1'));
-    expect(child2.id, const RestorationId('child1'));
+    expect(child1.restorationId, 'child1');
+    expect(child2.restorationId, 'child2');
+    child2.rename('child1');
+    expect(child2.restorationId, 'child1');
 
     expect(manager.updateScheduled, isTrue);
     expect(() => manager.doSerialization(), throwsFlutterError);
@@ -366,8 +366,8 @@ void main() {
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
-    final RestorationBucket child1 = root.claimChild(const RestorationId('child1'), debugOwner: 'owner1');
-    final RestorationBucket child2 = root.claimChild(const RestorationId('child2'), debugOwner: 'owner1');
+    final RestorationBucket child1 = root.claimChild('child1', debugOwner: 'owner1');
+    final RestorationBucket child2 = root.claimChild('child2', debugOwner: 'owner1');
     manager.doSerialization();
 
     final Object rawChild1Data = rawData[childrenMapKey]['child1'];
@@ -375,11 +375,11 @@ void main() {
     final Object rawChild2Data = rawData[childrenMapKey]['child2'];
     expect(rawChild2Data, isNotNull);
 
-    expect(child1.id, const RestorationId('child1'));
-    expect(child2.id, const RestorationId('child2'));
-    child2.rename(const RestorationId('child1'));
-    expect(child2.id, const RestorationId('child1'));
-    expect(child1.id, const RestorationId('child1'));
+    expect(child1.restorationId, 'child1');
+    expect(child2.restorationId, 'child2');
+    child2.rename('child1');
+    expect(child2.restorationId, 'child1');
+    expect(child1.restorationId, 'child1');
 
     child1.dispose();
 
@@ -399,17 +399,17 @@ void main() {
     final Object rawChild1Data = rawData[childrenMapKey]['child1'];
     expect(rawChild1Data, isNotNull);
 
-    final RestorationBucket child1 = root.claimChild(const RestorationId('child1'), debugOwner: 'owner1');
-    final RestorationBucket child2 = root.claimChild(const RestorationId('child1'), debugOwner: 'owner1');
+    final RestorationBucket child1 = root.claimChild('child1', debugOwner: 'owner1');
+    final RestorationBucket child2 = root.claimChild('child1', debugOwner: 'owner1');
 
-    child2.rename(const RestorationId('foo'));
+    child2.rename('foo');
 
     expect(manager.updateScheduled, isTrue);
     manager.doSerialization();
     expect(manager.updateScheduled, isFalse);
 
-    expect(child1.id, const RestorationId('child1'));
-    expect(child2.id, const RestorationId('foo'));
+    expect(child1.restorationId, 'child1');
+    expect(child2.restorationId, 'foo');
 
     expect(rawData[childrenMapKey]['child1'], rawChild1Data);
     expect(rawData[childrenMapKey]['foo'], isEmpty); // new bucket
@@ -420,7 +420,7 @@ void main() {
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
-    final RestorationBucket child1 = root.claimChild(const RestorationId('child1'), debugOwner: 'owner1');
+    final RestorationBucket child1 = root.claimChild('child1', debugOwner: 'owner1');
 
     root.adoptChild(child1);
     expect(manager.updateScheduled, isFalse);
@@ -432,12 +432,12 @@ void main() {
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
-    final RestorationBucket child = RestorationBucket.empty(id: const RestorationId('fresh-child'), debugOwner: 'owner1');
+    final RestorationBucket child = RestorationBucket.empty(restorationId: 'fresh-child', debugOwner: 'owner1');
 
     root.adoptChild(child);
     expect(manager.updateScheduled, isTrue);
 
-    child.write(const RestorationId('value'), 22);
+    child.write('value', 22);
 
     manager.doSerialization();
     expect(manager.updateScheduled, isFalse);
@@ -445,7 +445,7 @@ void main() {
     expect(rawData[childrenMapKey].containsKey('fresh-child'), isTrue);
     expect(rawData[childrenMapKey]['fresh-child'][valuesMapKey]['value'], 22);
 
-    child.write(const RestorationId('bar'), 'blabla');
+    child.write('bar', 'blabla');
     expect(manager.updateScheduled, isTrue);
   });
 
@@ -454,9 +454,9 @@ void main() {
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
-    final RestorationBucket child = root.claimChild(const RestorationId('child1'), debugOwner: 'owner1');
-    final RestorationBucket childOfChild = child.claimChild(const RestorationId('childOfChild'), debugOwner: 'owner2');
-    childOfChild.write<String>(const RestorationId('foo'), 'bar');
+    final RestorationBucket child = root.claimChild('child1', debugOwner: 'owner1');
+    final RestorationBucket childOfChild = child.claimChild('childOfChild', debugOwner: 'owner2');
+    childOfChild.write<String>('foo', 'bar');
 
     expect(manager.updateScheduled, isTrue);
     manager.doSerialization();
@@ -479,9 +479,9 @@ void main() {
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
-    final RestorationBucket child = root.claimChild(const RestorationId('child1'), debugOwner: 'owner1');
-    final RestorationBucket childOfChild = child.claimChild(const RestorationId('child1'), debugOwner: 'owner2');
-    childOfChild.write<String>(const RestorationId('foo'), 'bar');
+    final RestorationBucket child = root.claimChild('child1', debugOwner: 'owner1');
+    final RestorationBucket childOfChild = child.claimChild('child1', debugOwner: 'owner2');
+    childOfChild.write<String>('foo', 'bar');
 
     root.adoptChild(childOfChild);
     expect(manager.updateScheduled, isTrue);
@@ -493,9 +493,9 @@ void main() {
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
-    final RestorationBucket child = root.claimChild(const RestorationId('child1'), debugOwner: 'owner1');
-    final RestorationBucket childOfChild = child.claimChild(const RestorationId('child1'), debugOwner: 'owner2');
-    childOfChild.write<String>(const RestorationId('foo'), 'bar');
+    final RestorationBucket child = root.claimChild('child1', debugOwner: 'owner1');
+    final RestorationBucket childOfChild = child.claimChild('child1', debugOwner: 'owner2');
+    childOfChild.write<String>('foo', 'bar');
 
     final Object childOfChildData = rawData[childrenMapKey]['child1'][childrenMapKey]['child1'];
     expect(childOfChildData, isNotEmpty);
@@ -518,17 +518,17 @@ void main() {
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
-    final RestorationBucket child1 = root.claimChild(const RestorationId('child1'), debugOwner: 'owner1');
-    final RestorationBucket child2 = root.claimChild(const RestorationId('child2'), debugOwner: 'owner1');
+    final RestorationBucket child1 = root.claimChild('child1', debugOwner: 'owner1');
+    final RestorationBucket child2 = root.claimChild('child2', debugOwner: 'owner1');
 
     expect(manager.updateScheduled, isTrue);
     manager.doSerialization();
     expect(manager.updateScheduled, isFalse);
 
-    final RestorationBucket child1OfChild1 = child1.claimChild(const RestorationId('child2'), debugOwner: 'owner2');
-    child1OfChild1.write<String>(const RestorationId('hello'), 'world');
-    final RestorationBucket child2OfChild1 = child1.claimChild(const RestorationId('child2'), debugOwner: 'owner2');
-    child2OfChild1.write<String>(const RestorationId('foo'), 'bar');
+    final RestorationBucket child1OfChild1 = child1.claimChild('child2', debugOwner: 'owner2');
+    child1OfChild1.write<String>('hello', 'world');
+    final RestorationBucket child2OfChild1 = child1.claimChild('child2', debugOwner: 'owner2');
+    child2OfChild1.write<String>('foo', 'bar');
 
     root.adoptChild(child2OfChild1);
     child2.dispose();
@@ -546,10 +546,10 @@ void main() {
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
-    final RestorationBucket child1 = root.claimChild(const RestorationId('child1'), debugOwner: 'owner1');
-    final RestorationBucket child2 = root.claimChild(const RestorationId('child2'), debugOwner: 'owner1');
-    final RestorationBucket childOfChild1 = child1.claimChild(const RestorationId('child1.1'), debugOwner: 'owner1');
-    final RestorationBucket childOfChildOfChild1 = childOfChild1.claimChild(const RestorationId('child1.1.1'), debugOwner: 'owner1');
+    final RestorationBucket child1 = root.claimChild('child1', debugOwner: 'owner1');
+    final RestorationBucket child2 = root.claimChild('child2', debugOwner: 'owner1');
+    final RestorationBucket childOfChild1 = child1.claimChild('child1.1', debugOwner: 'owner1');
+    final RestorationBucket childOfChildOfChild1 = childOfChild1.claimChild('child1.1.1', debugOwner: 'owner1');
 
     expect(manager.updateScheduled, isTrue);
     manager.doSerialization();
@@ -589,26 +589,26 @@ void main() {
   });
 
   test('throws when used after dispose', () {
-    final RestorationBucket bucket = RestorationBucket.empty(id: const RestorationId('foo'), debugOwner: null);
+    final RestorationBucket bucket = RestorationBucket.empty(restorationId: 'foo', debugOwner: null);
     bucket.dispose();
 
     expect(() => bucket.debugOwner, throwsFlutterError);
-    expect(() => bucket.id, throwsFlutterError);
+    expect(() => bucket.restorationId, throwsFlutterError);
     expect(() => bucket.decommission(), throwsFlutterError);
-    expect(() => bucket.read<int>(const RestorationId('foo')), throwsFlutterError);
-    expect(() => bucket.write(const RestorationId('foo'), 10), throwsFlutterError);
-    expect(() => bucket.remove<int>(const RestorationId('foo')), throwsFlutterError);
-    expect(() => bucket.contains(const RestorationId('foo')), throwsFlutterError);
-    expect(() => bucket.claimChild(const RestorationId('child'), debugOwner: null), throwsFlutterError);
-    final RestorationBucket child = RestorationBucket.empty(id: const RestorationId('child'), debugOwner: null);
+    expect(() => bucket.read<int>('foo'), throwsFlutterError);
+    expect(() => bucket.write('foo', 10), throwsFlutterError);
+    expect(() => bucket.remove<int>('foo'), throwsFlutterError);
+    expect(() => bucket.contains('foo'), throwsFlutterError);
+    expect(() => bucket.claimChild('child', debugOwner: null), throwsFlutterError);
+    final RestorationBucket child = RestorationBucket.empty(restorationId: 'child', debugOwner: null);
     expect(() => bucket.adoptChild(child), throwsFlutterError);
-    expect(() => bucket.rename(const RestorationId('bar')), throwsFlutterError);
+    expect(() => bucket.rename('bar'), throwsFlutterError);
     expect(() => bucket.dispose(), throwsFlutterError);
   });
 
   test('cannot serialize without manager', () {
-    final RestorationBucket bucket = RestorationBucket.empty(id: const RestorationId('foo'), debugOwner: null);
-    expect(() => bucket.write(const RestorationId('foo'), 10), throwsAssertionError);
+    final RestorationBucket bucket = RestorationBucket.empty(restorationId: 'foo', debugOwner: null);
+    expect(() => bucket.write('foo', 10), throwsAssertionError);
   });
 }
 

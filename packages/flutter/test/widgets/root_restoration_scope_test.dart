@@ -32,7 +32,7 @@ void main() {
         child: UnmanagedRestorationScope(
           bucket: root,
           child: const RootRestorationScope(
-            restorationId: RestorationId('root-child'),
+            restorationId: 'root-child',
             child: BucketSpy(
               child: Text('Hello'),
             ),
@@ -44,7 +44,7 @@ void main() {
 
     expect(binding.restorationManager.rootBucketAccessed, 0);
     final BucketSpyState state = tester.state(find.byType(BucketSpy));
-    expect(state.bucket.id, const RestorationId('root-child'));
+    expect(state.bucket.restorationId, 'root-child');
     expect(rawData[childrenMapKey].containsKey('root-child'), isTrue);
 
     expect(find.text('Hello'), findsOneWidget);
@@ -58,7 +58,7 @@ void main() {
       const Directionality(
         textDirection: TextDirection.ltr,
         child: RootRestorationScope(
-          restorationId: RestorationId('root-child'),
+          restorationId: 'root-child',
           child: BucketSpy(
             child: Text('Hello'),
           ),
@@ -82,7 +82,7 @@ void main() {
     expect(binding.firstFrameIsDeferred, isFalse);
 
     final BucketSpyState state = tester.state(find.byType(BucketSpy));
-    expect(state.bucket.id, const RestorationId('root-child'));
+    expect(state.bucket.restorationId, 'root-child');
     expect(rawData[childrenMapKey].containsKey('root-child'), isTrue);
   });
 
@@ -95,7 +95,7 @@ void main() {
       const Directionality(
         textDirection: TextDirection.ltr,
         child: RootRestorationScope(
-          restorationId: RestorationId('root-child'),
+          restorationId: 'root-child',
           child: BucketSpy(
             child: Text('Hello'),
           ),
@@ -108,7 +108,7 @@ void main() {
     expect(binding.firstFrameIsDeferred, isFalse);
 
     final BucketSpyState state = tester.state(find.byType(BucketSpy));
-    expect(state.bucket.id, const RestorationId('root-child'));
+    expect(state.bucket.restorationId, 'root-child');
     expect(rawData[childrenMapKey].containsKey('root-child'), isTrue);
   });
 
@@ -139,7 +139,7 @@ void main() {
       const Directionality(
         textDirection: TextDirection.ltr,
         child: RootRestorationScope(
-          restorationId: RestorationId('root-child'),
+          restorationId: 'root-child',
           child: BucketSpy(
             child: Text('Hello'),
           ),
@@ -158,7 +158,7 @@ void main() {
 
     expect(binding.restorationManager.rootBucketAccessed, 1);
     expect(find.text('Hello'), findsOneWidget);
-    expect(state.bucket.id, const RestorationId('root-child'));
+    expect(state.bucket.restorationId, 'root-child');
 
     // Change ID back to null.
     await tester.pumpWidget(
@@ -191,7 +191,7 @@ void main() {
           bucket: inScopeRootBucket,
           child: RootRestorationScope(
             key: rootScopeKey,
-            restorationId: const RestorationId('root-child'),
+            restorationId: 'root-child',
             child: const BucketSpy(
               child: Text('Hello'),
             ),
@@ -203,7 +203,7 @@ void main() {
     expect(binding.restorationManager.rootBucketAccessed, 0);
     expect(find.text('Hello'), findsOneWidget);
     final BucketSpyState state = tester.state(find.byType(BucketSpy));
-    expect(state.bucket.id, const RestorationId('root-child'));
+    expect(state.bucket.restorationId, 'root-child');
     expect(inScopeRawData[childrenMapKey].containsKey('root-child'), isTrue);
 
     // Move out of scope.
@@ -214,7 +214,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: RootRestorationScope(
           key: rootScopeKey,
-          restorationId: const RestorationId('root-child'),
+          restorationId: 'root-child',
           child: const BucketSpy(
             child: Text('Hello'),
           ),
@@ -232,7 +232,7 @@ void main() {
 
     expect(binding.restorationManager.rootBucketAccessed, 1);
     expect(find.text('Hello'), findsOneWidget);
-    expect(state.bucket.id, const RestorationId('root-child'));
+    expect(state.bucket.restorationId, 'root-child');
     expect(outOfScopeRawData[childrenMapKey].containsKey('root-child'), isTrue);
     expect(inScopeRawData, isEmpty);
 
@@ -244,7 +244,7 @@ void main() {
           bucket: inScopeRootBucket,
           child: RootRestorationScope(
             key: rootScopeKey,
-            restorationId: const RestorationId('root-child'),
+            restorationId: 'root-child',
             child: const BucketSpy(
               child: Text('Hello'),
             ),
@@ -255,7 +255,7 @@ void main() {
 
     expect(binding.restorationManager.rootBucketAccessed, 1);
     expect(find.text('Hello'), findsOneWidget);
-    expect(state.bucket.id, const RestorationId('root-child'));
+    expect(state.bucket.restorationId, 'root-child');
     expect(outOfScopeRawData, isEmpty);
     expect(inScopeRawData[childrenMapKey].containsKey('root-child'), isTrue);
   });
@@ -269,7 +269,7 @@ void main() {
       const Directionality(
         textDirection: TextDirection.ltr,
         child: RootRestorationScope(
-          restorationId: RestorationId('root-child'),
+          restorationId: 'root-child',
           child: BucketSpy(
             child: Text('Hello'),
           ),
@@ -280,7 +280,7 @@ void main() {
     expect(binding.restorationManager.rootBucketAccessed, 1);
     expect(find.text('Hello'), findsOneWidget);
     final BucketSpyState state = tester.state(find.byType(BucketSpy));
-    state.bucket.write(const RestorationId('foo'), 42);
+    state.bucket.write('foo', 42);
     expect(firstRawData[childrenMapKey]['root-child'][valuesMapKey]['foo'], 42);
     final RestorationBucket firstBucket = state.bucket;
 
@@ -300,7 +300,7 @@ void main() {
     await tester.pump();
 
     expect(state.bucket, isNot(same(firstBucket)));
-    expect(state.bucket.read<int>(const RestorationId('foo')), 22);
+    expect(state.bucket.read<int>('foo'), 22);
   });
 
   testWidgets('injects null when rootBucket is null', (WidgetTester tester) async {
@@ -311,7 +311,7 @@ void main() {
       const Directionality(
         textDirection: TextDirection.ltr,
         child: RootRestorationScope(
-          restorationId: RestorationId('root-child'),
+          restorationId: 'root-child',
           child: BucketSpy(
             child: Text('Hello'),
           ),
@@ -348,7 +348,7 @@ void main() {
       const Directionality(
         textDirection: TextDirection.ltr,
         child: RootRestorationScope(
-          restorationId: RestorationId('root-child'),
+          restorationId: 'root-child',
           child: BucketSpy(
             child: Text('Hello'),
           ),

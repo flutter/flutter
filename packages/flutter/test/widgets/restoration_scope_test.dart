@@ -14,7 +14,7 @@ void main() {
   group('UnmanagedRestorationScope', () {
     testWidgets('makes bucket available to descendants', (WidgetTester tester) async {
       final RestorationBucket bucket1 = RestorationBucket.empty(
-        id: const RestorationId('foo'),
+        restorationId: 'foo',
         debugOwner: 'owner',
       );
 
@@ -30,7 +30,7 @@ void main() {
 
       // Notifies when bucket changes.
       final RestorationBucket bucket2 = RestorationBucket.empty(
-        id: const RestorationId('foo2'),
+        restorationId: 'foo2',
         debugOwner: 'owner',
       );
       await tester.pumpWidget(
@@ -56,7 +56,7 @@ void main() {
 
   group('RestorationScope', () {
     testWidgets('makes bucket available to descendants', (WidgetTester tester) async {
-      const RestorationId id = RestorationId('hello world 1234');
+      const String id = 'hello world 1234';
       final MockRestorationManager manager = MockRestorationManager();
       final Map<String, dynamic> rawData = <String, dynamic>{};
       final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
@@ -74,8 +74,8 @@ void main() {
       manager.doSerialization();
 
       final BucketSpyState state = tester.state(find.byType(BucketSpy));
-      expect(state.bucket.id, id);
-      expect(rawData[childrenMapKey].containsKey(id.value), isTrue);
+      expect(state.bucket.restorationId, id);
+      expect(rawData[childrenMapKey].containsKey(id), isTrue);
     });
 
     testWidgets('bucket for descendants contains data claimed from parent', (WidgetTester tester) async {
@@ -86,7 +86,7 @@ void main() {
         UnmanagedRestorationScope(
           bucket: root,
           child: const RestorationScope(
-            restorationId: RestorationId('child1'),
+            restorationId: 'child1',
             child: BucketSpy(),
           ),
         ),
@@ -94,8 +94,8 @@ void main() {
       manager.doSerialization();
 
       final BucketSpyState state = tester.state(find.byType(BucketSpy));
-      expect(state.bucket.id, const RestorationId('child1'));
-      expect(state.bucket.read<int>(const RestorationId('foo')), 22);
+      expect(state.bucket.restorationId, 'child1');
+      expect(state.bucket.read<int>('foo'), 22);
     });
 
     testWidgets('renames existing bucket when new ID is provided', (WidgetTester tester) async {
@@ -106,7 +106,7 @@ void main() {
         UnmanagedRestorationScope(
           bucket: root,
           child: const RestorationScope(
-            restorationId: RestorationId('child1'),
+            restorationId: 'child1',
             child: BucketSpy(),
           ),
         ),
@@ -115,8 +115,8 @@ void main() {
 
       // Claimed existing bucket with data.
       final BucketSpyState state = tester.state(find.byType(BucketSpy));
-      expect(state.bucket.id, const RestorationId('child1'));
-      expect(state.bucket.read<int>(const RestorationId('foo')), 22);
+      expect(state.bucket.restorationId, 'child1');
+      expect(state.bucket.read<int>('foo'), 22);
       final RestorationBucket bucket = state.bucket;
 
       // Rename the existing bucket.
@@ -124,15 +124,15 @@ void main() {
         UnmanagedRestorationScope(
           bucket: root,
           child: const RestorationScope(
-            restorationId: RestorationId('something else'),
+            restorationId: 'something else',
             child: BucketSpy(),
           ),
         ),
       );
       manager.doSerialization();
 
-      expect(state.bucket.id, const RestorationId('something else'));
-      expect(state.bucket.read<int>(const RestorationId('foo')), 22);
+      expect(state.bucket.restorationId, 'something else');
+      expect(state.bucket.read<int>('foo'), 22);
       expect(state.bucket, same(bucket));
     });
 
@@ -146,7 +146,7 @@ void main() {
         UnmanagedRestorationScope(
           bucket: root,
           child: const RestorationScope(
-            restorationId: RestorationId('child1'),
+            restorationId: 'child1',
             child: BucketSpy(),
           ),
         ),
@@ -186,14 +186,14 @@ void main() {
         UnmanagedRestorationScope(
           bucket: root,
           child: const RestorationScope(
-            restorationId: RestorationId('foo'),
+            restorationId: 'foo',
             child: BucketSpy(),
           ),
         ),
       );
       manager.doSerialization();
       expect(state.bucket, isNotNull);
-      expect(state.bucket.id, const RestorationId('foo'));
+      expect(state.bucket.restorationId, 'foo');
 
       // Change id back to null.
       await tester.pumpWidget(
@@ -215,7 +215,7 @@ void main() {
       await tester.pumpWidget(
         RestorationScope(
           key: scopeKey,
-          restorationId: const RestorationId('foo'),
+          restorationId: 'foo',
           child: const BucketSpy(),
         ),
       );
@@ -230,20 +230,20 @@ void main() {
           bucket: root,
           child: RestorationScope(
             key: scopeKey,
-            restorationId: const RestorationId('foo'),
+            restorationId: 'foo',
             child: const BucketSpy(),
           ),
         ),
       );
       manager.doSerialization();
       expect(state.bucket, isNotNull);
-      expect(state.bucket.id, const RestorationId('foo'));
+      expect(state.bucket.restorationId, 'foo');
 
       // Move out of scope again.
       await tester.pumpWidget(
         RestorationScope(
           key: scopeKey,
-          restorationId: const RestorationId('foo'),
+          restorationId: 'foo',
           child: const BucketSpy(),
         ),
       );
@@ -275,10 +275,10 @@ void main() {
             textDirection: TextDirection.ltr,
             children: <Widget>[
               RestorationScope(
-                restorationId: const RestorationId('fixed'),
+                restorationId: 'fixed',
                 child: RestorationScope(
                   key: scopeKey,
-                  restorationId: const RestorationId('moving-child'),
+                  restorationId: 'moving-child',
                   child: const BucketSpy(),
                 ),
               ),
@@ -288,11 +288,11 @@ void main() {
       );
       manager.doSerialization();
       final BucketSpyState state = tester.state(find.byType(BucketSpy));
-      expect(state.bucket.id, const RestorationId('moving-child'));
+      expect(state.bucket.restorationId, 'moving-child');
       expect(rawData[childrenMapKey]['fixed'][childrenMapKey].containsKey('moving-child'), isTrue);
       final RestorationBucket bucket = state.bucket;
 
-      state.bucket.write(const RestorationId('value'), 11);
+      state.bucket.write('value', 11);
       manager.doSerialization();
 
       // Move scope.
@@ -303,12 +303,12 @@ void main() {
             textDirection: TextDirection.ltr,
             children: <Widget>[
               RestorationScope(
-                restorationId: const RestorationId('fixed'),
+                restorationId: 'fixed',
                 child: Container(),
               ),
               RestorationScope(
                 key: scopeKey,
-                restorationId: const RestorationId('moving-child'),
+                restorationId: 'moving-child',
                 child: const BucketSpy(),
               ),
             ],
@@ -316,9 +316,9 @@ void main() {
         ),
       );
       manager.doSerialization();
-      expect(state.bucket.id, const RestorationId('moving-child'));
+      expect(state.bucket.restorationId, 'moving-child');
       expect(state.bucket, same(bucket));
-      expect(state.bucket.read<int>(const RestorationId('value')), 11);
+      expect(state.bucket.read<int>('value'), 11);
 
       expect(rawData[childrenMapKey]['fixed'], isEmpty);
       expect(rawData[childrenMapKey].containsKey('moving-child'), isTrue);
@@ -332,15 +332,15 @@ void main() {
         UnmanagedRestorationScope(
           bucket: root,
           child: const RestorationScope(
-            restorationId: RestorationId('child1'),
+            restorationId: 'child1',
             child: BucketSpy(),
           ),
         ),
       );
       manager.doSerialization();
       final BucketSpyState state = tester.state(find.byType(BucketSpy));
-      expect(state.bucket.id, const RestorationId('child1'));
-      expect(state.bucket.read<int>(const RestorationId('foo')), isNull); // Does not exist.
+      expect(state.bucket.restorationId, 'child1');
+      expect(state.bucket.read<int>('foo'), isNull); // Does not exist.
       final RestorationBucket bucket = state.bucket;
 
       // Replace root bucket.
@@ -351,7 +351,7 @@ void main() {
         UnmanagedRestorationScope(
           bucket: root,
           child: const RestorationScope(
-            restorationId: RestorationId('child1'),
+            restorationId: 'child1',
             child: BucketSpy(),
           ),
         ),
@@ -359,8 +359,8 @@ void main() {
 
       // Bucket has been replaced.
       expect(state.bucket, isNot(same(bucket)));
-      expect(state.bucket.id, const RestorationId('child1'));
-      expect(state.bucket.read<int>(const RestorationId('foo')), 22);
+      expect(state.bucket.restorationId, 'child1');
+      expect(state.bucket.read<int>('foo'), 22);
     });
   });
 }

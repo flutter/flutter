@@ -14,22 +14,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'restoration.dart';
 
 void main() {
-  group('RestorationId', () {
-    test('has good toString', () {
-      expect(const RestorationId('hello').toString(), 'RestorationId(hello)');
-      expect(const RestorationId('world').toString(), 'RestorationId(world)');
-    });
-
-    test('equal values are equal', () {
-      expect(const RestorationId('hello') == const RestorationId('world'), isFalse);
-      expect(const RestorationId('hello') == const RestorationId('hello'), isTrue);
-      int i = 0;
-      expect(RestorationId('hello ${i++}') == const RestorationId('hello 0'), isTrue);
-      expect(RestorationId('hello ${i++}') == RestorationId('hello ${--i}'), isTrue);
-      expect(RestorationId('hello ${i++}') == RestorationId('hello $i'), isFalse);
-    });
-  });
-
   group('RestorationManager', () {
     testWidgets('root bucket retrieval', (WidgetTester tester) async {
       final List<MethodCall> callsToEngine = <MethodCall>[];
@@ -63,10 +47,10 @@ void main() {
       expect(rootBucket, isNotNull);
 
       // Root bucket contains the expected data.
-      expect(rootBucket.read<int>(const RestorationId('value1')), 10);
-      expect(rootBucket.read<String>(const RestorationId('value2')), 'Hello');
-      final RestorationBucket child = rootBucket.claimChild(const RestorationId('child1'), debugOwner: null);
-      expect(child.read<int>(const RestorationId('another value')), 22);
+      expect(rootBucket.read<int>('value1'), 10);
+      expect(rootBucket.read<String>('value2'), 'Hello');
+      final RestorationBucket child = rootBucket.claimChild('child1', debugOwner: null);
+      expect(child.read<int>('another value'), 22);
 
       // Accessing the root bucket again completes synchronously with same bucket.
       RestorationBucket synchronousBucket;
@@ -113,7 +97,7 @@ void main() {
 
       await _pushDataFromEngine(_createEncodedRestorationData1());
       expect(rootBucket, isNotNull);
-      expect(rootBucket.read<int>(const RestorationId('value1')), 10);
+      expect(rootBucket.read<int>('value1'), 10);
 
       result.complete(_createEncodedRestorationData2());
       await tester.pump();
@@ -122,8 +106,8 @@ void main() {
       manager.rootBucket.then((RestorationBucket bucket) => rootBucket2 = bucket);
       expect(rootBucket2, isNotNull);
       expect(rootBucket2, same(rootBucket));
-      expect(rootBucket2.read<int>(const RestorationId('value1')), 10);
-      expect(rootBucket2.contains(const RestorationId('foo')), isFalse);
+      expect(rootBucket2.read<int>('value1'), 10);
+      expect(rootBucket2.contains('foo'), isFalse);
     });
 
     testWidgets('root bucket is properly replaced when new data is available', (WidgetTester tester) async {
@@ -137,9 +121,9 @@ void main() {
       });
       await tester.pump();
       expect(rootBucket, isNotNull);
-      expect(rootBucket.read<int>(const RestorationId('value1')), 10);
-      final RestorationBucket child = rootBucket.claimChild(const RestorationId('child1'), debugOwner: null);
-      expect(child.read<int>(const RestorationId('another value')), 22);
+      expect(rootBucket.read<int>('value1'), 10);
+      final RestorationBucket child = rootBucket.claimChild('child1', debugOwner: null);
+      expect(child.read<int>('another value'), 22);
 
       bool rootDecommissioned = false;
       bool childDecommissioned = false;
@@ -165,10 +149,10 @@ void main() {
 
       child.dispose();
 
-      expect(newRoot.read<int>(const RestorationId('foo')), 33);
-      expect(newRoot.read<int>(const RestorationId('value1')), null);
-      final RestorationBucket newChild = newRoot.claimChild(const RestorationId('childFoo'), debugOwner: null);
-      expect(newChild.read<String>(const RestorationId('bar')), 'Hello');
+      expect(newRoot.read<int>('foo'), 33);
+      expect(newRoot.read<int>('value1'), null);
+      final RestorationBucket newChild = newRoot.claimChild('childFoo', debugOwner: null);
+      expect(newChild.read<String>('bar'), 'Hello');
     });
 
     testWidgets('returns null as root bucket when restoration is disabled', (WidgetTester tester) async {

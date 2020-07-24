@@ -10,9 +10,9 @@ void main() {
   testWidgets('restartAndRestore', (WidgetTester tester) async {
     await tester.pumpWidget(
       const RootRestorationScope(
-        restorationId: RestorationId('root-child'),
+        restorationId: 'root-child',
         child: _RestorableWidget(
-          restorationId: RestorationId('restorable-widget'),
+          restorationId: 'restorable-widget',
         ),
       ),
     );
@@ -39,9 +39,9 @@ void main() {
   testWidgets('restore from previous restoration data', (WidgetTester tester) async {
     await tester.pumpWidget(
       const RootRestorationScope(
-        restorationId: RestorationId('root-child'),
+        restorationId: 'root-child',
         child: _RestorableWidget(
-          restorationId: RestorationId('restorable-widget'),
+          restorationId: 'restorable-widget',
         ),
       ),
     );
@@ -75,7 +75,7 @@ void main() {
 class _RestorableWidget extends StatefulWidget {
   const _RestorableWidget({Key key, this.restorationId}) : super(key: key);
 
-  final RestorationId restorationId;
+  final String restorationId;
 
   @override
   State<_RestorableWidget> createState() => _RestorableWidgetState();
@@ -89,8 +89,8 @@ class _RestorableWidgetState extends State<_RestorableWidget> with RestorationMi
 
   @override
   void restoreState(RestorationBucket oldBucket) {
-    registerForRestoration(stringValue, const RestorationId('string'));
-    registerForRestoration(intValue, const RestorationId('int'));
+    registerForRestoration(stringValue, 'string');
+    registerForRestoration(intValue, 'int');
   }
 
   void setValues(String s, int i, double d) {
@@ -107,5 +107,5 @@ class _RestorableWidgetState extends State<_RestorableWidget> with RestorationMi
   }
 
   @override
-  RestorationId get restorationId => widget.restorationId;
+  String get restorationId => widget.restorationId;
 }
