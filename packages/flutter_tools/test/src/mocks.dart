@@ -526,6 +526,48 @@ class FakePollingDeviceDiscovery extends PollingDeviceDiscovery {
   Stream<Device> get onRemoved => _onRemovedController.stream;
 }
 
+class LongPollingDeviceDiscovery extends PollingDeviceDiscovery {
+  LongPollingDeviceDiscovery() : super('forever');
+
+  final Completer<List<Device>> _completer = Completer<List<Device>>();
+
+  @override
+  Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
+    return _completer.future;
+  }
+
+  @override
+  Future<void> stopPolling() async {
+    _completer.complete();
+  }
+
+  @override
+  Future<void> dispose() async {
+    _completer.complete();
+  }
+
+  @override
+  bool get supportsPlatform => true;
+
+  @override
+  bool get canListAnything => true;
+}
+
+class ThrowingPollingDeviceDiscovery extends PollingDeviceDiscovery {
+  ThrowingPollingDeviceDiscovery() : super('throw');
+
+  @override
+  Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
+    throw const ProcessException('fake-discovery', <String>[]);
+  }
+
+  @override
+  bool get supportsPlatform => true;
+
+  @override
+  bool get canListAnything => true;
+}
+
 class MockIosProject extends Mock implements IosProject {
   static const String bundleId = 'com.example.test';
   static const String appBundleName = 'My Super Awesome App.app';
