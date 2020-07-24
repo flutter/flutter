@@ -179,25 +179,26 @@ void main() {
     };
 
     Future<void> verifyPadding({ EdgeInsets padding }) async {
-      final EdgeInsets effectivePadding = padding ?? const EdgeInsets.symmetric(vertical: 2, horizontal: 3);
+      final EdgeInsets defaultPadding = padding ?? const EdgeInsets.symmetric(horizontal: 16);
+      const EdgeInsets effectivePadding = EdgeInsets.symmetric(vertical: 2, horizontal: 3);
       final Rect segmentedControlRect = tester.getRect(find.byKey(key));
 
       expect(
           tester.getTopLeft(find.ancestor(of: find.byWidget(children[0]), matching: find.byType(Opacity))),
-          segmentedControlRect.topLeft + effectivePadding.topLeft,
+          defaultPadding.topLeft + segmentedControlRect.topLeft + effectivePadding.topLeft,
       );
       expect(
         tester.getBottomLeft(find.ancestor(of: find.byWidget(children[0]), matching: find.byType(Opacity))),
-        segmentedControlRect.bottomLeft + effectivePadding.bottomLeft,
+        defaultPadding.bottomLeft + segmentedControlRect.bottomLeft + effectivePadding.bottomLeft,
       );
 
       expect(
         tester.getTopRight(find.ancestor(of: find.byWidget(children[1]), matching: find.byType(Opacity))),
-        segmentedControlRect.topRight + effectivePadding.topRight,
+        defaultPadding.topRight + segmentedControlRect.topRight + effectivePadding.topRight,
       );
       expect(
         tester.getBottomRight(find.ancestor(of: find.byWidget(children[1]), matching: find.byType(Opacity))),
-        segmentedControlRect.bottomRight + effectivePadding.bottomRight,
+        defaultPadding.bottomRight + segmentedControlRect.bottomRight + effectivePadding.bottomRight,
       );
     }
 
@@ -536,7 +537,7 @@ void main() {
     );
   });
 
-  testWidgets('Width of each segmented control segment is determined by widest widget', (WidgetTester tester) async {
+  testWidgets('Width of each segmented control segment is determined by widest widget when shrinkWrap is true', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{
       0: Container(constraints: const BoxConstraints.tightFor(width: 50.0)),
       1: Container(constraints: const BoxConstraints.tightFor(width: 100.0)),
@@ -551,6 +552,8 @@ void main() {
             children: children,
             groupValue: groupValue,
             onValueChanged: defaultCallback,
+            padding: EdgeInsets.zero,
+            shrinkWrap: true,
           );
         },
       ),
@@ -567,7 +570,7 @@ void main() {
     expect(childWidth, 200.0 + 9.25 * 2);
   });
 
-  testWidgets('Width is finite in unbounded space', (WidgetTester tester) async {
+  testWidgets('Width is finite in unbounded space when shrinkWrap is true', (WidgetTester tester) async {
     const Map<int, Widget> children = <int, Widget>{
       0: SizedBox(width: 50),
       1: SizedBox(width: 70),
@@ -583,6 +586,8 @@ void main() {
                 children: children,
                 groupValue: groupValue,
                 onValueChanged: defaultCallback,
+                padding: EdgeInsets.zero,
+                shrinkWrap: true,
               ),
             ],
           );
@@ -938,7 +943,7 @@ void main() {
     expect(secondThumbRect.center.dx, greaterThan(initialThumbRect.center.dx));
     expect(secondThumbRect.center.dx, lessThan(tester.getCenter(find.text('B')).dx));
 
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pumpAndSettle();
 
     // Eventually moves to C.
     expect(
