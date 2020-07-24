@@ -410,7 +410,13 @@ class IOSSimulator extends Device {
       }
     }
 
-    // Prepare launch arguments.
+    // TODO(jonahwilliams): remove after enabling null_assertions by default
+    // in the engine.
+    String dartFlags = debuggingOptions.dartFlags ?? '';
+    if (debuggingOptions.buildInfo.dartExperiments.contains('non-nullable')) {
+      dartFlags += '--null_assertions';
+    }
+
     final List<String> args = <String>[
       '--enable-dart-profiling',
       if (debuggingOptions.debuggingEnabled) ...<String>[
@@ -424,6 +430,8 @@ class IOSSimulator extends Device {
         if (debuggingOptions.useTestFonts) '--use-test-fonts',
         if (debuggingOptions.traceAllowlist != null) '--trace-allowlist="${debuggingOptions.traceAllowlist}"',
         '--observatory-port=${debuggingOptions.hostVmServicePort ?? 0}',
+        if (debuggingOptions.verboseSystemLogs) '--verbose-logging',
+        if (dartFlags.isNotEmpty) '--dart-flags="$dartFlags"',
       ],
     ];
 

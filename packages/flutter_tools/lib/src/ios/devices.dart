@@ -355,6 +355,13 @@ class IOSDevice extends Device {
     final int assumedObservatoryPort = debuggingOptions?.deviceVmServicePort
       ?? math.Random(packageId.hashCode).nextInt(16383) + 49152;
 
+    // TODO(jonahwilliams): remove after enabling null_assertions by default
+    // in the engine.
+    String dartFlags = debuggingOptions.dartFlags ?? '';
+    if (debuggingOptions.buildInfo.dartExperiments.contains('non-nullable')) {
+      dartFlags += '--null_assertions';
+    }
+
     // Step 3: Attempt to install the application on the device.
     final List<String> launchArguments = <String>[
       '--enable-dart-profiling',
@@ -364,7 +371,7 @@ class IOSDevice extends Device {
       '--disable-service-auth-codes',
       '--observatory-port=$assumedObservatoryPort',
       if (debuggingOptions.startPaused) '--start-paused',
-      if (debuggingOptions.dartFlags.isNotEmpty) '--dart-flags="${debuggingOptions.dartFlags}"',
+      if (dartFlags.isNotEmpty) '--dart-flags="$dartFlags"',
       if (debuggingOptions.useTestFonts) '--use-test-fonts',
       // "--enable-checked-mode" and "--verify-entry-points" should always be
       // passed when we launch debug build via "ios-deploy". However, we don't

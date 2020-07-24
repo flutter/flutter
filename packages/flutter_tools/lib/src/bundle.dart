@@ -109,6 +109,7 @@ class BundleBuilder {
       trackWidgetCreation: trackWidgetCreation,
       treeShakeIcons: treeShakeIcons,
       dartDefines: buildInfo.dartDefines,
+      extraFrontEndOptions: extraFrontEndOptions,
     );
     // Work around for flutter_tester placing kernel artifacts in odd places.
     if (applicationKernelFilePath != null) {
@@ -135,6 +136,7 @@ Future<void> buildWithAssemble({
   bool trackWidgetCreation,
   @required bool treeShakeIcons,
   List<String> dartDefines,
+  List<String> extraFrontEndOptions,
 }) async {
   // If the precompiled flag was not passed, force us into debug mode.
   buildMode = precompiled ? buildMode : BuildMode.debug;
@@ -155,6 +157,8 @@ Future<void> buildWithAssemble({
       kIconTreeShakerFlag: treeShakeIcons ? 'true' : null,
       if (dartDefines != null && dartDefines.isNotEmpty)
         kDartDefines: encodeDartDefines(dartDefines),
+      if (extraFrontEndOptions != null && extraFrontEndOptions.isNotEmpty)
+        kExtraFrontEndOptions: encodeDartDefines(extraFrontEndOptions),
     },
     artifacts: globals.artifacts,
     fileSystem: globals.fs,

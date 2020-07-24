@@ -482,6 +482,9 @@ class FlutterPlatform extends PlatformPlugin {
         disableServiceAuthCodes: disableServiceAuthCodes,
         observatoryPort: explicitObservatoryPort,
         serverPort: server.port,
+        // TODO(jonahwilliams): remove after enabling null_assertions by default
+        // in the engine.
+        nullSafety: extraFrontEndOptions?.contains('--enable-experiment=non-nullable') ?? false,
       );
       subprocessActive = true;
       finalizers.add(() async {
@@ -813,6 +816,7 @@ class FlutterPlatform extends PlatformPlugin {
     bool disableServiceAuthCodes = false,
     int observatoryPort,
     int serverPort,
+    bool nullSafety = false,
   }) {
     assert(executable != null); // Please provide the path to the shell in the SKY_SHELL environment variable.
     assert(!startPaused || enableObservatory);
@@ -843,6 +847,8 @@ class FlutterPlatform extends PlatformPlugin {
       '--enable-dart-profiling',
       '--non-interactive',
       '--use-test-fonts',
+      if (nullSafety)
+        '--dart-flags=--null_assertions',
       '--packages=$packages',
       testPath,
     ];
