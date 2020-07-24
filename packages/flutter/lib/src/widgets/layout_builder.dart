@@ -253,7 +253,7 @@ mixin RenderConstrainedLayoutBuilder<ConstraintType extends Constraints, ChildTy
 /// DartPad window to see [LayoutBuilder] in action!
 /// 
 /// ```dart
-/// class LayoutBuilderExample extends StatelessWidget {
+/// class BasicLayoutBuilder extends StatelessWidget {
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return Scaffold(
