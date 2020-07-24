@@ -9,11 +9,11 @@ import 'dart:typed_data';
 import 'dart:ui' as ui show Gradient, TextBox, lerpDouble;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
 
 import 'alignment.dart';
 import 'basic_types.dart';
 import 'box_fit.dart';
+import 'colors.dart';
 import 'decoration.dart';
 import 'edge_insets.dart';
 import 'image_provider.dart';
