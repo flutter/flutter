@@ -1,4 +1,4 @@
-Signature: 0212c8288e5f0e4cde3e33cff50375d1
+Signature: 0eba58ca7b443c612cf1e8ed8d7c296e
 
 UNUSED LICENSES:
 
@@ -3495,8 +3495,8 @@ FILE: ../../../third_party/skia/src/gpu/ops/GrQuadPerEdgeAA.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrQuadPerEdgeAA.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrStrokeRectOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrStrokeRectOp.h
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeGeometry.cpp
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeGeometry.h
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokePatchBuilder.cpp
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokePatchBuilder.h
 FILE: ../../../third_party/skia/src/gpu/text/GrAtlasManager.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrAtlasManager.h
 FILE: ../../../third_party/skia/src/gpu/text/GrSDFMaskFilter.cpp
