@@ -12,6 +12,8 @@ void main() {
   macroPerfTestE2E(
     'textfield_perf',
     kTextRouteName,
+    // The driver version doesn't have this delay.
+    pageDelay: const Duration(milliseconds: 50),
     body: (WidgetController controller) async {
       final Finder textfield = find.byKey(const ValueKey<String>('basic-textfield'));
       controller.tap(textfield);
