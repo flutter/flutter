@@ -61,11 +61,12 @@ enum _ScaffoldSlot {
   statusBar,
 }
 
-/// Doc
+/// Manages the multiple [Scaffold]s that a given [SnackBar] is currently displaying
+/// on, along with the associated [ScaffoldFeatureController] for the SnackBar.
 class _MultiScaffoldSnackBar {
-  _MultiScaffoldSnackBar(this.snackbar);
+  _MultiScaffoldSnackBar(this.snackBar);
 
-  final SnackBar snackbar;
+  final SnackBar snackBar;
   final Map<ScaffoldState, ScaffoldFeatureController<SnackBar, SnackBarClosedReason>> _controllerForScaffold = <ScaffoldState, ScaffoldFeatureController<SnackBar, SnackBarClosedReason>>{};
 
   void addControllerForScaffold(ScaffoldState scaffold, ScaffoldFeatureController<SnackBar, SnackBarClosedReason> controller) {
@@ -82,9 +83,10 @@ class _MultiScaffoldSnackBar {
 }
 
 
-/// Doc
+/// Dispatches feature events to registered [Scaffold]s.
 class ScaffoldMessenger extends StatefulWidget {
-  /// Doc
+  /// Creates a widget that provides [Scaffold] feature events to its registered
+  /// [Scaffold] descendants.
   const ScaffoldMessenger({
     Key key,
     @required this.child,
@@ -102,7 +104,7 @@ class ScaffoldMessenger extends StatefulWidget {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// ScaffoldMessages scaffoldMessenger = ScaffoldMessages.of(context);
+  /// ScaffoldMessenger scaffoldMessenger = ScaffoldMessenger.of(context);
   /// scaffoldMessenger.showSnackBar(const SnackBar(content: Text('Snack-tastic'));
   /// ```
   static ScaffoldMessengerState of(BuildContext context) {
@@ -114,7 +116,13 @@ class ScaffoldMessenger extends StatefulWidget {
   ScaffoldMessengerState createState() => ScaffoldMessengerState();
 }
 
-/// Doc
+/// State associated with a [ScaffoldMessenger] widget.
+///
+/// A [ScaffoldMessengerState] object can be used to [showSnackBar] for every
+/// registered [Scaffold] that is a descendant of the associated
+/// [ScaffoldMessenger].
+///
+/// Typically obtained via [ScaffoldMessenger.of].
 class ScaffoldMessengerState extends State<ScaffoldMessenger> {
   final LinkedHashSet<ScaffoldState> _scaffolds = LinkedHashSet<ScaffoldState>();
   final Queue<_MultiScaffoldSnackBar> _multiSnackBars = Queue<_MultiScaffoldSnackBar>();
@@ -123,9 +131,9 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> {
     // Do we have SnackBars to send to this new Scaffold's queue?
     if (!_scaffolds.contains(scaffold) && _multiSnackBars.isNotEmpty) {
       for (final _MultiScaffoldSnackBar multiSnackBar in _multiSnackBars) {
-        final ScaffoldFeatureController<SnackBar, SnackBarClosedReason> controller = scaffold.showSnackBar(multiSnackBar.snackbar);
+        final ScaffoldFeatureController<SnackBar, SnackBarClosedReason> controller = scaffold.showSnackBar(multiSnackBar.snackBar);
         controller.closed.then((SnackBarClosedReason reason) {
-          _handleSnackBarStatusChange(multiSnackBar.snackbar, reason);
+          _handleSnackBarStatusChange(multiSnackBar.snackBar, reason);
         });
         multiSnackBar.addControllerForScaffold(scaffold, controller);
       }
@@ -138,22 +146,22 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> {
     // We may also have a reference to this Scaffold for the SnackBars we are
     // currently broadcasting.
     if (_multiSnackBars.isNotEmpty) {
-      for (final _MultiScaffoldSnackBar multiSnackbar in _multiSnackBars) {
-        multiSnackbar.removeControllerForScaffold(scaffold);
+      for (final _MultiScaffoldSnackBar multiSnackBar in _multiSnackBars) {
+        multiSnackBar.removeControllerForScaffold(scaffold);
       }
     }
   }
 
-  void _handleSnackBarStatusChange(SnackBar snackbar, SnackBarClosedReason reason) {
-    // We've already completed and popped the finished snackbar, we're here due
-    // to the subsequent completions of propagated snackbars, so get out.
-    if (_multiSnackBars.isEmpty || snackbar != _multiSnackBars.first.snackbar) {
+  void _handleSnackBarStatusChange(SnackBar snackBar, SnackBarClosedReason reason) {
+    // We've already completed and popped the finished snackBar, we're here due
+    // to the subsequent completions of propagated snackBars, so get out.
+    if (_multiSnackBars.isEmpty || snackBar != _multiSnackBars.first.snackBar) {
       return;
     }
-    // We're respecting the ScaffoldMessenger snackbar queue.
-    assert(snackbar == _multiSnackBars.first.snackbar);
+    // We're respecting the ScaffoldMessenger snackBar queue.
+    assert(snackBar == _multiSnackBars.first.snackBar);
 
-    // Dismiss snackbar across Scaffolds/remove from local Scaffold queue if
+    // Dismiss snackBar across Scaffolds/remove from local Scaffold queue if
     // not yet presented.
     for (final ScaffoldState scaffold in _scaffolds) {
       _multiSnackBars.first.dismissFromScaffold(scaffold, reason);
@@ -162,14 +170,17 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> {
     _multiSnackBars.removeFirst();
   }
 
-  /// Doc
-  ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(SnackBar snackbar) {
-    final _MultiScaffoldSnackBar _multiSnackBar = _MultiScaffoldSnackBar(snackbar);
+  /// Creates a [_MultiScaffoldSnackBar] in order to distribute a [SnackBar]
+  /// notification across all registered [Scaffolds].
+  ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(SnackBar snackBar) {
+    final _MultiScaffoldSnackBar _multiSnackBar = _MultiScaffoldSnackBar(snackBar);
     ScaffoldFeatureController<SnackBar, SnackBarClosedReason> controller;
     for (final ScaffoldState scaffold in _scaffolds) {
-      controller = scaffold.showSnackBar(snackbar);
+      controller = scaffold.showSnackBar(snackBar);
+      // Set up handler for when the SnackBar is completed, so that all of the
+      // other instances of the same SnackBar can be completed.
       controller.closed.then((SnackBarClosedReason reason) {
-        _handleSnackBarStatusChange(snackbar, reason);
+        _handleSnackBarStatusChange(snackBar, reason);
       });
       _multiSnackBar.addControllerForScaffold(scaffold, controller);
     }
@@ -182,11 +193,12 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> {
   }
 
   // TODO(Piinks): how might state restoration need to be considered?
-  // Test with mix of global and local snackbars (ScaffoldMessengerState.showSnackBar + ScaffoldState.showSnackBar)
+  // Test with mix of global and local snackBars (ScaffoldMessengerState.showSnackBar + ScaffoldState.showSnackBar)
   // ++ later:
   //  - openDrawer?
   //  - openEndDrawer?
   //  - showMaterialBanner, needs Scaffold support first, https://github.com/flutter/flutter/issues/60024
+  //    - seems most reasonable extension, animated notification from above, wherein SnackBars notify from below.
   //  - showBottomSheet?
 
   @override
