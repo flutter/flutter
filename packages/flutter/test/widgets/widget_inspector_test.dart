@@ -2356,7 +2356,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             equals('true'));
 
         // Create an error.
-        FlutterError.reportError(FlutterErrorDetailsForRendering(
+        FlutterError.reportError(FlutterErrorDetails(
           library: 'rendering library',
           context: ErrorDescription('during layout'),
           exception: StackTrace.current,
@@ -2379,7 +2379,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
                 '══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞════════════'));
 
         // Send a second error.
-        FlutterError.reportError(FlutterErrorDetailsForRendering(
+        FlutterError.reportError(FlutterErrorDetails(
           library: 'rendering library',
           context: ErrorDescription('also during layout'),
           exception: StackTrace.current,
@@ -2407,7 +2407,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         binding.postTest();
 
         // Send another error.
-        FlutterError.reportError(FlutterErrorDetailsForRendering(
+        FlutterError.reportError(FlutterErrorDetails(
           library: 'rendering library',
           context: ErrorDescription('during layout'),
           exception: StackTrace.current,
