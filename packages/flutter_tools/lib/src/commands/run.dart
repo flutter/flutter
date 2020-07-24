@@ -52,6 +52,10 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
             'By default, this is not enabled to reduce the overhead. '
             'This is only available in profile or debug build. ',
       )
+      ..addFlag('purge-persistent-cache',
+        negatable: false,
+        help: 'Remove all existing persistent cache.',
+      )
       ..addOption('route',
         help: 'Which route to load when running the app.',
       )
@@ -74,6 +78,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get traceStartup => boolArg('trace-startup');
   bool get cacheSkSL => boolArg('cache-sksl');
   bool get dumpSkpOnShaderCompilation => boolArg('dump-skp-on-shader-compilation');
+  bool get purgePersistentCache => boolArg('purge-persistent-cache');
 
   String get route => stringArg('route');
 }
@@ -395,6 +400,7 @@ class RunCommand extends RunCommandBase {
         endlessTraceBuffer: boolArg('endless-trace-buffer'),
         dumpSkpOnShaderCompilation: dumpSkpOnShaderCompilation,
         cacheSkSL: cacheSkSL,
+        purgePersistentCache: purgePersistentCache,
         deviceVmServicePort: deviceVmservicePort,
         hostVmServicePort: hostVmservicePort,
         verboseSystemLogs: boolArg('verbose-system-logs'),
