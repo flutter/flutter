@@ -1239,9 +1239,10 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 /// }
 /// ```
 enum LiveTestWidgetsFlutterBindingFramePolicy {
-  /// Strictly show only frames that are explicitly pumped. This most closely
-  /// matches the [AutomatedTestWidgetsFlutterBinding] (the defualt binding for
-  /// `flutter test`) behavior.
+  /// Strictly show only frames that are explicitly pumped.
+  ///
+  /// This most closely matches the [AutomatedTestWidgetsFlutterBinding]
+  /// (the defualt binding for `flutter test`) behavior.
   onlyPumps,
 
   /// Show pumped frames, and additionally schedule and run frames to fade
