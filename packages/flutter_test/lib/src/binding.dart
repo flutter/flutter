@@ -1226,10 +1226,19 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 /// frames.
 ///
 /// These values are set on the binding's
-/// [LiveTestWidgetsFlutterBinding.framePolicy] property. The default is
-/// [fadePointers]. To set a value while still allowing the test file to
-/// work as a normal test, add the following code to your test file at the
-/// top of your `void main() { }` function, before calls to
+/// [LiveTestWidgetsFlutterBinding.framePolicy] property.
+///
+/// {@template flutter.flutter_test.frame_policy}
+/// The default is [fadePointers]. Setting this to anything other than
+/// [onlyPumps] means pumping extra frames, which might involve calling builders
+/// more, or calling paint callbacks more, etc, which might interfere with the
+/// test. If you know your test file wouldn't be affected by this, you can set
+/// it to [fullyLive] or [benchmarkLive] persistently in that particular test
+/// file.
+///
+/// To set a value while still allowing the test
+/// file to work as a normal test, add the following code to your test file at
+/// the top of your `void main() { }` function, before calls to
 /// [testWidgets]:
 ///
 /// ```dart
@@ -1238,6 +1247,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 ///   binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.[thePolicy];
 /// }
 /// ```
+/// {@endtemplate}
 enum LiveTestWidgetsFlutterBindingFramePolicy {
   /// Strictly show only frames that are explicitly pumped.
   ///
@@ -1366,28 +1376,9 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   /// asynchronous pause in the test (as would normally happen when
   /// running an application with [WidgetsFlutterBinding]).
   ///
-  /// The default behavior is
-  /// [LiveTestWidgetsFlutterBindingFramePolicy.fadePointers].
+  /// {@macro flutter.flutter_test.frame_policy}
   ///
   /// See [LiveTestWidgetsFlutterBindingFramePolicy].
-  ///
-  /// Setting this to anything other than
-  /// [LiveTestWidgetsFlutterBindingFramePolicy.onlyPumps] means pumping extra
-  /// frames, which might involve calling builders more, or calling paint
-  /// callbacks more, etc, which might interfere with the test. If you know your
-  /// test file wouldn't be affected by this, you can set it to
-  /// [LiveTestWidgetsFlutterBindingFramePolicy.fullyLive] or
-  /// [LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive] persistently in
-  /// that particular test file. To do so while still allowing the test file to
-  /// work as a normal test, add the following code to your test file at the
-  /// top of your `void main() { }` function, before calls to
-  /// [testWidgets]:
-  ///
-  /// ```dart
-  /// TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
-  /// if (binding is LiveTestWidgetsFlutterBinding)
-  ///   binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
-  /// ```
   LiveTestWidgetsFlutterBindingFramePolicy framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fadePointers;
 
   @override
