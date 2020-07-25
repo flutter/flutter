@@ -13,10 +13,10 @@ void main() {
     kPictureCacheRouteName,
     pageDelay: const Duration(seconds: 1),
     driverOps: (FlutterDriver driver) async {
-      final SerializableFinder tabbarScroll = find.byValueKey('tabbar_view');
+      final SerializableFinder tabBarView = find.byValueKey('tabbar_view');
       Future<void> _scrollOnce(double offset) async {
         // Technically it's not scrolling but moving
-        await driver.scroll(tabbarScroll, offset, 0.0, const Duration(milliseconds: 300));
+        await driver.scroll(tabBarView, offset, 0.0, const Duration(milliseconds: 300));
         await Future<void>.delayed(const Duration(milliseconds: 500));
       }
       for (int i = 0; i < 3; i += 1) {
