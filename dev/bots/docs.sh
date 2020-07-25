@@ -40,7 +40,7 @@ function script_location() {
 # Zip up the docs so people can download them for offline usage.
 function create_offline_zip() {
   # Must be run from "$FLUTTER_ROOT/dev/docs"
-  echo "Zipping Flutter offline docs archive."
+  echo "$(date): Zipping Flutter offline docs archive."
   rm -rf flutter.docs.zip doc/offline
   (cd ./doc; zip -r -9 -q ../flutter.docs.zip .)
 }
@@ -51,7 +51,7 @@ function create_docset() {
   # Must have dashing installed: go get -u github.com/technosophos/dashing
   # Dashing produces a LOT of log output (~30MB), so we redirect it, and just
   # show the end of it if there was a problem.
-  echo "Building Flutter docset."
+  echo "$(date): Building Flutter docset."
   rm -rf flutter.docset
   # If dashing gets stuck, Cirrus will time out the build after an hour, and we
   # never get to see the logs. Thus, we time it out after 30 minutes to see the
@@ -68,7 +68,7 @@ function create_docset() {
 # as part of their process.
 function move_offline_into_place() {
   # Must be run from "$FLUTTER_ROOT/dev/docs"
-  echo "Moving offline data into place."
+  echo "$(date): Moving offline data into place."
   mkdir -p doc/offline
   mv flutter.docs.zip doc/offline/flutter.docs.zip
   du -sh doc/offline/flutter.docs.zip
@@ -88,7 +88,7 @@ SCRIPT_LOCATION="$(script_location)"
 # then this line will need to as well.
 FLUTTER_ROOT="$(dirname "$(dirname "$SCRIPT_LOCATION")")"
 
-echo "Running docs.sh"
+echo "$(date): Running docs.sh"
 
 if [[ ! -d "$FLUTTER_ROOT" || ! -f "$FLUTTER_ROOT/bin/flutter" ]]; then
   echo "Unable to locate the Flutter installation (using FLUTTER_ROOT: $FLUTTER_ROOT)"
@@ -136,7 +136,7 @@ if [[ -n "$CIRRUS_CI" && -z "$CIRRUS_PR" ]]; then
 
   echo "This is not a pull request; considering whether to upload docs... (branch=$CIRRUS_BRANCH)"
   if [[ "$CIRRUS_BRANCH" == "master" ]]; then
-    echo "Updating $CIRRUS_BRANCH docs: https://master-api.flutter.dev/"
+    echo "$(date): Updating $CIRRUS_BRANCH docs: https://master-api.flutter.dev/"
     # Disable search indexing on the master staging site so searches get only
     # the stable site.
     echo -e "User-agent: *\nDisallow: /" > "$FLUTTER_ROOT/dev/docs/doc/robots.txt"
@@ -147,7 +147,7 @@ if [[ -n "$CIRRUS_CI" && -z "$CIRRUS_PR" ]]; then
   if [[ "$CIRRUS_BRANCH" == "stable" ]]; then
     # Enable search indexing on the master staging site so searches get only
     # the stable site.
-    echo "Updating $CIRRUS_BRANCH docs: https://api.flutter.dev/"
+    echo "$(date): Updating $CIRRUS_BRANCH docs: https://api.flutter.dev/"
     echo -e "# All robots welcome!" > "$FLUTTER_ROOT/dev/docs/doc/robots.txt"
     export FIREBASE_TOKEN="$FIREBASE_PUBLIC_TOKEN"
     deploy 5 docs-flutter-dev
