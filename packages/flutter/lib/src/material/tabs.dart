@@ -999,6 +999,9 @@ class _TabBarState extends State<TabBar> {
   }
 
   void _handleTap(int index) {
+    if (_controller.indexIsChanging)
+      return;
+
     assert(index >= 0 && index < widget.tabs.length);
     _controller.animateTo(index);
     if (widget.onTap != null) {
