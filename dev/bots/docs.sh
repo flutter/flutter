@@ -59,7 +59,7 @@ function create_docset() {
   (timeout '30m' dashing build --source ./doc --config ./dashing.json > /tmp/dashing.log 2>&1 || \
   (echo 'Dashing failed! Tailing last 200 lines of log...'; tail -200 /tmp/dashing.log; exit 1)) && \
   cp ./doc/flutter/static-assets/favicon.png ./flutter.docset/icon.png && \
-  "$DART" ./dashing_postprocess.dart && \
+  "$DART" --disable-dart-dev ./dashing_postprocess.dart && \
   tar cf flutter.docset.tar.gz --use-compress-program="gzip --best" flutter.docset
 }
 
@@ -121,8 +121,8 @@ fi
 # a custom index.html, placing everything into dev/docs/doc.
 (cd "$FLUTTER_ROOT/dev/tools" && "$FLUTTER" pub get)
 (cd "$FLUTTER_ROOT/dev/tools" && "$PUB" get)
-(cd "$FLUTTER_ROOT" && "$DART" "$FLUTTER_ROOT/dev/tools/dartdoc.dart")
-(cd "$FLUTTER_ROOT" && "$DART" "$FLUTTER_ROOT/dev/tools/java_and_objc_doc.dart")
+(cd "$FLUTTER_ROOT" && "$DART" --disable-dart-dev "$FLUTTER_ROOT/dev/tools/dartdoc.dart")
+(cd "$FLUTTER_ROOT" && "$DART" --disable-dart-dev "$FLUTTER_ROOT/dev/tools/java_and_objc_doc.dart")
 
 # Upload new API docs when running on Cirrus
 if [[ -n "$CIRRUS_CI" && -z "$CIRRUS_PR" ]]; then
