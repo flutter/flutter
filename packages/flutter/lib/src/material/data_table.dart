@@ -371,12 +371,9 @@ class DataCell {
 /// {@end-tool}
 ///
 /// [DataTable] can be sorted on the basis of any column in [columns] in
-/// ascending or descending order. If [sortColumnIndex] is mentioned then that
-/// particular column is the column by which [DataTable] will be sorted and if
-/// [sortAscending] is set to true then the [DataTable] will be displayed in
-/// ascending order of that column and if it is set to false then the
-/// [DataTable] will be displayed in descending order of that column. Manual
-/// sorting is required in order to sort [DataTable] on the basis of any row.
+/// ascending or descending order. If [sortColumnIndex] is non-null, then the
+/// table will be sorted by the values in the specified column. The boolean
+/// [sortAscending] flag controls the sort order.
 ///
 /// See also:
 ///
