@@ -719,9 +719,6 @@ abstract class WidgetController {
       Duration duration = const Duration(milliseconds: 50),
     }
   ) {
-    assert(finder != null);
-    assert(scrollable != null);
-    assert(scrollable.evaluate().isNotEmpty);
     assert(maxScrolls > 0);
     return TestAsyncUtils.guard<void>(() async {
       Offset moveStep;
