@@ -627,7 +627,7 @@ class AndroidDevice extends Device {
     }
 
     // TODO(jonahwilliams): remove after enabling null_assertions by default
-    // in the engine.
+    // in the engine https://github.com/flutter/flutter/issues/61042.
     String dartFlags = debuggingOptions.dartFlags ?? '';
     if (debuggingOptions.buildInfo.dartExperiments.contains('non-nullable')) {
       dartFlags += '--null_assertions';

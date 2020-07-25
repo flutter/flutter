@@ -182,7 +182,7 @@ class FlutterTesterDevice extends Device {
       if (debuggingOptions.hasObservatoryPort)
         '--observatory-port=${debuggingOptions.hostVmServicePort}',
       // TODO(jonahwilliams): remove after enabling null_assertions by default
-      // in the engine.
+      // in the engine https://github.com/flutter/flutter/issues/61042.
       if (buildInfo.dartExperiments.contains('non-nullable'))
         '--dart-flags=--null_assertions',
       applicationKernelFilePath
