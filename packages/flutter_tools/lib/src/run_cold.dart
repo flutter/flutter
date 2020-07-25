@@ -23,12 +23,16 @@ class ColdRunner extends ResidentRunner {
     this.applicationBinary,
     bool ipv6 = false,
     bool stayResident = true,
-  }) : super(devices,
-             target: target,
-             debuggingOptions: debuggingOptions,
-             hotMode: false,
-             stayResident: stayResident,
-             ipv6: ipv6);
+    bool machine = false,
+  }) : super(
+          devices,
+          target: target,
+          debuggingOptions: debuggingOptions,
+          hotMode: false,
+          stayResident: stayResident,
+          ipv6: ipv6,
+          machine: machine,
+        );
 
   final bool traceStartup;
   final bool awaitFirstFrameWhenTracing;

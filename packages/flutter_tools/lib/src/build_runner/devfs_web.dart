@@ -851,7 +851,7 @@ class WebDevFS implements DevFS {
       success: true,
       syncedBytes: codeFile.lengthSync(),
       invalidatedSourcesCount: invalidatedFiles.length,
-    )..invalidatedModules = modules;
+    );
   }
 
   @visibleForTesting

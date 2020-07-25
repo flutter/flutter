@@ -217,6 +217,7 @@ class SelectableText extends StatefulWidget {
     this.minLines,
     this.maxLines,
     this.cursorWidth = 2.0,
+    this.cursorHeight,
     this.cursorRadius,
     this.cursorColor,
     this.dragStartBehavior = DragStartBehavior.start,
@@ -267,6 +268,7 @@ class SelectableText extends StatefulWidget {
     this.minLines,
     this.maxLines,
     this.cursorWidth = 2.0,
+    this.cursorHeight,
     this.cursorRadius,
     this.cursorColor,
     this.dragStartBehavior = DragStartBehavior.start,
@@ -364,6 +366,9 @@ class SelectableText extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.cursorWidth}
   final double cursorWidth;
 
+  /// {@macro flutter.widgets.editableText.cursorHeight}
+  final double cursorHeight;
+
   /// {@macro flutter.widgets.editableText.cursorRadius}
   final Radius cursorRadius;
 
@@ -433,6 +438,7 @@ class SelectableText extends StatefulWidget {
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
     properties.add(DoubleProperty('cursorWidth', cursorWidth, defaultValue: 2.0));
+    properties.add(DoubleProperty('cursorHeight', cursorHeight, defaultValue: null));
     properties.add(DiagnosticsProperty<Radius>('cursorRadius', cursorRadius, defaultValue: null));
     properties.add(DiagnosticsProperty<Color>('cursorColor', cursorColor, defaultValue: null));
     properties.add(FlagProperty('selectionEnabled', value: selectionEnabled, defaultValue: true, ifFalse: 'selection disabled'));
@@ -626,6 +632,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
         onSelectionHandleTapped: _handleSelectionHandleTapped,
         rendererIgnoresPointer: true,
         cursorWidth: widget.cursorWidth,
+        cursorHeight: widget.cursorHeight,
         cursorRadius: cursorRadius,
         cursorColor: cursorColor,
         cursorOpacityAnimates: cursorOpacityAnimates,

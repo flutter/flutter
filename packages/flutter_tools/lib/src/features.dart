@@ -227,7 +227,7 @@ const Feature flutterFuchsiaFeature = Feature(
   environmentOverride: 'FLUTTER_FUCHSIA',
   master: FeatureChannelSetting(
     available: true,
-    enabledByDefault: true,
+    enabledByDefault: false,
   ),
 );
 

@@ -388,6 +388,7 @@ $ex
 }
 
 Future<Device> findTargetDevice() async {
+  final DeviceManager deviceManager = globals.deviceManager;
   final List<Device> devices = await deviceManager.findTargetDevices(FlutterProject.current());
 
   if (deviceManager.hasSpecifiedDeviceId) {

@@ -201,4 +201,23 @@ Future<void> main() async {
     console.clear();
     FlutterError.resetErrorCount();
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/62223
+  test('Error reporting - empty stack', () async {
+    expect(console, isEmpty);
+    FlutterError.dumpErrorToConsole(FlutterErrorDetails(
+      exception: 'exception - empty stack',
+      stack: StackTrace.fromString(''),
+    ));
+    expect(console.join('\n'), matches(
+      r'^══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞═════════════════════════════════════════════════════════\n'
+      r'The following message was thrown:\n'
+      r'exception - empty stack\n'
+      r'\n'
+      r'When the exception was thrown, this was the stack:\n'
+      r'...\n'
+      r'════════════════════════════════════════════════════════════════════════════════════════════════════$',
+    ));
+    console.clear();
+  });
 }
