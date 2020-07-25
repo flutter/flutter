@@ -235,8 +235,10 @@ class TabController extends ChangeNotifier {
         .animateTo(_index.toDouble(), duration: duration, curve: curve)
         .whenCompleteOrCancel(() {
           _indexIsChangingCount -= 1;
-          _ongoingAnimationDuration = null;
-          _ongoingAnimationCurve = null;
+          if (_indexIsChangingCount == 0) {
+            _ongoingAnimationDuration = null;
+            _ongoingAnimationCurve = null;
+          }
           notifyListeners();
         });
     } else {
