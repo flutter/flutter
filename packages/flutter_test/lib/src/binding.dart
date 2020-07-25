@@ -1277,7 +1277,7 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
   ///
   /// This allows all frame requests from the engine to be serviced, and allows
   /// all frame requests that are artificially triggered to be serviced, but
-  /// prevents the framework from requesting any frames from the engine itself.
+  /// ignores [scheduleFrame] requests from the framework.
   /// Therefore any animation will not run for this mode as animation is
   /// implemented by constantly requesting new frames from the framework.
   ///
@@ -1294,11 +1294,11 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
   /// This is used for running the test on a device, where scheduling of new
   /// frames respects what the engine and the device needed.
   ///
-  /// Compared to [fullyLive] this policy ignores the frame requests from pump
+  /// Compared to [fullyLive] this policy ignores the frame requests from [pump]
   /// of the test code so that the frame scheduling respects the situation of
-  /// that for the real environment, and avoids waiting for the new frame when
-  /// driving the test in methods like [WidgetTester.handlePointerEventRecord]
-  /// or [WidgetTester.fling].
+  /// that for the real environment, and avoids waiting for the artificially
+  /// [pump]ed frame frame when driving the test in methods like
+  /// [WidgetTester.handlePointerEventRecord] or [WidgetTester.fling].
   ///
   /// Compared to [benchmark] this policy can be used for capturing the
   /// animation frames requested by the framework.
@@ -1356,7 +1356,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   bool _viewNeedsPaint = false;
   bool _runningAsyncTasks = false;
 
-  /// The strategy for [pump]ing and for requesting new frames.
+  /// The strategy for [pump]ing and requesting new frames.
   ///
   /// Whether to have [pump] with a duration only pump a single frame
   /// (as would happen in a normal test environment using
