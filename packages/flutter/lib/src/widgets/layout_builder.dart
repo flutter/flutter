@@ -251,7 +251,7 @@ mixin RenderConstrainedLayoutBuilder<ConstraintType extends Constraints, ChildTy
 ///
 /// This example uses a [LayoutBuilder] to build a different widget depending on the available width. Resize the
 /// DartPad window to see [LayoutBuilder] in action!
-/// 
+///
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
