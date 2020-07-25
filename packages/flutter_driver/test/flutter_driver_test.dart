@@ -35,7 +35,6 @@ void main() {
     MockVM mockVM;
     MockIsolate mockIsolate;
     MockPeer mockPeer;
-    MockIsolate otherIsolate;
 
     void expectLogContains(String message) {
       expect(log, anyElement(contains(message)));
@@ -46,12 +45,8 @@ void main() {
       mockClient = MockVMServiceClient();
       mockVM = MockVM();
       mockIsolate = MockIsolate();
-      otherIsolate = MockIsolate();
       mockPeer = MockPeer();
       when(mockClient.getVM()).thenAnswer((_) => Future<MockVM>.value(mockVM));
-      when(mockClient.onIsolateRunnable).thenAnswer((Invocation invocation) {
-        return Stream<VMIsolateRef>.fromIterable(<VMIsolateRef>[otherIsolate]);
-      });
       when(mockVM.isolates).thenReturn(<VMRunnableIsolate>[mockIsolate]);
       when(mockIsolate.loadRunnable()).thenAnswer((_) => Future<MockIsolate>.value(mockIsolate));
       when(mockIsolate.extensionRpcs).thenReturn(<String>[]);
@@ -65,10 +60,6 @@ void main() {
           VMServiceClientConnection(mockClient, mockPeer)
         );
       };
-      when(otherIsolate.load()).thenAnswer((_) => Future<MockIsolate>.value(otherIsolate));
-      when(otherIsolate.resume()).thenAnswer((Invocation invocation) {
-        return Future<dynamic>.value(null);
-      });
     });
 
     tearDown(() async {
@@ -86,20 +77,15 @@ void main() {
         connectionLog.add('resume');
         return Future<dynamic>.value(null);
       });
-      when(otherIsolate.pauseEvent).thenReturn(MockVMPauseStartEvent());
       when(mockIsolate.onExtensionAdded).thenAnswer((Invocation invocation) {
         connectionLog.add('onExtensionAdded');
         return Stream<String>.fromIterable(<String>['ext.flutter.driver']);
-      });
-      when(otherIsolate.resume()).thenAnswer((Invocation invocation) {
-        connectionLog.add('other-resume');
-        return Future<dynamic>.value(null);
       });
 
       final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
       expect(driver, isNotNull);
       expectLogContains('Isolate is paused at start');
-      expect(connectionLog, <String>['resume', 'streamListen', 'other-resume', 'onExtensionAdded']);
+      expect(connectionLog, <String>['resume', 'streamListen', 'onExtensionAdded']);
     });
 
     test('connects to isolate paused mid-flight', () async {
