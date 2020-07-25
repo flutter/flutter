@@ -718,32 +718,34 @@ abstract class WidgetController {
       int maxScrolls = 50,
       Duration duration = const Duration(milliseconds: 50),
     }
-  ) async {
+  ) {
     assert(finder != null);
     assert(scrollable != null);
     assert(scrollable.evaluate().isNotEmpty);
     assert(maxScrolls > 0);
-    Offset moveStep;
-    switch(widget<Scrollable>(scrollable).axisDirection) {
-      case AxisDirection.up:
-        moveStep = Offset(0, delta);
-        break;
-      case AxisDirection.down:
-        moveStep = Offset(0, -delta);
-        break;
-      case AxisDirection.left:
-        moveStep = Offset(delta, 0);
-        break;
-      case AxisDirection.right:
-        moveStep = Offset(-delta, 0);
-        break;
-    }
-    while(maxScrolls > 0 && finder.evaluate().isEmpty) {
-      await drag(scrollable, moveStep);
-      await pump(duration);
-      maxScrolls -= 1;
-    }
-    await Scrollable.ensureVisible(element(finder));
+    return TestAsyncUtils.guard<void>(() async {
+      Offset moveStep;
+      switch(widget<Scrollable>(scrollable).axisDirection) {
+        case AxisDirection.up:
+          moveStep = Offset(0, delta);
+          break;
+        case AxisDirection.down:
+          moveStep = Offset(0, -delta);
+          break;
+        case AxisDirection.left:
+          moveStep = Offset(delta, 0);
+          break;
+        case AxisDirection.right:
+          moveStep = Offset(-delta, 0);
+          break;
+      }
+      while(maxScrolls > 0 && finder.evaluate().isEmpty) {
+        await drag(scrollable, moveStep);
+        await pump(duration);
+        maxScrolls -= 1;
+      }
+      await Scrollable.ensureVisible(element(finder));
+    });
   }
 }
 
