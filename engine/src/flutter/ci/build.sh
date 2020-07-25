@@ -18,5 +18,4 @@ flutter/ci/licenses.sh
 cd flutter/web_sdk
 pub get
 cd ..
-# TODO(jsimmons): reenable this when the analyzer has been updated for Dart 2.10
-# dart web_sdk/test/api_conform_test.dart
+dart web_sdk/test/api_conform_test.dart
