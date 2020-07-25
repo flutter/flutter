@@ -322,11 +322,6 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// changes the [AppBar]'s size. A [SliverAppBar] in a [CustomScrollView]
   /// changes the [AppBar]'s height when scrolled.
   ///
-  /// While including [SliverAppBar.flexibleSpace] it is important to mention
-  /// [expandedHeight] property because if a [flexibleSpace] widget is specified
-  /// [expandedHeight] should be big enough to accommodate whatever that widget
-  /// contains.
-  ///
   /// Typically a [FlexibleSpaceBar]. See [FlexibleSpaceBar] for details.
   final Widget flexibleSpace;
 
@@ -1127,6 +1122,9 @@ class SliverAppBar extends StatefulWidget {
 
   /// This widget is stacked behind the toolbar and the tab bar. It's height will
   /// be the same as the app bar's overall height.
+  ///
+  /// When using [SliverAppBar.flexibleSpace], the [SliverAppBar.expandedHeight]
+  /// must be large enough to accommodate the [SliverAppBar.flexibleSpace] widget.
   ///
   /// Typically a [FlexibleSpaceBar]. See [FlexibleSpaceBar] for details.
   final Widget flexibleSpace;
