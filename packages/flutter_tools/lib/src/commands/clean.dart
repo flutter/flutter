@@ -14,12 +14,10 @@ import '../ios/xcodeproj.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 
-class CleanCommand extends FlutterCommand {
+class CleanCommand extends PubspecYamlRequiredCommand {
   CleanCommand({
     bool verbose = false,
-  }) : _verbose = verbose {
-    requiresPubspecYaml();
-  }
+  }) : _verbose = verbose;
 
   final bool _verbose;
 

@@ -25,15 +25,14 @@ import '../globals.dart' as globals;
 import '../macos/cocoapod_utils.dart';
 import '../plugins.dart';
 import '../project.dart';
-import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
+import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult, PubspecYamlRequiredCommand;
 import '../version.dart';
-import 'build.dart';
 
 /// Produces a .framework for integration into a host iOS app. The .framework
 /// contains the Flutter engine and framework code as well as plugins. It can
 /// be integrated into plain Xcode projects without using or other package
 /// managers.
-class BuildIOSFrameworkCommand extends BuildSubCommand {
+class BuildIOSFrameworkCommand extends PubspecYamlRequiredCommand {
   BuildIOSFrameworkCommand({
     FlutterVersion flutterVersion, // Instantiating FlutterVersion kicks off networking, so delay until it's needed, but allow test injection.
     @required BuildSystem buildSystem,

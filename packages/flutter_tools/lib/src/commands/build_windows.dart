@@ -12,13 +12,12 @@ import '../cache.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
-import '../runner/flutter_command.dart' show FlutterCommandResult;
+import '../runner/flutter_command.dart' show FlutterCommandResult, PubspecYamlRequiredCommand;
 import '../windows/build_windows.dart';
 import '../windows/visual_studio.dart';
-import 'build.dart';
 
 /// A command to build a windows desktop target through a build shell script.
-class BuildWindowsCommand extends BuildSubCommand {
+class BuildWindowsCommand extends PubspecYamlRequiredCommand {
   BuildWindowsCommand({ bool verboseHelp = false }) {
     addTreeShakeIconsFlag();
     usesTargetOption();

@@ -12,9 +12,8 @@ import '../device.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
-class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
+class InstallCommand extends PubspecYamlRequiredCommand with DeviceBasedDevelopmentArtifacts {
   InstallCommand() {
-    requiresPubspecYaml();
     usesDeviceUserOption();
     argParser.addFlag('uninstall-only',
       negatable: true,

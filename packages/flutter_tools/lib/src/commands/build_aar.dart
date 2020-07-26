@@ -15,10 +15,9 @@ import '../cache.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
-import '../runner/flutter_command.dart' show FlutterCommandResult;
-import 'build.dart';
+import '../runner/flutter_command.dart' show FlutterCommandResult, PubspecYamlRequiredCommand;
 
-class BuildAarCommand extends BuildSubCommand {
+class BuildAarCommand extends PubspecYamlRequiredCommand {
   BuildAarCommand({ @required bool verboseHelp }) {
     argParser
       ..addFlag(

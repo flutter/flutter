@@ -9,10 +9,8 @@ import '../plugins.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 
-class InjectPluginsCommand extends FlutterCommand {
-  InjectPluginsCommand() {
-    requiresPubspecYaml();
-  }
+class InjectPluginsCommand extends PubspecYamlRequiredCommand {
+  InjectPluginsCommand();
 
   @override
   final String name = 'inject-plugins';

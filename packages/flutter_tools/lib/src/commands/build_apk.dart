@@ -13,10 +13,9 @@ import '../cache.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
-import '../runner/flutter_command.dart' show FlutterCommandResult;
-import 'build.dart';
+import '../runner/flutter_command.dart' show FlutterCommandResult, PubspecYamlRequiredCommand;
 
-class BuildApkCommand extends BuildSubCommand {
+class BuildApkCommand extends PubspecYamlRequiredCommand {
   BuildApkCommand({bool verboseHelp = false}) {
     addTreeShakeIconsFlag();
     usesTargetOption();

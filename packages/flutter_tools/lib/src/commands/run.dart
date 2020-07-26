@@ -26,7 +26,7 @@ import '../web/web_runner.dart';
 import '../widget_cache.dart';
 import 'daemon.dart';
 
-abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
+abstract class RunCommandBase extends PubspecYamlRequiredCommand with DeviceBasedDevelopmentArtifacts {
   // Used by run and drive commands.
   RunCommandBase({ bool verboseHelp = false }) {
     addBuildModeFlags(defaultToRelease: false, verboseHelp: verboseHelp);
@@ -80,7 +80,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
 
 class RunCommand extends RunCommandBase {
   RunCommand({ bool verboseHelp = false }) : super(verboseHelp: verboseHelp) {
-    requiresPubspecYaml();
     usesFilesystemOptions(hide: !verboseHelp);
     usesExtraFrontendOptions();
     addEnableExperimentation(hide: !verboseHelp);

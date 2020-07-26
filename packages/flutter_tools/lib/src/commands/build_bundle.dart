@@ -11,10 +11,9 @@ import '../features.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
-import '../runner/flutter_command.dart' show FlutterOptions, FlutterCommandResult;
-import 'build.dart';
+import '../runner/flutter_command.dart' show FlutterOptions, FlutterCommandResult, PubspecYamlRequiredCommand;
 
-class BuildBundleCommand extends BuildSubCommand {
+class BuildBundleCommand extends PubspecYamlRequiredCommand {
   BuildBundleCommand({bool verboseHelp = false, this.bundleBuilder}) {
     addTreeShakeIconsFlag();
     usesTargetOption();

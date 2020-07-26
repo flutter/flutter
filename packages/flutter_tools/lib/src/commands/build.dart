@@ -47,9 +47,3 @@ class BuildCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async => null;
 }
-
-abstract class BuildSubCommand extends FlutterCommand {
-  BuildSubCommand() {
-    requiresPubspecYaml();
-  }
-}

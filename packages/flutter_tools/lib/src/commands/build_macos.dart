@@ -13,11 +13,10 @@ import '../features.dart';
 import '../globals.dart' as globals;
 import '../macos/build_macos.dart';
 import '../project.dart';
-import '../runner/flutter_command.dart' show FlutterCommandResult;
-import 'build.dart';
+import '../runner/flutter_command.dart' show FlutterCommandResult, PubspecYamlRequiredCommand;
 
 /// A command to build a macOS desktop target through a build shell script.
-class BuildMacosCommand extends BuildSubCommand {
+class BuildMacosCommand extends PubspecYamlRequiredCommand {
   BuildMacosCommand({ @required bool verboseHelp }) {
     addTreeShakeIconsFlag();
     addSplitDebugInfoOption();

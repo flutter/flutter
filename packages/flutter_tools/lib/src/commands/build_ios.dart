@@ -12,13 +12,12 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../globals.dart' as globals;
 import '../ios/mac.dart';
-import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
-import 'build.dart';
+import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult, PubspecYamlRequiredCommand;
 
 /// Builds an .app for an iOS app to be used for local testing on an iOS device
 /// or simulator. Can only be run on a macOS host. For producing deployment
 /// .ipas, see https://flutter.dev/docs/deployment/ios.
-class BuildIOSCommand extends BuildSubCommand {
+class BuildIOSCommand extends PubspecYamlRequiredCommand {
   BuildIOSCommand({ @required bool verboseHelp }) {
     addTreeShakeIconsFlag();
     addSplitDebugInfoOption();

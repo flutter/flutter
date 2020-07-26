@@ -5,10 +5,8 @@
 import 'dart:async';
 import '../runner/flutter_command.dart';
 
-class MakeHostAppEditableCommand extends FlutterCommand {
+class MakeHostAppEditableCommand extends PubspecYamlRequiredCommand {
   MakeHostAppEditableCommand() {
-    requiresPubspecYaml();
-
     argParser.addFlag(
       'ios',
       help: "Whether to make this project's iOS app editable.",

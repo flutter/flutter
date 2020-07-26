@@ -14,11 +14,10 @@ import '../fuchsia/fuchsia_build.dart';
 import '../fuchsia/fuchsia_pm.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
-import '../runner/flutter_command.dart' show FlutterCommandResult;
-import 'build.dart';
+import '../runner/flutter_command.dart' show FlutterCommandResult, PubspecYamlRequiredCommand;
 
 /// A command to build a Fuchsia target.
-class BuildFuchsiaCommand extends BuildSubCommand {
+class BuildFuchsiaCommand extends PubspecYamlRequiredCommand {
   BuildFuchsiaCommand({ @required bool verboseHelp }) {
     addTreeShakeIconsFlag();
     usesTargetOption();

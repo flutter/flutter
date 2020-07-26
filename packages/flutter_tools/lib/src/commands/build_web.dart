@@ -11,11 +11,10 @@ import '../build_info.dart';
 import '../features.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart'
-    show DevelopmentArtifact, FlutterCommandResult;
+    show DevelopmentArtifact, FlutterCommandResult, PubspecYamlRequiredCommand;
 import '../web/compile.dart';
-import 'build.dart';
 
-class BuildWebCommand extends BuildSubCommand {
+class BuildWebCommand extends PubspecYamlRequiredCommand {
   BuildWebCommand({
     @required bool verboseHelp,
   }) {

@@ -1015,6 +1015,12 @@ abstract class FlutterCommand extends Command<void> {
   List<String> stringsArg(String name) => argResults[name] as List<String>;
 }
 
+abstract class PubspecYamlRequiredCommand extends FlutterCommand {
+  PubspecYamlRequiredCommand() {
+    requiresPubspecYaml();
+  }
+}
+
 /// A mixin which applies an implementation of [requiredArtifacts] that only
 /// downloads artifacts corresponding to an attached device.
 mixin DeviceBasedDevelopmentArtifacts on FlutterCommand {

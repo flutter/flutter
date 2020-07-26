@@ -42,9 +42,8 @@ class PackagesCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async => null;
 }
 
-class PackagesGetCommand extends FlutterCommand {
+class PackagesGetCommand extends PubspecYamlRequiredCommand {
   PackagesGetCommand(this.name, this.upgrade) {
-    requiresPubspecYaml();
     argParser.addFlag('offline',
       negatable: false,
       help: 'Use cached packages instead of accessing the network.',
@@ -138,10 +137,8 @@ class PackagesGetCommand extends FlutterCommand {
   }
 }
 
-class PackagesTestCommand extends FlutterCommand {
-  PackagesTestCommand() {
-    requiresPubspecYaml();
-  }
+class PackagesTestCommand extends PubspecYamlRequiredCommand {
+  PackagesTestCommand();
 
   @override
   String get name => 'test';
@@ -168,9 +165,8 @@ class PackagesTestCommand extends FlutterCommand {
   }
 }
 
-class PackagesPublishCommand extends FlutterCommand {
+class PackagesPublishCommand extends PubspecYamlRequiredCommand {
   PackagesPublishCommand() {
-    requiresPubspecYaml();
     argParser.addFlag('dry-run',
       abbr: 'n',
       negatable: false,
@@ -239,10 +235,8 @@ class PackagesForwardCommand extends FlutterCommand {
 
 }
 
-class PackagesPassthroughCommand extends FlutterCommand {
-  PackagesPassthroughCommand() {
-    requiresPubspecYaml();
-  }
+class PackagesPassthroughCommand extends PubspecYamlRequiredCommand {
+  PackagesPassthroughCommand();
 
   @override
   String get name => 'pub';

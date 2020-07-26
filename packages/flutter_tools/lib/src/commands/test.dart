@@ -22,13 +22,12 @@ import '../test/runner.dart';
 import '../test/test_wrapper.dart';
 import '../test/watcher.dart';
 
-class TestCommand extends FlutterCommand {
+class TestCommand extends PubspecYamlRequiredCommand {
   TestCommand({
     bool verboseHelp = false,
     this.testWrapper = const TestWrapper(),
     this.testRunner = const FlutterTestRunner(),
   }) : assert(testWrapper != null) {
-    requiresPubspecYaml();
     usesPubOption();
     addNullSafetyModeOptions(hide: !verboseHelp);
     usesTrackWidgetCreation(verboseHelp: verboseHelp);

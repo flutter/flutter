@@ -10,10 +10,9 @@ import '../build_info.dart';
 import '../ios/bitcode.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart';
-import 'build.dart';
 
 /// Builds AOT snapshots into platform specific library containers.
-class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmentArtifacts {
+class BuildAotCommand extends PubspecYamlRequiredCommand with TargetPlatformBasedDevelopmentArtifacts {
   BuildAotCommand({this.aotBuilder}) {
     addTreeShakeIconsFlag();
     usesTargetOption();

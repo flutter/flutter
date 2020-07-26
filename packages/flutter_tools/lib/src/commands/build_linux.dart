@@ -11,11 +11,10 @@ import '../features.dart';
 import '../globals.dart' as globals;
 import '../linux/build_linux.dart';
 import '../project.dart';
-import '../runner/flutter_command.dart' show FlutterCommandResult;
-import 'build.dart';
+import '../runner/flutter_command.dart' show FlutterCommandResult, PubspecYamlRequiredCommand;
 
 /// A command to build a linux desktop target through a build shell script.
-class BuildLinuxCommand extends BuildSubCommand {
+class BuildLinuxCommand extends PubspecYamlRequiredCommand {
   BuildLinuxCommand({ bool verboseHelp = false }) {
     addTreeShakeIconsFlag();
     usesTargetOption();
