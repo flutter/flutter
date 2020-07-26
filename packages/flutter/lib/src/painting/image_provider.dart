@@ -839,7 +839,9 @@ abstract class NetworkImage extends ImageProvider<NetworkImage> {
 ///
 /// See also:
 ///
-///  * [Image.file] for a shorthand of an [Image] widget backed by [FileImage].
+///  * [Image.file] for a shorthand of an [Image] widget backed by [FileImage],
+///     which creates an in memory copy of file retained in the [ImageCache].
+///     To change the underlying data easily, you should use [FileImage] provider.
 @immutable
 class FileImage extends ImageProvider<FileImage> {
   /// Creates an object that decodes a [File] as an image.
