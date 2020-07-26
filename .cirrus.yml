@@ -278,12 +278,54 @@ task:
         # Empirically, as of October 2019, the docs-linux shard took about 30 minutes when run with
         # 1 CPU and 4G of RAM. 2 CPUs reduced that to 20 minutes, more CPUs did not improve matters.
         CPU: 2
+      docs_cache:
+        folder: dev/docs
+        fingerprint_script:
+          - echo "docs_${CIRRUS_CHANGE_IN_REPO}_${CIRRUS_BUILD_ID}"
+      script:
+        - ./dev/bots/docs.sh docs
+
+    - name: docs_offline-linux # linux-only
+      only_if: "$CIRRUS_PR == ''"
+      depends_on:
+        - docs-linux
+      docs_cache:
+        folder: dev/docs
+        fingerprint_script:
+          - echo "docs_${CIRRUS_CHANGE_IN_REPO}_${CIRRUS_BUILD_ID}"
+      script:
+        - ./dev/bots/docs.sh offline
+
+    - name: docs_docset-linux # linux-only
+      only_if: "$CIRRUS_PR == ''"
+      depends_on:
+        - docs-linux
+      environment:
+        CPU: 2
+      docs_cache:
+        folder: dev/docs
+        fingerprint_script:
+          - echo "docs_${CIRRUS_CHANGE_IN_REPO}_${CIRRUS_BUILD_ID}"
+      script:
+        - ./dev/bots/docs.sh docset
+
+    - name: docs_deploy-linux # linux-only
+      only_if: "$CIRRUS_BRANCH == 'master' || $CIRRUS_BRANCH == 'stable'"
+      depends_on:
+        - docs-linux
+        - docs_offline-linux
+        - docs_docset-linux
+      environment:
         # For uploading master docs to Firebase master branch staging site
         FIREBASE_MASTER_TOKEN: ENCRYPTED[eb768d18798fdc5abfe09b224e1724c4d82831d715ccf90df2c79d618c317216cbd99493278361f6fe7948b409b603f0]
-        # For uploading beta docs to Firebase public live site
+        # For uploading stable docs to Firebase public live site
         FIREBASE_PUBLIC_TOKEN: ENCRYPTED[37e8b82f167864cae9a3f4d2cf3f37dea331d9375c295327c45de524f6c588fa6f6d63e5784f10f6d43ce29689f36c92]
+      docs_cache:
+        folder: dev/docs
+        fingerprint_script:
+          - echo "docs_${CIRRUS_CHANGE_IN_REPO}_${CIRRUS_BUILD_ID}"
       script:
-        - ./dev/bots/docs.sh
+        - ./dev/bots/docs.sh deploy
 
     - name: customer_testing-linux
       # environment:
