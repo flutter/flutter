@@ -3,6 +3,8 @@ set -e
 
 # felt: a command-line utility for building and testing Flutter web engine.
 #       It stands for Flutter Engine Local Tester.
+# TODO: Add git fetch --tags step. Tags are critical for the correct Dart
+# version.
 
 FELT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
