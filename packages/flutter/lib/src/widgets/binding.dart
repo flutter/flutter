@@ -695,7 +695,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// A future that completes when the Flutter engine has rasterized the first
   /// frame.
   ///
-  /// {@macro flutter.frame_rasterize_vs_presented}
+  /// {@macro flutter.frame_rasterized_vs_presented}
   ///
   /// See also:
   ///

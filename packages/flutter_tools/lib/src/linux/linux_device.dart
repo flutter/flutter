@@ -3,12 +3,15 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
+import '../base/logger.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
 import '../desktop_device.dart';
 import '../device.dart';
 import '../features.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import 'application_package.dart';
 import 'build_linux.dart';
@@ -16,10 +19,15 @@ import 'linux_workflow.dart';
 
 /// A device that represents a desktop Linux target.
 class LinuxDevice extends DesktopDevice {
-  LinuxDevice() : super(
+  LinuxDevice({
+    @required ProcessManager processManager,
+    @required Logger logger,
+  }) : super(
       'linux',
       platformType: PlatformType.linux,
       ephemeral: false,
+      logger: logger,
+      processManager: processManager,
   );
 
   @override
@@ -59,15 +67,21 @@ class LinuxDevices extends PollingDeviceDiscovery {
   LinuxDevices({
     @required Platform platform,
     @required FeatureFlags featureFlags,
-  }) : _platform = platform,
+    ProcessManager processManager,
+    Logger logger,
+  }) : _platform = platform ?? globals.platform, // TODO(jonahwilliams): remove after google3 roll
        _linuxWorkflow = LinuxWorkflow(
           platform: platform,
           featureFlags: featureFlags,
        ),
+       _logger = logger,
+       _processManager = processManager ?? globals.processManager,
        super('linux devices');
 
   final Platform _platform;
   final LinuxWorkflow _linuxWorkflow;
+  final ProcessManager _processManager;
+  final Logger _logger;
 
   @override
   bool get supportsPlatform => _platform.isLinux;
@@ -81,7 +95,10 @@ class LinuxDevices extends PollingDeviceDiscovery {
       return const <Device>[];
     }
     return <Device>[
-      LinuxDevice(),
+      LinuxDevice(
+        logger: _logger,
+        processManager: _processManager,
+      ),
     ];
   }
 
