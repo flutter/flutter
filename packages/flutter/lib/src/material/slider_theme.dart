@@ -790,7 +790,7 @@ class SliderThemeData with Diagnosticable {
 /// See also:
 ///
 ///  * [RoundSliderThumbShape], which is the default [Slider]'s thumb shape that
-///     paints a solid circle.
+///    paints a solid circle.
 ///  * [RoundSliderOverlayShape], which is the default [Slider] and
 ///    [RangeSlider]'s overlay shape that paints a transparent circle.
 ///  * [PaddleSliderValueIndicatorShape], which is the default [Slider]'s value
