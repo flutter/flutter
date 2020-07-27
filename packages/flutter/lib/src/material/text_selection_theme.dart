@@ -33,15 +33,16 @@ class TextSelectionThemeData with Diagnosticable {
     this.selectionHandleColor,
   });
 
-  /// The color used to paint the cursor in the text field.
+  /// The color of the cursor in the text field.
   ///
-  /// The cursor indicates the current location of text input in the field.
+  /// The cursor indicates the current location of text insertion point in
+  /// the field.
   final Color cursorColor;
 
-  /// The color used to paint the background of selected text.
+  /// The background color of selected text.
   final Color selectionColor;
 
-  /// The color used to paint the selection handles on the text field.
+  /// The color of the selection handles on the text field.
   ///
   /// Selection handles are used to indicate the bounds of the selected text,
   /// or as a handle to drag the cursor to a new location in the text.
@@ -107,8 +108,8 @@ class TextSelectionThemeData with Diagnosticable {
   }
 }
 
-/// An inherited widget that defines the configuration for
-/// the rendering of text selection in this widget's subtree.
+/// An inherited widget that defines the appearance of text selection in
+/// this widget's subtree.
 ///
 /// Values specified here are used for [TextField] and [SelectableText]
 /// properties that are not given an explicit non-null value.

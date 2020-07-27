@@ -638,9 +638,10 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.cursorRadius}
   final Radius cursorRadius;
 
-  /// The color used to paint the cursor.
+  /// The color of the cursor.
   ///
-  /// The cursor indicates the current location of text input in the field.
+  /// The cursor indicates the current location of text insertion point in
+  /// the field.
   ///
   /// If this is null it will default to a value based on the following:
   ///
