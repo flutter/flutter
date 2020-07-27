@@ -190,8 +190,8 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
     assert(() {
       final Map<GlobalKey, Element> keyToParent = <GlobalKey, Element>{};
       _debugReservations.forEach((Element parent, Map<Element, GlobalKey> childToKey) {
-        // We ignore parent that are detached.
-        if (parent.renderObject?.attached == false)
+        // We ignore parent that are detached or unmounted.
+      if (parent.renderObject?.attached == false || parent._debugLifecycleState ==  _ElementLifecycle.defunct)
           return;
         childToKey.forEach((Element child, GlobalKey key) {
           // If parent = null, the node is deactivated by its parent and is
