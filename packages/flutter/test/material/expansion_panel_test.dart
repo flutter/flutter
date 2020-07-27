@@ -1396,4 +1396,383 @@ void main() {
     // For the last DecoratedBox, we will have a Border.top with the provided dividerColor.
     expect(boxDecoration.border.top.color, dividerColor);
   });
+
+  testWidgets('ExpansionPanel respects expandIconBuilder', (WidgetTester tester) async {
+    final List<bool> _isExpanded = <bool>[true, false];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SingleChildScrollView(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return ExpansionPanelList(
+                expansionCallback: (int index, bool isExpanded) {
+                  setState(() => _isExpanded[index] = !isExpanded);
+                },
+                children: <ExpansionPanel>[
+                  ExpansionPanel(
+                    headerBuilder: (BuildContext context, bool isExpanded) {
+                      return const Text('ExpansionPanel Header');
+                    },
+                    expandIconBuilder: (
+                      BuildContext context,
+                      bool isExpanded,
+                      VoidCallback handlePressed,
+                      Duration animationDuration,
+                    ) {
+                      return Checkbox(
+                        value: isExpanded,
+                        onChanged: (bool isChecked) {
+                          handlePressed();
+                        },
+                      );
+                    },
+                    isExpanded: _isExpanded[0],
+                    body: _isExpanded[0] ? const Text('A') : const Text('B'),
+                  ),
+                  ExpansionPanel(
+                    headerBuilder: (BuildContext context, bool isExpanded) {
+                      return const Text('ExpansionPanel Header');
+                    },
+                    expandIconBuilder: (
+                        BuildContext context,
+                        bool isExpanded,
+                        VoidCallback handlePressed,
+                        Duration animationDuration,
+                        ) {
+                      return Checkbox(
+                        value: isExpanded,
+                        onChanged: (bool isChecked) {
+                          handlePressed();
+                        },
+                      );
+                    },
+                    isExpanded: _isExpanded[1],
+                    body: _isExpanded[1] ? const Text('C') : const Text('D'),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(Checkbox), findsWidgets);
+    expect(find.byType(ExpandIcon), findsNothing);
+
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B'), findsNothing);
+    expect(find.text('C'), findsNothing);
+    expect(find.text('D'), findsOneWidget);
+
+    expect(tester.widget<Checkbox>(find.byType(Checkbox).first).value, isTrue);
+    expect(tester.widget<Checkbox>(find.byType(Checkbox).last).value, isFalse);
+
+    // Tap on the first Checkbox to collapse the first ExpansionPanel.
+    await tester.tap(find.byType(Checkbox).first);
+    // Tap on the second Checkbox to expand the second ExpansionPanel.
+    await tester.tap(find.byType(Checkbox).last);
+    await tester.pumpAndSettle();
+
+    expect(find.text('A'), findsNothing);
+    expect(find.text('B'), findsOneWidget);
+    expect(find.text('C'), findsOneWidget);
+    expect(find.text('D'), findsNothing);
+
+    expect(tester.widget<Checkbox>(find.byType(Checkbox).first).value, isFalse);
+    expect(tester.widget<Checkbox>(find.byType(Checkbox).last).value, isTrue);
+  });
+
+  testWidgets('ExpansionPanelRadio respects expandIconBuilder', (WidgetTester tester) async {
+    final List<bool> _isExpanded = <bool>[true, false];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SingleChildScrollView(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return ExpansionPanelList.radio(
+                expansionCallback: (int index, bool isExpanded) {
+                  setState(() => _isExpanded[index] = !isExpanded);
+                },
+                initialOpenPanelValue: _isExpanded.indexWhere((bool val) => val),
+                children: <ExpansionPanel>[
+                  ExpansionPanelRadio(
+                    headerBuilder: (BuildContext context, bool isExpanded) {
+                      return const Text('ExpansionPanel Header');
+                    },
+                    expandIconBuilder: (
+                        BuildContext context,
+                        bool isExpanded,
+                        VoidCallback handlePressed,
+                        Duration animationDuration,
+                        ) {
+                      return Checkbox(
+                        value: isExpanded,
+                        onChanged: (bool isChecked) {
+                          handlePressed();
+                        },
+                      );
+                    },
+                    value: 0,
+                    body: _isExpanded[0] ? const Text('A') : const Text('B'),
+                  ),
+                  ExpansionPanelRadio(
+                    headerBuilder: (BuildContext context, bool isExpanded) {
+                      return const Text('ExpansionPanel Header');
+                    },
+                    expandIconBuilder: (
+                        BuildContext context,
+                        bool isExpanded,
+                        VoidCallback handlePressed,
+                        Duration animationDuration,
+                        ) {
+                      return Checkbox(
+                        value: isExpanded,
+                        onChanged: (bool isChecked) {
+                          handlePressed();
+                        },
+                      );
+                    },
+                    value: 1,
+                    body: _isExpanded[1] ? const Text('C') : const Text('D'),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(Checkbox), findsWidgets);
+    expect(find.byType(ExpandIcon), findsNothing);
+
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B'), findsNothing);
+    expect(find.text('C'), findsNothing);
+    expect(find.text('D'), findsOneWidget);
+
+    expect(tester.widget<Checkbox>(find.byType(Checkbox).first).value, isTrue);
+    expect(tester.widget<Checkbox>(find.byType(Checkbox).last).value, isFalse);
+
+    // Tap on the last Checkbox to expand the last ExpansionPanel and collapse others.
+    await tester.tap(find.byType(Checkbox).last);
+    await tester.pumpAndSettle();
+
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B'), findsNothing);
+    expect(find.text('C'), findsOneWidget);
+    expect(find.text('D'), findsNothing);
+
+    expect(tester.widget<Checkbox>(find.byType(Checkbox).first).value, isFalse);
+    expect(tester.widget<Checkbox>(find.byType(Checkbox).last).value, isTrue);
+  });
+  
+  testWidgets('ExpansionPanel ignores custom indicator hit test when canTapOnHeader is true', (WidgetTester tester) async {
+    final List<bool> _isExpanded = <bool>[true, false];
+    const Key firstPanelKey = Key('firstPanelKey');
+    const Key secondPanelKey = Key('secondPanelKey');
+    bool _onChangeCalled = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SingleChildScrollView(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return ExpansionPanelList(
+                expansionCallback: (int index, bool isExpanded) {
+                  setState(() => _isExpanded[index] = !isExpanded);
+                },
+                children: <ExpansionPanel>[
+                  ExpansionPanel(
+                    canTapOnHeader: true,
+                    headerBuilder: (BuildContext context, bool isExpanded) {
+                      return const Text('ExpansionPanel Header', key: firstPanelKey);
+                    },
+                    expandIconBuilder: (
+                        BuildContext context,
+                        bool isExpanded,
+                        VoidCallback handlePressed,
+                        Duration animationDuration,
+                        ) {
+                      return Checkbox(
+                        value: isExpanded,
+                        onChanged: (bool isChecked) {
+                          handlePressed();
+                          _onChangeCalled = true;
+                        },
+                      );
+                    },
+                    isExpanded: _isExpanded[0],
+                    body: _isExpanded[0] ? const Text('A') : const Text('B'),
+                  ),
+                  ExpansionPanel(
+                    canTapOnHeader: true,
+                    headerBuilder: (BuildContext context, bool isExpanded) {
+                      return const Text('ExpansionPanel Header', key: secondPanelKey);
+                    },
+                    expandIconBuilder: (
+                        BuildContext context,
+                        bool isExpanded,
+                        VoidCallback handlePressed,
+                        Duration animationDuration,
+                        ) {
+                      return Checkbox(
+                        value: isExpanded,
+                        onChanged: (bool isChecked) {
+                          handlePressed();
+                          _onChangeCalled = true;
+                        },
+                      );
+                    },
+                    isExpanded: _isExpanded[1],
+                    body: _isExpanded[1] ? const Text('C') : const Text('D'),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(Checkbox), findsWidgets);
+    expect(find.byType(ExpandIcon), findsNothing);
+
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B'), findsNothing);
+    expect(find.text('C'), findsNothing);
+    expect(find.text('D'), findsOneWidget);
+
+    expect(tester.widget<Checkbox>(find.byType(Checkbox).first).value, isTrue);
+    expect(tester.widget<Checkbox>(find.byType(Checkbox).last).value, isFalse);
+
+    // Tapping on the first Checkbox will collapse the first ExpansionPanel,
+    // but expansion icon onChanged will not be called since canTapOnHeader
+    // is set to true.
+    await tester.tap(find.byType(Checkbox).first);
+    await tester.pumpAndSettle();
+
+    expect(tester.widget<Checkbox>(find.byType(Checkbox).first).value, isFalse);
+    expect(_onChangeCalled, isFalse);
+
+    // Tap on the second panel header to expand the ExpansionPanel.
+    await tester.tap(find.byKey(secondPanelKey));
+    await tester.pumpAndSettle();
+
+    expect(find.text('A'), findsNothing);
+    expect(find.text('B'), findsOneWidget);
+    expect(find.text('C'), findsOneWidget);
+    expect(find.text('D'), findsNothing);
+
+    expect(tester.widget<Checkbox>(find.byType(Checkbox).last).value, isTrue);
+  });
+
+  testWidgets('ExpansionPanelRadio ignores custom indicator hit test when canTapOnHeader is true', (WidgetTester tester) async {
+    final List<bool> _isExpanded = <bool>[true, false];
+    const Key firstPanelKey = Key('firstPanelKey');
+    const Key secondPanelKey = Key('secondPanelKey');
+    bool _onChangeCalled = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SingleChildScrollView(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return ExpansionPanelList.radio(
+                expansionCallback: (int index, bool isExpanded) {
+                  setState(() => _isExpanded[index] = !isExpanded);
+                },
+                initialOpenPanelValue: _isExpanded.indexWhere((bool val) => val),
+                children: <ExpansionPanel>[
+                  ExpansionPanelRadio(
+                    canTapOnHeader: true,
+                    headerBuilder: (BuildContext context, bool isExpanded) {
+                      return const Text('ExpansionPanel Header', key: firstPanelKey);
+                    },
+                    expandIconBuilder: (
+                        BuildContext context,
+                        bool isExpanded,
+                        VoidCallback handlePressed,
+                        Duration animationDuration,
+                        ) {
+                      return Checkbox(
+                        value: isExpanded,
+                        onChanged: (bool isChecked) {
+                          handlePressed();
+                          _onChangeCalled = true;
+                        },
+                      );
+                    },
+                    value: 0,
+                    body: _isExpanded[0] ? const Text('A') : const Text('B'),
+                  ),
+                  ExpansionPanelRadio(
+                    canTapOnHeader: true,
+                    headerBuilder: (BuildContext context, bool isExpanded) {
+                      return const Text('ExpansionPanel Header', key: secondPanelKey);
+                    },
+                    expandIconBuilder: (
+                        BuildContext context,
+                        bool isExpanded,
+                        VoidCallback handlePressed,
+                        Duration animationDuration,
+                        ) {
+                      return Checkbox(
+                        value: isExpanded,
+                        onChanged: (bool isChecked) {
+                          handlePressed();
+                          _onChangeCalled = true;
+                        },
+                      );
+                    },
+                    value: 1,
+                    body: _isExpanded[1] ? const Text('C') : const Text('D'),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(Checkbox), findsWidgets);
+    expect(find.byType(ExpandIcon), findsNothing);
+
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B'), findsNothing);
+    expect(find.text('C'), findsNothing);
+    expect(find.text('D'), findsOneWidget);
+
+    expect(tester.widget<Checkbox>(find.byType(Checkbox).first).value, isTrue);
+    expect(tester.widget<Checkbox>(find.byType(Checkbox).last).value, isFalse);
+
+    // Tapping on the second Checkbox will expand the second ExpansionPanel
+    // and collapse the remaining panels but expansion icon onChanged will
+    // not be called since canTapOnHeader is set to true.
+    await tester.tap(find.byType(Checkbox).last);
+    await tester.pumpAndSettle();
+
+    expect(tester.widget<Checkbox>(find.byType(Checkbox).last).value, isTrue);
+    expect(tester.widget<Checkbox>(find.byType(Checkbox).first).value, isFalse);
+    expect(_onChangeCalled, isFalse);
+
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B'), findsNothing);
+    expect(find.text('C'), findsOneWidget);
+    expect(find.text('D'), findsNothing);
+
+    // Tap on the first panel header to expand the panel.
+    await tester.tap(find.byKey(firstPanelKey));
+    await tester.pumpAndSettle();
+
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B'), findsNothing);
+    expect(find.text('C'), findsOneWidget);
+    expect(find.text('D'), findsNothing);
+
+    expect(tester.widget<Checkbox>(find.byType(Checkbox).first).value, isTrue);
+    expect(tester.widget<Checkbox>(find.byType(Checkbox).last).value, isFalse);
+  });
 }
