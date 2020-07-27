@@ -4,11 +4,11 @@
 
 #include "flutter/shell/platform/linux/fl_text_input_plugin.h"
 
+#include <gtk/gtk.h>
+
 #include "flutter/shell/platform/common/cpp/text_input_model.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_json_method_codec.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_method_channel.h"
-
-#include <gtk/gtk.h>
 
 static constexpr char kChannelName[] = "flutter/textinput";
 
@@ -190,6 +190,10 @@ static FlMethodResponse* set_editing_state(FlTextInputPlugin* self,
       fl_value_get_int(fl_value_lookup_string(args, kSelectionBaseKey));
   int64_t selection_extent =
       fl_value_get_int(fl_value_lookup_string(args, kSelectionExtentKey));
+  // Flutter uses -1/-1 for invalid; translate that to 0/0 for the model.
+  if (selection_base == -1 && selection_extent == -1) {
+    selection_base = selection_extent = 0;
+  }
 
   self->text_model->SetEditingState(selection_base, selection_extent, text);
 
