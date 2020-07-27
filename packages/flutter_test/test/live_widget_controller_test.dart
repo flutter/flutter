@@ -31,7 +31,7 @@ class _CountButtonState extends State<CountButton> {
 
 void main() {
   test('Test pump on LiveWidgetController', () async {
-    runApp(MaterialApp(home:Center(child: CountButton())));
+    runApp(MaterialApp(home: Center(child: CountButton())));
 
     await SchedulerBinding.instance.endOfFrame;
     final WidgetController controller =
