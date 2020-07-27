@@ -1067,8 +1067,8 @@ void main() {
     const Key key1 = GlobalObjectKey('key1');
     const Key key2 = GlobalObjectKey('key2');
     StateSetter setState;
-    int tabsCnt = 2;
-    TabController tabController = TabController(length: tabsCnt, vsync: const TestVSync(),);
+    int tabBarViewCnt = 2;
+    TabController tabController = TabController(length: tabBarViewCnt, vsync: const TestVSync(),);
 
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -1078,8 +1078,8 @@ void main() {
           return TabBarView(
             controller: tabController,
             children: <Widget>[
-              if (tabsCnt > 0) const Text('key1', key: key1,),
-              if (tabsCnt > 1) const Text('key2', key: key2,),
+              if (tabBarViewCnt > 0) const Text('key1', key: key1,),
+              if (tabBarViewCnt > 1) const Text('key2', key: key2,),
             ],
           );
         },
@@ -1099,8 +1099,8 @@ void main() {
 
     // rebuild tabs that only have the 1'st page with GlobalKey 'key1'
     setState((){
-      tabsCnt = 1;
-      tabController = TabController(length: tabsCnt, vsync: const TestVSync(),);
+      tabBarViewCnt = 1;
+      tabController = TabController(length: tabBarViewCnt, vsync: const TestVSync(),);
     });
 
     await tester.pump(const Duration(seconds: 1)); // finish the animation
