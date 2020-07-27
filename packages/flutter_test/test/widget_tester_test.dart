@@ -158,30 +158,6 @@ void main() {
     });
   });
 
-  group('ensureVisible', () {
-    testWidgets('scrolls to make widget visible', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: ListView.builder(
-              itemCount: 20,
-              shrinkWrap: true,
-              itemBuilder: (BuildContext context, int i) => ListTile(title: Text('Item $i')),
-           ),
-         ),
-        ),
-      );
-
-      // Make sure widget isn't on screen
-      expect(find.text('Item 15', skipOffstage: true), findsNothing);
-
-      await tester.ensureVisible(find.text('Item 15', skipOffstage: false));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Item 15', skipOffstage: true), findsOneWidget);
-    });
-  });
-
   group('expectLater', () {
     testWidgets('completes when matcher completes', (WidgetTester tester) async {
       final Completer<void> completer = Completer<void>();

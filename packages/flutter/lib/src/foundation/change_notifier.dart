@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:collection';
 
 import 'package:meta/meta.dart';
@@ -66,7 +64,7 @@ abstract class Listenable {
   /// will lead to memory leaks or exceptions.
   ///
   /// The list may contain nulls; they are ignored.
-  factory Listenable.merge(List<Listenable> listenables) = _MergingListenable;
+  factory Listenable.merge(List<Listenable?> listenables) = _MergingListenable;
 
   /// Register a closure to be called when the object notifies its listeners.
   void addListener(VoidCallback listener);
@@ -80,6 +78,12 @@ abstract class Listenable {
 ///
 /// This interface is implemented by [ValueNotifier<T>] and [Animation<T>], and
 /// allows other APIs to accept either of those implementations interchangeably.
+///
+/// See also:
+///
+///  * [ValueListenableBuilder], a widget that uses a builder callback to
+///    rebuild whenever a [ValueListenable] object triggers its notifications,
+///    providing the builder with the value of the object.
 abstract class ValueListenable<T> extends Listenable {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -105,10 +109,10 @@ class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
 ///
 ///  * [ValueNotifier], which is a [ChangeNotifier] that wraps a single value.
 class ChangeNotifier implements Listenable {
-  LinkedList<_ListenerEntry> _listeners = LinkedList<_ListenerEntry>();
+  LinkedList<_ListenerEntry>? _listeners = LinkedList<_ListenerEntry>();
   // Keeps track of the first newly added listened inside notifyListeners
   // to stop the dispatching and not immediately execute new listeners
-  _ListenerEntry _firstNewlyAddedEntry;
+  _ListenerEntry? _firstNewlyAddedEntry;
 
   bool _debugAssertNotDisposed() {
     assert(() {
@@ -141,7 +145,7 @@ class ChangeNotifier implements Listenable {
   @protected
   bool get hasListeners {
     assert(_debugAssertNotDisposed());
-    return _listeners.isNotEmpty;
+    return _listeners!.isNotEmpty;
   }
 
   /// Register a closure to be called when the object changes.
@@ -152,7 +156,7 @@ class ChangeNotifier implements Listenable {
     assert(_debugAssertNotDisposed());
     final _ListenerEntry entry = _ListenerEntry(listener);
     _firstNewlyAddedEntry ??= entry;
-    _listeners.add(entry);
+    _listeners!.add(entry);
   }
 
   /// Remove a previously registered closure from the list of closures that are
@@ -178,7 +182,7 @@ class ChangeNotifier implements Listenable {
   void removeListener(VoidCallback listener) {
     assert(_debugAssertNotDisposed());
     _listeners
-        .firstWhere(
+        !.firstWhere(
           (_ListenerEntry element) => element.listener == listener,
           orElse: () => null,
         )
@@ -217,12 +221,12 @@ class ChangeNotifier implements Listenable {
   void notifyListeners() {
     assert(_debugAssertNotDisposed());
     _firstNewlyAddedEntry = null;
-    if (_listeners != null && _listeners.isNotEmpty) {
-      for (_ListenerEntry entry = _listeners.first;
+    if (_listeners != null && _listeners!.isNotEmpty) {
+      for (_ListenerEntry? entry = _listeners!.first;
             entry != null && entry != _firstNewlyAddedEntry;
-            entry = entry.next) {
+            entry = entry!.next) {
         try {
-          entry.listener();
+          entry!.listener();
         } catch (exception, stack) {
           FlutterError.reportError(FlutterErrorDetails(
             exception: exception,
@@ -246,18 +250,18 @@ class ChangeNotifier implements Listenable {
 class _MergingListenable extends Listenable {
   _MergingListenable(this._children);
 
-  final List<Listenable> _children;
+  final List<Listenable?> _children;
 
   @override
   void addListener(VoidCallback listener) {
-    for (final Listenable child in _children) {
+    for (final Listenable? child in _children) {
       child?.addListener(listener);
     }
   }
 
   @override
   void removeListener(VoidCallback listener) {
-    for (final Listenable child in _children) {
+    for (final Listenable? child in _children) {
       child?.removeListener(listener);
     }
   }

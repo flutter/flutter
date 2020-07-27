@@ -536,6 +536,17 @@ class MaterialApp extends StatefulWidget {
 
   @override
   _MaterialAppState createState() => _MaterialAppState();
+
+  /// The [HeroController] used for Material page transitions.
+  ///
+  /// Used by the [MaterialApp].
+  static HeroController createMaterialHeroController() {
+    return HeroController(
+      createRectTween: (Rect begin, Rect end) {
+        return MaterialRectArcTween(begin: begin, end: end);
+      },
+    );
+  }
 }
 
 class _MaterialScrollBehavior extends ScrollBehavior {
@@ -572,7 +583,7 @@ class _MaterialAppState extends State<MaterialApp> {
   @override
   void initState() {
     super.initState();
-    _heroController = HeroController(createRectTween: _createRectTween);
+    _heroController = MaterialApp.createMaterialHeroController();
   }
 
   @override
@@ -583,12 +594,8 @@ class _MaterialAppState extends State<MaterialApp> {
       // old Navigator won't be disposed (and thus won't unregister with its
       // observers) until after the new one has been created (because the
       // Navigator has a GlobalKey).
-      _heroController = HeroController(createRectTween: _createRectTween);
+      _heroController = MaterialApp.createMaterialHeroController();
     }
-  }
-
-  RectTween _createRectTween(Rect begin, Rect end) {
-    return MaterialRectArcTween(begin: begin, end: end);
   }
 
   // Combine the Localizations for Material with the ones contributed

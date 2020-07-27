@@ -127,6 +127,37 @@ class ImageSizeInfo {
 /// time.
 PaintImageCallback debugOnPaintImage;
 
+/// If true, the framework will color invert and horizontally flip images that
+/// have been decoded to a size taking at least [debugImageOverheadAllowance]
+/// bytes more than necessary.
+///
+/// It will also call [FlutterError.reportError] with information about the
+/// image's decoded size and its display size, which can be used resize the
+/// asset before shipping it, apply `cacheHeight` or `cacheWidth` parameters, or
+/// directly use a [ResizeImage]. Whenever possible, resizing the image asset
+/// itself should be preferred, to avoid unnecessary network traffic, disk space
+/// usage, and other memory overhead incurred during decoding.
+///
+/// Developers using this flag should test their application on appropriate
+/// devices and display sizes for their expected deployment targets when using
+/// these parameters. For example, an application that responsively resizes
+/// images for a desktop and mobile layout should avoid decoding all images at
+/// sizes appropriate for mobile when on desktop. Applications should also avoid
+/// animating these parameters, as each change will result in a newly decoded
+/// image. For example, an image that always grows into view should decode only
+/// at its largest size, whereas an image that normally is a thumbnail and then
+/// pops into view should be decoded at its smallest size for the thumbnail and
+/// the largest size when needed.
+///
+/// This has no effect unless asserts are enabled.
+bool debugInvertOversizedImages = false;
+
+/// The number of bytes an image must use before it triggers inversion when
+/// [debugInvertOversizedImages] is true.
+///
+/// Default is 1024 (1kb).
+int debugImageOverheadAllowance = 1024;
+
 /// Returns true if none of the painting library debug variables have been changed.
 ///
 /// This function is used by the test framework to ensure that debug variables
@@ -142,7 +173,9 @@ bool debugAssertAllPaintingVarsUnset(String reason, { bool debugDisableShadowsOv
   assert(() {
     if (debugDisableShadows != debugDisableShadowsOverride ||
         debugNetworkImageHttpClientProvider != null ||
-        debugOnPaintImage != null) {
+        debugOnPaintImage != null ||
+        debugInvertOversizedImages == true ||
+        debugImageOverheadAllowance != 1024) {
       throw FlutterError(reason);
     }
     return true;

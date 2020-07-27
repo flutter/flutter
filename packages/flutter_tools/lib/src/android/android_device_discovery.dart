@@ -40,7 +40,7 @@ class AndroidDevices extends PollingDeviceDiscovery {
   final AndroidSdk _androidSdk;
 
   @override
-  bool get supportsPlatform => true;
+  bool get supportsPlatform => _androidWorkflow.appliesToHostPlatform;
 
   @override
   bool get canListAnything => _androidWorkflow.canListDevices;

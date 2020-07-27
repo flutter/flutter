@@ -80,18 +80,17 @@ class PointerRouter {
       InformationCollector collector;
       assert(() {
         collector = () sync* {
-          yield DiagnosticsProperty<PointerEvent>('Event', event, style: DiagnosticsTreeStyle.errorProperty);
+          yield DiagnosticsProperty<PointerRouter>('router', this, level: DiagnosticLevel.debug);
+          yield DiagnosticsProperty<PointerRoute>('route', route, level: DiagnosticLevel.debug);
+          yield DiagnosticsProperty<PointerEvent>('event', event, level: DiagnosticLevel.debug);
         };
         return true;
       }());
-      FlutterError.reportError(FlutterErrorDetailsForPointerRouter(
+      FlutterError.reportError(FlutterErrorDetails(
         exception: exception,
         stack: stack,
         library: 'gesture library',
         context: ErrorDescription('while routing a pointer event'),
-        router: this,
-        route: route,
-        event: event,
         informationCollector: collector
       ));
     }
@@ -125,49 +124,4 @@ class PointerRouter {
       }
     });
   }
-}
-
-/// Variant of [FlutterErrorDetails] with extra fields for the gestures
-/// library's pointer router ([PointerRouter]).
-///
-/// See also:
-///
-///  * [FlutterErrorDetailsForPointerEventDispatcher], which is also used
-///    by the gestures library.
-class FlutterErrorDetailsForPointerRouter extends FlutterErrorDetails {
-  /// Creates a [FlutterErrorDetailsForPointerRouter] object with the given
-  /// arguments setting the object's properties.
-  ///
-  /// The gestures library calls this constructor when catching an exception
-  /// that will subsequently be reported using [FlutterError.onError].
-  const FlutterErrorDetailsForPointerRouter({
-    dynamic exception,
-    StackTrace stack,
-    String library,
-    DiagnosticsNode context,
-    this.router,
-    this.route,
-    this.event,
-    InformationCollector informationCollector,
-    bool silent = false,
-  }) : super(
-    exception: exception,
-    stack: stack,
-    library: library,
-    context: context,
-    informationCollector: informationCollector,
-    silent: silent,
-  );
-
-  /// The pointer router that caught the exception.
-  ///
-  /// In a typical application, this is the value of [GestureBinding.pointerRouter] on
-  /// the binding ([GestureBinding.instance]).
-  final PointerRouter router;
-
-  /// The callback that threw the exception.
-  final PointerRoute route;
-
-  /// The pointer event that was being routed when the exception was raised.
-  final PointerEvent event;
 }

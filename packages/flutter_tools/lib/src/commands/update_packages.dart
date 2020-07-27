@@ -308,6 +308,7 @@ class UpdatePackagesCommand extends FlutterCommand {
           flutterRootOverride: upgrade
             ? temporaryFlutterSdk.path
             : null,
+          generateSyntheticPackage: false,
         );
         // Cleanup the temporary SDK
         try {
@@ -387,6 +388,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         directory: dir.path,
         checkLastModified: false,
         offline: offline,
+        generateSyntheticPackage: false,
       );
       count += 1;
     }

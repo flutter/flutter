@@ -7,8 +7,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 
-import 'android_platform_view.dart';
-
 void main() {
   runApp(
     const PlatformViewApp()
@@ -17,12 +15,8 @@ void main() {
 
 class PlatformViewApp extends StatefulWidget {
   const PlatformViewApp({
-    Key key,
-    this.enableHybridCompositionOnAndroid = false,
+    Key key
   }) : super(key: key);
-
-  /// Whether to use render the Android view as a platform view or a texture.
-  final bool enableHybridCompositionOnAndroid;
 
   @override
   PlatformViewAppState createState() => PlatformViewAppState();
@@ -89,17 +83,9 @@ class DummyPlatformView extends StatelessWidget {
         viewType: viewType,
       );
     } else if (Platform.isAndroid) {
-      final PlatformViewApp app = PlatformViewApp.of(context).widget;
-      assert(app != null);
-      if (app.enableHybridCompositionOnAndroid) {
-        nativeView = const AndroidPlatformView(
-          viewType: viewType,
-        );
-      } else {
-        nativeView = const AndroidView(
-          viewType: viewType,
-        );
-      }
+      nativeView = const AndroidView(
+        viewType: viewType,
+      );
     } else {
       assert(false, 'Invalid platform');
     }
