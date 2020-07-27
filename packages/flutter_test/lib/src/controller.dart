@@ -423,8 +423,7 @@ abstract class WidgetController {
   /// See [PointerEventRecord].
   Future<List<Duration>> handlePointerEventRecord(List<PointerEventRecord> records);
 
-  /// Called to indicate that there should be a new frame and if necessary,
-  /// time should advance.
+  /// Called to indicate that there should be a new frame after an optional delay.
   ///
   /// This is invoked by [flingFrom], for instance, so that the sequence of
   /// pointer events occurs over time.
