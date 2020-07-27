@@ -98,8 +98,7 @@ class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
 /// A class that can be extended or mixed in that provides a change notification
 /// API using [VoidCallback] for notifications.
 ///
-/// [ChangeNotifier] is optimized for small numbers (one or two) of listeners.
-/// It is O(N) for adding and removing listeners and O(N²) for dispatching
+/// It is O(1) for adding listeners and O(N) removing listeners and dispatching
 /// notifications (where N is the number of listeners).
 ///
 /// See also:
