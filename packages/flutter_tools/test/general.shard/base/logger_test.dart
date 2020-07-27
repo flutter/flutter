@@ -5,10 +5,12 @@
 import 'dart:async';
 import 'dart:convert' show jsonEncode;
 
+import 'package:flutter_tools/executable.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:mockito/mockito.dart';
 import 'package:quiver/testing/async.dart';
 
@@ -24,6 +26,52 @@ final String resetColor = RegExp.escape(AnsiTerminal.resetColor);
 class MockStdout extends Mock implements Stdout {}
 
 void main() {
+  testWithoutContext('correct logger instance is created', () {
+    final LoggerFactory loggerFactory = LoggerFactory(
+      terminal: Terminal.test(),
+      stdio: mocks.MockStdio(),
+      outputPreferences: OutputPreferences.test(),
+      timeoutConfiguration: const TimeoutConfiguration(),
+    );
+
+    expect(loggerFactory.createLogger(
+      verbose: false,
+      machine: false,
+      daemon: false,
+      windows: false,
+    ), isA<StdoutLogger>());
+    expect(loggerFactory.createLogger(
+      verbose: false,
+      machine: false,
+      daemon: false,
+      windows: true,
+    ), isA<WindowsStdoutLogger>());
+    expect(loggerFactory.createLogger(
+      verbose: true,
+      machine: false,
+      daemon: false,
+      windows: true,
+    ), isA<VerboseLogger>());
+    expect(loggerFactory.createLogger(
+      verbose: true,
+      machine: false,
+      daemon: false,
+      windows: false,
+    ), isA<VerboseLogger>());
+    expect(loggerFactory.createLogger(
+      verbose: false,
+      machine: false,
+      daemon: true,
+      windows: false,
+    ), isA<NotifyingLogger>());
+    expect(loggerFactory.createLogger(
+      verbose: false,
+      machine: true,
+      daemon: false,
+      windows: false,
+    ), isA<AppRunLogger>());
+  });
+
   group('AppContext', () {
     FakeStopwatch fakeStopWatch;
 

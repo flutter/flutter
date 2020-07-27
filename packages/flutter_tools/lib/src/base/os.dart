@@ -226,6 +226,7 @@ class _PosixUtils extends OperatingSystemUtils {
     _processUtils.runSync(
       <String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path],
       throwOnError: true,
+      verboseExceptions: true,
     );
   }
 

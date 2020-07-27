@@ -301,5 +301,6 @@ Future<void> _ensurePackageDependencies(String packagePath) async {
   await pub.get(
     context: PubContext.pubGet,
     directory: packagePath,
+    generateSyntheticPackage: false,
   );
 }

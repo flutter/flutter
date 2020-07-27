@@ -457,6 +457,8 @@ class Text extends StatelessWidget {
   final bool softWrap;
 
   /// How visual overflow should be handled.
+  ///
+  /// Defaults to retrieving the value from the nearest [DefaultTextStyle] ancestor.
   final TextOverflow overflow;
 
   /// The number of font pixels for each logical pixel.

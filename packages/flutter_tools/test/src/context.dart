@@ -395,6 +395,9 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   int get minorVersion => 0;
 
   @override
+  int get patchVersion => 0;
+
+  @override
   Future<Map<String, String>> getBuildSettings(
     String projectPath, {
     String scheme,
