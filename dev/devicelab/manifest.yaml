@@ -204,12 +204,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
-  cubic_bezier_perf__e2e_summary:
-    description: >
-      Measures the runtime performance of cubic bezier animations on Android.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
-    flaky: true
+  # cubic_bezier_perf__e2e_summary:
+  #   description: >
+  #     Measures the runtime performance of cubic bezier animations on Android.
+  #   stage: devicelab
+  #   required_agent_capabilities: ["linux/android"]
+  #   flaky: true
 
   cubic_bezier_perf_sksl_warmup__timeline_summary:
     description: >
@@ -226,12 +226,12 @@ tasks:
     required_agent_capabilities: ["mac/ios32"]
     flaky: true
 
-  backdrop_filter_perf__e2e_summary:
-    description: >
-      Measures the runtime performance of backdrop filter blurs on Android.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
-    flaky: true
+  # backdrop_filter_perf__e2e_summary:
+  #   description: >
+  #     Measures the runtime performance of backdrop filter blurs on Android.
+  #   stage: devicelab
+  #   required_agent_capabilities: ["linux/android"]
+  #   flaky: true
 
   backdrop_filter_perf__timeline_summary:
     description: >
@@ -245,12 +245,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
-  textfield_perf__e2e_summary:
-    description: >
-      Measures the runtime performance of textfield on Android.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
-    flaky: true
+  # textfield_perf__e2e_summary:
+  #   description: >
+  #     Measures the runtime performance of textfield on Android.
+  #   stage: devicelab
+  #   required_agent_capabilities: ["linux/android"]
+  #   flaky: true
 
   color_filter_and_fade_perf__timeline_summary:
     description: >
@@ -258,12 +258,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
-  color_filter_and_fade_perf__e2e_summary:
-    description: >
-      Measures the runtime performance of color filter with fade on Android.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
-    flaky: true
+  # color_filter_and_fade_perf__e2e_summary:
+  #   description: >
+  #     Measures the runtime performance of color filter with fade on Android.
+  #   stage: devicelab
+  #   required_agent_capabilities: ["linux/android"]
+  #   flaky: true
 
   fading_child_animation_perf__timeline_summary:
     description: >
@@ -271,12 +271,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
-  fading_child_animation_perf__e2e_summary:
-    description: >
-      Measures the runtime performance of opacity filter with fade on Android.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
-    flaky: true
+  # fading_child_animation_perf__e2e_summary:
+  #   description: >
+  #     Measures the runtime performance of opacity filter with fade on Android.
+  #   stage: devicelab
+  #   required_agent_capabilities: ["linux/android"]
+  #   flaky: true
 
   imagefiltered_transform_animation_perf__timeline_summary:
     description: >
@@ -284,12 +284,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
-  imagefiltered_transform_animation_perf__e2e_summary:
-    description: >
-      Measures the runtime performance of imagefiltered widget with transform on Android.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
-    flaky: true
+  # imagefiltered_transform_animation_perf__e2e_summary:
+  #   description: >
+  #     Measures the runtime performance of imagefiltered widget with transform on Android.
+  #   stage: devicelab
+  #   required_agent_capabilities: ["linux/android"]
+  #   flaky: true
 
   flavors_test:
     description: >
@@ -586,12 +586,12 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
-  backdrop_filter_perf_ios__e2e_summary:
-    description: >
-      Measures the runtime performance of backdrop filter blurs on iOS.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-    flaky: true
+  # backdrop_filter_perf_ios__e2e_summary:
+  #   description: >
+  #     Measures the runtime performance of backdrop filter blurs on iOS.
+  #   stage: devicelab_ios
+  #   required_agent_capabilities: ["mac/ios"]
+  #   flaky: true
 
   # post_backdrop_filter_perf_ios__timeline_summary:
   #   description: >
