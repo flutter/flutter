@@ -272,6 +272,7 @@ task:
     - name: hostonly_devicelab_tests-3_last-linux
       << : *LINUX_SHARD_TEMPLATE
 
+    # This task populates `docs_cache`
     - name: docs-linux # linux-only
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_drive/**', 'packages/flutter_localizations/**', 'packages/flutter_goldens/**', 'bin/**') || $CIRRUS_PR == ''"
       environment:
@@ -285,17 +286,8 @@ task:
       script:
         - ./dev/bots/docs.sh docs
 
-    - name: docs_offline-linux # linux-only
-      only_if: "$CIRRUS_PR == ''"
-      depends_on:
-        - docs-linux
-      docs_cache:
-        folder: dev/docs
-        fingerprint_script:
-          - echo "docs_${CIRRUS_CHANGE_IN_REPO}_${CIRRUS_BUILD_ID}"
-      script:
-        - ./dev/bots/docs.sh offline
-
+    # This task relies on `docs_cache` having been populated in `docs-linux`.
+    # It updates the cache with the docset gzip file it generates.
     - name: docs_docset-linux # linux-only
       only_if: "$CIRRUS_PR == ''"
       depends_on:
@@ -304,16 +296,17 @@ task:
         CPU: 2
       docs_cache:
         folder: dev/docs
+        reupload_on_changes: true
         fingerprint_script:
           - echo "docs_${CIRRUS_CHANGE_IN_REPO}_${CIRRUS_BUILD_ID}"
       script:
         - ./dev/bots/docs.sh docset
 
+    # This task relies on an updated `docs_cache` from `docs_docset-linux`
     - name: docs_deploy-linux # linux-only
       only_if: "$CIRRUS_BRANCH == 'master' || $CIRRUS_BRANCH == 'stable'"
       depends_on:
         - docs-linux
-        - docs_offline-linux
         - docs_docset-linux
       environment:
         # For uploading master docs to Firebase master branch staging site
