@@ -298,8 +298,8 @@ class MaterialApp extends StatefulWidget {
 
   /// The [ThemeData] to use when 'high contrast' is requested by the system.
   ///
-  /// Some host platforms allow the users to increase contrast through an
-  /// accessibility setting.
+  /// Some host platforms (for example, iOS) allow the users to increase
+  /// contrast through an accessibility setting.
   ///
   /// Uses [theme] instead when null.
   ///
@@ -312,8 +312,8 @@ class MaterialApp extends StatefulWidget {
   /// The [ThemeData] to use when a 'dark mode' and 'high contrast' is requested
   /// by the system.
   ///
-  /// Some host platforms allow the users to increase contrast through an
-  /// accessibility setting.
+  /// Some host platforms (for example, iOS) allow the users to increase
+  /// contrast through an accessibility setting.
   ///
   /// This theme should have a [ThemeData.brightness] set to [Brightness.dark].
   ///

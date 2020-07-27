@@ -753,8 +753,8 @@ void main() {
   });
 
   testWidgets('MaterialApp uses high contrast theme when appropriate', (WidgetTester tester) async {
-    // TODO: Fake the high contrast somehow?.
     tester.binding.window.platformBrightnessTestValue = Brightness.light;
+    tester.binding.window.accessibilityFeaturesTestValue = MockAccessibilityFeature();
 
     ThemeData appliedTheme;
 
@@ -776,6 +776,40 @@ void main() {
     );
 
     expect(appliedTheme.primaryColor, Colors.blue);
+    tester.binding.window.accessibilityFeaturesTestValue = null;
+  });
+
+  testWidgets('MaterialApp uses high contrast dark theme when appropriate', (WidgetTester tester) async {
+    tester.binding.window.platformBrightnessTestValue = Brightness.dark;
+    tester.binding.window.accessibilityFeaturesTestValue = MockAccessibilityFeature();
+
+    ThemeData appliedTheme;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          primaryColor: Colors.lightBlue,
+        ),
+        darkTheme: ThemeData(
+          primaryColor: Colors.lightGreen,
+        ),
+        highContrastTheme: ThemeData(
+          primaryColor: Colors.blue,
+        ),
+        highContrastDarkTheme: ThemeData(
+          primaryColor: Colors.green,
+        ),
+        home: Builder(
+          builder: (BuildContext context) {
+            appliedTheme = Theme.of(context);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    expect(appliedTheme.primaryColor, Colors.green);
+    tester.binding.window.accessibilityFeaturesTestValue = null;
   });
 
   testWidgets('MaterialApp switches themes when the Window platformBrightness changes.', (WidgetTester tester) async {
