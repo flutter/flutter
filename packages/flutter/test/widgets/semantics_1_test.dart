@@ -59,7 +59,7 @@ void main() {
             Container(
               height: 10.0,
               child: IgnorePointer(
-                ignoring: true,
+                ignoringSemantics: true,
                 child: Semantics(
                   label: 'child1',
                   textDirection: TextDirection.ltr,
@@ -101,7 +101,7 @@ void main() {
             Container(
               height: 10.0,
               child: IgnorePointer(
-                ignoring: false,
+                ignoringSemantics: false,
                 child: Semantics(
                   label: 'child2',
                   textDirection: TextDirection.ltr,
@@ -155,7 +155,7 @@ void main() {
             Container(
               height: 10.0,
               child: IgnorePointer(
-                ignoring: true,
+                ignoringSemantics: true,
                 child: Semantics(
                   label: 'child2',
                   textDirection: TextDirection.ltr,
@@ -197,7 +197,7 @@ void main() {
             Container(
               height: 10.0,
               child: IgnorePointer(
-                ignoring: false,
+                ignoringSemantics: false,
                 child: Semantics(
                   label: 'child2',
                   textDirection: TextDirection.ltr,

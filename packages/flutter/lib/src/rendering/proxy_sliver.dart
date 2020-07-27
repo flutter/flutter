@@ -8,6 +8,7 @@ import 'dart:ui' as ui show Color;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/semantics.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'layer.dart';
@@ -208,7 +209,7 @@ class RenderSliverOpacity extends RenderProxySliver {
 /// When [ignoringSemantics] is true, the subtree will be invisible to the
 /// semantics layer (and thus e.g. accessibility tools). If [ignoringSemantics]
 /// is null, it uses the value of [ignoring].
-class RenderSliverIgnorePointer extends RenderProxySliver {
+class RenderSliverIgnorePointer extends RenderProxySliver with IgnoreSemanticsActionsMixin{
   /// Creates a render object that is invisible to hit testing.
   ///
   /// The [ignoring] argument must not be null. If [ignoringSemantics] is null,
@@ -216,11 +217,24 @@ class RenderSliverIgnorePointer extends RenderProxySliver {
   RenderSliverIgnorePointer({
     RenderSliver sliver,
     bool ignoring = true,
-    bool ignoringSemantics,
+    bool ignoringSemantics = false,
   }) : assert(ignoring != null),
+       assert(ignoringSemantics != null),
        _ignoring = ignoring,
        _ignoringSemantics = ignoringSemantics {
     child = sliver;
+    _updateIgnoredActions();
+  }
+
+  void _updateIgnoredActions() {
+    if (ignoring) {
+      setIgnoredSemanticsAction(kPointerRelatedSemanticsAction);
+    } else {
+      // Either we don't need to ignore any actions or the entire subtree will
+      // not be included in semantics tree due to _ignoringSemantics = true.
+      // In either cases, we don't need to set ignore actions.
+      setIgnoredSemanticsAction(const <SemanticsAction>{});
+    }
   }
 
   /// Whether this render object is ignored during hit testing.
@@ -234,14 +248,14 @@ class RenderSliverIgnorePointer extends RenderProxySliver {
     if (value == _ignoring)
       return;
     _ignoring = value;
-    if (_ignoringSemantics == null || !_ignoringSemantics)
-      markNeedsSemanticsUpdate();
+    _updateIgnoredActions();
+    markNeedsSemanticsUpdate();
   }
 
   /// Whether the semantics of this render object is ignored when compiling the
   /// semantics tree.
   ///
-  /// If null, defaults to value of [ignoring].
+  /// Defaults to false.
   ///
   /// See [SemanticsNode] for additional information about the semantics tree.
   bool get ignoringSemantics => _ignoringSemantics;
@@ -249,13 +263,11 @@ class RenderSliverIgnorePointer extends RenderProxySliver {
   set ignoringSemantics(bool value) {
     if (value == _ignoringSemantics)
       return;
-    final bool oldEffectiveValue = _effectiveIgnoringSemantics;
     _ignoringSemantics = value;
-    if (oldEffectiveValue != _effectiveIgnoringSemantics)
-      markNeedsSemanticsUpdate();
+    _updateIgnoredActions();
+    markNeedsSemanticsUpdate();
   }
 
-  bool get _effectiveIgnoringSemantics => ignoringSemantics ?? ignoring;
 
   @override
   bool hitTest(SliverHitTestResult result, {double mainAxisPosition, double crossAxisPosition}) {
@@ -269,7 +281,7 @@ class RenderSliverIgnorePointer extends RenderProxySliver {
 
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    if (child != null && !_effectiveIgnoringSemantics)
+    if (child != null && !_ignoringSemantics)
       visitor(child);
   }
 
@@ -277,7 +289,11 @@ class RenderSliverIgnorePointer extends RenderProxySliver {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<bool>('ignoring', ignoring));
-    properties.add(DiagnosticsProperty<bool>('ignoringSemantics', _effectiveIgnoringSemantics, description: ignoringSemantics == null ? 'implicitly $_effectiveIgnoringSemantics' : null));
+    properties.add(DiagnosticsProperty<bool>(
+      'ignoringSemantics',
+      ignoringSemantics,
+      description: ignoringSemantics == null ? 'implicitly $ignoringSemantics' : null,
+    ));
   }
 }
 

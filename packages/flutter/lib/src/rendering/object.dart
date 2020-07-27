@@ -2506,7 +2506,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 
   SemanticsConfiguration get _semanticsConfiguration {
     if (_cachedSemanticsConfiguration == null) {
+      _updateInheritedIgnoredSemanticsActions();
       _cachedSemanticsConfiguration = SemanticsConfiguration();
+      _cachedSemanticsConfiguration.inheritedIgnoredActions = _inheritedIgnoredSemanticsActions;
       describeSemanticsConfiguration(_cachedSemanticsConfiguration);
     }
     return _cachedSemanticsConfiguration;
@@ -2602,6 +2604,32 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         owner._nodesNeedingSemantics.add(node);
         owner.requestVisualUpdate();
       }
+    }
+  }
+  Set<SemanticsAction> _inheritedIgnoredSemanticsActions;
+  Set<SemanticsAction> _ignoredSemanticsActions;
+
+  Set<SemanticsAction> _getIncomingIgnoredSemanticsActions() {
+    if (parent == null) {
+      // This is a root node.
+      return <SemanticsAction>{};
+    }
+
+    final RenderObject parentRenderObject = parent as RenderObject;
+    parentRenderObject._updateInheritedIgnoredSemanticsActions();
+    assert(parentRenderObject._inheritedIgnoredSemanticsActions != null);
+    return parentRenderObject._inheritedIgnoredSemanticsActions;
+  }
+
+  void _updateInheritedIgnoredSemanticsActions() {
+    if (_inheritedIgnoredSemanticsActions != null)
+      return;
+    _inheritedIgnoredSemanticsActions = _getIncomingIgnoredSemanticsActions();
+    assert(_inheritedIgnoredSemanticsActions != null);
+    if (_ignoredSemanticsActions != null) {
+      _inheritedIgnoredSemanticsActions = Set<SemanticsAction>.from(
+        _inheritedIgnoredSemanticsActions
+      )..addAll(_ignoredSemanticsActions);
     }
   }
 
@@ -3026,6 +3054,42 @@ mixin RenderObjectWithChildMixin<ChildType extends RenderObject> on RenderObject
   List<DiagnosticsNode> debugDescribeChildren() {
     return child != null ? <DiagnosticsNode>[child.toDiagnosticsNode(name: 'child')] : <DiagnosticsNode>[];
   }
+}
+
+/// A mixin to prevent semantics binding from collecting certain semantics
+/// actions for its rendering subtree.
+///
+/// Use this mixin when you want to hide semantics actions such as the
+/// [SemanticsAction.Tap] or the [SemanticsAction.longPress] from the
+/// accessibility service so that those semantics actions will be treated as if
+/// they do not exist.
+///
+/// To use this mixin, calls [setIgnoredSemanticsAction] with a set of
+/// [SemanticsAction]s that you want to hide from the accessibility service.
+mixin IgnoreSemanticsActionsMixin on RenderObject {
+  /// Use this method to hide the [SemanticsAction]s for its rendering subtree.
+  ///
+  /// The input [actions] are the semantics actions you want to hide.
+  ///
+  /// This is a rather expensive operation because it will dirty the entire
+  /// semantics subtree. You should only call this method when it is necessary.
+  void setIgnoredSemanticsAction(Set<SemanticsAction> actions) {
+    assert(actions != null);
+    if (_ignoredSemanticsActions == actions)
+      return;
+    _ignoredSemanticsActions = actions;
+    _resetInheritedIgnoredSemanticsActionsForChildren(this);
+  }
+
+  static void _resetInheritedIgnoredSemanticsActionsForChildren(RenderObject node) {
+    node._inheritedIgnoredSemanticsActions = null;
+    node.markNeedsSemanticsUpdate();
+    // We need to reset both the _inheritedIgnoredSemanticsActions cache and
+    // the semantics configuration cache of the entire rendering subtree because
+    // we need to re-collect the semantics action handlers.
+    node.visitChildrenForSemantics(_resetInheritedIgnoredSemanticsActionsForChildren);
+  }
+
 }
 
 /// Parent data to support a doubly-linked list of children.

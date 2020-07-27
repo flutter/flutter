@@ -31,6 +31,20 @@ export 'package:flutter/gestures.dart' show
   PointerUpEvent,
   PointerCancelEvent;
 
+/// A set that contains all pointer related semantics action.
+///
+/// This is used by the [RenderIgnorePointer] and the
+/// [RenderSliverIgnorePointer] in order to hide pointer semantics actions
+/// in their rendering subtree.
+const Set<SemanticsAction> kPointerRelatedSemanticsAction = <SemanticsAction>{
+  SemanticsAction.tap,
+  SemanticsAction.longPress,
+  SemanticsAction.scrollLeft,
+  SemanticsAction.scrollRight,
+  SemanticsAction.scrollUp,
+  SemanticsAction.scrollDown,
+};
+
 /// A base class for render boxes that resemble their children.
 ///
 /// A proxy box has a single child and simply mimics all the properties of that
@@ -3106,7 +3120,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
 ///
 ///  * [RenderAbsorbPointer], which takes the pointer events but prevents any
 ///    nodes in the subtree from seeing them.
-class RenderIgnorePointer extends RenderProxyBox {
+class RenderIgnorePointer extends RenderProxyBox with IgnoreSemanticsActionsMixin {
   /// Creates a render object that is invisible to hit testing.
   ///
   /// The [ignoring] argument must not be null. If [ignoringSemantics] is null,
@@ -3114,11 +3128,24 @@ class RenderIgnorePointer extends RenderProxyBox {
   RenderIgnorePointer({
     RenderBox child,
     bool ignoring = true,
-    bool ignoringSemantics,
+    bool ignoringSemantics = false,
   }) : _ignoring = ignoring,
        _ignoringSemantics = ignoringSemantics,
        super(child) {
+    _updateIgnoredActions();
     assert(_ignoring != null);
+    assert(_ignoringSemantics != null);
+  }
+
+  void _updateIgnoredActions() {
+    if (ignoring) {
+      setIgnoredSemanticsAction(kPointerRelatedSemanticsAction);
+    } else {
+      // Either we don't need to ignore any actions or the entire subtree will
+      // not be included in semantics tree due to _ignoringSemantics = true.
+      // In either cases, we don't need to set ignore actions.
+      setIgnoredSemanticsAction(const <SemanticsAction>{});
+    }
   }
 
   /// Whether this render object is ignored during hit testing.
@@ -3132,40 +3159,37 @@ class RenderIgnorePointer extends RenderProxyBox {
     if (value == _ignoring)
       return;
     _ignoring = value;
-    if (_ignoringSemantics == null || !_ignoringSemantics)
-      markNeedsSemanticsUpdate();
+    _updateIgnoredActions();
+    markNeedsSemanticsUpdate();
   }
 
-  /// Whether the semantics of this render object is ignored when compiling the semantics tree.
+  /// Whether the semantics of this render object is ignored when compiling the
+  /// semantics tree.
   ///
-  /// If null, defaults to value of [ignoring].
+  /// Defaults to false.
   ///
   /// See [SemanticsNode] for additional information about the semantics tree.
   bool get ignoringSemantics => _ignoringSemantics;
   bool _ignoringSemantics;
   set ignoringSemantics(bool value) {
+    assert(ignoringSemantics != null);
     if (value == _ignoringSemantics)
       return;
-    final bool oldEffectiveValue = _effectiveIgnoringSemantics;
     _ignoringSemantics = value;
-    if (oldEffectiveValue != _effectiveIgnoringSemantics)
-      markNeedsSemanticsUpdate();
+    _updateIgnoredActions();
+    markNeedsSemanticsUpdate();
   }
-
-  bool get _effectiveIgnoringSemantics => ignoringSemantics ?? ignoring;
 
   @override
   bool hitTest(BoxHitTestResult result, { Offset position }) {
     return !ignoring && super.hitTest(result, position: position);
   }
 
-  // TODO(ianh): figure out a way to still include labels and flags in
-  // descendants, just make them non-interactive, even when
-  // _effectiveIgnoringSemantics is true
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    if (child != null && !_effectiveIgnoringSemantics)
+    if (child != null && !ignoringSemantics) {
       visitor(child);
+    }
   }
 
   @override
@@ -3175,8 +3199,8 @@ class RenderIgnorePointer extends RenderProxyBox {
     properties.add(
       DiagnosticsProperty<bool>(
         'ignoringSemantics',
-        _effectiveIgnoringSemantics,
-        description: ignoringSemantics == null ? 'implicitly $_effectiveIgnoringSemantics' : null,
+        ignoringSemantics,
+        description: ignoringSemantics == null ? 'implicitly $ignoringSemantics' : null,
       ),
     );
   }

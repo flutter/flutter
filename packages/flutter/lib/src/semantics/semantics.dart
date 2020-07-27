@@ -2816,6 +2816,11 @@ class SemanticsConfiguration {
   bool get hasBeenAnnotated => _hasBeenAnnotated;
   bool _hasBeenAnnotated = false;
 
+  /// Aggregated ignored semantics actions from ancestors.
+  ///
+  /// This set is used for post filtering of semantics action related api.
+  Set<SemanticsAction> inheritedIgnoredActions;
+
   /// The actions (with associated action handlers) that this configuration
   /// would like to contribute to the semantics tree.
   ///
@@ -2873,6 +2878,8 @@ class SemanticsConfiguration {
   VoidCallback get onTap => _onTap;
   VoidCallback _onTap;
   set onTap(VoidCallback value) {
+    if (inheritedIgnoredActions.contains(SemanticsAction.tap))
+      return;
     _addArgumentlessAction(SemanticsAction.tap, value);
     _onTap = value;
   }
@@ -2888,6 +2895,8 @@ class SemanticsConfiguration {
   VoidCallback get onLongPress => _onLongPress;
   VoidCallback _onLongPress;
   set onLongPress(VoidCallback value) {
+    if (inheritedIgnoredActions.contains(SemanticsAction.longPress))
+      return;
     _addArgumentlessAction(SemanticsAction.longPress, value);
     _onLongPress = value;
   }
@@ -2906,6 +2915,8 @@ class SemanticsConfiguration {
   VoidCallback get onScrollLeft => _onScrollLeft;
   VoidCallback _onScrollLeft;
   set onScrollLeft(VoidCallback value) {
+    if (inheritedIgnoredActions.contains(SemanticsAction.scrollLeft))
+      return;
     _addArgumentlessAction(SemanticsAction.scrollLeft, value);
     _onScrollLeft = value;
   }
@@ -2920,6 +2931,8 @@ class SemanticsConfiguration {
   VoidCallback get onDismiss => _onDismiss;
   VoidCallback _onDismiss;
   set onDismiss(VoidCallback value) {
+    if (inheritedIgnoredActions.contains(SemanticsAction.dismiss))
+      return;
     _addArgumentlessAction(SemanticsAction.dismiss, value);
     _onDismiss = value;
   }
@@ -2938,6 +2951,8 @@ class SemanticsConfiguration {
   VoidCallback get onScrollRight => _onScrollRight;
   VoidCallback _onScrollRight;
   set onScrollRight(VoidCallback value) {
+    if (inheritedIgnoredActions.contains(SemanticsAction.scrollRight))
+      return;
     _addArgumentlessAction(SemanticsAction.scrollRight, value);
     _onScrollRight = value;
   }
@@ -2956,6 +2971,8 @@ class SemanticsConfiguration {
   VoidCallback get onScrollUp => _onScrollUp;
   VoidCallback _onScrollUp;
   set onScrollUp(VoidCallback value) {
+    if (inheritedIgnoredActions.contains(SemanticsAction.scrollUp))
+      return;
     _addArgumentlessAction(SemanticsAction.scrollUp, value);
     _onScrollUp = value;
   }
@@ -2974,6 +2991,8 @@ class SemanticsConfiguration {
   VoidCallback get onScrollDown => _onScrollDown;
   VoidCallback _onScrollDown;
   set onScrollDown(VoidCallback value) {
+    if (inheritedIgnoredActions.contains(SemanticsAction.scrollDown))
+      return;
     _addArgumentlessAction(SemanticsAction.scrollDown, value);
     _onScrollDown = value;
   }
@@ -2992,6 +3011,8 @@ class SemanticsConfiguration {
   VoidCallback get onIncrease => _onIncrease;
   VoidCallback _onIncrease;
   set onIncrease(VoidCallback value) {
+    if (inheritedIgnoredActions.contains(SemanticsAction.increase))
+      return;
     _addArgumentlessAction(SemanticsAction.increase, value);
     _onIncrease = value;
   }
@@ -3010,6 +3031,8 @@ class SemanticsConfiguration {
   VoidCallback get onDecrease => _onDecrease;
   VoidCallback _onDecrease;
   set onDecrease(VoidCallback value) {
+    if (inheritedIgnoredActions.contains(SemanticsAction.decrease))
+      return;
     _addArgumentlessAction(SemanticsAction.decrease, value);
     _onDecrease = value;
   }
@@ -3023,6 +3046,8 @@ class SemanticsConfiguration {
   VoidCallback get onCopy => _onCopy;
   VoidCallback _onCopy;
   set onCopy(VoidCallback value) {
+    if (inheritedIgnoredActions.contains(SemanticsAction.copy))
+      return;
     _addArgumentlessAction(SemanticsAction.copy, value);
     _onCopy = value;
   }
@@ -3037,6 +3062,8 @@ class SemanticsConfiguration {
   VoidCallback get onCut => _onCut;
   VoidCallback _onCut;
   set onCut(VoidCallback value) {
+    if (inheritedIgnoredActions.contains(SemanticsAction.cut))
+      return;
     _addArgumentlessAction(SemanticsAction.cut, value);
     _onCut = value;
   }
@@ -3050,6 +3077,8 @@ class SemanticsConfiguration {
   VoidCallback get onPaste => _onPaste;
   VoidCallback _onPaste;
   set onPaste(VoidCallback value) {
+    if (inheritedIgnoredActions.contains(SemanticsAction.paste))
+      return;
     _addArgumentlessAction(SemanticsAction.paste, value);
     _onPaste = value;
   }
@@ -3066,6 +3095,8 @@ class SemanticsConfiguration {
   VoidCallback get onShowOnScreen => _onShowOnScreen;
   VoidCallback _onShowOnScreen;
   set onShowOnScreen(VoidCallback value) {
+    if (inheritedIgnoredActions.contains(SemanticsAction.showOnScreen))
+      return;
     _addArgumentlessAction(SemanticsAction.showOnScreen, value);
     _onShowOnScreen = value;
   }
@@ -3081,6 +3112,8 @@ class SemanticsConfiguration {
   MoveCursorHandler _onMoveCursorForwardByCharacter;
   set onMoveCursorForwardByCharacter(MoveCursorHandler value) {
     assert(value != null);
+    if (inheritedIgnoredActions.contains(SemanticsAction.moveCursorForwardByCharacter))
+      return;
     _addAction(SemanticsAction.moveCursorForwardByCharacter, (dynamic args) {
       final bool extentSelection = args as bool;
       assert(extentSelection != null);
@@ -3100,6 +3133,8 @@ class SemanticsConfiguration {
   MoveCursorHandler _onMoveCursorBackwardByCharacter;
   set onMoveCursorBackwardByCharacter(MoveCursorHandler value) {
     assert(value != null);
+    if (inheritedIgnoredActions.contains(SemanticsAction.moveCursorBackwardByCharacter))
+      return;
     _addAction(SemanticsAction.moveCursorBackwardByCharacter, (dynamic args) {
       final bool extentSelection = args as bool;
       assert(extentSelection != null);
@@ -3119,6 +3154,8 @@ class SemanticsConfiguration {
   MoveCursorHandler _onMoveCursorForwardByWord;
   set onMoveCursorForwardByWord(MoveCursorHandler value) {
     assert(value != null);
+    if (inheritedIgnoredActions.contains(SemanticsAction.moveCursorForwardByWord))
+      return;
     _addAction(SemanticsAction.moveCursorForwardByWord, (dynamic args) {
       final bool extentSelection = args as bool;
       assert(extentSelection != null);
@@ -3138,6 +3175,8 @@ class SemanticsConfiguration {
   MoveCursorHandler _onMoveCursorBackwardByWord;
   set onMoveCursorBackwardByWord(MoveCursorHandler value) {
     assert(value != null);
+    if (inheritedIgnoredActions.contains(SemanticsAction.moveCursorBackwardByWord))
+      return;
     _addAction(SemanticsAction.moveCursorBackwardByWord, (dynamic args) {
       final bool extentSelection = args as bool;
       assert(extentSelection != null);
@@ -3157,6 +3196,8 @@ class SemanticsConfiguration {
   SetSelectionHandler _onSetSelection;
   set onSetSelection(SetSelectionHandler value) {
     assert(value != null);
+    if (inheritedIgnoredActions.contains(SemanticsAction.setSelection))
+      return;
     _addAction(SemanticsAction.setSelection, (dynamic args) {
       assert(args != null && args is Map);
       final Map<String, int> selection = (args as Map<dynamic, dynamic>).cast<String, int>();
@@ -3189,6 +3230,8 @@ class SemanticsConfiguration {
   VoidCallback get onDidGainAccessibilityFocus => _onDidGainAccessibilityFocus;
   VoidCallback _onDidGainAccessibilityFocus;
   set onDidGainAccessibilityFocus(VoidCallback value) {
+    if (inheritedIgnoredActions.contains(SemanticsAction.didGainAccessibilityFocus))
+      return;
     _addArgumentlessAction(SemanticsAction.didGainAccessibilityFocus, value);
     _onDidGainAccessibilityFocus = value;
   }
@@ -3213,6 +3256,8 @@ class SemanticsConfiguration {
   VoidCallback get onDidLoseAccessibilityFocus => _onDidLoseAccessibilityFocus;
   VoidCallback _onDidLoseAccessibilityFocus;
   set onDidLoseAccessibilityFocus(VoidCallback value) {
+    if (inheritedIgnoredActions.contains(SemanticsAction.didLoseAccessibilityFocus))
+      return;
     _addArgumentlessAction(SemanticsAction.didLoseAccessibilityFocus, value);
     _onDidLoseAccessibilityFocus = value;
   }
