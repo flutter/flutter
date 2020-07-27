@@ -63,7 +63,7 @@ enum OverflowBarAlignment {
 ///       color: Colors.white,
 ///       elevation: 24,
 ///       shape: RoundedRectangleBorder(
-///         borderRadius: BorderRadius.all(Radius.circular(4.0))
+///         borderRadius: BorderRadius.all(Radius.circular(4))
 ///       ),
 ///       child: Padding(
 ///         padding: EdgeInsets.all(8),
@@ -79,9 +79,9 @@ enum OverflowBarAlignment {
 ///                   spacing: 8,
 ///                   overflowAlignment: OverflowBarAlignment.end,
 ///                   children: <Widget>[
-///                     OutlinedButton(child: Text('OK'), onPressed: () { }),
 ///                     TextButton(child: Text('Cancel'), onPressed: () { }),
 ///                     TextButton(child: Text('Really Really Cancel'), onPressed: () { }),
+///                     OutlinedButton(child: Text('OK'), onPressed: () { }),
 ///                   ],
 ///                 ),
 ///               ),
@@ -157,7 +157,7 @@ class OverflowBar extends MultiChildRenderObjectWidget {
   /// [OverflowBarAlignment.start], and with the left edge of the
   /// available space for [OverflowBarAlignment.end]. For
   /// [OverflowBarAlignment.center] each child is horizontally
-  /// centered with the available space.
+  /// centered within the available space.
   ///
   /// Defaults to [OverflowBarAlignment.start].
   ///
@@ -200,11 +200,16 @@ class OverflowBar extends MultiChildRenderObjectWidget {
   /// [textDirection] is [TextDirection.ltr] then the first child is
   /// laid out first.
   ///
+  /// If this parameter is null, then the value of
+  /// `Directionality.of(context)` is used.
+  ///
   /// See also:
   ///
   ///  * [overflowDirection], which defines the order that the
   ///    [OverflowBar]'s children appear in, if the horizontal layout
   ///    overflows.
+  ///  * [Directionality], which defines the ambient directionality of
+  ///    text and text-direction-sensitive render objects.
   final TextDirection textDirection;
 
   /// {@macro flutter.widgets.Clip}
@@ -239,7 +244,7 @@ class OverflowBar extends MultiChildRenderObjectWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('spacing', spacing, defaultValue: 0));
-    properties.add(DoubleProperty('overflowSpacing', overflowSpacing));
+    properties.add(DoubleProperty('overflowSpacing', overflowSpacing, defaultValue: 0));
     properties.add(EnumProperty<OverflowBarAlignment>('overflowAlignment', overflowAlignment, defaultValue: OverflowBarAlignment.start));
     properties.add(EnumProperty<VerticalDirection>('overflowDirection', overflowDirection, defaultValue: VerticalDirection.down));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
@@ -316,21 +321,21 @@ class _RenderOverflowBar extends RenderBox
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
-    if (_textDirection != value) {
-      _textDirection = value;
-      markNeedsLayout();
-    }
+    if (_textDirection == value)
+      return;
+    _textDirection = value;
+    markNeedsLayout();
   }
 
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior = Clip.none;
   set clipBehavior(Clip value) {
     assert(value != null);
-    if (value != _clipBehavior) {
-      _clipBehavior = value;
-      markNeedsPaint();
-      markNeedsSemanticsUpdate();
-    }
+    if (value == _clipBehavior)
+      return;
+    _clipBehavior = value;
+    markNeedsPaint();
+    markNeedsSemanticsUpdate();
   }
 
   @override
@@ -448,7 +453,7 @@ class _RenderOverflowBar extends RenderBox
     } else {
       // Default horizontal layout
       child = rtl ? lastChild : firstChild;
-      RenderBox nextChild() => textDirection == TextDirection.rtl ? childBefore(child) : childAfter(child);
+      RenderBox nextChild() => rtl ? childBefore(child) : childAfter(child);
       double x  = 0;
       while (child != null) {
         final _OverflowBarParentData childParentData = child.parentData as _OverflowBarParentData;

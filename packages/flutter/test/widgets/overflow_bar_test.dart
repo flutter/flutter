@@ -18,7 +18,7 @@ void main() {
     expect(bar.children, const <Widget>[]);
   });
 
-  testWidgets('EmptyOverflowBar', (WidgetTester tester) async {
+  testWidgets('Empty OverflowBar', (WidgetTester tester) async {
     const Size size = Size(16, 24);
 
     await tester.pumpWidget(
@@ -173,6 +173,5 @@ void main() {
     expect(tester.getRect(find.byKey(child1Key)), const Rect.fromLTRB(100.0/2.0 - 48/2, 0, 100.0/2.0 + 48/2, 48));
     expect(tester.getRect(find.byKey(child2Key)), const Rect.fromLTRB(100.0/2.0 - 64/2, 48, 100.0/2.0 + 64/2, 112));
     expect(tester.getRect(find.byKey(child3Key)), const Rect.fromLTRB(100.0/2.0 - 32/2, 112, 100.0/2.0 + 32/2, 144));
-
   });
 }
