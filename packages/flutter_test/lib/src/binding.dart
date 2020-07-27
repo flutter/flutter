@@ -252,10 +252,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// This method has no effect on the timeout specified via `timeout` on
   /// [testWidgets]. That timeout is implemented by the `test` package.
   ///
-  /// By default, each [pump] and [pumpWidget] call increases the timeout by a
-  /// hundred milliseconds, and each [matchesGoldenFile] expectation increases
-  /// it by a minute. If there is no timeout in the first place, this has no
-  /// effect.
+  /// By default, each [pump] and [WidgetTester.pumpWidget] call increases the
+  /// timeout by a hundred milliseconds, and each [matchesGoldenFile]
+  /// expectation increases it by a minute. If there is no timeout in the first
+  /// place, this has no effect.
   ///
   /// The granularity of timeouts is coarse: the time is checked once per
   /// second, and only when the test is not executing. It is therefore possible

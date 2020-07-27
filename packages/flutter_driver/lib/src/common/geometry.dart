@@ -52,7 +52,7 @@ class GetOffset extends CommandWithTarget {
   String get kind => 'get_offset';
 }
 
-/// The result of the [GetRect] command.
+/// The result of the [GetOffset] command.
 ///
 /// The offset is provided in logical pixels, which can be translated
 /// to device pixels via [Window.devicePixelRatio].
