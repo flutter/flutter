@@ -4,12 +4,13 @@
 
 // @dart = 2.8
 
+import 'dart:collection';
+
 import 'package:meta/meta.dart';
 
 import 'assertions.dart';
 import 'basic_types.dart';
 import 'diagnostics.dart';
-import 'observer_list.dart';
 
 /// An object that maintains a list of listeners.
 ///
@@ -89,6 +90,11 @@ abstract class ValueListenable<T> extends Listenable {
   T get value;
 }
 
+class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
+  _ListenerEntry(this.listener);
+  final void Function() listener;
+}
+
 /// A class that can be extended or mixed in that provides a change notification
 /// API using [VoidCallback] for notifications.
 ///
@@ -100,7 +106,10 @@ abstract class ValueListenable<T> extends Listenable {
 ///
 ///  * [ValueNotifier], which is a [ChangeNotifier] that wraps a single value.
 class ChangeNotifier implements Listenable {
-  ObserverList<VoidCallback> _listeners = ObserverList<VoidCallback>();
+  LinkedList<_ListenerEntry> _listeners = LinkedList<_ListenerEntry>();
+  // Keeps track of the first newly added listened inside notifyListeners
+  // to stop the dispatching and not immediately execute new listeners
+  _ListenerEntry _firstNewlyAddedEntry;
 
   bool _debugAssertNotDisposed() {
     assert(() {
@@ -142,7 +151,9 @@ class ChangeNotifier implements Listenable {
   @override
   void addListener(VoidCallback listener) {
     assert(_debugAssertNotDisposed());
-    _listeners.add(listener);
+    final _ListenerEntry entry = _ListenerEntry(listener);
+    _firstNewlyAddedEntry ??= entry;
+    _listeners.add(entry);
   }
 
   /// Remove a previously registered closure from the list of closures that are
@@ -167,7 +178,12 @@ class ChangeNotifier implements Listenable {
   @override
   void removeListener(VoidCallback listener) {
     assert(_debugAssertNotDisposed());
-    _listeners.remove(listener);
+    _listeners
+        .firstWhere(
+          (_ListenerEntry element) => element.listener == listener,
+          orElse: () => null,
+        )
+        ?.unlink();
   }
 
   /// Discards any resources used by the object. After this is called, the
@@ -201,12 +217,13 @@ class ChangeNotifier implements Listenable {
   @visibleForTesting
   void notifyListeners() {
     assert(_debugAssertNotDisposed());
-    if (_listeners != null) {
-      final List<VoidCallback> localListeners = List<VoidCallback>.from(_listeners);
-      for (final VoidCallback listener in localListeners) {
+    _firstNewlyAddedEntry = null;
+    if (_listeners != null && _listeners.isNotEmpty) {
+      for (_ListenerEntry entry = _listeners.first;
+            entry != null && entry != _firstNewlyAddedEntry;
+            entry = entry.next) {
         try {
-          if (_listeners.contains(listener))
-            listener();
+          entry.listener();
         } catch (exception, stack) {
           FlutterError.reportError(FlutterErrorDetails(
             exception: exception,
