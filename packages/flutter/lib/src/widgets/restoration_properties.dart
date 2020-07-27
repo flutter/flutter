@@ -65,15 +65,31 @@ abstract class RestorableValue<T> extends RestorableProperty<T> {
   void didUpdateValue(T oldValue);
 }
 
+// _RestorablePrimitiveValue and its subclasses do not allow null values in
+// anticipation of NNBD (non-nullability by default).
+//
+// If necessary, we can in the future define a new subclass hierarchy that
+// does allow null values for primitive types. Borrowing from lisp where
+// functions that returned a bool ended in 'p', a suggested naming scheme for
+// these new subclasses could be to add 'N' (for nullable) to the end of a
+// class name (e.g. RestorableIntN, RestorableStringN, etc.) to distinguish them
+// from their non-nullable friends.
 class _RestorablePrimitiveValue<T> extends RestorableValue<T> {
   _RestorablePrimitiveValue(this._defaultValue)
-    : assert(debugIsSerializableForRestoration(_defaultValue)),
+    : assert(_defaultValue != null),
+      assert(debugIsSerializableForRestoration(_defaultValue)),
       super();
 
   final T _defaultValue;
 
   @override
   T createDefaultValue() => _defaultValue;
+
+  @override
+  set value(T value) {
+    assert(value != null);
+    super.value = value;
+  }
 
   @override
   void didUpdateValue(T oldValue) {
@@ -83,11 +99,13 @@ class _RestorablePrimitiveValue<T> extends RestorableValue<T> {
 
   @override
   T fromPrimitives(Object serialized) {
+    assert(serialized != null);
     return serialized as T;
   }
 
   @override
   Object toPrimitives() {
+    assert(value != null);
     return value;
   }
 }
@@ -113,7 +131,7 @@ class RestorableNum<T extends num> extends _RestorablePrimitiveValue<T> {
   /// If no restoration data is available to restore the value in this property
   /// from, the property will be initialized with the provided `defaultValue`.
   /// {@endtemplate}
-  RestorableNum(T defaultValue) : super(defaultValue);
+  RestorableNum(T defaultValue) : assert(defaultValue != null), super(defaultValue);
 }
 
 /// A [RestorableProperty] that knows how to store and restore a [double].
@@ -123,7 +141,7 @@ class RestorableDouble extends RestorableNum<double> {
   /// Creates a [RestorableDouble].
   ///
   /// {@macro flutter.widgets.restoration.primitivevalue.constructor}
-  RestorableDouble(double defaultValue) : super(defaultValue);
+  RestorableDouble(double defaultValue) : assert(defaultValue != null), super(defaultValue);
 }
 
 /// A [RestorableProperty] that knows how to store and restore an [int].
@@ -133,7 +151,7 @@ class RestorableInt extends RestorableNum<int> {
   /// Creates a [RestorableInt].
   ///
   /// {@macro flutter.widgets.restoration.primitivevalue.constructor}
-  RestorableInt(int defaultValue) : super(defaultValue);
+  RestorableInt(int defaultValue) : assert(defaultValue != null), super(defaultValue);
 }
 
 /// A [RestorableProperty] that knows how to store and restore a [String].
@@ -143,7 +161,7 @@ class RestorableString extends _RestorablePrimitiveValue<String> {
   /// Creates a [RestorableString].
   ///
   /// {@macro flutter.widgets.restoration.primitivevalue.constructor}
-  RestorableString(String defaultValue) : super(defaultValue);
+  RestorableString(String defaultValue) : assert(defaultValue != null), super(defaultValue);
 }
 
 /// A [RestorableProperty] that knows how to store and restore a [bool].
@@ -153,7 +171,7 @@ class RestorableBool extends _RestorablePrimitiveValue<bool> {
   /// Creates a [RestorableBool].
   ///
   /// {@macro flutter.widgets.restoration.primitivevalue.constructor}
-  RestorableBool(bool defaultValue) : super(defaultValue);
+  RestorableBool(bool defaultValue) : assert(defaultValue != null), super(defaultValue);
 }
 
 /// A base class for creating a [RestorableProperty] that stores and restores a

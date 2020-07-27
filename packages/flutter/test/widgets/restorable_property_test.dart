@@ -19,6 +19,14 @@ void main() {
     expect(() => _TestRestorableValue().value, throwsAssertionError);
   });
 
+  testWidgets('cannot initialize with null', (WidgetTester tester) async {
+    expect(() => RestorableNum<num>(null), throwsAssertionError);
+    expect(() => RestorableDouble(null), throwsAssertionError);
+    expect(() => RestorableInt(null), throwsAssertionError);
+    expect(() => RestorableString(null).value, throwsAssertionError);
+    expect(() => RestorableBool(null).value, throwsAssertionError);
+  });
+
   testWidgets('work when not in restoration scope', (WidgetTester tester) async {
     await tester.pumpWidget(const _RestorableWidget());
 
@@ -111,40 +119,20 @@ void main() {
     expect(find.text('guten tag'), findsOneWidget);
   });
 
-  testWidgets('restore to null', (WidgetTester tester) async {
+  testWidgets('cannot set to null', (WidgetTester tester) async {
     await tester.pumpWidget(const RootRestorationScope(
       restorationId: 'root-child',
       child: _RestorableWidget(),
     ));
 
     expect(find.text('hello world'), findsOneWidget);
-    _RestorableWidgetState state = tester.state(find.byType(_RestorableWidget));
+    final _RestorableWidgetState state = tester.state(find.byType(_RestorableWidget));
 
-    // Modify values.
-    state.setProperties(() {
-      state.numValue.value = null;
-      state.doubleValue.value = null;
-      state.intValue.value = null;
-      state.stringValue.value = null;
-      state.boolValue.value = null;
-      state.objectValue.value = null;
-    });
-    await tester.pump();
-    expect(find.text('null'), findsOneWidget);
-
-    // Restores to previous values.
-    await tester.restartAndRestore();
-    final _RestorableWidgetState oldState = state;
-    state = tester.state(find.byType(_RestorableWidget));
-    expect(state, isNot(same(oldState)));
-
-    expect(state.numValue.value, null);
-    expect(state.doubleValue.value, null);
-    expect(state.intValue.value, null);
-    expect(state.stringValue.value, null);
-    expect(state.boolValue.value, null);
-    expect(state.objectValue.value, null);
-    expect(find.text('null'), findsOneWidget);
+    expect(() => state.numValue.value = null, throwsAssertionError);
+    expect(() => state.doubleValue.value = null, throwsAssertionError);
+    expect(() => state.intValue.value = null, throwsAssertionError);
+    expect(() => state.stringValue.value = null, throwsAssertionError);
+    expect(() => state.boolValue.value = null, throwsAssertionError);
   });
 
   testWidgets('restore to older state', (WidgetTester tester) async {
