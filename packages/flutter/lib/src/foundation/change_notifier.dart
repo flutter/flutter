@@ -96,7 +96,7 @@ abstract class ValueListenable<T> extends Listenable {
 
 class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
   _ListenerEntry(this.listener);
-  final void Function() listener;
+  final VoidCallback listener;
 }
 
 /// A class that can be extended or mixed in that provides a change notification
@@ -110,9 +110,17 @@ class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
 ///  * [ValueNotifier], which is a [ChangeNotifier] that wraps a single value.
 class ChangeNotifier implements Listenable {
   LinkedList<_ListenerEntry>? _listeners = LinkedList<_ListenerEntry>();
-  // Keeps track of the first newly added listened inside notifyListeners
-  // to stop the dispatching and not immediately execute new listeners
+  /// Keeps track of the first newly added listened inside notifyListeners
+  /// to stop the dispatching and not immediately execute new listeners
   _ListenerEntry? _firstNewlyAddedEntry;
+
+  /// During [notifyListeners], corresponds to the listeners that were already notified,
+  /// from the last listener notified to the first one.
+  ///
+  /// This list is updated only when a listener removes itself, for performance reason.
+  List<_ListenerEntry>? _visitedEntriesInReverseOrder;
+
+  _ListenerEntry? _currentlyVisitedEntry;
 
   bool _debugAssertNotDisposed() {
     assert(() {
@@ -155,7 +163,9 @@ class ChangeNotifier implements Listenable {
   void addListener(VoidCallback listener) {
     assert(_debugAssertNotDisposed());
     final _ListenerEntry entry = _ListenerEntry(listener);
-    _firstNewlyAddedEntry ??= entry;
+    if (_currentlyVisitedEntry != null) {
+      _firstNewlyAddedEntry ??= entry;
+    }
     _listeners!.add(entry);
   }
 
@@ -181,13 +191,23 @@ class ChangeNotifier implements Listenable {
   @override
   void removeListener(VoidCallback listener) {
     assert(_debugAssertNotDisposed());
-    _listeners
-        !.cast<_ListenerEntry?>()
-        .firstWhere(
-          (_ListenerEntry? element) => element!.listener == listener,
-          orElse: () => null,
-        )
-        ?.unlink();
+    for (final _ListenerEntry entry in _listeners!) {
+      if (entry.listener == listener) {
+        if (entry == _firstNewlyAddedEntry) {
+          // During notifyListeners, a listener was added and removed immediatly
+          _firstNewlyAddedEntry = _firstNewlyAddedEntry!.next;
+        }
+        if (entry == _currentlyVisitedEntry) {
+          // A listener is removing itself, so we create a back-up of the already
+          // notified listeners, so that notifyListeners can resume the iteration.
+          // We are storing all already visited listeners instead of only the latest
+          // as notifyListeners can be called recursively while adding/removing listeners.
+          _visitedEntriesInReverseOrder = _allEntriesBefore(entry).toList(growable: false);
+        }
+        entry.unlink();
+        return;
+      }
+    }
   }
 
   /// Discards any resources used by the object. After this is called, the
@@ -221,11 +241,12 @@ class ChangeNotifier implements Listenable {
   @visibleForTesting
   void notifyListeners() {
     assert(_debugAssertNotDisposed());
-    _firstNewlyAddedEntry = null;
+    // TODO notifyListeners inside notifyListeners
+
     if (_listeners != null && _listeners!.isNotEmpty) {
-      for (_ListenerEntry? entry = _listeners!.first;
-            entry != null && entry != _firstNewlyAddedEntry;
-            entry = entry.next) {
+      _ListenerEntry? entry = _listeners!.first;
+      while (entry != null && entry != _firstNewlyAddedEntry) {
+        _currentlyVisitedEntry = entry;
         try {
           entry.listener();
         } catch (exception, stack) {
@@ -243,8 +264,42 @@ class ChangeNotifier implements Listenable {
             },
           ));
         }
+
+        if (entry.list != null) {
+          entry = entry.next;
+          continue;
+        }
+
+        // At this stage, the listener removed itself and as a consequence
+        // entry.next is no-longer available. We need to determine where to
+        // restart the iteration.
+
+        _ListenerEntry? lastValidEntry;
+        for (final _ListenerEntry entry in _visitedEntriesInReverseOrder!) {
+          if (entry.list != null) {
+            lastValidEntry = entry;
+          }
+        }
+
+        if (lastValidEntry != null) {
+          entry = lastValidEntry.next;
+        } else if (_listeners!.isNotEmpty) {
+          // entry and all of the previous listeners were removed, so we can
+          // safely restart the iteration from the start
+          entry = _listeners!.first;
+        }
       }
     }
+
+    _firstNewlyAddedEntry = null;
+    _currentlyVisitedEntry = null;
+    _visitedEntriesInReverseOrder = null;
+  }
+}
+
+Iterable<T> _allEntriesBefore<T extends LinkedListEntry<T>>(T target) sync* {
+  for (T? entry = target.previous; entry != null; entry = entry.previous) {
+    yield entry;
   }
 }
 
