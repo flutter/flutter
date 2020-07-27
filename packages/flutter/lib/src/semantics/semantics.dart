@@ -2818,7 +2818,8 @@ class SemanticsConfiguration {
 
   /// Aggregated ignored semantics actions from ancestors.
   ///
-  /// This set is used for post filtering of semantics action related api.
+  /// This set is used for blocking the semantics action setter from registering
+  /// semantics action handler.
   Set<SemanticsAction> inheritedIgnoredActions;
 
   /// The actions (with associated action handlers) that this configuration
