@@ -56,6 +56,15 @@ typedef ExpansionPanelCallback = void Function(int panelIndex, bool isExpanded);
 /// [ExpansionPanel] needs to rebuild.
 typedef ExpansionPanelHeaderBuilder = Widget Function(BuildContext context, bool isExpanded);
 
+/// Signature for the callback that's called when the expansion indicator of the
+/// [ExpansionPanel] needs to rebuild.
+typedef ExpansionPanelIconBuilder =  Widget Function(
+  BuildContext context,
+  bool isExpanded,
+  VoidCallback handlePressed,
+  Duration animationDuration,
+);
+
 /// A material expansion panel. It has a header and a body and can be either
 /// expanded or collapsed. The body of the panel is only visible when it is
 /// expanded.
@@ -79,6 +88,7 @@ class ExpansionPanel {
     @required this.body,
     this.isExpanded = false,
     this.canTapOnHeader = false,
+    this.expandIconBuilder,
   }) : assert(headerBuilder != null),
        assert(body != null),
        assert(isExpanded != null),
@@ -102,6 +112,9 @@ class ExpansionPanel {
   /// Defaults to false.
   final bool canTapOnHeader;
 
+  /// A callback which builds the expansion panel indicator to show
+  /// whether the panel is expanded or not.
+  final ExpansionPanelIconBuilder expandIconBuilder;
 }
 
 /// An expansion panel that allows for radio-like functionality.
@@ -124,11 +137,13 @@ class ExpansionPanelRadio extends ExpansionPanel {
     @required ExpansionPanelHeaderBuilder headerBuilder,
     @required Widget body,
     bool canTapOnHeader = false,
+    ExpansionPanelIconBuilder expandIconBuilder,
   }) : assert(value != null),
       super(
         body: body,
         headerBuilder: headerBuilder,
         canTapOnHeader: canTapOnHeader,
+        expandIconBuilder: expandIconBuilder,
       );
 
   /// The value that uniquely identifies a radio panel so that the currently
@@ -468,20 +483,40 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         _isChildExpanded(index),
       );
 
-      Widget expandIconContainer = Container(
-        margin: const EdgeInsetsDirectional.only(end: 8.0),
-        child: ExpandIcon(
+      Widget expansionIndicator;
+      if (child.expandIconBuilder != null) {
+        expansionIndicator = IgnorePointer(
+          ignoring: child.canTapOnHeader,
+          ignoringSemantics: child.canTapOnHeader,
+          child: child.expandIconBuilder(
+            context,
+            _isChildExpanded(index),
+            () { _handlePressed(_isChildExpanded(index), index); },
+            widget.animationDuration,
+          ),
+        );
+      } else {
+        expansionIndicator = ExpandIcon(
           isExpanded: _isChildExpanded(index),
           padding: const EdgeInsets.all(16.0),
           onPressed: !child.canTapOnHeader
-              ? (bool isExpanded) => _handlePressed(isExpanded, index)
-              : null,
-        ),
+            ? (bool isExpanded) => _handlePressed(isExpanded, index)
+            : null,
+        );
+      }
+
+      Widget expandIconContainer = Container(
+        margin: const EdgeInsetsDirectional.only(end: 8.0),
+        child: expansionIndicator,
       );
       if (!child.canTapOnHeader) {
         final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+        final String onTapHint = _isChildExpanded(index)
+          ? localizations.expandedIconTapHint
+          : localizations.collapsedIconTapHint;
         expandIconContainer = Semantics(
-          label: _isChildExpanded(index)? localizations.expandedIconTapHint : localizations.collapsedIconTapHint,
+          label: onTapHint,
+          onTapHint: child.expandIconBuilder == null ? null : onTapHint,
           container: true,
           child: expandIconContainer,
         );
@@ -506,7 +541,13 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         header = MergeSemantics(
           child: InkWell(
             onTap: () => _handlePressed(_isChildExpanded(index), index),
-            child: header,
+            child: child.expandIconBuilder != null
+              ? Semantics(
+                  button: true,
+                  enabled: true,
+                  child: header,
+                )
+              : header,
           ),
         );
       }
