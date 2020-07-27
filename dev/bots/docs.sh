@@ -175,10 +175,9 @@ fi
 case "$COMMAND" in
     docs)
         generate_docs
-        ;;
-    offline)
-        assert_not_in_pr
-        (cd "$FLUTTER_ROOT/dev/docs"; create_offline_zip)
+        if [[ -n "$CIRRUS_CI" && -z "$CIRRUS_PR" ]]; then
+            (cd "$FLUTTER_ROOT/dev/docs"; create_offline_zip)
+        fi
         ;;
     docset)
         assert_not_in_pr
@@ -189,6 +188,6 @@ case "$COMMAND" in
         deploy_docs
         ;;
     *)
-        >&2 echo "Usage: $0 {docs|offline|docset|deploy}"
+        >&2 echo "Usage: $0 {docs|docset|deploy}"
         exit 1
 esac
