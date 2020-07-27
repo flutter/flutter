@@ -1202,7 +1202,7 @@ class EditableText extends StatefulWidget {
   ///   [associated domains](https://developer.apple.com/documentation/safariservices/supporting_associated_domains_in_your_app).
   /// * Some autofill hints only work with specific [keyboardType]s. For example,
   ///   [AutofillHints.name] requires [TextInputType.name] and [AutofillHints.email]
-  ///   works only with [TextInputType.email]. Make sure the input field has a
+  ///   works only with [TextInputType.emailAddress]. Make sure the input field has a
   ///   compatible [keyboardType]. Empirically, [TextInputType.name] works well
   ///   with many autofill hints that are predefined on iOS.
   /// {@endtemplate}
