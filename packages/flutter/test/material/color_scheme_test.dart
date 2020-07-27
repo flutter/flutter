@@ -47,6 +47,8 @@ void main() {
   });
 
   test('high contrast light scheme matches the spec', () {
+    // Colors are based off of the Material Design baseline default theme:
+    // https://material.io/design/color/dark-theme.html#ui-application
     const ColorScheme scheme = ColorScheme.highContrastLight();
     expect(scheme.primary, const Color(0xff0000ba));
     expect(scheme.primaryVariant, const Color(0xff000088));
@@ -64,6 +66,8 @@ void main() {
   });
 
   test('high contrast dark scheme matches the spec', () {
+    // Colors are based off of the Material Design baseline dark theme:
+    // https://material.io/design/color/dark-theme.html#ui-application
     const ColorScheme scheme = ColorScheme.highContrastDark();
     expect(scheme.primary, const Color(0xffefb7ff));
     expect(scheme.primaryVariant, const Color(0xffbe9eff));
