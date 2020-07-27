@@ -37,6 +37,25 @@ function script_location() {
   echo "$(cd -P "$(dirname "$script_location")" >/dev/null && pwd)"
 }
 
+function assert_not_in_pr() {
+    if [[ -z "$CIRRUS_CI" || -n "$CIRRUS_PR" ]]; then
+        >&2 echo "The $COMMAND command can only be run in Cirrus for non-PR commits."
+        exit 1
+    fi
+}
+
+function generate_docs() {
+    # Install and activate dartdoc.
+    "$PUB" global activate dartdoc 0.32.1
+
+    # This script generates a unified doc set, and creates
+    # a custom index.html, placing everything into dev/docs/doc.
+    (cd "$FLUTTER_ROOT/dev/tools" && "$FLUTTER" pub get)
+    (cd "$FLUTTER_ROOT/dev/tools" && "$PUB" get)
+    (cd "$FLUTTER_ROOT" && "$DART" --disable-dart-dev "$FLUTTER_ROOT/dev/tools/dartdoc.dart")
+    (cd "$FLUTTER_ROOT" && "$DART" --disable-dart-dev "$FLUTTER_ROOT/dev/tools/java_and_objc_doc.dart")
+}
+
 # Zip up the docs so people can download them for offline usage.
 function create_offline_zip() {
   # Must be run from "$FLUTTER_ROOT/dev/docs"
@@ -67,6 +86,40 @@ function create_docset() {
   kill $tail_pid &> /dev/null
 }
 
+function deploy_docs() {
+    (cd "$FLUTTER_ROOT/dev/docs"; move_offline_into_place)
+
+    # Ensure google webmaster tools can verify our site.
+    cp "$FLUTTER_ROOT/dev/docs/google2ed1af765c529f57.html" "$FLUTTER_ROOT/dev/docs/doc"
+
+    # To help diagnose when things go wrong.
+    echo "Deploying the following files to Firebase:"
+    find "$FLUTTER_ROOT/dev/docs"
+    echo 'EOL'
+
+    case "$CIRRUS_BRANCH" in
+        master)
+            echo "$(date): Updating $CIRRUS_BRANCH docs: https://master-api.flutter.dev/"
+            # Disable search indexing on the master staging site so searches get only
+            # the stable site.
+            echo -e "User-agent: *\nDisallow: /" > "$FLUTTER_ROOT/dev/docs/doc/robots.txt"
+            export FIREBASE_TOKEN="$FIREBASE_MASTER_TOKEN"
+            deploy 5 master-docs-flutter-dev
+            ;;
+        stable)
+            echo "$(date): Updating $CIRRUS_BRANCH docs: https://api.flutter.dev/"
+            # Enable search indexing on the master staging site so searches get only
+            # the stable site.
+            echo -e "# All robots welcome!" > "$FLUTTER_ROOT/dev/docs/doc/robots.txt"
+            export FIREBASE_TOKEN="$FIREBASE_PUBLIC_TOKEN"
+            deploy 5 docs-flutter-dev
+            ;;
+        *)
+            >&2 echo "The $COMMAND command cannot be run on the $CIRRUS_BRANCH branch."
+            exit 1
+    esac
+}
+
 # Move the offline archives into place, after all the processing of the doc
 # directory is done. This avoids the tools recursively processing the archives
 # as part of their process.
@@ -92,10 +145,11 @@ SCRIPT_LOCATION="$(script_location)"
 # then this line will need to as well.
 FLUTTER_ROOT="$(dirname "$(dirname "$SCRIPT_LOCATION")")"
 
-echo "$(date): Running docs.sh"
+COMMAND="$1"
+echo "$(date): Running docs.sh $COMMAND"
 
 if [[ ! -d "$FLUTTER_ROOT" || ! -f "$FLUTTER_ROOT/bin/flutter" ]]; then
-  echo "Unable to locate the Flutter installation (using FLUTTER_ROOT: $FLUTTER_ROOT)"
+  >&2 echo "Unable to locate the Flutter installation (using FLUTTER_ROOT: $FLUTTER_ROOT)"
   exit 1
 fi
 
@@ -118,42 +172,23 @@ if [[ -d "$FLUTTER_PUB_CACHE" ]]; then
   export PUB_CACHE="${PUB_CACHE:-"$FLUTTER_PUB_CACHE"}"
 fi
 
-# Install and activate dartdoc.
-"$PUB" global activate dartdoc 0.32.1
-
-# This script generates a unified doc set, and creates
-# a custom index.html, placing everything into dev/docs/doc.
-(cd "$FLUTTER_ROOT/dev/tools" && "$FLUTTER" pub get)
-(cd "$FLUTTER_ROOT/dev/tools" && "$PUB" get)
-(cd "$FLUTTER_ROOT" && "$DART" --disable-dart-dev "$FLUTTER_ROOT/dev/tools/dartdoc.dart")
-(cd "$FLUTTER_ROOT" && "$DART" --disable-dart-dev "$FLUTTER_ROOT/dev/tools/java_and_objc_doc.dart")
-
-# Upload new API docs when running on Cirrus
-if [[ -n "$CIRRUS_CI" && -z "$CIRRUS_PR" ]]; then
-  # Create offline doc archives.
-  (cd "$FLUTTER_ROOT/dev/docs"; create_offline_zip)
-  (cd "$FLUTTER_ROOT/dev/docs"; create_docset)
-  (cd "$FLUTTER_ROOT/dev/docs"; move_offline_into_place)
-
-  # Ensure google webmaster tools can verify our site.
-  cp "$FLUTTER_ROOT/dev/docs/google2ed1af765c529f57.html" "$FLUTTER_ROOT/dev/docs/doc"
-
-  echo "This is not a pull request; considering whether to upload docs... (branch=$CIRRUS_BRANCH)"
-  if [[ "$CIRRUS_BRANCH" == "master" ]]; then
-    echo "$(date): Updating $CIRRUS_BRANCH docs: https://master-api.flutter.dev/"
-    # Disable search indexing on the master staging site so searches get only
-    # the stable site.
-    echo -e "User-agent: *\nDisallow: /" > "$FLUTTER_ROOT/dev/docs/doc/robots.txt"
-    export FIREBASE_TOKEN="$FIREBASE_MASTER_TOKEN"
-    deploy 5 master-docs-flutter-dev
-  fi
-
-  if [[ "$CIRRUS_BRANCH" == "stable" ]]; then
-    # Enable search indexing on the master staging site so searches get only
-    # the stable site.
-    echo "$(date): Updating $CIRRUS_BRANCH docs: https://api.flutter.dev/"
-    echo -e "# All robots welcome!" > "$FLUTTER_ROOT/dev/docs/doc/robots.txt"
-    export FIREBASE_TOKEN="$FIREBASE_PUBLIC_TOKEN"
-    deploy 5 docs-flutter-dev
-  fi
-fi
+case "$COMMAND" in
+    docs)
+        generate_docs
+        ;;
+    offline)
+        assert_not_in_pr
+        (cd "$FLUTTER_ROOT/dev/docs"; create_offline_zip)
+        ;;
+    docset)
+        assert_not_in_pr
+        (cd "$FLUTTER_ROOT/dev/docs"; create_docset)
+        ;;
+    deploy)
+        assert_not_in_pr
+        deploy_docs
+        ;;
+    *)
+        >&2 echo "Usage: $0 {docs|offline|docset|deploy}"
+        exit 1
+esac
