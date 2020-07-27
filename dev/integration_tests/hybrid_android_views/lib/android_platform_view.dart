@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
+MethodChannel channel = const MethodChannel('android_views_integration');
+
 class AndroidPlatformView extends StatelessWidget {
   /// Creates a platform view for Android, which is rendered as a
   /// native view.
