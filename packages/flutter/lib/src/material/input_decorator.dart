@@ -2801,7 +2801,7 @@ class InputDecoration {
   ///
   /// A collapsed decoration cannot have [labelText], [errorText], an [icon].
   ///
-  /// To create a collapsed input decoration, use [InputDecoration..collapsed].
+  /// To create a collapsed input decoration, use [InputDecoration.collapsed].
   final bool isCollapsed;
 
   /// An icon that appears before the [prefix] or [prefixText] and before
