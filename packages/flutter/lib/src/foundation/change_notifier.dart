@@ -182,8 +182,9 @@ class ChangeNotifier implements Listenable {
   void removeListener(VoidCallback listener) {
     assert(_debugAssertNotDisposed());
     _listeners
-        !.firstWhere(
-          (_ListenerEntry element) => element.listener == listener,
+        !.cast<_ListenerEntry?>()
+        .firstWhere(
+          (_ListenerEntry? element) => element!.listener == listener,
           orElse: () => null,
         )
         ?.unlink();
@@ -224,9 +225,9 @@ class ChangeNotifier implements Listenable {
     if (_listeners != null && _listeners!.isNotEmpty) {
       for (_ListenerEntry? entry = _listeners!.first;
             entry != null && entry != _firstNewlyAddedEntry;
-            entry = entry!.next) {
+            entry = entry.next) {
         try {
-          entry!.listener();
+          entry.listener();
         } catch (exception, stack) {
           FlutterError.reportError(FlutterErrorDetails(
             exception: exception,
