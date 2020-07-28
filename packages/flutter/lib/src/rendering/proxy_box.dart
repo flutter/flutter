@@ -1179,7 +1179,7 @@ abstract class CustomClipper<T> extends Listenable {
 
   /// Called whenever a new instance of the custom clipper delegate class is
   /// provided to the clip object, or any time that a new clip object is created
-  /// with a new instance of the custom painter delegate class (which amounts to
+  /// with a new instance of the custom clipper delegate class (which amounts to
   /// the same thing, because the latter is implemented in terms of the former).
   ///
   /// If the new instance represents different information than the old
