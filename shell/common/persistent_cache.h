@@ -58,6 +58,10 @@ class PersistentCache : public GrContextOptions::PersistentCache {
   bool IsDumpingSkp() const { return is_dumping_skp_; }
   void SetIsDumpingSkp(bool value) { is_dumping_skp_ = value; }
 
+  // Remove all files inside the persistent cache directory.
+  // Return whether the purge is successful.
+  bool Purge();
+
   // |GrContextOptions::PersistentCache|
   sk_sp<SkData> load(const SkData& key) override;
 

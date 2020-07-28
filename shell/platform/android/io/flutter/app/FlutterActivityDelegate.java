@@ -307,6 +307,9 @@ public final class FlutterActivityDelegate
     if (intent.getBooleanExtra("cache-sksl", false)) {
       args.add("--cache-sksl");
     }
+    if (intent.getBooleanExtra("purge-persistent-cache", false)) {
+      args.add("--purge-persistent-cache");
+    }
     if (intent.getBooleanExtra("verbose-logging", false)) {
       args.add("--verbose-logging");
     }

@@ -566,6 +566,10 @@ bool Shell::Setup(std::unique_ptr<PlatformView> platform_view,
   PersistentCache::GetCacheForProcess()->SetIsDumpingSkp(
       settings_.dump_skp_on_shader_compilation);
 
+  if (settings_.purge_persistent_cache) {
+    PersistentCache::GetCacheForProcess()->Purge();
+  }
+
   // TODO(gw280): The WeakPtr here asserts that we are derefing it on the
   // same thread as it was created on. Shell is constructed on the platform
   // thread but we need to call into the Engine on the UI thread, so we need

@@ -148,6 +148,10 @@ DEF_SWITCH(CacheSkSL,
            "should only be used during development phases. The generated SkSLs "
            "can later be used in the release build for shader precompilation "
            "at launch in order to eliminate the shader-compile jank.")
+DEF_SWITCH(PurgePersistentCache,
+           "purge-persistent-cache",
+           "Remove all existing persistent cache. This is mainly for debugging "
+           "purposes such as reproducing the shader compilation jank.")
 DEF_SWITCH(
     TraceSystrace,
     "trace-systrace",
