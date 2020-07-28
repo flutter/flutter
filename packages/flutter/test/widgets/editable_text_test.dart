@@ -5344,7 +5344,7 @@ class _TransformedEditableTextState extends State<TransformedEditableText> {
                 backgroundCursorColor: Colors.grey,
               ),
             ),
-            RaisedButton(
+            ElevatedButton(
               key: widget.transformButtonKey,
               onPressed: () {
                 setState(() {
