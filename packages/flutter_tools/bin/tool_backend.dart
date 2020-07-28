@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// Do not add package imports to this file.
 import 'dart:convert'; // ignore: dart_convert_import.
 import 'dart:io'; // ignore: dart_io_import.
-import 'package:path/path.dart' as path; // ignore: package_path_import.
 
 /// Executes the required flutter tasks for a desktop build.
 Future<void> main(List<String> arguments) async {
@@ -17,8 +17,14 @@ Future<void> main(List<String> arguments) async {
   final String extraGenSnapshotOptions = Platform.environment['EXTRA_GEN_SNAPSHOT_OPTIONS'];
   final String flutterEngine = Platform.environment['FLUTTER_ENGINE'];
   final String flutterRoot = Platform.environment['FLUTTER_ROOT'];
-  final String flutterTarget = Platform.environment['FLUTTER_TARGET']
-    ?? path.join('lib', 'main.dart');
+  String flutterTarget = Platform.environment['FLUTTER_TARGET'];
+  if (flutterTarget == null) {
+    if (Platform.isWindows) {
+      flutterTarget = r'lib\main.dart';
+    } else {
+      flutterTarget = 'lib/main.dart';
+    }
+  }
   final String localEngine = Platform.environment['LOCAL_ENGINE'];
   final String projectDirectory = Platform.environment['PROJECT_DIR'];
   final String splitDebugInfo = Platform.environment['SPLIT_DEBUG_INFO'];
@@ -42,9 +48,12 @@ or
 ''');
     exit(1);
   }
-
-  final String flutterExecutable = path.join(
-    flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
+  String flutterExecutable;
+  if (Platform.isWindows) {
+    flutterExecutable = '$flutterRoot\\bin\\flutter.bat';
+  } else {
+    flutterExecutable = '$flutterRoot/bin/flutter';
+  }
   final String bundlePlatform = targetPlatform == 'windows-x64' ? 'windows' : 'linux';
   final String target = '${buildMode}_bundle_${bundlePlatform}_assets';
 
