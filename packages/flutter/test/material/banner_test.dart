@@ -17,7 +17,7 @@ void main() {
           backgroundColor: color,
           content: const Text('I am a banner'),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: const Text('Action'),
               onPressed: () { },
             ),
@@ -39,7 +39,7 @@ void main() {
           contentTextStyle: contentTextStyle,
           content: const Text(contentText),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: const Text('Action'),
               onPressed: () { },
             ),
@@ -60,11 +60,11 @@ void main() {
         home: MaterialBanner(
           content: const Text(contentText),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: const Text('Action 1'),
               onPressed: () { },
             ),
-            FlatButton(
+            TextButton(
               child: const Text('Action 2'),
               onPressed: () { },
             ),
@@ -87,7 +87,7 @@ void main() {
         home: MaterialBanner(
           content: const Text(contentText),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: const Text('Action'),
               onPressed: () { },
             ),
@@ -109,7 +109,7 @@ void main() {
         home: MaterialBanner(
           content: const Text('Content'),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: const Text('Action'),
               onPressed: () { },
             ),
@@ -132,7 +132,7 @@ void main() {
           child: MaterialBanner(
             content: const Text('Content'),
             actions: <Widget>[
-              FlatButton(
+              TextButton(
                 child: const Text('Action'),
                 onPressed: () { },
               ),
@@ -156,7 +156,7 @@ void main() {
           forceActionsBelow: true,
           content: const Text(contentText),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: const Text('Action'),
               onPressed: () { },
             ),

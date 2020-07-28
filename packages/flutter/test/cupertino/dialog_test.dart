@@ -1170,7 +1170,7 @@ Widget createAppWithButtonThatLaunchesDialog({ WidgetBuilder dialogBuilder }) {
     home: Material(
       child: Center(
         child: Builder(builder: (BuildContext context) {
-          return RaisedButton(
+          return ElevatedButton(
             onPressed: () {
               showDialog<void>(
                 context: context,
@@ -1196,7 +1196,7 @@ Widget createAppWithCenteredButton(Widget child) {
   return MaterialApp(
     home: Material(
       child: Center(
-        child: RaisedButton(
+        child: ElevatedButton(
           onPressed: null,
           child: child
         ),

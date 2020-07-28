@@ -57,7 +57,7 @@ void main() {
         body: MaterialBanner(
           content: const Text(contentText),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: const Text('Action'),
               onPressed: () { },
             ),
@@ -83,7 +83,7 @@ void main() {
           leading: const Icon(Icons.ac_unit),
           content: const Text(contentText),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: const Text('Action'),
               onPressed: () { },
             ),
@@ -122,7 +122,7 @@ void main() {
           padding: const EdgeInsets.all(10),
           leadingPadding: const EdgeInsets.all(10),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: const Text('Action'),
               onPressed: () { },
             ),
@@ -153,7 +153,7 @@ void main() {
         body: MaterialBanner(
           content: const Text('Content'),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: const Text('Action'),
               onPressed: () { },
             ),
