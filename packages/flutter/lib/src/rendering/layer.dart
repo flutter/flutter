@@ -646,7 +646,7 @@ class PlatformViewLayer extends Layer {
 
   /// The unique identifier of the UIView displayed on this layer.
   ///
-  /// A UIView with this identifier must have been created by [PlatformViewsServices.initUiKitView].
+  /// A UIView with this identifier must have been created by [PlatformViewsService.initUiKitView].
   final int viewId;
 
   @override
@@ -1188,7 +1188,7 @@ class OffsetLayer extends ContainerLayer {
   ///
   /// The [pixelRatio] describes the scale between the logical pixels and the
   /// size of the output image. It is independent of the
-  /// [window.devicePixelRatio] for the device, so specifying 1.0 (the default)
+  /// [Window.devicePixelRatio] for the device, so specifying 1.0 (the default)
   /// will give you a 1:1 mapping between logical pixels and the output pixels
   /// in the image.
   ///
@@ -2413,7 +2413,7 @@ class FollowerLayer extends ContainerLayer {
 ///
 /// When an annotation search arrives, this layer defers the same search to each
 /// of this layer's children, respecting their opacity. Then it adds this
-/// layer's [annotation] if all of the following restrictions are met:
+/// layer's annotation if all of the following restrictions are met:
 ///
 /// {@template flutter.rendering.annotatedRegionLayer.restrictions}
 /// * The target type must be identical to the annotated type `T`.

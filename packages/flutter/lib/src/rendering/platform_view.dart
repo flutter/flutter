@@ -68,7 +68,7 @@ Set<Type> _factoriesTypeSet<T>(Set<Factory<T>> factories) {
 /// {@endtemplate}
 ///
 /// {@template flutter.rendering.platformView.gestures}
-/// The render object participates in Flutter's [GestureArena]s, and dispatches touch events to the
+/// The render object participates in Flutter's gesture arenas, and dispatches touch events to the
 /// platform view iff it won the arena. Specific gestures that should be dispatched to the platform
 /// view can be specified with factories in the `gestureRecognizers` constructor parameter or
 /// by calling `updateGestureRecognizers`. If the set of gesture recognizers is empty, the gesture

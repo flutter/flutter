@@ -40,7 +40,7 @@ typedef _BucketVisitor = void Function(RestorationBucket bucket);
 /// [rootBucket] provided by this [RestorationManager]). The owner of a bucket
 /// may store arbitrary values in the bucket as long as they can be serialized
 /// with the [StandardMessageCodec]. The values are stored in the bucket under a
-/// given restoration ID as key. A restoration ID is a [Sting] that must be
+/// given restoration ID as key. A restoration ID is a [String] that must be
 /// unique within a given bucket. To access the stored value again during state
 /// restoration, the same restoration ID must be provided again. The owner of
 /// the bucket may also make the bucket available to other entities so that they
@@ -458,7 +458,7 @@ class RestorationBucket extends ChangeNotifier {
   }
 
   /// Creates a child bucket initialized with the data that the provided
-  /// `parent` has stored under the provided [id].
+  /// `parent` has stored under the provided [restorationId].
   ///
   /// This constructor cannot be used if the `parent` does not have any child
   /// data stored under the given ID. In that case, create an empty bucket (via
@@ -720,9 +720,9 @@ class RestorationBucket extends ChangeNotifier {
   ///
   /// The `child` will be dropped from its old parent, if it had one.
   ///
-  /// The `child` is stored under its [id] in this bucket. If this bucket
-  /// already contains a child bucket under the same id, the owner of that
-  /// existing bucket must give it up (e.g. by moving the child bucket to a
+  /// The `child` is stored under its [restorationId] in this bucket. If this
+  /// bucket already contains a child bucket under the same id, the owner of
+  /// that existing bucket must give it up (e.g. by moving the child bucket to a
   /// different parent or by disposing it) before the end of the current frame.
   /// Otherwise an exception indicating the illegal use of duplicated
   /// restoration IDs will trigger in debug mode.

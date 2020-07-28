@@ -297,8 +297,8 @@ class MouseTrackerUpdateDetails with Diagnosticable {
 ///
 ///   * [MouseTracker], which is a subclass of [BaseMouseTracker] with definition
 ///     of how to process mouse event callbacks and mouse cursors.
-///   * [MouseCursorMixin], which is a mixin for [BaseMouseTracker] that defines
-///     how to process mouse cursors.
+///   * [MouseTrackerCursorMixin], which is a mixin for [BaseMouseTracker] that
+///     defines how to process mouse cursors.
 class BaseMouseTracker extends ChangeNotifier {
   /// Creates a [BaseMouseTracker] to keep track of mouse locations.
   ///

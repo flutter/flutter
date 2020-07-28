@@ -1882,7 +1882,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
 class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
   /// Creates an arbitrary shape clip.
   ///
-  /// The [color] and [shape] parameters are required.
+  /// The [color] and [clipper] parameters are required.
   ///
   /// The [clipper], [elevation], [color] and [shadowColor] must not be null.
   /// Additionally, the [elevation] must be non-negative.
@@ -2149,10 +2149,10 @@ class RenderTransform extends RenderProxyBox {
   /// This is equivalent to setting an origin based on the size of the box.
   /// If it is specified at the same time as an offset, both are applied.
   ///
-  /// An [AlignmentDirectional.start] value is the same as an [Alignment]
+  /// An [AlignmentDirectional.centerStart] value is the same as an [Alignment]
   /// whose [Alignment.x] value is `-1.0` if [textDirection] is
   /// [TextDirection.ltr], and `1.0` if [textDirection] is [TextDirection.rtl].
-  /// Similarly [AlignmentDirectional.end] is the same as an [Alignment]
+  /// Similarly [AlignmentDirectional.centerEnd] is the same as an [Alignment]
   /// whose [Alignment.x] value is `1.0` if [textDirection] is
   /// [TextDirection.ltr], and `-1.0` if [textDirection] is [TextDirection.rtl].
   AlignmentGeometry get alignment => _alignment;
@@ -2947,7 +2947,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///
   /// The [pixelRatio] describes the scale between the logical pixels and the
   /// size of the output image. It is independent of the
-  /// [window.devicePixelRatio] for the device, so specifying 1.0 (the default)
+  /// [Window.devicePixelRatio] for the device, so specifying 1.0 (the default)
   /// will give you a 1:1 mapping between logical pixels and the output pixels
   /// in the image.
   ///
@@ -3807,7 +3807,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the [SemanticsNode.isLink] semantic to the given value.
+  /// If non-null, sets the [SemanticsConfiguration.isLink] semantic to the
+  /// given value.
   bool get link => _link;
   bool _link;
   set link(bool value) {
@@ -3817,7 +3818,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the [SemanticsNode.isHeader] semantic to the given value.
+  /// If non-null, sets the [SemanticsConfiguration.isHeader] semantic to the
+  /// given value.
   bool get header => _header;
   bool _header;
   set header(bool value) {
@@ -3827,7 +3829,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the [SemanticsNode.isTextField] semantic to the given value.
+  /// If non-null, sets the [SemanticsConfiguration.isTextField] semantic to the
+  /// given value.
   bool get textField => _textField;
   bool _textField;
   set textField(bool value) {
@@ -3837,7 +3840,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the [SemanticsNode.isReadOnly] semantic to the given value.
+  /// If non-null, sets the [SemanticsConfiguration.isReadOnly] semantic to the
+  /// given value.
   bool get readOnly => _readOnly;
   bool _readOnly;
   set readOnly(bool value) {
@@ -3847,7 +3851,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the [SemanticsNode.isFocusable] semantic to the given value.
+  /// If non-null, sets the [SemanticsConfiguration.isFocusable] semantic to the
+  /// given value.
   bool get focusable => _focusable;
   bool _focusable;
   set focusable(bool value) {
@@ -3857,7 +3862,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the [SemanticsNode.isFocused] semantic to the given value.
+  /// If non-null, sets the [SemanticsConfiguration.isFocused] semantic to the
+  /// given value.
   bool get focused => _focused;
   bool _focused;
   set focused(bool value) {
@@ -3867,8 +3873,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the [SemanticsNode.isInMutuallyExclusiveGroup] semantic
-  /// to the given value.
+  /// If non-null, sets the [SemanticsConfiguration.isInMutuallyExclusiveGroup]
+  /// semantic to the given value.
   bool get inMutuallyExclusiveGroup => _inMutuallyExclusiveGroup;
   bool _inMutuallyExclusiveGroup;
   set inMutuallyExclusiveGroup(bool value) {
@@ -3878,8 +3884,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the [SemanticsNode.isObscured] semantic to the given
-  /// value.
+  /// If non-null, sets the [SemanticsConfiguration.isObscured] semantic to the
+  /// given value.
   bool get obscured => _obscured;
   bool _obscured;
   set obscured(bool value) {
@@ -3900,7 +3906,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the [SemanticsNode.scopesRoute] semantic to the give value.
+  /// If non-null, sets the [SemanticsConfiguration.scopesRoute] semantic to the
+  /// give value.
   bool get scopesRoute => _scopesRoute;
   bool _scopesRoute;
   set scopesRoute(bool value) {
@@ -3910,7 +3917,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the [SemanticsNode.namesRoute] semantic to the give value.
+  /// If non-null, sets the [SemanticsConfiguration.namesRoute] semantic to the
+  /// give value.
   bool get namesRoute => _namesRoute;
   bool _namesRoute;
   set namesRoute(bool value) {
@@ -3920,8 +3928,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the [SemanticsNode.isHidden] semantic to the given
-  /// value.
+  /// If non-null, sets the [SemanticsConfiguration.isHidden] semantic to the
+  /// given value.
   bool get hidden => _hidden;
   bool _hidden;
   set hidden(bool value) {
@@ -3931,8 +3939,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the [SemanticsNode.isImage] semantic to the given
-  /// value.
+  /// If non-null, sets the [SemanticsConfiguration.isImage] semantic to the
+  /// given value.
   bool get image => _image;
   bool _image;
   set image(bool value) {
@@ -3941,8 +3949,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     _image = value;
   }
 
-  /// If non-null, sets the [SemanticsFlag.isLiveRegion] semantic to the given
-  /// value.
+  /// If non-null, sets the [SemanticsConfiguration.liveRegion] semantic to
+  /// the given value.
   bool get liveRegion => _liveRegion;
   bool _liveRegion;
   set liveRegion(bool value) {
@@ -3974,7 +3982,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the [SemanticsNode.isToggled] semantic to the given
+  /// If non-null, sets the [SemanticsConfiguration.isToggled] semantic to the given
   /// value.
   bool get toggled => _toggled;
   bool _toggled;
@@ -4047,7 +4055,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the [SemanticsNode.hintOverride] to the given value.
+  /// If non-null, sets the [SemanticsConfiguration.hintOverrides] to the given value.
   SemanticsHintOverrides get hintOverrides => _hintOverrides;
   SemanticsHintOverrides _hintOverrides;
   set hintOverrides(SemanticsHintOverrides value) {
@@ -4318,7 +4326,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       markNeedsSemanticsUpdate();
   }
 
-  /// The handler for [SemanticsAction.onMoveCursorForwardByCharacter].
+  /// The handler for [SemanticsAction.moveCursorForwardByCharacter].
   ///
   /// This handler is invoked when the user wants to move the cursor in a
   /// text field forward by one character.
@@ -4336,7 +4344,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       markNeedsSemanticsUpdate();
   }
 
-  /// The handler for [SemanticsAction.onMoveCursorBackwardByCharacter].
+  /// The handler for [SemanticsAction.moveCursorBackwardByCharacter].
   ///
   /// This handler is invoked when the user wants to move the cursor in a
   /// text field backward by one character.
@@ -4354,7 +4362,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       markNeedsSemanticsUpdate();
   }
 
-  /// The handler for [SemanticsAction.onMoveCursorForwardByWord].
+  /// The handler for [SemanticsAction.moveCursorForwardByWord].
   ///
   /// This handler is invoked when the user wants to move the cursor in a
   /// text field backward by one character.
@@ -4372,7 +4380,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       markNeedsSemanticsUpdate();
   }
 
-  /// The handler for [SemanticsAction.onMoveCursorBackwardByWord].
+  /// The handler for [SemanticsAction.moveCursorBackwardByWord].
   ///
   /// This handler is invoked when the user wants to move the cursor in a
   /// text field backward by one character.
@@ -5079,7 +5087,7 @@ class RenderAnnotatedRegion<T> extends RenderProxyBox {
   /// layer tree.
   ///
   /// If [sized] is true, the layer is provided with the size of this render
-  /// object to clip the results of [Layer.findRegion].
+  /// object to clip the results of [Layer.find].
   ///
   /// Neither [value] nor [sized] can be null.
   RenderAnnotatedRegion({
