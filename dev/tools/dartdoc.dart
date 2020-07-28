@@ -126,6 +126,7 @@ Future<void> main(List<String> arguments) async {
   final List<String> dartdocArgs = <String>[
     ...dartdocBaseArgs,
     '--allow-tools',
+    '--enable-experiment=non-nullable',
     if (args['json'] as bool) '--json',
     if (args['validate-links'] as bool) '--validate-links' else '--no-validate-links',
     '--link-to-source-excludes', '../../bin/cache',
