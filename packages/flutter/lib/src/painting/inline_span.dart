@@ -294,7 +294,7 @@ abstract class InlineSpan extends DiagnosticableTree {
 
   /// Returns the UTF-16 code unit at the given `index` in the flattened string.
   ///
-  /// This only accounts for the [TextSpan.text] values and ignores [PlaceholderSpans].
+  /// This only accounts for the [TextSpan.text] values and ignores [PlaceholderSpan]s.
   ///
   /// Returns null if the `index` is out of bounds.
   int codeUnitAt(int index) {
