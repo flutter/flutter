@@ -2507,6 +2507,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   SemanticsConfiguration get _semanticsConfiguration {
     if (_cachedSemanticsConfiguration == null) {
       _updateInheritedIgnoredSemanticsActions();
+      assert(_inheritedIgnoredSemanticsActions != null);
       _cachedSemanticsConfiguration = SemanticsConfiguration();
       _cachedSemanticsConfiguration.inheritedIgnoredActions = _inheritedIgnoredSemanticsActions;
       describeSemanticsConfiguration(_cachedSemanticsConfiguration);
@@ -2610,8 +2611,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   Set<SemanticsAction> _ignoredSemanticsActions;
 
   Set<SemanticsAction> _getIncomingIgnoredSemanticsActions() {
-    if (parent == null) {
-      // This is a root node.
+    if (parent == null || parent is! RenderObject) {
       return <SemanticsAction>{};
     }
 

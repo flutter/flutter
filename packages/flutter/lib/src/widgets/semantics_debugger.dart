@@ -173,7 +173,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
         child: Listener(
           onPointerDown: _handlePointerDown,
           behavior: HitTestBehavior.opaque,
-          child: IgnorePointer(
+          child: AbsorbPointer(
             ignoringSemantics: false,
             child: widget.child,
           ),

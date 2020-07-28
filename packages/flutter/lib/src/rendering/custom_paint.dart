@@ -629,12 +629,12 @@ class RenderCustomPaint extends RenderProxyBox {
     final List<CustomPainterSemantics> backgroundSemantics = _backgroundSemanticsBuilder != null
       ? _backgroundSemanticsBuilder(size)
       : const <CustomPainterSemantics>[];
-    _backgroundSemanticsNodes = _updateSemanticsChildren(_backgroundSemanticsNodes, backgroundSemantics);
+    _backgroundSemanticsNodes = _updateSemanticsChildren(_backgroundSemanticsNodes, backgroundSemantics, config);
 
     final List<CustomPainterSemantics> foregroundSemantics = _foregroundSemanticsBuilder != null
       ? _foregroundSemanticsBuilder(size)
       : const <CustomPainterSemantics>[];
-    _foregroundSemanticsNodes = _updateSemanticsChildren(_foregroundSemanticsNodes, foregroundSemantics);
+    _foregroundSemanticsNodes = _updateSemanticsChildren(_foregroundSemanticsNodes, foregroundSemantics, config);
 
     final bool hasBackgroundSemantics = _backgroundSemanticsNodes != null && _backgroundSemanticsNodes.isNotEmpty;
     final bool hasForegroundSemantics = _foregroundSemanticsNodes != null && _foregroundSemanticsNodes.isNotEmpty;
@@ -678,6 +678,7 @@ class RenderCustomPaint extends RenderProxyBox {
   static List<SemanticsNode> _updateSemanticsChildren(
     List<SemanticsNode> oldSemantics,
     List<CustomPainterSemantics> newChildSemantics,
+    SemanticsConfiguration parentConfig,
   ) {
     oldSemantics = oldSemantics ?? const <SemanticsNode>[];
     newChildSemantics = newChildSemantics ?? const <CustomPainterSemantics>[];
@@ -716,7 +717,7 @@ class RenderCustomPaint extends RenderProxyBox {
       final CustomPainterSemantics newSemantics = newChildSemantics[newChildrenTop];
       if (!_canUpdateSemanticsChild(oldChild, newSemantics))
         break;
-      final SemanticsNode newChild = _updateSemanticsChild(oldChild, newSemantics);
+      final SemanticsNode newChild = _updateSemanticsChild(oldChild, newSemantics, parentConfig);
       newChildren[newChildrenTop] = newChild;
       newChildrenTop += 1;
       oldChildrenTop += 1;
@@ -766,7 +767,7 @@ class RenderCustomPaint extends RenderProxyBox {
         }
       }
       assert(oldChild == null || _canUpdateSemanticsChild(oldChild, newSemantics));
-      final SemanticsNode newChild = _updateSemanticsChild(oldChild, newSemantics);
+      final SemanticsNode newChild = _updateSemanticsChild(oldChild, newSemantics, parentConfig);
       assert(oldChild == newChild || oldChild == null);
       newChildren[newChildrenTop] = newChild;
       newChildrenTop += 1;
@@ -784,7 +785,7 @@ class RenderCustomPaint extends RenderProxyBox {
       final SemanticsNode oldChild = oldSemantics[oldChildrenTop];
       final CustomPainterSemantics newSemantics = newChildSemantics[newChildrenTop];
       assert(_canUpdateSemanticsChild(oldChild, newSemantics));
-      final SemanticsNode newChild = _updateSemanticsChild(oldChild, newSemantics);
+      final SemanticsNode newChild = _updateSemanticsChild(oldChild, newSemantics, parentConfig);
       assert(oldChild == newChild);
       newChildren[newChildrenTop] = newChild;
       newChildrenTop += 1;
@@ -813,7 +814,11 @@ class RenderCustomPaint extends RenderProxyBox {
   ///
   /// This method requires that `_canUpdateSemanticsChild(oldChild, newSemantics)`
   /// is true prior to calling it.
-  static SemanticsNode _updateSemanticsChild(SemanticsNode oldChild, CustomPainterSemantics newSemantics) {
+  static SemanticsNode _updateSemanticsChild(
+    SemanticsNode oldChild,
+    CustomPainterSemantics newSemantics,
+    SemanticsConfiguration parentConfig,
+  ) {
     assert(oldChild == null || _canUpdateSemanticsChild(oldChild, newSemantics));
 
     final SemanticsNode newChild = oldChild ?? SemanticsNode(
@@ -821,7 +826,8 @@ class RenderCustomPaint extends RenderProxyBox {
     );
 
     final SemanticsProperties properties = newSemantics.properties;
-    final SemanticsConfiguration config = SemanticsConfiguration();
+    final SemanticsConfiguration config = SemanticsConfiguration()
+      ..inheritedIgnoredActions = parentConfig.inheritedIgnoredActions;
     if (properties.sortKey != null) {
       config.sortKey = properties.sortKey;
     }

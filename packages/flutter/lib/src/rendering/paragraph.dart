@@ -926,7 +926,8 @@ class RenderParagraph extends RenderBox
         final SemanticsConfiguration configuration = SemanticsConfiguration()
           ..sortKey = OrdinalSortKey(ordinal++)
           ..textDirection = initialDirection
-          ..label = info.semanticsLabel ?? info.text;
+          ..label = info.semanticsLabel ?? info.text
+          ..inheritedIgnoredActions = config.inheritedIgnoredActions;
         final GestureRecognizer recognizer = info.recognizer;
         if (recognizer != null) {
           if (recognizer is TapGestureRecognizer) {

@@ -63,6 +63,20 @@ void main() {
       ignoreTransform: true,
     );
 
+    final Matcher expectedSemanticsWhenPresentNotInteractive = hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics.rootChild(
+            label: 'a true',
+            textDirection: TextDirection.rtl,
+          ),
+        ],
+      ),
+      ignoreId: true,
+      ignoreRect: true,
+      ignoreTransform: true,
+    );
+
     final Matcher expectedSemanticsWhenAbsent = hasSemantics(TestSemantics.root());
 
     // We now run a sequence of pumpWidget calls one after the other. In
@@ -221,7 +235,7 @@ void main() {
     expect(find.byType(Placeholder), findsNothing);
     expect(find.byType(Visibility), paintsNothing);
     expect(tester.getSize(find.byType(Visibility)), const Size(84.0, 14.0));
-    expect(semantics, expectedSemanticsWhenPresent);
+    expect(semantics, expectedSemanticsWhenPresentNotInteractive);
     expect(log, <String>['created new state']);
     await tester.tap(find.byType(Visibility));
     expect(log, <String>['created new state']);

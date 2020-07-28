@@ -3991,6 +3991,8 @@ void main() {
       matchesSemantics(
         isEnabled: false,
         hasEnabledState: true,
+        isReadOnly: true,
+        isTextField: true,
         hasTapAction: false,
       ),
     );
