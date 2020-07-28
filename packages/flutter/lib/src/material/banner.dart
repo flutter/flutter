@@ -117,7 +117,7 @@ class MaterialBanner extends StatelessWidget {
         ? const EdgeInsetsDirectional.only(start: 16.0, top: 2.0)
         : const EdgeInsetsDirectional.only(start: 16.0, top: 24.0, end: 16.0, bottom: 4.0));
     final EdgeInsetsGeometry leadingPadding = this.leadingPadding
-        ?? bannerTheme.padding
+        ?? bannerTheme.leadingPadding
         ?? const EdgeInsetsDirectional.only(end: 16.0);
 
     final Widget buttonBar = ButtonBar(

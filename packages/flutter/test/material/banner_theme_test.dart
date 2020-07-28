@@ -101,9 +101,9 @@ void main() {
     final Offset containerTopLeft = tester.getTopLeft(_containerFinder());
     final Offset leadingTopLeft = tester.getTopLeft(find.byIcon(Icons.ac_unit));
     expect(contentTopLeft.dy - containerTopLeft.dy, 24);
-    expect(contentTopLeft.dx - containerTopLeft.dx, 39);
+    expect(contentTopLeft.dx - containerTopLeft.dx, 41);
     expect(leadingTopLeft.dy - containerTopLeft.dy, 19);
-    expect(leadingTopLeft.dx - containerTopLeft.dx, 10);
+    expect(leadingTopLeft.dx - containerTopLeft.dx, 11);
   });
 
   testWidgets('MaterialBanner widget properties take priority over theme', (WidgetTester tester) async {
@@ -120,7 +120,7 @@ void main() {
           contentTextStyle: textStyle,
           content: const Text(contentText),
           padding: const EdgeInsets.all(10),
-          leadingPadding: const EdgeInsets.all(10),
+          leadingPadding: const EdgeInsets.all(12),
           actions: <Widget>[
             TextButton(
               child: const Text('Action'),
@@ -140,9 +140,9 @@ void main() {
     final Offset containerTopLeft = tester.getTopLeft(_containerFinder());
     final Offset leadingTopLeft = tester.getTopLeft(find.byIcon(Icons.ac_unit));
     expect(contentTopLeft.dy - containerTopLeft.dy, 29);
-    expect(contentTopLeft.dx - containerTopLeft.dx, 54);
+    expect(contentTopLeft.dx - containerTopLeft.dx, 58);
     expect(leadingTopLeft.dy - containerTopLeft.dy, 24);
-    expect(leadingTopLeft.dx - containerTopLeft.dx, 20);
+    expect(leadingTopLeft.dx - containerTopLeft.dx, 22);
   });
 
   testWidgets('MaterialBanner uses color scheme when necessary', (WidgetTester tester) async {
@@ -172,7 +172,7 @@ MaterialBannerThemeData _bannerTheme() {
     backgroundColor: Colors.orange,
     contentTextStyle: TextStyle(color: Colors.pink),
     padding: EdgeInsets.all(5),
-    leadingPadding: EdgeInsets.all(5),
+    leadingPadding: EdgeInsets.all(6),
   );
 }
 
