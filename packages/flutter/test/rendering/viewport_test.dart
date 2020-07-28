@@ -334,7 +334,7 @@ void main() {
                 );
                 children.add(sliver);
                 return SliverPadding(
-                  padding: const EdgeInsets.all(22.0),
+                  padding: const EdgeInsets.only(top: 22.0, bottom: 23.0),
                   sliver: sliver,
                 );
               }),
@@ -348,17 +348,19 @@ void main() {
 
     final RenderObject target = tester.renderObject(find.byWidget(children[5], skipOffstage: false));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
-    expect(revealed.offset, 5 * (100 + 22 + 22) + 22);
+    // Do not include the bottom padding of the target child thus the + 23.
+    expect(revealed.offset, 5 * (100 + 22 + 23) + 23);
 
     revealed = viewport.getOffsetToReveal(target, 1.0);
-    expect(revealed.offset, 5 * (100 + 22 + 22) + 22 - 100);
+    expect(revealed.offset, 5 * (100 + 22 + 23) + 23 - 100);
   });
 
   testWidgets('Viewport getOffsetToReveal Sliver - up - reverse growth', (WidgetTester tester) async {
     const Key centerKey = ValueKey<String>('center');
+    const EdgeInsets padding = EdgeInsets.only(top: 22.0, bottom: 23.0);
     final Widget centerSliver = SliverPadding(
       key: centerKey,
-      padding: const EdgeInsets.all(22.0),
+      padding: padding,
       sliver: SliverToBoxAdapter(
         child: Container(
           height: 100.0,
@@ -371,7 +373,7 @@ void main() {
       child: const Text('Tile lower'),
     );
     final Widget lowerSliver = SliverPadding(
-      padding: const EdgeInsets.all(22.0),
+      padding: padding,
       sliver: SliverToBoxAdapter(
         child: lowerItem,
       ),
@@ -398,10 +400,10 @@ void main() {
 
     final RenderObject target = tester.renderObject(find.byWidget(lowerItem, skipOffstage: false));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
-    expect(revealed.offset, - 100 - 22);
+    expect(revealed.offset, - 100 - 23);
 
     revealed = viewport.getOffsetToReveal(target, 1.0);
-    expect(revealed.offset, - 100 - 22 - 100);
+    expect(revealed.offset, - 100 - 23 - 100);
   });
 
   testWidgets('Viewport getOffsetToReveal Sliver - left - reverse growth', (WidgetTester tester) async {
@@ -1098,8 +1100,8 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Center(
           child: Container(
-            height: 600.0,
-            width: 600.0,
+            height: 400.0,
+            width: 400.0,
             child: CustomScrollView(
               scrollDirection: axis,
               center: reversed ? const Key('19') : null,
@@ -1376,16 +1378,16 @@ void main() {
           // children[9] will be partially obstructed by the persistent header,
           // the viewport should scroll to reveal it.
           controller.jumpTo(
-            -8 * 300.0  // Preceding headers 11 - 18
-            - 200.0     // Viewport height
-            - 200.0     // Shrinks the pinned header to minExtent
+            - 8 * 300.0 // Preceding headers 11 - 18, children[11]'s top edge is aligned to the leading edge.
+            - 400.0     // Viewport height. children[10] (the pinned header) becomes pinned at the bottom of the screen.
+            - 200.0     // Shrinks the pinned header to minExtent (100).
             - 100.0     // Obstructs the leading 100 pixels of the 11th header
           );
           await tester.pumpAndSettle();
 
-          tester.renderObject(find.byWidget(children[11], skipOffstage: false)).showOnScreen();
+          tester.renderObject(find.byWidget(children[9], skipOffstage: false)).showOnScreen();
           await tester.pumpAndSettle();
-          expect(controller.offset, lessThan(-8 * 300.0 - 200.0 - 100.0));
+          expect(controller.offset, -8 * 300.0 - 400.0 - 200.0);
       });
     });
   }
