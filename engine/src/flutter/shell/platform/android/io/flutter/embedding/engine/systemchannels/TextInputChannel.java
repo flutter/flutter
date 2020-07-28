@@ -112,6 +112,10 @@ public class TextInputChannel {
               textInputMethodHandler.clearClient();
               result.success(null);
               break;
+            case "TextInput.finishAutofillContext":
+              textInputMethodHandler.finishAutofillContext((boolean) args);
+              result.success(null);
+              break;
             default:
               result.notImplemented();
               break;
@@ -283,6 +287,18 @@ public class TextInputChannel {
      * <p>Has no effect if the current client does not support autofill.
      */
     void requestAutofill();
+
+    /**
+     * Requests that the {@link AutofillManager} cancel or commit the current autofill context.
+     *
+     * <p>The method calls {@link android.view.autofill.AutofillManager#commit()} when {@code
+     * shouldSave} is true, and calls {@link android.view.autofill.AutofillManager#cancel()}
+     * otherwise.
+     *
+     * @param shouldSave whether the active autofill service should save the current user input for
+     *     future use.
+     */
+    void finishAutofillContext(boolean shouldSave);
 
     // TODO(mattcarroll): javadoc
     void setClient(int textInputClientId, @NonNull Configuration configuration);
