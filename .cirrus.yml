@@ -281,7 +281,7 @@ task:
         # Empirically, as of October 2019, the docs-linux shard took about 30 minutes when run with
         # 1 CPU and 4G of RAM. 2 CPUs reduced that to 20 minutes, more CPUs did not improve matters.
         CPU: 2
-	USE_IN_MEMORY_DISK: true
+        USE_IN_MEMORY_DISK: true
       docs_cache:
         folder: dev/docs
         fingerprint_script:
@@ -297,7 +297,7 @@ task:
         - docs-linux
       environment:
         CPU: 2
-	USE_IN_MEMORY_DISK: true
+        USE_IN_MEMORY_DISK: true
       docs_cache:
         folder: dev/docs
         reupload_on_changes: true
@@ -313,7 +313,7 @@ task:
         - docs-linux
         - docs_docset-linux
       environment:
-	USE_IN_MEMORY_DISK: true
+        USE_IN_MEMORY_DISK: true
         # For uploading master docs to Firebase master branch staging site
         FIREBASE_MASTER_TOKEN: ENCRYPTED[eb768d18798fdc5abfe09b224e1724c4d82831d715ccf90df2c79d618c317216cbd99493278361f6fe7948b409b603f0]
         # For uploading stable docs to Firebase public live site
