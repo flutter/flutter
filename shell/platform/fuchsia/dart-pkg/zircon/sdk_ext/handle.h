@@ -51,6 +51,13 @@ class Handle : public fml::RefCountedThreadSafe<Handle>,
 
   zx_handle_t handle() const { return handle_; }
 
+  zx_koid_t koid() const {
+    zx_info_handle_basic_t info;
+    zx_status_t status = zx_object_get_info(
+        handle_, ZX_INFO_HANDLE_BASIC, &info, sizeof(info), nullptr, nullptr);
+    return status == ZX_OK ? info.koid : ZX_KOID_INVALID;
+  }
+
   zx_status_t Close();
 
   fml::RefPtr<HandleWaiter> AsyncWait(zx_signals_t signals,

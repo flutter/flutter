@@ -24,4 +24,16 @@ void main() {
     final Handle duplicate = handle.duplicate(ZX.RIGHT_SAME_RIGHTS);
     expect(duplicate.isValid, isFalse);
   });
+
+  test('handle and its duplicate have same koid', () {
+    final HandlePairResult pair = System.eventpairCreate();
+    expect(pair.status, equals(ZX.OK));
+    expect(pair.first.isValid, isTrue);
+    expect(pair.second.isValid, isTrue);
+
+    final Handle duplicate = pair.first.duplicate(ZX.RIGHT_SAME_RIGHTS);
+    expect(duplicate.isValid, isTrue);
+
+    expect(pair.first.koid, duplicate.koid);
+  });
 }

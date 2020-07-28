@@ -22,6 +22,8 @@ class Handle extends NativeFieldWrapperClass2 {
 
   int get handle native 'Handle_handle';
 
+  int get koid native 'Handle_koid';
+
   @override
   String toString() => 'Handle($handle)';
 
