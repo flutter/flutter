@@ -37,13 +37,6 @@ function script_location() {
   echo "$(cd -P "$(dirname "$script_location")" >/dev/null && pwd)"
 }
 
-function assert_not_in_pr() {
-    if [[ -z "$CIRRUS_CI" || -n "$CIRRUS_PR" ]]; then
-        >&2 echo "The $COMMAND command can only be run in Cirrus for non-PR commits."
-        exit 1
-    fi
-}
-
 function generate_docs() {
     # Install and activate dartdoc.
     "$PUB" global activate dartdoc 0.32.1
@@ -90,15 +83,8 @@ function create_docset() {
 }
 
 function deploy_docs() {
-    (cd "$FLUTTER_ROOT/dev/docs"; move_offline_into_place)
-
     # Ensure google webmaster tools can verify our site.
     cp "$FLUTTER_ROOT/dev/docs/google2ed1af765c529f57.html" "$FLUTTER_ROOT/dev/docs/doc"
-
-    # To help diagnose when things go wrong.
-    echo "Deploying the following files to Firebase:"
-    find "$FLUTTER_ROOT/dev/docs"
-    echo 'EOL'
 
     case "$CIRRUS_BRANCH" in
         master)
@@ -118,7 +104,7 @@ function deploy_docs() {
             deploy 5 docs-flutter-dev
             ;;
         *)
-            >&2 echo "The $COMMAND command cannot be run on the $CIRRUS_BRANCH branch."
+            >&2 echo "Docs deployment cannot be run on the $CIRRUS_BRANCH branch."
             exit 1
     esac
 }
@@ -132,13 +118,14 @@ function move_offline_into_place() {
   mkdir -p doc/offline
   mv flutter.docs.zip doc/offline/flutter.docs.zip
   du -sh doc/offline/flutter.docs.zip
-  if [[ "$CIRRUS_BRANCH" == "stable" ]]; then
-    echo -e "<entry>\n  <version>${FLUTTER_VERSION}</version>\n  <url>https://api.flutter.dev/offline/flutter.docset.tar.gz</url>\n</entry>" > doc/offline/flutter.xml
-  else
-    echo -e "<entry>\n  <version>${FLUTTER_VERSION}</version>\n  <url>https://master-api.flutter.dev/offline/flutter.docset.tar.gz</url>\n</entry>" > doc/offline/flutter.xml
-  fi
-  mv flutter.docset.tar.gz doc/offline/flutter.docset.tar.gz
-  du -sh doc/offline/flutter.docset.tar.gz
+  # TODO(tvolkert): re-enable (https://github.com/flutter/flutter/issues/60646)
+  # if [[ "$CIRRUS_BRANCH" == "stable" ]]; then
+  #   echo -e "<entry>\n  <version>${FLUTTER_VERSION}</version>\n  <url>https://api.flutter.dev/offline/flutter.docset.tar.gz</url>\n</entry>" > doc/offline/flutter.xml
+  # else
+  #   echo -e "<entry>\n  <version>${FLUTTER_VERSION}</version>\n  <url>https://master-api.flutter.dev/offline/flutter.docset.tar.gz</url>\n</entry>" > doc/offline/flutter.xml
+  # fi
+  # mv flutter.docset.tar.gz doc/offline/flutter.docset.tar.gz
+  # du -sh doc/offline/flutter.docset.tar.gz
 }
 
 # So that users can run this script from anywhere and it will work as expected.
@@ -148,8 +135,7 @@ SCRIPT_LOCATION="$(script_location)"
 # then this line will need to as well.
 FLUTTER_ROOT="$(dirname "$(dirname "$SCRIPT_LOCATION")")"
 
-COMMAND="$1"
-echo "$(date): Running docs.sh $COMMAND"
+echo "$(date): Running docs.sh"
 
 if [[ ! -d "$FLUTTER_ROOT" || ! -f "$FLUTTER_ROOT/bin/flutter" ]]; then
   >&2 echo "Unable to locate the Flutter installation (using FLUTTER_ROOT: $FLUTTER_ROOT)"
@@ -175,22 +161,11 @@ if [[ -d "$FLUTTER_PUB_CACHE" ]]; then
   export PUB_CACHE="${PUB_CACHE:-"$FLUTTER_PUB_CACHE"}"
 fi
 
-case "$COMMAND" in
-    docs)
-        generate_docs
-        if [[ -n "$CIRRUS_CI" && -z "$CIRRUS_PR" ]]; then
-            (cd "$FLUTTER_ROOT/dev/docs"; create_offline_zip)
-        fi
-        ;;
-    docset)
-        assert_not_in_pr
-        (cd "$FLUTTER_ROOT/dev/docs"; create_docset)
-        ;;
-    deploy)
-        assert_not_in_pr
-        deploy_docs
-        ;;
-    *)
-        >&2 echo "Usage: $0 {docs|docset|deploy}"
-        exit 1
-esac
+generate_docs
+if [[ -n "$CIRRUS_CI" && -z "$CIRRUS_PR" ]]; then
+    (cd "$FLUTTER_ROOT/dev/docs"; create_offline_zip)
+    # TODO(tvolkert): re-enable (https://github.com/flutter/flutter/issues/60646)
+    # (cd "$FLUTTER_ROOT/dev/docs"; create_docset)
+    (cd "$FLUTTER_ROOT/dev/docs"; move_offline_into_place)
+    deploy_docs
+fi
