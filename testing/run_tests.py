@@ -137,6 +137,7 @@ def RunCCTests(build_dir, filter):
     # https://github.com/google/googletest/issues/2490
     RunEngineExecutable(build_dir, 'android_external_view_embedder_unittests', filter, shuffle_flags)
     RunEngineExecutable(build_dir, 'jni_unittests', filter, shuffle_flags)
+    RunEngineExecutable(build_dir, 'platform_view_android_delegate_unittests', filter, shuffle_flags)
 
   RunEngineExecutable(build_dir, 'ui_unittests', filter, shuffle_flags)
 
