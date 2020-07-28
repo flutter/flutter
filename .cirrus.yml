@@ -297,14 +297,15 @@ task:
         - dart --enable-asserts dev/customer_testing/run_tests.dart --skip-on-fetch-failure --skip-template bin/cache/pkg/tests/registry/*.test
 
     # firebase_test_lab_tests are linux-only
-    - name: firebase_test_lab_tests-0-linux
-      <<: *FIREBASE_SHARD_TEMPLATE
+    $ TODO(tvolkert): Re-enable (https://github.com/flutter/flutter/issues/62427)
+    # - name: firebase_test_lab_tests-0-linux
+    #   <<: *FIREBASE_SHARD_TEMPLATE
 
-    - name: firebase_test_lab_tests-1-linux
-      <<: *FIREBASE_SHARD_TEMPLATE
+    # - name: firebase_test_lab_tests-1-linux
+    #   <<: *FIREBASE_SHARD_TEMPLATE
 
-    - name: firebase_test_lab_tests-2_last-linux
-      <<: *FIREBASE_SHARD_TEMPLATE
+    # - name: firebase_test_lab_tests-2_last-linux
+    #   <<: *FIREBASE_SHARD_TEMPLATE
 
     - name: web_smoke_test
       only_if: "changesInclude('.cirrus.yml', 'examples/hello_world/**' ,'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'packages/flutter_web_plugins/**', 'bin/**') || $CIRRUS_PR == ''"
