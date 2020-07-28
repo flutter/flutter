@@ -820,12 +820,6 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/ios"]
 
-  new_gallery__crane_perf:
-    description: >
-      Measures the performance of the Crane page in the new Flutter Gallery on Android.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
-
   fast_scroll_large_images__memory:
     description: >
       Measures memory usage for scrolling through a list of large images.

@@ -357,7 +357,6 @@ class PerfTest {
     this.testDriver,
     this.needsFullTimeline = true,
     this.benchmarkScoreKeys,
-    this.dartDefine = '',
   });
 
   /// The directory where the app under test is defined.
@@ -396,9 +395,6 @@ class PerfTest {
   /// ```
   final List<String> benchmarkScoreKeys;
 
-  /// Additional flags for `--dart-define` to control the test
-  final String dartDefine;
-
   Future<TaskResult> run() {
     return internalRun();
   }
@@ -431,8 +427,6 @@ class PerfTest {
         if (writeSkslFileName != null)
           ...<String>['--write-sksl-on-exit', writeSkslFileName],
         if (cacheSkSL) '--cache-sksl',
-        if (dartDefine.isNotEmpty)
-          ...<String>['--dart-define', dartDefine],
         '-d',
         deviceId,
       ]);
