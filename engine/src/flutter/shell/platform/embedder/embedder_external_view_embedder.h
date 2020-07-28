@@ -30,7 +30,7 @@ class EmbedderExternalViewEmbedder final : public ExternalViewEmbedder {
  public:
   using CreateRenderTargetCallback =
       std::function<std::unique_ptr<EmbedderRenderTarget>(
-          GrContext* context,
+          GrDirectContext* context,
           const FlutterBackingStoreConfig& config)>;
   using PresentCallback =
       std::function<bool(const std::vector<const FlutterLayer*>& layers)>;
@@ -75,7 +75,7 @@ class EmbedderExternalViewEmbedder final : public ExternalViewEmbedder {
   // |ExternalViewEmbedder|
   void BeginFrame(
       SkISize frame_size,
-      GrContext* context,
+      GrDirectContext* context,
       double device_pixel_ratio,
       fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) override;
 
@@ -91,7 +91,7 @@ class EmbedderExternalViewEmbedder final : public ExternalViewEmbedder {
   SkCanvas* CompositeEmbeddedView(int view_id) override;
 
   // |ExternalViewEmbedder|
-  void SubmitFrame(GrContext* context,
+  void SubmitFrame(GrDirectContext* context,
                    std::unique_ptr<SurfaceFrame> frame) override;
 
   // |ExternalViewEmbedder|

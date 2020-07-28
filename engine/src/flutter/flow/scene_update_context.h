@@ -214,7 +214,7 @@ class SceneUpdateContext : public flutter::ExternalViewEmbedder {
   // |ExternalViewEmbedder|
   void BeginFrame(
       SkISize frame_size,
-      GrContext* context,
+      GrDirectContext* context,
       double device_pixel_ratio,
       fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) override {}
 

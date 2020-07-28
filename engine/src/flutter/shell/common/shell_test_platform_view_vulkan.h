@@ -45,7 +45,7 @@ class ShellTestPlatformViewVulkan : public ShellTestPlatformView {
     SkMatrix GetRootTransformation() const override;
 
     // |Surface|
-    GrContext* GetContext() override;
+    GrDirectContext* GetContext() override;
 
     flutter::ExternalViewEmbedder* GetExternalViewEmbedder() override;
 
@@ -56,7 +56,7 @@ class ShellTestPlatformViewVulkan : public ShellTestPlatformView {
         shell_test_external_view_embedder_;
     std::unique_ptr<vulkan::VulkanApplication> application_;
     std::unique_ptr<vulkan::VulkanDevice> logical_device_;
-    sk_sp<GrContext> context_;
+    sk_sp<GrDirectContext> context_;
 
     bool CreateSkiaGrContext();
     bool CreateSkiaBackendContext(GrVkBackendContext* context);

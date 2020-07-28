@@ -44,7 +44,7 @@ enum Clip { none, hardEdge, antiAlias, antiAliasWithSaveLayer };
 
 struct PrerollContext {
   RasterCache* raster_cache;
-  GrContext* gr_context;
+  GrDirectContext* gr_context;
   ExternalViewEmbedder* view_embedder;
   MutatorsStack& mutators_stack;
   SkColorSpace* dst_color_space;
@@ -121,7 +121,7 @@ class Layer {
     // layers.
     SkCanvas* internal_nodes_canvas;
     SkCanvas* leaf_nodes_canvas;
-    GrContext* gr_context;
+    GrDirectContext* gr_context;
     ExternalViewEmbedder* view_embedder;
     const Stopwatch& raster_time;
     const Stopwatch& ui_time;

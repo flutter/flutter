@@ -15,7 +15,7 @@
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkPicture.h"
 #include "third_party/skia/include/core/SkSurface.h"
-#include "third_party/skia/include/gpu/GrContext.h"
+#include "third_party/skia/include/gpu/GrDirectContext.h"
 
 namespace flutter {
 
@@ -89,7 +89,7 @@ static bool IsPictureWorthRasterizing(SkPicture* picture,
 
 /// @note Procedure doesn't copy all closures.
 static std::unique_ptr<RasterCacheResult> Rasterize(
-    GrContext* context,
+    GrDirectContext* context,
     const SkMatrix& ctm,
     SkColorSpace* dst_color_space,
     bool checkerboard,
@@ -126,7 +126,7 @@ static std::unique_ptr<RasterCacheResult> Rasterize(
 
 std::unique_ptr<RasterCacheResult> RasterCache::RasterizePicture(
     SkPicture* picture,
-    GrContext* context,
+    GrDirectContext* context,
     const SkMatrix& ctm,
     SkColorSpace* dst_color_space,
     bool checkerboard) const {
@@ -177,7 +177,7 @@ std::unique_ptr<RasterCacheResult> RasterCache::RasterizeLayer(
       });
 }
 
-bool RasterCache::Prepare(GrContext* context,
+bool RasterCache::Prepare(GrDirectContext* context,
                           SkPicture* picture,
                           const SkMatrix& transformation_matrix,
                           SkColorSpace* dst_color_space,

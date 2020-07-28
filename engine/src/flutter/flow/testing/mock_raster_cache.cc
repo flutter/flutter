@@ -15,7 +15,7 @@ MockRasterCacheResult::MockRasterCacheResult(SkIRect device_rect)
 
 std::unique_ptr<RasterCacheResult> MockRasterCache::RasterizePicture(
     SkPicture* picture,
-    GrContext* context,
+    GrDirectContext* context,
     const SkMatrix& ctm,
     SkColorSpace* dst_color_space,
     bool checkerboard) const {

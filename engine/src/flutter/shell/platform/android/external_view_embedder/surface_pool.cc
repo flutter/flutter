@@ -20,7 +20,7 @@ SurfacePool::SurfacePool() = default;
 SurfacePool::~SurfacePool() = default;
 
 std::shared_ptr<OverlayLayer> SurfacePool::GetLayer(
-    GrContext* gr_context,
+    GrDirectContext* gr_context,
     std::shared_ptr<AndroidContext> android_context,
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
     const AndroidSurface::Factory& surface_factory) {

@@ -28,7 +28,7 @@ class VulkanSwapchain {
   VulkanSwapchain(const VulkanProcTable& vk,
                   const VulkanDevice& device,
                   const VulkanSurface& surface,
-                  GrContext* skia_context,
+                  GrDirectContext* skia_context,
                   std::unique_ptr<VulkanSwapchain> old_swapchain,
                   uint32_t queue_family_index);
 
@@ -77,11 +77,11 @@ class VulkanSwapchain {
 
   std::vector<VkImage> GetImages() const;
 
-  bool CreateSwapchainImages(GrContext* skia_context,
+  bool CreateSwapchainImages(GrDirectContext* skia_context,
                              SkColorType color_type,
                              sk_sp<SkColorSpace> color_space);
 
-  sk_sp<SkSurface> CreateSkiaSurface(GrContext* skia_context,
+  sk_sp<SkSurface> CreateSkiaSurface(GrDirectContext* skia_context,
                                      VkImage image,
                                      const SkISize& size,
                                      SkColorType color_type,

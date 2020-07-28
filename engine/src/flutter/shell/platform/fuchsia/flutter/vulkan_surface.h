@@ -48,7 +48,7 @@ class VulkanSurface final
     : public flutter::SceneUpdateContext::SurfaceProducerSurface {
  public:
   VulkanSurface(vulkan::VulkanProvider& vulkan_provider,
-                sk_sp<GrContext> context,
+                sk_sp<GrDirectContext> context,
                 scenic::Session* session,
                 const SkISize& size);
 
@@ -117,7 +117,7 @@ class VulkanSurface final
   // than or equal the amount of memory contained in |vk_memory_|. Returns
   // whether the swap was successful.  The |VulkanSurface| will become invalid
   // if the swap was not successful.
-  bool BindToImage(sk_sp<GrContext> context, VulkanImage vulkan_image);
+  bool BindToImage(sk_sp<GrDirectContext> context, VulkanImage vulkan_image);
 
   // Flutter may retain a |VulkanSurface| for a |flutter::Layer| subtree to
   // improve the performance. The |retained_key_| identifies which layer subtree
@@ -162,11 +162,11 @@ class VulkanSurface final
                      zx_status_t status,
                      const zx_packet_signal_t* signal);
 
-  bool AllocateDeviceMemory(sk_sp<GrContext> context,
+  bool AllocateDeviceMemory(sk_sp<GrDirectContext> context,
                             const SkISize& size,
                             zx::vmo& exported_vmo);
 
-  bool SetupSkiaSurface(sk_sp<GrContext> context,
+  bool SetupSkiaSurface(sk_sp<GrDirectContext> context,
                         const SkISize& size,
                         SkColorType color_type,
                         const VkImageCreateInfo& image_create_info,

@@ -310,7 +310,7 @@ InferPlatformViewCreationCallback(
 }
 
 static sk_sp<SkSurface> MakeSkSurfaceFromBackingStore(
-    GrContext* context,
+    GrDirectContext* context,
     const FlutterBackingStoreConfig& config,
     const FlutterOpenGLTexture* texture) {
   GrGLTextureInfo texture_info;
@@ -350,7 +350,7 @@ static sk_sp<SkSurface> MakeSkSurfaceFromBackingStore(
 }
 
 static sk_sp<SkSurface> MakeSkSurfaceFromBackingStore(
-    GrContext* context,
+    GrDirectContext* context,
     const FlutterBackingStoreConfig& config,
     const FlutterOpenGLFramebuffer* framebuffer) {
   GrGLFramebufferInfo framebuffer_info = {};
@@ -389,7 +389,7 @@ static sk_sp<SkSurface> MakeSkSurfaceFromBackingStore(
 }
 
 static sk_sp<SkSurface> MakeSkSurfaceFromBackingStore(
-    GrContext* context,
+    GrDirectContext* context,
     const FlutterBackingStoreConfig& config,
     const FlutterSoftwareBackingStore* software) {
   const auto image_info =
@@ -427,7 +427,7 @@ static sk_sp<SkSurface> MakeSkSurfaceFromBackingStore(
 static std::unique_ptr<flutter::EmbedderRenderTarget>
 CreateEmbedderRenderTarget(const FlutterCompositor* compositor,
                            const FlutterBackingStoreConfig& config,
-                           GrContext* context) {
+                           GrDirectContext* context) {
   FlutterBackingStore backing_store = {};
   backing_store.struct_size = sizeof(backing_store);
 
@@ -517,7 +517,7 @@ InferExternalViewEmbedderFromArgs(const FlutterCompositor* compositor) {
 
   flutter::EmbedderExternalViewEmbedder::CreateRenderTargetCallback
       create_render_target_callback =
-          [captured_compositor](GrContext* context, const auto& config) {
+          [captured_compositor](GrDirectContext* context, const auto& config) {
             return CreateEmbedderRenderTarget(&captured_compositor, config,
                                               context);
           };
@@ -1005,7 +1005,7 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
                     nullptr) != nullptr) {
       external_texture_callback =
           [ptr = open_gl_config->gl_external_texture_frame_callback, user_data](
-              int64_t texture_identifier, GrContext* context,
+              int64_t texture_identifier, GrDirectContext* context,
               const SkISize& size) -> sk_sp<SkImage> {
         FlutterOpenGLTexture texture = {};
 

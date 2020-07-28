@@ -138,7 +138,7 @@ std::unique_ptr<Surface> PlatformViewIOS::CreateRenderingSurface() {
 }
 
 // |PlatformView|
-sk_sp<GrContext> PlatformViewIOS::CreateResourceContext() const {
+sk_sp<GrDirectContext> PlatformViewIOS::CreateResourceContext() const {
   return ios_context_->CreateResourceContext();
 }
 

@@ -78,7 +78,7 @@ struct FlutterPlatformViewLayer {
   // The GrContext that is currently used by the overlay surfaces.
   // We track this to know when the GrContext for the Flutter app has changed
   // so we can update the overlay with the new context.
-  GrContext* gr_context;
+  GrDirectContext* gr_context;
 };
 
 // This class isn't thread safe.
@@ -89,7 +89,7 @@ class FlutterPlatformViewLayerPool {
 
   // Gets a layer from the pool if available, or allocates a new one.
   // Finally, it marks the layer as used. That is, it increments `available_layer_index_`.
-  std::shared_ptr<FlutterPlatformViewLayer> GetLayer(GrContext* gr_context,
+  std::shared_ptr<FlutterPlatformViewLayer> GetLayer(GrDirectContext* gr_context,
                                                      std::shared_ptr<IOSContext> ios_context);
 
   // Gets the layers in the pool that aren't currently used.
@@ -162,7 +162,7 @@ class FlutterPlatformViewsController {
   // Discards all platform views instances and auxiliary resources.
   void Reset();
 
-  bool SubmitFrame(GrContext* gr_context,
+  bool SubmitFrame(GrDirectContext* gr_context,
                    std::shared_ptr<IOSContext> ios_context,
                    std::unique_ptr<SurfaceFrame> frame);
 
@@ -290,7 +290,7 @@ class FlutterPlatformViewsController {
   bool merge_threads_ = false;
   // Allocates a new FlutterPlatformViewLayer if needed, draws the pixels within the rect from
   // the picture on the layer's canvas.
-  std::shared_ptr<FlutterPlatformViewLayer> GetLayer(GrContext* gr_context,
+  std::shared_ptr<FlutterPlatformViewLayer> GetLayer(GrDirectContext* gr_context,
                                                      std::shared_ptr<IOSContext> ios_context,
                                                      sk_sp<SkPicture> picture,
                                                      SkRect rect,

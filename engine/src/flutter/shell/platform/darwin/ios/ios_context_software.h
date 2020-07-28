@@ -18,7 +18,7 @@ class IOSContextSoftware final : public IOSContext {
   ~IOSContextSoftware();
 
   // |IOSContext|
-  sk_sp<GrContext> CreateResourceContext() override;
+  sk_sp<GrDirectContext> CreateResourceContext() override;
 
   // |IOSContext|
   std::unique_ptr<GLContextResult> MakeCurrent() override;

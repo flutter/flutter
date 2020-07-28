@@ -18,7 +18,7 @@ namespace flutter {
 
 GPUSurfaceMetal::GPUSurfaceMetal(GPUSurfaceDelegate* delegate,
                                  fml::scoped_nsobject<CAMetalLayer> layer,
-                                 sk_sp<GrContext> context,
+                                 sk_sp<GrDirectContext> context,
                                  fml::scoped_nsprotocol<id<MTLCommandQueue>> command_queue)
     : delegate_(delegate),
       layer_(std::move(layer)),
@@ -118,7 +118,7 @@ SkMatrix GPUSurfaceMetal::GetRootTransformation() const {
 }
 
 // |Surface|
-GrContext* GPUSurfaceMetal::GetContext() {
+GrDirectContext* GPUSurfaceMetal::GetContext() {
   return context_.get();
 }
 

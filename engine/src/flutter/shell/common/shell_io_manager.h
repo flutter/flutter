@@ -11,20 +11,20 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/lib/ui/io_manager.h"
-#include "third_party/skia/include/gpu/GrContext.h"
+#include "third_party/skia/include/gpu/GrDirectContext.h"
 
 namespace flutter {
 
 class ShellIOManager final : public IOManager {
  public:
-  // Convenience methods for platforms to create a GrContext used to supply to
-  // the IOManager. The platforms may create the context themselves if they so
-  // desire.
-  static sk_sp<GrContext> CreateCompatibleResourceLoadingContext(
+  // Convenience methods for platforms to create a GrDirectContext used to
+  // supply to the IOManager. The platforms may create the context themselves if
+  // they so desire.
+  static sk_sp<GrDirectContext> CreateCompatibleResourceLoadingContext(
       GrBackend backend,
       sk_sp<const GrGLInterface> gl_interface);
 
-  ShellIOManager(sk_sp<GrContext> resource_context,
+  ShellIOManager(sk_sp<GrDirectContext> resource_context,
                  std::shared_ptr<fml::SyncSwitch> is_gpu_disabled_sync_switch,
                  fml::RefPtr<fml::TaskRunner> unref_queue_task_runner);
 
@@ -33,13 +33,13 @@ class ShellIOManager final : public IOManager {
   // This method should be called when a resource_context first becomes
   // available. It is safe to call multiple times, and will only update
   // the held resource context if it has not already been set.
-  void NotifyResourceContextAvailable(sk_sp<GrContext> resource_context);
+  void NotifyResourceContextAvailable(sk_sp<GrDirectContext> resource_context);
 
   // This method should be called if you want to force the IOManager to
   // update its resource context reference. It should not be called
   // if there are any Dart objects that have a reference to the old
   // resource context, but may be called if the Dart VM is restarted.
-  void UpdateResourceContext(sk_sp<GrContext> resource_context);
+  void UpdateResourceContext(sk_sp<GrDirectContext> resource_context);
 
   fml::WeakPtr<ShellIOManager> GetWeakPtr();
 
@@ -47,7 +47,7 @@ class ShellIOManager final : public IOManager {
   fml::WeakPtr<IOManager> GetWeakIOManager() const override;
 
   // |IOManager|
-  fml::WeakPtr<GrContext> GetResourceContext() const override;
+  fml::WeakPtr<GrDirectContext> GetResourceContext() const override;
 
   // |IOManager|
   fml::RefPtr<flutter::SkiaUnrefQueue> GetSkiaUnrefQueue() const override;
@@ -57,8 +57,8 @@ class ShellIOManager final : public IOManager {
 
  private:
   // Resource context management.
-  sk_sp<GrContext> resource_context_;
-  std::unique_ptr<fml::WeakPtrFactory<GrContext>>
+  sk_sp<GrDirectContext> resource_context_;
+  std::unique_ptr<fml::WeakPtrFactory<GrDirectContext>>
       resource_context_weak_factory_;
 
   // Unref queue management.

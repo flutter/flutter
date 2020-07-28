@@ -38,7 +38,7 @@ class IOSExternalTextureMetal final : public Texture {
   void Paint(SkCanvas& canvas,
              const SkRect& bounds,
              bool freeze,
-             GrContext* context,
+             GrDirectContext* context,
              SkFilterQuality filter_quality) override;
 
   // |Texture|
@@ -54,7 +54,7 @@ class IOSExternalTextureMetal final : public Texture {
   void OnTextureUnregistered() override;
 
   sk_sp<SkImage> WrapExternalPixelBuffer(fml::CFRef<CVPixelBufferRef> pixel_buffer,
-                                         GrContext* context) const;
+                                         GrDirectContext* context) const;
 
   FML_DISALLOW_COPY_AND_ASSIGN(IOSExternalTextureMetal);
 };

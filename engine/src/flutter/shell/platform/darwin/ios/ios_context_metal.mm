@@ -40,9 +40,11 @@ IOSContextMetal::IOSContextMetal() {
   const auto& context_options = CreateMetalGrContextOptions();
 
   // Skia expect arguments to `MakeMetal` transfer ownership of the reference in for release later
-  // when the GrContext is collected.
-  main_context_ = GrContext::MakeMetal([device_ retain], [main_queue_ retain], context_options);
-  resource_context_ = GrContext::MakeMetal([device_ retain], [main_queue_ retain], context_options);
+  // when the GrDirectContext is collected.
+  main_context_ =
+      GrDirectContext::MakeMetal([device_ retain], [main_queue_ retain], context_options);
+  resource_context_ =
+      GrDirectContext::MakeMetal([device_ retain], [main_queue_ retain], context_options);
 
   if (!main_context_ || !resource_context_) {
     FML_DLOG(ERROR) << "Could not create Skia Metal contexts.";
@@ -82,16 +84,16 @@ fml::scoped_nsprotocol<id<MTLCommandQueue>> IOSContextMetal::GetResourceCommandQ
   return main_queue_;
 }
 
-sk_sp<GrContext> IOSContextMetal::GetMainContext() const {
+sk_sp<GrDirectContext> IOSContextMetal::GetMainContext() const {
   return main_context_;
 }
 
-sk_sp<GrContext> IOSContextMetal::GetResourceContext() const {
+sk_sp<GrDirectContext> IOSContextMetal::GetResourceContext() const {
   return resource_context_;
 }
 
 // |IOSContext|
-sk_sp<GrContext> IOSContextMetal::CreateResourceContext() {
+sk_sp<GrDirectContext> IOSContextMetal::CreateResourceContext() {
   return resource_context_;
 }
 
