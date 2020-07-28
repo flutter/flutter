@@ -42,6 +42,7 @@ def install_flutter_engine_pod
   # Keep pod path relative so it can be checked into Podfile.lock.
   # Process will be run from project directory.
   engine_pathname = Pathname.new engine_dir
+  # defined_in_file is set by CocoaPods and is a Pathname to the Podfile.
   project_directory_pathname = defined_in_file.dirname
   relative = engine_pathname.relative_path_from project_directory_pathname
 
@@ -63,6 +64,7 @@ def install_flutter_plugin_pods(flutter_application_path)
   # Keep pod path relative so it can be checked into Podfile.lock.
   # Process will be run from project directory.
   current_directory_pathname = Pathname.new File.expand_path('..', __FILE__)
+  # defined_in_file is set by CocoaPods and is a Pathname to the Podfile.
   project_directory_pathname = defined_in_file.dirname
   relative = current_directory_pathname.relative_path_from project_directory_pathname
   pod 'FlutterPluginRegistrant', :path => File.join(relative, 'FlutterPluginRegistrant'), :inhibit_warnings => true
@@ -71,7 +73,7 @@ def install_flutter_plugin_pods(flutter_application_path)
   FileUtils.mkdir_p(symlinks_dir)
 
   plugins_file = File.expand_path('.flutter-plugins-dependencies', flutter_application_path)
-  plugin_pods = flutter_parse_plugins_file(plugins_file)
+  plugin_pods = flutter_parse_dependencies_file_for_ios_plugin(plugins_file)
   plugin_pods.each do |plugin_hash|
     plugin_name = plugin_hash['name']
     plugin_path = plugin_hash['path']
@@ -107,12 +109,13 @@ def install_flutter_application_pod(flutter_application_path)
   # Keep pod and script phase paths relative so they can be checked into source control.
   # Process will be run from project directory.
   current_directory_pathname = Pathname.new File.expand_path('..', __FILE__)
+  # defined_in_file is set by CocoaPods and is a Pathname to the Podfile.
   project_directory_pathname = defined_in_file.dirname
   relative = current_directory_pathname.relative_path_from project_directory_pathname
   pod '{{projectName}}', :path => relative.to_s, :inhibit_warnings => true
 
   flutter_export_environment_path = File.join('${SRCROOT}', relative, 'flutter_export_environment.sh');
-  script_phase :name => 'Run Flutter Build flutterapp Script',
+  script_phase :name => 'Run Flutter Build {{projectName}} Script',
     :script => "set -e\nset -u\nsource \"#{flutter_export_environment_path}\"\n\"$FLUTTER_ROOT\"/packages/flutter_tools/bin/xcode_backend.sh build",
     :input_files => [
       File.join('${SRCROOT}', flutter_application_path, '.metadata'),
@@ -125,7 +128,7 @@ end
 
 # .flutter-plugins-dependencies format documented at
 # https://flutter.dev/go/plugins-list-migration
-def flutter_parse_plugins_file(file)
+def flutter_parse_dependencies_file_for_ios_plugin(file)
   file_path = File.expand_path(file)
   return [] unless File.exists? file_path
 
@@ -148,5 +151,6 @@ def flutter_root
     matches = line.match(/FLUTTER_ROOT\=(.*)/)
     return matches[1].strip if matches
   end
+  # This should never happen...
   raise "FLUTTER_ROOT not found in #{generated_xcode_build_settings_path}. Try deleting Generated.xcconfig, then run flutter pub get"
 end
