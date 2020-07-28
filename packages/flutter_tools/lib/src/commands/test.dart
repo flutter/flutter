@@ -219,10 +219,10 @@ class TestCommand extends FlutterCommand {
     }
 
     Directory workDir;
+    workDir = globals.fs.directory('test');
     if (files.isEmpty) {
       // We don't scan the entire package, only the test/ subdirectory, so that
       // files with names like like "hit_test.dart" don't get run.
-      workDir = globals.fs.directory('test');
       if (!workDir.existsSync()) {
         throwToolExit('Test directory "${workDir.path}" not found.');
       }
