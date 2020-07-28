@@ -50,9 +50,9 @@ enum OverflowBarAlignment {
 ///
 /// This example defines a simple approximation of a dialog
 /// layout, where the layout of the dialog's action buttons are
-/// defined by an [OverflowBar].  The content is wrapped in a
+/// defined by an [OverflowBar]. The content is wrapped in a
 /// [SingleChildScrollView], so that if overflow occurs, the
-/// action buttons will be still be accessible by scrolling,
+/// action buttons will still be accessible by scrolling,
 /// no matter how much vertical space is available.
 ///
 /// ```dart
@@ -101,7 +101,8 @@ class OverflowBar extends MultiChildRenderObjectWidget {
   ///
   /// The [spacing], [overflowSpacing], [overflowAlignment],
   /// [overflowDirection], and [clipBehavior] parameters must not be
-  /// null.
+  /// null. The [children] argument must not be null and must not contain
+  /// any null objects.
   OverflowBar({
     Key key,
     this.spacing = 0.0,
