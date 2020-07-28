@@ -27,10 +27,16 @@ void main(List<String> arguments) {
   );
   parser.addOption(
     'output-dir',
-    help: 'The directory where the generated localization classes will be written. '
+    help: 'The directory where the generated localization classes will be written '
+      'if the synthetic-package flag is set to false.'
+      '\n\n'
+      'If output-dir is specified and the synthetic-package flag is enabled, '
+      'this option will be ignored by the tool.'
+      '\n\n'
       'The app must import the file specified in the \'output-localization-file\' '
       'option from this directory. If unspecified, this defaults to the same '
       'directory as the input directory specified in \'arb-dir\'.'
+      '\n\n',
   );
   parser.addOption(
     'template-arb-file',
@@ -123,8 +129,7 @@ void main(List<String> arguments) {
   parser.addFlag(
     'synthetic-package',
     defaultsTo: true,
-    help:
-      'Determines whether or not the generated output files will be '
+    help: 'Determines whether or not the generated output files will be '
       'generated as a synthetic package or at a specified directory in '
       'the Flutter project.'
       '\n\n'
@@ -133,7 +138,7 @@ void main(List<String> arguments) {
       'When synthetic-package is set to false, it will generate the '
       'localizations files in the directory specified by arb-dir by default. '
       '\n\n'
-      'If output-dir is specified, files will be generated there.'
+      'If output-dir is specified, files will be generated there.',
   );
 
   final argslib.ArgResults results = parser.parse(arguments);
