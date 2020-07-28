@@ -1085,7 +1085,7 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
 ///     return Scaffold(
 ///       appBar: AppBar(title: Text('My Page')),
 ///       body: Center(
-///         child: FlatButton(
+///         child: TextButton(
 ///           child: Text('POP'),
 ///           onPressed: () {
 ///             Navigator.pop(context);
