@@ -70,6 +70,14 @@ public class TextInputPluginTest {
     }
   }
 
+  private static void sendToBinaryMessageHandler(
+      BinaryMessenger.BinaryMessageHandler binaryMessageHandler, String method, Object args) {
+    MethodCall methodCall = new MethodCall(method, args);
+    ByteBuffer encodedMethodCall = JSONMethodCodec.INSTANCE.encodeMethodCall(methodCall);
+    binaryMessageHandler.onMessage(
+        (ByteBuffer) encodedMethodCall.flip(), mock(BinaryMessenger.BinaryReply.class));
+  }
+
   @Test
   public void textInputPlugin_RequestsReattachOnCreation() throws JSONException {
     // Initialize a general TextInputPlugin.
@@ -529,6 +537,33 @@ public class TextInputPluginTest {
     verify(children[0]).setAutofillHints(aryEq(new String[] {"HINT1"}));
     // Verifies that the child has a non-zero size.
     verify(children[0]).setDimens(anyInt(), anyInt(), anyInt(), anyInt(), geq(0), geq(0));
+  }
+
+  @Test
+  public void respondsToInputChannelMessages() {
+    ArgumentCaptor<BinaryMessenger.BinaryMessageHandler> binaryMessageHandlerCaptor =
+        ArgumentCaptor.forClass(BinaryMessenger.BinaryMessageHandler.class);
+    DartExecutor mockBinaryMessenger = mock(DartExecutor.class);
+    TextInputChannel.TextInputMethodHandler mockHandler =
+        mock(TextInputChannel.TextInputMethodHandler.class);
+    TextInputChannel textInputChannel = new TextInputChannel(mockBinaryMessenger);
+
+    textInputChannel.setTextInputMethodHandler(mockHandler);
+
+    verify(mockBinaryMessenger, times(1))
+        .setMessageHandler(any(String.class), binaryMessageHandlerCaptor.capture());
+
+    BinaryMessenger.BinaryMessageHandler binaryMessageHandler =
+        binaryMessageHandlerCaptor.getValue();
+
+    sendToBinaryMessageHandler(binaryMessageHandler, "TextInput.requestAutofill", null);
+    verify(mockHandler, times(1)).requestAutofill();
+
+    sendToBinaryMessageHandler(binaryMessageHandler, "TextInput.finishAutofillContext", true);
+    verify(mockHandler, times(1)).finishAutofillContext(true);
+
+    sendToBinaryMessageHandler(binaryMessageHandler, "TextInput.finishAutofillContext", false);
+    verify(mockHandler, times(1)).finishAutofillContext(false);
   }
 
   @Implements(InputMethodManager.class)
