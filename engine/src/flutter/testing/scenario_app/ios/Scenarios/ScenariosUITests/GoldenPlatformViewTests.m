@@ -59,11 +59,11 @@ static const NSInteger kSecondsToWaitForPlatformView = 30;
   }
 
   if (![golden compareGoldenToImage:screenshot.image]) {
-    XCTAttachment* goldenAttachment;
-    goldenAttachment = [XCTAttachment attachmentWithImage:golden.image];
-    goldenAttachment.name = @"current_golden";
-    goldenAttachment.lifetime = XCTAttachmentLifetimeKeepAlways;
-    [self addAttachment:goldenAttachment];
+    XCTAttachment* screenshotAttachment;
+    screenshotAttachment = [XCTAttachment attachmentWithImage:screenshot.image];
+    screenshotAttachment.name = golden.goldenName;
+    screenshotAttachment.lifetime = XCTAttachmentLifetimeKeepAlways;
+    [self addAttachment:screenshotAttachment];
 
     XCTFail(@"Goldens to not match. Follow the steps in the "
             @"README to update golden named %@ if needed.",
