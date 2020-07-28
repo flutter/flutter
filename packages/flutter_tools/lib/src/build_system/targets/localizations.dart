@@ -60,7 +60,7 @@ Future<void> generateLocalizations({
       '--use-deferred-loading',
     if (options.preferredSupportedLocales != null)
       '--preferred-supported-locales=${options.preferredSupportedLocales}',
-    if (!options.useSyntheticPackage)
+    if (options.useSyntheticPackage != null && !options.useSyntheticPackage)
       '--no-synthetic-package'
   ]);
   if (result.exitCode != 0) {
@@ -110,8 +110,6 @@ class GenerateLocalizationsTarget extends Target {
       file: configFile,
       logger: globals.logger,
     );
-    print('attempt to log here');
-    print(options);
     final DepfileService depfileService = DepfileService(
       logger: environment.logger,
       fileSystem: environment.fileSystem,
