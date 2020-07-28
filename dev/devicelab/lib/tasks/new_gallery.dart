@@ -12,14 +12,23 @@ import '../framework/framework.dart';
 import '../framework/utils.dart';
 
 class NewGalleryPerfTest extends PerfTest {
-  NewGalleryPerfTest(this.galleryDir) : super(galleryDir.path, 'test_driver/transitions_perf.dart', 'transitions');
+  NewGalleryPerfTest(
+    this.galleryDir, {
+    String timelineFileName = 'transitions',
+    String dartDefine = '',
+  }) : super(
+    galleryDir.path,
+    'test_driver/transitions_perf.dart',
+    timelineFileName,
+    dartDefine: dartDefine,
+  );
 
   @override
   Future<TaskResult> run() async {
     // Manually roll the new gallery version for now. If the new gallery repo
     // turns out to be updated frequently in the future, we can set up an auto
     // roller to update this version.
-    await getNewGallery('d00362e6bdd0f9b30bba337c358b9e4a6e4ca950', galleryDir);
+    await getNewGallery('e6357bccc49ec542ca127ca4b26b2b87216d07d5', galleryDir);
     return await super.run();
   }
 
