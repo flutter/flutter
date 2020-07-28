@@ -439,4 +439,95 @@ void main() {
       expect(find.text('Item 15', skipOffstage: true), findsOneWidget);
     },
   );
+
+  group('scrollUntilVisible: scrolls to make unbuilt widget visible', () {
+    testWidgets(
+      'Vertical',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: ListView.builder(
+                itemCount: 50,
+                shrinkWrap: true,
+                itemBuilder: (BuildContext context, int i) => ListTile(title: Text('Item $i')),
+              ),
+            ),
+          ),
+        );
+
+        // Make sure widget isn't built yet.
+        expect(find.text('Item 45', skipOffstage: false), findsNothing);
+
+        await tester.scrollUntilVisible(
+          find.text('Item 45', skipOffstage: false),
+          find.byType(Scrollable),
+          100,
+        );
+        await tester.pumpAndSettle();
+
+        // Now the widget is on screen.
+        expect(find.text('Item 45', skipOffstage: true), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'Horizontal',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: ListView.builder(
+                itemCount: 50,
+                shrinkWrap: true,
+                scrollDirection: Axis.horizontal,
+                // ListTile does not support horizontal list
+                itemBuilder: (BuildContext context, int i) => Container(child: Text('Item $i')),
+              ),
+            ),
+          ),
+        );
+
+        // Make sure widget isn't built yet.
+        expect(find.text('Item 45', skipOffstage: false), findsNothing);
+
+        await tester.scrollUntilVisible(
+          find.text('Item 45', skipOffstage: false),
+          find.byType(Scrollable),
+          100,
+        );
+        await tester.pumpAndSettle();
+
+        // Now the widget is on screen.
+        expect(find.text('Item 45', skipOffstage: true), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'Fail',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: ListView.builder(
+                itemCount: 50,
+                shrinkWrap: true,
+                itemBuilder: (BuildContext context, int i) => ListTile(title: Text('Item $i')),
+              ),
+            ),
+          ),
+        );
+
+        try {
+          await tester.scrollUntilVisible(
+            find.text('Item 55', skipOffstage: false),
+            find.byType(Scrollable),
+            100,
+          );
+        } on StateError catch (e) {
+          expect(e.message, 'No element');
+        }
+      },
+    );
+  });
 }

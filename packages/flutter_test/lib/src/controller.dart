@@ -699,6 +699,51 @@ abstract class WidgetController {
   ///
   /// Shorthand for `Scrollable.ensureVisible(element(finder))`
   Future<void> ensureVisible(Finder finder) => Scrollable.ensureVisible(element(finder));
+
+  /// Repeatedly scrolls the `scrollable` by `delta` in the
+  /// [Scrpllable.axisDirection] until `finder` is visible.
+  ///
+  /// Between each scroll, wait for `duration` time for settling.
+  ///
+  /// Throws a [StateError] if `finder` is not found for maximum `maxScrolls`
+  /// times.
+  ///
+  /// This is different from [ensureVisible] in that this allows looking for
+  /// `finder` that is not built yet, but the caller must specify the scrollable
+  /// that will build child specified by `finder`.
+  Future<void> scrollUntilVisible(
+    Finder finder,
+    Finder scrollable,
+    double delta, {
+      int maxScrolls = 50,
+      Duration duration = const Duration(milliseconds: 50),
+    }
+  ) {
+    assert(maxScrolls > 0);
+    return TestAsyncUtils.guard<void>(() async {
+      Offset moveStep;
+      switch(widget<Scrollable>(scrollable).axisDirection) {
+        case AxisDirection.up:
+          moveStep = Offset(0, delta);
+          break;
+        case AxisDirection.down:
+          moveStep = Offset(0, -delta);
+          break;
+        case AxisDirection.left:
+          moveStep = Offset(delta, 0);
+          break;
+        case AxisDirection.right:
+          moveStep = Offset(-delta, 0);
+          break;
+      }
+      while(maxScrolls > 0 && finder.evaluate().isEmpty) {
+        await drag(scrollable, moveStep);
+        await pump(duration);
+        maxScrolls -= 1;
+      }
+      await Scrollable.ensureVisible(element(finder));
+    });
+  }
 }
 
 /// Variant of [WidgetController] that can be used in tests running
