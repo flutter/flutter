@@ -30,7 +30,7 @@ import 'theme_data.dart';
 /// An elevated button is a label [child] displayed on a [Material]
 /// widget whose [Material.elevation] increases when the button is
 /// pressed. The label's [Text] and [Icon] widgets are displayed in
-/// [style]'s [ButtonStyle.onForegroundColor] and the button's filled
+/// [style]'s [ButtonStyle.foregroundColor] and the button's filled
 /// background is the [ButtonStyle.backgroundColor].
 ///
 /// The elevated button's default style is defined by
@@ -39,7 +39,7 @@ import 'theme_data.dart';
 /// buttons in a subtree can be overridden with the
 /// [ElevatedButtonTheme], and the style of all of the contained
 /// buttons in an app can be overridden with the [Theme]'s
-/// [ThemeData.ElevatedButtonTheme] property.
+/// [ThemeData.elevatedButtonTheme] property.
 ///
 /// The static [styleFrom] method is a convenient way to create a
 /// elevated button [ButtonStyle] from simple values.
