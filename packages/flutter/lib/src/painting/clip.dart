@@ -6,7 +6,7 @@
 
 import 'dart:ui' show Canvas, Clip, Path, Paint, Rect, RRect;
 
-/// Clip utilities used by [PaintingContext] and [TestRecordingPaintingContext].
+/// Clip utilities used by [PaintingContext].
 abstract class ClipContext {
   /// The canvas on which to paint.
   Canvas get canvas;

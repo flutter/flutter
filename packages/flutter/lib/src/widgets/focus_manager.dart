@@ -823,7 +823,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///                   ],
   ///                 );
   ///               }),
-  ///               OutlineButton(
+  ///               OutlinedButton(
   ///                 child: const Text('UNFOCUS'),
   ///                 onPressed: () {
   ///                   setState(() {

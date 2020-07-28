@@ -19,6 +19,30 @@ void main() {
     expect(AnalyzeBase.generateDartDocMessage(2), '2 public members lack documentation');
   });
 
+  testWithoutContext('analyze generate correct errors message', () async {
+    expect(
+      AnalyzeBase.generateErrorsMessage(
+        issueCount: 0,
+        seconds: '0.1',
+        undocumentedMembers: 1,
+        dartDocMessage: 'one public member lacks documentation',
+      ),
+      'No issues found! (ran in 0.1s; one public member lacks documentation)',
+    );
+
+    expect(
+      AnalyzeBase.generateErrorsMessage(
+        issueCount: 3,
+        issueDiff: 2,
+        files: 1,
+        seconds: '0.1',
+        undocumentedMembers: 1,
+        dartDocMessage: 'one public member lacks documentation',
+      ),
+      '3 issues found. (2 new) • analyzed 1 file (ran in 0.1s; one public member lacks documentation)',
+    );
+  });
+
   testWithoutContext('analyze inRepo', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.directory(_kFlutterRoot).createSync(recursive: true);
@@ -54,10 +78,10 @@ void main() {
         'offset': 362,
         'length': 72,
         'startLine': 15,
-        'startColumn': 4
+        'startColumn': 4,
       },
       'message': 'Prefer final for variable declarations if they are not reassigned.',
-      'hasFix': false
+      'hasFix': false,
     };
     expect(WrittenError.fromJson(json).toString(),
         '[info] Prefer final for variable declarations if they are not reassigned (/Users/.../lib/test.dart:15:4)');
