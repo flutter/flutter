@@ -32,11 +32,11 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'flutter_template_images': '1.0.1', // Must always exactly match flutter_tools template.
   'shelf': '0.7.5',
   // nnbd
-  'characters': '1.1.0-nullsafety',
-  'collection': '1.15.0-nullsafety',
-  'meta': '1.3.0-nullsafety',
-  'typed_data': '1.3.0-nullsafety',
-  'vector_math': '2.1.0-nullsafety',
+  'characters': '1.1.0-nullsafety.2',
+  'collection': '1.15.0-nullsafety.2',
+  'meta': '1.3.0-nullsafety.2',
+  'typed_data': '1.3.0-nullsafety.2',
+  'vector_math': '2.1.0-nullsafety.2',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
