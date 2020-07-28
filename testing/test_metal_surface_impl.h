@@ -19,14 +19,14 @@ class TestMetalSurfaceImpl : public TestMetalSurface {
 
  private:
   bool is_valid_ = false;
-  sk_sp<GrContext> context_;
+  sk_sp<GrDirectContext> context_;
   sk_sp<SkSurface> surface_;
 
   // |TestMetalSurface|
   bool IsValid() const override;
 
   // |TestMetalSurface|
-  sk_sp<GrContext> GetGrContext() const override;
+  sk_sp<GrDirectContext> GetGrContext() const override;
 
   // |TestMetalSurface|
   sk_sp<SkSurface> GetSurface() const override;

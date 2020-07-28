@@ -35,7 +35,7 @@ bool TestMetalSurface::IsValid() const {
   return impl_ ? impl_->IsValid() : false;
 }
 
-sk_sp<GrContext> TestMetalSurface::GetGrContext() const {
+sk_sp<GrDirectContext> TestMetalSurface::GetGrContext() const {
   return impl_ ? impl_->GetGrContext() : nullptr;
 }
 

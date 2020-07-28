@@ -33,7 +33,7 @@ class IOSSurfaceMetal final : public IOSSurface, public GPUSurfaceDelegate {
   void UpdateStorageSizeIfNecessary() override;
 
   // |IOSSurface|
-  std::unique_ptr<Surface> CreateGPUSurface(GrContext* gr_context) override;
+  std::unique_ptr<Surface> CreateGPUSurface(GrDirectContext* gr_context) override;
 
   // |GPUSurfaceDelegate|
   ExternalViewEmbedder* GetExternalViewEmbedder() override;

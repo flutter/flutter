@@ -66,7 +66,7 @@ class VulkanSurfaceProducer final
             width_change_factor, height_change_factor);
   }
 
-  GrContext* gr_context() { return context_.get(); }
+  GrDirectContext* gr_context() { return context_.get(); }
 
  private:
   // VulkanProvider
@@ -86,7 +86,7 @@ class VulkanSurfaceProducer final
   fml::RefPtr<vulkan::VulkanProcTable> vk_;
   std::unique_ptr<vulkan::VulkanApplication> application_;
   std::unique_ptr<vulkan::VulkanDevice> logical_device_;
-  sk_sp<GrContext> context_;
+  sk_sp<GrDirectContext> context_;
   std::unique_ptr<VulkanSurfacePool> surface_pool_;
   bool valid_ = false;
 

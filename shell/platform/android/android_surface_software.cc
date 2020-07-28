@@ -65,7 +65,7 @@ bool AndroidSurfaceSoftware::ResourceContextClearCurrent() {
 }
 
 std::unique_ptr<Surface> AndroidSurfaceSoftware::CreateGPUSurface(
-    GrContext* gr_context) {
+    GrDirectContext* gr_context) {
   if (!IsValid()) {
     return nullptr;
   }

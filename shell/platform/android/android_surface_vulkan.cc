@@ -33,7 +33,7 @@ void AndroidSurfaceVulkan::TeardownOnScreenContext() {
 }
 
 std::unique_ptr<Surface> AndroidSurfaceVulkan::CreateGPUSurface(
-    GrContext* gr_context) {
+    GrDirectContext* gr_context) {
   if (!IsValid()) {
     return nullptr;
   }

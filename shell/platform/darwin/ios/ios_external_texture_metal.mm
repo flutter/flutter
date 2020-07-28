@@ -6,6 +6,7 @@
 
 #include "flutter/fml/logging.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
+#include "third_party/skia/include/gpu/GrDirectContext.h"
 #include "third_party/skia/include/gpu/mtl/GrMtlTypes.h"
 
 namespace flutter {
@@ -26,7 +27,7 @@ IOSExternalTextureMetal::~IOSExternalTextureMetal() = default;
 void IOSExternalTextureMetal::Paint(SkCanvas& canvas,
                                     const SkRect& bounds,
                                     bool freeze,
-                                    GrContext* context,
+                                    GrDirectContext* context,
                                     SkFilterQuality filter_quality) {
   const bool needs_updated_texture = (!freeze && texture_frame_available_) || !external_image_;
 
@@ -59,7 +60,7 @@ void IOSExternalTextureMetal::Paint(SkCanvas& canvas,
 
 sk_sp<SkImage> IOSExternalTextureMetal::WrapExternalPixelBuffer(
     fml::CFRef<CVPixelBufferRef> pixel_buffer,
-    GrContext* context) const {
+    GrDirectContext* context) const {
   if (!pixel_buffer) {
     return nullptr;
   }

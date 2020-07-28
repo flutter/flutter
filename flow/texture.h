@@ -11,6 +11,8 @@
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 
+class GrDirectContext;
+
 namespace flutter {
 
 class Texture {
@@ -22,7 +24,7 @@ class Texture {
   virtual void Paint(SkCanvas& canvas,
                      const SkRect& bounds,
                      bool freeze,
-                     GrContext* context,
+                     GrDirectContext* context,
                      SkFilterQuality quality) = 0;
 
   // Called from raster thread.

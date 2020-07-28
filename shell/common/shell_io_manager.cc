@@ -11,7 +11,7 @@
 
 namespace flutter {
 
-sk_sp<GrContext> ShellIOManager::CreateCompatibleResourceLoadingContext(
+sk_sp<GrDirectContext> ShellIOManager::CreateCompatibleResourceLoadingContext(
     GrBackend backend,
     sk_sp<const GrGLInterface> gl_interface) {
   if (backend != GrBackend::kOpenGL_GrBackend) {
@@ -40,7 +40,7 @@ sk_sp<GrContext> ShellIOManager::CreateCompatibleResourceLoadingContext(
   options.fPreferExternalImagesOverES3 = true;
 
 #if !OS_FUCHSIA
-  if (auto context = GrContext::MakeGL(gl_interface, options)) {
+  if (auto context = GrDirectContext::MakeGL(gl_interface, options)) {
     // Do not cache textures created by the image decoder.  These textures
     // should be deleted when they are no longer referenced by an SkImage.
     context->setResourceCacheLimits(0, 0);
@@ -52,14 +52,15 @@ sk_sp<GrContext> ShellIOManager::CreateCompatibleResourceLoadingContext(
 }
 
 ShellIOManager::ShellIOManager(
-    sk_sp<GrContext> resource_context,
+    sk_sp<GrDirectContext> resource_context,
     std::shared_ptr<fml::SyncSwitch> is_gpu_disabled_sync_switch,
     fml::RefPtr<fml::TaskRunner> unref_queue_task_runner)
     : resource_context_(std::move(resource_context)),
       resource_context_weak_factory_(
-          resource_context_ ? std::make_unique<fml::WeakPtrFactory<GrContext>>(
-                                  resource_context_.get())
-                            : nullptr),
+          resource_context_
+              ? std::make_unique<fml::WeakPtrFactory<GrDirectContext>>(
+                    resource_context_.get())
+              : nullptr),
       unref_queue_(fml::MakeRefCounted<flutter::SkiaUnrefQueue>(
           std::move(unref_queue_task_runner),
           fml::TimeDelta::FromMilliseconds(8),
@@ -83,7 +84,7 @@ ShellIOManager::~ShellIOManager() {
 }
 
 void ShellIOManager::NotifyResourceContextAvailable(
-    sk_sp<GrContext> resource_context) {
+    sk_sp<GrDirectContext> resource_context) {
   // The resource context needs to survive as long as we have Dart objects
   // referencing. We shouldn't ever need to replace it if we have one - unless
   // we've somehow shut down the Dart VM and started a new one fresh.
@@ -92,12 +93,14 @@ void ShellIOManager::NotifyResourceContextAvailable(
   }
 }
 
-void ShellIOManager::UpdateResourceContext(sk_sp<GrContext> resource_context) {
+void ShellIOManager::UpdateResourceContext(
+    sk_sp<GrDirectContext> resource_context) {
   resource_context_ = std::move(resource_context);
   resource_context_weak_factory_ =
-      resource_context_ ? std::make_unique<fml::WeakPtrFactory<GrContext>>(
-                              resource_context_.get())
-                        : nullptr;
+      resource_context_
+          ? std::make_unique<fml::WeakPtrFactory<GrDirectContext>>(
+                resource_context_.get())
+          : nullptr;
 }
 
 fml::WeakPtr<ShellIOManager> ShellIOManager::GetWeakPtr() {
@@ -105,10 +108,10 @@ fml::WeakPtr<ShellIOManager> ShellIOManager::GetWeakPtr() {
 }
 
 // |IOManager|
-fml::WeakPtr<GrContext> ShellIOManager::GetResourceContext() const {
+fml::WeakPtr<GrDirectContext> ShellIOManager::GetResourceContext() const {
   return resource_context_weak_factory_
              ? resource_context_weak_factory_->GetWeakPtr()
-             : fml::WeakPtr<GrContext>();
+             : fml::WeakPtr<GrDirectContext>();
 }
 
 // |IOManager|

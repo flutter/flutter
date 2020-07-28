@@ -21,7 +21,7 @@ class EmbedderSurface {
 
   virtual std::unique_ptr<Surface> CreateGPUSurface() = 0;
 
-  virtual sk_sp<GrContext> CreateResourceContext() const = 0;
+  virtual sk_sp<GrDirectContext> CreateResourceContext() const = 0;
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderSurface);

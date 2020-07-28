@@ -14,7 +14,7 @@
 #include "flutter/fml/trace_event.h"
 #include "third_party/skia/include/gpu/GrBackendSemaphore.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
-#include "third_party/skia/include/gpu/GrContext.h"
+#include "third_party/skia/include/gpu/GrDirectContext.h"
 #include "third_party/skia/include/gpu/vk/GrVkBackendContext.h"
 #include "third_party/skia/include/gpu/vk/GrVkExtensions.h"
 #include "third_party/skia/include/gpu/vk/GrVkTypes.h"
@@ -138,10 +138,10 @@ bool VulkanSurfaceProducer::Initialize(scenic::Session* scenic_session) {
                      countof(device_extensions), device_extensions);
   backend_context.fVkExtensions = &vk_extensions;
 
-  context_ = GrContext::MakeVulkan(backend_context);
+  context_ = GrDirectContext::MakeVulkan(backend_context);
 
   if (context_ == nullptr) {
-    FML_LOG(ERROR) << "Failed to create GrContext.";
+    FML_LOG(ERROR) << "Failed to create GrDirectContext.";
     return false;
   }
 

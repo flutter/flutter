@@ -113,10 +113,11 @@ bool ShellTestPlatformViewVulkan::OffScreenSurface::CreateSkiaGrContext() {
   PersistentCache::MarkStrategySet();
   options.fPersistentCache = PersistentCache::GetCacheForProcess();
 
-  sk_sp<GrContext> context = GrContext::MakeVulkan(backend_context, options);
+  sk_sp<GrDirectContext> context =
+      GrDirectContext::MakeVulkan(backend_context, options);
 
   if (context == nullptr) {
-    FML_DLOG(ERROR) << "Failed to create GrContext";
+    FML_DLOG(ERROR) << "Failed to create GrDirectContext";
     return false;
   }
 
@@ -179,7 +180,7 @@ ShellTestPlatformViewVulkan::OffScreenSurface::AcquireFrame(
                                         std::move(callback));
 }
 
-GrContext* ShellTestPlatformViewVulkan::OffScreenSurface::GetContext() {
+GrDirectContext* ShellTestPlatformViewVulkan::OffScreenSurface::GetContext() {
   return context_.get();
 }
 

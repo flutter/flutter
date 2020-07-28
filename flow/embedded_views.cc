@@ -6,7 +6,7 @@
 
 namespace flutter {
 
-void ExternalViewEmbedder::SubmitFrame(GrContext* context,
+void ExternalViewEmbedder::SubmitFrame(GrDirectContext* context,
                                        std::unique_ptr<SurfaceFrame> frame) {
   frame->Submit();
 };

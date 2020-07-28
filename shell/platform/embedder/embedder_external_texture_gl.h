@@ -14,8 +14,10 @@ namespace flutter {
 
 class EmbedderExternalTextureGL : public flutter::Texture {
  public:
-  using ExternalTextureCallback = std::function<
-      sk_sp<SkImage>(int64_t texture_identifier, GrContext*, const SkISize&)>;
+  using ExternalTextureCallback =
+      std::function<sk_sp<SkImage>(int64_t texture_identifier,
+                                   GrDirectContext*,
+                                   const SkISize&)>;
 
   EmbedderExternalTextureGL(int64_t texture_identifier,
                             const ExternalTextureCallback& callback);
@@ -30,7 +32,7 @@ class EmbedderExternalTextureGL : public flutter::Texture {
   void Paint(SkCanvas& canvas,
              const SkRect& bounds,
              bool freeze,
-             GrContext* context,
+             GrDirectContext* context,
              SkFilterQuality filter_quality) override;
 
   // |flutter::Texture|

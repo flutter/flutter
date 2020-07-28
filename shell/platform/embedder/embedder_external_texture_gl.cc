@@ -21,11 +21,11 @@ EmbedderExternalTextureGL::~EmbedderExternalTextureGL() = default;
 void EmbedderExternalTextureGL::Paint(SkCanvas& canvas,
                                       const SkRect& bounds,
                                       bool freeze,
-                                      GrContext* context,
+                                      GrDirectContext* context,
                                       SkFilterQuality filter_quality) {
   if (auto image = external_texture_callback_(
           Id(),                                           //
-          canvas.getGrContext(),                          //
+          context,                                        //
           SkISize::Make(bounds.width(), bounds.height())  //
           )) {
     last_image_ = image;

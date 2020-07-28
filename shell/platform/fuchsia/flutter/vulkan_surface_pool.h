@@ -21,7 +21,7 @@ class VulkanSurfacePool final {
   static constexpr int kMaxSurfaceAge = 3;
 
   VulkanSurfacePool(vulkan::VulkanProvider& vulkan_provider,
-                    sk_sp<GrContext> context,
+                    sk_sp<GrDirectContext> context,
                     scenic::Session* scenic_session);
 
   ~VulkanSurfacePool();
@@ -59,7 +59,7 @@ class VulkanSurfacePool final {
   };
 
   vulkan::VulkanProvider& vulkan_provider_;
-  sk_sp<GrContext> context_;
+  sk_sp<GrDirectContext> context_;
   scenic::Session* scenic_session_;
   std::vector<std::unique_ptr<VulkanSurface>> available_surfaces_;
   std::unordered_map<uintptr_t, std::unique_ptr<VulkanSurface>>

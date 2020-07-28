@@ -5,7 +5,7 @@
 #include "vulkan_swapchain.h"
 
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
-#include "third_party/skia/include/gpu/GrContext.h"
+#include "third_party/skia/include/gpu/GrDirectContext.h"
 #include "third_party/skia/include/gpu/vk/GrVkTypes.h"
 #include "vulkan_backbuffer.h"
 #include "vulkan_device.h"
@@ -39,7 +39,7 @@ static std::vector<FormatInfo> DesiredFormatInfos() {
 VulkanSwapchain::VulkanSwapchain(const VulkanProcTable& p_vk,
                                  const VulkanDevice& device,
                                  const VulkanSurface& surface,
-                                 GrContext* skia_context,
+                                 GrDirectContext* skia_context,
                                  std::unique_ptr<VulkanSwapchain> old_swapchain,
                                  uint32_t queue_family_index)
     : vk(p_vk),
@@ -208,7 +208,7 @@ SkISize VulkanSwapchain::GetSize() const {
 }
 
 sk_sp<SkSurface> VulkanSwapchain::CreateSkiaSurface(
-    GrContext* gr_context,
+    GrDirectContext* gr_context,
     VkImage image,
     const SkISize& size,
     SkColorType color_type,
@@ -246,7 +246,7 @@ sk_sp<SkSurface> VulkanSwapchain::CreateSkiaSurface(
   );
 }
 
-bool VulkanSwapchain::CreateSwapchainImages(GrContext* skia_context,
+bool VulkanSwapchain::CreateSwapchainImages(GrDirectContext* skia_context,
                                             SkColorType color_type,
                                             sk_sp<SkColorSpace> color_space) {
   std::vector<VkImage> images = GetImages();

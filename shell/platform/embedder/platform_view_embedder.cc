@@ -74,7 +74,7 @@ std::unique_ptr<Surface> PlatformViewEmbedder::CreateRenderingSurface() {
 }
 
 // |PlatformView|
-sk_sp<GrContext> PlatformViewEmbedder::CreateResourceContext() const {
+sk_sp<GrDirectContext> PlatformViewEmbedder::CreateResourceContext() const {
   if (embedder_surface_ == nullptr) {
     FML_LOG(ERROR) << "Embedder surface was null.";
     return nullptr;

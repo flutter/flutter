@@ -13,7 +13,7 @@
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/platform/darwin/common/framework/Headers/FlutterTexture.h"
 #include "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
-#include "third_party/skia/include/gpu/GrContext.h"
+#include "third_party/skia/include/gpu/GrDirectContext.h"
 
 namespace flutter {
 
@@ -58,12 +58,12 @@ class IOSContext {
   ///             asynchronously and collect resources that are no longer needed
   ///             on the render task runner.
   ///
-  /// @attention  Client rendering APIs for which a GrContext cannot be realized
+  /// @attention  Client rendering APIs for which a GrDirectContext cannot be realized
   ///             (software rendering), this method will always return null.
   ///
   /// @return     A non-null Skia context on success. `nullptr` on failure.
   ///
-  virtual sk_sp<GrContext> CreateResourceContext() = 0;
+  virtual sk_sp<GrDirectContext> CreateResourceContext() = 0;
 
   //----------------------------------------------------------------------------
   /// @brief      When using client rendering APIs whose contexts need to be
@@ -75,7 +75,7 @@ class IOSContext {
   ///             bindings (anything that is not OpenGL) will always return
   ///             `true`.
   ///
-  /// @attention  Client rendering APIs for which a GrContext cannot be created
+  /// @attention  Client rendering APIs for which a GrDirectContext cannot be created
   ///             (software rendering) will always return `false`.
   ///
   /// @attention  This binds the on-screen context to the current thread. To

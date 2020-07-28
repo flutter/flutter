@@ -27,7 +27,7 @@ class Surface {
 
   virtual SkMatrix GetRootTransformation() const = 0;
 
-  virtual GrContext* GetContext() = 0;
+  virtual GrDirectContext* GetContext() = 0;
 
   virtual flutter::ExternalViewEmbedder* GetExternalViewEmbedder();
 

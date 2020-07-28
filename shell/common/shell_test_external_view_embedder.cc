@@ -8,7 +8,7 @@ void ShellTestExternalViewEmbedder::CancelFrame() {}
 // |ExternalViewEmbedder|
 void ShellTestExternalViewEmbedder::BeginFrame(
     SkISize frame_size,
-    GrContext* context,
+    GrDirectContext* context,
     double device_pixel_ratio,
     fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {}
 
@@ -36,7 +36,7 @@ SkCanvas* ShellTestExternalViewEmbedder::CompositeEmbeddedView(int view_id) {
 
 // |ExternalViewEmbedder|
 void ShellTestExternalViewEmbedder::SubmitFrame(
-    GrContext* context,
+    GrDirectContext* context,
     std::unique_ptr<SurfaceFrame> frame) {
   frame->Submit();
 }

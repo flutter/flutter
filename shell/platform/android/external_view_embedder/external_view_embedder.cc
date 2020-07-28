@@ -73,7 +73,7 @@ SkRect AndroidExternalViewEmbedder::GetViewRect(int view_id) const {
 
 // |ExternalViewEmbedder|
 void AndroidExternalViewEmbedder::SubmitFrame(
-    GrContext* context,
+    GrDirectContext* context,
     std::unique_ptr<SurfaceFrame> frame) {
   TRACE_EVENT0("flutter", "AndroidExternalViewEmbedder::SubmitFrame");
 
@@ -185,7 +185,7 @@ void AndroidExternalViewEmbedder::SubmitFrame(
 
 // |ExternalViewEmbedder|
 std::unique_ptr<SurfaceFrame>
-AndroidExternalViewEmbedder::CreateSurfaceIfNeeded(GrContext* context,
+AndroidExternalViewEmbedder::CreateSurfaceIfNeeded(GrDirectContext* context,
                                                    int64_t view_id,
                                                    sk_sp<SkPicture> picture,
                                                    const SkRect& rect) {
@@ -257,7 +257,7 @@ void AndroidExternalViewEmbedder::Reset() {
 // |ExternalViewEmbedder|
 void AndroidExternalViewEmbedder::BeginFrame(
     SkISize frame_size,
-    GrContext* context,
+    GrDirectContext* context,
     double device_pixel_ratio,
     fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
   Reset();

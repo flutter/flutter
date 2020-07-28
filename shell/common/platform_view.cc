@@ -82,7 +82,7 @@ void PlatformView::NotifyDestroyed() {
   delegate_.OnPlatformViewDestroyed();
 }
 
-sk_sp<GrContext> PlatformView::CreateResourceContext() const {
+sk_sp<GrDirectContext> PlatformView::CreateResourceContext() const {
   FML_DLOG(WARNING) << "This platform does not setup the resource "
                        "context on the IO thread for async texture uploads.";
   return nullptr;

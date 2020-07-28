@@ -14,7 +14,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/shell/gpu/gpu_surface_gl_delegate.h"
-#include "third_party/skia/include/gpu/GrContext.h"
+#include "third_party/skia/include/gpu/GrDirectContext.h"
 
 namespace flutter {
 
@@ -22,8 +22,8 @@ class GPUSurfaceGL : public Surface {
  public:
   GPUSurfaceGL(GPUSurfaceGLDelegate* delegate, bool render_to_surface);
 
-  // Creates a new GL surface reusing an existing GrContext.
-  GPUSurfaceGL(sk_sp<GrContext> gr_context,
+  // Creates a new GL surface reusing an existing GrDirectContext.
+  GPUSurfaceGL(sk_sp<GrDirectContext> gr_context,
                GPUSurfaceGLDelegate* delegate,
                bool render_to_surface);
 
@@ -40,7 +40,7 @@ class GPUSurfaceGL : public Surface {
   SkMatrix GetRootTransformation() const override;
 
   // |Surface|
-  GrContext* GetContext() override;
+  GrDirectContext* GetContext() override;
 
   // |Surface|
   flutter::ExternalViewEmbedder* GetExternalViewEmbedder() override;
@@ -50,7 +50,7 @@ class GPUSurfaceGL : public Surface {
 
  private:
   GPUSurfaceGLDelegate* delegate_;
-  sk_sp<GrContext> context_;
+  sk_sp<GrDirectContext> context_;
   sk_sp<SkSurface> onscreen_surface_;
   bool context_owner_;
   // TODO(38466): Refactor GPU surface APIs take into account the fact that an

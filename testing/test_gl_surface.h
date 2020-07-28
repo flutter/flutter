@@ -8,7 +8,7 @@
 #include <cstdint>
 
 #include "flutter/fml/macros.h"
-#include "third_party/skia/include/gpu/GrContext.h"
+#include "third_party/skia/include/gpu/GrDirectContext.h"
 
 namespace flutter {
 namespace testing {
@@ -35,9 +35,9 @@ class TestGLSurface {
 
   sk_sp<SkSurface> GetOnscreenSurface();
 
-  sk_sp<GrContext> GetGrContext();
+  sk_sp<GrDirectContext> GetGrContext();
 
-  sk_sp<GrContext> CreateGrContext();
+  sk_sp<GrDirectContext> CreateGrContext();
 
   sk_sp<SkImage> GetRasterSurfaceSnapshot();
 
@@ -56,7 +56,7 @@ class TestGLSurface {
   EGLContext offscreen_context_;
   EGLSurface onscreen_surface_;
   EGLSurface offscreen_surface_;
-  sk_sp<GrContext> context_;
+  sk_sp<GrDirectContext> context_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(TestGLSurface);
 };

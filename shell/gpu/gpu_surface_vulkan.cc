@@ -63,7 +63,7 @@ SkMatrix GPUSurfaceVulkan::GetRootTransformation() const {
   return matrix;
 }
 
-GrContext* GPUSurfaceVulkan::GetContext() {
+GrDirectContext* GPUSurfaceVulkan::GetContext() {
   return window_.GetSkiaGrContext();
 }
 

@@ -12,7 +12,7 @@ MockTexture::MockTexture(int64_t textureId) : Texture(textureId) {}
 void MockTexture::Paint(SkCanvas& canvas,
                         const SkRect& bounds,
                         bool freeze,
-                        GrContext* context,
+                        GrDirectContext* context,
                         SkFilterQuality filter_quality) {
   paint_calls_.emplace_back(
       PaintCall{canvas, bounds, freeze, context, filter_quality});

@@ -1023,7 +1023,7 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderToSoftwareBuffer) {
 }
 
 static sk_sp<SkSurface> CreateRenderSurface(const FlutterLayer& layer,
-                                            GrContext* context) {
+                                            GrDirectContext* context) {
   const auto image_info =
       SkImageInfo::MakeN32Premul(layer.size.width, layer.size.height);
   auto surface = context ? SkSurface::MakeRenderTarget(
@@ -1260,7 +1260,8 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderKnownScene) {
       });
 
   context.GetCompositor().SetPlatformViewRendererCallback(
-      [&](const FlutterLayer& layer, GrContext* context) -> sk_sp<SkImage> {
+      [&](const FlutterLayer& layer,
+          GrDirectContext* context) -> sk_sp<SkImage> {
         auto surface = CreateRenderSurface(layer, context);
         auto canvas = surface->getCanvas();
         FML_CHECK(canvas != nullptr);
@@ -1432,7 +1433,7 @@ TEST_F(EmbedderTest,
       });
 
   context.GetCompositor().SetPlatformViewRendererCallback(
-      [&](const FlutterLayer& layer, GrContext*
+      [&](const FlutterLayer& layer, GrDirectContext*
           /* don't use because software compositor */) -> sk_sp<SkImage> {
         auto surface = CreateRenderSurface(
             layer, nullptr /* null because software compositor */);
@@ -1748,7 +1749,8 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderWithPlatformLayerOnBottom) {
       });
 
   context.GetCompositor().SetPlatformViewRendererCallback(
-      [&](const FlutterLayer& layer, GrContext* context) -> sk_sp<SkImage> {
+      [&](const FlutterLayer& layer,
+          GrDirectContext* context) -> sk_sp<SkImage> {
         auto surface = CreateRenderSurface(layer, context);
         auto canvas = surface->getCanvas();
         FML_CHECK(canvas != nullptr);
@@ -1917,7 +1919,8 @@ TEST_F(EmbedderTest,
       });
 
   context.GetCompositor().SetPlatformViewRendererCallback(
-      [&](const FlutterLayer& layer, GrContext* context) -> sk_sp<SkImage> {
+      [&](const FlutterLayer& layer,
+          GrDirectContext* context) -> sk_sp<SkImage> {
         auto surface = CreateRenderSurface(layer, context);
         auto canvas = surface->getCanvas();
         FML_CHECK(canvas != nullptr);
@@ -2219,7 +2222,8 @@ TEST_F(EmbedderTest, CanRenderGradientWithCompositorOnNonRootLayer) {
       });
 
   context.GetCompositor().SetPlatformViewRendererCallback(
-      [&](const FlutterLayer& layer, GrContext* context) -> sk_sp<SkImage> {
+      [&](const FlutterLayer& layer,
+          GrDirectContext* context) -> sk_sp<SkImage> {
         auto surface = CreateRenderSurface(layer, context);
         auto canvas = surface->getCanvas();
         FML_CHECK(canvas != nullptr);
@@ -2329,7 +2333,8 @@ TEST_F(EmbedderTest, CanRenderGradientWithCompositorOnNonRootLayerWithXform) {
       });
 
   context.GetCompositor().SetPlatformViewRendererCallback(
-      [&](const FlutterLayer& layer, GrContext* context) -> sk_sp<SkImage> {
+      [&](const FlutterLayer& layer,
+          GrDirectContext* context) -> sk_sp<SkImage> {
         auto surface = CreateRenderSurface(layer, context);
         auto canvas = surface->getCanvas();
         FML_CHECK(canvas != nullptr);
@@ -2991,7 +2996,8 @@ TEST_F(EmbedderTest, VerifyB143464703WithSoftwareBackend) {
       });
 
   context.GetCompositor().SetPlatformViewRendererCallback(
-      [](const FlutterLayer& layer, GrContext* context) -> sk_sp<SkImage> {
+      [](const FlutterLayer& layer,
+         GrDirectContext* context) -> sk_sp<SkImage> {
         auto surface = CreateRenderSurface(
             layer, nullptr /* null because software compositor */);
         auto canvas = surface->getCanvas();

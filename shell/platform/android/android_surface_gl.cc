@@ -43,7 +43,7 @@ bool AndroidSurfaceGL::IsValid() const {
 }
 
 std::unique_ptr<Surface> AndroidSurfaceGL::CreateGPUSurface(
-    GrContext* gr_context) {
+    GrDirectContext* gr_context) {
   if (gr_context) {
     return std::make_unique<GPUSurfaceGL>(sk_ref_sp(gr_context), this, true);
   }
