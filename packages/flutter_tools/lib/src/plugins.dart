@@ -213,6 +213,14 @@ class Plugin {
       return <String>[errorMessage];
     }
 
+    if (!usesOldPluginFormat && !usesNewPluginFormat) {
+      const String errorMessage =
+          'Cannot find the `flutter.plugin.platforms` key in the `pubspec.yaml` file. '
+          'An instruction to format the `pubspec.yaml` can be found here: '
+          'https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms';
+      return <String>[errorMessage];
+    }
+
     if (usesNewPluginFormat) {
       if (yaml['platforms'] != null && yaml['platforms'] is! YamlMap) {
         const String errorMessage = 'flutter.plugin.platforms should be a map with the platform name as the key';
@@ -264,6 +272,7 @@ class Plugin {
 
   static List<String> _validateLegacyYaml(YamlMap yaml) {
     final List<String> errors = <String>[];
+
     if (yaml['androidPackage'] != null && yaml['androidPackage'] is! String) {
       errors.add('The "androidPackage" must either be null or a string.');
     }

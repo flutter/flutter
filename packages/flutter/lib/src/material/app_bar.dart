@@ -1137,6 +1137,9 @@ class SliverAppBar extends StatefulWidget {
   /// This widget is stacked behind the toolbar and the tab bar. It's height will
   /// be the same as the app bar's overall height.
   ///
+  /// When using [SliverAppBar.flexibleSpace], the [SliverAppBar.expandedHeight]
+  /// must be large enough to accommodate the [SliverAppBar.flexibleSpace] widget.
+  ///
   /// Typically a [FlexibleSpaceBar]. See [FlexibleSpaceBar] for details.
   final Widget flexibleSpace;
 

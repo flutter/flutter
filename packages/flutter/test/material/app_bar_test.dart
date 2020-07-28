@@ -1729,7 +1729,7 @@ void main() {
                     floating: true,
                     snap: snap,
                     actions: <Widget>[
-                      FlatButton(
+                      TextButton(
                         child: const Text('snap=false'),
                         onPressed: () {
                           setState(() {

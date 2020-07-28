@@ -695,7 +695,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// A future that completes when the Flutter engine has rasterized the first
   /// frame.
   ///
-  /// {@macro flutter.frame_rasterize_vs_presented}
+  /// {@macro flutter.frame_rasterized_vs_presented}
   ///
   /// See also:
   ///
@@ -1050,6 +1050,7 @@ typedef FastReassemblePredicate = bool Function(Object);
 /// the provided predicate and use it to mark specific elements dirty wherever
 /// [Element.widget] is a `Foo`. Afterwards, the internal field will be nulled
 /// out.
+FastReassemblePredicate get debugFastReassembleMethod => _debugFastReassembleMethod;
 set debugFastReassembleMethod(FastReassemblePredicate fastReassemblePredicate) {
   assert(() {
     _debugFastReassembleMethod = fastReassemblePredicate;

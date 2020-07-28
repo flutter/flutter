@@ -8,14 +8,12 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_driver/driver_extension.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'android_platform_view.dart';
+import 'future_data_handler.dart';
 import 'motion_event_diff.dart';
 import 'page.dart';
-
-MethodChannel channel = const MethodChannel('android_views_integration');
 
 const String kEventsFileName = 'touchEvents';
 
@@ -28,22 +26,6 @@ class MotionEventsPage extends PageWidget {
     return MotionEventsBody();
   }
 }
-
-/// Wraps a flutter driver [DataHandler] with one that waits until a delegate is set.
-///
-/// This allows the driver test to call [FlutterDriver.requestData] before the handler was
-/// set by the app in which case the requestData call will only complete once the app is ready
-/// for it.
-class FutureDataHandler {
-  final Completer<DataHandler> handlerCompleter = Completer<DataHandler>();
-
-  Future<String> handleMessage(String message) async {
-    final DataHandler handler = await handlerCompleter.future;
-    return handler(message);
-  }
-}
-
-FutureDataHandler driverDataHandler = FutureDataHandler();
 
 class MotionEventsBody extends StatefulWidget {
   @override
@@ -196,7 +178,7 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
   void onPlatformViewCreated(int id) {
     viewChannel = MethodChannel('simple_view/$id');
     viewChannel.setMethodCallHandler(onViewMethodChannelCall);
-    driverDataHandler.handlerCompleter.complete(handleDriverMessage);
+    driverDataHandler.registerHandler('run test').complete(playEventsFile);
   }
 
   void listenToFlutterViewEvents() {
@@ -204,14 +186,6 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
     Timer(const Duration(seconds: 3), () {
       viewChannel.invokeMethod<void>('stopTouchEvents');
     });
-  }
-
-  Future<String> handleDriverMessage(String message) async {
-    switch (message) {
-      case 'run test':
-        return playEventsFile();
-    }
-    return 'unknown message: "$message"';
   }
 
   Future<dynamic> onMethodChannelCall(MethodCall call) {
