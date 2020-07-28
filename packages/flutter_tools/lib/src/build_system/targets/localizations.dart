@@ -36,6 +36,7 @@ Future<void> generateLocalizations({
     'bin',
     'gen_l10n.dart',
   );
+
   final ProcessResult result = await processManager.run(<String>[
     dartBinaryPath,
     '--disable-dart-dev',
@@ -59,6 +60,8 @@ Future<void> generateLocalizations({
       '--use-deferred-loading',
     if (options.preferredSupportedLocales != null)
       '--preferred-supported-locales=${options.preferredSupportedLocales}',
+    if (!options.useSyntheticPackage)
+      '--no-synthetic-package'
   ]);
   if (result.exitCode != 0) {
     logger.printError(result.stdout + result.stderr as String);
@@ -107,6 +110,8 @@ class GenerateLocalizationsTarget extends Target {
       file: configFile,
       logger: globals.logger,
     );
+    print('attempt to log here');
+    print(options);
     final DepfileService depfileService = DepfileService(
       logger: environment.logger,
       fileSystem: environment.fileSystem,
@@ -155,6 +160,7 @@ class LocalizationOptions {
     this.preferredSupportedLocales,
     this.headerFile,
     this.deferredLoading,
+    this.useSyntheticPackage,
   });
 
   /// The `--arb-dir` argument.
@@ -199,6 +205,12 @@ class LocalizationOptions {
   /// Whether to generate the Dart localization file with locales imported
   /// as deferred.
   final bool deferredLoading;
+
+  /// The `--synthetic-package` argument.
+  ///
+  /// Whether to generate the Dart localization files in a synthetic package
+  /// or in a custom directory.
+  final bool useSyntheticPackage;
 }
 
 /// Parse the localizations configuration options from [file].
@@ -230,6 +242,7 @@ LocalizationOptions parseLocalizationsOptions({
     preferredSupportedLocales: _tryReadString(yamlMap, 'preferred-supported-locales', logger),
     headerFile: _tryReadUri(yamlMap, 'header-file', logger),
     deferredLoading: _tryReadBool(yamlMap, 'use-deferred-loading', logger),
+    useSyntheticPackage: _tryReadBool(yamlMap, 'synthetic-package', logger),
   );
 }
 

@@ -32,7 +32,8 @@ void main() {
           '--header-file=header',
           '--header=HEADER',
           '--use-deferred-loading',
-          '--preferred-supported-locales=en_US'
+          '--preferred-supported-locales=en_US',
+          '--no-synthetic-package',
         ],
       ),
     ]);
@@ -51,6 +52,7 @@ void main() {
       preferredSupportedLocales: 'en_US',
       templateArbFile: Uri.file('example.arb'),
       untranslatedMessagesFile: Uri.file('untranslated'),
+      useSyntheticPackage: false,
     );
     await generateLocalizations(
       options: options,
