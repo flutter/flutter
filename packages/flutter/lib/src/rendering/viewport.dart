@@ -760,9 +760,9 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     // whether the `rect` protrudes the leading edge of the `child` sliver. When
     // this value is non-negative and `child`'s `maxScrollObstructionExtent` is
     // greater than 0, we assume `rect` can't be obstructed by the leading edge
-    // of the viewport (i.e. its pinned to the leadge edge).
+    // of the viewport (i.e. its pinned to the leading edge).
     final bool isPinned = sliver.geometry.maxScrollObstructionExtent > 0
-                     && leadingScrollOffset >= 0;
+                      && leadingScrollOffset >= 0;
 
     final double extentOfPinnedSlivers = maxScrollObstructionExtentBefore(sliver);
     leadingScrollOffset = scrollOffsetOf(sliver, leadingScrollOffset);
