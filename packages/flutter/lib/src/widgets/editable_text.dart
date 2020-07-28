@@ -1410,6 +1410,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   AutofillScope get currentAutofillScope => _currentAutofillScope;
 
+  // Is this field in the current autofill context.
+  bool _isInAutofillContext = false;
+
   // This value is an eyeball estimation of the time it takes for the iOS cursor
   // to ease in and out.
   static const Duration _fadeDuration = Duration(milliseconds: 250);
@@ -1470,6 +1473,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _currentAutofillScope?.unregister(autofillId);
       _currentAutofillScope = newAutofillGroup;
       newAutofillGroup?.register(this);
+      _isInAutofillContext = _isInAutofillContext || _shouldBeInAutofillContext;
     }
 
     if (!_didAutoFocus && widget.autofocus) {
@@ -1494,6 +1498,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _selectionOverlay?.update(_value);
     }
     _selectionOverlay?.handlesVisible = widget.showSelectionHandles;
+    _isInAutofillContext = _isInAutofillContext || _shouldBeInAutofillContext;
+
     if (widget.focusNode != oldWidget.focusNode) {
       oldWidget.focusNode.removeListener(_handleFocusChanged);
       _focusAttachment?.detach();
@@ -1776,6 +1782,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   bool get _hasInputConnection => _textInputConnection != null && _textInputConnection.attached;
+  bool get _needsAutofill => widget.autofillHints?.isNotEmpty ?? false;
+  bool get _shouldBeInAutofillContext => _needsAutofill && currentAutofillScope != null;
 
   void _openInputConnection() {
     if (widget.readOnly) {
@@ -1785,14 +1793,24 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final TextEditingValue localValue = _value;
       _lastFormattedUnmodifiedTextEditingValue = localValue;
 
-      _textInputConnection = (widget.autofillHints?.isNotEmpty ?? false) && currentAutofillScope != null
+      // When _needsAutofill == true && currentAutofillScope == null, autofill
+      // is allowed but saving the user input from the text field is
+      // discouraged.
+      //
+      // In case the autofillScope changes from a non-null value to null, or
+      // _needsAutofill changes to false from true, the platform needs to be
+      // notified to exclude this field from the autofill context. So we need to
+      // provide the autofillId.
+      _textInputConnection = _needsAutofill && currentAutofillScope != null
         ? currentAutofillScope.attach(this, textInputConfiguration)
-        : TextInput.attach(this, textInputConfiguration);
+        : TextInput.attach(this, _createTextInputConfiguration(_isInAutofillContext || _needsAutofill));
       _textInputConnection.show();
       _updateSizeAndTransform();
-      // Request autofill AFTER the size and the transform have been sent to the
-      // platform side.
-      _textInputConnection.requestAutofill();
+      if (_needsAutofill) {
+        // Request autofill AFTER the size and the transform have been sent to
+        // the platform text input plugin.
+        _textInputConnection.requestAutofill();
+      }
 
       final TextStyle style = widget.style;
       _textInputConnection
@@ -2223,9 +2241,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   String get autofillId => 'EditableText-$hashCode';
 
-  @override
-  TextInputConfiguration get textInputConfiguration {
-    final bool isAutofillEnabled = widget.autofillHints?.isNotEmpty ?? false;
+  TextInputConfiguration _createTextInputConfiguration(bool needsAutofillConfiguration) {
+    assert(needsAutofillConfiguration != null);
     return TextInputConfiguration(
       inputType: widget.keyboardType,
       obscureText: widget.obscureText,
@@ -2239,12 +2256,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       ),
       textCapitalization: widget.textCapitalization,
       keyboardAppearance: widget.keyboardAppearance,
-      autofillConfiguration: !isAutofillEnabled ? null : AutofillConfiguration(
+      autofillConfiguration: !needsAutofillConfiguration ? null : AutofillConfiguration(
         uniqueIdentifier: autofillId,
-        autofillHints: widget.autofillHints.toList(growable: false),
+        autofillHints: widget.autofillHints?.toList(growable: false) ?? <String>[],
         currentEditingValue: currentTextEditingValue,
       ),
     );
+  }
+
+  @override
+  TextInputConfiguration get textInputConfiguration {
+    return _createTextInputConfiguration(_needsAutofill);
   }
 
   // null if no promptRect should be shown.
