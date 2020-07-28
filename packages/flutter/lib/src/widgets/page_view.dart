@@ -395,6 +395,9 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   @override
   bool applyViewportDimension(double viewportDimension) {
     final double oldViewportDimensions = this.viewportDimension;
+    if (viewportDimension == oldViewportDimensions) {
+      return true;
+    }
     final bool result = super.applyViewportDimension(viewportDimension);
     final double oldPixels = pixels;
     final double page = (oldPixels == null || oldViewportDimensions == 0.0) ? _pageToUseOnStartup : getPageFromPixels(oldPixels, oldViewportDimensions);

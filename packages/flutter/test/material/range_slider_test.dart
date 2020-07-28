@@ -1742,6 +1742,63 @@ void main() {
     );
   });
 
+  testWidgets('Range Slider Semantics', (WidgetTester tester) async {
+    await tester.pumpWidget(
+        MaterialApp(
+          home: Theme(
+            data: ThemeData.light(),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: MediaQuery(
+                data: MediaQueryData.fromWindow(window),
+                child: Material(
+                  child: RangeSlider(
+                    values: const RangeValues(10.0, 12.0),
+                    min: 0.0,
+                    max: 100.0,
+                    onChanged: (RangeValues v) { },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        )
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.getSemantics(find.byType(RangeSlider)),
+      matchesSemantics(
+        scopesRoute: true,
+        children:<Matcher>[
+          matchesSemantics(
+            children:  <Matcher>[
+              matchesSemantics(
+                isEnabled: true,
+                hasEnabledState: true,
+                hasIncreaseAction: true,
+                hasDecreaseAction: true,
+                value: '10%',
+                increasedValue: '10%',
+                decreasedValue: '5%',
+              ),
+              matchesSemantics(
+                isEnabled: true,
+                hasEnabledState: true,
+                hasIncreaseAction: true,
+                hasDecreaseAction: true,
+                value: '12%',
+                increasedValue: '17%',
+                decreasedValue: '12%',
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  });
+
   testWidgets('Range Slider implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 

@@ -119,7 +119,7 @@ class RawMaterialButton extends StatefulWidget {
   ///  * [MaterialState.disabled].
   ///
   /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
-  /// {@endtemplate flutter.material.button.mouseCursor}
+  /// {@endtemplate}
   final MouseCursor mouseCursor;
 
   /// Defines the default text style, with [Material.textStyle], for the

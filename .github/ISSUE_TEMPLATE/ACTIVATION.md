@@ -18,7 +18,7 @@ assignees: ''
       * https://stackoverflow.com/questions/tagged/flutter?sort=frequent
 
      If you have found a bug or if our documentation doesn't have an answer
-     to what you're looking for, then fill our the template below. Please read
+     to what you're looking for, then fill out the template below. Please read
      our guide to filing a bug first: https://flutter.dev/docs/resources/bug-reports
 -->
 

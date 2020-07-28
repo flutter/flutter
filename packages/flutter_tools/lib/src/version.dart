@@ -16,7 +16,8 @@ import 'convert.dart';
 import 'globals.dart' as globals;
 
 /// The flutter GitHub repository.
-const String kFlutterGit = 'https://github.com/flutter/flutter.git';
+String get kFlutterGit => globals.platform.environment['FLUTTER_GIT_URL'] ?? 'https://github.com/flutter/flutter.git';
+
 
 /// This maps old branch names to the names of branches that replaced them.
 ///
@@ -258,6 +259,13 @@ class FlutterVersion {
         branch: '$_versionCheckRemote/$branch',
         lenient: false,
       );
+    } on VersionCheckError catch (error) {
+      if (globals.platform.environment.containsKey('FLUTTER_GIT_URL')) {
+        globals.logger.printError('Warning: the Flutter git upstream was overriden '
+        'by the environment variable FLUTTER_GIT_URL = $kFlutterGit');
+      }
+      globals.logger.printError(error.toString());
+      rethrow;
     } finally {
       await _removeVersionCheckRemoteIfExists();
     }

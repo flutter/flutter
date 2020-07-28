@@ -31,6 +31,9 @@ typedef LayoutWidgetBuilder = Widget Function(BuildContext context, BoxConstrain
 /// The [builder] function is _not_ called during layout if the parent passes
 /// the same constraints repeatedly.
 /// {@endtemplate}
+///
+/// Subclasses must return a [RenderObject] that mixes in
+/// [RenderConstrainedLayoutBuilder].
 abstract class ConstrainedLayoutBuilder<ConstraintType extends Constraints> extends RenderObjectWidget {
   /// Creates a widget that defers its building until layout.
   ///

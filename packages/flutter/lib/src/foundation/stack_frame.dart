@@ -86,6 +86,7 @@ class StackFrame {
     return stack
         .trim()
         .split('\n')
+        .where((String line) => line.isNotEmpty)
         .map(fromStackTraceLine)
         // On the Web in non-debug builds the stack trace includes the exception
         // message that precedes the stack trace itself. fromStackTraceLine will
