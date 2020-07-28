@@ -212,7 +212,7 @@ class ExpansionPanel {
   ///         ExpansionPanel(
   ///           isExpanded: _isExpanded,
   ///           headerBuilder: (BuildContext context, bool isExpanded) {
-  ///             return LisTile(title: Text('Header Text'));
+  ///             return ListTile(title: Text('Header Text'));
   ///           },
   ///           expandIconBuilder: (
   ///             BuildContext context,
@@ -221,12 +221,12 @@ class ExpansionPanel {
   ///             Duration animationDuration,
   ///           ) {
   ///             return InkWell(
-  ///               customBorder: CircleBoreder(),
+  ///               customBorder: CircleBorder(),
   ///               onTap: () {
   ///                 handlePressed();
   ///               },
   ///               child: Padding(
-  ///                 padding: EdgeInsets.all(12.0)
+  ///                 padding: EdgeInsets.all(12.0),
   ///                 child: isExpanded
   ///                   ? Icon(Icons.check_box)
   ///                   : Icon(Icons.check_box_outline_blank),
@@ -235,7 +235,7 @@ class ExpansionPanel {
   ///           },
   ///           body: ListTile(
   ///             title: Text('Title Text'),
-  ///             subtitle: Text('Subtitle Text),
+  ///             subtitle: Text('Subtitle Text'),
   ///           ),
   ///         ),
   ///       ],
@@ -309,7 +309,7 @@ class ExpansionPanel {
   ///   return SingleChildScrollView(
   ///     child: ExpansionPanelList(
   ///       expansionCallback: (int index, bool isExpanded) {
-  ///         setSate(() {
+  ///         setState(() {
   ///           _isExpanded = !isExpanded;
   ///         });
   ///       },
