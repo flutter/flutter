@@ -90,7 +90,7 @@ std::unique_ptr<Surface> EmbedderSurfaceGL::CreateGPUSurface() {
 }
 
 // |EmbedderSurface|
-sk_sp<GrContext> EmbedderSurfaceGL::CreateResourceContext() const {
+sk_sp<GrDirectContext> EmbedderSurfaceGL::CreateResourceContext() const {
   auto callback = gl_dispatch_table_.gl_make_resource_current_callback;
   if (callback && callback()) {
     if (auto context = ShellIOManager::CreateCompatibleResourceLoadingContext(

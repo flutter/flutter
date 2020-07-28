@@ -10,7 +10,7 @@
 #include "flutter/fml/closure.h"
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/embedder/embedder.h"
-#include "third_party/skia/include/gpu/GrContext.h"
+#include "third_party/skia/include/gpu/GrDirectContext.h"
 
 namespace flutter {
 namespace testing {
@@ -23,7 +23,7 @@ class EmbedderTestCompositor {
     kSoftwareBuffer,
   };
 
-  EmbedderTestCompositor(SkISize surface_size, sk_sp<GrContext> context);
+  EmbedderTestCompositor(SkISize surface_size, sk_sp<GrDirectContext> context);
 
   ~EmbedderTestCompositor();
 
@@ -38,7 +38,7 @@ class EmbedderTestCompositor {
 
   using PlatformViewRendererCallback =
       std::function<sk_sp<SkImage>(const FlutterLayer& layer,
-                                   GrContext* context)>;
+                                   GrDirectContext* context)>;
   void SetPlatformViewRendererCallback(
       const PlatformViewRendererCallback& callback);
 
@@ -75,7 +75,7 @@ class EmbedderTestCompositor {
 
  private:
   const SkISize surface_size_;
-  sk_sp<GrContext> context_;
+  sk_sp<GrDirectContext> context_;
   RenderTargetType type_ = RenderTargetType::kOpenGLFramebuffer;
   PlatformViewRendererCallback platform_view_renderer_callback_;
   bool present_callback_is_one_shot_ = false;

@@ -8,7 +8,7 @@
 #include <memory>
 #include <string>
 
-#include "third_party/skia/include/gpu/GrContext.h"
+#include "third_party/skia/include/gpu/GrDirectContext.h"
 #include "vulkan_application.h"
 #include "vulkan_device.h"
 #include "vulkan_native_surface.h"
@@ -75,7 +75,7 @@ VulkanWindow::VulkanWindow(fml::RefPtr<VulkanProcTable> proc_table,
     return;
   }
 
-  // Create the Skia GrContext.
+  // Create the Skia GrDirectContext.
 
   if (!CreateSkiaGrContext()) {
     FML_DLOG(INFO) << "Could not create Skia context.";
@@ -98,7 +98,7 @@ bool VulkanWindow::IsValid() const {
   return valid_;
 }
 
-GrContext* VulkanWindow::GetSkiaGrContext() {
+GrDirectContext* VulkanWindow::GetSkiaGrContext() {
   return skia_gr_context_.get();
 }
 
@@ -109,7 +109,7 @@ bool VulkanWindow::CreateSkiaGrContext() {
     return false;
   }
 
-  sk_sp<GrContext> context = GrContext::MakeVulkan(backend_context);
+  sk_sp<GrDirectContext> context = GrDirectContext::MakeVulkan(backend_context);
 
   if (context == nullptr) {
     return false;

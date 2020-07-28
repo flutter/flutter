@@ -47,7 +47,7 @@ class EmbedderSurfaceGL final : public EmbedderSurface,
   std::unique_ptr<Surface> CreateGPUSurface() override;
 
   // |EmbedderSurface|
-  sk_sp<GrContext> CreateResourceContext() const override;
+  sk_sp<GrDirectContext> CreateResourceContext() const override;
 
   // |GPUSurfaceGLDelegate|
   std::unique_ptr<GLContextResult> GLContextMakeCurrent() override;

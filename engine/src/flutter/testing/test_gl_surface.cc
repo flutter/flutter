@@ -248,17 +248,15 @@ void* TestGLSurface::GetProcAddress(const char* name) const {
   return reinterpret_cast<void*>(symbol);
 }
 
-sk_sp<GrContext> TestGLSurface::GetGrContext() {
+sk_sp<GrDirectContext> TestGLSurface::GetGrContext() {
   if (context_) {
     return context_;
   }
 
-  context_ = CreateGrContext();
-
-  return context_;
+  return CreateGrContext();
 }
 
-sk_sp<GrContext> TestGLSurface::CreateGrContext() {
+sk_sp<GrDirectContext> TestGLSurface::CreateGrContext() {
   if (!MakeCurrent()) {
     return nullptr;
   }
@@ -290,7 +288,7 @@ sk_sp<GrContext> TestGLSurface::CreateGrContext() {
     return nullptr;
   }
 
-  context_ = GrContext::MakeGL(interface);
+  context_ = GrDirectContext::MakeGL(interface);
   return context_;
 }
 

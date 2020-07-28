@@ -31,7 +31,7 @@ class IOSSurfaceSoftware final : public IOSSurface, public GPUSurfaceSoftwareDel
   void UpdateStorageSizeIfNecessary() override;
 
   // |IOSSurface|
-  std::unique_ptr<Surface> CreateGPUSurface(GrContext* gr_context = nullptr) override;
+  std::unique_ptr<Surface> CreateGPUSurface(GrDirectContext* gr_context = nullptr) override;
 
   // |GPUSurfaceSoftwareDelegate|
   sk_sp<SkSurface> AcquireBackingStore(const SkISize& size) override;

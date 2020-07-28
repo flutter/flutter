@@ -5,7 +5,7 @@
 #include "flutter/shell/platform/embedder/embedder_surface_software.h"
 
 #include "flutter/fml/trace_event.h"
-#include "third_party/skia/include/gpu/GrContext.h"
+#include "third_party/skia/include/gpu/GrDirectContext.h"
 
 namespace flutter {
 
@@ -43,7 +43,7 @@ std::unique_ptr<Surface> EmbedderSurfaceSoftware::CreateGPUSurface() {
 }
 
 // |EmbedderSurface|
-sk_sp<GrContext> EmbedderSurfaceSoftware::CreateResourceContext() const {
+sk_sp<GrDirectContext> EmbedderSurfaceSoftware::CreateResourceContext() const {
   return nullptr;
 }
 

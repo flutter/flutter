@@ -9,7 +9,7 @@
 #include "flutter/shell/platform/android/surface/android_surface_mock.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "third_party/skia/include/gpu/GrContext.h"
+#include "third_party/skia/include/gpu/GrDirectContext.h"
 
 namespace flutter {
 namespace testing {
@@ -20,7 +20,7 @@ using ::testing::Return;
 TEST(SurfacePool, GetLayer__AllocateOneLayer) {
   auto pool = std::make_unique<SurfacePool>();
 
-  auto gr_context = GrContext::MakeMock(nullptr);
+  auto gr_context = GrDirectContext::MakeMock(nullptr);
   auto android_context =
       std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
 
@@ -51,7 +51,7 @@ TEST(SurfacePool, GetLayer__AllocateOneLayer) {
 TEST(SurfacePool, GetUnusedLayers) {
   auto pool = std::make_unique<SurfacePool>();
 
-  auto gr_context = GrContext::MakeMock(nullptr);
+  auto gr_context = GrDirectContext::MakeMock(nullptr);
   auto android_context =
       std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
 
@@ -84,7 +84,7 @@ TEST(SurfacePool, GetUnusedLayers) {
 TEST(SurfacePool, GetLayer__Recycle) {
   auto pool = std::make_unique<SurfacePool>();
 
-  auto gr_context_1 = GrContext::MakeMock(nullptr);
+  auto gr_context_1 = GrDirectContext::MakeMock(nullptr);
   auto jni_mock = std::make_shared<JNIMock>();
   auto window = fml::MakeRefCounted<AndroidNativeWindow>(nullptr);
   EXPECT_CALL(*jni_mock, FlutterViewCreateOverlaySurface())
@@ -95,7 +95,7 @@ TEST(SurfacePool, GetLayer__Recycle) {
   auto android_context =
       std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
 
-  auto gr_context_2 = GrContext::MakeMock(nullptr);
+  auto gr_context_2 = GrDirectContext::MakeMock(nullptr);
   auto surface_factory =
       [gr_context_1, gr_context_2, window](
           std::shared_ptr<AndroidContext> android_context,
@@ -130,7 +130,7 @@ TEST(SurfacePool, GetLayer__Recycle) {
 TEST(SurfacePool, GetLayer__AllocateTwoLayers) {
   auto pool = std::make_unique<SurfacePool>();
 
-  auto gr_context = GrContext::MakeMock(nullptr);
+  auto gr_context = GrDirectContext::MakeMock(nullptr);
   auto android_context =
       std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
 
@@ -172,7 +172,7 @@ TEST(SurfacePool, DestroyLayers) {
   EXPECT_CALL(*jni_mock, FlutterViewDestroyOverlaySurfaces()).Times(0);
   pool->DestroyLayers(jni_mock);
 
-  auto gr_context = GrContext::MakeMock(nullptr);
+  auto gr_context = GrDirectContext::MakeMock(nullptr);
   auto android_context =
       std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
 

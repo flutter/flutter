@@ -8,7 +8,7 @@
 #include "flutter/fml/macros.h"
 #include "third_party/skia/include/core/SkSize.h"
 #include "third_party/skia/include/core/SkSurface.h"
-#include "third_party/skia/include/gpu/GrContext.h"
+#include "third_party/skia/include/gpu/GrDirectContext.h"
 
 namespace flutter {
 
@@ -27,7 +27,7 @@ class TestMetalSurface {
 
   virtual bool IsValid() const;
 
-  virtual sk_sp<GrContext> GetGrContext() const;
+  virtual sk_sp<GrDirectContext> GetGrContext() const;
 
   virtual sk_sp<SkSurface> GetSurface() const;
 

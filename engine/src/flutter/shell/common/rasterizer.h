@@ -458,7 +458,7 @@ class Rasterizer final : public SnapshotDelegate {
   sk_sp<SkData> ScreenshotLayerTreeAsImage(
       flutter::LayerTree* tree,
       flutter::CompositorContext& compositor_context,
-      GrContext* surface_context,
+      GrDirectContext* surface_context,
       bool compressed);
 
   sk_sp<SkImage> DoMakeRasterSnapshot(

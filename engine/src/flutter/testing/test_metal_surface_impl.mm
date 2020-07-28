@@ -54,7 +54,7 @@ TestMetalSurfaceImpl::TestMetalSurfaceImpl(SkISize surface_size) {
     return;
   }
 
-  auto skia_context = GrContext::MakeMetal(device.get(), command_queue.get());
+  auto skia_context = GrDirectContext::MakeMetal(device.get(), command_queue.get());
 
   if (skia_context) {
     // Skia wants ownership of the device and queue. If a context was created,
@@ -63,7 +63,7 @@ TestMetalSurfaceImpl::TestMetalSurfaceImpl(SkISize surface_size) {
     FML_ALLOW_UNUSED_LOCAL(device.release());
     FML_ALLOW_UNUSED_LOCAL(command_queue.release());
   } else {
-    FML_LOG(ERROR) << "Could not create the GrContext from the Metal Device "
+    FML_LOG(ERROR) << "Could not create the GrDirectContext from the Metal Device "
                       "and command queue.";
     return;
   }
@@ -108,7 +108,7 @@ bool TestMetalSurfaceImpl::IsValid() const {
   return is_valid_;
 }
 // |TestMetalSurface|
-sk_sp<GrContext> TestMetalSurfaceImpl::GetGrContext() const {
+sk_sp<GrDirectContext> TestMetalSurfaceImpl::GetGrContext() const {
   return IsValid() ? context_ : nullptr;
 }
 // |TestMetalSurface|

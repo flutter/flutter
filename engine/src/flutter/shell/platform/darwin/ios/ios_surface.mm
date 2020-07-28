@@ -95,7 +95,7 @@ void IOSSurface::CancelFrame() {
 
 // |ExternalViewEmbedder|
 void IOSSurface::BeginFrame(SkISize frame_size,
-                            GrContext* context,
+                            GrDirectContext* context,
                             double device_pixel_ratio,
                             fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
   TRACE_EVENT0("flutter", "IOSSurface::BeginFrame");
@@ -135,7 +135,7 @@ SkCanvas* IOSSurface::CompositeEmbeddedView(int view_id) {
 }
 
 // |ExternalViewEmbedder|
-void IOSSurface::SubmitFrame(GrContext* context, std::unique_ptr<SurfaceFrame> frame) {
+void IOSSurface::SubmitFrame(GrDirectContext* context, std::unique_ptr<SurfaceFrame> frame) {
   TRACE_EVENT0("flutter", "IOSSurface::SubmitFrame");
   FML_CHECK(platform_views_controller_ != nullptr);
   bool submitted =

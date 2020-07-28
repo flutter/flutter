@@ -30,7 +30,7 @@ class IOSContextGL final : public IOSContext {
   fml::scoped_nsobject<EAGLContext> resource_context_;
 
   // |IOSContext|
-  sk_sp<GrContext> CreateResourceContext() override;
+  sk_sp<GrDirectContext> CreateResourceContext() override;
 
   // |IOSContext|
   std::unique_ptr<GLContextResult> MakeCurrent() override;

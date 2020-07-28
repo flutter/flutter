@@ -52,7 +52,7 @@ class SurfacePool {
   // Finally, it marks the layer as used. That is, it increments
   // `available_layer_index_`.
   std::shared_ptr<OverlayLayer> GetLayer(
-      GrContext* gr_context,
+      GrDirectContext* gr_context,
       std::shared_ptr<AndroidContext> android_context,
       std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
       const AndroidSurface::Factory& surface_factory);

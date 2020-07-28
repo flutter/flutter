@@ -108,7 +108,7 @@ class PlatformViewAndroid final : public PlatformView {
   std::unique_ptr<Surface> CreateRenderingSurface() override;
 
   // |PlatformView|
-  sk_sp<GrContext> CreateResourceContext() const override;
+  sk_sp<GrDirectContext> CreateResourceContext() const override;
 
   // |PlatformView|
   void ReleaseResourceContext() const override;

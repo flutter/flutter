@@ -11,6 +11,7 @@
 #include "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
+#include "third_party/skia/include/gpu/GrDirectContext.h"
 
 namespace flutter {
 
@@ -63,7 +64,7 @@ bool IOSExternalTextureGL::NeedUpdateTexture(bool freeze) {
 void IOSExternalTextureGL::Paint(SkCanvas& canvas,
                                  const SkRect& bounds,
                                  bool freeze,
-                                 GrContext* context,
+                                 GrDirectContext* context,
                                  SkFilterQuality filter_quality) {
   EnsureTextureCacheExists();
   if (NeedUpdateTexture(freeze)) {

@@ -29,7 +29,7 @@ class GPUSurfaceSoftware : public Surface {
   SkMatrix GetRootTransformation() const override;
 
   // |Surface|
-  GrContext* GetContext() override;
+  GrDirectContext* GetContext() override;
 
   // |Surface|
   flutter::ExternalViewEmbedder* GetExternalViewEmbedder() override;

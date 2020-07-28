@@ -30,7 +30,7 @@ class IOSExternalTextureGL final : public Texture {
   void Paint(SkCanvas& canvas,
              const SkRect& bounds,
              bool freeze,
-             GrContext* context,
+             GrDirectContext* context,
              SkFilterQuality filter_quality) override;
 
   // |Texture|

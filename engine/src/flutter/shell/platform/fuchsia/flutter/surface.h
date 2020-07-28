@@ -33,7 +33,7 @@ class Surface final : public flutter::Surface {
       const SkISize& size) override;
 
   // |flutter::Surface|
-  GrContext* GetContext() override;
+  GrDirectContext* GetContext() override;
 
   // |flutter::Surface|
   SkMatrix GetRootTransformation() const override;

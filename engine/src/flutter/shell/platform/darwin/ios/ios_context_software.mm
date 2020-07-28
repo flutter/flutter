@@ -12,7 +12,7 @@ IOSContextSoftware::IOSContextSoftware() = default;
 IOSContextSoftware::~IOSContextSoftware() = default;
 
 // |IOSContext|
-sk_sp<GrContext> IOSContextSoftware::CreateResourceContext() {
+sk_sp<GrDirectContext> IOSContextSoftware::CreateResourceContext() {
   return nullptr;
 }
 

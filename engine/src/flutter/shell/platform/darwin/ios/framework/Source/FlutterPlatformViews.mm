@@ -22,7 +22,7 @@
 namespace flutter {
 
 std::shared_ptr<FlutterPlatformViewLayer> FlutterPlatformViewLayerPool::GetLayer(
-    GrContext* gr_context,
+    GrDirectContext* gr_context,
     std::shared_ptr<IOSContext> ios_context) {
   if (available_layer_index_ >= layers_.size()) {
     std::shared_ptr<FlutterPlatformViewLayer> layer;
@@ -462,7 +462,7 @@ SkRect FlutterPlatformViewsController::GetPlatformViewRect(int view_id) {
   );
 }
 
-bool FlutterPlatformViewsController::SubmitFrame(GrContext* gr_context,
+bool FlutterPlatformViewsController::SubmitFrame(GrDirectContext* gr_context,
                                                  std::shared_ptr<IOSContext> ios_context,
                                                  std::unique_ptr<SurfaceFrame> frame) {
   FML_DCHECK(flutter_view_);
@@ -608,7 +608,7 @@ void FlutterPlatformViewsController::EndFrame(
 }
 
 std::shared_ptr<FlutterPlatformViewLayer> FlutterPlatformViewsController::GetLayer(
-    GrContext* gr_context,
+    GrDirectContext* gr_context,
     std::shared_ptr<IOSContext> ios_context,
     sk_sp<SkPicture> picture,
     SkRect rect,

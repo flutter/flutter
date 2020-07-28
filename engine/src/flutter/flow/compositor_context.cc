@@ -31,7 +31,7 @@ void CompositorContext::EndFrame(ScopedFrame& frame,
 }
 
 std::unique_ptr<CompositorContext::ScopedFrame> CompositorContext::AcquireFrame(
-    GrContext* gr_context,
+    GrDirectContext* gr_context,
     SkCanvas* canvas,
     ExternalViewEmbedder* view_embedder,
     const SkMatrix& root_surface_transformation,
@@ -45,7 +45,7 @@ std::unique_ptr<CompositorContext::ScopedFrame> CompositorContext::AcquireFrame(
 
 CompositorContext::ScopedFrame::ScopedFrame(
     CompositorContext& context,
-    GrContext* gr_context,
+    GrDirectContext* gr_context,
     SkCanvas* canvas,
     ExternalViewEmbedder* view_embedder,
     const SkMatrix& root_surface_transformation,

@@ -12,7 +12,7 @@
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/task_runner.h"
 #include "third_party/skia/include/core/SkRefCnt.h"
-#include "third_party/skia/include/gpu/GrContext.h"
+#include "third_party/skia/include/gpu/GrDirectContext.h"
 
 namespace flutter {
 
@@ -37,7 +37,7 @@ class SkiaUnrefQueue : public fml::RefCountedThreadSafe<SkiaUnrefQueue> {
   bool drain_pending_;
   fml::WeakPtr<GrContext> context_;
 
-  // The `GrContext* context` is only used for signaling Skia to
+  // The `GrDirectContext* context` is only used for signaling Skia to
   // performDeferredCleanup. It can be nullptr when such signaling is not needed
   // (e.g., in unit tests).
   SkiaUnrefQueue(fml::RefPtr<fml::TaskRunner> task_runner,

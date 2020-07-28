@@ -11,7 +11,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/gpu/gpu_surface_delegate.h"
-#include "third_party/skia/include/gpu/GrContext.h"
+#include "third_party/skia/include/gpu/GrDirectContext.h"
 
 @class CAMetalLayer;
 
@@ -21,7 +21,7 @@ class GPUSurfaceMetal : public Surface {
  public:
   GPUSurfaceMetal(GPUSurfaceDelegate* delegate,
                   fml::scoped_nsobject<CAMetalLayer> layer,
-                  sk_sp<GrContext> context,
+                  sk_sp<GrDirectContext> context,
                   fml::scoped_nsprotocol<id<MTLCommandQueue>> command_queue);
 
   // |Surface|
@@ -30,7 +30,7 @@ class GPUSurfaceMetal : public Surface {
  private:
   GPUSurfaceDelegate* delegate_;
   fml::scoped_nsobject<CAMetalLayer> layer_;
-  sk_sp<GrContext> context_;
+  sk_sp<GrDirectContext> context_;
   fml::scoped_nsprotocol<id<MTLCommandQueue>> command_queue_;
   GrMTLHandle next_drawable_ = nullptr;
 
@@ -44,7 +44,7 @@ class GPUSurfaceMetal : public Surface {
   SkMatrix GetRootTransformation() const override;
 
   // |Surface|
-  GrContext* GetContext() override;
+  GrDirectContext* GetContext() override;
 
   // |Surface|
   flutter::ExternalViewEmbedder* GetExternalViewEmbedder() override;

@@ -35,7 +35,7 @@ std::unique_ptr<flutter::SurfaceFrame> Surface::AcquireFrame(
 }
 
 // |flutter::Surface|
-GrContext* Surface::GetContext() {
+GrDirectContext* Surface::GetContext() {
   return nullptr;
 }
 

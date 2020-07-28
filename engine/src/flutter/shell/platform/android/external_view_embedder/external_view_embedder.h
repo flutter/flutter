@@ -45,7 +45,7 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
   std::vector<SkCanvas*> GetCurrentCanvases() override;
 
   // |ExternalViewEmbedder|
-  void SubmitFrame(GrContext* context,
+  void SubmitFrame(GrDirectContext* context,
                    std::unique_ptr<SurfaceFrame> frame) override;
 
   // |ExternalViewEmbedder|
@@ -58,7 +58,7 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
   // |ExternalViewEmbedder|
   void BeginFrame(
       SkISize frame_size,
-      GrContext* context,
+      GrDirectContext* context,
       double device_pixel_ratio,
       fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) override;
 
@@ -132,7 +132,7 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
 
   // Creates a Surface when needed or recycles an existing one.
   // Finally, draws the picture on the frame's canvas.
-  std::unique_ptr<SurfaceFrame> CreateSurfaceIfNeeded(GrContext* context,
+  std::unique_ptr<SurfaceFrame> CreateSurfaceIfNeeded(GrDirectContext* context,
                                                       int64_t view_id,
                                                       sk_sp<SkPicture> picture,
                                                       const SkRect& rect);

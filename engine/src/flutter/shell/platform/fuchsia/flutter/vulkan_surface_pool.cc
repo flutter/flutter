@@ -8,7 +8,7 @@
 #include <string>
 
 #include "flutter/fml/trace_event.h"
-#include "third_party/skia/include/gpu/GrContext.h"
+#include "third_party/skia/include/gpu/GrDirectContext.h"
 
 namespace flutter_runner {
 
@@ -22,7 +22,7 @@ std::string ToString(const SkISize& size) {
 }  // namespace
 
 VulkanSurfacePool::VulkanSurfacePool(vulkan::VulkanProvider& vulkan_provider,
-                                     sk_sp<GrContext> context,
+                                     sk_sp<GrDirectContext> context,
                                      scenic::Session* scenic_session)
     : vulkan_provider_(vulkan_provider),
       context_(std::move(context)),

@@ -39,7 +39,7 @@ class EmbedderSurfaceSoftware final : public EmbedderSurface,
   std::unique_ptr<Surface> CreateGPUSurface() override;
 
   // |EmbedderSurface|
-  sk_sp<GrContext> CreateResourceContext() const override;
+  sk_sp<GrDirectContext> CreateResourceContext() const override;
 
   // |GPUSurfaceSoftwareDelegate|
   sk_sp<SkSurface> AcquireBackingStore(const SkISize& size) override;

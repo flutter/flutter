@@ -21,7 +21,7 @@
 #include "flutter/shell/common/pointer_data_dispatcher.h"
 #include "flutter/shell/common/vsync_waiter.h"
 #include "third_party/skia/include/core/SkSize.h"
-#include "third_party/skia/include/gpu/GrContext.h"
+#include "third_party/skia/include/gpu/GrDirectContext.h"
 
 namespace flutter {
 
@@ -427,7 +427,7 @@ class PlatformView {
   ///             main render thread GPU context. May be `nullptr` in case such
   ///             a context cannot be created.
   ///
-  virtual sk_sp<GrContext> CreateResourceContext() const;
+  virtual sk_sp<GrDirectContext> CreateResourceContext() const;
 
   //----------------------------------------------------------------------------
   /// @brief      Used by the shell to notify the embedder that the resource

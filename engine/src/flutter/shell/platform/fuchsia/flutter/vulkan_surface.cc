@@ -13,7 +13,7 @@
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/gpu/GrBackendSemaphore.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
-#include "third_party/skia/include/gpu/GrContext.h"
+#include "third_party/skia/include/gpu/GrDirectContext.h"
 
 namespace flutter_runner {
 
@@ -104,7 +104,7 @@ bool CreateVulkanImage(vulkan::VulkanProvider& vulkan_provider,
 }
 
 VulkanSurface::VulkanSurface(vulkan::VulkanProvider& vulkan_provider,
-                             sk_sp<GrContext> context,
+                             sk_sp<GrDirectContext> context,
                              scenic::Session* session,
                              const SkISize& size)
     : vulkan_provider_(vulkan_provider), session_(session), wait_(this) {
@@ -226,7 +226,7 @@ bool VulkanSurface::CreateFences() {
   return true;
 }
 
-bool VulkanSurface::AllocateDeviceMemory(sk_sp<GrContext> context,
+bool VulkanSurface::AllocateDeviceMemory(sk_sp<GrDirectContext> context,
                                          const SkISize& size,
                                          zx::vmo& exported_vmo) {
   if (size.isEmpty()) {
@@ -323,7 +323,7 @@ bool VulkanSurface::AllocateDeviceMemory(sk_sp<GrContext> context,
                           image_create_info, memory_reqs);
 }
 
-bool VulkanSurface::SetupSkiaSurface(sk_sp<GrContext> context,
+bool VulkanSurface::SetupSkiaSurface(sk_sp<GrDirectContext> context,
                                      const SkISize& size,
                                      SkColorType color_type,
                                      const VkImageCreateInfo& image_create_info,
@@ -407,7 +407,7 @@ sk_sp<SkSurface> VulkanSurface::GetSkiaSurface() const {
   return valid_ ? sk_surface_ : nullptr;
 }
 
-bool VulkanSurface::BindToImage(sk_sp<GrContext> context,
+bool VulkanSurface::BindToImage(sk_sp<GrDirectContext> context,
                                 VulkanImage vulkan_image) {
   FML_DCHECK(vulkan_image.vk_memory_requirements.size <=
              vk_memory_info_.allocationSize);
