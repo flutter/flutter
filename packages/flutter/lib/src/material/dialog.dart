@@ -208,7 +208,7 @@ class Dialog extends StatelessWidget {
 ///           ),
 ///         ),
 ///         actions: <Widget>[
-///           FlatButton(
+///           TextButton(
 ///             child: Text('Approve'),
 ///             onPressed: () {
 ///               Navigator.of(context).pop();
@@ -311,9 +311,9 @@ class AlertDialog extends StatelessWidget {
   /// The (optional) set of actions that are displayed at the bottom of the
   /// dialog.
   ///
-  /// Typically this is a list of [FlatButton] widgets. It is recommended to
+  /// Typically this is a list of [TextButton] widgets. It is recommended to
   /// set the [textAlign] to [TextAlign.end] for the [Text] within the
-  /// [FlatButton], so that buttons whose labels wrap to an extra line align
+  /// [TextButton], so that buttons whose labels wrap to an extra line align
   /// with the overall [ButtonBar]'s alignment within the dialog.
   ///
   /// These widgets will be wrapped in a [ButtonBar], which introduces 8 pixels
@@ -341,8 +341,8 @@ class AlertDialog extends StatelessWidget {
   ///   title: Text('Title'),
   ///   content: Container(width: 200, height: 200, color: Colors.green),
   ///   actions: <Widget>[
-  ///     RaisedButton(onPressed: () {}, child: Text('Button 1')),
-  ///     RaisedButton(onPressed: () {}, child: Text('Button 2')),
+  ///     ElevatedButton(onPressed: () {}, child: Text('Button 1')),
+  ///     ElevatedButton(onPressed: () {}, child: Text('Button 2')),
   ///   ],
   ///   actionsPadding: EdgeInsets.symmetric(horizontal: 8.0),
   /// )
@@ -613,7 +613,7 @@ class AlertDialog extends StatelessWidget {
 ///
 ///  * [SimpleDialog], for a dialog in which to use this widget.
 ///  * [showDialog], which actually displays the dialog and returns its result.
-///  * [FlatButton], which are commonly used as actions in other kinds of
+///  * [TextButton], which are commonly used as actions in other kinds of
 ///    dialogs, such as [AlertDialog]s.
 ///  * <https://material.io/design/components/dialogs.html#simple-dialog>
 class SimpleDialogOption extends StatelessWidget {

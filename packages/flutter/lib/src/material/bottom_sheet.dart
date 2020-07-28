@@ -600,7 +600,7 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Center(
-///     child: RaisedButton(
+///     child: ElevatedButton(
 ///       child: const Text('showModalBottomSheet'),
 ///       onPressed: () {
 ///         showModalBottomSheet<void>(
@@ -615,7 +615,7 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 ///                   mainAxisSize: MainAxisSize.min,
 ///                   children: <Widget>[
 ///                     const Text('Modal BottomSheet'),
-///                     RaisedButton(
+///                     ElevatedButton(
 ///                       child: const Text('Close BottomSheet'),
 ///                       onPressed: () => Navigator.pop(context),
 ///                     )

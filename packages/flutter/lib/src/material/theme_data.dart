@@ -71,6 +71,9 @@ const Color _kDarkThemeSplashColor = Color(0x40CCCCCC);
 ///
 ///   * [FloatingActionButton], only the mini tap target size is increased.
 ///   * [MaterialButton]
+///   * [OutlinedButton]
+///   * [TextButton]
+///   * [ElevatedButton]
 ///   * [OutlineButton]
 ///   * [FlatButton]
 ///   * [RaisedButton]
