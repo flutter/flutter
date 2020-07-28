@@ -1567,7 +1567,7 @@ void main() {
     expect(tester.widget<Checkbox>(find.byType(Checkbox).first).value, isFalse);
     expect(tester.widget<Checkbox>(find.byType(Checkbox).last).value, isTrue);
   });
-  
+
   testWidgets('ExpansionPanel ignores custom indicator hit test when canTapOnHeader is true', (WidgetTester tester) async {
     final List<bool> _isExpanded = <bool>[true, false];
     const Key firstPanelKey = Key('firstPanelKey');
@@ -1775,7 +1775,7 @@ void main() {
     expect(tester.widget<Checkbox>(find.byType(Checkbox).first).value, isTrue);
     expect(tester.widget<Checkbox>(find.byType(Checkbox).last).value, isFalse);
   });
-  
+
   testWidgets('Custom expansion indicator semantics test', (WidgetTester tester) async {
     const Key expandedPanelKey = Key('isExpanded');
     const Key collapsedPanelKey = Key('isCollapsed');
