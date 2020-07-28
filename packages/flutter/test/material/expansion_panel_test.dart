@@ -1754,15 +1754,15 @@ void main() {
     await tester.tap(find.byType(Checkbox).last);
     await tester.pumpAndSettle();
 
-    expect(tester.widget<Checkbox>(find.byType(Checkbox).last).value, isTrue);
-    expect(tester.widget<Checkbox>(find.byType(Checkbox).first).value, isFalse);
-    expect(_onChangeCalled, isFalse);
-
     expect(find.text('A'), findsOneWidget);
     expect(find.text('B'), findsNothing);
     expect(find.text('C'), findsOneWidget);
     expect(find.text('D'), findsNothing);
 
+    expect(tester.widget<Checkbox>(find.byType(Checkbox).first).value, isFalse);
+    expect(tester.widget<Checkbox>(find.byType(Checkbox).last).value, isTrue);
+    expect(_onChangeCalled, isFalse);
+    
     // Tap on the first panel header to expand the panel.
     await tester.tap(find.byKey(firstPanelKey));
     await tester.pumpAndSettle();
@@ -1774,5 +1774,123 @@ void main() {
 
     expect(tester.widget<Checkbox>(find.byType(Checkbox).first).value, isTrue);
     expect(tester.widget<Checkbox>(find.byType(Checkbox).last).value, isFalse);
+  });
+  
+  testWidgets('Custom expansion indicator semantics test', (WidgetTester tester) async {
+    const Key expandedPanelKey = Key('isExpanded');
+    const Key collapsedPanelKey = Key('isCollapsed');
+    const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
+    final SemanticsHandle semanticsHandle = tester.ensureSemantics();
+
+    Widget _buildExpansionPanelList([bool canTapOnHeader=false]) {
+      return MaterialApp(
+        home: SingleChildScrollView(
+          child: ExpansionPanelList(
+            children: <ExpansionPanel>[
+              ExpansionPanel(
+                canTapOnHeader: canTapOnHeader,
+                headerBuilder: (BuildContext context, bool isExpanded) {
+                  return const Text('Header Text', key: expandedPanelKey);
+                },
+                expandIconBuilder: (
+                  BuildContext context,
+                  bool isExpanded,
+                  VoidCallback handlePressed,
+                  Duration animationDuration,
+                ) {
+                  return Checkbox(
+                    value: isExpanded,
+                    onChanged: (bool value) {
+                      handlePressed();
+                    },
+                  );
+                },
+                body: const Text('Body'),
+                isExpanded: true,
+              ),
+              ExpansionPanel(
+                canTapOnHeader: canTapOnHeader,
+                headerBuilder: (BuildContext context, bool isExpanded) {
+                  return const Text('Header Text', key: collapsedPanelKey);
+                },
+                expandIconBuilder: (
+                  BuildContext context,
+                  bool isExpanded,
+                  VoidCallback handlePressed,
+                  Duration animationDuration,
+                ) {
+                  return Checkbox(
+                    value: isExpanded,
+                    onChanged: (bool value) {
+                      handlePressed();
+                    },
+                  );
+                },
+                body: const Text('Body'),
+                isExpanded: false,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Check semantics when canTapOnHeader is set to false.
+    await tester.pumpWidget(_buildExpansionPanelList());
+
+    // Check semantics of Checkbox for expanded panel.
+    expect(tester.getSemantics(find.byType(Checkbox).first), matchesSemantics(
+      label: 'Collapse',
+      hasCheckedState: true,
+      isChecked: true,
+      hasEnabledState: true,
+      isEnabled: true,
+      hasTapAction: true,
+      isFocusable: true,
+      onTapHint: localizations.expandedIconTapHint,
+    ));
+
+    // Check semantics for header widget for expanded panel.
+    expect(tester.getSemantics(find.byKey(expandedPanelKey)), matchesSemantics(label: 'Header Text'));
+    
+    // Check semantics of Checkbox for collapsed panel.
+    expect(tester.getSemantics(find.byType(Checkbox).last), matchesSemantics(
+      label: 'Expand',
+      hasCheckedState: true,
+      isChecked: false,
+      hasEnabledState: true,
+      isEnabled: true,
+      hasTapAction: true,
+      isFocusable: true,
+      onTapHint: localizations.collapsedIconTapHint,
+    ));
+
+    // Check semantics for header widget for collapsed panel.
+    expect(tester.getSemantics(find.byKey(collapsedPanelKey)), matchesSemantics(label: 'Header Text'));
+
+    // Check semantics when canTapOnHeader is set to true.
+    await tester.pumpWidget(_buildExpansionPanelList(true));
+
+    // Check semantics for header widget for expanded panel.
+    expect(tester.getSemantics(find.byKey(expandedPanelKey)), matchesSemantics(
+      label: 'Header Text',
+      isButton: true,
+      isEnabled: true,
+      hasEnabledState: true,
+      isFocusable: true,
+      hasTapAction: true,
+    ));
+
+    // Check semantics for header widget for collapsed panel.
+    expect(tester.getSemantics(find.byKey(collapsedPanelKey)), matchesSemantics(
+      label: 'Header Text',
+      isButton: true,
+      isEnabled: true,
+      hasEnabledState: true,
+      isFocusable: true,
+      hasTapAction: true,
+    ));
+
+    semanticsHandle.dispose();
   });
 }
