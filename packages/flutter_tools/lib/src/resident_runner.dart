@@ -1257,7 +1257,7 @@ abstract class ResidentRunner {
   Future<void> launchDevTools() async {
     assert(supportsServiceProtocol);
     _devtoolsLauncher ??= DevtoolsLauncher.instance;
-    _devtoolsLauncher.launch(flutterDevices.first.vmService.httpAddress);
+    return _devtoolsLauncher.launch(flutterDevices.first.vmService.httpAddress);
   }
 
   Future<void> shutdownDevtools() async {
