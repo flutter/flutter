@@ -878,24 +878,12 @@ class ThemeData with Diagnosticable {
   final Color secondaryHeaderColor;
 
   /// The color of text selections in text fields, such as [TextField].
-  @Deprecated(
-    'Use textSelectionTheme.selectionColor instead. '
-    'This feature was deprecated after v1.21.0-1.0.pre.'
-  )
   final Color textSelectionColor;
 
   /// The color of cursors in Material-style text fields, such as [TextField].
-  @Deprecated(
-    'Use textSelectionTheme.cursorColor instead. '
-    'This feature was deprecated after v1.21.0-1.0.pre.'
-  )
   final Color cursorColor;
 
   /// The color of the handles used to adjust what part of the text is currently selected.
-  @Deprecated(
-    'Use textSelectionTheme.textSelectionHandleColor instead. '
-    'This feature was deprecated after v1.21.0-1.0.pre.'
-  )
   final Color textSelectionHandleColor;
 
   /// A color that contrasts with the [primaryColor], e.g. used as the
@@ -1141,11 +1129,6 @@ class ThemeData with Diagnosticable {
   ///
   /// The flag is currently false by default. It will be removed after migration
   /// to the [TextSelectionTheme] has been completed.
-  @Deprecated(
-    'Set useTextSelectionTheme to `true`. This parameter will be removed after '
-    'the migration TextSelectionTheme is complete. '
-    'This feature was deprecated after v1.21.0-1.0.pre.'
-  )
   final bool useTextSelectionTheme;
 
   /// Creates a copy of this theme but with the given fields replaced with the new values.
