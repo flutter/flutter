@@ -531,7 +531,10 @@ class LocalizationsGenerator {
     _setHeader(headerString, headerFile);
     _setUseDeferredLoading(useDeferredLoading);
     className = classNameString;
-    _setInputsAndOutputsListFile(inputsAndOutputsListPath, useSyntheticPackage);
+    _setInputsAndOutputsListFile(
+      inputsAndOutputsListPath: inputsAndOutputsListPath,
+      useSyntheticPackage: useSyntheticPackage,
+    );
   }
 
   static bool _isNotReadable(FileStat fileStat) {
@@ -690,10 +693,10 @@ class LocalizationsGenerator {
     _useDeferredLoading = useDeferredLoading;
   }
 
-  void _setInputsAndOutputsListFile(
+  void _setInputsAndOutputsListFile({
     String inputsAndOutputsListPath,
     bool useSyntheticPackage,
-  ) {
+  }) {
     if (inputsAndOutputsListPath == null && !useSyntheticPackage)
       return;
 
