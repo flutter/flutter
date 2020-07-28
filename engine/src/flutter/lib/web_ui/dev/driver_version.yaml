@@ -2,6 +2,8 @@
 ## Map for driver versions to use for each browser version.
 ## See: https://chromedriver.chromium.org/downloads
 chrome:
+  85: '85.0.4183.38'
+  84: '84.0.4147.30'
   83: '83.0.4103.39'
   81: '81.0.4044.69'
   80: '80.0.3987.106'
