@@ -13,6 +13,8 @@ import 'gen_l10n_templates.dart';
 import 'gen_l10n_types.dart';
 import 'localizations_utils.dart';
 
+String defaultSyntheticPackagePath = path.join('.dart_tool', 'flutter_gen', 'gen_l10n');
+
 List<String> generateMethodParameters(Message message) {
   assert(message.placeholders.isNotEmpty);
   final Placeholder countPlaceholder = message.isPlural ? message.getCountPlaceholder() : null;
@@ -578,7 +580,7 @@ class LocalizationsGenerator {
     bool useSyntheticPackage = true,
   }) {
     if (useSyntheticPackage) {
-      outputDirectory = _fs.directory(path.join('.dart_tool', 'flutter_gen', 'gen_l10n'));
+      outputDirectory = _fs.directory(defaultSyntheticPackagePath);
       return;
     } else {
       if (outputPathString == null)
@@ -702,7 +704,7 @@ class LocalizationsGenerator {
 
     if (useSyntheticPackage && inputsAndOutputsListPath == null) {
       _inputsAndOutputsListFile = _fs.file(
-        path.join('.dart_tool', 'flutter_gen', 'gen_l10n', 'gen_l10n_inputs_and_outputs.json'),
+        path.join(defaultSyntheticPackagePath, 'gen_l10n_inputs_and_outputs.json'),
       );
     } else {
       _inputsAndOutputsListFile = _fs.file(
