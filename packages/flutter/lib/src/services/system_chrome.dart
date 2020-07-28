@@ -375,7 +375,7 @@ class SystemChrome {
   ///   return AnnotatedRegion(
   ///     value: _currentStyle,
   ///     child: Center(
-  ///       child: RaisedButton(
+  ///       child: ElevatedButton(
   ///         child: const Text('Change Color'),
   ///         onPressed: _changeColor,
   ///        ),

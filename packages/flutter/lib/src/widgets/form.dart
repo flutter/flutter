@@ -20,7 +20,7 @@ import 'will_pop_scope.dart';
 ///
 /// {@tool dartpad --template=stateful_widget_scaffold}
 /// This example shows a [Form] with one [TextFormField] to enter an email
-/// address and a [RaisedButton] to submit the form. A [GlobalKey] is used here
+/// address and an [ElevatedButton] to submit the form. A [GlobalKey] is used here
 /// to identify the [Form] and validate input.
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/widgets/form.png)
@@ -48,7 +48,7 @@ import 'will_pop_scope.dart';
 ///         ),
 ///         Padding(
 ///           padding: const EdgeInsets.symmetric(vertical: 16.0),
-///           child: RaisedButton(
+///           child: ElevatedButton(
 ///             onPressed: () {
 ///               // Validate will return true if the form is valid, or false if
 ///               // the form is invalid.

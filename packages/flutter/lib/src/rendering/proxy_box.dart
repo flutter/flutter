@@ -2980,7 +2980,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///     return RepaintBoundary(
   ///       key: globalKey,
   ///       child: Center(
-  ///         child: FlatButton(
+  ///         child: TextButton(
   ///           child: Text('Hello World', textDirection: TextDirection.ltr),
   ///           onPressed: _capturePng,
   ///         ),

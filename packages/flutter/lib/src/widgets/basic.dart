@@ -6231,7 +6231,7 @@ class MouseRegion extends StatefulWidget {
   ///   Widget build(BuildContext context) {
   ///     return Column(
   ///       children: <Widget>[
-  ///         RaisedButton(
+  ///         ElevatedButton(
   ///           onPressed: () {
   ///             setState(() { key = UniqueKey(); });
   ///           },

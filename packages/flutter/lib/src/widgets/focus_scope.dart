@@ -801,7 +801,7 @@ class _FocusState extends State<Focus> {
 ///               children: <Widget>[
 ///                 // This button would be not visible, but still focusable from
 ///                 // the foreground pane without the FocusScope.
-///                 RaisedButton(
+///                 ElevatedButton(
 ///                   onPressed: () => print('You pressed the other button!'),
 ///                   child: Text('ANOTHER BUTTON TO FOCUS'),
 ///                 ),
