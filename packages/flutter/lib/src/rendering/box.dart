@@ -1262,12 +1262,12 @@ class _IntrinsicDimensionsCacheEntry {
 /// ### Semantics
 ///
 /// For a render box to be accessible, implement the
-/// [describeApproximatePaintClip] and [visitChildrenForSemantics] methods, and
-/// the [semanticsAnnotator] getter. The default implementations are sufficient
-/// for objects that only affect layout, but nodes that represent interactive
-/// components or information (diagrams, text, images, etc) should provide more
-/// complete implementations. For more information, see the documentation for
-/// these members.
+/// [describeApproximatePaintClip], [visitChildrenForSemantics], and
+/// [describeSemanticsConfiguration] methods. The default implementations are
+/// sufficient for objects that only affect layout, but nodes that represent
+/// interactive components or information (diagrams, text, images, etc) should
+/// provide more complete implementations. For more information, see the
+/// documentation for these members.
 ///
 /// ### Intrinsics and Baselines
 ///
@@ -2199,11 +2199,11 @@ abstract class RenderBox extends RenderObject {
   /// Likewise, this [RenderBox] is responsible for transforming the position
   /// that it passes to its children when it calls [hitTest] on each child.
   ///
-  /// If transforming is necessary, [HitTestResult.addWithPaintTransform],
-  /// [HitTestResult.addWithPaintOffset], or [HitTestResult.addWithRawTransform] need
-  /// to be invoked by subclasses to record the required transform operations
-  /// in the [HitTestResult]. These methods will also help with applying the
-  /// transform to `position`.
+  /// If transforming is necessary, [BoxHitTestResult.addWithPaintTransform],
+  /// [BoxHitTestResult.addWithPaintOffset], or
+  /// [BoxHitTestResult.addWithRawTransform] need to be invoked by subclasses to
+  /// record the required transform operations in the [BoxHitTestResult]. These
+  /// methods will also help with applying the transform to `position`.
   ///
   /// Used by [hitTest]. If you override [hitTest] and do not call this
   /// function, then you don't need to implement this function.

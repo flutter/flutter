@@ -361,7 +361,7 @@ class _SystemMouseCursorSession extends MouseCursorSession {
 ///  * macOS: API name in Objective C
 ///
 /// If the platform that the application is running on is not listed for a cursor,
-/// using this cursor falls back to [basic].
+/// using this cursor falls back to [SystemMouseCursors.basic].
 ///
 /// [SystemMouseCursors] enumerates the complete set of system cursors supported
 /// by Flutter, which are hard-coded in the engine. Therefore, manually
@@ -433,7 +433,8 @@ class SystemMouseCursors {
 
   /// Hide the cursor.
   ///
-  /// Any cursor other than [none] or [uncontrolled] unhides the cursor.
+  /// Any cursor other than [none] or [MouseCursor.uncontrolled] unhides the
+  /// cursor.
   static const SystemMouseCursor none = SystemMouseCursor._(kind: 'none');
 
 
