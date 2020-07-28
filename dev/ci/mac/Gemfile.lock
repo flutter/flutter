@@ -142,7 +142,7 @@ GEM
     httpclient (2.8.3)
     i18n (0.9.5)
       concurrent-ruby (~> 1.0)
-    json (2.2.0)
+    json (2.3.1)
     jwt (2.1.0)
     memoist (0.16.0)
     mime-types (3.3)
