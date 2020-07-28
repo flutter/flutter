@@ -86,5 +86,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  generate: true
 
 # PUBSPEC CHECKSUM: 3b81
