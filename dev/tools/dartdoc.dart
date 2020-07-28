@@ -11,6 +11,8 @@ import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 
+import 'dartdoc_checker.dart';
+
 const String kDocsRoot = 'dev/docs';
 const String kPublishRoot = '$kDocsRoot/doc';
 const String kSnippetsRoot = 'dev/snippets';
@@ -126,6 +128,7 @@ Future<void> main(List<String> arguments) async {
   final List<String> dartdocArgs = <String>[
     ...dartdocBaseArgs,
     '--allow-tools',
+    '--enable-experiment=non-nullable',
     if (args['json'] as bool) '--json',
     if (args['validate-links'] as bool) '--validate-links' else '--no-validate-links',
     '--link-to-source-excludes', '../../bin/cache',
@@ -141,12 +144,7 @@ Future<void> main(List<String> arguments) async {
     '--footer-text', 'lib/footer.html',
     '--allow-warnings-in-packages',
     <String>[
-      'Flutter',
       'flutter',
-      'platform_integration',
-      'flutter_test',
-      'flutter_driver',
-      'flutter_localizations',
     ].join(','),
     '--exclude-packages',
     <String>[
@@ -221,6 +219,7 @@ Future<void> main(List<String> arguments) async {
     exit(exitCode);
 
   sanityCheckDocs();
+  checkForUnresolvedDirectives('$kPublishRoot/api');
 
   createIndexAndCleanup();
 }

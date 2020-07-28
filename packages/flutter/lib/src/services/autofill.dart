@@ -722,8 +722,8 @@ abstract class AutofillClient {
   /// [TextInputConfiguration.autofillConfiguration] must not be null.
   TextInputConfiguration get textInputConfiguration;
 
-  /// Requests this [AutofillClient] update its [TextEditingState] to the given
-  /// state.
+  /// Requests this [AutofillClient] update its [TextEditingValue] to the given
+  /// value.
   void updateEditingValue(TextEditingValue newEditingValue);
 }
 
@@ -807,13 +807,11 @@ mixin AutofillScopeMixin implements AutofillScope {
       !autofillClients.any((AutofillClient client) => client.textInputConfiguration.autofillConfiguration == null),
       'Every client in AutofillScope.autofillClients must enable autofill',
     );
-    return TextInput.attach(
-      trigger,
-      _AutofillScopeTextInputConfiguration(
-        allConfigurations: autofillClients
-          .map((AutofillClient client) => client.textInputConfiguration),
-        currentClientConfiguration: configuration,
-      ),
+
+    final TextInputConfiguration inputConfiguration = _AutofillScopeTextInputConfiguration(
+      allConfigurations: autofillClients.map((AutofillClient client) => client.textInputConfiguration),
+      currentClientConfiguration: configuration,
     );
+    return TextInput.attach(trigger, inputConfiguration);
   }
 }

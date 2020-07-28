@@ -146,11 +146,11 @@ class TimelineSummary {
   /// * "frame_rasterizer_begin_times": The rasterize begin time of each frame.
   /// * "average_vsync_transitions_missed": Computes the average of the
   ///   `vsync_transitions_missed` over the lag events.
-  ///   See [sceneDisplayLagSummarizer.computeAverageVsyncTransitionsMissed].
+  ///   See [SceneDisplayLagSummarizer.computeAverageVsyncTransitionsMissed].
   /// * "90th_percentile_vsync_transitions_missed" and
   ///   "99th_percentile_vsync_transitions_missed": The 90/99-th percentile
   ///   `vsync_transitions_missed` over the lag events.
-  ///   See [sceneDisplayLagSummarizer.computePercentileVsyncTransitionsMissed].
+  ///   See [SceneDisplayLagSummarizer.computePercentileVsyncTransitionsMissed].
   Map<String, dynamic> get summaryJson {
     final SceneDisplayLagSummarizer sceneDisplayLagSummarizer = _sceneDisplayLagSummarizer();
     final Map<String, dynamic> profilingSummary = _profilingSummarizer().summarize();

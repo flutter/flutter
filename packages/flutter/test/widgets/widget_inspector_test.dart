@@ -276,7 +276,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final GlobalKey topButtonKey = GlobalKey();
 
       Widget selectButtonBuilder(BuildContext context, VoidCallback onPressed) {
-        return Material(child: RaisedButton(onPressed: onPressed, key: selectButtonKey));
+        return Material(child: ElevatedButton(onPressed: onPressed, key: selectButtonKey, child: null));
       }
       // State type is private, hence using dynamic.
       dynamic getInspectorState() => inspectorKey.currentState;
@@ -294,14 +294,14 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             child: Material(
               child: ListView(
                 children: <Widget>[
-                  RaisedButton(
+                  ElevatedButton(
                     key: topButtonKey,
                     onPressed: () {
                       log.add('top');
                     },
                     child: const Text('TOP'),
                   ),
-                  RaisedButton(
+                  ElevatedButton(
                     onPressed: () {
                       log.add('bottom');
                     },
@@ -376,7 +376,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final GlobalKey inspectorKey = GlobalKey();
 
       Widget selectButtonBuilder(BuildContext context, VoidCallback onPressed) {
-        return Material(child: RaisedButton(onPressed: onPressed, key: selectButtonKey));
+        return Material(child: ElevatedButton(onPressed: onPressed, key: selectButtonKey, child: null));
       }
       // State type is private, hence using dynamic.
       dynamic getInspectorState() => inspectorKey.currentState;
@@ -2356,7 +2356,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             equals('true'));
 
         // Create an error.
-        FlutterError.reportError(FlutterErrorDetailsForRendering(
+        FlutterError.reportError(FlutterErrorDetails(
           library: 'rendering library',
           context: ErrorDescription('during layout'),
           exception: StackTrace.current,
@@ -2379,7 +2379,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
                 '══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞════════════'));
 
         // Send a second error.
-        FlutterError.reportError(FlutterErrorDetailsForRendering(
+        FlutterError.reportError(FlutterErrorDetails(
           library: 'rendering library',
           context: ErrorDescription('also during layout'),
           exception: StackTrace.current,
@@ -2407,7 +2407,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         binding.postTest();
 
         // Send another error.
-        FlutterError.reportError(FlutterErrorDetailsForRendering(
+        FlutterError.reportError(FlutterErrorDetails(
           library: 'rendering library',
           context: ErrorDescription('during layout'),
           exception: StackTrace.current,

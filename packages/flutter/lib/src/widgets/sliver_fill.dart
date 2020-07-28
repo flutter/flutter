@@ -373,7 +373,7 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 ///             alignment: Alignment.bottomCenter,
 ///             child: Padding(
 ///               padding: const EdgeInsets.all(16.0),
-///               child: RaisedButton(
+///               child: ElevatedButton(
 ///                 onPressed: () {
 ///                   /* Place your onPressed code here! */
 ///                 },

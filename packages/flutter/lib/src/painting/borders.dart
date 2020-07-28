@@ -81,7 +81,7 @@ class BorderSide {
   ///
   /// If one of the sides is zero-width with [BorderStyle.none], then the other
   /// side is return as-is. If both of the sides are zero-width with
-  /// [BorderStyle.none], then [BorderSide.zero] is returned.
+  /// [BorderStyle.none], then [BorderSide.none] is returned.
   ///
   /// The arguments must not be null.
   static BorderSide merge(BorderSide a, BorderSide b) {

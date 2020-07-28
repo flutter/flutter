@@ -35,6 +35,7 @@ Future<Map<String, dynamic>> runTask(
   final Process runner = await startProcess(
     dartBin,
     <String>[
+      '--disable-dart-dev',
       '--enable-vm-service=0', // zero causes the system to choose a free port
       '--no-pause-isolates-on-exit',
       if (localEngine != null) '-DlocalEngine=$localEngine',
