@@ -114,6 +114,239 @@ class ExpansionPanel {
 
   /// A callback which builds the expansion panel indicator to show
   /// whether the panel is expanded or not.
+  ///
+  /// If [expandIconBuilder] is specified, then the widget it returns must
+  /// rebuild the panel with a new [isExpanded] value.
+  /// [ExpansionPanelList.expansionCallback] should still be used to update
+  /// the state correctly. A [VoidCallback] is passed as a parameter to `expandIconBuilder`
+  /// to properly trigger [ExpansionPanelList.expansionCallback].
+  ///
+  /// The `expandIconBuilder` callback also provides [ExpansionPanelList.animationDuration],
+  /// which can be used to build custom animation for expansion icon.
+  ///
+  /// If [expandIconBuilder] is not specified, then [ExpandIcon] is used as
+  /// expansion indicator icon.
+  ///
+  /// When [canTapOnHeader] is set to true, the expansion indicator icon will we
+  /// invisible to hit testing. Since the entire header should semantically behave
+  /// as a single button, the expansion indicator icon's gesture detection and
+  /// semantics are ignored.
+  ///
+  /// ## Handling Gesture Detection
+  ///
+  /// Since there are many ways to customize the expanded icons, the gesture
+  /// detection has to be properly handled. This makes it necessary to
+  /// define a [VoidCallback] that calls [ExpansionPanelList.expansionCallback]
+  /// with correct index and isExpanded values.
+  ///
+  /// {@tool dartpad --template=stateful_widget_scaffold}
+  ///
+  /// Here is a custom expansion indicator icon that uses a [Checkbox], which
+  /// has its own gesture detector. This example assumes that
+  /// [ExpansionPanelList.expansionCallback] toggles `_isExpanded`.
+  ///
+  /// ```dart
+  /// bool _isExpanded = false;
+  ///
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return SingleChildScrollView(
+  ///     child: ExpansionPanelList(
+  ///       expansionCallback: (int index, bool isExpanded) {
+  ///         setState(() {
+  ///           _isExpanded = !_isExpanded;
+  ///         });
+  ///       },
+  ///       children: <ExpansionPanel>[
+  ///         ExpansionPanel(
+  ///           isExpanded: _isExpanded,
+  ///           headerBuilder: (context, isExpanded) {
+  ///             return ListTile(
+  ///               title: Text('Header Text'),
+  ///             );
+  ///           },
+  ///           expandIconBuilder: (
+  ///             BuildContext context,
+  ///             bool isExpanded,
+  ///             VoidCallback handlePressed,
+  ///             Duration animationDuration,
+  ///         ) {
+  ///           return Checkbox(
+  ///             value: isExpanded,
+  ///             onChanged: (bool value) {
+  ///               handlePressed();
+  ///             });
+  ///           },
+  ///           body: ListTile(
+  ///             title: Text('Title Text'),
+  ///             subtitle: Text('Subtitle Text'),
+  ///           ),
+  ///         ),
+  ///       ],
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  ///
+  /// {@tool dartpad --template=stateful_widget_scaffold}
+  ///
+  /// Here is a custom expansion icon that uses two static icons, which requires
+  /// gesture detection to be manually handled. In this case, an [InkWell] is
+  /// used. This example assumes that [ExpansionPanelList.expansionCallback]
+  /// toggles _isExpanded.
+  ///
+  /// ```dart
+  /// bool _isExpanded = false;
+  ///
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return SingleChildScrollView(
+  ///     child: ExpansionPanelList(
+  ///       expansionCallback: (int index, bool isExpanded) {
+  ///         setState(() {
+  ///           _isExpanded = !_isExpanded;
+  ///         });
+  ///       },
+  ///       children: [
+  ///         ExpansionPanel(
+  ///           isExpanded: _isExpanded,
+  ///           headerBuilder: (BuildContext context, bool isExpanded) {
+  ///             return LisTile(title: Text('Header Text'));
+  ///           },
+  ///           expandIconBuilder: (
+  ///             BuildContext context,
+  ///             bool isExpanded,
+  ///             VoidCallback handlePressed,
+  ///             Duration animationDuration,
+  ///           ) {
+  ///             return InkWell(
+  ///               customBorder: CircleBoreder(),
+  ///               onTap: () {
+  ///                 handlePressed();
+  ///               },
+  ///               child: Padding(
+  ///                 padding: EdgeInsets.all(12.0)
+  ///                 child: isExpanded
+  ///                   ? Icon(Icons.check_box)
+  ///                   : Icon(Icons.check_box_outline_blank),
+  ///               ),
+  ///             );
+  ///           },
+  ///           body: ListTile(
+  ///             title: Text('Title Text'),
+  ///             subtitle: Text('Subtitle Text),
+  ///           ),
+  ///         ),
+  ///       ],
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  ///
+  /// {@tool dartpad --template=stateful_widget_scaffold}
+  ///
+  /// Here is a custom expansion icon that uses an [AnimatedIcon], which
+  /// requires gesture detection to be manually handled. In this case, an
+  /// [InkWell] is used. It also can make use of the
+  /// [ExpansionPanelList.animationDuration] for its animation. This example
+  /// assumes that [ExpansionPanelList.expansionCallback] toggles _isExpanded.
+  ///
+  /// ```dart preamble
+  /// class CustomAnimatedIcon extends StatefulWidget{
+  ///   CustomAnimatedIcon(
+  ///     this.isExpanded,
+  ///     this.duration,
+  ///   );
+  ///
+  ///   final bool isExpanded;
+  ///   final Duration duration;
+  ///
+  ///   @override
+  ///   _CustomAnimatedIconState createState() => _CustomAnimatedIconState();
+  /// }
+  ///
+  /// class _CustomAnimatedIconState extends State<CustomAnimatedIcon> with SingleTickerProviderStateMixin {
+  ///   AnimationController animationController;
+  ///
+  ///   @override
+  ///   void initState() {
+  ///     super.initState();
+  ///     animationController = AnimationController(
+  ///       vsync: this,
+  ///       duration: widget.duration,
+  ///     );
+  ///   }
+  ///
+  ///   @override
+  ///   void didUpdateWidget(CustomAnimatedIcon oldWidget) {
+  ///     if (widget.isExpanded != oldWidget.isExpanded) {
+  ///       if (widget.isExpanded) {
+  ///         animationController.forward();
+  ///       } else {
+  ///         animationController.reverse();
+  ///       }
+  ///     }
+  ///     super.didUpdateWidget(oldWidget);
+  ///   }
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return AnimatedIcon(
+  ///       icon: AnimatedIcons.menu_close,
+  ///       progress: animationController,
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// ```dart
+  /// bool _isExpanded = false;
+  ///
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return SingleChildScrollView(
+  ///     child: ExpansionPanelList(
+  ///       expansionCallback: (int index, bool isExpanded) {
+  ///         setSate(() {
+  ///           _isExpanded = !isExpanded;
+  ///         });
+  ///       },
+  ///       children: [
+  ///         ExpansionPanel(
+  ///           isExpanded: _isExpanded,
+  ///           headerBuilder: (BuildContext context, bool isExpanded) {
+  ///             return ListTile(title: Text('Header Text'));
+  ///           },
+  ///           expandIconBuilder: (
+  ///             BuildContext context,
+  ///             bool isExpanded,
+  ///             VoidCallback handlePressed,
+  ///             Duration animationDuration,
+  ///           ) {
+  ///             return InkWell(
+  ///               customBorder: CircleBorder(),
+  ///               onTap: () {
+  ///                 handlePressed();
+  ///               },
+  ///               child: Padding(
+  ///                 padding: EdgeInsets.all(12.0),
+  ///                 child: CustomAnimatedIcon(isExpanded, animationDuration),
+  ///               ),
+  ///             );
+  ///           },
+  ///           body: ListTile(
+  ///             title: Text('Title Text'),
+  ///             subtitle: Text('Subtitle Text'),
+  ///           ),
+  ///         ),
+  ///       ],
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
   final ExpansionPanelIconBuilder expandIconBuilder;
 }
 
