@@ -815,6 +815,9 @@ FILE: ../../../flutter/shell/platform/android/platform_message_response_android.
 FILE: ../../../flutter/shell/platform/android/platform_message_response_android.h
 FILE: ../../../flutter/shell/platform/android/platform_view_android.cc
 FILE: ../../../flutter/shell/platform/android/platform_view_android.h
+FILE: ../../../flutter/shell/platform/android/platform_view_android_delegate/platform_view_android_delegate.cc
+FILE: ../../../flutter/shell/platform/android/platform_view_android_delegate/platform_view_android_delegate.h
+FILE: ../../../flutter/shell/platform/android/platform_view_android_delegate/platform_view_android_delegate_unittests.cc
 FILE: ../../../flutter/shell/platform/android/platform_view_android_jni_impl.cc
 FILE: ../../../flutter/shell/platform/android/platform_view_android_jni_impl.h
 FILE: ../../../flutter/shell/platform/android/robolectric.properties
