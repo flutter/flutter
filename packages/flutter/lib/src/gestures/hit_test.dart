@@ -65,7 +65,7 @@ class HitTestEntry {
   ///
   /// See also:
   ///
-  ///  * [HitTestResult.addWithPaintTransform], which is used during hit testing
+  ///  * [BoxHitTestResult.addWithPaintTransform], which is used during hit testing
   ///    to build up this transform.
   Matrix4 get transform => _transform;
   Matrix4 _transform;

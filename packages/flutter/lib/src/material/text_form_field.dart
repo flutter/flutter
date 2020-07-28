@@ -33,8 +33,9 @@ export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 /// If a [controller] is not specified, [initialValue] can be used to give
 /// the automatically generated controller an initial value.
 ///
-/// Remember to [dispose] of the [TextEditingController] when it is no longer needed.
-/// This will ensure we discard any resources used by the object.
+/// Remember to call [TextEditingController.dispose] of the [TextEditingController]
+/// when it is no longer needed. This will ensure we discard any resources used
+/// by the object.
 ///
 /// By default, [TextFormField.decoration] will apply the
 /// [ThemeData.inputDecorationTheme] for the current context to the
@@ -122,7 +123,7 @@ export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 ///    integration.
 ///  * [InputDecorator], which shows the labels and other visual elements that
 ///    surround the actual text editing widget.
-///  * Learn how to use a [TextEditingController] in one of our [cookbook recipe]s.(https://flutter.dev/docs/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller)
+///  * Learn how to use a [TextEditingController] in one of our [cookbook recipes](https://flutter.dev/docs/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller).
 class TextFormField extends FormField<String> {
   /// Creates a [FormField] that contains a [TextField].
   ///

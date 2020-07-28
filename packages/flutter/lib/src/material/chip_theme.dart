@@ -120,7 +120,7 @@ class ChipTheme extends InheritedTheme {
 ///
 /// The simplest way to create a ChipThemeData is to use [copyWith] on the one
 /// you get from [ChipTheme.of], or create an entirely new one with
-/// [ChipThemeData..fromDefaults].
+/// [ChipThemeData.fromDefaults].
 ///
 /// {@tool snippet}
 ///

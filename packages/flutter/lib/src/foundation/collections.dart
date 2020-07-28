@@ -13,7 +13,7 @@
 /// The term "deep" above refers to the first level of equality: if the elements
 /// are maps, lists, sets, or other collections/composite objects, then the
 /// values of those elements are not compared element by element unless their
-/// equality operators ([Object.operator==]) do so.
+/// equality operators ([Object.==]) do so.
 ///
 /// See also:
 ///
@@ -42,7 +42,7 @@ bool setEquals<T>(Set<T>? a, Set<T>? b) {
 /// The term "deep" above refers to the first level of equality: if the elements
 /// are maps, lists, sets, or other collections/composite objects, then the
 /// values of those elements are not compared element by element unless their
-/// equality operators ([Object.operator==]) do so.
+/// equality operators ([Object.==]) do so.
 ///
 /// See also:
 ///
@@ -71,7 +71,7 @@ bool listEquals<T>(List<T>? a, List<T>? b) {
 /// The term "deep" above refers to the first level of equality: if the elements
 /// are maps, lists, sets, or other collections/composite objects, then the
 /// values of those elements are not compared element by element unless their
-/// equality operators ([Object.operator==]) do so.
+/// equality operators ([Object.==]) do so.
 ///
 /// See also:
 ///

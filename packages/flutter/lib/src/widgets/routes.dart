@@ -1227,11 +1227,11 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// pops. If this is not necessary, this can be set to false to allow the
   /// framework to entirely discard the route's widget hierarchy when it is not
   /// visible.
+  /// {@endtemplate}
   ///
   /// If this getter would ever start returning a different value, the
   /// [changedInternalState] should be invoked so that the change can take
   /// effect.
-  /// {@endtemplate}
   bool get maintainState;
 
 

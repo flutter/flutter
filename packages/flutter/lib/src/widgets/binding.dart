@@ -1050,6 +1050,7 @@ typedef FastReassemblePredicate = bool Function(Object);
 /// the provided predicate and use it to mark specific elements dirty wherever
 /// [Element.widget] is a `Foo`. Afterwards, the internal field will be nulled
 /// out.
+FastReassemblePredicate get debugFastReassembleMethod => _debugFastReassembleMethod;
 set debugFastReassembleMethod(FastReassemblePredicate fastReassemblePredicate) {
   assert(() {
     _debugFastReassembleMethod = fastReassemblePredicate;

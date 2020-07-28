@@ -24,7 +24,7 @@ import 'theme.dart';
 ///  * [OutlinedButtonTheme], the theme which is configured with this class.
 ///  * [OutlinedButton.defaultStyleOf], which returns the default [ButtonStyle]
 ///    for outlined buttons.
-///  * [OutlinedButton.styleOf], which converts simple values into a
+///  * [OutlinedButton.styleFrom], which converts simple values into a
 ///    [ButtonStyle] that's consistent with [OutlinedButton]'s defaults.
 ///  * [MaterialStateProperty.resolve], "resolve" a material state property
 ///    to a simple value based on a set of [MaterialState]s.
@@ -84,7 +84,7 @@ class OutlinedButtonThemeData with Diagnosticable {
 ///  * [OutlinedButtonThemeData], which is used to configure this theme.
 ///  * [OutlinedButton.defaultStyleOf], which returns the default [ButtonStyle]
 ///    for outlined buttons.
-///  * [OutlinedButton.styleOf], which converts simple values into a
+///  * [OutlinedButton.styleFrom], which converts simple values into a
 ///    [ButtonStyle] that's consistent with [OutlinedButton]'s defaults.
 ///  * [ThemeData.outlinedButtonTheme], which can be used to override the default
 ///    [ButtonStyle] for [OutlinedButton]s below the overall [Theme].

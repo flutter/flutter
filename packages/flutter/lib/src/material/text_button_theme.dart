@@ -24,7 +24,7 @@ import 'theme.dart';
 ///  * [TextButtonTheme], the theme which is configured with this class.
 ///  * [TextButton.defaultStyleOf], which returns the default [ButtonStyle]
 ///    for text buttons.
-///  * [TextButton.styleOf], which converts simple values into a
+///  * [TextButton.styleFrom], which converts simple values into a
 ///    [ButtonStyle] that's consistent with [TextButton]'s defaults.
 ///  * [MaterialStateProperty.resolve], "resolve" a material state property
 ///    to a simple value based on a set of [MaterialState]s.
@@ -84,7 +84,7 @@ class TextButtonThemeData with Diagnosticable {
 ///  * [TextButtonThemeData], which is used to configure this theme.
 ///  * [TextButton.defaultStyleOf], which returns the default [ButtonStyle]
 ///    for text buttons.
-///  * [TextButton.styleOf], which converts simple values into a
+///  * [TextButton.styleFrom], which converts simple values into a
 ///    [ButtonStyle] that's consistent with [TextButton]'s defaults.
 ///  * [ThemeData.textButtonTheme], which can be used to override the default
 ///    [ButtonStyle] for [TextButton]s below the overall [Theme].

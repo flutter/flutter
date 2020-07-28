@@ -12,7 +12,7 @@ import 'theme.dart';
 
 /// A [ButtonStyle] that overrides the default appearance of
 /// [ElevatedButton]s when it's used with [ElevatedButtonTheme] or with the
-/// overall [Theme]'s [ThemeData.ElevatedButtonTheme].
+/// overall [Theme]'s [ThemeData.elevatedButtonTheme].
 ///
 /// The [style]'s properties override [ElevatedButton]'s default style,
 /// i.e.  the [ButtonStyle] returned by [ElevatedButton.defaultStyleOf]. Only
@@ -24,11 +24,11 @@ import 'theme.dart';
 ///  * [ElevatedButtonTheme], the theme which is configured with this class.
 ///  * [ElevatedButton.defaultStyleOf], which returns the default [ButtonStyle]
 ///    for text buttons.
-///  * [ElevatedButton.styleOf], which converts simple values into a
+///  * [ElevatedButton.styleFrom], which converts simple values into a
 ///    [ButtonStyle] that's consistent with [ElevatedButton]'s defaults.
 ///  * [MaterialStateProperty.resolve], "resolve" a material state property
 ///    to a simple value based on a set of [MaterialState]s.
-///  * [ThemeData.ElevatedButtonTheme], which can be used to override the default
+///  * [ThemeData.elevatedButtonTheme], which can be used to override the default
 ///    [ButtonStyle] for [ElevatedButton]s below the overall [Theme].
 @immutable
 class ElevatedButtonThemeData with Diagnosticable {
@@ -84,9 +84,9 @@ class ElevatedButtonThemeData with Diagnosticable {
 ///  * [ElevatedButtonThemeData], which is used to configure this theme.
 ///  * [ElevatedButton.defaultStyleOf], which returns the default [ButtonStyle]
 ///    for elevated buttons.
-///  * [ElevatedButton.styleOf], which converts simple values into a
+///  * [ElevatedButton.styleFrom], which converts simple values into a
 ///    [ButtonStyle] that's consistent with [ElevatedButton]'s defaults.
-///  * [ThemeData.ElevatedButtonTheme], which can be used to override the default
+///  * [ThemeData.elevatedButtonTheme], which can be used to override the default
 ///    [ButtonStyle] for [ElevatedButton]s below the overall [Theme].
 class ElevatedButtonTheme extends InheritedTheme {
   /// Create a [ElevatedButtonTheme].
@@ -104,7 +104,7 @@ class ElevatedButtonTheme extends InheritedTheme {
   /// The closest instance of this class that encloses the given context.
   ///
   /// If there is no enclosing [ElevatedButtonsTheme] widget, then
-  /// [ThemeData.ElevatedButtonTheme] is used.
+  /// [ThemeData.elevatedButtonTheme] is used.
   ///
   /// Typical usage is as follows:
   ///
