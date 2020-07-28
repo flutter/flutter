@@ -103,8 +103,10 @@ Future<bool> containsBitcode(String pathToBinary) async {
 }
 
 /// Creates and boots a new simulator, passes the new simulator's identifier to
-/// `testFunction`, then shuts down and deletes simulator.
-Future<void> testWithNewiOSSimulator(
+/// `testFunction`.
+///
+/// Remember to call removeIOSimulator in the test teardown.
+Future<void> testWithNewIOSSimulator(
   String deviceName,
   SimulatorFunction testFunction, {
   String deviceTypeId = 'com.apple.CoreSimulator.SimDeviceType.iPhone-11',
@@ -160,7 +162,10 @@ Future<void> testWithNewiOSSimulator(
   );
 
   await testFunction(deviceId);
+}
 
+/// Shuts down and deletes simulator with deviceId.
+Future<void> removeIOSimulator(String deviceId) async {
   if (deviceId != null && deviceId != '') {
     await eval(
       'xcrun',
