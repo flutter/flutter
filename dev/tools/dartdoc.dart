@@ -11,6 +11,8 @@ import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 
+import 'dartdoc_checker.dart';
+
 const String kDocsRoot = 'dev/docs';
 const String kPublishRoot = '$kDocsRoot/doc';
 const String kSnippetsRoot = 'dev/snippets';
@@ -222,6 +224,7 @@ Future<void> main(List<String> arguments) async {
     exit(exitCode);
 
   sanityCheckDocs();
+  checkForUnresolvedDirectives('$kPublishRoot/api');
 
   createIndexAndCleanup();
 }

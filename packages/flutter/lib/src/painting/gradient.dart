@@ -94,6 +94,7 @@ abstract class GradientTransform {
 ///   transform: GradientRotation(math.pi/4),
 /// );
 /// ```
+/// {@end-tool}
 @immutable
 class GradientRotation extends GradientTransform {
   /// Constructs a [GradientRotation] for the specified angle.
