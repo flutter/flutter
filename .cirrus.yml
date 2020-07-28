@@ -74,6 +74,7 @@ task:
     dockerfile: "dev/ci/docker_linux/Dockerfile"
     cpu: $CPU
     memory: $MEMORY
+    use_in_memory_disk: $USE_IN_MEMORY_DISK
   environment:
     # We shrink our default resource requirement as much as possible because that way we are more
     # likely to get scheduled. We require 4G of RAM because most of the shards (all but one as of
@@ -86,6 +87,7 @@ task:
     CIRRUS_DOCKER_CONTEXT: "dev/"
     PATH: "$CIRRUS_WORKING_DIR/bin:$CIRRUS_WORKING_DIR/bin/cache/dart-sdk/bin:$PATH"
     ANDROID_SDK_ROOT: "/opt/android_sdk"
+    USE_IN_MEMORY_DISK: false
   pub_cache:
     folder: $HOME/.pub-cache
     fingerprint_script: echo $OS; grep -r --include=pubspec.yaml 'PUBSPEC CHECKSUM' "$CIRRUS_WORKING_DIR"
@@ -279,6 +281,7 @@ task:
         # Empirically, as of October 2019, the docs-linux shard took about 30 minutes when run with
         # 1 CPU and 4G of RAM. 2 CPUs reduced that to 20 minutes, more CPUs did not improve matters.
         CPU: 2
+        USE_IN_MEMORY_DISK: true
       docs_cache:
         folder: dev/docs
         fingerprint_script:
@@ -293,7 +296,10 @@ task:
       depends_on:
         - docs-linux
       environment:
+        # TODO(tvolkert): optimize CPU and MEMORY settings once #60646 is resolved.
         CPU: 2
+        MEMORY: 8G
+        USE_IN_MEMORY_DISK: true
       docs_cache:
         folder: dev/docs
         reupload_on_changes: true
@@ -309,6 +315,7 @@ task:
         - docs-linux
         - docs_docset-linux
       environment:
+        USE_IN_MEMORY_DISK: true
         # For uploading master docs to Firebase master branch staging site
         FIREBASE_MASTER_TOKEN: ENCRYPTED[eb768d18798fdc5abfe09b224e1724c4d82831d715ccf90df2c79d618c317216cbd99493278361f6fe7948b409b603f0]
         # For uploading stable docs to Firebase public live site

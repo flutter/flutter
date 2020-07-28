@@ -75,15 +75,18 @@ function create_docset() {
   # If dashing gets stuck, Cirrus will time out the build after an hour, and we
   # never get to see the logs. Thus, we run it in the background and tail the logs
   # while we wait for it to complete.
-  dashing build --source ./doc --config ./dashing.json > /tmp/dashing.log 2>&1 &
+  dashing_log=/tmp/dashing.log
+  dashing build --source ./doc --config ./dashing.json > $dashing_log 2>&1 &
   dashing_pid=$!
-  tail -f /tmp/dashing.log &
-  tail_pid=$!
   wait $dashing_pid && \
   cp ./doc/flutter/static-assets/favicon.png ./flutter.docset/icon.png && \
   "$DART" --disable-dart-dev ./dashing_postprocess.dart && \
-  tar cf flutter.docset.tar.gz --use-compress-program="gzip --best" flutter.docset && \
-  kill $tail_pid &> /dev/null
+  tar cf flutter.docset.tar.gz --use-compress-program="gzip --best" flutter.docset
+  if [[ $? -ne 0 ]]; then
+      >&2 echo "Dashing docset generation failed"
+      tail -200 $dashing_log
+      exit 1
+  fi
 }
 
 function deploy_docs() {
