@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:async';
 import 'dart:collection';
@@ -75,8 +74,8 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   }
 
   /// The singleton instance of this object.
-  static GestureBinding get instance => _instance;
-  static GestureBinding _instance;
+  static GestureBinding? get instance => _instance;
+  static GestureBinding? _instance;
 
   final Queue<PointerEvent> _pendingPointerEvents = Queue<PointerEvent>();
 
@@ -123,7 +122,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
 
   void _handlePointerEvent(PointerEvent event) {
     assert(!locked);
-    HitTestResult hitTestResult;
+    HitTestResult? hitTestResult;
     if (event is PointerDownEvent || event is PointerSignalEvent) {
       assert(!_hitTests.containsKey(event.pointer));
       hitTestResult = HitTestResult();
@@ -172,7 +171,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   /// might throw. The [hitTestResult] argument may only be null for
   /// [PointerHoverEvent], [PointerAddedEvent], or [PointerRemovedEvent] events.
   @override // from HitTestDispatcher
-  void dispatchEvent(PointerEvent event, HitTestResult hitTestResult) {
+  void dispatchEvent(PointerEvent event, HitTestResult? hitTestResult) {
     assert(!locked);
     // No hit test information implies that this is a hover or pointer
     // add/remove event.
@@ -243,12 +242,12 @@ class FlutterErrorDetailsForPointerEventDispatcher extends FlutterErrorDetails {
   /// that will subsequently be reported using [FlutterError.onError].
   const FlutterErrorDetailsForPointerEventDispatcher({
     dynamic exception,
-    StackTrace stack,
-    String library,
-    DiagnosticsNode context,
+    StackTrace? stack,
+    String? library,
+    DiagnosticsNode? context,
     this.event,
     this.hitTestEntry,
-    InformationCollector informationCollector,
+    InformationCollector? informationCollector,
     bool silent = false,
   }) : super(
     exception: exception,
@@ -260,7 +259,7 @@ class FlutterErrorDetailsForPointerEventDispatcher extends FlutterErrorDetails {
   );
 
   /// The pointer event that was being routed when the exception was raised.
-  final PointerEvent event;
+  final PointerEvent? event;
 
   /// The hit test result entry for the object whose handleEvent method threw
   /// the exception. May be null if no hit test entry is associated with the
@@ -268,5 +267,5 @@ class FlutterErrorDetailsForPointerEventDispatcher extends FlutterErrorDetails {
   ///
   /// The target object itself is given by the [HitTestEntry.target] property of
   /// the hitTestEntry object.
-  final HitTestEntry hitTestEntry;
+  final HitTestEntry? hitTestEntry;
 }

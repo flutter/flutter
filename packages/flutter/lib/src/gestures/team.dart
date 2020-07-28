@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'arena.dart';
 import 'binding.dart';
@@ -27,8 +26,8 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
   final int _pointer;
 
   bool _resolved = false;
-  GestureArenaMember _winner;
-  GestureArenaEntry _entry;
+  GestureArenaMember? _winner;
+  GestureArenaEntry? _entry;
 
   @override
   void acceptGesture(int pointer) {
@@ -40,7 +39,7 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
       if (member != _winner)
         member.rejectGesture(pointer);
     }
-    _winner.acceptGesture(pointer);
+    _winner!.acceptGesture(pointer);
   }
 
   @override
@@ -54,7 +53,7 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
   void _close() {
     assert(!_resolved);
     _resolved = true;
-    final _CombiningGestureArenaMember combiner = _owner._combiners.remove(_pointer);
+    final _CombiningGestureArenaMember? combiner = _owner._combiners.remove(_pointer);
     assert(combiner == this);
   }
 
@@ -62,7 +61,7 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
     assert(!_resolved);
     assert(_pointer == pointer);
     _members.add(member);
-    _entry ??= GestureBinding.instance.gestureArena.add(pointer, this);
+    _entry ??= GestureBinding.instance!.gestureArena.add(pointer, this);
     return _CombiningGestureArenaEntry(this, member);
   }
 
@@ -73,11 +72,11 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
       _members.remove(member);
       member.rejectGesture(_pointer);
       if (_members.isEmpty)
-        _entry.resolve(disposition);
+        _entry!.resolve(disposition);
     } else {
       assert(disposition == GestureDisposition.accepted);
       _winner ??= _owner.captain ?? member;
-      _entry.resolve(disposition);
+      _entry!.resolve(disposition);
     }
   }
 }
@@ -131,7 +130,7 @@ class GestureArenaTeam {
   /// If not null, when any one of the [GestureArenaTeam] members claims victory
   /// the captain accepts the gesture.
   /// If null, the member that claims a victory accepts the gesture.
-  GestureArenaMember captain;
+  GestureArenaMember? captain;
 
   /// Adds a new member to the arena on behalf of this team.
   ///
