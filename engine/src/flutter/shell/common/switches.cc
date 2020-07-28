@@ -394,6 +394,9 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   settings.cache_sksl =
       command_line.HasOption(FlagForSwitch(Switch::CacheSkSL));
 
+  settings.purge_persistent_cache =
+      command_line.HasOption(FlagForSwitch(Switch::PurgePersistentCache));
+
   return settings;
 }
 

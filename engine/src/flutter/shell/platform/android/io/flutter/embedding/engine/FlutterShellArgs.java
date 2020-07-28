@@ -46,6 +46,8 @@ public class FlutterShellArgs {
       "--dump-skp-on-shader-compilation";
   public static final String ARG_KEY_CACHE_SKSL = "cache-sksl";
   public static final String ARG_CACHE_SKSL = "--cache-sksl";
+  public static final String ARG_KEY_PURGE_PERSISTENT_CACHE = "purge-persistent-cache";
+  public static final String ARG_PURGE_PERSISTENT_CACHE = "--purge-persistent-cache";
   public static final String ARG_KEY_VERBOSE_LOGGING = "verbose-logging";
   public static final String ARG_VERBOSE_LOGGING = "--verbose-logging";
   public static final String ARG_KEY_OBSERVATORY_PORT = "observatory-port";
@@ -101,6 +103,9 @@ public class FlutterShellArgs {
     }
     if (intent.getBooleanExtra(ARG_KEY_CACHE_SKSL, false)) {
       args.add(ARG_CACHE_SKSL);
+    }
+    if (intent.getBooleanExtra(ARG_KEY_PURGE_PERSISTENT_CACHE, false)) {
+      args.add(ARG_PURGE_PERSISTENT_CACHE);
     }
     if (intent.getBooleanExtra(ARG_KEY_VERBOSE_LOGGING, false)) {
       args.add(ARG_VERBOSE_LOGGING);

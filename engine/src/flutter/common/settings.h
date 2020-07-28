@@ -97,6 +97,7 @@ struct Settings {
   bool trace_systrace = false;
   bool dump_skp_on_shader_compilation = false;
   bool cache_sksl = false;
+  bool purge_persistent_cache = false;
   bool endless_trace_buffer = false;
   bool enable_dart_profiling = false;
   bool disable_dart_asserts = false;
