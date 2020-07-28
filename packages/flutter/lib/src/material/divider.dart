@@ -138,7 +138,7 @@ class Divider extends StatelessWidget {
   /// {@end-tool}
   final Color color;
 
-  /// Computes the [BorderSide] that represents a divider..
+  /// Computes the [BorderSide] that represents a divider.
   ///
   /// If [color] is null, then [DividerThemeData.color] is used. If that is also
   /// null, then [ThemeData.dividerColor] is used.
