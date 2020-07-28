@@ -8,7 +8,6 @@ import 'dart:io';
 import 'package:file/file.dart' as file;
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
-import 'package:test/test.dart';
 
 import 'gen_l10n_templates.dart';
 import 'gen_l10n_types.dart';
