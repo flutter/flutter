@@ -141,9 +141,7 @@ Future<void> main(List<String> arguments) async {
     '--footer-text', 'lib/footer.html',
     '--allow-warnings-in-packages',
     <String>[
-      'material',
-      'rendering',
-      'widgets',
+      'flutter',
     ].join(','),
     '--exclude-packages',
     <String>[
