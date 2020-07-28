@@ -1,4 +1,4 @@
-Signature: e358f67df3bec8657baccaf2b831741a
+Signature: 4702616306ab125ad0738133f941e247
 
 UNUSED LICENSES:
 
@@ -3938,8 +3938,6 @@ FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DCommandList.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DCommandList.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DCommandSignature.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DCommandSignature.h
-FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DConstantRingBuffer.cpp
-FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DConstantRingBuffer.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DCpuDescriptorManager.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DCpuDescriptorManager.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DDescriptorHeap.cpp
