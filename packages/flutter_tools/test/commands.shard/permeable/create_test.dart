@@ -1534,7 +1534,7 @@ void main() {
 
     // TODO(cyanglaz): no-op iOS folder should be removed after 1.20.0 release
     // https://github.com/flutter/flutter/issues/59787
-    expect(projectDir.childDirectory('ios').existsSync(), true);
+    expect(projectDir.childDirectory('ios').existsSync(), false);
     expect(projectDir.childDirectory('android').existsSync(), false);
     expect(projectDir.childDirectory('web').existsSync(), false);
     expect(projectDir.childDirectory('linux').existsSync(), false);
@@ -1543,7 +1543,7 @@ void main() {
 
     // TODO(cyanglaz): no-op iOS folder should be removed after 1.20.0 release
     // https://github.com/flutter/flutter/issues/59787
-    expect(projectDir.childDirectory('example').childDirectory('ios').existsSync(), true);
+    expect(projectDir.childDirectory('example').childDirectory('ios').existsSync(), false);
     expect(projectDir.childDirectory('example').childDirectory('android').existsSync(), false);
     expect(projectDir.childDirectory('example').childDirectory('web').existsSync(), false);
     expect(projectDir.childDirectory('example').childDirectory('linux').existsSync(), false);
@@ -1557,25 +1557,6 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
   });
 
-
-  // TODO(cyanglaz): no-op iOS folder should be removed after 1.20.0 release
-  // https://github.com/flutter/flutter/issues/59787
-  testUsingContext('create an empty plugin contains a no-op ios folder, but no pubspec entry.', () async {
-    Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
-
-    final CreateCommand command = CreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
-
-    expect(projectDir.childDirectory('ios').existsSync(), true);
-    expect(projectDir.childDirectory('example').childDirectory('ios').existsSync(), true);
-    validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: const <String>[
-      'some_platform'
-    ], pluginClass: 'somePluginClass',
-    unexpectedPlatforms: <String>['ios']);
-  });
 
   testUsingContext('plugin supports ios if requested', () async {
     Cache.flutterRoot = '../..';
@@ -1944,34 +1925,6 @@ void main() {
     expect(projectDir.childDirectory('example').childDirectory('macos').existsSync(), false);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
-  });
-
-  testUsingContext('flutter create -t plugin in an empty folder should not show pubspec.yaml updating suggestion', () async {
-    Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
-
-    final CreateCommand command = CreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=android', projectDir.path]);
-    expect(logger.statusText, isNot(contains('The `pubspec.yaml` under the project directory must be updated to support')));
-  }, overrides: <Type, Generator> {
-    Logger: () => logger,
-  });
-
-  testUsingContext('flutter create -t plugin in an existing plugin should show pubspec.yaml updating suggestion', () async {
-    Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
-
-    final CreateCommand command = CreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=ios', projectDir.path]);
-    expect(logger.statusText, isNot(contains('The `pubspec.yaml` under the project directory must be updated to support')));
-    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=android', projectDir.path]);
-    expect(logger.statusText, contains('The `pubspec.yaml` under the project directory must be updated to support'));
-  }, overrides: <Type, Generator> {
-    Logger: () => logger,
   });
 
   testUsingContext('newly created plugin has min flutter sdk version as 1.20.0', () async {
