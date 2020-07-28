@@ -624,26 +624,30 @@ class NavigatorObserver {
 
 /// An inherited widget to host a hero controller.
 ///
-/// This class should not be used directly. The [MaterialApp] and [CupertinoApp]
-/// use this class to host the [HeroController], and they should be the only
-/// exception to use this class. If you want to subscribe your own
-/// [HeroController], use the [Navigator.observers] instead.
-///
 /// The hosted hero controller will be picked up by the navigator in the
 /// [child] subtree. Once a navigator picks up this controller, the navigator
 /// will bar any navigator below its subtree from receiving this controller.
 ///
-/// See also:
-///
-///  * [Navigator.observers], which is the standard way of providing a
-///    [HeroController].
+/// The hero controller inside the [HeroControllerScope] can only subscribe to
+/// one navigator at a time. An assertion will be thrown if the hero controller
+/// subscribes to more than one navigators. This can happen when there are
+/// multiple navigators under the same [HeroControllerScope] in parallel.
 class HeroControllerScope extends InheritedWidget {
   /// Creates a widget to host the input [controller].
   const HeroControllerScope({
     Key key,
     this.controller,
     Widget child,
-  }) : super(key: key, child: child);
+  }) : assert(controller != null),
+       super(key: key, child: child);
+
+  /// Creates a widget to prevent the subtree from receiving the hero controller
+  /// above.
+  const HeroControllerScope.none({
+    Key key,
+    Widget child,
+  }) : controller = null,
+       super(key: key, child: child);
 
   /// The hero controller that is hosted inside this widget.
   final HeroController controller;
@@ -2803,8 +2807,30 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
 
   void _updateHeroController(HeroController newHeroController) {
     if (_heroControllerFromScope != newHeroController) {
-      _heroControllerFromScope?._navigator = null;
-      newHeroController?._navigator = this;
+      if (newHeroController != null) {
+        // Makes sure the same hero controller is not shared between two navigators.
+        assert(() {
+          // It is possible that the hero controller subscribes to an existing
+          // navigator. We are fine as long as that navigator gives up the hero
+          // controller at the end of the build.
+          if (newHeroController.navigator != null) {
+            final NavigatorState previousOwner = newHeroController.navigator;
+            ServicesBinding.instance.addPostFrameCallback((Duration timestamp) {
+              // We only check if this navigator still owns the hero controller.
+              if (_heroControllerFromScope == newHeroController) {
+                assert(_heroControllerFromScope._navigator == this);
+                assert(previousOwner._heroControllerFromScope != newHeroController);
+              }
+            });
+          }
+          return true;
+        }());
+        newHeroController._navigator = this;
+      }
+      // Only unsubscribe the hero controller when it is currently subscribe to
+      // this navigator.
+      if (_heroControllerFromScope?._navigator == this)
+        _heroControllerFromScope?._navigator = null;
       _heroControllerFromScope = newHeroController;
       _updateEffectiveObservers();
     }
@@ -2865,6 +2891,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       _debugLocked = true;
       return true;
     }());
+    _updateHeroController(null);
     for (final NavigatorObserver observer in _effectiveObservers)
       observer._navigator = null;
     focusScopeNode.dispose();
@@ -4051,7 +4078,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     // Hides the HeroControllerScope for the widget subtree so that the other
     // nested navigator underneath will not pick up the hero controller above
     // this level.
-    return HeroControllerScope(
+    return HeroControllerScope.none(
       child: Listener(
         onPointerDown: _handlePointerDown,
         onPointerUp: _handlePointerUpOrCancel,
