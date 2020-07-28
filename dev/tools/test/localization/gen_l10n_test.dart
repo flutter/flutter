@@ -517,7 +517,7 @@ void main() {
           templateArbFileName: defaultTemplateArbFileName,
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
-          inputsAndOutputsListPath: path.join('.dart_tool', 'flutter_gen', 'gen_l10n'),
+          inputsAndOutputsListPath: syntheticPackagePath,
         )
         ..loadResources()
         ..writeOutputFiles();
@@ -526,7 +526,7 @@ void main() {
     }
 
     final File inputsAndOutputsList = fs.file(
-      path.join('.dart_tool', 'flutter_gen', 'gen_l10n', 'gen_l10n_inputs_and_outputs.json'),
+      path.join(syntheticPackagePath, 'gen_l10n_inputs_and_outputs.json'),
     );
     expect(inputsAndOutputsList.existsSync(), isTrue);
 
@@ -538,9 +538,9 @@ void main() {
 
     expect(jsonResult.containsKey('outputs'), isTrue);
     final List<dynamic> outputList = jsonResult['outputs'] as List<dynamic>;
-    expect(outputList, contains(fs.path.absolute('.dart_tool', 'flutter_gen', 'gen_l10n', 'output-localization-file.dart')));
-    expect(outputList, contains(fs.path.absolute('.dart_tool', 'flutter_gen', 'gen_l10n', 'output-localization-file_en.dart')));
-    expect(outputList, contains(fs.path.absolute('.dart_tool', 'flutter_gen', 'gen_l10n', 'output-localization-file_es.dart')));
+    expect(outputList, contains(fs.path.absolute(syntheticPackagePath, 'output-localization-file.dart')));
+    expect(outputList, contains(fs.path.absolute(syntheticPackagePath, 'output-localization-file_en.dart')));
+    expect(outputList, contains(fs.path.absolute(syntheticPackagePath, 'output-localization-file_es.dart')));
   });
 
   test('setting both a headerString and a headerFile should fail', () {
@@ -1029,11 +1029,11 @@ void main() {
         fail('Generating output files should not fail: $e');
       }
 
-      expect(fs.isFileSync(path.join('.dart_tool', 'flutter_gen', 'gen_l10n', 'output-localization-file_en.dart')), true);
-      expect(fs.isFileSync(path.join('.dart_tool', 'flutter_gen', 'gen_l10n', 'output-localization-file_en_US.dart')), false);
+      expect(fs.isFileSync(path.join(syntheticPackagePath, 'output-localization-file_en.dart')), true);
+      expect(fs.isFileSync(path.join(syntheticPackagePath, 'output-localization-file_en_US.dart')), false);
 
       final String englishLocalizationsFile = fs.file(
-        path.join('.dart_tool', 'flutter_gen', 'gen_l10n', 'output-localization-file_en.dart')
+        path.join(syntheticPackagePath, 'output-localization-file_en.dart')
       ).readAsStringSync();
       expect(englishLocalizationsFile, contains('class AppLocalizationsEnCa extends AppLocalizationsEn'));
       expect(englishLocalizationsFile, contains('class AppLocalizationsEn extends AppLocalizations'));
@@ -1063,7 +1063,7 @@ void main() {
       }
 
       final String localizationsFile = fs.file(
-        path.join('.dart_tool', 'flutter_gen', 'gen_l10n', defaultOutputFileString),
+        path.join(syntheticPackagePath, defaultOutputFileString),
       ).readAsStringSync();
       expect(localizationsFile, contains(
 '''
