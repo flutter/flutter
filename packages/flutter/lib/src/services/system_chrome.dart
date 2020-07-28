@@ -336,7 +336,7 @@ class SystemChrome {
   /// {@end-tool}
   ///
   /// For more complex control of the system overlay styles, consider using
-  /// an [AnnotatedRegion] widget instead of calling [setSystemUiOverlayStyle]
+  /// an [AnnotatedRegion] widget instead of calling [setSystemUIOverlayStyle]
   /// directly. This widget places a value directly into the layer tree where
   /// it can be hit-tested by the framework. On every frame, the framework will
   /// hit-test and select the annotated region it finds under the status and

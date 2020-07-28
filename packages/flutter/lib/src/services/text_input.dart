@@ -32,7 +32,6 @@ export 'dart:ui' show TextAffinity;
 /// See also:
 ///
 ///  * [TextField.smartDashesType]
-///  * [TextFormField.smartDashesType]
 ///  * [CupertinoTextField.smartDashesType]
 ///  * [EditableText.smartDashesType]
 ///  * [SmartQuotesType]
@@ -56,10 +55,8 @@ enum SmartDashesType {
 /// See also:
 ///
 ///  * [TextField.smartQuotesType]
-///  * [TextFormField.smartQuotesType]
 ///  * [CupertinoTextField.smartQuotesType]
 ///  * [EditableText.smartQuotesType]
-///  * [SmartDashesType]
 ///  * <https://developer.apple.com/documentation/uikit/uitextinputtraits>
 enum SmartQuotesType {
   /// Smart quotes is disabled.
@@ -79,7 +76,7 @@ enum SmartQuotesType {
 ///
 /// On Android, behavior may vary across device and keyboard provider.
 ///
-/// This class stays as close to [Enum] interface as possible, and allows
+/// This class stays as close to `Enum` interface as possible, and allows
 /// for additional flags for some input types. For example, numeric input
 /// can specify whether it supports decimal numbers and/or signed numbers.
 @immutable

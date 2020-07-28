@@ -34,12 +34,12 @@ HttpClientProvider debugNetworkImageHttpClientProvider;
 
 typedef PaintImageCallback = void Function(ImageSizeInfo);
 
-/// Tracks the bytes used by a [ui.Image] compared to the bytes needed to paint
-/// that image without scaling it.
+/// Tracks the bytes used by a [dart:ui.Image] compared to the bytes needed to
+/// paint that image without scaling it.
 @immutable
 class ImageSizeInfo {
-  /// Creates an object to track the backing size of a [ui.Image] compared to
-  /// its display size on a [Canvas].
+  /// Creates an object to track the backing size of a [dart:ui.Image] compared
+  /// to its display size on a [Canvas].
   ///
   /// This class is used by the framework when it paints an image to a canvas
   /// to report to `dart:developer`'s [postEvent], as well as to the

@@ -50,7 +50,8 @@ mixin SemanticsBinding on BindingBase {
   /// a flag is changed.
   ///
   /// To listen to changes to accessibility features, create a
-  /// [WidgetsBindingObserver] and listen to [didChangeAccessibilityFeatures].
+  /// [WidgetsBindingObserver] and listen to
+  /// [WidgetsBindingObserver.didChangeAccessibilityFeatures].
   ui.AccessibilityFeatures get accessibilityFeatures => _accessibilityFeatures;
   ui.AccessibilityFeatures _accessibilityFeatures;
 
