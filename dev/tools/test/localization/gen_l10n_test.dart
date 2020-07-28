@@ -16,6 +16,7 @@ import '../../localization/localizations_utils.dart';
 import '../common.dart';
 
 final String defaultL10nPathString = path.join('lib', 'l10n');
+final String syntheticPackagePath = path.join('.dart_tool', 'flutter_gen', 'gen_l10n');
 const String defaultTemplateArbFileName = 'app_en.arb';
 const String defaultOutputFileString = 'output-localization-file.dart';
 const String defaultClassNameString = 'AppLocalizations';
@@ -98,21 +99,28 @@ void main() {
       );
     });
 
-    test('setOutputDirectory fails if output string is null', () {
-      _standardFlutterDirectoryL10nSetup(fs);
-      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
-      try {
-        generator.setOutputDirectory(null);
-      } on L10nException catch (e) {
-        expect(e.message, contains('cannot be null'));
-        return;
-      }
+    test(
+      'setOutputDirectory fails if output string is null and '
+      'synthetic package option is not being used',
+      () {
+        _standardFlutterDirectoryL10nSetup(fs);
+        final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+        try {
+          generator.setOutputDirectory(
+            outputPathString: null,
+            useSyntheticPackage: false,
+          );
+        } on L10nException catch (e) {
+          expect(e.message, contains('cannot be null'));
+          return;
+        }
 
-      fail(
-        'LocalizationsGenerator.setOutputDirectory should fail if the '
-        'input string is null.'
-      );
-    });
+        fail(
+          'LocalizationsGenerator.setOutputDirectory should fail if the '
+          'input string is null.'
+        );
+      },
+    );
 
     test('setTemplateArbFile fails if inputDirectory is null', () {
       final LocalizationsGenerator generator = LocalizationsGenerator(fs);
@@ -200,7 +208,10 @@ void main() {
         generator = LocalizationsGenerator(fs);
         try {
           generator.setInputDirectory(defaultL10nPathString);
-          generator.setOutputDirectory(defaultL10nPathString);
+          generator.setOutputDirectory(
+            outputPathString: defaultL10nPathString,
+            useSyntheticPackage: false,
+          );
           generator.setTemplateArbFile(defaultTemplateArbFileName);
           generator.setBaseOutputFile(defaultOutputFileString);
         } on L10nException catch (e) {
@@ -331,7 +342,7 @@ void main() {
       fail('Generating output should not fail: \n${e.message}');
     }
 
-    final Directory outputDirectory = fs.directory('lib').childDirectory('l10n');
+    final Directory outputDirectory = fs.directory(syntheticPackagePath);
     expect(outputDirectory.childFile('output-localization-file.dart').existsSync(), isTrue);
     expect(outputDirectory.childFile('output-localization-file_en.dart').existsSync(), isTrue);
     expect(outputDirectory.childFile('output-localization-file_es.dart').existsSync(), isTrue);
@@ -412,6 +423,7 @@ void main() {
           templateArbFileName: defaultTemplateArbFileName,
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
+          useSyntheticPackage: false,
         )
         ..loadResources()
         ..writeOutputFiles();
@@ -450,6 +462,7 @@ void main() {
           templateArbFileName: defaultTemplateArbFileName,
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
+          useSyntheticPackage: false,
         )
         ..loadResources()
         ..writeOutputFiles();
@@ -477,6 +490,7 @@ void main() {
           templateArbFileName: defaultTemplateArbFileName,
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
+          useSyntheticPackage: false,
         )
         ..loadResources()
         ..writeOutputFiles();
@@ -503,7 +517,7 @@ void main() {
           templateArbFileName: defaultTemplateArbFileName,
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
-          inputsAndOutputsListPath: defaultL10nPathString,
+          inputsAndOutputsListPath: path.join('.dart_tool', 'flutter_gen', 'gen_l10n'),
         )
         ..loadResources()
         ..writeOutputFiles();
@@ -511,10 +525,9 @@ void main() {
       fail('Generating output should not fail: \n${e.message}');
     }
 
-    final File inputsAndOutputsList = fs
-      .directory('lib')
-      .childDirectory('l10n')
-      .childFile('gen_l10n_inputs_and_outputs.json');
+    final File inputsAndOutputsList = fs.file(
+      path.join('.dart_tool', 'flutter_gen', 'gen_l10n', 'gen_l10n_inputs_and_outputs.json'),
+    );
     expect(inputsAndOutputsList.existsSync(), isTrue);
 
     final Map<String, dynamic> jsonResult = json.decode(inputsAndOutputsList.readAsStringSync()) as Map<String, dynamic>;
@@ -525,9 +538,9 @@ void main() {
 
     expect(jsonResult.containsKey('outputs'), isTrue);
     final List<dynamic> outputList = jsonResult['outputs'] as List<dynamic>;
-    expect(outputList, contains(fs.path.absolute('lib', 'l10n', 'output-localization-file.dart')));
-    expect(outputList, contains(fs.path.absolute('lib', 'l10n', 'output-localization-file_en.dart')));
-    expect(outputList, contains(fs.path.absolute('lib', 'l10n', 'output-localization-file_es.dart')));
+    expect(outputList, contains(fs.path.absolute('.dart_tool', 'flutter_gen', 'gen_l10n', 'output-localization-file.dart')));
+    expect(outputList, contains(fs.path.absolute('.dart_tool', 'flutter_gen', 'gen_l10n', 'output-localization-file_en.dart')));
+    expect(outputList, contains(fs.path.absolute('.dart_tool', 'flutter_gen', 'gen_l10n', 'output-localization-file_es.dart')));
   });
 
   test('setting both a headerString and a headerFile should fail', () {
@@ -1016,11 +1029,11 @@ void main() {
         fail('Generating output files should not fail: $e');
       }
 
-      expect(fs.isFileSync(path.join('lib', 'l10n', 'output-localization-file_en.dart')), true);
-      expect(fs.isFileSync(path.join('lib', 'l10n', 'output-localization-file_en_US.dart')), false);
+      expect(fs.isFileSync(path.join('.dart_tool', 'flutter_gen', 'gen_l10n', 'output-localization-file_en.dart')), true);
+      expect(fs.isFileSync(path.join('.dart_tool', 'flutter_gen', 'gen_l10n', 'output-localization-file_en_US.dart')), false);
 
       final String englishLocalizationsFile = fs.file(
-        path.join('lib', 'l10n', 'output-localization-file_en.dart')
+        path.join('.dart_tool', 'flutter_gen', 'gen_l10n', 'output-localization-file_en.dart')
       ).readAsStringSync();
       expect(englishLocalizationsFile, contains('class AppLocalizationsEnCa extends AppLocalizationsEn'));
       expect(englishLocalizationsFile, contains('class AppLocalizationsEn extends AppLocalizations'));
@@ -1050,7 +1063,7 @@ void main() {
       }
 
       final String localizationsFile = fs.file(
-        path.join('lib', 'l10n', defaultOutputFileString),
+        path.join('.dart_tool', 'flutter_gen', 'gen_l10n', defaultOutputFileString),
       ).readAsStringSync();
       expect(localizationsFile, contains(
 '''
@@ -1073,6 +1086,7 @@ import 'output-localization-file_zh.dart';
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
           useDeferredLoading: true,
+          useSyntheticPackage: false,
         );
         generator.loadResources();
         generator.writeOutputFiles();
@@ -1119,6 +1133,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
             templateArbFileName: defaultTemplateArbFileName,
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
+            useSyntheticPackage: false,
           );
           generator.loadResources();
           generator.writeOutputFiles();
@@ -1494,7 +1509,6 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         try {
           generator.initialize(
             inputPathString: defaultL10nPathString,
-            outputPathString: defaultL10nPathString,
             templateArbFileName: defaultTemplateArbFileName,
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,

@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:file/file.dart' as file;
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
+import 'package:test/test.dart';
 
 import 'gen_l10n_templates.dart';
 import 'gen_l10n_types.dart';
@@ -518,16 +519,20 @@ class LocalizationsGenerator {
     String headerFile,
     bool useDeferredLoading = false,
     String inputsAndOutputsListPath,
+    bool useSyntheticPackage = true,
   }) {
     setInputDirectory(inputPathString);
-    setOutputDirectory(outputPathString ?? inputPathString);
+    setOutputDirectory(
+      outputPathString: outputPathString ?? inputPathString,
+      useSyntheticPackage: useSyntheticPackage,
+    );
     setTemplateArbFile(templateArbFileName);
     setBaseOutputFile(outputFileString);
     setPreferredSupportedLocales(preferredSupportedLocaleString);
     _setHeader(headerString, headerFile);
     _setUseDeferredLoading(useDeferredLoading);
     className = classNameString;
-    _setInputsAndOutputsListFile(inputsAndOutputsListPath);
+    _setInputsAndOutputsListFile(inputsAndOutputsListPath, useSyntheticPackage);
   }
 
   static bool _isNotReadable(FileStat fileStat) {
@@ -566,10 +571,22 @@ class LocalizationsGenerator {
 
   /// Sets the reference [Directory] for [outputDirectory].
   @visibleForTesting
-  void setOutputDirectory(String outputPathString) {
-    if (outputPathString == null)
-      throw L10nException('outputPathString argument cannot be null');
-    outputDirectory = _fs.directory(outputPathString);
+  void setOutputDirectory({
+    String outputPathString,
+    bool useSyntheticPackage = true,
+  }) {
+    if (useSyntheticPackage) {
+      outputDirectory = _fs.directory(path.join('.dart_tool', 'flutter_gen', 'gen_l10n'));
+      return;
+    } else {
+      if (outputPathString == null)
+        throw L10nException(
+          'outputPathString argument cannot be null if not using'
+          'synthetic package option.'
+        );
+
+      outputDirectory = _fs.directory(outputPathString);
+    }
   }
 
   /// Sets the reference [File] for [templateArbFile].
@@ -674,13 +691,23 @@ class LocalizationsGenerator {
     _useDeferredLoading = useDeferredLoading;
   }
 
-  void _setInputsAndOutputsListFile(String inputsAndOutputsListPath) {
-    if (inputsAndOutputsListPath == null)
+  void _setInputsAndOutputsListFile(
+    String inputsAndOutputsListPath,
+    bool useSyntheticPackage,
+  ) {
+    if (inputsAndOutputsListPath == null && !useSyntheticPackage)
       return;
 
-    _inputsAndOutputsListFile = _fs.file(
-      path.join(inputsAndOutputsListPath, 'gen_l10n_inputs_and_outputs.json'),
-    );
+    if (useSyntheticPackage && inputsAndOutputsListPath == null) {
+      _inputsAndOutputsListFile = _fs.file(
+        path.join('.dart_tool', 'flutter_gen', 'gen_l10n', 'gen_l10n_inputs_and_outputs.json'),
+      );
+    } else {
+      _inputsAndOutputsListFile = _fs.file(
+        path.join(inputsAndOutputsListPath, 'gen_l10n_inputs_and_outputs.json'),
+      );
+    }
+
     _inputFileList = <String>[];
     _outputFileList = <String>[];
   }

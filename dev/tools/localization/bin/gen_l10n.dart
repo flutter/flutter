@@ -120,6 +120,12 @@ void main(List<String> arguments) {
       '\n\n'
       'When null, the JSON file will not be generated.'
   );
+  parser.addFlag(
+    'synthetic-package',
+    defaultsTo: true,
+    // TODO (shihaohong): add help text
+    help: ''
+  );
 
   final argslib.ArgResults results = parser.parse(arguments);
   if (results['help'] == true) {
@@ -140,6 +146,7 @@ void main(List<String> arguments) {
   final String headerFile = results['header-file'] as String;
   final bool useDeferredLoading = results['use-deferred-loading'] as bool;
   final String inputsAndOutputsListPath = results['gen-inputs-and-outputs-list'] as String;
+  final bool useSyntheticPackage = results['synthetic-package'] as bool;
 
   const local.LocalFileSystem fs = local.LocalFileSystem();
   final LocalizationsGenerator localizationsGenerator = LocalizationsGenerator(fs);
@@ -157,6 +164,7 @@ void main(List<String> arguments) {
         headerFile: headerFile,
         useDeferredLoading: useDeferredLoading,
         inputsAndOutputsListPath: inputsAndOutputsListPath,
+        useSyntheticPackage: useSyntheticPackage,
       )
       ..loadResources()
       ..writeOutputFiles()
