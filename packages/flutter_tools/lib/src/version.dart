@@ -15,6 +15,20 @@ import 'cache.dart';
 import 'convert.dart';
 import 'globals.dart' as globals;
 
+/// The flutter GitHub repository.
+const String kFlutterGit = 'https://github.com/flutter/flutter.git';
+
+/// This maps old branch names to the names of branches that replaced them.
+///
+/// For example, in early 2018 we changed from having an "alpha" branch to
+/// having a "dev" branch, so anyone using "alpha" now gets transitioned to
+/// "dev".
+const Map<String, String> kObsoleteBranches = <String, String>{
+  'alpha': 'dev',
+  'hackathon': 'dev',
+  'codelab': 'dev',
+};
+
 /// The names of each channel/branch in order of increasing stability.
 enum Channel {
   master,
@@ -23,23 +37,28 @@ enum Channel {
   stable,
 }
 
-/// The flutter GitHub repository.
-const String _flutterGit = 'https://github.com/flutter/flutter.git';
+// Beware: Keep order in accordance with stability
+const Set<String> kOfficialChannels = <String>{
+  'master',
+  'dev',
+  'beta',
+  'stable',
+};
 
 /// Retrieve a human-readable name for a given [channel].
 ///
-/// Requires [FlutterVersion.officialChannels] to be correctly ordered.
+/// Requires [kOfficialChannels] to be correctly ordered.
 String getNameForChannel(Channel channel) {
-  return FlutterVersion.officialChannels.elementAt(channel.index);
+  return kOfficialChannels.elementAt(channel.index);
 }
 
 /// Retrieve the [Channel] representation for a string [name].
 ///
 /// Returns `null` if [name] is not in the list of official channels, according
-/// to [FlutterVersion.officialChannels].
+/// to [kOfficialChannels].
 Channel getChannelForName(String name) {
-  if (FlutterVersion.officialChannels.contains(name)) {
-    return Channel.values[FlutterVersion.officialChannels.toList().indexOf(name)];
+  if (kOfficialChannels.contains(name)) {
+    return Channel.values[kOfficialChannels.toList().indexOf(name)];
   }
   return null;
 }
@@ -82,28 +101,8 @@ class FlutterVersion {
 
   /// Whether we are currently on the master branch.
   bool get isMaster {
-    final String branchName = getBranchName();
-    return !<String>['dev', 'beta', 'stable'].contains(branchName);
+    return getBranchName() == 'stable';
   }
-
-  // Beware: Keep order in accordance with stability
-  static const Set<String> officialChannels = <String>{
-    'master',
-    'dev',
-    'beta',
-    'stable',
-  };
-
-  /// This maps old branch names to the names of branches that replaced them.
-  ///
-  /// For example, in early 2018 we changed from having an "alpha" branch to
-  /// having a "dev" branch, so anyone using "alpha" now gets transitioned to
-  /// "dev".
-  static Map<String, String> obsoleteBranches = <String, String>{
-    'alpha': 'dev',
-    'hackathon': 'dev',
-    'codelab': 'dev',
-  };
 
   String _channel;
   /// The channel is the upstream branch.
@@ -252,7 +251,7 @@ class FlutterVersion {
         'remote',
         'add',
         _versionCheckRemote,
-        _flutterGit,
+        kFlutterGit,
       ]);
       await _run(<String>['git', 'fetch', _versionCheckRemote, branch]);
       return _latestGitCommitDate(
@@ -293,8 +292,8 @@ class FlutterVersion {
     }();
     if (redactUnknownBranches || _branch.isEmpty) {
       // Only return the branch names we know about; arbitrary branch names might contain PII.
-      if (!officialChannels.contains(_branch) &&
-          !obsoleteBranches.containsKey(_branch)) {
+      if (!kOfficialChannels.contains(_branch) &&
+          !kObsoleteBranches.containsKey(_branch)) {
         return '[user-branch]';
       }
     }
@@ -383,7 +382,7 @@ class FlutterVersion {
   /// writes shared cache files.
   Future<void> checkFlutterVersionFreshness() async {
     // Don't perform update checks if we're not on an official channel.
-    if (!officialChannels.contains(channel)) {
+    if (!kOfficialChannels.contains(channel)) {
       return;
     }
 
@@ -745,11 +744,11 @@ class GitTagVersion {
 
   static GitTagVersion determine(ProcessUtils processUtils, {String workingDirectory, bool fetchTags = false}) {
     if (fetchTags) {
-      final String channel = _runGit('git rev-parse --abbrev-ref HEAD', processUtils, workingDirectory);
-      if (channel == 'dev' || channel == 'beta' || channel == 'stable') {
-        globals.printTrace('Skipping request to fetchTags - on well known channel $channel.');
+      final String branch = _runGit('git rev-parse --abbrev-ref HEAD', processUtils, workingDirectory);
+      if (branch == 'dev' || branch == 'beta' || branch == 'stable') {
+        globals.printTrace('Skipping request to fetchTags - on well known channel $branch.');
       } else {
-        _runGit('git fetch $_flutterGit --tags -f', processUtils, workingDirectory);
+        _runGit('git fetch $kFlutterGit --tags -f', processUtils, workingDirectory);
       }
     }
     final List<String> tags = _runGit(

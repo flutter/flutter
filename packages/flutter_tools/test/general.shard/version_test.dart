@@ -32,7 +32,16 @@ void main() {
     mockCache = MockCache();
   });
 
-  for (final String channel in FlutterVersion.officialChannels) {
+  testUsingContext('Channel enum and string transform to each other', () {
+    for (final Channel channel in Channel.values) {
+      expect(getNameForChannel(channel), kOfficialChannels.toList()[channel.index]);
+    }
+    expect(kOfficialChannels.toList()
+            .map((String str) => getChannelForName(str)).toList(),
+      Channel.values);
+  });
+
+  for (final String channel in kOfficialChannels) {
     DateTime getChannelUpToDateVersion() {
       return _testClock.ago(FlutterVersion.versionAgeConsideredUpToDate(channel) ~/ 2);
     }
@@ -483,7 +492,7 @@ void main() {
   testUsingContext('determine does not call fetch --tags', () {
     final MockProcessUtils processUtils = MockProcessUtils();
     when(processUtils.runSync(
-      <String>['git', 'fetch', 'https://github.com/flutter/flutter.git', '--tags'],
+      <String>['git', 'fetch', kFlutterGit, '--tags'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(ProcessResult(105, 0, '', ''), <String>['git', 'fetch']));
@@ -509,7 +518,7 @@ void main() {
       environment: anyNamed('environment'),
     ));
     verifyNever(processUtils.runSync(
-      <String>['git', 'fetch', 'https://github.com/flutter/flutter.git', '--tags'],
+      <String>['git', 'fetch', kFlutterGit, '--tags'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     ));
@@ -528,7 +537,7 @@ void main() {
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(ProcessResult(105, 0, 'dev', ''), <String>['git', 'fetch']));
     when(processUtils.runSync(
-      <String>['git', 'fetch', 'https://github.com/flutter/flutter.git', '--tags'],
+      <String>['git', 'fetch', kFlutterGit, '--tags'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(ProcessResult(106, 0, '', ''), <String>['git', 'fetch']));
@@ -554,7 +563,7 @@ void main() {
       environment: anyNamed('environment'),
     )).called(1);
     verifyNever(processUtils.runSync(
-      <String>['git', 'fetch', 'https://github.com/flutter/flutter.git', '--tags'],
+      <String>['git', 'fetch', kFlutterGit, '--tags'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     ));
@@ -573,7 +582,7 @@ void main() {
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(ProcessResult(108, 0, 'master', ''), <String>['git', 'fetch']));
     when(processUtils.runSync(
-      <String>['git', 'fetch', 'https://github.com/flutter/flutter.git', '--tags', '-f'],
+      <String>['git', 'fetch', kFlutterGit, '--tags', '-f'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(ProcessResult(109, 0, '', ''), <String>['git', 'fetch']));
@@ -599,7 +608,7 @@ void main() {
       environment: anyNamed('environment'),
     )).called(1);
     verify(processUtils.runSync(
-      <String>['git', 'fetch', 'https://github.com/flutter/flutter.git', '--tags', '-f'],
+      <String>['git', 'fetch', kFlutterGit, '--tags', '-f'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).called(1);
@@ -677,7 +686,7 @@ void fakeData(
       return success(localCommitDate.toString());
     } else if (argsAre('git', 'remote')) {
       return success('');
-    } else if (argsAre('git', 'remote', 'add', '__flutter_version_check__', 'https://github.com/flutter/flutter.git')) {
+    } else if (argsAre('git', 'remote', 'add', '__flutter_version_check__', kFlutterGit)) {
       return success('');
     } else if (argsAre('git', 'fetch', '__flutter_version_check__', channel)) {
       if (!expectServerPing) {
@@ -687,7 +696,7 @@ void fakeData(
     // Careful here!  argsAre accepts 9 arguments and FlutterVersion.gitLog adds 4.
     } else if (remoteCommitDate != null && listArgsAre(FlutterVersion.gitLog(<String>['__flutter_version_check__/$channel', '-n', '1', '--pretty=format:%ad', '--date=iso']))) {
       return success(remoteCommitDate.toString());
-    } else if (argsAre('git', 'fetch', 'https://github.com/flutter/flutter.git', '--tags')) {
+    } else if (argsAre('git', 'fetch', kFlutterGit, '--tags')) {
       return success('');
     }
 
