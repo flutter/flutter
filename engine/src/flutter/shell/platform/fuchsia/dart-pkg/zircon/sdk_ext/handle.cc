@@ -151,6 +151,7 @@ void Handle::ScheduleCallback(tonic::DartPersistentValue callback,
 
 #define FOR_EACH_BINDING(V) \
   V(Handle, handle)         \
+  V(Handle, koid)           \
   V(Handle, is_valid)       \
   V(Handle, Close)          \
   V(Handle, AsyncWait)      \
