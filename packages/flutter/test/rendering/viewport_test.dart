@@ -252,7 +252,7 @@ void main() {
                 );
                 children.add(sliver);
                 return SliverPadding(
-                  padding: const EdgeInsets.all(22.0),
+                  padding: const EdgeInsets.only(top: 22.0, bottom: 23.0),
                   sliver: sliver,
                 );
               }),
@@ -266,10 +266,10 @@ void main() {
 
     final RenderObject target = tester.renderObject(find.byWidget(children[5], skipOffstage: false));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
-    expect(revealed.offset, 5 * (100 + 22 + 22) + 22);
+    expect(revealed.offset, 5 * (100 + 22 + 23) + 22);
 
     revealed = viewport.getOffsetToReveal(target, 1.0);
-    expect(revealed.offset, 5 * (100 + 22 + 22) + 22 - 100);
+    expect(revealed.offset, 5 * (100 + 22 + 23) + 22 - 100);
   });
 
   testWidgets('Viewport getOffsetToReveal Sliver - right', (WidgetTester tester) async {
@@ -293,7 +293,7 @@ void main() {
                 );
                 children.add(sliver);
                 return SliverPadding(
-                  padding: const EdgeInsets.all(22.0),
+                  padding: const EdgeInsets.only(left: 22.0, right: 23.0),
                   sliver: sliver,
                 );
               }),
@@ -307,10 +307,10 @@ void main() {
 
     final RenderObject target = tester.renderObject(find.byWidget(children[5], skipOffstage: false));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
-    expect(revealed.offset, 5 * (100 + 22 + 22) + 22);
+    expect(revealed.offset, 5 * (100 + 22 + 23) + 22);
 
     revealed = viewport.getOffsetToReveal(target, 1.0);
-    expect(revealed.offset, 5 * (100 + 22 + 22) + 22 - 100);
+    expect(revealed.offset, 5 * (100 + 22 + 23) + 22 - 100);
   });
 
   testWidgets('Viewport getOffsetToReveal Sliver - up', (WidgetTester tester) async {
@@ -408,9 +408,10 @@ void main() {
 
   testWidgets('Viewport getOffsetToReveal Sliver - left - reverse growth', (WidgetTester tester) async {
     const Key centerKey = ValueKey<String>('center');
+    const EdgeInsets padding = EdgeInsets.only(left: 22.0, right: 23.0);
     final Widget centerSliver = SliverPadding(
       key: centerKey,
-      padding: const EdgeInsets.all(22.0),
+      padding: padding,
       sliver: SliverToBoxAdapter(
         child: Container(
           width: 100.0,
@@ -423,7 +424,7 @@ void main() {
       child: const Text('Tile lower'),
     );
     final Widget lowerSliver = SliverPadding(
-      padding: const EdgeInsets.all(22.0),
+      padding: padding,
       sliver: SliverToBoxAdapter(
         child: lowerItem,
       ),
@@ -451,10 +452,10 @@ void main() {
 
     final RenderObject target = tester.renderObject(find.byWidget(lowerItem, skipOffstage: false));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
-    expect(revealed.offset, -100 - 22);
+    expect(revealed.offset, -100 - 23);
 
     revealed = viewport.getOffsetToReveal(target, 1.0);
-    expect(revealed.offset, - 100 - 22 - 200);
+    expect(revealed.offset, - 100 - 23 - 200);
   });
 
   testWidgets('Viewport getOffsetToReveal Sliver - left', (WidgetTester tester) async {
@@ -479,7 +480,7 @@ void main() {
                 );
                 children.add(sliver);
                 return SliverPadding(
-                  padding: const EdgeInsets.all(22.0),
+                  padding: const EdgeInsets.only(left: 22.0, right: 23.0),
                   sliver: sliver,
                 );
               }),
@@ -493,10 +494,10 @@ void main() {
 
     final RenderObject target = tester.renderObject(find.byWidget(children[5], skipOffstage: false));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
-    expect(revealed.offset, 5 * (100 + 22 + 22) + 22);
+    expect(revealed.offset, 5 * (100 + 22 + 23) + 23);
 
     revealed = viewport.getOffsetToReveal(target, 1.0);
-    expect(revealed.offset, 5 * (100 + 22 + 22) + 22 - 100);
+    expect(revealed.offset, 5 * (100 + 22 + 23) + 23 - 100);
   });
 
   testWidgets('Nested Viewports showOnScreen', (WidgetTester tester) async {
