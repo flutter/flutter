@@ -559,6 +559,10 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// frames) for `duration` amount of time, and then received a "Vsync" signal
   /// to paint the application.
   ///
+  /// For a [FakeAsync] environment (typically in `flutter test`), this advances
+  /// time and timeout counting; for a live environment this delays `duration`
+  /// time.
+  ///
   /// This is a convenience function that just calls
   /// [TestWidgetsFlutterBinding.pump].
   ///
