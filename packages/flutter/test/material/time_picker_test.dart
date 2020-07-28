@@ -39,7 +39,7 @@ class _TimePickerLauncher extends StatelessWidget {
         child: Center(
           child: Builder(
               builder: (BuildContext context) {
-                return RaisedButton(
+                return ElevatedButton(
                   child: const Text('X'),
                   onPressed: () async {
                     onChanged(await showTimePicker(
@@ -69,7 +69,7 @@ Future<Offset> startPicker(
 }
 
 Future<void> finishPicker(WidgetTester tester) async {
-  final MaterialLocalizations materialLocalizations = MaterialLocalizations.of(tester.element(find.byType(RaisedButton)));
+  final MaterialLocalizations materialLocalizations = MaterialLocalizations.of(tester.element(find.byType(ElevatedButton)));
   await tester.tap(find.text(materialLocalizations.okButtonLabel));
   await tester.pumpAndSettle(const Duration(seconds: 1));
 }
@@ -499,7 +499,7 @@ void _tests() {
           child: Center(
             child: Builder(
               builder: (BuildContext context) {
-                return RaisedButton(
+                return ElevatedButton(
                   child: const Text('X'),
                   onPressed: () {
                     showTimePicker(
@@ -551,7 +551,7 @@ void _tests() {
         onGenerateRoute: (RouteSettings settings) {
           return MaterialPageRoute<dynamic>(
             builder: (BuildContext context) {
-              return RaisedButton(
+              return ElevatedButton(
                 onPressed: () {
                   showTimePicker(
                     context: context,
@@ -567,7 +567,7 @@ void _tests() {
     ));
 
     // Open the dialog.
-    await tester.tap(find.byType(RaisedButton));
+    await tester.tap(find.byType(ElevatedButton));
 
     expect(rootObserver.pickerCount, 1);
     expect(nestedObserver.pickerCount, 0);
@@ -584,7 +584,7 @@ void _tests() {
         onGenerateRoute: (RouteSettings settings) {
           return MaterialPageRoute<dynamic>(
             builder: (BuildContext context) {
-              return RaisedButton(
+              return ElevatedButton(
                 onPressed: () {
                   showTimePicker(
                     context: context,
@@ -601,7 +601,7 @@ void _tests() {
     ));
 
     // Open the dialog.
-    await tester.tap(find.byType(RaisedButton));
+    await tester.tap(find.byType(ElevatedButton));
 
     expect(rootObserver.pickerCount, 0);
     expect(nestedObserver.pickerCount, 1);
@@ -616,7 +616,7 @@ void _tests() {
           child: Center(
             child: Builder(
                 builder: (BuildContext context) {
-                  return RaisedButton(
+                  return ElevatedButton(
                     child: const Text('X'),
                     onPressed: () async {
                       await showTimePicker(
@@ -805,7 +805,7 @@ Future<void> mediaQueryBoilerplate(
             child: Navigator(
               onGenerateRoute: (RouteSettings settings) {
                 return MaterialPageRoute<void>(builder: (BuildContext context) {
-                  return FlatButton(
+                  return TextButton(
                     onPressed: () {
                       showTimePicker(
                         context: context,

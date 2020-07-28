@@ -98,7 +98,7 @@ void main() {
         home: Builder(
           builder: (BuildContext context) {
             return Material(
-              child: RaisedButton(
+              child: ElevatedButton(
                 child: const Text('X'),
                 onPressed: () { Navigator.of(context).pushNamed('/next'); },
               ),
@@ -255,7 +255,7 @@ void main() {
           home: Builder(
               builder: (BuildContext context) {
                 return Material(
-                  child: RaisedButton(
+                  child: ElevatedButton(
                       child: const Text('X'),
                       onPressed: () async {
                         result = Navigator.of(context).pushNamed('/a');
@@ -267,7 +267,7 @@ void main() {
           routes: <String, WidgetBuilder>{
             '/a': (BuildContext context) {
               return Material(
-                child: RaisedButton(
+                child: ElevatedButton(
                   child: const Text('Y'),
                   onPressed: () {
                     Navigator.of(context).pop('all done');
@@ -842,6 +842,22 @@ void main() {
       const Rect.fromLTRB(0.0, 0.0, 20.0, 20.0)
     );
     expect(tween, isA<MaterialRectArcTween>());
+  });
+
+  testWidgets('MaterialApp.navigatorKey can be updated', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> key1 = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(MaterialApp(
+      navigatorKey: key1,
+      home: const Placeholder(),
+    ));
+    expect(key1.currentState, isA<NavigatorState>());
+    final GlobalKey<NavigatorState> key2 = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(MaterialApp(
+      navigatorKey: key2,
+      home: const Placeholder(),
+    ));
+    expect(key2.currentState, isA<NavigatorState>());
+    expect(key1.currentState, isNull);
   });
 }
 

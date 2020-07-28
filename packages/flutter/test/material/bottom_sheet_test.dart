@@ -738,7 +738,7 @@ class _TestPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: FlatButton(
+      child: TextButton(
         child: const Text('Show bottom sheet'),
         onPressed: () {
           if (useRootNavigator != null) {

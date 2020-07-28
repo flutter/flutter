@@ -1370,13 +1370,13 @@ void main() {
                     divisions: divisions,
                     onChanged: onChanged,
                   ),
-                  RaisedButton(
+                  ElevatedButton(
                     child: const Text('Next'),
                     onPressed: () {
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute<void>(
                           builder: (BuildContext context) {
-                            return RaisedButton(
+                            return ElevatedButton(
                               child: const Text('Inner page'),
                               onPressed: () { Navigator.of(context).pop(); },
                             );
