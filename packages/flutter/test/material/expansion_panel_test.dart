@@ -1434,11 +1434,11 @@ void main() {
                       return const Text('ExpansionPanel Header');
                     },
                     expandIconBuilder: (
-                        BuildContext context,
-                        bool isExpanded,
-                        VoidCallback handlePressed,
-                        Duration animationDuration,
-                        ) {
+                      BuildContext context,
+                      bool isExpanded,
+                      VoidCallback handlePressed,
+                      Duration animationDuration,
+                    ) {
                       return Checkbox(
                         value: isExpanded,
                         onChanged: (bool isChecked) {
@@ -1501,11 +1501,11 @@ void main() {
                       return const Text('ExpansionPanel Header');
                     },
                     expandIconBuilder: (
-                        BuildContext context,
-                        bool isExpanded,
-                        VoidCallback handlePressed,
-                        Duration animationDuration,
-                        ) {
+                      BuildContext context,
+                      bool isExpanded,
+                      VoidCallback handlePressed,
+                      Duration animationDuration,
+                    ) {
                       return Checkbox(
                         value: isExpanded,
                         onChanged: (bool isChecked) {
@@ -1521,11 +1521,11 @@ void main() {
                       return const Text('ExpansionPanel Header');
                     },
                     expandIconBuilder: (
-                        BuildContext context,
-                        bool isExpanded,
-                        VoidCallback handlePressed,
-                        Duration animationDuration,
-                        ) {
+                      BuildContext context,
+                      bool isExpanded,
+                      VoidCallback handlePressed,
+                      Duration animationDuration,
+                    ) {
                       return Checkbox(
                         value: isExpanded,
                         onChanged: (bool isChecked) {
@@ -1590,11 +1590,11 @@ void main() {
                       return const Text('ExpansionPanel Header', key: firstPanelKey);
                     },
                     expandIconBuilder: (
-                        BuildContext context,
-                        bool isExpanded,
-                        VoidCallback handlePressed,
-                        Duration animationDuration,
-                        ) {
+                      BuildContext context,
+                      bool isExpanded,
+                      VoidCallback handlePressed,
+                      Duration animationDuration,
+                    ) {
                       return Checkbox(
                         value: isExpanded,
                         onChanged: (bool isChecked) {
@@ -1612,11 +1612,11 @@ void main() {
                       return const Text('ExpansionPanel Header', key: secondPanelKey);
                     },
                     expandIconBuilder: (
-                        BuildContext context,
-                        bool isExpanded,
-                        VoidCallback handlePressed,
-                        Duration animationDuration,
-                        ) {
+                      BuildContext context,
+                      bool isExpanded,
+                      VoidCallback handlePressed,
+                      Duration animationDuration,
+                    ) {
                       return Checkbox(
                         value: isExpanded,
                         onChanged: (bool isChecked) {
@@ -1691,11 +1691,11 @@ void main() {
                       return const Text('ExpansionPanel Header', key: firstPanelKey);
                     },
                     expandIconBuilder: (
-                        BuildContext context,
-                        bool isExpanded,
-                        VoidCallback handlePressed,
-                        Duration animationDuration,
-                        ) {
+                      BuildContext context,
+                      bool isExpanded,
+                      VoidCallback handlePressed,
+                      Duration animationDuration,
+                    ) {
                       return Checkbox(
                         value: isExpanded,
                         onChanged: (bool isChecked) {
@@ -1713,11 +1713,11 @@ void main() {
                       return const Text('ExpansionPanel Header', key: secondPanelKey);
                     },
                     expandIconBuilder: (
-                        BuildContext context,
-                        bool isExpanded,
-                        VoidCallback handlePressed,
-                        Duration animationDuration,
-                        ) {
+                      BuildContext context,
+                      bool isExpanded,
+                      VoidCallback handlePressed,
+                      Duration animationDuration,
+                    ) {
                       return Checkbox(
                         value: isExpanded,
                         onChanged: (bool isChecked) {
