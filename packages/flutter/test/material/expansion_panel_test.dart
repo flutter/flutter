@@ -1762,7 +1762,7 @@ void main() {
     expect(tester.widget<Checkbox>(find.byType(Checkbox).first).value, isFalse);
     expect(tester.widget<Checkbox>(find.byType(Checkbox).last).value, isTrue);
     expect(_onChangeCalled, isFalse);
-    
+
     // Tap on the first panel header to expand the panel.
     await tester.tap(find.byKey(firstPanelKey));
     await tester.pumpAndSettle();
@@ -1852,7 +1852,7 @@ void main() {
 
     // Check semantics for header widget for expanded panel.
     expect(tester.getSemantics(find.byKey(expandedPanelKey)), matchesSemantics(label: 'Header Text'));
-    
+
     // Check semantics of Checkbox for collapsed panel.
     expect(tester.getSemantics(find.byType(Checkbox).last), matchesSemantics(
       label: 'Expand',
