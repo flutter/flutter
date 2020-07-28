@@ -274,58 +274,18 @@ task:
     - name: hostonly_devicelab_tests-3_last-linux
       << : *LINUX_SHARD_TEMPLATE
 
-    # This task populates `docs_cache`
     - name: docs-linux # linux-only
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_drive/**', 'packages/flutter_localizations/**', 'packages/flutter_goldens/**', 'bin/**') || $CIRRUS_PR == ''"
       environment:
-        # Empirically, as of October 2019, the docs-linux shard took about 30 minutes when run with
-        # 1 CPU and 4G of RAM. 2 CPUs reduced that to 20 minutes, more CPUs did not improve matters.
-        CPU: 2
-        USE_IN_MEMORY_DISK: true
-      docs_cache:
-        folder: dev/docs
-        fingerprint_script:
-          - echo "docs_${CIRRUS_CHANGE_IN_REPO}_${CIRRUS_BUILD_ID}"
-      script:
-        - ./dev/bots/docs.sh docs
-
-    # This task relies on `docs_cache` having been populated in `docs-linux`.
-    # It updates the cache with the docset gzip file it generates.
-    - name: docs_docset-linux # linux-only
-      only_if: "$CIRRUS_PR == ''"
-      depends_on:
-        - docs-linux
-      environment:
         # TODO(tvolkert): optimize CPU and MEMORY settings once #60646 is resolved.
-        CPU: 2
+        CPU: 4
         MEMORY: 8G
-        USE_IN_MEMORY_DISK: true
-      docs_cache:
-        folder: dev/docs
-        reupload_on_changes: true
-        fingerprint_script:
-          - echo "docs_${CIRRUS_CHANGE_IN_REPO}_${CIRRUS_BUILD_ID}"
-      script:
-        - ./dev/bots/docs.sh docset
-
-    # This task relies on an updated `docs_cache` from `docs_docset-linux`
-    - name: docs_deploy-linux # linux-only
-      only_if: "$CIRRUS_BRANCH == 'master' || $CIRRUS_BRANCH == 'stable'"
-      depends_on:
-        - docs-linux
-        - docs_docset-linux
-      environment:
-        USE_IN_MEMORY_DISK: true
         # For uploading master docs to Firebase master branch staging site
         FIREBASE_MASTER_TOKEN: ENCRYPTED[eb768d18798fdc5abfe09b224e1724c4d82831d715ccf90df2c79d618c317216cbd99493278361f6fe7948b409b603f0]
         # For uploading stable docs to Firebase public live site
         FIREBASE_PUBLIC_TOKEN: ENCRYPTED[37e8b82f167864cae9a3f4d2cf3f37dea331d9375c295327c45de524f6c588fa6f6d63e5784f10f6d43ce29689f36c92]
-      docs_cache:
-        folder: dev/docs
-        fingerprint_script:
-          - echo "docs_${CIRRUS_CHANGE_IN_REPO}_${CIRRUS_BUILD_ID}"
       script:
-        - ./dev/bots/docs.sh deploy
+        - ./dev/bots/docs.sh
 
     - name: customer_testing-linux
       # environment:
