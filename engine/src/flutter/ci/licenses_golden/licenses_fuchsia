@@ -1,4 +1,4 @@
-Signature: 17c6122682d326202112e1fa00f76851
+Signature: d44656965559d99cada764733ebd9f4c
 
 UNUSED LICENSES:
 
@@ -504,6 +504,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.dhcp/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.http/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.mdns/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.oldhttp/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.routes/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.netstack/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.posix.socket/meta.json
@@ -1374,6 +1375,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.dhcp/server.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.http/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.mdns/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.oldhttp/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.routes/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net/namelookup.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.netstack/meta.json
@@ -2147,6 +2149,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.dhcp/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.http/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.mdns/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.oldhttp/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.routes/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.netstack/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.posix.socket/meta.json
@@ -3173,6 +3176,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/activity_reporter.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/profile_provider.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.memorypressure/memorypressure.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/session_restart_controller.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.routes/routes.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net/socket.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.posix/error.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/input.fidl
