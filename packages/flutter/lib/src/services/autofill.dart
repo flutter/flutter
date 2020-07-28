@@ -722,8 +722,8 @@ abstract class AutofillClient {
   /// [TextInputConfiguration.autofillConfiguration] must not be null.
   TextInputConfiguration get textInputConfiguration;
 
-  /// Requests this [AutofillClient] update its [TextEditingState] to the given
-  /// state.
+  /// Requests this [AutofillClient] update its [TextEditingValue] to the given
+  /// value.
   void updateEditingValue(TextEditingValue newEditingValue);
 }
 
