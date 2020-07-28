@@ -35,8 +35,7 @@ void main(List<String> arguments) {
       '\n\n'
       'The app must import the file specified in the \'output-localization-file\' '
       'option from this directory. If unspecified, this defaults to the same '
-      'directory as the input directory specified in \'arb-dir\'.'
-      '\n\n',
+      'directory as the input directory specified in \'arb-dir\'.',
   );
   parser.addOption(
     'template-arb-file',
