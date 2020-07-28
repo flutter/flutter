@@ -184,7 +184,7 @@ enum UnfocusDisposition {
 /// a widget might need to host one if the widget subsystem is not being used,
 /// or if the [Focus] and [FocusScope] widgets provide insufficient control.
 ///
-/// [FocusNodes] are organized into _scopes_ (see [FocusScopeNode]), which form
+/// [FocusNode]s are organized into _scopes_ (see [FocusScopeNode]), which form
 /// sub-trees of nodes that restrict traversal to a group of nodes. Within a
 /// scope, the most recent nodes to have focus are remembered, and if a node is
 /// focused and then unfocused, the previous node receives focus again.
@@ -1173,7 +1173,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 /// that manage their own [FocusScopeNode]s and [FocusNode]s, respectively. If
 /// they aren't appropriate, [FocusScopeNode]s can be managed directly._
 ///
-/// [FocusScopeNode] organizes [FocusNodes] into _scopes_. Scopes form sub-trees
+/// [FocusScopeNode] organizes [FocusNode]s into _scopes_. Scopes form sub-trees
 /// of nodes that can be traversed as a group. Within a scope, the most recent
 /// nodes to have focus are remembered, and if a node is focused and then
 /// removed, the original node receives focus again.

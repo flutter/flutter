@@ -191,7 +191,7 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 /// size its child to fill the maximum available extent. [SliverFillRemaining]
 /// will not constrain the scrollable area, as it could potentially have an
 /// infinite depth. This is also true for use cases such as a [ScrollView] when
-/// [ScrollView.shrinkwrap] is true.
+/// [ScrollView.shrinkWrap] is true.
 ///
 /// ### When [SliverFillRemaining] does not have a scrollable child
 ///
@@ -418,7 +418,7 @@ class SliverFillRemaining extends StatelessWidget {
   ///
   /// Setting this value to false will allow the child to fill the remainder of
   /// the viewport and not extend further. However, if the
-  /// [precedingScrollExtent] of the [SliverConstraints] and/or the [child]'s
+  /// [SliverConstraints.precedingScrollExtent] and/or the [child]'s
   /// extent exceeds the size of the viewport, the sliver will defer to the
   /// child's size rather than overriding it.
   final bool hasScrollBody;

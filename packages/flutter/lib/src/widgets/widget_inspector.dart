@@ -1894,7 +1894,7 @@ mixin WidgetInspectorService {
     }
   }
 
-  /// This method is called by [WidgetBinding.performReassemble] to flush caches
+  /// This method is called by [WidgetsBinding.performReassemble] to flush caches
   /// of obsolete values after a hot reload.
   ///
   /// Do not call this method directly. Instead, use
