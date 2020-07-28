@@ -950,8 +950,9 @@ class DecoratedBoxTransition extends AnimatedWidget {
 ///
 /// Here's an illustration of the [DecoratedBoxTransition] widget, with it's
 /// [DecoratedBoxTransition.decoration] animated by a [CurvedAnimation] set to
-/// [Curves.decelerate]: {@animation 300 378
-/// https://flutter.github.io/assets-for-api-docs/assets/widgets/align_transition.mp4}
+/// [Curves.decelerate]:
+///
+/// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/align_transition.mp4}
 ///
 /// See also:
 ///

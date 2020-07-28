@@ -54,8 +54,8 @@ class SliverFillViewport extends StatelessWidget {
   /// widget along this main axis, such as in a [CustomScrollView] with multiple
   /// children.
   ///
-  /// This option cannot be [null]. If [viewportFraction] >= 1.0, this option has no
-  /// effect. Defaults to [true].
+  /// This option cannot be null. If [viewportFraction] >= 1.0, this option has no
+  /// effect. Defaults to true.
   final bool padEnds;
 
   /// {@macro flutter.widgets.sliverMultiBoxAdaptor.delegate}

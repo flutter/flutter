@@ -239,8 +239,8 @@ abstract class Route<T> {
   /// Returns whether calling [Navigator.maybePop] when this [Route] is current
   /// ([isCurrent]) should do anything.
   ///
-  /// [Navigator.maybePop] is usually used instead of [pop] to handle the system
-  /// back button.
+  /// [Navigator.maybePop] is usually used instead of [Navigator.pop] to handle
+  /// the system back button.
   ///
   /// By default, if a [Route] is the first route in the history (i.e., if
   /// [isFirst]), it reports that pops should be bubbled
