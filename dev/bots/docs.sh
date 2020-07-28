@@ -83,6 +83,7 @@ function create_docset() {
   "$DART" --disable-dart-dev ./dashing_postprocess.dart && \
   tar cf flutter.docset.tar.gz --use-compress-program="gzip --best" flutter.docset
   if [[ $? -ne 0 ]]; then
+      >&2 echo "Dashing docset generation failed"
       tail -200 $dashing_log
       exit 1
   fi
