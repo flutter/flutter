@@ -2041,7 +2041,7 @@ typedef ElementVisitor = void Function(Element element);
 ///       appBar: AppBar(title: Text('Demo')),
 ///       body: Builder(
 ///         builder: (BuildContext context) {
-///           return FlatButton(
+///           return TextButton(
 ///             child: Text('BUTTON'),
 ///             onPressed: () {
 ///               // here, Scaffold.of(context) returns the locally created Scaffold
