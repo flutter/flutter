@@ -2,7 +2,7 @@ name: ui
 publish_to: none
 
 environment:
-  sdk: ">=2.9.0-0 <3.0.0"
+  sdk: ">=2.10.0-0 <3.0.0"
 
 dependencies:
   meta: 1.1.8

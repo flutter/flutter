@@ -128,17 +128,13 @@ class TestCommand extends Command<bool> with ArgUtils {
       case TestTypesRequested.unit:
         return runUnitTests();
       case TestTypesRequested.integration:
-        // TODO(nurhan): Stop running all integration tests for now.
-        // Related to: https://github.com/flutter/flutter/issues/62146
-        return true; // runIntegrationTests();
+        return runIntegrationTests();
       case TestTypesRequested.all:
         // TODO(nurhan): https://github.com/flutter/flutter/issues/53322
         // TODO(nurhan): Expand browser matrix for felt integration tests.
         if (runAllTests && (isChrome || isSafariOnMacOS || isFirefox)) {
           bool unitTestResult = await runUnitTests();
-          // TODO(nurhan): Stop running all integration tests for now.
-          // Related to: https://github.com/flutter/flutter/issues/62146
-          bool integrationTestResult = true; // await runIntegrationTests();
+          bool integrationTestResult = await runIntegrationTests();
           if (integrationTestResult != unitTestResult) {
             print('Tests run. Integration tests passed: $integrationTestResult '
                 'unit tests passed: $unitTestResult');
