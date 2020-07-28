@@ -24,7 +24,8 @@ class Tappable extends RoleManager {
     semanticsObject.setAriaRole(
         'button', semanticsObject.hasFlag(ui.SemanticsFlag.isButton));
 
-    if (!semanticsObject.hasFlag(ui.SemanticsFlag.isEnabled) &&
+    // Add `aria-disabled` for disabled buttons.
+    if (semanticsObject.enabledState() == EnabledState.disabled &&
         semanticsObject.hasFlag(ui.SemanticsFlag.isButton)) {
       semanticsObject.element.setAttribute('aria-disabled', 'true');
       _stopListening();
