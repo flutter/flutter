@@ -533,10 +533,7 @@ class LocalizationsGenerator {
     _setHeader(headerString, headerFile);
     _setUseDeferredLoading(useDeferredLoading);
     className = classNameString;
-    _setInputsAndOutputsListFile(
-      inputsAndOutputsListPath: inputsAndOutputsListPath,
-      useSyntheticPackage: useSyntheticPackage,
-    );
+    _setInputsAndOutputsListFile(inputsAndOutputsListPath);
   }
 
   static bool _isNotReadable(FileStat fileStat) {
@@ -695,22 +692,13 @@ class LocalizationsGenerator {
     _useDeferredLoading = useDeferredLoading;
   }
 
-  void _setInputsAndOutputsListFile({
-    String inputsAndOutputsListPath,
-    bool useSyntheticPackage,
-  }) {
-    if (inputsAndOutputsListPath == null && !useSyntheticPackage)
+  void _setInputsAndOutputsListFile(String inputsAndOutputsListPath) {
+    if (inputsAndOutputsListPath == null)
       return;
 
-    if (useSyntheticPackage && inputsAndOutputsListPath == null) {
-      _inputsAndOutputsListFile = _fs.file(
-        path.join(defaultSyntheticPackagePath, 'gen_l10n_inputs_and_outputs.json'),
-      );
-    } else {
-      _inputsAndOutputsListFile = _fs.file(
-        path.join(inputsAndOutputsListPath, 'gen_l10n_inputs_and_outputs.json'),
-      );
-    }
+    _inputsAndOutputsListFile = _fs.file(
+      path.join(inputsAndOutputsListPath, 'gen_l10n_inputs_and_outputs.json'),
+    );
 
     _inputFileList = <String>[];
     _outputFileList = <String>[];
