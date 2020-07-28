@@ -238,11 +238,11 @@ class SliverConstraints extends Constraints {
   /// have enough information to estimate its total extent,
   /// [precedingScrollExtent] will be [double.infinity] for all [RenderSliver]s
   /// that appear after the lazily constructed child. This is because a total
-  /// [scrollExtent] cannot be calculated unless all inner children have been
-  /// created and sized, or the number of children and estimated extents are
-  /// provided. The infinite [SliverGeometry.scrollExtent] will become finite as
-  /// soon as enough information is available to estimate the overall extent of
-  /// all children within the given [RenderSliver].
+  /// [SliverGeometry.scrollExtent] cannot be calculated unless all inner
+  /// children have been created and sized, or the number of children and
+  /// estimated extents are provided. The infinite [SliverGeometry.scrollExtent]
+  /// will become finite as soon as enough information is available to estimate
+  /// the overall extent of all children within the given [RenderSliver].
   ///
   /// [RenderSliver]s may legitimately be infinite, meaning that they can scroll
   /// content forever without reaching the end. For any [RenderSliver]s that

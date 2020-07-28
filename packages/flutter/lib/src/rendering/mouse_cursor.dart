@@ -160,7 +160,7 @@ abstract class MouseCursorSession {
 ///
 /// A [MouseCursor] object is used by being assigned to a [MouseRegion] or
 /// another widget that exposes the [MouseRegion] API, such as
-/// [InkWell.mouseCursor].
+/// [InkResponse.mouseCursor].
 ///
 /// {@tool snippet --template=stateless_widget_material}
 /// This sample creates a rectangular region that is wrapped by a [MouseRegion]
