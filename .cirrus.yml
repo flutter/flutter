@@ -296,7 +296,9 @@ task:
       depends_on:
         - docs-linux
       environment:
+        # TODO(tvolkert): optimize CPU and MEMORY settings once #60646 is resolved.
         CPU: 2
+        MEMORY: 8G
         USE_IN_MEMORY_DISK: true
       docs_cache:
         folder: dev/docs
