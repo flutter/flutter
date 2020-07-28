@@ -142,6 +142,7 @@ void main() {
     final Map<String, Object> versionInfo = json.decode(result.stdout
       .toString()
       .replaceAll('Building flutter tool...', '')
+      .replaceAll('Waiting for another flutter command to release the startup lock...', '')
       .trim()) as Map<String, Object>;
 
     expect(versionInfo, containsPair('flutterRoot', isNotNull));
