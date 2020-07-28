@@ -785,7 +785,7 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 ///  * [DropdownMenuItem], the class used to represent the [items].
 ///  * [DropdownButtonHideUnderline], which prevents its descendant dropdown buttons
 ///    from displaying their underlines.
-///  * [RaisedButton], [FlatButton], ordinary buttons that trigger a single action.
+///  * [ElevatedButton], [TextButton], ordinary buttons that trigger a single action.
 ///  * <https://material.io/design/components/menus.html#dropdown-menu>
 class DropdownButton<T> extends StatefulWidget {
   /// Creates a dropdown button.
