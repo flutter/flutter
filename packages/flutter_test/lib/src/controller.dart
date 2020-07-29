@@ -423,7 +423,11 @@ abstract class WidgetController {
   /// See [PointerEventRecord].
   Future<List<Duration>> handlePointerEventRecord(List<PointerEventRecord> records);
 
-  /// Called to indicate that time should advance.
+  /// Called to indicate that there should be a new frame after an optional
+  /// delay.
+  ///
+  /// The frame is pumped after a delay of [duration] if [duration] is not null,
+  /// or immediately otherwise.
   ///
   /// This is invoked by [flingFrom], for instance, so that the sequence of
   /// pointer events occurs over time.
@@ -432,7 +436,7 @@ abstract class WidgetController {
   ///
   /// See also [SchedulerBinding.endOfFrame], which returns a future that could
   /// be appropriate to return in the implementation of this method.
-  Future<void> pump(Duration duration);
+  Future<void> pump([Duration duration]);
 
   /// Attempts to drag the given widget by the given offset, by
   /// starting a drag in the middle of the widget.
@@ -755,7 +759,7 @@ class LiveWidgetController extends WidgetController {
   LiveWidgetController(WidgetsBinding binding) : super(binding);
 
   @override
-  Future<void> pump(Duration duration) async {
+  Future<void> pump([Duration duration]) async {
     if (duration != null)
       await Future<void>.delayed(duration);
     binding.scheduleFrame();
