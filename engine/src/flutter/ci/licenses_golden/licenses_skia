@@ -1,4 +1,4 @@
-Signature: 1749afc2e4e078afa2ece8623360bf4e
+Signature: 57b47312e2b9edbe85e390c4fd69095c
 
 UNUSED LICENSES:
 
@@ -6426,6 +6426,8 @@ FILE: ../../../third_party/skia/infra/bots/gen_tasks_logic/task_builder.go
 FILE: ../../../third_party/skia/infra/bots/task_drivers/canary/canary.go
 FILE: ../../../third_party/skia/infra/bots/task_drivers/fm_driver/fm_driver.go
 FILE: ../../../third_party/skia/infra/bots/task_drivers/g3_canary/g3_canary.go
+FILE: ../../../third_party/skia/infra/bots/task_drivers/perf_puppeteer_canvas/perf_puppeteer_canvas.go
+FILE: ../../../third_party/skia/infra/bots/task_drivers/perf_puppeteer_canvas/perf_puppeteer_canvas_test.go
 FILE: ../../../third_party/skia/infra/bots/task_drivers/perf_puppeteer_render_skps/perf_puppeteer_render_skps.go
 FILE: ../../../third_party/skia/infra/bots/task_drivers/perf_puppeteer_render_skps/perf_puppeteer_render_skps_test.go
 FILE: ../../../third_party/skia/infra/bots/task_drivers/perf_puppeteer_skottie_frames/perf_puppeteer_skottie_frames.go
