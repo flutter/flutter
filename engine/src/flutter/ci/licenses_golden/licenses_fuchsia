@@ -1,4 +1,4 @@
-Signature: 5a1b3d8dfbe535825c50a22df016b843
+Signature: b2381a52cb4e2776290fc09a588c7aa9
 
 UNUSED LICENSES:
 
@@ -3190,6 +3190,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.drm/properties.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.drm/types.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.target/target_discovery.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/activity_reporter.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/audio_errors.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/profile_provider.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.memorypressure/memorypressure.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular.session/launcher.fidl
