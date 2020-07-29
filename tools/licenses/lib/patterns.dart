@@ -322,9 +322,13 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
     fileIndex: 5,
     pattern: RegExp(
       kIndent +
-      r'(Copyright .+(The .+ Authors)\. +All rights reserved\. *\n)' +
-      r'\1\2Use of this source code is governed by a BSD-style license that can be *\n'
-      r'\1\2found in the Chromium source repository ([^ ]+) file.',
+      // The " \* " is needed to ensure that both copyright lines start with
+      // the comment decoration in the captured match, otherwise it won't be
+      // stripped from the second line when generating output.
+      r'((?: \* Copyright \(C\) 2017 ARM, Inc.\n)?'
+      r'Copyright .+(The .+ Authors)\. +All rights reserved\.)\n'
+      r'Use of this source code is governed by a BSD-style license that can be\n'
+      r'found in the Chromium source repository ([^ ]+) file.'.replaceAll(r'\n', _linebreakLoose),
       multiLine: true,
       caseSensitive: false,
     )
