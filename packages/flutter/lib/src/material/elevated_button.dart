@@ -103,7 +103,7 @@ class ElevatedButton extends ButtonStyleButton {
   /// way that [defaultStyleOf] uses the [ColorScheme] colors with the same
   /// names. Specify a value for [onPrimary] to specify the color of the
   /// button's text and icons as well as the overlay colors used to indicate the
-  /// hover, focus, and pressed states. Use primary for the button's background
+  /// hover, focus, and pressed states. Use [primary] for the button's background
   /// fill color and [onSurface] to specify the button's disabled text, icon,
   /// and fill color.
   ///

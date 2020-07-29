@@ -343,14 +343,14 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// If this property is null, then [AppBarTheme.elevation] of
   /// [ThemeData.appBarTheme] is used. If that is also null, the default value
-  /// is 4, the appropriate elevation for app bars.
+  /// is 4.
   final double elevation;
 
   /// The color to paint the shadow below the app bar.
   ///
   /// If this property is null, then [AppBarTheme.shadowColor] of
   /// [ThemeData.appBarTheme] is used. If that is also null, the default value
-  /// is fully opaque black, the appropriate color for shadows.
+  /// is fully opaque black.
   final Color shadowColor;
 
   /// The material's shape as well its shadow.
@@ -1150,7 +1150,7 @@ class SliverAppBar extends StatefulWidget {
   ///
   /// If this property is null, then [AppBarTheme.elevation] of
   /// [ThemeData.appBarTheme] is used, if that is also null, the default value
-  /// is 4, the appropriate elevation for app bars.
+  /// is 4.
   ///
   /// If [forceElevated] is false, the elevation is ignored when the app bar has
   /// no content underneath it. For example, if the app bar is [pinned] but no
@@ -1163,7 +1163,7 @@ class SliverAppBar extends StatefulWidget {
   ///
   /// If this property is null, then [AppBarTheme.shadowColor] of
   /// [ThemeData.appBarTheme] is used, if that is also null, the default value
-  /// is fully opaque black, the appropriate color for shadows.
+  /// is fully opaque black.
   final Color shadowColor;
 
   /// Whether to show the shadow appropriate for the [elevation] even if the
@@ -1196,7 +1196,7 @@ class SliverAppBar extends StatefulWidget {
   /// The color, opacity, and size to use for app bar icons. Typically this
   /// is set along with [backgroundColor], [brightness], [textTheme].
   ///
-  /// If this property is null, then [AppbarTheme.iconTheme] of
+  /// If this property is null, then [AppBarTheme.iconTheme] of
   /// [ThemeData.appBarTheme] is used, if that is also null, then
   /// [ThemeData.primaryIconTheme] is used.
   final IconThemeData iconTheme;
