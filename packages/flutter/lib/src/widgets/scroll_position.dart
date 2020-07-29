@@ -784,7 +784,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// deferred.
   ///
   /// The actual work of this is delegated to the [physics] via
-  /// [ScrollPhysics.recommendDeferredScrolling] called with the current
+  /// [ScrollPhysics.recommendDeferredLoading] called with the current
   /// [activity]'s [ScrollActivity.velocity].
   ///
   /// Returning true from this method indicates that the [ScrollPhysics]

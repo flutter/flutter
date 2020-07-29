@@ -1237,11 +1237,12 @@ class Transform extends SingleChildRenderObjectWidget {
   /// If it is specified at the same time as the [origin], both are applied.
   ///
   /// An [AlignmentDirectional.centerStart] value is the same as an [Alignment]
-  /// whose [Alignment.x] value is `-1.0` if [textDirection] is
-  /// [TextDirection.ltr], and `1.0` if [textDirection] is [TextDirection.rtl].
-  /// Similarly [AlignmentDirectional.centerEnd] is the same as an [Alignment]
-  /// whose [Alignment.x] value is `1.0` if [textDirection] is
-  /// [TextDirection.ltr], and `-1.0` if [textDirection] is [TextDirection.rtl].
+  /// whose [Alignment.x] value is `-1.0` if [Directionality.of] returns
+  /// [TextDirection.ltr], and `1.0` if [Directionality.of] returns
+  /// [TextDirection.rtl].	 Similarly [AlignmentDirectional.centerEnd] is the
+  /// same as an [Alignment] whose [Alignment.x] value is `1.0` if
+  /// [Directionality.of] returns	 [TextDirection.ltr], and `-1.0` if
+  /// [Directionality.of] returns [TextDirection.rtl].
   final AlignmentGeometry alignment;
 
   /// Whether to apply the transformation when performing hit tests.
@@ -6085,12 +6086,12 @@ class MouseRegion extends StatefulWidget {
   /// This means that a [MouseRegion.onExit] might not be matched by a
   /// [MouseRegion.onEnter].
   ///
-  /// This restriction aims to prevent a common misuse: if [setState] is called
-  /// during [MouseRegion.onExit] without checking whether the widget is still
-  /// mounted, an exception will occur. This is because the callback is
+  /// This restriction aims to prevent a common misuse: if [State.setState] is
+  /// called during [MouseRegion.onExit] without checking whether the widget is
+  /// still mounted, an exception will occur. This is because the callback is
   /// triggered during the post-frame phase, at which point the widget has been
-  /// unmounted. Since [setState] is exclusive to widgets, the restriction is
-  /// specific to [MouseRegion], and does not apply to its lower-level
+  /// unmounted. Since [State.setState] is exclusive to widgets, the restriction
+  /// is specific to [MouseRegion], and does not apply to its lower-level
   /// counterparts, [RenderMouseRegion] and [MouseTrackerAnnotation].
   ///
   /// There are a few ways to mitigate this restriction:
@@ -6358,10 +6359,10 @@ class _RawMouseRegion extends SingleChildRenderObjectWidget {
 ///
 /// [RepaintBoundary] is therefore used, both while propagating the
 /// `markNeedsPaint` flag up the render tree and while traversing down the
-/// render tree via [RenderObject.paintChild], to strategically contain repaints
-/// to the render subtree that visually changed for performance. This is done
-/// because the [RepaintBoundary] widget creates a [RenderObject] that always
-/// has a [Layer], decoupling ancestor render objects from the descendant
+/// render tree via [PaintingContext.paintChild], to strategically contain
+/// repaints to the render subtree that visually changed for performance. This
+/// is done because the [RepaintBoundary] widget creates a [RenderObject] that
+/// always has a [Layer], decoupling ancestor render objects from the descendant
 /// render objects.
 ///
 /// [RepaintBoundary] has the further side-effect of possibly hinting to the
@@ -7168,7 +7169,7 @@ class Builder extends StatelessWidget {
 
 /// Signature for the builder callback used by [StatefulBuilder].
 ///
-/// Call [setState] to schedule the [StatefulBuilder] to rebuild.
+/// Call `setState` to schedule the [StatefulBuilder] to rebuild.
 typedef StatefulWidgetBuilder = Widget Function(BuildContext context, StateSetter setState);
 
 /// A platonic widget that both has state and calls a closure to obtain its child widget.
