@@ -2733,6 +2733,8 @@ class _NavigatorReplaceObservation extends _NavigatorObservation {
 }
 
 /// The state for a [Navigator] widget.
+///
+/// A reference to this class can be obtained by calling [Navigator.of].
 class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   final GlobalKey<OverlayState> _overlayKey = GlobalKey<OverlayState>();
   List<_RouteEntry> _history = <_RouteEntry>[];
