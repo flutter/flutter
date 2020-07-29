@@ -1,3 +1,4 @@
+
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -1435,6 +1436,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       sliderTheme: _sliderTheme,
       thumb: bottomThumb,
       isPressed: bottomThumb == Thumb.start ? startThumbSelected : endThumbSelected,
+      values: _values,
     );
 
     if (shouldPaintValueIndicators) {
@@ -1511,6 +1513,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       sliderTheme: _sliderTheme,
       thumb: topThumb,
       isPressed: topThumb == Thumb.start ? startThumbSelected : endThumbSelected,
+      values: _values,
     );
   }
 
