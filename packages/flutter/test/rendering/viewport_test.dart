@@ -400,10 +400,10 @@ void main() {
 
     final RenderObject target = tester.renderObject(find.byWidget(lowerItem, skipOffstage: false));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
-    expect(revealed.offset, - 100 - 23);
+    expect(revealed.offset, - 100 - 22);
 
     revealed = viewport.getOffsetToReveal(target, 1.0);
-    expect(revealed.offset, - 100 - 23 - 100);
+    expect(revealed.offset, - 100 - 22 - 100);
   });
 
   testWidgets('Viewport getOffsetToReveal Sliver - left - reverse growth', (WidgetTester tester) async {
@@ -452,10 +452,10 @@ void main() {
 
     final RenderObject target = tester.renderObject(find.byWidget(lowerItem, skipOffstage: false));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
-    expect(revealed.offset, -100 - 23);
+    expect(revealed.offset, -100 - 22);
 
     revealed = viewport.getOffsetToReveal(target, 1.0);
-    expect(revealed.offset, - 100 - 23 - 200);
+    expect(revealed.offset, - 100 - 22 - 200);
   });
 
   testWidgets('Viewport getOffsetToReveal Sliver - left', (WidgetTester tester) async {
