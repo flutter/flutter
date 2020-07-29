@@ -47,6 +47,15 @@ Future<void> main() async {
       true,
     );
     await file.writeAsString(resultString);
+    final File histogramFile = fs.file(path.join(
+      testOutputsDirectory,
+      'transition_durations.json',
+    ));
+    final String histogramString = _encodeJson(
+      response.data['transition_durations'] as Map<String, dynamic>,
+      true,
+    );
+    await histogramFile.writeAsString(histogramString);
 
     exit(0);
   } else {
