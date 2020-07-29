@@ -191,13 +191,8 @@ class OutlinedButton extends ButtonStyleButton {
   /// value for all states, otherwise the values are as specified for
   /// each state and "others" means all other states.
   ///
-<<<<<<< Updated upstream
-  /// The color of the [textStyle] is not used, the [foreground] color
-  /// is used instead.
-=======
   /// The color of the [ButtonStyle.textStyle] is not used, the
   /// [ButtonStyle.foregroundColor] is used instead.
->>>>>>> Stashed changes
   ///
   /// * `textStyle` - Theme.textTheme.button
   /// * `backgroundColor` - transparent
