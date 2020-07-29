@@ -13,7 +13,12 @@ import 'gen_l10n_templates.dart';
 import 'gen_l10n_types.dart';
 import 'localizations_utils.dart';
 
-String defaultSyntheticPackagePath = path.join('.dart_tool', 'flutter_gen', 'gen_l10n');
+/// The default path used when the `useSyntheticPackage` setting is set to true
+/// in [LocalizationsGenerator].
+///
+/// See [LocalizationsGenerator.initialize] for where and how it is used by the
+/// localizations tool.
+final String defaultSyntheticPackagePath = path.join('.dart_tool', 'flutter_gen', 'gen_l10n');
 
 List<String> generateMethodParameters(Message message) {
   assert(message.placeholders.isNotEmpty);
@@ -578,7 +583,6 @@ class LocalizationsGenerator {
   }) {
     if (useSyntheticPackage) {
       outputDirectory = _fs.directory(defaultSyntheticPackagePath);
-      return;
     } else {
       if (outputPathString == null)
         throw L10nException(
