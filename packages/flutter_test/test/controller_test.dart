@@ -596,7 +596,6 @@ void main() {
 
         await tester.scrollUntilVisible(
           find.text('Item 45', skipOffstage: false),
-          find.byType(Scrollable),
           100,
         );
         await tester.pumpAndSettle();
@@ -628,7 +627,6 @@ void main() {
 
         await tester.scrollUntilVisible(
           find.text('Item 45', skipOffstage: false),
-          find.byType(Scrollable),
           100,
         );
         await tester.pumpAndSettle();
@@ -656,7 +654,6 @@ void main() {
         try {
           await tester.scrollUntilVisible(
             find.text('Item 55', skipOffstage: false),
-            find.byType(Scrollable),
             100,
           );
         } on StateError catch (e) {
