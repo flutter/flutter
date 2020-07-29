@@ -393,7 +393,7 @@ class AnimationController extends Animation<double>
   double get velocity {
     if (!isAnimating)
       return 0.0;
-    return _simulation!.dx(lastElapsedDuration.inMicroseconds.toDouble() / Duration.microsecondsPerSecond);
+    return _simulation!.dx(lastElapsedDuration!.inMicroseconds.toDouble() / Duration.microsecondsPerSecond);
   }
 
   void _internalSetValue(double newValue) {
@@ -413,7 +413,7 @@ class AnimationController extends Animation<double>
   /// and the most recent tick of the animation.
   ///
   /// If the controller is not animating, the last elapsed duration is null.
-  Duration get lastElapsedDuration => _lastElapsedDuration!;
+  Duration? get lastElapsedDuration => _lastElapsedDuration;
   Duration? _lastElapsedDuration;
 
   /// Whether this animation is currently animating in either the forward or reverse direction.
