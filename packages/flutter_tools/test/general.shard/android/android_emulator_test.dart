@@ -4,8 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/android/android_sdk.dart'
-  show getEmulatorPath;
 import 'package:flutter_tools/src/android/android_emulator.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -144,7 +142,7 @@ void main() {
         logger: BufferLogger.test(),
       );
 
-      expect(getEmulatorPath(mockSdk), mockSdk.emulatorPath);
+      expect(mockSdk.getEmulatorPath(), mockSdk.emulatorPath);
 
       final Completer<void> completer = Completer<void>();
       FakeAsync().run((FakeAsync time) {

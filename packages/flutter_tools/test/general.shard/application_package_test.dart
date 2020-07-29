@@ -72,7 +72,7 @@ void main() {
       const String aaptPath = 'aaptPath';
       final File apkFile = globals.fs.file('app.apk');
       final AndroidSdkVersion sdkVersion = MockitoAndroidSdkVersion();
-      when(sdkVersion.aaptPath).thenReturn(aaptPath);
+      when(sdkVersion.aaptPath(fileSystem: anyNamed('filesystem'))).thenReturn(aaptPath);
       when(sdk.latestVersion).thenReturn(sdkVersion);
       when(sdk.platformToolsAvailable).thenReturn(true);
       when(sdk.licensesAvailable).thenReturn(false);

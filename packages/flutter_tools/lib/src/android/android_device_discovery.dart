@@ -55,7 +55,7 @@ class AndroidDevices extends PollingDeviceDiscovery {
 
   @override
   Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
-    final String adbPath = getAdbPath(_androidSdk);
+    final String adbPath = _androidSdk.adbPath;
     if (adbPath == null) {
       return <AndroidDevice>[];
     }
@@ -88,7 +88,7 @@ class AndroidDevices extends PollingDeviceDiscovery {
 
   @override
   Future<List<String>> getDiagnostics() async {
-    final String adbPath = getAdbPath(_androidSdk);
+    final String adbPath = _androidSdk.adbPath;
     if (adbPath == null) {
       return <String>[];
     }

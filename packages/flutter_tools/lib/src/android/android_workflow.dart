@@ -58,13 +58,13 @@ class AndroidWorkflow implements Workflow {
   bool get appliesToHostPlatform => _featureFlags.isAndroidEnabled;
 
   @override
-  bool get canListDevices => getAdbPath(_androidSdk) != null;
+  bool get canListDevices => _androidSdk.adbPath != null;
 
   @override
   bool get canLaunchDevices => _androidSdk != null && _androidSdk.validateSdkWellFormed().isEmpty;
 
   @override
-  bool get canListEmulators => getEmulatorPath(_androidSdk) != null;
+  bool get canListEmulators => _androidSdk.emulatorPath != null;
 }
 
 class AndroidValidator extends DoctorValidator {
