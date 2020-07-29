@@ -222,7 +222,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// Typically the [leading] widget is an [Icon] or an [IconButton].
   ///
-  /// Becomes the leading component of the [NavigationToolBar] built
+  /// Becomes the leading component of the [NavigationToolbar] built
   /// by this widget. The [leading] widget's width and height are constrained to
   /// be no bigger than [leadingWidth] and [toolbarHeight] respectively.
   ///
@@ -277,7 +277,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// Typically a [Text] widget that contains a description of the current
   /// contents of the app.
   ///
-  /// Becomes the middle component of the [NavigationToolBar] built by this widget.
+  /// Becomes the middle component of the [NavigationToolbar] built by this widget.
   /// The [title]'s width is constrained to fit within the remaining space
   /// between the toolbar's [leading] and [actions] widgets. Its height is
   /// _not_ constrained. The [title] is vertically centered and clipped to fit
@@ -310,7 +310,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// For less common operations, consider using a [PopupMenuButton] as the
   /// last action.
   ///
-  /// The [actions] become the trailing component of the [NavigationToolBar] built
+  /// The [actions] become the trailing component of the [NavigationToolbar] built
   /// by this widget. The height of each action is constrained to be no bigger
   /// than the [toolbarHeight].
   final List<Widget> actions;
@@ -341,16 +341,16 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// The value is non-negative.
   ///
-  /// If this property is null, then [ThemeData.appBarTheme.elevation] is used,
-  /// if that is also null, the default value is 4, the appropriate elevation
-  /// for app bars.
+  /// If this property is null, then [AppBarTheme.elevation] of
+  /// [ThemeData.appBarTheme] is used. If that is also null, the default value
+  /// is 4, the appropriate elevation for app bars.
   final double elevation;
 
   /// The color to paint the shadow below the app bar.
   ///
-  /// If this property is null, then [ThemeData.appBarTheme.shadowColor] is used,
-  /// if that is also null, the default value is fully opaque black, the appropriate
-  /// color for shadows.
+  /// If this property is null, then [AppBarTheme.shadowColor] of
+  /// [ThemeData.appBarTheme] is used. If that is also null, the default value
+  /// is fully opaque black, the appropriate color for shadows.
   final Color shadowColor;
 
   /// The material's shape as well its shadow.
@@ -362,22 +362,25 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// The color to use for the app bar's material. Typically this should be set
   /// along with [brightness], [iconTheme], [textTheme].
   ///
-  /// If this property is null, then [ThemeData.appBarTheme.color] is used,
-  /// if that is also null, then [ThemeData.primaryColor] is used.
+  /// If this property is null, then [AppBarTheme.color] of
+  /// [ThemeData.appBarTheme] is used. If that is also null, then
+  /// [ThemeData.primaryColor] is used.
   final Color backgroundColor;
 
   /// The brightness of the app bar's material. Typically this is set along
   /// with [backgroundColor], [iconTheme], [textTheme].
   ///
-  /// If this property is null, then [ThemeData.appBarTheme.brightness] is used,
-  /// if that is also null, then [ThemeData.primaryColorBrightness] is used.
+  /// If this property is null, then [AppBarTheme.brightness] of
+  /// [ThemeData.appBarTheme] is used. If that is also null, then
+  /// [ThemeData.primaryColorBrightness] is used.
   final Brightness brightness;
 
   /// The color, opacity, and size to use for app bar icons. Typically this
   /// is set along with [backgroundColor], [brightness], [textTheme].
   ///
-  /// If this property is null, then [ThemeData.appBarTheme.iconTheme] is used,
-  /// if that is also null, then [ThemeData.primaryIconTheme] is used.
+  /// If this property is null, then [AppBarTheme.iconTheme] of
+  /// [ThemeData.appBarTheme] is used. If that is also null, then
+  /// [ThemeData.primaryIconTheme] is used.
   final IconThemeData iconTheme;
 
   /// The color, opacity, and size to use for the icons that appear in the app
@@ -385,15 +388,17 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// themed differently than the icon that appears in the app bar's [leading]
   /// widget.
   ///
-  /// If this property is null, then [ThemeData.appBarTheme.actionsIconTheme] is
-  /// used, if that is also null, then this falls back to [iconTheme].
+  /// If this property is null, then [AppBarTheme.actionsIconTheme] of
+  /// [ThemeData.appBarTheme] is used. If that is also null, then this falls
+  /// back to [iconTheme].
   final IconThemeData actionsIconTheme;
 
   /// The typographic styles to use for text in the app bar. Typically this is
   /// set along with [brightness] [backgroundColor], [iconTheme].
   ///
-  /// If this property is null, then [ThemeData.appBarTheme.textTheme] is used,
-  /// if that is also null, then [ThemeData.primaryTextTheme] is used.
+  /// If this property is null, then [AppBarTheme.textTheme] of
+  /// [ThemeData.appBarTheme] is used. If that is also null, then
+  /// [ThemeData.primaryTextTheme] is used.
   final TextTheme textTheme;
 
   /// Whether this app bar is being displayed at the top of the screen.
@@ -405,8 +410,9 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// Whether the title should be centered.
   ///
-  /// If this property is null, then [ThemeData.appBarTheme.centerTitle] is used,
-  /// if that is also null, then value is adapted to the current [TargetPlatform].
+  /// If this property is null, then [AppBarTheme.centerTitle] of
+  /// [ThemeData.appBarTheme] is used. If that is also null, then value is
+  /// adapted to the current [TargetPlatform].
   final bool centerTitle;
 
   /// Whether the title should be wrapped with header [Semantics].

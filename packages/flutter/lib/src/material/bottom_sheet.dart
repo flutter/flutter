@@ -154,8 +154,9 @@ class BottomSheet extends StatefulWidget {
   /// a bottom sheet with rounded corners and an edge-to-edge [Image] at the
   /// top.
   ///
-  /// If this property is null then [ThemeData.bottomSheetTheme.clipBehavior] is
-  /// used. If that's null then the behavior will be [Clip.none].
+  /// If this property is null then [BottomSheetTheme.clipBehavior] of
+  /// [ThemeData.bottomSheetTheme] is used. If that's null then the behavior
+  /// will be [Clip.none].
   final Clip clipBehavior;
 
   @override
