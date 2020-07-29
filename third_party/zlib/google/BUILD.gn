@@ -11,5 +11,5 @@ static_library("compression_utils_portable") {
     "compression_utils_portable.cc",
     "compression_utils_portable.h",
   ]
-  deps = [ "//third_party/zlib" ]
+  public_deps = [ "//third_party/zlib" ]
 }

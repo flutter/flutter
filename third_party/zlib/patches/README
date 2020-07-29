@@ -1,0 +1,43 @@
+== Patches applied on top of zlib ==
+
+ - 0000-build.patch: changes from the upstream version, mostly related to the
+   build.
+ - 0001-simd.patch: integrate Intel SIMD optimizations from
+   https://github.com/jtkukunas/zlib/
+ - 0002-uninitializedcheck.patch: prevent uninitialized use of state->check
+
+== Procedure to create a patch file ==
+
+  Assuming you are working in a new feature branch:
+ - git format-patch master --stdout > foo.patch # where naming follows a growing
+                                                # number plus patch description.
+ - git add foo.patch
+ - git commit -a -m "Local patch."
+ - git rebase -i HEAD~2 # Squashing the second commit
+
+  As patches created in this way will feature a ChangeLog, there is no longer
+the need to append this file with a description of what the patch does. This
+should help to solve frequent conflicts in pending new patches on
+Chromium's zlib.
+
+  The plan for the near future is to better insulate the platform specific
+changes to ease update adoption with new releases of zlib. This insulation
+happens by making changes inside contrib/ rather than the root directory
+(where conflicts can happen).
+
+  If a change modifies enough things inside the root directory that the
+intention is not immediately clear, generate a .patch file to go with your
+change. If the change's modifications in the root directory are small, like:
+
+#ifdef FEATURE_FLAG
+use_special_feature();
+#elif
+use_default_behavior();
+#endif
+
+  then the intent is clear and a .patch file doesn't need to be generated (since
+it would not provide much value).
+
+  Ideally local changes should have a merge request featured in either:
+ - canonical zlib: https://github.com/madler/zlib/
+ - zlib-ng: https://github.com/Dead2/zlib-ng

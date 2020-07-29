@@ -4,19 +4,25 @@
 
 #include "third_party/zlib/google/zip_reader.h"
 
+#include <stddef.h>
+#include <stdint.h>
+#include <string.h>
+
 #include <set>
 #include <string>
 
 #include "base/bind.h"
+#include "base/check.h"
 #include "base/files/file.h"
 #include "base/files/file_util.h"
 #include "base/files/scoped_temp_dir.h"
-#include "base/logging.h"
-#include "base/md5.h"
+#include "base/hash/md5.h"
 #include "base/path_service.h"
 #include "base/run_loop.h"
+#include "base/stl_util.h"
 #include "base/strings/stringprintf.h"
 #include "base/strings/utf_string_conversions.h"
+#include "base/test/task_environment.h"
 #include "base/time/time.h"
 #include "testing/gmock/include/gmock/gmock.h"
 #include "testing/gtest/include/gtest/gtest.h"
@@ -80,7 +86,7 @@ class MockUnzipListener : public base::SupportsWeakPtr<MockUnzipListener> {
   }
 
   // Progress callback for async functions.
-  void OnUnzipProgress(int64 progress) {
+  void OnUnzipProgress(int64_t progress) {
     DCHECK(progress > current_progress_);
     progress_calls_++;
     current_progress_ = progress;
@@ -96,14 +102,36 @@ class MockUnzipListener : public base::SupportsWeakPtr<MockUnzipListener> {
   int failure_calls_;
   int progress_calls_;
 
-  int64 current_progress_;
+  int64_t current_progress_;
 };
 
 class MockWriterDelegate : public zip::WriterDelegate {
  public:
   MOCK_METHOD0(PrepareOutput, bool());
   MOCK_METHOD2(WriteBytes, bool(const char*, int));
+  MOCK_METHOD1(SetTimeModified, void(const base::Time&));
 };
+
+bool ExtractCurrentEntryToFilePath(zip::ZipReader* reader,
+                                   base::FilePath path) {
+  zip::FilePathWriterDelegate writer(path);
+  return reader->ExtractCurrentEntry(&writer,
+                                     std::numeric_limits<uint64_t>::max());
+}
+
+bool LocateAndOpenEntry(zip::ZipReader* reader,
+                        const base::FilePath& path_in_zip) {
+  // The underlying library can do O(1) access, but ZipReader does not expose
+  // that. O(N) access is acceptable for these tests.
+  while (reader->HasMore()) {
+    if (!reader->OpenCurrentEntryInZip())
+      return false;
+    if (reader->current_entry_info()->file_path() == path_in_zip)
+      return true;
+    reader->AdvanceToNextEntry();
+  }
+  return false;
+}
 
 }   // namespace
 
@@ -116,11 +144,12 @@ class ZipReaderTest : public PlatformTest {
     PlatformTest::SetUp();
 
     ASSERT_TRUE(temp_dir_.CreateUniqueTempDir());
-    test_dir_ = temp_dir_.path();
+    test_dir_ = temp_dir_.GetPath();
 
     ASSERT_TRUE(GetTestDataDirectory(&test_data_dir_));
 
     test_zip_file_ = test_data_dir_.AppendASCII("test.zip");
+    encrypted_zip_file_ = test_data_dir_.AppendASCII("test_encrypted.zip");
     evil_zip_file_ = test_data_dir_.AppendASCII("evil.zip");
     evil_via_invalid_utf8_zip_file_ = test_data_dir_.AppendASCII(
         "evil_via_invalid_utf8.zip");
@@ -145,7 +174,7 @@ class ZipReaderTest : public PlatformTest {
   }
 
   bool GetTestDataDirectory(base::FilePath* path) {
-    bool success = PathService::Get(base::DIR_SOURCE_ROOT, path);
+    bool success = base::PathService::Get(base::DIR_SOURCE_ROOT, path);
     EXPECT_TRUE(success);
     if (!success)
       return false;
@@ -173,6 +202,8 @@ class ZipReaderTest : public PlatformTest {
   base::FilePath test_data_dir_;
   // The path to test.zip in the test data directory.
   base::FilePath test_zip_file_;
+  // The path to test_encrypted.zip in the test data directory.
+  base::FilePath encrypted_zip_file_;
   // The path to evil.zip in the test data directory.
   base::FilePath evil_zip_file_;
   // The path to evil_via_invalid_utf8.zip in the test data directory.
@@ -183,7 +214,7 @@ class ZipReaderTest : public PlatformTest {
 
   base::ScopedTempDir temp_dir_;
 
-  base::MessageLoop message_loop_;
+  base::test::TaskEnvironment task_environment_;
 };
 
 TEST_F(ZipReaderTest, Open_ValidZipFile) {
@@ -244,112 +275,11 @@ TEST_F(ZipReaderTest, PlatformFileIteration) {
   EXPECT_EQ(test_zip_contents_, actual_contents);
 }
 
-TEST_F(ZipReaderTest, LocateAndOpenEntry_ValidFile) {
-  std::set<base::FilePath> actual_contents;
-  ZipReader reader;
-  ASSERT_TRUE(reader.Open(test_zip_file_));
-  base::FilePath target_path(FILE_PATH_LITERAL("foo/bar/quux.txt"));
-  ASSERT_TRUE(reader.LocateAndOpenEntry(target_path));
-  EXPECT_EQ(target_path, reader.current_entry_info()->file_path());
-}
-
-TEST_F(ZipReaderTest, LocateAndOpenEntry_NonExistentFile) {
-  std::set<base::FilePath> actual_contents;
-  ZipReader reader;
-  ASSERT_TRUE(reader.Open(test_zip_file_));
-  base::FilePath target_path(FILE_PATH_LITERAL("nonexistent.txt"));
-  ASSERT_FALSE(reader.LocateAndOpenEntry(target_path));
-  EXPECT_EQ(NULL, reader.current_entry_info());
-}
-
-TEST_F(ZipReaderTest, ExtractCurrentEntryToFilePath_RegularFile) {
-  ZipReader reader;
-  ASSERT_TRUE(reader.Open(test_zip_file_));
-  base::FilePath target_path(FILE_PATH_LITERAL("foo/bar/quux.txt"));
-  ASSERT_TRUE(reader.LocateAndOpenEntry(target_path));
-  ASSERT_TRUE(reader.ExtractCurrentEntryToFilePath(
-      test_dir_.AppendASCII("quux.txt")));
-  // Read the output file ans compute the MD5.
-  std::string output;
-  ASSERT_TRUE(base::ReadFileToString(test_dir_.AppendASCII("quux.txt"),
-                                     &output));
-  const std::string md5 = base::MD5String(output);
-  EXPECT_EQ(kQuuxExpectedMD5, md5);
-  // quux.txt should be larger than kZipBufSize so that we can exercise
-  // the loop in ExtractCurrentEntry().
-  EXPECT_LT(static_cast<size_t>(internal::kZipBufSize), output.size());
-}
-
-TEST_F(ZipReaderTest, PlatformFileExtractCurrentEntryToFilePath_RegularFile) {
-  ZipReader reader;
-  FileWrapper zip_fd_wrapper(test_zip_file_, FileWrapper::READ_ONLY);
-  ASSERT_TRUE(reader.OpenFromPlatformFile(zip_fd_wrapper.platform_file()));
-  base::FilePath target_path(FILE_PATH_LITERAL("foo/bar/quux.txt"));
-  ASSERT_TRUE(reader.LocateAndOpenEntry(target_path));
-  ASSERT_TRUE(reader.ExtractCurrentEntryToFilePath(
-      test_dir_.AppendASCII("quux.txt")));
-  // Read the output file and compute the MD5.
-  std::string output;
-  ASSERT_TRUE(base::ReadFileToString(test_dir_.AppendASCII("quux.txt"),
-                                     &output));
-  const std::string md5 = base::MD5String(output);
-  EXPECT_EQ(kQuuxExpectedMD5, md5);
-  // quux.txt should be larger than kZipBufSize so that we can exercise
-  // the loop in ExtractCurrentEntry().
-  EXPECT_LT(static_cast<size_t>(internal::kZipBufSize), output.size());
-}
-
-TEST_F(ZipReaderTest, PlatformFileExtractCurrentEntryToFile_RegularFile) {
-  ZipReader reader;
-  FileWrapper zip_fd_wrapper(test_zip_file_, FileWrapper::READ_ONLY);
-  ASSERT_TRUE(reader.OpenFromPlatformFile(zip_fd_wrapper.platform_file()));
-  base::FilePath target_path(FILE_PATH_LITERAL("foo/bar/quux.txt"));
-  base::FilePath out_path = test_dir_.AppendASCII("quux.txt");
-  FileWrapper out_fd_w(out_path, FileWrapper::READ_WRITE);
-  ASSERT_TRUE(reader.LocateAndOpenEntry(target_path));
-  ASSERT_TRUE(reader.ExtractCurrentEntryToFile(out_fd_w.file()));
-  // Read the output file and compute the MD5.
-  std::string output;
-  ASSERT_TRUE(base::ReadFileToString(out_path, &output));
-  const std::string md5 = base::MD5String(output);
-  EXPECT_EQ(kQuuxExpectedMD5, md5);
-  // quux.txt should be larger than kZipBufSize so that we can exercise
-  // the loop in ExtractCurrentEntry().
-  EXPECT_LT(static_cast<size_t>(internal::kZipBufSize), output.size());
-}
-
-TEST_F(ZipReaderTest, ExtractCurrentEntryToFilePath_Directory) {
-  ZipReader reader;
-  ASSERT_TRUE(reader.Open(test_zip_file_));
-  base::FilePath target_path(FILE_PATH_LITERAL("foo/"));
-  ASSERT_TRUE(reader.LocateAndOpenEntry(target_path));
-  ASSERT_TRUE(reader.ExtractCurrentEntryToFilePath(
-      test_dir_.AppendASCII("foo")));
-  // The directory should be created.
-  ASSERT_TRUE(base::DirectoryExists(test_dir_.AppendASCII("foo")));
-}
-
-TEST_F(ZipReaderTest, ExtractCurrentEntryIntoDirectory_RegularFile) {
-  ZipReader reader;
-  ASSERT_TRUE(reader.Open(test_zip_file_));
-  base::FilePath target_path(FILE_PATH_LITERAL("foo/bar/quux.txt"));
-  ASSERT_TRUE(reader.LocateAndOpenEntry(target_path));
-  ASSERT_TRUE(reader.ExtractCurrentEntryIntoDirectory(test_dir_));
-  // Sub directories should be created.
-  ASSERT_TRUE(base::DirectoryExists(test_dir_.AppendASCII("foo/bar")));
-  // And the file should be created.
-  std::string output;
-  ASSERT_TRUE(base::ReadFileToString(
-      test_dir_.AppendASCII("foo/bar/quux.txt"), &output));
-  const std::string md5 = base::MD5String(output);
-  EXPECT_EQ(kQuuxExpectedMD5, md5);
-}
-
 TEST_F(ZipReaderTest, current_entry_info_RegularFile) {
   ZipReader reader;
   ASSERT_TRUE(reader.Open(test_zip_file_));
   base::FilePath target_path(FILE_PATH_LITERAL("foo/bar/quux.txt"));
-  ASSERT_TRUE(reader.LocateAndOpenEntry(target_path));
+  ASSERT_TRUE(LocateAndOpenEntry(&reader, target_path));
   ZipReader::EntryInfo* current_entry_info = reader.current_entry_info();
 
   EXPECT_EQ(target_path, current_entry_info->file_path());
@@ -375,7 +305,7 @@ TEST_F(ZipReaderTest, current_entry_info_DotDotFile) {
   ASSERT_TRUE(reader.Open(evil_zip_file_));
   base::FilePath target_path(FILE_PATH_LITERAL(
       "../levilevilevilevilevilevilevilevilevilevilevilevil"));
-  ASSERT_TRUE(reader.LocateAndOpenEntry(target_path));
+  ASSERT_TRUE(LocateAndOpenEntry(&reader, target_path));
   ZipReader::EntryInfo* current_entry_info = reader.current_entry_info();
   EXPECT_EQ(target_path, current_entry_info->file_path());
 
@@ -403,7 +333,7 @@ TEST_F(ZipReaderTest, current_entry_info_AbsoluteFile) {
   ZipReader reader;
   ASSERT_TRUE(reader.Open(evil_via_absolute_file_name_zip_file_));
   base::FilePath target_path(FILE_PATH_LITERAL("/evil.txt"));
-  ASSERT_TRUE(reader.LocateAndOpenEntry(target_path));
+  ASSERT_TRUE(LocateAndOpenEntry(&reader, target_path));
   ZipReader::EntryInfo* current_entry_info = reader.current_entry_info();
   EXPECT_EQ(target_path, current_entry_info->file_path());
 
@@ -416,7 +346,7 @@ TEST_F(ZipReaderTest, current_entry_info_Directory) {
   ZipReader reader;
   ASSERT_TRUE(reader.Open(test_zip_file_));
   base::FilePath target_path(FILE_PATH_LITERAL("foo/bar/"));
-  ASSERT_TRUE(reader.LocateAndOpenEntry(target_path));
+  ASSERT_TRUE(LocateAndOpenEntry(&reader, target_path));
   ZipReader::EntryInfo* current_entry_info = reader.current_entry_info();
 
   EXPECT_EQ(base::FilePath(FILE_PATH_LITERAL("foo/bar/")),
@@ -439,6 +369,20 @@ TEST_F(ZipReaderTest, current_entry_info_Directory) {
   EXPECT_TRUE(current_entry_info->is_directory());
 }
 
+TEST_F(ZipReaderTest, current_entry_info_EncryptedFile) {
+  ZipReader reader;
+  base::FilePath target_path(FILE_PATH_LITERAL("foo/bar/quux.txt"));
+
+  ASSERT_TRUE(reader.Open(encrypted_zip_file_));
+  ASSERT_TRUE(LocateAndOpenEntry(&reader, target_path));
+  EXPECT_TRUE(reader.current_entry_info()->is_encrypted());
+  reader.Close();
+
+  ASSERT_TRUE(reader.Open(test_zip_file_));
+  ASSERT_TRUE(LocateAndOpenEntry(&reader, target_path));
+  EXPECT_FALSE(reader.current_entry_info()->is_encrypted());
+}
+
 // Verifies that the ZipReader class can extract a file from a zip archive
 // stored in memory. This test opens a zip archive in a std::string object,
 // extracts its content, and verifies the content is the same as the expected
@@ -459,13 +403,13 @@ TEST_F(ZipReaderTest, OpenFromString) {
       "\x50\x75\x78\x0b\x00\x01\x04\x8e\xf0\x00\x00\x04\x88\x13\x00\x00"
       "\x50\x4b\x05\x06\x00\x00\x00\x00\x01\x00\x01\x00\x4e\x00\x00\x00"
       "\x52\x00\x00\x00\x00\x00";
-  std::string data(kTestData, arraysize(kTestData));
+  std::string data(kTestData, base::size(kTestData));
   ZipReader reader;
   ASSERT_TRUE(reader.OpenFromString(data));
   base::FilePath target_path(FILE_PATH_LITERAL("test.txt"));
-  ASSERT_TRUE(reader.LocateAndOpenEntry(target_path));
-  ASSERT_TRUE(reader.ExtractCurrentEntryToFilePath(
-      test_dir_.AppendASCII("test.txt")));
+  ASSERT_TRUE(LocateAndOpenEntry(&reader, target_path));
+  ASSERT_TRUE(ExtractCurrentEntryToFilePath(&reader,
+                                            test_dir_.AppendASCII("test.txt")));
 
   std::string actual;
   ASSERT_TRUE(base::ReadFileToString(
@@ -481,15 +425,13 @@ TEST_F(ZipReaderTest, ExtractToFileAsync_RegularFile) {
   base::FilePath target_file = test_dir_.AppendASCII("quux.txt");
   base::FilePath target_path(FILE_PATH_LITERAL("foo/bar/quux.txt"));
   ASSERT_TRUE(reader.Open(test_zip_file_));
-  ASSERT_TRUE(reader.LocateAndOpenEntry(target_path));
+  ASSERT_TRUE(LocateAndOpenEntry(&reader, target_path));
   reader.ExtractCurrentEntryToFilePathAsync(
       target_file,
-      base::Bind(&MockUnzipListener::OnUnzipSuccess,
-                 listener.AsWeakPtr()),
-      base::Bind(&MockUnzipListener::OnUnzipFailure,
-                 listener.AsWeakPtr()),
-      base::Bind(&MockUnzipListener::OnUnzipProgress,
-                 listener.AsWeakPtr()));
+      base::BindOnce(&MockUnzipListener::OnUnzipSuccess, listener.AsWeakPtr()),
+      base::BindOnce(&MockUnzipListener::OnUnzipFailure, listener.AsWeakPtr()),
+      base::BindRepeating(&MockUnzipListener::OnUnzipProgress,
+                          listener.AsWeakPtr()));
 
   EXPECT_EQ(0, listener.success_calls());
   EXPECT_EQ(0, listener.failure_calls());
@@ -507,7 +449,7 @@ TEST_F(ZipReaderTest, ExtractToFileAsync_RegularFile) {
   const std::string md5 = base::MD5String(output);
   EXPECT_EQ(kQuuxExpectedMD5, md5);
 
-  int64 file_size = 0;
+  int64_t file_size = 0;
   ASSERT_TRUE(base::GetFileSize(target_file, &file_size));
 
   EXPECT_EQ(file_size, listener.current_progress());
@@ -521,15 +463,13 @@ TEST_F(ZipReaderTest, ExtractToFileAsync_Directory) {
   base::FilePath target_file = test_dir_.AppendASCII("foo");
   base::FilePath target_path(FILE_PATH_LITERAL("foo/"));
   ASSERT_TRUE(reader.Open(test_zip_file_));
-  ASSERT_TRUE(reader.LocateAndOpenEntry(target_path));
+  ASSERT_TRUE(LocateAndOpenEntry(&reader, target_path));
   reader.ExtractCurrentEntryToFilePathAsync(
       target_file,
-      base::Bind(&MockUnzipListener::OnUnzipSuccess,
-                 listener.AsWeakPtr()),
-      base::Bind(&MockUnzipListener::OnUnzipFailure,
-                 listener.AsWeakPtr()),
-      base::Bind(&MockUnzipListener::OnUnzipProgress,
-                 listener.AsWeakPtr()));
+      base::BindOnce(&MockUnzipListener::OnUnzipSuccess, listener.AsWeakPtr()),
+      base::BindOnce(&MockUnzipListener::OnUnzipFailure, listener.AsWeakPtr()),
+      base::BindRepeating(&MockUnzipListener::OnUnzipProgress,
+                          listener.AsWeakPtr()));
 
   EXPECT_EQ(0, listener.success_calls());
   EXPECT_EQ(0, listener.failure_calls());
@@ -560,7 +500,7 @@ TEST_F(ZipReaderTest, ExtractCurrentEntryToString) {
 
     base::FilePath file_name = base::FilePath::FromUTF8Unsafe(
         base::StringPrintf("%d.txt", static_cast<int>(i)));
-    ASSERT_TRUE(reader.LocateAndOpenEntry(file_name));
+    ASSERT_TRUE(LocateAndOpenEntry(&reader, file_name));
 
     if (i > 1) {
       // Off by one byte read limit: must fail.
@@ -570,15 +510,56 @@ TEST_F(ZipReaderTest, ExtractCurrentEntryToString) {
     if (i > 0) {
       // Exact byte read limit: must pass.
       EXPECT_TRUE(reader.ExtractCurrentEntryToString(i, &contents));
-      EXPECT_EQ(i, contents.size());
-      EXPECT_EQ(0, memcmp(contents.c_str(), "0123456", i));
+      EXPECT_EQ(base::StringPiece("0123456", i).as_string(), contents);
     }
 
     // More than necessary byte read limit: must pass.
     EXPECT_TRUE(reader.ExtractCurrentEntryToString(16, &contents));
-    EXPECT_EQ(i, contents.size());
-    EXPECT_EQ(0, memcmp(contents.c_str(), "0123456", i));
+    EXPECT_EQ(base::StringPiece("0123456", i).as_string(), contents);
   }
+  reader.Close();
+}
+
+TEST_F(ZipReaderTest, ExtractPartOfCurrentEntry) {
+  // test_mismatch_size.zip contains files with names from 0.txt to 7.txt with
+  // sizes from 0 to 7 bytes respectively, being the contents of each file a
+  // substring of "0123456" starting at '0'.
+  base::FilePath test_zip_file =
+      test_data_dir_.AppendASCII("test_mismatch_size.zip");
+
+  ZipReader reader;
+  std::string contents;
+  ASSERT_TRUE(reader.Open(test_zip_file));
+
+  base::FilePath file_name0 = base::FilePath::FromUTF8Unsafe("0.txt");
+  ASSERT_TRUE(LocateAndOpenEntry(&reader, file_name0));
+  EXPECT_TRUE(reader.ExtractCurrentEntryToString(0, &contents));
+  EXPECT_EQ("", contents);
+  EXPECT_TRUE(reader.ExtractCurrentEntryToString(1, &contents));
+  EXPECT_EQ("", contents);
+
+  base::FilePath file_name1 = base::FilePath::FromUTF8Unsafe("1.txt");
+  ASSERT_TRUE(LocateAndOpenEntry(&reader, file_name1));
+  EXPECT_TRUE(reader.ExtractCurrentEntryToString(0, &contents));
+  EXPECT_EQ("", contents);
+  EXPECT_TRUE(reader.ExtractCurrentEntryToString(1, &contents));
+  EXPECT_EQ("0", contents);
+  EXPECT_TRUE(reader.ExtractCurrentEntryToString(2, &contents));
+  EXPECT_EQ("0", contents);
+
+  base::FilePath file_name4 = base::FilePath::FromUTF8Unsafe("4.txt");
+  ASSERT_TRUE(LocateAndOpenEntry(&reader, file_name4));
+  EXPECT_TRUE(reader.ExtractCurrentEntryToString(0, &contents));
+  EXPECT_EQ("", contents);
+  EXPECT_FALSE(reader.ExtractCurrentEntryToString(2, &contents));
+  EXPECT_EQ("01", contents);
+  EXPECT_TRUE(reader.ExtractCurrentEntryToString(4, &contents));
+  EXPECT_EQ("0123", contents);
+  // Checks that entire file is extracted and function returns true when
+  // |max_read_bytes| is larger than file size.
+  EXPECT_TRUE(reader.ExtractCurrentEntryToString(5, &contents));
+  EXPECT_EQ("0123", contents);
+
   reader.Close();
 }
 
@@ -603,8 +584,9 @@ TEST_F(ZipReaderTest, ExtractCurrentEntryPrepareFailure) {
   ZipReader reader;
 
   ASSERT_TRUE(reader.Open(test_zip_file_));
-  ASSERT_TRUE(reader.LocateAndOpenEntry(target_path));
-  ASSERT_FALSE(reader.ExtractCurrentEntry(&mock_writer));
+  ASSERT_TRUE(LocateAndOpenEntry(&reader, target_path));
+  ASSERT_FALSE(reader.ExtractCurrentEntry(
+      &mock_writer, std::numeric_limits<uint64_t>::max()));
 }
 
 // Test that when WriterDelegate::WriteBytes returns false, no other methods on
@@ -621,8 +603,9 @@ TEST_F(ZipReaderTest, ExtractCurrentEntryWriteBytesFailure) {
   ZipReader reader;
 
   ASSERT_TRUE(reader.Open(test_zip_file_));
-  ASSERT_TRUE(reader.LocateAndOpenEntry(target_path));
-  ASSERT_FALSE(reader.ExtractCurrentEntry(&mock_writer));
+  ASSERT_TRUE(LocateAndOpenEntry(&reader, target_path));
+  ASSERT_FALSE(reader.ExtractCurrentEntry(
+      &mock_writer, std::numeric_limits<uint64_t>::max()));
 }
 
 // Test that extraction succeeds when the writer delegate reports all is well.
@@ -633,13 +616,15 @@ TEST_F(ZipReaderTest, ExtractCurrentEntrySuccess) {
       .WillOnce(Return(true));
   EXPECT_CALL(mock_writer, WriteBytes(_, _))
       .WillRepeatedly(Return(true));
+  EXPECT_CALL(mock_writer, SetTimeModified(_));
 
   base::FilePath target_path(FILE_PATH_LITERAL("foo/bar/quux.txt"));
   ZipReader reader;
 
   ASSERT_TRUE(reader.Open(test_zip_file_));
-  ASSERT_TRUE(reader.LocateAndOpenEntry(target_path));
-  ASSERT_TRUE(reader.ExtractCurrentEntry(&mock_writer));
+  ASSERT_TRUE(LocateAndOpenEntry(&reader, target_path));
+  ASSERT_TRUE(reader.ExtractCurrentEntry(&mock_writer,
+                                         std::numeric_limits<uint64_t>::max()));
 }
 
 class FileWriterDelegateTest : public ::testing::Test {

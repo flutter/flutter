@@ -2,43 +2,228 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+
+if (current_cpu == "arm" || current_cpu == "arm64") {
+  import("//build/config/arm.gni")
+}
+
 config("zlib_config") {
   include_dirs = [ "." ]
 }
 
-static_library("zlib_x86_simd") {
-  if (!is_ios && (current_cpu == "x86" || current_cpu == "x64")) {
+config("zlib_internal_config") {
+  defines = [ "ZLIB_IMPLEMENTATION" ]
+}
+
+use_arm_neon_optimizations = false
+if ((current_cpu == "arm" || current_cpu == "arm64") &&
+    !(is_win && !is_clang)) {
+  # TODO(richard.townsend@arm.com): Optimizations temporarily disabled for
+  # Windows on Arm MSVC builds, see http://crbug.com/v8/10012.
+  if (arm_use_neon) {
+    use_arm_neon_optimizations = true
+  }
+}
+
+use_x86_x64_optimizations =
+    (current_cpu == "x86" || current_cpu == "x64") && !is_ios
+
+config("zlib_adler32_simd_config") {
+  if (use_x86_x64_optimizations) {
+    defines = [ "ADLER32_SIMD_SSSE3" ]
+    if (is_win) {
+      defines += [ "X86_WINDOWS" ]
+    } else {
+      defines += [ "X86_NOT_WINDOWS" ]
+    }
+  }
+
+  if (use_arm_neon_optimizations) {
+    defines = [ "ADLER32_SIMD_NEON" ]
+  }
+}
+
+source_set("zlib_adler32_simd") {
+  visibility = [ ":*" ]
+
+  if (use_x86_x64_optimizations) {
     sources = [
-      "crc_folding.c",
-      "fill_window_sse.c",
+      "adler32_simd.c",
+      "adler32_simd.h",
     ]
+
+    if (!is_win || is_clang) {
+      cflags = [ "-mssse3" ]
+    }
+  }
+
+  if (use_arm_neon_optimizations) {
+    sources = [
+      "adler32_simd.c",
+      "adler32_simd.h",
+    ]
+  }
+
+  configs += [ ":zlib_internal_config" ]
+
+  public_configs = [ ":zlib_adler32_simd_config" ]
+}
+
+if (use_arm_neon_optimizations) {
+  config("zlib_arm_crc32_config") {
+    # Disabled for iPhone, as described in DDI0487C_a_armv8_arm:
+    #  "All implementations of the ARMv8.1 architecture are required to
+    #   implement the CRC32* instructions. These are optional in ARMv8.0."
+    if (!is_ios) {
+      defines = [ "CRC32_ARMV8_CRC32" ]
+      if (is_android) {
+        defines += [ "ARMV8_OS_ANDROID" ]
+      } else if (is_linux || is_chromeos) {
+        defines += [ "ARMV8_OS_LINUX" ]
+      } else if (is_mac) {
+        defines += [ "ARMV8_OS_MACOS" ]
+      } else if (is_fuchsia) {
+        defines += [ "ARMV8_OS_FUCHSIA" ]
+      } else if (is_win) {
+        defines += [ "ARMV8_OS_WINDOWS" ]
+      } else {
+        assert(false, "Unsupported ARM OS")
+      }
+    }
+  }
+
+  source_set("zlib_arm_crc32") {
+    visibility = [ ":*" ]
+
+    if (!is_ios) {
+      include_dirs = [ "." ]
+
+      if (!is_win && !is_clang) {
+        assert(!use_thin_lto,
+               "ThinLTO fails mixing different module-level targets")
+        cflags_c = [ "-march=armv8-a+crc" ]
+      }
+
+      sources = [
+        "crc32_simd.c",
+        "crc32_simd.h",
+      ]
+    }
+
+    configs += [ ":zlib_internal_config" ]
+
+    public_configs = [ ":zlib_arm_crc32_config" ]
+  }
+}
+
+config("zlib_inflate_chunk_simd_config") {
+  if (use_x86_x64_optimizations) {
+    defines = [ "INFLATE_CHUNK_SIMD_SSE2" ]
+
+    if (current_cpu == "x64") {
+      defines += [ "INFLATE_CHUNK_READ_64LE" ]
+    }
+  }
+
+  if (use_arm_neon_optimizations) {
+    defines = [ "INFLATE_CHUNK_SIMD_NEON" ]
+
+    if (current_cpu == "arm64") {
+      defines += [ "INFLATE_CHUNK_READ_64LE" ]
+    }
+  }
+}
+
+source_set("zlib_inflate_chunk_simd") {
+  visibility = [ ":*" ]
+
+  if (use_x86_x64_optimizations || use_arm_neon_optimizations) {
+    include_dirs = [ "." ]
+
+    sources = [
+      "contrib/optimizations/chunkcopy.h",
+      "contrib/optimizations/inffast_chunk.c",
+      "contrib/optimizations/inffast_chunk.h",
+      "contrib/optimizations/inflate.c",
+    ]
+  }
+
+  configs += [ ":zlib_internal_config" ]
+
+  # Needed for MSVC, which is still supported by V8 and PDFium. zlib uses K&R C
+  # style function declarations, which triggers warning C4131.
+  configs -= [ "//build/config/compiler:chromium_code" ]
+  configs += [ "//build/config/compiler:no_chromium_code" ]
+
+  public_configs = [ ":zlib_inflate_chunk_simd_config" ]
+}
+
+config("zlib_crc32_simd_config") {
+  if (use_x86_x64_optimizations) {
+    defines = [ "CRC32_SIMD_SSE42_PCLMUL" ]
+  }
+}
+
+source_set("zlib_crc32_simd") {
+  visibility = [ ":*" ]
+
+  if (use_x86_x64_optimizations) {
+    sources = [
+      "crc32_simd.c",
+      "crc32_simd.h",
+    ]
+
     if (!is_win || is_clang) {
       cflags = [
         "-msse4.2",
         "-mpclmul",
       ]
     }
-  } else {
-    sources = [
-      "simd_stub.c",
-    ]
   }
 
-  configs -= [ "//build/config/compiler:chromium_code" ]
-  configs += [ "//build/config/compiler:no_chromium_code" ]
+  configs += [ ":zlib_internal_config" ]
+
+  public_configs = [ ":zlib_crc32_simd_config" ]
+}
+
+config("zlib_x86_simd_config") {
+  if (use_x86_x64_optimizations) {
+    defines = [
+      "CRC32_SIMD_SSE42_PCLMUL",
+      "DEFLATE_FILL_WINDOW_SSE2",
+    ]
+  }
+}
+
+source_set("zlib_x86_simd") {
+  visibility = [ ":*" ]
+
+  if (use_x86_x64_optimizations) {
+    sources = [
+      "crc_folding.c",
+      "fill_window_sse.c",
+    ]
+
+    if (!is_win || is_clang) {
+      cflags = [
+        "-msse4.2",
+        "-mpclmul",
+      ]
+    }
+  }
+
+  configs += [ ":zlib_internal_config" ]
+
+  public_configs = [ ":zlib_x86_simd_config" ]
 }
 
 config("zlib_warnings") {
-  visibility = [ ":*" ]
-  if (is_clang) {
-    cflags = [
-      "-Wno-incompatible-pointer-types",
-      "-Wno-shift-negative-value",
-    ]
+  if (is_clang && use_x86_x64_optimizations) {
+    cflags = [ "-Wno-incompatible-pointer-types" ]
   }
 }
 
-static_library("zlib") {
+component("zlib") {
   if (!is_win) {
     # Don't stomp on "libzlib" on other platforms.
     output_name = "chrome_zlib"
@@ -46,7 +231,11 @@ static_library("zlib") {
 
   sources = [
     "adler32.c",
+    "chromeconf.h",
     "compress.c",
+    "contrib/optimizations/insert_string.h",
+    "cpu_features.c",
+    "cpu_features.h",
     "crc32.c",
     "crc32.h",
     "deflate.c",
@@ -60,37 +249,80 @@ static_library("zlib") {
     "inffast.c",
     "inffast.h",
     "inffixed.h",
-    "inflate.c",
     "inflate.h",
     "inftrees.c",
     "inftrees.h",
-    "mozzconf.h",
     "trees.c",
     "trees.h",
     "uncompr.c",
-    "x86.h",
     "zconf.h",
     "zlib.h",
     "zutil.c",
     "zutil.h",
   ]
 
-  if (!is_ios && (current_cpu == "x86" || current_cpu == "x64")) {
-    sources += [ "x86.c" ]
+  defines = []
+  deps = []
+
+  if (!use_x86_x64_optimizations && !use_arm_neon_optimizations) {
+    # Apparently android_cronet bot builds with NEON disabled and
+    # we also should disable optimizations for iOS@x86 (a.k.a. simulator).
+    defines += [ "CPU_NO_SIMD" ]
   }
-  configs += [ ":zlib_warnings" ]
+
+  if (is_ios) {
+    # iOS@ARM is a special case where we always have NEON but don't check
+    # for crypto extensions.
+    # TODO(cavalcantii): verify what is the current state of CPU features
+    # shipped on latest iOS devices.
+    defines += [ "ARM_OS_IOS" ]
+  }
+
+  if (use_x86_x64_optimizations || use_arm_neon_optimizations) {
+    deps += [
+      ":zlib_adler32_simd",
+      ":zlib_inflate_chunk_simd",
+    ]
+
+    if (use_x86_x64_optimizations) {
+      deps += [ ":zlib_crc32_simd" ]
+    } else if (use_arm_neon_optimizations) {
+      sources += [ "contrib/optimizations/slide_hash_neon.h" ]
+      deps += [ ":zlib_arm_crc32" ]
+    }
+  } else {
+    sources += [ "inflate.c" ]
+  }
+
+  deps += [ ":zlib_x86_simd" ]
+
+  if (is_android) {
+    import("//build/config/android/config.gni")
+    if (defined(android_ndk_root) && android_ndk_root != "") {
+      deps += [ "//third_party/android_tools:cpu_features" ]
+    } else {
+      assert(false, "CPU detection requires the Android NDK")
+    }
+  }
 
   configs -= [ "//build/config/compiler:chromium_code" ]
   configs += [ "//build/config/compiler:no_chromium_code" ]
 
   public_configs = [ ":zlib_config" ]
-  deps = [
-    ":zlib_x86_simd",
+
+  configs += [
+    ":zlib_internal_config",
+
+    # Must be after no_chromium_code for warning flags to be ordered correctly.
+    ":zlib_warnings",
   ]
+
+  allow_circular_includes_from = deps
 }
 
 config("minizip_warnings") {
   visibility = [ ":*" ]
+
   if (is_clang) {
     # zlib uses `if ((a == b))` for some reason.
     cflags = [ "-Wno-parentheses-equality" ]
@@ -115,32 +347,33 @@ static_library("minizip") {
       "contrib/minizip/iowin32.h",
     ]
   }
+
   if (is_mac || is_ios || is_android || is_fuchsia) {
     # Mac, Android and the BSDs don't have fopen64, ftello64, or fseeko64. We
     # use fopen, ftell, and fseek instead on these systems.
     defines = [ "USE_FILE32API" ]
   }
 
-  deps = [
-    ":zlib",
-  ]
+  deps = [ ":zlib" ]
 
   configs -= [ "//build/config/compiler:chromium_code" ]
   configs += [ "//build/config/compiler:no_chromium_code" ]
-  configs += [ ":minizip_warnings" ]
+
   public_configs = [ ":zlib_config" ]
+
+  configs += [
+    # Must be after no_chromium_code for warning flags to be ordered correctly.
+    ":minizip_warnings",
+  ]
 }
 
-static_library("zip") {
-  sources = [
-    "google/zip.cc",
-    "google/zip.h",
-    "google/zip_internal.cc",
-    "google/zip_internal.h",
-    "google/zip_reader.cc",
-    "google/zip_reader.h",
-  ]
-  deps = [
-    ":minizip",
-  ]
+executable("zlib_bench") {
+  include_dirs = [ "." ]
+
+  sources = [ "contrib/bench/zlib_bench.cc" ]
+
+  deps = [ ":zlib" ]
+
+  configs -= [ "//build/config/compiler:chromium_code" ]
+  configs += [ "//build/config/compiler:no_chromium_code" ]
 }

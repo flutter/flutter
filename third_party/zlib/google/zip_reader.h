@@ -4,14 +4,17 @@
 #ifndef THIRD_PARTY_ZLIB_GOOGLE_ZIP_READER_H_
 #define THIRD_PARTY_ZLIB_GOOGLE_ZIP_READER_H_
 
+#include <stddef.h>
+#include <stdint.h>
+
+#include <memory>
 #include <string>
 
-#include "base/basictypes.h"
 #include "base/callback.h"
 #include "base/files/file.h"
 #include "base/files/file_path.h"
 #include "base/files/file_util.h"
-#include "base/memory/scoped_ptr.h"
+#include "base/macros.h"
 #include "base/memory/weak_ptr.h"
 #include "base/time/time.h"
 
@@ -36,6 +39,9 @@ class WriterDelegate {
   // Invoked to write the next chunk of data. Return false on failure to cancel
   // extraction.
   virtual bool WriteBytes(const char* data, int num_bytes) = 0;
+
+  // Sets the last-modified time of the data.
+  virtual void SetTimeModified(const base::Time& time) = 0;
 };
 
 // This class is used for reading zip files. A typical use case of this
@@ -46,25 +52,25 @@ class WriterDelegate {
 //   reader.Open(zip_file_path);
 //   while (reader.HasMore()) {
 //     reader.OpenCurrentEntryInZip();
-//     reader.ExtractCurrentEntryToDirectory(output_directory_path);
+//     const base::FilePath& entry_path =
+//        reader.current_entry_info()->file_path();
+//     auto writer = CreateFilePathWriterDelegate(extract_dir, entry_path);
+//     reader.ExtractCurrentEntry(writer, std::numeric_limits<uint64_t>::max());
 //     reader.AdvanceToNextEntry();
 //   }
 //
 // For simplicity, error checking is omitted in the example code above. The
 // production code should check return values from all of these functions.
 //
-// This calls can also be used for random access of contents in a zip file
-// using LocateAndOpenEntry().
-//
 class ZipReader {
  public:
   // A callback that is called when the operation is successful.
-  typedef base::Closure SuccessCallback;
+  using SuccessCallback = base::OnceClosure;
   // A callback that is called when the operation fails.
-  typedef base::Closure FailureCallback;
+  using FailureCallback = base::OnceClosure;
   // A callback that is called periodically during the operation with the number
   // of bytes that have been processed so far.
-  typedef base::Callback<void(int64)> ProgressCallback;
+  using ProgressCallback = base::RepeatingCallback<void(int64_t)>;
 
   // This class represents information of an entry (file or directory) in
   // a zip file.
@@ -81,7 +87,7 @@ class ZipReader {
     // Returns 0 if the entry is a directory.
     // Note: this value should not be trusted, because it is stored as metadata
     // in the zip archive and can be different from the real uncompressed size.
-    int64 original_size() const { return original_size_; }
+    int64_t original_size() const { return original_size_; }
 
     // Returns the last modified time. If the time stored in the zip file was
     // not valid, the unix epoch will be returned.
@@ -101,12 +107,16 @@ class ZipReader {
     // UTF-8 characters in its file name, or the file path is absolute.
     bool is_unsafe() const { return is_unsafe_; }
 
+    // Returns true if the entry is encrypted.
+    bool is_encrypted() const { return is_encrypted_; }
+
    private:
     const base::FilePath file_path_;
-    int64 original_size_;
+    int64_t original_size_;
     base::Time last_modified_;
     bool is_directory_;
     bool is_unsafe_;
+    bool is_encrypted_;
     DISALLOW_COPY_AND_ASSIGN(EntryInfo);
   };
 
@@ -151,23 +161,11 @@ class ZipReader {
   // state is reset automatically as needed.
   bool OpenCurrentEntryInZip();
 
-  // Locates an entry in the zip file and opens it. Returns true on
-  // success. This function internally calls OpenCurrentEntryInZip() on
-  // success. On failure, current_entry_info() becomes NULL.
-  bool LocateAndOpenEntry(const base::FilePath& path_in_zip);
-
-  // Extracts the current entry in chunks to |delegate|.
-  bool ExtractCurrentEntry(WriterDelegate* delegate) const;
-
-  // Extracts the current entry to the given output file path. If the
-  // current file is a directory, just creates a directory
-  // instead. Returns true on success. OpenCurrentEntryInZip() must be
-  // called beforehand.
-  //
-  // This function preserves the timestamp of the original entry. If that
-  // timestamp is not valid, the timestamp will be set to the current time.
-  bool ExtractCurrentEntryToFilePath(
-      const base::FilePath& output_file_path) const;
+  // Extracts |num_bytes_to_extract| bytes of the current entry to |delegate|,
+  // starting from the beginning of the entry. Return value specifies whether
+  // the entire file was extracted.
+  bool ExtractCurrentEntry(WriterDelegate* delegate,
+                           uint64_t num_bytes_to_extract) const;
 
   // Asynchronously extracts the current entry to the given output file path.
   // If the current entry is a directory it just creates the directory
@@ -177,42 +175,24 @@ class ZipReader {
   // Callbacks will be posted to the current MessageLoop in-order.
   void ExtractCurrentEntryToFilePathAsync(
       const base::FilePath& output_file_path,
-      const SuccessCallback& success_callback,
-      const FailureCallback& failure_callback,
+      SuccessCallback success_callback,
+      FailureCallback failure_callback,
       const ProgressCallback& progress_callback);
 
-  // Extracts the current entry to the given output directory path using
-  // ExtractCurrentEntryToFilePath(). Sub directories are created as needed
-  // based on the file path of the current entry. For example, if the file
-  // path in zip is "foo/bar.txt", and the output directory is "output",
-  // "output/foo/bar.txt" will be created.
-  //
-  // Returns true on success. OpenCurrentEntryInZip() must be called
-  // beforehand.
-  //
-  // This function preserves the timestamp of the original entry. If that
-  // timestamp is not valid, the timestamp will be set to the current time.
-  bool ExtractCurrentEntryIntoDirectory(
-      const base::FilePath& output_directory_path) const;
-
-  // Extracts the current entry by writing directly to a platform file.
-  // Does not close the file. Returns true on success.
-  bool ExtractCurrentEntryToFile(base::File* file) const;
-
-  // Extracts the current entry into memory. If the current entry is a directory
-  // the |output| parameter is set to the empty string. If the current entry is
-  // a file, the |output| parameter is filled with its contents. Returns true on
-  // success. OpenCurrentEntryInZip() must be called beforehand.
-  // Note: the |output| parameter can be filled with a big amount of data, avoid
-  // passing it around by value, but by reference or pointer.
-  // Note: the value returned by EntryInfo::original_size() cannot be
-  // trusted, so the real size of the uncompressed contents can be different.
-  // Use max_read_bytes to limit the ammount of memory used to carry the entry.
-  // If the real size of the uncompressed data is bigger than max_read_bytes
-  // then false is returned. |max_read_bytes| must be non-zero.
-  bool ExtractCurrentEntryToString(
-      size_t max_read_bytes,
-      std::string* output) const;
+  // Extracts the current entry into memory. If the current entry is a
+  // directory, the |output| parameter is set to the empty string. If the
+  // current entry is a file, the |output| parameter is filled with its
+  // contents. OpenCurrentEntryInZip() must be called beforehand. Note: the
+  // |output| parameter can be filled with a big amount of data, avoid passing
+  // it around by value, but by reference or pointer. Note: the value returned
+  // by EntryInfo::original_size() cannot be trusted, so the real size of the
+  // uncompressed contents can be different. |max_read_bytes| limits the ammount
+  // of memory used to carry the entry. Returns true if the entire content is
+  // read. If the entry is bigger than |max_read_bytes|, returns false and
+  // |output| is filled with |max_read_bytes| of data. If an error occurs,
+  // returns false, and |output| is set to the empty string.
+  bool ExtractCurrentEntryToString(uint64_t max_read_bytes,
+                                   std::string* output) const;
 
   // Returns the current entry info. Returns NULL if the current entry is
   // not yet opened. OpenCurrentEntryInZip() must be called beforehand.
@@ -234,17 +214,17 @@ class ZipReader {
   // Extracts a chunk of the file to the target.  Will post a task for the next
   // chunk and success/failure/progress callbacks as necessary.
   void ExtractChunk(base::File target_file,
-                    const SuccessCallback& success_callback,
-                    const FailureCallback& failure_callback,
+                    SuccessCallback success_callback,
+                    FailureCallback failure_callback,
                     const ProgressCallback& progress_callback,
-                    const int64 offset);
+                    const int64_t offset);
 
   unzFile zip_file_;
   int num_entries_;
   bool reached_end_;
-  scoped_ptr<EntryInfo> current_entry_info_;
+  std::unique_ptr<EntryInfo> current_entry_info_;
 
-  base::WeakPtrFactory<ZipReader> weak_ptr_factory_;
+  base::WeakPtrFactory<ZipReader> weak_ptr_factory_{this};
 
   DISALLOW_COPY_AND_ASSIGN(ZipReader);
 };
@@ -252,7 +232,13 @@ class ZipReader {
 // A writer delegate that writes to a given File.
 class FileWriterDelegate : public WriterDelegate {
  public:
+  // Constructs a FileWriterDelegate that manipulates |file|. The delegate will
+  // not own |file|, therefore the caller must guarantee |file| will outlive the
+  // delegate.
   explicit FileWriterDelegate(base::File* file);
+
+  // Constructs a FileWriterDelegate that takes ownership of |file|.
+  explicit FileWriterDelegate(std::unique_ptr<base::File> file);
 
   // Truncates the file to the number of bytes written.
   ~FileWriterDelegate() override;
@@ -266,11 +252,48 @@ class FileWriterDelegate : public WriterDelegate {
   // if not all bytes could be written.
   bool WriteBytes(const char* data, int num_bytes) override;
 
+  // Sets the last-modified time of the data.
+  void SetTimeModified(const base::Time& time) override;
+
+  // Return the actual size of the file.
+  int64_t file_length() { return file_length_; }
+
  private:
+  // The file the delegate modifies.
   base::File* file_;
-  int64_t file_length_;
+
+  // The delegate can optionally own the file it modifies, in which case
+  // owned_file_ is set and file_ is an alias for owned_file_.
+  std::unique_ptr<base::File> owned_file_;
+
+  int64_t file_length_ = 0;
 
   DISALLOW_COPY_AND_ASSIGN(FileWriterDelegate);
+};
+
+// A writer delegate that writes a file at a given path.
+class FilePathWriterDelegate : public WriterDelegate {
+ public:
+  explicit FilePathWriterDelegate(const base::FilePath& output_file_path);
+  ~FilePathWriterDelegate() override;
+
+  // WriterDelegate methods:
+
+  // Creates the output file and any necessary intermediate directories.
+  bool PrepareOutput() override;
+
+  // Writes |num_bytes| bytes of |data| to the file, returning false if not all
+  // bytes could be written.
+  bool WriteBytes(const char* data, int num_bytes) override;
+
+  // Sets the last-modified time of the data.
+  void SetTimeModified(const base::Time& time) override;
+
+ private:
+  base::FilePath output_file_path_;
+  base::File file_;
+
+  DISALLOW_COPY_AND_ASSIGN(FilePathWriterDelegate);
 };
 
 }  // namespace zip

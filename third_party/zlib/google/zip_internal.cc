@@ -4,12 +4,14 @@
 
 #include "third_party/zlib/google/zip_internal.h"
 
+#include <stddef.h>
+#include <string.h>
+
 #include <algorithm>
 
-#include "base/files/file_util.h"
 #include "base/logging.h"
+#include "base/notreached.h"
 #include "base/strings/utf_string_conversions.h"
-#include "base/time/time.h"
 
 #if defined(USE_SYSTEM_MINIZIP)
 #include <minizip/ioapi.h>
@@ -343,40 +345,32 @@ zipFile OpenFdForZipping(int zip_fd, int append_flag) {
 }
 #endif
 
-zip_fileinfo GetFileInfoForZipping(const base::FilePath& path) {
-  base::Time file_time;
-  base::File::Info file_info;
-  if (base::GetFileInfo(path, &file_info))
-    file_time = file_info.last_modified;
-  return TimeToZipFileInfo(file_time);
-}
-
 bool ZipOpenNewFileInZip(zipFile zip_file,
                          const std::string& str_path,
-                         const zip_fileinfo* file_info) {
+                         base::Time last_modified_time) {
   // Section 4.4.4 http://www.pkware.com/documents/casestudies/APPNOTE.TXT
   // Setting the Language encoding flag so the file is told to be in utf-8.
   const uLong LANGUAGE_ENCODING_FLAG = 0x1 << 11;
 
-  if (ZIP_OK != zipOpenNewFileInZip4(
-                    zip_file,  // file
-                    str_path.c_str(),  // filename
-                    file_info,  // zipfi
-                    NULL,  // extrafield_local,
-                    0u,  // size_extrafield_local
-                    NULL,  // extrafield_global
-                    0u,  // size_extrafield_global
-                    NULL,  // comment
-                    Z_DEFLATED,  // method
-                    Z_DEFAULT_COMPRESSION,  // level
-                    0,  // raw
-                    -MAX_WBITS,  // windowBits
-                    DEF_MEM_LEVEL,  // memLevel
-                    Z_DEFAULT_STRATEGY,  // strategy
-                    NULL,  // password
-                    0,  // crcForCrypting
-                    0,  // versionMadeBy
-                    LANGUAGE_ENCODING_FLAG)) {  // flagBase
+  zip_fileinfo file_info = TimeToZipFileInfo(last_modified_time);
+  if (ZIP_OK != zipOpenNewFileInZip4(zip_file,          // file
+                                     str_path.c_str(),  // filename
+                                     &file_info,        // zip_fileinfo
+                                     NULL,              // extrafield_local,
+                                     0u,                // size_extrafield_local
+                                     NULL,              // extrafield_global
+                                     0u,          // size_extrafield_global
+                                     NULL,        // comment
+                                     Z_DEFLATED,  // method
+                                     Z_DEFAULT_COMPRESSION,  // level
+                                     0,                      // raw
+                                     -MAX_WBITS,             // windowBits
+                                     DEF_MEM_LEVEL,          // memLevel
+                                     Z_DEFAULT_STRATEGY,     // strategy
+                                     NULL,                   // password
+                                     0,                      // crcForCrypting
+                                     0,                      // versionMadeBy
+                                     LANGUAGE_ENCODING_FLAG)) {  // flagBase
     DLOG(ERROR) << "Could not open zip file entry " << str_path;
     return false;
   }

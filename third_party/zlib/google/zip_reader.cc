@@ -4,13 +4,17 @@
 
 #include "third_party/zlib/google/zip_reader.h"
 
+#include <utility>
+
 #include "base/bind.h"
 #include "base/files/file.h"
 #include "base/logging.h"
-#include "base/message_loop/message_loop.h"
+#include "base/macros.h"
+#include "base/single_thread_task_runner.h"
 #include "base/strings/string_util.h"
 #include "base/strings/utf_string_conversions.h"
-#include "base/thread_task_runner_handle.h"
+#include "base/threading/thread_task_runner_handle.h"
+#include "build/build_config.h"
 #include "third_party/zlib/google/zip_internal.h"
 
 #if defined(USE_SYSTEM_MINIZIP)
@@ -25,54 +29,6 @@
 namespace zip {
 
 namespace {
-
-// FilePathWriterDelegate ------------------------------------------------------
-
-// A writer delegate that writes a file at a given path.
-class FilePathWriterDelegate : public WriterDelegate {
- public:
-  explicit FilePathWriterDelegate(const base::FilePath& output_file_path);
-  ~FilePathWriterDelegate() override;
-
-  // WriterDelegate methods:
-
-  // Creates the output file and any necessary intermediate directories.
-  bool PrepareOutput() override;
-
-  // Writes |num_bytes| bytes of |data| to the file, returning false if not all
-  // bytes could be written.
-  bool WriteBytes(const char* data, int num_bytes) override;
-
- private:
-  base::FilePath output_file_path_;
-  base::File file_;
-
-  DISALLOW_COPY_AND_ASSIGN(FilePathWriterDelegate);
-};
-
-FilePathWriterDelegate::FilePathWriterDelegate(
-    const base::FilePath& output_file_path)
-    : output_file_path_(output_file_path) {
-}
-
-FilePathWriterDelegate::~FilePathWriterDelegate() {
-}
-
-bool FilePathWriterDelegate::PrepareOutput() {
-  // We can't rely on parent directory entries being specified in the
-  // zip, so we make sure they are created.
-  if (!base::CreateDirectory(output_file_path_.DirName()))
-    return false;
-
-  file_.Initialize(output_file_path_,
-                   base::File::FLAG_CREATE_ALWAYS | base::File::FLAG_WRITE);
-  return file_.IsValid();
-}
-
-bool FilePathWriterDelegate::WriteBytes(const char* data, int num_bytes) {
-  return num_bytes == file_.WriteAtCurrentPos(data, num_bytes);
-}
-
 
 // StringWriterDelegate --------------------------------------------------------
 
@@ -91,6 +47,8 @@ class StringWriterDelegate : public WriterDelegate {
   // Appends |num_bytes| bytes from |data| to the output string. Returns false
   // if |num_bytes| will cause the string to exceed |max_read_bytes|.
   bool WriteBytes(const char* data, int num_bytes) override;
+
+  void SetTimeModified(const base::Time& time) override;
 
  private:
   size_t max_read_bytes_;
@@ -119,6 +77,10 @@ bool StringWriterDelegate::WriteBytes(const char* data, int num_bytes) {
   return true;
 }
 
+void StringWriterDelegate::SetTimeModified(const base::Time& time) {
+  // Do nothing.
+}
+
 }  // namespace
 
 // TODO(satorux): The implementation assumes that file names in zip files
@@ -127,7 +89,9 @@ bool StringWriterDelegate::WriteBytes(const char* data, int num_bytes) {
 ZipReader::EntryInfo::EntryInfo(const std::string& file_name_in_zip,
                                 const unz_file_info& raw_file_info)
     : file_path_(base::FilePath::FromUTF8Unsafe(file_name_in_zip)),
-      is_directory_(false) {
+      is_directory_(false),
+      is_unsafe_(false),
+      is_encrypted_(false) {
   original_size_ = raw_file_info.uncompressed_size;
 
   // Directory entries in zip files end with "/".
@@ -147,8 +111,12 @@ ZipReader::EntryInfo::EntryInfo(const std::string& file_name_in_zip,
   // We also consider that the file name is unsafe, if it's absolute.
   // On Windows, IsAbsolute() returns false for paths starting with "/".
   if (file_path_.IsAbsolute() ||
-      base::StartsWithASCII(file_name_in_zip, "/", false))
+      base::StartsWith(file_name_in_zip, "/",
+                       base::CompareCase::INSENSITIVE_ASCII))
     is_unsafe_ = true;
+
+  // Whether the file is encrypted is bit 0 of the flag.
+  is_encrypted_ = raw_file_info.flag & 1;
 
   // Construct the last modified time. The timezone info is not present in
   // zip files, so we construct the time as local time.
@@ -161,16 +129,12 @@ ZipReader::EntryInfo::EntryInfo(const std::string& file_name_in_zip,
   exploded_time.minute = raw_file_info.tmu_date.tm_min;
   exploded_time.second = raw_file_info.tmu_date.tm_sec;
   exploded_time.millisecond = 0;
-  if (exploded_time.HasValidValues()) {
-    last_modified_ = base::Time::FromLocalExploded(exploded_time);
-  } else {
-    // Use Unix time epoch if the time stamp data is invalid.
+
+  if (!base::Time::FromLocalExploded(exploded_time, &last_modified_))
     last_modified_ = base::Time::UnixEpoch();
-  }
 }
 
-ZipReader::ZipReader()
-    : weak_ptr_factory_(this) {
+ZipReader::ZipReader() {
   Reset();
 }
 
@@ -271,23 +235,8 @@ bool ZipReader::OpenCurrentEntryInZip() {
   return true;
 }
 
-bool ZipReader::LocateAndOpenEntry(const base::FilePath& path_in_zip) {
-  DCHECK(zip_file_);
-
-  current_entry_info_.reset();
-  reached_end_ = false;
-  const int kDefaultCaseSensivityOfOS = 0;
-  const int result = unzLocateFile(zip_file_,
-                                   path_in_zip.AsUTF8Unsafe().c_str(),
-                                   kDefaultCaseSensivityOfOS);
-  if (result != UNZ_OK)
-    return false;
-
-  // Then Open the entry.
-  return OpenCurrentEntryInZip();
-}
-
-bool ZipReader::ExtractCurrentEntry(WriterDelegate* delegate) const {
+bool ZipReader::ExtractCurrentEntry(WriterDelegate* delegate,
+                                    uint64_t num_bytes_to_extract) const {
   DCHECK(zip_file_);
 
   const int open_result = unzOpenCurrentFile(zip_file_);
@@ -296,61 +245,50 @@ bool ZipReader::ExtractCurrentEntry(WriterDelegate* delegate) const {
 
   if (!delegate->PrepareOutput())
     return false;
+  std::unique_ptr<char[]> buf(new char[internal::kZipBufSize]);
 
-  bool success = true;  // This becomes false when something bad happens.
-  scoped_ptr<char[]> buf(new char[internal::kZipBufSize]);
-  while (true) {
-    const int num_bytes_read = unzReadCurrentFile(zip_file_, buf.get(),
-                                                  internal::kZipBufSize);
+  uint64_t remaining_capacity = num_bytes_to_extract;
+  bool entire_file_extracted = false;
+
+  while (remaining_capacity > 0) {
+    const int num_bytes_read =
+        unzReadCurrentFile(zip_file_, buf.get(), internal::kZipBufSize);
+
     if (num_bytes_read == 0) {
-      // Reached the end of the file.
+      entire_file_extracted = true;
       break;
     } else if (num_bytes_read < 0) {
       // If num_bytes_read < 0, then it's a specific UNZ_* error code.
-      success = false;
       break;
     } else if (num_bytes_read > 0) {
-      // Some data is read.
-      if (!delegate->WriteBytes(buf.get(), num_bytes_read)) {
-        success = false;
+      uint64_t num_bytes_to_write = std::min<uint64_t>(
+          remaining_capacity, base::checked_cast<uint64_t>(num_bytes_read));
+      if (!delegate->WriteBytes(buf.get(), num_bytes_to_write))
         break;
+      if (remaining_capacity == base::checked_cast<uint64_t>(num_bytes_read)) {
+        // Ensures function returns true if the entire file has been read.
+        entire_file_extracted =
+            (unzReadCurrentFile(zip_file_, buf.get(), 1) == 0);
       }
+      CHECK_GE(remaining_capacity, num_bytes_to_write);
+      remaining_capacity -= num_bytes_to_write;
     }
   }
 
   unzCloseCurrentFile(zip_file_);
 
-  return success;
-}
-
-bool ZipReader::ExtractCurrentEntryToFilePath(
-    const base::FilePath& output_file_path) const {
-  DCHECK(zip_file_);
-
-  // If this is a directory, just create it and return.
-  if (current_entry_info()->is_directory())
-    return base::CreateDirectory(output_file_path);
-
-  bool success = false;
-  {
-    FilePathWriterDelegate writer(output_file_path);
-    success = ExtractCurrentEntry(&writer);
-  }
-
-  if (success &&
+  if (entire_file_extracted &&
       current_entry_info()->last_modified() != base::Time::UnixEpoch()) {
-    base::TouchFile(output_file_path,
-                    base::Time::Now(),
-                    current_entry_info()->last_modified());
+    delegate->SetTimeModified(current_entry_info()->last_modified());
   }
 
-  return success;
+  return entire_file_extracted;
 }
 
 void ZipReader::ExtractCurrentEntryToFilePathAsync(
     const base::FilePath& output_file_path,
-    const SuccessCallback& success_callback,
-    const FailureCallback& failure_callback,
+    SuccessCallback success_callback,
+    FailureCallback failure_callback,
     const ProgressCallback& progress_callback) {
   DCHECK(zip_file_);
   DCHECK(current_entry_info_.get());
@@ -358,24 +296,28 @@ void ZipReader::ExtractCurrentEntryToFilePathAsync(
   // If this is a directory, just create it and return.
   if (current_entry_info()->is_directory()) {
     if (base::CreateDirectory(output_file_path)) {
-      base::ThreadTaskRunnerHandle::Get()->PostTask(FROM_HERE, success_callback);
+      base::ThreadTaskRunnerHandle::Get()->PostTask(
+          FROM_HERE, std::move(success_callback));
     } else {
       DVLOG(1) << "Unzip failed: unable to create directory.";
-      base::ThreadTaskRunnerHandle::Get()->PostTask(FROM_HERE, failure_callback);
+      base::ThreadTaskRunnerHandle::Get()->PostTask(
+          FROM_HERE, std::move(failure_callback));
     }
     return;
   }
 
   if (unzOpenCurrentFile(zip_file_) != UNZ_OK) {
     DVLOG(1) << "Unzip failed: unable to open current zip entry.";
-    base::ThreadTaskRunnerHandle::Get()->PostTask(FROM_HERE, failure_callback);
+    base::ThreadTaskRunnerHandle::Get()->PostTask(FROM_HERE,
+                                                  std::move(failure_callback));
     return;
   }
 
   base::FilePath output_dir_path = output_file_path.DirName();
   if (!base::CreateDirectory(output_dir_path)) {
     DVLOG(1) << "Unzip failed: unable to create containing directory.";
-    base::ThreadTaskRunnerHandle::Get()->PostTask(FROM_HERE, failure_callback);
+    base::ThreadTaskRunnerHandle::Get()->PostTask(FROM_HERE,
+                                                  std::move(failure_callback));
     return;
   }
 
@@ -385,47 +327,28 @@ void ZipReader::ExtractCurrentEntryToFilePathAsync(
   if (!output_file.IsValid()) {
     DVLOG(1) << "Unzip failed: unable to create platform file at "
              << output_file_path.value();
-    base::ThreadTaskRunnerHandle::Get()->PostTask(FROM_HERE, failure_callback);
+    base::ThreadTaskRunnerHandle::Get()->PostTask(FROM_HERE,
+                                                  std::move(failure_callback));
     return;
   }
 
-  base::MessageLoop::current()->PostTask(
+  base::ThreadTaskRunnerHandle::Get()->PostTask(
       FROM_HERE,
-      base::Bind(&ZipReader::ExtractChunk,
-                 weak_ptr_factory_.GetWeakPtr(),
-                 Passed(output_file.Pass()),
-                 success_callback,
-                 failure_callback,
-                 progress_callback,
-                 0 /* initial offset */));
+      base::BindOnce(&ZipReader::ExtractChunk, weak_ptr_factory_.GetWeakPtr(),
+                     Passed(std::move(output_file)),
+                     std::move(success_callback), std::move(failure_callback),
+                     progress_callback, 0 /* initial offset */));
 }
 
-bool ZipReader::ExtractCurrentEntryIntoDirectory(
-    const base::FilePath& output_directory_path) const {
-  DCHECK(current_entry_info_.get());
-
-  base::FilePath output_file_path = output_directory_path.Append(
-      current_entry_info()->file_path());
-  return ExtractCurrentEntryToFilePath(output_file_path);
-}
-
-bool ZipReader::ExtractCurrentEntryToFile(base::File* file) const {
-  DCHECK(zip_file_);
-
-  // If this is a directory, there's nothing to extract to the file, so return
-  // false.
-  if (current_entry_info()->is_directory())
-    return false;
-
-  FileWriterDelegate writer(file);
-  return ExtractCurrentEntry(&writer);
-}
-
-bool ZipReader::ExtractCurrentEntryToString(size_t max_read_bytes,
+bool ZipReader::ExtractCurrentEntryToString(uint64_t max_read_bytes,
                                             std::string* output) const {
   DCHECK(output);
   DCHECK(zip_file_);
-  DCHECK_NE(0U, max_read_bytes);
+
+  if (max_read_bytes == 0) {
+    output->clear();
+    return true;
+  }
 
   if (current_entry_info()->is_directory()) {
     output->clear();
@@ -437,13 +360,24 @@ bool ZipReader::ExtractCurrentEntryToString(size_t max_read_bytes,
   // correct. However, we need to assume that the uncompressed size could be
   // incorrect therefore this function needs to read as much data as possible.
   std::string contents;
-  contents.reserve(static_cast<size_t>(std::min(
-      static_cast<int64>(max_read_bytes),
-      current_entry_info()->original_size())));
+  contents.reserve(
+      static_cast<size_t>(std::min(base::checked_cast<int64_t>(max_read_bytes),
+                                   current_entry_info()->original_size())));
 
   StringWriterDelegate writer(max_read_bytes, &contents);
-  if (!ExtractCurrentEntry(&writer))
+  if (!ExtractCurrentEntry(&writer, max_read_bytes)) {
+    if (contents.length() < max_read_bytes) {
+      // There was an error in extracting entry. If ExtractCurrentEntry()
+      // returns false, the entire file was not read - in which case
+      // contents.length() should equal |max_read_bytes| unless an error
+      // occurred which caused extraction to be aborted.
+      output->clear();
+    } else {
+      // |num_bytes| is less than the length of current entry.
+      output->swap(contents);
+    }
     return false;
+  }
   output->swap(contents);
   return true;
 }
@@ -472,10 +406,10 @@ void ZipReader::Reset() {
 }
 
 void ZipReader::ExtractChunk(base::File output_file,
-                             const SuccessCallback& success_callback,
-                             const FailureCallback& failure_callback,
+                             SuccessCallback success_callback,
+                             FailureCallback failure_callback,
                              const ProgressCallback& progress_callback,
-                             const int64 offset) {
+                             const int64_t offset) {
   char buffer[internal::kZipBufSize];
 
   const int num_bytes_read = unzReadCurrentFile(zip_file_,
@@ -484,48 +418,42 @@ void ZipReader::ExtractChunk(base::File output_file,
 
   if (num_bytes_read == 0) {
     unzCloseCurrentFile(zip_file_);
-    success_callback.Run();
+    std::move(success_callback).Run();
   } else if (num_bytes_read < 0) {
     DVLOG(1) << "Unzip failed: error while reading zipfile "
              << "(" << num_bytes_read << ")";
-    failure_callback.Run();
+    std::move(failure_callback).Run();
   } else {
     if (num_bytes_read != output_file.Write(offset, buffer, num_bytes_read)) {
       DVLOG(1) << "Unzip failed: unable to write all bytes to target.";
-      failure_callback.Run();
+      std::move(failure_callback).Run();
       return;
     }
 
-    int64 current_progress = offset + num_bytes_read;
+    int64_t current_progress = offset + num_bytes_read;
 
     progress_callback.Run(current_progress);
 
-    base::MessageLoop::current()->PostTask(
+    base::ThreadTaskRunnerHandle::Get()->PostTask(
         FROM_HERE,
-        base::Bind(&ZipReader::ExtractChunk,
-                   weak_ptr_factory_.GetWeakPtr(),
-                   Passed(output_file.Pass()),
-                   success_callback,
-                   failure_callback,
-                   progress_callback,
-                   current_progress));
-
+        base::BindOnce(&ZipReader::ExtractChunk, weak_ptr_factory_.GetWeakPtr(),
+                       Passed(std::move(output_file)),
+                       std::move(success_callback), std::move(failure_callback),
+                       progress_callback, current_progress));
   }
 }
 
 // FileWriterDelegate ----------------------------------------------------------
 
-FileWriterDelegate::FileWriterDelegate(base::File* file)
-    : file_(file),
-      file_length_(0) {
-}
+FileWriterDelegate::FileWriterDelegate(base::File* file) : file_(file) {}
+
+FileWriterDelegate::FileWriterDelegate(std::unique_ptr<base::File> file)
+    : file_(file.get()), owned_file_(std::move(file)) {}
 
 FileWriterDelegate::~FileWriterDelegate() {
-#if !defined(NDEBUG)
-  const bool success =
-#endif
-      file_->SetLength(file_length_);
-  DPLOG_IF(ERROR, !success) << "Failed updating length of written file";
+  if (!file_->SetLength(file_length_)) {
+    DVPLOG(1) << "Failed updating length of written file";
+  }
 }
 
 bool FileWriterDelegate::PrepareOutput() {
@@ -537,6 +465,38 @@ bool FileWriterDelegate::WriteBytes(const char* data, int num_bytes) {
   if (bytes_written > 0)
     file_length_ += bytes_written;
   return bytes_written == num_bytes;
+}
+
+void FileWriterDelegate::SetTimeModified(const base::Time& time) {
+  file_->SetTimes(base::Time::Now(), time);
+}
+
+// FilePathWriterDelegate ------------------------------------------------------
+
+FilePathWriterDelegate::FilePathWriterDelegate(
+    const base::FilePath& output_file_path)
+    : output_file_path_(output_file_path) {}
+
+FilePathWriterDelegate::~FilePathWriterDelegate() {}
+
+bool FilePathWriterDelegate::PrepareOutput() {
+  // We can't rely on parent directory entries being specified in the
+  // zip, so we make sure they are created.
+  if (!base::CreateDirectory(output_file_path_.DirName()))
+    return false;
+
+  file_.Initialize(output_file_path_,
+                   base::File::FLAG_CREATE_ALWAYS | base::File::FLAG_WRITE);
+  return file_.IsValid();
+}
+
+bool FilePathWriterDelegate::WriteBytes(const char* data, int num_bytes) {
+  return num_bytes == file_.WriteAtCurrentPos(data, num_bytes);
+}
+
+void FilePathWriterDelegate::SetTimeModified(const base::Time& time) {
+  file_.Close();
+  base::TouchFile(output_file_path_, base::Time::Now(), time);
 }
 
 }  // namespace zip

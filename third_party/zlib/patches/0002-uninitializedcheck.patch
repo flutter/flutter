@@ -1,0 +1,27 @@
+From 1a03e7aec95d89c659fd91f195b99893b6458cd7 Mon Sep 17 00:00:00 2001
+From: Adenilson Cavalcanti <adenilson.cavalcanti@arm.com>
+Date: Wed, 27 Sep 2017 13:59:04 -0700
+Subject: [PATCH] Zlib patch: prevent uninitialized use of state->check
+
+No need to call the Adler32 checksum function, just set
+the struct field to the expected value.
+
+Upstream bug: madler/zlib#245
+---
+ third_party/zlib/inflate.c                             |  2 +-
+ 1 files changed, 1 insertion(+), 1 deletions(-)
+ delete mode 100644 third_party/zlib/patches/0002-uninitializedcheck.patch
+
+diff --git a/third_party/zlib/inflate.c b/third_party/zlib/inflate.c
+index bec9497..5c40cf1 100644
+--- a/third_party/zlib/inflate.c
++++ b/third_party/zlib/inflate.c
+@@ -228,7 +228,7 @@ int stream_size;
+     state->strm = strm;
+     state->window = Z_NULL;
+     state->mode = HEAD;     /* to pass state test in inflateReset2() */
+-    state->check = adler32(0L, Z_NULL, 0);
++    state->check = 1L;      /* 1L is the result of adler32() zero length data */
+     ret = inflateReset2(strm, windowBits);
+     if (ret != Z_OK) {
+         ZFREE(strm, state);

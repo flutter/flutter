@@ -1,0 +1,15 @@
+diff --git a/third_party/zlib/deflate.c b/third_party/zlib/deflate.c
+index a39e62787862..c6053fd1c7ea 100644
+--- a/third_party/zlib/deflate.c
++++ b/third_party/zlib/deflate.c
+@@ -318,6 +318,10 @@ int ZEXPORT deflateInit2_(strm, level, method, windowBits, memLevel, strategy,
+                                  s->w_size + window_padding,
+                                  2*sizeof(Byte));
+     s->prev   = (Posf *)  ZALLOC(strm, s->w_size, sizeof(Pos));
++    /* Avoid use of uninitialized value, see:
++     * https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=11360
++     */
++    zmemzero(s->prev, s->w_size * sizeof(Pos));
+     s->head   = (Posf *)  ZALLOC(strm, s->hash_size, sizeof(Pos));
+ 
+     s->high_water = 0;      /* nothing written to s->window yet */

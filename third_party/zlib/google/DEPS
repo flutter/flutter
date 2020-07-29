@@ -1,4 +1,6 @@
 include_rules = [
   '+base',
+  '+build',
   '+testing',
+  "+third_party/zlib/zlib.h",
 ]

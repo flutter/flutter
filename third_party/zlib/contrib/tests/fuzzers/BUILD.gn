@@ -1,0 +1,29 @@
+# Copyright 2017 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//testing/libfuzzer/fuzzer_test.gni")
+
+# root BUILD depends on this target. Needed for package discovery
+group("fuzzers") {
+}
+
+fuzzer_test("zlib_uncompress_fuzzer") {
+  sources = [ "uncompress_fuzzer.cc" ]
+  deps = [ "../../../:zlib" ]
+}
+
+fuzzer_test("zlib_inflate_fuzzer") {
+  sources = [ "inflate_fuzzer.cc" ]
+  deps = [ "../../../:zlib" ]
+}
+
+fuzzer_test("zlib_deflate_set_dictionary_fuzzer") {
+  sources = [ "deflate_set_dictionary_fuzzer.cc" ]
+  deps = [ "../../../:zlib" ]
+}
+
+fuzzer_test("zlib_deflate_fuzzer") {
+  sources = [ "deflate_fuzzer.cc" ]
+  deps = [ "../../../:zlib" ]
+}

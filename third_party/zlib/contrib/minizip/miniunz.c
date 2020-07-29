@@ -12,7 +12,7 @@
          Copyright (C) 2009-2010 Mathias Svensson ( http://result42.com )
 */
 
-#ifndef _WIN32
+#if (!defined(_WIN32)) && (!defined(WIN32)) && (!defined(__APPLE__))
         #ifndef __USE_FILE_OFFSET64
                 #define __USE_FILE_OFFSET64
         #endif
@@ -27,6 +27,18 @@
         #endif
 #endif
 
+#ifdef __APPLE__
+// In darwin and perhaps other BSD variants off_t is a 64 bit value, hence no need for specific 64 bit functions
+#define FOPEN_FUNC(filename, mode) fopen(filename, mode)
+#define FTELLO_FUNC(stream) ftello(stream)
+#define FSEEKO_FUNC(stream, offset, origin) fseeko(stream, offset, origin)
+#else
+#define FOPEN_FUNC(filename, mode) fopen64(filename, mode)
+#define FTELLO_FUNC(stream) ftello64(stream)
+#define FSEEKO_FUNC(stream, offset, origin) fseeko64(stream, offset, origin)
+#endif
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -34,13 +46,14 @@
 #include <errno.h>
 #include <fcntl.h>
 
-#ifdef unix
-# include <unistd.h>
-# include <utime.h>
-#else
+#ifdef _WIN32
 # include <direct.h>
 # include <io.h>
+#else
+# include <unistd.h>
+# include <utime.h>
 #endif
+
 
 #include "unzip.h"
 
@@ -84,7 +97,7 @@ void change_file_date(filename,dosdate,tmu_date)
   SetFileTime(hFile,&ftm,&ftLastAcc,&ftm);
   CloseHandle(hFile);
 #else
-#ifdef unix
+#ifdef unix || __APPLE__
   struct utimbuf ut;
   struct tm newdate;
   newdate.tm_sec = tmu_date.tm_sec;
@@ -114,10 +127,10 @@ int mymkdir(dirname)
     int ret=0;
 #ifdef _WIN32
     ret = _mkdir(dirname);
-#else
-#ifdef unix
+#elif unix
     ret = mkdir (dirname,0775);
-#endif
+#elif __APPLE__
+    ret = mkdir (dirname,0775);
 #endif
     return ret;
 }
@@ -364,7 +377,7 @@ int do_extract_currentfile(uf,popt_extract_without_path,popt_overwrite,password)
         {
             char rep=0;
             FILE* ftestexist;
-            ftestexist = fopen64(write_filename,"rb");
+            ftestexist = FOPEN_FUNC(write_filename,"rb");
             if (ftestexist!=NULL)
             {
                 fclose(ftestexist);
@@ -395,8 +408,7 @@ int do_extract_currentfile(uf,popt_extract_without_path,popt_overwrite,password)
 
         if ((skip==0) && (err==UNZ_OK))
         {
-            fout=fopen64(write_filename,"wb");
-
+            fout=FOPEN_FUNC(write_filename,"wb");
             /* some zipfile don't contain directory alone before file */
             if ((fout==NULL) && ((*popt_extract_without_path)==0) &&
                                 (filename_withoutpath!=(char*)filename_inzip))
@@ -405,7 +417,7 @@ int do_extract_currentfile(uf,popt_extract_without_path,popt_overwrite,password)
                 *(filename_withoutpath-1)='\0';
                 makedir(write_filename);
                 *(filename_withoutpath-1)=c;
-                fout=fopen64(write_filename,"wb");
+                fout=FOPEN_FUNC(write_filename,"wb");
             }
 
             if (fout==NULL)
