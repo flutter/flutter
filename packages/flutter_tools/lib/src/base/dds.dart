@@ -27,9 +27,9 @@ class DartDevelopmentService {
   ) async {
     if (ddsDisabled) {
       logger.printTrace(
-          'DDS is currently disabled due to '
-          'https://github.com/flutter/flutter/issues/62507'
-        );
+        'DDS is currently disabled due to '
+        'https://github.com/flutter/flutter/issues/62507'
+      );
       return;
     }
     final Uri ddsUri = Uri(
