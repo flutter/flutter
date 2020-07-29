@@ -28,8 +28,6 @@
 #       the overall build status. Tests should be marked flaky when newly added, until they have
 #       been proved for a few cycles. Tests that are actually flaky but not being actively worked
 #       on should be hidden because they just cause confusion otherwise.
-# * timeout_in_minutes: integer
-#       a custom task timeout, specified in minutes.
 # * on_luci: boolean true or false
 #       whether the task runs on LUCI builders. Tests will be gradually marked on_luci during the
 #       devicelab to LUCI migration. And when the migration is complete, on_luci flag will be
@@ -345,7 +343,6 @@ tasks:
       Runs benchmarks from dev/benchmarks/microbenchmarks.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
-    timeout_in_minutes: 30
 
   flutter_view__start_up:
     description: >
@@ -422,7 +419,6 @@ tasks:
       Tests the `flutter attach` command.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    timeout_in_minutes: 20
 
   named_isolates_test:
     description: >
@@ -601,7 +597,6 @@ tasks:
     #TODO(godofredoc): Remove ios/12 capability once
     # https://github.com/flutter/flutter/issues/49635 is fixed.
     required_agent_capabilities: ["mac/ios", "ios/12"]
-    timeout_in_minutes: 30
 
   flutter_view_ios__start_up:
     description: >
@@ -614,7 +609,6 @@ tasks:
       Runs end-to-end Flutter tests on iPhone 6.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
-    timeout_in_minutes: 20
 
   ios_platform_view_tests:
     description: >
@@ -634,7 +628,6 @@ tasks:
   #     Tests that the Engine correctly initializes the system debugger for debug-mode iOS apps.
   #   stage: devicelab_ios
   #   required_agent_capabilities: ["mac/ios"]
-  #   timeout_in_minutes: 10
 
   ios_sample_catalog_generator:
     description: >
