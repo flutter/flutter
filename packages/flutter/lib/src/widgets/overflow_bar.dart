@@ -352,12 +352,29 @@ class _RenderOverflowBar extends RenderBox
     RenderBox child = firstChild;
     if (child == null)
       return 0;
-    double height = 0.0;
+    double barWidth = 0.0;
     while (child != null) {
-      height += child.getMinIntrinsicHeight(width);
+      barWidth += child.getMinIntrinsicWidth(double.infinity);
       child = childAfter(child);
     }
-    return height + overflowSpacing * (childCount - 1);
+    barWidth += spacing * (childCount - 1);
+
+    double height = 0.0;
+    if (barWidth > width) {
+      child = firstChild;
+      while (child != null) {
+        height += child.getMinIntrinsicHeight(width);
+        child = childAfter(child);
+      }
+      return height + overflowSpacing * (childCount - 1);
+    } else {
+      child = firstChild;
+      while (child != null) {
+        height = math.max(height, child.getMinIntrinsicHeight(width));
+        child = childAfter(child);
+      }
+      return height;
+    }
   }
 
   @override
@@ -365,12 +382,29 @@ class _RenderOverflowBar extends RenderBox
     RenderBox child = firstChild;
     if (child == null)
       return 0;
-    double height = 0.0;
+    double barWidth = 0.0;
     while (child != null) {
-      height += child.getMaxIntrinsicHeight(width);
+      barWidth += child.getMinIntrinsicWidth(double.infinity);
       child = childAfter(child);
     }
-    return height + overflowSpacing * (childCount - 1);
+    barWidth += spacing * (childCount - 1);
+
+    double height = 0.0;
+    if (barWidth > width) {
+      child = firstChild;
+      while (child != null) {
+        height += child.getMaxIntrinsicHeight(width);
+        child = childAfter(child);
+      }
+      return height + overflowSpacing * (childCount - 1);
+    } else {
+      child = firstChild;
+      while (child != null) {
+        height = math.max(height, child.getMaxIntrinsicHeight(width));
+        child = childAfter(child);
+      }
+      return height;
+    }
   }
 
   @override

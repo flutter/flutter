@@ -174,4 +174,66 @@ void main() {
     expect(tester.getRect(find.byKey(child2Key)), const Rect.fromLTRB(100.0/2.0 - 64/2, 48, 100.0/2.0 + 64/2, 112));
     expect(tester.getRect(find.byKey(child3Key)), const Rect.fromLTRB(100.0/2.0 - 32/2, 112, 100.0/2.0 + 32/2, 144));
   });
+
+  testWidgets('OverflowBar intrinsic width', (WidgetTester tester) async {
+    Widget buildFrame({ double width }) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Container(
+            width: width,
+            alignment: Alignment.topLeft,
+            child: IntrinsicWidth(
+              child: OverflowBar(
+                spacing: 4,
+                overflowSpacing: 8,
+                children: const <Widget>[
+                  SizedBox(width: 48, height: 50),
+                  SizedBox(width: 64, height: 25),
+                  SizedBox(width: 32, height: 75),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(width: 800));
+    expect(tester.getSize(find.byType(OverflowBar)).width, 152); // 152 = 48 + 4 + 64 + 4 + 32
+
+    await tester.pumpWidget(buildFrame(width: 150));
+    expect(tester.getSize(find.byType(OverflowBar)).width, 150);
+  });
+
+  testWidgets('OverflowBar intrinsic height', (WidgetTester tester) async {
+    Widget buildFrame({ double maxWidth }) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Container(
+            width: maxWidth,
+            alignment: Alignment.topLeft,
+            child: IntrinsicHeight(
+              child: OverflowBar(
+                spacing: 4,
+                overflowSpacing: 8,
+                children: const <Widget>[
+                  SizedBox(width: 48, height: 50),
+                  SizedBox(width: 64, height: 25),
+                  SizedBox(width: 32, height: 75),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(maxWidth: 800));
+    expect(tester.getSize(find.byType(OverflowBar)).height, 75); // 75 = max(50, 25, 75)
+
+    await tester.pumpWidget(buildFrame(maxWidth: 150));
+    expect(tester.getSize(find.byType(OverflowBar)).height, 166); // 166 = 50 + 8 + 25 + 8 + 75
+  });
 }
