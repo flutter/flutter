@@ -628,15 +628,13 @@ extension FlutterVmService on vm_service.VmService {
     );
   }
 
-  Future<Map<String, dynamic>> flutterFastReassemble(String classId, {
+  Future<Map<String, dynamic>> flutterFastReassemble({
    @required String isolateId,
   }) {
     return invokeFlutterExtensionRpcRaw(
       'ext.flutter.fastReassemble',
       isolateId: isolateId,
-      args: <String, Object>{
-        'class': classId,
-      },
+      args: <String, Object>{},
     );
   }
 

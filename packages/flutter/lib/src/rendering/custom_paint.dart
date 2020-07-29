@@ -194,9 +194,9 @@ abstract class CustomPainter extends Listenable {
   ///
   /// If the returned function is null, this painter will not contribute new
   /// [SemanticsNode]s to the semantics tree and the [CustomPaint] corresponding
-  /// to this painter will not create a semantics boundary. However, if
-  /// [CustomPaint.child] is not null, the child may contribute [SemanticsNode]s
-  /// to the tree.
+  /// to this painter will not create a semantics boundary. However, if the
+  /// child of a [CustomPaint] is not null, the child may contribute
+  /// [SemanticsNode]s to the tree.
   ///
   /// See also:
   ///

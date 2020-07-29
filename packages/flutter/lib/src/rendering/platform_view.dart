@@ -68,7 +68,7 @@ Set<Type> _factoriesTypeSet<T>(Set<Factory<T>> factories) {
 /// {@endtemplate}
 ///
 /// {@template flutter.rendering.platformView.gestures}
-/// The render object participates in Flutter's [GestureArena]s, and dispatches touch events to the
+/// The render object participates in Flutter's gesture arenas, and dispatches touch events to the
 /// platform view iff it won the arena. Specific gestures that should be dispatched to the platform
 /// view can be specified with factories in the `gestureRecognizers` constructor parameter or
 /// by calling `updateGestureRecognizers`. If the set of gesture recognizers is empty, the gesture
@@ -401,7 +401,19 @@ class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
     team.captain = this;
     _gestureRecognizers = gestureRecognizerFactories.map(
       (Factory<OneSequenceGestureRecognizer> recognizerFactory) {
-        return recognizerFactory.constructor()..team = team;
+        final OneSequenceGestureRecognizer gestureRecognizer = recognizerFactory.constructor();
+        gestureRecognizer.team = team;
+        // The below gesture recognizers requires at least one non-empty callback to
+        // compete in the gesture arena.
+        // https://github.com/flutter/flutter/issues/35394#issuecomment-562285087
+        if (gestureRecognizer is LongPressGestureRecognizer) {
+          gestureRecognizer.onLongPress ??= (){};
+        } else if (gestureRecognizer is DragGestureRecognizer) {
+          gestureRecognizer.onDown ??= (_){};
+        } else if (gestureRecognizer is TapGestureRecognizer) {
+          gestureRecognizer.onTapDown ??= (_){};
+        }
+        return gestureRecognizer;
       },
     ).toSet();
   }
@@ -467,7 +479,19 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
     team.captain = this;
     _gestureRecognizers = gestureRecognizerFactories.map(
       (Factory<OneSequenceGestureRecognizer> recognizerFactory) {
-        return recognizerFactory.constructor()..team = team;
+        final OneSequenceGestureRecognizer gestureRecognizer = recognizerFactory.constructor();
+        gestureRecognizer.team = team;
+        // The below gesture recognizers requires at least one non-empty callback to
+        // compete in the gesture arena.
+        // https://github.com/flutter/flutter/issues/35394#issuecomment-562285087
+        if (gestureRecognizer is LongPressGestureRecognizer) {
+          gestureRecognizer.onLongPress ??= (){};
+        } else if (gestureRecognizer is DragGestureRecognizer) {
+          gestureRecognizer.onDown ??= (_){};
+        } else if (gestureRecognizer is TapGestureRecognizer) {
+          gestureRecognizer.onTapDown ??= (_){};
+        }
+        return gestureRecognizer;
       },
     ).toSet();
     _handlePointerEvent = handlePointerEvent;

@@ -982,7 +982,7 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
-///  * [ShapeBorderClipper], which converts a [ShapeBorder] to a [CustomerClipper], as
+///  * [ShapeBorderClipper], which converts a [ShapeBorder] to a [CustomClipper], as
 ///    needed by this widget.
 class PhysicalShape extends SingleChildRenderObjectWidget {
   /// Creates a physical model with an arbitrary shape clip.
@@ -1236,10 +1236,10 @@ class Transform extends SingleChildRenderObjectWidget {
   /// This is equivalent to setting an origin based on the size of the box.
   /// If it is specified at the same time as the [origin], both are applied.
   ///
-  /// An [AlignmentDirectional.start] value is the same as an [Alignment]
+  /// An [AlignmentDirectional.centerStart] value is the same as an [Alignment]
   /// whose [Alignment.x] value is `-1.0` if [textDirection] is
   /// [TextDirection.ltr], and `1.0` if [textDirection] is [TextDirection.rtl].
-  /// Similarly [AlignmentDirectional.end] is the same as an [Alignment]
+  /// Similarly [AlignmentDirectional.centerEnd] is the same as an [Alignment]
   /// whose [Alignment.x] value is `1.0` if [textDirection] is
   /// [TextDirection.ltr], and `-1.0` if [textDirection] is [TextDirection.rtl].
   final AlignmentGeometry alignment;
@@ -1694,8 +1694,8 @@ class Padding extends SingleChildRenderObjectWidget {
 ///
 /// {@tool snippet}
 /// The [Align] widget in this example uses one of the defined constants from
-/// [Alignment], [topRight]. This places the [FlutterLogo] in the top right corner
-/// of the parent blue [Container].
+/// [Alignment], [Alignment.topRight]. This places the [FlutterLogo] in the top
+/// right corner of the parent blue [Container].
 ///
 /// ![A blue square container with the Flutter logo in the top right corner.](https://flutter.github.io/assets-for-api-docs/assets/widgets/align_constant.png)
 ///
@@ -2793,16 +2793,22 @@ class AspectRatio extends SingleChildRenderObjectWidget {
   }
 }
 
-/// A widget that sizes its child to the child's intrinsic width.
-///
-/// Sizes its child's width to the child's maximum intrinsic width. If
-/// [stepWidth] is non-null, the child's width will be snapped to a multiple of
-/// the [stepWidth]. Similarly, if [stepHeight] is non-null, the child's height
-/// will be snapped to a multiple of the [stepHeight].
+/// A widget that sizes its child to the child's maximum intrinsic width.
 ///
 /// This class is useful, for example, when unlimited width is available and
 /// you would like a child that would otherwise attempt to expand infinitely to
 /// instead size itself to a more reasonable width.
+///
+/// The constraints that this widget passes to its child will adhere to the
+/// parent's constraints, so if the constraints are not large enough to satisfy
+/// the child's maximum intrinsic width, then the child will get less width
+/// than it otherwise would. Likewise, if the minimum width constraint is
+/// larger than the child's maximum intrinsic width, the child will be given
+/// more width than it otherwise would.
+///
+/// If [stepWidth] is non-null, the child's width will be snapped to a multiple
+/// of the [stepWidth]. Similarly, if [stepHeight] is non-null, the child's
+/// height will be snapped to a multiple of the [stepHeight].
 ///
 /// This class is relatively expensive, because it adds a speculative layout
 /// pass before the final layout phase. Avoid using it where possible. In the
@@ -2811,6 +2817,14 @@ class AspectRatio extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
+///  * [Align], a widget that aligns its child within itself. This can be used
+///    to loosen the constraints passed to the [RenderIntrinsicWidth],
+///    allowing the [RenderIntrinsicWidth]'s child to be smaller than that of
+///    its parent.
+///  * [Row], which when used with [CrossAxisAlignment.stretch] can be used
+///    to loosen just the width constraints that are passed to the
+///    [RenderIntrinsicWidth], allowing the [RenderIntrinsicWidth]'s child's
+///    width to be smaller than that of its parent.
 ///  * [The catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class IntrinsicWidth extends SingleChildRenderObjectWidget {
   /// Creates a widget that sizes its child to the child's intrinsic width.
@@ -2863,6 +2877,13 @@ class IntrinsicWidth extends SingleChildRenderObjectWidget {
 /// you would like a child that would otherwise attempt to expand infinitely to
 /// instead size itself to a more reasonable height.
 ///
+/// The constraints that this widget passes to its child will adhere to the
+/// parent's constraints, so if the constraints are not large enough to satisfy
+/// the child's maximum intrinsic height, then the child will get less height
+/// than it otherwise would. Likewise, if the minimum height constraint is
+/// larger than the child's maximum intrinsic height, the child will be given
+/// more height than it otherwise would.
+///
 /// This class is relatively expensive, because it adds a speculative layout
 /// pass before the final layout phase. Avoid using it where possible. In the
 /// worst case, this widget can result in a layout that is O(N²) in the depth of
@@ -2870,6 +2891,14 @@ class IntrinsicWidth extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
+///  * [Align], a widget that aligns its child within itself. This can be used
+///    to loosen the constraints passed to the [RenderIntrinsicHeight],
+///    allowing the [RenderIntrinsicHeight]'s child to be smaller than that of
+///    its parent.
+///  * [Column], which when used with [CrossAxisAlignment.stretch] can be used
+///    to loosen just the height constraints that are passed to the
+///    [RenderIntrinsicHeight], allowing the [RenderIntrinsicHeight]'s child's
+///    height to be smaller than that of its parent.
 ///  * [The catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class IntrinsicHeight extends SingleChildRenderObjectWidget {
   /// Creates a widget that sizes its child to the child's intrinsic height.
@@ -3879,7 +3908,7 @@ class Flex extends MultiChildRenderObjectWidget {
        assert(mainAxisSize != null),
        assert(crossAxisAlignment != null),
        assert(verticalDirection != null),
-       assert(crossAxisAlignment != CrossAxisAlignment.baseline || textBaseline != null),
+       assert(crossAxisAlignment != CrossAxisAlignment.baseline || textBaseline != null, 'textBaseline is required if you specify the crossAxisAlignment with CrossAxisAlignment.baseline'),
        assert(clipBehavior != null),
        super(key: key, children: children);
 
@@ -5243,7 +5272,7 @@ class RichText extends MultiChildRenderObjectWidget {
   /// {@macro flutter.painting.textPainter.strutStyle}
   final StrutStyle strutStyle;
 
-  /// {@macro flutter.widgets.text.DefaultTextStyle.textWidthBasis}
+  /// {@macro flutter.painting.textPainter.textWidthBasis}
   final TextWidthBasis textWidthBasis;
 
   /// {@macro flutter.dart:ui.textHeightBehavior}
@@ -5558,7 +5587,7 @@ class RawImage extends LeafRenderObjectWidget {
 /// {@end-tool}
 ///
 /// Assuming that `TestWidget` uses [DefaultAssetBundle.of] to obtain its
-/// [AssetBundle], it will now see the [TestAssetBundle]'s "Hello World!" data
+/// [AssetBundle], it will now see the `TestAssetBundle`'s "Hello World!" data
 /// when requesting the "resources/test" asset.
 ///
 /// See also:
@@ -6175,7 +6204,7 @@ class MouseRegion extends StatefulWidget {
   ///   Widget build(BuildContext context) {
   ///     return Column(
   ///       children: <Widget>[
-  ///         RaisedButton(
+  ///         ElevatedButton(
   ///           onPressed: () {
   ///             setState(() { key = UniqueKey(); });
   ///           },
@@ -6578,8 +6607,8 @@ class MetaData extends SingleChildRenderObjectWidget {
 ///  * [ExcludeSemantics], which excludes a subtree from the semantics tree
 ///    (which might be useful if it is, e.g., totally decorative and not
 ///    important to the user).
-///  * [RenderObject.semanticsAnnotator], the rendering library API through which
-///    the [Semantics] widget is actually implemented.
+///  * [RenderObject.describeSemanticsConfiguration], the rendering library API
+///    through which the [Semantics] widget is actually implemented.
 ///  * [SemanticsNode], the object used by the rendering library to represent
 ///    semantics in the semantics tree.
 ///  * [SemanticsDebugger], an overlay to help visualize the semantics tree. Can

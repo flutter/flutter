@@ -229,10 +229,11 @@ void main() {
         home: Scaffold(
           body: Stack(
             children: <Widget>[
-              RaisedButton(
+              ElevatedButton(
                 onPressed: () {
                   pressed = true;
                 },
+                child: null,
               ),
               Material(
                 type: MaterialType.transparency,
@@ -246,7 +247,7 @@ void main() {
         ),
       ),
     );
-    await tester.tap(find.byType(RaisedButton));
+    await tester.tap(find.byType(ElevatedButton));
     expect(pressed, isTrue);
   });
 

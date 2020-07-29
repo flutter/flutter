@@ -17,6 +17,7 @@ import 'src/filtered_child_animation.dart';
 import 'src/multi_widget_construction.dart';
 import 'src/post_backdrop_filter.dart';
 import 'src/simple_animation.dart';
+import 'src/simple_scroll.dart';
 import 'src/text.dart';
 
 const String kMacrobenchmarks = 'Macrobenchmarks';
@@ -47,6 +48,7 @@ class MacrobenchmarksApp extends StatelessWidget {
         kImageFilteredTransformAnimationRouteName: (BuildContext context) => const FilteredChildAnimationPage(FilterType.rotateFilter),
         kMultiWidgetConstructionRouteName: (BuildContext context) => const MultiWidgetConstructTable(10, 20),
         kHeavyGridViewRouteName: (BuildContext context) => HeavyGridViewPage(),
+        kSimpleScrollRouteName: (BuildContext context) => SimpleScroll(),
       },
     );
   }

@@ -149,7 +149,7 @@ class TapSemanticEvent extends SemanticsEvent {
 ///
 /// See also:
 ///
-///  * [SemanticsFlag.liveRegion], for a description of live regions.
+///  * [SemanticsFlag.isLiveRegion], for a description of live regions.
 ///
 @Deprecated(
   'This event has never been implemented and will be removed in a future version of Flutter. References to it should be removed. '
