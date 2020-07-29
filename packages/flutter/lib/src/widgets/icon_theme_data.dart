@@ -74,7 +74,7 @@ class IconThemeData with Diagnosticable {
   /// See also:
   ///
   ///  * [CupertinoIconThemeData.resolve] an implementation that resolves
-  ///    [CupertinoIconThemeData.color] before returning.
+  ///    the color of [CupertinoIconThemeData] before returning.
   IconThemeData resolve(BuildContext context) => this;
 
   /// Whether all the properties of this object are non-null.
