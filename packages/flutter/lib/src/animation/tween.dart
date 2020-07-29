@@ -269,7 +269,7 @@ class Tween<T extends dynamic> extends Animatable<T> {
 }
 
 /// A [Tween] that evaluates its [parent] in reverse.
-class ReverseTween<T extends Object> extends Tween<T> {
+class ReverseTween<T> extends Tween<T> {
   /// Construct a [Tween] that evaluates its [parent] in reverse.
   ReverseTween(this.parent)
     : assert(parent != null),
