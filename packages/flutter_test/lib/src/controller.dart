@@ -7,9 +7,11 @@ import 'dart:async';
 import 'package:clock/clock.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'all_elements.dart';
+import 'event_simulation.dart';
 import 'finders.dart';
 import 'test_async_utils.dart';
 import 'test_pointer.dart';
@@ -686,9 +688,120 @@ abstract class WidgetController {
     return box.size;
   }
 
+  /// Simulates sending physical key down and up events through the system channel.
+  ///
+  /// This only simulates key events coming from a physical keyboard, not from a
+  /// soft keyboard.
+  ///
+  /// Specify `platform` as one of the platforms allowed in
+  /// [Platform.operatingSystem] to make the event appear to be from that type
+  /// of system. Defaults to "android". Must not be null. Some platforms (e.g.
+  /// Windows, iOS) are not yet supported.
+  ///
+  /// Keys that are down when the test completes are cleared after each test.
+  ///
+  /// This method sends both the key down and the key up events, to simulate a
+  /// key press. To simulate individual down and/or up events, see
+  /// [sendKeyDownEvent] and [sendKeyUpEvent].
+  ///
+  /// See also:
+  ///
+  ///  - [sendKeyDownEvent] to simulate only a key down event.
+  ///  - [sendKeyUpEvent] to simulate only a key up event.
+  Future<void> sendKeyEvent(LogicalKeyboardKey key, { String platform = 'android' }) async {
+    assert(platform != null);
+    await simulateKeyDownEvent(key, platform: platform);
+    // Internally wrapped in async guard.
+    return simulateKeyUpEvent(key, platform: platform);
+  }
+
+  /// Simulates sending a physical key down event through the system channel.
+  ///
+  /// This only simulates key down events coming from a physical keyboard, not
+  /// from a soft keyboard.
+  ///
+  /// Specify `platform` as one of the platforms allowed in
+  /// [Platform.operatingSystem] to make the event appear to be from that type
+  /// of system. Defaults to "android". Must not be null. Some platforms (e.g.
+  /// Windows, iOS) are not yet supported.
+  ///
+  /// Keys that are down when the test completes are cleared after each test.
+  ///
+  /// See also:
+  ///
+  ///  - [sendKeyUpEvent] to simulate the corresponding key up event.
+  ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
+  Future<void> sendKeyDownEvent(LogicalKeyboardKey key, { String platform = 'android' }) async {
+    assert(platform != null);
+    // Internally wrapped in async guard.
+    return simulateKeyDownEvent(key, platform: platform);
+  }
+
+  /// Simulates sending a physical key up event through the system channel.
+  ///
+  /// This only simulates key up events coming from a physical keyboard,
+  /// not from a soft keyboard.
+  ///
+  /// Specify `platform` as one of the platforms allowed in
+  /// [Platform.operatingSystem] to make the event appear to be from that type
+  /// of system. Defaults to "android". May not be null.
+  ///
+  /// See also:
+  ///
+  ///  - [sendKeyDownEvent] to simulate the corresponding key down event.
+  ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
+  Future<void> sendKeyUpEvent(LogicalKeyboardKey key, { String platform = 'android' }) async {
+    assert(platform != null);
+    // Internally wrapped in async guard.
+    return simulateKeyUpEvent(key, platform: platform);
+  }
+
   /// Returns the rect of the given widget. This is only valid once
   /// the widget's render object has been laid out at least once.
   Rect getRect(Finder finder) => getTopLeft(finder) & getSize(finder);
+
+  /// Attempts to find the [SemanticsNode] of first result from `finder`.
+  ///
+  /// If the object identified by the finder doesn't own it's semantic node,
+  /// this will return the semantics data of the first ancestor with semantics.
+  /// The ancestor's semantic data will include the child's as well as
+  /// other nodes that have been merged together.
+  ///
+  /// If the [SemanticsNode] of the object identified by the finder is
+  /// force-merged into an ancestor (e.g. via the [MergeSemantics] widget)
+  /// the node into which it is merged is returned. That node will include
+  /// all the semantics information of the nodes merged into it.
+  ///
+  /// Will throw a [StateError] if the finder returns more than one element or
+  /// if no semantics are found or are not enabled.
+  SemanticsNode getSemantics(Finder finder) {
+    if (binding.pipelineOwner.semanticsOwner == null)
+      throw StateError('Semantics are not enabled.');
+    final Iterable<Element> candidates = finder.evaluate();
+    if (candidates.isEmpty) {
+      throw StateError('Finder returned no matching elements.');
+    }
+    if (candidates.length > 1) {
+      throw StateError('Finder returned more than one element.');
+    }
+    final Element element = candidates.single;
+    RenderObject renderObject = element.findRenderObject();
+    SemanticsNode result = renderObject.debugSemantics;
+    while (renderObject != null && (result == null || result.isMergedIntoParent)) {
+      renderObject = renderObject?.parent as RenderObject;
+      result = renderObject?.debugSemantics;
+    }
+    if (result == null)
+      throw StateError('No Semantics data found.');
+    return result;
+  }
+
+  /// Enable semantics in a test by creating a [SemanticsHandle].
+  ///
+  /// The handle must be disposed at the end of the test.
+  SemanticsHandle ensureSemantics() {
+    return binding.pipelineOwner.ensureSemantics();
+  }
 
   /// Given a widget `W` specified by [finder] and a [Scrollable] widget `S` in
   /// its ancestry tree, this scrolls `S` so as to make `W` visible.
