@@ -837,11 +837,12 @@ abstract class NetworkImage extends ImageProvider<NetworkImage> {
 /// Decodes the given [File] object as an image, associating it with the given
 /// scale.
 ///
+/// The provider does not monitor the file for changes. If you expect the
+/// underlying data to change, you should call the [evict] method.
+///
 /// See also:
 ///
-///  * [Image.file] for a shorthand of an [Image] widget backed by [FileImage],
-///     which creates an in memory copy of file retained in the [ImageCache].
-///     To change the underlying data easily, you should use [FileImage] provider.
+///  * [Image.file] for a shorthand of an [Image] widget backed by [FileImage].
 @immutable
 class FileImage extends ImageProvider<FileImage> {
   /// Creates an object that decodes a [File] as an image.
