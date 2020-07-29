@@ -342,7 +342,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// The value is non-negative.
   ///
   /// If this property is null, then [AppBarTheme.elevation] of
-  /// [ThemeData.appBarTheme]  is used, if that is also null, the default value
+  /// [ThemeData.appBarTheme] is used, if that is also null, the default value
   /// is 4, the appropriate elevation for app bars.
   final double elevation;
 
@@ -371,7 +371,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// with [backgroundColor], [iconTheme], [textTheme].
   ///
   /// If this property is null, then [AppBarTheme.brightness] of
-  /// [ThemeData.appBarTheme]  is used, if that is also null, then
+  /// [ThemeData.appBarTheme] is used, if that is also null, then
   /// [ThemeData.primaryColorBrightness] is used.
   final Brightness brightness;
 
@@ -411,7 +411,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// Whether the title should be centered.
   ///
   /// If this property is null, then [AppBarTheme.centerTitle] of
-  /// [ThemeData.appBarTheme]  is used, if that is also null, then value is
+  /// [ThemeData.appBarTheme] is used, if that is also null, then value is
   /// adapted to the current [TargetPlatform].
   final bool centerTitle;
 
