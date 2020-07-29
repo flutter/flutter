@@ -29,7 +29,7 @@ import 'theme.dart';
 ///    application.
 @immutable
 class BottomAppBarTheme with Diagnosticable {
-  /// Creates a theme that can be used for [ThemeData.BottomAppBarTheme].
+  /// Creates a theme that can be used for [ThemeData.bottomAppBarTheme].
   const BottomAppBarTheme({
     this.color,
     this.elevation,
