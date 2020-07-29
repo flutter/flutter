@@ -11,34 +11,45 @@ import '../base/file_system.dart';
 import '../convert.dart';
 import 'logger.dart';
 
+/// A class to analyze APK and AOT snapshot and generate a breakdown of the data.
 class SizeAnalyzer {
-  SizeAnalyzer(this._fileSystem, this._logger, this._processUtils);
+  SizeAnalyzer({
+    @required this.fileSystem,
+    @required this.logger,
+    @required this.processUtils,
+  });
 
-  final FileSystem _fileSystem;
-  final Logger _logger;
-  final ProcessUtils _processUtils;
+  final FileSystem fileSystem;
+  final Logger logger;
+  final ProcessUtils processUtils;
 
-  static const String aotSizeFileName = 'aot-size.json';
+  static const String aotSnapshotFileName = 'aot-snapshot.json';
 
   static const int tableWidth = 80;
 
-  Future<Map<String, dynamic>> analyzeApkSize({
+  /// Analyzes [apk] and [aotSnapshot] to output a [Map] object that includes
+  /// the breakdown of the both files, where the breakdown of [aotSnapshot] is placed
+  /// under 'lib/arm64-v8a/libapp.so'.
+  /// 
+  /// The [aotSnapshot] can be either instruction sizes snapshot or v8 snapshot.
+  Future<Map<String, dynamic>> analyzeApkSizeAndAotSnapshot({
     @required File apk,
-    @required File aotSizeJson,
+    @required File aotSnapshot,
   }) async {
-    _logger.printStatus('▒' * tableWidth);
+    logger.printStatus('▒' * tableWidth);
     _printEntitySize(
       '${apk.basename} (total compressed)',
-      apk.lengthSync(),
-      0,
+      numBytes: apk.lengthSync(),
+      level: 0,
       showColor: false,
     );
-    _logger.printStatus('━' * tableWidth);
-    final Directory tempApkContent = _fileSystem.systemTempDirectory.createTempSync('flutter_tools.');
+    logger.printStatus('━' * tableWidth);
+    final Directory tempApkContent = fileSystem.systemTempDirectory.createTempSync('flutter_tools.');
     // TODO: implement Windows.
     String unzipOut;
     try {
-      unzipOut = (await _processUtils.run(<String>[
+      // TODO(peterdjlee): Use zipinfo instead of unzip.
+      unzipOut = (await processUtils.run(<String>[
         'unzip',
         '-o',
         '-v',
@@ -55,34 +66,35 @@ class SizeAnalyzer {
 
     final SymbolNode apkAnalysisRoot = _parseUnzipFile(unzipOut);
 
+    // Convert an AOT snapshot file into a map.
+    final Map<String, dynamic> processedAotSnapshotJson = treemapFromJson(
+      json.decode(aotSnapshot.readAsStringSync()),
+    );
+    final SymbolNode aotSnapshotJsonRoot = _parseAotSnapshot(processedAotSnapshotJson);
+
     for (final SymbolNode firstLevelPath in apkAnalysisRoot.children) {
       _printEntitySize(
         firstLevelPath.name,
-        firstLevelPath.value,
-        1,
+        numBytes: firstLevelPath.value,
+        level: 1,
       );
       if (firstLevelPath.name == 'lib') {
-        _printLibDetails(firstLevelPath, '', aotSizeJson);
+        _printLibChildrenPaths(firstLevelPath, '', aotSnapshotJsonRoot);
       }
     }
 
-    _logger.printStatus('▒' * tableWidth);
+    logger.printStatus('▒' * tableWidth);
     
     Map<String, dynamic> apkAnalysisJson = apkAnalysisRoot.toJson();
-    
-    // TODO(peterdjlee): Add aot size for all platforms.
-    apkAnalysisJson = addAotSizeDataToJson(
-      apkAnalysisJson,
-      'lib/arm64-v8a/libapp.so (Dart AOT)'.split('/'), 
-      json.decode(aotSizeJson.readAsStringSync()) as List<dynamic>,
-    );
 
-    // Rearrange children to ensure the type key shows at the top.
-    final List<dynamic> rootChildren = apkAnalysisJson['children'] as List<dynamic>;
-    apkAnalysisJson.remove('children');
-    
     apkAnalysisJson['type'] = 'apk';
-    apkAnalysisJson['children'] = rootChildren;
+    
+    // TODO(peterdjlee): Add aot snapshot for all platforms.
+    apkAnalysisJson = _addAotSnapshotDataToApkAnalysis(
+      apkAnalysisJson: apkAnalysisJson,
+      path: 'lib/arm64-v8a/libapp.so (Dart AOT)'.split('/'), // Pass in a list of paths by splitting with '/'.
+      aotSnapshotJson: processedAotSnapshotJson,
+    );
 
     return apkAnalysisJson;
   }
@@ -94,9 +106,6 @@ class SizeAnalyzer {
   //    11708  Defl:N     2592  78% 00-00-1980 00:00 07733eef  AndroidManifest.xml
   //     1399  Defl:N     1092  22% 00-00-1980 00:00 f53d952a  META-INF/CERT.RSA
   //    46298  Defl:N    14530  69% 00-00-1980 00:00 17df02b8  META-INF/CERT.SF
-
-  final RegExp _parseUnzipOutput = RegExp(r'^\s*\d+\s+[\w|:]+\s+(\d+)\s+.*  (.+)$');
-
   SymbolNode _parseUnzipFile(String unzipOut) {
     final Map<List<String>, int> pathsToSize = <List<String>, int>{};
 
@@ -105,11 +114,15 @@ class SizeAnalyzer {
     // For example:
     // 'path/to/file' where file = 1500 => pathsToSize[['path', 'to', 'file']] = 1500
     for (final String line in const LineSplitter().convert(unzipOut)) {
-      final RegExpMatch match = _parseUnzipOutput.firstMatch(line);
+      // Expression to match 'Size' column to group 1 and 'Name' column to group 2.
+      final RegExp parseUnzipOutput = RegExp(r'^\s*\d+\s+[\w|:]+\s+(\d+)\s+.*  (.+)$');
+      final RegExpMatch match = parseUnzipOutput.firstMatch(line);
       if (match == null) {
         continue;
       }
-      pathsToSize[match.group(2).split('/')] = int.parse(match.group(1));
+      const int sizeGroupIndex = 1;
+      const int nameGroupIndex = 2;
+      pathsToSize[match.group(nameGroupIndex).split('/')] = int.parse(match.group(sizeGroupIndex));
     }
 
     final SymbolNode rootNode = SymbolNode('Root');
@@ -121,7 +134,6 @@ class SizeAnalyzer {
 
         if (childWithPathAsName == null) {
           childWithPathAsName = SymbolNode(path);
-
           if (path.endsWith('libapp.so')) {
             childWithPathAsName.name += ' (Dart AOT)';
           } else if (path.endsWith('libflutter.so')) {
@@ -138,61 +150,56 @@ class SizeAnalyzer {
     return rootNode;
   }
 
-  /// Prints the paths from currentNode all leaf nodes.
-  void _printLibDetails(
+  /// Prints all children paths for the lib/ directory in an APK.
+  /// 
+  /// A brief summary of aot snapshot is printed under 'lib/arm64-v8a/libapp.so'.
+  void _printLibChildrenPaths(
     SymbolNode currentNode,
     String totalPath,
-    File aotSizeJson,
+    SymbolNode aotSnapshotJsonRoot,
   ) {
     totalPath += currentNode.name;
 
     if (currentNode.children.isNotEmpty && !currentNode.name.contains('libapp.so')) {
       for (final SymbolNode child in currentNode.children) {
-        _printLibDetails(child, totalPath + '/', aotSizeJson);
+        _printLibChildrenPaths(child, '$totalPath/', aotSnapshotJsonRoot);
       }
     } else {
-      // Print total path and size if currentPath does not have any chilren.
-      _printEntitySize(totalPath, currentNode.value, 2);
+      // Print total path and size if currentNode does not have any chilren.
+      _printEntitySize(totalPath, numBytes: currentNode.value, level: 2);
 
+      // We picked this file because arm64-v8a is likely the most popular
+      // architecture. ther architecture sizes should be similar.
       const String libappPath = 'lib/arm64-v8a/libapp.so';
       // TODO(peterdjlee): Analyze aot size for all platforms.
       if (totalPath.contains(libappPath)) {
-        _printAotSizeDetails(aotSizeJson);
+        _printAotSnapshotSummary(aotSnapshotJsonRoot);
       }
     }
   }
 
   /// Go through the AOT gen snapshot size JSON and print out a collapsed summary
   /// for the first package level.
-  void _printAotSizeDetails(File aotSizeJson) {
-    final SymbolNode root = _parseSymbols(
-      json.decode(aotSizeJson.readAsStringSync()) as List<dynamic>,
-    );
-
-    final int totalSymbolSize = root.children.fold(
-      0,
-      (int previousValue, SymbolNode element) => previousValue + element.value,
-    );
-
+  void _printAotSnapshotSummary(SymbolNode aotSnapshotRoot, {int maxDirectoriesShown = 10}) {
     _printEntitySize(
       'Dart AOT symbols accounted decompressed size',
-      totalSymbolSize,
-      3,
+      numBytes: aotSnapshotRoot.value,
+      level: 3,
     );
 
-    final List<SymbolNode> sortedSymbols = root.children.toList()
+    final List<SymbolNode> sortedSymbols = aotSnapshotRoot.children.toList()
       ..sort((SymbolNode a, SymbolNode b) => b.value.compareTo(a.value));
-    for (final SymbolNode node in sortedSymbols.take(10)) {
-      _printEntitySize(node.name, node.value, 4);
+    for (final SymbolNode node in sortedSymbols.take(maxDirectoriesShown)) {
+      _printEntitySize(node.name, numBytes: node.value, level: 4);
     }
   }
 
-  /// Adds breakdown of aot size data as the children of the node at the given path.
-  Map<String, dynamic> addAotSizeDataToJson(
-    Map<String, dynamic> apkAnalysisJson,
-    List<String> path, 
-    List<dynamic> aotSizeJson,
-  ) {
+  /// Adds breakdown of aot snapshot data as the children of the node at the given path.
+  Map<String, dynamic> _addAotSnapshotDataToApkAnalysis({
+    @required Map<String, dynamic> apkAnalysisJson,
+    @required List<String> path,
+    @required Map<String, dynamic> aotSnapshotJson,
+  }) {
     Map<String, dynamic> currentLevel = apkAnalysisJson;
     while (path.isNotEmpty) {
       final List<Map<String, dynamic>> children = currentLevel['children'] as List<Map<String, dynamic>>;
@@ -202,15 +209,15 @@ class SizeAnalyzer {
       path.removeAt(0);
       currentLevel = childWithPathAsName;
     }
-    currentLevel['children'] = treemapFromJson(aotSizeJson)['children'];
+    currentLevel['children'] = aotSnapshotJson['children'];
     return apkAnalysisJson;
   }
 
   /// A pretty printer for an entity with a size.
   void _printEntitySize(
-    String entityName,
-    int numBytes,
-    int level, {
+    String entityName, {
+    @required int numBytes,
+    @required int level, 
     bool showColor = true,
     }) {
     final bool emphasis = level <= 1;
@@ -224,13 +231,13 @@ class SizeAnalyzer {
     }
 
     final int spaceInBetween = tableWidth - level * 2 - entityName.length - formattedSize.length;
-    _logger.printStatus(
+    logger.printStatus(
       entityName + ' ' * spaceInBetween,
       newline: false,
       emphasis: emphasis,
       indent: level * 2,
     );
-    _logger.printStatus(formattedSize, color: showColor ? color : null);
+    logger.printStatus(formattedSize, color: showColor ? color : null);
   }
 
   String _prettyPrintBytes(int numBytes) {
@@ -244,31 +251,80 @@ class SizeAnalyzer {
       return '${(numBytes / mB).round()} MB';
     }
   }
+
+  SymbolNode _parseAotSnapshot(Map<String, dynamic> aotSnapshotJson) {
+    final bool isLeafNode = aotSnapshotJson['children'] == null;
+    if (!isLeafNode) {
+      return _buildNodeWithChildren(aotSnapshotJson);
+    } else {
+      // TODO(peterdjlee): Investigate why there are leaf nodes with size of null.
+      final int byteSize = aotSnapshotJson['value'] as int;
+      if (byteSize == null) {
+        return null;
+      }
+      return _buildNode(aotSnapshotJson, byteSize);
+    }
+  }
+
+  SymbolNode _buildNode(
+    Map<String, dynamic> aotSnapshotJson,
+    int byteSize, {
+    List<SymbolNode> children = const <SymbolNode>[],
+  }) {
+    final String name = aotSnapshotJson['n'] as String;
+    final Map<String, SymbolNode> childrenMap = <String, SymbolNode>{};
+
+    for (final SymbolNode child in children) {
+      childrenMap[child.name] = child;
+    }
+
+    return SymbolNode(
+      name,
+      value: byteSize,
+    )..addAllChildren(children);
+  }
+
+  /// Builds a node by recursively building all of its children first
+  /// in order to calculate the sum of its children's sizes.
+  SymbolNode _buildNodeWithChildren(Map<String, dynamic> aotSnapshotJson) {
+    final List<dynamic> rawChildren = aotSnapshotJson['children'] as List<dynamic>;
+    final List<SymbolNode> symbolNodeChildren = <SymbolNode>[];
+    int totalByteSize = 0;
+
+    // Given a child, build its subtree.
+    for (final dynamic child in rawChildren) {
+      final SymbolNode childTreemapNode = _parseAotSnapshot(child as Map<String, dynamic>);
+      symbolNodeChildren.add(childTreemapNode);
+      totalByteSize += childTreemapNode.value;
+    }
+
+    // If none of the children matched the diff tree type
+    if (totalByteSize == 0) {
+      return null;
+    } else {
+      return _buildNode(
+        aotSnapshotJson,
+        totalByteSize,
+        children: symbolNodeChildren,
+      );
+    }
+  }
 }
 
 class SymbolNode {
   SymbolNode(
     this.name, {
-    int value = 0,
+    this.value = 0,
   })  : assert(name != null),
         assert(value != null),
-        _children = <String, SymbolNode>{},
-        _value = value;
+        _children = <String, SymbolNode>{};
 
   /// The human friendly identifier for this node.
   String name;
 
-  int _value;
-  int get value {
-    _value ??= children.fold(
-      0,
-      (int accumulator, SymbolNode node) => accumulator + node.value,
-    );
-    return _value;
-  }
-
+  int value;
   void addValue(int valueToBeAdded) {
-    _value += valueToBeAdded;
+    value += valueToBeAdded;
   }
 
   SymbolNode get parent => _parent;
@@ -286,43 +342,17 @@ class SymbolNode {
 
     child._parent = this;
     _children[child.name] = child;
-    SymbolNode ancestor = this;
-    while (ancestor != null) {
-      ancestor._value += child.value;
-      ancestor = ancestor.parent;
-    }
     return child;
   }
 
-  List<SymbolNode> get ancestors {
-    final List<SymbolNode> nodes = <SymbolNode>[];
-    SymbolNode current = this;
-    while (current.parent != null) {
-      nodes.add(current.parent);
-      current = current.parent;
-    }
-    return nodes;
+  void addAllChildren(List<SymbolNode> children) {
+    children.forEach(addChild);
   }
-
-  bool get isLeaf => _children.isEmpty;
-
-  Iterable<SymbolNode> get siblings {
-    final List<SymbolNode> result = <SymbolNode>[];
-    if (parent == null) {
-      return result;
-    }
-    for (final SymbolNode sibling in parent.children) {
-      if (sibling != this) {
-        result.add(sibling);
-      }
-    }
-    return result;
-  }
-
+  
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> json = <String, dynamic>{
       'n': name,
-      'value': _value
+      'value': value
     };
     final List<Map<String, dynamic>> childrenAsJson = <Map<String, dynamic>>[];
     for (final SymbolNode child in children) {
@@ -332,63 +362,5 @@ class SymbolNode {
       json['children'] = childrenAsJson;
     }
     return json;
-  }
-}
-
-SymbolNode _parseSymbols(List<dynamic> symbols) {
-  final Iterable<Symbol> iter =
-      symbols.cast<Map<String, dynamic>>().map(Symbol.fromMap);
-  final SymbolNode root = SymbolNode('root');
-  SymbolNode currentParent = root;
-  for (final Symbol symbol in iter) {
-    final SymbolNode parentReset = currentParent;
-    for (final String pathPart in symbol.parts.take(symbol.parts.length - 1)) {
-      currentParent = currentParent.childByName(pathPart) ??
-          currentParent.addChild(SymbolNode(pathPart));
-    }
-    // TODO: this shouldn't be necessary, https://github.com/dart-lang/sdk/issues/41137
-    String leafName = symbol.parts.last;
-    int duplicates = 0;
-    while (currentParent.childByName(leafName) != null) {
-      duplicates += 1;
-      leafName = '${symbol.parts.last}_$duplicates';
-    }
-    currentParent.addChild(
-      SymbolNode(leafName, value: symbol.size),
-    );
-    currentParent = parentReset;
-  }
-  return root;
-}
-
-class Symbol {
-  const Symbol({
-    @required this.name,
-    @required this.size,
-    this.libraryUri,
-    this.className,
-  })  : assert(name != null),
-        assert(size != null);
-
-  static Symbol fromMap(Map<String, dynamic> json) {
-    return Symbol(
-      name: (json['n'] as String).replaceAll('[Optimized] ', ''),
-      size: json['s'] as int,
-      className: json['c'] as String,
-      libraryUri: json['l'] as String,
-    );
-  }
-
-  final String name;
-  final int size;
-  final String libraryUri;
-  final String className;
-
-  List<String> get parts {
-    return <String>[
-      if (libraryUri != null) ...libraryUri.split('/') else '@stubs',
-      if (className?.isNotEmpty ?? false) className,
-      name,
-    ];
   }
 }

@@ -1,3 +1,6 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/analyze_size.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -7,21 +10,16 @@ import 'package:flutter_tools/src/base/process.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 
-void main() {
-  MemoryFileSystem fileSystem;
-  BufferLogger logger;
-  FakeProcessManager processManager;
-
-  const FakeCommand unzipCommmand = FakeCommand(
-    command: <String>[
-      'unzip',
-      '-o',
-      '-v',
-      'test.apk',
-      '-d',
-      '/.tmp_rand0/flutter_tools.rand0'
-    ],
-    stdout: '''
+const FakeCommand unzipCommmand = FakeCommand(
+  command: <String>[
+    'unzip',
+    '-o',
+    '-v',
+    'test.apk',
+    '-d',
+    '/.tmp_rand0/flutter_tools.rand0'
+  ],
+  stdout: '''
 Length   Method    Size  Cmpr    Date    Time   CRC-32   Name
 --------  ------  ------- ---- ---------- ----- --------  ----
 11708  Defl:N     2592  78% 00-00-1980 00:00 07733eef  AndroidManifest.xml
@@ -30,10 +28,9 @@ Length   Method    Size  Cmpr    Date    Time   CRC-32   Name
 46298  Defl:N    14530  69% 00-00-1980 00:00 17df02b8  lib/arm64-v8a/libapp.so
 46298  Defl:N    14530  69% 00-00-1980 00:00 17df02b8  lib/arm64-v8a/libflutter.so
 ''',
-  );
+);
 
-  const String aotSizeOutput = '''
-[
+const String aotSizeOutput = '''[
     {
         "l": "dart:_internal",
         "c": "SubListIterable",
@@ -61,6 +58,11 @@ Length   Method    Size  Cmpr    Date    Time   CRC-32   Name
 ]
 ''';
 
+void main() {
+  MemoryFileSystem fileSystem;
+  BufferLogger logger;
+  FakeProcessManager processManager;
+  
   setUp(() {
     fileSystem = MemoryFileSystem.test();
     logger = BufferLogger.test();
@@ -69,9 +71,9 @@ Length   Method    Size  Cmpr    Date    Time   CRC-32   Name
 
   test('builds APK analysis correctly', () async {
     final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
-      fileSystem,
-      logger,
-      ProcessUtils(
+      fileSystem: fileSystem,
+      logger: logger,
+      processUtils: ProcessUtils(
         processManager: processManager,
         logger: logger,
       ),
@@ -81,7 +83,7 @@ Length   Method    Size  Cmpr    Date    Time   CRC-32   Name
     final File aotSizeJson = fileSystem.file('test.json')
       ..createSync()
       ..writeAsStringSync(aotSizeOutput);
-    final Map<String, dynamic> result = await sizeAnalyzer.analyzeApkSize(apk: apk, aotSizeJson: aotSizeJson);
+    final Map<String, dynamic> result = await sizeAnalyzer.analyzeApkSizeAndAotSnapshot(apk: apk, aotSnapshot: aotSizeJson);
     
     expect(result['type'], contains('apk'));
     
@@ -131,9 +133,9 @@ Length   Method    Size  Cmpr    Date    Time   CRC-32   Name
 
   test('outputs summary to command line correctly', () async {
     final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
-      fileSystem,
-      logger,
-      ProcessUtils(
+      fileSystem: fileSystem,
+      logger: logger,
+      processUtils: ProcessUtils(
         processManager: processManager,
         logger: logger,
       ),
@@ -143,7 +145,7 @@ Length   Method    Size  Cmpr    Date    Time   CRC-32   Name
     final File aotSizeJson = fileSystem.file('test.json')
       ..createSync()
       ..writeAsStringSync(aotSizeOutput);
-    await sizeAnalyzer.analyzeApkSize(apk: apk, aotSizeJson: aotSizeJson);
+    await sizeAnalyzer.analyzeApkSizeAndAotSnapshot(apk: apk, aotSnapshot: aotSizeJson);
 
     final List<String> stdout = logger.statusText.split('\n');
     expect(
@@ -154,8 +156,9 @@ Length   Method    Size  Cmpr    Date    Time   CRC-32   Name
         '  lib                                                                      28 KB',
         '    lib/arm64-v8a/libapp.so (Dart AOT)                                     14 KB',
         '      Dart AOT symbols accounted decompressed size                         14 KB',
-        '        dart:core                                                           8 KB',
-        '        dart:_internal                                                      6 KB',
+        '        dart:_internal/SubListIterable                                      6 KB',
+        '        @stubs/allocation-stubs/dart:core/ArgumentError                     5 KB',
+        '        dart:core/RangeError                                                4 KB',
         '    lib/arm64-v8a/libflutter.so (Flutter Engine)                           14 KB',
       ]),
     );
