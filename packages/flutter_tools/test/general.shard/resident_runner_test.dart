@@ -122,6 +122,7 @@ void main() {
   ResidentRunner residentRunner;
   MockDevice mockDevice;
   FakeVmServiceHost fakeVmServiceHost;
+  MockDevtoolsLauncher mockDevtoolsLauncher;
 
   setUp(() {
     testbed = Testbed(setup: () {
@@ -142,6 +143,7 @@ void main() {
     mockDevice = MockDevice();
     mockVMService = MockVMService();
     mockDevFS = MockDevFS();
+    mockDevtoolsLauncher = MockDevtoolsLauncher();
 
     // DevFS Mocks
     when(mockDevFS.lastCompiled).thenReturn(DateTime(2000));
@@ -1298,6 +1300,18 @@ void main() {
     )
   }));
 
+  testUsingContext('ResidentRunner invokes DevtoolsLauncher when launching and shutting down Devtools', () => testbed.run(() async {
+    when(mockFlutterDevice.vmService).thenReturn(fakeVmServiceHost.vmService);
+    setHttpAddress(testUri, fakeVmServiceHost.vmService);
+    await residentRunner.launchDevTools();
+    verify(mockDevtoolsLauncher.launch(testUri)).called(1);
+
+    await residentRunner.shutdownDevtools();
+    verify(mockDevtoolsLauncher.close()).called(1);
+  }), overrides: <Type, Generator>{
+    DevtoolsLauncher: () => mockDevtoolsLauncher,
+  });
+
   testUsingContext('ResidentRunner can take screenshot on debug device', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
@@ -2076,6 +2090,7 @@ class MockDevFS extends Mock implements DevFS {}
 class MockDevice extends Mock implements Device {}
 class MockDeviceLogReader extends Mock implements DeviceLogReader {}
 class MockDevicePortForwarder extends Mock implements DevicePortForwarder {}
+class MockDevtoolsLauncher extends Mock implements DevtoolsLauncher {}
 class MockUsage extends Mock implements Usage {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockResidentCompiler extends Mock implements ResidentCompiler {}
