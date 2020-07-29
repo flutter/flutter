@@ -116,8 +116,10 @@ void testEachCanvas(String description, CanvasTest body,
   test('$description (dom)', () {
     try {
       TextMeasurementService.initialize(rulerCacheCapacity: 2);
+      WebExperiments.instance.useCanvasText = false;
       return body(DomCanvas());
     } finally {
+      WebExperiments.instance.useCanvasText = null;
       TextMeasurementService.clearCache();
     }
   });
@@ -125,8 +127,10 @@ void testEachCanvas(String description, CanvasTest body,
     test('$description (houdini)', () {
       try {
         TextMeasurementService.initialize(rulerCacheCapacity: 2);
+        WebExperiments.instance.useCanvasText = false;
         return body(HoudiniCanvas(bounds));
       } finally {
+        WebExperiments.instance.useCanvasText = null;
         TextMeasurementService.clearCache();
       }
     });
