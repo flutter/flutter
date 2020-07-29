@@ -821,9 +821,9 @@ abstract class SliderComponentShape {
   ///
   /// {@template flutter.material.slider.shape.argument.enableAnimation}
   /// The `enableAnimation` argument is an animation triggered when the [Slider]
-  /// is enabled, and it reverses when the slider is disabled. Enabled is the
-  /// [Slider.isInteractive] state. Use this to paint intermediate frames for
-  /// this shape when the slider changes enabled state.
+  /// is enabled, and it reverses when the slider is disabled. The [Slider] is
+  /// enabled when [Slider.onChanged] is not null.Use this to paint intermediate
+  /// frames for this shape when the slider changes enabled state.
   /// {@endtemplate}
   ///
   /// {@template flutter.material.slider.shape.argument.isDiscrete}
@@ -1106,9 +1106,10 @@ abstract class RangeSliderThumbShape {
   ///
   /// {@template flutter.material.rangeSlider.shape.argument.enableAnimation}
   /// The `enableAnimation` argument is an animation triggered when the
-  /// [RangeSlider] is enabled, and it reverses when the slider is disabled.
-  /// Enabled is the [RangeSlider.isEnabled] state. Use this to paint
-  /// intermediate frames for this shape when the slider changes enabled state.
+  /// [RangeSlider] is enabled, and it reverses when the slider is disabled. The
+  /// [RangeSlider] is enabled when [RangeSlider.onChanged] is not null. Use
+  /// this to paint intermediate frames for this shape when the slider changes
+  /// enabled state.
   /// {@endtemplate}
   ///
   /// {@macro flutter.material.rangeSlider.shape.argument.isDiscrete}
