@@ -843,6 +843,17 @@ class MediaQuery extends InheritedWidget {
     return MediaQuery.of(context, nullOk: true)?.platformBrightness ?? Brightness.light;
   }
 
+  /// Returns highContrast for the nearest MediaQuery ancestor or false, if no
+  /// such ancestor exists.
+  ///
+  /// See also:
+  ///
+  ///  * [MediaQueryData.highContrast], which indicates the platform's
+  ///    desire to increase contrast.
+  static bool highContrastOf(BuildContext context) {
+    return MediaQuery.of(context, nullOk: true)?.highContrast ?? false;
+  }
+
   /// Returns the boldText accessibility setting for the nearest MediaQuery
   /// ancestor, or false if no such ancestor exists.
   static bool boldTextOverride(BuildContext context) {
