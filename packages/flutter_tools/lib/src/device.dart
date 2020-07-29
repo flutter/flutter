@@ -774,6 +774,7 @@ class DebuggingOptions {
     this.endlessTraceBuffer = false,
     this.dumpSkpOnShaderCompilation = false,
     this.cacheSkSL = false,
+    this.purgePersistentCache = false,
     this.useTestFonts = false,
     this.verboseSystemLogs = false,
     this.hostVmServicePort,
@@ -814,6 +815,7 @@ class DebuggingOptions {
       traceSystrace = false,
       endlessTraceBuffer = false,
       dumpSkpOnShaderCompilation = false,
+      purgePersistentCache = false,
       verboseSystemLogs = false,
       hostVmServicePort = null,
       deviceVmServicePort = null,
@@ -836,6 +838,7 @@ class DebuggingOptions {
   final bool endlessTraceBuffer;
   final bool dumpSkpOnShaderCompilation;
   final bool cacheSkSL;
+  final bool purgePersistentCache;
   final bool useTestFonts;
   final bool verboseSystemLogs;
   /// Whether to invoke webOnlyInitializePlatform in Flutter for web.

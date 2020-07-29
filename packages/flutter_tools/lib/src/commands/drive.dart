@@ -493,6 +493,7 @@ Future<LaunchResult> _startApp(
       verboseSystemLogs: command.verboseSystemLogs,
       cacheSkSL: command.cacheSkSL,
       dumpSkpOnShaderCompilation: command.dumpSkpOnShaderCompilation,
+      purgePersistentCache: command.purgePersistentCache,
     ),
     platformArgs: platformArgs,
     prebuiltApplication: !command.shouldBuild,

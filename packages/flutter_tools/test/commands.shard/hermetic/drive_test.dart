@@ -619,6 +619,11 @@ void main() {
         '--cache-sksl',
         () => debuggingOptions.cacheSkSL,
       );
+
+      testOptionThatDefaultsToFalse(
+        '--purge-persistent-cache',
+        () => debuggingOptions.purgePersistentCache,
+      );
     });
   });
 
