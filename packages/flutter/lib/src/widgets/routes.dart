@@ -103,10 +103,12 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// {@endtemplate}
   Duration get transitionDuration;
 
+  /// {@template flutter.widgets.transitionRoute.reverseTransitionDuration}
   /// The duration the transition going in reverse.
   ///
   /// By default, the reverse transition duration is set to the value of
   /// the forwards [transitionDuration].
+  /// {@endtemplate}
   Duration get reverseTransitionDuration => transitionDuration;
 
   /// {@template flutter.widgets.transitionRoute.opaque}
@@ -521,7 +523,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   ///           children: <Widget>[
   ///             Text('HomePage'),
   ///             // Press this button to open the SecondPage.
-  ///             RaisedButton(
+  ///             ElevatedButton(
   ///               child: Text('Second Page >'),
   ///               onPressed: () {
   ///                 Navigator.pushNamed(context, '/second_page');
@@ -566,7 +568,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   ///           height: 100.0,
   ///           color: Colors.red,
   ///         )
-  ///       : RaisedButton(
+  ///       : ElevatedButton(
   ///           child: Text('Show Rectangle'),
   ///           onPressed: _navigateLocallyToShowRectangle,
   ///         );
@@ -577,7 +579,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   ///           mainAxisAlignment: MainAxisAlignment.center,
   ///           children: <Widget>[
   ///             localNavContent,
-  ///             RaisedButton(
+  ///             ElevatedButton(
   ///               child: Text('< Back'),
   ///               onPressed: () {
   ///                 // Pop a route. If this is pressed while the red rectangle is
@@ -1225,11 +1227,11 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// pops. If this is not necessary, this can be set to false to allow the
   /// framework to entirely discard the route's widget hierarchy when it is not
   /// visible.
+  /// {@endtemplate}
   ///
   /// If this getter would ever start returning a different value, the
   /// [changedInternalState] should be invoked so that the change can take
   /// effect.
-  /// {@endtemplate}
   bool get maintainState;
 
 

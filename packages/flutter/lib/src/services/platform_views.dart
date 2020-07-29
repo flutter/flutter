@@ -14,6 +14,12 @@ import 'package:flutter/gestures.dart';
 import 'message_codec.dart';
 import 'system_channels.dart';
 
+/// Converts a given point from the global coordinate system in logical pixels
+/// to the local coordinate system for a box.
+///
+/// Used by [AndroidViewController.pointTransformer].
+typedef PointTransformer = Offset Function(Offset position);
+
 /// The [PlatformViewsRegistry] responsible for generating unique identifiers for platform views.
 final PlatformViewsRegistry platformViewsRegistry = PlatformViewsRegistry._instance();
 
@@ -33,7 +39,7 @@ class PlatformViewsRegistry {
   /// A platform view identifier can refer to a platform view that was never created,
   /// a platform view that was disposed, or a platform view that is alive.
   ///
-  /// Typically a platform view identifier is passed to a [PlatformView] widget
+  /// Typically a platform view identifier is passed to a platform view widget
   /// which creates the platform view and manages its lifecycle.
   int getNextPlatformViewId() => _nextPlatformViewId++;
 }
@@ -495,22 +501,27 @@ class _AndroidMotionEventConverter {
       <int, AndroidPointerCoords>{};
   final Map<int, AndroidPointerProperties> pointerProperties =
       <int, AndroidPointerProperties>{};
+  final Set<int> usedAndroidPointerIds = <int>{};
 
-  Offset Function(Offset position) _pointTransformer;
+  PointTransformer _pointTransformer;
 
-  set pointTransformer(Offset Function(Offset position) transformer) {
+  set pointTransformer(PointTransformer transformer) {
     assert(transformer != null);
     _pointTransformer = transformer;
   }
 
-  int nextPointerId = 0;
   int downTimeMillis;
 
   void handlePointerDownEvent(PointerDownEvent event) {
-    if (nextPointerId == 0) {
+    if (pointerProperties.isEmpty) {
       downTimeMillis = event.timeStamp.inMilliseconds;
     }
-    pointerProperties[event.pointer] = propertiesFor(event, nextPointerId++);
+    int androidPointerId = 0;
+    while (usedAndroidPointerIds.contains(androidPointerId)) {
+      androidPointerId++;
+    }
+    usedAndroidPointerIds.add(androidPointerId);
+    pointerProperties[event.pointer] = propertiesFor(event, androidPointerId);
   }
 
   void updatePointerPositions(PointerEvent event) {
@@ -531,9 +542,9 @@ class _AndroidMotionEventConverter {
 
   void handlePointerUpEvent(PointerUpEvent event) {
     pointerPositions.remove(event.pointer);
+    usedAndroidPointerIds.remove(pointerProperties[event.pointer].id);
     pointerProperties.remove(event.pointer);
     if (pointerProperties.isEmpty) {
-      nextPointerId = 0;
       downTimeMillis = null;
     }
   }
@@ -541,7 +552,7 @@ class _AndroidMotionEventConverter {
   void handlePointerCancelEvent(PointerCancelEvent event) {
     pointerPositions.clear();
     pointerProperties.clear();
-    nextPointerId = 0;
+    usedAndroidPointerIds.clear();
     downTimeMillis = null;
   }
 
@@ -792,7 +803,7 @@ abstract class AndroidViewController extends PlatformViewController {
   ///
   /// This is required to convert a [PointerEvent] to an [AndroidMotionEvent].
   /// It is typically provided by using [RenderBox.globalToLocal].
-  set pointTransformer(Offset Function(Offset position) transformer) {
+  set pointTransformer(PointTransformer transformer) {
     assert(transformer != null);
     _motionEventConverter._pointTransformer = transformer;
   }
@@ -1130,7 +1141,7 @@ abstract class PlatformViewController {
   ///
   /// See also:
   ///
-  ///  * [PlatformViewRegistry], which is a helper for managing platform view ids.
+  ///  * [PlatformViewsRegistry], which is a helper for managing platform view ids.
   int get viewId;
 
   /// Dispatches the `event` to the platform view.

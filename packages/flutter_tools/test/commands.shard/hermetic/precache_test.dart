@@ -216,6 +216,7 @@ void main() {
         isLinuxEnabled: true,
         isMacOSEnabled: true,
         isWindowsEnabled: true,
+        isFuchsiaEnabled: true,
       ),
       platform: FakePlatform(environment: <String, String>{}),
     );
@@ -329,6 +330,7 @@ void main() {
         isLinuxEnabled: true,
         isMacOSEnabled: true,
         isWindowsEnabled: true,
+        isFuchsiaEnabled: true,
       ),
       platform: FakePlatform(environment: <String, String>{}),
     );

@@ -182,7 +182,7 @@ abstract class SliverChildDelegate {
 
   /// Find index of child element with associated key.
   ///
-  /// This will be called during [performRebuild] in [SliverMultiBoxAdaptorElement]
+  /// This will be called during `performRebuild` in [SliverMultiBoxAdaptorElement]
   /// to check if a child has moved to a different position. It should return the
   /// index of the child element with associated key, null if not found.
   int findIndexByKey(Key key) => null;
@@ -605,7 +605,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
   ///
   /// See also:
   ///
-  ///  * [IndexedChildSemantics], for an explanation of how to manually
+  ///  * [IndexedSemantics], for an explanation of how to manually
   ///    provide semantic indexes.
   final bool addSemanticIndexes;
 

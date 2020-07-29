@@ -440,8 +440,6 @@ class TextSelectionOverlay {
       OverlayEntry(builder: (BuildContext context) => _buildHandle(context, _TextSelectionHandlePosition.end)),
     ];
 
-
-
     Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor).insertAll(_handles);
   }
 
@@ -1065,7 +1063,7 @@ class TextSelectionGestureDetectorBuilder {
 
   /// Handler for [TextSelectionGestureDetector.onDoubleTapDown].
   ///
-  /// By default, it selects a word through [renderEditable.selectWord] if
+  /// By default, it selects a word through [RenderEditable.selectWord] if
   /// selectionEnabled and shows toolbar if necessary.
   ///
   /// See also:
@@ -1099,7 +1097,8 @@ class TextSelectionGestureDetectorBuilder {
 
   /// Handler for [TextSelectionGestureDetector.onDragSelectionUpdate].
   ///
-  /// By default, it updates the selection location specified in [details].
+  /// By default, it updates the selection location specified in the provided
+  /// details objects.
   ///
   /// See also:
   ///
@@ -1196,7 +1195,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
   final GestureTapDownCallback onTapDown;
 
   /// Called when a pointer has tapped down and the force of the pointer has
-  /// just become greater than [ForcePressGestureDetector.startPressure].
+  /// just become greater than [ForcePressGestureRecognizer.startPressure].
   final GestureForcePressStartCallback onForcePressStart;
 
   /// Called when a pointer that had previously triggered [onForcePressStart] is
@@ -1204,7 +1203,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
   final GestureForcePressEndCallback onForcePressEnd;
 
   /// Called for each distinct tap except for every second tap of a double tap.
-  /// For example, if the detector was configured [onSingleTapDown] and
+  /// For example, if the detector was configured with [onTapDown] and
   /// [onDoubleTapDown], three quick taps would be recognized as a single tap
   /// down, followed by a double tap down, followed by a single tap down.
   final GestureTapUpCallback onSingleTapUp;

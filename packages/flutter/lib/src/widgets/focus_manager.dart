@@ -184,7 +184,7 @@ enum UnfocusDisposition {
 /// a widget might need to host one if the widget subsystem is not being used,
 /// or if the [Focus] and [FocusScope] widgets provide insufficient control.
 ///
-/// [FocusNodes] are organized into _scopes_ (see [FocusScopeNode]), which form
+/// [FocusNode]s are organized into _scopes_ (see [FocusScopeNode]), which form
 /// sub-trees of nodes that restrict traversal to a group of nodes. Within a
 /// scope, the most recent nodes to have focus are remembered, and if a node is
 /// focused and then unfocused, the previous node receives focus again.
@@ -515,6 +515,9 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///
   /// Does not affect the value of [canRequestFocus] on the descendants.
   ///
+  /// If a descendant node loses focus when this value is changed, the focus
+  /// will move to the scope enclosing this node.
+  ///
   /// See also:
   ///
   ///  * [ExcludeFocus], a widget that uses this property to conditionally
@@ -531,12 +534,12 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     if (value == _descendantsAreFocusable) {
       return;
     }
-    if (!value && hasFocus) {
-      for (final FocusNode child in children) {
-        child.unfocus(disposition: UnfocusDisposition.previouslyFocusedChild);
-      }
-    }
+    // Set _descendantsAreFocusable before unfocusing, so the scope won't try
+    // and focus any of the children here again if it is false.
     _descendantsAreFocusable = value;
+    if (!value && hasFocus) {
+      unfocus(disposition: UnfocusDisposition.previouslyFocusedChild);
+    }
     _manager?._markPropertiesChanged(this);
   }
 
@@ -820,7 +823,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///                   ],
   ///                 );
   ///               }),
-  ///               OutlineButton(
+  ///               OutlinedButton(
   ///                 child: const Text('UNFOCUS'),
   ///                 onPressed: () {
   ///                   setState(() {
@@ -1170,7 +1173,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 /// that manage their own [FocusScopeNode]s and [FocusNode]s, respectively. If
 /// they aren't appropriate, [FocusScopeNode]s can be managed directly._
 ///
-/// [FocusScopeNode] organizes [FocusNodes] into _scopes_. Scopes form sub-trees
+/// [FocusScopeNode] organizes [FocusNode]s into _scopes_. Scopes form sub-trees
 /// of nodes that can be traversed as a group. Within a scope, the most recent
 /// nodes to have focus are remembered, and if a node is focused and then
 /// removed, the original node receives focus again.

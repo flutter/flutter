@@ -93,7 +93,7 @@ void main() {
       home: Material(
         child: Builder(
           builder: (BuildContext context) {
-            return RaisedButton(
+            return ElevatedButton(
               onPressed: () {
                 buttonContext = context;
               },
@@ -211,7 +211,7 @@ void main() {
             child: Center(
               child: Builder(
                 builder: (BuildContext context) {
-                  return RaisedButton(
+                  return ElevatedButton(
                     child: const Text('X'),
                     onPressed: () {
                       showDatePicker(
@@ -265,7 +265,7 @@ void main() {
           onGenerateRoute: (RouteSettings settings) {
             return MaterialPageRoute<dynamic>(
               builder: (BuildContext context) {
-                return RaisedButton(
+                return ElevatedButton(
                   onPressed: () {
                     showDatePicker(
                       context: context,
@@ -285,7 +285,7 @@ void main() {
       ));
 
       // Open the dialog.
-      await tester.tap(find.byType(RaisedButton));
+      await tester.tap(find.byType(ElevatedButton));
 
       expect(rootObserver.datePickerCount, 0);
       expect(nestedObserver.datePickerCount, 1);
@@ -304,7 +304,7 @@ void main() {
           home: Center(
             child: Builder(
               builder: (BuildContext context) {
-                return RaisedButton(
+                return ElevatedButton(
                   child: const Text('X'),
                   onPressed: () {
                     showDatePicker(
@@ -339,7 +339,7 @@ void main() {
           home: Center(
             child: Builder(
               builder: (BuildContext context) {
-                return RaisedButton(
+                return ElevatedButton(
                   child: const Text('X'),
                   onPressed: () {
                     showDatePicker(
@@ -705,7 +705,7 @@ void main() {
         home: Material(
           child: Builder(
             builder: (BuildContext context) {
-              return RaisedButton(
+              return ElevatedButton(
                 onPressed: () {
                   buttonContext = context;
                 },

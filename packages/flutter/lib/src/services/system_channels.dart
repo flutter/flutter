@@ -131,7 +131,7 @@ class SystemChannels {
   ///    a [List] whose first value is an integer representing a previously
   ///    unused transaction identifier, and the second is a [String] with a
   ///    JSON-encoded object with five keys, as obtained from
-  ///    [TextInputConfiguration.toJSON]. This method must be invoked before any
+  ///    [TextInputConfiguration.toJson]. This method must be invoked before any
   ///    others (except `TextInput.hide`). See [TextInput.attach].
   ///
   ///  * `TextInput.show`: Show the keyboard. See [TextInputConnection.show].
@@ -154,8 +154,8 @@ class SystemChannels {
   ///
   ///  * `TextInputClient.updateEditingState`: The user has changed the contents
   ///    of the text control. The second argument is a [String] containing a
-  ///    JSON-encoded object with seven keys, in the form expected by [new
-  ///    TextEditingValue.fromJSON].
+  ///    JSON-encoded object with seven keys, in the form expected by
+  ///    [TextEditingValue.fromJSON].
   ///
   ///  * `TextInputClient.performAction`: The user has triggered an action. The
   ///    second argument is a [String] consisting of the stringification of one
@@ -284,6 +284,37 @@ class SystemChannels {
   ///    integer `device`, and string `kind`.
   static const MethodChannel mouseCursor = OptionalMethodChannel(
     'flutter/mousecursor',
+    StandardMethodCodec(),
+  );
+
+  /// A [MethodChannel] for synchronizing restoration data with the engine.
+  ///
+  /// The following outgoing methods are defined for this channel (invoked using
+  /// [OptionalMethodChannel.invokeMethod]):
+  ///
+  ///  * `get`: Retrieves the current restoration information (e.g. provided by
+  ///    the operating system) from the engine. The method returns a map
+  ///    containing an `enabled` boolean to indicate whether collecting
+  ///    restoration data is supported by the embedder. If `enabled` is true,
+  ///    the map may also contain restoration data stored under the `data` key
+  ///    from which the state of the framework may be restored. The restoration
+  ///    data is encoded as [Uint8List].
+  ///  * `put`: Sends the current restoration data to the engine. Takes the
+  ///    restoration data encoded as [Uint8List] as argument.
+  ///
+  /// The following incoming methods are defined for this channel (registered
+  /// using [MethodChannel.setMethodCallHandler]).
+  ///
+  ///  * `push`: Called by the engine to send newly provided restoration
+  ///    information to the framework. The argument given to this method has
+  ///    the same format as the object that the `get` method returns.
+  ///
+  /// See also:
+  ///
+  ///  * [RestorationManager], which uses this channel and also describes how
+  ///    restoration data is used in Flutter.
+  static const MethodChannel restoration = OptionalMethodChannel(
+    'flutter/restoration',
     StandardMethodCodec(),
   );
 }
