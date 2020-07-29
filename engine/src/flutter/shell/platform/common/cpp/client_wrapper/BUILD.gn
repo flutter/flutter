@@ -10,9 +10,7 @@ source_set("client_wrapper") {
   sources = core_cpp_client_wrapper_sources
   public = core_cpp_client_wrapper_includes
 
-  deps = [
-    "//flutter/shell/platform/common/cpp:common_cpp_library_headers",
-  ]
+  deps = [ "//flutter/shell/platform/common/cpp:common_cpp_library_headers" ]
 
   configs +=
       [ "//flutter/shell/platform/common/cpp:desktop_library_implementation" ]
@@ -29,9 +27,8 @@ source_set("client_wrapper_library_stubs") {
 
   defines = [ "FLUTTER_DESKTOP_LIBRARY" ]
 
-  public_deps = [
-    "//flutter/shell/platform/common/cpp:common_cpp_library_headers",
-  ]
+  public_deps =
+      [ "//flutter/shell/platform/common/cpp:common_cpp_library_headers" ]
 }
 
 test_fixtures("client_wrapper_fixtures") {

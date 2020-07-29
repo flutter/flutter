@@ -12,7 +12,5 @@ source_set("context") {
 
   public_configs = [ "//flutter:config" ]
 
-  deps = [
-    "//flutter/fml",
-  ]
+  deps = [ "//flutter/fml" ]
 }

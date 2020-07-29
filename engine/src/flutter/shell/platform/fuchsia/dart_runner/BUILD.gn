@@ -40,13 +40,13 @@ template("runner") {
     dart_deps = []
     if (!invoker.product) {
       dart_deps += [
-        "//third_party/dart/runtime/bin:dart_io_api",
         "//flutter/shell/platform/fuchsia/runtime/dart/utils:utils",
+        "//third_party/dart/runtime/bin:dart_io_api",
       ]
     } else {
       dart_deps += [
-        "//third_party/dart/runtime/bin:dart_io_api_product",
         "//flutter/shell/platform/fuchsia/runtime/dart/utils:utils_product",
+        "//third_party/dart/runtime/bin:dart_io_api_product",
       ]
     }
 
@@ -130,9 +130,7 @@ template("aot_runner_package") {
     product_suffix = "_product"
   }
   fuchsia_archive(target_name) {
-    deps = [
-      ":dart_aot${product_suffix}_runner_bin",
-    ]
+    deps = [ ":dart_aot${product_suffix}_runner_bin" ]
     if (!invoker.product) {
       deps += [
         "vmservice:vmservice_snapshot",

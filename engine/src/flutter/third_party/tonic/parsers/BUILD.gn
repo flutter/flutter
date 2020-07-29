@@ -7,9 +7,7 @@ source_set("parsers") {
 
   configs += [ "../:config" ]
 
-  deps = [
-    "../common",
-  ]
+  deps = [ "../common" ]
 
   sources = [
     "packages_map.cc",

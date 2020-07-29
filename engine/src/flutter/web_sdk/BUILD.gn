@@ -52,9 +52,7 @@ prebuilt_dart_action("web_ui_sources") {
   output_dir = rebase_path("$root_out_dir/flutter_web_sdk/lib/ui/")
   input_dir = rebase_path("//flutter/lib/web_ui/lib/")
 
-  outputs = [
-    "$target_gen_dir/$target_name.stamp",
-  ]
+  outputs = [ "$target_gen_dir/$target_name.stamp" ]
 
   args = [
     "--output-dir=$output_dir",
@@ -78,9 +76,7 @@ prebuilt_dart_action("web_engine_sources") {
   output_dir = rebase_path("$root_out_dir/flutter_web_sdk/lib/_engine/")
   input_dir = rebase_path("//flutter/lib/web_ui/lib/src/")
 
-  outputs = [
-    "$target_gen_dir/$target_name.stamp",
-  ]
+  outputs = [ "$target_gen_dir/$target_name.stamp" ]
 
   args = [
     "--output-dir=$output_dir",
@@ -97,13 +93,9 @@ prebuilt_dart_action("web_engine_sources") {
 }
 
 copy("web_ui_library") {
-  sources = [
-    "//flutter/web_sdk/libraries.json",
-  ]
+  sources = [ "//flutter/web_sdk/libraries.json" ]
 
-  outputs = [
-    "$root_out_dir/flutter_web_sdk/{{source_file_part}}",
-  ]
+  outputs = [ "$root_out_dir/flutter_web_sdk/{{source_file_part}}" ]
 }
 
 # Compile the DDC SDK's summary.
@@ -117,9 +109,7 @@ prebuilt_dart_action("flutter_dartdevc_kernel_sdk_outline") {
 
   inputs = [ "sdk_rewriter.dart" ] + web_ui_sources + web_engine_sources
 
-  outputs = [
-    sdk_dill,
-  ]
+  outputs = [ sdk_dill ]
 
   script = "//third_party/dart/utils/bazel/kernel_worker.dart"
 
@@ -373,9 +363,7 @@ prebuilt_dart_action("flutter_dartdevc_kernel_sdk_outline_sound") {
 
   inputs = [ "sdk_rewriter.dart" ] + web_ui_sources + web_engine_sources
 
-  outputs = [
-    sdk_dill_sound,
-  ]
+  outputs = [ sdk_dill_sound ]
 
   script = "//third_party/dart/utils/bazel/kernel_worker.dart"
 

@@ -11,9 +11,7 @@ if (!is_fuchsia) {
       "//LICENSE",
     ]
 
-    outputs = [
-      "$root_gen_dir/dart-pkg/sky_services/{{source_file_part}}",
-    ]
+    outputs = [ "$root_gen_dir/dart-pkg/sky_services/{{source_file_part}}" ]
   }
 }
 
@@ -24,8 +22,6 @@ dart_pkg("sky_services") {
   ]
 
   if (!is_fuchsia) {
-    deps = [
-      ":copy_sky_services_license",
-    ]
+    deps = [ ":copy_sky_services_license" ]
   }
 }

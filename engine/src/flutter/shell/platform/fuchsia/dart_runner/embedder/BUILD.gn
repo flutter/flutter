@@ -35,16 +35,10 @@ template("create_aot_snapshot") {
     shim_kernel = get_label_info(shim_target, "target_gen_dir") +
                   "/shim${product_suffix}_kernel.dill"
 
-    inputs = [
-      shim_kernel,
-    ]
-    outputs = [
-      snapshot_assembly,
-    ]
+    inputs = [ shim_kernel ]
+    outputs = [ snapshot_assembly ]
 
-    deps = [
-      shim_target,
-    ]
+    deps = [ shim_target ]
     if (invoker.product) {
       tool = gen_snapshot_product
     } else {
@@ -70,9 +64,7 @@ template("create_aot_snapshot") {
   }
 
   source_set(target_name) {
-    deps = [
-      ":${target_name}_assembly",
-    ]
+    deps = [ ":${target_name}_assembly" ]
 
     sources = [
       "$target_gen_dir/aot${product_suffix}_vm_snapshot.S",

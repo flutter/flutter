@@ -51,13 +51,9 @@ template("make_utils") {
 }
 
 make_utils("utils") {
-  deps = [
-    "//third_party/dart/runtime/bin:elf_loader",
-  ]
+  deps = [ "//third_party/dart/runtime/bin:elf_loader" ]
 }
 
 make_utils("utils_product") {
-  deps = [
-    "//third_party/dart/runtime/bin:elf_loader_product",
-  ]
+  deps = [ "//third_party/dart/runtime/bin:elf_loader_product" ]
 }

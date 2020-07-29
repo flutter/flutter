@@ -29,9 +29,7 @@ source_set("filesystem") {
     sources += [ "path_posix.cc" ]
   }
 
-  deps = [
-    "../../common",
-  ]
+  deps = [ "../../common" ]
 
   public_configs = [ ":filesystem_config" ]
 }

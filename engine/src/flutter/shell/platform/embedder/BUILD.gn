@@ -75,9 +75,7 @@ template("embedder_source_set") {
       "//third_party/skia",
     ]
 
-    public_deps = [
-      ":embedder_headers",
-    ]
+    public_deps = [ ":embedder_headers" ]
 
     public_configs += [ "//flutter:config" ]
   }
@@ -92,9 +90,7 @@ embedder_source_set("embedder_as_internal_library") {
 }
 
 source_set("embedder_headers") {
-  public = [
-    "embedder.h",
-  ]
+  public = [ "embedder.h" ]
 
   public_configs = [ "//flutter:config" ]
 }
@@ -178,21 +174,15 @@ shared_library("flutter_engine_library") {
     ldflags = [ "-Wl,-install_name,@rpath/FlutterEmbedder.framework/$_framework_binary_subpath" ]
   }
 
-  deps = [
-    ":embedder",
-  ]
+  deps = [ ":embedder" ]
 
   public_configs = [ "//flutter:config" ]
 }
 
 copy("copy_headers") {
   visibility = [ ":*" ]
-  sources = [
-    "embedder.h",
-  ]
-  outputs = [
-    "$root_out_dir/flutter_embedder.h",
-  ]
+  sources = [ "embedder.h" ]
+  outputs = [ "$root_out_dir/flutter_embedder.h" ]
 }
 
 if (is_mac && !embedder_for_target) {
@@ -200,9 +190,7 @@ if (is_mac && !embedder_for_target) {
 
   copy("copy_framework_headers") {
     visibility = [ ":*" ]
-    sources = [
-      "embedder.h",
-    ]
+    sources = [ "embedder.h" ]
     outputs = [
       "$_flutter_embedder_framework_dir/Versions/A/Headers/FlutterEmbedder.h",
     ]
@@ -210,23 +198,17 @@ if (is_mac && !embedder_for_target) {
 
   copy("copy_icu") {
     visibility = [ ":*" ]
-    sources = [
-      "//third_party/icu/flutter/icudtl.dat",
-    ]
-    outputs = [
-      "$_flutter_embedder_framework_dir/Versions/A/Resources/icudtl.dat",
-    ]
+    sources = [ "//third_party/icu/flutter/icudtl.dat" ]
+    outputs =
+        [ "$_flutter_embedder_framework_dir/Versions/A/Resources/icudtl.dat" ]
   }
 
   action("copy_info_plist") {
     script = "//flutter/build/copy_info_plist.py"
     visibility = [ ":*" ]
-    sources = [
-      "assets/EmbedderInfo.plist",
-    ]
-    outputs = [
-      "$_flutter_embedder_framework_dir/Versions/A/Resources/Info.plist",
-    ]
+    sources = [ "assets/EmbedderInfo.plist" ]
+    outputs =
+        [ "$_flutter_embedder_framework_dir/Versions/A/Resources/Info.plist" ]
     args = [
       rebase_path(sources[0]),
       rebase_path(outputs[0]),
@@ -236,9 +218,7 @@ if (is_mac && !embedder_for_target) {
 
   copy("copy_module_map") {
     visibility = [ ":*" ]
-    sources = [
-      "assets/embedder.modulemap",
-    ]
+    sources = [ "assets/embedder.modulemap" ]
     outputs = [
       "$_flutter_embedder_framework_dir/Versions/A/Modules/module.modulemap",
     ]
@@ -247,24 +227,16 @@ if (is_mac && !embedder_for_target) {
   copy("copy_dylib") {
     visibility = [ ":*" ]
 
-    sources = [
-      "$root_out_dir/libflutter_engine.dylib",
-    ]
-    outputs = [
-      "$_flutter_embedder_framework_dir/$_framework_binary_subpath",
-    ]
+    sources = [ "$root_out_dir/libflutter_engine.dylib" ]
+    outputs = [ "$_flutter_embedder_framework_dir/$_framework_binary_subpath" ]
 
-    deps = [
-      ":flutter_engine_library",
-    ]
+    deps = [ ":flutter_engine_library" ]
   }
 
   action("generate_symlinks") {
     visibility = [ ":*" ]
     script = "//build/config/mac/package_framework.py"
-    outputs = [
-      "$root_build_dir/FlutterEmbedder.stamp",
-    ]
+    outputs = [ "$root_build_dir/FlutterEmbedder.stamp" ]
     args = [
       "--framework",
       "FlutterEmbedder.framework",
@@ -289,9 +261,7 @@ if (is_mac && !embedder_for_target) {
 
   group("flutter_embedder_framework") {
     visibility = [ ":*" ]
-    deps = [
-      ":generate_symlinks",
-    ]
+    deps = [ ":generate_symlinks" ]
   }
 }
 

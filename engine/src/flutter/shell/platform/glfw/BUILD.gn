@@ -17,9 +17,8 @@ config("relative_flutter_glfw_headers") {
 source_set("flutter_glfw_headers") {
   public = _public_headers
 
-  public_deps = [
-    "//flutter/shell/platform/common/cpp:common_cpp_library_headers",
-  ]
+  public_deps =
+      [ "//flutter/shell/platform/common/cpp:common_cpp_library_headers" ]
 
   configs +=
       [ "//flutter/shell/platform/common/cpp:desktop_library_implementation" ]
@@ -74,12 +73,8 @@ source_set("flutter_glfw") {
 
 copy("publish_headers_glfw") {
   sources = _public_headers
-  outputs = [
-    "$root_out_dir/{{source_file_part}}",
-  ]
+  outputs = [ "$root_out_dir/{{source_file_part}}" ]
 
   # The GLFW header assumes the presence of the common headers.
-  deps = [
-    "//flutter/shell/platform/common/cpp:publish_headers",
-  ]
+  deps = [ "//flutter/shell/platform/common/cpp:publish_headers" ]
 }

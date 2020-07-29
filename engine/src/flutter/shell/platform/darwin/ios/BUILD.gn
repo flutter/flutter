@@ -236,9 +236,7 @@ shared_library("create_flutter_framework_dylib") {
 
   public = _flutter_framework_headers
 
-  deps = [
-    ":flutter_framework_source",
-  ]
+  deps = [ ":flutter_framework_source" ]
 
   public_configs = [ "//flutter:config" ]
 }
@@ -246,27 +244,17 @@ shared_library("create_flutter_framework_dylib") {
 copy("copy_dylib") {
   visibility = [ ":*" ]
 
-  sources = [
-    "$root_out_dir/libFlutter.dylib",
-  ]
-  outputs = [
-    "$_flutter_framework_dir/Flutter",
-  ]
+  sources = [ "$root_out_dir/libFlutter.dylib" ]
+  outputs = [ "$_flutter_framework_dir/Flutter" ]
 
-  deps = [
-    ":create_flutter_framework_dylib",
-  ]
+  deps = [ ":create_flutter_framework_dylib" ]
 }
 
 action("copy_framework_info_plist") {
   script = "//flutter/build/copy_info_plist.py"
   visibility = [ ":*" ]
-  sources = [
-    "framework/Info.plist",
-  ]
-  outputs = [
-    "$_flutter_framework_dir/Info.plist",
-  ]
+  sources = [ "framework/Info.plist" ]
+  outputs = [ "$_flutter_framework_dir/Info.plist" ]
   args = [
     rebase_path(sources[0]),
     rebase_path(outputs[0]),
@@ -276,12 +264,8 @@ action("copy_framework_info_plist") {
 
 copy("copy_framework_module_map") {
   visibility = [ ":*" ]
-  sources = [
-    "framework/module.modulemap",
-  ]
-  outputs = [
-    "$_flutter_framework_dir/Modules/module.modulemap",
-  ]
+  sources = [ "framework/module.modulemap" ]
+  outputs = [ "$_flutter_framework_dir/Modules/module.modulemap" ]
 }
 
 action("copy_framework_headers") {
@@ -303,44 +287,28 @@ action("copy_framework_headers") {
 
 copy("copy_framework_icu") {
   visibility = [ ":*" ]
-  sources = [
-    "//third_party/icu/flutter/icudtl.dat",
-  ]
-  outputs = [
-    "$_flutter_framework_dir/{{source_file_part}}",
-  ]
+  sources = [ "//third_party/icu/flutter/icudtl.dat" ]
+  outputs = [ "$_flutter_framework_dir/{{source_file_part}}" ]
 }
 
 copy("copy_framework_podspec") {
   visibility = [ ":*" ]
-  sources = [
-    "framework/Flutter.podspec",
-  ]
-  outputs = [
-    "$root_out_dir/Flutter.podspec",
-  ]
+  sources = [ "framework/Flutter.podspec" ]
+  outputs = [ "$root_out_dir/Flutter.podspec" ]
 }
 
 copy("copy_license") {
   visibility = [ ":*" ]
-  sources = [
-    "//LICENSE",
-  ]
-  outputs = [
-    "$root_out_dir/LICENSE",
-  ]
+  sources = [ "//LICENSE" ]
+  outputs = [ "$root_out_dir/LICENSE" ]
 }
 
 shared_library("copy_and_verify_framework_headers") {
   visibility = [ ":*" ]
   include_dirs = [ "$_flutter_framework_headers_copy_dir" ]
 
-  sources = [
-    "framework/Source/FlutterUmbrellaImport.m",
-  ]
-  deps = [
-    ":copy_framework_headers",
-  ]
+  sources = [ "framework/Source/FlutterUmbrellaImport.m" ]
+  deps = [ ":copy_framework_headers" ]
 }
 
 group("flutter_framework") {

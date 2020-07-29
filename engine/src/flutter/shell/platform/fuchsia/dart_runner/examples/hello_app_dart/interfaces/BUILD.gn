@@ -7,7 +7,5 @@ import("//build/fidl/fidl.gni")
 fidl("interfaces") {
   name = "fuchsia.examples.hello"
 
-  sources = [
-    "hello.fidl",
-  ]
+  sources = [ "hello.fidl" ]
 }

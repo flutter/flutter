@@ -33,9 +33,7 @@ config("disable_fatal_link_warnings") {
 
 if (build_glfw_shell) {
   shared_library("flutter_linux_glfw") {
-    deps = [
-      "//flutter/shell/platform/glfw:flutter_glfw",
-    ]
+    deps = [ "//flutter/shell/platform/glfw:flutter_glfw" ]
 
     configs += [ ":disable_fatal_link_warnings" ]
 
@@ -122,13 +120,9 @@ source_set("flutter_linux") {
     "//third_party/khronos:khronos_headers",
   ]
 
-  public_deps = [
-    ":flutter_linux_sources",
-  ]
+  public_deps = [ ":flutter_linux_sources" ]
 
-  deps = [
-    "//flutter/shell/platform/embedder:embedder_as_internal_library",
-  ]
+  deps = [ "//flutter/shell/platform/embedder:embedder_as_internal_library" ]
 }
 
 test_fixtures("flutter_linux_fixtures") {
@@ -177,16 +171,12 @@ executable("flutter_linux_unittests") {
 }
 
 shared_library("flutter_linux_gtk") {
-  deps = [
-    ":flutter_linux",
-  ]
+  deps = [ ":flutter_linux" ]
 
   public_configs = [ "//flutter:config" ]
 }
 
 copy("publish_headers_linux") {
   sources = _public_headers
-  outputs = [
-    "$root_out_dir/flutter_linux/{{source_file_part}}",
-  ]
+  outputs = [ "$root_out_dir/flutter_linux/{{source_file_part}}" ]
 }

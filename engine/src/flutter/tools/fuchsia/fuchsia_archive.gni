@@ -64,12 +64,8 @@ template("fuchsia_archive") {
   }
 
   copy("$cmx_target") {
-    sources = [
-      "$cmx_file",
-    ]
-    outputs = [
-      "$far_base_dir/meta/${pkg_target_name}.cmx",
-    ]
+    sources = [ "$cmx_file" ]
+    outputs = [ "$far_base_dir/meta/${pkg_target_name}.cmx" ]
   }
 
   write_file("${far_base_dir}/meta/package",

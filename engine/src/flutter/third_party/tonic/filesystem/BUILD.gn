@@ -3,7 +3,5 @@
 # found in the LICENSE file.
 
 group("filesystem") {
-  public_deps = [
-    "filesystem",
-  ]
+  public_deps = [ "filesystem" ]
 }

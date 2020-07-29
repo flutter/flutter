@@ -36,9 +36,7 @@ source_set("testing") {
     "test_timeout_listener.h",
   ]
 
-  public_deps = [
-    ":testing_lib",
-  ]
+  public_deps = [ ":testing_lib" ]
 }
 
 source_set_maybe_fuchsia_legacy("dart") {
@@ -90,9 +88,7 @@ source_set_maybe_fuchsia_legacy("fixture_test") {
     "fixture_test.h",
   ]
 
-  public_deps = [
-    "//flutter/common",
-  ]
+  public_deps = [ "//flutter/common" ]
 
   public_deps_legacy_and_next = [
     ":dart",

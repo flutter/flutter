@@ -9,9 +9,7 @@ import("//third_party/dart/utils/compile_platform.gni")
 application_snapshot("kernel_compiler") {
   main_dart = "compiler.dart"
 
-  deps = [
-    "../flutter/kernel:kernel_platform_files($host_toolchain)",
-  ]
+  deps = [ "../flutter/kernel:kernel_platform_files($host_toolchain)" ]
 
   dot_packages =
       rebase_path("//third_party/dart/.dart_tool/package_config.json")
