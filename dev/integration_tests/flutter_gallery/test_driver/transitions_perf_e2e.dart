@@ -17,7 +17,7 @@ import 'package:flutter_gallery/gallery/demos.dart';
 import 'package:flutter_gallery/demo_lists.dart';
 import 'package:flutter_gallery/gallery/home.dart';
 
-import 'util.dart' show watchPerformance;
+import 'e2e_util.dart' show watchPerformance;
 
 const List<String> kSkippedDemos = <String>[];
 

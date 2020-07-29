@@ -15,11 +15,34 @@ TaskFunction createGalleryTransitionTest({ bool semanticsEnabled = false }) {
   return GalleryTransitionTest(semanticsEnabled: semanticsEnabled);
 }
 
+TaskFunction createGalleryTransitionE2ETest({ bool semanticsEnabled = false }) {
+  return GalleryTransitionTest(
+    semanticsEnabled: semanticsEnabled,
+    testFile: 'transitions_perf_e2e',
+    needFullTimeline: false,
+    timelineSummaryFile: 'e2e_perf_summary',
+    transitionDurationFile: 'transition_durations',
+    driverFile: 'transitions_perf_e2e_test',
+  );
+}
+
 class GalleryTransitionTest {
 
-  GalleryTransitionTest({ this.semanticsEnabled = false });
+  GalleryTransitionTest({
+    this.semanticsEnabled = false,
+    this.testFile = 'transitions_perf',
+    this.needFullTimeline = true,
+    this.timelineSummaryFile = 'transitions.timeline_summary',
+    this.transitionDurationFile = 'transition_durations.timeline',
+    this.driverFile,
+  });
 
   final bool semanticsEnabled;
+  final bool needFullTimeline;
+  final String testFile;
+  final String timelineSummaryFile;
+  final String transitionDurationFile;
+  final String driverFile;
 
   Future<TaskResult> call() async {
     final Device device = await devices.workingDevice;
@@ -31,14 +54,17 @@ class GalleryTransitionTest {
       await flutter('packages', options: <String>['get']);
 
       final String testDriver = semanticsEnabled
-          ? 'transitions_perf_with_semantics.dart'
-          : 'transitions_perf.dart';
+          ? '${testFile}_with_semantics.dart'
+          : '$testFile.dart';
 
       await flutter('drive', options: <String>[
         '--profile',
-        '--trace-startup',
+        if (needFullTimeline)
+          '--trace-startup',
         '-t',
         'test_driver/$testDriver',
+        if (driverFile != null)
+          ...<String>['--driver', 'test_driver/$driverFile.dart'],
         '-d',
         deviceId,
       ]);
@@ -47,7 +73,7 @@ class GalleryTransitionTest {
     // Route paths contains slashes, which Firebase doesn't accept in keys, so we
     // remove them.
     final Map<String, dynamic> original = json.decode(
-      file('${galleryDirectory.path}/build/transition_durations.timeline.json').readAsStringSync(),
+      file('${galleryDirectory.path}/build/$transitionDurationFile.json').readAsStringSync(),
     ) as Map<String, dynamic>;
     final Map<String, List<int>> transitions = <String, List<int>>{};
     for (final String key in original.keys) {
@@ -55,7 +81,7 @@ class GalleryTransitionTest {
     }
 
     final Map<String, dynamic> summary = json.decode(
-      file('${galleryDirectory.path}/build/transitions.timeline_summary.json').readAsStringSync(),
+      file('${galleryDirectory.path}/build/$timelineSummaryFile.json').readAsStringSync(),
     ) as Map<String, dynamic>;
 
     final Map<String, dynamic> data = <String, dynamic>{

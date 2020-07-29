@@ -763,6 +763,13 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
+  flutter_gallery__transition_perf_e2e:
+    description: >
+      Measures the performance of screen transitions in Flutter Gallery on
+      Android with e2e.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
   flutter_gallery_sksl_warmup__transition_perf:
     description: >
       Measures the runtime performance of Flutter gallery transitions on Android
