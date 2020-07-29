@@ -25,5 +25,6 @@ abstract class WebRunnerFactory {
     @required bool ipv6,
     @required DebuggingOptions debuggingOptions,
     @required UrlTunneller urlTunneller,
+    bool machine = false,
   });
 }

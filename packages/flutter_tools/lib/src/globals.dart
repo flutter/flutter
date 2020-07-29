@@ -24,6 +24,7 @@ import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'build_system/build_system.dart';
 import 'cache.dart';
+import 'device.dart';
 import 'doctor.dart';
 import 'fuchsia/fuchsia_sdk.dart';
 import 'ios/ios_workflow.dart';
@@ -49,6 +50,7 @@ OperatingSystemUtils get os => context.get<OperatingSystemUtils>();
 PersistentToolState get persistentToolState => PersistentToolState.instance;
 Signals get signals => context.get<Signals>() ?? LocalSignals.instance;
 Usage get flutterUsage => context.get<Usage>();
+DeviceManager get deviceManager => context.get<DeviceManager>();
 
 FlutterProjectFactory get projectFactory {
   return context.get<FlutterProjectFactory>() ?? FlutterProjectFactory(

@@ -29,12 +29,12 @@ import 'theme_data.dart';
 /// hovered, focused, disabled, etc.
 ///
 /// These properties can override the default value for just one state or all of
-/// them. For example to create a [ContainedButton] whose background color is the
+/// them. For example to create a [ElevatedButton] whose background color is the
 /// color scheme’s primary color with 50% opacity, but only when the button is
 /// pressed, one could write:
 ///
 /// ```dart
-/// ContainedButton(
+/// ElevatedButton(
 ///   style: ButtonStyle(
 ///     backgroundColor: MaterialStateProperty.resolveWith<Color>(
 ///       (Set<MaterialState> states) {
@@ -48,11 +48,11 @@ import 'theme_data.dart';
 ///```
 ///
 /// In this case the background color for all other button states would fallback
-/// to the ContainedButton’s default values. To unconditionally set the button's
+/// to the ElevatedButton’s default values. To unconditionally set the button's
 /// [backgroundColor] for all states one could write:
 ///
 /// ```dart
-/// ContainedButton(
+/// ElevatedButton(
 ///   style: ButtonStyle(
 ///     backgroundColor: MaterialStateProperty.all<Color>(Colors.green),
 ///   ),
@@ -66,7 +66,7 @@ import 'theme_data.dart';
 /// useful to make relatively sweeping changes based on a few initial
 /// parameters with simple values. The button styleFrom() methods
 /// enable such sweeping changes. See for example:
-/// [TextButton.styleFrom], [ContainedButton.styleFrom],
+/// [TextButton.styleFrom], [ElevatedButton.styleFrom],
 /// [OutlinedButton.styleFrom].
 ///
 /// For example, to override the default text and icon colors for a
@@ -95,7 +95,7 @@ import 'theme_data.dart';
 /// See also:
 ///
 ///  * [TextButtonTheme], the theme for [TextButton]s.
-///  * [ContainedButtonTheme], the theme for [ContainedButton]s.
+///  * [ElevatedButtonTheme], the theme for [ElevatedButton]s.
 ///  * [OutlinedButtonTheme], the theme for [OutlinedButton]s.
 @immutable
 class ButtonStyle with Diagnosticable {

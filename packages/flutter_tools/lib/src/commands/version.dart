@@ -154,6 +154,7 @@ class VersionCommand extends FlutterCommand {
         directory: projectRoot,
         upgrade: true,
         checkLastModified: false,
+        generateSyntheticPackage: false,
       );
     }
 

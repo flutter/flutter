@@ -601,6 +601,10 @@ extension FlutterVmService on vm_service.VmService {
     @required String isolateId,
   }) => _flutterToggle('inspector.show', isolateId: isolateId);
 
+  Future<Map<String,dynamic>> flutterToggleInvertOversizedImages({
+    @required String isolateId,
+  }) => _flutterToggle('invertOversizedImages', isolateId: isolateId);
+
   Future<Map<String, dynamic>> flutterToggleProfileWidgetBuilds({
     @required String isolateId,
   }) => _flutterToggle('profileWidgetBuilds', isolateId: isolateId);
@@ -624,15 +628,13 @@ extension FlutterVmService on vm_service.VmService {
     );
   }
 
-  Future<Map<String, dynamic>> flutterFastReassemble(String classId, {
+  Future<Map<String, dynamic>> flutterFastReassemble({
    @required String isolateId,
   }) {
     return invokeFlutterExtensionRpcRaw(
       'ext.flutter.fastReassemble',
       isolateId: isolateId,
-      args: <String, Object>{
-        'class': classId,
-      },
+      args: <String, Object>{},
     );
   }
 

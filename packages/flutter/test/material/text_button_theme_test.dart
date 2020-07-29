@@ -177,4 +177,74 @@ void main() {
       checkButton(tester);
     });
   });
+
+  testWidgets('Theme shadowColor', (WidgetTester tester) async {
+    const ColorScheme colorScheme = ColorScheme.light();
+    const Color shadowColor = Color(0xff000001);
+    const Color overiddenColor = Color(0xff000002);
+
+    Widget buildFrame({ Color overallShadowColor, Color themeShadowColor, Color shadowColor }) {
+      return MaterialApp(
+        theme: ThemeData.from(colorScheme: colorScheme).copyWith(
+          shadowColor: overallShadowColor,
+        ),
+        home: Scaffold(
+          body: Center(
+            child: TextButtonTheme(
+              data: TextButtonThemeData(
+                style: TextButton.styleFrom(
+                  shadowColor: themeShadowColor,
+                ),
+              ),
+              child: Builder(
+                builder: (BuildContext context) {
+                  return TextButton(
+                    style: TextButton.styleFrom(
+                      shadowColor: shadowColor,
+                    ),
+                    onPressed: () { },
+                    child: const Text('button'),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    final Finder buttonMaterialFinder = find.descendant(
+      of: find.byType(TextButton),
+      matching: find.byType(Material),
+    );
+
+    await tester.pumpWidget(buildFrame());
+    Material material = tester.widget<Material>(buttonMaterialFinder);
+    expect(material.shadowColor, Colors.black); //default
+
+    await tester.pumpWidget(buildFrame(overallShadowColor: shadowColor));
+    await tester.pumpAndSettle(); // theme animation
+    material = tester.widget<Material>(buttonMaterialFinder);
+    expect(material.shadowColor, shadowColor);
+
+    await tester.pumpWidget(buildFrame(themeShadowColor: shadowColor));
+    await tester.pumpAndSettle(); // theme animation
+    material = tester.widget<Material>(buttonMaterialFinder);
+    expect(material.shadowColor, shadowColor);
+
+    await tester.pumpWidget(buildFrame(shadowColor: shadowColor));
+    await tester.pumpAndSettle(); // theme animation
+    material = tester.widget<Material>(buttonMaterialFinder);
+    expect(material.shadowColor, shadowColor);
+
+    await tester.pumpWidget(buildFrame(overallShadowColor: overiddenColor, themeShadowColor: shadowColor));
+    await tester.pumpAndSettle(); // theme animation
+    material = tester.widget<Material>(buttonMaterialFinder);
+    expect(material.shadowColor, shadowColor);
+
+    await tester.pumpWidget(buildFrame(themeShadowColor: overiddenColor, shadowColor: shadowColor));
+    await tester.pumpAndSettle(); // theme animation
+    material = tester.widget<Material>(buttonMaterialFinder);
+    expect(material.shadowColor, shadowColor);
+  });
 }

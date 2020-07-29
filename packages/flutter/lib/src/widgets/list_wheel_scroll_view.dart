@@ -559,6 +559,8 @@ class FixedExtentScrollPhysics extends ScrollPhysics {
 /// This widget is similar to a [ListView] but with the restriction that all
 /// children must be the same size along the scrolling axis.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=dUhmWAz4C7Y}
+///
 /// When the list is at the zero scroll offset, the first child is aligned with
 /// the middle of the viewport. When the list is at the final scroll offset,
 /// the last child is aligned with the middle of the viewport

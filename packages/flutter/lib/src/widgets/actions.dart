@@ -30,11 +30,17 @@ BuildContext _getParent(BuildContext context) {
   return parent;
 }
 
-/// A class representing a particular configuration of an action.
+/// A class representing a particular configuration of an [Action].
 ///
 /// This class is what a key map in a [ShortcutMap] has as values, and is used
 /// by an [ActionDispatcher] to look up an action and invoke it, giving it this
 /// object to extract configuration information from.
+///
+/// See also:
+///
+///  * [Actions.invoke], which invokes the action associated with a specified
+///    [Intent] using the [Actions] widget that most tightly encloses the given
+///    [BuildContext].
 @immutable
 class Intent with Diagnosticable {
   /// A const constructor for an [Intent].
@@ -581,7 +587,13 @@ class Actions extends StatefulWidget {
   /// that are found.
   ///
   /// Setting `nullOk` to true means that if no ambient [Actions] widget is
-  /// found, then this method will return false instead of throwing.
+  /// found, then this method will return null instead of throwing.
+  ///
+  /// Returns the result of invoking the action's [Action.invoke] method. If
+  /// no action mapping was found for the specified intent, or if the action
+  /// that was found was disabled, then this returns null. Callers can detect
+  /// whether or not the action is available (found, and not disabled) using
+  /// [Actions.find] with its `nullOk` argument set to true.
   static Object invoke<T extends Intent>(
     BuildContext context,
     T intent, {
@@ -624,7 +636,7 @@ class Actions extends StatefulWidget {
     }());
     // Invoke the action we found using the relevant dispatcher from the Actions
     // Element we found.
-    return actionElement != null ? _findDispatcher(actionElement).invokeAction(action, intent, context) != null : null;
+    return actionElement != null ? _findDispatcher(actionElement).invokeAction(action, intent, context) : null;
   }
 
   @override
@@ -851,7 +863,7 @@ class _ActionsMarker extends InheritedWidget {
 ///         children: <Widget>[
 ///           Padding(
 ///             padding: const EdgeInsets.all(8.0),
-///             child: FlatButton(onPressed: () {}, child: Text('Press Me')),
+///             child: TextButton(onPressed: () {}, child: Text('Press Me')),
 ///           ),
 ///           Padding(
 ///             padding: const EdgeInsets.all(8.0),

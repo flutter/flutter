@@ -85,7 +85,7 @@ void main() {
         when(portForwarder.forwardedPorts)
           .thenReturn(<ForwardedPort>[ForwardedPort(hostPort, devicePort)]);
         when(portForwarder.unforward(any))
-          .thenAnswer((_) async => null);
+          .thenAnswer((_) async {});
 
         final HttpClientRequest httpClientRequest = MockHttpClientRequest();
         httpClient = MockHttpClient();
@@ -296,7 +296,7 @@ void main() {
       when(portForwarder.forwardedPorts)
         .thenReturn(<ForwardedPort>[ForwardedPort(hostPort, devicePort)]);
       when(portForwarder.unforward(any))
-        .thenAnswer((_) async => null);
+        .thenAnswer((_) async {});
       when(mockHotRunner.attach(appStartedCompleter: anyNamed('appStartedCompleter')))
         .thenAnswer((_) async => 0);
       when(mockHotRunnerFactory.build(
@@ -370,7 +370,7 @@ void main() {
       when(portForwarder.forwardedPorts)
         .thenReturn(<ForwardedPort>[ForwardedPort(hostPort, devicePort)]);
       when(portForwarder.unforward(any))
-        .thenAnswer((_) async => null);
+        .thenAnswer((_) async {});
       when(mockHotRunner.attach(appStartedCompleter: anyNamed('appStartedCompleter')))
         .thenAnswer((_) async => 0);
       when(mockHotRunnerFactory.build(
@@ -424,7 +424,7 @@ void main() {
         when(portForwarder.forwardedPorts)
           .thenReturn(<ForwardedPort>[ForwardedPort(hostPort, devicePort)]);
         when(portForwarder.unforward(any))
-          .thenAnswer((_) async => null);
+          .thenAnswer((_) async {});
       });
 
       testUsingContext('succeeds in ipv4 mode', () async {

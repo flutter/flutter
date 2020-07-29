@@ -44,10 +44,6 @@ abstract class RenderSliverBoxChildManager {
   /// the [RenderSliverMultiBoxAdaptor] object if they were not created during
   /// this frame and have not yet been updated during this frame. It is not
   /// valid to add any other children to this render object.
-  ///
-  /// If this method does not create a child for a given `index` greater than or
-  /// equal to zero, then [computeMaxScrollOffset] must be able to return a
-  /// precise value.
   void createChild(int index, { @required RenderBox after });
 
   /// Remove the given child from the child list.

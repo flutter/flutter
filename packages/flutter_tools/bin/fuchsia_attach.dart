@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
 import 'package:flutter_tools/src/commands/doctor.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_device.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_sdk.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_workflow.dart';
@@ -106,6 +107,7 @@ Future<void> main(List<String> args) async {
     muteCommandLogging: false,
     verboseHelp: false,
     overrides: <Type, Generator>{
+      FeatureFlags: () => const _FuchsiaFeatureFlags(),
       DeviceManager: () => _FuchsiaDeviceManager(),
       FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig, devFinder: devFinder),
       Artifacts: () => OverrideArtifacts(
@@ -170,4 +172,32 @@ class _FuchsiaAttachCommand extends AttachCommand {
     Cache.flutterRoot = '$originalWorkingDirectory/third_party/dart-pkg/git/flutter';
     return super.runCommand();
   }
+}
+
+class _FuchsiaFeatureFlags extends FeatureFlags {
+  const _FuchsiaFeatureFlags();
+
+  @override
+  bool get isLinuxEnabled => false;
+
+  @override
+  bool get isMacOSEnabled => false;
+
+  @override
+  bool get isWebEnabled => false;
+
+  @override
+  bool get isWindowsEnabled => false;
+
+  @override
+  bool get isAndroidEnabled => false;
+
+  @override
+  bool get isIOSEnabled => false;
+
+  @override
+  bool get isFuchsiaEnabled => true;
+
+  @override
+  bool get isSingleWidgetReloadEnabled => false;
 }

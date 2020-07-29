@@ -11,19 +11,23 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:path/path.dart' as path;
 
-const String kOptionCodepointsPath = 'codepoints';
-const String kOptionIconsPath = 'icons';
-const String kOptionDryRun = 'dry-run';
+const String _newCodepointsPathOption = 'new-codepoints';
+const String _oldCodepointsPathOption = 'old-codepoints';
+const String _iconsClassPathOption = 'icons';
+const String _dryRunOption = 'dry-run';
 
-const String kDefaultCodepointsPath = 'bin/cache/artifacts/material_fonts/codepoints';
-const String kDefaultIconsPath = 'packages/flutter/lib/src/material/icons.dart';
+const String _defaultNewCodepointsPath = 'codepoints';
+const String _defaultOldCodepointsPath = 'bin/cache/artifacts/material_fonts/codepoints';
+const String _defaultIconsPath = 'packages/flutter/lib/src/material/icons.dart';
 
-const String kBeginGeneratedMark = '// BEGIN GENERATED';
-const String kEndGeneratedMark = '// END GENERATED';
+const String _beginGeneratedMark = '// BEGIN GENERATED';
+const String _endGeneratedMark = '// END GENERATED';
 
-const Map<String, String> kIdentifierRewrites = <String, String>{
+const Map<String, String> _identifierRewrites = <String, String>{
   '360': 'threesixty',
   '3d_rotation': 'threed_rotation',
+  '6_ft': 'six_ft',
+  '5g': 'five_g',
   '1k': 'one_k',
   '2k': 'two_k',
   '3k': 'three_k',
@@ -68,10 +72,9 @@ const Map<String, String> kIdentifierRewrites = <String, String>{
   '23mp': 'twenty_three_mp',
   '24mp': 'twenty_four_mp',
   'class': 'class_',
-
 };
 
-const Set<String> kMirroredIcons = <String>{
+const Set<String> _mirroredIcons = <String>{
   // This list is obtained from:
   // http://google.github.io/material-design-icons/#icons-in-rtl
   'arrow_back',
@@ -152,44 +155,90 @@ void main(List<String> args) {
   if (path.basename(Directory.current.path) == 'tools')
     Directory.current = Directory.current.parent.parent;
 
-  final ArgParser argParser = ArgParser();
-  argParser.addOption(kOptionCodepointsPath, defaultsTo: kDefaultCodepointsPath);
-  argParser.addOption(kOptionIconsPath, defaultsTo: kDefaultIconsPath);
-  argParser.addFlag(kOptionDryRun, defaultsTo: false);
-  final ArgResults argResults = argParser.parse(args);
+  final ArgResults argResults = _handleArguments(args);
 
-  final File iconFile = File(path.absolute(argResults[kOptionIconsPath] as String));
-  if (!iconFile.existsSync()) {
-    stderr.writeln('Icons file not found: ${iconFile.path}');
+  final File iconClassFile = File(path.normalize(path.absolute(argResults[_iconsClassPathOption] as String)));
+  if (!iconClassFile.existsSync()) {
+    stderr.writeln('Error: Icons file not found: ${iconClassFile.path}');
     exit(1);
   }
-  final File codepointsFile = File(path.absolute(argResults[kOptionCodepointsPath] as String));
-  if (!codepointsFile.existsSync()) {
-    stderr.writeln('Codepoints file not found: ${codepointsFile.path}');
+  final File newCodepointsFile = File(path.absolute(path.normalize(argResults[_newCodepointsPathOption] as String)));
+  if (!newCodepointsFile.existsSync()) {
+    stderr.writeln('Error: New codepoints file not found: ${newCodepointsFile.path}');
+    exit(1);
+  }
+  final File oldCodepointsFile = File(path.absolute(argResults[_oldCodepointsPathOption] as String));
+  if (!oldCodepointsFile.existsSync()) {
+    stderr.writeln('Error: Old codepoints file not found: ${oldCodepointsFile.path}');
     exit(1);
   }
 
-  final String iconData = iconFile.readAsStringSync();
-  final String codepointData = codepointsFile.readAsStringSync();
-  final String newIconData = regenerateIconsFile(iconData, codepointData);
+  final String newCodepointsString = newCodepointsFile.readAsStringSync();
+  final Map<String, String> newTokenPairMap = _stringToTokenPairMap(newCodepointsString);
 
-  if (argResults[kOptionDryRun] as bool)
+  final String oldCodepointsString = oldCodepointsFile.readAsStringSync();
+  final Map<String, String> oldTokenPairMap = _stringToTokenPairMap(oldCodepointsString);
+
+  _testIsMapSuperset(newTokenPairMap, oldTokenPairMap);
+
+  final String iconClassFileData = iconClassFile.readAsStringSync();
+
+  stderr.writeln('Generating new token pairs.');
+  final String newIconData = _regenerateIconsFile(iconClassFileData, newTokenPairMap);
+
+  if (argResults[_dryRunOption] as bool) {
     stdout.writeln(newIconData);
-  else
-    iconFile.writeAsStringSync(newIconData);
+  } else {
+    stderr.writeln('\nWriting to ${iconClassFile.path}.');
+    iconClassFile.writeAsStringSync(newIconData);
+    _cleanUpFiles(newCodepointsFile, oldCodepointsFile);
+  }
 }
 
-String regenerateIconsFile(String iconData, String codepointData) {
+ArgResults _handleArguments(List<String> args) {
+  final ArgParser argParser = ArgParser()
+    ..addOption(_newCodepointsPathOption, defaultsTo: _defaultNewCodepointsPath)
+    ..addOption(_oldCodepointsPathOption, defaultsTo: _defaultOldCodepointsPath)
+    ..addOption(_iconsClassPathOption, defaultsTo: _defaultIconsPath)
+    ..addFlag(_dryRunOption, defaultsTo: false);
+  return argParser.parse(args);
+}
+
+Map<String, String> _stringToTokenPairMap(String codepointData) {
+  final Iterable<String> cleanData = LineSplitter.split(codepointData)
+      .map((String line) => line.trim())
+      .where((String line) => line.isNotEmpty);
+
+  final Map<String, String> pairs = <String, String>{};
+
+  for (final String line in cleanData) {
+    final List<String> tokens = line.split(' ');
+    if (tokens.length != 2) {
+      throw FormatException('Unexpected codepoint data: $line');
+    }
+    pairs.putIfAbsent(tokens[0], () => tokens[1]);
+  }
+
+  return pairs;
+}
+
+String _regenerateIconsFile(String iconData, Map<String, String> tokenPairMap) {
   final StringBuffer buf = StringBuffer();
   bool generating = false;
   for (final String line in LineSplitter.split(iconData)) {
-    if (!generating)
+    if (!generating) {
       buf.writeln(line);
-    if (line.contains(kBeginGeneratedMark)) {
+    }
+    if (line.contains(_beginGeneratedMark)) {
       generating = true;
-      final String iconDeclarations = generateIconDeclarations(codepointData);
-      buf.write(iconDeclarations);
-    } else if (line.contains(kEndGeneratedMark)) {
+
+      final String iconDeclarationsString = <String>[
+        for (MapEntry<String, String> entry in tokenPairMap.entries)
+          _generateDeclaration(entry)
+      ].join();
+
+      buf.write(iconDeclarationsString);
+    } else if (line.contains(_endGeneratedMark)) {
       generating = false;
       buf.writeln(line);
     }
@@ -197,26 +246,44 @@ String regenerateIconsFile(String iconData, String codepointData) {
   return buf.toString();
 }
 
-String generateIconDeclarations(String codepointData) {
-  return LineSplitter.split(codepointData)
-      .map<String>((String l) => l.trim())
-      .where((String l) => l.isNotEmpty)
-      .map<String>(getIconDeclaration)
-      .join();
+void _testIsMapSuperset(Map<String, String> newCodepoints, Map<String, String> oldCodepoints) {
+  final Set<String> newCodepointsSet = newCodepoints.keys.toSet();
+  final Set<String> oldCodepointsSet = oldCodepoints.keys.toSet();
+
+  if (!newCodepointsSet.containsAll(oldCodepointsSet)) {
+    stderr.writeln(
+      '''Error: New codepoints file does not contain all the existing codepoints.\n
+        Missing: ${oldCodepointsSet.difference(newCodepointsSet)}
+        ''',
+    );
+    exit(1);
+  }
 }
 
-String getIconDeclaration(String line) {
-  final List<String> tokens = line.split(' ');
-  if (tokens.length != 2)
-    throw FormatException('Unexpected codepoint data: $line');
-  final String name = tokens[0];
-  final String codepoint = tokens[1];
-  final String identifier = kIdentifierRewrites[name] ?? name;
-  final String description = name.replaceAll('_', ' ');
-  final String rtl = kMirroredIcons.contains(name) ? ', matchTextDirection: true' : '';
+String _generateDeclaration(MapEntry<String, String> tokenPair) {
+  final String identifier = _generateIdentifier(tokenPair.key);
+  final String description = tokenPair.key.replaceAll('_', ' ');
+  final String rtl = _mirroredIcons.contains(tokenPair.key)
+      ? ', matchTextDirection: true'
+      : '';
   return '''
 
-  /// <i class="material-icons md-36">$name</i> &#x2014; material icon named "$description".
-  static const IconData $identifier = IconData(0x$codepoint, fontFamily: 'MaterialIcons'$rtl);
+  /// <i class="material-icons md-36">${tokenPair.key}</i> &#x2014; material icon named "$description".
+  static const IconData $identifier = IconData(0x${tokenPair.value}, fontFamily: 'MaterialIcons'$rtl);
 ''';
+}
+
+String _generateIdentifier(String rawIdentifier) {
+  for (final MapEntry<String, String> rewritePair in _identifierRewrites.entries) {
+    if (rawIdentifier.startsWith(rewritePair.key)) {
+      return rawIdentifier.replaceFirst(rewritePair.key, _identifierRewrites[rewritePair.key]);
+    }
+  }
+  return rawIdentifier;
+}
+
+// Replace the old codepoints file with the new.
+void _cleanUpFiles(File newCodepointsFile, File oldCodepointsFile) {
+  stderr.writeln('\nMoving new codepoints file to ${oldCodepointsFile.path}.\n');
+  newCodepointsFile.renameSync(oldCodepointsFile.path);
 }

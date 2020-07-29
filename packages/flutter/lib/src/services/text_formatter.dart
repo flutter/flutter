@@ -92,11 +92,12 @@ class FilteringTextInputFormatter extends TextInputFormatter {
   ///
   /// If [allow] is true, then the filter pattern is an allow list,
   /// and characters must match the pattern to be accepted. See also
-  /// [new FilteringTextInputFormatter.allow].
+  /// the `FilteringTextInputFormatter.allow` constructor.
+  // TODO(goderbauer): Cannot link to the constructor because of https://github.com/dart-lang/dartdoc/issues/2276.
   ///
   /// If [allow] is false, then the filter pattern is a deny list,
   /// and characters that match the pattern are rejected. See also
-  /// [new FilteringTextInputFormatter.deny].
+  /// the [FilteringTextInputFormatter.deny] constructor.
   ///
   /// The [filterPattern], [allow], and [replacementString] arguments
   /// must not be null.
@@ -269,11 +270,10 @@ class BlacklistingTextInputFormatter extends FilteringTextInputFormatter {
 }
 
 /// Old name for [FilteringTextInputFormatter.allow].
-// TODO(ianh): Deprecate these once the samples are migrated.
-// at-Deprecated(
-//   'Use FilteringTextInputFormatter.allow instead. '
-//   'This feature was deprecated after v1.20.0-1.0.pre.'
-// )
+@Deprecated(
+  'Use FilteringTextInputFormatter.allow instead. '
+  'This feature was deprecated after v1.20.0-1.0.pre.'
+)
 class WhitelistingTextInputFormatter extends FilteringTextInputFormatter {
   /// Old name for [FilteringTextInputFormatter.allow].
   @Deprecated(
@@ -292,11 +292,10 @@ class WhitelistingTextInputFormatter extends FilteringTextInputFormatter {
   Pattern get whitelistedPattern => filterPattern;
 
   /// Old name for [FilteringTextInputFormatter.digitsOnly].
-  // TODO(ianh): Deprecate these once the samples are migrated.
-  // at-Deprecated(
-  //   'Use FilteringTextInputFormatter.digitsOnly instead. '
-  //   'This feature was deprecated after v1.20.0-1.0.pre.'
-  // )
+  @Deprecated(
+    'Use FilteringTextInputFormatter.digitsOnly instead. '
+    'This feature was deprecated after v1.20.0-1.0.pre.'
+  )
   static final WhitelistingTextInputFormatter digitsOnly
       = WhitelistingTextInputFormatter(RegExp(r'\d+'));
 }

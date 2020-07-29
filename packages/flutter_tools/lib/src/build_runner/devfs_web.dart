@@ -42,10 +42,12 @@ typedef DwdsLauncher = Future<Dwds> Function({
   bool enableDebugExtension,
   String hostname,
   bool useSseForDebugProxy,
+  bool useSseForDebugBackend,
   bool serveDevTools,
   void Function(Level, String) logWriter,
   bool verbose,
   UrlEncoder urlEncoder,
+  bool useFileProvider,
   ExpressionCompiler expressionCompiler,
 });
 
@@ -141,6 +143,7 @@ class WebAssetServer implements AssetReader {
     int port,
     UrlTunneller urlTunneller,
     bool useSseForDebugProxy,
+    bool useSseForDebugBackend,
     BuildInfo buildInfo,
     bool enableDwds,
     Uri entrypoint,
@@ -234,6 +237,7 @@ class WebAssetServer implements AssetReader {
         urlEncoder: urlTunneller,
         enableDebugging: true,
         useSseForDebugProxy: useSseForDebugProxy,
+        useSseForDebugBackend: useSseForDebugBackend,
         serveDevTools: false,
         logWriter: (Level logLevel, String message) => globals.printTrace(message),
         loadStrategy: RequireStrategy(
@@ -245,6 +249,7 @@ class WebAssetServer implements AssetReader {
           serverPathForModule,
           serverPathForAppUri,
         ),
+        useFileProvider: true,
         expressionCompiler: expressionCompiler
       );
       shelf.Pipeline pipeline = const shelf.Pipeline();
@@ -271,6 +276,8 @@ class WebAssetServer implements AssetReader {
   // RandomAccessFile and read on demand.
   final Map<String, Uint8List> _files = <String, Uint8List>{};
   final Map<String, Uint8List> _sourcemaps = <String, Uint8List>{};
+  final Map<String, Uint8List> _metadataFiles = <String, Uint8List>{};
+  String _mergedMetadata;
   final PackageConfig _packages;
   final InternetAddress internetAddress;
   /* late final */ Dwds dwds;
@@ -281,6 +288,9 @@ class WebAssetServer implements AssetReader {
 
   @visibleForTesting
   Uint8List getSourceMap(String path) => _sourcemaps[path];
+
+  @visibleForTesting
+  Uint8List getMetadata(String path) => _metadataFiles[path];
 
   // handle requests for JavaScript source, dart sources maps, or asset files.
   @visibleForTesting
@@ -331,6 +341,20 @@ class WebAssetServer implements AssetReader {
     // Attempt to lookup the file by URI.
     if (_sourcemaps.containsKey(requestPath)) {
       final List<int> bytes = getSourceMap(requestPath);
+      final String etag = bytes.hashCode.toString();
+      if (ifNoneMatch == etag) {
+        return shelf.Response.notModified();
+      }
+      headers[HttpHeaders.contentLengthHeader] = bytes.length.toString();
+      headers[HttpHeaders.contentTypeHeader] = 'application/json';
+      headers[HttpHeaders.etagHeader] = etag;
+      return shelf.Response.ok(bytes, headers: headers);
+    }
+
+    // If this is a metadata file, then it might be in the in-memory cache.
+    // Attempt to lookup the file by URI.
+    if (_metadataFiles.containsKey(requestPath)) {
+      final List<int> bytes = getMetadata(requestPath);
       final String etag = bytes.hashCode.toString();
       if (ifNoneMatch == etag) {
         return shelf.Response.notModified();
@@ -405,10 +429,15 @@ class WebAssetServer implements AssetReader {
   /// Update the in-memory asset server with the provided source and manifest files.
   ///
   /// Returns a list of updated modules.
-  List<String> write(File codeFile, File manifestFile, File sourcemapFile) {
+  List<String> write(
+      File codeFile,
+      File manifestFile,
+      File sourcemapFile,
+      File metadataFile) {
     final List<String> modules = <String>[];
     final Uint8List codeBytes = codeFile.readAsBytesSync();
     final Uint8List sourcemapBytes = sourcemapFile.readAsBytesSync();
+    final Uint8List metadataBytes = metadataFile.readAsBytesSync();
     final Map<String, dynamic> manifest = castStringKeyedMap(json.decode(manifestFile.readAsStringSync()));
     for (final String filePath in manifest.keys) {
       if (filePath == null) {
@@ -418,7 +447,10 @@ class WebAssetServer implements AssetReader {
       final Map<String, dynamic> offsets = castStringKeyedMap(manifest[filePath]);
       final List<int> codeOffsets = (offsets['code'] as List<dynamic>).cast<int>();
       final List<int> sourcemapOffsets = (offsets['sourcemap'] as List<dynamic>).cast<int>();
-      if (codeOffsets.length != 2 || sourcemapOffsets.length != 2) {
+      final List<int> metadataOffsets = (offsets['metadata'] as List<dynamic>).cast<int>();
+      if (codeOffsets.length != 2 ||
+          sourcemapOffsets.length != 2 ||
+          metadataOffsets.length != 2) {
         globals.printTrace('Invalid manifest byte offsets: $offsets');
         continue;
       }
@@ -453,8 +485,27 @@ class WebAssetServer implements AssetReader {
       final String sourcemapName = '$fileName.map';
       _sourcemaps[sourcemapName] = sourcemapView;
 
+      final int metadataStart = metadataOffsets[0];
+      final int metadataEnd = metadataOffsets[1];
+      if (metadataStart < 0 || metadataEnd > metadataBytes.lengthInBytes) {
+        globals.printTrace('Invalid byte index: [$metadataStart, $metadataEnd]');
+        continue;
+      }
+      final Uint8List metadataView = Uint8List.view(
+        metadataBytes.buffer,
+        metadataStart,
+        metadataEnd - metadataStart,
+      );
+      final String metadataName = '$fileName.metadata';
+      _metadataFiles[metadataName] = metadataView;
+
       modules.add(fileName);
     }
+
+    _mergedMetadata = _metadataFiles.values
+      .map((Uint8List encoded) => utf8.decode(encoded))
+      .join('\n');
+
     return modules;
   }
 
@@ -549,7 +600,13 @@ class WebAssetServer implements AssetReader {
   }
 
   @override
-  Future<String> metadataContents(String serverPath) {
+  Future<String> metadataContents(String serverPath) async {
+    if (serverPath == 'main_module.ddc_merged_metadata') {
+      return _mergedMetadata;
+    }
+    if (_metadataFiles.containsKey(serverPath)) {
+      return utf8.decode(_metadataFiles[serverPath]);
+    }
     return null;
   }
 }
@@ -573,6 +630,7 @@ class WebDevFS implements DevFS {
     @required this.packagesFilePath,
     @required this.urlTunneller,
     @required this.useSseForDebugProxy,
+    @required this.useSseForDebugBackend,
     @required this.buildInfo,
     @required this.enableDwds,
     @required this.entrypoint,
@@ -587,6 +645,7 @@ class WebDevFS implements DevFS {
   final String packagesFilePath;
   final UrlTunneller urlTunneller;
   final bool useSseForDebugProxy;
+  final bool useSseForDebugBackend;
   final BuildInfo buildInfo;
   final bool enableDwds;
   final bool testMode;
@@ -654,6 +713,7 @@ class WebDevFS implements DevFS {
       port,
       urlTunneller,
       useSseForDebugProxy,
+      useSseForDebugBackend,
       buildInfo,
       enableDwds,
       entrypoint,
@@ -731,6 +791,8 @@ class WebDevFS implements DevFS {
         'main_module.bootstrap.js',
         generateMainModule(
           entrypoint: entrypoint,
+          nullSafety: buildInfo.extraFrontEndOptions
+            ?.contains('--enable-experiment=non-nullable') ?? false,
         ),
       );
       // TODO(jonahwilliams): refactor the asset code in this and the regular devfs to
@@ -772,13 +834,15 @@ class WebDevFS implements DevFS {
     File codeFile;
     File manifestFile;
     File sourcemapFile;
+    File metadataFile;
     List<String> modules;
     try {
       final Directory parentDirectory = globals.fs.directory(outputDirectoryPath);
       codeFile = parentDirectory.childFile('${compilerOutput.outputFilename}.sources');
       manifestFile = parentDirectory.childFile('${compilerOutput.outputFilename}.json');
       sourcemapFile = parentDirectory.childFile('${compilerOutput.outputFilename}.map');
-      modules = webAssetServer.write(codeFile, manifestFile, sourcemapFile);
+      metadataFile = parentDirectory.childFile('${compilerOutput.outputFilename}.metadata');
+      modules = webAssetServer.write(codeFile, manifestFile, sourcemapFile, metadataFile);
     } on FileSystemException catch (err) {
       throwToolExit('Failed to load recompiled sources:\n$err');
     }
@@ -787,7 +851,7 @@ class WebDevFS implements DevFS {
       success: true,
       syncedBytes: codeFile.lengthSync(),
       invalidatedSourcesCount: invalidatedFiles.length,
-    )..invalidatedModules = modules;
+    );
   }
 
   @visibleForTesting

@@ -206,6 +206,7 @@ void main() {
     expect(selectableText.autofocus, false);
     expect(selectableText.dragStartBehavior, DragStartBehavior.start);
     expect(selectableText.cursorWidth, 2.0);
+    expect(selectableText.cursorHeight, isNull);
     expect(selectableText.enableInteractiveSelection, true);
   });
 
@@ -250,6 +251,7 @@ void main() {
     expect(selectableText.autofocus, false);
     expect(selectableText.dragStartBehavior, DragStartBehavior.start);
     expect(selectableText.cursorWidth, 2.0);
+    expect(selectableText.cursorHeight, isNull);
     expect(selectableText.enableInteractiveSelection, true);
   });
 
@@ -3256,6 +3258,7 @@ void main() {
       minLines: 2,
       maxLines: 10,
       cursorWidth: 1.0,
+      cursorHeight: 1.0,
       cursorRadius: Radius.zero,
       cursorColor: Color(0xff00ff00),
       scrollPhysics: ClampingScrollPhysics(),
@@ -3277,6 +3280,7 @@ void main() {
       'textDirection: ltr',
       'textScaleFactor: 1.0',
       'cursorWidth: 1.0',
+      'cursorHeight: 1.0',
       'cursorRadius: Radius.circular(0.0)',
       'cursorColor: Color(0xff00ff00)',
       'selection disabled',

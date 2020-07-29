@@ -637,7 +637,7 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
   const AssetBundleImageProvider();
 
   /// Converts a key into an [ImageStreamCompleter], and begins fetching the
-  /// image using [loadAsync].
+  /// image.
   @override
   ImageStreamCompleter load(AssetBundleImageKey key, DecoderCallback decode) {
     InformationCollector collector;
@@ -802,8 +802,8 @@ class ResizeImage extends ImageProvider<_SizeAwareCacheKey> {
 ///
 /// The image will be cached regardless of cache headers from the server.
 ///
-/// When a network image is used on the Web platform, the [cacheWidth] and
-/// [cacheHeight] parameters of the [DecoderCallback] are ignored as the Web
+/// When a network image is used on the Web platform, the `cacheWidth` and
+/// `cacheHeight` parameters of the [DecoderCallback] are ignored as the Web
 /// engine delegates image decoding of network images to the Web, which does
 /// not support custom decode sizes.
 ///
@@ -977,7 +977,7 @@ class MemoryImage extends ImageProvider<MemoryImage> {
 ///
 /// When fetching an image provided by the app itself, use the [assetName]
 /// argument to name the asset to choose. For instance, consider a directory
-/// `icons` with an image `heart.png`. First, the [pubspec.yaml] of the project
+/// `icons` with an image `heart.png`. First, the `pubspec.yaml` of the project
 /// should specify its assets in the `flutter` section:
 ///
 /// ```yaml
@@ -1127,8 +1127,8 @@ class _ErrorImageCompleter extends ImageStreamCompleter {
 
 /// The exception thrown when the HTTP request to load a network image fails.
 class NetworkImageLoadException implements Exception {
-  /// Creates a [NetworkImageLoadException] with the specified http status
-  /// [code] and the [uri]
+  /// Creates a [NetworkImageLoadException] with the specified http [statusCode]
+  /// and [uri].
   NetworkImageLoadException({@required this.statusCode, @required this.uri})
       : assert(uri != null),
         assert(statusCode != null),

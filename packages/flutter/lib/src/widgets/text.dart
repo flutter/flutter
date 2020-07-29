@@ -322,7 +322,7 @@ class DefaultTextHeightBehavior extends InheritedTheme {
 /// To make [Text] react to touch events, wrap it in a [GestureDetector] widget
 /// with a [GestureDetector.onTap] handler.
 ///
-/// In a material design application, consider using a [FlatButton] instead, or
+/// In a material design application, consider using a [TextButton] instead, or
 /// if that isn't appropriate, at least using an [InkWell] instead of
 /// [GestureDetector].
 ///
@@ -457,6 +457,8 @@ class Text extends StatelessWidget {
   final bool softWrap;
 
   /// How visual overflow should be handled.
+  ///
+  /// Defaults to retrieving the value from the nearest [DefaultTextStyle] ancestor.
   final TextOverflow overflow;
 
   /// The number of font pixels for each logical pixel.

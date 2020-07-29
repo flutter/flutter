@@ -275,7 +275,7 @@ Matcher offsetMoreOrLessEquals(Offset value, { double epsilon = precisionErrorTo
 ///    with ids that match the pattern #[0-9a-f]{5}.
 ///  * [shortHash], a method that generates a 5 character long hexadecimal
 ///    [String] based on [Object.hashCode].
-///  * [TreeDiagnosticsMixin.toStringDeep], a method that returns a [String]
+///  * [DiagnosticableTree.toStringDeep], a method that returns a [String]
 ///    typically containing multiple hash codes.
 Matcher equalsIgnoringHashCodes(String value) {
   return _EqualsIgnoringHashCodes(value);
@@ -416,7 +416,7 @@ AsyncMatcher matchesReferenceImage(ui.Image image) {
 /// provided, then they are not part of the comparison.  All of the boolean
 /// flag and action fields must match, and default to false.
 ///
-/// To retrieve the semantics data of a widget, use [tester.getSemantics]
+/// To retrieve the semantics data of a widget, use [WidgetTester.getSemantics]
 /// with a [Finder] that returns a single widget. Semantics must be enabled
 /// in order to use this method.
 ///

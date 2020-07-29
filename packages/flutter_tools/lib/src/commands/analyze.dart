@@ -77,10 +77,10 @@ class AnalyzeCommand extends FlutterCommand {
               'Ignored if --watch is specified.');
     argParser.addFlag('fatal-infos',
         help: 'Treat info level issues as fatal.',
-        defaultsTo: false);
+        defaultsTo: true);
     argParser.addFlag('fatal-warnings',
         help: 'Treat warning level issues as fatal.',
-        defaultsTo: false);
+        defaultsTo: true);
   }
 
   /// The working directory for testing analysis using dartanalyzer.

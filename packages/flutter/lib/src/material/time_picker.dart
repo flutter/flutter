@@ -20,7 +20,6 @@ import 'curves.dart';
 import 'debug.dart';
 import 'dialog.dart';
 import 'feedback.dart';
-import 'flat_button.dart';
 import 'icon_button.dart';
 import 'icons.dart';
 import 'ink_well.dart';
@@ -29,6 +28,7 @@ import 'input_decorator.dart';
 import 'material.dart';
 import 'material_localizations.dart';
 import 'material_state.dart';
+import 'text_button.dart';
 import 'text_form_field.dart';
 import 'text_theme.dart';
 import 'theme.dart';
@@ -1831,11 +1831,11 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
           child: ButtonBar(
             layoutBehavior: ButtonBarLayoutBehavior.constrained,
             children: <Widget>[
-              FlatButton(
+              TextButton(
                 onPressed: _handleCancel,
                 child: Text(widget.cancelText ?? localizations.cancelButtonLabel),
               ),
-              FlatButton(
+              TextButton(
                 onPressed: _handleOk,
                 child: Text(widget.confirmText ?? localizations.okButtonLabel),
               ),

@@ -19,6 +19,8 @@ import 'theme_data.dart';
 /// The entire list tile is interactive: tapping anywhere in the tile toggles
 /// the checkbox.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=RkSqPAn9szs}
+///
 /// The [value], [onChanged], [activeColor] and [checkColor] properties of this widget are
 /// identical to the similarly-named properties on the [Checkbox] widget.
 ///

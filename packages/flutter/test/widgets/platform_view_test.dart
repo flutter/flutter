@@ -576,7 +576,7 @@ void main() {
       );
     });
 
-    testWidgets('Android view gesture recognizers', (WidgetTester tester) async {
+    testWidgets('Android view drag gesture recognizer', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -596,8 +596,7 @@ void main() {
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<VerticalDragGestureRecognizer>(
                     () {
-                      return VerticalDragGestureRecognizer()
-                        ..onStart = (_) {}; // Add callback to enable recognizer
+                      return VerticalDragGestureRecognizer();
                     },
                   ),
                 },
@@ -622,6 +621,96 @@ void main() {
               AndroidViewController.kActionMove, <int>[0], <Offset>[Offset(50.0, 150.0)]),
           const FakeAndroidMotionEvent(
               AndroidViewController.kActionUp, <int>[0], <Offset>[Offset(50.0, 150.0)]),
+        ]),
+      );
+    });
+
+    testWidgets('Android view long press gesture recognizer', (WidgetTester tester) async {
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
+      viewsController.registerViewType('webview');
+      bool longPressAccessedByParent = false;
+      await tester.pumpWidget(
+        Align(
+          alignment: Alignment.topLeft,
+          child: GestureDetector(
+            onLongPress: () {
+              longPressAccessedByParent = true;
+            },
+            child: SizedBox(
+              width: 200.0,
+              height: 100.0,
+              child: AndroidView(
+                viewType: 'webview',
+                gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+                  Factory<LongPressGestureRecognizer>(
+                    () {
+                      return LongPressGestureRecognizer();
+                    },
+                  ),
+                },
+                layoutDirection: TextDirection.ltr,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.longPressAt(const Offset(50.0, 50.0));
+
+      expect(longPressAccessedByParent, false);
+      expect(
+        viewsController.motionEvents[currentViewId + 1],
+        orderedEquals(<FakeAndroidMotionEvent>[
+          const FakeAndroidMotionEvent(
+              AndroidViewController.kActionDown, <int>[0], <Offset>[Offset(50.0, 50.0)]),
+          const FakeAndroidMotionEvent(
+              AndroidViewController.kActionUp, <int>[0], <Offset>[Offset(50.0, 50.0)]),
+        ]),
+      );
+    });
+
+    testWidgets('Android view tap gesture recognizer', (WidgetTester tester) async {
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
+      viewsController.registerViewType('webview');
+      bool tapAccessedByParent = false;
+      await tester.pumpWidget(
+        Align(
+          alignment: Alignment.topLeft,
+          child: GestureDetector(
+            onTap: () {
+              tapAccessedByParent = true;
+            },
+            child: SizedBox(
+              width: 200.0,
+              height: 100.0,
+              child: AndroidView(
+                viewType: 'webview',
+                gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+                  Factory<TapGestureRecognizer>(
+                    () {
+                      return TapGestureRecognizer();
+                    },
+                  ),
+                },
+                layoutDirection: TextDirection.ltr,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tapAt(const Offset(50.0, 50.0));
+
+      expect(tapAccessedByParent, false);
+      expect(
+        viewsController.motionEvents[currentViewId + 1],
+        orderedEquals(<FakeAndroidMotionEvent>[
+          const FakeAndroidMotionEvent(
+              AndroidViewController.kActionDown, <int>[0], <Offset>[Offset(50.0, 50.0)]),
+          const FakeAndroidMotionEvent(
+              AndroidViewController.kActionUp, <int>[0], <Offset>[Offset(50.0, 50.0)]),
         ]),
       );
     });
@@ -1422,17 +1511,17 @@ void main() {
       expect(viewsController.gesturesRejected[currentViewId + 1], 1);
     });
 
-    testWidgets('UiKitView gesture recognizers', (WidgetTester tester) async {
+    testWidgets('UiKitView tap gesture recognizers', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
-      bool verticalDragAcceptedByParent = false;
+      bool gestureAcceptedByParent = false;
       await tester.pumpWidget(
         Align(
           alignment: Alignment.topLeft,
           child: GestureDetector(
             onVerticalDragStart: (DragStartDetails d) {
-              verticalDragAcceptedByParent = true;
+              gestureAcceptedByParent = true;
             },
             child: SizedBox(
               width: 200.0,
@@ -1442,8 +1531,7 @@ void main() {
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<VerticalDragGestureRecognizer>(
                     () {
-                      return VerticalDragGestureRecognizer()
-                        ..onStart = (_) {}; // Add callback to enable recognizer
+                      return VerticalDragGestureRecognizer();
                     },
                   ),
                 },
@@ -1461,6 +1549,90 @@ void main() {
       final TestGesture gesture = await tester.startGesture(const Offset(50.0, 50.0));
       await gesture.moveBy(const Offset(0.0, 100.0));
       await gesture.up();
+
+      expect(gestureAcceptedByParent, false);
+      expect(viewsController.gesturesAccepted[currentViewId + 1], 1);
+      expect(viewsController.gesturesRejected[currentViewId + 1], 0);
+    });
+
+    testWidgets('UiKitView long press gesture recognizers', (WidgetTester tester) async {
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      viewsController.registerViewType('webview');
+      bool gestureAcceptedByParent = false;
+      await tester.pumpWidget(
+        Align(
+          alignment: Alignment.topLeft,
+          child: GestureDetector(
+            onLongPress: () {
+              gestureAcceptedByParent = true;
+            },
+            child: SizedBox(
+              width: 200.0,
+              height: 100.0,
+              child: UiKitView(
+                viewType: 'webview',
+                gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+                  Factory<LongPressGestureRecognizer>(
+                    () {
+                      return LongPressGestureRecognizer();
+                    },
+                  ),
+                },
+                layoutDirection: TextDirection.ltr,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // First frame is before the platform view was created so the render object
+      // is not yet in the tree.
+      await tester.pump();
+
+      await tester.longPressAt(const Offset(50.0, 50.0));
+
+      expect(gestureAcceptedByParent, false);
+      expect(viewsController.gesturesAccepted[currentViewId + 1], 1);
+      expect(viewsController.gesturesRejected[currentViewId + 1], 0);
+    });
+
+    testWidgets('UiKitView drag gesture recognizers', (WidgetTester tester) async {
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      viewsController.registerViewType('webview');
+      bool verticalDragAcceptedByParent = false;
+      await tester.pumpWidget(
+        Align(
+          alignment: Alignment.topLeft,
+          child: GestureDetector(
+            onVerticalDragStart: (DragStartDetails d) {
+              verticalDragAcceptedByParent = true;
+            },
+            child: SizedBox(
+              width: 200.0,
+              height: 100.0,
+              child: UiKitView(
+                viewType: 'webview',
+                gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+                  Factory<TapGestureRecognizer>(
+                    () {
+                      return TapGestureRecognizer();
+                    },
+                  ),
+                },
+                layoutDirection: TextDirection.ltr,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // First frame is before the platform view was created so the render object
+      // is not yet in the tree.
+      await tester.pump();
+
+      await tester.tapAt(const Offset(50.0, 50.0));
 
       expect(verticalDragAcceptedByParent, false);
       expect(viewsController.gesturesAccepted[currentViewId + 1], 1);
@@ -1806,8 +1978,7 @@ void main() {
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<VerticalDragGestureRecognizer>(
                     () {
-                      return VerticalDragGestureRecognizer()
-                        ..onStart = (_) {}; // Add callback to enable recognizer
+                      return VerticalDragGestureRecognizer();
                     },
                   ),
                 },

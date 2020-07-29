@@ -124,7 +124,7 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 ///    current platform's conventions.
 ///  * [CloseButton], an icon button for closing pages.
 ///  * [AppBar], to show a toolbar at the top of an application.
-///  * [RaisedButton] and [FlatButton], for buttons with text in them.
+///  * [TextButton], [ElevatedButton], [OutlinedButton], for buttons with text labels and an optional icon.
 ///  * [InkResponse] and [InkWell], for the ink splash effect itself.
 class IconButton extends StatelessWidget {
   /// Creates an icon button.
@@ -278,7 +278,7 @@ class IconButton extends StatelessWidget {
   /// If this is set to null, the button will be disabled.
   final VoidCallback onPressed;
 
-  /// {@macro flutter.material.inkwell.mousecursor}
+  /// {@macro flutter.material.button.mouseCursor}
   ///
   /// Defaults to [SystemMouseCursors.click].
   final MouseCursor mouseCursor;

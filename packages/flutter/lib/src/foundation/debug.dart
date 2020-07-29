@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:ui' as ui show Brightness;
 
@@ -54,7 +52,7 @@ bool debugInstrumentationEnabled = false;
 ///  * [Timeline], which is used to record synchronous tracing events for
 ///    visualization in Chrome's tracing format. This method does not
 ///    implicitly add any timeline events.
-Future<T> debugInstrumentAction<T>(String description, Future<T> action()) {
+Future<T> debugInstrumentAction<T>(String description, Future<T> action()) async {
   bool instrument = false;
   assert(() {
     instrument = debugInstrumentationEnabled;
@@ -62,10 +60,12 @@ Future<T> debugInstrumentAction<T>(String description, Future<T> action()) {
   }());
   if (instrument) {
     final Stopwatch stopwatch = Stopwatch()..start();
-    return action().whenComplete(() {
+    try {
+      return await action();
+    } finally {
       stopwatch.stop();
       debugPrint('Action "$description" took ${stopwatch.elapsed}');
-    });
+    }
   } else {
     return action();
   }
@@ -87,17 +87,17 @@ const Map<String, String> timelineArgumentsIndicatingLandmarkEvent = <String, St
 /// Configure [debugFormatDouble] using [num.toStringAsPrecision].
 ///
 /// Defaults to null, which uses the default logic of [debugFormatDouble].
-int debugDoublePrecision;
+int? debugDoublePrecision;
 
 /// Formats a double to have standard formatting.
 ///
 /// This behavior can be overridden by [debugDoublePrecision].
-String debugFormatDouble(double value) {
+String debugFormatDouble(double? value) {
   if (value == null) {
     return 'null';
   }
   if (debugDoublePrecision != null) {
-    return value.toStringAsPrecision(debugDoublePrecision);
+    return value.toStringAsPrecision(debugDoublePrecision!);
   }
   return value.toStringAsFixed(1);
 }
@@ -109,4 +109,4 @@ String debugFormatDouble(double value) {
 ///
 ///  * [WidgetsApp], which uses the [debugBrightnessOverride] setting in debug mode
 ///    to construct a [MediaQueryData].
-ui.Brightness debugBrightnessOverride;
+ui.Brightness? debugBrightnessOverride;

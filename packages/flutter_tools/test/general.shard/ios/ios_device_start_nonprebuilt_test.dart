@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
+import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
@@ -321,7 +322,7 @@ IOSDevice setUpIOSDevice({
     sdkVersion: sdkVersion,
     fileSystem: fileSystem ?? MemoryFileSystem.test(),
     platform: macPlatform,
-    artifacts: artifacts,
+    iProxy: IProxy.test(logger: logger, processManager: processManager ?? FakeProcessManager.any()),
     logger: logger,
     iosDeploy: IOSDeploy(
       logger: logger,

@@ -129,6 +129,7 @@ void main() {
     expect(editableText.enableSuggestions, isTrue);
     expect(editableText.textAlign, TextAlign.start);
     expect(editableText.cursorWidth, 2.0);
+    expect(editableText.cursorHeight, isNull);
     expect(editableText.textHeightBehavior, isNull);
   });
 
@@ -4320,6 +4321,30 @@ void main() {
     expect(scrollController.offset, 0);
   });
 
+  testWidgets('getLocalRectForCaret does not throw when it sees an infinite point', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SkipPainting(
+          child: Transform(
+            transform: Matrix4.zero(),
+            child: EditableText(
+              controller: TextEditingController(),
+              focusNode: FocusNode(),
+              style: textStyle,
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    final Rect rect = state.renderEditable.getLocalRectForCaret(const TextPosition(offset: 0));
+    expect(rect.isFinite, false);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('obscured multiline fields throw an exception', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
     expect(
@@ -4382,13 +4407,12 @@ void main() {
       'TextInput.setClient',
       'TextInput.show',
       'TextInput.setEditableSizeAndTransform',
-      'TextInput.requestAutofill',
       'TextInput.setStyle',
       'TextInput.setEditingState',
       'TextInput.setEditingState',
       'TextInput.show',
     ];
-    expect(tester.testTextInput.log.length, 8);
+    expect(tester.testTextInput.log.length, 7);
     int index = 0;
     for (final MethodCall m in tester.testTextInput.log) {
       expect(m.method, logOrder[index]);
@@ -4427,7 +4451,6 @@ void main() {
       'TextInput.setClient',
       'TextInput.show',
       'TextInput.setEditableSizeAndTransform',
-      'TextInput.requestAutofill',
       'TextInput.setStyle',
       'TextInput.setEditingState',
       'TextInput.setEditingState',
@@ -4475,7 +4498,6 @@ void main() {
       'TextInput.setClient',
       'TextInput.show',
       'TextInput.setEditableSizeAndTransform',
-      'TextInput.requestAutofill',
       'TextInput.setStyle',
       'TextInput.setEditingState',
       'TextInput.setEditingState',
@@ -5322,7 +5344,7 @@ class _TransformedEditableTextState extends State<TransformedEditableText> {
                 backgroundCursorColor: Colors.grey,
               ),
             ),
-            RaisedButton(
+            ElevatedButton(
               key: widget.transformButtonKey,
               onPressed: () {
                 setState(() {
@@ -5348,4 +5370,16 @@ class NoImplicitScrollPhysics extends AlwaysScrollableScrollPhysics {
   NoImplicitScrollPhysics applyTo(ScrollPhysics ancestor) {
     return NoImplicitScrollPhysics(parent: buildParent(ancestor));
   }
+}
+
+class SkipPainting extends SingleChildRenderObjectWidget {
+  const SkipPainting({ Key key, Widget child }): super(key: key, child: child);
+
+  @override
+  SkipPaintingRenderObject createRenderObject(BuildContext context) => SkipPaintingRenderObject();
+}
+
+class SkipPaintingRenderObject extends RenderProxyBox {
+  @override
+  void paint(PaintingContext context, Offset offset) { }
 }
