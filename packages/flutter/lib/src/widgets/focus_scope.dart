@@ -14,14 +14,14 @@ import 'inherited_notifier.dart';
 /// A widget that manages a [FocusNode] to allow keyboard focus to be given
 /// to this widget and its descendants.
 ///
-/// When the focus is gained or lost, [onFocusChanged] is called.
+/// When the focus is gained or lost, [onFocusChange] is called.
 ///
 /// For keyboard events, [onKey] is called if [FocusNode.hasFocus] is true for
 /// this widget's [focusNode], unless a focused descendant's [onKey] callback
 /// returns true when called.
 ///
 /// This widget does not provide any visual indication that the focus has
-/// changed. Any desired visual changes should be made when [onFocusChanged] is
+/// changed. Any desired visual changes should be made when [onFocusChange] is
 /// called.
 ///
 /// To access the [FocusNode] of the nearest ancestor [Focus] widget and
@@ -949,7 +949,7 @@ class _FocusMarker extends InheritedNotifier<FocusNode> {
 /// A widget that controls whether or not the descendants of this widget are
 /// focusable.
 ///
-/// Does not affect the value of [canRequestFocus] on the descendants.
+/// Does not affect the value of [Focus.canRequestFocus] on the descendants.
 ///
 /// See also:
 ///

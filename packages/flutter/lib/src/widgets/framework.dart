@@ -4506,7 +4506,7 @@ typedef TransitionBuilder = Widget Function(BuildContext context, Widget child);
 /// A builder that creates a widget given the two callbacks `onStepContinue` and
 /// `onStepCancel`.
 ///
-/// Used by [Stepper.builder].
+/// Used by [Stepper.controlsBuilder].
 ///
 /// See also:
 ///

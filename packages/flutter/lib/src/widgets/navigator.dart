@@ -239,8 +239,8 @@ abstract class Route<T> {
   /// Returns whether calling [Navigator.maybePop] when this [Route] is current
   /// ([isCurrent]) should do anything.
   ///
-  /// [Navigator.maybePop] is usually used instead of [pop] to handle the system
-  /// back button.
+  /// [Navigator.maybePop] is usually used instead of [Navigator.pop] to handle
+  /// the system back button.
   ///
   /// By default, if a [Route] is the first route in the history (i.e., if
   /// [isFirst]), it reports that pops should be bubbled
@@ -1255,7 +1255,7 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
 /// root [Navigator].
 ///
 /// In practice, the nested [Navigator]s for tabbed navigation sit in the
-/// [WidgetApp] and [CupertinoTabView] widgets and do not need to be explicitly
+/// [WidgetsApp] and [CupertinoTabView] widgets and do not need to be explicitly
 /// created or managed.
 ///
 /// {@tool sample --template=freeform}
@@ -1393,7 +1393,7 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
 ///
 /// [Navigator.of] operates on the nearest ancestor [Navigator] from the given
 /// [BuildContext]. Be sure to provide a [BuildContext] below the intended
-/// [Navigator], especially in large [build] methods where nested [Navigator]s
+/// [Navigator], especially in large `build` methods where nested [Navigator]s
 /// are created. The [Builder] widget can be used to access a [BuildContext] at
 /// a desired location in the widget subtree.
 class Navigator extends StatefulWidget {
