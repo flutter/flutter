@@ -31,7 +31,7 @@ class WebExperiments {
 
   static const bool _defaultUseCanvasText = const bool.fromEnvironment(
     'FLUTTER_WEB_USE_EXPERIMENTAL_CANVAS_TEXT',
-    defaultValue: false,
+    defaultValue: true,
   );
 
   bool _useCanvasText = _defaultUseCanvasText;
