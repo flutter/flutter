@@ -1445,10 +1445,9 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   /// interaction type.
   ///
   /// The initial value of [highlightMode] depends upon the value of
-  /// [defaultTargetPlatform] and
-  /// [RendererBinding.instance.mouseTracker.mouseIsConnected], making a guess
-  /// about which interaction is most appropriate for the initial interaction
-  /// mode.
+  /// [defaultTargetPlatform] and [BaseMouseTracker.mouseIsConnected] of
+  /// [RendererBinding.mouseTracker], making a guess about which interaction is
+  /// most appropriate for the initial interaction mode.
   ///
   /// Defaults to [FocusHighlightStrategy.automatic].
   FocusHighlightStrategy get highlightStrategy => _highlightStrategy;

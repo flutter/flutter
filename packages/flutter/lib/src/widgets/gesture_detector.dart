@@ -689,9 +689,9 @@ class GestureDetector extends StatelessWidget {
   ///
   /// By default, the drag start behavior is [DragStartBehavior.start].
   ///
-  /// Only the [onStart] callbacks for the [VerticalDragGestureRecognizer],
-  /// [HorizontalDragGestureRecognizer] and [PanGestureRecognizer] are affected
-  /// by this setting.
+  /// Only the [DragGestureRecognizer.onStart] callbacks for the
+  /// [VerticalDragGestureRecognizer], [HorizontalDragGestureRecognizer] and
+  /// [PanGestureRecognizer] are affected by this setting.
   ///
   /// See also:
   ///
@@ -1223,7 +1223,7 @@ abstract class SemanticsGestureDelegate {
   /// object of the gesture detector.
   ///
   /// This method is called when the widget is created, updated, or during
-  /// [RawGestureDetector.replaceGestureRecognizers].
+  /// [RawGestureDetectorState.replaceGestureRecognizers].
   void assignSemantics(RenderSemanticsGestureHandler renderObject);
 
   @override

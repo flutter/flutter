@@ -264,8 +264,8 @@ class Scrollable extends StatefulWidget {
   /// when it is called, and callers will not get updated if the value changes.
   ///
   /// The heuristic used is determined by the [physics] of this [Scrollable]
-  /// via [ScrollPhysics.recommendDeferredScrolling]. That method is called with
-  /// the current [activity]'s [ScrollActivity.velocity].
+  /// via [ScrollPhysics.recommendDeferredLoading]. That method is called with
+  /// the current [ScrollPosition.activity]'s [ScrollActivity.velocity].
   ///
   /// If there is no [Scrollable] in the widget tree above the [context], this
   /// method returns false.
@@ -884,9 +884,6 @@ class ScrollIncrementDetails {
 class ScrollIntent extends Intent {
   /// Creates a const [ScrollIntent] that requests scrolling in the given
   /// [direction], with the given [type].
-  ///
-  /// If [reversed] is specified, then the scroll will happen in the opposite
-  /// direction from the normal scroll direction.
   const ScrollIntent({
     @required this.direction,
     this.type = ScrollIncrementType.line,

@@ -3290,8 +3290,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// the "active" lifecycle state.
   ///
   /// Subclasses that override this method are likely to want to also override
-  /// [update], [visitChildren], [insertChildRenderObject], [moveChildRenderObject],
-  /// and [removeChildRenderObject].
+  /// [update], [visitChildren], [RenderObjectElement.insertChildRenderObject],
+  /// [RenderObjectElement.moveChildRenderObject], and
+  /// [RenderObjectElement.removeChildRenderObject].
   @mustCallSuper
   void mount(Element parent, dynamic newSlot) {
     assert(_debugLifecycleState == _ElementLifecycle.initial);

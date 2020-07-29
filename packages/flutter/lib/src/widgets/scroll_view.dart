@@ -208,10 +208,11 @@ abstract class ScrollView extends StatelessWidget {
 
   /// The first child in the [GrowthDirection.forward] growth direction.
   ///
-  /// Children after [center] will be placed in the [axisDirection] relative to
-  /// the [center]. Children before [center] will be placed in the opposite of
-  /// the [axisDirection] relative to the [center]. This makes the [center] the
-  /// inflection point of the growth direction.
+  /// Children after [center] will be placed in the [AxisDirection] determined
+  /// by [scrollDirection] and [reverse] relative to the [center]. Children
+  /// before [center] will be placed in the opposite of the axis direction
+  /// relative to the [center]. This makes the [center] the inflection point of
+  /// the growth direction.
   ///
   /// The [center] must be the key of one of the slivers built by [buildSlivers].
   ///
@@ -226,11 +227,12 @@ abstract class ScrollView extends StatelessWidget {
 
   /// The relative position of the zero scroll offset.
   ///
-  /// For example, if [anchor] is 0.5 and the [axisDirection] is
-  /// [AxisDirection.down] or [AxisDirection.up], then the zero scroll offset is
-  /// vertically centered within the viewport. If the [anchor] is 1.0, and the
-  /// [axisDirection] is [AxisDirection.right], then the zero scroll offset is
-  /// on the left edge of the viewport.
+  /// For example, if [anchor] is 0.5 and the [AxisDirection] determined by
+  /// [scrollDirection] and [reverse] is [AxisDirection.down] or
+  /// [AxisDirection.up], then the zero scroll offset is vertically centered
+  /// within the viewport. If the [anchor] is 1.0, and the axis direction is
+  /// [AxisDirection.right], then the zero scroll offset is on the left edge of
+  /// the viewport.
   final double anchor;
 
   /// {@macro flutter.rendering.viewport.cacheExtent}
@@ -856,7 +858,8 @@ abstract class BoxScrollView extends ScrollView {
 ///
 ///    [AutomaticKeepAlive] descendants typically signal it to be kept alive
 ///    by using the [AutomaticKeepAliveClientMixin], then implementing the
-///    [wantKeepAlive] getter and calling [updateKeepAlive].
+///    [AutomaticKeepAliveClientMixin.wantKeepAlive] getter and calling
+///    [AutomaticKeepAliveClientMixin.updateKeepAlive].
 ///
 /// ## Transitioning to [CustomScrollView]
 ///

@@ -398,7 +398,7 @@ class Focus extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [DefaultFocusTraversal], a widget that sets the traversal policy for
+  ///  * [FocusTraversalGroup], a widget that sets the traversal policy for
   ///    its descendants.
   ///  * [FocusTraversalPolicy], a class that can be extended to describe a
   ///    traversal policy.
