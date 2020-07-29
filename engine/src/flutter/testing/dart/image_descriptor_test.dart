@@ -13,7 +13,7 @@ import 'package:test/test.dart';
 
 void main() {
   test('basic image descriptor - encoded - greyscale', () async {
-    final Uint8List bytes = await readFile('4x4.png');
+    final Uint8List bytes = await readFile('2x2.png');
     final ImmutableBuffer buffer = await ImmutableBuffer.fromUint8List(bytes);
     final ImageDescriptor descriptor = await ImageDescriptor.encoded(buffer);
 
