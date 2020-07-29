@@ -138,7 +138,7 @@ class GenerateLocalizationsTarget extends Target {
 
         final YamlMap flutterMap = value as YamlMap;
         print('flutterMap: $flutterMap');
-        final String shouldGenerateCode = _tryReadString(flutterMap, 'generate', globals.logger);
+        final bool shouldGenerateCode = _tryReadBool(flutterMap, 'generate', globals.logger);
         print('shouldGenCode: $shouldGenerateCode');
         if (shouldGenerateCode == null) {
           print('should generate code returns null');
