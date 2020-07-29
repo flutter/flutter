@@ -154,7 +154,7 @@ class BottomNavigationBar extends StatefulWidget {
   /// are non-null, they will be used instead of [selectedItemColor] and
   /// [unselectedItemColor].
   ///
-  /// If custom [IconThemData]s are used, you must provide both
+  /// If custom [IconThemeData]s are used, you must provide both
   /// [selectedIconTheme] and [unselectedIconTheme], and both
   /// [IconThemeData.color] and [IconThemeData.size] must be set.
   ///
@@ -246,7 +246,7 @@ class BottomNavigationBar extends StatefulWidget {
   /// The color of the [BottomNavigationBar] itself.
   ///
   /// If [type] is [BottomNavigationBarType.shifting] and the
-  /// [items]s, have [BottomNavigationBarItem.backgroundColor] set, the [item]'s
+  /// [items] have [BottomNavigationBarItem.backgroundColor] set, the [items]'
   /// backgroundColor will splash and overwrite this color.
   final Color backgroundColor;
 
@@ -256,13 +256,13 @@ class BottomNavigationBar extends StatefulWidget {
   final double iconSize;
 
   /// The color of the selected [BottomNavigationBarItem.icon] and
-  /// [BottomNavigationBarItem.label].
+  /// [BottomNavigationBarItem.title].
   ///
   /// If null then the [ThemeData.primaryColor] is used.
   final Color selectedItemColor;
 
   /// The color of the unselected [BottomNavigationBarItem.icon] and
-  /// [BottomNavigationBarItem.label]s.
+  /// [BottomNavigationBarItem.title]s.
   ///
   /// If null then the [TextTheme.caption]'s color is used.
   final Color unselectedItemColor;
@@ -299,7 +299,8 @@ class BottomNavigationBar extends StatefulWidget {
 
   /// The font size of the [BottomNavigationBarItem] labels when they are selected.
   ///
-  /// If [selectedLabelStyle.fontSize] is non-null, it will be used instead of this.
+  /// If [TextStyle.fontSize] of [selectedLabelStyle] is non-null, it will be
+  /// used instead of this.
   ///
   /// Defaults to `14.0`.
   final double selectedFontSize;
@@ -307,7 +308,8 @@ class BottomNavigationBar extends StatefulWidget {
   /// The font size of the [BottomNavigationBarItem] labels when they are not
   /// selected.
   ///
-  /// If [unselectedLabelStyle.fontSize] is non-null, it will be used instead of this.
+  /// If [TextStyle.fontSize] of [unselectedLabelStyle] is non-null, it will be
+  /// used instead of this.
   ///
   /// Defaults to `12.0`.
   final double unselectedFontSize;

@@ -77,7 +77,6 @@ const Color _kDarkThemeSplashColor = Color(0x40CCCCCC);
 ///   * [OutlineButton]
 ///   * [FlatButton]
 ///   * [RaisedButton]
-///   * [TimePicker]
 ///   * [SnackBar]
 ///   * [Chip]
 ///   * [RawChip]

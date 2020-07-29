@@ -3227,7 +3227,7 @@ class _PaddleSliderValueIndicatorPathPainter {
   }
 }
 
-/// A callback that formats a numeric value from a [Slider] or [RangerSlider] widget.
+/// A callback that formats a numeric value from a [Slider] or [RangeSlider] widget.
 ///
 /// See also:
 ///
@@ -3241,7 +3241,7 @@ typedef SemanticFormatterCallback = String Function(double value);
 /// other, it waits for movement defined by [dx] to determine the selected
 /// thumb.
 ///
-/// Override [RangeSlider.thumbSelector] for custom thumb selection.
+/// Override [SliderThemeData.thumbSelector] for custom thumb selection.
 typedef RangeThumbSelector = Thumb Function(
   TextDirection textDirection,
   RangeValues values,
