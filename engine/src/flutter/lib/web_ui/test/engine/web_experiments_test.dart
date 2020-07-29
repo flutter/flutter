@@ -9,6 +9,8 @@ import 'dart:js_util' as js_util;
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 
+const bool _defaultUseCanvasText = true;
+
 void main() {
   setUp(() {
     WebExperiments.ensureInitialized();
@@ -19,7 +21,7 @@ void main() {
   });
 
   test('default web experiment values', () {
-    expect(WebExperiments.instance.useCanvasText, false);
+    expect(WebExperiments.instance.useCanvasText, _defaultUseCanvasText);
   });
 
   test('can turn on/off web experiments', () {
@@ -31,36 +33,36 @@ void main() {
 
     WebExperiments.instance.updateExperiment('useCanvasText', null);
     // Goes back to default value.
-    expect(WebExperiments.instance.useCanvasText, false);
+    expect(WebExperiments.instance.useCanvasText, _defaultUseCanvasText);
   });
 
   test('ignores unknown experiments', () {
-    expect(WebExperiments.instance.useCanvasText, false);
+    expect(WebExperiments.instance.useCanvasText, _defaultUseCanvasText);
     WebExperiments.instance.updateExperiment('foobarbazqux', true);
-    expect(WebExperiments.instance.useCanvasText, false);
+    expect(WebExperiments.instance.useCanvasText, _defaultUseCanvasText);
     WebExperiments.instance.updateExperiment('foobarbazqux', false);
-    expect(WebExperiments.instance.useCanvasText, false);
+    expect(WebExperiments.instance.useCanvasText, _defaultUseCanvasText);
   });
 
   test('can reset web experiments', () {
-    WebExperiments.instance.updateExperiment('useCanvasText', true);
+    WebExperiments.instance.updateExperiment('useCanvasText', false);
     WebExperiments.instance.reset();
-    expect(WebExperiments.instance.useCanvasText, false);
+    expect(WebExperiments.instance.useCanvasText, _defaultUseCanvasText);
 
-    WebExperiments.instance.updateExperiment('useCanvasText', true);
+    WebExperiments.instance.updateExperiment('useCanvasText', false);
     WebExperiments.instance.updateExperiment('foobarbazqux', true);
     WebExperiments.instance.reset();
-    expect(WebExperiments.instance.useCanvasText, false);
+    expect(WebExperiments.instance.useCanvasText, _defaultUseCanvasText);
   });
 
   test('js interop also works', () {
-    expect(WebExperiments.instance.useCanvasText, false);
+    expect(WebExperiments.instance.useCanvasText, _defaultUseCanvasText);
 
     expect(() => jsUpdateExperiment('useCanvasText', true), returnsNormally);
     expect(WebExperiments.instance.useCanvasText, true);
 
     expect(() => jsUpdateExperiment('useCanvasText', null), returnsNormally);
-    expect(WebExperiments.instance.useCanvasText, false);
+    expect(WebExperiments.instance.useCanvasText, _defaultUseCanvasText);
   });
 
   test('js interop throws on wrong type', () {
