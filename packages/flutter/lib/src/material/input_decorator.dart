@@ -2682,9 +2682,9 @@ class InputDecoration {
   /// Text that suggests what sort of input the field accepts.
   ///
   /// Displayed on top of the [InputDecorator.child] (i.e., at the same location
-  /// on the screen where text may be entered in the input [child]) when the
-  /// input [isEmpty] and either (a) [labelText] is null or (b) the input has
-  /// the focus.
+  /// on the screen where text may be entered in the [InputDecorator.child])
+  /// when the input [isEmpty] and either (a) [labelText] is null or (b) the
+  /// input has the focus.
   final String hintText;
 
   /// The style to use for the [hintText].

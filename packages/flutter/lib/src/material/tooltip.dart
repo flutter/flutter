@@ -134,8 +134,8 @@ class Tooltip extends StatefulWidget {
   /// [ThemeData]. If [ThemeData.brightness] is set to [Brightness.dark],
   /// [TextTheme.bodyText2] of [ThemeData.textTheme] will be used with
   /// [Colors.white]. Otherwise, if [ThemeData.brightness] is set to
-  /// [Brightness.light], [ThemeData.textTheme.bodyText2] will be used with
-  /// [Colors.black].
+  /// [Brightness.light], [TextTheme.bodyText2] of [ThemeData.textTheme] will be
+  /// used with [Colors.black].
   final TextStyle textStyle;
 
   /// The length of time that a pointer must hover over a tooltip's widget
