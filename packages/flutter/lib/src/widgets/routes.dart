@@ -380,12 +380,12 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// need to coordinate transitions with.
   ///
   /// If true, and `nextRoute.canTransitionFrom()` is true, then the
-  /// [buildTransitions] `secondaryAnimation` will run from 0.0 - 1.0
+  /// [ModalRoute.buildTransitions] `secondaryAnimation` will run from 0.0 - 1.0
   /// when [nextRoute] is pushed on top of this one.  Similarly, if
   /// the [nextRoute] is popped off of this route, the
   /// `secondaryAnimation` will run from 1.0 - 0.0.
   ///
-  /// If false, this route's [buildTransitions] `secondaryAnimation` parameter
+  /// If false, this route's [ModalRoute.buildTransitions] `secondaryAnimation` parameter
   /// value will be [kAlwaysDismissedAnimation]. In other words, this route
   /// will not animate when when [nextRoute] is pushed on top of it or when
   /// [nextRoute] is popped off of it.
@@ -395,7 +395,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// See also:
   ///
   ///  * [canTransitionFrom], which must be true for [nextRoute] for the
-  ///    [buildTransitions] `secondaryAnimation` to run.
+  ///    [ModalRoute.buildTransitions] `secondaryAnimation` to run.
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) => true;
 
   /// Returns true if [previousRoute] should animate when this route
@@ -1114,7 +1114,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// If [barrierDismissible] is false, then tapping the barrier has no effect.
   ///
   /// If this getter would ever start returning a different value, the
-  /// [changedInternalState] should be invoked so that the change can take
+  /// [Route.changedInternalState] should be invoked so that the change can take
   /// effect.
   ///
   /// See also:
@@ -1182,7 +1182,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// usually darkened by the modal barrier.
   ///
   /// If this getter would ever start returning a different label, the
-  /// [changedInternalState] should be invoked so that the change can take
+  /// [Route.changedInternalState] should be invoked so that the change can take
   /// effect.
   ///
   /// See also:

@@ -300,7 +300,7 @@ abstract class ContextAction<T extends Intent> extends Action<T> {
   /// [ActionDispatcher.invokeAction] directly.
   ///
   /// This method is only meant to be invoked by an [ActionDispatcher], or by
-  /// its subclasses, and only when [enabled] is true.
+  /// its subclasses, and only when [isEnabled] is true.
   ///
   /// The optional `context` parameter is the context of the invocation of the
   /// action, and in the case of an action invoked by a [ShortcutManager], via
