@@ -1136,7 +1136,7 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
 ///  * [FocusTraversalGroup], a widget that groups together and imposes a
 ///    traversal policy on the [Focus] nodes below it in the widget hierarchy.
 ///  * [FocusTraversalOrder], a widget that assigns an order to a widget subtree
-///    for the [OrderedFocusTraversalPolicy] to use.
+///    for the [OrderedTraversalPolicy] to use.
 ///  * [NumericFocusOrder], for a focus order that describes its order with a
 ///    `double`.
 ///  * [LexicalFocusOrder], a focus order that assigns a string-based lexical
@@ -1190,7 +1190,7 @@ abstract class FocusOrder with Diagnosticable implements Comparable<FocusOrder> 
 /// See also:
 ///
 ///  * [FocusTraversalOrder], a widget that assigns an order to a widget subtree
-///    for the [OrderedFocusTraversalPolicy] to use.
+///    for the [OrderedTraversalPolicy] to use.
 class NumericFocusOrder extends FocusOrder {
   /// Const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -1228,7 +1228,7 @@ class NumericFocusOrder extends FocusOrder {
 /// See also:
 ///
 ///  * [FocusTraversalOrder], a widget that assigns an order to a widget subtree
-///    for the [OrderedFocusTraversalPolicy] to use.
+///    for the [OrderedTraversalPolicy] to use.
 class LexicalFocusOrder extends FocusOrder {
   /// Const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.

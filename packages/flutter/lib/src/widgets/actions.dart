@@ -32,7 +32,7 @@ BuildContext _getParent(BuildContext context) {
 
 /// A class representing a particular configuration of an [Action].
 ///
-/// This class is what a key map in a [ShortcutMap] has as values, and is used
+/// This class is what the [Shortcuts.shortcuts] map has as values, and is used
 /// by an [ActionDispatcher] to look up an action and invoke it, giving it this
 /// object to extract configuration information from.
 ///

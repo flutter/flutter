@@ -838,12 +838,12 @@ abstract class BoxScrollView extends ScrollView {
 ///    list instead of destroying them. When scrolled back into view, the render
 ///    object is repainted as-is (if it wasn't marked dirty in the interim).
 ///
-///    This only works if [addAutomaticKeepAlives] and [addRepaintBoundaries]
+///    This only works if `addAutomaticKeepAlives` and `addRepaintBoundaries`
 ///    are false since those parameters cause the [ListView] to wrap each child
 ///    widget subtree with other widgets.
 ///
 ///  * Using [AutomaticKeepAlive] widgets (inserted by default when
-///    [addAutomaticKeepAlives] is true). [AutomaticKeepAlive] allows descendant
+///    `addAutomaticKeepAlives` is true). [AutomaticKeepAlive] allows descendant
 ///    widgets to control whether the subtree is actually kept alive or not.
 ///    This behavior is in contrast with [KeepAlive], which will unconditionally keep
 ///    the subtree alive.
@@ -1470,7 +1470,7 @@ class ListView extends BoxScrollView {
 ///
 /// {@tool snippet}
 /// This example demonstrates how to create a [GridView] with two columns. The
-/// children are spaced apart using the [crossAxisSpacing] and [mainAxisSpacing]
+/// children are spaced apart using the `crossAxisSpacing` and `mainAxisSpacing`
 /// properties.
 ///
 /// ![The GridView displays six children with different background colors arranged in two columns](https://flutter.github.io/assets-for-api-docs/assets/widgets/grid_view.png)

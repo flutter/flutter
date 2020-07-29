@@ -120,7 +120,7 @@ const int _kObscureShowLatestCharCursorTicks = 3;
 ///    with a [TextEditingController].
 ///  * [EditableText], which is a raw region of editable text that can be
 ///    controlled with a [TextEditingController].
-///  * Learn how to use a [TextEditingController] in one of our [cookbook recipe]s.(https://flutter.dev/docs/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller)
+///  * Learn how to use a [TextEditingController] in one of our [cookbook recipes](https://flutter.dev/docs/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller).
 class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// Creates a controller for an editable text field.
   ///
@@ -320,7 +320,7 @@ class ToolbarOptions {
 /// action when running on an Android device will result in an error when in
 /// debug mode. In release mode, incompatible [TextInputAction]s are replaced
 /// either with "unspecified" on Android, or "default" on iOS. Appropriate
-/// [inputAction]s can be chosen by checking the current platform and then
+/// [textInputAction]s can be chosen by checking the current platform and then
 /// selecting the appropriate action.
 ///
 /// ## Lifecycle

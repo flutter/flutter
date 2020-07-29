@@ -582,7 +582,7 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 /// {@tool dartpad --template=stateful_widget_scaffold}
 ///
 /// The following example (depicted above) transitions an AnimatedContainer
-/// between two states. It adjusts the [height], [width], [color], and
+/// between two states. It adjusts the `height`, `width`, `color`, and
 /// [alignment] properties when tapped.
 ///
 /// ```dart
@@ -790,7 +790,8 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
 ///
 ///  * [AnimatedContainer], which can transition more values at once.
 ///  * [AnimatedAlign], which automatically transitions its child's
-///    position over a given duration whenever the given [alignment] changes.
+///    position over a given duration whenever the given
+///    [AnimatedAlign.alignment] changes.
 class AnimatedPadding extends ImplicitlyAnimatedWidget {
   /// Creates a widget that insets its child by a value that animates
   /// implicitly.
@@ -1535,7 +1536,7 @@ class _SliverAnimatedOpacityState extends ImplicitlyAnimatedWidgetState<SliverAn
 /// without explicit style) over a given duration whenever the given style
 /// changes.
 ///
-/// The [textAlign], [softWrap], [textOverflow], [maxLines], [textWidthBasis]
+/// The [textAlign], [softWrap], [overflow], [maxLines], [textWidthBasis]
 /// and [textHeightBehavior] properties are not animated and take effect
 /// immediately when changed.
 ///
