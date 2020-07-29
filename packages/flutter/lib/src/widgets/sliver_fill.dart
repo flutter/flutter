@@ -286,7 +286,7 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 /// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// In this sample the [SliverFillRemaining] defers to the size of its [child]
-/// because the [precedingScrollExtent] of the [SliverConstraints] has gone
+/// because the [SliverConstraints.precedingScrollExtent] has gone
 /// beyond that of the viewport's main axis.
 ///
 /// ```dart

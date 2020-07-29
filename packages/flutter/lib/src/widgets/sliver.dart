@@ -106,7 +106,8 @@ int _kDefaultSemanticIndexCallback(Widget _, int localIndex) => localIndex;
 ///
 ///    [AutomaticKeepAlive] descendants typically signal it to be kept alive by
 ///    using the [AutomaticKeepAliveClientMixin], then implementing the
-///    [wantKeepAlive] getter and calling [updateKeepAlive].
+///    [AutomaticKeepAliveClientMixin.wantKeepAlive] getter and calling
+///    [AutomaticKeepAliveClientMixin.updateKeepAlive].
 /// {@endtemplate}
 ///
 /// See also:
@@ -327,9 +328,9 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   /// null.
   ///
   /// If the order in which [builder] returns children ever changes, consider
-  /// providing a [findChildIndex]. This allows the delegate to find the new index
-  /// for a child that was previously located at a different index to attach the
-  /// existing state to the [Widget] at its new location.
+  /// providing a [findChildIndexCallback]. This allows the delegate to find the
+  /// new index for a child that was previously located at a different index to
+  /// attach the existing state to the [Widget] at its new location.
   const SliverChildBuilderDelegate(
     this.builder, {
     this.findChildIndexCallback,
@@ -393,13 +394,13 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   /// Typically, children in a scrolling container must be annotated with a
   /// semantic index in order to generate the correct accessibility
   /// announcements. This should only be set to false if the indexes have
-  /// already been provided by an [IndexedChildSemantics] widget.
+  /// already been provided by an [IndexedSemantics] widget.
   ///
   /// Defaults to true.
   ///
   /// See also:
   ///
-  ///  * [IndexedChildSemantics], for an explanation of how to manually
+  ///  * [IndexedSemantics], for an explanation of how to manually
   ///    provide semantic indexes.
   final bool addSemanticIndexes;
 
@@ -599,7 +600,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
   /// Typically, children in a scrolling container must be annotated with a
   /// semantic index in order to generate the correct accessibility
   /// announcements. This should only be set to false if the indexes have
-  /// already been provided by an [IndexedChildSemantics] widget.
+  /// already been provided by an [IndexedSemantics] widget.
   ///
   /// Defaults to true.
   ///
@@ -717,8 +718,8 @@ abstract class SliverWithKeepAliveWidget extends RenderObjectWidget {
 /// Helps subclasses build their children lazily using a [SliverChildDelegate].
 ///
 /// The widgets returned by the [delegate] are cached and the delegate is only
-/// consulted again if it changes and the new delegate's [shouldRebuild] method
-/// returns true.
+/// consulted again if it changes and the new delegate's
+/// [SliverChildDelegate.shouldRebuild] method returns true.
 abstract class SliverMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
   /// Initializes fields for subclasses.
   const SliverMultiBoxAdaptorWidget({

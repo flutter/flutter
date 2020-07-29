@@ -405,12 +405,12 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// need to coordinate transitions with.
   ///
   /// If true, and `previousRoute.canTransitionTo()` is true, then the
-  /// previous route's [buildTransitions] `secondaryAnimation` will
+  /// previous route's [ModalRoute.buildTransitions] `secondaryAnimation` will
   /// run from 0.0 - 1.0 when this route is pushed on top of
   /// it. Similarly, if this route is popped off of [previousRoute]
   /// the previous route's `secondaryAnimation` will run from 1.0 - 0.0.
   ///
-  /// If false, then the previous route's [buildTransitions]
+  /// If false, then the previous route's [ModalRoute.buildTransitions]
   /// `secondaryAnimation` value will be kAlwaysDismissedAnimation. In
   /// other words [previousRoute] will not animate when this route is
   /// pushed on top of it or when then this route is popped off of it.
@@ -420,7 +420,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// See also:
   ///
   ///  * [canTransitionTo], which must be true for [previousRoute] for its
-  ///    [buildTransitions] `secondaryAnimation` to run.
+  ///    [ModalRoute.buildTransitions] `secondaryAnimation` to run.
   bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) => true;
 
   @override
@@ -1150,14 +1150,14 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// For example, when a dialog is on the screen, the page below the dialog is
   /// usually darkened by the modal barrier.
   ///
-  /// The color is ignored, and the barrier made invisible, when [offstage] is
-  /// true.
+  /// The color is ignored, and the barrier made invisible, when
+  /// [ModalRoute.offstage] is true.
   ///
   /// While the route is animating into position, the color is animated from
   /// transparent to the specified color.
   ///
   /// If this getter would ever start returning a different color, the
-  /// [changedInternalState] should be invoked so that the change can take
+  /// [Route.changedInternalState] should be invoked so that the change can take
   /// effect.
   ///
   /// See also:
