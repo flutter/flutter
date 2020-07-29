@@ -1,4 +1,4 @@
-Signature: 3cce4ee3e396aba2880dabfd7cd8cbc5
+Signature: db42b926bc8c1faa020767c8f755b69e
 
 UNUSED LICENSES:
 
@@ -1061,7 +1061,6 @@ FILE: ../../../third_party/skia/infra/bots/assets/valgrind/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/win_ninja/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/win_toolchain/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/xcode-11.4.1/VERSION
-FILE: ../../../third_party/skia/infra/bots/canary.isolate
 FILE: ../../../third_party/skia/infra/bots/canvaskit.isolate
 FILE: ../../../third_party/skia/infra/bots/cfg.json
 FILE: ../../../third_party/skia/infra/bots/compile.isolate
@@ -1205,9 +1204,6 @@ FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Win-Cl
 FILE: ../../../third_party/skia/infra/bots/recipes/compute_buildstats.expected/normal_bot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/compute_buildstats.expected/trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/compute_test.expected/Test-Debian10-Clang-NUC7i5BNK-GPU-IntelIris640-x86_64-Debug-All-OpenCL.json
-FILE: ../../../third_party/skia/infra/bots/recipes/g3_canary.expected/g3_canary_nontrybot.json
-FILE: ../../../third_party/skia/infra/bots/recipes/g3_canary.expected/g3_canary_trybot.json
-FILE: ../../../third_party/skia/infra/bots/recipes/g3_canary.expected/g3_canary_trybot_failure.json
 FILE: ../../../third_party/skia/infra/bots/recipes/housekeeper.expected/Housekeeper-PerCommit-Trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/housekeeper.expected/Housekeeper-PerCommit.json
 FILE: ../../../third_party/skia/infra/bots/recipes/infra.expected/infra_tests.json
@@ -1525,8 +1521,6 @@ FILE: ../../../third_party/skia/bench/RegionBench.cpp
 FILE: ../../../third_party/skia/bench/RepeatTileBench.cpp
 FILE: ../../../third_party/skia/bench/ScalarBench.cpp
 FILE: ../../../third_party/skia/bench/VertBench.cpp
-FILE: ../../../third_party/skia/experimental/Networking/SkSockets.cpp
-FILE: ../../../third_party/skia/experimental/Networking/SkSockets.h
 FILE: ../../../third_party/skia/gm/aaclip.cpp
 FILE: ../../../third_party/skia/gm/aarectmodes.cpp
 FILE: ../../../third_party/skia/gm/arithmode.cpp
@@ -1932,7 +1926,6 @@ FILE: ../../../third_party/skia/src/gpu/GrRectanizerPow2.h
 FILE: ../../../third_party/skia/src/gpu/GrRectanizerSkyline.h
 FILE: ../../../third_party/skia/src/gpu/GrResourceCache.cpp
 FILE: ../../../third_party/skia/src/gpu/GrResourceCache.h
-FILE: ../../../third_party/skia/src/gpu/GrSurfacePriv.h
 FILE: ../../../third_party/skia/src/gpu/GrTracing.h
 FILE: ../../../third_party/skia/src/gpu/GrXferProcessor.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrBicubicEffect.cpp
@@ -2480,7 +2473,6 @@ FILE: ../../../third_party/skia/src/gpu/GrPipeline.h
 FILE: ../../../third_party/skia/src/gpu/GrProcessorUnitTest.cpp
 FILE: ../../../third_party/skia/src/gpu/GrRenderTargetContext.cpp
 FILE: ../../../third_party/skia/src/gpu/GrRenderTargetContext.h
-FILE: ../../../third_party/skia/src/gpu/GrRenderTargetPriv.h
 FILE: ../../../third_party/skia/src/gpu/GrResourceProvider.cpp
 FILE: ../../../third_party/skia/src/gpu/GrResourceProvider.h
 FILE: ../../../third_party/skia/src/gpu/GrSamplerState.h
@@ -6433,6 +6425,7 @@ FILE: ../../../third_party/skia/infra/bots/gen_tasks_logic/schema.go
 FILE: ../../../third_party/skia/infra/bots/gen_tasks_logic/task_builder.go
 FILE: ../../../third_party/skia/infra/bots/task_drivers/canary/canary.go
 FILE: ../../../third_party/skia/infra/bots/task_drivers/fm_driver/fm_driver.go
+FILE: ../../../third_party/skia/infra/bots/task_drivers/g3_canary/g3_canary.go
 FILE: ../../../third_party/skia/infra/bots/task_drivers/perf_puppeteer_render_skps/perf_puppeteer_render_skps.go
 FILE: ../../../third_party/skia/infra/bots/task_drivers/perf_puppeteer_render_skps/perf_puppeteer_render_skps_test.go
 FILE: ../../../third_party/skia/infra/bots/task_drivers/perf_puppeteer_skottie_frames/perf_puppeteer_skottie_frames.go
