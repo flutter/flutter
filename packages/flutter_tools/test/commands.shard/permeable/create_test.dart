@@ -1037,7 +1037,7 @@ void main() {
     Platform: _kNoColorTerminalPlatform,
   });
 
-  testUsingContext('has correct application id for android and bundle id for ios', () async {
+  testUsingContext('has correct application id for android, bundle id for ios and application id for Linux', () async {
     Cache.flutterRoot = '../..';
     when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
     when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
@@ -1068,6 +1068,10 @@ void main() {
         project.android.applicationId,
         'com.example.hello_flutter',
     );
+    expect(
+        project.linux.applicationId,
+        'com.example.hello_flutter',
+    );
 
     tmpProjectDir = globals.fs.path.join(tempDir.path, 'test_abc');
     await runner.run(<String>['create', '--template=app', '--no-pub', '--org', 'abc^*.1#@', tmpProjectDir]);
@@ -1092,9 +1096,14 @@ void main() {
         project.android.applicationId,
         'flutter_project.untitled',
     );
+    expect(
+        project.linux.applicationId,
+        'flutter_project.untitled',
+    );
   }, overrides: <Type, Generator>{
     FlutterVersion: () => mockFlutterVersion,
     Platform: _kNoColorTerminalPlatform,
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
   });
 
   testUsingContext('can re-gen default template over existing project', () async {
