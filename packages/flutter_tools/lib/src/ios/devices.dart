@@ -383,6 +383,7 @@ class IOSDevice extends Device {
       if (debuggingOptions.dumpSkpOnShaderCompilation) '--dump-skp-on-shader-compilation',
       if (debuggingOptions.verboseSystemLogs) '--verbose-logging',
       if (debuggingOptions.cacheSkSL) '--cache-sksl',
+      if (debuggingOptions.purgePersistentCache) '--purge-persistent-cache',
       if (platformArgs['trace-startup'] as bool ?? false) '--trace-startup',
     ];
 
