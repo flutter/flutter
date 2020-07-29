@@ -71,6 +71,7 @@ export 'src/widgets/navigator.dart';
 export 'src/widgets/nested_scroll_view.dart';
 export 'src/widgets/notification_listener.dart';
 export 'src/widgets/orientation_builder.dart';
+export 'src/widgets/overflow_bar.dart';
 export 'src/widgets/overlay.dart';
 export 'src/widgets/overscroll_indicator.dart';
 export 'src/widgets/page_storage.dart';
