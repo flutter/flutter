@@ -19,7 +19,7 @@ void main() {
   }());
 
   test('no resize by default', () async {
-    final Uint8List bytes = await readFile('4x4.png');
+    final Uint8List bytes = await readFile('2x2.png');
     final Codec codec = await instantiateImageCodec(bytes);
     final FrameInfo frame = await codec.getNextFrame();
     final int codecHeight = frame.image.height;
@@ -29,7 +29,7 @@ void main() {
   });
 
   test('resize width with constrained height', () async {
-    final Uint8List bytes = await readFile('4x4.png');
+    final Uint8List bytes = await readFile('2x2.png');
     final Codec codec = await instantiateImageCodec(bytes, targetHeight: 1);
     final FrameInfo frame = await codec.getNextFrame();
     final int codecHeight = frame.image.height;
@@ -39,7 +39,7 @@ void main() {
   });
 
   test('resize height with constrained width', () async {
-    final Uint8List bytes = await readFile('4x4.png');
+    final Uint8List bytes = await readFile('2x2.png');
     final Codec codec = await instantiateImageCodec(bytes, targetWidth: 1);
     final FrameInfo frame = await codec.getNextFrame();
     final int codecHeight = frame.image.height;
@@ -49,7 +49,7 @@ void main() {
   });
 
   test('upscale image by 5x', () async {
-    final Uint8List bytes = await readFile('4x4.png');
+    final Uint8List bytes = await readFile('2x2.png');
     final Codec codec = await instantiateImageCodec(bytes, targetWidth: 10, allowUpscaling: true);
     final FrameInfo frame = await codec.getNextFrame();
     final int codecHeight = frame.image.height;
@@ -59,7 +59,7 @@ void main() {
   });
 
   test('upscale image by 5x - no upscaling', () async {
-    final Uint8List bytes = await readFile('4x4.png');
+    final Uint8List bytes = await readFile('2x2.png');
     final Codec codec = await instantiateImageCodec(bytes, targetWidth: 10, allowUpscaling: false);
     final FrameInfo frame = await codec.getNextFrame();
     final int codecHeight = frame.image.height;
@@ -69,7 +69,7 @@ void main() {
   });
 
   test('upscale image varying width and height', () async {
-    final Uint8List bytes = await readFile('4x4.png');
+    final Uint8List bytes = await readFile('2x2.png');
     final Codec codec =
         await instantiateImageCodec(bytes, targetWidth: 10, targetHeight: 1, allowUpscaling: true);
     final FrameInfo frame = await codec.getNextFrame();
@@ -80,7 +80,7 @@ void main() {
   });
 
   test('upscale image varying width and height - no upscaling', () async {
-    final Uint8List bytes = await readFile('4x4.png');
+    final Uint8List bytes = await readFile('2x2.png');
     final Codec codec =
         await instantiateImageCodec(bytes, targetWidth: 10, targetHeight: 1, allowUpscaling: false);
     final FrameInfo frame = await codec.getNextFrame();
