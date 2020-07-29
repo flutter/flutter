@@ -84,11 +84,10 @@ class ParagraphGeometricStyle {
 
     if (fontSize != null) {
       result.write(fontSize!.floor());
-      result.write('px');
     } else {
       result.write(DomRenderer.defaultFontSize);
     }
-    result.write(' ');
+    result.write('px ');
     result.write(canonicalizeFontFamily(effectiveFontFamily));
 
     return result.toString();
