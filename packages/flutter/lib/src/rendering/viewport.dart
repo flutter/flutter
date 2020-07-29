@@ -707,14 +707,17 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       assert(pivot.parent != this);
       assert(pivot != this);
       assert(pivot.parent is RenderSliver);  // TODO(abarth): Support other kinds of render objects besides slivers.
+      final RenderSliver pivotParent = pivot.parent as RenderSliver;
 
-      final RenderSliver parent = pivot.parent as RenderSliver;
       final Matrix4 transform = target.getTransformTo(pivot);
       final Rect bounds = MatrixUtils.transformRect(transform, rect);
 
       // Convert `rect`'s leading edge from `pivot`'s RenderBox coordinate
-      // system to the scrollOffset within `child`.
-      switch (applyGrowthDirectionToAxisDirection(axisDirection, parent.constraints.growthDirection)) {
+      // system to the scrollOffset within `pivot.parent`. For `up` and `left`
+      // AxisDirections here, the leading edge of the render box is the
+      // bottom/right edge.
+      final GrowthDirection growthDirection = pivotParent.constraints.growthDirection;
+      switch (applyGrowthDirectionToAxisDirection(axisDirection, growthDirection)) {
         case AxisDirection.up:
           leadingScrollOffset += pivot.size.height - bounds.bottom;
           targetMainAxisExtent = bounds.height;
@@ -750,7 +753,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     Rect targetRect = MatrixUtils.transformRect(transform, rect);
 
     // So far leadingScrollOffset is the scroll offset of `rect` in the `child`
-    // sliver's "scroll" coordinate system. The sign of this value indicates
+    // sliver's sliver coordinate system. The sign of this value indicates
     // whether the `rect` protrudes the leading edge of the `child` sliver. When
     // this value is non-negative and `child`'s `maxScrollObstructionExtent` is
     // greater than 0, we assume `rect` can't be obstructed by the leading edge
@@ -765,12 +768,13 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
 
     switch (sliver.constraints.growthDirection) {
       case GrowthDirection.forward:
-        leadingScrollOffset -= extentOfPinnedSlivers;
         if (isPinned && alignment <= 0)
           return RevealedOffset(offset: double.infinity, rect: targetRect);
-
+        leadingScrollOffset -= extentOfPinnedSlivers;
         break;
       case GrowthDirection.reverse:
+        if (isPinned && alignment >= 1)
+          return RevealedOffset(offset: double.negativeInfinity, rect: targetRect);
         switch (axis) {
           case Axis.vertical:
             leadingScrollOffset -= targetRect.height;
@@ -779,8 +783,6 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
             leadingScrollOffset -= targetRect.width;
             break;
         }
-        if (isPinned && alignment >= 1)
-          return RevealedOffset(offset: double.negativeInfinity, rect: targetRect);
         break;
     }
 
@@ -1515,7 +1517,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
         }
         return scrollOffsetToChild + scrollOffsetWithinChild;
       case GrowthDirection.reverse:
-        double scrollOffsetToChild = 0;
+        double scrollOffsetToChild = 0.0;
         RenderSliver current = childBefore(center);
         while (current != child) {
           scrollOffsetToChild -= current.geometry.scrollExtent;

@@ -348,7 +348,7 @@ void main() {
 
     final RenderObject target = tester.renderObject(find.byWidget(children[5], skipOffstage: false));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
-    // Do not include the bottom padding of the target child thus the + 23.
+    // Does not include the bottom padding of children[5] thus + 23 instead of + 22.
     expect(revealed.offset, 5 * (100 + 22 + 23) + 23);
 
     revealed = viewport.getOffsetToReveal(target, 1.0);
