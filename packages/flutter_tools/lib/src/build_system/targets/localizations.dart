@@ -37,6 +37,51 @@ Future<void> generateLocalizations({
     'gen_l10n.dart',
   );
 
+  // If generating a synthetic package, generate a warning if
+  // flutter: generate is not set.
+  if (options.useSyntheticPackage) {
+    final File pubspecFile = projectDir.childFile('pubspec.yaml');
+    assert(pubspecFile.existsSync());
+
+    final YamlNode yamlNode = loadYamlNode(pubspecFile.readAsStringSync());
+    if (yamlNode is! YamlMap) {
+      globals.logger.printError(
+        'Expected ${pubspecFile.path} to contain a map, instead was $yamlNode',
+      );
+      throw Exception();
+    }
+    final YamlMap yamlMap = yamlNode as YamlMap;
+
+    final Object value = yamlMap['flutter'];
+    if (value != null) {
+      if (value is! YamlMap) {
+        globals.logger.printError(
+          'Expected "flutter" to have a YamlMap value, instead was "$value"',
+        );
+        throw Exception();
+      }
+
+      final YamlMap flutterMap = value as YamlMap;
+      final bool shouldGenerateCode = _tryReadBool(
+        flutterMap,
+        'generate',
+        globals.logger,
+      );
+
+      if (shouldGenerateCode == null) {
+        globals.logger.printError(
+          'Attempted to generate localizations code without having '
+          'the flutter: generate flag turned on.'
+          '\n'
+          'Check pubspec.yaml and ensure that flutter: generate: true has '
+          'been added and rebuild the project. Otherwise, the localizations '
+          'source code will not be importable.'
+        );
+        throw Exception();
+      }
+    }
+  }
+
   final ProcessResult result = await processManager.run(<String>[
     dartBinaryPath,
     '--disable-dart-dev',
@@ -114,51 +159,6 @@ class GenerateLocalizationsTarget extends Target {
       logger: environment.logger,
       fileSystem: environment.fileSystem,
     );
-
-    // If generating a synthetic package, generate a warning if
-    // flutter: generate is not set.
-    if (options.useSyntheticPackage) {
-      final File pubspecFile = environment.projectDir.childFile('pubspec.yaml');
-      assert(pubspecFile.existsSync());
-
-      final YamlNode yamlNode = loadYamlNode(pubspecFile.readAsStringSync());
-      if (yamlNode is! YamlMap) {
-        globals.logger.printError(
-          'Expected ${pubspecFile.path} to contain a map, instead was $yamlNode',
-        );
-        throw Exception();
-      }
-      final YamlMap yamlMap = yamlNode as YamlMap;
-
-      final Object value = yamlMap['flutter'];
-      if (value != null) {
-        if (value is! YamlMap) {
-          globals.logger.printError(
-            'Expected "flutter" to have a YamlMap value, instead was "$value"',
-          );
-          throw Exception();
-        }
-
-        final YamlMap flutterMap = value as YamlMap;
-        final bool shouldGenerateCode = _tryReadBool(
-          flutterMap,
-          'generate',
-          globals.logger,
-        );
-
-        if (shouldGenerateCode == null) {
-          globals.logger.printError(
-            'Attempted to generate localizations code without having '
-            'the flutter: generate flag turned on.'
-            '\n'
-            'Check pubspec.yaml and ensure that flutter: generate: true has '
-            'been added and rebuild the project. Otherwise, the localizations '
-            'source code will not be importable.'
-          );
-          throw Exception();
-        }
-      }
-    }
 
     await generateLocalizations(
       fileSystem: environment.fileSystem,

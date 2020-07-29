@@ -68,6 +68,50 @@ void main() {
     expect(processManager.hasRemainingExpectations, false);
   });
 
+  testWithoutContext('generateLocalizations throws exception on missing flutter: generate: true flag', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Logger logger = BufferLogger.test();
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[]);
+    final Directory arbDirectory = fileSystem.directory('arb')
+      ..createSync();
+    arbDirectory.childFile('foo.arb').createSync();
+    arbDirectory.childFile('bar.arb').createSync();
+
+    // Missing flutter: generate: true should throw exception.
+    fileSystem.file('pubspec.yaml').writeAsStringSync('''
+flutter:
+  uses-material-design: true
+''');
+
+    final LocalizationOptions options = LocalizationOptions(
+      header: 'HEADER',
+      headerFile: Uri.file('header'),
+      arbDirectory: Uri.file('arb'),
+      deferredLoading: true,
+      outputClass: 'Foo',
+      outputLocalizationsFile: Uri.file('bar'),
+      preferredSupportedLocales: 'en_US',
+      templateArbFile: Uri.file('example.arb'),
+      untranslatedMessagesFile: Uri.file('untranslated'),
+      // Set synthetic package to true.
+      useSyntheticPackage: true,
+    );
+
+    expect(
+      generateLocalizations(
+        options: options,
+        logger: logger,
+        fileSystem: fileSystem,
+        processManager: processManager,
+        projectDir: fileSystem.currentDirectory,
+        dartBinaryPath: 'dart',
+        flutterRoot: '',
+        dependenciesDir: fileSystem.currentDirectory,
+      ),
+      throwsA(Exception),
+    );
+  });
+
   testWithoutContext('generateLocalizations is skipped if l10n.yaml does not exist.', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Environment environment = Environment.test(
