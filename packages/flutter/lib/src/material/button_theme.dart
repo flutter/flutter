@@ -251,7 +251,7 @@ class ButtonThemeData with Diagnosticable {
   /// Create a button theme object that can be used with [ButtonTheme]
   /// or [ThemeData].
   ///
-  /// The [textTheme], [minWidth], [height], [alignedDropDown], and
+  /// The [textTheme], [minWidth], [height], [alignedDropdown], and
   /// [layoutBehavior] parameters must not be null. The [minWidth] and
   /// [height] parameters must greater than or equal to zero.
   ///
@@ -596,7 +596,8 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// If [button] is not [MaterialButton.enabled], the value of
   /// [getDisabledTextColor] is returned. If the button is enabled and
-  /// [buttonTextColor] is non-null, then [buttonTextColor] is returned.
+  /// [MaterialButton.textColor] is non-null, then [MaterialButton.textColor]
+  /// is returned.
   ///
   /// Otherwise the text color depends on the value of [getTextTheme]
   /// and [getBrightness].
@@ -604,7 +605,7 @@ class ButtonThemeData with Diagnosticable {
   ///  * [ButtonTextTheme.normal]: [Colors.white] is used if [getBrightness]
   ///    resolves to [Brightness.dark]. [Colors.black87] is used if
   ///    [getBrightness] resolves to [Brightness.light].
-  ///  * [ButtonTextTheme.accent]: [colorScheme.secondary].
+  ///  * [ButtonTextTheme.accent]: [ColorScheme.secondary] of [colorScheme].
   ///  * [ButtonTextTheme.primary]: If [getFillColor] is dark then [Colors.white],
   ///    otherwise if [button] is a [FlatButton] or an [OutlineButton] then
   ///    [colorScheme.primary], otherwise [Colors.black].
@@ -854,9 +855,9 @@ class ButtonThemeData with Diagnosticable {
 
   /// The minimum size of the [button]'s tap target.
   ///
-  /// Returns the button's [MaterialButton.tapTargetSize] if it is non-null.
+  /// Returns the button's [MaterialButton.materialTapTargetSize] if it is non-null.
   ///
-  /// Otherwise the value of the [materialTapTargetSize] constructor
+  /// Otherwise the value of the `materialTapTargetSize` constructor
   /// parameter is returned if that's non-null.
   ///
   /// Otherwise [MaterialTapTargetSize.padded] is returned.

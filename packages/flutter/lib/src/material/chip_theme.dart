@@ -284,14 +284,15 @@ class ChipThemeData with Diagnosticable {
   /// (slightly transparent black) for light themes, and Color(0xdeffffff)
   /// (slightly transparent white) for dark themes.
   ///
-  /// May be set to null, in which case the ambient [IconTheme.color] is used.
+  /// May be set to null, in which case the ambient [IconThemeData.color] is used.
   final Color deleteIconColor;
 
   /// Color to be used for the chip's background indicating that it is disabled.
   ///
-  /// The chip is disabled when [isEnabled] is false, or all three of
-  /// [SelectableChipAttributes.onSelected], [TappableChipAttributes.onPressed],
-  /// and [DeletableChipAttributes.onDelete] are null.
+  /// The chip is disabled when [DisabledChipAttributes.isEnabled] is false, or
+  /// all three of [SelectableChipAttributes.onSelected],
+  /// [TappableChipAttributes.onPressed], and
+  /// [DeletableChipAttributes.onDeleted] are null.
   ///
   /// It defaults to [Colors.black38].
   final Color disabledColor;
@@ -299,14 +300,14 @@ class ChipThemeData with Diagnosticable {
   /// Color to be used for the chip's background, indicating that it is
   /// selected.
   ///
-  /// The chip is selected when [selected] is true.
+  /// The chip is selected when [SelectableChipAttributes.selected] is true.
   final Color selectedColor;
 
   /// An alternate color to be used for the chip's background, indicating that
   /// it is selected. For example, this color is used by [ChoiceChip] when the
   /// choice is selected.
   ///
-  /// The chip is selected when [selected] is true.
+  /// The chip is selected when [SelectableChipAttributes.selected] is true.
   final Color secondarySelectedColor;
 
   /// Color of the chip's shadow when the elevation is greater than 0.
@@ -328,7 +329,7 @@ class ChipThemeData with Diagnosticable {
   ///  * [shadowColor]
   final Color selectedShadowColor;
 
-  /// Whether or not to show a check mark when [selected] is true.
+  /// Whether or not to show a check mark when [SelectableChipAttributes.selected] is true.
   ///
   /// For instance, the [ChoiceChip] sets this to false so that it can be
   /// selected without showing the check mark.
@@ -341,7 +342,7 @@ class ChipThemeData with Diagnosticable {
   /// This will override the color set by the platform's brightness setting.
   final Color checkmarkColor;
 
-  /// The padding around the [label] widget.
+  /// The padding around the [Chip.label] widget.
   ///
   /// By default, this is 4 logical pixels at the beginning and the end of the
   /// label, and zero on top and bottom.

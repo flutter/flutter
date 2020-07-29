@@ -87,11 +87,6 @@ class AnimatedIcon extends StatelessWidget {
   ///
   /// Announced in accessibility modes (e.g TalkBack/VoiceOver).
   /// This label does not show in the UI.
-  ///
-  /// See also:
-  ///
-  ///  * [Semantics.label], which is set to [semanticLabel] in the underlying
-  ///    [Semantics] widget.
   final String semanticLabel;
 
   /// The text direction to use for rendering the icon.
@@ -100,6 +95,11 @@ class AnimatedIcon extends StatelessWidget {
   ///
   /// If the text direction is [TextDirection.rtl], the icon will be mirrored
   /// horizontally (e.g back arrow will point right).
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticProperties.label], which is set to [semanticLabel] in the
+  ///    underlying [Semantics] widget.
   final TextDirection textDirection;
 
   static final _UiPathFactory _pathFactory = () => ui.Path();

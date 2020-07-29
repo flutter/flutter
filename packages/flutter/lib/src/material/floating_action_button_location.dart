@@ -416,7 +416,7 @@ abstract class StandardFabLocation extends FloatingActionButtonLocation {
 /// Mixin for a "top" floating action button location, such as
 /// [FloatingActionButtonLocation.startTop].
 ///
-/// The [adjustment], typically [kMiniButtonOffsetAdjustment], is ignored in the
+/// The `adjustment`, typically [kMiniButtonOffsetAdjustment], is ignored in the
 /// Y axis of "top" positions. For "top" positions, the X offset is adjusted to
 /// move closer to the edge of the screen. This is so that a minified floating
 /// action button appears to align with [CircleAvatar]s in the
