@@ -982,7 +982,7 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
-///  * [ShapeBorderClipper], which converts a [ShapeBorder] to a [CustomerClipper], as
+///  * [ShapeBorderClipper], which converts a [ShapeBorder] to a [CustomClipper], as
 ///    needed by this widget.
 class PhysicalShape extends SingleChildRenderObjectWidget {
   /// Creates a physical model with an arbitrary shape clip.
@@ -1236,10 +1236,10 @@ class Transform extends SingleChildRenderObjectWidget {
   /// This is equivalent to setting an origin based on the size of the box.
   /// If it is specified at the same time as the [origin], both are applied.
   ///
-  /// An [AlignmentDirectional.start] value is the same as an [Alignment]
+  /// An [AlignmentDirectional.centerStart] value is the same as an [Alignment]
   /// whose [Alignment.x] value is `-1.0` if [textDirection] is
   /// [TextDirection.ltr], and `1.0` if [textDirection] is [TextDirection.rtl].
-  /// Similarly [AlignmentDirectional.end] is the same as an [Alignment]
+  /// Similarly [AlignmentDirectional.centerEnd] is the same as an [Alignment]
   /// whose [Alignment.x] value is `1.0` if [textDirection] is
   /// [TextDirection.ltr], and `-1.0` if [textDirection] is [TextDirection.rtl].
   final AlignmentGeometry alignment;
@@ -1694,8 +1694,8 @@ class Padding extends SingleChildRenderObjectWidget {
 ///
 /// {@tool snippet}
 /// The [Align] widget in this example uses one of the defined constants from
-/// [Alignment], [topRight]. This places the [FlutterLogo] in the top right corner
-/// of the parent blue [Container].
+/// [Alignment], [Alignment.topRight]. This places the [FlutterLogo] in the top
+/// right corner of the parent blue [Container].
 ///
 /// ![A blue square container with the Flutter logo in the top right corner.](https://flutter.github.io/assets-for-api-docs/assets/widgets/align_constant.png)
 ///
@@ -5587,7 +5587,7 @@ class RawImage extends LeafRenderObjectWidget {
 /// {@end-tool}
 ///
 /// Assuming that `TestWidget` uses [DefaultAssetBundle.of] to obtain its
-/// [AssetBundle], it will now see the [TestAssetBundle]'s "Hello World!" data
+/// [AssetBundle], it will now see the `TestAssetBundle`'s "Hello World!" data
 /// when requesting the "resources/test" asset.
 ///
 /// See also:
@@ -6607,8 +6607,8 @@ class MetaData extends SingleChildRenderObjectWidget {
 ///  * [ExcludeSemantics], which excludes a subtree from the semantics tree
 ///    (which might be useful if it is, e.g., totally decorative and not
 ///    important to the user).
-///  * [RenderObject.semanticsAnnotator], the rendering library API through which
-///    the [Semantics] widget is actually implemented.
+///  * [RenderObject.describeSemanticsConfiguration], the rendering library API
+///    through which the [Semantics] widget is actually implemented.
 ///  * [SemanticsNode], the object used by the rendering library to represent
 ///    semantics in the semantics tree.
 ///  * [SemanticsDebugger], an overlay to help visualize the semantics tree. Can

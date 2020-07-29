@@ -33,12 +33,12 @@ abstract class RenderSliverBoxChildManager {
   /// If no child corresponds to `index`, then do nothing.
   ///
   /// Which child is indicated by index zero depends on the [GrowthDirection]
-  /// specified in the [RenderSliverMultiBoxAdaptor.constraints]. For example
-  /// if the children are the alphabet, then if
+  /// specified in the `constraints` of the [RenderSliverMultiBoxAdaptor]. For
+  /// example if the children are the alphabet, then if
   /// [SliverConstraints.growthDirection] is [GrowthDirection.forward] then
   /// index zero is A, and index 25 is Z. On the other hand if
-  /// [SliverConstraints.growthDirection] is [GrowthDirection.reverse]
-  /// then index zero is Z, and index 25 is A.
+  /// [SliverConstraints.growthDirection] is [GrowthDirection.reverse] then
+  /// index zero is Z, and index 25 is A.
   ///
   /// During a call to [createChild] it is valid to remove other children from
   /// the [RenderSliverMultiBoxAdaptor] object if they were not created during
@@ -49,7 +49,7 @@ abstract class RenderSliverBoxChildManager {
   /// Remove the given child from the child list.
   ///
   /// Called by [RenderSliverMultiBoxAdaptor.collectGarbage], which itself is
-  /// called from [RenderSliverMultiBoxAdaptor.performLayout].
+  /// called from [RenderSliverMultiBoxAdaptor]'s `performLayout`.
   ///
   /// The index of the given child can be obtained using the
   /// [RenderSliverMultiBoxAdaptor.indexOf] method, which reads it from the
