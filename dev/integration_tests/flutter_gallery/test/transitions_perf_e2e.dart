@@ -10,48 +10,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_gallery/gallery/demos.dart';
 import 'package:e2e/e2e.dart';
 import 'package:flutter_gallery/gallery/app.dart' show GalleryApp;
+import 'package:flutter_gallery/demo_lists.dart';
 
 import 'util.dart' show watchPerformance;
-
-// Demos for which timeline data will be collected using
-// FlutterDriver.traceAction().
-//
-// Warning: The number of tests executed with timeline collection enabled
-// significantly impacts heap size of the running app. When run with
-// --trace-startup, as we do in this test, the VM stores trace events in an
-// endless buffer instead of a ring buffer.
-//
-// These names must match GalleryItem titles from kAllGalleryDemos
-// in dev/integration_tests/flutter_gallery/lib/gallery/demos.dart
-const List<String> kProfiledDemos = <String>[
-  'Shrine@Studies',
-  'Contact profile@Studies',
-  'Animation@Studies',
-  'Bottom navigation@Material',
-  'Buttons@Material',
-  'Cards@Material',
-  'Chips@Material',
-  'Dialogs@Material',
-  'Pickers@Material',
-];
-
-// There are 3 places where the Gallery demos are traversed.
-// 1- In widget tests such as dev/integration_tests/flutter_gallery/test/smoke_test.dart
-// 2- In driver tests such as dev/integration_tests/flutter_gallery/test_driver/transitions_perf_test.dart
-// 3- In on-device instrumentation tests such as dev/integration_tests/flutter_gallery/test/live_smoketest.dart
-//
-// If you change navigation behavior in the Gallery or in the framework, make
-// sure all 3 are covered.
-
-// Demos that will be backed out of within FlutterDriver.runUnsynchronized();
-//
-// These names must match GalleryItem titles from kAllGalleryDemos
-// in dev/integration_tests/flutter_gallery/lib/gallery/demos.dart
-const List<String> kUnsynchronizedDemos = <String>[
-  'Progress indicators@Material',
-  'Activity Indicator@Cupertino',
-  'Video@Media',
-];
 
 const List<String> kSkippedDemos = <String>[];
 
@@ -59,11 +20,9 @@ const List<String> kSkippedDemos = <String>[];
 //
 // These names are reported by the test app, see _handleMessages()
 // in transitions_perf.dart.
-List<String> _allDemos = kAllGalleryDemos
-    .map(
-      (GalleryDemo demo) => '${demo.title}@${demo.category.name}',
-    )
-    .toList();
+List<String> _allDemos = kAllGalleryDemos.map(
+  (GalleryDemo demo) => '${demo.title}@${demo.category.name}',
+).toList();
 
 /// Scrolls each demo menu item into view, launches it, then returns to the
 /// home screen twice.
