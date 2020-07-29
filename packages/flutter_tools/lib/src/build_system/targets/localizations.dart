@@ -122,10 +122,6 @@ class GenerateLocalizationsTarget extends Target {
     print('test the prints!');
     print(options.useSyntheticPackage);
     if (options.useSyntheticPackage == null) {
-      final String contents = pubspecFile.readAsStringSync();
-      if (contents.trim().isEmpty) {
-        return const LocalizationOptions();
-      }
       final YamlNode yamlNode = loadYamlNode(pubspecFile.readAsStringSync());
       if (yamlNode is! YamlMap) {
         globals.logger.printError(
@@ -181,7 +177,7 @@ class LocalizationOptions {
     this.preferredSupportedLocales,
     this.headerFile,
     this.deferredLoading,
-    @required this.useSyntheticPackage,
+    this.useSyntheticPackage = true,
   }) : assert(useSyntheticPackage != null);
 
   /// The `--arb-dir` argument.
