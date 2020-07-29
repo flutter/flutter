@@ -1,7 +1,6 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// FLUTTER_NOLINT
 
 #include "flutter/shell/common/engine.h"
 
@@ -281,22 +280,31 @@ void Engine::SetViewportMetrics(const ViewportMetrics& metrics) {
   viewport_metrics_ = metrics;
   runtime_controller_->SetViewportMetrics(viewport_metrics_);
   if (animator_) {
-    if (dimensions_changed)
+    if (dimensions_changed) {
       animator_->SetDimensionChangePending();
-    if (have_surface_)
+    }
+    if (have_surface_) {
       ScheduleFrame();
+    }
   }
 }
 
 void Engine::DispatchPlatformMessage(fml::RefPtr<PlatformMessage> message) {
-  if (message->channel() == kLifecycleChannel) {
-    if (HandleLifecyclePlatformMessage(message.get()))
+  std::string channel = message->channel();
+  if (channel == kLifecycleChannel) {
+    if (HandleLifecyclePlatformMessage(message.get())) {
       return;
-  } else if (message->channel() == kLocalizationChannel) {
-    if (HandleLocalizationPlatformMessage(message.get()))
+    }
+  } else if (channel == kLocalizationChannel) {
+    if (HandleLocalizationPlatformMessage(message.get())) {
       return;
-  } else if (message->channel() == kSettingsChannel) {
+    }
+  } else if (channel == kSettingsChannel) {
     HandleSettingsPlatformMessage(message.get());
+    return;
+  } else if (channel == kNavigationChannel) {
+    // If there's no runtime_, we may still need to set the initial route.
+    HandleNavigationPlatformMessage(std::move(message));
     return;
   }
 
@@ -305,14 +313,7 @@ void Engine::DispatchPlatformMessage(fml::RefPtr<PlatformMessage> message) {
     return;
   }
 
-  // If there's no runtime_, we may still need to set the initial route.
-  if (message->channel() == kNavigationChannel) {
-    HandleNavigationPlatformMessage(std::move(message));
-    return;
-  }
-
-  FML_DLOG(WARNING) << "Dropping platform message on channel: "
-                    << message->channel();
+  FML_DLOG(WARNING) << "Dropping platform message on channel: " << channel;
 }
 
 bool Engine::HandleLifecyclePlatformMessage(PlatformMessage* message) {
@@ -345,12 +346,14 @@ bool Engine::HandleNavigationPlatformMessage(
 
   rapidjson::Document document;
   document.Parse(reinterpret_cast<const char*>(data.data()), data.size());
-  if (document.HasParseError() || !document.IsObject())
+  if (document.HasParseError() || !document.IsObject()) {
     return false;
+  }
   auto root = document.GetObject();
   auto method = root.FindMember("method");
-  if (method->value != "setInitialRoute")
+  if (method->value != "setInitialRoute") {
     return false;
+  }
   auto route = root.FindMember("args");
   initial_route_ = std::move(route->value.GetString());
   return true;
@@ -361,27 +364,32 @@ bool Engine::HandleLocalizationPlatformMessage(PlatformMessage* message) {
 
   rapidjson::Document document;
   document.Parse(reinterpret_cast<const char*>(data.data()), data.size());
-  if (document.HasParseError() || !document.IsObject())
+  if (document.HasParseError() || !document.IsObject()) {
     return false;
+  }
   auto root = document.GetObject();
   auto method = root.FindMember("method");
-  if (method == root.MemberEnd())
+  if (method == root.MemberEnd()) {
     return false;
+  }
   const size_t strings_per_locale = 4;
   if (method->value == "setLocale") {
     // Decode and pass the list of locale data onwards to dart.
     auto args = root.FindMember("args");
-    if (args == root.MemberEnd() || !args->value.IsArray())
+    if (args == root.MemberEnd() || !args->value.IsArray()) {
       return false;
+    }
 
-    if (args->value.Size() % strings_per_locale != 0)
+    if (args->value.Size() % strings_per_locale != 0) {
       return false;
+    }
     std::vector<std::string> locale_data;
     for (size_t locale_index = 0; locale_index < args->value.Size();
          locale_index += strings_per_locale) {
       if (!args->value[locale_index].IsString() ||
-          !args->value[locale_index + 1].IsString())
+          !args->value[locale_index + 1].IsString()) {
         return false;
+      }
       locale_data.push_back(args->value[locale_index].GetString());
       locale_data.push_back(args->value[locale_index + 1].GetString());
       locale_data.push_back(args->value[locale_index + 2].GetString());
@@ -429,8 +437,9 @@ void Engine::StopAnimator() {
 }
 
 void Engine::StartAnimatorIfPossible() {
-  if (activity_running_ && have_surface_)
+  if (activity_running_ && have_surface_) {
     animator_->Start();
+  }
 }
 
 std::string Engine::DefaultRouteName() {
@@ -445,14 +454,16 @@ void Engine::ScheduleFrame(bool regenerate_layer_tree) {
 }
 
 void Engine::Render(std::unique_ptr<flutter::LayerTree> layer_tree) {
-  if (!layer_tree)
+  if (!layer_tree) {
     return;
+  }
 
   // Ensure frame dimensions are sane.
   if (layer_tree->frame_size().isEmpty() ||
       layer_tree->frame_physical_depth() <= 0.0f ||
-      layer_tree->frame_device_pixel_ratio() <= 0.0f)
+      layer_tree->frame_device_pixel_ratio() <= 0.0f) {
     return;
+  }
 
   animator_->Render(std::move(layer_tree));
 }
