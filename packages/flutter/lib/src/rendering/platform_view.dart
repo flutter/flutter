@@ -667,7 +667,8 @@ mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
   set hitTestBehavior(PlatformViewHitTestBehavior value) {
     if (value != _hitTestBehavior) {
       _hitTestBehavior = value;
-      RendererBinding.instance.mouseTracker.schedulePostFrameCheck();
+      if (owner != null)
+        RendererBinding.instance.mouseTracker.schedulePostFrameCheck();
     }
   }
   PlatformViewHitTestBehavior _hitTestBehavior;
