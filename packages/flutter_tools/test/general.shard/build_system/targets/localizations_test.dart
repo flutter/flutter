@@ -97,8 +97,8 @@ flutter:
       useSyntheticPackage: true,
     );
 
-    expect(
-      generateLocalizations(
+    try {
+      await generateLocalizations(
         options: options,
         logger: logger,
         fileSystem: fileSystem,
@@ -107,9 +107,11 @@ flutter:
         dartBinaryPath: 'dart',
         flutterRoot: '',
         dependenciesDir: fileSystem.currentDirectory,
-      ),
-      throwsA(Exception),
-    );
+      );
+      fail('Missing flutter: generate: true on pubspec.yaml should throw an Exception.');
+    } on Exception catch (e) {
+      expect(e, isA<Exception>());
+    }
   });
 
   testWithoutContext('generateLocalizations is skipped if l10n.yaml does not exist.', () async {

@@ -45,7 +45,7 @@ Future<void> generateLocalizations({
 
     final YamlNode yamlNode = loadYamlNode(pubspecFile.readAsStringSync());
     if (yamlNode is! YamlMap) {
-      globals.logger.printError(
+      logger.printError(
         'Expected ${pubspecFile.path} to contain a map, instead was $yamlNode',
       );
       throw Exception();
@@ -55,7 +55,7 @@ Future<void> generateLocalizations({
     final Object value = yamlMap['flutter'];
     if (value != null) {
       if (value is! YamlMap) {
-        globals.logger.printError(
+        logger.printError(
           'Expected "flutter" to have a YamlMap value, instead was "$value"',
         );
         throw Exception();
@@ -65,11 +65,11 @@ Future<void> generateLocalizations({
       final bool shouldGenerateCode = _tryReadBool(
         flutterMap,
         'generate',
-        globals.logger,
+        logger,
       );
 
       if (shouldGenerateCode == null) {
-        globals.logger.printError(
+        logger.printError(
           'Attempted to generate localizations code without having '
           'the flutter: generate flag turned on.'
           '\n'
