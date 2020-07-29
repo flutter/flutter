@@ -26,6 +26,8 @@ void main() {
         featureFlags: TestFeatureFlags(),
       ),
       processManager: FakeProcessManager.list(<FakeCommand>[]),
+      fileSystem: MemoryFileSystem.test(),
+      platform: FakePlatform(),
     );
 
     expect(await androidDevices.pollingGetDevices(), isEmpty);
@@ -48,6 +50,8 @@ void main() {
         featureFlags: TestFeatureFlags(),
       ),
       processManager: processManager,
+      fileSystem: MemoryFileSystem.test(),
+      platform: FakePlatform(),
     );
 
     expect(androidDevices.pollingGetDevices(),
@@ -69,6 +73,8 @@ void main() {
         featureFlags: TestFeatureFlags(),
       ),
       processManager: processManager,
+      fileSystem: MemoryFileSystem.test(),
+      platform: FakePlatform(),
     );
 
     expect(androidDevices.pollingGetDevices(),
@@ -86,6 +92,8 @@ void main() {
         ),
       ),
       processManager: FakeProcessManager.any(),
+      fileSystem: MemoryFileSystem.test(),
+      platform: FakePlatform(),
     );
 
     expect(androidDevices.supportsPlatform, false);
@@ -163,6 +171,11 @@ Use the 'android' tool to install them:
 ''', devices: devices,
      diagnostics: diagnostics,
      timeoutConfiguration: const TimeoutConfiguration(),
+     processManager: FakeProcessManager.any(),
+     platform: FakePlatform(),
+     logger: BufferLogger.test(),
+     fileSystem: MemoryFileSystem.test(),
+     androidSdk: MockAndroidSdk(),
     );
 
     expect(devices, isEmpty);

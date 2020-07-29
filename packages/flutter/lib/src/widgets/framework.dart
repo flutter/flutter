@@ -107,9 +107,13 @@ class ObjectKey extends LocalKey {
 /// in the same animation frame in which it was removed from its old location in
 /// the tree.
 ///
-/// Global keys are relatively expensive. If you don't need any of the features
-/// listed above, consider using a [Key], [ValueKey], [ObjectKey], or
-/// [UniqueKey] instead.
+/// Reparenting an [Element] using a global key is relatively expensive, as
+/// this operation will trigger a call to [State.deactivate] on the associated
+/// [State] and all of its descendants; then force all widgets that depends
+/// on an [InheritedWidget] to rebuild.
+///
+/// If you don't need any of the features listed above, consider using a [Key],
+/// [ValueKey], [ObjectKey], or [UniqueKey] instead.
 ///
 /// You cannot simultaneously include two widgets in the tree with the same
 /// global key. Attempting to do so will assert at runtime.
@@ -2037,7 +2041,7 @@ typedef ElementVisitor = void Function(Element element);
 ///       appBar: AppBar(title: Text('Demo')),
 ///       body: Builder(
 ///         builder: (BuildContext context) {
-///           return FlatButton(
+///           return TextButton(
 ///             child: Text('BUTTON'),
 ///             onPressed: () {
 ///               // here, Scaffold.of(context) returns the locally created Scaffold
@@ -2167,7 +2171,7 @@ abstract class BuildContext {
   )
   InheritedWidget inheritFromWidgetOfExactType(Type targetType, { Object aspect });
 
-  /// Obtains the nearest widget of the given type [T], which must be the type of a
+  /// Obtains the nearest widget of the given type `T`, which must be the type of a
   /// concrete [InheritedWidget] subclass, and registers this build context with
   /// that widget such that when that widget changes (or a new widget of that
   /// type is introduced, or the widget goes away), this build context is
@@ -2202,7 +2206,7 @@ abstract class BuildContext {
   /// the widget or one of its ancestors is moved (for example, because an
   /// ancestor is added or removed).
   ///
-  /// The [aspect] parameter is only used when [T] is an
+  /// The [aspect] parameter is only used when `T` is an
   /// [InheritedWidget] subclasses that supports partial updates, like
   /// [InheritedModel]. It specifies what "aspect" of the inherited
   /// widget this context depends on.
@@ -2219,7 +2223,7 @@ abstract class BuildContext {
   )
   InheritedElement ancestorInheritedElementForWidgetOfExactType(Type targetType);
 
-  /// Obtains the element corresponding to the nearest widget of the given type [T],
+  /// Obtains the element corresponding to the nearest widget of the given type `T`,
   /// which must be the type of a concrete [InheritedWidget] subclass.
   ///
   /// Returns null if no such element is found.
@@ -2248,7 +2252,7 @@ abstract class BuildContext {
   )
   Widget ancestorWidgetOfExactType(Type targetType);
 
-  /// Returns the nearest ancestor widget of the given type [T], which must be the
+  /// Returns the nearest ancestor widget of the given type `T`, which must be the
   /// type of a concrete [Widget] subclass.
   ///
   /// In general, [dependOnInheritedWidgetOfExactType] is more useful, since
@@ -2286,7 +2290,7 @@ abstract class BuildContext {
   State ancestorStateOfType(TypeMatcher matcher);
 
   /// Returns the [State] object of the nearest ancestor [StatefulWidget] widget
-  /// that is an instance of the given type [T].
+  /// that is an instance of the given type `T`.
   ///
   /// This should not be used from build methods, because the build context will
   /// not be rebuilt if the value that would be returned by this method changes.
@@ -2330,10 +2334,10 @@ abstract class BuildContext {
   State rootAncestorStateOfType(TypeMatcher matcher);
 
   /// Returns the [State] object of the furthest ancestor [StatefulWidget] widget
-  /// that is an instance of the given type [T].
+  /// that is an instance of the given type `T`.
   ///
   /// Functions the same way as [findAncestorStateOfType] but keeps visiting subsequent
-  /// ancestors until there are none of the type instance of [T] remaining.
+  /// ancestors until there are none of the type instance of `T` remaining.
   /// Then returns the last one found.
   ///
   /// This operation is O(N) as well though N is the entire widget tree rather than
@@ -2352,7 +2356,7 @@ abstract class BuildContext {
   RenderObject ancestorRenderObjectOfType(TypeMatcher matcher);
 
   /// Returns the [RenderObject] object of the nearest ancestor [RenderObjectWidget] widget
-  /// that is an instance of the given type [T].
+  /// that is an instance of the given type `T`.
   ///
   /// This should not be used from build methods, because the build context will
   /// not be rebuilt if the value that would be returned by this method changes.
@@ -4502,7 +4506,7 @@ typedef TransitionBuilder = Widget Function(BuildContext context, Widget child);
 /// A builder that creates a widget given the two callbacks `onStepContinue` and
 /// `onStepCancel`.
 ///
-/// Used by [Stepper.builder].
+/// Used by [Stepper.controlsBuilder].
 ///
 /// See also:
 ///

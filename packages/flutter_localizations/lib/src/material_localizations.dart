@@ -79,7 +79,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   ///  4. The [intl.DateFormat] for [formatMediumDate].
   ///  5. The [intl.DateFormat] for [formatFullDate].
   ///  6. The [intl.DateFormat] for [formatMonthYear].
-  ///  7. The [int.DateFormat] for [formatShortMonthDay].
+  ///  7. The [intl.DateFormat] for [formatShortMonthDay].
   ///  8. The [NumberFormat] for [formatDecimal] (also used by [formatHour] and
   ///     [formatTimeOfDay] when [timeOfDayFormat] doesn't use [HourFormat.HH]).
   ///  9. The [NumberFormat] for [formatHour] and the hour part of
@@ -667,8 +667,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   @override
   ScriptCategory get scriptCategory;
 
-  /// A [LocalizationsDelegate] that uses [GlobalMaterialLocalizations.load]
-  /// to create an instance of this class.
+  /// A [LocalizationsDelegate] for [MaterialLocalizations].
   ///
   /// Most internationalized apps will use [GlobalMaterialLocalizations.delegates]
   /// as the value of [MaterialApp.localizationsDelegates] to include
