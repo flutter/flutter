@@ -5,6 +5,8 @@
 // @dart = 2.10
 part of engine;
 
+const ui.Color _defaultTextColor = ui.Color(0xFFFF0000);
+
 class EngineLineMetrics implements ui.LineMetrics {
   EngineLineMetrics({
     required this.hardBreak,
@@ -1110,15 +1112,15 @@ class EngineParagraphBuilder implements ui.ParagraphBuilder {
   /// paragraph. Plain text is more efficient to lay out and measure than rich
   /// text.
   EngineParagraph? _tryBuildPlainText() {
-    ui.Color? color;
+    ui.Color color = _defaultTextColor;
     ui.TextDecoration? decoration;
     ui.Color? decorationColor;
     ui.TextDecorationStyle? decorationStyle;
     ui.FontWeight? fontWeight = _paragraphStyle._fontWeight;
     ui.FontStyle? fontStyle = _paragraphStyle._fontStyle;
     ui.TextBaseline? textBaseline;
-    String? fontFamily = _paragraphStyle._fontFamily;
-    double? fontSize = _paragraphStyle._fontSize;
+    String fontFamily = _paragraphStyle._fontFamily ?? DomRenderer.defaultFontFamily;
+    double fontSize = _paragraphStyle._fontSize ?? DomRenderer.defaultFontSize;
     final ui.TextAlign textAlign = _paragraphStyle._effectiveTextAlign;
     final ui.TextDirection textDirection = _paragraphStyle._effectiveTextDirection;
     double? letterSpacing;
@@ -1138,7 +1140,7 @@ class EngineParagraphBuilder implements ui.ParagraphBuilder {
     while (i < _ops.length && _ops[i] is EngineTextStyle) {
       final EngineTextStyle style = _ops[i];
       if (style._color != null) {
-        color = style._color;
+        color = style._color!;
       }
       if (style._decoration != null) {
         decoration = style._decoration;
@@ -1160,7 +1162,7 @@ class EngineParagraphBuilder implements ui.ParagraphBuilder {
       }
       fontFamily = style._fontFamily;
       if (style._fontSize != null) {
-        fontSize = style._fontSize;
+        fontSize = style._fontSize!;
       }
       if (style._letterSpacing != null) {
         letterSpacing = style._letterSpacing;
@@ -1210,9 +1212,7 @@ class EngineParagraphBuilder implements ui.ParagraphBuilder {
       paint = foreground;
     } else {
       paint = ui.Paint();
-      if (color != null) {
-        paint.color = color;
-      }
+      paint.color = color;
     }
 
     if (i >= _ops.length) {
