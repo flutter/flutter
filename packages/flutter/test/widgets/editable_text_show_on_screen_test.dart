@@ -450,32 +450,32 @@ void main() {
                 controller: controller = ScrollController(initialScrollOffset: 0),
                 slivers: List<Widget>.generate(50, (int i) {
                   return i == 10
-                  ? SliverPersistentHeader(
-                    pinned: true,
-                    floating: false,
-                    delegate: _TestSliverPersistentHeaderDelegate(
-                      minExtent: 50,
-                      maxExtent: 50,
-                      vsync: null,
-                      child: Container(
-                        alignment: Alignment.topCenter,
-                        child: EditableText(
-                          key: headerKey,
-                          backgroundCursorColor: Colors.grey,
-                          controller: textEditingController,
-                          focusNode: focusNode,
-                          style: textStyle,
-                          cursorColor: cursorColor,
+                    ? SliverPersistentHeader(
+                      pinned: true,
+                      floating: false,
+                      delegate: _TestSliverPersistentHeaderDelegate(
+                        minExtent: 50,
+                        maxExtent: 50,
+                        vsync: null,
+                        child: Container(
+                          alignment: Alignment.topCenter,
+                          child: EditableText(
+                            key: headerKey,
+                            backgroundCursorColor: Colors.grey,
+                            controller: textEditingController,
+                            focusNode: focusNode,
+                            style: textStyle,
+                            cursorColor: cursorColor,
+                          ),
                         ),
                       ),
-                    ),
-                  )
-                  : SliverToBoxAdapter(
-                    child: Container(
-                      height: 100.0,
-                      child: Text('Tile $i'),
-                    ),
-                  );
+                    )
+                    : SliverToBoxAdapter(
+                      child: Container(
+                        height: 100.0,
+                        child: Text('Tile $i'),
+                      ),
+                    );
                 }),
               ),
             ),

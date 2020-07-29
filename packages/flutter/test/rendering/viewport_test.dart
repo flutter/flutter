@@ -1398,6 +1398,113 @@ void main() {
     testFloatingHeaderShowOnScreen(animated: true, axis: Axis.horizontal);
   });
 
+  group('RenderViewport getOffsetToReveal renderBox to sliver coordinates conversion', () {
+    const EdgeInsets padding = EdgeInsets.fromLTRB(22, 22, 34, 34);
+    const Key centerKey = Key('5');
+    Widget buildList({ Axis axis, bool reverse = false, bool reverseGrowth = false }) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Container(
+            height: 400.0,
+            width: 400.0,
+            child: CustomScrollView(
+              scrollDirection: axis,
+              reverse: reverse,
+              center: reverseGrowth ? centerKey : null,
+              slivers: List<Widget>.generate(6, (int i) {
+                return SliverPadding(
+                  key: i == 5 ? centerKey : null,
+                  padding: padding,
+                  sliver: SliverToBoxAdapter(
+                    child: Container(
+                      padding: padding,
+                      height: 300.0,
+                      width: 300.0,
+                      child: Text('Tile $i'),
+                    ),
+                  ),
+                );
+              }),
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('up, forward growth', (WidgetTester tester) async {
+      await tester.pumpWidget(buildList(axis: Axis.vertical, reverse: true, reverseGrowth: false));
+      final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+
+      final RenderObject target = tester.renderObject(find.text('Tile 5', skipOffstage: false));
+      final double revealOffset = viewport.getOffsetToReveal(target, 0.0).offset;
+      expect(revealOffset, (300.0 + padding.horizontal)  * 5 + 34.0 * 2);
+    });
+
+    testWidgets('up, reverse growth', (WidgetTester tester) async {
+      await tester.pumpWidget(buildList(axis: Axis.vertical, reverse: true, reverseGrowth: true));
+      final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+
+      final RenderObject target = tester.renderObject(find.text('Tile 0', skipOffstage: false));
+      final double revealOffset = viewport.getOffsetToReveal(target, 0.0).offset;
+      expect(revealOffset, -(300.0 + padding.horizontal)  * 5 + 34.0 * 2);
+    });
+
+    testWidgets('right, forward growth', (WidgetTester tester) async {
+      await tester.pumpWidget(buildList(axis: Axis.horizontal, reverse: false, reverseGrowth: false));
+      final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+
+      final RenderObject target = tester.renderObject(find.text('Tile 5', skipOffstage: false));
+      final double revealOffset = viewport.getOffsetToReveal(target, 0.0).offset;
+      expect(revealOffset, (300.0 + padding.horizontal)  * 5 + 22.0 * 2);
+    });
+
+    testWidgets('right, reverse growth', (WidgetTester tester) async {
+      await tester.pumpWidget(buildList(axis: Axis.horizontal, reverse: false, reverseGrowth: true));
+      final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+
+      final RenderObject target = tester.renderObject(find.text('Tile 0', skipOffstage: false));
+      final double revealOffset = viewport.getOffsetToReveal(target, 0.0).offset;
+      expect(revealOffset, -(300.0 + padding.horizontal)  * 5 + 22.0 * 2);
+    });
+
+    testWidgets('down, forward growth', (WidgetTester tester) async {
+      await tester.pumpWidget(buildList(axis: Axis.vertical, reverse: false, reverseGrowth: false));
+      final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+
+      final RenderObject target = tester.renderObject(find.text('Tile 5', skipOffstage: false));
+      final double revealOffset = viewport.getOffsetToReveal(target, 0.0).offset;
+      expect(revealOffset, (300.0 + padding.horizontal)  * 5 + 22.0 * 2);
+    });
+
+    testWidgets('down, reverse growth', (WidgetTester tester) async {
+      await tester.pumpWidget(buildList(axis: Axis.vertical, reverse: false, reverseGrowth: true));
+      final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+
+      final RenderObject target = tester.renderObject(find.text('Tile 0', skipOffstage: false));
+      final double revealOffset = viewport.getOffsetToReveal(target, 0.0).offset;
+      expect(revealOffset, -(300.0 + padding.horizontal)  * 5 + 22.0 * 2);
+    });
+
+    testWidgets('left, forward growth', (WidgetTester tester) async {
+      await tester.pumpWidget(buildList(axis: Axis.horizontal, reverse: true, reverseGrowth: false));
+      final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+
+      final RenderObject target = tester.renderObject(find.text('Tile 5', skipOffstage: false));
+      final double revealOffset = viewport.getOffsetToReveal(target, 0.0).offset;
+      expect(revealOffset, (300.0 + padding.horizontal)  * 5 + 34.0 * 2);
+    });
+
+    testWidgets('left, reverse growth', (WidgetTester tester) async {
+      await tester.pumpWidget(buildList(axis: Axis.horizontal, reverse: true, reverseGrowth: true));
+      final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+
+      final RenderObject target = tester.renderObject(find.text('Tile 0', skipOffstage: false));
+      final double revealOffset = viewport.getOffsetToReveal(target, 0.0).offset;
+      expect(revealOffset, -(300.0 + padding.horizontal)  * 5 + 34.0 * 2);
+    });
+  });
+
   testWidgets('RenderViewportBase.showOnScreen reports the correct targetRect', (WidgetTester tester) async {
     final ScrollController innerController = ScrollController();
     final ScrollController outerController = ScrollController();
