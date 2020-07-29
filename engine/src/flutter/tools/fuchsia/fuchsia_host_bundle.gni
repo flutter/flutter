@@ -17,8 +17,6 @@ template("fuchsia_host_bundle") {
 
     sources = invoker.sources
 
-    outputs = [
-      "${_dest_dir}/{{source_file_part}}",
-    ]
+    outputs = [ "${_dest_dir}/{{source_file_part}}" ]
   }
 }

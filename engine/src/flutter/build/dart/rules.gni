@@ -163,12 +163,8 @@ template("dart_pkg") {
       dartx_application("${app_name}_dart_app") {
         output_name = dartx_output_name
         main_dart = rebase_path(app_entrypoint, "", pkg_helper_output_dir)
-        sources = [
-          "$root_gen_dir/dart-pkg/${dart_package_name}.stamp",
-        ]
-        deps = [
-          ":$dart_pkg_target_name",
-        ]
+        sources = [ "$root_gen_dir/dart-pkg/${dart_package_name}.stamp" ]
+        deps = [ ":$dart_pkg_target_name" ]
         deps += invoker.deps
         if (defined(invoker.strict)) {
           strict = invoker.strict
@@ -178,9 +174,7 @@ template("dart_pkg") {
   }
 
   group(target_name) {
-    public_deps = [
-      ":$dart_pkg_target_name",
-    ]
+    public_deps = [ ":$dart_pkg_target_name" ]
     if (defined(invoker.apps)) {
       foreach(app, invoker.apps) {
         app_name = app[0]

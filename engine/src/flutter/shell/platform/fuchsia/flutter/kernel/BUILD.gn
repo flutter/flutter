@@ -42,9 +42,7 @@ template("core_snapshot") {
   }
 
   compiled_action(target_name) {
-    deps = [
-      ":kernel_platform_files",
-    ]
+    deps = [ ":kernel_platform_files" ]
 
     platform_dill =
         "$root_out_dir/flutter_runner_patched_sdk/platform_strong.dill"

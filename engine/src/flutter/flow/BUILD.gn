@@ -183,24 +183,18 @@ if (enable_unittests) {
     executable("flow_unittests") {
       testonly = true
 
-      deps = [
-        ":flow_unittests_common_fuchsia_legacy",
-      ]
+      deps = [ ":flow_unittests_common_fuchsia_legacy" ]
     }
     executable("flow_unittests_next") {
       testonly = true
 
-      deps = [
-        ":flow_unittests_common",
-      ]
+      deps = [ ":flow_unittests_common" ]
     }
   } else {
     executable("flow_unittests") {
       testonly = true
 
-      deps = [
-        ":flow_unittests_common",
-      ]
+      deps = [ ":flow_unittests_common" ]
     }
   }
 }

@@ -9,9 +9,7 @@ config("sdk_ext_config") {
 }
 
 group("fuchsia") {
-  public_deps = [
-    ":sdk_ext",
-  ]
+  public_deps = [ ":sdk_ext" ]
 }
 
 source_set("sdk_ext") {

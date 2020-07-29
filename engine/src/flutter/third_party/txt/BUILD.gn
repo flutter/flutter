@@ -143,9 +143,7 @@ source_set("txt") {
     "//third_party/skia",
   ]
 
-  deps = [
-    "//third_party/skia",
-  ]
+  deps = [ "//third_party/skia" ]
 
   if (flutter_use_fontconfig) {
     deps += [ "//third_party/fontconfig" ]
@@ -180,8 +178,8 @@ source_set("txt") {
 
 if (enable_unittests) {
   txt_common_executable_deps = [
-    "//third_party/dart/runtime:libdart_jit",  # For logging.
     "//flutter/fml",  # For ICU initialization.
+    "//third_party/dart/runtime:libdart_jit",  # For logging.
   ]
 
   test_fixtures("txt_fixtures") {

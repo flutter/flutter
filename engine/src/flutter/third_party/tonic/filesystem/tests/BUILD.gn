@@ -14,7 +14,5 @@ executable("files_unittests") {
     "scoped_temp_dir_unittest.cc",
   ]
 
-  deps = [
-    ":../:filesystem",
-  ]
+  deps = [ ":../:filesystem" ]
 }

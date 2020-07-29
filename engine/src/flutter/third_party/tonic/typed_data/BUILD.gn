@@ -21,9 +21,7 @@ source_set("typed_data") {
     "uint8_list.h",
   ]
 
-  deps = [
-    "../common",
-  ]
+  deps = [ "../common" ]
 
   public_deps = [
     "../converter",

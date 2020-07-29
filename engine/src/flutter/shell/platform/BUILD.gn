@@ -7,13 +7,9 @@ import("//flutter/shell/platform/config.gni")
 
 group("platform") {
   if (is_mac || is_ios) {
-    deps = [
-      "darwin",
-    ]
+    deps = [ "darwin" ]
   } else if (is_android) {
-    deps = [
-      "android",
-    ]
+    deps = [ "android" ]
   } else if (is_linux) {
     deps = []
     if (enable_desktop_embeddings) {
@@ -25,9 +21,7 @@ group("platform") {
       deps += [ "windows" ]
     }
   } else if (is_fuchsia) {
-    deps = [
-      "fuchsia",
-    ]
+    deps = [ "fuchsia" ]
   } else {
     assert(false, "Unknown/Unsupported platform.")
   }

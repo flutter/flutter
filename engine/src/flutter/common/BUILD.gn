@@ -16,9 +16,7 @@ source_set("common") {
     "task_runners.h",
   ]
 
-  deps = [
-    "//flutter/fml",
-  ]
+  deps = [ "//flutter/fml" ]
 
   public_configs = [
     ":flutter_config",

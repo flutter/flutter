@@ -12,11 +12,7 @@ source_set("converter") {
     "dart_converter.h",
   ]
 
-  deps = [
-    "../common",
-  ]
+  deps = [ "../common" ]
 
-  public_deps = [
-    "//third_party/dart/runtime:dart_api",
-  ]
+  public_deps = [ "//third_party/dart/runtime:dart_api" ]
 }

@@ -11,15 +11,9 @@ template("generate_dart_profiler_symbols") {
   assert(defined(invoker.output), "Must define 'output'")
 
   prebuilt_dart_action(target_name) {
-    deps = [
-      invoker.library_label,
-    ]
-    inputs = [
-      invoker.library_path,
-    ]
-    outputs = [
-      invoker.output,
-    ]
+    deps = [ invoker.library_label ]
+    inputs = [ invoker.library_path ]
+    outputs = [ invoker.output ]
 
     script = "dart_profiler_symbols.dart"
 

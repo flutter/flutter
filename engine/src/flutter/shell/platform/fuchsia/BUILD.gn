@@ -22,17 +22,13 @@ fuchsia_host_bundle("flutter_binaries") {
 
   _flutter_tester_label = "//flutter/shell/testing:testing($host_toolchain)"
 
-  deps = [
-    _flutter_tester_label,
-  ]
+  deps = [ _flutter_tester_label ]
 
   _flutter_tester_bin_path =
       rebase_path(get_label_info(_flutter_tester_label, "root_out_dir") +
                   "/flutter_tester")
 
-  sources = [
-    _flutter_tester_bin_path,
-  ]
+  sources = [ _flutter_tester_bin_path ]
 }
 
 fuchsia_host_bundle("dart_binaries") {
@@ -93,7 +89,5 @@ group("fuchsia") {
 group("tests") {
   testonly = true
 
-  deps = [
-    "flutter:tests",
-  ]
+  deps = [ "flutter:tests" ]
 }
