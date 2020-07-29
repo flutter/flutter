@@ -119,8 +119,6 @@ class GenerateLocalizationsTarget extends Target {
 
     // If generating a synthetic package, generate a warning if flutter: generate
     // is not found.
-    print('test the prints!');
-    print(options.useSyntheticPackage);
     if (options.useSyntheticPackage) {
       final YamlNode yamlNode = loadYamlNode(pubspecFile.readAsStringSync());
       if (yamlNode is! YamlMap) {
@@ -131,7 +129,23 @@ class GenerateLocalizationsTarget extends Target {
       }
       final YamlMap yamlMap = yamlNode as YamlMap;
 
-      print(yamlMap);
+      final Object value = yamlMap['flutter'];
+      if (value != null) {
+        if (value is! YamlMap) {
+          globals.logger.printError('Expected "flutter" to have a YamlMap value, instead was "$value"');
+          throw Exception();
+        }
+
+        final YamlMap flutterMap = value as YamlMap;
+        print('flutterMap: $flutterMap');
+        final String shouldGenerateCode = _tryReadString(flutterMap, 'generate', globals.logger);
+        print('shouldGenCode: $shouldGenerateCode');
+        if (shouldGenerateCode == null) {
+          print('should generate code returns null');
+          globals.logger.printError('Generating localizations code without generate');
+          throw Exception();
+        }
+      }
     }
 
     await generateLocalizations(
