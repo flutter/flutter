@@ -13,6 +13,7 @@
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "flutter/lib/ui/painting/immutable_buffer.h"
 #include "third_party/skia/include/codec/SkCodec.h"
+#include "third_party/skia/include/core/SkImageGenerator.h"
 #include "third_party/skia/include/core/SkImageInfo.h"
 #include "third_party/skia/src/codec/SkCodecImageGenerator.h"
 #include "third_party/tonic/dart_library_natives.h"
@@ -81,31 +82,31 @@ class ImageDescriptor : public RefCountedDartWrappable<ImageDescriptor> {
   /// The underlying buffer for this image.
   sk_sp<SkData> data() const { return buffer_; }
 
+  sk_sp<SkImage> image() const;
+
   /// Whether this descriptor represents compressed (encoded) data or not.
-  bool is_compressed() const { return !!generator_; }
+  bool is_compressed() const { return generator_ || platform_image_generator_; }
 
   /// The orientation corrected image info for this image.
   const SkImageInfo& image_info() const { return image_info_; }
 
+  /// Gets the scaled dimensions of this image, if backed by a codec that can
+  /// perform efficient subpixel scaling.
   SkISize get_scaled_dimensions(float scale) {
-    if (!generator_) {
-      FML_DCHECK(false);
-      return image_info_.dimensions();
+    if (generator_) {
+      return generator_->getScaledDimensions(scale);
     }
-    return generator_->getScaledDimensions(scale);
+    return image_info_.dimensions();
   }
 
   /// Gets pixels for this image transformed based on the EXIF orientation tag,
   /// if applicable.
-  bool get_pixels(const SkPixmap& pixmap) const {
-    FML_DCHECK(generator_);
-    return generator_->getPixels(pixmap.info(), pixmap.writable_addr(),
-                                 pixmap.rowBytes());
-  }
+  bool get_pixels(const SkPixmap& pixmap) const;
 
   void dispose() {
     ClearDartWrapper();
     generator_.reset();
+    platform_image_generator_.reset();
   }
 
   size_t GetAllocationSize() const override {
@@ -119,9 +120,12 @@ class ImageDescriptor : public RefCountedDartWrappable<ImageDescriptor> {
                   const SkImageInfo& image_info,
                   std::optional<size_t> row_bytes);
   ImageDescriptor(sk_sp<SkData> buffer, std::unique_ptr<SkCodec> codec);
+  ImageDescriptor(sk_sp<SkData> buffer,
+                  std::unique_ptr<SkImageGenerator> generator);
 
   sk_sp<SkData> buffer_;
   std::shared_ptr<SkCodecImageGenerator> generator_;
+  std::unique_ptr<SkImageGenerator> platform_image_generator_;
   const SkImageInfo image_info_;
   std::optional<size_t> row_bytes_;
 

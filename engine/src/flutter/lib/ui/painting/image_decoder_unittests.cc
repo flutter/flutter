@@ -165,7 +165,8 @@ TEST_F(ImageDecoderFixtureTest, InvalidImageResultsError) {
     ASSERT_FALSE(data);
 
     fml::RefPtr<ImageDescriptor> image_descriptor =
-        fml::MakeRefCounted<ImageDescriptor>(std::move(data), nullptr);
+        fml::MakeRefCounted<ImageDescriptor>(std::move(data),
+                                             std::unique_ptr<SkCodec>(nullptr));
 
     ImageDecoder::ImageResult callback = [&](SkiaGPUObject<SkImage> image) {
       ASSERT_TRUE(runners.GetUITaskRunner()->RunsTasksOnCurrentThread());

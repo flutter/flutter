@@ -70,6 +70,19 @@ void main() {
     final Codec codec = await descriptor.instantiateCodec();
     expect(codec.frameCount, 1);
   });
+
+  test('HEIC image', () async {
+    final Uint8List bytes = await readFile('grill_chicken.heic');
+    final ImmutableBuffer buffer = await ImmutableBuffer.fromUint8List(bytes);
+    final ImageDescriptor descriptor = await ImageDescriptor.encoded(buffer);
+
+    expect(descriptor.width, 300);
+    expect(descriptor.height, 400);
+    expect(descriptor.bytesPerPixel, 4);
+
+    final Codec codec = await descriptor.instantiateCodec();
+    expect(codec.frameCount, 1);
+  }, skip: !(Platform.isIOS || Platform.isMacOS || Platform.isWindows));
 }
 
 Future<Uint8List> readFile(String fileName, ) async {
