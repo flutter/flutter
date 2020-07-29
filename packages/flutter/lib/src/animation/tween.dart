@@ -208,7 +208,7 @@ class _ChainedEvaluation<T> extends Animatable<T> {
 /// [Tween]s that use dedicated `lerp` methods instead of merely relying on the
 /// operators (in particular, this allows them to handle null values in a more
 /// useful manner).
-class Tween<T extends Object> extends Animatable<T> {
+class Tween<T extends dynamic> extends Animatable<T> {
   /// Creates a tween.
   ///
   /// The [begin] and [end] properties must be non-null before the tween is
@@ -240,7 +240,7 @@ class Tween<T extends Object> extends Animatable<T> {
   T lerp(double t) {
     assert(begin != null);
     assert(end != null);
-    return (begin as dynamic) + ((end as dynamic) - begin) * t as T;
+    return begin + (end - begin) * t as T;
   }
 
   /// Returns the interpolated value for the current value of the given animation.
@@ -292,7 +292,7 @@ class ReverseTween<T extends Object> extends Tween<T> {
 /// [Color.lerp].
 ///
 /// See [Tween] for a discussion on how to use interpolation objects.
-class ColorTween extends Tween<Color> {
+class ColorTween extends Tween<Color?> {
   /// Creates a [Color] tween.
   ///
   /// The [begin] and [end] properties may be null; the null value
@@ -306,7 +306,7 @@ class ColorTween extends Tween<Color> {
 
   /// Returns the value this variable has at the given animation clock value.
   @override
-  Color lerp(double t) => Color.lerp(begin, end, t)!;
+  Color? lerp(double t) => Color.lerp(begin, end, t);
 }
 
 /// An interpolation between two sizes.
@@ -315,7 +315,7 @@ class ColorTween extends Tween<Color> {
 /// [Size.lerp].
 ///
 /// See [Tween] for a discussion on how to use interpolation objects.
-class SizeTween extends Tween<Size> {
+class SizeTween extends Tween<Size?> {
   /// Creates a [Size] tween.
   ///
   /// The [begin] and [end] properties may be null; the null value
@@ -324,7 +324,7 @@ class SizeTween extends Tween<Size> {
 
   /// Returns the value this variable has at the given animation clock value.
   @override
-  Size lerp(double t) => Size.lerp(begin, end, t)!;
+  Size? lerp(double t) => Size.lerp(begin, end, t);
 }
 
 /// An interpolation between two rectangles.
@@ -333,7 +333,7 @@ class SizeTween extends Tween<Size> {
 /// [Rect.lerp].
 ///
 /// See [Tween] for a discussion on how to use interpolation objects.
-class RectTween extends Tween<Rect> {
+class RectTween extends Tween<Rect?> {
   /// Creates a [Rect] tween.
   ///
   /// The [begin] and [end] properties may be null; the null value
@@ -342,7 +342,7 @@ class RectTween extends Tween<Rect> {
 
   /// Returns the value this variable has at the given animation clock value.
   @override
-  Rect lerp(double t) => Rect.lerp(begin, end, t)!;
+  Rect? lerp(double t) => Rect.lerp(begin, end, t);
 }
 
 /// An interpolation between two integers that rounds.
@@ -396,7 +396,7 @@ class StepTween extends Tween<int> {
 }
 
 /// A tween with a constant value.
-class ConstantTween<T extends Object> extends Tween<T> {
+class ConstantTween<T> extends Tween<T> {
   /// Create a tween whose [begin] and [end] values equal [value].
   ConstantTween(T value) : super(begin: value, end: value);
 
