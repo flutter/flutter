@@ -104,7 +104,7 @@ class GenerateLocalizationsTarget extends Target {
   @override
   Future<void> build(Environment environment) async {
     final File configFile = environment.projectDir.childFile('l10n.yaml');
-    final File pubspecFile = environment.projectDir.childFile('pubspect.yaml');
+    final File pubspecFile = environment.projectDir.childFile('pubspec.yaml');
     assert(configFile.existsSync());
     assert(pubspecFile.existsSync());
 
@@ -119,6 +119,8 @@ class GenerateLocalizationsTarget extends Target {
 
     // If generating a synthetic package, generate a warning if flutter: generate
     // is not found.
+    print('test the prints!');
+    print(options.useSyntheticPackage);
     if (options.useSyntheticPackage != null && options.useSyntheticPackage) {
       final String contents = pubspecFile.readAsStringSync();
       if (contents.trim().isEmpty) {
