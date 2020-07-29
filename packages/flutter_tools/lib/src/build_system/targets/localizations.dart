@@ -104,7 +104,9 @@ class GenerateLocalizationsTarget extends Target {
   @override
   Future<void> build(Environment environment) async {
     final File configFile = environment.projectDir.childFile('l10n.yaml');
+    final File pubspecFile = environment.projectDir.childFile('pubspect.yaml');
     assert(configFile.existsSync());
+    assert(pubspecFile.existsSync());
 
     final LocalizationOptions options = parseLocalizationsOptions(
       file: configFile,
@@ -114,6 +116,25 @@ class GenerateLocalizationsTarget extends Target {
       logger: environment.logger,
       fileSystem: environment.fileSystem,
     );
+
+    // If generating a synthetic package, generate a warning if flutter: generate
+    // is not found.
+    if (options.useSyntheticPackage != null && options.useSyntheticPackage) {
+      final String contents = pubspecFile.readAsStringSync();
+      if (contents.trim().isEmpty) {
+        return const LocalizationOptions();
+      }
+      final YamlNode yamlNode = loadYamlNode(pubspecFile.readAsStringSync());
+      if (yamlNode is! YamlMap) {
+        globals.logger.printError(
+          'Expected ${pubspecFile.path} to contain a map, instead was $yamlNode',
+        );
+        throw Exception();
+      }
+      final YamlMap yamlMap = yamlNode as YamlMap;
+
+      print(yamlMap);
+    }
 
     await generateLocalizations(
       fileSystem: environment.fileSystem,
