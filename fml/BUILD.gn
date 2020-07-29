@@ -230,9 +230,7 @@ if (enable_unittests) {
   executable("fml_benchmarks") {
     testonly = true
 
-    sources = [
-      "message_loop_task_queues_benchmark.cc",
-    ]
+    sources = [ "message_loop_task_queues_benchmark.cc" ]
 
     deps = [
       "//flutter/benchmarking",

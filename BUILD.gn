@@ -37,9 +37,7 @@ config("fuchsia_legacy") {
 
 config("export_dynamic_symbols") {
   if (is_linux || is_fuchsia) {
-    inputs = [
-      "//flutter/common/exported_symbols.sym",
-    ]
+    inputs = [ "//flutter/common/exported_symbols.sym" ]
     ldflags = [ "-Wl,--dynamic-list=" + rebase_path(inputs[0], root_build_dir) ]
   }
 }
@@ -165,17 +163,13 @@ group("flutter") {
 group("dist") {
   testonly = true
 
-  deps = [
-    "//flutter/sky/dist",
-  ]
+  deps = [ "//flutter/sky/dist" ]
 }
 
 if (is_fuchsia) {
   group("fuchsia_tests") {
     testonly = true
 
-    deps = [
-      "//flutter/shell/platform/fuchsia:tests",
-    ]
+    deps = [ "//flutter/shell/platform/fuchsia:tests" ]
   }
 }

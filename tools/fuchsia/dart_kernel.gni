@@ -14,9 +14,7 @@ template("dart_kernel") {
 
     main_dart = rebase_path(invoker.main_dart)
 
-    deps = [
-      invoker.kernel_platform_files,
-    ]
+    deps = [ invoker.kernel_platform_files ]
 
     gen_kernel_script = "//third_party/dart/pkg/vm/bin/gen_kernel.dart"
     platform_dill = "$root_out_dir/dart_runner_patched_sdk/platform_strong.dill"
@@ -32,9 +30,7 @@ template("dart_kernel") {
     ]
 
     output = "$target_gen_dir/$target_name.dill"
-    outputs = [
-      output,
-    ]
+    outputs = [ output ]
 
     depfile = "$output.d"
     abs_depfile = rebase_path(depfile)

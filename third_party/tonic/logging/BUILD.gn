@@ -19,7 +19,5 @@ source_set("logging") {
     "../converter",
   ]
 
-  public_deps = [
-    "//third_party/dart/runtime:dart_api",
-  ]
+  public_deps = [ "//third_party/dart/runtime:dart_api" ]
 }

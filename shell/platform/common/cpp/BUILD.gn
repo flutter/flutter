@@ -32,19 +32,13 @@ source_set("common_cpp_library_headers") {
 
 copy("publish_headers") {
   sources = _public_headers
-  outputs = [
-    "$root_out_dir/{{source_file_part}}",
-  ]
+  outputs = [ "$root_out_dir/{{source_file_part}}" ]
 }
 
 source_set("common_cpp_input") {
-  public = [
-    "text_input_model.h",
-  ]
+  public = [ "text_input_model.h" ]
 
-  sources = [
-    "text_input_model.cc",
-  ]
+  sources = [ "text_input_model.cc" ]
 
   configs += [ ":desktop_library_implementation" ]
 
@@ -88,13 +82,9 @@ source_set("common_cpp") {
 # embedding is futher along and it's clearer how much, if any, shared
 # API surface there will be.
 source_set("common_cpp_core") {
-  public = [
-    "path_utils.h",
-  ]
+  public = [ "path_utils.h" ]
 
-  sources = [
-    "path_utils.cc",
-  ]
+  sources = [ "path_utils.cc" ]
 }
 
 if (enable_unittests) {
@@ -105,9 +95,7 @@ if (enable_unittests) {
   executable("common_cpp_core_unittests") {
     testonly = true
 
-    sources = [
-      "path_utils_unittests.cc",
-    ]
+    sources = [ "path_utils_unittests.cc" ]
 
     deps = [
       ":common_cpp_core",

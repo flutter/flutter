@@ -12,9 +12,7 @@ executable("testing") {
     "//flutter:export_dynamic_symbols",
   ]
 
-  sources = [
-    "tester_main.cc",
-  ]
+  sources = [ "tester_main.cc" ]
 
   deps = [
     "//flutter/assets",

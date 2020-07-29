@@ -184,9 +184,7 @@ template("aot_runner") {
   }
 
   fuchsia_archive(target_name) {
-    deps = [
-      ":aot${product_suffix}",
-    ]
+    deps = [ ":aot${product_suffix}" ]
 
     if (!product) {
       deps += [
@@ -444,9 +442,7 @@ executable("flutter_runner_scenic_unittests") {
     "//third_party/skia",
   ]
 
-  public_deps = [
-    "//third_party/googletest:gtest",
-  ]
+  public_deps = [ "//third_party/googletest:gtest" ]
 }
 
 # When adding a new dep here, please also ensure the dep is added to
@@ -454,9 +450,7 @@ executable("flutter_runner_scenic_unittests") {
 fuchsia_archive("flutter_runner_tests") {
   testonly = true
 
-  deps = [
-    ":flutter_runner_unittests",
-  ]
+  deps = [ ":flutter_runner_unittests" ]
 
   binary = "$target_name"
 
@@ -497,9 +491,7 @@ fuchsia_archive("flutter_runner_tests") {
 fuchsia_archive("flutter_runner_tzdata_tests") {
   testonly = true
 
-  deps = [
-    ":flutter_runner_tzdata_unittests",
-  ]
+  deps = [ ":flutter_runner_tzdata_unittests" ]
 
   binary = "$target_name"
 
@@ -525,9 +517,7 @@ fuchsia_archive("flutter_runner_tzdata_tests") {
 fuchsia_archive("flutter_runner_scenic_tests") {
   testonly = true
 
-  deps = [
-    ":flutter_runner_scenic_unittests",
-  ]
+  deps = [ ":flutter_runner_scenic_unittests" ]
 
   binary = "$target_name"
 
@@ -551,17 +541,13 @@ fuchsia_archive("flutter_runner_scenic_tests") {
 }
 
 fuchsia_test_archive("fml_tests") {
-  deps = [
-    "//flutter/fml:fml_unittests",
-  ]
+  deps = [ "//flutter/fml:fml_unittests" ]
 
   binary = "fml_unittests"
 }
 
 fuchsia_test_archive("flow_tests") {
-  deps = [
-    "//flutter/flow:flow_unittests",
-  ]
+  deps = [ "//flutter/flow:flow_unittests" ]
 
   binary = "flow_unittests"
 
@@ -585,9 +571,7 @@ fuchsia_test_archive("flow_tests") {
 }
 
 fuchsia_test_archive("flow_tests_next") {
-  deps = [
-    "//flutter/flow:flow_unittests_next",
-  ]
+  deps = [ "//flutter/flow:flow_unittests_next" ]
 
   binary = "flow_unittests_next"
 
@@ -703,17 +687,13 @@ fuchsia_test_archive("shell_tests_next") {
 }
 
 fuchsia_test_archive("testing_tests") {
-  deps = [
-    "//flutter/testing:testing_unittests",
-  ]
+  deps = [ "//flutter/testing:testing_unittests" ]
 
   binary = "testing_unittests"
 }
 
 fuchsia_test_archive("txt_tests") {
-  deps = [
-    "//flutter/third_party/txt:txt_unittests",
-  ]
+  deps = [ "//flutter/third_party/txt:txt_unittests" ]
 
   binary = "txt_unittests"
 

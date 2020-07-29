@@ -8,9 +8,7 @@ executable("font-subset") {
     "main.cc",
   ]
 
-  deps = [
-    "//third_party/harfbuzz",
-  ]
+  deps = [ "//third_party/harfbuzz" ]
 
   libs = []
   if (is_mac) {

@@ -14,9 +14,7 @@ copy("generate_dart_ui") {
   visibility = [ ":*" ]
   sources = dart_ui_files
 
-  outputs = [
-    "$bindings_output_dir/dart_ui/{{source_file_part}}",
-  ]
+  outputs = [ "$bindings_output_dir/dart_ui/{{source_file_part}}" ]
 }
 
 compiled_action("generate_snapshot_bin") {
@@ -32,12 +30,8 @@ compiled_action("generate_snapshot_bin") {
 
   platform_kernel = "$root_out_dir/flutter_patched_sdk/platform_strong.dill"
 
-  inputs = [
-    platform_kernel,
-  ]
-  deps = [
-    ":kernel_platform_files",
-  ]
+  inputs = [ platform_kernel ]
+  deps = [ ":kernel_platform_files" ]
 
   vm_snapshot_data = "$target_gen_dir/vm_isolate_snapshot.bin"
   vm_snapshot_instructions = "$target_gen_dir/vm_snapshot_instructions.bin"
@@ -109,9 +103,7 @@ template("bin_to_assembly") {
       script,
       invoker.input,
     ]
-    outputs = [
-      output,
-    ]
+    outputs = [ output ]
   }
 }
 
@@ -150,12 +142,8 @@ template("bin_to_coff") {
     if (current_cpu == "x64") {
       args += [ "--64-bit" ]
     }
-    inputs = [
-      invoker.input,
-    ]
-    outputs = [
-      output,
-    ]
+    inputs = [ invoker.input ]
+    outputs = [ output ]
   }
 }
 
@@ -174,45 +162,35 @@ template("bin_to_linkable") {
 }
 
 bin_to_linkable("vm_snapshot_data_linkable") {
-  deps = [
-    ":generate_snapshot_bin",
-  ]
+  deps = [ ":generate_snapshot_bin" ]
   input = "$target_gen_dir/vm_isolate_snapshot.bin"
   symbol = "kDartVmSnapshotData"
   executable = false
 }
 
 bin_to_linkable("vm_snapshot_instructions_linkable") {
-  deps = [
-    ":generate_snapshot_bin",
-  ]
+  deps = [ ":generate_snapshot_bin" ]
   input = "$target_gen_dir/vm_snapshot_instructions.bin"
   symbol = "kDartVmSnapshotInstructions"
   executable = true
 }
 
 bin_to_linkable("isolate_snapshot_data_linkable") {
-  deps = [
-    ":generate_snapshot_bin",
-  ]
+  deps = [ ":generate_snapshot_bin" ]
   input = "$target_gen_dir/isolate_snapshot.bin"
   symbol = "kDartIsolateSnapshotData"
   executable = false
 }
 
 bin_to_linkable("isolate_snapshot_instructions_linkable") {
-  deps = [
-    ":generate_snapshot_bin",
-  ]
+  deps = [ ":generate_snapshot_bin" ]
   input = "$target_gen_dir/isolate_snapshot_instructions.bin"
   symbol = "kDartIsolateSnapshotInstructions"
   executable = true
 }
 
 bin_to_linkable("platform_strong_dill_linkable") {
-  deps = [
-    ":kernel_platform_files",
-  ]
+  deps = [ ":kernel_platform_files" ]
   input = "$root_out_dir/flutter_patched_sdk/platform_strong.dill"
   symbol = "kPlatformStrongDill"
   size_symbol = "kPlatformStrongDillSize"
@@ -261,7 +239,5 @@ compile_platform("strong_platform") {
 
 # Fuchsia's snapshot requires a different platform with extra dart: libraries.
 group("kernel_platform_files") {
-  public_deps = [
-    ":strong_platform",
-  ]
+  public_deps = [ ":strong_platform" ]
 }

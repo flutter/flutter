@@ -62,9 +62,7 @@ source_set("client_wrapper_library_stubs_glfw") {
 
   defines = [ "FLUTTER_DESKTOP_LIBRARY" ]
 
-  public_deps = [
-    "//flutter/shell/platform/glfw:flutter_glfw_headers",
-  ]
+  public_deps = [ "//flutter/shell/platform/glfw:flutter_glfw_headers" ]
 }
 
 test_fixtures("client_wrapper_glfw_fixtures") {

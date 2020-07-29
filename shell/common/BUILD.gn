@@ -30,9 +30,7 @@ template("dart_embedder_resources") {
     }
 
     output = invoker.output
-    outputs = [
-      output,
-    ]
+    outputs = [ output ]
 
     inputs = [ script ] + invoker.inputs
 
@@ -174,9 +172,7 @@ if (enable_unittests) {
   }
 
   shell_host_executable("shell_benchmarks") {
-    sources = [
-      "shell_benchmarks.cc",
-    ]
+    sources = [ "shell_benchmarks.cc" ]
 
     deps = [
       ":shell_unittests_fixtures",
