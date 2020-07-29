@@ -611,7 +611,7 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
 /// class RestorationExampleApp extends StatelessWidget {
 ///   @override
 ///   Widget build(BuildContext context) {
-///     // TODO(goderbauer): remove the [RootRestorationScope] once it is part of [MaterialApp]. // ignore: flutter_style_todos
+///     // The [RootRestorationScope] can be removed once it is part of [MaterialApp].
 ///     return RootRestorationScope(
 ///       restorationId: 'root',
 ///       child: MaterialApp(
