@@ -86,11 +86,12 @@ class ButtonBar extends StatelessWidget {
   /// If that is null, it will default to [MainAxisSize.max].
   final MainAxisSize mainAxisSize;
 
-  /// Overrides the surrounding [ButtonBarThemeData.textTheme] to define a button's
-  /// base colors, size, internal padding and shape.
+  /// Overrides the surrounding [ButtonBarThemeData.buttonTextTheme] to define a
+  /// button's base colors, size, internal padding and shape.
   ///
-  /// If null then it will use the surrounding [ButtonBarThemeData.buttonTextTheme].
-  /// If that is null, it will default to [ButtonTextTheme.primary].
+  /// If null then it will use the surrounding
+  /// [ButtonBarThemeData.buttonTextTheme]. If that is null, it will default to
+  /// [ButtonTextTheme.primary].
   final ButtonTextTheme buttonTextTheme;
 
   /// Overrides the surrounding [ButtonThemeData.minWidth] to define a button's
