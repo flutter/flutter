@@ -802,6 +802,8 @@ abstract class SliverMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
 ///
 /// See also:
 ///
+///  * <https://flutter.dev/docs/development/ui/advanced/slivers>, a description
+///    of what slivers are and how to use them.
 ///  * [SliverFixedExtentList], which is more efficient for children with
 ///    the same extent in the main axis.
 ///  * [SliverPrototypeExtentList], which is similar to [SliverFixedExtentList]

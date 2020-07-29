@@ -48,6 +48,22 @@ const Duration _kElevationDuration = Duration(milliseconds: 75);
 /// Outline buttons have a minimum size of 88.0 by 36.0 which can be overridden
 /// with [ButtonTheme].
 ///
+/// {@tool dartpad --template=stateless_widget_scaffold_center}
+///
+/// Here is an example of a basic [OutlineButton].
+///
+/// ```dart
+///   Widget build(BuildContext context) {
+///     return OutlineButton(
+///       onPressed: () {
+///         print('Received click');
+///       },
+///       child: Text('Click Me'),
+///     );
+///   }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [RaisedButton], a filled material design button with a shadow.

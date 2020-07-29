@@ -262,25 +262,6 @@ class FlutterProject {
     }
     await injectPlugins(this, checkProjects: checkProjects);
   }
-
-  /// Return the set of builders used by this package.
-  YamlMap get builders {
-    if (!pubspecFile.existsSync()) {
-      return null;
-    }
-    final YamlMap pubspec = loadYaml(pubspecFile.readAsStringSync()) as YamlMap;
-    // If the pubspec file is empty, this will be null.
-    if (pubspec == null) {
-      return null;
-    }
-    return pubspec['builders'] as YamlMap;
-  }
-
-  /// Whether there are any builders used by this package.
-  bool get hasBuilders {
-    final YamlMap result = builders;
-    return result != null && result.isNotEmpty;
-  }
 }
 
 /// Base class for projects per platform.
@@ -540,7 +521,7 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   Map<String, Map<String, String>> _buildSettingsByScheme;
 
   Future<XcodeProjectInfo> projectInfo() async {
-    if (!existsSync() || !globals.xcodeProjectInterpreter.isInstalled) {
+    if (!xcodeProject.existsSync() || !globals.xcodeProjectInterpreter.isInstalled) {
       return null;
     }
     return _projectInfo ??= await globals.xcodeProjectInterpreter.getInfo(hostAppRoot.path);
@@ -805,7 +786,7 @@ class AndroidProject extends FlutterProjectPlatform {
     await _overwriteFromTemplate(globals.fs.path.join(
       'module',
       'android',
-      featureFlags.isAndroidEmbeddingV2Enabled ? 'library_new_embedding' : 'library',
+      'library_new_embedding',
     ), ephemeralDirectory);
     await _overwriteFromTemplate(globals.fs.path.join('module', 'android', 'gradle'), ephemeralDirectory);
     gradle.gradleUtils.injectGradleWrapperIfNeeded(ephemeralDirectory);
@@ -820,7 +801,6 @@ class AndroidProject extends FlutterProjectPlatform {
         'projectName': parent.manifest.appName,
         'androidIdentifier': parent.manifest.androidPackage,
         'androidX': usesAndroidX,
-        'useAndroidEmbeddingV2': featureFlags.isAndroidEmbeddingV2Enabled,
       },
       printStatusWhenWriting: false,
       overwriteExisting: true,

@@ -23,6 +23,7 @@ import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../tracing.dart';
 import '../web/web_runner.dart';
+import '../widget_cache.dart';
 import 'daemon.dart';
 
 abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
@@ -342,7 +343,7 @@ class RunCommand extends RunCommandBase {
     if (devices == null) {
       throwToolExit(null);
     }
-    if (deviceManager.hasSpecifiedAllDevices && runningWithPrebuiltApplication) {
+    if (globals.deviceManager.hasSpecifiedAllDevices && runningWithPrebuiltApplication) {
       throwToolExit('Using -d all with --use-application-binary is not supported');
     }
 
@@ -374,6 +375,7 @@ class RunCommand extends RunCommandBase {
         hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',
         port: featureFlags.isWebEnabled ? stringArg('web-port') : '',
         webUseSseForDebugProxy: featureFlags.isWebEnabled && stringArg('web-server-debug-protocol') == 'sse',
+        webUseSseForDebugBackend: featureFlags.isWebEnabled && stringArg('web-server-debug-backend-protocol') == 'sse',
         webEnableExposeUrl: featureFlags.isWebEnabled && boolArg('web-allow-expose-url'),
         webRunHeadless: featureFlags.isWebEnabled && boolArg('web-run-headless'),
         webBrowserDebugPort: browserDebugPort,
@@ -400,6 +402,7 @@ class RunCommand extends RunCommandBase {
         hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',
         port: featureFlags.isWebEnabled ? stringArg('web-port') : '',
         webUseSseForDebugProxy: featureFlags.isWebEnabled && stringArg('web-server-debug-protocol') == 'sse',
+        webUseSseForDebugBackend: featureFlags.isWebEnabled && stringArg('web-server-debug-backend-protocol') == 'sse',
         webEnableExposeUrl: featureFlags.isWebEnabled && boolArg('web-allow-expose-url'),
         webRunHeadless: featureFlags.isWebEnabled && boolArg('web-run-headless'),
         webBrowserDebugPort: browserDebugPort,
@@ -448,6 +451,7 @@ class RunCommand extends RunCommandBase {
           packagesFilePath: globalResults['packages'] as String,
           dillOutputPath: stringArg('output-dill'),
           ipv6: ipv6,
+          machine: true,
         );
       } on Exception catch (error) {
         throwToolExit(error.toString());
@@ -516,6 +520,7 @@ class RunCommand extends RunCommandBase {
           target: stringArg('target'),
           buildInfo: getBuildInfo(),
           userIdentifier: userIdentifier,
+          widgetCache: WidgetCache(featureFlags: featureFlags),
         ),
     ];
     // Only support "web mode" with a single web device due to resident runner

@@ -126,6 +126,21 @@ void main() {
     expect(c.color, equals(b.color));
   });
 
+  test('Decoration equality', () {
+    const BoxDecoration a = BoxDecoration(
+      color: Color(0xFFFFFFFF),
+      boxShadow: <BoxShadow>[BoxShadow()],
+    );
+
+    const BoxDecoration b = BoxDecoration(
+      color: Color(0xFFFFFFFF),
+      boxShadow: <BoxShadow>[BoxShadow()],
+    );
+
+    expect(a.hashCode, equals(b.hashCode));
+    expect(a, equals(b));
+  });
+
   test('BoxDecorationImageListenerSync', () {
     final ImageProvider imageProvider = SynchronousTestImageProvider();
     final DecorationImage backgroundImage = DecorationImage(image: imageProvider);

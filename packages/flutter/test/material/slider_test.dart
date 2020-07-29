@@ -2041,13 +2041,13 @@ void main() {
                       value = newValue;
                     },
                   ),
-                  RaisedButton(
+                  ElevatedButton(
                     child: const Text('Next'),
                     onPressed: () {
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute<void>(
                           builder: (BuildContext context) {
-                            return RaisedButton(
+                            return ElevatedButton(
                               child: const Text('Inner page'),
                               onPressed: () { Navigator.of(context).pop(); },
                             );
@@ -2100,7 +2100,7 @@ void main() {
       ),
     );
 
-    // Represents the RaisedButton with inner Text, inner page.
+    // Represents the ElevatedButton with inner Text, inner page.
     expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 1));
     expect(valueIndicatorBox, paintsExactlyCountTimes(#drawParagraph, 1));
 

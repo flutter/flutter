@@ -151,15 +151,10 @@ void main() {
     );
   }
 
+  // TODO(jsimmons): need a localization test that uses deferred loading
+  // (see https://github.com/flutter/flutter/issues/61911)
   test('generated l10n classes produce expected localized strings', () async {
     await project.setUpIn(tempDir);
-    flutter = FlutterRunTestDriver(tempDir);
-    final StringBuffer stdout = await runApp();
-    expectOutput(stdout);
-  });
-
-  test('generated l10n classes produce expected localized strings with deferred loading', () async {
-    await project.setUpIn(tempDir, useDeferredLoading: true);
     flutter = FlutterRunTestDriver(tempDir);
     final StringBuffer stdout = await runApp();
     expectOutput(stdout);

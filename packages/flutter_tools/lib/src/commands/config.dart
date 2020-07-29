@@ -113,9 +113,15 @@ class ConfigCommand extends FlutterCommand {
 
     if (argResults.wasParsed('analytics')) {
       final bool value = boolArg('analytics');
-      // We send the analytics event *before* toggling the flag intentionally
-      // to be sure that opt-out events are sent correctly.
+      // The tool sends the analytics event *before* toggling the flag
+      // intentionally to be sure that opt-out events are sent correctly.
       AnalyticsConfigEvent(enabled: value).send();
+      if (!value) {
+        // Normally, the tool waits for the analytics to all send before the
+        // tool exits, but only when analytics are enabled. When reporting that
+        // analytics have been disable, the wait must be done here instead.
+        await globals.flutterUsage.ensureAnalyticsSent();
+      }
       globals.flutterUsage.enabled = value;
       globals.printStatus('Analytics reporting ${value ? 'enabled' : 'disabled'}.');
     }

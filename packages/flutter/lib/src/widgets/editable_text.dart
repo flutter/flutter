@@ -419,6 +419,7 @@ class EditableText extends StatefulWidget {
     this.mouseCursor,
     this.rendererIgnoresPointer = false,
     this.cursorWidth = 2.0,
+    this.cursorHeight,
     this.cursorRadius,
     this.cursorOpacityAnimates = false,
     this.cursorOffset,
@@ -517,7 +518,7 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.dart:ui.textHeightBehavior},
   final TextHeightBehavior textHeightBehavior;
 
-  /// {@macro flutter.widgets.text.DefaultTextStyle.textWidthBasis}
+  /// {@macro flutter.painting.textPainter.textWidthBasis}
   final TextWidthBasis textWidthBasis;
 
   /// {@template flutter.widgets.editableText.readOnly}
@@ -641,12 +642,16 @@ class EditableText extends StatefulWidget {
   /// context, the English phrase will be on the right and the Hebrew phrase on
   /// its left.
   ///
+  /// When LTR text is entered into an RTL field, or RTL text is entered into an
+  /// LTR field, [LRM](https://en.wikipedia.org/wiki/Left-to-right_mark) or
+  /// [RLM](https://en.wikipedia.org/wiki/Right-to-left_mark) characters will be
+  /// inserted alongside whitespace characters, respectively. This is to
+  /// eliminate ambiguous directionality in whitespace and ensure proper caret
+  /// placement. These characters will affect the length of the string and may
+  /// need to be parsed out when doing things like string comparison with other
+  /// text.
+  ///
   /// Defaults to the ambient [Directionality], if any.
-  ///
-  /// See also:
-  ///
-  ///  * {@macro flutter.gestures.monodrag.dragStartExample}
-  ///
   /// {@endtemplate}
   final TextDirection textDirection;
 
@@ -675,6 +680,7 @@ class EditableText extends StatefulWidget {
   /// See [RenderEditable.locale] for more information.
   final Locale locale;
 
+  /// {@template flutter.widgets.editableText.textScaleFactor}
   /// The number of font pixels for each logical pixel.
   ///
   /// For example, if the text scale factor is 1.5, text will be 50% larger than
@@ -682,6 +688,7 @@ class EditableText extends StatefulWidget {
   ///
   /// Defaults to the [MediaQueryData.textScaleFactor] obtained from the ambient
   /// [MediaQuery], or 1.0 if there is no [MediaQuery] in scope.
+  /// {@endtemplate}
   final double textScaleFactor;
 
   /// The color to use when painting the cursor.
@@ -755,10 +762,36 @@ class EditableText extends StatefulWidget {
 
   /// {@template flutter.widgets.editableText.minLines}
   /// The minimum number of lines to occupy when the content spans fewer lines.
-
+  ///
+  /// If this is null (default), text container starts with enough vertical space
+  /// for one line and grows to accommodate additional lines as they are entered.
+  ///
+  /// This can be used in combination with [maxLines] for a varying set of behaviors.
+  ///
+  /// If the value is set, it must be greater than zero. If the value is greater
+  /// than 1, [maxLines] should also be set to either null or greater than
+  /// this value.
+  ///
   /// When [maxLines] is set as well, the height will grow between the indicated
   /// range of lines. When [maxLines] is null, it will grow as high as needed,
   /// starting from [minLines].
+  ///
+  /// A few examples of behaviors possible with [minLines] and [maxLines] are as follows.
+  /// These apply equally to `TextField`, `TextFormField`, `CupertinoTextField`,
+  /// and `EditableText`.
+  ///
+  /// Input that always occupies at least 2 lines and has an infinite max.
+  /// Expands vertically as needed.
+  /// ```dart
+  /// TextField(minLines: 2)
+  /// ```
+  ///
+  /// Input whose height starts from 2 lines and grows up to 4 lines at which
+  /// point the height limit is reached. If additional lines are entered it will
+  /// scroll vertically.
+  /// ```dart
+  /// TextField(minLines:2, maxLines: 4)
+  /// ```
   ///
   /// See the examples in [maxLines] for the complete picture of how [maxLines]
   /// and [minLines] interact to produce various behaviors.
@@ -888,7 +921,7 @@ class EditableText extends StatefulWidget {
   ///                   title: const Text('Thats correct!'),
   ///                   content: Text ('13 is the right answer.'),
   ///                   actions: <Widget>[
-  ///                     FlatButton(
+  ///                     TextButton(
   ///                       onPressed: () { Navigator.pop(context); },
   ///                       child: const Text('OK'),
   ///                     ),
@@ -1041,6 +1074,13 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   final double cursorWidth;
 
+  /// {@template flutter.widgets.editableText.cursorHeight}
+  /// How tall the cursor will be.
+  ///
+  /// If this property is null, [RenderEditable.preferredLineHeight] will be used.
+  /// {@endtemplate}
+  final double cursorHeight;
+
   /// {@template flutter.widgets.editableText.cursorRadius}
   /// How rounded the corners of the cursor should be.
   ///
@@ -1157,7 +1197,7 @@ class EditableText extends StatefulWidget {
   ///   [associated domains](https://developer.apple.com/documentation/safariservices/supporting_associated_domains_in_your_app).
   /// * Some autofill hints only work with specific [keyboardType]s. For example,
   ///   [AutofillHints.name] requires [TextInputType.name] and [AutofillHints.email]
-  ///   works only with [TextInputType.email]. Make sure the input field has a
+  ///   works only with [TextInputType.emailAddress]. Make sure the input field has a
   ///   compatible [keyboardType]. Empirically, [TextInputType.name] works well
   ///   with many autofill hints that are predefined on iOS.
   /// {@endtemplate}
@@ -1365,6 +1405,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   AutofillScope get currentAutofillScope => _currentAutofillScope;
 
+  // Is this field in the current autofill context.
+  bool _isInAutofillContext = false;
+
   // This value is an eyeball estimation of the time it takes for the iOS cursor
   // to ease in and out.
   static const Duration _fadeDuration = Duration(milliseconds: 250);
@@ -1425,6 +1468,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _currentAutofillScope?.unregister(autofillId);
       _currentAutofillScope = newAutofillGroup;
       newAutofillGroup?.register(this);
+      _isInAutofillContext = _isInAutofillContext || _shouldBeInAutofillContext;
     }
 
     if (!_didAutoFocus && widget.autofocus) {
@@ -1449,6 +1493,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _selectionOverlay?.update(_value);
     }
     _selectionOverlay?.handlesVisible = widget.showSelectionHandles;
+    _isInAutofillContext = _isInAutofillContext || _shouldBeInAutofillContext;
+
     if (widget.focusNode != oldWidget.focusNode) {
       oldWidget.focusNode.removeListener(_handleFocusChanged);
       _focusAttachment?.detach();
@@ -1731,6 +1777,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   bool get _hasInputConnection => _textInputConnection != null && _textInputConnection.attached;
+  bool get _needsAutofill => widget.autofillHints?.isNotEmpty ?? false;
+  bool get _shouldBeInAutofillContext => _needsAutofill && currentAutofillScope != null;
 
   void _openInputConnection() {
     if (widget.readOnly) {
@@ -1740,14 +1788,24 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final TextEditingValue localValue = _value;
       _lastFormattedUnmodifiedTextEditingValue = localValue;
 
-      _textInputConnection = (widget.autofillHints?.isNotEmpty ?? false) && currentAutofillScope != null
+      // When _needsAutofill == true && currentAutofillScope == null, autofill
+      // is allowed but saving the user input from the text field is
+      // discouraged.
+      //
+      // In case the autofillScope changes from a non-null value to null, or
+      // _needsAutofill changes to false from true, the platform needs to be
+      // notified to exclude this field from the autofill context. So we need to
+      // provide the autofillId.
+      _textInputConnection = _needsAutofill && currentAutofillScope != null
         ? currentAutofillScope.attach(this, textInputConfiguration)
-        : TextInput.attach(this, textInputConfiguration);
+        : TextInput.attach(this, _createTextInputConfiguration(_isInAutofillContext || _needsAutofill));
       _textInputConnection.show();
       _updateSizeAndTransform();
-      // Request autofill AFTER the size and the transform have been sent to the
-      // platform side.
-      _textInputConnection.requestAutofill();
+      if (_needsAutofill) {
+        // Request autofill AFTER the size and the transform have been sent to
+        // the platform text input plugin.
+        _textInputConnection.requestAutofill();
+      }
 
       final TextStyle style = widget.style;
       _textInputConnection
@@ -2178,9 +2236,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   String get autofillId => 'EditableText-$hashCode';
 
-  @override
-  TextInputConfiguration get textInputConfiguration {
-    final bool isAutofillEnabled = widget.autofillHints?.isNotEmpty ?? false;
+  TextInputConfiguration _createTextInputConfiguration(bool needsAutofillConfiguration) {
+    assert(needsAutofillConfiguration != null);
     return TextInputConfiguration(
       inputType: widget.keyboardType,
       obscureText: widget.obscureText,
@@ -2194,12 +2251,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       ),
       textCapitalization: widget.textCapitalization,
       keyboardAppearance: widget.keyboardAppearance,
-      autofillConfiguration: !isAutofillEnabled ? null : AutofillConfiguration(
+      autofillConfiguration: !needsAutofillConfiguration ? null : AutofillConfiguration(
         uniqueIdentifier: autofillId,
-        autofillHints: widget.autofillHints.toList(growable: false),
+        autofillHints: widget.autofillHints?.toList(growable: false) ?? <String>[],
         currentEditingValue: currentTextEditingValue,
       ),
     );
+  }
+
+  @override
+  TextInputConfiguration get textInputConfiguration {
+    return _createTextInputConfiguration(_needsAutofill);
   }
 
   // null if no promptRect should be shown.
@@ -2288,6 +2350,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                 onCaretChanged: _handleCaretChanged,
                 rendererIgnoresPointer: widget.rendererIgnoresPointer,
                 cursorWidth: widget.cursorWidth,
+                cursorHeight: widget.cursorHeight,
                 cursorRadius: widget.cursorRadius,
                 cursorOffset: widget.cursorOffset,
                 selectionHeightStyle: widget.selectionHeightStyle,
@@ -2370,6 +2433,7 @@ class _Editable extends LeafRenderObjectWidget {
     this.onCaretChanged,
     this.rendererIgnoresPointer = false,
     this.cursorWidth,
+    this.cursorHeight,
     this.cursorRadius,
     this.cursorOffset,
     this.paintCursorAboveText,
@@ -2417,6 +2481,7 @@ class _Editable extends LeafRenderObjectWidget {
   final CaretChangedHandler onCaretChanged;
   final bool rendererIgnoresPointer;
   final double cursorWidth;
+  final double cursorHeight;
   final Radius cursorRadius;
   final Offset cursorOffset;
   final bool paintCursorAboveText;
@@ -2460,6 +2525,7 @@ class _Editable extends LeafRenderObjectWidget {
       textHeightBehavior: textHeightBehavior,
       textWidthBasis: textWidthBasis,
       cursorWidth: cursorWidth,
+      cursorHeight: cursorHeight,
       cursorRadius: cursorRadius,
       cursorOffset: cursorOffset,
       paintCursorAboveText: paintCursorAboveText,
@@ -2504,6 +2570,7 @@ class _Editable extends LeafRenderObjectWidget {
       ..obscuringCharacter = obscuringCharacter
       ..obscureText = obscureText
       ..cursorWidth = cursorWidth
+      ..cursorHeight = cursorHeight
       ..cursorRadius = cursorRadius
       ..cursorOffset = cursorOffset
       ..selectionHeightStyle = selectionHeightStyle

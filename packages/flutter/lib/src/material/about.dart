@@ -19,7 +19,6 @@ import 'card.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'dialog.dart';
-import 'flat_button.dart';
 import 'floating_action_button.dart';
 import 'floating_action_button_location.dart';
 import 'ink_decoration.dart';
@@ -31,6 +30,7 @@ import 'page_transitions_theme.dart';
 import 'progress_indicator.dart';
 import 'scaffold.dart';
 import 'scrollbar.dart';
+import 'text_button.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 
@@ -97,7 +97,7 @@ import 'theme.dart';
 ///        ),
 ///      ),
 ///      body: Center(
-///        child: RaisedButton(
+///        child: ElevatedButton(
 ///          child: Text('Show About Example'),
 ///          onPressed: () {
 ///            showAboutDialog(
@@ -313,6 +313,8 @@ const double _textVerticalSeparation = 18.0;
 ///
 /// To show an [AboutDialog], use [showAboutDialog].
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=YFCSODyFxbE}
+///
 /// If the application has a [Drawer], the [AboutListTile] widget can make the
 /// process of showing an about dialog simpler.
 ///
@@ -404,7 +406,7 @@ class AboutDialog extends StatelessWidget {
         ],
       ),
       actions: <Widget>[
-        FlatButton(
+        TextButton(
           child: Text(MaterialLocalizations.of(context).viewLicensesButtonLabel),
           onPressed: () {
             showLicensePage(
@@ -416,7 +418,7 @@ class AboutDialog extends StatelessWidget {
             );
           },
         ),
-        FlatButton(
+        TextButton(
           child: Text(MaterialLocalizations.of(context).closeButtonLabel),
           onPressed: () {
             Navigator.pop(context);

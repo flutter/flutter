@@ -32,7 +32,6 @@ export 'dart:ui' show TextAffinity;
 /// See also:
 ///
 ///  * [TextField.smartDashesType]
-///  * [TextFormField.smartDashesType]
 ///  * [CupertinoTextField.smartDashesType]
 ///  * [EditableText.smartDashesType]
 ///  * [SmartQuotesType]
@@ -56,10 +55,8 @@ enum SmartDashesType {
 /// See also:
 ///
 ///  * [TextField.smartQuotesType]
-///  * [TextFormField.smartQuotesType]
 ///  * [CupertinoTextField.smartQuotesType]
 ///  * [EditableText.smartQuotesType]
-///  * [SmartDashesType]
 ///  * <https://developer.apple.com/documentation/uikit/uitextinputtraits>
 enum SmartQuotesType {
   /// Smart quotes is disabled.
@@ -79,7 +76,7 @@ enum SmartQuotesType {
 ///
 /// On Android, behavior may vary across device and keyboard provider.
 ///
-/// This class stays as close to [Enum] interface as possible, and allows
+/// This class stays as close to `Enum` interface as possible, and allows
 /// for additional flags for some input types. For example, numeric input
 /// can specify whether it supports decimal numbers and/or signed numbers.
 @immutable
@@ -861,12 +858,14 @@ class TextInputConnection {
     TextInput._instance._show();
   }
 
-  /// Requests the platform autofill UI to appear.
+  /// Requests the system autofill UI to appear.
   ///
-  /// The call has no effect unless the currently attached client supports
-  /// autofill, and the platform has a standalone autofill UI (for example, this
-  /// call has no effect on iOS since its autofill UI is part of the software
-  /// keyboard).
+  /// Currently only works on Android. Other platforms do not respond to this
+  /// message.
+  ///
+  /// See also:
+  ///
+  ///  * [EditableText], a [TextInputClient] that calls this method when focused.
   void requestAutofill() {
     assert(attached);
     TextInput._instance._requestAutofill();
@@ -1000,7 +999,11 @@ RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, d
   return RawFloatingCursorPoint(offset: offset, state: state);
 }
 
-/// An interface to the system's text input control.
+/// An low-level interface to the system's text input control.
+///
+/// See also:
+///
+///  * [TextField], a widget in which the user may enter text.
 class TextInput {
   TextInput._() {
     _channel = SystemChannels.textInput;
@@ -1222,6 +1225,60 @@ class TextInput {
     _channel.invokeMethod<void>(
       'TextInput.setStyle',
       args,
+    );
+  }
+
+  /// Finishes the current autofill context, and potentially saves the user
+  /// input for future use if `shouldSave` is true.
+  ///
+  /// Typically, this method should be called when the user has finalized their
+  /// input. For example, in a [Form], it's typically done immediately before or
+  /// after its content is submitted.
+  ///
+  /// The topmost [AutofillGroup]s also call [finishAutofillContext]
+  /// automatically when they are disposed. The default behavior can be
+  /// overridden in [AutofillGroup.onDisposeAction].
+  ///
+  /// {@template flutter.services.autofill.autofillContext}
+  /// An autofill context is a collection of input fields that live in the
+  /// platform's text input plugin. The platform is encouraged to save the user
+  /// input stored in the current autofill context before the context is
+  /// destroyed, when [finishAutofillContext] is called with `shouldSave` set to
+  /// true.
+  ///
+  /// Currently, there can only be at most one autofill context at any given
+  /// time. When any input field in an [AutofillGroup] requests for autofill
+  /// (which is done automatically when an autofillable [EditableText] gains
+  /// focus), the current autofill context will merge the content of that
+  /// [AutofillGroup] into itself. When there isn't an existing autofill context,
+  /// one will be created to hold the newly added input fields from the group.
+  ///
+  /// Once added to an autofill context, an input field will stay in the context
+  /// until the context is destroyed. To prevent leaks, call [finishAutofillContext]
+  /// to signal the text input plugin that the user has finalized their input in
+  /// the current autofill context. The platform text input plugin either
+  /// encourages or discourages the platform from saving the user input based on
+  /// the value of the `shouldSave` parameter. The platform usually shows a
+  /// "Save for autofill?" prompt for user confirmation.
+  /// {@endtemplate}
+  ///
+  /// On many platforms, calling [finishAutofillContext] shows the save user
+  /// input dialog and disrupts the user's flow. Ideally the dialog should only
+  /// be shown no more than once for every screen. Consider removing premature
+  /// [finishAutofillContext] calls to prevent showing the save user input UI
+  /// too frequently. However, calling [finishAutofillContext] when there's no
+  /// existing autofill context usually does not bring up the save user input
+  /// UI.
+  ///
+  /// See also:
+  ///
+  /// * [AutofillGroup.onDisposeAction], a configurable action that runs when a
+  ///   topmost [AutofillGroup] is getting disposed.
+  static void finishAutofillContext({ bool shouldSave = true }) {
+    assert(shouldSave != null);
+    TextInput._instance._channel.invokeMethod<void>(
+      'TextInput.finishAutofillContext',
+      shouldSave ,
     );
   }
 }

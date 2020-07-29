@@ -286,12 +286,33 @@ void main() {
       expect(processUtils.runSync(<String>['boohoo']).exitCode, 1);
     });
 
-    testWithoutContext(' throws on failure with throwOnError', () async {
+    testWithoutContext('throws on failure with throwOnError', () async {
+      const String stderr = 'Something went wrong.';
       when(mockProcessManager.runSync(<String>['kaboom'])).thenReturn(
-        ProcessResult(0, 1, '', '')
+        ProcessResult(0, 1, '', stderr),
       );
-      expect(() => processUtils.runSync(<String>['kaboom'], throwOnError: true),
-             throwsA(isA<ProcessException>()));
+      try {
+        processUtils.runSync(<String>['kaboom'], throwOnError: true);
+        fail('ProcessException expected.');
+      } on ProcessException catch (e) {
+        expect(e, isA<ProcessException>());
+        expect(e.message.contains(stderr), false);
+      }
+    });
+
+    testWithoutContext('throws with stderr in exception on failure with verboseExceptions', () async {
+      const String stderr = 'Something went wrong.';
+      when(mockProcessManager.runSync(<String>['verybad'])).thenReturn(
+        ProcessResult(0, 1, '', stderr),
+      );
+      expect(
+        () => processUtils.runSync(
+          <String>['verybad'],
+          throwOnError: true,
+          verboseExceptions: true,
+        ),
+        throwsProcessException(message: stderr),
+      );
     });
 
     testWithoutContext(' does not throw on allowed Failures', () async {

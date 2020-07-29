@@ -93,6 +93,11 @@ class IntrinsicColumnWidth extends TableColumnWidth {
   /// Creates a column width based on intrinsic sizing.
   ///
   /// This sizing algorithm is very expensive.
+  ///
+  /// The `flex` argument specifies the flex factor to apply to the column if
+  /// there is any room left over when laying out the table. If `flex` is
+  /// null (the default), the table will not distribute any extra space to the
+  /// column.
   const IntrinsicColumnWidth({ double flex }) : _flex = flex;
 
   @override

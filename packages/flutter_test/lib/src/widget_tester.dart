@@ -23,8 +23,10 @@ import 'controller.dart';
 import 'event_simulation.dart';
 import 'finders.dart';
 import 'matchers.dart';
+import 'restoration.dart';
 import 'test_async_utils.dart';
 import 'test_compat.dart';
+import 'test_pointer.dart';
 import 'test_text_input.dart';
 
 /// Keep users from needing multiple imports to test semantics.
@@ -136,6 +138,7 @@ void testWidgets(
         test_package.addTearDown(binding.postTest);
         return binding.runTest(
           () async {
+            binding.reset();
             debugResetSemanticsIdCounter();
             tester.resetTestTextInput();
             Object memento;
@@ -269,6 +272,22 @@ class TargetPlatformVariant extends TestVariant<TargetPlatform> {
   }
 }
 
+/// The warning message to show when a benchmark is performed with assert on.
+const String kDebugWarning = '''
+┏╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍┓
+┇ ⚠    THIS BENCHMARK IS BEING RUN IN DEBUG MODE     ⚠  ┇
+┡╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍┦
+│                                                       │
+│  Numbers obtained from a benchmark while asserts are  │
+│  enabled will not accurately reflect the performance  │
+│  that will be experienced by end users using release  ╎
+│  builds. Benchmarks should be run using this command  ╎
+│  line:  "flutter run --profile test.dart" or          ┊
+│  or "flutter drive --profile -t test.dart".           ┊
+│                                                       ┊
+└─────────────────────────────────────────────────╌┄┈  🐢
+''';
+
 /// Runs the [callback] inside the Flutter benchmark environment.
 ///
 /// Use this function for benchmarking custom [StatelessWidget]s and
@@ -319,18 +338,7 @@ Future<void> benchmarkWidgets(
   assert(() {
     if (mayRunWithAsserts)
       return true;
-
-    print('┏╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍┓');
-    print('┇ ⚠ THIS BENCHMARK IS BEING RUN WITH ASSERTS ENABLED ⚠  ┇');
-    print('┡╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍┦');
-    print('│                                                       │');
-    print('│  Numbers obtained from a benchmark while asserts are  │');
-    print('│  enabled will not accurately reflect the performance  │');
-    print('│  that will be experienced by end users using release  ╎');
-    print('│  builds. Benchmarks should be run using this command  ┆');
-    print('│  line:  flutter run --release benchmark.dart          ┊');
-    print('│                                                        ');
-    print('└─────────────────────────────────────────────────╌┄┈  🐢');
+    print(kDebugWarning);
     return true;
   }());
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
@@ -463,6 +471,89 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     });
   }
 
+  @override
+  Future<List<Duration>> handlePointerEventRecord(List<PointerEventRecord> records) {
+    assert(records != null);
+    assert(records.isNotEmpty);
+    return TestAsyncUtils.guard<List<Duration>>(() async {
+      // hitTestHistory is an equivalence of _hitTests in [GestureBinding]
+      final Map<int, HitTestResult> hitTestHistory = <int, HitTestResult>{};
+      final List<Duration> handleTimeStampDiff = <Duration>[];
+      DateTime startTime;
+      for (final PointerEventRecord record in records) {
+        final DateTime now = binding.clock.now();
+        startTime ??= now;
+        // So that the first event is promised to receive a zero timeDiff
+        final Duration timeDiff = record.timeDelay - now.difference(startTime);
+        if (timeDiff.isNegative) {
+          // Flush all past events
+          handleTimeStampDiff.add(-timeDiff);
+          for (final PointerEvent event in record.events) {
+            _handlePointerEvent(event, hitTestHistory);
+          }
+        } else {
+          // TODO(CareF): reconsider the pumping strategy after
+          // https://github.com/flutter/flutter/issues/60739 is fixed
+          await binding.pump();
+          await binding.delayed(timeDiff);
+          handleTimeStampDiff.add(
+            binding.clock.now().difference(startTime) - record.timeDelay,
+          );
+          for (final PointerEvent event in record.events) {
+            _handlePointerEvent(event, hitTestHistory);
+          }
+        }
+      }
+      await binding.pump();
+      // This makes sure that a gesture is completed, with no more pointers
+      // active.
+      assert(hitTestHistory.isEmpty);
+      return handleTimeStampDiff;
+    });
+  }
+
+  // This is a parallel implementation of [GestureBinding._handlePointerEvent]
+  // to make compatible with test bindings.
+  void _handlePointerEvent(
+    PointerEvent event,
+    Map<int, HitTestResult> _hitTests
+  ) {
+    HitTestResult hitTestResult;
+    if (event is PointerDownEvent || event is PointerSignalEvent) {
+      assert(!_hitTests.containsKey(event.pointer));
+      hitTestResult = HitTestResult();
+      binding.hitTest(hitTestResult, event.position);
+      if (event is PointerDownEvent) {
+        _hitTests[event.pointer] = hitTestResult;
+      }
+      assert(() {
+        if (debugPrintHitTestResults)
+          debugPrint('$event: $hitTestResult');
+        return true;
+      }());
+    } else if (event is PointerUpEvent || event is PointerCancelEvent) {
+      hitTestResult = _hitTests.remove(event.pointer);
+    } else if (event.down) {
+      // Because events that occur with the pointer down (like
+      // PointerMoveEvents) should be dispatched to the same place that their
+      // initial PointerDownEvent was, we want to re-use the path we found when
+      // the pointer went down, rather than do hit detection each time we get
+      // such an event.
+      hitTestResult = _hitTests[event.pointer];
+    }
+    assert(() {
+      if (debugPrintMouseHoverEvents && event is PointerHoverEvent)
+        debugPrint('$event');
+      return true;
+    }());
+    if (hitTestResult != null ||
+        event is PointerHoverEvent ||
+        event is PointerAddedEvent ||
+        event is PointerRemovedEvent) {
+      binding.dispatchEvent(event, hitTestResult, source: TestBindingEventSource.test);
+    }
+  }
+
   /// Triggers a frame after `duration` amount of time.
   ///
   /// This makes the framework act as if the application had janked (missed
@@ -587,6 +678,53 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
         elapsed += interval;
       }
     });
+  }
+
+  /// Simulates restoring the state of the widget tree after the application
+  /// is restarted.
+  ///
+  /// The method grabs the current serialized restoration data from the
+  /// [RestorationManager], takes down the widget tree to destroy all in-memory
+  /// state, and then restores the widget tree from the serialized restoration
+  /// data.
+  Future<void> restartAndRestore() async {
+    assert(
+      binding.restorationManager.debugRootBucketAccessed,
+      'The current widget tree did not inject the root bucket of the RestorationManager and '
+      'therefore no restoration data has been collected to restore from. Did you forget to wrap '
+      'your widget tree in a RootRestorationScope?',
+    );
+    final Widget widget = (binding.renderViewElement as RenderObjectToWidgetElement<RenderObject>).widget.child;
+    final TestRestorationData restorationData = binding.restorationManager.restorationData;
+    runApp(Container(key: UniqueKey()));
+    await pump();
+    binding.restorationManager.restoreFrom(restorationData);
+    return pumpWidget(widget);
+  }
+
+  /// Retrieves the current restoration data from the [RestorationManager].
+  ///
+  /// The returned [TestRestorationData] describes the current state of the
+  /// widget tree under test and can be provided to [restoreFrom] to restore
+  /// the widget tree to the state described by this data.
+  Future<TestRestorationData> getRestorationData() async {
+    assert(
+      binding.restorationManager.debugRootBucketAccessed,
+      'The current widget tree did not inject the root bucket of the RestorationManager and '
+      'therefore no restoration data has been collected. Did you forget to wrap your widget tree '
+      'in a RootRestorationScope?',
+    );
+    return binding.restorationManager.restorationData;
+  }
+
+  /// Restores the widget tree under test to the state described by the
+  /// provided [TestRestorationData].
+  ///
+  /// The data provided to this method is usually obtained from
+  /// [getRestorationData].
+  Future<void> restoreFrom(TestRestorationData data) {
+    binding.restorationManager.restoreFrom(data);
+    return pump();
   }
 
   /// Runs a [callback] that performs real asynchronous work.
@@ -1044,12 +1182,6 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   SemanticsHandle ensureSemantics() {
     return binding.pipelineOwner.ensureSemantics();
   }
-
-  /// Given a widget `W` specified by [finder] and a [Scrollable] widget `S` in
-  /// its ancestry tree, this scrolls `S` so as to make `W` visible.
-  ///
-  /// Shorthand for `Scrollable.ensureVisible(tester.element(finder))`
-  Future<void> ensureVisible(Finder finder) => Scrollable.ensureVisible(element(finder));
 }
 
 typedef _TickerDisposeCallback = void Function(_TestTicker ticker);

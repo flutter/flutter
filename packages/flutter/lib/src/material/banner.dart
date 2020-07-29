@@ -65,7 +65,7 @@ class MaterialBanner extends StatelessWidget {
   /// The set of actions that are displayed at the bottom or trailing side of
   /// the [MaterialBanner].
   ///
-  /// Typically this is a list of [FlatButton] widgets.
+  /// Typically this is a list of [TextButton] widgets.
   ///
   /// These widgets will be wrapped in a [ButtonBar], which introduces 8 pixels
   /// of padding on each side.
@@ -117,7 +117,7 @@ class MaterialBanner extends StatelessWidget {
         ? const EdgeInsetsDirectional.only(start: 16.0, top: 2.0)
         : const EdgeInsetsDirectional.only(start: 16.0, top: 24.0, end: 16.0, bottom: 4.0));
     final EdgeInsetsGeometry leadingPadding = this.leadingPadding
-        ?? bannerTheme.padding
+        ?? bannerTheme.leadingPadding
         ?? const EdgeInsetsDirectional.only(end: 16.0);
 
     final Widget buttonBar = ButtonBar(
