@@ -39,6 +39,15 @@ void main() {
       tryToDelete(tempDir);
     });
 
+    test('getSupportedProtocols includes DDS', () async {
+      final ProtocolList protocolList =
+          await vmService.getSupportedProtocols();
+      expect(protocolList.protocols, hasLength(2));
+      for (final Protocol protocol in protocolList.protocols) {
+        expect(protocol.protocolName, anyOf('VM Service', 'DDS'));
+      }
+    });
+
     test('flutterVersion can be called', () async {
       final Response response =
           await vmService.callServiceExtension('s0.flutterVersion');

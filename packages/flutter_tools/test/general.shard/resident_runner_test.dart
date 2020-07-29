@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/widget_cache.dart';
@@ -2052,8 +2053,11 @@ void main() {
   testUsingContext('connect sets up log reader', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final MockDevice mockDevice = MockDevice();
+    final MockDartDevelopmentService mockDds = MockDartDevelopmentService();
     final MockDeviceLogReader mockLogReader = MockDeviceLogReader();
     when(mockDevice.getLogReader(app: anyNamed('app'))).thenReturn(mockLogReader);
+    when(mockDevice.dds).thenReturn(mockDds);
+    when(mockDds.startDartDevelopmentService(any, any)).thenReturn(null);
 
     final TestFlutterDevice flutterDevice = TestFlutterDevice(
       mockDevice,
@@ -2085,6 +2089,7 @@ void main() {
 }
 
 class MockFlutterDevice extends Mock implements FlutterDevice {}
+class MockDartDevelopmentService extends Mock implements DartDevelopmentService {}
 class MockVMService extends Mock implements vm_service.VmService {}
 class MockDevFS extends Mock implements DevFS {}
 class MockDevice extends Mock implements Device {}
@@ -2138,6 +2143,8 @@ class FakeFlutterDevice extends FlutterDevice {
   Future<void> connect({
     ReloadSources reloadSources,
     Restart restart,
+    bool disableDds = false,
+    bool ipv6 = false,
     CompileExpression compileExpression,
     ReloadMethod reloadMethod,
     GetSkSLMethod getSkSLMethod,
