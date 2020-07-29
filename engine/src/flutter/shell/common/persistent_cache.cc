@@ -266,8 +266,6 @@ sk_sp<SkData> PersistentCache::load(const SkData& key) {
   auto result = PersistentCache::LoadFile(*cache_directory_, file_name);
   if (result != nullptr) {
     TRACE_EVENT0("flutter", "PersistentCacheLoadHit");
-  } else {
-    FML_LOG(INFO) << "PersistentCache::load failed: " << file_name;
   }
   return result;
 }
