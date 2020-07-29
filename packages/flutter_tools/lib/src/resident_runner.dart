@@ -14,6 +14,7 @@ import 'artifacts.dart';
 import 'asset.dart';
 import 'base/command_help.dart';
 import 'base/common.dart';
+import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
@@ -799,7 +800,7 @@ abstract class ResidentRunner {
   final CommandHelp commandHelp;
   final bool machine;
 
-  io.HttpServer _devtoolsServer;
+  DevtoolsLauncher _devtoolsLauncher;
 
   bool _exited = false;
   Completer<int> _finished = Completer<int>();
@@ -1254,28 +1255,14 @@ abstract class ResidentRunner {
   }
 
   Future<void> launchDevTools() async {
-    try {
-      assert(supportsServiceProtocol);
-      _devtoolsServer ??= await devtools_server.serveDevTools(
-        enableStdinCommands: false,
-      );
-      await devtools_server.launchDevTools(
-        <String, dynamic>{
-          'reuseWindows': true,
-        },
-        flutterDevices.first.vmService.httpAddress,
-        'http://${_devtoolsServer.address.host}:${_devtoolsServer.port}',
-        false,  // headless mode,
-        false,  // machine mode
-      );
-    } on Exception catch (e, st) {
-      globals.printTrace('Failed to launch DevTools: $e\n$st');
-    }
+    assert(supportsServiceProtocol);
+    _devtoolsLauncher ??= DevtoolsLauncher.instance;
+    return _devtoolsLauncher.launch(flutterDevices.first.vmService.httpAddress);
   }
 
   Future<void> shutdownDevtools() async {
-    await _devtoolsServer?.close();
-    _devtoolsServer = null;
+    await _devtoolsLauncher?.close();
+    _devtoolsLauncher = null;
   }
 
   Future<void> _serviceProtocolDone(dynamic object) async {
@@ -1719,4 +1706,33 @@ String nextPlatform(String currentPlatform, FeatureFlags featureFlags) {
       assert(false); // Invalid current platform.
       return 'android';
   }
+}
+
+class DevtoolsLauncher {
+  io.HttpServer _devtoolsServer;
+  Future<void> launch(Uri observatoryAddress) async {
+    try {
+      _devtoolsServer ??= await devtools_server.serveDevTools(
+        enableStdinCommands: false,
+      );
+      await devtools_server.launchDevTools(
+        <String, dynamic>{
+          'reuseWindows': true,
+        },
+        observatoryAddress,
+        'http://${_devtoolsServer.address.host}:${_devtoolsServer.port}',
+        false,  // headless mode,
+        false,  // machine mode
+      );
+    } on Exception catch (e, st) {
+      globals.printTrace('Failed to launch DevTools: $e\n$st');
+    }
+  }
+
+  Future<void> close() async {
+    await _devtoolsServer?.close();
+    _devtoolsServer = null;
+  }
+
+  static DevtoolsLauncher get instance => context.get<DevtoolsLauncher>() ?? DevtoolsLauncher();
 }
