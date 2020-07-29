@@ -123,7 +123,7 @@ class Card extends StatelessWidget {
   /// Defines the card's [Material.color].
   ///
   /// If this property is null then [CardTheme.color] of [ThemeData.cardTheme]
-  /// is used, if that's null then [ThemeData.cardColor] is used.
+  /// is used. If that's null then [ThemeData.cardColor] is used.
   final Color color;
 
   /// The color to paint the shadow below the card.
@@ -139,7 +139,7 @@ class Card extends StatelessWidget {
   /// Defines the card's [Material.elevation].
   ///
   /// If this property is null then [CardTheme.elevation] of
-  /// [ThemeData.cardTheme] is used, if that's null, the default value is 1.0.
+  /// [ThemeData.cardTheme] is used. If that's null, the default value is 1.0.
   final double elevation;
 
   /// The shape of the card's [Material].
@@ -168,7 +168,7 @@ class Card extends StatelessWidget {
   /// Defines the card's outer [Container.margin].
   ///
   /// If this property is null then [CardTheme.margin] of
-  /// [ThemeData.cardTheme] is used, if that's null, the default margin is 4.0
+  /// [ThemeData.cardTheme] is used. If that's null, the default margin is 4.0
   /// logical pixels on all sides: `EdgeInsets.all(4.0)`.
   final EdgeInsetsGeometry margin;
 

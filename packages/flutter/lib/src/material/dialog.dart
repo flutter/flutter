@@ -281,7 +281,7 @@ class AlertDialog extends StatelessWidget {
 
   /// Style for the text in the [title] of this [AlertDialog].
   ///
-  /// If null, [DialogTheme.titleTextStyle] is used, if that's null, defaults to
+  /// If null, [DialogTheme.titleTextStyle] is used. If that's null, defaults to
   /// [TextTheme.headline6] of [ThemeData.textTheme].
   final TextStyle titleTextStyle;
 
@@ -304,7 +304,7 @@ class AlertDialog extends StatelessWidget {
 
   /// Style for the text in the [content] of this [AlertDialog].
   ///
-  /// If null, [DialogTheme.contentTextStyle] is used, if that's null, defaults
+  /// If null, [DialogTheme.contentTextStyle] is used. If that's null, defaults
   /// to [TextTheme.subtitle1] of [ThemeData.textTheme].
   final TextStyle contentTextStyle;
 
@@ -764,7 +764,7 @@ class SimpleDialog extends StatelessWidget {
 
   /// Style for the text in the [title] of this [SimpleDialog].
   ///
-  /// If null, [DialogTheme.titleTextStyle] is used, if that's null, defaults to
+  /// If null, [DialogTheme.titleTextStyle] is used. If that's null, defaults to
   /// [ThemeData.textTheme.headline6].
   final TextStyle titleTextStyle;
 

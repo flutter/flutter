@@ -73,7 +73,7 @@ class BottomAppBar extends StatefulWidget {
   /// The bottom app bar's background color.
   ///
   /// If this property is null then [BottomAppBarTheme.color] of
-  /// [ThemeData.bottomAppBarTheme] is used, if that's null then
+  /// [ThemeData.bottomAppBarTheme] is used. If that's null then
   /// [ThemeData.bottomAppBarColor] is used.
   final Color color;
 
@@ -84,14 +84,14 @@ class BottomAppBar extends StatefulWidget {
   /// value is non-negative.
   ///
   /// If this property is null then [BottomAppBarTheme.elevation] of
-  /// [ThemeData.bottomAppBarTheme] is used, if that's null, the default value
+  /// [ThemeData.bottomAppBarTheme] is used. If that's null, the default value
   /// is 8.
   final double elevation;
 
   /// The notch that is made for the floating action button.
   ///
   /// If this property is null then [BottomAppBarTheme.shape] of
-  /// [ThemeData.bottomAppBarTheme] is used, if that's null then the shape will
+  /// [ThemeData.bottomAppBarTheme] is used. If that's null then the shape will
   /// be rectangular with no notch.
   final NotchedShape shape;
 

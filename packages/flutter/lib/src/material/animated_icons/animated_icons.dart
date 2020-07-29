@@ -95,6 +95,11 @@ class AnimatedIcon extends StatelessWidget {
   ///
   /// If the text direction is [TextDirection.rtl], the icon will be mirrored
   /// horizontally (e.g back arrow will point right).
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticProperties.label], which is set to [semanticLabel] in the
+  ///    underlying [Semantics] widget.
   final TextDirection textDirection;
 
   static final _UiPathFactory _pathFactory = () => ui.Path();
