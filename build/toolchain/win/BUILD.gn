@@ -77,7 +77,11 @@ template("msvc_toolchain") {
       # TODO(brettw) enable this when GN support in the binary has been rolled.
       #precompiled_header_type = "msvc"
       pdbname = "{{target_out_dir}}/{{target_output_name}}_c.pdb"
-      command = "ninja -t msvc -e $env -- $cl /nologo /showIncludes /FC @$rspfile /c {{source}} /Fo{{output}} /Fd$pdbname"
+      flags = ""
+      if (is_clang && invoker.current_cpu == "x86") {
+        flags = "-m32"
+      }
+      command = "ninja -t msvc -e $env -- $cl $flags /nologo /showIncludes /FC @$rspfile /c {{source}} /Fo{{output}} /Fd$pdbname"
       depsformat = "msvc"
       description = "CC {{output}}"
       outputs = [
@@ -94,7 +98,11 @@ template("msvc_toolchain") {
 
       # The PDB name needs to be different between C and C++ compiled files.
       pdbname = "{{target_out_dir}}/{{target_output_name}}_cc.pdb"
-      command = "ninja -t msvc -e $env -- $cl /nologo /showIncludes /FC @$rspfile /c {{source}} /Fo{{output}} /Fd$pdbname"
+      flags = ""
+      if (is_clang && invoker.current_cpu == "x86") {
+        flags = "-m32"
+      }
+      command = "ninja -t msvc -e $env -- $cl $flags /nologo /showIncludes /FC @$rspfile /c {{source}} /Fo{{output}} /Fd$pdbname"
       depsformat = "msvc"
       description = "CXX {{output}}"
       outputs = [
