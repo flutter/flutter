@@ -188,10 +188,10 @@ class CupertinoApp extends StatefulWidget {
   final List<NavigatorObserver> navigatorObservers;
 
   /// {@macro flutter.widgets.widgetsApp.routeInformationParser}
-  final RouteInformationParser<dynamic> routeInformationParser;
+  final RouteInformationParser<Object> routeInformationParser;
 
   /// {@macro flutter.widgets.widgetsApp.routerDelegate}
-  final RouterDelegate<dynamic> routerDelegate;
+  final RouterDelegate<Object> routerDelegate;
 
   /// {@macro flutter.widgets.widgetsApp.backButtonDispatcher}
   final BackButtonDispatcher backButtonDispatcher;

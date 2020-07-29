@@ -18,8 +18,8 @@ import 'route_notification_messages.dart';
 
 /// A piece of routing information.
 ///
-/// The route information is consist of a location string of the application and
-/// a state object that configure the application in that location.
+/// The route information consists of a location string of the application and
+/// a state object that configures the application in that location.
 ///
 /// This information flows two ways, from the [RouteInformationProvider] to the
 /// [Router] or from the [Router] to [RouteInformationProvider].
@@ -32,21 +32,21 @@ import 'route_notification_messages.dart';
 /// reports route change back to web engine.
 class RouteInformation {
   /// Creates a route information.
-  const RouteInformation({this.location, this.configuration});
+  const RouteInformation({this.location, this.state});
 
   /// The location of the application.
   ///
   /// The string is usually in the format of multiple string identifiers with
-  /// with slashes in between. ex: `/`, `/path`, `/path/to/the/app`.
+  /// slashes in between. ex: `/`, `/path`, `/path/to/the/app`.
   ///
   /// It is equivalent to the URL in a web application.
   final String location;
 
-  /// The configuration of the application in the [location].
+  /// The state of the application in the [location].
   ///
-  /// The app can have different configurations even in the same location. For
-  /// example the text inside a [TextField] or the scroll position in a
-  /// [ScrollView], these widget states can be stored in the [configuration].
+  /// The app can have different states even in the same location. For example
+  /// the text inside a [TextField] or the scroll position in a [ScrollView],
+  /// these widget states can be stored in the [state].
   ///
   /// It's only used in the web application currently. In a web application,
   /// this property is stored into browser history entry when the [Router]
@@ -54,8 +54,8 @@ class RouteInformation {
   /// [PlatformRouteInformationProvider], so we can get the url along with state
   /// back when the user click the forward or backward buttons.
   ///
-  /// The configuration must be serializable.
-  final Object configuration;
+  /// The state must be serializable.
+  final Object state;
 }
 
 /// The dispatcher for opening and closing pages of an application.
@@ -197,9 +197,9 @@ class RouteInformation {
 /// information back to the engine after running the callback. This is useful
 /// when you want to support the browser backward and forward buttons without
 /// changing the URL. For example, the scroll position of a scroll view may be
-/// saved in the [RouteInformation.configuration]. If you use the [Router.navigate] to
+/// saved in the [RouteInformation.state]. If you use the [Router.navigate] to
 /// update the scroll position, the browser will create a new history entry with
-/// the [RouteInformation.configuration] that stores the new scroll position. when the
+/// the [RouteInformation.state] that stores the new scroll position. when the
 /// users click the backward button, the browser will go back to previous scroll
 /// position without changing the url bar.
 ///
@@ -217,14 +217,14 @@ class RouteInformation {
 /// web engine. This is not recommended in general, but You may decide to opt
 /// out in these cases:
 ///
-/// If you are not writing a web application.
+/// * If you are not writing a web application.
 ///
-/// If you have multiple router widgets in your app, then only one router widget
-/// should update the URL (Usually the top-most one created by the
-/// [WidgetsApp.router]/[MaterialApp.router]/[CupertinoApp.router]).
+/// * If you have multiple router widgets in your app, then only one router
+///   widget should update the URL (Usually the top-most one created by the
+///   [WidgetsApp.router]/[MaterialApp.router]/[CupertinoApp.router]).
 ///
-/// If your app does not care about the in-app navigation using the browser's
-/// forward and backward buttons.
+/// * If your app does not care about the in-app navigation using the browser's
+///   forward and backward buttons.
 ///
 /// Otherwise, we strongly recommend implementing the
 /// [RouterDelegate.currentConfiguration] and the
@@ -305,7 +305,7 @@ class Router<T> extends StatefulWidget {
     return scope.routerState.widget;
   }
 
-  /// Forces the [Router] to to run the [callback] and reports the route
+  /// Forces the [Router] to run the [callback] and reports the route
   /// information back to the engine.
   ///
   /// The web application relies on the [Router] to report new route information
@@ -316,11 +316,12 @@ class Router<T> extends StatefulWidget {
   /// support the browser backward and forward button without changing the URL.
   ///
   /// For example, you can store certain state such as the scroll position into
-  /// the [RouteInformation.configuration]. If you use this method to update the scroll
-  /// position, the browser will create a new history entry with the same url
-  /// but a different [RouteInformation.configuration] that stores the new scroll
-  /// position. If the user click the backward button in browser, the browser
-  /// will restore the state prior to this update without changing the URL.
+  /// the [RouteInformation.state]. If you use this method to update the
+  /// scroll position multiple times with the same URL, the browser will create
+  /// a stack of new history entries with the same URL but different
+  /// [RouteInformation.state]s that store the new scroll positions. If the user
+  /// click the backward button in the browser, the browser will restore the
+  /// scroll positions saved in history entries without changing the URL.
   ///
   /// See also:
   ///
@@ -404,43 +405,77 @@ class _RouterState<T> extends State<Router<T>> {
     super.initState();
     widget.routeInformationProvider
       ?.addListener(_handleRouteInformationProviderNotification);
-    widget?.backButtonDispatcher
+    widget.backButtonDispatcher
       ?.addCallback(_handleBackButtonDispatcherNotification);
     widget.routerDelegate.addListener(_handleRouterDelegateNotification);
     _currentIntentionToReporting = _IntentionToReportRouteInformation.none;
     if (widget.routeInformationProvider != null) {
       _processInitialRoute();
     }
-    _lastReportedLocation = widget.routeInformationProvider?.value?.location;
+    _lastSeenLocation = widget.routeInformationProvider?.value?.location;
   }
 
-  String _lastReportedLocation;
+  String _lastSeenLocation;
   void _reportRouteInformation() {
     switch (_currentIntentionToReporting) {
       case _IntentionToReportRouteInformation.none:
+        return;
+
+      case _IntentionToReportRouteInformation.ignore:
+        // In the ignore case, we still want to update _lastSeenLocation.
+        final RouteInformation routeInformation = _retrieveNewRouteInformation;
+        if (routeInformation != null) {
+          _lastSeenLocation = routeInformation.location;
+        }
         _currentIntentionToReporting = _IntentionToReportRouteInformation.none;
         return;
-      case _IntentionToReportRouteInformation.ignore:
-        // In the ignore case, we still want to update _lastReportedRouteName.
+
       case _IntentionToReportRouteInformation.maybe:
-      case _IntentionToReportRouteInformation.must:
-        final T configuration = widget.routerDelegate.currentConfiguration;
-        if (configuration != null) {
-          final RouteInformation routeInformation = widget
-            .routeInformationParser
-            .restoreRouteInformation(configuration);
-          assert(routeInformation != null);
-          if (_currentIntentionToReporting != _IntentionToReportRouteInformation.ignore &&
-              (_currentIntentionToReporting == _IntentionToReportRouteInformation.must ||
-              _lastReportedLocation != routeInformation.location)) {
+        final RouteInformation routeInformation = _retrieveNewRouteInformation;
+        if (routeInformation != null) {
+          if (_lastSeenLocation != routeInformation.location) {
             widget.routeInformationProvider
               .routerReportsNewRouteInformation(routeInformation);
+            _lastSeenLocation = routeInformation.location;
           }
-          _lastReportedLocation = routeInformation.location;
+        }
+        _currentIntentionToReporting = _IntentionToReportRouteInformation.none;
+        return;
+
+      case _IntentionToReportRouteInformation.must:
+        final RouteInformation routeInformation = _retrieveNewRouteInformation;
+        if (routeInformation != null) {
+          widget.routeInformationProvider
+            .routerReportsNewRouteInformation(routeInformation);
+          _lastSeenLocation = routeInformation.location;
         }
         _currentIntentionToReporting = _IntentionToReportRouteInformation.none;
         return;
     }
+  }
+
+  RouteInformation get _retrieveNewRouteInformation {
+    final T configuration = widget.routerDelegate.currentConfiguration;
+    if (configuration == null)
+      return null;
+    final RouteInformation routeInformation = widget
+      .routeInformationParser
+      .restoreRouteInformation(configuration);
+    assert((){
+      if (routeInformation == null) {
+        FlutterError.reportError(
+          const FlutterErrorDetails(
+            exception:
+              'Router.routeInformationParser returns a null RouteInformation. '
+              'If you opt for route information reporting, the '
+              'routeInformationParser must not report null for a given '
+              'configuration.'
+          ),
+        );
+      }
+      return true;
+    }());
+    return routeInformation;
   }
 
   void _setStateWithExplicitReportStatus(
@@ -455,9 +490,9 @@ class _RouterState<T> extends State<Router<T>> {
         FlutterError.reportError(
           const FlutterErrorDetails(
             exception:
-              'Both Router.navigate and Router.neglect have been called in this'
-              'build cycle, and the Router cannot decide whether to report the'
-              'route information. Please make sure only one of them is called'
+              'Both Router.navigate and Router.neglect have been called in this '
+              'build cycle, and the Router cannot decide whether to report the '
+              'route information. Please make sure only one of them is called '
               'within the same build cycle.'
           ),
         );
@@ -523,7 +558,7 @@ class _RouterState<T> extends State<Router<T>> {
   void dispose() {
     widget.routeInformationProvider
       ?.removeListener(_handleRouteInformationProviderNotification);
-    widget?.backButtonDispatcher
+    widget.backButtonDispatcher
       ?.removeCallback(_handleBackButtonDispatcherNotification);
     widget.routerDelegate.removeListener(_handleRouterDelegateNotification);
     _currentRouteInformationParserTransaction = null;
@@ -1170,7 +1205,7 @@ class PlatformRouteInformationProvider extends RouteInformationProvider
     try {
       result = jsonEncode(<String, dynamic>{
         'location': routeInformation.location,
-        'configuration': routeInformation.configuration,
+        'state': routeInformation.state,
       });
     } on JsonUnsupportedObjectError catch (error) {
       FlutterError.reportError(
@@ -1189,10 +1224,10 @@ class PlatformRouteInformationProvider extends RouteInformationProvider
       return RouteInformation(location: json);
     assert(json is Map<String, dynamic>);
     final Map<String, dynamic> map = json as Map<String, dynamic>;
-    assert(map.containsKey('location') && map.containsKey('configuration'));
+    assert(map.containsKey('location') && map.containsKey('state'));
     return RouteInformation(
       location: json['location'] as String,
-      configuration: json['configuration'],
+      state: json['state'],
     );
   }
 

@@ -292,10 +292,10 @@ class MaterialApp extends StatefulWidget {
   final List<NavigatorObserver> navigatorObservers;
 
   /// {@macro flutter.widgets.widgetsApp.routeInformationParser}
-  final RouteInformationParser<dynamic> routeInformationParser;
+  final RouteInformationParser<Object> routeInformationParser;
 
   /// {@macro flutter.widgets.widgetsApp.routerDelegate}
-  final RouterDelegate<dynamic> routerDelegate;
+  final RouterDelegate<Object> routerDelegate;
 
   /// {@macro flutter.widgets.widgetsApp.backButtonDispatcher}
   final BackButtonDispatcher backButtonDispatcher;
@@ -727,21 +727,21 @@ class _MaterialAppState extends State<MaterialApp> {
       isMaterialAppTheme: true,
       child: widget.builder != null
         ? Builder(
-        builder: (BuildContext context) {
-          // Why are we surrounding a builder with a builder?
-          //
-          // The widget.builder may contain code that invokes
-          // Theme.of(), which should return the theme we selected
-          // above in AnimatedTheme. However, if we invoke
-          // widget.builder() directly as the child of AnimatedTheme
-          // then there is no Context separating them, and the
-          // widget.builder() will not find the theme. Therefore, we
-          // surround widget.builder with yet another builder so that
-          // a context separates them and Theme.of() correctly
-          // resolves to the theme we passed to AnimatedTheme.
-          return widget.builder(context, child);
-        },
-      )
+            builder: (BuildContext context) {
+              // Why are we surrounding a builder with a builder?
+              //
+              // The widget.builder may contain code that invokes
+              // Theme.of(), which should return the theme we selected
+              // above in AnimatedTheme. However, if we invoke
+              // widget.builder() directly as the child of AnimatedTheme
+              // then there is no Context separating them, and the
+              // widget.builder() will not find the theme. Therefore, we
+              // surround widget.builder with yet another builder so that
+              // a context separates them and Theme.of() correctly
+              // resolves to the theme we passed to AnimatedTheme.
+              return widget.builder(context, child);
+            },
+          )
         : child,
     );
   }

@@ -40,7 +40,7 @@ class OnTapPage extends StatelessWidget {
 String serializeRouteInformation(RouteInformation routeInformation) {
   return jsonEncode(<String, dynamic>{
     'location': routeInformation.location,
-    'configuration': routeInformation.configuration,
+    'state': routeInformation.state,
   });
 }
 

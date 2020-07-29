@@ -382,7 +382,7 @@ class WidgetsApp extends StatefulWidget {
   /// A parser to parse the route information into a generic data type for
   /// configuring the [routerDelegate].
   /// {@endtemplate}
-  final RouteInformationParser<dynamic> routeInformationParser;
+  final RouteInformationParser<Object> routeInformationParser;
 
   /// {@template flutter.widgets.widgetsApp.routerDelegate}
   /// A delegate that configures a [Navigator] that will be used by the [Router].
@@ -390,7 +390,7 @@ class WidgetsApp extends StatefulWidget {
   /// The generic type `T` must match the generic type of the
   /// [routeInformationParser].
   /// {@endtemplate}
-  final RouterDelegate<dynamic> routerDelegate;
+  final RouterDelegate<Object> routerDelegate;
 
   /// {@template flutter.widgets.widgetsApp.backButtonDispatcher}
   /// A back button dispatcher that decide whether to handle the android back

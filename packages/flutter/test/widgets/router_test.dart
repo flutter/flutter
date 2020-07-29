@@ -357,7 +357,7 @@ void main() {
     reportedRouteInformation = null;
     delegate.routeInformation = const RouteInformation(
       location: 'update',
-      configuration: 'another state',
+      state: 'another state',
     );
     await tester.pump();
     expect(find.text('update'), findsOneWidget);
@@ -461,7 +461,7 @@ void main() {
         'pushRoute',
         jsonEncode(<String, dynamic>{
           'location': 'pushed',
-          'configuration': null,
+          'state': null,
         })
       )
     );
