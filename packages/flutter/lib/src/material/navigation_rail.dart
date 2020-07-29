@@ -159,7 +159,7 @@ class NavigationRail extends StatefulWidget {
   ///
   /// The default value is [NavigationRailThemeData.backgroundColor]. If
   /// [NavigationRailThemeData.backgroundColor] is null, then the default value
-  /// is based on [ThemeData.colorScheme.surface].
+  /// is based on [ColorScheme.surface] of [ThemeData.colorScheme].
   final Color backgroundColor;
 
   /// Indicates that the [NavigationRail] should be in the extended state.
@@ -262,9 +262,8 @@ class NavigationRail extends StatefulWidget {
   /// When one of the [destinations] is selected the [selectedLabelTextStyle]
   /// will be used instead.
   ///
-  /// The default value is based on the [Theme]'s
-  /// [ThemeData.textTheme.bodyText]. The default color is based on the
-  /// [Theme]'s [ColorScheme.onSurface].
+  /// The default value is based on the [Theme]'s [TextTheme.bodyText]. The
+  /// default color is based on the [Theme]'s [ColorScheme.onSurface].
   ///
   /// Properties from this text style, or
   /// [NavigationRailThemeData.unselectedLabelTextStyle] if this is null, are
@@ -276,9 +275,9 @@ class NavigationRail extends StatefulWidget {
   /// When a [NavigationRailDestination] is not selected,
   /// [unselectedLabelTextStyle] will be used.
   ///
-  /// The default value is based on the [Theme]'s
-  /// [ThemeData.textTheme.bodyText]. The default color is based on the
-  /// [Theme]'s [ColorScheme.primary].
+  /// The default value is based on the [TextTheme.bodyText] of
+  /// [ThemeData.textTheme]. The default color is based on the [Theme]'s
+  /// [ColorScheme.primary].
   ///
   /// Properties from this text style,
   /// or [NavigationRailThemeData.selectedLabelTextStyle] if this is null, are

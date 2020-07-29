@@ -96,12 +96,12 @@ class OutlinedButton extends ButtonStyleButton {
   /// [ButtonStyle] given simple values.
   ///
   /// The [primary], and [onSurface] colors are used to to create a
-  /// [MaterialStateProperty] [foreground] value in the same way that
-  /// [defaultStyleOf] uses the [ColorScheme] colors with the same
-  /// names. Specify a value for [primary] to specify the color of the
-  /// button's text and icons as well as the overlay colors used to
-  /// indicate the hover, focus, and pressed states. Use [onSurface]
-  /// to specify the button's disabled text and icon color.
+  /// [MaterialStateProperty] [ButtonStyle.foreground] value in the same way
+  /// that [defaultStyleOf] uses the [ColorScheme] colors with the same names.
+  /// Specify a value for [primary] to specify the color of the button's text
+  /// and icons as well as the overlay colors used to indicate the hover, focus,
+  /// and pressed states. Use [onSurface] to specify the button's disabled text
+  /// and icon color.
   ///
   /// Similarly, the [enabledMouseCursor] and [disabledMouseCursor]
   /// parameters are used to construct [ButtonStyle].mouseCursor.
@@ -191,8 +191,8 @@ class OutlinedButton extends ButtonStyleButton {
   /// value for all states, otherwise the values are as specified for
   /// each state and "others" means all other states.
   ///
-  /// The color of the [textStyle] is not used, the [foreground] color
-  /// is used instead.
+  /// The color of the [ButtonStyle.textStyle] is not used, the
+  /// [ButtonStyle.foreground] color is used instead.
   ///
   /// * `textStyle` - Theme.textTheme.button
   /// * `backgroundColor` - transparent

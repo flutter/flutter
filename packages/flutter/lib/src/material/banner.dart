@@ -59,7 +59,7 @@ class MaterialBanner extends StatelessWidget {
   /// Style for the text in the [content] of the [MaterialBanner].
   ///
   /// If `null`, [MaterialBannerThemeData.contentTextStyle] is used. If that is
-  /// also `null`, [ThemeData.textTheme.bodyText2] is used.
+  /// also `null`, [TextTheme.bodyText2] of [ThemeData.textTheme] is used.
   final TextStyle contentTextStyle;
 
   /// The set of actions that are displayed at the bottom or trailing side of
@@ -79,7 +79,7 @@ class MaterialBanner extends StatelessWidget {
   /// The color of the surface of this [MaterialBanner].
   ///
   /// If `null`, [MaterialBannerThemeData.backgroundColor] is used. If that is
-  /// also `null`, [ThemeData.colorScheme.surface] is used.
+  /// also `null`, [ColorScheme.surface] of [ThemeData.colorScheme] is used.
   final Color backgroundColor;
 
   /// The amount of space by which to inset the [content].
@@ -99,10 +99,10 @@ class MaterialBanner extends StatelessWidget {
   /// An override to force the [actions] to be below the [content] regardless of
   /// how many there are.
   ///
-  /// If this is `true`, the [actions] will be placed below the [content]. If
-  /// this is `false`, the [actions] will be placed on the trailing side of the
-  /// [content] if [actions.length] is `1` and below the [content] if greater
-  /// than `1`.
+  /// If this is true, the [actions] will be placed below the [content]. If
+  /// this is false, the [actions] will be placed on the trailing side of the
+  /// [content] if [actions]'s length is 1 and below the [content] if greater
+  /// than 1.
   final bool forceActionsBelow;
 
   @override
