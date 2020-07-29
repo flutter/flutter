@@ -207,10 +207,10 @@ class DomRenderer {
 
   static const String defaultFontStyle = 'normal';
   static const String defaultFontWeight = 'normal';
-  static const String defaultFontSize = '14px';
+  static const double defaultFontSize = 14;
   static const String defaultFontFamily = 'sans-serif';
   static const String defaultCssFont =
-      '$defaultFontStyle $defaultFontWeight $defaultFontSize $defaultFontFamily';
+      '$defaultFontStyle $defaultFontWeight ${defaultFontSize}px $defaultFontFamily';
 
   void reset() {
     _styleElement?.remove();
