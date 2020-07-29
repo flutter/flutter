@@ -614,7 +614,6 @@ tasks:
       Runs end-to-end Flutter tests on iPhone 6.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
-    timeout_in_minutes: 20
 
   ios_platform_view_tests:
     description: >
