@@ -477,25 +477,42 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
     _controller = _TextSpanEditingController(
         textSpan: widget.textSpan ?? TextSpan(text: widget.data)
     );
+    _controller.addListener(_onControllerChanged);
   }
 
   @override
   void didUpdateWidget(SelectableText oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.data != oldWidget.data || widget.textSpan != oldWidget.textSpan) {
+      _controller.removeListener(_onControllerChanged);
       _controller = _TextSpanEditingController(
           textSpan: widget.textSpan ?? TextSpan(text: widget.data)
       );
+      _controller.addListener(_onControllerChanged);
     }
     if (_effectiveFocusNode.hasFocus && _controller.selection.isCollapsed) {
       _showSelectionHandles = false;
+    } else {
+      _showSelectionHandles = true;
     }
   }
 
   @override
   void dispose() {
     _focusNode?.dispose();
+    _controller.removeListener(_onControllerChanged);
     super.dispose();
+  }
+
+  void _onControllerChanged() {
+    final bool showSelectionHandles = !_effectiveFocusNode.hasFocus
+      || !_controller.selection.isCollapsed;
+    if (showSelectionHandles == _showSelectionHandles) {
+      return;
+    }
+    setState(() {
+      _showSelectionHandles = showSelectionHandles;
+    });
   }
 
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause cause) {

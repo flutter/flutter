@@ -440,8 +440,6 @@ class TextSelectionOverlay {
       OverlayEntry(builder: (BuildContext context) => _buildHandle(context, _TextSelectionHandlePosition.end)),
     ];
 
-
-
     Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor).insertAll(_handles);
   }
 
