@@ -60,7 +60,7 @@ Future<void> generateLocalizations({
       '--use-deferred-loading',
     if (options.preferredSupportedLocales != null)
       '--preferred-supported-locales=${options.preferredSupportedLocales}',
-    if (options.useSyntheticPackage != null && !options.useSyntheticPackage)
+    if (!options.useSyntheticPackage)
       '--no-synthetic-package'
   ]);
   if (result.exitCode != 0) {
@@ -121,7 +121,7 @@ class GenerateLocalizationsTarget extends Target {
     // is not found.
     print('test the prints!');
     print(options.useSyntheticPackage);
-    if (options.useSyntheticPackage != null && options.useSyntheticPackage) {
+    if (options.useSyntheticPackage == null) {
       final String contents = pubspecFile.readAsStringSync();
       if (contents.trim().isEmpty) {
         return const LocalizationOptions();
@@ -181,8 +181,8 @@ class LocalizationOptions {
     this.preferredSupportedLocales,
     this.headerFile,
     this.deferredLoading,
-    this.useSyntheticPackage,
-  });
+    @required this.useSyntheticPackage,
+  }) : assert(useSyntheticPackage != null);
 
   /// The `--arb-dir` argument.
   ///
@@ -263,7 +263,7 @@ LocalizationOptions parseLocalizationsOptions({
     preferredSupportedLocales: _tryReadString(yamlMap, 'preferred-supported-locales', logger),
     headerFile: _tryReadUri(yamlMap, 'header-file', logger),
     deferredLoading: _tryReadBool(yamlMap, 'use-deferred-loading', logger),
-    useSyntheticPackage: _tryReadBool(yamlMap, 'synthetic-package', logger),
+    useSyntheticPackage: _tryReadBool(yamlMap, 'synthetic-package', logger) ?? true,
   );
 }
 
