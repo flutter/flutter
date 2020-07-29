@@ -160,7 +160,7 @@ template("mac_toolchain") {
       lto_object_file = "{{root_out_dir}}/lto_{{target_output_name}}.o"
 
       does_reexport_command = "[ ! -e $dylib -o ! -e $tocname ] || otool -l $dylib | grep -q LC_REEXPORT_DYLIB"
-      link_command = "$ld -shared $sysroot_flags $lto_flags $coverage_flags -Wl,-object_path_lto,$lto_object_file {{ldflags}} -o $dylib -Wl,-filelist,$rspfile {{solibs}} {{libs}}"
+      link_command = "$ld -shared $sysroot_flags $lto_flags $coverage_flags -Wl,-object_path_lto,$lto_object_file {{ldflags}} -o $dylib -Wl,-filelist,$rspfile {{solibs}} {{libs}} {{frameworks}}"
       replace_command = "if ! cmp -s $temporary_tocname $tocname; then mv $temporary_tocname $tocname"
       extract_toc_command = "{ otool -l $dylib | grep LC_ID_DYLIB -A 5; nm -gP $dylib | cut -f1-2 -d' ' | grep -v U\$\$; true; }"
 
@@ -196,7 +196,7 @@ template("mac_toolchain") {
       outfile = "{{root_out_dir}}/{{target_output_name}}{{output_extension}}"
       rspfile = "$outfile.rsp"
 
-      command = "$ld $sysroot_flags $lto_flags {{ldflags}} $coverage_flags -Xlinker -rpath -Xlinker @executable_path/Frameworks -o $outfile -Wl,-filelist,$rspfile {{solibs}} {{libs}}"
+      command = "$ld $sysroot_flags $lto_flags {{ldflags}} $coverage_flags -Xlinker -rpath -Xlinker @executable_path/Frameworks -o $outfile -Wl,-filelist,$rspfile {{solibs}} {{libs}} {{frameworks}}"
       description = "LINK $outfile"
       rspfile_content = "{{inputs_newline}}"
       outputs = [
