@@ -104,9 +104,7 @@ class GenerateLocalizationsTarget extends Target {
   @override
   Future<void> build(Environment environment) async {
     final File configFile = environment.projectDir.childFile('l10n.yaml');
-    final File pubspecFile = environment.projectDir.childFile('pubspec.yaml');
     assert(configFile.existsSync());
-    assert(pubspecFile.existsSync());
 
     final LocalizationOptions options = parseLocalizationsOptions(
       file: configFile,
@@ -117,9 +115,12 @@ class GenerateLocalizationsTarget extends Target {
       fileSystem: environment.fileSystem,
     );
 
-    // If generating a synthetic package, generate a warning if flutter: generate
-    // is not found.
+    // If generating a synthetic package, generate a warning if
+    // flutter: generate is not set.
     if (options.useSyntheticPackage) {
+      final File pubspecFile = environment.projectDir.childFile('pubspec.yaml');
+      assert(pubspecFile.existsSync());
+
       final YamlNode yamlNode = loadYamlNode(pubspecFile.readAsStringSync());
       if (yamlNode is! YamlMap) {
         globals.logger.printError(
@@ -132,17 +133,28 @@ class GenerateLocalizationsTarget extends Target {
       final Object value = yamlMap['flutter'];
       if (value != null) {
         if (value is! YamlMap) {
-          globals.logger.printError('Expected "flutter" to have a YamlMap value, instead was "$value"');
+          globals.logger.printError(
+            'Expected "flutter" to have a YamlMap value, instead was "$value"',
+          );
           throw Exception();
         }
 
         final YamlMap flutterMap = value as YamlMap;
-        print('flutterMap: $flutterMap');
-        final bool shouldGenerateCode = _tryReadBool(flutterMap, 'generate', globals.logger);
-        print('shouldGenCode: $shouldGenerateCode');
+        final bool shouldGenerateCode = _tryReadBool(
+          flutterMap,
+          'generate',
+          globals.logger,
+        );
+
         if (shouldGenerateCode == null) {
-          print('should generate code returns null');
-          globals.logger.printError('Generating localizations code without generate');
+          globals.logger.printError(
+            'Attempted to generate localizations code without having '
+            'the flutter: generate flag turned on.'
+            '\n'
+            'Check pubspec.yaml and ensure that flutter: generate: true has '
+            'been added and rebuild the project. Otherwise, the localizations '
+            'source code will not be importable.'
+          );
           throw Exception();
         }
       }
