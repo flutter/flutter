@@ -16,6 +16,7 @@ import 'application_package.dart';
 import 'artifacts.dart';
 import 'base/config.dart';
 import 'base/context.dart';
+import 'base/dds.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
@@ -584,6 +585,12 @@ abstract class Device {
   /// Get the port forwarder for this device.
   DevicePortForwarder get portForwarder;
 
+  /// Get the DDS instance for this device.
+  DartDevelopmentService get dds => _dds ??= DartDevelopmentService(
+    logger: globals.logger,
+  );
+  DartDevelopmentService _dds;
+
   /// Clear the device's logs.
   void clearLogs();
 
@@ -757,6 +764,7 @@ class DebuggingOptions {
     this.buildInfo, {
     this.startPaused = false,
     this.disableServiceAuthCodes = false,
+    this.disableDds = false,
     this.dartFlags = '',
     this.enableSoftwareRendering = false,
     this.skiaDeterministicRendering = false,
@@ -799,6 +807,7 @@ class DebuggingOptions {
       startPaused = false,
       dartFlags = '',
       disableServiceAuthCodes = false,
+      disableDds = false,
       enableSoftwareRendering = false,
       skiaDeterministicRendering = false,
       traceSkia = false,
@@ -818,6 +827,7 @@ class DebuggingOptions {
   final bool startPaused;
   final String dartFlags;
   final bool disableServiceAuthCodes;
+  final bool disableDds;
   final bool enableSoftwareRendering;
   final bool skiaDeterministicRendering;
   final bool traceSkia;
