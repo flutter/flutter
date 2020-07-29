@@ -121,7 +121,7 @@ class GenerateLocalizationsTarget extends Target {
     // is not found.
     print('test the prints!');
     print(options.useSyntheticPackage);
-    if (options.useSyntheticPackage == null) {
+    if (options.useSyntheticPackage) {
       final YamlNode yamlNode = loadYamlNode(pubspecFile.readAsStringSync());
       if (yamlNode is! YamlMap) {
         globals.logger.printError(
