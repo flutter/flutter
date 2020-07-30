@@ -64,8 +64,8 @@ class _FocusTraversalGroupInfo {
 /// A direction along either the horizontal or vertical axes.
 ///
 /// This is used by the [DirectionalFocusTraversalPolicyMixin], and
-/// [Focus.focusInDirection] to indicate which direction to look in for the next
-/// focus.
+/// [FocusNode.focusInDirection] to indicate which direction to look in for the
+/// next focus.
 enum TraversalDirection {
   /// Indicates a direction above the currently focused widget.
   up,
@@ -433,7 +433,7 @@ class _DirectionalPolicyData {
 ///
 /// Since hysteresis in the navigation order is undesirable, this implementation
 /// maintains a stack of previous locations that have been visited on the
-/// [policyData] for the affected [FocusScopeNode]. If the previous direction
+/// policy data for the affected [FocusScopeNode]. If the previous direction
 /// was the opposite of the current direction, then the this policy will request
 /// focus on the previously focused node. Change to another direction other than
 /// the current one or its opposite will clear the stack.
@@ -682,7 +682,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
   /// Returns true if it successfully found a node and requested focus.
   ///
   /// Maintains a stack of previous locations that have been visited on the
-  /// [policyData] for the affected [FocusScopeNode]. If the previous direction
+  /// policy data for the affected [FocusScopeNode]. If the previous direction
   /// was the opposite of the current direction, then the this policy will
   /// request focus on the previously focused node. Change to another direction
   /// other than the current one or its opposite will clear the stack.
@@ -1122,25 +1122,26 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
 ///
 /// {@template flutter.widgets.focusorder.comparable}
 /// Only orders of the same type are comparable. If a set of widgets in the same
-/// [FocusTraversalGroup] contains orders that are not comparable with each other, it
-/// will assert, since the ordering between such keys is undefined. To avoid
-/// collisions, use a [FocusTraversalGroup] to group similarly ordered widgets
-/// together.
+/// [FocusTraversalGroup] contains orders that are not comparable with each
+/// other, it will assert, since the ordering between such keys is undefined. To
+/// avoid collisions, use a [FocusTraversalGroup] to group similarly ordered
+/// widgets together.
 ///
-/// When overriding, [doCompare] must be overridden instead of [compareTo],
-/// which calls [doCompare] to do the actual comparison.
+/// When overriding, [FocusOrder.doCompare] must be overridden instead of
+/// [FocusOrder.compareTo], which calls [FocusOrder.doCompare] to do the actual
+/// comparison.
 /// {@endtemplate}
 ///
 /// See also:
 ///
-///  * [FocusTraversalGroup], a widget that groups together and imposes a
-///    traversal policy on the [Focus] nodes below it in the widget hierarchy.
-///  * [FocusTraversalOrder], a widget that assigns an order to a widget subtree
-///    for the [OrderedTraversalPolicy] to use.
-///  * [NumericFocusOrder], for a focus order that describes its order with a
-///    `double`.
-///  * [LexicalFocusOrder], a focus order that assigns a string-based lexical
-///    traversal order to a [FocusTraversalOrder] widget.
+/// * [FocusTraversalGroup], a widget that groups together and imposes a
+///   traversal policy on the [Focus] nodes below it in the widget hierarchy.
+/// * [FocusTraversalOrder], a widget that assigns an order to a widget subtree
+///   for the [OrderedTraversalPolicy] to use.
+/// * [NumericFocusOrder], for a focus order that describes its order with a
+///   `double`.
+/// * [LexicalFocusOrder], a focus order that assigns a string-based lexical
+///   traversal order to a [FocusTraversalOrder] widget.
 @immutable
 abstract class FocusOrder with Diagnosticable implements Comparable<FocusOrder> {
   /// Abstract const constructor. This constructor enables subclasses to provide

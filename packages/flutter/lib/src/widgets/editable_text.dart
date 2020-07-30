@@ -975,7 +975,7 @@ class EditableText extends StatefulWidget {
   /// {@tool dartpad --template=stateful_widget_material}
   /// When a non-completion action is pressed, such as "next" or "previous", it
   /// is often desirable to move the focus to the next or previous field.  To do
-  /// this, handle it as in this example, by calling [FocusNode.focusNext] in
+  /// this, handle it as in this example, by calling [FocusNode.nextFocus] in
   /// the `onFieldSubmitted` callback of [TextFormField]. ([TextFormField] wraps
   /// [EditableText] internally, and uses the value of `onFieldSubmitted` as its
   /// [onSubmitted]).
