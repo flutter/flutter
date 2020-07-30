@@ -19,7 +19,7 @@ import 'raw_keyboard.dart';
 class RawKeyEventDataWeb extends RawKeyEventData {
   /// Creates a key event data structure specific for Web.
   ///
-  /// The [keyCode] and [metaState] arguments must not be null.
+  /// The [code] and [metaState] arguments must not be null.
   const RawKeyEventDataWeb({
     @required this.code,
     @required this.key,

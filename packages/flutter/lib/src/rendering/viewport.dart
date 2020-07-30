@@ -301,7 +301,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   /// {@template flutter.rendering.viewport.cacheExtentStyle}
   /// Controls how the [cacheExtent] is interpreted.
   ///
-  /// If set to [CacheExtentStyle.pixels], the [cacheExtent] will be treated as
+  /// If set to [CacheExtentStyle.pixel], the [cacheExtent] will be treated as
   /// a logical pixels.
   ///
   /// If set to [CacheExtentStyle.viewport], the [cacheExtent] will be treated
@@ -1232,7 +1232,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
   /// The first child in the [GrowthDirection.forward] growth direction.
   ///
   /// This child that will be at the position defined by [anchor] when the
-  /// [offset.pixels] is `0`.
+  /// [ViewportOffset.pixels] of [offset] is `0`.
   ///
   /// Children after [center] will be placed in the [axisDirection] relative to
   /// the [center]. Children before [center] will be placed in the opposite of

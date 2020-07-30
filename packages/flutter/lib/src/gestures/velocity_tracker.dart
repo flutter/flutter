@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:ui' show Offset;
 
@@ -19,7 +18,7 @@ class Velocity {
   ///
   /// The [pixelsPerSecond] argument must not be null.
   const Velocity({
-    @required this.pixelsPerSecond,
+    required this.pixelsPerSecond,
   }) : assert(pixelsPerSecond != null);
 
   /// A velocity that isn't moving at all.
@@ -95,10 +94,10 @@ class VelocityEstimate {
   ///
   /// [pixelsPerSecond], [confidence], [duration], and [offset] must not be null.
   const VelocityEstimate({
-    @required this.pixelsPerSecond,
-    @required this.confidence,
-    @required this.duration,
-    @required this.offset,
+    required this.pixelsPerSecond,
+    required this.confidence,
+    required this.duration,
+    required this.offset,
   }) : assert(pixelsPerSecond != null),
        assert(confidence != null),
        assert(duration != null),
@@ -154,7 +153,7 @@ class VelocityTracker {
   static const int _minSampleSize = 3;
 
   // Circular buffer; current sample at _index.
-  final List<_PointAtTime> _samples = List<_PointAtTime>(_historySize);
+  final List<_PointAtTime?> _samples = List<_PointAtTime?>.filled(_historySize, null, growable: false);
   int _index = 0;
 
   /// Adds a position as the given time to the tracker.
@@ -171,7 +170,7 @@ class VelocityTracker {
   /// Information is added using [addPosition].
   ///
   /// Returns null if there is no data on which to base an estimate.
-  VelocityEstimate getVelocityEstimate() {
+  VelocityEstimate? getVelocityEstimate() {
     final List<double> x = <double>[];
     final List<double> y = <double>[];
     final List<double> w = <double>[];
@@ -179,7 +178,7 @@ class VelocityTracker {
     int sampleCount = 0;
     int index = _index;
 
-    final _PointAtTime newestSample = _samples[index];
+    final _PointAtTime? newestSample = _samples[index];
     if (newestSample == null)
       return null;
 
@@ -189,7 +188,7 @@ class VelocityTracker {
     // Starting with the most recent PointAtTime sample, iterate backwards while
     // the samples represent continuous motion.
     do {
-      final _PointAtTime sample = _samples[index];
+      final _PointAtTime? sample = _samples[index];
       if (sample == null)
         break;
 
@@ -212,10 +211,10 @@ class VelocityTracker {
 
     if (sampleCount >= _minSampleSize) {
       final LeastSquaresSolver xSolver = LeastSquaresSolver(time, x, w);
-      final PolynomialFit xFit = xSolver.solve(2);
+      final PolynomialFit? xFit = xSolver.solve(2);
       if (xFit != null) {
         final LeastSquaresSolver ySolver = LeastSquaresSolver(time, y, w);
-        final PolynomialFit yFit = ySolver.solve(2);
+        final PolynomialFit? yFit = ySolver.solve(2);
         if (yFit != null) {
           return VelocityEstimate( // convert from pixels/ms to pixels/s
             pixelsPerSecond: Offset(xFit.coefficients[1] * 1000, yFit.coefficients[1] * 1000),
@@ -245,7 +244,7 @@ class VelocityTracker {
   /// Returns [Velocity.zero] if there is no data from which to compute an
   /// estimate or if the estimated velocity is zero.
   Velocity getVelocity() {
-    final VelocityEstimate estimate = getVelocityEstimate();
+    final VelocityEstimate? estimate = getVelocityEstimate();
     if (estimate == null || estimate.pixelsPerSecond == Offset.zero)
       return Velocity.zero;
     return Velocity(pixelsPerSecond: estimate.pixelsPerSecond);
