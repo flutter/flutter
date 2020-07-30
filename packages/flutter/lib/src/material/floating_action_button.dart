@@ -254,7 +254,7 @@ class FloatingActionButton extends StatelessWidget {
   /// If this property is null, then the
   /// [FloatingActionButtonThemeData.backgroundColor] of
   /// [ThemeData.floatingActionButtonTheme] is used. If that property is also
-  /// null, then the [Theme]'s [ThemeData.colorScheme.secondary] color is used.
+  /// null, then the [Theme]'s [ColorScheme.secondary] color is used.
   final Color backgroundColor;
 
   /// The color to use for filling the button when the button has input focus.
