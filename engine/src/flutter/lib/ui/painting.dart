@@ -1167,8 +1167,9 @@ class Paint {
   /// See also:
   ///
   ///  * [Canvas.saveLayer], which uses its [Paint]'s [blendMode] to composite
-  ///    the layer when [restore] is called.
-  ///  * [BlendMode], which discusses the user of [saveLayer] with [blendMode].
+  ///    the layer when [Canvas.restore] is called.
+  ///  * [BlendMode], which discusses the user of [Canvas.saveLayer] with
+  ///    [blendMode].
   BlendMode get blendMode {
     final int encoded = _data.getInt32(_kBlendModeOffset, _kFakeHostEndian);
     return BlendMode.values[encoded ^ _kBlendModeDefault];

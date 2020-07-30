@@ -213,7 +213,7 @@ class ChannelBuffers {
   }
 }
 
-/// [ChannelBuffer]s that allow the storage of messages between the
+/// [ChannelBuffers] that allow the storage of messages between the
 /// Engine and the Framework.  Typically messages that can't be delivered
 /// are stored here until the Framework is able to process them.
 ///
