@@ -1,7 +1,6 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// FLUTTER_NOLINT
 
 #include <atomic>
 #include <thread>
@@ -14,7 +13,7 @@ namespace {
 
 class Box {
  public:
-  Box(int value, std::atomic_int* destroys = nullptr)
+  explicit Box(int value, std::atomic_int* destroys = nullptr)
       : value_(value), destroys_(destroys) {}
   ~Box() {
     if (destroys_) {

@@ -1,7 +1,6 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// FLUTTER_NOLINT
 
 #include "flutter/fml/command_line.h"
 
@@ -27,8 +26,9 @@ CommandLine::CommandLine(const std::string& argv0,
       argv0_(argv0),
       options_(options),
       positional_args_(positional_args) {
-  for (size_t i = 0; i < options_.size(); i++)
+  for (size_t i = 0; i < options_.size(); i++) {
     option_index_[options_[i].name] = i;
+  }
 }
 
 CommandLine::~CommandLine() = default;
@@ -39,18 +39,21 @@ CommandLine& CommandLine::operator=(CommandLine&& from) = default;
 
 bool CommandLine::HasOption(std::string_view name, size_t* index) const {
   auto it = option_index_.find(name.data());
-  if (it == option_index_.end())
+  if (it == option_index_.end()) {
     return false;
-  if (index)
+  }
+  if (index) {
     *index = it->second;
+  }
   return true;
 }
 
 bool CommandLine::GetOptionValue(std::string_view name,
                                  std::string* value) const {
   size_t index;
-  if (!HasOption(name, &index))
+  if (!HasOption(name, &index)) {
     return false;
+  }
   *value = options_[index].value;
   return true;
 }
@@ -59,8 +62,9 @@ std::vector<std::string_view> CommandLine::GetOptionValues(
     std::string_view name) const {
   std::vector<std::string_view> ret;
   for (const auto& option : options_) {
-    if (option.name == name)
+    if (option.name == name) {
       ret.push_back(option.value);
+    }
   }
   return ret;
 }
@@ -69,8 +73,9 @@ std::string CommandLine::GetOptionValueWithDefault(
     std::string_view name,
     std::string_view default_value) const {
   size_t index;
-  if (!HasOption(name, &index))
+  if (!HasOption(name, &index)) {
     return {default_value.data(), default_value.size()};
+  }
   return options_[index].value;
 }
 
@@ -125,16 +130,18 @@ bool CommandLineBuilder::ProcessArg(const std::string& arg) {
 }
 
 CommandLine CommandLineBuilder::Build() const {
-  if (!has_argv0_)
+  if (!has_argv0_) {
     return CommandLine();
+  }
   return CommandLine(argv0_, options_, positional_args_);
 }
 
 }  // namespace internal
 
 std::vector<std::string> CommandLineToArgv(const CommandLine& command_line) {
-  if (!command_line.has_argv0())
+  if (!command_line.has_argv0()) {
     return std::vector<std::string>();
+  }
 
   std::vector<std::string> argv;
   const std::vector<CommandLine::Option>& options = command_line.options();
@@ -146,17 +153,19 @@ std::vector<std::string> CommandLineToArgv(const CommandLine& command_line) {
 
   argv.push_back(command_line.argv0());
   for (const auto& option : options) {
-    if (option.value.empty())
+    if (option.value.empty()) {
       argv.push_back("--" + option.name);
-    else
+    } else {
       argv.push_back("--" + option.name + "=" + option.value);
+    }
   }
 
   if (!positional_args.empty()) {
     // Insert a "--" if necessary.
     if (positional_args[0].size() >= 2u && positional_args[0][0] == '-' &&
-        positional_args[0][1] == '-')
+        positional_args[0][1] == '-') {
       argv.push_back("--");
+    }
 
     argv.insert(argv.end(), positional_args.begin(), positional_args.end());
   }

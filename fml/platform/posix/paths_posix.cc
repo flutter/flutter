@@ -1,7 +1,6 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// FLUTTER_NOLINT
 
 #include "flutter/fml/paths.h"
 
@@ -41,16 +40,19 @@ std::string AbsolutePath(const std::string& path) {
 
 std::string GetDirectoryName(const std::string& path) {
   size_t separator = path.rfind('/');
-  if (separator == 0u)
+  if (separator == 0u) {
     return "/";
-  if (separator == std::string::npos)
+  }
+  if (separator == std::string::npos) {
     return std::string();
+  }
   return path.substr(0, separator);
 }
 
 std::string FromURI(const std::string& uri) {
-  if (uri.substr(0, kFileURLPrefixLength) != kFileURLPrefix)
+  if (uri.substr(0, kFileURLPrefixLength) != kFileURLPrefix) {
     return uri;
+  }
 
   std::string file_path = uri.substr(kFileURLPrefixLength);
   return SanitizeURIEscapedCharacters(file_path);
