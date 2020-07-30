@@ -39,7 +39,7 @@ function script_location() {
 
 function generate_docs() {
     # Install and activate dartdoc.
-    "$PUB" global activate dartdoc -sgit https://github.com/dart-lang/dartdoc.git
+    "$PUB" global activate -sgit https://github.com/dart-lang/dartdoc.git
 
     # This script generates a unified doc set, and creates
     # a custom index.html, placing everything into dev/docs/doc.
