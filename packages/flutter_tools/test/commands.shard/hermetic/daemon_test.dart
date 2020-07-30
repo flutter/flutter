@@ -25,11 +25,13 @@ void main() {
   Daemon daemon;
   NotifyingLogger notifyingLogger;
   BufferLogger bufferLogger;
+  DevtoolsLauncher mockDevToolsLauncher;
 
   group('daemon', () {
     setUp(() {
       bufferLogger = BufferLogger.test();
       notifyingLogger = NotifyingLogger(verbose: false, parent: bufferLogger);
+      mockDevToolsLauncher = MockDevToolsLauncher();
     });
 
     tearDown(() {
@@ -316,7 +318,7 @@ void main() {
       when(mockInternetAddress.host).thenReturn('127.0.0.1');
       when(mockDevToolsServer.port).thenReturn(1234);
 
-      daemon.devToolsDomain.setDevToolsServer(mockDevToolsServer);
+      when(mockDevToolsLauncher.serve()).thenAnswer((_) async => mockDevToolsServer);
 
       commands.add(<String, dynamic>{'id': 0, 'method': 'devtools.serve'});
       final Map<String, dynamic> response = await responses.stream.firstWhere(_isDevToolsEvent);
@@ -325,6 +327,8 @@ void main() {
       expect(response['params']['port'], equals(1234));
       await responses.close();
       await commands.close();
+    }, overrides: <Type, Generator>{
+      DevtoolsLauncher: () => mockDevToolsLauncher,
     });
   });
 
@@ -484,3 +488,5 @@ class MockIOSWorkflow extends IOSWorkflow {
   @override
   final bool canListDevices;
 }
+
+class MockDevToolsLauncher extends Mock implements DevtoolsLauncher {}

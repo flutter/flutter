@@ -895,25 +895,21 @@ class DevToolsDomain extends Domain {
     registerHandler('serve', startServer);
   }
 
-  HttpServer _devToolsServer;
-
-  void setDevToolsServer(HttpServer devToolsServer) {
-    _devToolsServer ??= devToolsServer;
-  }
+  DevtoolsLauncher _devtoolsLauncher;
 
   Future<void> startServer([ Map<String, dynamic> args ]) async {
-    _devToolsServer ??= await devtools_server.serveDevTools();
+    _devtoolsLauncher ??= DevtoolsLauncher.instance;
+    final HttpServer server = await _devtoolsLauncher.serve();
 
     sendEvent('devtools.serve', <String, dynamic>{
-      'host': _devToolsServer.address.host,
-      'port': _devToolsServer.port,
+      'host': server.address.host,
+      'port': server.port,
     });
   }
 
   @override
   Future<void> dispose() async {
-    await _devToolsServer?.close();
-    _devToolsServer = null;
+    await _devtoolsLauncher?.close();
   }
 }
 
