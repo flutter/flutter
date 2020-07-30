@@ -196,7 +196,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 /// view. The app bar can still expand and contract as the user scrolls, but it
 /// will remain visible rather than being scrolled out of view.
 ///
-/// This works naturally in a [NestedScroll] view, as the pinned [SliverAppBar]
+/// This works naturally in a [NestedScrollView], as the pinned [SliverAppBar]
 /// is not expected to move in or out of the visible portion of the viewport.
 /// As the inner or outer [Scrollable]s are moved, the app bar persists as
 /// expected.
@@ -266,7 +266,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 ///
 /// ### Snapping [SliverAppBar]s
 ///
-/// Floating [SliverAppBars] also have the option to perform a snapping animation.
+/// Floating [SliverAppBar]s also have the option to perform a snapping animation.
 /// If [SliverAppBar.snap] is true, then a scroll that exposes the floating app
 /// bar will trigger an animation that slides the entire app bar into view.
 /// Similarly if a scroll dismisses the app bar, the animation will slide the
@@ -289,10 +289,10 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 ///
 /// This simple example shows a [NestedScrollView] whose header contains a
 /// snapping, floating [SliverAppBar]. _Without_ setting any additional flags,
-/// e.g [NestedScrollView.floatHeaderSlivers] and [SliverAppBar.nestedSnap], the
-/// [SliverAppBar] will animate in and out without floating. The
-/// [SliverOverlapAbsorber] and [SliverOverlapInjector] maintain the proper
-/// alignment between the two separate scroll views.
+/// e.g [NestedScrollView.floatHeaderSlivers], the [SliverAppBar] will animate
+/// in and out without floating. The [SliverOverlapAbsorber] and
+/// [SliverOverlapInjector] maintain the proper alignment between the two
+/// separate scroll views.
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
@@ -1703,7 +1703,7 @@ class SliverOverlapAbsorberHandle extends ChangeNotifier {
 /// A sliver that wraps another, forcing its layout extent to be treated as
 /// overlap.
 ///
-/// The difference between the overlap requested by the child [sliver] and the
+/// The difference between the overlap requested by the child `sliver` and the
 /// overlap reported by this widget, called the _absorbed overlap_, is reported
 /// to the [SliverOverlapAbsorberHandle], which is typically passed to a
 /// [SliverOverlapInjector].
@@ -1752,7 +1752,7 @@ class SliverOverlapAbsorber extends SingleChildRenderObjectWidget {
 /// A sliver that wraps another, forcing its layout extent to be treated as
 /// overlap.
 ///
-/// The difference between the overlap requested by the child [sliver] and the
+/// The difference between the overlap requested by the child `sliver` and the
 /// overlap reported by this widget, called the _absorbed overlap_, is reported
 /// to the [SliverOverlapAbsorberHandle], which is typically passed to a
 /// [RenderSliverOverlapInjector].

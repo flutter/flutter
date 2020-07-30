@@ -728,6 +728,7 @@ void main() {
         fuchsiaDevice,
         expectedIsolateName,
         (Uri uri) async => fakeVmServiceHost.vmService,
+        (Device device, Uri uri) => null,
         true, // only poll once.
       );
 

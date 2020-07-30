@@ -1193,6 +1193,16 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey brightnessAuto = LogicalKeyboardKey(0x001000c0075, debugName: kReleaseMode ? null : 'Brightness Auto');
 
+  /// Represents the logical "Kbd Illum Up" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey kbdIllumUp = LogicalKeyboardKey(0x001000c0079, debugName: kReleaseMode ? null : 'Kbd Illum Up');
+
+  /// Represents the logical "Kbd Illum Down" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey kbdIllumDown = LogicalKeyboardKey(0x001000c007a, debugName: kReleaseMode ? null : 'Kbd Illum Down');
+
   /// Represents the logical "Media Last" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
@@ -1847,6 +1857,8 @@ class LogicalKeyboardKey extends KeyboardKey {
     0x01000c0073: brightnessMinimum,
     0x01000c0074: brightnessMaximum,
     0x01000c0075: brightnessAuto,
+    0x01000c0079: kbdIllumUp,
+    0x01000c007a: kbdIllumDown,
     0x01000c0083: mediaLast,
     0x01000c008c: launchPhone,
     0x01000c008d: programGuide,
@@ -3038,6 +3050,18 @@ class PhysicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.physicalKey] for more information.
   static const PhysicalKeyboardKey brightnessAuto = PhysicalKeyboardKey(0x000c0075, debugName: kReleaseMode ? null : 'Brightness Auto');
 
+  /// Represents the location of the "Kbd Illum Up" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey kbdIllumUp = PhysicalKeyboardKey(0x000c0079, debugName: kReleaseMode ? null : 'Kbd Illum Up');
+
+  /// Represents the location of the "Kbd Illum Down" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey kbdIllumDown = PhysicalKeyboardKey(0x000c007a, debugName: kReleaseMode ? null : 'Kbd Illum Down');
+
   /// Represents the location of the "Media Last" key on a generalized keyboard.
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
@@ -3735,6 +3759,8 @@ class PhysicalKeyboardKey extends KeyboardKey {
     0x000c0073: brightnessMinimum,
     0x000c0074: brightnessMaximum,
     0x000c0075: brightnessAuto,
+    0x000c0079: kbdIllumUp,
+    0x000c007a: kbdIllumDown,
     0x000c0083: mediaLast,
     0x000c008c: launchPhone,
     0x000c008d: programGuide,
