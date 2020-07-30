@@ -130,7 +130,7 @@ Future<void> main(List<String> arguments) async {
   // TODO(goderbauer): Figure out how to add 'dart:ui'.
   final List<String> flutterPackages = <String>[
     kDummyPackageName,
-    kPlatfromIntegrationsPackageName,
+    kPlatformIntegrationPackageName,
   ]..addAll(findPackageNames());
 
   // Generate the documentation.
