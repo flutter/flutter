@@ -17,6 +17,9 @@ const String kDocsRoot = 'dev/docs';
 const String kPublishRoot = '$kDocsRoot/doc';
 const String kSnippetsRoot = 'dev/snippets';
 
+const String kDummyPackageName = 'Flutter';
+const String kPlatformIntegrationPackageName = 'platform_integration';
+
 /// This script expects to run with the cwd as the root of the flutter repo. It
 /// will generate documentation for the packages in `//packages/` and write the
 /// documentation to `//dev/docs/doc/api/`.
@@ -50,7 +53,7 @@ Future<void> main(List<String> arguments) async {
 
   // Create the pubspec.yaml file.
   final StringBuffer buf = StringBuffer();
-  buf.writeln('name: Flutter');
+  buf.writeln('name: $kDummyPackageName');
   buf.writeln('homepage: https://flutter.dev');
   // TODO(dnfield): Re-factor for proper versioning, https://github.com/flutter/flutter/issues/55409
   buf.writeln('version: 0.0.0');
@@ -59,10 +62,10 @@ Future<void> main(List<String> arguments) async {
     buf.writeln('  $package:');
     buf.writeln('    sdk: flutter');
   }
-  buf.writeln('  platform_integration: 0.0.1');
+  buf.writeln('  $kPlatformIntegrationPackageName: 0.0.1');
   buf.writeln('dependency_overrides:');
-  buf.writeln('  platform_integration:');
-  buf.writeln('    path: platform_integration');
+  buf.writeln('  $kPlatformIntegrationPackageName:');
+  buf.writeln('    path: $kPlatformIntegrationPackageName');
   File('$kDocsRoot/pubspec.yaml').writeAsStringSync(buf.toString());
 
   // Create the library file.
@@ -122,6 +125,17 @@ Future<void> main(List<String> arguments) async {
   );
   print('\n${result.stdout}flutter version: $version\n');
 
+  // Dartdoc warnings and errors in these packages are considered fatal.
+  // All packages owned by flutter should be in the list.
+  // TODO(goderbauer): Figure out how to add 'dart:ui'.
+  final List<String> flutterPackages = <String>[
+    kDummyPackageName,
+    kPlatformIntegrationPackageName,
+    ...findPackageNames(),
+  ]..remove('flutter_test');
+  // TODO(goderbauer): Enable flutter_test when engine is rolled to include
+  //     https://github.com/flutter/engine/pull/20140.
+
   // Generate the documentation.
   // We don't need to exclude flutter_tools in this list because it's not in the
   // recursive dependencies of the package defined at dev/docs/pubspec.yaml
@@ -142,10 +156,7 @@ Future<void> main(List<String> arguments) async {
     '--header', 'snippets.html',
     '--header', 'opensearch.html',
     '--footer-text', 'lib/footer.html',
-    '--allow-warnings-in-packages',
-    <String>[
-      'flutter',
-    ].join(','),
+    '--allow-warnings-in-packages', flutterPackages.join(','),
     '--exclude-packages',
     <String>[
       'analyzer',
@@ -189,7 +200,7 @@ Future<void> main(List<String> arguments) async {
       'package:web_socket_channel/html.dart',
     ].join(','),
     '--favicon=favicon.ico',
-    '--package-order', 'flutter,Dart,platform_integration,flutter_test,flutter_driver',
+    '--package-order', 'flutter,Dart,$kPlatformIntegrationPackageName,flutter_test,flutter_driver',
     '--auto-include-dependencies',
   ];
 
@@ -477,8 +488,8 @@ Iterable<String> libraryRefs() sync* {
   }
 
   // Add a fake package for platform integration APIs.
-  yield 'platform_integration/android.dart';
-  yield 'platform_integration/ios.dart';
+  yield '$kPlatformIntegrationPackageName/android.dart';
+  yield '$kPlatformIntegrationPackageName/ios.dart';
 }
 
 void printStream(Stream<List<int>> stream, { String prefix = '', List<Pattern> filter = const <Pattern>[] }) {
