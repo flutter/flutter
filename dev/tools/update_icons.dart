@@ -204,6 +204,7 @@ ArgResults _handleArguments(List<String> args) {
   return argParser.parse(args);
 }
 
+// Do not make this method private as it is used by g3 roll.
 Map<String, String> stringToTokenPairMap(String codepointData) {
   final Iterable<String> cleanData = LineSplitter.split(codepointData)
       .map((String line) => line.trim())
@@ -222,6 +223,7 @@ Map<String, String> stringToTokenPairMap(String codepointData) {
   return pairs;
 }
 
+// Do not make this method private as it is used by g3 roll.
 String regenerateIconsFile(String iconData, Map<String, String> tokenPairMap) {
   final StringBuffer buf = StringBuffer();
   bool generating = false;
