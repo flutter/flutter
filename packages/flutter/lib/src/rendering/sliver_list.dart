@@ -178,7 +178,7 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
         assert(earliestUsefulChild != null);
         final double firstChildScrollOffset = earliestScrollOffset - paintExtentOf(firstChild);
         geometry = SliverGeometry(
-          scrollOffsetCorrection: -firstChildScrollOffset,
+          scrollOffsetCorrection: firstChildScrollOffset == 0 ? null : -firstChildScrollOffset,
         );
         final SliverMultiBoxAdaptorParentData childParentData = firstChild.parentData as SliverMultiBoxAdaptorParentData;
         childParentData.layoutOffset = 0.0;
