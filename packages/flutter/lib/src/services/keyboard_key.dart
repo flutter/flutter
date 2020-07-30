@@ -155,6 +155,8 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// This value is useful for describing or matching mnemonic keyboard
   /// shortcuts.
   ///
+  /// This value can be null if there's no key label data for a key.
+  ///
   /// On most platforms this is a single code point, but it could contain any
   /// Unicode string. The `keyLabel` differs from [RawKeyEvent.character]
   /// because `keyLabel` only takes into account the key being pressed, not any

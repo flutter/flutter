@@ -594,14 +594,14 @@ class TextInputConfiguration {
   }
 }
 
-TextAffinity? _toTextAffinity(String affinity) {
+TextAffinity _toTextAffinity(String affinity) {
   switch (affinity) {
     case 'TextAffinity.downstream':
       return TextAffinity.downstream;
     case 'TextAffinity.upstream':
       return TextAffinity.upstream;
   }
-  return null;
+  throw ArgumentError('Affinity $affinity not supported.');
 }
 
 /// A floating cursor state the user has induced by force pressing an iOS
@@ -662,7 +662,7 @@ class TextEditingValue {
       selection: TextSelection(
         baseOffset: encoded['selectionBase'] as int? ?? -1,
         extentOffset: encoded['selectionExtent'] as int? ?? -1,
-        affinity: _toTextAffinity(encoded['selectionAffinity'] as String) ?? TextAffinity.downstream,
+        affinity: _toTextAffinity(encoded['selectionAffinity'] as String),
         isDirectional: encoded['selectionIsDirectional'] as bool? ?? false,
       ),
       composing: TextRange(
