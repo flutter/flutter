@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -18,7 +19,6 @@ import 'package:process/process.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/mocks.dart';
 import '../src/testbed.dart';
 
 const FakeEmulator emulator1 = FakeEmulator('Nexus_5', 'Nexus 5', 'Google');
@@ -357,3 +357,4 @@ class MockProcessManager extends Mock implements ProcessManager {
 }
 
 class MockXcode extends Mock implements Xcode {}
+class MockAndroidSdk extends Mock implements AndroidSdk {}

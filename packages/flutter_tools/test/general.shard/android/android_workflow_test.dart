@@ -21,7 +21,7 @@ import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart' show MockAndroidSdk, MockProcess, MockProcessManager, MockStdio;
+import '../../src/mocks.dart' show MockProcess, MockProcessManager, MockStdio;
 
 class MockAndroidSdkVersion extends Mock implements AndroidSdkVersion {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
@@ -157,7 +157,9 @@ void main() {
 
   testUsingContext('runLicenseManager succeeds for version >= 26', () async {
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
-    when(sdk.sdkManagerVersion).thenReturn('26.0.0');
+    when(sdk.sdkManagerVersion).thenAnswer((Invocation invocation) async {
+      return '26.0.0';
+    });
 
     expect(await AndroidLicenseValidator.runLicenseManager(), isTrue);
   }, overrides: Map<Type, Generator>.unmodifiable(<Type, Generator>{
@@ -325,3 +327,5 @@ void main() {
     );
   });
 }
+
+class MockAndroidSdk extends Mock implements AndroidSdk {}

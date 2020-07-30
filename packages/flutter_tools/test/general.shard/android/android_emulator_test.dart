@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/android/android_emulator.dart';
+import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -14,7 +15,6 @@ import 'package:quiver/testing/async.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
-import '../../src/mocks.dart' show MockAndroidSdk;
 
 const String emulatorID = 'i1234';
 const String errorText = '[Android emulator test error]';
@@ -131,6 +131,7 @@ void main() {
     setUp(() {
       mockSdk = MockAndroidSdk();
       when(mockSdk.emulatorPath).thenReturn('emulator');
+      when(mockSdk.getEmulatorPath()).thenReturn('emulator');
     });
 
     testWithoutContext('succeeds', () async {
@@ -207,3 +208,5 @@ void main() {
     });
   });
 }
+
+class MockAndroidSdk extends Mock implements AndroidSdk {}

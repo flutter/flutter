@@ -146,7 +146,7 @@ class EmulatorManager {
         '-n', name,
         '-k', sdkId,
         '-d', device,
-      ], environment: _androidSdk?.sdkManagerEnv,
+      ], environment: await _androidSdk?.sdkManagerEnv,
     );
     return CreateEmulatorResult(
       name,
@@ -169,7 +169,7 @@ class EmulatorManager {
       '-c',
     ];
     final RunResult runResult = await _processUtils.run(args,
-        environment: _androidSdk?.sdkManagerEnv);
+        environment: await _androidSdk?.sdkManagerEnv);
     if (runResult.exitCode != 0) {
       return null;
     }
@@ -197,7 +197,7 @@ class EmulatorManager {
       '-n', 'temp',
     ];
     final RunResult runResult = await _processUtils.run(args,
-        environment: _androidSdk?.sdkManagerEnv);
+        environment: await _androidSdk?.sdkManagerEnv);
 
     // Get the list of IDs that match our criteria
     final List<String> availableIDs = runResult.stderr

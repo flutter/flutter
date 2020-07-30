@@ -70,7 +70,17 @@ Future<T> runInContext<T>(
     overrides: overrides,
     fallbacks: <Type, Generator>{
       AndroidLicenseValidator: () => AndroidLicenseValidator(),
-      AndroidSdk: AndroidSdk.locateAndroidSdk,
+      AndroidSdk: () {
+        return AndroidSdk.locateAndroidSdk(
+          androidStudio: globals.androidStudio,
+          logger: globals.logger,
+          fileSystem: globals.fs,
+          config: globals.config,
+          operatingSystemUtils: globals.os,
+          platform: globals.platform,
+          processManager: globals.processManager,
+        );
+      },
       AndroidStudio: AndroidStudio.latestValid,
       AndroidValidator: () => AndroidValidator(
         androidStudio: globals.androidStudio,

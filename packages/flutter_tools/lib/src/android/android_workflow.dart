@@ -219,11 +219,12 @@ class AndroidValidator extends DoctorValidator {
     }
 
     // Now check for the JDK.
-    final String javaBinary = AndroidSdk.findJavaBinary(
+    final String javaBinary = await AndroidSdk.findJavaBinary(
       androidStudio: _androidStudio,
       fileSystem: _fileSystem,
       operatingSystemUtils: _operatingSystemUtils,
       platform: _platform,
+      processUtils: ProcessUtils(logger: _logger, processManager: _processManager),
     );
     if (javaBinary == null) {
       messages.add(ValidationMessage.error(_userMessages.androidMissingJdk));
@@ -279,11 +280,12 @@ class AndroidLicenseValidator extends DoctorValidator {
   }
 
   Future<bool> _checkJavaVersionNoOutput() async {
-    final String javaBinary = AndroidSdk.findJavaBinary(
+    final String javaBinary = await AndroidSdk.findJavaBinary(
       androidStudio: globals.androidStudio,
       fileSystem: globals.fs,
       operatingSystemUtils: globals.os,
       platform: globals.platform,
+      processUtils: ProcessUtils.instance,
     );
     if (javaBinary == null) {
       return false;
@@ -336,7 +338,7 @@ class AndroidLicenseValidator extends DoctorValidator {
     try {
       final Process process = await processUtils.start(
         <String>[globals.androidSdk.sdkManagerPath, '--licenses'],
-        environment: globals.androidSdk.sdkManagerEnv,
+        environment: await globals.androidSdk.sdkManagerEnv,
       );
       process.stdin.write('n\n');
       // We expect logcat streams to occasionally contain invalid utf-8,
@@ -373,7 +375,7 @@ class AndroidLicenseValidator extends DoctorValidator {
     try {
       final Process process = await processUtils.start(
         <String>[globals.androidSdk.sdkManagerPath, '--licenses'],
-        environment: globals.androidSdk.sdkManagerEnv,
+        environment: await globals.androidSdk.sdkManagerEnv,
       );
 
       // The real stdin will never finish streaming. Pipe until the child process

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/config.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
@@ -401,12 +402,13 @@ class AndroidSdk {
   }
 
   /// First try Java bundled with Android Studio, then sniff JAVA_HOME, then fallback to PATH.
-  static String findJavaBinary({
+  static Future<String> findJavaBinary({
     @required AndroidStudio androidStudio,
     @required FileSystem fileSystem,
     @required OperatingSystemUtils operatingSystemUtils,
     @required Platform platform,
-  }) {
+    @required ProcessUtils processUtils,
+  }) async {
     if (androidStudio?.javaPath != null) {
       return fileSystem.path.join(androidStudio.javaPath, 'bin', 'java');
     }
@@ -421,11 +423,10 @@ class AndroidSdk {
     // See: http://stackoverflow.com/questions/14292698/how-do-i-check-if-the-java-jdk-is-installed-on-mac.
     if (platform.isMacOS) {
       try {
-        final String javaHomeOutput = processUtils.runSync(
+        final String javaHomeOutput = (await processUtils.run(
           <String>['/usr/libexec/java_home', '-v', '1.8'],
           throwOnError: true,
-          hideStdout: true,
-        ).stdout.trim();
+        )).stdout.trim();
         if (javaHomeOutput != null) {
           if ((javaHomeOutput != null) && (javaHomeOutput.isNotEmpty)) {
             final String javaHome = javaHomeOutput.split('\n').last.trim();
@@ -442,15 +443,16 @@ class AndroidSdk {
   Map<String, String> _sdkManagerEnv;
   /// Returns an environment with the Java folder added to PATH for use in calling
   /// Java-based Android SDK commands such as sdkmanager and avdmanager.
-  Map<String, String> get sdkManagerEnv {
+  Future<Map<String, String>> get sdkManagerEnv async {
     if (_sdkManagerEnv == null) {
       // If we can locate Java, then add it to the path used to run the Android SDK manager.
       _sdkManagerEnv = <String, String>{};
-      final String javaBinary = findJavaBinary(
+      final String javaBinary = await findJavaBinary(
         androidStudio: _androidStudio,
         fileSystem: _fileSystem,
         operatingSystemUtils: _operatingSystemUtils,
         platform: _platform,
+        processUtils: ProcessUtils(processManager: _processManager, logger: _logger),
       );
       // This is probably the cause of the Java version bug.
       if (javaBinary != null) {
@@ -463,19 +465,19 @@ class AndroidSdk {
   }
 
   /// Returns the version of the Android SDK manager tool or null if not found.
-  String get sdkManagerVersion {
+  Future<String> get sdkManagerVersion async {
     if (!_processManager.canRun(sdkManagerPath)) {
       throwToolExit('Android sdkmanager not found. Update to the latest Android SDK to resolve this.');
     }
-    final RunResult result = processUtils.runSync(
+    final ProcessResult result = await _processManager.run(
       <String>[sdkManagerPath, '--version'],
-      environment: sdkManagerEnv,
+      environment: await sdkManagerEnv,
     );
     if (result.exitCode != 0) {
       _logger.printTrace('sdkmanager --version failed: exitCode: ${result.exitCode} stdout: ${result.stdout} stderr: ${result.stderr}');
       return null;
     }
-    return result.stdout.trim();
+    return result.stdout.toString().trim();
   }
 
   @override

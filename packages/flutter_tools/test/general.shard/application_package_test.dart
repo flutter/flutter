@@ -72,7 +72,7 @@ void main() {
       const String aaptPath = 'aaptPath';
       final File apkFile = globals.fs.file('app.apk');
       final AndroidSdkVersion sdkVersion = MockitoAndroidSdkVersion();
-      when(sdkVersion.aaptPath(fileSystem: anyNamed('filesystem'))).thenReturn(aaptPath);
+      when(sdkVersion.aaptPath(fileSystem: anyNamed('fileSystem'))).thenReturn(aaptPath);
       when(sdk.latestVersion).thenReturn(sdkVersion);
       when(sdk.platformToolsAvailable).thenReturn(true);
       when(sdk.licensesAvailable).thenReturn(false);
@@ -153,7 +153,7 @@ void main() {
       when(mockProcessManager.runSync(argThat(contains('logcat'))))
           .thenReturn(ProcessResult(0, 1, '', ''));
 
-      expect(AndroidApk.fromApk(null), isNull);
+      expect(AndroidApk.fromApk(MemoryFileSystem.test().file('missing')), isNull);
     }, overrides: overrides);
   });
 
