@@ -47,6 +47,9 @@ abstract class FeatureFlags {
   /// Whether fast single widget reloads are enabled.
   bool get isSingleWidgetReloadEnabled => false;
 
+  /// Whether null-assertions are enabled for flutter_tester.
+  bool get isNullAssertionsEnabled => false;
+
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
@@ -101,6 +104,9 @@ class FlutterFeatureFlags implements FeatureFlags {
     }
     return isEnabled;
   }
+
+  @override
+  bool get isNullAssertionsEnabled => true;
 }
 
 /// All current Flutter feature flags.

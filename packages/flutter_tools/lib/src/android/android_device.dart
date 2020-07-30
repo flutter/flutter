@@ -626,13 +626,6 @@ class AndroidDevice extends Device {
       );
     }
 
-    // TODO(jonahwilliams): remove after enabling null_assertions by default
-    // in the engine.
-    String dartFlags = debuggingOptions.dartFlags ?? '';
-    if (debuggingOptions.buildInfo.dartExperiments.contains('non-nullable')) {
-      dartFlags += '--null_assertions';
-    }
-
     final List<String> cmd = <String>[
       'shell', 'am', 'start',
       '-a', 'android.intent.action.RUN',
@@ -668,8 +661,8 @@ class AndroidDevice extends Device {
           ...<String>['--ez', 'start-paused', 'true'],
         if (debuggingOptions.disableServiceAuthCodes)
           ...<String>['--ez', 'disable-service-auth-codes', 'true'],
-        if (dartFlags.isNotEmpty)
-          ...<String>['--es', 'dart-flags', dartFlags],
+        if (debuggingOptions.dartFlags.isNotEmpty)
+          ...<String>['--es', 'dart-flags', debuggingOptions.dartFlags],
         if (debuggingOptions.useTestFonts)
           ...<String>['--ez', 'use-test-fonts', 'true'],
         if (debuggingOptions.verboseSystemLogs)

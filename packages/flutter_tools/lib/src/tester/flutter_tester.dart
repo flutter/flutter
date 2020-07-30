@@ -181,10 +181,6 @@ class FlutterTesterDevice extends Device {
         '--disable-service-auth-codes',
       if (debuggingOptions.hasObservatoryPort)
         '--observatory-port=${debuggingOptions.hostVmServicePort}',
-      // TODO(jonahwilliams): remove after enabling null_assertions by default
-      // in the engine.
-      if (buildInfo.dartExperiments.contains('non-nullable'))
-        '--dart-flags=--null_assertions',
       applicationKernelFilePath
     ];
 
