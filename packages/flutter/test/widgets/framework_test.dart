@@ -1097,7 +1097,7 @@ void main() {
 
     expect(tabController.index, 1);
 
-    // rebuild tabs that only have the 1'st page with GlobalKey 'key1'
+    // rebuild TabBarView that only have the 1st page with GlobalKey 'key1'
     setState((){
       tabBarViewCnt = 1;
       tabController = TabController(length: tabBarViewCnt, vsync: const TestVSync(),);
