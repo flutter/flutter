@@ -184,9 +184,18 @@ abstract class FlutterCommand extends Command<void> {
       allowed: <String>['sse', 'ws'],
       defaultsTo: 'sse',
       help: 'The protocol (SSE or WebSockets) to use for the debug service proxy '
-      'when using the Web Server device and Dart Debugger extension. '
+      'when using the Web Server device and Dart Debug extension. '
       'This is useful for editors/debug adapters that do not support debugging '
       'over SSE (the default protocol for Web Server/Dart Debugger extension).',
+      hide: hide,
+    );
+    argParser.addOption('web-server-debug-backend-protocol',
+      allowed: <String>['sse', 'ws'],
+      defaultsTo: 'sse',
+      help: 'The protocol (SSE or WebSockets) to use for the Dart Debug Extension '
+      'backend service when using the Web Server device. '
+      'Using WebSockets can improve performance but may fail when connecting through '
+      'some proxy servers.',
       hide: hide,
     );
     argParser.addFlag('web-allow-expose-url',
@@ -287,6 +296,19 @@ abstract class FlutterCommand extends Command<void> {
             '(the default) will find a random free host port.'
     );
     _usesPortOption = true;
+  }
+
+  void addDdsOptions({@required bool verboseHelp}) {
+    argParser.addFlag(
+      'disable-dds',
+      hide: !verboseHelp,
+      help: 'Disable the Dart Developer Service (DDS). This flag should only be provided'
+            ' when attaching to an application with an existing DDS instance (e.g.,'
+            ' attaching to an application currently connected to by "flutter run") or'
+            ' when running certain tests.\n'
+            'Note: passing this flag may degrade IDE functionality if a DDS instance is not'
+            ' already connected to the target application.'
+    );
   }
 
   /// Gets the vmservice port provided to in the 'observatory-port' or
@@ -836,10 +858,13 @@ abstract class FlutterCommand extends Command<void> {
     await validateCommand();
 
     if (shouldRunPub) {
-      await pub.get(context: PubContext.getVerifyContext(name));
+      final FlutterProject project = FlutterProject.current();
+      await pub.get(
+        context: PubContext.getVerifyContext(name),
+        generateSyntheticPackage: project.manifest.generateSyntheticPackage,
+      );
       // All done updating dependencies. Release the cache lock.
       Cache.releaseLock();
-      final FlutterProject project = FlutterProject.current();
       await project.ensureReadyForPlatformSpecificTooling(checkProjects: true);
     } else {
       Cache.releaseLock();
@@ -880,7 +905,7 @@ abstract class FlutterCommand extends Command<void> {
       globals.printError(userMessages.flutterNoDevelopmentDevice);
       return null;
     }
-
+    final DeviceManager deviceManager = globals.deviceManager;
     List<Device> devices = await deviceManager.findTargetDevices(FlutterProject.current());
 
     if (devices.isEmpty && deviceManager.hasSpecifiedDeviceId) {
@@ -934,7 +959,7 @@ abstract class FlutterCommand extends Command<void> {
     }
     if (deviceList.length > 1) {
       globals.printStatus(userMessages.flutterSpecifyDevice);
-      deviceList = await deviceManager.getAllConnectedDevices();
+      deviceList = await globals.deviceManager.getAllConnectedDevices();
       globals.printStatus('');
       await Device.printDevices(deviceList);
       return null;
@@ -1011,7 +1036,7 @@ mixin DeviceBasedDevelopmentArtifacts on FlutterCommand {
     // If there are no attached devices, use the default configuration.
     // Otherwise, only add development artifacts which correspond to a
     // connected device.
-    final List<Device> devices = await deviceManager.getDevices();
+    final List<Device> devices = await globals.deviceManager.getDevices();
     if (devices.isEmpty) {
       return super.requiredArtifacts;
     }

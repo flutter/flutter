@@ -285,7 +285,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// ```
 /// {@end-tool}
 ///
-/// To use a font family defined in a package, the [package] argument must be
+/// To use a font family defined in a package, the `package` argument must be
 /// provided. For instance, suppose the font declaration above is in the
 /// `pubspec.yaml` of a package named `my_package` which the app depends on.
 /// Then creating the TextStyle is done as follows:

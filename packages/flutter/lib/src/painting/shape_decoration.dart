@@ -257,7 +257,7 @@ class ShapeDecoration extends Decoration {
         && other.color == color
         && other.gradient == gradient
         && other.image == image
-        && other.shadows == shadows
+        && listEquals<BoxShadow>(other.shadows, shadows)
         && other.shape == shape;
   }
 
@@ -268,7 +268,7 @@ class ShapeDecoration extends Decoration {
       gradient,
       image,
       shape,
-      shadows,
+      hashList(shadows),
     );
   }
 

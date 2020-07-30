@@ -111,7 +111,7 @@ void main() {
                       showB,
                       showC,
                       showABC,
-                      RaisedButton(
+                      ElevatedButton(
                         child: const Text('Increment a'),
                         onPressed: () {
                           // Rebuilds the ABCModel which triggers a rebuild
@@ -120,7 +120,7 @@ void main() {
                           setState(() { _a += 1; });
                         },
                       ),
-                      RaisedButton(
+                      ElevatedButton(
                         child: const Text('Increment b'),
                         onPressed: () {
                           // Rebuilds the ABCModel which triggers a rebuild
@@ -129,7 +129,7 @@ void main() {
                           setState(() { _b += 1; });
                         },
                       ),
-                      RaisedButton(
+                      ElevatedButton(
                         child: const Text('Increment c'),
                         onPressed: () {
                           // Rebuilds the ABCModel which triggers a rebuild
@@ -254,19 +254,19 @@ void main() {
                         const SizedBox(height: 24.0),
                         showABC,
                         const SizedBox(height: 24.0),
-                        RaisedButton(
+                        ElevatedButton(
                           child: const Text('Increment a'),
                           onPressed: () {
                             setState(() { _a += 1; });
                           },
                         ),
-                        RaisedButton(
+                        ElevatedButton(
                           child: const Text('Increment b'),
                           onPressed: () {
                             setState(() { _b += 1; });
                           },
                         ),
-                        RaisedButton(
+                        ElevatedButton(
                           child: const Text('Increment c'),
                           onPressed: () {
                             setState(() { _c += 1; });
@@ -371,25 +371,25 @@ void main() {
                         const SizedBox(height: 24.0),
                         showABC,
                         const SizedBox(height: 24.0),
-                        RaisedButton(
+                        ElevatedButton(
                           child: const Text('Increment a'),
                           onPressed: () {
                             setState(() { _a += 1; });
                           },
                         ),
-                        RaisedButton(
+                        ElevatedButton(
                           child: const Text('Increment b'),
                           onPressed: () {
                             setState(() { _b += 1; });
                           },
                         ),
-                        RaisedButton(
+                        ElevatedButton(
                           child: const Text('Increment c'),
                           onPressed: () {
                             setState(() { _c += 1; });
                           },
                         ),
-                        RaisedButton(
+                        ElevatedButton(
                           child: const Text('rebuild'),
                           onPressed: () {
                             setState(() {

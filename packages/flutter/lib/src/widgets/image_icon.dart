@@ -62,10 +62,8 @@ class ImageIcon extends StatelessWidget {
   /// Announced in accessibility modes (e.g TalkBack/VoiceOver).
   /// This label does not show in the UI.
   ///
-  /// See also:
-  ///
-  ///  * [Semantics.label], which is set to [semanticLabel] in the underlying
-  ///    [Semantics] widget.
+  ///  * [SemanticsProperties.label], which is set to [semanticLabel] in the
+  ///    underlying	 [Semantics] widget.
   final String semanticLabel;
 
   @override

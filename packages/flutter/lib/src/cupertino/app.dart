@@ -293,18 +293,6 @@ class _CupertinoAppState extends State<CupertinoApp> {
     _heroController = CupertinoApp.createCupertinoHeroController();
   }
 
-  @override
-  void didUpdateWidget(CupertinoApp oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.navigatorKey != oldWidget.navigatorKey) {
-      // If the Navigator changes, we have to create a new observer, because the
-      // old Navigator won't be disposed (and thus won't unregister with its
-      // observers) until after the new one has been created (because the
-      // Navigator has a GlobalKey).
-      _heroController = CupertinoApp.createCupertinoHeroController();
-    }
-  }
-
   // Combine the default localization for Cupertino with the ones contributed
   // by the localizationsDelegates parameter, if any. Only the first delegate
   // of a particular LocalizationsDelegate.type is loaded so the
@@ -370,7 +358,6 @@ class _CupertinoAppState extends State<CupertinoApp> {
                   },
                   shortcuts: widget.shortcuts,
                   actions: widget.actions,
-
                 ),
               );
             },

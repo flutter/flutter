@@ -4,6 +4,7 @@
 
 // @dart = 2.8
 
+import 'dart:collection' show LinkedHashMap;
 import 'dart:typed_data';
 import 'dart:ui' as ui show Gradient, Image, ImageFilter;
 
@@ -260,7 +261,7 @@ void main() {
     expect(getPixel(20, 20), equals(0x00000080));
     expect(getPixel(image.width - 1, 0), equals(0x00000000));
     expect(getPixel(image.width - 1, 20), equals(0xffffffff));
-  }, skip: isBrowser);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42767
 
   test('RenderOpacity does not composite if it is transparent', () {
     final RenderOpacity renderOpacity = RenderOpacity(
@@ -492,7 +493,7 @@ void main() {
   test('RenderMouseRegion can change properties when detached', () {
     renderer.initMouseTracker(MouseTracker(
       renderer.pointerRouter,
-      (_) => <MouseTrackerAnnotation>[],
+      (_) => <MouseTrackerAnnotation, Matrix4>{} as LinkedHashMap<MouseTrackerAnnotation, Matrix4>,
     ));
     final RenderMouseRegion object = RenderMouseRegion();
     object

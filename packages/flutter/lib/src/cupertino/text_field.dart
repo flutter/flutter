@@ -260,6 +260,7 @@ class CupertinoTextField extends StatefulWidget {
     this.inputFormatters,
     this.enabled,
     this.cursorWidth = 2.0,
+    this.cursorHeight,
     this.cursorRadius = const Radius.circular(2.0),
     this.cursorColor,
     this.selectionHeightStyle = ui.BoxHeightStyle.tight,
@@ -544,6 +545,9 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.cursorWidth}
   final double cursorWidth;
 
+  /// {@macro flutter.widgets.editableText.cursorHeight}
+  final double cursorHeight;
+
   /// {@macro flutter.widgets.editableText.cursorRadius}
   final Radius cursorRadius;
 
@@ -625,6 +629,9 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
     properties.add(IntProperty('maxLength', maxLength, defaultValue: null));
     properties.add(FlagProperty('maxLengthEnforced', value: maxLengthEnforced, ifTrue: 'max length enforced'));
+    properties.add(DoubleProperty('cursorWidth', cursorWidth, defaultValue: 2.0));
+    properties.add(DoubleProperty('cursorHeight', cursorHeight, defaultValue: null));
+    properties.add(DiagnosticsProperty<Radius>('cursorRadius', cursorRadius, defaultValue: null));
     properties.add(createCupertinoColorProperty('cursorColor', cursorColor, defaultValue: null));
     properties.add(FlagProperty('selectionEnabled', value: selectionEnabled, defaultValue: true, ifFalse: 'selection disabled'));
     properties.add(DiagnosticsProperty<ScrollController>('scrollController', scrollController, defaultValue: null));
@@ -954,6 +961,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
           inputFormatters: formatters,
           rendererIgnoresPointer: true,
           cursorWidth: widget.cursorWidth,
+          cursorHeight: widget.cursorHeight,
           cursorRadius: widget.cursorRadius,
           cursorColor: cursorColor,
           cursorOpacityAnimates: true,

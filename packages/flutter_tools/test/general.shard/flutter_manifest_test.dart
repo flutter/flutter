@@ -82,6 +82,60 @@ flutter:
     expect(flutterManifest.usesMaterialDesign, true);
   });
 
+  testWithoutContext('FlutterManifest knows if generate is provided', () async {
+    const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  generate: true
+''';
+    final BufferLogger logger = BufferLogger.test();
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest.generateSyntheticPackage, true);
+  });
+
+  testWithoutContext('FlutterManifest can parse invalid generate key', () async {
+    const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  generate: "invalid"
+''';
+    final BufferLogger logger = BufferLogger.test();
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest.generateSyntheticPackage, false);
+  });
+
+  testWithoutContext('FlutterManifest knows if generate is disabled', () async {
+    const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  generate: false
+''';
+    final BufferLogger logger = BufferLogger.test();
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest.generateSyntheticPackage, false);
+  });
+
   testWithoutContext('FlutterManifest has two assets', () async {
     const String manifest = '''
 name: test
@@ -962,6 +1016,28 @@ flutter:
     expect(flutterManifest, null);
     expect(logger.errorText,
       contains('flutter.plugin.platforms should be a map with the platform name as the key'));
+  });
+
+    testWithoutContext('FlutterManifest validates plugin format not support.', () {
+    const String manifest = '''
+name: test
+flutter:
+  plugin:
+    android:
+      package: com.example
+      pluginClass: SomeClass
+    ios:
+      pluginClass: SomeClass
+''';
+    final BufferLogger logger = BufferLogger.test();
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest, null);
+    expect(logger.errorText,
+      contains('Cannot find the `flutter.plugin.platforms` key in the `pubspec.yaml` file. '));
   });
 }
 

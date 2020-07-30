@@ -197,6 +197,12 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
 ///
 /// To see how large the hit test box of a [GestureDetector] is for debugging
 /// purposes, set [debugPaintPointersEnabled] to true.
+///
+/// See also:
+///
+///  * [Listener], a widget for listening to lower-level raw pointer events.
+///  * [MouseRegion], a widget that tracks the movement of mice, even when no
+///    button is pressed.
 class GestureDetector extends StatelessWidget {
   /// Creates a widget that detects gestures.
   ///
@@ -683,9 +689,9 @@ class GestureDetector extends StatelessWidget {
   ///
   /// By default, the drag start behavior is [DragStartBehavior.start].
   ///
-  /// Only the [onStart] callbacks for the [VerticalDragGestureRecognizer],
-  /// [HorizontalDragGestureRecognizer] and [PanGestureRecognizer] are affected
-  /// by this setting.
+  /// Only the [DragGestureRecognizer.onStart] callbacks for the
+  /// [VerticalDragGestureRecognizer], [HorizontalDragGestureRecognizer] and
+  /// [PanGestureRecognizer] are affected by this setting.
   ///
   /// See also:
   ///
@@ -1217,7 +1223,7 @@ abstract class SemanticsGestureDelegate {
   /// object of the gesture detector.
   ///
   /// This method is called when the widget is created, updated, or during
-  /// [RawGestureDetector.replaceGestureRecognizers].
+  /// [RawGestureDetectorState.replaceGestureRecognizers].
   void assignSemantics(RenderSemanticsGestureHandler renderObject);
 
   @override

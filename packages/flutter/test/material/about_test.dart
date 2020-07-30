@@ -358,7 +358,7 @@ void main() {
             onGenerateRoute: (RouteSettings settings) {
               return PageRouteBuilder<dynamic>(
                 pageBuilder: (BuildContext context, _, __) {
-                  return RaisedButton(
+                  return ElevatedButton(
                     onPressed: () {
                       showLicensePage(
                         context: context,
@@ -376,7 +376,7 @@ void main() {
     ));
 
     // Open the dialog.
-    await tester.tap(find.byType(RaisedButton));
+    await tester.tap(find.byType(ElevatedButton));
 
     expect(rootObserver.licensePageCount, 0);
     expect(nestedObserver.licensePageCount, 1);
@@ -396,7 +396,7 @@ void main() {
             onGenerateRoute: (RouteSettings settings) {
               return PageRouteBuilder<dynamic>(
                 pageBuilder: (BuildContext context, _, __) {
-                  return RaisedButton(
+                  return ElevatedButton(
                     onPressed: () {
                       showLicensePage(
                         context: context,
@@ -415,7 +415,7 @@ void main() {
     ));
 
     // Open the dialog.
-    await tester.tap(find.byType(RaisedButton));
+    await tester.tap(find.byType(ElevatedButton));
 
     expect(rootObserver.licensePageCount, 1);
     expect(nestedObserver.licensePageCount, 0);
@@ -432,7 +432,7 @@ void main() {
         onGenerateRoute: (RouteSettings settings) {
           return MaterialPageRoute<dynamic>(
             builder: (BuildContext context) {
-              return RaisedButton(
+              return ElevatedButton(
                 onPressed: () {
                   showAboutDialog(
                     context: context,
@@ -448,7 +448,7 @@ void main() {
     ));
 
     // Open the dialog.
-    await tester.tap(find.byType(RaisedButton));
+    await tester.tap(find.byType(ElevatedButton));
 
     expect(rootObserver.dialogCount, 1);
     expect(nestedObserver.dialogCount, 0);
@@ -465,7 +465,7 @@ void main() {
         onGenerateRoute: (RouteSettings settings) {
           return MaterialPageRoute<dynamic>(
             builder: (BuildContext context) {
-              return RaisedButton(
+              return ElevatedButton(
                 onPressed: () {
                   showAboutDialog(
                     context: context,
@@ -482,7 +482,7 @@ void main() {
     ));
 
     // Open the dialog.
-    await tester.tap(find.byType(RaisedButton));
+    await tester.tap(find.byType(ElevatedButton));
 
     expect(rootObserver.dialogCount, 0);
     expect(nestedObserver.dialogCount, 1);
@@ -515,7 +515,7 @@ void main() {
         onGenerateRoute: (RouteSettings settings) {
           return MaterialPageRoute<dynamic>(
             builder: (BuildContext context) {
-              return RaisedButton(
+              return ElevatedButton(
                 onPressed: () {
                   showAboutDialog(
                     context: context,

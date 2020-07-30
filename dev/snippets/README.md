@@ -22,15 +22,15 @@ There are three kinds of code blocks.
   magically determine how to analyze, and
 
 * A `dartpad` sample, which gets placed into a full-fledged application, and can
-  be actually executed inline in the documentation on the web page using
+  be executed inline in the documentation on the web page using
   DartPad.
 
 * A `sample`, which gets placed into a full-fledged application, but isn't
   placed into DartPad in the documentation because it doesn't make sense to do
   so.
 
-Ideally every sample is a DartPad sample, but some samples don't have any visual
-representation, and some just don't make sense that way (for example, sample
+Ideally, every sample is a DartPad sample, but some samples don't have any visual
+representation and some just don't make sense that way (for example, sample
 code for setting the system UI's notification area color on Android won't do
 anything on the web).
 
@@ -70,7 +70,7 @@ There are several kinds of sample code you can specify:
 
 * Constructor calls, typically showing what might exist in a build method. These
   will be inserted into an assignment expression assigning to a variable of type
-  "dynamic" and followed by a semicolon, for the purposes of analysis.
+  "dynamic" and followed by a semicolon, for analysis.
 
 * Class definitions. These start with "class", and are analyzed verbatim.
 
@@ -79,7 +79,7 @@ There are several kinds of sample code you can specify:
   individually.
 
 The above means that it's tricky to include verbatim imperative code (e.g. a
-call to a method), since it won't be valid to have such code at the top level.
+call to a method) since it won't be valid to have such code at the top level.
 Instead, wrap it in a function or even a whole class, or make it a valid
 variable declaration.
 
@@ -151,7 +151,7 @@ This command is displayed as part of the sample in the API docs.
 
 #### Templates
 
-In order to support showing an entire app when you click on the right tab of the
+To support showing an entire app when you click on the right tab of the
 code sample UI, we have to be able to insert the `sample` or `dartpad` block
 into the template and instantiate the right parts.
 
@@ -171,7 +171,7 @@ specified template.
 
 ## Skeletons
 
-A skeleton (in relation to this tool) is an HTML template into which the Dart
+A skeleton (concerning this tool) is an HTML template into which the Dart
 code blocks and descriptions are interpolated.
 
 There is currently one skeleton for
@@ -180,11 +180,11 @@ There is currently one skeleton for
 [snippet](config/skeletons/snippet.html) code samples, but there could be more.
 
 Skeletons use mustache notation (e.g. `{{code}}`) to mark where components will
-be interpolated into the template. It doesn't actually use the mustache
-package, since these are simple string substitutions, but it uses the same
+be interpolated into the template. It doesn't use the mustache
+package since these are simple string substitutions, but it uses the same
 syntax.
 
-The code block generation tools process the source input and emit HTML for
+The code block generation tools that process the source input and emit HTML for
 output, which dartdoc places back into the documentation. Any options given to
 the `{@tool ...}` directive are passed on verbatim to the tool.
 

@@ -25,6 +25,8 @@ import 'toggle_buttons_theme.dart';
 /// correlated by their index in the list. The length of [isSelected] has to
 /// match the length of the [children] list.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=kVEguaQWGAY}
+///
 /// ## Customizing toggle buttons
 /// Each toggle's behavior can be configured by the [onPressed] callback, which
 /// can update the [isSelected] list however it wants to.
