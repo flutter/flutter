@@ -46,7 +46,7 @@ class SizeAnalyzer {
     );
     logger.printStatus('━' * tableWidth);
     final Directory tempApkContent = fileSystem.systemTempDirectory.createTempSync('flutter_tools.');
-    // TODO: implement Windows.
+    // TODO(peterdjlee): Implement a way to unzip the APK for Windows. See issue #62603.
     String unzipOut;
     try {
       // TODO(peterdjlee): Use zipinfo instead of unzip.
