@@ -35,6 +35,7 @@ dependencies:
   native_stack_traces: 0.3.7
   build_daemon: 2.1.4
   shelf: 0.7.5
+  vm_snapshot_analysis: 0.5.0+1
 
   # We depend on very specific internal implementation details of the
   # 'test' package, which change between versions, so when upgrading
@@ -110,4 +111,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: f65b
+# PUBSPEC CHECKSUM: 0181
