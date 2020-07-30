@@ -1,4 +1,4 @@
-Signature: 97b4e16e073bc47a226f17c77c9f1f2b
+Signature: aac90fed14a1ac3c138389e19f3e4ae6
 
 UNUSED LICENSES:
 
@@ -6432,6 +6432,7 @@ FILE: ../../../third_party/skia/infra/bots/task_drivers/perf_puppeteer_render_sk
 FILE: ../../../third_party/skia/infra/bots/task_drivers/perf_puppeteer_render_skps/perf_puppeteer_render_skps_test.go
 FILE: ../../../third_party/skia/infra/bots/task_drivers/perf_puppeteer_skottie_frames/perf_puppeteer_skottie_frames.go
 FILE: ../../../third_party/skia/infra/bots/task_drivers/perf_puppeteer_skottie_frames/perf_puppeteer_skottie_frames_test.go
+FILE: ../../../third_party/skia/infra/bots/task_drivers/run_gn_to_bp/run_gn_to_bp.go
 ----------------------------------------------------------------------------------------------------
 Copyright 2020 The Chromium Authors. All rights reserved.
 
