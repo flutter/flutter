@@ -56,7 +56,7 @@ enum PointerDeviceKind {
   unknown
 }
 
-/// The kind of [PointerDeviceKind.signal].
+/// The kind of pointer signal event.
 enum PointerSignalKind {
   /// The event is not associated with a pointer signal.
   none,
