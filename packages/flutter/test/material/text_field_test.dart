@@ -6136,7 +6136,6 @@ void main() {
         kind: PointerDeviceKind.mouse,
       );
       addTearDown(gesture.removePointer);
-      await tester.pump();
       await gesture.up();
 
       // Cursor at tap position, not at word edge.
