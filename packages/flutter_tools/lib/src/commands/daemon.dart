@@ -897,13 +897,13 @@ class DevToolsDomain extends Domain {
 
   HttpServer _devToolsServer;
 
-  Future<Map<String, dynamic>> startServer([ Map<String, dynamic> args ]) async {
+  Future<void> startServer([ Map<String, dynamic> args ]) async {
     _devToolsServer ??= await devtools_server.serveDevTools();
 
-    return <String, dynamic>{
+    sendEvent('devtools.serve', <String, dynamic>{
       'host': _devToolsServer.address.host,
       'port': _devToolsServer.port,
-    };
+    });
   }
 
   @override
