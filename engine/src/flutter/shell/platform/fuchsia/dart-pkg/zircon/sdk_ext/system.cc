@@ -423,9 +423,7 @@ struct SizedRegion {
   size_t size;
 };
 
-void System::VmoMapFinalizer(void* isolate_callback_data,
-                             Dart_WeakPersistentHandle handle,
-                             void* peer) {
+void System::VmoMapFinalizer(void* isolate_callback_data, void* peer) {
   SizedRegion* r = reinterpret_cast<SizedRegion*>(peer);
   zx_vmar_unmap(zx_vmar_root_self(), reinterpret_cast<uintptr_t>(r->region),
                 r->size);
@@ -453,9 +451,9 @@ Dart_Handle System::VmoMap(fml::RefPtr<Handle> vmo) {
   FML_DCHECK(!tonic::LogIfError(object));
 
   SizedRegion* r = new SizedRegion(data, size);
-  Dart_NewWeakPersistentHandle(object, reinterpret_cast<void*>(r),
-                               static_cast<intptr_t>(size) + sizeof(*r),
-                               System::VmoMapFinalizer);
+  Dart_NewFinalizableHandle(object, reinterpret_cast<void*>(r),
+                            static_cast<intptr_t>(size) + sizeof(*r),
+                            System::VmoMapFinalizer);
 
   return ConstructDartObject(kMapResult, ToDart(ZX_OK), object);
 }

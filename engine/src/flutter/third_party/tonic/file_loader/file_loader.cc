@@ -195,9 +195,7 @@ Dart_Handle FileLoader::Import(Dart_Handle url) {
 }
 
 namespace {
-void MallocFinalizer(void* isolate_callback_data,
-                     Dart_WeakPersistentHandle handle,
-                     void* peer) {
+void MallocFinalizer(void* isolate_callback_data, void* peer) {
   free(peer);
 }
 }  // namespace
@@ -212,7 +210,7 @@ Dart_Handle FileLoader::Kernel(Dart_Handle url) {
   }
   result =
       Dart_NewExternalTypedData(Dart_TypedData_kUint8, buffer, buffer_size);
-  Dart_NewWeakPersistentHandle(result, buffer, buffer_size, MallocFinalizer);
+  Dart_NewFinalizableHandle(result, buffer, buffer_size, MallocFinalizer);
   return result;
 }
 

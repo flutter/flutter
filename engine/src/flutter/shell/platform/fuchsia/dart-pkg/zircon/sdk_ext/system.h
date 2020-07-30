@@ -69,9 +69,7 @@ class System : public fml::RefCountedThreadSafe<System>,
                                       fml::RefPtr<Handle> channel);
 
  private:
-  static void VmoMapFinalizer(void* isolate_callback_data,
-                              Dart_WeakPersistentHandle handle,
-                              void* peer);
+  static void VmoMapFinalizer(void* isolate_callback_data, void* peer);
 
   static zx::channel CloneChannelFromFileDescriptor(int fd);
 };
