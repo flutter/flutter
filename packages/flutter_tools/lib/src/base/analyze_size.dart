@@ -4,6 +4,7 @@
 
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/globals.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_snapshot_analysis/treemap.dart';
 
@@ -30,7 +31,7 @@ class SizeAnalyzer {
   /// Analyzes [apk] and [aotSnapshot] to output a [Map] object that includes
   /// the breakdown of the both files, where the breakdown of [aotSnapshot] is placed
   /// under 'lib/arm64-v8a/libapp.so'.
-  /// 
+  ///
   /// The [aotSnapshot] can be either instruction sizes snapshot or v8 snapshot.
   Future<Map<String, dynamic>> analyzeApkSizeAndAotSnapshot({
     @required File apk,
@@ -58,7 +59,7 @@ class SizeAnalyzer {
         tempApkContent.path
       ])).stdout;
     } on Exception catch (e) {
-      print(e);
+      logger.printError(e.toString());
     } finally {
       // We just want the the stdout printout. We don't need the files.
       tempApkContent.deleteSync(recursive: true);
@@ -85,11 +86,11 @@ class SizeAnalyzer {
     }
 
     logger.printStatus('▒' * tableWidth);
-    
+
     Map<String, dynamic> apkAnalysisJson = apkAnalysisRoot.toJson();
 
     apkAnalysisJson['type'] = 'apk';
-    
+
     // TODO(peterdjlee): Add aot snapshot for all platforms.
     apkAnalysisJson = _addAotSnapshotDataToApkAnalysis(
       apkAnalysisJson: apkAnalysisJson,
@@ -99,6 +100,10 @@ class SizeAnalyzer {
 
     return apkAnalysisJson;
   }
+
+
+  // Expression to match 'Size' column to group 1 and 'Name' column to group 2.
+  final RegExp _parseUnzipOutput = RegExp(r'^\s*\d+\s+[\w|:]+\s+(\d+)\s+.*  (.+)$');
 
   // Parse the output of unzip -v which shows the zip's contents' compressed sizes.
   // Example output of unzip -v:
@@ -115,9 +120,7 @@ class SizeAnalyzer {
     // For example:
     // 'path/to/file' where file = 1500 => pathsToSize[['path', 'to', 'file']] = 1500
     for (final String line in const LineSplitter().convert(unzipOut)) {
-      // Expression to match 'Size' column to group 1 and 'Name' column to group 2.
-      final RegExp parseUnzipOutput = RegExp(r'^\s*\d+\s+[\w|:]+\s+(\d+)\s+.*  (.+)$');
-      final RegExpMatch match = parseUnzipOutput.firstMatch(line);
+      final RegExpMatch match = _parseUnzipOutput.firstMatch(line);
       if (match == null) {
         continue;
       }
@@ -152,7 +155,7 @@ class SizeAnalyzer {
   }
 
   /// Prints all children paths for the lib/ directory in an APK.
-  /// 
+  ///
   /// A brief summary of aot snapshot is printed under 'lib/arm64-v8a/libapp.so'.
   void _printLibChildrenPaths(
     _SymbolNode currentNode,
@@ -214,13 +217,13 @@ class SizeAnalyzer {
     return apkAnalysisJson;
   }
 
-  /// A pretty printer for an entity with a size.
+  /// Print an entity's name with its size on the same line.
   void _printEntitySize(
     String entityName, {
     @required int byteSize,
-    @required int level, 
+    @required int level,
     bool showColor = true,
-    }) {
+  }) {
     final bool emphasis = level <= 1;
     final String formattedSize = _prettyPrintBytes(byteSize);
 
@@ -350,7 +353,7 @@ class _SymbolNode {
   void addAllChildren(List<_SymbolNode> children) {
     children.forEach(addChild);
   }
-  
+
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> json = <String, dynamic>{
       'n': name,

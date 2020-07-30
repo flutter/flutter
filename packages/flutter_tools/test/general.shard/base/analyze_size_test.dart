@@ -62,7 +62,7 @@ void main() {
   MemoryFileSystem fileSystem;
   BufferLogger logger;
   FakeProcessManager processManager;
-  
+
   setUp(() {
     fileSystem = MemoryFileSystem.test();
     logger = BufferLogger.test();
@@ -84,9 +84,9 @@ void main() {
       ..createSync()
       ..writeAsStringSync(aotSizeOutput);
     final Map<String, dynamic> result = await sizeAnalyzer.analyzeApkSizeAndAotSnapshot(apk: apk, aotSnapshot: aotSizeJson);
-    
+
     expect(result['type'], contains('apk'));
-    
+
     final Map<String, dynamic> androidManifestMap = result['children'][0] as Map<String, dynamic>;
     expect(androidManifestMap['n'], equals('AndroidManifest.xml'));
     expect(androidManifestMap['value'], equals(2592));
