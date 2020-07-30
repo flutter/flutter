@@ -387,8 +387,8 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
 }
 
 - (UITextField*)textField {
-  if (_textField == nil) {
-    _textField = [[[UITextField alloc] init] autorelease];
+  if (!_textField) {
+    _textField = [[UITextField alloc] init];
   }
   return _textField;
 }

@@ -17,6 +17,10 @@ FLUTTER_ASSERT_ARC
 - (BOOL)isVisibleToAutofill;
 @end
 
+@interface FlutterSecureTextInputView : FlutterTextInputView
+@property(nonatomic, strong) UITextField* textField;
+@end
+
 @interface FlutterTextInputPlugin ()
 @property(nonatomic, strong) FlutterTextInputView* reusableInputView;
 @property(nonatomic, assign) FlutterTextInputView* activeView;
@@ -495,5 +499,16 @@ FLUTTER_ASSERT_ARC
 
   [inputView unmarkText];
   XCTAssertEqual(updateCount, 6);
+}
+
+- (void)testNoZombies {
+  // Regression test for https://github.com/flutter/flutter/issues/62501.
+  FlutterSecureTextInputView* passwordView = [[FlutterSecureTextInputView alloc] init];
+
+  @autoreleasepool {
+    // Initialize the lazy textField.
+    [passwordView.textField description];
+  }
+  XCTAssert([[passwordView.textField description] containsString:@"TextField"]);
 }
 @end
