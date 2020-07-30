@@ -20,14 +20,14 @@ static void fl_renderer_x11_dispose(GObject* object) {
   G_OBJECT_CLASS(fl_renderer_x11_parent_class)->dispose(object);
 }
 
-// Implments FlRenderer::get_visual.
+// Implements FlRenderer::get_visual.
 static GdkVisual* fl_renderer_x11_get_visual(FlRenderer* renderer,
                                              GdkScreen* screen,
                                              EGLint visual_id) {
   return gdk_x11_screen_lookup_visual(GDK_X11_SCREEN(screen), visual_id);
 }
 
-// Implments FlRenderer::create_surface.
+// Implements FlRenderer::create_surface.
 static EGLSurface fl_renderer_x11_create_surface(FlRenderer* renderer,
                                                  EGLDisplay display,
                                                  EGLConfig config) {
