@@ -9,7 +9,41 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Future<void> main() async {
+class CountButton extends StatefulWidget {
+  @override
+  _CountButtonState createState() => _CountButtonState();
+}
+
+class _CountButtonState extends State<CountButton> {
+  int counter = 0;
+  @override
+  Widget build(BuildContext context) {
+    return RaisedButton(
+      child: Text('Counter $counter'),
+      onPressed: () {
+        setState(() {
+          counter += 1;
+        });
+      },
+    );
+  }
+}
+
+void main() {
+  test('Test pump on LiveWidgetController', () async {
+    runApp(MaterialApp(home: Center(child: CountButton())));
+
+    await SchedulerBinding.instance.endOfFrame;
+    final WidgetController controller =
+        LiveWidgetController(WidgetsBinding.instance);
+    await controller.tap(find.text('Counter 0'));
+    expect(find.text('Counter 0'), findsOneWidget);
+    expect(find.text('Counter 1'), findsNothing);
+    await controller.pump();
+    expect(find.text('Counter 0'), findsNothing);
+    expect(find.text('Counter 1'), findsOneWidget);
+  });
+
   test('Input event array on LiveWidgetController', () async {
     final List<String> logs = <String>[];
     runApp(

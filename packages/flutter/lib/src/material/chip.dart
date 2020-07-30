@@ -86,7 +86,7 @@ abstract class ChipAttributes {
   /// This only has an effect on widgets that respect the [DefaultTextStyle],
   /// such as [Text].
   ///
-  /// If [labelStyle.color] is a [MaterialStateProperty<Color>], [MaterialStateProperty.resolve]
+  /// If [TextStyle.color] is a [MaterialStateProperty<Color>], [MaterialStateProperty.resolve]
   /// is used for the following [MaterialState]s:
   ///
   ///  * [MaterialState.disabled].
@@ -130,8 +130,8 @@ abstract class ChipAttributes {
   ///
   /// See also:
   ///
-  ///  * [ThemeData.visualDensity], which specifies the [density] for all widgets
-  ///    within a [Theme].
+  ///  * [ThemeData.visualDensity], which specifies the [visualDensity] for all
+  ///    widgets within a [Theme].
   VisualDensity get visualDensity;
 
   /// The padding around the [label] widget.
@@ -257,7 +257,7 @@ abstract class DeletableChipAttributes {
   VoidCallback get onDeleted;
 
   /// The [Color] for the delete icon. The default is based on the ambient
-  /// [IconTheme.color].
+  /// [IconThemeData.color].
   Color get deleteIconColor;
 
   /// The message to be used for the chip's delete button tooltip.
@@ -283,7 +283,8 @@ abstract class CheckmarkableChipAttributes {
   // ignore: unused_element
   factory CheckmarkableChipAttributes._() => null;
 
-  /// Whether or not to show a check mark when [selected] is true.
+  /// Whether or not to show a check mark when
+  /// [SelectableChipAttributes.selected] is true.
   ///
   /// Defaults to true.
   bool get showCheckmark;
@@ -431,7 +432,7 @@ abstract class DisabledChipAttributes {
   ///
   /// If this is true, but all of the user action callbacks are null (i.e.
   /// [SelectableChipAttributes.onSelected], [TappableChipAttributes.onPressed],
-  /// and [DeletableChipAttributes.onDelete]), then the
+  /// and [DeletableChipAttributes.onDeleted]), then the
   /// control will still be shown as disabled.
   ///
   /// This is typically used if you want the chip to be disabled, but also show
@@ -447,7 +448,7 @@ abstract class DisabledChipAttributes {
   ///
   /// The chip is disabled when [isEnabled] is false, or all three of
   /// [SelectableChipAttributes.onSelected], [TappableChipAttributes.onPressed],
-  /// and [DeletableChipAttributes.onDelete] are null.
+  /// and [DeletableChipAttributes.onDeleted] are null.
   ///
   /// It defaults to [Colors.black38].
   Color get disabledColor;

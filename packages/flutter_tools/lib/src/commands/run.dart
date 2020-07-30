@@ -52,6 +52,13 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
             'By default, this is not enabled to reduce the overhead. '
             'This is only available in profile or debug build. ',
       )
+      ..addFlag('purge-persistent-cache',
+        negatable: false,
+        help: 'Removes all existing persistent caches. This allows reproducing '
+            'shader compilation jank that normally only happens the first time '
+            'an app is run, or for reliable testing of compilation jank fixes '
+            '(e.g. shader warm-up).',
+      )
       ..addOption('route',
         help: 'Which route to load when running the app.',
       )
@@ -74,6 +81,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get traceStartup => boolArg('trace-startup');
   bool get cacheSkSL => boolArg('cache-sksl');
   bool get dumpSkpOnShaderCompilation => boolArg('dump-skp-on-shader-compilation');
+  bool get purgePersistentCache => boolArg('purge-persistent-cache');
 
   String get route => stringArg('route');
 }
@@ -219,6 +227,7 @@ class RunCommand extends RunCommandBase {
               'Currently this is only supported on Android devices. This option '
               'cannot be paired with --use-application-binary.'
       );
+      addDdsOptions(verboseHelp: verboseHelp);
   }
 
   @override
@@ -385,6 +394,7 @@ class RunCommand extends RunCommandBase {
         buildInfo,
         startPaused: boolArg('start-paused'),
         disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
+        disableDds: boolArg('disable-dds'),
         dartFlags: stringArg('dart-flags') ?? '',
         useTestFonts: boolArg('use-test-fonts'),
         enableSoftwareRendering: boolArg('enable-software-rendering'),
@@ -395,6 +405,7 @@ class RunCommand extends RunCommandBase {
         endlessTraceBuffer: boolArg('endless-trace-buffer'),
         dumpSkpOnShaderCompilation: dumpSkpOnShaderCompilation,
         cacheSkSL: cacheSkSL,
+        purgePersistentCache: purgePersistentCache,
         deviceVmServicePort: deviceVmservicePort,
         hostVmServicePort: hostVmservicePort,
         verboseSystemLogs: boolArg('verbose-system-logs'),

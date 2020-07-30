@@ -722,8 +722,8 @@ abstract class AutofillClient {
   /// [TextInputConfiguration.autofillConfiguration] must not be null.
   TextInputConfiguration get textInputConfiguration;
 
-  /// Requests this [AutofillClient] update its [TextEditingState] to the given
-  /// state.
+  /// Requests this [AutofillClient] update its [TextEditingValue] to the given
+  /// value.
   void updateEditingValue(TextEditingValue newEditingValue);
 }
 
@@ -734,11 +734,11 @@ abstract class AutofillClient {
 /// input fields during autofill. That is, when an autofillable [TextInputClient]
 /// gains focus, only the [AutofillClient]s within the same [AutofillScope] will
 /// be visible to the autofill service, in the same order as they appear in
-/// [autofillClients].
+/// [AutofillScope.autofillClients].
 ///
 /// [AutofillScope] also allows [TextInput] to redirect autofill values from the
 /// platform to the [AutofillClient] with the given identifier, by calling
-/// [getAutofillClient].
+/// [AutofillScope.getAutofillClient].
 ///
 /// An [AutofillClient] that's not tied to any [AutofillScope] will only
 /// participate in autofill if the autofill is directly triggered by its own

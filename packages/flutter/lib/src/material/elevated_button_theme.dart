@@ -103,7 +103,7 @@ class ElevatedButtonTheme extends InheritedTheme {
 
   /// The closest instance of this class that encloses the given context.
   ///
-  /// If there is no enclosing [ElevatedButtonsTheme] widget, then
+  /// If there is no enclosing [ElevatedButtonTheme] widget, then
   /// [ThemeData.elevatedButtonTheme] is used.
   ///
   /// Typical usage is as follows:
@@ -138,7 +138,7 @@ class ContainedButtonThemeData extends ElevatedButtonThemeData {
   /// Please use [new ElevatedButtonTheme].
   const ContainedButtonThemeData({ ButtonStyle style }) : super(style: style);
 
-  /// Please use [ElevatedButtonTheme.lerp()].
+  /// Please use [ElevatedButtonThemeData.lerp].
   static ContainedButtonThemeData lerp(ContainedButtonThemeData a, ContainedButtonThemeData b, double t) {
     return ElevatedButtonThemeData.lerp(a, b, t) as ContainedButtonThemeData;
   }

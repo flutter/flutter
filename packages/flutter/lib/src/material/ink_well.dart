@@ -377,9 +377,6 @@ class InkResponse extends StatelessWidget {
   ///  * [MaterialState.focused].
   ///  * [MaterialState.disabled].
   ///
-  /// When [value] is null and [tristate] is true, [MaterialState.selected] is
-  /// included as a state.
-  ///
   /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
   final MouseCursor mouseCursor;
 
@@ -562,7 +559,7 @@ class InkResponse extends StatelessWidget {
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode focusNode;
 
-  /// {@template flutter.widgets.Focus.canRequestFocus}
+  /// {@macro flutter.widgets.Focus.canRequestFocus}
   final bool canRequestFocus;
 
   /// The rectangle to use for the highlight effect and for clipping

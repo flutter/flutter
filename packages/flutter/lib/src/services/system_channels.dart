@@ -131,7 +131,7 @@ class SystemChannels {
   ///    a [List] whose first value is an integer representing a previously
   ///    unused transaction identifier, and the second is a [String] with a
   ///    JSON-encoded object with five keys, as obtained from
-  ///    [TextInputConfiguration.toJSON]. This method must be invoked before any
+  ///    [TextInputConfiguration.toJson]. This method must be invoked before any
   ///    others (except `TextInput.hide`). See [TextInput.attach].
   ///
   ///  * `TextInput.show`: Show the keyboard. See [TextInputConnection.show].
@@ -154,8 +154,8 @@ class SystemChannels {
   ///
   ///  * `TextInputClient.updateEditingState`: The user has changed the contents
   ///    of the text control. The second argument is a [String] containing a
-  ///    JSON-encoded object with seven keys, in the form expected by [new
-  ///    TextEditingValue.fromJSON].
+  ///    JSON-encoded object with seven keys, in the form expected by
+  ///    [TextEditingValue.fromJSON].
   ///
   ///  * `TextInputClient.performAction`: The user has triggered an action. The
   ///    second argument is a [String] consisting of the stringification of one

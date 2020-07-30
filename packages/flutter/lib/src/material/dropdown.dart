@@ -791,7 +791,7 @@ class DropdownButton<T> extends StatefulWidget {
   /// Creates a dropdown button.
   ///
   /// The [items] must have distinct values. If [value] isn't null then it
-  /// must be equal to one of the [DropDownMenuItem] values. If [items] or
+  /// must be equal to one of the [DropdownMenuItem] values. If [items] or
   /// [onChanged] is null, the button will be disabled, the down arrow
   /// will be greyed out, and the [disabledHint] will be shown (if provided).
   /// If [disabledHint] is null and [hint] is non-null, [hint] will instead be
@@ -880,12 +880,12 @@ class DropdownButton<T> extends StatefulWidget {
   /// {@template flutter.material.dropdownButton.onChanged}
   /// Called when the user selects an item.
   ///
-  /// If the [onChanged] callback is null or the list of [items] is null
-  /// then the dropdown button will be disabled, i.e. its arrow will be
+  /// If the [onChanged] callback is null or the list of [DropdownButton.items]
+  /// is null then the dropdown button will be disabled, i.e. its arrow will be
   /// displayed in grey and it will not respond to input. A disabled button
-  /// will display the [disabledHint] widget if it is non-null. If
-  /// [disabledHint] is also null but [hint] is non-null, [hint] will instead
-  /// be displayed.
+  /// will display the [DropdownButton.disabledHint] widget if it is non-null.
+  /// If [DropdownButton.disabledHint] is also null but [DropdownButton.hint] is
+  /// non-null, [DropdownButton.hint] will instead be displayed.
   /// {@endtemplate}
   final ValueChanged<T> onChanged;
 
@@ -1014,7 +1014,7 @@ class DropdownButton<T> extends StatefulWidget {
   /// The color of any [Icon] descendant of [icon] if this button is disabled,
   /// i.e. if [onChanged] is null.
   ///
-  /// Defaults to [Colors.grey.shade400] when the theme's
+  /// Defaults to [MaterialColor.shade400] of [Colors.grey] when the theme's
   /// [ThemeData.brightness] is [Brightness.light] and to
   /// [Colors.white10] when it is [Brightness.dark]
   final Color iconDisabledColor;
@@ -1022,7 +1022,7 @@ class DropdownButton<T> extends StatefulWidget {
   /// The color of any [Icon] descendant of [icon] if this button is enabled,
   /// i.e. if [onChanged] is defined.
   ///
-  /// Defaults to [Colors.grey.shade700] when the theme's
+  /// Defaults to [MaterialColor.shade700] of [Colors.grey] when the theme's
   /// [ThemeData.brightness] is [Brightness.light] and to
   /// [Colors.white70] when it is [Brightness.dark]
   final Color iconEnabledColor;

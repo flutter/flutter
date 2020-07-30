@@ -22,6 +22,9 @@ enum SystemSoundType {
   /// web platform does not support playing any sounds, so this will be
   /// ignored on the web as well.
   alert,
+
+  // If you add new values here, you also need to update the `SoundType` Java
+  // enum in `PlatformChannel.java`.
 }
 
 /// Provides access to the library of short system specific sounds for common

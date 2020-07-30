@@ -654,6 +654,8 @@ class AndroidDevice extends Device {
         ...<String>['--ez', 'dump-skp-on-shader-compilation', 'true'],
       if (debuggingOptions.cacheSkSL)
       ...<String>['--ez', 'cache-sksl', 'true'],
+      if (debuggingOptions.purgePersistentCache)
+        ...<String>['--ez', 'purge-persistent-cache', 'true'],
       if (debuggingOptions.debuggingEnabled) ...<String>[
         if (debuggingOptions.buildInfo.isDebug) ...<String>[
           ...<String>['--ez', 'enable-checked-mode', 'true'],
