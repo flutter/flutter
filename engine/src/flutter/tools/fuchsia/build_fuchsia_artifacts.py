@@ -221,15 +221,7 @@ def GetRunnerTarget(runner_type, product, aot):
   target += 'runner'
   return base + target
 
-
-def GetTargetsToBuild(product=False, additional_targets=[]):
-  targets_to_build = [
-      'flutter/shell/platform/fuchsia:fuchsia',
-  ] + additional_targets
-  return targets_to_build
-
-
-def BuildTarget(runtime_mode, arch, product, enable_lto, additional_targets=[]):
+def BuildTarget(runtime_mode, arch, enable_lto, additional_targets=[]):
   out_dir = 'fuchsia_%s_%s' % (runtime_mode, arch)
   flags = [
       '--fuchsia',
@@ -243,7 +235,7 @@ def BuildTarget(runtime_mode, arch, product, enable_lto, additional_targets=[]):
     flags.append('--no-lto')
 
   RunGN(out_dir, flags)
-  BuildNinjaTargets(out_dir, GetTargetsToBuild(product))
+  BuildNinjaTargets(out_dir, [ 'flutter' ] + additional_targets)
 
   return
 
@@ -305,8 +297,7 @@ def main():
       product = product_modes[i]
       if build_mode == 'all' or runtime_mode == build_mode:
         if not args.skip_build:
-          BuildTarget(runtime_mode, arch, product, enable_lto,
-                      args.targets.split(","))
+          BuildTarget(runtime_mode, arch, enable_lto, args.targets.split(","))
         BuildBucket(runtime_mode, arch, product)
 
   if args.upload:
