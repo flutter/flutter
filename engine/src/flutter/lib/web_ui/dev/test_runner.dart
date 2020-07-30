@@ -16,9 +16,11 @@ import 'package:test_core/src/executable.dart'
     as test; // ignore: implementation_imports
 import 'package:simulators/simulator_manager.dart';
 
+import 'common.dart';
 import 'environment.dart';
 import 'exceptions.dart';
 import 'integration_tests_manager.dart';
+import 'macos_info.dart';
 import 'safari_installation.dart';
 import 'supported_browsers.dart';
 import 'test_platform.dart';
@@ -123,6 +125,16 @@ class TestCommand extends Command<bool> with ArgUtils {
 
     // Check the flags to see what type of integration tests are requested.
     testTypesRequested = findTestType();
+
+    if (isSafariOnMacOS) {
+      /// Collect information on the bot.
+      final MacOSInfo macOsInfo = new MacOSInfo();
+      await macOsInfo.printInformation();
+      /// Tests may fail on the CI, therefore exit test_runner.
+      if (isLuci) {
+        return true;
+      }
+    }
 
     switch (testTypesRequested) {
       case TestTypesRequested.unit:
