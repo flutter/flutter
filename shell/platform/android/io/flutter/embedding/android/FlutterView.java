@@ -936,6 +936,10 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
     textInputPlugin.getInputMethodManager().restartInput(this);
     textInputPlugin.destroy();
 
+    if (mouseCursorPlugin != null) {
+      mouseCursorPlugin.destroy();
+    }
+
     // Instruct our FlutterRenderer that we are no longer interested in being its RenderSurface.
     FlutterRenderer flutterRenderer = flutterEngine.getRenderer();
     isFlutterUiDisplayed = false;
