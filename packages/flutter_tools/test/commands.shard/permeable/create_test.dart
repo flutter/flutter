@@ -37,7 +37,6 @@ final Generator _kNoColorTerminalPlatform = () => FakePlatform.fromPlatform(cons
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
   Platform: _kNoColorTerminalPlatform,
 };
-
 const String samplesIndexJson = '''
 [
   { "id": "sample1" },
