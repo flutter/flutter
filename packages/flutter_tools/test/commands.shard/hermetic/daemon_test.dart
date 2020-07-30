@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -13,6 +14,7 @@ import 'package:flutter_tools/src/fuchsia/fuchsia_workflow.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:mockito/mockito.dart';
 import 'package:quiver/testing/async.dart';
 
 import '../../src/common.dart';
@@ -299,6 +301,31 @@ void main() {
       await output.close();
       await input.close();
     });
+
+    testUsingContext('devtools.serve command should return host and port', () async {
+      final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
+      daemon = Daemon(
+        commands.stream,
+        responses.add,
+        notifyingLogger: notifyingLogger,
+      );
+      final HttpServer mockDevToolsServer = MockDevToolsServer();
+      final InternetAddress mockInternetAddress = MockInternetAddress();
+      when(mockDevToolsServer.address).thenReturn(mockInternetAddress);
+      when(mockInternetAddress.host).thenReturn('127.0.0.1');
+      when(mockDevToolsServer.port).thenReturn(1234);
+
+      daemon.devToolsDomain.setDevToolsServer(mockDevToolsServer);
+
+      commands.add(<String, dynamic>{'id': 0, 'method': 'devtools.serve'});
+      final Map<String, dynamic> response = await responses.stream.firstWhere(_isDevToolsEvent);
+      expect(response['params'], isNotEmpty);
+      expect(response['params']['host'], equals('127.0.0.1'));
+      expect(response['params']['port'], equals(1234));
+      await responses.close();
+      await commands.close();
+    });
   });
 
   testUsingContext('notifyingLogger outputs trace messages in verbose mode', () async {
@@ -434,6 +461,8 @@ void main() {
 bool _notEvent(Map<String, dynamic> map) => map['event'] == null;
 
 bool _isConnectedEvent(Map<String, dynamic> map) => map['event'] == 'daemon.connected';
+
+bool _isDevToolsEvent(Map<String, dynamic> map) => map['event'] == 'devtools.serve';
 
 class MockFuchsiaWorkflow extends FuchsiaWorkflow {
   MockFuchsiaWorkflow({ this.canListDevices = true });

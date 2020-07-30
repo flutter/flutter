@@ -897,6 +897,10 @@ class DevToolsDomain extends Domain {
 
   HttpServer _devToolsServer;
 
+  void setDevToolsServer(HttpServer devToolsServer) {
+    _devToolsServer ??= devToolsServer;
+  }
+
   Future<void> startServer([ Map<String, dynamic> args ]) async {
     _devToolsServer ??= await devtools_server.serveDevTools();
 
