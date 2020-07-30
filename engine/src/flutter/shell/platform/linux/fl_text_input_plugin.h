@@ -37,14 +37,14 @@ FlTextInputPlugin* fl_text_input_plugin_new(FlBinaryMessenger* messenger);
 
 /**
  * fl_text_input_plugin_filter_keypress
- * @self: an #FlTextInputPlugin.
+ * @plugin: an #FlTextInputPlugin.
  * @event: a #GdkEventKey
  *
  * Process a Gdk key event.
  *
  * Returns: %TRUE if the event was used.
  */
-gboolean fl_text_input_plugin_filter_keypress(FlTextInputPlugin* self,
+gboolean fl_text_input_plugin_filter_keypress(FlTextInputPlugin* plugin,
                                               GdkEventKey* event);
 
 G_END_DECLS
