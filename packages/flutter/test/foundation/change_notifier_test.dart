@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -41,7 +39,7 @@ void main() {
     final VoidCallback listener2 = () { log.add('listener2'); };
     final VoidCallback badListener = () {
       log.add('badListener');
-      throw null;
+      throw ArgumentError();
     };
 
     final TestNotifier test = TestNotifier();
@@ -95,7 +93,7 @@ void main() {
     test.addListener(badListener);
     test.notify();
     expect(log, <String>['listener', 'listener2', 'listener1', 'badListener']);
-    expect(tester.takeException(), isNullThrownError);
+    expect(tester.takeException(), isArgumentError);
     log.clear();
 
     test.addListener(listener1);
@@ -105,7 +103,7 @@ void main() {
     test.addListener(listener2);
     test.notify();
     expect(log, <String>['badListener', 'listener1', 'listener2']);
-    expect(tester.takeException(), isNullThrownError);
+    expect(tester.takeException(), isArgumentError);
     log.clear();
   });
 
@@ -177,7 +175,7 @@ void main() {
     final TestNotifier source2 = TestNotifier();
     final List<String> log = <String>[];
 
-    final Listenable merged = Listenable.merge(<Listenable>[null, source1, null, source2, null]);
+    final Listenable merged = Listenable.merge(<Listenable?>[null, source1, null, source2, null]);
     final VoidCallback listener = () { log.add('listener'); };
 
     merged.addListener(listener);
@@ -209,9 +207,10 @@ void main() {
 
   test('Cannot use a disposed ChangeNotifier', () {
     final TestNotifier source = TestNotifier();
+    final VoidCallback testCallback = () {};
     source.dispose();
-    expect(() { source.addListener(null); }, throwsFlutterError);
-    expect(() { source.removeListener(null); }, throwsFlutterError);
+    expect(() { source.addListener(testCallback); }, throwsFlutterError);
+    expect(() { source.removeListener(testCallback); }, throwsFlutterError);
     expect(() { source.dispose(); }, throwsFlutterError);
     expect(() { source.notify(); }, throwsFlutterError);
   });
@@ -239,7 +238,7 @@ void main() {
     Listenable listenableUnderTest = Listenable.merge(<Listenable>[]);
     expect(listenableUnderTest.toString(), 'Listenable.merge([])');
 
-    listenableUnderTest = Listenable.merge(<Listenable>[null]);
+    listenableUnderTest = Listenable.merge(<Listenable?>[null]);
     expect(listenableUnderTest.toString(), 'Listenable.merge([null])');
 
     listenableUnderTest = Listenable.merge(<Listenable>[source1]);
@@ -254,7 +253,7 @@ void main() {
       "Listenable.merge([Instance of 'TestNotifier', Instance of 'TestNotifier'])",
     );
 
-    listenableUnderTest = Listenable.merge(<Listenable>[null, source2]);
+    listenableUnderTest = Listenable.merge(<Listenable?>[null, source2]);
     expect(
       listenableUnderTest.toString(),
       "Listenable.merge([null, Instance of 'TestNotifier'])",
@@ -321,14 +320,14 @@ void main() {
   test('Throws FlutterError when disposed and called', () {
     final TestNotifier testNotifier = TestNotifier();
     testNotifier.dispose();
-    FlutterError error;
+    FlutterError? error;
     try {
       testNotifier.dispose();
     } on FlutterError catch (e) {
       error = e;
     }
     expect(error, isNotNull);
-    expect(error, isFlutterError);
+    expect(error!, isFlutterError);
     expect(error.toStringDeep(), equalsIgnoringHashCodes(
       'FlutterError\n'
       '   A TestNotifier was used after being disposed.\n'

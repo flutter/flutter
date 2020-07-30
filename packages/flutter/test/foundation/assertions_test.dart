@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import '../flutter_test_alternative.dart';
 
@@ -442,7 +440,7 @@ void main() {
       ],
       replacement: 'test',
     );
-    final List<String> reasons = List<String>(2);
+    final List<String?> reasons = List<String?>.filled(2, null);
     filter.filter(
       const <StackFrame>[
         StackFrame(className: 'TestClass', method: 'test1', packageScheme: 'package', package: 'test', packagePath: 'blah.dart', line: 1, column: 1, number: 0, source: ''),
@@ -450,6 +448,6 @@ void main() {
       ],
       reasons,
     );
-    expect(reasons, List<String>(2));
+    expect(reasons, List<String?>.filled(2, null));
   });
 }

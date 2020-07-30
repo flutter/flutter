@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -13,7 +11,7 @@ void main() {
   test('SynchronousFuture control test', () async {
     final Future<int> future = SynchronousFuture<int>(42);
 
-    int result;
+    int? result;
     future.then<void>((int value) { result = value; });
 
     expect(result, equals(42));
@@ -41,16 +39,16 @@ void main() {
 
     expect(await completeResult, equals(42));
 
-    Object exception;
+    Object? exception;
     try {
       await future.whenComplete(() {
-        throw null;
+        throw ArgumentError();
       });
       // Unreached.
       expect(false, isTrue);
     } catch (e) {
       exception = e;
     }
-    expect(exception, isNullThrownError);
+    expect(exception, isArgumentError);
   });
 }

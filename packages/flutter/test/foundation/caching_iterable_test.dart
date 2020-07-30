@@ -2,13 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 
 import '../flutter_test_alternative.dart';
 
-int yieldCount;
+int yieldCount = 0;
 
 Iterable<int> range(int start, int end) sync* {
   assert(yieldCount == 0);

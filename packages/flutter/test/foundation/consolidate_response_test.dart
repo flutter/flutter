@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 @TestOn('!chrome')
 
 import 'dart:async';
@@ -19,7 +17,7 @@ void main() {
   group(consolidateHttpClientResponseBytes, () {
     final Uint8List chunkOne = Uint8List.fromList(<int>[0, 1, 2, 3, 4, 5]);
     final Uint8List chunkTwo = Uint8List.fromList(<int>[6, 7, 8, 9, 10]);
-    MockHttpClientResponse response;
+    late MockHttpClientResponse response;
 
     setUp(() {
       response = MockHttpClientResponse();
@@ -73,11 +71,11 @@ void main() {
     test('Notifies onBytesReceived for every chunk of bytes', () async {
       final int syntheticTotal = (chunkOne.length + chunkTwo.length) * 2;
       when(response.contentLength).thenReturn(syntheticTotal);
-      final List<int> records = <int>[];
+      final List<int?> records = <int?>[];
       await consolidateHttpClientResponseBytes(
         response,
-        onBytesReceived: (int cumulative, int total) {
-          records.addAll(<int>[cumulative, total]);
+        onBytesReceived: (int cumulative, int? total) {
+          records.addAll(<int?>[cumulative, total]);
         },
       );
 
@@ -119,7 +117,7 @@ void main() {
       when(response.contentLength).thenReturn(-1);
       final Future<List<int>> result = consolidateHttpClientResponseBytes(
         response,
-        onBytesReceived: (int cumulative, int total) {
+        onBytesReceived: (int cumulative, int? total) {
           throw 'misbehaving callback';
         },
       );
@@ -172,11 +170,11 @@ void main() {
       test('Notifies onBytesReceived with gzipped numbers', () async {
         when(response.compressionState).thenReturn(HttpClientResponseCompressionState.compressed);
         when(response.contentLength).thenReturn(gzipped.length);
-        final List<int> records = <int>[];
+        final List<int?> records = <int?>[];
         await consolidateHttpClientResponseBytes(
           response,
-          onBytesReceived: (int cumulative, int total) {
-            records.addAll(<int>[cumulative, total]);
+          onBytesReceived: (int cumulative, int? total) {
+            records.addAll(<int?>[cumulative, total]);
           },
         );
 
@@ -192,15 +190,15 @@ void main() {
         final int syntheticTotal = (chunkOne.length + chunkTwo.length) * 2;
         when(response.compressionState).thenReturn(HttpClientResponseCompressionState.decompressed);
         when(response.contentLength).thenReturn(syntheticTotal);
-        final List<int> records = <int>[];
+        final List<int?> records = <int?>[];
         await consolidateHttpClientResponseBytes(
           response,
-          onBytesReceived: (int cumulative, int total) {
-            records.addAll(<int>[cumulative, total]);
+          onBytesReceived: (int cumulative, int? total) {
+            records.addAll(<int?>[cumulative, total]);
           },
         );
 
-        expect(records, <int>[
+        expect(records, <int?>[
           gzippedChunkOne.length,
           null,
           gzipped.length,

@@ -1896,7 +1896,7 @@ abstract class _NumProperty<T extends num> extends DiagnosticsProperty<T> {
 
   _NumProperty.lazy(
     String name,
-    ComputePropertyValueCallback<T> computeValue, {
+    ComputePropertyValueCallback<T?> computeValue, {
     String? ifNull,
     this.unit,
     bool showName = true,
@@ -1983,7 +1983,7 @@ class DoubleProperty extends _NumProperty<double> {
   /// The [showName] and [level] arguments must not be null.
   DoubleProperty.lazy(
     String name,
-    ComputePropertyValueCallback<double> computeValue, {
+    ComputePropertyValueCallback<double?> computeValue, {
     String? ifNull,
     bool showName = true,
     String? unit,
@@ -2053,7 +2053,7 @@ class PercentProperty extends DoubleProperty {
   /// The [showName] and [level] arguments must not be null.
   PercentProperty(
     String name,
-    double fraction, {
+    double? fraction, {
     String? ifNull,
     bool showName = true,
     String? tooltip,
@@ -2479,7 +2479,7 @@ class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
 ///    only one flag, and is preferred if there is only one entry.
 ///  * [IterableProperty], which provides similar functionality describing
 ///    the values a collection of objects.
-class FlagsSummary<T> extends DiagnosticsProperty<Map<String, T>> {
+class FlagsSummary<T> extends DiagnosticsProperty<Map<String, T?>> {
   /// Create a summary for multiple properties, indicating whether each of them
   /// is present (non-null) or absent (null).
   ///
@@ -2487,7 +2487,7 @@ class FlagsSummary<T> extends DiagnosticsProperty<Map<String, T>> {
   /// null.
   FlagsSummary(
     String name,
-    Map<String, T> value, {
+    Map<String, T?> value, {
     String? ifEmpty,
     bool showName = true,
     bool showSeparator = true,
@@ -2566,7 +2566,7 @@ class FlagsSummary<T> extends DiagnosticsProperty<Map<String, T>> {
 /// May throw exception if accessing the property would throw an exception
 /// and callers must handle that case gracefully. For example, accessing a
 /// property may trigger an assert that layout constraints were violated.
-typedef ComputePropertyValueCallback<T> = T Function();
+typedef ComputePropertyValueCallback<T> = T? Function();
 
 /// Property with a [value] of type [T].
 ///
@@ -2650,7 +2650,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
     DiagnosticLevel level = DiagnosticLevel.info,
   }) : assert(showName != null),
        assert(showSeparator != null),
-       assert(defaultValue == kNoDefaultValue || defaultValue is T),
+       assert(defaultValue == kNoDefaultValue || defaultValue is T?),
        assert(missingIfNull != null),
        assert(style != null),
        assert(level != null),

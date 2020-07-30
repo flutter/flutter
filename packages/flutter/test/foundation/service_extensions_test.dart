@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
@@ -16,6 +14,10 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import '../flutter_test_alternative.dart';
+
+Future<Map<String, dynamic>> _defaultCallback(Map<String, String> parameters) async {
+  return <String, dynamic>{};
+}
 
 class TestServiceExtensionsBinding extends BindingBase
   with SchedulerBinding,
@@ -31,9 +33,12 @@ class TestServiceExtensionsBinding extends BindingBase
   final Map<String, List<Map<String, dynamic>>> eventsDispatched = <String, List<Map<String, dynamic>>>{};
 
   @override
+  @protected
   void registerServiceExtension({
-    @required String name,
-    @required ServiceExtensionCallback callback,
+    // TODO(dkwingsmt): The two parameters should have been "required" according
+    // to its superclass, but somehow the compiler refuses to compile.
+    String name = '',
+    ServiceExtensionCallback callback = _defaultCallback,
   }) {
     expect(extensions.containsKey(name), isFalse);
     extensions[name] = callback;
@@ -55,7 +60,7 @@ class TestServiceExtensionsBinding extends BindingBase
 
   Future<Map<String, dynamic>> testExtension(String name, Map<String, String> arguments) {
     expect(extensions.containsKey(name), isTrue);
-    return extensions[name](arguments);
+    return extensions[name]!(arguments);
   }
 
   int reassembled = 0;
@@ -76,12 +81,12 @@ class TestServiceExtensionsBinding extends BindingBase
   Future<void> doFrame() async {
     frameScheduled = false;
     if (ui.window.onBeginFrame != null)
-      ui.window.onBeginFrame(Duration.zero);
+      ui.window.onBeginFrame!(Duration.zero);
     await flushMicrotasks();
     if (ui.window.onDrawFrame != null)
-      ui.window.onDrawFrame();
+      ui.window.onDrawFrame!();
     if (ui.window.onReportTimings != null)
-      ui.window.onReportTimings(<ui.FrameTiming>[]);
+      ui.window.onReportTimings!(<ui.FrameTiming>[]);
   }
 
   @override
@@ -102,7 +107,7 @@ class TestServiceExtensionsBinding extends BindingBase
   }
 }
 
-TestServiceExtensionsBinding binding;
+late TestServiceExtensionsBinding binding;
 
 Future<Map<String, dynamic>> hasReassemble(Future<Map<String, dynamic>> pendingResult) async {
   bool completed = false;
@@ -120,7 +125,7 @@ Future<Map<String, dynamic>> hasReassemble(Future<Map<String, dynamic>> pendingR
 }
 
 void main() {
-  final List<String> console = <String>[];
+  final List<String?> console = <String?>[];
 
   setUpAll(() async {
     binding = TestServiceExtensionsBinding()..scheduleFrame();
@@ -150,7 +155,7 @@ void main() {
     expect(binding.frameScheduled, isFalse);
 
     expect(debugPrint, equals(debugPrintThrottled));
-    debugPrint = (String message, { int wrapWidth }) {
+    debugPrint = (String? message, { int? wrapWidth }) {
       console.add(message);
     };
   });
@@ -208,7 +213,7 @@ void main() {
 
     bool lastValue = false;
     Future<void> _updateAndCheck(bool newValue) async {
-      Map<String, dynamic> result;
+      Map<String, dynamic>? result;
       binding.testExtension(
         'debugCheckElevationsEnabled',
         <String, String>{'enabled': '$newValue'},

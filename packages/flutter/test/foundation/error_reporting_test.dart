@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 @TestOn('!chrome') // web has different stack traces
 
 import 'dart:async';
@@ -43,13 +41,13 @@ Future<StackTrace> getSampleStack() async {
 }
 
 Future<void> main() async {
-  final List<String> console = <String>[];
+  final List<String?> console = <String?>[];
 
   final StackTrace sampleStack = await getSampleStack();
 
   setUp(() async {
     expect(debugPrint, equals(debugPrintThrottled));
-    debugPrint = (String message, { int wrapWidth }) {
+    debugPrint = (String? message, { int? wrapWidth }) {
       console.add(message);
     };
   });
