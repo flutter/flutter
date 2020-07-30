@@ -384,7 +384,7 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
   final Animation<double> parent;
 
   /// The curve to use in the forward direction.
-  Curve curve;
+  Curve? curve;
 
   /// The curve to use in the reverse direction.
   ///
