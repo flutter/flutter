@@ -1,4 +1,4 @@
-Signature: 13df292d0c33e43491905bb34a5476a9
+Signature: 96e0e2ea543ae93312100580d567ee04
 
 UNUSED LICENSES:
 
@@ -394,10 +394,10 @@ FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/WindowSurfaceEGL.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/android/DisplayAndroid.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/android/DisplayAndroid.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/functionsegl_typedefs.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/ozone/DisplayOzone.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/ozone/DisplayOzone.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/ozone/SurfaceOzone.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/ozone/SurfaceOzone.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/gbm/DisplayGbm.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/gbm/DisplayGbm.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/gbm/SurfaceGbm.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/gbm/SurfaceGbm.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/glx/SurfaceGLX.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/null/BufferNULL.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/null/BufferNULL.h
@@ -645,6 +645,7 @@ FILE: ../../../third_party/angle/src/android_system_settings/src/com/android/ang
 FILE: ../../../third_party/angle/src/android_system_settings/src/com/android/angle/common/Receiver.java
 FILE: ../../../third_party/angle/src/android_system_settings/src/com/android/angle/common/SearchProvider.java
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/vk_ext_provoking_vertex.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/vk_google_filtering_precision.h
 FILE: ../../../third_party/angle/util/android/third_party/android_native_app_glue.c
 FILE: ../../../third_party/angle/util/android/third_party/android_native_app_glue.h
 FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/METADATA
@@ -1287,7 +1288,6 @@ FILE: ../../../third_party/angle/src/common/system_utils_unittest.cpp
 FILE: ../../../third_party/angle/src/common/system_utils_win32.cpp
 FILE: ../../../third_party/angle/src/common/system_utils_winuwp.cpp
 FILE: ../../../third_party/angle/src/common/third_party/xxhash/xxhash_fuzzer.cpp
-FILE: ../../../third_party/angle/src/common/uniform_type_info_autogen.cpp
 FILE: ../../../third_party/angle/src/compiler/preprocessor/preprocessor.l
 FILE: ../../../third_party/angle/src/compiler/preprocessor/preprocessor.y
 FILE: ../../../third_party/angle/src/compiler/preprocessor/preprocessor_lex_autogen.cpp
@@ -1415,8 +1415,6 @@ FILE: ../../../third_party/angle/src/libANGLE/renderer/metal/mtl_state_cache.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/metal/mtl_state_cache.mm
 FILE: ../../../third_party/angle/src/libANGLE/renderer/metal/mtl_utils.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/metal/mtl_utils.mm
-FILE: ../../../third_party/angle/src/libANGLE/renderer/metal/shaders/compiled/mtl_default_shaders.inc
-FILE: ../../../third_party/angle/src/libANGLE/renderer/metal/shaders/mtl_default_shaders_src_autogen.inc
 FILE: ../../../third_party/angle/src/libANGLE/renderer/serial_utils.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/serial_utils_unittest.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/DisplayVk_api.h
@@ -1892,15 +1890,6 @@ FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/Conver
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/ConvertVertex.comp.00000005.inc
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/ConvertVertex.comp.00000006.inc
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/ConvertVertex.comp.00000007.inc
-FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/ConvertVertex.comp.00000008.inc
-FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/ConvertVertex.comp.00000009.inc
-FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/ConvertVertex.comp.0000000A.inc
-FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/ConvertVertex.comp.0000000B.inc
-FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/ConvertVertex.comp.0000000C.inc
-FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/ConvertVertex.comp.0000000D.inc
-FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/ConvertVertex.comp.0000000E.inc
-FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/ConvertVertex.comp.0000000F.inc
-FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/ConvertVertex.comp.00000010.inc
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/FullScreenQuad.vert.00000000.inc
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/ImageClear.frag.00000000.inc
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/ImageClear.frag.00000001.inc
@@ -2175,10 +2164,14 @@ FILE: ../../../third_party/angle/include/GLES2/gl2ext_explicit_context_autogen.i
 FILE: ../../../third_party/angle/include/GLES3/gl31ext_explicit_context_autogen.inc
 FILE: ../../../third_party/angle/include/GLES3/gl32ext_explicit_context_autogen.inc
 FILE: ../../../third_party/angle/include/GLES3/gl3ext_explicit_context_autogen.inc
+FILE: ../../../third_party/angle/include/platform/Platform.h
 FILE: ../../../third_party/angle/src/common/PackedEGLEnums_autogen.cpp
 FILE: ../../../third_party/angle/src/common/PackedEGLEnums_autogen.h
 FILE: ../../../third_party/angle/src/common/PackedGLEnums_autogen.cpp
 FILE: ../../../third_party/angle/src/common/PackedGLEnums_autogen.h
+FILE: ../../../third_party/angle/src/common/uniform_type_info_autogen.cpp
+FILE: ../../../third_party/angle/src/common/vulkan/vulkan_icd.cpp
+FILE: ../../../third_party/angle/src/common/vulkan/vulkan_icd.h
 FILE: ../../../third_party/angle/src/compiler/translator/ImmutableString_ESSL_autogen.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/ImmutableString_autogen.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/ParseContext_ESSL_autogen.h
@@ -2269,10 +2262,18 @@ FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/eagl/RendererEAGL.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/eagl/RendererEAGL.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/eagl/WindowSurfaceEAGL.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/eagl/WindowSurfaceEAGL.mm
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/glx/PixmapSurfaceGLX.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/glx/PixmapSurfaceGLX.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/glx/glx_utils.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/glx/glx_utils.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/null_functions.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/null_functions.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/load_functions_table_autogen.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/metal/mtl_format_table_autogen.mm
+FILE: ../../../third_party/angle/src/libANGLE/renderer/metal/shaders/compiled/mtl_default_shaders.inc
+FILE: ../../../third_party/angle/src/libANGLE/renderer/metal/shaders/mtl_default_shaders_src_autogen.inc
+FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/CommandProcessor.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/CommandProcessor.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/ProgramExecutableVk.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/ProgramExecutableVk.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/mac/IOSurfaceSurfaceVkMac.h
@@ -2374,6 +2375,8 @@ FILE: ../../../third_party/angle/util/egl_loader_autogen.h
 FILE: ../../../third_party/angle/util/frame_capture_utils.h
 FILE: ../../../third_party/angle/util/gles_loader_autogen.cpp
 FILE: ../../../third_party/angle/util/gles_loader_autogen.h
+FILE: ../../../third_party/angle/util/png_utils.cpp
+FILE: ../../../third_party/angle/util/png_utils.h
 FILE: ../../../third_party/angle/util/windows/wgl_loader_autogen.cpp
 FILE: ../../../third_party/angle/util/windows/wgl_loader_autogen.h
 ----------------------------------------------------------------------------------------------------
@@ -2939,7 +2942,7 @@ ORIGIN: ../../../third_party/angle/include/platform/FeaturesD3D.h + ../../../thi
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/angle/include/platform/FeaturesD3D.h
 FILE: ../../../third_party/angle/include/platform/FeaturesGL.h
-FILE: ../../../third_party/angle/include/platform/Platform.h
+FILE: ../../../third_party/angle/include/platform/PlatformMethods.h
 FILE: ../../../third_party/angle/samples/WindowTest/WindowTest.cpp
 FILE: ../../../third_party/angle/samples/multi_window/MultiWindow.cpp
 FILE: ../../../third_party/angle/src/common/Optional.h
@@ -3355,6 +3358,48 @@ FILE: ../../../third_party/angle/src/libANGLE/Uniform.cpp
 FILE: ../../../third_party/angle/src/libANGLE/Uniform.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2010 The ANGLE Project Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+    Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+    Redistributions in binary form must reproduce the above
+    copyright notice, this list of conditions and the following
+    disclaimer in the documentation and/or other materials provided
+    with the distribution.
+
+    Neither the name of TransGaming Inc., Google Inc., 3DLabs Inc.
+    Ltd., nor the names of their contributors may be used to endorse
+    or promote products derived from this software without specific
+    prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: angle
+ORIGIN: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/DmaBufImageSiblingEGL.cpp + ../../../third_party/angle/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/DmaBufImageSiblingEGL.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/DmaBufImageSiblingEGL.h
+FILE: ../../../third_party/angle/util/fuchsia/FuchsiaPixmap.cpp
+FILE: ../../../third_party/angle/util/fuchsia/FuchsiaPixmap.h
+----------------------------------------------------------------------------------------------------
+Copyright The ANGLE Project Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -22811,4 +22856,4 @@ freely, subject to the following restrictions:
    misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 ====================================================================================================
-Total license count: 359
+Total license count: 360
