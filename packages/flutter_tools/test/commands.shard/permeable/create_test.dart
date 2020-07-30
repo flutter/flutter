@@ -49,7 +49,7 @@ void main() {
   Directory projectDir;
   FlutterVersion mockFlutterVersion;
   LoggingProcessManager loggingProcessManager;
-  BufferLogger logger = BufferLogger.test();
+  BufferLogger logger;
 
   setUpAll(() async {
     Cache.disableLocking();
