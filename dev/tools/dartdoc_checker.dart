@@ -80,7 +80,7 @@ void checkForUnresolvedDirectives(String htmlOutputPath) {
 
 int _scanFile(File file) {
   assert(path.extension(file.path) == 'html');
-  Iterable<String> matches = _pattern.allMatches(file.readAsStringSync())
+  final Iterable<String> matches = _pattern.allMatches(file.readAsStringSync())
       .map((RegExpMatch m ) => m.group(0));
 
   if (matches.isNotEmpty) {
