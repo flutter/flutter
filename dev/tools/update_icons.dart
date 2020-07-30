@@ -174,17 +174,17 @@ void main(List<String> args) {
   }
 
   final String newCodepointsString = newCodepointsFile.readAsStringSync();
-  final Map<String, String> newTokenPairMap = _stringToTokenPairMap(newCodepointsString);
+  final Map<String, String> newTokenPairMap = stringToTokenPairMap(newCodepointsString);
 
   final String oldCodepointsString = oldCodepointsFile.readAsStringSync();
-  final Map<String, String> oldTokenPairMap = _stringToTokenPairMap(oldCodepointsString);
+  final Map<String, String> oldTokenPairMap = stringToTokenPairMap(oldCodepointsString);
 
   _testIsMapSuperset(newTokenPairMap, oldTokenPairMap);
 
   final String iconClassFileData = iconClassFile.readAsStringSync();
 
   stderr.writeln('Generating new token pairs.');
-  final String newIconData = _regenerateIconsFile(iconClassFileData, newTokenPairMap);
+  final String newIconData = regenerateIconsFile(iconClassFileData, newTokenPairMap);
 
   if (argResults[_dryRunOption] as bool) {
     stdout.writeln(newIconData);
@@ -204,7 +204,8 @@ ArgResults _handleArguments(List<String> args) {
   return argParser.parse(args);
 }
 
-Map<String, String> _stringToTokenPairMap(String codepointData) {
+// Do not make this method private as it is used by g3 roll.
+Map<String, String> stringToTokenPairMap(String codepointData) {
   final Iterable<String> cleanData = LineSplitter.split(codepointData)
       .map((String line) => line.trim())
       .where((String line) => line.isNotEmpty);
@@ -222,7 +223,8 @@ Map<String, String> _stringToTokenPairMap(String codepointData) {
   return pairs;
 }
 
-String _regenerateIconsFile(String iconData, Map<String, String> tokenPairMap) {
+// Do not make this method private as it is used by g3 roll.
+String regenerateIconsFile(String iconData, Map<String, String> tokenPairMap) {
   final StringBuffer buf = StringBuffer();
   bool generating = false;
   for (final String line in LineSplitter.split(iconData)) {

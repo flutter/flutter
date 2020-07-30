@@ -120,7 +120,7 @@ const int _kObscureShowLatestCharCursorTicks = 3;
 ///    with a [TextEditingController].
 ///  * [EditableText], which is a raw region of editable text that can be
 ///    controlled with a [TextEditingController].
-///  * Learn how to use a [TextEditingController] in one of our [cookbook recipe]s.(https://flutter.dev/docs/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller)
+///  * Learn how to use a [TextEditingController] in one of our [cookbook recipes](https://flutter.dev/docs/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller).
 class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// Creates a controller for an editable text field.
   ///
@@ -313,14 +313,14 @@ class ToolbarOptions {
 /// action button on the soft keyboard for Android and iOS. The default action
 /// is [TextInputAction.done].
 ///
-/// Many [TextInputAction]s are common between Android and iOS. However, if an
-/// [inputAction] is provided that is not supported by the current
+/// Many [TextInputAction]s are common between Android and iOS. However, if a
+/// [textInputAction] is provided that is not supported by the current
 /// platform in debug mode, an error will be thrown when the corresponding
 /// EditableText receives focus. For example, providing iOS's "emergencyCall"
 /// action when running on an Android device will result in an error when in
 /// debug mode. In release mode, incompatible [TextInputAction]s are replaced
 /// either with "unspecified" on Android, or "default" on iOS. Appropriate
-/// [inputAction]s can be chosen by checking the current platform and then
+/// [textInputAction]s can be chosen by checking the current platform and then
 /// selecting the appropriate action.
 ///
 /// ## Lifecycle
@@ -976,7 +976,7 @@ class EditableText extends StatefulWidget {
   /// When a non-completion action is pressed, such as "next" or "previous", it
   /// is often desirable to move the focus to the next or previous field.  To do
   /// this, handle it as in this example, by calling [FocusNode.focusNext] in
-  /// the [TextFormField.onFieldSubmitted] callback ([TextFormField] wraps
+  /// the `onFieldSubmitted` callback of [TextFormField]. ([TextFormField] wraps
   /// [EditableText] internally, and uses the value of `onFieldSubmitted` as its
   /// [onSubmitted]).
   ///
@@ -1056,7 +1056,7 @@ class EditableText extends StatefulWidget {
   final MouseCursor mouseCursor;
 
   /// If true, the [RenderEditable] created by this widget will not handle
-  /// pointer events, see [renderEditable] and [RenderEditable.ignorePointer].
+  /// pointer events, see [RenderEditable] and [RenderEditable.ignorePointer].
   ///
   /// This property is false by default.
   final bool rendererIgnoresPointer;
@@ -2171,10 +2171,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     return result;
   }
 
-  /// The renderer for this widget's [Editable] descendant.
+  /// The renderer for this widget's descendant.
   ///
   /// This property is typically used to notify the renderer of input gestures
-  /// when [ignorePointer] is true. See [RenderEditable.ignorePointer].
+  /// when [RenderEditable.ignorePointer] is true.
   RenderEditable get renderEditable => _editableKey.currentContext.findRenderObject() as RenderEditable;
 
   @override

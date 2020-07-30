@@ -384,6 +384,7 @@ class IOSDevice extends Device {
       if (debuggingOptions.dumpSkpOnShaderCompilation) '--dump-skp-on-shader-compilation',
       if (debuggingOptions.verboseSystemLogs) '--verbose-logging',
       if (debuggingOptions.cacheSkSL) '--cache-sksl',
+      if (debuggingOptions.purgePersistentCache) '--purge-persistent-cache',
       if (platformArgs['trace-startup'] as bool ?? false) '--trace-startup',
     ];
 
@@ -432,7 +433,7 @@ class IOSDevice extends Device {
       );
       final Uri localUri = await fallbackDiscovery.discover(
         assumedDevicePort: assumedObservatoryPort,
-        deivce: this,
+        device: this,
         usesIpv6: ipv6,
         hostVmservicePort: debuggingOptions.hostVmServicePort,
         packageId: packageId,

@@ -39,9 +39,8 @@ enum FlutterLogoStyle {
 class FlutterLogoDecoration extends Decoration {
   /// Creates a decoration that knows how to paint Flutter's logo.
   ///
-  /// The [lightColor], [mediumColor], and [darkColor] are used to fill the
-  /// logo. The [style] controls whether and where to draw the "Flutter" label.
-  /// If one is shown, the [textColor] controls the color of the label.
+  /// The [style] controls whether and where to draw the "Flutter" label. If one
+  /// is shown, the [textColor] controls the color of the label.
   ///
   /// The [textColor], [style], and [margin] arguments must not be null.
   const FlutterLogoDecoration({

@@ -198,10 +198,10 @@ class AutofillGroup extends StatefulWidget {
 /// [AutofillClient] when it exits (for example, when an [EditableText] gets
 /// unmounted or reparented out of the [AutofillGroup]'s subtree).
 ///
-/// The [AutofillGroupState] class also provides an [attach] method that can be
-/// called by [TextInputClient]s that support autofill, instead of
-/// [TextInputClient.attach], to create a [TextInputConnection] to interact with
-/// the platform's text input system.
+/// The [AutofillGroupState] class also provides an [AutofillGroupState.attach]
+/// method that can be called by [TextInputClient]s that support autofill,
+/// instead of [TextInput.attach], to create a [TextInputConnection] to interact
+/// with the platform's text input system.
 /// {@endtemplate}
 ///
 /// Typically obtained using [AutofillGroup.of].

@@ -99,13 +99,13 @@ class ElevatedButton extends ButtonStyleButton {
   /// [ButtonStyle] given simple values.
   ///
   /// The [onPrimary], and [onSurface] colors are used to to create a
-  /// [MaterialStateProperty] [foreground] value in the same way that
-  /// [defaultStyleOf] uses the [ColorScheme] colors with the same
+  /// [MaterialStateProperty] [ButtonStyle.foregroundColor] value in the same
+  /// way that [defaultStyleOf] uses the [ColorScheme] colors with the same
   /// names. Specify a value for [onPrimary] to specify the color of the
-  /// button's text and icons as well as the overlay colors used to
-  /// indicate the hover, focus, and pressed states. Use primary for
-  /// the button's background fill color and [onSurface]
-  /// to specify the button's disabled text, icon, and fill color.
+  /// button's text and icons as well as the overlay colors used to indicate the
+  /// hover, focus, and pressed states. Use [primary] for the button's background
+  /// fill color and [onSurface] to specify the button's disabled text, icon,
+  /// and fill color.
   ///
   /// The button's elevations are defined relative to the [elevation]
   /// parameter. The disabled elevation is the same as the parameter
@@ -206,8 +206,8 @@ class ElevatedButton extends ButtonStyleButton {
   /// EdgeInsets constructors and `EdgeInsetsGeometry.lerp` have been
   /// abbreviated for readability.
   ///
-  /// The color of the [textStyle] is not used, the [foreground] color
-  /// is used instead.
+  /// The color of the [ButtonStyle.textStyle] is not used, the
+  /// [ButtonStyle.foregroundColor] color is used instead.
   ///
   /// * `textStyle` - Theme.textTheme.button
   /// * `backgroundColor`
