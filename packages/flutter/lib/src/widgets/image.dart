@@ -436,6 +436,15 @@ class Image extends StatefulWidget {
   /// will be rendered to the constraints of the layout or [width] and [height]
   /// regardless of these parameters. These parameters are primarily intended
   /// to reduce the memory usage of [ImageCache].
+  ///
+  /// Loading an image from a file creates an in memory copy of the file,
+  /// which is retained in the [ImageCache]. The underlying file is not
+  /// monitored for changes. If it does change, the application should evict
+  /// the entry from the [ImageCache].
+  ///
+  /// See also:
+  ///
+  ///  * [FileImage] provider for evicting the underlying file easily.
   Image.file(
     File file, {
     Key key,
