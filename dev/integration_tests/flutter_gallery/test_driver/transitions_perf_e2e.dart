@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -15,7 +14,6 @@ import 'package:e2e/e2e.dart';
 import 'package:flutter_gallery/gallery/app.dart' show GalleryApp;
 import 'package:flutter_gallery/gallery/demos.dart';
 import 'package:flutter_gallery/demo_lists.dart';
-import 'package:flutter_gallery/gallery/home.dart';
 
 import 'e2e_util.dart' show watchPerformance;
 
@@ -102,26 +100,12 @@ void main([List<String> args = const <String>[]]) {
     testWidgets(
       'all demos',
       (WidgetTester tester) async {
-        final Map<String, List<int>> transitionTimes = <String, List<int>>{};
-        galleryTransitionCallback = (String routeName) {
-          TimingsCallback transitionWatcher;
-          transitionWatcher = (Iterable<FrameTiming> timings) {
-            transitionTimes[routeName] ??= <int>[];
-            transitionTimes[routeName].add(timings.first.buildDuration.inMicroseconds);
-            binding.removeTimingsCallback(transitionWatcher);
-          };
-          binding.addTimingsCallback(transitionWatcher);
-        };
         runApp(const GalleryApp(testMode: true));
         await tester.pumpAndSettle();
         // Collect timeline data for just a limited set of demos to avoid OOMs.
         await watchPerformance(binding, () async {
           await runDemos(kProfiledDemos, tester);
         });
-
-        print(transitionTimes);
-        reportTransitionsHistogram(transitionTimes, binding);
-        galleryTransitionCallback = null;
 
         // Execute the remaining tests.
         final Set<String> unprofiledDemos = Set<String>.from(_allDemos)
@@ -132,30 +116,4 @@ void main([List<String> args = const <String>[]]) {
       semanticsEnabled: withSemantics,
     );
   });
-}
-
-/// Validates and reports transition times.
-///
-/// This is a duplicate implementation of part of [saveDurationsHistogram] in
-/// [test_driver/transitions_perf_test.dart].
-void reportTransitionsHistogram(
-  final Map<String, List<int>> durations,
-  E2EWidgetsFlutterBinding binding,
-) {
-  if(durations.keys.isEmpty) {
-    throw ArgumentError('no "Start Transition" timeline events found');
-  }
-  final Map<String, int> unexpectedValueCounts = <String, int>{};
-  durations.forEach((String routeName, List<int> values) {
-    if (values.length != 2) {
-      unexpectedValueCounts[routeName] = values.length;
-    }
-  });
-
-  if (unexpectedValueCounts.isNotEmpty) {
-    throw ArgumentError('Some routes recorded wrong number of values '
-    '(expected 2 values/route):\n'
-    '\t${unexpectedValueCounts.keys.toList()}');
-  }
-  binding.reportData['transition_durations'] = durations;
 }

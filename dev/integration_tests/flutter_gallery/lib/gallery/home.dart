@@ -164,13 +164,6 @@ class _CategoriesPage extends StatelessWidget {
   }
 }
 
-void Function(String routeName) galleryTransitionCallback = (String routeName) {
-  Timeline.instantSync('Start Transition', arguments: <String, String>{
-    'from': '/',
-    'to': routeName,
-  });
-};
-
 class _DemoItem extends StatelessWidget {
   const _DemoItem({ Key key, this.demo }) : super(key: key);
 
@@ -178,9 +171,10 @@ class _DemoItem extends StatelessWidget {
 
   void _launchDemo(BuildContext context) {
     if (demo.routeName != null) {
-      if (galleryTransitionCallback != null) {
-        galleryTransitionCallback(demo.routeName);
-      }
+      Timeline.instantSync('Start Transition', arguments: <String, String>{
+        'from': '/',
+        'to': demo.routeName,
+      });
       Navigator.pushNamed(context, demo.routeName);
     }
   }

@@ -21,7 +21,7 @@ TaskFunction createGalleryTransitionE2ETest({ bool semanticsEnabled = false }) {
     testFile: 'transitions_perf_e2e',
     needFullTimeline: false,
     timelineSummaryFile: 'e2e_perf_summary',
-    transitionDurationFile: 'transition_durations',
+    transitionDurationFile: null,
     driverFile: 'transitions_perf_e2e_test',
   );
 }
@@ -70,28 +70,27 @@ class GalleryTransitionTest {
       ]);
     });
 
-    // Route paths contains slashes, which Firebase doesn't accept in keys, so we
-    // remove them.
-    final Map<String, dynamic> original = json.decode(
-      file('${galleryDirectory.path}/build/$transitionDurationFile.json').readAsStringSync(),
-    ) as Map<String, dynamic>;
-    final Map<String, List<int>> transitions = <String, List<int>>{};
-    for (final String key in original.keys) {
-      transitions[key.replaceAll('/', '')] = List<int>.from(original[key] as List<dynamic>);
-    }
-
     final Map<String, dynamic> summary = json.decode(
       file('${galleryDirectory.path}/build/$timelineSummaryFile.json').readAsStringSync(),
     ) as Map<String, dynamic>;
 
-    final Map<String, dynamic> data = <String, dynamic>{
-      'transitions': transitions,
-      'missed_transition_count': _countMissedTransitions(transitions),
-      ...summary,
-    };
+    // Route paths contains slashes, which Firebase doesn't accept in keys, so we
+    // remove them.
+    if (transitionDurationFile != null) {
+      final Map<String, dynamic> original = json.decode(
+        file('${galleryDirectory.path}/build/$transitionDurationFile.json').readAsStringSync(),
+      ) as Map<String, dynamic>;
+      final Map<String, List<int>> transitions = <String, List<int>>{};
+      for (final String key in original.keys) {
+        transitions[key.replaceAll('/', '')] = List<int>.from(original[key] as List<dynamic>);
+      }
+      summary['transitions'] = transitions;
+      summary['missed_transition_count'] = _countMissedTransitions(transitions);
+    }
 
-    return TaskResult.success(data, benchmarkScoreKeys: <String>[
-      'missed_transition_count',
+    return TaskResult.success(summary, benchmarkScoreKeys: <String>[
+      if (transitionDurationFile != null)
+        'missed_transition_count',
       'average_frame_build_time_millis',
       'worst_frame_build_time_millis',
       '90th_percentile_frame_build_time_millis',
