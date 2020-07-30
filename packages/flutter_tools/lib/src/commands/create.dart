@@ -612,7 +612,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       );
     }
 
-    final bool addPlatformsToExistingPlugin = willAddPlatforms&& existingPlatforms.isNotEmpty;
+    final bool addPlatformsToExistingPlugin = willAddPlatforms && existingPlatforms.isNotEmpty;
 
     if (addPlatformsToExistingPlugin) {
       // If adding new platforms to an existing plugin project, prints
