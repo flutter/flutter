@@ -1230,16 +1230,14 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 ///
 /// {@template flutter.flutter_test.frame_policy}
 /// The default is [fadePointers]. Setting this to anything other than
-/// [onlyPumps] means pumping extra frames, which might involve calling builders
-/// more, or calling paint callbacks more, etc, which might interfere with the
-/// test. If you know your test file wouldn't be affected by this, you can set
-/// it to [fullyLive] or [benchmarkLive] persistently in that particular test
-/// file.
+/// [onlyPumps] results in pumping extra frames, which might involve calling
+/// builders more, or calling paint callbacks more, etc, and might interfere
+/// with the test. If you know that your test won't be affected by this, you can
+/// set the policy to [fullyLive] or [benchmarkLive] in that particular file.
 ///
-/// To set a value while still allowing the test
-/// file to work as a normal test, add the following code to your test file at
-/// the top of your `void main() { }` function, before calls to
-/// [testWidgets]:
+/// To set a value while still allowing the test file to work as a normal test,
+/// add the following code to your test file at the top of your
+/// `void main() { }` function, before calls to [testWidgets]:
 ///
 /// ```dart
 /// TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
@@ -1269,8 +1267,8 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
   /// Show every frame that the framework requests, even if the frames are not
   /// explicitly pumped.
   ///
-  /// The major difference with [benchmarkLive] is the latter ignores frame
-  /// requests by [pump].
+  /// The major difference between [fullyLive] and [benchmarkLive] is the latter
+  /// ignores frame requests by [pump].
   ///
   /// This can help with orienting the developer when looking at
   /// heavily-animated situations, and will almost certainly result in
@@ -1289,8 +1287,8 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
   /// This allows all frame requests from the engine to be serviced, and allows
   /// all frame requests that are artificially triggered to be serviced, but
   /// ignores [scheduleFrame] requests from the framework.
-  /// Therefore any animation will not run for this mode as animation is
-  /// implemented by constantly requesting new frames from the framework.
+  /// Therefore animation won't run for this mode because the framework
+  /// generates an animation by requesting new frames.
   ///
   /// The [SchedulerBinding.hasScheduledFrame] property will never be true in
   /// this mode. This can cause unexpected effects. For instance,
@@ -1306,12 +1304,12 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
   /// frames respects what the engine and the device needed.
   ///
   /// Compared to [fullyLive] this policy ignores the frame requests from [pump]
-  /// of the test code so that the frame scheduling respects the situation of
-  /// that for the real environment, and avoids waiting for the artificially
-  /// [pump]ed frame frame when driving the test in methods like
-  /// [WidgetTester.handlePointerEventRecord] or [WidgetTester.fling].
+  /// so that frame scheduling mimics that of the real environment, and avoids
+  /// waiting for an artificially [pump]ed frame. (For example, when driving the
+  /// test in methods like [WidgetTester.handlePointerEventRecord] or
+  /// [WidgetTester.fling].)
   ///
-  /// Compared to [benchmark] this policy can be used for capturing the
+  /// This policy differs from [benchmark] in that it can be used for capturing
   /// animation frames requested by the framework.
   benchmarkLive,
 }
@@ -1369,12 +1367,11 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   /// The strategy for [pump]ing and requesting new frames.
   ///
-  /// Whether to have [pump] with a duration only pump a single frame
+  /// The policy decides whether [pump] (with a duration) pumps a single frame
   /// (as would happen in a normal test environment using
-  /// [AutomatedTestWidgetsFlutterBinding]), or whether to instead
-  /// pump every frame that the system requests during any
-  /// asynchronous pause in the test (as would normally happen when
-  /// running an application with [WidgetsFlutterBinding]).
+  /// [AutomatedTestWidgetsFlutterBinding]), or pumps every frame that the
+  /// system requests during an asynchronous pause (as would normally happen
+  /// when running an application with [WidgetsFlutterBinding]).
   ///
   /// {@macro flutter.flutter_test.frame_policy}
   ///
