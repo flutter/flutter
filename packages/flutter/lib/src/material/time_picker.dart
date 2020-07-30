@@ -1981,7 +1981,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 /// to add inherited widgets like [Localizations.override],
 /// [Directionality], or [MediaQuery].
 ///
-/// The [entryMode] parameter can be used to
+/// The `initialEntryMode` parameter can be used to
 /// determine the initial time entry selection of the picker (either a clock
 /// dial or text input).
 ///

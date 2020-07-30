@@ -31,7 +31,7 @@ import 'framework.dart';
 /// {@endtemplate}
 ///
 /// {@template flutter.widgets.platformViews.gestures}
-/// The widget participates in Flutter's [GestureArena]s, and dispatches touch events to the
+/// The widget participates in Flutter's gesture arenas, and dispatches touch events to the
 /// platform view iff it won the arena. Specific gestures that should be dispatched to the platform
 /// view can be specified in the `gestureRecognizers` constructor parameter. If
 /// the set of gesture recognizers is empty, a gesture will be dispatched to the platform
@@ -748,7 +748,7 @@ typedef PlatformViewSurfaceFactory = Widget Function(BuildContext context, Platf
 
 /// Constructs a [PlatformViewController].
 ///
-/// The [PlatformViewController.id] field of the created controller must match the value of the
+/// The [PlatformViewController.viewId] field of the created controller must match the value of the
 /// params [PlatformViewCreationParams.id] field.
 ///
 /// See also:
@@ -916,7 +916,7 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
 /// See also:
 ///
 ///  * [AndroidView] which embeds an Android platform view in the widget hierarchy using a [TextureLayer].
-///  * [UIKitView] which embeds an iOS platform view in the widget hierarchy.
+///  * [UiKitView] which embeds an iOS platform view in the widget hierarchy.
 // TODO(amirh): Link to the embedder's system compositor documentation once available.
 class PlatformViewSurface extends LeafRenderObjectWidget {
 
@@ -1011,7 +1011,7 @@ class PlatformViewSurface extends LeafRenderObjectWidget {
 /// See also:
 ///
 ///  * [AndroidView] which embeds an Android platform view in the widget hierarchy using a [TextureLayer].
-///  * [UIKitView] which embeds an iOS platform view in the widget hierarchy.
+///  * [UiKitView] which embeds an iOS platform view in the widget hierarchy.
 class AndroidViewSurface extends PlatformViewSurface {
   /// Construct an `AndroidPlatformViewSurface`.
   const AndroidViewSurface({

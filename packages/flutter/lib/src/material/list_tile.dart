@@ -115,8 +115,8 @@ class ListTileTheme extends InheritedTheme {
 
   /// The tile's internal padding.
   ///
-  /// Insets a [ListTile]'s contents: its [leading], [title], [subtitle],
-  /// and [trailing] widgets.
+  /// Insets a [ListTile]'s contents: its [ListTile.leading], [ListTile.title],
+  /// [ListTile.subtitle], and [ListTile.trailing] widgets.
   final EdgeInsetsGeometry contentPadding;
 
   /// If specified, defines the background color for `ListTile` when
@@ -734,7 +734,7 @@ class ListTile extends StatelessWidget {
   ///
   /// To show right-aligned metadata (assuming left-to-right reading order;
   /// left-aligned for right-to-left reading order), consider using a [Row] with
-  /// [MainAxisAlign.baseline] alignment whose first item is [Expanded] and
+  /// [CrossAxisAlignment.baseline] alignment whose first item is [Expanded] and
   /// whose second child is the metadata text, instead of using the [trailing]
   /// property.
   final Widget trailing;
@@ -764,17 +764,17 @@ class ListTile extends StatelessWidget {
   ///
   /// See also:
   ///
-  ///  * [ThemeData.visualDensity], which specifies the [density] for all widgets
-  ///    within a [Theme].
+  ///  * [ThemeData.visualDensity], which specifies the [visualDensity] for all
+  ///    widgets within a [Theme].
   final VisualDensity visualDensity;
 
   /// The shape of the tile's [InkWell].
   ///
   /// Defines the tile's [InkWell.customBorder].
   ///
-  /// If this property is null then [ThemeData.cardTheme.shape] is used.
-  /// If that's null then the shape will be a [RoundedRectangleBorder] with a
-  /// circular corner radius of 4.0.
+  /// If this property is null then [CardTheme.shape] of [ThemeData.cardTheme]
+  /// is used. If that's null then the shape will be a [RoundedRectangleBorder]
+  /// with a circular corner radius of 4.0.
   final ShapeBorder shape;
 
   /// The tile's internal padding.

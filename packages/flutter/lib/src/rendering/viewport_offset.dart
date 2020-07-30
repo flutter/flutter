@@ -208,7 +208,7 @@ abstract class ViewportOffset extends ChangeNotifier {
   }
 
   /// The direction in which the user is trying to change [pixels], relative to
-  /// the viewport's [RenderViewport.axisDirection].
+  /// the viewport's [RenderViewportBase.axisDirection].
   ///
   /// If the _user_ is not scrolling, this will return [ScrollDirection.idle]
   /// even if there is (for example) a [ScrollActivity] currently animating the

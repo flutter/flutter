@@ -41,8 +41,7 @@ void macroPerfTestE2E(
   binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive;
 
   testWidgets(testName, (WidgetTester tester) async {
-    assert((tester.binding as LiveTestWidgetsFlutterBinding).framePolicy ==
-        LiveTestWidgetsFlutterBindingFramePolicy.fullyLive);
+    assert(tester.binding == binding);
     app.main();
     await tester.pumpAndSettle();
 
@@ -61,6 +60,8 @@ void macroPerfTestE2E(
     expect(button, findsOneWidget);
     await tester.pumpAndSettle();
     await tester.tap(button);
+    // Cannot be pumpAndSettle because some tests have inifite animation.
+    await tester.pump(const Duration(milliseconds: 20));
 
     if (pageDelay != null) {
       // Wait for the page to load
@@ -108,7 +109,7 @@ class FrameTimingSummarizer {
     final List<Duration> frameRasterizerTime = List<Duration>.unmodifiable(
       data.map<Duration>((FrameTiming datum) => datum.rasterDuration),
     );
-    final List<Duration> frameRasterizerTimeSorted = List<Duration>.from(frameBuildTime)..sort();
+    final List<Duration> frameRasterizerTimeSorted = List<Duration>.from(frameRasterizerTime)..sort();
     final Duration Function(Duration, Duration) add = (Duration a, Duration b) => a + b;
     return FrameTimingSummarizer._(
       frameBuildTime: frameBuildTime,

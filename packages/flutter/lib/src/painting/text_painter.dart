@@ -54,9 +54,9 @@ class PlaceholderDimensions {
   /// See also:
   ///
   ///  * [baseline], the baseline to align to when using
-  ///    [ui.PlaceholderAlignment.baseline],
-  ///    [ui.PlaceholderAlignment.aboveBaseline],
-  ///    or [ui.PlaceholderAlignment.underBaseline].
+  ///    [dart:ui.PlaceholderAlignment.baseline],
+  ///    [dart:ui.PlaceholderAlignment.aboveBaseline],
+  ///    or [dart:ui.PlaceholderAlignment.belowBaseline].
   ///  * [baselineOffset], the distance of the alphabetic baseline from the upper
   ///    edge of the placeholder.
   final ui.PlaceholderAlignment alignment;
@@ -70,7 +70,7 @@ class PlaceholderDimensions {
   ///
   ///  * [ui.PlaceholderAlignment.baseline]
   ///  * [ui.PlaceholderAlignment.aboveBaseline]
-  ///  * [ui.PlaceholderAlignment.underBaseline]
+  ///  * [ui.PlaceholderAlignment.belowBaseline]
   ///  * [ui.PlaceholderAlignment.middle]
   final TextBaseline baseline;
 
@@ -318,7 +318,7 @@ class TextPainter {
   ///
   /// Omitting or providing null for any properties of [StrutStyle] will result in
   /// default values being used. It is highly recommended to at least specify a
-  /// [fontSize].
+  /// [StrutStyle.fontSize].
   ///
   /// See [StrutStyle] for details.
   /// {@endtemplate}
