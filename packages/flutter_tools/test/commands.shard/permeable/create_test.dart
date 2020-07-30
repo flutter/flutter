@@ -37,7 +37,7 @@ final Generator _kNoColorTerminalPlatform = () => FakePlatform.fromPlatform(cons
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
   Platform: _kNoColorTerminalPlatform,
 };
-final BufferLogger logger = BufferLogger.test();
+
 const String samplesIndexJson = '''
 [
   { "id": "sample1" },
@@ -49,6 +49,7 @@ void main() {
   Directory projectDir;
   FlutterVersion mockFlutterVersion;
   LoggingProcessManager loggingProcessManager;
+  BufferLogger logger = BufferLogger.test();
 
   setUpAll(() async {
     Cache.disableLocking();
@@ -57,6 +58,7 @@ void main() {
 
   setUp(() {
     loggingProcessManager = LoggingProcessManager();
+    logger = BufferLogger.test();
     tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_create_test.');
     projectDir = tempDir.childDirectory('flutter_project');
     mockFlutterVersion = MockFlutterVersion();
