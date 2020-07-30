@@ -630,7 +630,7 @@ class AutofillConfiguration {
   const AutofillConfiguration({
     required this.uniqueIdentifier,
     required this.autofillHints,
-    this.currentEditingValue,
+    required this.currentEditingValue,
   }) : assert(uniqueIdentifier != null),
        assert(autofillHints != null);
 
@@ -692,7 +692,7 @@ class AutofillConfiguration {
   final List<String> autofillHints;
 
   /// The current [TextEditingValue] of the [AutofillClient].
-  final TextEditingValue? currentEditingValue;
+  final TextEditingValue currentEditingValue;
 
   /// Returns a representation of this object as a JSON object.
   Map<String, dynamic> toJson() {
@@ -700,8 +700,7 @@ class AutofillConfiguration {
     return <String, dynamic>{
       'uniqueIdentifier': uniqueIdentifier,
       'hints': autofillHints,
-      if (currentEditingValue != null)
-        'editingValue': currentEditingValue!.toJSON(),
+      'editingValue': currentEditingValue.toJSON(),
     };
   }
 }
