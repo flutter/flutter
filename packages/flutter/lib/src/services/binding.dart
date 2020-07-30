@@ -189,11 +189,11 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   }
 
   Future<String?> _handleLifecycleMessage(String? message) async {
-    handleAppLifecycleStateChanged(_parseAppLifecycleMessage(message!));
+    handleAppLifecycleStateChanged(_parseAppLifecycleMessage(message!)!);
     return null;
   }
 
-  static AppLifecycleState _parseAppLifecycleMessage(String message) {
+  static AppLifecycleState? _parseAppLifecycleMessage(String message) {
     switch (message) {
       case 'AppLifecycleState.paused':
         return AppLifecycleState.paused;
@@ -204,7 +204,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
       case 'AppLifecycleState.detached':
         return AppLifecycleState.detached;
     }
-    throw ArgumentError('AppLifecycleState $message not supported.');
+    return null;
   }
 
   /// The [RestorationManager] synchronizes the restoration data between
