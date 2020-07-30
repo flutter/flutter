@@ -91,7 +91,7 @@ const Color _kDarkThemeSplashColor = Color(0x40CCCCCC);
 enum MaterialTapTargetSize {
   /// Expands the minimum tap target size to 48px by 48px.
   ///
-  /// This is the default value of [ThemeData.materialHitTestSize] and the
+  /// This is the default value of [ThemeData.materialTapTargetSize] and the
   /// recommended size to conform to Android accessibility scanner
   /// recommendations.
   padded,
@@ -954,7 +954,7 @@ class ThemeData with Diagnosticable {
   /// objects at lower layers that try to emulate the underlying platform
   /// platform can depend on [defaultTargetPlatform] directly, or may require
   /// that the target platform be provided as an argument. The
-  /// [dart.io.Platform] object should only be used directly when it's critical
+  /// [dart:io.Platform] object should only be used directly when it's critical
   /// to actually know the current platform, without any overrides possible (for
   /// example, when a system API is about to be called).
   ///
@@ -979,17 +979,17 @@ class ThemeData with Diagnosticable {
   /// overlay increases in opacity. [applyElevationOverlayColor] turns the
   /// application of this overlay on or off for dark themes.
   ///
-  /// If [true] and [brightness] is [Brightness.dark], a
-  /// semi-transparent version of [colorScheme.onSurface] will be
-  /// applied on top of [Material] widgets that have a [colorScheme.surface]
+  /// If true and [brightness] is [Brightness.dark], a
+  /// semi-transparent version of [ColorScheme.onSurface] will be
+  /// applied on top of [Material] widgets that have a [ColorScheme.surface]
   /// color. The level of transparency is based on [Material.elevation] as
   /// per the Material Dark theme specification.
   ///
-  /// If [false] the surface color will be used unmodified.
+  /// If false the surface color will be used unmodified.
   ///
-  /// Defaults to [false] in order to maintain backwards compatibility with
+  /// Defaults to false in order to maintain backwards compatibility with
   /// apps that were built before the Material Dark theme specification
-  /// was published. New apps should set this to [true] for any themes
+  /// was published. New apps should set this to true for any themes
   /// where [brightness] is [Brightness.dark].
   ///
   /// See also:
@@ -1004,9 +1004,9 @@ class ThemeData with Diagnosticable {
 
   /// Default [MaterialPageRoute] transitions per [TargetPlatform].
   ///
-  /// [MaterialPageRoute.buildTransitions] delegates to a [PageTransitionsBuilder]
-  /// whose [PageTransitionsBuilder.platform] matches [platform]. If a matching
-  /// builder is not found, a builder whose platform is null is used.
+  /// [MaterialPageRoute.buildTransitions] delegates to a [platform] specific
+  /// [PageTransitionsBuilder]. If a matching builder is not found, a builder
+  /// whose platform is null is used.
   final PageTransitionsTheme pageTransitionsTheme;
 
   /// A theme for customizing the color, elevation, brightness, iconTheme and
@@ -1049,7 +1049,7 @@ class ThemeData with Diagnosticable {
   ///
   /// By default, [cupertinoOverrideTheme] is null and Cupertino widgets
   /// descendant to the Material [Theme] will adhere to a [CupertinoTheme]
-  /// derived from the Material [ThemeData]. e.g. [ThemeData]'s [ColorTheme]
+  /// derived from the Material [ThemeData]. e.g. [ThemeData]'s [ColorScheme]
   /// will also inform the [CupertinoThemeData]'s `primaryColor` etc.
   ///
   /// This cascading effect for individual attributes of the [CupertinoThemeData]
