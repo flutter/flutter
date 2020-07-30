@@ -314,7 +314,7 @@ class RangeSlider extends StatefulWidget {
   ///
   /// Each label is rendered using the active [ThemeData]'s
   /// [TextTheme.bodyText1] text style, with the theme data's
-  /// [ColorScheme.onPrimaryColor]. The label's text style can be overridden
+  /// [ColorScheme.onPrimary] color. The label's text style can be overridden
   /// with [SliderThemeData.valueIndicatorTextStyle].
   ///
   /// If null, then the value indicator will not be displayed.

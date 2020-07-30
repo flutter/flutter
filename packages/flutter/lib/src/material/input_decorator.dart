@@ -2500,11 +2500,10 @@ class InputDecoration {
   /// Creates a bundle of the border, labels, icons, and styles used to
   /// decorate a Material Design text field.
   ///
-  /// Unless specified by [ThemeData.inputDecorationTheme],
-  /// [InputDecorator] defaults [isDense] to false, and [filled] to false,
-  /// and [maxLines] to 1. The default border is an instance
-  /// of [UnderlineInputBorder]. If [border] is [InputBorder.none] then
-  /// no border is drawn.
+  /// Unless specified by [ThemeData.inputDecorationTheme], [InputDecorator]
+  /// defaults [isDense] to false and [filled] to false. The default border is
+  /// an instance of [UnderlineInputBorder]. If [border] is [InputBorder.none]
+  /// then no border is drawn.
   ///
   /// The [enabled] argument must not be null.
   ///
@@ -2659,9 +2658,9 @@ class InputDecoration {
   /// Text that provides context about the [InputDecorator.child]'s value, such
   /// as how the value will be used.
   ///
-  /// If non-null, the text is displayed below the input [child], in the same
-  /// location as [errorText]. If a non-null [errorText] value is specified then
-  /// the helper text is not shown.
+  /// If non-null, the text is displayed below the [InputDecorator.child], in
+  /// the same location as [errorText]. If a non-null [errorText] value is
+  /// specified then the helper text is not shown.
   final String helperText;
 
   /// The style to use for the [helperText].
@@ -2683,9 +2682,9 @@ class InputDecoration {
   /// Text that suggests what sort of input the field accepts.
   ///
   /// Displayed on top of the [InputDecorator.child] (i.e., at the same location
-  /// on the screen where text may be entered in the input [child]) when the
-  /// input [isEmpty] and either (a) [labelText] is null or (b) the input has
-  /// the focus.
+  /// on the screen where text may be entered in the [InputDecorator.child])
+  /// when the input [isEmpty] and either (a) [labelText] is null or (b) the
+  /// input has the focus.
   final String hintText;
 
   /// The style to use for the [hintText].
@@ -3081,8 +3080,8 @@ class InputDecoration {
 
   /// If true the decoration's container is filled with [fillColor].
   ///
-  /// When [isFocused] is true, the [focusColor] is also blended into the final
-  /// fill color.  When [isHovering] is true, the [hoverColor] is also blended
+  /// When [InputDecorator.isFocused] is true, the [focusColor] is also blended into the final
+  /// fill color.  When [InputDecorator.isHovering] is true, the [hoverColor] is also blended
   /// into the final fill color.
   ///
   /// Typically this field set to true if [border] is an
@@ -3098,9 +3097,9 @@ class InputDecoration {
 
   /// The base fill color of the decoration's container color.
   ///
-  /// When [isFocused] is true, the [focusColor] is also blended into the final
-  /// fill color.  When [isHovering] is true, the [hoverColor] is also blended
-  /// into the final fill color.
+  /// When [InputDecorator.isFocused] is true, the [focusColor] is also blended
+  /// into the final fill color.  When [InputDecorator.isHovering] is true, the
+  /// [hoverColor] is also blended into the final fill color.
   ///
   /// By default the fillColor is based on the current [Theme].
   ///
@@ -3114,7 +3113,7 @@ class InputDecoration {
   /// The color to blend with [fillColor] and fill the decoration's container
   /// with, if [filled] is true and the container has input focus.
   ///
-  /// When [isHovering] is true, the [hoverColor] is also blended into the final
+  /// When [InputDecorator.isHovering] is true, the [hoverColor] is also blended into the final
   /// fill color.
   ///
   /// By default the [focusColor] is based on the current [Theme].
@@ -3129,11 +3128,11 @@ class InputDecoration {
   /// is being hovered over by a mouse.
   ///
   /// If [filled] is true, the color is blended with [fillColor] and fills the
-  /// decoration's container. When [isFocused] is true, the [focusColor] is also
-  /// blended into the final fill color.
+  /// decoration's container. When [InputDecorator.isFocused] is true, the
+  /// [focusColor] is also blended into the final fill color.
   ///
-  /// If [filled] is false, and [isFocused] is false, the color is blended over
-  /// the [enabledBorder]'s color.
+  /// If [filled] is false, and [InputDecorator.isFocused] is false, the color
+  /// is blended over the [enabledBorder]'s color.
   ///
   /// By default the [hoverColor] is based on the current [Theme].
   ///
@@ -3664,17 +3663,17 @@ class InputDecorationTheme with Diagnosticable {
   /// The style to use for [InputDecoration.helperText].
   final TextStyle helperStyle;
 
-  /// The maximum number of lines the [InputDecorator.helperText] can occupy.
+  /// The maximum number of lines the [InputDecoration.helperText] can occupy.
   ///
-  /// Defaults to null, which means that the [InputDecorator.helperText] will be
-  /// limited to a single line with [TextOverflow.ellipsis].
+  /// Defaults to null, which means that the [InputDecoration.helperText] will
+  /// be limited to a single line with [TextOverflow.ellipsis].
   ///
   /// This value is passed along to the [Text.maxLines] attribute
   /// of the [Text] widget used to display the helper.
   ///
   /// See also:
   ///
-  ///  * [errorMaxLines], the equivalent but for the [InputDecorator.errorText].
+  ///  * [errorMaxLines], the equivalent but for the [InputDecoration.errorText].
   final int helperMaxLines;
 
   /// The style to use for the [InputDecoration.hintText].
@@ -3696,8 +3695,8 @@ class InputDecorationTheme with Diagnosticable {
 
   /// The maximum number of lines the [InputDecoration.errorText] can occupy.
   ///
-  /// Defaults to null, which means that the [errorText] will be limited
-  /// to a single line with [TextOverflow.ellipsis].
+  /// Defaults to null, which means that the [InputDecoration.errorText] will be
+  /// limited to a single line with [TextOverflow.ellipsis].
   ///
   /// This value is passed along to the [Text.maxLines] attribute
   /// of the [Text] widget used to display the error.
