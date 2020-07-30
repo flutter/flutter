@@ -131,7 +131,8 @@ Future<void> main(List<String> arguments) async {
   final List<String> flutterPackages = <String>[
     kDummyPackageName,
     kPlatformIntegrationPackageName,
-  ]..addAll(findPackageNames());
+    ...findPackageNames(),
+  ];
 
   // Generate the documentation.
   // We don't need to exclude flutter_tools in this list because it's not in the
