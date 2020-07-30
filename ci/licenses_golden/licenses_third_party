@@ -1,4 +1,4 @@
-Signature: 7f5f1317ad0cdf579afba6e695998e8e
+Signature: 0485f6b15a488eabf7ad0b32fbd1b040
 
 UNUSED LICENSES:
 
@@ -8384,6 +8384,7 @@ FILE: ../../../third_party/dart/sdk/lib/_http/embedder_config.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/patch/js_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/js_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/ffi_struct_patch.dart
+FILE: ../../../third_party/dart/sdk/lib/io/network_policy.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2020, the Dart project authors.  Please see the AUTHORS file
 for details. All rights reserved.
