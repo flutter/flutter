@@ -177,7 +177,6 @@ class AndroidSdk {
     final String androidHomeDir = findAndroidHomeDir();
     if (androidHomeDir == null) {
       logger.printTrace('Unable to locate an Android SDK.');
-      return null;
     }
 
     return AndroidSdk(
@@ -259,7 +258,7 @@ class AndroidSdk {
   }
 
   /// Validate the Android SDK. This returns an empty list if there are no
-  /// issues; otherwise, it returns a list of issues found.
+  /// issues. otherwise, it returns a list of issues found.
   List<String> validateSdkWellFormed() {
     if (adbPath == null || !_processManager.canRun(adbPath)) {
       return <String>['Android SDK file not found: ${adbPath ?? 'adb'}.'];
@@ -289,9 +288,13 @@ class AndroidSdk {
     if (_fileSystem.file(path).existsSync()) {
       return path;
     }
-    return null;
+    return _operatingSystemUtils.which(binaryName).path;
   }
 
+  /// Returns the emulator executable path.
+  ///
+  /// First checks for this inside the located android SDK. If this cannot be found,
+  /// returns the result of `which`/`where`.
   String getEmulatorPath() {
     final String binaryName = _platform.isWindows ? 'emulator.exe' : 'emulator';
     // Emulator now lives inside "emulator" but used to live inside "tools" so
@@ -303,7 +306,7 @@ class AndroidSdk {
         return path;
       }
     }
-    return null;
+    return _operatingSystemUtils.which(binaryName).path;
   }
 
   String getAvdManagerPath() {
@@ -312,7 +315,7 @@ class AndroidSdk {
     if (_fileSystem.file(path).existsSync()) {
       return path;
     }
-    return null;
+    return _operatingSystemUtils.which(binaryName).path;
   }
 
   /// Sets up various paths used internally.
