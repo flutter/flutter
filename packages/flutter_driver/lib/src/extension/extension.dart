@@ -33,8 +33,6 @@ import '../common/wait.dart';
 import '_extension_io.dart' if (dart.library.html) '_extension_web.dart';
 import 'wait_conditions.dart';
 
-export 'wait_conditions.dart';
-
 const String _extensionMethodName = 'driver';
 const String _extensionMethod = 'ext.flutter.$_extensionMethodName';
 
