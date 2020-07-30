@@ -185,6 +185,7 @@ class Daemon {
   void _send(Map<String, dynamic> map) => sendCommand(map);
 
   Future<void> shutdown({ dynamic error }) async {
+    await devToolsDomain?.dispose();
     await _commandSubscription?.cancel();
     for (final Domain domain in _domainMap.values) {
       await domain.dispose();
@@ -903,6 +904,12 @@ class DevToolsDomain extends Domain {
       'host': _devToolsServer.address.host,
       'port': _devToolsServer.port,
     };
+  }
+
+  @override
+  Future<void> dispose() async {
+    await _devToolsServer?.close();
+    _devToolsServer = null;
   }
 }
 
