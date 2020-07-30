@@ -10,6 +10,7 @@ import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -48,6 +49,7 @@ void main() {
   Directory projectDir;
   FlutterVersion mockFlutterVersion;
   LoggingProcessManager loggingProcessManager;
+  BufferLogger logger;
 
   setUpAll(() async {
     Cache.disableLocking();
@@ -56,6 +58,7 @@ void main() {
 
   setUp(() {
     loggingProcessManager = LoggingProcessManager();
+    logger = BufferLogger.test();
     tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_create_test.');
     projectDir = tempDir.childDirectory('flutter_project');
     mockFlutterVersion = MockFlutterVersion();
@@ -1936,6 +1939,34 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
+  testUsingContext('flutter create -t plugin in an empty folder should not show pubspec.yaml updating suggestion', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=android', projectDir.path]);
+    expect(logger.statusText, isNot(contains('The `pubspec.yaml` under the project directory must be updated to support')));
+  }, overrides: <Type, Generator> {
+    Logger: () => logger,
+  });
+
+  testUsingContext('flutter create -t plugin in an existing plugin should show pubspec.yaml updating suggestion', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=ios', projectDir.path]);
+    expect(logger.statusText, isNot(contains('The `pubspec.yaml` under the project directory must be updated to support')));
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=android', projectDir.path]);
+    expect(logger.statusText, contains('The `pubspec.yaml` under the project directory must be updated to support'));
+  }, overrides: <Type, Generator> {
+    Logger: () => logger,
+  });
+
   testUsingContext('newly created plugin has min flutter sdk version as 1.20.0', () async {
     Cache.flutterRoot = '../..';
     when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
@@ -1950,6 +1981,7 @@ void main() {
     expect(env['flutter'].allows(Version(1, 20, 0)), true);
     expect(env['flutter'].allows(Version(1, 19, 0)), false);
   });
+
 }
 
 Future<void> _createProject(
