@@ -162,10 +162,10 @@ if [[ -d "$FLUTTER_PUB_CACHE" ]]; then
 fi
 
 generate_docs
-if [[ -n "$CIRRUS_CI" && -z "$CIRRUS_PR" ]]; then
+if [[ -n "$CIRRUS_CI" ]]; then # TODO restore
     (cd "$FLUTTER_ROOT/dev/docs"; create_offline_zip)
     # TODO(tvolkert): re-enable (https://github.com/flutter/flutter/issues/60646)
-    # (cd "$FLUTTER_ROOT/dev/docs"; create_docset)
+    (cd "$FLUTTER_ROOT/dev/docs"; create_docset)
     (cd "$FLUTTER_ROOT/dev/docs"; move_offline_into_place)
     deploy_docs
 fi
