@@ -28,8 +28,8 @@ dartdoc:
     - no-canonical-found
     - no-library-level-docs
     - not-implemented
-    - reexported-private-api-across-packages
-    - unknown-macro
-    - unknown-file
-    - unresolved-doc-reference
     - orphaned-file
+    - reexported-private-api-across-packages
+    - unknown-file
+    - unknown-macro
+    - unresolved-doc-reference
