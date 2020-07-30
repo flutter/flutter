@@ -66,7 +66,8 @@ template <typename T>
 class RefPtr final {
  public:
   RefPtr() : ptr_(nullptr) {}
-  RefPtr(std::nullptr_t) : ptr_(nullptr) {}
+  RefPtr(std::nullptr_t)
+      : ptr_(nullptr) {}  // NOLINT(google-explicit-constructor)
 
   // Explicit constructor from a plain pointer (to an object that must have
   // already been adopted). (Note that in |T::T()|, references to |this| cannot
@@ -74,34 +75,39 @@ class RefPtr final {
   // yet.)
   template <typename U>
   explicit RefPtr(U* p) : ptr_(p) {
-    if (ptr_)
+    if (ptr_) {
       ptr_->AddRef();
+    }
   }
 
   // Copy constructor.
   RefPtr(const RefPtr<T>& r) : ptr_(r.ptr_) {
-    if (ptr_)
+    if (ptr_) {
       ptr_->AddRef();
+    }
   }
 
   template <typename U>
-  RefPtr(const RefPtr<U>& r) : ptr_(r.ptr_) {
-    if (ptr_)
+  RefPtr(const RefPtr<U>& r)
+      : ptr_(r.ptr_) {  // NOLINT(google-explicit-constructor)
+    if (ptr_) {
       ptr_->AddRef();
+    }
   }
 
   // Move constructor.
   RefPtr(RefPtr<T>&& r) : ptr_(r.ptr_) { r.ptr_ = nullptr; }
 
   template <typename U>
-  RefPtr(RefPtr<U>&& r) : ptr_(r.ptr_) {
+  RefPtr(RefPtr<U>&& r) : ptr_(r.ptr_) {  // NOLINT(google-explicit-constructor)
     r.ptr_ = nullptr;
   }
 
   // Destructor.
   ~RefPtr() {
-    if (ptr_)
+    if (ptr_) {
       ptr_->Release();
+    }
   }
 
   T* get() const { return ptr_; }
@@ -118,25 +124,34 @@ class RefPtr final {
 
   // Copy assignment.
   RefPtr<T>& operator=(const RefPtr<T>& r) {
-    // Call |AddRef()| first so self-assignments work.
-    if (r.ptr_)
+    // Handle self-assignment.
+    if (r.ptr_ == ptr_) {
+      return *this;
+    }
+    if (r.ptr_) {
       r.ptr_->AddRef();
+    }
     T* old_ptr = ptr_;
     ptr_ = r.ptr_;
-    if (old_ptr)
+    if (old_ptr) {
       old_ptr->Release();
+    }
     return *this;
   }
 
   template <typename U>
   RefPtr<T>& operator=(const RefPtr<U>& r) {
-    // Call |AddRef()| first so self-assignments work.
-    if (r.ptr_)
+    if (reinterpret_cast<T*>(r.ptr_) == ptr_) {
+      return *this;
+    }
+    if (r.ptr_) {
       r.ptr_->AddRef();
+    }
     T* old_ptr = ptr_;
     ptr_ = r.ptr_;
-    if (old_ptr)
+    if (old_ptr) {
       old_ptr->Release();
+    }
     return *this;
   }
 

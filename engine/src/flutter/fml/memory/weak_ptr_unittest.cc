@@ -1,7 +1,6 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// FLUTTER_NOLINT
 
 #define FML_USED_ON_EMBEDDER
 
@@ -39,7 +38,7 @@ TEST(WeakPtrTest, MoveConstruction) {
   WeakPtrFactory<int> factory(&data);
   WeakPtr<int> ptr = factory.GetWeakPtr();
   WeakPtr<int> ptr2(std::move(ptr));
-  EXPECT_EQ(nullptr, ptr.get());
+  EXPECT_EQ(nullptr, ptr.get());  // NOLINT
   EXPECT_EQ(&data, ptr2.get());
 }
 
@@ -61,7 +60,7 @@ TEST(WeakPtrTest, MoveAssignment) {
   WeakPtr<int> ptr2;
   EXPECT_EQ(nullptr, ptr2.get());
   ptr2 = std::move(ptr);
-  EXPECT_EQ(nullptr, ptr.get());
+  EXPECT_EQ(nullptr, ptr.get());  // NOLINT
   EXPECT_EQ(&data, ptr2.get());
 }
 
