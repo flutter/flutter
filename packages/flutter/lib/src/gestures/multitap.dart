@@ -478,9 +478,9 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
     if (onTapUp != null)
       invokeCallback<void>('onTapUp', () {
         onTapUp!(pointer, TapUpDetails(
+          kind: getKindForPointer(pointer),
           localPosition: position.local,
           globalPosition: position.global,
-          kind: getKindForPointer(pointer),
         ));
       });
     if (onTap != null)

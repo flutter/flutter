@@ -6138,7 +6138,6 @@ void main() {
       addTearDown(gesture.removePointer);
       await tester.pump();
       await gesture.up();
-      await tester.pump();
 
       // Cursor at tap position, not at word edge.
       expect(

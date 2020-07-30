@@ -516,9 +516,9 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   @override
   void handleTapUp({ required PointerDownEvent down, required PointerUpEvent up}) {
     final TapUpDetails details = TapUpDetails(
+      kind: up.kind,
       globalPosition: up.position,
       localPosition: up.localPosition,
-      kind: up.kind,
     );
     switch (down.buttons) {
       case kPrimaryButton:
