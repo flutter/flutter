@@ -1,7 +1,6 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// FLUTTER_NOLINT
 
 #include "flutter/fml/synchronization/waitable_event.h"
 
@@ -24,29 +23,33 @@ bool WaitWithTimeoutImpl(std::unique_lock<std::mutex>* locker,
                          TimeDelta timeout) {
   FML_DCHECK(locker->owns_lock());
 
-  if (condition())
+  if (condition()) {
     return false;
+  }
 
   // We may get spurious wakeups.
   TimeDelta wait_remaining = timeout;
   TimePoint start = TimePoint::Now();
   while (true) {
     if (std::cv_status::timeout ==
-        cv->wait_for(*locker,
-                     std::chrono::nanoseconds(wait_remaining.ToNanoseconds())))
+        cv->wait_for(*locker, std::chrono::nanoseconds(
+                                  wait_remaining.ToNanoseconds()))) {
       return true;  // Definitely timed out.
+    }
 
     // We may have been awoken.
-    if (condition())
+    if (condition()) {
       return false;
+    }
 
     // Or the wakeup may have been spurious.
     TimePoint now = TimePoint::Now();
     FML_DCHECK(now >= start);
     TimeDelta elapsed = now - start;
     // It's possible that we may have timed out anyway.
-    if (elapsed >= timeout)
+    if (elapsed >= timeout) {
       return true;
+    }
 
     // Otherwise, recalculate the amount that we have left to wait.
     wait_remaining = timeout - elapsed;
@@ -68,8 +71,9 @@ void AutoResetWaitableEvent::Reset() {
 
 void AutoResetWaitableEvent::Wait() {
   std::unique_lock<std::mutex> locker(mutex_);
-  while (!signaled_)
+  while (!signaled_) {
     cv_.wait(locker);
+  }
   signaled_ = false;
 }
 
@@ -86,21 +90,24 @@ bool AutoResetWaitableEvent::WaitWithTimeout(TimeDelta timeout) {
   TimePoint start = TimePoint::Now();
   while (true) {
     if (std::cv_status::timeout ==
-        cv_.wait_for(locker,
-                     std::chrono::nanoseconds(wait_remaining.ToNanoseconds())))
+        cv_.wait_for(
+            locker, std::chrono::nanoseconds(wait_remaining.ToNanoseconds()))) {
       return true;  // Definitely timed out.
+    }
 
     // We may have been awoken.
-    if (signaled_)
+    if (signaled_) {
       break;
+    }
 
     // Or the wakeup may have been spurious.
     TimePoint now = TimePoint::Now();
     FML_DCHECK(now >= start);
     TimeDelta elapsed = now - start;
     // It's possible that we may have timed out anyway.
-    if (elapsed >= timeout)
+    if (elapsed >= timeout) {
       return true;
+    }
 
     // Otherwise, recalculate the amount that we have left to wait.
     wait_remaining = timeout - elapsed;
@@ -132,8 +139,9 @@ void ManualResetWaitableEvent::Reset() {
 void ManualResetWaitableEvent::Wait() {
   std::unique_lock<std::mutex> locker(mutex_);
 
-  if (signaled_)
+  if (signaled_) {
     return;
+  }
 
   auto last_signal_id = signal_id_;
   do {
