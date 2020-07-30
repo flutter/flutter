@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:async/async.dart';
+import 'package:devtools_server/devtools_server.dart' as devtools_server;
 import 'package:meta/meta.dart';
 import 'package:uuid/uuid.dart';
 
@@ -82,6 +83,7 @@ class Daemon {
     _registerDomain(appDomain = AppDomain(this));
     _registerDomain(deviceDomain = DeviceDomain(this));
     _registerDomain(emulatorDomain = EmulatorDomain(this));
+    _registerDomain(devToolsDomain = DevToolsDomain(this));
 
     // Start listening.
     _commandSubscription = commandStream.listen(
@@ -98,6 +100,7 @@ class Daemon {
   AppDomain appDomain;
   DeviceDomain deviceDomain;
   EmulatorDomain emulatorDomain;
+  DevToolsDomain devToolsDomain;
   StreamSubscription<Map<String, dynamic>> _commandSubscription;
   int _outgoingRequestId = 1;
   final Map<String, Completer<dynamic>> _outgoingRequestCompleters = <String, Completer<dynamic>>{};
@@ -883,6 +886,23 @@ class DeviceDomain extends Domain {
       }
     }
     return null;
+  }
+}
+
+class DevToolsDomain extends Domain {
+  DevToolsDomain(Daemon daemon) : super(daemon, 'devtools') {
+    registerHandler('serve', startServer);
+  }
+
+  HttpServer _devToolsServer;
+
+  Future<Map<String, dynamic>> startServer([ Map<String, dynamic> args ]) async {
+    _devToolsServer ??= await devtools_server.serveDevTools();
+
+    return <String, dynamic>{
+      'host': _devToolsServer.address.host,
+      'port': _devToolsServer.port,
+    };
   }
 }
 
