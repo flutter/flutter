@@ -145,6 +145,9 @@ FLUTTER_ASSERT_ARC
   // Verify secureTextEntry is set to the correct value.
   XCTAssertTrue(inputView.secureTextEntry);
 
+  // Verify keyboardType is set to the default value.
+  XCTAssertEqual(inputView.keyboardType, UIKeyboardTypeDefault);
+
   // We should have only ever created one FlutterTextInputView.
   XCTAssertEqual(inputFields.count, 1);
 
@@ -446,6 +449,20 @@ FLUTTER_ASSERT_ARC
   // FlutterSecureTextInputView does not respond to font,
   // but it should return the default UITextField.font.
   XCTAssertNotEqual([inputView performSelector:@selector(font)], nil);
+}
+
+- (void)testKeyboardType {
+  NSDictionary* config = self.mutableTemplateCopy;
+  [config setValue:@{@"name" : @"TextInputType.url"} forKey:@"inputType"];
+  [self setClientId:123 configuration:config];
+
+  // Find all the FlutterTextInputViews we created.
+  NSArray<FlutterTextInputView*>* inputFields = self.installedInputViews;
+
+  FlutterTextInputView* inputView = inputFields[0];
+
+  // Verify keyboardType is set to the value specified in config.
+  XCTAssertEqual(inputView.keyboardType, UIKeyboardTypeURL);
 }
 
 - (void)testAutocorrectionPromptRectAppears {
