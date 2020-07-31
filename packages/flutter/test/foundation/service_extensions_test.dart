@@ -15,10 +15,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import '../flutter_test_alternative.dart';
 
-Future<Map<String, dynamic>> _defaultCallback(Map<String, String> parameters) async {
-  return <String, dynamic>{};
-}
-
 class TestServiceExtensionsBinding extends BindingBase
   with SchedulerBinding,
        ServicesBinding,
@@ -35,10 +31,8 @@ class TestServiceExtensionsBinding extends BindingBase
   @override
   @protected
   void registerServiceExtension({
-    // TODO(dkwingsmt): The two parameters should have been "required" according
-    // to its superclass, but somehow the compiler refuses to compile.
-    String name = '',
-    ServiceExtensionCallback callback = _defaultCallback,
+    required String name,
+    required ServiceExtensionCallback callback,
   }) {
     expect(extensions.containsKey(name), isFalse);
     extensions[name] = callback;
