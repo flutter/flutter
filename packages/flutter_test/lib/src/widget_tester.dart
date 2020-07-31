@@ -21,7 +21,6 @@ import 'all_elements.dart';
 import 'binding.dart';
 import 'controller.dart';
 import 'finders.dart';
-import 'matchers.dart';
 import 'restoration.dart';
 import 'test_async_utils.dart';
 import 'test_compat.dart';
@@ -604,34 +603,11 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     }
   }
 
-  /// Repeatedly calls [pump] with the given `duration` until there are no
-  /// longer any frames scheduled. This will call [pump] at least once, even if
-  /// no frames are scheduled when the function is called, to flush any pending
-  /// microtasks which may themselves schedule a frame.
-  ///
-  /// This essentially waits for all animations to have completed.
-  ///
-  /// If it takes longer that the given `timeout` to settle, then the test will
-  /// fail (this method will throw an exception). In particular, this means that
-  /// if there is an infinite animation in progress (for example, if there is an
-  /// indeterminate progress indicator spinning), this method will throw.
-  ///
-  /// The default timeout is ten minutes, which is longer than most reasonable
-  /// finite animations would last.
-  ///
-  /// If the function returns, it returns the number of pumps that it performed.
-  ///
-  /// In general, it is better practice to figure out exactly why each frame is
-  /// needed, and then to [pump] exactly as many frames as necessary. This will
-  /// help catch regressions where, for instance, an animation is being started
-  /// one frame later than it should.
-  ///
-  /// Alternatively, one can check that the return value from this function
-  /// matches the expected number of pumps.
+  @override
   Future<int> pumpAndSettle([
     Duration duration = const Duration(milliseconds: 100),
-    EnginePhase phase = EnginePhase.sendSemanticsUpdate,
     Duration timeout = const Duration(minutes: 10),
+    EnginePhase phase = EnginePhase.sendSemanticsUpdate,
   ]) {
     assert(duration != null);
     assert(duration > Duration.zero);
@@ -1055,23 +1031,6 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       await showKeyboard(finder);
       testTextInput.enterText(text);
       await idle();
-    });
-  }
-
-  /// Makes an effort to dismiss the current page with a Material [Scaffold] or
-  /// a [CupertinoPageScaffold].
-  ///
-  /// Will throw an error if there is no back button in the page.
-  Future<void> pageBack() async {
-    return TestAsyncUtils.guard<void>(() async {
-      Finder backButton = find.byTooltip('Back');
-      if (backButton.evaluate().isEmpty) {
-        backButton = find.byType(CupertinoNavigationBarBackButton);
-      }
-
-      expectSync(backButton, findsOneWidget, reason: 'One back button expected on screen');
-
-      await tap(backButton);
     });
   }
 }
