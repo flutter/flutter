@@ -26,3 +26,9 @@ supported luci try/prod builders for engine. They follow format:
 ```
 These files will be mainly used in [`flutter/cocoon`](https://github.com/flutter/cocoon)
 to trigger/update flutter luci tasks.
+
+If any new changes, please validate json contents by running
+```
+dart validate_json.dart flutter_try_builders.json
+dart validate_json.dart flutter_prod_builders.json
+```
