@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/semantics.dart';
@@ -551,7 +552,7 @@ void main() {
   );
 
   testWidgets(
-    'ensureVisibl: scrolls to make widget visible',
+    'ensureVisible: scrolls to make widget visible',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -661,5 +662,48 @@ void main() {
         }
       },
     );
+
+    testWidgets('Drag Until Visible', (WidgetTester tester) async {
+      // when there are two implicit [Scrollable], `scrollUntilVisible` is hard
+      // to use.
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Column(
+              children: <Widget>[
+                Container(height: 200, child: ListView.builder(
+                  key: const Key('listView-a'),
+                  itemCount: 50,
+                  shrinkWrap: true,
+                  itemBuilder: (BuildContext context, int i) => ListTile(title: Text('Item a-$i')),
+                )),
+                const Divider(thickness: 5),
+                Expanded(child: ListView.builder(
+                  key: const Key('listView-b'),
+                  itemCount: 50,
+                  shrinkWrap: true,
+                  itemBuilder: (BuildContext context, int i) => ListTile(title: Text('Item b-$i')),
+                )),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(Scrollable), findsNWidgets(2));
+
+      // Make sure widget isn't built yet.
+      expect(find.text('Item b-45', skipOffstage: false), findsNothing);
+
+      await tester.dragUntilVisible(
+        find.text('Item b-45', skipOffstage: false),
+        find.byKey(const ValueKey<String>('listView-b')),
+        const Offset(0, -100),
+      );
+      await tester.pumpAndSettle();
+
+      // Now the widget is on screen.
+      expect(find.text('Item b-45', skipOffstage: true), findsOneWidget);
+    });
   });
 }
