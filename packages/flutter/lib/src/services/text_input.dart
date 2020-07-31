@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:async';
 import 'dart:io' show Platform;
@@ -101,13 +100,13 @@ class TextInputType {
   ///
   /// This flag is only used for the [number] input type, otherwise `null`.
   /// Use `const TextInputType.numberWithOptions(signed: true)` to set this.
-  final bool signed;
+  final bool? signed;
 
   /// The number is decimal, allowing a decimal point to provide fractional.
   ///
   /// This flag is only used for the [number] input type, otherwise `null`.
   /// Use `const TextInputType.numberWithOptions(decimal: true)` to set this.
-  final bool decimal;
+  final bool? decimal;
 
   /// Optimize for textual information.
   ///
@@ -450,8 +449,8 @@ class TextInputConfiguration {
     this.inputType = TextInputType.text,
     this.obscureText = false,
     this.autocorrect = true,
-    SmartDashesType smartDashesType,
-    SmartQuotesType smartQuotesType,
+    SmartDashesType? smartDashesType,
+    SmartQuotesType? smartQuotesType,
     this.enableSuggestions = true,
     this.actionLabel,
     this.inputAction = TextInputAction.done,
@@ -487,7 +486,7 @@ class TextInputConfiguration {
   /// to the platform. This will prevent the corresponding input field from
   /// participating in autofills triggered by other fields. Additionally, on
   /// Android and web, setting [autofillConfiguration] to null disables autofill.
-  final AutofillConfiguration autofillConfiguration;
+  final AutofillConfiguration? autofillConfiguration;
 
   /// {@template flutter.services.textInput.smartDashesType}
   /// Whether to allow the platform to automatically format dashes.
@@ -555,7 +554,7 @@ class TextInputConfiguration {
   final bool enableSuggestions;
 
   /// What text to display in the text input control's action button.
-  final String actionLabel;
+  final String? actionLabel;
 
   /// What kind of action to request for the action button on the IME.
   final TextInputAction inputAction;
@@ -590,12 +589,12 @@ class TextInputConfiguration {
       'inputAction': inputAction.toString(),
       'textCapitalization': textCapitalization.toString(),
       'keyboardAppearance': keyboardAppearance.toString(),
-      if (autofillConfiguration != null) 'autofill': autofillConfiguration.toJson(),
+      if (autofillConfiguration != null) 'autofill': autofillConfiguration!.toJson(),
     };
   }
 }
 
-TextAffinity _toTextAffinity(String affinity) {
+TextAffinity? _toTextAffinity(String affinity) {
   switch (affinity) {
     case 'TextAffinity.downstream':
       return TextAffinity.downstream;
@@ -628,12 +627,12 @@ class RawFloatingCursorPoint {
   /// [FloatingCursorDragState.Update].
   RawFloatingCursorPoint({
     this.offset,
-    @required this.state,
+    required this.state,
   }) : assert(state != null),
        assert(state != FloatingCursorDragState.Update || offset != null);
 
   /// The raw position of the floating cursor as determined by the iOS sdk.
-  final Offset offset;
+  final Offset? offset;
 
   /// The state of the floating cursor.
   final FloatingCursorDragState state;
@@ -661,14 +660,14 @@ class TextEditingValue {
     return TextEditingValue(
       text: encoded['text'] as String,
       selection: TextSelection(
-        baseOffset: encoded['selectionBase'] as int ?? -1,
-        extentOffset: encoded['selectionExtent'] as int ?? -1,
+        baseOffset: encoded['selectionBase'] as int? ?? -1,
+        extentOffset: encoded['selectionExtent'] as int? ?? -1,
         affinity: _toTextAffinity(encoded['selectionAffinity'] as String) ?? TextAffinity.downstream,
-        isDirectional: encoded['selectionIsDirectional'] as bool ?? false,
+        isDirectional: encoded['selectionIsDirectional'] as bool? ?? false,
       ),
       composing: TextRange(
-        start: encoded['composingBase'] as int ?? -1,
-        end: encoded['composingExtent'] as int ?? -1,
+        start: encoded['composingBase'] as int? ?? -1,
+        end: encoded['composingExtent'] as int? ?? -1,
       ),
     );
   }
@@ -700,9 +699,9 @@ class TextEditingValue {
 
   /// Creates a copy of this value but with the given fields replaced with the new values.
   TextEditingValue copyWith({
-    String text,
-    TextSelection selection,
-    TextRange composing,
+    String? text,
+    TextSelection? selection,
+    TextRange? composing,
   }) {
     return TextEditingValue(
       text: text ?? this.text,
@@ -795,7 +794,7 @@ abstract class TextInputClient {
   ///
   /// * [AutofillGroup], a widget that creates an [AutofillScope] for its
   ///   descendent autofillable [TextInputClient]s.
-  AutofillScope get currentAutofillScope;
+  AutofillScope? get currentAutofillScope;
 
   /// Requests that this client update its editing state to the given value.
   void updateEditingValue(TextEditingValue value);
@@ -828,8 +827,8 @@ class TextInputConnection {
       : assert(_client != null),
         _id = _nextId++;
 
-  Size _cachedSize;
-  Matrix4 _cachedTransform;
+  Size? _cachedSize;
+  Matrix4? _cachedTransform;
 
   static int _nextId = 1;
   final int _id;
@@ -906,11 +905,11 @@ class TextInputConnection {
   /// of the hidden native input's content. Hence, the content size will match
   /// to the size of the editable widget's content.
   void setStyle({
-    @required String fontFamily,
-    @required double fontSize,
-    @required FontWeight fontWeight,
-    @required TextDirection textDirection,
-    @required TextAlign textAlign,
+    required String? fontFamily,
+    required double? fontSize,
+    required FontWeight? fontWeight,
+    required TextDirection textDirection,
+    required TextAlign textAlign,
   }) {
     assert(attached);
 
@@ -1108,10 +1107,10 @@ class TextInput {
     return true;
   }
 
-  MethodChannel _channel;
+  late MethodChannel _channel;
 
-  TextInputConnection _currentConnection;
-  TextInputConfiguration _currentConfiguration;
+  TextInputConnection? _currentConnection;
+  late TextInputConfiguration _currentConfiguration;
 
   Future<dynamic> _handleTextInputInvocation(MethodCall methodCall) async {
     if (_currentConnection == null)
@@ -1121,9 +1120,9 @@ class TextInput {
     // The requestExistingInputState request needs to be handled regardless of
     // the client ID, as long as we have a _currentConnection.
     if (method == 'TextInputClient.requestExistingInputState') {
-      assert(_currentConnection._client != null);
-      _attach(_currentConnection, _currentConfiguration);
-      final TextEditingValue editingValue = _currentConnection._client.currentTextEditingValue;
+      assert(_currentConnection!._client != null);
+      _attach(_currentConnection!, _currentConfiguration);
+      final TextEditingValue editingValue = _currentConnection!._client.currentTextEditingValue;
       if (editingValue != null) {
         _setEditingState(editingValue);
       }
@@ -1133,9 +1132,9 @@ class TextInput {
     final List<dynamic> args = methodCall.arguments as List<dynamic>;
 
     if (method == 'TextInputClient.updateEditingStateWithTag') {
-      final TextInputClient client = _currentConnection._client;
+      final TextInputClient client = _currentConnection!._client;
       assert(client != null);
-      final AutofillScope scope = client.currentAutofillScope;
+      final AutofillScope? scope = client.currentAutofillScope;
       final Map<String, dynamic> editingValue = args[1] as Map<String, dynamic>;
       for (final String tag in editingValue.keys) {
         final TextEditingValue textEditingValue = TextEditingValue.fromJSON(
@@ -1149,26 +1148,26 @@ class TextInput {
 
     final int client = args[0] as int;
     // The incoming message was for a different client.
-    if (client != _currentConnection._id)
+    if (client != _currentConnection!._id)
       return;
     switch (method) {
       case 'TextInputClient.updateEditingState':
-        _currentConnection._client.updateEditingValue(TextEditingValue.fromJSON(args[1] as Map<String, dynamic>));
+        _currentConnection!._client.updateEditingValue(TextEditingValue.fromJSON(args[1] as Map<String, dynamic>));
         break;
       case 'TextInputClient.performAction':
-        _currentConnection._client.performAction(_toTextInputAction(args[1] as String));
+        _currentConnection!._client.performAction(_toTextInputAction(args[1] as String));
         break;
       case 'TextInputClient.updateFloatingCursor':
-        _currentConnection._client.updateFloatingCursor(_toTextPoint(
+        _currentConnection!._client.updateFloatingCursor(_toTextPoint(
           _toTextCursorAction(args[1] as String),
           args[2] as Map<String, dynamic>,
         ));
         break;
       case 'TextInputClient.onConnectionClosed':
-        _currentConnection._client.connectionClosed();
+        _currentConnection!._client.connectionClosed();
         break;
       case 'TextInputClient.showAutocorrectionPromptRect':
-        _currentConnection._client.showAutocorrectionPromptRect(args[1] as int, args[2] as int);
+        _currentConnection!._client.showAutocorrectionPromptRect(args[1] as int, args[2] as int);
         break;
       default:
         throw MissingPluginException();

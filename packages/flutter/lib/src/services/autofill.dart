@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'package:flutter/foundation.dart';
 import 'text_input.dart';
@@ -629,9 +628,9 @@ class AutofillConfiguration {
   /// Creates autofill related configuration information that can be sent to the
   /// platform.
   const AutofillConfiguration({
-    @required this.uniqueIdentifier,
-    @required this.autofillHints,
-    this.currentEditingValue,
+    required this.uniqueIdentifier,
+    required this.autofillHints,
+    required this.currentEditingValue,
   }) : assert(uniqueIdentifier != null),
        assert(autofillHints != null);
 
@@ -749,7 +748,7 @@ abstract class AutofillScope {
   /// this [AutofillScope].
   ///
   /// Returns null if there's no matching [AutofillClient].
-  AutofillClient getAutofillClient(String autofillId);
+  AutofillClient? getAutofillClient(String autofillId);
 
   /// The collection of [AutofillClient]s currently tied to this [AutofillScope].
   ///
@@ -767,8 +766,8 @@ abstract class AutofillScope {
 @immutable
 class _AutofillScopeTextInputConfiguration extends TextInputConfiguration {
   _AutofillScopeTextInputConfiguration({
-    @required this.allConfigurations,
-    @required TextInputConfiguration currentClientConfiguration,
+    required this.allConfigurations,
+    required TextInputConfiguration currentClientConfiguration,
   }) : assert(allConfigurations != null),
        assert(currentClientConfiguration != null),
        super(inputType: currentClientConfiguration.inputType,
