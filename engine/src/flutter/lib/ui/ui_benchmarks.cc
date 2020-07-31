@@ -1,7 +1,6 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// FLUTTER_NOLINT
 
 #include "flutter/benchmarking/benchmarking.h"
 #include "flutter/common/settings.h"
@@ -19,7 +18,8 @@ class Fixture : public testing::FixtureTest {
   void TestBody() override{};
 };
 
-static void BM_PlatformMessageResponseDartComplete(benchmark::State& state) {
+static void BM_PlatformMessageResponseDartComplete(
+    benchmark::State& state) {  // NOLINT
   ThreadHost thread_host("test",
                          ThreadHost::Type::Platform | ThreadHost::Type::GPU |
                              ThreadHost::Type::IO | ThreadHost::Type::UI);

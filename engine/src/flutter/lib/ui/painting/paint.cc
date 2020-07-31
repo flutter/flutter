@@ -1,7 +1,6 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// FLUTTER_NOLINT
 
 #include "flutter/lib/ui/painting/paint.h"
 
@@ -68,8 +67,9 @@ enum MaskFilterType { Null, Blur };
 
 Paint::Paint(Dart_Handle paint_objects, Dart_Handle paint_data) {
   is_null_ = Dart_IsNull(paint_data);
-  if (is_null_)
+  if (is_null_) {
     return;
+  }
 
   Dart_Handle values[kObjectCount];
   if (!Dart_IsNull(paint_objects)) {
@@ -78,8 +78,10 @@ Paint::Paint(Dart_Handle paint_objects, Dart_Handle paint_data) {
     Dart_ListLength(paint_objects, &length);
 
     FML_CHECK(length == kObjectCount);
-    if (Dart_IsError(Dart_ListGetRange(paint_objects, 0, kObjectCount, values)))
+    if (Dart_IsError(
+            Dart_ListGetRange(paint_objects, 0, kObjectCount, values))) {
       return;
+    }
 
     Dart_Handle shader = values[kShaderIndex];
     if (!Dart_IsNull(shader)) {
@@ -123,28 +125,34 @@ Paint::Paint(Dart_Handle paint_objects, Dart_Handle paint_data) {
   }
 
   uint32_t style = uint_data[kStyleIndex];
-  if (style)
+  if (style) {
     paint_.setStyle(static_cast<SkPaint::Style>(style));
+  }
 
   float stroke_width = float_data[kStrokeWidthIndex];
-  if (stroke_width != 0.0)
+  if (stroke_width != 0.0) {
     paint_.setStrokeWidth(stroke_width);
+  }
 
   uint32_t stroke_cap = uint_data[kStrokeCapIndex];
-  if (stroke_cap)
+  if (stroke_cap) {
     paint_.setStrokeCap(static_cast<SkPaint::Cap>(stroke_cap));
+  }
 
   uint32_t stroke_join = uint_data[kStrokeJoinIndex];
-  if (stroke_join)
+  if (stroke_join) {
     paint_.setStrokeJoin(static_cast<SkPaint::Join>(stroke_join));
+  }
 
   float stroke_miter_limit = float_data[kStrokeMiterLimitIndex];
-  if (stroke_miter_limit != 0.0)
+  if (stroke_miter_limit != 0.0) {
     paint_.setStrokeMiter(stroke_miter_limit + kStrokeMiterLimitDefault);
+  }
 
   uint32_t filter_quality = uint_data[kFilterQualityIndex];
-  if (filter_quality)
+  if (filter_quality) {
     paint_.setFilterQuality(static_cast<SkFilterQuality>(filter_quality));
+  }
 
   if (uint_data[kInvertColorIndex]) {
     sk_sp<SkColorFilter> invert_filter =
