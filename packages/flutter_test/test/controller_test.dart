@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -549,6 +550,85 @@ void main() {
       }
     },
   );
+
+  group('pageBack', () {
+    testWidgets('successfully taps material back buttons', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return RaisedButton(
+                  child: const Text('Next'),
+                  onPressed: () {
+                    Navigator.push<void>(context, MaterialPageRoute<void>(
+                      builder: (BuildContext context) {
+                        return Scaffold(
+                          appBar: AppBar(
+                            title: const Text('Page 2'),
+                          ),
+                        );
+                      },
+                    ));
+                  },
+                );
+              } ,
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Next'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      await tester.pageBack();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      expect(find.text('Next'), findsOneWidget);
+      expect(find.text('Page 2'), findsNothing);
+    });
+
+    testWidgets('successfully taps cupertino back buttons', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return CupertinoButton(
+                  child: const Text('Next'),
+                  onPressed: () {
+                    Navigator.push<void>(context, CupertinoPageRoute<void>(
+                      builder: (BuildContext context) {
+                        return CupertinoPageScaffold(
+                          navigationBar: const CupertinoNavigationBar(
+                            middle: Text('Page 2'),
+                          ),
+                          child: Container(),
+                        );
+                      },
+                    ));
+                  },
+                );
+              } ,
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Next'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      await tester.pageBack();
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Next'), findsOneWidget);
+      expect(find.text('Page 2'), findsNothing);
+    });
+  });
 
   testWidgets(
     'ensureVisibl: scrolls to make widget visible',
