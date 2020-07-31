@@ -149,12 +149,14 @@ class LogicalKeyboardKey extends KeyboardKey {
 
   /// The debug string to print for this keyboard key, which will be null in
   /// release mode.
-  final String debugName;
+  final String? debugName;
 
   /// The Unicode string representing the character produced by a [RawKeyEvent].
   ///
   /// This value is useful for describing or matching mnemonic keyboard
   /// shortcuts.
+  ///
+  /// This value can be null if there's no key label data for a key.
   ///
   /// On most platforms this is a single code point, but it could contain any
   /// Unicode string. The `keyLabel` differs from [RawKeyEvent.character]
@@ -164,7 +166,7 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// “o” for [keyLabel], but would return “ö” for [RawKeyEvent.character].
   ///
   /// {@macro flutter.services.RawKeyEventData.keyLabel}
-  final String keyLabel;
+  final String? keyLabel;
 
   @override
   int get hashCode => keyId.hashCode;
@@ -180,7 +182,7 @@ class LogicalKeyboardKey extends KeyboardKey {
 
   /// Returns the [LogicalKeyboardKey] constant that matches the given ID, or
   /// null, if not found.
-  static LogicalKeyboardKey findKeyByKeyId(int keyId) => _knownLogicalKeys[keyId];
+  static LogicalKeyboardKey? findKeyByKeyId(int keyId) => _knownLogicalKeys[keyId];
 
   /// Returns true if the given label represents a Unicode control character.
   ///
@@ -237,7 +239,7 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// this is a [shiftLeft] key, this accessor will return the set
   /// `<LogicalKeyboardKey>{ shift }`.
   Set<LogicalKeyboardKey> get synonyms {
-    final LogicalKeyboardKey result = _synonyms[this];
+    final LogicalKeyboardKey? result = _synonyms[this];
     return result == null ? <LogicalKeyboardKey>{} : <LogicalKeyboardKey>{result};
   }
 
@@ -250,7 +252,7 @@ class LogicalKeyboardKey extends KeyboardKey {
   static Set<LogicalKeyboardKey> collapseSynonyms(Set<LogicalKeyboardKey> input) {
     final Set<LogicalKeyboardKey> result = <LogicalKeyboardKey>{};
     for (final LogicalKeyboardKey key in input) {
-      final LogicalKeyboardKey synonym = _synonyms[key];
+      final LogicalKeyboardKey? synonym = _synonyms[key];
       result.add(synonym ?? key);
     }
     return result;
@@ -434,11 +436,11 @@ class PhysicalKeyboardKey extends KeyboardKey {
 
   /// The debug string to print for this keyboard key, which will be null in
   /// release mode.
-  final String debugName;
+  final String? debugName;
 
   /// Finds a known [PhysicalKeyboardKey] that matches the given USB HID usage
   /// code.
-  static PhysicalKeyboardKey findKeyByCode(int usageCode) => _knownPhysicalKeys[usageCode];
+  static PhysicalKeyboardKey? findKeyByCode(int usageCode) => _knownPhysicalKeys[usageCode];
 
   @override
   int get hashCode => usbHidUsage.hashCode;
