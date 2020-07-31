@@ -4,7 +4,6 @@
 
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:flutter_tools/src/globals.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_snapshot_analysis/treemap.dart';
 
