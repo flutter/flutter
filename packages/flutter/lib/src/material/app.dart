@@ -655,11 +655,11 @@ class _MaterialAppState extends State<MaterialApp> {
           final bool highContrast = MediaQuery.highContrastOf(context);
           ThemeData theme;
 
-          if (useDarkTheme && highContrast) {
+          if (useDarkTheme && highContrast && widget.highContrastDarkTheme != null) {
             theme = widget.highContrastDarkTheme;
-          } else if (useDarkTheme) {
+          } else if (useDarkTheme && widget.darkTheme != null) {
             theme = widget.darkTheme;
-          } else if (highContrast) {
+          } else if (highContrast && widget.highContrastTheme != null) {
             theme = widget.highContrastTheme;
           }
           theme ??= widget.theme ?? ThemeData.light();
