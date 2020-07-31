@@ -39,7 +39,7 @@ void main() {
   final Map<String, ClassDeclaration> uiClasses = <String, ClassDeclaration>{};
   final Map<String, ClassDeclaration> webClasses = <String, ClassDeclaration>{};
 
-  // Gather all public classes from each library. For now we are skiping
+  // Gather all public classes from each library. For now we are skipping
   // other top level members.
   _collectPublicClasses(uiUnit, uiClasses, 'lib/ui/');
   _collectPublicClasses(webUnit, webClasses, 'lib/web_ui/lib/');
