@@ -288,7 +288,7 @@ class AndroidSdk {
     if (_fileSystem.file(path).existsSync()) {
       return path;
     }
-    return _operatingSystemUtils.which(binaryName).path;
+    return _operatingSystemUtils.which(binaryName)?.path;
   }
 
   /// Returns the emulator executable path.
@@ -306,7 +306,7 @@ class AndroidSdk {
         return path;
       }
     }
-    return _operatingSystemUtils.which(binaryName).path;
+    return _operatingSystemUtils.which(binaryName)?.path;
   }
 
   String getAvdManagerPath() {
@@ -315,7 +315,7 @@ class AndroidSdk {
     if (_fileSystem.file(path).existsSync()) {
       return path;
     }
-    return _operatingSystemUtils.which(binaryName).path;
+    return _operatingSystemUtils.which(binaryName)?.path;
   }
 
   /// Sets up various paths used internally.
