@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:math' as math;
 
@@ -103,7 +102,7 @@ class FilteringTextInputFormatter extends TextInputFormatter {
   /// must not be null.
   FilteringTextInputFormatter(
     this.filterPattern, {
-    @required this.allow,
+    required this.allow,
     this.replacementString = '',
   }) : assert(filterPattern != null),
        assert(allow != null),
@@ -342,7 +341,7 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   /// counted as a single character, but because it is a combination of two
   /// Unicode scalar values, '\u{1F44D}\u{1F3FD}', it is counted as two
   /// characters.
-  final int maxLength;
+  final int? maxLength;
 
   /// Truncate the given TextEditingValue to maxLength characters.
   ///
@@ -371,13 +370,13 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
     TextEditingValue oldValue, // unused.
     TextEditingValue newValue,
   ) {
-    if (maxLength != null && maxLength > 0 && newValue.text.characters.length > maxLength) {
+    if (maxLength != null && maxLength! > 0 && newValue.text.characters.length > maxLength!) {
       // If already at the maximum and tried to enter even more, keep the old
       // value.
       if (oldValue.text.characters.length == maxLength) {
         return oldValue;
       }
-      return truncate(newValue, maxLength);
+      return truncate(newValue, maxLength!);
     }
     return newValue;
   }
@@ -390,7 +389,7 @@ TextEditingValue _selectionAwareTextManipulation(
   final int selectionStartIndex = value.selection.start;
   final int selectionEndIndex = value.selection.end;
   String manipulatedText;
-  TextSelection manipulatedSelection;
+  TextSelection? manipulatedSelection;
   if (selectionStartIndex < 0 || selectionEndIndex < 0) {
     manipulatedText = substringManipulation(value.text);
   } else {
