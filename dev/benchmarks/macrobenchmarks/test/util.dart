@@ -13,8 +13,6 @@ import 'package:e2e/e2e.dart';
 import 'package:macrobenchmarks/common.dart';
 import 'package:macrobenchmarks/main.dart' as app;
 
-typedef ControlCallback = Future<void> Function(WidgetController controller);
-
 void macroPerfTestE2E(
   String testName,
   String routeName, {
