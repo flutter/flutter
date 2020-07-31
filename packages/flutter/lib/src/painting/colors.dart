@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:math' as math;
 import 'dart:ui' show Color, lerpDouble, hashValues;
@@ -10,7 +9,7 @@ import 'dart:ui' show Color, lerpDouble, hashValues;
 import 'package:flutter/foundation.dart';
 
 double _getHue(double red, double green, double blue, double max, double delta) {
-  double hue;
+  late double hue;
   if (max == 0.0) {
     hue = 0.0;
   } else if (max == red) {
@@ -199,19 +198,19 @@ class HSVColor {
   /// {@macro dart.ui.shadow.lerp}
   ///
   /// Values outside of the valid range for each channel will be clamped.
-  static HSVColor lerp(HSVColor a, HSVColor b, double t) {
+  static HSVColor? lerp(HSVColor? a, HSVColor? b, double t) {
     assert(t != null);
     if (a == null && b == null)
       return null;
     if (a == null)
-      return b._scaleAlpha(t);
+      return b!._scaleAlpha(t);
     if (b == null)
       return a._scaleAlpha(1.0 - t);
     return HSVColor.fromAHSV(
-      lerpDouble(a.alpha, b.alpha, t).clamp(0.0, 1.0) as double,
-      lerpDouble(a.hue, b.hue, t) % 360.0,
-      lerpDouble(a.saturation, b.saturation, t).clamp(0.0, 1.0) as double,
-      lerpDouble(a.value, b.value, t).clamp(0.0, 1.0) as double,
+      lerpDouble(a.alpha, b.alpha, t)!.clamp(0.0, 1.0) as double,
+      lerpDouble(a.hue, b.hue, t)! % 360.0,
+      lerpDouble(a.saturation, b.saturation, t)!.clamp(0.0, 1.0) as double,
+      lerpDouble(a.value, b.value, t)!.clamp(0.0, 1.0) as double,
     );
   }
 
@@ -383,19 +382,19 @@ class HSLColor {
   ///
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
-  static HSLColor lerp(HSLColor a, HSLColor b, double t) {
+  static HSLColor? lerp(HSLColor? a, HSLColor? b, double t) {
     assert(t != null);
     if (a == null && b == null)
       return null;
     if (a == null)
-      return b._scaleAlpha(t);
+      return b!._scaleAlpha(t);
     if (b == null)
       return a._scaleAlpha(1.0 - t);
     return HSLColor.fromAHSL(
-      lerpDouble(a.alpha, b.alpha, t).clamp(0.0, 1.0) as double,
-      lerpDouble(a.hue, b.hue, t) % 360.0,
-      lerpDouble(a.saturation, b.saturation, t).clamp(0.0, 1.0) as double,
-      lerpDouble(a.lightness, b.lightness, t).clamp(0.0, 1.0) as double,
+      lerpDouble(a.alpha, b.alpha, t)!.clamp(0.0, 1.0) as double,
+      lerpDouble(a.hue, b.hue, t)! % 360.0,
+      lerpDouble(a.saturation, b.saturation, t)!.clamp(0.0, 1.0) as double,
+      lerpDouble(a.lightness, b.lightness, t)!.clamp(0.0, 1.0) as double,
     );
   }
 
@@ -441,7 +440,7 @@ class ColorSwatch<T> extends Color {
   final Map<T, Color> _swatch;
 
   /// Returns an element of the swatch table.
-  Color operator [](T index) => _swatch[index];
+  Color? operator [](T index) => _swatch[index];
 
   @override
   bool operator ==(Object other) {
@@ -468,9 +467,9 @@ class ColorProperty extends DiagnosticsProperty<Color> {
   /// The [showName], [style], and [level] arguments must not be null.
   ColorProperty(
     String name,
-    Color value, {
+    Color? value, {
     bool showName = true,
-    Object defaultValue = kNoDefaultValue,
+    Object? defaultValue = kNoDefaultValue,
     DiagnosticsTreeStyle style = DiagnosticsTreeStyle.singleLine,
     DiagnosticLevel level = DiagnosticLevel.info,
   }) : assert(showName != null),
@@ -484,14 +483,14 @@ class ColorProperty extends DiagnosticsProperty<Color> {
        );
 
   @override
-  Map<String, Object> toJsonMap(DiagnosticsSerializationDelegate delegate) {
-    final Map<String, Object> json = super.toJsonMap(delegate);
+  Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
+    final Map<String, Object?> json = super.toJsonMap(delegate);
     if (value != null) {
       json['valueProperties'] = <String, Object>{
-        'red': value.red,
-        'green': value.green,
-        'blue': value.blue,
-        'alpha': value.alpha,
+        'red': value!.red,
+        'green': value!.green,
+        'blue': value!.blue,
+        'alpha': value!.alpha,
       };
     }
     return json;
