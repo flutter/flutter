@@ -1,7 +1,6 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// FLUTTER_NOLINT
 
 #include "flutter/common/task_runners.h"
 #include "flutter/fml/mapping.h"
@@ -23,8 +22,8 @@ namespace testing {
 
 class TestIOManager final : public IOManager {
  public:
-  TestIOManager(fml::RefPtr<fml::TaskRunner> task_runner,
-                bool has_gpu_context = true)
+  explicit TestIOManager(fml::RefPtr<fml::TaskRunner> task_runner,
+                         bool has_gpu_context = true)
       : gl_surface_(SkISize::Make(1, 1)),
         gl_context_(has_gpu_context ? gl_surface_.CreateGrContext() : nullptr),
         weak_gl_context_factory_(

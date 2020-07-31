@@ -1,7 +1,6 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// FLUTTER_NOLINT
 
 #include "flutter/lib/ui/window/platform_message_response_dart.h"
 
@@ -29,16 +28,18 @@ PlatformMessageResponseDart::~PlatformMessageResponseDart() {
 }
 
 void PlatformMessageResponseDart::Complete(std::unique_ptr<fml::Mapping> data) {
-  if (callback_.is_empty())
+  if (callback_.is_empty()) {
     return;
+  }
   FML_DCHECK(!is_complete_);
   is_complete_ = true;
   ui_task_runner_->PostTask(fml::MakeCopyable(
       [callback = std::move(callback_), data = std::move(data)]() mutable {
         std::shared_ptr<tonic::DartState> dart_state =
             callback.dart_state().lock();
-        if (!dart_state)
+        if (!dart_state) {
           return;
+        }
         tonic::DartState::Scope scope(dart_state);
 
         Dart_Handle byte_buffer =
@@ -48,16 +49,18 @@ void PlatformMessageResponseDart::Complete(std::unique_ptr<fml::Mapping> data) {
 }
 
 void PlatformMessageResponseDart::CompleteEmpty() {
-  if (callback_.is_empty())
+  if (callback_.is_empty()) {
     return;
+  }
   FML_DCHECK(!is_complete_);
   is_complete_ = true;
   ui_task_runner_->PostTask(
       fml::MakeCopyable([callback = std::move(callback_)]() mutable {
         std::shared_ptr<tonic::DartState> dart_state =
             callback.dart_state().lock();
-        if (!dart_state)
+        if (!dart_state) {
           return;
+        }
         tonic::DartState::Scope scope(dart_state);
         tonic::DartInvoke(callback.Release(), {Dart_Null()});
       }));

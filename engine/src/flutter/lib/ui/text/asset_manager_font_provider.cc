@@ -1,7 +1,6 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// FLUTTER_NOLINT
 
 #include "flutter/lib/ui/text/asset_manager_font_provider.h"
 
@@ -97,8 +96,9 @@ void AssetManagerFontStyleSet::getStyle(int index,
 
 SkTypeface* AssetManagerFontStyleSet::createTypeface(int i) {
   size_t index = i;
-  if (index >= assets_.size())
+  if (index >= assets_.size()) {
     return nullptr;
+  }
 
   TypefaceAsset& asset = assets_[index];
   if (!asset.typeface) {
@@ -116,8 +116,9 @@ SkTypeface* AssetManagerFontStyleSet::createTypeface(int i) {
 
     // Ownership of the stream is transferred.
     asset.typeface = SkTypeface::MakeFromStream(std::move(stream));
-    if (!asset.typeface)
+    if (!asset.typeface) {
       return nullptr;
+    }
   }
 
   return SkRef(asset.typeface.get());

@@ -1,7 +1,6 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// FLUTTER_NOLINT
 
 #include "flutter/lib/ui/window/pointer_data_packet_converter.h"
 #include "gtest/gtest.h"
@@ -9,7 +8,7 @@
 namespace flutter {
 namespace testing {
 
-void CreateSimulatedPointerData(PointerData& data,
+void CreateSimulatedPointerData(PointerData& data,  // NOLINT
                                 PointerData::Change change,
                                 int64_t device,
                                 double dx,
@@ -44,7 +43,7 @@ void CreateSimulatedPointerData(PointerData& data,
   data.scroll_delta_y = 0.0;
 }
 
-void CreateSimulatedMousePointerData(PointerData& data,
+void CreateSimulatedMousePointerData(PointerData& data,  // NOLINT
                                      PointerData::Change change,
                                      PointerData::SignalKind signal_kind,
                                      int64_t device,
@@ -82,7 +81,7 @@ void CreateSimulatedMousePointerData(PointerData& data,
   data.scroll_delta_y = scroll_delta_y;
 }
 
-void UnpackPointerPacket(std::vector<PointerData>& output,
+void UnpackPointerPacket(std::vector<PointerData>& output,  // NOLINT
                          std::unique_ptr<PointerDataPacket> packet) {
   size_t kBytesPerPointerData = kPointerDataFieldCount * kBytesPerField;
   auto buffer = packet->data();

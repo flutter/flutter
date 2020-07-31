@@ -1,7 +1,6 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// FLUTTER_NOLINT
 
 #include "flutter/lib/ui/ui_dart_state.h"
 
@@ -74,8 +73,9 @@ void UIDartState::ThrowIfUIOperationsProhibited() {
 
 void UIDartState::SetDebugName(const std::string debug_name) {
   debug_name_ = debug_name;
-  if (window_)
+  if (window_) {
     window_->client()->UpdateIsolateDescription(debug_name_, main_port_);
+  }
 }
 
 UIDartState* UIDartState::Current() {
@@ -84,8 +84,9 @@ UIDartState* UIDartState::Current() {
 
 void UIDartState::SetWindow(std::unique_ptr<Window> window) {
   window_ = std::move(window);
-  if (window_)
+  if (window_) {
     window_->client()->UpdateIsolateDescription(debug_name_, main_port_);
+  }
 }
 
 const TaskRunners& UIDartState::GetTaskRunners() const {

@@ -1,7 +1,6 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// FLUTTER_NOLINT
 
 #include "flutter/lib/ui/painting/path.h"
 
@@ -209,8 +208,10 @@ void CanvasPath::addRRect(const RRect& rrect) {
 }
 
 void CanvasPath::addPath(CanvasPath* path, double dx, double dy) {
-  if (!path)
+  if (!path) {
     Dart_ThrowException(ToDart("Path.addPath called with non-genuine Path."));
+    return;
+  }
   path_.addPath(path->path(), dx, dy, SkPath::kAppend_AddPathMode);
 }
 
@@ -221,6 +222,7 @@ void CanvasPath::addPathWithMatrix(CanvasPath* path,
   if (!path) {
     Dart_ThrowException(
         ToDart("Path.addPathWithMatrix called with non-genuine Path."));
+    return;
   }
 
   SkMatrix matrix = ToSkMatrix(matrix4);
@@ -231,9 +233,11 @@ void CanvasPath::addPathWithMatrix(CanvasPath* path,
 }
 
 void CanvasPath::extendWithPath(CanvasPath* path, double dx, double dy) {
-  if (!path)
+  if (!path) {
     Dart_ThrowException(
         ToDart("Path.extendWithPath called with non-genuine Path."));
+    return;
+  }
   path_.addPath(path->path(), dx, dy, SkPath::kExtend_AddPathMode);
 }
 
@@ -244,6 +248,7 @@ void CanvasPath::extendWithPathAndMatrix(CanvasPath* path,
   if (!path) {
     Dart_ThrowException(
         ToDart("Path.addPathWithMatrix called with non-genuine Path."));
+    return;
   }
 
   SkMatrix matrix = ToSkMatrix(matrix4);
@@ -288,7 +293,8 @@ tonic::Float32List CanvasPath::getBounds() {
 }
 
 bool CanvasPath::op(CanvasPath* path1, CanvasPath* path2, int operation) {
-  return Op(path1->path(), path2->path(), (SkPathOp)operation, &path_);
+  return Op(path1->path(), path2->path(), static_cast<SkPathOp>(operation),
+            &path_);
 }
 
 void CanvasPath::clone(Dart_Handle path_handle) {
