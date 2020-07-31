@@ -892,12 +892,12 @@ class DeviceDomain extends Domain {
 
 class DevToolsDomain extends Domain {
   DevToolsDomain(Daemon daemon) : super(daemon, 'devtools') {
-    registerHandler('serve', startServer);
+    registerHandler('serve', serve);
   }
 
   DevtoolsLauncher _devtoolsLauncher;
 
-  Future<void> startServer([ Map<String, dynamic> args ]) async {
+  Future<void> serve([ Map<String, dynamic> args ]) async {
     _devtoolsLauncher ??= DevtoolsLauncher.instance;
     final HttpServer server = await _devtoolsLauncher.serve();
 
