@@ -269,53 +269,55 @@ public class DummyPluginAClass {
         return TaskResult.failure('Failed to build plugin A example APK');
       }
 
-      section('Build plugin A example iOS app');
+      if (Platform.isMacOS) {
+        section('Build plugin A example iOS app');
 
-      await inDirectory(exampleApp, () async {
-        await evalFlutter(
+        await inDirectory(exampleApp, () async {
+          await evalFlutter(
+            'build',
+            options: <String>[
+              'ios',
+              '--no-codesign',
+            ],
+          );
+        });
+
+        final Directory appBundle = Directory(path.join(
+          pluginADirectory.path,
+          'example',
           'build',
-          options: <String>[
-            'ios',
-            '--no-codesign',
-          ],
-        );
-      });
+          'ios',
+          'iphoneos',
+          'Runner.app',
+        ));
 
-      final Directory appBundle = Directory(path.join(
-        pluginADirectory.path,
-        'example',
-        'build',
-        'ios',
-        'iphoneos',
-        'Runner.app',
-      ));
+        if (!exists(appBundle)) {
+          return TaskResult.failure('Failed to build plugin A example iOS app');
+        }
 
-      if (!exists(appBundle)) {
-        return TaskResult.failure('Failed to build plugin A example iOS app');
+        checkDirectoryExists(path.join(
+          appBundle.path,
+          'Frameworks',
+          'plugin_a.framework',
+        ));
+        checkDirectoryExists(path.join(
+          appBundle.path,
+          'Frameworks',
+          'plugin_b.framework',
+        ));
+        checkDirectoryExists(path.join(
+          appBundle.path,
+          'Frameworks',
+          'plugin_c.framework',
+        ));
+
+        // Plugin D is Android only and should not be embedded.
+        checkDirectoryNotExists(path.join(
+          appBundle.path,
+          'Frameworks',
+          'plugin_d.framework',
+        ));
       }
-
-      checkDirectoryExists(path.join(
-        appBundle.path,
-        'Frameworks',
-        'plugin_a.framework',
-      ));
-      checkDirectoryExists(path.join(
-        appBundle.path,
-        'Frameworks',
-        'plugin_b.framework',
-      ));
-      checkDirectoryExists(path.join(
-        appBundle.path,
-        'Frameworks',
-        'plugin_c.framework',
-      ));
-
-      // Plugin D is Android only and should not be embedded.
-      checkDirectoryNotExists(path.join(
-        appBundle.path,
-        'Frameworks',
-        'plugin_d.framework',
-      ));
 
       return TaskResult.success(null);
     } on TaskResult catch (taskResult) {
