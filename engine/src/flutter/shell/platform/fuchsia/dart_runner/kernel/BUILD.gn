@@ -72,8 +72,9 @@ template("create_kernel_core_snapshot") {
     tool = gen_snapshot_to_use
 
     args = [
+      # TODO(FL-117): Re-enable causal async stack traces when this issue is
+      # addressed.
       "--no_causal_async_stacks",
-      "--lazy_async_stacks",
       "--use_bytecode_compiler",
       "--enable_mirrors=false",
       "--deterministic",
