@@ -155,8 +155,7 @@ class AndroidValidator extends DoctorValidator {
   @override
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
-
-    if (_androidSdk == null) {
+    if (_androidSdk.latestVersion == null) {
       // No Android SDK found.
       if (_platform.environment.containsKey(kAndroidHome)) {
         final String androidHomeDir = _platform.environment[kAndroidHome];
@@ -253,7 +252,7 @@ class AndroidLicenseValidator extends DoctorValidator {
     final List<ValidationMessage> messages = <ValidationMessage>[];
 
     // Match pre-existing early termination behavior
-    if (globals.androidSdk == null || globals.androidSdk.latestVersion == null ||
+    if (globals.androidSdk.latestVersion == null ||
         globals.androidSdk.validateSdkWellFormed().isNotEmpty ||
         ! await _checkJavaVersionNoOutput()) {
       return ValidationResult(ValidationType.missing, messages);
@@ -363,7 +362,7 @@ class AndroidLicenseValidator extends DoctorValidator {
 
   /// Run the Android SDK manager tool in order to accept SDK licenses.
   static Future<bool> runLicenseManager() async {
-    if (globals.androidSdk == null) {
+    if (globals.androidSdk.latestVersion == null) {
       globals.printStatus(userMessages.androidSdkShort);
       return false;
     }

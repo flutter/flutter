@@ -49,7 +49,8 @@ class AndroidSdk {
     @required OperatingSystemUtils operatingSystemUtils,
     @required AndroidStudio androidStudio,
     @required Logger logger,
-  }) : _fileSystem = fileSystem,
+  }) : assert(directory != null),
+       _fileSystem = fileSystem,
        _platform = platform,
        _processManager = processManager,
        _operatingSystemUtils = operatingSystemUtils,
@@ -180,7 +181,7 @@ class AndroidSdk {
     }
 
     return AndroidSdk(
-      androidHomeDir,
+      androidHomeDir ?? '',
       androidStudio: androidStudio,
       fileSystem: fileSystem,
       platform: platform,
@@ -372,7 +373,7 @@ class AndroidSdk {
         return null;
       }
 
-      return AndroidSdkVersion._(
+      return AndroidSdkVersion(
         this,
         sdkLevel: platformVersion,
         platformName: platformName,
@@ -487,7 +488,7 @@ class AndroidSdk {
 }
 
 class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
-  AndroidSdkVersion._(
+  AndroidSdkVersion(
     this.sdk, {
     @required this.sdkLevel,
     @required this.platformName,

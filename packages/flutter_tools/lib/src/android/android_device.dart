@@ -312,7 +312,7 @@ class AndroidDevice extends Device {
   }
 
   Future<bool> _checkForSupportedAdbVersion() async {
-    if (_androidSdk == null) {
+    if (_androidSdk.adbPath == null) {
       return false;
     }
 

@@ -48,6 +48,12 @@ void main() {
     processManager = MockProcessManager();
     stdio = MockStdio();
     userMessages = UserMessages();
+    when(sdk.latestVersion).thenReturn(AndroidSdkVersion(
+      sdk,
+      sdkLevel: 20,
+      platformName: '',
+      buildToolsVersion: Version(2, 1, 0),
+    ));
   });
 
   MockProcess Function(List<String>) processMetaFactory(List<String> stdout) {
@@ -310,8 +316,9 @@ void main() {
   });
 
   testWithoutContext('Mentions `kAndroidSdkRoot if user has no AndroidSdk`', () async {
+    final AndroidSdk androidSdk = MockAndroidSdk();
     final ValidationResult validationResult = await AndroidValidator(
-      androidSdk: null,
+      androidSdk: androidSdk,
       androidStudio: null,
       fileSystem: fs,
       logger: logger,

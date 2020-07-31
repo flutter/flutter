@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -326,7 +327,7 @@ void main() {
         message: '$warningMark No Android SDK found. Try setting the ANDROID_SDK_ROOT environment variable.',
       ));
     }, overrides: <Type, Generator>{
-      AndroidSdk: () => null,
+      AndroidSdk: () => MockAndroidSdk(),
     });
 
     test('androidXPluginWarningRegex should match lines with the AndroidX plugin warnings', () {
@@ -446,8 +447,17 @@ include ':app'
     MockProcessManager mockProcessManager;
     FakePlatform android;
     FileSystem fs;
+    AndroidSdk androidSdk;
 
     setUp(() {
+      androidSdk = MockAndroidSdk();
+      when(androidSdk.directory).thenReturn('');
+      when(androidSdk.latestVersion).thenReturn(AndroidSdkVersion(
+        androidSdk,
+        sdkLevel: 20,
+        platformName: '',
+        buildToolsVersion: Version(2, 1, 0),
+      ));
       fs = MemoryFileSystem();
       mockArtifacts = MockLocalEngineArtifacts();
       mockProcessManager = MockProcessManager();
@@ -460,6 +470,7 @@ include ':app'
         Platform: () => android,
         FileSystem: () => fs,
         ProcessManager: () => mockProcessManager,
+        AndroidSdk: () => androidSdk,
       });
     }
 
@@ -953,6 +964,12 @@ plugin1=${plugin1.path}
       android = fakePlatform('android');
 
       when(mockAndroidSdk.directory).thenReturn('irrelevant');
+      when(mockAndroidSdk.latestVersion).thenReturn(AndroidSdkVersion(
+        mockAndroidSdk,
+        sdkLevel: 20,
+        platformName: '',
+        buildToolsVersion: Version(2, 3, 1),
+      ));
 
       final Directory rootDirectory = fileSystem.currentDirectory;
       cache = Cache(

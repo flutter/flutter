@@ -237,7 +237,7 @@ void updateLocalProperties({
   BuildInfo buildInfo,
   bool requireAndroidSdk = true,
 }) {
-  if (requireAndroidSdk && globals.androidSdk == null) {
+  if (requireAndroidSdk && globals.androidSdk.latestVersion == null) {
     exitWithNoSdkMessage();
   }
   final File localProperties = project.android.localPropertiesFile;
