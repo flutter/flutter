@@ -1,7 +1,6 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// FLUTTER_NOLINT
 
 #include "flutter/lib/ui/painting/picture_recorder.h"
 
@@ -44,8 +43,9 @@ SkCanvas* PictureRecorder::BeginRecording(SkRect bounds) {
 }
 
 fml::RefPtr<Picture> PictureRecorder::endRecording(Dart_Handle dart_picture) {
-  if (!canvas_)
+  if (!canvas_) {
     return nullptr;
+  }
 
   fml::RefPtr<Picture> picture =
       Picture::Create(dart_picture,

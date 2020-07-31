@@ -1,7 +1,6 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// FLUTTER_NOLINT
 
 #include "flutter/lib/ui/painting/vertices.h"
 #include "flutter/lib/ui/ui_dart_state.h"
@@ -16,14 +15,16 @@ namespace flutter {
 namespace {
 
 void DecodePoints(const tonic::Float32List& coords, SkPoint* points) {
-  for (int i = 0; i < coords.num_elements(); i += 2)
+  for (int i = 0; i < coords.num_elements(); i += 2) {
     points[i / 2] = SkPoint::Make(coords[i], coords[i + 1]);
+  }
 }
 
 template <typename T>
 void DecodeInts(const tonic::Int32List& ints, T* out) {
-  for (int i = 0; i < ints.num_elements(); i++)
+  for (int i = 0; i < ints.num_elements(); i++) {
     out[i] = ints[i];
+  }
 }
 
 }  // namespace
@@ -50,21 +51,25 @@ bool Vertices::init(Dart_Handle vertices_handle,
                     const tonic::Uint16List& indices) {
   UIDartState::ThrowIfUIOperationsProhibited();
   uint32_t builderFlags = 0;
-  if (texture_coordinates.data())
+  if (texture_coordinates.data()) {
     builderFlags |= SkVertices::kHasTexCoords_BuilderFlag;
-  if (colors.data())
+  }
+  if (colors.data()) {
     builderFlags |= SkVertices::kHasColors_BuilderFlag;
+  }
 
   SkVertices::Builder builder(vertex_mode, positions.num_elements() / 2,
                               indices.num_elements(), builderFlags);
 
-  if (!builder.isValid())
+  if (!builder.isValid()) {
     return false;
+  }
 
   // positions are required for SkVertices::Builder
   FML_DCHECK(positions.data());
-  if (positions.data())
+  if (positions.data()) {
     DecodePoints(positions, builder.positions());
+  }
 
   if (texture_coordinates.data()) {
     // SkVertices::Builder assumes equal numbers of elements

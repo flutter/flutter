@@ -1,7 +1,6 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// FLUTTER_NOLINT
 
 #include "flutter/lib/ui/text/font_collection.h"
 
@@ -28,7 +27,7 @@ namespace flutter {
 
 namespace {
 
-void LoadFontFromList(tonic::Uint8List& font_data,
+void LoadFontFromList(tonic::Uint8List& font_data,  // NOLINT
                       Dart_Handle callback,
                       std::string family_name) {
   FontCollection& font_collection =
@@ -122,7 +121,7 @@ void FontCollection::RegisterFonts(
         continue;
       }
 
-      // TODO: Handle weights and styles.
+      // TODO(chinmaygarde): Handle weights and styles.
       font_provider->RegisterAsset(family_name->value.GetString(),
                                    font_asset->value.GetString());
     }

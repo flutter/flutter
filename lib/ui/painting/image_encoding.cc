@@ -1,7 +1,6 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// FLUTTER_NOLINT
 
 #include "flutter/lib/ui/painting/image_encoding.h"
 
@@ -237,11 +236,13 @@ void EncodeImageAndInvokeDataCallback(
 Dart_Handle EncodeImage(CanvasImage* canvas_image,
                         int format,
                         Dart_Handle callback_handle) {
-  if (!canvas_image)
+  if (!canvas_image) {
     return ToDart("encode called with non-genuine Image.");
+  }
 
-  if (!Dart_IsClosure(callback_handle))
+  if (!Dart_IsClosure(callback_handle)) {
     return ToDart("Callback must be a function.");
+  }
 
   ImageByteFormat image_format = static_cast<ImageByteFormat>(format);
 

@@ -1,7 +1,6 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// FLUTTER_NOLINT
 
 #include "flutter/lib/ui/painting/matrix.h"
 
@@ -23,18 +22,20 @@ SkMatrix ToSkMatrix(const tonic::Float64List& matrix4) {
   SkMatrix sk_matrix;
   for (int i = 0; i < 9; ++i) {
     int matrix4_index = kSkMatrixIndexToMatrix4Index[i];
-    if (matrix4_index < matrix4.num_elements())
+    if (matrix4_index < matrix4.num_elements()) {
       sk_matrix[i] = matrix4[matrix4_index];
-    else
+    } else {
       sk_matrix[i] = 0.0;
+    }
   }
   return sk_matrix;
 }
 
 tonic::Float64List ToMatrix4(const SkMatrix& sk_matrix) {
   tonic::Float64List matrix4(Dart_NewTypedData(Dart_TypedData_kFloat64, 16));
-  for (int i = 0; i < 9; ++i)
+  for (int i = 0; i < 9; ++i) {
     matrix4[kSkMatrixIndexToMatrix4Index[i]] = sk_matrix[i];
+  }
   matrix4[10] = 1.0;  // Identity along the z axis.
   return matrix4;
 }
