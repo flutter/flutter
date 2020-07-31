@@ -769,6 +769,7 @@ tasks:
       Android with e2e.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+    flaky: true
 
   flutter_gallery_sksl_warmup__transition_perf:
     description: >
