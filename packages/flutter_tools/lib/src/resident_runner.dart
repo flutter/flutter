@@ -1731,9 +1731,7 @@ class DevtoolsLauncher {
   io.HttpServer _devtoolsServer;
   Future<void> launch(Uri observatoryAddress) async {
     try {
-      _devtoolsServer ??= await devtools_server.serveDevTools(
-        enableStdinCommands: false,
-      );
+      await serve();
       await devtools_server.launchDevTools(
         <String, dynamic>{
           'reuseWindows': true,
@@ -1746,6 +1744,17 @@ class DevtoolsLauncher {
     } on Exception catch (e, st) {
       globals.printTrace('Failed to launch DevTools: $e\n$st');
     }
+  }
+
+  Future<io.HttpServer> serve() async {
+    try {
+      _devtoolsServer ??= await devtools_server.serveDevTools(
+        enableStdinCommands: false,
+      );
+    } on Exception catch (e, st) {
+      globals.printTrace('Failed to serve DevTools: $e\n$st');
+    }
+    return _devtoolsServer;
   }
 
   Future<void> close() async {
