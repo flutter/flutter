@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/base/process.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_snapshot_analysis/treemap.dart';
 
 import '../base/file_system.dart';
 import '../convert.dart';
 import 'logger.dart';
+import 'process.dart';
+import 'terminal.dart';
 
 /// A class to analyze APK and AOT snapshot and generate a breakdown of the data.
 class SizeAnalyzer {
