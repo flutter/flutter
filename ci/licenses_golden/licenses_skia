@@ -1,4 +1,4 @@
-Signature: c7ee484f0bf49aed48999011c8ec793c
+Signature: 6888632fda3913e222404b942deccd12
 
 UNUSED LICENSES:
 
@@ -3325,7 +3325,6 @@ FILE: ../../../third_party/skia/src/core/SkCanvasPriv.cpp
 FILE: ../../../third_party/skia/src/core/SkColorSpaceXformSteps.cpp
 FILE: ../../../third_party/skia/src/core/SkColorSpaceXformSteps.h
 FILE: ../../../third_party/skia/src/core/SkContourMeasure.cpp
-FILE: ../../../third_party/skia/src/core/SkCoverageModePriv.h
 FILE: ../../../third_party/skia/src/core/SkCubicMap.cpp
 FILE: ../../../third_party/skia/src/core/SkCubicSolver.h
 FILE: ../../../third_party/skia/src/core/SkDeferredDisplayList.cpp
@@ -5163,10 +5162,10 @@ FILE: ../../../third_party/skia/src/gpu/ccpr/GrStencilAtlasOp.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrComposeLerpEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrComposeLerpEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrComposeLerpEffect.h
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathTessellateOp.cpp
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathTessellateOp.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStencilPathShader.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStencilPathShader.h
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrTessellatePathOp.cpp
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrTessellatePathOp.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrTessellationPathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrTessellationPathRenderer.h
 FILE: ../../../third_party/skia/src/pdf/SkPDFGraphicStackState.cpp
@@ -5208,9 +5207,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
-ORIGIN: ../../../third_party/skia/bench/TessellatePathBench.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/bench/TessellateBench.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../third_party/skia/bench/TessellatePathBench.cpp
+FILE: ../../../third_party/skia/bench/TessellateBench.cpp
 FILE: ../../../third_party/skia/experimental/skrive/include/SkRive.h
 FILE: ../../../third_party/skia/experimental/skrive/src/Artboard.cpp
 FILE: ../../../third_party/skia/experimental/skrive/src/Color.cpp
@@ -5534,10 +5533,10 @@ FILE: ../../../third_party/skia/src/gpu/GrFinishCallbacks.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrFillPathShader.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrFillPathShader.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathShader.h
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrTessellateStrokeOp.cpp
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrTessellateStrokeOp.h
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrTessellateStrokeShader.cpp
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrTessellateStrokeShader.h
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeTessellateOp.cpp
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeTessellateOp.h
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeTessellateShader.cpp
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeTessellateShader.h
 FILE: ../../../third_party/skia/src/opts/SkVM_opts.h
 FILE: ../../../third_party/skia/src/sksl/SkSLAnalysis.cpp
 ----------------------------------------------------------------------------------------------------
