@@ -461,7 +461,6 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
 
   self.secureTextEntry = [configuration[kSecureTextEntry] boolValue];
   self.keyboardType = ToUIKeyboardType(inputType);
-  self.keyboardType = UIKeyboardTypeNamePhonePad;
   self.returnKeyType = ToUIReturnKeyType(configuration[kInputAction]);
   self.autocapitalizationType = ToUITextAutoCapitalizationType(configuration);
 
