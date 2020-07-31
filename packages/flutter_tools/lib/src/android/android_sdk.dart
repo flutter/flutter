@@ -180,7 +180,7 @@ class AndroidSdk {
     }
 
     return AndroidSdk(
-      androidHomeDir,
+      '',
       androidStudio: androidStudio,
       fileSystem: fileSystem,
       platform: platform,
