@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:process/process.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
@@ -22,5 +23,5 @@ void main() {
     expect(globals.fs.file(globals.fs.path.join(
       getFlutterRoot(), 'examples', 'hello_world', 'apk-analysis.json')).existsSync(), true);
     expect(result.exitCode, 0);
-  });
+  }, skip: const LocalPlatform().isWindows); // Not yet supported on Windows
 }

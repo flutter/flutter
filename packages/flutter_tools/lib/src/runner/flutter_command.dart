@@ -610,8 +610,8 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag(
       FlutterOptions.kAnalyzeSize,
       defaultsTo: false,
-      help: 'Whether to produce additonal profile information on a release artifact output size. '
-        'This flag can only be used on release builds.'
+      help: 'Whether to produce additonal profile information for artifact output size. '
+        'This flag is only support on release builds on macOS/Linux hosts.'
     );
   }
 
@@ -651,7 +651,9 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     String analyzeSize;
-    if (argParser.options.containsKey(FlutterOptions.kAnalyzeSize) && boolArg(FlutterOptions.kAnalyzeSize)) {
+    if (argParser.options.containsKey(FlutterOptions.kAnalyzeSize)
+      && boolArg(FlutterOptions.kAnalyzeSize)
+      && !globals.platform.isWindows) {
       final File file = globals.fsUtils.getUniqueFile(globals.fs.currentDirectory, 'flutter_size', '.json');
       extraGenSnapshotOptions.add('--write-v8-snapshot-profile-to=${file.path}');
       analyzeSize = file.path;

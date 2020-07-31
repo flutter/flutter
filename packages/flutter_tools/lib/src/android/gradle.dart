@@ -503,7 +503,7 @@ Future<void> buildGradleApp({
   );
 
   // Call size analyzer if --analyze-size flag was provided.
-  if (buildInfo.analyzeSize != null) {
+  if (buildInfo.analyzeSize != null && !globals.platform.isWindows) {
     final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
       fileSystem: globals.fs,
       logger: globals.logger,
