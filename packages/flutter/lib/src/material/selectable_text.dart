@@ -390,7 +390,8 @@ class SelectableText extends StatefulWidget {
   /// If not set, select all and copy will be enabled by default.
   final ToolbarOptions toolbarOptions;
 
-  /// {@macro flutter.rendering.editable.selectionEnabled}
+  /// True if interactive selection is enabled based on the values of
+  /// [enableInteractiveSelection].
   bool get selectionEnabled {
     return enableInteractiveSelection;
   }

@@ -1216,8 +1216,7 @@ mixin WidgetInspectorService {
   }
 
   /// Returns a unique id for [object] that will remain live at least until
-  /// [disposeGroup] is called on [groupName] or [dispose] is called on the id
-  /// returned by this method.
+  /// [disposeGroup] is called on [groupName].
   @protected
   String toId(Object object, String groupName) {
     if (object == null)

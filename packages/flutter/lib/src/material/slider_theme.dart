@@ -552,7 +552,7 @@ class SliderThemeData with Diagnosticable {
   /// Use this only if you want to control the visual appearance of the thumbs
   /// in terms of a logical pixel value. This can be done when you want a
   /// specific look for thumbs when they are close together. To limit with the
-  /// real values, rather than logical pixels, the [values] can be restricted by
+  /// real values, rather than logical pixels, the values can be restricted by
   /// the parent.
   final double minThumbSeparation;
 
@@ -821,9 +821,9 @@ abstract class SliderComponentShape {
   ///
   /// {@template flutter.material.slider.shape.argument.enableAnimation}
   /// The `enableAnimation` argument is an animation triggered when the [Slider]
-  /// is enabled, and it reverses when the slider is disabled. Enabled is the
-  /// [Slider.isInteractive] state. Use this to paint intermediate frames for
-  /// this shape when the slider changes enabled state.
+  /// is enabled, and it reverses when the slider is disabled. The [Slider] is
+  /// enabled when [Slider.onChanged] is not null.Use this to paint intermediate
+  /// frames for this shape when the slider changes enabled state.
   /// {@endtemplate}
   ///
   /// {@template flutter.material.slider.shape.argument.isDiscrete}
@@ -924,8 +924,8 @@ abstract class SliderTickMarkShape {
   /// {@macro flutter.material.slider.shape.argument.sliderTheme}
   ///
   /// {@template flutter.material.slider.shape.argument.isEnabled}
-  /// The `isEnabled` argument has the same value as [Slider.isInteractive]. When
-  /// true, the slider will respond to input.
+  /// The `isEnabled` argument is false when [Slider.onChanged] is null and true
+  /// otherwise. When true, the slider will respond to input.
   /// {@endtemplate}
   Size getPreferredSize({
     SliderThemeData sliderTheme,
@@ -1085,8 +1085,8 @@ abstract class RangeSliderThumbShape {
   /// {@endtemplate}
   ///
   /// {@template flutter.material.rangeSlider.shape.argument.isEnabled}
-  /// The `isEnabled` argument has the same value as [RangeSlider.isEnabled].
-  /// When true, the slider will respond to input.
+  /// The `isEnabled` argument is false when [RangeSlider.onChanged] is null and
+  /// true otherwise. When true, the slider will respond to input.
   /// {@endtemplate}
   Size getPreferredSize(bool isEnabled, bool isDiscrete);
 
@@ -1106,9 +1106,10 @@ abstract class RangeSliderThumbShape {
   ///
   /// {@template flutter.material.rangeSlider.shape.argument.enableAnimation}
   /// The `enableAnimation` argument is an animation triggered when the
-  /// [RangeSlider] is enabled, and it reverses when the slider is disabled.
-  /// Enabled is the [RangeSlider.isEnabled] state. Use this to paint
-  /// intermediate frames for this shape when the slider changes enabled state.
+  /// [RangeSlider] is enabled, and it reverses when the slider is disabled. The
+  /// [RangeSlider] is enabled when [RangeSlider.onChanged] is not null. Use
+  /// this to paint intermediate frames for this shape when the slider changes
+  /// enabled state.
   /// {@endtemplate}
   ///
   /// {@macro flutter.material.rangeSlider.shape.argument.isDiscrete}

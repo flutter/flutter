@@ -765,7 +765,7 @@ class SimpleDialog extends StatelessWidget {
   /// Style for the text in the [title] of this [SimpleDialog].
   ///
   /// If null, [DialogTheme.titleTextStyle] is used. If that's null, defaults to
-  /// [ThemeData.textTheme.headline6].
+  /// [TextTheme.headline6] of [ThemeData.textTheme].
   final TextStyle titleTextStyle;
 
   /// The (optional) content of the dialog is displayed in a
@@ -804,7 +804,7 @@ class SimpleDialog extends StatelessWidget {
   ///
   /// See also:
   ///
-  ///  * [SemanticsConfiguration.isRouteName], for a description of how this
+  ///  * [SemanticsConfiguration.namesRoute], for a description of how this
   ///    value is used.
   final String semanticLabel;
 

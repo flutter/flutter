@@ -13,24 +13,23 @@ dartdoc:
       command: ["dev/snippets/lib/main.dart", "--type=sample", "--dartpad"]
       description: "Creates full application sample code documentation output from embedded documentation samples and displays it in an embedded DartPad."
   errors:
-    # The following are always errors:
+    # Default errors of dartdoc:
     - duplicate-file
     - invalid-parameter
     - tool-error
     - unresolved-export
-    # The following are elevated from warnings because we currently don't
-    # fail on warnings:
+    # Warnings that are elevated to errors:
     - ambiguous-doc-reference
     - ambiguous-reexport
-    - ignored-canonical-for
-    - no-canonical-found
-    - not-implemented
-    - no-library-level-docs
-    - category-order-gives-missing-package-name
-    - reexported-private-api-across-packages
-    # - unresolved-doc-reference # Too many failures, needs clean-up
     - broken-link
-    - unknown-macro
-    - orphaned-file
-    - unknown-file
+    - category-order-gives-missing-package-name
+    - ignored-canonical-for
     - missing-from-search-index
+    - no-canonical-found
+    - no-library-level-docs
+    - not-implemented
+    - reexported-private-api-across-packages
+    - unknown-macro
+    - unknown-file
+    - unresolved-doc-reference
+    - orphaned-file

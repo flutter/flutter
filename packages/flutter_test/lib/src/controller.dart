@@ -818,7 +818,7 @@ abstract class WidgetController {
   Future<void> ensureVisible(Finder finder) => Scrollable.ensureVisible(element(finder));
 
   /// Repeatedly scrolls the `scrollable` by `delta` in the
-  /// [Scrpllable.axisDirection] until `finder` is visible.
+  /// [Scrollable.axisDirection] until `finder` is visible.
   ///
   /// Between each scroll, wait for `duration` time for settling.
   ///

@@ -19,6 +19,7 @@ void main() {
     FakePlatformViewController fakePlatformViewController;
     PlatformViewRenderBox platformViewRenderBox;
     setUp(() {
+      renderer; // Initialize bindings
       fakePlatformViewController = FakePlatformViewController(0);
       platformViewRenderBox = PlatformViewRenderBox(
         controller: fakePlatformViewController,
