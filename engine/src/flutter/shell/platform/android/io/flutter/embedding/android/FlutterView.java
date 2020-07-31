@@ -953,13 +953,22 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
     flutterEngine = null;
   }
 
+  @VisibleForTesting
+  @NonNull
+  public FlutterImageView createImageView() {
+    return new FlutterImageView(
+        getContext(), getWidth(), getHeight(), FlutterImageView.SurfaceKind.background);
+  }
+
+  /**
+   * Converts the current render surface to a {@link FlutterImageView} if it's not one already.
+   * Otherwise, it resizes the {@link FlutterImageView} based on the current view size.
+   */
   public void convertToImageView() {
     renderSurface.pause();
 
     if (flutterImageView == null) {
-      flutterImageView =
-          new FlutterImageView(
-              getContext(), getWidth(), getHeight(), FlutterImageView.SurfaceKind.background);
+      flutterImageView = createImageView();
       addView(flutterImageView);
     } else {
       flutterImageView.resizeIfNeeded(getWidth(), getHeight());
@@ -973,10 +982,13 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
   }
 
   /**
-   * If the surface is rendered by a {@code FlutterImageView}. Then, calling this method will stop
-   * rendering to a {@code FlutterImageView}, and use the previous surface instead.
+   * If the surface is rendered by a {@link FlutterImageView}, then calling this method will stop
+   * rendering to a {@link FlutterImageView}, and render on the previous surface instead.
+   *
+   * @param onDone a callback called when Flutter UI is rendered on the previous surface. Use this
+   *     callback to perform cleanups. For example, destroy overlay surfaces.
    */
-  public void revertImageView() {
+  public void revertImageView(@NonNull Runnable onDone) {
     if (flutterImageView == null) {
       Log.v(TAG, "Tried to revert the image view, but no image view is used.");
       return;
@@ -985,12 +997,39 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
       Log.v(TAG, "Tried to revert the image view, but no previous surface was used.");
       return;
     }
-    flutterImageView.detachFromRenderer();
     renderSurface = previousRenderSurface;
     previousRenderSurface = null;
-    if (flutterEngine != null) {
-      renderSurface.attachToRenderer(flutterEngine.getRenderer());
+    if (flutterEngine == null) {
+      flutterImageView.detachFromRenderer();
+      onDone.run();
+      return;
     }
+    final FlutterRenderer renderer = flutterEngine.getRenderer();
+    if (renderer == null) {
+      flutterImageView.detachFromRenderer();
+      onDone.run();
+      return;
+    }
+    // Start rendering on the previous surface.
+    // This surface is typically `FlutterSurfaceView` or `FlutterTextureView`.
+    renderSurface.attachToRenderer(renderer);
+
+    // Install a Flutter UI listener to wait until the first frame is rendered
+    // in the new surface to call the `onDone` callback.
+    renderer.addIsDisplayingFlutterUiListener(
+        new FlutterUiDisplayListener() {
+          @Override
+          public void onFlutterUiDisplayed() {
+            renderer.removeIsDisplayingFlutterUiListener(this);
+            onDone.run();
+            flutterImageView.detachFromRenderer();
+          }
+
+          @Override
+          public void onFlutterUiNoLongerDisplayed() {
+            // no-op
+          }
+        });
   }
 
   public void attachOverlaySurfaceToRender(FlutterImageView view) {
