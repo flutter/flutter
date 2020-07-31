@@ -316,6 +316,8 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
             right: 0.0,
             height: height,
             child: Opacity(
+              // IOS is relying on this semantics node to correctly traverse
+              // through the app bar when it is collapsed.
               alwaysIncludeSemantics: true,
               opacity: opacity,
               child: widget.background,
