@@ -178,6 +178,7 @@ if (enable_unittests) {
     public_configs = [ "//flutter:export_dynamic_symbols" ]
 
     sources = [
+      "painting/image_encoding_unittests.cc",
       "painting/vertices_unittests.cc",
       "window/pointer_data_packet_converter_unittests.cc",
     ]
