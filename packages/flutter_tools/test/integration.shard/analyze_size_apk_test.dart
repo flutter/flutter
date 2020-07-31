@@ -19,6 +19,8 @@ void main() {
       '--analyze-size',
     ], workingDirectory: globals.fs.path.join(getFlutterRoot(), 'examples', 'hello_world'));
 
+    print(result.stdout);
+    print(result.stderr);
     expect(result.stdout.toString(), contains('app-release.apk (total compressed)'));
     expect(globals.fs.file(globals.fs.path.join(
       getFlutterRoot(), 'examples', 'hello_world', 'apk-analysis.json')).existsSync(), true);
