@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:async/async.dart';
-import 'package:devtools_server/devtools_server.dart' as devtools_server;
 import 'package:meta/meta.dart';
 import 'package:uuid/uuid.dart';
 
