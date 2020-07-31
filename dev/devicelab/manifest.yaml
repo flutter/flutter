@@ -177,6 +177,7 @@ tasks:
       Measures the runtime performance of constructing and destructing widgets on Android.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+    flaky: true
 
   frame_policy_delay_test_android:
     description: >
