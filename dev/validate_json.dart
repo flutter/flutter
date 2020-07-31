@@ -69,4 +69,3 @@ String get clock {
       '${now.second.toString().padLeft(2, "0")}'
       '▐$reset';
 }
-
