@@ -837,6 +837,7 @@ void main() {
 
     expect(appliedTheme.primaryColor, Colors.lightGreen);
     tester.binding.window.accessibilityFeaturesTestValue = null;
+    tester.binding.window.platformBrightnessTestValue = null;
   });
 
   testWidgets('MaterialApp switches themes when the Window platformBrightness changes.', (WidgetTester tester) async {
