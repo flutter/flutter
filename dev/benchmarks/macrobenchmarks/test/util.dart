@@ -24,10 +24,6 @@ void macroPerfTestE2E(
   ControlCallback body,
   ControlCallback setup,
 }) {
-  assert(() {
-    debugPrint(kDebugWarning);
-    return true;
-  }());
   final WidgetsBinding _binding = E2EWidgetsFlutterBinding.ensureInitialized();
   assert(_binding is E2EWidgetsFlutterBinding);
   final E2EWidgetsFlutterBinding binding = _binding as E2EWidgetsFlutterBinding;
