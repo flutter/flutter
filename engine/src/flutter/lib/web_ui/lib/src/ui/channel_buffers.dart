@@ -24,7 +24,7 @@ class _StoredMessage {
 
 /// A fixed-size circular queue.
 class _RingBuffer<T> {
-  /// The underlying data for the RingBuffer.  ListQueue's dynamically resize,
+  /// The underlying data for the RingBuffer.  ListQueues dynamically resize,
   /// [_RingBuffer]s do not.
   final collection.ListQueue<T> _queue;
 

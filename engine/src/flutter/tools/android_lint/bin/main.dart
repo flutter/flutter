@@ -65,7 +65,7 @@ Future<int> runLint(ArgParser argParser, ArgResults argResults) async {
       await baselineXml.delete();
     }
   }
-  print('Preparing projext.xml...');
+  print('Preparing project.xml...');
   final IOSink projectXml = File(projectXmlPath).openWrite();
   projectXml.write(
       '''<!-- THIS FILE IS GENERATED. PLEASE USE THE INCLUDED DART PROGRAM  WHICH -->
@@ -154,7 +154,7 @@ ArgParser setupOptions() {
     )
     ..addOption(
       'out',
-      help: 'The path to write the generated the HTML report to. Ignored if '
+      help: 'The path to write the generated HTML report. Ignored if '
           '--html is not also true.',
       defaultsTo: path.join(projectDir, 'lint_report'),
     );

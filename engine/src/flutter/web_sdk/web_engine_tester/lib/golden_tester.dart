@@ -65,7 +65,7 @@ Future<void> matchGoldenFile(String filename,
     'pixelComparison': pixelComparison.toString(),
   };
 
-  // Chrome on macOS renders slighly differently from Linux, so allow it an
+  // Chrome on macOS renders slightly differently from Linux, so allow it an
   // extra 1% to deviate from the golden files.
   if (maxDiffRatePercent != null) {
     if (operatingSystem == OperatingSystem.macOs) {
