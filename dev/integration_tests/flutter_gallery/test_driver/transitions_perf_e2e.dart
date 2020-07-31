@@ -10,12 +10,11 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:e2e/e2e.dart';
+import 'package:end_perf/end_perf.dart';
 
 import 'package:flutter_gallery/gallery/app.dart' show GalleryApp;
 import 'package:flutter_gallery/gallery/demos.dart';
 import 'package:flutter_gallery/demo_lists.dart';
-
-import 'e2e_util.dart' show watchPerformance;
 
 const List<String> kSkippedDemos = <String>[];
 
