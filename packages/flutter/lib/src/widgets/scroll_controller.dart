@@ -4,6 +4,9 @@
 
 // @dart = 2.8
 
+// Examples can assume:
+// ScrollController controller;
+
 import 'dart:async';
 
 import 'package:flutter/animation.dart';
@@ -172,6 +175,99 @@ class ScrollController extends ChangeNotifier {
   ///
   /// Immediately after the jump, a ballistic activity is started, in case the
   /// value was out of range.
+  ///
+  /// ### Forcing a jump to a position that is not yet in range
+  ///
+  /// When jumping to a position that is out of range (or on the edge
+  /// of the valid range), but which in the very next frame will
+  /// become in-range, the scroll position typically tries to force
+  /// the position to remain out-of-range until the ballistic scroll
+  /// begins.
+  ///
+  /// For example:
+  ///
+  ///  1. A scroll view has a child from 0..100, and is at position 0.
+  ///     The valid scroll range is 0..20 (i.e. 20% of the child is
+  ///     off screen).
+  ///
+  ///  2. The scroll position is moved to position 100, and a new
+  ///     child is inserted so that the valid range will be 0..120.
+  ///
+  ///  3. The scroll view updates, and finds that the range has
+  ///     changed. Since the current position (100) is out of the
+  ///     previous valid range (0..20), its relative position is
+  ///     maintained, and the scroll position becomes 200 (80 more
+  ///     than the max value, as before). (See
+  ///     [RangeMaintainingScrollPhysics]).
+  ///
+  ///  4. The scroll view begins a ballistic scroll activity, to bring
+  ///     the scroll positino back into range. (See
+  ///     [BallisticScrollActivity].)
+  ///
+  /// To avoid this, there are several options. One is to add the
+  /// contents and then scroll to the new position using [animateTo].
+  /// This has the advantage of not disorienting the user.
+  ///
+  /// A second option is to remove the [RangeMaintainingScrollPhysics]
+  /// from the set of active physics for this scroll view. This works
+  /// well if the scroll view cannot otherwise go out of range (e.g.
+  /// due to being resized or due to the contents changing
+  /// dimensions).
+  ///
+  /// A third and more dramatic option to create a custom
+  /// [ScrollActivity] that prevents the position from jumping as
+  /// described in step 3 above.
+  ///
+  /// {@tool snippet}
+  ///
+  /// For example, this code defines a scroll activity that forces the
+  /// pixels to remain the same when the content changes dimensions:
+  ///
+  /// ```dart
+  /// class ForceJumpActivity extends ScrollActivity implements ScrollHoldController {
+  ///   ForceJumpActivity(
+  ///     ScrollActivityDelegate delegate,
+  ///     this.pixels,
+  ///   ) : super(delegate);
+  ///
+  ///   @override
+  ///   void begin() {
+  ///     delegate.setPixels(pixels);
+  ///   }
+  ///
+  ///   @override
+  ///   double adjustPositionForNewDimensions({ @required ScrollMetrics oldPosition, @required ScrollMetrics newPosition }) {
+  ///     return pixels;
+  ///   }
+  ///
+  ///   final double pixels;
+  ///
+  ///   @override
+  ///   void applyNewDimensions() => cancel();
+  ///
+  ///   @override
+  ///   bool get shouldIgnorePointer => false;
+  ///
+  ///   @override
+  ///   bool get isScrolling => true;
+  ///
+  ///   @override
+  ///   double get velocity => 0.0;
+  ///
+  ///   @override
+  ///   void cancel() {
+  ///     delegate.goBallistic(0.0);
+  ///   }
+  /// }
+  ///
+  /// // ...
+  ///
+  /// void _scroll(double newOffset) {
+  ///   controller.position.beginActivity(ForceJumpActivity(controller.position as ScrollActivityDelegate, newOffset));
+  /// }
+  /// ```
+  ///
+  /// {@end-tool}
   void jumpTo(double value) {
     assert(_positions.isNotEmpty, 'ScrollController not attached to any scroll views.');
     for (final ScrollPosition position in List<ScrollPosition>.from(_positions))

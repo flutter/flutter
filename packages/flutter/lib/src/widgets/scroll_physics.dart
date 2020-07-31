@@ -246,7 +246,11 @@ class ScrollPhysics {
 
   /// Describes what the scroll position should be given new viewport dimensions.
   ///
-  /// This is called by [ScrollPosition.correctForNewDimensions].
+  /// This is called by [ScrollPosition.correctForNewDimensions],
+  /// after consulting with the [ScrollActivity] (via
+  /// [ScrollActivity.adjustPositionForNewDimensions]), if the scroll
+  /// activity returns null. (If it does not return null then the correction
+  /// requested by the scroll activity is applied.)
   ///
   /// The arguments consist of the scroll metrics as they stood in the previous
   /// frame and the scroll metrics as they now stand after the last layout,

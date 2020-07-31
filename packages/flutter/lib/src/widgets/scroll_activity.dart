@@ -57,6 +57,11 @@ abstract class ScrollActivityDelegate {
 
 /// Base class for scrolling activities like dragging and flinging.
 ///
+/// An activity should be begun (by calling [begin]) in the same task
+/// or microtask as the one in which it is constructed. For example,
+/// by constructing it immediately prior to calling
+/// [ScrollPosition.beginActivity].
+///
 /// See also:
 ///
 ///  * [ScrollPosition], which uses [ScrollActivity] objects to manage the
@@ -77,6 +82,17 @@ abstract class ScrollActivity {
     assert(_delegate != value);
     _delegate = value;
   }
+
+  /// Called by the [ScrollActivityDelegate] when it has finished
+  /// configuring itself to use this activity.
+  ///
+  /// The [delegate] should not be used until this method has been called.
+  ///
+  /// See also:
+  ///
+  ///  * [ScrollPosition.beginActivity], which calls this method.
+  ///  * [dispose], which is called when the activity is finished.
+  void begin() { }
 
   /// Called by the [ScrollActivityDelegate] when it has changed type (for
   /// example, when changing from an Android-style scroll position to an
@@ -106,6 +122,46 @@ abstract class ScrollActivity {
   /// Dispatch a [ScrollEndNotification] with the given metrics and overscroll.
   void dispatchScrollEndNotification(ScrollMetrics metrics, BuildContext context) {
     ScrollEndNotification(metrics: metrics, context: context).dispatch(context);
+  }
+
+  /// Called when the scroll view that is performing this activity
+  /// changes its metrics, to determine if the position should be
+  /// adjusted to a particular value.
+  ///
+  /// Return null if the activity has no opinion on the required
+  /// correction. In that case, the
+  /// [ScrollPhysics.adjustPositionForNewDimensions] will be consulted
+  /// instead.
+  ///
+  /// The arguments are the scroll metrics as they stood in the
+  /// previous frame and the scroll metrics as they now stand after
+  /// the last layout, including the position and minimum and maximum
+  /// scroll extents.
+  ///
+  /// The scroll metrics will be identical except for the
+  /// [ScrollMetrics.minScrollExtent] and
+  /// [ScrollMetrics.maxScrollExtent]. They are referred to as the
+  /// `oldPosition` and `newPosition` (even though they both
+  /// technically have the same "position", in the form of
+  /// [ScrollMetrics.pixels]) because they are generated from the
+  /// [ScrollPosition] before and after updating the scroll extents.
+  ///
+  /// The given [ScrollMetrics] are only valid during this method call. Do not
+  /// keep references to them to use later, as the values may update, may not
+  /// update, or may update to reflect an entirely unrelated scrollable.
+  ///
+  /// If this adjusts the position, it must return a consistent value
+  /// each time, otherwise the position will be repeatedly changed
+  /// which is very expensive.
+  ///
+  /// After this is called, if no adjustment is needed,
+  /// [applyNewDimensions] will be invoked.
+  ///
+  /// See also:
+  ///
+  ///  * [ScrollPosition.correctForNewDimensions], which calls this.
+  double adjustPositionForNewDimensions({ @required ScrollMetrics oldPosition, @required ScrollMetrics newPosition }) {
+    return null;
   }
 
   /// Called when the scroll view that is performing this activity changes its metrics.
