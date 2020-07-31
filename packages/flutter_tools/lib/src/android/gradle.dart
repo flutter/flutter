@@ -9,6 +9,7 @@ import 'package:meta/meta.dart';
 import 'package:xml/xml.dart';
 
 import '../artifacts.dart';
+import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -18,6 +19,7 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../convert.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -499,6 +501,24 @@ Future<void> buildGradleApp({
     '$successMark Built ${globals.fs.path.relative(apkFile.path)}$appSize.',
     color: TerminalColor.green,
   );
+
+  // Call size analyzer if --analyze-size flag was provided.
+  if (buildInfo.analyzeSize != null) {
+    final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processUtils: ProcessUtils.instance,
+    );
+    final Map<String, Object> output = await sizeAnalyzer.analyzeApkSizeAndAotSnapshot(
+      apk: apkFile,
+      aotSnapshot: globals.fs.file(buildInfo.analyzeSize),
+    );
+    final File outputFile = globals.fs.file('apk-analysis.json')
+      ..writeAsStringSync(jsonEncode(output));
+    globals.printStatus(
+      'A summary of your APK analysis can be found at ${outputFile.path}',
+    );
+  }
 }
 
 /// Builds AAR and POM files.
