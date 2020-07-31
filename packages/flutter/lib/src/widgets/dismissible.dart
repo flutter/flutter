@@ -96,9 +96,11 @@ class Dismissible extends StatefulWidget {
     this.movementDuration = const Duration(milliseconds: 200),
     this.crossAxisEndOffset = 0.0,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.hitTestBehavior = HitTestBehavior.opaque,
   }) : assert(key != null),
        assert(secondaryBackground == null || background != null),
        assert(dragStartBehavior != null),
+       assert(hitTestBehavior != null),
        super(key: key);
 
   /// The widget below this widget in the tree.
@@ -186,6 +188,9 @@ class Dismissible extends StatefulWidget {
   ///
   ///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
   final DragStartBehavior dragStartBehavior;
+
+  /// How to behave during hit tests.
+  final HitTestBehavior hitTestBehavior;
 
   @override
   _DismissibleState createState() => _DismissibleState();
@@ -579,7 +584,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       onVerticalDragStart: _directionIsXAxis ? null : _handleDragStart,
       onVerticalDragUpdate: _directionIsXAxis ? null : _handleDragUpdate,
       onVerticalDragEnd: _directionIsXAxis ? null : _handleDragEnd,
-      behavior: HitTestBehavior.opaque,
+      behavior: widget.hitTestBehavior,
       child: content,
       dragStartBehavior: widget.dragStartBehavior,
     );
