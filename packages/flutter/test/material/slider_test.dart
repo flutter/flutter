@@ -2314,4 +2314,46 @@ void main() {
       'inactiveColor: MaterialColor(primary value: Color(0xff9e9e9e))',
     ]);
   });
+
+  testWidgets('Slider.thumbColor is passed to CupertinoSlider', (WidgetTester tester) async {
+    const TargetPlatform platform = TargetPlatform.iOS;
+
+    Future<void> buildWidget({Color thumbColor}) {
+      return tester.pumpWidget(
+          MaterialApp(
+            theme: ThemeData(platform: platform),
+            home: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Material(
+                child: Center(
+                  child: MouseRegion(
+                    cursor: SystemMouseCursors.forbidden,
+                    child: Slider.adaptive(
+                      mouseCursor: SystemMouseCursors.text,
+                      value: 0.5,
+                      thumbColor: thumbColor,
+                      onChanged: (double newValue) {},
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          )
+      );
+    }
+
+    CupertinoSlider cupertinoSliderWidget() {
+      final Finder cupertinoSliderFinder = find.byType(CupertinoSlider);
+      return tester.widget(cupertinoSliderFinder);
+    }
+
+    // When not provided, CupertinoSlider.thumbColor should default to [CupertinoColor.white].
+    await buildWidget();
+    expect(cupertinoSliderWidget().thumbColor, equals(CupertinoColors.white));
+
+    // When provided, CupertinoSlider.thumbColor should contains the provided color.
+    final Color thumbColor = Colors.amber;
+    await buildWidget(thumbColor: thumbColor);
+    expect(cupertinoSliderWidget().thumbColor, equals(thumbColor));
+  });
 }
