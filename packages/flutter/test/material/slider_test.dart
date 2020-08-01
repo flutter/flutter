@@ -2352,7 +2352,7 @@ void main() {
     expect(cupertinoSliderWidget().thumbColor, equals(CupertinoColors.white));
 
     // When provided, CupertinoSlider.thumbColor should contains the provided color.
-    final Color thumbColor = Colors.amber;
+    const Color thumbColor = Colors.amber;
     await buildWidget(thumbColor: thumbColor);
     expect(cupertinoSliderWidget().thumbColor, equals(thumbColor));
   });
