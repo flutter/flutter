@@ -490,8 +490,8 @@ class SurfaceCanvas implements ui.Canvas {
     ui.Image atlas,
     List<ui.RSTransform> transforms,
     List<ui.Rect> rects,
-    List<ui.Color> colors,
-    ui.BlendMode blendMode,
+    List<ui.Color>? colors,
+    ui.BlendMode? blendMode,
     ui.Rect? cullRect,
     ui.Paint paint,
   ) {
@@ -499,15 +499,14 @@ class SurfaceCanvas implements ui.Canvas {
     assert(atlas != null); // atlas is checked on the engine side
     assert(transforms != null); // ignore: unnecessary_null_comparison
     assert(rects != null); // ignore: unnecessary_null_comparison
-    assert(colors != null); // ignore: unnecessary_null_comparison
-    assert(blendMode != null); // ignore: unnecessary_null_comparison
+    assert(colors == null || colors.isEmpty || blendMode != null);
     assert(paint != null); // ignore: unnecessary_null_comparison
 
     final int rectCount = rects.length;
     if (transforms.length != rectCount) {
       throw ArgumentError('"transforms" and "rects" lengths must match.');
     }
-    if (colors.isNotEmpty && colors.length != rectCount) {
+    if (colors != null && colors.isNotEmpty && colors.length != rectCount) {
       throw ArgumentError(
           'If non-null, "colors" length must match that of "transforms" and "rects".');
     }
@@ -521,8 +520,8 @@ class SurfaceCanvas implements ui.Canvas {
     ui.Image atlas,
     Float32List rstTransforms,
     Float32List rects,
-    Int32List colors,
-    ui.BlendMode blendMode,
+    Int32List? colors,
+    ui.BlendMode? blendMode,
     ui.Rect? cullRect,
     ui.Paint paint,
   ) {
@@ -530,8 +529,7 @@ class SurfaceCanvas implements ui.Canvas {
     assert(atlas != null); // atlas is checked on the engine side
     assert(rstTransforms != null); // ignore: unnecessary_null_comparison
     assert(rects != null); // ignore: unnecessary_null_comparison
-    assert(colors != null); // ignore: unnecessary_null_comparison
-    assert(blendMode != null); // ignore: unnecessary_null_comparison
+    assert(colors == null || blendMode != null);
     assert(paint != null); // ignore: unnecessary_null_comparison
 
     final int rectCount = rects.length;
@@ -542,7 +540,7 @@ class SurfaceCanvas implements ui.Canvas {
       throw ArgumentError(
           '"rstTransforms" and "rects" lengths must be a multiple of four.');
     }
-    if (colors.length * 4 != rectCount) {
+    if (colors != null && colors.length * 4 != rectCount) {
       throw ArgumentError(
           'If non-null, "colors" length must be one fourth the length of "rstTransforms" and "rects".');
     }

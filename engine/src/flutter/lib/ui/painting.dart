@@ -4026,13 +4026,128 @@ class Canvas extends NativeFieldWrapperClass2 {
                      List<dynamic>? paintObjects,
                      ByteData paintData) native 'Canvas_drawVertices';
 
-  /// Draws part of an image - the [atlas] - onto the canvas.
+  /// Draws many parts of an image - the [atlas] - onto the canvas.
   ///
-  /// This method allows for optimization when you only want to draw part of an
-  /// image on the canvas, such as when using sprites or zooming. It is more
-  /// efficient than using clips or masks directly.
+  /// This method allows for optimization when you want to draw many parts of an
+  /// image onto the canvas, such as when using sprites or zooming. It is more efficient
+  /// than using multiple calls to [drawImageRect] and provides more functionality
+  /// to individually transform each image part by a separate rotation or scale and
+  /// blend or modulate those parts with a solid color.
   ///
-  /// All parameters must not be null.
+  /// The method takes a list of [Rect] objects that each define a piece of the
+  /// [atlas] image to be drawn independently. Each [Rect] is associated with an
+  /// [RSTransform] entry in the [transforms] list which defines the location,
+  /// rotation, and (uniform) scale with which to draw that portion of the image.
+  /// Each [Rect] can also be associated with an optional [Color] which will be
+  /// composed with the associated image part using the [blendMode] before blending
+  /// the result onto the canvas. The full operation can be broken down as:
+  ///
+  /// - Blend each rectangular portion of the image specified by an entry in the
+  /// [rects] argument with its associated entry in the [colors] list using the
+  /// [blendMode] argument (if a color is specified). In this part of the operation,
+  /// the image part will be considered the source of the operation and the associated
+  /// color will be considered the destination.
+  /// - Blend the result from the first step onto the canvas using the translation,
+  /// rotation, and scale properties expressed in the associated entry in the
+  /// [transforms] list using the properties of the [Paint] object.
+  ///
+  /// If the first stage of the operation which blends each part of the image with
+  /// a color is needed, then both the [colors] and [blendMode] arguments must
+  /// not be null and there must be an entry in the [colors] list for each
+  /// image part. If that stage is not needed, then the [colors] argument can
+  /// be either null or an empty list and the [blendMode] argument may also be null.
+  ///
+  /// The optional [cullRect] argument can provide an estimate of the bounds of the
+  /// coordinates rendered by all components of the atlas to be compared against
+  /// the clip to quickly reject the operation if it does not intersect.
+  ///
+  /// An example usage to render many sprites from a single sprite atlas with no
+  /// rotations or scales:
+  ///
+  /// ```dart
+  /// class Sprite {
+  ///   int index;
+  ///   double centerX;
+  ///   double centerY;
+  /// }
+  ///
+  /// class MyPainter extends CustomPainter {
+  ///   // assume spriteAtlas contains N 10x10 sprites side by side in a (N*10)x10 image
+  ///   ui.Image spriteAtlas;
+  ///   List<Sprite> allSprites;
+  ///
+  ///   @override
+  ///   void paint(Canvas canvas, Size size) {
+  ///     Paint paint = Paint();
+  ///     canvas.drawAtlas(spriteAtlas, <RSTransform>[
+  ///       for (Sprite sprite in allSprites)
+  ///         RSTransform.fromComponents(
+  ///           rotation: 0.0,
+  ///           scale: 1.0,
+  ///           // Center of the sprite relative to its rect
+  ///           anchorX: 5.0,
+  ///           anchorY: 5.0,
+  ///           // Location at which to draw the center of the sprite
+  ///           translateX: sprite.centerX,
+  ///           translateY: sprite.centerY,
+  ///         ),
+  ///     ], <Rect>[
+  ///       for (Sprite sprite in allSprites)
+  ///         Rect.fromLTWH(sprite.index * 10.0, 0.0, 10.0, 10.0),
+  ///     ], null, null, null, paint);
+  ///   }
+  ///
+  ///   ...
+  /// }
+  /// ```
+  ///
+  /// Another example usage which renders sprites with an optional opacity and rotation:
+  ///
+  /// ```dart
+  /// class Sprite {
+  ///   int index;
+  ///   double centerX;
+  ///   double centerY;
+  ///   int alpha;
+  ///   double rotation;
+  /// }
+  ///
+  /// class MyPainter extends CustomPainter {
+  ///   // assume spriteAtlas contains N 10x10 sprites side by side in a (N*10)x10 image
+  ///   ui.Image spriteAtlas;
+  ///   List<Sprite> allSprites;
+  ///
+  ///   @override
+  ///   void paint(Canvas canvas, Size size) {
+  ///     Paint paint = Paint();
+  ///     canvas.drawAtlas(spriteAtlas, <RSTransform>[
+  ///       for (Sprite sprite in allSprites)
+  ///         RSTransform.fromComponents(
+  ///           rotation: sprite.rotation,
+  ///           scale: 1.0,
+  ///           // Center of the sprite relative to its rect
+  ///           anchorX: 5.0,
+  ///           anchorY: 5.0,
+  ///           // Location at which to draw the center of the sprite
+  ///           translateX: sprite.centerX,
+  ///           translateY: sprite.centerY,
+  ///         ),
+  ///     ], <Rect>[
+  ///       for (Sprite sprite in allSprites)
+  ///         Rect.fromLTWH(sprite.index * 10.0, 0.0, 10.0, 10.0),
+  ///     ], <Color>[
+  ///       for (Sprite sprite in allSprites)
+  ///         Color.white.withAlpha(sprite.alpha),
+  ///     ], BlendMode.srcIn, null, paint);
+  ///   }
+  ///
+  ///   ...
+  /// }
+  /// ```
+  ///
+  /// The length of the [transforms] and [rects] lists must be equal and
+  /// if the [colors] argument is not null then it must either be empty or
+  /// have the same length as the other two lists.
   ///
   /// See also:
   ///
@@ -4041,22 +4156,21 @@ class Canvas extends NativeFieldWrapperClass2 {
   void drawAtlas(Image atlas,
                  List<RSTransform> transforms,
                  List<Rect> rects,
-                 List<Color> colors,
-                 BlendMode blendMode,
+                 List<Color>? colors,
+                 BlendMode? blendMode,
                  Rect? cullRect,
                  Paint paint) {
     // ignore: unnecessary_null_comparison
     assert(atlas != null); // atlas is checked on the engine side
     assert(transforms != null); // ignore: unnecessary_null_comparison
     assert(rects != null); // ignore: unnecessary_null_comparison
-    assert(colors != null); // ignore: unnecessary_null_comparison
-    assert(blendMode != null); // ignore: unnecessary_null_comparison
+    assert(colors == null || colors.isEmpty || blendMode != null);
     assert(paint != null); // ignore: unnecessary_null_comparison
 
     final int rectCount = rects.length;
     if (transforms.length != rectCount)
       throw ArgumentError('"transforms" and "rects" lengths must match.');
-    if (colors.isNotEmpty && colors.length != rectCount)
+    if (colors != null && colors.isNotEmpty && colors.length != rectCount)
       throw ArgumentError('If non-null, "colors" length must match that of "transforms" and "rects".');
 
     final Float32List rstTransformBuffer = Float32List(rectCount * 4);
@@ -4080,20 +4194,27 @@ class Canvas extends NativeFieldWrapperClass2 {
       rectBuffer[index3] = rect.bottom;
     }
 
-    final Int32List? colorBuffer = colors.isEmpty ? null : _encodeColorList(colors);
+    final Int32List? colorBuffer = (colors == null || colors.isEmpty) ? null : _encodeColorList(colors);
     final Float32List? cullRectBuffer = cullRect?._value32;
 
     _drawAtlas(
       paint._objects, paint._data, atlas, rstTransformBuffer, rectBuffer,
-      colorBuffer, blendMode.index, cullRectBuffer
+      colorBuffer, (blendMode ?? BlendMode.src).index, cullRectBuffer
     );
   }
 
-  /// Draws part of an image - the [atlas] - onto the canvas.
+  /// Draws many parts of an image - the [atlas] - onto the canvas.
   ///
-  /// This method allows for optimization when you only want to draw part of an
-  /// image on the canvas, such as when using sprites or zooming. It is more
-  /// efficient than using clips or masks directly.
+  /// This method allows for optimization when you want to draw many parts of an
+  /// image onto the canvas, such as when using sprites or zooming. It is more efficient
+  /// than using multiple calls to [drawImageRect] and provides more functionality
+  /// to individually transform each image part by a separate rotation or scale and
+  /// blend or modulate those parts with a solid color. It is also more efficient
+  /// than [drawAtlas] as the data in the arguments is already packed in a format
+  /// that can be directly used by the rendering code.
+  ///
+  /// A full description of how this method uses its arguments to draw onto the
+  /// canvas can be found in the description of the [drawAtlas] method.
   ///
   /// The [rstTransforms] argument is interpreted as a list of four-tuples, with
   /// each tuple being ([RSTransform.scos], [RSTransform.ssin],
@@ -4103,7 +4224,121 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// tuple being ([Rect.left], [Rect.top], [Rect.right], [Rect.bottom]).
   ///
   /// The [colors] argument, which can be null, is interpreted as a list of
-  /// 32-bit colors, with the same packing as [Color.value].
+  /// 32-bit colors, with the same packing as [Color.value]. If the [colors]
+  /// argument is not null then the [blendMode] argument must also not be null.
+  ///
+  /// An example usage to render many sprites from a single sprite atlas with no rotations
+  /// or scales:
+  ///
+  /// ```dart
+  /// class Sprite {
+  ///   int index;
+  ///   double centerX;
+  ///   double centerY;
+  /// }
+  ///
+  /// class MyPainter extends CustomPainter {
+  ///   // assume spriteAtlas contains N 10x10 sprites side by side in a (N*10)x10 image
+  ///   ui.Image spriteAtlas;
+  ///   List<Sprite> allSprites;
+  ///
+  ///   @override
+  ///   void paint(Canvas canvas, Size size) {
+  ///     // For best advantage, these lists should be cached and only specific
+  ///     // entries updated when the sprite information changes. This code is
+  ///     // illustrative of how to set up the data and not a recommendation for
+  ///     // optimal usage.
+  ///     Float32List rectList = Float32List(allSprites.length * 4);
+  ///     Float32List transformList = Float32List(allSprites.length * 4);
+  ///     for (int i = 0; i < allSprites.length; i++) {
+  ///       final double rectX = sprite.spriteIndex * 10.0;
+  ///       rectList[i * 4 + 0] = rectX;
+  ///       rectList[i * 4 + 1] = 0.0;
+  ///       rectList[i * 4 + 2] = rectX + 10.0;
+  ///       rectList[i * 4 + 3] = 10.0;
+  ///
+  ///       // This example sets the RSTransform values directly for a common case of no
+  ///       // rotations or scales and just a translation to position the atlas entry. For
+  ///       // more complicated transforms one could use the RSTransform class to compute
+  ///       // the necessary values or do the same math directly.
+  ///       transformList[i * 4 + 0] = 1.0;
+  ///       transformList[i * 4 + 1] = 0.0;
+  ///       transformList[i * 4 + 2] = sprite.centerX - 5.0;
+  ///       transformList[i * 4 + 2] = sprite.centerY - 5.0;
+  ///     }
+  ///     Paint paint = Paint();
+  ///     canvas.drawAtlas(spriteAtlas, transformList, rectList, null, null, null, paint);
+  ///   }
+  ///
+  ///   ...
+  /// }
+  /// ```
+  ///
+  /// Another example usage which renders sprites with an optional opacity and rotation:
+  ///
+  /// ```dart
+  /// class Sprite {
+  ///   int index;
+  ///   double centerX;
+  ///   double centerY;
+  ///   int alpha;
+  ///   double rotation;
+  /// }
+  ///
+  /// class MyPainter extends CustomPainter {
+  ///   // assume spriteAtlas contains N 10x10 sprites side by side in a (N*10)x10 image
+  ///   ui.Image spriteAtlas;
+  ///   List<Sprite> allSprites;
+  ///
+  ///   @override
+  ///   void paint(Canvas canvas, Size size) {
+  ///     // For best advantage, these lists should be cached and only specific
+  ///     // entries updated when the sprite information changes. This code is
+  ///     // illustrative of how to set up the data and not a recommendation for
+  ///     // optimal usage.
+  ///     Float32List rectList = Float32List(allSprites.length * 4);
+  ///     Float32List transformList = Float32List(allSprites.length * 4);
+  ///     Int32List colorList = Int32List(allSprites.length);
+  ///     for (int i = 0; i < allSprites.length; i++) {
+  ///       final double rectX = sprite.spriteIndex * 10.0;
+  ///       rectList[i * 4 + 0] = rectX;
+  ///       rectList[i * 4 + 1] = 0.0;
+  ///       rectList[i * 4 + 2] = rectX + 10.0;
+  ///       rectList[i * 4 + 3] = 10.0;
+  ///
+  ///       // This example uses an RSTransform object to compute the necessary values for
+  ///       // the transform using a factory helper method because the sprites contain
+  ///       // rotation values which are not trivial to work with. But if the math for the
+  ///       // values falls out from other calculations on the sprites then the values could
+  ///       // possibly be generated directly from the sprite update code.
+  ///       final RSTransform transform = RSTransform.fromComponents(
+  ///         rotation: sprite.rotation,
+  ///         scale: 1.0,
+  ///         // Center of the sprite relative to its rect
+  ///         anchorX: 5.0,
+  ///         anchorY: 5.0,
+  ///         // Location at which to draw the center of the sprite
+  ///         translateX: sprite.centerX,
+  ///         translateY: sprite.centerY,
+  ///       );
+  ///       transformList[i * 4 + 0] = transform.scos;
+  ///       transformList[i * 4 + 1] = transform.ssin;
+  ///       transformList[i * 4 + 2] = transform.tx;
+  ///       transformList[i * 4 + 2] = transform.ty;
+  ///
+  ///       // This example computes the color value directly, but one could also compute
+  ///       // an actual Color object and use its Color.value getter for the same result.
+  ///       // Since we are using BlendMode.srcIn, only the alpha component matters for
+  ///       // these colors which makes this a simple shift operation.
+  ///       colorList[i] = sprite.alpha << 24;
+  ///     }
+  ///     Paint paint = Paint();
+  ///     canvas.drawAtlas(spriteAtlas, transformList, rectList, colorList, BlendMode.srcIn, null, paint);
+  ///   }
+  ///
+  ///   ...
+  /// }
+  /// ```
   ///
   /// See also:
   ///
@@ -4112,16 +4347,15 @@ class Canvas extends NativeFieldWrapperClass2 {
   void drawRawAtlas(Image atlas,
                     Float32List rstTransforms,
                     Float32List rects,
-                    Int32List colors,
-                    BlendMode blendMode,
+                    Int32List? colors,
+                    BlendMode? blendMode,
                     Rect? cullRect,
                     Paint paint) {
     // ignore: unnecessary_null_comparison
     assert(atlas != null); // atlas is checked on the engine side
     assert(rstTransforms != null); // ignore: unnecessary_null_comparison
     assert(rects != null); // ignore: unnecessary_null_comparison
-    assert(colors != null); // ignore: unnecessary_null_comparison
-    assert(blendMode != null); // ignore: unnecessary_null_comparison
+    assert(colors == null || blendMode != null);
     assert(paint != null); // ignore: unnecessary_null_comparison
 
     final int rectCount = rects.length;
@@ -4129,12 +4363,12 @@ class Canvas extends NativeFieldWrapperClass2 {
       throw ArgumentError('"rstTransforms" and "rects" lengths must match.');
     if (rectCount % 4 != 0)
       throw ArgumentError('"rstTransforms" and "rects" lengths must be a multiple of four.');
-    if (colors.length * 4 != rectCount)
+    if (colors != null && colors.length * 4 != rectCount)
       throw ArgumentError('If non-null, "colors" length must be one fourth the length of "rstTransforms" and "rects".');
 
     _drawAtlas(
       paint._objects, paint._data, atlas, rstTransforms, rects,
-      colors, blendMode.index, cullRect?._value32
+      colors, (blendMode ?? BlendMode.src).index, cullRect?._value32
     );
   }
 
