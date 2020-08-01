@@ -1,7 +1,6 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// FLUTTER_NOLINT
 
 #include "flutter/fml/build_config.h"
 
@@ -98,7 +97,8 @@ TEST(MatrixDecomposition, Combination) {
 
 TEST(MatrixDecomposition, ScaleFloatError) {
   constexpr float scale_increment = 0.00001f;
-  for (float scale = 0.0001f; scale < 2.0f; scale += scale_increment) {
+  float scale = 0.0001f;
+  while (scale < 2.0f) {
     SkM44 matrix;
     matrix.setScale(scale, scale, 1.0f);
 
@@ -111,11 +111,12 @@ TEST(MatrixDecomposition, ScaleFloatError) {
     ASSERT_FLOAT_EQ(0, decomposition3.rotation().x);
     ASSERT_FLOAT_EQ(0, decomposition3.rotation().y);
     ASSERT_FLOAT_EQ(0, decomposition3.rotation().z);
+    scale += scale_increment;
   }
 
   SkM44 matrix;
-  const auto scale = 1.7734375f;
-  matrix.setScale(scale, scale, 1.f);
+  const auto scale1 = 1.7734375f;
+  matrix.setScale(scale1, scale1, 1.f);
 
   // Bug upper bound (empirical)
   const auto scale2 = 1.773437559603f;
@@ -136,8 +137,8 @@ TEST(MatrixDecomposition, ScaleFloatError) {
   flutter::MatrixDecomposition decomposition3(matrix3);
   ASSERT_TRUE(decomposition3.IsValid());
 
-  ASSERT_FLOAT_EQ(scale, decomposition.scale().x);
-  ASSERT_FLOAT_EQ(scale, decomposition.scale().y);
+  ASSERT_FLOAT_EQ(scale1, decomposition.scale().x);
+  ASSERT_FLOAT_EQ(scale1, decomposition.scale().y);
   ASSERT_FLOAT_EQ(1.f, decomposition.scale().z);
   ASSERT_FLOAT_EQ(0, decomposition.rotation().x);
   ASSERT_FLOAT_EQ(0, decomposition.rotation().y);

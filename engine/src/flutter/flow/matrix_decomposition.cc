@@ -1,7 +1,6 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// FLUTTER_NOLINT
 
 #include "flutter/flow/matrix_decomposition.h"
 
@@ -18,12 +17,12 @@ MatrixDecomposition::MatrixDecomposition(const SkMatrix& matrix)
     : MatrixDecomposition(SkM44{matrix}) {}
 
 // Use custom normalize to avoid skia precision loss/normalize() privatization.
-static inline void SkV3Normalize(SkV3& v) {
-  double mag = sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+static inline void SkV3Normalize(SkV3* v) {
+  double mag = sqrt(v->x * v->x + v->y * v->y + v->z * v->z);
   double scale = 1.0 / mag;
-  v.x *= scale;
-  v.y *= scale;
-  v.z *= scale;
+  v->x *= scale;
+  v->y *= scale;
+  v->z *= scale;
 }
 
 MatrixDecomposition::MatrixDecomposition(SkM44 matrix) : valid_(false) {
@@ -71,14 +70,14 @@ MatrixDecomposition::MatrixDecomposition(SkM44 matrix) : valid_(false) {
 
   scale_.x = row[0].length();
 
-  SkV3Normalize(row[0]);
+  SkV3Normalize(&row[0]);
 
   shear_.x = row[0].dot(row[1]);
   row[1] = SkV3Combine(row[1], 1.0, row[0], -shear_.x);
 
   scale_.y = row[1].length();
 
-  SkV3Normalize(row[1]);
+  SkV3Normalize(&row[1]);
 
   shear_.x /= scale_.y;
 
@@ -89,7 +88,7 @@ MatrixDecomposition::MatrixDecomposition(SkM44 matrix) : valid_(false) {
 
   scale_.z = row[2].length();
 
-  SkV3Normalize(row[2]);
+  SkV3Normalize(&row[2]);
 
   shear_.y /= scale_.z;
   shear_.z /= scale_.z;

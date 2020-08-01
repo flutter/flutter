@@ -39,9 +39,8 @@ const char* StripPath(const char* path) {
   auto* p = strrchr(path, '/');
   if (p) {
     return p + 1;
-  } else {
-    return path;
   }
+  return path;
 }
 
 }  // namespace
