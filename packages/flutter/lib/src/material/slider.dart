@@ -159,6 +159,7 @@ class Slider extends StatefulWidget {
     this.semanticFormatterCallback,
     this.focusNode,
     this.autofocus = false,
+    this.thumbColor,
   }) : _sliderType = _SliderType.material,
        assert(value != null),
        assert(min != null),
@@ -191,6 +192,7 @@ class Slider extends StatefulWidget {
     this.semanticFormatterCallback,
     this.focusNode,
     this.autofocus = false,
+    this.thumbColor,
   }) : _sliderType = _SliderType.adaptive,
        assert(value != null),
        assert(min != null),
@@ -430,6 +432,12 @@ class Slider extends StatefulWidget {
 
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
+
+  /// {@macro flutter.cupertino.slider.thumbColor}
+  ///
+  /// Used if this slider is created with [Slider.adaptive] and
+  /// running in a cupertino style platform.
+  final Color thumbColor;
 
   final _SliderType _sliderType ;
 
@@ -756,6 +764,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
         max: widget.max,
         divisions: widget.divisions,
         activeColor: widget.activeColor,
+        thumbColor: widget.thumbColor ?? CupertinoColors.white,
       ),
     );
   }
