@@ -365,7 +365,7 @@ class Shell final : public PlatformView::Delegate,
  private:
   using ServiceProtocolHandler =
       std::function<bool(const ServiceProtocol::Handler::ServiceProtocolMap&,
-                         rapidjson::Document&)>;
+                         rapidjson::Document*)>;
 
   const TaskRunners task_runners_;
   const Settings settings_;
@@ -541,7 +541,7 @@ class Shell final : public PlatformView::Delegate,
   bool HandleServiceProtocolMessage(
       std::string_view method,  // one if the extension names specified above.
       const ServiceProtocolMap& params,
-      rapidjson::Document& response) override;
+      rapidjson::Document* response) override;
 
   // |ServiceProtocol::Handler|
   ServiceProtocol::Handler::Description GetServiceProtocolDescription()
@@ -550,39 +550,39 @@ class Shell final : public PlatformView::Delegate,
   // Service protocol handler
   bool OnServiceProtocolScreenshot(
       const ServiceProtocol::Handler::ServiceProtocolMap& params,
-      rapidjson::Document& response);
+      rapidjson::Document* response);
 
   // Service protocol handler
   bool OnServiceProtocolScreenshotSKP(
       const ServiceProtocol::Handler::ServiceProtocolMap& params,
-      rapidjson::Document& response);
+      rapidjson::Document* response);
 
   // Service protocol handler
   bool OnServiceProtocolRunInView(
       const ServiceProtocol::Handler::ServiceProtocolMap& params,
-      rapidjson::Document& response);
+      rapidjson::Document* response);
 
   // Service protocol handler
   bool OnServiceProtocolFlushUIThreadTasks(
       const ServiceProtocol::Handler::ServiceProtocolMap& params,
-      rapidjson::Document& response);
+      rapidjson::Document* response);
 
   // Service protocol handler
   bool OnServiceProtocolSetAssetBundlePath(
       const ServiceProtocol::Handler::ServiceProtocolMap& params,
-      rapidjson::Document& response);
+      rapidjson::Document* response);
 
   // Service protocol handler
   bool OnServiceProtocolGetDisplayRefreshRate(
       const ServiceProtocol::Handler::ServiceProtocolMap& params,
-      rapidjson::Document& response);
+      rapidjson::Document* response);
 
   // Service protocol handler
   //
   // The returned SkSLs are base64 encoded. Decode before storing them to files.
   bool OnServiceProtocolGetSkSLs(
       const ServiceProtocol::Handler::ServiceProtocolMap& params,
-      rapidjson::Document& response);
+      rapidjson::Document* response);
 
   fml::WeakPtrFactory<Shell> weak_factory_;
 

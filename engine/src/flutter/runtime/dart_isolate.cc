@@ -1,7 +1,6 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// FLUTTER_NOLINT
 
 #include "flutter/runtime/dart_isolate.h"
 
@@ -44,7 +43,7 @@ class DartErrorString {
   }
   char** error() { return &str_; }
   const char* str() const { return str_; }
-  operator bool() const { return str_ != nullptr; }
+  explicit operator bool() const { return str_ != nullptr; }
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(DartErrorString);
@@ -385,7 +384,7 @@ bool DartIsolate::LoadKernel(std::shared_ptr<const fml::Mapping> mapping,
   if (GetIsolateGroupData().GetChildIsolatePreparer() == nullptr) {
     GetIsolateGroupData().SetChildIsolatePreparer(
         [buffers = kernel_buffers_](DartIsolate* isolate) {
-          for (unsigned long i = 0; i < buffers.size(); i++) {
+          for (uint64_t i = 0; i < buffers.size(); i++) {
             bool last_piece = i + 1 == buffers.size();
             const std::shared_ptr<const fml::Mapping>& buffer = buffers.at(i);
             if (!isolate->PrepareForRunningFromKernel(buffer, last_piece)) {
@@ -676,6 +675,10 @@ Dart_Isolate DartIsolate::DartIsolateGroupCreateCallback(
     );
   }
 
+  if (!parent_isolate_data) {
+    return nullptr;
+  }
+
   DartIsolateGroupData& parent_group_data =
       (*parent_isolate_data)->GetIsolateGroupData();
 
@@ -690,7 +693,8 @@ Dart_Isolate DartIsolate::DartIsolateGroupCreateCallback(
               parent_group_data.GetIsolateShutdownCallback())));
 
   TaskRunners null_task_runners(advisory_script_uri,
-                                /* platform= */ nullptr, /* raster= */ nullptr,
+                                /* platform= */ nullptr,
+                                /* raster= */ nullptr,
                                 /* ui= */ nullptr,
                                 /* io= */ nullptr);
 
@@ -732,7 +736,8 @@ bool DartIsolate::DartIsolateInitializeCallback(void** child_callback_data,
           Dart_CurrentIsolateGroupData());
 
   TaskRunners null_task_runners((*isolate_group_data)->GetAdvisoryScriptURI(),
-                                /* platform= */ nullptr, /* raster= */ nullptr,
+                                /* platform= */ nullptr,
+                                /* raster= */ nullptr,
                                 /* ui= */ nullptr,
                                 /* io= */ nullptr);
 

@@ -1,7 +1,6 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// FLUTTER_NOLINT
 
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
@@ -19,7 +18,19 @@
 namespace flutter {
 namespace testing {
 
-using DartIsolateTest = FixtureTest;
+class DartIsolateTest : public FixtureTest {
+ public:
+  DartIsolateTest() {}
+
+  void Wait() { latch_.Wait(); }
+
+  void Signal() { latch_.Signal(); }
+
+ private:
+  fml::AutoResetWaitableEvent latch_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(DartIsolateTest);
+};
 
 TEST_F(DartIsolateTest, RootIsolateCreationAndShutdown) {
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
@@ -153,11 +164,10 @@ TEST_F(DartIsolateTest, CanRunDartCodeCodeSynchronously) {
 
 TEST_F(DartIsolateTest, CanRegisterNativeCallback) {
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
-  fml::AutoResetWaitableEvent latch;
   AddNativeCallback("NotifyNative",
-                    CREATE_NATIVE_ENTRY(([&latch](Dart_NativeArguments args) {
+                    CREATE_NATIVE_ENTRY(([this](Dart_NativeArguments args) {
                       FML_LOG(ERROR) << "Hello from Dart!";
-                      latch.Signal();
+                      Signal();
                     })));
   const auto settings = CreateSettingsForFixture();
   auto vm_ref = DartVMRef::Create(settings);
@@ -173,7 +183,7 @@ TEST_F(DartIsolateTest, CanRegisterNativeCallback) {
                            "canRegisterNativeCallback", {}, GetFixturesPath());
   ASSERT_TRUE(isolate);
   ASSERT_EQ(isolate->get()->GetPhase(), DartIsolate::Phase::Running);
-  latch.Wait();
+  Wait();
 }
 
 TEST_F(DartIsolateTest, CanSaveCompilationTrace) {
@@ -182,12 +192,11 @@ TEST_F(DartIsolateTest, CanSaveCompilationTrace) {
     GTEST_SKIP();
     return;
   }
-  fml::AutoResetWaitableEvent latch;
   AddNativeCallback("NotifyNative",
-                    CREATE_NATIVE_ENTRY(([&latch](Dart_NativeArguments args) {
+                    CREATE_NATIVE_ENTRY(([this](Dart_NativeArguments args) {
                       ASSERT_TRUE(tonic::DartConverter<bool>::FromDart(
                           Dart_GetNativeArgument(args, 0)));
-                      latch.Signal();
+                      Signal();
                     })));
 
   const auto settings = CreateSettingsForFixture();
@@ -205,31 +214,52 @@ TEST_F(DartIsolateTest, CanSaveCompilationTrace) {
   ASSERT_TRUE(isolate);
   ASSERT_EQ(isolate->get()->GetPhase(), DartIsolate::Phase::Running);
 
-  latch.Wait();
+  Wait();
 }
 
-TEST_F(DartIsolateTest, CanLaunchSecondaryIsolates) {
-  fml::CountDownLatch latch(3);
-  fml::AutoResetWaitableEvent child_shutdown_latch;
-  fml::AutoResetWaitableEvent root_isolate_shutdown_latch;
+class DartSecondaryIsolateTest : public FixtureTest {
+ public:
+  DartSecondaryIsolateTest() : latch_(3) {}
+
+  void LatchCountDown() { latch_.CountDown(); }
+
+  void LatchWait() { latch_.Wait(); }
+
+  void ChildShutdownSignal() { child_shutdown_latch_.Signal(); }
+
+  void ChildShutdownWait() { child_shutdown_latch_.Wait(); }
+
+  void RootIsolateShutdownSignal() { root_isolate_shutdown_latch_.Signal(); }
+
+  bool RootIsolateIsSignaled() {
+    return root_isolate_shutdown_latch_.IsSignaledForTest();
+  }
+
+ private:
+  fml::CountDownLatch latch_;
+  fml::AutoResetWaitableEvent child_shutdown_latch_;
+  fml::AutoResetWaitableEvent root_isolate_shutdown_latch_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(DartSecondaryIsolateTest);
+};
+
+TEST_F(DartSecondaryIsolateTest, CanLaunchSecondaryIsolates) {
   AddNativeCallback("NotifyNative",
-                    CREATE_NATIVE_ENTRY(([&latch](Dart_NativeArguments args) {
-                      latch.CountDown();
+                    CREATE_NATIVE_ENTRY(([this](Dart_NativeArguments args) {
+                      LatchCountDown();
                     })));
   AddNativeCallback(
-      "PassMessage", CREATE_NATIVE_ENTRY(([&latch](Dart_NativeArguments args) {
+      "PassMessage", CREATE_NATIVE_ENTRY(([this](Dart_NativeArguments args) {
         auto message = tonic::DartConverter<std::string>::FromDart(
             Dart_GetNativeArgument(args, 0));
         ASSERT_EQ("Hello from code is secondary isolate.", message);
-        latch.CountDown();
+        LatchCountDown();
       })));
   auto settings = CreateSettingsForFixture();
-  settings.root_isolate_shutdown_callback = [&root_isolate_shutdown_latch]() {
-    root_isolate_shutdown_latch.Signal();
+  settings.root_isolate_shutdown_callback = [this]() {
+    RootIsolateShutdownSignal();
   };
-  settings.isolate_shutdown_callback = [&child_shutdown_latch]() {
-    child_shutdown_latch.Signal();
-  };
+  settings.isolate_shutdown_callback = [this]() { ChildShutdownSignal(); };
   auto vm_ref = DartVMRef::Create(settings);
   auto thread = CreateNewThread();
   TaskRunners task_runners(GetCurrentTestName(),  //
@@ -243,19 +273,18 @@ TEST_F(DartIsolateTest, CanLaunchSecondaryIsolates) {
                                       GetFixturesPath());
   ASSERT_TRUE(isolate);
   ASSERT_EQ(isolate->get()->GetPhase(), DartIsolate::Phase::Running);
-  child_shutdown_latch.Wait();  // wait for child isolate to shutdown first
-  ASSERT_FALSE(root_isolate_shutdown_latch.IsSignaledForTest());
-  latch.Wait();  // wait for last NotifyNative called by main isolate
+  ChildShutdownWait();  // wait for child isolate to shutdown first
+  ASSERT_FALSE(RootIsolateIsSignaled());
+  LatchWait();  // wait for last NotifyNative called by main isolate
   // root isolate will be auto-shutdown
 }
 
 TEST_F(DartIsolateTest, CanRecieveArguments) {
-  fml::AutoResetWaitableEvent latch;
   AddNativeCallback("NotifyNative",
-                    CREATE_NATIVE_ENTRY(([&latch](Dart_NativeArguments args) {
+                    CREATE_NATIVE_ENTRY(([this](Dart_NativeArguments args) {
                       ASSERT_TRUE(tonic::DartConverter<bool>::FromDart(
                           Dart_GetNativeArgument(args, 0)));
-                      latch.Signal();
+                      Signal();
                     })));
 
   const auto settings = CreateSettingsForFixture();
@@ -273,7 +302,7 @@ TEST_F(DartIsolateTest, CanRecieveArguments) {
   ASSERT_TRUE(isolate);
   ASSERT_EQ(isolate->get()->GetPhase(), DartIsolate::Phase::Running);
 
-  latch.Wait();
+  Wait();
 }
 
 }  // namespace testing

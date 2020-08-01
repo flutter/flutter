@@ -92,7 +92,7 @@ class ShellTest : public FixtureTest {
       ServiceProtocolEnum some_protocol,
       fml::RefPtr<fml::TaskRunner> task_runner,
       const ServiceProtocol::Handler::ServiceProtocolMap& params,
-      rapidjson::Document& response);
+      rapidjson::Document* response);
 
   std::shared_ptr<txt::FontCollection> GetFontCollection(Shell* shell);
 

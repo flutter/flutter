@@ -42,6 +42,7 @@ fi
 
 cd "$CI_DIR"
 pub get && dart \
+  --disable-dart-dev \
   bin/lint.dart \
   --compile-commands="$COMPILE_COMMANDS" \
   --repo="$SRC_DIR/flutter" \

@@ -241,7 +241,7 @@ void main(List<String> arguments) async {
   final ProcessPool pool = ProcessPool();
 
   await for (final WorkerJob job in pool.startWorkers(jobs)) {
-    if (job.result.stdout.isEmpty) {
+    if (job.result?.stdout.isEmpty ?? true) {
       continue;
     }
     print('❌ Failures for ${job.name}:');

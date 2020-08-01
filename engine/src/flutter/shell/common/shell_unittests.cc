@@ -1256,7 +1256,7 @@ TEST_F(ShellTest, OnServiceProtocolGetSkSLsWorks) {
   rapidjson::Document document;
   OnServiceProtocol(shell.get(), ServiceProtocolEnum::kGetSkSLs,
                     shell->GetTaskRunners().GetIOTaskRunner(), empty_params,
-                    document);
+                    &document);
   rapidjson::StringBuffer buffer;
   rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
   document.Accept(writer);
