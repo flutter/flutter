@@ -56,7 +56,7 @@ class ServiceProtocol {
     virtual bool HandleServiceProtocolMessage(
         std::string_view method,  // one if the extension names specified above.
         const ServiceProtocolMap& params,
-        rapidjson::Document& response) = 0;
+        rapidjson::Document* response) = 0;
   };
 
   ServiceProtocol();
@@ -87,12 +87,12 @@ class ServiceProtocol {
       std::string_view method,
       const Handler::ServiceProtocolMap& params,
       ServiceProtocol* service_protocol,
-      rapidjson::Document& response);
+      rapidjson::Document* response);
   [[nodiscard]] bool HandleMessage(std::string_view method,
                                    const Handler::ServiceProtocolMap& params,
-                                   rapidjson::Document& response) const;
+                                   rapidjson::Document* response) const;
 
-  [[nodiscard]] bool HandleListViewsMethod(rapidjson::Document& response) const;
+  [[nodiscard]] bool HandleListViewsMethod(rapidjson::Document* response) const;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ServiceProtocol);
 };

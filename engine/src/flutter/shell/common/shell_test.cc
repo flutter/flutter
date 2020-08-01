@@ -178,10 +178,10 @@ void ShellTest::OnServiceProtocol(
     ServiceProtocolEnum some_protocol,
     fml::RefPtr<fml::TaskRunner> task_runner,
     const ServiceProtocol::Handler::ServiceProtocolMap& params,
-    rapidjson::Document& response) {
+    rapidjson::Document* response) {
   std::promise<bool> finished;
   fml::TaskRunner::RunNowOrPostTask(
-      task_runner, [shell, some_protocol, params, &response, &finished]() {
+      task_runner, [shell, some_protocol, params, response, &finished]() {
         switch (some_protocol) {
           case ServiceProtocolEnum::kGetSkSLs:
             shell->OnServiceProtocolGetSkSLs(params, response);

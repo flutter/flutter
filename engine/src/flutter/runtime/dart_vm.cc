@@ -1,7 +1,6 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// FLUTTER_NOLINT
 
 #include "flutter/runtime/dart_vm.h"
 
@@ -129,13 +128,15 @@ bool DartFileModifiedCallback(const char* source_url, int64_t since_ms) {
 
   const char* path = source_url + kFileUriPrefixLength;
   struct stat info;
-  if (stat(path, &info) < 0)
+  if (stat(path, &info) < 0) {
     return true;
+  }
 
   // If st_mtime is zero, it's more likely that the file system doesn't support
   // mtime than that the file was actually modified in the 1970s.
-  if (!info.st_mtime)
+  if (!info.st_mtime) {
     return true;
+  }
 
   // It's very unclear what time bases we're with here. The Dart API doesn't
   // document the time base for since_ms. Reading the code, the value varies by
@@ -383,8 +384,9 @@ DartVM::DartVM(std::shared_ptr<const DartVMData> vm_data,
   PushBackAll(&args, kDartTraceStreamsArgs, fml::size(kDartTraceStreamsArgs));
 #endif
 
-  for (size_t i = 0; i < settings_.dart_flags.size(); i++)
+  for (size_t i = 0; i < settings_.dart_flags.size(); i++) {
     args.push_back(settings_.dart_flags[i].c_str());
+  }
 
   char* flags_error = Dart_SetVMFlags(args.size(), args.data());
   if (flags_error) {
