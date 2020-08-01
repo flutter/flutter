@@ -22,7 +22,7 @@ class RasterCacheResult {
 
   virtual ~RasterCacheResult() = default;
 
-  virtual void draw(SkCanvas& canvas, const SkPaint* paint = nullptr) const;
+  virtual void draw(SkCanvas& canvas, const SkPaint* paint) const;
 
   virtual SkISize image_dimensions() const {
     return image_ ? image_->dimensions() : SkISize::Make(0, 0);

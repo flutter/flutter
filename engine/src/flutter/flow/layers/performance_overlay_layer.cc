@@ -1,7 +1,6 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// FLUTTER_NOLINT
 
 #include <iomanip>
 #include <iostream>
@@ -14,7 +13,7 @@
 namespace flutter {
 namespace {
 
-void VisualizeStopWatch(SkCanvas& canvas,
+void VisualizeStopWatch(SkCanvas* canvas,
                         const Stopwatch& stopwatch,
                         SkScalar x,
                         SkScalar y,
@@ -37,7 +36,7 @@ void VisualizeStopWatch(SkCanvas& canvas,
         stopwatch, label_prefix, font_path);
     SkPaint paint;
     paint.setColor(SK_ColorGRAY);
-    canvas.drawTextBlob(text, x + label_x, y + height + label_y, paint);
+    canvas->drawTextBlob(text, x + label_x, y + height + label_y, paint);
   }
 }
 
@@ -77,8 +76,9 @@ PerformanceOverlayLayer::PerformanceOverlayLayer(uint64_t options,
 void PerformanceOverlayLayer::Paint(PaintContext& context) const {
   const int padding = 8;
 
-  if (!options_)
+  if (!options_) {
     return;
+  }
 
   TRACE_EVENT0("flutter", "PerformanceOverlayLayer::Paint");
   SkScalar x = paint_bounds().x() + padding;
@@ -88,11 +88,11 @@ void PerformanceOverlayLayer::Paint(PaintContext& context) const {
   SkAutoCanvasRestore save(context.leaf_nodes_canvas, true);
 
   VisualizeStopWatch(
-      *context.leaf_nodes_canvas, context.raster_time, x, y, width,
+      context.leaf_nodes_canvas, context.raster_time, x, y, width,
       height - padding, options_ & kVisualizeRasterizerStatistics,
       options_ & kDisplayRasterizerStatistics, "Raster", font_path_);
 
-  VisualizeStopWatch(*context.leaf_nodes_canvas, context.ui_time, x, y + height,
+  VisualizeStopWatch(context.leaf_nodes_canvas, context.ui_time, x, y + height,
                      width, height - padding,
                      options_ & kVisualizeEngineStatistics,
                      options_ & kDisplayEngineStatistics, "UI", font_path_);
