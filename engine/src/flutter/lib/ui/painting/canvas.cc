@@ -11,6 +11,7 @@
 #include "flutter/lib/ui/painting/image.h"
 #include "flutter/lib/ui/painting/matrix.h"
 #include "flutter/lib/ui/ui_dart_state.h"
+#include "flutter/lib/ui/window/platform_configuration.h"
 #include "flutter/lib/ui/window/window.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkCanvas.h"
@@ -474,8 +475,11 @@ void Canvas::drawShadow(const CanvasPath* path,
         ToDart("Canvas.drawShader called with non-genuine Path."));
     return;
   }
-  SkScalar dpr =
-      UIDartState::Current()->window()->viewport_metrics().device_pixel_ratio;
+  SkScalar dpr = UIDartState::Current()
+                     ->platform_configuration()
+                     ->window()
+                     ->viewport_metrics()
+                     .device_pixel_ratio;
   external_allocation_size_ += path->path().approximateBytesUsed();
   flutter::PhysicalShapeLayer::DrawShadow(canvas_, path->path(), color,
                                           elevation, transparentOccluder, dpr);

@@ -53,6 +53,8 @@ source_set_maybe_fuchsia_legacy("runtime") {
     "dart_vm_lifecycle.h",
     "embedder_resources.cc",
     "embedder_resources.h",
+    "platform_data.cc",
+    "platform_data.h",
     "ptrace_ios.cc",
     "ptrace_ios.h",
     "runtime_controller.cc",
@@ -63,8 +65,6 @@ source_set_maybe_fuchsia_legacy("runtime") {
     "service_protocol.h",
     "skia_concurrent_executor.cc",
     "skia_concurrent_executor.h",
-    "window_data.cc",
-    "window_data.h",
   ]
 
   public_deps = [ "//third_party/rapidjson" ]

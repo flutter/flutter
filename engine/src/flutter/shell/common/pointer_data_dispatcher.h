@@ -23,7 +23,7 @@ class PointerDataDispatcher;
 /// delivered packets, and dispatches them in sync with the VSYNC signal.
 ///
 /// This object will be owned by the engine because it relies on the engine's
-/// `Animator` (which owns `VsyncWaiter`) and `RuntomeController` to do the
+/// `Animator` (which owns `VsyncWaiter`) and `RuntimeController` to do the
 /// filtering. This object is currently designed to be only called from the UI
 /// thread (no thread safety is guaranteed).
 ///

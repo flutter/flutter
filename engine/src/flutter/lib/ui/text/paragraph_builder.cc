@@ -10,7 +10,7 @@
 #include "flutter/fml/task_runner.h"
 #include "flutter/lib/ui/text/font_collection.h"
 #include "flutter/lib/ui/ui_dart_state.h"
-#include "flutter/lib/ui/window/window.h"
+#include "flutter/lib/ui/window/platform_configuration.h"
 #include "flutter/third_party/txt/src/txt/font_style.h"
 #include "flutter/third_party/txt/src/txt/font_weight.h"
 #include "flutter/third_party/txt/src/txt/paragraph_style.h"
@@ -288,8 +288,10 @@ ParagraphBuilder::ParagraphBuilder(
     style.locale = locale;
   }
 
-  FontCollection& font_collection =
-      UIDartState::Current()->window()->client()->GetFontCollection();
+  FontCollection& font_collection = UIDartState::Current()
+                                        ->platform_configuration()
+                                        ->client()
+                                        ->GetFontCollection();
 
 #if FLUTTER_ENABLE_SKSHAPER
 #define FLUTTER_PARAGRAPH_BUILDER txt::ParagraphBuilder::CreateSkiaBuilder

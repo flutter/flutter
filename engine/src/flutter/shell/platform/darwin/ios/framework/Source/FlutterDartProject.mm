@@ -168,12 +168,12 @@ static flutter::Settings DefaultSettingsForProcess(NSBundle* bundle = nil) {
   return self;
 }
 
-#pragma mark - WindowData accessors
+#pragma mark - PlatformData accessors
 
-- (const flutter::WindowData)defaultWindowData {
-  flutter::WindowData windowData;
-  windowData.lifecycle_state = std::string("AppLifecycleState.detached");
-  return windowData;
+- (const flutter::PlatformData)defaultPlatformData {
+  flutter::PlatformData PlatformData;
+  PlatformData.lifecycle_state = std::string("AppLifecycleState.detached");
+  return PlatformData;
 }
 
 #pragma mark - Settings accessors
@@ -261,6 +261,6 @@ static flutter::Settings DefaultSettingsForProcess(NSBundle* bundle = nil) {
   );
 }
 
-#pragma mark - windowData utilities
+#pragma mark - PlatformData utilities
 
 @end
