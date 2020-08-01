@@ -54,13 +54,13 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
 
   // keep these next five dartdocs in sync with the dartdocs in AnimationWithParentMixin<T>
 
-  /// Calls the listener every time the value of the animation changes.
+  /// Calls the listener every time the controller ticks.
   ///
   /// Listeners can be removed with [removeListener].
   @override
   void addListener(VoidCallback listener);
 
-  /// Stop calling the listener every time the value of the animation changes.
+  /// Stops calling the listener every time the controller ticks.
   ///
   /// If `listener` is not currently registered as a listener, this method does
   /// nothing.
