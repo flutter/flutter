@@ -61,7 +61,7 @@ import 'theme.dart';
 ///          children: <TextSpan>[
 ///            TextSpan(
 ///              style: textStyle,
-///              text: 'Flutter is Google’s UI toolkit for building beautiful, '
+///              text: "Flutter is Google's UI toolkit for building beautiful, "
 ///              'natively compiled applications for mobile, web, and desktop '
 ///              'from a single codebase. Learn more about Flutter at '
 ///            ),
@@ -90,7 +90,7 @@ import 'theme.dart';
 ///              applicationIcon: FlutterLogo(),
 ///              applicationName: 'Show About Example',
 ///              applicationVersion: 'August 2019',
-///              applicationLegalese: '© 2014 The Flutter Authors',
+///              applicationLegalese: '\u{a9} 2014 The Flutter Authors',
 ///              aboutBoxChildren: aboutBoxChildren,
 ///            ),
 ///          ),
@@ -105,7 +105,7 @@ import 'theme.dart';
 ///              applicationIcon: FlutterLogo(),
 ///              applicationName: 'Show About Example',
 ///              applicationVersion: 'August 2019',
-///              applicationLegalese: '© 2014 The Flutter Authors',
+///              applicationLegalese: '\u{a9} 2014 The Flutter Authors',
 ///              children: aboutBoxChildren,
 ///            );
 ///          },
