@@ -1,7 +1,6 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// FLUTTER_NOLINT
 
 #include "flutter/flow/layers/layer_tree.h"
 
@@ -117,7 +116,7 @@ void LayerTree::Paint(CompositorContext::ScopedFrame& frame,
   }
 
   Layer::PaintContext context = {
-      (SkCanvas*)&internal_nodes_canvas,
+      static_cast<SkCanvas*>(&internal_nodes_canvas),
       frame.canvas(),
       frame.gr_context(),
       frame.view_embedder(),
@@ -129,8 +128,9 @@ void LayerTree::Paint(CompositorContext::ScopedFrame& frame,
       frame_physical_depth_,
       frame_device_pixel_ratio_};
 
-  if (root_layer_->needs_painting())
+  if (root_layer_->needs_painting()) {
     root_layer_->Paint(context);
+  }
 }
 
 sk_sp<SkPicture> LayerTree::Flatten(const SkRect& bounds) {
@@ -171,7 +171,7 @@ sk_sp<SkPicture> LayerTree::Flatten(const SkRect& bounds) {
   internal_nodes_canvas.addCanvas(canvas);
 
   Layer::PaintContext paint_context = {
-      (SkCanvas*)&internal_nodes_canvas,
+      static_cast<SkCanvas*>(&internal_nodes_canvas),
       canvas,  // canvas
       nullptr,
       nullptr,

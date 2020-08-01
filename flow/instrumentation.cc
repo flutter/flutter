@@ -1,7 +1,6 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// FLUTTER_NOLINT
 
 #include "flutter/flow/instrumentation.h"
 
@@ -52,16 +51,18 @@ double Stopwatch::UnitFrameInterval(double raster_time_ms) const {
 double Stopwatch::UnitHeight(double raster_time_ms,
                              double max_unit_interval) const {
   double unitHeight = UnitFrameInterval(raster_time_ms) / max_unit_interval;
-  if (unitHeight > 1.0)
+  if (unitHeight > 1.0) {
     unitHeight = 1.0;
+  }
   return unitHeight;
 }
 
 fml::TimeDelta Stopwatch::MaxDelta() const {
   fml::TimeDelta max_delta;
   for (size_t i = 0; i < kMaxSamples; i++) {
-    if (laps_[i] > max_delta)
+    if (laps_[i] > max_delta) {
       max_delta = laps_[i];
+    }
   }
   return max_delta;
 }
@@ -135,7 +136,7 @@ void Stopwatch::InitVisualizeSurface(const SkRect& rect) const {
   cache_canvas->drawPath(path, paint);
 }
 
-void Stopwatch::Visualize(SkCanvas& canvas, const SkRect& rect) const {
+void Stopwatch::Visualize(SkCanvas* canvas, const SkRect& rect) const {
   // Initialize visualize cache if it has not yet been initialized.
   InitVisualizeSurface(rect);
 
@@ -191,8 +192,9 @@ void Stopwatch::Visualize(SkCanvas& canvas, const SkRect& rect) const {
 
     // Limit the number of markers displayed. After a certain point, the graph
     // becomes crowded
-    if (frame_marker_count > kMaxFrameMarkers)
+    if (frame_marker_count > kMaxFrameMarkers) {
       frame_marker_count = 1;
+    }
 
     for (size_t frame_index = 0; frame_index < frame_marker_count;
          frame_index++) {
@@ -224,7 +226,7 @@ void Stopwatch::Visualize(SkCanvas& canvas, const SkRect& rect) const {
 
   // Draw the cached surface onto the output canvas.
   paint.reset();
-  visualize_cache_surface_->draw(&canvas, rect.x(), rect.y(), &paint);
+  visualize_cache_surface_->draw(canvas, rect.x(), rect.y(), &paint);
 }
 
 CounterValues::CounterValues() : current_sample_(kMaxSamples - 1) {
@@ -238,7 +240,7 @@ void CounterValues::Add(int64_t value) {
   values_[current_sample_] = value;
 }
 
-void CounterValues::Visualize(SkCanvas& canvas, const SkRect& rect) const {
+void CounterValues::Visualize(SkCanvas* canvas, const SkRect& rect) const {
   size_t max_bytes = GetMaxValue();
 
   if (max_bytes == 0) {
@@ -252,7 +254,7 @@ void CounterValues::Visualize(SkCanvas& canvas, const SkRect& rect) const {
 
   // Paint the background.
   paint.setColor(0x99FFFFFF);
-  canvas.drawRect(rect, paint);
+  canvas->drawRect(rect, paint);
 
   // Establish the graph position.
   const SkScalar x = rect.x();
@@ -268,10 +270,12 @@ void CounterValues::Visualize(SkCanvas& canvas, const SkRect& rect) const {
 
   for (size_t i = 0; i < kMaxSamples; ++i) {
     int64_t current_bytes = values_[i];
-    double ratio =
-        (double)(current_bytes - min_bytes) / (max_bytes - min_bytes);
-    path.lineTo(x + (((double)(i) / (double)kMaxSamples) * width),
-                y + ((1.0 - ratio) * height));
+    double ratio = static_cast<double>(current_bytes - min_bytes) /
+                   static_cast<double>(max_bytes - min_bytes);
+    path.lineTo(
+        x + ((static_cast<double>(i) / static_cast<double>(kMaxSamples)) *
+             width),
+        y + ((1.0 - ratio) * height));
   }
 
   path.rLineTo(100, 0);
@@ -280,7 +284,7 @@ void CounterValues::Visualize(SkCanvas& canvas, const SkRect& rect) const {
 
   // Draw the graph.
   paint.setColor(0xAA0000FF);
-  canvas.drawPath(path, paint);
+  canvas->drawPath(path, paint);
 
   // Paint the vertical marker for the current frame.
   const double sample_unit_width = (1.0 / kMaxSamples);
@@ -294,7 +298,7 @@ void CounterValues::Visualize(SkCanvas& canvas, const SkRect& rect) const {
   const auto marker_rect = SkRect::MakeLTRB(
       sample_x, y,
       sample_x + width * sample_unit_width + sample_margin_width * 2, bottom);
-  canvas.drawRect(marker_rect, paint);
+  canvas->drawRect(marker_rect, paint);
 }
 
 int64_t CounterValues::GetCurrentValue() const {

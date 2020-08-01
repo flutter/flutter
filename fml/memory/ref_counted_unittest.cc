@@ -227,6 +227,8 @@ TEST(RefCountedTest, NullAssignmentToNull) {
   // No-op null assignment using move constructor.
   r1 = std::move(r2);
   EXPECT_TRUE(r1.get() == nullptr);
+  // The clang linter flags the method called on the moved-from reference, but
+  // this is testing the move implementation, so it is marked NOLINT.
   EXPECT_TRUE(r2.get() == nullptr);  // NOLINT(clang-analyzer-cplusplus.Move)
   EXPECT_FALSE(r1);
   EXPECT_FALSE(r2);
@@ -272,6 +274,8 @@ TEST(RefCountedTest, NonNullAssignmentToNull) {
     RefPtr<MyClass> r2;
     // Move assignment (to null ref pointer).
     r2 = std::move(r1);
+    // The clang linter flags the method called on the moved-from reference, but
+    // this is testing the move implementation, so it is marked NOLINT.
     EXPECT_TRUE(r1.get() == nullptr);  // NOLINT(clang-analyzer-cplusplus.Move)
     EXPECT_EQ(created, r2.get());
     EXPECT_FALSE(r1);
@@ -336,6 +340,8 @@ TEST(RefCountedTest, NullAssignmentToNonNull) {
   // Null assignment using move constructor.
   r1 = std::move(r2);
   EXPECT_TRUE(r1.get() == nullptr);
+  // The clang linter flags the method called on the moved-from reference, but
+  // this is testing the move implementation, so it is marked NOLINT.
   EXPECT_TRUE(r2.get() == nullptr);  // NOLINT(clang-analyzer-cplusplus.Move)
   EXPECT_FALSE(r1);
   EXPECT_FALSE(r2);
@@ -389,6 +395,8 @@ TEST(RefCountedTest, NonNullAssignmentToNonNull) {
     RefPtr<MyClass> r2(MakeRefCounted<MyClass>(nullptr, &was_destroyed2));
     // Move assignment (to non-null ref pointer).
     r2 = std::move(r1);
+    // The clang linter flags the method called on the moved-from reference, but
+    // this is testing the move implementation, so it is marked NOLINT.
     EXPECT_TRUE(r1.get() == nullptr);  // NOLINT(clang-analyzer-cplusplus.Move)
     EXPECT_FALSE(r2.get() == nullptr);
     EXPECT_FALSE(r1);
@@ -436,7 +444,13 @@ TEST(RefCountedTest, SelfAssignment) {
   {
     MyClass* created = nullptr;
     was_destroyed = false;
-    RefPtr<MyClass> r(MakeRefCounted<MyClass>(&created, &was_destroyed));
+    // This line is marked NOLINT because the clang linter does not reason about
+    // the value of the reference count. In particular, the self-assignment
+    // below is handled in the copy constructor by a refcount increment then
+    // decrement. The linter sees only that the decrement might destroy the
+    // object.
+    RefPtr<MyClass> r(MakeRefCounted<MyClass>(  // NOLINT
+        &created, &was_destroyed));
     // Copy.
     ALLOW_SELF_ASSIGN_OVERLOADED(r = r);
     EXPECT_EQ(created, r.get());

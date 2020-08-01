@@ -1,7 +1,6 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// FLUTTER_NOLINT
 
 #include "rtree.h"
 
@@ -12,7 +11,7 @@
 namespace flutter {
 namespace testing {
 
-TEST(RTree, searchNonOverlappingDrawnRects_NoIntersection) {
+TEST(RTree, searchNonOverlappingDrawnRectsNoIntersection) {
   auto rtree_factory = RTreeFactory();
   auto recorder = std::make_unique<SkPictureRecorder>();
   auto recording_canvas =
@@ -32,7 +31,7 @@ TEST(RTree, searchNonOverlappingDrawnRects_NoIntersection) {
   ASSERT_TRUE(hits.empty());
 }
 
-TEST(RTree, searchNonOverlappingDrawnRects_SingleRectIntersection) {
+TEST(RTree, searchNonOverlappingDrawnRectsSingleRectIntersection) {
   auto rtree_factory = RTreeFactory();
   auto recorder = std::make_unique<SkPictureRecorder>();
   auto recording_canvas =
@@ -54,7 +53,7 @@ TEST(RTree, searchNonOverlappingDrawnRects_SingleRectIntersection) {
   ASSERT_EQ(*hits.begin(), SkRect::MakeLTRB(120, 120, 160, 160));
 }
 
-TEST(RTree, searchNonOverlappingDrawnRects_IgnoresNonDrawingRecords) {
+TEST(RTree, searchNonOverlappingDrawnRectsIgnoresNonDrawingRecords) {
   auto rtree_factory = RTreeFactory();
   auto recorder = std::make_unique<SkPictureRecorder>();
   auto recording_canvas =
@@ -82,7 +81,7 @@ TEST(RTree, searchNonOverlappingDrawnRects_IgnoresNonDrawingRecords) {
   ASSERT_EQ(*hits.begin(), SkRect::MakeLTRB(120, 120, 180, 180));
 }
 
-TEST(RTree, searchNonOverlappingDrawnRects_MultipleRectIntersection) {
+TEST(RTree, searchNonOverlappingDrawnRectsMultipleRectIntersection) {
   auto rtree_factory = RTreeFactory();
   auto recorder = std::make_unique<SkPictureRecorder>();
   auto recording_canvas =
@@ -113,7 +112,7 @@ TEST(RTree, searchNonOverlappingDrawnRects_MultipleRectIntersection) {
   ASSERT_EQ(*std::next(hits.begin(), 1), SkRect::MakeLTRB(300, 100, 400, 200));
 }
 
-TEST(RTree, searchNonOverlappingDrawnRects_JoinRectsWhenIntersectedCase1) {
+TEST(RTree, searchNonOverlappingDrawnRectsJoinRectsWhenIntersectedCase1) {
   auto rtree_factory = RTreeFactory();
   auto recorder = std::make_unique<SkPictureRecorder>();
   auto recording_canvas =
@@ -147,7 +146,7 @@ TEST(RTree, searchNonOverlappingDrawnRects_JoinRectsWhenIntersectedCase1) {
   ASSERT_EQ(*hits.begin(), SkRect::MakeLTRB(100, 100, 175, 175));
 }
 
-TEST(RTree, searchNonOverlappingDrawnRects_JoinRectsWhenIntersectedCase2) {
+TEST(RTree, searchNonOverlappingDrawnRectsJoinRectsWhenIntersectedCase2) {
   auto rtree_factory = RTreeFactory();
   auto recorder = std::make_unique<SkPictureRecorder>();
   auto recording_canvas =
@@ -188,7 +187,7 @@ TEST(RTree, searchNonOverlappingDrawnRects_JoinRectsWhenIntersectedCase2) {
   ASSERT_EQ(*hits.begin(), SkRect::MakeLTRB(50, 50, 500, 250));
 }
 
-TEST(RTree, searchNonOverlappingDrawnRects_JoinRectsWhenIntersectedCase3) {
+TEST(RTree, searchNonOverlappingDrawnRectsJoinRectsWhenIntersectedCase3) {
   auto rtree_factory = RTreeFactory();
   auto recorder = std::make_unique<SkPictureRecorder>();
   auto recording_canvas =
