@@ -1,7 +1,6 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// FLUTTER_NOLINT
 
 #define RAPIDJSON_HAS_STDSTRING 1
 
@@ -76,8 +75,9 @@ void ServiceProtocol::SetHandlerDescription(Handler* handler,
                                             Handler::Description description) {
   fml::SharedLock lock(*handlers_mutex_);
   auto it = handlers_.find(handler);
-  if (it != handlers_.end())
+  if (it != handlers_.end()) {
     it->second.Store(description);
+  }
 }
 
 void ServiceProtocol::ToggleHooks(bool set) {
@@ -90,13 +90,13 @@ void ServiceProtocol::ToggleHooks(bool set) {
   }
 }
 
-static void WriteServerErrorResponse(rapidjson::Document& document,
+static void WriteServerErrorResponse(rapidjson::Document* document,
                                      const char* message) {
-  document.SetObject();
-  document.AddMember("code", -32000, document.GetAllocator());
+  document->SetObject();
+  document->AddMember("code", -32000, document->GetAllocator());
   rapidjson::Value message_value;
-  message_value.SetString(message, document.GetAllocator());
-  document.AddMember("message", message_value, document.GetAllocator());
+  message_value.SetString(message, document->GetAllocator());
+  document->AddMember("message", message_value, document->GetAllocator());
 }
 
 bool ServiceProtocol::HandleMessage(const char* method,
@@ -123,7 +123,7 @@ bool ServiceProtocol::HandleMessage(const char* method,
   bool result = HandleMessage(std::string_view{method},                  //
                               params,                                    //
                               static_cast<ServiceProtocol*>(user_data),  //
-                              document                                   //
+                              &document                                  //
   );
   rapidjson::StringBuffer buffer;
   rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
@@ -141,7 +141,7 @@ bool ServiceProtocol::HandleMessage(const char* method,
 bool ServiceProtocol::HandleMessage(std::string_view method,
                                     const Handler::ServiceProtocolMap& params,
                                     ServiceProtocol* service_protocol,
-                                    rapidjson::Document& response) {
+                                    rapidjson::Document* response) {
   if (service_protocol == nullptr) {
     WriteServerErrorResponse(response, "Service protocol unavailable.");
     return false;
@@ -154,7 +154,7 @@ bool ServiceProtocol::HandleMessage(std::string_view method,
     ServiceProtocol::Handler* handler,
     std::string_view method,
     const ServiceProtocol::Handler::ServiceProtocolMap& params,
-    rapidjson::Document& document) {
+    rapidjson::Document* document) {
   FML_DCHECK(handler);
   fml::AutoResetWaitableEvent latch;
   bool result = false;
@@ -177,7 +177,7 @@ bool ServiceProtocol::HandleMessage(std::string_view method,
 
 bool ServiceProtocol::HandleMessage(std::string_view method,
                                     const Handler::ServiceProtocolMap& params,
-                                    rapidjson::Document& response) const {
+                                    rapidjson::Document* response) const {
   if (method == kListViewsExtensionName) {
     // So far, this is the only built-in method that does not forward to the
     // dynamic set of handlers.
@@ -254,7 +254,7 @@ void ServiceProtocol::Handler::Description::Write(
 }
 
 bool ServiceProtocol::HandleListViewsMethod(
-    rapidjson::Document& response) const {
+    rapidjson::Document* response) const {
   fml::SharedLock lock(*handlers_mutex_);
   std::vector<std::pair<intptr_t, Handler::Description>> descriptions;
   for (const auto& handler : handlers_) {
@@ -262,11 +262,11 @@ bool ServiceProtocol::HandleListViewsMethod(
                               handler.second.Load());
   }
 
-  auto& allocator = response.GetAllocator();
+  auto& allocator = response->GetAllocator();
 
   // Construct the response objects.
-  response.SetObject();
-  response.AddMember("type", "FlutterViewList", allocator);
+  response->SetObject();
+  response->AddMember("type", "FlutterViewList", allocator);
 
   rapidjson::Value viewsList(rapidjson::Type::kArrayType);
   for (const auto& description : descriptions) {
@@ -276,7 +276,7 @@ bool ServiceProtocol::HandleListViewsMethod(
     viewsList.PushBack(view, allocator);
   }
 
-  response.AddMember("views", viewsList, allocator);
+  response->AddMember("views", viewsList, allocator);
 
   return true;
 }
