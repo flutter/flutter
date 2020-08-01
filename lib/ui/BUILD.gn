@@ -93,6 +93,8 @@ source_set_maybe_fuchsia_legacy("ui") {
     "text/text_box.h",
     "ui_dart_state.cc",
     "ui_dart_state.h",
+    "window/platform_configuration.cc",
+    "window/platform_configuration.h",
     "window/platform_message.cc",
     "window/platform_message.h",
     "window/platform_message_response.cc",
@@ -180,6 +182,7 @@ if (enable_unittests) {
     sources = [
       "painting/image_encoding_unittests.cc",
       "painting/vertices_unittests.cc",
+      "window/platform_configuration_unittests.cc",
       "window/pointer_data_packet_converter_unittests.cc",
     ]
 

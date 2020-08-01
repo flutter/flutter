@@ -57,7 +57,7 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRootIsolate(
     const Settings& settings,
     fml::RefPtr<const DartSnapshot> isolate_snapshot,
     TaskRunners task_runners,
-    std::unique_ptr<Window> window,
+    std::unique_ptr<PlatformConfiguration> platform_configuration,
     fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
     fml::WeakPtr<IOManager> io_manager,
     fml::RefPtr<SkiaUnrefQueue> unref_queue,
@@ -112,7 +112,8 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRootIsolate(
   std::shared_ptr<DartIsolate>* root_isolate_data =
       static_cast<std::shared_ptr<DartIsolate>*>(Dart_IsolateData(vm_isolate));
 
-  (*root_isolate_data)->SetWindow(std::move(window));
+  (*root_isolate_data)
+      ->SetPlatformConfiguration(std::move(platform_configuration));
 
   return (*root_isolate_data)->GetWeakIsolatePtr();
 }
@@ -598,7 +599,7 @@ Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
           vm_data->GetSettings(),         // settings
           vm_data->GetIsolateSnapshot(),  // isolate snapshot
           null_task_runners,              // task runners
-          nullptr,                        // window
+          nullptr,                        // platform_configuration
           {},                             // snapshot delegate
           {},                             // IO Manager
           {},                             // Skia unref queue

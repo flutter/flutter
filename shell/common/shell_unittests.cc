@@ -684,7 +684,7 @@ TEST_F(ShellTest, WaitForFirstFrameZeroSizeFrame) {
   configuration.SetEntrypoint("emptyMain");
 
   RunEngine(shell.get(), std::move(configuration));
-  PumpOneFrame(shell.get(), {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
+  PumpOneFrame(shell.get(), {1.0, 0.0, 0.0});
   fml::Status result =
       shell->WaitForFirstFrame(fml::TimeDelta::FromMilliseconds(1000));
   ASSERT_FALSE(result.ok());
@@ -802,8 +802,7 @@ TEST_F(ShellTest, SetResourceCacheSize) {
 
   fml::TaskRunner::RunNowOrPostTask(
       shell->GetTaskRunners().GetPlatformTaskRunner(), [&shell]() {
-        shell->GetPlatformView()->SetViewportMetrics(
-            {1.0, 400, 200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
+        shell->GetPlatformView()->SetViewportMetrics({1.0, 400, 200});
       });
   PumpOneFrame(shell.get());
 
@@ -822,8 +821,7 @@ TEST_F(ShellTest, SetResourceCacheSize) {
 
   fml::TaskRunner::RunNowOrPostTask(
       shell->GetTaskRunners().GetPlatformTaskRunner(), [&shell]() {
-        shell->GetPlatformView()->SetViewportMetrics(
-            {1.0, 800, 400, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
+        shell->GetPlatformView()->SetViewportMetrics({1.0, 800, 400});
       });
   PumpOneFrame(shell.get());
 
@@ -841,8 +839,7 @@ TEST_F(ShellTest, SetResourceCacheSizeEarly) {
 
   fml::TaskRunner::RunNowOrPostTask(
       shell->GetTaskRunners().GetPlatformTaskRunner(), [&shell]() {
-        shell->GetPlatformView()->SetViewportMetrics(
-            {1.0, 400, 200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
+        shell->GetPlatformView()->SetViewportMetrics({1.0, 400, 200});
       });
   PumpOneFrame(shell.get());
 
@@ -870,8 +867,7 @@ TEST_F(ShellTest, SetResourceCacheSizeNotifiesDart) {
 
   fml::TaskRunner::RunNowOrPostTask(
       shell->GetTaskRunners().GetPlatformTaskRunner(), [&shell]() {
-        shell->GetPlatformView()->SetViewportMetrics(
-            {1.0, 400, 200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
+        shell->GetPlatformView()->SetViewportMetrics({1.0, 400, 200});
       });
   PumpOneFrame(shell.get());
 
@@ -1235,7 +1231,7 @@ TEST_F(ShellTest, CanDecompressImageFromAsset) {
 }
 
 TEST_F(ShellTest, OnServiceProtocolGetSkSLsWorks) {
-  // Create 2 dummpy SkSL cache file IE (base32 encoding of A), II (base32
+  // Create 2 dummy SkSL cache file IE (base32 encoding of A), II (base32
   // encoding of B) with content x and y.
   fml::ScopedTemporaryDirectory temp_dir;
   PersistentCache::SetCacheDirectoryPath(temp_dir.path());

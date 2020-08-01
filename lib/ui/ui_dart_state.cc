@@ -5,7 +5,7 @@
 #include "flutter/lib/ui/ui_dart_state.h"
 
 #include "flutter/fml/message_loop.h"
-#include "flutter/lib/ui/window/window.h"
+#include "flutter/lib/ui/window/platform_configuration.h"
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/dart_message_handler.h"
 
@@ -73,8 +73,9 @@ void UIDartState::ThrowIfUIOperationsProhibited() {
 
 void UIDartState::SetDebugName(const std::string debug_name) {
   debug_name_ = debug_name;
-  if (window_) {
-    window_->client()->UpdateIsolateDescription(debug_name_, main_port_);
+  if (platform_configuration_) {
+    platform_configuration_->client()->UpdateIsolateDescription(debug_name_,
+                                                                main_port_);
   }
 }
 
@@ -82,10 +83,12 @@ UIDartState* UIDartState::Current() {
   return static_cast<UIDartState*>(DartState::Current());
 }
 
-void UIDartState::SetWindow(std::unique_ptr<Window> window) {
-  window_ = std::move(window);
-  if (window_) {
-    window_->client()->UpdateIsolateDescription(debug_name_, main_port_);
+void UIDartState::SetPlatformConfiguration(
+    std::unique_ptr<PlatformConfiguration> platform_configuration) {
+  platform_configuration_ = std::move(platform_configuration);
+  if (platform_configuration_) {
+    platform_configuration_->client()->UpdateIsolateDescription(debug_name_,
+                                                                main_port_);
   }
 }
 

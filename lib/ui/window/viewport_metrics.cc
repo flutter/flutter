@@ -80,4 +80,16 @@ ViewportMetrics::ViewportMetrics(double p_device_pixel_ratio,
   FML_DCHECK(device_pixel_ratio > 0);
 }
 
+ViewportMetrics::ViewportMetrics(double p_device_pixel_ratio,
+                                 double p_physical_width,
+                                 double p_physical_height)
+    : device_pixel_ratio(p_device_pixel_ratio),
+      physical_width(p_physical_width),
+      physical_height(p_physical_height) {
+  // Ensure we don't have nonsensical dimensions.
+  FML_DCHECK(physical_width >= 0);
+  FML_DCHECK(physical_height >= 0);
+  FML_DCHECK(device_pixel_ratio > 0);
+}
+
 }  // namespace flutter

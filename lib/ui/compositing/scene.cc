@@ -8,6 +8,7 @@
 #include "flutter/lib/ui/painting/image.h"
 #include "flutter/lib/ui/painting/picture.h"
 #include "flutter/lib/ui/ui_dart_state.h"
+#include "flutter/lib/ui/window/platform_configuration.h"
 #include "flutter/lib/ui/window/window.h"
 #include "third_party/skia/include/core/SkImageInfo.h"
 #include "third_party/skia/include/core/SkSurface.h"
@@ -41,7 +42,10 @@ Scene::Scene(std::shared_ptr<flutter::Layer> rootLayer,
              uint32_t rasterizerTracingThreshold,
              bool checkerboardRasterCacheImages,
              bool checkerboardOffscreenLayers) {
-  auto viewport_metrics = UIDartState::Current()->window()->viewport_metrics();
+  auto viewport_metrics = UIDartState::Current()
+                              ->platform_configuration()
+                              ->window()
+                              ->viewport_metrics();
 
   layer_tree_ = std::make_unique<LayerTree>(
       SkISize::Make(viewport_metrics.physical_width,

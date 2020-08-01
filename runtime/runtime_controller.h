@@ -14,10 +14,10 @@
 #include "flutter/lib/ui/io_manager.h"
 #include "flutter/lib/ui/text/font_collection.h"
 #include "flutter/lib/ui/ui_dart_state.h"
+#include "flutter/lib/ui/window/platform_configuration.h"
 #include "flutter/lib/ui/window/pointer_data_packet.h"
-#include "flutter/lib/ui/window/window.h"
 #include "flutter/runtime/dart_vm.h"
-#include "flutter/runtime/window_data.h"
+#include "flutter/runtime/platform_data.h"
 #include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"
 
@@ -38,7 +38,7 @@ class Window;
 /// used by the engine to copy the currently accumulated window state so it can
 /// be referenced by the new runtime controller.
 ///
-class RuntimeController final : public WindowClient {
+class RuntimeController final : public PlatformConfigurationClient {
  public:
   //----------------------------------------------------------------------------
   /// @brief      Creates a new instance of a runtime controller. This is
@@ -90,7 +90,7 @@ class RuntimeController final : public WindowClient {
   ///                                         code in isolate scope when the VM
   ///                                         is about to be notified that the
   ///                                         engine is going to be idle.
-  /// @param[in]  window_data                 The window data (if exists).
+  /// @param[in]  platform_data                 The window data (if exists).
   /// @param[in]  isolate_create_callback     The isolate create callback. This
   ///                                         allows callers to run native code
   ///                                         in isolate scope on the UI task
@@ -117,12 +117,12 @@ class RuntimeController final : public WindowClient {
       std::string advisory_script_uri,
       std::string advisory_script_entrypoint,
       const std::function<void(int64_t)>& idle_notification_callback,
-      const WindowData& window_data,
+      const PlatformData& platform_data,
       const fml::closure& isolate_create_callback,
       const fml::closure& isolate_shutdown_callback,
       std::shared_ptr<const fml::Mapping> persistent_isolate_data);
 
-  // |WindowClient|
+  // |PlatformConfigurationClient|
   ~RuntimeController() override;
 
   //----------------------------------------------------------------------------
@@ -136,11 +136,11 @@ class RuntimeController final : public WindowClient {
   std::unique_ptr<RuntimeController> Clone() const;
 
   //----------------------------------------------------------------------------
-  /// @brief      Forward the specified window metrics to the running isolate.
+  /// @brief      Forward the specified viewport metrics to the running isolate.
   ///             If the isolate is not running, these metrics will be saved and
   ///             flushed to the isolate when it starts.
   ///
-  /// @param[in]  metrics  The metrics.
+  /// @param[in]  metrics  The viewport metrics.
   ///
   /// @return     If the window metrics were forwarded to the running isolate.
   ///
@@ -466,46 +466,46 @@ class RuntimeController final : public WindowClient {
   std::string advisory_script_uri_;
   std::string advisory_script_entrypoint_;
   std::function<void(int64_t)> idle_notification_callback_;
-  WindowData window_data_;
+  PlatformData platform_data_;
   std::weak_ptr<DartIsolate> root_isolate_;
   std::pair<bool, uint32_t> root_isolate_return_code_ = {false, 0};
   const fml::closure isolate_create_callback_;
   const fml::closure isolate_shutdown_callback_;
   std::shared_ptr<const fml::Mapping> persistent_isolate_data_;
 
-  Window* GetWindowIfAvailable();
+  PlatformConfiguration* GetPlatformConfigurationIfAvailable();
 
   bool FlushRuntimeStateToIsolate();
 
-  // |WindowClient|
+  // |PlatformConfigurationClient|
   std::string DefaultRouteName() override;
 
-  // |WindowClient|
+  // |PlatformConfigurationClient|
   void ScheduleFrame() override;
 
-  // |WindowClient|
+  // |PlatformConfigurationClient|
   void Render(Scene* scene) override;
 
-  // |WindowClient|
+  // |PlatformConfigurationClient|
   void UpdateSemantics(SemanticsUpdate* update) override;
 
-  // |WindowClient|
+  // |PlatformConfigurationClient|
   void HandlePlatformMessage(fml::RefPtr<PlatformMessage> message) override;
 
-  // |WindowClient|
+  // |PlatformConfigurationClient|
   FontCollection& GetFontCollection() override;
 
-  // |WindowClient|
+  // |PlatformConfigurationClient|
   void UpdateIsolateDescription(const std::string isolate_name,
                                 int64_t isolate_port) override;
 
-  // |WindowClient|
+  // |PlatformConfigurationClient|
   void SetNeedsReportTimings(bool value) override;
 
-  // |WindowClient|
+  // |PlatformConfigurationClient|
   std::shared_ptr<const fml::Mapping> GetPersistentIsolateData() override;
 
-  // |WindowClient|
+  // |PlatformConfigurationClient|
   std::unique_ptr<std::vector<std::string>> ComputePlatformResolvedLocale(
       const std::vector<std::string>& supported_locale_data) override;
 
