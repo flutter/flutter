@@ -414,12 +414,6 @@ tasks:
   #   required_agent_capabilities: ["linux/android"]
   #   flaky: true
 
-  flutter_attach_test_android:
-    description: >
-      Tests the `flutter attach` command.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
-
   named_isolates_test:
     description: >
       Tests naming and attaching to specific isolates.
