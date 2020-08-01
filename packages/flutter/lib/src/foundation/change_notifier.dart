@@ -110,17 +110,6 @@ class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
 ///  * [ValueNotifier], which is a [ChangeNotifier] that wraps a single value.
 class ChangeNotifier implements Listenable {
   LinkedList<_ListenerEntry>? _listeners = LinkedList<_ListenerEntry>();
-  /// Keeps track of the first newly added listened inside notifyListeners
-  /// to stop the dispatching and not immediately execute new listeners
-  _ListenerEntry? _firstNewlyAddedEntry;
-
-  /// During [notifyListeners], corresponds to the listeners that were already notified,
-  /// from the last listener notified to the first one.
-  ///
-  /// This list is updated only when a listener removes itself, for performance reason.
-  List<_ListenerEntry>? _visitedEntriesInReverseOrder;
-
-  _ListenerEntry? _currentlyVisitedEntry;
 
   bool _debugAssertNotDisposed() {
     assert(() {
@@ -162,11 +151,7 @@ class ChangeNotifier implements Listenable {
   @override
   void addListener(VoidCallback listener) {
     assert(_debugAssertNotDisposed());
-    final _ListenerEntry entry = _ListenerEntry(listener);
-    if (_currentlyVisitedEntry != null) {
-      _firstNewlyAddedEntry ??= entry;
-    }
-    _listeners!.add(entry);
+    _listeners!.add(_ListenerEntry(listener));
   }
 
   /// Remove a previously registered closure from the list of closures that are
@@ -193,17 +178,6 @@ class ChangeNotifier implements Listenable {
     assert(_debugAssertNotDisposed());
     for (final _ListenerEntry entry in _listeners!) {
       if (entry.listener == listener) {
-        if (entry == _firstNewlyAddedEntry) {
-          // During notifyListeners, a listener was added and removed immediatly
-          _firstNewlyAddedEntry = _firstNewlyAddedEntry!.next;
-        }
-        if (entry == _currentlyVisitedEntry) {
-          // A listener is removing itself, so we create a back-up of the already
-          // notified listeners, so that notifyListeners can resume the iteration.
-          // We are storing all already visited listeners instead of only the latest
-          // as notifyListeners can be called recursively while adding/removing listeners.
-          _visitedEntriesInReverseOrder = _allEntriesBefore(entry).toList(growable: false);
-        }
         entry.unlink();
         return;
       }
@@ -241,65 +215,28 @@ class ChangeNotifier implements Listenable {
   @visibleForTesting
   void notifyListeners() {
     assert(_debugAssertNotDisposed());
-    // TODO notifyListeners inside notifyListeners
+    final List<_ListenerEntry> listeners = _listeners!.toList(growable: false);
 
-    if (_listeners != null && _listeners!.isNotEmpty) {
-      _ListenerEntry? entry = _listeners!.first;
-      while (entry != null && entry != _firstNewlyAddedEntry) {
-        _currentlyVisitedEntry = entry;
-        try {
+    for (final _ListenerEntry entry in listeners) {
+      try {
+        if (entry.list != null)
           entry.listener();
-        } catch (exception, stack) {
-          FlutterError.reportError(FlutterErrorDetails(
-            exception: exception,
-            stack: stack,
-            library: 'foundation library',
-            context: ErrorDescription('while dispatching notifications for $runtimeType'),
-            informationCollector: () sync* {
-              yield DiagnosticsProperty<ChangeNotifier>(
-                'The $runtimeType sending notification was',
-                this,
-                style: DiagnosticsTreeStyle.errorProperty,
-              );
-            },
-          ));
-        }
-
-        if (entry.list != null) {
-          entry = entry.next;
-          continue;
-        }
-
-        // At this stage, the listener removed itself and as a consequence
-        // entry.next is no-longer available. We need to determine where to
-        // restart the iteration.
-
-        _ListenerEntry? lastValidEntry;
-        for (final _ListenerEntry entry in _visitedEntriesInReverseOrder!) {
-          if (entry.list != null) {
-            lastValidEntry = entry;
-          }
-        }
-
-        if (lastValidEntry != null) {
-          entry = lastValidEntry.next;
-        } else if (_listeners!.isNotEmpty) {
-          // entry and all of the previous listeners were removed, so we can
-          // safely restart the iteration from the start
-          entry = _listeners!.first;
-        }
+      } catch (exception, stack) {
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'foundation library',
+          context: ErrorDescription('while dispatching notifications for $runtimeType'),
+          informationCollector: () sync* {
+            yield DiagnosticsProperty<ChangeNotifier>(
+              'The $runtimeType sending notification was',
+              this,
+              style: DiagnosticsTreeStyle.errorProperty,
+            );
+          },
+        ));
       }
     }
-
-    _firstNewlyAddedEntry = null;
-    _currentlyVisitedEntry = null;
-    _visitedEntriesInReverseOrder = null;
-  }
-}
-
-Iterable<T> _allEntriesBefore<T extends LinkedListEntry<T>>(T target) sync* {
-  for (T? entry = target.previous; entry != null; entry = entry.previous) {
-    yield entry;
   }
 }
 
