@@ -1063,7 +1063,7 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
   }
 
   /**
-   * Adds a {@link FlutterEngineAttachmentListener}, which is notifed whenever this {@code
+   * Adds a {@link FlutterEngineAttachmentListener}, which is notified whenever this {@code
    * FlutterView} attached to/detaches from a {@link FlutterEngine}.
    */
   @VisibleForTesting

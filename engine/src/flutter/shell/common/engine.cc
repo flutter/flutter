@@ -40,7 +40,7 @@ Engine::Engine(Delegate& delegate,
                DartVM& vm,
                fml::RefPtr<const DartSnapshot> isolate_snapshot,
                TaskRunners task_runners,
-               const WindowData window_data,
+               const PlatformData platform_data,
                Settings settings,
                std::unique_ptr<Animator> animator,
                fml::WeakPtr<IOManager> io_manager,
@@ -71,7 +71,7 @@ Engine::Engine(Delegate& delegate,
       settings_.advisory_script_uri,         // advisory script uri
       settings_.advisory_script_entrypoint,  // advisory script entrypoint
       settings_.idle_notification_callback,  // idle notification callback
-      window_data,                           // window data
+      platform_data,                         // platform data
       settings_.isolate_create_callback,     // isolate create callback
       settings_.isolate_shutdown_callback,   // isolate shutdown callback
       settings_.persistent_isolate_data      // persistent isolate data
@@ -276,7 +276,8 @@ void Engine::SetViewportMetrics(const ViewportMetrics& metrics) {
   bool dimensions_changed =
       viewport_metrics_.physical_height != metrics.physical_height ||
       viewport_metrics_.physical_width != metrics.physical_width ||
-      viewport_metrics_.physical_depth != metrics.physical_depth;
+      viewport_metrics_.physical_depth != metrics.physical_depth ||
+      viewport_metrics_.device_pixel_ratio != metrics.device_pixel_ratio;
   viewport_metrics_ = metrics;
   runtime_controller_->SetViewportMetrics(viewport_metrics_);
   if (animator_) {

@@ -34,6 +34,7 @@ void createVertices() {
   );
   _validateVertices(vertices);
 }
+
 void _validateVertices(Vertices vertices) native 'ValidateVertices';
 
 @pragma('vm:entry-point')
@@ -42,8 +43,10 @@ void frameCallback(FrameInfo info) {
 }
 
 @pragma('vm:entry-point')
-void messageCallback(dynamic data) {
-}
+void messageCallback(dynamic data) {}
+
+@pragma('vm:entry-point')
+void validateConfiguration() native 'ValidateConfiguration';
 
 
 // Draw a circle on a Canvas that has a PictureRecorder. Take the image from

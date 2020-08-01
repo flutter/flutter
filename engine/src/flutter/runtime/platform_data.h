@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_RUNTIME_WINDOW_DATA_H_
-#define FLUTTER_RUNTIME_WINDOW_DATA_H_
+#ifndef FLUTTER_RUNTIME_PLATFORM_DATA_H_
+#define FLUTTER_RUNTIME_PLATFORM_DATA_H_
 
 #include "flutter/lib/ui/window/viewport_metrics.h"
 
@@ -23,12 +23,12 @@ namespace flutter {
 ///
 /// See also:
 ///
-///  * flutter::Shell::Create, which takes a window_data to initialize the
+///  * flutter::Shell::Create, which takes a platform_data to initialize the
 ///    ui.Window attached to it.
-struct WindowData {
-  WindowData();
+struct PlatformData {
+  PlatformData();
 
-  ~WindowData();
+  ~PlatformData();
 
   ViewportMetrics viewport_metrics;
   std::string language_code;
@@ -45,4 +45,4 @@ struct WindowData {
 
 }  // namespace flutter
 
-#endif  // FLUTTER_RUNTIME_WINDOW_DATA_H_
+#endif  // FLUTTER_RUNTIME_PLATFORM_DATA_H_

@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/runtime/window_data.h"
+#include "flutter/runtime/platform_data.h"
 
 namespace flutter {
-WindowData::WindowData() = default;
+PlatformData::PlatformData() = default;
 
-WindowData::~WindowData() = default;
+PlatformData::~PlatformData() = default;
 
 }  // namespace flutter

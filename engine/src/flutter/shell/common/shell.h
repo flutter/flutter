@@ -138,7 +138,7 @@ class Shell final : public PlatformView::Delegate,
   ///             the Dart VM.
   ///
   /// @param[in]  task_runners             The task runners
-  /// @param[in]  window_data              The default data for setting up
+  /// @param[in]  platform_data            The default data for setting up
   ///                                      ui.Window that attached to this
   ///                                      intance.
   /// @param[in]  settings                 The settings
@@ -161,7 +161,7 @@ class Shell final : public PlatformView::Delegate,
   ///
   static std::unique_ptr<Shell> Create(
       TaskRunners task_runners,
-      const WindowData window_data,
+      const PlatformData platform_data,
       Settings settings,
       CreateCallback<PlatformView> on_create_platform_view,
       CreateCallback<Rasterizer> on_create_rasterizer);
@@ -176,7 +176,7 @@ class Shell final : public PlatformView::Delegate,
   ///             requires the specification of a running VM instance.
   ///
   /// @param[in]  task_runners             The task runners
-  /// @param[in]  window_data              The default data for setting up
+  /// @param[in]  platform_data            The default data for setting up
   ///                                      ui.Window that attached to this
   ///                                      intance.
   /// @param[in]  settings                 The settings
@@ -203,7 +203,7 @@ class Shell final : public PlatformView::Delegate,
   ///
   static std::unique_ptr<Shell> Create(
       TaskRunners task_runners,
-      const WindowData window_data,
+      const PlatformData platform_data,
       Settings settings,
       fml::RefPtr<const DartSnapshot> isolate_snapshot,
       const CreateCallback<PlatformView>& on_create_platform_view,
@@ -426,7 +426,7 @@ class Shell final : public PlatformView::Delegate,
   static std::unique_ptr<Shell> CreateShellOnPlatformThread(
       DartVMRef vm,
       TaskRunners task_runners,
-      const WindowData window_data,
+      const PlatformData platform_data,
       Settings settings,
       fml::RefPtr<const DartSnapshot> isolate_snapshot,
       const Shell::CreateCallback<PlatformView>& on_create_platform_view,

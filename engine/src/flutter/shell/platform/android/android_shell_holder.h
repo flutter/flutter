@@ -10,7 +10,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/unique_fd.h"
 #include "flutter/lib/ui/window/viewport_metrics.h"
-#include "flutter/runtime/window_data.h"
+#include "flutter/runtime/platform_data.h"
 #include "flutter/shell/common/run_configuration.h"
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/thread_host.h"

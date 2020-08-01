@@ -22,10 +22,10 @@
 
 namespace flutter {
 
-static WindowData GetDefaultWindowData() {
-  WindowData window_data;
-  window_data.lifecycle_state = "AppLifecycleState.detached";
-  return window_data;
+static PlatformData GetDefaultPlatformData() {
+  PlatformData platform_data;
+  platform_data.lifecycle_state = "AppLifecycleState.detached";
+  return platform_data;
 }
 
 bool AndroidShellHolder::use_embedded_view;
@@ -121,9 +121,9 @@ AndroidShellHolder::AndroidShellHolder(
     );
 
     shell_ =
-        Shell::Create(task_runners,             // task runners
-                      GetDefaultWindowData(),   // window data
-                      settings_,                // settings
+        Shell::Create(task_runners,              // task runners
+                      GetDefaultPlatformData(),  // window data
+                      settings_,                 // settings
                       on_create_platform_view,  // platform view create callback
                       on_create_rasterizer      // rasterizer create callback
         );
@@ -137,9 +137,9 @@ AndroidShellHolder::AndroidShellHolder(
     );
 
     shell_ =
-        Shell::Create(task_runners,             // task runners
-                      GetDefaultWindowData(),   // window data
-                      settings_,                // settings
+        Shell::Create(task_runners,              // task runners
+                      GetDefaultPlatformData(),  // window data
+                      settings_,                 // settings
                       on_create_platform_view,  // platform view create callback
                       on_create_rasterizer      // rasterizer create callback
         );
