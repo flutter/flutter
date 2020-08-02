@@ -21,6 +21,7 @@ const Color _kActiveTickColor = CupertinoDynamicColor.withBrightness(
 /// Define the iOS version style of [CupertinoActivityIndicator].
 enum CupertinoActivityIndicatorIOSVersionStyle {
   /// The style that is used in iOS13 and earlier (12 points).
+  @deprecated
   iOS13,
 
   /// The style that was introduced in iOS14 (8 points).
@@ -40,7 +41,7 @@ class CupertinoActivityIndicator extends StatefulWidget {
     Key key,
     this.animating = true,
     this.radius = _kDefaultIndicatorRadius,
-    this.iOSVersionStyle = CupertinoActivityIndicatorIOSVersionStyle.iOS13,
+    this.iOSVersionStyle = CupertinoActivityIndicatorIOSVersionStyle.iOS14,
   })  : assert(animating != null),
         assert(radius != null),
         assert(radius > 0.0),
@@ -57,7 +58,7 @@ class CupertinoActivityIndicator extends StatefulWidget {
     Key key,
     this.radius = _kDefaultIndicatorRadius,
     this.progress = 1.0,
-    this.iOSVersionStyle = CupertinoActivityIndicatorIOSVersionStyle.iOS13,
+    this.iOSVersionStyle = CupertinoActivityIndicatorIOSVersionStyle.iOS14,
   })  : assert(radius != null),
         assert(radius > 0.0),
         assert(progress != null),
@@ -86,8 +87,8 @@ class CupertinoActivityIndicator extends StatefulWidget {
 
   /// The iOS version style of activity indicator.
   ///
-  /// Defaults to [CupertinoActivityIndicatorIOSVersionStyle.iOS13].
-  // TODO(ctrysbita): Change default style to iOS14 after official release, https://github.com/flutter/flutter/issues/60047
+  /// Defaults to [CupertinoActivityIndicatorIOSVersionStyle.iOS14].
+  // TODO(ctrysbita): Deprecate after official release, https://github.com/flutter/flutter/issues/62521
   final CupertinoActivityIndicatorIOSVersionStyle iOSVersionStyle;
 
   @override
