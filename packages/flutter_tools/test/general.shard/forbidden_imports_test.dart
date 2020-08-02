@@ -210,6 +210,16 @@ void main() {
       }
     }
   });
+
+  test('no import of packages in tool_backend.dart', () {
+    final File file = globals.fs.file(globals.fs.path.join(flutterTools, 'bin', 'tool_backend.dart'));
+    for (final String line in file.readAsLinesSync()) {
+      if (line.startsWith(RegExp(r'import.*package:.*'))) {
+        final String relativePath = globals.fs.path.relative(file.path, from:flutterTools);
+        fail('$relativePath imports a package');
+      }
+    }
+  });
 }
 
 bool _isDartFile(FileSystemEntity entity) => entity is File && entity.path.endsWith('.dart');

@@ -73,9 +73,10 @@ class SafeArea extends StatelessWidget {
   /// The greater of the minimum insets and the media padding will be applied.
   final EdgeInsets minimum;
 
-  /// Specifies whether the [SafeArea] should maintain the [viewPadding] instead
-  /// of the [padding] when consumed by the [viewInsets] of the current
-  /// context's [MediaQuery], defaults to false.
+  /// Specifies whether the [SafeArea] should maintain the
+  /// [MediaQueryData.viewPadding] instead of the [MediaQueryData.padding] when
+  /// consumed by the [MediaQueryData.viewInsets] of the current context's
+  /// [MediaQuery], defaults to false.
   ///
   /// For example, if there is an onscreen keyboard displayed above the
   /// SafeArea, the padding can be maintained below the obstruction rather than

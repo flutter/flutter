@@ -71,7 +71,8 @@ class SnackBarThemeData with Diagnosticable {
 
   /// Default value for [SnackBarAction.textColor].
   ///
-  /// If null, [SnackBarAction] defaults to [ThemeData.colorScheme.secondaryColor].
+  /// If null, [SnackBarAction] defaults to [ColorScheme.secondary] of
+  /// [ThemeData.colorScheme] .
   final Color actionTextColor;
 
   /// Default value for [SnackBarAction.disabledTextColor].

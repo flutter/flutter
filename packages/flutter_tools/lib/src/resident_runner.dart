@@ -14,6 +14,7 @@ import 'artifacts.dart';
 import 'asset.dart';
 import 'base/command_help.dart';
 import 'base/common.dart';
+import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
@@ -208,6 +209,8 @@ class FlutterDevice {
     ReloadMethod reloadMethod,
     GetSkSLMethod getSkSLMethod,
     PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
+    bool disableDds = false,
+    bool ipv6 = false,
   }) {
     final Completer<void> completer = Completer<void>();
     StreamSubscription<void> subscription;
@@ -218,7 +221,12 @@ class FlutterDevice {
       globals.printTrace('Connecting to service protocol: $observatoryUri');
       isWaitingForVm = true;
       vm_service.VmService service;
-
+      if (!disableDds) {
+        await device.dds.startDartDevelopmentService(
+          observatoryUri,
+          ipv6,
+        );
+      }
       try {
         service = await connectToVmService(
           observatoryUri,
@@ -799,7 +807,7 @@ abstract class ResidentRunner {
   final CommandHelp commandHelp;
   final bool machine;
 
-  io.HttpServer _devtoolsServer;
+  DevtoolsLauncher _devtoolsLauncher;
 
   bool _exited = false;
   Completer<int> _finished = Completer<int>();
@@ -1004,12 +1012,14 @@ abstract class ResidentRunner {
     await stopEchoingDeviceLog();
     await preExit();
     await exitApp();
+    await shutdownDartDevelopmentService();
   }
 
   Future<void> detach() async {
     await shutdownDevtools();
     await stopEchoingDeviceLog();
     await preExit();
+    await shutdownDartDevelopmentService();
     appFinished();
   }
 
@@ -1176,6 +1186,14 @@ abstract class ResidentRunner {
     );
   }
 
+  Future<void> shutdownDartDevelopmentService() async {
+    await Future.wait<void>(
+      flutterDevices.map<Future<void>>(
+        (FlutterDevice device) => device.device?.dds?.shutdown()
+      ).where((Future<void> element) => element != null)
+    );
+  }
+
   @protected
   void cacheInitialDillCompilation() {
     if (_dillOutputPath != null) {
@@ -1229,9 +1247,11 @@ abstract class ResidentRunner {
         reloadSources: reloadSources,
         restart: restart,
         compileExpression: compileExpression,
+        disableDds: debuggingOptions.disableDds,
         reloadMethod: reloadMethod,
         getSkSLMethod: getSkSLMethod,
         printStructuredErrorLogMethod: printStructuredErrorLog,
+        ipv6: ipv6,
       );
       // This will wait for at least one flutter view before returning.
       final Status status = globals.logger.startProgress(
@@ -1254,28 +1274,14 @@ abstract class ResidentRunner {
   }
 
   Future<void> launchDevTools() async {
-    try {
-      assert(supportsServiceProtocol);
-      _devtoolsServer ??= await devtools_server.serveDevTools(
-        enableStdinCommands: false,
-      );
-      await devtools_server.launchDevTools(
-        <String, dynamic>{
-          'reuseWindows': true,
-        },
-        flutterDevices.first.vmService.httpAddress,
-        'http://${_devtoolsServer.address.host}:${_devtoolsServer.port}',
-        false,  // headless mode,
-        false,  // machine mode
-      );
-    } on Exception catch (e, st) {
-      globals.printTrace('Failed to launch DevTools: $e\n$st');
-    }
+    assert(supportsServiceProtocol);
+    _devtoolsLauncher ??= DevtoolsLauncher.instance;
+    return _devtoolsLauncher.launch(flutterDevices.first.vmService.httpAddress);
   }
 
   Future<void> shutdownDevtools() async {
-    await _devtoolsServer?.close();
-    _devtoolsServer = null;
+    await _devtoolsLauncher?.close();
+    _devtoolsLauncher = null;
   }
 
   Future<void> _serviceProtocolDone(dynamic object) async {
@@ -1719,4 +1725,42 @@ String nextPlatform(String currentPlatform, FeatureFlags featureFlags) {
       assert(false); // Invalid current platform.
       return 'android';
   }
+}
+
+class DevtoolsLauncher {
+  io.HttpServer _devtoolsServer;
+  Future<void> launch(Uri observatoryAddress) async {
+    try {
+      await serve();
+      await devtools_server.launchDevTools(
+        <String, dynamic>{
+          'reuseWindows': true,
+        },
+        observatoryAddress,
+        'http://${_devtoolsServer.address.host}:${_devtoolsServer.port}',
+        false,  // headless mode,
+        false,  // machine mode
+      );
+    } on Exception catch (e, st) {
+      globals.printTrace('Failed to launch DevTools: $e\n$st');
+    }
+  }
+
+  Future<io.HttpServer> serve() async {
+    try {
+      _devtoolsServer ??= await devtools_server.serveDevTools(
+        enableStdinCommands: false,
+      );
+    } on Exception catch (e, st) {
+      globals.printTrace('Failed to serve DevTools: $e\n$st');
+    }
+    return _devtoolsServer;
+  }
+
+  Future<void> close() async {
+    await _devtoolsServer?.close();
+    _devtoolsServer = null;
+  }
+
+  static DevtoolsLauncher get instance => context.get<DevtoolsLauncher>() ?? DevtoolsLauncher();
 }
