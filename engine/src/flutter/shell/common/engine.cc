@@ -303,7 +303,8 @@ void Engine::DispatchPlatformMessage(fml::RefPtr<PlatformMessage> message) {
   } else if (channel == kSettingsChannel) {
     HandleSettingsPlatformMessage(message.get());
     return;
-  } else if (channel == kNavigationChannel) {
+  } else if (!runtime_controller_->IsRootIsolateRunning() &&
+             channel == kNavigationChannel) {
     // If there's no runtime_, we may still need to set the initial route.
     HandleNavigationPlatformMessage(std::move(message));
     return;
