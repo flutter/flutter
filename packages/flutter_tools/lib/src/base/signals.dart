@@ -11,7 +11,7 @@ import 'io.dart';
 
 typedef SignalHandler = FutureOr<void> Function(ProcessSignal signal);
 
-/// A class that manages signal handlers
+/// A class that manages signal handlers.
 ///
 /// Signal handlers are run in the order that they were added.
 abstract class Signals {

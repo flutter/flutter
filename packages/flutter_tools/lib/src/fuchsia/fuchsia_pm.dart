@@ -199,7 +199,7 @@ class FuchsiaPackageServer {
   String get url => Uri(scheme: 'http', host: _host, port: _port).toString();
 
   /// The URL that is stripped of interface name if it is an ipv6 address,
-  /// which should be supplied to amber_ctl to configure access to host
+  /// which should be supplied to amber_ctl to configure access to host.
   String get interfaceStrippedUrl => Uri(
     scheme: 'http',
     host: (isIPv6Address(_host.split('%').first)) ? '[${_host.split('%').first}]' : _host,

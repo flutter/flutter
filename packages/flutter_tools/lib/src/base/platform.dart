@@ -43,7 +43,7 @@ abstract class Platform {
   /// True if the operating system is iOS.
   bool get isIOS => operatingSystem == 'ios';
 
-  /// True if the operating system is Fuchsia
+  /// True if the operating system is Fuchsia.
   bool get isFuchsia => operatingSystem == 'fuchsia';
 
   /// The environment for this process.

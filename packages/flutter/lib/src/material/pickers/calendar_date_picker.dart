@@ -58,7 +58,7 @@ const double _monthNavButtonsWidth = 108.0;
 ///    time picker.
 ///
 class CalendarDatePicker extends StatefulWidget {
-  /// Creates a calender date picker
+  /// Creates a calender date picker.
   ///
   /// It will display a grid of days for the [initialDate]'s month. The day
   /// indicated by [initialDate] will be selected.
@@ -437,7 +437,7 @@ class _MonthPicker extends StatefulWidget {
        assert(!selectedDate.isAfter(lastDate)),
        super(key: key);
 
-  /// The initial month to display
+  /// The initial month to display.
   final DateTime initialMonth;
 
   /// The current date.
@@ -463,7 +463,7 @@ class _MonthPicker extends StatefulWidget {
   /// Called when the user picks a day.
   final ValueChanged<DateTime> onChanged;
 
-  /// Called when the user navigates to a new month
+  /// Called when the user navigates to a new month.
   final ValueChanged<DateTime> onDisplayedMonthChanged;
 
   /// Optional user supplied predicate function to customize selectable days.

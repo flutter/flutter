@@ -989,7 +989,7 @@ class MemoryImage extends ImageProvider<MemoryImage> {
 ///     - icons/heart.png
 /// ```
 ///
-/// Then, to fetch the image and associate it with scale `1.5`, use
+/// Then, to fetch the image and associate it with scale `1.5`, use:
 ///
 /// ```dart
 /// AssetImage('icons/heart.png', scale: 1.5)

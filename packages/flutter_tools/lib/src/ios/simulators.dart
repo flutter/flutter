@@ -866,11 +866,12 @@ int compareIosVersions(String v1, String v2) {
 /// Matches on device type given an identifier.
 ///
 /// Example device type identifiers:
-///   ✓ com.apple.CoreSimulator.SimDeviceType.iPhone-5
-///   ✓ com.apple.CoreSimulator.SimDeviceType.iPhone-6
-///   ✓ com.apple.CoreSimulator.SimDeviceType.iPhone-6s-Plus
-///   ✗ com.apple.CoreSimulator.SimDeviceType.iPad-2
-///   ✗ com.apple.CoreSimulator.SimDeviceType.Apple-Watch-38mm
+///
+/// - ✓ com.apple.CoreSimulator.SimDeviceType.iPhone-5
+/// - ✓ com.apple.CoreSimulator.SimDeviceType.iPhone-6
+/// - ✓ com.apple.CoreSimulator.SimDeviceType.iPhone-6s-Plus
+/// - ✗ com.apple.CoreSimulator.SimDeviceType.iPad-2
+/// - ✗ com.apple.CoreSimulator.SimDeviceType.Apple-Watch-38mm
 final RegExp _iosDeviceTypePattern =
     RegExp(r'com.apple.CoreSimulator.SimDeviceType.iPhone-(\d+)(.*)');
 

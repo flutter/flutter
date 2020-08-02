@@ -182,9 +182,9 @@ final RegExp _escapeExpr = RegExp(r'\\(.)');
 ///
 /// Snapshot dependency files are a single line mapping the output snapshot to a
 /// space-separated list of input files used to generate that output. Spaces and
-/// backslashes are escaped with a backslash. e.g,
+/// backslashes are escaped with a backslash. For example:
 ///
-/// outfile : file1.dart fil\\e2.dart fil\ e3.dart
+///     outfile : file1.dart fil\\e2.dart fil\ e3.dart
 ///
 /// will return a set containing: 'file1.dart', 'fil\e2.dart', 'fil e3.dart'.
 Set<String> readDepfile(String depfilePath) {

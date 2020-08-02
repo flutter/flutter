@@ -179,7 +179,7 @@ class FlexibleSpaceBar extends StatefulWidget {
   /// Defaults to [CollapseMode.parallax].
   final CollapseMode collapseMode;
 
-  /// Stretch effect while over-scrolling,
+  /// Stretch effect while over-scrolling.
   ///
   /// Defaults to include [StretchMode.zoomBackground].
   final List<StretchMode> stretchModes;

@@ -359,7 +359,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   /// Updates [_initialLine] and [_currentLine] accordingly to the situation of
-  /// the registered pointers
+  /// the registered pointers.
   void _updateLines() {
     final int count = _pointerLocations.keys.length;
     assert(_pointerQueue.length >= count);

@@ -694,7 +694,7 @@ class SemanticsProperties extends DiagnosticableTree {
 
   /// If non-null, indicates that this subtree is read only.
   ///
-  /// Only applicable when [textField] is true
+  /// Only applicable when [textField] is true.
   ///
   /// TalkBack/VoiceOver will treat it as non-editable text field.
   final bool readOnly;

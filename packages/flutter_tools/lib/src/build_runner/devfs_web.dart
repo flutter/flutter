@@ -60,9 +60,9 @@ const String _kDefaultIndex = '''
 </html>
 ''';
 
-/// An expression compiler connecting to FrontendServer
+/// An expression compiler connecting to FrontendServer.
 ///
-/// This is only used in development mode
+/// This is only used in development mode.
 class WebExpressionCompiler implements ExpressionCompiler {
   WebExpressionCompiler(this._generator);
 

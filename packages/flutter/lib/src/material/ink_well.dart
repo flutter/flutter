@@ -85,7 +85,7 @@ abstract class InteractiveInkFeature extends InkFeature {
   /// [clipCallback] is the callback used to obtain the [Rect] used for clipping the ink effect.
   /// If [clipCallback] is null, no clipping is performed on the ink circle.
   ///
-  /// Clipping can happen in 3 different ways -
+  /// Clipping can happen in 3 different ways:
   ///  1. If [customBorder] is provided, it is used to determine the path
   ///     for clipping.
   ///  2. If [customBorder] is null, and [borderRadius] is provided, the canvas

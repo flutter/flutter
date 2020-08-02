@@ -1707,7 +1707,7 @@ class DebugConnectionInfo {
 /// Returns the next platform value for the switcher.
 ///
 /// These values must match what is available in
-/// packages/flutter/lib/src/foundation/binding.dart
+/// `packages/flutter/lib/src/foundation/binding.dart`.
 String nextPlatform(String currentPlatform, FeatureFlags featureFlags) {
   switch (currentPlatform) {
     case 'android':

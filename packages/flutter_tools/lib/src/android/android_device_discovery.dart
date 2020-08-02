@@ -18,7 +18,7 @@ import 'android_device.dart';
 import 'android_sdk.dart';
 import 'android_workflow.dart' hide androidWorkflow;
 
-/// Device discovery for Android physical devices and emulators.s
+/// Device discovery for Android physical devices and emulators.
 class AndroidDevices extends PollingDeviceDiscovery {
   AndroidDevices({
     @required AndroidWorkflow androidWorkflow,

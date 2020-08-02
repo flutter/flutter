@@ -471,7 +471,7 @@ class _BoxDecorationPainter extends BoxPainter {
     super.dispose();
   }
 
-  /// Paint the box decoration into the given location on the given canvas
+  /// Paint the box decoration into the given location on the given canvas.
   @override
   void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
     assert(configuration != null);

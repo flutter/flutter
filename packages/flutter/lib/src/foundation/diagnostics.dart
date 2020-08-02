@@ -258,7 +258,7 @@ class TextTreeConfiguration {
   /// Prefix to add to other lines to display a child with this style.
   ///
   /// [prefixOtherLines] should typically be one character shorter than
-  /// [prefixLineOne] as
+  /// [prefixLineOne] is.
   final String prefixOtherLines;
 
   /// Prefix to add to the first line to display the last child of a node with
@@ -1511,7 +1511,7 @@ abstract class DiagnosticsNode {
   /// will make the name self-evident.
   final bool showName;
 
-  /// Prefix to include at the start of each line
+  /// Prefix to include at the start of each line.
   final String? linePrefix;
 
   /// Description to show if the node has no displayed properties or children.

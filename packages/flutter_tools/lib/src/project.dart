@@ -194,7 +194,7 @@ class FlutterProject {
   /// True if this project is a Flutter module project.
   bool get isModule => manifest.isModule;
 
-  /// True if the Flutter project is using the AndroidX support library
+  /// True if the Flutter project is using the AndroidX support library.
   bool get usesAndroidX => manifest.usesAndroidX;
 
   /// True if this project has an example application.
@@ -709,7 +709,7 @@ class AndroidProject extends FlutterProjectPlatform {
   /// True if the parent Flutter project is a module.
   bool get isModule => parent.isModule;
 
-  /// True if the Flutter project is using the AndroidX support library
+  /// True if the Flutter project is using the AndroidX support library.
   bool get usesAndroidX => parent.usesAndroidX;
 
   /// True, if the app project is using Kotlin.
@@ -989,7 +989,7 @@ class MacOSProject extends FlutterProjectPlatform implements XcodeBasedProject {
   }
 }
 
-/// The Windows sub project
+/// The Windows sub project.
 class WindowsProject extends FlutterProjectPlatform implements CmakeBasedProject {
   WindowsProject._(this.parent);
 
@@ -1075,7 +1075,7 @@ class LinuxProject extends FlutterProjectPlatform implements CmakeBasedProject {
   }
 }
 
-/// The Fuchsia sub project
+/// The Fuchsia sub project.
 class FuchsiaProject {
   FuchsiaProject._(this.project);
 

@@ -284,7 +284,7 @@ enum Overflow {
   clip,
 }
 
-/// Implements the stack layout algorithm
+/// Implements the stack layout algorithm.
 ///
 /// In a stack layout, the children are positioned on top of each other in the
 /// order in which they appear in the child list. First, the non-positioned

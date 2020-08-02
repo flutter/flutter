@@ -27,7 +27,7 @@ import 'theme_data.dart';
 /// The slider is as big as the largest of
 /// the [SliderComponentShape.getPreferredSize] of the thumb shape,
 /// the [SliderComponentShape.getPreferredSize] of the overlay shape,
-/// and the [SliderTickMarkShape.getPreferredSize] of the tick mark shape
+/// and the [SliderTickMarkShape.getPreferredSize] of the tick mark shape.
 ///
 /// See also:
 ///

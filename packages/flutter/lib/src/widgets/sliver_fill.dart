@@ -407,7 +407,9 @@ class SliverFillRemaining extends StatelessWidget {
        assert(fillOverscroll != null),
        super(key: key);
 
-  /// Doc
+  /// Box child widget that fills the remaining space in the viewport.
+  ///
+  /// The main [SliverFillRemaining] documentation contains more details.
   final Widget child;
 
   /// Indicates whether the child has a scrollable body, this value cannot be

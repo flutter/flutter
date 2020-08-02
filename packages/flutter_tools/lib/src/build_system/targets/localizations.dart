@@ -179,7 +179,7 @@ class LocalizationOptions {
 
   /// The `--header` argument.
   ///
-  /// The header to prepend to the generated Dart localizations
+  /// The header to prepend to the generated Dart localizations.
   final String header;
 
   /// The `--output-class` argument.

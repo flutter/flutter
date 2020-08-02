@@ -811,7 +811,7 @@ extension FlutterVmService on vm_service.VmService {
     return callServiceExtension(kScreenshotSkpMethod);
   }
 
-  /// Set the VM timeline flags
+  /// Set the VM timeline flags.
   Future<vm_service.Response> setVMTimelineFlags(List<String> recordedStreams) {
     assert(recordedStreams != null);
     return callServiceExtension(

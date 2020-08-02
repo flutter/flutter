@@ -41,7 +41,7 @@ enum SdkType {
 ///
 /// Usage: xcrun [options] <tool name> ... arguments ...
 /// ...
-/// --sdk <sdk name>            find the tool for the given SDK name
+/// --sdk <sdk name>            find the tool for the given SDK name.
 String getNameForSdk(SdkType sdk) {
   switch (sdk) {
     case SdkType.iPhone:

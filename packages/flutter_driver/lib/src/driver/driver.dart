@@ -160,10 +160,10 @@ abstract class FlutterDriver {
     );
   }
 
-  /// Getter of appIsolate
+  /// Getter of appIsolate.
   VMIsolate get appIsolate => throw UnimplementedError();
 
-  /// Getter of serviceClient
+  /// Getter of serviceClient.
   VMServiceClient get serviceClient => throw UnimplementedError();
 
   /// Sends [command] to the Flutter Driver extensions.

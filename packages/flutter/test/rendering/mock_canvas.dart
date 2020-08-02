@@ -50,7 +50,7 @@ Matcher get paintsNothing => _TestRecordingCanvasPaintsNothingMatcher();
 /// Matches objects or functions that assert when they try to paint.
 Matcher get paintsAssertion => _TestRecordingCanvasPaintsAssertionMatcher();
 
-/// Matches objects or functions that draw `methodName` exactly `count` number of times
+/// Matches objects or functions that draw `methodName` exactly `count` number of times.
 Matcher paintsExactlyCountTimes(Symbol methodName, int count) {
   return _TestRecordingCanvasPaintsCountMatcher(methodName, count);
 }

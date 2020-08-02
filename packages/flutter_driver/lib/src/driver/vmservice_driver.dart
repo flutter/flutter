@@ -266,7 +266,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
   /// The unique ID of this driver instance.
   final int _driverId;
 
-  /// Client connected to the Dart VM running the Flutter application
+  /// Client connected to the Dart VM running the Flutter application.
   ///
   /// You can use [VMServiceClient] to check VM version, flags and get
   /// notified when a new isolate has been instantiated. That could be

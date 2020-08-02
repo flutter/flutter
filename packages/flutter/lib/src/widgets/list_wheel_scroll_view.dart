@@ -563,7 +563,7 @@ class FixedExtentScrollPhysics extends ScrollPhysics {
 ///
 /// When the list is at the zero scroll offset, the first child is aligned with
 /// the middle of the viewport. When the list is at the final scroll offset,
-/// the last child is aligned with the middle of the viewport
+/// the last child is aligned with the middle of the viewport.
 ///
 /// The children are rendered as if rotating on a wheel instead of scrolling on
 /// a plane.

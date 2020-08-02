@@ -541,7 +541,7 @@ Future<bool> _stopApp(DriveCommand command) async {
   return stopped;
 }
 
-/// A list of supported browsers
+/// A list of supported browsers.
 @visibleForTesting
 enum Browser {
   /// Chrome on Android: https://developer.chrome.com/multidevice/android/overview

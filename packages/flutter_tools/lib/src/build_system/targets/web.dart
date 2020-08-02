@@ -221,7 +221,7 @@ class Dart2JSTarget extends Target {
   }
 }
 
-/// Unpacks the dart2js compilation and resources to a given output directory
+/// Unpacks the dart2js compilation and resources to a given output directory.
 class WebReleaseBundle extends Target {
   const WebReleaseBundle();
 

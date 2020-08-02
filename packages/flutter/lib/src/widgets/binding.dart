@@ -1006,7 +1006,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 /// The widget is given constraints during layout that force it to fill the
 /// entire screen. If you wish to align your widget to one side of the screen
 /// (e.g., the top), consider using the [Align] widget. If you wish to center
-/// your widget, you can also use the [Center] widget
+/// your widget, you can also use the [Center] widget.
 ///
 /// Calling [runApp] again will detach the previous root widget from the screen
 /// and attach the given widget in its place. The new widget tree is compared
