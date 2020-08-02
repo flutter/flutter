@@ -21,7 +21,10 @@ const Color _kActiveTickColor = CupertinoDynamicColor.withBrightness(
 /// Define the iOS version style of [CupertinoActivityIndicator].
 enum CupertinoActivityIndicatorIOSVersionStyle {
   /// The style that is used in iOS13 and earlier (12 points).
-  @deprecated
+  @Deprecated(
+    'Use iOS14 instead or simply leave this field to default. '
+    'This feature was deprecated after v1.21.0.'
+  )
   iOS13,
 
   /// The style that was introduced in iOS14 (8 points).
