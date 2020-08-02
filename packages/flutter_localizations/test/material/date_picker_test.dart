@@ -232,7 +232,9 @@ void main() {
 
     Future<void> _showPicker(WidgetTester tester, Locale locale, Size size) async {
       tester.binding.window.physicalSizeTestValue = size;
+      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
       tester.binding.window.devicePixelRatioTestValue = 1.0;
+      addTearDown(tester.binding.window.clearDevicePixelRatioTestValue);
       await tester.pumpWidget(
         MaterialApp(
           home: Builder(
