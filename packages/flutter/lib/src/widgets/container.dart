@@ -248,6 +248,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 ///
 ///  * [AnimatedContainer], a variant that smoothly animates the properties when
 ///    they change.
+///    * Cookbook: [Animate the properties of a container](https://flutter.dev/docs/cookbook/animation/animated-container)
 ///  * [Border], which has a sample which uses [Container] heavily.
 ///  * [Ink], which paints a [Decoration] on a [Material], allowing
 ///    [InkResponse] and [InkWell] splashes to paint over them.

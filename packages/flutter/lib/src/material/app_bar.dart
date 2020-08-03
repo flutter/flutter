@@ -165,6 +165,7 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 ///  * [Scaffold], which displays the [AppBar] in its [Scaffold.appBar] slot.
 ///  * [SliverAppBar], which uses [AppBar] to provide a flexible app bar that
 ///    can be used in a [CustomScrollView].
+///    * Cookbook: [Place a floating app bar above a list](https://flutter.dev/docs/cookbook/lists/floating-app-bar)
 ///  * [TabBar], which is typically placed in the [bottom] slot of the [AppBar]
 ///    if the screen has multiple pages arranged in tabs.
 ///  * [IconButton], which is used with [actions] to show buttons on the app bar.
@@ -172,6 +173,11 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 ///  * [FlexibleSpaceBar], which is used with [flexibleSpace] when the app bar
 ///    can expand and collapse.
 ///  * <https://material.io/design/components/app-bars-top.html>
+///  * See our
+///    [AppBar Basics sample](https://flutter.dev/docs/catalog/samples/basic-app-bar)
+///    and our advanced samples with app bars with 
+///    [tabs](https://flutter.dev/docs/catalog/samples/tabbed-app-bar) or
+///    [custom bottom widgets](https://flutter.dev/docs/catalog/samples/app-bar-bottom).
 class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// Creates a material design app bar.
   ///

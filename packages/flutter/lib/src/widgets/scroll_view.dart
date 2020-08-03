@@ -992,7 +992,7 @@ abstract class BoxScrollView extends ScrollView {
 ///    child.
 ///  * [PageView], which is a scrolling list of child widgets that are each the
 ///    size of the viewport.
-///  * [GridView], which is scrollable, 2D array of widgets.
+///  * [GridView], which is a scrollable, 2D array of widgets.
 ///  * [CustomScrollView], which is a scrollable widget that creates custom
 ///    scroll effects using slivers.
 ///  * [ListBody], which arranges its children in a similar manner, but without
@@ -1000,6 +1000,11 @@ abstract class BoxScrollView extends ScrollView {
 ///  * [ScrollNotification] and [NotificationListener], which can be used to watch
 ///    the scroll position without using a [ScrollController].
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
+///  * Cookbook: [Use lists](https://flutter.dev/docs/cookbook/lists/basic-list)
+///  * Cookbook: [Work with long lists](https://flutter.dev/docs/cookbook/lists/long-lists)
+///  * Cookbook: [Create a horizontal list](https://flutter.dev/docs/cookbook/lists/horizontal-list)
+///  * Cookbook: [Create lists with different types of items](https://flutter.dev/docs/cookbook/lists/mixed-list)
+///  * Cookbook: [Implement swipe to dismiss](https://flutter.dev/docs/cookbook/gestures/dismissible)
 class ListView extends BoxScrollView {
   /// Creates a scrollable, linear array of widgets from an explicit [List].
   ///

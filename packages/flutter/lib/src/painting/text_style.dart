@@ -391,7 +391,8 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 ///  * [TextSpan], the class that wraps a [TextStyle] for the purposes of
 ///    passing it to a [RichText].
 ///  * [TextStyle](https://api.flutter.dev/flutter/dart-ui/TextStyle-class.html), the class in the [dart:ui] library.
-///
+///  * Cookbook: [Use a custom font](https://flutter.dev/docs/cookbook/design/fonts)
+///  * Cookbook: [Use themes to share colors and font styles](https://flutter.dev/docs/cookbook/design/themes)
 @immutable
 class TextStyle with Diagnosticable {
   /// Creates a text style.
