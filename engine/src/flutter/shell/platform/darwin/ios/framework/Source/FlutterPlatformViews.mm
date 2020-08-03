@@ -167,7 +167,11 @@ void FlutterPlatformViewsController::OnCreate(FlutterMethodCall* call, FlutterRe
 
   touch_interceptors_[viewId] =
       fml::scoped_nsobject<FlutterTouchInterceptingView>([touch_interceptor retain]);
-  root_views_[viewId] = fml::scoped_nsobject<UIView>([touch_interceptor retain]);
+
+  ChildClippingView* clipping_view =
+      [[[ChildClippingView alloc] initWithFrame:CGRectZero] autorelease];
+  [clipping_view addSubview:touch_interceptor];
+  root_views_[viewId] = fml::scoped_nsobject<UIView>([clipping_view retain]);
 
   result(nil);
 }
@@ -317,83 +321,60 @@ int FlutterPlatformViewsController::CountClips(const MutatorsStack& mutators_sta
   return clipCount;
 }
 
-UIView* FlutterPlatformViewsController::ReconstructClipViewsChain(int number_of_clips,
-                                                                  UIView* platform_view,
-                                                                  UIView* head_clip_view) {
-  NSInteger indexInFlutterView = -1;
-  if (head_clip_view.superview) {
-    // TODO(cyanglaz): potentially cache the index of oldPlatformViewRoot to make this a O(1).
-    // https://github.com/flutter/flutter/issues/35023
-    indexInFlutterView = [flutter_view_.get().subviews indexOfObject:head_clip_view];
-    [head_clip_view removeFromSuperview];
-  }
-  UIView* head = platform_view;
-  int clipIndex = 0;
-  // Re-use as much existing clip views as needed.
-  while (head != head_clip_view && clipIndex < number_of_clips) {
-    head = head.superview;
-    clipIndex++;
-  }
-  // If there were not enough existing clip views, add more.
-  while (clipIndex < number_of_clips) {
-    ChildClippingView* clippingView =
-        [[[ChildClippingView alloc] initWithFrame:flutter_view_.get().bounds] autorelease];
-    [clippingView addSubview:head];
-    head = clippingView;
-    clipIndex++;
-  }
-  [head removeFromSuperview];
-
-  if (indexInFlutterView > -1) {
-    // The chain was previously attached; attach it to the same position.
-    [flutter_view_.get() insertSubview:head atIndex:indexInFlutterView];
-  }
-  return head;
-}
-
 void FlutterPlatformViewsController::ApplyMutators(const MutatorsStack& mutators_stack,
                                                    UIView* embedded_view) {
   FML_DCHECK(CATransform3DEqualToTransform(embedded_view.layer.transform, CATransform3DIdentity));
-  UIView* head = embedded_view;
-  ResetAnchor(head.layer);
+  ResetAnchor(embedded_view.layer);
+  ChildClippingView* clipView = (ChildClippingView*)embedded_view.superview;
 
-  std::vector<std::shared_ptr<Mutator>>::const_reverse_iterator iter = mutators_stack.Bottom();
-  while (iter != mutators_stack.Top()) {
-    switch ((*iter)->GetType()) {
-      case transform: {
-        CATransform3D transform = GetCATransform3DFromSkMatrix((*iter)->GetMatrix());
-        head.layer.transform = CATransform3DConcat(head.layer.transform, transform);
-        break;
-      }
-      case clip_rect:
-      case clip_rrect:
-      case clip_path: {
-        ChildClippingView* clipView = (ChildClippingView*)head.superview;
-        clipView.layer.transform = CATransform3DIdentity;
-        [clipView setClip:(*iter)->GetType()
-                     rect:(*iter)->GetRect()
-                    rrect:(*iter)->GetRRect()
-                     path:(*iter)->GetPath()];
-        ResetAnchor(clipView.layer);
-        head = clipView;
-        break;
-      }
-      case opacity:
-        embedded_view.alpha = (*iter)->GetAlphaFloat() * embedded_view.alpha;
-        break;
-    }
-    ++iter;
-  }
-  // Reverse scale based on screen scale.
-  //
   // The UIKit frame is set based on the logical resolution instead of physical.
   // (https://developer.apple.com/library/archive/documentation/DeviceInformation/Reference/iOSDeviceCompatibility/Displays/Displays.html).
   // However, flow is based on the physical resolution. For example, 1000 pixels in flow equals
   // 500 points in UIKit. And until this point, we did all the calculation based on the flow
   // resolution. So we need to scale down to match UIKit's logical resolution.
   CGFloat screenScale = [UIScreen mainScreen].scale;
-  head.layer.transform = CATransform3DConcat(
-      head.layer.transform, CATransform3DMakeScale(1 / screenScale, 1 / screenScale, 1));
+  CATransform3D finalTransform = CATransform3DMakeScale(1 / screenScale, 1 / screenScale, 1);
+
+  // Mask view needs to be full screen because we might draw platform view pixels outside of the
+  // `ChildClippingView`. Since the mask view's frame will be based on the `clipView`'s coordinate
+  // system, we need to convert the flutter_view's frame to the clipView's coordinate system. The
+  // mask view is not displayed on the screen.
+  CGRect maskViewFrame = [flutter_view_ convertRect:flutter_view_.get().frame toView:clipView];
+  FlutterClippingMaskView* maskView =
+      [[[FlutterClippingMaskView alloc] initWithFrame:maskViewFrame] autorelease];
+  auto iter = mutators_stack.Begin();
+  while (iter != mutators_stack.End()) {
+    switch ((*iter)->GetType()) {
+      case transform: {
+        CATransform3D transform = GetCATransform3DFromSkMatrix((*iter)->GetMatrix());
+        finalTransform = CATransform3DConcat(transform, finalTransform);
+        break;
+      }
+      case clip_rect:
+        [maskView clipRect:(*iter)->GetRect() matrix:finalTransform];
+        break;
+      case clip_rrect:
+        [maskView clipRRect:(*iter)->GetRRect() matrix:finalTransform];
+        break;
+      case clip_path:
+        [maskView clipPath:(*iter)->GetPath() matrix:finalTransform];
+        break;
+      case opacity:
+        embedded_view.alpha = (*iter)->GetAlphaFloat() * embedded_view.alpha;
+        break;
+    }
+    ++iter;
+  }
+  // Reverse the offset of the clipView.
+  // The clipView's frame includes the final translate of the final transform matrix.
+  // So we need to revese this translate so the platform view can layout at the correct offset.
+  //
+  // Note that we don't apply this transform matrix the clippings because clippings happen on the
+  // mask view, whose origin is alwasy (0,0) to the flutter_view.
+  CATransform3D reverseTranslate =
+      CATransform3DMakeTranslation(-clipView.frame.origin.x, -clipView.frame.origin.y, 0);
+  embedded_view.layer.transform = CATransform3DConcat(finalTransform, reverseTranslate);
+  clipView.maskView = maskView;
 }
 
 void FlutterPlatformViewsController::CompositeWithParams(int view_id,
@@ -406,17 +387,15 @@ void FlutterPlatformViewsController::CompositeWithParams(int view_id,
   touchInterceptor.alpha = 1;
 
   const MutatorsStack& mutatorStack = params.mutatorsStack();
-  int currentClippingCount = CountClips(mutatorStack);
-  int previousClippingCount = clip_count_[view_id];
-  if (currentClippingCount != previousClippingCount) {
-    clip_count_[view_id] = currentClippingCount;
-    // If we have a different clipping count in this frame, we need to reconstruct the
-    // ClippingChildView chain to prepare for `ApplyMutators`.
-    UIView* oldPlatformViewRoot = root_views_[view_id].get();
-    UIView* newPlatformViewRoot =
-        ReconstructClipViewsChain(currentClippingCount, touchInterceptor, oldPlatformViewRoot);
-    root_views_[view_id] = fml::scoped_nsobject<UIView>([newPlatformViewRoot retain]);
-  }
+  UIView* clippingView = root_views_[view_id].get();
+  // The frame of the clipping view should be the final bounding rect.
+  // Because the translate matrix in the Mutator Stack also includes the offset,
+  // when we apply the transforms matrix in |ApplyMutators|, we need
+  // to remember to do a reverse translate.
+  const SkRect& rect = params.finalBoundingRect();
+  CGFloat screenScale = [UIScreen mainScreen].scale;
+  clippingView.frame = CGRectMake(rect.x() / screenScale, rect.y() / screenScale,
+                                  rect.width() / screenScale, rect.height() / screenScale);
   ApplyMutators(mutatorStack, touchInterceptor);
 }
 
