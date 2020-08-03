@@ -7,7 +7,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
-import 'package:mockito/mockito.dart';
 
 import '../rendering/mock_canvas.dart';
 
@@ -440,10 +439,6 @@ void main() {
 
     final RenderBox decoratedBox = tester.renderObject(find.byType(DecoratedBox).last);
     final PaintingContext context = _MockPaintingContext();
-    final Canvas canvas = _MockCanvas();
-    int saveCount = 0;
-    when(canvas.getSaveCount()).thenAnswer((_) => saveCount++);
-    when(context.canvas).thenReturn(canvas);
     FlutterError error;
     try {
       decoratedBox.paint(context, const Offset(0, 0));
@@ -561,5 +556,19 @@ void main() {
   });
 }
 
-class _MockPaintingContext extends Mock implements PaintingContext {}
-class _MockCanvas extends Mock implements Canvas {}
+class _MockPaintingContext extends Fake implements PaintingContext {
+  @override
+  final Canvas canvas = _MockCanvas();
+}
+
+class _MockCanvas extends Fake implements Canvas {
+  int saveCount = 0;
+
+  @override
+  int getSaveCount() {
+    return saveCount++;
+  }
+
+  @override
+  void drawRect(Rect rect, Paint paint) { }
+}
