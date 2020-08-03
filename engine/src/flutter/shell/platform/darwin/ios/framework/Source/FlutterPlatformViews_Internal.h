@@ -16,6 +16,33 @@
 #include "flutter/shell/platform/darwin/ios/ios_context.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 
+// A UIView that acts as a clipping mask for the |ChildClippingView|.
+//
+// On the [UIView drawRect:] method, this view performs a series of clipping operations and sets the
+// alpha channel to the final resulting area to be 1; it also sets the "clipped out" area's alpha
+// channel to be 0.
+//
+// When a UIView sets a |FlutterClippingMaskView| as its `maskView`, the alpha channel of the UIView
+// is replaced with the alpha channel of the |FlutterClippingMaskView|.
+@interface FlutterClippingMaskView : UIView
+
+// Adds a clip rect operation to the queue.
+//
+// The `clipSkRect` is transformed with the `matrix` before adding to the queue.
+- (void)clipRect:(const SkRect&)clipSkRect matrix:(const CATransform3D&)matrix;
+
+// Adds a clip rrect operation to the queue.
+//
+// The `clipSkRRect` is transformed with the `matrix` before adding to the queue.
+- (void)clipRRect:(const SkRRect&)clipSkRRect matrix:(const CATransform3D&)matrix;
+
+// Adds a clip path operation to the queue.
+//
+// The `path` is transformed with the `matrix` before adding to the queue.
+- (void)clipPath:(const SkPath&)path matrix:(const CATransform3D&)matrix;
+
+@end
+
 // A UIView that is used as the parent for embedded UIViews.
 //
 // This view has 2 roles:
@@ -36,14 +63,6 @@
 
 // The parent view handles clipping to its subviews.
 @interface ChildClippingView : UIView
-
-// Performs the clipping based on the type.
-//
-// The `type` must be one of the 3: clip_rect, clip_rrect, clip_path.
-- (void)setClip:(flutter::MutatorType)type
-           rect:(const SkRect&)rect
-          rrect:(const SkRRect&)rrect
-           path:(const SkPath&)path;
 
 @end
 
@@ -252,20 +271,6 @@ class FlutterPlatformViewsController {
 
   // Traverse the `mutators_stack` and return the number of clip operations.
   int CountClips(const MutatorsStack& mutators_stack);
-
-  // Make sure that platform_view has exactly clip_count ChildClippingView ancestors.
-  //
-  // Existing ChildClippingViews are re-used. If there are currently more ChildClippingView
-  // ancestors than needed, the extra views are detached. If there are less ChildClippingView
-  // ancestors than needed, new ChildClippingViews will be added.
-  //
-  // If head_clip_view was attached as a subview to FlutterView, the head of the newly constructed
-  // ChildClippingViews chain is attached to FlutterView in the same position.
-  //
-  // Returns the new head of the clip views chain.
-  UIView* ReconstructClipViewsChain(int number_of_clips,
-                                    UIView* platform_view,
-                                    UIView* head_clip_view);
 
   // Applies the mutators in the mutators_stack to the UIView chain that was constructed by
   // `ReconstructClipViewsChain`
