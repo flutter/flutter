@@ -362,6 +362,80 @@ void main() {
       expect(themeDialogMaterial.elevation, customDialogTheme.elevation);
     });
 
+    testWidgets('OK Cancel button layout', (WidgetTester tester) async {
+       Widget buildFrame(TextDirection textDirection) {
+         return MaterialApp(
+           home: Material(
+             child: Center(
+               child: Builder(
+                 builder: (BuildContext context) {
+                   return ElevatedButton(
+                     child: const Text('X'),
+                     onPressed: () {
+                       showDatePicker(
+                         context: context,
+                         initialDate: DateTime(2016, DateTime.january, 15),
+                         firstDate:DateTime(2001, DateTime.january, 1),
+                         lastDate: DateTime(2031, DateTime.december, 31),
+                         builder: (BuildContext context, Widget child) {
+                           return Directionality(
+                             textDirection: textDirection,
+                             child: child,
+                           );
+                         },
+                       );
+                     },
+                   );
+                 },
+               ),
+             ),
+           ),
+         );
+       }
+
+      // Default landscape layout.
+
+      await tester.pumpWidget(buildFrame(TextDirection.ltr));
+      await tester.tap(find.text('X'));
+      await tester.pumpAndSettle();
+      expect(tester.getBottomRight(find.text('OK')).dx, 622);
+      expect(tester.getBottomLeft(find.text('OK')).dx, 594);
+      expect(tester.getBottomRight(find.text('CANCEL')).dx, 560);
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+
+      await tester.pumpWidget(buildFrame(TextDirection.rtl));
+      await tester.tap(find.text('X'));
+      await tester.pumpAndSettle();
+      expect(tester.getBottomRight(find.text('OK')).dx, 206);
+      expect(tester.getBottomLeft(find.text('OK')).dx, 178);
+      expect(tester.getBottomRight(find.text('CANCEL')).dx, 324);
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+
+      // Portrait layout.
+
+      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+      tester.binding.window.physicalSizeTestValue = const Size(900, 1200);
+
+      await tester.pumpWidget(buildFrame(TextDirection.ltr));
+      await tester.tap(find.text('X'));
+      await tester.pumpAndSettle();
+      expect(tester.getBottomRight(find.text('OK')).dx, 258);
+      expect(tester.getBottomLeft(find.text('OK')).dx, 230);
+      expect(tester.getBottomRight(find.text('CANCEL')).dx, 196);
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+
+      await tester.pumpWidget(buildFrame(TextDirection.rtl));
+      await tester.tap(find.text('X'));
+      await tester.pumpAndSettle();
+      expect(tester.getBottomRight(find.text('OK')).dx, 70);
+      expect(tester.getBottomLeft(find.text('OK')).dx, 42);
+      expect(tester.getBottomRight(find.text('CANCEL')).dx, 188);
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+    });
   });
 
   group('Calendar mode', () {
