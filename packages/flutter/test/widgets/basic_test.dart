@@ -674,5 +674,4 @@ class _MockCanvas extends Fake implements Canvas {
     rects.add(rect);
     paints.add(paint);
   }
-
 }
