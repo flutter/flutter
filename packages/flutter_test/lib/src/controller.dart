@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:clock/clock.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -401,20 +400,6 @@ abstract class WidgetController {
         }
       }
       await sendEventToBinding(testPointer.up(timeStamp: Duration(milliseconds: timeStamp.round())), result);
-    });
-  }
-
-  /// Makes an effort to dismiss the current page with a Material [Scaffold] or
-  /// a [CupertinoPageScaffold].
-  ///
-  /// Will throw an error if there is no back button in the page.
-  Future<void> pageBack() async {
-    return TestAsyncUtils.guard<void>(() async {
-      Finder backButton = find.byTooltip('Back');
-      if (backButton.evaluate().isEmpty) {
-        backButton = find.byType(CupertinoNavigationBarBackButton);
-      }
-      await tap(backButton);
     });
   }
 

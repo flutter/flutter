@@ -21,6 +21,7 @@ import 'all_elements.dart';
 import 'binding.dart';
 import 'controller.dart';
 import 'finders.dart';
+import 'matchers.dart';
 import 'restoration.dart';
 import 'test_async_utils.dart';
 import 'test_compat.dart';
@@ -1026,6 +1027,23 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       await showKeyboard(finder);
       testTextInput.enterText(text);
       await idle();
+    });
+  }
+
+  /// Makes an effort to dismiss the current page with a Material [Scaffold] or
+  /// a [CupertinoPageScaffold].
+  ///
+  /// Will throw an error if there is no back button in the page.
+  Future<void> pageBack() async {
+    return TestAsyncUtils.guard<void>(() async {
+      Finder backButton = find.byTooltip('Back');
+      if (backButton.evaluate().isEmpty) {
+        backButton = find.byType(CupertinoNavigationBarBackButton);
+      }
+
+      expectSync(backButton, findsOneWidget, reason: 'One back button expected on screen');
+
+      await tap(backButton);
     });
   }
 }
