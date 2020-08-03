@@ -654,7 +654,7 @@ abstract class FlutterCommand extends Command<void> {
     if (argParser.options.containsKey(FlutterOptions.kAnalyzeSize)
       && boolArg(FlutterOptions.kAnalyzeSize)
       && !globals.platform.isWindows) {
-      final File file = globals.fsUtils.getUniqueFile(globals.fs.currentDirectory, 'flutter_size', '.json');
+      final File file = globals.fsUtils.getUniqueFile(globals.fs.currentDirectory, 'flutter_size', 'json');
       extraGenSnapshotOptions.add('--write-v8-snapshot-profile-to=${file.path}');
       analyzeSize = file.path;
     }

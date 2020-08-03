@@ -9,6 +9,8 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../src/common.dart';
 
+const String debugMessage = 'A summary of your APK analysis can be found at: ';
+
 void main() {
   test('--analyze-size flag produces expected output on hello_world', () async {
     final String flutterBin = globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter');
@@ -22,8 +24,12 @@ void main() {
     print(result.stdout);
     print(result.stderr);
     expect(result.stdout.toString(), contains('app-release.apk (total compressed)'));
-    expect(globals.fs.file(globals.fs.path.join(
-      getFlutterRoot(), 'examples', 'hello_world', 'apk-analysis.json')).existsSync(), true);
+
+    final String line = result.stdout.toString()
+      .split('\n')
+      .firstWhere((String line) => line.contains(debugMessage));
+
+    expect(globals.fs.file(globals.fs.path.join(line.split(debugMessage).last.trim())).existsSync(), true);
     expect(result.exitCode, 0);
   }, skip: const LocalPlatform().isWindows); // Not yet supported on Windows
 }
