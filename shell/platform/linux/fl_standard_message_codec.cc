@@ -66,8 +66,9 @@ static void write_float64(GByteArray* buffer, double value) {
 
 // Write padding bytes to align to @align multiple of bytes.
 static void write_align(GByteArray* buffer, guint align) {
-  while (buffer->len % align != 0)
+  while (buffer->len % align != 0) {
     write_uint8(buffer, 0);
+  }
 }
 
 // Checks there is enough data in @buffer to be read.
@@ -88,12 +89,14 @@ static gboolean read_align(GBytes* buffer,
                            size_t* offset,
                            size_t align,
                            GError** error) {
-  if ((*offset) % align == 0)
+  if ((*offset) % align == 0) {
     return TRUE;
+  }
 
   size_t required = align - (*offset) % align;
-  if (!check_size(buffer, *offset, required, error))
+  if (!check_size(buffer, *offset, required, error)) {
     return FALSE;
+  }
 
   (*offset) += required;
   return TRUE;
@@ -111,8 +114,9 @@ static gboolean read_uint8(GBytes* buffer,
                            size_t* offset,
                            uint8_t* value,
                            GError** error) {
-  if (!check_size(buffer, *offset, sizeof(uint8_t), error))
+  if (!check_size(buffer, *offset, sizeof(uint8_t), error)) {
     return FALSE;
+  }
 
   *value = get_data(buffer, offset)[0];
   (*offset)++;
@@ -125,8 +129,9 @@ static gboolean read_uint16(GBytes* buffer,
                             size_t* offset,
                             uint16_t* value,
                             GError** error) {
-  if (!check_size(buffer, *offset, sizeof(uint16_t), error))
+  if (!check_size(buffer, *offset, sizeof(uint16_t), error)) {
     return FALSE;
+  }
 
   *value = reinterpret_cast<const uint16_t*>(get_data(buffer, offset))[0];
   *offset += sizeof(uint16_t);
@@ -139,8 +144,9 @@ static gboolean read_uint32(GBytes* buffer,
                             size_t* offset,
                             uint32_t* value,
                             GError** error) {
-  if (!check_size(buffer, *offset, sizeof(uint32_t), error))
+  if (!check_size(buffer, *offset, sizeof(uint32_t), error)) {
     return FALSE;
+  }
 
   *value = reinterpret_cast<const uint32_t*>(get_data(buffer, offset))[0];
   *offset += sizeof(uint32_t);
@@ -153,8 +159,9 @@ static gboolean read_uint32(GBytes* buffer,
 static FlValue* read_int32_value(GBytes* buffer,
                                  size_t* offset,
                                  GError** error) {
-  if (!check_size(buffer, *offset, sizeof(int32_t), error))
+  if (!check_size(buffer, *offset, sizeof(int32_t), error)) {
     return nullptr;
+  }
 
   FlValue* value = fl_value_new_int(
       reinterpret_cast<const int32_t*>(get_data(buffer, offset))[0]);
@@ -168,8 +175,9 @@ static FlValue* read_int32_value(GBytes* buffer,
 static FlValue* read_int64_value(GBytes* buffer,
                                  size_t* offset,
                                  GError** error) {
-  if (!check_size(buffer, *offset, sizeof(int64_t), error))
+  if (!check_size(buffer, *offset, sizeof(int64_t), error)) {
     return nullptr;
+  }
 
   FlValue* value = fl_value_new_int(
       reinterpret_cast<const int64_t*>(get_data(buffer, offset))[0]);
@@ -183,10 +191,12 @@ static FlValue* read_int64_value(GBytes* buffer,
 static FlValue* read_float64_value(GBytes* buffer,
                                    size_t* offset,
                                    GError** error) {
-  if (!read_align(buffer, offset, 8, error))
+  if (!read_align(buffer, offset, 8, error)) {
     return nullptr;
-  if (!check_size(buffer, *offset, sizeof(double), error))
+  }
+  if (!check_size(buffer, *offset, sizeof(double), error)) {
     return nullptr;
+  }
 
   FlValue* value = fl_value_new_float(
       reinterpret_cast<const double*>(get_data(buffer, offset))[0]);
@@ -203,10 +213,12 @@ static FlValue* read_string_value(FlStandardMessageCodec* self,
                                   GError** error) {
   uint32_t length;
   if (!fl_standard_message_codec_read_size(self, buffer, offset, &length,
-                                           error))
+                                           error)) {
     return nullptr;
-  if (!check_size(buffer, *offset, length, error))
+  }
+  if (!check_size(buffer, *offset, length, error)) {
     return nullptr;
+  }
   FlValue* value = fl_value_new_string_sized(
       reinterpret_cast<const gchar*>(get_data(buffer, offset)), length);
   *offset += length;
@@ -222,10 +234,12 @@ static FlValue* read_uint8_list_value(FlStandardMessageCodec* self,
                                       GError** error) {
   uint32_t length;
   if (!fl_standard_message_codec_read_size(self, buffer, offset, &length,
-                                           error))
+                                           error)) {
     return nullptr;
-  if (!check_size(buffer, *offset, sizeof(uint8_t) * length, error))
+  }
+  if (!check_size(buffer, *offset, sizeof(uint8_t) * length, error)) {
     return nullptr;
+  }
   FlValue* value = fl_value_new_uint8_list(get_data(buffer, offset), length);
   *offset += length;
   return value;
@@ -240,12 +254,15 @@ static FlValue* read_int32_list_value(FlStandardMessageCodec* self,
                                       GError** error) {
   uint32_t length;
   if (!fl_standard_message_codec_read_size(self, buffer, offset, &length,
-                                           error))
+                                           error)) {
     return nullptr;
-  if (!read_align(buffer, offset, 4, error))
+  }
+  if (!read_align(buffer, offset, 4, error)) {
     return nullptr;
-  if (!check_size(buffer, *offset, sizeof(int32_t) * length, error))
+  }
+  if (!check_size(buffer, *offset, sizeof(int32_t) * length, error)) {
     return nullptr;
+  }
   FlValue* value = fl_value_new_int32_list(
       reinterpret_cast<const int32_t*>(get_data(buffer, offset)), length);
   *offset += sizeof(int32_t) * length;
@@ -261,12 +278,15 @@ static FlValue* read_int64_list_value(FlStandardMessageCodec* self,
                                       GError** error) {
   uint32_t length;
   if (!fl_standard_message_codec_read_size(self, buffer, offset, &length,
-                                           error))
+                                           error)) {
     return nullptr;
-  if (!read_align(buffer, offset, 8, error))
+  }
+  if (!read_align(buffer, offset, 8, error)) {
     return nullptr;
-  if (!check_size(buffer, *offset, sizeof(int64_t) * length, error))
+  }
+  if (!check_size(buffer, *offset, sizeof(int64_t) * length, error)) {
     return nullptr;
+  }
   FlValue* value = fl_value_new_int64_list(
       reinterpret_cast<const int64_t*>(get_data(buffer, offset)), length);
   *offset += sizeof(int64_t) * length;
@@ -282,12 +302,15 @@ static FlValue* read_float64_list_value(FlStandardMessageCodec* self,
                                         GError** error) {
   uint32_t length;
   if (!fl_standard_message_codec_read_size(self, buffer, offset, &length,
-                                           error))
+                                           error)) {
     return nullptr;
-  if (!read_align(buffer, offset, 8, error))
+  }
+  if (!read_align(buffer, offset, 8, error)) {
     return nullptr;
-  if (!check_size(buffer, *offset, sizeof(double) * length, error))
+  }
+  if (!check_size(buffer, *offset, sizeof(double) * length, error)) {
     return nullptr;
+  }
   FlValue* value = fl_value_new_float_list(
       reinterpret_cast<const double*>(get_data(buffer, offset)), length);
   *offset += sizeof(double) * length;
@@ -303,15 +326,17 @@ static FlValue* read_list_value(FlStandardMessageCodec* self,
                                 GError** error) {
   uint32_t length;
   if (!fl_standard_message_codec_read_size(self, buffer, offset, &length,
-                                           error))
+                                           error)) {
     return nullptr;
+  }
 
   g_autoptr(FlValue) list = fl_value_new_list();
   for (size_t i = 0; i < length; i++) {
     g_autoptr(FlValue) child =
         fl_standard_message_codec_read_value(self, buffer, offset, error);
-    if (child == nullptr)
+    if (child == nullptr) {
       return nullptr;
+    }
     fl_value_append(list, child);
   }
 
@@ -327,19 +352,22 @@ static FlValue* read_map_value(FlStandardMessageCodec* self,
                                GError** error) {
   uint32_t length;
   if (!fl_standard_message_codec_read_size(self, buffer, offset, &length,
-                                           error))
+                                           error)) {
     return nullptr;
+  }
 
   g_autoptr(FlValue) map = fl_value_new_map();
   for (size_t i = 0; i < length; i++) {
     g_autoptr(FlValue) key =
         fl_standard_message_codec_read_value(self, buffer, offset, error);
-    if (key == nullptr)
+    if (key == nullptr) {
       return nullptr;
+    }
     g_autoptr(FlValue) value =
         fl_standard_message_codec_read_value(self, buffer, offset, error);
-    if (value == nullptr)
+    if (value == nullptr) {
       return nullptr;
+    }
     fl_value_set(map, key, value);
   }
 
@@ -354,8 +382,9 @@ static GBytes* fl_standard_message_codec_encode_message(FlMessageCodec* codec,
       reinterpret_cast<FlStandardMessageCodec*>(codec);
 
   g_autoptr(GByteArray) buffer = g_byte_array_new();
-  if (!fl_standard_message_codec_write_value(self, buffer, message, error))
+  if (!fl_standard_message_codec_write_value(self, buffer, message, error)) {
     return nullptr;
+  }
   return g_byte_array_free_to_bytes(
       static_cast<GByteArray*>(g_steal_pointer(&buffer)));
 }
@@ -370,8 +399,9 @@ static FlValue* fl_standard_message_codec_decode_message(FlMessageCodec* codec,
   size_t offset = 0;
   g_autoptr(FlValue) value =
       fl_standard_message_codec_read_value(self, message, &offset, error);
-  if (value == nullptr)
+  if (value == nullptr) {
     return nullptr;
+  }
 
   if (offset != g_bytes_get_size(message)) {
     g_set_error(error, FL_MESSAGE_CODEC_ERROR,
@@ -419,16 +449,19 @@ gboolean fl_standard_message_codec_read_size(FlStandardMessageCodec* codec,
                                              uint32_t* value,
                                              GError** error) {
   uint8_t value8;
-  if (!read_uint8(buffer, offset, &value8, error))
+  if (!read_uint8(buffer, offset, &value8, error)) {
     return FALSE;
+  }
 
   if (value8 == 255) {
-    if (!read_uint32(buffer, offset, value, error))
+    if (!read_uint32(buffer, offset, value, error)) {
       return FALSE;
+    }
   } else if (value8 == 254) {
     uint16_t value16;
-    if (!read_uint16(buffer, offset, &value16, error))
+    if (!read_uint16(buffer, offset, &value16, error)) {
       return FALSE;
+    }
     *value = value16;
   } else {
     *value = value8;
@@ -451,10 +484,11 @@ gboolean fl_standard_message_codec_write_value(FlStandardMessageCodec* self,
       write_uint8(buffer, kValueNull);
       return TRUE;
     case FL_VALUE_TYPE_BOOL:
-      if (fl_value_get_bool(value))
+      if (fl_value_get_bool(value)) {
         write_uint8(buffer, kValueTrue);
-      else
+      } else {
         write_uint8(buffer, kValueFalse);
+      }
       return TRUE;
     case FL_VALUE_TYPE_INT: {
       int64_t v = fl_value_get_int(value);
@@ -528,8 +562,9 @@ gboolean fl_standard_message_codec_write_value(FlStandardMessageCodec* self,
                                            fl_value_get_length(value));
       for (size_t i = 0; i < fl_value_get_length(value); i++) {
         if (!fl_standard_message_codec_write_value(
-                self, buffer, fl_value_get_list_value(value, i), error))
+                self, buffer, fl_value_get_list_value(value, i), error)) {
           return FALSE;
+        }
       }
       return TRUE;
     case FL_VALUE_TYPE_MAP:
@@ -540,8 +575,9 @@ gboolean fl_standard_message_codec_write_value(FlStandardMessageCodec* self,
         if (!fl_standard_message_codec_write_value(
                 self, buffer, fl_value_get_map_key(value, i), error) ||
             !fl_standard_message_codec_write_value(
-                self, buffer, fl_value_get_map_value(value, i), error))
+                self, buffer, fl_value_get_map_value(value, i), error)) {
           return FALSE;
+        }
       }
       return TRUE;
   }
@@ -557,8 +593,9 @@ FlValue* fl_standard_message_codec_read_value(FlStandardMessageCodec* self,
                                               size_t* offset,
                                               GError** error) {
   uint8_t type;
-  if (!read_uint8(buffer, offset, &type, error))
+  if (!read_uint8(buffer, offset, &type, error)) {
     return nullptr;
+  }
 
   g_autoptr(FlValue) value = nullptr;
   if (type == kValueNull) {

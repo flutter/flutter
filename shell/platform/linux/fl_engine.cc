@@ -94,34 +94,42 @@ static void parse_locale(const gchar* locale,
 // Passes locale information to the Flutter engine.
 static void setup_locales(FlEngine* self) {
   const gchar* const* languages = g_get_language_names();
-  g_autoptr(GPtrArray) locales = g_ptr_array_new_with_free_func(g_free);
+  g_autoptr(GPtrArray) locales_array = g_ptr_array_new_with_free_func(g_free);
   // Helper array to take ownership of the strings passed to Flutter.
   g_autoptr(GPtrArray) locale_strings = g_ptr_array_new_with_free_func(g_free);
   for (int i = 0; languages[i] != nullptr; i++) {
     gchar *language, *territory, *codeset, *modifier;
     parse_locale(languages[i], &language, &territory, &codeset, &modifier);
-    if (language != nullptr)
+    if (language != nullptr) {
       g_ptr_array_add(locale_strings, language);
-    if (territory != nullptr)
+    }
+    if (territory != nullptr) {
       g_ptr_array_add(locale_strings, territory);
-    if (codeset != nullptr)
+    }
+    if (codeset != nullptr) {
       g_ptr_array_add(locale_strings, codeset);
-    if (modifier != nullptr)
+    }
+    if (modifier != nullptr) {
       g_ptr_array_add(locale_strings, modifier);
+    }
 
     FlutterLocale* locale =
         static_cast<FlutterLocale*>(g_malloc0(sizeof(FlutterLocale)));
-    g_ptr_array_add(locales, locale);
+    g_ptr_array_add(locales_array, locale);
     locale->struct_size = sizeof(FlutterLocale);
     locale->language_code = language;
     locale->country_code = territory;
     locale->script_code = codeset;
     locale->variant_code = modifier;
   }
+  FlutterLocale** locales =
+      reinterpret_cast<FlutterLocale**>(locales_array->pdata);
   FlutterEngineResult result = FlutterEngineUpdateLocales(
-      self->engine, (const FlutterLocale**)locales->pdata, locales->len);
-  if (result != kSuccess)
+      self->engine, const_cast<const FlutterLocale**>(locales),
+      locales_array->len);
+  if (result != kSuccess) {
     g_warning("Failed to set up Flutter locales");
+  }
 }
 
 // Callback to run a Flutter task in the GLib main loop.
@@ -133,8 +141,9 @@ static gboolean flutter_source_dispatch(GSource* source,
 
   FlutterEngineResult result =
       FlutterEngineRunTask(self->engine, &fl_source->task);
-  if (result != kSuccess)
+  if (result != kSuccess) {
     g_warning("Failed to run Flutter task\n");
+  }
 
   return G_SOURCE_REMOVE;
 }
@@ -160,8 +169,9 @@ static bool fl_engine_gl_make_current(void* user_data) {
   FlEngine* self = static_cast<FlEngine*>(user_data);
   g_autoptr(GError) error = nullptr;
   gboolean result = fl_renderer_make_current(self->renderer, &error);
-  if (!result)
+  if (!result) {
     g_warning("%s", error->message);
+  }
   return result;
 }
 
@@ -169,8 +179,9 @@ static bool fl_engine_gl_clear_current(void* user_data) {
   FlEngine* self = static_cast<FlEngine*>(user_data);
   g_autoptr(GError) error = nullptr;
   gboolean result = fl_renderer_clear_current(self->renderer, &error);
-  if (!result)
+  if (!result) {
     g_warning("%s", error->message);
+  }
   return result;
 }
 
@@ -183,8 +194,9 @@ static bool fl_engine_gl_present(void* user_data) {
   FlEngine* self = static_cast<FlEngine*>(user_data);
   g_autoptr(GError) error = nullptr;
   gboolean result = fl_renderer_present(self->renderer, &error);
-  if (!result)
+  if (!result) {
     g_warning("%s", error->message);
+  }
   return result;
 }
 
@@ -192,8 +204,9 @@ static bool fl_engine_gl_make_resource_current(void* user_data) {
   FlEngine* self = static_cast<FlEngine*>(user_data);
   g_autoptr(GError) error = nullptr;
   gboolean result = fl_renderer_make_resource_current(self->renderer, &error);
-  if (!result)
+  if (!result) {
     g_warning("%s", error->message);
+  }
   return result;
 }
 
@@ -246,7 +259,7 @@ static void fl_engine_platform_message_response_cb(const uint8_t* data,
                                                    void* user_data) {
   g_autoptr(GTask) task = G_TASK(user_data);
   g_task_return_pointer(task, g_bytes_new(data, data_length),
-                        (GDestroyNotify)g_bytes_unref);
+                        reinterpret_cast<GDestroyNotify>(g_bytes_unref));
 }
 
 // Implements FlPluginRegistry::get_registrar_for_plugin.
@@ -318,8 +331,9 @@ G_MODULE_EXPORT FlEngine* fl_engine_new_headless(FlDartProject* project) {
 gboolean fl_engine_start(FlEngine* self, GError** error) {
   g_return_val_if_fail(FL_IS_ENGINE(self), FALSE);
 
-  if (!fl_renderer_start(self->renderer, error))
+  if (!fl_renderer_start(self->renderer, error)) {
     return FALSE;
+  }
 
   FlutterRendererConfig config = {};
   config.type = kOpenGL;
@@ -499,8 +513,9 @@ void fl_engine_send_platform_message(FlEngine* self,
     g_object_unref(task);
   }
 
-  if (response_handle != nullptr)
+  if (response_handle != nullptr) {
     FlutterPlatformMessageReleaseResponseHandle(self->engine, response_handle);
+  }
 }
 
 GBytes* fl_engine_send_platform_message_finish(FlEngine* self,
@@ -518,8 +533,9 @@ void fl_engine_send_window_metrics_event(FlEngine* self,
                                          double pixel_ratio) {
   g_return_if_fail(FL_IS_ENGINE(self));
 
-  if (self->engine == nullptr)
+  if (self->engine == nullptr) {
     return;
+  }
 
   FlutterWindowMetricsEvent event = {};
   event.struct_size = sizeof(FlutterWindowMetricsEvent);
@@ -539,8 +555,9 @@ void fl_engine_send_mouse_pointer_event(FlEngine* self,
                                         int64_t buttons) {
   g_return_if_fail(FL_IS_ENGINE(self));
 
-  if (self->engine == nullptr)
+  if (self->engine == nullptr) {
     return;
+  }
 
   FlutterPointerEvent fl_event = {};
   fl_event.struct_size = sizeof(fl_event);
@@ -548,8 +565,9 @@ void fl_engine_send_mouse_pointer_event(FlEngine* self,
   fl_event.timestamp = timestamp;
   fl_event.x = x;
   fl_event.y = y;
-  if (scroll_delta_x != 0 || scroll_delta_y != 0)
+  if (scroll_delta_x != 0 || scroll_delta_y != 0) {
     fl_event.signal_kind = kFlutterPointerSignalKindScroll;
+  }
   fl_event.scroll_delta_x = scroll_delta_x;
   fl_event.scroll_delta_y = scroll_delta_y;
   fl_event.device_kind = kFlutterPointerDeviceKindMouse;
