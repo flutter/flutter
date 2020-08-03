@@ -481,7 +481,6 @@ abstract class WidgetController {
   /// matches the expected number of pumps.
   Future<int> pumpAndSettle([
     Duration duration = const Duration(milliseconds: 100),
-    Duration timeout = const Duration(minutes: 10),
   ]);
 
   /// Attempts to drag the given widget by the given offset, by
@@ -926,22 +925,17 @@ class LiveWidgetController extends WidgetController {
   @override
   Future<int> pumpAndSettle([
     Duration duration = const Duration(milliseconds: 100),
-    Duration timeout = const Duration(minutes: 10),
   ]) {
     assert(duration != null);
     assert(duration > Duration.zero);
-    assert(timeout != null);
-    assert(timeout > Duration.zero);
-    int count = 0;
-    return TestAsyncUtils.guard<void>(() async {
-      final DateTime endTime = clock.fromNowBy(timeout);
+    return TestAsyncUtils.guard<int>(() async {
+      int count = 0;
       do {
-        if (clock.now().isAfter(endTime))
-          throw FlutterError('pumpAndSettle timed out');
         await pump(duration);
         count += 1;
       } while (binding.hasScheduledFrame);
-    }).then<int>((_) => count);
+      return count;
+    });
   }
 
   @override

@@ -606,8 +606,8 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   @override
   Future<int> pumpAndSettle([
     Duration duration = const Duration(milliseconds: 100),
-    Duration timeout = const Duration(minutes: 10),
     EnginePhase phase = EnginePhase.sendSemanticsUpdate,
+    Duration timeout = const Duration(minutes: 10),
   ]) {
     assert(duration != null);
     assert(duration > Duration.zero);
@@ -624,16 +624,17 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       }
       return true;
     }());
-    int count = 0;
-    return TestAsyncUtils.guard<void>(() async {
+    return TestAsyncUtils.guard<int>(() async {
       final DateTime endTime = binding.clock.fromNowBy(timeout);
+      int count = 0;
       do {
         if (binding.clock.now().isAfter(endTime))
           throw FlutterError('pumpAndSettle timed out');
         await binding.pump(duration, phase);
         count += 1;
       } while (binding.hasScheduledFrame);
-    }).then<int>((_) => count);
+      return count;
+    });
   }
 
   /// Repeatedly pump frames that render the `target` widget with a fixed time
