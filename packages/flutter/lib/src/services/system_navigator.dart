@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:async';
 
@@ -33,7 +32,7 @@ class SystemNavigator {
   /// This method should be preferred over calling `dart:io`'s [exit]
   /// method, as the latter may cause the underlying platform to act
   /// as if the application had crashed.
-  static Future<void> pop({bool animated}) async {
+  static Future<void> pop({bool? animated}) async {
     await SystemChannels.platform.invokeMethod<void>('SystemNavigator.pop', animated);
   }
 }
