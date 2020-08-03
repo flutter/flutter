@@ -7,8 +7,6 @@
 import 'package:flutter/widgets.dart';
 
 import 'banner_theme.dart';
-import 'button_bar.dart';
-import 'button_theme.dart';
 import 'divider.dart';
 import 'theme.dart';
 
@@ -66,9 +64,6 @@ class MaterialBanner extends StatelessWidget {
   /// the [MaterialBanner].
   ///
   /// Typically this is a list of [TextButton] widgets.
-  ///
-  /// These widgets will be wrapped in a [ButtonBar], which introduces 8 pixels
-  /// of padding on each side.
   final List<Widget> actions;
 
   /// The (optional) leading widget of the [MaterialBanner].
@@ -120,9 +115,14 @@ class MaterialBanner extends StatelessWidget {
         ?? bannerTheme.leadingPadding
         ?? const EdgeInsetsDirectional.only(end: 16.0);
 
-    final Widget buttonBar = ButtonBar(
-      layoutBehavior: ButtonBarLayoutBehavior.constrained,
-      children: actions,
+    final Widget buttonBar = Container(
+      alignment: AlignmentDirectional.centerEnd,
+      constraints: const BoxConstraints(minHeight: 52.0),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: OverflowBar(
+        spacing: 8,
+        children: actions,
+      ),
     );
 
     final Color backgroundColor = this.backgroundColor
