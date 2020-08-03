@@ -68,8 +68,9 @@ FlMethodResponse* fl_method_codec_decode_response(FlMethodCodec* self,
   g_return_val_if_fail(FL_IS_METHOD_CODEC(self), nullptr);
   g_return_val_if_fail(message != nullptr, nullptr);
 
-  if (g_bytes_get_size(message) == 0)
+  if (g_bytes_get_size(message) == 0) {
     return FL_METHOD_RESPONSE(fl_method_not_implemented_response_new());
+  }
 
   return FL_METHOD_CODEC_GET_CLASS(self)->decode_response(self, message, error);
 }

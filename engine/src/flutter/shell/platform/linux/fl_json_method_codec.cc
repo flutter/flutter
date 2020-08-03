@@ -56,8 +56,9 @@ static gboolean fl_json_method_codec_decode_method_call(FlMethodCodec* codec,
 
   g_autoptr(FlValue) value = fl_message_codec_decode_message(
       FL_MESSAGE_CODEC(self->codec), message, error);
-  if (value == nullptr)
+  if (value == nullptr) {
     return FALSE;
+  }
 
   if (fl_value_get_type(value) != FL_VALUE_TYPE_MAP) {
     g_set_error(error, FL_MESSAGE_CODEC_ERROR, FL_MESSAGE_CODEC_ERROR_FAILED,
@@ -131,8 +132,9 @@ static FlMethodResponse* fl_json_method_codec_decode_response(
 
   g_autoptr(FlValue) value = fl_message_codec_decode_message(
       FL_MESSAGE_CODEC(self->codec), message, error);
-  if (value == nullptr)
+  if (value == nullptr) {
     return nullptr;
+  }
 
   if (fl_value_get_type(value) != FL_VALUE_TYPE_LIST) {
     g_set_error(error, FL_MESSAGE_CODEC_ERROR, FL_MESSAGE_CODEC_ERROR_FAILED,
@@ -167,8 +169,9 @@ static FlMethodResponse* fl_json_method_codec_decode_response(
             : nullptr;
 
     FlValue* args = fl_value_get_list_value(value, 2);
-    if (fl_value_get_type(args) == FL_VALUE_TYPE_NULL)
+    if (fl_value_get_type(args) == FL_VALUE_TYPE_NULL) {
       args = nullptr;
+    }
 
     return FL_METHOD_RESPONSE(
         fl_method_error_response_new(code, message, args));

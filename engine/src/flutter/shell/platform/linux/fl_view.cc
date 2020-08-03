@@ -70,25 +70,28 @@ static gboolean fl_view_send_pointer_button_event(FlView* self,
       return FALSE;
   }
   int old_button_state = self->button_state;
-  FlutterPointerPhase phase;
+  FlutterPointerPhase phase = kMove;
   if (event->type == GDK_BUTTON_PRESS) {
     // Drop the event if Flutter already thinks the button is down.
-    if ((self->button_state & button) != 0)
+    if ((self->button_state & button) != 0) {
       return FALSE;
+    }
     self->button_state ^= button;
 
     phase = old_button_state == 0 ? kDown : kMove;
   } else if (event->type == GDK_BUTTON_RELEASE) {
     // Drop the event if Flutter already thinks the button is up.
-    if ((self->button_state & button) == 0)
+    if ((self->button_state & button) == 0) {
       return FALSE;
+    }
     self->button_state ^= button;
 
     phase = self->button_state == 0 ? kUp : kMove;
   }
 
-  if (self->engine == nullptr)
+  if (self->engine == nullptr) {
     return FALSE;
+  }
 
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
   fl_engine_send_mouse_pointer_event(
@@ -178,8 +181,9 @@ static void fl_view_notify(GObject* object, GParamSpec* pspec) {
     fl_view_send_window_metrics(self);
   }
 
-  if (G_OBJECT_CLASS(fl_view_parent_class)->notify != nullptr)
+  if (G_OBJECT_CLASS(fl_view_parent_class)->notify != nullptr) {
     G_OBJECT_CLASS(fl_view_parent_class)->notify(object, pspec);
+  }
 }
 
 static void fl_view_dispose(GObject* object) {
@@ -203,8 +207,9 @@ static void fl_view_realize(GtkWidget* widget) {
   gtk_widget_set_realized(widget, TRUE);
 
   g_autoptr(GError) error = nullptr;
-  if (!fl_renderer_setup(self->renderer, &error))
+  if (!fl_renderer_setup(self->renderer, &error)) {
     g_warning("Failed to setup renderer: %s", error->message);
+  }
 
   GtkAllocation allocation;
   gtk_widget_get_allocation(widget, &allocation);
@@ -236,8 +241,9 @@ static void fl_view_realize(GtkWidget* widget) {
       FL_RENDERER_X11(self->renderer),
       GDK_X11_WINDOW(gtk_widget_get_window(GTK_WIDGET(self))));
 
-  if (!fl_engine_start(self->engine, &error))
+  if (!fl_engine_start(self->engine, &error)) {
     g_warning("Failed to start Flutter engine: %s", error->message);
+  }
 }
 
 // Implements GtkWidget::size-allocate.
@@ -263,8 +269,9 @@ static gboolean fl_view_button_press_event(GtkWidget* widget,
 
   // Flutter doesn't handle double and triple click events.
   if (event->type == GDK_DOUBLE_BUTTON_PRESS ||
-      event->type == GDK_TRIPLE_BUTTON_PRESS)
+      event->type == GDK_TRIPLE_BUTTON_PRESS) {
     return FALSE;
+  }
 
   return fl_view_send_pointer_button_event(self, event);
 }
@@ -298,8 +305,8 @@ static gboolean fl_view_scroll_event(GtkWidget* widget, GdkEventScroll* event) {
     scroll_delta_x = 1;
   }
 
-  // TODO: See if this can be queried from the OS; this value is chosen
-  // arbitrarily to get something that feels reasonable.
+  // TODO(robert-ancell): See if this can be queried from the OS; this value is
+  // chosen arbitrarily to get something that feels reasonable.
   const int kScrollOffsetMultiplier = 20;
   scroll_delta_x *= kScrollOffsetMultiplier;
   scroll_delta_y *= kScrollOffsetMultiplier;
@@ -319,8 +326,9 @@ static gboolean fl_view_motion_notify_event(GtkWidget* widget,
                                             GdkEventMotion* event) {
   FlView* self = FL_VIEW(widget);
 
-  if (self->engine == nullptr)
+  if (self->engine == nullptr) {
     return FALSE;
+  }
 
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
   fl_engine_send_mouse_pointer_event(

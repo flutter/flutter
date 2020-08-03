@@ -61,8 +61,9 @@ static gboolean finish_method(GObject* object,
                               GError** error) {
   g_autoptr(FlMethodResponse) response = fl_method_channel_invoke_method_finish(
       FL_METHOD_CHANNEL(object), result, error);
-  if (response == nullptr)
+  if (response == nullptr) {
     return FALSE;
+  }
   return fl_method_response_get_result(response, error) != nullptr;
 }
 
@@ -113,8 +114,9 @@ static void perform_action_response_cb(GObject* object,
                                        GAsyncResult* result,
                                        gpointer user_data) {
   g_autoptr(GError) error = nullptr;
-  if (!finish_method(object, result, &error))
+  if (!finish_method(object, result, &error)) {
     g_warning("Failed to call %s: %s", kPerformActionMethod, error->message);
+  }
 }
 
 // Inform Flutter that the input has been activated.
@@ -150,8 +152,9 @@ static gboolean im_retrieve_surrounding_cb(FlTextInputPlugin* self) {
 static gboolean im_delete_surrounding_cb(FlTextInputPlugin* self,
                                          gint offset,
                                          gint n_chars) {
-  if (self->text_model->DeleteSurrounding(offset, n_chars))
+  if (self->text_model->DeleteSurrounding(offset, n_chars)) {
     update_editing_state(self);
+  }
   return TRUE;
 }
 
@@ -168,8 +171,9 @@ static FlMethodResponse* set_client(FlTextInputPlugin* self, FlValue* args) {
   g_free(self->input_action);
   FlValue* input_action_value =
       fl_value_lookup_string(config_value, kInputActionKey);
-  if (fl_value_get_type(input_action_value) == FL_VALUE_TYPE_STRING)
+  if (fl_value_get_type(input_action_value) == FL_VALUE_TYPE_STRING) {
     self->input_action = g_strdup(fl_value_get_string(input_action_value));
+  }
 
   return FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
 }
@@ -224,22 +228,24 @@ static void method_call_cb(FlMethodChannel* channel,
   FlValue* args = fl_method_call_get_args(method_call);
 
   g_autoptr(FlMethodResponse) response = nullptr;
-  if (strcmp(method, kSetClientMethod) == 0)
+  if (strcmp(method, kSetClientMethod) == 0) {
     response = set_client(self, args);
-  else if (strcmp(method, kShowMethod) == 0)
+  } else if (strcmp(method, kShowMethod) == 0) {
     response = show(self);
-  else if (strcmp(method, kSetEditingStateMethod) == 0)
+  } else if (strcmp(method, kSetEditingStateMethod) == 0) {
     response = set_editing_state(self, args);
-  else if (strcmp(method, kClearClientMethod) == 0)
+  } else if (strcmp(method, kClearClientMethod) == 0) {
     response = clear_client(self);
-  else if (strcmp(method, kHideMethod) == 0)
+  } else if (strcmp(method, kHideMethod) == 0) {
     response = hide(self);
-  else
+  } else {
     response = FL_METHOD_RESPONSE(fl_method_not_implemented_response_new());
+  }
 
   g_autoptr(GError) error = nullptr;
-  if (!fl_method_call_respond(method_call, response, &error))
+  if (!fl_method_call_respond(method_call, response, &error)) {
     g_warning("Failed to send method call response: %s", error->message);
+  }
 }
 
 static void fl_text_input_plugin_dispose(GObject* object) {
@@ -293,11 +299,13 @@ gboolean fl_text_input_plugin_filter_keypress(FlTextInputPlugin* self,
                                               GdkEventKey* event) {
   g_return_val_if_fail(FL_IS_TEXT_INPUT_PLUGIN(self), FALSE);
 
-  if (self->client_id == kClientIdUnset)
+  if (self->client_id == kClientIdUnset) {
     return FALSE;
+  }
 
-  if (gtk_im_context_filter_keypress(self->im_context, event))
+  if (gtk_im_context_filter_keypress(self->im_context, event)) {
     return TRUE;
+  }
 
   // Handle navigation keys.
   gboolean changed = FALSE;
@@ -334,8 +342,9 @@ gboolean fl_text_input_plugin_filter_keypress(FlTextInputPlugin* self,
     }
   }
 
-  if (changed)
+  if (changed) {
     update_editing_state(self);
+  }
 
   return FALSE;
 }

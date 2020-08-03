@@ -44,10 +44,13 @@ static GBytes* fl_standard_method_codec_encode_method_call(FlMethodCodec* codec,
   g_autoptr(GByteArray) buffer = g_byte_array_new();
   g_autoptr(FlValue) name_value = fl_value_new_string(name);
   if (!fl_standard_message_codec_write_value(self->codec, buffer, name_value,
-                                             error))
+                                             error)) {
     return nullptr;
-  if (!fl_standard_message_codec_write_value(self->codec, buffer, args, error))
+  }
+  if (!fl_standard_message_codec_write_value(self->codec, buffer, args,
+                                             error)) {
     return nullptr;
+  }
 
   return g_byte_array_free_to_bytes(
       static_cast<GByteArray*>(g_steal_pointer(&buffer)));
@@ -65,8 +68,9 @@ static gboolean fl_standard_method_codec_decode_method_call(
   size_t offset = 0;
   g_autoptr(FlValue) name_value = fl_standard_message_codec_read_value(
       self->codec, message, &offset, error);
-  if (name_value == nullptr)
+  if (name_value == nullptr) {
     return FALSE;
+  }
   if (fl_value_get_type(name_value) != FL_VALUE_TYPE_STRING) {
     g_set_error(error, FL_MESSAGE_CODEC_ERROR, FL_MESSAGE_CODEC_ERROR_FAILED,
                 "Method call name wrong type");
@@ -75,8 +79,9 @@ static gboolean fl_standard_method_codec_decode_method_call(
 
   g_autoptr(FlValue) args_value = fl_standard_message_codec_read_value(
       self->codec, message, &offset, error);
-  if (args_value == nullptr)
+  if (args_value == nullptr) {
     return FALSE;
+  }
 
   if (offset != g_bytes_get_size(message)) {
     g_set_error(error, FL_MESSAGE_CODEC_ERROR, FL_MESSAGE_CODEC_ERROR_FAILED,
@@ -101,8 +106,9 @@ static GBytes* fl_standard_method_codec_encode_success_envelope(
   guint8 type = kEnvelopeTypeSuccess;
   g_byte_array_append(buffer, &type, 1);
   if (!fl_standard_message_codec_write_value(self->codec, buffer, result,
-                                             error))
+                                             error)) {
     return nullptr;
+  }
 
   return g_byte_array_free_to_bytes(
       static_cast<GByteArray*>(g_steal_pointer(&buffer)));
@@ -122,16 +128,19 @@ static GBytes* fl_standard_method_codec_encode_error_envelope(
   g_byte_array_append(buffer, &type, 1);
   g_autoptr(FlValue) code_value = fl_value_new_string(code);
   if (!fl_standard_message_codec_write_value(self->codec, buffer, code_value,
-                                             error))
+                                             error)) {
     return nullptr;
+  }
   g_autoptr(FlValue) message_value =
       message != nullptr ? fl_value_new_string(message) : nullptr;
   if (!fl_standard_message_codec_write_value(self->codec, buffer, message_value,
-                                             error))
+                                             error)) {
     return nullptr;
+  }
   if (!fl_standard_message_codec_write_value(self->codec, buffer, details,
-                                             error))
+                                             error)) {
     return nullptr;
+  }
 
   return g_byte_array_free_to_bytes(
       static_cast<GByteArray*>(g_steal_pointer(&buffer)));
@@ -160,8 +169,9 @@ static FlMethodResponse* fl_standard_method_codec_decode_response(
   if (type == kEnvelopeTypeError) {
     g_autoptr(FlValue) code = fl_standard_message_codec_read_value(
         self->codec, message, &offset, error);
-    if (code == nullptr)
+    if (code == nullptr) {
       return nullptr;
+    }
     if (fl_value_get_type(code) != FL_VALUE_TYPE_STRING) {
       g_set_error(error, FL_MESSAGE_CODEC_ERROR, FL_MESSAGE_CODEC_ERROR_FAILED,
                   "Error code wrong type");
@@ -170,8 +180,9 @@ static FlMethodResponse* fl_standard_method_codec_decode_response(
 
     g_autoptr(FlValue) error_message = fl_standard_message_codec_read_value(
         self->codec, message, &offset, error);
-    if (error_message == nullptr)
+    if (error_message == nullptr) {
       return nullptr;
+    }
     if (fl_value_get_type(error_message) != FL_VALUE_TYPE_STRING &&
         fl_value_get_type(error_message) != FL_VALUE_TYPE_NULL) {
       g_set_error(error, FL_MESSAGE_CODEC_ERROR, FL_MESSAGE_CODEC_ERROR_FAILED,
@@ -181,8 +192,9 @@ static FlMethodResponse* fl_standard_method_codec_decode_response(
 
     g_autoptr(FlValue) details = fl_standard_message_codec_read_value(
         self->codec, message, &offset, error);
-    if (details == nullptr)
+    if (details == nullptr) {
       return nullptr;
+    }
 
     response = FL_METHOD_RESPONSE(fl_method_error_response_new(
         fl_value_get_string(code),
@@ -194,8 +206,9 @@ static FlMethodResponse* fl_standard_method_codec_decode_response(
     g_autoptr(FlValue) result = fl_standard_message_codec_read_value(
         self->codec, message, &offset, error);
 
-    if (result == nullptr)
+    if (result == nullptr) {
       return nullptr;
+    }
 
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(result));
   } else {
