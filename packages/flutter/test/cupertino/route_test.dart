@@ -1404,7 +1404,7 @@ void main() {
     await tester.tap(find.text('tap'));
 
     expect(routeSettingsObserver.routeName, '/modal');
-  }
+  });
 
   testWidgets('CupertinoPage works', (WidgetTester tester) async {
     final LocalKey pageKey = UniqueKey();
