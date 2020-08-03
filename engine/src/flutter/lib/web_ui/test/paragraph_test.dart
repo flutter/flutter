@@ -801,6 +801,46 @@ void main() async {
     );
   });
 
+  testEachMeasurement('getBoxesForRange includes trailing spaces', () {
+    const String text = 'abcd abcde  ';
+    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
+      fontFamily: 'Ahem',
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.normal,
+      fontSize: 10,
+    ));
+    builder.addText(text);
+    final Paragraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: double.infinity));
+    expect(
+      paragraph.getBoxesForRange(0, text.length),
+      <TextBox>[
+        TextBox.fromLTRBD(0.0, 0.0, 120.0, 10.0, TextDirection.ltr),
+      ],
+    );
+  });
+
+  testEachMeasurement('getBoxesForRange multi-line includes trailing spaces', () {
+    const String text = 'abcd\nabcde  \nabc';
+    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
+      fontFamily: 'Ahem',
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.normal,
+      fontSize: 10,
+    ));
+    builder.addText(text);
+    final Paragraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: double.infinity));
+    expect(
+      paragraph.getBoxesForRange(0, text.length),
+      <TextBox>[
+        TextBox.fromLTRBD(0.0, 0.0, 40.0, 10.0, TextDirection.ltr),
+        TextBox.fromLTRBD(0.0, 10.0, 70.0, 20.0, TextDirection.ltr),
+        TextBox.fromLTRBD(0.0, 20.0, 30.0, 30.0, TextDirection.ltr),
+      ],
+    );
+  });
+
   test('longestLine', () {
     // [Paragraph.longestLine] is only supported by canvas-based measurement.
     WebExperiments.instance.useCanvasText = true;
