@@ -5,6 +5,7 @@
 // @dart = 2.8
 
 import 'dart:async';
+import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -3966,5 +3967,45 @@ void main() {
     expect(editableText.selectionOverlay.handlesAreVisible, isTrue);
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+  );
+
+  testWidgets('Selection of Latin and non-Latin texts.', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Material(
+            child: SelectableText(
+              'abc def ghi',
+              selectionWidthStyle: ui.BoxWidthStyle.tight,
+              selectionHeightStyle: ui.BoxHeightStyle.max,
+            ),
+          ),
+        ),
+      );
+
+      // Long press at 'e' in 'def'.
+      final Offset ePos = textOffsetToPosition(tester, 5);
+      await tester.longPressAt(ePos);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Select All'), findsOneWidget);
+      expect(find.text('Copy'), findsNothing);
+      expect(find.text('Paste'), findsNothing);
+      expect(find.text('Cut'), findsNothing);
+      EditableTextState editableText = tester.state(find.byType(EditableText));
+      expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
+      expect(editableText.selectionOverlay.toolbarIsVisible, isTrue);
+
+      await tester.tap(find.text('Select All'));
+      await tester.pumpAndSettle();
+      expect(find.text('Copy'), findsOneWidget);
+      expect(find.text('Select All'), findsNothing);
+      expect(find.text('Paste'), findsNothing);
+      expect(find.text('Cut'), findsNothing);
+      editableText = tester.state(find.byType(EditableText));
+      expect(editableText.selectionOverlay.handlesAreVisible, isTrue);
+      expect(editableText.widget.selectionWidthStyle, ui.BoxWidthStyle.tight);
+      expect(editableText.widget.selectionHeightStyle, ui.BoxHeightStyle.max);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}),
   );
 }
