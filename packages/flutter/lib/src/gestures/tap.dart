@@ -356,7 +356,7 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   /// A pointer has stopped contacting the screen at a particular location,
   /// which is recognized as a tap of a primary button.
   ///
-  /// This triggers on the up event if the recognizer wins the arena with it
+  /// This triggers on the up event, if the recognizer wins the arena with it
   /// or has previously won, immediately followed by [onTap].
   ///
   /// If this recognizer doesn't win the arena, [onTapCancel] is called instead.
@@ -373,7 +373,7 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   /// A pointer has stopped contacting the screen, which is recognized as a tap
   /// of a primary button.
   ///
-  /// This triggers on the up event if the recognizer wins the arena with it
+  /// This triggers on the up event, if the recognizer wins the arena with it
   /// or has previously won, immediately following [onTapUp].
   ///
   /// If this recognizer doesn't win the arena, [onTapCancel] is called instead.
@@ -405,7 +405,7 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   /// A pointer has stopped contacting the screen, which is recognized as a tap
   /// of a secondary button.
   ///
-  /// This triggers on the up event if the recognizer wins the arena with it or
+  /// This triggers on the up event, if the recognizer wins the arena with it or
   /// has previously won, immediately following [onSecondaryTapUp].
   ///
   /// If this recognizer doesn't win the arena, [onSecondaryTapCancel] is called
