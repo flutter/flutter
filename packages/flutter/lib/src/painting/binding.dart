@@ -168,6 +168,6 @@ class _SystemFontsNotifier extends Listenable {
 /// Use [PaintingBinding.imageCache] instead.
 @Deprecated(
   'Use PaintingBinding.instance.imageCache instead. '
-  'This feature was deprecated after v1.21.0.'
+  'This feature was deprecated after v1.21.0-6.0.pre.'
 )
 ImageCache get imageCache => PaintingBinding.instance.imageCache;
