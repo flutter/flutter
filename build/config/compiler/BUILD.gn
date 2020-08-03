@@ -301,6 +301,18 @@ config("compiler") {
         "_LARGEFILE64_SOURCE",
       ]
     }
+  } else if (is_win) {
+    if (is_clang) {
+      if (current_cpu == "x86") {
+        cflags += [ "-m32" ]
+      } else if (current_cpu == "x64") {
+        cflags += [ "-m64" ]
+      } else if (current_cpu == "arm64") {
+        cflags += [ "--target=arm64-windows" ]
+      } else {
+        assert(false, "unknown current_cpu " + current_cpu)
+      }
+    }
   }
 
   if (operator_new_alignment != "default" && is_clang) {

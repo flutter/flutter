@@ -41,7 +41,7 @@ config("sdk_link") {
       "$visual_studio_path\VC\lib\amd64",
       "$visual_studio_path\VC\atlmfc\lib\amd64",
     ]
-  } else {
+  } else if (current_cpu == "x86") {
     ldflags = [
       "/MACHINE:X86",
       "/SAFESEH",  # Not compatible with x64 so use only for x86.
@@ -54,6 +54,15 @@ config("sdk_link") {
     if (!is_asan) {
       ldflags += [ "/largeaddressaware" ]
     }
+  } else if (current_cpu == "arm64") {
+    ldflags = [ "/MACHINE:ARM64" ]
+    lib_dirs = [
+      "$windows_sdk_path\Lib\winv6.3\um\arm64",
+      "$visual_studio_path\VC\lib\arm64",
+      "$visual_studio_path\VC\atlmfc\lib\arm64",
+    ]
+  } else {
+    assert(false, "Unsupported CPU type")
   }
 }
 
@@ -102,6 +111,9 @@ if (current_cpu == "x64") {
   # The number after the comma is the minimum required OS version.
   # 5.02 = Windows Server 2003.
   subsystem_version_suffix = ",5.02"
+} else if (current_cpu == "arm64") {
+  # Windows ARM64 requires Windows 10.
+  subsystem_version_suffix = ",10.0"
 } else {
   # 5.01 = Windows XP.
   subsystem_version_suffix = ",5.01"

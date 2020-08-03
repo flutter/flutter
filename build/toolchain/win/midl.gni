@@ -63,6 +63,9 @@ template("midl") {
     } else if (current_cpu == "x64") {
       win_tool_arch = "environment.x64"
       idl_target_platform = "x64"
+    } else if (current_cpu == "arm64") {
+      win_tool_arch = "environment.arm64"
+      idl_target_platform = "arm64"
     } else {
       assert(false, "Need environment for this arch")
     }

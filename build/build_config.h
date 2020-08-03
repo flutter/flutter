@@ -73,8 +73,8 @@
 
 // For access to standard POSIXish features, use OS_POSIX instead of a
 // more specific macro.
-#if defined(OS_MACOSX) || defined(OS_LINUX) || defined(OS_FREEBSD) ||     \
-    defined(OS_OPENBSD) || defined(OS_SOLARIS) || defined(OS_ANDROID) ||  \
+#if defined(OS_MACOSX) || defined(OS_LINUX) || defined(OS_FREEBSD) ||    \
+    defined(OS_OPENBSD) || defined(OS_SOLARIS) || defined(OS_ANDROID) || \
     defined(OS_NACL) || defined(OS_QNX)
 #define OS_POSIX 1
 #endif
@@ -113,7 +113,7 @@
 #define ARCH_CPU_ARMEL 1
 #define ARCH_CPU_32_BITS 1
 #define ARCH_CPU_LITTLE_ENDIAN 1
-#elif defined(__aarch64__)
+#elif defined(__aarch64__) || defined(_M_ARM64)
 #define ARCH_CPU_ARM_FAMILY 1
 #define ARCH_CPU_ARM64 1
 #define ARCH_CPU_64_BITS 1
@@ -140,12 +140,10 @@
 // Type detection for wchar_t.
 #if defined(OS_WIN)
 #define WCHAR_T_IS_UTF16
-#elif defined(OS_POSIX) && defined(COMPILER_GCC) && \
-    defined(__WCHAR_MAX__) && \
+#elif defined(OS_POSIX) && defined(COMPILER_GCC) && defined(__WCHAR_MAX__) && \
     (__WCHAR_MAX__ == 0x7fffffff || __WCHAR_MAX__ == 0xffffffff)
 #define WCHAR_T_IS_UTF32
-#elif defined(OS_POSIX) && defined(COMPILER_GCC) && \
-    defined(__WCHAR_MAX__) && \
+#elif defined(OS_POSIX) && defined(COMPILER_GCC) && defined(__WCHAR_MAX__) && \
     (__WCHAR_MAX__ == 0x7fff || __WCHAR_MAX__ == 0xffff)
 // On Posix, we'll detect short wchar_t, but projects aren't guaranteed to
 // compile in this mode (in particular, Chrome doesn't). This is intended for

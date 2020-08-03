@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+default_clang_base_path = "//third_party/llvm-build/Release+Asserts"
+
 declare_args() {
   # Path to the directory containing the VC binaries for the right
   # combination of host and target architectures. Currently only the
@@ -9,6 +11,9 @@ declare_args() {
   # If vc_bin_dir is not specified on the command line (and it normally
   # isn't), we will dynamically determine the right value to use at runtime.
   vc_bin_dir = ""
+
+  # Path to the clang toolchain.
+  clang_base_path = default_clang_base_path
 }
 
 import("//build/config/win/visual_studio_version.gni")
@@ -45,12 +50,7 @@ if (use_goma) {
   goma_prefix = ""
 }
 
-# Parameters:
-#  current_cpu: current_cpu to pass as a build arg
-#  environment: File name of environment file.
-template("msvc_toolchain") {
-  env = invoker.environment
-
+if (current_toolchain == default_toolchain) {
   if (is_debug) {
     configuration = "Debug"
   } else {
@@ -61,12 +61,29 @@ template("msvc_toolchain") {
                 "copy_dlls",
                 rebase_path(root_build_dir),
                 configuration,
-                invoker.current_cpu,
+                target_cpu,
               ])
+}
 
-  cl = invoker.cl
-
+# Parameters:
+#  toolchain_args: Settings for the toolchain, including at least:
+#     current_cpu: current_cpu to pass as a build arg
+#  environment: File name of environment file.
+template("msvc_toolchain") {
   toolchain(target_name) {
+    # When invoking this toolchain not as the default one, these args will be
+    # passed to the build. They are ignored when this is the default toolchain.
+    assert(defined(invoker.toolchain_args))
+    toolchain_args = {
+      if (defined(invoker.toolchain_args)) {
+        forward_variables_from(invoker.toolchain_args, "*")
+      }
+    }
+
+    env = invoker.environment
+
+    cl = invoker.cl
+
     # Make these apply to all tools below.
     lib_switch = ""
     lib_dir_switch = "/LIBPATH:"
@@ -77,11 +94,7 @@ template("msvc_toolchain") {
       # TODO(brettw) enable this when GN support in the binary has been rolled.
       #precompiled_header_type = "msvc"
       pdbname = "{{target_out_dir}}/{{target_output_name}}_c.pdb"
-      flags = ""
-      if (is_clang && invoker.current_cpu == "x86") {
-        flags = "-m32"
-      }
-      command = "ninja -t msvc -e $env -- $cl $flags /nologo /showIncludes /FC @$rspfile /c {{source}} /Fo{{output}} /Fd$pdbname"
+      command = "ninja -t msvc -e $env -- $cl /nologo /showIncludes /FC @$rspfile /c {{source}} /Fo{{output}} /Fd$pdbname"
       depsformat = "msvc"
       description = "CC {{output}}"
       outputs = [
@@ -120,16 +133,25 @@ template("msvc_toolchain") {
     }
 
     tool("asm") {
-      # TODO(brettw): "/safeseh" assembler argument is hardcoded here. Extract
-      # assembler flags to a variable like cflags. crbug.com/418613
-      if (invoker.current_cpu == "x64") {
+      is_msvc_assembler = true
+      if (toolchain_args.current_cpu == "x64") {
         ml = "ml64.exe"
         x64 = "-D_ML64_X64"
+      } else if (toolchain_args.current_cpu == "arm64") {
+        is_msvc_assembler = false
+        prefix = rebase_path("$clang_base_path/bin", root_build_dir)
+        ml = "${goma_prefix}${prefix}/clang_cl.exe --target=arm64-windows"
+        x64 = ""
       } else {
         ml = "ml.exe"
         x64 = ""
       }
-      command = "$python_path gyp-win-tool asm-wrapper $env $ml $x64 {{defines}} {{include_dirs}} {{asmflags}} /safeseh /c /Fo {{output}} {{source}}"
+      command = "$python_path gyp-win-tool asm-wrapper $env $ml $x64 {{defines}} {{include_dirs}} {{asmflags}} "
+      if (is_msvc_assembler) {
+        command += "-c -o{{output}} {{source}}"
+      } else {
+        command += "/c /Fo{{output}} {{source}}"
+      }
       outputs = [
         "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.obj",
       ]
@@ -217,52 +239,55 @@ template("msvc_toolchain") {
           "$python_path gyp-win-tool recursive-mirror {{source}} {{output}}"
       description = "COPY {{source}} {{output}}"
     }
+  }
+}
 
-    # When invoking this toolchain not as the default one, these args will be
-    # passed to the build. They are ignored when this is the default toolchain.
+template("win_toolchains") {
+  assert(defined(invoker.toolchain_arch))
+  toolchain_arch = invoker.toolchain_arch
+
+  msvc_toolchain(target_name) {
+    environment = "environment." + toolchain_arch
+    cl = "${goma_prefix}\"${vc_bin_dir}/cl.exe\""
     toolchain_args = {
-      current_cpu = invoker.current_cpu
-      if (defined(invoker.is_clang)) {
-        is_clang = invoker.is_clang
+      if (defined(invoker.toolchain_args)) {
+        forward_variables_from(invoker.toolchain_args, "*")
       }
+      current_cpu = toolchain_arch
+      is_clang = false
+    }
+  }
+  msvc_toolchain("clang_" + target_name) {
+    environment = "environment." + toolchain_arch
+    prefix = rebase_path("$clang_base_path/bin", root_build_dir)
+    cl = "${goma_prefix}$prefix/clang-cl.exe"
+    toolchain_args = {
+      if (defined(invoker.toolchain_args)) {
+        forward_variables_from(invoker.toolchain_args, "*")
+      }
+      current_cpu = toolchain_arch
+      is_clang = true
     }
   }
 }
 
-# TODO(dpranke): Declare both toolchains all of the time when we
-# get it sorted out how we want to support them both in a single build.
-# Right now only one of these can be enabled at a time because the
-# runtime libraries get copied to root_build_dir and would collide.
-if (current_cpu == "x86") {
-  msvc_toolchain("x86") {
-    environment = "environment.x86"
-    current_cpu = "x86"
-    cl = "${goma_prefix}\"${vc_bin_dir}/cl.exe\""
-    is_clang = false
-  }
-  msvc_toolchain("clang_x86") {
-    environment = "environment.x86"
-    current_cpu = "x86"
-    prefix = rebase_path("//third_party/llvm-build/Release+Asserts/bin",
-                         root_build_dir)
-    cl = "${goma_prefix}$prefix/clang-cl.exe"
-    is_clang = true
+if (target_cpu == "x86") {
+  win_toolchains("x86") {
+    toolchain_arch = "x86"
   }
 }
 
-if (current_cpu == "x64") {
-  msvc_toolchain("x64") {
-    environment = "environment.x64"
-    current_cpu = "x64"
-    cl = "${goma_prefix}\"${vc_bin_dir}/cl.exe\""
-    is_clang = false
+if (target_cpu == "x64") {
+  win_toolchains("x64") {
+    toolchain_arch = "x64"
   }
-  msvc_toolchain("clang_x64") {
-    environment = "environment.x64"
-    current_cpu = "x64"
-    prefix = rebase_path("//third_party/llvm-build/Release+Asserts/bin",
-                         root_build_dir)
-    cl = "${goma_prefix}$prefix/clang-cl.exe"
-    is_clang = true
+}
+
+if (target_cpu == "arm64") {
+  win_toolchains("arm64") {
+    toolchain_arch = "arm64"
+  }
+  win_toolchains(host_cpu) {
+    toolchain_arch = host_cpu
   }
 }

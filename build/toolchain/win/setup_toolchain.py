@@ -55,9 +55,8 @@ def _SetupScript(target_cpu, sdk_dir):
   """Returns a command (with arguments) to be used to set up the
   environment."""
   # Check if we are running in the SDK command line environment and use
-  # the setup script from the SDK if so. |target_cpu| should be either
-  # 'x86' or 'x64'.
-  assert target_cpu in ('x86', 'x64')
+  # the setup script from the SDK if so.
+  assert target_cpu in ('x86', 'x64', 'arm64')
   if bool(int(os.environ.get('DEPOT_TOOLS_WIN_TOOLCHAIN', 1))) and sdk_dir:
     return [os.path.normpath(os.path.join(sdk_dir, 'Bin/SetEnv.Cmd')),
             '/' + target_cpu]
@@ -109,7 +108,7 @@ def main():
 
   _CopyTool(tool_source)
 
-  cpus = ('x86', 'x64')
+  cpus = ('x86', 'x64', 'arm64')
   assert target_cpu in cpus
   vc_bin_dir = ''
 
