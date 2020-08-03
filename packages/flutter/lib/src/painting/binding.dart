@@ -163,11 +163,11 @@ class _SystemFontsNotifier extends Listenable {
   }
 }
 
-/// The singleton that implements the Flutter framework's image cache.
+/// Deprecated.
 ///
-/// The cache is used internally by [ImageProvider] and should generally not be
-/// accessed directly.
-///
-/// The image cache is created during startup by the [PaintingBinding]'s
-/// [PaintingBinding.createImageCache] method.
+/// Use [PaintingBinding.imageCache] instead.
+@Deprecated(
+    'Use PaintingBinding.instance.imageCache instead. '
+    'This feature was deprecated after v1.21.0-6.0.pre.149.'
+)
 ImageCache get imageCache => PaintingBinding.instance.imageCache;
