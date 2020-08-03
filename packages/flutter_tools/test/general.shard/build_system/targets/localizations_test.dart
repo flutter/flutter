@@ -14,7 +14,7 @@ import '../../../src/context.dart';
 void main() {
   // Verifies that values are correctly passed through the localizations
   // target, but does not validate them beyond the serialized data type.
-  testWithoutContext('generateLocalizations forwards arguments correctly', () async {
+  testUsingContext('generateLocalizations forwards arguments correctly', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Logger logger = BufferLogger.test();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
@@ -68,7 +68,7 @@ void main() {
     expect(processManager.hasRemainingExpectations, false);
   });
 
-  testWithoutContext('generateLocalizations throws exception on missing flutter: generate: true flag', () async {
+  testUsingContext('generateLocalizations throws exception on missing flutter: generate: true flag', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Logger logger = BufferLogger.test();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[]);
