@@ -496,7 +496,7 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   /// This triggers on the up event if the recognizer wins the arena with it
   /// or has previously won.
   ///
-  /// If this recognizer doesn't win the arena, [onTeriaryTapCancel] is called
+  /// If this recognizer doesn't win the arena, [onTertiaryTapCancel] is called
   /// instead.
   ///
   /// See also:
