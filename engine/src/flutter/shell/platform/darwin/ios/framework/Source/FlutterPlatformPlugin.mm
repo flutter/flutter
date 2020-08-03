@@ -88,6 +88,8 @@ using namespace flutter;
   } else if ([method isEqualToString:@"Clipboard.setData"]) {
     [self setClipboardData:args];
     result(nil);
+  } else if ([method isEqualToString:@"Clipboard.hasStrings"]) {
+    result([self clipboardHasStrings]);
   } else {
     result(FlutterMethodNotImplemented);
   }
@@ -246,6 +248,18 @@ using namespace flutter;
   } else {
     pasteboard.string = @"null";
   }
+}
+
+- (NSDictionary*)clipboardHasStrings {
+  bool hasStrings = false;
+  UIPasteboard* pasteboard = [UIPasteboard generalPasteboard];
+  if (@available(iOS 10, *)) {
+    hasStrings = pasteboard.hasStrings;
+  } else {
+    NSString* stringInPasteboard = pasteboard.string;
+    hasStrings = stringInPasteboard != nil;
+  }
+  return @{@"value" : @(hasStrings)};
 }
 
 @end
