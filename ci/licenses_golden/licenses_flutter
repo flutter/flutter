@@ -929,6 +929,7 @@ FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterOverlay
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterOverlayView.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.mm
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPluginTest.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViewsTest.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h
