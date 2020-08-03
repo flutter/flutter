@@ -3974,7 +3974,7 @@ void main() {
         const MaterialApp(
           home: Material(
             child: SelectableText(
-              'abc def ghi',
+              'Latin 中文(non-Latin)',
               selectionWidthStyle: ui.BoxWidthStyle.tight,
               selectionHeightStyle: ui.BoxHeightStyle.max,
             ),
