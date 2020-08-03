@@ -159,6 +159,9 @@ class WebAssetServer implements AssetReader {
         address = (await InternetAddress.lookup(hostname)).first;
       }
       final HttpServer httpServer = await HttpServer.bind(address, port);
+      // Allow rendering in a frame.
+      httpServer.defaultResponseHeaders.remove('x-frame-options', 'SAMEORIGIN');
+
       final PackageConfig packageConfig = await loadPackageConfigWithLogging(
         globals.fs.file(buildInfo.packagesPath),
         logger: globals.logger,
@@ -177,11 +180,6 @@ class WebAssetServer implements AssetReader {
         return server;
       }
       
-      // In debug and profile builds allow rendering in a frame.
-      if (!buildInfo.mode.isRelease) {
-        httpServer.defaultResponseHeaders
-            .remove('x-frame-options', 'SAMEORIGIN');
-      }
       // In release builds deploy a simpler proxy server.
       if (buildInfo.mode != BuildMode.debug) {
         final ReleaseAssetServer releaseAssetServer = ReleaseAssetServer(
