@@ -321,10 +321,10 @@ void main() {
       when(mockDevToolsLauncher.serve()).thenAnswer((_) async => mockDevToolsServer);
 
       commands.add(<String, dynamic>{'id': 0, 'method': 'devtools.serve'});
-      final Map<String, dynamic> response = await responses.stream.firstWhere(_isDevToolsEvent);
-      expect(response['params'], isNotEmpty);
-      expect(response['params']['host'], equals('127.0.0.1'));
-      expect(response['params']['port'], equals(1234));
+      final Map<String, dynamic> response = await responses.stream.firstWhere((Map<String, dynamic> response) => response['id'] == 0);
+      expect(response['result'], isNotEmpty);
+      expect(response['result']['host'], equals('127.0.0.1'));
+      expect(response['result']['port'], equals(1234));
       await responses.close();
       await commands.close();
     }, overrides: <Type, Generator>{
@@ -465,8 +465,6 @@ void main() {
 bool _notEvent(Map<String, dynamic> map) => map['event'] == null;
 
 bool _isConnectedEvent(Map<String, dynamic> map) => map['event'] == 'daemon.connected';
-
-bool _isDevToolsEvent(Map<String, dynamic> map) => map['event'] == 'devtools.serve';
 
 class MockFuchsiaWorkflow extends FuchsiaWorkflow {
   MockFuchsiaWorkflow({ this.canListDevices = true });

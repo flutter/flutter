@@ -398,13 +398,9 @@ void main() {
     expect(controller.selection.baseOffset, 29);
 
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start));
-
-    expect(controller.selection.baseOffset, 29);
 
     // Sets the origin.
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-        offset: const Offset(20, 20)));
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: const Offset(20, 20)));
 
     expect(controller.selection.baseOffset, 29);
 
@@ -427,10 +423,9 @@ void main() {
     expect(controller.selection.baseOffset, 8);
 
     // Go in the other direction.
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start));
+
     // Sets the origin.
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-        offset: const Offset(20, 20)));
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: const Offset(20, 20)));
 
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
         offset: const Offset(-5000, 20)));
@@ -482,13 +477,9 @@ void main() {
     expect(controller.selection.baseOffset, 29);
 
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start));
-
-    expect(controller.selection.baseOffset, 29);
 
     // Sets the origin.
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-      offset: const Offset(20, 20)));
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: const Offset(20, 20)));
 
     expect(controller.selection.baseOffset, 29);
 
@@ -583,13 +574,9 @@ void main() {
     expect(controller.selection.baseOffset, 29);
 
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start));
-
-    expect(controller.selection.baseOffset, 29);
 
     // Sets the origin.
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-      offset: const Offset(20, 20)));
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: const Offset(20, 20)));
 
     expect(controller.selection.baseOffset, 29);
 
@@ -603,13 +590,11 @@ void main() {
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
     // Immediately start a new floating cursor, in the same way as happens when
     // the user tries to select text in trackpad mode.
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start));
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: const Offset(20, 20)));
     await tester.pumpAndSettle();
 
     // Set and move the second cursor like a selection. Previously, the second
     // Update here caused a crash.
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
-      offset: const Offset(20, 20)));
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update,
       offset: const Offset(-250, 20)));
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
@@ -676,13 +661,7 @@ void main() {
 
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
     editableTextState.updateFloatingCursor(
-      RawFloatingCursorPoint(state: FloatingCursorDragState.Start),
-    );
-    editableTextState.updateFloatingCursor(
-      RawFloatingCursorPoint(
-        state: FloatingCursorDragState.Update,
-        offset: const Offset(20, 20),
-      ),
+      RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: const Offset(20, 20)),
     );
     await tester.pump();
 
