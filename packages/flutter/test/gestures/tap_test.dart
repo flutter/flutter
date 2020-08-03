@@ -89,13 +89,13 @@ void main() {
 
   // Down/up sequence 6: tap sequence with tertiary button
   const PointerDownEvent down6 = PointerDownEvent(
-    pointer: 5,
+    pointer: 6,
     position: Offset(20.0, 20.0),
     buttons: kMiddleMouseButton,
   );
 
   const PointerUpEvent up6 = PointerUpEvent(
-    pointer: 5,
+    pointer: 6,
     position: Offset(20.0, 20.0),
   );
 

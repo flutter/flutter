@@ -370,6 +370,10 @@ void main() {
     }, variant: buttonVariant);
 
     testWidgets('Long Press Up Callback called after long press', (WidgetTester tester) async {
+      // The middle mouse button has no long press and will thus skip this test.
+      if (ButtonVariant.button == kMiddleMouseButton)
+        return;
+
       int longPressUp = 0;
 
       await tester.pumpWidget(
