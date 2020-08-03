@@ -9,9 +9,9 @@
 #include "flutter/lib/ui/compositing/scene.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/lib/ui/window/platform_configuration.h"
+#include "flutter/lib/ui/window/viewport_metrics.h"
 #include "flutter/lib/ui/window/window.h"
 #include "flutter/runtime/runtime_delegate.h"
-#include "lib/ui/window/viewport_metrics.h"
 #include "third_party/tonic/dart_message_handler.h"
 
 namespace flutter {
