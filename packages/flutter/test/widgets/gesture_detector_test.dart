@@ -129,10 +129,11 @@ void main() {
 
   group('Tap', () {
     final ButtonVariant buttonVariant = ButtonVariant(
-      values: <int>[kPrimaryButton, kSecondaryButton],
+      values: <int>[kPrimaryButton, kSecondaryButton, kMiddleMouseButton],
       descriptions: <int, String>{
         kPrimaryButton: 'primary',
         kSecondaryButton: 'secondary',
+        kMiddleMouseButton: 'tertiary',
       },
     );
 
@@ -164,6 +165,9 @@ void main() {
                       didTap = true;
                     } : null,
                     onSecondaryTap: ButtonVariant.button == kSecondaryButton ? () {
+                      didTap = true;
+                    } : null,
+                    onTertiaryTapDown: ButtonVariant.button == kMiddleMouseButton ? (_) {
                       didTap = true;
                     } : null,
                     behavior: behavior,
@@ -215,6 +219,9 @@ void main() {
             onSecondaryTap: ButtonVariant.button == kSecondaryButton ? () {
               didTap = true;
             } : null,
+            onTertiaryTapUp: ButtonVariant.button == kMiddleMouseButton ? (_) {
+              didTap = true;
+            } : null,
           ),
         ),
       );
@@ -234,6 +241,9 @@ void main() {
             onSecondaryTap: ButtonVariant.button == kSecondaryButton ? () {
               didTap = true;
             } : null,
+            onTertiaryTapUp: ButtonVariant.button == kMiddleMouseButton ? (_) {
+              didTap = true;
+            } : null,
             child: Container(),
           ),
         ),
@@ -251,6 +261,7 @@ void main() {
           child: GestureDetector(
             onTap: ButtonVariant.button == kPrimaryButton ? inputCallback : null,
             onSecondaryTap: ButtonVariant.button == kSecondaryButton ? inputCallback : null,
+            onTertiaryTapUp: ButtonVariant.button == kMiddleMouseButton ? (_) => inputCallback() : null,
             child: Container(),
           ),
         ),
@@ -263,6 +274,7 @@ void main() {
           child: GestureDetector(
             onTap: ButtonVariant.button == kPrimaryButton ? inputCallback : null,
             onSecondaryTap: ButtonVariant.button == kSecondaryButton ? inputCallback : null,
+            onTertiaryTapUp: ButtonVariant.button == kMiddleMouseButton ? (_) => inputCallback() : null,
             child: Container(),
           ),
         ),
@@ -293,16 +305,25 @@ void main() {
               onSecondaryTapDown: ButtonVariant.button == kSecondaryButton ? (TapDownDetails details) {
                 tapDown += 1;
               } : null,
+              onTertiaryTapDown: ButtonVariant.button == kMiddleMouseButton ? (TapDownDetails details) {
+                tapDown += 1;
+              } : null,
               onTap: ButtonVariant.button == kPrimaryButton ? () {
                 tap += 1;
               } : null,
               onSecondaryTap: ButtonVariant.button == kSecondaryButton ? () {
                 tap += 1;
               } : null,
+              onTertiaryTapUp: ButtonVariant.button == kMiddleMouseButton ? (TapUpDetails details) {
+                tap += 1;
+              } : null,
               onTapCancel: ButtonVariant.button == kPrimaryButton ? () {
                 tapCancel += 1;
               } : null,
               onSecondaryTapCancel: ButtonVariant.button == kSecondaryButton ? () {
+                tapCancel += 1;
+              } : null,
+              onTertiaryTapCancel: ButtonVariant.button == kMiddleMouseButton ? () {
                 tapCancel += 1;
               } : null,
               onLongPress: ButtonVariant.button == kPrimaryButton ? () {

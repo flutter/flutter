@@ -87,6 +87,18 @@ void main() {
     position: Offset(20.0, 20.0),
   );
 
+  // Down/up sequence 6: tap sequence with tertiary button
+  const PointerDownEvent down6 = PointerDownEvent(
+    pointer: 5,
+    position: Offset(20.0, 20.0),
+    buttons: kMiddleMouseButton,
+  );
+
+  const PointerUpEvent up6 = PointerUpEvent(
+    pointer: 5,
+    position: Offset(20.0, 20.0),
+  );
+
   testGesture('Should recognize tap', (GestureTester tester) {
     final TapGestureRecognizer tap = TapGestureRecognizer();
 
@@ -748,6 +760,7 @@ void main() {
     TapGestureRecognizer primary;
     TapGestureRecognizer primary2;
     TapGestureRecognizer secondary;
+    TapGestureRecognizer tertiary;
     setUp(() {
       primary = TapGestureRecognizer()
         ..onTapDown = (TapDownDetails details) {
@@ -779,6 +792,16 @@ void main() {
         ..onSecondaryTapCancel = () {
           recognized.add('secondaryCancel');
         };
+      tertiary = TapGestureRecognizer()
+        ..onTertiaryTapDown = (TapDownDetails details) {
+          recognized.add('tertiaryDown');
+        }
+        ..onTertiaryTapUp = (TapUpDetails details) {
+          recognized.add('tertiaryUp');
+        }
+        ..onTertiaryTapCancel = () {
+          recognized.add('tertiaryCancel');
+        };
     });
 
     tearDown(() {
@@ -786,11 +809,25 @@ void main() {
       primary.dispose();
       primary2.dispose();
       secondary.dispose();
+      tertiary.dispose();
     });
 
     testGesture('A primary tap recognizer does not form competition with a secondary tap recognizer', (GestureTester tester) {
       primary.addPointer(down1);
       secondary.addPointer(down1);
+      tester.closeArena(1);
+
+      tester.route(down1);
+      expect(recognized, <String>['primaryDown']);
+      recognized.clear();
+
+      tester.route(up1);
+      expect(recognized, <String>['primaryUp']);
+    });
+
+    testGesture('A primary tap recognizer does not form competition with a tertiary tap recognizer', (GestureTester tester) {
+      primary.addPointer(down1);
+      tertiary.addPointer(down1);
       tester.closeArena(1);
 
       tester.route(down1);
@@ -823,6 +860,9 @@ void main() {
     const PointerCancelEvent cancel5 = PointerCancelEvent(
       pointer: 5,
     );
+    const PointerCancelEvent cancel6 = PointerCancelEvent(
+      pointer: 6,
+    );
 
     setUp(() {
       tap = TapGestureRecognizer()
@@ -846,6 +886,15 @@ void main() {
         }
         ..onSecondaryTapCancel = () {
           recognized.add('secondaryCancel');
+        }
+        ..onTertiaryTapDown = (TapDownDetails details) {
+          recognized.add('tertiaryDown');
+        }
+        ..onTertiaryTapUp = (TapUpDetails details) {
+          recognized.add('tertiaryUp');
+        }
+        ..onTertiaryTapCancel = () {
+          recognized.add('tertiaryCancel');
         };
     });
 
@@ -893,6 +942,19 @@ void main() {
       expect(recognized, <String>['secondaryUp']);
     });
 
+    testGesture('A tertiary tap should trigger tertiary callbacks', (GestureTester tester) {
+      tap.addPointer(down6);
+      tester.closeArena(down6.pointer);
+      expect(recognized, <String>[]);
+      tester.async.elapse(const Duration(milliseconds: 500));
+      expect(recognized, <String>['tertiaryDown']);
+      recognized.clear();
+
+      tester.route(up6);
+      GestureBinding.instance.gestureArena.sweep(down6.pointer);
+      expect(recognized, <String>['tertiaryUp']);
+    });
+
     testGesture('A secondary tap cancel should trigger secondary callbacks', (GestureTester tester) {
       tap.addPointer(down5);
       tester.closeArena(down5.pointer);
@@ -904,6 +966,19 @@ void main() {
       tester.route(cancel5);
       GestureBinding.instance.gestureArena.sweep(down5.pointer);
       expect(recognized, <String>['secondaryCancel']);
+    });
+
+    testGesture('A tertiary tap cancel should trigger tertiary callbacks', (GestureTester tester) {
+      tap.addPointer(down6);
+      tester.closeArena(down6.pointer);
+      expect(recognized, <String>[]);
+      tester.async.elapse(const Duration(milliseconds: 500));
+      expect(recognized, <String>['tertiaryDown']);
+      recognized.clear();
+
+      tester.route(cancel6);
+      GestureBinding.instance.gestureArena.sweep(down6.pointer);
+      expect(recognized, <String>['tertiaryCancel']);
     });
   });
 
