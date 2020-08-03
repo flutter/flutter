@@ -427,7 +427,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       await tester.pump();
 
       expect(tester.getTopLeft(find.byKey(childKey)).dy, equals(0.0));
-    }, skip: true); // https://github.com/flutter/flutter/issues/29108
+    });
 
     testWidgets('WidgetInspector long press', (WidgetTester tester) async {
       bool didLongPress = false;
