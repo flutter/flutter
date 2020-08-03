@@ -82,6 +82,7 @@ class Daemon {
     _registerDomain(appDomain = AppDomain(this));
     _registerDomain(deviceDomain = DeviceDomain(this));
     _registerDomain(emulatorDomain = EmulatorDomain(this));
+    _registerDomain(devToolsDomain = DevToolsDomain(this));
 
     // Start listening.
     _commandSubscription = commandStream.listen(
@@ -98,6 +99,7 @@ class Daemon {
   AppDomain appDomain;
   DeviceDomain deviceDomain;
   EmulatorDomain emulatorDomain;
+  DevToolsDomain devToolsDomain;
   StreamSubscription<Map<String, dynamic>> _commandSubscription;
   int _outgoingRequestId = 1;
   final Map<String, Completer<dynamic>> _outgoingRequestCompleters = <String, Completer<dynamic>>{};
@@ -182,6 +184,7 @@ class Daemon {
   void _send(Map<String, dynamic> map) => sendCommand(map);
 
   Future<void> shutdown({ dynamic error }) async {
+    await devToolsDomain?.dispose();
     await _commandSubscription?.cancel();
     for (final Domain domain in _domainMap.values) {
       await domain.dispose();
@@ -883,6 +886,29 @@ class DeviceDomain extends Domain {
       }
     }
     return null;
+  }
+}
+
+class DevToolsDomain extends Domain {
+  DevToolsDomain(Daemon daemon) : super(daemon, 'devtools') {
+    registerHandler('serve', serve);
+  }
+
+  DevtoolsLauncher _devtoolsLauncher;
+
+  Future<void> serve([ Map<String, dynamic> args ]) async {
+    _devtoolsLauncher ??= DevtoolsLauncher.instance;
+    final HttpServer server = await _devtoolsLauncher.serve();
+
+    sendEvent('devtools.serve', <String, dynamic>{
+      'host': server.address.host,
+      'port': server.port,
+    });
+  }
+
+  @override
+  Future<void> dispose() async {
+    await _devtoolsLauncher?.close();
   }
 }
 

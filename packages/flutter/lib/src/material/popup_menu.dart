@@ -243,7 +243,8 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   /// The text style of the popup menu item.
   ///
   /// If this property is null, then [PopupMenuThemeData.textStyle] is used.
-  /// If [PopupMenuThemeData.textStyle] is also null, then [ThemeData.textTheme.subtitle1] is used.
+  /// If [PopupMenuThemeData.textStyle] is also null, then [TextTheme.subtitle1]
+  /// of [ThemeData.textTheme] is used.
   final TextStyle textStyle;
 
   /// The cursor for a mouse pointer when it enters or is hovering over the
@@ -342,15 +343,17 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
       },
     );
 
-    return Semantics(
-      enabled: widget.enabled,
-      button: true,
-      child: InkWell(
-        onTap: widget.enabled ? handleTap : null,
-        canRequestFocus: widget.enabled,
-        mouseCursor: effectiveMouseCursor,
-        child: item,
-      ),
+    return MergeSemantics(
+      child: Semantics(
+        enabled: widget.enabled,
+        button: true,
+        child: InkWell(
+          onTap: widget.enabled ? handleTap : null,
+          canRequestFocus: widget.enabled,
+          mouseCursor: effectiveMouseCursor,
+          child: item,
+        ),
+      )
     );
   }
 }
@@ -1060,7 +1063,7 @@ class PopupMenuButton<T> extends StatefulWidget {
   final Color color;
 
   /// If true (the default) then the menu will be wrapped with copies
-  /// of the [InheritedThemes], like [Theme] and [PopupMenuTheme], which
+  /// of the [InheritedTheme]s, like [Theme] and [PopupMenuTheme], which
   /// are defined above the [BuildContext] where the menu is shown.
   final bool captureInheritedThemes;
 

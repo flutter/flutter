@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:async';
 
@@ -22,6 +21,9 @@ enum SystemSoundType {
   /// web platform does not support playing any sounds, so this will be
   /// ignored on the web as well.
   alert,
+
+  // If you add new values here, you also need to update the `SoundType` Java
+  // enum in `PlatformChannel.java`.
 }
 
 /// Provides access to the library of short system specific sounds for common

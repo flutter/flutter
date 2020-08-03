@@ -77,7 +77,7 @@ class CupertinoTheme extends StatelessWidget {
   /// on the value of [CupertinoThemeData.brightness] in the given [context].
   ///
   /// If no [CupertinoTheme] can be found in the given [context], or its `brightness`
-  /// is null, it will fall back to [MediaQueryData.brightness].
+  /// is null, it will fall back to [MediaQueryData.platformBrightness].
   ///
   /// Throws an exception if no valid [CupertinoTheme] or [MediaQuery] widgets
   /// exist in the ancestry tree, unless [nullOk] is set to true.

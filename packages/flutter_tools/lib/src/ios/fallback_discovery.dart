@@ -67,7 +67,7 @@ class FallbackDiscovery {
   Future<Uri> discover({
     @required int assumedDevicePort,
     @required String packageId,
-    @required Device deivce,
+    @required Device device,
     @required bool usesIpv6,
     @required int hostVmservicePort,
     @required String packageName,
@@ -84,7 +84,7 @@ class FallbackDiscovery {
     try {
       final Uri result = await _mDnsObservatoryDiscovery.getObservatoryUri(
         packageId,
-        deivce,
+        device,
         usesIpv6: usesIpv6,
         hostVmservicePort: hostVmservicePort,
       );
@@ -173,6 +173,10 @@ class FallbackDiscovery {
               'success',
               flutterUsage: _flutterUsage,
             ).send();
+
+            // We absolutely must dispose this vmService instance, otherwise
+            // DDS will fail to start.
+            vmService.dispose();
             return Uri.parse('http://localhost:$hostPort');
           }
         }

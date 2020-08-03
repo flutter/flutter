@@ -854,7 +854,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
               child.size.height - distance,
               maxSizeBelowBaseline,
             );
-            crossSize = maxSizeAboveBaseline + maxSizeBelowBaseline;
+            crossSize = math.max(maxSizeAboveBaseline + maxSizeBelowBaseline, crossSize);
           }
         }
         final FlexParentData childParentData = child.parentData as FlexParentData;

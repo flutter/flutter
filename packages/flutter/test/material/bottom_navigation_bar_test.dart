@@ -1338,7 +1338,7 @@ void main() {
           builder: (BuildContext context, StateSetter setState) {
             return Scaffold(
               body: Center(
-                child: RaisedButton(
+                child: ElevatedButton(
                   child: const Text('green'),
                   onPressed: () {
                     setState(() {

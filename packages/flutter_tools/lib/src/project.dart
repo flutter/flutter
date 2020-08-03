@@ -1039,6 +1039,8 @@ class LinuxProject extends FlutterProjectPlatform implements CmakeBasedProject {
   @override
   String get pluginConfigKey => LinuxPlugin.kConfigKey;
 
+  static final RegExp _applicationIdPattern = RegExp(r'''^\s*set\s*\(\s*APPLICATION_ID\s*"(.*)"\s*\)\s*$''');
+
   Directory get _editableDirectory => parent.directory.childDirectory('linux');
 
   /// The directory in the project that is managed by Flutter. As much as
@@ -1067,6 +1069,10 @@ class LinuxProject extends FlutterProjectPlatform implements CmakeBasedProject {
   Directory get pluginSymlinkDirectory => ephemeralDirectory.childDirectory('.plugin_symlinks');
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {}
+
+  String get applicationId {
+    return _firstMatchInFile(cmakeFile, _applicationIdPattern)?.group(1);
+  }
 }
 
 /// The Fuchsia sub project

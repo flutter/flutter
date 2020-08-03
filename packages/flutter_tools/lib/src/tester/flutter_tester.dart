@@ -17,7 +17,6 @@ import '../build_info.dart';
 import '../bundle.dart';
 import '../convert.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
 import '../project.dart';
 import '../protocol_discovery.dart';
 import '../version.dart';
@@ -48,18 +47,18 @@ class FlutterTesterApp extends ApplicationPackage {
 // TODO(scheglov): This device does not currently work with full restarts.
 class FlutterTesterDevice extends Device {
   FlutterTesterDevice(String deviceId, {
-    ProcessManager processManager,
-    FlutterVersion flutterVersion,
-    Logger logger,
-    String buildDirectory,
-    FileSystem fileSystem,
-    Artifacts artifacts,
-  }) : _processManager = processManager ?? globals.processManager, // TODO(jonahwilliams): remove after google3 roll.
-       _flutterVersion = flutterVersion ?? globals.flutterVersion,
-       _logger = logger ?? globals.logger,
-       _buildDirectory = buildDirectory ?? getBuildDirectory(),
-       _fileSystem = fileSystem ?? globals.fs,
-       _artifacts = artifacts ?? globals.artifacts,
+    @required ProcessManager processManager,
+    @required FlutterVersion flutterVersion,
+    @required Logger logger,
+    @required String buildDirectory,
+    @required FileSystem fileSystem,
+    @required Artifacts artifacts,
+  }) : _processManager = processManager,
+       _flutterVersion = flutterVersion,
+       _logger = logger,
+       _buildDirectory = buildDirectory,
+       _fileSystem = fileSystem,
+       _artifacts = artifacts,
        super(
         deviceId,
         platformType: null,
@@ -255,20 +254,20 @@ class FlutterTesterDevice extends Device {
 
 class FlutterTesterDevices extends PollingDeviceDiscovery {
   FlutterTesterDevices({
-    FileSystem fileSystem,
-    Artifacts artifacts,
-    ProcessManager processManager,
-    Logger logger,
-    FlutterVersion flutterVersion,
-    Config config,
-  }) : _testerDevice = FlutterTesterDevice( // TODO(jonahwilliams): remove after google3 roll.
+    @required FileSystem fileSystem,
+    @required Artifacts artifacts,
+    @required ProcessManager processManager,
+    @required Logger logger,
+    @required FlutterVersion flutterVersion,
+    @required Config config,
+  }) : _testerDevice = FlutterTesterDevice(
         kTesterDeviceId,
-        fileSystem: fileSystem ?? globals.fs,
-        artifacts: artifacts ?? globals.artifacts,
-        processManager: processManager ?? globals.processManager,
-        buildDirectory: getBuildDirectory(config ?? globals.config, fileSystem ?? globals.fs),
-        logger: logger ?? globals.logger,
-        flutterVersion: flutterVersion ?? globals.flutterVersion,
+        fileSystem: fileSystem,
+        artifacts: artifacts,
+        processManager: processManager,
+        buildDirectory: getBuildDirectory(config, fileSystem),
+        logger: logger,
+        flutterVersion: flutterVersion,
       ),
        super('Flutter tester');
 
