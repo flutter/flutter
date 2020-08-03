@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui' show Color, hashValues;
 import 'dart:ui' as ui show lerpDouble;
 
@@ -72,7 +74,7 @@ class IconThemeData with Diagnosticable {
   /// See also:
   ///
   ///  * [CupertinoIconThemeData.resolve] an implementation that resolves
-  ///    [CupertinoIconThemeData.color] before returning.
+  ///    the color of [CupertinoIconThemeData] before returning.
   IconThemeData resolve(BuildContext context) => this;
 
   /// Whether all the properties of this object are non-null.

@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart' as intl;
-import 'package:intl/date_symbols.dart' as intl;
 
 import 'l10n/generated_cupertino_localizations.dart';
 import 'utils/date_localizations.dart' as util;
@@ -251,6 +250,21 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
     }
   }
 
+  /// The raw version of [tabSemanticsLabel], with `$tabIndex` and `$tabCount` verbatim
+  /// in the string.
+  @protected
+  String get tabSemanticsLabelRaw;
+
+  @override
+  String tabSemanticsLabel({ int tabIndex, int tabCount }) {
+    assert(tabIndex >= 1);
+    assert(tabCount >= 1);
+    final String template = tabSemanticsLabelRaw;
+    return template
+      .replaceFirst(r'$tabIndex', _decimalFormat.format(tabIndex))
+      .replaceFirst(r'$tabCount', _decimalFormat.format(tabCount));
+  }
+
   @override
   String timerPickerHour(int hour) {
     return _singleDigitHourFormat.format(DateTime.utc(0, 0, 0, hour));
@@ -347,8 +361,7 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
     ).replaceFirst(r'$second', _decimalFormat.format(second));
   }
 
-  /// A [LocalizationsDelegate] that uses [GlobalCupertinoLocalizations.load]
-  /// to create an instance of this class.
+  /// A [LocalizationsDelegate] for [CupertinoLocalizations].
   ///
   /// Most internationalized apps will use [GlobalCupertinoLocalizations.delegates]
   /// as the value of [CupertinoApp.localizationsDelegates] to include

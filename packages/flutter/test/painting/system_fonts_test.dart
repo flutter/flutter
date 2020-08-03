@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
@@ -206,7 +208,7 @@ void main() {
           child: Center(
             child: Builder(
               builder: (BuildContext context) {
-                return RaisedButton(
+                return ElevatedButton(
                   child: const Text('X'),
                   onPressed: () {
                     showTimePicker(

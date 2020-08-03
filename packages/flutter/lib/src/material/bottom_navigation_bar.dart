@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:collection' show Queue;
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
+import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 import 'bottom_navigation_bar_theme.dart';
@@ -151,7 +154,7 @@ class BottomNavigationBar extends StatefulWidget {
   /// are non-null, they will be used instead of [selectedItemColor] and
   /// [unselectedItemColor].
   ///
-  /// If custom [IconThemData]s are used, you must provide both
+  /// If custom [IconThemeData]s are used, you must provide both
   /// [selectedIconTheme] and [unselectedIconTheme], and both
   /// [IconThemeData.color] and [IconThemeData.size] must be set.
   ///
@@ -162,7 +165,7 @@ class BottomNavigationBar extends StatefulWidget {
   /// former is preferred, [fixedColor] only exists for the sake of
   /// backwards compatibility.
   ///
-  /// The [showSelectedLabels] argument must not be non-null.
+  /// The [showSelectedLabels] argument must be non-null.
   ///
   /// The [showUnselectedLabels] argument defaults to `true` if [type] is
   /// [BottomNavigationBarType.fixed] and `false` if [type] is
@@ -187,6 +190,7 @@ class BottomNavigationBar extends StatefulWidget {
     this.unselectedLabelStyle,
     this.showSelectedLabels = true,
     this.showUnselectedLabels,
+    this.mouseCursor,
   }) : assert(items != null),
        assert(items.length >= 2),
        assert(
@@ -242,7 +246,7 @@ class BottomNavigationBar extends StatefulWidget {
   /// The color of the [BottomNavigationBar] itself.
   ///
   /// If [type] is [BottomNavigationBarType.shifting] and the
-  /// [items]s, have [BottomNavigationBarItem.backgroundColor] set, the [item]'s
+  /// [items] have [BottomNavigationBarItem.backgroundColor] set, the [items]'
   /// backgroundColor will splash and overwrite this color.
   final Color backgroundColor;
 
@@ -252,13 +256,13 @@ class BottomNavigationBar extends StatefulWidget {
   final double iconSize;
 
   /// The color of the selected [BottomNavigationBarItem.icon] and
-  /// [BottomNavigationBarItem.label].
+  /// [BottomNavigationBarItem.title].
   ///
   /// If null then the [ThemeData.primaryColor] is used.
   final Color selectedItemColor;
 
   /// The color of the unselected [BottomNavigationBarItem.icon] and
-  /// [BottomNavigationBarItem.label]s.
+  /// [BottomNavigationBarItem.title]s.
   ///
   /// If null then the [TextTheme.caption]'s color is used.
   final Color unselectedItemColor;
@@ -295,7 +299,8 @@ class BottomNavigationBar extends StatefulWidget {
 
   /// The font size of the [BottomNavigationBarItem] labels when they are selected.
   ///
-  /// If [selectedLabelStyle.fontSize] is non-null, it will be used instead of this.
+  /// If [TextStyle.fontSize] of [selectedLabelStyle] is non-null, it will be
+  /// used instead of this.
   ///
   /// Defaults to `14.0`.
   final double selectedFontSize;
@@ -303,7 +308,8 @@ class BottomNavigationBar extends StatefulWidget {
   /// The font size of the [BottomNavigationBarItem] labels when they are not
   /// selected.
   ///
-  /// If [unselectedLabelStyle.fontSize] is non-null, it will be used instead of this.
+  /// If [TextStyle.fontSize] of [unselectedLabelStyle] is non-null, it will be
+  /// used instead of this.
   ///
   /// Defaults to `12.0`.
   final double unselectedFontSize;
@@ -313,6 +319,12 @@ class BottomNavigationBar extends StatefulWidget {
 
   /// Whether the labels are shown for the unselected [BottomNavigationBarItem]s.
   final bool showSelectedLabels;
+
+  /// The cursor for a mouse pointer when it enters or is hovering over the
+  /// tiles.
+  ///
+  /// If this property is null, [SystemMouseCursors.click] will be used.
+  final MouseCursor mouseCursor;
 
   @override
   _BottomNavigationBarState createState() => _BottomNavigationBarState();
@@ -337,12 +349,14 @@ class _BottomNavigationTile extends StatelessWidget {
     this.showSelectedLabels,
     this.showUnselectedLabels,
     this.indexLabel,
+    @required this.mouseCursor,
     }) : assert(type != null),
          assert(item != null),
          assert(animation != null),
          assert(selected != null),
          assert(selectedLabelStyle != null),
-         assert(unselectedLabelStyle != null);
+         assert(unselectedLabelStyle != null),
+         assert(mouseCursor != null);
 
   final BottomNavigationBarType type;
   final BottomNavigationBarItem item;
@@ -359,6 +373,7 @@ class _BottomNavigationTile extends StatelessWidget {
   final String indexLabel;
   final bool showSelectedLabels;
   final bool showUnselectedLabels;
+  final MouseCursor mouseCursor;
 
   @override
   Widget build(BuildContext context) {
@@ -452,6 +467,7 @@ class _BottomNavigationTile extends StatelessWidget {
           children: <Widget>[
             InkResponse(
               onTap: onTap,
+              mouseCursor: mouseCursor,
               child: Padding(
                 padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
                 child: Column(
@@ -833,6 +849,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         );
         break;
     }
+    final MouseCursor effectiveMouseCursor = widget.mouseCursor ?? SystemMouseCursors.click;
 
     final List<Widget> tiles = <Widget>[];
     for (int i = 0; i < widget.items.length; i++) {
@@ -855,6 +872,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         showSelectedLabels: widget.showSelectedLabels ?? bottomTheme.showSelectedLabels,
         showUnselectedLabels: widget.showUnselectedLabels ?? bottomTheme.showUnselectedLabels ?? _defaultShowUnselected,
         indexLabel: localizations.tabLabel(tabIndex: i + 1, tabCount: widget.items.length),
+        mouseCursor: effectiveMouseCursor,
       ));
     }
     return tiles;

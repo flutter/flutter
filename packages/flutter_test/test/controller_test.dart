@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/semantics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -22,6 +23,140 @@ class TestDragData {
 }
 
 void main() {
+  group('getSemanticsData', () {
+    testWidgets('throws when there are no semantics', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: Text('hello'),
+          ),
+        ),
+      );
+
+      expect(() => tester.getSemantics(find.text('hello')), throwsStateError);
+    }, semanticsEnabled: false);
+
+    testWidgets('throws when there are multiple results from the finder', (WidgetTester tester) async {
+      final SemanticsHandle semanticsHandle = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Row(
+              children: const <Widget>[
+                Text('hello'),
+                Text('hello'),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      expect(() => tester.getSemantics(find.text('hello')), throwsStateError);
+      semanticsHandle.dispose();
+    });
+
+    testWidgets('Returns the correct SemanticsData', (WidgetTester tester) async {
+      final SemanticsHandle semanticsHandle = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Container(
+              child: OutlineButton(
+                  onPressed: () { },
+                  child: const Text('hello'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final SemanticsNode node = tester.getSemantics(find.text('hello'));
+      final SemanticsData semantics = node.getSemanticsData();
+      expect(semantics.label, 'hello');
+      expect(semantics.hasAction(SemanticsAction.tap), true);
+      expect(semantics.hasFlag(SemanticsFlag.isButton), true);
+      semanticsHandle.dispose();
+    });
+
+    testWidgets('Can enable semantics for tests via semanticsEnabled', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Container(
+              child: OutlineButton(
+                  onPressed: () { },
+                  child: const Text('hello'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final SemanticsNode node = tester.getSemantics(find.text('hello'));
+      final SemanticsData semantics = node.getSemanticsData();
+      expect(semantics.label, 'hello');
+      expect(semantics.hasAction(SemanticsAction.tap), true);
+      expect(semantics.hasFlag(SemanticsFlag.isButton), true);
+    }, semanticsEnabled: true);
+
+    testWidgets('Returns merged SemanticsData', (WidgetTester tester) async {
+      final SemanticsHandle semanticsHandle = tester.ensureSemantics();
+      const Key key = Key('test');
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Semantics(
+              label: 'A',
+              child: Semantics(
+                label: 'B',
+                child: Semantics(
+                  key: key,
+                  label: 'C',
+                  child: Container(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final SemanticsNode node = tester.getSemantics(find.byKey(key));
+      final SemanticsData semantics = node.getSemanticsData();
+      expect(semantics.label, 'A\nB\nC');
+      semanticsHandle.dispose();
+    });
+
+    testWidgets('Does not return partial semantics', (WidgetTester tester) async {
+      final SemanticsHandle semanticsHandle = tester.ensureSemantics();
+      final Key key = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MergeSemantics(
+              child: Semantics(
+                container: true,
+                label: 'A',
+                child: Semantics(
+                  container: true,
+                  key: key,
+                  label: 'B',
+                  child: Container(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final SemanticsNode node = tester.getSemantics(find.byKey(key));
+      final SemanticsData semantics = node.getSemanticsData();
+      expect(semantics.label, 'A\nB');
+      semanticsHandle.dispose();
+    });
+  });
+
   testWidgets(
     'WidgetTester.drag must break the offset into multiple parallel components if '
     'the drag goes outside the touch slop values',
@@ -414,4 +549,120 @@ void main() {
       }
     },
   );
+
+  testWidgets(
+    'ensureVisibl: scrolls to make widget visible',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ListView.builder(
+              itemCount: 20,
+              shrinkWrap: true,
+              itemBuilder: (BuildContext context, int i) => ListTile(title: Text('Item $i')),
+            ),
+          ),
+        ),
+      );
+
+      // Make sure widget isn't on screen
+      expect(find.text('Item 15', skipOffstage: true), findsNothing);
+
+      await tester.ensureVisible(find.text('Item 15', skipOffstage: false));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Item 15', skipOffstage: true), findsOneWidget);
+    },
+  );
+
+  group('scrollUntilVisible: scrolls to make unbuilt widget visible', () {
+    testWidgets(
+      'Vertical',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: ListView.builder(
+                itemCount: 50,
+                shrinkWrap: true,
+                itemBuilder: (BuildContext context, int i) => ListTile(title: Text('Item $i')),
+              ),
+            ),
+          ),
+        );
+
+        // Make sure widget isn't built yet.
+        expect(find.text('Item 45', skipOffstage: false), findsNothing);
+
+        await tester.scrollUntilVisible(
+          find.text('Item 45', skipOffstage: false),
+          find.byType(Scrollable),
+          100,
+        );
+        await tester.pumpAndSettle();
+
+        // Now the widget is on screen.
+        expect(find.text('Item 45', skipOffstage: true), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'Horizontal',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: ListView.builder(
+                itemCount: 50,
+                shrinkWrap: true,
+                scrollDirection: Axis.horizontal,
+                // ListTile does not support horizontal list
+                itemBuilder: (BuildContext context, int i) => Container(child: Text('Item $i')),
+              ),
+            ),
+          ),
+        );
+
+        // Make sure widget isn't built yet.
+        expect(find.text('Item 45', skipOffstage: false), findsNothing);
+
+        await tester.scrollUntilVisible(
+          find.text('Item 45', skipOffstage: false),
+          find.byType(Scrollable),
+          100,
+        );
+        await tester.pumpAndSettle();
+
+        // Now the widget is on screen.
+        expect(find.text('Item 45', skipOffstage: true), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'Fail',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: ListView.builder(
+                itemCount: 50,
+                shrinkWrap: true,
+                itemBuilder: (BuildContext context, int i) => ListTile(title: Text('Item $i')),
+              ),
+            ),
+          ),
+        );
+
+        try {
+          await tester.scrollUntilVisible(
+            find.text('Item 55', skipOffstage: false),
+            find.byType(Scrollable),
+            100,
+          );
+        } on StateError catch (e) {
+          expect(e.message, 'No element');
+        }
+      },
+    );
+  });
 }

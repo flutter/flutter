@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -929,6 +931,54 @@ void main() {
       expect(find.text('CRASHHH'), findsOneWidget);
     },
   );
+
+  testWidgets(
+    'Table widget - Default textBaseline is set to TableBaseline.alphabetic',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Table(
+            defaultVerticalAlignment: TableCellVerticalAlignment.baseline,
+            children: const <TableRow>[
+              TableRow(
+                children: <Widget>[
+                  Text('Some Text'),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+
+      final RenderTable table = tester.renderObject(find.byType(Table));
+      expect(table.textBaseline, TextBaseline.alphabetic);
+    },
+  );
+
+  testWidgets(
+    'Table widget requires all TableRows to have non-null children',
+    (WidgetTester tester) async {
+      FlutterError error;
+      try {
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Table(
+              children: const <TableRow>[
+                TableRow(children: <Widget>[Text('Some Text')]),
+                TableRow(),
+              ],
+            ),
+          ),
+        );
+      } on FlutterError catch (e) {
+        error = e;
+      } finally {
+        expect(error, isNotNull);
+        expect(error.toStringDeep(), contains('The children property of TableRow must not be null.'));
+      }
+  });
 
   // TODO(ianh): Test handling of TableCell object
 }

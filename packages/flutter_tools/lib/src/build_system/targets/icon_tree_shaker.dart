@@ -14,21 +14,20 @@ import '../../base/logger.dart';
 import '../../convert.dart';
 import '../../devfs.dart';
 import '../build_system.dart';
-import 'dart.dart';
+import 'common.dart';
 
 /// The build define controlling whether icon fonts should be stripped down to
 /// only the glyphs used by the application.
 const String kIconTreeShakerFlag = 'TreeShakeIcons';
 
 /// Whether icon font subsetting is enabled by default.
-const bool kIconTreeShakerEnabledDefault = false;
+const bool kIconTreeShakerEnabledDefault = true;
 
 List<Map<String, dynamic>> _getList(dynamic object, String errorMessage) {
-  try {
-    return (object as List<dynamic>).cast<Map<String, dynamic>>();
-  } on TypeError catch (_) {
-    throw IconTreeShakerException._(errorMessage);
+  if (object is List<dynamic>) {
+    return object.cast<Map<String, dynamic>>();
   }
+  throw IconTreeShakerException._(errorMessage);
 }
 
 /// A class that wraps the functionality of the const finder package and the
@@ -70,6 +69,10 @@ class IconTreeShaker {
   /// The MIME type for ttf fonts.
   static const Set<String> kTtfMimeTypes = <String>{
     'font/ttf', // based on internet search
+    'font/opentype',
+    'font/otf',
+    'application/x-font-opentype',
+    'application/x-font-otf',
     'application/x-font-ttf', // based on running locally.
   };
 
@@ -127,7 +130,7 @@ class IconTreeShaker {
     );
 
     if (fonts.length != iconData.length) {
-      throwToolExit(
+      environment.logger.printStatus(
         'Expected to find fonts for ${iconData.keys}, but found '
         '${fonts.keys}. This usually means you are refering to '
         'font families in an IconData class but not including them '
@@ -263,6 +266,7 @@ class IconTreeShaker {
   ) async {
     final List<String> cmd = <String>[
       dart.path,
+      '--disable-dart-dev',
       constFinder.path,
       '--kernel-file', appDill.path,
       '--class-library-uri', 'package:flutter/src/widgets/icon_data.dart',

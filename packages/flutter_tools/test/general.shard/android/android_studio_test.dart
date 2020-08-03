@@ -5,11 +5,10 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/ios/plist_parser.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-
+import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:mockito/mockito.dart';
-import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -29,14 +28,12 @@ const Map<String, dynamic> macStudioInfoPlist = <String, dynamic>{
   },
 };
 
-class MockPlistUtils extends Mock implements PlistParser {}
+final Platform linuxPlatform = FakePlatform(
+  operatingSystem: 'linux',
+  environment: <String, String>{'HOME': homeLinux},
+);
 
-Platform linuxPlatform() {
-  return FakePlatform(
-    operatingSystem: 'linux',
-    environment: <String, String>{'HOME': homeLinux},
-  );
-}
+class MockPlistUtils extends Mock implements PlistParser {}
 
 Platform macPlatform() {
   return FakePlatform(
@@ -46,45 +43,47 @@ Platform macPlatform() {
 }
 
 void main() {
-  MemoryFileSystem fs;
-  MockPlistUtils plistUtils;
+  FileSystem fileSystem;
 
   setUp(() {
-    fs = MemoryFileSystem();
-    plistUtils = MockPlistUtils();
+    fileSystem = MemoryFileSystem.test();
   });
 
-  group('pluginsPath on Linux', () {
-    testUsingContext('extracts custom paths from home dir', () {
-      const String installPath = '/opt/android-studio-with-cheese-5.0';
-      const String studioHome = '$homeLinux/.AndroidStudioWithCheese5.0';
-      const String homeFile = '$studioHome/system/.home';
-      globals.fs.directory(installPath).createSync(recursive: true);
-      globals.fs.file(homeFile).createSync(recursive: true);
-      globals.fs.file(homeFile).writeAsStringSync(installPath);
+  testUsingContext('pluginsPath on Linux extracts custom paths from home dir', () {
+    const String installPath = '/opt/android-studio-with-cheese-5.0';
+    const String studioHome = '$homeLinux/.AndroidStudioWithCheese5.0';
+    const String homeFile = '$studioHome/system/.home';
+    globals.fs.directory(installPath).createSync(recursive: true);
+    globals.fs.file(homeFile).createSync(recursive: true);
+    globals.fs.file(homeFile).writeAsStringSync(installPath);
 
-      final AndroidStudio studio =
+    final AndroidStudio studio =
       AndroidStudio.fromHomeDot(globals.fs.directory(studioHome));
-      expect(studio, isNotNull);
-      expect(studio.pluginsPath,
-          equals('/home/me/.AndroidStudioWithCheese5.0/config/plugins'));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
-      // Custom home paths are not supported on macOS nor Windows yet,
-      // so we force the platform to fake Linux here.
-      Platform: () => linuxPlatform(),
-    });
+    expect(studio, isNotNull);
+    expect(studio.pluginsPath,
+        equals('/home/me/.AndroidStudioWithCheese5.0/config/plugins'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+    // Custom home paths are not supported on macOS nor Windows yet,
+    // so we force the platform to fake Linux here.
+    Platform: () => linuxPlatform,
+    FileSystemUtils: () => FileSystemUtils(
+      fileSystem: fileSystem,
+      platform: linuxPlatform,
+    ),
   });
 
   group('pluginsPath on Mac', () {
     FileSystemUtils fsUtils;
     Platform platform;
+    MockPlistUtils plistUtils;
 
     setUp(() {
+      plistUtils = MockPlistUtils();
       platform = macPlatform();
       fsUtils = FileSystemUtils(
-        fileSystem: fs,
+        fileSystem: fileSystem,
         platform: platform,
       );
     });
@@ -111,7 +110,7 @@ void main() {
         'AndroidStudio3.3',
       )));
     }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
+      FileSystem: () => fileSystem,
       FileSystemUtils: () => fsUtils,
       ProcessManager: () => FakeProcessManager.any(),
       // Custom home paths are not supported on macOS nor Windows yet,
@@ -169,7 +168,7 @@ void main() {
         'AndroidStudio3.3',
       )));
     }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
+      FileSystem: () => fileSystem,
       FileSystemUtils: () => fsUtils,
       ProcessManager: () => FakeProcessManager.any(),
       // Custom home paths are not supported on macOS nor Windows yet,
@@ -177,6 +176,5 @@ void main() {
       Platform: () => platform,
       PlistParser: () => plistUtils,
     });
-
   });
 }

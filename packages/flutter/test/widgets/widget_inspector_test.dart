@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
@@ -13,6 +15,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'widget_inspector_test_utils.dart';
 
 // Start of block of code where widget creation location line numbers and
 // columns will impact whether tests pass.
@@ -222,64 +226,10 @@ int getChildLayerCount(OffsetLayer layer) {
 }
 
 void main() {
-  TestWidgetInspectorService.runTests();
+  _TestWidgetInspectorService.runTests();
 }
 
-class TestWidgetInspectorService extends Object with WidgetInspectorService {
-  final Map<String, InspectorServiceExtensionCallback> extensions = <String, InspectorServiceExtensionCallback>{};
-
-  final Map<String, List<Map<Object, Object>>> eventsDispatched = <String, List<Map<Object, Object>>>{};
-
-  @override
-  void registerServiceExtension({
-    @required String name,
-    @required FutureOr<Map<String, Object>> callback(Map<String, String> parameters),
-  }) {
-    assert(!extensions.containsKey(name));
-    extensions[name] = callback;
-  }
-
-  @override
-  void postEvent(String eventKind, Map<Object, Object> eventData) {
-    getEventsDispatched(eventKind).add(eventData);
-  }
-
-  List<Map<Object, Object>> getEventsDispatched(String eventKind) {
-    return eventsDispatched.putIfAbsent(eventKind, () => <Map<Object, Object>>[]);
-  }
-
-  Iterable<Map<Object, Object>> getServiceExtensionStateChangedEvents(String extensionName) {
-    return getEventsDispatched('Flutter.ServiceExtensionStateChanged')
-      .where((Map<Object, Object> event) => event['extension'] == extensionName);
-  }
-
-  Future<Object> testExtension(String name, Map<String, String> arguments) async {
-    expect(extensions, contains(name));
-    // Encode and decode to JSON to match behavior using a real service
-    // extension where only JSON is allowed.
-    return json.decode(json.encode(await extensions[name](arguments)))['result'];
-  }
-
-  Future<String> testBoolExtension(String name, Map<String, String> arguments) async {
-    expect(extensions, contains(name));
-    // Encode and decode to JSON to match behavior using a real service
-    // extension where only JSON is allowed.
-    return json.decode(json.encode(await extensions[name](arguments)))['enabled'] as String;
-  }
-
-  int rebuildCount = 0;
-
-  @override
-  Future<void> forceRebuild() async {
-    rebuildCount++;
-    final WidgetsBinding binding = WidgetsBinding.instance;
-
-    if (binding.renderViewElement != null) {
-      binding.buildOwner.reassemble(binding.renderViewElement);
-    }
-  }
-
-
+class _TestWidgetInspectorService extends TestWidgetInspectorService {
   // These tests need access to protected members of WidgetInspectorService.
   static void runTests() {
     final TestWidgetInspectorService service = TestWidgetInspectorService();
@@ -326,7 +276,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       final GlobalKey topButtonKey = GlobalKey();
 
       Widget selectButtonBuilder(BuildContext context, VoidCallback onPressed) {
-        return Material(child: RaisedButton(onPressed: onPressed, key: selectButtonKey));
+        return Material(child: ElevatedButton(onPressed: onPressed, key: selectButtonKey, child: null));
       }
       // State type is private, hence using dynamic.
       dynamic getInspectorState() => inspectorKey.currentState;
@@ -344,14 +294,14 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
             child: Material(
               child: ListView(
                 children: <Widget>[
-                  RaisedButton(
+                  ElevatedButton(
                     key: topButtonKey,
                     onPressed: () {
                       log.add('top');
                     },
                     child: const Text('TOP'),
                   ),
-                  RaisedButton(
+                  ElevatedButton(
                     onPressed: () {
                       log.add('bottom');
                     },
@@ -426,7 +376,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       final GlobalKey inspectorKey = GlobalKey();
 
       Widget selectButtonBuilder(BuildContext context, VoidCallback onPressed) {
-        return Material(child: RaisedButton(onPressed: onPressed, key: selectButtonKey));
+        return Material(child: ElevatedButton(onPressed: onPressed, key: selectButtonKey, child: null));
       }
       // State type is private, hence using dynamic.
       dynamic getInspectorState() => inspectorKey.currentState;
@@ -560,6 +510,123 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       // Exactly 2 out of the 3 text elements should be in the candidate list of
       // objects to select as only 2 are onstage.
       expect(inspectorState.selection.candidates.where((RenderObject object) => object is RenderParagraph).length, equals(2));
+    });
+
+    testWidgets('WidgetInspector with Transform above', (WidgetTester tester) async {
+      final GlobalKey childKey = GlobalKey();
+      final GlobalKey repaintBoundaryKey = GlobalKey();
+
+      final Matrix4 mainTransform = Matrix4.identity()
+          ..translate(50.0, 30.0)
+          ..scale(0.8, 0.8)
+          ..translate(100.0, 50.0);
+
+      await tester.pumpWidget(
+        RepaintBoundary(
+          key: repaintBoundaryKey,
+          child: Container(
+            color: Colors.grey,
+            child: Transform(
+              transform: mainTransform,
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: WidgetInspector(
+                  selectButtonBuilder: null,
+                  child: Container(
+                    color: Colors.white,
+                    child: Center(
+                      child: Container(
+                        key: childKey,
+                        height: 100.0,
+                        width: 50.0,
+                        color: Colors.red,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byKey(childKey));
+      await tester.pump();
+
+      await expectLater(
+        find.byKey(repaintBoundaryKey),
+        matchesGoldenFile('inspector.overlay_positioning_with_transform.png'),
+      );
+    });
+
+    testWidgets('Multiple widget inspectors', (WidgetTester tester) async {
+      // This test verifies that interacting with different inspectors
+      // works correctly. This use case may be an app that displays multiple
+      // apps inside (i.e. a storyboard).
+      final GlobalKey selectButton1Key = GlobalKey();
+      final GlobalKey selectButton2Key = GlobalKey();
+
+      final GlobalKey inspector1Key = GlobalKey();
+      final GlobalKey inspector2Key = GlobalKey();
+
+      final GlobalKey child1Key = GlobalKey();
+      final GlobalKey child2Key = GlobalKey();
+
+      InspectorSelectButtonBuilder selectButtonBuilder(Key key) {
+        return (BuildContext context, VoidCallback onPressed) {
+          return Material(child: RaisedButton(onPressed: onPressed, key: key));
+        };
+      }
+
+      // State type is private, hence using dynamic.
+      // The inspector state is static, so it's enough with reading one of them.
+      dynamic getInspectorState() => inspector1Key.currentState;
+      String paragraphText(RenderParagraph paragraph) {
+        final TextSpan textSpan = paragraph.text as TextSpan;
+        return textSpan.text;
+      }
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Row(
+            children: <Widget>[
+              Flexible(
+                child: WidgetInspector(
+                  key: inspector1Key,
+                  selectButtonBuilder: selectButtonBuilder(selectButton1Key),
+                  child: Container(
+                    key: child1Key,
+                    child: const Text('Child 1'),
+                  ),
+                ),
+              ),
+              Flexible(
+                child: WidgetInspector(
+                  key: inspector2Key,
+                  selectButtonBuilder: selectButtonBuilder(selectButton2Key),
+                  child: Container(
+                    key: child2Key,
+                    child: const Text('Child 2'),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      final InspectorSelection selection = getInspectorState().selection as InspectorSelection;
+      // The selection is static, so it may be initialized from previous tests.
+      selection?.clear();
+
+      await tester.tap(find.text('Child 1'));
+      await tester.pump();
+      expect(paragraphText(selection.current as RenderParagraph), equals('Child 1'));
+
+      await tester.tap(find.text('Child 2'));
+      await tester.pump();
+      expect(paragraphText(selection.current as RenderParagraph), equals('Child 2'));
     });
 
     test('WidgetInspectorService null id', () {
@@ -1725,7 +1792,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       _CreationLocation location = knownLocations[id];
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(51));
+      expect(location.line, equals(55));
       expect(location.column, equals(9));
       expect(count, equals(1));
 
@@ -1734,7 +1801,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       location = knownLocations[id];
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(89));
+      expect(location.line, equals(93));
       expect(location.column, equals(12));
       expect(count, equals(1));
 
@@ -1759,7 +1826,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       location = knownLocations[id];
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(51));
+      expect(location.line, equals(55));
       expect(location.column, equals(9));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
 
@@ -1768,7 +1835,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       location = knownLocations[id];
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(89));
+      expect(location.line, equals(93));
       expect(location.column, equals(12));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
 
@@ -1934,7 +2001,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
 
       state.updateTime(); // Triggers a rebuild.
       await tester.pump();
-      // Verify that rapint events are not fired once the extension is disabled.
+      // Verify that repaint events are not fired once the extension is disabled.
       expect(repaintEvents, isEmpty);
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
 
@@ -2274,7 +2341,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         ),
         matchesGoldenFile('inspector.sizedBox_debugPaint_margin.png'),
       );
-    }, skip: isBrowser);
+    });
 
     test('ext.flutter.inspector.structuredErrors', () async {
       List<Map<Object, Object>> flutterErrorEvents = service.getEventsDispatched('Flutter.Error');
@@ -2289,7 +2356,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
             equals('true'));
 
         // Create an error.
-        FlutterError.reportError(FlutterErrorDetailsForRendering(
+        FlutterError.reportError(FlutterErrorDetails(
           library: 'rendering library',
           context: ErrorDescription('during layout'),
           exception: StackTrace.current,
@@ -2306,9 +2373,13 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
 
         // Validate that we received an error count.
         expect(error['errorsSinceReload'], 0);
+        expect(
+            error['renderedErrorText'],
+            startsWith(
+                '══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞════════════'));
 
         // Send a second error.
-        FlutterError.reportError(FlutterErrorDetailsForRendering(
+        FlutterError.reportError(FlutterErrorDetails(
           library: 'rendering library',
           context: ErrorDescription('also during layout'),
           exception: StackTrace.current,
@@ -2319,6 +2390,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         expect(flutterErrorEvents, hasLength(2));
         error = flutterErrorEvents.last;
         expect(error['errorsSinceReload'], 1);
+        expect(error['renderedErrorText'], startsWith('Another exception was thrown:'));
 
         // Reloads the app.
         final FlutterExceptionHandler oldHandler = FlutterError.onError;
@@ -2335,7 +2407,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         binding.postTest();
 
         // Send another error.
-        FlutterError.reportError(FlutterErrorDetailsForRendering(
+        FlutterError.reportError(FlutterErrorDetails(
           library: 'rendering library',
           context: ErrorDescription('during layout'),
           exception: StackTrace.current,
@@ -2443,7 +2515,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         ),
         matchesGoldenFile('inspector.composited_transform.only_offsets_target.png'),
       );
-    }, skip: isBrowser);
+    });
 
     testWidgets('Screenshot composited transforms - with rotations', (WidgetTester tester) async {
       final LayerLink link = LayerLink();
@@ -2549,7 +2621,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       expect(identical(key2.currentContext.findRenderObject(), box2), isTrue);
       expect(box1.localToGlobal(Offset.zero), equals(position1));
       expect(box2.localToGlobal(Offset.zero), equals(position2));
-    }, skip: isBrowser);
+    });
 
     testWidgets('getChildrenDetailsSubtree', (WidgetTester tester) async {
       await tester.pumpWidget(

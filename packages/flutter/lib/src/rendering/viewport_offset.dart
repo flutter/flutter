@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:flutter/animation.dart';
@@ -206,7 +208,7 @@ abstract class ViewportOffset extends ChangeNotifier {
   }
 
   /// The direction in which the user is trying to change [pixels], relative to
-  /// the viewport's [RenderViewport.axisDirection].
+  /// the viewport's [RenderViewportBase.axisDirection].
   ///
   /// If the _user_ is not scrolling, this will return [ScrollDirection.idle]
   /// even if there is (for example) a [ScrollActivity] currently animating the

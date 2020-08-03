@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 @TestOn('!chrome')
 import 'dart:async';
 import 'dart:typed_data';
@@ -122,6 +124,21 @@ void main() {
 
     c = Decoration.lerp(a, b, 1.0) as BoxDecoration;
     expect(c.color, equals(b.color));
+  });
+
+  test('Decoration equality', () {
+    const BoxDecoration a = BoxDecoration(
+      color: Color(0xFFFFFFFF),
+      boxShadow: <BoxShadow>[BoxShadow()],
+    );
+
+    const BoxDecoration b = BoxDecoration(
+      color: Color(0xFFFFFFFF),
+      boxShadow: <BoxShadow>[BoxShadow()],
+    );
+
+    expect(a.hashCode, equals(b.hashCode));
+    expect(a, equals(b));
   });
 
   test('BoxDecorationImageListenerSync', () {
@@ -534,7 +551,7 @@ void main() {
     // sourceRect should contain all pixels of the source image
     expect(call.positionalArguments[1], Offset.zero & imageSize);
 
-    // Image should be scaled down to fit in hejght
+    // Image should be scaled down to fit in height
     // and be positioned in the bottom right of the outputRect
     const Size expectedTileSize = Size(20.0, 20.0);
     final Rect expectedTileRect = Rect.fromPoints(

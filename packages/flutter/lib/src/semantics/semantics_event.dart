@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
@@ -147,7 +149,7 @@ class TapSemanticEvent extends SemanticsEvent {
 ///
 /// See also:
 ///
-///  * [SemanticsFlag.liveRegion], for a description of live regions.
+///  * [SemanticsFlag.isLiveRegion], for a description of live regions.
 ///
 @Deprecated(
   'This event has never been implemented and will be removed in a future version of Flutter. References to it should be removed. '

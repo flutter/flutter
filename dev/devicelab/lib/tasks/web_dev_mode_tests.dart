@@ -45,21 +45,11 @@ TaskFunction createWebDevModeTest(String webDevice, bool enableIncrementalCompil
           final Process packagesGet = await startProcess(
               path.join(flutterDirectory.path, 'bin', 'flutter'),
               <String>['packages', 'get'],
-              environment: <String, String>{
-                'FLUTTER_WEB': 'true',
-                if (enableIncrementalCompiler)
-                  'WEB_INCREMENTAL_COMPILER': 'true',
-              },
           );
           await packagesGet.exitCode;
           final Process process = await startProcess(
               path.join(flutterDirectory.path, 'bin', 'flutter'),
               flutterCommandArgs('run', options),
-              environment: <String, String>{
-                'FLUTTER_WEB': 'true',
-                if (enableIncrementalCompiler)
-                  'WEB_INCREMENTAL_COMPILER': 'true',
-              },
           );
 
           final Completer<void> stdoutDone = Completer<void>();
@@ -140,11 +130,6 @@ TaskFunction createWebDevModeTest(String webDevice, bool enableIncrementalCompil
           final Process process = await startProcess(
               path.join(flutterDirectory.path, 'bin', 'flutter'),
               flutterCommandArgs('run', options),
-              environment: <String, String>{
-                'FLUTTER_WEB': 'true',
-                if (enableIncrementalCompiler)
-                  'WEB_INCREMENTAL_COMPILER': 'true',
-              },
           );
           final Completer<void> stdoutDone = Completer<void>();
           final Completer<void> stderrDone = Completer<void>();

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:developer';
 import 'dart:ui' show hashValues;
 
@@ -31,7 +33,7 @@ const int _kDefaultSizeBytes = 100 << 20; // 100 MiB
 ///
 /// A caller can determine whether an image is already in the cache by using
 /// [containsKey], which will return true if the image is tracked by the cache
-/// in a pending or compelted state. More fine grained information is available
+/// in a pending or completed state. More fine grained information is available
 /// by using the [statusForKey] method.
 ///
 /// Generally this class is not used directly. The [ImageProvider] class and its
@@ -255,7 +257,7 @@ class ImageCache {
       if (!kReleaseMode) {
         Timeline.instantSync('ImageCache.evict', arguments: <String, dynamic>{
           'type': 'keepAlive',
-          'sizeiInBytes': image.sizeBytes,
+          'sizeInBytes': image.sizeBytes,
         });
       }
       _currentSizeBytes -= image.sizeBytes;
@@ -286,10 +288,9 @@ class ImageCache {
     }
   }
 
-  void _trackLiveImage(Object key, _LiveImage image, { bool debugPutOk = true }) {
+  void _trackLiveImage(Object key, _LiveImage image) {
     // Avoid adding unnecessary callbacks to the completer.
     _liveImages.putIfAbsent(key, () {
-      assert(debugPutOk);
       // Even if no callers to ImageProvider.resolve have listened to the stream,
       // the cache is listening to the stream and will remove itself once the
       // image completes to move it from pending to keepAlive.
@@ -400,10 +401,6 @@ class ImageCache {
           imageSize,
           () => _liveImages.remove(key),
         ),
-        // This should result in a put if `loader()` above executed
-        // synchronously, in which case syncCall is true and we arrived here
-        // before we got a chance to track the image otherwise.
-        debugPutOk: syncCall,
       );
 
       final _PendingImage pendingImage = untrackedPendingImage ?? _pendingImages.remove(key);

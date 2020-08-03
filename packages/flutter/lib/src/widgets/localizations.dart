@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:ui' show Locale;
 
@@ -193,7 +195,7 @@ class _WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocaliz
 ///
 ///  * [GlobalWidgetsLocalizations], which provides widgets localizations for
 ///    many languages.
-///  * [WidgetsApp.delegates], which automatically includes
+///  * [WidgetsApp.localizationsDelegates], which automatically includes
 ///    [DefaultWidgetsLocalizations.delegate] by default.
 class DefaultWidgetsLocalizations implements WidgetsLocalizations {
   /// Construct an object that defines the localized values for the widgets
@@ -219,7 +221,7 @@ class DefaultWidgetsLocalizations implements WidgetsLocalizations {
   /// A [LocalizationsDelegate] that uses [DefaultWidgetsLocalizations.load]
   /// to create an instance of this class.
   ///
-  /// [WidgetsApp] automatically adds this value to [WidgetApp.localizationsDelegates].
+  /// [WidgetsApp] automatically adds this value to [WidgetsApp.localizationsDelegates].
   static const LocalizationsDelegate<WidgetsLocalizations> delegate = _WidgetsLocalizationsDelegate();
 }
 
@@ -297,6 +299,10 @@ class _LocalizationsScope extends InheritedWidget {
 /// then widgets that have created a dependency by calling
 /// `Localizations.of(context)` will be rebuilt after the resources
 /// for the new locale have been loaded.
+///
+/// The `Localizations` widget also instantiates [Directionality] in order to
+/// support the appropriate [Directionality.textDirection] of the localized
+/// resources.
 ///
 /// {@tool snippet}
 ///

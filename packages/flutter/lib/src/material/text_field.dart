@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
+import 'package:characters/characters.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -16,6 +19,7 @@ import 'feedback.dart';
 import 'input_decorator.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'material_state.dart';
 import 'selectable_text.dart' show iOSHorizontalOffset;
 import 'text_selection.dart';
 import 'theme.dart';
@@ -154,8 +158,9 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 /// To integrate the [TextField] into a [Form] with other [FormField] widgets,
 /// consider using [TextFormField].
 ///
-/// Remember to [dispose] of the [TextEditingController] when it is no longer needed.
-/// This will ensure we discard any resources used by the object.
+/// Remember to call [TextEditingController.dispose] of the [TextEditingController]
+/// when it is no longer needed. This will ensure we discard any resources used
+/// by the object.
 ///
 /// {@tool snippet}
 /// This example shows how to create a [TextField] that will obscure input. The
@@ -335,6 +340,7 @@ class TextField extends StatefulWidget {
     this.inputFormatters,
     this.enabled,
     this.cursorWidth = 2.0,
+    this.cursorHeight,
     this.cursorRadius,
     this.cursorColor,
     this.selectionHeightStyle = ui.BoxHeightStyle.tight,
@@ -344,6 +350,7 @@ class TextField extends StatefulWidget {
     this.dragStartBehavior = DragStartBehavior.start,
     this.enableInteractiveSelection = true,
     this.onTap,
+    this.mouseCursor,
     this.buildCounter,
     this.scrollController,
     this.scrollPhysics,
@@ -549,8 +556,9 @@ class TextField extends StatefulWidget {
   /// character count.
   ///
   /// If [maxLengthEnforced] is set to false, then more than [maxLength]
-  /// characters may be entered, but the error counter and divider will
-  /// switch to the [decoration.errorStyle] when the limit is exceeded.
+  /// characters may be entered, but the error counter and divider will switch
+  /// to the [decoration]'s [InputDecoration.errorStyle] when the limit is
+  /// exceeded.
   ///
   /// ## Limitations
   ///
@@ -594,7 +602,7 @@ class TextField extends StatefulWidget {
   ///
   ///  * [inputFormatters], which are called before [onChanged]
   ///    runs and can validate and change ("format") the input value.
-  ///  * [onEditingComplete], [onSubmitted], [onSelectionChanged]:
+  ///  * [onEditingComplete], [onSubmitted]:
   ///    which are more specialized input change notifications.
   final ValueChanged<String> onChanged;
 
@@ -617,18 +625,21 @@ class TextField extends StatefulWidget {
   /// [decoration] is rendered in grey.
   ///
   /// If non-null this property overrides the [decoration]'s
-  /// [Decoration.enabled] property.
+  /// [InputDecoration.enabled] property.
   final bool enabled;
 
   /// {@macro flutter.widgets.editableText.cursorWidth}
   final double cursorWidth;
+
+  /// {@macro flutter.widgets.editableText.cursorHeight}
+  final double cursorHeight;
 
   /// {@macro flutter.widgets.editableText.cursorRadius}
   final Radius cursorRadius;
 
   /// The color to use when painting the cursor.
   ///
-  /// Defaults to [ThemeData.cursorColor] or [CupertinoTheme.primaryColor]
+  /// Defaults to [ThemeData.cursorColor] or [CupertinoThemeData.primaryColor]
   /// depending on [ThemeData.platform].
   final Color cursorColor;
 
@@ -683,15 +694,34 @@ class TextField extends StatefulWidget {
   /// {@endtemplate}
   final GestureTapCallback onTap;
 
-  /// Callback that generates a custom [InputDecorator.counter] widget.
+  /// The cursor for a mouse pointer when it enters or is hovering over the
+  /// widget.
+  ///
+  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
+  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  ///
+  ///  * [MaterialState.error].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.disabled].
+  ///
+  /// If this property is null, [MaterialStateMouseCursor.textable] will be used.
+  ///
+  /// The [mouseCursor] is the only property of [TextField] that controls the
+  /// appearance of the mouse pointer. All other properties related to "cursor"
+  /// stand for the text cursor, which is usually a blinking vertical line at
+  /// the editing position.
+  final MouseCursor mouseCursor;
+
+  /// Callback that generates a custom [InputDecoration.counter] widget.
   ///
   /// See [InputCounterWidgetBuilder] for an explanation of the passed in
   /// arguments.  The returned widget will be placed below the line in place of
-  /// the default widget built when [counterText] is specified.
+  /// the default widget built when [InputDecoration.counterText] is specified.
   ///
   /// The returned widget will be wrapped in a [Semantics] widget for
-  /// accessibility, but it also needs to be accessible itself.  For example,
-  /// if returning a Text widget, set the [semanticsLabel] property.
+  /// accessibility, but it also needs to be accessible itself. For example,
+  /// if returning a Text widget, set the [Text.semanticsLabel] property.
   ///
   /// {@tool snippet}
   /// ```dart
@@ -722,6 +752,7 @@ class TextField extends StatefulWidget {
   final ScrollController scrollController;
 
   /// {@macro flutter.widgets.editableText.autofillHints}
+  /// {@macro flutter.services.autofill.autofillHints}
   final Iterable<String> autofillHints;
 
   @override
@@ -754,6 +785,7 @@ class TextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<TextAlignVertical>('textAlignVertical', textAlignVertical, defaultValue: null));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(DoubleProperty('cursorWidth', cursorWidth, defaultValue: 2.0));
+    properties.add(DoubleProperty('cursorHeight', cursorHeight, defaultValue: null));
     properties.add(DiagnosticsProperty<Radius>('cursorRadius', cursorRadius, defaultValue: null));
     properties.add(ColorProperty('cursorColor', cursorColor, defaultValue: null));
     properties.add(DiagnosticsProperty<Brightness>('keyboardAppearance', keyboardAppearance, defaultValue: null));
@@ -794,7 +826,11 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
 
   bool get _isEnabled =>  widget.enabled ?? widget.decoration?.enabled ?? true;
 
-  int get _currentLength => _effectiveController.value.text.runes.length;
+  int get _currentLength => _effectiveController.value.text.characters.length;
+
+  bool get _hasIntrinsicError => widget.maxLength != null && widget.maxLength > 0 && _effectiveController.value.text.characters.length > widget.maxLength;
+
+  bool get _hasError => widget.decoration?.errorText != null || _hasIntrinsicError;
 
   InputDecoration _getEffectiveDecoration() {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
@@ -846,17 +882,16 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
       counterText += '/${widget.maxLength}';
       final int remaining = (widget.maxLength - currentLength).clamp(0, widget.maxLength) as int;
       semanticCounterText = localizations.remainingTextFieldCharacterCount(remaining);
+    }
 
-      // Handle length exceeds maxLength
-      if (_effectiveController.value.text.runes.length > widget.maxLength) {
-        return effectiveDecoration.copyWith(
-          errorText: effectiveDecoration.errorText ?? '',
-          counterStyle: effectiveDecoration.errorStyle
-            ?? themeData.textTheme.caption.copyWith(color: themeData.errorColor),
-          counterText: counterText,
-          semanticCounterText: semanticCounterText,
-        );
-      }
+    if (_hasIntrinsicError) {
+      return effectiveDecoration.copyWith(
+        errorText: effectiveDecoration.errorText ?? '',
+        counterStyle: effectiveDecoration.errorStyle
+          ?? themeData.textTheme.caption.copyWith(color: themeData.errorColor),
+        counterText: counterText,
+        semanticCounterText: semanticCounterText,
+      );
     }
 
     return effectiveDecoration.copyWith(
@@ -875,6 +910,24 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
     _effectiveFocusNode.canRequestFocus = _isEnabled;
   }
 
+  bool get _canRequestFocus {
+    final NavigationMode mode = MediaQuery.of(context, nullOk: true)?.navigationMode ?? NavigationMode.traditional;
+    switch (mode) {
+      case NavigationMode.traditional:
+        return _isEnabled;
+      case NavigationMode.directional:
+        return true;
+    }
+    assert(false, 'Navigation mode $mode not handled');
+    return null;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _effectiveFocusNode.canRequestFocus = _canRequestFocus;
+  }
+
   @override
   void didUpdateWidget(TextField oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -882,8 +935,8 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
       _controller = TextEditingController.fromValue(oldWidget.controller.value);
     else if (widget.controller != null && oldWidget.controller == null)
       _controller = null;
-    _effectiveFocusNode.canRequestFocus = _isEnabled;
-    if (_effectiveFocusNode.hasFocus && widget.readOnly != oldWidget.readOnly) {
+    _effectiveFocusNode.canRequestFocus = _canRequestFocus;
+    if (_effectiveFocusNode.hasFocus && widget.readOnly != oldWidget.readOnly && _isEnabled) {
       if(_effectiveController.selection.isCollapsed) {
         _showSelectionHandles = !widget.readOnly;
       }
@@ -912,6 +965,9 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
       return false;
 
     if (widget.readOnly && _effectiveController.selection.isCollapsed)
+      return false;
+
+    if (!_isEnabled)
       return false;
 
     if (cause == SelectionChangedCause.longPress)
@@ -964,8 +1020,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    // TODO(jonahwilliams): uncomment out this check once we have migrated tests.
-    // assert(debugCheckHasMaterialLocalizations(context));
+    assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasDirectionality(context));
     assert(
       !(widget.style != null && widget.style.inherit == false &&
@@ -1018,7 +1073,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
     Widget child = RepaintBoundary(
       child: EditableText(
         key: editableTextKey,
-        readOnly: widget.readOnly,
+        readOnly: widget.readOnly || !_isEnabled,
         toolbarOptions: widget.toolbarOptions,
         showCursor: widget.showCursor,
         showSelectionHandles: _showSelectionHandles,
@@ -1050,7 +1105,9 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
         onSelectionHandleTapped: _handleSelectionHandleTapped,
         inputFormatters: formatters,
         rendererIgnoresPointer: true,
+        mouseCursor: MouseCursor.defer, // TextField will handle the cursor
         cursorWidth: widget.cursorWidth,
+        cursorHeight: widget.cursorHeight,
         cursorRadius: cursorRadius,
         cursorColor: cursorColor,
         selectionHeightStyle: widget.selectionHeightStyle,
@@ -1089,11 +1146,22 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
         child: child,
       );
     }
-    return IgnorePointer(
-      ignoring: !_isEnabled,
-      child: MouseRegion(
-        onEnter: (PointerEnterEvent event) => _handleHover(true),
-        onExit: (PointerExitEvent event) => _handleHover(false),
+    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
+      widget.mouseCursor ?? MaterialStateMouseCursor.textable,
+      <MaterialState>{
+        if (!_isEnabled) MaterialState.disabled,
+        if (_isHovering) MaterialState.hovered,
+        if (focusNode.hasFocus) MaterialState.focused,
+        if (_hasError) MaterialState.error,
+      },
+    );
+
+    return MouseRegion(
+      cursor: effectiveMouseCursor,
+      onEnter: (PointerEnterEvent event) => _handleHover(true),
+      onExit: (PointerExitEvent event) => _handleHover(false),
+      child: IgnorePointer(
+        ignoring: !_isEnabled,
         child: AnimatedBuilder(
           animation: controller, // changes the _currentLength
           builder: (BuildContext context, Widget child) {

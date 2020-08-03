@@ -30,6 +30,9 @@ class BuildWindowsCommand extends BuildSubCommand {
     usesExtraFrontendOptions();
     addEnableExperimentation(hide: !verboseHelp);
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
+    addBuildPerformanceFile(hide: !verboseHelp);
+    addBundleSkSLPathOption(hide: !verboseHelp);
+    addNullSafetyModeOptions(hide: !verboseHelp);
   }
 
   @override
@@ -44,14 +47,13 @@ class BuildWindowsCommand extends BuildSubCommand {
   };
 
   @override
-  String get description => 'build the desktop Windows target.';
+  String get description => 'Build a Windows desktop application.';
 
   @visibleForTesting
   VisualStudio visualStudioOverride;
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    Cache.releaseLockEarly();
     final FlutterProject flutterProject = FlutterProject.current();
     final BuildInfo buildInfo = getBuildInfo();
     if (!featureFlags.isWindowsEnabled) {

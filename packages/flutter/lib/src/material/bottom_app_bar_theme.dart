@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -27,7 +29,7 @@ import 'theme.dart';
 ///    application.
 @immutable
 class BottomAppBarTheme with Diagnosticable {
-  /// Creates a theme that can be used for [ThemeData.BottomAppBarTheme].
+  /// Creates a theme that can be used for [ThemeData.bottomAppBarTheme].
   const BottomAppBarTheme({
     this.color,
     this.elevation,

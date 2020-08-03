@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -20,6 +22,11 @@ typedef DragTargetWillAccept<T> = bool Function(T data);
 ///
 /// Used by [DragTarget.onAccept].
 typedef DragTargetAccept<T> = void Function(T data);
+
+/// Signature for determining information about the acceptance by a [DragTarget].
+///
+/// Used by [DragTarget.onAcceptWithDetails].
+typedef DragTargetAcceptWithDetails<T> = void Function(DragTargetDetails<T> details);
 
 /// Signature for building children of a [DragTarget].
 ///
@@ -49,6 +56,11 @@ typedef DragEndCallback = void Function(DraggableDetails details);
 ///
 /// Used by [DragTarget.onLeave].
 typedef DragTargetLeave = void Function(Object data);
+
+/// Signature for when a [Draggable] moves within a [DragTarget].
+///
+/// Used by [DragTarget.onMove].
+typedef DragTargetMove = void Function(DragTargetDetails<dynamic> details);
 
 /// Where the [Draggable] should be anchored during a drag.
 enum DragAnchor {
@@ -459,6 +471,21 @@ class DraggableDetails {
   final Offset offset;
 }
 
+/// Represents the details when a pointer event occurred on the [DragTarget].
+class DragTargetDetails<T> {
+  /// Creates details for a [DragTarget] callback.
+  ///
+  /// The [offset] must not be null.
+  DragTargetDetails({@required this.data, @required this.offset}) : assert(offset != null);
+
+  /// The data that was dropped onto this [DragTarget].
+  final T data;
+
+  /// The global position when the specific pointer event occurred on
+  /// the draggable.
+  final Offset offset;
+}
+
 /// A widget that receives data when a [Draggable] widget is dropped.
 ///
 /// When a draggable is dragged on top of a drag target, the drag target is
@@ -480,7 +507,9 @@ class DragTarget<T> extends StatefulWidget {
     @required this.builder,
     this.onWillAccept,
     this.onAccept,
+    this.onAcceptWithDetails,
     this.onLeave,
+    this.onMove,
   }) : super(key: key);
 
   /// Called to build the contents of this widget.
@@ -493,16 +522,29 @@ class DragTarget<T> extends StatefulWidget {
   /// piece of data being dragged over this drag target.
   ///
   /// Called when a piece of data enters the target. This will be followed by
-  /// either [onAccept], if the data is dropped, or [onLeave], if the drag
-  /// leaves the target.
+  /// either [onAccept] and [onAcceptWithDetails], if the data is dropped, or
+  /// [onLeave], if the drag leaves the target.
   final DragTargetWillAccept<T> onWillAccept;
 
   /// Called when an acceptable piece of data was dropped over this drag target.
+  ///
+  /// Equivalent to [onAcceptWithDetails], but only includes the data.
   final DragTargetAccept<T> onAccept;
+
+  /// Called when an acceptable piece of data was dropped over this drag target.
+  ///
+  /// Equivalent to [onAccept], but with information, including the data, in a
+  /// [DragTargetDetails].
+  final DragTargetAcceptWithDetails<T> onAcceptWithDetails;
 
   /// Called when a given piece of data being dragged over this target leaves
   /// the target.
   final DragTargetLeave onLeave;
+
+  /// Called when a [Draggable] moves within this [DragTarget].
+  ///
+  /// Note that this includes entering and leaving the target.
+  final DragTargetMove onMove;
 
   @override
   _DragTargetState<T> createState() => _DragTargetState<T>();
@@ -553,6 +595,15 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
     });
     if (widget.onAccept != null)
       widget.onAccept(avatar.data as T);
+    if (widget.onAcceptWithDetails != null)
+      widget.onAcceptWithDetails(DragTargetDetails<T>(data: avatar.data as T, offset: avatar._lastOffset));
+  }
+
+  void didMove(_DragAvatar<Object> avatar) {
+    if (!mounted)
+      return;
+    if (widget.onMove != null)
+      widget.onMove(DragTargetDetails<dynamic>(data: avatar.data, offset: avatar._lastOffset));
   }
 
   @override
@@ -647,9 +698,13 @@ class _DragAvatar<T> extends Drag {
       }
     }
 
-    // If everything's the same, bail early.
-    if (listsMatch)
+    // If everything's the same, report moves, and bail early.
+    if (listsMatch) {
+      for (final _DragTargetState<T> target in _enteredTargets) {
+        target.didMove(this);
+      }
       return;
+    }
 
     // Leave old targets.
     _leaveAllEntered();
@@ -662,6 +717,11 @@ class _DragAvatar<T> extends Drag {
       },
       orElse: () => null,
     );
+
+    // Report moves to the targets.
+    for (final _DragTargetState<T> target in _enteredTargets) {
+      target.didMove(this);
+    }
 
     _activeTarget = newTarget;
   }

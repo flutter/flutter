@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
-import 'package:intl/date_symbols.dart' as intl;
 
 import 'cupertino_localizations.dart';
 import 'l10n/generated_material_localizations.dart';
@@ -75,12 +74,12 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   ///
   ///  1. The string that would be returned by [Intl.canonicalizedLocale] for
   ///     the locale.
-  ///  2. The [intl.DateFormat] for [formatYear].
-  ///  3. The [int.DateFormat] for [formatShortDate].
-  ///  4. The [intl.DateFormat] for [formatMediumDate].
-  ///  5. The [intl.DateFormat] for [formatFullDate].
-  ///  6. The [intl.DateFormat] for [formatMonthYear].
-  ///  7. The [int.DateFormat] for [formatShortMonthDay].
+  ///  2. The [DateFormat] for [formatYear].
+  ///  3. The [DateFormat] for [formatShortDate].
+  ///  4. The [DateFormat] for [formatMediumDate].
+  ///  5. The [DateFormat] for [formatFullDate].
+  ///  6. The [DateFormat] for [formatMonthYear].
+  ///  7. The [DateFormat] for [formatShortMonthDay].
   ///  8. The [NumberFormat] for [formatDecimal] (also used by [formatHour] and
   ///     [formatTimeOfDay] when [timeOfDayFormat] doesn't use [HourFormat.HH]).
   ///  9. The [NumberFormat] for [formatHour] and the hour part of
@@ -244,6 +243,26 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
         return postMeridiemAbbreviation;
     }
     return null;
+  }
+
+  /// The raw version of [dateRangeStartDateSemanticLabel], with `$formattedDate` verbatim
+  /// in the string.
+  @protected
+  String get dateRangeStartDateSemanticLabelRaw;
+
+  @override
+  String dateRangeStartDateSemanticLabel(String fullDate) {
+    return dateRangeStartDateSemanticLabelRaw.replaceFirst(r'$fullDate', fullDate);
+  }
+
+  /// The raw version of [dateRangeEndDateSemanticLabel], with `$fullDate` verbatim
+  /// in the string.
+  @protected
+  String get dateRangeEndDateSemanticLabelRaw;
+
+  @override
+  String dateRangeEndDateSemanticLabel(String fullDate) {
+    return dateRangeEndDateSemanticLabelRaw.replaceFirst(r'$fullDate', fullDate);
   }
 
   /// The raw version of [aboutListTileTitle], with `$applicationName` verbatim
@@ -427,6 +446,115 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
     return timeOfDayFormatRaw;
   }
 
+  /// The "zero" form of [licensesPackageDetailText].
+  ///
+  /// This form is optional.
+  ///
+  /// See also:
+  ///
+  ///  * [Intl.plural], to which this form is passed.
+  ///  * [licensesPackageDetailTextZero], the "zero" form
+  ///  * [licensesPackageDetailTextOne], the "one" form
+  ///  * [licensesPackageDetailTextTwo], the "two" form
+  ///  * [licensesPackageDetailTextFew], the "few" form
+  ///  * [licensesPackageDetailTextMany], the "many" form
+  ///  * [licensesPackageDetailTextOther], the "other" form
+  @protected
+  String get licensesPackageDetailTextZero => null;
+
+  /// The "one" form of [licensesPackageDetailText].
+  ///
+  /// This form is optional.
+  ///
+  /// See also:
+  ///
+  ///  * [licensesPackageDetailTextZero], the "zero" form
+  ///  * [licensesPackageDetailTextOne], the "one" form
+  ///  * [licensesPackageDetailTextTwo], the "two" form
+  ///  * [licensesPackageDetailTextFew], the "few" form
+  ///  * [licensesPackageDetailTextMany], the "many" form
+  ///  * [licensesPackageDetailTextOther], the "other" form
+  @protected
+  String get licensesPackageDetailTextOne => null;
+
+  /// The "two" form of [licensesPackageDetailText].
+  ///
+  /// This form is optional.
+  ///
+  /// See also:
+  ///
+  ///  * [Intl.plural], to which this form is passed.
+  ///  * [licensesPackageDetailTextZero], the "zero" form
+  ///  * [licensesPackageDetailTextOne], the "one" form
+  ///  * [licensesPackageDetailTextTwo], the "two" form
+  ///  * [licensesPackageDetailTextFew], the "few" form
+  ///  * [licensesPackageDetailTextMany], the "many" form
+  ///  * [licensesPackageDetailTextOther], the "other" form
+  @protected
+  String get licensesPackageDetailTextTwo => null;
+
+  /// The "many" form of [licensesPackageDetailText].
+  ///
+  /// This form is optional.
+  ///
+  /// See also:
+  ///
+  ///  * [Intl.plural], to which this form is passed.
+  ///  * [licensesPackageDetailTextZero], the "zero" form
+  ///  * [licensesPackageDetailTextOne], the "one" form
+  ///  * [licensesPackageDetailTextTwo], the "two" form
+  ///  * [licensesPackageDetailTextFew], the "few" form
+  ///  * [licensesPackageDetailTextMany], the "many" form
+  ///  * [licensesPackageDetailTextOther], the "other" form
+  @protected
+  String get licensesPackageDetailTextMany => null;
+
+  /// The "few" form of [licensesPackageDetailText].
+  ///
+  /// This form is optional.
+  ///
+  /// See also:
+  ///
+  ///  * [Intl.plural], to which this form is passed.
+  ///  * [licensesPackageDetailTextZero], the "zero" form
+  ///  * [licensesPackageDetailTextOne], the "one" form
+  ///  * [licensesPackageDetailTextTwo], the "two" form
+  ///  * [licensesPackageDetailTextFew], the "few" form
+  ///  * [licensesPackageDetailTextMany], the "many" form
+  ///  * [licensesPackageDetailTextOther], the "other" form
+  @protected
+  String get licensesPackageDetailTextFew => null;
+
+  /// The "other" form of [licensesPackageDetailText].
+  ///
+  /// This form is required.
+  ///
+  /// See also:
+  ///
+  ///  * [Intl.plural], to which this form is passed.
+  ///  * [licensesPackageDetailTextZero], the "zero" form
+  ///  * [licensesPackageDetailTextOne], the "one" form
+  ///  * [licensesPackageDetailTextTwo], the "two" form
+  ///  * [licensesPackageDetailTextFew], the "few" form
+  ///  * [licensesPackageDetailTextMany], the "many" form
+  ///  * [licensesPackageDetailTextOther], the "other" form
+  @protected
+  String get licensesPackageDetailTextOther;
+
+  @override
+  String licensesPackageDetailText(int licenseCount) {
+    return intl.Intl.pluralLogic(
+      licenseCount,
+      zero: licensesPackageDetailTextZero,
+      one: licensesPackageDetailTextOne,
+      two: licensesPackageDetailTextTwo,
+      many: licensesPackageDetailTextMany,
+      few: licensesPackageDetailTextFew,
+      other: licensesPackageDetailTextOther,
+      locale: _localeName,
+    ).replaceFirst(r'$licenseCount', formatDecimal(licenseCount));
+  }
+
   /// The "zero" form of [remainingTextFieldCharacterCount].
   ///
   /// This form is required.
@@ -539,8 +667,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   @override
   ScriptCategory get scriptCategory;
 
-  /// A [LocalizationsDelegate] that uses [GlobalMaterialLocalizations.load]
-  /// to create an instance of this class.
+  /// A [LocalizationsDelegate] for [MaterialLocalizations].
   ///
   /// Most internationalized apps will use [GlobalMaterialLocalizations.delegates]
   /// as the value of [MaterialApp.localizationsDelegates] to include

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -63,10 +65,10 @@ class TooltipThemeData with Diagnosticable {
   /// direction, the tooltip will be displayed in the opposite direction.
   final bool preferBelow;
 
-  /// Whether the tooltip's [message] should be excluded from the semantics
+  /// Whether the [Tooltip.message] should be excluded from the semantics
   /// tree.
   ///
-  /// By default, [Tooltip]s will add a [Semantics.label] that is set to
+  /// By default, [Tooltip]s will add a [Semantics] label that is set to
   /// [Tooltip.message]. Set this property to true if the app is going to
   /// provide its own custom semantics label.
   final bool excludeFromSemantics;

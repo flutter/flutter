@@ -12,9 +12,7 @@ void main() {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
         FakeVmServiceRequest(
-          id: '1',
           method: 'getVM',
-          args: null,
           jsonResponse: (vm_service.VM.parse(<String, Object>{})
             ..isolates = <vm_service.IsolateRef>[
               vm_service.IsolateRef.parse(<String, Object>{
@@ -24,7 +22,6 @@ void main() {
           ).toJson(),
         ),
         const FakeVmServiceRequest(
-          id: '2',
           method: 'getScripts',
           args: <String, Object>{
             'isolateId': '1',

@@ -10,16 +10,16 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' show ProcessResult;
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
-
 import 'package:mockito/mockito.dart';
-import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
@@ -86,10 +86,14 @@ void main() {
           logger: logger,
         );
 
-        expect(() async => await iMobileDevice.takeScreenshot(mockOutputFile), throwsA(anything));
+        expect(() async => await iMobileDevice.takeScreenshot(
+          mockOutputFile,
+          '1234',
+          IOSDeviceInterface.usb,
+        ), throwsA(anything));
       });
 
-      testWithoutContext('idevicescreenshot captures and returns screenshot', () async {
+      testWithoutContext('idevicescreenshot captures and returns USB screenshot', () async {
         when(mockOutputFile.path).thenReturn(outputPath);
         when(mockProcessManager.run(any, environment: anyNamed('environment'), workingDirectory: null)).thenAnswer(
             (Invocation invocation) => Future<ProcessResult>.value(ProcessResult(4, 0, '', '')));
@@ -101,10 +105,37 @@ void main() {
           logger: logger,
         );
 
-        await iMobileDevice.takeScreenshot(mockOutputFile);
-        verify(mockProcessManager.run(<String>[idevicescreenshotPath, outputPath],
+        await iMobileDevice.takeScreenshot(
+          mockOutputFile,
+          '1234',
+          IOSDeviceInterface.usb,
+        );
+        verify(mockProcessManager.run(<String>[idevicescreenshotPath, outputPath, '--udid', '1234'],
             environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
             workingDirectory: null,
+        ));
+      });
+
+      testWithoutContext('idevicescreenshot captures and returns network screenshot', () async {
+        when(mockOutputFile.path).thenReturn(outputPath);
+        when(mockProcessManager.run(any, environment: anyNamed('environment'), workingDirectory: null)).thenAnswer(
+            (Invocation invocation) => Future<ProcessResult>.value(ProcessResult(4, 0, '', '')));
+
+        final IMobileDevice iMobileDevice = IMobileDevice(
+          artifacts: mockArtifacts,
+          cache: mockCache,
+          processManager: mockProcessManager,
+          logger: logger,
+        );
+
+        await iMobileDevice.takeScreenshot(
+          mockOutputFile,
+          '1234',
+          IOSDeviceInterface.network,
+        );
+        verify(mockProcessManager.run(<String>[idevicescreenshotPath, outputPath, '--udid', '1234', '--network'],
+          environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
+          workingDirectory: null,
         ));
       });
     });
@@ -396,7 +427,7 @@ Exited (sigterm)''',
       final MockFile pbxprojFile = MockFile();
 
       when(project.xcodeProjectInfoFile).thenReturn(pbxprojFile);
-      when(project.hostAppBundleName).thenReturn('UnitTestRunner.app');
+      when(project.hostAppBundleName(any)).thenAnswer((_) => Future<String>.value('UnitTestRunner.app'));
       when(pbxprojFile.readAsLinesSync())
           .thenAnswer((_) => flutterAssetPbxProjLines);
       when(pbxprojFile.existsSync())

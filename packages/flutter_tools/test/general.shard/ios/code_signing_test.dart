@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:flutter_tools/src/application_package.dart';
@@ -36,28 +37,32 @@ void main() {
       when(mockProcessManager.canRun(any)).thenReturn(true);
       mockConfig = MockConfig();
       mockIosProject = MockIosProject();
-      when(mockIosProject.buildSettings).thenAnswer((_) {
+      when(mockIosProject.buildSettingsForBuildInfo(any)).thenAnswer((_) {
         return Future<Map<String, String>>.value(<String, String>{
           'For our purposes': 'a non-empty build settings map is valid',
         });
       });
       testTerminal = TestTerminal();
       testTerminal.usesTerminalUi = true;
-      app = await BuildableIOSApp.fromProject(mockIosProject);
+      app = await BuildableIOSApp.fromProject(mockIosProject, null);
     });
 
     testWithoutContext('No auto-sign if Xcode project settings are not available', () async {
-      when(mockIosProject.buildSettings).thenReturn(null);
+      const BuildInfo buildInfo = BuildInfo.debug;
+      when(mockIosProject.buildSettingsForBuildInfo(any)).thenReturn(null);
       final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
         iosApp: app,
         processManager: mockProcessManager,
         logger: logger,
+        buildInfo: buildInfo,
       );
       expect(signingConfigs, isNull);
+      verify(mockIosProject.buildSettingsForBuildInfo(buildInfo));
     });
 
     testWithoutContext('No discovery if development team specified in Xcode project', () async {
-      when(mockIosProject.buildSettings).thenAnswer((_) {
+      const BuildInfo buildInfo = BuildInfo.debug;
+      when(mockIosProject.buildSettingsForBuildInfo(any)).thenAnswer((_) {
         return Future<Map<String, String>>.value(<String, String>{
           'DEVELOPMENT_TEAM': 'abc',
         });
@@ -66,11 +71,13 @@ void main() {
         iosApp: app,
         processManager: mockProcessManager,
         logger: logger,
+        buildInfo: buildInfo,
       );
       expect(signingConfigs, isNull);
       expect(logger.statusText, equals(
         'Automatically signing iOS for device deployment using specified development team in Xcode project: abc\n'
       ));
+      verify(mockIosProject.buildSettingsForBuildInfo(buildInfo));
     });
 
     testWithoutContext('No auto-sign if security or openssl not available', () async {
@@ -80,12 +87,14 @@ void main() {
         iosApp: app,
         processManager: mockProcessManager,
         logger: logger,
+        buildInfo: null,
       );
       expect(signingConfigs, isNull);
     });
 
     testUsingContext('No valid code signing certificates shows instructions', () async {
-      when(mockIosProject.buildSettings).thenAnswer((_) {
+      const BuildInfo buildInfo = BuildInfo.debug;
+      when(mockIosProject.buildSettingsForBuildInfo(any)).thenAnswer((_) {
         return Future<Map<String, String>>.value(<String, String>{});
       });
       when(mockProcessManager.run(
@@ -108,7 +117,9 @@ void main() {
         iosApp: app,
         processManager: mockProcessManager,
         logger: logger,
+        buildInfo: buildInfo,
       ), throwsToolExit(message: 'No development certificates available to code sign app for device deployment'));
+      verify(mockIosProject.buildSettingsForBuildInfo(buildInfo));
     },
     overrides: <Type, Generator>{
       OutputPreferences: () => OutputPreferences(wrapText: false),
@@ -172,6 +183,7 @@ void main() {
         iosApp: app,
         processManager: mockProcessManager,
         logger: logger,
+        buildInfo: null,
       );
 
       expect(logger.statusText, contains('iPhone Developer: Profile 1 (1111AAAA11)'));
@@ -240,6 +252,7 @@ void main() {
           iosApp: app,
           processManager: mockProcessManager,
           logger: logger,
+          buildInfo: null,
         );
       } on Exception catch (e) {
         // This should not throw
@@ -314,6 +327,7 @@ void main() {
         iosApp: app,
         processManager: mockProcessManager,
         logger: logger,
+        buildInfo: null,
       );
 
       expect(
@@ -399,6 +413,7 @@ void main() {
         iosApp: app,
         processManager: mockProcessManager,
         logger: logger,
+        buildInfo: null,
       );
 
       expect(
@@ -476,6 +491,7 @@ void main() {
         iosApp: app,
         processManager: mockProcessManager,
         logger: logger,
+        buildInfo: null,
       );
 
       expect(
@@ -559,6 +575,7 @@ void main() {
         iosApp: app,
         processManager: mockProcessManager,
         logger: logger,
+        buildInfo: null,
       );
 
       expect(
@@ -600,6 +617,7 @@ void main() {
         iosApp: app,
         processManager: mockProcessManager,
         logger: logger,
+        buildInfo: null,
       );
       expect(signingConfigs, isNull);
     });
@@ -643,6 +661,7 @@ void main() {
         iosApp: app,
         processManager: mockProcessManager,
         logger: logger,
+        buildInfo: null,
       );
       expect(signingConfigs, isNull);
     },

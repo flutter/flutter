@@ -5,13 +5,13 @@
 import 'package:archive/archive.dart';
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 import '../globals.dart' as globals;
 import 'file_system.dart';
 import 'io.dart';
 import 'logger.dart';
+import 'platform.dart';
 import 'process.dart';
 
 abstract class OperatingSystemUtils {
@@ -226,6 +226,7 @@ class _PosixUtils extends OperatingSystemUtils {
     _processUtils.runSync(
       <String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path],
       throwOnError: true,
+      verboseExceptions: true,
     );
   }
 

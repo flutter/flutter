@@ -2,12 +2,25 @@
 <!-- Copyright 2014 The Flutter Authors. All rights reserved.
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file. -->
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8">
-  <title>web_integration</title>
-  <script defer src="main.dart.js" type="application/javascript"></script>
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+
+  <title>Web Test</title>
+  <link rel="manifest" href="manifest.json">
 </head>
 <body>
+  <!-- This script installs service_worker.js to provide PWA functionality to
+  application. For more information, see:
+  https://developers.google.com/web/fundamentals/primers/service-workers -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('flutter_service_worker.js');
+      });
+    }
+  </script>
+  <script src="main.dart.js" type="application/javascript"></script>
 </body>
 </html>

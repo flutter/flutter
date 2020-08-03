@@ -16,7 +16,7 @@ import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
 import 'assets.dart';
-import 'dart.dart';
+import 'common.dart';
 import 'icon_tree_shaker.dart';
 
 /// Supports compiling a dart kernel file to an assembly file.
@@ -46,7 +46,7 @@ abstract class AotAssemblyBase extends Target {
     if (environment.defines[kTargetPlatform] == null) {
       throw MissingDefineException(kTargetPlatform, 'aot_assembly');
     }
-    final List<String> extraGenSnapshotOptions = parseExtraGenSnapshotOptions(environment);
+    final List<String> extraGenSnapshotOptions = decodeDartDefines(environment.defines, kExtraGenSnapshotOptions);
     final bool bitcode = environment.defines[kBitcodeFlag] == 'true';
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
@@ -58,7 +58,13 @@ abstract class AotAssemblyBase extends Target {
       ?.toList()
       ?? <DarwinArch>[DarwinArch.arm64];
     if (targetPlatform != TargetPlatform.ios) {
-      throw Exception('aot_assembly is only supported for iOS applications');
+      throw Exception('aot_assembly is only supported for iOS applications.');
+    }
+    if (iosArchs.contains(DarwinArch.x86_64)) {
+      throw Exception(
+        'release/profile builds are only supported for physical devices. '
+        'attempted to build for $iosArchs.'
+      );
     }
 
     // If we're building multiple iOS archs the binaries need to be lipo'd
@@ -187,7 +193,7 @@ class DebugUniveralFramework extends Target {
 
   @override
   List<Source> get outputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/App')
+    Source.pattern('{BUILD_DIR}/App.framework/App'),
   ];
 
   @override
@@ -200,7 +206,10 @@ class DebugUniveralFramework extends Target {
       ?? <DarwinArch>{DarwinArch.arm64};
     final File iphoneFile = environment.buildDir.childFile('iphone_framework');
     final File simulatorFile = environment.buildDir.childFile('simulator_framework');
-    final File lipoOutputFile = environment.buildDir.childFile('App');
+    final File lipoOutputFile = environment.buildDir
+      .childDirectory('App.framework')
+      .childFile('App');
+    lipoOutputFile.parent.createSync(recursive: true);
     final RunResult iphoneResult = await createStubAppFramework(
       iphoneFile,
       SdkType.iPhone,
@@ -250,7 +259,7 @@ abstract class IosAssetBundle extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/App'),
+    Source.pattern('{BUILD_DIR}/App.framework/App'),
     Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
     ...IconTreeShaker.inputs,
   ];
@@ -280,7 +289,9 @@ abstract class IosAssetBundle extends Target {
     // Only copy the prebuilt runtimes and kernel blob in debug mode.
     if (buildMode == BuildMode.debug) {
       // Copy the App.framework to the output directory.
-      environment.buildDir.childFile('App')
+      environment.buildDir
+        .childDirectory('App.framework')
+        .childFile('App')
         .copySync(frameworkDirectory.childFile('App').path);
 
       final String vmSnapshotData = globals.artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug);
@@ -297,7 +308,11 @@ abstract class IosAssetBundle extends Target {
     }
 
     // Copy the assets.
-    final Depfile assetDepfile = await copyAssets(environment, assetDirectory);
+    final Depfile assetDepfile = await copyAssets(
+      environment,
+      assetDirectory,
+      targetPlatform: TargetPlatform.ios,
+    );
     final DepfileService depfileService = DepfileService(
       fileSystem: globals.fs,
       logger: globals.logger,
@@ -435,14 +450,4 @@ Future<RunResult> createStubAppFramework(File outputFile, SdkType sdk, { bool in
       throwToolExit('Failed to create App.framework stub at ${outputFile.path}: $e');
     }
   }
-}
-
-/// iOS and macOS build scripts may pass extraGenSnapshotOptions as an empty
-/// string.
-List<String> parseExtraGenSnapshotOptions(Environment environment) {
-  final String value = environment.defines[kExtraGenSnapshotOptions];
-  if (value == null || value.trim().isEmpty) {
-    return <String>[];
-  }
-  return value.split(',');
 }

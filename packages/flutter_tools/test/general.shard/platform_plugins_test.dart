@@ -35,7 +35,7 @@ void main() {
 
       final MockFile pluginJavaMainClass = MockFile();
       when(pluginJavaMainClass.existsSync()).thenReturn(true);
-      when(pluginJavaMainClass.readAsStringSync()).thenThrow(const FileSystemException());
+      when(pluginJavaMainClass.readAsStringSync(encoding: anyNamed('encoding'))).thenThrow(const FileSystemException());
       when(mockFileSystem.file('.pub_cache/plugin_a/android/src/main/java/com/company/PluginA.java'))
         .thenReturn(pluginJavaMainClass);
 

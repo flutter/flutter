@@ -2,11 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/semantics.dart';
+
+import 'semantics_tester.dart';
 
 class TestFocus extends StatefulWidget {
   const TestFocus({
@@ -73,7 +77,7 @@ class TestFocusState extends State<TestFocus> {
 }
 
 void main() {
-  group(FocusScope, () {
+  group('FocusScope', () {
     testWidgets('Can focus', (WidgetTester tester) async {
       final GlobalKey<TestFocusState> key = GlobalKey();
 
@@ -990,6 +994,7 @@ void main() {
       expect(keyB.currentState.focusNode.hasFocus, isFalse);
       expect(find.text('b'), findsOneWidget);
     });
+
     testWidgets('Can focus root node.', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       await tester.pumpWidget(
@@ -1008,6 +1013,7 @@ void main() {
       expect(rootNode.hasFocus, isTrue);
       expect(rootNode, equals(firstElement.owner.focusManager.rootScope));
     });
+
     testWidgets('Can autofocus a node.', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
       await tester.pumpWidget(
@@ -1031,6 +1037,7 @@ void main() {
       await tester.pump();
       expect(focusNode.hasPrimaryFocus, isTrue);
     });
+
     testWidgets("Won't autofocus a node if one is already focused.", (WidgetTester tester) async {
       final FocusNode focusNodeA = FocusNode(debugLabel: 'Test Node A');
       final FocusNode focusNodeB = FocusNode(debugLabel: 'Test Node B');
@@ -1070,7 +1077,8 @@ void main() {
       expect(focusNodeA.hasPrimaryFocus, isTrue);
     });
   });
-  group(Focus, () {
+
+  group('Focus', () {
     testWidgets('Focus.of stops at the nearest Focus widget.', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final GlobalKey key2 = GlobalKey(debugLabel: '2');
@@ -1195,6 +1203,7 @@ void main() {
       expect(nodes.length, equals(2));
       expect(keys, equals(<Key>[key7, key8]));
     });
+
     testWidgets('Can set focus.', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       bool gotFocus;
@@ -1214,6 +1223,7 @@ void main() {
       expect(gotFocus, isTrue);
       expect(node.hasFocus, isTrue);
     });
+
     testWidgets('Focus is ignored when set to not focusable.', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       bool gotFocus;
@@ -1234,6 +1244,7 @@ void main() {
       expect(gotFocus, isNull);
       expect(node.hasFocus, isFalse);
     });
+
     testWidgets('Focus is lost when set to not focusable.', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       bool gotFocus;
@@ -1273,6 +1284,7 @@ void main() {
       expect(gotFocus, false);
       expect(node.hasFocus, isFalse);
     });
+
     testWidgets('Child of unfocusable Focus can get focus.', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final GlobalKey key2 = GlobalKey(debugLabel: '2');
@@ -1304,237 +1316,400 @@ void main() {
       expect(gotFocus, isTrue);
       expect(unfocusableNode.hasFocus, isTrue);
     });
-  });
-  testWidgets('Nodes are removed when all Focuses are removed.', (WidgetTester tester) async {
-    final GlobalKey key1 = GlobalKey(debugLabel: '1');
-    bool gotFocus;
-    await tester.pumpWidget(
-      FocusScope(
-        child: Focus(
-          onFocusChange: (bool focused) => gotFocus = focused,
-          child: Container(key: key1),
-        ),
-      ),
-    );
 
-    final Element firstNode = tester.element(find.byKey(key1));
-    final FocusNode node = Focus.of(firstNode);
-    node.requestFocus();
-
-    await tester.pump();
-
-    expect(gotFocus, isTrue);
-    expect(node.hasFocus, isTrue);
-
-    await tester.pumpWidget(Container());
-
-    expect(FocusManager.instance.rootScope.descendants, isEmpty);
-  });
-  testWidgets('Focus widgets set Semantics information about focus', (WidgetTester tester) async {
-    final GlobalKey<TestFocusState> key = GlobalKey();
-
-    await tester.pumpWidget(
-      TestFocus(key: key, name: 'a'),
-    );
-
-    final SemanticsNode semantics = tester.getSemantics(find.byKey(key));
-
-    expect(key.currentState.focusNode.hasFocus, isFalse);
-    expect(semantics.hasFlag(SemanticsFlag.isFocused), isFalse);
-    expect(semantics.hasFlag(SemanticsFlag.isFocusable), isTrue);
-
-    FocusScope.of(key.currentContext).requestFocus(key.currentState.focusNode);
-    await tester.pumpAndSettle();
-
-    expect(key.currentState.focusNode.hasFocus, isTrue);
-    expect(semantics.hasFlag(SemanticsFlag.isFocused), isTrue);
-    expect(semantics.hasFlag(SemanticsFlag.isFocusable), isTrue);
-
-    key.currentState.focusNode.canRequestFocus = false;
-    await tester.pumpAndSettle();
-
-    expect(key.currentState.focusNode.hasFocus, isFalse);
-    expect(key.currentState.focusNode.canRequestFocus, isFalse);
-    expect(semantics.hasFlag(SemanticsFlag.isFocused), isFalse);
-    expect(semantics.hasFlag(SemanticsFlag.isFocusable), isFalse);
-  });
-  testWidgets('Setting canRequestFocus on focus node causes update.', (WidgetTester tester) async {
-    final GlobalKey<TestFocusState> key = GlobalKey();
-
-    final TestFocus testFocus = TestFocus(key: key, name: 'a');
-    await tester.pumpWidget(
-      testFocus,
-    );
-
-    await tester.pumpAndSettle();
-    key.currentState.built = false;
-    key.currentState.focusNode.canRequestFocus = false;
-    await tester.pumpAndSettle();
-    key.currentState.built = true;
-
-    expect(key.currentState.focusNode.canRequestFocus, isFalse);
-  });
-
-  testWidgets('canRequestFocus causes descendants of scope to be skipped.', (WidgetTester tester) async {
-    final GlobalKey scope1 = GlobalKey(debugLabel: 'scope1');
-    final GlobalKey scope2 = GlobalKey(debugLabel: 'scope2');
-    final GlobalKey focus1 = GlobalKey(debugLabel: 'focus1');
-    final GlobalKey focus2 = GlobalKey(debugLabel: 'focus2');
-    final GlobalKey container1 = GlobalKey(debugLabel: 'container');
-    Future<void> pumpTest({
-      bool allowScope1 = true,
-      bool allowScope2 = true,
-      bool allowFocus1 = true,
-      bool allowFocus2 = true,
-    }) async {
+    testWidgets('Nodes are removed when all Focuses are removed.', (WidgetTester tester) async {
+      final GlobalKey key1 = GlobalKey(debugLabel: '1');
+      bool gotFocus;
       await tester.pumpWidget(
         FocusScope(
-          key: scope1,
-          canRequestFocus: allowScope1,
-          child: FocusScope(
-            key: scope2,
-            canRequestFocus: allowScope2,
-            child: Focus(
-              key: focus1,
-              canRequestFocus: allowFocus1,
+          child: Focus(
+            onFocusChange: (bool focused) => gotFocus = focused,
+            child: Container(key: key1),
+          ),
+        ),
+      );
+
+      final Element firstNode = tester.element(find.byKey(key1));
+      final FocusNode node = Focus.of(firstNode);
+      node.requestFocus();
+
+      await tester.pump();
+
+      expect(gotFocus, isTrue);
+      expect(node.hasFocus, isTrue);
+
+      await tester.pumpWidget(Container());
+
+      expect(FocusManager.instance.rootScope.descendants, isEmpty);
+    });
+
+    testWidgets('Focus widgets set Semantics information about focus', (WidgetTester tester) async {
+      final GlobalKey<TestFocusState> key = GlobalKey();
+
+      await tester.pumpWidget(
+        TestFocus(key: key, name: 'a'),
+      );
+
+      final SemanticsNode semantics = tester.getSemantics(find.byKey(key));
+
+      expect(key.currentState.focusNode.hasFocus, isFalse);
+      expect(semantics.hasFlag(SemanticsFlag.isFocused), isFalse);
+      expect(semantics.hasFlag(SemanticsFlag.isFocusable), isTrue);
+
+      FocusScope.of(key.currentContext).requestFocus(key.currentState.focusNode);
+      await tester.pumpAndSettle();
+
+      expect(key.currentState.focusNode.hasFocus, isTrue);
+      expect(semantics.hasFlag(SemanticsFlag.isFocused), isTrue);
+      expect(semantics.hasFlag(SemanticsFlag.isFocusable), isTrue);
+
+      key.currentState.focusNode.canRequestFocus = false;
+      await tester.pumpAndSettle();
+
+      expect(key.currentState.focusNode.hasFocus, isFalse);
+      expect(key.currentState.focusNode.canRequestFocus, isFalse);
+      expect(semantics.hasFlag(SemanticsFlag.isFocused), isFalse);
+      expect(semantics.hasFlag(SemanticsFlag.isFocusable), isFalse);
+    });
+
+    testWidgets('Setting canRequestFocus on focus node causes update.', (WidgetTester tester) async {
+      final GlobalKey<TestFocusState> key = GlobalKey();
+
+      final TestFocus testFocus = TestFocus(key: key, name: 'a');
+      await tester.pumpWidget(
+        testFocus,
+      );
+
+      await tester.pumpAndSettle();
+      key.currentState.built = false;
+      key.currentState.focusNode.canRequestFocus = false;
+      await tester.pumpAndSettle();
+      key.currentState.built = true;
+
+      expect(key.currentState.focusNode.canRequestFocus, isFalse);
+    });
+
+    testWidgets('canRequestFocus causes descendants of scope to be skipped.', (WidgetTester tester) async {
+      final GlobalKey scope1 = GlobalKey(debugLabel: 'scope1');
+      final GlobalKey scope2 = GlobalKey(debugLabel: 'scope2');
+      final GlobalKey focus1 = GlobalKey(debugLabel: 'focus1');
+      final GlobalKey focus2 = GlobalKey(debugLabel: 'focus2');
+      final GlobalKey container1 = GlobalKey(debugLabel: 'container');
+      Future<void> pumpTest({
+        bool allowScope1 = true,
+        bool allowScope2 = true,
+        bool allowFocus1 = true,
+        bool allowFocus2 = true,
+      }) async {
+        await tester.pumpWidget(
+          FocusScope(
+            key: scope1,
+            canRequestFocus: allowScope1,
+            child: FocusScope(
+              key: scope2,
+              canRequestFocus: allowScope2,
               child: Focus(
-                key: focus2,
-                canRequestFocus: allowFocus2,
-                child: Container(
-                  key: container1,
+                key: focus1,
+                canRequestFocus: allowFocus1,
+                child: Focus(
+                  key: focus2,
+                  canRequestFocus: allowFocus2,
+                  child: Container(
+                    key: container1,
+                  ),
                 ),
               ),
             ),
           ),
+        );
+        await tester.pump();
+      }
+
+      // Check childless node (focus2).
+      await pumpTest();
+      Focus.of(container1.currentContext).requestFocus();
+      await tester.pump();
+      expect(Focus.of(container1.currentContext).hasFocus, isTrue);
+      await pumpTest(allowFocus2: false);
+      expect(Focus.of(container1.currentContext).hasFocus, isFalse);
+      Focus.of(container1.currentContext).requestFocus();
+      await tester.pump();
+      expect(Focus.of(container1.currentContext).hasFocus, isFalse);
+      await pumpTest();
+      Focus.of(container1.currentContext).requestFocus();
+      await tester.pump();
+      expect(Focus.of(container1.currentContext).hasFocus, isTrue);
+
+      // Check FocusNode with child (focus1). Shouldn't affect children.
+      await pumpTest(allowFocus1: false);
+      expect(Focus.of(container1.currentContext).hasFocus, isTrue); // focus2 has focus.
+      Focus.of(focus2.currentContext).requestFocus(); // Try to focus focus1
+      await tester.pump();
+      expect(Focus.of(container1.currentContext).hasFocus, isTrue); // focus2 still has focus.
+      Focus.of(container1.currentContext).requestFocus(); // Now try to focus focus2
+      await tester.pump();
+      expect(Focus.of(container1.currentContext).hasFocus, isTrue);
+      await pumpTest();
+      // Try again, now that we've set focus1's canRequestFocus to true again.
+      Focus.of(container1.currentContext).unfocus();
+      await tester.pump();
+      expect(Focus.of(container1.currentContext).hasFocus, isFalse);
+      Focus.of(container1.currentContext).requestFocus();
+      await tester.pump();
+      expect(Focus.of(container1.currentContext).hasFocus, isTrue);
+
+      // Check FocusScopeNode with only FocusNode children (scope2). Should affect children.
+      await pumpTest(allowScope2: false);
+      expect(Focus.of(container1.currentContext).hasFocus, isFalse);
+      FocusScope.of(focus1.currentContext).requestFocus(); // Try to focus scope2
+      await tester.pump();
+      expect(Focus.of(container1.currentContext).hasFocus, isFalse);
+      Focus.of(focus2.currentContext).requestFocus(); // Try to focus focus1
+      await tester.pump();
+      expect(Focus.of(container1.currentContext).hasFocus, isFalse);
+      Focus.of(container1.currentContext).requestFocus(); // Try to focus focus2
+      await tester.pump();
+      expect(Focus.of(container1.currentContext).hasFocus, isFalse);
+      await pumpTest();
+      // Try again, now that we've set scope2's canRequestFocus to true again.
+      Focus.of(container1.currentContext).requestFocus();
+      await tester.pump();
+      expect(Focus.of(container1.currentContext).hasFocus, isTrue);
+
+      // Check FocusScopeNode with both FocusNode children and FocusScope children (scope1). Should affect children.
+      await pumpTest(allowScope1: false);
+      expect(Focus.of(container1.currentContext).hasFocus, isFalse);
+      FocusScope.of(scope2.currentContext).requestFocus(); // Try to focus scope1
+      await tester.pump();
+      expect(Focus.of(container1.currentContext).hasFocus, isFalse);
+      FocusScope.of(focus1.currentContext).requestFocus(); // Try to focus scope2
+      await tester.pump();
+      expect(Focus.of(container1.currentContext).hasFocus, isFalse);
+      Focus.of(focus2.currentContext).requestFocus(); // Try to focus focus1
+      await tester.pump();
+      expect(Focus.of(container1.currentContext).hasFocus, isFalse);
+      Focus.of(container1.currentContext).requestFocus(); // Try to focus focus2
+      await tester.pump();
+      expect(Focus.of(container1.currentContext).hasFocus, isFalse);
+      await pumpTest();
+      // Try again, now that we've set scope1's canRequestFocus to true again.
+      Focus.of(container1.currentContext).requestFocus();
+      await tester.pump();
+      expect(Focus.of(container1.currentContext).hasFocus, isTrue);
+    });
+
+    testWidgets('skipTraversal works as expected.', (WidgetTester tester) async {
+      final FocusScopeNode scope1 = FocusScopeNode(debugLabel: 'scope1');
+      final FocusScopeNode scope2 = FocusScopeNode(debugLabel: 'scope2');
+      final FocusNode focus1 = FocusNode(debugLabel: 'focus1');
+      final FocusNode focus2 = FocusNode(debugLabel: 'focus2');
+
+      Future<void> pumpTest({
+        bool traverseScope1 = false,
+        bool traverseScope2 = false,
+        bool traverseFocus1 = false,
+        bool traverseFocus2 = false,
+      }) async {
+        await tester.pumpWidget(
+          FocusScope(
+            node: scope1,
+            skipTraversal: traverseScope1,
+            child: FocusScope(
+              node: scope2,
+              skipTraversal: traverseScope2,
+              child: Focus(
+                focusNode: focus1,
+                skipTraversal: traverseFocus1,
+                child: Focus(
+                  focusNode: focus2,
+                  skipTraversal: traverseFocus2,
+                  child: Container(),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+      }
+
+      await pumpTest();
+      expect(scope1.traversalDescendants, equals(<FocusNode>[focus2, focus1, scope2]));
+
+      // Check childless node (focus2).
+      await pumpTest(traverseFocus2: true);
+      expect(scope1.traversalDescendants, equals(<FocusNode>[focus1, scope2]));
+
+      // Check FocusNode with child (focus1). Shouldn't affect children.
+      await pumpTest(traverseFocus1: true);
+      expect(scope1.traversalDescendants, equals(<FocusNode>[focus2, scope2]));
+
+      // Check FocusScopeNode with only FocusNode children (scope2). Should affect children.
+      await pumpTest(traverseScope2: true);
+      expect(scope1.traversalDescendants, equals(<FocusNode>[focus2, focus1]));
+
+      // Check FocusScopeNode with both FocusNode children and FocusScope children (scope1). Should affect children.
+      await pumpTest(traverseScope1: true);
+      expect(scope1.traversalDescendants, equals(<FocusNode>[focus2, focus1, scope2]));
+    });
+    testWidgets('descendantsAreFocusable works as expected.', (WidgetTester tester) async {
+      final GlobalKey key1 = GlobalKey(debugLabel: '1');
+      final GlobalKey key2 = GlobalKey(debugLabel: '2');
+      final FocusNode focusNode = FocusNode();
+      bool gotFocus;
+      await tester.pumpWidget(
+        Focus(
+          descendantsAreFocusable: false,
+          child: Focus(
+            onFocusChange: (bool focused) => gotFocus = focused,
+            child: Focus(
+              key: key1,
+              focusNode: focusNode,
+              child: Container(key: key2),
+            ),
+          ),
         ),
       );
+
+      final Element childWidget = tester.element(find.byKey(key1));
+      final FocusNode unfocusableNode = Focus.of(childWidget);
+      final Element containerWidget = tester.element(find.byKey(key2));
+      final FocusNode containerNode = Focus.of(containerWidget);
+
+      unfocusableNode.requestFocus();
       await tester.pump();
-    }
 
-    // Check childless node (focus2).
-    await pumpTest();
-    Focus.of(container1.currentContext).requestFocus();
-    await tester.pump();
-    expect(Focus.of(container1.currentContext).hasFocus, isTrue);
-    await pumpTest(allowFocus2: false);
-    expect(Focus.of(container1.currentContext).hasFocus, isFalse);
-    Focus.of(container1.currentContext).requestFocus();
-    await tester.pump();
-    expect(Focus.of(container1.currentContext).hasFocus, isFalse);
-    await pumpTest();
-    Focus.of(container1.currentContext).requestFocus();
-    await tester.pump();
-    expect(Focus.of(container1.currentContext).hasFocus, isTrue);
+      expect(gotFocus, isNull);
+      expect(containerNode.hasFocus, isFalse);
+      expect(unfocusableNode.hasFocus, isFalse);
 
-    // Check FocusNode with child (focus1). Shouldn't affect children.
-    await pumpTest(allowFocus1: false);
-    expect(Focus.of(container1.currentContext).hasFocus, isTrue); // focus2 has focus.
-    Focus.of(focus2.currentContext).requestFocus(); // Try to focus focus1
-    await tester.pump();
-    expect(Focus.of(container1.currentContext).hasFocus, isTrue); // focus2 still has focus.
-    Focus.of(container1.currentContext).requestFocus(); // Now try to focus focus2
-    await tester.pump();
-    expect(Focus.of(container1.currentContext).hasFocus, isTrue);
-    await pumpTest();
-    // Try again, now that we've set focus1's canRequestFocus to true again.
-    Focus.of(container1.currentContext).unfocus();
-    await tester.pump();
-    expect(Focus.of(container1.currentContext).hasFocus, isFalse);
-    Focus.of(container1.currentContext).requestFocus();
-    await tester.pump();
-    expect(Focus.of(container1.currentContext).hasFocus, isTrue);
+      containerNode.requestFocus();
+      await tester.pump();
 
-    // Check FocusScopeNode with only FocusNode children (scope2). Should affect children.
-    await pumpTest(allowScope2: false);
-    expect(Focus.of(container1.currentContext).hasFocus, isFalse);
-    FocusScope.of(focus1.currentContext).requestFocus(); // Try to focus scope2
-    await tester.pump();
-    expect(Focus.of(container1.currentContext).hasFocus, isFalse);
-    Focus.of(focus2.currentContext).requestFocus(); // Try to focus focus1
-    await tester.pump();
-    expect(Focus.of(container1.currentContext).hasFocus, isFalse);
-    Focus.of(container1.currentContext).requestFocus(); // Try to focus focus2
-    await tester.pump();
-    expect(Focus.of(container1.currentContext).hasFocus, isFalse);
-    await pumpTest();
-    // Try again, now that we've set scope2's canRequestFocus to true again.
-    Focus.of(container1.currentContext).requestFocus();
-    await tester.pump();
-    expect(Focus.of(container1.currentContext).hasFocus, isTrue);
-
-    // Check FocusScopeNode with both FocusNode children and FocusScope children (scope1). Should affect children.
-    await pumpTest(allowScope1: false);
-    expect(Focus.of(container1.currentContext).hasFocus, isFalse);
-    FocusScope.of(scope2.currentContext).requestFocus(); // Try to focus scope1
-    await tester.pump();
-    expect(Focus.of(container1.currentContext).hasFocus, isFalse);
-    FocusScope.of(focus1.currentContext).requestFocus(); // Try to focus scope2
-    await tester.pump();
-    expect(Focus.of(container1.currentContext).hasFocus, isFalse);
-    Focus.of(focus2.currentContext).requestFocus(); // Try to focus focus1
-    await tester.pump();
-    expect(Focus.of(container1.currentContext).hasFocus, isFalse);
-    Focus.of(container1.currentContext).requestFocus(); // Try to focus focus2
-    await tester.pump();
-    expect(Focus.of(container1.currentContext).hasFocus, isFalse);
-    await pumpTest();
-    // Try again, now that we've set scope1's canRequestFocus to true again.
-    Focus.of(container1.currentContext).requestFocus();
-    await tester.pump();
-    expect(Focus.of(container1.currentContext).hasFocus, isTrue);
+      expect(gotFocus, isNull);
+      expect(containerNode.hasFocus, isFalse);
+      expect(unfocusableNode.hasFocus, isFalse);
+    });
+    testWidgets("Focus doesn't introduce a Semantics node when includeSemantics is false", (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      await tester.pumpWidget(Focus(includeSemantics: false, child: Container()));
+      final TestSemantics expectedSemantics = TestSemantics.root();
+      expect(semantics, hasSemantics(expectedSemantics));
+    });
   });
-
-  testWidgets('skipTraversal works as expected.', (WidgetTester tester) async {
-    final FocusScopeNode scope1 = FocusScopeNode(debugLabel: 'scope1');
-    final FocusScopeNode scope2 = FocusScopeNode(debugLabel: 'scope2');
-    final FocusNode focus1 = FocusNode(debugLabel: 'focus1');
-    final FocusNode focus2 = FocusNode(debugLabel: 'focus2');
-
-    Future<void> pumpTest({
-      bool traverseScope1 = false,
-      bool traverseScope2 = false,
-      bool traverseFocus1 = false,
-      bool traverseFocus2 = false,
-    }) async {
+  group('ExcludeFocus', () {
+    testWidgets("Descendants of ExcludeFocus aren't focusable.", (WidgetTester tester) async {
+      final GlobalKey key1 = GlobalKey(debugLabel: '1');
+      final GlobalKey key2 = GlobalKey(debugLabel: '2');
+      final FocusNode focusNode = FocusNode();
+      bool gotFocus;
       await tester.pumpWidget(
-        FocusScope(
-          node: scope1,
-          skipTraversal: traverseScope1,
-          child: FocusScope(
-            node: scope2,
-            skipTraversal: traverseScope2,
+        ExcludeFocus(
+          excluding: true,
+          child: Focus(
+            onFocusChange: (bool focused) => gotFocus = focused,
             child: Focus(
-              focusNode: focus1,
-              skipTraversal: traverseFocus1,
-              child: Focus(
-                focusNode: focus2,
-                skipTraversal: traverseFocus2,
-                child: Container(),
-              ),
+              key: key1,
+              focusNode: focusNode,
+              child: Container(key: key2),
+            ),
+          ),
+        ),
+      );
+
+      final Element childWidget = tester.element(find.byKey(key1));
+      final FocusNode unfocusableNode = Focus.of(childWidget);
+      final Element containerWidget = tester.element(find.byKey(key2));
+      final FocusNode containerNode = Focus.of(containerWidget);
+
+      unfocusableNode.requestFocus();
+      await tester.pump();
+
+      expect(gotFocus, isNull);
+      expect(containerNode.hasFocus, isFalse);
+      expect(unfocusableNode.hasFocus, isFalse);
+
+      containerNode.requestFocus();
+      await tester.pump();
+
+      expect(gotFocus, isNull);
+      expect(containerNode.hasFocus, isFalse);
+      expect(unfocusableNode.hasFocus, isFalse);
+    });
+    // Regression test for https://github.com/flutter/flutter/issues/61700
+    testWidgets("ExcludeFocus doesn't transfer focus to another descendant.", (WidgetTester tester) async {
+      final FocusNode parentFocusNode = FocusNode(debugLabel: 'group');
+      final FocusNode focusNode1 = FocusNode(debugLabel: 'node 1');
+      final FocusNode focusNode2 = FocusNode(debugLabel: 'node 2');
+      await tester.pumpWidget(
+        ExcludeFocus(
+          excluding: false,
+          child: Focus(
+            focusNode: parentFocusNode,
+            child: Column(
+              children: <Widget>[
+                Focus(
+                  autofocus: true,
+                  focusNode: focusNode1,
+                  child: Container(),
+                ),
+                Focus(
+                  focusNode: focusNode2,
+                  child: Container(),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      expect(parentFocusNode.hasFocus, isTrue);
+      expect(focusNode1.hasPrimaryFocus, isTrue);
+      expect(focusNode2.hasFocus, isFalse);
+
+      // Move focus to the second node to create some focus history for the scope.
+      focusNode2.requestFocus();
+      await tester.pump();
+
+      expect(parentFocusNode.hasFocus, isTrue);
+      expect(focusNode1.hasFocus, isFalse);
+      expect(focusNode2.hasPrimaryFocus, isTrue);
+
+      // Now turn off the focus for the subtree.
+      await tester.pumpWidget(
+        ExcludeFocus(
+          excluding: true,
+          child: Focus(
+            focusNode: parentFocusNode,
+            child: Column(
+              children: <Widget>[
+                Focus(
+                  autofocus: true,
+                  focusNode: focusNode1,
+                  child: Container(),
+                ),
+                Focus(
+                  focusNode: focusNode2,
+                  child: Container(),
+                ),
+              ],
             ),
           ),
         ),
       );
       await tester.pump();
-    }
 
-    await pumpTest();
-    expect(scope1.traversalDescendants, equals(<FocusNode>[focus2, focus1, scope2]));
-
-    // Check childless node (focus2).
-    await pumpTest(traverseFocus2: true);
-    expect(scope1.traversalDescendants, equals(<FocusNode>[focus1, scope2]));
-
-    // Check FocusNode with child (focus1). Shouldn't affect children.
-    await pumpTest(traverseFocus1: true);
-    expect(scope1.traversalDescendants, equals(<FocusNode>[focus2, scope2]));
-
-    // Check FocusScopeNode with only FocusNode children (scope2). Should affect children.
-    await pumpTest(traverseScope2: true);
-    expect(scope1.traversalDescendants, equals(<FocusNode>[focus2, focus1]));
-
-    // Check FocusScopeNode with both FocusNode children and FocusScope children (scope1). Should affect children.
-    await pumpTest(traverseScope1: true);
-    expect(scope1.traversalDescendants, equals(<FocusNode>[focus2, focus1, scope2]));
+      expect(focusNode1.hasFocus, isFalse);
+      expect(focusNode2.hasFocus, isFalse);
+      expect(parentFocusNode.hasFocus, isFalse);
+      expect(parentFocusNode.enclosingScope.hasPrimaryFocus, isTrue);
+    });
+    testWidgets("ExcludeFocus doesn't introduce a Semantics node", (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      await tester.pumpWidget(ExcludeFocus(child: Container()));
+      final TestSemantics expectedSemantics = TestSemantics.root();
+      expect(semantics, hasSemantics(expectedSemantics));
+    });
   });
 }

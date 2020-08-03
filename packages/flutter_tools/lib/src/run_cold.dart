@@ -13,23 +13,26 @@ import 'resident_runner.dart';
 import 'tracing.dart';
 import 'vmservice.dart';
 
-// TODO(mklim): Test this, flutter/flutter#23031.
 class ColdRunner extends ResidentRunner {
   ColdRunner(
     List<FlutterDevice> devices, {
     String target,
-    DebuggingOptions debuggingOptions,
+    @required DebuggingOptions debuggingOptions,
     this.traceStartup = false,
     this.awaitFirstFrameWhenTracing = true,
     this.applicationBinary,
     bool ipv6 = false,
     bool stayResident = true,
-  }) : super(devices,
-             target: target,
-             debuggingOptions: debuggingOptions,
-             hotMode: false,
-             stayResident: stayResident,
-             ipv6: ipv6);
+    bool machine = false,
+  }) : super(
+          devices,
+          target: target,
+          debuggingOptions: debuggingOptions,
+          hotMode: false,
+          stayResident: stayResident,
+          ipv6: ipv6,
+          machine: machine,
+        );
 
   final bool traceStartup;
   final bool awaitFirstFrameWhenTracing;
@@ -60,14 +63,21 @@ class ColdRunner extends ResidentRunner {
       }
     }
 
-    for (final FlutterDevice device in flutterDevices) {
-      final int result = await device.runCold(
-        coldRunner: this,
-        route: route,
-      );
-      if (result != 0) {
-        return result;
+    try {
+      for (final FlutterDevice device in flutterDevices) {
+        final int result = await device.runCold(
+          coldRunner: this,
+          route: route,
+        );
+        if (result != 0) {
+          appFailedToStart();
+          return result;
+        }
       }
+    } on Exception catch (err) {
+      globals.printError(err.toString());
+      appFailedToStart();
+      return 1;
     }
 
     // Connect to observatory.
@@ -76,6 +86,7 @@ class ColdRunner extends ResidentRunner {
         await connectToServiceProtocol();
       } on String catch (message) {
         globals.printError(message);
+        appFailedToStart();
         return 2;
       }
     }
@@ -95,7 +106,6 @@ class ColdRunner extends ResidentRunner {
         continue;
       }
       await device.initLogReader();
-      await device.refreshViews();
       globals.printTrace('Connected to ${device.device.name}');
     }
 
@@ -130,24 +140,19 @@ class ColdRunner extends ResidentRunner {
   }) async {
     _didAttach = true;
     try {
-      await connectToServiceProtocol();
+      await connectToServiceProtocol(
+        getSkSLMethod: writeSkSL,
+      );
     } on Exception catch (error) {
       globals.printError('Error connecting to the service protocol: $error');
-      // https://github.com/flutter/flutter/issues/33050
-      // TODO(blasten): Remove this check once https://issuetracker.google.com/issues/132325318 has been fixed.
-      if (await hasDeviceRunningAndroidQ(flutterDevices) &&
-          error.toString().contains(kAndroidQHttpConnectionClosedExp)) {
-        globals.printStatus('🔨 If you are using an emulator running Android Q Beta, consider using an emulator running API level 29 or lower.');
-        globals.printStatus('Learn more about the status of this issue on https://issuetracker.google.com/issues/132325318');
-      }
       return 2;
     }
     for (final FlutterDevice device in flutterDevices) {
       await device.initLogReader();
     }
-    await refreshViews();
     for (final FlutterDevice device in flutterDevices) {
-      for (final FlutterView view in device.views) {
+      final List<FlutterView> views = await device.vmService.getFlutterViews();
+      for (final FlutterView view in views) {
         globals.printTrace('Connected to $view.');
       }
     }
@@ -208,7 +213,7 @@ class ColdRunner extends ResidentRunner {
     for (final FlutterDevice device in flutterDevices) {
       // If we're running in release mode, stop the app using the device logic.
       if (device.vmService == null) {
-        await device.device.stopApp(device.package);
+        await device.device.stopApp(device.package, userIdentifier: device.userIdentifier);
       }
     }
     await super.preExit();

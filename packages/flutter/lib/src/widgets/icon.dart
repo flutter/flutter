@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
@@ -130,10 +132,8 @@ class Icon extends StatelessWidget {
   /// Announced in accessibility modes (e.g TalkBack/VoiceOver).
   /// This label does not show in the UI.
   ///
-  /// See also:
-  ///
-  ///  * [Semantics.label], which is set to [semanticLabel] in the underlying
-  ///    [Semantics] widget.
+  ///  * [SemanticsProperties.label], which is set to [semanticLabel] in the
+  ///    underlying	 [Semantics] widget.
   final String semanticLabel;
 
   /// The text direction to use for rendering the icon.

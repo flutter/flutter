@@ -19,5 +19,6 @@
   "copyButtonLabel": "Көчүрүү",
   "pasteButtonLabel": "Чаптоо",
   "selectAllButtonLabel": "Баарын тандоо",
+  "tabSemanticsLabel": "$tabCount ичинен $tabIndex-өтмөк",
   "modalBarrierDismissLabel": "Жабуу"
 }

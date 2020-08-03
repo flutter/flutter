@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -761,8 +763,9 @@ class SemanticsProperties extends DiagnosticableTree {
   /// If non-null, whether the node corresponds to the root of a subtree for
   /// which a route name should be announced.
   ///
-  /// Generally, this is set in combination with [explicitChildNodes], since
-  /// nodes with this flag are not considered focusable by Android or iOS.
+  /// Generally, this is set in combination with
+  /// [SemanticsConfiguration.explicitChildNodes], since nodes with this flag
+  /// are not considered focusable by Android or iOS.
   ///
   /// See also:
   ///
@@ -781,7 +784,7 @@ class SemanticsProperties extends DiagnosticableTree {
   ///
   /// See also:
   ///
-  ///  * [SemanticsFlag.image], for the flag this setting controls.
+  ///  * [SemanticsFlag.isImage], for the flag this setting controls.
   final bool image;
 
   /// If non-null, whether the node should be considered a live region.
@@ -794,14 +797,14 @@ class SemanticsProperties extends DiagnosticableTree {
   /// On iOS, no announcements are made but the node is marked as
   /// `UIAccessibilityTraitUpdatesFrequently`.
   ///
-  /// An example of a live region is the [Snackbar] widget. When it appears
+  /// An example of a live region is the [SnackBar] widget. When it appears
   /// on the screen it may be difficult to focus to read the label. A live
   /// region causes an initial polite announcement to be generated
   /// automatically.
   ///
   /// See also:
   ///
-  ///  * [SemanticsFlag.liveRegion], the semantics flag this setting controls.
+  ///  * [SemanticsFlag.isLiveRegion], the semantics flag this setting controls.
   ///  * [SemanticsConfiguration.liveRegion], for a full description of a live region.
   final bool liveRegion;
 
@@ -1032,7 +1035,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// menu of a text field, for example.
   final VoidCallback onPaste;
 
-  /// The handler for [SemanticsAction.onMoveCursorForwardByCharacter].
+  /// The handler for [SemanticsAction.moveCursorForwardByCharacter].
   ///
   /// This handler is invoked when the user wants to move the cursor in a
   /// text field forward by one character.
@@ -1041,7 +1044,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// input focus is in a text field.
   final MoveCursorHandler onMoveCursorForwardByCharacter;
 
-  /// The handler for [SemanticsAction.onMoveCursorBackwardByCharacter].
+  /// The handler for [SemanticsAction.moveCursorBackwardByCharacter].
   ///
   /// This handler is invoked when the user wants to move the cursor in a
   /// text field backward by one character.
@@ -1050,7 +1053,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// input focus is in a text field.
   final MoveCursorHandler onMoveCursorBackwardByCharacter;
 
-  /// The handler for [SemanticsAction.onMoveCursorForwardByWord].
+  /// The handler for [SemanticsAction.moveCursorForwardByWord].
   ///
   /// This handler is invoked when the user wants to move the cursor in a
   /// text field backward by one word.
@@ -1059,7 +1062,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// input focus is in a text field.
   final MoveCursorHandler onMoveCursorForwardByWord;
 
-  /// The handler for [SemanticsAction.onMoveCursorBackwardByWord].
+  /// The handler for [SemanticsAction.moveCursorBackwardByWord].
   ///
   /// This handler is invoked when the user wants to move the cursor in a
   /// text field backward by one word.
@@ -1127,7 +1130,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// A map from each supported [CustomSemanticsAction] to a provided handler.
   ///
   /// The handler associated with each custom action is called whenever a
-  /// semantics event of type [SemanticsEvent.customEvent] is received. The
+  /// semantics action of type [SemanticsAction.customAction] is received. The
   /// provided argument will be an identifier used to retrieve an instance of
   /// a custom action which can then retrieve the correct handler from this map.
   ///
@@ -1282,7 +1285,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// The [elevation] property is relative to the elevation of the parent
   /// [SemanticsNode]. However, as [SemanticsConfiguration]s from various
-  /// ascending [RenderObjects] are merged into each other to form that
+  /// ascending [RenderObject]s are merged into each other to form that
   /// [SemanticsNode] the parent’s elevation may change. This requires an
   /// adjustment of the child’s relative elevation which is represented by this
   /// value.
@@ -2155,12 +2158,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// Semantics events should be sent to inform interested parties (like
   /// the accessibility system of the operating system) about changes to the UI.
-  ///
-  /// For example, if this semantics node represents a scrollable list, a
-  /// [ScrollCompletedSemanticsEvent] should be sent after a scroll action is completed.
-  /// That way, the operating system can give additional feedback to the user
-  /// about the state of the UI (e.g. on Android a ping sound is played to
-  /// indicate a successful scroll in accessibility mode).
   void sendEvent(SemanticsEvent event) {
     if (!attached)
       return;
@@ -2622,13 +2619,15 @@ class SemanticsOwner extends ChangeNotifier {
         if (node.isPartOfNodeMerging) {
           assert(node.mergeAllDescendantsIntoThisNode || node.parent != null);
           // if we're merged into our parent, make sure our parent is added to the dirty list
-          if (node.parent != null && node.parent.isPartOfNodeMerging)
+          if (node.parent != null && node.parent.isPartOfNodeMerging) {
             node.parent._markDirty(); // this can add the node to the dirty list
+            node._dirty = false; // We don't want to send update for this node.
+          }
         }
       }
     }
     visitedNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
-    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+    final ui.SemanticsUpdateBuilder builder = SemanticsBinding.instance.createSemanticsUpdateBuilder();
     for (final SemanticsNode node in visitedNodes) {
       assert(node.parent?._dirty != true); // could be null (no parent) or false (not dirty)
       // The _serialize() method marks the node as not dirty, and
@@ -2761,7 +2760,7 @@ class SemanticsConfiguration {
   /// information to the [SemanticsNode] introduced by this configuration
   /// is controlled by [explicitChildNodes].
   ///
-  /// This has to be true if [isMergingDescendantsIntoOneNode] is also true.
+  /// This has to be true if [isMergingSemanticsOfDescendants] is also true.
   bool get isSemanticBoundary => _isSemanticBoundary;
   bool _isSemanticBoundary = false;
   set isSemanticBoundary(bool value) {
@@ -3066,7 +3065,7 @@ class SemanticsConfiguration {
     _onShowOnScreen = value;
   }
 
-  /// The handler for [SemanticsAction.onMoveCursorForwardByCharacter].
+  /// The handler for [SemanticsAction.moveCursorForwardByCharacter].
   ///
   /// This handler is invoked when the user wants to move the cursor in a
   /// text field forward by one character.
@@ -3085,7 +3084,7 @@ class SemanticsConfiguration {
     _onMoveCursorForwardByCharacter = value;
   }
 
-  /// The handler for [SemanticsAction.onMoveCursorBackwardByCharacter].
+  /// The handler for [SemanticsAction.moveCursorBackwardByCharacter].
   ///
   /// This handler is invoked when the user wants to move the cursor in a
   /// text field backward by one character.
@@ -3104,7 +3103,7 @@ class SemanticsConfiguration {
     _onMoveCursorBackwardByCharacter = value;
   }
 
-  /// The handler for [SemanticsAction.onMoveCursorForwardByWord].
+  /// The handler for [SemanticsAction.moveCursorForwardByWord].
   ///
   /// This handler is invoked when the user wants to move the cursor in a
   /// text field backward by one word.
@@ -3123,7 +3122,7 @@ class SemanticsConfiguration {
     _onMoveCursorForwardByCharacter = value;
   }
 
-  /// The handler for [SemanticsAction.onMoveCursorBackwardByWord].
+  /// The handler for [SemanticsAction.moveCursorBackwardByWord].
   ///
   /// This handler is invoked when the user wants to move the cursor in a
   /// text field backward by one word.
@@ -3215,10 +3214,6 @@ class SemanticsConfiguration {
 
   /// Returns the action handler registered for [action] or null if none was
   /// registered.
-  ///
-  /// See also:
-  ///
-  ///  * [addAction] to add an action.
   _SemanticsActionHandler getActionHandler(SemanticsAction action) => _actions[action];
 
   /// Determines the position of this node among its siblings in the traversal
@@ -3341,7 +3336,7 @@ class SemanticsConfiguration {
   /// The handlers for each supported [CustomSemanticsAction].
   ///
   /// Whenever a custom accessibility action is added to a node, the action
-  /// [SemanticAction.customAction] is automatically added. A handler is
+  /// [SemanticsAction.customAction] is automatically added. A handler is
   /// created which uses the passed argument to lookup the custom action
   /// handler from this map and invoke it, if present.
   Map<CustomSemanticsAction, VoidCallback> get customSemanticsActions => _customSemanticsActions;
@@ -3522,7 +3517,7 @@ class SemanticsConfiguration {
   /// announcement occurs even if the node is not focused, but only if the label
   /// has changed since the last update.
   ///
-  /// An example of a live region is the [Snackbar] widget. When it appears
+  /// An example of a live region is the [SnackBar] widget. When it appears
   /// on the screen it may be difficult to focus to read the label. A live
   /// region causes an initial polite announcement to be generated
   /// automatically.
@@ -3682,7 +3677,7 @@ class SemanticsConfiguration {
 
   /// Whether the [value] should be obscured.
   ///
-  /// This option is usually set in combination with [textField] to indicate
+  /// This option is usually set in combination with [isTextField] to indicate
   /// that the text field contains a password (or other sensitive information).
   /// Doing so instructs screen readers to not read out the [value].
   bool get isObscured => _hasFlag(SemanticsFlag.isObscured);
@@ -3692,7 +3687,7 @@ class SemanticsConfiguration {
 
   /// Whether the text field is multiline.
   ///
-  /// This option is usually set in combination with [textField] to indicate
+  /// This option is usually set in combination with [isTextField] to indicate
   /// that the text field is configured to be multiline.
   bool get isMultiline => _hasFlag(SemanticsFlag.isMultiline);
   set isMultiline(bool value) {
@@ -3796,7 +3791,7 @@ class SemanticsConfiguration {
   ///
   /// See also:
   ///
-  ///  * [RenderSemanticsGestureHandler.excludeFromScrolling] for an example of
+  ///  * [RenderViewport.excludeFromScrolling] for an example of
   ///    how tags are used.
   void addTagForChildren(SemanticsTag tag) {
     _tagsForChildren ??= <SemanticsTag>{};
@@ -4060,7 +4055,7 @@ abstract class SemanticsSortKey with Diagnosticable implements Comparable<Semant
 ///
 /// [OrdinalSortKey]s are sorted by the optional [name], then by their [order].
 /// If [SemanticsProperties.sortKey] is a [OrdinalSortKey], then all the other
-/// speficied sort keys in the same semantics group must also be
+/// specified sort keys in the same semantics group must also be
 /// [OrdinalSortKey]s.
 ///
 /// Keys with no [name] are compared to other keys with no [name], and will

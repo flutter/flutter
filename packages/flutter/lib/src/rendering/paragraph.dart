@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:collection';
 import 'dart:math' as math;
 import 'dart:ui' as ui show Gradient, Shader, TextBox, PlaceholderAlignment, TextHeightBehavior;
@@ -267,7 +269,7 @@ class RenderParagraph extends RenderBox
     markNeedsLayout();
   }
 
-  /// {@macro flutter.widgets.basic.TextWidthBasis}
+  /// {@macro flutter.painting.textPainter.textWidthBasis}
   TextWidthBasis get textWidthBasis => _textPainter.textWidthBasis;
   set textWidthBasis(TextWidthBasis value) {
     assert(value != null);
@@ -524,13 +526,16 @@ class RenderParagraph extends RenderBox
     RenderBox child = firstChild;
     _placeholderDimensions = List<PlaceholderDimensions>(childCount);
     int childIndex = 0;
+    BoxConstraints boxConstraints = BoxConstraints(maxWidth: constraints.maxWidth);
+    // The content will be enlarged by textScaleFactor during painting phase.
+    // We reduce constraint by textScaleFactor so that the content will fit
+    // into the box once it is enlarged.
+    boxConstraints = boxConstraints / textScaleFactor;
     while (child != null) {
       // Only constrain the width to the maximum width of the paragraph.
       // Leave height unconstrained, which will overflow if expanded past.
       child.layout(
-        BoxConstraints(
-          maxWidth: constraints.maxWidth,
-        ),
+        boxConstraints,
         parentUsesSize: true,
       );
       double baselineOffset;
@@ -916,10 +921,13 @@ class RenderParagraph extends RenderBox
           if (recognizer is TapGestureRecognizer) {
             configuration.onTap = recognizer.onTap;
             configuration.isLink = true;
+          } else if (recognizer is DoubleTapGestureRecognizer) {
+            configuration.onTap = recognizer.onDoubleTap;
+            configuration.isLink = true;
           } else if (recognizer is LongPressGestureRecognizer) {
             configuration.onLongPress = recognizer.onLongPress;
           } else {
-            assert(false);
+            assert(false, '${recognizer.runtimeType} is not supported.');
           }
         }
         final SemanticsNode newChild = (_cachedChildNodes?.isNotEmpty == true)

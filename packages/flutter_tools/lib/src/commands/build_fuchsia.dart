@@ -4,9 +4,12 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
 import '../base/common.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../features.dart';
 import '../fuchsia/fuchsia_build.dart';
 import '../fuchsia/fuchsia_pm.dart';
 import '../globals.dart' as globals;
@@ -16,11 +19,13 @@ import 'build.dart';
 
 /// A command to build a Fuchsia target.
 class BuildFuchsiaCommand extends BuildSubCommand {
-  BuildFuchsiaCommand({bool verboseHelp = false}) {
+  BuildFuchsiaCommand({ @required bool verboseHelp }) {
     addTreeShakeIconsFlag();
     usesTargetOption();
     usesDartDefineOption();
     addBuildModeFlags(verboseHelp: verboseHelp);
+    addNullSafetyModeOptions(hide: !verboseHelp);
+    addEnableExperimentation(hide: !verboseHelp);
     argParser.addOption(
       'runner-source',
       help: 'The package source to use for the flutter_runner. '
@@ -55,7 +60,12 @@ class BuildFuchsiaCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    Cache.releaseLockEarly();
+    if (!featureFlags.isFuchsiaEnabled) {
+      throwToolExit(
+        '"build fuchsia" is currently disabled. See "flutter config" for more '
+        'information.'
+      );
+    }
     final BuildInfo buildInfo = getBuildInfo();
     final FlutterProject flutterProject = FlutterProject.current();
     if (!globals.platform.isLinux && !globals.platform.isMacOS) {

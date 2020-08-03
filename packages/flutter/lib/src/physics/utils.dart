@@ -7,7 +7,7 @@
 /// The `epsilon` argument must be positive and not null.
 /// The `a` and `b` arguments may be null. A null value is only considered
 /// near-equal to another null value.
-bool nearEqual(double a, double b, double epsilon) {
+bool nearEqual(double? a, double? b, double epsilon) {
   assert(epsilon != null);
   assert(epsilon >= 0.0);
   if (a == null || b == null)

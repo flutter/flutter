@@ -8,14 +8,16 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
+import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
-import 'package:platform/platform.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -25,7 +27,7 @@ const Map<String, String> kDyLdLibEntry = <String, String>{
 };
 
 void main() {
-  testWithoutContext('IOSDevice.installApp calls ios-deploy correctly', () async {
+  testWithoutContext('IOSDevice.installApp calls ios-deploy correctly with USB', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
@@ -47,6 +49,36 @@ void main() {
     final IOSDevice device = setUpIOSDevice(
       processManager: processManager,
       fileSystem: fileSystem,
+      interfaceType: IOSDeviceInterface.usb,
+    );
+    final bool wasInstalled = await device.installApp(iosApp);
+
+    expect(wasInstalled, true);
+    expect(processManager.hasRemainingExpectations, false);
+  });
+
+  testWithoutContext('IOSDevice.installApp calls ios-deploy correctly with network', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final IOSApp iosApp = PrebuiltIOSApp(
+      projectBundleId: 'app',
+      bundleDir: fileSystem.currentDirectory,
+    );
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(command: <String>[
+        'ios-deploy',
+        '--id',
+        '1234',
+        '--bundle',
+        '/',
+      ], environment: <String, String>{
+        'PATH': '/usr/bin:null',
+        ...kDyLdLibEntry,
+      })
+    ]);
+    final IOSDevice device = setUpIOSDevice(
+      processManager: processManager,
+      fileSystem: fileSystem,
+      interfaceType: IOSDeviceInterface.network,
     );
     final bool wasInstalled = await device.installApp(iosApp);
 
@@ -237,6 +269,7 @@ IOSDevice setUpIOSDevice({
   @required ProcessManager processManager,
   FileSystem fileSystem,
   Logger logger,
+  IOSDeviceInterface interfaceType,
 }) {
   logger ??= BufferLogger.test();
   final FakePlatform platform = FakePlatform(
@@ -269,9 +302,12 @@ IOSDevice setUpIOSDevice({
       artifacts: artifacts,
       cache: cache,
     ),
-    artifacts: artifacts,
+    iProxy: IProxy.test(logger: logger, processManager: processManager),
+    interfaceType: interfaceType,
+    vmServiceConnectUri: (String string, {Log log}) async => MockVmService(),
   );
 }
 
 class MockArtifacts extends Mock implements Artifacts {}
 class MockCache extends Mock implements Cache {}
+class MockVmService extends Mock implements VmService {}

@@ -4,6 +4,9 @@
 
 import 'dart:async';
 
+import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -21,6 +24,36 @@ import '../src/common.dart';
 import '../src/context.dart';
 import '../src/mocks.dart';
 
+final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
+  id: '1',
+  pauseEvent: vm_service.Event(
+    kind: vm_service.EventKind.kResume,
+    timestamp: 0
+  ),
+  breakpoints: <vm_service.Breakpoint>[],
+  exceptionPauseMode: null,
+  libraries: <vm_service.LibraryRef>[],
+  livePorts: 0,
+  name: 'test',
+  number: '1',
+  pauseOnExit: false,
+  runnable: true,
+  startTime: 0,
+);
+
+final FlutterView fakeFlutterView = FlutterView(
+  id: 'a',
+  uiIsolate: fakeUnpausedIsolate,
+);
+
+final FakeVmServiceRequest listViews = FakeVmServiceRequest(
+  method: kListViewsMethod,
+  jsonResponse: <String, Object>{
+    'views': <Object>[
+      fakeFlutterView.toJson(),
+    ],
+  },
+);
 void main() {
   group('validateReloadReport', () {
     testUsingContext('invalid', () async {
@@ -101,7 +134,7 @@ void main() {
   group('hotRestart', () {
     final MockResidentCompiler residentCompiler = MockResidentCompiler();
     final MockDevFs mockDevFs = MockDevFs();
-    MockLocalEngineArtifacts mockArtifacts;
+    FileSystem fileSystem;
 
     when(mockDevFs.update(
       mainUri: anyNamed('mainUri'),
@@ -125,11 +158,13 @@ void main() {
     when(mockDevFs.lastCompiled).thenReturn(DateTime.now());
 
     setUp(() {
-      mockArtifacts = MockLocalEngineArtifacts();
-      when(mockArtifacts.getArtifactPath(Artifact.flutterPatchedSdkPath)).thenReturn('some/path');
+      fileSystem = MemoryFileSystem.test();
     });
 
     testUsingContext('Does not hot restart when device does not support it', () async {
+      fileSystem.file('.packages')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('\n');
       // Setup mocks
       final MockDevice mockDevice = MockDevice();
       when(mockDevice.supportsHotReload).thenReturn(true);
@@ -139,16 +174,25 @@ void main() {
       final List<FlutterDevice> devices = <FlutterDevice>[
         FlutterDevice(mockDevice, generator: residentCompiler, buildInfo: BuildInfo.debug)..devFS = mockDevFs,
       ];
-      final OperationResult result = await HotRunner(devices).restart(fullRestart: true);
+      final OperationResult result = await HotRunner(
+        devices,
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+      ).restart(fullRestart: true);
       // Expect hot restart failed.
       expect(result.isOk, false);
       expect(result.message, 'hotRestart not supported');
     }, overrides: <Type, Generator>{
-      Artifacts: () => mockArtifacts,
       HotRunnerConfig: () => TestHotRunnerConfig(successfulSetup: true),
+      Artifacts: () => Artifacts.test(),
+      FileSystem: () => fileSystem,
+      Platform: () => FakePlatform(operatingSystem: 'linux'),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('Does not hot restart when one of many devices does not support it', () async {
+      fileSystem.file('.packages')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('\n');
       // Setup mocks
       final MockDevice mockDevice = MockDevice();
       final MockDevice mockHotDevice = MockDevice();
@@ -161,59 +205,89 @@ void main() {
         FlutterDevice(mockDevice, generator: residentCompiler, buildInfo: BuildInfo.debug)..devFS = mockDevFs,
         FlutterDevice(mockHotDevice, generator: residentCompiler, buildInfo: BuildInfo.debug)..devFS = mockDevFs,
       ];
-      final OperationResult result = await HotRunner(devices).restart(fullRestart: true);
+      final OperationResult result = await HotRunner(
+        devices,
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug)
+      ).restart(fullRestart: true);
       // Expect hot restart failed.
       expect(result.isOk, false);
       expect(result.message, 'hotRestart not supported');
     }, overrides: <Type, Generator>{
-      Artifacts: () => mockArtifacts,
       HotRunnerConfig: () => TestHotRunnerConfig(successfulSetup: true),
+      Artifacts: () => Artifacts.test(),
+      FileSystem: () => fileSystem,
+      Platform: () => FakePlatform(operatingSystem: 'linux'),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('Does hot restarts when all devices support it', () async {
       final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+        listViews,
+        FakeVmServiceRequest(
+          method: 'getIsolate',
+          args: <String, Object>{
+            'isolateId': fakeUnpausedIsolate.id,
+          },
+          jsonResponse: fakeUnpausedIsolate.toJson(),
+        ),
+        FakeVmServiceRequest(
+          method: 'getVM',
+          jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson()
+        ),
+        listViews,
+        FakeVmServiceRequest(
+          method: 'getIsolate',
+          args: <String, Object>{
+            'isolateId': fakeUnpausedIsolate.id,
+          },
+          jsonResponse: fakeUnpausedIsolate.toJson(),
+        ),
+        FakeVmServiceRequest(
+          method: 'getVM',
+          jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson()
+        ),
+        listViews,
+        listViews,
         const FakeVmServiceRequest(
-          id: '1',
-          method: kListViewsMethod,
-          args: null,
-          jsonResponse: <String, Object>{
-            'views': <Object>[],
+          method: 'streamListen',
+          args: <String, Object>{
+            'streamId': 'Isolate',
           }
         ),
-         const FakeVmServiceRequest(
-          id: '2',
-          method: kListViewsMethod,
-          args: null,
-          jsonResponse: <String, Object>{
-            'views': <Object>[],
+        const FakeVmServiceRequest(
+          method: 'streamListen',
+          args: <String, Object>{
+            'streamId': 'Isolate',
+          }
+        ),
+        FakeVmServiceStreamResponse(
+          streamId: 'Isolate',
+          event: vm_service.Event(
+            timestamp: 0,
+            kind: vm_service.EventKind.kIsolateRunnable,
+          )
+        ),
+        FakeVmServiceStreamResponse(
+          streamId: 'Isolate',
+          event: vm_service.Event(
+            timestamp: 0,
+            kind: vm_service.EventKind.kIsolateRunnable,
+          )
+        ),
+        FakeVmServiceRequest(
+          method: kRunInViewMethod,
+          args: <String, Object>{
+            'viewId': fakeFlutterView.id,
+            'mainScript': 'lib/main.dart.dill',
+            'assetDirectory': 'build/flutter_assets',
           }
         ),
         FakeVmServiceRequest(
-          id: '3',
-          method: 'getVM',
-          args: null,
-          jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson()
-        ),
-        FakeVmServiceRequest(
-          id: '4',
-          method: 'getVM',
-          args: null,
-          jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson()
-        ),
-        const FakeVmServiceRequest(
-          id: '5',
-          method: kListViewsMethod,
-          args: null,
-          jsonResponse: <String, Object>{
-            'views': <Object>[],
-          }
-        ),
-        const FakeVmServiceRequest(
-          id: '6',
-          method: kListViewsMethod,
-          args: null,
-          jsonResponse: <String, Object>{
-            'views': <Object>[],
+          method: kRunInViewMethod,
+          args: <String, Object>{
+            'viewId': fakeFlutterView.id,
+            'mainScript': 'lib/main.dart.dill',
+            'assetDirectory': 'build/flutter_assets',
           }
         ),
       ]);
@@ -233,18 +307,27 @@ void main() {
           ..vmService = fakeVmServiceHost.vmService
           ..devFS = mockDevFs,
       ];
-      final HotRunner hotRunner = HotRunner(devices);
+      final HotRunner hotRunner = HotRunner(
+        devices,
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+      );
       final OperationResult result = await hotRunner.restart(fullRestart: true);
       // Expect hot restart was successful.
       expect(hotRunner.uri, mockDevFs.baseUri);
       expect(result.isOk, true);
       expect(result.message, isNot('hotRestart not supported'));
     }, overrides: <Type, Generator>{
-      Artifacts: () => mockArtifacts,
       HotRunnerConfig: () => TestHotRunnerConfig(successfulSetup: true),
+      Artifacts: () => Artifacts.test(),
+      FileSystem: () => fileSystem,
+      Platform: () => FakePlatform(operatingSystem: 'linux'),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('setup function fails', () async {
+      fileSystem.file('.packages')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('\n');
       final MockDevice mockDevice = MockDevice();
       when(mockDevice.supportsHotReload).thenReturn(true);
       when(mockDevice.supportsHotRestart).thenReturn(true);
@@ -252,38 +335,59 @@ void main() {
       final List<FlutterDevice> devices = <FlutterDevice>[
         FlutterDevice(mockDevice, generator: residentCompiler, buildInfo: BuildInfo.debug),
       ];
-      final OperationResult result = await HotRunner(devices).restart(fullRestart: true);
+      final OperationResult result = await HotRunner(
+        devices,
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+      ).restart(fullRestart: true);
       expect(result.isOk, false);
       expect(result.message, 'setupHotRestart failed');
     }, overrides: <Type, Generator>{
-      Artifacts: () => mockArtifacts,
       HotRunnerConfig: () => TestHotRunnerConfig(successfulSetup: false),
+      Artifacts: () => Artifacts.test(),
+      FileSystem: () => fileSystem,
+      Platform: () => FakePlatform(operatingSystem: 'linux'),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('hot restart supported', () async {
+      fileSystem.file('.packages')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('\n');
       // Setup mocks
       final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+        listViews,
+        FakeVmServiceRequest(
+          method: 'getIsolate',
+          args: <String, Object>{
+            'isolateId': fakeUnpausedIsolate.id,
+          },
+          jsonResponse: fakeUnpausedIsolate.toJson(),
+        ),
+        FakeVmServiceRequest(
+          method: 'getVM',
+          jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson(),
+        ),
+        listViews,
         const FakeVmServiceRequest(
-          id: '1',
-          method: kListViewsMethod,
-          args: null,
-          jsonResponse: <String, Object>{
-            'views': <Object>[],
+          method: 'streamListen',
+          args: <String, Object>{
+            'streamId': 'Isolate',
           }
         ),
         FakeVmServiceRequest(
-          id: '2',
-          method: 'getVM',
-          args: null,
-          jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson()
-        ),
-        const FakeVmServiceRequest(
-          id: '3',
-          method: kListViewsMethod,
-          args: null,
-          jsonResponse: <String, Object>{
-            'views': <Object>[],
+          method: kRunInViewMethod,
+          args: <String, Object>{
+            'viewId': fakeFlutterView.id,
+            'mainScript': 'lib/main.dart.dill',
+            'assetDirectory': 'build/flutter_assets',
           }
+        ),
+        FakeVmServiceStreamResponse(
+          streamId: 'Isolate',
+          event: vm_service.Event(
+            timestamp: 0,
+            kind: vm_service.EventKind.kIsolateRunnable,
+          )
         ),
       ]);
       final MockDevice mockDevice = MockDevice();
@@ -296,15 +400,21 @@ void main() {
           ..vmService = fakeVmServiceHost.vmService
           ..devFS = mockDevFs,
       ];
-      final HotRunner hotRunner = HotRunner(devices);
+      final HotRunner hotRunner = HotRunner(
+        devices,
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+      );
       final OperationResult result = await hotRunner.restart(fullRestart: true);
       // Expect hot restart successful.
       expect(hotRunner.uri, mockDevFs.baseUri);
       expect(result.isOk, true);
       expect(result.message, isNot('setupHotRestart failed'));
     }, overrides: <Type, Generator>{
-      Artifacts: () => mockArtifacts,
       HotRunnerConfig: () => TestHotRunnerConfig(successfulSetup: true),
+      Artifacts: () => Artifacts.test(),
+      FileSystem: () => fileSystem,
+      Platform: () => FakePlatform(operatingSystem: 'linux'),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     group('shutdown hook tests', () {
@@ -317,6 +427,9 @@ void main() {
       });
 
       testUsingContext('shutdown hook called after signal', () async {
+        fileSystem.file('.packages')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('\n');
         final MockDevice mockDevice = MockDevice();
         when(mockDevice.supportsHotReload).thenReturn(true);
         when(mockDevice.supportsHotRestart).thenReturn(true);
@@ -324,14 +437,23 @@ void main() {
         final List<FlutterDevice> devices = <FlutterDevice>[
           FlutterDevice(mockDevice, generator: residentCompiler, buildInfo: BuildInfo.debug),
         ];
-        await HotRunner(devices).cleanupAfterSignal();
+        await HotRunner(
+          devices,
+          debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug)
+        ).cleanupAfterSignal();
         expect(shutdownTestingConfig.shutdownHookCalled, true);
       }, overrides: <Type, Generator>{
-        Artifacts: () => mockArtifacts,
         HotRunnerConfig: () => shutdownTestingConfig,
+        Artifacts: () => Artifacts.test(),
+        FileSystem: () => fileSystem,
+        Platform: () => FakePlatform(operatingSystem: 'linux'),
+        ProcessManager: () => FakeProcessManager.any(),
       });
 
       testUsingContext('shutdown hook called after app stop', () async {
+        fileSystem.file('.packages')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('\n');
         final MockDevice mockDevice = MockDevice();
         when(mockDevice.supportsHotReload).thenReturn(true);
         when(mockDevice.supportsHotRestart).thenReturn(true);
@@ -339,25 +461,35 @@ void main() {
         final List<FlutterDevice> devices = <FlutterDevice>[
           FlutterDevice(mockDevice, generator: residentCompiler, buildInfo: BuildInfo.debug),
         ];
-        await HotRunner(devices).preExit();
+        await HotRunner(
+          devices,
+          debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug)
+        ).preExit();
         expect(shutdownTestingConfig.shutdownHookCalled, true);
       }, overrides: <Type, Generator>{
-        Artifacts: () => mockArtifacts,
         HotRunnerConfig: () => shutdownTestingConfig,
+        Artifacts: () => Artifacts.test(),
+        FileSystem: () => fileSystem,
+        Platform: () => FakePlatform(operatingSystem: 'linux'),
+        ProcessManager: () => FakeProcessManager.any(),
       });
     });
   });
 
   group('hot attach', () {
-    MockResidentCompiler residentCompiler = MockResidentCompiler();
-    MockLocalEngineArtifacts mockArtifacts;
+    FileSystem fileSystem;
 
     setUp(() {
-      residentCompiler = MockResidentCompiler();
-      mockArtifacts = MockLocalEngineArtifacts();
+      fileSystem = MemoryFileSystem.test();
     });
 
-    testUsingContext('Prints message when HttpException is thrown - 1', () async {
+    testUsingContext('Exits with code 2 when when HttpException is thrown '
+      'during VM service connection', () async {
+      fileSystem.file('.packages')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('\n');
+
+      final MockResidentCompiler residentCompiler = MockResidentCompiler();
       final MockDevice mockDevice = MockDevice();
       when(mockDevice.supportsHotReload).thenReturn(true);
       when(mockDevice.supportsHotRestart).thenReturn(false);
@@ -377,41 +509,12 @@ void main() {
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ).attach();
       expect(exitCode, 2);
-      expect(testLogger.statusText, contains('If you are using an emulator running Android Q Beta, '
-          'consider using an emulator running API level 29 or lower.'));
-      expect(testLogger.statusText, contains('Learn more about the status of this issue on '
-          'https://issuetracker.google.com/issues/132325318'));
     }, overrides: <Type, Generator>{
-      Artifacts: () => mockArtifacts,
       HotRunnerConfig: () => TestHotRunnerConfig(successfulSetup: true),
-    });
-
-    testUsingContext('Prints message when HttpException is thrown - 2', () async {
-      final MockDevice mockDevice = MockDevice();
-      when(mockDevice.supportsHotReload).thenReturn(true);
-      when(mockDevice.supportsHotRestart).thenReturn(false);
-      when(mockDevice.targetPlatform).thenAnswer((Invocation _) async => TargetPlatform.tester);
-      when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation _) async => 'Android 10');
-
-      final List<FlutterDevice> devices = <FlutterDevice>[
-        TestFlutterDevice(
-          device: mockDevice,
-          generator: residentCompiler,
-          exception: const HttpException(', uri = http://127.0.0.1:63394/5ZmLv8A59xY=/ws'),
-        ),
-      ];
-
-      final int exitCode = await HotRunner(devices,
-        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-      ).attach();
-      expect(exitCode, 2);
-      expect(testLogger.statusText, contains('If you are using an emulator running Android Q Beta, '
-          'consider using an emulator running API level 29 or lower.'));
-      expect(testLogger.statusText, contains('Learn more about the status of this issue on '
-          'https://issuetracker.google.com/issues/132325318'));
-    }, overrides: <Type, Generator>{
-      Artifacts: () => mockArtifacts,
-      HotRunnerConfig: () => TestHotRunnerConfig(successfulSetup: true),
+      Artifacts: () => Artifacts.test(),
+      FileSystem: () => fileSystem,
+      Platform: () => FakePlatform(operatingSystem: 'linux'),
+      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 
@@ -448,8 +551,6 @@ void main() {
 
 class MockDevFs extends Mock implements DevFS {}
 
-class MockLocalEngineArtifacts extends Mock implements LocalEngineArtifacts {}
-
 class MockDevice extends Mock implements Device {
   MockDevice() {
     when(isSupported()).thenReturn(true);
@@ -475,6 +576,10 @@ class TestFlutterDevice extends FlutterDevice {
     Restart restart,
     CompileExpression compileExpression,
     ReloadMethod reloadMethod,
+    GetSkSLMethod getSkSLMethod,
+    PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
+    bool disableDds = false,
+    bool ipv6 = false,
   }) async {
     throw exception;
   }

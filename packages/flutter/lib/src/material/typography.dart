@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
@@ -39,7 +41,7 @@ enum ScriptCategory {
   tall,
 }
 
-/// The color and geometry [TextThemes] for Material apps.
+/// The color and geometry [TextTheme]s for Material apps.
 ///
 /// The text themes provided by the overall [Theme], like
 /// [ThemeData.textTheme], are based on the current locale's
@@ -54,7 +56,7 @@ enum ScriptCategory {
 /// `Theme.of(context).accentTextTheme`.
 ///
 /// The color text themes are [blackMountainView], [whiteMountainView],
-/// [blackCupertino], and [whiteCupertino]. The Mountain View theme [TextStyles]
+/// [blackCupertino], and [whiteCupertino]. The Mountain View theme [TextStyle]s
 /// are based on the Roboto fonts as used on Android. The Cupertino themes are
 /// based on the [San Francisco
 /// font](https://developer.apple.com/ios/human-interface-guidelines/visual-design/typography/)
@@ -109,7 +111,7 @@ class Typography with Diagnosticable {
   /// If [platform] is [TargetPlatform.iOS] or [TargetPlatform.macOS], the
   /// default values for [black] and [white] are [blackCupertino] and
   /// [whiteCupertino] respectively. Otherwise they are [blackMountainView] and
-  /// [whiteMoutainView]. If [platform] is null then both [black] and [white]
+  /// [whiteMountainView]. If [platform] is null then both [black] and [white]
   /// must be specified.
   ///
   /// The default values for [englishLike], [dense], and [tall] are
@@ -137,7 +139,7 @@ class Typography with Diagnosticable {
   /// If [platform] is [TargetPlatform.iOS] or [TargetPlatform.macOS], the
   /// default values for [black] and [white] are [blackCupertino] and
   /// [whiteCupertino] respectively. Otherwise they are [blackMountainView] and
-  /// [whiteMoutainView]. If [platform] is null then both [black] and [white]
+  /// [whiteMountainView]. If [platform] is null then both [black] and [white]
   /// must be specified.
   ///
   /// The default values for [englishLike], [dense], and [tall] are
@@ -526,7 +528,7 @@ class Typography with Diagnosticable {
     bodyText2 : TextStyle(debugLabel: 'englishLike bodyText2 2018', fontSize: 14.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.25),
     subtitle1 : TextStyle(debugLabel: 'englishLike subtitle1 2018', fontSize: 16.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.15),
     subtitle2 : TextStyle(debugLabel: 'englishLike subtitle2 2018', fontSize: 14.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.1),
-    button    : TextStyle(debugLabel: 'englishLike button 2018',    fontSize: 14.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.75),
+    button    : TextStyle(debugLabel: 'englishLike button 2018',    fontSize: 14.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic, letterSpacing: 1.25),
     caption   : TextStyle(debugLabel: 'englishLike caption 2018',   fontSize: 12.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.4),
     overline  : TextStyle(debugLabel: 'englishLike overline 2018',  fontSize: 10.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 1.5),
   );

@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
+import 'dart:collection' show LinkedHashMap;
 import 'dart:typed_data';
 import 'dart:ui' as ui show Gradient, Image, ImageFilter;
 
@@ -258,7 +261,7 @@ void main() {
     expect(getPixel(20, 20), equals(0x00000080));
     expect(getPixel(image.width - 1, 0), equals(0x00000000));
     expect(getPixel(image.width - 1, 20), equals(0xffffffff));
-  }, skip: isBrowser);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42767
 
   test('RenderOpacity does not composite if it is transparent', () {
     final RenderOpacity renderOpacity = RenderOpacity(
@@ -431,6 +434,7 @@ void main() {
     _testLayerReuse<ClipRectLayer>(RenderFittedBox(
       alignment: Alignment.center,
       fit: BoxFit.cover,
+      clipBehavior: Clip.hardEdge,
       // Inject opacity under the clip to force compositing.
       child: RenderOpacity(
         opacity: 0.5,
@@ -468,10 +472,28 @@ void main() {
     _testFittedBoxWithClipRectLayer();
   });
 
+  test('RenderFittedBox respects clipBehavior', () {
+    const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
+    final TestClipPaintingContext context = TestClipPaintingContext();
+
+    // By default, clipBehavior should be Clip.none
+    final RenderFittedBox defaultBox = RenderFittedBox(child: box200x200, fit: BoxFit.none);
+    layout(defaultBox, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
+    defaultBox.paint(context, Offset.zero);
+    expect(context.clipBehavior, equals(Clip.none));
+
+    for (final Clip clip in Clip.values) {
+      final RenderFittedBox box = RenderFittedBox(child: box200x200, fit: BoxFit.none, clipBehavior: clip);
+      layout(box, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
+      box.paint(context, Offset.zero);
+      expect(context.clipBehavior, equals(clip));
+    }
+  });
+
   test('RenderMouseRegion can change properties when detached', () {
     renderer.initMouseTracker(MouseTracker(
       renderer.pointerRouter,
-      (_) => <MouseTrackerAnnotation>[],
+      (_) => <MouseTrackerAnnotation, Matrix4>{} as LinkedHashMap<MouseTrackerAnnotation, Matrix4>,
     ));
     final RenderMouseRegion object = RenderMouseRegion();
     object

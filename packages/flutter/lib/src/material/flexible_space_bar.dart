@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
@@ -39,10 +41,13 @@ enum StretchMode {
 /// The part of a material design [AppBar] that expands, collapses, and
 /// stretches.
 ///
-/// Most commonly used in in the [SliverAppBar.flexibleSpace] field, a flexible
+/// Most commonly used in the [SliverAppBar.flexibleSpace] field, a flexible
 /// space bar expands and contracts as the app scrolls so that the [AppBar]
 /// reaches from the top of the app to the top of the scrolling contents of the
-/// app. Furthermore is included functionality for stretch behavior. When
+/// app. When using [SliverAppBar.flexibleSpace], the [SliverAppBar.expandedHeight]
+/// must be large enough to accommodate the [SliverAppBar.flexibleSpace] widget.
+///
+/// Furthermore is included functionality for stretch behavior. When
 /// [SliverAppBar.stretch] is true, and your [ScrollPhysics] allow for
 /// overscroll, this space will stretch with the overscroll.
 ///

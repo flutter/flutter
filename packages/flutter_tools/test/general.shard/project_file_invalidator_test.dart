@@ -5,11 +5,10 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:package_config/package_config.dart';
-
-import 'package:platform/platform.dart';
 
 import '../src/common.dart';
 
@@ -85,7 +84,7 @@ void main() {
       ', asyncScanning: $asyncScanning', () async {
       final DateTime past = DateTime.now().subtract(const Duration(seconds: 1));
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final PackageConfig packageConfig = PackageConfig.empty;
+      const PackageConfig packageConfig = PackageConfig.empty;
       final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
         fileSystem: fileSystem,
         platform: FakePlatform(),
@@ -127,7 +126,7 @@ void main() {
     testWithoutContext('Picks up changes to the .packages file and updates PackageConfig'
       ', asyncScanning: $asyncScanning', () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final PackageConfig packageConfig = PackageConfig.empty;
+      const PackageConfig packageConfig = PackageConfig.empty;
       final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
         fileSystem: fileSystem,
         platform: FakePlatform(),

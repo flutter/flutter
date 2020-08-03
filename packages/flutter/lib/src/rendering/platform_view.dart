@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:ui';
 
@@ -10,8 +12,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
+import 'binding.dart';
 import 'box.dart';
 import 'layer.dart';
+import 'mouse_cursor.dart';
 import 'mouse_tracking.dart';
 import 'object.dart';
 
@@ -65,7 +69,7 @@ Set<Type> _factoriesTypeSet<T>(Set<Factory<T>> factories) {
 /// {@endtemplate}
 ///
 /// {@template flutter.rendering.platformView.gestures}
-/// The render object participates in Flutter's [GestureArena]s, and dispatches touch events to the
+/// The render object participates in Flutter's gesture arenas, and dispatches touch events to the
 /// platform view iff it won the arena. Specific gestures that should be dispatched to the platform
 /// view can be specified with factories in the `gestureRecognizers` constructor parameter or
 /// by calling `updateGestureRecognizers`. If the set of gesture recognizers is empty, the gesture
@@ -87,7 +91,7 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
        assert(hitTestBehavior != null),
        assert(gestureRecognizers != null),
        _viewController = viewController {
-    _motionEventsDispatcher = _MotionEventsDispatcher(globalToLocal, viewController);
+    _viewController.pointTransformer = (Offset offset) => globalToLocal(offset);
     updateGestureRecognizers(gestureRecognizers);
     _viewController.addOnPlatformViewCreatedListener(_onPlatformViewCreated);
     this.hitTestBehavior = hitTestBehavior;
@@ -136,7 +140,7 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
   /// Any active gesture arena the Android view participates in is rejected when the
   /// set of gesture recognizers is changed.
   void updateGestureRecognizers(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers) {
-    _updateGestureRecognizersWithCallBack(gestureRecognizers, _motionEventsDispatcher.handlePointerEvent);
+    _updateGestureRecognizersWithCallBack(gestureRecognizers, _viewController.dispatchPointerEvent);
   }
 
   @override
@@ -147,8 +151,6 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
 
   @override
   bool get isRepaintBoundary => true;
-
-  _MotionEventsDispatcher _motionEventsDispatcher;
 
   @override
   void performResize() {
@@ -222,7 +224,7 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
     config.isSemanticBoundary = true;
 
     if (_viewController.isCreated) {
-      config.platformViewId = _viewController.id;
+      config.platformViewId = _viewController.viewId;
     }
   }
 }
@@ -230,10 +232,10 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
 /// A render object for an iOS UIKit UIView.
 ///
 /// {@template flutter.rendering.platformView.preview}
-/// Embedding UIViews is still in release preview, to enable the preview for an iOS app add a boolean
+/// Embedding UIViews is still preview-quality. To enable the preview for an iOS app add a boolean
 /// field with the key 'io.flutter.embedded_views_preview' and the value set to 'YES' to the
 /// application's Info.plist file. A list of open issued with embedding UIViews is available on
-/// [Github](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22a%3A+platform-views%22+label%3A%22%E2%8C%BA%E2%80%AC+platform-ios%22)
+/// [Github](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22a%3A+platform-views%22+label%3Aplatform-ios+sort%3Acreated-asc)
 /// {@endtemplate}
 ///
 /// [RenderUiKitView] is responsible for sizing and displaying an iOS
@@ -400,7 +402,19 @@ class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
     team.captain = this;
     _gestureRecognizers = gestureRecognizerFactories.map(
       (Factory<OneSequenceGestureRecognizer> recognizerFactory) {
-        return recognizerFactory.constructor()..team = team;
+        final OneSequenceGestureRecognizer gestureRecognizer = recognizerFactory.constructor();
+        gestureRecognizer.team = team;
+        // The below gesture recognizers requires at least one non-empty callback to
+        // compete in the gesture arena.
+        // https://github.com/flutter/flutter/issues/35394#issuecomment-562285087
+        if (gestureRecognizer is LongPressGestureRecognizer) {
+          gestureRecognizer.onLongPress ??= (){};
+        } else if (gestureRecognizer is DragGestureRecognizer) {
+          gestureRecognizer.onDown ??= (_){};
+        } else if (gestureRecognizer is TapGestureRecognizer) {
+          gestureRecognizer.onTapDown ??= (_){};
+        }
+        return gestureRecognizer;
       },
     ).toSet();
   }
@@ -448,7 +462,7 @@ class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 }
 
-typedef _HandlePointerEvent = void Function(PointerEvent event);
+typedef _HandlePointerEvent = Future<void> Function(PointerEvent event);
 
 // This recognizer constructs gesture recognizers from a set of gesture recognizer factories
 // it was give, adds all of them to a gesture arena team with the _PlatformViewGestureRecognizer
@@ -466,7 +480,19 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
     team.captain = this;
     _gestureRecognizers = gestureRecognizerFactories.map(
       (Factory<OneSequenceGestureRecognizer> recognizerFactory) {
-        return recognizerFactory.constructor()..team = team;
+        final OneSequenceGestureRecognizer gestureRecognizer = recognizerFactory.constructor();
+        gestureRecognizer.team = team;
+        // The below gesture recognizers requires at least one non-empty callback to
+        // compete in the gesture arena.
+        // https://github.com/flutter/flutter/issues/35394#issuecomment-562285087
+        if (gestureRecognizer is LongPressGestureRecognizer) {
+          gestureRecognizer.onLongPress ??= (){};
+        } else if (gestureRecognizer is DragGestureRecognizer) {
+          gestureRecognizer.onDown ??= (_){};
+        } else if (gestureRecognizer is TapGestureRecognizer) {
+          gestureRecognizer.onTapDown ??= (_){};
+        }
+        return gestureRecognizer;
       },
     ).toSet();
     _handlePointerEvent = handlePointerEvent;
@@ -552,144 +578,6 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 }
 
-typedef _GlobalToLocal = Offset Function(Offset point);
-
-// Composes a stream of PointerEvent objects into AndroidMotionEvent objects
-// and dispatches them to the associated embedded Android view.
-class _MotionEventsDispatcher {
-  _MotionEventsDispatcher(this.globalToLocal, this.viewController);
-
-  final Map<int, AndroidPointerCoords> pointerPositions = <int, AndroidPointerCoords>{};
-  final Map<int, AndroidPointerProperties> pointerProperties = <int, AndroidPointerProperties>{};
-  final _GlobalToLocal globalToLocal;
-  final AndroidViewController viewController;
-
-  int nextPointerId = 0;
-  int downTimeMillis;
-
-  void handlePointerEvent(PointerEvent event) {
-    if (event is PointerDownEvent) {
-      if (nextPointerId == 0)
-        downTimeMillis = event.timeStamp.inMilliseconds;
-      pointerProperties[event.pointer] = propertiesFor(event, nextPointerId++);
-    }
-    pointerPositions[event.pointer] = coordsFor(event);
-
-    dispatchPointerEvent(event);
-
-    if (event is PointerUpEvent) {
-      pointerPositions.remove(event.pointer);
-      pointerProperties.remove(event.pointer);
-      if (pointerProperties.isEmpty) {
-        nextPointerId = 0;
-        downTimeMillis = null;
-      }
-    }
-    if (event is PointerCancelEvent) {
-      pointerPositions.clear();
-      pointerProperties.clear();
-      nextPointerId = 0;
-      downTimeMillis = null;
-    }
-  }
-
-  void dispatchPointerEvent(PointerEvent event) {
-    final List<int> pointers = pointerPositions.keys.toList();
-    final int pointerIdx = pointers.indexOf(event.pointer);
-    final int numPointers = pointers.length;
-
-    // This value must match the value in engine's FlutterView.java.
-    // This flag indicates whether the original Android pointer events were batched together.
-    const int kPointerDataFlagBatched = 1;
-
-    // Android MotionEvent objects can batch information on multiple pointers.
-    // Flutter breaks these such batched events into multiple PointerEvent objects.
-    // When there are multiple active pointers we accumulate the information for all pointers
-    // as we get PointerEvents, and only send it to the embedded Android view when
-    // we see the last pointer. This way we achieve the same batching as Android.
-    if (event.platformData == kPointerDataFlagBatched ||
-        (isSinglePointerAction(event) && pointerIdx < numPointers - 1))
-      return;
-
-    int action;
-    switch (event.runtimeType) {
-      case PointerDownEvent:
-        action = numPointers == 1 ? AndroidViewController.kActionDown
-            : AndroidViewController.pointerAction(pointerIdx, AndroidViewController.kActionPointerDown);
-        break;
-      case PointerUpEvent:
-        action = numPointers == 1 ? AndroidViewController.kActionUp
-            : AndroidViewController.pointerAction(pointerIdx, AndroidViewController.kActionPointerUp);
-        break;
-      case PointerMoveEvent:
-        action = AndroidViewController.kActionMove;
-        break;
-      case PointerCancelEvent:
-        action = AndroidViewController.kActionCancel;
-        break;
-      default:
-        return;
-    }
-
-    final AndroidMotionEvent androidMotionEvent = AndroidMotionEvent(
-        downTime: downTimeMillis,
-        eventTime: event.timeStamp.inMilliseconds,
-        action: action,
-        pointerCount: pointerPositions.length,
-        pointerProperties: pointers.map<AndroidPointerProperties>((int i) => pointerProperties[i]).toList(),
-        pointerCoords: pointers.map<AndroidPointerCoords>((int i) => pointerPositions[i]).toList(),
-        metaState: 0,
-        buttonState: 0,
-        xPrecision: 1.0,
-        yPrecision: 1.0,
-        deviceId: 0,
-        edgeFlags: 0,
-        source: 0,
-        flags: 0,
-    );
-    viewController.sendMotionEvent(androidMotionEvent);
-  }
-
-  AndroidPointerCoords coordsFor(PointerEvent event) {
-    final Offset position = globalToLocal(event.position);
-    return AndroidPointerCoords(
-        orientation: event.orientation,
-        pressure: event.pressure,
-        size: event.size,
-        toolMajor: event.radiusMajor,
-        toolMinor: event.radiusMinor,
-        touchMajor: event.radiusMajor,
-        touchMinor: event.radiusMinor,
-        x: position.dx,
-        y: position.dy,
-    );
-  }
-
-  AndroidPointerProperties propertiesFor(PointerEvent event, int pointerId) {
-    int toolType = AndroidPointerProperties.kToolTypeUnknown;
-    switch(event.kind) {
-      case PointerDeviceKind.touch:
-        toolType = AndroidPointerProperties.kToolTypeFinger;
-        break;
-      case PointerDeviceKind.mouse:
-        toolType = AndroidPointerProperties.kToolTypeMouse;
-        break;
-      case PointerDeviceKind.stylus:
-        toolType = AndroidPointerProperties.kToolTypeStylus;
-        break;
-      case PointerDeviceKind.invertedStylus:
-        toolType = AndroidPointerProperties.kToolTypeEraser;
-        break;
-      case PointerDeviceKind.unknown:
-        toolType = AndroidPointerProperties.kToolTypeUnknown;
-        break;
-    }
-    return AndroidPointerProperties(id: pointerId, toolType: toolType);
-  }
-
-  bool isSinglePointerAction(PointerEvent event) => event is! PointerDownEvent && event is! PointerUpEvent;
-}
-
 /// A render object for embedding a platform view.
 ///
 /// [PlatformViewRenderBox] presents a platform view by adding a [PlatformViewLayer] layer,
@@ -757,9 +645,9 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
   void paint(PaintingContext context, Offset offset) {
     assert(_controller.viewId != null);
     context.addLayer(PlatformViewLayer(
-            rect: offset & size,
-            viewId: _controller.viewId,
-            hoverAnnotation: _hoverAnnotation));
+      rect: offset & size,
+      viewId: _controller.viewId,
+    ));
   }
 
   @override
@@ -772,22 +660,18 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
 }
 
 /// The Mixin handling the pointer events and gestures of a platform view render box.
-mixin _PlatformViewGestureMixin on RenderBox {
+mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
 
   /// How to behave during hit testing.
-  // The implicit setter is enough here as changing this value will just affect
-  // any newly arriving events there's nothing we need to invalidate.
-  PlatformViewHitTestBehavior hitTestBehavior;
-
-  /// [MouseTrackerAnnotation] associated with the platform view layer.
-  ///
-  /// Gesture recognizers don't receive hover events due to the performance
-  /// cost associated with hit testing a sequence of potentially thousands of
-  /// events -- move events only hit-test the down event, then cache the result
-  /// and apply it to all subsequent move events, but there is no down event
-  /// for a hover. To support native hover gesture handling by platform views,
-  /// we attach/detach this layer annotation as necessary.
-  MouseTrackerAnnotation _hoverAnnotation;
+  // Changing _hitTestBehavior might affect which objects are considered hovered over.
+  set hitTestBehavior(PlatformViewHitTestBehavior value) {
+    if (value != _hitTestBehavior) {
+      _hitTestBehavior = value;
+      if (owner != null)
+        RendererBinding.instance.mouseTracker.schedulePostFrameCheck();
+    }
+  }
+  PlatformViewHitTestBehavior _hitTestBehavior;
 
   _HandlePointerEvent _handlePointerEvent;
 
@@ -813,15 +697,31 @@ mixin _PlatformViewGestureMixin on RenderBox {
 
   @override
   bool hitTest(BoxHitTestResult result, { Offset position }) {
-    if (hitTestBehavior == PlatformViewHitTestBehavior.transparent || !size.contains(position)) {
+    if (_hitTestBehavior == PlatformViewHitTestBehavior.transparent || !size.contains(position)) {
       return false;
     }
     result.add(BoxHitTestEntry(this, position));
-    return hitTestBehavior == PlatformViewHitTestBehavior.opaque;
+    return _hitTestBehavior == PlatformViewHitTestBehavior.opaque;
   }
 
   @override
-  bool hitTestSelf(Offset position) => hitTestBehavior != PlatformViewHitTestBehavior.transparent;
+  bool hitTestSelf(Offset position) => _hitTestBehavior != PlatformViewHitTestBehavior.transparent;
+
+  @override
+  PointerEnterEventListener get onEnter => null;
+
+  @override
+  PointerHoverEventListener get onHover => _handleHover;
+  void _handleHover(PointerHoverEvent event) {
+    if (_handlePointerEvent != null)
+      _handlePointerEvent(event);
+  }
+
+  @override
+  PointerExitEventListener get onExit => null;
+
+  @override
+  MouseCursor get cursor => MouseCursor.uncontrolled;
 
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
@@ -831,19 +731,8 @@ mixin _PlatformViewGestureMixin on RenderBox {
   }
 
   @override
-  void attach(PipelineOwner owner) {
-    super.attach(owner);
-    assert(_hoverAnnotation == null);
-    _hoverAnnotation = MouseTrackerAnnotation(onHover: (PointerHoverEvent event) {
-      if (_handlePointerEvent != null)
-        _handlePointerEvent(event);
-    });
-  }
-
-  @override
   void detach() {
     _gestureRecognizer.reset();
-    _hoverAnnotation = null;
     super.detach();
   }
 }

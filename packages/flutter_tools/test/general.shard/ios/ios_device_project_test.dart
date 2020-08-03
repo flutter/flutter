@@ -6,11 +6,13 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
+import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
-import 'package:platform/platform.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -88,8 +90,11 @@ IOSDevice setUpIOSDevice(FileSystem fileSystem) {
     name: 'iPhone 1',
     sdkVersion: '13.3',
     cpuArchitecture: DarwinArch.arm64,
-    artifacts: artifacts,
+    iProxy: IProxy.test(logger: BufferLogger.test(), processManager: FakeProcessManager.any()),
+    interfaceType: IOSDeviceInterface.usb,
+    vmServiceConnectUri: (String string, {Log log}) async => MockVmService(),
   );
 }
 
 class MockArtifacts extends Mock implements Artifacts {}
+class MockVmService extends Mock implements VmService {}

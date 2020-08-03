@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui' as ui show ParagraphStyle, TextStyle, StrutStyle, lerpDouble, Shadow, FontFeature, TextHeightBehavior;
 
 import 'package:flutter/foundation.dart';
@@ -283,7 +285,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// ```
 /// {@end-tool}
 ///
-/// To use a font family defined in a package, the [package] argument must be
+/// To use a font family defined in a package, the `package` argument must be
 /// provided. For instance, suppose the font declaration above is in the
 /// `pubspec.yaml` of a package named `my_package` which the app depends on.
 /// Then creating the TextStyle is done as follows:
@@ -482,7 +484,7 @@ class TextStyle with Diagnosticable {
   ///
   /// When [fontFamily] is null or not provided, the first value in [fontFamilyFallback]
   /// acts as the preferred/first font family. When neither is provided, then
-  /// the default platform font will be used. Providing and empty list or null
+  /// the default platform font will be used. Providing an empty list or null
   /// for this property is the same as omitting it.
   ///
   /// For example, if a glyph is not found in [fontFamily], then each font family
@@ -1086,7 +1088,7 @@ class TextStyle with Diagnosticable {
     return ui.ParagraphStyle(
       textAlign: textAlign,
       textDirection: textDirection,
-      // Here, we stablish the contents of this TextStyle as the paragraph's default font
+      // Here, we establish the contents of this TextStyle as the paragraph's default font
       // unless an override is passed in.
       fontWeight: fontWeight ?? this.fontWeight,
       fontStyle: fontStyle ?? this.fontStyle,

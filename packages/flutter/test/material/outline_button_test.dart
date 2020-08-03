@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -34,7 +36,7 @@ void main() {
     expect(material.clipBehavior, Clip.none);
     expect(material.color, const Color(0x00000000));
     expect(material.elevation, 0.0);
-    expect(material.shadowColor, const Color(0xff000000));
+    expect(material.shadowColor, null);
     expect(material.textStyle.color, const Color(0xdd000000));
     expect(material.textStyle.fontFamily, 'Roboto');
     expect(material.textStyle.fontSize, 14);
@@ -53,7 +55,7 @@ void main() {
     expect(material.clipBehavior, Clip.none);
     expect(material.color, const Color(0x00000000));
     expect(material.elevation, 0.0);
-    expect(material.shadowColor, const Color(0xff000000));
+    expect(material.shadowColor, null);
     expect(material.textStyle.color, const Color(0xdd000000));
     expect(material.textStyle.fontFamily, 'Roboto');
     expect(material.textStyle.fontSize, 14);
@@ -77,7 +79,7 @@ void main() {
     expect(material.clipBehavior, Clip.none);
     expect(material.color, const Color(0x00000000));
     expect(material.elevation, 0.0);
-    expect(material.shadowColor, const Color(0xff000000));
+    expect(material.shadowColor, null);
     expect(material.textStyle.color, const Color(0x61000000));
     expect(material.textStyle.fontFamily, 'Roboto');
     expect(material.textStyle.fontSize, 14);
@@ -109,6 +111,75 @@ void main() {
     gesture.removePointer();
   });
 
+  testWidgets('OutlineButton changes mouse cursor when hovered', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: OutlineButton.icon(
+            icon: const Icon(Icons.add),
+            label: const Text('Hello'),
+            onPressed: () {},
+            mouseCursor: SystemMouseCursors.text,
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: const Offset(1, 1));
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: OutlineButton(
+            onPressed: () {},
+            mouseCursor: SystemMouseCursors.text,
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    // Test default cursor
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: OutlineButton(
+            onPressed: () {},
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    // Test default cursor when disabled
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: OutlineButton(
+            onPressed: null,
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+  });
+
   testWidgets('Does OutlineButton work with focus', (WidgetTester tester) async {
     const Color focusColor = Color(0xff001122);
 
@@ -127,6 +198,30 @@ void main() {
 
     FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     focusNode.requestFocus();
+    await tester.pumpAndSettle();
+
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paints..rect(color: focusColor));
+  });
+
+  testWidgets('Does OutlineButton work with autofocus', (WidgetTester tester) async {
+    const Color focusColor = Color(0xff001122);
+
+    final FocusNode focusNode = FocusNode(debugLabel: 'OutlineButton Node');
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: OutlineButton(
+          autofocus: true,
+          focusColor: focusColor,
+          focusNode: focusNode,
+          onPressed: () { },
+          child: const Text('button'),
+        ),
+      ),
+    );
+
+    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     await tester.pumpAndSettle();
 
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
@@ -946,6 +1041,97 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
     _checkPhysicalLayer(buttonElement, fillColor.withAlpha(0x00));
+  });
+
+  testWidgets('OutlineButton respects the provided materialTapTargetSize', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: Center(
+            child: OutlineButton(
+              materialTapTargetSize: MaterialTapTargetSize.padded,
+              onPressed: () {},
+              child: const SizedBox(width: 50.0, height: 8.0),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Default Width of OutlineButton with MaterialTapTargetSize (88)
+    expect(tester.getSize(find.byType(OutlineButton)), const Size(88.0, 48.0));
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: Center(
+            child: OutlineButton(
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              onPressed: () {},
+              child: const SizedBox(width: 50.0, height: 8.0),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Default Width of OutlineButton with MaterialTapTargetSize (88)
+    expect(tester.getSize(find.byType(OutlineButton)), const Size(88.0, 36.0));
+
+    final LocalKey key1 = UniqueKey();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: Center(
+            child: OutlineButton.icon(
+              key: key1,
+              materialTapTargetSize: MaterialTapTargetSize.padded,
+              icon: const Icon(Icons.add_alarm),
+              label: const SizedBox(width: 50.0, height: 8.0),
+              onPressed: () { },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Size addAlarmIconSize = tester.getSize(find.byIcon(Icons.add_alarm));
+
+    // The expected width is the sum of:
+    // the width of the icon
+    // the gap between the icon and the label (8)
+    // the width of the label (50)
+    // the horizontal padding: start (12), end (16)
+    expect(tester.getSize(find.byKey(key1)), Size(86 + addAlarmIconSize.width, 48.0));
+
+    final LocalKey key2 = UniqueKey();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: Center(
+            child: OutlineButton.icon(
+              key: key2,
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              icon: const Icon(Icons.add),
+              label: const SizedBox(width: 50.0, height: 8.0),
+              onPressed: () { },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // The expected width is the sum of:
+    // the width of the icon
+    // the gap between the icon and the label (8)
+    // the width of the label (50)
+    // the horizontal padding: start (12), end (16)
+    final Size addIconSize = tester.getSize(find.byIcon(Icons.add));
+    expect(tester.getSize(find.byKey(key2)), Size(86 + addIconSize.width, 36.0));
   });
 
   testWidgets('OutlineButton onPressed and onLongPress callbacks are distinctly recognized', (WidgetTester tester) async {

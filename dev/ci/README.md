@@ -11,6 +11,6 @@ to manually build and push the Docker image locally.
 
 NOTE: there are some factors external to the actual `Dockerfile` that would
 necessitate rebuilding the Docker image, such as upstream code changes, (Linux
-distribution) repository updates, or a file that gets `COPY`ied into the image
+distribution) repository updates or a file that gets `COPY`ied into the image
 changing. In this case, a trivial `Dockerfile` change (such as a comment)
 would invalidate the cache and trigger a rebuild.

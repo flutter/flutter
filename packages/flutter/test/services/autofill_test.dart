@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:convert' show utf8;
 
 import 'package:flutter/services.dart';
@@ -212,7 +214,13 @@ class FakeTextChannel implements MethodChannel {
   }
 
   @override
+  bool checkMethodCallHandler(Future<void> Function(MethodCall call) handler) => throw UnimplementedError();
+
+  @override
   void setMockMethodCallHandler(Future<void> Function(MethodCall call) handler)  => throw UnimplementedError();
+
+  @override
+  bool checkMockMethodCallHandler(Future<void> Function(MethodCall call) handler) => throw UnimplementedError();
 
   void validateOutgoingMethodCalls(List<MethodCall> calls) {
     expect(outgoingCalls.length, calls.length);

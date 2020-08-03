@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -30,7 +32,7 @@ import 'theme.dart';
 ///    application.
 @immutable
 class BottomNavigationBarThemeData with Diagnosticable {
-  /// Creates a theme that can be used for [ThemeData.BottomNavigationBarTheme].
+  /// Creates a theme that can be used for [ThemeData.bottomNavigationBarTheme].
   const BottomNavigationBarThemeData({
     this.backgroundColor,
     this.elevation,
@@ -68,13 +70,13 @@ class BottomNavigationBarThemeData with Diagnosticable {
   final IconThemeData unselectedIconTheme;
 
   /// The color of the selected [BottomNavigationBarItem.icon] and
-  /// [BottomNavigationBarItem.label].
+  /// [BottomNavigationBarItem.title].
   ///
   /// See [BottomNavigationBar.selectedItemColor].
   final Color selectedItemColor;
 
   /// The color of the unselected [BottomNavigationBarItem.icon] and
-  /// [BottomNavigationBarItem.label]s.
+  /// [BottomNavigationBarItem.title]s.
   ///
   /// See [BottomNavigationBar.unselectedItemColor].
   final Color unselectedItemColor;

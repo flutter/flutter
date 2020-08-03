@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui' as ui show ParagraphBuilder;
 
 import 'package:flutter/foundation.dart';
@@ -104,7 +106,7 @@ class InlineSpanSemanticsInformation {
 ///  * The subclass [TextSpan] specifies text and may contain child [InlineSpan]s.
 ///  * The subclass [PlaceholderSpan] represents a placeholder that may be
 ///    filled with non-text content. [PlaceholderSpan] itself defines a
-///    [ui.PlaceholderAlignemnt] and a [TextBaseline]. To be useful,
+///    [ui.PlaceholderAlignment] and a [TextBaseline]. To be useful,
 ///    [PlaceholderSpan] must be extended to define content. An instance of
 ///    this is the [WidgetSpan] class in the widgets library.
 ///  * The subclass [WidgetSpan] specifies embedded inline widgets.
@@ -292,7 +294,7 @@ abstract class InlineSpan extends DiagnosticableTree {
 
   /// Returns the UTF-16 code unit at the given `index` in the flattened string.
   ///
-  /// This only accounts for the [TextSpan.text] values and ignores [PlaceholderSpans].
+  /// This only accounts for the [TextSpan.text] values and ignores [PlaceholderSpan]s.
   ///
   /// Returns null if the `index` is out of bounds.
   int codeUnitAt(int index) {

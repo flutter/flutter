@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
@@ -534,5 +536,43 @@ void main() {
       ],
     ));
     handle.dispose();
+  });
+
+  testWidgets('Updates viewport dimensions when scroll direction changes', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/43380.
+    final ScrollController controller = ScrollController();
+
+    Widget buildListView({@required Axis scrollDirection}) {
+      assert(scrollDirection != null);
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Container(
+            height: 200.0,
+            width: 100.0,
+            child: ListView(
+              controller: controller,
+              scrollDirection: scrollDirection,
+              itemExtent: 50.0,
+              children: <Widget>[
+                Container(
+                  height: 50.0,
+                  width: 50.0,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildListView(scrollDirection: Axis.horizontal));
+    expect(controller.position.viewportDimension, 100.0);
+
+    await tester.pumpWidget(buildListView(scrollDirection: Axis.vertical));
+    expect(controller.position.viewportDimension, 200.0);
+
+    await tester.pumpWidget(buildListView(scrollDirection: Axis.horizontal));
+    expect(controller.position.viewportDimension, 100.0);
   });
 }

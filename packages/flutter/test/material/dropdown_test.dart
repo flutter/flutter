@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 import 'dart:ui' show window;
 
@@ -1242,49 +1244,53 @@ void main() {
         TestSemantics.rootChild(
           children: <TestSemantics>[
             TestSemantics(
-              flags: <SemanticsFlag>[
-                SemanticsFlag.scopesRoute,
-                SemanticsFlag.namesRoute,
-              ],
-              label: 'Popup menu',
               children: <TestSemantics>[
                 TestSemantics(
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.scopesRoute,
+                    SemanticsFlag.namesRoute,
+                  ],
+                  label: 'Popup menu',
                   children: <TestSemantics>[
                     TestSemantics(
-                      flags: <SemanticsFlag>[
-                        SemanticsFlag.hasImplicitScrolling,
-                      ],
                       children: <TestSemantics>[
                         TestSemantics(
-                          label: 'one',
-                          textDirection: TextDirection.ltr,
                           flags: <SemanticsFlag>[
-                            SemanticsFlag.isFocused,
-                            SemanticsFlag.isFocusable,
+                            SemanticsFlag.hasImplicitScrolling,
                           ],
-                          tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
-                          actions: <SemanticsAction>[SemanticsAction.tap],
-                        ),
-                        TestSemantics(
-                          label: 'two',
-                          textDirection: TextDirection.ltr,
-                          flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                          tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
-                          actions: <SemanticsAction>[SemanticsAction.tap],
-                        ),
-                        TestSemantics(
-                          label: 'three',
-                          textDirection: TextDirection.ltr,
-                          flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                          tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
-                          actions: <SemanticsAction>[SemanticsAction.tap],
-                        ),
-                        TestSemantics(
-                          label: 'four',
-                          textDirection: TextDirection.ltr,
-                          flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                          tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
-                          actions: <SemanticsAction>[SemanticsAction.tap],
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              label: 'one',
+                              textDirection: TextDirection.ltr,
+                              flags: <SemanticsFlag>[
+                                SemanticsFlag.isFocused,
+                                SemanticsFlag.isFocusable,
+                              ],
+                              tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                              actions: <SemanticsAction>[SemanticsAction.tap],
+                            ),
+                            TestSemantics(
+                              label: 'two',
+                              textDirection: TextDirection.ltr,
+                              flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                              tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                              actions: <SemanticsAction>[SemanticsAction.tap],
+                            ),
+                            TestSemantics(
+                              label: 'three',
+                              textDirection: TextDirection.ltr,
+                              flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                              tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                              actions: <SemanticsAction>[SemanticsAction.tap],
+                            ),
+                            TestSemantics(
+                              label: 'four',
+                              textDirection: TextDirection.ltr,
+                              flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                              tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                              actions: <SemanticsAction>[SemanticsAction.tap],
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -1292,6 +1298,7 @@ void main() {
                 ),
               ],
             ),
+            TestSemantics(),
           ],
         ),
       ],
@@ -2143,8 +2150,8 @@ void main() {
                           // hard coded 16px margin in the dropdown code, so that
                           // this hint aligns "properly" with the menu.
                           return Stack(
+                            clipBehavior: Clip.none,
                             alignment: Alignment.topCenter,
-                            overflow: Overflow.visible,
                             children: <Widget>[
                               PositionedDirectional(
                                 width: constraints.maxWidth + hintPaddingOffset,
@@ -2162,6 +2169,7 @@ void main() {
                       icon: Container(),
                       items: itemValues.map<DropdownMenuItem<String>>((String value) {
                         return DropdownMenuItem<String>(
+                          value: value,
                           child: Text(value),
                         );
                       }).toList(),

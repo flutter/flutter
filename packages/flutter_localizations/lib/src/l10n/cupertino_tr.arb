@@ -19,5 +19,6 @@
   "copyButtonLabel": "Kopyala",
   "pasteButtonLabel": "Yapıştır",
   "selectAllButtonLabel": "Tümünü Seç",
+  "tabSemanticsLabel": "Sekme $tabIndex/$tabCount",
   "modalBarrierDismissLabel": "Kapat"
 }

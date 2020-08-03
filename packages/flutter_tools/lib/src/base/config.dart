@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
 
 import '../convert.dart';
 import 'file_system.dart';
 import 'logger.dart';
+import 'platform.dart';
 import 'utils.dart';
 
 /// A class to abstract configuration files.

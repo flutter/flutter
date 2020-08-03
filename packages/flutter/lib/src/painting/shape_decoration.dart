@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
@@ -255,7 +257,7 @@ class ShapeDecoration extends Decoration {
         && other.color == color
         && other.gradient == gradient
         && other.image == image
-        && other.shadows == shadows
+        && listEquals<BoxShadow>(other.shadows, shadows)
         && other.shape == shape;
   }
 
@@ -266,7 +268,7 @@ class ShapeDecoration extends Decoration {
       gradient,
       image,
       shape,
-      shadows,
+      hashList(shadows),
     );
   }
 

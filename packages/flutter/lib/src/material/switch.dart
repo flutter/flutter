@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -11,6 +13,7 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
+import 'material_state.dart';
 import 'shadows.dart';
 import 'theme.dart';
 import 'theme_data.dart';
@@ -76,6 +79,7 @@ class Switch extends StatefulWidget {
     this.onInactiveThumbImageError,
     this.materialTapTargetSize,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.mouseCursor,
     this.focusColor,
     this.hoverColor,
     this.focusNode,
@@ -92,7 +96,7 @@ class Switch extends StatefulWidget {
   /// If a [CupertinoSwitch] is created, the following parameters are
   /// ignored: [activeTrackColor], [inactiveThumbColor], [inactiveTrackColor],
   /// [activeThumbImage], [onActiveThumbImageError], [inactiveThumbImage],
-  /// [onInactiveImageThumbError], [materialTapTargetSize].
+  /// [onInactiveThumbImageError], [materialTapTargetSize].
   ///
   /// The target platform is based on the current [Theme]: [ThemeData.platform].
   const Switch.adaptive({
@@ -109,6 +113,7 @@ class Switch extends StatefulWidget {
     this.onInactiveThumbImageError,
     this.materialTapTargetSize,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.mouseCursor,
     this.focusColor,
     this.hoverColor,
     this.focusNode,
@@ -205,6 +210,20 @@ class Switch extends StatefulWidget {
 
   /// {@macro flutter.cupertino.switch.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
+
+  /// The cursor for a mouse pointer when it enters or is hovering over the
+  /// widget.
+  ///
+  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
+  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  ///
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.disabled].
+  ///
+  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
+  final MouseCursor mouseCursor;
 
   /// The color for the button's [Material] when it has the input focus.
   final Color focusColor;
@@ -303,6 +322,15 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
       inactiveThumbColor = widget.inactiveThumbColor ?? (isDark ? Colors.grey.shade800 : Colors.grey.shade400);
       inactiveTrackColor = widget.inactiveTrackColor ?? (isDark ? Colors.white10 : Colors.black12);
     }
+    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
+      widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
+      <MaterialState>{
+        if (!enabled) MaterialState.disabled,
+        if (_hovering) MaterialState.hovered,
+        if (_focused) MaterialState.focused,
+        if (widget.value) MaterialState.selected,
+      },
+    );
 
     return FocusableActionDetector(
       actions: _actionMap,
@@ -311,6 +339,7 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
       enabled: enabled,
       onShowFocusHighlight: _handleFocusHighlightChanged,
       onShowHoverHighlight: _handleHoverChanged,
+      mouseCursor: effectiveMouseCursor,
       child: Builder(
         builder: (BuildContext context) {
           return _SwitchRenderObjectWidget(

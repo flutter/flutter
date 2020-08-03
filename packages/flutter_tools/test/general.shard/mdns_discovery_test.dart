@@ -135,7 +135,7 @@ void main() {
       );
 
       final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
-      expect(() => portDiscovery.query(), throwsToolExit());
+      expect(portDiscovery.query, throwsToolExit());
     });
 
     testUsingContext('Multiple ports available, with appId', () async {
@@ -193,7 +193,7 @@ void main() {
       expect(port, isNull);
     });
 
-    testUsingContext('Throws SocketException when client throws OSError on start', () async {
+    testUsingContext('Throws Exception when client throws OSError on start', () async {
       final MDnsClient client = MockMDnsClient();
       when(client.start()).thenAnswer((_) {
         throw const OSError('Operation not suppoted on socket', 102);
@@ -204,7 +204,7 @@ void main() {
       );
       expect(
         () async => await portDiscovery.query(),
-        throwsA(isA<SocketException>()),
+        throwsA(isA<Exception>()),
       );
     });
   });

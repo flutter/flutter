@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -128,5 +130,21 @@ void main() {
     expect(find.text('non-regular page one'), findsOneWidget);
     expect(find.text('regular page one'), findsNothing);
     expect(find.text('regular page two'), findsNothing);
+  });
+
+  testWidgets('CupertinoApp.navigatorKey can be updated', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> key1 = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(CupertinoApp(
+      navigatorKey: key1,
+      home: const Placeholder(),
+    ));
+    expect(key1.currentState, isA<NavigatorState>());
+    final GlobalKey<NavigatorState> key2 = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(CupertinoApp(
+      navigatorKey: key2,
+      home: const Placeholder(),
+    ));
+    expect(key2.currentState, isA<NavigatorState>());
+    expect(key1.currentState, isNull);
   });
 }

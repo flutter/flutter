@@ -2,14 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
 import 'package:yaml/yaml.dart';
 
 import 'utils.dart';
-
-Platform get platform => _platform ??= const LocalPlatform();
-Platform _platform;
 
 /// Loads manifest data from `manifest.yaml` file or from [yaml], if present.
 Manifest loadTaskManifest([ String yaml ]) {
@@ -38,6 +36,7 @@ class ManifestTask {
     @required this.requiredAgentCapabilities,
     @required this.isFlaky,
     @required this.timeoutInMinutes,
+    @required this.onLuci,
   }) {
     final String taskName = 'task "$name"';
     _checkIsNotBlank(name, 'Task name', taskName);
@@ -66,6 +65,9 @@ class ManifestTask {
   /// An optional custom timeout specified in minutes.
   final int timeoutInMinutes;
 
+  /// (Optional) Whether this test runs on LUCI.
+  final bool onLuci;
+
   /// Whether the task is supported by the current host platform
   bool isSupportedByHost() {
     final Set<String> supportedHosts = Set<String>.from(
@@ -73,7 +75,7 @@ class ManifestTask {
         (String str) => str.split('/')[0]
       )
     );
-    String hostPlatform = platform.operatingSystem;
+    String hostPlatform = Platform.operatingSystem;
     if (hostPlatform == 'macos') {
       hostPlatform = 'mac'; // package:platform uses 'macos' while manifest.yaml uses 'mac'
     }
@@ -113,6 +115,7 @@ ManifestTask _validateAndParseTask(dynamic taskName, dynamic taskYaml) {
     'required_agent_capabilities',
     'flaky',
     'timeout_in_minutes',
+    'on_luci',
   ]);
 
   final dynamic isFlaky = taskYaml['flaky'];
@@ -126,6 +129,12 @@ ManifestTask _validateAndParseTask(dynamic taskName, dynamic taskYaml) {
   }
 
   final List<dynamic> capabilities = _validateAndParseCapabilities(taskName as String, taskYaml['required_agent_capabilities']);
+
+  final dynamic onLuci = taskYaml['on_luci'];
+  if (onLuci != null) {
+    _checkType(onLuci is bool, onLuci, 'on_luci', 'boolean');
+  }
+
   return ManifestTask._(
     name: taskName as String,
     description: taskYaml['description'] as String,
@@ -133,6 +142,7 @@ ManifestTask _validateAndParseTask(dynamic taskName, dynamic taskYaml) {
     requiredAgentCapabilities: capabilities as List<String>,
     isFlaky: isFlaky as bool ?? false,
     timeoutInMinutes: timeoutInMinutes as int,
+    onLuci: onLuci as bool ?? false,
   );
 }
 

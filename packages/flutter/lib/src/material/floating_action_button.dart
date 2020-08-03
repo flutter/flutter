@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -142,6 +144,7 @@ class FloatingActionButton extends StatelessWidget {
     this.highlightElevation,
     this.disabledElevation,
     @required this.onPressed,
+    this.mouseCursor,
     this.mini = false,
     this.shape,
     this.clipBehavior = Clip.none,
@@ -182,6 +185,7 @@ class FloatingActionButton extends StatelessWidget {
     this.highlightElevation,
     this.disabledElevation,
     @required this.onPressed,
+    this.mouseCursor = SystemMouseCursors.click,
     this.shape,
     this.isExtended = true,
     this.materialTapTargetSize,
@@ -233,10 +237,11 @@ class FloatingActionButton extends StatelessWidget {
 
   /// The default foreground color for icons and text within the button.
   ///
-  /// If this property is null, then the [Theme]'s
-  /// [ThemeData.floatingActionButtonTheme.foregroundColor] is used. If that
-  /// property is also null, then the [Theme]'s
-  /// [ThemeData.colorScheme.onSecondary] color is used.
+  /// If this property is null, then the
+  /// [FloatingActionButtonThemeData.foregroundColor] of
+  /// [ThemeData.floatingActionButtonTheme] is used. If that property is also
+  /// null, then the [ColorScheme.onSecondary] color of [ThemeData.colorScheme]
+  /// is used.
   ///
   /// Although the color of theme's `accentIconTheme` currently provides a
   /// default that supercedes the `onSecondary` color, this dependency
@@ -246,10 +251,10 @@ class FloatingActionButton extends StatelessWidget {
 
   /// The button's background color.
   ///
-  /// If this property is null, then the [Theme]'s
-  /// [ThemeData.floatingActionButtonTheme.backgroundColor] is used. If that
-  /// property is also null, then the [Theme]'s
-  /// [ThemeData.colorScheme.secondary] color is used.
+  /// If this property is null, then the
+  /// [FloatingActionButtonThemeData.backgroundColor] of
+  /// [ThemeData.floatingActionButtonTheme] is used. If that property is also
+  /// null, then the [Theme]'s [ColorScheme.secondary] color is used.
   final Color backgroundColor;
 
   /// The color to use for filling the button when the button has input focus.
@@ -287,6 +292,9 @@ class FloatingActionButton extends StatelessWidget {
   ///
   /// If this is set to null, the button will be disabled.
   final VoidCallback onPressed;
+
+  /// {@macro flutter.material.button.mouseCursor}
+  final MouseCursor mouseCursor;
 
   /// The z-coordinate at which to place this button relative to its parent.
   ///
@@ -484,6 +492,7 @@ class FloatingActionButton extends StatelessWidget {
 
     Widget result = RawMaterialButton(
       onPressed: onPressed,
+      mouseCursor: mouseCursor,
       elevation: elevation,
       focusElevation: focusElevation,
       hoverElevation: hoverElevation,

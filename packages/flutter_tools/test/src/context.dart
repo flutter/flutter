@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' as io;
 
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
@@ -126,7 +125,7 @@ void testUsingContext(
           SimControl: () => MockSimControl(),
           Usage: () => FakeUsage(),
           XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(),
-          FileSystem: () => const LocalFileSystemBlockingSetCurrentDirectory(),
+          FileSystem: () => LocalFileSystemBlockingSetCurrentDirectory(),
           TimeoutConfiguration: () => const TimeoutConfiguration(),
           PlistParser: () => FakePlistParser(),
           Signals: () => FakeSignals(),
@@ -158,8 +157,8 @@ void testUsingContext(
               rethrow;
             }
           }, onError: (Object error, StackTrace stackTrace) { // ignore: deprecated_member_use
-            io.stdout.writeln(error);
-            io.stdout.writeln(stackTrace);
+            print(error);
+            print(stackTrace);
             _printBufferedErrors(context);
             throw error;
           });
@@ -396,9 +395,12 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   int get minorVersion => 0;
 
   @override
+  int get patchVersion => 0;
+
+  @override
   Future<Map<String, String>> getBuildSettings(
-    String projectPath,
-    String target, {
+    String projectPath, {
+    String scheme,
     Duration timeout = const Duration(minutes: 1),
   }) async {
     return <String, String>{};
@@ -415,6 +417,7 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
       <String>['Runner'],
       <String>['Debug', 'Release'],
       <String>['Runner'],
+      BufferLogger.test(),
     );
   }
 }
@@ -443,7 +446,9 @@ class FakePlistParser implements PlistParser {
 }
 
 class LocalFileSystemBlockingSetCurrentDirectory extends LocalFileSystem {
-  const LocalFileSystemBlockingSetCurrentDirectory();
+  LocalFileSystemBlockingSetCurrentDirectory() : super.test(
+    signals: LocalSignals.instance,
+  );
 
   @override
   set currentDirectory(dynamic value) {

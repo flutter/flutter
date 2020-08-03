@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
@@ -20,7 +22,7 @@ import 'scroll_simulation.dart';
 
 /// The signature of a method that provides a [BuildContext] and
 /// [ScrollController] for building a widget that may overflow the draggable
-/// [Axis] of the containing [DraggableScrollSheet].
+/// [Axis] of the containing [DraggableScrollableSheet].
 ///
 /// Users should apply the [scrollController] to a [ScrollView] subclass, such
 /// as a [SingleChildScrollView], [ListView] or [GridView], to have the whole
@@ -162,7 +164,7 @@ class DraggableScrollableSheet extends StatefulWidget {
 /// this notification bubbles up through the tree, which means a given
 /// [NotificationListener] will receive notifications for all descendant
 /// [DraggableScrollableSheet] widgets. To focus on notifications from the
-/// nearest [DraggableScorllableSheet] descendant, check that the [depth]
+/// nearest [DraggableScrollableSheet] descendant, check that the [depth]
 /// property of the notification is zero.
 ///
 /// When an extent notification is received by a [NotificationListener], the
@@ -556,7 +558,7 @@ class DraggableScrollableActuator extends StatelessWidget {
   }
 }
 
-/// A [ChangeNotifier] to use with [InheritedResetNotifer] to notify
+/// A [ChangeNotifier] to use with [InheritedResetNotifier] to notify
 /// descendants that they should reset to initial state.
 class _ResetNotifier extends ChangeNotifier {
   /// Whether someone called [sendReset] or not.

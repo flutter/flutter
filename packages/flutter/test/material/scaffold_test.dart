@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
@@ -429,7 +431,7 @@ void main() {
             ),
           ),
           persistentFooterButtons: <Widget>[
-            FlatButton(
+            TextButton(
               onPressed: () {
                 didPressButton = true;
               },
@@ -655,7 +657,7 @@ void main() {
         child: MediaQuery(
           data: const MediaQueryData(),
           child: Scaffold(
-            body: FlatButton(
+            body: TextButton(
               key: testKey,
               onPressed: () { },
               child: const Text(''),
@@ -663,7 +665,7 @@ void main() {
           ),
         ),
       ));
-      expect(tester.element(find.byKey(testKey)).size, const Size(88.0, 48.0));
+      expect(tester.element(find.byKey(testKey)).size, const Size(64.0, 48.0));
       expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
     });
 

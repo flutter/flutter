@@ -13,9 +13,8 @@ import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
 import 'assets.dart';
-import 'dart.dart';
+import 'common.dart';
 import 'icon_tree_shaker.dart';
-import 'ios.dart';
 
 /// Copy the macOS framework to the correct copy dir by invoking 'cp -R'.
 ///
@@ -198,7 +197,7 @@ class CompileMacOSFramework extends Target {
     }
     final String splitDebugInfo = environment.defines[kSplitDebugInfo];
     final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
-    final List<String> extraGenSnapshotOptions = parseExtraGenSnapshotOptions(environment);
+    final List<String> extraGenSnapshotOptions = decodeDartDefines(environment.defines, kExtraGenSnapshotOptions);
     final AOTSnapshotter snapshotter = AOTSnapshotter(
       reportTimings: false,
       fileSystem: globals.fs,
@@ -293,13 +292,18 @@ abstract class MacOSBundleFlutterAssets extends Target {
       .childDirectory('Resources')
       .childDirectory('flutter_assets');
     assetDirectory.createSync(recursive: true);
-    final Depfile depfile = await copyAssets(environment, assetDirectory);
+
+    final Depfile assetDepfile = await copyAssets(
+      environment,
+      assetDirectory,
+      targetPlatform: TargetPlatform.darwin_x64,
+    );
     final DepfileService depfileService = DepfileService(
       fileSystem: globals.fs,
       logger: globals.logger,
     );
     depfileService.writeToFile(
-      depfile,
+      assetDepfile,
       environment.buildDir.childFile('flutter_assets.d'),
     );
 

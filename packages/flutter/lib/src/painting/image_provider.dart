@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
@@ -160,13 +162,15 @@ class ImageConfiguration {
 
 /// Performs the decode process for use in [ImageProvider.load].
 ///
-/// This callback allows decoupling of the `cacheWidth` and `cacheHeight`
-/// parameters from implementations of [ImageProvider] that do not use them.
+/// This callback allows decoupling of the `cacheWidth`, `cacheHeight`, and
+/// `allowUpscaling` parameters from implementations of [ImageProvider] that do
+/// not expose them.
 ///
 /// See also:
 ///
-///  * [ResizeImage], which uses this to override the `cacheWidth` and `cacheHeight` parameters.
-typedef DecoderCallback = Future<ui.Codec> Function(Uint8List bytes, {int cacheWidth, int cacheHeight});
+///  * [ResizeImage], which uses this to override the `cacheWidth`,
+///    `cacheHeight`, and `allowUpscaling` parameters.
+typedef DecoderCallback = Future<ui.Codec> Function(Uint8List bytes, {int cacheWidth, int cacheHeight, bool allowUpscaling});
 
 /// Identifies an image without committing to the precise final asset. This
 /// allows a set of images to be identified and for the precise image to later
@@ -347,10 +351,10 @@ abstract class ImageProvider<T> {
           stack: stack,
           context: ErrorDescription('while resolving an image'),
           silent: true, // could be a network error or whatnot
-          informationCollector: collector
-          );
-        },
-      );
+          informationCollector: collector,
+        );
+      },
+    );
     return stream;
   }
 
@@ -633,7 +637,7 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
   const AssetBundleImageProvider();
 
   /// Converts a key into an [ImageStreamCompleter], and begins fetching the
-  /// image using [loadAsync].
+  /// image.
   @override
   ImageStreamCompleter load(AssetBundleImageKey key, DecoderCallback decode) {
     InformationCollector collector;
@@ -647,6 +651,7 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key, decode),
       scale: key.scale,
+      debugLabel: key.name,
       informationCollector: collector
     );
   }
@@ -716,7 +721,9 @@ class ResizeImage extends ImageProvider<_SizeAwareCacheKey> {
     this.imageProvider, {
     this.width,
     this.height,
-  }) : assert(width != null || height != null);
+    this.allowUpscaling = false,
+  }) : assert(width != null || height != null),
+       assert(allowUpscaling != null);
 
   /// The [ImageProvider] that this class wraps.
   final ImageProvider imageProvider;
@@ -726,6 +733,15 @@ class ResizeImage extends ImageProvider<_SizeAwareCacheKey> {
 
   /// The height the image should decode to and cache.
   final int height;
+
+  /// Whether the [width] and [height] parameters should be clamped to the
+  /// intrinsic width and height of the image.
+  ///
+  /// In general, it is better for memory usage to avoid scaling the image
+  /// beyond its intrinsic dimensions when decoding it. If there is a need to
+  /// scale an image larger, it is better to apply a scale to the canvas, or
+  /// to use an appropriate [Image.fit].
+  final bool allowUpscaling;
 
   /// Composes the `provider` in a [ResizeImage] only when `cacheWidth` and
   /// `cacheHeight` are not both null.
@@ -741,14 +757,19 @@ class ResizeImage extends ImageProvider<_SizeAwareCacheKey> {
 
   @override
   ImageStreamCompleter load(_SizeAwareCacheKey key, DecoderCallback decode) {
-    final DecoderCallback decodeResize = (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
+    final DecoderCallback decodeResize = (Uint8List bytes, {int cacheWidth, int cacheHeight, bool allowUpscaling}) {
       assert(
-        cacheWidth == null && cacheHeight == null,
-        'ResizeImage cannot be composed with another ImageProvider that applies cacheWidth or cacheHeight.'
+        cacheWidth == null && cacheHeight == null && allowUpscaling == null,
+        'ResizeImage cannot be composed with another ImageProvider that applies '
+        'cacheWidth, cacheHeight, or allowUpscaling.'
       );
-      return decode(bytes, cacheWidth: width, cacheHeight: height);
+      return decode(bytes, cacheWidth: width, cacheHeight: height, allowUpscaling: this.allowUpscaling);
     };
-    return imageProvider.load(key.providerCacheKey, decodeResize);
+    final ImageStreamCompleter completer = imageProvider.load(key.providerCacheKey, decodeResize);
+    if (!kReleaseMode) {
+      completer.debugLabel = '${completer.debugLabel} - Resized(${key.width}×${key.height})';
+    }
+    return completer;
   }
 
   @override
@@ -781,8 +802,8 @@ class ResizeImage extends ImageProvider<_SizeAwareCacheKey> {
 ///
 /// The image will be cached regardless of cache headers from the server.
 ///
-/// When a network image is used on the Web platform, the [cacheWidth] and
-/// [cacheHeight] parameters of the [DecoderCallback] are ignored as the Web
+/// When a network image is used on the Web platform, the `cacheWidth` and
+/// `cacheHeight` parameters of the [DecoderCallback] are ignored as the Web
 /// engine delegates image decoding of network images to the Web, which does
 /// not support custom decode sizes.
 ///
@@ -816,6 +837,9 @@ abstract class NetworkImage extends ImageProvider<NetworkImage> {
 /// Decodes the given [File] object as an image, associating it with the given
 /// scale.
 ///
+/// The provider does not monitor the file for changes. If you expect the
+/// underlying data to change, you should call the [evict] method.
+///
 /// See also:
 ///
 ///  * [Image.file] for a shorthand of an [Image] widget backed by [FileImage].
@@ -844,6 +868,7 @@ class FileImage extends ImageProvider<FileImage> {
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key, decode),
       scale: key.scale,
+      debugLabel: key.file.path,
       informationCollector: () sync* {
         yield ErrorDescription('Path: ${file?.path}');
       },
@@ -917,6 +942,7 @@ class MemoryImage extends ImageProvider<MemoryImage> {
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key, decode),
       scale: key.scale,
+      debugLabel: 'MemoryImage(${describeIdentity(key.bytes)})',
     );
   }
 
@@ -954,7 +980,7 @@ class MemoryImage extends ImageProvider<MemoryImage> {
 ///
 /// When fetching an image provided by the app itself, use the [assetName]
 /// argument to name the asset to choose. For instance, consider a directory
-/// `icons` with an image `heart.png`. First, the [pubspec.yaml] of the project
+/// `icons` with an image `heart.png`. First, the `pubspec.yaml` of the project
 /// should specify its assets in the `flutter` section:
 ///
 /// ```yaml
@@ -1104,8 +1130,8 @@ class _ErrorImageCompleter extends ImageStreamCompleter {
 
 /// The exception thrown when the HTTP request to load a network image fails.
 class NetworkImageLoadException implements Exception {
-  /// Creates a [NetworkImageLoadException] with the specified http status
-  /// [code] and the [uri]
+  /// Creates a [NetworkImageLoadException] with the specified http [statusCode]
+  /// and [uri].
   NetworkImageLoadException({@required this.statusCode, @required this.uri})
       : assert(uri != null),
         assert(statusCode != null),

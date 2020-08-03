@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -660,5 +662,58 @@ void main() {
     disabledNode.requestFocus();
     await tester.pump();
     expect(disabledNode.hasPrimaryFocus, isFalse);
+  });
+
+  testWidgets('Stepper header title should not overflow', (WidgetTester tester) async {
+    const String longText =
+        'A long long long long long long long long long long long long text';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: <Widget>[
+              Stepper(
+                steps: const <Step>[
+                  Step(
+                    title: Text(longText),
+                    content: Text('Text content')
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Stepper header subtitle should not overflow', (WidgetTester tester) async {
+    const String longText =
+        'A long long long long long long long long long long long long text';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: <Widget>[
+              Stepper(
+                steps: const <Step>[
+                  Step(
+                    title: Text('Regular title'),
+                    subtitle: Text(longText),
+                    content: Text('Text content')
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
   });
 }

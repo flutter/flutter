@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
@@ -136,7 +138,7 @@ void main() {
       viewportHeight: viewportHeight,
     ));
     final int frames = await tester.pumpAndSettle();
-    expect(frames, greaterThan(1)); // ensure animation to bring tile17 into view
+    expect(frames, 1); // No animation when content shrinks suddenly.
 
     expect(controller.offset, scrollPosition - itemHeight);
     expect(find.text('Tile 0'), findsNothing);

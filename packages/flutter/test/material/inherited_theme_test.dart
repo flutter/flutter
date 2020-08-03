@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -38,7 +40,7 @@ void main() {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: <Widget>[
-                          RaisedButton(
+                          ElevatedButton(
                             child: const Text('push unwrapped'),
                             onPressed: () {
                               Navigator.of(context).push<void>(
@@ -49,7 +51,7 @@ void main() {
                               );
                             },
                           ),
-                          RaisedButton(
+                          ElevatedButton(
                             child: const Text('push wrapped'),
                             onPressed: () {
                               Navigator.of(context).push<void>(
@@ -167,7 +169,7 @@ void main() {
     final Widget banner = MaterialBanner(
       content: const Text('hello'),
       actions: <Widget>[
-        FlatButton(
+        TextButton(
           child: const Text('action'),
           onPressed: () { },
         ),
@@ -191,7 +193,7 @@ void main() {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      RaisedButton(
+                      ElevatedButton(
                         child: const Text('push unwrapped'),
                         onPressed: () {
                           Navigator.of(context).push<void>(
@@ -202,7 +204,7 @@ void main() {
                           );
                         },
                       ),
-                      RaisedButton(
+                      ElevatedButton(
                         child: const Text('push wrapped'),
                         onPressed: () {
                           Navigator.of(context).push<void>(
@@ -281,7 +283,7 @@ void main() {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      RaisedButton(
+                      ElevatedButton(
                         child: const Text('push unwrapped'),
                         onPressed: () {
                           Navigator.of(context).push<void>(
@@ -292,7 +294,7 @@ void main() {
                           );
                         },
                       ),
-                      RaisedButton(
+                      ElevatedButton(
                         child: const Text('push wrapped'),
                         onPressed: () {
                           Navigator.of(context).push<void>(
@@ -385,7 +387,7 @@ void main() {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      RaisedButton(
+                      ElevatedButton(
                         child: const Text('push unwrapped'),
                         onPressed: () {
                           Navigator.of(context).push<void>(
@@ -396,7 +398,7 @@ void main() {
                           );
                         },
                       ),
-                      RaisedButton(
+                      ElevatedButton(
                         child: const Text('push wrapped'),
                         onPressed: () {
                           Navigator.of(context).push<void>(
@@ -461,8 +463,6 @@ void main() {
     final Widget slider = Scaffold(
       body: Center(
         child: Slider(
-          // ignore: deprecated_member_use_from_same_package
-          useV2Slider: false,
           value: 0.5,
           onChanged: (double value) { },
         ),
@@ -487,7 +487,7 @@ void main() {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      RaisedButton(
+                      ElevatedButton(
                         child: const Text('push unwrapped'),
                         onPressed: () {
                           Navigator.of(context).push<void>(
@@ -498,7 +498,7 @@ void main() {
                           );
                         },
                       ),
-                      RaisedButton(
+                      ElevatedButton(
                         child: const Text('push wrapped'),
                         onPressed: () {
                           Navigator.of(context).push<void>(
@@ -525,7 +525,7 @@ void main() {
     await tester.tap(find.text('push wrapped'));
     await tester.pumpAndSettle(); // route animation
     RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
-    expect(sliderBox, paints..rect(color: activeTrackColor)..rect(color: inactiveTrackColor));
+    expect(sliderBox, paints..rrect(color: activeTrackColor)..rrect(color: inactiveTrackColor));
     expect(sliderBox, paints..circle(color: thumbColor));
 
     Navigator.of(navigatorContext).pop();
@@ -534,7 +534,7 @@ void main() {
     await tester.tap(find.text('push unwrapped'));
     await tester.pumpAndSettle(); // route animation
     sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
-    expect(sliderBox, isNot(paints..rect(color: activeTrackColor)..rect(color: inactiveTrackColor)));
+    expect(sliderBox, isNot(paints..rrect(color: activeTrackColor)..rrect(color: inactiveTrackColor)));
     expect(sliderBox, isNot(paints..circle(color: thumbColor)));
   });
 
@@ -572,7 +572,7 @@ void main() {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      RaisedButton(
+                      ElevatedButton(
                         child: const Text('push unwrapped'),
                         onPressed: () {
                           Navigator.of(context).push<void>(
@@ -583,7 +583,7 @@ void main() {
                           );
                         },
                       ),
-                      RaisedButton(
+                      ElevatedButton(
                         child: const Text('push wrapped'),
                         onPressed: () {
                           Navigator.of(context).push<void>(

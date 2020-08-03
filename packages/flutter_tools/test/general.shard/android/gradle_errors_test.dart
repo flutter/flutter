@@ -8,13 +8,11 @@ import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
-
 import 'package:mockito/mockito.dart';
-import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
@@ -54,7 +52,7 @@ at org.gradle.wrapper.Install.createDist(Install.java:48)
 at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
 at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
-      expect(testErrorMessage(errorMessage, networkErrorHandler), isTrue);
+      expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
 
       expect(testLogger.errorText,
@@ -82,7 +80,7 @@ at org.gradle.wrapper.Install.createDist(Install.java:48)
 at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
 at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
-      expect(testErrorMessage(errorMessage, networkErrorHandler), isTrue);
+      expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
 
       expect(testLogger.errorText,
@@ -101,7 +99,7 @@ Exception in thread "main" java.lang.RuntimeException: Timeout of 120000 reached
 	at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
 	at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
-      expect(testErrorMessage(errorMessage, networkErrorHandler), isTrue);
+      expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
 
       expect(testLogger.errorText,
@@ -136,7 +134,7 @@ Exception in thread "main" javax.net.ssl.SSLHandshakeException: Remote host clos
 	at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
 	at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
-      expect(testErrorMessage(errorMessage, networkErrorHandler), isTrue);
+      expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
 
       expect(testLogger.errorText,
@@ -163,7 +161,7 @@ Exception in thread "main" java.io.FileNotFoundException: https://downloads.grad
 	at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
 	at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
-      expect(testErrorMessage(errorMessage, networkErrorHandler), isTrue);
+      expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
 
       expect(testLogger.errorText,
@@ -201,7 +199,7 @@ Exception in thread "main" java.net.SocketException: Connection reset
 	at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
 	at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
-      expect(testErrorMessage(errorMessage, networkErrorHandler), isTrue);
+      expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
 
       expect(testLogger.errorText,
@@ -226,7 +224,7 @@ A problem occurred configuring root project 'android'.
                   > Could not get resource 'https://jcenter.bintray.com/net/sf/proguard/proguard-parent/6.0.3/proguard-parent-6.0.3.pom'.
                      > Could not GET 'https://jcenter.bintray.com/net/sf/proguard/proguard-parent/6.0.3/proguard-parent-6.0.3.pom'. Received status code 504 from server: Gateway Time-out''';
 
-      expect(testErrorMessage(errorMessage, networkErrorHandler), isTrue);
+      expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
 
       expect(testLogger.errorText,
@@ -244,7 +242,7 @@ A problem occurred configuring root project 'android'.
 Permission denied
 Command: /home/android/gradlew assembleRelease
 ''';
-      expect(testErrorMessage(errorMessage, permissionDeniedErrorHandler), isTrue);
+      expect(formatTestErrorMessage(errorMessage, permissionDeniedErrorHandler), isTrue);
       expect(await permissionDeniedErrorHandler.handler(), equals(GradleBuildStatus.exit));
 
       expect(
@@ -305,7 +303,7 @@ Command: /home/android/gradlew assembleRelease
 
       expect(status, equals(GradleBuildStatus.exit));
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => MockProcessManager(),
       Usage: () => mockUsage,
     });
@@ -323,7 +321,7 @@ Command: /home/android/gradlew assembleRelease
       expect(testLogger.statusText,
         contains(
           'AndroidX incompatibilities may have caused this build to fail. '
-          'Please migrate your app to AndroidX. See https://goo.gl/CP92wY.'
+          'Please migrate your app to AndroidX. See https://goo.gl/CP92wY .'
         )
       );
       verify(mockUsage.sendEvent(
@@ -337,7 +335,7 @@ Command: /home/android/gradlew assembleRelease
 
       expect(status, equals(GradleBuildStatus.exit));
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => MockProcessManager(),
       Usage: () => mockUsage,
     });
@@ -363,7 +361,7 @@ Command: /home/android/gradlew assembleRelease
 
       expect(status, equals(GradleBuildStatus.exit));
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => MockProcessManager(),
       Usage: () => mockUsage,
     });
@@ -394,7 +392,7 @@ Command: /home/android/gradlew assembleRelease
       )).called(1);
       expect(status, equals(GradleBuildStatus.retryWithAarPlugins));
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => MockProcessManager(),
       Usage: () => mockUsage,
     });
@@ -406,7 +404,7 @@ Command: /home/android/gradlew assembleRelease
 Permission denied
 Command: /home/android/gradlew assembleRelease
 ''';
-      expect(testErrorMessage(errorMessage, permissionDeniedErrorHandler), isTrue);
+      expect(formatTestErrorMessage(errorMessage, permissionDeniedErrorHandler), isTrue);
     });
 
     testUsingContext('handler', () async {
@@ -541,6 +539,7 @@ assembleFooTest
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),
       ProcessManager: () => mockProcessManager,
+      FileSystem: () => MemoryFileSystem.test(),
     });
 
     testUsingContext('handler - without flavor', () async {
@@ -588,13 +587,14 @@ assembleProfile
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),
       ProcessManager: () => mockProcessManager,
+      FileSystem: () => MemoryFileSystem.test(),
     });
   });
 }
 
 class MockUsage extends Mock implements Usage {}
 
-bool testErrorMessage(String errorMessage, GradleHandledError error) {
+bool formatTestErrorMessage(String errorMessage, GradleHandledError error) {
   return errorMessage
     .split('\n')
     .any((String line) => error.test(line));
@@ -602,7 +602,9 @@ bool testErrorMessage(String errorMessage, GradleHandledError error) {
 
 Platform fakePlatform(String name) {
   return FakePlatform(
-    environment: <String, String>{},
+    environment: <String, String>{
+      'HOME': '/',
+    },
     operatingSystem: name,
   );
 }

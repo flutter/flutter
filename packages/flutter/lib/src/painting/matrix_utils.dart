@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
@@ -11,7 +13,7 @@ import 'basic_types.dart';
 
 /// Utility functions for working with matrices.
 class MatrixUtils {
-  // This class is not meant to be instatiated or extended; this constructor
+  // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
   // ignore: unused_element
   MatrixUtils._();
@@ -125,6 +127,13 @@ class MatrixUtils {
   ///
   /// This function assumes the given point has a z-coordinate of 0.0. The
   /// z-coordinate of the result is ignored.
+  ///
+  /// While not common, this method may return (NaN, NaN), iff the given `point`
+  /// results in a "point at infinity" in homogeneous coordinates after applying
+  /// the `transform`. For example, a [RenderObject] may set its transform to
+  /// the zero matrix to indicate its content is currently not visible. Trying
+  /// to convert an `Offset` to its coordinate space always results in
+  /// (NaN, NaN).
   static Offset transformPoint(Matrix4 transform, Offset point) {
     final Float64List storage = transform.storage;
     final double x = point.dx;

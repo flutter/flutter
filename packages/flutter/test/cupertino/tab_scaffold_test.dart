@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -407,7 +409,7 @@ void main() {
     expect(MediaQuery.of(innerContext).padding.bottom, 0);
   });
 
-  testWidgets('Tab contents are not inset when resizeToAvoidBottomInset overriden', (WidgetTester tester) async {
+  testWidgets('Tab contents are not inset when resizeToAvoidBottomInset overridden', (WidgetTester tester) async {
     BuildContext innerContext;
 
     await tester.pumpWidget(
@@ -434,15 +436,22 @@ void main() {
     expect(MediaQuery.of(innerContext).padding.bottom, 50);
   });
 
-  testWidgets('Tab contents bottom padding are not consumed by viewInsets when resizeToAvoidBottomInset overriden', (WidgetTester tester) async {
-    final Widget child = Directionality(
-      textDirection: TextDirection.ltr,
-      child: CupertinoTabScaffold(
-        resizeToAvoidBottomInset: false,
-        tabBar: _buildTabBar(),
-        tabBuilder: (BuildContext context, int index) {
-          return const Placeholder();
-        },
+  testWidgets('Tab contents bottom padding are not consumed by viewInsets when resizeToAvoidBottomInset overridden', (WidgetTester tester) async {
+    final Widget child = Localizations(
+      locale: const Locale('en', 'US'),
+      delegates: const <LocalizationsDelegate<dynamic>>[
+        DefaultWidgetsLocalizations.delegate,
+        DefaultCupertinoLocalizations.delegate,
+      ],
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: CupertinoTabScaffold(
+          resizeToAvoidBottomInset: false,
+          tabBar: _buildTabBar(),
+          tabBuilder: (BuildContext context, int index) {
+            return const Placeholder();
+          },
+        ),
       ),
     );
 

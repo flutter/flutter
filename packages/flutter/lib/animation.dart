@@ -131,8 +131,8 @@
 /// another. For example, let's say you want to animate the background of a
 /// widget from yellow to green and then, after a short pause, to red. For this
 /// you can specify three tweens within a tween sequence: One [ColorTween]
-/// animating from blue to green, one [ConstantTween] that just holds the color
-/// green, and another [ColorTween] animating from green to yellow. For each
+/// animating from yellow to green, one [ConstantTween] that just holds the color
+/// green, and another [ColorTween] animating from green to red. For each
 /// tween you need to pick a weight indicating the ratio of time spent on that
 /// tween compared to all other tweens. If we assign a weight of 2 to both of
 /// the [ColorTween]s and a weight of 1 to the [ConstantTween] the transition

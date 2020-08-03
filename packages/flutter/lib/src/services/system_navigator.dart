@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 import 'dart:async';
 
 import 'system_channels.dart';
 
 /// Controls specific aspects of the system navigation stack.
 class SystemNavigator {
-  // This class is not meant to be instatiated or extended; this constructor
+  // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
   // ignore: unused_element
   SystemNavigator._();
@@ -31,7 +32,7 @@ class SystemNavigator {
   /// This method should be preferred over calling `dart:io`'s [exit]
   /// method, as the latter may cause the underlying platform to act
   /// as if the application had crashed.
-  static Future<void> pop({bool animated}) async {
+  static Future<void> pop({bool? animated}) async {
     await SystemChannels.platform.invokeMethod<void>('SystemNavigator.pop', animated);
   }
 }

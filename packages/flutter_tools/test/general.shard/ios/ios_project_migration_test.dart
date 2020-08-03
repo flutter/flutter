@@ -4,19 +4,18 @@
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/ios/migrations/ios_migrator.dart';
 import 'package:flutter_tools/src/ios/migrations/project_base_configuration_migration.dart';
-import 'package:meta/meta.dart';
-import 'package:mockito/mockito.dart';
-import 'package:platform/platform.dart';
-
-import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/ios/migrations/remove_framework_link_and_embedding_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/xcode_build_system_migration.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:meta/meta.dart';
+import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 
@@ -101,7 +100,7 @@ void main () {
 
       testWithoutContext('skips migrating script with embed', () {
         const String contents = '''
-shellScript = "/bin/sh \"\$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\\" embed\\n/bin/sh \"\$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\\" thin\n";
+shellScript = "/bin/sh \"\$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\\" embed\\n/bin/sh \"\$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\\" thin";
 			''';
         xcodeProjectInfoFile.writeAsStringSync(contents);
 
@@ -146,7 +145,6 @@ keep this 2
 keep this 1
 			shellScript = "/bin/sh "\$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\\" embed_and_thin";
 keep this 2
-
 ''');
         expect(testLogger.statusText, contains('Upgrading project.pbxproj'));
       });
@@ -166,7 +164,7 @@ keep this 2
           mockUsage,
         );
 
-        expect(() =>iosProjectMigration.migrate(), throwsToolExit(message: 'Your Xcode project requires migration'));
+        expect(iosProjectMigration.migrate, throwsToolExit(message: 'Your Xcode project requires migration'));
         verify(mockUsage.sendEvent('ios-migration', 'remove-frameworks', label: 'failure', value: null));
       });
 
@@ -184,7 +182,7 @@ keep this 2
           mockXcode,
           mockUsage,
         );
-        expect(() =>iosProjectMigration.migrate(), throwsToolExit(message: 'Your Xcode project requires migration'));
+        expect(iosProjectMigration.migrate, throwsToolExit(message: 'Your Xcode project requires migration'));
         verify(mockUsage.sendEvent('ios-migration', 'remove-frameworks', label: 'failure', value: null));
       });
 
@@ -200,7 +198,7 @@ keep this 2
           mockXcode,
           mockUsage,
         );
-        expect(() =>iosProjectMigration.migrate(), throwsToolExit(message: 'Your Xcode project requires migration'));
+        expect(iosProjectMigration.migrate, throwsToolExit(message: 'Your Xcode project requires migration'));
         verify(mockUsage.sendEvent('ios-migration', 'remove-frameworks', label: 'failure', value: null));
       });
 
@@ -237,7 +235,7 @@ keep this 2
           mockXcode,
           mockUsage,
         );
-        expect(() =>iosProjectMigration.migrate(), throwsToolExit(message: 'Your Xcode project requires migration'));
+        expect(iosProjectMigration.migrate, throwsToolExit(message: 'Your Xcode project requires migration'));
         verify(mockUsage.sendEvent('ios-migration', 'remove-frameworks', label: 'failure', value: null));
       });
 
@@ -255,7 +253,7 @@ keep this 2
           mockXcode,
           mockUsage,
         );
-        expect(() =>iosProjectMigration.migrate(), throwsToolExit(message: 'Your Xcode project requires migration'));
+        expect(iosProjectMigration.migrate, throwsToolExit(message: 'Your Xcode project requires migration'));
         verify(mockUsage.sendEvent('ios-migration', 'remove-frameworks', label: 'failure', value: null));
       });
     });
@@ -323,6 +321,8 @@ keep this 2
 <dict>
 	<key>BuildSystemType</key>
 	<string>Original</string>
+	<key>PreviewsEnabled</key>
+	<false/>
 </dict>
 </plist>''';
         xcodeWorkspaceSharedSettings.writeAsStringSync(contents);

@@ -6,8 +6,8 @@
 // entries that are included in the English arb files. This is useful when
 // adding new resources for localization. You can just add the appropriate
 // entries to the English arb file and then run this script. It will then check
-// all of the other language locale arb files and update them with new 'TBD'
-// entries for any missing resources. These will be picked up by the localization
+// all of the other language locale arb files and update them with the English
+// source for any missing resources. These will be picked up by the localization
 // team and then translated.
 //
 // ## Usage
@@ -77,7 +77,8 @@ void updateMissingResources(String localizationPath, String groupPrefix) {
   final Directory localizationDir = Directory(localizationPath);
   final RegExp filenamePattern = RegExp('${groupPrefix}_(\\w+)\\.arb');
 
-  final Set<String> requiredKeys = resourceKeys(loadBundle(File(path.join(localizationPath, '${groupPrefix}_en.arb'))));
+  final Map<String, dynamic> englishBundle = loadBundle(File(path.join(localizationPath, '${groupPrefix}_en.arb')));
+  final Set<String> requiredKeys = resourceKeys(englishBundle);
 
   for (final FileSystemEntity entity in localizationDir.listSync().toList()..sort(sortFilesByPath)) {
     final String entityPath = entity.path;
@@ -94,7 +95,8 @@ void updateMissingResources(String localizationPath, String groupPrefix) {
           (String key) => !isPluralVariation(key, localeBundle) && !intentionallyOmitted(key, localeBundle)
         ).toSet();
         if (missingResources.isNotEmpty) {
-          localeBundle.addEntries(missingResources.map((String k) => MapEntry<String, String>(k, 'TBD')));
+          localeBundle.addEntries(missingResources.map((String k) =>
+            MapEntry<String, String>(k, englishBundle[k].toString())));
           writeBundle(arbFile, localeBundle);
           print('Updated $entityPath with missing entries for $missingResources');
         }

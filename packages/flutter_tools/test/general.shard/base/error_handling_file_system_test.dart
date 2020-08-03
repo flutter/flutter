@@ -5,8 +5,8 @@
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/error_handling_file_system.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:mockito/mockito.dart';
-import 'package:platform/platform.dart';
 import 'package:path/path.dart' as path; // ignore: package_path_import
 
 import '../../src/common.dart';
@@ -222,17 +222,6 @@ void main() {
     when(mockFileSystem.path).thenReturn(MockPathContext());
 
     expect(identical(firstPath, fs.path), false);
-  });
-
-  testWithoutContext('Throws type error if Directory type is set to curentDirectory with LocalFileSystem', () {
-    final FileSystem fs = ErrorHandlingFileSystem(
-      delegate: const LocalFileSystem(),
-      platform: const LocalPlatform(),
-    );
-    final MockDirectory directory = MockDirectory();
-    when(directory.path).thenReturn('path');
-
-    expect(() => fs.currentDirectory = directory, throwsA(isA<TypeError>()));
   });
 
   group('toString() gives toString() of delegate', () {

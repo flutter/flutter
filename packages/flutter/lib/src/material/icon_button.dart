@@ -2,9 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
@@ -121,7 +124,7 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 ///    current platform's conventions.
 ///  * [CloseButton], an icon button for closing pages.
 ///  * [AppBar], to show a toolbar at the top of an application.
-///  * [RaisedButton] and [FlatButton], for buttons with text in them.
+///  * [TextButton], [ElevatedButton], [OutlinedButton], for buttons with text labels and an optional icon.
 ///  * [InkResponse] and [InkWell], for the ink splash effect itself.
 class IconButton extends StatelessWidget {
   /// Creates an icon button.
@@ -151,6 +154,7 @@ class IconButton extends StatelessWidget {
     this.splashColor,
     this.disabledColor,
     @required this.onPressed,
+    this.mouseCursor = SystemMouseCursors.click,
     this.focusNode,
     this.autofocus = false,
     this.tooltip,
@@ -182,8 +186,8 @@ class IconButton extends StatelessWidget {
   ///
   /// See also:
   ///
-  ///  * [ThemeData.visualDensity], which specifies the [density] for all widgets
-  ///    within a [Theme].
+  ///  * [ThemeData.visualDensity], which specifies the [visualDensity] for all
+  ///    widgets within a [Theme].
   final VisualDensity visualDensity;
 
   /// The padding around the button's icon. The entire padded icon will react
@@ -273,6 +277,11 @@ class IconButton extends StatelessWidget {
   ///
   /// If this is set to null, the button will be disabled.
   final VoidCallback onPressed;
+
+  /// {@macro flutter.material.button.mouseCursor}
+  ///
+  /// Defaults to [SystemMouseCursors.click].
+  final MouseCursor mouseCursor;
 
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode focusNode;
@@ -370,12 +379,13 @@ class IconButton extends StatelessWidget {
         autofocus: autofocus,
         canRequestFocus: onPressed != null,
         onTap: onPressed,
+        mouseCursor: mouseCursor,
         enableFeedback: enableFeedback,
         child: result,
-        focusColor: focusColor ?? Theme.of(context).focusColor,
-        hoverColor: hoverColor ?? Theme.of(context).hoverColor,
-        highlightColor: highlightColor ?? Theme.of(context).highlightColor,
-        splashColor: splashColor ?? Theme.of(context).splashColor,
+        focusColor: focusColor ?? theme.focusColor,
+        hoverColor: hoverColor ?? theme.hoverColor,
+        highlightColor: highlightColor ?? theme.highlightColor,
+        splashColor: splashColor ?? theme.splashColor,
         radius: splashRadius ?? math.max(
           Material.defaultSplashRadius,
           (iconSize + math.min(padding.horizontal, padding.vertical)) * 0.7,

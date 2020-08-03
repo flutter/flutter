@@ -5,11 +5,11 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
 
 import '../persistent_tool_state.dart';
 import 'io.dart';
 import 'net.dart';
+import 'platform.dart';
 
 class BotDetector {
   BotDetector({

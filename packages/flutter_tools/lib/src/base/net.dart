@@ -5,13 +5,13 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
 
 import '../convert.dart';
 import 'common.dart';
 import 'file_system.dart';
 import 'io.dart';
 import 'logger.dart';
+import 'platform.dart';
 
 const int kNetworkProblemExitCode = 50;
 

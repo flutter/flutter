@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:collection';
 import 'dart:math' as math;
 import 'dart:typed_data';
@@ -92,6 +94,7 @@ abstract class GradientTransform {
 ///   transform: GradientRotation(math.pi/4),
 /// );
 /// ```
+/// {@end-tool}
 @immutable
 class GradientRotation extends GradientTransform {
   /// Constructs a [GradientRotation] for the specified angle.
@@ -201,6 +204,7 @@ abstract class Gradient {
   ///
   /// The shader's transform will be resolved from the [transform] of this
   /// gradient.
+  @factory
   Shader createShader(Rect rect, { TextDirection textDirection });
 
   /// Returns a new gradient with its properties scaled by the given factor.
@@ -657,7 +661,7 @@ class RadialGradient extends Gradient {
   ///
   /// For example, if a radial gradient is painted on a box that is
   /// 100.0 pixels wide and 200.0 pixels tall, then a radius of 1.0
-  /// will place the 1.0 stop at 100.0 pixels from the [focus].
+  /// will place the 1.0 stop at 100.0 pixels from the [focal] point.
   ///
   /// If this value is specified and is greater than 0.0, either [focal] or
   /// [center] must not resolve to [Offset.zero], which would fail to create

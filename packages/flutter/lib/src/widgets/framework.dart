@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:collection';
 import 'dart:developer';
@@ -16,6 +18,7 @@ import 'inherited_model.dart';
 export 'dart:ui' show hashValues, hashList;
 
 export 'package:flutter/foundation.dart' show
+  factory,
   immutable,
   mustCallSuper,
   optionalTypeArgs,
@@ -104,9 +107,13 @@ class ObjectKey extends LocalKey {
 /// in the same animation frame in which it was removed from its old location in
 /// the tree.
 ///
-/// Global keys are relatively expensive. If you don't need any of the features
-/// listed above, consider using a [Key], [ValueKey], [ObjectKey], or
-/// [UniqueKey] instead.
+/// Reparenting an [Element] using a global key is relatively expensive, as
+/// this operation will trigger a call to [State.deactivate] on the associated
+/// [State] and all of its descendants; then force all widgets that depends
+/// on an [InheritedWidget] to rebuild.
+///
+/// If you don't need any of the features listed above, consider using a [Key],
+/// [ValueKey], [ObjectKey], or [UniqueKey] instead.
 ///
 /// You cannot simultaneously include two widgets in the tree with the same
 /// global key. Attempting to do so will assert at runtime.
@@ -186,11 +193,11 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
   static void _debugVerifyGlobalKeyReservation() {
     assert(() {
       final Map<GlobalKey, Element> keyToParent = <GlobalKey, Element>{};
-      _debugReservations.forEach((Element parent, Map<Element, GlobalKey> chidToKey) {
-        // We ignore parent that are detached.
-        if (parent.renderObject?.attached == false)
+      _debugReservations.forEach((Element parent, Map<Element, GlobalKey> childToKey) {
+        // We ignore parent that are unmounted or detached.
+        if (parent._debugLifecycleState == _ElementLifecycle.defunct || parent.renderObject?.attached == false)
           return;
-        chidToKey.forEach((Element child, GlobalKey key) {
+        childToKey.forEach((Element child, GlobalKey key) {
           // If parent = null, the node is deactivated by its parent and is
           // not re-attached to other part of the tree. We should ignore this
           // node.
@@ -488,6 +495,7 @@ abstract class Widget extends DiagnosticableTree {
   /// widget that is incorporated into the tree multiple times will be inflated
   /// multiple times.
   @protected
+  @factory
   Element createElement();
 
   /// A short, textual description of this widget.
@@ -660,9 +668,11 @@ abstract class StatelessWidget extends Widget {
 
   /// Describes the part of the user interface represented by this widget.
   ///
-  /// The framework calls this method when this widget is inserted into the
-  /// tree in a given [BuildContext] and when the dependencies of this widget
-  /// change (e.g., an [InheritedWidget] referenced by this widget changes).
+  /// The framework calls this method when this widget is inserted into the tree
+  /// in a given [BuildContext] and when the dependencies of this widget change
+  /// (e.g., an [InheritedWidget] referenced by this widget changes). This
+  /// method can potentially be called in every frame and should not have any side
+  /// effects beyond building a widget.
   ///
   /// The framework replaces the subtree below this widget with the widget
   /// returned by this method, either by updating the existing subtree or by
@@ -911,6 +921,7 @@ abstract class StatefulWidget extends Widget {
   /// again to create a fresh [State] object, simplifying the lifecycle of
   /// [State] objects.
   @protected
+  @factory
   State createState();
 }
 
@@ -1312,7 +1323,8 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
 
   /// Describes the part of the user interface represented by this widget.
   ///
-  /// The framework calls this method in a number of different situations:
+  /// The framework calls this method in a number of different situations. For
+  /// example:
   ///
   ///  * After calling [initState].
   ///  * After calling [didUpdateWidget].
@@ -1321,6 +1333,9 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   ///    [InheritedWidget] referenced by the previous [build] changes).
   ///  * After calling [deactivate] and then reinserting the [State] object into
   ///    the tree at another location.
+  ///
+  /// This method can potentially be called in every frame and should not have
+  /// any side effects beyond building a widget.
   ///
   /// The framework replaces the subtree below this widget with the widget
   /// returned by this method, either by updating the existing subtree or by
@@ -1730,6 +1745,7 @@ abstract class RenderObjectWidget extends Widget {
 
   /// RenderObjectWidgets always inflate to a [RenderObjectElement] subclass.
   @override
+  @factory
   RenderObjectElement createElement();
 
   /// Creates an instance of the [RenderObject] class that this
@@ -1742,6 +1758,7 @@ abstract class RenderObjectWidget extends Widget {
   /// [createElement] method. See, for example,
   /// [SingleChildRenderObjectElement.mount].
   @protected
+  @factory
   RenderObject createRenderObject(BuildContext context);
 
   /// Copies the configuration described by this [RenderObjectWidget] to the
@@ -1801,10 +1818,12 @@ abstract class SingleChildRenderObjectWidget extends RenderObjectWidget {
 /// storage for that child list, it doesn't actually provide the updating
 /// logic.)
 ///
-/// This will return a [RenderObject] mixing in [ContainerRenderObjectMixin],
-/// which provides the necessary functionality to visit the children of the
-/// container render object (the render object belonging to the [children] widgets).
-/// Typically, this is a [RenderBox] with [RenderBoxContainerDefaultsMixin].
+/// Subclasses must return a [RenderObject] that mixes in
+/// [ContainerRenderObjectMixin], which provides the necessary functionality to
+/// visit the children of the container render object (the render object
+/// belonging to the [children] widgets). Typically, subclasses will return a
+/// [RenderBox] that mixes in both [ContainerRenderObjectMixin] and
+/// [RenderBoxContainerDefaultsMixin].
 ///
 /// See also:
 ///
@@ -2022,7 +2041,7 @@ typedef ElementVisitor = void Function(Element element);
 ///       appBar: AppBar(title: Text('Demo')),
 ///       body: Builder(
 ///         builder: (BuildContext context) {
-///           return FlatButton(
+///           return TextButton(
 ///             child: Text('BUTTON'),
 ///             onPressed: () {
 ///               // here, Scaffold.of(context) returns the locally created Scaffold
@@ -2152,7 +2171,7 @@ abstract class BuildContext {
   )
   InheritedWidget inheritFromWidgetOfExactType(Type targetType, { Object aspect });
 
-  /// Obtains the nearest widget of the given type [T], which must be the type of a
+  /// Obtains the nearest widget of the given type `T`, which must be the type of a
   /// concrete [InheritedWidget] subclass, and registers this build context with
   /// that widget such that when that widget changes (or a new widget of that
   /// type is introduced, or the widget goes away), this build context is
@@ -2187,7 +2206,7 @@ abstract class BuildContext {
   /// the widget or one of its ancestors is moved (for example, because an
   /// ancestor is added or removed).
   ///
-  /// The [aspect] parameter is only used when [T] is an
+  /// The [aspect] parameter is only used when `T` is an
   /// [InheritedWidget] subclasses that supports partial updates, like
   /// [InheritedModel]. It specifies what "aspect" of the inherited
   /// widget this context depends on.
@@ -2204,7 +2223,7 @@ abstract class BuildContext {
   )
   InheritedElement ancestorInheritedElementForWidgetOfExactType(Type targetType);
 
-  /// Obtains the element corresponding to the nearest widget of the given type [T],
+  /// Obtains the element corresponding to the nearest widget of the given type `T`,
   /// which must be the type of a concrete [InheritedWidget] subclass.
   ///
   /// Returns null if no such element is found.
@@ -2233,7 +2252,7 @@ abstract class BuildContext {
   )
   Widget ancestorWidgetOfExactType(Type targetType);
 
-  /// Returns the nearest ancestor widget of the given type [T], which must be the
+  /// Returns the nearest ancestor widget of the given type `T`, which must be the
   /// type of a concrete [Widget] subclass.
   ///
   /// In general, [dependOnInheritedWidgetOfExactType] is more useful, since
@@ -2271,7 +2290,7 @@ abstract class BuildContext {
   State ancestorStateOfType(TypeMatcher matcher);
 
   /// Returns the [State] object of the nearest ancestor [StatefulWidget] widget
-  /// that is an instance of the given type [T].
+  /// that is an instance of the given type `T`.
   ///
   /// This should not be used from build methods, because the build context will
   /// not be rebuilt if the value that would be returned by this method changes.
@@ -2315,10 +2334,10 @@ abstract class BuildContext {
   State rootAncestorStateOfType(TypeMatcher matcher);
 
   /// Returns the [State] object of the furthest ancestor [StatefulWidget] widget
-  /// that is an instance of the given type [T].
+  /// that is an instance of the given type `T`.
   ///
   /// Functions the same way as [findAncestorStateOfType] but keeps visiting subsequent
-  /// ancestors until there are none of the type instance of [T] remaining.
+  /// ancestors until there are none of the type instance of `T` remaining.
   /// Then returns the last one found.
   ///
   /// This operation is O(N) as well though N is the entire widget tree rather than
@@ -2337,7 +2356,7 @@ abstract class BuildContext {
   RenderObject ancestorRenderObjectOfType(TypeMatcher matcher);
 
   /// Returns the [RenderObject] object of the nearest ancestor [RenderObjectWidget] widget
-  /// that is an instance of the given type [T].
+  /// that is an instance of the given type `T`.
   ///
   /// This should not be used from build methods, because the build context will
   /// not be rebuilt if the value that would be returned by this method changes.
@@ -2590,7 +2609,7 @@ class BuildOwner {
       _debugBuilding = true;
       return true;
     }());
-    Timeline.startSync('Build', arguments: timelineWhitelistArguments);
+    Timeline.startSync('Build', arguments: timelineArgumentsIndicatingLandmarkEvent);
     try {
       _scheduledFlushDirtyElements = true;
       if (callback != null) {
@@ -2622,7 +2641,34 @@ class BuildOwner {
       while (index < dirtyCount) {
         assert(_dirtyElements[index] != null);
         assert(_dirtyElements[index]._inDirtyList);
-        assert(!_dirtyElements[index]._active || _dirtyElements[index]._debugIsInScope(context));
+        assert(() {
+          if (_dirtyElements[index]._active && !_dirtyElements[index]._debugIsInScope(context)) {
+            throw FlutterError.fromParts(<DiagnosticsNode>[
+              ErrorSummary('Tried to build dirty widget in the wrong build scope.'),
+              ErrorDescription(
+                'A widget which was marked as dirty and is still active was scheduled to be built, '
+                'but the current build scope unexpectedly does not contain that widget.',
+              ),
+              ErrorHint(
+                'Sometimes this is detected when an element is removed from the widget tree, but the '
+                'element somehow did not get marked as inactive. In that case, it might be caused by '
+                'an ancestor element failing to implement visitChildren correctly, thus preventing '
+                'some or all of its descendants from being correctly deactivated.',
+              ),
+              DiagnosticsProperty<Element>(
+                'The root of the build scope was',
+                context,
+                style: DiagnosticsTreeStyle.errorProperty,
+              ),
+              DiagnosticsProperty<Element>(
+                'The offending element (which does not appear to be a descendant of the root of the build scope) was',
+                _dirtyElements[index],
+                style: DiagnosticsTreeStyle.errorProperty,
+              ),
+            ]);
+          }
+          return true;
+        }());
         try {
           _dirtyElements[index].rebuild();
         } catch (e, stack) {
@@ -2708,7 +2754,7 @@ class BuildOwner {
   /// After the current call stack unwinds, a microtask that notifies listeners
   /// about changes to global keys will run.
   void finalizeTree() {
-    Timeline.startSync('Finalize tree', arguments: timelineWhitelistArguments);
+    Timeline.startSync('Finalize tree', arguments: timelineArgumentsIndicatingLandmarkEvent);
     try {
       lockState(() {
         _inactiveElements._unmountAll(); // this unregisters the GlobalKeys
@@ -3139,6 +3185,8 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// This method is the core of the widgets system. It is called each time we
   /// are to add, update, or remove a child based on an updated configuration.
   ///
+  /// The `newSlot` argument specifies the new value for this element's [slot].
+  ///
   /// If the `child` is null, and the `newWidget` is not null, then we have a new
   /// child for which we need to create an [Element], configured with `newWidget`.
   ///
@@ -3240,6 +3288,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   ///
   /// This method transitions the element from the "initial" lifecycle state to
   /// the "active" lifecycle state.
+  ///
+  /// Subclasses that override this method are likely to want to also override
+  /// [update], [visitChildren], [RenderObjectElement.insertChildRenderObject],
+  /// [RenderObjectElement.moveChildRenderObject], and
+  /// [RenderObjectElement.removeChildRenderObject].
   @mustCallSuper
   void mount(Element parent, dynamic newSlot) {
     assert(_debugLifecycleState == _ElementLifecycle.initial);
@@ -3269,6 +3322,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   void _debugRemoveGlobalKeyReservation(Element child) {
     GlobalKey._debugRemoveReservationFor(this, child);
   }
+
   /// Change the widget used to configure this element.
   ///
   /// The framework calls this function when the parent wishes to use a
@@ -3340,7 +3394,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// Remove [renderObject] from the render tree.
   ///
   /// The default implementation of this function simply calls
-  /// [detachRenderObject] recursively on its child. The
+  /// [detachRenderObject] recursively on each child. The
   /// [RenderObjectElement.detachRenderObject] override does the actual work of
   /// removing [renderObject] from the render tree.
   ///
@@ -3352,12 +3406,14 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     _slot = null;
   }
 
-  /// Add [renderObject] to the render tree at the location specified by [slot].
+  /// Add [renderObject] to the render tree at the location specified by `newSlot`.
   ///
   /// The default implementation of this function simply calls
-  /// [attachRenderObject] recursively on its child. The
+  /// [attachRenderObject] recursively on each child. The
   /// [RenderObjectElement.attachRenderObject] override does the actual work of
   /// adding [renderObject] to the render tree.
+  ///
+  /// The `newSlot` argument specifies the new value for this element's [slot].
   void attachRenderObject(dynamic newSlot) {
     assert(_slot == null);
     visitChildren((Element child) {
@@ -3369,7 +3425,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   Element _retakeInactiveElement(GlobalKey key, Widget newWidget) {
     // The "inactivity" of the element being retaken here may be forward-looking: if
     // we are taking an element with a GlobalKey from an element that currently has
-    // it as a child, then we know that that element will soon no longer have that
+    // it as a child, then we know that element will soon no longer have that
     // element as a child. The only way that assumption could be false is if the
     // global key is being duplicated, and we'll try to track that using the
     // _debugTrackElementThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans call below.
@@ -3421,6 +3477,8 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// has a widget with that global key, this function will reuse that element
   /// (potentially grafting it from another location in the tree or reactivating
   /// it from the list of inactive elements) rather than creating a new element.
+  ///
+  /// The `newSlot` argument specifies the new value for this element's [slot].
   ///
   /// The element returned by this function will already have been mounted and
   /// will be in the "active" lifecycle state.
@@ -4449,7 +4507,7 @@ typedef TransitionBuilder = Widget Function(BuildContext context, Widget child);
 /// A builder that creates a widget given the two callbacks `onStepContinue` and
 /// `onStepCancel`.
 ///
-/// Used by [Stepper.builder].
+/// Used by [Stepper.controlsBuilder].
 ///
 /// See also:
 ///
@@ -4494,7 +4552,7 @@ abstract class ComponentElement extends Element {
   @override
   void performRebuild() {
     if (!kReleaseMode && debugProfileBuildsEnabled)
-      Timeline.startSync('${widget.runtimeType}',  arguments: timelineWhitelistArguments);
+      Timeline.startSync('${widget.runtimeType}',  arguments: timelineArgumentsIndicatingLandmarkEvent);
 
     assert(_debugSetAllowIgnoredCallsToMarkNeedsBuild(true));
     Widget built;

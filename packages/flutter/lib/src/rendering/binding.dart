@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:developer';
 import 'dart:typed_data';
@@ -382,8 +384,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// sent to the GPU.
   ///
   /// 7. The semantics phase: All the dirty [RenderObject]s in the system have
-  /// their semantics updated (see [RenderObject.semanticsAnnotator]). This
-  /// generates the [SemanticsNode] tree. See
+  /// their semantics updated. This generates the [SemanticsNode] tree. See
   /// [RenderObject.markNeedsSemanticsUpdate] for further details on marking an
   /// object dirty for semantics.
   ///
@@ -412,7 +413,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   @override
   Future<void> performReassemble() async {
     await super.performReassemble();
-    Timeline.startSync('Dirty Render Tree', arguments: timelineWhitelistArguments);
+    Timeline.startSync('Dirty Render Tree', arguments: timelineArgumentsIndicatingLandmarkEvent);
     try {
       renderView.reassemble();
     } finally {

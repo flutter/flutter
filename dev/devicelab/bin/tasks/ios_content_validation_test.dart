@@ -24,19 +24,32 @@ Future<void> main() async {
             '--release',
             '--obfuscate',
             '--split-debug-info=foo/',
+            '--no-codesign',
           ]);
         });
+        final String buildPath = path.join(
+          flutterProject.rootPath,
+          'build',
+          'ios',
+          'iphoneos',
+        );
         final String outputAppPath = path.join(
-          flutterProject.rootPath,
-          'build/ios/iphoneos/Runner.app',
+          buildPath,
+          'Runner.app',
         );
-        final String outputAppFramework = path.join(
-          flutterProject.rootPath,
+        final Directory outputAppFramework = Directory(path.join(
           outputAppPath,
-          'Frameworks/App.framework/App',
-        );
-        if (!File(outputAppFramework).existsSync()) {
-          fail('Failed to produce expected output at $outputAppFramework');
+          'Frameworks',
+          'App.framework',
+        ));
+
+        final File outputAppFrameworkBinary = File(path.join(
+          outputAppFramework.path,
+          'App',
+        ));
+
+        if (!outputAppFrameworkBinary.existsSync()) {
+          fail('Failed to produce expected output at ${outputAppFrameworkBinary.path}');
         }
 
         section('Validate obfuscation');
@@ -46,7 +59,7 @@ Future<void> main() async {
         await inDirectory(flutterProject.rootPath, () async {
           final String response = await eval(
             'grep',
-            <String>[flutterProject.name, outputAppFramework],
+            <String>[flutterProject.name, outputAppFrameworkBinary.path],
             canFail: true,
           );
           if (response.trim().contains('matches')) {
@@ -56,16 +69,63 @@ Future<void> main() async {
 
         section('Validate bitcode');
 
-        final String outputFlutterFramework = path.join(
+        final Directory outputFlutterFramework = Directory(path.join(
           flutterProject.rootPath,
           outputAppPath,
-          'Frameworks/Flutter.framework/Flutter',
+          'Frameworks',
+          'Flutter.framework',
+        ));
+        final File outputFlutterFrameworkBinary = File(path.join(
+          outputFlutterFramework.path,
+          'Flutter',
+        ));
+
+        if (!outputFlutterFrameworkBinary.existsSync()) {
+          fail('Failed to produce expected output at ${outputFlutterFrameworkBinary.path}');
+        }
+        bitcode = await containsBitcode(outputFlutterFrameworkBinary.path);
+
+        section('Xcode backend script');
+
+        outputFlutterFramework.deleteSync(recursive: true);
+        outputAppFramework.deleteSync(recursive: true);
+        if (outputFlutterFramework.existsSync() || outputAppFramework.existsSync()) {
+          fail('Failed to delete embedded frameworks');
+        }
+
+        final String xcodeBackendPath = path.join(
+          flutterDirectory.path,
+          'packages',
+          'flutter_tools',
+          'bin',
+          'xcode_backend.sh'
         );
 
-        if (!File(outputFlutterFramework).existsSync()) {
-          fail('Failed to produce expected output at $outputFlutterFramework');
+        // Simulate a commonly Xcode build setting misconfiguration
+        // where FLUTTER_APPLICATION_PATH is missing
+        final int result = await exec(
+          xcodeBackendPath,
+          <String>['embed_and_thin'],
+          environment: <String, String>{
+            'SOURCE_ROOT': flutterProject.iosPath,
+            'TARGET_BUILD_DIR': buildPath,
+            'FRAMEWORKS_FOLDER_PATH': 'Runner.app/Frameworks',
+            'VERBOSE_SCRIPT_LOGGING': '1',
+            'ACTION': 'install', // Skip bitcode stripping since we just checked that above.
+          },
+        );
+
+        if (result != 0) {
+          fail('xcode_backend embed_and_thin failed');
         }
-        bitcode = await containsBitcode(outputFlutterFramework);
+
+        if (!outputFlutterFrameworkBinary.existsSync()) {
+          fail('Failed to re-embed ${outputFlutterFrameworkBinary.path}');
+        }
+
+        if (!outputAppFrameworkBinary.existsSync()) {
+          fail('Failed to re-embed ${outputAppFrameworkBinary.path}');
+        }
       });
 
       if (foundProjectName) {

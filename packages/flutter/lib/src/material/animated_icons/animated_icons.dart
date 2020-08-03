@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 part of material_animated_icons;
 
 // The code for drawing animated icons is kept in a private API, as we are not
@@ -88,8 +90,8 @@ class AnimatedIcon extends StatelessWidget {
   ///
   /// See also:
   ///
-  ///  * [Semantics.label], which is set to [semanticLabel] in the underlying
-  ///    [Semantics] widget.
+  ///  * [SemanticsProperties.label], which is set to [semanticLabel] in the
+  ///    underlying [Semantics] widget.
   final String semanticLabel;
 
   /// The text direction to use for rendering the icon.

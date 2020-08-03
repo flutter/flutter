@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -38,7 +40,7 @@ void main() {
     expect(material.clipBehavior, Clip.none);
     expect(material.color, null);
     expect(material.elevation, 2.0);
-    expect(material.shadowColor, const Color(0xff000000));
+    expect(material.shadowColor, null);
     expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)));
     expect(material.textStyle.color, const Color(0xdd000000));
     expect(material.textStyle.fontFamily, 'Roboto');
@@ -58,7 +60,7 @@ void main() {
     expect(material.clipBehavior, Clip.none);
     expect(material.color, null);
     expect(material.elevation, 8.0);
-    expect(material.shadowColor, const Color(0xff000000));
+    expect(material.shadowColor, null);
     expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)));
     expect(material.textStyle.color, const Color(0xdd000000));
     expect(material.textStyle.fontFamily, 'Roboto');
@@ -83,7 +85,7 @@ void main() {
     expect(material.clipBehavior, Clip.none);
     expect(material.color, null);
     expect(material.elevation, 0.0);
-    expect(material.shadowColor, const Color(0xff000000));
+    expect(material.shadowColor, null);
     expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)));
     expect(material.textStyle.color, const Color(0x61000000));
     expect(material.textStyle.fontFamily, 'Roboto');
@@ -371,6 +373,59 @@ void main() {
     expect(didLongPressButton, isFalse);
     await tester.longPress(materialButton);
     expect(didLongPressButton, isTrue);
+  });
+
+  testWidgets('MaterialButton changes mouse cursor when hovered', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: MaterialButton(
+            onPressed: () {},
+            mouseCursor: SystemMouseCursors.text,
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: Offset.zero);
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    // Test default cursor
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: MaterialButton(
+            onPressed: () {},
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    // Test default cursor when disabled
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: MaterialButton(
+            onPressed: null,
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
   // This test is very similar to the '...explicit splashColor and highlightColor' test
@@ -787,5 +842,48 @@ void main() {
     childRect = tester.getRect(find.byKey(childKey));
     expect(box.size, equals(const Size(76, 36)));
     expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
+  });
+
+  testWidgets('disabledElevation is passed to RawMaterialButton', (WidgetTester tester) async {
+    const double disabledElevation = 16;
+
+    final Finder rawMaterialButtonFinder = find.descendant(
+        of: find.byType(MaterialButton),
+        matching: find.byType(RawMaterialButton)
+    );
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: MaterialButton(
+          disabledElevation: disabledElevation,
+          onPressed: null, // disabled button
+          child: Text('button'),
+        ),
+      ),
+    );
+
+    final RawMaterialButton rawMaterialButton = tester.widget(rawMaterialButtonFinder);
+    expect(rawMaterialButton.disabledElevation, equals(disabledElevation));
+  });
+
+  testWidgets('MaterialButton.disabledElevation defaults to 0.0 when not provided', (WidgetTester tester) async {
+    final Finder rawMaterialButtonFinder = find.descendant(
+        of: find.byType(MaterialButton),
+        matching: find.byType(RawMaterialButton)
+    );
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: MaterialButton(
+          onPressed: null, // disabled button
+          child: Text('button'),
+        ),
+      ),
+    );
+
+    final RawMaterialButton rawMaterialButton = tester.widget(rawMaterialButtonFinder);
+    expect(rawMaterialButton.disabledElevation, equals(0.0));
   });
 }

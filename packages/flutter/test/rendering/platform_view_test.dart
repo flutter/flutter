@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -17,6 +19,7 @@ void main() {
     FakePlatformViewController fakePlatformViewController;
     PlatformViewRenderBox platformViewRenderBox;
     setUp(() {
+      renderer; // Initialize bindings
       fakePlatformViewController = FakePlatformViewController(0);
       platformViewRenderBox = PlatformViewRenderBox(
         controller: fakePlatformViewController,

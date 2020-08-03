@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -225,27 +227,27 @@ class SliverConstraints extends Constraints {
   /// contents depends on the [growthDirection].
   final double scrollOffset;
 
-  /// The scroll distance that has been consumed by all [Sliver]s that came
-  /// before this [Sliver].
+  /// The scroll distance that has been consumed by all [RenderSliver]s that
+  /// came before this [RenderSliver].
   ///
   /// # Edge Cases
   ///
-  /// [Sliver]s often lazily create their internal content as layout occurs,
-  /// e.g., [SliverList]. In this case, when [Sliver]s exceed the viewport,
-  /// their children are built lazily, and the [Sliver] does not have enough
-  /// information to estimate its total extent, [precedingScrollExtent] will be
-  /// [double.infinity] for all [Sliver]s that appear after the lazily
-  /// constructed child. This is because a total [scrollExtent] cannot be
-  /// calculated unless all inner children have been created and sized, or the
-  /// number of children and estimated extents are provided. The infinite
-  /// [scrollExtent] will become finite as soon as enough information is
-  /// available to estimate the overall extent of all children within the given
-  /// [Sliver].
+  /// [RenderSliver]s often lazily create their internal content as layout
+  /// occurs, e.g., [SliverList]. In this case, when [RenderSliver]s exceed the
+  /// viewport, their children are built lazily, and the [RenderSliver] does not
+  /// have enough information to estimate its total extent,
+  /// [precedingScrollExtent] will be [double.infinity] for all [RenderSliver]s
+  /// that appear after the lazily constructed child. This is because a total
+  /// [SliverGeometry.scrollExtent] cannot be calculated unless all inner
+  /// children have been created and sized, or the number of children and
+  /// estimated extents are provided. The infinite [SliverGeometry.scrollExtent]
+  /// will become finite as soon as enough information is available to estimate
+  /// the overall extent of all children within the given [RenderSliver].
   ///
-  /// [Sliver]s may legitimately be infinite, meaning that they can scroll
-  /// content forever without reaching the end. For any [Sliver]s that appear
-  /// after the infinite [Sliver], the [precedingScrollExtent] will be
-  /// [double.infinity].
+  /// [RenderSliver]s may legitimately be infinite, meaning that they can scroll
+  /// content forever without reaching the end. For any [RenderSliver]s that
+  /// appear after the infinite [RenderSliver], the [precedingScrollExtent] will
+  /// be [double.infinity].
   final double precedingScrollExtent;
 
   /// The number of pixels from where the pixels corresponding to the
@@ -634,7 +636,7 @@ class SliverGeometry with Diagnosticable {
   ///
   /// This value is typically 0 when outside of the viewport and grows or
   /// shrinks from 0 or to 0 as the sliver is being scrolled into and out of the
-  /// viewport unless then sliver wants to achieve a special effect and push
+  /// viewport unless the sliver wants to achieve a special effect and push
   /// down the layout start position of subsequent slivers before the sliver is
   /// even scrolled into the viewport.
   final double layoutExtent;
@@ -786,7 +788,7 @@ class SliverGeometry with Diagnosticable {
   }
 }
 
-/// Method signature for hit testing a [RenderSLiver].
+/// Method signature for hit testing a [RenderSliver].
 ///
 /// Used by [SliverHitTestResult.addWithAxisOffset] to hit test [RenderSliver]
 /// children.
@@ -859,7 +861,7 @@ class SliverHitTestResult extends HitTestResult {
     assert(crossAxisPosition != null);
     assert(hitTest != null);
     if (paintOffset != null) {
-      pushTransform(Matrix4.translationValues(-paintOffset.dx, -paintOffset.dy, 0));
+      pushOffset(-paintOffset);
     }
     final bool isHit = hitTest(
       this,

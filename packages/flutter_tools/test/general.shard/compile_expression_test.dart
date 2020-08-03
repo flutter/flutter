@@ -4,17 +4,16 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
-import 'package:platform/platform.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -27,13 +26,21 @@ void main() {
   MockStdIn mockFrontendServerStdIn;
   MockStream mockFrontendServerStdErr;
   StreamController<String> stdErrStreamController;
+  BufferLogger testLogger;
 
   setUp(() {
-    generator = ResidentCompiler('sdkroot',  buildMode: BuildMode.debug);
+    testLogger = BufferLogger.test();
     mockProcessManager = MockProcessManager();
     mockFrontendServer = MockProcess();
     mockFrontendServerStdIn = MockStdIn();
     mockFrontendServerStdErr = MockStream();
+    generator = ResidentCompiler(
+      'sdkroot',
+      buildMode: BuildMode.debug,
+      artifacts: Artifacts.test(),
+      processManager: mockProcessManager,
+      logger: testLogger,
+    );
 
     when(mockFrontendServer.stdin).thenReturn(mockFrontendServerStdIn);
     when(mockFrontendServer.stderr)
@@ -52,13 +59,14 @@ void main() {
     );
   });
 
-  testUsingContext('compile expression fails if not previously compiled', () async {
+  testWithoutContext('compile expression fails if not previously compiled', () async {
     final CompilerOutput result = await generator.compileExpression(
         '2+2', null, null, null, null, false);
+
     expect(result, isNull);
   });
 
-  testUsingContext('compile expression can compile single expression', () async {
+  testWithoutContext('compile expression can compile single expression', () async {
     final Completer<List<int>> compileResponseCompleter =
         Completer<List<int>>();
     final Completer<List<int>> compileExpressionResponseCompleter =
@@ -76,7 +84,7 @@ void main() {
     )));
 
     await generator.recompile(
-      globals.fs.file('/path/to/main.dart').uri,
+      Uri.file('/path/to/main.dart'),
       null, /* invalidatedFiles */
       outputPath: '/build/',
       packageConfig: PackageConfig.empty,
@@ -85,7 +93,7 @@ void main() {
           'compile file:///path/to/main.dart\n');
       verifyNoMoreInteractions(mockFrontendServerStdIn);
       expect(testLogger.errorText,
-          equals('\nCompiler message:\nline1\nline2\n'));
+          equals('line1\nline2\n'));
       expect(output.outputFilename, equals('/path/to/main.dart.dill'));
 
       compileExpressionResponseCompleter.complete(
@@ -101,14 +109,9 @@ void main() {
               }
       );
     });
-
-  }, overrides: <Type, Generator>{
-    ProcessManager: () => mockProcessManager,
-    OutputPreferences: () => OutputPreferences(showColor: false),
-    Platform: kNoColorTerminalPlatform,
   });
 
-  testUsingContext('compile expressions without awaiting', () async {
+  testWithoutContext('compile expressions without awaiting', () async {
     final Completer<List<int>> compileResponseCompleter = Completer<List<int>>();
     final Completer<List<int>> compileExpressionResponseCompleter1 = Completer<List<int>>();
     final Completer<List<int>> compileExpressionResponseCompleter2 = Completer<List<int>>();
@@ -131,7 +134,7 @@ void main() {
         packageConfig: PackageConfig.empty,
       ).then((CompilerOutput outputCompile) {
         expect(testLogger.errorText,
-            equals('\nCompiler message:\nline1\nline2\n'));
+            equals('line1\nline2\n'));
         expect(outputCompile.outputFilename, equals('/path/to/main.dart.dill'));
 
         compileExpressionResponseCompleter1.complete(Future<List<int>>.value(utf8.encode(
@@ -174,10 +177,6 @@ void main() {
     )));
 
     expect(await lastExpressionCompleted.future, isTrue);
-  }, overrides: <Type, Generator>{
-    ProcessManager: () => mockProcessManager,
-    OutputPreferences: () => OutputPreferences(showColor: false),
-    Platform: kNoColorTerminalPlatform,
   });
 }
 

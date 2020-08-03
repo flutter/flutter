@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
@@ -240,11 +242,10 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
     // TODO(jacobr): add the overflows in pixels as structured data so they can
     // be visualized in debugging tools.
     FlutterError.reportError(
-      FlutterErrorDetailsForRendering(
+      FlutterErrorDetails(
         exception: FlutterError('A $runtimeType overflowed by $overflowText.'),
         library: 'rendering library',
         context: ErrorDescription('during layout'),
-        renderObject: this,
         informationCollector: () sync* {
           if (debugCreator != null)
             yield DiagnosticsDebugCreator(debugCreator);

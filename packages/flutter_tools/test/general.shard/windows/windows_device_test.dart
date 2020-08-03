@@ -4,15 +4,15 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/windows/application_package.dart';
 import 'package:flutter_tools/src/windows/windows_device.dart';
-import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
-import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -38,6 +38,11 @@ void main() {
       expect(await device.isLatestBuildInstalled(windowsApp), true);
       expect(await device.isAppInstalled(windowsApp), true);
       expect(device.category, Category.desktop);
+
+      expect(device.supportsRuntimeMode(BuildMode.debug), true);
+      expect(device.supportsRuntimeMode(BuildMode.profile), true);
+      expect(device.supportsRuntimeMode(BuildMode.release), true);
+      expect(device.supportsRuntimeMode(BuildMode.jitRelease), false);
     });
 
     testUsingContext('No devices listed if platform unsupported', () async {
@@ -66,6 +71,7 @@ void main() {
       globals.fs.file('pubspec.yaml').createSync();
       globals.fs.file('.packages').createSync();
       globals.fs.directory('windows').createSync();
+      globals.fs.file(globals.fs.path.join('windows', 'CMakeLists.txt')).createSync();
       final FlutterProject flutterProject = FlutterProject.current();
 
       expect(WindowsDevice().isSupportedForProject(flutterProject), true);
@@ -77,6 +83,18 @@ void main() {
     testUsingContext('isSupportedForProject is false with no host app', () async {
       globals.fs.file('pubspec.yaml').createSync();
       globals.fs.file('.packages').createSync();
+      final FlutterProject flutterProject = FlutterProject.current();
+
+      expect(WindowsDevice().isSupportedForProject(flutterProject), false);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('isSupportedForProject is false with no build file', () async {
+      globals.fs.file('pubspec.yaml').createSync();
+      globals.fs.file('.packages').createSync();
+      globals.fs.directory('windows').createSync();
       final FlutterProject flutterProject = FlutterProject.current();
 
       expect(WindowsDevice().isSupportedForProject(flutterProject), false);

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -307,6 +309,109 @@ void main() {
   );
 
   testWidgets(
+    'SliverList can handle inaccurate scroll offset due to changes in children list',
+      (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/pull/59888.
+      bool skip = true;
+      Widget _buildItem(BuildContext context, int index) {
+        return !skip || index.isEven
+          ? Card(
+          child: ListTile(
+            title: Text(
+              'item$index',
+              style: const TextStyle(fontSize: 80),
+            ),
+          ),
+        )
+          : Container();
+      }
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CustomScrollView(
+              slivers: <Widget> [
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    _buildItem,
+                    childCount: 30,
+                  ),
+                ),
+              ],
+            )
+          ),
+        ),
+      );
+      // Only even items 0~12 are on the screen.
+      expect(find.text('item0'), findsOneWidget);
+      expect(find.text('item12'), findsOneWidget);
+      expect(find.text('item14'), findsNothing);
+
+      await tester.drag(find.byType(CustomScrollView), const Offset(0.0, -750.0));
+      await tester.pump();
+      // Only even items 16~28 are on the screen.
+      expect(find.text('item15'), findsNothing);
+      expect(find.text('item16'), findsOneWidget);
+      expect(find.text('item28'), findsOneWidget);
+
+      skip = false;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CustomScrollView(
+              slivers: <Widget> [
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    _buildItem,
+                    childCount: 30,
+                  ),
+                ),
+              ],
+            )
+          ),
+        ),
+      );
+
+      // Only items 12~19 are on the screen.
+      expect(find.text('item11'), findsNothing);
+      expect(find.text('item12'), findsOneWidget);
+      expect(find.text('item19'), findsOneWidget);
+      expect(find.text('item20'), findsNothing);
+
+      await tester.drag(find.byType(CustomScrollView), const Offset(0.0, 250.0));
+      await tester.pump();
+
+      // Only items 10~16 are on the screen.
+      expect(find.text('item9'), findsNothing);
+      expect(find.text('item10'), findsOneWidget);
+      expect(find.text('item16'), findsOneWidget);
+      expect(find.text('item17'), findsNothing);
+
+      // The inaccurate scroll offset should reach zero at this point
+      await tester.drag(find.byType(CustomScrollView), const Offset(0.0, 250.0));
+      await tester.pump();
+
+      // Only items 7~13 are on the screen.
+      expect(find.text('item6'), findsNothing);
+      expect(find.text('item7'), findsOneWidget);
+      expect(find.text('item13'), findsOneWidget);
+      expect(find.text('item14'), findsNothing);
+
+      // It will be corrected as we scroll, so we have to drag multiple times.
+      await tester.drag(find.byType(CustomScrollView), const Offset(0.0, 250.0));
+      await tester.pump();
+      await tester.drag(find.byType(CustomScrollView), const Offset(0.0, 250.0));
+      await tester.pump();
+      await tester.drag(find.byType(CustomScrollView), const Offset(0.0, 250.0));
+      await tester.pump();
+
+      // Only items 0~6 are on the screen.
+      expect(find.text('item0'), findsOneWidget);
+      expect(find.text('item6'), findsOneWidget);
+      expect(find.text('item7'), findsNothing);
+    },
+  );
+
+  testWidgets(
     'SliverFixedExtentList Correctly layout children after rearranging',
     (WidgetTester tester) async {
       await tester.pumpWidget(const TestSliverFixedExtentList(
@@ -384,11 +489,26 @@ void main() {
         ),
       ),
     );
+    expect(find.text('Page 0'), findsNothing);
+    expect(find.text('Page 6'), findsNothing);
+
     await tester.drag(find.text('Page 5'), const Offset(0, -1000));
-    // Controller will be temporarily over-scrolled.
+    // Controller will be temporarily over-scrolled (before the frame triggered by the drag) because
+    // SliverFixedExtentList doesn't report its size until it has built its last child, so the
+    // maxScrollExtent is infinite, so when we move by 1000 pixels in one go, we go all the way.
+    //
+    // This never actually gets rendered, it's just the controller state before we lay out.
     expect(controller.offset, 1600.0);
-    await tester.pumpAndSettle();
-    // It will be corrected after a auto scroll animation.
+
+    // However, once we pump, the scroll offset gets clamped to the newly discovered maximum, which
+    // is the itemExtent (200) times the number of items (7) minus the height of the viewport (600).
+    // This adds up to 800.0.
+    await tester.pump();
+    expect(find.text('Page 0'), findsNothing);
+    expect(find.text('Page 6'), findsOneWidget);
+    expect(controller.offset, 800.0);
+
+    expect(await tester.pumpAndSettle(), 1); // there should be no animation here
     expect(controller.offset, 800.0);
   });
 

@@ -2,13 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/build_system/targets/dart.dart';
+import 'package:flutter_tools/src/build_system/targets/assets.dart';
+import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/ios.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 
@@ -44,10 +48,12 @@ void main() {
         defines: <String, String>{
           kTargetPlatform: 'ios',
         },
+        inputs: <String, String>{},
         processManager: processManager,
         artifacts: MockArtifacts(),
         logger: globals.logger,
         fileSystem: globals.fs,
+        engineVersion: '2',
       );
     });
   });
@@ -100,7 +106,7 @@ void main() {
         environment.buildDir.childFile('iphone_framework').path,
         environment.buildDir.childFile('simulator_framework').path,
         '-output',
-        environment.buildDir.childFile('App').path,
+        environment.buildDir.childDirectory('App.framework').childFile('App').path,
       ]),
     ]);
 
@@ -110,6 +116,7 @@ void main() {
   }));
 
   test('DebugIosApplicationBundle', () => testbed.run(() async {
+    environment.inputs[kBundleSkSLPath] = 'bundle.sksl';
     environment.defines[kBuildMode] = 'debug';
     // Precompiled dart data
     when(globals.artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug))
@@ -127,7 +134,20 @@ void main() {
     // App kernel
     environment.buildDir.childFile('app.dill').createSync(recursive: true);
     // Stub framework
-    environment.buildDir.childFile('App').createSync();
+    environment.buildDir
+      .childDirectory('App.framework')
+      .childFile('App')
+      .createSync(recursive: true);
+    // sksl bundle
+    globals.fs.file('bundle.sksl').writeAsStringSync(json.encode(
+      <String, Object>{
+        'engineRevision': '2',
+        'platform': 'ios',
+        'data': <String, Object>{
+          'A': 'B',
+        }
+      }
+    ));
 
     await const DebugIosApplicationBundle().build(environment);
 
@@ -140,6 +160,8 @@ void main() {
     expect(assetDirectory.childFile('AssetManifest.json'), exists);
     expect(assetDirectory.childFile('vm_snapshot_data'), exists);
     expect(assetDirectory.childFile('isolate_snapshot_data'), exists);
+    expect(assetDirectory.childFile('io.flutter.shaders.json'), exists);
+    expect(assetDirectory.childFile('io.flutter.shaders.json').readAsStringSync(), '{"data":{"A":"B"}}');
   }, overrides: <Type, Generator>{
     Artifacts: () => MockArtifacts(),
   }));
@@ -171,6 +193,30 @@ void main() {
     expect(assetDirectory.childFile('AssetManifest.json'), exists);
     expect(assetDirectory.childFile('vm_snapshot_data'), isNot(exists));
     expect(assetDirectory.childFile('isolate_snapshot_data'), isNot(exists));
+  }));
+
+  test('AotAssemblyRelease throws exception if asked to build for x86 target', () => testbed.run(() async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      defines: <String, String>{
+        kTargetPlatform: 'ios',
+      },
+      processManager: processManager,
+      artifacts: MockArtifacts(),
+      logger: BufferLogger.test(),
+      fileSystem: fileSystem,
+    );
+    environment.defines[kBuildMode] = 'release';
+    environment.defines[kIosArchs] = 'x86_64';
+
+    expect(const AotAssemblyRelease().build(environment), throwsA(isA<Exception>()
+      .having(
+        (Exception exception) => exception.toString(),
+        'description',
+        contains('release/profile builds are only supported for physical devices.'),
+      )
+    ));
   }));
 }
 

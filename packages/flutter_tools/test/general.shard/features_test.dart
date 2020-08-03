@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/config.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
-import 'package:platform/platform.dart';
 
 import '../src/common.dart';
 import '../src/testbed.dart';
@@ -26,7 +26,7 @@ void main() {
       when(mockPlatform.environment).thenReturn(const <String, String>{});
       testbed = Testbed(overrides: <Type, Generator>{
         FlutterVersion: () => mockFlutterVerion,
-        FeatureFlags: () => const FeatureFlags(),
+        FeatureFlags: () => const FlutterFeatureFlags(),
         Config: () => mockFlutterConfig,
         Platform: () => mockPlatform,
       });
@@ -92,7 +92,7 @@ void main() {
     test('flutter Linux desktop help string', () {
       expect(flutterLinuxDesktopFeature.generateHelpMessage(),
       'Enable or disable Flutter for desktop on Linux. '
-      'This setting will take effect on the master channel.');
+      'This setting will take effect on the master and dev channels.');
     });
 
     test('flutter Windows desktop help string', () {
@@ -306,18 +306,18 @@ void main() {
       expect(featureFlags.isLinuxEnabled, false);
     }));
 
-    test('flutter linux desktop not enabled with config on dev', () => testbed.run(() {
+    test('flutter linux desktop enabled with config on dev', () => testbed.run(() {
       when(mockFlutterVerion.channel).thenReturn('dev');
       when<bool>(mockFlutterConfig.getValue('enable-linux-desktop') as bool).thenReturn(true);
 
-      expect(featureFlags.isLinuxEnabled, false);
+      expect(featureFlags.isLinuxEnabled, true);
     }));
 
-    test('flutter linux desktop not enabled with environment variable on dev', () => testbed.run(() {
+    test('flutter linux desktop enabled with environment variable on dev', () => testbed.run(() {
       when(mockFlutterVerion.channel).thenReturn('dev');
       when(mockPlatform.environment).thenReturn(<String, String>{'FLUTTER_LINUX': 'true'});
 
-      expect(featureFlags.isLinuxEnabled, false);
+      expect(featureFlags.isLinuxEnabled, true);
     }));
 
     test('flutter linux desktop off by default on beta', () => testbed.run(() {
@@ -440,36 +440,6 @@ void main() {
 
       expect(featureFlags.isWindowsEnabled, false);
     }));
-
-    group('isAndroidEmbeddingV2Enabled', () {
-      test('is enabled on beta', () => testbed.run(() {
-        when(mockFlutterVerion.channel).thenReturn('beta');
-        when<bool>(mockFlutterConfig.getValue('enable-android-embedding-v2') as bool).thenReturn(true);
-
-        expect(featureFlags.isAndroidEmbeddingV2Enabled, true);
-      }));
-
-      test('is enabled on dev', () => testbed.run(() {
-        when(mockFlutterVerion.channel).thenReturn('dev');
-        when<bool>(mockFlutterConfig.getValue('enable-android-embedding-v2') as bool).thenReturn(true);
-
-        expect(featureFlags.isAndroidEmbeddingV2Enabled, true);
-      }));
-
-      test('is enabled on master', () => testbed.run(() {
-        when(mockFlutterVerion.channel).thenReturn('master');
-        when<bool>(mockFlutterConfig.getValue('enable-android-embedding-v2') as bool).thenReturn(true);
-
-        expect(featureFlags.isAndroidEmbeddingV2Enabled, true);
-      }));
-
-      test('is enabled on stable', () => testbed.run(() {
-        when(mockFlutterVerion.channel).thenReturn('stable');
-        when<bool>(mockFlutterConfig.getValue('enable-android-embedding-v2') as bool).thenReturn(true);
-
-        expect(featureFlags.isAndroidEmbeddingV2Enabled, true);
-      }));
-    });
   });
 }
 
