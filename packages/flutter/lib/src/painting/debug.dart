@@ -43,7 +43,7 @@ class ImageSizeInfo {
   /// This class is used by the framework when it paints an image to a canvas
   /// to report to `dart:developer`'s [postEvent], as well as to the
   /// [debugOnPaintImage] callback if it is set.
-  const ImageSizeInfo({this.source, this.displaySize, this.imageSize});
+  const ImageSizeInfo({this.source, this.displaySize, required this.imageSize});
 
   /// A unique identifier for this image, for example its asset path or network
   /// URL.
@@ -53,13 +53,13 @@ class ImageSizeInfo {
   final Size? displaySize;
 
   /// The size the image has been decoded to.
-  final Size? imageSize;
+  final Size imageSize;
 
   /// The number of bytes needed to render the image without scaling it.
   int get displaySizeInBytes => _sizeToBytes(displaySize!);
 
   /// The number of bytes used by the image in memory.
-  int get decodedSizeInBytes => _sizeToBytes(imageSize!);
+  int get decodedSizeInBytes => _sizeToBytes(imageSize);
 
   int _sizeToBytes(Size size) {
     // Assume 4 bytes per pixel and that mipmapping will be used, which adds
@@ -76,11 +76,10 @@ class ImageSizeInfo {
           'width': displaySize!.width,
           'height': displaySize!.height,
         },
-      if (imageSize != null)
-        'imageSize': <String, Object?>{
-          'width': imageSize!.width,
-          'height': imageSize!.height,
-        },
+      'imageSize': <String, Object?>{
+        'width': imageSize.width,
+        'height': imageSize.height,
+      },
       'displaySizeInBytes': displaySizeInBytes,
       'decodedSizeInBytes': decodedSizeInBytes,
     };

@@ -389,7 +389,7 @@ class ImageCache {
     _PendingImage? untrackedPendingImage;
     void listener(ImageInfo? info, bool syncCall) {
       // Images that fail to load don't contribute to cache size.
-      final int imageSize = info == null || info.image == null ? 0 : info.image!.height * info.image!.width * 4;
+      final int imageSize = info == null || info.image == null ? 0 : info.image.height * info.image.width * 4;
 
       final _CachedImage image = _CachedImage(result!, imageSize);
 

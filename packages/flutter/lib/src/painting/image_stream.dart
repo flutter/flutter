@@ -30,7 +30,7 @@ class ImageInfo {
   /// This is the object to pass to the [Canvas.drawImage],
   /// [Canvas.drawImageRect], or [Canvas.drawImageNine] methods when painting
   /// the image.
-  final ui.Image? image;
+  final ui.Image image;
 
   /// The linear scale factor for drawing this image at its intended size.
   ///
