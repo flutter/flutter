@@ -19,7 +19,7 @@ class MacOsCodeGenerator extends PlatformCodeGenerator {
     final StringBuffer macOsScanCodeMap = StringBuffer();
     for (final Key entry in keyData.data) {
       if (entry.macOsScanCode != null) {
-        macOsScanCodeMap.writeln('  { ${toHex(entry.macOsScanCode)}, ${toHex(entry.usbHidCode)} },    // ${entry.constantName}');
+        macOsScanCodeMap.writeln('  @${toHex(entry.macOsScanCode)} : @${toHex(entry.usbHidCode)},    // ${entry.constantName}');
       }
     }
     return macOsScanCodeMap.toString().trimRight();
@@ -30,7 +30,7 @@ class MacOsCodeGenerator extends PlatformCodeGenerator {
     final StringBuffer macOsNumPadMap = StringBuffer();
     for (final Key entry in numpadKeyData) {
       if (entry.macOsScanCode != null) {
-        macOsNumPadMap.writeln('  { ${toHex(entry.macOsScanCode)}, ${toHex(entry.flutterId, digits: 10)} },    // ${entry.constantName}');
+        macOsNumPadMap.writeln('  @${toHex(entry.macOsScanCode)} : @${toHex(entry.flutterId, digits: 10)},    // ${entry.constantName}');
       }
     }
     return macOsNumPadMap.toString().trimRight();
@@ -40,7 +40,7 @@ class MacOsCodeGenerator extends PlatformCodeGenerator {
     final StringBuffer macOsFunctionKeyMap = StringBuffer();
     for (final Key entry in functionKeyData) {
       if (entry.macOsScanCode != null) {
-        macOsFunctionKeyMap.writeln('  { ${toHex(entry.macOsScanCode)}, ${toHex(entry.flutterId, digits: 10)} },    // ${entry.constantName}');
+        macOsFunctionKeyMap.writeln('  @${toHex(entry.macOsScanCode)} : @${toHex(entry.flutterId, digits: 10)},    // ${entry.constantName}');
       }
     }
     return macOsFunctionKeyMap.toString().trimRight();
@@ -48,6 +48,9 @@ class MacOsCodeGenerator extends PlatformCodeGenerator {
 
   @override
   String get templatePath => path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'keyboard_map_darwin_cc.tmpl');
+
+  @override
+  String outputPath(String platform) => path.join(flutterRoot.path, '..', 'engine', 'src', 'flutter', path.join('shell', 'platform', 'darwin', 'macos', 'framework', 'Source', 'KeyCodeMap.mm'));
 
   @override
   Map<String, String> mappings() {
