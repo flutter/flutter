@@ -30,12 +30,7 @@ void macroPerfTestE2E(
   binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive;
 
   testWidgets(testName, (WidgetTester tester) async {
-<<<<<<< HEAD
     assert(tester.binding == binding);
-=======
-    assert((tester.binding as LiveTestWidgetsFlutterBinding).framePolicy ==
-        LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive);
->>>>>>> 92bfa815db... add macrobenchmark e2e
     app.main();
     await tester.pumpAndSettle();
 
@@ -54,12 +49,8 @@ void macroPerfTestE2E(
     expect(button, findsOneWidget);
     await tester.pumpAndSettle();
     await tester.tap(button);
-<<<<<<< HEAD
     // Cannot be pumpAndSettle because some tests have inifite animation.
     await tester.pump(const Duration(milliseconds: 20));
-=======
-    await tester.pump();
->>>>>>> 92bfa815db... add macrobenchmark e2e
 
     if (pageDelay != null) {
       // Wait for the page to load
