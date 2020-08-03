@@ -884,6 +884,7 @@ void main() {
   group('Semantics', () {
     testWidgets('calendar day mode', (WidgetTester tester) async {
       final SemanticsHandle semantics = tester.ensureSemantics();
+      addTearDown(semantics.dispose);
 
       await prepareDatePicker(tester, (Future<DateTime> date) async {
         // Header
@@ -1096,12 +1097,11 @@ void main() {
           isFocusable: true,
         ));
       });
-
-      semantics.dispose();
     });
 
     testWidgets('calendar year mode', (WidgetTester tester) async {
       final SemanticsHandle semantics = tester.ensureSemantics();
+      addTearDown(semantics.dispose);
 
       initialCalendarMode = DatePickerMode.year;
       await prepareDatePicker(tester, (Future<DateTime> date) async {
@@ -1153,14 +1153,12 @@ void main() {
           hasEnabledState: true,
           isFocusable: true,
         ));
-
       });
-
-      semantics.dispose();
     });
 
     testWidgets('input mode', (WidgetTester tester) async {
       final SemanticsHandle semantics = tester.ensureSemantics();
+      addTearDown(semantics.dispose);
 
       initialEntryMode = DatePickerEntryMode.input;
       await prepareDatePicker(tester, (Future<DateTime> date) async {
@@ -1211,10 +1209,7 @@ void main() {
           hasEnabledState: true,
           isFocusable: true,
         ));
-
       });
-
-      semantics.dispose();
     });
   });
 
@@ -1416,9 +1411,9 @@ void main() {
 
     Future<void> _showPicker(WidgetTester tester, Size size, [double textScaleFactor = 1.0]) async {
       tester.binding.window.physicalSizeTestValue = size;
+      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
       tester.binding.window.devicePixelRatioTestValue = 1.0;
-      tester.binding.window.clearPhysicalSizeTestValue();
-      tester.binding.window.clearDevicePixelRatioTestValue();
+      addTearDown(tester.binding.window.clearDevicePixelRatioTestValue);
       await prepareDatePicker(tester, (Future<DateTime> date) async {
         await tester.tap(find.text('OK'));
       });
