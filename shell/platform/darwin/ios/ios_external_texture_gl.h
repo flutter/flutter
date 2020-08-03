@@ -25,6 +25,9 @@ class IOSExternalTextureGL final : public Texture {
   fml::CFRef<CVOpenGLESTextureCacheRef> cache_ref_;
   fml::CFRef<CVOpenGLESTextureRef> texture_ref_;
   fml::CFRef<CVPixelBufferRef> buffer_ref_;
+  OSType pixel_format_ = 0;
+  fml::CFRef<CVOpenGLESTextureRef> y_texture_ref_;
+  fml::CFRef<CVOpenGLESTextureRef> uv_texture_ref_;
 
   // |Texture|
   void Paint(SkCanvas& canvas,
@@ -50,6 +53,16 @@ class IOSExternalTextureGL final : public Texture {
   void EnsureTextureCacheExists();
 
   bool NeedUpdateTexture(bool freeze);
+
+  bool IsTexturesAvailable() const;
+
+  void CreateYUVTexturesFromPixelBuffer();
+
+  void CreateRGBATextureFromPixelBuffer();
+
+  sk_sp<SkImage> CreateImageFromYUVTextures(GrContext* context, const SkRect& bounds);
+
+  sk_sp<SkImage> CreateImageFromRGBATexture(GrContext* context, const SkRect& bounds);
 
   FML_DISALLOW_COPY_AND_ASSIGN(IOSExternalTextureGL);
 };
