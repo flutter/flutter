@@ -39,9 +39,10 @@ static void create_resource_surface(FlRenderer* self, EGLConfig config) {
 
   priv->resource_context = eglCreateContext(
       priv->egl_display, config, priv->egl_context, context_attributes);
-  if (priv->resource_context == EGL_NO_CONTEXT)
+  if (priv->resource_context == EGL_NO_CONTEXT) {
     g_warning("Failed to create EGL resource context: %s",
               egl_error_to_string(eglGetError()));
+  }
 }
 
 static void fl_renderer_class_init(FlRendererClass* klass) {}
@@ -188,8 +189,9 @@ gboolean fl_renderer_make_resource_current(FlRenderer* self, GError** error) {
       static_cast<FlRendererPrivate*>(fl_renderer_get_instance_private(self));
 
   if (priv->resource_surface == EGL_NO_SURFACE ||
-      priv->resource_context == EGL_NO_CONTEXT)
+      priv->resource_context == EGL_NO_CONTEXT) {
     return FALSE;
+  }
 
   if (!eglMakeCurrent(priv->egl_display, priv->resource_surface,
                       priv->resource_surface, priv->resource_context)) {
