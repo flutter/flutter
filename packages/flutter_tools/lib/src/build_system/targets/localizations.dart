@@ -12,6 +12,7 @@ import '../../base/io.dart';
 import '../../base/logger.dart';
 import '../../convert.dart';
 import '../../globals.dart' as globals;
+import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 
@@ -39,47 +40,17 @@ Future<void> generateLocalizations({
 
   // If generating a synthetic package, generate a warning if
   // flutter: generate is not set.
-  if (options.useSyntheticPackage) {
-    final File pubspecFile = projectDir.childFile('pubspec.yaml');
-    assert(pubspecFile.existsSync());
-
-    final YamlNode yamlNode = loadYamlNode(pubspecFile.readAsStringSync());
-    if (yamlNode is! YamlMap) {
-      logger.printError(
-        'Expected ${pubspecFile.path} to contain a map, instead was $yamlNode',
-      );
-      throw Exception();
-    }
-    final YamlMap yamlMap = yamlNode as YamlMap;
-
-    final Object value = yamlMap['flutter'];
-    if (value != null) {
-      if (value is! YamlMap) {
-        logger.printError(
-          'Expected "flutter" to have a YamlMap value, instead was "$value"',
-        );
-        throw Exception();
-      }
-
-      final YamlMap flutterMap = value as YamlMap;
-      final bool shouldGenerateCode = _tryReadBool(
-        flutterMap,
-        'generate',
-        logger,
-      );
-
-      if (shouldGenerateCode == null) {
-        logger.printError(
-          'Attempted to generate localizations code without having '
-          'the flutter: generate flag turned on.'
-          '\n'
-          'Check pubspec.yaml and ensure that flutter: generate: true has '
-          'been added and rebuild the project. Otherwise, the localizations '
-          'source code will not be importable.'
-        );
-        throw Exception();
-      }
-    }
+  final FlutterProject flutterProject = FlutterProject.fromDirectory(projectDir);
+  if (options.useSyntheticPackage && !flutterProject.manifest.generateSyntheticPackage) {
+    logger.printError(
+      'Attempted to generate localizations code without having '
+      'the flutter: generate flag turned on.'
+      '\n'
+      'Check pubspec.yaml and ensure that flutter: generate: true has '
+      'been added and rebuild the project. Otherwise, the localizations '
+      'source code will not be importable.'
+    );
+    throw Exception();
   }
 
   final ProcessResult result = await processManager.run(<String>[
