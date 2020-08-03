@@ -34,6 +34,9 @@ void main() {
             onTapDown: (TapDownDetails details) {
               log.add('tap-down');
             },
+            onTapUp: (TapUpDetails details) {
+              log.add('tap-up');
+            },
             onTapCancel: () {
               log.add('tap-cancel');
             },
@@ -48,7 +51,7 @@ void main() {
 
     await tester.pump(const Duration(seconds: 1));
 
-    expect(log, equals(<String>['tap-down', 'tap']));
+    expect(log, equals(<String>['tap-down', 'tap-up', 'tap']));
     log.clear();
 
     await tester.tap(find.byType(InkWell), pointer: 2);
@@ -65,9 +68,9 @@ void main() {
     log.clear();
     TestGesture gesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
     await tester.pump(const Duration(milliseconds: 100));
-    expect(log, equals(<String>['tap-down']));
     await gesture.up();
     await tester.pump(const Duration(seconds: 1));
+    expect(log, equals(<String>['tap-down', 'tap-up', 'tap']));
 
     log.clear();
     gesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
