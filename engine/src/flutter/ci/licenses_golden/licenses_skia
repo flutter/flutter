@@ -1,4 +1,4 @@
-Signature: 971bdf525d6d356dc41f0eb6c3848846
+Signature: 648bb8c8a92f1eab892fdc727826b4db
 
 UNUSED LICENSES:
 
@@ -3432,7 +3432,6 @@ FILE: ../../../third_party/skia/src/gpu/gradients/GrLinearGradientLayout.fp
 FILE: ../../../third_party/skia/src/gpu/gradients/GrRadialGradientLayout.fp
 FILE: ../../../third_party/skia/src/gpu/gradients/GrSingleIntervalGradientColorizer.fp
 FILE: ../../../third_party/skia/src/gpu/gradients/GrSweepGradientLayout.fp
-FILE: ../../../third_party/skia/src/gpu/gradients/GrTextureGradientColorizer.fp
 FILE: ../../../third_party/skia/src/gpu/gradients/GrTiledGradientEffect.fp
 FILE: ../../../third_party/skia/src/gpu/gradients/GrTwoPointConicalGradientLayout.fp
 FILE: ../../../third_party/skia/src/gpu/gradients/GrUnrolledBinaryGradientColorizer.fp
@@ -3448,8 +3447,6 @@ FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrSingleIntervalGrad
 FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrSingleIntervalGradientColorizer.h
 FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrSweepGradientLayout.cpp
 FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrSweepGradientLayout.h
-FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrTextureGradientColorizer.cpp
-FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrTextureGradientColorizer.h
 FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrTiledGradientEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrTiledGradientEffect.h
 FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrTwoPointConicalGradientLayout.cpp
@@ -5673,6 +5670,7 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/fuzz/FuzzCreateDDL.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzAPICreateDDL.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzAPISVGCanvas.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzSKP.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzSVG.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzSkRuntimeEffect.cpp
 ----------------------------------------------------------------------------------------------------
