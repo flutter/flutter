@@ -10,6 +10,8 @@ import 'package:flutter/widgets.dart';
 import '../painting/image_test_utils.dart';
 import '../painting/mocks_for_image_cache.dart' show TestImage;
 
+ImageCache get imageCache => PaintingBinding.instance.imageCache;
+
 void main() {
   tearDown(() {
     imageCache.clear();

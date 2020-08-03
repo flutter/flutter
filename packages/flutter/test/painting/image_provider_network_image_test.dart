@@ -18,6 +18,8 @@ import 'package:mockito/mockito.dart';
 import '../rendering/rendering_tester.dart';
 import 'image_data.dart';
 
+ImageCache get imageCache => PaintingBinding.instance.imageCache;
+
 void main() {
   TestRenderingFlutterBinding();
 

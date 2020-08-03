@@ -27,7 +27,7 @@ void main() {
         completer.complete();
       }
     ));
-    imageCache.clearLiveImages();
+    PaintingBinding.instance.imageCache.clearLiveImages();
     await completer.future;
   });
 }

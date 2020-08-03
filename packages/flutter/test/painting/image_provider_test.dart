@@ -19,6 +19,8 @@ import '../rendering/rendering_tester.dart';
 import 'image_data.dart';
 import 'mocks_for_image_cache.dart';
 
+ImageCache get imageCache => PaintingBinding.instance.imageCache;
+
 void main() {
   TestRenderingFlutterBinding();
 

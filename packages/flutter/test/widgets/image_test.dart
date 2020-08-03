@@ -18,6 +18,8 @@ import 'package:flutter_test/flutter_test.dart';
 import '../painting/image_data.dart';
 import 'semantics_tester.dart';
 
+ImageCache get imageCache => PaintingBinding.instance.imageCache;
+
 // This must be run with [WidgetTester.runAsync] since it performs real async
 // work.
 Future<ui.Image> createTestImage([List<int> bytes = kTransparentImage]) async {
