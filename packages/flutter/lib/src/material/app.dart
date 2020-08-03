@@ -206,19 +206,19 @@ class MaterialApp extends StatefulWidget {
        assert(checkerboardOffscreenLayers != null),
        assert(showSemanticsDebugger != null),
        assert(debugShowCheckedModeBanner != null),
+       routeInformationProvider = null,
        routeInformationParser = null,
        routerDelegate = null,
        backButtonDispatcher = null,
-       routeInformationProvider = null,
        super(key: key);
 
   /// Creates a [MaterialApp] that uses the [Router] instead of a [Navigator].
   const MaterialApp.router({
     Key key,
+    this.routeInformationProvider,
     @required this.routeInformationParser,
     @required this.routerDelegate,
     this.backButtonDispatcher,
-    this.routeInformationProvider,
     this.builder,
     this.title = '',
     this.onGenerateTitle,
@@ -291,6 +291,9 @@ class MaterialApp extends StatefulWidget {
   /// {@macro flutter.widgets.widgetsApp.navigatorObservers}
   final List<NavigatorObserver> navigatorObservers;
 
+  /// {@macro flutter.widgets.widgetsApp.routeInformationProvider}
+  final RouteInformationProvider routeInformationProvider;
+
   /// {@macro flutter.widgets.widgetsApp.routeInformationParser}
   final RouteInformationParser<Object> routeInformationParser;
 
@@ -299,9 +302,6 @@ class MaterialApp extends StatefulWidget {
 
   /// {@macro flutter.widgets.widgetsApp.backButtonDispatcher}
   final BackButtonDispatcher backButtonDispatcher;
-
-  /// {@macro flutter.widgets.widgetsApp.routeInformationProvider}
-  final RouteInformationProvider routeInformationProvider;
 
   /// {@macro flutter.widgets.widgetsApp.builder}
   ///
@@ -758,9 +758,9 @@ class _MaterialAppState extends State<MaterialApp> {
     if (_usesRouter) {
       return WidgetsApp.router(
         key: GlobalObjectKey(this),
-        routerDelegate: widget.routerDelegate,
-        routeInformationParser: widget.routeInformationParser,
         routeInformationProvider: widget.routeInformationProvider,
+        routeInformationParser: widget.routeInformationParser,
+        routerDelegate: widget.routerDelegate,
         backButtonDispatcher: widget.backButtonDispatcher,
         builder: _materialBuilder,
         title: widget.title,

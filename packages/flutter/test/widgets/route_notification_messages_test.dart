@@ -6,7 +6,6 @@
 
 @TestOn('chrome')
 
-import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -37,11 +36,11 @@ class OnTapPage extends StatelessWidget {
   }
 }
 
-String serializeRouteInformation(RouteInformation routeInformation) {
-  return jsonEncode(<String, dynamic>{
+Map<String, dynamic> convertRouteInformationToMap(RouteInformation routeInformation) {
+  return <String, dynamic>{
     'location': routeInformation.location,
     'state': routeInformation.state,
-  });
+  };
 }
 
 void main() {
@@ -269,7 +268,7 @@ void main() {
 
   testWidgets('PlatformRouteInformationProvider reports URL', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
-    SystemChannels.navigation.setMockMethodCallHandler((MethodCall methodCall) async {
+    SystemChannels.router.setMockMethodCallHandler((MethodCall methodCall) async {
       log.add(methodCall);
     });
 
@@ -303,9 +302,9 @@ void main() {
     expect(log, hasLength(1));
     expect(
       log.last,
-      isMethodCall('routeUpdated', arguments: <String, dynamic>{
-        'previousRouteName': serializeRouteInformation(const RouteInformation(location: 'initial')),
-        'routeName': serializeRouteInformation(const RouteInformation(location: 'update')),
+      isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{
+        'previousRouteName': convertRouteInformationToMap(const RouteInformation(location: 'initial')),
+        'routeName': convertRouteInformationToMap(const RouteInformation(location: 'update')),
       }),
     );
 
@@ -318,9 +317,9 @@ void main() {
     expect(log, hasLength(2));
     expect(
       log.last,
-      isMethodCall('routeUpdated', arguments: <String, dynamic>{
-        'previousRouteName': serializeRouteInformation(const RouteInformation(location: 'update')),
-        'routeName': serializeRouteInformation(const RouteInformation(location: 'update2')),
+      isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{
+        'previousRouteName': convertRouteInformationToMap(const RouteInformation(location: 'update')),
+        'routeName': convertRouteInformationToMap(const RouteInformation(location: 'update2')),
       }),
     );
   });

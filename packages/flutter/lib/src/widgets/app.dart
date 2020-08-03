@@ -261,19 +261,19 @@ class WidgetsApp extends StatefulWidget {
        assert(showSemanticsDebugger != null),
        assert(debugShowCheckedModeBanner != null),
        assert(debugShowWidgetInspector != null),
+       routeInformationProvider = null,
        routeInformationParser = null,
        routerDelegate = null,
        backButtonDispatcher = null,
-       routeInformationProvider = null,
        super(key: key);
 
   /// Creates a [WidgetsApp] that uses the [Router] instead of a [Navigator].
   WidgetsApp.router({
     Key key,
+    this.routeInformationProvider,
     @required this.routeInformationParser,
     @required this.routerDelegate,
     BackButtonDispatcher backButtonDispatcher,
-    this.routeInformationProvider,
     this.builder,
     this.title = '',
     this.onGenerateTitle,
@@ -379,35 +379,67 @@ class WidgetsApp extends StatefulWidget {
   final PageRouteFactory pageRouteBuilder;
 
   /// {@template flutter.widgets.widgetsApp.routeInformationParser}
-  /// A parser to parse the route information into a generic data type for
-  /// configuring the [routerDelegate].
+  /// A delegate to parse the route information from the
+  /// [routeInformationProvider] into a generic data type to be processed by
+  /// the [routerDelegate] at a later stage.
+  ///
+  /// This object will be used by the underlying [Router].
+  ///
+  /// The generic type `T` must match the generic type of the [routerDelegate].
+  ///
+  /// See also:
+  ///
+  ///  * [Router.routeInformationParser]: which receives this object when this
+  ///    widget builds the [Router].
   /// {@endtemplate}
   final RouteInformationParser<Object> routeInformationParser;
 
   /// {@template flutter.widgets.widgetsApp.routerDelegate}
-  /// A delegate that configures a [Navigator] that will be used by the [Router].
+  /// A delegate that configures a widget, typically a [Navigator], with
+  /// parsed result from the [routeInformationParser].
+  ///
+  /// This object will be used by the underlying [Router].
   ///
   /// The generic type `T` must match the generic type of the
   /// [routeInformationParser].
+  ///
+  /// See also:
+  ///
+  ///  * [Router.routerDelegate]: which receives this object when this widget
+  ///    builds the [Router].
   /// {@endtemplate}
   final RouterDelegate<Object> routerDelegate;
 
   /// {@template flutter.widgets.widgetsApp.backButtonDispatcher}
-  /// A back button dispatcher that decide whether to handle the android back
-  /// button intent.
+  /// A delegate that decide whether to handle the Android back button intent.
+  ///
+  /// This object will be used by the underlying [Router].
   ///
   /// If this is not provided, the widgets app will create a
   /// [RootBackButtonDispatcher] by default.
+  ///
+  /// See also:
+  ///
+  ///  * [Router.backButtonDispatcher]: which receives this object when this
+  ///    widget builds the [Router].
   /// {@endtemplate}
   final BackButtonDispatcher backButtonDispatcher;
 
   /// {@template flutter.widgets.widgetsApp.routeInformationProvider}
-  /// A route information provider that provides the route information for the
-  /// [Router].
+  /// A object that provides route information through the
+  /// [RouteInformationProvider.value] and notifies its listener when its value
+  /// changes.
+  ///
+  /// This object will be used by the underlying [Router].
   ///
   /// If this is not provided, the widgets app will create a
   /// [PlatformRouteInformationProvider] with initial route name equals to
   /// the [Window.defaultRouteName] by default.
+  ///
+  /// See also:
+  ///
+  ///  * [Router.routeInformationProvider]: which receives this object when this
+  ///    widget builds the [Router].
   /// {@endtemplate}
   final RouteInformationProvider routeInformationProvider;
 

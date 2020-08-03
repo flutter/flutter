@@ -106,6 +106,17 @@ abstract class WidgetsBindingObserver {
   /// [SystemChannels.navigation].
   Future<bool> didPushRoute(String route) => Future<bool>.value(false);
 
+  /// Called when the host tells the app to push a new route information onto
+  /// the router.
+  ///
+  /// Observers are expected to return true if they were able to
+  /// handle the notification. Observers are notified in registration
+  /// order until one returns true.
+  ///
+  /// This method exposes the `pushRouteInformation` notification from
+  /// [SystemChannels.router].
+  Future<bool> didPushRouteInformation(String route, Object state) => Future<bool>.value(false);
+
   /// Called when the application's dimensions change. For example,
   /// when a phone is rotated.
   ///
@@ -270,6 +281,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     window.onLocaleChanged = handleLocaleChanged;
     window.onAccessibilityFeaturesChanged = handleAccessibilityFeaturesChanged;
     SystemChannels.navigation.setMethodCallHandler(_handleNavigationInvocation);
+    SystemChannels.router.setMethodCallHandler(_handleRouterInvocation);
     FlutterErrorDetails.propertiesTransformers.add(transformDebugCreator);
   }
 
@@ -652,6 +664,27 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       if (await observer.didPushRoute(route))
         return;
     }
+  }
+
+  Future<void> _handlePushRouteInformation(Map<dynamic, dynamic> routeArguments) async {
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.from(_observers)) {
+      if (
+        await observer.didPushRouteInformation(
+          routeArguments['location'] as String,
+          routeArguments['state'] as Object
+        )
+      )
+      return;
+    }
+  }
+
+  Future<dynamic> _handleRouterInvocation(MethodCall methodCall) {
+    switch (methodCall.method) {
+      case 'pushRouteInformation':
+        print('pushRouteInformation hit');
+        return _handlePushRouteInformation(methodCall.arguments as Map<dynamic, dynamic>);
+    }
+    return Future<dynamic>.value();
   }
 
   Future<dynamic> _handleNavigationInvocation(MethodCall methodCall) {

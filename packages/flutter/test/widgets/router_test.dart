@@ -4,8 +4,6 @@
 
 // @dart = 2.8
 
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
@@ -444,7 +442,15 @@ void main() {
     );
     final SimpleRouterDelegate delegate = SimpleRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
-        return Text(information.location);
+        final List<Widget> children = <Widget>[];
+        print('build ${information.location}, and ${information.state}');
+        if (information.location != null)
+          children.add(Text(information.location));
+        if (information.state != null)
+          children.add(Text(information.state.toString()));
+        return Column(
+          children: children,
+        );
       }
     );
 
@@ -455,19 +461,18 @@ void main() {
     ));
     expect(find.text('initial'), findsOneWidget);
 
-    // Pushes route through the message channel.
-    final ByteData message = const JSONMethodCodec().encodeMethodCall(
-      MethodCall(
-        'pushRoute',
-        jsonEncode(<String, dynamic>{
-          'location': 'pushed',
-          'state': null,
-        })
-      )
+    // Pushes through router method channel
+    const Map<String, dynamic> testRouteInformation = <String, dynamic>{
+      'location': 'testRouteName',
+      'state': 'state',
+    };
+    final ByteData routerMessage = const StandardMethodCodec().encodeMethodCall(
+      const MethodCall('pushRouteInformation', testRouteInformation)
     );
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/router', routerMessage, (_) { });
     await tester.pump();
-    expect(find.text('pushed'), findsOneWidget);
+    expect(find.text('testRouteName'), findsOneWidget);
+    expect(find.text('state'), findsOneWidget);
   });
 
   testWidgets('RootBackButtonDispatcher works', (WidgetTester tester) async {

@@ -40,6 +40,18 @@ class PushRouteObserver with WidgetsBindingObserver {
   }
 }
 
+class PushRouteInformationObserver with WidgetsBindingObserver {
+  String pushedRoute;
+  Object pushedState;
+
+  @override
+  Future<bool> didPushRouteInformation(String route, Object state) async {
+    pushedRoute = route;
+    pushedState = state;
+    return true;
+  }
+}
+
 void main() {
   setUp(() {
     WidgetsFlutterBinding.ensureInitialized();
@@ -77,7 +89,7 @@ void main() {
     expect(observer.lifecycleState, AppLifecycleState.detached);
   });
 
-  testWidgets('didPushRoute callback', (WidgetTester tester) async {
+  testWidgets('didPushRoute callback - navigation', (WidgetTester tester) async {
     final PushRouteObserver observer = PushRouteObserver();
     WidgetsBinding.instance.addObserver(observer);
 
@@ -86,6 +98,23 @@ void main() {
       const MethodCall('pushRoute', testRouteName));
     await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     expect(observer.pushedRoute, testRouteName);
+
+    WidgetsBinding.instance.removeObserver(observer);
+  });
+
+  testWidgets('didPushRoute callback - router', (WidgetTester tester) async {
+    final PushRouteInformationObserver observer = PushRouteInformationObserver();
+    WidgetsBinding.instance.addObserver(observer);
+
+    const Map<String, dynamic> testRouteInformation = <String, dynamic>{
+      'location': 'testRouteName',
+      'state': 'state',
+    };
+    final ByteData message = const StandardMethodCodec().encodeMethodCall(
+      const MethodCall('pushRouteInformation', testRouteInformation));
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/router', message, (_) { });
+    expect(observer.pushedRoute, 'testRouteName');
+    expect(observer.pushedState, 'state');
 
     WidgetsBinding.instance.removeObserver(observer);
   });

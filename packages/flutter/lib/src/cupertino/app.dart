@@ -104,19 +104,19 @@ class CupertinoApp extends StatefulWidget {
        assert(checkerboardOffscreenLayers != null),
        assert(showSemanticsDebugger != null),
        assert(debugShowCheckedModeBanner != null),
+       routeInformationProvider = null,
        routeInformationParser = null,
        routerDelegate = null,
        backButtonDispatcher = null,
-       routeInformationProvider = null,
        super(key: key);
 
   /// Creates a [CupertinoApp] that uses the [Router] instead of a [Navigator].
   const CupertinoApp.router({
     Key key,
+    this.routeInformationProvider,
     @required this.routeInformationParser,
     @required this.routerDelegate,
     this.backButtonDispatcher,
-    this.routeInformationProvider,
     this.theme,
     this.builder,
     this.title = '',
@@ -187,6 +187,9 @@ class CupertinoApp extends StatefulWidget {
   /// {@macro flutter.widgets.widgetsApp.navigatorObservers}
   final List<NavigatorObserver> navigatorObservers;
 
+  /// {@macro flutter.widgets.widgetsApp.routeInformationProvider}
+  final RouteInformationProvider routeInformationProvider;
+
   /// {@macro flutter.widgets.widgetsApp.routeInformationParser}
   final RouteInformationParser<Object> routeInformationParser;
 
@@ -195,9 +198,6 @@ class CupertinoApp extends StatefulWidget {
 
   /// {@macro flutter.widgets.widgetsApp.backButtonDispatcher}
   final BackButtonDispatcher backButtonDispatcher;
-
-  /// {@macro flutter.widgets.widgetsApp.routeInformationProvider}
-  final RouteInformationProvider routeInformationProvider;
 
   /// {@macro flutter.widgets.widgetsApp.builder}
   final TransitionBuilder builder;
@@ -380,9 +380,9 @@ class _CupertinoAppState extends State<CupertinoApp> {
     if (_usesRouter) {
       return WidgetsApp.router(
         key: GlobalObjectKey(this),
-        routerDelegate: widget.routerDelegate,
-        routeInformationParser: widget.routeInformationParser,
         routeInformationProvider: widget.routeInformationProvider,
+        routeInformationParser: widget.routeInformationParser,
+        routerDelegate: widget.routerDelegate,
         backButtonDispatcher: widget.backButtonDispatcher,
         builder: widget.builder,
         title: widget.title,

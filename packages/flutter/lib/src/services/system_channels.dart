@@ -108,6 +108,21 @@ class SystemChannels {
       JSONMethodCodec(),
   );
 
+  /// A [MethodChannel] for router events.
+  ///
+  /// This channel exposes the APIs to push or report new route information from
+  /// or to an application.
+  ///
+  /// * `WidgetsBindingObserver.didPushRouteInformation` handles the platform
+  ///   intent that pushes new route information.
+  ///
+  /// * `RouteNotificationMessages.maybeNotifyRouteInformationChange` uses this
+  ///   channel to set route information update to the engine.
+  static const MethodChannel router = MethodChannel(
+    'flutter/router',
+    StandardMethodCodec(),
+  );
+
   /// A JSON [MethodChannel] for handling text input.
   ///
   /// This channel exposes a system text input control for interacting with IMEs
