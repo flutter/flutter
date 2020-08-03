@@ -4,6 +4,8 @@
 
 // @dart = 2.8
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -226,6 +228,8 @@ class SelectableText extends StatefulWidget {
     this.scrollPhysics,
     this.textHeightBehavior,
     this.textWidthBasis,
+    this.selectionWidthStyle = ui.BoxWidthStyle.tight,
+    this.selectionHeightStyle = ui.BoxHeightStyle.tight,
   }) :  assert(showCursor != null),
         assert(autofocus != null),
         assert(dragStartBehavior != null),
@@ -277,6 +281,8 @@ class SelectableText extends StatefulWidget {
     this.scrollPhysics,
     this.textHeightBehavior,
     this.textWidthBasis,
+    this.selectionWidthStyle = ui.BoxWidthStyle.tight,
+    this.selectionHeightStyle = ui.BoxHeightStyle.tight,
   }) :  assert(showCursor != null),
     assert(autofocus != null),
     assert(dragStartBehavior != null),
@@ -421,6 +427,12 @@ class SelectableText extends StatefulWidget {
 
   /// {@macro flutter.painting.textPainter.textWidthBasis}
   final TextWidthBasis textWidthBasis;
+
+  /// {@macro flutter.widgets.editableText.selectionWidthStyle}
+  final ui.BoxWidthStyle selectionWidthStyle;
+
+  /// {@macro flutter.widgets.editableText.selectionHeightStyle}
+  final ui.BoxHeightStyle selectionHeightStyle;
 
   @override
   _SelectableTextState createState() => _SelectableTextState();
@@ -660,6 +672,8 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
         enableInteractiveSelection: widget.enableInteractiveSelection,
         dragStartBehavior: widget.dragStartBehavior,
         scrollPhysics: widget.scrollPhysics,
+        selectionWidthStyle: widget.selectionWidthStyle,
+        selectionHeightStyle: widget.selectionHeightStyle,
       ),
     );
 
