@@ -7,8 +7,8 @@ import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
-import 'package:end_perf/end_perf.dart';
 import 'package:e2e/e2e.dart';
+import 'package:e2e/e2e_perf.dart';
 
 import 'package:macrobenchmarks/common.dart';
 import 'package:macrobenchmarks/main.dart' as app;
