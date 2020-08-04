@@ -717,7 +717,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
- testWidgets('Stepper custom elevation', (WidgetTester tester) async {
+  testWidgets('Stepper custom elevation', (WidgetTester tester) async {
     const double elevation = 4.0;
 
     await tester.pumpWidget(
@@ -743,7 +743,7 @@ void main() {
         ),
       ),
     );
-    
+
     await tester.pump();
     final Stepper stepper = find.byType(Stepper).evaluate().first.widget as Stepper;
 
@@ -775,7 +775,7 @@ void main() {
         ),
       ),
     );
-    
+
     await tester.pump();
     final Stepper stepper = find.byType(Stepper).evaluate().first.widget as Stepper;
 
