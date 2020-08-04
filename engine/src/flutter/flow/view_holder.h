@@ -9,17 +9,17 @@
 #include <fuchsia/ui/views/cpp/fidl.h>
 #include <lib/ui/scenic/cpp/id.h>
 #include <lib/ui/scenic/cpp/resources.h>
+#include <lib/ui/scenic/cpp/session.h>
 #include <zircon/types.h>
-#include "third_party/skia/include/core/SkMatrix.h"
-#include "third_party/skia/include/core/SkPoint.h"
-#include "third_party/skia/include/core/SkSize.h"
 
 #include <memory>
 
-#include "flutter/flow/scene_update_context.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/ref_counted.h"
 #include "flutter/fml/task_runner.h"
+#include "third_party/skia/include/core/SkColor.h"
+#include "third_party/skia/include/core/SkPoint.h"
+#include "third_party/skia/include/core/SkSize.h"
 
 namespace flutter {
 
@@ -54,7 +54,8 @@ class ViewHolder {
 
   // Creates or updates the contained ViewHolder resource using the specified
   // |SceneUpdateContext|.
-  void UpdateScene(SceneUpdateContext& context,
+  void UpdateScene(scenic::Session* session,
+                   scenic::ContainerNode& container_node,
                    const SkPoint& offset,
                    const SkSize& size,
                    SkAlpha opacity,

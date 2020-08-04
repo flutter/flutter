@@ -6,6 +6,7 @@
 
 #include "platform_view.h"
 
+#include <fuchsia/ui/gfx/cpp/fidl.h>
 #include <sstream>
 
 #include "flutter/fml/logging.h"
@@ -21,41 +22,6 @@
 #include "vsync_waiter.h"
 
 namespace flutter_runner {
-
-namespace {
-
-inline fuchsia::ui::gfx::vec3 Add(const fuchsia::ui::gfx::vec3& a,
-                                  const fuchsia::ui::gfx::vec3& b) {
-  return {.x = a.x + b.x, .y = a.y + b.y, .z = a.z + b.z};
-}
-
-inline fuchsia::ui::gfx::vec3 Subtract(const fuchsia::ui::gfx::vec3& a,
-                                       const fuchsia::ui::gfx::vec3& b) {
-  return {.x = a.x - b.x, .y = a.y - b.y, .z = a.z - b.z};
-}
-
-inline fuchsia::ui::gfx::BoundingBox InsetBy(
-    const fuchsia::ui::gfx::BoundingBox& box,
-    const fuchsia::ui::gfx::vec3& inset_from_min,
-    const fuchsia::ui::gfx::vec3& inset_from_max) {
-  return {.min = Add(box.min, inset_from_min),
-          .max = Subtract(box.max, inset_from_max)};
-}
-
-inline fuchsia::ui::gfx::BoundingBox ViewPropertiesLayoutBox(
-    const fuchsia::ui::gfx::ViewProperties& view_properties) {
-  return InsetBy(view_properties.bounding_box, view_properties.inset_from_min,
-                 view_properties.inset_from_max);
-}
-
-inline fuchsia::ui::gfx::vec3 Max(const fuchsia::ui::gfx::vec3& v,
-                                  float min_val) {
-  return {.x = std::max(v.x, min_val),
-          .y = std::max(v.y, min_val),
-          .z = std::max(v.z, min_val)};
-}
-
-}  // end namespace
 
 static constexpr char kFlutterPlatformChannel[] = "flutter/platform";
 static constexpr char kTextInputChannel[] = "flutter/textinput";
@@ -89,8 +55,6 @@ PlatformView::PlatformView(
     fidl::InterfaceRequest<fuchsia::ui::scenic::SessionListener>
         session_listener_request,
     fit::closure session_listener_error_callback,
-    OnMetricsUpdate session_metrics_did_change_callback,
-    OnSizeChangeHint session_size_change_hint_callback,
     OnEnableWireframe wireframe_enabled_callback,
     OnCreateView on_create_view_callback,
     OnDestroyView on_destroy_view_callback,
@@ -103,8 +67,6 @@ PlatformView::PlatformView(
       session_listener_binding_(this, std::move(session_listener_request)),
       session_listener_error_callback_(
           std::move(session_listener_error_callback)),
-      metrics_changed_callback_(std::move(session_metrics_did_change_callback)),
-      size_change_hint_callback_(std::move(session_size_change_hint_callback)),
       wireframe_enabled_callback_(std::move(wireframe_enabled_callback)),
       on_create_view_callback_(std::move(on_create_view_callback)),
       on_destroy_view_callback_(std::move(on_destroy_view_callback)),
@@ -150,64 +112,6 @@ void PlatformView::RegisterPlatformMessageHandlers() {
   platform_message_handlers_[kFlutterPlatformViewsChannel] =
       std::bind(&PlatformView::HandleFlutterPlatformViewsChannelPlatformMessage,
                 this, std::placeholders::_1);
-}
-
-void PlatformView::OnPropertiesChanged(
-    const fuchsia::ui::gfx::ViewProperties& view_properties) {
-  fuchsia::ui::gfx::BoundingBox layout_box =
-      ViewPropertiesLayoutBox(view_properties);
-
-  fuchsia::ui::gfx::vec3 logical_size =
-      Max(Subtract(layout_box.max, layout_box.min), 0.f);
-
-  metrics_.size.width = logical_size.x;
-  metrics_.size.height = logical_size.y;
-  metrics_.size.depth = logical_size.z;
-  metrics_.padding.left = view_properties.inset_from_min.x;
-  metrics_.padding.top = view_properties.inset_from_min.y;
-  metrics_.padding.front = view_properties.inset_from_min.z;
-  metrics_.padding.right = view_properties.inset_from_max.x;
-  metrics_.padding.bottom = view_properties.inset_from_max.y;
-  metrics_.padding.back = view_properties.inset_from_max.z;
-
-  FlushViewportMetrics();
-}
-
-// TODO(SCN-975): Re-enable.
-// void PlatformView::ConnectSemanticsProvider(
-//     fuchsia::ui::viewsv1token::ViewToken token) {
-//   semantics_bridge_.SetupEnvironment(
-//       token.value, parent_environment_service_provider_.get());
-// }
-
-void PlatformView::UpdateViewportMetrics(
-    const fuchsia::ui::gfx::Metrics& metrics) {
-  metrics_.scale = metrics.scale_x;
-  metrics_.scale_z = metrics.scale_z;
-
-  FlushViewportMetrics();
-}
-
-void PlatformView::FlushViewportMetrics() {
-  const auto scale = metrics_.scale;
-  const auto scale_z = metrics_.scale_z;
-
-  SetViewportMetrics({
-      scale,                                // device_pixel_ratio
-      metrics_.size.width * scale,          // physical_width
-      metrics_.size.height * scale,         // physical_height
-      metrics_.size.depth * scale_z,        // physical_depth
-      metrics_.padding.top * scale,         // physical_padding_top
-      metrics_.padding.right * scale,       // physical_padding_right
-      metrics_.padding.bottom * scale,      // physical_padding_bottom
-      metrics_.padding.left * scale,        // physical_padding_left
-      metrics_.view_inset.front * scale_z,  // physical_view_inset_front
-      metrics_.view_inset.back * scale_z,   // physical_view_inset_back
-      metrics_.view_inset.top * scale,      // physical_view_inset_top
-      metrics_.view_inset.right * scale,    // physical_view_inset_right
-      metrics_.view_inset.bottom * scale,   // physical_view_inset_bottom
-      metrics_.view_inset.left * scale      // physical_view_inset_left
-  });
 }
 
 // |fuchsia::ui::input::InputMethodEditorClient|
@@ -302,27 +206,40 @@ void PlatformView::OnScenicError(std::string error) {
 void PlatformView::OnScenicEvent(
     std::vector<fuchsia::ui::scenic::Event> events) {
   TRACE_EVENT0("flutter", "PlatformView::OnScenicEvent");
+  bool should_update_metrics = false;
   for (const auto& event : events) {
     switch (event.Which()) {
       case fuchsia::ui::scenic::Event::Tag::kGfx:
         switch (event.gfx().Which()) {
           case fuchsia::ui::gfx::Event::Tag::kMetrics: {
-            if (!fidl::Equals(event.gfx().metrics().metrics, scenic_metrics_)) {
-              scenic_metrics_ = std::move(event.gfx().metrics().metrics);
-              metrics_changed_callback_(scenic_metrics_);
-              UpdateViewportMetrics(scenic_metrics_);
+            const fuchsia::ui::gfx::Metrics& metrics =
+                event.gfx().metrics().metrics;
+            const float new_view_pixel_ratio = metrics.scale_x;
+
+            // Avoid metrics update when possible -- it is computationally
+            // expensive.
+            if (view_pixel_ratio_ != new_view_pixel_ratio) {
+              view_pixel_ratio_ = new_view_pixel_ratio;
+              should_update_metrics = true;
             }
             break;
           }
-          case fuchsia::ui::gfx::Event::Tag::kSizeChangeHint: {
-            size_change_hint_callback_(
-                event.gfx().size_change_hint().width_change_factor,
-                event.gfx().size_change_hint().height_change_factor);
-            break;
-          }
           case fuchsia::ui::gfx::Event::Tag::kViewPropertiesChanged: {
-            OnPropertiesChanged(
-                std::move(event.gfx().view_properties_changed().properties));
+            const fuchsia::ui::gfx::BoundingBox& bounding_box =
+                event.gfx().view_properties_changed().properties.bounding_box;
+            const float new_view_width =
+                std::max(bounding_box.max.x - bounding_box.min.x, 0.0f);
+            const float new_view_height =
+                std::max(bounding_box.max.y - bounding_box.min.y, 0.0f);
+
+            // Avoid metrics update when possible -- it is computationally
+            // expensive.
+            if (view_width_ != new_view_width ||
+                view_height_ != new_view_width) {
+              view_width_ = new_view_width;
+              view_height_ = new_view_height;
+              should_update_metrics = true;
+            }
             break;
           }
           case fuchsia::ui::gfx::Event::Tag::kViewConnected:
@@ -371,6 +288,26 @@ void PlatformView::OnScenicEvent(
         break;
       }
     }
+  }
+
+  if (should_update_metrics) {
+    SetViewportMetrics({
+        view_pixel_ratio_,                 // device_pixel_ratio
+        view_width_ * view_pixel_ratio_,   // physical_width
+        view_height_ * view_pixel_ratio_,  // physical_height
+        0.0f,                              // physical_padding_top
+        0.0f,                              // physical_padding_right
+        0.0f,                              // physical_padding_bottom
+        0.0f,                              // physical_padding_left
+        0.0f,                              // physical_view_inset_top
+        0.0f,                              // physical_view_inset_right
+        0.0f,                              // physical_view_inset_bottom
+        0.0f,                              // physical_view_inset_left
+        0.0f,  // p_physical_system_gesture_inset_top
+        0.0f,  // p_physical_system_gesture_inset_right
+        0.0f,  // p_physical_system_gesture_inset_bottom
+        0.0f,  // p_physical_system_gesture_inset_left
+    });
   }
 }
 
@@ -451,8 +388,9 @@ bool PlatformView::OnHandlePointerEvent(
   pointer_data.change = GetChangeFromPointerEventPhase(pointer.phase);
   pointer_data.kind = GetKindFromPointerType(pointer.type);
   pointer_data.device = pointer.pointer_id;
-  pointer_data.physical_x = pointer.x * metrics_.scale;
-  pointer_data.physical_y = pointer.y * metrics_.scale;
+  // Pointer events are in logical pixels, so scale to physical.
+  pointer_data.physical_x = pointer.x * view_pixel_ratio_;
+  pointer_data.physical_y = pointer.y * view_pixel_ratio_;
   // Buttons are single bit values starting with kMousePrimaryButton = 1.
   pointer_data.buttons = static_cast<uint64_t>(pointer.buttons);
 
