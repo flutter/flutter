@@ -3,96 +3,82 @@
 // found in the LICENSE file.
 // FLUTTER_NOLINT
 
-#include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/encodable_value.h"
-
 #include <limits>
 
+#include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/encodable_value.h"
 #include "gtest/gtest.h"
 
 namespace flutter {
 
-// Verifies that value.type() is |type|, and that of all the Is* methods, only
-// the one that matches the type is true.
-void VerifyType(EncodableValue& value,
-                EncodableValue::EncodableValue::Type type) {
-  EXPECT_EQ(value.type(), type);
-
-  EXPECT_EQ(value.IsNull(), type == EncodableValue::Type::kNull);
-  EXPECT_EQ(value.IsBool(), type == EncodableValue::Type::kBool);
-  EXPECT_EQ(value.IsInt(), type == EncodableValue::Type::kInt);
-  EXPECT_EQ(value.IsLong(), type == EncodableValue::Type::kLong);
-  EXPECT_EQ(value.IsDouble(), type == EncodableValue::Type::kDouble);
-  EXPECT_EQ(value.IsString(), type == EncodableValue::Type::kString);
-  EXPECT_EQ(value.IsByteList(), type == EncodableValue::Type::kByteList);
-  EXPECT_EQ(value.IsIntList(), type == EncodableValue::Type::kIntList);
-  EXPECT_EQ(value.IsLongList(), type == EncodableValue::Type::kLongList);
-  EXPECT_EQ(value.IsDoubleList(), type == EncodableValue::Type::kDoubleList);
-  EXPECT_EQ(value.IsList(), type == EncodableValue::Type::kList);
-  EXPECT_EQ(value.IsMap(), type == EncodableValue::Type::kMap);
-}
-
 TEST(EncodableValueTest, Null) {
   EncodableValue value;
-  VerifyType(value, EncodableValue::Type::kNull);
+  value.IsNull();
 }
 
 TEST(EncodableValueTest, Bool) {
   EncodableValue value(false);
-  VerifyType(value, EncodableValue::Type::kBool);
 
-  EXPECT_FALSE(value.BoolValue());
+  EXPECT_FALSE(std::get<bool>(value));
   value = true;
-  EXPECT_TRUE(value.BoolValue());
+  EXPECT_TRUE(std::get<bool>(value));
 }
 
 TEST(EncodableValueTest, Int) {
   EncodableValue value(42);
-  VerifyType(value, EncodableValue::Type::kInt);
 
-  EXPECT_EQ(value.IntValue(), 42);
+  EXPECT_EQ(std::get<int32_t>(value), 42);
   value = std::numeric_limits<int32_t>::max();
-  EXPECT_EQ(value.IntValue(), std::numeric_limits<int32_t>::max());
+  EXPECT_EQ(std::get<int32_t>(value), std::numeric_limits<int32_t>::max());
 }
 
-TEST(EncodableValueTest, LongValueFromInt) {
+// Test the int/long convenience wrapper.
+TEST(EncodableValueTest, LongValue) {
   EncodableValue value(std::numeric_limits<int32_t>::max());
   EXPECT_EQ(value.LongValue(), std::numeric_limits<int32_t>::max());
-}
-
-TEST(EncodableValueTest, Long) {
-  EncodableValue value(INT64_C(42));
-  VerifyType(value, EncodableValue::Type::kLong);
-
-  EXPECT_EQ(value.LongValue(), 42);
   value = std::numeric_limits<int64_t>::max();
   EXPECT_EQ(value.LongValue(), std::numeric_limits<int64_t>::max());
 }
 
+TEST(EncodableValueTest, Long) {
+  EncodableValue value(INT64_C(42));
+
+  EXPECT_EQ(std::get<int64_t>(value), 42);
+  value = std::numeric_limits<int64_t>::max();
+  EXPECT_EQ(std::get<int64_t>(value), std::numeric_limits<int64_t>::max());
+}
+
 TEST(EncodableValueTest, Double) {
   EncodableValue value(3.14);
-  VerifyType(value, EncodableValue::Type::kDouble);
 
-  EXPECT_EQ(value.DoubleValue(), 3.14);
+  EXPECT_EQ(std::get<double>(value), 3.14);
   value = std::numeric_limits<double>::max();
-  EXPECT_EQ(value.DoubleValue(), std::numeric_limits<double>::max());
+  EXPECT_EQ(std::get<double>(value), std::numeric_limits<double>::max());
 }
 
 TEST(EncodableValueTest, String) {
   std::string hello("Hello, world!");
   EncodableValue value(hello);
-  VerifyType(value, EncodableValue::Type::kString);
 
-  EXPECT_EQ(value.StringValue(), hello);
+  EXPECT_EQ(std::get<std::string>(value), hello);
+  value = std::string("Goodbye");
+  EXPECT_EQ(std::get<std::string>(value), "Goodbye");
+}
+
+// Explicitly verify that the overrides to prevent char*->bool conversions work.
+TEST(EncodableValueTest, CString) {
+  const char* hello = "Hello, world!";
+  EncodableValue value(hello);
+
+  EXPECT_EQ(std::get<std::string>(value), hello);
   value = "Goodbye";
-  EXPECT_EQ(value.StringValue(), "Goodbye");
+  EXPECT_EQ(std::get<std::string>(value), "Goodbye");
 }
 
 TEST(EncodableValueTest, UInt8List) {
   std::vector<uint8_t> data = {0, 2};
   EncodableValue value(data);
-  VerifyType(value, EncodableValue::Type::kByteList);
 
-  std::vector<uint8_t>& list_value = value.ByteListValue();
+  auto& list_value = std::get<std::vector<uint8_t>>(value);
   list_value.push_back(std::numeric_limits<uint8_t>::max());
   EXPECT_EQ(list_value[0], 0);
   EXPECT_EQ(list_value[1], 2);
@@ -105,9 +91,8 @@ TEST(EncodableValueTest, UInt8List) {
 TEST(EncodableValueTest, Int32List) {
   std::vector<int32_t> data = {-10, 2};
   EncodableValue value(data);
-  VerifyType(value, EncodableValue::Type::kIntList);
 
-  std::vector<int32_t>& list_value = value.IntListValue();
+  auto& list_value = std::get<std::vector<int32_t>>(value);
   list_value.push_back(std::numeric_limits<int32_t>::max());
   EXPECT_EQ(list_value[0], -10);
   EXPECT_EQ(list_value[1], 2);
@@ -120,9 +105,8 @@ TEST(EncodableValueTest, Int32List) {
 TEST(EncodableValueTest, Int64List) {
   std::vector<int64_t> data = {-10, 2};
   EncodableValue value(data);
-  VerifyType(value, EncodableValue::Type::kLongList);
 
-  std::vector<int64_t>& list_value = value.LongListValue();
+  auto& list_value = std::get<std::vector<int64_t>>(value);
   list_value.push_back(std::numeric_limits<int64_t>::max());
   EXPECT_EQ(list_value[0], -10);
   EXPECT_EQ(list_value[1], 2);
@@ -135,9 +119,8 @@ TEST(EncodableValueTest, Int64List) {
 TEST(EncodableValueTest, DoubleList) {
   std::vector<double> data = {-10.0, 2.0};
   EncodableValue value(data);
-  VerifyType(value, EncodableValue::Type::kDoubleList);
 
-  std::vector<double>& list_value = value.DoubleListValue();
+  auto& list_value = std::get<std::vector<double>>(value);
   list_value.push_back(std::numeric_limits<double>::max());
   EXPECT_EQ(list_value[0], -10.0);
   EXPECT_EQ(list_value[1], 2.0);
@@ -154,18 +137,17 @@ TEST(EncodableValueTest, List) {
       EncodableValue("Three"),
   };
   EncodableValue value(encodables);
-  VerifyType(value, EncodableValue::Type::kList);
 
-  EncodableList& list_value = value.ListValue();
-  EXPECT_EQ(list_value[0].IntValue(), 1);
-  EXPECT_EQ(list_value[1].DoubleValue(), 2.0);
-  EXPECT_EQ(list_value[2].StringValue(), "Three");
+  auto& list_value = std::get<EncodableList>(value);
+  EXPECT_EQ(std::get<int32_t>(list_value[0]), 1);
+  EXPECT_EQ(std::get<double>(list_value[1]), 2.0);
+  EXPECT_EQ(std::get<std::string>(list_value[2]), "Three");
 
   // Ensure that it's a modifiable copy of the original array.
   list_value.push_back(EncodableValue(true));
   ASSERT_EQ(list_value.size(), 4u);
   EXPECT_EQ(encodables.size(), 3u);
-  EXPECT_EQ(value.ListValue()[3].BoolValue(), true);
+  EXPECT_EQ(std::get<bool>(std::get<EncodableList>(value)[3]), true);
 }
 
 TEST(EncodableValueTest, Map) {
@@ -175,43 +157,19 @@ TEST(EncodableValueTest, Map) {
       {EncodableValue("two"), EncodableValue(7)},
   };
   EncodableValue value(encodables);
-  VerifyType(value, EncodableValue::Type::kMap);
 
-  EncodableMap& map_value = value.MapValue();
-  EXPECT_EQ(map_value[EncodableValue()].IsIntList(), true);
-  EXPECT_EQ(map_value[EncodableValue(1)].LongValue(), INT64_C(10000));
-  EXPECT_EQ(map_value[EncodableValue("two")].IntValue(), 7);
+  auto& map_value = std::get<EncodableMap>(value);
+  EXPECT_EQ(
+      std::holds_alternative<std::vector<int32_t>>(map_value[EncodableValue()]),
+      true);
+  EXPECT_EQ(std::get<int64_t>(map_value[EncodableValue(1)]), INT64_C(10000));
+  EXPECT_EQ(std::get<int32_t>(map_value[EncodableValue("two")]), 7);
 
   // Ensure that it's a modifiable copy of the original map.
   map_value[EncodableValue(true)] = EncodableValue(false);
   ASSERT_EQ(map_value.size(), 4u);
   EXPECT_EQ(encodables.size(), 3u);
-  EXPECT_EQ(map_value[EncodableValue(true)].BoolValue(), false);
-}
-
-TEST(EncodableValueTest, EmptyTypeConstructor) {
-  EXPECT_TRUE(EncodableValue(EncodableValue::Type::kNull).IsNull());
-  EXPECT_EQ(EncodableValue(EncodableValue::Type::kBool).BoolValue(), false);
-  EXPECT_EQ(EncodableValue(EncodableValue::Type::kInt).IntValue(), 0);
-  EXPECT_EQ(EncodableValue(EncodableValue::Type::kLong).LongValue(),
-            INT64_C(0));
-  EXPECT_EQ(EncodableValue(EncodableValue::Type::kDouble).DoubleValue(), 0.0);
-  EXPECT_EQ(EncodableValue(EncodableValue::Type::kString).StringValue().size(),
-            0u);
-  EXPECT_EQ(
-      EncodableValue(EncodableValue::Type::kByteList).ByteListValue().size(),
-      0u);
-  EXPECT_EQ(
-      EncodableValue(EncodableValue::Type::kIntList).IntListValue().size(), 0u);
-  EXPECT_EQ(
-      EncodableValue(EncodableValue::Type::kLongList).LongListValue().size(),
-      0u);
-  EXPECT_EQ(EncodableValue(EncodableValue::Type::kDoubleList)
-                .DoubleListValue()
-                .size(),
-            0u);
-  EXPECT_EQ(EncodableValue(EncodableValue::Type::kList).ListValue().size(), 0u);
-  EXPECT_EQ(EncodableValue(EncodableValue::Type::kMap).MapValue().size(), 0u);
+  EXPECT_EQ(std::get<bool>(map_value[EncodableValue(true)]), false);
 }
 
 // Tests that the < operator meets the requirements of using EncodableValue as
@@ -248,8 +206,8 @@ TEST(EncodableValueTest, Comparison) {
       EncodableValue(std::vector<int64_t>{0, INT64_C(1)}),
       EncodableValue(std::vector<int64_t>{0, INT64_C(100)}),
       // DoubleList
-      EncodableValue(std::vector<int64_t>{0, INT64_C(1)}),
-      EncodableValue(std::vector<int64_t>{0, INT64_C(100)}),
+      EncodableValue(std::vector<double>{0, INT64_C(1)}),
+      EncodableValue(std::vector<double>{0, INT64_C(100)}),
       // List
       EncodableValue(EncodableList{EncodableValue(), EncodableValue(true)}),
       EncodableValue(EncodableList{EncodableValue(), EncodableValue(1.0)}),
@@ -272,23 +230,19 @@ TEST(EncodableValueTest, Comparison) {
       } else {
         // All other comparisons should be consistent, but the direction doesn't
         // matter.
-        EXPECT_NE(a < b, b < a);
+        EXPECT_NE(a < b, b < a) << "Indexes: " << i << ", " << j;
       }
     }
 
-    // Different non-collection objects with the same value should be equal;
-    // different collections should always be unequal regardless of contents.
-    bool is_collection = a.IsByteList() || a.IsIntList() || a.IsLongList() ||
-                         a.IsDoubleList() || a.IsList() || a.IsMap();
+    // Copies should always be equal.
     EncodableValue copy(a);
-    bool is_equal = !(a < copy || copy < a);
-    EXPECT_EQ(is_equal, !is_collection);
+    EXPECT_FALSE(a < copy || copy < a);
   }
 }
 
 // Tests that structures are deep-copied.
 TEST(EncodableValueTest, DeepCopy) {
-  EncodableList encodables = {
+  EncodableList original = {
       EncodableValue(EncodableMap{
           {EncodableValue(), EncodableValue(std::vector<int32_t>{1, 2, 3})},
           {EncodableValue(1), EncodableValue(INT64_C(0000))},
@@ -302,30 +256,28 @@ TEST(EncodableValueTest, DeepCopy) {
       }),
   };
 
-  EncodableValue value(encodables);
-  ASSERT_TRUE(value.IsList());
+  EncodableValue copy(original);
+  ASSERT_TRUE(std::holds_alternative<EncodableList>(copy));
 
   // Spot-check innermost collection values.
-  EXPECT_EQ(value.ListValue()[0].MapValue()[EncodableValue("two")].IntValue(),
-            7);
-  EXPECT_EQ(value.ListValue()[1]
-                .ListValue()[2]
-                .MapValue()[EncodableValue("a")]
-                .StringValue(),
-            "b");
+  auto& root_list = std::get<EncodableList>(copy);
+  auto& first_child = std::get<EncodableMap>(root_list[0]);
+  EXPECT_EQ(std::get<int32_t>(first_child[EncodableValue("two")]), 7);
+  auto& second_child = std::get<EncodableList>(root_list[1]);
+  auto& innermost_map = std::get<EncodableMap>(second_child[2]);
+  EXPECT_EQ(std::get<std::string>(innermost_map[EncodableValue("a")]), "b");
 
   // Modify those values in the original structure.
-  encodables[0].MapValue()[EncodableValue("two")] = EncodableValue();
-  encodables[1].ListValue()[2].MapValue()[EncodableValue("a")] = 99;
+  first_child[EncodableValue("two")] = EncodableValue();
+  innermost_map[EncodableValue("a")] = 99;
 
-  // Re-check innermost collection values to ensure that they haven't changed.
-  EXPECT_EQ(value.ListValue()[0].MapValue()[EncodableValue("two")].IntValue(),
-            7);
-  EXPECT_EQ(value.ListValue()[1]
-                .ListValue()[2]
-                .MapValue()[EncodableValue("a")]
-                .StringValue(),
-            "b");
+  // Re-check innermost collection values of the original to ensure that they
+  // haven't changed.
+  first_child = std::get<EncodableMap>(original[0]);
+  EXPECT_EQ(std::get<int32_t>(first_child[EncodableValue("two")]), 7);
+  second_child = std::get<EncodableList>(original[1]);
+  innermost_map = std::get<EncodableMap>(second_child[2]);
+  EXPECT_EQ(std::get<std::string>(innermost_map[EncodableValue("a")]), "b");
 }
 
 }  // namespace flutter
