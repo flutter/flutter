@@ -832,7 +832,7 @@ abstract class WidgetController {
   /// that will build child specified by `finder` when there are multiple
   ///[Scrollable]s.
   ///
-  /// See [dragUntilVisible].
+  /// See also [dragUntilVisible].
   Future<void> scrollUntilVisible(
     Finder finder,
     double delta, {
