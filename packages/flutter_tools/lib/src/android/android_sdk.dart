@@ -210,10 +210,21 @@ class AndroidSdk {
     return fileSystem.isDirectorySync(fileSystem.path.join(dir, 'licenses'));
   }
 
+  /// All downloaded Android SDK versions.
+  ///
+  /// This may be an empty list if the SDK is not fully materialized yet, or if
+  /// the sdk was not correctly located.
+  ///
+  /// To verify that the Android SDK was downloaded, check that
+  /// [latestVersion] is non `null`.
   List<AndroidSdkVersion> get sdkVersions => _sdkVersions;
 
+  /// The latest version of the SDK tools in the currently located SDK.
+  ///
+  /// Returns `null` if the Android SDK is not downloaded.
   AndroidSdkVersion get latestVersion => _latestVersion;
 
+  /// The path to the Android Debug Bridge (adb) executable.
   String get adbPath => getPlatformToolsPath(_platform.isWindows ? 'adb.exe' : 'adb');
 
   String get emulatorPath => getEmulatorPath();

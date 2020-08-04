@@ -31,7 +31,7 @@ void main() {
     );
 
     expect(await androidDevices.pollingGetDevices(), isEmpty);
-  }, skip: true); // a null adb unconditionally calls a static method in AndroidSDK that hits the context.
+  });
 
   testWithoutContext('AndroidDevices throwsToolExit on missing adb path', () {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
