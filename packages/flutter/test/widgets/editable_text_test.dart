@@ -13,7 +13,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
-import 'package:mockito/mockito.dart';
 import 'package:flutter/foundation.dart';
 
 import '../rendering/mock_canvas.dart';
@@ -2559,18 +2558,15 @@ void main() {
           TextSelection.collapsed(offset: controller.text.length);
 
       controls = MockTextSelectionControls();
-      when(controls.buildHandle(any, any, any)).thenReturn(Container());
-      when(controls.buildToolbar(any, any, any, any, any, any, any))
-          .thenReturn(Container());
     });
 
     testWidgets('are exposed', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       addTearDown(semantics.dispose);
 
-      when(controls.canCopy(any)).thenReturn(false);
-      when(controls.canCut(any)).thenReturn(false);
-      when(controls.canPaste(any)).thenReturn(false);
+      controls.testCanCopy = false;
+      controls.testCanCut = false;
+      controls.testCanPaste = false;
 
       await _buildApp(controls, tester);
       await tester.tap(find.byType(EditableText));
@@ -2588,7 +2584,7 @@ void main() {
         ),
       );
 
-      when(controls.canCopy(any)).thenReturn(true);
+      controls.testCanCopy = true;
       await _buildApp(controls, tester);
       expect(
         semantics,
@@ -2603,8 +2599,8 @@ void main() {
         ),
       );
 
-      when(controls.canCopy(any)).thenReturn(false);
-      when(controls.canPaste(any)).thenReturn(true);
+      controls.testCanCopy = false;
+      controls.testCanPaste = true;
       await _buildApp(controls, tester);
       await tester.pumpAndSettle();
       expect(
@@ -2620,8 +2616,8 @@ void main() {
         ),
       );
 
-      when(controls.canPaste(any)).thenReturn(false);
-      when(controls.canCut(any)).thenReturn(true);
+      controls.testCanPaste = false;
+      controls.testCanCut = true;
       await _buildApp(controls, tester);
       expect(
         semantics,
@@ -2636,9 +2632,9 @@ void main() {
         ),
       );
 
-      when(controls.canCopy(any)).thenReturn(true);
-      when(controls.canCut(any)).thenReturn(true);
-      when(controls.canPaste(any)).thenReturn(true);
+      controls.testCanCopy = true;
+      controls.testCanCut = true;
+      controls.testCanPaste = true;
       await _buildApp(controls, tester);
       expect(
         semantics,
@@ -2659,9 +2655,9 @@ void main() {
     testWidgets('can copy/cut/paste with a11y', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
 
-      when(controls.canCopy(any)).thenReturn(true);
-      when(controls.canCut(any)).thenReturn(true);
-      when(controls.canPaste(any)).thenReturn(true);
+      controls.testCanCopy = true;
+      controls.testCanCut = true;
+      controls.testCanPaste = true;
       await _buildApp(controls, tester);
       await tester.tap(find.byType(EditableText));
       await tester.pump();
@@ -2717,13 +2713,13 @@ void main() {
       );
 
       owner.performAction(expectedNodeId, SemanticsAction.copy);
-      verify(controls.handleCopy(any, any)).called(1);
+      expect(controls.didCopy, true);
 
       owner.performAction(expectedNodeId, SemanticsAction.cut);
-      verify(controls.handleCut(any)).called(1);
+      expect(controls.didCut, true);
 
       owner.performAction(expectedNodeId, SemanticsAction.paste);
-      verify(controls.handlePaste(any)).called(1);
+      expect(controls.didPaste, true);
 
       semantics.dispose();
     });
@@ -5263,7 +5259,17 @@ class MockTextFormatter extends TextInputFormatter {
   }
 }
 
-class MockTextSelectionControls extends Mock implements TextSelectionControls {
+class MockTextSelectionControls extends Fake implements TextSelectionControls {
+  @override
+  Widget buildToolbar(BuildContext context, Rect globalEditableRegion, double textLineHeight, Offset position, List<TextSelectionPoint> endpoints, TextSelectionDelegate delegate, ClipboardStatusNotifier clipboardStatus) {
+    return Container();
+  }
+
+  @override
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight) {
+    return Container();
+  }
+
   @override
   Size getHandleSize(double textLineHeight) {
     return Size.zero;
@@ -5272,6 +5278,44 @@ class MockTextSelectionControls extends Mock implements TextSelectionControls {
   @override
   Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
     return Offset.zero;
+  }
+
+  bool testCanCut = false;
+  bool testCanCopy = false;
+  bool testCanPaste = false;
+
+  bool didCut = false;
+  bool didPaste = false;
+  bool didCopy = false;
+
+  @override
+  void handleCopy(TextSelectionDelegate delegate, ClipboardStatusNotifier clipboardStatus) {
+    didCopy = true;
+  }
+
+  @override
+  Future<void> handlePaste(TextSelectionDelegate delegate) async {
+    didPaste = true;
+  }
+
+  @override
+  void handleCut(TextSelectionDelegate delegate) {
+    didCut = true;
+  }
+
+  @override
+  bool canCut(TextSelectionDelegate delegate) {
+    return testCanCut;
+  }
+
+  @override
+  bool canCopy(TextSelectionDelegate delegate) {
+    return testCanCopy;
+  }
+
+  @override
+  bool canPaste(TextSelectionDelegate delegate) {
+    return testCanPaste;
   }
 }
 
