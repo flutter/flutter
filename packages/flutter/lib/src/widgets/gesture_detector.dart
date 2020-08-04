@@ -747,8 +747,8 @@ class GestureDetector extends StatelessWidget {
         onSecondaryLongPressMoveUpdate != null ||
         onSecondaryLongPressEnd != null) {
       gestures[LongPressGestureRecognizer] = GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
-            () => LongPressGestureRecognizer(debugOwner: this),
-            (LongPressGestureRecognizer instance) {
+        () => LongPressGestureRecognizer(debugOwner: this),
+        (LongPressGestureRecognizer instance) {
           instance
             ..onLongPress = onLongPress
             ..onLongPressStart = onLongPressStart
@@ -770,8 +770,8 @@ class GestureDetector extends StatelessWidget {
         onVerticalDragEnd != null ||
         onVerticalDragCancel != null) {
       gestures[VerticalDragGestureRecognizer] = GestureRecognizerFactoryWithHandlers<VerticalDragGestureRecognizer>(
-            () => VerticalDragGestureRecognizer(debugOwner: this),
-            (VerticalDragGestureRecognizer instance) {
+        () => VerticalDragGestureRecognizer(debugOwner: this),
+        (VerticalDragGestureRecognizer instance) {
           instance
             ..onDown = onVerticalDragDown
             ..onStart = onVerticalDragStart
@@ -789,8 +789,8 @@ class GestureDetector extends StatelessWidget {
         onHorizontalDragEnd != null ||
         onHorizontalDragCancel != null) {
       gestures[HorizontalDragGestureRecognizer] = GestureRecognizerFactoryWithHandlers<HorizontalDragGestureRecognizer>(
-            () => HorizontalDragGestureRecognizer(debugOwner: this),
-            (HorizontalDragGestureRecognizer instance) {
+        () => HorizontalDragGestureRecognizer(debugOwner: this),
+        (HorizontalDragGestureRecognizer instance) {
           instance
             ..onDown = onHorizontalDragDown
             ..onStart = onHorizontalDragStart
@@ -808,8 +808,8 @@ class GestureDetector extends StatelessWidget {
         onPanEnd != null ||
         onPanCancel != null) {
       gestures[PanGestureRecognizer] = GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
-            () => PanGestureRecognizer(debugOwner: this),
-            (PanGestureRecognizer instance) {
+        () => PanGestureRecognizer(debugOwner: this),
+        (PanGestureRecognizer instance) {
           instance
             ..onDown = onPanDown
             ..onStart = onPanStart
@@ -823,8 +823,8 @@ class GestureDetector extends StatelessWidget {
 
     if (onScaleStart != null || onScaleUpdate != null || onScaleEnd != null) {
       gestures[ScaleGestureRecognizer] = GestureRecognizerFactoryWithHandlers<ScaleGestureRecognizer>(
-            () => ScaleGestureRecognizer(debugOwner: this),
-            (ScaleGestureRecognizer instance) {
+        () => ScaleGestureRecognizer(debugOwner: this),
+        (ScaleGestureRecognizer instance) {
           instance
             ..onStart = onScaleStart
             ..onUpdate = onScaleUpdate
@@ -838,8 +838,8 @@ class GestureDetector extends StatelessWidget {
         onForcePressUpdate != null ||
         onForcePressEnd != null) {
       gestures[ForcePressGestureRecognizer] = GestureRecognizerFactoryWithHandlers<ForcePressGestureRecognizer>(
-            () => ForcePressGestureRecognizer(debugOwner: this),
-            (ForcePressGestureRecognizer instance) {
+        () => ForcePressGestureRecognizer(debugOwner: this),
+        (ForcePressGestureRecognizer instance) {
           instance
             ..onStart = onForcePressStart
             ..onPeak = onForcePressPeak
