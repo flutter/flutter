@@ -107,6 +107,7 @@ class PlatformException implements Exception {
     required this.code,
     this.message,
     this.details,
+    this.stacktrace,
   }) : assert(code != null);
 
   /// An error code.
@@ -118,8 +119,11 @@ class PlatformException implements Exception {
   /// Error details, possibly null.
   final dynamic details;
 
+  /// Native stacktrace for the error, possibly null.
+  final String? stacktrace;
+
   @override
-  String toString() => 'PlatformException($code, $message, $details)';
+  String toString() => 'PlatformException($code, $message, $details, $stacktrace)';
 }
 
 /// Thrown to indicate that a platform interaction failed to find a handling

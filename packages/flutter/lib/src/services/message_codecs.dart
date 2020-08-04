@@ -567,8 +567,9 @@ class StandardMethodCodec implements MethodCodec {
     final dynamic errorCode = messageCodec.readValue(buffer);
     final dynamic errorMessage = messageCodec.readValue(buffer);
     final dynamic errorDetails = messageCodec.readValue(buffer);
+    final dynamic errorStacktrace = messageCodec.readValue(buffer);
     if (errorCode is String && (errorMessage == null || errorMessage is String) && !buffer.hasRemaining)
-      throw PlatformException(code: errorCode, message: errorMessage as String, details: errorDetails);
+      throw PlatformException(code: errorCode, message: errorMessage as String, details: errorDetails, stacktrace: errorStacktrace as String);
     else
       throw const FormatException('Invalid envelope');
   }
