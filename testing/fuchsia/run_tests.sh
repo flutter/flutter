@@ -194,13 +194,14 @@ echo "$(date) START:flutter_runner_tests ----------------------------"
     --timeout-seconds $test_timeout_seconds \
     --packages-directory packages
 
-./fuchsia_ctl -d $device_name test \
-    -f flutter_aot_runner-0.far    \
-    -f flutter_runner_scenic_tests-0.far  \
-    -t flutter_runner_scenic_tests \
-    --identity-file $pkey \
-    --timeout-seconds $test_timeout_seconds \
-    --packages-directory packages
+# TODO(https://github.com/flutter/flutter/issues/61768): De-flake and re-enable
+# ./fuchsia_ctl -d $device_name test \
+#     -f flutter_aot_runner-0.far    \
+#     -f flutter_runner_scenic_tests-0.far  \
+#     -t flutter_runner_scenic_tests \
+#     --identity-file $pkey \
+#     --timeout-seconds $test_timeout_seconds \
+#     --packages-directory packages
 
 ./fuchsia_ctl -d $device_name test \
     -f flutter_aot_runner-0.far    \
