@@ -323,7 +323,7 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
 /// [TapGestureRecognizer] competes on pointer events of [kPrimaryButton] only
 /// when it has at least one non-null `onTap*` callback, on events of
 /// [kSecondaryButton] only when it has at least one non-null `onSecondaryTap*`
-/// callback, and on events of [kMiddleMouseButton] only when it has at least
+/// callback, and on events of [kTertiaryButton] only when it has at least
 /// one non-null `onTertiaryTap*` callback. If it has no callbacks, it is a
 /// no-op.
 ///
@@ -483,7 +483,7 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   ///
   /// See also:
   ///
-  ///  * [kMiddleMouseButton], the button this callback responds to.
+  ///  * [kTertiaryButton], the button this callback responds to.
   ///  * [onTapDown], a similar callback but for a primary button.
   ///  * [onSecondaryTapDown], a similar callback but for a secondary button.
   ///  * [TapDownDetails], which is passed as an argument to this callback.
@@ -501,7 +501,7 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   ///
   /// See also:
   ///
-  ///  * [kMiddleMouseButton], the button this callback responds to.
+  ///  * [kTertiaryButton], the button this callback responds to.
   ///  * [onTapUp], a similar callback but for a primary button.
   ///  * [onSecondaryTapUp], a similar callback but for a secondary button.
   ///  * [TapUpDetails], which is passed as an argument to this callback.
@@ -541,7 +541,7 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
             onSecondaryTapCancel == null)
           return false;
         break;
-      case kMiddleMouseButton:
+      case kTertiaryButton:
         if (onTertiaryTapDown == null &&
             onTertiaryTapUp == null &&
             onTertiaryTapCancel == null)
@@ -570,7 +570,7 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
         if (onSecondaryTapDown != null)
           invokeCallback<void>('onSecondaryTapDown', () => onSecondaryTapDown!(details));
         break;
-      case kMiddleMouseButton:
+      case kTertiaryButton:
         if (onTertiaryTapDown != null)
           invokeCallback<void>('onTertiaryTapDown', () => onTertiaryTapDown!(details));
         break;
@@ -598,7 +598,7 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
         if (onSecondaryTap != null)
           invokeCallback<void>('onSecondaryTap', () => onSecondaryTap!());
         break;
-      case kMiddleMouseButton:
+      case kTertiaryButton:
         if (onTertiaryTapUp != null)
           invokeCallback<void>('onTertiaryTapUp', () => onTertiaryTapUp!(details));
         break;
@@ -619,7 +619,7 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
         if (onSecondaryTapCancel != null)
           invokeCallback<void>('${note}onSecondaryTapCancel', onSecondaryTapCancel!);
         break;
-      case kMiddleMouseButton:
+      case kTertiaryButton:
         if (onTertiaryTapCancel != null)
           invokeCallback<void>('${note}onTertiaryTapCancel', onTertiaryTapCancel!);
         break;

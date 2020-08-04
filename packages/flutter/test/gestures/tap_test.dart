@@ -91,7 +91,7 @@ void main() {
   const PointerDownEvent down6 = PointerDownEvent(
     pointer: 6,
     position: Offset(20.0, 20.0),
-    buttons: kMiddleMouseButton,
+    buttons: kTertiaryButton,
   );
 
   const PointerUpEvent up6 = PointerUpEvent(
