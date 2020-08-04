@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: I want help writing my application from Flutter's community on Reddit
+    url: https://www.reddit.com/r/flutterhelp/
+    about: Get help from the Flutter's community on Reddit to achieve a particular effect, or with using a particular API.
+  - name: I want help writing my application from Flutter's community on Stackoverflow
+    url: https://stackoverflow.com/tags/flutter
+    about: Get help from the Flutter's community on Reddit to achieve a particular effect, or with using a particular API.
