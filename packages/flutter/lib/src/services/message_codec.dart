@@ -120,6 +120,13 @@ class PlatformException implements Exception {
   final dynamic details;
 
   /// Native stacktrace for the error, possibly null.
+  /// This is strictly for native platform stacktrace.
+  /// The stacktrace info on dart platform can be found within the try-catch block for example:
+  /// try {
+  ///   ...
+  /// } catch (e, stacktrace) {
+  ///   print(stacktrace);
+  /// }
   final String? stacktrace;
 
   @override
