@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
 
 import 'dart:async';
 import 'dart:ui' as ui show Image, Codec, FrameInfo;
@@ -21,7 +22,7 @@ class ImageInfo {
   /// Both the image and the scale must not be null.
   ///
   /// The tag may be used to identify the source of this image.
-  const ImageInfo({ required this.image, this.scale = 1.0, this.debugLabel })
+  const ImageInfo({ @required this.image, this.scale = 1.0, this.debugLabel })
     : assert(image != null),
       assert(scale != null);
 
@@ -44,7 +45,7 @@ class ImageInfo {
   final double scale;
 
   /// A string used for debugging purpopses to identify the source of this image.
-  final String? debugLabel;
+  final String debugLabel;
 
   @override
   String toString() => '${debugLabel != null ? '$debugLabel ' : ''}$image @ ${debugFormatDouble(scale)}x';
@@ -111,13 +112,13 @@ class ImageStreamListener {
   /// This callback may also continue to fire after the [onImage] callback has
   /// fired (e.g. for multi-frame images that continue to load after the first
   /// frame is available).
-  final ImageChunkListener? onChunk;
+  final ImageChunkListener onChunk;
 
   /// Callback for getting notified when an error occurs while loading an image.
   ///
   /// If an error occurs during loading, [onError] will be called instead of
   /// [onImage].
-  final ImageErrorListener? onError;
+  final ImageErrorListener onError;
 
   @override
   int get hashCode => hashValues(onImage, onChunk, onError);
@@ -154,7 +155,7 @@ typedef ImageChunkListener = void Function(ImageChunkEvent event);
 ///
 /// Used in [ImageStreamListener], as well as by [ImageCache.putIfAbsent] and
 /// [precacheImage], to report errors.
-typedef ImageErrorListener = void Function(dynamic exception, StackTrace? stackTrace);
+typedef ImageErrorListener = void Function(dynamic exception, StackTrace stackTrace);
 
 /// An immutable notification of image bytes that have been incrementally loaded.
 ///
@@ -169,8 +170,8 @@ typedef ImageErrorListener = void Function(dynamic exception, StackTrace? stackT
 class ImageChunkEvent with Diagnosticable {
   /// Creates a new chunk event.
   const ImageChunkEvent({
-    required this.cumulativeBytesLoaded,
-    required this.expectedTotalBytes,
+    @required this.cumulativeBytesLoaded,
+    @required this.expectedTotalBytes,
   }) : assert(cumulativeBytesLoaded >= 0),
        assert(expectedTotalBytes == null || expectedTotalBytes >= 0);
 
@@ -188,7 +189,7 @@ class ImageChunkEvent with Diagnosticable {
   /// When this value is null, the chunk event may still be useful as an
   /// indication that data is loading (and how much), but it cannot represent a
   /// loading completion percentage.
-  final int? expectedTotalBytes;
+  final int expectedTotalBytes;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -228,10 +229,10 @@ class ImageStream with Diagnosticable {
   /// The completer that has been assigned to this image stream.
   ///
   /// Generally there is no need to deal with the completer directly.
-  ImageStreamCompleter? get completer => _completer;
-  ImageStreamCompleter? _completer;
+  ImageStreamCompleter get completer => _completer;
+  ImageStreamCompleter _completer;
 
-  List<ImageStreamListener>? _listeners;
+  List<ImageStreamListener> _listeners;
 
   /// Assigns a particular [ImageStreamCompleter] to this [ImageStream].
   ///
@@ -245,9 +246,9 @@ class ImageStream with Diagnosticable {
     assert(_completer == null);
     _completer = value;
     if (_listeners != null) {
-      final List<ImageStreamListener> initialListeners = _listeners!;
+      final List<ImageStreamListener> initialListeners = _listeners;
       _listeners = null;
-      initialListeners.forEach(_completer!.addListener);
+      initialListeners.forEach(_completer.addListener);
     }
   }
 
@@ -271,9 +272,9 @@ class ImageStream with Diagnosticable {
   /// {@endtemplate}
   void addListener(ImageStreamListener listener) {
     if (_completer != null)
-      return _completer!.addListener(listener);
+      return _completer.addListener(listener);
     _listeners ??= <ImageStreamListener>[];
-    _listeners!.add(listener);
+    _listeners.add(listener);
   }
 
   /// Stops listening for events from this stream's [ImageStreamCompleter].
@@ -282,11 +283,11 @@ class ImageStream with Diagnosticable {
   /// instance of the listener.
   void removeListener(ImageStreamListener listener) {
     if (_completer != null)
-      return _completer!.removeListener(listener);
+      return _completer.removeListener(listener);
     assert(_listeners != null);
-    for (int i = 0; i < _listeners!.length; i += 1) {
-      if (_listeners![i] == listener) {
-        _listeners!.removeAt(i);
+    for (int i = 0; i < _listeners.length; i += 1) {
+      if (_listeners[i] == listener) {
+        _listeners.removeAt(i);
         break;
       }
     }
@@ -333,11 +334,11 @@ class ImageStream with Diagnosticable {
 /// configure it with the right [ImageStreamCompleter] when possible.
 abstract class ImageStreamCompleter with Diagnosticable {
   final List<ImageStreamListener> _listeners = <ImageStreamListener>[];
-  ImageInfo? _currentImage;
-  FlutterErrorDetails? _currentError;
+  ImageInfo _currentImage;
+  FlutterErrorDetails _currentError;
 
   /// A string identifying the source of the underlying image.
-  String? debugLabel;
+  String debugLabel;
 
   /// Whether any listeners are currently registered.
   ///
@@ -371,7 +372,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
     _listeners.add(listener);
     if (_currentImage != null) {
       try {
-        listener.onImage(_currentImage!, true);
+        listener.onImage(_currentImage, true);
       } catch (exception, stack) {
         reportError(
           context: ErrorDescription('by a synchronously-called image listener'),
@@ -382,7 +383,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
     }
     if (_currentError != null && listener.onError != null) {
       try {
-        listener.onError!(_currentError!.exception, _currentError!.stack);
+        listener.onError(_currentError.exception, _currentError.stack);
       } catch (exception, stack) {
         FlutterError.reportError(
           FlutterErrorDetails(
@@ -485,10 +486,10 @@ abstract class ImageStreamCompleter with Diagnosticable {
   /// See [FlutterErrorDetails] for further details on these values.
   @protected
   void reportError({
-    DiagnosticsNode? context,
+    DiagnosticsNode context,
     dynamic exception,
-    StackTrace? stack,
-    InformationCollector? informationCollector,
+    StackTrace stack,
+    InformationCollector informationCollector,
     bool silent = false,
   }) {
     _currentError = FlutterErrorDetails(
@@ -502,12 +503,12 @@ abstract class ImageStreamCompleter with Diagnosticable {
 
     // Make a copy to allow for concurrent modification.
     final List<ImageErrorListener> localErrorListeners = _listeners
-        .map<ImageErrorListener?>((ImageStreamListener listener) => listener.onError)
-        .whereType<ImageErrorListener>()
+        .map<ImageErrorListener>((ImageStreamListener listener) => listener.onError)
+        .where((ImageErrorListener errorListener) => errorListener != null)
         .toList();
 
     if (localErrorListeners.isEmpty) {
-      FlutterError.reportError(_currentError!);
+      FlutterError.reportError(_currentError);
     } else {
       for (final ImageErrorListener errorListener in localErrorListeners) {
         try {
@@ -534,8 +535,8 @@ abstract class ImageStreamCompleter with Diagnosticable {
     if (hasListeners) {
       // Make a copy to allow for concurrent modification.
       final List<ImageChunkListener> localListeners = _listeners
-          .map<ImageChunkListener?>((ImageStreamListener listener) => listener.onChunk)
-          .whereType<ImageChunkListener>()
+          .map<ImageChunkListener>((ImageStreamListener listener) => listener.onChunk)
+          .where((ImageChunkListener chunkListener) => chunkListener != null)
           .toList();
       for (final ImageChunkListener listener in localListeners) {
         listener(event);
@@ -552,7 +553,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
     description.add(ObjectFlagProperty<List<ImageStreamListener>>(
       'listeners',
       _listeners,
-      ifPresent: '${_listeners.length} listener${_listeners.length == 1 ? "" : "s" }',
+      ifPresent: '${_listeners?.length} listener${_listeners?.length == 1 ? "" : "s" }',
     ));
   }
 }
@@ -574,7 +575,7 @@ class OneFrameImageStreamCompleter extends ImageStreamCompleter {
   /// argument on [FlutterErrorDetails] set to true, meaning that by default the
   /// message is only dumped to the console in debug mode (see [new
   /// FlutterErrorDetails]).
-  OneFrameImageStreamCompleter(Future<ImageInfo> image, { InformationCollector? informationCollector })
+  OneFrameImageStreamCompleter(Future<ImageInfo> image, { InformationCollector informationCollector })
       : assert(image != null) {
     image.then<void>(setImage, onError: (dynamic error, StackTrace stack) {
       reportError(
@@ -639,11 +640,11 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   /// produced by the stream will be delivered to registered [ImageChunkListener]s
   /// (see [addListener]).
   MultiFrameImageStreamCompleter({
-    required Future<ui.Codec> codec,
-    required double scale,
-    String? debugLabel,
-    Stream<ImageChunkEvent>? chunkEvents,
-    InformationCollector? informationCollector,
+    @required Future<ui.Codec> codec,
+    @required double scale,
+    String debugLabel,
+    Stream<ImageChunkEvent> chunkEvents,
+    InformationCollector informationCollector,
   }) : assert(codec != null),
        _informationCollector = informationCollector,
        _scale = scale {
@@ -672,17 +673,17 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     }
   }
 
-  ui.Codec? _codec;
+  ui.Codec _codec;
   final double _scale;
-  final InformationCollector? _informationCollector;
-  ui.FrameInfo? _nextFrame;
+  final InformationCollector _informationCollector;
+  ui.FrameInfo _nextFrame;
   // When the current was first shown.
-  late Duration _shownTimestamp;
+  Duration _shownTimestamp;
   // The requested duration for the current frame;
-  Duration? _frameDuration;
+  Duration _frameDuration;
   // How many frames have been emitted so far.
   int _framesEmitted = 0;
-  Timer? _timer;
+  Timer _timer;
 
   // Used to guard against registering multiple _handleAppFrame callbacks for the same frame.
   bool _frameCallbackScheduled = false;
@@ -701,17 +702,17 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     if (!hasListeners)
       return;
     if (_isFirstFrame() || _hasFrameDurationPassed(timestamp)) {
-      _emitFrame(ImageInfo(image: _nextFrame!.image, scale: _scale, debugLabel: debugLabel));
+      _emitFrame(ImageInfo(image: _nextFrame.image, scale: _scale, debugLabel: debugLabel));
       _shownTimestamp = timestamp;
-      _frameDuration = _nextFrame!.duration;
+      _frameDuration = _nextFrame.duration;
       _nextFrame = null;
-      final int completedCycles = _framesEmitted ~/ _codec!.frameCount;
-      if (_codec!.repetitionCount == -1 || completedCycles <= _codec!.repetitionCount) {
+      final int completedCycles = _framesEmitted ~/ _codec.frameCount;
+      if (_codec.repetitionCount == -1 || completedCycles <= _codec.repetitionCount) {
         _decodeNextFrameAndSchedule();
       }
       return;
     }
-    final Duration delay = _frameDuration! - (timestamp - _shownTimestamp);
+    final Duration delay = _frameDuration - (timestamp - _shownTimestamp);
     _timer = Timer(delay * timeDilation, () {
       _scheduleAppFrame();
     });
@@ -722,12 +723,13 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   }
 
   bool _hasFrameDurationPassed(Duration timestamp) {
-    return timestamp - _shownTimestamp >= _frameDuration!;
+    assert(_shownTimestamp != null);
+    return timestamp - _shownTimestamp >= _frameDuration;
   }
 
   Future<void> _decodeNextFrameAndSchedule() async {
     try {
-      _nextFrame = await _codec!.getNextFrame();
+      _nextFrame = await _codec.getNextFrame();
     } catch (exception, stack) {
       reportError(
         context: ErrorDescription('resolving an image frame'),
@@ -738,10 +740,10 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       );
       return;
     }
-    if (_codec!.frameCount == 1) {
+    if (_codec.frameCount == 1) {
       // This is not an animated image, just return it and don't schedule more
       // frames.
-      _emitFrame(ImageInfo(image: _nextFrame!.image, scale: _scale, debugLabel: debugLabel));
+      _emitFrame(ImageInfo(image: _nextFrame.image, scale: _scale, debugLabel: debugLabel));
       return;
     }
     _scheduleAppFrame();
@@ -752,7 +754,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       return;
     }
     _frameCallbackScheduled = true;
-    SchedulerBinding.instance!.scheduleFrameCallback(_handleAppFrame);
+    SchedulerBinding.instance.scheduleFrameCallback(_handleAppFrame);
   }
 
   void _emitFrame(ImageInfo imageInfo) {
