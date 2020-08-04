@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/basic_message_channel.h"
-
 #include <memory>
 #include <string>
 
+#include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/basic_message_channel.h"
 #include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/binary_messenger.h"
 #include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/standard_message_codec.h"
 #include "gtest/gtest.h"
@@ -56,7 +55,7 @@ TEST(BasicMessageChannelTest, Registration) {
         callback_called = true;
         // Ensure that the wrapper recieved a correctly decoded message and a
         // reply.
-        EXPECT_EQ(message.StringValue(), message_value);
+        EXPECT_EQ(std::get<std::string>(message), message_value);
         EXPECT_NE(reply, nullptr);
       });
   EXPECT_EQ(messenger.last_message_handler_channel(), channel_name);

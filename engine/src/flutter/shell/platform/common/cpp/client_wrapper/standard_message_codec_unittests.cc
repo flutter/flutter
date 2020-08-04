@@ -2,12 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/standard_message_codec.h"
-
 #include <map>
 #include <vector>
 
-#include "flutter/shell/platform/common/cpp/client_wrapper/testing/encodable_value_utils.h"
+#include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/standard_message_codec.h"
 #include "gtest/gtest.h"
 
 namespace flutter {
@@ -22,7 +20,7 @@ static void CheckEncodeDecode(const EncodableValue& value,
   EXPECT_EQ(*encoded, expected_encoding);
 
   auto decoded = codec.DecodeMessage(*encoded);
-  EXPECT_TRUE(testing::EncodableValuesAreEqual(value, *decoded));
+  EXPECT_EQ(value, *decoded);
 }
 
 // Validates round-trip encoding and decoding of |value|, and checks that the
@@ -34,7 +32,7 @@ static void CheckEncodeDecodeWithEncodePrefix(
     const EncodableValue& value,
     const std::vector<uint8_t>& expected_encoding_prefix,
     size_t expected_encoding_length) {
-  EXPECT_TRUE(value.IsMap());
+  EXPECT_TRUE(std::holds_alternative<EncodableMap>(value));
   const StandardMessageCodec& codec = StandardMessageCodec::GetInstance();
   auto encoded = codec.EncodeMessage(value);
   ASSERT_TRUE(encoded);
@@ -46,7 +44,7 @@ static void CheckEncodeDecodeWithEncodePrefix(
       expected_encoding_prefix.begin(), expected_encoding_prefix.end()));
 
   auto decoded = codec.DecodeMessage(*encoded);
-  EXPECT_TRUE(testing::EncodableValuesAreEqual(value, *decoded));
+  EXPECT_EQ(value, *decoded);
 }
 
 TEST(StandardMessageCodec, CanEncodeAndDecodeNull) {

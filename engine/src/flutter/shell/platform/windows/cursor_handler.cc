@@ -16,33 +16,32 @@ static constexpr char kKindKey[] = "kind";
 
 namespace flutter {
 
-CursorHandler::CursorHandler(flutter::BinaryMessenger* messenger,
+CursorHandler::CursorHandler(BinaryMessenger* messenger,
                              WindowBindingHandler* delegate)
-    : channel_(std::make_unique<flutter::MethodChannel<EncodableValue>>(
+    : channel_(std::make_unique<MethodChannel<EncodableValue>>(
           messenger,
           kChannelName,
-          &flutter::StandardMethodCodec::GetInstance())),
+          &StandardMethodCodec::GetInstance())),
       delegate_(delegate) {
   channel_->SetMethodCallHandler(
-      [this](const flutter::MethodCall<EncodableValue>& call,
-             std::unique_ptr<flutter::MethodResult<EncodableValue>> result) {
+      [this](const MethodCall<EncodableValue>& call,
+             std::unique_ptr<MethodResult<EncodableValue>> result) {
         HandleMethodCall(call, std::move(result));
       });
 }
 
 void CursorHandler::HandleMethodCall(
-    const flutter::MethodCall<EncodableValue>& method_call,
-    std::unique_ptr<flutter::MethodResult<EncodableValue>> result) {
+    const MethodCall<EncodableValue>& method_call,
+    std::unique_ptr<MethodResult<EncodableValue>> result) {
   const std::string& method = method_call.method_name();
   if (method.compare(kActivateSystemCursorMethod) == 0) {
-    const flutter::EncodableMap& arguments =
-        method_call.arguments()->MapValue();
-    auto kind_iter = arguments.find(EncodableValue(kKindKey));
+    const auto& arguments = std::get<EncodableMap>(*method_call.arguments());
+    auto kind_iter = arguments.find(EncodableValue(std::string(kKindKey)));
     if (kind_iter == arguments.end()) {
       result->Error("Argument error",
                     "Missing argument while trying to activate system cursor");
     }
-    const std::string& kind = kind_iter->second.StringValue();
+    const auto& kind = std::get<std::string>(kind_iter->second);
     delegate_->UpdateFlutterCursor(kind);
     result->Success();
   } else {

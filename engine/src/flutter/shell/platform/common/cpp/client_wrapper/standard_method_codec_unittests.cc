@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/standard_method_codec.h"
-
 #include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/method_result_functions.h"
-#include "flutter/shell/platform/common/cpp/client_wrapper/testing/encodable_value_utils.h"
+#include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/standard_method_codec.h"
 #include "gtest/gtest.h"
 
 namespace flutter {
@@ -24,7 +22,11 @@ bool MethodCallsAreEqual(const MethodCall<EncodableValue>& a,
       (!b.arguments() || b.arguments()->IsNull())) {
     return true;
   }
-  return testing::EncodableValuesAreEqual(*a.arguments(), *b.arguments());
+  // If only one is nullptr, fail early rather than throw below.
+  if (!a.arguments() || !b.arguments()) {
+    return false;
+  }
+  return *a.arguments() == *b.arguments();
 }
 
 }  // namespace
@@ -86,7 +88,7 @@ TEST(StandardMethodCodec, HandlesSuccessEnvelopesWithResult) {
   MethodResultFunctions<EncodableValue> result_handler(
       [&decoded_successfully](const EncodableValue* result) {
         decoded_successfully = true;
-        EXPECT_EQ(result->IntValue(), 42);
+        EXPECT_EQ(std::get<int32_t>(*result), 42);
       },
       nullptr, nullptr);
   codec.DecodeAndProcessResponseEnvelope(encoded->data(), encoded->size(),
@@ -145,9 +147,10 @@ TEST(StandardMethodCodec, HandlesErrorEnvelopesWithDetails) {
         decoded_successfully = true;
         EXPECT_EQ(code, "errorCode");
         EXPECT_EQ(message, "something failed");
-        EXPECT_TRUE(details->IsList());
-        EXPECT_EQ(details->ListValue()[0].StringValue(), "a");
-        EXPECT_EQ(details->ListValue()[1].IntValue(), 42);
+        const auto* details_list = std::get_if<EncodableList>(details);
+        ASSERT_NE(details_list, nullptr);
+        EXPECT_EQ(std::get<std::string>((*details_list)[0]), "a");
+        EXPECT_EQ(std::get<int32_t>((*details_list)[1]), 42);
       },
       nullptr);
   codec.DecodeAndProcessResponseEnvelope(encoded->data(), encoded->size(),

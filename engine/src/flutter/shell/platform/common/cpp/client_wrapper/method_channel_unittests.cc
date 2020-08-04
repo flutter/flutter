@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/method_channel.h"
-
 #include <memory>
 #include <string>
 
 #include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/binary_messenger.h"
+#include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/method_channel.h"
 #include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/method_result_functions.h"
 #include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/standard_method_codec.h"
 #include "gtest/gtest.h"
@@ -119,7 +118,7 @@ TEST(MethodChannelTest, InvokeWithResponse) {
   auto result_handler = std::make_unique<MethodResultFunctions<EncodableValue>>(
       [&received_reply, reply](const EncodableValue* success_value) {
         received_reply = true;
-        EXPECT_EQ(success_value->StringValue(), reply);
+        EXPECT_EQ(std::get<std::string>(*success_value), reply);
       },
       nullptr, nullptr);
 

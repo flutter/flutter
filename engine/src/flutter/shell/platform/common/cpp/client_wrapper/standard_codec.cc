@@ -8,16 +8,17 @@
 // together to simplify use of the client wrapper, since the common case is
 // that any client that needs one of these files needs all three.
 
-#include "include/flutter/standard_message_codec.h"
-#include "include/flutter/standard_method_codec.h"
-#include "standard_codec_serializer.h"
-
 #include <assert.h>
+
 #include <cstring>
 #include <iostream>
 #include <map>
 #include <string>
 #include <vector>
+
+#include "include/flutter/standard_message_codec.h"
+#include "include/flutter/standard_method_codec.h"
+#include "standard_codec_serializer.h"
 
 namespace flutter {
 
@@ -45,6 +46,7 @@ enum class EncodedType {
 
 // Returns the encoded type that should be written when serializing |value|.
 EncodedType EncodedTypeForValue(const EncodableValue& value) {
+#ifdef USE_LEGACY_ENCODABLE_VALUE
   switch (value.type()) {
     case EncodableValue::Type::kNull:
       return EncodedType::kNull;
@@ -71,6 +73,34 @@ EncodedType EncodedTypeForValue(const EncodableValue& value) {
     case EncodableValue::Type::kMap:
       return EncodedType::kMap;
   }
+#else
+  switch (value.index()) {
+    case 0:
+      return EncodedType::kNull;
+    case 1:
+      return std::get<bool>(value) ? EncodedType::kTrue : EncodedType::kFalse;
+    case 2:
+      return EncodedType::kInt32;
+    case 3:
+      return EncodedType::kInt64;
+    case 4:
+      return EncodedType::kFloat64;
+    case 5:
+      return EncodedType::kString;
+    case 6:
+      return EncodedType::kUInt8List;
+    case 7:
+      return EncodedType::kInt32List;
+    case 8:
+      return EncodedType::kInt64List;
+    case 9:
+      return EncodedType::kFloat64List;
+    case 10:
+      return EncodedType::kList;
+    case 11:
+      return EncodedType::kMap;
+  }
+#endif
   assert(false);
   return EncodedType::kNull;
 }
@@ -151,6 +181,7 @@ EncodableValue StandardCodecSerializer::ReadValue(
 void StandardCodecSerializer::WriteValue(const EncodableValue& value,
                                          ByteBufferStreamWriter* stream) const {
   stream->WriteByte(static_cast<uint8_t>(EncodedTypeForValue(value)));
+#ifdef USE_LEGACY_ENCODABLE_VALUE
   switch (value.type()) {
     case EncodableValue::Type::kNull:
     case EncodableValue::Type::kBool:
@@ -208,6 +239,70 @@ void StandardCodecSerializer::WriteValue(const EncodableValue& value,
       }
       break;
   }
+#else
+  // TODO: Consider replacing this this with a std::visitor.
+  switch (value.index()) {
+    case 0:
+    case 1:
+      // Null and bool are encoded directly in the type.
+      break;
+    case 2: {
+      int32_t int_value = std::get<int32_t>(value);
+      stream->WriteBytes(reinterpret_cast<const uint8_t*>(&int_value), 4);
+      break;
+    }
+    case 3: {
+      int64_t long_value = std::get<int64_t>(value);
+      stream->WriteBytes(reinterpret_cast<const uint8_t*>(&long_value), 8);
+      break;
+    }
+    case 4: {
+      stream->WriteAlignment(8);
+      double double_value = std::get<double>(value);
+      stream->WriteBytes(reinterpret_cast<const uint8_t*>(&double_value), 8);
+      break;
+    }
+    case 5: {
+      const auto& string_value = std::get<std::string>(value);
+      size_t size = string_value.size();
+      WriteSize(size, stream);
+      if (size > 0) {
+        stream->WriteBytes(
+            reinterpret_cast<const uint8_t*>(string_value.data()), size);
+      }
+      break;
+    }
+    case 6:
+      WriteVector(std::get<std::vector<uint8_t>>(value), stream);
+      break;
+    case 7:
+      WriteVector(std::get<std::vector<int32_t>>(value), stream);
+      break;
+    case 8:
+      WriteVector(std::get<std::vector<int64_t>>(value), stream);
+      break;
+    case 9:
+      WriteVector(std::get<std::vector<double>>(value), stream);
+      break;
+    case 10: {
+      const auto& list = std::get<EncodableList>(value);
+      WriteSize(list.size(), stream);
+      for (const auto& item : list) {
+        WriteValue(item, stream);
+      }
+      break;
+    }
+    case 11: {
+      const auto& map = std::get<EncodableMap>(value);
+      WriteSize(map.size(), stream);
+      for (const auto& pair : map) {
+        WriteValue(pair.first, stream);
+        WriteValue(pair.second, stream);
+      }
+      break;
+    }
+  }
+#endif
 }
 
 size_t StandardCodecSerializer::ReadSize(ByteBufferStreamReader* stream) const {
@@ -315,6 +410,7 @@ StandardMethodCodec::DecodeMethodCallInternal(const uint8_t* message,
                                               size_t message_size) const {
   StandardCodecSerializer serializer;
   ByteBufferStreamReader stream(message, message_size);
+#ifdef USE_LEGACY_ENCODABLE_VALUE
   EncodableValue method_name = serializer.ReadValue(&stream);
   if (!method_name.IsString()) {
     std::cerr << "Invalid method call; method name is not a string."
@@ -325,6 +421,19 @@ StandardMethodCodec::DecodeMethodCallInternal(const uint8_t* message,
       std::make_unique<EncodableValue>(serializer.ReadValue(&stream));
   return std::make_unique<MethodCall<EncodableValue>>(method_name.StringValue(),
                                                       std::move(arguments));
+#else
+  EncodableValue method_name_value = serializer.ReadValue(&stream);
+  const auto* method_name = std::get_if<std::string>(&method_name_value);
+  if (!method_name) {
+    std::cerr << "Invalid method call; method name is not a string."
+              << std::endl;
+    return nullptr;
+  }
+  auto arguments =
+      std::make_unique<EncodableValue>(serializer.ReadValue(&stream));
+  return std::make_unique<MethodCall<EncodableValue>>(*method_name,
+                                                      std::move(arguments));
+#endif
 }
 
 std::unique_ptr<std::vector<uint8_t>>
@@ -397,9 +506,15 @@ bool StandardMethodCodec::DecodeAndProcessResponseEnvelopeInternal(
       EncodableValue code = serializer.ReadValue(&stream);
       EncodableValue message = serializer.ReadValue(&stream);
       EncodableValue details = serializer.ReadValue(&stream);
+#ifdef USE_LEGACY_ENCODABLE_VALUE
       result->Error(code.StringValue(),
                     message.IsNull() ? "" : message.StringValue(),
                     details.IsNull() ? nullptr : &details);
+#else
+      result->Error(std::get<std::string>(code),
+                    message.IsNull() ? "" : std::get<std::string>(message),
+                    details.IsNull() ? nullptr : &details);
+#endif
       return true;
     }
     default:

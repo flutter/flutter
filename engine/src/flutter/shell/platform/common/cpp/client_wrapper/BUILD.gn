@@ -48,8 +48,6 @@ executable("client_wrapper_unittests") {
     "plugin_registrar_unittests.cc",
     "standard_message_codec_unittests.cc",
     "standard_method_codec_unittests.cc",
-    "testing/encodable_value_utils.cc",
-    "testing/encodable_value_utils.h",
   ]
 
   deps = [
