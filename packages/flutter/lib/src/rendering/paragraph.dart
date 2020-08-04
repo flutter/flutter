@@ -79,13 +79,6 @@ class RenderParagraph extends RenderBox
     StrutStyle strutStyle,
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
     ui.TextHeightBehavior textHeightBehavior,
-    @Deprecated(
-      'This parameter is a temporary flag to migrate the internal tests and '
-      'should not be used in other contexts. For more details, please check '
-      'https://github.com/flutter/flutter/issues/59316. '
-      'This feature was deprecated after v1.19.0.'
-    )
-    bool applyTextScaleFactorToWidgetSpan = false,
     List<RenderBox> children,
   }) : assert(text != null),
        assert(text.debugAssertIsValid()),
@@ -98,7 +91,6 @@ class RenderParagraph extends RenderBox
        assert(textWidthBasis != null),
        _softWrap = softWrap,
        _overflow = overflow,
-       _applyTextScaleFactorToWidgetSpan = applyTextScaleFactorToWidgetSpan,
        _textPainter = TextPainter(
          text: text,
          textAlign: textAlign,
@@ -297,8 +289,6 @@ class RenderParagraph extends RenderBox
     _overflowShader = null;
     markNeedsLayout();
   }
-
-  final bool _applyTextScaleFactorToWidgetSpan;
 
   @override
   double computeMinIntrinsicWidth(double height) {
@@ -540,8 +530,7 @@ class RenderParagraph extends RenderBox
     // The content will be enlarged by textScaleFactor during painting phase.
     // We reduce constraint by textScaleFactor so that the content will fit
     // into the box once it is enlarged.
-    if (_applyTextScaleFactorToWidgetSpan)
-      boxConstraints = boxConstraints / textScaleFactor;
+    boxConstraints = boxConstraints / textScaleFactor;
     while (child != null) {
       // Only constrain the width to the maximum width of the paragraph.
       // Leave height unconstrained, which will overflow if expanded past.

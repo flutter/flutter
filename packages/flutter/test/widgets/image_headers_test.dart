@@ -9,15 +9,11 @@ import 'dart:io';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 
 import '../painting/image_data.dart';
 
 void main() {
   final MockHttpClient client = MockHttpClient();
-  final MockHttpClientRequest request = MockHttpClientRequest();
-  final MockHttpClientResponse response = MockHttpClientResponse();
-  final MockHttpHeaders headers = MockHttpHeaders();
 
   testWidgets('Headers', (WidgetTester tester) async {
     HttpOverrides.runZoned<Future<void>>(() async {
@@ -26,30 +22,61 @@ void main() {
         headers: const <String, String>{'flutter': 'flutter'},
       ));
 
-      verify(headers.add('flutter', 'flutter')).called(1);
+      expect(MockHttpHeaders.headers['flutter'], <String>['flutter']);
 
     }, createHttpClient: (SecurityContext _) {
-      when(client.getUrl(any)).thenAnswer((_) => Future<HttpClientRequest>.value(request));
-      when(request.headers).thenReturn(headers);
-      when(request.close()).thenAnswer((_) => Future<HttpClientResponse>.value(response));
-      when(response.contentLength).thenReturn(kTransparentImage.length);
-      when(response.statusCode).thenReturn(HttpStatus.ok);
-      when(response.listen(any)).thenAnswer((Invocation invocation) {
-        final void Function(List<int>) onData = invocation.positionalArguments[0] as void Function(List<int>);
-        final void Function() onDone = invocation.namedArguments[#onDone] as void Function();
-        final void Function(Object, [ StackTrace ]) onError = invocation.namedArguments[#onError] as void Function(Object, [ StackTrace ]);
-        final bool cancelOnError = invocation.namedArguments[#cancelOnError] as bool;
-        return Stream<List<int>>.fromIterable(<List<int>>[kTransparentImage]).listen(onData, onDone: onDone, onError: onError, cancelOnError: cancelOnError);
-      });
       return client;
     });
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/57187
 }
 
-class MockHttpClient extends Mock implements HttpClient {}
+class MockHttpClient extends Fake implements HttpClient {
+  @override
+  Future<HttpClientRequest> getUrl(Uri url) async {
+    return MockHttpClientRequest();
+  }
 
-class MockHttpClientRequest extends Mock implements HttpClientRequest {}
+  @override
+  bool autoUncompress = false;
+}
 
-class MockHttpClientResponse extends Mock implements HttpClientResponse {}
+class MockHttpClientRequest extends Fake implements HttpClientRequest {
+  @override
+  final MockHttpHeaders headers = MockHttpHeaders();
 
-class MockHttpHeaders extends Mock implements HttpHeaders {}
+  @override
+  Future<HttpClientResponse> close() async {
+    return MockHttpClientResponse();
+  }
+}
+
+class MockHttpClientResponse extends Fake implements HttpClientResponse {
+  @override
+  int get contentLength => kTransparentImage.length;
+
+  @override
+  int get statusCode => HttpStatus.ok;
+
+  @override
+  HttpClientResponseCompressionState get compressionState => HttpClientResponseCompressionState.decompressed;
+
+  @override
+  StreamSubscription<List<int>> listen(void Function(List<int> event) onData, {Function onError, void Function() onDone, bool cancelOnError}) {
+    return Stream<List<int>>.fromIterable(<List<int>>[kTransparentImage]).listen(
+      onData,
+      onDone: onDone,
+      onError: onError,
+      cancelOnError: cancelOnError,
+    );
+  }
+}
+
+class MockHttpHeaders extends Fake implements HttpHeaders {
+  static final Map<String, List<String>> headers = <String, List<String>>{};
+
+  @override
+  void add(String key, Object value, { bool preserveHeaderCase = false }) {
+    headers[key] ??= <String>[];
+    headers[key].add(value.toString());
+  }
+}

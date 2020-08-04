@@ -12,7 +12,16 @@ import '../framework/framework.dart';
 import '../framework/utils.dart';
 
 class NewGalleryPerfTest extends PerfTest {
-  NewGalleryPerfTest(this.galleryDir) : super(galleryDir.path, 'test_driver/transitions_perf.dart', 'transitions');
+  NewGalleryPerfTest(
+    this.galleryDir, {
+    String timelineFileName = 'transitions',
+    String dartDefine = '',
+  }) : super(
+    galleryDir.path,
+    'test_driver/transitions_perf.dart',
+    timelineFileName,
+    dartDefine: dartDefine,
+  );
 
   @override
   Future<TaskResult> run() async {

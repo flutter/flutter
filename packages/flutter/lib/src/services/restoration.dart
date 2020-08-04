@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:typed_data';
 
@@ -132,25 +130,25 @@ class RestorationManager extends ChangeNotifier {
   ///
   ///  * [RootRestorationScope], which makes the root bucket available in the
   ///    [Widget] tree.
-  Future<RestorationBucket> get rootBucket {
+  Future<RestorationBucket?> get rootBucket {
     if (!SystemChannels.restoration.checkMethodCallHandler(_methodHandler)) {
       SystemChannels.restoration.setMethodCallHandler(_methodHandler);
     }
     if (_rootBucketIsValid) {
-      return SynchronousFuture<RestorationBucket>(_rootBucket);
+      return SynchronousFuture<RestorationBucket?>(_rootBucket);
     }
     if (_pendingRootBucket == null) {
       _pendingRootBucket = Completer<RestorationBucket>();
       _getRootBucketFromEngine();
     }
-    return _pendingRootBucket.future;
+    return _pendingRootBucket!.future;
   }
-  RestorationBucket _rootBucket; // May be null to indicate that restoration is turned off.
-  Completer<RestorationBucket> _pendingRootBucket;
+  RestorationBucket? _rootBucket; // May be null to indicate that restoration is turned off.
+  Completer<RestorationBucket>? _pendingRootBucket;
   bool _rootBucketIsValid = false;
 
   Future<void> _getRootBucketFromEngine() async {
-    final Map<dynamic, dynamic> config = await SystemChannels.restoration.invokeMethod<Map<dynamic, dynamic>>('get');
+    final Map<dynamic, dynamic>? config = await SystemChannels.restoration.invokeMethod<Map<dynamic, dynamic>>('get');
     if (_pendingRootBucket == null) {
       // The restoration data was obtained via other means (e.g. by calling
       // [handleRestorationDataUpdate] while the request to the engine was
@@ -161,7 +159,7 @@ class RestorationManager extends ChangeNotifier {
     _parseAndHandleRestorationUpdateFromEngine(config);
   }
 
-  void _parseAndHandleRestorationUpdateFromEngine(Map<dynamic, dynamic> update) {
+  void _parseAndHandleRestorationUpdateFromEngine(Map<dynamic, dynamic>? update) {
     handleRestorationUpdateFromEngine(
       enabled: update != null && update['enabled'] as bool,
       data: update == null ? null : update['data'] as Uint8List,
@@ -185,16 +183,16 @@ class RestorationManager extends ChangeNotifier {
   /// accessed, [rootBucket] will complete synchronously the next time it is
   /// called.
   @protected
-  void handleRestorationUpdateFromEngine({@required bool enabled, @required Uint8List data}) {
+  void handleRestorationUpdateFromEngine({required bool enabled, required Uint8List? data}) {
     assert(enabled != null);
 
-    final RestorationBucket oldRoot = _rootBucket;
+    final RestorationBucket? oldRoot = _rootBucket;
 
     _rootBucket = enabled
         ? RestorationBucket.root(manager: this, rawData: _decodeRestorationData(data))
         : null;
     _rootBucketIsValid = true;
-    assert(_pendingRootBucket == null || !_pendingRootBucket.isCompleted);
+    assert(_pendingRootBucket == null || !_pendingRootBucket!.isCompleted);
     _pendingRootBucket?.complete(_rootBucket);
     _pendingRootBucket = null;
 
@@ -228,7 +226,7 @@ class RestorationManager extends ChangeNotifier {
     );
   }
 
-  Future<dynamic> _methodHandler(MethodCall call) {
+  Future<dynamic> _methodHandler(MethodCall call) async {
     switch (call.method) {
       case 'push':
         _parseAndHandleRestorationUpdateFromEngine(call.arguments as Map<dynamic, dynamic>);
@@ -236,10 +234,9 @@ class RestorationManager extends ChangeNotifier {
       default:
         throw UnimplementedError("${call.method} was invoked but isn't implemented by $runtimeType");
     }
-    return null;
   }
 
-  Map<dynamic, dynamic> _decodeRestorationData(Uint8List data) {
+  Map<dynamic, dynamic>? _decodeRestorationData(Uint8List? data) {
     if (data == null) {
       return null;
     }
@@ -248,7 +245,7 @@ class RestorationManager extends ChangeNotifier {
   }
 
   Uint8List _encodeRestorationData(Map<dynamic, dynamic> data) {
-    final ByteData encoded = const StandardMessageCodec().encodeMessage(data);
+    final ByteData encoded = const StandardMessageCodec().encodeMessage(data)!;
     return encoded.buffer.asUint8List(encoded.offsetInBytes, encoded.lengthInBytes);
   }
 
@@ -275,7 +272,7 @@ class RestorationManager extends ChangeNotifier {
     _bucketsNeedingSerialization.add(bucket);
     if (!_postFrameScheduled) {
       _postFrameScheduled = true;
-      SchedulerBinding.instance.addPostFrameCallback((Duration _) => _doSerialization());
+      SchedulerBinding.instance!.addPostFrameCallback((Duration _) => _doSerialization());
     }
   }
 
@@ -308,7 +305,7 @@ class RestorationManager extends ChangeNotifier {
       bucket.finalize();
     }
     _bucketsNeedingSerialization.clear();
-    sendToEngine(_encodeRestorationData(_rootBucket._rawData));
+    sendToEngine(_encodeRestorationData(_rootBucket!._rawData));
 
     assert(() {
       _debugDoingUpdate = false;
@@ -410,8 +407,8 @@ class RestorationBucket extends ChangeNotifier {
   ///
   /// The `restorationId` must not be null.
   RestorationBucket.empty({
-    @required String restorationId,
-    @required Object debugOwner,
+    required String restorationId,
+    required Object? debugOwner,
   }) : assert(restorationId != null),
        _restorationId = restorationId,
        _rawData = <String, dynamic>{} {
@@ -445,8 +442,8 @@ class RestorationBucket extends ChangeNotifier {
   ///
   /// The `manager` argument must not be null.
   RestorationBucket.root({
-    @required RestorationManager manager,
-    @required Map<dynamic, dynamic> rawData,
+    required RestorationManager manager,
+    required Map<dynamic, dynamic>? rawData,
   }) : assert(manager != null),
        _manager = manager,
        _rawData = rawData ?? <dynamic, dynamic>{},
@@ -468,9 +465,9 @@ class RestorationBucket extends ChangeNotifier {
   ///
   /// The `restorationId` and `parent` argument must not be null.
   RestorationBucket.child({
-    @required String restorationId,
-    @required RestorationBucket parent,
-    @required Object debugOwner,
+    required String restorationId,
+    required RestorationBucket parent,
+    required Object? debugOwner,
   }) : assert(restorationId != null),
        assert(parent != null),
        assert(parent._rawChildren[restorationId] != null),
@@ -494,14 +491,14 @@ class RestorationBucket extends ChangeNotifier {
   ///
   /// The value is used in error messages. Accessing the value is only valid
   /// in debug mode, otherwise it will return null.
-  Object get debugOwner {
+  Object? get debugOwner {
     assert(_debugAssertNotDisposed());
     return _debugOwner;
   }
-  Object _debugOwner;
+  Object? _debugOwner;
 
-  RestorationManager _manager;
-  RestorationBucket _parent;
+  RestorationManager? _manager;
+  RestorationBucket? _parent;
 
   /// The restoration ID under which the bucket is currently stored in the
   /// parent of this bucket (or wants to be stored if it is currently
@@ -545,7 +542,7 @@ class RestorationBucket extends ChangeNotifier {
   void decommission() {
     assert(_debugAssertNotDisposed());
     if (_parent != null) {
-      _parent._dropChild(this);
+      _parent!._dropChild(this);
       _parent = null;
     }
     _performDecommission();
@@ -678,7 +675,7 @@ class RestorationBucket extends ChangeNotifier {
   ///
   /// When the returned bucket is no longer needed, it must be [dispose]d to
   /// delete the information stored in it from the app's restoration data.
-  RestorationBucket claimChild(String restorationId, {@required Object debugOwner}) {
+  RestorationBucket claimChild(String restorationId, {required Object? debugOwner}) {
     assert(_debugAssertNotDisposed());
     assert(restorationId != null);
     // There are three cases to consider:
@@ -780,7 +777,7 @@ class RestorationBucket extends ChangeNotifier {
     bucket._visitChildren(_recursivelyUpdateManager);
   }
 
-  void _updateManager(RestorationManager newManager) {
+  void _updateManager(RestorationManager? newManager) {
     if (_manager == newManager) {
       return;
     }
@@ -811,7 +808,7 @@ class RestorationBucket extends ChangeNotifier {
         error.addAll(<DiagnosticsNode>[
           ErrorDescription(' * "$id" was claimed by:'),
           ...buckets.map((RestorationBucket bucket) => ErrorDescription('   * ${bucket.debugOwner}')),
-          ErrorDescription('   * ${_claimedChildren[id].debugOwner} (current owner)'),
+          ErrorDescription('   * ${_claimedChildren[id]!.debugOwner} (current owner)'),
         ]);
       }
       throw FlutterError.fromParts(error);
@@ -824,7 +821,7 @@ class RestorationBucket extends ChangeNotifier {
     assert(child._parent == this);
     if (_claimedChildren.remove(child.restorationId) == child) {
       _rawChildren.remove(child.restorationId);
-      final List<RestorationBucket> pendingChildren = _childrenToAdd[child.restorationId];
+      final List<RestorationBucket>? pendingChildren = _childrenToAdd[child.restorationId];
       if (pendingChildren != null) {
         final RestorationBucket toAdd = pendingChildren.removeLast();
         _finalizeAddChildData(toAdd);
@@ -893,9 +890,9 @@ class RestorationBucket extends ChangeNotifier {
     if (newRestorationId == restorationId) {
       return;
     }
-    _parent._removeChildData(this);
+    _parent!._removeChildData(this);
     _restorationId = newRestorationId;
-    _parent._addChildData(this);
+    _parent!._addChildData(this);
   }
 
   /// Deletes the bucket and all the data stored in it from the bucket
@@ -946,7 +943,7 @@ class RestorationBucket extends ChangeNotifier {
 ///
 /// Should only be called from within asserts. Always returns false outside
 /// of debug builds.
-bool debugIsSerializableForRestoration(Object object) {
+bool debugIsSerializableForRestoration(Object? object) {
   bool result = false;
 
   assert(() {

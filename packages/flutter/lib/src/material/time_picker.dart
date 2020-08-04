@@ -11,8 +11,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import 'button_bar.dart';
-import 'button_theme.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
 import 'constants.dart';
@@ -1827,19 +1825,24 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
               : MaterialLocalizations.of(context).dialModeButtonLabel,
         ),
         Expanded(
-          // TODO(rami-a): Move away from ButtonBar to avoid https://github.com/flutter/flutter/issues/53378.
-          child: ButtonBar(
-            layoutBehavior: ButtonBarLayoutBehavior.constrained,
-            children: <Widget>[
-              TextButton(
-                onPressed: _handleCancel,
-                child: Text(widget.cancelText ?? localizations.cancelButtonLabel),
-              ),
-              TextButton(
-                onPressed: _handleOk,
-                child: Text(widget.confirmText ?? localizations.okButtonLabel),
-              ),
-            ],
+          child: Container(
+            alignment: AlignmentDirectional.centerEnd,
+            constraints: const BoxConstraints(minHeight: 52.0),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: OverflowBar(
+              spacing: 8,
+              overflowAlignment: OverflowBarAlignment.end,
+              children: <Widget>[
+                TextButton(
+                  onPressed: _handleCancel,
+                  child: Text(widget.cancelText ?? localizations.cancelButtonLabel),
+                ),
+                TextButton(
+                  onPressed: _handleOk,
+                  child: Text(widget.confirmText ?? localizations.okButtonLabel),
+                ),
+              ],
+            ),
           ),
         ),
       ],
