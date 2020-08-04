@@ -1703,7 +1703,6 @@ String? textAlignToCssValue(ui.TextAlign? align, ui.TextDirection textDirection)
         case ui.TextDirection.rtl:
           return 'left';
       }
-      break;
     default: // including ui.TextAlign.start
       switch (textDirection) {
         case ui.TextDirection.ltr:
@@ -1711,7 +1710,6 @@ String? textAlignToCssValue(ui.TextAlign? align, ui.TextDirection textDirection)
         case ui.TextDirection.rtl:
           return 'right';
       }
-      break;
   }
 }
 

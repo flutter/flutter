@@ -499,13 +499,10 @@ class _GlContext {
     switch (mode) {
       case ui.VertexMode.triangles:
         return kTriangles;
-        break;
       case ui.VertexMode.triangleFan:
         return kTriangleFan;
-        break;
       case ui.VertexMode.triangleStrip:
         return kTriangleStrip;
-        break;
     }
   }
 
