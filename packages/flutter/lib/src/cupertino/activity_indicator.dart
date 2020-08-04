@@ -22,8 +22,8 @@ const Color _kActiveTickColor = CupertinoDynamicColor.withBrightness(
 enum CupertinoActivityIndicatorIOSVersionStyle {
   /// The style that is used in iOS13 and earlier (12 points).
   @Deprecated(
-    'Use iOS14 instead or simply leave this field to default. '
-    'This feature was deprecated after v1.21.0.'
+    'Use iOS14 instead. '
+    'This feature was deprecated after v1.21.0-1.0.pre.'
   )
   iOS13,
 
@@ -44,6 +44,10 @@ class CupertinoActivityIndicator extends StatefulWidget {
     Key key,
     this.animating = true,
     this.radius = _kDefaultIndicatorRadius,
+    @Deprecated(
+      'Leave this field default to use latest style. '
+      'This feature was deprecated after v1.21.0-1.0.pre.'
+    )
     this.iOSVersionStyle = CupertinoActivityIndicatorIOSVersionStyle.iOS14,
   })  : assert(animating != null),
         assert(radius != null),
@@ -61,6 +65,10 @@ class CupertinoActivityIndicator extends StatefulWidget {
     Key key,
     this.radius = _kDefaultIndicatorRadius,
     this.progress = 1.0,
+    @Deprecated(
+      'Leave this field default to use latest style. '
+      'This feature was deprecated after v1.21.0-1.0.pre.'
+    )
     this.iOSVersionStyle = CupertinoActivityIndicatorIOSVersionStyle.iOS14,
   })  : assert(radius != null),
         assert(radius > 0.0),
