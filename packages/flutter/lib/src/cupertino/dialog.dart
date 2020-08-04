@@ -5,7 +5,7 @@
 // @dart = 2.8
 
 import 'dart:math' as math;
-import 'dart:ui' show ImageFilter;
+import 'dart:ui' show ImageFilter, Brightness;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -51,12 +51,26 @@ const TextStyle _kCupertinoDialogActionStyle = TextStyle(
 const double _kCupertinoDialogWidth = 270.0;
 const double _kAccessibilityCupertinoDialogWidth = 310.0;
 
-const double _kBlurAmount = 20.0;
+const double _kBlurAmount = 29.5;
 const double _kEdgePadding = 20.0;
 const double _kMinButtonHeight = 45.0;
 const double _kMinButtonFontSize = 10.0;
 const double _kDialogCornerRadius = 14.0;
 const double _kDividerThickness = 1.0;
+
+// _kCupertinoDialogBlurOverlayDecoration is applied to the blurred backdrop to
+// lighten the blurred image. Brightening is done to counteract the dark modal
+// barrier that appears behind the dialog. The overlay blend mode does the
+// brightening. The white color doesn't paint any white, it's just the basis
+// for the overlay blend mode.
+//
+// The decoration is needed for `CupertinoPopupSurface` to not appear excessively
+// transparent when placed above a PlatformView. See
+// https://github.com/flutter/flutter/issues/50183.
+const BoxDecoration _kCupertinoDialogBlurOverlayDecoration = BoxDecoration(
+  color: CupertinoColors.white,
+  backgroundBlendMode: BlendMode.overlay,
+);
 
 // A translucent color that is painted on top of the blurred backdrop as the
 // dialog's background color
@@ -354,13 +368,23 @@ class CupertinoPopupSurface extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    BoxDecoration decoration;
+
+    switch (MediaQuery.platformBrightnessOf(context)) {
+      case Brightness.light:
+      case Brightness.dark:
+    }
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(_kDialogCornerRadius),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
         child: Container(
-          color: isSurfacePainted ? CupertinoDynamicColor.resolve(_kDialogColor, context) : null,
-          child: child,
+          decoration: _kCupertinoDialogBlurOverlayDecoration,
+          child: Container(
+            color: isSurfacePainted ? CupertinoDynamicColor.resolve(_kDialogColor, context) : null,
+            child: child,
+          ),
         ),
       ),
     );

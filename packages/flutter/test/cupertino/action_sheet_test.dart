@@ -31,6 +31,32 @@ void main() {
     expect(find.text('Action Sheet'), findsNothing);
   });
 
+  testWidgets(
+    'Action sheets contain BoxDecoration with overlay blend mode',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        createAppWithButtonThatLaunchesActionSheet(
+          const CupertinoActionSheet(
+            title: Text('Action Sheet'),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Go'));
+      await tester.pump();
+
+      expect(
+        find.widgetWithText(DecoratedBox, 'Action Sheet')
+          .evaluate()
+          .map((Element element) => element.widget)
+          .whereType<DecoratedBox>()
+          .map((DecoratedBox box) => box.decoration)
+          .whereType<BoxDecoration>()
+          .any((BoxDecoration decoration) => decoration.backgroundBlendMode == BlendMode.overlay),
+        isTrue,
+      );
+  });
+
   testWidgets('Verify that a tap on title section (not buttons) does not dismiss an action sheet', (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(

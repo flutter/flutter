@@ -149,7 +149,9 @@ void main() {
 
     expect(
       find.byType(CupertinoAlertDialog),
-      paints..rect(color: const Color(0xBF1E1E1E)),
+      paints
+        ..rect(color: const Color(0xFFFFFFFF))
+        ..rect(color: const Color(0xBF1E1E1E)),
     );
   });
 
@@ -247,6 +249,30 @@ void main() {
 
     expect(widget.style.color.withAlpha(255), CupertinoColors.systemRed.color);
     expect(widget.style.fontWeight, equals(FontWeight.w600));
+  });
+
+  testWidgets(
+    'Dialog contains BoxDecoration with overlay blend mode',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: MediaQuery(
+            data: MediaQueryData(viewInsets: EdgeInsets.zero),
+            child: CupertinoAlertDialog(content: Text('Ok')),
+          ),
+        ),
+      );
+
+      expect(
+        find.widgetWithText(DecoratedBox, 'Ok')
+          .evaluate()
+          .map((Element element) => element.widget)
+          .whereType<DecoratedBox>()
+          .map((DecoratedBox box) => box.decoration)
+          .whereType<BoxDecoration>()
+          .any((BoxDecoration decoration) => decoration.backgroundBlendMode == BlendMode.overlay),
+        isTrue,
+      );
   });
 
   testWidgets('Dialog disabled action style', (WidgetTester tester) async {
