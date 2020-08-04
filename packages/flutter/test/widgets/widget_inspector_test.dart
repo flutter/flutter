@@ -2749,7 +2749,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(node.toJsonMap(emptyDelegate), node.toJsonMap(defaultDelegate));
     });
 
-
     testWidgets('debugIsLocalCreationLocation test', (WidgetTester tester) async {
 
       final GlobalKey key = GlobalKey();
@@ -2774,11 +2773,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
       final Element paddingElement = paddingFinder.evaluate().first;
 
-
       expect(debugIsLocalCreationLocation(paddingElement), isFalse);
       expect(debugIsLocalCreationLocation(paddingElement.widget), isFalse);
-
-
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
 
   }
