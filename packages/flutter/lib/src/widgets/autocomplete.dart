@@ -11,19 +11,24 @@ import 'editable_text.dart';
 import 'framework.dart';
 
 // TODO(justinmc): Autocomplete should make it easy to do asynchronous searches.
-// TODO(justinmc): Rename if we keep this.
-typedef List<T> SearchFunction<T>(String query);
+/// A type for autocomplete search functions.
+///
+/// [AutocompleteController] uses a search function to search through
+/// [AutocompleteController.options] and return a subset as results.
+typedef AutocompleteSearchFunction<T> = List<T> Function(String query);
 
-// TODO(justinmc): Rename if we keep this?
-typedef void OnSelectedAutocomplete<T>(T result);
+/// A type for indicating the selection of an autocomplete result.
+typedef OnSelectedAutocomplete<T> = void Function(T result);
 
-typedef Widget AutocompleteResultsBuilder<T>(
+/// A builder for the selectable results given the current autocomplete query.
+typedef AutocompleteResultsBuilder<T> = Widget Function(
   BuildContext context,
   List<T> results,
   OnSelectedAutocomplete<T> onSelected,
 );
 
-typedef Widget FieldBuilder(
+/// A builder for the query field in autocomplete.
+typedef AutocompleteFieldBuilder = Widget Function(
   BuildContext context,
   TextEditingController textEditingController,
 );
@@ -42,10 +47,39 @@ class AutocompleteController<T> {
        textEditingController = textEditingController ?? TextEditingController() {
     this.textEditingController.addListener(_onQueryChanged);
   }
+
+  /// All possible options that can be searched.
+  ///
+  /// If left null, a custom [search] method must be provided that handles the
+  /// options to be searched on its own.
   final List<T> options;
+
+  /// The [TextEditingController] that represents the query.
   final TextEditingController textEditingController;
-  final SearchFunction<T> search;
+
+  /// A search function that takes some [options] and returns a subset as
+  /// results.
+  ///
+  /// If [options] is null, then this field must not be null. This may be the
+  /// case when querying an external service for search results, for example.
+  ///
+  /// Defaults to a simple string-matching search of [options].
+  final AutocompleteSearchFunction<T> search;
+
+  /// The current results being returned by [search].
+  ///
+  /// This is a [ValueNotifier] so that UI may be updated when results change.
   final ValueNotifier<List<T>> results = ValueNotifier<List<T>>(<T>[]);
+
+  /// Clean up memory created by the AutocompleteController.
+  ///
+  /// Call this when the AutocompleteController is no longer needed, such as in
+  // the dispose method of the widget it was created in.
+  void dispose() {
+    textEditingController.removeListener(_onQueryChanged);
+    // TODO(justinmc): Shouldn't be disposed if it wasn't created here.
+    textEditingController.dispose();
+  }
 
   // Called when textEditingController reports a change in its value.
   void _onQueryChanged() {
@@ -62,11 +96,6 @@ class AutocompleteController<T> {
         .where((T option) => option.toString().contains(query))
         .toList();
   }
-
-  void dispose() {
-    textEditingController.removeListener(_onQueryChanged);
-    textEditingController.dispose();
-  }
 }
 
 class AutocompleteCore<T> extends StatefulWidget {
@@ -79,7 +108,7 @@ class AutocompleteCore<T> extends StatefulWidget {
        assert(buildResults != null);
 
   final AutocompleteController<T> autocompleteController;
-  final FieldBuilder buildField;
+  final AutocompleteFieldBuilder buildField;
   final AutocompleteResultsBuilder<T> buildResults;
 
   @override
