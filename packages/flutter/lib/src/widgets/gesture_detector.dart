@@ -703,13 +703,13 @@ class GestureDetector extends StatelessWidget {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
 
     if (onTapDown != null ||
-      onTapUp != null ||
-      onTap != null ||
-      onTapCancel != null ||
-      onSecondaryTap != null ||
-      onSecondaryTapDown != null ||
-      onSecondaryTapUp != null ||
-      onSecondaryTapCancel != null
+        onTapUp != null ||
+        onTap != null ||
+        onTapCancel != null ||
+        onSecondaryTap != null ||
+        onSecondaryTapDown != null ||
+        onSecondaryTapUp != null ||
+        onSecondaryTapCancel != null
     ) {
       gestures[TapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
         () => TapGestureRecognizer(debugOwner: this),
