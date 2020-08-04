@@ -11,15 +11,14 @@
 
 namespace flutter {
 
-LayerTree::LayerTree(const SkISize& frame_size,
-                     float frame_physical_depth,
-                     float frame_device_pixel_ratio)
+LayerTree::LayerTree(const SkISize& frame_size, float device_pixel_ratio)
     : frame_size_(frame_size),
-      frame_physical_depth_(frame_physical_depth),
-      frame_device_pixel_ratio_(frame_device_pixel_ratio),
+      device_pixel_ratio_(device_pixel_ratio),
       rasterizer_tracing_threshold_(0),
       checkerboard_raster_cache_images_(false),
-      checkerboard_offscreen_layers_(false) {}
+      checkerboard_offscreen_layers_(false) {
+  FML_CHECK(device_pixel_ratio_ != 0.0f);
+}
 
 void LayerTree::RecordBuildTime(fml::TimePoint build_start,
                                 fml::TimePoint target_time) {
@@ -54,32 +53,21 @@ bool LayerTree::Preroll(CompositorContext::ScopedFrame& frame,
       frame.context().ui_time(),
       frame.context().texture_registry(),
       checkerboard_offscreen_layers_,
-      frame_physical_depth_,
-      frame_device_pixel_ratio_};
+      device_pixel_ratio_};
 
   root_layer_->Preroll(&context, frame.root_surface_transformation());
   return context.surface_needs_readback;
 }
 
 #if defined(LEGACY_FUCHSIA_EMBEDDER)
-void LayerTree::UpdateScene(SceneUpdateContext& context,
-                            scenic::ContainerNode& container) {
+void LayerTree::UpdateScene(SceneUpdateContext& context) {
   TRACE_EVENT0("flutter", "LayerTree::UpdateScene");
 
-  // Ensure the context is aware of the view metrics.
-  context.set_dimensions(frame_size_, frame_physical_depth_,
-                         frame_device_pixel_ratio_);
+  // Reset for a new Scene.
+  context.Reset();
 
-  const auto& metrics = context.metrics();
-  FML_DCHECK(metrics->scale_x > 0.0f);
-  FML_DCHECK(metrics->scale_y > 0.0f);
-  FML_DCHECK(metrics->scale_z > 0.0f);
-
-  SceneUpdateContext::Transform transform(context,                  // context
-                                          1.0f / metrics->scale_x,  // X
-                                          1.0f / metrics->scale_y,  // Y
-                                          1.0f / metrics->scale_z   // Z
-  );
+  const float inv_dpr = 1.0f / device_pixel_ratio_;
+  SceneUpdateContext::Transform transform(context, inv_dpr, inv_dpr, 1.0f);
 
   SceneUpdateContext::Frame frame(
       context,
@@ -92,7 +80,7 @@ void LayerTree::UpdateScene(SceneUpdateContext& context,
   if (root_layer_->needs_painting()) {
     frame.AddPaintLayer(root_layer_.get());
   }
-  container.AddChild(transform.entity_node());
+  context.root_node().AddChild(transform.entity_node());
 }
 #endif
 
@@ -125,8 +113,7 @@ void LayerTree::Paint(CompositorContext::ScopedFrame& frame,
       frame.context().texture_registry(),
       ignore_raster_cache ? nullptr : &frame.context().raster_cache(),
       checkerboard_offscreen_layers_,
-      frame_physical_depth_,
-      frame_device_pixel_ratio_};
+      device_pixel_ratio_};
 
   if (root_layer_->needs_painting()) {
     root_layer_->Paint(context);
@@ -151,19 +138,18 @@ sk_sp<SkPicture> LayerTree::Flatten(const SkRect& bounds) {
   root_surface_transformation.reset();
 
   PrerollContext preroll_context{
-      nullptr,                   // raster_cache (don't consult the cache)
-      nullptr,                   // gr_context  (used for the raster cache)
-      nullptr,                   // external view embedder
-      unused_stack,              // mutator stack
-      nullptr,                   // SkColorSpace* dst_color_space
-      kGiantRect,                // SkRect cull_rect
-      false,                     // layer reads from surface
-      unused_stopwatch,          // frame time (dont care)
-      unused_stopwatch,          // engine time (dont care)
-      unused_texture_registry,   // texture registry (not supported)
-      false,                     // checkerboard_offscreen_layers
-      frame_physical_depth_,     // maximum depth allowed for rendering
-      frame_device_pixel_ratio_  // ratio between logical and physical
+      nullptr,                  // raster_cache (don't consult the cache)
+      nullptr,                  // gr_context  (used for the raster cache)
+      nullptr,                  // external view embedder
+      unused_stack,             // mutator stack
+      nullptr,                  // SkColorSpace* dst_color_space
+      kGiantRect,               // SkRect cull_rect
+      false,                    // layer reads from surface
+      unused_stopwatch,         // frame time (dont care)
+      unused_stopwatch,         // engine time (dont care)
+      unused_texture_registry,  // texture registry (not supported)
+      false,                    // checkerboard_offscreen_layers
+      device_pixel_ratio_       // ratio between logical and physical
   };
 
   SkISize canvas_size = canvas->getBaseLayerSize();
@@ -175,13 +161,12 @@ sk_sp<SkPicture> LayerTree::Flatten(const SkRect& bounds) {
       canvas,  // canvas
       nullptr,
       nullptr,
-      unused_stopwatch,          // frame time (dont care)
-      unused_stopwatch,          // engine time (dont care)
-      unused_texture_registry,   // texture registry (not supported)
-      nullptr,                   // raster cache
-      false,                     // checkerboard offscreen layers
-      frame_physical_depth_,     // maximum depth allowed for rendering
-      frame_device_pixel_ratio_  // ratio between logical and physical
+      unused_stopwatch,         // frame time (dont care)
+      unused_stopwatch,         // engine time (dont care)
+      unused_texture_registry,  // texture registry (not supported)
+      nullptr,                  // raster cache
+      false,                    // checkerboard offscreen layers
+      device_pixel_ratio_       // ratio between logical and physical
   };
 
   // Even if we don't have a root layer, we still need to create an empty

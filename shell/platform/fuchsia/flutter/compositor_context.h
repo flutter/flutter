@@ -5,15 +5,15 @@
 #ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_COMPOSITOR_CONTEXT_H_
 #define FLUTTER_SHELL_PLATFORM_FUCHSIA_COMPOSITOR_CONTEXT_H_
 
-#include <fuchsia/ui/scenic/cpp/fidl.h>
-#include <fuchsia/ui/views/cpp/fidl.h>
-#include <lib/fit/function.h>
-#include <lib/ui/scenic/cpp/view_ref_pair.h>
+#include <memory>
 
 #include "flutter/flow/compositor_context.h"
 #include "flutter/flow/embedded_views.h"
+#include "flutter/flow/scene_update_context.h"
 #include "flutter/fml/macros.h"
+
 #include "session_connection.h"
+#include "vulkan_surface_producer.h"
 
 namespace flutter_runner {
 
@@ -21,31 +21,16 @@ namespace flutter_runner {
 // Fuchsia.
 class CompositorContext final : public flutter::CompositorContext {
  public:
-  CompositorContext(std::string debug_label,
-                    fuchsia::ui::views::ViewToken view_token,
-                    scenic::ViewRefPair view_ref_pair,
-                    fidl::InterfaceHandle<fuchsia::ui::scenic::Session> session,
-                    fml::closure session_error_callback,
-                    zx_handle_t vsync_event_handle);
+  CompositorContext(SessionConnection& session_connection,
+                    VulkanSurfaceProducer& surface_producer,
+                    flutter::SceneUpdateContext& scene_update_context);
 
   ~CompositorContext() override;
 
-  void OnSessionMetricsDidChange(const fuchsia::ui::gfx::Metrics& metrics);
-  void OnSessionSizeChangeHint(float width_change_factor,
-                               float height_change_factor);
-
-  void OnWireframeEnabled(bool enabled);
-  void OnCreateView(int64_t view_id, bool hit_testable, bool focusable);
-  void OnDestroyView(int64_t view_id);
-
-  flutter::ExternalViewEmbedder* GetViewEmbedder() {
-    return &session_connection_.scene_update_context();
-  }
-
  private:
-  const std::string debug_label_;
-  scenic::ViewRefPair view_ref_pair_;
-  SessionConnection session_connection_;
+  SessionConnection& session_connection_;
+  VulkanSurfaceProducer& surface_producer_;
+  flutter::SceneUpdateContext& scene_update_context_;
 
   // |flutter::CompositorContext|
   std::unique_ptr<ScopedFrame> AcquireFrame(
