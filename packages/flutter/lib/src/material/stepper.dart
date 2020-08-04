@@ -144,6 +144,7 @@ class Stepper extends StatefulWidget {
     this.onStepContinue,
     this.onStepCancel,
     this.controlsBuilder,
+    this.horizontalElevation = 2.0,
   }) : assert(steps != null),
        assert(type != null),
        assert(currentStep != null),
@@ -236,6 +237,8 @@ class Stepper extends StatefulWidget {
   /// ```
   /// {@end-tool}
   final ControlsWidgetBuilder controlsBuilder;
+  /// This determines the elevation of the stepper widget when build horizontally.
+  final double horizontalElevation;
 
   @override
   _StepperState createState() => _StepperState();
@@ -645,7 +648,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     return Column(
       children: <Widget>[
         Material(
-          elevation: 2.0,
+          elevation: widget.horizontalElevation,
           child: Container(
             margin: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Row(
