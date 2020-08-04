@@ -817,26 +817,32 @@ abstract class WidgetController {
   /// Shorthand for `Scrollable.ensureVisible(element(finder))`
   Future<void> ensureVisible(Finder finder) => Scrollable.ensureVisible(element(finder));
 
-  /// Repeatedly scrolls the `scrollable` by `delta` in the
+  /// Repeatedly scrolls a [Scrollable] by `delta` in the
   /// [Scrollable.axisDirection] until `finder` is visible.
   ///
   /// Between each scroll, wait for `duration` time for settling.
+  ///
+  /// If `scrollable` is `null`, this will find a [Scrollable].
   ///
   /// Throws a [StateError] if `finder` is not found for maximum `maxScrolls`
   /// times.
   ///
   /// This is different from [ensureVisible] in that this allows looking for
   /// `finder` that is not built yet, but the caller must specify the scrollable
-  /// that will build child specified by `finder`.
+  /// that will build child specified by `finder` when there are multiple
+  ///[Scrollable]s.
+  ///
+  /// See also [dragUntilVisible].
   Future<void> scrollUntilVisible(
     Finder finder,
-    Finder scrollable,
     double delta, {
+      Finder scrollable,
       int maxScrolls = 50,
       Duration duration = const Duration(milliseconds: 50),
     }
   ) {
     assert(maxScrolls > 0);
+    scrollable ??= find.byType(Scrollable);
     return TestAsyncUtils.guard<void>(() async {
       Offset moveStep;
       switch(widget<Scrollable>(scrollable).axisDirection) {
@@ -853,10 +859,33 @@ abstract class WidgetController {
           moveStep = Offset(-delta, 0);
           break;
       }
-      while(maxScrolls > 0 && finder.evaluate().isEmpty) {
-        await drag(scrollable, moveStep);
+      await dragUntilVisible(
+        finder,
+        scrollable,
+        moveStep,
+        maxIteration: maxScrolls,
+        duration: duration);
+    });
+  }
+
+  /// Repeatedly drags the `view` by `moveStep` until `finder` is visible.
+  ///
+  /// Between each operation, wait for `duration` time for settling.
+  ///
+  /// Throws a [StateError] if `finder` is not found for maximum `maxIteration`
+  /// times.
+  Future<void> dragUntilVisible(
+    Finder finder,
+    Finder view,
+    Offset moveStep, {
+      int maxIteration = 50,
+      Duration duration = const Duration(milliseconds: 50),
+  }) {
+    return TestAsyncUtils.guard<void>(() async {
+      while(maxIteration > 0 && finder.evaluate().isEmpty) {
+        await drag(view, moveStep);
         await pump(duration);
-        maxScrolls -= 1;
+        maxIteration-= 1;
       }
       await Scrollable.ensureVisible(element(finder));
     });
