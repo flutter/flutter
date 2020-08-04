@@ -619,6 +619,87 @@ void main() {
     expect(buildOrder, <int>[3, 4, 1, 2, 0]);
   });
 
+  testWidgets('debugVerifyInsertPosition', (WidgetTester tester) async {
+    final GlobalKey overlayKey = GlobalKey();
+    OverlayEntry base;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          key: overlayKey,
+          initialEntries: <OverlayEntry>[
+            base = OverlayEntry(
+              builder: (BuildContext context) {
+                return Container();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final OverlayState overlay = overlayKey.currentState as OverlayState;
+
+    try {
+      overlay.insert(
+        OverlayEntry(builder: (BuildContext context) {
+          return Container();
+        }),
+        above: OverlayEntry(
+          builder: (BuildContext context) {
+            return Container();
+          },
+        ),
+        below: OverlayEntry(
+          builder: (BuildContext context) {
+            return Container();
+          },
+        ),
+      );
+    } catch (e) {
+      expect(e, isAssertionError);
+      expect(e.message, 'Only one of `above` and `below` may be specified.');
+    }
+
+    expect(() => overlay.insert(
+      OverlayEntry(builder: (BuildContext context) {
+        return Container();
+      }),
+      above: base,
+    ), isNot(throwsAssertionError));
+
+    try {
+      overlay.insert(
+        OverlayEntry(builder: (BuildContext context) {
+          return Container();
+        }),
+        above: OverlayEntry(
+          builder: (BuildContext context) {
+            return Container();
+          },
+        ),
+      );
+    } catch (e) {
+      expect(e, isAssertionError);
+      expect(e.message, 'The provided entry used for `above` must be present in the Overlay.');
+    }
+
+    try {
+      overlay.rearrange(<OverlayEntry>[base], above: OverlayEntry(
+        builder: (BuildContext context) {
+          return Container();
+        },
+      ));
+
+    } catch (e) {
+      expect(e, isAssertionError);
+      expect(e.message, 'The provided entry used for `above` must be present in the Overlay and in the `newEntriesList`.');
+    }
+
+    await tester.pump();
+  });
+
   testWidgets('OverlayState.of() called without Overlay being exist', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
