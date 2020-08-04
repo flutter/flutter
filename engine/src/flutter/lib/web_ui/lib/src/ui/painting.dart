@@ -7,7 +7,8 @@ part of ui;
 
 // ignore: unused_element, Used in Shader assert.
 bool _offsetIsValid(Offset offset) {
-  assert(offset != null, 'Offset argument was null.'); // ignore: unnecessary_null_comparison
+  assert(offset != null,
+      'Offset argument was null.'); // ignore: unnecessary_null_comparison
   assert(!offset.dx.isNaN && !offset.dy.isNaN,
       'Offset argument contained a NaN value.');
   return true;
@@ -15,7 +16,8 @@ bool _offsetIsValid(Offset offset) {
 
 // ignore: unused_element, Used in Shader assert.
 bool _matrix4IsValid(Float32List matrix4) {
-  assert(matrix4 != null, 'Matrix4 argument was null.'); // ignore: unnecessary_null_comparison
+  assert(matrix4 != null,
+      'Matrix4 argument was null.'); // ignore: unnecessary_null_comparison
   assert(matrix4.length == 16, 'Matrix4 must have 16 entries.');
   return true;
 }
@@ -246,8 +248,7 @@ class Color {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is Color
-        && other.value == value;
+    return other is Color && other.value == value;
   }
 
   @override
@@ -1141,7 +1142,8 @@ abstract class Gradient extends Shader {
     _validateColorStops(colors, colorStops);
     // If focal is null or focal radius is null, this should be treated as a regular radial gradient
     // If focal == center and the focal radius is 0.0, it's still a regular radial gradient
-    final Float32List? matrix32 = matrix4 != null ? engine.toMatrix32(matrix4) : null;
+    final Float32List? matrix32 =
+        matrix4 != null ? engine.toMatrix32(matrix4) : null;
     if (focal == null || (focal == center && focalRadius == 0.0)) {
       return engine.GradientRadial(
           center, radius, colors, colorStops, tileMode, matrix32);
@@ -1184,12 +1186,12 @@ abstract class Gradient extends Shader {
     List<Color> colors, [
     List<double>? colorStops,
     TileMode tileMode = TileMode.clamp,
-    double startAngle/*?*/ = 0.0,
-    double endAngle/*!*/ = math.pi * 2,
+    double startAngle /*?*/ = 0.0,
+    double endAngle /*!*/ = math.pi * 2,
     Float64List? matrix4,
   ]) =>
-      engine.GradientSweep(
-          center, colors, colorStops, tileMode, startAngle, endAngle, matrix4 != null ? engine.toMatrix32(matrix4) : null);
+      engine.GradientSweep(center, colors, colorStops, tileMode, startAngle,
+          endAngle, matrix4 != null ? engine.toMatrix32(matrix4) : null);
 }
 
 /// Opaque handle to raw decoded image data (pixels).
@@ -1383,9 +1385,9 @@ class MaskFilter {
 
   @override
   bool operator ==(Object other) {
-    return other is MaskFilter
-        && other._style == _style
-        && other._sigma == _sigma;
+    return other is MaskFilter &&
+        other._style == _style &&
+        other._sigma == _sigma;
   }
 
   @override
@@ -1594,7 +1596,8 @@ String? _instantiateImageCodec(
     } else {
       assert(height != null);
       assert(format != null);
-      engine.skiaInstantiateImageCodec(list, callback, width, height, format!.index, rowBytes);
+      engine.skiaInstantiateImageCodec(
+          list, callback, width, height, format!.index, rowBytes);
     }
     return null;
   }
@@ -1613,8 +1616,14 @@ String? _instantiateImageCodecFromUrl(
     Uri uri,
     engine.WebOnlyImageCodecChunkCallback? chunkCallback,
     engine.Callback<Codec> callback) {
-  callback(engine.HtmlCodec(uri.toString(), chunkCallback: chunkCallback));
-  return null;
+  if (engine.experimentalUseSkia) {
+    engine.skiaInstantiateWebImageCodec(
+        uri.toString(), callback, chunkCallback);
+    return null;
+  } else {
+    callback(engine.HtmlCodec(uri.toString(), chunkCallback: chunkCallback));
+    return null;
+  }
 }
 
 /// Loads a single image frame from a byte array into an [Image] object.
@@ -1650,16 +1659,16 @@ void decodeImageFromPixels(
   int? targetHeight,
   bool allowUpscaling = true,
 }) {
-  final Future<Codec> codecFuture = _futurize(
-      (engine.Callback<Codec> callback) {
-        return _instantiateImageCodec(
-          pixels,
-          callback,
-          width: width,
-          height: height,
-          format: format,
-          rowBytes: rowBytes,
-        );
+  final Future<Codec> codecFuture =
+      _futurize((engine.Callback<Codec> callback) {
+    return _instantiateImageCodec(
+      pixels,
+      callback,
+      width: width,
+      height: height,
+      format: format,
+      rowBytes: rowBytes,
+    );
   });
   codecFuture
       .then((Codec codec) => codec.getNextFrame())
@@ -1684,8 +1693,10 @@ class Shadow {
     this.color = const Color(_kColorDefault),
     this.offset = Offset.zero,
     this.blurRadius = 0.0,
-  })  : assert(color != null, 'Text shadow color was null.'), // ignore: unnecessary_null_comparison
-        assert(offset != null, 'Text shadow offset was null.'), // ignore: unnecessary_null_comparison
+  })  : assert(color != null,
+            'Text shadow color was null.'), // ignore: unnecessary_null_comparison
+        assert(offset != null,
+            'Text shadow offset was null.'), // ignore: unnecessary_null_comparison
         assert(blurRadius >= 0.0,
             'Text shadow blur radius should be non-negative.');
 
@@ -1816,10 +1827,10 @@ class Shadow {
     if (identical(this, other)) {
       return true;
     }
-    return other is Shadow
-        && other.color == color
-        && other.offset == offset
-        && other.blurRadius == blurRadius;
+    return other is Shadow &&
+        other.color == color &&
+        other.offset == offset &&
+        other.blurRadius == blurRadius;
   }
 
   @override
@@ -1829,7 +1840,6 @@ class Shadow {
   String toString() => 'TextShadow($color, $offset, $blurRadius)';
 }
 
-
 /// A shader (as used by [Paint.shader]) that tiles an image.
 class ImageShader extends Shader {
   /// Creates an image-tiling shader. The first argument specifies the image to
@@ -1838,18 +1848,13 @@ class ImageShader extends Shader {
   /// matrix to apply to the effect. All the arguments are required and must not
   /// be null.
   factory ImageShader(
-    Image image,
-    TileMode tmx,
-    TileMode tmy,
-    Float64List matrix4) {
+      Image image, TileMode tmx, TileMode tmy, Float64List matrix4) {
     if (engine.experimentalUseSkia) {
       return engine.EngineImageShader(image, tmx, tmy, matrix4);
     }
-    throw UnsupportedError(
-        'ImageShader not implemented for web platform.');
+    throw UnsupportedError('ImageShader not implemented for web platform.');
   }
 }
-
 
 /// A handle to a read-only byte buffer that is managed by the engine.
 class ImmutableBuffer {
@@ -1878,7 +1883,11 @@ class ImmutableBuffer {
 /// Use this class to determine the height, width, and byte size of image data
 /// before decoding it.
 class ImageDescriptor {
-  ImageDescriptor._() : _width = null, _height = null, _rowBytes = null, _format = null;
+  ImageDescriptor._()
+      : _width = null,
+        _height = null,
+        _rowBytes = null,
+        _format = null;
 
   /// Creates an image descriptor from encoded data in a supported format.
   static Future<ImageDescriptor> encoded(ImmutableBuffer buffer) async {
@@ -1902,7 +1911,10 @@ class ImageDescriptor {
     required int height,
     int? rowBytes,
     required PixelFormat pixelFormat,
-  }) : _width = width, _height = height, _rowBytes = rowBytes, _format = pixelFormat {
+  })   : _width = width,
+        _height = height,
+        _rowBytes = rowBytes,
+        _format = pixelFormat {
     _data = buffer._list;
   }
 
@@ -1913,7 +1925,8 @@ class ImageDescriptor {
   final PixelFormat? _format;
 
   Never _throw(String parameter) {
-     throw UnsupportedError('ImageDescriptor.$parameter is not supported on web.');
+    throw UnsupportedError(
+        'ImageDescriptor.$parameter is not supported on web.');
   }
 
   /// The width, in pixels, of the image.
@@ -1923,7 +1936,8 @@ class ImageDescriptor {
   int get height => _height ?? _throw('height');
 
   /// The number of bytes per pixel in the image.
-  int get bytesPerPixel => throw UnsupportedError('ImageDescriptor.bytesPerPixel is not supported on web.');
+  int get bytesPerPixel => throw UnsupportedError(
+      'ImageDescriptor.bytesPerPixel is not supported on web.');
 
   /// Release the resources used by this object. The object is no longer usable
   /// after this method is called.
@@ -1943,16 +1957,15 @@ class ImageDescriptor {
         allowUpscaling: false,
       );
     }
-    return _futurize(
-      (engine.Callback<Codec> callback) {
-        return _instantiateImageCodec(
-          _data!,
-          callback,
-          width: _width,
-          height: _height,
-          format: _format,
-          rowBytes: _rowBytes,
-        );
-  });
+    return _futurize((engine.Callback<Codec> callback) {
+      return _instantiateImageCodec(
+        _data!,
+        callback,
+        width: _width,
+        height: _height,
+        format: _format,
+        rowBytes: _rowBytes,
+      );
+    });
   }
 }

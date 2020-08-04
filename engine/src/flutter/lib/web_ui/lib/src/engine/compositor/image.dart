@@ -5,13 +5,34 @@
 // @dart = 2.10
 part of engine;
 
-/// Instantiates a [ui.Codec] backed by an `SkImage` from Skia.
+/// Instantiates a [ui.Codec] backed by an `SkAnimatedImage` from Skia.
 void skiaInstantiateImageCodec(Uint8List list, Callback<ui.Codec> callback,
     [int? width, int? height, int? format, int? rowBytes]) {
-  final SkAnimatedImage skAnimatedImage = canvasKit.MakeAnimatedImageFromEncoded(list);
+  final SkAnimatedImage skAnimatedImage =
+      canvasKit.MakeAnimatedImageFromEncoded(list);
   final CkAnimatedImage animatedImage = CkAnimatedImage(skAnimatedImage);
   final CkAnimatedImageCodec codec = CkAnimatedImageCodec(animatedImage);
   callback(codec);
+}
+
+/// Instantiates a [ui.Codec] backed by an `SkAnimatedImage` from Skia after requesting from URI.
+void skiaInstantiateWebImageCodec(String src, Callback<ui.Codec> callback,
+    WebOnlyImageCodecChunkCallback? chunkCallback) {
+  chunkCallback?.call(0, 100);
+  //TODO: Switch to using MakeImageFromCanvasImageSource when animated images are supported.
+  html.HttpRequest.request(
+    src,
+    responseType: "arraybuffer",
+  ).then((html.HttpRequest response) {
+    chunkCallback?.call(100, 100);
+    final Uint8List list =
+        new Uint8List.view((response.response as ByteBuffer));
+    final SkAnimatedImage skAnimatedImage =
+        canvasKit.MakeAnimatedImageFromEncoded(list);
+    final CkAnimatedImage animatedImage = CkAnimatedImage(skAnimatedImage);
+    final CkAnimatedImageCodec codec = CkAnimatedImageCodec(animatedImage);
+    callback(codec);
+  });
 }
 
 /// A wrapper for `SkAnimatedImage`.
