@@ -90,8 +90,7 @@ class Chrome {
         '--user-data-dir=${options.userDataDirectory}',
       if (options.url != null)
         options.url,
-      if (io.Platform.environment['CHROME_NO_SANDBOX'] == 'true')
-        '--no-sandbox',
+      '--no-sandbox',
       if (options.headless)
         '--headless',
       if (withDebugging)
