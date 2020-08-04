@@ -7,7 +7,9 @@ web_shard_template: &WEB_SHARD_TEMPLATE
   only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'packages/flutter_web_plugins/**', 'bin/**') || $CIRRUS_PR == ''"
   environment:
     # As of March 2020, the Web shards needed 16G of RAM and 4 CPUs to run all framework tests with goldens without flaking.
-    WEB_SHARD_COUNT: 8
+    # The tests are encountering a flake in Chrome. Increasing the number of shards to decrease race conditions.
+    # https://github.com/flutter/flutter/issues/62510
+    WEB_SHARD_COUNT: 12
     CPU: 4
     MEMORY: 16G
     CHROME_NO_SANDBOX: true
@@ -239,7 +241,19 @@ task:
     - name: web_tests-6-linux
       << : *WEB_SHARD_TEMPLATE
 
-    - name: web_tests-7_last-linux # last Web shard must end with _last
+    - name: web_tests-7-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests-8-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests-9-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests-10-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests-11_last-linux # last Web shard must end with _last
       << : *WEB_SHARD_TEMPLATE
 
     - name: build_tests-0-linux
