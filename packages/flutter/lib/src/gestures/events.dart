@@ -91,7 +91,7 @@ const int kPrimaryStylusButton = kSecondaryButton;
 /// It is equivalent to:
 ///
 ///  * [kMiddleMouseButton]: The tertiary mouseButton.
-///  * [kSecondaryStyleButton]: The secondary button on a stylus. This is considered
+///  * [kSecondaryStylusButton]: The secondary button on a stylus. This is considered
 ///    a tertiary button as the primary button of a stylus already corresponds to a
 ///    "secondary operation" (where stylus contact is the primary operation).
 ///
