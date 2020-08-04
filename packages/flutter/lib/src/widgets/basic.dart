@@ -3913,8 +3913,8 @@ class Flex extends MultiChildRenderObjectWidget {
   ///
   /// Defaults to the ambient [Directionality].
   ///
-  /// If `textDirection` is [TextDirection.rtl], then the direction in which
-  /// text flows starts from right to left. Otherwise, if `textDirection` is
+  /// If [textDirection] is [TextDirection.rtl], then the direction in which
+  /// text flows starts from right to left. Otherwise, if [textDirection] is
   /// [TextDirection.ltr], then the direction in which text flows starts from
   /// left to right.
   ///
@@ -4149,15 +4149,12 @@ class Flex extends MultiChildRenderObjectWidget {
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/widgets/row_fixed.png)
 ///
-/// Now suppose you want to render children in different direction, this can be
-/// done by setting [textDirection] property.
-/// [TextDirection.ltr] is the default rendering of children of row so the first
-/// child is the `start` of row i.e. left and and moving to right last child is
-/// the `end` of row i.e. right. But, if you want to render it in opposite
-/// direction i.e. right to left, then [textDirection] can be set to
-/// [TextDirection.rtl] and this will render children starting from right to
-/// left. So the first child will become `end` of row starting from right and
-/// moving to left the last child is the `start` of row.
+/// The [textDirection] property controls the direction that children are rendered in.
+/// [TextDirection.ltr] is the default [textDirection] of [Row] children, so the first
+/// child is rendered at the `start` of the [Row], to the left, with subsequent children
+/// following to the right. If you want to order children in the opposite
+/// direction (right to left), then [textDirection] can be set to
+/// [TextDirection.rtl]. This is shown in the example below
 ///
 /// ```dart
 /// Row(
