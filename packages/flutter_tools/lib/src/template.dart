@@ -129,10 +129,9 @@ class Template {
         return null;
       }
 
-      final bool ios = context['ios'] as bool;
-      if (relativeDestinationPath.contains('ios') && !ios) {
-        return null;
-      }
+      // TODO(cyanglaz): do not add iOS folder by default when 1.20.0 is released.
+      // Also need to update the flutter SDK min constraint in the pubspec.yaml to 1.20.0.
+      // https://github.com/flutter/flutter/issues/59787
 
       // Only build a web project if explicitly asked.
       final bool web = context['web'] as bool;
