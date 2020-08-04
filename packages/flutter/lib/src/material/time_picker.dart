@@ -164,9 +164,17 @@ class _TimePickerHeader extends StatelessWidget {
                     ),
                     const SizedBox(width: 12.0),
                   ],
-                  Expanded(child: _HourControl(fragmentContext: fragmentContext)),
-                  _StringFragment(timeOfDayFormat: timeOfDayFormat),
-                  Expanded(child: _MinuteControl(fragmentContext: fragmentContext)),
+                  Expanded(
+                    child: Row(
+                      // Hour/minutes should not change positions in RTL locales.
+                      textDirection: TextDirection.ltr,
+                      children: <Widget>[
+                        Expanded(child: _HourControl(fragmentContext: fragmentContext)),
+                        _StringFragment(timeOfDayFormat: timeOfDayFormat),
+                        Expanded(child: _MinuteControl(fragmentContext: fragmentContext)),
+                      ],
+                    ),
+                  ),
                   if (!use24HourDials && timeOfDayFormat != TimeOfDayFormat.a_space_h_colon_mm) ...<Widget>[
                     const SizedBox(width: 12.0),
                     _DayPeriodControl(
@@ -197,6 +205,8 @@ class _TimePickerHeader extends StatelessWidget {
               Container(
                 height: kMinInteractiveDimension * 2,
                 child: Row(
+                  // Hour/minutes should not change positions in RTL locales.
+                  textDirection: TextDirection.ltr,
                   children: <Widget>[
                     Expanded(child: _HourControl(fragmentContext: fragmentContext)),
                     _StringFragment(timeOfDayFormat: timeOfDayFormat),
