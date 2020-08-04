@@ -374,7 +374,7 @@ class ExpansionPanelList extends StatefulWidget {
   /// is null, then [ThemeData.dividerColor] is used.
   final Color dividerColor;
 
-  /// Defines elevation for the [ExpansionPanel].
+  /// Defines elevation for the [ExpansionPanel] while it's expanded.
   ///
   /// This uses [kElevationToShadow] to simulate shadows, it does not use
   /// [Material]'s arbitrary elevation feature.
