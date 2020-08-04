@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
 
 import 'dart:typed_data' show Uint8List;
 import 'dart:ui' as ui show instantiateImageCodec, Codec;
@@ -22,12 +23,14 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
     super.initInstances();
     _instance = this;
     _imageCache = createImageCache();
-    shaderWarmUp?.execute();
+    if (shaderWarmUp != null) {
+      shaderWarmUp.execute();
+    }
   }
 
   /// The current [PaintingBinding], if one has been created.
-  static PaintingBinding? get instance => _instance;
-  static PaintingBinding? _instance;
+  static PaintingBinding get instance => _instance;
+  static PaintingBinding _instance;
 
   /// [ShaderWarmUp] to be executed during [initInstances].
   ///
@@ -50,7 +53,7 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   /// See also:
   ///
   ///  * [ShaderWarmUp], the interface of how this warm up works.
-  static ShaderWarmUp? shaderWarmUp = const DefaultShaderWarmUp();
+  static ShaderWarmUp shaderWarmUp = const DefaultShaderWarmUp();
 
   /// The singleton that implements the Flutter framework's image cache.
   ///
@@ -59,8 +62,8 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   ///
   /// The image cache is created during startup by the [createImageCache]
   /// method.
-  ImageCache? get imageCache => _imageCache;
-  ImageCache? _imageCache;
+  ImageCache get imageCache => _imageCache;
+  ImageCache _imageCache;
 
   /// Creates the [ImageCache] singleton (accessible via [imageCache]).
   ///
@@ -87,8 +90,8 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   /// above its native resolution should prefer scaling the canvas the image is
   /// drawn into.
   Future<ui.Codec> instantiateImageCodec(Uint8List bytes, {
-    int? cacheWidth,
-    int? cacheHeight,
+    int cacheWidth,
+    int cacheHeight,
     bool allowUpscaling = false,
   }) {
     assert(cacheWidth == null || cacheWidth > 0);
@@ -105,8 +108,8 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   @override
   void evict(String asset) {
     super.evict(asset);
-    imageCache!.clear();
-    imageCache!.clearLiveImages();
+    imageCache.clear();
+    imageCache.clearLiveImages();
   }
 
   @override
@@ -167,4 +170,4 @@ class _SystemFontsNotifier extends Listenable {
 ///
 /// The image cache is created during startup by the [PaintingBinding]'s
 /// [PaintingBinding.createImageCache] method.
-ImageCache? get imageCache => PaintingBinding.instance!.imageCache;
+ImageCache get imageCache => PaintingBinding.instance.imageCache;

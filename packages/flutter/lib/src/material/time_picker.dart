@@ -162,9 +162,17 @@ class _TimePickerHeader extends StatelessWidget {
                     ),
                     const SizedBox(width: 12.0),
                   ],
-                  Expanded(child: _HourControl(fragmentContext: fragmentContext)),
-                  _StringFragment(timeOfDayFormat: timeOfDayFormat),
-                  Expanded(child: _MinuteControl(fragmentContext: fragmentContext)),
+                  Expanded(
+                    child: Row(
+                      // Hour/minutes should not change positions in RTL locales.
+                      textDirection: TextDirection.ltr,
+                      children: <Widget>[
+                        Expanded(child: _HourControl(fragmentContext: fragmentContext)),
+                        _StringFragment(timeOfDayFormat: timeOfDayFormat),
+                        Expanded(child: _MinuteControl(fragmentContext: fragmentContext)),
+                      ],
+                    ),
+                  ),
                   if (!use24HourDials && timeOfDayFormat != TimeOfDayFormat.a_space_h_colon_mm) ...<Widget>[
                     const SizedBox(width: 12.0),
                     _DayPeriodControl(
@@ -195,6 +203,8 @@ class _TimePickerHeader extends StatelessWidget {
               Container(
                 height: kMinInteractiveDimension * 2,
                 child: Row(
+                  // Hour/minutes should not change positions in RTL locales.
+                  textDirection: TextDirection.ltr,
                   children: <Widget>[
                     Expanded(child: _HourControl(fragmentContext: fragmentContext)),
                     _StringFragment(timeOfDayFormat: timeOfDayFormat),
@@ -1126,7 +1136,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   ];
 
   _TappableLabel _buildTappableLabel(TextTheme textTheme, Color color, int value, String label, VoidCallback onTap) {
-    final TextStyle style = textTheme.subtitle1.copyWith(color: color);
+    final TextStyle style = textTheme.bodyText1.copyWith(color: color);
     final double labelScaleFactor = math.min(MediaQuery.of(context).textScaleFactor, 2.0);
     return _TappableLabel(
       value: value,
@@ -1201,8 +1211,8 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     final TimePickerThemeData pickerTheme = TimePickerTheme.of(context);
     final Color backgroundColor = pickerTheme.dialBackgroundColor ?? themeData.colorScheme.onBackground.withOpacity(0.12);
     final Color accentColor = pickerTheme.dialHandColor ?? themeData.colorScheme.primary;
-    final Color primaryLabelColor = MaterialStateProperty.resolveAs(pickerTheme.dialTextColor, <MaterialState>{});
-    final Color secondaryLabelColor = MaterialStateProperty.resolveAs(pickerTheme.dialTextColor, <MaterialState>{MaterialState.selected});
+    final Color primaryLabelColor = MaterialStateProperty.resolveAs(pickerTheme.dialTextColor, <MaterialState>{}) ?? themeData.colorScheme.onSurface;
+    final Color secondaryLabelColor = MaterialStateProperty.resolveAs(pickerTheme.dialTextColor, <MaterialState>{MaterialState.selected}) ?? themeData.colorScheme.onPrimary;
     List<_TappableLabel> primaryLabels;
     List<_TappableLabel> secondaryLabels;
     int selectedDialValue;
@@ -1539,11 +1549,9 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> {
     if (inputDecorationTheme != null) {
       inputDecoration = const InputDecoration().applyDefaults(inputDecorationTheme);
     } else {
-      final Color unfocusedFillColor = timePickerTheme.hourMinuteColor ?? colorScheme.onSurface.withOpacity(0.12);
       inputDecoration = InputDecoration(
         contentPadding: EdgeInsets.zero,
         filled: true,
-        fillColor: focusNode.hasFocus ? Colors.transparent : unfocusedFillColor,
         enabledBorder: const OutlineInputBorder(
           borderSide: BorderSide(color: Colors.transparent),
         ),
@@ -1561,10 +1569,12 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> {
         errorStyle: const TextStyle(fontSize: 0.0, height: 0.0), // Prevent the error text from appearing.
       );
     }
+    final Color unfocusedFillColor = timePickerTheme.hourMinuteColor ?? colorScheme.onSurface.withOpacity(0.12);
     inputDecoration = inputDecoration.copyWith(
       // Remove the hint text when focused because the centered cursor appears
       // odd above the hint text.
       hintText: focusNode.hasFocus ? null : _formattedValue,
+      fillColor: focusNode.hasFocus ? Colors.transparent : inputDecorationTheme?.fillColor ?? unfocusedFillColor,
     );
 
     return SizedBox(
@@ -1574,10 +1584,13 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> {
         child: TextFormField(
           expands: true,
           maxLines: null,
+          inputFormatters: <TextInputFormatter>[
+            LengthLimitingTextInputFormatter(2),
+          ],
           focusNode: focusNode,
           textAlign: TextAlign.center,
           keyboardType: TextInputType.number,
-          style: widget.style.copyWith(color: colorScheme.onSurface),
+          style: widget.style.copyWith(color: timePickerTheme.hourMinuteTextColor ?? colorScheme.onSurface),
           controller: controller,
           decoration: inputDecoration,
           validator: widget.validator,
