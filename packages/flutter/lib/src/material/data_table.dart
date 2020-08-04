@@ -1033,7 +1033,7 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
         child: Icon(
           Icons.arrow_downward,
           size: _arrowIconSize,
-          color: (Theme.of(context).brightness == Brightness.light) ? Colors.black87 : Colors.white70,
+          color: Theme.of(context).iconTheme.color,
         ),
       ),
     );
