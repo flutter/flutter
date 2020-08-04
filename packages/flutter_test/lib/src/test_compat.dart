@@ -21,9 +21,6 @@ import 'package:test_api/src/backend/state.dart'; // ignore: implementation_impo
 // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart';
 
-// ignore: deprecated_member_use
-export 'package:test_api/fake.dart' show Fake;
-
 Declarer _localDeclarer;
 Declarer get _declarer {
   final Declarer declarer = Zone.current[#test.declarer] as Declarer;
