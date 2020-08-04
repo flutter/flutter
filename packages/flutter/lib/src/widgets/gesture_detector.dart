@@ -784,8 +784,21 @@ class GestureDetector extends StatelessWidget {
         onLongPressUp != null ||
         onLongPressStart != null ||
         onLongPressMoveUpdate != null ||
-        onLongPressEnd != null ||
-        onSecondaryLongPress != null ||
+        onLongPressEnd != null) {
+      gestures[LongPressGestureRecognizer] = GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
+        () => LongPressGestureRecognizer(debugOwner: this),
+        (LongPressGestureRecognizer instance) {
+          instance
+            ..onLongPress = onLongPress
+            ..onLongPressStart = onLongPressStart
+            ..onLongPressMoveUpdate = onLongPressMoveUpdate
+            ..onLongPressEnd =onLongPressEnd
+            ..onLongPressUp = onLongPressUp;
+        },
+      );
+    }
+
+    if (onSecondaryLongPress != null ||
         onSecondaryLongPressUp != null ||
         onSecondaryLongPressStart != null ||
         onSecondaryLongPressMoveUpdate != null ||
@@ -794,15 +807,10 @@ class GestureDetector extends StatelessWidget {
         () => LongPressGestureRecognizer(debugOwner: this),
         (LongPressGestureRecognizer instance) {
           instance
-            ..onLongPress = onLongPress
-            ..onLongPressStart = onLongPressStart
-            ..onLongPressMoveUpdate = onLongPressMoveUpdate
-            ..onLongPressEnd = onLongPressEnd
-            ..onLongPressUp = onLongPressUp
             ..onSecondaryLongPress = onSecondaryLongPress
             ..onSecondaryLongPressStart = onSecondaryLongPressStart
             ..onSecondaryLongPressMoveUpdate = onSecondaryLongPressMoveUpdate
-            ..onSecondaryLongPressEnd = onSecondaryLongPressEnd
+            ..onSecondaryLongPressEnd =onSecondaryLongPressEnd
             ..onSecondaryLongPressUp = onSecondaryLongPressUp;
         },
       );
@@ -900,7 +908,6 @@ class GestureDetector extends StatelessWidget {
       child: child,
     );
   }
-
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
