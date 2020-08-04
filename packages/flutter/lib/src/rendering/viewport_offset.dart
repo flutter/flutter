@@ -127,7 +127,9 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// The arguments are the minimum and maximum scroll extents respectively. The
   /// minimum will be equal to or less than the maximum. In the case of slivers,
   /// the minimum will be equal to or less than zero, the maximum will be equal
-  /// to or greater than zero.
+  /// to or greater than zero. Optionally, the old offset in pixels
+  /// may be passed in if the offset in pixels was different before the content
+  /// dimensions changed.
   ///
   /// The maximum scroll extent has the viewport dimension subtracted from it.
   /// For instance, if there is 100.0 pixels of scrollable content, and the
@@ -147,7 +149,7 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// even if the values have not changed. It may be called many times if the
   /// scroll offset is corrected (if this returns false). This is always called
   /// after [applyViewportDimension], if that method is called.
-  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent);
+  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent, {double oldPixels});
 
   /// Apply a layout-time correction to the scroll offset.
   ///
@@ -265,7 +267,7 @@ class _FixedViewportOffset extends ViewportOffset {
   bool applyViewportDimension(double viewportDimension) => true;
 
   @override
-  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) => true;
+  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent, {double oldPixels}) => true;
 
   @override
   void correctBy(double correction) {

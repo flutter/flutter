@@ -482,7 +482,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   }
 
   @override
-  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
+  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent, {double oldPixels}) {
     assert(minScrollExtent != null);
     assert(maxScrollExtent != null);
     if (!nearEqual(_minScrollExtent, minScrollExtent, Tolerance.defaultTolerance.distance) ||
@@ -491,7 +491,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       assert(minScrollExtent != null);
       assert(maxScrollExtent != null);
       assert(minScrollExtent <= maxScrollExtent);
-      final ScrollMetrics oldPosition = haveDimensions ? copyWith() : null;
+      final ScrollMetrics oldPosition = haveDimensions ? copyWith(pixels: oldPixels) : null;
       _minScrollExtent = minScrollExtent;
       _maxScrollExtent = maxScrollExtent;
       final ScrollMetrics newPosition = haveDimensions ? copyWith() : null;

@@ -526,7 +526,7 @@ class _TabBarScrollPosition extends ScrollPositionWithSingleContext {
   bool _initialViewportDimensionWasZero;
 
   @override
-  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
+  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent, {double oldPixels}) {
     bool result = true;
     if (_initialViewportDimensionWasZero != true) {
       // If the viewport never had a non-zero dimension, we just want to jump
@@ -541,7 +541,7 @@ class _TabBarScrollPosition extends ScrollPositionWithSingleContext {
       correctPixels(tabBar._initialScrollOffset(viewportDimension, minScrollExtent, maxScrollExtent));
       result = false;
     }
-    return super.applyContentDimensions(minScrollExtent, maxScrollExtent) && result;
+    return super.applyContentDimensions(minScrollExtent, maxScrollExtent, oldPixels: oldPixels) && result;
   }
 }
 

@@ -396,8 +396,8 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
     if (viewportDimension == oldViewportDimensions) {
       return true;
     }
-    final bool result = super.applyViewportDimension(viewportDimension);
     final double oldPixels = pixels;
+    final bool result = super.applyViewportDimension(viewportDimension);
     final double page = (oldPixels == null || oldViewportDimensions == 0.0) ? _pageToUseOnStartup : getPageFromPixels(oldPixels, oldViewportDimensions);
     final double newPixels = getPixelsFromPage(page);
 
@@ -409,11 +409,12 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   }
 
   @override
-  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
+  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent, {double oldPixels}) {
     final double newMinScrollExtent = minScrollExtent + _initialPageOffset;
     return super.applyContentDimensions(
       newMinScrollExtent,
       math.max(newMinScrollExtent, maxScrollExtent - _initialPageOffset),
+      oldPixels: oldPixels,
     );
   }
 

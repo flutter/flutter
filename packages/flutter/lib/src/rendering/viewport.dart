@@ -1334,6 +1334,10 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
   void performLayout() {
     // Ignore the return value of applyViewportDimension because we are
     // doing a layout regardless.
+    // Applying the viewport dimension may change the pixel offset. Physics
+    // to adjust the content dimensions is based on the previous dimensions
+    // and offset and dimensions so will come to bogus xxx.
+    final oldPixels = offset.pixels;
     switch (axis) {
       case Axis.vertical:
         offset.applyViewportDimension(size.height);
@@ -1348,7 +1352,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
       _minScrollExtent = 0.0;
       _maxScrollExtent = 0.0;
       _hasVisualOverflow = false;
-      offset.applyContentDimensions(0.0, 0.0);
+      offset.applyContentDimensions(0.0, 0.0, oldPixels: oldPixels);
       return;
     }
     assert(center.parent == this);
@@ -1379,6 +1383,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
         if (offset.applyContentDimensions(
               math.min(0.0, _minScrollExtent + mainAxisExtent * anchor),
               math.max(0.0, _maxScrollExtent - mainAxisExtent * (1.0 - anchor)),
+              oldPixels: oldPixels,
            ))
           break;
       }
@@ -1766,6 +1771,7 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
     double effectiveExtent;
     do {
       assert(offset.pixels != null);
+      final oldPixels = offset.pixels;
       correction = _attemptLayout(mainAxisExtent, crossAxisExtent, offset.pixels);
       if (correction != 0.0) {
         offset.correctBy(correction);
@@ -1779,7 +1785,8 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
             break;
         }
         final bool didAcceptViewportDimension = offset.applyViewportDimension(effectiveExtent);
-        final bool didAcceptContentDimension = offset.applyContentDimensions(0.0, math.max(0.0, _maxScrollExtent - effectiveExtent));
+        // TODO(jacobr): is this right?
+        final bool didAcceptContentDimension = offset.applyContentDimensions(0.0, math.max(0.0, _maxScrollExtent - effectiveExtent), oldPixels: oldPixels);
         if (didAcceptViewportDimension && didAcceptContentDimension)
           break;
       }

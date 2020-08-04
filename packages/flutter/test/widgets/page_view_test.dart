@@ -910,6 +910,39 @@ void main() {
     expect(pageController.page, 1);
   });
 
+  testWidgets('Page view can handle resize', (WidgetTester tester) async {
+    final PageController pageController = PageController();
+
+    tester.binding.window.physicalSizeTestValue = const Size(800, 600);
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: PageView(
+        controller: pageController,
+        children: List<Widget>.generate(3, (int i) {
+          return Semantics(
+            child: Text('Page #$i'),
+            container: true,
+          );
+        }),
+      ),
+    ));
+    pageController.position.jumpTo(1600);
+    await tester.pumpAndSettle();
+    print("XXX here1");
+    expect(pageController.page, 2);
+//    expect(pageController.offset, equals(1600.0));
+    print("XXX here2");
+    await tester.pumpAndSettle();
+    tester.binding.window.physicalSizeTestValue = const Size(500, 600);
+    expect(pageController.page, 2);
+    expect(pageController.offset, equals(1000.0));
+    print("XXX here3");
+    tester.binding.window.physicalSizeTestValue = const Size(800, 600);
+    await tester.pumpAndSettle();
+    expect(pageController.page, 2);
+    expect(pageController.offset, equals(1600.0));
+  });
+
   testWidgets('PageView can participate in a11y scrolling', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 

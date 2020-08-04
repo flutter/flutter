@@ -435,13 +435,14 @@ class _DraggableScrollableSheetScrollPosition
   bool get listShouldScroll => pixels > 0.0;
 
   @override
-  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
+  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent, {double oldPixels}) {
     // We need to provide some extra extent if we haven't yet reached the max or
     // min extents. Otherwise, a list with fewer children than the extent of
     // the available space will get stuck.
     return super.applyContentDimensions(
       minScrollExtent - extent.additionalMinExtent,
       maxScrollExtent + extent.additionalMaxExtent,
+      oldPixels: oldPixels,
     );
   }
 

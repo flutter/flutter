@@ -65,10 +65,10 @@ class TestViewportScrollPosition extends ScrollPositionWithSingleContext {
   }) : super(physics: physics, context: context, oldPosition: oldPosition);
 
   @override
-  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
+  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent, {double oldPixels}) {
     expect(minScrollExtent, moreOrLessEquals(-3895.0));
     expect(maxScrollExtent, moreOrLessEquals(8575.0));
-    return super.applyContentDimensions(minScrollExtent, maxScrollExtent);
+    return super.applyContentDimensions(minScrollExtent, maxScrollExtent, oldPixels: oldPixels);
   }
 }
 
