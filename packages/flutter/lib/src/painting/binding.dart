@@ -22,9 +22,7 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
     super.initInstances();
     _instance = this;
     _imageCache = createImageCache();
-    if (shaderWarmUp != null) {
-      shaderWarmUp!.execute();
-    }
+    shaderWarmUp?.execute();
   }
 
   /// The current [PaintingBinding], if one has been created.
