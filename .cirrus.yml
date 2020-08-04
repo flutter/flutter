@@ -258,7 +258,7 @@ task:
       << : *LINUX_SHARD_TEMPLATE
 
     - name: docs-linux # linux-only
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_drive/**', 'packages/flutter_localizations/**', 'packages/flutter_goldens/**', 'packages/flutter_goldens_client/**', 'bin/**') || $CIRRUS_PR == ''"
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_drive/**', 'packages/flutter_localizations/**', 'bin/**') || $CIRRUS_PR == ''"
       environment:
         # TODO(tvolkert): optimize CPU and MEMORY settings once #60646 is resolved.
         CPU: 4
