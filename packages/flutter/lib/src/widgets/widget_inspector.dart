@@ -2894,6 +2894,7 @@ bool debugIsLocalCreationLocation(Object object) {
     if (location == null)
       isLocal =  false;
     isLocal = WidgetInspectorService.instance._isLocalCreationLocation(location);
+    return true;
   }());
   return isLocal;
 }
