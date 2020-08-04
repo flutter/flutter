@@ -37,6 +37,7 @@ typedef AutocompleteFieldBuilder = Widget Function(
 ///
 /// Can also be used in a stand-alone manner to implement autocomplete behavior
 /// in a fully custom UI.
+@immutable
 class AutocompleteController<T> {
   /// Create an instance of AutocompleteController.
   AutocompleteController({
@@ -98,8 +99,17 @@ class AutocompleteController<T> {
   }
 }
 
+/// A widget for helping the user to search a list of options and select a
+/// result.
+///
+/// This is a core framework widget with very basic UI. Try using [Autocomplete]
+/// or [AutocompleteCupertino] before resorting to this widget.
 class AutocompleteCore<T> extends StatefulWidget {
-  AutocompleteCore({
+  /// Create an instance of AutocompleteCore.
+  ///
+  /// [autocompleteController], [buildField], and [buildResults] must not be
+  /// null.
+  const AutocompleteCore({
     @required this.autocompleteController,
     @required this.buildField,
     @required this.buildResults,
@@ -107,16 +117,22 @@ class AutocompleteCore<T> extends StatefulWidget {
        assert(buildField != null),
        assert(buildResults != null);
 
+  /// The controller that provides access to the main autocomplete state and
+  /// logic.
   final AutocompleteController<T> autocompleteController;
+
+  /// Builds the field that is used to input the query.
   final AutocompleteFieldBuilder buildField;
+
+  /// Builds the selectable results of searching.
   final AutocompleteResultsBuilder<T> buildResults;
 
   @override
-  AutocompleteCoreState<T> createState() =>
-      AutocompleteCoreState<T>();
+  _AutocompleteCoreState<T> createState() =>
+      _AutocompleteCoreState<T>();
 }
 
-class AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
+class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
   T _selection;
 
   void _onChangeResults() {
