@@ -4,6 +4,7 @@
 
 // @dart = 2.8
 
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -231,6 +232,7 @@ class ExpansionPanelList extends StatefulWidget {
     this.animationDuration = kThemeAnimationDuration,
     this.expandedHeaderPadding = _kPanelHeaderExpandedDefaultPadding,
     this.dividerColor,
+    this.elevation = 2,
   }) : assert(children != null),
        assert(animationDuration != null),
        _allowOnlyOnePanelOpen = false,
@@ -321,6 +323,7 @@ class ExpansionPanelList extends StatefulWidget {
     this.initialOpenPanelValue,
     this.expandedHeaderPadding = _kPanelHeaderExpandedDefaultPadding,
     this.dividerColor,
+    this.elevation = 2,
   }) : assert(children != null),
        assert(animationDuration != null),
        _allowOnlyOnePanelOpen = true,
@@ -370,6 +373,17 @@ class ExpansionPanelList extends StatefulWidget {
   /// If `dividerColor` is null, then [DividerThemeData.color] is used. If that
   /// is null, then [ThemeData.dividerColor] is used.
   final Color dividerColor;
+
+  /// Defines elevation for the [ExpansionPanel].
+  ///
+  /// This uses [kElevationToShadow] to simulate shadows, it does not use
+  /// [Material]'s arbitrary elevation feature.
+  ///
+  /// The following values can be used to define the elevation: 0, 1, 2, 3, 4, 6,
+  /// 8, 9, 12, 16, 24.
+  ///
+  /// By default, the value of elevation is 2.
+  final int elevation;
 
   @override
   State<StatefulWidget> createState() => _ExpansionPanelListState();
@@ -537,6 +551,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
     return MergeableMaterial(
       hasDividers: true,
       dividerColor: widget.dividerColor,
+      elevation: widget.elevation,
       children: items,
     );
   }
