@@ -178,11 +178,8 @@ void Animator::Render(std::unique_ptr<flutter::LayerTree> layer_tree) {
   }
   last_layer_tree_size_ = layer_tree->frame_size();
 
-  if (layer_tree) {
-    // Note the frame time for instrumentation.
-    layer_tree->RecordBuildTime(last_frame_begin_time_,
-                                last_frame_target_time_);
-  }
+  // Note the frame time for instrumentation.
+  layer_tree->RecordBuildTime(last_frame_begin_time_, last_frame_target_time_);
 
   // Commit the pending continuation.
   bool result = producer_continuation_.Complete(std::move(layer_tree));
