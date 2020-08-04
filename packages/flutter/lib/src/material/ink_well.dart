@@ -733,6 +733,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   Set<InteractiveInkFeature> _splashes;
   InteractiveInkFeature _currentSplash;
   bool _hovering = false;
+  bool _containsMouse = false;
   final Map<_HighlightType, InkHighlight> _highlights = <_HighlightType, InkHighlight>{};
   Map<Type, Action<Intent>> _actionMap;
 
@@ -773,7 +774,10 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   void didUpdateWidget(_InkResponseStateWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (_isWidgetEnabled(widget) != _isWidgetEnabled(oldWidget)) {
-      _handleHoverChange(_hovering);
+      // The value of _hovering and _containsMouse maybe not match when
+      // the widget's enabled flag changes. We sync them up here, at
+      // _build_ time.
+      _handleHoverChange(_containsMouse);
       _updateFocusHighlights();
     }
   }
@@ -1040,8 +1044,20 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 
   bool get enabled => _isWidgetEnabled(widget);
 
-  void _handleMouseEnter(PointerEnterEvent event) => _handleHoverChange(true);
-  void _handleMouseExit(PointerExitEvent event) => _handleHoverChange(false);
+  void _handleMouseEnter(PointerEnterEvent event) {
+    _containsMouse = true;
+    if (enabled)
+      _handleHoverChange(true);
+  }
+
+  void _handleMouseExit(PointerExitEvent event) {
+    _containsMouse = false;
+    // If the exit occurs after we've been disabled, we still
+    // want to take down the highlights and run widget.onHover.
+    if (enabled || (!enabled && _hovering))
+      _handleHoverChange(false);
+  }
+
   void _handleHoverChange(bool hovering) {
     if (_hovering != hovering) {
       _hovering = hovering;
@@ -1091,8 +1107,8 @@ class _InkResponseState extends State<_InkResponseStateWidget>
           autofocus: widget.autofocus,
           child: MouseRegion(
             cursor: effectiveMouseCursor,
-            onEnter: enabled ? _handleMouseEnter : null,
-            onExit: enabled ? _handleMouseExit : null,
+            onEnter: _handleMouseEnter,
+            onExit: _handleMouseExit,
             child: GestureDetector(
               onTapDown: enabled ? _handleTapDown : null,
               onTap: enabled ? () => _handleTap(context) : null,
