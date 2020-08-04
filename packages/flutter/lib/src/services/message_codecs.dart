@@ -9,6 +9,7 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart' show ReadBuffer, WriteBuffer;
 
 import 'message_codec.dart';
+import 'message_codecs.dart';
 
 /// [MessageCodec] with unencoded binary messages represented using [ByteData].
 ///
@@ -567,9 +568,9 @@ class StandardMethodCodec implements MethodCodec {
     final dynamic errorCode = messageCodec.readValue(buffer);
     final dynamic errorMessage = messageCodec.readValue(buffer);
     final dynamic errorDetails = messageCodec.readValue(buffer);
-    /// TODO(libe): Mute the readValue check for stacktrace for now.
+    /// TODO(libe, b/158148913): Mute the readValue check for stacktrace for now.
     /// Remove this once flutter engine is ready with the stacktrace fields.
-    final dynamic errorStacktrace = (buffer.hasRemaining) ? messageCodec.readValue(buffer) as String : null;
+    final String? errorStacktrace = (buffer.hasRemaining) ? messageCodec.readValue(buffer) as String : null;
     if (errorCode is String && (errorMessage == null || errorMessage is String) && !buffer.hasRemaining)
       throw PlatformException(code: errorCode, message: errorMessage as String, details: errorDetails, stacktrace: errorStacktrace);
     else
