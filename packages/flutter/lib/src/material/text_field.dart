@@ -648,8 +648,8 @@ class TextField extends StatefulWidget {
   /// * If the ambient [ThemeData.useTextSelectionTheme] is true then it
   ///   will use the value of the ambient [TextSelectionThemeData.cursorColor].
   ///   If that is null then if the [ThemeData.platform] is [TargetPlatform.iOS]
-  ///   or [TargetPlatform.macOS] then it will use [CupertinoTheme.primaryColor].
-  ///   Otherwise it will use the value of [ThemeData.colorScheme.primary].
+  ///   or [TargetPlatform.macOS] then it will use [CupertinoThemeData.primaryColor].
+  ///   Otherwise it will use the value of [ColorScheme.primary] of [ThemeData.colorScheme].
   ///
   /// * If the ambient [ThemeData.useTextSelectionTheme] is false then it
   ///   will use either [ThemeData.cursorColor] or [CupertinoThemeData.primaryColor]

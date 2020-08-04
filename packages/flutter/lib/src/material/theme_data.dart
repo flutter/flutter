@@ -1125,7 +1125,7 @@ class ThemeData with Diagnosticable {
   /// Setting this flag to true will cause the [textSelectionTheme] to be used
   /// instead of the [cursorColor] and [textSelectionHandleColor] by [TextField]
   /// and [SelectableText] widgets. In addition, the default values of these
-  /// colors have changed to [colorScheme.primary].
+  /// colors have changed to [ColorScheme.primary].
   ///
   /// The flag is currently false by default. It will be removed after migration
   /// to the [TextSelectionTheme] has been completed.
