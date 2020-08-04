@@ -1,0 +1,60 @@
+{
+   "builders":[
+      {
+         "name":"Linux Host Engine",
+         "repo":"engine"
+      },
+      {
+         "name":"Linux Fuchsia",
+         "repo":"engine"
+      },
+      {
+         "name":"Linux Android AOT Engine",
+         "repo":"engine"
+      },
+      {
+         "name":"Linux Android Debug Engine",
+         "repo":"engine"
+      },
+      {
+         "name":"Linux Web Engine",
+         "repo":"engine"
+      },
+      {
+         "name":"Mac Host Engine",
+         "repo":"engine"
+      },
+      {
+         "name":"Mac Android AOT Engine",
+         "repo":"engine"
+      },
+      {
+         "name":"Mac Android Debug Engine",
+         "repo":"engine"
+      },
+      {
+         "name":"Mac Host Engine",
+         "repo":"engine"
+      },
+      {
+         "name":"Mac iOS Engine",
+         "repo":"engine"
+      },
+      {
+         "name":"Windows Host Engine",
+         "repo":"engine"
+      },
+      {
+         "name":"Windows Android AOT Engine",
+         "repo":"engine"
+      },
+      {
+         "name":"Windows Web Engine",
+         "repo":"engine"
+      },
+      {
+         "name":"Mac Web Engine",
+         "repo":"engine"
+      }
+   ]
+}
