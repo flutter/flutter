@@ -716,4 +716,69 @@ void main() {
 
     expect(tester.takeException(), isNull);
   });
+
+ testWidgets('Stepper custom elevation', (WidgetTester tester) async {
+    const double elevation = 4.0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child:
+          Container(
+            width: 200,
+            height: 75,
+            child:
+              Stepper(
+                type: StepperType.horizontal,
+                horizontalElevation: elevation,
+                steps: const <Step>[
+                  Step(
+                    title: Text('Regular title'),
+                    subtitle: Text('Text subtitle'),
+                    content: Text('Text content')
+                  ),
+                ],
+              ),
+          ),
+        ),
+      ),
+    );
+    
+    await tester.pump();
+    final Stepper stepper = find.byType(Stepper).evaluate().first.widget as Stepper;
+
+    expect(stepper.horizontalElevation, elevation);
+  });
+
+  testWidgets('Stepper no elevation defined', (WidgetTester tester) async {
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child:
+          Container(
+            width: 200,
+            height: 75,
+            child:
+              Stepper(
+                type: StepperType.horizontal,
+                //horizontalElevation: ,
+                steps: const <Step>[
+                  Step(
+                    title: Text('Regular title'),
+                    subtitle: Text('Text subtitle'),
+                    content: Text('Text content')
+                  ),
+                ],
+              ),
+          ),
+        ),
+      ),
+    );
+    
+    await tester.pump();
+    final Stepper stepper = find.byType(Stepper).evaluate().first.widget as Stepper;
+
+    expect(stepper.horizontalElevation, 2.0);
+  });
 }
