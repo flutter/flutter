@@ -2713,13 +2713,13 @@ void main() {
       );
 
       owner.performAction(expectedNodeId, SemanticsAction.copy);
-      expect(controls.didCopy, true);
+      expect(controls.copyCount, 1);
 
       owner.performAction(expectedNodeId, SemanticsAction.cut);
-      expect(controls.didCut, true);
+      expect(controls.cutCount, 1);
 
       owner.performAction(expectedNodeId, SemanticsAction.paste);
-      expect(controls.didPaste, true);
+      expect(controls.pasteCount, 1);
 
       semantics.dispose();
     });
@@ -5284,23 +5284,23 @@ class MockTextSelectionControls extends Fake implements TextSelectionControls {
   bool testCanCopy = false;
   bool testCanPaste = false;
 
-  bool didCut = false;
-  bool didPaste = false;
-  bool didCopy = false;
+  int cutCount = 0;
+  int pasteCount = 0;
+  int copyCount = 0;
 
   @override
   void handleCopy(TextSelectionDelegate delegate, ClipboardStatusNotifier clipboardStatus) {
-    didCopy = true;
+    copyCount += 1;
   }
 
   @override
   Future<void> handlePaste(TextSelectionDelegate delegate) async {
-    didPaste = true;
+    pasteCount += 1;
   }
 
   @override
   void handleCut(TextSelectionDelegate delegate) {
-    didCut = true;
+    cutCount += 1;
   }
 
   @override
