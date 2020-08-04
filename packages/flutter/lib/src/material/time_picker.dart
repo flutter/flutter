@@ -1834,7 +1834,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
             theme.colorScheme.brightness == Brightness.dark ? 1.0 : 0.6,
           ),
           onPressed: _handleEntryModeToggle,
-          icon: Icon(_entryMode == TimePickerEntryMode.dial ? Icons.keyboard_outlined : Icons.access_time),
+          icon: Icon(_entryMode == TimePickerEntryMode.dial ? Icons.keyboard : Icons.access_time),
           tooltip: _entryMode == TimePickerEntryMode.dial
               ? MaterialLocalizations.of(context).inputTimeModeButtonLabel
               : MaterialLocalizations.of(context).dialModeButtonLabel,
