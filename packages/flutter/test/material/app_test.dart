@@ -812,6 +812,34 @@ void main() {
     tester.binding.window.accessibilityFeaturesTestValue = null;
   });
 
+  testWidgets('MaterialApp uses dark theme when no high contrast dark theme is provided', (WidgetTester tester) async {
+    tester.binding.window.platformBrightnessTestValue = Brightness.dark;
+    tester.binding.window.accessibilityFeaturesTestValue = MockAccessibilityFeature();
+
+    ThemeData appliedTheme;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          primaryColor: Colors.lightBlue,
+        ),
+        darkTheme: ThemeData(
+          primaryColor: Colors.lightGreen,
+        ),
+        home: Builder(
+          builder: (BuildContext context) {
+            appliedTheme = Theme.of(context);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    expect(appliedTheme.primaryColor, Colors.lightGreen);
+    tester.binding.window.accessibilityFeaturesTestValue = null;
+    tester.binding.window.platformBrightnessTestValue = null;
+  });
+
   testWidgets('MaterialApp switches themes when the Window platformBrightness changes.', (WidgetTester tester) async {
     // Mock the Window to explicitly report a light platformBrightness.
     final TestWidgetsFlutterBinding binding = tester.binding;
