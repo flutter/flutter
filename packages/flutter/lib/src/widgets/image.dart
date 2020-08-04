@@ -1028,7 +1028,7 @@ class Image extends StatefulWidget {
   /// image provider you're not just changing the image, you're removing the
   /// old widget and adding a new one and not expecting them to have any
   /// relationship. With [gaplessPlayback] on you might accidentally break this
-  /// expectation. .
+  /// expectation.
   final bool gaplessPlayback;
 
   /// A Semantic description of the image.
