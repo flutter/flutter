@@ -46,7 +46,6 @@ void main() {
 
   double? oldDPR;
   Size? oldSize;
-  double? oldDepth;
   WindowPadding? oldPadding;
   WindowPadding? oldInsets;
   WindowPadding? oldSystemGestureInsets;
@@ -54,7 +53,6 @@ void main() {
   void setUp() {
     oldDPR = window.devicePixelRatio;
     oldSize = window.physicalSize;
-    oldDepth = window.physicalDepth;
     oldPadding = window.viewPadding;
     oldInsets = window.viewInsets;
     oldSystemGestureInsets = window.systemGestureInsets;
@@ -76,7 +74,6 @@ void main() {
       oldDPR!,                         // DPR
       oldSize!.width,                  // width
       oldSize!.height,                 // height
-      oldDepth!,                       // depth
       oldPadding!.top,                 // padding top
       oldPadding!.right,               // padding right
       oldPadding!.bottom,              // padding bottom
@@ -161,7 +158,6 @@ void main() {
       0.1234, // DPR
       0.0,    // width
       0.0,    // height
-      0.0,    // depth
       0.0,    // padding top
       0.0,    // padding right
       0.0,    // padding bottom
@@ -378,7 +374,6 @@ void main() {
       1.0,   // DPR
       800.0, // width
       600.0, // height
-      100.0, // depth
       50.0,  // padding top
       0.0,   // padding right
       40.0,  // padding bottom
@@ -396,14 +391,12 @@ void main() {
     expectEquals(window.viewInsets.bottom, 0.0);
     expectEquals(window.viewPadding.bottom, 40.0);
     expectEquals(window.padding.bottom, 40.0);
-    expectEquals(window.physicalDepth, 100.0);
     expectEquals(window.systemGestureInsets.bottom, 0.0);
 
     _updateWindowMetrics(
       1.0,   // DPR
       800.0, // width
       600.0, // height
-      100.0, // depth
       50.0,  // padding top
       0.0,   // padding right
       40.0,  // padding bottom
@@ -421,7 +414,6 @@ void main() {
     expectEquals(window.viewInsets.bottom, 400.0);
     expectEquals(window.viewPadding.bottom, 40.0);
     expectEquals(window.padding.bottom, 0.0);
-    expectEquals(window.physicalDepth, 100.0);
     expectEquals(window.systemGestureInsets.bottom, 44.0);
   });
 }
