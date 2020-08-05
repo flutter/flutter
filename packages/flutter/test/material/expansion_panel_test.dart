@@ -1456,8 +1456,8 @@ void main() {
     final dynamic exception = tester.takeException();
     expect(exception, isAssertionError);
     expect((exception as AssertionError).toString(), contains(
-      'Invalid value for elevation. Only the following values can be used to define'
-      ' the elevation: 0, 1, 2, 3, 4, 6, 8, 9, 12, 16, 24'
+      'Invalid value for elevation. See the kElevationToShadow constant for'
+      ' possible elevation values.'
     ));
   });
 }

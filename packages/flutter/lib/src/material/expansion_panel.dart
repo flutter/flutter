@@ -470,9 +470,9 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
 
   @override
   Widget build(BuildContext context) {
-    assert(kElevationToShadow.containsKey(widget.elevation) != false,
-      'Invalid value for elevation. Only the following values can be used to define'
-      ' the elevation: 0, 1, 2, 3, 4, 6, 8, 9, 12, 16, 24'
+    assert(kElevationToShadow.containsKey(widget.elevation),
+      'Invalid value for elevation. See the kElevationToShadow constant for'
+      ' possible elevation values.'
     );
 
     final List<MergeableMaterialItem> items = <MergeableMaterialItem>[];
