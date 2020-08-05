@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:ui';
 
@@ -218,7 +217,7 @@ class SystemChannels {
   ///
   ///  * [WidgetsBindingObserver.didChangeAppLifecycleState], which triggers
   ///    whenever a message is received on this channel.
-  static const BasicMessageChannel<String> lifecycle = BasicMessageChannel<String>(
+  static const BasicMessageChannel<String?> lifecycle = BasicMessageChannel<String?>(
       'flutter/lifecycle',
       StringCodec(),
   );
