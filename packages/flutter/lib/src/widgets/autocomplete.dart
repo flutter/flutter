@@ -44,10 +44,13 @@ class AutocompleteController<T> {
     this.options,
     this.search,
     TextEditingController textEditingController,
-  }) : assert(search != null || options != null, "If a search function isn't specified, Autocomplete will search by string on the given options."),
+  }) : assert(search != null || options != null, 'Must specify either options or search (or both).'),
+       _ownsTextEditingController = textEditingController == null,
        textEditingController = textEditingController ?? TextEditingController() {
     this.textEditingController.addListener(_onQueryChanged);
   }
+
+  final bool _ownsTextEditingController;
 
   /// All possible options that can be searched.
   ///
@@ -69,7 +72,7 @@ class AutocompleteController<T> {
 
   /// The current results being returned by [search].
   ///
-  /// This is a [ValueNotifier] so that UI may be updated when results change.
+  /// This is a [ValueNotifier], so it can be listened to for changes.
   final ValueNotifier<List<T>> results = ValueNotifier<List<T>>(<T>[]);
 
   /// Clean up memory created by the AutocompleteController.
@@ -78,8 +81,9 @@ class AutocompleteController<T> {
   // the dispose method of the widget it was created in.
   void dispose() {
     textEditingController.removeListener(_onQueryChanged);
-    // TODO(justinmc): Shouldn't be disposed if it wasn't created here.
-    textEditingController.dispose();
+    if (_ownsTextEditingController) {
+      textEditingController.dispose();
+    }
   }
 
   // Called when textEditingController reports a change in its value.
