@@ -60,7 +60,7 @@ class UIDartState : public tonic::DartState {
 
   fml::WeakPtr<SnapshotDelegate> GetSnapshotDelegate() const;
 
-  fml::WeakPtr<GrContext> GetResourceContext() const;
+  fml::WeakPtr<GrDirectContext> GetResourceContext() const;
 
   fml::WeakPtr<ImageDecoder> GetImageDecoder() const;
 
