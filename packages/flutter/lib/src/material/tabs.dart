@@ -859,13 +859,11 @@ class _TabBarState extends State<TabBar> {
     if (_controllerIsValid) {
       _controller.animation.removeListener(_handleTabControllerAnimationTick);
       _controller.removeListener(_handleTabControllerTick);
-      _controller.removeAnimationStartedListener(_handleTabControllerAnimationStarted);
     }
     _controller = newController;
     if (_controller != null) {
       _controller.animation.addListener(_handleTabControllerAnimationTick);
       _controller.addListener(_handleTabControllerTick);
-      _controller.addAnimationStartedListener(_handleTabControllerAnimationStarted);
       _currentIndex = _controller.index;
     }
   }
@@ -915,7 +913,6 @@ class _TabBarState extends State<TabBar> {
     if (_controllerIsValid) {
       _controller.animation.removeListener(_handleTabControllerAnimationTick);
       _controller.removeListener(_handleTabControllerTick);
-      _controller.removeAnimationStartedListener(_handleTabControllerAnimationStarted);
     }
     _controller = null;
     // We don't own the _controller Animation, so it's not disposed here.
@@ -947,9 +944,9 @@ class _TabBarState extends State<TabBar> {
     return _tabScrollOffset(_currentIndex, viewportWidth, minExtent, maxExtent);
   }
 
-  void _scrollToCurrentIndex({Duration duration = kTabScrollDuration, Curve curve = Curves.ease}) {
+  void _scrollToCurrentIndex() {
     final double offset = _tabCenteredScrollOffset(_currentIndex);
-    _scrollController.animateTo(offset, duration: duration, curve: curve);
+    _scrollController.animateTo(offset, duration: _controller.ongoingAnimationDuration ?? kTabScrollDuration, curve: _controller.ongoingAnimationCurve ?? Curves.ease);
   }
 
   void _scrollToControllerValue() {
@@ -984,14 +981,10 @@ class _TabBarState extends State<TabBar> {
   }
 
   void _handleTabControllerTick() {
-    _handleTabControllerAnimationStarted(kTabScrollDuration, Curves.ease);
-  }
-
-  void _handleTabControllerAnimationStarted(Duration duration, Curve curve) {
     if (_controller.index != _currentIndex) {
       _currentIndex = _controller.index;
       if (widget.isScrollable)
-        _scrollToCurrentIndex(duration: duration, curve: curve);
+        _scrollToCurrentIndex();
     }
     setState(() {
       // Rebuild the tabs after a (potentially animated) index change
@@ -1240,15 +1233,11 @@ class _TabBarViewState extends State<TabBarView> {
     if (newController == _controller)
       return;
 
-    if (_controllerIsValid) {
+    if (_controllerIsValid)
       _controller.animation.removeListener(_handleTabControllerAnimationTick);
-      _controller.removeAnimationStartedListener(_handleTabControllerAnimationStarted);
-    }
     _controller = newController;
-    if (_controller != null) {
+    if (_controller != null)
       _controller.animation.addListener(_handleTabControllerAnimationTick);
-      _controller.addAnimationStartedListener(_handleTabControllerAnimationStarted);
-    }
   }
 
   @override
@@ -1276,10 +1265,8 @@ class _TabBarViewState extends State<TabBarView> {
 
   @override
   void dispose() {
-    if (_controllerIsValid) {
+    if (_controllerIsValid)
       _controller.animation.removeListener(_handleTabControllerAnimationTick);
-      _controller.removeAnimationStartedListener(_handleTabControllerAnimationStarted);
-    }
     _controller = null;
     // We don't own the _controller Animation, so it's not disposed here.
     super.dispose();
@@ -1292,20 +1279,16 @@ class _TabBarViewState extends State<TabBarView> {
   }
 
   void _handleTabControllerAnimationTick() {
-    _handleTabControllerAnimationStarted(kTabScrollDuration, Curves.ease);
-  }
-
-  void _handleTabControllerAnimationStarted(Duration duration, Curve curve) {
     if (_warpUnderwayCount > 0 && _controller.index == _currentIndex)
       return; // This widget is driving the controller's animation.
 
     if (_controller.index != _currentIndex) {
       _currentIndex = _controller.index;
-      _warpToCurrentIndex(duration, curve);
+      _warpToCurrentIndex();
     }
   }
 
-  Future<void> _warpToCurrentIndex(Duration duration, Curve curve) async {
+  Future<void> _warpToCurrentIndex() async {
     if (!mounted)
       return Future<void>.value();
 
@@ -1317,7 +1300,7 @@ class _TabBarViewState extends State<TabBarView> {
       setState(() {
         _warpUnderwayCount += 1;
       });
-      await _pageController.animateToPage(_currentIndex, duration: duration, curve: curve);
+      await _pageController.animateToPage(_currentIndex, duration: _controller.ongoingAnimationDuration ?? kTabScrollDuration, curve: _controller.ongoingAnimationCurve ?? Curves.ease);
       if (!mounted)
         return Future<void>.value();
       setState(() {
@@ -1340,7 +1323,7 @@ class _TabBarViewState extends State<TabBarView> {
     });
     _pageController.jumpToPage(initialPage);
 
-    await _pageController.animateToPage(_currentIndex, duration: duration, curve: curve);
+    await _pageController.animateToPage(_currentIndex, duration: _controller.ongoingAnimationDuration ?? kTabScrollDuration, curve: _controller.ongoingAnimationCurve ?? Curves.ease);
     if (!mounted)
       return Future<void>.value();
     setState(() {

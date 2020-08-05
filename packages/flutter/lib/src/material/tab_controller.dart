@@ -6,7 +6,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/src/foundation/observer_list.dart';
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
@@ -206,7 +205,17 @@ class TabController extends ChangeNotifier {
   /// [TabBarView.children]'s length.
   final int length;
 
-  final ObserverList<AnimationStartedListener> _animationStartedListeners = ObserverList<AnimationStartedListener>();
+  /// The duration given to [animateTo].
+  ///
+  /// Only valid while animation is running, null otherwise.
+  Duration get ongoingAnimationDuration => _ongoingAnimationDuration;
+  Duration _ongoingAnimationDuration;
+
+  /// The curve given to [animateTo].
+  ///
+  /// Only valid while animation is running, null otherwise.
+  Curve get ongoingAnimationCurve => _ongoingAnimationCurve;
+  Curve _ongoingAnimationCurve;
 
   void _changeIndex(int value, { Duration duration, Curve curve }) {
     assert(value != null);
@@ -217,6 +226,8 @@ class TabController extends ChangeNotifier {
       return;
     _previousIndex = index;
     _index = value;
+    _ongoingAnimationDuration = duration;
+    _ongoingAnimationCurve = curve;
     if (duration != null) {
       _indexIsChangingCount += 1;
       notifyListeners(); // Because the value of indexIsChanging may have changed.
@@ -224,41 +235,18 @@ class TabController extends ChangeNotifier {
         .animateTo(_index.toDouble(), duration: duration, curve: curve)
         .whenCompleteOrCancel(() {
           _indexIsChangingCount -= 1;
+          if (_indexIsChangingCount == 0) {
+            _ongoingAnimationDuration = null;
+            _ongoingAnimationCurve = null;
+          }
           notifyListeners();
         });
-      _notifyAnimationStartedListeners(duration, curve);
     } else {
       _indexIsChangingCount += 1;
       _animationController.value = _index.toDouble();
       _indexIsChangingCount -= 1;
       notifyListeners();
     }
-  }
-
-  void _notifyAnimationStartedListeners(Duration duration, Curve curve) {
-    debugPrint('animationStarted to index: $index');
-    final List<AnimationStartedListener> localListeners = List<AnimationStartedListener>.from(_animationStartedListeners);
-    for (final AnimationStartedListener listener in localListeners) {
-      if (_animationStartedListeners.contains(listener))
-        listener(duration ?? kTabScrollDuration, curve ?? Curves.ease);
-    }
-  }
-
-  /// Calls listener every time the animation starts by [animateTo].
-  ///
-  /// Listeners can be removed with [removeAnimationStartedListener].
-  void addAnimationStartedListener(AnimationStartedListener listener) {
-    _animationStartedListeners.add(listener);
-  }
-
-  /// Stops calling the listener every time the animation starts by [animateTo].
-  ///
-  /// If `listener` is not currently registered as a listener, this
-  /// method does nothing.
-  ///
-  /// Listeners can be added with [addAnimationStartedListener].
-  void removeAnimationStartedListener(AnimationStartedListener listener) {
-    _animationStartedListeners.remove(listener);
   }
 
   /// The index of the currently selected tab.
@@ -342,8 +330,6 @@ class _TabControllerScope extends InheritedWidget {
     return enabled != old.enabled || controller != old.controller;
   }
 }
-
-typedef AnimationStartedListener = void Function(Duration duration, Curve curve);
 
 /// The [TabController] for descendant widgets that don't specify one
 /// explicitly.
