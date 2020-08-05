@@ -10,15 +10,18 @@ struct _FlRendererHeadless {
 
 G_DEFINE_TYPE(FlRendererHeadless, fl_renderer_headless, fl_renderer_get_type())
 
-static EGLSurface fl_renderer_headless_create_surface(FlRenderer* renderer,
-                                                      EGLDisplay display,
-                                                      EGLConfig config) {
-  return EGL_NO_SURFACE;
+static gboolean fl_renderer_headless_create_surfaces(FlRenderer* renderer,
+                                                     EGLDisplay display,
+                                                     EGLConfig config,
+                                                     EGLSurface* visible,
+                                                     EGLSurface* resource,
+                                                     GError** error) {
+  return FALSE;
 }
 
 static void fl_renderer_headless_class_init(FlRendererHeadlessClass* klass) {
-  FL_RENDERER_CLASS(klass)->create_surface =
-      fl_renderer_headless_create_surface;
+  FL_RENDERER_CLASS(klass)->create_surfaces =
+      fl_renderer_headless_create_surfaces;
 }
 
 static void fl_renderer_headless_init(FlRendererHeadless* self) {}
