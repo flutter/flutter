@@ -1350,7 +1350,7 @@ void main() {
           'type': 'keydown',
           'keymap': 'web',
           'code': 'RandomCode',
-          'key': null,
+          'key': '0',
           'metaState': modifier,
         });
         final RawKeyEventDataWeb data = event.data as RawKeyEventDataWeb;
@@ -1381,7 +1381,7 @@ void main() {
           'type': 'keydown',
           'keymap': 'web',
           'code': 'RandomCode',
-          'key': null,
+          'key': '',
           'metaState': modifier | RawKeyEventDataWeb.modifierMeta,
         });
         final RawKeyEventDataWeb data = event.data as RawKeyEventDataWeb;
@@ -1422,39 +1422,41 @@ void main() {
         'type': 'keydown',
         'keymap': 'web',
         'code': 'Escape',
-        'key': null,
+        'key': '',
         'metaState': 0x0,
       });
       final RawKeyEventDataWeb data = escapeKeyEvent.data as RawKeyEventDataWeb;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.escape));
       expect(data.logicalKey, equals(LogicalKeyboardKey.escape));
-      expect(data.keyLabel, isNull);
+      expect(data.keyLabel, '');
     });
     test('Modifier keyboard keys are correctly translated', () {
       final RawKeyEvent shiftKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
         'keymap': 'web',
         'code': 'ShiftLeft',
-        'keyLabel': null,
+        'key': '',
+        'keyLabel': '',
         'metaState': RawKeyEventDataWeb.modifierShift,
       });
       final RawKeyEventDataWeb data = shiftKeyEvent.data as RawKeyEventDataWeb;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.shiftLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.shiftLeft));
-      expect(data.keyLabel, isNull);
+      expect(data.keyLabel, '');
     });
+
     test('Arrow keys from a keyboard give correct physical key mappings', () {
       final RawKeyEvent arrowKeyDown = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
         'keymap': 'web',
         'code': 'ArrowDown',
-        'key': null,
+        'key': '',
         'metaState': 0x0,
       });
       final RawKeyEventDataWeb data = arrowKeyDown.data as RawKeyEventDataWeb;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.arrowDown));
       expect(data.logicalKey, equals(LogicalKeyboardKey.arrowDown));
-      expect(data.keyLabel, isNull);
+      expect(data.keyLabel, '');
     });
   });
 }

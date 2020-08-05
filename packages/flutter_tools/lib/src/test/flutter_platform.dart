@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/features.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:stream_channel/stream_channel.dart';
@@ -844,6 +845,8 @@ class FlutterPlatform extends PlatformPlugin {
       '--non-interactive',
       '--use-test-fonts',
       '--packages=$packages',
+      if (featureFlags.areNullAssertionsEnabled)
+        '--dart-flags=--null_assertions',
       testPath,
     ];
 
