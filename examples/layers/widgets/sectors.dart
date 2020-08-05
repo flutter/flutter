@@ -97,7 +97,6 @@ class SectorAppState extends State<SectorApp> {
           child: Row(
             children: <Widget>[
               ElevatedButton(
-                style: ElevatedButton.styleFrom(primary: Colors.grey[300], onPrimary: Colors.black),
                 onPressed: _enabledAdd ? addSector : null,
                 child: IntrinsicWidth(
                   child: Row(
@@ -113,7 +112,6 @@ class SectorAppState extends State<SectorApp> {
                 ),
               ),
               ElevatedButton(
-                style: ElevatedButton.styleFrom(primary: Colors.grey[300], onPrimary: Colors.black),
                 onPressed: _enabledRemove ? removeSector : null,
                 child: IntrinsicWidth(
                   child: Row(
