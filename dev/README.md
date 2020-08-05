@@ -7,7 +7,7 @@ The tests in this directory are run in the `framework_tests_misc-*`
 shards.
 
 ## Luci builder file
-`flutter_try_builders.json` and `flutter_prod_builders.json` contain the
+`try_builders.json` and `prod_builders.json` contain the
 supported luci try/prod builders for engine. They follow format:
 ```json
 {
