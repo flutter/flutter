@@ -95,7 +95,7 @@ abstract class WidgetsBindingObserver {
   /// [SystemChannels.navigation].
   Future<bool> didPopRoute() => Future<bool>.value(false);
 
-  /// Called when the host tells the app to push a new route onto the
+  /// Called when the host tells the application to push a new route onto the
   /// navigator.
   ///
   /// Observers are expected to return true if they were able to
@@ -106,16 +106,29 @@ abstract class WidgetsBindingObserver {
   /// [SystemChannels.navigation].
   Future<bool> didPushRoute(String route) => Future<bool>.value(false);
 
-  /// Called when the host tells the app to push a new route information onto
-  /// the router.
+  /// Called when the host tells the application to push a new
+  /// [RouteInformation] and a restoration state onto the router.
+  ///
+  /// The [restorationData] contains the restoration information that the
+  /// platform wants this application to restore if this application opt for
+  /// state restoration. Otherwise, The [restorationData] will be null.
   ///
   /// Observers are expected to return true if they were able to
   /// handle the notification. Observers are notified in registration
   /// order until one returns true.
   ///
   /// This method exposes the `pushRouteInformation` notification from
-  /// [SystemChannels.router].
-  Future<bool> didPushRouteInformation(String route, Object state) => Future<bool>.value(false);
+  /// [SystemChannels.navigation].
+  ///
+  /// The default implementation is to call the [didPushRoute] directly with the
+  /// input string [location].
+  Future<bool> didPushRouteInformation(
+    String location,
+    Object state,
+    Map<dynamic, dynamic> restorationData
+  ) {
+    return didPushRoute(location);
+  }
 
   /// Called when the application's dimensions change. For example,
   /// when a phone is rotated.
@@ -281,7 +294,6 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     window.onLocaleChanged = handleLocaleChanged;
     window.onAccessibilityFeaturesChanged = handleAccessibilityFeaturesChanged;
     SystemChannels.navigation.setMethodCallHandler(_handleNavigationInvocation);
-    SystemChannels.router.setMethodCallHandler(_handleRouterInvocation);
     FlutterErrorDetails.propertiesTransformers.add(transformDebugCreator);
   }
 
@@ -671,20 +683,12 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       if (
         await observer.didPushRouteInformation(
           routeArguments['location'] as String,
-          routeArguments['state'] as Object
+          routeArguments['state'] as Object,
+          routeArguments['restorationData'] as Map<dynamic, dynamic>
         )
       )
       return;
     }
-  }
-
-  Future<dynamic> _handleRouterInvocation(MethodCall methodCall) {
-    switch (methodCall.method) {
-      case 'pushRouteInformation':
-        print('pushRouteInformation hit');
-        return _handlePushRouteInformation(methodCall.arguments as Map<dynamic, dynamic>);
-    }
-    return Future<dynamic>.value();
   }
 
   Future<dynamic> _handleNavigationInvocation(MethodCall methodCall) {
@@ -693,6 +697,8 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         return handlePopRoute();
       case 'pushRoute':
         return handlePushRoute(methodCall.arguments as String);
+      case 'pushRouteInformation':
+        return _handlePushRouteInformation(methodCall.arguments as Map<dynamic, dynamic>);
     }
     return Future<dynamic>.value();
   }

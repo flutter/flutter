@@ -160,8 +160,8 @@ void main() {
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.location);
       },
-      onPopPage: (Route<void> route, void result) {
-        provider.value = const RouteInformation(
+      onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
+        delegate.routeInformation = const RouteInformation(
           location: 'popped',
         );
         return route.didPop(result);
@@ -183,7 +183,7 @@ void main() {
 }
 
 typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext, RouteInformation);
-typedef SimpleNavigatorRouterDelegatePopPage<T> = bool Function(Route<T> route, T result);
+typedef SimpleNavigatorRouterDelegatePopPage<T> = bool Function(Route<T> route, T result, SimpleNavigatorRouterDelegate delegate);
 
 class SimpleRouteInformationParser extends RouteInformationParser<RouteInformation> {
   SimpleRouteInformationParser();
@@ -225,7 +225,7 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
   }
 
   bool _handlePopPage(Route<void> route, void data) {
-    return onPopPage(route, data);
+    return onPopPage(route, data, this);
   }
 
   @override

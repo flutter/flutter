@@ -15,13 +15,19 @@ class RouteNotificationMessages {
   // ignore: unused_element
   RouteNotificationMessages._();
 
-  /// When the engine is Web notify the platform for a route information change.
-  static void maybeNotifyRouteInformationChange(RouteInformation routeInformation, RouteInformation previousRouteInformation) {
-    if(kIsWeb) {
-      _notifyRouteInformationChange(routeInformation, previousRouteInformation);
-    } else {
-      // No op.
-    }
+  /// Notifies the platform for a route information change.
+  ///
+  /// See also:
+  ///
+  ///  * [SystemChannels.navigation], which handles subsequent navigation
+  ///    requests.
+  static void notifyRouteInformationChange(RouteInformation routeInformation) {
+    SystemChannels.navigation.invokeMethod<void>(
+      'routeInformationUpdated',
+      <String, dynamic>{
+        'routeInformation': _convertRouteInformationToMap(routeInformation),
+      },
+    );
   }
 
   /// When the engine is Web notify the platform for a route change.
@@ -31,21 +37,6 @@ class RouteNotificationMessages {
     } else {
       // No op.
     }
-  }
-
-  /// Notifies the platform of a route information change.
-  ///
-  /// See also:
-  ///
-  ///  * [SystemChannels.router], which handles subsequent router requests
-  static void _notifyRouteInformationChange(RouteInformation routeInformation, RouteInformation previousRouteInformation) {
-    SystemChannels.router.invokeMethod<void>(
-      'routeInformationUpdated',
-      <String, dynamic>{
-        'previousRouteName': _convertRouteInformationToMap(previousRouteInformation),
-        'routeName': _convertRouteInformationToMap(routeInformation),
-      },
-    );
   }
 
   static Map<String, dynamic> _convertRouteInformationToMap(RouteInformation routeInformation) {

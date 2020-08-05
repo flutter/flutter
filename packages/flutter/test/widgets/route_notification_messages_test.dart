@@ -268,7 +268,7 @@ void main() {
 
   testWidgets('PlatformRouteInformationProvider reports URL', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
-    SystemChannels.router.setMockMethodCallHandler((MethodCall methodCall) async {
+    SystemChannels.navigation.setMockMethodCallHandler((MethodCall methodCall) async {
       log.add(methodCall);
     });
 
@@ -303,23 +303,7 @@ void main() {
     expect(
       log.last,
       isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{
-        'previousRouteName': convertRouteInformationToMap(const RouteInformation(location: 'initial')),
-        'routeName': convertRouteInformationToMap(const RouteInformation(location: 'update')),
-      }),
-    );
-
-    // The other alternative way to trigger the rebuild also reports correctly.
-    provider.value = const RouteInformation(
-      location: 'update2',
-    );
-    await tester.pump();
-    expect(find.text('update2'), findsOneWidget);
-    expect(log, hasLength(2));
-    expect(
-      log.last,
-      isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{
-        'previousRouteName': convertRouteInformationToMap(const RouteInformation(location: 'update')),
-        'routeName': convertRouteInformationToMap(const RouteInformation(location: 'update2')),
+        'routeInformation': convertRouteInformationToMap(const RouteInformation(location: 'update')),
       }),
     );
   });

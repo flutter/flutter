@@ -19,7 +19,9 @@ import 'route_notification_messages.dart';
 /// A piece of routing information.
 ///
 /// The route information consists of a location string of the application and
-/// a state object that configures the application in that location.
+/// a state object that configures the application in that location. It also
+/// includes an additional restoration information which is only used when the
+/// web engine wants to restore the application to previous state.
 ///
 /// This information flows two ways, from the [RouteInformationProvider] to the
 /// [Router] or from the [Router] to [RouteInformationProvider].
@@ -56,6 +58,14 @@ class RouteInformation {
   ///
   /// The state must be serializable.
   final Object state;
+
+  /// The restoration information of the application.
+  ///
+  /// This is currently only used in web applications. The web engine will not
+  /// only provide [location] and [state] when it want to push a new route, but
+  /// it will also provide a restoration information if the application opts for
+  /// state restoration.
+  Map<dynamic, dynamic> get restorationData => null;
 }
 
 /// The dispatcher for opening and closing pages of an application.
@@ -120,7 +130,7 @@ class RouteInformation {
 /// Using asynchronous computation is entirely reasonable, however, and the API
 /// is designed to support it. For example, maybe a set of images need to be
 /// loaded before a route can be shown; waiting for those images to be loaded
-/// before [RouterDelegate.pushRoute] returns is a reasonable approach to
+/// before [RouterDelegate.setNewRoutePath] returns is a reasonable approach to
 /// handle this case.
 ///
 /// If an asynchronous operation is ongoing when a new one is to be started, the
@@ -383,7 +393,7 @@ enum _IntentionToReportRouteInformation {
 class _RouterState<T> extends State<Router<T>> {
   Object _currentRouteInformationParserTransaction;
   Object _currentRouterDelegateTransaction;
-  _IntentionToReportRouteInformation _currentIntentionToReporting;
+  _IntentionToReportRouteInformation _currentIntentionToReport;
 
   @override
   void initState() {
@@ -391,55 +401,63 @@ class _RouterState<T> extends State<Router<T>> {
     widget.routeInformationProvider?.addListener(_handleRouteInformationProviderNotification);
     widget.backButtonDispatcher?.addCallback(_handleBackButtonDispatcherNotification);
     widget.routerDelegate.addListener(_handleRouterDelegateNotification);
-    _currentIntentionToReporting = _IntentionToReportRouteInformation.none;
+    _currentIntentionToReport = _IntentionToReportRouteInformation.none;
     if (widget.routeInformationProvider != null) {
       _processInitialRoute();
     }
     _lastSeenLocation = widget.routeInformationProvider?.value?.location;
   }
-  Object _scheduledRouteInformationReportTask;
+
+  bool _routeInformationReportingTaskScheduled = false;
+
   String _lastSeenLocation;
-  void _scheduleRouteInformationReportTask() {
-    if (_scheduledRouteInformationReportTask != null)
+
+  void _scheduleRouteInformationReportingTask() {
+    if (_routeInformationReportingTaskScheduled)
       return;
-    _scheduledRouteInformationReportTask = Object();
-    SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
-      assert(_scheduledRouteInformationReportTask != null);
-      _scheduledRouteInformationReportTask = null;
-      switch (_currentIntentionToReporting) {
-        case _IntentionToReportRouteInformation.none:
-          return;
+    assert(_currentIntentionToReport != _IntentionToReportRouteInformation.none);
+    _routeInformationReportingTaskScheduled = true;
+    SchedulerBinding.instance.addPostFrameCallback(_reportRouteInformation);
+  }
 
-        case _IntentionToReportRouteInformation.ignore:
+  void _reportRouteInformation(Duration timestamp) {
+    assert(_routeInformationReportingTaskScheduled);
+    _routeInformationReportingTaskScheduled = false;
+
+    switch (_currentIntentionToReport) {
+      case _IntentionToReportRouteInformation.none:
+        assert(false);
+        return;
+
+      case _IntentionToReportRouteInformation.ignore:
         // In the ignore case, we still want to update the _lastSeenLocation.
-          final RouteInformation routeInformation = _retrieveNewRouteInformation();
-          if (routeInformation != null) {
-            _lastSeenLocation = routeInformation.location;
-          }
-          _currentIntentionToReporting = _IntentionToReportRouteInformation.none;
-          return;
+        final RouteInformation routeInformation = _retrieveNewRouteInformation();
+        if (routeInformation != null) {
+          _lastSeenLocation = routeInformation.location;
+        }
+        _currentIntentionToReport = _IntentionToReportRouteInformation.none;
+        return;
 
-        case _IntentionToReportRouteInformation.maybe:
-          final RouteInformation routeInformation = _retrieveNewRouteInformation();
-          if (routeInformation != null) {
-            if (_lastSeenLocation != routeInformation.location) {
-              widget.routeInformationProvider.routerReportsNewRouteInformation(routeInformation);
-              _lastSeenLocation = routeInformation.location;
-            }
-          }
-          _currentIntentionToReporting = _IntentionToReportRouteInformation.none;
-          return;
-
-        case _IntentionToReportRouteInformation.must:
-          final RouteInformation routeInformation = _retrieveNewRouteInformation();
-          if (routeInformation != null) {
+      case _IntentionToReportRouteInformation.maybe:
+        final RouteInformation routeInformation = _retrieveNewRouteInformation();
+        if (routeInformation != null) {
+          if (_lastSeenLocation != routeInformation.location) {
             widget.routeInformationProvider.routerReportsNewRouteInformation(routeInformation);
             _lastSeenLocation = routeInformation.location;
           }
-          _currentIntentionToReporting = _IntentionToReportRouteInformation.none;
-          return;
-      }
-    });
+        }
+        _currentIntentionToReport = _IntentionToReportRouteInformation.none;
+        return;
+
+      case _IntentionToReportRouteInformation.must:
+        final RouteInformation routeInformation = _retrieveNewRouteInformation();
+        if (routeInformation != null) {
+          widget.routeInformationProvider.routerReportsNewRouteInformation(routeInformation);
+          _lastSeenLocation = routeInformation.location;
+        }
+        _currentIntentionToReport = _IntentionToReportRouteInformation.none;
+        return;
+    }
   }
 
   RouteInformation _retrieveNewRouteInformation() {
@@ -471,8 +489,8 @@ class _RouterState<T> extends State<Router<T>> {
     assert(status != null);
     assert(status.index >= _IntentionToReportRouteInformation.must.index);
     assert(() {
-      if (_currentIntentionToReporting.index >= _IntentionToReportRouteInformation.must.index &&
-          _currentIntentionToReporting != status) {
+      if (_currentIntentionToReport.index >= _IntentionToReportRouteInformation.must.index &&
+          _currentIntentionToReport != status) {
         FlutterError.reportError(
           const FlutterErrorDetails(
             exception:
@@ -485,16 +503,16 @@ class _RouterState<T> extends State<Router<T>> {
       }
       return true;
     }());
-    _currentIntentionToReporting = status;
-    _scheduleRouteInformationReportTask();
+    _currentIntentionToReport = status;
+    _scheduleRouteInformationReportingTask();
     fn();
   }
 
   void _maybeNeedToReportRouteInformation() {
-    _currentIntentionToReporting = _currentIntentionToReporting != _IntentionToReportRouteInformation.none
-      ? _currentIntentionToReporting
+    _currentIntentionToReport = _currentIntentionToReport != _IntentionToReportRouteInformation.none
+      ? _currentIntentionToReport
       : _IntentionToReportRouteInformation.maybe;
-    _scheduleRouteInformationReportTask();
+    _scheduleRouteInformationReportingTask();
   }
 
   @override
@@ -753,7 +771,7 @@ class _CallbackHookProvider<T> {
 /// [ChildBackButtonDispatcher]) instance.
 ///
 /// The class takes a single callback, which must return a [Future<bool>]. The
-/// callback's semantics match [WidgetsFlutterBinding.didPopRoute]'s, namely,
+/// callback's semantics match [WidgetsBindingObserver.didPopRoute]'s, namely,
 /// the callback should return a future that completes to true if it can handle
 /// the pop request, and a future that completes to false otherwise.
 abstract class BackButtonDispatcher extends _CallbackHookProvider<Future<bool>> {
@@ -889,8 +907,7 @@ abstract class BackButtonDispatcher extends _CallbackHookProvider<Future<bool>> 
 /// This dispatcher listens to platform pop route notifications. When the
 /// platform wants to pop the current route, this dispatcher calls the
 /// [BackButtonDispatcher.invokeCallback] method to handle the request.
-class RootBackButtonDispatcher extends BackButtonDispatcher
-    with WidgetsBindingObserver {
+class RootBackButtonDispatcher extends BackButtonDispatcher with WidgetsBindingObserver {
   /// Create a root back button dispatcher.
   RootBackButtonDispatcher();
 
@@ -1001,7 +1018,7 @@ abstract class RouteInformationParser<T> {
   RouteInformation restoreRouteInformation(T configuration) => null;
 }
 
-/// A delegate that is used by the [router] widget to build and configure a
+/// A delegate that is used by the [Router] widget to build and configure a
 /// navigating widget.
 ///
 /// This delegate is the core piece of the [Router] widget. It responds to
@@ -1011,15 +1028,15 @@ abstract class RouteInformationParser<T> {
 /// builds.
 ///
 /// When engine pushes a new route, the route information is parsed by the
-/// [RouteInformationParser] to produce a configuration of type T. The router delegate
-/// receives the configuration through [setInitialRoutePath] or
+/// [RouteInformationParser] to produce a configuration of type T. The router
+/// delegate receives the configuration through [setInitialRoutePath] or
 /// [setNewRoutePath] to configure itself and builds the latest navigating
 /// widget upon asked.
 ///
-/// When implementing subclass, consider defining a listenable app
-/// state to be used for building the navigating widget. The router delegate
-/// should update the app state accordingly and notify the listener know the app
-/// state has changed when it receive route related engine intents (e.g.
+/// When implementing subclass, consider defining a listenable app state to be
+/// used for building the navigating widget. The router delegate should update
+/// the app state accordingly and notify the listener know the app state has
+/// changed when it receive route related engine intents (e.g.
 /// [setNewRoutePath], [setInitialRoutePath], or [popRoute]).
 ///
 /// All subclass must implement [setNewRoutePath], [popRoute], and [build].
@@ -1060,10 +1077,6 @@ abstract class RouterDelegate<T> extends Listenable {
   /// The method should return a boolean [Future] to indicate whether this
   /// delegate handles the request. Returning false will cause the entire app
   /// to be popped.
-  ///
-  /// If the app state has changed as a result the pop, make sure to call the
-  /// [notifyListeners] so that the listener, typically the [Router], can
-  /// respond accordingly.
   ///
   /// Consider using a [SynchronousFuture] if the result can be computed
   /// synchronously, so that the [Router] does not need to wait for the next
@@ -1146,6 +1159,19 @@ abstract class RouteInformationProvider extends ValueListenable<RouteInformation
   void routerReportsNewRouteInformation(RouteInformation routeInformation) {}
 }
 
+/// This class is used by the [PlatformRouteInformationProvider] to carry
+/// additional restoration information from the platform.
+class _PlatformRouteInformation extends RouteInformation {
+  const _PlatformRouteInformation({
+    String location,
+    Object state,
+    this.restorationData
+  }) : super(location: location, state: state);
+
+  @override
+  final Map<dynamic, dynamic> restorationData;
+}
+
 /// The route information provider that propagates the platform route information changes.
 ///
 /// This provider also reports the new route information from the [Router] widget
@@ -1156,45 +1182,25 @@ class PlatformRouteInformationProvider extends RouteInformationProvider with Wid
   ///
   /// Use the [initialRouteInformation] to set the default route information for this
   /// provider.
-  PlatformRouteInformationProvider({RouteInformation initialRouteInformation})
-      : _value = initialRouteInformation,
-        _currentRouteInformationInEngine = initialRouteInformation;
-
-  RouteInformation _currentRouteInformationInEngine;
+  PlatformRouteInformationProvider({
+    RouteInformation initialRouteInformation
+  }) : _value = initialRouteInformation;
 
   @override
   void routerReportsNewRouteInformation(RouteInformation routeInformation) {
-    RouteNotificationMessages.maybeNotifyRouteInformationChange(
-      routeInformation,
-      _currentRouteInformationInEngine
-    );
-    _currentRouteInformationInEngine = routeInformation;
+    RouteNotificationMessages.notifyRouteInformationChange(routeInformation);
     _value = routeInformation;
-  }
-
-  void _updateAndNotify(RouteInformation newValue) {
-    assert(_value != newValue);
-    _value = newValue;
-    notifyListeners();
   }
 
   @override
   RouteInformation get value => _value;
   RouteInformation _value;
-  set value(RouteInformation newValue) {
-    if (_value == newValue)
-      return;
-    _updateAndNotify(newValue);
-    routerReportsNewRouteInformation(newValue);
-  }
 
   void _platformReportsNewRouteInformation(RouteInformation routeInformation) {
     if (_value == routeInformation)
       return;
-    _updateAndNotify(routeInformation);
-    // We can't use the routerReportsNewRouteInformation because we don't want
-    // to report it back to the engine again.
-    _currentRouteInformationInEngine = routeInformation;
+    _value = routeInformation;
+    notifyListeners();
   }
 
   @override
@@ -1223,11 +1229,26 @@ class PlatformRouteInformationProvider extends RouteInformationProvider with Wid
   }
 
   @override
-  Future<bool> didPushRouteInformation(String route, Object state) async {
+  Future<bool> didPushRouteInformation(
+    String location,
+    Object state,
+    Map<dynamic, dynamic> restorationData,
+  ) async {
     assert(hasListeners);
     _platformReportsNewRouteInformation(
-      RouteInformation(location:route, state: state),
+      _PlatformRouteInformation(
+        location: location,
+        state: state,
+        restorationData: restorationData
+      ),
     );
+    return true;
+  }
+
+  @override
+  Future<bool> didPushRoute(String route) async {
+    assert(hasListeners);
+    _platformReportsNewRouteInformation(RouteInformation(location: route));
     return true;
   }
 }

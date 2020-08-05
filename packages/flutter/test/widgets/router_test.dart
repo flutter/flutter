@@ -386,7 +386,7 @@ void main() {
     );
     final SimpleRouterDelegate delegate = SimpleRouterDelegate(reportConfiguration: true);
     delegate.builder = (BuildContext context, RouteInformation information) {
-      return RaisedButton(
+      return ElevatedButton(
         child: Text(information.location),
         onPressed: () {
           if (isNavigating) {
@@ -419,7 +419,7 @@ void main() {
     nextRouteInformation = const RouteInformation(
       location: 'update',
     );
-    await tester.tap(find.byType(RaisedButton));
+    await tester.tap(find.byType(ElevatedButton));
     await tester.pump();
     expect(find.text('initial'), findsNothing);
     expect(find.text('update'), findsOneWidget);
@@ -429,7 +429,7 @@ void main() {
     // This should not trigger any real navigating event because the
     // nextRouteInformation does not change. However, the router should still
     // report a route information because isNavigating = true.
-    await tester.tap(find.byType(RaisedButton));
+    await tester.tap(find.byType(ElevatedButton));
     await tester.pump();
     expect(reportedRouteInformation.location, 'update');
   });
@@ -443,11 +443,12 @@ void main() {
     final SimpleRouterDelegate delegate = SimpleRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
         final List<Widget> children = <Widget>[];
-        print('build ${information.location}, and ${information.state}');
         if (information.location != null)
           children.add(Text(information.location));
         if (information.state != null)
           children.add(Text(information.state.toString()));
+        if (information.restorationData != null)
+          children.add(Text(information.restorationData.toString()));
         return Column(
           children: children,
         );
@@ -461,18 +462,30 @@ void main() {
     ));
     expect(find.text('initial'), findsOneWidget);
 
-    // Pushes through router method channel
+    const Map<dynamic, dynamic> restorationData = <dynamic, dynamic>{'test': 'data'};
+
+    // Pushes through the `pushRouteInformation` in the navigation method channel.
     const Map<String, dynamic> testRouteInformation = <String, dynamic>{
       'location': 'testRouteName',
       'state': 'state',
+      'restorationData': restorationData,
     };
-    final ByteData routerMessage = const StandardMethodCodec().encodeMethodCall(
+    final ByteData routerMessage = const JSONMethodCodec().encodeMethodCall(
       const MethodCall('pushRouteInformation', testRouteInformation)
     );
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/router', routerMessage, (_) { });
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', routerMessage, (_) { });
     await tester.pump();
     expect(find.text('testRouteName'), findsOneWidget);
     expect(find.text('state'), findsOneWidget);
+    expect(find.text(restorationData.toString()), findsOneWidget);
+
+    // Pushes through the `pushRoute` in the navigation method channel.
+    const String testRouteName = 'newTestRouteName';
+    final ByteData message = const JSONMethodCodec().encodeMethodCall(
+      const MethodCall('pushRoute', testRouteName));
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await tester.pump();
+    expect(find.text('newTestRouteName'), findsOneWidget);
   });
 
   testWidgets('RootBackButtonDispatcher works', (WidgetTester tester) async {

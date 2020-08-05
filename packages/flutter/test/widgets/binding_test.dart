@@ -43,11 +43,17 @@ class PushRouteObserver with WidgetsBindingObserver {
 class PushRouteInformationObserver with WidgetsBindingObserver {
   String pushedRoute;
   Object pushedState;
+  Map<dynamic, dynamic> pushedConfig;
 
   @override
-  Future<bool> didPushRouteInformation(String route, Object state) async {
-    pushedRoute = route;
+  Future<bool> didPushRouteInformation(
+    String location,
+    Object state,
+    Map<dynamic, dynamic> restorationData
+  ) async {
+    pushedRoute = location;
     pushedState = state;
+    pushedConfig = restorationData;
     return true;
   }
 }
@@ -89,7 +95,7 @@ void main() {
     expect(observer.lifecycleState, AppLifecycleState.detached);
   });
 
-  testWidgets('didPushRoute callback - navigation', (WidgetTester tester) async {
+  testWidgets('didPushRoute callback', (WidgetTester tester) async {
     final PushRouteObserver observer = PushRouteObserver();
     WidgetsBinding.instance.addObserver(observer);
 
@@ -102,20 +108,37 @@ void main() {
     WidgetsBinding.instance.removeObserver(observer);
   });
 
-  testWidgets('didPushRoute callback - router', (WidgetTester tester) async {
+  testWidgets('didPushRouteInformation calls didPushRoute by default', (WidgetTester tester) async {
+    final PushRouteObserver observer = PushRouteObserver();
+    WidgetsBinding.instance.addObserver(observer);
+
+    const Map<String, dynamic> testRouteInformation = <String, dynamic>{
+      'location': 'testRouteName',
+      'state': 'state',
+      'restorationData': <dynamic, dynamic>{'test': 'config'}
+    };
+    final ByteData message = const JSONMethodCodec().encodeMethodCall(
+      const MethodCall('pushRouteInformation', testRouteInformation));
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    expect(observer.pushedRoute, 'testRouteName');
+    WidgetsBinding.instance.removeObserver(observer);
+  });
+
+  testWidgets('didPushRouteInformation callback', (WidgetTester tester) async {
     final PushRouteInformationObserver observer = PushRouteInformationObserver();
     WidgetsBinding.instance.addObserver(observer);
 
     const Map<String, dynamic> testRouteInformation = <String, dynamic>{
       'location': 'testRouteName',
       'state': 'state',
+      'restorationData': <dynamic, dynamic>{'test': 'config'}
     };
-    final ByteData message = const StandardMethodCodec().encodeMethodCall(
+    final ByteData message = const JSONMethodCodec().encodeMethodCall(
       const MethodCall('pushRouteInformation', testRouteInformation));
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/router', message, (_) { });
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     expect(observer.pushedRoute, 'testRouteName');
     expect(observer.pushedState, 'state');
-
+    expect(observer.pushedConfig['test'], 'config');
     WidgetsBinding.instance.removeObserver(observer);
   });
 

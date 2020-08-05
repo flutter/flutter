@@ -26,16 +26,19 @@ class SystemChannels {
   ///  * `pushRoute`, which is called with a single string argument when the
   ///    operating system instructs the application to open a particular page.
   ///
+  ///  * `pushRouteInformation`, which is called with a map, which contains a
+  ///    location string, a state object and a restoration config, when the
+  ///    operating system instructs the application to open a particular page.
+  ///    These parameters are store under the key`location`, `state` and
+  ///    `restorationData` in the map.
+  ///
   /// The following methods are used for the opposite direction data flow. The
   /// framework notifies the engine about the route changes.
   ///
-  ///  * `routePushed`, which is called when a route is pushed. (e.g. A modal
-  ///    replaces the entire screen.)
+  ///  * `routeUpdated`, which is called when current route has changed.
   ///
-  ///  * `routePopped`, which is called when a route is popped. (e.g. A dialog,
-  ///    such as time picker is closed.)
-  ///
-  ///  * `routeReplaced`, which is called when a route is replaced.
+  ///  * `routeInformationUpdated`, which is called by the [Router] when
+  ///    applications navigate to new locations.
   ///
   /// See also:
   ///
@@ -106,21 +109,6 @@ class SystemChannels {
   static const MethodChannel platform = OptionalMethodChannel(
       'flutter/platform',
       JSONMethodCodec(),
-  );
-
-  /// A [MethodChannel] for router events.
-  ///
-  /// This channel exposes the APIs to push or report new route information from
-  /// or to an application.
-  ///
-  /// * `WidgetsBindingObserver.didPushRouteInformation` handles the platform
-  ///   intent that pushes new route information.
-  ///
-  /// * `RouteNotificationMessages.maybeNotifyRouteInformationChange` uses this
-  ///   channel to set route information update to the engine.
-  static const MethodChannel router = MethodChannel(
-    'flutter/router',
-    StandardMethodCodec(),
   );
 
   /// A JSON [MethodChannel] for handling text input.
