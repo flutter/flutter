@@ -32,32 +32,7 @@ FlutterViewController::FlutterViewController(int width,
     return;
   }
   view_ = std::make_unique<FlutterView>(FlutterDesktopGetView(controller_));
-}
-
-FlutterViewController::FlutterViewController(
-    const std::string& icu_data_path,
-    int width,
-    int height,
-    const std::string& assets_path,
-    const std::vector<std::string>& arguments) {
-  if (controller_) {
-    std::cerr << "Only one Flutter view can exist at a time." << std::endl;
-  }
-
-  std::vector<const char*> engine_arguments;
-  std::transform(
-      arguments.begin(), arguments.end(), std::back_inserter(engine_arguments),
-      [](const std::string& arg) -> const char* { return arg.c_str(); });
-  size_t arg_count = engine_arguments.size();
-
-  controller_ = FlutterDesktopCreateViewControllerLegacy(
-      width, height, assets_path.c_str(), icu_data_path.c_str(),
-      arg_count > 0 ? &engine_arguments[0] : nullptr, arg_count);
-  if (!controller_) {
-    std::cerr << "Failed to create view controller." << std::endl;
-    return;
-  }
-  view_ = std::make_unique<FlutterView>(FlutterDesktopGetView(controller_));
+  engine_ = FlutterDesktopGetEngine(controller_);
 }
 
 FlutterViewController::~FlutterViewController() {
@@ -67,18 +42,16 @@ FlutterViewController::~FlutterViewController() {
 }
 
 std::chrono::nanoseconds FlutterViewController::ProcessMessages() {
-  return std::chrono::nanoseconds(FlutterDesktopProcessMessages(controller_));
+  return std::chrono::nanoseconds(FlutterDesktopProcessMessages(engine_));
 }
 
 FlutterDesktopPluginRegistrarRef FlutterViewController::GetRegistrarForPlugin(
     const std::string& plugin_name) {
-  if (!controller_) {
-    std::cerr << "Cannot get plugin registrar without a window; call "
-                 "CreateWindow first."
-              << std::endl;
+  if (!engine_) {
+    std::cerr << "Cannot get plugin registrar without an engine." << std::endl;
     return nullptr;
   }
-  return FlutterDesktopGetPluginRegistrar(controller_, plugin_name.c_str());
+  return FlutterDesktopGetPluginRegistrar(engine_, plugin_name.c_str());
 }
 
 }  // namespace flutter

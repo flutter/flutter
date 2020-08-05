@@ -33,13 +33,6 @@ class FlutterViewController : public PluginRegistry {
                                  int height,
                                  const DartProject& project);
 
-  // DEPRECATED. Will be removed soon; use the version above.
-  explicit FlutterViewController(const std::string& icu_data_path,
-                                 int width,
-                                 int height,
-                                 const std::string& assets_path,
-                                 const std::vector<std::string>& arguments);
-
   virtual ~FlutterViewController();
 
   // Prevent copying.
@@ -63,6 +56,9 @@ class FlutterViewController : public PluginRegistry {
  private:
   // Handle for interacting with the C API's view controller, if any.
   FlutterDesktopViewControllerRef controller_ = nullptr;
+
+  // |controller_|'s engine.
+  FlutterDesktopEngineRef engine_ = nullptr;
 
   // The owned FlutterView.
   std::unique_ptr<FlutterView> view_;

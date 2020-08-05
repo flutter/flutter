@@ -45,6 +45,7 @@ class DartProject {
   // flexible options for project structures are needed later without it
   // being a breaking change. Provide access to internal classes that need
   // them.
+  friend class FlutterEngine;
   friend class FlutterViewController;
   friend class DartProjectTest;
 

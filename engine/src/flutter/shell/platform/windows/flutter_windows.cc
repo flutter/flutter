@@ -19,6 +19,8 @@
 #include "flutter/shell/platform/common/cpp/incoming_message_dispatcher.h"
 #include "flutter/shell/platform/common/cpp/path_utils.h"
 #include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/windows/flutter_project_bundle.h"
+#include "flutter/shell/platform/windows/flutter_windows_engine.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
 #include "flutter/shell/platform/windows/win32_dpi_utils.h"
 #include "flutter/shell/platform/windows/win32_flutter_window.h"
@@ -29,172 +31,16 @@
 
 static_assert(FLUTTER_ENGINE_VERSION == 1, "");
 
-// Attempts to load AOT data from the given path, which must be absolute and
-// non-empty. Logs and returns nullptr on failure.
-UniqueAotDataPtr LoadAotData(std::filesystem::path aot_data_path) {
-  if (aot_data_path.empty()) {
-    std::cerr
-        << "Attempted to load AOT data, but no aot_library_path was provided."
-        << std::endl;
-    return nullptr;
-  }
-  if (!std::filesystem::exists(aot_data_path)) {
-    std::cerr << "Can't load AOT data from " << aot_data_path.u8string()
-              << "; no such file." << std::endl;
-    return nullptr;
-  }
-  std::string path_string = aot_data_path.u8string();
-  FlutterEngineAOTDataSource source = {};
-  source.type = kFlutterEngineAOTDataSourceTypeElfPath;
-  source.elf_path = path_string.c_str();
-  FlutterEngineAOTData data = nullptr;
-  auto result = FlutterEngineCreateAOTData(&source, &data);
-  if (result != kSuccess) {
-    std::cerr << "Failed to load AOT data from: " << path_string << std::endl;
-    return nullptr;
-  }
-  return UniqueAotDataPtr(data);
+// Returns the engine corresponding to the given opaque API handle.
+static flutter::FlutterWindowsEngine* EngineFromHandle(
+    FlutterDesktopEngineRef ref) {
+  return reinterpret_cast<flutter::FlutterWindowsEngine*>(ref);
 }
 
-// Spins up an instance of the Flutter Engine.
-//
-// This function launches the Flutter Engine in a background thread, supplying
-// the necessary callbacks for rendering within a win32window (if one is
-// provided).
-//
-// Returns the state object for the engine, or null on failure to start the
-// engine.
-static std::unique_ptr<FlutterDesktopEngineState> RunFlutterEngine(
-    flutter::FlutterWindowsView* view,
-    const FlutterDesktopEngineProperties& engine_properties) {
-  auto state = std::make_unique<FlutterDesktopEngineState>();
-
-  // FlutterProjectArgs is expecting a full argv, so when processing it for
-  // flags the first item is treated as the executable and ignored. Add a dummy
-  // value so that all provided arguments are used.
-  std::vector<const char*> argv = {"placeholder"};
-  if (engine_properties.switches_count > 0) {
-    argv.insert(argv.end(), &engine_properties.switches[0],
-                &engine_properties.switches[engine_properties.switches_count]);
-  }
-
-  view->CreateRenderSurface();
-
-  // Provide the necessary callbacks for rendering within a win32 child window.
-  FlutterRendererConfig config = {};
-  config.type = kOpenGL;
-  config.open_gl.struct_size = sizeof(config.open_gl);
-  config.open_gl.make_current = [](void* user_data) -> bool {
-    auto host = static_cast<flutter::FlutterWindowsView*>(user_data);
-    return host->MakeCurrent();
-  };
-  config.open_gl.clear_current = [](void* user_data) -> bool {
-    auto host = static_cast<flutter::FlutterWindowsView*>(user_data);
-    return host->ClearContext();
-  };
-  config.open_gl.present = [](void* user_data) -> bool {
-    auto host = static_cast<flutter::FlutterWindowsView*>(user_data);
-    return host->SwapBuffers();
-  };
-  config.open_gl.fbo_callback = [](void* user_data) -> uint32_t { return 0; };
-  config.open_gl.gl_proc_resolver = [](void* user_data,
-                                       const char* what) -> void* {
-    return reinterpret_cast<void*>(eglGetProcAddress(what));
-  };
-  config.open_gl.make_resource_current = [](void* user_data) -> bool {
-    auto host = static_cast<flutter::FlutterWindowsView*>(user_data);
-    return host->MakeResourceCurrent();
-  };
-
-  // Configure task runner interop.
-  auto state_ptr = state.get();
-  state->task_runner = std::make_unique<flutter::Win32TaskRunner>(
-      GetCurrentThreadId(), [state_ptr](const auto* task) {
-        if (FlutterEngineRunTask(state_ptr->engine, task) != kSuccess) {
-          std::cerr << "Could not post an engine task." << std::endl;
-        }
-      });
-  FlutterTaskRunnerDescription platform_task_runner = {};
-  platform_task_runner.struct_size = sizeof(FlutterTaskRunnerDescription);
-  platform_task_runner.user_data = state->task_runner.get();
-  platform_task_runner.runs_task_on_current_thread_callback =
-      [](void* user_data) -> bool {
-    return reinterpret_cast<flutter::Win32TaskRunner*>(user_data)
-        ->RunsTasksOnCurrentThread();
-  };
-  platform_task_runner.post_task_callback = [](FlutterTask task,
-                                               uint64_t target_time_nanos,
-                                               void* user_data) -> void {
-    reinterpret_cast<flutter::Win32TaskRunner*>(user_data)->PostTask(
-        task, target_time_nanos);
-  };
-
-  FlutterCustomTaskRunners custom_task_runners = {};
-  custom_task_runners.struct_size = sizeof(FlutterCustomTaskRunners);
-  custom_task_runners.platform_task_runner = &platform_task_runner;
-
-  std::filesystem::path assets_path(engine_properties.assets_path);
-  std::filesystem::path icu_path(engine_properties.icu_data_path);
-  std::filesystem::path aot_library_path =
-      engine_properties.aot_library_path == nullptr
-          ? std::filesystem::path()
-          : std::filesystem::path(engine_properties.aot_library_path);
-  if (assets_path.is_relative() || icu_path.is_relative() ||
-      (!aot_library_path.empty() && aot_library_path.is_relative())) {
-    // Treat relative paths as relative to the directory of this executable.
-    std::filesystem::path executable_location =
-        flutter::GetExecutableDirectory();
-    if (executable_location.empty()) {
-      std::cerr
-          << "Unable to find executable location to resolve resource paths."
-          << std::endl;
-      return nullptr;
-    }
-    assets_path = std::filesystem::path(executable_location) / assets_path;
-    icu_path = std::filesystem::path(executable_location) / icu_path;
-    if (!aot_library_path.empty()) {
-      aot_library_path =
-          std::filesystem::path(executable_location) / aot_library_path;
-    }
-  }
-  std::string assets_path_string = assets_path.u8string();
-  std::string icu_path_string = icu_path.u8string();
-
-  if (FlutterEngineRunsAOTCompiledDartCode()) {
-    state->aot_data = LoadAotData(aot_library_path);
-    if (!state->aot_data) {
-      std::cerr << "Unable to start engine without AOT data." << std::endl;
-      return nullptr;
-    }
-  }
-
-  FlutterProjectArgs args = {};
-  args.struct_size = sizeof(FlutterProjectArgs);
-  args.assets_path = assets_path_string.c_str();
-  args.icu_data_path = icu_path_string.c_str();
-  args.command_line_argc = static_cast<int>(argv.size());
-  args.command_line_argv = &argv[0];
-  args.platform_message_callback =
-      [](const FlutterPlatformMessage* engine_message,
-         void* user_data) -> void {
-    auto window = reinterpret_cast<flutter::FlutterWindowsView*>(user_data);
-    return window->HandlePlatformMessage(engine_message);
-  };
-  args.custom_task_runners = &custom_task_runners;
-  if (state->aot_data) {
-    args.aot_data = state->aot_data.get();
-  }
-
-  FLUTTER_API_SYMBOL(FlutterEngine) engine = nullptr;
-  auto result =
-      FlutterEngineRun(FLUTTER_ENGINE_VERSION, &config, &args, view, &engine);
-  if (result != kSuccess || engine == nullptr) {
-    std::cerr << "Failed to start Flutter engine: error " << result
-              << std::endl;
-    return nullptr;
-  }
-  state->engine = engine;
-  return state;
+// Returns opaque API handle for the given engine instance.
+static FlutterDesktopEngineRef HandleForEngine(
+    flutter::FlutterWindowsEngine* engine) {
+  return reinterpret_cast<FlutterDesktopEngineRef>(engine);
 }
 
 FlutterDesktopViewControllerRef FlutterDesktopCreateViewController(
@@ -204,59 +50,48 @@ FlutterDesktopViewControllerRef FlutterDesktopCreateViewController(
   std::unique_ptr<flutter::WindowBindingHandler> window_wrapper =
       std::make_unique<flutter::Win32FlutterWindow>(width, height);
 
-  FlutterDesktopViewControllerRef state =
-      flutter::FlutterWindowsView::CreateFlutterWindowsView(
-          std::move(window_wrapper));
+  auto state = std::make_unique<FlutterDesktopViewControllerState>();
+  state->view =
+      std::make_unique<flutter::FlutterWindowsView>(std::move(window_wrapper));
+  state->view->CreateRenderSurface();
+  state->view_wrapper = std::make_unique<FlutterDesktopView>();
+  state->view_wrapper->view = state->view.get();
 
-  auto engine_state = RunFlutterEngine(state->view.get(), engine_properties);
-
-  if (!engine_state) {
+  flutter::FlutterProjectBundle project(engine_properties);
+  auto engine = std::make_unique<flutter::FlutterWindowsEngine>(project);
+  if (!engine) {
     return nullptr;
   }
-  state->view->SetState(engine_state->engine);
-  state->engine_state = std::move(engine_state);
-  return state;
+  state->view->SetEngine(std::move(engine));
+  if (!state->view->GetEngine()->RunWithEntrypoint(
+          engine_properties.entry_point)) {
+    return nullptr;
+  }
+  return state.release();
 }
 
-FlutterDesktopViewControllerRef FlutterDesktopCreateViewControllerLegacy(
-    int initial_width,
-    int initial_height,
-    const char* assets_path,
-    const char* icu_data_path,
-    const char** arguments,
-    size_t argument_count) {
-  std::filesystem::path assets_path_fs = std::filesystem::u8path(assets_path);
-  std::filesystem::path icu_data_path_fs =
-      std::filesystem::u8path(icu_data_path);
-  FlutterDesktopEngineProperties engine_properties = {};
-  engine_properties.assets_path = assets_path_fs.c_str();
-  engine_properties.icu_data_path = icu_data_path_fs.c_str();
-  engine_properties.switches = arguments;
-  engine_properties.switches_count = argument_count;
-
-  return FlutterDesktopCreateViewController(initial_width, initial_height,
-                                            engine_properties);
-}
-
-uint64_t FlutterDesktopProcessMessages(
-    FlutterDesktopViewControllerRef controller) {
-  return controller->engine_state->task_runner->ProcessTasks().count();
+uint64_t FlutterDesktopProcessMessages(FlutterDesktopEngineRef engine) {
+  return EngineFromHandle(engine)->task_runner()->ProcessTasks().count();
 }
 
 void FlutterDesktopDestroyViewController(
     FlutterDesktopViewControllerRef controller) {
-  FlutterEngineShutdown(controller->engine_state->engine);
   delete controller;
 }
 
+FlutterDesktopEngineRef FlutterDesktopGetEngine(
+    FlutterDesktopViewControllerRef controller) {
+  return HandleForEngine(controller->view->GetEngine());
+}
+
 FlutterDesktopPluginRegistrarRef FlutterDesktopGetPluginRegistrar(
-    FlutterDesktopViewControllerRef controller,
+    FlutterDesktopEngineRef engine,
     const char* plugin_name) {
   // Currently, one registrar acts as the registrar for all plugins, so the
   // name is ignored. It is part of the API to reduce churn in the future when
   // aligning more closely with the Flutter registrar system.
 
-  return controller->view->GetRegistrar();
+  return EngineFromHandle(engine)->GetRegistrar();
 }
 
 FlutterDesktopViewRef FlutterDesktopGetView(
@@ -289,15 +124,20 @@ void FlutterDesktopResyncOutputStreams() {
 
 FlutterDesktopEngineRef FlutterDesktopRunEngine(
     const FlutterDesktopEngineProperties& engine_properties) {
-  auto engine = RunFlutterEngine(nullptr, engine_properties);
-  return engine.release();
+  flutter::FlutterProjectBundle project(engine_properties);
+  auto engine = std::make_unique<flutter::FlutterWindowsEngine>(project);
+  if (!engine->RunWithEntrypoint(engine_properties.entry_point)) {
+    return nullptr;
+  }
+  return HandleForEngine(engine.release());
 }
 
 bool FlutterDesktopShutDownEngine(FlutterDesktopEngineRef engine_ref) {
   std::cout << "Shutting down flutter engine process." << std::endl;
-  auto result = FlutterEngineShutdown(engine_ref->engine);
-  delete engine_ref;
-  return (result == kSuccess);
+  flutter::FlutterWindowsEngine* engine = EngineFromHandle(engine_ref);
+  bool result = engine->Stop();
+  delete engine;
+  return result;
 }
 
 void FlutterDesktopRegistrarEnableInputBlocking(
@@ -319,7 +159,7 @@ void FlutterDesktopRegistrarSetDestructionHandler(
 
 FlutterDesktopViewRef FlutterDesktopRegistrarGetView(
     FlutterDesktopPluginRegistrarRef registrar) {
-  return registrar->view;
+  return registrar->view.get();
 }
 
 bool FlutterDesktopMessengerSendWithReply(FlutterDesktopMessengerRef messenger,

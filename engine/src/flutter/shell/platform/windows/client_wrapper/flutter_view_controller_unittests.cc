@@ -25,16 +25,6 @@ class TestWindowsApi : public testing::StubFlutterWindowsApi {
 
 }  // namespace
 
-TEST(FlutterViewControllerTest, CreateDestroyLegacy) {
-  testing::ScopedStubFlutterWindowsApi scoped_api_stub(
-      std::make_unique<TestWindowsApi>());
-  auto test_api = static_cast<TestWindowsApi*>(scoped_api_stub.stub());
-  {
-    FlutterViewController controller("", 100, 100, "",
-                                     std::vector<std::string>{});
-  }
-}
-
 TEST(FlutterViewControllerTest, CreateDestroy) {
   DartProject project(L"data");
   testing::ScopedStubFlutterWindowsApi scoped_api_stub(

@@ -7,14 +7,15 @@
 
 #include <windowsx.h>
 
+#include <memory>
 #include <string>
 #include <vector>
 
 #include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/plugin_registrar.h"
-#include "flutter/shell/platform/common/cpp/incoming_message_dispatcher.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/windows/angle_surface_manager.h"
 #include "flutter/shell/platform/windows/cursor_handler.h"
+#include "flutter/shell/platform/windows/flutter_windows_engine.h"
 #include "flutter/shell/platform/windows/key_event_handler.h"
 #include "flutter/shell/platform/windows/keyboard_hook_handler.h"
 #include "flutter/shell/platform/windows/public/flutter_windows.h"
@@ -30,26 +31,18 @@ namespace flutter {
 // view that works with win32 hwnds and Windows::UI::Composition visuals.
 class FlutterWindowsView : public WindowBindingHandlerDelegate {
  public:
-  FlutterWindowsView();
+  // Creates a FlutterWindowsView with the given implementator of
+  // WindowBindingHandler.
+  //
+  // In order for object to render Flutter content the SetEngine method must be
+  // called with a valid FlutterWindowsEngine instance.
+  FlutterWindowsView(std::unique_ptr<WindowBindingHandler> window_binding);
 
   ~FlutterWindowsView();
 
-  // Factory for creating FlutterWindowsView requiring an implementator of
-  // WindowBindingHandler.  In order for object to render Flutter content
-  // the SetState method must be called with a valid FlutterEngine instance.
-  static FlutterDesktopViewControllerRef CreateFlutterWindowsView(
-      std::unique_ptr<WindowBindingHandler> window_binding);
-
   // Configures the window instance with an instance of a running Flutter
   // engine.
-  void SetState(FLUTTER_API_SYMBOL(FlutterEngine) state);
-
-  // Returns the currently configured Plugin Registrar.
-  FlutterDesktopPluginRegistrarRef GetRegistrar();
-
-  // Callback passed to Flutter engine for notifying window of platform
-  // messages.
-  void HandlePlatformMessage(const FlutterPlatformMessage*);
+  void SetEngine(std::unique_ptr<FlutterWindowsEngine> engine);
 
   // Creates rendering surface for Flutter engine to draw into.
   // Should be called before calling FlutterEngineRun using this view.
@@ -60,6 +53,9 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
 
   // Return the currently configured WindowsRenderTarget.
   WindowsRenderTarget* GetRenderTarget();
+
+  // Returns the engine backing this view.
+  FlutterWindowsEngine* GetEngine();
 
   // Callbacks for clearing context, settings context and swapping buffers.
   bool ClearContext();
@@ -189,20 +185,11 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   // surfaces. Surface creation functionality requires a valid render_target.
   std::unique_ptr<AngleSurfaceManager> surface_manager_;
 
-  // The handle to the Flutter engine instance.
-  FLUTTER_API_SYMBOL(FlutterEngine) engine_ = nullptr;
+  // The engine associated with this view.
+  std::unique_ptr<FlutterWindowsEngine> engine_;
 
   // Keeps track of mouse state in relation to the window.
   MouseState mouse_state_;
-
-  // The window handle given to API clients.
-  std::unique_ptr<FlutterDesktopView> window_wrapper_;
-
-  // The plugin registrar handle given to API clients.
-  std::unique_ptr<FlutterDesktopPluginRegistrar> plugin_registrar_;
-
-  // Message dispatch manager for messages from the Flutter engine.
-  std::unique_ptr<flutter::IncomingMessageDispatcher> message_dispatcher_;
 
   // The plugin registrar managing internal plugins.
   std::unique_ptr<flutter::PluginRegistrar> internal_plugin_registrar_;

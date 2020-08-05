@@ -25,7 +25,8 @@ typedef struct FlutterDesktopViewControllerState*
 typedef struct FlutterDesktopView* FlutterDesktopViewRef;
 
 // Opaque reference to a Flutter engine instance.
-typedef struct FlutterDesktopEngineState* FlutterDesktopEngineRef;
+struct FlutterDesktopEngine;
+typedef struct FlutterDesktopEngine* FlutterDesktopEngineRef;
 
 // Properties for configuring a Flutter engine instance.
 typedef struct {
@@ -44,6 +45,9 @@ typedef struct {
   // containing the executable. This can be nullptr for a non-AOT build, as
   // it will be ignored in that case.
   const wchar_t* aot_library_path;
+
+  // The entry point to use in the Dart project. If null, defaults to main().
+  const char* entry_point;
 
   // The switches to pass to the Flutter engine.
   //
@@ -67,15 +71,6 @@ FlutterDesktopCreateViewController(
     int height,
     const FlutterDesktopEngineProperties& engine_properties);
 
-// DEPRECATED. Will be removed soon; switch to the version above.
-FLUTTER_EXPORT FlutterDesktopViewControllerRef
-FlutterDesktopCreateViewControllerLegacy(int initial_width,
-                                         int initial_height,
-                                         const char* assets_path,
-                                         const char* icu_data_path,
-                                         const char** arguments,
-                                         size_t argument_count);
-
 // Shuts down the engine instance associated with |controller|, and cleans up
 // associated state.
 //
@@ -83,11 +78,17 @@ FlutterDesktopCreateViewControllerLegacy(int initial_width,
 FLUTTER_EXPORT void FlutterDesktopDestroyViewController(
     FlutterDesktopViewControllerRef controller);
 
+// Returns the handle for the engine running in FlutterDesktopViewControllerRef.
+//
+// Its lifetime is the same as the |controller|'s.
+FLUTTER_EXPORT FlutterDesktopEngineRef
+FlutterDesktopGetEngine(FlutterDesktopViewControllerRef controller);
+
 // Returns the plugin registrar handle for the plugin with the given name.
 //
 // The name must be unique across the application.
 FLUTTER_EXPORT FlutterDesktopPluginRegistrarRef
-FlutterDesktopGetPluginRegistrar(FlutterDesktopViewControllerRef controller,
+FlutterDesktopGetPluginRegistrar(FlutterDesktopEngineRef engine,
                                  const char* plugin_name);
 
 // Returns the view managed by the given controller.
@@ -95,13 +96,13 @@ FLUTTER_EXPORT FlutterDesktopViewRef
 FlutterDesktopGetView(FlutterDesktopViewControllerRef controller);
 
 // Processes any pending events in the Flutter engine, and returns the
-// number of nanoseconds until the next scheduled event (or  max, if none).
+// number of nanoseconds until the next scheduled event (or max, if none).
 //
 // This should be called on every run of the application-level runloop, and
 // a wait for native events in the runloop should never be longer than the
 // last return value from this function.
 FLUTTER_EXPORT uint64_t
-FlutterDesktopProcessMessages(FlutterDesktopViewControllerRef controller);
+FlutterDesktopProcessMessages(FlutterDesktopEngineRef engine);
 
 // Return backing HWND for manipulation in host application.
 FLUTTER_EXPORT HWND FlutterDesktopViewGetHWND(FlutterDesktopViewRef view);
@@ -127,9 +128,9 @@ FLUTTER_EXPORT FlutterDesktopEngineRef FlutterDesktopRunEngine(
     const FlutterDesktopEngineProperties& engine_properties);
 
 // Shuts down the given engine instance. Returns true if the shutdown was
-// successful. |engine_ref| is no longer valid after this call.
+// successful. |engine| is no longer valid after this call.
 FLUTTER_EXPORT bool FlutterDesktopShutDownEngine(
-    FlutterDesktopEngineRef engine_ref);
+    FlutterDesktopEngineRef engine);
 
 // Returns the view associated with this registrar's engine instance
 // This is a Windows-specific extension to flutter_plugin_registrar.h.
