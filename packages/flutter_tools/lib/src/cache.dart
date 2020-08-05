@@ -21,28 +21,25 @@ import 'globals.dart' as globals;
 /// A tag for a set of development artifacts that need to be cached.
 class DevelopmentArtifact {
 
-  const DevelopmentArtifact._(this.name, {this.unstable = false, this.feature});
+  const DevelopmentArtifact._(this.name, {this.feature});
 
   /// The name of the artifact.
   ///
   /// This should match the flag name in precache.dart
   final String name;
 
-  /// Whether this artifact should be unavailable on master branch only.
-  final bool unstable;
-
   /// A feature to control the visibility of this artifact.
   final Feature feature;
 
   /// Artifacts required for Android development.
-  static const DevelopmentArtifact androidGenSnapshot = DevelopmentArtifact._('android_gen_snapshot');
-  static const DevelopmentArtifact androidMaven = DevelopmentArtifact._('android_maven');
+  static const DevelopmentArtifact androidGenSnapshot = DevelopmentArtifact._('android_gen_snapshot', feature: flutterAndroidFeature);
+  static const DevelopmentArtifact androidMaven = DevelopmentArtifact._('android_maven', feature: flutterAndroidFeature);
 
   // Artifacts used for internal builds.
-  static const DevelopmentArtifact androidInternalBuild = DevelopmentArtifact._('android_internal_build');
+  static const DevelopmentArtifact androidInternalBuild = DevelopmentArtifact._('android_internal_build', feature: flutterAndroidFeature);
 
   /// Artifacts required for iOS development.
-  static const DevelopmentArtifact iOS = DevelopmentArtifact._('ios');
+  static const DevelopmentArtifact iOS = DevelopmentArtifact._('ios', feature: flutterIOSFeature);
 
   /// Artifacts required for web development.
   static const DevelopmentArtifact web = DevelopmentArtifact._('web', feature: flutterWebFeature);
@@ -57,10 +54,10 @@ class DevelopmentArtifact {
   static const DevelopmentArtifact linux = DevelopmentArtifact._('linux', feature: flutterLinuxDesktopFeature);
 
   /// Artifacts required for Fuchsia.
-  static const DevelopmentArtifact fuchsia = DevelopmentArtifact._('fuchsia', unstable: true);
+  static const DevelopmentArtifact fuchsia = DevelopmentArtifact._('fuchsia', feature: flutterFuchsiaFeature);
 
   /// Artifacts required for the Flutter Runner.
-  static const DevelopmentArtifact flutterRunner = DevelopmentArtifact._('flutter_runner', unstable: true);
+  static const DevelopmentArtifact flutterRunner = DevelopmentArtifact._('flutter_runner', feature: flutterFuchsiaFeature);
 
   /// Artifacts required for any development platform.
   ///
@@ -84,7 +81,7 @@ class DevelopmentArtifact {
   ];
 
   @override
-  String toString() => 'Artifact($name, $unstable)';
+  String toString() => 'Artifact($name)';
 }
 
 /// A wrapper around the `bin/cache/` directory.

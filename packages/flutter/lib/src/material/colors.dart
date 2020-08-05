@@ -331,7 +331,7 @@ class Colors {
 
   /// White with 60% opacity.
   ///
-  /// Used for medium-emphasis text and hint text when [Theme.brightness] is
+  /// Used for medium-emphasis text and hint text when [ThemeData.brightness] is
   /// set to [Brightness.dark].
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.whites.png)

@@ -449,7 +449,7 @@ class RenderListWheelViewport
   /// If false, every child will be painted. However the [Scrollable] is still
   /// the size of the viewport and detects gestures inside only.
   ///
-  /// Defaults to [false]. Must not be null. Cannot be true if [clipBehavior]
+  /// Defaults to false. Must not be null. Cannot be true if [clipBehavior]
   /// is not [Clip.none] since children outside the viewport will be clipped, and
   /// therefore cannot render children outside the viewport.
   /// {@endtemplate}

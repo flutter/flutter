@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:typed_data';
 
 import 'package:typed_data/typed_buffers.dart' show Uint8Buffer;
@@ -16,86 +14,86 @@ import 'package:typed_data/typed_buffers.dart' show Uint8Buffer;
 /// The byte order used is [Endian.host] throughout.
 class WriteBuffer {
   /// Creates an interface for incrementally building a [ByteData] instance.
-  WriteBuffer() {
-    _buffer = Uint8Buffer();
-    _eightBytes = ByteData(8);
+  WriteBuffer()
+    : _buffer = Uint8Buffer(),
+      _eightBytes = ByteData(8) {
     _eightBytesAsList = _eightBytes.buffer.asUint8List();
   }
 
-  Uint8Buffer _buffer;
-  ByteData _eightBytes;
-  Uint8List _eightBytesAsList;
+  Uint8Buffer? _buffer;
+  final ByteData _eightBytes;
+  late Uint8List _eightBytesAsList;
 
   /// Write a Uint8 into the buffer.
   void putUint8(int byte) {
-    _buffer.add(byte);
+    _buffer!.add(byte);
   }
 
   /// Write a Uint16 into the buffer.
-  void putUint16(int value, {Endian endian}) {
+  void putUint16(int value, {Endian? endian}) {
     _eightBytes.setUint16(0, value, endian ?? Endian.host);
-    _buffer.addAll(_eightBytesAsList, 0, 2);
+    _buffer!.addAll(_eightBytesAsList, 0, 2);
   }
 
   /// Write a Uint32 into the buffer.
-  void putUint32(int value, {Endian endian}) {
+  void putUint32(int value, {Endian? endian}) {
     _eightBytes.setUint32(0, value, endian ?? Endian.host);
-    _buffer.addAll(_eightBytesAsList, 0, 4);
+    _buffer!.addAll(_eightBytesAsList, 0, 4);
   }
 
   /// Write an Int32 into the buffer.
-  void putInt32(int value, {Endian endian}) {
+  void putInt32(int value, {Endian? endian}) {
     _eightBytes.setInt32(0, value, endian ?? Endian.host);
-    _buffer.addAll(_eightBytesAsList, 0, 4);
+    _buffer!.addAll(_eightBytesAsList, 0, 4);
   }
 
   /// Write an Int64 into the buffer.
-  void putInt64(int value, {Endian endian}) {
+  void putInt64(int value, {Endian? endian}) {
     _eightBytes.setInt64(0, value, endian ?? Endian.host);
-    _buffer.addAll(_eightBytesAsList, 0, 8);
+    _buffer!.addAll(_eightBytesAsList, 0, 8);
   }
 
   /// Write an Float64 into the buffer.
-  void putFloat64(double value, {Endian endian}) {
+  void putFloat64(double value, {Endian? endian}) {
     _alignTo(8);
     _eightBytes.setFloat64(0, value, endian ?? Endian.host);
-    _buffer.addAll(_eightBytesAsList);
+    _buffer!.addAll(_eightBytesAsList);
   }
 
   /// Write all the values from a [Uint8List] into the buffer.
   void putUint8List(Uint8List list) {
-    _buffer.addAll(list);
+    _buffer!.addAll(list);
   }
 
   /// Write all the values from an [Int32List] into the buffer.
   void putInt32List(Int32List list) {
     _alignTo(4);
-    _buffer.addAll(list.buffer.asUint8List(list.offsetInBytes, 4 * list.length));
+    _buffer!.addAll(list.buffer.asUint8List(list.offsetInBytes, 4 * list.length));
   }
 
   /// Write all the values from an [Int64List] into the buffer.
   void putInt64List(Int64List list) {
     _alignTo(8);
-    _buffer.addAll(list.buffer.asUint8List(list.offsetInBytes, 8 * list.length));
+    _buffer!.addAll(list.buffer.asUint8List(list.offsetInBytes, 8 * list.length));
   }
 
   /// Write all the values from a [Float64List] into the buffer.
   void putFloat64List(Float64List list) {
     _alignTo(8);
-    _buffer.addAll(list.buffer.asUint8List(list.offsetInBytes, 8 * list.length));
+    _buffer!.addAll(list.buffer.asUint8List(list.offsetInBytes, 8 * list.length));
   }
 
   void _alignTo(int alignment) {
-    final int mod = _buffer.length % alignment;
+    final int mod = _buffer!.length % alignment;
     if (mod != 0) {
       for (int i = 0; i < alignment - mod; i++)
-        _buffer.add(0);
+        _buffer!.add(0);
     }
   }
 
   /// Finalize and return the written [ByteData].
   ByteData done() {
-    final ByteData result = _buffer.buffer.asByteData(0, _buffer.lengthInBytes);
+    final ByteData result = _buffer!.buffer.asByteData(0, _buffer!.lengthInBytes);
     _buffer = null;
     return result;
   }
@@ -124,35 +122,35 @@ class ReadBuffer {
   }
 
   /// Reads a Uint16 from the buffer.
-  int getUint16({Endian endian}) {
+  int getUint16({Endian? endian}) {
     final int value = data.getUint16(_position, endian ?? Endian.host);
     _position += 2;
     return value;
   }
 
   /// Reads a Uint32 from the buffer.
-  int getUint32({Endian endian}) {
+  int getUint32({Endian? endian}) {
     final int value = data.getUint32(_position, endian ?? Endian.host);
     _position += 4;
     return value;
   }
 
   /// Reads an Int32 from the buffer.
-  int getInt32({Endian endian}) {
+  int getInt32({Endian? endian}) {
     final int value = data.getInt32(_position, endian ?? Endian.host);
     _position += 4;
     return value;
   }
 
   /// Reads an Int64 from the buffer.
-  int getInt64({Endian endian}) {
+  int getInt64({Endian? endian}) {
     final int value = data.getInt64(_position, endian ?? Endian.host);
     _position += 8;
     return value;
   }
 
   /// Reads a Float64 from the buffer.
-  double getFloat64({Endian endian}) {
+  double getFloat64({Endian? endian}) {
     _alignTo(8);
     final double value = data.getFloat64(_position, endian ?? Endian.host);
     _position += 8;

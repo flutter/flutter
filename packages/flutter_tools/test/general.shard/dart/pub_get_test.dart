@@ -197,10 +197,10 @@ void main() {
   });
 
   testWithoutContext('analytics sent on success', () async {
-    MockDirectory.findCache = true;
+    final FileSystem fileSystem = MemoryFileSystem.test();
     final MockUsage usage = MockUsage();
     final Pub pub = Pub(
-      fileSystem: MockFileSystem(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       processManager: MockProcessManager(0),
       botDetector: const BotDetectorAlwaysNo(),
@@ -211,8 +211,16 @@ void main() {
         }
       ),
     );
+    fileSystem.file('pubspec.yaml').createSync();
+    fileSystem.file('.dart_tool/package_config.json')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('{"configVersion": 2,"packages": []}');
 
-    await pub.get(context: PubContext.flutterTests, checkLastModified: false);
+    await pub.get(
+      context: PubContext.flutterTests,
+      generateSyntheticPackage: true,
+      checkLastModified: false,
+    );
 
     verify(usage.sendEvent('pub-result', 'flutter-tests', label: 'success')).called(1);
   });
@@ -242,10 +250,10 @@ void main() {
   });
 
   testWithoutContext('analytics sent on failed version solve', () async {
-    MockDirectory.findCache = true;
     final MockUsage usage = MockUsage();
+    final FileSystem fileSystem = MemoryFileSystem.test();
     final Pub pub = Pub(
-      fileSystem: MockFileSystem(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       processManager: MockProcessManager(
         1,
@@ -259,6 +267,7 @@ void main() {
       usage: usage,
       botDetector: const BotDetectorAlwaysNo(),
     );
+    fileSystem.file('pubspec.yaml').writeAsStringSync('name: foo');
 
     try {
       await pub.get(context: PubContext.flutterTests, checkLastModified: false);

@@ -316,6 +316,8 @@ class _TabControllerScope extends InheritedWidget {
 /// The [TabController] for descendant widgets that don't specify one
 /// explicitly.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=POtoEH-5l40}
+///
 /// [DefaultTabController] is an inherited widget that is used to share a
 /// [TabController] with a [TabBar] or a [TabBarView]. It's used when sharing an
 /// explicitly created [TabController] isn't convenient because the tab bar

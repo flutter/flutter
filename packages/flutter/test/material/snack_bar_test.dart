@@ -380,6 +380,129 @@ void main() {
     expect(renderModel.color, equals(darkTheme.colorScheme.onSurface));
   });
 
+  testWidgets('Snackbar margin can be customized', (WidgetTester tester) async {
+    const double padding = 20.0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+              builder: (BuildContext context) {
+                return GestureDetector(
+                  onTap: () {
+                    Scaffold.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text('I am a snack bar.'),
+                        margin: const EdgeInsets.all(padding),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  },
+                  child: const Text('X'),
+                );
+              }
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750));
+
+    final Finder materialFinder = find.descendant(
+      of: find.byType(SnackBar),
+      matching: find.byType(Material),
+    );
+    final Offset snackBarBottomLeft = tester.getBottomLeft(materialFinder);
+    final Offset snackBarBottomRight = tester.getBottomRight(materialFinder);
+    expect(snackBarBottomLeft.dx, padding);
+    expect(snackBarBottomLeft.dy, 600 - padding); // Device height is 600.
+    expect(snackBarBottomRight.dx, 800 - padding); // Device width is 800.
+  });
+
+  testWidgets('Snackbar padding can be customized', (WidgetTester tester) async {
+    const double padding = 20.0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+              builder: (BuildContext context) {
+                return GestureDetector(
+                  onTap: () {
+                    Scaffold.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('I am a snack bar.'),
+                        padding: EdgeInsets.all(padding),
+                      ),
+                    );
+                  },
+                  child: const Text('X'),
+                );
+              }
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750));
+
+    final Finder textFinder = find.text('I am a snack bar.');
+    final Finder materialFinder = find.descendant(
+      of: find.byType(SnackBar),
+      matching: find.byType(Material),
+    );
+    final Offset textBottomLeft = tester.getBottomLeft(textFinder);
+    final Offset textTopRight = tester.getTopRight(textFinder);
+    final Offset snackBarBottomLeft = tester.getBottomLeft(materialFinder);
+    final Offset snackBarTopRight = tester.getTopRight(materialFinder);
+    expect(textBottomLeft.dx - snackBarBottomLeft.dx, padding);
+    expect(snackBarTopRight.dx - textTopRight.dx, padding);
+    // The text is given a vertical padding of 14 already.
+    expect(snackBarBottomLeft.dy - textBottomLeft.dy, padding + 14);
+    expect(textTopRight.dy - snackBarTopRight.dy, padding + 14);
+  });
+
+  testWidgets('Snackbar width can be customized', (WidgetTester tester) async {
+    const double width = 200.0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+              builder: (BuildContext context) {
+                return GestureDetector(
+                  onTap: () {
+                    Scaffold.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text('I am a snack bar.'),
+                        width: width,
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  },
+                  child: const Text('X'),
+                );
+              }
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750));
+
+    final Finder materialFinder = find.descendant(
+      of: find.byType(SnackBar),
+      matching: find.byType(Material),
+    );
+    final Offset snackBarBottomLeft = tester.getBottomLeft(materialFinder);
+    final Offset snackBarBottomRight = tester.getBottomRight(materialFinder);
+    expect(snackBarBottomLeft.dx, (800 - width) / 2); // Device width is 800.
+    expect(snackBarBottomRight.dx, (800 + width) / 2); // Device width is 800.
+  });
+
   testWidgets('Snackbar labels can be colored', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(

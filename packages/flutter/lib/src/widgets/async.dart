@@ -518,7 +518,7 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 /// a [Future].
 ///
 /// The [future] must have been obtained earlier, e.g. during [State.initState],
-/// [State.didUpdateConfig], or [State.didChangeDependencies]. It must not be
+/// [State.didUpdateWidget], or [State.didChangeDependencies]. It must not be
 /// created during the [State.build] or [StatelessWidget.build] method call when
 /// constructing the [FutureBuilder]. If the [future] is created at the same
 /// time as the [FutureBuilder], then every time the [FutureBuilder]'s parent is

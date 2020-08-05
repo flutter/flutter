@@ -56,7 +56,7 @@ class DevicesCommand extends FlutterCommand {
         exitCode: 1);
     }
 
-    final List<Device> devices = await deviceManager.refreshAllConnectedDevices(timeout: timeout);
+    final List<Device> devices = await globals.deviceManager.refreshAllConnectedDevices(timeout: timeout);
 
     if (boolArg('machine')) {
       await printDevicesAsJson(devices);
@@ -84,7 +84,7 @@ class DevicesCommand extends FlutterCommand {
   }
 
   Future<void> _printDiagnostics() async {
-    final List<String> diagnostics = await deviceManager.getDeviceDiagnostics();
+    final List<String> diagnostics = await globals.deviceManager.getDeviceDiagnostics();
     if (diagnostics.isNotEmpty) {
       globals.printStatus('');
       for (final String diagnostic in diagnostics) {

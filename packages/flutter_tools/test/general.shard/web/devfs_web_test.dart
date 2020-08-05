@@ -461,6 +461,7 @@ void main() {
       packagesFilePath: '.packages',
       urlTunneller: null,
       useSseForDebugProxy: true,
+      useSseForDebugBackend: true,
       buildInfo: const BuildInfo(
         BuildMode.debug,
         '',
@@ -572,6 +573,7 @@ void main() {
       packagesFilePath: '.packages',
       urlTunneller: null,
       useSseForDebugProxy: true,
+      useSseForDebugBackend: true,
       buildInfo: const BuildInfo(
         BuildMode.debug,
         '',
@@ -680,6 +682,7 @@ void main() {
       packagesFilePath: '.packages',
       urlTunneller: null,
       useSseForDebugProxy: true,
+      useSseForDebugBackend: true,
       buildInfo: BuildInfo.debug,
       enableDwds: false,
       entrypoint: Uri.base,
@@ -721,6 +724,7 @@ void main() {
       packagesFilePath: '.packages',
       urlTunneller: null,
       useSseForDebugProxy: true,
+      useSseForDebugBackend: true,
       buildInfo: const BuildInfo(
         BuildMode.debug,
         '',

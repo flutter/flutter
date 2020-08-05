@@ -107,8 +107,8 @@ class ScaffoldPrelayoutGeometry {
   ///
   /// The [Scaffold.body] is laid out with respect to [minInsets] already. This
   /// means that a [FloatingActionButtonLocation] does not need to factor in
-  /// [minInsets.bottom] when aligning a [FloatingActionButton] to
-  /// [contentBottom].
+  /// [EdgeInsets.bottom] of [minInsets] when aligning a [FloatingActionButton]
+  /// to [contentBottom].
   final double contentBottom;
 
   /// The vertical distance from the [Scaffold]'s origin to the top of
@@ -120,27 +120,28 @@ class ScaffoldPrelayoutGeometry {
   ///
   /// The [Scaffold.body] is laid out with respect to [minInsets] already. This
   /// means that a [FloatingActionButtonLocation] does not need to factor in
-  /// [minInsets.top] when aligning a [FloatingActionButton] to [contentTop].
+  /// [EdgeInsets.top] of [minInsets] when aligning a [FloatingActionButton] to
+  /// [contentTop].
   final double contentTop;
 
   /// The minimum padding to inset the [FloatingActionButton] by for it
   /// to remain visible.
   ///
-  /// This value is the result of calling [MediaQuery.padding] in the
+  /// This value is the result of calling [MediaQueryData.padding] in the
   /// [Scaffold]'s [BuildContext],
   /// and is useful for insetting the [FloatingActionButton] to avoid features like
   /// the system status bar or the keyboard.
   ///
-  /// If [Scaffold.resizeToAvoidBottomInset] is set to false, [minInsets.bottom]
-  /// will be 0.0.
+  /// If [Scaffold.resizeToAvoidBottomInset] is set to false,
+  /// [EdgeInsets.bottom] of [minInsets] will be 0.0.
   final EdgeInsets minInsets;
 
   /// The minimum padding to inset interactive elements to be within a safe,
   /// un-obscured space.
   ///
-  /// This value reflects the [MediaQuery.viewPadding] of the [Scaffold]'s
+  /// This value reflects the [MediaQueryData.viewPadding] of the [Scaffold]'s
   /// [BuildContext] when [Scaffold.resizeToAvoidBottomInset] is false or and
-  /// the [MediaQuery.viewInsets] > 0.0. This helps distinguish between
+  /// the [MediaQueryData.viewInsets] > 0.0. This helps distinguish between
   /// different types of obstructions on the screen, such as software keyboards
   /// and physical device notches.
   final EdgeInsets minViewPadding;
@@ -156,8 +157,8 @@ class ScaffoldPrelayoutGeometry {
   /// up should use [minInsets] to make sure that the [FloatingActionButton] is
   /// inset by enough to remain visible.
   ///
-  /// See [minInsets] and [MediaQuery.padding] for more information on the appropriate
-  /// insets to apply.
+  /// See [minInsets] and [MediaQueryData.padding] for more information on the
+  /// appropriate insets to apply.
   final Size scaffoldSize;
 
   /// The [Size] of the [Scaffold]'s [SnackBar].
@@ -409,6 +410,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     @required this.floatingActionButtonMoveAnimationProgress,
     @required this.floatingActionButtonMotionAnimator,
     @required this.isSnackBarFloating,
+    @required this.snackBarWidth,
     @required this.extendBody,
     @required this.extendBodyBehindAppBar,
   }) : assert(minInsets != null),
@@ -432,6 +434,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   final FloatingActionButtonAnimator floatingActionButtonMotionAnimator;
 
   final bool isSnackBarFloating;
+  final double snackBarWidth;
 
   @override
   void performLayout(Size size) {
@@ -563,8 +566,12 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     }
 
     if (hasChild(_ScaffoldSlot.snackBar)) {
+      final bool hasCustomWidth = snackBarWidth != null && snackBarWidth < size.width;
       if (snackBarSize == Size.zero) {
-        snackBarSize = layoutChild(_ScaffoldSlot.snackBar, fullWidthConstraints);
+        snackBarSize = layoutChild(
+          _ScaffoldSlot.snackBar,
+          hasCustomWidth ? looseConstraints : fullWidthConstraints,
+        );
       }
 
       double snackBarYOffsetBase;
@@ -574,7 +581,8 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         snackBarYOffsetBase = contentBottom;
       }
 
-      positionChild(_ScaffoldSlot.snackBar, Offset(0.0, snackBarYOffsetBase - snackBarSize.height));
+      final double xOffset = hasCustomWidth ? (size.width - snackBarWidth) / 2 : 0.0;
+      positionChild(_ScaffoldSlot.snackBar, Offset(xOffset, snackBarYOffsetBase - snackBarSize.height));
     }
 
     if (hasChild(_ScaffoldSlot.statusBar)) {
@@ -1104,7 +1112,7 @@ class Scaffold extends StatefulWidget {
 
   /// A set of buttons that are displayed at the bottom of the scaffold.
   ///
-  /// Typically this is a list of [FlatButton] widgets. These buttons are
+  /// Typically this is a list of [TextButton] widgets. These buttons are
   /// persistently visible, even if the [body] of the scaffold scrolls.
   ///
   /// These widgets will be wrapped in a [ButtonBar].
@@ -1146,7 +1154,7 @@ class Scaffold extends StatefulWidget {
   ///     key: _scaffoldKey,
   ///     appBar: AppBar(title: const Text('Drawer Demo')),
   ///     body: Center(
-  ///       child: RaisedButton(
+  ///       child: ElevatedButton(
   ///         onPressed: _openDrawer,
   ///         child: const Text('Open Drawer'),
   ///       ),
@@ -1157,7 +1165,7 @@ class Scaffold extends StatefulWidget {
   ///           mainAxisAlignment: MainAxisAlignment.center,
   ///           children: <Widget>[
   ///             const Text('This is the Drawer'),
-  ///             RaisedButton(
+  ///             ElevatedButton(
   ///               onPressed: _closeDrawer,
   ///               child: const Text('Close Drawer'),
   ///             ),
@@ -1206,7 +1214,7 @@ class Scaffold extends StatefulWidget {
   ///     key: _scaffoldKey,
   ///     appBar: AppBar(title: Text('Drawer Demo')),
   ///     body: Center(
-  ///       child: RaisedButton(
+  ///       child: ElevatedButton(
   ///         onPressed: _openEndDrawer,
   ///         child: Text('Open End Drawer'),
   ///       ),
@@ -1217,7 +1225,7 @@ class Scaffold extends StatefulWidget {
   ///           mainAxisAlignment: MainAxisAlignment.center,
   ///           children: <Widget>[
   ///             const Text('This is the Drawer'),
-  ///             RaisedButton(
+  ///             ElevatedButton(
   ///               onPressed: _closeEndDrawer,
   ///               child: const Text('Close Drawer'),
   ///             ),
@@ -1322,10 +1330,11 @@ class Scaffold extends StatefulWidget {
   /// drawer.
   ///
   /// By default, the value used is 20.0 added to the padding edge of
-  /// `MediaQuery.of(context).padding` that corresponds to [alignment].
-  /// This ensures that the drag area for notched devices is not obscured. For
-  /// example, if `TextDirection.of(context)` is set to [TextDirection.ltr],
-  /// 20.0 will be added to `MediaQuery.of(context).padding.left`.
+  /// `MediaQuery.of(context).padding` that corresponds to the surrounding
+  /// [TextDirection]. This ensures that the drag area for notched devices is
+  /// not obscured. For example, if `TextDirection.of(context)` is set to
+  /// [TextDirection.ltr], 20.0 will be added to
+  /// `MediaQuery.of(context).padding.left`.
   final double drawerEdgeDragWidth;
 
   /// Determines if the [Scaffold.drawer] can be opened with a drag
@@ -1379,7 +1388,7 @@ class Scaffold extends StatefulWidget {
   ///   @override
   ///   Widget build(BuildContext context) {
   ///     return Center(
-  ///       child: RaisedButton(
+  ///       child: ElevatedButton(
   ///         child: Text('SHOW A SNACKBAR'),
   ///         onPressed: () {
   ///           Scaffold.of(context).showSnackBar(
@@ -1414,7 +1423,7 @@ class Scaffold extends StatefulWidget {
   ///       // can refer to the Scaffold with Scaffold.of().
   ///       builder: (BuildContext context) {
   ///         return Center(
-  ///           child: RaisedButton(
+  ///           child: ElevatedButton(
   ///             child: Text('SHOW A SNACKBAR'),
   ///             onPressed: () {
   ///               Scaffold.of(context).showSnackBar(SnackBar(
@@ -1667,6 +1676,26 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// animation), use [removeCurrentSnackBar].
   ///
   /// See [Scaffold.of] for information about how to obtain the [ScaffoldState].
+  ///
+  /// {@tool dartpad --template=stateless_widget_scaffold_center}
+  ///
+  /// Here is an example of showing a [SnackBar] when the user presses a button.
+  ///
+  /// ```dart
+  ///   Widget build(BuildContext context) {
+  ///     return OutlinedButton(
+  ///       onPressed: () {
+  ///         Scaffold.of(context).showSnackBar(
+  ///           SnackBar(
+  ///             content: Text('A SnackBar has been shown.'),
+  ///           ),
+  ///         );
+  ///       },
+  ///       child: Text('Show SnackBar'),
+  ///     );
+  ///   }
+  /// ```
+  /// {@end-tool}
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(SnackBar snackbar) {
     _snackBarController ??= SnackBar.createAnimationController(vsync: this)
       ..addStatusListener(_handleSnackBarStatusChange);
@@ -1959,7 +1988,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// ```dart
   /// Widget build(BuildContext context) {
   ///   return Center(
-  ///     child: RaisedButton(
+  ///     child: ElevatedButton(
   ///       child: const Text('showBottomSheet'),
   ///       onPressed: () {
   ///         Scaffold.of(context).showBottomSheet<void>(
@@ -1973,7 +2002,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///                   mainAxisSize: MainAxisSize.min,
   ///                   children: <Widget>[
   ///                     const Text('BottomSheet'),
-  ///                     RaisedButton(
+  ///                     ElevatedButton(
   ///                       child: const Text('Close BottomSheet'),
   ///                       onPressed: () => Navigator.pop(context),
   ///                     )
@@ -2381,11 +2410,13 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     }
 
     bool isSnackBarFloating = false;
+    double snackBarWidth;
     if (_snackBars.isNotEmpty) {
       final SnackBarBehavior snackBarBehavior = _snackBars.first._widget.behavior
         ?? themeData.snackBarTheme.behavior
         ?? SnackBarBehavior.fixed;
       isSnackBarFloating = snackBarBehavior == SnackBarBehavior.floating;
+      snackBarWidth = _snackBars.first._widget.width;
 
       _addIfNonNull(
         children,
@@ -2541,6 +2572,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
                 previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation,
                 textDirection: textDirection,
                 isSnackBarFloating: isSnackBarFloating,
+                snackBarWidth: snackBarWidth,
               ),
             );
           }),

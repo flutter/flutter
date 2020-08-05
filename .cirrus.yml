@@ -4,10 +4,12 @@
 # YAML anchors used to share fields between tasks.
 # See https://confluence.atlassian.com/bitbucket/yaml-anchors-960154027.html
 web_shard_template: &WEB_SHARD_TEMPLATE
-  only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'packages/flutter_web_plugins/**', 'bin/**') || $CIRRUS_PR == ''"
+  only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_goldens_client/**', 'packages/flutter_goldens/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'packages/flutter_web_plugins/**', 'bin/**') || $CIRRUS_PR == ''"
   environment:
     # As of March 2020, the Web shards needed 16G of RAM and 4 CPUs to run all framework tests with goldens without flaking.
-    WEB_SHARD_COUNT: 8
+    # The tests are encountering a flake in Chrome. Increasing the number of shards to decrease race conditions.
+    # https://github.com/flutter/flutter/issues/62510
+    WEB_SHARD_COUNT: 12
     CPU: 4
     MEMORY: 16G
     CHROME_NO_SANDBOX: true
@@ -74,6 +76,7 @@ task:
     dockerfile: "dev/ci/docker_linux/Dockerfile"
     cpu: $CPU
     memory: $MEMORY
+    use_in_memory_disk: $USE_IN_MEMORY_DISK
   environment:
     # We shrink our default resource requirement as much as possible because that way we are more
     # likely to get scheduled. We require 4G of RAM because most of the shards (all but one as of
@@ -86,6 +89,7 @@ task:
     CIRRUS_DOCKER_CONTEXT: "dev/"
     PATH: "$CIRRUS_WORKING_DIR/bin:$CIRRUS_WORKING_DIR/bin/cache/dart-sdk/bin:$PATH"
     ANDROID_SDK_ROOT: "/opt/android_sdk"
+    USE_IN_MEMORY_DISK: false
   pub_cache:
     folder: $HOME/.pub-cache
     fingerprint_script: echo $OS; grep -r --include=pubspec.yaml 'PUBSPEC CHECKSUM' "$CIRRUS_WORKING_DIR"
@@ -128,37 +132,6 @@ task:
       script:
         - flutter precache --fuchsia --no-android --no-ios
         - flutter precache --flutter_runner --no-android --no-ios
-
-    - name: framework_tests-widgets-linux
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/**') || $CIRRUS_PR == ''"
-      environment:
-        # We use 3 CPUs because that's the minimum required to get framework_tests-widgets-linux
-        # running fast enough that it is not the long pole, as of October 2019.
-        CPU: 3
-        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
-      script:
-        - dart --enable-asserts ./dev/bots/test.dart
-
-    - name: framework_tests-libraries-linux
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/**') || $CIRRUS_PR == ''"
-      environment:
-        # We use 3 CPUs because that's the minimum required to get the
-        # framework_tests-libraries-linux shard running fast enough that it is not the long pole, as
-        # of October 2019.
-        CPU: 3
-        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
-      script:
-        - dart --enable-asserts ./dev/bots/test.dart
-
-    - name: framework_tests-misc-linux
-      # this includes the tests for directories in dev/
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_goldens/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/**') || $CIRRUS_PR == ''"
-      environment:
-        # We use 3 CPUs because that's the minimum required to get framework_tests-misc-linux
-        # running fast enough that it is not the long pole, as of October 2019.
-        CPU: 3
-      script:
-        - dart --enable-asserts ./dev/bots/test.dart
 
     - name: tool_tests-general-linux
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/**') || $CIRRUS_PR == ''"
@@ -237,7 +210,19 @@ task:
     - name: web_tests-6-linux
       << : *WEB_SHARD_TEMPLATE
 
-    - name: web_tests-7_last-linux # last Web shard must end with _last
+    - name: web_tests-7-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests-8-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests-9-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests-10-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests-11_last-linux # last Web shard must end with _last
       << : *WEB_SHARD_TEMPLATE
 
     - name: build_tests-0-linux
@@ -273,14 +258,14 @@ task:
       << : *LINUX_SHARD_TEMPLATE
 
     - name: docs-linux # linux-only
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_drive/**', 'packages/flutter_localizations/**', 'packages/flutter_goldens/**', 'bin/**') || $CIRRUS_PR == ''"
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_drive/**', 'packages/flutter_localizations/**', 'bin/**') || $CIRRUS_PR == ''"
       environment:
-        # Empirically, as of October 2019, the docs-linux shard took about 30 minutes when run with
-        # 1 CPU and 4G of RAM. 2 CPUs reduced that to 20 minutes, more CPUs did not improve matters.
-        CPU: 2
+        # TODO(tvolkert): optimize CPU and MEMORY settings once #60646 is resolved.
+        CPU: 4
+        MEMORY: 8G
         # For uploading master docs to Firebase master branch staging site
         FIREBASE_MASTER_TOKEN: ENCRYPTED[eb768d18798fdc5abfe09b224e1724c4d82831d715ccf90df2c79d618c317216cbd99493278361f6fe7948b409b603f0]
-        # For uploading beta docs to Firebase public live site
+        # For uploading stable docs to Firebase public live site
         FIREBASE_PUBLIC_TOKEN: ENCRYPTED[37e8b82f167864cae9a3f4d2cf3f37dea331d9375c295327c45de524f6c588fa6f6d63e5784f10f6d43ce29689f36c92]
       script:
         - ./dev/bots/docs.sh
@@ -371,48 +356,6 @@ task:
     - flutter update-packages
     - git fetch origin master
   matrix:
-    - name: framework_tests-widgets-windows
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/**') || $CIRRUS_PR == ''"
-      environment:
-        # As of December 2019, framework_tests-widgets-windows needs 4 CPUs to pass reliably.
-        # With a min of 4 CPUs and 4 GB of RAM, it ran in about 50 minutes. Increasing to 8 CPUs and
-        # 8 GB RAM sped that up to ~25 minutes, and increasing either beyond that yielded no
-        # further speed increase. Cirrus requires >= 8GM RAM for 8 CPUs.
-        CPU: 8
-        MEMORY: 8G
-        GOLDCTL: "C:\\Windows\\Temp\\depot_tools\\goldctl.exe"
-        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
-      script:
-        - powershell dev\bots\download_goldctl.ps1
-        - dart --enable-asserts dev\bots\test.dart
-
-    - name: framework_tests-libraries-windows
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/**') || $CIRRUS_PR == ''"
-      environment:
-        # As of December 2019, the framework_tests-libraries-windows shard needed 2 CPUs to pass.
-        # With a min of 2 CPUs and 2 GB RAM, it ran in about 60 minutes. Increasing to 8 CPUs made
-        # it run in ~20 minutes, and Cirrus requires 8 CPUs to have at least 8 GB RAM. Increasing
-        # beyond this yielded no gains.
-        CPU: 8
-        MEMORY: 8G
-        GOLDCTL: "C:\\Windows\\Temp\\depot_tools\\goldctl.exe"
-        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
-      script:
-        - powershell dev\bots\download_goldctl.ps1
-        - dart --enable-asserts dev\bots\test.dart
-
-    - name: framework_tests-misc-windows
-      # this includes the tests for directories in dev/
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_goldens/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/**') || $CIRRUS_PR == ''"
-      environment:
-        # As of December 2019, the framework_tests-misc-windows shard needed 2 CPUs and 3 GB RAM
-        # to pass (taking ~40 minutes). Increasing to 4 CPUs (necessitating 4 GB RAM per Cirrus)
-        # sped that up to ~30 minutes, with further overprovisioning yielding no further gain.
-        CPU: 4
-        MEMORY: 4G
-      script:
-        - dart --enable-asserts dev\bots\test.dart
-
     - name: tool_tests-general-windows
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/**') || $CIRRUS_PR == ''"
       environment:
@@ -573,7 +516,7 @@ task:
 
     - name: framework_tests-misc-macos
       # this includes the tests for directories in dev/
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_goldens/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/**') || $CIRRUS_PR == ''"
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_goldens/**', 'packages/flutter_goldens_client/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/**') || $CIRRUS_PR == ''"
       script:
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
         - dart --enable-asserts dev/bots/test.dart

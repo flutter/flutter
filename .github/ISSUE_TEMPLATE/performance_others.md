@@ -15,7 +15,7 @@ assignees: ''
       * https://api.flutter.dev/
       * https://stackoverflow.com/questions/tagged/flutter?sort=frequent
 
-     If you have found a performance problem, then fill our the template below.
+     If you have found a performance problem, then fill out the template below.
      Please read our guide to filing a bug first: https://flutter.dev/docs/resources/bug-reports
 -->
 
@@ -39,7 +39,7 @@ assignees: ''
 <!--
      Please tell us which target platform(s) the problem occurs (Android / iOS / Web / macOS / Linux / Windows)
      Which target OS version, for Web, browser, is the test system running?
-     Does the problem occur on emulator/simulator as well as on physical devices?
+     Does the problem occur on an emulator/simulator as well as on physical devices?
 -->
 
 **Target Platform:**

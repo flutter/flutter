@@ -3,7 +3,7 @@
 This project demonstrates how to embed Flutter within an iOS or Android
 application. On iOS, the iOS and Flutter components are built with Xcode. On
 Android, the Android and Flutter components are built with Android Studio or
-gradle.
+Gradle.
 
 You can read more about
 [accessing platform and third-party services in Flutter](https://flutter.dev/platform-services/).

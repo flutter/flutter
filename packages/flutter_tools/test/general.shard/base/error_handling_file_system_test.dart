@@ -224,17 +224,6 @@ void main() {
     expect(identical(firstPath, fs.path), false);
   });
 
-  testWithoutContext('Throws type error if Directory type is set to curentDirectory with LocalFileSystem', () {
-    final FileSystem fs = ErrorHandlingFileSystem(
-      delegate: LocalFileSystem.instance,
-      platform: const LocalPlatform(),
-    );
-    final MockDirectory directory = MockDirectory();
-    when(directory.path).thenReturn('path');
-
-    expect(() => fs.currentDirectory = directory, throwsA(isA<TypeError>()));
-  });
-
   group('toString() gives toString() of delegate', () {
     testWithoutContext('ErrorHandlingFileSystem', () {
       final MockFileSystem mockFileSystem = MockFileSystem();

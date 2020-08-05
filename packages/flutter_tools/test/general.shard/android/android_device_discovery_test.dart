@@ -14,6 +14,7 @@ import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/testbed.dart';
 
 void main() {
   testWithoutContext('AndroidDevices returns empty device list on null adb', () async {
@@ -22,8 +23,11 @@ void main() {
       logger: BufferLogger.test(),
       androidWorkflow: AndroidWorkflow(
         androidSdk: MockAndroidSdk(null),
+        featureFlags: TestFeatureFlags(),
       ),
       processManager: FakeProcessManager.list(<FakeCommand>[]),
+      fileSystem: MemoryFileSystem.test(),
+      platform: FakePlatform(),
     );
 
     expect(await androidDevices.pollingGetDevices(), isEmpty);
@@ -43,8 +47,11 @@ void main() {
       logger: BufferLogger.test(),
       androidWorkflow: AndroidWorkflow(
         androidSdk: MockAndroidSdk(),
+        featureFlags: TestFeatureFlags(),
       ),
       processManager: processManager,
+      fileSystem: MemoryFileSystem.test(),
+      platform: FakePlatform(),
     );
 
     expect(androidDevices.pollingGetDevices(),
@@ -63,12 +70,33 @@ void main() {
       logger: BufferLogger.test(),
       androidWorkflow: AndroidWorkflow(
         androidSdk: MockAndroidSdk(),
+        featureFlags: TestFeatureFlags(),
       ),
       processManager: processManager,
+      fileSystem: MemoryFileSystem.test(),
+      platform: FakePlatform(),
     );
 
     expect(androidDevices.pollingGetDevices(),
       throwsToolExit(message: RegExp('Unable to run "adb"')));
+  });
+
+  testWithoutContext('AndroidDevices is disabled if feature is disabled', () {
+    final AndroidDevices androidDevices = AndroidDevices(
+      androidSdk: MockAndroidSdk(),
+      logger: BufferLogger.test(),
+      androidWorkflow: AndroidWorkflow(
+        androidSdk: MockAndroidSdk(),
+        featureFlags: TestFeatureFlags(
+          isAndroidEnabled: false,
+        ),
+      ),
+      processManager: FakeProcessManager.any(),
+      fileSystem: MemoryFileSystem.test(),
+      platform: FakePlatform(),
+    );
+
+    expect(androidDevices.supportsPlatform, false);
   });
 
   testWithoutContext('physical devices', () {
@@ -143,6 +171,11 @@ Use the 'android' tool to install them:
 ''', devices: devices,
      diagnostics: diagnostics,
      timeoutConfiguration: const TimeoutConfiguration(),
+     processManager: FakeProcessManager.any(),
+     platform: FakePlatform(),
+     logger: BufferLogger.test(),
+     fileSystem: MemoryFileSystem.test(),
+     androidSdk: MockAndroidSdk(),
     );
 
     expect(devices, isEmpty);

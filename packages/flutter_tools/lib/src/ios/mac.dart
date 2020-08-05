@@ -320,7 +320,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   buildCommands.addAll(environmentVariablesAsXcodeBuildSettings(globals.platform));
 
   final Stopwatch sw = Stopwatch()..start();
-  initialBuildStatus = globals.logger.startProgress('Running Xcode build...', timeout: timeoutConfiguration.fastOperation);
+  initialBuildStatus = globals.logger.startProgress('Running Xcode build...', timeout: timeoutConfiguration.slowOperation);
 
   final RunResult buildResult = await _runBuildWithRetries(buildCommands, app);
 
@@ -600,7 +600,7 @@ class XcodeBuildExecution {
   final Map<String, String> buildSettings;
 }
 
-const String _xcodeRequirement = 'Xcode $kXcodeRequiredVersionMajor.$kXcodeRequiredVersionMinor or greater is required to develop for iOS.';
+const String _xcodeRequirement = 'Xcode $kXcodeRequiredVersionMajor.$kXcodeRequiredVersionMinor.$kXcodeRequiredVersionPatch or greater is required to develop for iOS.';
 
 bool _checkXcodeVersion() {
   if (!globals.platform.isMacOS) {

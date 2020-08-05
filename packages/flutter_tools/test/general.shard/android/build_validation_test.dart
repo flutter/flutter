@@ -45,7 +45,7 @@ void main() {
 
     expect(() => validateBuild(
       const AndroidBuildInfo(
-        // Nigger than maximum supported play store value
+        // bigger than maximum supported play store value
         BuildInfo(BuildMode.debug, '', treeShakeIcons: false, buildNumber: '2100000001'),
         targetArchs: <AndroidArch>[AndroidArch.x86],
       ),

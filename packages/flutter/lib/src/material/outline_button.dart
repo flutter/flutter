@@ -48,6 +48,22 @@ const Duration _kElevationDuration = Duration(milliseconds: 75);
 /// Outline buttons have a minimum size of 88.0 by 36.0 which can be overridden
 /// with [ButtonTheme].
 ///
+/// {@tool dartpad --template=stateless_widget_scaffold_center}
+///
+/// Here is an example of a basic [OutlineButton].
+///
+/// ```dart
+///   Widget build(BuildContext context) {
+///     return OutlineButton(
+///       onPressed: () {
+///         print('Received click');
+///       },
+///       child: Text('Click Me'),
+///     );
+///   }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [RaisedButton], a filled material design button with a shadow.
@@ -155,7 +171,7 @@ class OutlineButton extends MaterialButton {
   /// By default the border's color does not change when the button
   /// is pressed.
   ///
-  /// This field is ignored if [borderSide.color] is a [MaterialStateProperty<Color>].
+  /// This field is ignored if [BorderSide.color] is a [MaterialStateProperty<Color>].
   final Color highlightedBorderColor;
 
   /// The outline border's color when the button is not [enabled].
@@ -163,7 +179,7 @@ class OutlineButton extends MaterialButton {
   /// By default the outline border's color does not change when the
   /// button is disabled.
   ///
-  /// This field is ignored if [borderSide.color] is a [MaterialStateProperty<Color>].
+  /// This field is ignored if [BorderSide.color] is a [MaterialStateProperty<Color>].
   final Color disabledBorderColor;
 
   /// Defines the color of the border when the button is enabled but not
@@ -175,7 +191,7 @@ class OutlineButton extends MaterialButton {
   /// If null the default border's style is [BorderStyle.solid], its
   /// [BorderSide.width] is 1.0, and its color is a light shade of grey.
   ///
-  /// If [borderSide.color] is a [MaterialStateProperty<Color>], [MaterialStateProperty.resolve]
+  /// If [BorderSide.color] is a [MaterialStateProperty<Color>], [MaterialStateProperty.resolve]
   /// is used in all states and both [highlightedBorderColor] and [disabledBorderColor]
   /// are ignored.
   final BorderSide borderSide;
