@@ -819,7 +819,6 @@ tasks:
       Measures the performance of the Crane page in the new Flutter Gallery on Android.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   fast_scroll_large_images__memory:
     description: >
