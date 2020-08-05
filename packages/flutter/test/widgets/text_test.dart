@@ -914,6 +914,38 @@ void main() {
     expect(tester.getSize(find.text('RIGHT ALIGNED, LONGEST LINE')).width, equals(width));
   }, skip: isBrowser);  // https://github.com/flutter/flutter/issues/44020
 
+  testWidgets(
+    'textWidthBasis.longestLine confines the width of the paragraph '
+    'when given loose constraints',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/62550.
+      await tester.pumpWidget(
+          Center(
+            child: SizedBox(
+              width: 400,
+              child: Center(
+                child: RichText(
+                  text: const TextSpan(text: 'fwefwefwewfefewfwe fwfwfwefweabcdefghijklmnopqrstuvwxyz'),
+                  textWidthBasis: TextWidthBasis.longestLine,
+                  textDirection: TextDirection.ltr,
+                ),
+              ),
+            ),
+          ),
+        );
+
+      expect(find.byType(RichText), paints..something((Symbol method, List<dynamic> arguments) {
+        if (method != #drawParagraph)
+          return false;
+        final ui.Paragraph paragraph = arguments[0] as ui.Paragraph;
+        if (paragraph.width > paragraph.longestLine)
+          throw 'paragraph width (${paragraph.width}) greater than its longest line (${paragraph.longestLine}).';
+        if (paragraph.width >= 400)
+          throw 'paragraph.width (${paragraph.width}) >= 400';
+        return true;
+      }));
+  }, skip: isBrowser);  // https://github.com/flutter/flutter/issues/44020
+
   testWidgets('Paragraph.getBoxesForRange returns nothing when selection range is zero length', (WidgetTester tester) async {
     final ui.ParagraphBuilder builder = ui.ParagraphBuilder(ui.ParagraphStyle());
     builder.addText('hello');

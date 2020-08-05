@@ -440,6 +440,34 @@ abstract class WidgetController {
   /// be appropriate to return in the implementation of this method.
   Future<void> pump([Duration duration]);
 
+  /// Repeatedly calls [pump] with the given `duration` until there are no
+  /// longer any frames scheduled. This will call [pump] at least once, even if
+  /// no frames are scheduled when the function is called, to flush any pending
+  /// microtasks which may themselves schedule a frame.
+  ///
+  /// This essentially waits for all animations to have completed.
+  ///
+  /// If it takes longer that the given `timeout` to settle, then the test will
+  /// fail (this method will throw an exception). In particular, this means that
+  /// if there is an infinite animation in progress (for example, if there is an
+  /// indeterminate progress indicator spinning), this method will throw.
+  ///
+  /// The default timeout is ten minutes, which is longer than most reasonable
+  /// finite animations would last.
+  ///
+  /// If the function returns, it returns the number of pumps that it performed.
+  ///
+  /// In general, it is better practice to figure out exactly why each frame is
+  /// needed, and then to [pump] exactly as many frames as necessary. This will
+  /// help catch regressions where, for instance, an animation is being started
+  /// one frame later than it should.
+  ///
+  /// Alternatively, one can check that the return value from this function
+  /// matches the expected number of pumps.
+  Future<int> pumpAndSettle([
+    Duration duration = const Duration(milliseconds: 100),
+  ]);
+
   /// Attempts to drag the given widget by the given offset, by
   /// starting a drag in the middle of the widget.
   ///
@@ -817,26 +845,32 @@ abstract class WidgetController {
   /// Shorthand for `Scrollable.ensureVisible(element(finder))`
   Future<void> ensureVisible(Finder finder) => Scrollable.ensureVisible(element(finder));
 
-  /// Repeatedly scrolls the `scrollable` by `delta` in the
+  /// Repeatedly scrolls a [Scrollable] by `delta` in the
   /// [Scrollable.axisDirection] until `finder` is visible.
   ///
   /// Between each scroll, wait for `duration` time for settling.
+  ///
+  /// If `scrollable` is `null`, this will find a [Scrollable].
   ///
   /// Throws a [StateError] if `finder` is not found for maximum `maxScrolls`
   /// times.
   ///
   /// This is different from [ensureVisible] in that this allows looking for
   /// `finder` that is not built yet, but the caller must specify the scrollable
-  /// that will build child specified by `finder`.
+  /// that will build child specified by `finder` when there are multiple
+  ///[Scrollable]s.
+  ///
+  /// See also [dragUntilVisible].
   Future<void> scrollUntilVisible(
     Finder finder,
-    Finder scrollable,
     double delta, {
+      Finder scrollable,
       int maxScrolls = 50,
       Duration duration = const Duration(milliseconds: 50),
     }
   ) {
     assert(maxScrolls > 0);
+    scrollable ??= find.byType(Scrollable);
     return TestAsyncUtils.guard<void>(() async {
       Offset moveStep;
       switch(widget<Scrollable>(scrollable).axisDirection) {
@@ -853,10 +887,33 @@ abstract class WidgetController {
           moveStep = Offset(-delta, 0);
           break;
       }
-      while(maxScrolls > 0 && finder.evaluate().isEmpty) {
-        await drag(scrollable, moveStep);
+      await dragUntilVisible(
+        finder,
+        scrollable,
+        moveStep,
+        maxIteration: maxScrolls,
+        duration: duration);
+    });
+  }
+
+  /// Repeatedly drags the `view` by `moveStep` until `finder` is visible.
+  ///
+  /// Between each operation, wait for `duration` time for settling.
+  ///
+  /// Throws a [StateError] if `finder` is not found for maximum `maxIteration`
+  /// times.
+  Future<void> dragUntilVisible(
+    Finder finder,
+    Finder view,
+    Offset moveStep, {
+      int maxIteration = 50,
+      Duration duration = const Duration(milliseconds: 50),
+  }) {
+    return TestAsyncUtils.guard<void>(() async {
+      while(maxIteration > 0 && finder.evaluate().isEmpty) {
+        await drag(view, moveStep);
         await pump(duration);
-        maxScrolls -= 1;
+        maxIteration-= 1;
       }
       await Scrollable.ensureVisible(element(finder));
     });
@@ -877,6 +934,22 @@ class LiveWidgetController extends WidgetController {
       await Future<void>.delayed(duration);
     binding.scheduleFrame();
     await binding.endOfFrame;
+  }
+
+  @override
+  Future<int> pumpAndSettle([
+    Duration duration = const Duration(milliseconds: 100),
+  ]) {
+    assert(duration != null);
+    assert(duration > Duration.zero);
+    return TestAsyncUtils.guard<int>(() async {
+      int count = 0;
+      do {
+        await pump(duration);
+        count += 1;
+      } while (binding.hasScheduledFrame);
+      return count;
+    });
   }
 
   @override
