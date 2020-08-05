@@ -22,6 +22,7 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
+import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
 
 import '../../src/common.dart';
@@ -384,8 +385,8 @@ void main() {
         'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
         'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
         'lib/flutter_project_web.dart',
-        // TODO(cyanglaz): no-op iOS folder should be removed after 1.20.0 release
-        // https://github.com/flutter/flutter/issues/59787
+        'ios/Classes/FlutterProjectPlugin.m',
+        'example/ios/Runner/AppDelegate.m',
       ],
     );
     return _runFlutterTest(projectDir.childDirectory('example'));
@@ -1531,18 +1532,14 @@ void main() {
 
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
 
-    // TODO(cyanglaz): no-op iOS folder should be removed after 1.20.0 release
-    // https://github.com/flutter/flutter/issues/59787
-    expect(projectDir.childDirectory('ios').existsSync(), true);
+    expect(projectDir.childDirectory('ios').existsSync(), false);
     expect(projectDir.childDirectory('android').existsSync(), false);
     expect(projectDir.childDirectory('web').existsSync(), false);
     expect(projectDir.childDirectory('linux').existsSync(), false);
     expect(projectDir.childDirectory('windows').existsSync(), false);
     expect(projectDir.childDirectory('macos').existsSync(), false);
 
-    // TODO(cyanglaz): no-op iOS folder should be removed after 1.20.0 release
-    // https://github.com/flutter/flutter/issues/59787
-    expect(projectDir.childDirectory('example').childDirectory('ios').existsSync(), true);
+    expect(projectDir.childDirectory('example').childDirectory('ios').existsSync(), false);
     expect(projectDir.childDirectory('example').childDirectory('android').existsSync(), false);
     expect(projectDir.childDirectory('example').childDirectory('web').existsSync(), false);
     expect(projectDir.childDirectory('example').childDirectory('linux').existsSync(), false);
@@ -1556,25 +1553,6 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
   });
 
-
-  // TODO(cyanglaz): no-op iOS folder should be removed after 1.20.0 release
-  // https://github.com/flutter/flutter/issues/59787
-  testUsingContext('create an empty plugin contains a no-op ios folder, but no pubspec entry.', () async {
-    Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
-
-    final CreateCommand command = CreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
-
-    expect(projectDir.childDirectory('ios').existsSync(), true);
-    expect(projectDir.childDirectory('example').childDirectory('ios').existsSync(), true);
-    validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: const <String>[
-      'some_platform'
-    ], pluginClass: 'somePluginClass',
-    unexpectedPlatforms: <String>['ios']);
-  });
 
   testUsingContext('plugin supports ios if requested', () async {
     Cache.flutterRoot = '../..';
@@ -1943,6 +1921,21 @@ void main() {
     expect(projectDir.childDirectory('example').childDirectory('macos').existsSync(), false);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+  });
+
+  testUsingContext('newly created plugin has min flutter sdk version as 1.20.0', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+    final String rawPubspec = await projectDir.childFile('pubspec.yaml').readAsString();
+    final Pubspec pubspec = Pubspec.parse(rawPubspec);
+    final Map<String, VersionConstraint> env = pubspec.environment;
+    expect(env['flutter'].allows(Version(1, 20, 0)), true);
+    expect(env['flutter'].allows(Version(1, 19, 0)), false);
   });
 
 }
