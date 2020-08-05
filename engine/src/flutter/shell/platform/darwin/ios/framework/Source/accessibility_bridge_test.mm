@@ -96,7 +96,8 @@ class MockDelegate : public PlatformView::Delegate {
 
 class MockIosDelegate : public AccessibilityBridge::IosDelegate {
  public:
-  bool IsFlutterViewControllerPresentingModalViewController(UIView* view) override {
+  bool IsFlutterViewControllerPresentingModalViewController(
+      FlutterViewController* view_controller) override {
     return result_IsFlutterViewControllerPresentingModalViewController_;
   };
 
@@ -157,9 +158,11 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
       /*task_runners=*/runners);
   id mockFlutterView = OCMClassMock([FlutterView class]);
+  id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
+  OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
   OCMExpect([mockFlutterView setAccessibilityElements:[OCMArg isNil]]);
   auto bridge =
-      std::make_unique<flutter::AccessibilityBridge>(/*view=*/mockFlutterView,
+      std::make_unique<flutter::AccessibilityBridge>(/*view_controller=*/mockFlutterViewController,
                                                      /*platform_view=*/platform_view.get(),
                                                      /*platform_views_controller=*/nil);
   flutter::SemanticsNodeUpdates nodes;
@@ -181,10 +184,12 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
       /*task_runners=*/runners);
   id mockFlutterView = OCMClassMock([FlutterView class]);
+  id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
+  OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
   std::string label = "some label";
 
   __block auto bridge =
-      std::make_unique<flutter::AccessibilityBridge>(/*view=*/mockFlutterView,
+      std::make_unique<flutter::AccessibilityBridge>(/*view_controller=*/mockFlutterViewController,
                                                      /*platform_view=*/platform_view.get(),
                                                      /*platform_views_controller=*/nil);
 
@@ -224,6 +229,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
         /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
         /*task_runners=*/runners);
     id mockFlutterView = OCMClassMock([FlutterView class]);
+    id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
+    OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
     std::string label = "some label";
 
     auto flutterPlatformViewsController =
@@ -243,7 +250,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
         result);
 
     auto bridge = std::make_unique<flutter::AccessibilityBridge>(
-        /*view=*/mockFlutterView,
+        /*view_controller=*/mockFlutterViewController,
         /*platform_view=*/platform_view.get(),
         /*platform_views_controller=*/flutterPlatformViewsController.get());
 
@@ -274,6 +281,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
       /*task_runners=*/runners);
   id mockFlutterView = OCMClassMock([FlutterView class]);
+  id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
+  OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
   std::string label = "some label";
 
   NSMutableArray<NSDictionary<NSString*, id>*>* accessibility_notifications =
@@ -287,7 +296,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
         }];
       };
   __block auto bridge =
-      std::make_unique<flutter::AccessibilityBridge>(/*view=*/mockFlutterView,
+      std::make_unique<flutter::AccessibilityBridge>(/*view_controller=*/mockFlutterViewController,
                                                      /*platform_view=*/platform_view.get(),
                                                      /*platform_views_controller=*/nil,
                                                      /*ios_delegate=*/std::move(ios_delegate));
@@ -331,6 +340,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
       /*task_runners=*/runners);
   id mockFlutterView = OCMClassMock([FlutterView class]);
+  id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
+  OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
   std::string label = "some label";
 
   NSMutableArray<NSDictionary<NSString*, id>*>* accessibility_notifications =
@@ -345,7 +356,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
       };
   ios_delegate->result_IsFlutterViewControllerPresentingModalViewController_ = true;
   __block auto bridge =
-      std::make_unique<flutter::AccessibilityBridge>(/*view=*/mockFlutterView,
+      std::make_unique<flutter::AccessibilityBridge>(/*view_controller=*/mockFlutterViewController,
                                                      /*platform_view=*/platform_view.get(),
                                                      /*platform_views_controller=*/nil,
                                                      /*ios_delegate=*/std::move(ios_delegate));
