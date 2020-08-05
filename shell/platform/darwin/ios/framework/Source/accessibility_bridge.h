@@ -18,6 +18,7 @@
 #include "flutter/lib/ui/semantics/custom_accessibility_action.h"
 #include "flutter/lib/ui/semantics/semantics_node.h"
 #include "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
+#include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/SemanticsObject.h"
@@ -42,12 +43,13 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
     virtual ~IosDelegate() = default;
     /// Returns true when the FlutterViewController associated with the `view`
     /// is presenting a modal view controller.
-    virtual bool IsFlutterViewControllerPresentingModalViewController(UIView* view) = 0;
+    virtual bool IsFlutterViewControllerPresentingModalViewController(
+        FlutterViewController* view_controller) = 0;
     virtual void PostAccessibilityNotification(UIAccessibilityNotifications notification,
                                                id argument) = 0;
   };
 
-  AccessibilityBridge(UIView* view,
+  AccessibilityBridge(FlutterViewController* view_controller,
                       PlatformViewIOS* platform_view,
                       FlutterPlatformViewsController* platform_views_controller,
                       std::unique_ptr<IosDelegate> ios_delegate = nullptr);
@@ -62,7 +64,7 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
 
   UIView<UITextInput>* textInputView() override;
 
-  UIView* view() const override { return view_; }
+  UIView* view() const override { return view_controller_.view; }
 
   fml::WeakPtr<AccessibilityBridge> GetWeakPtr();
 
@@ -78,7 +80,7 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
                                         NSMutableArray<NSNumber*>* doomed_uids);
   void HandleEvent(NSDictionary<NSString*, id>* annotatedEvent);
 
-  UIView* view_;
+  FlutterViewController* view_controller_;
   PlatformViewIOS* platform_view_;
   FlutterPlatformViewsController* platform_views_controller_;
   fml::scoped_nsobject<NSMutableDictionary<NSNumber*, SemanticsObject*>> objects_;
