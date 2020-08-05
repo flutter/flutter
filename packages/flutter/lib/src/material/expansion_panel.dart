@@ -12,6 +12,7 @@ import 'expand_icon.dart';
 import 'ink_well.dart';
 import 'material_localizations.dart';
 import 'mergeable_material.dart';
+import 'shadows.dart';
 import 'theme.dart';
 
 const double _kPanelHeaderCollapsedHeight = kMinInteractiveDimension;
@@ -469,6 +470,11 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
 
   @override
   Widget build(BuildContext context) {
+    assert(kElevationToShadow.containsKey(widget.elevation) != false,
+      'Invalid value for elevation. Only the following values can be used to define'
+      ' the elevation: 0, 1, 2, 3, 4, 6, 8, 9, 12, 16, 24'
+    );
+
     final List<MergeableMaterialItem> items = <MergeableMaterialItem>[];
 
     for (int index = 0; index < widget.children.length; index += 1) {

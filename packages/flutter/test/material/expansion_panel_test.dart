@@ -1441,4 +1441,23 @@ void main() {
 
     expect(tester.widget<MergeableMaterial>(find.byType(MergeableMaterial)).elevation, _elevation);
   });
+
+  testWidgets('Using a value non defined value throws assertion error', (WidgetTester tester) async {
+
+    // It should throw an AssertionError since, 19 is not defined in kElevationToShadow.
+    await tester.pumpWidget(const MaterialApp(
+      home: SingleChildScrollView(
+        child: SimpleExpansionPanelListTestWidget(
+          elevation: 19,
+        ),
+      ),
+    ));
+
+    final dynamic exception = tester.takeException();
+    expect(exception, isAssertionError);
+    expect((exception as AssertionError).toString(), contains(
+      'Invalid value for elevation. Only the following values can be used to define'
+      ' the elevation: 0, 1, 2, 3, 4, 6, 8, 9, 12, 16, 24'
+    ));
+  });
 }
