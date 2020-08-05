@@ -733,7 +733,6 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   Set<InteractiveInkFeature> _splashes;
   InteractiveInkFeature _currentSplash;
   bool _hovering = false;
-  bool _containsMouse = false;
   final Map<_HighlightType, InkHighlight> _highlights = <_HighlightType, InkHighlight>{};
   Map<Type, Action<Intent>> _actionMap;
 
@@ -774,10 +773,8 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   void didUpdateWidget(_InkResponseStateWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (_isWidgetEnabled(widget) != _isWidgetEnabled(oldWidget)) {
-      // The value of _hovering and _containsMouse maybe not match when
-      // the widget's enabled flag changes. We sync them up here, at
-      // _build_ time.
-      _handleHoverChange(_containsMouse);
+      if (enabled)
+        _handleHoverChange();
       _updateFocusHighlights();
     }
   }
@@ -822,7 +819,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     return null;
   }
 
-  void updateHighlight(_HighlightType type, {@required bool value}) {
+  void updateHighlight(_HighlightType type, { @required bool value }) {
     final InkHighlight highlight = _highlights[type];
     void handleInkRemoval() {
       assert(_highlights[type] != null);
@@ -1045,24 +1042,20 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   bool get enabled => _isWidgetEnabled(widget);
 
   void _handleMouseEnter(PointerEnterEvent event) {
-    _containsMouse = true;
+    _hovering = true;
     if (enabled)
-      _handleHoverChange(true);
+      _handleHoverChange();
   }
 
   void _handleMouseExit(PointerExitEvent event) {
-    _containsMouse = false;
+    _hovering = false;
     // If the exit occurs after we've been disabled, we still
     // want to take down the highlights and run widget.onHover.
-    if (enabled || (!enabled && _hovering))
-      _handleHoverChange(false);
+    _handleHoverChange();
   }
 
-  void _handleHoverChange(bool hovering) {
-    if (_hovering != hovering) {
-      _hovering = hovering;
-      updateHighlight(_HighlightType.hover, value: enabled && _hovering);
-    }
+  void _handleHoverChange() {
+    updateHighlight(_HighlightType.hover, value: _hovering);
   }
 
   bool get _canRequestFocus {
@@ -1092,7 +1085,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
       widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
       <MaterialState>{
         if (!enabled) MaterialState.disabled,
-        if (_hovering) MaterialState.hovered,
+        if (_hovering && enabled) MaterialState.hovered,
         if (_hasFocus) MaterialState.focused,
       },
     );
