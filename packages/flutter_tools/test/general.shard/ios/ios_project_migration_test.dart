@@ -164,7 +164,7 @@ keep this 2
           mockUsage,
         );
 
-        expect(() =>iosProjectMigration.migrate(), throwsToolExit(message: 'Your Xcode project requires migration'));
+        expect(iosProjectMigration.migrate, throwsToolExit(message: 'Your Xcode project requires migration'));
         verify(mockUsage.sendEvent('ios-migration', 'remove-frameworks', label: 'failure', value: null));
       });
 
@@ -182,7 +182,7 @@ keep this 2
           mockXcode,
           mockUsage,
         );
-        expect(() =>iosProjectMigration.migrate(), throwsToolExit(message: 'Your Xcode project requires migration'));
+        expect(iosProjectMigration.migrate, throwsToolExit(message: 'Your Xcode project requires migration'));
         verify(mockUsage.sendEvent('ios-migration', 'remove-frameworks', label: 'failure', value: null));
       });
 
@@ -198,7 +198,7 @@ keep this 2
           mockXcode,
           mockUsage,
         );
-        expect(() =>iosProjectMigration.migrate(), throwsToolExit(message: 'Your Xcode project requires migration'));
+        expect(iosProjectMigration.migrate, throwsToolExit(message: 'Your Xcode project requires migration'));
         verify(mockUsage.sendEvent('ios-migration', 'remove-frameworks', label: 'failure', value: null));
       });
 
@@ -235,7 +235,7 @@ keep this 2
           mockXcode,
           mockUsage,
         );
-        expect(() =>iosProjectMigration.migrate(), throwsToolExit(message: 'Your Xcode project requires migration'));
+        expect(iosProjectMigration.migrate, throwsToolExit(message: 'Your Xcode project requires migration'));
         verify(mockUsage.sendEvent('ios-migration', 'remove-frameworks', label: 'failure', value: null));
       });
 
@@ -253,7 +253,7 @@ keep this 2
           mockXcode,
           mockUsage,
         );
-        expect(() =>iosProjectMigration.migrate(), throwsToolExit(message: 'Your Xcode project requires migration'));
+        expect(iosProjectMigration.migrate, throwsToolExit(message: 'Your Xcode project requires migration'));
         verify(mockUsage.sendEvent('ios-migration', 'remove-frameworks', label: 'failure', value: null));
       });
     });

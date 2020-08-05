@@ -40,7 +40,7 @@ class _ExpandingBoxState extends State<ExpandingBox> with AutomaticKeepAliveClie
       color: Colors.green,
       child: Align(
         alignment: Alignment.bottomCenter,
-        child: FlatButton(
+        child: TextButton(
           child: const Text('Collapse'),
           onPressed: toggleSize,
         ),
@@ -68,7 +68,7 @@ void main() {
     expect(position.minScrollExtent, 0.0);
     expect(position.maxScrollExtent, 100.0);
     expect(position.pixels, 0.0);
-    await tester.tap(find.byType(FlatButton));
+    await tester.tap(find.byType(TextButton));
     await tester.pump();
 
     final TestGesture drag1 = await tester.startGesture(const Offset(10.0, 500.0));
@@ -91,7 +91,7 @@ void main() {
     expect(position.pixels, moreOrLessEquals(900.0));
 
     await tester.pump();
-    await tester.tap(find.byType(FlatButton));
+    await tester.tap(find.byType(TextButton));
     await tester.pump();
     expect(position.minScrollExtent, 0.0);
     expect(position.maxScrollExtent, 100.0);
@@ -113,7 +113,7 @@ void main() {
     expect(position.minScrollExtent, 0.0);
     expect(position.maxScrollExtent, 100.0);
     expect(position.pixels, 0.0);
-    await tester.tap(find.byType(FlatButton));
+    await tester.tap(find.byType(TextButton));
     await tester.pump(); // start button animation
     await tester.pump(const Duration(seconds: 1)); // finish button animation
     expect(position.minScrollExtent, 0.0);

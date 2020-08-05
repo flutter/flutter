@@ -5,8 +5,15 @@
 import 'percentile_utils.dart';
 import 'timeline.dart';
 
-/// The catrgory shared by all profiling related timeline events.
-const String kProfilingCategory = 'flutter::profiling';
+/// Profiling related timeline events.
+///
+/// We do not use a profiling category for these as all the dart timeline events
+/// have the same profiling category "embedder".
+const Set<String> kProfilingEvents = <String>{
+  _kCpuProfile,
+  _kGpuProfile,
+  _kMemoryProfile,
+};
 
 // These field names need to be in-sync with:
 // https://github.com/flutter/engine/blob/master/shell/profiling/sampling_profiler.cc
@@ -26,12 +33,12 @@ enum ProfileType {
   Memory,
 }
 
-/// Summarizes [TimelineEvents]s corresponding to [kProfilingCategory] category.
+/// Summarizes [TimelineEvents]s corresponding to [kProfilingEvents] category.
 ///
 /// A sample event (some fields have been omitted for brewity):
 /// ```
 ///     {
-///      "category": "flutter::profiling",
+///      "category": "embedder",
 ///      "name": "CpuUsage",
 ///      "ts": 121120,
 ///      "args": {
@@ -51,7 +58,7 @@ class ProfilingSummarizer {
     final Map<ProfileType, List<TimelineEvent>> eventsByType =
         <ProfileType, List<TimelineEvent>>{};
     for (final TimelineEvent event in profilingEvents) {
-      assert(event.category == kProfilingCategory);
+      assert(kProfilingEvents.contains(event.name));
       final ProfileType type = _getProfileType(event.name);
       eventsByType[type] ??= <TimelineEvent>[];
       eventsByType[type].add(event);

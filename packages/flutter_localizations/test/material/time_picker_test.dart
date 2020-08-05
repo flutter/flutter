@@ -78,6 +78,7 @@ void main() {
       const Locale('es', 'ES'), //'H:mm'
       const Locale('fr', 'CA'), //'HH \'h\' mm'
       const Locale('zh', 'ZH'), //'ah:mm'
+      const Locale('fa', 'IR'), //'H:mm' but RTL
     ];
 
     for (final Locale locale in locales) {
@@ -114,6 +115,12 @@ void main() {
         expect(dayPeriodLeftOffset, lessThan(hourLeftOffset));
         expect(hourLeftOffset, lessThan(stringFragmentLeftOffset));
         expect(stringFragmentLeftOffset, lessThan(minuteLeftOffset));
+      } else if (locale == const Locale('fa', 'IR')) {
+        // Even though this is an RTL locale, the hours and minutes positions should remain the same.
+        expect(stringFragmentText.data, ':');
+        expect(hourLeftOffset, lessThan(stringFragmentLeftOffset));
+        expect(stringFragmentLeftOffset, lessThan(minuteLeftOffset));
+        expect(dayPeriodControlFinder, findsNothing);
       }
       await tester.tapAt(Offset(center.dx, center.dy - 50.0));
       await finishPicker(tester);
@@ -143,6 +150,7 @@ void main() {
       const Locale('es', 'ES'), //'H:mm'
       const Locale('fr', 'CA'), //'HH \'h\' mm'
       const Locale('zh', 'ZH'), //'ah:mm'
+      const Locale('fa', 'IR'), //'H:mm' but RTL
     ];
 
     for (final Locale locale in locales) {
@@ -184,6 +192,12 @@ void main() {
         expect(stringFragmentLeftOffset, lessThan(minuteLeftOffset));
         expect(hourLeftOffset, dayPeriodLeftOffset);
         expect(hourTopOffset, greaterThan(dayPeriodTopOffset));
+      } else if (locale == const Locale('fa', 'IR')) {
+        // Even though this is an RTL locale, the hours and minutes positions should remain the same.
+        expect(stringFragmentText.data, ':');
+        expect(hourLeftOffset, lessThan(stringFragmentLeftOffset));
+        expect(stringFragmentLeftOffset, lessThan(minuteLeftOffset));
+        expect(dayPeriodControlFinder, findsNothing);
       }
       await tester.tapAt(Offset(center.dx, center.dy - 50.0));
       await finishPicker(tester);

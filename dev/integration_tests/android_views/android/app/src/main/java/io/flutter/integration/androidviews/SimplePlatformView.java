@@ -20,19 +20,21 @@ import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.platform.PlatformView;
 
 public class SimplePlatformView implements PlatformView, MethodChannel.MethodCallHandler {
-    private final View view;
+    private final TextView view;
     private final MethodChannel methodChannel;
     private final io.flutter.integration.platformviews.TouchPipe touchPipe;
 
     SimplePlatformView(Context context, MethodChannel methodChannel) {
         this.methodChannel = methodChannel;
-        view = new View(context) {
+        view = new TextView(context) {
             @Override
             public boolean onTouchEvent(MotionEvent event) {
                 return true;
             }
         };
+        view.setTextSize(72);
         view.setBackgroundColor(0xff0000ff);
+        view.setText("Hello from Android view");
         this.methodChannel.setMethodCallHandler(this);
         touchPipe = new io.flutter.integration.platformviews.TouchPipe(this.methodChannel, view);
     }

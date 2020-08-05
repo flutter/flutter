@@ -5,6 +5,7 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/commands/clean.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
@@ -52,6 +53,8 @@ void main() {
         projectUnderTest.linux.ephemeralDirectory.createSync(recursive: true);
         projectUnderTest.macos.ephemeralDirectory.createSync(recursive: true);
         projectUnderTest.windows.ephemeralDirectory.createSync(recursive: true);
+        projectUnderTest.flutterPluginsFile.createSync(recursive: true);
+        projectUnderTest.flutterPluginsDependenciesFile.createSync(recursive: true);
       });
 
       testUsingContext('$CleanCommand removes build and .dart_tool and ephemeral directories, cleans Xcode', () async {
@@ -70,6 +73,9 @@ void main() {
         expect(projectUnderTest.linux.ephemeralDirectory.existsSync(), isFalse);
         expect(projectUnderTest.macos.ephemeralDirectory.existsSync(), isFalse);
         expect(projectUnderTest.windows.ephemeralDirectory.existsSync(), isFalse);
+
+        expect(projectUnderTest.flutterPluginsFile.existsSync(), isFalse);
+        expect(projectUnderTest.flutterPluginsDependenciesFile.existsSync(), isFalse);
 
         verify(mockXcodeProjectInterpreter.cleanWorkspace(any, 'Runner', verbose: false)).called(2);
       }, overrides: <Type, Generator>{
@@ -140,6 +146,6 @@ class MockXcode extends Mock implements Xcode {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {
   @override
   Future<XcodeProjectInfo> getInfo(String projectPath, {String projectFilename}) async {
-    return XcodeProjectInfo(null, null, <String>['Runner']);
+    return XcodeProjectInfo(null, null, <String>['Runner'], BufferLogger.test());
   }
 }

@@ -96,6 +96,7 @@ presented.
    practice to do before coding more intricate changes.
 
 In addition to the above, there are many pages on [our
-Wiki](https://github.com/flutter/flutter/wiki/) that may be of
-interest. For a curated list of pages see the sidebar on the wiki's
-home page. They are more or less listed in order of importance.
+Wiki](https://github.com/flutter/flutter/wiki/) and an article [Contributing to Flutter:
+Getting Started](https://medium.com/@ayushbherwani/contributing-to-flutter-getting-started-a0db68cbcd5b)
+on Medium that may be of interest. For a curated list of pages see the sidebar
+on the wiki's home page. They are more or less listed in order of importance.

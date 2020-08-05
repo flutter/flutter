@@ -2477,7 +2477,7 @@ void main() {
                   tabs: List<Widget>.generate(controller.length, (int index) => Tab(text: 'Tab$index')),
                 ),
                 actions: <Widget>[
-                  FlatButton(
+                  TextButton(
                     child: const Text('Change TabController length'),
                     onPressed: () {
                       setState(() {

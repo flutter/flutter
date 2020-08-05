@@ -13,9 +13,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
-import 'package:mockito/mockito.dart';
 import 'package:flutter/foundation.dart';
 
+import '../flutter_test_alternative.dart' show Fake;
 import '../rendering/mock_canvas.dart';
 import 'editable_text_utils.dart';
 import 'semantics_tester.dart';
@@ -129,6 +129,7 @@ void main() {
     expect(editableText.enableSuggestions, isTrue);
     expect(editableText.textAlign, TextAlign.start);
     expect(editableText.cursorWidth, 2.0);
+    expect(editableText.cursorHeight, isNull);
     expect(editableText.textHeightBehavior, isNull);
   });
 
@@ -2558,18 +2559,15 @@ void main() {
           TextSelection.collapsed(offset: controller.text.length);
 
       controls = MockTextSelectionControls();
-      when(controls.buildHandle(any, any, any)).thenReturn(Container());
-      when(controls.buildToolbar(any, any, any, any, any, any, any))
-          .thenReturn(Container());
     });
 
     testWidgets('are exposed', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       addTearDown(semantics.dispose);
 
-      when(controls.canCopy(any)).thenReturn(false);
-      when(controls.canCut(any)).thenReturn(false);
-      when(controls.canPaste(any)).thenReturn(false);
+      controls.testCanCopy = false;
+      controls.testCanCut = false;
+      controls.testCanPaste = false;
 
       await _buildApp(controls, tester);
       await tester.tap(find.byType(EditableText));
@@ -2587,7 +2585,7 @@ void main() {
         ),
       );
 
-      when(controls.canCopy(any)).thenReturn(true);
+      controls.testCanCopy = true;
       await _buildApp(controls, tester);
       expect(
         semantics,
@@ -2602,8 +2600,8 @@ void main() {
         ),
       );
 
-      when(controls.canCopy(any)).thenReturn(false);
-      when(controls.canPaste(any)).thenReturn(true);
+      controls.testCanCopy = false;
+      controls.testCanPaste = true;
       await _buildApp(controls, tester);
       await tester.pumpAndSettle();
       expect(
@@ -2619,8 +2617,8 @@ void main() {
         ),
       );
 
-      when(controls.canPaste(any)).thenReturn(false);
-      when(controls.canCut(any)).thenReturn(true);
+      controls.testCanPaste = false;
+      controls.testCanCut = true;
       await _buildApp(controls, tester);
       expect(
         semantics,
@@ -2635,9 +2633,9 @@ void main() {
         ),
       );
 
-      when(controls.canCopy(any)).thenReturn(true);
-      when(controls.canCut(any)).thenReturn(true);
-      when(controls.canPaste(any)).thenReturn(true);
+      controls.testCanCopy = true;
+      controls.testCanCut = true;
+      controls.testCanPaste = true;
       await _buildApp(controls, tester);
       expect(
         semantics,
@@ -2658,9 +2656,9 @@ void main() {
     testWidgets('can copy/cut/paste with a11y', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
 
-      when(controls.canCopy(any)).thenReturn(true);
-      when(controls.canCut(any)).thenReturn(true);
-      when(controls.canPaste(any)).thenReturn(true);
+      controls.testCanCopy = true;
+      controls.testCanCut = true;
+      controls.testCanPaste = true;
       await _buildApp(controls, tester);
       await tester.tap(find.byType(EditableText));
       await tester.pump();
@@ -2716,13 +2714,13 @@ void main() {
       );
 
       owner.performAction(expectedNodeId, SemanticsAction.copy);
-      verify(controls.handleCopy(any, any)).called(1);
+      expect(controls.copyCount, 1);
 
       owner.performAction(expectedNodeId, SemanticsAction.cut);
-      verify(controls.handleCut(any)).called(1);
+      expect(controls.cutCount, 1);
 
       owner.performAction(expectedNodeId, SemanticsAction.paste);
-      verify(controls.handlePaste(any)).called(1);
+      expect(controls.pasteCount, 1);
 
       semantics.dispose();
     });
@@ -4320,6 +4318,30 @@ void main() {
     expect(scrollController.offset, 0);
   });
 
+  testWidgets('getLocalRectForCaret does not throw when it sees an infinite point', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SkipPainting(
+          child: Transform(
+            transform: Matrix4.zero(),
+            child: EditableText(
+              controller: TextEditingController(),
+              focusNode: FocusNode(),
+              style: textStyle,
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    final Rect rect = state.renderEditable.getLocalRectForCaret(const TextPosition(offset: 0));
+    expect(rect.isFinite, false);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('obscured multiline fields throw an exception', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
     expect(
@@ -4382,13 +4404,12 @@ void main() {
       'TextInput.setClient',
       'TextInput.show',
       'TextInput.setEditableSizeAndTransform',
-      'TextInput.requestAutofill',
       'TextInput.setStyle',
       'TextInput.setEditingState',
       'TextInput.setEditingState',
       'TextInput.show',
     ];
-    expect(tester.testTextInput.log.length, 8);
+    expect(tester.testTextInput.log.length, 7);
     int index = 0;
     for (final MethodCall m in tester.testTextInput.log) {
       expect(m.method, logOrder[index]);
@@ -4427,7 +4448,6 @@ void main() {
       'TextInput.setClient',
       'TextInput.show',
       'TextInput.setEditableSizeAndTransform',
-      'TextInput.requestAutofill',
       'TextInput.setStyle',
       'TextInput.setEditingState',
       'TextInput.setEditingState',
@@ -4475,7 +4495,6 @@ void main() {
       'TextInput.setClient',
       'TextInput.show',
       'TextInput.setEditableSizeAndTransform',
-      'TextInput.requestAutofill',
       'TextInput.setStyle',
       'TextInput.setEditingState',
       'TextInput.setEditingState',
@@ -5241,7 +5260,17 @@ class MockTextFormatter extends TextInputFormatter {
   }
 }
 
-class MockTextSelectionControls extends Mock implements TextSelectionControls {
+class MockTextSelectionControls extends Fake implements TextSelectionControls {
+  @override
+  Widget buildToolbar(BuildContext context, Rect globalEditableRegion, double textLineHeight, Offset position, List<TextSelectionPoint> endpoints, TextSelectionDelegate delegate, ClipboardStatusNotifier clipboardStatus) {
+    return Container();
+  }
+
+  @override
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight) {
+    return Container();
+  }
+
   @override
   Size getHandleSize(double textLineHeight) {
     return Size.zero;
@@ -5250,6 +5279,44 @@ class MockTextSelectionControls extends Mock implements TextSelectionControls {
   @override
   Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
     return Offset.zero;
+  }
+
+  bool testCanCut = false;
+  bool testCanCopy = false;
+  bool testCanPaste = false;
+
+  int cutCount = 0;
+  int pasteCount = 0;
+  int copyCount = 0;
+
+  @override
+  void handleCopy(TextSelectionDelegate delegate, ClipboardStatusNotifier clipboardStatus) {
+    copyCount += 1;
+  }
+
+  @override
+  Future<void> handlePaste(TextSelectionDelegate delegate) async {
+    pasteCount += 1;
+  }
+
+  @override
+  void handleCut(TextSelectionDelegate delegate) {
+    cutCount += 1;
+  }
+
+  @override
+  bool canCut(TextSelectionDelegate delegate) {
+    return testCanCut;
+  }
+
+  @override
+  bool canCopy(TextSelectionDelegate delegate) {
+    return testCanCopy;
+  }
+
+  @override
+  bool canPaste(TextSelectionDelegate delegate) {
+    return testCanPaste;
   }
 }
 
@@ -5322,7 +5389,7 @@ class _TransformedEditableTextState extends State<TransformedEditableText> {
                 backgroundCursorColor: Colors.grey,
               ),
             ),
-            RaisedButton(
+            ElevatedButton(
               key: widget.transformButtonKey,
               onPressed: () {
                 setState(() {
@@ -5348,4 +5415,16 @@ class NoImplicitScrollPhysics extends AlwaysScrollableScrollPhysics {
   NoImplicitScrollPhysics applyTo(ScrollPhysics ancestor) {
     return NoImplicitScrollPhysics(parent: buildParent(ancestor));
   }
+}
+
+class SkipPainting extends SingleChildRenderObjectWidget {
+  const SkipPainting({ Key key, Widget child }): super(key: key, child: child);
+
+  @override
+  SkipPaintingRenderObject createRenderObject(BuildContext context) => SkipPaintingRenderObject();
+}
+
+class SkipPaintingRenderObject extends RenderProxyBox {
+  @override
+  void paint(PaintingContext context, Offset offset) { }
 }

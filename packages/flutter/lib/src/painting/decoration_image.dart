@@ -456,42 +456,6 @@ void paintImage({
     assert(sourceSize == inputSize, 'centerSlice was used with a BoxFit that does not guarantee that the image is fully visible.');
   }
 
-  // Output size is fully calculated.
-  if (!kReleaseMode) {
-    final ImageSizeInfo sizeInfo = ImageSizeInfo(
-      // Some ImageProvider implementations may not have given this.
-      source: debugImageLabel ?? '<Unknown Image(${image.width}×${image.height})>',
-      imageSize: Size(image.width.toDouble(), image.height.toDouble()),
-      displaySize: outputSize,
-    );
-    // Avoid emitting events that are the same as those emitted in the last frame.
-    if (!_lastFrameImageSizeInfo.contains(sizeInfo)) {
-      final ImageSizeInfo existingSizeInfo = _pendingImageSizeInfo[sizeInfo.source];
-      if (existingSizeInfo == null || existingSizeInfo.displaySizeInBytes < sizeInfo.displaySizeInBytes) {
-        _pendingImageSizeInfo[sizeInfo.source] = sizeInfo;
-      }
-      // _pendingImageSizeInfo.add(sizeInfo);
-      if (debugOnPaintImage != null) {
-        debugOnPaintImage(sizeInfo);
-      }
-      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
-        _lastFrameImageSizeInfo = _pendingImageSizeInfo.values.toSet();
-        if (_pendingImageSizeInfo.isEmpty) {
-          return;
-        }
-        developer.postEvent(
-          'Flutter.ImageSizesForFrame',
-          <Object, Object>{
-            for (ImageSizeInfo imageSizeInfo in _pendingImageSizeInfo.values)
-              imageSizeInfo.source: imageSizeInfo.toJson()
-          },
-        );
-        _pendingImageSizeInfo = <String, ImageSizeInfo>{};
-      });
-
-    }
-  }
-
   if (repeat != ImageRepeat.noRepeat && destinationSize == outputSize) {
     // There's no need to repeat the image because we're exactly filling the
     // output rect with the image.
@@ -510,6 +474,79 @@ void paintImage({
   final double dy = halfHeightDelta + alignment.y * halfHeightDelta;
   final Offset destinationPosition = rect.topLeft.translate(dx, dy);
   final Rect destinationRect = destinationPosition & destinationSize;
+
+  // Set to true if we added a saveLayer to the canvas to invert/flip the image.
+  bool invertedCanvas = false;
+  // Output size and destination rect are fully calculated.
+  if (!kReleaseMode) {
+    final ImageSizeInfo sizeInfo = ImageSizeInfo(
+      // Some ImageProvider implementations may not have given this.
+      source: debugImageLabel ?? '<Unknown Image(${image.width}×${image.height})>',
+      imageSize: Size(image.width.toDouble(), image.height.toDouble()),
+      displaySize: outputSize,
+    );
+    assert(() {
+      if (debugInvertOversizedImages &&
+          sizeInfo.decodedSizeInBytes > sizeInfo.displaySizeInBytes + debugImageOverheadAllowance) {
+        final int overheadInKilobytes = (sizeInfo.decodedSizeInBytes - sizeInfo.displaySizeInBytes) ~/ 1024;
+        final int outputWidth = outputSize.width.toInt();
+        final int outputHeight = outputSize.height.toInt();
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: 'Image $debugImageLabel has a display size of '
+            '$outputWidth×$outputHeight but a decode size of '
+            '${image.width}×${image.height}, which uses an additional '
+            '${overheadInKilobytes}kb.\n\n'
+            'Consider resizing the asset ahead of time, supplying a cacheWidth '
+            'parameter of $outputWidth, a cacheHeight parameter of '
+            '$outputHeight, or using a ResizeImage.',
+          library: 'painting library',
+          context: ErrorDescription('while painting an image'),
+        ));
+        // Invert the colors of the canvas.
+        canvas.saveLayer(
+          destinationRect,
+          Paint()..colorFilter = const ColorFilter.matrix(<double>[
+            -1,  0,  0, 0, 255,
+             0, -1,  0, 0, 255,
+             0,  0, -1, 0, 255,
+             0,  0,  0, 1,   0,
+          ]),
+        );
+        // Flip the canvas vertically.
+        final double dy = -(rect.top + rect.height / 2.0);
+        canvas.translate(0.0, -dy);
+        canvas.scale(1.0, -1.0);
+        canvas.translate(0.0, dy);
+        invertedCanvas = true;
+      }
+      return true;
+    }());
+    // Avoid emitting events that are the same as those emitted in the last frame.
+    if (!_lastFrameImageSizeInfo.contains(sizeInfo)) {
+      final ImageSizeInfo existingSizeInfo = _pendingImageSizeInfo[sizeInfo.source];
+      if (existingSizeInfo == null || existingSizeInfo.displaySizeInBytes < sizeInfo.displaySizeInBytes) {
+        _pendingImageSizeInfo[sizeInfo.source] = sizeInfo;
+      }
+      if (debugOnPaintImage != null) {
+        debugOnPaintImage(sizeInfo);
+      }
+      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+        _lastFrameImageSizeInfo = _pendingImageSizeInfo.values.toSet();
+        if (_pendingImageSizeInfo.isEmpty) {
+          return;
+        }
+        developer.postEvent(
+          'Flutter.ImageSizesForFrame',
+          <Object, Object>{
+            for (ImageSizeInfo imageSizeInfo in _pendingImageSizeInfo.values)
+              imageSizeInfo.source: imageSizeInfo.toJson()
+          },
+        );
+        _pendingImageSizeInfo = <String, ImageSizeInfo>{};
+      });
+    }
+  }
+
   final bool needSave = repeat != ImageRepeat.noRepeat || flipHorizontally;
   if (needSave)
     canvas.save();
@@ -541,6 +578,10 @@ void paintImage({
   }
   if (needSave)
     canvas.restore();
+
+  if (invertedCanvas) {
+    canvas.restore();
+  }
 }
 
 Iterable<Rect> _generateImageTileRects(Rect outputRect, Rect fundamentalRect, ImageRepeat repeat) sync* {

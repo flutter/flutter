@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -16,7 +17,6 @@ class WindowManagerIntegrationsPage extends PageWidget {
 
   @override
   Widget build(BuildContext context) => WindowManagerBody();
-
 }
 
 class WindowManagerBody extends StatefulWidget {
@@ -133,15 +133,17 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
     }
   }
 
-
   Future<void> onTapWindowPressed() async {
     await Future<void>.delayed(const Duration(seconds: 1));
-    for (final AndroidMotionEvent event in _tapSequence) {
-      await SystemChannels.platform_views.invokeMethod<dynamic>(
-        'touch',
-        _motionEventasList(event, id),
-      );
-    }
+
+    // Dispatch a tap event on the child view inside the platform view.
+    //
+    // Android mutates `MotionEvent` instances, so in this case *do not* dispatch
+    // new instances as it won't cover the `MotionEventTracker` class in the embedding
+    // which tracks events.
+    //
+    // See the issue this prevents: https://github.com/flutter/flutter/issues/61169
+    await Process.run('input', const <String>['tap', '250', '550']);
   }
 
   void onPlatformViewCreated(int id) {
@@ -151,110 +153,4 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
     });
   }
 
-
-  static List<double> _pointerCoordsAsList(AndroidPointerCoords coords) {
-    return <double>[
-      coords.orientation,
-      coords.pressure,
-      coords.size,
-      coords.toolMajor,
-      coords.toolMinor,
-      coords.touchMajor,
-      coords.touchMinor,
-      coords.x,
-      coords.y,
-    ];
-  }
-
-  static List<dynamic> _motionEventasList(AndroidMotionEvent event, int viewId) {
-    return <dynamic>[
-      viewId,
-      event.downTime,
-      event.eventTime,
-      event.action,
-      event.pointerCount,
-      event.pointerProperties.map<List<int>>((AndroidPointerProperties p) => <int> [p.id, p.toolType]).toList(),
-      event.pointerCoords.map<List<double>>((AndroidPointerCoords p) => _pointerCoordsAsList(p)).toList(),
-      event.metaState,
-      event.buttonState,
-      event.xPrecision,
-      event.yPrecision,
-      event.deviceId,
-      event.edgeFlags,
-      event.source,
-      event.flags,
-      event.motionEventId,
-    ];
-  }
-
-  static final List<AndroidMotionEvent> _tapSequence = <AndroidMotionEvent> [
-    AndroidMotionEvent(
-      downTime: 723657071,
-      pointerCount: 1,
-      pointerCoords:  <AndroidPointerCoords> [
-        const AndroidPointerCoords(
-          orientation: 0.0,
-          touchMajor: 5.0,
-          size: 0.019607843831181526,
-          x: 180.0,
-          y: 200.0,
-          touchMinor: 5.0,
-          pressure: 1.0,
-          toolMajor: 5.0,
-          toolMinor: 5.0,
-        ),
-      ],
-      yPrecision: 1.0,
-      buttonState: 0,
-      flags: 0,
-      source: 4098,
-      deviceId: 4,
-      metaState: 0,
-      pointerProperties:  <AndroidPointerProperties> [
-        const AndroidPointerProperties(
-          id: 0,
-          toolType: 1,
-        ),
-      ],
-      edgeFlags: 0,
-      eventTime: 723657071,
-      action: 0,
-      xPrecision: 1.0,
-      motionEventId: 1,
-    ),
-    AndroidMotionEvent(
-      downTime: 723657071,
-      eventTime: 723657137,
-      action: 1,
-      pointerCount: 1,
-      pointerProperties: <AndroidPointerProperties> [
-        const AndroidPointerProperties(
-          id:  0,
-          toolType: 1,
-        ),
-      ],
-      pointerCoords: <AndroidPointerCoords> [
-        const AndroidPointerCoords(
-          orientation: 0.0,
-          touchMajor: 5.0,
-          size: 0.019607843831181526,
-          x: 180.0,
-          y: 200.0,
-          touchMinor: 5.0,
-          pressure: 1.0,
-          toolMajor: 5.0,
-          toolMinor: 5.0,
-        )
-      ],
-      metaState: 0,
-      buttonState: 0,
-      xPrecision: 1.0,
-      yPrecision: 1.0,
-      deviceId: 4,
-      edgeFlags: 0,
-      source: 4098,
-      flags: 0,
-      motionEventId: 2,
-    ),
-  ];
 }

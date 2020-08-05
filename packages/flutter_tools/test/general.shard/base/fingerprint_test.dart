@@ -47,7 +47,7 @@ void main() {
           'wobble': 'womble',
         },
       );
-      expect(() => fingerprinter.buildFingerprint(), throwsA(anything));
+      expect(fingerprinter.buildFingerprint, throwsA(anything));
     }, overrides: contextOverrides);
 
     testUsingContext('creates fingerprint with specified properties and files', () {

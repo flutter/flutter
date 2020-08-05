@@ -451,7 +451,7 @@ void main() {
         shadowColor: const Color(0x00000000),
       );
       _testConflicts(layerA, layerB, expectedErrorCount: 1);
-    });
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44572
 
     // Tests:
     //
@@ -497,7 +497,7 @@ void main() {
         shadowColor: const Color(0x00000000),
       );
       _testConflicts(layerA, layerB, expectedErrorCount: 0);
-    });
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44572
 
     // Tests:
     //
@@ -529,7 +529,7 @@ void main() {
         shadowColor: const Color(0x00000000),
       );
       _testConflicts(layerA, layerB, expectedErrorCount: 0);
-    });
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44572
 
     // Tests:
     //
@@ -565,8 +565,8 @@ void main() {
       );
 
       _testConflicts(layerA, layerB, expectedErrorCount: 1);
-    });
-  }, skip: isBrowser);
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44572
+  });
 
   test('ContainerLayer.toImage can render interior layer', () {
     final OffsetLayer parent = OffsetLayer();

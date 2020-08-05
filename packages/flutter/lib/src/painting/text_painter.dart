@@ -54,9 +54,9 @@ class PlaceholderDimensions {
   /// See also:
   ///
   ///  * [baseline], the baseline to align to when using
-  ///    [ui.PlaceholderAlignment.baseline],
-  ///    [ui.PlaceholderAlignment.aboveBaseline],
-  ///    or [ui.PlaceholderAlignment.underBaseline].
+  ///    [dart:ui.PlaceholderAlignment.baseline],
+  ///    [dart:ui.PlaceholderAlignment.aboveBaseline],
+  ///    or [dart:ui.PlaceholderAlignment.belowBaseline].
   ///  * [baselineOffset], the distance of the alphabetic baseline from the upper
   ///    edge of the placeholder.
   final ui.PlaceholderAlignment alignment;
@@ -70,7 +70,7 @@ class PlaceholderDimensions {
   ///
   ///  * [ui.PlaceholderAlignment.baseline]
   ///  * [ui.PlaceholderAlignment.aboveBaseline]
-  ///  * [ui.PlaceholderAlignment.underBaseline]
+  ///  * [ui.PlaceholderAlignment.belowBaseline]
   ///  * [ui.PlaceholderAlignment.middle]
   final TextBaseline baseline;
 
@@ -318,7 +318,7 @@ class TextPainter {
   ///
   /// Omitting or providing null for any properties of [StrutStyle] will result in
   /// default values being used. It is highly recommended to at least specify a
-  /// [fontSize].
+  /// [StrutStyle.fontSize].
   ///
   /// See [StrutStyle] for details.
   /// {@endtemplate}
@@ -568,7 +568,21 @@ class TextPainter {
     _previousCaretPrototype = null;
     _paragraph.layout(ui.ParagraphConstraints(width: maxWidth));
     if (minWidth != maxWidth) {
-      final double newWidth = maxIntrinsicWidth.clamp(minWidth, maxWidth) as double;
+      double newWidth;
+      switch (textWidthBasis) {
+        case TextWidthBasis.longestLine:
+          // The parent widget expects the paragraph to be exactly
+          // `TextPainter.width` wide, if that value satisfies the constraints
+          // it gave to the TextPainter. So when `textWidthBasis` is longestLine,
+          // the paragraph's width needs to be as close to the width of its
+          // longest line as possible.
+          newWidth = _applyFloatingPointHack(_paragraph.longestLine);
+          break;
+        case TextWidthBasis.parent:
+          newWidth = maxIntrinsicWidth;
+          break;
+      }
+      newWidth = newWidth.clamp(minWidth, maxWidth) as double;
       if (newWidth != _applyFloatingPointHack(_paragraph.width)) {
         _paragraph.layout(ui.ParagraphConstraints(width: newWidth));
       }

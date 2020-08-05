@@ -61,7 +61,7 @@ Future<void> buildMacOS({
   );
   final String scheme = projectInfo.schemeFor(buildInfo);
   if (scheme == null) {
-    throwToolExit('Unable to find expected scheme in Xcode project.');
+    projectInfo.reportFlavorNotFoundAndExit();
   }
   final String configuration = projectInfo.buildConfigurationFor(buildInfo, scheme);
   if (configuration == null) {

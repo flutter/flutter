@@ -4,7 +4,9 @@
 
 import 'package:meta/meta.dart';
 
+import 'base/config.dart';
 import 'base/context.dart';
+import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
 import 'build_system/targets/icon_tree_shaker.dart';
@@ -31,6 +33,7 @@ class BuildInfo {
     this.performanceMeasurementFile,
     this.packagesPath = '.packages',
     this.nullSafetyMode = NullSafetyMode.autodetect,
+    this.analyzeSize,
   });
 
   final BuildMode mode;
@@ -110,6 +113,10 @@ class BuildInfo {
   /// This is not considered a build input and will not force assemble to
   /// rerun tasks.
   final String performanceMeasurementFile;
+
+  /// If provided, an output file where a v8-style heapsnapshot will be written for size
+  /// profiling.
+  final String analyzeSize;
 
   static const BuildInfo debug = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
   static const BuildInfo profile = BuildInfo(BuildMode.profile, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
@@ -612,15 +619,20 @@ HostPlatform getCurrentHostPlatform() {
 }
 
 /// Returns the top-level build output directory.
-String getBuildDirectory() {
+String getBuildDirectory([Config config, FileSystem fileSystem]) {
   // TODO(johnmccutchan): Stop calling this function as part of setting
   // up command line argument processing.
-  if (context == null || globals.config == null) {
+  if (context == null) {
+    return 'build';
+  }
+  final Config localConfig = config ?? globals.config;
+  final FileSystem localFilesystem = fileSystem ?? globals.fs;
+  if (localConfig == null) {
     return 'build';
   }
 
-  final String buildDir = globals.config.getValue('build-dir') as String ?? 'build';
-  if (globals.fs.path.isAbsolute(buildDir)) {
+  final String buildDir = localConfig.getValue('build-dir') as String ?? 'build';
+  if (localFilesystem.path.isAbsolute(buildDir)) {
     throw Exception(
         'build-dir config setting in ${globals.config.configPath} must be relative');
   }

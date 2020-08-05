@@ -198,7 +198,7 @@ void main() {
     revealed = viewport.getOffsetToReveal(target, 1.0, rect: const Rect.fromLTWH(40.0, 40.0, 10.0, 10.0));
     expect(revealed.offset, 360.0);
     expect(revealed.rect, const Rect.fromLTWH(0.0, 40.0, 10.0, 10.0));
-  }, skip: isBrowser);
+  });
 
   testWidgets('Viewport getOffsetToReveal Sliver - down', (WidgetTester tester) async {
     final List<Widget> children = <Widget>[];

@@ -956,5 +956,29 @@ void main() {
     },
   );
 
+  testWidgets(
+    'Table widget requires all TableRows to have non-null children',
+    (WidgetTester tester) async {
+      FlutterError error;
+      try {
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Table(
+              children: const <TableRow>[
+                TableRow(children: <Widget>[Text('Some Text')]),
+                TableRow(),
+              ],
+            ),
+          ),
+        );
+      } on FlutterError catch (e) {
+        error = e;
+      } finally {
+        expect(error, isNotNull);
+        expect(error.toStringDeep(), contains('The children property of TableRow must not be null.'));
+      }
+  });
+
   // TODO(ianh): Test handling of TableCell object
 }

@@ -280,7 +280,7 @@ typedef _CheckContext = bool Function(BuildContext context);
 /// See also:
 ///
 ///  * [GestureDetector], for listening for gestures without ink splashes.
-///  * [RaisedButton] and [FlatButton], two kinds of buttons in material design.
+///  * [ElevatedButton] and [TextButton], two kinds of buttons in material design.
 ///  * [IconButton], which combines [InkResponse] with an [Icon].
 class InkResponse extends StatelessWidget {
   /// Creates an area of a [Material] that responds to touch.
@@ -376,9 +376,6 @@ class InkResponse extends StatelessWidget {
   ///  * [MaterialState.hovered].
   ///  * [MaterialState.focused].
   ///  * [MaterialState.disabled].
-  ///
-  /// When [value] is null and [tristate] is true, [MaterialState.selected] is
-  /// included as a state.
   ///
   /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
   final MouseCursor mouseCursor;
@@ -562,7 +559,7 @@ class InkResponse extends StatelessWidget {
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode focusNode;
 
-  /// {@template flutter.widgets.Focus.canRequestFocus}
+  /// {@macro flutter.widgets.Focus.canRequestFocus}
   final bool canRequestFocus;
 
   /// The rectangle to use for the highlight effect and for clipping
@@ -1071,7 +1068,10 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     for (final _HighlightType type in _highlights.keys) {
       _highlights[type]?.color = getHighlightColorForType(type);
     }
-    _currentSplash?.color = widget.splashColor ?? Theme.of(context).splashColor;
+
+    const Set<MaterialState> pressed = <MaterialState>{MaterialState.pressed};
+    _currentSplash?.color = widget.overlayColor?.resolve(pressed) ?? widget.splashColor ?? Theme.of(context).splashColor;
+
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
       widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
       <MaterialState>{
@@ -1195,7 +1195,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 /// See also:
 ///
 ///  * [GestureDetector], for listening for gestures without ink splashes.
-///  * [RaisedButton] and [FlatButton], two kinds of buttons in material design.
+///  * [ElevatedButton] and [TextButton], two kinds of buttons in material design.
 ///  * [InkResponse], a variant of [InkWell] that doesn't force a rectangular
 ///    shape on the ink reaction.
 class InkWell extends InkResponse {
