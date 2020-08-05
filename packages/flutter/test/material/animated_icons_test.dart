@@ -45,33 +45,33 @@ class MockCanvas extends Fake implements Canvas {
 }
 
 @immutable
-abstract class CanvasCall {
-  const CanvasCall();
+abstract class RecordedCanvasCall {
+  const RecordedCanvasCall();
 }
 
-class Rotate extends CanvasCall {
-  const Rotate(this.radians);
+class RecordedRotate extends RecordedCanvasCall {
+  const RecordedRotate(this.radians);
 
   final double radians;
 
   @override
   bool operator ==(Object other) {
-    return other is Rotate && other.radians == radians;
+    return other is RecordedRotate && other.radians == radians;
   }
 
   @override
   int get hashCode => radians.hashCode;
 }
 
-class Translate extends CanvasCall {
-  const Translate(this.dx, this.dy);
+class RecordedTranslate extends RecordedCanvasCall {
+  const RecordedTranslate(this.dx, this.dy);
 
   final double dx;
   final double dy;
 
   @override
   bool operator ==(Object other) {
-    return other is Translate && other.dx == dx && other.dy == dy;
+    return other is RecordedTranslate && other.dx == dx && other.dy == dy;
   }
 
   @override
@@ -231,9 +231,9 @@ void main() {
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
     final MockCanvas canvas = MockCanvas();
     customPaint.painter.paint(canvas, const Size(48.0, 48.0));
-    expect(canvas.invocations, const <CanvasCall>[
-      Rotate(math.pi),
-      Translate(-48, -48),
+    expect(canvas.invocations, const <RecordedCanvasCall>[
+      RecordedRotate(math.pi),
+      RecordedTranslate(-48, -48),
     ]);
   });
 
@@ -277,9 +277,9 @@ void main() {
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
     final MockCanvas canvas = MockCanvas();
     customPaint.painter.paint(canvas, const Size(48.0, 48.0));
-    expect(canvas.invocations, const <CanvasCall>[
-      Rotate(math.pi),
-      Translate(-48, -48),
+    expect(canvas.invocations, const <RecordedCanvasCall>[
+      RecordedRotate(math.pi),
+      RecordedTranslate(-48, -48),
     ]);
   });
 }
