@@ -28,7 +28,7 @@ List<String> _allDemos = kAllGalleryDemos.map(
 
 /// Scrolls each demo menu item into view, launches it, then returns to the
 /// home screen twice.
-Future<void> runDemos(List<String> demos, WidgetTester tester) async {
+Future<void> runDemos(List<String> demos, WidgetController controller) async {
   final Finder demoList = find.byType(Scrollable);
   String currentDemoCategory;
 
@@ -39,48 +39,57 @@ Future<void> runDemos(List<String> demos, WidgetTester tester) async {
     final String demoName = demo.substring(0, demo.indexOf('@'));
     final String demoCategory = demo.substring(demo.indexOf('@') + 1);
     print('> $demo');
-    await tester.binding.delayed(const Duration(milliseconds: 250));
+    await controller.pump(const Duration(milliseconds: 250));
 
     if (currentDemoCategory == null) {
-      await tester.tap(find.text(demoCategory));
-      await tester.pumpAndSettle();
+      await controller.tap(find.text(demoCategory));
+      await controller.pumpAndSettle();
     } else if (currentDemoCategory != demoCategory) {
-      await tester.tap(find.byTooltip('Back'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text(demoCategory));
-      await tester.pumpAndSettle();
+      await controller.tap(find.byTooltip('Back'));
+      await controller.pumpAndSettle();
+      await controller.tap(find.text(demoCategory));
+      await controller.pumpAndSettle();
       // Scroll back to the top
-      await tester.drag(demoList, const Offset(0.0, 10000.0));
-      await tester.pumpAndSettle(const Duration(milliseconds: 100));
+      await controller.drag(demoList, const Offset(0.0, 10000.0));
+      await controller.pumpAndSettle(const Duration(milliseconds: 100));
     }
     currentDemoCategory = demoCategory;
 
     final Finder demoItem = find.text(demoName);
-    await tester.scrollUntilVisible(demoItem, demoList, 48.0);
-    await tester.pumpAndSettle();
+    await controller.scrollUntilVisible(demoItem, 48.0);
+    await controller.pumpAndSettle();
+
+    Future<void> pageBack() {
+      Finder backButton = find.byTooltip('Back');
+      if (backButton.evaluate().isEmpty) {
+        backButton = find.byType(CupertinoNavigationBarBackButton);
+      }
+      return controller.tap(backButton);
+    }
 
     for (int i = 0; i < 2; i += 1) {
-      await tester.tap(demoItem); // Launch the demo
+      await controller.tap(demoItem); // Launch the demo
 
       if (kUnsynchronizedDemos.contains(demo)) {
         // These tests have animation, pumpAndSettle cannot be used.
         // This time is questionable. 300ms is the tested reasonable result.
-        await tester.pump(const Duration(milliseconds: 300));
-        await tester.pump();
-        await tester.pageBack();
+        await controller.pump(const Duration(milliseconds: 300));
+        await controller.pump();
+        await pageBack();
       } else {
-        await tester.pumpAndSettle();
-        await tester.pageBack();
+        await controller.pumpAndSettle();
+        // page back
+        await pageBack();
       }
-      await tester.pumpAndSettle();
+      await controller.pumpAndSettle();
     }
 
     print('< Success');
   }
 
   // Return to the home screen
-  await tester.tap(find.byTooltip('Back'));
-  await tester.pumpAndSettle();
+  await controller.tap(find.byTooltip('Back'));
+  await controller.pumpAndSettle();
 }
 
 void main([List<String> args = const <String>[]]) {
