@@ -102,7 +102,7 @@ class FlutterVersion {
 
   /// Whether we are currently on the master branch.
   bool get isMaster {
-    return getBranchName() == 'stable';
+    return getBranchName() == 'master';
   }
 
   String _channel;

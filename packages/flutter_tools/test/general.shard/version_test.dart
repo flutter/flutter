@@ -37,8 +37,7 @@ void main() {
     for (final Channel channel in Channel.values) {
       expect(getNameForChannel(channel), kOfficialChannels.toList()[channel.index]);
     }
-    expect(kOfficialChannels.toList()
-            .map((String str) => getChannelForName(str)).toList(),
+    expect(kOfficialChannels.toList().map((String str) => getChannelForName(str)).toList(),
       Channel.values);
   });
 
