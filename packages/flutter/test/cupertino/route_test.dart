@@ -1542,7 +1542,7 @@ class RouteSettingsObserver extends NavigatorObserver {
     super.didPush(route, previousRoute);
   }
 }
-              
+
 class TransitionDetector extends DefaultTransitionDelegate<void> {
   bool hasTransition = false;
   @override
