@@ -475,7 +475,7 @@ void main() {
     // We shouldn't have to fallback to git describe, because we are exactly
     // on a release tag.
     verifyNever(mockProcessUtils.runSync(
-      <String>['git', 'describe', '--match', '*.*.*-*.*.pre', '--first-parent', '--long', '--tags'],
+      <String>['git', 'describe', '--match', '*.*.*', '--first-parent', '--long', '--tags'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     ));
@@ -632,7 +632,7 @@ void main() {
       <String>['git', 'tag', '--contains', 'HEAD'],
     ));
     when(processUtils.runSync(
-      <String>['git', 'describe', '--match', '*.*.*-*.*.pre', '--first-parent', '--long', '--tags'],
+      <String>['git', 'describe', '--match', '*.*.*', '--first-parent', '--long', '--tags'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(ProcessResult(111, 0, 'v0.1.2-3-1234abcd', ''), <String>['git', 'describe']));
