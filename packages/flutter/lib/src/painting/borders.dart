@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:math' as math;
 import 'dart:ui' as ui show lerpDouble;
@@ -130,9 +129,9 @@ class BorderSide {
 
   /// Creates a copy of this border but with the given fields replaced with the new values.
   BorderSide copyWith({
-    Color color,
-    double width,
-    BorderStyle style,
+    Color? color,
+    double? width,
+    BorderStyle? style,
   }) {
     assert(width == null || width >= 0.0);
     return BorderSide(
@@ -186,7 +185,6 @@ class BorderSide {
           ..strokeWidth = 0.0
           ..style = PaintingStyle.stroke;
     }
-    return null;
   }
 
   /// Whether the two given [BorderSide]s can be merged using [new
@@ -219,12 +217,12 @@ class BorderSide {
       return a;
     if (t == 1.0)
       return b;
-    final double width = ui.lerpDouble(a.width, b.width, t);
+    final double width = ui.lerpDouble(a.width, b.width, t)!;
     if (width < 0.0)
       return BorderSide.none;
     if (a.style == b.style) {
       return BorderSide(
-        color: Color.lerp(a.color, b.color, t),
+        color: Color.lerp(a.color, b.color, t)!,
         width: width,
         style: a.style, // == b.style
       );
@@ -247,7 +245,7 @@ class BorderSide {
         break;
     }
     return BorderSide(
-      color: Color.lerp(colorA, colorB, t),
+      color: Color.lerp(colorA, colorB, t)!,
       width: width,
       style: BorderStyle.solid,
     );
@@ -319,7 +317,7 @@ abstract class ShapeBorder {
   /// The `reversed` argument is true if this object was the right operand of
   /// the `+` operator, and false if it was the left operand.
   @protected
-  ShapeBorder add(ShapeBorder other, { bool reversed = false }) => null;
+  ShapeBorder? add(ShapeBorder other, { bool reversed = false }) => null;
 
   /// Creates a new border consisting of the two borders on either side of the
   /// operator.
@@ -382,7 +380,7 @@ abstract class ShapeBorder {
   ///
   /// Instead of calling this directly, use [ShapeBorder.lerp].
   @protected
-  ShapeBorder lerpFrom(ShapeBorder a, double t) {
+  ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
     if (a == null)
       return scale(t);
     return null;
@@ -414,7 +412,7 @@ abstract class ShapeBorder {
   ///
   /// Instead of calling this directly, use [ShapeBorder.lerp].
   @protected
-  ShapeBorder lerpTo(ShapeBorder b, double t) {
+  ShapeBorder? lerpTo(ShapeBorder? b, double t) {
     if (b == null)
       return scale(1.0 - t);
     return null;
@@ -428,9 +426,9 @@ abstract class ShapeBorder {
   /// and `b` after `t=0.5`.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static ShapeBorder lerp(ShapeBorder a, ShapeBorder b, double t) {
+  static ShapeBorder? lerp(ShapeBorder? a, ShapeBorder? b, double t) {
     assert(t != null);
-    ShapeBorder result;
+    ShapeBorder? result;
     if (b != null)
       result = b.lerpFrom(a, t);
     if (result == null && a != null)
@@ -457,7 +455,7 @@ abstract class ShapeBorder {
   ///
   ///  * [getInnerPath], which creates the path for the inner edge.
   ///  * [Path.contains], which can tell if an [Offset] is within a [Path].
-  Path getOuterPath(Rect rect, { TextDirection textDirection });
+  Path getOuterPath(Rect rect, { TextDirection? textDirection });
 
   /// Create a [Path] that describes the inner edge of the border.
   ///
@@ -478,7 +476,7 @@ abstract class ShapeBorder {
   ///
   ///  * [getOuterPath], which creates the path for the outer edge.
   ///  * [Path.contains], which can tell if an [Offset] is within a [Path].
-  Path getInnerPath(Rect rect, { TextDirection textDirection });
+  Path getInnerPath(Rect rect, { TextDirection? textDirection });
 
   /// Paints the border within the given [Rect] on the given [Canvas].
   ///
@@ -486,7 +484,7 @@ abstract class ShapeBorder {
   /// has a text direction dependency (for example if it is expressed in terms
   /// of "start" and "end" instead of "left" and "right"). It may be null if
   /// the border will not need the text direction to paint itself.
-  void paint(Canvas canvas, Rect rect, { TextDirection textDirection });
+  void paint(Canvas canvas, Rect rect, { TextDirection? textDirection });
 
   @override
   String toString() {
@@ -548,7 +546,7 @@ class _CompoundBorder extends ShapeBorder {
       // border, and "merged" is the result of attempting to merge it with the
       // new border. If it's null, it couldn't be merged.
       final ShapeBorder ours = reversed ? borders.last : borders.first;
-      final ShapeBorder merged = ours.add(other, reversed: reversed)
+      final ShapeBorder? merged = ours.add(other, reversed: reversed)
                              ?? other.add(ours, reversed: !reversed);
       if (merged != null) {
         final List<ShapeBorder> result = <ShapeBorder>[...borders];
@@ -574,27 +572,27 @@ class _CompoundBorder extends ShapeBorder {
   }
 
   @override
-  ShapeBorder lerpFrom(ShapeBorder a, double t) {
+  ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
     return _CompoundBorder.lerp(a, this, t);
   }
 
   @override
-  ShapeBorder lerpTo(ShapeBorder b, double t) {
+  ShapeBorder? lerpTo(ShapeBorder? b, double t) {
     return _CompoundBorder.lerp(this, b, t);
   }
 
-  static _CompoundBorder lerp(ShapeBorder a, ShapeBorder b, double t) {
+  static _CompoundBorder lerp(ShapeBorder? a, ShapeBorder? b, double t) {
     assert(t != null);
     assert(a is _CompoundBorder || b is _CompoundBorder); // Not really necessary, but all call sites currently intend this.
-    final List<ShapeBorder> aList = a is _CompoundBorder ? a.borders : <ShapeBorder>[a];
-    final List<ShapeBorder> bList = b is _CompoundBorder ? b.borders : <ShapeBorder>[b];
+    final List<ShapeBorder?> aList = a is _CompoundBorder ? a.borders : <ShapeBorder?>[a];
+    final List<ShapeBorder?> bList = b is _CompoundBorder ? b.borders : <ShapeBorder?>[b];
     final List<ShapeBorder> results = <ShapeBorder>[];
     final int length = math.max(aList.length, bList.length);
     for (int index = 0; index < length; index += 1) {
-      final ShapeBorder localA = index < aList.length ? aList[index] : null;
-      final ShapeBorder localB = index < bList.length ? bList[index] : null;
+      final ShapeBorder? localA = index < aList.length ? aList[index] : null;
+      final ShapeBorder? localB = index < bList.length ? bList[index] : null;
       if (localA != null && localB != null) {
-        final ShapeBorder localResult = localA.lerpTo(localB, t) ?? localB.lerpFrom(localA, t);
+        final ShapeBorder? localResult = localA.lerpTo(localB, t) ?? localB.lerpFrom(localA, t);
         if (localResult != null) {
           results.add(localResult);
           continue;
@@ -613,19 +611,19 @@ class _CompoundBorder extends ShapeBorder {
   }
 
   @override
-  Path getInnerPath(Rect rect, { TextDirection textDirection }) {
+  Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
     for (int index = 0; index < borders.length - 1; index += 1)
       rect = borders[index].dimensions.resolve(textDirection).deflateRect(rect);
     return borders.last.getInnerPath(rect, textDirection: textDirection);
   }
 
   @override
-  Path getOuterPath(Rect rect, { TextDirection textDirection }) {
+  Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
     return borders.first.getOuterPath(rect, textDirection: textDirection);
   }
 
   @override
-  void paint(Canvas canvas, Rect rect, { TextDirection textDirection }) {
+  void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) {
     for (final ShapeBorder border in borders) {
       border.paint(canvas, rect, textDirection: textDirection);
       rect = border.dimensions.resolve(textDirection).deflateRect(rect);
