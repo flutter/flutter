@@ -11,11 +11,11 @@
 namespace flutter {
 
 sk_sp<SkData> SerializeTypefaceWithoutData(SkTypeface* typeface, void* ctx) {
-  return typeface->serialize(SkTypeface::SerializeBehavior::kDoIncludeData);
+  return typeface->serialize(SkTypeface::SerializeBehavior::kDontIncludeData);
 }
 
 sk_sp<SkData> SerializeTypefaceWithData(SkTypeface* typeface, void* ctx) {
-  return typeface->serialize(SkTypeface::SerializeBehavior::kDontIncludeData);
+  return typeface->serialize(SkTypeface::SerializeBehavior::kDoIncludeData);
 }
 
 struct ImageMetaData {
