@@ -6,6 +6,7 @@ import 'dart:io';
 
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
+import 'package:flutter_devicelab/versions/gallery.dart';
 
 import 'package:flutter_devicelab/tasks/perf_tests.dart' show WebCompileTest;
 
@@ -22,7 +23,8 @@ class NewGalleryWebCompileTest {
 
   /// Runs the test.
   Future<TaskResult> run() async {
-    await gitClone(path: 'temp', repo: 'https://github.com/flutter/gallery.git');
+    await Directory('temp').create(recursive: true);
+    await getNewGallery(galleryVersion, Directory('temp/gallery'));
 
     final Map<String, Object> metrics = await inDirectory<Map<String, int>>(
       'temp/gallery',
