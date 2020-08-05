@@ -61,6 +61,7 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
   void DispatchSemanticsAction(int32_t id,
                                flutter::SemanticsAction action,
                                std::vector<uint8_t> args) override;
+  void AccessibilityFocusDidChange(int32_t id) override;
 
   UIView<UITextInput>* textInputView() override;
 
@@ -83,6 +84,7 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
   FlutterViewController* view_controller_;
   PlatformViewIOS* platform_view_;
   FlutterPlatformViewsController* platform_views_controller_;
+  int32_t last_focused_semantics_object_id_;
   fml::scoped_nsobject<NSMutableDictionary<NSNumber*, SemanticsObject*>> objects_;
   fml::scoped_nsprotocol<FlutterBasicMessageChannel*> accessibility_channel_;
   fml::WeakPtrFactory<AccessibilityBridge> weak_factory_;

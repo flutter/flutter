@@ -41,6 +41,7 @@ AccessibilityBridge::AccessibilityBridge(FlutterViewController* view_controller,
     : view_controller_(view_controller),
       platform_view_(platform_view),
       platform_views_controller_(platform_views_controller),
+      last_focused_semantics_object_id_(0),
       objects_([[NSMutableDictionary alloc] init]),
       weak_factory_(this),
       previous_route_id_(0),
@@ -64,6 +65,10 @@ AccessibilityBridge::~AccessibilityBridge() {
 
 UIView<UITextInput>* AccessibilityBridge::textInputView() {
   return [[platform_view_->GetOwnerViewController().get().engine textInputPlugin] textInputView];
+}
+
+void AccessibilityBridge::AccessibilityFocusDidChange(int32_t id) {
+  last_focused_semantics_object_id_ = id;
 }
 
 void AccessibilityBridge::UpdateSemantics(flutter::SemanticsNodeUpdates nodes,
@@ -188,12 +193,16 @@ void AccessibilityBridge::UpdateSemantics(flutter::SemanticsNodeUpdates nodes,
                                                    [lastAdded routeFocusObject]);
     }
   } else if (layoutChanged) {
-    // TODO(goderbauer): figure out which node to focus next.
-    ios_delegate_->PostAccessibilityNotification(UIAccessibilityLayoutChangedNotification, nil);
+    // Tries to refocus the previous focused semantics object to avoid random jumps.
+    ios_delegate_->PostAccessibilityNotification(
+        UIAccessibilityLayoutChangedNotification,
+        [objects_.get() objectForKey:@(last_focused_semantics_object_id_)]);
   }
   if (scrollOccured) {
-    // TODO(tvolkert): provide meaningful string (e.g. "page 2 of 5")
-    ios_delegate_->PostAccessibilityNotification(UIAccessibilityPageScrolledNotification, @"");
+    // Tries to refocus the previous focused semantics object to avoid random jumps.
+    ios_delegate_->PostAccessibilityNotification(
+        UIAccessibilityPageScrolledNotification,
+        [objects_.get() objectForKey:@(last_focused_semantics_object_id_)]);
   }
 }
 
