@@ -68,6 +68,9 @@ class BasicMessageChannel<T> {
   /// The handler's return value is sent back to the platform plugins as a
   /// message reply. It may be null.
   void setMessageHandler(Future<T> handler(T message)) {
+    // Note: handler has a non-nullable type, but might be null when running
+    // with weak checking, so we need to null check it anyway (and ignore the
+    // warning that the null-handling logic is dead code).
     if (handler == null) { // ignore: dead_code
       binaryMessenger.setMessageHandler(name, null);
     } else {
@@ -89,6 +92,9 @@ class BasicMessageChannel<T> {
   /// This is intended for testing. Messages intercepted in this manner are not
   /// sent to platform plugins.
   void setMockMessageHandler(Future<T> handler(T message)) {
+    // Note: handler has a non-nullable type, but might be null when running
+    // with weak checking, so we need to null check it anyway (and ignore the
+    // warning that the null-handling logic is dead code).
     if (handler == null) { // ignore: dead_code
       binaryMessenger.setMockMessageHandler(name, null);
     } else {
@@ -412,6 +418,9 @@ class MethodChannel {
   /// returned that value.
   void setMockMethodCallHandler(Future<dynamic> handler(MethodCall call)) {
     _methodChannelMockHandlers[this] = handler;
+    // Note: handler has a non-nullable type, but might be null when running
+    // with weak checking, so we need to null check it anyway (and ignore the
+    // warning that the null-handling logic is dead code).
     binaryMessenger.setMockMessageHandler(
       name,
       handler == null ? null // ignore: dead_code

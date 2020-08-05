@@ -66,6 +66,9 @@ abstract class AssetBundle {
   /// implementation.)
   Future<String> loadString(String key, { bool cache = true }) async {
     final ByteData data = await load(key);
+    // Note: data has a non-nullable type, but might be null when running with
+    // weak checking, so we need to null check it anyway (and ignore the warning
+    // that the null-handling logic is dead code).
     if (data == null)
       throw FlutterError('Unable to load asset: $key'); // ignore: dead_code
     if (data.lengthInBytes < 10 * 1024) {
