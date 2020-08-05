@@ -34,6 +34,17 @@ const List<int> _kFailPngBytes =
   120, 1, 99, 249, 207, 240, 255, 63, 0, 7, 18, 3, 2, 164, 147, 160, 197, 0,
   0, 0, 0, 73, 69, 78, 68, 174, 66, 96, 130];
 
+Future<void> testWithOutput(String name, Future<void> body(), String expectedOutput) async {
+  test(name, () async {
+    final StringBuffer output = StringBuffer();
+    void _recordPrint(Zone self, ZoneDelegate parent, Zone zone, String line) {
+      output.write(line);
+    }
+    await runZoned<Future<void>>(body, zoneSpecification: ZoneSpecification(print: _recordPrint));
+    expect(output.toString(), expectedOutput);
+  });
+}
+
 void main() {
   MemoryFileSystem fs;
   FakePlatform platform;
@@ -327,6 +338,24 @@ void main() {
         url = Uri.parse('https://flutter-gold.skia.org/json/expectations/commit/HEAD');
         final MockHttpClientResponse mockHttpResponse = MockHttpClientResponse(
           utf8.encode(rawExpectationsTemplate())
+        );
+        when(mockHttpClient.getUrl(url))
+          .thenAnswer((_) => Future<MockHttpClientRequest>.value(mockHttpRequest));
+        when(mockHttpRequest.close())
+          .thenAnswer((_) => Future<MockHttpClientResponse>.value(mockHttpResponse));
+
+        await skiaClient.getExpectations();
+        expect(skiaClient.expectations, isNotNull);
+        expect(
+          skiaClient.expectations['flutter.golden_test.1'],
+          contains(expectation),
+        );
+      });
+
+      test('sets up expectations with temporary key', () async {
+        url = Uri.parse('https://flutter-gold.skia.org/json/expectations/commit/HEAD');
+        final MockHttpClientResponse mockHttpResponse = MockHttpClientResponse(
+          utf8.encode(rawExpectationsTemplateWithTemporaryKey())
         );
         when(mockHttpClient.getUrl(url))
           .thenAnswer((_) => Future<MockHttpClientRequest>.value(mockHttpRequest));
@@ -851,7 +880,7 @@ void main() {
           );
         });
 
-        test('passes non-existent baseline for new test', () async {
+        testWithOutput('passes non-existent baseline for new test', () async {
           when(mockSkiaClient.cleanTestName('library.flutter.new_golden_test.1.png'))
             .thenReturn('flutter.new_golden_test.1');
           expect(
@@ -861,7 +890,8 @@ void main() {
             ),
             isTrue,
           );
-        });
+        }, 'No expectations provided by Skia Gold for test: library.flutter.new_golden_test.1.png. '
+           'This may be a new test. If this is an unexpected result, check https://flutter-gold.skia.org.\n');
       });
     });
 
@@ -937,7 +967,7 @@ void main() {
         );
       });
 
-      test('passes non-existent baseline for new test', () async {
+      testWithOutput('passes non-existent baseline for new test', () async {
         expect(
           await comparator.compare(
             Uint8List.fromList(_kFailPngBytes),
@@ -945,7 +975,10 @@ void main() {
           ),
           isTrue,
         );
-      });
+      }, 'No expectations provided by Skia Gold for test: library.flutter.new_golden_test.1. '
+         'This may be a new test. If this is an unexpected result, check https://flutter-gold.skia.org.\n'
+         'Validate image output found at flutter/test/library/'
+      );
 
       test('compare properly awaits validation & output before failing.', () async {
         final Completer<bool> completer = Completer<bool>();
