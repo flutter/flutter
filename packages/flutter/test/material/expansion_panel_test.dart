@@ -15,12 +15,14 @@ class SimpleExpansionPanelListTestWidget extends StatefulWidget {
     this.canTapOnHeader = false,
     this.expandedHeaderPadding,
     this.dividerColor,
+    this.elevation = 2,
   }) : super(key: key);
 
   final Key firstPanelKey;
   final Key secondPanelKey;
   final bool canTapOnHeader;
   final Color dividerColor;
+  final int elevation;
 
   /// If null, the default [ExpansionPanelList]'s expanded header padding value is applied via [defaultExpandedHeaderPadding]
   final EdgeInsets expandedHeaderPadding;
@@ -48,6 +50,7 @@ class _SimpleExpansionPanelListTestWidgetState extends State<SimpleExpansionPane
         });
       },
       dividerColor: widget.dividerColor,
+      elevation: widget.elevation,
       children: <ExpansionPanel>[
         ExpansionPanel(
           headerBuilder: (BuildContext context, bool isExpanded) {
@@ -1395,5 +1398,66 @@ void main() {
 
     // For the last DecoratedBox, we will have a Border.top with the provided dividerColor.
     expect(boxDecoration.border.top.color, dividerColor);
+  });
+
+  testWidgets('elevation is propagated properly to MergeableMaterial', (WidgetTester tester) async {
+    const int _elevation = 8;
+
+    // Test for ExpansionPanelList.
+    await tester.pumpWidget(const MaterialApp(
+      home: SingleChildScrollView(
+        child: SimpleExpansionPanelListTestWidget(
+          elevation: _elevation,
+        ),
+      ),
+    ));
+
+    expect(tester.widget<MergeableMaterial>(find.byType(MergeableMaterial)).elevation, _elevation);
+
+    // Test for ExpansionPanelList.radio.
+    await tester.pumpWidget(MaterialApp(
+      home: SingleChildScrollView(
+        child: ExpansionPanelList.radio(
+          elevation: _elevation,
+          children: <ExpansionPanelRadio>[
+            ExpansionPanelRadio(
+              headerBuilder: (BuildContext context, bool isExpanded) {
+                return Text(isExpanded ? 'B' : 'A', key: const Key('firstKey'));
+              },
+              body: const SizedBox(height: 100.0),
+              value: 0,
+            ),
+            ExpansionPanelRadio(
+              headerBuilder: (BuildContext context, bool isExpanded) {
+                return Text(isExpanded ? 'D' : 'C', key: const Key('secondKey'));
+              },
+              body: const SizedBox(height: 100.0),
+              value: 1,
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    expect(tester.widget<MergeableMaterial>(find.byType(MergeableMaterial)).elevation, _elevation);
+  });
+
+  testWidgets('Using a value non defined value throws assertion error', (WidgetTester tester) async {
+
+    // It should throw an AssertionError since, 19 is not defined in kElevationToShadow.
+    await tester.pumpWidget(const MaterialApp(
+      home: SingleChildScrollView(
+        child: SimpleExpansionPanelListTestWidget(
+          elevation: 19,
+        ),
+      ),
+    ));
+
+    final dynamic exception = tester.takeException();
+    expect(exception, isAssertionError);
+    expect((exception as AssertionError).toString(), contains(
+      'Invalid value for elevation. See the kElevationToShadow constant for'
+      ' possible elevation values.'
+    ));
   });
 }

@@ -33,6 +33,9 @@ const Color _kKeyUmbraOpacity = Color(0x33000000); // alpha = 0.2
 const Color _kKeyPenumbraOpacity = Color(0x24000000); // alpha = 0.14
 const Color _kAmbientShadowOpacity = Color(0x1F000000); // alpha = 0.12
 const Map<int, List<BoxShadow>> _elevationToShadow = <int, List<BoxShadow>>{
+  // The empty list depicts no elevation.
+  0: <BoxShadow>[],
+
   1: <BoxShadow>[
     BoxShadow(offset: Offset(0.0, 2.0), blurRadius: 1.0, spreadRadius: -1.0, color: _kKeyUmbraOpacity),
     BoxShadow(offset: Offset(0.0, 1.0), blurRadius: 1.0, spreadRadius: 0.0, color: _kKeyPenumbraOpacity),
