@@ -132,9 +132,7 @@ Future<void> main(List<String> arguments) async {
     kDummyPackageName,
     kPlatformIntegrationPackageName,
     ...findPackageNames(),
-  ]..remove('flutter_test');
-  // TODO(goderbauer): Enable flutter_test when engine is rolled to include
-  //     https://github.com/flutter/engine/pull/20140.
+  ];
 
   // Generate the documentation.
   // We don't need to exclude flutter_tools in this list because it's not in the

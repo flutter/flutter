@@ -594,7 +594,7 @@ class TextInputConfiguration {
   }
 }
 
-TextAffinity? _toTextAffinity(String affinity) {
+TextAffinity? _toTextAffinity(String? affinity) {
   switch (affinity) {
     case 'TextAffinity.downstream':
       return TextAffinity.downstream;
@@ -662,7 +662,7 @@ class TextEditingValue {
       selection: TextSelection(
         baseOffset: encoded['selectionBase'] as int? ?? -1,
         extentOffset: encoded['selectionExtent'] as int? ?? -1,
-        affinity: _toTextAffinity(encoded['selectionAffinity'] as String) ?? TextAffinity.downstream,
+        affinity: _toTextAffinity(encoded['selectionAffinity'] as String?) ?? TextAffinity.downstream,
         isDirectional: encoded['selectionIsDirectional'] as bool? ?? false,
       ),
       composing: TextRange(

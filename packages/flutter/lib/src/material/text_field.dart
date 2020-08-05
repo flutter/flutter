@@ -22,6 +22,7 @@ import 'material_localizations.dart';
 import 'material_state.dart';
 import 'selectable_text.dart' show iOSHorizontalOffset;
 import 'text_selection.dart';
+import 'text_selection_theme.dart';
 import 'theme.dart';
 
 export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization, SmartQuotesType, SmartDashesType;
@@ -637,10 +638,22 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.cursorRadius}
   final Radius cursorRadius;
 
-  /// The color to use when painting the cursor.
+  /// The color of the cursor.
   ///
-  /// Defaults to [ThemeData.cursorColor] or [CupertinoThemeData.primaryColor]
-  /// depending on [ThemeData.platform].
+  /// The cursor indicates the current location of text insertion point in
+  /// the field.
+  ///
+  /// If this is null it will default to a value based on the following:
+  ///
+  /// * If the ambient [ThemeData.useTextSelectionTheme] is true then it
+  ///   will use the value of the ambient [TextSelectionThemeData.cursorColor].
+  ///   If that is null then if the [ThemeData.platform] is [TargetPlatform.iOS]
+  ///   or [TargetPlatform.macOS] then it will use [CupertinoThemeData.primaryColor].
+  ///   Otherwise it will use the value of [ColorScheme.primary] of [ThemeData.colorScheme].
+  ///
+  /// * If the ambient [ThemeData.useTextSelectionTheme] is false then it
+  ///   will use either [ThemeData.cursorColor] or [CupertinoThemeData.primaryColor]
+  ///   depending on [ThemeData.platform].
   final Color cursorColor;
 
   /// Controls how tall the selection highlight boxes are computed to be.
@@ -1017,6 +1030,11 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
     }
   }
 
+  Color _defaultSelectionColor(BuildContext context, Color primary) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    return primary.withOpacity(isDark ? 0.40 : 0.12);
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -1028,9 +1046,10 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
       'inherit false style must supply fontSize and textBaseline',
     );
 
-    final ThemeData themeData = Theme.of(context);
-    final TextStyle style = themeData.textTheme.subtitle1.merge(widget.style);
-    final Brightness keyboardAppearance = widget.keyboardAppearance ?? themeData.primaryColorBrightness;
+    final ThemeData theme = Theme.of(context);
+    final TextSelectionThemeData selectionTheme = TextSelectionTheme.of(context);
+    final TextStyle style = theme.textTheme.subtitle1.merge(widget.style);
+    final Brightness keyboardAppearance = widget.keyboardAppearance ?? theme.primaryColorBrightness;
     final TextEditingController controller = _effectiveController;
     final FocusNode focusNode = _effectiveFocusNode;
     final List<TextInputFormatter> formatters = widget.inputFormatters ?? <TextInputFormatter>[];
@@ -1042,20 +1061,27 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
     bool cursorOpacityAnimates;
     Offset cursorOffset;
     Color cursorColor = widget.cursorColor;
+    Color selectionColor;
     Color autocorrectionTextRectColor;
     Radius cursorRadius = widget.cursorRadius;
 
-    switch (themeData.platform) {
+    switch (theme.platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         forcePressEnabled = true;
         textSelectionControls = cupertinoTextSelectionControls;
         paintCursorAboveText = true;
         cursorOpacityAnimates = true;
-        cursorColor ??= CupertinoTheme.of(context).primaryColor;
+        if (theme.useTextSelectionTheme) {
+          cursorColor ??= selectionTheme.cursorColor ?? CupertinoTheme.of(context).primaryColor;
+          selectionColor = selectionTheme.selectionColor ?? _defaultSelectionColor(context, CupertinoTheme.of(context).primaryColor);
+        } else {
+          cursorColor ??= CupertinoTheme.of(context).primaryColor;
+          selectionColor = theme.textSelectionColor;
+        }
         cursorRadius ??= const Radius.circular(2.0);
         cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
-        autocorrectionTextRectColor = themeData.textSelectionColor;
+        autocorrectionTextRectColor = selectionColor;
         break;
 
       case TargetPlatform.android:
@@ -1066,7 +1092,13 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
         textSelectionControls = materialTextSelectionControls;
         paintCursorAboveText = false;
         cursorOpacityAnimates = false;
-        cursorColor ??= themeData.cursorColor;
+        if (theme.useTextSelectionTheme) {
+          cursorColor ??= selectionTheme.cursorColor ?? theme.colorScheme.primary;
+          selectionColor = selectionTheme.selectionColor ?? _defaultSelectionColor(context, theme.colorScheme.primary);
+        } else {
+          cursorColor ??= theme.cursorColor;
+          selectionColor = theme.textSelectionColor;
+        }
         break;
     }
 
@@ -1096,7 +1128,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
         maxLines: widget.maxLines,
         minLines: widget.minLines,
         expands: widget.expands,
-        selectionColor: themeData.textSelectionColor,
+        selectionColor: selectionColor,
         selectionControls: widget.selectionEnabled ? textSelectionControls : null,
         onChanged: widget.onChanged,
         onSelectionChanged: _handleSelectionChanged,
