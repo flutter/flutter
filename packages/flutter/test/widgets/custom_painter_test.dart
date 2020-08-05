@@ -434,9 +434,10 @@ void _defineTests() {
       ),
     ));
     List<SemanticsFlag> flags = SemanticsFlag.values.values.toList();
-    // [SemanticsFlag.hasImplicitScrolling] isn't part of [SemanticsProperties]
-    // therefore it has to be removed.
-    flags.remove(SemanticsFlag.hasImplicitScrolling);
+    // These aren't a part of [SemanticsProperties] and therefore have to be removed.
+    flags
+      ..remove(SemanticsFlag.hasImplicitScrolling)
+      ..remove(SemanticsFlag.isPartiallyHidden);
     TestSemantics expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
@@ -483,9 +484,10 @@ void _defineTests() {
       ),
     ));
     flags = SemanticsFlag.values.values.toList();
-    // [SemanticsFlag.hasImplicitScrolling] isn't part of [SemanticsProperties]
-    // therefore it has to be removed.
-    flags.remove(SemanticsFlag.hasImplicitScrolling);
+    // These aren't a part of [SemanticsProperties] and therefore have to be removed.
+    flags
+      ..remove(SemanticsFlag.hasImplicitScrolling)
+      ..remove(SemanticsFlag.isPartiallyHidden);
     expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(

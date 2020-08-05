@@ -3679,9 +3679,14 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
         ..transform = geometry.transform
         ..parentSemanticsClipRect = geometry.semanticsClipRect
         ..parentPaintClipRect = geometry.paintClipRect;
-      if (!_mergeIntoParent && geometry.markAsHidden) {
+      if (!_mergeIntoParent) {
         _ensureConfigIsWritable();
-        _config.isHidden = true;
+        if (geometry.markAsHidden) {
+          _config.isHidden = true;
+        }
+        if (geometry.markAsPartiallyHidden) {
+          _config.isPartiallyHidden = true;
+        }
       }
     }
 
@@ -3832,6 +3837,7 @@ class _SemanticsGeometry {
     if (_paintClipRect != null) {
       final Rect paintRect = _paintClipRect.intersect(_rect);
       _markAsHidden = paintRect.isEmpty && !_rect.isEmpty;
+      _markAsPartiallyHidden = !markAsHidden && paintRect != _rect; // true if the intersection resulted in a smaller rect
       if (!_markAsHidden)
         _rect = paintRect;
     }
@@ -3911,6 +3917,19 @@ class _SemanticsGeometry {
   ///  * [SemanticsFlag.isHidden] for the purpose of marking a node as hidden.
   bool get markAsHidden => _markAsHidden;
   bool _markAsHidden = false;
+
+  /// Whether the [SemanticsNode] annotated with the geometric information
+  /// tracked by this object should be marked as partially hidden because
+  /// it is both partially on and off screen or otherwise obscured.
+  ///
+  /// Platforms should generally call [SemanticsAction.showOnScreen] when an
+  /// element with [SemanticsFlag.isPartiallyHidden] receives accessibility focus.
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsFlag.isPartiallyHidden] for marking a node as partially hidden.
+  bool get markAsPartiallyHidden => _markAsPartiallyHidden;
+  bool _markAsPartiallyHidden = false;
 }
 
 /// A class that creates [DiagnosticsNode] by wrapping [RenderObject.debugCreator].

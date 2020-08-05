@@ -1133,6 +1133,7 @@ void main() {
             hasTapAction: true,
             isSelected: year == 2016,
             isFocusable: true,
+            isPartiallyHidden: year >= 2022, // The last row is partially hidden.
           ));
         }
 

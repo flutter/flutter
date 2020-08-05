@@ -494,7 +494,9 @@ void main() {
     flags
       ..remove(SemanticsFlag.hasToggledState)
       ..remove(SemanticsFlag.isToggled)
-      ..remove(SemanticsFlag.hasImplicitScrolling);
+      // These aren't a part of [SemanticsProperties] and therefore have to be removed.
+      ..remove(SemanticsFlag.hasImplicitScrolling)
+      ..remove(SemanticsFlag.isPartiallyHidden);
 
     TestSemantics expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[

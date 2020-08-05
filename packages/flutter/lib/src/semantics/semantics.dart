@@ -3640,7 +3640,7 @@ class SemanticsConfiguration {
     _setFlag(SemanticsFlag.isHeader, value);
   }
 
-  /// Whether the owning [RenderObject] is considered hidden.
+  /// Whether the owning [RenderObject] is considered fully hidden.
   ///
   /// Hidden elements are currently not visible on screen. They may be covered
   /// by other elements or positioned outside of the visible area of a viewport.
@@ -3656,9 +3656,39 @@ class SemanticsConfiguration {
   /// the semantics tree altogether. Hidden elements are only included in the
   /// semantics tree to work around platform limitations and they are mainly
   /// used to implement accessibility scrolling on iOS.
+  ///
+  /// See also:
+  ///
+  /// * [SemanticsFlag.isPartiallyHidden]
   bool get isHidden => _hasFlag(SemanticsFlag.isHidden);
   set isHidden(bool value) {
     _setFlag(SemanticsFlag.isHidden, value);
+  }
+
+  /// Whether the owning [RenderObject] is considered partially hidden.
+  ///
+  /// Elements with this flag are both partially hidden off screen and partially
+  /// visible on screen. They may be partially covered by other elements or
+  /// positioned partway outside of the visible area of a viewport.
+  ///
+  /// Partially hidden elements are brought fully on screen upon gaining
+  /// accessibility focus.
+  ///
+  /// This flag is different from [isHidden], since partially hidden elements
+  /// are still valid memebers of the semantics tree for all platforms.
+  ///
+  /// Platforms should generally call [SemanticsAction.showOnScreen] when an
+  /// element with [isPartiallyHidden] receives accessibility focus, although
+  /// additional platform-specific considerations may be needed to ensure
+  /// this does not interfere with other actions, such as smooth scrolling
+  /// on Android.
+  ///
+  /// See also:
+  ///
+  /// * [SemanticsFlag.isHidden]
+  bool get isPartiallyHidden => _hasFlag(SemanticsFlag.isPartiallyHidden);
+  set isPartiallyHidden(bool value) {
+    _setFlag(SemanticsFlag.isPartiallyHidden, value);
   }
 
   /// Whether the owning [RenderObject] is a text field.

@@ -2401,6 +2401,7 @@ void main() {
                               TestSemantics(
                                 id: 8,
                                 tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                                flags: <SemanticsFlag>[SemanticsFlag.isPartiallyHidden],
                                 label: 'N',
                                 textDirection: TextDirection.ltr,
                               ),

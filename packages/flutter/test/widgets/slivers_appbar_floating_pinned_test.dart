@@ -195,6 +195,7 @@ void main() {
                     TestSemantics(
                       label: 'Tile 10',
                       textDirection: TextDirection.ltr,
+                      flags: <SemanticsFlag>[SemanticsFlag.isPartiallyHidden],
                     ),
                     TestSemantics(
                       label: 'Tile 11',
@@ -219,6 +220,7 @@ void main() {
                     TestSemantics(
                       label: 'Tile 16',
                       textDirection: TextDirection.ltr,
+                      flags: <SemanticsFlag>[SemanticsFlag.isPartiallyHidden],
                     ),
                     TestSemantics(
                       label: 'Tile 17',

@@ -362,6 +362,7 @@ void main() {
                   textDirection: TextDirection.ltr,
                 ),
                 TestSemantics(
+                  flags: <SemanticsFlag>[SemanticsFlag.isPartiallyHidden],
                   label: r'item 1',
                   textDirection: TextDirection.ltr,
                 ),

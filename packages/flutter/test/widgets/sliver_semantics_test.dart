@@ -174,6 +174,7 @@ void _tests() {
                     children: <TestSemantics>[
                       TestSemantics(
                         id: 3,
+                        flags: <SemanticsFlag>[SemanticsFlag.isPartiallyHidden],
                         label: 'Item 0',
                         textDirection: TextDirection.ltr,
                       ),
@@ -262,6 +263,7 @@ void _tests() {
                       ),
                       TestSemantics(
                         id: 5,
+                        flags: <SemanticsFlag>[SemanticsFlag.isPartiallyHidden],
                         label: 'Item 2',
                         textDirection: TextDirection.ltr,
                       ),
@@ -350,10 +352,12 @@ void _tests() {
                         textDirection: TextDirection.ltr,
                       ),
                       TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isPartiallyHidden],
                         label: 'Item 1',
                         textDirection: TextDirection.ltr,
                       ),
                       TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isPartiallyHidden],
                         label: 'Item 2',
                         textDirection: TextDirection.ltr,
                       ),
@@ -532,6 +536,7 @@ void _tests() {
                         textDirection: TextDirection.ltr,
                       ),
                       TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isPartiallyHidden],
                         label: 'Item 1',
                         textDirection: TextDirection.ltr,
                       ),
@@ -540,6 +545,7 @@ void _tests() {
                         textDirection: TextDirection.ltr,
                       ),
                       TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isPartiallyHidden],
                         label: 'Item 3',
                         textDirection: TextDirection.ltr,
                       ),
@@ -643,6 +649,7 @@ void _tests() {
                         textDirection: TextDirection.ltr,
                       ),
                       TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isPartiallyHidden],
                         label: 'Item 1',
                         textDirection: TextDirection.ltr,
                       ),
@@ -651,6 +658,7 @@ void _tests() {
                         textDirection: TextDirection.ltr,
                       ),
                       TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isPartiallyHidden],
                         label: 'Item 3',
                         textDirection: TextDirection.ltr,
                       ),
@@ -749,6 +757,7 @@ void _tests() {
                         textDirection: TextDirection.ltr,
                       ),
                       TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isPartiallyHidden],
                         label: 'Item 3',
                         textDirection: TextDirection.ltr,
                       ),
@@ -757,6 +766,7 @@ void _tests() {
                         textDirection: TextDirection.ltr,
                       ),
                       TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isPartiallyHidden],
                         label: 'Item 1',
                         textDirection: TextDirection.ltr,
                       ),
@@ -863,6 +873,7 @@ void _tests() {
                         textDirection: TextDirection.ltr,
                       ),
                       TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isPartiallyHidden],
                         label: 'Item 3',
                         textDirection: TextDirection.ltr,
                       ),
@@ -871,6 +882,7 @@ void _tests() {
                         textDirection: TextDirection.ltr,
                       ),
                       TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isPartiallyHidden],
                         label: 'Item 1',
                         textDirection: TextDirection.ltr,
                       ),
@@ -1009,6 +1021,7 @@ void _tests() {
                         textDirection: TextDirection.ltr,
                       ),
                       TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isPartiallyHidden],
                         label: 'Forward Item 1',
                         textDirection: TextDirection.ltr,
                       ),
@@ -1017,6 +1030,7 @@ void _tests() {
                         textDirection: TextDirection.ltr,
                       ),
                       TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isPartiallyHidden],
                         label: 'Forward Item 3',
                         textDirection: TextDirection.ltr,
                       ),
@@ -1075,6 +1089,7 @@ void _tests() {
                         textDirection: TextDirection.ltr,
                       ),
                       TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isPartiallyHidden],
                         label: 'Backward Item 3',
                         textDirection: TextDirection.ltr,
                       ),
@@ -1083,6 +1098,7 @@ void _tests() {
                         textDirection: TextDirection.ltr,
                       ),
                       TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isPartiallyHidden],
                         label: 'Backward Item 1',
                         textDirection: TextDirection.ltr,
                       ),
