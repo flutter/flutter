@@ -385,8 +385,8 @@ void main() {
         'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
         'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
         'lib/flutter_project_web.dart',
-        // TODO(cyanglaz): no-op iOS folder should be removed after 1.20.0 release
-        // https://github.com/flutter/flutter/issues/59787
+        'ios/Classes/FlutterProjectPlugin.m',
+        'example/ios/Runner/AppDelegate.m',
       ],
     );
     return _runFlutterTest(projectDir.childDirectory('example'));
@@ -1532,8 +1532,6 @@ void main() {
 
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
 
-    // TODO(cyanglaz): no-op iOS folder should be removed after 1.20.0 release
-    // https://github.com/flutter/flutter/issues/59787
     expect(projectDir.childDirectory('ios').existsSync(), false);
     expect(projectDir.childDirectory('android').existsSync(), false);
     expect(projectDir.childDirectory('web').existsSync(), false);
@@ -1541,8 +1539,6 @@ void main() {
     expect(projectDir.childDirectory('windows').existsSync(), false);
     expect(projectDir.childDirectory('macos').existsSync(), false);
 
-    // TODO(cyanglaz): no-op iOS folder should be removed after 1.20.0 release
-    // https://github.com/flutter/flutter/issues/59787
     expect(projectDir.childDirectory('example').childDirectory('ios').existsSync(), false);
     expect(projectDir.childDirectory('example').childDirectory('android').existsSync(), false);
     expect(projectDir.childDirectory('example').childDirectory('web').existsSync(), false);
