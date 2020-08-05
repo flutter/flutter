@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 // Common date utility functions used by the date picker implementation
 
 // This is an internal implementation file. Even though there are public
@@ -27,7 +25,7 @@ DateTimeRange datesOnly(DateTimeRange range) {
 
 /// Returns true if the two [DateTime] objects have the same day, month, and
 /// year, or are both null.
-bool isSameDay(DateTime dateA, DateTime dateB) {
+bool isSameDay(DateTime? dateA, DateTime? dateB) {
   return
     dateA?.year == dateB?.year &&
     dateA?.month == dateB?.month &&
@@ -36,7 +34,7 @@ bool isSameDay(DateTime dateA, DateTime dateB) {
 
 /// Returns true if the two [DateTime] objects have the same month, and
 /// year, or are both null.
-bool isSameMonth(DateTime dateA, DateTime dateB) {
+bool isSameMonth(DateTime? dateA, DateTime? dateB) {
   return
     dateA?.year == dateB?.year &&
     dateA?.month == dateB?.month;
@@ -148,7 +146,7 @@ int getDaysInMonth(int year, int month) {
 /// is in the same year as the `endDate` then it will use the short month
 /// day format (i.e. 'Jan 21'). Otherwise it will return the short date format
 /// (i.e. 'Jan 21, 2020').
-String formatRangeStartDate(MaterialLocalizations localizations, DateTime startDate, DateTime endDate) {
+String formatRangeStartDate(MaterialLocalizations localizations, DateTime? startDate, DateTime? endDate) {
   return startDate == null
     ? localizations.dateRangeStartLabel
     : (endDate == null || startDate.year == endDate.year)
@@ -162,7 +160,7 @@ String formatRangeStartDate(MaterialLocalizations localizations, DateTime startD
 /// is in the same year as the `startDate` and the `currentDate` then it will
 /// just use the short month day format (i.e. 'Jan 21'), otherwise it will
 /// include the year (i.e. 'Jan 21, 2020').
-String formatRangeEndDate(MaterialLocalizations localizations, DateTime startDate, DateTime endDate, DateTime currentDate) {
+String formatRangeEndDate(MaterialLocalizations localizations, DateTime? startDate, DateTime? endDate, DateTime currentDate) {
   return endDate == null
     ? localizations.dateRangeEndLabel
     : (startDate != null && startDate.year == endDate.year && startDate.year == currentDate.year)

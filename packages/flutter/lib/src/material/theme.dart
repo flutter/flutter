@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -40,10 +38,10 @@ class Theme extends StatelessWidget {
   ///
   /// The [data] and [child] arguments must not be null.
   const Theme({
-    Key key,
-    @required this.data,
+    Key? key,
+    required this.data,
     this.isMaterialAppTheme = false,
-    @required this.child,
+    required this.child,
   }) : assert(child != null),
        assert(data != null),
        super(key: key);
@@ -126,17 +124,17 @@ class Theme extends StatelessWidget {
   ///   );
   /// }
   /// ```
-  static ThemeData of(BuildContext context, { bool shadowThemeOnly = false }) {
-    final _InheritedTheme inheritedTheme = context.dependOnInheritedWidgetOfExactType<_InheritedTheme>();
+  static ThemeData? of(BuildContext context, { bool shadowThemeOnly = false }) {
+    final _InheritedTheme? inheritedTheme = context.dependOnInheritedWidgetOfExactType<_InheritedTheme>();
     if (shadowThemeOnly) {
       if (inheritedTheme == null || inheritedTheme.theme.isMaterialAppTheme)
         return null;
       return inheritedTheme.theme.data;
     }
 
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final MaterialLocalizations? localizations = MaterialLocalizations.of(context);
     final ScriptCategory category = localizations?.scriptCategory ?? ScriptCategory.englishLike;
-    final ThemeData theme = inheritedTheme?.theme?.data ?? _kFallbackTheme;
+    final ThemeData theme = inheritedTheme?.theme.data ?? _kFallbackTheme;
     return ThemeData.localize(theme, theme.typography.geometryThemeFor(category));
   }
 
@@ -168,9 +166,9 @@ class Theme extends StatelessWidget {
 
 class _InheritedTheme extends InheritedTheme {
   const _InheritedTheme({
-    Key key,
-    @required this.theme,
-    @required Widget child,
+    Key? key,
+    required this.theme,
+    required Widget child,
   }) : assert(theme != null),
        super(key: key, child: child);
 
@@ -178,7 +176,7 @@ class _InheritedTheme extends InheritedTheme {
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final _InheritedTheme ancestorTheme = context.findAncestorWidgetOfExactType<_InheritedTheme>();
+    final _InheritedTheme? ancestorTheme = context.findAncestorWidgetOfExactType<_InheritedTheme>();
     return identical(this, ancestorTheme) ? child : Theme(data: theme.data, child: child);
   }
 
@@ -198,10 +196,10 @@ class ThemeDataTween extends Tween<ThemeData> {
   /// The [begin] and [end] properties must be non-null before the tween is
   /// first used, but the arguments can be null if the values are going to be
   /// filled in later.
-  ThemeDataTween({ ThemeData begin, ThemeData end }) : super(begin: begin, end: end);
+  ThemeDataTween({ ThemeData? begin, ThemeData? end }) : super(begin: begin, end: end);
 
   @override
-  ThemeData lerp(double t) => ThemeData.lerp(begin, end, t);
+  ThemeData lerp(double t) => ThemeData.lerp(begin!, end!, t);
 }
 
 /// Animated version of [Theme] which automatically transitions the colors,
@@ -224,13 +222,13 @@ class AnimatedTheme extends ImplicitlyAnimatedWidget {
   /// By default, the theme transition uses a linear curve. The [data] and
   /// [child] arguments must not be null.
   const AnimatedTheme({
-    Key key,
-    @required this.data,
+    Key? key,
+    required this.data,
     this.isMaterialAppTheme = false,
     Curve curve = Curves.linear,
     Duration duration = kThemeAnimationDuration,
-    VoidCallback onEnd,
-    @required this.child,
+    VoidCallback? onEnd,
+    required this.child,
   }) : assert(child != null),
        assert(data != null),
        super(key: key, curve: curve, duration: duration, onEnd: onEnd);
@@ -251,7 +249,7 @@ class AnimatedTheme extends ImplicitlyAnimatedWidget {
 }
 
 class _AnimatedThemeState extends AnimatedWidgetBaseState<AnimatedTheme> {
-  ThemeDataTween _data;
+  ThemeDataTween? _data;
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
@@ -265,7 +263,7 @@ class _AnimatedThemeState extends AnimatedWidgetBaseState<AnimatedTheme> {
     return Theme(
       isMaterialAppTheme: widget.isMaterialAppTheme,
       child: widget.child,
-      data: _data.evaluate(animation),
+      data: _data!.evaluate(animation!),
     );
   }
 
