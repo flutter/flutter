@@ -783,7 +783,7 @@ class GitTagVersion {
     // recent tag and number of commits past.
     return parse(
       _runGit(
-        'git describe --match *.*.*-*.*.pre --first-parent --long --tags',
+        'git describe --match *.*.* --first-parent --long --tags',
         processUtils,
         workingDirectory,
       )
@@ -845,12 +845,13 @@ class GitTagVersion {
   }
 
   String frameworkVersionFor(String revision) {
-    if (x == null || y == null || z == null || !revision.startsWith(hash)) {
+  if (x == null || y == null || z == null || !revision.startsWith(hash)) {
       return '0.0.0-unknown';
     }
     if (commits == 0) {
       return gitTag;
     }
+
     if (hotfix != null) {
       // This is an unexpected state where untagged commits exist past a hotfix
       return '$x.$y.$z+hotfix.${hotfix + 1}.pre.$commits';
@@ -858,7 +859,7 @@ class GitTagVersion {
     if (devPatch != null && devVersion != null) {
       return '$x.$y.$z-${devVersion + 1}.0.pre.$commits';
     }
-    return '$x.$y.${z + 1}.pre.$commits';
+    return '$x.$y.${z + 1}-0.0.pre.$commits';
   }
 }
 
