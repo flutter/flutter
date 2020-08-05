@@ -38,7 +38,7 @@ class NewGalleryWebCompileTest {
         await flutter('doctor');
 
         return await WebCompileTest.runSingleBuildTest(
-          directory: 'temp/gallery',
+          directory: galleryDir.path,
           metric: metricKeyPrefix,
           measureBuildTime: true,
         );
