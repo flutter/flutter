@@ -172,6 +172,13 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
+  multi_widget_construction_perf__e2e_summary:
+    description: >
+      Measures the runtime performance of constructing and destructing widgets on Android.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
+
   frame_policy_delay_test_android:
     description: >
       Tests the effect of LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive
