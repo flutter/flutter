@@ -845,13 +845,12 @@ class GitTagVersion {
   }
 
   String frameworkVersionFor(String revision) {
-  if (x == null || y == null || z == null || !revision.startsWith(hash)) {
+    if (x == null || y == null || z == null || !revision.startsWith(hash)) {
       return '0.0.0-unknown';
     }
     if (commits == 0) {
       return gitTag;
     }
-
     if (hotfix != null) {
       // This is an unexpected state where untagged commits exist past a hotfix
       return '$x.$y.$z+hotfix.${hotfix + 1}.pre.$commits';
