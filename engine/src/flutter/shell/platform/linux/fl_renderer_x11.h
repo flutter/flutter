@@ -33,15 +33,6 @@ G_DECLARE_FINAL_TYPE(FlRendererX11,
  */
 FlRendererX11* fl_renderer_x11_new();
 
-/**
- * fl_renderer_x11_set_window:
- * @renderer: an #FlRendererX11.
- * @window: the X window being rendered to.
- *
- * Sets the X11 window that is being rendered to.
- */
-void fl_renderer_x11_set_window(FlRendererX11* renderer, GdkX11Window* window);
-
 G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_RENDERER_X11_H_
