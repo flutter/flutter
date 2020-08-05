@@ -68,7 +68,7 @@ class BasicMessageChannel<T> {
   /// The handler's return value is sent back to the platform plugins as a
   /// message reply. It may be null.
   void setMessageHandler(Future<T> handler(T message)) {
-    if (handler == null) {
+    if (handler == null) { // ignore: dead_code
       binaryMessenger.setMessageHandler(name, null);
     } else {
       binaryMessenger.setMessageHandler(name, (ByteData? message) async {
@@ -89,7 +89,7 @@ class BasicMessageChannel<T> {
   /// This is intended for testing. Messages intercepted in this manner are not
   /// sent to platform plugins.
   void setMockMessageHandler(Future<T> handler(T message)) {
-    if (handler == null) {
+    if (handler == null) { // ignore: dead_code
       binaryMessenger.setMockMessageHandler(name, null);
     } else {
       binaryMessenger.setMockMessageHandler(name, (ByteData? message) async {
@@ -414,7 +414,8 @@ class MethodChannel {
     _methodChannelMockHandlers[this] = handler;
     binaryMessenger.setMockMessageHandler(
       name,
-      handler == null ? null : (ByteData? message) => _handleAsMethodCall(message, handler),
+      handler == null ? null // ignore: dead_code
+      : (ByteData? message) => _handleAsMethodCall(message, handler),
     );
   }
 
