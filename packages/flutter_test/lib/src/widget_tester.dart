@@ -608,9 +608,12 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   Future<int> pumpAndSettle([
     Duration duration = const Duration(milliseconds: 100),
     EnginePhase phase = EnginePhase.sendSemanticsUpdate,
+    Duration timeout = const Duration(minutes: 10),
   ]) {
     assert(duration != null);
     assert(duration > Duration.zero);
+    assert(timeout != null);
+    assert(timeout > Duration.zero);
     assert(() {
       final WidgetsBinding binding = this.binding;
       if (binding is LiveTestWidgetsFlutterBinding &&
@@ -623,8 +626,11 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       return true;
     }());
     return TestAsyncUtils.guard<int>(() async {
+      final DateTime endTime = binding.clock.fromNowBy(timeout);
       int count = 0;
       do {
+        if (binding.clock.now().isAfter(endTime))
+          throw FlutterError('pumpAndSettle timed out');
         await binding.pump(duration, phase);
         count += 1;
       } while (binding.hasScheduledFrame);
