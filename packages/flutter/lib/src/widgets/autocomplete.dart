@@ -37,6 +37,91 @@ typedef AutocompleteFieldBuilder = Widget Function(
 ///
 /// Can also be used in a stand-alone manner to implement autocomplete behavior
 /// in a fully custom UI.
+///
+/// {@tool dartpad --template=stateless_widget_scaffold}
+/// This example shows how to build an autocomplete widget with your own UI
+/// using AutocompleteController. Most typical use cases would instead pass the
+/// AutocompleteController directly to [Autocomplete] or
+/// [AutocompleteCupertino].
+///
+/// ```dart imports
+/// import 'package:flutter/widgets.dart';
+/// import 'package:flutter/material.dart';
+/// ```
+///
+/// ```dart
+/// class CustomUIAutocomplete extends StatefulWidget {
+///   CustomUIAutocomplete({Key key}) : super(key: key);
+///
+///   @override
+///   CustomUIAutocompleteState createState() => CustomUIAutocompleteState();
+/// }
+///
+/// class CustomUIAutocompleteState extends State<CustomUIAutocomplete> {
+///   AutocompleteController<String> _autocompleteController;
+///   String _selection;
+///
+///   void _onChangeResults() {
+///     setState(() {});
+///   }
+///
+///   void _onChangeQuery() {
+///     if (_autocompleteController.textEditingController.value.text != _selection) {
+///       setState(() {
+///         _selection = null;
+///       });
+///     }
+///   }
+///
+///   @override
+///   void initState() {
+///     super.initState();
+///     _autocompleteController = AutocompleteController<String>(
+///       options: <String>['aardvark', 'baboon', 'chameleon'],
+///     );
+///     _autocompleteController.textEditingController.addListener(_onChangeQuery);
+///     _autocompleteController.results.addListener(_onChangeResults);
+///   }
+///
+///   @override
+///   void dispose() {
+///     _autocompleteController.textEditingController.removeListener(_onChangeQuery);
+///     _autocompleteController.results.removeListener(_onChangeResults);
+///     _autocompleteController.dispose();
+///     super.dispose();
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Column(
+///       children: <Widget>[
+///         // Query field.
+///         TextFormField(
+///           controller: _autocompleteController.textEditingController,
+///         ),
+///         // Results list.
+///         if (_selection == null)
+///           Expanded(
+///             child: ListView(
+///               children: _autocompleteController.results.value.map((String result) => GestureDetector(
+///                 onTap: () {
+///                   setState(() {
+///                     _selection = result;
+///                     _autocompleteController.textEditingController.text = result;
+///                   });
+///                 },
+///                 child: ListTile(
+///                   title: Text(result),
+///                 ),
+///               )).toList(),
+///             ),
+///           ),
+///       ],
+///     );
+///   }
+/// }
+/// ```
+/// {@end-tool}
 @immutable
 class AutocompleteController<T> {
   /// Create an instance of AutocompleteController.
@@ -103,12 +188,46 @@ class AutocompleteController<T> {
   }
 }
 
-// TODO(justinmc): Add a dartpad example here.
 /// A widget for helping the user to search a list of options and select a
 /// result.
 ///
 /// This is a core framework widget with very basic UI. Try using [Autocomplete]
 /// or [AutocompleteCupertino] before resorting to this widget.
+///
+/// {@tool dartpad --template=stateless_widget_scaffold}
+/// This example shows how to create a very basic autocomplete widget using the
+/// [buildField] and [buildResults] parameters.
+///
+/// ```dart
+/// final AutocompleteController _autocompleteController =
+///     AutocompleteController(
+///       options: <String>['aardvark', 'baboon', 'chameleon'],
+///     );
+///
+/// Widget build(BuildContext context) {
+///   return AutocompleteCore(
+///     autocompleteController: _autocompleteController,
+///     buildField: (BuildContext context, TextEditingController textEditingController) {
+///       return TextFormField(
+///         controller: textEditingController,
+///       );
+///     },
+///     buildResults: (BuildContext context, List<String> results, OnSelectedAutocomplete<String> onSelected) {
+///       return ListView(
+///         children: results.map((String result) => GestureDetector(
+///           onTap: () {
+///             onSelected(result);
+///           },
+///           child: ListTile(
+///             title: Text(result),
+///           ),
+///         )).toList(),
+///       );
+///     },
+///   );
+/// }
+/// ```
+/// {@end-tool}
 class AutocompleteCore<T> extends StatefulWidget {
   /// Create an instance of AutocompleteCore.
   ///
@@ -153,7 +272,7 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
     });
   }
 
-  void onSelected (T result) {
+  void _onSelected (T result) {
     setState(() {
       _selection = result;
       widget.autocompleteController.textEditingController.text = result.toString();
@@ -205,7 +324,7 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
             child: widget.buildResults(
               context,
               widget.autocompleteController.results.value,
-              onSelected,
+              _onSelected,
             ),
           ),
       ],
