@@ -144,13 +144,15 @@ class JSONMethodCodec implements MethodCodec {
       throw FormatException('Expected envelope List, got $decoded');
     if (decoded.length == 1)
       return decoded[0];
-    if (decoded.length == 3
+    if (decoded.length == 4
         && decoded[0] is String
-        && (decoded[1] == null || decoded[1] is String))
+        && (decoded[1] == null || decoded[1] is String) 
+        && (decoded[3] == null || decoded[3] is String))
       throw PlatformException(
         code: decoded[0] as String,
         message: decoded[1] as String,
         details: decoded[2],
+        stacktrace: decoded[3] as String,
       );
     throw FormatException('Invalid envelope: $decoded');
   }
