@@ -1,6 +1,9 @@
 #!/bin/bash
 
 set -e
+SCRIPT_DIR=`realpath $(dirname "${BASH_SOURCE[0]}")`
+DART="${SCRIPT_DIR}/../../third_party/dart/tools/sdks/dart-sdk/bin/dart"
+PUB="${SCRIPT_DIR}/../../third_party/dart/tools/sdks/dart-sdk/bin/pub"
 
 # Needed because if it is set, cd may print the path it changed to.
 unset CDPATH
@@ -41,7 +44,7 @@ if [ ! -f "$COMPILE_COMMANDS" ]; then
 fi
 
 cd "$CI_DIR"
-pub get && dart \
+$PUB get && $DART \
   --disable-dart-dev \
   bin/lint.dart \
   --compile-commands="$COMPILE_COMMANDS" \
