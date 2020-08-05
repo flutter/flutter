@@ -9,7 +9,6 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart' show ReadBuffer, WriteBuffer;
 
 import 'message_codec.dart';
-import 'message_codecs.dart';
 
 /// [MessageCodec] with unencoded binary messages represented using [ByteData].
 ///
