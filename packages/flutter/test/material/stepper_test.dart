@@ -390,19 +390,14 @@ void main() {
             constraints: const BoxConstraints.tightFor(height: 48.0),
             child: Row(
               children: <Widget>[
-                FlatButton(
+                TextButton(
                   onPressed: onStepContinue,
-                  color: Colors.blue,
-                  textColor: Colors.white,
-                  textTheme: ButtonTextTheme.normal,
                   child: const Text('Let us continue!'),
                 ),
                 Container(
                   margin: const EdgeInsetsDirectional.only(start: 8.0),
-                  child: FlatButton(
+                  child: TextButton(
                     onPressed: onStepCancel,
-                    textColor: Colors.red,
-                    textTheme: ButtonTextTheme.normal,
                     child: const Text('Cancel This!'),
                   ),
                 ),
