@@ -46,23 +46,6 @@ FlutterDesktopViewControllerRef FlutterDesktopCreateViewController(
   return nullptr;
 }
 
-FlutterDesktopViewControllerRef FlutterDesktopCreateViewControllerLegacy(
-    int initial_width,
-    int initial_height,
-    const char* assets_path,
-    const char* icu_data_path,
-    const char** arguments,
-    size_t argument_count) {
-  if (s_stub_implementation) {
-    // This stub will be removed shortly, and the current tests don't need the
-    // arguments, so there's no need to translate them to engine_properties.
-    FlutterDesktopEngineProperties engine_properties;
-    return s_stub_implementation->CreateViewController(
-        initial_width, initial_height, engine_properties);
-  }
-  return nullptr;
-}
-
 void FlutterDesktopDestroyViewController(
     FlutterDesktopViewControllerRef controller) {
   if (s_stub_implementation) {
@@ -76,8 +59,13 @@ FlutterDesktopViewRef FlutterDesktopGetView(
   return reinterpret_cast<FlutterDesktopViewRef>(1);
 }
 
-uint64_t FlutterDesktopProcessMessages(
+FlutterDesktopEngineRef FlutterDesktopGetEngine(
     FlutterDesktopViewControllerRef controller) {
+  // The stub ignores this, so just return an arbitrary non-zero value.
+  return reinterpret_cast<FlutterDesktopEngineRef>(1);
+}
+
+uint64_t FlutterDesktopProcessMessages(FlutterDesktopEngineRef engine) {
   if (s_stub_implementation) {
     return s_stub_implementation->ProcessMessages();
   }
@@ -107,7 +95,7 @@ bool FlutterDesktopShutDownEngine(FlutterDesktopEngineRef engine_ref) {
 }
 
 FlutterDesktopPluginRegistrarRef FlutterDesktopGetPluginRegistrar(
-    FlutterDesktopViewControllerRef controller,
+    FlutterDesktopEngineRef engine,
     const char* plugin_name) {
   // The stub ignores this, so just return an arbitrary non-zero value.
   return reinterpret_cast<FlutterDesktopPluginRegistrarRef>(1);

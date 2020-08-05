@@ -1,63 +1,39 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
 
 #include <chrono>
 
 namespace flutter {
 
-FlutterWindowsView::FlutterWindowsView() {
+FlutterWindowsView::FlutterWindowsView(
+    std::unique_ptr<WindowBindingHandler> window_binding) {
   surface_manager_ = std::make_unique<AngleSurfaceManager>();
+
+  // Take the binding handler, and give it a pointer back to self.
+  binding_handler_ = std::move(window_binding);
+  binding_handler_->SetView(this);
+
+  render_target_ = std::make_unique<WindowsRenderTarget>(
+      binding_handler_->GetRenderTarget());
 }
 
 FlutterWindowsView::~FlutterWindowsView() {
   DestroyRenderSurface();
-  if (plugin_registrar_ && plugin_registrar_->destruction_handler) {
-    plugin_registrar_->destruction_handler(plugin_registrar_.get());
-  }
 }
 
-FlutterDesktopViewControllerRef FlutterWindowsView::CreateFlutterWindowsView(
-    std::unique_ptr<WindowBindingHandler> windowbinding) {
-  auto state = std::make_unique<FlutterDesktopViewControllerState>();
-  state->view = std::make_unique<flutter::FlutterWindowsView>();
+void FlutterWindowsView::SetEngine(
+    std::unique_ptr<FlutterWindowsEngine> engine) {
+  engine_ = std::move(engine);
 
-  // FlutterWindowsView instance owns windowbinding
-  state->view->binding_handler_ = std::move(windowbinding);
-
-  // a window wrapper for the state block, distinct from the
-  // window_wrapper handed to plugin_registrar.
-  state->view_wrapper = std::make_unique<FlutterDesktopView>();
-
-  // Give the binding handler a pointer back to this | FlutterWindowsView |
-  state->view->binding_handler_->SetView(state->view.get());
-
-  // opaque pointer to FlutterWindowsView
-  state->view_wrapper->view = state->view.get();
-
-  state->view->render_target_ = std::make_unique<WindowsRenderTarget>(
-      state->view->binding_handler_->GetRenderTarget());
-
-  return state.release();
-}
-
-void FlutterWindowsView::SetState(FLUTTER_API_SYMBOL(FlutterEngine) eng) {
-  engine_ = eng;
-
-  auto messenger = std::make_unique<FlutterDesktopMessenger>();
-  message_dispatcher_ =
-      std::make_unique<flutter::IncomingMessageDispatcher>(messenger.get());
-  messenger->engine = engine_;
-  messenger->dispatcher = message_dispatcher_.get();
-
-  window_wrapper_ = std::make_unique<FlutterDesktopView>();
-  window_wrapper_->view = this;
-  plugin_registrar_ = std::make_unique<FlutterDesktopPluginRegistrar>();
-  plugin_registrar_->messenger = std::move(messenger);
-  plugin_registrar_->view = window_wrapper_.get();
+  engine_->SetView(this);
 
   internal_plugin_registrar_ =
-      std::make_unique<flutter::PluginRegistrar>(plugin_registrar_.get());
+      std::make_unique<flutter::PluginRegistrar>(engine_->GetRegistrar());
 
-  // Set up the keyboard handlers.
+  // Set up the system channel handlers.
   auto internal_plugin_messenger = internal_plugin_registrar_->messenger();
   keyboard_hook_handlers_.push_back(
       std::make_unique<flutter::KeyEventHandler>(internal_plugin_messenger));
@@ -72,39 +48,6 @@ void FlutterWindowsView::SetState(FLUTTER_API_SYMBOL(FlutterEngine) eng) {
 
   SendWindowMetrics(bounds.width, bounds.height,
                     binding_handler_->GetDpiScale());
-}
-
-FlutterDesktopPluginRegistrarRef FlutterWindowsView::GetRegistrar() {
-  return plugin_registrar_.get();
-}
-
-// Converts a FlutterPlatformMessage to an equivalent FlutterDesktopMessage.
-static FlutterDesktopMessage ConvertToDesktopMessage(
-    const FlutterPlatformMessage& engine_message) {
-  FlutterDesktopMessage message = {};
-  message.struct_size = sizeof(message);
-  message.channel = engine_message.channel;
-  message.message = engine_message.message;
-  message.message_size = engine_message.message_size;
-  message.response_handle = engine_message.response_handle;
-  return message;
-}
-
-// The Flutter Engine calls out to this function when new platform messages
-// are available.
-void FlutterWindowsView::HandlePlatformMessage(
-    const FlutterPlatformMessage* engine_message) {
-  if (engine_message->struct_size != sizeof(FlutterPlatformMessage)) {
-    std::cerr << "Invalid message size received. Expected: "
-              << sizeof(FlutterPlatformMessage) << " but received "
-              << engine_message->struct_size << std::endl;
-    return;
-  }
-
-  auto message = ConvertToDesktopMessage(*engine_message);
-
-  message_dispatcher_->HandleMessage(
-      message, [this] {}, [this] {});
 }
 
 void FlutterWindowsView::OnWindowSizeChanged(size_t width,
@@ -162,17 +105,17 @@ void FlutterWindowsView::OnScroll(double x,
 }
 
 void FlutterWindowsView::OnFontChange() {
-  if (engine_ == nullptr) {
+  if (engine_->engine() == nullptr) {
     return;
   }
-  FlutterEngineReloadSystemFonts(engine_);
+  FlutterEngineReloadSystemFonts(engine_->engine());
 }
 
 // Sends new size  information to FlutterEngine.
 void FlutterWindowsView::SendWindowMetrics(size_t width,
                                            size_t height,
                                            double dpiScale) const {
-  if (engine_ == nullptr) {
+  if (engine_->engine() == nullptr) {
     return;
   }
 
@@ -181,7 +124,7 @@ void FlutterWindowsView::SendWindowMetrics(size_t width,
   event.width = width;
   event.height = height;
   event.pixel_ratio = dpiScale;
-  auto result = FlutterEngineSendWindowMetricsEvent(engine_, &event);
+  auto result = FlutterEngineSendWindowMetricsEvent(engine_->engine(), &event);
 }
 
 // Set's |event_data|'s phase to either kMove or kHover depending on the current
@@ -293,7 +236,7 @@ void FlutterWindowsView::SendPointerEventWithData(
           std::chrono::high_resolution_clock::now().time_since_epoch())
           .count();
 
-  FlutterEngineSendPointerEvent(engine_, &event, 1);
+  FlutterEngineSendPointerEvent(engine_->engine(), &event, 1);
 
   if (event_data.phase == FlutterPointerPhase::kAdd) {
     SetMouseFlutterStateAdded(true);
@@ -331,6 +274,10 @@ void FlutterWindowsView::DestroyRenderSurface() {
 
 WindowsRenderTarget* FlutterWindowsView::GetRenderTarget() {
   return render_target_.get();
+}
+
+FlutterWindowsEngine* FlutterWindowsView::GetEngine() {
+  return engine_.get();
 }
 
 }  // namespace flutter
