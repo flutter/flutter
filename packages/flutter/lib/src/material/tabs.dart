@@ -861,11 +861,15 @@ class _TabBarState extends State<TabBar> {
     if (_controllerIsValid) {
       _controller.animation.removeListener(_handleTabControllerAnimationTick);
       _controller.removeListener(_handleTabControllerTick);
+      _controller.removeAnimationStartedListener(_handleTabControllerAnimationStarted);
     }
     _controller = newController;
     if (_controller != null) {
       _controller.animation.addListener(_handleTabControllerAnimationTick);
+      // TabBar should also register AnimationStartedListener because
+      // it needs to know duration and curve.
       _controller.addListener(_handleTabControllerTick);
+      _controller.addAnimationStartedListener(_handleTabControllerAnimationStarted);
       _currentIndex = _controller.index;
     }
   }
@@ -915,6 +919,7 @@ class _TabBarState extends State<TabBar> {
     if (_controllerIsValid) {
       _controller.animation.removeListener(_handleTabControllerAnimationTick);
       _controller.removeListener(_handleTabControllerTick);
+      _controller.removeAnimationStartedListener(_handleTabControllerAnimationStarted);
     }
     _controller = null;
     // We don't own the _controller Animation, so it's not disposed here.
@@ -946,9 +951,9 @@ class _TabBarState extends State<TabBar> {
     return _tabScrollOffset(_currentIndex, viewportWidth, minExtent, maxExtent);
   }
 
-  void _scrollToCurrentIndex() {
+  void _scrollToCurrentIndex(Duration duration, Curve curve) {
     final double offset = _tabCenteredScrollOffset(_currentIndex);
-    _scrollController.animateTo(offset, duration: _controller.ongoingAnimationDuration ?? kTabScrollDuration, curve: _controller.ongoingAnimationCurve ?? Curves.ease);
+    _scrollController.animateTo(offset, duration: duration, curve: curve);
   }
 
   void _scrollToControllerValue() {
@@ -982,16 +987,24 @@ class _TabBarState extends State<TabBar> {
     }
   }
 
+  // TabBar should keep using _handleTabControllerTick() because
+  // AnimationStartedListener is not notified when user drags TabBarView and signals ScrollEndNotification.
+  // So in that case _currentIndex should be updated here.
   void _handleTabControllerTick() {
-    if (_controller.index != _currentIndex) {
+    if (_controller.index != _currentIndex)
       _currentIndex = _controller.index;
-      if (widget.isScrollable)
-        _scrollToCurrentIndex();
-    }
     setState(() {
       // Rebuild the tabs after a (potentially animated) index change
       // has completed.
     });
+  }
+
+  void _handleTabControllerAnimationStarted(Duration duration, Curve curve) {
+    if (_controller.index != _currentIndex) {
+      _currentIndex = _controller.index;
+      if (widget.isScrollable)
+        _scrollToCurrentIndex(duration, curve);
+    }
   }
 
   // Called each time layout completes.
@@ -1238,10 +1251,10 @@ class _TabBarViewState extends State<TabBarView> {
       return;
 
     if (_controllerIsValid)
-      _controller.animation.removeListener(_handleTabControllerAnimationTick);
+      _controller.removeAnimationStartedListener(_handleTabControllerAnimationStarted);
     _controller = newController;
     if (_controller != null)
-      _controller.animation.addListener(_handleTabControllerAnimationTick);
+      _controller.addAnimationStartedListener(_handleTabControllerAnimationStarted);
   }
 
   @override
@@ -1270,7 +1283,7 @@ class _TabBarViewState extends State<TabBarView> {
   @override
   void dispose() {
     if (_controllerIsValid)
-      _controller.animation.removeListener(_handleTabControllerAnimationTick);
+      _controller.removeAnimationStartedListener(_handleTabControllerAnimationStarted);
     _controller = null;
     // We don't own the _controller Animation, so it's not disposed here.
     super.dispose();
@@ -1282,17 +1295,17 @@ class _TabBarViewState extends State<TabBarView> {
     _childrenWithKey = _originalChildrenWithKey;
   }
 
-  void _handleTabControllerAnimationTick() {
+  void _handleTabControllerAnimationStarted(Duration duration, Curve curve) {
     if (_warpUnderwayCount > 0 && _controller.index == _currentIndex)
       return; // This widget is driving the controller's animation.
 
     if (_controller.index != _currentIndex) {
       _currentIndex = _controller.index;
-      _warpToCurrentIndex();
+      _warpToCurrentIndex(duration, curve);
     }
   }
 
-  Future<void> _warpToCurrentIndex() async {
+  Future<void> _warpToCurrentIndex(Duration duration, Curve curve) async {
     if (!mounted)
       return Future<void>.value();
 
@@ -1304,7 +1317,7 @@ class _TabBarViewState extends State<TabBarView> {
       setState(() {
         _warpUnderwayCount += 1;
       });
-      await _pageController.animateToPage(_currentIndex, duration: _controller.ongoingAnimationDuration ?? kTabScrollDuration, curve: _controller.ongoingAnimationCurve ?? Curves.ease);
+      await _pageController.animateToPage(_currentIndex, duration: duration, curve: curve);
       if (!mounted)
         return Future<void>.value();
       setState(() {
@@ -1327,7 +1340,7 @@ class _TabBarViewState extends State<TabBarView> {
     });
     _pageController.jumpToPage(initialPage);
 
-    await _pageController.animateToPage(_currentIndex, duration: _controller.ongoingAnimationDuration ?? kTabScrollDuration, curve: _controller.ongoingAnimationCurve ?? Curves.ease);
+    await _pageController.animateToPage(_currentIndex, duration: duration, curve: curve);
     if (!mounted)
       return Future<void>.value();
     setState(() {
@@ -1356,8 +1369,12 @@ class _TabBarViewState extends State<TabBarView> {
       }
       _controller.offset = (_pageController.page - _controller.index).clamp(-1.0, 1.0) as double;
     } else if (notification is ScrollEndNotification) {
-      _controller.index = _pageController.page.round();
-      _currentIndex = _controller.index;
+      // need this to block calling AnimationStartedListener when the user drags again
+      // while ballistic scrolling was ongoing
+      if (_pageController.page.roundToDouble() == _pageController.page) {
+        _controller.index = _pageController.page.round();
+        _currentIndex = _controller.index;
+      }
       _controller.offset = (_pageController.page - _controller.index).clamp(-1.0, 1.0) as double;
     }
     _warpUnderwayCount -= 1;

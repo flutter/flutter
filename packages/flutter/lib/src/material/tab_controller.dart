@@ -6,6 +6,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/src/foundation/observer_list.dart';
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
@@ -205,17 +206,7 @@ class TabController extends ChangeNotifier {
   /// [TabBarView.children]'s length.
   final int length;
 
-  /// The duration given to [animateTo].
-  ///
-  /// Only valid while animation is running, null otherwise.
-  Duration get ongoingAnimationDuration => _ongoingAnimationDuration;
-  Duration _ongoingAnimationDuration;
-
-  /// The curve given to [animateTo].
-  ///
-  /// Only valid while animation is running, null otherwise.
-  Curve get ongoingAnimationCurve => _ongoingAnimationCurve;
-  Curve _ongoingAnimationCurve;
+  final ObserverList<AnimationStartedListener> _animationStartedListeners = ObserverList<AnimationStartedListener>();
 
   void _changeIndex(int value, { Duration duration, Curve curve }) {
     assert(value != null);
@@ -226,27 +217,60 @@ class TabController extends ChangeNotifier {
       return;
     _previousIndex = index;
     _index = value;
-    _ongoingAnimationDuration = duration;
-    _ongoingAnimationCurve = curve;
     if (duration != null) {
       _indexIsChangingCount += 1;
+      // need to call this before notifyListeners() because
+      // TabBar needs to depend on both listeners, and it should receive
+      // AnimationStartedListener first to animate properly.
+      _notifyAnimationStartedListeners(duration, curve);
       notifyListeners(); // Because the value of indexIsChanging may have changed.
       _animationController
         .animateTo(_index.toDouble(), duration: duration, curve: curve)
         .whenCompleteOrCancel(() {
           _indexIsChangingCount -= 1;
-          if (_indexIsChangingCount == 0) {
-            _ongoingAnimationDuration = null;
-            _ongoingAnimationCurve = null;
-          }
           notifyListeners();
         });
     } else {
+      final bool wasIndexChanging = _indexIsChangingCount > 0;
       _indexIsChangingCount += 1;
+      // should only notify AnimationStartedListener when
+      // it was not called by ScrollEndNotification or
+      // index was changing before (so that TabBar and TabBarView will start a new animation with new target index.)
+      // This happens when controller.index = ? is called while animation was ongoing.
+      if (_animationController.value != _index.toDouble() || wasIndexChanging) {
+        _notifyAnimationStartedListeners(kTabScrollDuration, Curves.ease);
+      }
       _animationController.value = _index.toDouble();
       _indexIsChangingCount -= 1;
       notifyListeners();
     }
+  }
+
+  void _notifyAnimationStartedListeners(Duration duration, Curve curve) {
+    final List<AnimationStartedListener> localListeners = List<AnimationStartedListener>.from(_animationStartedListeners);
+    for (final AnimationStartedListener listener in localListeners) {
+      if (_animationStartedListeners.contains(listener))
+        listener(duration, curve);
+    }
+  }
+
+  /// Calls listener every time the animation starts by setting [index] or [animateTo].
+  /// When setting [index], duration is always [kTabScrollDuration] and
+  /// curve is always [Curves.ease].
+  ///
+  /// Listeners can be removed with [removeAnimationStartedListener].
+  void addAnimationStartedListener(AnimationStartedListener listener) {
+    _animationStartedListeners.add(listener);
+  }
+
+  /// Stops calling the listener every time the animation starts by setting [index] or [animateTo].
+  ///
+  /// If `listener` is not currently registered as a listener, this
+  /// method does nothing.
+  ///
+  /// Listeners can be added with [addAnimationStartedListener].
+  void removeAnimationStartedListener(AnimationStartedListener listener) {
+    _animationStartedListeners.remove(listener);
   }
 
   /// The index of the currently selected tab.
@@ -330,6 +354,8 @@ class _TabControllerScope extends InheritedWidget {
     return enabled != old.enabled || controller != old.controller;
   }
 }
+
+typedef AnimationStartedListener = void Function(Duration duration, Curve curve);
 
 /// The [TabController] for descendant widgets that don't specify one
 /// explicitly.
