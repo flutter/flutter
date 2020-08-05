@@ -773,8 +773,9 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   void didUpdateWidget(_InkResponseStateWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (_isWidgetEnabled(widget) != _isWidgetEnabled(oldWidget)) {
-      if (enabled)
+      if (enabled) {
         _handleHoverChange();
+      }
       _updateFocusHighlights();
     }
   }
@@ -1043,8 +1044,9 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 
   void _handleMouseEnter(PointerEnterEvent event) {
     _hovering = true;
-    if (enabled)
+    if (enabled) {
       _handleHoverChange();
+    }
   }
 
   void _handleMouseExit(PointerExitEvent event) {
