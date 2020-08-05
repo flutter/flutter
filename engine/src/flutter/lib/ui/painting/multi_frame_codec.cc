@@ -75,7 +75,7 @@ static bool CopyToBitmap(SkBitmap* dst,
 }
 
 sk_sp<SkImage> MultiFrameCodec::State::GetNextFrameImage(
-    fml::WeakPtr<GrContext> resourceContext) {
+    fml::WeakPtr<GrDirectContext> resourceContext) {
   SkBitmap bitmap = SkBitmap();
   SkImageInfo info = generator_->getInfo().makeColorType(kN32_SkColorType);
   if (info.alphaType() == kUnpremul_SkAlphaType) {
@@ -136,7 +136,7 @@ sk_sp<SkImage> MultiFrameCodec::State::GetNextFrameImage(
 void MultiFrameCodec::State::GetNextFrameAndInvokeCallback(
     std::unique_ptr<DartPersistentValue> callback,
     fml::RefPtr<fml::TaskRunner> ui_task_runner,
-    fml::WeakPtr<GrContext> resourceContext,
+    fml::WeakPtr<GrDirectContext> resourceContext,
     fml::RefPtr<flutter::SkiaUnrefQueue> unref_queue,
     size_t trace_id) {
   fml::RefPtr<FrameInfo> frameInfo = NULL;

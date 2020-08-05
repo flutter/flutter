@@ -53,12 +53,13 @@ class MultiFrameCodec : public Codec {
     // The index of the last decoded required frame.
     int lastRequiredFrameIndex_ = -1;
 
-    sk_sp<SkImage> GetNextFrameImage(fml::WeakPtr<GrContext> resourceContext);
+    sk_sp<SkImage> GetNextFrameImage(
+        fml::WeakPtr<GrDirectContext> resourceContext);
 
     void GetNextFrameAndInvokeCallback(
         std::unique_ptr<DartPersistentValue> callback,
         fml::RefPtr<fml::TaskRunner> ui_task_runner,
-        fml::WeakPtr<GrContext> resourceContext,
+        fml::WeakPtr<GrDirectContext> resourceContext,
         fml::RefPtr<flutter::SkiaUnrefQueue> unref_queue,
         size_t trace_id);
   };

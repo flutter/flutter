@@ -136,7 +136,7 @@ fml::WeakPtr<SnapshotDelegate> UIDartState::GetSnapshotDelegate() const {
   return snapshot_delegate_;
 }
 
-fml::WeakPtr<GrContext> UIDartState::GetResourceContext() const {
+fml::WeakPtr<GrDirectContext> UIDartState::GetResourceContext() const {
   if (!io_manager_) {
     return {};
   }
