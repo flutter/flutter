@@ -171,18 +171,18 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
     if (scrollOffset < precisionErrorTolerance) {
       while (indexOf(firstChild) > 0) {
         final double earliestScrollOffset = childScrollOffset(firstChild);
+        // We correct one child at a time. If there are more children before
+        // the earliestUsefulChild, we will correct it once the scroll offset
+        // reaches zero again.
+        earliestUsefulChild = insertAndLayoutLeadingChild(childConstraints, parentUsesSize: true);
+        assert(earliestUsefulChild != null);
         final double firstChildScrollOffset = earliestScrollOffset - paintExtentOf(firstChild);
+        final SliverMultiBoxAdaptorParentData childParentData = firstChild.parentData as SliverMultiBoxAdaptorParentData;
+        childParentData.layoutOffset = 0.0;
         if (firstChildScrollOffset < -precisionErrorTolerance) {
-          // We correct one child at a time. If there are more children before
-          // the earliestUsefulChild, we will correct it once the scroll offset
-          // reaches zero again.
-          earliestUsefulChild = insertAndLayoutLeadingChild(childConstraints, parentUsesSize: true);
-          assert(earliestUsefulChild != null);
           geometry = SliverGeometry(
             scrollOffsetCorrection: -firstChildScrollOffset,
           );
-          final SliverMultiBoxAdaptorParentData childParentData = firstChild.parentData as SliverMultiBoxAdaptorParentData;
-          childParentData.layoutOffset = 0.0;
           return;
         }
       }
