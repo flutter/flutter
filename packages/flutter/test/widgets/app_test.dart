@@ -179,6 +179,8 @@ void main() {
           'FlutterError\n'
           '   Could not find a generator for route RouteSettings("/path", null)\n'
           '   in the _WidgetsAppState.\n'
+          '   Make sure your root app widget has provided a way to generate\n'
+          '   this route.\n'
           '   Generators for routes are searched for in the following order:\n'
           '    1. For the "/" route, the "home" property, if non-null, is used.\n'
           '    2. Otherwise, the "routes" table is used, if it has an entry for\n'
