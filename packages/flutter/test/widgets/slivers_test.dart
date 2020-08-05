@@ -837,6 +837,7 @@ void main() {
     ));
     await tester.fling(find.byType(Scrollable), const Offset(0.0, -500.0), 10000.0);
     await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
   });
 }
 
