@@ -10,7 +10,6 @@ import 'package:path/path.dart' as path;
 
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
-import 'package:flutter_devicelab/versions/gallery.dart';
 
 Future<void> main() async {
   await task(const NewGalleryChromeRunTest().run);
@@ -37,8 +36,7 @@ class NewGalleryChromeRunTest {
 
   /// Runs the test.
   Future<TaskResult> run() async {
-    await Directory('temp').create(recursive: true);
-    await getNewGallery(galleryVersion, Directory('temp/gallery'));
+    await gitClone(path: 'temp', repo: galleryRepo);
 
     final TaskResult result = await inDirectory<TaskResult>('temp/gallery', () async {
       await flutter('doctor');
