@@ -9,8 +9,9 @@
 
 import 'dart:typed_data';
 
-// import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:matcher/matcher.dart';
 import '../flutter_test_alternative.dart';
 import 'message_codecs_testing.dart';
 
@@ -45,21 +46,15 @@ void main() {
       expect(string.decodeMessage(offsetByteData), ' world');
     });
   });
-  // group('Decode envelope', () {
-  //   const MethodCodec method = StandardMethodCodec();
-  //   const MessageCodec<String> string = StringCodec();
-  //   const StandardMessageCodec standard = StandardMessageCodec();
-  //   test('should decode native stacktrace.', () {
-  //     final WriteBuffer buffer = WriteBuffer();
-  //     standard.writeValue(buffer, 'errorCode');
-  //     standard.writeValue(buffer, 'errorMessage');
-  //     standard.writeValue(buffer, 'errorDetails');
-  //     standard.writeValue(buffer, 'errorStacktrace');
-  //     final ByteData errorData = buffer.done();
-
-  //     expect(method.decodeEnvelope(errorData), '');
-  //   });
-  // });
+  group('Decode envelope', () {
+    const MethodCodec method = StandardMethodCodec();
+    const MessageCodec<String> string = StringCodec();
+    const StandardMessageCodec standard = StandardMessageCodec();
+    test('should decode native stacktrace.', () {
+      final ByteData errorData = method.encodeErrorEnvelope(code: 'errorCode', message: 'errorMessage', details: 'errorDetails', stacktrace: 'errorStacktrace',);
+      expect(() => method.decodeEnvelope(errorData), throwsA(predicate((e) => e is PlatformException && e.stacktrace == 'errorStacktrace')));
+    });
+  });
   group('JSON message codec', () {
     const MessageCodec<dynamic> json = JSONMessageCodec();
     test('should encode and decode simple messages', () {
