@@ -3822,6 +3822,7 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Gib eine gültige Uhrzeit ein';
 
   @override
+<<<<<<< HEAD
   String get licensesPackageDetailTextFew => null;
 
   @override
@@ -3835,6 +3836,12 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPackageDetailTextTwo => null;
+=======
+  String get licensesPackageDetailTextOne => '1 Lizenz';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount Lizenzen';
+>>>>>>> 980438ca444810f532a7c7a2ffaa0fbf29ad60e4
 
   @override
   String get licensesPackageDetailTextZero => 'No licenses';
