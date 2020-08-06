@@ -278,6 +278,15 @@ class AutocompleteController<T> {
 ///         body: Center(
 ///           child: AutocompleteCore<User>(
 ///             autocompleteController: _autocompleteController,
+///             // This custom onSelected callback allows the field to be set to
+///             // just the name when selected, instead of User.toString by
+///             // default.
+///             onSelected: (User selected) {
+///               _autocompleteController.textEditingController.value = TextEditingValue(
+///                 selection: TextSelection.collapsed(offset: selected.name.length),
+///                 text: selected.name,
+///               );
+///             },
 ///             buildField: (BuildContext context) {
 ///               return TextFormField(
 ///                 controller: _autocompleteController.textEditingController,
@@ -358,8 +367,11 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
       if (widget.onSelected != null) {
         widget.onSelected(result);
       } else {
-        // TODO(justinmc): Set cursor position to end.
-        widget.autocompleteController.textEditingController.text = result.toString();
+        final String resultString = result.toString();
+        widget.autocompleteController.textEditingController.value = TextEditingValue(
+          selection: TextSelection.collapsed(offset: resultString.length),
+          text: resultString,
+        );
       }
       _selection = result;
     });
