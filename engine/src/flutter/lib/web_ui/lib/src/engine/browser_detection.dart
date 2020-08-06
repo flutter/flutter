@@ -159,3 +159,32 @@ bool get isDesktop => _desktopOperatingSystems.contains(operatingSystem);
 /// See [_desktopOperatingSystems].
 /// See [isDesktop].
 bool get isMobile => !isDesktop;
+
+int? _cachedWebGLVersion;
+
+/// The highest WebGL version supported by the current browser, or -1 if WebGL
+/// is not supported.
+int get webGLVersion => _cachedWebGLVersion ?? (_cachedWebGLVersion = _detectWebGLVersion());
+
+/// Detects the highest WebGL version supported by the current browser, or
+/// -1 if WebGL is not supported.
+///
+/// Chrome reports that `WebGL2RenderingContext` is available even when WebGL 2 is
+/// disabled due hardware-specific issues. This happens, for example, on Chrome on
+/// Moto E5. Therefore checking for the presence of `WebGL2RenderingContext` or
+/// using the current [browserEngine] is insufficient.
+///
+/// Our CanvasKit backend is affected due to: https://github.com/emscripten-core/emscripten/issues/11819
+int _detectWebGLVersion() {
+  final html.CanvasElement canvas = html.CanvasElement(
+    width: 1,
+    height: 1,
+  );
+  if (canvas.getContext('webgl2') != null) {
+    return 2;
+  }
+  if (canvas.getContext('webgl') != null) {
+    return 1;
+  }
+  return -1;
+}

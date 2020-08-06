@@ -123,7 +123,7 @@ class Surface {
       ..height = '${logicalSize.height.ceil()}px';
 
     htmlElement = htmlCanvas;
-    if (canvasKitForceCpuOnly) {
+    if (webGLVersion == -1 || canvasKitForceCpuOnly) {
       return _makeSoftwareCanvasSurface(htmlCanvas);
     } else {
       // Try WebGL first.
@@ -133,6 +133,7 @@ class Surface {
           // Default to no anti-aliasing. Paint commands can be explicitly
           // anti-aliased by setting their `Paint` object's `antialias` property.
           anitalias: 0,
+          majorVersion: webGLVersion,
         ),
       );
 

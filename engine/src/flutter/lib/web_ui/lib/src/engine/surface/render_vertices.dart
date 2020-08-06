@@ -163,8 +163,7 @@ class _WebGlRenderer implements _GlRenderer {
     }
     _GlContext gl =
         _OffscreenCanvas.createGlContext(widthInPixels, heightInPixels)!;
-    final bool isWebKit = (browserEngine == BrowserEngine.webkit);
-    _GlProgram glProgram = isWebKit
+    _GlProgram glProgram = webGLVersion == 1
         ? gl.useAndCacheProgram(
             _vertexShaderTriangleEs1, _fragmentShaderTriangleEs1)!
         : gl.useAndCacheProgram(
