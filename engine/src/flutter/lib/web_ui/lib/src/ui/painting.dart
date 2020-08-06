@@ -1186,8 +1186,8 @@ abstract class Gradient extends Shader {
     List<Color> colors, [
     List<double>? colorStops,
     TileMode tileMode = TileMode.clamp,
-    double startAngle /*?*/ = 0.0,
-    double endAngle /*!*/ = math.pi * 2,
+    double startAngle = 0.0,
+    double endAngle = math.pi * 2,
     Float64List? matrix4,
   ]) =>
       engine.GradientSweep(center, colors, colorStops, tileMode, startAngle,
