@@ -48,6 +48,82 @@ void main() {
   ];
 
   group('AutocompleteController', () {
+    testWidgets('default filter on options', (WidgetTester tester) async {
+      final AutocompleteController<String> autocompleteController =
+          AutocompleteController<String>(
+            options: kOptions,
+          );
+
+      // Set a query and see that the results are filtered.
+      autocompleteController.textEditingController.text = 'ele';
+      expect(autocompleteController.results.value.length, 2);
+      expect(autocompleteController.results.value[0], 'chameleon');
+      expect(autocompleteController.results.value[1], 'elephant');
+
+      // Modify the selected query. The results are filtered again.
+      autocompleteController.textEditingController.text = 'e';
+      expect(autocompleteController.results.value.length, 6);
+      expect(autocompleteController.results.value[0], 'chameleon');
+      expect(autocompleteController.results.value[1], 'elephant');
+      expect(autocompleteController.results.value[2], 'goose');
+      expect(autocompleteController.results.value[3], 'lemur');
+      expect(autocompleteController.results.value[4], 'mouse');
+      expect(autocompleteController.results.value[5], 'northern white rhinocerous');
+    });
+
+    testWidgets('custom filter', (WidgetTester tester) async {
+      final AutocompleteController<String> autocompleteController =
+          AutocompleteController<String>(
+            // A custom filter that always includes 'goose' in the results.
+            filter: (String query) {
+              return kOptions
+                .where((String option) => option.contains(query) || option == 'goose')
+                .toList();
+            },
+          );
+
+      // Set a query and see that the results are filtered by the custom filter.
+      autocompleteController.textEditingController.text = 'ele';
+      expect(autocompleteController.results.value.length, 3);
+      expect(autocompleteController.results.value[0], 'chameleon');
+      expect(autocompleteController.results.value[1], 'elephant');
+      expect(autocompleteController.results.value[2], 'goose');
+
+      // Modify the selected query. The results are filtered again.
+      autocompleteController.textEditingController.text = 'e';
+      expect(autocompleteController.results.value.length, 6);
+      expect(autocompleteController.results.value[0], 'chameleon');
+      expect(autocompleteController.results.value[1], 'elephant');
+      expect(autocompleteController.results.value[2], 'goose');
+      expect(autocompleteController.results.value[3], 'lemur');
+      expect(autocompleteController.results.value[4], 'mouse');
+      expect(autocompleteController.results.value[5], 'northern white rhinocerous');
+    });
+
+    testWidgets('custom filter on User options', (WidgetTester tester) async {
+      final AutocompleteController<User> autocompleteController =
+          AutocompleteController<User>(
+            // A custom filter that searches by both email and name.
+            filter: (String query) {
+              return kOptionsUsers
+                .where((User option) => option.name.contains(query) || option.email.contains(query))
+                .toList();
+            },
+          );
+
+      // Set a query based on the email and see that the results are filtered.
+      autocompleteController.textEditingController.text = 'example';
+      expect(autocompleteController.results.value.length, 2);
+      expect(autocompleteController.results.value[0], kOptionsUsers[0]);
+      expect(autocompleteController.results.value[1], kOptionsUsers[1]);
+
+      // Modify the selected query. The results appear again and are filtered,
+      // this time by name instead of email.
+      autocompleteController.textEditingController.text = 'B';
+      expect(autocompleteController.results.value.length, 1);
+      expect(autocompleteController.results.value[0], kOptionsUsers[1]);
+    });
+
     group('dispose', () {
       testWidgets('disposes the TextEditingController when not passed in', (WidgetTester tester) async {
         final AutocompleteController<String> autocompleteController =

@@ -128,7 +128,14 @@ class AutocompleteController<T> {
     this.options,
     this.filter,
     TextEditingController textEditingController,
-  }) : assert(filter != null || options != null, 'Must specify either options or filter (or both).'),
+  }) : assert(
+        filter == null || options == null,
+        "It's unnecessary to pass options if you've passed a custom filter.",
+      ),
+      assert(
+        filter != null || options != null,
+        'Must pass either options or filter.',
+      ),
        _ownsTextEditingController = textEditingController == null,
        textEditingController = textEditingController ?? TextEditingController() {
     this.textEditingController.addListener(_onQueryChanged);
@@ -145,8 +152,7 @@ class AutocompleteController<T> {
   /// The [TextEditingController] that represents the query.
   final TextEditingController textEditingController;
 
-  /// A filter function that takes some [options] and returns a subset as
-  /// results.
+  /// A filter function returns the possible results given a query string.
   ///
   /// If [options] is null, then this field must not be null. This may be the
   /// case when querying an external service for filter results, for example.
@@ -181,6 +187,7 @@ class AutocompleteController<T> {
 
   // The default filter function, if one wasn't supplied.
   List<T> _filterByString(String query) {
+    assert(options != null);
     return options
         .where((T option) => option.toString().contains(query))
         .toList();
