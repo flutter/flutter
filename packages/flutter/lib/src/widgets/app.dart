@@ -1017,6 +1017,8 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       if (widget.onUnknownRoute == null) {
         throw FlutterError(
           'Could not find a generator for route $settings in the $runtimeType.\n'
+          'Make sure your root app widget has provided a way to generate \n'
+          'this route.\n'
           'Generators for routes are searched for in the following order:\n'
           ' 1. For the "/" route, the "home" property, if non-null, is used.\n'
           ' 2. Otherwise, the "routes" table is used, if it has an entry for '
