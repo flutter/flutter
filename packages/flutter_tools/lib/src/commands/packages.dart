@@ -19,6 +19,30 @@ import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 
+Future<void> generateLocalizationsSyntheticPackage() async {
+  final Environment environment = Environment(
+    artifacts: globals.artifacts,
+    logger: globals.logger,
+    cacheDir: globals.cache.getRoot(),
+    engineVersion: globals.flutterVersion.engineRevision,
+    fileSystem: globals.fs,
+    flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+    outputDir: globals.fs.directory(getBuildDirectory()),
+    processManager: globals.processManager,
+    projectDir: globals.fs.currentDirectory,
+  );
+  final BuildResult result = await globals.buildSystem.build(
+    const GenerateLocalizationsTarget(),
+    environment,
+  );
+  if (result.hasException) {
+    throwToolExit(
+      'Generating synthetic localizations package has failed. '
+      '${result.exceptions}'
+    );
+  }
+}
+
 class PackagesCommand extends FlutterCommand {
   PackagesCommand() {
     addSubcommand(PackagesGetCommand('get', false));
@@ -143,46 +167,31 @@ class PackagesGetCommand extends FlutterCommand {
       l10nYamlFile.existsSync()
     ) {
       final YamlNode yamlNode = loadYamlNode(l10nYamlFile.readAsStringSync());
-      if (yamlNode is! YamlMap) {
+
+      // If an l10n.yaml file exists but is empty, attempt to build synthetic
+      // package with default settings.
+      if (yamlNode == null) {
+        await generateLocalizationsSyntheticPackage();
+      } else if (yamlNode is! YamlMap) {
         throwToolExit(
           'Expected ${l10nYamlFile.path} to contain a map, instead was $yamlNode'
         );
-      }
-      final YamlMap yamlMap = yamlNode as YamlMap;
-      final Object value = yamlMap['synthetic-package'];
+      } else {
+        final YamlMap yamlMap = yamlNode as YamlMap;
+        final Object value = yamlMap['synthetic-package'];
 
-      if (value is! bool && value != null) {
-        throwToolExit(
-          'Expected "synthetic-package" to have a bool value, '
-          'instead was "$value"'
-        );
-      }
-
-      // Generate gen_l10n synthetic package if synthetic-package: true or
-      // synthetic-package is null, since the gen_l10n generates synthetic
-      // packages by default.
-      final bool isSyntheticL10nPackage = value as bool ?? true;
-      if (isSyntheticL10nPackage) {
-        final Environment environment = Environment(
-          artifacts: globals.artifacts,
-          logger: globals.logger,
-          cacheDir: globals.cache.getRoot(),
-          engineVersion: globals.flutterVersion.engineRevision,
-          fileSystem: globals.fs,
-          flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-          outputDir: globals.fs.directory(getBuildDirectory()),
-          processManager: globals.processManager,
-          projectDir: globals.fs.currentDirectory,
-        );
-        final BuildResult result = await globals.buildSystem.build(
-          const GenerateLocalizationsTarget(),
-          environment,
-        );
-        if (result.hasException) {
+        if (value is! bool && value != null) {
           throwToolExit(
-            'Generating synthetic localizations package has failed. '
-            '${result.exceptions}'
+            'Expected "synthetic-package" to have a bool value, '
+            'instead was "$value"'
           );
+        }
+
+        // Generate gen_l10n synthetic package if synthetic-package: true or
+        // synthetic-package is null.
+        final bool isSyntheticL10nPackage = value as bool ?? true;
+        if (isSyntheticL10nPackage) {
+          await generateLocalizationsSyntheticPackage();
         }
       }
     }
