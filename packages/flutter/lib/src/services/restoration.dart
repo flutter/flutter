@@ -250,7 +250,7 @@ class RestorationManager extends ChangeNotifier {
   }
 
   bool _debugDoingUpdate = false;
-  bool _postFrameScheduled = false;
+  bool _serializationScheduled = false;
 
   final Set<RestorationBucket> _bucketsNeedingSerialization = <RestorationBucket>{};
 
@@ -270,8 +270,8 @@ class RestorationManager extends ChangeNotifier {
     assert(bucket._manager == this);
     assert(!_debugDoingUpdate);
     _bucketsNeedingSerialization.add(bucket);
-    if (!_postFrameScheduled) {
-      _postFrameScheduled = true;
+    if (!_serializationScheduled) {
+      _serializationScheduled = true;
       SchedulerBinding.instance!.addPostFrameCallback((Duration _) => _doSerialization());
     }
   }
@@ -294,23 +294,53 @@ class RestorationManager extends ChangeNotifier {
     _bucketsNeedingSerialization.remove(bucket);
   }
 
-  void _doSerialization() {
+  Future<void> _doSerialization() {
+    if (!_serializationScheduled) {
+      return Future<void>.value(null);
+    }
     assert(() {
       _debugDoingUpdate = true;
       return true;
     }());
-    _postFrameScheduled = false;
+    _serializationScheduled = false;
 
     for (final RestorationBucket bucket in _bucketsNeedingSerialization) {
       bucket.finalize();
     }
     _bucketsNeedingSerialization.clear();
-    sendToEngine(_encodeRestorationData(_rootBucket!._rawData));
+    final Future<void> result = sendToEngine(_encodeRestorationData(_rootBucket!._rawData));
 
     assert(() {
       _debugDoingUpdate = false;
       return true;
     }());
+    return result;
+  }
+
+  /// Called to manually flush the restoration data to the engine.
+  ///
+  /// Restoration data is automatically flushed to the engine at the end of a
+  /// frame. Since a change in restoration data is usually accompanied by
+  /// scheduling a frame (e.g. because the restoration data is modified inside a
+  /// [State.setState] call) it is uncommon to call this method directly.
+  /// However if restoration data is changed without triggering a frame this
+  /// method must be called to ensure that the updated restoration data is send
+  /// to the engine in a timely manner. An example for such a use case is the
+  /// [Scrollable], where the final to be persisted scroll offset after a scroll
+  /// activity finishes is determined between frames without scheduling a new
+  /// frame.
+  ///
+  /// Calling this method is a no-op if a frame is already scheduled. In that
+  /// case, the restoration data will be flushed to the engine at the end of
+  /// that frame. If this method is called and no frame is scheduled, the
+  /// current restoration data is directly send to the engine.
+  Future<void> flushData() async {
+    assert(!_debugDoingUpdate);
+    if (SchedulerBinding.instance!.hasScheduledFrame) {
+      return;
+    }
+    await _doSerialization();
+    assert(!_serializationScheduled);
   }
 }
 

@@ -128,6 +128,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ///
   ///  * [ScrollController.keepScrollOffset] and [PageController.keepPage], which
   ///    create scroll positions and initialize this property.
+  // TODO(goderbauer): Deprecate this when state restoration supports all features of PageStorage.
   final bool keepScrollOffset;
 
   /// A label that is used in the [toString] output.
@@ -358,6 +359,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// The default implementation writes the [pixels] using the nearest
   /// [PageStorage] found from the [context]'s [ScrollContext.storageContext]
   /// property.
+  // TODO(goderbauer): Deprecate this when state restoration supports all features of PageStorage.
   @protected
   void saveScrollOffset() {
     PageStorage.of(context.storageContext)?.writeState(context.storageContext, pixels);
@@ -378,6 +380,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ///
   /// This method is called from the constructor, so layout has not yet
   /// occurred, and the viewport dimensions aren't yet known when it is called.
+  // TODO(goderbauer): Deprecate this when state restoration supports all features of PageStorage.
   @protected
   void restoreScrollOffset() {
     if (pixels == null) {
@@ -385,6 +388,42 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       if (value != null)
         correctPixels(value);
     }
+  }
+
+  /// Called by [context] to restore the scroll offset to the provided value.
+  ///
+  /// The provided value has previously been provided to the [context] by
+  /// calling [ScrollContext.saveOffset], e.g. from [saveOffset].
+  ///
+  /// This method may be called right after the scroll position is created
+  /// before layout has occurred. In that case, `initialRestore` is set to true
+  /// and the viewport dimensions will not be known yet. If the [context]
+  /// doesn't have any information to restore the scroll offset this method is
+  /// not called.
+  ///
+  /// The method may be called multiple times in the lifecycle of a
+  /// [ScrollPosition] to restore it to different scroll offsets.
+  void restoreOffset(double offset, {bool initialRestore = false}) {
+    assert(initialRestore != null);
+    assert(offset != null);
+    if (initialRestore) {
+      correctPixels(offset);
+    } else {
+      jumpTo(offset);
+    }
+  }
+
+  /// Called whenever scrolling ends, to persist the current scroll offset for
+  /// state restoration purposes.
+  ///
+  /// The default implementation stores the current value of [pixels] on the
+  /// [context] by calling [ScrollContext.saveOffset]. At a later point in time
+  /// or after the application restarts, the [context] may restore the scroll
+  /// position to the persisted offset by calling [restoreOffset].
+  @protected
+  void saveOffset() {
+    assert(pixels != null);
+    context.saveOffset(pixels);
   }
 
   /// Returns the overscroll by applying the boundary conditions.
@@ -761,6 +800,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// This also saves the scroll offset using [saveScrollOffset].
   void didEndScroll() {
     activity.dispatchScrollEndNotification(copyWith(), context.notificationContext);
+    saveOffset();
     if (keepScrollOffset)
       saveScrollOffset();
   }

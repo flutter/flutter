@@ -12,6 +12,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/services.dart';
 
 import 'actions.dart';
 import 'basic.dart';
@@ -19,6 +20,8 @@ import 'focus_manager.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'notification_listener.dart';
+import 'restoration.dart';
+import 'restoration_properties.dart';
 import 'scroll_configuration.dart';
 import 'scroll_context.dart';
 import 'scroll_controller.dart';
@@ -90,6 +93,7 @@ class Scrollable extends StatefulWidget {
     this.excludeFromSemantics = false,
     this.semanticChildCount,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.restorationId,
   }) : assert(axisDirection != null),
        assert(dragStartBehavior != null),
        assert(viewportBuilder != null),
@@ -226,6 +230,22 @@ class Scrollable extends StatefulWidget {
   /// {@endtemplate}
   final DragStartBehavior dragStartBehavior;
 
+  /// {@template flutter.widgets.scrollable.restorationId}
+  /// Restoration ID to save and restore the scroll offset of the scrollable.
+  ///
+  /// If a restoration id is provided, the scrollable will persist its current
+  /// scroll offset and restore it during state restoration.
+  ///
+  /// The scroll offset is persisted in a [RestorationBucket] claimed from
+  /// the surrounding [RestorationScope] using the provided restoration ID.
+  ///
+  /// See also:
+  ///
+  ///  * [RestorationManager], which explains how state restoration works in
+  ///    Flutter.
+  /// {@endtemplate}
+  final String restorationId;
+
   /// The axis along which the scroll view scrolls.
   ///
   /// Determined by the [axisDirection].
@@ -239,6 +259,7 @@ class Scrollable extends StatefulWidget {
     super.debugFillProperties(properties);
     properties.add(EnumProperty<AxisDirection>('axisDirection', axisDirection));
     properties.add(DiagnosticsProperty<ScrollPhysics>('physics', physics));
+    properties.add(StringProperty('restorationId', restorationId));
   }
 
   /// The state from the closest instance of this class that encloses the given context.
@@ -340,7 +361,7 @@ class _ScrollableScope extends InheritedWidget {
 ///
 /// This class is not intended to be subclassed. To specialize the behavior of a
 /// [Scrollable], provide it with a [ScrollPhysics].
-class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
+class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, RestorationMixin
     implements ScrollContext {
   /// The manager for this [Scrollable] widget's viewport position.
   ///
@@ -349,6 +370,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   /// [ScrollPosition] in its [ScrollController.createScrollPosition] method.
   ScrollPosition get position => _position;
   ScrollPosition _position;
+
+  final _RestorableScrollOffset _persistedScrollOffset = _RestorableScrollOffset();
 
   @override
   AxisDirection get axisDirection => widget.axisDirection;
@@ -379,9 +402,27 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   }
 
   @override
+  void restoreState(RestorationBucket oldBucket) {
+    registerForRestoration(_persistedScrollOffset, 'offset');
+    assert(position != null);
+    if (_persistedScrollOffset.value != null) {
+      position.restoreOffset(_persistedScrollOffset.value, initialRestore: oldBucket == null);
+    }
+  }
+
+  @override
+  void saveOffset(double offset) {
+    assert(debugIsSerializableForRestoration(offset));
+    _persistedScrollOffset.value = offset;
+    // [saveOffset] is called after a scrolling ends and it is usually not
+    // followed by a frame. Therefore, manually flush restoration data.
+    ServicesBinding.instance.restorationManager.flushData();
+  }
+
+  @override
   void didChangeDependencies() {
-    super.didChangeDependencies();
     _updatePosition();
+    super.didChangeDependencies();
   }
 
   bool _shouldUpdatePosition(Scrollable oldWidget) {
@@ -414,6 +455,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   void dispose() {
     widget.controller?.detach(position);
     position.dispose();
+    _persistedScrollOffset.dispose();
     super.dispose();
   }
 
@@ -663,6 +705,9 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ScrollPosition>('position', position));
   }
+
+  @override
+  String get restorationId => widget.restorationId;
 }
 
 /// With [_ScrollSemantics] certain child [SemanticsNode]s can be
@@ -1028,4 +1073,29 @@ class ScrollAction extends Action<ScrollIntent> {
       curve: Curves.easeInOut,
     );
   }
+}
+
+// Not using a RestorableDouble because we want to allow null values and override
+// [enabled].
+class _RestorableScrollOffset extends RestorableValue<double> {
+  @override
+  double createDefaultValue() => null;
+
+  @override
+  void didUpdateValue(double oldValue) {
+    notifyListeners();
+  }
+
+  @override
+  double fromPrimitives(Object data) {
+    return data as double;
+  }
+
+  @override
+  Object toPrimitives() {
+    return value;
+  }
+
+  @override
+  bool get enabled => value != null;
 }
