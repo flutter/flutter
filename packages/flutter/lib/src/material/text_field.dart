@@ -22,6 +22,7 @@ import 'material_localizations.dart';
 import 'material_state.dart';
 import 'selectable_text.dart' show iOSHorizontalOffset;
 import 'text_selection.dart';
+import 'text_selection_theme.dart';
 import 'theme.dart';
 
 export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization, SmartQuotesType, SmartDashesType;
@@ -92,7 +93,20 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
       switch (Theme.of(_state.context).platform) {
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
-          renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
+          switch (details.kind) {
+            case PointerDeviceKind.mouse:
+            case PointerDeviceKind.stylus:
+            case PointerDeviceKind.invertedStylus:
+              // Precise devices should place the cursor at a precise position.
+              renderEditable.selectPosition(cause: SelectionChangedCause.tap);
+              break;
+            case PointerDeviceKind.touch:
+            case PointerDeviceKind.unknown:
+              // On macOS/iOS/iPadOS a touch tap places the cursor at the edge
+              // of the word.
+              renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
+              break;
+          }
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
@@ -556,8 +570,9 @@ class TextField extends StatefulWidget {
   /// character count.
   ///
   /// If [maxLengthEnforced] is set to false, then more than [maxLength]
-  /// characters may be entered, but the error counter and divider will
-  /// switch to the [decoration.errorStyle] when the limit is exceeded.
+  /// characters may be entered, but the error counter and divider will switch
+  /// to the [decoration]'s [InputDecoration.errorStyle] when the limit is
+  /// exceeded.
   ///
   /// ## Limitations
   ///
@@ -601,7 +616,7 @@ class TextField extends StatefulWidget {
   ///
   ///  * [inputFormatters], which are called before [onChanged]
   ///    runs and can validate and change ("format") the input value.
-  ///  * [onEditingComplete], [onSubmitted], [onSelectionChanged]:
+  ///  * [onEditingComplete], [onSubmitted]:
   ///    which are more specialized input change notifications.
   final ValueChanged<String> onChanged;
 
@@ -624,7 +639,7 @@ class TextField extends StatefulWidget {
   /// [decoration] is rendered in grey.
   ///
   /// If non-null this property overrides the [decoration]'s
-  /// [Decoration.enabled] property.
+  /// [InputDecoration.enabled] property.
   final bool enabled;
 
   /// {@macro flutter.widgets.editableText.cursorWidth}
@@ -636,10 +651,22 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.cursorRadius}
   final Radius cursorRadius;
 
-  /// The color to use when painting the cursor.
+  /// The color of the cursor.
   ///
-  /// Defaults to [ThemeData.cursorColor] or [CupertinoTheme.primaryColor]
-  /// depending on [ThemeData.platform].
+  /// The cursor indicates the current location of text insertion point in
+  /// the field.
+  ///
+  /// If this is null it will default to a value based on the following:
+  ///
+  /// * If the ambient [ThemeData.useTextSelectionTheme] is true then it
+  ///   will use the value of the ambient [TextSelectionThemeData.cursorColor].
+  ///   If that is null then if the [ThemeData.platform] is [TargetPlatform.iOS]
+  ///   or [TargetPlatform.macOS] then it will use [CupertinoThemeData.primaryColor].
+  ///   Otherwise it will use the value of [ColorScheme.primary] of [ThemeData.colorScheme].
+  ///
+  /// * If the ambient [ThemeData.useTextSelectionTheme] is false then it
+  ///   will use either [ThemeData.cursorColor] or [CupertinoThemeData.primaryColor]
+  ///   depending on [ThemeData.platform].
   final Color cursorColor;
 
   /// Controls how tall the selection highlight boxes are computed to be.
@@ -712,15 +739,15 @@ class TextField extends StatefulWidget {
   /// the editing position.
   final MouseCursor mouseCursor;
 
-  /// Callback that generates a custom [InputDecorator.counter] widget.
+  /// Callback that generates a custom [InputDecoration.counter] widget.
   ///
   /// See [InputCounterWidgetBuilder] for an explanation of the passed in
   /// arguments.  The returned widget will be placed below the line in place of
-  /// the default widget built when [counterText] is specified.
+  /// the default widget built when [InputDecoration.counterText] is specified.
   ///
   /// The returned widget will be wrapped in a [Semantics] widget for
-  /// accessibility, but it also needs to be accessible itself.  For example,
-  /// if returning a Text widget, set the [semanticsLabel] property.
+  /// accessibility, but it also needs to be accessible itself. For example,
+  /// if returning a Text widget, set the [Text.semanticsLabel] property.
   ///
   /// {@tool snippet}
   /// ```dart
@@ -1016,6 +1043,11 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
     }
   }
 
+  Color _defaultSelectionColor(BuildContext context, Color primary) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    return primary.withOpacity(isDark ? 0.40 : 0.12);
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -1027,9 +1059,10 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
       'inherit false style must supply fontSize and textBaseline',
     );
 
-    final ThemeData themeData = Theme.of(context);
-    final TextStyle style = themeData.textTheme.subtitle1.merge(widget.style);
-    final Brightness keyboardAppearance = widget.keyboardAppearance ?? themeData.primaryColorBrightness;
+    final ThemeData theme = Theme.of(context);
+    final TextSelectionThemeData selectionTheme = TextSelectionTheme.of(context);
+    final TextStyle style = theme.textTheme.subtitle1.merge(widget.style);
+    final Brightness keyboardAppearance = widget.keyboardAppearance ?? theme.primaryColorBrightness;
     final TextEditingController controller = _effectiveController;
     final FocusNode focusNode = _effectiveFocusNode;
     final List<TextInputFormatter> formatters = widget.inputFormatters ?? <TextInputFormatter>[];
@@ -1041,20 +1074,27 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
     bool cursorOpacityAnimates;
     Offset cursorOffset;
     Color cursorColor = widget.cursorColor;
+    Color selectionColor;
     Color autocorrectionTextRectColor;
     Radius cursorRadius = widget.cursorRadius;
 
-    switch (themeData.platform) {
+    switch (theme.platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         forcePressEnabled = true;
         textSelectionControls = cupertinoTextSelectionControls;
         paintCursorAboveText = true;
         cursorOpacityAnimates = true;
-        cursorColor ??= CupertinoTheme.of(context).primaryColor;
+        if (theme.useTextSelectionTheme) {
+          cursorColor ??= selectionTheme.cursorColor ?? CupertinoTheme.of(context).primaryColor;
+          selectionColor = selectionTheme.selectionColor ?? _defaultSelectionColor(context, CupertinoTheme.of(context).primaryColor);
+        } else {
+          cursorColor ??= CupertinoTheme.of(context).primaryColor;
+          selectionColor = theme.textSelectionColor;
+        }
         cursorRadius ??= const Radius.circular(2.0);
         cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
-        autocorrectionTextRectColor = themeData.textSelectionColor;
+        autocorrectionTextRectColor = selectionColor;
         break;
 
       case TargetPlatform.android:
@@ -1065,7 +1105,13 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
         textSelectionControls = materialTextSelectionControls;
         paintCursorAboveText = false;
         cursorOpacityAnimates = false;
-        cursorColor ??= themeData.cursorColor;
+        if (theme.useTextSelectionTheme) {
+          cursorColor ??= selectionTheme.cursorColor ?? theme.colorScheme.primary;
+          selectionColor = selectionTheme.selectionColor ?? _defaultSelectionColor(context, theme.colorScheme.primary);
+        } else {
+          cursorColor ??= theme.cursorColor;
+          selectionColor = theme.textSelectionColor;
+        }
         break;
     }
 
@@ -1095,7 +1141,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
         maxLines: widget.maxLines,
         minLines: widget.minLines,
         expands: widget.expands,
-        selectionColor: themeData.textSelectionColor,
+        selectionColor: selectionColor,
         selectionControls: widget.selectionEnabled ? textSelectionControls : null,
         onChanged: widget.onChanged,
         onSelectionChanged: _handleSelectionChanged,

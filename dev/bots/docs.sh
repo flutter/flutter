@@ -19,9 +19,7 @@ function deploy {
   [[ "$remaining_tries" == 0 ]] && {
     echo "Command still failed after $total_tries tries: '$@'"
     cat firebase-debug.log || echo "Unable to show contents of firebase-debug.log."
-    # TODO(jackson): Return an error here when the Firebase service is more reliable.
-    # https://github.com/flutter/flutter/issues/44452
-    return 0
+    return 1
   }
   return 0
 }

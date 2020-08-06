@@ -1330,10 +1330,11 @@ class Scaffold extends StatefulWidget {
   /// drawer.
   ///
   /// By default, the value used is 20.0 added to the padding edge of
-  /// `MediaQuery.of(context).padding` that corresponds to [alignment].
-  /// This ensures that the drag area for notched devices is not obscured. For
-  /// example, if `TextDirection.of(context)` is set to [TextDirection.ltr],
-  /// 20.0 will be added to `MediaQuery.of(context).padding.left`.
+  /// `MediaQuery.of(context).padding` that corresponds to the surrounding
+  /// [TextDirection]. This ensures that the drag area for notched devices is
+  /// not obscured. For example, if `TextDirection.of(context)` is set to
+  /// [TextDirection.ltr], 20.0 will be added to
+  /// `MediaQuery.of(context).padding.left`.
   final double drawerEdgeDragWidth;
 
   /// Determines if the [Scaffold.drawer] can be opened with a drag

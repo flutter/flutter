@@ -381,6 +381,42 @@ void main() {
     }, variant: buttonVariant);
   });
 
+  testWidgets('Primary and secondary long press callbacks should work together in GestureDetector', (WidgetTester tester) async {
+    bool primaryLongPress = false, secondaryLongPress = false;
+
+    await tester.pumpWidget(
+      Container(
+        alignment: Alignment.topLeft,
+        child: Container(
+          alignment: Alignment.center,
+          height: 100.0,
+          color: const Color(0xFF00FF00),
+          child: GestureDetector(
+            onLongPress: () {
+              primaryLongPress = true;
+            },
+            onSecondaryLongPress: () {
+              secondaryLongPress = true;
+            },
+          ),
+        ),
+      ),
+    );
+
+    Future<void> longPress(Duration timeout, int buttons) async {
+      final TestGesture gesture = await tester.startGesture(const Offset(400.0, 50.0), buttons: buttons);
+      await tester.pump(timeout);
+      await gesture.up();
+    }
+
+    // Adding a second to make sure the time for long press has occurred.
+    await longPress(kLongPressTimeout + const Duration(seconds: 1), kPrimaryButton);
+    expect(primaryLongPress, isTrue);
+
+    await longPress(kLongPressTimeout + const Duration(seconds: 1), kSecondaryButton);
+    expect(secondaryLongPress, isTrue);
+  });
+
   testWidgets('Force Press Callback called after force press', (WidgetTester tester) async {
     int forcePressStart = 0;
     int forcePressPeaked = 0;

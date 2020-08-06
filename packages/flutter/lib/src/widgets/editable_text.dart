@@ -975,7 +975,7 @@ class EditableText extends StatefulWidget {
   /// {@tool dartpad --template=stateful_widget_material}
   /// When a non-completion action is pressed, such as "next" or "previous", it
   /// is often desirable to move the focus to the next or previous field.  To do
-  /// this, handle it as in this example, by calling [FocusNode.focusNext] in
+  /// this, handle it as in this example, by calling [FocusNode.nextFocus] in
   /// the `onFieldSubmitted` callback of [TextFormField]. ([TextFormField] wraps
   /// [EditableText] internally, and uses the value of `onFieldSubmitted` as its
   /// [onSubmitted]).
@@ -1623,7 +1623,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // cursor.
   TextPosition _lastTextPosition;
 
-  // The offset of the floating cursor as determined from the first update call.
+  // The offset of the floating cursor as determined from the start call.
   Offset _pointOffsetOrigin;
 
   // The most recent position of the floating cursor.
@@ -1642,22 +1642,24 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           _floatingCursorResetController.stop();
           _onFloatingCursorResetTick();
         }
+        // We want to send in points that are centered around a (0,0) origin, so
+        // we cache the position.
+        _pointOffsetOrigin = point.offset;
+
         final TextPosition currentTextPosition = TextPosition(offset: renderEditable.selection.baseOffset);
         _startCaretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
-        renderEditable.setFloatingCursor(point.state, _startCaretRect.center - _floatingCursorOffset, currentTextPosition);
+
+        _lastBoundedOffset = _startCaretRect.center - _floatingCursorOffset;
+        _lastTextPosition = currentTextPosition;
+        renderEditable.setFloatingCursor(point.state, _lastBoundedOffset, _lastTextPosition);
         break;
       case FloatingCursorDragState.Update:
-        // We want to send in points that are centered around a (0,0) origin, so we cache the
-        // position on the first update call.
-        if (_pointOffsetOrigin != null) {
-          final Offset centeredPoint = point.offset - _pointOffsetOrigin;
-          final Offset rawCursorOffset = _startCaretRect.center + centeredPoint - _floatingCursorOffset;
-          _lastBoundedOffset = renderEditable.calculateBoundedFloatingCursorOffset(rawCursorOffset);
-          _lastTextPosition = renderEditable.getPositionForPoint(renderEditable.localToGlobal(_lastBoundedOffset + _floatingCursorOffset));
-          renderEditable.setFloatingCursor(point.state, _lastBoundedOffset, _lastTextPosition);
-        } else {
-          _pointOffsetOrigin = point.offset;
-        }
+        final Offset centeredPoint = point.offset - _pointOffsetOrigin;
+        final Offset rawCursorOffset = _startCaretRect.center + centeredPoint - _floatingCursorOffset;
+
+        _lastBoundedOffset = renderEditable.calculateBoundedFloatingCursorOffset(rawCursorOffset);
+        _lastTextPosition = renderEditable.getPositionForPoint(renderEditable.localToGlobal(_lastBoundedOffset + _floatingCursorOffset));
+        renderEditable.setFloatingCursor(point.state, _lastBoundedOffset, _lastTextPosition);
         break;
       case FloatingCursorDragState.End:
         // We skip animation if no update has happened.

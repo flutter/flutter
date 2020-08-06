@@ -111,7 +111,7 @@ class Typography with Diagnosticable {
   /// If [platform] is [TargetPlatform.iOS] or [TargetPlatform.macOS], the
   /// default values for [black] and [white] are [blackCupertino] and
   /// [whiteCupertino] respectively. Otherwise they are [blackMountainView] and
-  /// [whiteMoutainView]. If [platform] is null then both [black] and [white]
+  /// [whiteMountainView]. If [platform] is null then both [black] and [white]
   /// must be specified.
   ///
   /// The default values for [englishLike], [dense], and [tall] are
@@ -139,7 +139,7 @@ class Typography with Diagnosticable {
   /// If [platform] is [TargetPlatform.iOS] or [TargetPlatform.macOS], the
   /// default values for [black] and [white] are [blackCupertino] and
   /// [whiteCupertino] respectively. Otherwise they are [blackMountainView] and
-  /// [whiteMoutainView]. If [platform] is null then both [black] and [white]
+  /// [whiteMountainView]. If [platform] is null then both [black] and [white]
   /// must be specified.
   ///
   /// The default values for [englishLike], [dense], and [tall] are
