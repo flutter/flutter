@@ -5,8 +5,46 @@
 
 import 'dart:ui';
 
+import 'message_codec.dart';
 import 'message_codecs.dart';
 import 'platform_channel.dart';
+
+class _PolymorphicMethodCodec implements MethodCodec {
+  const _PolymorphicMethodCodec(this.primaryCodec, this.secondaryCodec);
+  final MethodCodec primaryCodec;
+  final MethodCodec secondaryCodec;
+
+  @override
+  ByteData encodeMethodCall(MethodCall call) => primaryCodec.encodeMethodCall(call);
+
+  @override
+  MethodCall decodeMethodCall(ByteData? methodCall) {
+    try {
+      return primaryCodec.decodeMethodCall(methodCall);
+    } on FormatException {
+      return secondaryCodec.decodeMethodCall(methodCall);
+    }
+  }
+
+  @override
+  dynamic decodeEnvelope(ByteData envelope) {
+    try {
+      return primaryCodec.decodeEnvelope(envelope);
+    } on FormatException {
+      return secondaryCodec.decodeEnvelope(envelope);
+    }
+  }
+
+  @override
+  ByteData encodeSuccessEnvelope(dynamic result) {
+    return primaryCodec.encodeSuccessEnvelope(result);
+  }
+
+  @override
+  ByteData encodeErrorEnvelope({ required String code, String? message, dynamic details }) {
+    return primaryCodec.encodeErrorEnvelope(code: code, message: message, details:details);
+  }
+}
 
 /// Platform channels used by the Flutter system.
 class SystemChannels {
@@ -15,7 +53,7 @@ class SystemChannels {
   // ignore: unused_element
   SystemChannels._();
 
-  /// A JSON [MethodChannel] for navigation.
+  /// A [MethodChannel] for navigation.
   ///
   /// The following incoming methods are defined for this channel (registered
   /// using [MethodChannel.setMethodCallHandler]):
@@ -50,7 +88,7 @@ class SystemChannels {
   ///    change information from framework to engine.
   static const MethodChannel navigation = OptionalMethodChannel(
       'flutter/navigation',
-      JSONMethodCodec(),
+      _PolymorphicMethodCodec(StandardMethodCodec(), JSONMethodCodec())
   );
 
   /// A JSON [MethodChannel] for invoking miscellaneous platform methods.
