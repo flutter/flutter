@@ -150,7 +150,7 @@ class PackagesGetCommand extends FlutterCommand {
       }
       final YamlMap yamlMap = yamlNode as YamlMap;
       final Object isSyntheticL10nPackage = yamlMap['synthetic-package'];
-      if (isSyntheticL10nPackage is! bool) {
+      if (isSyntheticL10nPackage is! bool && isSyntheticL10nPackage != null) {
         throwToolExit(
           'Expected "synthetic-package" to have a bool value, '
           'instead was "$isSyntheticL10nPackage"'
