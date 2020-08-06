@@ -32,6 +32,7 @@ import 'theme_data.dart';
 ///   backgroundImage: NetworkImage(userAvatarUrl),
 /// )
 /// ```
+///
 /// {@end-tool}
 ///
 /// The image will be cropped to have a circle shape.
@@ -47,6 +48,7 @@ import 'theme_data.dart';
 ///   child: Text('AH'),
 /// )
 /// ```
+///
 /// {@end-tool}
 ///
 /// See also:
@@ -98,7 +100,7 @@ class CircleAvatar extends StatelessWidget {
   /// image will cause the avatar to animate to the new image.
   ///
   /// If the [CircleAvatar] is to have the user's initials, use [child] instead.
-  final ImageProvider backgroundImage;
+  final ImageProvider<dynamic> backgroundImage;
 
   /// An optional error callback for errors emitted when loading
   /// [backgroundImage].
@@ -163,14 +165,26 @@ class CircleAvatar extends StatelessWidget {
     if (radius == null && minRadius == null && maxRadius == null) {
       return _defaultRadius * 2.0;
     }
+    // If only the `maxRadius` is specified use `_defaultMinRadius`.
     return 2.0 * (radius ?? minRadius ?? _defaultMinRadius);
   }
 
   double get _maxDiameter {
-    if (radius == null && minRadius == null && maxRadius == null) {
+    if (radius == null && maxRadius == null && minRadius == null) {
       return _defaultRadius * 2.0;
     }
+    // If only the `minRadius` is specified use `_defaultMaxRadius`.
     return 2.0 * (radius ?? maxRadius ?? _defaultMaxRadius);
+  }
+
+  Color _changeThemeColorAccordingToBrightness(Color refColor, ThemeData theme) {
+    switch (ThemeData.estimateBrightnessForColor(refColor)) {
+      case Brightness.dark:
+        return theme.primaryColorLight;
+      case Brightness.light:
+        return theme.primaryColorDark;
+    }
+    return null;
   }
 
   @override
@@ -180,23 +194,9 @@ class CircleAvatar extends StatelessWidget {
     TextStyle textStyle = theme.primaryTextTheme.subtitle1.copyWith(color: foregroundColor);
     Color effectiveBackgroundColor = backgroundColor;
     if (effectiveBackgroundColor == null) {
-      switch (ThemeData.estimateBrightnessForColor(textStyle.color)) {
-        case Brightness.dark:
-          effectiveBackgroundColor = theme.primaryColorLight;
-          break;
-        case Brightness.light:
-          effectiveBackgroundColor = theme.primaryColorDark;
-          break;
-      }
+      effectiveBackgroundColor = _changeThemeColorAccordingToBrightness(textStyle.color, theme);
     } else if (foregroundColor == null) {
-      switch (ThemeData.estimateBrightnessForColor(backgroundColor)) {
-        case Brightness.dark:
-          textStyle = textStyle.copyWith(color: theme.primaryColorLight);
-          break;
-        case Brightness.light:
-          textStyle = textStyle.copyWith(color: theme.primaryColorDark);
-          break;
-      }
+      textStyle = textStyle.copyWith(color: _changeThemeColorAccordingToBrightness(backgroundColor, theme));
     }
     final double minDiameter = _minDiameter;
     final double maxDiameter = _maxDiameter;
