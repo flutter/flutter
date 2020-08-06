@@ -170,9 +170,9 @@ class PackagesGetCommand extends FlutterCommand {
 
       // If an l10n.yaml file exists but is empty, attempt to build synthetic
       // package with default settings.
-      if (yamlNode == null) {
+      if (yamlNode.value == null) {
         await generateLocalizationsSyntheticPackage();
-      } else if (yamlNode is! YamlMap && yamlNode != null) {
+      } else if (yamlNode.value != null && yamlNode is! YamlMap) {
         throwToolExit(
           'Expected ${l10nYamlFile.path} to contain a map, instead was $yamlNode'
         );
