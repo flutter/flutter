@@ -197,11 +197,12 @@ class AutocompleteController<T> {
 /// [buildField] and [buildResults] parameters.
 ///
 /// ```dart
-/// final AutocompleteController _autocompleteController =
-///     AutocompleteController(
+/// final AutocompleteController<String> _autocompleteController =
+///     AutocompleteController<String>(
 ///       options: <String>['aardvark', 'baboon', 'chameleon'],
 ///     );
 ///
+/// @override
 /// Widget build(BuildContext context) {
 ///   return AutocompleteCore(
 ///     autocompleteController: _autocompleteController,
@@ -210,7 +211,7 @@ class AutocompleteController<T> {
 ///         controller: _autocompleteController.textEditingController,
 ///       );
 ///     },
-///     buildResults: (BuildContext context, List<String> results, OnSelectedAutocomplete<String> onSelected) {
+///     buildResults: (BuildContext context, OnSelectedAutocomplete<String> onSelected, List<String> results) {
 ///       return ListView(
 ///         children: results.map((String result) => GestureDetector(
 ///           onTap: () {
@@ -269,7 +270,7 @@ class AutocompleteController<T> {
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return Material(
+///     return MaterialApp(
 ///       home: Scaffold(
 ///         appBar: AppBar(
 ///           title: Text('AutocompleteCore Example'),
@@ -291,7 +292,7 @@ class AutocompleteController<T> {
 ///                 controller: _autocompleteController.textEditingController,
 ///               );
 ///             },
-///             buildResults: (BuildContext context, List<User> results, OnSelectedAutocomplete<User> onSelected) {
+///             buildResults: (BuildContext context, OnSelectedAutocomplete<User> onSelected, List<User> results) {
 ///               return ListView(
 ///                 children: results.map((User result) => GestureDetector(
 ///                   onTap: () {
