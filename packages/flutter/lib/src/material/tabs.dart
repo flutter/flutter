@@ -734,7 +734,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// If this property is null, then kTabLabelPadding is used.
   final EdgeInsetsGeometry labelPadding;
 
-  /// The text style of the unselected tab labels
+  /// The text style of the unselected tab labels.
   ///
   /// If this property is null, then the [labelStyle] value is used. If [labelStyle]
   /// is null, then the text style of the [ThemeData.primaryTextTheme]'s

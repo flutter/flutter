@@ -156,7 +156,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   MouseTracker _mouseTracker;
 
   /// The render tree's owner, which maintains dirty state for layout,
-  /// composite, paint, and accessibility semantics
+  /// composite, paint, and accessibility semantics.
   PipelineOwner get pipelineOwner => _pipelineOwner;
   PipelineOwner _pipelineOwner;
 

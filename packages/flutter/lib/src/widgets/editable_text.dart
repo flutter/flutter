@@ -515,7 +515,7 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   final bool obscureText;
 
-  /// {@macro flutter.dart:ui.textHeightBehavior},
+  /// {@macro flutter.dart:ui.textHeightBehavior}
   final TextHeightBehavior textHeightBehavior;
 
   /// {@macro flutter.painting.textPainter.textWidthBasis}
@@ -814,7 +814,7 @@ class EditableText extends StatefulWidget {
   /// See the examples in [maxLines] for the complete picture of how [maxLines],
   /// [minLines], and [expands] interact to produce various behaviors.
   ///
-  /// Input that matches the height of its parent
+  /// Input that matches the height of its parent:
   /// ```dart
   /// Expanded(
   ///   child: TextField(maxLines: null, expands: true),
@@ -1064,7 +1064,7 @@ class EditableText extends StatefulWidget {
   /// {@template flutter.widgets.editableText.cursorWidth}
   /// How thick the cursor will be.
   ///
-  /// Defaults to 2.0
+  /// Defaults to 2.0.
   ///
   /// The cursor will draw under the text. The cursor width will extend
   /// to the right of the boundary between characters for left-to-right text

@@ -59,7 +59,7 @@ class Scroll extends CommandWithTarget {
   /// Delta Y offset per move event.
   final double dy;
 
-  /// The duration of the scrolling action
+  /// The duration of the scrolling action.
   final Duration duration;
 
   /// The frequency in Hz of the generated move events.
