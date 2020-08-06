@@ -4,7 +4,7 @@
 
 #include "flutter/shell/platform/fuchsia/flutter/platform_view.h"
 
-#include <fuchsia/ui/views/cpp/fidl.h>
+#include <gtest/gtest.h>
 #include <lib/async-loop/cpp/loop.h>
 #include <lib/async-loop/default.h>
 #include <lib/async/default.h>
@@ -15,11 +15,11 @@
 #include <memory>
 #include <vector>
 
-#include "flutter/flow/embedded_views.h"
+#include "flutter/flow/scene_update_context.h"
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/lib/ui/window/window.h"
+#include "fuchsia/ui/views/cpp/fidl.h"
 #include "gtest/gtest.h"
-
 #include "task_runner_adapter.h"
 
 namespace flutter_runner_test::flutter_runner_a11y_test {
@@ -39,33 +39,6 @@ class PlatformViewTests : public testing::Test {
   async::Loop loop_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformViewTests);
-};
-
-class MockExternalViewEmbedder : public flutter::ExternalViewEmbedder {
- public:
-  MockExternalViewEmbedder() = default;
-  ~MockExternalViewEmbedder() override = default;
-
-  SkCanvas* GetRootCanvas() override { return nullptr; }
-  std::vector<SkCanvas*> GetCurrentCanvases() override {
-    return std::vector<SkCanvas*>();
-  }
-
-  void CancelFrame() override {}
-  void BeginFrame(
-      SkISize frame_size,
-      GrDirectContext* context,
-      double device_pixel_ratio,
-      fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) override {}
-  void SubmitFrame(GrDirectContext* context,
-                   std::unique_ptr<flutter::SurfaceFrame> frame) override {
-    return;
-  }
-
-  void PrerollCompositeEmbeddedView(
-      int view_id,
-      std::unique_ptr<flutter::EmbeddedViewParams> params) override {}
-  SkCanvas* CompositeEmbeddedView(int view_id) override { return nullptr; }
 };
 
 class MockPlatformViewDelegate : public flutter::PlatformView::Delegate {
@@ -126,6 +99,30 @@ class MockPlatformViewDelegate : public flutter::PlatformView::Delegate {
   int32_t semantics_features_ = 0;
 };
 
+class MockSurfaceProducer
+    : public flutter::SceneUpdateContext::SurfaceProducer {
+ public:
+  std::unique_ptr<flutter::SceneUpdateContext::SurfaceProducerSurface>
+  ProduceSurface(const SkISize& size,
+                 const flutter::LayerRasterCacheKey& layer_key,
+                 std::unique_ptr<scenic::EntityNode> entity_node) override {
+    return nullptr;
+  }
+
+  bool HasRetainedNode(const flutter::LayerRasterCacheKey& key) const override {
+    return false;
+  }
+
+  scenic::EntityNode* GetRetainedNode(
+      const flutter::LayerRasterCacheKey& key) override {
+    return nullptr;
+  }
+
+  void SubmitSurface(
+      std::unique_ptr<flutter::SceneUpdateContext::SurfaceProducerSurface>
+          surface) override {}
+};
+
 TEST_F(PlatformViewTests, ChangesAccessibilitySettings) {
   sys::testing::ServiceDirectoryProvider services_provider(dispatcher());
 
@@ -150,6 +147,8 @@ TEST_F(PlatformViewTests, ChangesAccessibilitySettings) {
       nullptr,  // parent_environment_service_provider_handle
       nullptr,  // session_listener_request
       nullptr,  // on_session_listener_error_callback
+      nullptr,  // session_metrics_did_change_callback
+      nullptr,  // session_size_change_hint_callback
       nullptr,  // on_enable_wireframe_callback,
       nullptr,  // on_create_view_callback,
       nullptr,  // on_destroy_view_callback,
@@ -204,6 +203,8 @@ TEST_F(PlatformViewTests, EnableWireframeTest) {
       nullptr,                  // parent_environment_service_provider_handle
       nullptr,                  // session_listener_request
       nullptr,                  // on_session_listener_error_callback
+      nullptr,                  // session_metrics_did_change_callback
+      nullptr,                  // session_size_change_hint_callback
       EnableWireframeCallback,  // on_enable_wireframe_callback,
       nullptr,                  // on_create_view_callback,
       nullptr,                  // on_destroy_view_callback,
@@ -269,6 +270,8 @@ TEST_F(PlatformViewTests, CreateViewTest) {
       nullptr,             // parent_environment_service_provider_handle
       nullptr,             // session_listener_request
       nullptr,             // on_session_listener_error_callback
+      nullptr,             // session_metrics_did_change_callback
+      nullptr,             // session_size_change_hint_callback
       nullptr,             // on_enable_wireframe_callback,
       CreateViewCallback,  // on_create_view_callback,
       nullptr,             // on_destroy_view_callback,
@@ -336,6 +339,8 @@ TEST_F(PlatformViewTests, DestroyViewTest) {
       nullptr,              // parent_environment_service_provider_handle
       nullptr,              // session_listener_request
       nullptr,              // on_session_listener_error_callback
+      nullptr,              // session_metrics_did_change_callback
+      nullptr,              // session_size_change_hint_callback
       nullptr,              // on_enable_wireframe_callback,
       nullptr,              // on_create_view_callback,
       DestroyViewCallback,  // on_destroy_view_callback,
@@ -390,8 +395,11 @@ TEST_F(PlatformViewTests, GetViewEmbedderTest) {
       );
 
   // Test get view embedder callback function.
-  MockExternalViewEmbedder view_embedder;
-  auto GetViewEmbedderCallback = [&view_embedder]() { return &view_embedder; };
+  MockSurfaceProducer surfaceProducer;
+  flutter::SceneUpdateContext scene_update_context(nullptr, &surfaceProducer);
+  flutter::ExternalViewEmbedder* view_embedder =
+      reinterpret_cast<flutter::ExternalViewEmbedder*>(&scene_update_context);
+  auto GetViewEmbedderCallback = [view_embedder]() { return view_embedder; };
 
   auto platform_view = flutter_runner::PlatformView(
       delegate,                               // delegate
@@ -402,6 +410,8 @@ TEST_F(PlatformViewTests, GetViewEmbedderTest) {
       nullptr,                  // parent_environment_service_provider_handle
       nullptr,                  // session_listener_request
       nullptr,                  // on_session_listener_error_callback
+      nullptr,                  // session_metrics_did_change_callback
+      nullptr,                  // session_size_change_hint_callback
       nullptr,                  // on_enable_wireframe_callback,
       nullptr,                  // on_create_view_callback,
       nullptr,                  // on_destroy_view_callback,
@@ -416,7 +426,7 @@ TEST_F(PlatformViewTests, GetViewEmbedderTest) {
 
   RunLoopUntilIdle();
 
-  EXPECT_EQ(&view_embedder, delegate.get_view_embedder());
+  EXPECT_EQ(view_embedder, delegate.get_view_embedder());
 }
 
 }  // namespace flutter_runner_test::flutter_runner_a11y_test

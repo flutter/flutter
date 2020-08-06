@@ -21,7 +21,28 @@ PhysicalShapeLayer::PhysicalShapeLayer(SkColor color,
       shadow_color_(shadow_color),
       elevation_(elevation),
       path_(path),
-      clip_behavior_(clip_behavior) {}
+      isRect_(false),
+      clip_behavior_(clip_behavior) {
+  SkRect rect;
+  if (path.isRect(&rect)) {
+    isRect_ = true;
+    frameRRect_ = SkRRect::MakeRect(rect);
+  } else if (path.isRRect(&frameRRect_)) {
+    isRect_ = frameRRect_.isRect();
+  } else if (path.isOval(&rect)) {
+    // isRRect returns false for ovals, so we need to explicitly check isOval
+    // as well.
+    frameRRect_ = SkRRect::MakeOval(rect);
+  } else {
+    // Scenic currently doesn't provide an easy way to create shapes from
+    // arbitrary paths.
+    // For shapes that cannot be represented as a rounded rectangle we
+    // default to use the bounding rectangle.
+    // TODO(amirh): fix this once we have a way to create a Scenic shape from
+    // an SkPath.
+    frameRRect_ = SkRRect::MakeRect(path.getBounds());
+  }
+}
 
 void PhysicalShapeLayer::Preroll(PrerollContext* context,
                                  const SkMatrix& matrix) {
@@ -29,8 +50,13 @@ void PhysicalShapeLayer::Preroll(PrerollContext* context,
   Layer::AutoPrerollSaveLayerState save =
       Layer::AutoPrerollSaveLayerState::Create(context, UsesSaveLayer());
 
+  context->total_elevation += elevation_;
+  total_elevation_ = context->total_elevation;
+
   SkRect child_paint_bounds;
   PrerollChildren(context, matrix, &child_paint_bounds);
+
+  context->total_elevation -= elevation_;
 
   if (elevation_ == 0) {
     set_paint_bounds(path_.getBounds());
