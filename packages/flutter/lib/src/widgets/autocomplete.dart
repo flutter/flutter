@@ -10,7 +10,6 @@ import 'basic.dart';
 import 'editable_text.dart';
 import 'framework.dart';
 
-// TODO(justinmc): Autocomplete should make it easy to do asynchronous searches.
 /// A type for autocomplete search functions.
 ///
 /// [AutocompleteController] uses a search function to search through
@@ -414,7 +413,6 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
       children: <Widget>[
         widget.buildField(context),
         if (_selection == null)
-          // TODO(justinmc): Should this expanded be here?
           Expanded(
             child: widget.buildResults(
               context,
