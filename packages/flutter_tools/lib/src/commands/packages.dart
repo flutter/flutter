@@ -149,18 +149,20 @@ class PackagesGetCommand extends FlutterCommand {
         );
       }
       final YamlMap yamlMap = yamlNode as YamlMap;
-      final Object isSyntheticL10nPackage = yamlMap['synthetic-package'];
-      if (isSyntheticL10nPackage is! bool && isSyntheticL10nPackage != null) {
+      final Object value = yamlMap['synthetic-package'];
+
+      if (value is! bool && value != null) {
         throwToolExit(
           'Expected "synthetic-package" to have a bool value, '
-          'instead was "$isSyntheticL10nPackage"'
+          'instead was "$value"'
         );
       }
 
       // Generate gen_l10n synthetic package if synthetic-package: true or
       // synthetic-package is null, since the gen_l10n generates synthetic
       // packages by default.
-      if (isSyntheticL10nPackage as bool || isSyntheticL10nPackage == null) {
+      final bool isSyntheticL10nPackage = value as bool ?? true;
+      if (isSyntheticL10nPackage) {
         final Environment environment = Environment(
           artifacts: globals.artifacts,
           logger: globals.logger,
