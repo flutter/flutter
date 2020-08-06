@@ -26,7 +26,8 @@ class MatrixUtils {
     assert(transform != null);
     final Float64List values = transform.storage;
     // Values are stored in column-major order.
-    if (values[0] == 1.0 && // col 1
+    if (values[15] == 1.0 &&
+        values[0] == 1.0 && // col 1
         values[1] == 0.0 &&
         values[2] == 0.0 &&
         values[3] == 0.0 &&
@@ -37,9 +38,8 @@ class MatrixUtils {
         values[8] == 0.0 && // col 3
         values[9] == 0.0 &&
         values[10] == 1.0 &&
-        values[11] == 0.0 &&
-        values[14] == 0.0 && // bottom of col 4 (values 12 and 13 are the x and y offsets)
-        values[15] == 1.0) {
+        values[11] == 0.0 && // bottom of col 4 (values 12 and 13 are the x and y offsets)
+        values[14] == 0.0) {
       return Offset(values[12], values[13]);
     }
     return null;
@@ -84,7 +84,8 @@ class MatrixUtils {
     if (b == null)
       return isIdentity(a);
     assert(a != null && b != null);
-    return a.storage[0] == b.storage[0]
+    return a.storage[15] == b.storage[15]
+        && a.storage[0] == b.storage[0]
         && a.storage[1] == b.storage[1]
         && a.storage[2] == b.storage[2]
         && a.storage[3] == b.storage[3]
@@ -98,14 +99,14 @@ class MatrixUtils {
         && a.storage[11] == b.storage[11]
         && a.storage[12] == b.storage[12]
         && a.storage[13] == b.storage[13]
-        && a.storage[14] == b.storage[14]
-        && a.storage[15] == b.storage[15];
+        && a.storage[14] == b.storage[14];
   }
 
   /// Whether the given matrix is the identity matrix.
   static bool isIdentity(Matrix4 a) {
     assert(a != null);
-    return a.storage[0] == 1.0 // col 1
+    return a.storage[15] == 1.0
+        && a.storage[0] == 1.0 // col 1
         && a.storage[1] == 0.0
         && a.storage[2] == 0.0
         && a.storage[3] == 0.0
@@ -119,8 +120,7 @@ class MatrixUtils {
         && a.storage[11] == 0.0
         && a.storage[12] == 0.0 // col 4
         && a.storage[13] == 0.0
-        && a.storage[14] == 0.0
-        && a.storage[15] == 1.0;
+        && a.storage[14] == 0.0;
   }
 
   /// Applies the given matrix as a perspective transform to the given point.
@@ -161,9 +161,9 @@ class MatrixUtils {
   /// if it can.
   static Rect _safeTransformRect(Matrix4 transform, Rect rect) {
     final Float64List storage = transform.storage;
-    final bool isAffine = storage[3] == 0.0 &&
-        storage[7] == 0.0 &&
-        storage[15] == 1.0;
+    final bool isAffine = storage[15] == 1.0
+      && storage[3] == 0.0
+      && storage[7] == 0.0;
 
     _minMax ??= Float64List(4);
 
@@ -372,7 +372,7 @@ class MatrixUtils {
     final double hy = storage[5] * h;
     final double ry = storage[1] * x + storage[5] * y + storage[13];
 
-    if (storage[3] == 0.0 && storage[7] == 0.0 && storage[15] == 1.0) {
+    if (storage[15] == 1.0 && storage[3] == 0.0 && storage[7] == 0.0) {
       double left  = rx;
       double right = rx;
       if (wx < 0) {
