@@ -155,7 +155,9 @@ bool VulkanSurfaceProducer::Initialize(scenic::Session* scenic_session) {
 }
 
 void VulkanSurfaceProducer::OnSurfacesPresented(
-    std::vector<std::unique_ptr<SurfaceProducerSurface>> surfaces) {
+    std::vector<
+        std::unique_ptr<flutter::SceneUpdateContext::SurfaceProducerSurface>>
+        surfaces) {
   TRACE_EVENT0("flutter", "VulkanSurfaceProducer::OnSurfacesPresented");
 
   // Do a single flush for all canvases derived from the context.
@@ -195,12 +197,11 @@ void VulkanSurfaceProducer::OnSurfacesPresented(
 }
 
 bool VulkanSurfaceProducer::TransitionSurfacesToExternal(
-    const std::vector<std::unique_ptr<SurfaceProducerSurface>>& surfaces) {
+    const std::vector<
+        std::unique_ptr<flutter::SceneUpdateContext::SurfaceProducerSurface>>&
+        surfaces) {
   for (auto& surface : surfaces) {
     auto vk_surface = static_cast<VulkanSurface*>(surface.get());
-    if (!vk_surface) {
-      continue;
-    }
 
     vulkan::VulkanCommandBuffer* command_buffer =
         vk_surface->GetCommandBuffer(logical_device_->GetCommandPool());
@@ -258,15 +259,21 @@ bool VulkanSurfaceProducer::TransitionSurfacesToExternal(
   return true;
 }
 
-std::unique_ptr<SurfaceProducerSurface> VulkanSurfaceProducer::ProduceSurface(
-    const SkISize& size) {
+std::unique_ptr<flutter::SceneUpdateContext::SurfaceProducerSurface>
+VulkanSurfaceProducer::ProduceSurface(
+    const SkISize& size,
+    const flutter::LayerRasterCacheKey& layer_key,
+    std::unique_ptr<scenic::EntityNode> entity_node) {
   FML_DCHECK(valid_);
   last_produce_time_ = async::Now(async_get_default_dispatcher());
-  return surface_pool_->AcquireSurface(size);
+  auto surface = surface_pool_->AcquireSurface(size);
+  surface->SetRetainedInfo(layer_key, std::move(entity_node));
+  return surface;
 }
 
 void VulkanSurfaceProducer::SubmitSurface(
-    std::unique_ptr<SurfaceProducerSurface> surface) {
+    std::unique_ptr<flutter::SceneUpdateContext::SurfaceProducerSurface>
+        surface) {
   FML_DCHECK(valid_ && surface != nullptr);
   surface_pool_->SubmitSurface(std::move(surface));
 }

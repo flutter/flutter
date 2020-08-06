@@ -38,6 +38,7 @@ class OpacityLayer : public MergedContainerLayer {
  private:
   SkAlpha alpha_;
   SkPoint offset_;
+  SkRRect frameRRect_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(OpacityLayer);
 };

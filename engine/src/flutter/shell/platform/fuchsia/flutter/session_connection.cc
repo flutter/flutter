@@ -5,8 +5,8 @@
 #include "session_connection.h"
 
 #include "flutter/fml/make_copyable.h"
-#include "flutter/fml/trace_event.h"
-
+#include "lib/fidl/cpp/optional.h"
+#include "lib/ui/scenic/cpp/commands.h"
 #include "vsync_recorder.h"
 #include "vsync_waiter.h"
 
@@ -14,11 +14,23 @@ namespace flutter_runner {
 
 SessionConnection::SessionConnection(
     std::string debug_label,
+    fuchsia::ui::views::ViewToken view_token,
+    scenic::ViewRefPair view_ref_pair,
     fidl::InterfaceHandle<fuchsia::ui::scenic::Session> session,
     fml::closure session_error_callback,
     on_frame_presented_event on_frame_presented_callback,
     zx_handle_t vsync_event_handle)
-    : session_wrapper_(session.Bind(), nullptr),
+    : debug_label_(std::move(debug_label)),
+      session_wrapper_(session.Bind(), nullptr),
+      root_view_(&session_wrapper_,
+                 std::move(view_token),
+                 std::move(view_ref_pair.control_ref),
+                 std::move(view_ref_pair.view_ref),
+                 debug_label),
+      root_node_(&session_wrapper_),
+      surface_producer_(
+          std::make_unique<VulkanSurfaceProducer>(&session_wrapper_)),
+      scene_update_context_(&session_wrapper_, surface_producer_.get()),
       on_frame_presented_callback_(std::move(on_frame_presented_callback)),
       vsync_event_handle_(vsync_event_handle) {
   session_wrapper_.set_error_handler(
@@ -51,7 +63,11 @@ SessionConnection::SessionConnection(
       }  // callback
   );
 
-  session_wrapper_.SetDebugName(debug_label);
+  session_wrapper_.SetDebugName(debug_label_);
+
+  root_view_.AddChild(root_node_);
+  root_node_.SetEventMask(fuchsia::ui::gfx::kMetricsEventMask |
+                          fuchsia::ui::gfx::kSizeChangeHintEventMask);
 
   // Get information to finish initialization and only then allow Present()s.
   session_wrapper_.RequestPresentationTimes(
@@ -75,7 +91,8 @@ SessionConnection::SessionConnection(
 
 SessionConnection::~SessionConnection() = default;
 
-void SessionConnection::Present() {
+void SessionConnection::Present(
+    flutter::CompositorContext::ScopedFrame* frame) {
   TRACE_EVENT0("gfx", "SessionConnection::Present");
 
   TRACE_FLOW_BEGIN("gfx", "SessionConnection::PresentSession",
@@ -97,6 +114,21 @@ void SessionConnection::Present() {
     present_session_pending_ = true;
     ToggleSignal(vsync_event_handle_, false);
   }
+
+  if (frame) {
+    // Execute paint tasks and signal fences.
+    auto surfaces_to_submit = scene_update_context_.ExecutePaintTasks(*frame);
+
+    // Tell the surface producer that a present has occurred so it can perform
+    // book-keeping on buffer caches.
+    surface_producer_->OnSurfacesPresented(std::move(surfaces_to_submit));
+  }
+}
+
+void SessionConnection::OnSessionSizeChangeHint(float width_change_factor,
+                                                float height_change_factor) {
+  surface_producer_->OnSessionSizeChangeHint(width_change_factor,
+                                             height_change_factor);
 }
 
 fml::TimePoint SessionConnection::CalculateNextLatchPoint(
@@ -126,6 +158,17 @@ fml::TimePoint SessionConnection::CalculateNextLatchPoint(
   // We could not find a suitable latch point in the list given to us from
   // Scenic, so aim for the smallest safe value.
   return minimum_latch_point_to_target;
+}
+
+void SessionConnection::set_enable_wireframe(bool enable) {
+  session_wrapper_.Enqueue(
+      scenic::NewSetEnableDebugViewBoundsCmd(root_view_.id(), enable));
+}
+
+void SessionConnection::EnqueueClearOps() {
+  // We are going to be sending down a fresh node hierarchy every frame. So just
+  // enqueue a detach op on the imported root node.
+  session_wrapper_.Enqueue(scenic::NewDetachChildrenCmd(root_node_.id()));
 }
 
 void SessionConnection::PresentSession() {
@@ -189,6 +232,10 @@ void SessionConnection::PresentSession() {
         VsyncRecorder::GetInstance().UpdateNextPresentationInfo(
             std::move(info));
       });
+
+  // Prepare for the next frame. These ops won't be processed till the next
+  // present.
+  EnqueueClearOps();
 }
 
 void SessionConnection::ToggleSignal(zx_handle_t handle, bool set) {

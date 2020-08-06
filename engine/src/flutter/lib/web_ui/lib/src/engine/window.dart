@@ -146,6 +146,9 @@ class EngineWindow extends ui.Window {
   /// Overrides the value of [physicalSize] in tests.
   ui.Size? webOnlyDebugPhysicalSizeOverride;
 
+  @override
+  double get physicalDepth => double.maxFinite;
+
   /// Handles the browser history integration to allow users to use the back
   /// button, etc.
   final BrowserHistory _browserHistory = BrowserHistory();

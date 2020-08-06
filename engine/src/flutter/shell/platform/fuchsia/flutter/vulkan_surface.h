@@ -5,7 +5,6 @@
 #pragma once
 
 #include <lib/async/cpp/wait.h>
-#include <lib/ui/scenic/cpp/resources.h>
 #include <lib/zx/event.h>
 #include <lib/zx/vmo.h>
 
@@ -13,45 +12,16 @@
 #include <memory>
 
 #include "flutter/flow/raster_cache_key.h"
+#include "flutter/flow/scene_update_context.h"
 #include "flutter/fml/macros.h"
 #include "flutter/vulkan/vulkan_command_buffer.h"
 #include "flutter/vulkan/vulkan_handle.h"
 #include "flutter/vulkan/vulkan_proc_table.h"
 #include "flutter/vulkan/vulkan_provider.h"
+#include "lib/ui/scenic/cpp/resources.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
 namespace flutter_runner {
-
-class SurfaceProducerSurface {
- public:
-  virtual ~SurfaceProducerSurface() = default;
-
-  virtual size_t AdvanceAndGetAge() = 0;
-
-  virtual bool FlushSessionAcquireAndReleaseEvents() = 0;
-
-  virtual bool IsValid() const = 0;
-
-  virtual SkISize GetSize() const = 0;
-
-  virtual void SignalWritesFinished(
-      const std::function<void(void)>& on_writes_committed) = 0;
-
-  virtual scenic::Image* GetImage() = 0;
-
-  virtual sk_sp<SkSurface> GetSkiaSurface() const = 0;
-};
-
-class SurfaceProducer {
- public:
-  virtual ~SurfaceProducer() = default;
-
-  virtual std::unique_ptr<SurfaceProducerSurface> ProduceSurface(
-      const SkISize& size) = 0;
-
-  virtual void SubmitSurface(
-      std::unique_ptr<SurfaceProducerSurface> surface) = 0;
-};
 
 // A |VkImage| and its relevant metadata.
 struct VulkanImage {
@@ -74,7 +44,8 @@ bool CreateVulkanImage(vulkan::VulkanProvider& vulkan_provider,
                        const SkISize& size,
                        VulkanImage* out_vulkan_image);
 
-class VulkanSurface final : public SurfaceProducerSurface {
+class VulkanSurface final
+    : public flutter::SceneUpdateContext::SurfaceProducerSurface {
  public:
   VulkanSurface(vulkan::VulkanProvider& vulkan_provider,
                 sk_sp<GrDirectContext> context,
@@ -83,16 +54,16 @@ class VulkanSurface final : public SurfaceProducerSurface {
 
   ~VulkanSurface() override;
 
-  // |SurfaceProducerSurface|
+  // |flutter::SceneUpdateContext::SurfaceProducerSurface|
   size_t AdvanceAndGetAge() override;
 
-  // |SurfaceProducerSurface|
+  // |flutter::SceneUpdateContext::SurfaceProducerSurface|
   bool FlushSessionAcquireAndReleaseEvents() override;
 
-  // |SurfaceProducerSurface|
+  // |flutter::SceneUpdateContext::SurfaceProducerSurface|
   bool IsValid() const override;
 
-  // |SurfaceProducerSurface|
+  // |flutter::SceneUpdateContext::SurfaceProducerSurface|
   SkISize GetSize() const override;
 
   // Note: It is safe for the caller to collect the surface in the
@@ -100,10 +71,10 @@ class VulkanSurface final : public SurfaceProducerSurface {
   void SignalWritesFinished(
       const std::function<void(void)>& on_writes_committed) override;
 
-  // |SurfaceProducerSurface|
+  // |flutter::SceneUpdateContext::SurfaceProducerSurface|
   scenic::Image* GetImage() override;
 
-  // |SurfaceProducerSurface|
+  // |flutter::SceneUpdateContext::SurfaceProducerSurface|
   sk_sp<SkSurface> GetSkiaSurface() const override;
 
   const vulkan::VulkanHandle<VkImage>& GetVkImage() {
@@ -147,6 +118,41 @@ class VulkanSurface final : public SurfaceProducerSurface {
   // whether the swap was successful.  The |VulkanSurface| will become invalid
   // if the swap was not successful.
   bool BindToImage(sk_sp<GrDirectContext> context, VulkanImage vulkan_image);
+
+  // Flutter may retain a |VulkanSurface| for a |flutter::Layer| subtree to
+  // improve the performance. The |retained_key_| identifies which layer subtree
+  // this |VulkanSurface| is retained for. The key has two parts. One is the
+  // pointer to the root of that layer subtree: |retained_key_.id()|. Another is
+  // the transformation matrix: |retained_key_.matrix()|. We need the matrix
+  // part because a different matrix would invalidate the pixels (raster cache)
+  // in this |VulkanSurface|.
+  const flutter::LayerRasterCacheKey& GetRetainedKey() const {
+    return retained_key_;
+  }
+
+  // For better safety in retained rendering, Flutter uses a retained
+  // |EntityNode| associated with the retained surface instead of using the
+  // retained surface directly. Hence Flutter can't modify the surface during
+  // retained rendering. However, the node itself is modifiable to be able
+  // to adjust its position.
+  scenic::EntityNode* GetRetainedNode() {
+    used_in_retained_rendering_ = true;
+    return retained_node_.get();
+  }
+
+  // Check whether the retained surface (and its associated |EntityNode|) is
+  // used in the current frame or not. If unused, the |VulkanSurfacePool| will
+  // try to recycle the surface. This flag is reset after each frame.
+  bool IsUsedInRetainedRendering() const { return used_in_retained_rendering_; }
+  void ResetIsUsedInRetainedRendering() { used_in_retained_rendering_ = false; }
+
+  // Let this surface own the retained EntityNode associated with it (see
+  // |GetRetainedNode|), and set the retained key (see |GetRetainedKey|).
+  void SetRetainedInfo(const flutter::LayerRasterCacheKey& key,
+                       std::unique_ptr<scenic::EntityNode> node) {
+    retained_key_ = key;
+    retained_node_ = std::move(node);
+  }
 
  private:
   static constexpr int kSizeHistorySize = 4;
@@ -195,6 +201,11 @@ class VulkanSurface final : public SurfaceProducerSurface {
   int size_history_index_ = 0;
   size_t age_ = 0;
   bool valid_ = false;
+
+  flutter::LayerRasterCacheKey retained_key_ = {0, SkMatrix::Scale(1, 1)};
+  std::unique_ptr<scenic::EntityNode> retained_node_ = nullptr;
+
+  std::atomic<bool> used_in_retained_rendering_ = {false};
 
   FML_DISALLOW_COPY_AND_ASSIGN(VulkanSurface);
 };

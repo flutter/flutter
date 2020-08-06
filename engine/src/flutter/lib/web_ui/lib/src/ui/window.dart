@@ -455,6 +455,19 @@ abstract class Window {
   ///    observe when this value changes.
   Size get physicalSize;
 
+  /// The physical depth is the maximum elevation that the Window allows.
+  ///
+  /// Physical layers drawn at or above this elevation will have their elevation
+  /// clamped to this value. This can happen if the physical layer itself has
+  /// an elevation larger than available depth, or if some ancestor of the layer
+  /// causes it to have a cumulative elevation that is larger than the available
+  /// depth.
+  ///
+  /// The default value is [double.maxFinite], which is used for platforms that
+  /// do not specify a maximum elevation. This property is currently on expected
+  /// to be set to a non-default value on Fuchsia.
+  double get physicalDepth;
+
   /// The number of physical pixels on each side of the display rectangle into
   /// which the application can render, but over which the operating system
   /// will likely place system UI, such as the keyboard, that fully obscures

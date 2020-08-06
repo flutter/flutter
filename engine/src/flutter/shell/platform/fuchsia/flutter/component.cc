@@ -365,12 +365,6 @@ Application::Application(
   // Controls whether category "skia" trace events are enabled.
   settings_.trace_skia = true;
 
-  settings_.verbose_logging = true;
-
-  settings_.advisory_script_uri = debug_label_;
-
-  settings_.advisory_script_entrypoint = debug_label_;
-
   settings_.icu_data_path = "";
 
   settings_.assets_dir = application_assets_directory_.get();
