@@ -13,6 +13,7 @@ import 'package:flutter/gestures.dart';
 
 import 'feedback.dart';
 import 'text_selection.dart';
+import 'text_selection_theme.dart';
 import 'theme.dart';
 
 /// An eyeballed value that moves the cursor slightly left of where it is
@@ -584,7 +585,8 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
       'inherit false style must supply fontSize and textBaseline',
     );
 
-    final ThemeData themeData = Theme.of(context);
+    final ThemeData theme = Theme.of(context);
+    final TextSelectionThemeData selectionTheme = TextSelectionTheme.of(context);
     final FocusNode focusNode = _effectiveFocusNode;
 
     TextSelectionControls textSelectionControls;
@@ -592,16 +594,23 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
     bool cursorOpacityAnimates;
     Offset cursorOffset;
     Color cursorColor = widget.cursorColor;
+    Color selectionColor;
     Radius cursorRadius = widget.cursorRadius;
 
-    switch (themeData.platform) {
+    switch (theme.platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         forcePressEnabled = true;
         textSelectionControls = cupertinoTextSelectionControls;
         paintCursorAboveText = true;
         cursorOpacityAnimates = true;
-        cursorColor ??= CupertinoTheme.of(context).primaryColor;
+        if (theme.useTextSelectionTheme) {
+          cursorColor ??= selectionTheme.cursorColor ?? CupertinoTheme.of(context).primaryColor;
+          selectionColor = selectionTheme.selectionColor ?? CupertinoTheme.of(context).primaryColor;
+        } else {
+          cursorColor ??= CupertinoTheme.of(context).primaryColor;
+          selectionColor = theme.textSelectionColor;
+        }
         cursorRadius ??= const Radius.circular(2.0);
         cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
         break;
@@ -614,7 +623,13 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
         textSelectionControls = materialTextSelectionControls;
         paintCursorAboveText = false;
         cursorOpacityAnimates = false;
-        cursorColor ??= themeData.cursorColor;
+        if (theme.useTextSelectionTheme) {
+          cursorColor ??= selectionTheme.cursorColor ?? theme.colorScheme.primary;
+          selectionColor = selectionTheme.selectionColor ?? theme.colorScheme.primary;
+        } else {
+          cursorColor ??= theme.cursorColor;
+          selectionColor = theme.textSelectionColor;
+        }
         break;
     }
 
@@ -644,7 +659,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
         toolbarOptions: widget.toolbarOptions,
         minLines: widget.minLines,
         maxLines: widget.maxLines ?? defaultTextStyle.maxLines,
-        selectionColor: themeData.textSelectionColor,
+        selectionColor: selectionColor,
         selectionControls: widget.selectionEnabled ? textSelectionControls : null,
         onSelectionChanged: _handleSelectionChanged,
         onSelectionHandleTapped: _handleSelectionHandleTapped,

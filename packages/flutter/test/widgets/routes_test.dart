@@ -682,7 +682,7 @@ void main() {
           onGenerateRoute: (RouteSettings settings) {
             return MaterialPageRoute<dynamic>(
               builder: (BuildContext context) {
-                return RaisedButton(
+                return ElevatedButton(
                   onPressed: () {
                     Navigator.of(context).push<void>(
                       PageRouteBuilder<void>(
@@ -702,7 +702,7 @@ void main() {
       );
 
       // Open the new route.
-      await tester.tap(find.byType(RaisedButton));
+      await tester.tap(find.byType(ElevatedButton));
       await tester.pumpAndSettle();
       expect(find.text('Open page'), findsNothing);
       expect(find.text('Page Two'), findsOneWidget);
@@ -731,7 +731,7 @@ void main() {
         onGenerateRoute: (RouteSettings settings) {
           return MaterialPageRoute<dynamic>(
             builder: (BuildContext context) {
-              return RaisedButton(
+              return ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).push<void>(
                     PageRouteBuilder<void>(
@@ -752,7 +752,7 @@ void main() {
       );
 
       // Open the new route.
-      await tester.tap(find.byType(RaisedButton));
+      await tester.tap(find.byType(ElevatedButton));
       await tester.pumpAndSettle();
       expect(find.text('Open page'), findsNothing);
       expect(find.text('Page Two'), findsOneWidget);

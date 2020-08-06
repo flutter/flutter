@@ -23,6 +23,7 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
+import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
 
 import '../../src/common.dart';
@@ -1964,6 +1965,21 @@ void main() {
     expect(logger.statusText, contains('The `pubspec.yaml` under the project directory must be updated to support'));
   }, overrides: <Type, Generator> {
     Logger: () => logger,
+  });
+
+  testUsingContext('newly created plugin has min flutter sdk version as 1.20.0', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+    final String rawPubspec = await projectDir.childFile('pubspec.yaml').readAsString();
+    final Pubspec pubspec = Pubspec.parse(rawPubspec);
+    final Map<String, VersionConstraint> env = pubspec.environment;
+    expect(env['flutter'].allows(Version(1, 20, 0)), true);
+    expect(env['flutter'].allows(Version(1, 19, 0)), false);
   });
 
 }

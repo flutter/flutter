@@ -679,7 +679,7 @@ class FlutterErrorDetails with Diagnosticable {
         }
       }
       properties.add(ErrorSpacer());
-      properties.add(DiagnosticsStackTrace('When the exception was thrown, this was the stack', stack!, stackFilter: stackFilter));
+      properties.add(DiagnosticsStackTrace('When the exception was thrown, this was the stack', stack, stackFilter: stackFilter));
     }
     if (informationCollector != null) {
       properties.add(ErrorSpacer());
