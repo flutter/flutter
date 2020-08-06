@@ -656,7 +656,7 @@ class Rect {
   /// Constructs a rectangle from its center point, width, and height.
   ///
   /// The `center` argument is assumed to be an offset from the origin.
-  Rect.fromCenter({ required Offset center/*!*/, required double width, required double height }) : this.fromLTRB(
+  Rect.fromCenter({ required Offset center, required double width, required double height }) : this.fromLTRB(
     center.dx - width / 2,
     center.dy - height / 2,
     center.dx + width / 2,
