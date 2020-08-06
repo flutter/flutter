@@ -31,16 +31,16 @@ class MockCanvas extends Fake implements Canvas {
     capturedSy = sy;
   }
 
-  final List<CanvasCall> invocations = <CanvasCall>[];
+  final List<CanvasCall> invocations = <RecordedCanvasCall >[];
 
   @override
   void rotate(double radians) {
-    invocations.add(Rotate(radians));
+    invocations.add(RecordedRotate(radians));
   }
 
   @override
   void translate(double dx, double dy) {
-    invocations.add(Translate(dx, dy));
+    invocations.add(RecordedTranslate(dx, dy));
   }
 }
 
