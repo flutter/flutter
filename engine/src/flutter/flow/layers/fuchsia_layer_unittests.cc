@@ -238,17 +238,57 @@ class MockSession : public fuchsia::ui::scenic::testing::Session_TestBase {
   fuchsia::ui::scenic::SessionListenerPtr listener_;
 };
 
-class MockSessionWrapper : public flutter::SessionWrapper {
+class MockSurfaceProducerSurface
+    : public SceneUpdateContext::SurfaceProducerSurface {
  public:
-  MockSessionWrapper(fuchsia::ui::scenic::SessionPtr session_ptr)
-      : session_(std::move(session_ptr)) {}
-  ~MockSessionWrapper() override = default;
+  MockSurfaceProducerSurface(scenic::Session* session, const SkISize& size)
+      : image_(session, 0, 0, {}), size_(size) {}
 
-  scenic::Session* get() override { return &session_; }
-  void Present() override { session_.Flush(); }
+  size_t AdvanceAndGetAge() override { return 0; }
+
+  bool FlushSessionAcquireAndReleaseEvents() override { return false; }
+
+  bool IsValid() const override { return false; }
+
+  SkISize GetSize() const override { return size_; }
+
+  void SignalWritesFinished(
+      const std::function<void(void)>& on_writes_committed) override {}
+
+  scenic::Image* GetImage() override { return &image_; };
+
+  sk_sp<SkSurface> GetSkiaSurface() const override { return nullptr; };
 
  private:
-  scenic::Session session_;
+  scenic::Image image_;
+  SkISize size_;
+};
+
+class MockSurfaceProducer : public SceneUpdateContext::SurfaceProducer {
+ public:
+  MockSurfaceProducer(scenic::Session* session) : session_(session) {}
+  std::unique_ptr<SceneUpdateContext::SurfaceProducerSurface> ProduceSurface(
+      const SkISize& size,
+      const LayerRasterCacheKey& layer_key,
+      std::unique_ptr<scenic::EntityNode> entity_node) override {
+    return std::make_unique<MockSurfaceProducerSurface>(session_, size);
+  }
+
+  // Query a retained entity node (owned by a retained surface) for retained
+  // rendering.
+  bool HasRetainedNode(const LayerRasterCacheKey& key) const override {
+    return false;
+  }
+
+  scenic::EntityNode* GetRetainedNode(const LayerRasterCacheKey& key) override {
+    return nullptr;
+  }
+
+  void SubmitSurface(std::unique_ptr<SceneUpdateContext::SurfaceProducerSurface>
+                         surface) override {}
+
+ private:
+  scenic::Session* session_;
 };
 
 struct TestContext {
@@ -257,11 +297,12 @@ struct TestContext {
   fml::RefPtr<fml::TaskRunner> task_runner;
 
   // Session.
-  fidl::InterfaceRequest<fuchsia::ui::scenic::SessionListener> listener_request;
   MockSession mock_session;
-  std::unique_ptr<MockSessionWrapper> mock_session_wrapper;
+  fidl::InterfaceRequest<fuchsia::ui::scenic::SessionListener> listener_request;
+  std::unique_ptr<scenic::Session> session;
 
   // SceneUpdateContext.
+  std::unique_ptr<MockSurfaceProducer> mock_surface_producer;
   std::unique_ptr<SceneUpdateContext> scene_update_context;
 
   // PrerollContext.
@@ -283,13 +324,15 @@ std::unique_ptr<TestContext> InitTest() {
   fuchsia::ui::scenic::SessionListenerPtr listener;
   context->listener_request = listener.NewRequest();
   context->mock_session.Bind(session_ptr.NewRequest(), std::move(listener));
-  context->mock_session_wrapper =
-      std::make_unique<MockSessionWrapper>(std::move(session_ptr));
+  context->session = std::make_unique<scenic::Session>(std::move(session_ptr));
 
   // Init SceneUpdateContext.
+  context->mock_surface_producer =
+      std::make_unique<MockSurfaceProducer>(context->session.get());
   context->scene_update_context = std::make_unique<SceneUpdateContext>(
-      "fuchsia_layer_unittest", fuchsia::ui::views::ViewToken(),
-      scenic::ViewRefPair::New(), *(context->mock_session_wrapper));
+      context->session.get(), context->mock_surface_producer.get());
+  context->scene_update_context->set_metrics(
+      fidl::MakeOptional(fuchsia::ui::gfx::Metrics{1.f, 1.f, 1.f}));
 
   // Init PrerollContext.
   context->preroll_context = std::unique_ptr<PrerollContext>(new PrerollContext{
@@ -305,6 +348,7 @@ std::unique_ptr<TestContext> InitTest() {
       context->unused_texture_registry,  // texture registry (not
                                          // supported)
       false,                             // checkerboard_offscreen_layers
+      100.f,                             // maximum depth allowed for rendering
       1.f                                // ratio between logical and physical
   });
 
@@ -558,7 +602,7 @@ TEST_F(FuchsiaLayerTest, DISABLED_PhysicalShapeLayersAndChildSceneLayers) {
   // against the list above.
   root->UpdateScene(*(test_context->scene_update_context));
 
-  test_context->mock_session_wrapper->Present();
+  test_context->session->Flush();
 
   // Run loop until idle, so that the Session receives and processes
   // its method calls.
@@ -740,7 +784,7 @@ TEST_F(FuchsiaLayerTest, DISABLED_OpacityAndTransformLayer) {
   // commands against the list above.
   root->UpdateScene(*(test_context->scene_update_context));
 
-  test_context->mock_session_wrapper->Present();
+  test_context->session->Flush();
 
   // Run loop until idle, so that the Session receives and processes
   // its method calls.

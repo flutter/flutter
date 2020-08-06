@@ -4,7 +4,6 @@
 
 #include "flutter/flow/scene_update_context.h"
 
-#include <lib/ui/scenic/cpp/commands.h>
 #include <lib/ui/scenic/cpp/view_token_pair.h>
 
 #include "flutter/flow/layers/layer.h"
@@ -14,10 +13,10 @@
 #include "include/core/SkColor.h"
 
 namespace flutter {
-namespace {
 
-void SetEntityNodeClipPlanes(scenic::EntityNode& entity_node,
-                             const SkRect& bounds) {
+// Helper function to generate clip planes for a scenic::EntityNode.
+static void SetEntityNodeClipPlanes(scenic::EntityNode& entity_node,
+                                    const SkRect& bounds) {
   const float top = bounds.top();
   const float bottom = bounds.bottom();
   const float left = bounds.left();
@@ -54,69 +53,20 @@ void SetEntityNodeClipPlanes(scenic::EntityNode& entity_node,
   entity_node.SetClipPlanes(std::move(clip_planes));
 }
 
-void SetMaterialColor(scenic::Material& material,
-                      SkColor color,
-                      SkAlpha opacity) {
-  const SkAlpha color_alpha = static_cast<SkAlpha>(
-      ((float)SkColorGetA(color) * (float)opacity) / 255.0f);
-  material.SetColor(SkColorGetR(color), SkColorGetG(color), SkColorGetB(color),
-                    color_alpha);
+SceneUpdateContext::SceneUpdateContext(scenic::Session* session,
+                                       SurfaceProducer* surface_producer)
+    : session_(session), surface_producer_(surface_producer) {
+  FML_DCHECK(surface_producer_ != nullptr);
 }
 
-}  // namespace
-
-SceneUpdateContext::SceneUpdateContext(std::string debug_label,
-                                       fuchsia::ui::views::ViewToken view_token,
-                                       scenic::ViewRefPair view_ref_pair,
-                                       SessionWrapper& session)
-    : session_(session),
-      root_view_(session_.get(),
-                 std::move(view_token),
-                 std::move(view_ref_pair.control_ref),
-                 std::move(view_ref_pair.view_ref),
-                 debug_label),
-      root_node_(session_.get()) {
-  root_view_.AddChild(root_node_);
-  root_node_.SetEventMask(fuchsia::ui::gfx::kMetricsEventMask);
-
-  session_.Present();
-}
-
-std::vector<SceneUpdateContext::PaintTask> SceneUpdateContext::GetPaintTasks() {
-  std::vector<PaintTask> frame_paint_tasks = std::move(paint_tasks_);
-
-  paint_tasks_.clear();
-
-  return frame_paint_tasks;
-}
-
-void SceneUpdateContext::EnableWireframe(bool enable) {
-  session_.get()->Enqueue(
-      scenic::NewSetEnableDebugViewBoundsCmd(root_view_.id(), enable));
-}
-
-void SceneUpdateContext::Reset() {
-  paint_tasks_.clear();
-  top_entity_ = nullptr;
-  top_scale_x_ = 1.f;
-  top_scale_y_ = 1.f;
-  top_elevation_ = 0.f;
-  next_elevation_ = 0.f;
-  alpha_ = 1.f;
-
-  // We are going to be sending down a fresh node hierarchy every frame. So just
-  // enqueue a detach op on the imported root node.
-  session_.get()->Enqueue(scenic::NewDetachChildrenCmd(root_node_.id()));
-}
-
-void SceneUpdateContext::CreateFrame(scenic::EntityNode& entity_node,
+void SceneUpdateContext::CreateFrame(scenic::EntityNode entity_node,
                                      const SkRRect& rrect,
                                      SkColor color,
                                      SkAlpha opacity,
                                      const SkRect& paint_bounds,
-                                     std::vector<Layer*> paint_layers) {
-  if (rrect.isEmpty())
-    return;
+                                     std::vector<Layer*> paint_layers,
+                                     Layer* layer) {
+  FML_DCHECK(!rrect.isEmpty());
 
   // Frames always clip their children.
   SkRect shape_bounds = rrect.getBounds();
@@ -124,8 +74,11 @@ void SceneUpdateContext::CreateFrame(scenic::EntityNode& entity_node,
 
   // and possibly for its texture.
   // TODO(SCN-137): Need to be able to express the radii as vectors.
-  scenic::ShapeNode shape_node(session_.get());
-  scenic::Rectangle shape(session_.get(), rrect.width(), rrect.height());
+  scenic::ShapeNode shape_node(session());
+  scenic::Rectangle shape(session_,       // session
+                          rrect.width(),  // width
+                          rrect.height()  // height
+  );
   shape_node.SetShape(shape);
   shape_node.SetTranslation(shape_bounds.width() * 0.5f + shape_bounds.left(),
                             shape_bounds.height() * 0.5f + shape_bounds.top(),
@@ -135,49 +88,155 @@ void SceneUpdateContext::CreateFrame(scenic::EntityNode& entity_node,
   if (paint_bounds.isEmpty() || !paint_bounds.intersects(shape_bounds))
     paint_layers.clear();
 
-  scenic::Material material(session_.get());
+  scenic::Material material(session());
   shape_node.SetMaterial(material);
   entity_node.AddChild(shape_node);
 
   // Check whether a solid color will suffice.
-  if (paint_layers.empty() || shape_bounds.isEmpty()) {
+  if (paint_layers.empty()) {
     SetMaterialColor(material, color, opacity);
   } else {
+    // Apply current metrics and transformation scale factors.
+    const float scale_x = ScaleX();
+    const float scale_y = ScaleY();
+
+    // Apply a texture to the whole shape.
+    SetMaterialTextureAndColor(material, color, opacity, scale_x, scale_y,
+                               shape_bounds, std::move(paint_layers), layer,
+                               std::move(entity_node));
+  }
+}
+
+void SceneUpdateContext::SetMaterialTextureAndColor(
+    scenic::Material& material,
+    SkColor color,
+    SkAlpha opacity,
+    SkScalar scale_x,
+    SkScalar scale_y,
+    const SkRect& paint_bounds,
+    std::vector<Layer*> paint_layers,
+    Layer* layer,
+    scenic::EntityNode entity_node) {
+  scenic::Image* image = GenerateImageIfNeeded(
+      color, scale_x, scale_y, paint_bounds, std::move(paint_layers), layer,
+      std::move(entity_node));
+
+  if (image != nullptr) {
     // The final shape's color is material_color * texture_color.  The passed in
     // material color was already used as a background when generating the
     // texture, so set the model color to |SK_ColorWHITE| in order to allow
     // using the texture's color unmodified.
     SetMaterialColor(material, SK_ColorWHITE, opacity);
-
-    // Enqueue a paint task for these layers, to apply a texture to the whole
-    // shape.
-    paint_tasks_.emplace_back(PaintTask{.paint_bounds = paint_bounds,
-                                        .scale_x = top_scale_x_,
-                                        .scale_y = top_scale_y_,
-                                        .background_color = color,
-                                        .material = std::move(material),
-                                        .layers = std::move(paint_layers)});
+    material.SetTexture(*image);
+  } else {
+    // No texture was needed, so apply a solid color to the whole shape.
+    SetMaterialColor(material, color, opacity);
   }
 }
 
-void SceneUpdateContext::UpdateView(int64_t view_id,
-                                    const SkPoint& offset,
-                                    const SkSize& size,
-                                    std::optional<bool> override_hit_testable) {
+void SceneUpdateContext::SetMaterialColor(scenic::Material& material,
+                                          SkColor color,
+                                          SkAlpha opacity) {
+  const SkAlpha color_alpha = static_cast<SkAlpha>(
+      ((float)SkColorGetA(color) * (float)opacity) / 255.0f);
+  material.SetColor(SkColorGetR(color), SkColorGetG(color), SkColorGetB(color),
+                    color_alpha);
+}
+
+scenic::Image* SceneUpdateContext::GenerateImageIfNeeded(
+    SkColor color,
+    SkScalar scale_x,
+    SkScalar scale_y,
+    const SkRect& paint_bounds,
+    std::vector<Layer*> paint_layers,
+    Layer* layer,
+    scenic::EntityNode entity_node) {
+  // Bail if there's nothing to paint.
+  if (paint_layers.empty())
+    return nullptr;
+
+  // Bail if the physical bounds are empty after rounding.
+  SkISize physical_size = SkISize::Make(paint_bounds.width() * scale_x,
+                                        paint_bounds.height() * scale_y);
+  if (physical_size.isEmpty())
+    return nullptr;
+
+  // Acquire a surface from the surface producer and register the paint tasks.
+  std::unique_ptr<SurfaceProducerSurface> surface =
+      surface_producer_->ProduceSurface(
+          physical_size,
+          LayerRasterCacheKey(
+              // Root frame has a nullptr layer
+              layer ? layer->unique_id() : 0, Matrix()),
+          std::make_unique<scenic::EntityNode>(std::move(entity_node)));
+
+  if (!surface) {
+    FML_LOG(ERROR) << "Could not acquire a surface from the surface producer "
+                      "of size: "
+                   << physical_size.width() << "x" << physical_size.height();
+    return nullptr;
+  }
+
+  auto image = surface->GetImage();
+
+  // Enqueue the paint task.
+  paint_tasks_.push_back({.surface = std::move(surface),
+                          .left = paint_bounds.left(),
+                          .top = paint_bounds.top(),
+                          .scale_x = scale_x,
+                          .scale_y = scale_y,
+                          .background_color = color,
+                          .layers = std::move(paint_layers)});
+  return image;
+}
+
+std::vector<
+    std::unique_ptr<flutter::SceneUpdateContext::SurfaceProducerSurface>>
+SceneUpdateContext::ExecutePaintTasks(CompositorContext::ScopedFrame& frame) {
+  TRACE_EVENT0("flutter", "SceneUpdateContext::ExecutePaintTasks");
+  std::vector<std::unique_ptr<SurfaceProducerSurface>> surfaces_to_submit;
+  for (auto& task : paint_tasks_) {
+    FML_DCHECK(task.surface);
+    SkCanvas* canvas = task.surface->GetSkiaSurface()->getCanvas();
+    Layer::PaintContext context = {canvas,
+                                   canvas,
+                                   frame.gr_context(),
+                                   nullptr,
+                                   frame.context().raster_time(),
+                                   frame.context().ui_time(),
+                                   frame.context().texture_registry(),
+                                   &frame.context().raster_cache(),
+                                   false,
+                                   frame_physical_depth_,
+                                   frame_device_pixel_ratio_};
+    canvas->restoreToCount(1);
+    canvas->save();
+    canvas->clear(task.background_color);
+    canvas->scale(task.scale_x, task.scale_y);
+    canvas->translate(-task.left, -task.top);
+    for (Layer* layer : task.layers) {
+      layer->Paint(context);
+    }
+    surfaces_to_submit.emplace_back(std::move(task.surface));
+  }
+  paint_tasks_.clear();
+  alpha_ = 1.f;
+  topmost_global_scenic_elevation_ = kScenicZElevationBetweenLayers;
+  scenic_elevation_ = 0.f;
+  return surfaces_to_submit;
+}
+
+void SceneUpdateContext::UpdateScene(int64_t view_id,
+                                     const SkPoint& offset,
+                                     const SkSize& size) {
   auto* view_holder = ViewHolder::FromId(view_id);
   FML_DCHECK(view_holder);
 
-  if (size.width() > 0.f && size.height() > 0.f) {
-    view_holder->SetProperties(size.width(), size.height(), 0, 0, 0, 0,
-                               view_holder->focusable());
-  }
-
-  bool hit_testable = override_hit_testable.has_value()
-                          ? *override_hit_testable
-                          : view_holder->hit_testable();
-  view_holder->UpdateScene(session_.get(), top_entity_->embedder_node(), offset,
-                           size, SkScalarRoundToInt(alphaf() * 255),
-                           hit_testable);
+  view_holder->SetProperties(size.width(), size.height(), 0, 0, 0, 0,
+                             view_holder->focusable());
+  view_holder->UpdateScene(*this, offset, size,
+                           SkScalarRoundToInt(alphaf() * 255),
+                           view_holder->hit_testable());
 }
 
 void SceneUpdateContext::CreateView(int64_t view_id,
@@ -201,17 +260,13 @@ void SceneUpdateContext::DestroyView(int64_t view_id) {
 SceneUpdateContext::Entity::Entity(SceneUpdateContext& context)
     : context_(context),
       previous_entity_(context.top_entity_),
-      entity_node_(context.session_.get()) {
+      entity_node_(context.session()) {
+  if (previous_entity_)
+    previous_entity_->embedder_node().AddChild(entity_node_);
   context.top_entity_ = this;
 }
 
 SceneUpdateContext::Entity::~Entity() {
-  if (previous_entity_) {
-    previous_entity_->embedder_node().AddChild(entity_node_);
-  } else {
-    context_.root_node_.AddChild(entity_node_);
-  }
-
   FML_DCHECK(context_.top_entity_ == this);
   context_.top_entity_ = previous_entity_;
 }
@@ -274,20 +329,18 @@ SceneUpdateContext::Frame::Frame(SceneUpdateContext& context,
                                  const SkRRect& rrect,
                                  SkColor color,
                                  SkAlpha opacity,
-                                 std::string label)
+                                 std::string label,
+                                 float z_translation,
+                                 Layer* layer)
     : Entity(context),
-      previous_elevation_(context.top_elevation_),
       rrect_(rrect),
       color_(color),
       opacity_(opacity),
-      opacity_node_(context.session_.get()),
-      paint_bounds_(SkRect::MakeEmpty()) {
+      opacity_node_(context.session()),
+      paint_bounds_(SkRect::MakeEmpty()),
+      layer_(layer) {
   entity_node().SetLabel(label);
-  entity_node().SetTranslation(0.f, 0.f,
-                               context.next_elevation_ - previous_elevation_);
-  context.top_elevation_ += kScenicZElevationBetweenLayers;
-  context.next_elevation_ += kScenicZElevationBetweenLayers;
-
+  entity_node().SetTranslation(0.f, 0.f, z_translation);
   entity_node().AddChild(opacity_node_);
   // Scenic currently lacks an API to enable rendering of alpha channel; alpha
   // channels are only rendered if there is a OpacityNode higher in the tree
@@ -297,11 +350,20 @@ SceneUpdateContext::Frame::Frame(SceneUpdateContext& context,
 }
 
 SceneUpdateContext::Frame::~Frame() {
-  // Add a part which represents the frame's geometry for clipping purposes
-  context().CreateFrame(entity_node(), rrect_, color_, opacity_, paint_bounds_,
-                        std::move(paint_layers_));
+  // We don't need a shape if the frame is zero size.
+  if (rrect_.isEmpty())
+    return;
 
-  context().top_elevation_ = previous_elevation_;
+  // isEmpty should account for this, but we are adding these experimental
+  // checks to validate if this is the root cause for b/144933519.
+  if (std::isnan(rrect_.width()) || std::isnan(rrect_.height())) {
+    FML_LOG(ERROR) << "Invalid RoundedRectangle";
+    return;
+  }
+
+  // Add a part which represents the frame's geometry for clipping purposes
+  context().CreateFrame(std::move(entity_node()), rrect_, color_, opacity_,
+                        paint_bounds_, std::move(paint_layers_), layer_);
 }
 
 void SceneUpdateContext::Frame::AddPaintLayer(Layer* layer) {
