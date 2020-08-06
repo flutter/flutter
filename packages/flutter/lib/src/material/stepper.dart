@@ -428,7 +428,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
               onPressed: widget.onStepContinue,
               style: ButtonStyle(
                 foregroundColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-                  return states.contains(MaterialState.disabled) ? null : (_isDark() ? colorScheme.onSurface : colorScheme.primary);
+                  return states.contains(MaterialState.disabled) ? null : (_isDark() ? colorScheme.onSurface : colorScheme.onPrimary);
                 }),
                 backgroundColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
                   return _isDark() || states.contains(MaterialState.disabled) ? null : colorScheme.primary;
