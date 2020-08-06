@@ -38,7 +38,7 @@ typedef AutocompleteFieldBuilder = Widget Function(
 /// Can also be used in a stand-alone manner to implement autocomplete behavior
 /// in a fully custom UI.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=freeform}
 /// This example shows how to build an autocomplete widget with your own UI
 /// using AutocompleteController. Most typical use cases would instead pass the
 /// AutocompleteController directly to [Autocomplete] or
@@ -225,6 +225,84 @@ class AutocompleteController<T> {
 ///       );
 ///     },
 ///   );
+/// }
+/// ```
+///
+/// {@end-tool}
+/// {@tool dartpad --template=freeform}
+/// This example is similar to the previous example, but it uses a custom T data
+/// type instead of directly using String.
+///
+/// ```dart imports
+/// import 'package:flutter/widgets.dart';
+/// import 'package:flutter/material.dart';
+/// ```
+///
+/// ```dart
+/// class User {
+///   const User({
+///     this.email,
+///     this.name,
+///   });
+///
+///   final String email;
+///   final String name;
+///
+///   // When using a default search function, the query will be matched
+///   // directly with the output of this toString method. In this case,
+///   // including both the email and name allows the user to search by both.
+///   // If you wanted even more advanced search logic, you could pass a custom
+///   // search function into AutocompleteController.
+///   @override
+///   String toString() {
+///     return '$name, $email';
+///   }
+/// }
+///
+/// class AutocompleteCoreExample extends StatelessWidget {
+///   AutocompleteCoreExample({Key key}) : super(key: key);
+///   final AutocompleteController<User> _autocompleteController = AutocompleteController<User>(
+///     options: <User>[
+///       User(name: 'Alice', email: 'alice@example.com'),
+///       User(name: 'Bob', email: 'bob@example.com'),
+///       User(name: 'Charlie', email: 'charlie123@gmail.com'),
+///     ],
+///   );
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Material(
+///       home: Scaffold(
+///         appBar: AppBar(
+///           title: Text('AutocompleteCore Example'),
+///         ),
+///         body: Center(
+///           child: AutocompleteCore<User>(
+///             autocompleteController: _autocompleteController,
+///             buildField: (BuildContext context, TextEditingController textEditingController) {
+///               return TextFormField(
+///                 controller: textEditingController,
+///               );
+///             },
+///             buildResults: (BuildContext context, List<User> results, OnSelectedAutocomplete<User> onSelected) {
+///               return ListView(
+///                 children: results.map((User result) => GestureDetector(
+///                   onTap: () {
+///                     onSelected(result);
+///                   },
+///                   child: ListTile(
+///                     // Despite allowing search on both name and email, here
+///                     // only name is displayed in the results.
+///                     title: Text(result.name),
+///                   ),
+///                 )).toList(),
+///               );
+///             },
+///           ),
+///         ),
+///       ),
+///     );
+///   }
 /// }
 /// ```
 /// {@end-tool}
