@@ -72,13 +72,13 @@ class TargetModel {
 
   const TargetModel._(this._value);
 
-  /// The flutter patched dart SDK.
+  /// The Flutter patched Dart SDK.
   static const TargetModel flutter = TargetModel._('flutter');
 
-  /// The fuchsia patched SDK.
+  /// The Fuchsia patched SDK.
   static const TargetModel flutterRunner = TargetModel._('flutter_runner');
 
-  /// The Dart vm.
+  /// The Dart VM.
   static const TargetModel vm = TargetModel._('vm');
 
   /// The development compiler for JavaScript.
