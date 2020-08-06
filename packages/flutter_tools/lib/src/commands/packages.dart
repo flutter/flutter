@@ -3,9 +3,16 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
+
+import 'package:yaml/yaml.dart';
 
 import '../base/common.dart';
 import '../base/os.dart';
+import '../build_info.dart';
+import '../build_system/build_system.dart';
+import '../build_system/targets/localizations.dart';
+import '../cache.dart';
 import '../dart/pub.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -126,6 +133,57 @@ class PackagesGetCommand extends FlutterCommand {
 
     await _runPubGet(target, rootProject);
     await rootProject.ensureReadyForPlatformSpecificTooling(checkProjects: true);
+
+    final File l10nYamlFile = rootProject.directory.childFile('l10n.yaml');
+    // If pubspec.yaml has generate:true and if l10n.yaml exists in the
+    // root project directory, check to see if a synthetic package should
+    // be generated for gen_l10n.
+    if (
+      rootProject.manifest.generateSyntheticPackage &&
+      l10nYamlFile.existsSync()
+    ) {
+      final YamlNode yamlNode = loadYamlNode(l10nYamlFile.readAsStringSync());
+      if (yamlNode is! YamlMap) {
+        throwToolExit(
+          'Expected ${l10nYamlFile.path} to contain a map, instead was $yamlNode'
+        );
+      }
+      final YamlMap yamlMap = yamlNode as YamlMap;
+      final Object isSyntheticL10nPackage = yamlMap['synthetic-package'];
+      if (isSyntheticL10nPackage is! bool) {
+        throwToolExit(
+          'Expected "synthetic-package" to have a bool value, '
+          'instead was "$isSyntheticL10nPackage"'
+        );
+      }
+
+      // Generate gen_l10n synthetic package if synthetic-package: true or
+      // synthetic-package is null, since the gen_l10n generates synthetic
+      // packages by default.
+      if (isSyntheticL10nPackage as bool || isSyntheticL10nPackage == null) {
+        final Environment environment = Environment(
+          artifacts: globals.artifacts,
+          logger: globals.logger,
+          cacheDir: globals.cache.getRoot(),
+          engineVersion: globals.flutterVersion.engineRevision,
+          fileSystem: globals.fs,
+          flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+          outputDir: globals.fs.directory(getBuildDirectory()),
+          processManager: globals.processManager,
+          projectDir: globals.fs.currentDirectory,
+        );
+        final BuildResult result = await globals.buildSystem.build(
+          const GenerateLocalizationsTarget(),
+          environment,
+        );
+        if (result.hasException) {
+          throwToolExit(
+            'Generating synthetic localizations package has failed. '
+            '${result.exceptions}'
+          );
+        }
+      }
+    }
 
     // Get/upgrade packages in example app as well
     if (rootProject.hasExampleApp) {
