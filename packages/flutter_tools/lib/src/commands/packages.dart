@@ -172,7 +172,7 @@ class PackagesGetCommand extends FlutterCommand {
       // package with default settings.
       if (yamlNode == null) {
         await generateLocalizationsSyntheticPackage();
-      } else if (yamlNode is! YamlMap) {
+      } else if (yamlNode is! YamlMap && yamlNode != null) {
         throwToolExit(
           'Expected ${l10nYamlFile.path} to contain a map, instead was $yamlNode'
         );
