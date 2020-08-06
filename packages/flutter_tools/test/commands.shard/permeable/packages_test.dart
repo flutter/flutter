@@ -204,6 +204,79 @@ void main() {
       ),
     });
 
+    testUsingContext('get generates synthetic packages when generate:true', () async {
+      final String projectPath = await createProject(tempDir,
+        arguments: <String>['--no-pub', '--template=module']);
+      removeGeneratedFiles(projectPath);
+
+      // Add generate:true to pubspec.yaml
+      final String pubspecPath = globals.fs.path.join(projectPath, 'pubspec.yaml');
+      final File pubspecFile = globals.fs.file(pubspecPath);
+      final String content = pubspecFile.readAsStringSync().replaceFirst(
+        '\nflutter:\n',
+        '\nflutter:\n  generate: true\n',
+      );
+      pubspecFile.writeAsStringSync(content);
+
+      // Create an l10n.yaml file and l10n/arb directories
+      final String l10nYamlPath = globals.fs.path.join(projectPath, 'l10n.yaml');
+      globals.fs.file(l10nYamlPath).createSync();
+
+      final String l10nDirectoryPath = globals.fs.path.join(projectPath, 'lib', 'l10n');
+      final Directory l10nDirectory = globals.fs.directory(l10nDirectoryPath)
+        ..createSync();
+
+      l10nDirectory.childFile('app_en.arb')
+        ..createSync()
+        ..writeAsStringSync('''{
+    "helloWorld": "Hello, world!",
+    "@helloWorld": {}
+}
+''');
+      // print(l10nDirectory.path);
+      // print(l10nDirectory.listSync());
+
+      // TODO(shihaohong): fix implementation of gen_l10n or fix this test.
+      // when running the test, the "local directory" is {FLUTTER}/packages/flutter_tools
+      // this causes the gen_l10n tool to fail because it attempts to look for
+      // all its files (ie lib/l10n/*.arb) relative to flutter_tools instead
+      // of the Flutter project
+      await runCommandIn(projectPath, 'get');
+
+      final Directory syntheticGenL10nPackage = globals.fs.directory(
+        globals.fs.path.join(
+          projectPath,
+          '.dart_tool',
+          'flutter_gen',
+          'gen_l10n',
+        ),
+      );
+
+      final Directory dartToolDir = globals.fs.directory(
+        globals.fs.path.join(
+          projectPath,
+          '.dart_tool',
+        )
+      );
+
+      print('----check validity----');
+      print(dartToolDir.existsSync());
+      print(dartToolDir.listSync());
+      print(dartToolDir.childDirectory('flutter_gen').existsSync());
+      print(syntheticGenL10nPackage.existsSync());
+
+      // expect that synthetic package is built
+    }, overrides: <Type, Generator>{
+      Pub: () => Pub(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        usage: globals.flutterUsage,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+      ),
+    });
+
     testUsingContext('get --offline fetches packages', () async {
       final String projectPath = await createProject(tempDir,
         arguments: <String>['--no-pub', '--template=module']);
