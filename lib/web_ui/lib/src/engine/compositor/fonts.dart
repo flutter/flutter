@@ -22,26 +22,16 @@ class SkiaFontCollection {
   /// Fonts which have been registered and loaded.
   final List<_RegisteredFont?> _registeredFonts = <_RegisteredFont?>[];
 
-  /// A mapping from the name a font was registered with, to the family name
-  /// embedded in the font's bytes (the font's "actual" name).
-  ///
-  /// For example, a font may be registered in Flutter assets with the name
-  /// "MaterialIcons", but if you read the family name out of the font's bytes
-  /// it is actually "Material Icons". Skia works with the actual names of the
-  /// fonts, so when we create a Skia Paragraph with Flutter font families, we
-  /// must convert them to their actual family name when we pass them to Skia.
-  final Map<String, String> fontFamilyOverrides = <String, String>{};
-
   final Set<String?> registeredFamilies = <String?>{};
 
   Future<void> ensureFontsLoaded() async {
     await _loadFonts();
-    _computeFontFamilyOverrides();
 
-    final List<Uint8List> fontBuffers =
-        _registeredFonts.map<Uint8List>((f) => f!.bytes).toList();
+    fontProvider = canvasKit.TypefaceFontProvider.Make();
 
-    skFontMgr = canvasKit.SkFontMgr.FromData(fontBuffers);
+    for (var font in _registeredFonts) {
+      fontProvider!.registerFont(font!.bytes, font!.flutterFamily);
+    }
   }
 
   /// Loads all of the unloaded fonts in [_unloadedFonts] and adds them
@@ -51,27 +41,10 @@ class SkiaFontCollection {
       return;
     }
 
-    final List<_RegisteredFont?> loadedFonts = await Future.wait(_unloadedFonts);
+    final List<_RegisteredFont?> loadedFonts =
+        await Future.wait(_unloadedFonts);
     _registeredFonts.addAll(loadedFonts.where((x) => x != null));
     _unloadedFonts.clear();
-  }
-
-  void _computeFontFamilyOverrides() {
-    fontFamilyOverrides.clear();
-
-    for (_RegisteredFont? font in _registeredFonts) {
-      if (fontFamilyOverrides.containsKey(font!.flutterFamily)) {
-        if (fontFamilyOverrides[font.flutterFamily] != font.actualFamily) {
-          html.window.console.warn('Fonts in family ${font.flutterFamily} '
-              'have different actual family names.');
-          html.window.console.warn(
-              'Current actual family: ${fontFamilyOverrides[font.flutterFamily]}');
-          html.window.console.warn('New actual family: ${font.actualFamily}');
-        }
-      } else {
-        fontFamilyOverrides[font.flutterFamily] = font.actualFamily;
-      }
-    }
   }
 
   Future<void> loadFontFromList(Uint8List list, {String? fontFamily}) async {
@@ -118,8 +91,9 @@ class SkiaFontCollection {
           'There was a problem trying to load FontManifest.json');
     }
 
-    for (Map<String, dynamic> fontFamily in fontManifest.cast<Map<String, dynamic>>()) {
-      final String? family = fontFamily['family'];
+    for (Map<String, dynamic> fontFamily
+        in fontManifest.cast<Map<String, dynamic>>()) {
+      final String family = fontFamily['family']!;
       final List<dynamic> fontAssets = fontFamily['fonts'];
 
       registeredFamilies.add(family);
@@ -141,10 +115,12 @@ class SkiaFontCollection {
     }
   }
 
-  Future<_RegisteredFont?> _registerFont(String url, String? family) async {
+  Future<_RegisteredFont?> _registerFont(String url, String family) async {
     ByteBuffer buffer;
     try {
-      buffer = await html.window.fetch(url).then(_getArrayBuffer as FutureOr<ByteBuffer> Function(dynamic));
+      buffer = await html.window
+          .fetch(url)
+          .then(_getArrayBuffer as FutureOr<ByteBuffer> Function(dynamic));
     } catch (e) {
       html.window.console.warn('Failed to load font $family at $url');
       html.window.console.warn(e);
@@ -160,7 +136,7 @@ class SkiaFontCollection {
       actualFamily = family;
     }
 
-    return _RegisteredFont(bytes, family!, actualFamily!);
+    return _RegisteredFont(bytes, family, actualFamily!);
   }
 
   String? _readActualFamilyName(Uint8List bytes) {
@@ -178,6 +154,7 @@ class SkiaFontCollection {
   }
 
   SkFontMgr? skFontMgr;
+  TypefaceFontProvider? fontProvider;
 }
 
 /// Represents a font that has been registered.
