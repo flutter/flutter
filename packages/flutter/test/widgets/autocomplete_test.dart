@@ -42,7 +42,7 @@ void main() {
           buildField: (BuildContext context, TextEditingController textEditingController) {
             return Container(key: fieldKey);
           },
-          buildResults: (BuildContext context, List<String> results, OnSelectedAutocomplete<String> onSelected) {
+          buildResults: (BuildContext context, TextEditingController textEditingController, OnSelectedAutocomplete<String> onSelected, List<String> results) {
             return Container(key: resultsKey);
           },
         ),
