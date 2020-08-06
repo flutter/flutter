@@ -303,42 +303,42 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
           const double fadeEnd = 1.0;
           assert(fadeStart <= fadeEnd);
           final double opacity = 1.0 - Interval(fadeStart, fadeEnd).transform(t);
-          if (opacity > 0.0) {
-            double height = settings.maxExtent;
+          double height = settings.maxExtent;
 
-            // StretchMode.zoomBackground
-            if (widget.stretchModes.contains(StretchMode.zoomBackground) &&
-              constraints.maxHeight > height) {
-              height = constraints.maxHeight;
-            }
+          // StretchMode.zoomBackground
+          if (widget.stretchModes.contains(StretchMode.zoomBackground) &&
+            constraints.maxHeight > height) {
+            height = constraints.maxHeight;
+          }
+          children.add(Positioned(
+            top: _getCollapsePadding(t, settings),
+            left: 0.0,
+            right: 0.0,
+            height: height,
+            child: Opacity(
+              // IOS is relying on this semantics node to correctly traverse
+              // through the app bar when it is collapsed.
+              alwaysIncludeSemantics: true,
+              opacity: opacity,
+              child: widget.background,
+            ),
+          ));
 
-            children.add(Positioned(
-              top: _getCollapsePadding(t, settings),
-              left: 0.0,
-              right: 0.0,
-              height: height,
-              child: Opacity(
-                opacity: opacity,
-                child: widget.background,
-              ),
-            ));
-
-            // StretchMode.blurBackground
-            if (widget.stretchModes.contains(StretchMode.blurBackground) &&
-              constraints.maxHeight > settings.maxExtent) {
-              final double blurAmount = (constraints.maxHeight - settings.maxExtent) / 10;
-              children.add(Positioned.fill(
-                child: BackdropFilter(
-                  child: Container(
-                    color: Colors.transparent,
-                  ),
-                  filter: ui.ImageFilter.blur(
-                    sigmaX: blurAmount,
-                    sigmaY: blurAmount,
-                  )
+          // StretchMode.blurBackground
+          if (widget.stretchModes.contains(StretchMode.blurBackground) &&
+            constraints.maxHeight > settings.maxExtent) {
+            final double blurAmount = (constraints.maxHeight - settings.maxExtent) / 10;
+            children.add(Positioned.fill(
+              child: BackdropFilter(
+                child: Container(
+                  color: Colors.transparent,
+                ),
+                filter: ui.ImageFilter.blur(
+                  sigmaX: blurAmount,
+                  sigmaY: blurAmount,
                 )
-              ));
-            }
+              )
+            ));
           }
         }
 
