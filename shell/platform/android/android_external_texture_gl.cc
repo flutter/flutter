@@ -7,6 +7,7 @@
 #include <GLES/glext.h>
 
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
+#include "third_party/skia/include/gpu/GrDirectContext.h"
 
 namespace flutter {
 
@@ -54,8 +55,8 @@ void AndroidExternalTextureGL::Paint(SkCanvas& canvas,
                                  GL_RGBA8_OES};
   GrBackendTexture backendTexture(1, 1, GrMipMapped::kNo, textureInfo);
   sk_sp<SkImage> image = SkImage::MakeFromTexture(
-      canvas.getGrContext(), backendTexture, kTopLeft_GrSurfaceOrigin,
-      kRGBA_8888_SkColorType, kPremul_SkAlphaType, nullptr);
+      context, backendTexture, kTopLeft_GrSurfaceOrigin, kRGBA_8888_SkColorType,
+      kPremul_SkAlphaType, nullptr);
   if (image) {
     SkAutoCanvasRestore autoRestore(&canvas, true);
     canvas.translate(bounds.x(), bounds.y());
