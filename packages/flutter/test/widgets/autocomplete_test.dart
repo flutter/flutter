@@ -39,10 +39,10 @@ void main() {
       MaterialApp(
         home: AutocompleteCore<String>(
           autocompleteController: autocompleteController,
-          buildField: (BuildContext context, TextEditingController textEditingController) {
+          buildField: (BuildContext context) {
             return Container(key: fieldKey);
           },
-          buildResults: (BuildContext context, TextEditingController textEditingController, OnSelectedAutocomplete<String> onSelected, List<String> results) {
+          buildResults: (BuildContext context, OnSelectedAutocomplete<String> onSelected, List<String> results) {
             return Container(key: resultsKey);
           },
         ),

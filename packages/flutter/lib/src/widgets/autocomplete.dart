@@ -18,12 +18,11 @@ import 'framework.dart';
 typedef AutocompleteSearchFunction<T> = List<T> Function(String query);
 
 /// A type for indicating the selection of an autocomplete result.
-typedef OnSelectedAutocomplete<T> = void Function(TextEditingController textEditingController, T result);
+typedef OnSelectedAutocomplete<T> = void Function(T result);
 
 /// A builder for the selectable results given the current autocomplete query.
 typedef AutocompleteResultsBuilder<T> = Widget Function(
   BuildContext context,
-  TextEditingController textEditingController,
   OnSelectedAutocomplete<T> onSelected,
   List<T> results,
 );
@@ -31,7 +30,6 @@ typedef AutocompleteResultsBuilder<T> = Widget Function(
 /// A builder for the query field in autocomplete.
 typedef AutocompleteFieldBuilder = Widget Function(
   BuildContext context,
-  TextEditingController textEditingController,
 );
 
 /// A controller for the [AutocompleteCore] widget.
@@ -208,16 +206,16 @@ class AutocompleteController<T> {
 /// Widget build(BuildContext context) {
 ///   return AutocompleteCore(
 ///     autocompleteController: _autocompleteController,
-///     buildField: (BuildContext context, TextEditingController textEditingController) {
+///     buildField: (BuildContext context) {
 ///       return TextFormField(
-///         controller: textEditingController,
+///         controller: _autocompleteController.textEditingController,
 ///       );
 ///     },
-///     buildResults: (BuildContext context, List<String> results, TextEditingController textEditingController, OnSelectedAutocomplete<String> onSelected) {
+///     buildResults: (BuildContext context, List<String> results, OnSelectedAutocomplete<String> onSelected) {
 ///       return ListView(
 ///         children: results.map((String result) => GestureDetector(
 ///           onTap: () {
-///             onSelected(textEditingController, result);
+///             onSelected(result);
 ///           },
 ///           child: ListTile(
 ///             title: Text(result),
@@ -280,16 +278,16 @@ class AutocompleteController<T> {
 ///         body: Center(
 ///           child: AutocompleteCore<User>(
 ///             autocompleteController: _autocompleteController,
-///             buildField: (BuildContext context, TextEditingController textEditingController) {
+///             buildField: (BuildContext context) {
 ///               return TextFormField(
-///                 controller: textEditingController,
+///                 controller: _autocompleteController.textEditingController,
 ///               );
 ///             },
-///             buildResults: (BuildContext context, List<User> results, TextEditingController textEditingController, OnSelectedAutocomplete<User> onSelected) {
+///             buildResults: (BuildContext context, List<User> results, OnSelectedAutocomplete<User> onSelected) {
 ///               return ListView(
 ///                 children: results.map((User result) => GestureDetector(
 ///                   onTap: () {
-///                     onSelected(textEditingController, result);
+///                     onSelected(result);
 ///                   },
 ///                   child: ListTile(
 ///                     // Despite allowing search on both name and email, here
@@ -355,10 +353,10 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
     });
   }
 
-  void _onSelected (TextEditingController textEditingController, T result) {
+  void _onSelected (T result) {
     setState(() {
       if (widget.onSelected != null) {
-        widget.onSelected(widget.autocompleteController.textEditingController, result);
+        widget.onSelected(result);
       } else {
         // TODO(justinmc): Set cursor position to end.
         widget.autocompleteController.textEditingController.text = result.toString();
@@ -402,16 +400,12 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        widget.buildField(
-          context,
-          widget.autocompleteController.textEditingController,
-        ),
+        widget.buildField(context),
         if (_selection == null)
-          // TODO(justinmc): should this expanded be here?
+          // TODO(justinmc): Should this expanded be here?
           Expanded(
             child: widget.buildResults(
               context,
-              widget.autocompleteController.textEditingController,
               _onSelected,
               widget.autocompleteController.results.value,
             ),
