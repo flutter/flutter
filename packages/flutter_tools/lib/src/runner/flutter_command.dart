@@ -112,6 +112,7 @@ class FlutterOptions {
   static const String kPerformanceMeasurementFile = 'performance-measurement-file';
   static const String kNullSafety = 'sound-null-safety';
   static const String kDeviceUser = 'device-user';
+  static const String kAnalyzeSize = 'analyze-size';
 }
 
 abstract class FlutterCommand extends Command<void> {
@@ -296,6 +297,19 @@ abstract class FlutterCommand extends Command<void> {
             '(the default) will find a random free host port.'
     );
     _usesPortOption = true;
+  }
+
+  void addDdsOptions({@required bool verboseHelp}) {
+    argParser.addFlag(
+      'disable-dds',
+      hide: !verboseHelp,
+      help: 'Disable the Dart Developer Service (DDS). This flag should only be provided'
+            ' when attaching to an application with an existing DDS instance (e.g.,'
+            ' attaching to an application currently connected to by "flutter run") or'
+            ' when running certain tests.\n'
+            'Note: passing this flag may degrade IDE functionality if a DDS instance is not'
+            ' already connected to the target application.'
+    );
   }
 
   /// Gets the vmservice port provided to in the 'observatory-port' or
@@ -592,6 +606,15 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void usesAnalyzeSizeFlag() {
+    argParser.addFlag(
+      FlutterOptions.kAnalyzeSize,
+      defaultsTo: false,
+      help: 'Whether to produce additonal profile information for artifact output size. '
+        'This flag is only support on release builds on macOS/Linux hosts.'
+    );
+  }
+
   /// Compute the [BuildInfo] for the current flutter command.
   /// Commands that build multiple build modes can pass in a [forcedBuildMode]
   /// to be used instead of parsing flags.
@@ -627,6 +650,15 @@ abstract class FlutterCommand extends Command<void> {
       }
     }
 
+    String analyzeSize;
+    if (argParser.options.containsKey(FlutterOptions.kAnalyzeSize)
+      && boolArg(FlutterOptions.kAnalyzeSize)
+      && !globals.platform.isWindows) {
+      final File file = globals.fsUtils.getUniqueFile(globals.fs.currentDirectory, 'flutter_size', 'json');
+      extraGenSnapshotOptions.add('--write-v8-snapshot-profile-to=${file.path}');
+      analyzeSize = file.path;
+    }
+
     NullSafetyMode nullSafetyMode = NullSafetyMode.unsound;
     if (argParser.options.containsKey(FlutterOptions.kNullSafety)) {
       final bool nullSafety = boolArg(FlutterOptions.kNullSafety);
@@ -658,6 +690,10 @@ abstract class FlutterCommand extends Command<void> {
       );
     }
     final BuildMode buildMode = forcedBuildMode ?? getBuildMode();
+    if (buildMode != BuildMode.release && analyzeSize != null) {
+      throwToolExit('--analyze-size can only be used on release builds.');
+    }
+
     final bool treeShakeIcons = argParser.options.containsKey('tree-shake-icons')
       && buildMode.isPrecompiled
       && boolArg('tree-shake-icons');
@@ -702,6 +738,7 @@ abstract class FlutterCommand extends Command<void> {
       performanceMeasurementFile: performanceMeasurementFile,
       packagesPath: globalResults['packages'] as String ?? '.packages',
       nullSafetyMode: nullSafetyMode,
+      analyzeSize: analyzeSize,
     );
   }
 

@@ -17,27 +17,35 @@ import 'adb.dart';
 import 'android_device.dart';
 import 'android_sdk.dart';
 import 'android_workflow.dart' hide androidWorkflow;
-import 'android_workflow.dart' as workflow show androidWorkflow;
 
 /// Device discovery for Android physical devices and emulators.s
 class AndroidDevices extends PollingDeviceDiscovery {
-  // TODO(jonahwilliams): make these required after google3 is updated.
   AndroidDevices({
-    AndroidWorkflow androidWorkflow,
-    ProcessManager processManager,
-    Logger logger,
-    AndroidSdk androidSdk,
-  }) : _androidWorkflow = androidWorkflow ?? workflow.androidWorkflow,
-       _androidSdk = androidSdk ?? globals.androidSdk,
+    @required AndroidWorkflow androidWorkflow,
+    @required ProcessManager processManager,
+    @required Logger logger,
+    @required AndroidSdk androidSdk,
+    FileSystem fileSystem, // TODO(jonahwilliams): remove after rolling into google3
+    Platform platform,
+  }) : _androidWorkflow = androidWorkflow,
+       _androidSdk = androidSdk,
        _processUtils = ProcessUtils(
-         logger: logger ?? globals.logger,
-         processManager: processManager ?? globals.processManager,
+         logger: logger,
+         processManager: processManager,
         ),
+        _processManager = processManager,
+        _logger = logger,
+        _fileSystem = fileSystem ?? globals.fs,
+        _platform = platform ?? globals.platform,
        super('Android devices');
 
   final AndroidWorkflow _androidWorkflow;
   final ProcessUtils _processUtils;
   final AndroidSdk _androidSdk;
+  final ProcessManager _processManager;
+  final Logger _logger;
+  final FileSystem _fileSystem;
+  final Platform _platform;
 
   @override
   bool get supportsPlatform => _androidWorkflow.appliesToHostPlatform;
@@ -69,6 +77,11 @@ class AndroidDevices extends PollingDeviceDiscovery {
       text,
       devices: devices,
       timeoutConfiguration: timeoutConfiguration,
+      processManager: _processManager,
+      logger: _logger,
+      fileSystem: _fileSystem,
+      androidSdk: _androidSdk,
+      platform: _platform,
     );
     return devices;
   }
@@ -90,6 +103,11 @@ class AndroidDevices extends PollingDeviceDiscovery {
         text,
         diagnostics: diagnostics,
         timeoutConfiguration: timeoutConfiguration,
+        processManager: _processManager,
+        logger: _logger,
+        fileSystem: _fileSystem,
+        androidSdk: _androidSdk,
+        platform: _platform,
       );
       return diagnostics;
     }
@@ -106,11 +124,11 @@ class AndroidDevices extends PollingDeviceDiscovery {
     String text, {
     List<AndroidDevice> devices,
     List<String> diagnostics,
-    AndroidSdk androidSdk,
-    FileSystem fileSystem,
-    Logger logger,
-    Platform platform,
-    ProcessManager processManager,
+    @required AndroidSdk androidSdk,
+    @required FileSystem fileSystem,
+    @required Logger logger,
+    @required Platform platform,
+    @required ProcessManager processManager,
     @required TimeoutConfiguration timeoutConfiguration,
   }) {
     // Check for error messages from adb
@@ -170,11 +188,11 @@ class AndroidDevices extends PollingDeviceDiscovery {
             productID: info['product'],
             modelID: info['model'] ?? deviceID,
             deviceCodeName: info['device'],
-            androidSdk: androidSdk ?? globals.androidSdk,
-            fileSystem: fileSystem ?? globals.fs,
-            logger: logger ?? globals.logger,
-            platform: platform ?? globals.platform,
-            processManager: processManager ?? globals.processManager,
+            androidSdk: androidSdk,
+            fileSystem: fileSystem,
+            logger: logger,
+            platform: platform,
+            processManager: processManager,
             timeoutConfiguration: timeoutConfiguration,
           ));
         }

@@ -39,9 +39,9 @@ set timeDilation(double value) {
 /// common time base.
 typedef FrameCallback = void Function(Duration timeStamp);
 
-/// Signature for [Scheduler.scheduleTask] callbacks.
+/// Signature for [SchedulerBinding.scheduleTask] callbacks.
 ///
-/// The type argument `T` is the task's return value. Consider [void] if the
+/// The type argument `T` is the task's return value. Consider `void` if the
 /// task does not return a value.
 typedef TaskCallback<T> = T Function();
 
@@ -138,14 +138,14 @@ class _FrameCallbackEntry {
 ///    to generate a frame.
 enum SchedulerPhase {
   /// No frame is being processed. Tasks (scheduled by
-  /// [WidgetsBinding.scheduleTask]), microtasks (scheduled by
+  /// [SchedulerBinding.scheduleTask]), microtasks (scheduled by
   /// [scheduleMicrotask]), [Timer] callbacks, event handlers (e.g. from user
   /// input), and other callbacks (e.g. from [Future]s, [Stream]s, and the like)
   /// may be executing.
   idle,
 
   /// The transient callbacks (scheduled by
-  /// [WidgetsBinding.scheduleFrameCallback]) are currently executing.
+  /// [SchedulerBinding.scheduleFrameCallback]) are currently executing.
   ///
   /// Typically, these callbacks handle updating objects to new animation
   /// states.
@@ -161,14 +161,14 @@ enum SchedulerPhase {
   midFrameMicrotasks,
 
   /// The persistent callbacks (scheduled by
-  /// [WidgetsBinding.addPersistentFrameCallback]) are currently executing.
+  /// [SchedulerBinding.addPersistentFrameCallback]) are currently executing.
   ///
   /// Typically, this is the build/layout/paint pipeline. See
   /// [WidgetsBinding.drawFrame] and [SchedulerBinding.handleDrawFrame].
   persistentCallbacks,
 
   /// The post-frame callbacks (scheduled by
-  /// [WidgetsBinding.addPostFrameCallback]) are currently executing.
+  /// [SchedulerBinding.addPostFrameCallback]) are currently executing.
   ///
   /// Typically, these callbacks handle cleanup and scheduling of work for the
   /// next frame.
@@ -806,7 +806,7 @@ mixin SchedulerBinding on BindingBase {
   /// schedules a frame, set [debugPrintScheduleFrameStacks] to true.
   ///
   /// Prefer using [scheduleFrame] unless it is imperative that a frame be
-  /// scheduled immediately, since using [scheduleForceFrame] will cause
+  /// scheduled immediately, since using [scheduleForcedFrame] will cause
   /// significantly higher battery usage when the device should be idle.
   ///
   /// Consider using [scheduleWarmUpFrame] instead if the goal is to update the

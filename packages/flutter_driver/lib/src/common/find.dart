@@ -174,7 +174,7 @@ class BySemanticsLabel extends SerializableFinder {
   /// Creates a semantic label finder given the [label].
   const BySemanticsLabel(this.label);
 
-  /// A [Pattern] matching the [Semantics.properties.label].
+  /// A [Pattern] matching the label of a [SemanticsNode].
   ///
   /// If this is a [String], it will be treated as an exact match.
   final Pattern label;

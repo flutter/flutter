@@ -231,7 +231,7 @@ class TextTheme with Diagnosticable {
   /// Used for auxiliary text associated with images.
   final TextStyle caption;
 
-  /// Used for text on [RaisedButton] and [FlatButton].
+  /// Used for text on [ElevatedButton], [TextButton] and [OutlinedButton].
   final TextStyle button;
 
   /// The smallest style.

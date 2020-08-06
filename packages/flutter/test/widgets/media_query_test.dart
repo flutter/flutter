@@ -535,6 +535,33 @@ void main() {
     expect(insideBrightness, Brightness.dark);
   });
 
+  testWidgets('MediaQuery.highContrastOf', (WidgetTester tester) async {
+    bool outsideHighContrast;
+    bool insideHighContrast;
+
+    await tester.pumpWidget(
+      Builder(
+        builder: (BuildContext context) {
+          outsideHighContrast = MediaQuery.highContrastOf(context);
+          return MediaQuery(
+            data: const MediaQueryData(
+              highContrast: true,
+            ),
+            child: Builder(
+              builder: (BuildContext context) {
+                insideHighContrast = MediaQuery.highContrastOf(context);
+                return Container();
+              },
+            ),
+          );
+        },
+      ),
+    );
+
+    expect(outsideHighContrast, false);
+    expect(insideHighContrast, true);
+  });
+
   testWidgets('MediaQuery.boldTextOverride', (WidgetTester tester) async {
     bool outsideBoldTextOverride;
     bool insideBoldTextOverride;

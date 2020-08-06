@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:ui' show Offset;
 
@@ -51,9 +50,9 @@ class ForcePressDetails {
   ///
   /// The [globalPosition] argument must not be null.
   ForcePressDetails({
-    @required this.globalPosition,
-    Offset localPosition,
-    @required this.pressure,
+    required this.globalPosition,
+    Offset? localPosition,
+    required this.pressure,
   }) : assert(globalPosition != null),
        assert(pressure != null),
        localPosition = localPosition ?? globalPosition;
@@ -128,8 +127,8 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
     this.startPressure = 0.4,
     this.peakPressure = 0.85,
     this.interpolation = _inverseLerp,
-    Object debugOwner,
-    PointerDeviceKind kind,
+    Object? debugOwner,
+    PointerDeviceKind? kind,
   }) : assert(startPressure != null),
        assert(peakPressure != null),
        assert(interpolation != null),
@@ -143,7 +142,7 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// The position of the pointer is provided in the callback's `details`
   /// argument, which is a [ForcePressDetails] object.
-  GestureForcePressStartCallback onStart;
+  GestureForcePressStartCallback? onStart;
 
   /// A pointer is in contact with the screen and is either moving on the plane
   /// of the screen, pressing the screen with varying forces or both
@@ -154,7 +153,7 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
   /// matter what the pressure is during this time period. The position and
   /// pressure of the pointer is provided in the callback's `details` argument,
   /// which is a [ForcePressDetails] object.
-  GestureForcePressUpdateCallback onUpdate;
+  GestureForcePressUpdateCallback? onUpdate;
 
   /// A pointer is in contact with the screen and has just pressed with a force
   /// exceeding the [peakPressure]. This is an arbitrary second level action
@@ -163,13 +162,13 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// The position of the pointer is provided in the callback's `details`
   /// argument, which is a [ForcePressDetails] object.
-  GestureForcePressPeakCallback onPeak;
+  GestureForcePressPeakCallback? onPeak;
 
   /// A pointer is no longer in contact with the screen.
   ///
   /// The position of the pointer is provided in the callback's `details`
   /// argument, which is a [ForcePressDetails] object.
-  GestureForcePressEndCallback onEnd;
+  GestureForcePressEndCallback? onEnd;
 
   /// The pressure of the press required to initiate a force press.
   ///
@@ -209,8 +208,8 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
   /// ```
   final GestureForceInterpolation interpolation;
 
-  OffsetPair _lastPosition;
-  double _lastPressure;
+  late OffsetPair _lastPosition;
+  late double _lastPressure;
   _ForceState _state = _ForceState.ready;
 
   @override
@@ -264,7 +263,7 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
       if (pressure > startPressure && _state == _ForceState.accepted) {
         _state = _ForceState.started;
         if (onStart != null) {
-          invokeCallback<void>('onStart', () => onStart(ForcePressDetails(
+          invokeCallback<void>('onStart', () => onStart!(ForcePressDetails(
             pressure: pressure,
             globalPosition: _lastPosition.global,
             localPosition: _lastPosition.local,
@@ -275,7 +274,7 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
          (_state == _ForceState.started)) {
         _state = _ForceState.peaked;
         if (onPeak != null) {
-          invokeCallback<void>('onPeak', () => onPeak(ForcePressDetails(
+          invokeCallback<void>('onPeak', () => onPeak!(ForcePressDetails(
             pressure: pressure,
             globalPosition: event.position,
             localPosition: event.localPosition,
@@ -285,7 +284,7 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
       if (onUpdate != null &&  !pressure.isNaN &&
          (_state == _ForceState.started || _state == _ForceState.peaked)) {
         if (onUpdate != null) {
-          invokeCallback<void>('onUpdate', () => onUpdate(ForcePressDetails(
+          invokeCallback<void>('onUpdate', () => onUpdate!(ForcePressDetails(
             pressure: pressure,
             globalPosition: event.position,
             localPosition: event.localPosition,
@@ -302,7 +301,7 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
       _state = _ForceState.accepted;
 
     if (onStart != null && _state == _ForceState.started) {
-      invokeCallback<void>('onStart', () => onStart(ForcePressDetails(
+      invokeCallback<void>('onStart', () => onStart!(ForcePressDetails(
         pressure: _lastPressure,
         globalPosition: _lastPosition.global,
         localPosition: _lastPosition.local,
@@ -319,7 +318,7 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
     }
     if (wasAccepted && onEnd != null) {
       if (onEnd != null) {
-        invokeCallback<void>('onEnd', () => onEnd(ForcePressDetails(
+        invokeCallback<void>('onEnd', () => onEnd!(ForcePressDetails(
           pressure: 0.0,
           globalPosition: _lastPosition.global,
           localPosition: _lastPosition.local,

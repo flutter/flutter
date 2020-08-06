@@ -180,6 +180,8 @@ class MaterialApp extends StatefulWidget {
     this.color,
     this.theme,
     this.darkTheme,
+    this.highContrastTheme,
+    this.highContrastDarkTheme,
     this.themeMode = ThemeMode.system,
     this.locale,
     this.localizationsDelegates,
@@ -294,20 +296,49 @@ class MaterialApp extends StatefulWidget {
   ///    [MediaQueryData.platformBrightness].
   final ThemeData darkTheme;
 
+  /// The [ThemeData] to use when 'high contrast' is requested by the system.
+  ///
+  /// Some host platforms (for example, iOS) allow the users to increase
+  /// contrast through an accessibility setting.
+  ///
+  /// Uses [theme] instead when null.
+  ///
+  /// See also:
+  ///
+  ///  * [MediaQueryData.highContrast], which indicates the platform's
+  ///    desire to increase contrast.
+  final ThemeData highContrastTheme;
+
+  /// The [ThemeData] to use when a 'dark mode' and 'high contrast' is requested
+  /// by the system.
+  ///
+  /// Some host platforms (for example, iOS) allow the users to increase
+  /// contrast through an accessibility setting.
+  ///
+  /// This theme should have a [ThemeData.brightness] set to [Brightness.dark].
+  ///
+  /// Uses [darkTheme] instead when null.
+  ///
+  /// See also:
+  ///
+  ///  * [MediaQueryData.highContrast], which indicates the platform's
+  ///    desire to increase contrast.
+  final ThemeData highContrastDarkTheme;
+
   /// Determines which theme will be used by the application if both [theme]
   /// and [darkTheme] are provided.
   ///
   /// If set to [ThemeMode.system], the choice of which theme to use will
   /// be based on the user's system preferences. If the [MediaQuery.platformBrightnessOf]
   /// is [Brightness.light], [theme] will be used. If it is [Brightness.dark],
-  /// [darkTheme] will be used (unless it is [null], in which case [theme]
+  /// [darkTheme] will be used (unless it is null, in which case [theme]
   /// will be used.
   ///
   /// If set to [ThemeMode.light] the [theme] will always be used,
   /// regardless of the user's system preference.
   ///
   /// If set to [ThemeMode.dark] the [darkTheme] will be used
-  /// regardless of the user's system preference. If [darkTheme] is [null]
+  /// regardless of the user's system preference. If [darkTheme] is null
   /// then it will fallback to using [theme].
   ///
   /// The default value is [ThemeMode.system].
@@ -586,18 +617,6 @@ class _MaterialAppState extends State<MaterialApp> {
     _heroController = MaterialApp.createMaterialHeroController();
   }
 
-  @override
-  void didUpdateWidget(MaterialApp oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.navigatorKey != oldWidget.navigatorKey) {
-      // If the Navigator changes, we have to create a new observer, because the
-      // old Navigator won't be disposed (and thus won't unregister with its
-      // observers) until after the new one has been created (because the
-      // Navigator has a GlobalKey).
-      _heroController = MaterialApp.createMaterialHeroController();
-    }
-  }
-
   // Combine the Localizations for Material with the ones contributed
   // by the localizationsDelegates parameter, if any. Only the first delegate
   // of a particular LocalizationsDelegate.type is loaded so the
@@ -628,17 +647,22 @@ class _MaterialAppState extends State<MaterialApp> {
         onGenerateInitialRoutes: widget.onGenerateInitialRoutes,
         onUnknownRoute: widget.onUnknownRoute,
         builder: (BuildContext context, Widget child) {
-          // Use a light theme, dark theme, or fallback theme.
+          // Resolve which theme to use based on brightness and high contrast.
           final ThemeMode mode = widget.themeMode ?? ThemeMode.system;
+          final Brightness platformBrightness = MediaQuery.platformBrightnessOf(context);
+          final bool useDarkTheme = mode == ThemeMode.dark
+              || (mode == ThemeMode.system && platformBrightness == ui.Brightness.dark);
+          final bool highContrast = MediaQuery.highContrastOf(context);
           ThemeData theme;
-          if (widget.darkTheme != null) {
-            final ui.Brightness platformBrightness = MediaQuery.platformBrightnessOf(context);
-            if (mode == ThemeMode.dark ||
-              (mode == ThemeMode.system && platformBrightness == ui.Brightness.dark)) {
-              theme = widget.darkTheme;
-            }
+
+          if (useDarkTheme && highContrast && widget.highContrastDarkTheme != null) {
+            theme = widget.highContrastDarkTheme;
+          } else if (useDarkTheme && widget.darkTheme != null) {
+            theme = widget.darkTheme;
+          } else if (highContrast && widget.highContrastTheme != null) {
+            theme = widget.highContrastTheme;
           }
-          theme ??= widget.theme ?? ThemeData.fallback();
+          theme ??= widget.theme ?? ThemeData.light();
 
           return AnimatedTheme(
             data: theme,

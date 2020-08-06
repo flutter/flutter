@@ -689,9 +689,9 @@ class GestureDetector extends StatelessWidget {
   ///
   /// By default, the drag start behavior is [DragStartBehavior.start].
   ///
-  /// Only the [onStart] callbacks for the [VerticalDragGestureRecognizer],
-  /// [HorizontalDragGestureRecognizer] and [PanGestureRecognizer] are affected
-  /// by this setting.
+  /// Only the [DragGestureRecognizer.onStart] callbacks for the
+  /// [VerticalDragGestureRecognizer], [HorizontalDragGestureRecognizer] and
+  /// [PanGestureRecognizer] are affected by this setting.
   ///
   /// See also:
   ///
@@ -702,15 +702,14 @@ class GestureDetector extends StatelessWidget {
   Widget build(BuildContext context) {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
 
-    if (
-      onTapDown != null ||
-      onTapUp != null ||
-      onTap != null ||
-      onTapCancel != null ||
-      onSecondaryTap != null ||
-      onSecondaryTapDown != null ||
-      onSecondaryTapUp != null ||
-      onSecondaryTapCancel != null
+    if (onTapDown != null ||
+        onTapUp != null ||
+        onTap != null ||
+        onTapCancel != null ||
+        onSecondaryTap != null ||
+        onSecondaryTapDown != null ||
+        onSecondaryTapUp != null ||
+        onSecondaryTapCancel != null
     ) {
       gestures[TapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
         () => TapGestureRecognizer(debugOwner: this),
@@ -741,21 +740,8 @@ class GestureDetector extends StatelessWidget {
         onLongPressUp != null ||
         onLongPressStart != null ||
         onLongPressMoveUpdate != null ||
-        onLongPressEnd != null) {
-      gestures[LongPressGestureRecognizer] = GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
-        () => LongPressGestureRecognizer(debugOwner: this),
-        (LongPressGestureRecognizer instance) {
-          instance
-            ..onLongPress = onLongPress
-            ..onLongPressStart = onLongPressStart
-            ..onLongPressMoveUpdate = onLongPressMoveUpdate
-            ..onLongPressEnd =onLongPressEnd
-            ..onLongPressUp = onLongPressUp;
-        },
-      );
-    }
-
-    if (onSecondaryLongPress != null ||
+        onLongPressEnd != null ||
+        onSecondaryLongPress != null ||
         onSecondaryLongPressUp != null ||
         onSecondaryLongPressStart != null ||
         onSecondaryLongPressMoveUpdate != null ||
@@ -764,10 +750,15 @@ class GestureDetector extends StatelessWidget {
         () => LongPressGestureRecognizer(debugOwner: this),
         (LongPressGestureRecognizer instance) {
           instance
+            ..onLongPress = onLongPress
+            ..onLongPressStart = onLongPressStart
+            ..onLongPressMoveUpdate = onLongPressMoveUpdate
+            ..onLongPressEnd = onLongPressEnd
+            ..onLongPressUp = onLongPressUp
             ..onSecondaryLongPress = onSecondaryLongPress
             ..onSecondaryLongPressStart = onSecondaryLongPressStart
             ..onSecondaryLongPressMoveUpdate = onSecondaryLongPressMoveUpdate
-            ..onSecondaryLongPressEnd =onSecondaryLongPressEnd
+            ..onSecondaryLongPressEnd = onSecondaryLongPressEnd
             ..onSecondaryLongPressUp = onSecondaryLongPressUp;
         },
       );
@@ -865,6 +856,7 @@ class GestureDetector extends StatelessWidget {
       child: child,
     );
   }
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -1223,7 +1215,7 @@ abstract class SemanticsGestureDelegate {
   /// object of the gesture detector.
   ///
   /// This method is called when the widget is created, updated, or during
-  /// [RawGestureDetector.replaceGestureRecognizers].
+  /// [RawGestureDetectorState.replaceGestureRecognizers].
   void assignSemantics(RenderSemanticsGestureHandler renderObject);
 
   @override

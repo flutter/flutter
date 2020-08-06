@@ -3894,4 +3894,77 @@ void main() {
 
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
   });
+
+  testWidgets('The handles show after pressing Select All', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: SelectableText('abc def ghi'),
+        ),
+      ),
+    );
+
+    // Long press at 'e' in 'def'.
+    final Offset ePos = textOffsetToPosition(tester, 5);
+    await tester.longPressAt(ePos);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Select all'), findsOneWidget);
+    expect(find.text('Copy'), findsOneWidget);
+    expect(find.text('Paste'), findsNothing);
+    expect(find.text('Cut'), findsNothing);
+    EditableTextState editableText = tester.state(find.byType(EditableText));
+    expect(editableText.selectionOverlay.handlesAreVisible, isTrue);
+    expect(editableText.selectionOverlay.toolbarIsVisible, isTrue);
+
+    await tester.tap(find.text('Select all'));
+    await tester.pump();
+    expect(find.text('Copy'), findsOneWidget);
+    expect(find.text('Select all'), findsNothing);
+    expect(find.text('Paste'), findsNothing);
+    expect(find.text('Cut'), findsNothing);
+    editableText = tester.state(find.byType(EditableText));
+    expect(editableText.selectionOverlay.handlesAreVisible, isTrue);
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.android,
+      TargetPlatform.fuchsia,
+      TargetPlatform.linux,
+      TargetPlatform.windows,
+    }),
+  );
+
+  testWidgets('The handles show after pressing Select All (iOS and Mac)', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: SelectableText('abc def ghi'),
+        ),
+      ),
+    );
+
+    // Long press at 'e' in 'def'.
+    final Offset ePos = textOffsetToPosition(tester, 5);
+    await tester.longPressAt(ePos);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Select All'), findsOneWidget);
+    expect(find.text('Copy'), findsNothing);
+    expect(find.text('Paste'), findsNothing);
+    expect(find.text('Cut'), findsNothing);
+    EditableTextState editableText = tester.state(find.byType(EditableText));
+    expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
+    expect(editableText.selectionOverlay.toolbarIsVisible, isTrue);
+
+    await tester.tap(find.text('Select All'));
+    await tester.pumpAndSettle();
+    expect(find.text('Copy'), findsOneWidget);
+    expect(find.text('Select All'), findsNothing);
+    expect(find.text('Paste'), findsNothing);
+    expect(find.text('Cut'), findsNothing);
+    editableText = tester.state(find.byType(EditableText));
+    expect(editableText.selectionOverlay.handlesAreVisible, isTrue);
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+  );
 }
