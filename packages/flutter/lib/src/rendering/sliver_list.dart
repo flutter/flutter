@@ -169,6 +169,8 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
     // If the scroll offset is at zero, we should make sure we are
     // actually at the beginning of the list.
     if (scrollOffset < precisionErrorTolerance) {
+      // We iterate from the firstChild in case the leading child has a 0 paint
+      // extent.
       while (indexOf(firstChild) > 0) {
         final double earliestScrollOffset = childScrollOffset(firstChild);
         // We correct one child at a time. If there are more children before
@@ -179,6 +181,8 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
         final double firstChildScrollOffset = earliestScrollOffset - paintExtentOf(firstChild);
         final SliverMultiBoxAdaptorParentData childParentData = firstChild.parentData as SliverMultiBoxAdaptorParentData;
         childParentData.layoutOffset = 0.0;
+        // We only need to correct if the leading child actually has a
+        // paint extent.
         if (firstChildScrollOffset < -precisionErrorTolerance) {
           geometry = SliverGeometry(
             scrollOffsetCorrection: -firstChildScrollOffset,
