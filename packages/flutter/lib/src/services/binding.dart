@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:async';
 import 'dart:typed_data';
@@ -31,14 +30,14 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     _restorationManager = createRestorationManager();
     window.onPlatformMessage = defaultBinaryMessenger.handlePlatformMessage;
     initLicenses();
-    SystemChannels.system.setMessageHandler(handleSystemMessage);
+    SystemChannels.system.setMessageHandler((dynamic message) => handleSystemMessage(message as Object));
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
     readInitialLifecycleStateFromNativeWindow();
   }
 
   /// The current [ServicesBinding], if one has been created.
-  static ServicesBinding get instance => _instance;
-  static ServicesBinding _instance;
+  static ServicesBinding? get instance => _instance;
+  static ServicesBinding? _instance;
 
   /// The default instance of [BinaryMessenger].
   ///
@@ -46,7 +45,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   /// keeps track of which handlers have been registered on each channel so
   /// it may dispatch incoming messages to the registered handler.
   BinaryMessenger get defaultBinaryMessenger => _defaultBinaryMessenger;
-  BinaryMessenger _defaultBinaryMessenger;
+  late BinaryMessenger _defaultBinaryMessenger;
 
   /// Creates a default [BinaryMessenger] instance that can be used for sending
   /// platform messages.
@@ -110,7 +109,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     await rawLicenses.future;
     final Completer<List<LicenseEntry>> parsedLicenses = Completer<List<LicenseEntry>>();
     scheduleTask(() async {
-      parsedLicenses.complete(compute(_parseLicenses, await rawLicenses.future, debugLabel: 'parseLicenses'));
+      parsedLicenses.complete(compute<String, List<LicenseEntry>>(_parseLicenses, await rawLicenses.future, debugLabel: 'parseLicenses'));
     }, Priority.animation);
     await parsedLicenses.future;
     yield* Stream<LicenseEntry>.fromIterable(await parsedLicenses.future);
@@ -183,18 +182,18 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     if (lifecycleState != null) {
       return;
     }
-    final AppLifecycleState state = _parseAppLifecycleMessage(window.initialLifecycleState);
+    final AppLifecycleState? state = _parseAppLifecycleMessage(window.initialLifecycleState);
     if (state != null) {
       handleAppLifecycleStateChanged(state);
     }
   }
 
-  Future<String> _handleLifecycleMessage(String message) async {
-    handleAppLifecycleStateChanged(_parseAppLifecycleMessage(message));
+  Future<String?> _handleLifecycleMessage(String? message) async {
+    handleAppLifecycleStateChanged(_parseAppLifecycleMessage(message!)!);
     return null;
   }
 
-  static AppLifecycleState _parseAppLifecycleMessage(String message) {
+  static AppLifecycleState? _parseAppLifecycleMessage(String message) {
     switch (message) {
       case 'AppLifecycleState.paused':
         return AppLifecycleState.paused;
@@ -218,7 +217,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   /// [createRestorationManager], which is called to create the instance
   /// returned by this getter.
   RestorationManager get restorationManager => _restorationManager;
-  RestorationManager _restorationManager;
+  late RestorationManager _restorationManager;
 
   /// Creates the [RestorationManager] instance available via
   /// [restorationManager].
@@ -248,15 +247,15 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
   static final Map<String, MessageHandler> _mockHandlers =
       <String, MessageHandler>{};
 
-  Future<ByteData> _sendPlatformMessage(String channel, ByteData message) {
-    final Completer<ByteData> completer = Completer<ByteData>();
+  Future<ByteData?> _sendPlatformMessage(String channel, ByteData? message) {
+    final Completer<ByteData?> completer = Completer<ByteData?>();
     // ui.window is accessed directly instead of using ServicesBinding.instance.window
     // because this method might be invoked before any binding is initialized.
     // This issue was reported in #27541. It is not ideal to statically access
     // ui.window because the Window may be dependency injected elsewhere with
     // a different instance. However, static access at this location seems to be
     // the least bad option.
-    ui.window.sendPlatformMessage(channel, message, (ByteData reply) {
+    ui.window.sendPlatformMessage(channel, message, (ByteData? reply) {
       try {
         completer.complete(reply);
       } catch (exception, stack) {
@@ -274,16 +273,16 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
   @override
   Future<void> handlePlatformMessage(
     String channel,
-    ByteData data,
-    ui.PlatformMessageResponseCallback callback,
+    ByteData? data,
+    ui.PlatformMessageResponseCallback? callback,
   ) async {
-    ByteData response;
+    ByteData? response;
     try {
-      final MessageHandler handler = _handlers[channel];
+      final MessageHandler? handler = _handlers[channel];
       if (handler != null) {
         response = await handler(data);
       } else {
-        ui.channelBuffers.push(channel, data, callback);
+        ui.channelBuffers.push(channel, data, callback!);
         callback = null;
       }
     } catch (exception, stack) {
@@ -301,20 +300,20 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
   }
 
   @override
-  Future<ByteData> send(String channel, ByteData message) {
-    final MessageHandler handler = _mockHandlers[channel];
+  Future<ByteData?> send(String channel, ByteData? message) {
+    final MessageHandler? handler = _mockHandlers[channel];
     if (handler != null)
       return handler(message);
     return _sendPlatformMessage(channel, message);
   }
 
   @override
-  void setMessageHandler(String channel, MessageHandler handler) {
+  void setMessageHandler(String channel, MessageHandler? handler) {
     if (handler == null)
       _handlers.remove(channel);
     else
       _handlers[channel] = handler;
-    ui.channelBuffers.drain(channel, (ByteData data, ui.PlatformMessageResponseCallback callback) async {
+    ui.channelBuffers.drain(channel, (ByteData? data, ui.PlatformMessageResponseCallback callback) async {
       await handlePlatformMessage(channel, data, callback);
     });
   }
@@ -323,7 +322,7 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
   bool checkMessageHandler(String channel, MessageHandler handler) => _handlers[channel] == handler;
 
   @override
-  void setMockMessageHandler(String channel, MessageHandler handler) {
+  void setMockMessageHandler(String channel, MessageHandler? handler) {
     if (handler == null)
       _mockHandlers.remove(channel);
     else

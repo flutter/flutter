@@ -103,7 +103,7 @@ class ElevatedButtonTheme extends InheritedTheme {
 
   /// The closest instance of this class that encloses the given context.
   ///
-  /// If there is no enclosing [ElevatedButtonsTheme] widget, then
+  /// If there is no enclosing [ElevatedButtonTheme] widget, then
   /// [ThemeData.elevatedButtonTheme] is used.
   ///
   /// Typical usage is as follows:

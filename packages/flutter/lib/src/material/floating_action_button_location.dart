@@ -160,7 +160,7 @@ abstract class FloatingActionButtonLocation {
   /// Centered [FloatingActionButton], floating at the bottom of the screen.
   ///
   /// To position a mini floating action button, use [miniCenterFloat] and
-  /// set [FloatingActionButtonLocation.mini] to true.
+  /// set [FloatingActionButton.mini] to true.
   static const FloatingActionButtonLocation centerFloat = _CenterFloatFabLocation();
 
   /// Centered [FloatingActionButton], floating at the bottom of the screen,

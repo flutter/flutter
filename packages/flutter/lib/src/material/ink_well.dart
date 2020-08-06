@@ -377,9 +377,6 @@ class InkResponse extends StatelessWidget {
   ///  * [MaterialState.focused].
   ///  * [MaterialState.disabled].
   ///
-  /// When [value] is null and [tristate] is true, [MaterialState.selected] is
-  /// included as a state.
-  ///
   /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
   final MouseCursor mouseCursor;
 

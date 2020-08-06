@@ -194,8 +194,8 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
     assert(() {
       final Map<GlobalKey, Element> keyToParent = <GlobalKey, Element>{};
       _debugReservations.forEach((Element parent, Map<Element, GlobalKey> childToKey) {
-        // We ignore parent that are detached.
-        if (parent.renderObject?.attached == false)
+        // We ignore parent that are unmounted or detached.
+        if (parent._debugLifecycleState == _ElementLifecycle.defunct || parent.renderObject?.attached == false)
           return;
         childToKey.forEach((Element child, GlobalKey key) {
           // If parent = null, the node is deactivated by its parent and is
@@ -3290,8 +3290,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// the "active" lifecycle state.
   ///
   /// Subclasses that override this method are likely to want to also override
-  /// [update], [visitChildren], [insertChildRenderObject], [moveChildRenderObject],
-  /// and [removeChildRenderObject].
+  /// [update], [visitChildren], [RenderObjectElement.insertChildRenderObject],
+  /// [RenderObjectElement.moveChildRenderObject], and
+  /// [RenderObjectElement.removeChildRenderObject].
   @mustCallSuper
   void mount(Element parent, dynamic newSlot) {
     assert(_debugLifecycleState == _ElementLifecycle.initial);
