@@ -17,7 +17,7 @@
   "timerPickerSecondLabelOther": "s",
   "cutButtonLabel": "Ausschneiden",
   "copyButtonLabel": "Kopieren",
-  "pasteButtonLabel": "Einfügen",
+  "pasteButtonLabel": "Einsetzen",
   "selectAllButtonLabel": "Alles auswählen",
   "tabSemanticsLabel": "Tab $tabIndex von $tabCount",
   "modalBarrierDismissLabel": "Schließen"
