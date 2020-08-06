@@ -570,9 +570,9 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     assert(child != null);
     if (paintOffset.dx < 0 || paintOffset.dy < 0)
       return true;
-    if ((paintOffset & child.size).left > size.width)
-      return true;
-    if ((paintOffset & child.size).bottom > size.height)
+
+    final Rect childRect = paintOffset & child.size;
+    if (childRect.left > size.width || childRect.bottom > size.height)
       return true;
 
     return false;
