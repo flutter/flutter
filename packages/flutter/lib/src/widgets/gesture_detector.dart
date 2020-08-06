@@ -1260,7 +1260,7 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
       if (tap.onTapDown != null)
         tap.onTapDown(TapDownDetails());
       if (tap.onTapUp != null)
-        tap.onTapUp(TapUpDetails());
+        tap.onTapUp(TapUpDetails(kind: PointerDeviceKind.unknown));
       if (tap.onTap != null)
         tap.onTap();
     };
