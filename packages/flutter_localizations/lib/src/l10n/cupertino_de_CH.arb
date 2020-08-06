@@ -18,7 +18,7 @@
   "timerPickerSecondLabelOther": "s",
   "cutButtonLabel": "Ausschneiden",
   "copyButtonLabel": "Kopieren",
-  "pasteButtonLabel": "Einsetzen",
+  "pasteButtonLabel": "Einfügen",
   "selectAllButtonLabel": "Alles auswählen",
   "modalBarrierDismissLabel": "Schliessen"
 }
