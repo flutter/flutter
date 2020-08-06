@@ -200,42 +200,53 @@ class AutocompleteController<T> {
 /// This is a core framework widget with very basic UI. Try using [Autocomplete]
 /// or [AutocompleteCupertino] before resorting to this widget.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=freeform}
 /// This example shows how to create a very basic autocomplete widget using the
 /// [buildField] and [buildResults] parameters.
 ///
-/// ```dart
-/// final AutocompleteController<String> _autocompleteController =
-///     AutocompleteController<String>(
-///       options: <String>['aardvark', 'baboon', 'chameleon'],
-///     );
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return AutocompleteCore(
-///     autocompleteController: _autocompleteController,
-///     buildField: (BuildContext context) {
-///       return TextFormField(
-///         controller: _autocompleteController.textEditingController,
-///       );
-///     },
-///     buildResults: (BuildContext context, OnSelectedAutocomplete<String> onSelected, List<String> results) {
-///       return ListView(
-///         children: results.map((String result) => GestureDetector(
-///           onTap: () {
-///             onSelected(result);
-///           },
-///           child: ListTile(
-///             title: Text(result),
-///           ),
-///         )).toList(),
-///       );
-///     },
-///   );
-/// }
+/// ```dart imports
+/// import 'package:flutter/widgets.dart';
+/// import 'package:flutter/material.dart';
 /// ```
 ///
+/// ```dart
+/// class AutocompleteBasicExample extends StatelessWidget {
+///   AutocompleteBasicExample({
+///     Key key,
+///   }) : super(key: key);
+///
+///   final AutocompleteController<String> _autocompleteController =
+///       AutocompleteController<String>(
+///         options: <String>['aardvark', 'baboon', 'chameleon'],
+///       );
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return AutocompleteCore(
+///       autocompleteController: _autocompleteController,
+///       buildField: (BuildContext context) {
+///         return TextFormField(
+///           controller: _autocompleteController.textEditingController,
+///         );
+///       },
+///       buildResults: (BuildContext context, OnSelectedAutocomplete<String> onSelected, List<String> results) {
+///         return ListView(
+///           children: results.map((String result) => GestureDetector(
+///             onTap: () {
+///               onSelected(result);
+///             },
+///             child: ListTile(
+///               title: Text(result),
+///             ),
+///           )).toList(),
+///         );
+///       },
+///     );
+///   }
+/// }
+/// ```
 /// {@end-tool}
+///
 /// {@tool dartpad --template=freeform}
 /// This example is similar to the previous example, but it uses a custom T data
 /// type instead of directly using String.
