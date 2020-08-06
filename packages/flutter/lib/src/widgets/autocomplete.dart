@@ -10,11 +10,12 @@ import 'basic.dart';
 import 'editable_text.dart';
 import 'framework.dart';
 
-/// A type for autocomplete search functions.
+/// A type for autocomplete filter functions.
 ///
-/// [AutocompleteController] uses a search function to search through
-/// [AutocompleteController.options] and return a subset as results.
-typedef AutocompleteSearchFunction<T> = List<T> Function(String query);
+/// [AutocompleteController] uses a filter function to filter
+/// [AutocompleteController.options] and return a subset as results, given some
+/// query string.
+typedef AutocompleteFilter<T> = List<T> Function(String query);
 
 /// A type for indicating the selection of an autocomplete result.
 typedef OnSelectedAutocomplete<T> = void Function(T result);
@@ -125,9 +126,9 @@ class AutocompleteController<T> {
   /// Create an instance of AutocompleteController.
   AutocompleteController({
     this.options,
-    this.search,
+    this.filter,
     TextEditingController textEditingController,
-  }) : assert(search != null || options != null, 'Must specify either options or search (or both).'),
+  }) : assert(filter != null || options != null, 'Must specify either options or filter (or both).'),
        _ownsTextEditingController = textEditingController == null,
        textEditingController = textEditingController ?? TextEditingController() {
     this.textEditingController.addListener(_onQueryChanged);
@@ -135,25 +136,25 @@ class AutocompleteController<T> {
 
   final bool _ownsTextEditingController;
 
-  /// All possible options that can be searched.
+  /// All possible options that can be selected.
   ///
-  /// If left null, a custom [search] method must be provided that handles the
-  /// options to be searched on its own.
+  /// If left null, a custom [filter] method must be provided that handles the
+  /// options to be filtered on its own.
   final List<T> options;
 
   /// The [TextEditingController] that represents the query.
   final TextEditingController textEditingController;
 
-  /// A search function that takes some [options] and returns a subset as
+  /// A filter function that takes some [options] and returns a subset as
   /// results.
   ///
   /// If [options] is null, then this field must not be null. This may be the
-  /// case when querying an external service for search results, for example.
+  /// case when querying an external service for filter results, for example.
   ///
-  /// Defaults to a simple string-matching search of [options].
-  final AutocompleteSearchFunction<T> search;
+  /// Defaults to a simple string-matching filter of [options].
+  final AutocompleteFilter<T> filter;
 
-  /// The current results being returned by [search].
+  /// The current results being returned by [filter].
   ///
   /// This is a [ValueNotifier], so it can be listened to for changes.
   final ValueNotifier<List<T>> results = ValueNotifier<List<T>>(<T>[]);
@@ -171,22 +172,22 @@ class AutocompleteController<T> {
 
   // Called when textEditingController reports a change in its value.
   void _onQueryChanged() {
-    final List<T> resultsValue = search == null
-        ? _searchByString(textEditingController.value.text)
-        : search(textEditingController.value.text);
+    final List<T> resultsValue = filter == null
+        ? _filterByString(textEditingController.value.text)
+        : filter(textEditingController.value.text);
     assert(resultsValue != null);
     results.value = resultsValue;
   }
 
-  // The default search function, if one wasn't supplied.
-  List<T> _searchByString(String query) {
+  // The default filter function, if one wasn't supplied.
+  List<T> _filterByString(String query) {
     return options
         .where((T option) => option.toString().contains(query))
         .toList();
   }
 }
 
-/// A widget for helping the user to search a list of options and select a
+/// A widget for helping the user to filter a list of options and select a
 /// result.
 ///
 /// This is a core framework widget with very basic UI. Try using [Autocomplete]
@@ -247,11 +248,11 @@ class AutocompleteController<T> {
 ///   final String email;
 ///   final String name;
 ///
-///   // When using a default search function, the query will be matched
+///   // When using a default filter function, the query will be matched
 ///   // directly with the output of this toString method. In this case,
-///   // including both the email and name allows the user to search by both.
-///   // If you wanted even more advanced search logic, you could pass a custom
-///   // search function into AutocompleteController.
+///   // including both the email and name allows the user to filter by both.
+///   // If you wanted even more advanced filter logic, you could pass a custom
+///   // filter function into AutocompleteController.
 ///   @override
 ///   String toString() {
 ///     return '$name, $email';
@@ -299,7 +300,7 @@ class AutocompleteController<T> {
 ///                     onSelected(result);
 ///                   },
 ///                   child: ListTile(
-///                     // Despite allowing search on both name and email, here
+///                     // Despite allowing filter on both name and email, here
 ///                     // only name is displayed in the results.
 ///                     title: Text(result.name),
 ///                   ),
@@ -335,7 +336,7 @@ class AutocompleteCore<T> extends StatefulWidget {
   /// Builds the field that is used to input the query.
   final AutocompleteFieldBuilder buildField;
 
-  /// Builds the selectable results of searching.
+  /// Builds the selectable results of filtering.
   final AutocompleteResultsBuilder<T> buildResults;
 
   /// Called when a result is selected by the user.

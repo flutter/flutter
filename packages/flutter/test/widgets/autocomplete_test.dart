@@ -47,8 +47,41 @@ void main() {
     User(name: 'Charlie', email: 'charlie123@gmail.com'),
   ];
 
+  group('AutocompleteController', () {
+    group('dispose', () {
+      testWidgets('disposes the TextEditingController when not passed in', (WidgetTester tester) async {
+        final AutocompleteController<String> autocompleteController =
+            AutocompleteController<String>(
+              options: kOptions,
+            );
+        expect(autocompleteController.textEditingController, isNotNull);
+
+        autocompleteController.dispose();
+        expect(() {
+          autocompleteController.textEditingController.addListener(() {});
+        }, throwsFlutterError);
+      });
+
+      testWidgets("doesn't dispose the TextEditingController when passed in", (WidgetTester tester) async {
+        final TextEditingController textEditingController = TextEditingController();
+        final AutocompleteController<String> autocompleteController =
+            AutocompleteController<String>(
+              options: kOptions,
+              textEditingController: textEditingController,
+            );
+        expect(autocompleteController.textEditingController, isNotNull);
+
+        autocompleteController.dispose();
+        expect(() {
+          autocompleteController.textEditingController.addListener(() {});
+        }, isNot(throwsException));
+        // No error thrown
+      });
+    });
+  });
+
   group('AutocompleteCore', () {
-    testWidgets('can search and select a list of string options', (WidgetTester tester) async {
+    testWidgets('can filter and select a list of string options', (WidgetTester tester) async {
       final GlobalKey fieldKey = GlobalKey();
       final GlobalKey resultsKey = GlobalKey();
       final AutocompleteController<String> autocompleteController =
@@ -109,7 +142,7 @@ void main() {
       expect(lastResults[5], 'northern white rhinocerous');
     });
 
-    testWidgets('can search and select a list of custom User options', (WidgetTester tester) async {
+    testWidgets('can filter and select a list of custom User options', (WidgetTester tester) async {
       final GlobalKey fieldKey = GlobalKey();
       final GlobalKey resultsKey = GlobalKey();
       final AutocompleteController<User> autocompleteController =
@@ -170,39 +203,6 @@ void main() {
       expect(find.byKey(resultsKey), findsOneWidget);
       expect(lastResults.length, 1);
       expect(lastResults[0], kOptionsUsers[1]);
-    });
-  });
-
-  group('AutocompleteController', () {
-    group('dispose', () {
-      testWidgets('disposes the TextEditingController when not passed in', (WidgetTester tester) async {
-        final AutocompleteController<String> autocompleteController =
-            AutocompleteController<String>(
-              options: kOptions,
-            );
-        expect(autocompleteController.textEditingController, isNotNull);
-
-        autocompleteController.dispose();
-        expect(() {
-          autocompleteController.textEditingController.addListener(() {});
-        }, throwsFlutterError);
-      });
-
-      testWidgets("doesn't dispose the TextEditingController when passed in", (WidgetTester tester) async {
-        final TextEditingController textEditingController = TextEditingController();
-        final AutocompleteController<String> autocompleteController =
-            AutocompleteController<String>(
-              options: kOptions,
-              textEditingController: textEditingController,
-            );
-        expect(autocompleteController.textEditingController, isNotNull);
-
-        autocompleteController.dispose();
-        expect(() {
-          autocompleteController.textEditingController.addListener(() {});
-        }, isNot(throwsException));
-        // No error thrown
-      });
     });
   });
 }
