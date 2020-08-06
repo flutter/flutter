@@ -349,6 +349,9 @@ class AutocompleteCore<T> extends StatefulWidget {
 
   /// The controller that provides access to the main autocomplete state and
   /// logic.
+  ///
+  /// The owner of autocompleteController must call
+  /// [AutocompleteController.dispose] on this when it's no longer needed.
   final AutocompleteController<T> autocompleteController;
 
   /// Builds the field that is used to input the query.
