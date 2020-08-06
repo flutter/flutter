@@ -71,14 +71,14 @@
   "dateRangePickerHelpText": "期間の選択",
   "calendarModeButtonLabel": "カレンダーに切り替え",
   "inputDateModeButtonLabel": "入力に切り替え",
-  "timePickerDialHelpText": "SELECT TIME",
-  "timePickerInputHelpText": "ENTER TIME",
-  "timePickerHourLabel": "Hour",
-  "timePickerMinuteLabel": "Minute",
-  "invalidTimeLabel": "Enter a valid time",
-  "dialModeButtonLabel": "Switch to dial picker mode",
-  "inputTimeModeButtonLabel": "Switch to text input mode",
+  "timePickerDialHelpText": "時刻の選択",
+  "timePickerInputHelpText": "時刻の入力",
+  "timePickerHourLabel": "時",
+  "timePickerMinuteLabel": "分",
+  "invalidTimeLabel": "有効な時刻を入力してください",
+  "dialModeButtonLabel": "ダイヤル選択ツール モードに切り替えます",
+  "inputTimeModeButtonLabel": "テキスト入力モードに切り替えます",
   "licensesPackageDetailTextZero": "No licenses",
-  "licensesPackageDetailTextOne": "1 license",
-  "licensesPackageDetailTextOther": "$licenseCount licenses"
+  "licensesPackageDetailTextOne": "ライセンス: 1 件",
+  "licensesPackageDetailTextOther": "ライセンス: $licenseCount 件"
 }
