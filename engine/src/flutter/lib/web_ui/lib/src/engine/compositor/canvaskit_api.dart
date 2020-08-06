@@ -43,7 +43,8 @@ class CanvasKit {
   external SkFontSlantEnum get FontSlant;
   external SkAnimatedImage MakeAnimatedImageFromEncoded(Uint8List imageData);
   external SkShaderNamespace get SkShader;
-  external SkMaskFilter MakeBlurMaskFilter(SkBlurStyle blurStyle, double sigma, bool respectCTM);
+  external SkMaskFilter MakeBlurMaskFilter(
+      SkBlurStyle blurStyle, double sigma, bool respectCTM);
   external SkColorFilterNamespace get SkColorFilter;
   external SkImageFilterNamespace get SkImageFilter;
   external SkPath MakePathFromOp(SkPath path1, SkPath path2, SkPathOp pathOp);
@@ -57,7 +58,8 @@ class CanvasKit {
     Uint16List? indices,
   );
   external SkParagraphBuilderNamespace get ParagraphBuilder;
-  external SkParagraphStyle ParagraphStyle(SkParagraphStyleProperties properties);
+  external SkParagraphStyle ParagraphStyle(
+      SkParagraphStyleProperties properties);
   external SkTextStyle TextStyle(SkTextStyleProperties properties);
 
   // Text decoration enum is embedded in the CanvasKit object itself.
@@ -68,7 +70,9 @@ class CanvasKit {
   // End of text decoration enum.
 
   external SkFontMgrNamespace get SkFontMgr;
-  external int GetWebGLContext(html.CanvasElement canvas, SkWebGLContextOptions options);
+  external TypefaceFontProviderNamespace get TypefaceFontProvider;
+  external int GetWebGLContext(
+      html.CanvasElement canvas, SkWebGLContextOptions options);
   external SkGrContext MakeGrContext(int glContext);
   external SkSurface MakeOnScreenGLSurface(
     SkGrContext grContext,
@@ -569,7 +573,6 @@ SkStrokeJoin toSkStrokeJoin(ui.StrokeJoin strokeJoin) {
   return _skStrokeJoins[strokeJoin.index];
 }
 
-
 @JS()
 class SkFilterQualityEnum {
   external SkFilterQuality get None;
@@ -593,7 +596,6 @@ final List<SkFilterQuality> _skFilterQualitys = <SkFilterQuality>[
 SkFilterQuality toSkFilterQuality(ui.FilterQuality filterQuality) {
   return _skFilterQualitys[filterQuality.index];
 }
-
 
 @JS()
 class SkTileModeEnum {
@@ -620,6 +622,7 @@ SkTileMode toSkTileMode(ui.TileMode mode) {
 @JS()
 class SkAnimatedImage {
   external int getFrameCount();
+
   /// Returns duration in milliseconds.
   external int getRepetitionCount();
   external int decodeNextFrame();
@@ -675,9 +678,7 @@ class SkShaderNamespace {
 }
 
 @JS()
-class SkShader {
-
-}
+class SkShader {}
 
 // This needs to be bound to top-level because SkPaint is initialized
 // with `new`. Also in Dart you can't write this:
@@ -873,6 +874,7 @@ Float32List _populateSkColor(SkFloat32List skColor, ui.Color color) {
 Float32List toSharedSkColor1(ui.Color color) {
   return _populateSkColor(_sharedSkColor1, color);
 }
+
 final SkFloat32List _sharedSkColor1 = mallocFloat32List(4);
 
 /// Unpacks the [color] into CanvasKit-compatible representation stored
@@ -883,6 +885,7 @@ final SkFloat32List _sharedSkColor1 = mallocFloat32List(4);
 Float32List toSharedSkColor2(ui.Color color) {
   return _populateSkColor(_sharedSkColor2, color);
 }
+
 final SkFloat32List _sharedSkColor2 = mallocFloat32List(4);
 
 /// Unpacks the [color] into CanvasKit-compatible representation stored
@@ -893,6 +896,7 @@ final SkFloat32List _sharedSkColor2 = mallocFloat32List(4);
 Float32List toSharedSkColor3(ui.Color color) {
   return _populateSkColor(_sharedSkColor3, color);
 }
+
 final SkFloat32List _sharedSkColor3 = mallocFloat32List(4);
 
 Uint32List toSkIntColorList(List<ui.Color> colors) {
@@ -1392,20 +1396,26 @@ class SkParagraphBuilderNamespace {
     SkParagraphStyle paragraphStyle,
     SkFontMgr? fontManager,
   );
+
+  external SkParagraphBuilder MakeFromFontProvider(
+    SkParagraphStyle paragraphStyle,
+    TypefaceFontProvider? fontManager,
+  );
 }
 
 @JS()
 class SkParagraphBuilder {
   external void addText(String text);
   external void pushStyle(SkTextStyle textStyle);
+  external void pushPaintStyle(
+      SkTextStyle textStyle, SkPaint foreground, SkPaint background);
   external void pop();
   external SkParagraph build();
   external void delete();
 }
 
 @JS()
-class SkParagraphStyle {
-}
+class SkParagraphStyle {}
 
 @JS()
 @anonymous
@@ -1433,9 +1443,7 @@ class SkParagraphStyleProperties {
 }
 
 @JS()
-class SkTextStyle {
-
-}
+class SkTextStyle {}
 
 @JS()
 @anonymous
@@ -1481,6 +1489,12 @@ class SkFontMgr {
   external void delete();
 }
 
+@JS('window.flutter_canvas_kit.TypefaceFontProvider')
+class TypefaceFontProvider extends SkFontMgr {
+  external TypefaceFontProvider();
+  external void registerFont(Uint8List font, String family);
+}
+
 @JS()
 class SkParagraph {
   external double getAlphabeticBaseline();
@@ -1519,7 +1533,7 @@ class SkTextRange {
 }
 
 @JS()
-class SkVertices { }
+class SkVertices {}
 
 @JS()
 @anonymous
@@ -1536,4 +1550,9 @@ class SkTonalColors {
 class SkFontMgrNamespace {
   // TODO(yjbanov): can this be made non-null? It returns null in our unit-tests right now.
   external SkFontMgr? FromData(List<Uint8List> fonts);
+}
+
+@JS()
+class TypefaceFontProviderNamespace {
+  external TypefaceFontProvider Make();
 }
