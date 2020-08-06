@@ -18,7 +18,7 @@ import 'theme_data.dart';
 /// [InputChip], [ChoiceChip], [FilterChip], and [ActionChip].
 ///
 /// A chip theme describes the color, shape and text styles for the chips it is
-/// applied to
+/// applied to.
 ///
 /// Descendant widgets obtain the current theme's [ChipThemeData] object using
 /// [ChipTheme.of]. When a widget uses [ChipTheme.of], it is automatically

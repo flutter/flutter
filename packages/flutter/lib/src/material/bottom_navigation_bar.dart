@@ -279,7 +279,7 @@ class BottomNavigationBar extends StatefulWidget {
   final IconThemeData selectedIconTheme;
 
   /// The size, opacity, and color of the icon in the currently unselected
-  /// [BottomNavigationBarItem.icon]s
+  /// [BottomNavigationBarItem.icon]s.
   ///
   /// If this is not provided, the size will default to [iconSize], the color
   /// will default to [unselectedItemColor].

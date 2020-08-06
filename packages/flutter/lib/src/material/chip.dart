@@ -1430,7 +1430,7 @@ class RawChip extends StatefulWidget
         CheckmarkableChipAttributes,
         DisabledChipAttributes,
         TappableChipAttributes {
-  /// Creates a RawChip
+  /// Creates a RawChip.
   ///
   /// The [onPressed] and [onSelected] callbacks must not both be specified at
   /// the same time.
