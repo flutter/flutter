@@ -447,8 +447,6 @@ void main() {
           children.add(Text(information.location));
         if (information.state != null)
           children.add(Text(information.state.toString()));
-        if (information.restorationData != null)
-          children.add(Text(information.restorationData.toString()));
         return Column(
           children: children,
         );
@@ -462,13 +460,10 @@ void main() {
     ));
     expect(find.text('initial'), findsOneWidget);
 
-    const Map<dynamic, dynamic> restorationData = <dynamic, dynamic>{'test': 'data'};
-
     // Pushes through the `pushRouteInformation` in the navigation method channel.
     const Map<String, dynamic> testRouteInformation = <String, dynamic>{
       'location': 'testRouteName',
       'state': 'state',
-      'restorationData': restorationData,
     };
     final ByteData routerMessage = const JSONMethodCodec().encodeMethodCall(
       const MethodCall('pushRouteInformation', testRouteInformation)
@@ -477,7 +472,6 @@ void main() {
     await tester.pump();
     expect(find.text('testRouteName'), findsOneWidget);
     expect(find.text('state'), findsOneWidget);
-    expect(find.text(restorationData.toString()), findsOneWidget);
 
     // Pushes through the `pushRoute` in the navigation method channel.
     const String testRouteName = 'newTestRouteName';

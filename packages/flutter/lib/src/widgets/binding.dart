@@ -18,6 +18,7 @@ import 'app.dart';
 import 'debug.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
+import 'router.dart';
 import 'widget_inspector.dart';
 
 export 'dart:ui' show AppLifecycleState, Locale;
@@ -109,10 +110,6 @@ abstract class WidgetsBindingObserver {
   /// Called when the host tells the application to push a new
   /// [RouteInformation] and a restoration state onto the router.
   ///
-  /// The [restorationData] contains the restoration information that the
-  /// platform wants this application to restore if this application opt for
-  /// state restoration. Otherwise, The [restorationData] will be null.
-  ///
   /// Observers are expected to return true if they were able to
   /// handle the notification. Observers are notified in registration
   /// order until one returns true.
@@ -121,13 +118,9 @@ abstract class WidgetsBindingObserver {
   /// [SystemChannels.navigation].
   ///
   /// The default implementation is to call the [didPushRoute] directly with the
-  /// input string [location].
-  Future<bool> didPushRouteInformation(
-    String location,
-    Object state,
-    Map<dynamic, dynamic> restorationData
-  ) {
-    return didPushRoute(location);
+  /// [RouteInformation.location].
+  Future<bool> didPushRouteInformation(RouteInformation routeInformation) {
+    return didPushRoute(routeInformation.location);
   }
 
   /// Called when the application's dimensions change. For example,
@@ -682,9 +675,10 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.from(_observers)) {
       if (
         await observer.didPushRouteInformation(
-          routeArguments['location'] as String,
-          routeArguments['state'] as Object,
-          routeArguments['restorationData'] as Map<dynamic, dynamic>
+          RouteInformation(
+            location: routeArguments['location'] as String,
+            state: routeArguments['state'] as Object,
+          )
         )
       )
       return;

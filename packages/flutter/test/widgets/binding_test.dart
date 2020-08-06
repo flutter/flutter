@@ -41,19 +41,11 @@ class PushRouteObserver with WidgetsBindingObserver {
 }
 
 class PushRouteInformationObserver with WidgetsBindingObserver {
-  String pushedRoute;
-  Object pushedState;
-  Map<dynamic, dynamic> pushedConfig;
+  RouteInformation pushedRouteInformation;
 
   @override
-  Future<bool> didPushRouteInformation(
-    String location,
-    Object state,
-    Map<dynamic, dynamic> restorationData
-  ) async {
-    pushedRoute = location;
-    pushedState = state;
-    pushedConfig = restorationData;
+  Future<bool> didPushRouteInformation(RouteInformation routeInformation) async {
+    pushedRouteInformation = routeInformation;
     return true;
   }
 }
@@ -131,14 +123,12 @@ void main() {
     const Map<String, dynamic> testRouteInformation = <String, dynamic>{
       'location': 'testRouteName',
       'state': 'state',
-      'restorationData': <dynamic, dynamic>{'test': 'config'}
     };
     final ByteData message = const JSONMethodCodec().encodeMethodCall(
       const MethodCall('pushRouteInformation', testRouteInformation));
     await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
-    expect(observer.pushedRoute, 'testRouteName');
-    expect(observer.pushedState, 'state');
-    expect(observer.pushedConfig['test'], 'config');
+    expect(observer.pushedRouteInformation.location, 'testRouteName');
+    expect(observer.pushedRouteInformation.state, 'state');
     WidgetsBinding.instance.removeObserver(observer);
   });
 

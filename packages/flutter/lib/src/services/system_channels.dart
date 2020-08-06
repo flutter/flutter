@@ -27,18 +27,17 @@ class SystemChannels {
   ///    operating system instructs the application to open a particular page.
   ///
   ///  * `pushRouteInformation`, which is called with a map, which contains a
-  ///    location string, a state object and a restoration config, when the
-  ///    operating system instructs the application to open a particular page.
-  ///    These parameters are store under the key`location`, `state` and
-  ///    `restorationData` in the map.
+  ///    location string and a state object, when the operating system instructs
+  ///    the application to open a particular page. These parameters are store
+  ///    under the key `location` and `state` in the map.
   ///
   /// The following methods are used for the opposite direction data flow. The
   /// framework notifies the engine about the route changes.
   ///
   ///  * `routeUpdated`, which is called when current route has changed.
   ///
-  ///  * `routeInformationUpdated`, which is called by the [Router] when
-  ///    applications navigate to new locations.
+  ///  * `routeInformationUpdated`, which is called by the [Router] when the
+  ///    application navigate to a new location.
   ///
   /// See also:
   ///

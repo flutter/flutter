@@ -19,9 +19,7 @@ import 'route_notification_messages.dart';
 /// A piece of routing information.
 ///
 /// The route information consists of a location string of the application and
-/// a state object that configures the application in that location. It also
-/// includes an additional restoration information which is only used when the
-/// web engine wants to restore the application to previous state.
+/// a state object that configures the application in that location.
 ///
 /// This information flows two ways, from the [RouteInformationProvider] to the
 /// [Router] or from the [Router] to [RouteInformationProvider].
@@ -58,14 +56,6 @@ class RouteInformation {
   ///
   /// The state must be serializable.
   final Object state;
-
-  /// The restoration information of the application.
-  ///
-  /// This is currently only used in web applications. The web engine will not
-  /// only provide [location] and [state] when it want to push a new route, but
-  /// it will also provide a restoration information if the application opts for
-  /// state restoration.
-  Map<dynamic, dynamic> get restorationData => null;
 }
 
 /// The dispatcher for opening and closing pages of an application.
@@ -1159,19 +1149,6 @@ abstract class RouteInformationProvider extends ValueListenable<RouteInformation
   void routerReportsNewRouteInformation(RouteInformation routeInformation) {}
 }
 
-/// This class is used by the [PlatformRouteInformationProvider] to carry
-/// additional restoration information from the platform.
-class _PlatformRouteInformation extends RouteInformation {
-  const _PlatformRouteInformation({
-    String location,
-    Object state,
-    this.restorationData
-  }) : super(location: location, state: state);
-
-  @override
-  final Map<dynamic, dynamic> restorationData;
-}
-
 /// The route information provider that propagates the platform route information changes.
 ///
 /// This provider also reports the new route information from the [Router] widget
@@ -1229,19 +1206,9 @@ class PlatformRouteInformationProvider extends RouteInformationProvider with Wid
   }
 
   @override
-  Future<bool> didPushRouteInformation(
-    String location,
-    Object state,
-    Map<dynamic, dynamic> restorationData,
-  ) async {
+  Future<bool> didPushRouteInformation(RouteInformation routeInformation) async {
     assert(hasListeners);
-    _platformReportsNewRouteInformation(
-      _PlatformRouteInformation(
-        location: location,
-        state: state,
-        restorationData: restorationData
-      ),
-    );
+    _platformReportsNewRouteInformation(routeInformation);
     return true;
   }
 

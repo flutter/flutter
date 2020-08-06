@@ -300,10 +300,13 @@ void main() {
     expect(find.text('update'), findsOneWidget);
 
     expect(log, hasLength(1));
+    // TODO(chunhtai): check routeInformationUpdated instead once the engine
+    // side is done.
     expect(
       log.last,
-      isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{
-        'routeInformation': convertRouteInformationToMap(const RouteInformation(location: 'update')),
+      isMethodCall('routeUpdated', arguments: <String, dynamic>{
+        'previousRouteName': null,
+        'routeName': 'update',
       }),
     );
   });
