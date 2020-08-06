@@ -59,6 +59,7 @@ typedef GestureTapDownCallback = void Function(TapDownDetails details);
 class TapUpDetails {
   /// The [globalPosition] argument must not be null.
   TapUpDetails({
+    required this.kind,
     this.globalPosition = Offset.zero,
     Offset? localPosition,
   }) : assert(globalPosition != null),
@@ -69,6 +70,9 @@ class TapUpDetails {
 
   /// The local position at which the pointer contacted the screen.
   final Offset localPosition;
+
+  /// The kind of the device that initiated the event.
+  final PointerDeviceKind kind;
 }
 
 /// Signature for when a pointer that will trigger a tap has stopped contacting
@@ -512,6 +516,7 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   @override
   void handleTapUp({ required PointerDownEvent down, required PointerUpEvent up}) {
     final TapUpDetails details = TapUpDetails(
+      kind: up.kind,
       globalPosition: up.position,
       localPosition: up.localPosition,
     );
