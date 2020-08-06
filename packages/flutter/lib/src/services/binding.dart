@@ -9,9 +9,11 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/src/services/hardware_keyboard.dart';
 
 import 'asset_bundle.dart';
 import 'binary_messenger.dart';
+import 'hardware_keyboard.dart';
 import 'restoration.dart';
 import 'system_channels.dart';
 
@@ -29,6 +31,8 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     _defaultBinaryMessenger = createBinaryMessenger();
     _restorationManager = createRestorationManager();
     window.onPlatformMessage = defaultBinaryMessenger.handlePlatformMessage;
+    _hardwareKeyboard = HardwareKeyboard();
+    window.onKeyData = _hardwareKeyboard.dispatchKeyData;
     initLicenses();
     SystemChannels.system.setMessageHandler((dynamic message) => handleSystemMessage(message as Object));
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
@@ -38,6 +42,8 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   /// The current [ServicesBinding], if one has been created.
   static ServicesBinding? get instance => _instance;
   static ServicesBinding? _instance;
+
+  late HardwareKeyboard _hardwareKeyboard;
 
   /// The default instance of [BinaryMessenger].
   ///
