@@ -774,7 +774,9 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     super.didUpdateWidget(oldWidget);
     if (_isWidgetEnabled(widget) != _isWidgetEnabled(oldWidget)) {
       if (enabled) {
-        _handleHoverChange();
+        // Don't call wigdet.onHover because many wigets, including the button
+        // widgets, apply setState to an ancestor context from onHover.
+        updateHighlight(_HighlightType.hover, value: _hovering, callOnHover: false);
       }
       _updateFocusHighlights();
     }
@@ -820,7 +822,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     return null;
   }
 
-  void updateHighlight(_HighlightType type, { @required bool value }) {
+  void updateHighlight(_HighlightType type, { @required bool value, bool callOnHover = true }) {
     final InkHighlight highlight = _highlights[type];
     void handleInkRemoval() {
       assert(_highlights[type] != null);
@@ -864,7 +866,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
           widget.onHighlightChanged(value);
         break;
       case _HighlightType.hover:
-        if (widget.onHover != null)
+        if (callOnHover && widget.onHover != null)
           widget.onHover(value);
         break;
       case _HighlightType.focus:

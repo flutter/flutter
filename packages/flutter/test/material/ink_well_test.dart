@@ -1244,15 +1244,50 @@ void main() {
 
     await tester.pumpWidget(buildFrame(enabled: true));
     await tester.pumpAndSettle();
-    // The InkWell was enabled while it contained the mouse, so its
-    // state changes to hovered.
-    expect(onHoverCount, 3);
-    expect(hover, true);
+    // The InkWell was enabled while it contained the mouse, however
+    // we do not call onHover() because it may call setState().
+    expect(onHoverCount, 2);
+    expect(hover, false);
 
     await gesture.moveTo(tester.getCenter(find.byType(InkWell)) - const Offset(1, 1));
     await tester.pumpAndSettle();
     // Moving the mouse a little within the InkWell doesn't change anything.
-    expect(onHoverCount, 3);
-    expect(hover, true);
+    expect(onHoverCount, 2);
+    expect(hover, false);
+  });
+
+  testWidgets('Changing InkWell.enabled should not trigger TextButton setState()', (WidgetTester tester) async {
+    Widget buildFrame({ bool enabled }) {
+      return Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: TextButton(
+              onPressed: enabled ? () { } : null,
+              child: const Text('button'),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(enabled: false));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(tester.getCenter(find.byType(TextButton)));
+    await tester.pumpAndSettle();
+
+    // Rebuilding the button with enabled:true causes InkWell.didUpdateWidget()
+    // to be called per the change in its enabled flag. If onHover() was called,
+    // this test would crash.
+    await tester.pumpWidget(buildFrame(enabled: true));
+    await tester.pumpAndSettle();
+
+    // Rebuild again, with enabled:false
+    await gesture.moveBy(const Offset(1, 1));
+    await tester.pumpWidget(buildFrame(enabled: false));
+    await tester.pumpAndSettle();
   });
 }
