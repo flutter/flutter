@@ -1,4 +1,4 @@
-Signature: 36f9ecdff8ad64bac7f3defb82c2bd54
+Signature: 555e73f724d6c25386ac16b8371ffbbc
 
 UNUSED LICENSES:
 
@@ -2890,12 +2890,11 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/limits.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/namespace.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/private.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/unsafe.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/decoding.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/decoding_and_validating.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/encoding.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/formatting.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/coding.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/internal.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/validating.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/function.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/function_internal.h
 FILE: ../../../fuchsia/sdk/linux/pkg/memfs/include/lib/memfs/memfs.h
