@@ -10,7 +10,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:e2e/e2e.dart';
-import 'package:end_perf/end_perf.dart';
+import 'package:e2e/e2e_perf.dart';
 
 import 'package:flutter_gallery/gallery/app.dart' show GalleryApp;
 import 'package:flutter_gallery/gallery/demos.dart';
