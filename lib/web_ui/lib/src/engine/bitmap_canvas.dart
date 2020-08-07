@@ -965,7 +965,9 @@ List<html.Element> _clipContent(List<_SaveClipEntry> clipStack,
         ..height = '${roundRect.bottom - clipOffsetY}px';
       setElementTransform(curElement, newClipTransform.storage);
     } else if (entry.path != null) {
-      curElement.style.transform = matrix4ToCssTransform(newClipTransform);
+      curElement.style
+        ..transform = matrix4ToCssTransform(newClipTransform)
+        ..transformOrigin = '0 0 0';
       String svgClipPath = createSvgClipDef(curElement as html.HtmlElement, entry.path!);
       final html.Element clipElement =
           html.Element.html(svgClipPath, treeSanitizer: _NullTreeSanitizer());
