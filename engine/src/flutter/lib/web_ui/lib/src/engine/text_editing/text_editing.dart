@@ -6,7 +6,7 @@
 part of engine;
 
 /// Make the content editable span visible to facilitate debugging.
-const bool _debugVisibleTextEditing = false;
+bool _debugVisibleTextEditing = false;
 
 /// The `keyCode` of the "Enter" key.
 const int _kReturnKeyCode = 13;
@@ -55,7 +55,8 @@ void _setStaticStyleAttributes(html.HtmlElement domElement) {
 /// element.
 ///
 /// They are assigned once during the creation of the DOM element.
-void _hideAutofillElements(html.HtmlElement domElement) {
+void _hideAutofillElements(html.HtmlElement domElement,
+    {bool isOffScreen = false}) {
   final html.CssStyleDeclaration elementStyle = domElement.style;
   elementStyle
     ..whiteSpace = 'pre-wrap'
@@ -73,6 +74,12 @@ void _hideAutofillElements(html.HtmlElement domElement) {
     ..textShadow = 'transparent'
     ..transformOrigin = '0 0 0';
 
+  if (isOffScreen) {
+    elementStyle
+      ..top = '-9999px'
+      ..left = '-9999px';
+  }
+
   /// This property makes the input's blinking cursor transparent.
   elementStyle.setProperty('caret-color', 'transparent');
 }
@@ -82,13 +89,26 @@ void _hideAutofillElements(html.HtmlElement domElement) {
 /// These values are to be used when autofill is enabled and there is a group of
 /// text fields with more than one text field.
 class EngineAutofillForm {
-  EngineAutofillForm({this.formElement, this.elements, this.items});
+  EngineAutofillForm(
+      {required this.formElement,
+      this.elements,
+      this.items,
+      this.formIdentifier = ''});
 
-  final html.FormElement? formElement;
+  final html.FormElement formElement;
 
   final Map<String, html.HtmlElement>? elements;
 
   final Map<String, AutofillInfo>? items;
+
+  /// Identifier for the form.
+  ///
+  /// It is constructed by concatenating unique ids of input elements on the
+  /// form.
+  ///
+  /// It is used for storing the form until submission.
+  /// See [formsOnTheDom].
+  final String formIdentifier;
 
   static EngineAutofillForm? fromFrameworkMessage(
     Map<String, dynamic>? focusedElementAutofill,
@@ -109,8 +129,21 @@ class EngineAutofillForm {
 
     // Validation is in the framework side.
     formElement.noValidate = true;
+    formElement.method = 'post';
+    formElement.action = '#';
+    formElement.addEventListener('submit', (e) {
+      e.preventDefault();
+    });
 
     _hideAutofillElements(formElement);
+
+    // We keep the ids in a list then sort them later, in case the text fields'
+    // locations are re-ordered on the framework side.
+    final List<String> ids = List.empty(growable: true);
+
+    // The focused text editing element will not be created here.
+    final AutofillInfo focusedElement =
+        AutofillInfo.fromFrameworkMessage(focusedElementAutofill);
 
     if (fields != null) {
       for (Map<String, dynamic> field in fields.cast<Map<String, dynamic>>()) {
@@ -120,9 +153,8 @@ class EngineAutofillForm {
             textCapitalization: TextCapitalizationConfig.fromInputConfiguration(
                 field['textCapitalization']));
 
-        // The focused text editing element will not be created here.
-        final AutofillInfo focusedElement =
-            AutofillInfo.fromFrameworkMessage(focusedElementAutofill);
+        ids.add(autofill.uniqueIdentifier);
+
         if (autofill.uniqueIdentifier != focusedElement.uniqueIdentifier) {
           EngineInputType engineInputType =
               EngineInputType.fromName(field['inputType']['name']);
@@ -137,22 +169,57 @@ class EngineAutofillForm {
           formElement.append(htmlElement);
         }
       }
+    } else {
+      // There is one input element in the form.
+      ids.add(focusedElement.uniqueIdentifier);
     }
+
+    ids.sort();
+    final StringBuffer idBuffer = StringBuffer();
+
+    // Add a seperator between element identifiers.
+    for (final String id in ids) {
+      if (idBuffer.length > 0) {
+          idBuffer.write('*');
+        }
+     idBuffer.write(id);
+    }
+
+    final String formIdentifier = idBuffer.toString();
+
+    // If a form with the same Autofill elements is already on the dom, remove
+    // it from DOM.
+    if (formsOnTheDom[formIdentifier] != null) {
+      final html.FormElement form =
+          formsOnTheDom[formIdentifier] as html.FormElement;
+      form.remove();
+    }
+
+    // In order to submit the form when Framework sends a `TextInput.commit`
+    // message, we add a submit button to the form.
+    final html.InputElement submitButton = html.InputElement();
+    _hideAutofillElements(submitButton, isOffScreen: true);
+    submitButton.className = 'submitBtn';
+    submitButton.type = 'submit';
+
+    formElement.append(submitButton);
 
     return EngineAutofillForm(
       formElement: formElement,
       elements: elements,
       items: items,
+      formIdentifier: formIdentifier,
     );
   }
 
   void placeForm(html.HtmlElement mainTextEditingElement) {
-    formElement!.append(mainTextEditingElement);
-    domRenderer.glassPaneElement!.append(formElement!);
+    formElement.append(mainTextEditingElement);
+    domRenderer.glassPaneElement!.append(formElement);
   }
 
-  void removeForm() {
-    formElement!.remove();
+  void storeForm() {
+    formsOnTheDom[formIdentifier] = this.formElement;
+    _hideAutofillElements(formElement, isOffScreen: true);
   }
 
   /// Listens to `onInput` event on the form fields.
@@ -226,9 +293,11 @@ class AutofillInfo {
   /// The current text and selection state of a text field.
   final EditingState editingState;
 
-  /// Unique value set by the developer.
+  /// Unique value set by the developer or generated by the framework.
   ///
   /// Used as id of the text field.
+  ///
+  /// An example an id generated by the framework: `EditableText-285283643`.
   final String uniqueIdentifier;
 
   /// Information on how should autofilled text capitalized.
@@ -272,20 +341,17 @@ class AutofillInfo {
     if (domElement is html.InputElement) {
       html.InputElement element = domElement;
       element.name = hint;
-      element.id = uniqueIdentifier;
+      element.id = hint;
       element.autocomplete = hint;
-      // Do not change the element type for the focused element.
-      if (focusedElement == false) {
-        if (hint.contains('password')) {
-          element.type = 'password';
-        } else {
-          element.type = 'text';
-        }
+      if (hint.contains('password')) {
+        element.type = 'password';
+      } else {
+        element.type = 'text';
       }
     } else if (domElement is html.TextAreaElement) {
       html.TextAreaElement element = domElement;
       element.name = hint;
-      element.id = uniqueIdentifier;
+      element.id = hint;
       element.setAttribute('autocomplete', hint);
     }
   }
@@ -543,7 +609,7 @@ class GloballyPositionedTextEditingStrategy extends DefaultTextEditingStrategy {
       _geometry?.applyToDomElement(focusedFormElement!);
       placeForm();
       // On Chrome, when a form is focused, it opens an autofill menu
-      // immeddiately.
+      // immediately.
       // Flutter framework sends `setEditableSizeAndTransform` for informing
       // the engine about the location of the text field. This call will
       // arrive after `show` call.
@@ -555,6 +621,53 @@ class GloballyPositionedTextEditingStrategy extends DefaultTextEditingStrategy {
     } else {
       _geometry?.applyToDomElement(domElement);
     }
+  }
+}
+
+/// A [TextEditingStrategy] for Safari Desktop Browser.
+///
+/// It places its [domElement] assuming no prior transform or sizing is applied
+/// to it.
+///
+/// In case of an autofill enabled form, it does not append the form element
+/// to the DOM, until the geometry information is updated.
+///
+/// This implementation is used by text editables when semantics is not
+/// enabled. With semantics enabled the placement is provided by the semantics
+/// tree.
+class SafariDesktopTextEditingStrategy extends DefaultTextEditingStrategy {
+  SafariDesktopTextEditingStrategy(HybridTextEditing owner) : super(owner);
+
+  /// Appending an element on the DOM for Safari Desktop Browser.
+  ///
+  /// This method is only called when geometry information is updated by
+  /// 'TextInput.setEditableSizeAndTransform' message.
+  ///
+  /// This method is similar to the [GloballyPositionedTextEditingStrategy].
+  /// The only part different: this method does not call `super.placeElement()`,
+  /// which in current state calls `domElement.focus()`.
+  ///
+  /// Making an extra `focus` request causes flickering in Safari.
+  @override
+  void placeElement() {
+    _geometry?.applyToDomElement(domElement);
+    if (hasAutofillGroup) {
+      placeForm();
+      // On Safari Desktop, when a form is focused, it opens an autofill menu
+      // immediately.
+      // Flutter framework sends `setEditableSizeAndTransform` for informing
+      // the engine about the location of the text field. This call will
+      // arrive after `show` call. Therefore form is placed, when
+      //  `setEditableSizeAndTransform` method is called and focus called on the
+      // form only after placing it to the correct position and only once after
+      // that. Calling focus multiple times causes flickering.
+      focusedFormElement!.focus();
+    }
+  }
+
+  @override
+  void initializeElementPlacement() {
+    domElement.focus();
   }
 }
 
@@ -611,6 +724,10 @@ abstract class DefaultTextEditingStrategy implements TextEditingStrategy {
 
   bool get hasAutofillGroup => _inputConfiguration.autofillGroup != null;
 
+  /// Whether the focused input element is part of a form.
+  bool get appendedToForm => _appendedToForm;
+  bool _appendedToForm = false;
+
   html.FormElement? get focusedFormElement =>
       _inputConfiguration.autofillGroup?.formElement;
 
@@ -636,12 +753,14 @@ abstract class DefaultTextEditingStrategy implements TextEditingStrategy {
 
     _setStaticStyleAttributes(domElement);
     _style?.applyToDomElement(domElement);
+
     if (!hasAutofillGroup) {
       // If there is an Autofill Group the `FormElement`, it will be appended to the
       // DOM later, when the first location information arrived.
       // Otherwise, on Blink based Desktop browsers, the autofill menu appears
       // on top left of the screen.
       domRenderer.glassPaneElement!.append(domElement);
+      _appendedToForm = false;
     }
 
     initializeElementPlacement();
@@ -709,9 +828,19 @@ abstract class DefaultTextEditingStrategy implements TextEditingStrategy {
       _subscriptions[i].cancel();
     }
     _subscriptions.clear();
-    domElement.remove();
+    // If focused element is a part of a form, it needs to stay on the DOM
+    // until the autofill context of the form is finalized.
+    // More details on `TextInput.finishAutofillContext` call.
+    if (_appendedToForm &&
+        _inputConfiguration.autofillGroup?.formElement != null) {
+      // Subscriptions are removed, listeners won't be triggered.
+      domElement.blur();
+      _hideAutofillElements(domElement, isOffScreen: true);
+      _inputConfiguration.autofillGroup?.storeForm();
+    } else {
+      domElement.remove();
+    }
     _domElement = null;
-    _inputConfiguration.autofillGroup?.removeForm();
   }
 
   @mustCallSuper
@@ -730,6 +859,7 @@ abstract class DefaultTextEditingStrategy implements TextEditingStrategy {
 
   void placeForm() {
     _inputConfiguration.autofillGroup!.placeForm(domElement);
+    _appendedToForm = true;
   }
 
   void _handleChange(html.Event event) {
@@ -857,8 +987,6 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
     inputConfig.inputType.configureInputMode(domElement);
     if (hasAutofillGroup) {
       placeForm();
-    } else {
-      domRenderer.glassPaneElement!.append(domElement);
     }
     inputConfig.textCapitalization.setAutocapitalizeAttribute(domElement);
   }
@@ -1045,8 +1173,6 @@ class FirefoxTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
         onChange: onChange, onAction: onAction);
     if (hasAutofillGroup) {
       placeForm();
-    } else {
-      domRenderer.glassPaneElement!.append(domElement);
     }
   }
 
@@ -1156,8 +1282,14 @@ class TextEditingChannel {
         break;
 
       case 'TextInput.finishAutofillContext':
-        // TODO(nurhan): Handle saving autofill information on web.
-        // https://github.com/flutter/flutter/issues/59378
+        final bool saveForm = call.arguments as bool;
+        // Close the text editing connection. Form is finalizing.
+        implementation.sendTextConnectionClosedToFrameworkIfAny();
+        if (saveForm) {
+          saveForms();
+        }
+        // Clean the forms from DOM after submitting them.
+        cleanForms();
         break;
 
       default:
@@ -1165,6 +1297,30 @@ class TextEditingChannel {
             'Unsupported method call on the flutter/textinput channel: ${call.method}');
     }
     window._replyToPlatformMessage(callback, codec.encodeSuccessEnvelope(true));
+  }
+
+  /// Used for submitting the forms attached on the DOM.
+  ///
+  /// Browser will save the information entered to the form.
+  ///
+  /// Called when the form is finalized with save option `true`.
+  /// See: https://github.com/flutter/flutter/blob/bf9f3a3dcfea3022f9cf2dfc3ab10b120b48b19d/packages/flutter/lib/src/services/text_input.dart#L1277
+  void saveForms() {
+    formsOnTheDom.forEach((String identifier, html.FormElement form) {
+      final html.InputElement submitBtn =
+          form.getElementsByClassName('submitBtn').first as html.InputElement;
+      submitBtn.click();
+    });
+  }
+
+  /// Used for removing the forms on the DOM.
+  ///
+  /// Called when the form is finalized.
+  void cleanForms() {
+    for (html.FormElement form in formsOnTheDom.values) {
+      form.remove();
+    }
+    formsOnTheDom.clear();
   }
 
   /// Sends the 'TextInputClient.updateEditingState' message to the framework.
@@ -1219,6 +1375,15 @@ class TextEditingChannel {
 /// Text editing singleton.
 final HybridTextEditing textEditing = HybridTextEditing();
 
+/// Map for storing forms left attached on the DOM.
+///
+/// Used for keeping the form elements on the DOM until user confirms to
+/// save or cancel them.
+///
+/// See: https://github.com/flutter/flutter/blob/bf9f3a3dcfea3022f9cf2dfc3ab10b120b48b19d/packages/flutter/lib/src/services/text_input.dart#L1277
+final Map<String, html.FormElement> formsOnTheDom =
+    Map<String, html.FormElement>();
+
 /// Should be used as a singleton to provide support for text editing in
 /// Flutter Web.
 ///
@@ -1236,6 +1401,8 @@ class HybridTextEditing {
     if (browserEngine == BrowserEngine.webkit &&
         operatingSystem == OperatingSystem.iOs) {
       this._defaultEditingElement = IOSTextEditingStrategy(this);
+    } else if (browserEngine == BrowserEngine.webkit) {
+      this._defaultEditingElement = SafariDesktopTextEditingStrategy(this);
     } else if (browserEngine == BrowserEngine.blink &&
         operatingSystem == OperatingSystem.android) {
       this._defaultEditingElement = AndroidTextEditingStrategy(this);

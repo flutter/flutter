@@ -123,14 +123,19 @@ class EngineWindow extends ui.Window {
       height = html.window.innerHeight! * devicePixelRatio;
       width = html.window.innerWidth! * devicePixelRatio;
     }
-    // First confirm both heught and width is effected.
-    if (_physicalSize!.height != height && _physicalSize!.width != width) {
-      // If prior to rotation height is bigger than width it should be the
-      // opposite after the rotation and vice versa.
-      if ((_physicalSize!.height > _physicalSize!.width && height < width) ||
-          (_physicalSize!.width > _physicalSize!.height && width < height)) {
-        // Rotation detected
-        return true;
+
+    // This method compares the new dimensions with the previous ones.
+    // Return false if the previous dimensions are not set.
+    if(_physicalSize != null) {
+      // First confirm both height and width are effected.
+      if (_physicalSize!.height != height && _physicalSize!.width != width) {
+        // If prior to rotation height is bigger than width it should be the
+        // opposite after the rotation and vice versa.
+        if ((_physicalSize!.height > _physicalSize!.width && height < width) ||
+            (_physicalSize!.width > _physicalSize!.height && width < height)) {
+          // Rotation detected
+          return true;
+        }
       }
     }
     return false;
