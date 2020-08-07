@@ -38,7 +38,7 @@ class Window;
 /// used by the engine to copy the currently accumulated window state so it can
 /// be referenced by the new runtime controller.
 ///
-class RuntimeController final : public PlatformConfigurationClient {
+class RuntimeController : public PlatformConfigurationClient {
  public:
   //----------------------------------------------------------------------------
   /// @brief      Creates a new instance of a runtime controller. This is
@@ -340,7 +340,7 @@ class RuntimeController final : public PlatformConfigurationClient {
   ///
   /// @return     True if root isolate running, False otherwise.
   ///
-  bool IsRootIsolateRunning() const;
+  virtual bool IsRootIsolateRunning() const;
 
   //----------------------------------------------------------------------------
   /// @brief      Dispatch the specified platform message to running root
@@ -351,7 +351,7 @@ class RuntimeController final : public PlatformConfigurationClient {
   /// @return     If the message was dispatched to the running root isolate.
   ///             This may fail is an isolate is not running.
   ///
-  bool DispatchPlatformMessage(fml::RefPtr<PlatformMessage> message);
+  virtual bool DispatchPlatformMessage(fml::RefPtr<PlatformMessage> message);
 
   //----------------------------------------------------------------------------
   /// @brief      Dispatch the specified pointer data message to the running
@@ -439,6 +439,10 @@ class RuntimeController final : public PlatformConfigurationClient {
   ///             indicates if one is specified by the root isolate.
   ///
   std::pair<bool, uint32_t> GetRootIsolateReturnCode();
+
+ protected:
+  /// Constructor for Mocks.
+  RuntimeController(RuntimeDelegate& client, TaskRunners p_task_runners);
 
  private:
   struct Locale {
