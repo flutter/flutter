@@ -162,6 +162,62 @@ void main() {
       ]);
     });
 
+    test('trailing spaces and new lines', () {
+      expect(
+        findBreaks('foo bar  '),
+        <LineBreakResult>[
+          LineBreakResult(4, 4, 3, LineBreakType.opportunity),
+          LineBreakResult(9, 9, 7, LineBreakType.endOfText),
+        ],
+      );
+
+      expect(
+        findBreaks('foo  \nbar\nbaz   \n'),
+        <LineBreakResult>[
+          LineBreakResult(6, 5, 3, LineBreakType.mandatory),
+          LineBreakResult(10, 9, 9, LineBreakType.mandatory),
+          LineBreakResult(17, 16, 13, LineBreakType.mandatory),
+          LineBreakResult(17, 17, 17, LineBreakType.endOfText),
+        ],
+      );
+    });
+
+    test('leading spaces', () {
+      expect(
+        findBreaks(' foo'),
+        <LineBreakResult>[
+          LineBreakResult(1, 1, 0, LineBreakType.opportunity),
+          LineBreakResult(4, 4, 4, LineBreakType.endOfText),
+        ],
+      );
+
+      expect(
+        findBreaks('   foo'),
+        <LineBreakResult>[
+          LineBreakResult(3, 3, 0, LineBreakType.opportunity),
+          LineBreakResult(6, 6, 6, LineBreakType.endOfText),
+        ],
+      );
+
+      expect(
+        findBreaks('  foo   bar'),
+        <LineBreakResult>[
+          LineBreakResult(2, 2, 0, LineBreakType.opportunity),
+          LineBreakResult(8, 8, 5, LineBreakType.opportunity),
+          LineBreakResult(11, 11, 11, LineBreakType.endOfText),
+        ],
+      );
+
+      expect(
+        findBreaks('  \n   foo'),
+        <LineBreakResult>[
+          LineBreakResult(3, 2, 0, LineBreakType.mandatory),
+          LineBreakResult(6, 6, 3, LineBreakType.opportunity),
+          LineBreakResult(9, 9, 9, LineBreakType.endOfText),
+        ],
+      );
+    });
+
     test('comprehensive test', () {
       for (int t = 0; t < data.length; t++) {
         final TestCase testCase = data[t];
@@ -220,9 +276,7 @@ class Line {
 
   @override
   bool operator ==(Object other) {
-    return other is Line
-        && other.text == text
-        && other.breakType == breakType;
+    return other is Line && other.text == text && other.breakType == breakType;
   }
 
   String get escapedText {
@@ -245,14 +299,22 @@ class Line {
 List<Line> split(String text) {
   final List<Line> lines = <Line>[];
 
-  int i = 0;
-  LineBreakType? breakType;
-  while (breakType != LineBreakType.endOfText) {
-    final LineBreakResult result = nextLineBreak(text, i);
-    lines.add(Line(text.substring(i, result.index), result.type));
-
-    i = result.index;
-    breakType = result.type;
+  int lastIndex = 0;
+  for (LineBreakResult brk in findBreaks(text)) {
+    lines.add(Line(text.substring(lastIndex, brk.index), brk.type));
+    lastIndex = brk.index;
   }
   return lines;
+}
+
+List<LineBreakResult> findBreaks(String text) {
+  final List<LineBreakResult> breaks = <LineBreakResult>[];
+
+  LineBreakResult brk = nextLineBreak(text, 0);
+  breaks.add(brk);
+  while (brk.type != LineBreakType.endOfText) {
+    brk = nextLineBreak(text, brk.index);
+    breaks.add(brk);
+  }
+  return breaks;
 }
