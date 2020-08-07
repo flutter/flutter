@@ -16,17 +16,11 @@ const double _baselineRatioHack = 1.1662499904632568;
 /// Signature of a function that takes a character and returns true or false.
 typedef CharPredicate = bool Function(int char);
 
-bool _whitespacePredicate(int char) {
-  final LineCharProperty prop = lineLookup.findForChar(char);
-  return prop == LineCharProperty.SP ||
-      prop == LineCharProperty.BK ||
-      prop == LineCharProperty.LF ||
-      prop == LineCharProperty.CR;
-}
-
 bool _newlinePredicate(int char) {
   final LineCharProperty prop = lineLookup.findForChar(char);
-  return prop == LineCharProperty.BK || prop == LineCharProperty.LF || prop == LineCharProperty.CR;
+  return prop == LineCharProperty.BK ||
+      prop == LineCharProperty.LF ||
+      prop == LineCharProperty.CR;
 }
 
 /// Manages [ParagraphRuler] instances and caches them per unique
@@ -689,8 +683,8 @@ double _measureSubstring(
   final double letterSpacing = style.letterSpacing ?? 0.0;
   final String sub =
       start == 0 && end == text.length ? text : text.substring(start, end);
-  final double width =
-      _canvasContext.measureText(sub).width! + letterSpacing * sub.length as double;
+  final double width = _canvasContext.measureText(sub).width! +
+      letterSpacing * sub.length as double;
 
   // What we are doing here is we are rounding to the nearest 2nd decimal
   // point. So 39.999423 becomes 40, and 11.243982 becomes 11.24.
@@ -737,8 +731,17 @@ class LinesCalculator {
   /// The lines that have been consumed so far.
   List<EngineLineMetrics> lines = <EngineLineMetrics>[];
 
-  int _lineStart = 0;
-  int _chunkStart = 0;
+  /// The last line break regardless of whether it was optional or mandatory, or
+  /// whether we took it or not.
+  LineBreakResult _lastBreak =
+      const LineBreakResult.sameIndex(0, LineBreakType.mandatory);
+
+  /// The last line break that actually caused a new line to exist.
+  LineBreakResult _lastTakenBreak =
+      const LineBreakResult.sameIndex(0, LineBreakType.mandatory);
+
+  int get _lineStart => _lastTakenBreak.index;
+  int get _chunkStart => _lastBreak.index;
   bool _reachedMaxLines = false;
 
   double? _cachedEllipsisWidth;
@@ -756,8 +759,8 @@ class LinesCalculator {
     final bool isHardBreak = brk.type == LineBreakType.mandatory ||
         brk.type == LineBreakType.endOfText;
     final int chunkEnd = brk.index;
-    final int chunkEndWithoutSpace =
-        _excludeTrailing(_text!, _chunkStart, chunkEnd, _whitespacePredicate);
+    final int chunkEndWithoutNewlines = brk.indexWithoutTrailingNewlines;
+    final int chunkEndWithoutSpace = brk.indexWithoutTrailingSpaces;
 
     // A single chunk of text could be force-broken into multiple lines if it
     // doesn't fit in a single line. That's why we need a loop.
@@ -801,8 +804,7 @@ class LinesCalculator {
           _text!.substring(_lineStart, breakingPoint) + _style.ellipsis!,
           startIndex: _lineStart,
           endIndex: chunkEnd,
-          endIndexWithoutNewlines:
-              _excludeTrailing(_text!, _chunkStart, chunkEnd, _newlinePredicate),
+          endIndexWithoutNewlines: chunkEndWithoutNewlines,
           hardBreak: false,
           width: widthOfResultingLine,
           widthWithTrailingSpaces: widthOfResultingLine,
@@ -823,12 +825,14 @@ class LinesCalculator {
           // [isHardBreak] check below) to break the line.
           break;
         }
-        _addLineBreak(lineEnd: breakingPoint, isHardBreak: false);
-        _chunkStart = breakingPoint;
+        _addLineBreak(LineBreakResult.sameIndex(
+          breakingPoint,
+          LineBreakType.opportunity,
+        ));
       } else {
         // The control case of current line exceeding [_maxWidth], we break the
         // line.
-        _addLineBreak(lineEnd: _chunkStart, isHardBreak: false);
+        _addLineBreak(_lastBreak);
       }
     }
 
@@ -837,41 +841,30 @@ class LinesCalculator {
     }
 
     if (isHardBreak) {
-      _addLineBreak(lineEnd: chunkEnd, isHardBreak: true);
+      _addLineBreak(brk);
     }
-    _chunkStart = chunkEnd;
+    _lastBreak = brk;
   }
 
-  void _addLineBreak({
-    required int lineEnd,
-    required bool isHardBreak,
-  }) {
-    final int endWithoutNewlines = _excludeTrailing(
-      _text!,
-      _lineStart,
-      lineEnd,
-      _newlinePredicate,
-    );
-    final int endWithoutSpace = _excludeTrailing(
-      _text!,
-      _lineStart,
-      endWithoutNewlines,
-      _whitespacePredicate,
-    );
+  void _addLineBreak(LineBreakResult brk) {
     final int lineNumber = lines.length;
-    final double lineWidth = measureSubstring(_lineStart, endWithoutSpace);
+    final double lineWidth =
+        measureSubstring(_lineStart, brk.indexWithoutTrailingSpaces);
     final double lineWidthWithTrailingSpaces =
-        measureSubstring(_lineStart, endWithoutNewlines);
+        measureSubstring(_lineStart, brk.indexWithoutTrailingNewlines);
     final double alignOffset = _calculateAlignOffsetForLine(
       paragraph: _paragraph,
       lineWidth: lineWidth,
       maxWidth: _maxWidth,
     );
+    final bool isHardBreak = brk.type == LineBreakType.mandatory ||
+        brk.type == LineBreakType.endOfText;
+
     final EngineLineMetrics metrics = EngineLineMetrics.withText(
-      _text!.substring(_lineStart, endWithoutNewlines),
+      _text!.substring(_lineStart, brk.indexWithoutTrailingNewlines),
       startIndex: _lineStart,
-      endIndex: lineEnd,
-      endIndexWithoutNewlines: endWithoutNewlines,
+      endIndex: brk.index,
+      endIndexWithoutNewlines: brk.indexWithoutTrailingNewlines,
       hardBreak: isHardBreak,
       width: lineWidth,
       widthWithTrailingSpaces: lineWidthWithTrailingSpaces,
@@ -879,7 +872,7 @@ class LinesCalculator {
       lineNumber: lineNumber,
     );
     lines.add(metrics);
-    _lineStart = lineEnd;
+    _lastTakenBreak = _lastBreak = brk;
     if (lines.length == _style.maxLines) {
       _reachedMaxLines = true;
     }
@@ -948,10 +941,13 @@ class MinIntrinsicCalculator {
   /// [value] will contain the final minimum intrinsic width.
   void update(LineBreakResult brk) {
     final int chunkEnd = brk.index;
-    final int chunkEndWithoutSpace =
-        _excludeTrailing(_text, _lastChunkEnd, chunkEnd, _whitespacePredicate);
     final double width = _measureSubstring(
-        _canvasContext, _style, _text, _lastChunkEnd, chunkEndWithoutSpace);
+      _canvasContext,
+      _style,
+      _text,
+      _lastChunkEnd,
+      brk.indexWithoutTrailingSpaces,
+    );
     if (width > value) {
       value = width;
     }
@@ -982,24 +978,17 @@ class MaxIntrinsicCalculator {
       return;
     }
 
-    final int hardLineEnd = brk.index;
-    final int hardLineEndWithoutNewlines = _excludeTrailing(
-      _text,
-      _lastHardLineEnd,
-      hardLineEnd,
-      _newlinePredicate,
-    );
     final double lineWidth = _measureSubstring(
       _canvasContext,
       _style,
       _text,
       _lastHardLineEnd,
-      hardLineEndWithoutNewlines,
+      brk.indexWithoutTrailingNewlines,
     );
     if (lineWidth > value) {
       value = lineWidth;
     }
-    _lastHardLineEnd = hardLineEnd;
+    _lastHardLineEnd = brk.index;
   }
 }
 
