@@ -449,7 +449,7 @@ class GetSemanticsIdResult extends Result {
   /// Creates a new [GetSemanticsId] result.
   const GetSemanticsIdResult(this.id);
 
-  /// The semantics id of the node;
+  /// The semantics id of the node.
   final int id;
 
   /// Deserializes this result from JSON.

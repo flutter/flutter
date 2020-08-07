@@ -428,8 +428,9 @@ class RangeMaintainingScrollPhysics extends ScrollPhysics {
     @required bool isScrolling,
     @required double velocity,
   }) {
-    if (velocity != 0.0 || ((oldPosition.minScrollExtent == newPosition.minScrollExtent) && (oldPosition.maxScrollExtent == newPosition.maxScrollExtent)))
+    if (velocity != 0.0 || ((oldPosition.minScrollExtent == newPosition.minScrollExtent) && (oldPosition.maxScrollExtent == newPosition.maxScrollExtent))) {
       return super.adjustPositionForNewDimensions(oldPosition: oldPosition, newPosition: newPosition, isScrolling: isScrolling, velocity: velocity);
+    }
     if (oldPosition.pixels < oldPosition.minScrollExtent) {
       final double oldDelta = oldPosition.minScrollExtent - oldPosition.pixels;
       return newPosition.minScrollExtent - oldDelta;
