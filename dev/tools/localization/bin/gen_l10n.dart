@@ -120,6 +120,22 @@ void main(List<String> arguments) {
       '\n\n'
       'When null, the JSON file will not be generated.'
   );
+  parser.addOption(
+    'project-dir',
+    valueHelp: 'absolute/path/to/flutter/project',
+    // TODO(shihaohong): modify help text
+    // help: 'When specified, the tool generates a JSON file containing the '
+    //   'tool\'s inputs and outputs named gen_l10n_inputs_and_outputs.json.'
+    //   '\n\n'
+    //   'This can be useful for keeping track of which files of the Flutter '
+    //   'project were used when generating the latest set of localizations. '
+    //   'For example, the Flutter tool\'s build system uses this file to '
+    //   'keep track of when to call gen_l10n during hot reload.\n\n'
+    //   'The value of this option is the directory where the JSON file will be '
+    //   'generated.'
+    //   '\n\n'
+    //   'When null, the JSON file will not be generated.'
+  );
 
   final argslib.ArgResults results = parser.parse(arguments);
   if (results['help'] == true) {
@@ -140,6 +156,7 @@ void main(List<String> arguments) {
   final String headerFile = results['header-file'] as String;
   final bool useDeferredLoading = results['use-deferred-loading'] as bool;
   final String inputsAndOutputsListPath = results['gen-inputs-and-outputs-list'] as String;
+  final String projectPathString = results['project-dir'] as String;
 
   const local.LocalFileSystem fs = local.LocalFileSystem();
   final LocalizationsGenerator localizationsGenerator = LocalizationsGenerator(fs);
@@ -157,6 +174,7 @@ void main(List<String> arguments) {
         headerFile: headerFile,
         useDeferredLoading: useDeferredLoading,
         inputsAndOutputsListPath: inputsAndOutputsListPath,
+        projectPathString: projectPathString,
       )
       ..loadResources()
       ..writeOutputFiles()
