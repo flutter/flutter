@@ -7,12 +7,6 @@
 
 set -e
 
-FLUTTER_ENGINE=android_profile_unopt_arm64
-
-if [ $# -eq 1 ]; then
-  FLUTTER_ENGINE=$1
-fi
-
 cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd
 
 pushd android
