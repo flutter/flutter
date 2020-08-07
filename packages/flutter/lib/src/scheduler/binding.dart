@@ -720,7 +720,7 @@ mixin SchedulerBinding on BindingBase {
       scheduleFrame();
   }
 
-  /// Ensures callbacks for [window.onBeginFrame] and [window.onDrawFrame]
+  /// Ensures callbacks for `window.onBeginFrame` and `window.onDrawFrame`
   /// are registered.
   @protected
   void ensureFrameCallbacksRegistered() {
