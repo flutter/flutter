@@ -855,6 +855,7 @@ Map<String, String> parseAdbDeviceProperties(String str) {
 ///
 /// Example output:
 ///
+/// ```
 /// Applications Memory Usage (in Kilobytes):
 /// Uptime: 441088659 Realtime: 521464097
 ///
@@ -906,6 +907,7 @@ Map<String, String> parseAdbDeviceProperties(String str) {
 ///          MEMORY_USED:        0
 ///   PAGECACHE_OVERFLOW:        0          MALLOC_SIZE:        0
 /// ...
+/// ```
 ///
 /// For more information, see https://developer.android.com/studio/command-line/dumpsys.
 @visibleForTesting

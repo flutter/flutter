@@ -2670,6 +2670,13 @@ void main() {
     final PageView pageView = tester.widget<PageView>(find.byType(PageView));
     expect(pageView.physics.toString().contains('ClampingScrollPhysics'), isFalse);
   });
+
+  testWidgets('Crash on dispose', (WidgetTester tester) async {
+    await tester.pumpWidget(Padding(padding: const EdgeInsets.only(right: 200.0), child: TabBarDemo()));
+    await tester.tap(find.byIcon(Icons.directions_bike));
+    // There was a time where this would throw an exception
+    // because we tried to send a notification on dispose.
+  });
 }
 
 class KeepAliveInk extends StatefulWidget {
@@ -2692,4 +2699,34 @@ class _KeepAliveInkState extends State<KeepAliveInk> with AutomaticKeepAliveClie
 
   @override
   bool get wantKeepAlive => true;
+}
+
+class TabBarDemo extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: DefaultTabController(
+        length: 3,
+        child: Scaffold(
+          appBar: AppBar(
+            bottom: const TabBar(
+              tabs: <Widget>[
+                Tab(icon: Icon(Icons.directions_car)),
+                Tab(icon: Icon(Icons.directions_transit)),
+                Tab(icon: Icon(Icons.directions_bike)),
+              ],
+            ),
+            title: const Text('Tabs Demo'),
+          ),
+          body: const TabBarView(
+            children: <Widget>[
+              Icon(Icons.directions_car),
+              Icon(Icons.directions_transit),
+              Icon(Icons.directions_bike),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }

@@ -109,6 +109,35 @@ void main() {
     tap.dispose();
   });
 
+  testGesture('Details contain the correct device kind', (GestureTester tester) {
+    final TapGestureRecognizer tap = TapGestureRecognizer();
+
+    TapDownDetails lastDownDetails;
+    TapUpDetails lastUpDetails;
+
+    tap.onTapDown = (TapDownDetails details) {
+      lastDownDetails = details;
+    };
+    tap.onTapUp = (TapUpDetails details) {
+      lastUpDetails = details;
+    };
+
+    const PointerDownEvent mouseDown =
+        PointerDownEvent(pointer: 1, kind: PointerDeviceKind.mouse);
+    const PointerUpEvent mouseUp =
+        PointerUpEvent(pointer: 1, kind: PointerDeviceKind.mouse);
+
+    tap.addPointer(mouseDown);
+    tester.closeArena(1);
+    tester.route(mouseDown);
+    expect(lastDownDetails.kind, PointerDeviceKind.mouse);
+
+    tester.route(mouseUp);
+    expect(lastUpDetails.kind, PointerDeviceKind.mouse);
+
+    tap.dispose();
+  });
+
   testGesture('No duplicate tap events', (GestureTester tester) {
     final TapGestureRecognizer tap = TapGestureRecognizer();
 

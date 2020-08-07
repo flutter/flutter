@@ -67,11 +67,8 @@ class BasicMessageChannel<T> {
   ///
   /// The handler's return value is sent back to the platform plugins as a
   /// message reply. It may be null.
-  void setMessageHandler(Future<T> handler(T message)) {
-    // Note: handler has a non-nullable type, but might be null when running
-    // with weak checking, so we need to null check it anyway (and ignore the
-    // warning that the null-handling logic is dead code).
-    if (handler == null) { // ignore: dead_code
+  void setMessageHandler(Future<T> Function(T message)? handler) {
+    if (handler == null) {
       binaryMessenger.setMessageHandler(name, null);
     } else {
       binaryMessenger.setMessageHandler(name, (ByteData? message) async {
@@ -91,11 +88,8 @@ class BasicMessageChannel<T> {
   ///
   /// This is intended for testing. Messages intercepted in this manner are not
   /// sent to platform plugins.
-  void setMockMessageHandler(Future<T> handler(T message)) {
-    // Note: handler has a non-nullable type, but might be null when running
-    // with weak checking, so we need to null check it anyway (and ignore the
-    // warning that the null-handling logic is dead code).
-    if (handler == null) { // ignore: dead_code
+  void setMockMessageHandler(Future<T> Function(T message)? handler) {
+    if (handler == null) {
       binaryMessenger.setMockMessageHandler(name, null);
     } else {
       binaryMessenger.setMockMessageHandler(name, (ByteData? message) async {
@@ -396,7 +390,7 @@ class MethodChannel {
   ///
   /// This method is useful for tests or test harnesses that want to assert the
   /// handler for the specified channel has not been altered by a previous test.
-  bool checkMethodCallHandler(Future<dynamic> handler(MethodCall call)) => _methodChannelHandlers[this] == handler;
+  bool checkMethodCallHandler(Future<dynamic> Function(MethodCall call)? handler) => _methodChannelHandlers[this] == handler;
 
   /// Sets a mock callback for intercepting method invocations on this channel.
   ///
@@ -416,15 +410,11 @@ class MethodChannel {
   /// return value of the call. The value will be encoded using
   /// [MethodCodec.encodeSuccessEnvelope], to act as if platform plugin had
   /// returned that value.
-  void setMockMethodCallHandler(Future<dynamic> handler(MethodCall call)) {
+  void setMockMethodCallHandler(Future<dynamic> Function(MethodCall call)? handler) {
     _methodChannelMockHandlers[this] = handler;
-    // Note: handler has a non-nullable type, but might be null when running
-    // with weak checking, so we need to null check it anyway (and ignore the
-    // warning that the null-handling logic is dead code).
     binaryMessenger.setMockMessageHandler(
       name,
-      handler == null ? null // ignore: dead_code
-      : (ByteData? message) => _handleAsMethodCall(message, handler),
+      handler == null ? null : (ByteData? message) => _handleAsMethodCall(message, handler),
     );
   }
 
@@ -433,7 +423,7 @@ class MethodChannel {
   ///
   /// This method is useful for tests or test harnesses that want to assert the
   /// handler for the specified channel has not been altered by a previous test.
-  bool checkMockMethodCallHandler(Future<dynamic> handler(MethodCall call)) => _methodChannelMockHandlers[this] == handler;
+  bool checkMockMethodCallHandler(Future<dynamic> Function(MethodCall call)? handler) => _methodChannelMockHandlers[this] == handler;
 
   Future<ByteData?> _handleAsMethodCall(ByteData? message, Future<dynamic> handler(MethodCall call)) async {
     final MethodCall call = codec.decodeMethodCall(message);

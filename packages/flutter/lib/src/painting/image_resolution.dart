@@ -75,7 +75,7 @@ const String _kAssetManifestFileName = 'AssetManifest.json';
 ///     - icons/heart.png
 /// ```
 ///
-/// Then, to fetch the image, use
+/// Then, to fetch the image, use:
 /// ```dart
 /// AssetImage('icons/heart.png')
 /// ```
