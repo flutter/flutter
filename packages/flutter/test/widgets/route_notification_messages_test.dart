@@ -295,6 +295,7 @@ void main() {
     // to the web engine.
     delegate.routeInformation = const RouteInformation(
       location: 'update',
+      state: 'state',
     );
     await tester.pump();
     expect(find.text('update'), findsOneWidget);
@@ -304,9 +305,9 @@ void main() {
     // side is done.
     expect(
       log.last,
-      isMethodCall('routeUpdated', arguments: <String, dynamic>{
-        'previousRouteName': null,
-        'routeName': 'update',
+      isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{
+        'location': 'update',
+        'state': 'state',
       }),
     );
   });

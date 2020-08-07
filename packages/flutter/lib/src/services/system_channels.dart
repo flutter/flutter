@@ -28,7 +28,7 @@ class SystemChannels {
   ///
   ///  * `pushRouteInformation`, which is called with a map, which contains a
   ///    location string and a state object, when the operating system instructs
-  ///    the application to open a particular page. These parameters are store
+  ///    the application to open a particular page. These parameters are stored
   ///    under the key `location` and `state` in the map.
   ///
   /// The following methods are used for the opposite direction data flow. The
@@ -48,7 +48,7 @@ class SystemChannels {
   ///    [Navigator.push], [Navigator.pushReplacement], [Navigator.pop] and
   ///    [Navigator.replace], utilize this channel's methods to send route
   ///    change information from framework to engine.
-  static const MethodChannel navigation = MethodChannel(
+  static const MethodChannel navigation = OptionalMethodChannel(
       'flutter/navigation',
       JSONMethodCodec(),
   );

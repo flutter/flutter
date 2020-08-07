@@ -4,7 +4,6 @@
 
 // @dart = 2.8
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'router.dart';
 
@@ -22,28 +21,17 @@ class RouteNotificationMessages {
   ///  * [SystemNavigator.routeInformationUpdated], which handles subsequent
   ///    navigation requests.
   static void notifyRouteInformationChange(RouteInformation routeInformation) {
-    if(kIsWeb) {
-      SystemNavigator.routeInformationUpdated(
-        _convertRouteInformationToMap(routeInformation)
-      );
-    } else {
-      // No op.
-    }
-  }
-
-  static Map<String, dynamic> _convertRouteInformationToMap(RouteInformation routeInformation) {
-    return <String, dynamic>{
-      'location': routeInformation.location,
-      'state': routeInformation.state,
-    };
+    SystemNavigator.routeInformationUpdated(
+      location: routeInformation.location,
+      state: routeInformation.state,
+    );
   }
 
   /// When the engine is Web notify the platform for a route change.
   static void maybeNotifyRouteChange(String routeName, String previousRouteName) {
-    if(kIsWeb) {
-      SystemNavigator.routeUpdated(routeName, previousRouteName);
-    } else {
-      // No op.
-    }
+    SystemNavigator.routeUpdated(
+      routeName: routeName,
+      previousRouteName: previousRouteName
+    );
   }
 }
