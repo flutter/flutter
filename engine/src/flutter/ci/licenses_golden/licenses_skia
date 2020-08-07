@@ -1,4 +1,4 @@
-Signature: 7c94bd99f34de6a500998a8c196bd2cc
+Signature: 604e55c410460cdcea23cc8fb3a9222a
 
 UNUSED LICENSES:
 
@@ -1453,17 +1453,11 @@ FILE: ../../../third_party/skia/src/core/SkOrderedReadBuffer.h
 FILE: ../../../third_party/skia/src/ports/SkTLS_pthread.cpp
 FILE: ../../../third_party/skia/src/ports/SkTLS_win.cpp
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_fp.dehydrated.sksl
-FILE: ../../../third_party/skia/src/sksl/generated/sksl_frag.c.inc
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_frag.dehydrated.sksl
-FILE: ../../../third_party/skia/src/sksl/generated/sksl_geom.c.inc
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_geom.dehydrated.sksl
-FILE: ../../../third_party/skia/src/sksl/generated/sksl_gpu.c.inc
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_gpu.dehydrated.sksl
-FILE: ../../../third_party/skia/src/sksl/generated/sksl_interp.c.inc
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_interp.dehydrated.sksl
-FILE: ../../../third_party/skia/src/sksl/generated/sksl_pipeline.c.inc
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_pipeline.dehydrated.sksl
-FILE: ../../../third_party/skia/src/sksl/generated/sksl_vert.c.inc
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_vert.dehydrated.sksl
 FILE: ../../../third_party/skia/src/sksl/lex/sksl.lex
 FILE: ../../../third_party/skia/src/sksl/sksl_fp_raw.sksl
@@ -3823,7 +3817,6 @@ FILE: ../../../third_party/skia/src/sksl/SkSLSectionAndParameterHelper.h
 FILE: ../../../third_party/skia/src/sksl/SkSLString.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLString.h
 FILE: ../../../third_party/skia/src/sksl/SkSLStringStream.h
-FILE: ../../../third_party/skia/src/sksl/generated/sksl_fp.c.inc
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_fp.sksl
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLEnum.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLSetting.cpp
