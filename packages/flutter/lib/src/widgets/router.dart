@@ -9,12 +9,12 @@ import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 
 import 'basic.dart';
 import 'binding.dart';
 import 'framework.dart';
 import 'navigator.dart';
-import 'route_notification_messages.dart';
 
 /// A piece of routing information.
 ///
@@ -1153,7 +1153,7 @@ abstract class RouteInformationProvider extends ValueListenable<RouteInformation
 ///
 /// This provider also reports the new route information from the [Router] widget
 /// back to engine using message channel method, the
-/// [RouteNotificationMessages.maybeNotifyRouteChange].
+/// [SystemNavigator.routeInformationUpdated].
 class PlatformRouteInformationProvider extends RouteInformationProvider with WidgetsBindingObserver, ChangeNotifier {
   /// Create a platform route information provider.
   ///
@@ -1165,7 +1165,10 @@ class PlatformRouteInformationProvider extends RouteInformationProvider with Wid
 
   @override
   void routerReportsNewRouteInformation(RouteInformation routeInformation) {
-    RouteNotificationMessages.notifyRouteInformationChange(routeInformation);
+    SystemNavigator.routeInformationUpdated(
+      location: routeInformation.location,
+      state: routeInformation.state,
+    );
     _value = routeInformation;
   }
 

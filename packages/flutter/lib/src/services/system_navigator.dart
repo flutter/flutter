@@ -39,7 +39,7 @@ class SystemNavigator {
   /// Notifies the platform for a route information change.
   ///
   /// On Web, creates a new browser history entry and update URL with the route
-  /// information stores in the [args].
+  /// information.
   static void routeInformationUpdated({
     required String location,
     Object? state
