@@ -218,7 +218,7 @@ class ChangeNotifier implements Listenable {
     if (_listeners!.isEmpty)
       return;
 
-    final List<_ListenerEntry> localListeners = _listeners!.toList(growable: false);
+    final List<_ListenerEntry> localListeners = List<_ListenerEntry>.from(_listeners!);
 
     for (final _ListenerEntry entry in localListeners) {
       try {
