@@ -23,7 +23,7 @@ void main() async {
   // Commit a recording canvas to a bitmap, and compare with the expected
   Future<void> _checkScreenshot(RecordingCanvas rc, String fileName,
       {Rect region = const Rect.fromLTWH(0, 0, 500, 500),
-        double maxDiffRatePercent = 0.0}) async {
+        double maxDiffRatePercent = 0.0, bool write = false}) async {
     final EngineCanvas engineCanvas = BitmapCanvas(screenRect);
 
     rc.endRecording();
@@ -35,7 +35,7 @@ void main() async {
       sceneElement.append(engineCanvas.rootElement);
       html.document.body.append(sceneElement);
       await matchGoldenFile('$fileName.png',
-          region: region, maxDiffRatePercent: maxDiffRatePercent);
+          region: region, maxDiffRatePercent: maxDiffRatePercent, write: write);
     } finally {
       // The page is reused across tests, so remove the element after taking the
       // Scuba screenshot.
@@ -373,6 +373,28 @@ void main() async {
       // Scuba screenshot.
       sceneElement.remove();
     }
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/61691
+  //
+  // The bug in bitmap_canvas.dart was that when we transformed and clipped
+  // the image we did not apply `transform-origin: 0 0 0` to the clipping
+  // element which resulted in an undesirable offset.
+  test('Paints clipped and transformed image', () async {
+    final Rect region = const Rect.fromLTRB(0, 0, 60, 70);
+    final RecordingCanvas canvas = RecordingCanvas(region);
+    canvas.translate(10, 10);
+    canvas.transform(Matrix4.rotationZ(0.4).storage);
+    canvas.clipPath(Path()
+      ..moveTo(10, 10)
+      ..lineTo(50, 10)
+      ..lineTo(50, 30)
+      ..lineTo(10, 30)
+      ..close()
+    );
+    canvas.drawImage(createNineSliceImage(), Offset.zero, Paint());
+    await _checkScreenshot(canvas, 'draw_clipped_and_transformed_image', region: region,
+        maxDiffRatePercent: 1.0);
   });
 }
 
