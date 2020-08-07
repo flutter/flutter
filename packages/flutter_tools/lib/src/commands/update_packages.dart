@@ -28,6 +28,7 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'flutter_gallery_assets': '^0.2.0',
   'mockito': '^4.1.0',  // Prevent mockito from downgrading to 4.0.0
   'vm_service_client': '0.2.6+2', // Final version before being marked deprecated.
+  'vm_service': '4.1.0', // TODO(CareF): remove this when dwds updates (#63117)
   'video_player': '0.10.6', // 0.10.7 fails a gallery smoke test for toString.
   'flutter_template_images': '1.0.1', // Must always exactly match flutter_tools template.
   'shelf': '0.7.5',

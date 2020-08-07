@@ -872,7 +872,7 @@ Iterable<String> findApkFilesModule(
 /// Returns the APK files for a given [FlutterProject] and [AndroidBuildInfo].
 ///
 /// The flutter.gradle plugin will copy APK outputs into:
-/// $buildDir/app/outputs/flutter-apk/app-<abi>-<flavor-flag>-<build-mode-flag>.apk
+/// `$buildDir/app/outputs/flutter-apk/app-<abi>-<flavor-flag>-<build-mode-flag>.apk`
 @visibleForTesting
 Iterable<String> listApkPaths(
   AndroidBuildInfo androidBuildInfo,
