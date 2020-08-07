@@ -568,7 +568,14 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
 
   bool _shouldClipAtPaintOffset(Offset paintOffset) {
     assert(child != null);
-    return paintOffset < Offset.zero || !(Offset.zero & size).contains((paintOffset & child.size).bottomRight);
+    if (paintOffset.dx < 0 || paintOffset.dy < 0)
+      return true;
+
+    final Rect childRect = paintOffset & child.size;
+    if (childRect.left > size.width || childRect.bottom > size.height)
+      return true;
+
+    return false;
   }
 
   @override

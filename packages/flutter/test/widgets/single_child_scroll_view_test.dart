@@ -40,6 +40,19 @@ class TestScrollController extends ScrollController {
 }
 
 void main() {
+  testWidgets('SingleChildScrollView does not clipRect when the child size equals parent size', (WidgetTester tester) async {
+    await tester.pumpWidget(SingleChildScrollView(child: Container(height: 600.0)));
+
+    // 1st, check that the render object has received the default clip behavior.
+    final dynamic renderObject = tester.allRenderObjects.where((RenderObject o) => o.runtimeType.toString() == '_RenderSingleChildViewport').first;
+    expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+
+    // 2nd, check that the painting context does not call pushClipRect.
+    final TestClipPaintingContext context = TestClipPaintingContext();
+    renderObject.paint(context, Offset.zero);
+    expect(context.clipBehavior, equals(Clip.none));
+  });
+
   testWidgets('SingleChildScrollView respects clipBehavior', (WidgetTester tester) async {
     await tester.pumpWidget(SingleChildScrollView(child: Container(height: 2000.0)));
 
