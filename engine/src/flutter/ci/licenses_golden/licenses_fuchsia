@@ -1,4 +1,4 @@
-Signature: 40a429e51f435766f97bfdf6c2551674
+Signature: 36f9ecdff8ad64bac7f3defb82c2bd54
 
 UNUSED LICENSES:
 
@@ -2595,7 +2595,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/module_manifest.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/puppet_master.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/story_command.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/story_options.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/story_visibility_state.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.http/client.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net/net.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.process/launcher.fidl
@@ -3209,6 +3208,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/pointer.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.pointerinjector/config.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.pointerinjector/device.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.pointerinjector/event.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.policy/display_backlight.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/view_ref.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/view_ref_focused.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/view_ref_installed.fidl
