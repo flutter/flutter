@@ -6,7 +6,7 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/src/foundation/observer_list.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
@@ -206,7 +206,7 @@ class TabController extends ChangeNotifier {
   /// [TabBarView.children]'s length.
   final int length;
 
-  final ObserverList<AnimationStartedListener> _animationStartedListeners = ObserverList<AnimationStartedListener>();
+  final ObserverList<IndexChangeStartedListener> _indexChangeStartedListeners = ObserverList<IndexChangeStartedListener>();
 
   void _changeIndex(int value, { Duration duration, Curve curve }) {
     assert(value != null);
@@ -219,10 +219,7 @@ class TabController extends ChangeNotifier {
     _index = value;
     if (duration != null) {
       _indexIsChangingCount += 1;
-      // need to call this before notifyListeners() because
-      // TabBar needs to depend on both listeners, and it should receive
-      // AnimationStartedListener first to animate properly.
-      _notifyAnimationStartedListeners(duration, curve);
+      _notifyIndexChangeStartedListeners(_index, duration: duration, curve: curve);
       notifyListeners(); // Because the value of indexIsChanging may have changed.
       _animationController
         .animateTo(_index.toDouble(), duration: duration, curve: curve)
@@ -231,46 +228,42 @@ class TabController extends ChangeNotifier {
           notifyListeners();
         });
     } else {
-      final bool wasIndexChanging = _indexIsChangingCount > 0;
       _indexIsChangingCount += 1;
-      // should only notify AnimationStartedListener when
-      // it was not called by ScrollEndNotification or
-      // index was changing before (so that TabBar and TabBarView will start a new animation with new target index.)
-      // This happens when controller.index = ? is called while animation was ongoing.
-      if (_animationController.value != _index.toDouble() || wasIndexChanging) {
-        _notifyAnimationStartedListeners(kTabScrollDuration, Curves.ease);
-      }
+      _notifyIndexChangeStartedListeners(_index);
       _animationController.value = _index.toDouble();
       _indexIsChangingCount -= 1;
       notifyListeners();
     }
   }
 
-  void _notifyAnimationStartedListeners(Duration duration, Curve curve) {
-    final List<AnimationStartedListener> localListeners = List<AnimationStartedListener>.from(_animationStartedListeners);
-    for (final AnimationStartedListener listener in localListeners) {
-      if (_animationStartedListeners.contains(listener))
-        listener(duration, curve);
+  void _notifyIndexChangeStartedListeners(int index, {Duration duration, Curve curve}) {
+    final List<IndexChangeStartedListener> localListeners = List<IndexChangeStartedListener>.from(_indexChangeStartedListeners);
+    for (final IndexChangeStartedListener listener in localListeners) {
+      if (_indexChangeStartedListeners.contains(listener))
+        listener(index, duration, curve);
     }
   }
 
-  /// Calls listener every time the animation starts by setting [index] or [animateTo].
-  /// When setting [index], duration is always [kTabScrollDuration] and
-  /// curve is always [Curves.ease].
+  /// Calls listener every time the index starts changing by setting [index] or [animateTo].
+  /// When setting [index], duration and curve are null.
   ///
-  /// Listeners can be removed with [removeAnimationStartedListener].
-  void addAnimationStartedListener(AnimationStartedListener listener) {
-    _animationStartedListeners.add(listener);
+  /// if `listener` is currently registered as a listener, this
+  /// method does nothing.
+  ///
+  /// Listeners can be removed with [removeIndexChangeStartedListener].
+  void addIndexChangeStartedListener(IndexChangeStartedListener listener) {
+    if (!_indexChangeStartedListeners.contains(listener))
+      _indexChangeStartedListeners.add(listener);
   }
 
-  /// Stops calling the listener every time the animation starts by setting [index] or [animateTo].
+  /// Stops calling the listener every time the index starts changing by setting [index] or [animateTo].
   ///
   /// If `listener` is not currently registered as a listener, this
   /// method does nothing.
   ///
-  /// Listeners can be added with [addAnimationStartedListener].
-  void removeAnimationStartedListener(AnimationStartedListener listener) {
-    _animationStartedListeners.remove(listener);
+  /// Listeners can be added with [addIndexChangeStartedListener].
+  void removeIndexChangeStartedListener(IndexChangeStartedListener listener) {
+    _indexChangeStartedListeners.remove(listener);
   }
 
   /// The index of the currently selected tab.
@@ -355,7 +348,7 @@ class _TabControllerScope extends InheritedWidget {
   }
 }
 
-typedef AnimationStartedListener = void Function(Duration duration, Curve curve);
+typedef IndexChangeStartedListener = void Function(int index, Duration duration, Curve curve);
 
 /// The [TabController] for descendant widgets that don't specify one
 /// explicitly.
