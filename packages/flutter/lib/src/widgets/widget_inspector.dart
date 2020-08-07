@@ -954,6 +954,7 @@ mixin WidgetInspectorService {
     _errorsSinceReload = 0;
   }
 
+  /// Whether structured errors are enabled.
   bool isStructuredErrorsEnabled() {
     return const bool.fromEnvironment('flutter.inspector.structuredErrors');
   }
