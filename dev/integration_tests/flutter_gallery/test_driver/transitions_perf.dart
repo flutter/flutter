@@ -7,18 +7,45 @@ import 'dart:convert' show JsonEncoder;
 
 import 'package:flutter_driver/driver_extension.dart';
 import 'package:flutter_gallery/gallery/demos.dart';
+import 'package:flutter_gallery/demo_lists.dart';
 import 'package:flutter_gallery/gallery/app.dart' show GalleryApp;
+import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
+import 'run_demos.dart';
+
+LiveWidgetController controller;
+
+// All of the gallery demos, identified as "title@category".
+//
+// These names are reported by the test app, see _handleMessages()
+// in transitions_perf.dart.
+List<String> _allDemos = kAllGalleryDemos.map(
+  (GalleryDemo demo) => '${demo.title}@${demo.category.name}',
+).toList();
+
+Set<String> _unTestedDemos = Set<String>.from(_allDemos);
+
 Future<String> _handleMessages(String message) async {
-  assert(message == 'demoNames');
-  return const JsonEncoder.withIndent('  ').convert(
-    kAllGalleryDemos.map((GalleryDemo demo) => '${demo.title}@${demo.category.name}').toList(),
-  );
+  switch(message) {
+    case 'demoNames':
+      return const JsonEncoder.withIndent('  ').convert(_allDemos);
+    case 'profileDemos':
+      await runDemos(kProfiledDemos, controller);
+      _unTestedDemos.removeAll(kProfiledDemos);
+      return const JsonEncoder.withIndent('  ').convert(kProfiledDemos);
+    case 'restDemos':
+      final List<String> restDemos =  _unTestedDemos.toList();
+      await runDemos(restDemos, controller);
+      return const JsonEncoder.withIndent('  ').convert(restDemos);
+    default:
+      throw ArgumentError;
+  }
 }
 
 void main() {
   enableFlutterDriverExtension(handler: _handleMessages);
+  controller = LiveWidgetController(WidgetsBinding.instance);
   // As in lib/main.dart: overriding https://github.com/flutter/flutter/issues/13736
   // for better visual effect at the cost of performance.
   runApp(const GalleryApp(testMode: true));
