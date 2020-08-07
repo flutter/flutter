@@ -42,6 +42,18 @@ compared against golden reside.
 
 ## Running for Android
 
+The test is run on a x86 emulator. To run the test locally, you must create an emulator running API level 28, and set the following screen settings in the avd's `config.ini` file:
+
+```
+hw.lcd.density = 480
+hw.lcd.height = 1920
+hw.lcd.width = 1080
+```
+
+This file is typically located in your `$HOME/.android/avd/<avd>` folder.
+
+Once the emulator is up, you can run the test by running:
+
 ```bash
 ./build_and_run_android_tests.sh
 ```
