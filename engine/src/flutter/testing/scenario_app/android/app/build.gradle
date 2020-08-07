@@ -26,6 +26,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    sourceSets {
+        main.assets.srcDirs += "${project.buildDir}/assets"
+    }
 }
 
 dependencies {
