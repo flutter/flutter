@@ -653,6 +653,9 @@ template("component") {
       if (defined(invoker.forward_dependent_configs_from)) {
         forward_dependent_configs_from = invoker.forward_dependent_configs_from
       }
+      if (defined(invoker.frameworks)) {
+        frameworks = invoker.frameworks
+      }
       if (defined(invoker.include_dirs)) {
         include_dirs = invoker.include_dirs
       }
@@ -740,6 +743,9 @@ template("component") {
       }
       if (defined(invoker.forward_dependent_configs_from)) {
         forward_dependent_configs_from = invoker.forward_dependent_configs_from
+      }
+      if (defined(invoker.frameworks)) {
+        frameworks = invoker.frameworks
       }
       if (defined(invoker.include_dirs)) {
         include_dirs = invoker.include_dirs
