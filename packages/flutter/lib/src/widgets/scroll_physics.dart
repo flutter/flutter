@@ -533,7 +533,7 @@ class BouncingScrollPhysics extends ScrollPhysics {
       return BouncingScrollSimulation(
         spring: spring,
         position: position.pixels,
-        velocity: velocity * 0.91, // TODO(abarth): We should move this constant closer to the drag end.
+        velocity: velocity,
         leadingExtent: position.minScrollExtent,
         trailingExtent: position.maxScrollExtent,
         tolerance: tolerance,

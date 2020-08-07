@@ -5,6 +5,7 @@
 // @dart = 2.8
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
 import 'framework.dart';
@@ -48,6 +49,36 @@ class ScrollBehavior {
           axisDirection: axisDirection,
           color: _kDefaultGlowColor,
         );
+    }
+    return null;
+  }
+
+  /// Specifies the type of velocity tracker to use in the descendant
+  /// [Scrollable]s' drag gesture recognizers, for estimating the velocity of a
+  /// drag gesture.
+  ///
+  /// This can be used to, for example, apply different fling velocity
+  /// estimation methods on different platforms, in order to match the
+  /// platform's native behavior.
+  ///
+  /// Typically, the provided [GestureVelocityTrackerBuilder] should return a
+  /// fresh velocity tracker. If null is returned, [Scrollable] creates a new
+  /// [VelocityTracker] to track the newly added pointer that may develop into
+  /// a drag gesture.
+  ///
+  /// The default implementation provides a new
+  /// [IOSScrollViewFlingVelocityTracker] on iOS and macOS for each new pointer,
+  /// and a new [VelocityTracker] on other platforms for each new pointer.
+  GestureVelocityTrackerBuilder velocityTrackerBuilder(BuildContext context) {
+    switch (getPlatform(context)) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        return (PointerEvent ev) => IOSScrollViewFlingVelocityTracker();
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        return (PointerEvent ev) => VelocityTracker();
     }
     return null;
   }
