@@ -176,11 +176,12 @@ class Plugin {
   /// Create a YamlMap that represents the supported platforms.
   ///
   /// For example, if the `platforms` contains 'ios' and 'android', the return map looks like:
-  ///    android:
-  ///      package: io.flutter.plugins.sample
-  ///      pluginClass: SamplePlugin
-  ///    ios:
-  ///      pluginClass: SamplePlugin
+  ///
+  ///     android:
+  ///       package: io.flutter.plugins.sample
+  ///       pluginClass: SamplePlugin
+  ///     ios:
+  ///       pluginClass: SamplePlugin
   static YamlMap createPlatformsYamlMap(List<String> platforms, String pluginClass, String androidPackage) {
     final Map<String, dynamic> map = <String, dynamic>{};
     for (final String platform in platforms) {
@@ -891,7 +892,7 @@ Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plug
   final List<Map<String, dynamic>> iosPlugins = _extractPlatformMaps(plugins, IOSPlugin.kConfigKey);
   final Map<String, dynamic> context = <String, dynamic>{
     'os': 'ios',
-    'deploymentTarget': '8.0',
+    'deploymentTarget': '9.0',
     'framework': 'Flutter',
     'plugins': iosPlugins,
   };

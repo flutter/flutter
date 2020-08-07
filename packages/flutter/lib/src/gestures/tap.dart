@@ -11,7 +11,7 @@ import 'constants.dart';
 import 'events.dart';
 import 'recognizer.dart';
 
-/// Details for [GestureTapDownCallback], such as position
+/// Details for [GestureTapDownCallback], such as position.
 ///
 /// See also:
 ///

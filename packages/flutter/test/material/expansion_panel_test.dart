@@ -27,7 +27,7 @@ class SimpleExpansionPanelListTestWidget extends StatefulWidget {
   /// If null, the default [ExpansionPanelList]'s expanded header padding value is applied via [defaultExpandedHeaderPadding]
   final EdgeInsets expandedHeaderPadding;
 
-  /// Mirrors the default expanded header padding as its source constants are private
+  /// Mirrors the default expanded header padding as its source constants are private.
   static EdgeInsets defaultExpandedHeaderPadding()
   {
     return const ExpansionPanelList().expandedHeaderPadding;

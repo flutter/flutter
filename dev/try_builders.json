@@ -1,0 +1,14 @@
+{
+   "builders":[
+      {
+         "name":"Linux",
+         "repo":"flutter",
+         "taskName":"linux_bot"
+      },
+      {
+         "name":"Windows",
+         "repo":"flutter",
+         "taskName":"windows_bot"
+      }
+   ]
+}

@@ -699,7 +699,7 @@ String _shortGitRevision(String revision) {
   return revision.length > 10 ? revision.substring(0, 10) : revision;
 }
 
-/// Version of Flutter SDK parsed from git
+/// Version of Flutter SDK parsed from Git.
 class GitTagVersion {
   const GitTagVersion({
     this.x,
@@ -732,7 +732,7 @@ class GitTagVersion {
   /// The Z in vX.Y.Z.
   final int z;
 
-  /// the F in vX.Y.Z+hotfix.F
+  /// the F in vX.Y.Z+hotfix.F.
   final int hotfix;
 
   /// Number of commits since the vX.Y.Z tag.
@@ -741,10 +741,10 @@ class GitTagVersion {
   /// The git hash (or an abbreviation thereof) for this commit.
   final String hash;
 
-  /// The N in X.Y.Z-dev.N.M
+  /// The N in X.Y.Z-dev.N.M.
   final int devVersion;
 
-  /// The M in X.Y.Z-dev.N.M
+  /// The M in X.Y.Z-dev.N.M.
   final int devPatch;
 
   /// The git tag that is this version's closest ancestor.
