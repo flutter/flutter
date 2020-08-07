@@ -44,7 +44,7 @@ import 'viewport.dart';
 /// {@tool snippet}
 ///
 /// This widget introduces a [MaterialApp], [Scaffold] and [PageView] with two pages
-/// using the default constructor. Both pages contain a [RaisedButton] allowing you
+/// using the default constructor. Both pages contain an [ElevatedButton] allowing you
 /// to animate the [PageView] using a [PageController].
 ///
 /// ```dart
@@ -79,8 +79,7 @@ import 'viewport.dart';
 ///             Container(
 ///               color: Colors.red,
 ///               child: Center(
-///                 child: RaisedButton(
-///                   color: Colors.white,
+///                 child: ElevatedButton(
 ///                   onPressed: () {
 ///                     if (_pageController.hasClients) {
 ///                       _pageController.animateToPage(
@@ -97,8 +96,7 @@ import 'viewport.dart';
 ///             Container(
 ///               color: Colors.blue,
 ///               child: Center(
-///                 child: RaisedButton(
-///                   color: Colors.white,
+///                 child: ElevatedButton(
 ///                   onPressed: () {
 ///                     if (_pageController.hasClients) {
 ///                       _pageController.animateToPage(
@@ -660,7 +658,7 @@ class PageView extends StatefulWidget {
   ///         child: Row(
   ///           mainAxisAlignment: MainAxisAlignment.center,
   ///           children: <Widget>[
-  ///             FlatButton(
+  ///             TextButton(
   ///               onPressed: () => _reverse(),
   ///               child: Text('Reverse items'),
   ///             ),

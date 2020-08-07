@@ -402,7 +402,7 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   /// The image filter to apply to the existing painted content before painting the child.
   ///
   /// For example, consider using [ImageFilter.blur] to create a backdrop
-  /// blur effect
+  /// blur effect.
   final ui.ImageFilter filter;
 
   @override
@@ -982,7 +982,7 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
-///  * [ShapeBorderClipper], which converts a [ShapeBorder] to a [CustomerClipper], as
+///  * [ShapeBorderClipper], which converts a [ShapeBorder] to a [CustomClipper], as
 ///    needed by this widget.
 class PhysicalShape extends SingleChildRenderObjectWidget {
   /// Creates a physical model with an arbitrary shape clip.
@@ -1236,12 +1236,13 @@ class Transform extends SingleChildRenderObjectWidget {
   /// This is equivalent to setting an origin based on the size of the box.
   /// If it is specified at the same time as the [origin], both are applied.
   ///
-  /// An [AlignmentDirectional.start] value is the same as an [Alignment]
-  /// whose [Alignment.x] value is `-1.0` if [textDirection] is
-  /// [TextDirection.ltr], and `1.0` if [textDirection] is [TextDirection.rtl].
-  /// Similarly [AlignmentDirectional.end] is the same as an [Alignment]
-  /// whose [Alignment.x] value is `1.0` if [textDirection] is
-  /// [TextDirection.ltr], and `-1.0` if [textDirection] is [TextDirection.rtl].
+  /// An [AlignmentDirectional.centerStart] value is the same as an [Alignment]
+  /// whose [Alignment.x] value is `-1.0` if [Directionality.of] returns
+  /// [TextDirection.ltr], and `1.0` if [Directionality.of] returns
+  /// [TextDirection.rtl].	 Similarly [AlignmentDirectional.centerEnd] is the
+  /// same as an [Alignment] whose [Alignment.x] value is `1.0` if
+  /// [Directionality.of] returns	 [TextDirection.ltr], and `-1.0` if
+  /// [Directionality.of] returns [TextDirection.rtl].
   final AlignmentGeometry alignment;
 
   /// Whether to apply the transformation when performing hit tests.
@@ -1694,8 +1695,8 @@ class Padding extends SingleChildRenderObjectWidget {
 ///
 /// {@tool snippet}
 /// The [Align] widget in this example uses one of the defined constants from
-/// [Alignment], [topRight]. This places the [FlutterLogo] in the top right corner
-/// of the parent blue [Container].
+/// [Alignment], [Alignment.topRight]. This places the [FlutterLogo] in the top
+/// right corner of the parent blue [Container].
 ///
 /// ![A blue square container with the Flutter logo in the top right corner.](https://flutter.github.io/assets-for-api-docs/assets/widgets/align_constant.png)
 ///
@@ -4495,7 +4496,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
     @required Widget child,
   }) : super(key: key, child: child);
 
-  /// The flex factor to use for this child
+  /// The flex factor to use for this child.
   ///
   /// If null or zero, the child is inflexible and determines its own size. If
   /// non-zero, the amount of space the child's can occupy in the main axis is
@@ -5200,7 +5201,6 @@ class RichText extends MultiChildRenderObjectWidget {
        assert(textScaleFactor != null),
        assert(maxLines == null || maxLines > 0),
        assert(textWidthBasis != null),
-       _applyTextScaleFactorToWidgetSpan = applyTextScaleFactorToWidgetSpan,
        super(key: key, children: _extractChildren(text));
 
   // Traverses the InlineSpan tree and depth-first collects the list of
@@ -5278,8 +5278,6 @@ class RichText extends MultiChildRenderObjectWidget {
   /// {@macro flutter.dart:ui.textHeightBehavior}
   final ui.TextHeightBehavior textHeightBehavior;
 
-  final bool _applyTextScaleFactorToWidgetSpan;
-
   @override
   RenderParagraph createRenderObject(BuildContext context) {
     assert(textDirection != null || debugCheckHasDirectionality(context));
@@ -5293,7 +5291,6 @@ class RichText extends MultiChildRenderObjectWidget {
       strutStyle: strutStyle,
       textWidthBasis: textWidthBasis,
       textHeightBehavior: textHeightBehavior,
-      applyTextScaleFactorToWidgetSpan: _applyTextScaleFactorToWidgetSpan,
       locale: locale ?? Localizations.localeOf(context, nullOk: true),
     );
   }
@@ -5587,7 +5584,7 @@ class RawImage extends LeafRenderObjectWidget {
 /// {@end-tool}
 ///
 /// Assuming that `TestWidget` uses [DefaultAssetBundle.of] to obtain its
-/// [AssetBundle], it will now see the [TestAssetBundle]'s "Hello World!" data
+/// [AssetBundle], it will now see the `TestAssetBundle`'s "Hello World!" data
 /// when requesting the "resources/test" asset.
 ///
 /// See also:
@@ -6085,12 +6082,12 @@ class MouseRegion extends StatefulWidget {
   /// This means that a [MouseRegion.onExit] might not be matched by a
   /// [MouseRegion.onEnter].
   ///
-  /// This restriction aims to prevent a common misuse: if [setState] is called
-  /// during [MouseRegion.onExit] without checking whether the widget is still
-  /// mounted, an exception will occur. This is because the callback is
+  /// This restriction aims to prevent a common misuse: if [State.setState] is
+  /// called during [MouseRegion.onExit] without checking whether the widget is
+  /// still mounted, an exception will occur. This is because the callback is
   /// triggered during the post-frame phase, at which point the widget has been
-  /// unmounted. Since [setState] is exclusive to widgets, the restriction is
-  /// specific to [MouseRegion], and does not apply to its lower-level
+  /// unmounted. Since [State.setState] is exclusive to widgets, the restriction
+  /// is specific to [MouseRegion], and does not apply to its lower-level
   /// counterparts, [RenderMouseRegion] and [MouseTrackerAnnotation].
   ///
   /// There are a few ways to mitigate this restriction:
@@ -6204,7 +6201,7 @@ class MouseRegion extends StatefulWidget {
   ///   Widget build(BuildContext context) {
   ///     return Column(
   ///       children: <Widget>[
-  ///         RaisedButton(
+  ///         ElevatedButton(
   ///           onPressed: () {
   ///             setState(() { key = UniqueKey(); });
   ///           },
@@ -6358,10 +6355,10 @@ class _RawMouseRegion extends SingleChildRenderObjectWidget {
 ///
 /// [RepaintBoundary] is therefore used, both while propagating the
 /// `markNeedsPaint` flag up the render tree and while traversing down the
-/// render tree via [RenderObject.paintChild], to strategically contain repaints
-/// to the render subtree that visually changed for performance. This is done
-/// because the [RepaintBoundary] widget creates a [RenderObject] that always
-/// has a [Layer], decoupling ancestor render objects from the descendant
+/// render tree via [PaintingContext.paintChild], to strategically contain
+/// repaints to the render subtree that visually changed for performance. This
+/// is done because the [RepaintBoundary] widget creates a [RenderObject] that
+/// always has a [Layer], decoupling ancestor render objects from the descendant
 /// render objects.
 ///
 /// [RepaintBoundary] has the further side-effect of possibly hinting to the
@@ -6496,7 +6493,7 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
 class AbsorbPointer extends SingleChildRenderObjectWidget {
   /// Creates a widget that absorbs pointers during hit testing.
   ///
-  /// The [absorbing] argument must not be null
+  /// The [absorbing] argument must not be null.
   const AbsorbPointer({
     Key key,
     this.absorbing = true,
@@ -6560,7 +6557,7 @@ class MetaData extends SingleChildRenderObjectWidget {
     Widget child,
   }) : super(key: key, child: child);
 
-  /// Opaque meta data ignored by the render tree
+  /// Opaque meta data ignored by the render tree.
   final dynamic metaData;
 
   /// How to behave during hit testing.
@@ -6607,8 +6604,8 @@ class MetaData extends SingleChildRenderObjectWidget {
 ///  * [ExcludeSemantics], which excludes a subtree from the semantics tree
 ///    (which might be useful if it is, e.g., totally decorative and not
 ///    important to the user).
-///  * [RenderObject.semanticsAnnotator], the rendering library API through which
-///    the [Semantics] widget is actually implemented.
+///  * [RenderObject.describeSemanticsConfiguration], the rendering library API
+///    through which the [Semantics] widget is actually implemented.
 ///  * [SemanticsNode], the object used by the rendering library to represent
 ///    semantics in the semantics tree.
 ///  * [SemanticsDebugger], an overlay to help visualize the semantics tree. Can
@@ -7168,7 +7165,7 @@ class Builder extends StatelessWidget {
 
 /// Signature for the builder callback used by [StatefulBuilder].
 ///
-/// Call [setState] to schedule the [StatefulBuilder] to rebuild.
+/// Call `setState` to schedule the [StatefulBuilder] to rebuild.
 typedef StatefulWidgetBuilder = Widget Function(BuildContext context, StateSetter setState);
 
 /// A platonic widget that both has state and calls a closure to obtain its child widget.

@@ -158,3 +158,6 @@ GOTO :after_subroutine
   EXIT /B
 
 :after_subroutine
+
+:final_exit
+  EXIT /B %exit_code%

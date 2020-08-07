@@ -329,7 +329,7 @@ void main() {
           ),
           const FakeCommand(
             command: <String>[
-              'git', 'describe', '--match', '*.*.*-*.*.pre', '--first-parent', '--long', '--tags',
+              'git', 'describe', '--match', '*.*.*', '--first-parent', '--long', '--tags',
             ],
             stdout: 'v1.12.16-19-gb45b676af',
           ),

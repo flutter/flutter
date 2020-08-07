@@ -95,8 +95,9 @@ TaskFunction createCubicBezierPerfTest() {
 TaskFunction createCubicBezierPerfSkSLWarmupTest() {
   return PerfTestWithSkSL(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/cubic_bezier_perf.dart',
+    'test_driver/run_app.dart',
     'cubic_bezier_perf',
+    testDriver: 'test_driver/cubic_bezier_perf_test.dart',
   ).run;
 }
 
@@ -269,6 +270,13 @@ TaskFunction createsMultiWidgetConstructPerfTest() {
   ).run;
 }
 
+TaskFunction createsMultiWidgetConstructPerfE2ETest() {
+  return E2EPerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/multi_widget_construction_perf_e2e.dart',
+  ).run;
+}
+
 TaskFunction createFramePolicyIntegrationTest() {
   final String testDirectory =
       '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks';
@@ -357,6 +365,7 @@ class PerfTest {
     this.testDriver,
     this.needsFullTimeline = true,
     this.benchmarkScoreKeys,
+    this.dartDefine = '',
   });
 
   /// The directory where the app under test is defined.
@@ -395,6 +404,9 @@ class PerfTest {
   /// ```
   final List<String> benchmarkScoreKeys;
 
+  /// Additional flags for `--dart-define` to control the test
+  final String dartDefine;
+
   Future<TaskResult> run() {
     return internalRun();
   }
@@ -427,6 +439,8 @@ class PerfTest {
         if (writeSkslFileName != null)
           ...<String>['--write-sksl-on-exit', writeSkslFileName],
         if (cacheSkSL) '--cache-sksl',
+        if (dartDefine.isNotEmpty)
+          ...<String>['--dart-define', dartDefine],
         '-d',
         deviceId,
       ]);

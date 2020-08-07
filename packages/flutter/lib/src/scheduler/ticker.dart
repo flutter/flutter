@@ -105,9 +105,9 @@ class Ticker {
   /// ticking. In that case, the ticker will not call its callback, and
   /// [isTicking] will be false, but time will still be progressing.
   ///
-  /// This will return false if the [Scheduler.lifecycleState] is one that
-  /// indicates the application is not currently visible (e.g. if the device's
-  /// screen is turned off).
+  /// This will return false if the [SchedulerBinding.lifecycleState] is one
+  /// that indicates the application is not currently visible (e.g. if the
+  /// device's screen is turned off).
   bool get isTicking {
     if (_future == null)
       return false;

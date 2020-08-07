@@ -98,7 +98,7 @@ void main() {
         home: Builder(
           builder: (BuildContext context) {
             return Material(
-              child: RaisedButton(
+              child: ElevatedButton(
                 child: const Text('X'),
                 onPressed: () { Navigator.of(context).pushNamed('/next'); },
               ),
@@ -255,7 +255,7 @@ void main() {
           home: Builder(
               builder: (BuildContext context) {
                 return Material(
-                  child: RaisedButton(
+                  child: ElevatedButton(
                       child: const Text('X'),
                       onPressed: () async {
                         result = Navigator.of(context).pushNamed('/a');
@@ -267,7 +267,7 @@ void main() {
           routes: <String, WidgetBuilder>{
             '/a': (BuildContext context) {
               return Material(
-                child: RaisedButton(
+                child: ElevatedButton(
                   child: const Text('Y'),
                   onPressed: () {
                     Navigator.of(context).pop('all done');
@@ -752,6 +752,94 @@ void main() {
     expect(appliedTheme.brightness, Brightness.dark);
   });
 
+  testWidgets('MaterialApp uses high contrast theme when appropriate', (WidgetTester tester) async {
+    tester.binding.window.platformBrightnessTestValue = Brightness.light;
+    tester.binding.window.accessibilityFeaturesTestValue = MockAccessibilityFeature();
+
+    ThemeData appliedTheme;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          primaryColor: Colors.lightBlue,
+        ),
+        highContrastTheme: ThemeData(
+          primaryColor: Colors.blue,
+        ),
+        home: Builder(
+          builder: (BuildContext context) {
+            appliedTheme = Theme.of(context);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    expect(appliedTheme.primaryColor, Colors.blue);
+    tester.binding.window.accessibilityFeaturesTestValue = null;
+  });
+
+  testWidgets('MaterialApp uses high contrast dark theme when appropriate', (WidgetTester tester) async {
+    tester.binding.window.platformBrightnessTestValue = Brightness.dark;
+    tester.binding.window.accessibilityFeaturesTestValue = MockAccessibilityFeature();
+
+    ThemeData appliedTheme;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          primaryColor: Colors.lightBlue,
+        ),
+        darkTheme: ThemeData(
+          primaryColor: Colors.lightGreen,
+        ),
+        highContrastTheme: ThemeData(
+          primaryColor: Colors.blue,
+        ),
+        highContrastDarkTheme: ThemeData(
+          primaryColor: Colors.green,
+        ),
+        home: Builder(
+          builder: (BuildContext context) {
+            appliedTheme = Theme.of(context);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    expect(appliedTheme.primaryColor, Colors.green);
+    tester.binding.window.accessibilityFeaturesTestValue = null;
+  });
+
+  testWidgets('MaterialApp uses dark theme when no high contrast dark theme is provided', (WidgetTester tester) async {
+    tester.binding.window.platformBrightnessTestValue = Brightness.dark;
+    tester.binding.window.accessibilityFeaturesTestValue = MockAccessibilityFeature();
+
+    ThemeData appliedTheme;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          primaryColor: Colors.lightBlue,
+        ),
+        darkTheme: ThemeData(
+          primaryColor: Colors.lightGreen,
+        ),
+        home: Builder(
+          builder: (BuildContext context) {
+            appliedTheme = Theme.of(context);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    expect(appliedTheme.primaryColor, Colors.lightGreen);
+    tester.binding.window.accessibilityFeaturesTestValue = null;
+    tester.binding.window.platformBrightnessTestValue = null;
+  });
+
   testWidgets('MaterialApp switches themes when the Window platformBrightness changes.', (WidgetTester tester) async {
     // Mock the Window to explicitly report a light platformBrightness.
     final TestWidgetsFlutterBinding binding = tester.binding;
@@ -842,6 +930,22 @@ void main() {
       const Rect.fromLTRB(0.0, 0.0, 20.0, 20.0)
     );
     expect(tween, isA<MaterialRectArcTween>());
+  });
+
+  testWidgets('MaterialApp.navigatorKey can be updated', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> key1 = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(MaterialApp(
+      navigatorKey: key1,
+      home: const Placeholder(),
+    ));
+    expect(key1.currentState, isA<NavigatorState>());
+    final GlobalKey<NavigatorState> key2 = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(MaterialApp(
+      navigatorKey: key2,
+      home: const Placeholder(),
+    ));
+    expect(key2.currentState, isA<NavigatorState>());
+    expect(key1.currentState, isNull);
   });
 }
 

@@ -58,6 +58,29 @@ Map<String, List<String>> expectationsTemplate() {
   };
 }
 
+/// Same as [rawExpectationsTemplate] but with the temporary key.
+String rawExpectationsTemplateWithTemporaryKey() {
+  return '''
+    {
+      "md5": "a7489b00e03a1846e43500b7c14dd7b0",
+      "master_str": {
+        "flutter.golden_test.1": {
+          "55109a4bed52acc780530f7a9aeff6c0": 1
+        },
+        "flutter.golden_test.3": {
+          "87cb35131e6ad4b57d4d09d59ae743c3": 1,
+          "dc94eb2c39c0c8ae11a4efd090b72f94": 1,
+          "f2583c9003978a06b7888878bdc089e2": 1
+        },
+        "flutter.golden_test.2": {
+          "eb03a5e3114c9ecad5e4f1178f285a49": 1,
+          "f14631979de24fca6e14ad247d5f2bd6": 1
+        }
+      }
+    }
+  ''';
+}
+
 /// Json response template for Skia Gold digest request:
 /// https://flutter-gold.skia.org/json/details?test=[testName]&digest=[expectation]
 String digestResponseTemplate({

@@ -94,7 +94,7 @@ typedef PaintRangeValueIndicator = void Function(PaintingContext context, Offset
 /// The range slider widget itself does not maintain any state. Instead, when
 /// the state of the slider changes, the widget calls the [onChanged] callback.
 /// Most widgets that use a range slider will listen for the [onChanged] callback
-/// and rebuild the slider with a new [value] to update the visual appearance of
+/// and rebuild the slider with new [values] to update the visual appearance of
 /// the slider. To know when the value starts to change, or when it is done
 /// changing, set the optional callbacks [onChangeStart] and/or [onChangeEnd].
 ///
@@ -313,9 +313,9 @@ class RangeSlider extends StatefulWidget {
   /// There are two labels: one for the start thumb and one for the end thumb.
   ///
   /// Each label is rendered using the active [ThemeData]'s
-  /// [ThemeData.textTheme.bodyText1] text style, with the
-  /// theme data's [ThemeData.colorScheme.onPrimaryColor]. The label's text
-  /// style can be overridden with [SliderThemeData.valueIndicatorTextStyle].
+  /// [TextTheme.bodyText1] text style, with the theme data's
+  /// [ColorScheme.onPrimary] color. The label's text style can be overridden
+  /// with [SliderThemeData.valueIndicatorTextStyle].
   ///
   /// If null, then the value indicator will not be displayed.
   ///

@@ -166,12 +166,12 @@ class DataRow {
   ///
   /// ```dart
   /// DataRow(
-  ///   color: MaterialStateProperty.resolveWith<Color>(Set<MaterialState> states) {
+  ///   color: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
   ///     if (states.contains(MaterialState.selected))
   ///       return Theme.of(context).colorScheme.primary.withOpacity(0.08);
   ///     return null;  // Use the default value.
-  ///   },
-  ///)
+  ///   }),
+  /// )
   /// ```
   ///
   /// See also:
@@ -498,11 +498,11 @@ class DataTable extends StatelessWidget {
   /// {@template flutter.material.dataTable.showCheckboxColumn}
   /// Whether the widget should display checkboxes for selectable rows.
   ///
-  /// If true, a [CheckBox] will be placed at the beginning of each row that is
+  /// If true, a [Checkbox] will be placed at the beginning of each row that is
   /// selectable. However, if [DataRow.onSelectChanged] is not set for any row,
   /// checkboxes will not be placed, even if this value is true.
   ///
-  /// If false, all rows will not display a [CheckBox].
+  /// If false, all rows will not display a [Checkbox].
   /// {@endtemplate}
   final bool showCheckboxColumn;
 

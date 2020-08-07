@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/widget_cache.dart';
@@ -122,6 +123,7 @@ void main() {
   ResidentRunner residentRunner;
   MockDevice mockDevice;
   FakeVmServiceHost fakeVmServiceHost;
+  MockDevtoolsLauncher mockDevtoolsLauncher;
 
   setUp(() {
     testbed = Testbed(setup: () {
@@ -142,6 +144,7 @@ void main() {
     mockDevice = MockDevice();
     mockVMService = MockVMService();
     mockDevFS = MockDevFS();
+    mockDevtoolsLauncher = MockDevtoolsLauncher();
 
     // DevFS Mocks
     when(mockDevFS.lastCompiled).thenReturn(DateTime(2000));
@@ -604,6 +607,67 @@ void main() {
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     Usage: () => MockUsage(),
+  }));
+
+  testUsingContext('ResidentRunner reports error with missing entrypoint file', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      listViews,
+      listViews,
+      listViews,
+      listViews,
+      FakeVmServiceRequest(
+        method: 'getIsolate',
+        args: <String, Object>{
+          'isolateId': '1',
+        },
+        jsonResponse: fakeUnpausedIsolate.toJson(),
+      ),
+      FakeVmServiceRequest(
+        method: 'ext.flutter.reassemble',
+        args: <String, Object>{
+          'isolateId': fakeUnpausedIsolate.id,
+        },
+      ),
+    ]);
+    when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation invocation) async {
+      return 'Example';
+    });
+    when(mockDevice.targetPlatform).thenAnswer((Invocation invocation) async {
+      return TargetPlatform.android_arm;
+    });
+    when(mockDevice.isLocalEmulator).thenAnswer((Invocation invocation) async {
+      return false;
+    });
+    final Completer<DebugConnectionInfo> onConnectionInfo = Completer<DebugConnectionInfo>.sync();
+    final Completer<void> onAppStart = Completer<void>.sync();
+    unawaited(residentRunner.attach(
+      appStartedCompleter: onAppStart,
+      connectionInfoCompleter: onConnectionInfo,
+    ));
+    await onAppStart.future;
+    when(mockFlutterDevice.updateDevFS(
+      mainUri: anyNamed('mainUri'),
+      target: anyNamed('target'),
+      bundle: anyNamed('bundle'),
+      firstBuildTime: anyNamed('firstBuildTime'),
+      bundleFirstUpload: anyNamed('bundleFirstUpload'),
+      bundleDirty: anyNamed('bundleDirty'),
+      fullRestart: anyNamed('fullRestart'),
+      projectRootPath: anyNamed('projectRootPath'),
+      pathToReload: anyNamed('pathToReload'),
+      invalidatedFiles: anyNamed('invalidatedFiles'),
+      dillOutputPath: anyNamed('dillOutputPath'),
+      packageConfig: anyNamed('packageConfig'),
+    )).thenAnswer((Invocation invocation) async {
+      return UpdateFSReport(success: true);
+    });
+
+    final OperationResult result = await residentRunner.restart(fullRestart: false);
+
+    expect(globals.fs.file(globals.fs.path.join('lib', 'main.dart')), isNot(exists));
+    expect(testLogger.errorText, contains('The entrypoint file (i.e. the file with main())'));
+    expect(result.fatal, false);
+    expect(result.code, 0);
   }));
 
 
@@ -1297,6 +1361,18 @@ void main() {
       platform: globals.platform,
     )
   }));
+
+  testUsingContext('ResidentRunner invokes DevtoolsLauncher when launching and shutting down Devtools', () => testbed.run(() async {
+    when(mockFlutterDevice.vmService).thenReturn(fakeVmServiceHost.vmService);
+    setHttpAddress(testUri, fakeVmServiceHost.vmService);
+    await residentRunner.launchDevTools();
+    verify(mockDevtoolsLauncher.launch(testUri)).called(1);
+
+    await residentRunner.shutdownDevtools();
+    verify(mockDevtoolsLauncher.close()).called(1);
+  }), overrides: <Type, Generator>{
+    DevtoolsLauncher: () => mockDevtoolsLauncher,
+  });
 
   testUsingContext('ResidentRunner can take screenshot on debug device', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
@@ -2038,8 +2114,11 @@ void main() {
   testUsingContext('connect sets up log reader', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final MockDevice mockDevice = MockDevice();
+    final MockDartDevelopmentService mockDds = MockDartDevelopmentService();
     final MockDeviceLogReader mockLogReader = MockDeviceLogReader();
     when(mockDevice.getLogReader(app: anyNamed('app'))).thenReturn(mockLogReader);
+    when(mockDevice.dds).thenReturn(mockDds);
+    when(mockDds.startDartDevelopmentService(any, any)).thenReturn(null);
 
     final TestFlutterDevice flutterDevice = TestFlutterDevice(
       mockDevice,
@@ -2071,11 +2150,13 @@ void main() {
 }
 
 class MockFlutterDevice extends Mock implements FlutterDevice {}
+class MockDartDevelopmentService extends Mock implements DartDevelopmentService {}
 class MockVMService extends Mock implements vm_service.VmService {}
 class MockDevFS extends Mock implements DevFS {}
 class MockDevice extends Mock implements Device {}
 class MockDeviceLogReader extends Mock implements DeviceLogReader {}
 class MockDevicePortForwarder extends Mock implements DevicePortForwarder {}
+class MockDevtoolsLauncher extends Mock implements DevtoolsLauncher {}
 class MockUsage extends Mock implements Usage {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockResidentCompiler extends Mock implements ResidentCompiler {}
@@ -2123,6 +2204,8 @@ class FakeFlutterDevice extends FlutterDevice {
   Future<void> connect({
     ReloadSources reloadSources,
     Restart restart,
+    bool disableDds = false,
+    bool ipv6 = false,
     CompileExpression compileExpression,
     ReloadMethod reloadMethod,
     GetSkSLMethod getSkSLMethod,

@@ -31,16 +31,15 @@ import 'iproxy.dart';
 import 'mac.dart';
 
 class IOSDevices extends PollingDeviceDiscovery {
-  // TODO(fujino): make these required and remove fallbacks once internal invocations migrated
   IOSDevices({
-    Platform platform,
-    XCDevice xcdevice,
-    IOSWorkflow iosWorkflow,
-    Logger logger,
-  }) : _platform = platform ?? globals.platform,
-       _xcdevice = xcdevice ?? globals.xcdevice,
-       _iosWorkflow = iosWorkflow ?? globals.iosWorkflow,
-       _logger = logger ?? globals.logger,
+    @required Platform platform,
+    @required XCDevice xcdevice,
+    @required IOSWorkflow iosWorkflow,
+    @required Logger logger,
+  }) : _platform = platform,
+       _xcdevice = xcdevice,
+       _iosWorkflow = iosWorkflow,
+       _logger = logger,
        super('iOS devices');
 
   final Platform _platform;
@@ -384,6 +383,7 @@ class IOSDevice extends Device {
       if (debuggingOptions.dumpSkpOnShaderCompilation) '--dump-skp-on-shader-compilation',
       if (debuggingOptions.verboseSystemLogs) '--verbose-logging',
       if (debuggingOptions.cacheSkSL) '--cache-sksl',
+      if (debuggingOptions.purgePersistentCache) '--purge-persistent-cache',
       if (platformArgs['trace-startup'] as bool ?? false) '--trace-startup',
     ];
 
@@ -432,7 +432,7 @@ class IOSDevice extends Device {
       );
       final Uri localUri = await fallbackDiscovery.discover(
         assumedDevicePort: assumedObservatoryPort,
-        deivce: this,
+        device: this,
         usesIpv6: ipv6,
         hostVmservicePort: debuggingOptions.hostVmServicePort,
         packageId: packageId,

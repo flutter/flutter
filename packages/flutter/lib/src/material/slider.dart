@@ -339,10 +339,10 @@ class Slider extends StatefulWidget {
   /// It is used to display the value of a discrete slider, and it is displayed
   /// as part of the value indicator shape.
   ///
-  /// The label is rendered using the active [ThemeData]'s
-  /// [ThemeData.textTheme.bodyText1] text style, with the
-  /// theme data's [ThemeData.colorScheme.onPrimaryColor]. The label's text style
-  /// can be overridden with [SliderThemeData.valueIndicatorTextStyle].
+  /// The label is rendered using the active [ThemeData]'s [TextTheme.bodyText1]
+  /// text style, with the theme data's [ColorScheme.onPrimary] color. The
+  /// label's text style can be overridden with
+  /// [SliderThemeData.valueIndicatorTextStyle].
   ///
   /// If null, then the value indicator will not be displayed.
   ///
@@ -359,7 +359,8 @@ class Slider extends StatefulWidget {
   /// The "active" side of the slider is the side between the thumb and the
   /// minimum value.
   ///
-  /// Defaults to [SliderTheme.activeTrackColor] of the current [SliderTheme].
+  /// Defaults to [SliderThemeData.activeTrackColor] of the current
+  /// [SliderTheme].
   ///
   /// Using a [SliderTheme] gives much more fine-grained control over the
   /// appearance of various components of the slider.
@@ -370,7 +371,7 @@ class Slider extends StatefulWidget {
   /// The "inactive" side of the slider is the side between the thumb and the
   /// maximum value.
   ///
-  /// Defaults to the [SliderTheme.inactiveTrackColor] of the current
+  /// Defaults to the [SliderThemeData.inactiveTrackColor] of the current
   /// [SliderTheme].
   ///
   /// Using a [SliderTheme] gives much more fine-grained control over the

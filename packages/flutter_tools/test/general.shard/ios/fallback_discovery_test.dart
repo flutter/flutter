@@ -61,7 +61,7 @@ void main() {
 
     expect(await fallbackDiscovery.discover(
       assumedDevicePort: 23,
-      deivce: null,
+      device: null,
       hostVmservicePort: 1,
       packageId: null,
       usesIpv6: false,
@@ -86,7 +86,7 @@ void main() {
     });
     expect(await fallbackDiscovery.discover(
       assumedDevicePort: 23,
-      deivce: null,
+      device: null,
       hostVmservicePort: 1,
       packageId: null,
       usesIpv6: false,
@@ -117,7 +117,7 @@ void main() {
 
     expect(await fallbackDiscovery.discover(
       assumedDevicePort: 23,
-      deivce: null,
+      device: null,
       hostVmservicePort: 1,
       packageId: 'hello',
       usesIpv6: false,
@@ -139,7 +139,7 @@ void main() {
 
     expect(await fallbackDiscovery.discover(
       assumedDevicePort: 23,
-      deivce: null,
+      device: null,
       hostVmservicePort: 1,
       packageId: 'hello',
       usesIpv6: false,
@@ -161,7 +161,7 @@ void main() {
 
     expect(await fallbackDiscovery.discover(
       assumedDevicePort: 23,
-      deivce: null,
+      device: null,
       hostVmservicePort: 1,
       packageId: 'hello',
       usesIpv6: false,

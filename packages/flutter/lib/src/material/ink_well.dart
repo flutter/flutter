@@ -85,7 +85,7 @@ abstract class InteractiveInkFeature extends InkFeature {
   /// [clipCallback] is the callback used to obtain the [Rect] used for clipping the ink effect.
   /// If [clipCallback] is null, no clipping is performed on the ink circle.
   ///
-  /// Clipping can happen in 3 different ways -
+  /// Clipping can happen in 3 different ways:
   ///  1. If [customBorder] is provided, it is used to determine the path
   ///     for clipping.
   ///  2. If [customBorder] is null, and [borderRadius] is provided, the canvas
@@ -280,7 +280,7 @@ typedef _CheckContext = bool Function(BuildContext context);
 /// See also:
 ///
 ///  * [GestureDetector], for listening for gestures without ink splashes.
-///  * [RaisedButton] and [FlatButton], two kinds of buttons in material design.
+///  * [ElevatedButton] and [TextButton], two kinds of buttons in material design.
 ///  * [IconButton], which combines [InkResponse] with an [Icon].
 class InkResponse extends StatelessWidget {
   /// Creates an area of a [Material] that responds to touch.
@@ -376,9 +376,6 @@ class InkResponse extends StatelessWidget {
   ///  * [MaterialState.hovered].
   ///  * [MaterialState.focused].
   ///  * [MaterialState.disabled].
-  ///
-  /// When [value] is null and [tristate] is true, [MaterialState.selected] is
-  /// included as a state.
   ///
   /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
   final MouseCursor mouseCursor;
@@ -562,7 +559,7 @@ class InkResponse extends StatelessWidget {
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode focusNode;
 
-  /// {@template flutter.widgets.Focus.canRequestFocus}
+  /// {@macro flutter.widgets.Focus.canRequestFocus}
   final bool canRequestFocus;
 
   /// The rectangle to use for the highlight effect and for clipping
@@ -1198,7 +1195,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 /// See also:
 ///
 ///  * [GestureDetector], for listening for gestures without ink splashes.
-///  * [RaisedButton] and [FlatButton], two kinds of buttons in material design.
+///  * [ElevatedButton] and [TextButton], two kinds of buttons in material design.
 ///  * [InkResponse], a variant of [InkWell] that doesn't force a rectangular
 ///    shape on the ink reaction.
 class InkWell extends InkResponse {

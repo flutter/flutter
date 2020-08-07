@@ -622,7 +622,7 @@ void applyMocksToCommand(FlutterCommand command) {
   command.applicationPackages = MockApplicationPackageStore();
 }
 
-/// Common functionality for tracking mock interaction
+/// Common functionality for tracking mock interaction.
 class BasicMock {
   final List<String> messages = <String>[];
 
@@ -740,6 +740,9 @@ class MockStdIn extends Mock implements IOSink {
 }
 
 class MockStream extends Mock implements Stream<List<int>> {}
+
+class MockDevToolsServer extends Mock implements HttpServer {}
+class MockInternetAddress extends Mock implements InternetAddress {}
 
 class AlwaysTrueBotDetector implements BotDetector {
   const AlwaysTrueBotDetector();

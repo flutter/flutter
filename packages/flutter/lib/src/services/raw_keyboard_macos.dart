@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'package:flutter/foundation.dart';
 
@@ -63,7 +62,7 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
   final int modifiers;
 
   @override
-  String get keyLabel => charactersIgnoringModifiers.isEmpty ? null : charactersIgnoringModifiers;
+  String? get keyLabel => charactersIgnoringModifiers.isEmpty ? null : charactersIgnoringModifiers;
 
   @override
   PhysicalKeyboardKey get physicalKey => kMacOsToPhysicalKey[keyCode] ?? PhysicalKeyboardKey.none;
@@ -73,7 +72,7 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
     // Look to see if the keyCode is a printable number pad key, so that a
     // difference between regular keys (e.g. "=") and the number pad version
     // (e.g. the "=" on the number pad) can be determined.
-    final LogicalKeyboardKey numPadKey = kMacOsNumPadMap[keyCode];
+    final LogicalKeyboardKey? numPadKey = kMacOsNumPadMap[keyCode];
     if (numPadKey != null) {
       return numPadKey;
     }
@@ -81,8 +80,8 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
     // Control keys such as ESC, CRTL, and SHIFT are not printable. HOME, DEL, arrow keys, and function
     // keys are considered modifier function keys, which generate invalid Unicode scalar values.
     if (keyLabel != null &&
-        !LogicalKeyboardKey.isControlCharacter(keyLabel) &&
-        !_isUnprintableKey(keyLabel)) {
+        !LogicalKeyboardKey.isControlCharacter(keyLabel!) &&
+        !_isUnprintableKey(keyLabel!)) {
       // Given that charactersIgnoringModifiers can contain a String of arbitrary length,
       // limit to a maximum of two Unicode scalar values. It is unlikely that a keyboard would produce a code point
       // bigger than 32 bits, but it is still worth defending against this case.
@@ -97,7 +96,7 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
       return LogicalKeyboardKey.findKeyByKeyId(keyId) ?? LogicalKeyboardKey(
         keyId,
         keyLabel: keyLabel,
-        debugName: kReleaseMode ? null : 'Key ${keyLabel.toUpperCase()}',
+        debugName: kReleaseMode ? null : 'Key ${keyLabel!.toUpperCase()}',
       );
     }
 
@@ -145,7 +144,6 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
       case KeyboardSide.right:
         return modifiers & rightMask != 0 || anyOnly;
     }
-    return false;
   }
 
   @override
@@ -185,8 +183,8 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
   }
 
   @override
-  KeyboardSide getModifierSide(ModifierKey key) {
-    KeyboardSide findSide(int leftMask, int rightMask, int anyMask) {
+  KeyboardSide? getModifierSide(ModifierKey key) {
+    KeyboardSide? findSide(int leftMask, int rightMask, int anyMask) {
       final int combinedMask = leftMask | rightMask;
       final int combined = modifiers & combinedMask;
       if (combined == leftMask) {
@@ -218,9 +216,6 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
       case ModifierKey.symbolModifier:
         return KeyboardSide.all;
     }
-
-    assert(false, 'Not handling $key type properly.');
-    return null;
   }
 
   /// Returns true if the given label represents an unprintable key.

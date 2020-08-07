@@ -16,6 +16,7 @@ import 'application_package.dart';
 import 'artifacts.dart';
 import 'base/config.dart';
 import 'base/context.dart';
+import 'base/dds.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
@@ -556,7 +557,7 @@ abstract class Device {
     String userIdentifier,
   });
 
-  /// Check if the device is supported by Flutter
+  /// Check if the device is supported by Flutter.
   bool isSupported();
 
   // String meant to be displayed to the user indicating if the device is
@@ -583,6 +584,12 @@ abstract class Device {
 
   /// Get the port forwarder for this device.
   DevicePortForwarder get portForwarder;
+
+  /// Get the DDS instance for this device.
+  DartDevelopmentService get dds => _dds ??= DartDevelopmentService(
+    logger: globals.logger,
+  );
+  DartDevelopmentService _dds;
 
   /// Clear the device's logs.
   void clearLogs();
@@ -727,7 +734,7 @@ abstract class Device {
     };
   }
 
-  /// Clean up resources allocated by device
+  /// Clean up resources allocated by device.
   ///
   /// For example log readers or port forwarders.
   Future<void> dispose();
@@ -757,6 +764,7 @@ class DebuggingOptions {
     this.buildInfo, {
     this.startPaused = false,
     this.disableServiceAuthCodes = false,
+    this.disableDds = false,
     this.dartFlags = '',
     this.enableSoftwareRendering = false,
     this.skiaDeterministicRendering = false,
@@ -766,6 +774,7 @@ class DebuggingOptions {
     this.endlessTraceBuffer = false,
     this.dumpSkpOnShaderCompilation = false,
     this.cacheSkSL = false,
+    this.purgePersistentCache = false,
     this.useTestFonts = false,
     this.verboseSystemLogs = false,
     this.hostVmServicePort,
@@ -799,12 +808,14 @@ class DebuggingOptions {
       startPaused = false,
       dartFlags = '',
       disableServiceAuthCodes = false,
+      disableDds = false,
       enableSoftwareRendering = false,
       skiaDeterministicRendering = false,
       traceSkia = false,
       traceSystrace = false,
       endlessTraceBuffer = false,
       dumpSkpOnShaderCompilation = false,
+      purgePersistentCache = false,
       verboseSystemLogs = false,
       hostVmServicePort = null,
       deviceVmServicePort = null,
@@ -818,6 +829,7 @@ class DebuggingOptions {
   final bool startPaused;
   final String dartFlags;
   final bool disableServiceAuthCodes;
+  final bool disableDds;
   final bool enableSoftwareRendering;
   final bool skiaDeterministicRendering;
   final bool traceSkia;
@@ -826,6 +838,7 @@ class DebuggingOptions {
   final bool endlessTraceBuffer;
   final bool dumpSkpOnShaderCompilation;
   final bool cacheSkSL;
+  final bool purgePersistentCache;
   final bool useTestFonts;
   final bool verboseSystemLogs;
   /// Whether to invoke webOnlyInitializePlatform in Flutter for web.
@@ -848,7 +861,7 @@ class DebuggingOptions {
   /// The port the browser should use for its debugging protocol.
   final int webBrowserDebugPort;
 
-  /// Enable expression evaluation for web target
+  /// Enable expression evaluation for web target.
   final bool webEnableExpressionEvaluation;
 
   /// A file where the vmservice URL should be written after the application is started.
@@ -912,7 +925,7 @@ abstract class DevicePortForwarder {
   /// Stops forwarding [forwardedPort].
   Future<void> unforward(ForwardedPort forwardedPort);
 
-  /// Cleanup allocated resources, like forwardedPorts
+  /// Cleanup allocated resources, like [forwardedPorts].
   Future<void> dispose();
 }
 

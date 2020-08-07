@@ -143,7 +143,7 @@ class WidgetsApp extends StatefulWidget {
   /// _must_ contain an entry for `'/'`.
   ///
   /// If [home] or [routes] are not null, the routing implementation needs to know how
-  /// appropriately build [PageRoutes]. This can be achieved by supplying the
+  /// appropriately build [PageRoute]s. This can be achieved by supplying the
   /// [pageRouteBuilder] parameter.  The [pageRouteBuilder] is used by [MaterialApp]
   /// and [CupertinoApp] to create [MaterialPageRoute]s and [CupertinoPageRoute],
   /// respectively.
@@ -153,10 +153,10 @@ class WidgetsApp extends StatefulWidget {
   /// rather than [builder] if you intend to only display a single route in your app.
   ///
   /// [WidgetsApp] is also possible to provide a custom implementation of routing via the
-  /// [onGeneratedRoute] and [onUnknownRoute] parameters. These parameters correspond
+  /// [onGenerateRoute] and [onUnknownRoute] parameters. These parameters correspond
   /// to [Navigator.onGenerateRoute] and [Navigator.onUnknownRoute]. If [home], [routes],
   /// and [builder] are null, or if they fail to create a requested route,
-  /// [onGeneratedRoute] will be invoked.  If that fails, [onUnknownRoute] will be invoked.
+  /// [onGenerateRoute] will be invoked.  If that fails, [onUnknownRoute] will be invoked.
   ///
   /// The [pageRouteBuilder] will create a [PageRoute] that wraps newly built routes.
   /// If the [builder] is non-null and the [onGenerateRoute] argument is null, then the
@@ -1017,6 +1017,8 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       if (widget.onUnknownRoute == null) {
         throw FlutterError(
           'Could not find a generator for route $settings in the $runtimeType.\n'
+          'Make sure your root app widget has provided a way to generate \n'
+          'this route.\n'
           'Generators for routes are searched for in the following order:\n'
           ' 1. For the "/" route, the "home" property, if non-null, is used.\n'
           ' 2. Otherwise, the "routes" table is used, if it has an entry for '

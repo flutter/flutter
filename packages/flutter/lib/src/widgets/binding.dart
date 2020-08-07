@@ -577,7 +577,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 
   /// Called when the system locale changes.
   ///
-  /// Calls [dispatchLocaleChanged] to notify the binding observers.
+  /// Calls [dispatchLocalesChanged] to notify the binding observers.
   ///
   /// See [Window.onLocaleChanged].
   @protected
@@ -961,15 +961,16 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 
   /// Computes the locale the current platform would resolve to.
   ///
-  /// This method is meant to be used as part of a [localeListResolutionCallback].
-  /// Since this method may return null, a Flutter/dart algorithm should still be
-  /// provided as a fallback in case a native resolved locale cannot be determined
-  /// or if the native resolved locale is undesirable.
+  /// This method is meant to be used as part of a
+  /// [WidgetsApp.localeListResolutionCallback]. Since this method may return
+  /// null, a Flutter/dart algorithm should still be provided as a fallback in
+  /// case a native resolved locale cannot be determined or if the native
+  /// resolved locale is undesirable.
   ///
   /// This method may return a null [Locale] if the platform does not support
   /// native locale resolution, or if the resolution failed.
   ///
-  /// The first [supportedLocale] is treated as the default locale and will be returned
+  /// The first `supportedLocale` is treated as the default locale and will be returned
   /// if no better match is found.
   ///
   /// Android and iOS are currently supported.
@@ -994,7 +995,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///
   /// Second-best (and n-best) matching locales should be obtained by calling this
   /// method again with the matched locale of the first call omitted from
-  /// [supportedLocales].
+  /// `supportedLocales`.
   Locale computePlatformResolvedLocale(List<Locale> supportedLocales) {
     return window.computePlatformResolvedLocale(supportedLocales);
   }
@@ -1005,7 +1006,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 /// The widget is given constraints during layout that force it to fill the
 /// entire screen. If you wish to align your widget to one side of the screen
 /// (e.g., the top), consider using the [Align] widget. If you wish to center
-/// your widget, you can also use the [Center] widget
+/// your widget, you can also use the [Center] widget.
 ///
 /// Calling [runApp] again will detach the previous root widget from the screen
 /// and attach the given widget in its place. The new widget tree is compared
@@ -1050,6 +1051,7 @@ typedef FastReassemblePredicate = bool Function(Object);
 /// the provided predicate and use it to mark specific elements dirty wherever
 /// [Element.widget] is a `Foo`. Afterwards, the internal field will be nulled
 /// out.
+FastReassemblePredicate get debugFastReassembleMethod => _debugFastReassembleMethod;
 set debugFastReassembleMethod(FastReassemblePredicate fastReassemblePredicate) {
   assert(() {
     _debugFastReassembleMethod = fastReassemblePredicate;

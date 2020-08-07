@@ -23,7 +23,7 @@ class _TimePickerLauncher extends StatelessWidget {
         child: Center(
           child: Builder(
             builder: (BuildContext context) {
-              return RaisedButton(
+              return ElevatedButton(
                 child: const Text('X'),
                 onPressed: () async {
                   onChanged(await showTimePicker(
@@ -52,7 +52,7 @@ Future<Offset> startPicker(
 }
 
 Future<void> finishPicker(WidgetTester tester) async {
-  final MaterialLocalizations materialLocalizations = MaterialLocalizations.of(tester.element(find.byType(RaisedButton)));
+  final MaterialLocalizations materialLocalizations = MaterialLocalizations.of(tester.element(find.byType(ElevatedButton)));
   await tester.tap(find.text(materialLocalizations.okButtonLabel));
   await tester.pumpAndSettle(const Duration(seconds: 1));
 }
@@ -78,6 +78,7 @@ void main() {
       const Locale('es', 'ES'), //'H:mm'
       const Locale('fr', 'CA'), //'HH \'h\' mm'
       const Locale('zh', 'ZH'), //'ah:mm'
+      const Locale('fa', 'IR'), //'H:mm' but RTL
     ];
 
     for (final Locale locale in locales) {
@@ -114,6 +115,12 @@ void main() {
         expect(dayPeriodLeftOffset, lessThan(hourLeftOffset));
         expect(hourLeftOffset, lessThan(stringFragmentLeftOffset));
         expect(stringFragmentLeftOffset, lessThan(minuteLeftOffset));
+      } else if (locale == const Locale('fa', 'IR')) {
+        // Even though this is an RTL locale, the hours and minutes positions should remain the same.
+        expect(stringFragmentText.data, ':');
+        expect(hourLeftOffset, lessThan(stringFragmentLeftOffset));
+        expect(stringFragmentLeftOffset, lessThan(minuteLeftOffset));
+        expect(dayPeriodControlFinder, findsNothing);
       }
       await tester.tapAt(Offset(center.dx, center.dy - 50.0));
       await finishPicker(tester);
@@ -143,6 +150,7 @@ void main() {
       const Locale('es', 'ES'), //'H:mm'
       const Locale('fr', 'CA'), //'HH \'h\' mm'
       const Locale('zh', 'ZH'), //'ah:mm'
+      const Locale('fa', 'IR'), //'H:mm' but RTL
     ];
 
     for (final Locale locale in locales) {
@@ -184,6 +192,12 @@ void main() {
         expect(stringFragmentLeftOffset, lessThan(minuteLeftOffset));
         expect(hourLeftOffset, dayPeriodLeftOffset);
         expect(hourTopOffset, greaterThan(dayPeriodTopOffset));
+      } else if (locale == const Locale('fa', 'IR')) {
+        // Even though this is an RTL locale, the hours and minutes positions should remain the same.
+        expect(stringFragmentText.data, ':');
+        expect(hourLeftOffset, lessThan(stringFragmentLeftOffset));
+        expect(stringFragmentLeftOffset, lessThan(minuteLeftOffset));
+        expect(dayPeriodControlFinder, findsNothing);
       }
       await tester.tapAt(Offset(center.dx, center.dy - 50.0));
       await finishPicker(tester);
@@ -234,7 +248,7 @@ void main() {
               child: Navigator(
                 onGenerateRoute: (RouteSettings settings) {
                   return MaterialPageRoute<void>(builder: (BuildContext context) {
-                    return FlatButton(
+                    return TextButton(
                       onPressed: () {
                         showTimePicker(context: context, initialTime: const TimeOfDay(hour: 7, minute: 0));
                       },

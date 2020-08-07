@@ -272,7 +272,7 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
   ///
   /// When the map is changed, listeners to this manager will be notified.
   ///
-  /// The returned [LogicalKeyMap] should not be modified.
+  /// The returned map should not be modified.
   Map<LogicalKeySet, Intent> get shortcuts => _shortcuts;
   Map<LogicalKeySet, Intent> _shortcuts;
   set shortcuts(Map<LogicalKeySet, Intent> value) {
