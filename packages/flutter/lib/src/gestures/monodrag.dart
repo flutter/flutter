@@ -485,6 +485,11 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
   }
 
   @override
+  void rejectGesture(int pointer) {
+    acceptGesture(pointer);
+  }
+
+  @override
   bool get _hasSufficientGlobalDistanceToAccept => _globalDistanceMoved.abs() > kTouchSlop;
 
   @override
