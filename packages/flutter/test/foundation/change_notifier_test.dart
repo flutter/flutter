@@ -160,8 +160,8 @@ void main() {
   });
 
   test(
-      'If a listener in the middle of the list of listeners removes itself'
-      ', notifyListeners still notifies all listeners', () {
+      'If a listener in the middle of the list of listeners removes itself,'
+      ' notifyListeners still notifies all listeners', () {
     final TestNotifier source = TestNotifier();
     final List<String> log = <String>[];
 

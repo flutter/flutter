@@ -102,7 +102,7 @@ class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
 /// A class that can be extended or mixed in that provides a change notification
 /// API using [VoidCallback] for notifications.
 ///
-/// It is O(1) for adding listeners and O(N) removing listeners and dispatching
+/// It is O(1) for adding listeners and O(N) for removing listeners and dispatching
 /// notifications (where N is the number of listeners).
 ///
 /// See also:
@@ -215,9 +215,12 @@ class ChangeNotifier implements Listenable {
   @visibleForTesting
   void notifyListeners() {
     assert(_debugAssertNotDisposed());
-    final List<_ListenerEntry> listeners = _listeners!.toList(growable: false);
+    if (_listeners!.isEmpty)
+      return;
 
-    for (final _ListenerEntry entry in listeners) {
+    final List<_ListenerEntry> localListeners = _listeners!.toList(growable: false);
+
+    for (final _ListenerEntry entry in localListeners) {
       try {
         if (entry.list != null)
           entry.listener();
