@@ -8,7 +8,7 @@ part of engine;
 /// The CanvasKit implementation of [ui.ImageFilter].
 ///
 /// Currently only supports `blur`.
-class CkImageFilter extends ResurrectableSkiaObject<SkImageFilter> implements ui.ImageFilter {
+class CkImageFilter extends ManagedSkiaObject<SkImageFilter> implements ui.ImageFilter {
   CkImageFilter.blur({double sigmaX = 0.0, double sigmaY = 0.0})
       : _sigmaX = sigmaX,
         _sigmaY = sigmaY;

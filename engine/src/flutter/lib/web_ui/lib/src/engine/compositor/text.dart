@@ -216,7 +216,7 @@ SkFontStyle toSkFontStyle(ui.FontWeight? fontWeight, ui.FontStyle? fontStyle) {
   return style;
 }
 
-class CkParagraph extends ResurrectableSkiaObject<SkParagraph>
+class CkParagraph extends ManagedSkiaObject<SkParagraph>
     implements ui.Paragraph {
   CkParagraph(
       this._initialParagraph, this._paragraphStyle, this._paragraphCommands);

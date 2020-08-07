@@ -86,7 +86,7 @@ class SkiaObjectCache {
 /// WebAssembly heap.
 ///
 /// These objects are automatically deleted when no longer used.
-abstract class SkiaObject<T> {
+abstract class SkiaObject<T extends Object> {
   /// The JavaScript object that's mapped onto a Skia C++ object in the WebAssembly heap.
   T get skiaObject;
 
@@ -99,16 +99,19 @@ abstract class SkiaObject<T> {
   void didDelete();
 }
 
-/// A [SkiaObject] that can resurrect its C++ counterpart.
+/// A [SkiaObject] that manages the lifecycle of its C++ counterpart.
 ///
-/// Because there is no feedback from JavaScript's GC (no destructors or
-/// finalizers), we pessimistically delete the underlying C++ object before
-/// the Dart object is garbage-collected. The current algorithm deletes objects
-/// at the end of every frame. This allows reusing the C++ objects within the
-/// frame. In the future we may add smarter strategies that will allow us to
-/// reuse C++ objects across frames.
+/// In browsers that support weak references we use feedback from the garbage
+/// collector to determine when it is safe to release the C++ object.
 ///
-/// The lifecycle of a C++ object is as follows:
+/// In browsers that do not support weak references we pessimistically delete
+/// the underlying C++ object before the Dart object is garbage-collected. The
+/// current algorithm deletes objects at the end of every frame. This allows
+/// reusing the C++ objects within the frame. If the object is used again after
+/// is was deleted, we [resurrect] it based on the data available on the
+/// JavaScript side.
+///
+/// The lifecycle of a resurrectable C++ object is as follows:
 ///
 /// - Create default: when instantiating a C++ object for a Dart object for the
 ///   first time, the C++ object is populated with default data (the defaults are
@@ -120,13 +123,22 @@ abstract class SkiaObject<T> {
 ///   [resurrect] method.
 /// - Final delete: if a Dart object is never reused, it is GC'd after its
 ///   underlying C++ object is deleted. This is implemented by [SkiaObjects].
-abstract class ResurrectableSkiaObject<T> extends SkiaObject<T> {
-  ResurrectableSkiaObject() {
-    rawSkiaObject = createDefault();
-    if (isResurrectionExpensive) {
-      SkiaObjects.manageExpensive(this);
+abstract class ManagedSkiaObject<T extends Object> extends SkiaObject<T> {
+  ManagedSkiaObject() {
+    final T defaultObject = createDefault();
+    rawSkiaObject = defaultObject;
+    if (browserSupportsFinalizationRegistry) {
+      // If FinalizationRegistry is supported we will only ever need the
+      // default object, as we know precisely when to delete it.
+      skObjectFinalizationRegistry.register(this, defaultObject);
     } else {
-      SkiaObjects.manageResurrectable(this);
+      // If FinalizationRegistry is _not_ supported we may need to delete
+      // and resurrect the object multiple times before deleting it forever.
+      if (isResurrectionExpensive) {
+        SkiaObjects.manageExpensive(this);
+      } else {
+        SkiaObjects.manageResurrectable(this);
+      }
     }
   }
 
@@ -134,6 +146,7 @@ abstract class ResurrectableSkiaObject<T> extends SkiaObject<T> {
   T get skiaObject => rawSkiaObject ?? _doResurrect();
 
   T _doResurrect() {
+    assert(!browserSupportsFinalizationRegistry);
     final T skiaObject = resurrect();
     rawSkiaObject = skiaObject;
     if (isResurrectionExpensive) {
@@ -146,6 +159,7 @@ abstract class ResurrectableSkiaObject<T> extends SkiaObject<T> {
 
   @override
   void didDelete() {
+    assert(!browserSupportsFinalizationRegistry);
     rawSkiaObject = null;
   }
 
@@ -182,7 +196,11 @@ abstract class ResurrectableSkiaObject<T> extends SkiaObject<T> {
 //     use. This issue discusses ways to address this:
 //     https://github.com/flutter/flutter/issues/60401
 /// A [SkiaObject] which is deleted once and cannot be used again.
-abstract class OneShotSkiaObject<T> extends SkiaObject<T> {
+///
+/// In browsers that support weak references we use feedback from the garbage
+/// collector to determine when it is safe to release the C++ object. Otherwise,
+/// we use an LRU cache (see [SkiaObjects.manageOneShot]).
+abstract class OneShotSkiaObject<T extends Object> extends SkiaObject<T> {
   /// Returns the current skia object as is without attempting to
   /// resurrect it.
   ///
@@ -191,34 +209,41 @@ abstract class OneShotSkiaObject<T> extends SkiaObject<T> {
   ///
   /// Use this field instead of the [skiaObject] getter when implementing
   /// the [delete] method.
-  T? rawSkiaObject;
+  T rawSkiaObject;
 
-  OneShotSkiaObject(this.rawSkiaObject) {
-    SkiaObjects.manageOneShot(this);
+  bool _isDeleted = false;
+
+  OneShotSkiaObject(T skObject) : this.rawSkiaObject = skObject {
+    if (browserSupportsFinalizationRegistry) {
+      skObjectFinalizationRegistry.register(this, skObject);
+    } else {
+      SkiaObjects.manageOneShot(this);
+    }
   }
 
   @override
   T get skiaObject {
-    if (rawSkiaObject == null) {
+    if (browserSupportsFinalizationRegistry) {
+      return rawSkiaObject;
+    }
+    if (_isDeleted) {
       throw StateError('Attempting to use a Skia object that has been freed.');
     }
     SkiaObjects.oneShotCache.markUsed(this);
-    return rawSkiaObject!;
+    return rawSkiaObject;
   }
 
   @override
   void didDelete() {
-    rawSkiaObject = null;
+    _isDeleted = true;
   }
 }
 
 /// Singleton that manages the lifecycles of [SkiaObject] instances.
 class SkiaObjects {
-  // TODO(yjbanov): some sort of LRU strategy would allow us to reuse objects
-  //                beyond a single frame.
   @visibleForTesting
-  static final List<ResurrectableSkiaObject> resurrectableObjects =
-      <ResurrectableSkiaObject>[];
+  static final List<ManagedSkiaObject> resurrectableObjects =
+      <ManagedSkiaObject>[];
 
   @visibleForTesting
   static int maximumCacheSize = 8192;
@@ -247,7 +272,7 @@ class SkiaObjects {
   /// Starts managing the lifecycle of resurrectable [object].
   ///
   /// These can safely be deleted at any time.
-  static void manageResurrectable(ResurrectableSkiaObject object) {
+  static void manageResurrectable(ManagedSkiaObject object) {
     registerCleanupCallback();
     resurrectableObjects.add(object);
   }
@@ -265,7 +290,7 @@ class SkiaObjects {
   ///
   /// Since it's expensive to resurrect, we shouldn't just delete it after every
   /// frame. Instead, add it to a cache and only delete it when the cache fills.
-  static void manageExpensive(ResurrectableSkiaObject object) {
+  static void manageExpensive(ManagedSkiaObject object) {
     registerCleanupCallback();
     expensiveCache.add(object);
   }

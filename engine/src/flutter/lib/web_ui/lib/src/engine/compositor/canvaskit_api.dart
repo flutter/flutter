@@ -1558,3 +1558,74 @@ class SkFontMgrNamespace {
 class TypefaceFontProviderNamespace {
   external TypefaceFontProvider Make();
 }
+
+Timer? _skObjectCollector;
+List<SkDeletable> _skObjectDeleteQueue = <SkDeletable>[];
+
+final SkObjectFinalizationRegistry skObjectFinalizationRegistry = SkObjectFinalizationRegistry(js.allowInterop((SkDeletable deletable) {
+  _skObjectDeleteQueue.add(deletable);
+  _skObjectCollector ??= _scheduleSkObjectCollection();
+}));
+
+/// Schedules an asap timer to delete garbage-collected Skia objects.
+///
+/// We use a timer for the following reasons:
+///
+///  - Deleting the object immediately may lead to dangling pointer as the Skia
+///    object may still be used by a function in the current frame. For example,
+///    a `CkPaint` + `SkPaint` pair may be created by the framework, passed to
+///    the engine, and the `CkPaint` dropped immediately. Because GC can kick in
+///    any time, including in the middle of the event, we may delete `SkPaint`
+///    prematurely.
+///  - A microtask, while solves the problem above, would prevent the event from
+///    yielding to the graphics system to render the frame on the screen if there
+///    is a large number of objects to delete, causing jank.
+Timer _scheduleSkObjectCollection() => Timer(Duration.zero, () {
+  html.window.performance.mark('SkObject collection-start');
+  final int length = _skObjectDeleteQueue.length;
+  for (int i = 0; i < length; i++) {
+    _skObjectDeleteQueue[i].delete();
+  }
+  _skObjectDeleteQueue = <SkDeletable>[];
+
+  // Null out the timer so we can schedule a new one next time objects are
+  // scheduled for deletion.
+  _skObjectCollector = null;
+  html.window.performance.mark('SkObject collection-end');
+  html.window.performance.measure('SkObject collection', 'SkObject collection-start', 'SkObject collection-end');
+});
+
+typedef SkObjectFinalizer = void Function(SkDeletable deletable);
+
+/// Any Skia object that has a `delete` method.
+@JS()
+class SkDeletable {
+  /// Deletes the C++ side object.
+  external void delete();
+}
+
+/// Attaches a weakly referenced object to another object and calls a finalizer
+/// with the latter when weakly referenced object is garbage collected.
+///
+/// We use this to delete Skia objects when their "Ck" wrapper is garbage
+/// collected.
+///
+/// Example sequence of events:
+///
+/// 1. A (CkPaint, SkPaint) pair created.
+/// 2. The paint is used to paint some picture.
+/// 3. CkPaint is dropped by the app.
+/// 4. GC decides to perform a GC cycle and collects CkPaint.
+/// 5. The finalizer function is called with the SkPaint as the sole argument.
+/// 6. We call `delete` on SkPaint.
+@JS('window.FinalizationRegistry')
+class SkObjectFinalizationRegistry {
+  external SkObjectFinalizationRegistry(SkObjectFinalizer finalizer);
+  external void register(Object ckObject, Object skObject);
+}
+
+@JS('window.FinalizationRegistry')
+external Object? get _finalizationRegistryConstructor;
+
+/// Whether the current browser supports `FinalizationRegistry`.
+bool browserSupportsFinalizationRegistry = _finalizationRegistryConstructor != null;

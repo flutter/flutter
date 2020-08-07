@@ -6,7 +6,7 @@
 part of engine;
 
 /// The CanvasKit implementation of [ui.MaskFilter].
-class CkMaskFilter extends ResurrectableSkiaObject<SkMaskFilter> {
+class CkMaskFilter extends ManagedSkiaObject<SkMaskFilter> {
   CkMaskFilter.blur(ui.BlurStyle blurStyle, double sigma)
       : _blurStyle = blurStyle,
         _sigma = sigma;
