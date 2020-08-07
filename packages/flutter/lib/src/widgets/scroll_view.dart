@@ -92,10 +92,12 @@ abstract class ScrollView extends StatelessWidget {
     this.dragStartBehavior = DragStartBehavior.start,
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.restorationId,
+    this.clipBehavior = Clip.hardEdge,
   }) : assert(scrollDirection != null),
        assert(reverse != null),
        assert(shrinkWrap != null),
        assert(dragStartBehavior != null),
+       assert(clipBehavior != null),
        assert(!(controller != null && primary == true),
            'Primary ScrollViews obtain their ScrollController via inheritance from a PrimaryScrollController widget. '
            'You cannot both set primary to true and pass an explicit controller.'
@@ -264,6 +266,11 @@ abstract class ScrollView extends StatelessWidget {
   /// {@macro flutter.widgets.scrollable.restorationId}
   final String restorationId;
 
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.hardEdge].
+  final Clip clipBehavior;
+  
   /// Returns the [AxisDirection] in which the scroll view scrolls.
   ///
   /// Combines the [scrollDirection] with the [reverse] boolean to obtain the
@@ -321,6 +328,7 @@ abstract class ScrollView extends StatelessWidget {
       cacheExtent: cacheExtent,
       center: center,
       anchor: anchor,
+      clipBehavior: clipBehavior,
     );
   }
 
@@ -574,6 +582,7 @@ class CustomScrollView extends ScrollView {
     int semanticChildCount,
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
     String restorationId,
+    Clip clipBehavior = Clip.hardEdge,
   }) : super(
     key: key,
     scrollDirection: scrollDirection,
@@ -588,6 +597,7 @@ class CustomScrollView extends ScrollView {
     semanticChildCount: semanticChildCount,
     dragStartBehavior: dragStartBehavior,
     restorationId: restorationId,
+    clipBehavior: clipBehavior,
   );
 
   /// The slivers to place inside the viewport.
@@ -623,6 +633,7 @@ abstract class BoxScrollView extends ScrollView {
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
     ScrollViewKeyboardDismissBehavior keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     String restorationId,
+    Clip clipBehavior = Clip.hardEdge,
   }) : super(
     key: key,
     scrollDirection: scrollDirection,
@@ -636,6 +647,7 @@ abstract class BoxScrollView extends ScrollView {
     dragStartBehavior: dragStartBehavior,
     keyboardDismissBehavior: keyboardDismissBehavior,
     restorationId: restorationId,
+    clipBehavior: clipBehavior,
   );
 
   /// The amount of space by which to inset the children.
@@ -1042,6 +1054,7 @@ class ListView extends BoxScrollView {
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
     ScrollViewKeyboardDismissBehavior keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     String restorationId,
+    Clip clipBehavior = Clip.hardEdge,
   }) : childrenDelegate = SliverChildListDelegate(
          children,
          addAutomaticKeepAlives: addAutomaticKeepAlives,
@@ -1062,6 +1075,7 @@ class ListView extends BoxScrollView {
          dragStartBehavior: dragStartBehavior,
          keyboardDismissBehavior: keyboardDismissBehavior,
          restorationId: restorationId,
+         clipBehavior: clipBehavior,
        );
 
   /// Creates a scrollable, linear array of widgets that are created on demand.
@@ -1115,6 +1129,7 @@ class ListView extends BoxScrollView {
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
     ScrollViewKeyboardDismissBehavior keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     String restorationId,
+    Clip clipBehavior = Clip.hardEdge,
   }) : assert(itemCount == null || itemCount >= 0),
        assert(semanticChildCount == null || semanticChildCount <= itemCount),
        childrenDelegate = SliverChildBuilderDelegate(
@@ -1138,6 +1153,7 @@ class ListView extends BoxScrollView {
          dragStartBehavior: dragStartBehavior,
          keyboardDismissBehavior: keyboardDismissBehavior,
          restorationId: restorationId,
+         clipBehavior: clipBehavior,
        );
 
   /// Creates a fixed-length scrollable linear array of list "items" separated
@@ -1206,6 +1222,7 @@ class ListView extends BoxScrollView {
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
     ScrollViewKeyboardDismissBehavior keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     String restorationId,
+    Clip clipBehavior = Clip.hardEdge,
   }) : assert(itemBuilder != null),
        assert(separatorBuilder != null),
        assert(itemCount != null && itemCount >= 0),
@@ -1249,6 +1266,7 @@ class ListView extends BoxScrollView {
          dragStartBehavior: dragStartBehavior,
          keyboardDismissBehavior: keyboardDismissBehavior,
          restorationId: restorationId,
+         clipBehavior: clipBehavior,
        );
 
   /// Creates a scrollable, linear array of widgets with a custom child model.
@@ -1349,6 +1367,7 @@ class ListView extends BoxScrollView {
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
     ScrollViewKeyboardDismissBehavior keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     String restorationId,
+    Clip clipBehavior = Clip.hardEdge,
   }) : assert(childrenDelegate != null),
        super(
          key: key,
@@ -1364,6 +1383,7 @@ class ListView extends BoxScrollView {
          dragStartBehavior: dragStartBehavior,
          keyboardDismissBehavior: keyboardDismissBehavior,
          restorationId: restorationId,
+         clipBehavior: clipBehavior,
        );
 
   /// If non-null, forces the children to have the given extent in the scroll
@@ -1642,6 +1662,7 @@ class GridView extends BoxScrollView {
     List<Widget> children = const <Widget>[],
     int semanticChildCount,
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
+    Clip clipBehavior = Clip.hardEdge,
     ScrollViewKeyboardDismissBehavior keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     String restorationId,
   }) : assert(gridDelegate != null),
@@ -1665,6 +1686,7 @@ class GridView extends BoxScrollView {
          dragStartBehavior: dragStartBehavior,
          keyboardDismissBehavior: keyboardDismissBehavior,
          restorationId: restorationId,
+         clipBehavior: clipBehavior,
        );
 
   /// Creates a scrollable, 2D array of widgets that are created on demand.
@@ -1706,6 +1728,7 @@ class GridView extends BoxScrollView {
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
     ScrollViewKeyboardDismissBehavior keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     String restorationId,
+    Clip clipBehavior = Clip.hardEdge,
   }) : assert(gridDelegate != null),
        childrenDelegate = SliverChildBuilderDelegate(
          itemBuilder,
@@ -1728,6 +1751,7 @@ class GridView extends BoxScrollView {
          dragStartBehavior: dragStartBehavior,
          keyboardDismissBehavior: keyboardDismissBehavior,
          restorationId: restorationId,
+         clipBehavior: clipBehavior,
        );
 
   /// Creates a scrollable, 2D array of widgets with both a custom
@@ -1753,6 +1777,7 @@ class GridView extends BoxScrollView {
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
     ScrollViewKeyboardDismissBehavior keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     String restorationId,
+    Clip clipBehavior = Clip.hardEdge,
   }) : assert(gridDelegate != null),
        assert(childrenDelegate != null),
        super(
@@ -1769,6 +1794,7 @@ class GridView extends BoxScrollView {
          dragStartBehavior: dragStartBehavior,
          keyboardDismissBehavior: keyboardDismissBehavior,
          restorationId: restorationId,
+         clipBehavior: clipBehavior,
        );
 
   /// Creates a scrollable, 2D array of widgets with a fixed number of tiles in
@@ -1807,6 +1833,7 @@ class GridView extends BoxScrollView {
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
     ScrollViewKeyboardDismissBehavior keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     String restorationId,
+    Clip clipBehavior = Clip.hardEdge,
   }) : gridDelegate = SliverGridDelegateWithFixedCrossAxisCount(
          crossAxisCount: crossAxisCount,
          mainAxisSpacing: mainAxisSpacing,
@@ -1833,6 +1860,7 @@ class GridView extends BoxScrollView {
          dragStartBehavior: dragStartBehavior,
          keyboardDismissBehavior: keyboardDismissBehavior,
          restorationId: restorationId,
+         clipBehavior: clipBehavior,
        );
 
   /// Creates a scrollable, 2D array of widgets with tiles that each have a
@@ -1871,6 +1899,7 @@ class GridView extends BoxScrollView {
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
     ScrollViewKeyboardDismissBehavior keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     String restorationId,
+    Clip clipBehavior = Clip.hardEdge,
   }) : gridDelegate = SliverGridDelegateWithMaxCrossAxisExtent(
          maxCrossAxisExtent: maxCrossAxisExtent,
          mainAxisSpacing: mainAxisSpacing,
@@ -1897,6 +1926,7 @@ class GridView extends BoxScrollView {
          dragStartBehavior: dragStartBehavior,
          keyboardDismissBehavior: keyboardDismissBehavior,
          restorationId: restorationId,
+         clipBehavior: clipBehavior,
        );
 
   /// A delegate that controls the layout of the children within the [GridView].
