@@ -16,6 +16,10 @@
 
 namespace flutter {
 
+RuntimeController::RuntimeController(RuntimeDelegate& client,
+                                     TaskRunners p_task_runners)
+    : client_(client), vm_(nullptr), task_runners_(p_task_runners) {}
+
 RuntimeController::RuntimeController(
     RuntimeDelegate& p_client,
     DartVM* p_vm,

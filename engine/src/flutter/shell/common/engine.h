@@ -249,6 +249,20 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   };
 
   //----------------------------------------------------------------------------
+  /// @brief      Creates an instance of the engine with a supplied
+  ///             `RuntimeController`.  Use the other constructor except for
+  ///             tests.
+  ///
+  Engine(Delegate& delegate,
+         const PointerDataDispatcherMaker& dispatcher_maker,
+         std::shared_ptr<fml::ConcurrentTaskRunner> image_decoder_task_runner,
+         TaskRunners task_runners,
+         Settings settings,
+         std::unique_ptr<Animator> animator,
+         fml::WeakPtr<IOManager> io_manager,
+         std::unique_ptr<RuntimeController> runtime_controller);
+
+  //----------------------------------------------------------------------------
   /// @brief      Creates an instance of the engine. This is done by the Shell
   ///             on the UI task runner.
   ///
@@ -755,6 +769,12 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   ///             RunConfiguration when |Engine::Run| was called.
   ///
   const std::string& GetLastEntrypointLibrary() const;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Getter for the initial route.  This can be set with a platform
+  ///             message.
+  ///
+  const std::string& InitialRoute() const { return initial_route_; }
 
  private:
   Engine::Delegate& delegate_;
