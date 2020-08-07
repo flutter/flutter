@@ -955,7 +955,7 @@ mixin WidgetInspectorService {
   }
 
   /// Whether structured errors are enabled.
-  /// 
+  ///
   /// Structured errors provide semantic information that can be used by IDEs
   /// to enhance the display of errors with rich formatting.
   bool isStructuredErrorsEnabled() {
