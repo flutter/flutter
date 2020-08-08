@@ -533,7 +533,7 @@ class BouncingScrollPhysics extends ScrollPhysics {
       return BouncingScrollSimulation(
         spring: spring,
         position: position.pixels,
-        velocity: velocity * 0.91, // TODO(abarth): We should move this constant closer to the drag end.
+        velocity: velocity,
         leadingExtent: position.minScrollExtent,
         trailingExtent: position.maxScrollExtent,
         tolerance: tolerance,
@@ -549,9 +549,8 @@ class BouncingScrollPhysics extends ScrollPhysics {
   double get minFlingVelocity => kMinFlingVelocity * 2.0;
 
   // Methodology:
-  // 1- Use https://github.com/flutter/scroll_overlay to test with Flutter and
-  //    platform scroll views superimposed.
-  // 2- Record incoming speed and make rapid flings in the test app.
+  // 1- Use https://github.com/flutter/platform_tests/tree/master/scroll_overlay to test with
+  //    Flutter and platform scroll views superimposed.
   // 3- If the scrollables stopped overlapping at any moment, adjust the desired
   //    output value of this function at that input speed.
   // 4- Feed new input/output set into a power curve fitter. Change function
