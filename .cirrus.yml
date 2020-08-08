@@ -245,18 +245,6 @@ task:
       script:
         - dart --enable-asserts ./dev/bots/test.dart
 
-    - name: hostonly_devicelab_tests-0-linux
-      << : *LINUX_SHARD_TEMPLATE
-
-    - name: hostonly_devicelab_tests-1-linux
-      << : *LINUX_SHARD_TEMPLATE
-
-    - name: hostonly_devicelab_tests-2-linux
-      << : *LINUX_SHARD_TEMPLATE
-
-    - name: hostonly_devicelab_tests-3_last-linux
-      << : *LINUX_SHARD_TEMPLATE
-
     - name: docs-linux # linux-only
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_drive/**', 'packages/flutter_localizations/**', 'bin/**') || $CIRRUS_PR == ''"
       environment:
