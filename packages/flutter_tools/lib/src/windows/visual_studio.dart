@@ -103,7 +103,7 @@ class VisualStudio {
   /// Returns the highest installed Windows 10 SDK version, or null if none is
   /// found.
   ///
-  /// For instance: 10.0.18362.0
+  /// For instance: 10.0.18362.0.
   String getWindows10SDKVersion() {
     final String sdkLocation = _getWindows10SdkLocation();
     if (sdkLocation == null) {

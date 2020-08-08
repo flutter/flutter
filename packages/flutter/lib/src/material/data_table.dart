@@ -166,12 +166,12 @@ class DataRow {
   ///
   /// ```dart
   /// DataRow(
-  ///   color: MaterialStateProperty.resolveWith<Color>(Set<MaterialState> states) {
+  ///   color: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
   ///     if (states.contains(MaterialState.selected))
   ///       return Theme.of(context).colorScheme.primary.withOpacity(0.08);
   ///     return null;  // Use the default value.
-  ///   },
-  ///)
+  ///   }),
+  /// )
   /// ```
   ///
   /// See also:
