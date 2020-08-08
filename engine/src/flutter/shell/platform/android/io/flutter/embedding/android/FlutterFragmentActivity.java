@@ -397,10 +397,9 @@ public class FlutterFragmentActivity extends FragmentActivity
    */
   @NonNull
   protected FlutterFragment createFlutterFragment() {
-    BackgroundMode backgroundMode = getBackgroundMode();
-    RenderMode renderMode =
-        backgroundMode == BackgroundMode.opaque ? RenderMode.surface : RenderMode.texture;
-    TransparencyMode transparencyMode =
+    final BackgroundMode backgroundMode = getBackgroundMode();
+    final RenderMode renderMode = getRenderMode();
+    final TransparencyMode transparencyMode =
         backgroundMode == BackgroundMode.opaque
             ? TransparencyMode.opaque
             : TransparencyMode.transparent;
@@ -688,6 +687,19 @@ public class FlutterFragmentActivity extends FragmentActivity
     } else {
       return BackgroundMode.opaque;
     }
+  }
+
+  /**
+   * Returns the desired {@link RenderMode} for the {@link FlutterView} displayed in this {@code
+   * FlutterFragmentActivity}.
+   *
+   * <p>That is, {@link RenderMode#surface} if {@link FlutterFragmentActivity#getBackgroundMode()}
+   * is {@link BackgroundMode.opaque} or {@link RenderMode#texture} otherwise.
+   */
+  @NonNull
+  protected RenderMode getRenderMode() {
+    final BackgroundMode backgroundMode = getBackgroundMode();
+    return backgroundMode == BackgroundMode.opaque ? RenderMode.surface : RenderMode.texture;
   }
 
   /**
