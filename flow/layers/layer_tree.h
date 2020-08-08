@@ -54,7 +54,11 @@ class LayerTree {
   float frame_physical_depth() const { return frame_physical_depth_; }
   float frame_device_pixel_ratio() const { return frame_device_pixel_ratio_; }
 
-  void RecordBuildTime(fml::TimePoint build_start, fml::TimePoint target_time);
+  void RecordBuildTime(fml::TimePoint vsync_start,
+                       fml::TimePoint build_start,
+                       fml::TimePoint target_time);
+  fml::TimePoint vsync_start() const { return vsync_start_; }
+  fml::TimeDelta vsync_overhead() const { return build_start_ - vsync_start_; }
   fml::TimePoint build_start() const { return build_start_; }
   fml::TimePoint build_finish() const { return build_finish_; }
   fml::TimeDelta build_time() const { return build_finish_ - build_start_; }
@@ -83,6 +87,7 @@ class LayerTree {
 
  private:
   std::shared_ptr<Layer> root_layer_;
+  fml::TimePoint vsync_start_;
   fml::TimePoint build_start_;
   fml::TimePoint build_finish_;
   fml::TimePoint target_time_;
