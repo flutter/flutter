@@ -6,6 +6,16 @@
          "taskName":"linux_bot"
       },
       {
+         "name":"Linux framework_tests",
+         "repo":"flutter",
+         "taskName":"linux_framework_tests"
+      },
+      {
+         "name":"Linux hostonly_devicelab_tests",
+         "repo":"flutter",
+         "taskName":"hostonly_devicelab_tests"
+      },
+      {
          "name":"Windows",
          "repo":"flutter",
          "taskName":"windows_bot"
