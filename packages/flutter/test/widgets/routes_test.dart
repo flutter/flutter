@@ -11,8 +11,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 
+import '../flutter_test_alternative.dart' show Fake;
 import 'semantics_tester.dart';
 
 final List<String> results = <String>[];
@@ -452,60 +452,64 @@ void main() {
   group('PageRouteObserver', () {
     test('calls correct listeners', () {
       final RouteObserver<PageRoute<dynamic>> observer = RouteObserver<PageRoute<dynamic>>();
-      final RouteAware pageRouteAware1 = MockRouteAware();
+      final MockRouteAware pageRouteAware1 = MockRouteAware();
       final MockPageRoute route1 = MockPageRoute();
       observer.subscribe(pageRouteAware1, route1);
-      verify(pageRouteAware1.didPush()).called(1);
+      expect(pageRouteAware1.didPushCount, 1);
 
-      final RouteAware pageRouteAware2 = MockRouteAware();
+      final MockRouteAware pageRouteAware2 = MockRouteAware();
       final MockPageRoute route2 = MockPageRoute();
       observer.didPush(route2, route1);
-      verify(pageRouteAware1.didPushNext()).called(1);
+      expect(pageRouteAware1.didPushNextCount, 1);
 
       observer.subscribe(pageRouteAware2, route2);
-      verify(pageRouteAware2.didPush()).called(1);
+      expect(pageRouteAware2.didPushCount, 1);
 
       observer.didPop(route2, route1);
-      verify(pageRouteAware2.didPop()).called(1);
-      verify(pageRouteAware1.didPopNext()).called(1);
+      expect(pageRouteAware2.didPopCount, 1);
+      expect(pageRouteAware1.didPopNextCount, 1);
     });
 
     test('does not call listeners for non-PageRoute', () {
       final RouteObserver<PageRoute<dynamic>> observer = RouteObserver<PageRoute<dynamic>>();
-      final RouteAware pageRouteAware = MockRouteAware();
+      final MockRouteAware pageRouteAware = MockRouteAware();
       final MockPageRoute pageRoute = MockPageRoute();
       final MockRoute route = MockRoute();
       observer.subscribe(pageRouteAware, pageRoute);
-      verify(pageRouteAware.didPush());
+      expect(pageRouteAware.didPushCount, 1);
 
       observer.didPush(route, pageRoute);
       observer.didPop(route, pageRoute);
-      verifyNoMoreInteractions(pageRouteAware);
+
+      expect(pageRouteAware.didPushCount, 1);
+      expect(pageRouteAware.didPopCount, 0);
     });
 
     test('does not call listeners when already subscribed', () {
       final RouteObserver<PageRoute<dynamic>> observer = RouteObserver<PageRoute<dynamic>>();
-      final RouteAware pageRouteAware = MockRouteAware();
+      final MockRouteAware pageRouteAware = MockRouteAware();
       final MockPageRoute pageRoute = MockPageRoute();
       observer.subscribe(pageRouteAware, pageRoute);
       observer.subscribe(pageRouteAware, pageRoute);
-      verify(pageRouteAware.didPush()).called(1);
+      expect(pageRouteAware.didPushCount, 1);
     });
 
     test('does not call listeners when unsubscribed', () {
       final RouteObserver<PageRoute<dynamic>> observer = RouteObserver<PageRoute<dynamic>>();
-      final RouteAware pageRouteAware = MockRouteAware();
+      final MockRouteAware pageRouteAware = MockRouteAware();
       final MockPageRoute pageRoute = MockPageRoute();
       final MockPageRoute nextPageRoute = MockPageRoute();
       observer.subscribe(pageRouteAware, pageRoute);
       observer.subscribe(pageRouteAware, nextPageRoute);
-      verify(pageRouteAware.didPush()).called(2);
+      expect(pageRouteAware.didPushCount, 2);
 
       observer.unsubscribe(pageRouteAware);
 
       observer.didPush(nextPageRoute, pageRoute);
       observer.didPop(nextPageRoute, pageRoute);
-      verifyNoMoreInteractions(pageRouteAware);
+
+      expect(pageRouteAware.didPushCount, 2);
+      expect(pageRouteAware.didPopCount, 0);
     });
   });
 
@@ -1790,11 +1794,36 @@ class ModifiedReverseTransitionDurationRoute<T> extends MaterialPageRoute<T> {
   final Duration reverseTransitionDuration;
 }
 
-class MockPageRoute extends Mock implements PageRoute<dynamic> { }
+class MockPageRoute extends Fake implements PageRoute<dynamic> { }
 
-class MockRoute extends Mock implements Route<dynamic> { }
+class MockRoute extends Fake implements Route<dynamic> { }
 
-class MockRouteAware extends Mock implements RouteAware { }
+class MockRouteAware extends Fake implements RouteAware {
+  int didPushCount = 0;
+  int didPushNextCount = 0;
+  int didPopCount = 0;
+  int didPopNextCount = 0;
+
+  @override
+  void didPush() {
+    didPushCount += 1;
+  }
+
+  @override
+  void didPushNext() {
+    didPushNextCount += 1;
+  }
+
+  @override
+  void didPop() {
+    didPopCount += 1;
+  }
+
+  @override
+  void didPopNext() {
+    didPopNextCount += 1;
+  }
+}
 
 class TestPageRouteBuilder extends PageRouteBuilder<void> {
   TestPageRouteBuilder({RoutePageBuilder pageBuilder}) : super(pageBuilder: pageBuilder);
