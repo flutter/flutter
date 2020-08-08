@@ -270,7 +270,7 @@ abstract class ScrollView extends StatelessWidget {
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
-  
+
   /// Returns the [AxisDirection] in which the scroll view scrolls.
   ///
   /// Combines the [scrollDirection] with the [reverse] boolean to obtain the
