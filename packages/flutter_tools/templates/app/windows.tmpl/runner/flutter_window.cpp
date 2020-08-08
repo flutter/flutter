@@ -11,9 +11,11 @@ FlutterWindow::~FlutterWindow() {}
 void FlutterWindow::OnCreate() {
   Win32Window::OnCreate();
 
-  // The size here is arbitrary since SetChildContent will resize it.
+  RECT frame = GetWindowDimensions();
+
+  // The size here must match the window dimensions to avoid unnecessary surface creation / destruction in the startup path.
   flutter_controller_ =
-      std::make_unique<flutter::FlutterViewController>(100, 100, project_);
+      std::make_unique<flutter::FlutterViewController>(frame.right - frame.left, frame.bottom - frame.top, project_);
   RegisterPlugins(flutter_controller_.get());
   run_loop_->RegisterFlutterInstance(flutter_controller_.get());
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
