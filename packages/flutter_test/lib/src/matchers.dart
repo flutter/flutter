@@ -584,7 +584,7 @@ Matcher matchesSemantics({
 ///
 /// ```dart
 /// final SemanticsHandle handle = tester.ensureSemantics();
-/// await meetsGuideline(tester, meetsGuideline(textContrastGuideline));
+/// await meetsGuideline(textContrastGuideline);
 /// handle.dispose();
 /// ```
 ///
