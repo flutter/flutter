@@ -200,7 +200,7 @@ void _reportTimings(List<int> timings) {
   assert(timings.length % FramePhase.values.length == 0);
   final List<FrameTiming> frameTimings = <FrameTiming>[];
   for (int i = 0; i < timings.length; i += FramePhase.values.length) {
-    frameTimings.add(FrameTiming(timings.sublist(i, i + FramePhase.values.length)));
+    frameTimings.add(FrameTiming._(timings.sublist(i, i + FramePhase.values.length)));
   }
   _invoke1(window.onReportTimings, window._onReportTimingsZone, frameTimings);
 }

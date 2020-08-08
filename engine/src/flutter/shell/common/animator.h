@@ -98,6 +98,7 @@ class Animator final {
   std::shared_ptr<VsyncWaiter> waiter_;
 
   fml::TimePoint last_frame_begin_time_;
+  fml::TimePoint last_vsync_start_time_;
   fml::TimePoint last_frame_target_time_;
   int64_t dart_frame_deadline_;
   fml::RefPtr<LayerTreePipeline> layer_tree_pipeline_;

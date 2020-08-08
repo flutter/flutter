@@ -122,9 +122,6 @@ void VsyncWaiter::FireCallback(fml::TimePoint frame_start_time,
         [callback, flow_identifier, frame_start_time, frame_target_time]() {
           FML_TRACE_EVENT("flutter", kVsyncTraceName, "StartTime",
                           frame_start_time, "TargetTime", frame_target_time);
-          fml::tracing::TraceEventAsyncComplete(
-              "flutter", "VsyncSchedulingOverhead", fml::TimePoint::Now(),
-              frame_start_time);
           callback(frame_start_time, frame_target_time);
           TRACE_FLOW_END("flutter", kVsyncFlowName, flow_identifier);
         },

@@ -21,8 +21,10 @@ LayerTree::LayerTree(const SkISize& frame_size,
       checkerboard_raster_cache_images_(false),
       checkerboard_offscreen_layers_(false) {}
 
-void LayerTree::RecordBuildTime(fml::TimePoint build_start,
+void LayerTree::RecordBuildTime(fml::TimePoint vsync_start,
+                                fml::TimePoint build_start,
                                 fml::TimePoint target_time) {
+  vsync_start_ = vsync_start;
   build_start_ = build_start;
   target_time_ = target_time;
   build_finish_ = fml::TimePoint::Now();
