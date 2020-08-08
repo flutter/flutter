@@ -1,4 +1,4 @@
-Signature: 555e73f724d6c25386ac16b8371ffbbc
+Signature: 943c2bc86dd07b40e6ee4533db8f3598
 
 UNUSED LICENSES:
 
@@ -3055,7 +3055,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.playback/problem.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.playback/seeking_reader.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/audio.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/module_context.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/module_controller.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/session_shell.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/story_controller.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/story_info.fidl
