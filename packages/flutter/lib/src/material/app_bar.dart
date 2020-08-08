@@ -550,7 +550,7 @@ class _AppBarState extends State<AppBar> {
         );
       } else {
         if (canPop)
-          leading = useCloseButton ? const CloseButton() : const BackButton();
+          leading = useCloseButton ? const CloseButton() : null;
       }
     }
     if (leading != null) {
