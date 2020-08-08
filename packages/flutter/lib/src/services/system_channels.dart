@@ -26,16 +26,18 @@ class SystemChannels {
   ///  * `pushRoute`, which is called with a single string argument when the
   ///    operating system instructs the application to open a particular page.
   ///
+  ///  * `pushRouteInformation`, which is called with a map, which contains a
+  ///    location string and a state object, when the operating system instructs
+  ///    the application to open a particular page. These parameters are stored
+  ///    under the key `location` and `state` in the map.
+  ///
   /// The following methods are used for the opposite direction data flow. The
   /// framework notifies the engine about the route changes.
   ///
-  ///  * `routePushed`, which is called when a route is pushed. (e.g. A modal
-  ///    replaces the entire screen.)
+  ///  * `routeUpdated`, which is called when current route has changed.
   ///
-  ///  * `routePopped`, which is called when a route is popped. (e.g. A dialog,
-  ///    such as time picker is closed.)
-  ///
-  ///  * `routeReplaced`, which is called when a route is replaced.
+  ///  * `routeInformationUpdated`, which is called by the [Router] when the
+  ///    application navigate to a new location.
   ///
   /// See also:
   ///
@@ -46,7 +48,7 @@ class SystemChannels {
   ///    [Navigator.push], [Navigator.pushReplacement], [Navigator.pop] and
   ///    [Navigator.replace], utilize this channel's methods to send route
   ///    change information from framework to engine.
-  static const MethodChannel navigation = MethodChannel(
+  static const MethodChannel navigation = OptionalMethodChannel(
       'flutter/navigation',
       JSONMethodCodec(),
   );
