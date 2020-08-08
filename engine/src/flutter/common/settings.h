@@ -22,10 +22,17 @@ namespace flutter {
 
 class FrameTiming {
  public:
-  enum Phase { kBuildStart, kBuildFinish, kRasterStart, kRasterFinish, kCount };
+  enum Phase {
+    kVsyncStart,
+    kBuildStart,
+    kBuildFinish,
+    kRasterStart,
+    kRasterFinish,
+    kCount
+  };
 
-  static constexpr Phase kPhases[kCount] = {kBuildStart, kBuildFinish,
-                                            kRasterStart, kRasterFinish};
+  static constexpr Phase kPhases[kCount] = {
+      kVsyncStart, kBuildStart, kBuildFinish, kRasterStart, kRasterFinish};
 
   fml::TimePoint Get(Phase phase) const { return data_[phase]; }
   fml::TimePoint Set(Phase phase, fml::TimePoint value) {
