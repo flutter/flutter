@@ -18,6 +18,7 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.os.Build;
+import android.os.Bundle;
 import android.provider.Settings;
 import android.util.SparseIntArray;
 import android.view.KeyEvent;
@@ -40,6 +41,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -566,6 +568,74 @@ public class TextInputPluginTest {
     verify(mockHandler, times(1)).finishAutofillContext(false);
   }
 
+  @Test
+  public void sendAppPrivateCommand_dataIsEmpty() throws JSONException {
+    ArgumentCaptor<BinaryMessenger.BinaryMessageHandler> binaryMessageHandlerCaptor =
+        ArgumentCaptor.forClass(BinaryMessenger.BinaryMessageHandler.class);
+    DartExecutor mockBinaryMessenger = mock(DartExecutor.class);
+    TextInputChannel textInputChannel = new TextInputChannel(mockBinaryMessenger);
+
+    EventHandler mockEventHandler = mock(EventHandler.class);
+    TestImm testImm =
+        Shadow.extract(
+            RuntimeEnvironment.application.getSystemService(Context.INPUT_METHOD_SERVICE));
+    testImm.setEventHandler(mockEventHandler);
+
+    View testView = new View(RuntimeEnvironment.application);
+    TextInputPlugin textInputPlugin =
+        new TextInputPlugin(testView, textInputChannel, mock(PlatformViewsController.class));
+
+    verify(mockBinaryMessenger, times(1))
+        .setMessageHandler(any(String.class), binaryMessageHandlerCaptor.capture());
+
+    JSONObject arguments = new JSONObject();
+    arguments.put("action", "actionCommand");
+    arguments.put("data", "");
+
+    BinaryMessenger.BinaryMessageHandler binaryMessageHandler =
+        binaryMessageHandlerCaptor.getValue();
+    sendToBinaryMessageHandler(binaryMessageHandler, "TextInput.sendAppPrivateCommand", arguments);
+    verify(mockEventHandler, times(1))
+        .sendAppPrivateCommand(any(View.class), eq("actionCommand"), eq(null));
+  }
+
+  @Test
+  public void sendAppPrivateCommand_hasData() throws JSONException {
+    ArgumentCaptor<BinaryMessenger.BinaryMessageHandler> binaryMessageHandlerCaptor =
+        ArgumentCaptor.forClass(BinaryMessenger.BinaryMessageHandler.class);
+    DartExecutor mockBinaryMessenger = mock(DartExecutor.class);
+    TextInputChannel textInputChannel = new TextInputChannel(mockBinaryMessenger);
+
+    EventHandler mockEventHandler = mock(EventHandler.class);
+    TestImm testImm =
+        Shadow.extract(
+            RuntimeEnvironment.application.getSystemService(Context.INPUT_METHOD_SERVICE));
+    testImm.setEventHandler(mockEventHandler);
+
+    View testView = new View(RuntimeEnvironment.application);
+    TextInputPlugin textInputPlugin =
+        new TextInputPlugin(testView, textInputChannel, mock(PlatformViewsController.class));
+
+    verify(mockBinaryMessenger, times(1))
+        .setMessageHandler(any(String.class), binaryMessageHandlerCaptor.capture());
+
+    JSONObject arguments = new JSONObject();
+    arguments.put("action", "actionCommand");
+    arguments.put("data", "actionData");
+
+    ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
+    BinaryMessenger.BinaryMessageHandler binaryMessageHandler =
+        binaryMessageHandlerCaptor.getValue();
+    sendToBinaryMessageHandler(binaryMessageHandler, "TextInput.sendAppPrivateCommand", arguments);
+    verify(mockEventHandler, times(1))
+        .sendAppPrivateCommand(any(View.class), eq("actionCommand"), bundleCaptor.capture());
+    assertEquals("actionData", bundleCaptor.getValue().getCharSequence("data"));
+  }
+
+  interface EventHandler {
+    void sendAppPrivateCommand(View view, String action, Bundle data);
+  }
+
   @Implements(InputMethodManager.class)
   public static class TestImm extends ShadowInputMethodManager {
     private InputMethodSubtype currentInputMethodSubtype;
@@ -573,6 +643,7 @@ public class TextInputPluginTest {
     private CursorAnchorInfo cursorAnchorInfo;
     private ArrayList<Integer> selectionUpdateValues;
     private boolean trackSelection = false;
+    private EventHandler handler;
 
     public TestImm() {
       selectionUpdateValues = new ArrayList<Integer>();
@@ -595,6 +666,15 @@ public class TextInputPluginTest {
 
     public int getRestartCount(View view) {
       return restartCounter.get(view.hashCode(), /*defaultValue=*/ 0);
+    }
+
+    public void setEventHandler(EventHandler eventHandler) {
+      handler = eventHandler;
+    }
+
+    @Implementation
+    public void sendAppPrivateCommand(View view, String action, Bundle data) {
+      handler.sendAppPrivateCommand(view, action, data);
     }
 
     @Implementation
