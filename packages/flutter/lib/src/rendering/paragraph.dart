@@ -372,6 +372,9 @@ class RenderParagraph extends RenderBox
     RenderBox child = firstChild;
     final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>(childCount);
     int childIndex = 0;
+    // Takes textScaleFactor into account because the content of the placeholder
+    // span will be scale up when it paints.
+    height = height / textScaleFactor;
     while (child != null) {
       // Height and baseline is irrelevant as all text will be laid
       // out in a single line.
@@ -390,6 +393,9 @@ class RenderParagraph extends RenderBox
     RenderBox child = firstChild;
     final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>(childCount);
     int childIndex = 0;
+    // Takes textScaleFactor into account because the content of the placeholder
+    // span will be scale up when it paints.
+    height = height / textScaleFactor;
     while (child != null) {
       final double intrinsicWidth = child.getMinIntrinsicWidth(height);
       final double intrinsicHeight = child.getMinIntrinsicHeight(intrinsicWidth);
@@ -408,6 +414,9 @@ class RenderParagraph extends RenderBox
     RenderBox child = firstChild;
     final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>(childCount);
     int childIndex = 0;
+    // Takes textScaleFactor into account because the content of the placeholder
+    // span will be scale up when it paints.
+    width = width / textScaleFactor;
     while (child != null) {
       final double intrinsicHeight = child.getMinIntrinsicHeight(width);
       final double intrinsicWidth = child.getMinIntrinsicWidth(intrinsicHeight);
