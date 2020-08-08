@@ -1,4 +1,4 @@
-Signature: 2b088fd6d8bfa2c00e764f0c9e414cb2
+Signature: 310d4839c6f185d03b148e90eb671517
 
 UNUSED LICENSES:
 
@@ -3904,7 +3904,6 @@ FILE: ../../../third_party/skia/modules/canvaskit/wasm_tools/SIMD/simd_float_cap
 FILE: ../../../third_party/skia/modules/canvaskit/wasm_tools/SIMD/simd_int_capabilities.cpp
 FILE: ../../../third_party/skia/src/core/SkIDChangeListener.cpp
 FILE: ../../../third_party/skia/src/core/SkMatrixProvider.h
-FILE: ../../../third_party/skia/src/core/SkRuntimeEffectPriv.h
 FILE: ../../../third_party/skia/src/core/SkVM_fwd.h
 FILE: ../../../third_party/skia/src/gpu/GrBackendSemaphore.cpp
 FILE: ../../../third_party/skia/src/gpu/GrBackendSurfaceMutableStateImpl.h
@@ -5297,6 +5296,7 @@ FILE: ../../../third_party/skia/src/core/SkCompressedDataUtils.h
 FILE: ../../../third_party/skia/src/core/SkM44.cpp
 FILE: ../../../third_party/skia/src/core/SkMarkerStack.cpp
 FILE: ../../../third_party/skia/src/core/SkMarkerStack.h
+FILE: ../../../third_party/skia/src/core/SkPathView.h
 FILE: ../../../third_party/skia/src/core/SkVerticesPriv.h
 FILE: ../../../third_party/skia/src/gpu/GrDynamicAtlas.cpp
 FILE: ../../../third_party/skia/src/gpu/GrDynamicAtlas.h
