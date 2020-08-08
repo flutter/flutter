@@ -557,7 +557,7 @@ abstract class Device {
     String userIdentifier,
   });
 
-  /// Check if the device is supported by Flutter
+  /// Check if the device is supported by Flutter.
   bool isSupported();
 
   // String meant to be displayed to the user indicating if the device is
@@ -734,7 +734,7 @@ abstract class Device {
     };
   }
 
-  /// Clean up resources allocated by device
+  /// Clean up resources allocated by device.
   ///
   /// For example log readers or port forwarders.
   Future<void> dispose();
@@ -861,7 +861,7 @@ class DebuggingOptions {
   /// The port the browser should use for its debugging protocol.
   final int webBrowserDebugPort;
 
-  /// Enable expression evaluation for web target
+  /// Enable expression evaluation for web target.
   final bool webEnableExpressionEvaluation;
 
   /// A file where the vmservice URL should be written after the application is started.
@@ -925,7 +925,7 @@ abstract class DevicePortForwarder {
   /// Stops forwarding [forwardedPort].
   Future<void> unforward(ForwardedPort forwardedPort);
 
-  /// Cleanup allocated resources, like forwardedPorts
+  /// Cleanup allocated resources, like [forwardedPorts].
   Future<void> dispose();
 }
 

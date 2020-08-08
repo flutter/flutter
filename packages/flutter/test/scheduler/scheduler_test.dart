@@ -134,12 +134,12 @@ void main() {
   });
 
   test('Flutter.Frame event fired', () async {
-    window.onReportTimings(<FrameTiming>[FrameTiming(<int>[
-      // build start, build finish
-      10000, 15000,
-      // raster start, raster finish
-      16000, 20000,
-    ])]);
+    window.onReportTimings(<FrameTiming>[FrameTiming.fromTimeStamps(
+      buildStart: 10000,
+      buildFinish: 15000,
+      rasterStart: 16000,
+      rasterFinish: 20000,
+    )]);
 
     final List<Map<String, dynamic>> events = scheduler.getEventsDispatched('Flutter.Frame');
     expect(events, hasLength(1));

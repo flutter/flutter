@@ -450,7 +450,7 @@ class ColorSwatch<T> extends Color {
       return false;
     return super == other
         && other is ColorSwatch<T>
-        && other._swatch == _swatch;
+        && mapEquals<T, Color>(other._swatch, _swatch);
   }
 
   @override

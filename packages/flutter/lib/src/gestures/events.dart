@@ -388,7 +388,7 @@ abstract class PointerEvent with Diagnosticable {
   ///
   /// The angle of the contact ellipse, in radians in the range:
   ///
-  ///    -pi/2 < orientation <= pi/2
+  ///     -pi/2 < orientation <= pi/2
   ///
   /// ...giving the angle of the major axis of the ellipse with the y-axis
   /// (negative angles indicating an orientation along the top-left /
@@ -400,7 +400,7 @@ abstract class PointerEvent with Diagnosticable {
   ///
   /// The angle of the stylus, in radians in the range:
   ///
-  ///    -pi < orientation <= pi
+  ///     -pi < orientation <= pi
   ///
   /// ...giving the angle of the axis of the stylus projected onto the input
   /// surface, relative to the positive y-axis of that surface (thus 0.0
@@ -417,7 +417,7 @@ abstract class PointerEvent with Diagnosticable {
   ///
   /// The angle of the stylus, in radians in the range:
   ///
-  ///    0 <= tilt <= pi/2
+  ///     0 <= tilt <= pi/2
   ///
   /// ...giving the angle of the axis of the stylus, relative to the axis
   /// perpendicular to the input surface (thus 0.0 indicates the stylus is

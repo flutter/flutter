@@ -21,7 +21,6 @@ import 'focus_scope.dart';
 import 'framework.dart';
 import 'heroes.dart';
 import 'overlay.dart';
-import 'route_notification_messages.dart';
 import 'routes.dart';
 import 'ticker_provider.dart';
 
@@ -109,7 +108,7 @@ enum RoutePopDisposition {
 /// platform-adaptive transition.
 ///
 /// A route can belong to a page if the [settings] are a subclass of [Page]. A
-/// page-based route, as opposite to pageless route, is created from
+/// page-based route, as opposed to a pageless route, is created from
 /// [Page.createRoute] during [Navigator.pages] updates. The page associated
 /// with this route may change during the lifetime of the route. If the
 /// [Navigator] updates the page of this route, it calls [changedInternalState]
@@ -3308,8 +3307,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         _RouteEntry.isPresentPredicate, orElse: () => null);
       final String routeName = lastEntry?.route?.settings?.name;
       if (routeName != _lastAnnouncedRouteName) {
-        RouteNotificationMessages.maybeNotifyRouteChange(
-          routeName, _lastAnnouncedRouteName);
+        SystemNavigator.routeUpdated(
+          routeName: routeName,
+          previousRouteName: _lastAnnouncedRouteName
+        );
         _lastAnnouncedRouteName = routeName;
       }
     }

@@ -402,7 +402,7 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   /// The image filter to apply to the existing painted content before painting the child.
   ///
   /// For example, consider using [ImageFilter.blur] to create a backdrop
-  /// blur effect
+  /// blur effect.
   final ui.ImageFilter filter;
 
   @override
@@ -4496,7 +4496,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
     @required Widget child,
   }) : super(key: key, child: child);
 
-  /// The flex factor to use for this child
+  /// The flex factor to use for this child.
   ///
   /// If null or zero, the child is inflexible and determines its own size. If
   /// non-zero, the amount of space the child's can occupy in the main axis is
@@ -6493,7 +6493,7 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
 class AbsorbPointer extends SingleChildRenderObjectWidget {
   /// Creates a widget that absorbs pointers during hit testing.
   ///
-  /// The [absorbing] argument must not be null
+  /// The [absorbing] argument must not be null.
   const AbsorbPointer({
     Key key,
     this.absorbing = true,
@@ -6557,7 +6557,7 @@ class MetaData extends SingleChildRenderObjectWidget {
     Widget child,
   }) : super(key: key, child: child);
 
-  /// Opaque meta data ignored by the render tree
+  /// Opaque meta data ignored by the render tree.
   final dynamic metaData;
 
   /// How to behave during hit testing.
