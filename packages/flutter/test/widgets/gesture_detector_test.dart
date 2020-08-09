@@ -127,6 +127,61 @@ void main() {
     expect(didEndPan, isTrue);
   });
 
+  testWidgets('Use GestureDetector and CustomScrollView together', (WidgetTester tester) async {
+    bool didStartDrag = false;
+    bool didUpdateDrag = false;
+    bool didEndDrag = false;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: GestureDetector(
+          addPointerManually: true,
+          onVerticalDragStart: (DragStartDetails details) {
+            didStartDrag = true;
+          },
+          onVerticalDragUpdate: (DragUpdateDetails details) {
+            didUpdateDrag = true;
+          },
+          onVerticalDragEnd: (DragEndDetails details) {
+            didEndDrag = true;
+          },
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverGrid(
+                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: 200.0,
+                  mainAxisSpacing: 10.0,
+                  crossAxisSpacing: 10.0,
+                  childAspectRatio: 4.0,
+                ),
+                delegate: SliverChildBuilderDelegate(
+                      (BuildContext context, int index) {
+                    return Container(
+                      alignment: Alignment.center,
+                      color: const Color(0xFF00FF00),
+                    );
+                  },
+                  childCount: 20,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(didStartDrag, isFalse);
+    expect(didUpdateDrag, isFalse);
+    expect(didEndDrag, isFalse);
+
+    await tester.dragFrom(const Offset(10.0, 10.0), const Offset(10.0, 30.0));
+
+    expect(didStartDrag, isTrue);
+    expect(didUpdateDrag, isTrue);
+    expect(didEndDrag, isTrue);
+  });
+
   group('Tap', () {
     final ButtonVariant buttonVariant = ButtonVariant(
       values: <int>[kPrimaryButton, kSecondaryButton],
