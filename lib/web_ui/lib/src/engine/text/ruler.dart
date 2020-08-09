@@ -628,6 +628,31 @@ class ParagraphRuler {
     );
   }
 
+  List<ui.TextBox> measurePlaceholderBoxes() {
+    assert(!_debugIsDisposed);
+    assert(_paragraph != null);
+
+    if (_paragraph!.placeholderCount == 0) {
+      return const <ui.TextBox>[];
+    }
+
+    final List<html.Element> placeholderElements =
+        constrainedDimensions._element.querySelectorAll('.$_placeholderClass');
+    final List<ui.TextBox> boxes = <ui.TextBox>[];
+
+    for (final html.Element element in placeholderElements) {
+      final html.Rectangle<num> rect = element.getBoundingClientRect();
+      boxes.add(ui.TextBox.fromLTRBD(
+        rect.left as double,
+        rect.top as double,
+        rect.right as double,
+        rect.bottom as double,
+        _paragraph!._textDirection,
+      ));
+    }
+    return boxes;
+  }
+
   /// Returns text position in a paragraph that contains multiple
   /// nested spans given an offset.
   int hitTest(ui.ParagraphConstraints constraints, ui.Offset offset) {
@@ -905,6 +930,8 @@ class MeasurementResult {
   /// of each laid out line.
   final List<EngineLineMetrics>? lines;
 
+  final List<ui.TextBox> placeholderBoxes;
+
   /// The text align value of the paragraph.
   final ui.TextAlign textAlign;
 
@@ -923,6 +950,7 @@ class MeasurementResult {
     required this.alphabeticBaseline,
     required this.ideographicBaseline,
     required this.lines,
+    required this.placeholderBoxes,
     required ui.TextAlign? textAlign,
     required ui.TextDirection? textDirection,
   })  : assert(constraintWidth != null), // ignore: unnecessary_null_comparison
