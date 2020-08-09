@@ -170,6 +170,10 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// If null then [kMaxFlingVelocity] is used.
   double? maxFlingVelocity;
 
+  /// Add the pointer manually to the global gesture arena manager
+  /// (see [GestureArenaManager]) to track that pointer.
+  bool? addPointerManually;
+
   _DragState _state = _DragState.ready;
   late OffsetPair _initialPosition;
   late OffsetPair _pendingDragOffset;
@@ -330,6 +334,13 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void rejectGesture(int pointer) {
+    if (addPointerManually != null) {
+      assert(addPointerManually == false || addPointerManually == true);
+      if (addPointerManually == true) {
+        acceptGesture(pointer);
+        return;
+      }
+    }
     _giveUpPointer(pointer);
   }
 
@@ -482,11 +493,6 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
     final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
     final double minDistance = minFlingDistance ?? kTouchSlop;
     return estimate.pixelsPerSecond.dy.abs() > minVelocity && estimate.offset.dy.abs() > minDistance;
-  }
-
-  @override
-  void rejectGesture(int pointer) {
-    acceptGesture(pointer);
   }
 
   @override

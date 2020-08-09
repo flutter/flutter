@@ -262,6 +262,7 @@ class GestureDetector extends StatelessWidget {
     this.behavior,
     this.excludeFromSemantics = false,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.addPointerManually = false,
   }) : assert(excludeFromSemantics != null),
        assert(dragStartBehavior != null),
        assert(() {
@@ -698,6 +699,12 @@ class GestureDetector extends StatelessWidget {
   ///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
   final DragStartBehavior dragStartBehavior;
 
+  /// Add the pointer manually in the global gesture arena manager and make sure that
+  /// the GestureDetector is not ignored.
+  ///
+  /// By default, This value is set to false.
+  final bool addPointerManually;
+
   @override
   Widget build(BuildContext context) {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
@@ -778,7 +785,8 @@ class GestureDetector extends StatelessWidget {
             ..onUpdate = onVerticalDragUpdate
             ..onEnd = onVerticalDragEnd
             ..onCancel = onVerticalDragCancel
-            ..dragStartBehavior = dragStartBehavior;
+            ..dragStartBehavior = dragStartBehavior
+            ..addPointerManually = addPointerManually;
         },
       );
     }
