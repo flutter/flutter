@@ -63,7 +63,7 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: Container(
-              child: OutlineButton(
+              child: OutlinedButton(
                   onPressed: () { },
                   child: const Text('hello'),
               ),
@@ -85,7 +85,7 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: Container(
-              child: OutlineButton(
+              child: OutlinedButton(
                   onPressed: () { },
                   child: const Text('hello'),
               ),
