@@ -448,6 +448,7 @@ class DomTextMeasurementService extends TextMeasurementService {
       alphabeticBaseline: alphabeticBaseline,
       ideographicBaseline: ideographicBaseline,
       lines: lines,
+      placeholderBoxes: ruler.measurePlaceholderBoxes(),
       textAlign: paragraph._textAlign,
       textDirection: paragraph._textDirection,
     );
@@ -498,6 +499,7 @@ class DomTextMeasurementService extends TextMeasurementService {
       alphabeticBaseline: alphabeticBaseline,
       ideographicBaseline: ideographicBaseline,
       lines: null,
+      placeholderBoxes: ruler.measurePlaceholderBoxes(),
       textAlign: paragraph._textAlign,
       textDirection: paragraph._textDirection,
     );
@@ -609,6 +611,7 @@ class CanvasTextMeasurementService extends TextMeasurementService {
       maxIntrinsicWidth: maxIntrinsicCalculator.value,
       width: constraints.width,
       lines: linesCalculator.lines,
+      placeholderBoxes: <ui.TextBox>[],
       textAlign: paragraph._textAlign,
       textDirection: paragraph._textDirection,
     );
