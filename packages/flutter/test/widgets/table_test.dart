@@ -980,5 +980,41 @@ void main() {
       }
   });
 
+  testWidgets('Table widget rowSpacing test', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Table(
+          rowSpacing: 10,
+          children: const <TableRow>[
+            TableRow(
+              children: <Widget>[
+                SizedBox(width: 10, height: 10),
+              ],
+            ),
+            TableRow(
+              children: <Widget>[
+                SizedBox(width: 10, height: 20),
+              ],
+            ),
+            TableRow(
+              children: <Widget>[
+                SizedBox(width: 10, height: 30),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+    final List<Offset> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox)).map<Offset>(
+            (RenderBox target) => target.localToGlobal(Offset.zero)
+    ).toList();
+    expect(testAnswers, equals(<Offset>[
+      const Offset(0.0, 0.0),
+      const Offset(0.0, 20.0),
+      const Offset(0.0, 50.0),
+    ]));
+  });
+
   // TODO(ianh): Test handling of TableCell object
 }

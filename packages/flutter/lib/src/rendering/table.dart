@@ -369,6 +369,7 @@ class RenderTable extends RenderBox {
     int rows,
     Map<int, TableColumnWidth> columnWidths,
     TableColumnWidth defaultColumnWidth = const FlexColumnWidth(1.0),
+    double rowSpacing = 0.0,
     @required TextDirection textDirection,
     TableBorder border,
     List<Decoration> rowDecorations,
@@ -380,6 +381,7 @@ class RenderTable extends RenderBox {
        assert(rows == null || rows >= 0),
        assert(rows == null || children == null),
        assert(defaultColumnWidth != null),
+       assert(rowSpacing != null),
        assert(textDirection != null),
        assert(configuration != null),
        _textDirection = textDirection {
@@ -388,6 +390,7 @@ class RenderTable extends RenderBox {
     _children = <RenderBox>[]..length = _columns * _rows;
     _columnWidths = columnWidths ?? HashMap<int, TableColumnWidth>();
     _defaultColumnWidth = defaultColumnWidth;
+    _rowSpacing = rowSpacing;
     _border = border;
     this.rowDecorations = rowDecorations; // must use setter to initialize box painters array
     _configuration = configuration;
@@ -495,6 +498,22 @@ class RenderTable extends RenderBox {
     if (defaultColumnWidth == value)
       return;
     _defaultColumnWidth = value;
+    markNeedsLayout();
+  }
+
+  /// How much space to place between rows.
+  ///
+  /// For example, if [rowSpacing] is 10.0, the rows will be spaced at least
+  /// 10.0 logical pixels apart in the vertical axis.
+  ///
+  /// Defaults to 0.0.
+  double get rowSpacing => _rowSpacing;
+  double _rowSpacing;
+  set rowSpacing(double value) {
+    assert(value != null);
+    if (_rowSpacing == value)
+      return;
+    _rowSpacing = value;
     markNeedsLayout();
   }
 
@@ -1034,6 +1053,8 @@ class RenderTable extends RenderBox {
     // then, lay out each row
     double rowTop = 0.0;
     for (int y = 0; y < rows; y += 1) {
+      if (y != 0)
+        rowTop += rowSpacing;
       _rowTops.add(rowTop);
       double rowHeight = 0.0;
       bool haveBaseline = false;

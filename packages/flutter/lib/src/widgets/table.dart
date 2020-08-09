@@ -115,6 +115,7 @@ class Table extends RenderObjectWidget {
     this.children = const <TableRow>[],
     this.columnWidths,
     this.defaultColumnWidth = const FlexColumnWidth(1.0),
+    this.rowSpacing = 0.0,
     this.textDirection,
     this.border,
     this.defaultVerticalAlignment = TableCellVerticalAlignment.top,
@@ -215,6 +216,14 @@ class Table extends RenderObjectWidget {
   /// an [IntrinsicColumnWidth] as the horizontal space is infinite.
   final TableColumnWidth defaultColumnWidth;
 
+  /// How much space to place between rows.
+  ///
+  /// For example, if [rowSpacing] is 10.0, the rows will be spaced at least
+  /// 10.0 logical pixels apart in the vertical axis.
+  ///
+  /// Defaults to 0.0.
+  final double rowSpacing;
+
   /// The direction in which the columns are ordered.
   ///
   /// Defaults to the ambient [Directionality].
@@ -247,6 +256,7 @@ class Table extends RenderObjectWidget {
       rows: children.length,
       columnWidths: columnWidths,
       defaultColumnWidth: defaultColumnWidth,
+      rowSpacing: rowSpacing,
       textDirection: textDirection ?? Directionality.of(context),
       border: border,
       rowDecorations: _rowDecorations,
@@ -264,6 +274,7 @@ class Table extends RenderObjectWidget {
     renderObject
       ..columnWidths = columnWidths
       ..defaultColumnWidth = defaultColumnWidth
+      ..rowSpacing = rowSpacing
       ..textDirection = textDirection ?? Directionality.of(context)
       ..border = border
       ..rowDecorations = _rowDecorations
