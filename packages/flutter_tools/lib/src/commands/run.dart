@@ -73,7 +73,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesIpv6Flag();
     usesPubOption();
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
-    usesIsolateFilterOption(hide: !verboseHelp);
     addNullSafetyModeOptions(hide: !verboseHelp);
     usesDeviceUserOption();
   }
@@ -526,7 +525,6 @@ class RunCommand extends RunCommandBase {
           flutterProject: flutterProject,
           fileSystemRoots: stringsArg('filesystem-root'),
           fileSystemScheme: stringArg('filesystem-scheme'),
-          viewFilter: stringArg('isolate-filter'),
           experimentalFlags: expFlags,
           target: stringArg('target'),
           buildInfo: getBuildInfo(),
