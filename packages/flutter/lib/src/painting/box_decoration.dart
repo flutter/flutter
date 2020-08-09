@@ -455,7 +455,11 @@ class _BoxDecorationPainter extends BoxPainter {
     Path clipPath;
     switch (_decoration.shape) {
       case BoxShape.circle:
-        clipPath = Path()..addOval(rect);
+        assert(_decoration.borderRadius == null);
+        final Offset center = rect.center;
+        final double radius = rect.shortestSide / 2.0;
+        final Rect square = Rect.fromCircle(center: center, radius: radius);
+        clipPath = Path()..addOval(square);
         break;
       case BoxShape.rectangle:
         if (_decoration.borderRadius != null)
