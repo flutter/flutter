@@ -88,6 +88,7 @@ PlatformView::PlatformView(
         parent_environment_service_provider_handle,
     fidl::InterfaceRequest<fuchsia::ui::scenic::SessionListener>
         session_listener_request,
+    fidl::InterfaceHandle<fuchsia::ui::views::Focuser> focuser,
     fit::closure session_listener_error_callback,
     OnMetricsUpdate session_metrics_did_change_callback,
     OnSizeChangeHint session_size_change_hint_callback,
@@ -100,6 +101,7 @@ PlatformView::PlatformView(
     : flutter::PlatformView(delegate, std::move(task_runners)),
       debug_label_(std::move(debug_label)),
       view_ref_(std::move(view_ref)),
+      focuser_(focuser.Bind()),
       session_listener_binding_(this, std::move(session_listener_request)),
       session_listener_error_callback_(
           std::move(session_listener_error_callback)),
@@ -830,6 +832,39 @@ void PlatformView::HandleFlutterPlatformViewsChannelPlatformMessage(
       return;
     }
     on_destroy_view_callback_(view_id->value.GetUint64());
+  } else if (method->value == "View.requestFocus") {
+    auto args_it = root.FindMember("args");
+    if (args_it == root.MemberEnd() || !args_it->value.IsObject()) {
+      FML_LOG(ERROR) << "No arguments found.";
+      return;
+    }
+    const auto& args = args_it->value;
+
+    auto view_ref = args.FindMember("viewRef");
+    if (!view_ref->value.IsUint64()) {
+      FML_LOG(ERROR) << "Argument 'viewRef' is not a int64";
+      return;
+    }
+
+    zx_handle_t handle = view_ref->value.GetUint64();
+    zx_handle_t out_handle;
+    zx_status_t status =
+        zx_handle_duplicate(handle, ZX_RIGHT_SAME_RIGHTS, &out_handle);
+    if (status != ZX_OK) {
+      FML_LOG(ERROR) << "Argument 'viewRef' is not valid";
+      return;
+    }
+    auto ref = fuchsia::ui::views::ViewRef({
+        .reference = zx::eventpair(out_handle),
+    });
+    focuser_->RequestFocus(
+        std::move(ref),
+        [view_ref = view_ref->value.GetUint64()](
+            fuchsia::ui::views::Focuser_RequestFocus_Result result) {
+          if (result.is_err()) {
+            FML_LOG(ERROR) << "Failed to request focus for view: " << view_ref;
+          }
+        });
   } else {
     FML_DLOG(ERROR) << "Unknown " << message->channel() << " method "
                     << method->value.GetString();
