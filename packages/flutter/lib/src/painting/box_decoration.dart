@@ -220,7 +220,10 @@ class BoxDecoration extends Decoration {
     Path clipPath;
     switch (shape) {
       case BoxShape.circle:
-        clipPath = Path()..addOval(rect);
+        final Offset center = rect.center;
+        final double radius = rect.shortestSide / 2.0;
+        final Rect square = Rect.fromCircle(center: center, radius: radius);
+        clipPath = Path()..addOval(square);
         break;
       case BoxShape.rectangle:
         if (borderRadius != null)
