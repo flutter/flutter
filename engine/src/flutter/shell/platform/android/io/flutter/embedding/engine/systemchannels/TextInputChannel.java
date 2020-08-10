@@ -14,6 +14,7 @@ import io.flutter.plugin.common.MethodChannel;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -281,6 +282,38 @@ public class TextInputChannel {
     channel.invokeMethod(
         "TextInputClient.performAction",
         Arrays.asList(inputClientId, "TextInputAction.unspecified"));
+  }
+
+  public void performPrivateCommand(int inputClientId, String action, Bundle data) {
+    HashMap<Object, Object> json = new HashMap<>();
+    json.put("action", action);
+    if (data != null) {
+      HashMap<String, Object> dataMap = new HashMap<>();
+      Set<String> keySet = data.keySet();
+      for (String key : keySet) {
+        Object value = data.get(key);
+        if (value instanceof byte[]) {
+          dataMap.put(key, data.getByteArray(key));
+        } else if (value instanceof Byte) {
+          dataMap.put(key, data.getByte(key));
+        } else if (value instanceof char[]) {
+          dataMap.put(key, data.getCharArray(key));
+        } else if (value instanceof Character) {
+          dataMap.put(key, data.getChar(key));
+        } else if (value instanceof CharSequence[]) {
+          dataMap.put(key, data.getCharSequenceArray(key));
+        } else if (value instanceof CharSequence) {
+          dataMap.put(key, data.getCharSequence(key));
+        } else if (value instanceof float[]) {
+          dataMap.put(key, data.getFloatArray(key));
+        } else if (value instanceof Float) {
+          dataMap.put(key, data.getFloat(key));
+        }
+      }
+      json.put("data", dataMap);
+    }
+    channel.invokeMethod(
+        "TextInputClient.performPrivateCommand", Arrays.asList(inputClientId, json));
   }
 
   /**
