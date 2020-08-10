@@ -17,14 +17,15 @@ void main() {
   testWithoutContext('generateLocalizations forwards arguments correctly', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Logger logger = BufferLogger.test();
+    final String projectDir = fileSystem.path.join('path', 'to', 'flutter_project');
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      const FakeCommand(
+      FakeCommand(
         command: <String>[
           'dart',
           '--disable-dart-dev',
           'dev/tools/localization/bin/gen_l10n.dart',
           '--gen-inputs-and-outputs-list=/',
-          '--project-dir=/path/to/flutter_project',
+          '--project-dir=$projectDir',
           '--arb-dir=arb',
           '--template-arb-file=example.arb',
           '--output-localization-file=bar',
