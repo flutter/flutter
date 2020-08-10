@@ -17,28 +17,37 @@ namespace {
 class TestFlutterWindowsApi : public testing::StubFlutterWindowsApi {
  public:
   // |flutter::testing::StubFlutterWindowsApi|
-  FlutterDesktopEngineRef RunEngine(
-      const FlutterDesktopEngineProperties& properties) override {
-    run_called_ = true;
+  FlutterDesktopEngineRef EngineCreate(
+      const FlutterDesktopEngineProperties& engine_properties) {
+    create_called_ = true;
     return reinterpret_cast<FlutterDesktopEngineRef>(1);
   }
 
   // |flutter::testing::StubFlutterWindowsApi|
-  uint64_t ProcessMessages() override { return 99; }
-
-  // |flutter::testing::StubFlutterWindowsApi|
-  bool ShutDownEngine() override {
-    shut_down_called_ = true;
+  bool EngineRun(const char* entry_point) override {
+    run_called_ = true;
     return true;
   }
 
+  // |flutter::testing::StubFlutterWindowsApi|
+  bool EngineDestroy() override {
+    destroy_called_ = true;
+    return true;
+  }
+
+  // |flutter::testing::StubFlutterWindowsApi|
+  uint64_t EngineProcessMessages() override { return 99; }
+
+  bool create_called() { return create_called_; }
+
   bool run_called() { return run_called_; }
 
-  bool shut_down_called() { return shut_down_called_; }
+  bool destroy_called() { return destroy_called_; }
 
  private:
+  bool create_called_ = false;
   bool run_called_ = false;
-  bool shut_down_called_ = false;
+  bool destroy_called_ = false;
 };
 
 }  // namespace
@@ -50,11 +59,12 @@ TEST(FlutterEngineTest, CreateDestroy) {
   {
     FlutterEngine engine(DartProject(L"fake/project/path"));
     engine.Run();
+    EXPECT_EQ(test_api->create_called(), true);
     EXPECT_EQ(test_api->run_called(), true);
-    EXPECT_EQ(test_api->shut_down_called(), false);
+    EXPECT_EQ(test_api->destroy_called(), false);
   }
   // Destroying should implicitly shut down if it hasn't been done manually.
-  EXPECT_EQ(test_api->shut_down_called(), true);
+  EXPECT_EQ(test_api->destroy_called(), true);
 }
 
 TEST(FlutterEngineTest, ExplicitShutDown) {
@@ -64,10 +74,11 @@ TEST(FlutterEngineTest, ExplicitShutDown) {
 
   FlutterEngine engine(DartProject(L"fake/project/path"));
   engine.Run();
+  EXPECT_EQ(test_api->create_called(), true);
   EXPECT_EQ(test_api->run_called(), true);
-  EXPECT_EQ(test_api->shut_down_called(), false);
+  EXPECT_EQ(test_api->destroy_called(), false);
   engine.ShutDown();
-  EXPECT_EQ(test_api->shut_down_called(), true);
+  EXPECT_EQ(test_api->destroy_called(), true);
 }
 
 TEST(FlutterEngineTest, ProcessMessages) {

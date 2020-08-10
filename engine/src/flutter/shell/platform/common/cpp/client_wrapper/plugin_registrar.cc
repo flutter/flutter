@@ -140,11 +140,6 @@ void PluginRegistrar::AddPlugin(std::unique_ptr<Plugin> plugin) {
   plugins_.insert(std::move(plugin));
 }
 
-void PluginRegistrar::EnableInputBlockingForChannel(
-    const std::string& channel) {
-  FlutterDesktopRegistrarEnableInputBlocking(registrar_, channel.c_str());
-}
-
 // ===== PluginRegistrarManager =====
 
 // static
