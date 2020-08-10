@@ -131,7 +131,6 @@ void main() {
             'bad',
             'Something happened',
             <String, dynamic>{'a': 42, 'b': 3.14},
-            'errorStacktrace',
           ]);
         },
       );
@@ -142,7 +141,6 @@ void main() {
         expect(e.code, equals('bad'));
         expect(e.message, equals('Something happened'));
         expect(e.details, equals(<String, dynamic>{'a': 42, 'b': 3.14}));
-        expect(e.stacktrace, equals('errorStacktrace'));
       } catch (e) {
         fail('PlatformException expected');
       }
