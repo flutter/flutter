@@ -270,7 +270,7 @@ class FlutterPlatform extends PlatformPlugin {
     this.projectRootDirectory,
     this.flutterProject,
     this.icudtlPath,
-    this.nullAssertions,
+    this.nullAssertions = false,
     @required this.extraFrontEndOptions,
   }) : assert(shellPath != null);
 
