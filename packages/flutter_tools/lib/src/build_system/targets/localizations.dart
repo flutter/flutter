@@ -41,6 +41,7 @@ Future<void> generateLocalizations({
     '--disable-dart-dev',
     genL10nPath,
     '--gen-inputs-and-outputs-list=${dependenciesDir.path}',
+    '--project-dir=${projectDir.absolute}',
     if (options.arbDirectory != null)
       '--arb-dir=${options.arbDirectory.toFilePath()}',
     if (options.templateArbFile != null)

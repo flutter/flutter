@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:path/path.dart' as path;
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -24,6 +25,7 @@ void main() {
           '--disable-dart-dev',
           'dev/tools/localization/bin/gen_l10n.dart',
           '--gen-inputs-and-outputs-list=/',
+          "--project-dir=MemoryDirectory: '/path/to/flutter_project'",
           '--arb-dir=arb',
           '--template-arb-file=example.arb',
           '--output-localization-file=bar',
@@ -36,8 +38,9 @@ void main() {
         ],
       ),
     ]);
-    final Directory arbDirectory = fileSystem.directory('arb')
-      ..createSync();
+    final Directory arbDirectory = fileSystem
+      .directory(path.join('path', 'to', 'flutter_project'))
+      ..createSync(recursive: true);
     arbDirectory.childFile('foo.arb').createSync();
     arbDirectory.childFile('bar.arb').createSync();
 
@@ -57,7 +60,7 @@ void main() {
       logger: logger,
       fileSystem: fileSystem,
       processManager: processManager,
-      projectDir: fileSystem.currentDirectory,
+      projectDir: arbDirectory,
       dartBinaryPath: 'dart',
       flutterRoot: '',
       dependenciesDir: fileSystem.currentDirectory,
