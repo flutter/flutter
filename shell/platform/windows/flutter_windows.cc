@@ -43,10 +43,10 @@ static FlutterDesktopEngineRef HandleForEngine(
   return reinterpret_cast<FlutterDesktopEngineRef>(engine);
 }
 
-FlutterDesktopViewControllerRef FlutterDesktopCreateViewController(
+FlutterDesktopViewControllerRef FlutterDesktopViewControllerCreate(
     int width,
     int height,
-    const FlutterDesktopEngineProperties& engine_properties) {
+    FlutterDesktopEngineRef engine) {
   std::unique_ptr<flutter::WindowBindingHandler> window_wrapper =
       std::make_unique<flutter::Win32FlutterWindow>(width, height);
 
@@ -57,34 +57,59 @@ FlutterDesktopViewControllerRef FlutterDesktopCreateViewController(
   state->view_wrapper = std::make_unique<FlutterDesktopView>();
   state->view_wrapper->view = state->view.get();
 
-  flutter::FlutterProjectBundle project(engine_properties);
-  auto engine = std::make_unique<flutter::FlutterWindowsEngine>(project);
-  if (!engine) {
-    return nullptr;
-  }
-  state->view->SetEngine(std::move(engine));
-  if (!state->view->GetEngine()->RunWithEntrypoint(
-          engine_properties.entry_point)) {
-    return nullptr;
+  // Take ownership of the engine, starting it if necessary.
+  state->view->SetEngine(
+      std::unique_ptr<flutter::FlutterWindowsEngine>(EngineFromHandle(engine)));
+  if (!state->view->GetEngine()->running()) {
+    if (!state->view->GetEngine()->RunWithEntrypoint(nullptr)) {
+      return nullptr;
+    }
   }
   return state.release();
 }
 
-uint64_t FlutterDesktopProcessMessages(FlutterDesktopEngineRef engine) {
-  return EngineFromHandle(engine)->task_runner()->ProcessTasks().count();
-}
-
-void FlutterDesktopDestroyViewController(
+void FlutterDesktopViewControllerDestroy(
     FlutterDesktopViewControllerRef controller) {
   delete controller;
 }
 
-FlutterDesktopEngineRef FlutterDesktopGetEngine(
+FlutterDesktopEngineRef FlutterDesktopViewControllerGetEngine(
     FlutterDesktopViewControllerRef controller) {
   return HandleForEngine(controller->view->GetEngine());
 }
 
-FlutterDesktopPluginRegistrarRef FlutterDesktopGetPluginRegistrar(
+FlutterDesktopViewRef FlutterDesktopViewControllerGetView(
+    FlutterDesktopViewControllerRef controller) {
+  return controller->view_wrapper.get();
+}
+
+FlutterDesktopEngineRef FlutterDesktopEngineCreate(
+    const FlutterDesktopEngineProperties& engine_properties) {
+  flutter::FlutterProjectBundle project(engine_properties);
+  auto engine = std::make_unique<flutter::FlutterWindowsEngine>(project);
+  return HandleForEngine(engine.release());
+}
+
+bool FlutterDesktopEngineDestroy(FlutterDesktopEngineRef engine_ref) {
+  flutter::FlutterWindowsEngine* engine = EngineFromHandle(engine_ref);
+  bool result = true;
+  if (engine->running()) {
+    result = engine->Stop();
+  }
+  delete engine;
+  return result;
+}
+
+bool FlutterDesktopEngineRun(FlutterDesktopEngineRef engine,
+                             const char* entry_point) {
+  return EngineFromHandle(engine)->RunWithEntrypoint(entry_point);
+}
+
+uint64_t FlutterDesktopEngineProcessMessages(FlutterDesktopEngineRef engine) {
+  return EngineFromHandle(engine)->task_runner()->ProcessTasks().count();
+}
+
+FlutterDesktopPluginRegistrarRef FlutterDesktopEngineGetPluginRegistrar(
     FlutterDesktopEngineRef engine,
     const char* plugin_name) {
   // Currently, one registrar acts as the registrar for all plugins, so the
@@ -94,13 +119,13 @@ FlutterDesktopPluginRegistrarRef FlutterDesktopGetPluginRegistrar(
   return EngineFromHandle(engine)->GetRegistrar();
 }
 
-FlutterDesktopViewRef FlutterDesktopGetView(
-    FlutterDesktopViewControllerRef controller) {
-  return controller->view_wrapper.get();
-}
-
 HWND FlutterDesktopViewGetHWND(FlutterDesktopViewRef view_ref) {
   return std::get<HWND>(*view_ref->view->GetRenderTarget());
+}
+
+FlutterDesktopViewRef FlutterDesktopPluginRegistrarGetView(
+    FlutterDesktopPluginRegistrarRef registrar) {
+  return registrar->view.get();
 }
 
 UINT FlutterDesktopGetDpiForHWND(HWND hwnd) {
@@ -122,29 +147,7 @@ void FlutterDesktopResyncOutputStreams() {
   std::ios::sync_with_stdio();
 }
 
-FlutterDesktopEngineRef FlutterDesktopRunEngine(
-    const FlutterDesktopEngineProperties& engine_properties) {
-  flutter::FlutterProjectBundle project(engine_properties);
-  auto engine = std::make_unique<flutter::FlutterWindowsEngine>(project);
-  if (!engine->RunWithEntrypoint(engine_properties.entry_point)) {
-    return nullptr;
-  }
-  return HandleForEngine(engine.release());
-}
-
-bool FlutterDesktopShutDownEngine(FlutterDesktopEngineRef engine_ref) {
-  std::cout << "Shutting down flutter engine process." << std::endl;
-  flutter::FlutterWindowsEngine* engine = EngineFromHandle(engine_ref);
-  bool result = engine->Stop();
-  delete engine;
-  return result;
-}
-
-void FlutterDesktopRegistrarEnableInputBlocking(
-    FlutterDesktopPluginRegistrarRef registrar,
-    const char* channel) {
-  registrar->messenger->dispatcher->EnableInputBlockingForChannel(channel);
-}
+// Implementations of common/cpp/ API methods.
 
 FlutterDesktopMessengerRef FlutterDesktopRegistrarGetMessenger(
     FlutterDesktopPluginRegistrarRef registrar) {
@@ -155,11 +158,6 @@ void FlutterDesktopRegistrarSetDestructionHandler(
     FlutterDesktopPluginRegistrarRef registrar,
     FlutterDesktopOnRegistrarDestroyed callback) {
   registrar->destruction_handler = callback;
-}
-
-FlutterDesktopViewRef FlutterDesktopRegistrarGetView(
-    FlutterDesktopPluginRegistrarRef registrar) {
-  return registrar->view.get();
 }
 
 bool FlutterDesktopMessengerSendWithReply(FlutterDesktopMessengerRef messenger,
