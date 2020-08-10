@@ -2,30 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_COMMON_CPP_CLIENT_WRAPPER_BYTE_STREAM_WRAPPERS_H_
-#define FLUTTER_SHELL_PLATFORM_COMMON_CPP_CLIENT_WRAPPER_BYTE_STREAM_WRAPPERS_H_
+#ifndef FLUTTER_SHELL_PLATFORM_COMMON_CPP_CLIENT_WRAPPER_BYTE_BUFFER_STREAMS_H_
+#define FLUTTER_SHELL_PLATFORM_COMMON_CPP_CLIENT_WRAPPER_BYTE_BUFFER_STREAMS_H_
 
-// Utility classes for interacting with a buffer of bytes as a stream, for use
-// in message channel codecs.
-
+#include <cassert>
 #include <cstdint>
 #include <cstring>
 #include <iostream>
 #include <vector>
 
+#include "include/flutter/byte_streams.h"
+
 namespace flutter {
 
-// Wraps an array of bytes with utility methods for treating it as a readable
-// stream.
-class ByteBufferStreamReader {
+// Implementation of ByteStreamReader base on a byte array.
+class ByteBufferStreamReader : public ByteStreamReader {
  public:
   // Createa a reader reading from |bytes|, which must have a length of |size|.
   // |bytes| must remain valid for the lifetime of this object.
   explicit ByteBufferStreamReader(const uint8_t* bytes, size_t size)
       : bytes_(bytes), size_(size) {}
 
-  // Reads and returns the next byte from the stream.
-  uint8_t ReadByte() {
+  // |ByteStreamReader|
+  uint8_t ReadByte() override {
     if (location_ >= size_) {
       std::cerr << "Invalid read in StandardCodecByteStreamReader" << std::endl;
       return 0;
@@ -33,9 +32,8 @@ class ByteBufferStreamReader {
     return bytes_[location_++];
   }
 
-  // Reads the next |length| bytes from the stream into |buffer|. The caller
-  // is responsible for ensuring that |buffer| is large enough.
-  void ReadBytes(uint8_t* buffer, size_t length) {
+  // |ByteStreamReader|
+  void ReadBytes(uint8_t* buffer, size_t length) override {
     if (location_ + length > size_) {
       std::cerr << "Invalid read in StandardCodecByteStreamReader" << std::endl;
       return;
@@ -44,9 +42,8 @@ class ByteBufferStreamReader {
     location_ += length;
   }
 
-  // Advances the read cursor to the next multiple of |alignment| relative to
-  // the start of the wrapped byte buffer, unless it is already aligned.
-  void ReadAlignment(uint8_t alignment) {
+  // |ByteStreamReader|
+  void ReadAlignment(uint8_t alignment) override {
     uint8_t mod = location_ % alignment;
     if (mod) {
       location_ += alignment - mod;
@@ -62,30 +59,26 @@ class ByteBufferStreamReader {
   size_t location_ = 0;
 };
 
-// Wraps an array of bytes with utility methods for treating it as a writable
-// stream.
-class ByteBufferStreamWriter {
+// Implementation of ByteStreamWriter based on a byte array.
+class ByteBufferStreamWriter : public ByteStreamWriter {
  public:
-  // Createa a writter that writes into |buffer|.
+  // Creates a writer that writes into |buffer|.
   // |buffer| must remain valid for the lifetime of this object.
   explicit ByteBufferStreamWriter(std::vector<uint8_t>* buffer)
       : bytes_(buffer) {
     assert(buffer);
   }
 
-  // Writes |byte| to the wrapped buffer.
+  // |ByteStreamWriter|
   void WriteByte(uint8_t byte) { bytes_->push_back(byte); }
 
-  // Writes the next |length| bytes from |bytes| into the wrapped buffer.
-  // The caller is responsible for ensuring that |buffer| is large enough.
+  // |ByteStreamWriter|
   void WriteBytes(const uint8_t* bytes, size_t length) {
     assert(length > 0);
     bytes_->insert(bytes_->end(), bytes, bytes + length);
   }
 
-  // Writes 0s until the next multiple of |alignment| relative to
-  // the start of the wrapped byte buffer, unless the write positition is
-  // already aligned.
+  // |ByteStreamWriter|
   void WriteAlignment(uint8_t alignment) {
     uint8_t mod = bytes_->size() % alignment;
     if (mod) {
@@ -102,4 +95,4 @@ class ByteBufferStreamWriter {
 
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_PLATFORM_COMMON_CPP_CLIENT_WRAPPER_BYTE_STREAM_WRAPPERS_H_
+#endif  // FLUTTER_SHELL_PLATFORM_COMMON_CPP_CLIENT_WRAPPER_BYTE_BUFFER_STREAMS_H_

@@ -5,28 +5,37 @@
 #ifndef FLUTTER_SHELL_PLATFORM_COMMON_CPP_CLIENT_WRAPPER_INCLUDE_FLUTTER_STANDARD_METHOD_CODEC_H_
 #define FLUTTER_SHELL_PLATFORM_COMMON_CPP_CLIENT_WRAPPER_INCLUDE_FLUTTER_STANDARD_METHOD_CODEC_H_
 
+#include <memory>
+
 #include "encodable_value.h"
 #include "method_call.h"
 #include "method_codec.h"
+#include "standard_codec_serializer.h"
 
 namespace flutter {
 
 // An implementation of MethodCodec that uses a binary serialization.
 class StandardMethodCodec : public MethodCodec<EncodableValue> {
  public:
-  // Returns the shared instance of the codec.
-  static const StandardMethodCodec& GetInstance();
+  // Returns an instance of the codec, optionally using a custom serializer to
+  // add support for more types.
+  //
+  // If provided, |serializer| must be long-lived. If no serializer is provided,
+  // the default will be used.
+  //
+  // The instance returned for a given |extension| will be shared, and
+  // any instance returned from this will be long-lived, and can be safely
+  // passed to, e.g., channel constructors.
+  static const StandardMethodCodec& GetInstance(
+      const StandardCodecSerializer* serializer = nullptr);
 
-  ~StandardMethodCodec() = default;
+  ~StandardMethodCodec();
 
   // Prevent copying.
   StandardMethodCodec(StandardMethodCodec const&) = delete;
   StandardMethodCodec& operator=(StandardMethodCodec const&) = delete;
 
  protected:
-  // Instances should be obtained via GetInstance.
-  StandardMethodCodec() = default;
-
   // |flutter::MethodCodec|
   std::unique_ptr<MethodCall<EncodableValue>> DecodeMethodCallInternal(
       const uint8_t* message,
@@ -51,6 +60,12 @@ class StandardMethodCodec : public MethodCodec<EncodableValue> {
       const uint8_t* response,
       size_t response_size,
       MethodResult<EncodableValue>* result) const override;
+
+ private:
+  // Instances should be obtained via GetInstance.
+  explicit StandardMethodCodec(const StandardCodecSerializer* serializer);
+
+  const StandardCodecSerializer* serializer_;
 };
 
 }  // namespace flutter
