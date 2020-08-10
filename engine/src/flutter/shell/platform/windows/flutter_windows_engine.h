@@ -40,6 +40,9 @@ class FlutterWindowsEngine {
   // Returns false if the engine couldn't be started.
   bool RunWithEntrypoint(const char* entrypoint);
 
+  // Returns true if the engine is currently running.
+  bool running() { return engine_ != nullptr; }
+
   // Stops the engine. This invalidates the pointer returned by engine().
   //
   // Returns false if stopping the engine fails, or if it was not running.

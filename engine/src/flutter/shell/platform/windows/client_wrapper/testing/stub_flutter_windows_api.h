@@ -29,31 +29,32 @@ class StubFlutterWindowsApi {
 
   virtual ~StubFlutterWindowsApi() {}
 
-  // Called for FlutterDesktopCreateViewController.
-  virtual FlutterDesktopViewControllerRef CreateViewController(
-      int width,
-      int height,
+  // Called for FlutterDesktopViewControllerCreate.
+  virtual FlutterDesktopViewControllerRef
+  ViewControllerCreate(int width, int height, FlutterDesktopEngineRef engine) {
+    return nullptr;
+  }
+
+  // Called for FlutterDesktopViewControllerDestroy.
+  virtual void ViewControllerDestroy() {}
+
+  // Called for FlutterDesktopEngineCreate.
+  virtual FlutterDesktopEngineRef EngineCreate(
       const FlutterDesktopEngineProperties& engine_properties) {
     return nullptr;
   }
 
-  // Called for FlutterDesktopDestroyView.
-  virtual void DestroyViewController() {}
+  // Called for FlutterDesktopEngineDestroy.
+  virtual bool EngineDestroy() { return true; }
 
-  // Called for FlutterDesktopProcessMessages.
-  virtual uint64_t ProcessMessages() { return 0; }
+  // Called for FlutterDesktopEngineRun.
+  virtual bool EngineRun(const char* entry_point) { return true; }
+
+  // Called for FlutterDesktopEngineProcessMessages.
+  virtual uint64_t EngineProcessMessages() { return 0; }
 
   // Called for FlutterDesktopViewGetHWND.
   virtual HWND ViewGetHWND() { return reinterpret_cast<HWND>(1); }
-
-  // Called for FlutterDesktopRunEngine.
-  virtual FlutterDesktopEngineRef RunEngine(
-      const FlutterDesktopEngineProperties& engine_properties) {
-    return nullptr;
-  }
-
-  // Called for FlutterDesktopShutDownEngine.
-  virtual bool ShutDownEngine() { return true; }
 };
 
 // A test helper that owns a stub implementation, making it the test stub for

@@ -78,6 +78,8 @@ executable("client_wrapper_glfw_unittests") {
     "flutter_window_unittests.cc",
   ]
 
+  defines = [ "FLUTTER_DESKTOP_LIBRARY" ]
+
   deps = [
     ":client_wrapper_glfw",
     ":client_wrapper_glfw_fixtures",

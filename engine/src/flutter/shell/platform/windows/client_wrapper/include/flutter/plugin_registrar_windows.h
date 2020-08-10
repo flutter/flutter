@@ -24,7 +24,7 @@ class PluginRegistrarWindows : public PluginRegistrar {
       FlutterDesktopPluginRegistrarRef core_registrar)
       : PluginRegistrar(core_registrar) {
     view_ = std::make_unique<FlutterView>(
-        FlutterDesktopRegistrarGetView(core_registrar));
+        FlutterDesktopPluginRegistrarGetView(core_registrar));
   }
 
   virtual ~PluginRegistrarWindows() = default;

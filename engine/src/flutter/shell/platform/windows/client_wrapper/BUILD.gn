@@ -79,6 +79,9 @@ executable("client_wrapper_windows_unittests") {
     "plugin_registrar_windows_unittests.cc",
   ]
 
+  # Set embedder.h to export, not import, since the stubs are locally defined.
+  defines = [ "FLUTTER_DESKTOP_LIBRARY" ]
+
   deps = [
     ":client_wrapper_library_stubs_windows",
     ":client_wrapper_windows",

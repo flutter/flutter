@@ -34,9 +34,12 @@ class FlutterEngine : public PluginRegistry {
   FlutterEngine(FlutterEngine const&) = delete;
   FlutterEngine& operator=(FlutterEngine const&) = delete;
 
-  // Starts running the engine.
+  // Starts running the engine, with an optional entry point.
   //
-  // If the optional entry point is not provided, defaults to main().
+  // If provided, entry_point must be the name of a top-level function from the
+  // same Dart library that contains the app's main() function, and must be
+  // decorated with `@pragma(vm:entry-point)` to ensure the method is not
+  // tree-shaken by the Dart compiler. If not provided, defaults to main().
   bool Run(const char* entry_point = nullptr);
 
   // Terminates the running engine.
@@ -55,14 +58,25 @@ class FlutterEngine : public PluginRegistry {
       const std::string& plugin_name) override;
 
  private:
-  using UniqueEnginePtr =
-      std::unique_ptr<FlutterDesktopEngine, bool (*)(FlutterDesktopEngine*)>;
+  // For access to RelinquishEngine.
+  friend class FlutterViewController;
+
+  // Gives up ownership of |engine_|, but keeps a weak reference to it.
+  //
+  // This is intended to be used by FlutterViewController, since the underlying
+  // C API for view controllers takes over engine ownership.
+  FlutterDesktopEngineRef RelinquishEngine();
 
   // Handle for interacting with the C API's engine reference.
-  UniqueEnginePtr engine_ =
-      UniqueEnginePtr(nullptr, FlutterDesktopShutDownEngine);
+  FlutterDesktopEngineRef engine_ = nullptr;
 
-  std::unique_ptr<DartProject> project_;
+  // Whether or not this wrapper owns |engine_|.
+  bool owns_engine_ = true;
+
+  // Whether the engine has been run. This will be true if Run has been called,
+  // or if RelinquishEngine has been called (since the view controller will
+  // run the engine if it hasn't already been run).
+  bool has_been_run_ = false;
 };
 
 }  // namespace flutter
