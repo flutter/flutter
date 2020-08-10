@@ -169,7 +169,7 @@ abstract class BoxBorder extends ShapeBorder {
   Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
     assert(textDirection != null, 'The textDirection argument to $runtimeType.getInnerPath must not be null.');
     return Path()
-      ..addRect(dimensions.resolve(textDirection).deflateRect(rect));
+      ..addRect(dimensions.resolve(textDirection!).deflateRect(rect));
   }
 
   @override

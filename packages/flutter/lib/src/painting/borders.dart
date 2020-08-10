@@ -613,7 +613,7 @@ class _CompoundBorder extends ShapeBorder {
   @override
   Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
     for (int index = 0; index < borders.length - 1; index += 1)
-      rect = borders[index].dimensions.resolve(textDirection).deflateRect(rect);
+      rect = borders[index].dimensions.resolve(textDirection!).deflateRect(rect);
     return borders.last.getInnerPath(rect, textDirection: textDirection);
   }
 
@@ -626,7 +626,7 @@ class _CompoundBorder extends ShapeBorder {
   void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) {
     for (final ShapeBorder border in borders) {
       border.paint(canvas, rect, textDirection: textDirection);
-      rect = border.dimensions.resolve(textDirection).deflateRect(rect);
+      rect = border.dimensions.resolve(textDirection!).deflateRect(rect);
     }
   }
 

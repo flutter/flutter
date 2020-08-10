@@ -247,7 +247,7 @@ abstract class EdgeInsetsGeometry {
   ///  * [EdgeInsets], for which this is a no-op (returns itself).
   ///  * [EdgeInsetsDirectional], which flips the horizontal direction
   ///    based on the `direction` argument.
-  EdgeInsets resolve(TextDirection? direction);
+  EdgeInsets resolve(TextDirection direction);
 
   @override
   String toString() {
@@ -837,9 +837,9 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
   }
 
   @override
-  EdgeInsets resolve(TextDirection? direction) {
+  EdgeInsets resolve(TextDirection direction) {
     assert(direction != null);
-    switch (direction!) {
+    switch (direction) {
       case TextDirection.rtl:
         return EdgeInsets.fromLTRB(end, top, start, bottom);
       case TextDirection.ltr:
