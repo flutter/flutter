@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
-import 'package:path/path.dart' as path;
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -39,7 +38,7 @@ void main() {
       ),
     ]);
     final Directory flutterProjectDirectory = fileSystem
-      .directory(path.join('path', 'to', 'flutter_project'))
+      .directory(fileSystem.path.join('path', 'to', 'flutter_project'))
       ..createSync(recursive: true);
     final Directory arbDirectory = flutterProjectDirectory
       .childDirectory('arb')
