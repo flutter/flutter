@@ -319,6 +319,7 @@ abstract class ScrollView extends StatelessWidget {
         axisDirection: axisDirection,
         offset: offset,
         slivers: slivers,
+        clipBehavior: clipBehavior,
       );
     }
     return Viewport(
