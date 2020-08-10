@@ -1,9 +1,9 @@
 {
    "builders":[
       {
-         "name":"Linux",
+         "name":"Linux build_tests",
          "repo":"flutter",
-         "taskName":"linux_bot"
+         "taskName":"build_tests"
       },
       {
          "name":"Linux framework_tests",
@@ -16,9 +16,14 @@
          "taskName":"hostonly_devicelab_tests"
       },
       {
-         "name":"Windows",
+         "name":"Linux tool_tests",
          "repo":"flutter",
-         "taskName":"windows_bot"
+         "taskName":"tool_tests"
+      },
+      {
+         "name":"Linux web_tests",
+         "repo":"flutter",
+         "taskName":"web_tests"
       }
    ]
 }
