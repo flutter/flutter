@@ -860,11 +860,13 @@ class _TabBarState extends State<TabBar> {
 
     if (_controllerIsValid) {
       _controller.animation.removeListener(_handleTabControllerAnimationTick);
+      _controller.removeListener(_handleTabControllerTick);
       _controller.removeIndexChangeStartedListener(_handleTabControllerIndexChangeStarted);
     }
     _controller = newController;
     if (_controller != null) {
       _controller.animation.addListener(_handleTabControllerAnimationTick);
+      _controller.addListener(_handleTabControllerTick);
       _controller.addIndexChangeStartedListener(_handleTabControllerIndexChangeStarted);
       _currentIndex = _controller.index;
     }
@@ -914,6 +916,7 @@ class _TabBarState extends State<TabBar> {
     _indicatorPainter.dispose();
     if (_controllerIsValid) {
       _controller.animation.removeListener(_handleTabControllerAnimationTick);
+      _controller.removeListener(_handleTabControllerTick);
       _controller.removeIndexChangeStartedListener(_handleTabControllerIndexChangeStarted);
     }
     _controller = null;
@@ -982,16 +985,19 @@ class _TabBarState extends State<TabBar> {
     }
   }
 
+  void _handleTabControllerTick() {
+    setState(() {
+      // Rebuild the tabs after a (potentially animated) index change
+      // has completed.
+    });
+  }
+
   void _handleTabControllerIndexChangeStarted(int index, Duration duration, Curve curve) {
     if (index != _currentIndex) {
       _currentIndex = index;
       if (widget.isScrollable)
         _scrollToCurrentIndex(duration, curve);
     }
-    setState(() {
-      // Rebuild the tabs after a (potentially animated) index change
-      // has completed.
-    });
   }
 
   // Called each time layout completes.
