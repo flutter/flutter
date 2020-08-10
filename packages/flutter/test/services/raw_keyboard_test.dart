@@ -253,7 +253,7 @@ void main() {
       );
     });
 
-    testWidgets('keysPressed modifiers are synchronized with key events on linux', (WidgetTester tester) async {
+    testWidgets('keysPressed modifiers are synchronized with key events on Linux GLFW', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
       // Generate the data for a regular key down event.
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
@@ -274,6 +274,157 @@ void main() {
         RawKeyboard.instance.keysPressed,
         equals(
           <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.keyA},
+        ),
+      );
+    });
+
+    testWidgets('sided modifiers without a side set return all sides on Android', (WidgetTester tester) async {
+      expect(RawKeyboard.instance.keysPressed, isEmpty);
+      // Generate the data for a regular key down event.
+      final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
+        LogicalKeyboardKey.keyA,
+        platform: 'android',
+        isDown: true,
+      );
+      // Set only the generic "down" modifier, without setting a side.
+      data['metaState'] |=
+        RawKeyEventDataAndroid.modifierShift |
+        RawKeyEventDataAndroid.modifierAlt |
+        RawKeyEventDataAndroid.modifierControl |
+        RawKeyEventDataAndroid.modifierMeta;
+      // dispatch the modified data.
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.keyEvent.name,
+        SystemChannels.keyEvent.codec.encodeMessage(data),
+            (ByteData data) {},
+      );
+      expect(
+        RawKeyboard.instance.keysPressed,
+        equals(
+          <LogicalKeyboardKey>{
+            LogicalKeyboardKey.shiftLeft,
+            LogicalKeyboardKey.shiftRight,
+            LogicalKeyboardKey.altLeft,
+            LogicalKeyboardKey.altRight,
+            LogicalKeyboardKey.controlLeft,
+            LogicalKeyboardKey.controlRight,
+            LogicalKeyboardKey.metaLeft,
+            LogicalKeyboardKey.metaRight,
+            LogicalKeyboardKey.keyA,
+          },
+        ),
+      );
+    });
+
+    testWidgets('sided modifiers without a side set return all sides on macOS', (WidgetTester tester) async {
+      expect(RawKeyboard.instance.keysPressed, isEmpty);
+      // Generate the data for a regular key down event.
+      final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
+        LogicalKeyboardKey.keyA,
+        platform: 'macos',
+        isDown: true,
+      );
+      // Set only the generic "shift down" modifier, without setting a side.
+      data['modifiers'] |=
+          RawKeyEventDataMacOs.modifierShift |
+          RawKeyEventDataMacOs.modifierOption |
+          RawKeyEventDataMacOs.modifierCommand |
+          RawKeyEventDataMacOs.modifierControl;
+      // dispatch the modified data.
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.keyEvent.name,
+        SystemChannels.keyEvent.codec.encodeMessage(data),
+            (ByteData data) {},
+      );
+      expect(
+        RawKeyboard.instance.keysPressed,
+        equals(
+          <LogicalKeyboardKey>{
+            LogicalKeyboardKey.shiftLeft,
+            LogicalKeyboardKey.shiftRight,
+            LogicalKeyboardKey.altLeft,
+            LogicalKeyboardKey.altRight,
+            LogicalKeyboardKey.controlLeft,
+            LogicalKeyboardKey.controlRight,
+            LogicalKeyboardKey.metaLeft,
+            LogicalKeyboardKey.metaRight,
+            LogicalKeyboardKey.keyA,
+          },
+        ),
+      );
+    });
+
+    testWidgets('sided modifiers without a side set return all sides on Windows', (WidgetTester tester) async {
+      expect(RawKeyboard.instance.keysPressed, isEmpty);
+      // Generate the data for a regular key down event.
+      final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
+        LogicalKeyboardKey.keyA,
+        platform: 'windows',
+        isDown: true,
+      );
+      // Set only the generic "shift down" modifier, without setting a side.
+      // Windows doesn't have a concept of "either" for the Windows (meta) key.
+      data['modifiers'] |=
+          RawKeyEventDataWindows.modifierShift |
+          RawKeyEventDataWindows.modifierAlt |
+          RawKeyEventDataWindows.modifierControl;
+      // dispatch the modified data.
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.keyEvent.name,
+        SystemChannels.keyEvent.codec.encodeMessage(data),
+            (ByteData data) {},
+      );
+      expect(
+        RawKeyboard.instance.keysPressed,
+        equals(
+          <LogicalKeyboardKey>{
+            LogicalKeyboardKey.shiftLeft,
+            LogicalKeyboardKey.shiftRight,
+            LogicalKeyboardKey.altLeft,
+            LogicalKeyboardKey.altRight,
+            LogicalKeyboardKey.controlLeft,
+            LogicalKeyboardKey.controlRight,
+            LogicalKeyboardKey.keyA,
+          },
+        ),
+      );
+    });
+
+    testWidgets('sided modifiers without a side set return all sides on Linux GLFW', (WidgetTester tester) async {
+      expect(RawKeyboard.instance.keysPressed, isEmpty);
+      // Generate the data for a regular key down event.
+      final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
+        LogicalKeyboardKey.keyA,
+        platform: 'linux',
+        isDown: true,
+      );
+      // Set only the generic "shift down" modifier, without setting a side.
+      // Windows doesn't have a concept of "either" for the Windows (meta) key.
+      data['modifiers'] |=
+        GLFWKeyHelper.modifierShift |
+        GLFWKeyHelper.modifierAlt |
+        GLFWKeyHelper.modifierControl |
+        GLFWKeyHelper.modifierMeta;
+      // dispatch the modified data.
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.keyEvent.name,
+        SystemChannels.keyEvent.codec.encodeMessage(data),
+            (ByteData data) {},
+      );
+      expect(
+        RawKeyboard.instance.keysPressed,
+        equals(
+          <LogicalKeyboardKey>{
+            LogicalKeyboardKey.shiftLeft,
+            LogicalKeyboardKey.shiftRight,
+            LogicalKeyboardKey.altLeft,
+            LogicalKeyboardKey.altRight,
+            LogicalKeyboardKey.controlLeft,
+            LogicalKeyboardKey.controlRight,
+            LogicalKeyboardKey.metaLeft,
+            LogicalKeyboardKey.metaRight,
+            LogicalKeyboardKey.keyA,
+          },
         ),
       );
     });
