@@ -23,7 +23,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 // Examples can assume:
 // BuildContext context;
 
-/// An immutable style in which text can be formatted and painted. 
+/// An immutable style describing how to format and paint text.
 ///
 /// ### Bold
 ///
