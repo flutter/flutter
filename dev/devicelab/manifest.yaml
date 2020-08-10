@@ -420,13 +420,6 @@ tasks:
   #   required_agent_capabilities: ["linux/android"]
   #   flaky: true
 
-  named_isolates_test:
-    description: >
-      Tests naming and attaching to specific isolates.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
-    flaky: true # https://github.com/flutter/flutter/issues/63016
-
   linux_chrome_dev_mode:
     description: >
       Run flutter web on the devicelab and hot restart.

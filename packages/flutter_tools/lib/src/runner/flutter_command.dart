@@ -396,14 +396,6 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void usesIsolateFilterOption({ @required bool hide }) {
-    argParser.addOption('isolate-filter',
-      defaultsTo: null,
-      hide: hide,
-      help: 'Restricts commands to a subset of the available isolates (running instances of Flutter).\n'
-            "Normally there's only one, but when adding Flutter to a pre-existing app it's possible to create multiple.");
-  }
-
   void usesDeviceUserOption() {
     argParser.addOption(FlutterOptions.kDeviceUser,
       help: 'Identifier number for a user or work profile on Android only. Run "adb shell pm list users" for available identifiers.',
