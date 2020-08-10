@@ -1203,6 +1203,7 @@ void main() {
         '--disable-dart-dev',
         globals.fs.path.join(Cache.flutterRoot, 'dev', 'tools', 'localization', 'bin', 'gen_l10n.dart'),
         '--gen-inputs-and-outputs-list=${dependencies.absolute.path}',
+        "--project-dir=MemoryDirectory: '/'",
       ],
       onRun: () {
         dependencies
@@ -1232,6 +1233,7 @@ void main() {
         '--disable-dart-dev',
         globals.fs.path.join(Cache.flutterRoot, 'dev', 'tools', 'localization', 'bin', 'gen_l10n.dart'),
         '--gen-inputs-and-outputs-list=${dependencies.absolute.path}',
+        "--project-dir=MemoryDirectory: '/'",
       ],
       exitCode: 1,
       stderr: 'stderr'
