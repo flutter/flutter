@@ -790,6 +790,7 @@ class DebuggingOptions {
     this.webEnableExpressionEvaluation = false,
     this.vmserviceOutFile,
     this.fastStart = false,
+    this.nullAssertions = false,
    }) : debuggingEnabled = true;
 
   DebuggingOptions.disabled(this.buildInfo, {
@@ -821,7 +822,8 @@ class DebuggingOptions {
       deviceVmServicePort = null,
       vmserviceOutFile = null,
       fastStart = false,
-      webEnableExpressionEvaluation = false;
+      webEnableExpressionEvaluation = false,
+      nullAssertions = false;
 
   final bool debuggingEnabled;
 
@@ -867,6 +869,8 @@ class DebuggingOptions {
   /// A file where the vmservice URL should be written after the application is started.
   final String vmserviceOutFile;
   final bool fastStart;
+
+  final bool nullAssertions;
 
   bool get hasObservatoryPort => hostVmServicePort != null;
 }
@@ -992,4 +996,13 @@ class NoOpDevicePortForwarder implements DevicePortForwarder {
 
   @override
   Future<void> dispose() async { }
+}
+
+String computeDartVmFlags(DebuggingOptions debuggingOptions) {
+  String flags = debuggingOptions.dartFlags ?? '';
+  if (debuggingOptions.nullAssertions) {
+    final String separator = flags.isEmpty ? '' : ',';
+    flags += '$separator--null_assertions';
+  }
+  return flags;
 }

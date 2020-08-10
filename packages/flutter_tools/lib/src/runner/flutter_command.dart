@@ -113,6 +113,7 @@ class FlutterOptions {
   static const String kNullSafety = 'sound-null-safety';
   static const String kDeviceUser = 'device-user';
   static const String kAnalyzeSize = 'analyze-size';
+  static const String kNullAssertions = 'null-assertions';
 }
 
 abstract class FlutterCommand extends Command<void> {
@@ -499,6 +500,12 @@ abstract class FlutterCommand extends Command<void> {
         'applications will default to sound null-safety, unless specifically configured.',
       defaultsTo: null,
       hide: hide,
+    );
+    argParser.addFlag(FlutterOptions.kNullAssertions,
+      help:
+        'Whether to perform additional null checks on the boundaries of null safe and '
+        'non-null safe migrated code. This setting is not currently supported on desktop '
+        'devices.'
     );
   }
 
