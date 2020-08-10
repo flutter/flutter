@@ -19,7 +19,7 @@ in the source code into API documentation, as seen on https://api.flutter.dev/.
 There are three kinds of code blocks.
 
 * A `snippet`, which is a more or less context-free code snippet that we
-  magically determine how to analyze, and
+  magically determine how to analyze.
 
 * A `dartpad` sample, which gets placed into a full-fledged application, and can
   be executed inline in the documentation on the web page using
@@ -176,7 +176,7 @@ code blocks and descriptions are interpolated.
 
 There is currently one skeleton for
 [application](config/skeletons/sample.html) samples, one for
-[dartpad](config/skeletons/dartpad-sample.html) and one for
+[dartpad](config/skeletons/dartpad-sample.html), and one for
 [snippet](config/skeletons/snippet.html) code samples, but there could be more.
 
 Skeletons use mustache notation (e.g. `{{code}}`) to mark where components will
