@@ -222,7 +222,7 @@ void main() {
       SchedulerBinding.instance.ensureVisualUpdate();
       rootBucket.write('foo', 1);
       // flushData is no-op because frame is scheduled.
-      await manager.flushData();
+      manager.flushData();
       expect(callsToEngine, isEmpty);
       // Data is flushed at the end of the frame.
       await tester.pump();
@@ -231,7 +231,7 @@ void main() {
 
       // flushData without frame sends data directly.
       rootBucket.write('foo', 2);
-      await manager.flushData();
+      manager.flushData();
       expect(callsToEngine, hasLength(1));
     });
   });
