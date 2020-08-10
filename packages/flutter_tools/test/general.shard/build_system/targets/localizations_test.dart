@@ -38,9 +38,12 @@ void main() {
         ],
       ),
     ]);
-    final Directory arbDirectory = fileSystem
+    final Directory flutterProjectDirectory = fileSystem
       .directory(path.join('path', 'to', 'flutter_project'))
       ..createSync(recursive: true);
+    final Directory arbDirectory = flutterProjectDirectory
+      .childDirectory('arb')
+      ..createSync();
     arbDirectory.childFile('foo.arb').createSync();
     arbDirectory.childFile('bar.arb').createSync();
 
@@ -60,7 +63,7 @@ void main() {
       logger: logger,
       fileSystem: fileSystem,
       processManager: processManager,
-      projectDir: arbDirectory,
+      projectDir: flutterProjectDirectory,
       dartBinaryPath: 'dart',
       flutterRoot: '',
       dependenciesDir: fileSystem.currentDirectory,
