@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'stock_arrow.dart';
 import 'stock_data.dart';
+import 'stock_state.dart';
 
 class _StockSymbolView extends StatelessWidget {
   const _StockSymbolView({ this.stock, this.arrow });
@@ -65,17 +66,17 @@ class _StockSymbolView extends StatelessWidget {
 }
 
 class StockSymbolPage extends StatelessWidget {
-  const StockSymbolPage({ this.symbol, this.stocks });
+  const StockSymbolPage(this.symbol);
 
   final String symbol;
-  final StockData stocks;
 
   @override
   Widget build(BuildContext context) {
+    final StockState state = StockStateScope.of(context);
     return AnimatedBuilder(
-      animation: stocks,
+      animation: state.stocks,
       builder: (BuildContext context, Widget child) {
-        final Stock stock = stocks[symbol];
+        final Stock stock = state.stocks[symbol];
         return Scaffold(
           appBar: AppBar(
             title: Text(stock?.name ?? symbol),
@@ -92,16 +93,17 @@ class StockSymbolPage extends StatelessWidget {
                   ),
                   secondChild: stock != null
                     ? _StockSymbolView(
-                      stock: stock,
-                      arrow: Hero(
-                        tag: stock,
-                        child: StockArrow(percentChange: stock.percentChange),
-                      ),
-                    ) : Padding(
+                        stock: stock,
+                        arrow: Hero(
+                          tag: stock,
+                          child: StockArrow(percentChange: stock.percentChange),
+                        ),
+                      )
+                    : Padding(
                         padding: const EdgeInsets.all(20.0),
                         child: Center(child: Text('$symbol not found')),
-                    ),
-                  crossFadeState: stock == null && stocks.loading ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+                      ),
+                  crossFadeState: stock == null && state.stocks.loading ? CrossFadeState.showFirst : CrossFadeState.showSecond,
                 ),
               ),
             ),
@@ -128,6 +130,15 @@ class StockSymbolBottomSheet extends StatelessWidget {
         stock: stock,
         arrow: StockArrow(percentChange: stock.percentChange),
       ),
-   );
+    );
   }
+}
+
+class StockPage extends MaterialPage<void> {
+  StockPage(
+    String symbol
+  ) : super(
+        key: const ValueKey<String>('stock'),
+        builder: (BuildContext context) => StockSymbolPage(symbol),
+      );
 }

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stocks/main.dart' as stocks;
 import 'package:stocks/stock_data.dart' as stock_data;
+import 'package:stocks/stock_state.dart' as stock_state;
 
 void main() {
   stock_data.StockData.actuallyFetchData = false;
@@ -18,7 +19,9 @@ void main() {
     expect(find.text('AAPL'), findsNothing);
     expect(find.text('BANA'), findsNothing);
 
-    final stocks.StocksAppState app = tester.state<stocks.StocksAppState>(find.byType(stocks.StocksApp));
+    final stock_state.StockState app = tester.widget<stock_state.StockStateScope>(
+      find.byType(stock_state.StockStateScope)
+    ).notifier;
     app.stocks.add(<List<String>>[
       // "Symbol","Name","LastSale","MarketCap","IPOyear","Sector","industry","Summary Quote"
       <String>['AAPL', 'Apple', '', '', '', '', '', ''],

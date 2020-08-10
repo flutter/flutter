@@ -8,7 +8,7 @@ enum StockMode { optimistic, pessimistic }
 enum BackupMode { enabled, disabled }
 
 class StockConfiguration {
-  StockConfiguration({
+ const StockConfiguration({
     @required this.stockMode,
     @required this.backupMode,
     @required this.debugShowGrid,
