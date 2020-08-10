@@ -32,6 +32,8 @@ typedef AutocompleteFieldBuilder = Widget Function(
   BuildContext context,
 );
 
+// TODO(justinmc): Link to Autocomplete and AutocompleteCupertino when they are
+// implemented.
 /// A controller for the [AutocompleteCore] widget.
 ///
 /// Can also be used in a stand-alone manner to implement autocomplete behavior
@@ -40,8 +42,8 @@ typedef AutocompleteFieldBuilder = Widget Function(
 /// {@tool dartpad --template=freeform}
 /// This example shows how to build an autocomplete widget with your own UI
 /// using AutocompleteController. Most typical use cases would instead pass the
-/// AutocompleteController directly to [Autocomplete] or
-/// [AutocompleteCupertino].
+/// AutocompleteController directly to Autocomplete or
+/// AutocompleteCupertino.
 ///
 /// ```dart imports
 /// import 'package:flutter/widgets.dart';
@@ -194,11 +196,13 @@ class AutocompleteController<T> {
   }
 }
 
+// TODO(justinmc): Link to Autocomplete and AutocompleteCupertino when they are
+// implemented.
 /// A widget for helping the user to filter a list of options and select a
 /// result.
 ///
-/// This is a core framework widget with very basic UI. Try using [Autocomplete]
-/// or [AutocompleteCupertino] before resorting to this widget.
+/// This is a core framework widget with very basic UI. Try using Autocomplete
+/// or AutocompleteCupertino before resorting to this widget.
 ///
 /// {@tool dartpad --template=freeform}
 /// This example shows how to create a very basic autocomplete widget using the
