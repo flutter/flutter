@@ -559,7 +559,11 @@ class LocalizationsGenerator {
 
     final Directory directory = _fs.directory(projectPathString);
     if (!directory.existsSync()) {
-      // throw error
+      throw L10nException(
+        'Directory does not exist: $directory.\n'
+        'Please select a directory that contains the project\'s localizations '
+        'resource files.'
+      );
     }
     projectDirectory = directory;
   }
