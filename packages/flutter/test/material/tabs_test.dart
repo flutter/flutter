@@ -2692,9 +2692,10 @@ void main() {
     // because we tried to send a notification on dispose.
   });
 
-  testWidgets('TabController animation should not get interrupted when user drags TabBarView', (WidgetTester tester) async {
+  testWidgets('TabController animation should not get interrupted when user drags TabBarView or clicks a tab in TabBar', (WidgetTester tester) async {
+    const Key secondTabKey = Key('SecondTab');
     const List<Tab> tabs = <Tab>[
-      Tab(text: 'A'), Tab(text: 'B'), Tab(text: 'C')
+      Tab(text: 'A'), Tab(key: secondTabKey, text: 'B'), Tab(text: 'C')
     ];
     TabController tabController;
 
@@ -2725,16 +2726,22 @@ void main() {
     ));
 
     expect(tabController.index, 0);
-    tabController.animateTo(2, duration: const Duration(seconds: 1), curve: Curves.linear);
+    const int targetIndex = 2;
+    tabController.animateTo(targetIndex, duration: const Duration(seconds: 1), curve: Curves.linear);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
     // Drag the TabBarView while tabController is in animation
-    // and check if it didn't get interrupted
-    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(PageView)));
+    // and check if it didn't get interrupted.
+    TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(PageView)));
     await gesture.moveBy(const Offset(1.0, 0.0));
     expect(tabController.animation.value, 1.0);
     expect(tabController.indexIsChanging, true);
+
+    // Click the second tab and check if controller's target index hasn't changed.
+    gesture = await tester.startGesture(tester.getCenter(find.byKey(secondTabKey)));
+    await gesture.up();
+    expect(tabController.index, targetIndex);
 
     await tester.pumpAndSettle();
   });
@@ -2824,6 +2831,54 @@ void main() {
 
     // Ensure TabBar's scroll position is right in the middle.
     expect(scrollController.offset, scrollController.position.maxScrollExtent / 2.0);
+
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('TabController\'s animation value should be in sync with TabBarView\'s scroll value when user interrupts ballistic scroll', (WidgetTester tester) async {
+    // This is a test for bug fix: https://github.com/flutter/flutter/pull/60080#issuecomment-668004706
+
+    final TabController tabController = TabController(
+      vsync: const TestVSync(),
+      length: 3,
+    );
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: SizedBox.expand(
+        child: Center(
+          child: SizedBox(
+            width: 400.0,
+            height: 400.0,
+            child: TabBarView(
+              controller: tabController,
+              children: const <Widget>[
+                Center(child: Text('0')),
+                Center(child: Text('1')),
+                Center(child: Text('2')),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    final PageView pageView = tester.widget(find.byType(PageView));
+    final PageController pageController = pageView.controller;
+    final ScrollPosition position = pageController.position;
+
+    expect(tabController.index, 0);
+    expect(position.pixels, 0.0);
+
+    pageController.jumpTo(300.0);
+    await tester.pump();
+    expect(tabController.animation.value, pageController.page);
+
+    // Touch TabBarView while ballistic scrolling is happening and
+    // check if tabController's animation value properly follows page value.
+    await tester.startGesture(tester.getCenter(find.byType(PageView)));
+    await tester.pump();
+    expect(tabController.animation.value, pageController.page);
 
     await tester.pumpAndSettle();
   });

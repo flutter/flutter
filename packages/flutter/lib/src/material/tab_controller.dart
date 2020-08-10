@@ -247,7 +247,7 @@ class TabController extends ChangeNotifier {
   }
 
   /// Calls listener every time the index starts changing by setting [index] or [animateTo].
-  /// When setting [index], duration and curve are null.
+  /// The duration and curve may be null, which indicates the index is updated without any animation.
   ///
   /// if `listener` is currently registered as a listener, this
   /// method does nothing.
