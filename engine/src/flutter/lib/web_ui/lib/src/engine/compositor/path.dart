@@ -116,7 +116,7 @@ class CkPath implements ui.Path {
   void arcTo(
       ui.Rect rect, double startAngle, double sweepAngle, bool forceMoveTo) {
     const double toDegrees = 180.0 / math.pi;
-    _skPath.arcTo(
+    _skPath.arcToOval(
       toSkRect(rect),
       startAngle * toDegrees,
       sweepAngle * toDegrees,
@@ -130,7 +130,7 @@ class CkPath implements ui.Path {
       double rotation = 0.0,
       bool largeArc = false,
       bool clockwise = true}) {
-    (_skPath as SkPathArcToPointOverload).arcTo(
+    _skPath.arcToRotated(
       radius.x,
       radius.y,
       rotation,

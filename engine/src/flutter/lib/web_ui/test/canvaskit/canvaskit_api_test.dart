@@ -602,7 +602,7 @@ void _pathTests() {
   });
 
   test('arcTo', () {
-    path.arcTo(
+    path.arcToOval(
       SkRect(fLeft: 1, fTop: 2, fRight: 3, fBottom: 4),
       5,
       40,
@@ -611,7 +611,7 @@ void _pathTests() {
   });
 
   test('overloaded arcTo (used for arcToPoint)', () {
-    (path as SkPathArcToPointOverload).arcTo(
+    path.arcToRotated(
       1,
       2,
       3,

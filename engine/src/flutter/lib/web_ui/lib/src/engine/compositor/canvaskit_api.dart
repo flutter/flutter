@@ -973,11 +973,20 @@ class SkPath {
   external void addRect(
     SkRect rect,
   );
-  external void arcTo(
+  external void arcToOval(
     SkRect oval,
     double startAngleDegrees,
     double sweepAngleDegrees,
     bool forceMoveTo,
+  );
+  external void arcToRotated(
+    double radiusX,
+    double radiusY,
+    double rotation,
+    bool useSmallArc,
+    bool counterClockWise,
+    double x,
+    double y,
   );
   external void close();
   external void conicTo(
@@ -1054,21 +1063,6 @@ class SkPath {
     double pers0,
     double pers1,
     double pers2,
-  );
-}
-
-/// A different view on [SkPath] used to overload [SkPath.arcTo].
-// TODO(yjbanov): this is a hack to get around https://github.com/flutter/flutter/issues/61305
-@JS()
-class SkPathArcToPointOverload {
-  external void arcTo(
-    double radiusX,
-    double radiusY,
-    double rotation,
-    bool useSmallArc,
-    bool counterClockWise,
-    double x,
-    double y,
   );
 }
 
