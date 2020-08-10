@@ -6,21 +6,35 @@
 #include <vector>
 
 #include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/standard_message_codec.h"
+#include "flutter/shell/platform/common/cpp/client_wrapper/testing/test_codec_extensions.h"
 #include "gtest/gtest.h"
 
 namespace flutter {
 
 // Validates round-trip encoding and decoding of |value|, and checks that the
 // encoded value matches |expected_encoding|.
-static void CheckEncodeDecode(const EncodableValue& value,
-                              const std::vector<uint8_t>& expected_encoding) {
-  const StandardMessageCodec& codec = StandardMessageCodec::GetInstance();
+//
+// If testing with CustomEncodableValues, |serializer| must be provided to
+// handle the encoding/decoding, and |custom_comparator| must be provided to
+// validate equality since CustomEncodableValue doesn't define a useful ==.
+static void CheckEncodeDecode(
+    const EncodableValue& value,
+    const std::vector<uint8_t>& expected_encoding,
+    const StandardCodecSerializer* serializer = nullptr,
+    std::function<bool(const EncodableValue& a, const EncodableValue& b)>
+        custom_comparator = nullptr) {
+  const StandardMessageCodec& codec =
+      StandardMessageCodec::GetInstance(serializer);
   auto encoded = codec.EncodeMessage(value);
   ASSERT_TRUE(encoded);
   EXPECT_EQ(*encoded, expected_encoding);
 
   auto decoded = codec.DecodeMessage(*encoded);
-  EXPECT_EQ(value, *decoded);
+  if (custom_comparator) {
+    EXPECT_TRUE(custom_comparator(value, *decoded));
+  } else {
+    EXPECT_EQ(value, *decoded);
+  }
 }
 
 // Validates round-trip encoding and decoding of |value|, and checks that the
@@ -166,6 +180,41 @@ TEST(StandardMessageCodec, CanEncodeAndDecodeFloat64Array) {
   EncodableValue value(
       std::vector<double>{3.14159265358979311599796346854, 1000.0});
   CheckEncodeDecode(value, bytes);
+}
+
+TEST(StandardMessageCodec, CanEncodeAndDecodeSimpleCustomType) {
+  std::vector<uint8_t> bytes = {0x80, 0x09, 0x00, 0x00, 0x00,
+                                0x10, 0x00, 0x00, 0x00};
+  auto point_comparator = [](const EncodableValue& a, const EncodableValue& b) {
+    const Point& a_point =
+        std::any_cast<Point>(std::get<CustomEncodableValue>(a));
+    const Point& b_point =
+        std::any_cast<Point>(std::get<CustomEncodableValue>(b));
+    return a_point == b_point;
+  };
+  CheckEncodeDecode(CustomEncodableValue(Point(9, 16)), bytes,
+                    &PointExtensionSerializer::GetInstance(), point_comparator);
+}
+
+TEST(StandardMessageCodec, CanEncodeAndDecodeVariableLengthCustomType) {
+  std::vector<uint8_t> bytes = {
+      0x81,                                      // custom type
+      0x06, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05,  // data
+      0x07, 0x04,                                // string type and length
+      0x74, 0x65, 0x73, 0x74                     // string characters
+  };
+  auto some_data_comparator = [](const EncodableValue& a,
+                                 const EncodableValue& b) {
+    const SomeData& data_a =
+        std::any_cast<SomeData>(std::get<CustomEncodableValue>(a));
+    const SomeData& data_b =
+        std::any_cast<SomeData>(std::get<CustomEncodableValue>(b));
+    return data_a.data() == data_b.data() && data_a.label() == data_b.label();
+  };
+  CheckEncodeDecode(CustomEncodableValue(
+                        SomeData("test", {0x00, 0x01, 0x02, 0x03, 0x04, 0x05})),
+                    bytes, &SomeDataExtensionSerializer::GetInstance(),
+                    some_data_comparator);
 }
 
 }  // namespace flutter

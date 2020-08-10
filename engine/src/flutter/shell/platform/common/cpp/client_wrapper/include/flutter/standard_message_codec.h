@@ -5,8 +5,11 @@
 #ifndef FLUTTER_SHELL_PLATFORM_COMMON_CPP_CLIENT_WRAPPER_INCLUDE_FLUTTER_STANDARD_MESSAGE_CODEC_H_
 #define FLUTTER_SHELL_PLATFORM_COMMON_CPP_CLIENT_WRAPPER_INCLUDE_FLUTTER_STANDARD_MESSAGE_CODEC_H_
 
+#include <memory>
+
 #include "encodable_value.h"
 #include "message_codec.h"
+#include "standard_codec_serializer.h"
 
 namespace flutter {
 
@@ -14,8 +17,17 @@ namespace flutter {
 // Flutter engine via message channels.
 class StandardMessageCodec : public MessageCodec<EncodableValue> {
  public:
-  // Returns the shared instance of the codec.
-  static const StandardMessageCodec& GetInstance();
+  // Returns an instance of the codec, optionally using a custom serializer to
+  // add support for more types.
+  //
+  // If provided, |serializer| must be long-lived. If no serializer is provided,
+  // the default will be used.
+  //
+  // The instance returned for a given |serializer| will be shared, and
+  // any instance returned from this will be long-lived, and can be safely
+  // passed to, e.g., channel constructors.
+  static const StandardMessageCodec& GetInstance(
+      const StandardCodecSerializer* serializer = nullptr);
 
   ~StandardMessageCodec();
 
@@ -24,9 +36,6 @@ class StandardMessageCodec : public MessageCodec<EncodableValue> {
   StandardMessageCodec& operator=(StandardMessageCodec const&) = delete;
 
  protected:
-  // Instances should be obtained via GetInstance.
-  StandardMessageCodec();
-
   // |flutter::MessageCodec|
   std::unique_ptr<EncodableValue> DecodeMessageInternal(
       const uint8_t* binary_message,
@@ -35,6 +44,12 @@ class StandardMessageCodec : public MessageCodec<EncodableValue> {
   // |flutter::MessageCodec|
   std::unique_ptr<std::vector<uint8_t>> EncodeMessageInternal(
       const EncodableValue& message) const override;
+
+ private:
+  // Instances should be obtained via GetInstance.
+  explicit StandardMessageCodec(const StandardCodecSerializer* serializer);
+
+  const StandardCodecSerializer* serializer_;
 };
 
 }  // namespace flutter

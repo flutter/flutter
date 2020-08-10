@@ -5,8 +5,8 @@
 #ifndef FLUTTER_SHELL_PLATFORM_COMMON_CPP_CLIENT_WRAPPER_INCLUDE_FLUTTER_ENCODABLE_VALUE_H_
 #define FLUTTER_SHELL_PLATFORM_COMMON_CPP_CLIENT_WRAPPER_INCLUDE_FLUTTER_ENCODABLE_VALUE_H_
 
-#include <assert.h>
-
+#include <any>
+#include <cassert>
 #include <cstdint>
 #include <map>
 #include <string>
@@ -24,6 +24,57 @@ static_assert(sizeof(double) == 8, "EncodableValue requires a 64-bit double");
 // should update your code as soon as possible to use the new std::variant
 // version, or it will break when the legacy version is removed.
 #ifndef USE_LEGACY_ENCODABLE_VALUE
+
+// A container for arbitrary types in EncodableValue.
+//
+// This is used in conjunction with StandardCodecExtension to allow using other
+// types with a StandardMethodCodec/StandardMessageCodec. It is implicitly
+// convertible to EncodableValue, so constructing an EncodableValue from a
+// custom type can generally be written as:
+//   CustomEncodableValue(MyType(...))
+// rather than:
+//   EncodableValue(CustomEncodableValue(MyType(...)))
+//
+// For extracting recieved custom types, it is implicitly convertible to
+// std::any. For example:
+//   const MyType& my_type_value =
+//        std::any_cast<MyType>(std::get<CustomEncodableValue>(value));
+//
+// If RTTI is enabled, different extension types can be checked with type():
+//   if (custom_value->type() == typeid(SomeData)) { ... }
+// Clients that wish to disable RTTI would need to decide on another approach
+// for distinguishing types (e.g., in StandardCodecExtension::WriteValueOfType)
+// if multiple custom types are needed. For instance, wrapping all of the
+// extension types in an EncodableValue-style variant, and only ever storing
+// that variant in CustomEncodableValue.
+class CustomEncodableValue {
+ public:
+  explicit CustomEncodableValue(const std::any& value) : value_(value) {}
+  ~CustomEncodableValue() = default;
+
+  // Allow implict conversion to std::any to allow direct use of any_cast.
+  operator std::any &() { return value_; }
+  operator const std::any &() const { return value_; }
+
+#if __has_feature(cxx_rtti)
+  // Passthrough to std::any's type().
+  const std::type_info& type() const noexcept { return value_.type(); }
+#endif
+
+  // This operator exists only to provide a stable ordering for use as a
+  // std::map key, to satisfy the compiler requirements for EncodableValue.
+  // It does not attempt to provide useful ordering semantics, and using a
+  // custom value as a map key is not recommended.
+  bool operator<(const CustomEncodableValue& other) const {
+    return this < &other;
+  }
+  bool operator==(const CustomEncodableValue& other) const {
+    return this == &other;
+  }
+
+ private:
+  std::any value_;
+};
 
 class EncodableValue;
 
@@ -48,7 +99,8 @@ using EncodableValueVariant = std::variant<std::monostate,
                                            std::vector<int64_t>,
                                            std::vector<double>,
                                            EncodableList,
-                                           EncodableMap>;
+                                           EncodableMap,
+                                           CustomEncodableValue>;
 }  // namespace internal
 
 // An object that can contain any value or collection type supported by
@@ -76,7 +128,7 @@ using EncodableValueVariant = std::variant<std::monostate,
 //
 // The primary API surface for this object is std::variant. For instance,
 // getting a string value from an EncodableValue, with type checking:
-//   if (std::get<std::string>(value)) {
+//   if (std::holds_alternative<std::string>(value)) {
 //     std::string some_string = std::get<std::string>(value);
 //   }
 //
@@ -98,6 +150,13 @@ class EncodableValue : public internal::EncodableValueVariant {
     *this = std::string(other);
     return *this;
   }
+
+  // Allow implicit conversion from CustomEncodableValue; the only reason to
+  // make a CustomEncodableValue (which can only be constructed explicitly) is
+  // to use it with EncodableValue, so the risk of unintended conversions is
+  // minimal, and it avoids the need for the verbose:
+  //   EncodableValue(CustomEncodableValue(...)).
+  EncodableValue(const CustomEncodableValue& v) : super(v) {}
 
   // Override the conversion constructors from std::variant to make them
   // explicit, to avoid implicit conversion.

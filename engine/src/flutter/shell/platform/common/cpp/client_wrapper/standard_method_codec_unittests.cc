@@ -4,6 +4,7 @@
 
 #include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/method_result_functions.h"
 #include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/standard_method_codec.h"
+#include "flutter/shell/platform/common/cpp/client_wrapper/testing/test_codec_extensions.h"
 #include "gtest/gtest.h"
 
 namespace flutter {
@@ -157,5 +158,22 @@ TEST(StandardMethodCodec, HandlesErrorEnvelopesWithDetails) {
                                          &result_handler);
   EXPECT_TRUE(decoded_successfully);
 }
+
+TEST(StandardMethodCodec, HandlesCustomTypeArguments) {
+  const StandardMethodCodec& codec = StandardMethodCodec::GetInstance(
+      &PointExtensionSerializer::GetInstance());
+  Point point(7, 9);
+  MethodCall<EncodableValue> call(
+      "hello", std::make_unique<EncodableValue>(CustomEncodableValue(point)));
+  auto encoded = codec.EncodeMethodCall(call);
+  ASSERT_NE(encoded.get(), nullptr);
+  std::unique_ptr<MethodCall<EncodableValue>> decoded =
+      codec.DecodeMethodCall(*encoded);
+  ASSERT_NE(decoded.get(), nullptr);
+
+  const Point& decoded_point = std::any_cast<Point>(
+      std::get<CustomEncodableValue>(*decoded->arguments()));
+  EXPECT_EQ(point, decoded_point);
+};
 
 }  // namespace flutter

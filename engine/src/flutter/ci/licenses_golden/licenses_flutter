@@ -835,12 +835,13 @@ FILE: ../../../flutter/shell/platform/android/surface/android_surface_mock.h
 FILE: ../../../flutter/shell/platform/android/vsync_waiter_android.cc
 FILE: ../../../flutter/shell/platform/android/vsync_waiter_android.h
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/basic_message_channel_unittests.cc
-FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/byte_stream_wrappers.h
+FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/byte_buffer_streams.h
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/encodable_value_unittests.cc
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/engine_method_result.cc
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/event_channel_unittests.cc
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/include/flutter/basic_message_channel.h
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/include/flutter/binary_messenger.h
+FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/include/flutter/byte_streams.h
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/include/flutter/encodable_value.h
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/include/flutter/engine_method_result.h
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/include/flutter/event_channel.h
@@ -855,6 +856,7 @@ FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/include/flutter/
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/include/flutter/method_result_functions.h
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/include/flutter/plugin_registrar.h
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/include/flutter/plugin_registry.h
+FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/include/flutter/standard_codec_serializer.h
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/include/flutter/standard_message_codec.h
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/include/flutter/standard_method_codec.h
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/method_call_unittests.cc
@@ -863,7 +865,6 @@ FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/method_result_fu
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/plugin_registrar.cc
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/plugin_registrar_unittests.cc
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/standard_codec.cc
-FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/standard_codec_serializer.h
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/standard_message_codec_unittests.cc
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/standard_method_codec_unittests.cc
 FILE: ../../../flutter/shell/platform/common/cpp/incoming_message_dispatcher.cc

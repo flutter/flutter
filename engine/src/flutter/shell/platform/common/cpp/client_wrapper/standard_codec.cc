@@ -8,17 +8,17 @@
 // together to simplify use of the client wrapper, since the common case is
 // that any client that needs one of these files needs all three.
 
-#include <assert.h>
-
+#include <cassert>
 #include <cstring>
 #include <iostream>
 #include <map>
 #include <string>
 #include <vector>
 
+#include "byte_buffer_streams.h"
+#include "include/flutter/standard_codec_serializer.h"
 #include "include/flutter/standard_message_codec.h"
 #include "include/flutter/standard_method_codec.h"
-#include "standard_codec_serializer.h"
 
 namespace flutter {
 
@@ -111,75 +111,19 @@ StandardCodecSerializer::StandardCodecSerializer() = default;
 
 StandardCodecSerializer::~StandardCodecSerializer() = default;
 
+const StandardCodecSerializer& StandardCodecSerializer::GetInstance() {
+  static StandardCodecSerializer sInstance;
+  return sInstance;
+};
+
 EncodableValue StandardCodecSerializer::ReadValue(
-    ByteBufferStreamReader* stream) const {
-  EncodedType type = static_cast<EncodedType>(stream->ReadByte());
-  switch (type) {
-    case EncodedType::kNull:
-      return EncodableValue();
-    case EncodedType::kTrue:
-      return EncodableValue(true);
-    case EncodedType::kFalse:
-      return EncodableValue(false);
-    case EncodedType::kInt32: {
-      int32_t int_value = 0;
-      stream->ReadBytes(reinterpret_cast<uint8_t*>(&int_value), 4);
-      return EncodableValue(int_value);
-    }
-    case EncodedType::kInt64: {
-      int64_t long_value = 0;
-      stream->ReadBytes(reinterpret_cast<uint8_t*>(&long_value), 8);
-      return EncodableValue(long_value);
-    }
-    case EncodedType::kFloat64: {
-      double double_value = 0;
-      stream->ReadAlignment(8);
-      stream->ReadBytes(reinterpret_cast<uint8_t*>(&double_value), 8);
-      return EncodableValue(double_value);
-    }
-    case EncodedType::kLargeInt:
-    case EncodedType::kString: {
-      size_t size = ReadSize(stream);
-      std::string string_value;
-      string_value.resize(size);
-      stream->ReadBytes(reinterpret_cast<uint8_t*>(&string_value[0]), size);
-      return EncodableValue(string_value);
-    }
-    case EncodedType::kUInt8List:
-      return ReadVector<uint8_t>(stream);
-    case EncodedType::kInt32List:
-      return ReadVector<int32_t>(stream);
-    case EncodedType::kInt64List:
-      return ReadVector<int64_t>(stream);
-    case EncodedType::kFloat64List:
-      return ReadVector<double>(stream);
-    case EncodedType::kList: {
-      size_t length = ReadSize(stream);
-      EncodableList list_value;
-      list_value.reserve(length);
-      for (size_t i = 0; i < length; ++i) {
-        list_value.push_back(ReadValue(stream));
-      }
-      return EncodableValue(list_value);
-    }
-    case EncodedType::kMap: {
-      size_t length = ReadSize(stream);
-      EncodableMap map_value;
-      for (size_t i = 0; i < length; ++i) {
-        EncodableValue key = ReadValue(stream);
-        EncodableValue value = ReadValue(stream);
-        map_value.emplace(std::move(key), std::move(value));
-      }
-      return EncodableValue(map_value);
-    }
-  }
-  std::cerr << "Unknown type in StandardCodecSerializer::ReadValue: "
-            << static_cast<int>(type) << std::endl;
-  return EncodableValue();
+    ByteStreamReader* stream) const {
+  uint8_t type = stream->ReadByte();
+  return ReadValueOfType(type, stream);
 }
 
 void StandardCodecSerializer::WriteValue(const EncodableValue& value,
-                                         ByteBufferStreamWriter* stream) const {
+                                         ByteStreamWriter* stream) const {
   stream->WriteByte(static_cast<uint8_t>(EncodedTypeForValue(value)));
 #ifdef USE_LEGACY_ENCODABLE_VALUE
   switch (value.type()) {
@@ -187,22 +131,16 @@ void StandardCodecSerializer::WriteValue(const EncodableValue& value,
     case EncodableValue::Type::kBool:
       // Null and bool are encoded directly in the type.
       break;
-    case EncodableValue::Type::kInt: {
-      int32_t int_value = value.IntValue();
-      stream->WriteBytes(reinterpret_cast<const uint8_t*>(&int_value), 4);
+    case EncodableValue::Type::kInt:
+      stream->WriteInt32(std::get<int32_t>(value));
       break;
-    }
-    case EncodableValue::Type::kLong: {
-      int64_t long_value = value.LongValue();
-      stream->WriteBytes(reinterpret_cast<const uint8_t*>(&long_value), 8);
+    case case EncodableValue::Type::kLong:
+      stream->WriteInt64(std::get<int64_t>(value));
       break;
-    }
-    case EncodableValue::Type::kDouble: {
+    case EncodableValue::Type::kDouble:
       stream->WriteAlignment(8);
-      double double_value = value.DoubleValue();
-      stream->WriteBytes(reinterpret_cast<const uint8_t*>(&double_value), 8);
+      stream->WriteDouble(std::get<double>(value));
       break;
-    }
     case EncodableValue::Type::kString: {
       const auto& string_value = value.StringValue();
       size_t size = string_value.size();
@@ -246,22 +184,16 @@ void StandardCodecSerializer::WriteValue(const EncodableValue& value,
     case 1:
       // Null and bool are encoded directly in the type.
       break;
-    case 2: {
-      int32_t int_value = std::get<int32_t>(value);
-      stream->WriteBytes(reinterpret_cast<const uint8_t*>(&int_value), 4);
+    case 2:
+      stream->WriteInt32(std::get<int32_t>(value));
       break;
-    }
-    case 3: {
-      int64_t long_value = std::get<int64_t>(value);
-      stream->WriteBytes(reinterpret_cast<const uint8_t*>(&long_value), 8);
+    case 3:
+      stream->WriteInt64(std::get<int64_t>(value));
       break;
-    }
-    case 4: {
+    case 4:
       stream->WriteAlignment(8);
-      double double_value = std::get<double>(value);
-      stream->WriteBytes(reinterpret_cast<const uint8_t*>(&double_value), 8);
+      stream->WriteDouble(std::get<double>(value));
       break;
-    }
     case 5: {
       const auto& string_value = std::get<std::string>(value);
       size_t size = string_value.size();
@@ -301,11 +233,74 @@ void StandardCodecSerializer::WriteValue(const EncodableValue& value,
       }
       break;
     }
+    case 12:
+      std::cerr
+          << "Unhandled custom type in StandardCodecSerializer::WriteValue. "
+          << "Custom types require codec extensions." << std::endl;
+      break;
   }
 #endif
 }
 
-size_t StandardCodecSerializer::ReadSize(ByteBufferStreamReader* stream) const {
+EncodableValue StandardCodecSerializer::ReadValueOfType(
+    uint8_t type,
+    ByteStreamReader* stream) const {
+  switch (static_cast<EncodedType>(type)) {
+    case EncodedType::kNull:
+      return EncodableValue();
+    case EncodedType::kTrue:
+      return EncodableValue(true);
+    case EncodedType::kFalse:
+      return EncodableValue(false);
+    case EncodedType::kInt32:
+      return EncodableValue(stream->ReadInt32());
+    case EncodedType::kInt64:
+      return EncodableValue(stream->ReadInt64());
+    case EncodedType::kFloat64:
+      stream->ReadAlignment(8);
+      return EncodableValue(stream->ReadDouble());
+    case EncodedType::kLargeInt:
+    case EncodedType::kString: {
+      size_t size = ReadSize(stream);
+      std::string string_value;
+      string_value.resize(size);
+      stream->ReadBytes(reinterpret_cast<uint8_t*>(&string_value[0]), size);
+      return EncodableValue(string_value);
+    }
+    case EncodedType::kUInt8List:
+      return ReadVector<uint8_t>(stream);
+    case EncodedType::kInt32List:
+      return ReadVector<int32_t>(stream);
+    case EncodedType::kInt64List:
+      return ReadVector<int64_t>(stream);
+    case EncodedType::kFloat64List:
+      return ReadVector<double>(stream);
+    case EncodedType::kList: {
+      size_t length = ReadSize(stream);
+      EncodableList list_value;
+      list_value.reserve(length);
+      for (size_t i = 0; i < length; ++i) {
+        list_value.push_back(ReadValue(stream));
+      }
+      return EncodableValue(list_value);
+    }
+    case EncodedType::kMap: {
+      size_t length = ReadSize(stream);
+      EncodableMap map_value;
+      for (size_t i = 0; i < length; ++i) {
+        EncodableValue key = ReadValue(stream);
+        EncodableValue value = ReadValue(stream);
+        map_value.emplace(std::move(key), std::move(value));
+      }
+      return EncodableValue(map_value);
+    }
+  }
+  std::cerr << "Unknown type in StandardCodecSerializer::ReadValueOfType: "
+            << static_cast<int>(type) << std::endl;
+  return EncodableValue();
+}
+
+size_t StandardCodecSerializer::ReadSize(ByteStreamReader* stream) const {
   uint8_t byte = stream->ReadByte();
   if (byte < 254) {
     return byte;
@@ -321,7 +316,7 @@ size_t StandardCodecSerializer::ReadSize(ByteBufferStreamReader* stream) const {
 }
 
 void StandardCodecSerializer::WriteSize(size_t size,
-                                        ByteBufferStreamWriter* stream) const {
+                                        ByteStreamWriter* stream) const {
   if (size < 254) {
     stream->WriteByte(static_cast<uint8_t>(size));
   } else if (size <= 0xffff) {
@@ -337,7 +332,7 @@ void StandardCodecSerializer::WriteSize(size_t size,
 
 template <typename T>
 EncodableValue StandardCodecSerializer::ReadVector(
-    ByteBufferStreamReader* stream) const {
+    ByteStreamReader* stream) const {
   size_t count = ReadSize(stream);
   std::vector<T> vector;
   vector.resize(count);
@@ -351,9 +346,8 @@ EncodableValue StandardCodecSerializer::ReadVector(
 }
 
 template <typename T>
-void StandardCodecSerializer::WriteVector(
-    const std::vector<T> vector,
-    ByteBufferStreamWriter* stream) const {
+void StandardCodecSerializer::WriteVector(const std::vector<T> vector,
+                                          ByteStreamWriter* stream) const {
   size_t count = vector.size();
   WriteSize(count, stream);
   if (count == 0) {
@@ -370,59 +364,92 @@ void StandardCodecSerializer::WriteVector(
 // ===== standard_message_codec.h =====
 
 // static
-const StandardMessageCodec& StandardMessageCodec::GetInstance() {
-  static StandardMessageCodec sInstance;
-  return sInstance;
+const StandardMessageCodec& StandardMessageCodec::GetInstance(
+    const StandardCodecSerializer* serializer) {
+  if (!serializer) {
+    serializer = &StandardCodecSerializer::GetInstance();
+  }
+  auto* sInstances = new std::map<const StandardCodecSerializer*,
+                                  std::unique_ptr<StandardMessageCodec>>;
+  auto it = sInstances->find(serializer);
+  if (it == sInstances->end()) {
+    // Uses new due to private constructor (to prevent API clients from
+    // accidentally passing temporary codec instances to channels).
+    auto emplace_result = sInstances->emplace(
+        serializer, std::unique_ptr<StandardMessageCodec>(
+                        new StandardMessageCodec(serializer)));
+    it = emplace_result.first;
+  }
+  return *(it->second);
 }
 
-StandardMessageCodec::StandardMessageCodec() = default;
+StandardMessageCodec::StandardMessageCodec(
+    const StandardCodecSerializer* serializer)
+    : serializer_(serializer) {}
 
 StandardMessageCodec::~StandardMessageCodec() = default;
 
 std::unique_ptr<EncodableValue> StandardMessageCodec::DecodeMessageInternal(
     const uint8_t* binary_message,
     size_t message_size) const {
-  StandardCodecSerializer serializer;
   ByteBufferStreamReader stream(binary_message, message_size);
-  return std::make_unique<EncodableValue>(serializer.ReadValue(&stream));
+  return std::make_unique<EncodableValue>(serializer_->ReadValue(&stream));
 }
 
 std::unique_ptr<std::vector<uint8_t>>
 StandardMessageCodec::EncodeMessageInternal(
     const EncodableValue& message) const {
-  StandardCodecSerializer serializer;
   auto encoded = std::make_unique<std::vector<uint8_t>>();
   ByteBufferStreamWriter stream(encoded.get());
-  serializer.WriteValue(message, &stream);
+  serializer_->WriteValue(message, &stream);
   return encoded;
 }
 
 // ===== standard_method_codec.h =====
 
 // static
-const StandardMethodCodec& StandardMethodCodec::GetInstance() {
-  static StandardMethodCodec sInstance;
-  return sInstance;
+const StandardMethodCodec& StandardMethodCodec::GetInstance(
+    const StandardCodecSerializer* serializer) {
+  if (!serializer) {
+    serializer = &StandardCodecSerializer::GetInstance();
+  }
+  auto* sInstances = new std::map<const StandardCodecSerializer*,
+                                  std::unique_ptr<StandardMethodCodec>>;
+  auto it = sInstances->find(serializer);
+  if (it == sInstances->end()) {
+    // Uses new due to private constructor (to prevent API clients from
+    // accidentally passing temporary codec instances to channels).
+    auto emplace_result = sInstances->emplace(
+        serializer, std::unique_ptr<StandardMethodCodec>(
+                        new StandardMethodCodec(serializer)));
+    it = emplace_result.first;
+  }
+  return *(it->second);
 }
+
+StandardMethodCodec::StandardMethodCodec(
+    const StandardCodecSerializer* serializer)
+    : serializer_(serializer) {}
+
+StandardMethodCodec::~StandardMethodCodec() = default;
 
 std::unique_ptr<MethodCall<EncodableValue>>
 StandardMethodCodec::DecodeMethodCallInternal(const uint8_t* message,
                                               size_t message_size) const {
-  StandardCodecSerializer serializer;
   ByteBufferStreamReader stream(message, message_size);
 #ifdef USE_LEGACY_ENCODABLE_VALUE
-  EncodableValue method_name = serializer.ReadValue(&stream);
+  EncodableValue method_name = serializer_->ReadValue(&stream);
   if (!method_name.IsString()) {
     std::cerr << "Invalid method call; method name is not a string."
               << std::endl;
     return nullptr;
   }
   auto arguments =
-      std::make_unique<EncodableValue>(serializer.ReadValue(&stream));
+      std::make_unique<EncodableValue>(serializer_->ReadValue(&stream));
   return std::make_unique<MethodCall<EncodableValue>>(method_name.StringValue(),
                                                       std::move(arguments));
 #else
-  EncodableValue method_name_value = serializer.ReadValue(&stream);
+  EncodableValue method_name_value = serializer_->ReadValue(&stream);
   const auto* method_name = std::get_if<std::string>(&method_name_value);
   if (!method_name) {
     std::cerr << "Invalid method call; method name is not a string."
@@ -430,7 +457,7 @@ StandardMethodCodec::DecodeMethodCallInternal(const uint8_t* message,
     return nullptr;
   }
   auto arguments =
-      std::make_unique<EncodableValue>(serializer.ReadValue(&stream));
+      std::make_unique<EncodableValue>(serializer_->ReadValue(&stream));
   return std::make_unique<MethodCall<EncodableValue>>(*method_name,
                                                       std::move(arguments));
 #endif
@@ -439,14 +466,13 @@ StandardMethodCodec::DecodeMethodCallInternal(const uint8_t* message,
 std::unique_ptr<std::vector<uint8_t>>
 StandardMethodCodec::EncodeMethodCallInternal(
     const MethodCall<EncodableValue>& method_call) const {
-  StandardCodecSerializer serializer;
   auto encoded = std::make_unique<std::vector<uint8_t>>();
   ByteBufferStreamWriter stream(encoded.get());
-  serializer.WriteValue(EncodableValue(method_call.method_name()), &stream);
+  serializer_->WriteValue(EncodableValue(method_call.method_name()), &stream);
   if (method_call.arguments()) {
-    serializer.WriteValue(*method_call.arguments(), &stream);
+    serializer_->WriteValue(*method_call.arguments(), &stream);
   } else {
-    serializer.WriteValue(EncodableValue(), &stream);
+    serializer_->WriteValue(EncodableValue(), &stream);
   }
   return encoded;
 }
@@ -454,14 +480,13 @@ StandardMethodCodec::EncodeMethodCallInternal(
 std::unique_ptr<std::vector<uint8_t>>
 StandardMethodCodec::EncodeSuccessEnvelopeInternal(
     const EncodableValue* result) const {
-  StandardCodecSerializer serializer;
   auto encoded = std::make_unique<std::vector<uint8_t>>();
   ByteBufferStreamWriter stream(encoded.get());
   stream.WriteByte(0);
   if (result) {
-    serializer.WriteValue(*result, &stream);
+    serializer_->WriteValue(*result, &stream);
   } else {
-    serializer.WriteValue(EncodableValue(), &stream);
+    serializer_->WriteValue(EncodableValue(), &stream);
   }
   return encoded;
 }
@@ -471,20 +496,19 @@ StandardMethodCodec::EncodeErrorEnvelopeInternal(
     const std::string& error_code,
     const std::string& error_message,
     const EncodableValue* error_details) const {
-  StandardCodecSerializer serializer;
   auto encoded = std::make_unique<std::vector<uint8_t>>();
   ByteBufferStreamWriter stream(encoded.get());
   stream.WriteByte(1);
-  serializer.WriteValue(EncodableValue(error_code), &stream);
+  serializer_->WriteValue(EncodableValue(error_code), &stream);
   if (error_message.empty()) {
-    serializer.WriteValue(EncodableValue(), &stream);
+    serializer_->WriteValue(EncodableValue(), &stream);
   } else {
-    serializer.WriteValue(EncodableValue(error_message), &stream);
+    serializer_->WriteValue(EncodableValue(error_message), &stream);
   }
   if (error_details) {
-    serializer.WriteValue(*error_details, &stream);
+    serializer_->WriteValue(*error_details, &stream);
   } else {
-    serializer.WriteValue(EncodableValue(), &stream);
+    serializer_->WriteValue(EncodableValue(), &stream);
   }
   return encoded;
 }
@@ -493,19 +517,18 @@ bool StandardMethodCodec::DecodeAndProcessResponseEnvelopeInternal(
     const uint8_t* response,
     size_t response_size,
     MethodResult<EncodableValue>* result) const {
-  StandardCodecSerializer serializer;
   ByteBufferStreamReader stream(response, response_size);
   uint8_t flag = stream.ReadByte();
   switch (flag) {
     case 0: {
-      EncodableValue value = serializer.ReadValue(&stream);
+      EncodableValue value = serializer_->ReadValue(&stream);
       result->Success(value.IsNull() ? nullptr : &value);
       return true;
     }
     case 1: {
-      EncodableValue code = serializer.ReadValue(&stream);
-      EncodableValue message = serializer.ReadValue(&stream);
-      EncodableValue details = serializer.ReadValue(&stream);
+      EncodableValue code = serializer_->ReadValue(&stream);
+      EncodableValue message = serializer_->ReadValue(&stream);
+      EncodableValue details = serializer_->ReadValue(&stream);
 #ifdef USE_LEGACY_ENCODABLE_VALUE
       result->Error(code.StringValue(),
                     message.IsNull() ? "" : message.StringValue(),
