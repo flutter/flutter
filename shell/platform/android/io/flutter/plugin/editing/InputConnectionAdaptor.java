@@ -9,6 +9,7 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.os.Build;
+import android.os.Bundle;
 import android.provider.Settings;
 import android.text.DynamicLayout;
 import android.text.Editable;
@@ -475,6 +476,12 @@ class InputConnectionAdaptor extends BaseInputConnection {
       return true;
     }
     return false;
+  }
+
+  @Override
+  public boolean performPrivateCommand(String action, Bundle data) {
+    textInputChannel.performPrivateCommand(mClient, action, data);
+    return true;
   }
 
   @Override
