@@ -117,30 +117,6 @@ class FrameTiming {
   FrameTiming._(List<int> timestamps)
       : assert(timestamps.length == FramePhase.values.length), _timestamps = timestamps;
 
-  /// Construct [FrameTiming] with given timestamp in micrseconds.
-  ///
-  /// This constructor is used for unit test only. Real [FrameTiming]s should
-  /// be retrieved from [Window.onReportTimings].
-  ///
-  /// TODO(CareF): This is part of #20229. Remove back to default constructor
-  /// after #20229 lands and corresponding framwork PRs land.
-  factory FrameTiming.fromTimeStamps({
-    int? vsyncStart,
-    required int buildStart,
-    required int buildFinish,
-    required int rasterStart,
-    required int rasterFinish
-  }) {
-    return FrameTiming._(<int>[
-      // This is for temporarily backward compatiblilty.
-      vsyncStart ?? buildStart,
-      buildStart,
-      buildFinish,
-      rasterStart,
-      rasterFinish
-    ]);
-  }
-
   /// This is a raw timestamp in microseconds from some epoch. The epoch in all
   /// [FrameTiming] is the same, but it may not match [DateTime]'s epoch.
   int timestampInMicroseconds(FramePhase phase) => _timestamps[phase.index];
