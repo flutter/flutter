@@ -537,35 +537,21 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
   FlutterTextRange* newMarkedRange =
       composingRange.length > 0 ? [FlutterTextRange rangeWithNSRange:composingRange] : nil;
   needsEditingStateUpdate =
-      needsEditingStateUpdate || newMarkedRange == nil
-          ? self.markedTextRange == nil
-          : [newMarkedRange isEqualTo:(FlutterTextRange*)self.markedTextRange];
+      needsEditingStateUpdate ||
+      (!newMarkedRange ? self.markedTextRange != nil
+                       : ![newMarkedRange isEqualTo:(FlutterTextRange*)self.markedTextRange]);
   self.markedTextRange = newMarkedRange;
 
-  NSInteger selectionBase = [state[@"selectionBase"] intValue];
-  NSInteger selectionExtent = [state[@"selectionExtent"] intValue];
-  NSRange selectedRange = [self clampSelection:NSMakeRange(MIN(selectionBase, selectionExtent),
-                                                           ABS(selectionBase - selectionExtent))
-                                       forText:self.text];
+  NSRange selectedRange = [self clampSelectionFromBase:[state[@"selectionBase"] intValue]
+                                                extent:[state[@"selectionExtent"] intValue]
+                                               forText:self.text];
+
   NSRange oldSelectedRange = [(FlutterTextRange*)self.selectedTextRange range];
-  if (selectedRange.location != oldSelectedRange.location ||
-      selectedRange.length != oldSelectedRange.length) {
+  if (!NSEqualRanges(selectedRange, oldSelectedRange)) {
     needsEditingStateUpdate = YES;
     [self.inputDelegate selectionWillChange:self];
 
-    // The state may contain an invalid selection, such as when no selection was
-    // explicitly set in the framework. This is handled here by setting the
-    // selection to (0,0). In contrast, Android handles this situation by
-    // clearing the selection, but the result in both cases is that the cursor
-    // is placed at the beginning of the field.
-    bool selectionBaseIsValid = selectionBase > 0 && selectionBase <= ((NSInteger)self.text.length);
-    bool selectionExtentIsValid =
-        selectionExtent > 0 && selectionExtent <= ((NSInteger)self.text.length);
-    if (selectionBaseIsValid && selectionExtentIsValid) {
-      [self setSelectedTextRangeLocal:[FlutterTextRange rangeWithNSRange:selectedRange]];
-    } else {
-      [self setSelectedTextRangeLocal:[FlutterTextRange rangeWithNSRange:NSMakeRange(0, 0)]];
-    }
+    [self setSelectedTextRangeLocal:[FlutterTextRange rangeWithNSRange:selectedRange]];
 
     _selectionAffinity = _kTextAffinityDownstream;
     if ([state[@"selectionAffinity"] isEqualToString:@(_kTextAffinityUpstream)])
@@ -579,6 +565,22 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
 
   // For consistency with Android behavior, send an update to the framework if anything changed.
   return needsEditingStateUpdate;
+}
+
+// Extracts the selection information from the editing state dictionary.
+//
+// The state may contain an invalid selection, such as when no selection was
+// explicitly set in the framework. This is handled here by setting the
+// selection to (0,0). In contrast, Android handles this situation by
+// clearing the selection, but the result in both cases is that the cursor
+// is placed at the beginning of the field.
+- (NSRange)clampSelectionFromBase:(int)selectionBase
+                           extent:(int)selectionExtent
+                          forText:(NSString*)text {
+  int loc = MIN(selectionBase, selectionExtent);
+  int len = ABS(selectionExtent - selectionBase);
+  return loc < 0 ? NSMakeRange(0, 0)
+                 : [self clampSelection:NSMakeRange(loc, len) forText:self.text];
 }
 
 - (NSRange)clampSelection:(NSRange)range forText:(NSString*)text {
