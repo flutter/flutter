@@ -13,7 +13,8 @@ FLUTTER_ASSERT_ARC
 @interface FlutterTextInputView ()
 @property(nonatomic, copy) NSString* autofillId;
 
-- (void)setTextInputState:(NSDictionary*)state;
+- (BOOL)setTextInputState:(NSDictionary*)state;
+- (void)updateEditingState;
 - (BOOL)isVisibleToAutofill;
 @end
 
@@ -63,23 +64,6 @@ FLUTTER_ASSERT_ARC
                              }];
 }
 
-- (void)commitAutofillContextAndVerify {
-  FlutterMethodCall* methodCall =
-      [FlutterMethodCall methodCallWithMethodName:@"TextInput.finishAutofillContext"
-                                        arguments:@YES];
-  [textInputPlugin handleMethodCall:methodCall
-                             result:^(id _Nullable result){
-                             }];
-
-  XCTAssertEqual(self.viewsVisibleToAutofill.count,
-                 [textInputPlugin.activeView isVisibleToAutofill] ? 1 : 0);
-  XCTAssertNotEqual(textInputPlugin.textInputView, nil);
-  // The active view should still be installed so it doesn't get
-  // deallocated.
-  XCTAssertEqual(self.installedInputViews.count, 1);
-  XCTAssertEqual(textInputPlugin.autofillContext.count, 0);
-}
-
 - (NSMutableDictionary*)mutableTemplateCopy {
   if (!_template) {
     _template = @{
@@ -96,22 +80,6 @@ FLUTTER_ASSERT_ARC
   return [_template mutableCopy];
 }
 
-- (NSMutableDictionary*)mutablePasswordTemplateCopy {
-  if (!_passwordTemplate) {
-    _passwordTemplate = @{
-      @"inputType" : @{@"name" : @"TextInuptType.text"},
-      @"keyboardAppearance" : @"Brightness.light",
-      @"obscureText" : @YES,
-      @"inputAction" : @"TextInputAction.unspecified",
-      @"smartDashesType" : @"0",
-      @"smartQuotesType" : @"0",
-      @"autocorrect" : @YES
-    };
-  }
-
-  return [_passwordTemplate mutableCopy];
-}
-
 - (NSArray<FlutterTextInputView*>*)installedInputViews {
   UIWindow* keyWindow =
       [[[UIApplication sharedApplication] windows]
@@ -121,11 +89,6 @@ FLUTTER_ASSERT_ARC
   return [keyWindow.subviews
       filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"self isKindOfClass: %@",
                                                                    [FlutterTextInputView class]]];
-}
-
-- (NSArray<FlutterTextInputView*>*)viewsVisibleToAutofill {
-  return [self.installedInputViews
-      filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isVisibleToAutofill == YES"]];
 }
 
 #pragma mark - Tests
@@ -160,6 +123,86 @@ FLUTTER_ASSERT_ARC
   XCTAssert(inputView.autofillId.length > 0);
 }
 
+- (void)testKeyboardType {
+  NSDictionary* config = self.mutableTemplateCopy;
+  [config setValue:@{@"name" : @"TextInputType.url"} forKey:@"inputType"];
+  [self setClientId:123 configuration:config];
+
+  // Find all the FlutterTextInputViews we created.
+  NSArray<FlutterTextInputView*>* inputFields = self.installedInputViews;
+
+  FlutterTextInputView* inputView = inputFields[0];
+
+  // Verify keyboardType is set to the value specified in config.
+  XCTAssertEqual(inputView.keyboardType, UIKeyboardTypeURL);
+}
+
+- (void)testAutocorrectionPromptRectAppears {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithFrame:CGRectZero];
+  inputView.textInputDelegate = engine;
+  [inputView firstRectForRange:[FlutterTextRange rangeWithNSRange:NSMakeRange(0, 1)]];
+
+  // Verify behavior.
+  OCMVerify([engine showAutocorrectionPromptRectForStart:0 end:1 withClient:0]);
+}
+
+- (void)testTextRangeFromPositionMatchesUITextViewBehavior {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithFrame:CGRectZero];
+  FlutterTextPosition* fromPosition = [[FlutterTextPosition alloc] initWithIndex:2];
+  FlutterTextPosition* toPosition = [[FlutterTextPosition alloc] initWithIndex:0];
+
+  FlutterTextRange* flutterRange = (FlutterTextRange*)[inputView textRangeFromPosition:fromPosition
+                                                                            toPosition:toPosition];
+  NSRange range = flutterRange.range;
+
+  XCTAssertEqual(range.location, 0);
+  XCTAssertEqual(range.length, 2);
+}
+
+- (void)testNoZombies {
+  // Regression test for https://github.com/flutter/flutter/issues/62501.
+  FlutterSecureTextInputView* passwordView = [[FlutterSecureTextInputView alloc] init];
+
+  @autoreleasepool {
+    // Initialize the lazy textField.
+    [passwordView.textField description];
+  }
+  XCTAssert([[passwordView.textField description] containsString:@"TextField"]);
+}
+
+#pragma mark - EditingState tests
+
+- (void)testUITextInputCallsUpdateEditingStateOnce {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] init];
+  inputView.textInputDelegate = engine;
+
+  __block int updateCount = 0;
+  OCMStub([engine updateEditingClient:0 withState:[OCMArg isNotNil]])
+      .andDo(^(NSInvocation* invocation) {
+        updateCount++;
+      });
+
+  [inputView insertText:@"text to insert"];
+  // Update the framework exactly once.
+  XCTAssertEqual(updateCount, 1);
+
+  [inputView deleteBackward];
+  XCTAssertEqual(updateCount, 2);
+
+  inputView.selectedTextRange = [FlutterTextRange rangeWithNSRange:NSMakeRange(0, 1)];
+  XCTAssertEqual(updateCount, 3);
+
+  [inputView replaceRange:[FlutterTextRange rangeWithNSRange:NSMakeRange(0, 1)]
+                 withText:@"replace text"];
+  XCTAssertEqual(updateCount, 4);
+
+  [inputView setMarkedText:@"marked text" selectedRange:NSMakeRange(0, 1)];
+  XCTAssertEqual(updateCount, 5);
+
+  [inputView unmarkText];
+  XCTAssertEqual(updateCount, 6);
+}
+
 - (void)testTextChangesTriggerUpdateEditingClient {
   FlutterTextInputView* inputView = [[FlutterTextInputView alloc] init];
   inputView.textInputDelegate = engine;
@@ -169,12 +212,10 @@ FLUTTER_ASSERT_ARC
   inputView.selectedTextRange = nil;
 
   // Text changes trigger update.
-  [inputView setTextInputState:@{@"text" : @"AFTER"}];
-  OCMVerify([engine updateEditingClient:0 withState:[OCMArg isNotNil]]);
+  XCTAssertTrue([inputView setTextInputState:@{@"text" : @"AFTER"}]);
 
   // Don't send anything if there's nothing new.
-  [inputView setTextInputState:@{@"text" : @"AFTER"}];
-  OCMReject([engine updateEditingClient:0 withState:[OCMArg any]]);
+  XCTAssertFalse([inputView setTextInputState:@{@"text" : @"AFTER"}]);
 }
 
 - (void)testSelectionChangeTriggersUpdateEditingClient {
@@ -185,22 +226,22 @@ FLUTTER_ASSERT_ARC
   inputView.markedTextRange = nil;
   inputView.selectedTextRange = nil;
 
-  [inputView
+  BOOL shouldUpdate = [inputView
       setTextInputState:@{@"text" : @"SELECTION", @"selectionBase" : @0, @"selectionExtent" : @3}];
-  OCMVerify([engine updateEditingClient:0 withState:[OCMArg isNotNil]]);
+  XCTAssertTrue(shouldUpdate);
 
-  [inputView
+  shouldUpdate = [inputView
       setTextInputState:@{@"text" : @"SELECTION", @"selectionBase" : @1, @"selectionExtent" : @3}];
-  OCMVerify([engine updateEditingClient:0 withState:[OCMArg isNotNil]]);
+  XCTAssertTrue(shouldUpdate);
 
-  [inputView
+  shouldUpdate = [inputView
       setTextInputState:@{@"text" : @"SELECTION", @"selectionBase" : @1, @"selectionExtent" : @2}];
-  OCMVerify([engine updateEditingClient:0 withState:[OCMArg isNotNil]]);
+  XCTAssertTrue(shouldUpdate);
 
   // Don't send anything if there's nothing new.
-  [inputView
+  shouldUpdate = [inputView
       setTextInputState:@{@"text" : @"SELECTION", @"selectionBase" : @1, @"selectionExtent" : @2}];
-  OCMReject([engine updateEditingClient:0 withState:[OCMArg any]]);
+  XCTAssertFalse(shouldUpdate);
 }
 
 - (void)testComposingChangeTriggersUpdateEditingClient {
@@ -212,22 +253,22 @@ FLUTTER_ASSERT_ARC
   inputView.markedTextRange = nil;
   inputView.selectedTextRange = nil;
 
-  [inputView
+  BOOL shouldUpdate = [inputView
       setTextInputState:@{@"text" : @"COMPOSING", @"composingBase" : @0, @"composingExtent" : @3}];
-  OCMVerify([engine updateEditingClient:0 withState:[OCMArg isNotNil]]);
+  XCTAssertTrue(shouldUpdate);
 
-  [inputView
+  shouldUpdate = [inputView
       setTextInputState:@{@"text" : @"COMPOSING", @"composingBase" : @1, @"composingExtent" : @3}];
-  OCMVerify([engine updateEditingClient:0 withState:[OCMArg isNotNil]]);
+  XCTAssertTrue(shouldUpdate);
 
-  [inputView
+  shouldUpdate = [inputView
       setTextInputState:@{@"text" : @"COMPOSING", @"composingBase" : @1, @"composingExtent" : @2}];
-  OCMVerify([engine updateEditingClient:0 withState:[OCMArg isNotNil]]);
+  XCTAssertTrue(shouldUpdate);
 
   // Don't send anything if there's nothing new.
-  [inputView
+  shouldUpdate = [inputView
       setTextInputState:@{@"text" : @"COMPOSING", @"composingBase" : @1, @"composingExtent" : @2}];
-  OCMReject([engine updateEditingClient:0 withState:[OCMArg any]]);
+  XCTAssertFalse(shouldUpdate);
 }
 
 - (void)testUpdateEditingClientNegativeSelection {
@@ -243,12 +284,130 @@ FLUTTER_ASSERT_ARC
     @"selectionBase" : @-1,
     @"selectionExtent" : @-1
   }];
+  [inputView updateEditingState];
+  OCMVerify([engine updateEditingClient:0
+                              withState:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
+                                return ([state[@"selectionBase"] intValue]) == 0 &&
+                                       ([state[@"selectionExtent"] intValue] == 0);
+                              }]]);
+
+  // Returns (0, 0) when either end goes below 0.
+  [inputView
+      setTextInputState:@{@"text" : @"SELECTION", @"selectionBase" : @-1, @"selectionExtent" : @1}];
+  [inputView updateEditingState];
+  OCMVerify([engine updateEditingClient:0
+                              withState:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
+                                return ([state[@"selectionBase"] intValue]) == 0 &&
+                                       ([state[@"selectionExtent"] intValue] == 0);
+                              }]]);
+
+  [inputView
+      setTextInputState:@{@"text" : @"SELECTION", @"selectionBase" : @1, @"selectionExtent" : @-1}];
+  [inputView updateEditingState];
   OCMVerify([engine updateEditingClient:0
                               withState:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
                                 return ([state[@"selectionBase"] intValue]) == 0 &&
                                        ([state[@"selectionExtent"] intValue] == 0);
                               }]]);
 }
+
+- (void)testUpdateEditingClientSelectionClamping {
+  // Regression test for https://github.com/flutter/flutter/issues/62992.
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] init];
+  inputView.textInputDelegate = engine;
+
+  [inputView.text setString:@"SELECTION"];
+  inputView.markedTextRange = nil;
+  inputView.selectedTextRange = nil;
+
+  [inputView
+      setTextInputState:@{@"text" : @"SELECTION", @"selectionBase" : @0, @"selectionExtent" : @0}];
+  [inputView updateEditingState];
+  OCMVerify([engine updateEditingClient:0
+                              withState:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
+                                return ([state[@"selectionBase"] intValue]) == 0 &&
+                                       ([state[@"selectionExtent"] intValue] == 0);
+                              }]]);
+
+  // Needs clamping.
+  [inputView setTextInputState:@{
+    @"text" : @"SELECTION",
+    @"selectionBase" : @0,
+    @"selectionExtent" : @9999
+  }];
+  [inputView updateEditingState];
+
+  OCMVerify([engine updateEditingClient:0
+                              withState:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
+                                return ([state[@"selectionBase"] intValue]) == 0 &&
+                                       ([state[@"selectionExtent"] intValue] == 9);
+                              }]]);
+
+  // No clamping needed, but in reverse direction.
+  [inputView
+      setTextInputState:@{@"text" : @"SELECTION", @"selectionBase" : @1, @"selectionExtent" : @0}];
+  [inputView updateEditingState];
+  OCMVerify([engine updateEditingClient:0
+                              withState:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
+                                return ([state[@"selectionBase"] intValue]) == 0 &&
+                                       ([state[@"selectionExtent"] intValue] == 1);
+                              }]]);
+
+  // Both ends need clamping.
+  [inputView setTextInputState:@{
+    @"text" : @"SELECTION",
+    @"selectionBase" : @9999,
+    @"selectionExtent" : @9999
+  }];
+  [inputView updateEditingState];
+  OCMVerify([engine updateEditingClient:0
+                              withState:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
+                                return ([state[@"selectionBase"] intValue]) == 9 &&
+                                       ([state[@"selectionExtent"] intValue] == 9);
+                              }]]);
+}
+
+#pragma mark - Autofill - Utilities
+
+- (NSMutableDictionary*)mutablePasswordTemplateCopy {
+  if (!_passwordTemplate) {
+    _passwordTemplate = @{
+      @"inputType" : @{@"name" : @"TextInuptType.text"},
+      @"keyboardAppearance" : @"Brightness.light",
+      @"obscureText" : @YES,
+      @"inputAction" : @"TextInputAction.unspecified",
+      @"smartDashesType" : @"0",
+      @"smartQuotesType" : @"0",
+      @"autocorrect" : @YES
+    };
+  }
+
+  return [_passwordTemplate mutableCopy];
+}
+
+- (NSArray<FlutterTextInputView*>*)viewsVisibleToAutofill {
+  return [self.installedInputViews
+      filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isVisibleToAutofill == YES"]];
+}
+
+- (void)commitAutofillContextAndVerify {
+  FlutterMethodCall* methodCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.finishAutofillContext"
+                                        arguments:@YES];
+  [textInputPlugin handleMethodCall:methodCall
+                             result:^(id _Nullable result){
+                             }];
+
+  XCTAssertEqual(self.viewsVisibleToAutofill.count,
+                 [textInputPlugin.activeView isVisibleToAutofill] ? 1 : 0);
+  XCTAssertNotEqual(textInputPlugin.textInputView, nil);
+  // The active view should still be installed so it doesn't get
+  // deallocated.
+  XCTAssertEqual(self.installedInputViews.count, 1);
+  XCTAssertEqual(textInputPlugin.autofillContext.count, 0);
+}
+
+#pragma mark - Autofill - Tests
 
 - (void)testAutofillContext {
   NSMutableDictionary* field1 = self.mutableTemplateCopy;
@@ -451,81 +610,4 @@ FLUTTER_ASSERT_ARC
   XCTAssertNotEqual([inputView performSelector:@selector(font)], nil);
 }
 
-- (void)testKeyboardType {
-  NSDictionary* config = self.mutableTemplateCopy;
-  [config setValue:@{@"name" : @"TextInputType.url"} forKey:@"inputType"];
-  [self setClientId:123 configuration:config];
-
-  // Find all the FlutterTextInputViews we created.
-  NSArray<FlutterTextInputView*>* inputFields = self.installedInputViews;
-
-  FlutterTextInputView* inputView = inputFields[0];
-
-  // Verify keyboardType is set to the value specified in config.
-  XCTAssertEqual(inputView.keyboardType, UIKeyboardTypeURL);
-}
-
-- (void)testAutocorrectionPromptRectAppears {
-  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithFrame:CGRectZero];
-  inputView.textInputDelegate = engine;
-  [inputView firstRectForRange:[FlutterTextRange rangeWithNSRange:NSMakeRange(0, 1)]];
-
-  // Verify behavior.
-  OCMVerify([engine showAutocorrectionPromptRectForStart:0 end:1 withClient:0]);
-}
-
-- (void)testTextRangeFromPositionMatchesUITextViewBehavior {
-  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithFrame:CGRectZero];
-  FlutterTextPosition* fromPosition = [[FlutterTextPosition alloc] initWithIndex:2];
-  FlutterTextPosition* toPosition = [[FlutterTextPosition alloc] initWithIndex:0];
-
-  FlutterTextRange* flutterRange = (FlutterTextRange*)[inputView textRangeFromPosition:fromPosition
-                                                                            toPosition:toPosition];
-  NSRange range = flutterRange.range;
-
-  XCTAssertEqual(range.location, 0);
-  XCTAssertEqual(range.length, 2);
-}
-
-- (void)testUITextInputCallsUpdateEditingStateOnce {
-  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] init];
-  inputView.textInputDelegate = engine;
-
-  __block int updateCount = 0;
-  OCMStub([engine updateEditingClient:0 withState:[OCMArg isNotNil]])
-      .andDo(^(NSInvocation* invocation) {
-        updateCount++;
-      });
-
-  [inputView insertText:@"text to insert"];
-  // Update the framework exactly once.
-  XCTAssertEqual(updateCount, 1);
-
-  [inputView deleteBackward];
-  XCTAssertEqual(updateCount, 2);
-
-  inputView.selectedTextRange = [FlutterTextRange rangeWithNSRange:NSMakeRange(0, 1)];
-  XCTAssertEqual(updateCount, 3);
-
-  [inputView replaceRange:[FlutterTextRange rangeWithNSRange:NSMakeRange(0, 1)]
-                 withText:@"replace text"];
-  XCTAssertEqual(updateCount, 4);
-
-  [inputView setMarkedText:@"marked text" selectedRange:NSMakeRange(0, 1)];
-  XCTAssertEqual(updateCount, 5);
-
-  [inputView unmarkText];
-  XCTAssertEqual(updateCount, 6);
-}
-
-- (void)testNoZombies {
-  // Regression test for https://github.com/flutter/flutter/issues/62501.
-  FlutterSecureTextInputView* passwordView = [[FlutterSecureTextInputView alloc] init];
-
-  @autoreleasepool {
-    // Initialize the lazy textField.
-    [passwordView.textField description];
-  }
-  XCTAssert([[passwordView.textField description] containsString:@"TextField"]);
-}
 @end
