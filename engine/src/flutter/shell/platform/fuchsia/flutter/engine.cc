@@ -82,7 +82,9 @@ Engine::Engine(Delegate& delegate,
   fidl::InterfaceHandle<fuchsia::ui::scenic::Session> session;
   fidl::InterfaceHandle<fuchsia::ui::scenic::SessionListener> session_listener;
   auto session_listener_request = session_listener.NewRequest();
-  scenic->CreateSession(session.NewRequest(), session_listener.Bind());
+  fidl::InterfaceHandle<fuchsia::ui::views::Focuser> focuser;
+  scenic->CreateSession2(session.NewRequest(), session_listener.Bind(),
+                         focuser.NewRequest());
 
   // Grab the parent environment services. The platform view may want to access
   // some of these services.
@@ -139,6 +141,7 @@ Engine::Engine(Delegate& delegate,
            parent_environment_service_provider =
                std::move(parent_environment_service_provider),
            session_listener_request = std::move(session_listener_request),
+           focuser = std::move(focuser),
            on_session_listener_error_callback =
                std::move(on_session_listener_error_callback),
            on_session_metrics_change_callback =
@@ -161,6 +164,7 @@ Engine::Engine(Delegate& delegate,
                 std::move(runner_services),
                 std::move(parent_environment_service_provider),  // services
                 std::move(session_listener_request),  // session listener
+                std::move(focuser),
                 std::move(on_session_listener_error_callback),
                 std::move(on_session_metrics_change_callback),
                 std::move(on_session_size_change_hint_callback),
