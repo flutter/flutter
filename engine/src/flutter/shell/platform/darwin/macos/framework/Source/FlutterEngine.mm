@@ -329,6 +329,7 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
 
 - (bool)engineCallbackOnPresent {
   if (!_mainOpenGLContext) {
+    return false;
   }
   [_mainOpenGLContext flushBuffer];
   return true;
