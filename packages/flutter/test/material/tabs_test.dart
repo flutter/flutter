@@ -1000,22 +1000,18 @@ void main() {
 
     // Not close enough to switch to page 2
     pageController.jumpTo(500.0);
-    await tester.pumpAndSettle();
     expect(tabController.index, 1);
 
     // Close enough to switch to page 2
     pageController.jumpTo(700.0);
-    await tester.pumpAndSettle();
     expect(tabController.index, 2);
 
     // Same behavior going left: not left enough to get to page 0
     pageController.jumpTo(300.0);
-    await tester.pumpAndSettle();
     expect(tabController.index, 1);
 
     // Left enough to get to page 0
     pageController.jumpTo(100.0);
-    await tester.pumpAndSettle();
     expect(tabController.index, 0);
   });
 
@@ -1141,22 +1137,18 @@ void main() {
 
     // Not close enough to switch to page 2
     pageController.jumpTo(500.0);
-    await tester.pumpAndSettle();
     expect(tabController.index, 1);
 
     // Close enough to switch to page 2
     pageController.jumpTo(700.0);
-    await tester.pumpAndSettle();
     expect(tabController.index, 2);
 
     // Same behavior going left: not left enough to get to page 0
     pageController.jumpTo(300.0);
-    await tester.pumpAndSettle();
     expect(tabController.index, 1);
 
     // Left enough to get to page 0
     pageController.jumpTo(100.0);
-    await tester.pumpAndSettle();
     expect(tabController.index, 0);
   });
 
