@@ -500,6 +500,8 @@ abstract class WidgetController {
     int buttons = kPrimaryButton,
     double touchSlopX = kDragSlopDefault,
     double touchSlopY = kDragSlopDefault,
+    Duration duration,
+    double frequency,
   }) {
     assert(kDragSlopDefault > kTouchSlop);
     return dragFrom(
@@ -527,12 +529,29 @@ abstract class WidgetController {
     int buttons = kPrimaryButton,
     double touchSlopX = kDragSlopDefault,
     double touchSlopY = kDragSlopDefault,
+    Duration duration,
+    double frequency = 60.0,
   }) {
     assert(kDragSlopDefault > kTouchSlop);
+    if (duration != null) {
+      assert(frequency > 0);
+    }
     return TestAsyncUtils.guard<void>(() async {
       final TestGesture gesture = await startGesture(startLocation, pointer: pointer, buttons: buttons);
       assert(gesture != null);
+      for (final Offset dragOffset in _separateDragOffset(offset, touchSlopX, touchSlopY)) {
+        await gesture.moveBy(dragOffset);
+      }
+      await gesture.up();
+    });
+  }
 
+  // Separates the `offset` according to `touchSlopX` and `touchSlopY`.
+  Iterable<Offset> _separateDragOffset(
+    Offset offset,
+    double touchSlopX,
+    double touchSlopY,
+  ) sync* {
       final double xSign = offset.dx.sign;
       final double ySign = offset.dy.sign;
 
@@ -558,17 +577,17 @@ abstract class WidgetController {
             final double diffY = offsetSlope.abs() * touchSlopX * ySign;
 
             // The vector from the origin to the vertical edge.
-            await gesture.moveBy(Offset(signedSlopX, diffY));
+            yield Offset(signedSlopX, diffY);
             if (offsetY.abs() <= touchSlopY) {
               // The drag ends on or before getting to the horizontal extension of the horizontal edge.
-              await gesture.moveBy(Offset(offsetX - signedSlopX, offsetY - diffY));
+              yield Offset(offsetX - signedSlopX, offsetY - diffY);
             } else {
               final double diffY2 = signedSlopY - diffY;
               final double diffX2 = inverseOffsetSlope * diffY2;
 
               // The vector from the edge of the box to the horizontal extension of the horizontal edge.
-              await gesture.moveBy(Offset(diffX2, diffY2));
-              await gesture.moveBy(Offset(offsetX - diffX2 - signedSlopX, offsetY - signedSlopY));
+              yield Offset(diffX2, diffY2);
+              yield Offset(offsetX - diffX2 - signedSlopX, offsetY - signedSlopY);
             }
           } else {
             assert(offsetY.abs() > touchSlopY);
@@ -577,28 +596,26 @@ abstract class WidgetController {
             final double diffX = inverseOffsetSlope.abs() * touchSlopY * xSign;
 
             // The vector from the origin to the vertical edge.
-            await gesture.moveBy(Offset(diffX, signedSlopY));
+            yield Offset(diffX, signedSlopY);
             if (offsetX.abs() <= touchSlopX) {
               // The drag ends on or before getting to the vertical extension of the vertical edge.
-              await gesture.moveBy(Offset(offsetX - diffX, offsetY - signedSlopY));
+              yield Offset(offsetX - diffX, offsetY - signedSlopY);
             } else {
               final double diffX2 = signedSlopX - diffX;
               final double diffY2 = offsetSlope * diffX2;
 
               // The vector from the edge of the box to the vertical extension of the vertical edge.
-              await gesture.moveBy(Offset(diffX2, diffY2));
-              await gesture.moveBy(Offset(offsetX - signedSlopX, offsetY - diffY2 - signedSlopY));
+              yield Offset(diffX2, diffY2);
+              yield Offset(offsetX - signedSlopX, offsetY - diffY2 - signedSlopY);
             }
           }
         } else { // The drag goes through the corner of the box.
-          await gesture.moveBy(Offset(signedSlopX, signedSlopY));
-          await gesture.moveBy(Offset(offsetX - signedSlopX, offsetY - signedSlopY));
+          yield Offset(signedSlopX, signedSlopY);
+          yield Offset(offsetX - signedSlopX, offsetY - signedSlopY);
         }
       } else { // The drag ends inside the box.
-        await gesture.moveBy(offset);
+        yield offset;
       }
-      await gesture.up();
-    });
   }
 
   /// The next available pointer identifier.
