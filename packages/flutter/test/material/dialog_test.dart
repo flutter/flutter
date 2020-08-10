@@ -20,7 +20,7 @@ MaterialApp _buildAppWithDialog(Widget dialog, { ThemeData theme, double textSca
       child: Builder(
         builder: (BuildContext context) {
           return Center(
-            child: RaisedButton(
+            child: ElevatedButton(
               child: const Text('X'),
               onPressed: () {
                 showDialog<void>(
@@ -61,7 +61,7 @@ void main() {
         color: Colors.green[500],
       ),
       actions: <Widget>[
-        FlatButton(
+        TextButton(
             onPressed: () {
               didPressOk = true;
             },
@@ -224,7 +224,7 @@ void main() {
       const MaterialApp(
         home: Material(
           child: Center(
-            child: RaisedButton(
+            child: ElevatedButton(
               onPressed: null,
               child: Text('Go'),
             ),
@@ -333,7 +333,7 @@ void main() {
       const MaterialApp(
         home: Material(
           child: Center(
-            child: RaisedButton(
+            child: ElevatedButton(
               onPressed: null,
               child: Text('Go'),
             ),
@@ -427,7 +427,7 @@ void main() {
       const MaterialApp(
         home: Material(
           child: Center(
-            child: RaisedButton(
+            child: ElevatedButton(
               onPressed: null,
               child: Text(buttonText),
             ),
@@ -461,7 +461,7 @@ void main() {
       title: const Text('title'),
       content: const Text('content'),
       actions: <Widget>[
-        RaisedButton(
+        ElevatedButton(
           onPressed: () {},
           child: const Text('button'),
         ),
@@ -494,7 +494,7 @@ void main() {
       title: const Text('title'),
       content: const Text('content'),
       actions: <Widget>[
-        RaisedButton(
+        ElevatedButton(
           onPressed: () {},
           child: const Text('button'),
         ),
@@ -531,12 +531,12 @@ void main() {
       title: const Text('title'),
       content: const Text('content'),
       actions: <Widget>[
-        RaisedButton(
+        ElevatedButton(
           key: key1,
           onPressed: () {},
           child: const Text('button 1'),
         ),
-        RaisedButton(
+        ElevatedButton(
           key: key2,
           onPressed: () {},
           child: const Text('button 2'),
@@ -591,12 +591,12 @@ void main() {
       title: const Text('title'),
       content: const Text('content'),
       actions: <Widget>[
-        RaisedButton(
+        ElevatedButton(
           key: key1,
           onPressed: () {},
           child: const Text('button 1'),
         ),
-        RaisedButton(
+        ElevatedButton(
           key: key2,
           onPressed: () {},
           child: const Text('button 2'),
@@ -765,7 +765,7 @@ void main() {
       key: contentKey,
     );
     final List<Widget> actions = <Widget>[
-      RaisedButton(
+      ElevatedButton(
         onPressed: () {},
         child: const Text('button'),
       ),
@@ -1049,12 +1049,12 @@ void main() {
       title: const Text('title'),
       content: const Text('content'),
       actions: <Widget>[
-        RaisedButton(
+        ElevatedButton(
           key: key1,
           onPressed: () {},
           child: const Text('Looooooooooooooong button 1'),
         ),
-        RaisedButton(
+        ElevatedButton(
           key: key2,
           onPressed: () {},
           child: const Text('Looooooooooooooong button 2'),
@@ -1072,7 +1072,7 @@ void main() {
 
     final Rect buttonOneRect = tester.getRect(find.byKey(key1));
     final Rect buttonTwoRect = tester.getRect(find.byKey(key2));
-    // Second [RaisedButton] should appear above the first.
+    // Second [ElevatedButton] should appear above the first.
     expect(buttonTwoRect.bottom, lessThanOrEqualTo(buttonOneRect.top));
   });
 
@@ -1084,12 +1084,12 @@ void main() {
       title: const Text('title'),
       content: const Text('content'),
       actions: <Widget>[
-        RaisedButton(
+        ElevatedButton(
           key: key1,
           onPressed: () {},
           child: const Text('Looooooooooooooong button 1'),
         ),
-        RaisedButton(
+        ElevatedButton(
           key: key2,
           onPressed: () {},
           child: const Text('Looooooooooooooong button 2'),
@@ -1117,12 +1117,12 @@ void main() {
       title: const Text('title'),
       content: const Text('content'),
       actions: <Widget>[
-        RaisedButton(
+        ElevatedButton(
           key: key1,
           onPressed: () {},
           child: const Text('Looooooooooooooong button 1'),
         ),
-        RaisedButton(
+        ElevatedButton(
           key: key2,
           onPressed: () {},
           child: const Text('Looooooooooooooong button 2'),
@@ -1283,7 +1283,7 @@ void main() {
           child: Builder(
             builder: (BuildContext context) {
               return Center(
-                child: RaisedButton(
+                child: ElevatedButton(
                   child: const Text('X'),
                   onPressed: () {
                     showDialog<void>(
@@ -1333,13 +1333,13 @@ void main() {
         builder: (BuildContext context) {
           return AlertDialog(
             actions: <Widget>[
-              FlatButton(
+              TextButton(
                 child: const Text('TRUE'),
                 onPressed: () {
                   Navigator.pop(context, true); // showDialog() returns true
                 },
               ),
-              FlatButton(
+              TextButton(
                 child: const Text('FALSE'),
                 onPressed: () {
                   Navigator.pop(context, false); // showDialog() returns false
@@ -1460,7 +1460,7 @@ void main() {
           child: Builder(
             key: builderKey,
             builder: (BuildContext outerContext) {
-              return RaisedButton(
+              return ElevatedButton(
                 onPressed: () {
                   showDialog<void>(
                     context: outerContext,
@@ -1480,7 +1480,7 @@ void main() {
     await tester.pumpWidget(buildFrame(UniqueKey()));
 
     // Open the dialog.
-    await tester.tap(find.byType(RaisedButton));
+    await tester.tap(find.byType(ElevatedButton));
     await tester.pumpAndSettle();
 
     // Force the Builder to be recreated (new key) which causes outerContext to
@@ -1542,7 +1542,7 @@ void main() {
         onGenerateRoute: (RouteSettings settings) {
           return MaterialPageRoute<dynamic>(
             builder: (BuildContext context) {
-              return RaisedButton(
+              return ElevatedButton(
                 onPressed: () {
                   showDialog<void>(
                     context: context,
@@ -1560,7 +1560,7 @@ void main() {
     ));
 
     // Open the dialog.
-    await tester.tap(find.byType(RaisedButton));
+    await tester.tap(find.byType(ElevatedButton));
 
     expect(rootObserver.dialogCount, 1);
     expect(nestedObserver.dialogCount, 0);
@@ -1577,7 +1577,7 @@ void main() {
         onGenerateRoute: (RouteSettings settings) {
           return MaterialPageRoute<dynamic>(
             builder: (BuildContext context) {
-              return RaisedButton(
+              return ElevatedButton(
                 onPressed: () {
                   showDialog<void>(
                     context: context,
@@ -1596,7 +1596,7 @@ void main() {
     ));
 
     // Open the dialog.
-    await tester.tap(find.byType(RaisedButton));
+    await tester.tap(find.byType(ElevatedButton));
 
     expect(rootObserver.dialogCount, 0);
     expect(nestedObserver.dialogCount, 1);
@@ -1694,7 +1694,7 @@ void main() {
         ],
         home: const Material(
           child: Center(
-            child: RaisedButton(
+            child: ElevatedButton(
               onPressed: null,
               child: Text('Go'),
             ),

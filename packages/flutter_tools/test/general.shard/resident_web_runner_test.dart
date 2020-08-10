@@ -139,7 +139,7 @@ void main() {
       trackWidgetCreation: anyNamed('trackWidgetCreation'),
       packageConfig: anyNamed('packageConfig'),
     )).thenAnswer((Invocation _) async {
-      return UpdateFSReport(success: true,  syncedBytes: 0)..invalidatedModules = <String>[];
+      return UpdateFSReport(success: true,  syncedBytes: 0);
     });
     when(mockDebugConnection.vmService).thenAnswer((Invocation invocation) {
       return fakeVmServiceHost.vmService;
@@ -352,7 +352,7 @@ void main() {
       trackWidgetCreation: anyNamed('trackWidgetCreation'),
       packageConfig: anyNamed('packageConfig'),
     )).thenAnswer((Invocation _) async {
-      return UpdateFSReport(success: false, syncedBytes: 0)..invalidatedModules = <String>[];
+      return UpdateFSReport(success: false, syncedBytes: 0);
     });
 
     expect(await residentWebRunner.run(), 1);
@@ -587,8 +587,7 @@ void main() {
     )).thenAnswer((Invocation invocation) async {
       // Generated entrypoint file in temp dir.
       expect(invocation.namedArguments[#mainUri].toString(), contains('entrypoint.dart'));
-      return UpdateFSReport(success: true)
-        ..invalidatedModules = <String>['example'];
+      return UpdateFSReport(success: true);
     });
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     unawaited(residentWebRunner.run(
@@ -668,8 +667,7 @@ void main() {
       packageConfig: anyNamed('packageConfig'),
     )).thenAnswer((Invocation invocation) async {
       entrypointFileUri = invocation.namedArguments[#mainUri] as Uri;
-      return UpdateFSReport(success: true)
-        ..invalidatedModules = <String>['example'];
+      return UpdateFSReport(success: true);
     });
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     unawaited(residentWebRunner.run(
@@ -727,8 +725,7 @@ void main() {
       invalidatedFiles: anyNamed('invalidatedFiles'),
       packageConfig: anyNamed('packageConfig'),
     )).thenAnswer((Invocation invocation) async {
-      return UpdateFSReport(success: true)
-        ..invalidatedModules = <String>['example'];
+      return UpdateFSReport(success: true);
     });
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     unawaited(residentWebRunner.run(
@@ -801,7 +798,7 @@ void main() {
       packageConfig: anyNamed('packageConfig'),
       trackWidgetCreation: anyNamed('trackWidgetCreation'),
     )).thenAnswer((Invocation _) async {
-      return UpdateFSReport(success: false,  syncedBytes: 0)..invalidatedModules = <String>[];
+      return UpdateFSReport(success: false,  syncedBytes: 0);
     });
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     unawaited(residentWebRunner.run(
@@ -875,7 +872,7 @@ void main() {
       packageConfig: anyNamed('packageConfig'),
       trackWidgetCreation: anyNamed('trackWidgetCreation'),
     )).thenAnswer((Invocation _) async {
-      return UpdateFSReport(success: false,  syncedBytes: 0)..invalidatedModules = <String>[];
+      return UpdateFSReport(success: false,  syncedBytes: 0);
     });
 
     final OperationResult result = await residentWebRunner.restart(fullRestart: true);

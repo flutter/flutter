@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'package:collection/collection.dart' show ListEquality;
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/base/utils.dart';
@@ -418,7 +419,7 @@ void main() {
     expect(gitTagVersion.devPatch, 5);
 
     gitTagVersion = GitTagVersion.parse('1.2.3-13-g$hash');
-    expect(gitTagVersion.frameworkVersionFor(hash), '1.2.4.pre.13');
+    expect(gitTagVersion.frameworkVersionFor(hash), '1.2.4-0.0.pre.13');
     expect(gitTagVersion.gitTag, '1.2.3');
     expect(gitTagVersion.devVersion, null);
     expect(gitTagVersion.devPatch, null);
@@ -432,12 +433,12 @@ void main() {
 
     // new tag release format, stable channel
     gitTagVersion = GitTagVersion.parse('1.2.3-13-g$hash');
-    expect(gitTagVersion.frameworkVersionFor(hash), '1.2.4.pre.13');
+    expect(gitTagVersion.frameworkVersionFor(hash), '1.2.4-0.0.pre.13');
     expect(gitTagVersion.gitTag, '1.2.3');
     expect(gitTagVersion.devVersion, null);
     expect(gitTagVersion.devPatch, null);
 
-    expect(GitTagVersion.parse('98.76.54-32-g$hash').frameworkVersionFor(hash), '98.76.55.pre.32');
+    expect(GitTagVersion.parse('98.76.54-32-g$hash').frameworkVersionFor(hash), '98.76.55-0.0.pre.32');
     expect(GitTagVersion.parse('10.20.30-0-g$hash').frameworkVersionFor(hash), '10.20.30');
     expect(testLogger.traceText, '');
     expect(GitTagVersion.parse('v1.2.3+hotfix.1-4-g$hash').frameworkVersionFor(hash), '0.0.0-unknown');
@@ -474,7 +475,7 @@ void main() {
     // We shouldn't have to fallback to git describe, because we are exactly
     // on a release tag.
     verifyNever(mockProcessUtils.runSync(
-      <String>['git', 'describe', '--match', '*.*.*-*.*.pre', '--first-parent', '--long', '--tags'],
+      <String>['git', 'describe', '--match', '*.*.*', '--first-parent', '--long', '--tags'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     ));
@@ -488,7 +489,7 @@ void main() {
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(ProcessResult(105, 0, '', ''), <String>['git', 'fetch']));
     when(processUtils.runSync(
-      <String>['git', 'describe', '--match', '*.*.*-*.*.pre', '--first-parent', '--long', '--tags'],
+      <String>['git', 'describe', '--match', '*.*.*', '--first-parent', '--long', '--tags'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(ProcessResult(106, 0, 'v0.1.2-3-1234abcd', ''), <String>['git', 'describe']));
@@ -514,7 +515,7 @@ void main() {
       environment: anyNamed('environment'),
     ));
     verify(processUtils.runSync(
-      <String>['git', 'describe', '--match', '*.*.*-*.*.pre', '--first-parent', '--long', '--tags'],
+      <String>['git', 'describe', '--match', '*.*.*', '--first-parent', '--long', '--tags'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).called(1);
@@ -533,7 +534,7 @@ void main() {
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(ProcessResult(106, 0, '', ''), <String>['git', 'fetch']));
     when(processUtils.runSync(
-      <String>['git', 'describe', '--match', '*.*.*-*.*.pre', '--first-parent', '--long', '--tags'],
+      <String>['git', 'describe', '--match', '*.*.*', '--first-parent', '--long', '--tags'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(ProcessResult(107, 0, 'v0.1.2-3-1234abcd', ''), <String>['git', 'describe']));
@@ -559,7 +560,7 @@ void main() {
       environment: anyNamed('environment'),
     ));
     verify(processUtils.runSync(
-      <String>['git', 'describe', '--match', '*.*.*-*.*.pre', '--first-parent', '--long', '--tags'],
+      <String>['git', 'describe', '--match', '*.*.*', '--first-parent', '--long', '--tags'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).called(1);
@@ -586,7 +587,7 @@ void main() {
       <String>['git', 'tag', '--contains', 'HEAD'],
     ));
     when(processUtils.runSync(
-      <String>['git', 'describe', '--match', '*.*.*-*.*.pre', '--first-parent', '--long', '--tags'],
+      <String>['git', 'describe', '--match', '*.*.*', '--first-parent', '--long', '--tags'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(ProcessResult(111, 0, 'v0.1.2-3-1234abcd', ''), <String>['git', 'describe']));
@@ -604,10 +605,49 @@ void main() {
       environment: anyNamed('environment'),
     )).called(1);
     verify(processUtils.runSync(
-      <String>['git', 'describe', '--match', '*.*.*-*.*.pre', '--first-parent', '--long', '--tags'],
+      <String>['git', 'describe', '--match', '*.*.*', '--first-parent', '--long', '--tags'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).called(1);
+  });
+
+  testUsingContext('determine uses overridden git url', () {
+    final MockProcessUtils processUtils = MockProcessUtils();
+    when(processUtils.runSync(
+      <String>['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+      workingDirectory: anyNamed('workingDirectory'),
+      environment: anyNamed('environment'),
+    )).thenReturn(RunResult(ProcessResult(108, 0, 'master', ''), <String>['git', 'fetch']));
+    when(processUtils.runSync(
+      <String>['git', 'fetch', 'https://githubmirror.com/flutter.git', '--tags', '-f'],
+      workingDirectory: anyNamed('workingDirectory'),
+      environment: anyNamed('environment'),
+    )).thenReturn(RunResult(ProcessResult(109, 0, '', ''), <String>['git', 'fetch']));
+    when(processUtils.runSync(
+      <String>['git', 'tag', '--contains', 'HEAD'],
+      workingDirectory: anyNamed('workingDirectory'),
+      environment: anyNamed('environment'),
+    )).thenReturn(
+      RunResult(ProcessResult(110, 0, '', ''),
+      <String>['git', 'tag', '--contains', 'HEAD'],
+    ));
+    when(processUtils.runSync(
+      <String>['git', 'describe', '--match', '*.*.*', '--first-parent', '--long', '--tags'],
+      workingDirectory: anyNamed('workingDirectory'),
+      environment: anyNamed('environment'),
+    )).thenReturn(RunResult(ProcessResult(111, 0, 'v0.1.2-3-1234abcd', ''), <String>['git', 'describe']));
+
+    GitTagVersion.determine(processUtils, workingDirectory: '.', fetchTags: true);
+
+    verify(processUtils.runSync(
+      <String>['git', 'fetch', 'https://githubmirror.com/flutter.git', '--tags', '-f'],
+      workingDirectory: anyNamed('workingDirectory'),
+      environment: anyNamed('environment'),
+    )).called(1);
+  }, overrides: <Type, Generator>{
+    Platform: () => FakePlatform(environment: <String, String>{
+      'FLUTTER_GIT_URL': 'https://githubmirror.com/flutter.git',
+    }),
   });
 }
 
@@ -730,7 +770,7 @@ void fakeData(
     environment: anyNamed('environment'),
   )).thenReturn(ProcessResult(106, 0, '', ''));
   when(pm.runSync(
-    <String>['git', 'describe', '--match', '*.*.*-*.*.pre', '--first-parent', '--long', '--tags'],
+    <String>['git', 'describe', '--match', '*.*.*', '--first-parent', '--long', '--tags'],
     workingDirectory: anyNamed('workingDirectory'),
     environment: anyNamed('environment'),
   )).thenReturn(ProcessResult(107, 0, 'v0.1.2-3-1234abcd', ''));

@@ -12,15 +12,15 @@ import 'package:path/path.dart' as path;
 
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
-import 'package:flutter_devicelab/framework/ios.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:flutter_devicelab/tasks/track_widget_creation_enabled_task.dart';
 
-TaskFunction createComplexLayoutScrollPerfTest() {
+TaskFunction createComplexLayoutScrollPerfTest({bool needsMeasureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
     'test_driver/scroll_perf.dart',
     'complex_layout_scroll_perf',
+    needsMeasureCpuGpu: needsMeasureCpuGpu,
   ).run;
 }
 
@@ -44,7 +44,7 @@ TaskFunction createUiKitViewScrollPerfTest() {
 TaskFunction createAndroidTextureScrollPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
-    'test_driver/android_texture_scroll_perf.dart',
+    'test_driver/android_view_scroll_perf.dart',
     'platform_views_scroll_perf',
     testDriver: 'test_driver/scroll_perf_test.dart',
   ).run;
@@ -52,9 +52,9 @@ TaskFunction createAndroidTextureScrollPerfTest() {
 
 TaskFunction createAndroidViewScrollPerfTest() {
   return PerfTest(
-    '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
+    '${flutterDirectory.path}/dev/benchmarks/platform_views_layout_hybrid_composition',
     'test_driver/android_view_scroll_perf.dart',
-    'platform_views_scroll_perf',
+    'platform_views_scroll_perf_hybrid_composition',
     testDriver: 'test_driver/scroll_perf_test.dart',
   ).run;
 }
@@ -76,6 +76,13 @@ TaskFunction createCullOpacityPerfTest() {
   ).run;
 }
 
+TaskFunction createCullOpacityPerfE2ETest() {
+  return E2EPerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/cull_opacity_perf_e2e.dart',
+  ).run;
+}
+
 TaskFunction createCubicBezierPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -88,8 +95,9 @@ TaskFunction createCubicBezierPerfTest() {
 TaskFunction createCubicBezierPerfSkSLWarmupTest() {
   return PerfTestWithSkSL(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/cubic_bezier_perf.dart',
+    'test_driver/run_app.dart',
     'cubic_bezier_perf',
+    testDriver: 'test_driver/cubic_bezier_perf_test.dart',
   ).run;
 }
 
@@ -262,6 +270,13 @@ TaskFunction createsMultiWidgetConstructPerfTest() {
   ).run;
 }
 
+TaskFunction createsMultiWidgetConstructPerfE2ETest() {
+  return E2EPerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/multi_widget_construction_perf_e2e.dart',
+  ).run;
+}
+
 TaskFunction createFramePolicyIntegrationTest() {
   final String testDirectory =
       '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks';
@@ -348,6 +363,9 @@ class PerfTest {
     this.timelineFileName, {
     this.needsMeasureCpuGpu = false,
     this.testDriver,
+    this.needsFullTimeline = true,
+    this.benchmarkScoreKeys,
+    this.dartDefine = '',
   });
 
   /// The directory where the app under test is defined.
@@ -356,10 +374,38 @@ class PerfTest {
   final String testTarget;
   // The prefix name of the filename such as `<timelineFileName>.timeline_summary.json`.
   final String timelineFileName;
+  String get resultFilename => '$timelineFileName.timeline_summary';
   /// The test file to run on the host.
   final String testDriver;
   /// Whether to collect CPU and GPU metrics.
   final bool needsMeasureCpuGpu;
+  /// Whether to collect full timeline, meaning if `--trace-startup` flag is needed.
+  final bool needsFullTimeline;
+
+  /// The keys of the values that need to be reported.
+  ///
+  /// If it's `null`, then report:
+  /// ```Dart
+  /// <String>[
+  ///   'average_frame_build_time_millis',
+  ///   'worst_frame_build_time_millis',
+  ///   '90th_percentile_frame_build_time_millis',
+  ///   '99th_percentile_frame_build_time_millis',
+  ///   'average_frame_rasterizer_time_millis',
+  ///   'worst_frame_rasterizer_time_millis',
+  ///   '90th_percentile_frame_rasterizer_time_millis',
+  ///   '99th_percentile_frame_rasterizer_time_millis',
+  ///   'average_vsync_transitions_missed',
+  ///   '90th_percentile_vsync_transitions_missed',
+  ///   '99th_percentile_vsync_transitions_missed',
+  ///   if (needsMeasureCpuGpu) 'average_cpu_usage',
+  ///   if (needsMeasureCpuGpu) 'average_gpu_usage',
+  /// ]
+  /// ```
+  final List<String> benchmarkScoreKeys;
+
+  /// Additional flags for `--dart-define` to control the test
+  final String dartDefine;
 
   Future<TaskResult> run() {
     return internalRun();
@@ -382,7 +428,8 @@ class PerfTest {
         '-v',
         '--verbose-system-logs',
         '--profile',
-        '--trace-startup', // Enables "endless" timeline event buffering.
+        if (needsFullTimeline)
+          '--trace-startup', // Enables "endless" timeline event buffering.
         '-t', testTarget,
         if (noBuild) '--no-build',
         if (testDriver != null)
@@ -392,11 +439,13 @@ class PerfTest {
         if (writeSkslFileName != null)
           ...<String>['--write-sksl-on-exit', writeSkslFileName],
         if (cacheSkSL) '--cache-sksl',
+        if (dartDefine.isNotEmpty)
+          ...<String>['--dart-define', dartDefine],
         '-d',
         deviceId,
       ]);
       final Map<String, dynamic> data = json.decode(
-        file('$testDirectory/build/$timelineFileName.timeline_summary.json').readAsStringSync(),
+        file('$testDirectory/build/$resultFilename.json').readAsStringSync(),
       ) as Map<String, dynamic>;
 
       if (data['frame_count'] as int < 5) {
@@ -406,29 +455,55 @@ class PerfTest {
         );
       }
 
-      if (needsMeasureCpuGpu) {
-        await inDirectory<void>('$testDirectory/build', () async {
-          data.addAll(await measureIosCpuGpu(deviceId: deviceId));
-        });
-      }
-
-      return TaskResult.success(data, benchmarkScoreKeys: <String>[
-        'average_frame_build_time_millis',
-        'worst_frame_build_time_millis',
-        '90th_percentile_frame_build_time_millis',
-        '99th_percentile_frame_build_time_millis',
-        'average_frame_rasterizer_time_millis',
-        'worst_frame_rasterizer_time_millis',
-        '90th_percentile_frame_rasterizer_time_millis',
-        '99th_percentile_frame_rasterizer_time_millis',
-        'average_vsync_transitions_missed',
-        '90th_percentile_vsync_transitions_missed',
-        '99th_percentile_vsync_transitions_missed',
-        if (needsMeasureCpuGpu) 'cpu_percentage',
-        if (needsMeasureCpuGpu) 'gpu_percentage',
-      ]);
+      return TaskResult.success(
+        data,
+        benchmarkScoreKeys: benchmarkScoreKeys ?? <String>[
+          'average_frame_build_time_millis',
+          'worst_frame_build_time_millis',
+          '90th_percentile_frame_build_time_millis',
+          '99th_percentile_frame_build_time_millis',
+          'average_frame_rasterizer_time_millis',
+          'worst_frame_rasterizer_time_millis',
+          '90th_percentile_frame_rasterizer_time_millis',
+          '99th_percentile_frame_rasterizer_time_millis',
+          'average_vsync_transitions_missed',
+          '90th_percentile_vsync_transitions_missed',
+          '99th_percentile_vsync_transitions_missed',
+          if (needsMeasureCpuGpu) 'average_cpu_usage',
+          if (needsMeasureCpuGpu) 'average_gpu_usage',
+        ],
+      );
     });
   }
+}
+
+class E2EPerfTest extends PerfTest {
+  const E2EPerfTest(
+    String testDirectory,
+    String testTarget, {
+    String summaryFilename,
+    List<String> benchmarkScoreKeys,
+    }
+  ) : super(
+    testDirectory,
+    testTarget,
+    summaryFilename,
+    testDriver: 'test_driver/e2e_test.dart',
+    needsFullTimeline: false,
+    benchmarkScoreKeys: benchmarkScoreKeys ?? const <String>[
+      'average_frame_build_time_millis',
+      'worst_frame_build_time_millis',
+      '90th_percentile_frame_build_time_millis',
+      '99th_percentile_frame_build_time_millis',
+      'average_frame_rasterizer_time_millis',
+      'worst_frame_rasterizer_time_millis',
+      '90th_percentile_frame_rasterizer_time_millis',
+      '99th_percentile_frame_rasterizer_time_millis',
+      ],
+  );
+
+  @override
+  String get resultFilename => timelineFileName ?? 'e2e_perf_summary';
 }
 
 class PerfTestWithSkSL extends PerfTest {

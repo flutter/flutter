@@ -269,8 +269,8 @@ class ScaffoldPrelayoutGeometry {
   ///
   /// The [Scaffold.body] is laid out with respect to [minInsets] already. This
   /// means that a [FloatingActionButtonLocation] does not need to factor in
-  /// [minInsets.bottom] when aligning a [FloatingActionButton] to
-  /// [contentBottom].
+  /// [EdgeInsets.bottom] of [minInsets] when aligning a [FloatingActionButton]
+  /// to [contentBottom].
   final double contentBottom;
 
   /// The vertical distance from the [Scaffold]'s origin to the top of
@@ -282,27 +282,28 @@ class ScaffoldPrelayoutGeometry {
   ///
   /// The [Scaffold.body] is laid out with respect to [minInsets] already. This
   /// means that a [FloatingActionButtonLocation] does not need to factor in
-  /// [minInsets.top] when aligning a [FloatingActionButton] to [contentTop].
+  /// [EdgeInsets.top] of [minInsets] when aligning a [FloatingActionButton] to
+  /// [contentTop].
   final double contentTop;
 
   /// The minimum padding to inset the [FloatingActionButton] by for it
   /// to remain visible.
   ///
-  /// This value is the result of calling [MediaQuery.padding] in the
+  /// This value is the result of calling [MediaQueryData.padding] in the
   /// [Scaffold]'s [BuildContext],
   /// and is useful for insetting the [FloatingActionButton] to avoid features like
   /// the system status bar or the keyboard.
   ///
-  /// If [Scaffold.resizeToAvoidBottomInset] is set to false, [minInsets.bottom]
-  /// will be 0.0.
+  /// If [Scaffold.resizeToAvoidBottomInset] is set to false,
+  /// [EdgeInsets.bottom] of [minInsets] will be 0.0.
   final EdgeInsets minInsets;
 
   /// The minimum padding to inset interactive elements to be within a safe,
   /// un-obscured space.
   ///
-  /// This value reflects the [MediaQuery.viewPadding] of the [Scaffold]'s
+  /// This value reflects the [MediaQueryData.viewPadding] of the [Scaffold]'s
   /// [BuildContext] when [Scaffold.resizeToAvoidBottomInset] is false or and
-  /// the [MediaQuery.viewInsets] > 0.0. This helps distinguish between
+  /// the [MediaQueryData.viewInsets] > 0.0. This helps distinguish between
   /// different types of obstructions on the screen, such as software keyboards
   /// and physical device notches.
   final EdgeInsets minViewPadding;
@@ -318,8 +319,8 @@ class ScaffoldPrelayoutGeometry {
   /// up should use [minInsets] to make sure that the [FloatingActionButton] is
   /// inset by enough to remain visible.
   ///
-  /// See [minInsets] and [MediaQuery.padding] for more information on the appropriate
-  /// insets to apply.
+  /// See [minInsets] and [MediaQueryData.padding] for more information on the
+  /// appropriate insets to apply.
   final Size scaffoldSize;
 
   /// The [Size] of the [Scaffold]'s [SnackBar].
@@ -1493,10 +1494,11 @@ class Scaffold extends StatefulWidget {
   /// drawer.
   ///
   /// By default, the value used is 20.0 added to the padding edge of
-  /// `MediaQuery.of(context).padding` that corresponds to [alignment].
-  /// This ensures that the drag area for notched devices is not obscured. For
-  /// example, if `TextDirection.of(context)` is set to [TextDirection.ltr],
-  /// 20.0 will be added to `MediaQuery.of(context).padding.left`.
+  /// `MediaQuery.of(context).padding` that corresponds to the surrounding
+  /// [TextDirection]. This ensures that the drag area for notched devices is
+  /// not obscured. For example, if `TextDirection.of(context)` is set to
+  /// [TextDirection.ltr], 20.0 will be added to
+  /// `MediaQuery.of(context).padding.left`.
   final double drawerEdgeDragWidth;
 
   /// Determines if the [Scaffold.drawer] can be opened with a drag

@@ -53,6 +53,8 @@ void main() {
         projectUnderTest.linux.ephemeralDirectory.createSync(recursive: true);
         projectUnderTest.macos.ephemeralDirectory.createSync(recursive: true);
         projectUnderTest.windows.ephemeralDirectory.createSync(recursive: true);
+        projectUnderTest.flutterPluginsFile.createSync(recursive: true);
+        projectUnderTest.flutterPluginsDependenciesFile.createSync(recursive: true);
       });
 
       testUsingContext('$CleanCommand removes build and .dart_tool and ephemeral directories, cleans Xcode', () async {
@@ -71,6 +73,9 @@ void main() {
         expect(projectUnderTest.linux.ephemeralDirectory.existsSync(), isFalse);
         expect(projectUnderTest.macos.ephemeralDirectory.existsSync(), isFalse);
         expect(projectUnderTest.windows.ephemeralDirectory.existsSync(), isFalse);
+
+        expect(projectUnderTest.flutterPluginsFile.existsSync(), isFalse);
+        expect(projectUnderTest.flutterPluginsDependenciesFile.existsSync(), isFalse);
 
         verify(mockXcodeProjectInterpreter.cleanWorkspace(any, 'Runner', verbose: false)).called(2);
       }, overrides: <Type, Generator>{

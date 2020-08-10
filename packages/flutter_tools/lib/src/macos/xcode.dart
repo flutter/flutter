@@ -41,7 +41,7 @@ enum SdkType {
 ///
 /// Usage: xcrun [options] <tool name> ... arguments ...
 /// ...
-/// --sdk <sdk name>            find the tool for the given SDK name
+/// --sdk <sdk name>            find the tool for the given SDK name.
 String getNameForSdk(SdkType sdk) {
   switch (sdk) {
     case SdkType.iPhone:
@@ -334,8 +334,9 @@ class XCDevice {
   }
 
   // Attach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
+  // Attach: 00008027-00192736010F802E
   // Detach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
-  final RegExp _observationIdentifierPattern = RegExp(r'^(\w*): (\w*)$');
+  final RegExp _observationIdentifierPattern = RegExp(r'^(\w*): ([\w-]*)$');
 
   Future<void> _startObservingTetheredIOSDevices() async {
     try {
@@ -367,6 +368,7 @@ class XCDevice {
         //
         // Listening for all devices, on both interfaces.
         // Attach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
+        // Attach: 00008027-00192736010F802E
         // Detach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
         // Attach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
         final RegExpMatch match = _observationIdentifierPattern.firstMatch(line);

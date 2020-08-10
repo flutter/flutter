@@ -14,12 +14,9 @@ void main() {
       home: Scaffold(
       appBar: AppBar(title: const Text('Button Border Test')),
       body: Center(
-        child: RaisedButton(
+        child: ElevatedButton(
           child: const Text('Test'),
           onPressed: () { },
-          shape: Border.all(
-            color: Colors.blue,
-          ),
         ),
       ),
     )));

@@ -654,6 +654,8 @@ class AndroidDevice extends Device {
         ...<String>['--ez', 'dump-skp-on-shader-compilation', 'true'],
       if (debuggingOptions.cacheSkSL)
       ...<String>['--ez', 'cache-sksl', 'true'],
+      if (debuggingOptions.purgePersistentCache)
+        ...<String>['--ez', 'purge-persistent-cache', 'true'],
       if (debuggingOptions.debuggingEnabled) ...<String>[
         if (debuggingOptions.buildInfo.isDebug) ...<String>[
           ...<String>['--ez', 'enable-checked-mode', 'true'],
@@ -853,6 +855,7 @@ Map<String, String> parseAdbDeviceProperties(String str) {
 ///
 /// Example output:
 ///
+/// ```
 /// Applications Memory Usage (in Kilobytes):
 /// Uptime: 441088659 Realtime: 521464097
 ///
@@ -904,6 +907,7 @@ Map<String, String> parseAdbDeviceProperties(String str) {
 ///          MEMORY_USED:        0
 ///   PAGECACHE_OVERFLOW:        0          MALLOC_SIZE:        0
 /// ...
+/// ```
 ///
 /// For more information, see https://developer.android.com/studio/command-line/dumpsys.
 @visibleForTesting

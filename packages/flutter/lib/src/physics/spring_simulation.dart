@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -20,9 +18,9 @@ class SpringDescription {
   ///
   /// See [mass], [stiffness], and [damping] for the units of the arguments.
   const SpringDescription({
-    this.mass,
-    this.stiffness,
-    this.damping,
+    required this.mass,
+    required this.stiffness,
+    required this.damping,
   });
 
   /// Creates a spring given the mass (m), stiffness (k), and damping ratio (ζ).
@@ -33,8 +31,8 @@ class SpringDescription {
   /// See [mass] and [stiffness] for the units for those arguments. The damping
   /// ratio is unitless.
   SpringDescription.withDampingRatio({
-    this.mass,
-    this.stiffness,
+    required this.mass,
+    required this.stiffness,
     double ratio = 1.0,
   }) : damping = ratio * 2.0 * math.sqrt(mass * stiffness);
 

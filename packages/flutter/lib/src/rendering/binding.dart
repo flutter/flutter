@@ -156,7 +156,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   MouseTracker _mouseTracker;
 
   /// The render tree's owner, which maintains dirty state for layout,
-  /// composite, paint, and accessibility semantics
+  /// composite, paint, and accessibility semantics.
   PipelineOwner get pipelineOwner => _pipelineOwner;
   PipelineOwner _pipelineOwner;
 
@@ -384,8 +384,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// sent to the GPU.
   ///
   /// 7. The semantics phase: All the dirty [RenderObject]s in the system have
-  /// their semantics updated (see [RenderObject.semanticsAnnotator]). This
-  /// generates the [SemanticsNode] tree. See
+  /// their semantics updated. This generates the [SemanticsNode] tree. See
   /// [RenderObject.markNeedsSemanticsUpdate] for further details on marking an
   /// object dirty for semantics.
   ///

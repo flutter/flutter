@@ -12,9 +12,14 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.lang.StringBuilder;
 import java.util.HashMap;
 
 import io.flutter.embedding.android.FlutterActivity;
+import io.flutter.embedding.android.FlutterImageView;
+import io.flutter.embedding.android.FlutterSurfaceView;
+import io.flutter.embedding.android.FlutterTextureView;
+import io.flutter.embedding.android.FlutterView;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.plugin.common.MethodCall;
@@ -34,6 +39,63 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
         // TODO(egarciad): Set an unique ID in FlutterView, so it's easier to look it up.
         ViewGroup root = (ViewGroup)findViewById(android.R.id.content);
         return ((ViewGroup)root.getChildAt(0)).getChildAt(0);
+    }
+
+    private String getViewName(View view) {
+        if (view instanceof FlutterImageView) {
+            return "FlutterImageView";
+        }
+        if (view instanceof FlutterSurfaceView) {
+            return "FlutterSurfaceView";
+        }
+        if (view instanceof FlutterTextureView) {
+            return "FlutterTextureView";
+        }
+        if (view instanceof FlutterView) {
+            return "FlutterView";
+        }
+        if (view instanceof ViewGroup) {
+            return "ViewGroup";
+        }
+        return "View";
+    }
+
+    private void recurseViewHierarchy(View current, String padding, StringBuilder builder) {
+        if (current.getVisibility() != View.VISIBLE || current.getAlpha() == 0) {
+            return;
+        }
+        String name = getViewName(current);
+        builder.append(padding);
+        builder.append("|-");
+        builder.append(name);
+        builder.append("\n");
+
+        if (current instanceof ViewGroup) {
+            ViewGroup viewGroup = (ViewGroup) current;
+            for (int index = 0; index < viewGroup.getChildCount(); index++) {
+                recurseViewHierarchy(viewGroup.getChildAt(index), padding + "  ", builder);
+            }
+        }
+    }
+
+    /**
+     * Serializes the view hierarchy, so it can be sent to Dart over the method channel.
+     *
+     * Notation:
+     * |- <view-name>
+     *   |- ... child view ordered by z order.
+     *
+     * Example output:
+     * |- FlutterView
+     *   |- FlutterImageView
+     *      |- ViewGroup
+     *        |- View
+     */
+    private String getSerializedViewHierarchy() {
+        View root = getFlutterView();
+        StringBuilder builder = new StringBuilder();
+        recurseViewHierarchy(root, "", builder);
+        return builder.toString();
     }
 
     @Override
@@ -65,19 +127,23 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
                 getExternalStoragePermissions();
                 return;
             case "synthesizeEvent":
-                synthesizeEvent(methodCall, result);
+                synthesizeEvent(methodCall);
+                result.success(null);
+                return;
+             case "getViewHierarchy":
+                String viewHierarchy = getSerializedViewHierarchy();
+                result.success(viewHierarchy);
                 return;
         }
         result.notImplemented();
     }
 
     @SuppressWarnings("unchecked")
-    public void synthesizeEvent(MethodCall methodCall, MethodChannel.Result result) {
+    public void synthesizeEvent(MethodCall methodCall) {
         MotionEvent event = MotionEventCodec.decode((HashMap<String, Object>) methodCall.arguments());
         getFlutterView().dispatchTouchEvent(event);
         // TODO(egarciad): This can be cleaned up.
         mMethodChannel.invokeMethod("onTouch", MotionEventCodec.encode(event));
-        result.success(null);
     }
 
     @Override

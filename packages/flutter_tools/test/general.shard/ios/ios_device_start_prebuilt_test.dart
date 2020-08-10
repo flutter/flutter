@@ -329,6 +329,7 @@ void main() {
             '--dump-skp-on-shader-compilation',
             '--verbose-logging',
             '--cache-sksl',
+            '--purge-persistent-cache',
           ].join(' '),
         ], environment: const <String, String>{
           'PATH': '/usr/bin:null',
@@ -382,6 +383,7 @@ void main() {
         endlessTraceBuffer: true,
         dumpSkpOnShaderCompilation: true,
         cacheSkSL: true,
+        purgePersistentCache: true,
         verboseSystemLogs: true,
       ),
       platformArgs: <String, dynamic>{},
