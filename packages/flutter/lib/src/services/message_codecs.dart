@@ -144,13 +144,15 @@ class JSONMethodCodec implements MethodCodec {
       throw FormatException('Expected envelope List, got $decoded');
     if (decoded.length == 1)
       return decoded[0];
-    if (decoded.length == 3
+    if (decoded.length == 4
         && decoded[0] is String
-        && (decoded[1] == null || decoded[1] is String))
+        && (decoded[1] == null || decoded[1] is String) 
+        && (decoded[3] == null || decoded[3] is String))
       throw PlatformException(
         code: decoded[0] as String,
         message: decoded[1] as String,
         details: decoded[2],
+        stacktrace: decoded[3] as String,
       );
     throw FormatException('Invalid envelope: $decoded');
   }
@@ -161,9 +163,9 @@ class JSONMethodCodec implements MethodCodec {
   }
 
   @override
-  ByteData encodeErrorEnvelope({ required String code, String? message, dynamic details }) {
+  ByteData encodeErrorEnvelope({ required String code, String? message, dynamic details, String? stacktrace}) {
     assert(code != null);
-    return const JSONMessageCodec().encodeMessage(<dynamic>[code, message, details])!;
+    return const JSONMessageCodec().encodeMessage(<dynamic>[code, message, details, stacktrace])!;
   }
 }
 
@@ -547,12 +549,13 @@ class StandardMethodCodec implements MethodCodec {
   }
 
   @override
-  ByteData encodeErrorEnvelope({ required String code, String? message, dynamic details }) {
+  ByteData encodeErrorEnvelope({ required String code, String? message, dynamic details, String? stacktrace}) {
     final WriteBuffer buffer = WriteBuffer();
     buffer.putUint8(1);
     messageCodec.writeValue(buffer, code);
     messageCodec.writeValue(buffer, message);
     messageCodec.writeValue(buffer, details);
+    messageCodec.writeValue(buffer, stacktrace);
     return buffer.done();
   }
 
@@ -567,8 +570,11 @@ class StandardMethodCodec implements MethodCodec {
     final dynamic errorCode = messageCodec.readValue(buffer);
     final dynamic errorMessage = messageCodec.readValue(buffer);
     final dynamic errorDetails = messageCodec.readValue(buffer);
+    /// TODO(libe, b/158148913): Mute the readValue check for stacktrace for now.
+    /// Remove this once flutter engine is ready with the stacktrace fields.
+    final String? errorStacktrace = (buffer.hasRemaining) ? messageCodec.readValue(buffer) as String : null;
     if (errorCode is String && (errorMessage == null || errorMessage is String) && !buffer.hasRemaining)
-      throw PlatformException(code: errorCode, message: errorMessage as String, details: errorDetails);
+      throw PlatformException(code: errorCode, message: errorMessage as String, details: errorDetails, stacktrace: errorStacktrace);
     else
       throw const FormatException('Invalid envelope');
   }
