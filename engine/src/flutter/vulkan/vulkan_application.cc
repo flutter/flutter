@@ -1,7 +1,6 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// FLUTTER_NOLINT
 
 #include "vulkan_application.h"
 
@@ -15,7 +14,7 @@
 namespace vulkan {
 
 VulkanApplication::VulkanApplication(
-    VulkanProcTable& p_vk,
+    VulkanProcTable& p_vk,  // NOLINT
     const std::string& application_name,
     std::vector<std::string> enabled_extensions,
     uint32_t application_version,

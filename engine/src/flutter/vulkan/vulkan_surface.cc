@@ -1,7 +1,6 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// FLUTTER_NOLINT
 
 #include "vulkan_surface.h"
 
@@ -11,8 +10,8 @@
 namespace vulkan {
 
 VulkanSurface::VulkanSurface(
-    VulkanProcTable& p_vk,
-    VulkanApplication& application,
+    VulkanProcTable& p_vk,           // NOLINT
+    VulkanApplication& application,  // NOLINT
     std::unique_ptr<VulkanNativeSurface> native_surface)
     : vk(p_vk),
       application_(application),
