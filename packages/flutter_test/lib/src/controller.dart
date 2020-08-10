@@ -503,7 +503,6 @@ abstract class WidgetController {
     Duration duration,
     double frequency = 60.0,
   }) {
-    assert(kDragSlopDefault > kTouchSlop);
     return dragFrom(
       getCenter(finder),
       offset,
@@ -532,7 +531,6 @@ abstract class WidgetController {
     Duration duration,
     double frequency = 60.0,
   }) {
-    assert(kDragSlopDefault > kTouchSlop);
     if (duration != null) {
       return TestAsyncUtils.guard<void>(() async {
         return handlePointerEventRecord(_separateDragEvents(
@@ -543,6 +541,8 @@ abstract class WidgetController {
         ));
       });
     }
+    assert(touchSlopX > kTouchSlop);
+    assert(touchSlopY > kTouchSlop);
     return TestAsyncUtils.guard<void>(() async {
       final TestGesture gesture = await startGesture(startLocation, pointer: pointer, buttons: buttons);
       assert(gesture != null);
