@@ -501,7 +501,7 @@ abstract class WidgetController {
     double touchSlopX = kDragSlopDefault,
     double touchSlopY = kDragSlopDefault,
     Duration duration,
-    double frequency,
+    double frequency = 60.0,
   }) {
     assert(kDragSlopDefault > kTouchSlop);
     return dragFrom(
@@ -534,7 +534,14 @@ abstract class WidgetController {
   }) {
     assert(kDragSlopDefault > kTouchSlop);
     if (duration != null) {
-      assert(frequency > 0);
+      return TestAsyncUtils.guard<void>(() async {
+        return handlePointerEventRecord(_separateDragEvents(
+          duration,
+          startLocation,
+          offset,
+          frequency,
+        ));
+      });
     }
     return TestAsyncUtils.guard<void>(() async {
       final TestGesture gesture = await startGesture(startLocation, pointer: pointer, buttons: buttons);
@@ -616,6 +623,55 @@ abstract class WidgetController {
       } else { // The drag ends inside the box.
         yield offset;
       }
+  }
+
+  // generates a list of events for `handlePointerEventRecord`.
+  List<PointerEventRecord> _separateDragEvents(
+    Duration duration,
+    Offset startLocation,
+    Offset delta,
+    double frequency,
+  ) {
+    assert(frequency > 0);
+    final int intervals = duration.inMicroseconds * frequency ~/ 1E6;
+    assert(intervals > 0);
+    final List<Duration> timeStamps = <Duration>[
+      for (int t = 0; t <= intervals; t += 1)
+        duration * t ~/ intervals,
+    ];
+    final List<Offset> offsets = <Offset>[
+      startLocation,
+      for (int t = 0; t <= intervals; t += 1)
+        startLocation + delta * (t / intervals),
+    ];
+    return <PointerEventRecord>[
+      PointerEventRecord(Duration.zero, <PointerEvent>[
+          PointerAddedEvent(
+            timeStamp: Duration.zero,
+            position: startLocation,
+          ),
+          PointerDownEvent(
+            timeStamp: Duration.zero,
+            position: startLocation,
+          ),
+        ]),
+      ...<PointerEventRecord>[
+        for(int t = 0; t <= intervals; t += 1)
+          PointerEventRecord(timeStamps[t], <PointerEvent>[
+            PointerMoveEvent(
+              timeStamp: timeStamps[t],
+              position: offsets[t+1],
+              delta: offsets[t+1] - offsets[t],
+            ),
+          ]),
+      ],
+      PointerEventRecord(duration, <PointerEvent>[
+        PointerUpEvent(
+          timeStamp: duration,
+          position: offsets.last,
+        )
+      ]),
+    ];
   }
 
   /// The next available pointer identifier.
