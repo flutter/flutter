@@ -1081,6 +1081,7 @@ mixin SchedulerBinding on BindingBase {
       'elapsed': frameTiming.totalSpan.inMicroseconds,
       'build': frameTiming.buildDuration.inMicroseconds,
       'raster': frameTiming.rasterDuration.inMicroseconds,
+      'vsyncOverhead': frameTiming.vsyncOverhead.inMicroseconds,
     });
   }
 
