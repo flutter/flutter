@@ -11,7 +11,10 @@ config("vulkan_config") {
     include_dirs += [ "$fuchsia_sdk_root/vulkan/include" ]
     defines += [ "VK_USE_PLATFORM_FUCHSIA=1" ]
   } else {
-    include_dirs += [ "//third_party/vulkan/src" ]
+    include_dirs += [
+      "//third_party/vulkan/src",
+      "//third_party/vulkan/include",
+    ]
   }
 }
 
