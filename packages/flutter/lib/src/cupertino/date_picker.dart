@@ -948,9 +948,15 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       _getEstimatedColumnWidth(_PickerColumnType.hour),
       _getEstimatedColumnWidth(_PickerColumnType.minute),
     ];
+
+    // Swap the hours and minutes if RTL to ensure they are in the correct position.
+    final bool isRtl = Directionality.of(context) == TextDirection.rtl;
     final List<_ColumnBuilder> pickerBuilders = <_ColumnBuilder>[
+      if (isRtl)
+        _buildMinutePicker,
       _buildHourPicker,
-      _buildMinutePicker,
+      if (!isRtl)
+        _buildMinutePicker,
     ];
 
     // Adds am/pm column if the picker is not using 24h format.
