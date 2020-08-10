@@ -309,16 +309,21 @@ abstract class WidgetController {
   ///
   /// Exactly 50 pointer events are synthesized.
   ///
-  /// The offset and speed control the interval between each pointer event. For
-  /// example, if the offset is 200 pixels down, and the speed is 800 pixels per
-  /// second, the pointer events will be sent for each increment of 4 pixels
-  /// (200/50), over 250ms (200/800), meaning events will be sent every 1.25ms
-  /// (250/200).
+  /// The `speed` is in pixels per second in the direction given by `offset`.
+  ///
+  /// The `offset` and `speed` control the interval between each pointer event.
+  /// For example, if the `offset` is 200 pixels down, and the `speed` is 800
+  /// pixels per second, the pointer events will be sent for each increment
+  /// of 4 pixels (200/50), over 250ms (200/800), meaning events will be sent
+  /// every 1.25ms (250/200).
   ///
   /// To make tests more realistic, frames may be pumped during this time (using
   /// calls to [pump]). If the total duration is longer than `frameInterval`,
   /// then one frame is pumped each time that amount of time elapses while
   /// sending events, or each time an event is synthesized, whichever is rarer.
+  ///
+  /// See [LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive] if the method
+  /// is used in a live environment and accurate time control is important.
   ///
   /// The `initialOffset` argument, if non-zero, causes the pointer to first
   /// apply that offset, then pump a delay of `initialOffsetDelay`. This can be
@@ -326,10 +331,6 @@ abstract class WidgetController {
   /// opposite direction of the fling (e.g. dragging 200 pixels to the right,
   /// then fling to the left over 200 pixels, ending at the exact point that the
   /// drag started).
-  /// See [flingFrom] for a discussion of how the
-  /// `offset`, `velocity` and `frameInterval` arguments affect this.
-  ///
-  /// The `speed` is in pixels per second in the direction given by `offset`.
   /// {@endtemplate}
   ///
   /// A fling is essentially a drag that ends at a particular speed. If you
