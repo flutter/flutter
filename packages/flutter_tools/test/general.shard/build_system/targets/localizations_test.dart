@@ -24,7 +24,7 @@ void main() {
           '--disable-dart-dev',
           'dev/tools/localization/bin/gen_l10n.dart',
           '--gen-inputs-and-outputs-list=/',
-          "--project-dir=MemoryDirectory: '/path/to/flutter_project'",
+          '--project=/path/to/flutter_project',
           '--arb-dir=arb',
           '--template-arb-file=example.arb',
           '--output-localization-file=bar',
