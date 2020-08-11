@@ -1024,7 +1024,7 @@ class Image extends StatefulWidget {
   /// * Option B ([gaplessPlayback] = true): The widget displays the avatar of
   /// the previous person and the name of the newly loaded person.
   ///
-  /// This is why the default value is false. Most of the time, when you change 
+  /// This is why the default value is false. Most of the time, when you change
   /// the image provider you're not just changing the image, you're removing the
   /// old widget and adding a new one and not expecting them to have any
   /// relationship. With [gaplessPlayback] on you might accidentally break this
