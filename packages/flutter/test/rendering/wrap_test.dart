@@ -70,6 +70,29 @@ void main() {
     expect(renderWrap.computeMinIntrinsicHeight(79), 250);
   });
 
+  test('Compute intrinsic height test for width-in-height-out children', () {
+    final List<RenderBox> children = <RenderBox>[
+      RenderParagraph(
+        const TextSpan(text: 'A very very very very very very very very long text'),
+        textDirection: TextDirection.ltr,
+      ),
+    ];
+
+    final RenderWrap renderWrap = RenderWrap();
+
+    children.forEach(renderWrap.add);
+
+    renderWrap.spacing = 0;
+    renderWrap.runSpacing = 0;
+    renderWrap.direction = Axis.horizontal;
+
+    const double oneLine = 14.0;
+
+    expect(renderWrap.computeMaxIntrinsicHeight(double.infinity), oneLine);
+    expect(renderWrap.computeMaxIntrinsicHeight(600), 2 * oneLine);
+    expect(renderWrap.computeMaxIntrinsicHeight(300), 3 * oneLine);
+  });
+
   test('Compute intrinsic width test', () {
     final List<RenderBox> children = <RenderBox>[
       RenderConstrainedBox(
