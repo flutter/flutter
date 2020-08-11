@@ -759,8 +759,6 @@ class GitTagVersion {
         _runGit('git fetch $_flutterGit --tags -f', processUtils, workingDirectory);
       }
     }
-    //final List<String> tags = _runGit(
-    //  'git tag --contains HEAD', processUtils, workingDirectory).split('\n');
     final String tag = _runGit(
       'git tag --points-at HEAD', processUtils, workingDirectory).trim();
 

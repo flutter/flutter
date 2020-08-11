@@ -461,12 +461,12 @@ void main() {
   testUsingContext('determine favors stable tags over dev tags', () {
     final MockProcessUtils mockProcessUtils = MockProcessUtils();
     when(mockProcessUtils.runSync(
-      <String>['git', 'tag', '--contains', 'HEAD'],
+      <String>['git', 'tag', '--points-at', 'HEAD'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(
       ProcessResult(1, 0, '1.2.3-0.0.pre\n1.2.3\n1.2.3-0.1.pre', ''),
-      <String>['git', 'tag', '--contains', 'HEAD'],
+      <String>['git', 'tag', '--points-at', 'HEAD'],
     ));
     final GitTagVersion version = GitTagVersion.determine(mockProcessUtils, workingDirectory: '.');
     expect(version.gitTag, '1.2.3');
@@ -494,12 +494,12 @@ void main() {
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(ProcessResult(106, 0, 'v0.1.2-3-1234abcd', ''), <String>['git', 'describe']));
     when(processUtils.runSync(
-      <String>['git', 'tag', '--contains', 'HEAD'],
+      <String>['git', 'tag', '--points-at', 'HEAD'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).thenReturn(
       RunResult(ProcessResult(110, 0, '', ''),
-      <String>['git', 'tag', '--contains', 'HEAD'],
+      <String>['git', 'tag', '--points-at', 'HEAD'],
     ));
 
     GitTagVersion.determine(processUtils, workingDirectory: '.');
@@ -539,12 +539,12 @@ void main() {
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(ProcessResult(107, 0, 'v0.1.2-3-1234abcd', ''), <String>['git', 'describe']));
     when(processUtils.runSync(
-      <String>['git', 'tag', '--contains', 'HEAD'],
+      <String>['git', 'tag', '--points-at', 'HEAD'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).thenReturn(
       RunResult(ProcessResult(108, 0, '', ''),
-      <String>['git', 'tag', '--contains', 'HEAD'],
+      <String>['git', 'tag', '--points-at', 'HEAD'],
     ));
 
     GitTagVersion.determine(processUtils, workingDirectory: '.', fetchTags: true);
@@ -579,12 +579,12 @@ void main() {
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(ProcessResult(109, 0, '', ''), <String>['git', 'fetch']));
     when(processUtils.runSync(
-      <String>['git', 'tag', '--contains', 'HEAD'],
+      <String>['git', 'tag', '--points-at', 'HEAD'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).thenReturn(
       RunResult(ProcessResult(110, 0, '', ''),
-      <String>['git', 'tag', '--contains', 'HEAD'],
+      <String>['git', 'tag', '--points-at', 'HEAD'],
     ));
     when(processUtils.runSync(
       <String>['git', 'describe', '--match', '*.*.*', '--first-parent', '--long', '--tags'],
@@ -624,12 +624,12 @@ void main() {
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(ProcessResult(109, 0, '', ''), <String>['git', 'fetch']));
     when(processUtils.runSync(
-      <String>['git', 'tag', '--contains', 'HEAD'],
+      <String>['git', 'tag', '--points-at', 'HEAD'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).thenReturn(
       RunResult(ProcessResult(110, 0, '', ''),
-      <String>['git', 'tag', '--contains', 'HEAD'],
+      <String>['git', 'tag', '--points-at', 'HEAD'],
     ));
     when(processUtils.runSync(
       <String>['git', 'describe', '--match', '*.*.*', '--first-parent', '--long', '--tags'],
@@ -765,7 +765,7 @@ void fakeData(
     environment: anyNamed('environment'),
   )).thenReturn(ProcessResult(105, 0, '', ''));
   when(pm.runSync(
-    <String>['git', 'tag', '--contains', 'HEAD'],
+    <String>['git', 'tag', '--points-at', 'HEAD'],
     workingDirectory: anyNamed('workingDirectory'),
     environment: anyNamed('environment'),
   )).thenReturn(ProcessResult(106, 0, '', ''));
