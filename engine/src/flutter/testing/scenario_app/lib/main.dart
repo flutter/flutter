@@ -90,6 +90,14 @@ Future<Map<String, dynamic>> _getJson(Uri uri) async {
 
 void _onBeginFrame(Duration duration) {
   currentScenario?.onBeginFrame(duration);
+
+  // Render an empty frame to signal first frame in the platform side.
+  if (currentScenario == null) {
+    final SceneBuilder builder = SceneBuilder();
+    final Scene scene = builder.build();
+    window.render(scene);
+    scene.dispose();
+  }
 }
 
 void _onDrawFrame() {

@@ -28,6 +28,16 @@ echo "Using dart from $HOST_TOOLS, gen_snapshot from $DEVICE_TOOLS."
 OUTDIR="${BASH_SOURCE%/*}/build/app"
 FLUTTER_ASSETS_DIR=$OUTDIR/assets/flutter_assets
 LIBS_DIR="${BASH_SOURCE%/*}/android/app/libs"
+GEN_SNAPSHOT=$DEVICE_TOOLS/gen_snapshot
+
+if [[ ! -f "$GEN_SNAPSHOT" ]]; then
+  GEN_SNAPSHOT=$DEVICE_TOOLS/gen_snapshot_host_targeting_host
+fi
+
+if [[ ! -f "$GEN_SNAPSHOT" ]]; then
+  echo "Could not find gen_snapshot in $DEVICE_TOOLS."
+  exit 1
+fi
 
 echo "Creating directories..."
 
@@ -47,7 +57,7 @@ echo "Compiling kernel..."
 
 echo "Compiling JIT Snapshot..."
 
-"$DEVICE_TOOLS/gen_snapshot" --deterministic \
+"$GEN_SNAPSHOT" --deterministic \
   --enable-asserts \
   --no-causal_async_stacks \
   --lazy_async_stacks \

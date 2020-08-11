@@ -13,7 +13,6 @@ import android.os.Looper;
 import android.util.Xml;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnitRunner;
-import androidx.test.runner.screenshot.Screenshot;
 import com.facebook.testing.screenshot.ScreenshotRunner;
 import com.facebook.testing.screenshot.internal.AlbumImpl;
 import com.facebook.testing.screenshot.internal.Registry;
@@ -164,8 +163,6 @@ public class ScreenshotUtil {
 
     // This method is called from the runner thread,
     // so block the UI thread while taking the screenshot.
-    // UiThreadLocker locker = new UiThreadLocker();
-    // locker.lock();
 
     // Screenshot.capture(view or activity) does not capture the Flutter UI.
     // Unfortunately, it doesn't work with Android's `Surface` or `TextureSurface`.
@@ -182,7 +179,8 @@ public class ScreenshotUtil {
         new Callable<Void>() {
           @Override
           public Void call() {
-            Bitmap bitmap = Screenshot.capture().getBitmap();
+            Bitmap bitmap =
+                InstrumentationRegistry.getInstrumentation().getUiAutomation().takeScreenshot();
             // Remove the status and action bars from the screenshot capture.
             bitmap =
                 Bitmap.createBitmap(
