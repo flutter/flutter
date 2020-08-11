@@ -24,8 +24,12 @@ void main() {
         expect(
           RawKeyboard.instance.keysPressed,
           equals(
-            <LogicalKeyboardKey>{ LogicalKeyboardKey.shiftLeft },
-          ),
+            <LogicalKeyboardKey>{ LogicalKeyboardKey.shiftLeft,
+            // Linux doesn't have a concept of left/right keys, so they're all
+            // shown as down when either is pressed.
+            if (platform == 'linux') LogicalKeyboardKey.shiftRight,
+          },
+        ),
           reason: 'on $platform',
         );
         await simulateKeyDownEvent(LogicalKeyboardKey.controlLeft, platform: platform);
@@ -34,7 +38,9 @@ void main() {
           equals(
             <LogicalKeyboardKey>{
               LogicalKeyboardKey.shiftLeft,
+              if (platform == 'linux') LogicalKeyboardKey.shiftRight,
               LogicalKeyboardKey.controlLeft,
+              if (platform == 'linux') LogicalKeyboardKey.controlRight,
             },
           ),
           reason: 'on $platform',
@@ -45,7 +51,9 @@ void main() {
           equals(
             <LogicalKeyboardKey>{
               LogicalKeyboardKey.shiftLeft,
+              if (platform == 'linux') LogicalKeyboardKey.shiftRight,
               LogicalKeyboardKey.controlLeft,
+              if (platform == 'linux') LogicalKeyboardKey.controlRight,
               LogicalKeyboardKey.keyA,
             },
           ),
@@ -57,7 +65,9 @@ void main() {
           equals(
             <LogicalKeyboardKey>{
               LogicalKeyboardKey.shiftLeft,
+              if (platform == 'linux') LogicalKeyboardKey.shiftRight,
               LogicalKeyboardKey.controlLeft,
+              if (platform == 'linux') LogicalKeyboardKey.controlRight,
             },
           ),
           reason: 'on $platform',
@@ -66,7 +76,10 @@ void main() {
         expect(
           RawKeyboard.instance.keysPressed,
           equals(
-            <LogicalKeyboardKey>{ LogicalKeyboardKey.shiftLeft },
+            <LogicalKeyboardKey>{
+              LogicalKeyboardKey.shiftLeft,
+              if (platform == 'linux') LogicalKeyboardKey.shiftRight,
+            },
           ),
           reason: 'on $platform',
         );
@@ -116,7 +129,12 @@ void main() {
         expect(
           RawKeyboard.instance.keysPressed,
           equals(
-            <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft},
+            <LogicalKeyboardKey>{
+              LogicalKeyboardKey.shiftLeft,
+              // Linux doesn't have a concept of left/right keys, so they're all
+              // shown as down when either is pressed.
+              if (platform == 'linux') LogicalKeyboardKey.shiftRight,
+            },
           ),
           reason: 'on $platform',
         );
@@ -133,6 +151,7 @@ void main() {
           equals(
             <LogicalKeyboardKey>{
               LogicalKeyboardKey.shiftLeft,
+              if (platform == 'linux') LogicalKeyboardKey.shiftRight,
               LogicalKeyboardKey.keyA,
             },
           ),
@@ -273,7 +292,13 @@ void main() {
       expect(
         RawKeyboard.instance.keysPressed,
         equals(
-          <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.keyA},
+          <LogicalKeyboardKey>{
+            LogicalKeyboardKey.shiftLeft,
+            // Linux doesn't have a concept of left/right keys, so they're all
+            // shown as down when either is pressed.
+            LogicalKeyboardKey.shiftRight,
+            LogicalKeyboardKey.keyA,
+          },
         ),
       );
     });
@@ -981,9 +1006,9 @@ void main() {
       RawKeyEventDataWindows.modifierRightControl: _ModifierCheck(ModifierKey.controlModifier, KeyboardSide.right),
       RawKeyEventDataWindows.modifierLeftMeta: _ModifierCheck(ModifierKey.metaModifier, KeyboardSide.left),
       RawKeyEventDataWindows.modifierRightMeta: _ModifierCheck(ModifierKey.metaModifier, KeyboardSide.right),
-      RawKeyEventDataWindows.modifierShift: _ModifierCheck(ModifierKey.shiftModifier, KeyboardSide.any),
-      RawKeyEventDataWindows.modifierControl: _ModifierCheck(ModifierKey.controlModifier, KeyboardSide.any),
-      RawKeyEventDataWindows.modifierAlt: _ModifierCheck(ModifierKey.altModifier, KeyboardSide.any),
+      RawKeyEventDataWindows.modifierShift: _ModifierCheck(ModifierKey.shiftModifier, KeyboardSide.all),
+      RawKeyEventDataWindows.modifierControl: _ModifierCheck(ModifierKey.controlModifier, KeyboardSide.all),
+      RawKeyEventDataWindows.modifierAlt: _ModifierCheck(ModifierKey.altModifier, KeyboardSide.all),
       RawKeyEventDataWindows.modifierCaps: _ModifierCheck(ModifierKey.capsLockModifier, KeyboardSide.all),
       RawKeyEventDataWindows.modifierNumLock: _ModifierCheck(ModifierKey.numLockModifier, KeyboardSide.all),
       RawKeyEventDataWindows.modifierScrollLock: _ModifierCheck(ModifierKey.scrollLockModifier, KeyboardSide.all),
@@ -1118,10 +1143,10 @@ void main() {
 
   group('RawKeyEventDataLinux-GFLW', () {
     const Map<int, _ModifierCheck> modifierTests = <int, _ModifierCheck>{
-      GLFWKeyHelper.modifierAlt: _ModifierCheck(ModifierKey.altModifier, KeyboardSide.any),
-      GLFWKeyHelper.modifierShift: _ModifierCheck(ModifierKey.shiftModifier, KeyboardSide.any),
-      GLFWKeyHelper.modifierControl: _ModifierCheck(ModifierKey.controlModifier, KeyboardSide.any),
-      GLFWKeyHelper.modifierMeta: _ModifierCheck(ModifierKey.metaModifier, KeyboardSide.any),
+      GLFWKeyHelper.modifierAlt: _ModifierCheck(ModifierKey.altModifier, KeyboardSide.all),
+      GLFWKeyHelper.modifierShift: _ModifierCheck(ModifierKey.shiftModifier, KeyboardSide.all),
+      GLFWKeyHelper.modifierControl: _ModifierCheck(ModifierKey.controlModifier, KeyboardSide.all),
+      GLFWKeyHelper.modifierMeta: _ModifierCheck(ModifierKey.metaModifier, KeyboardSide.all),
       GLFWKeyHelper.modifierNumericPad: _ModifierCheck(ModifierKey.numLockModifier, KeyboardSide.all),
       GLFWKeyHelper.modifierCapsLock: _ModifierCheck(ModifierKey.capsLockModifier, KeyboardSide.all),
     };
@@ -1208,7 +1233,7 @@ void main() {
             if (key != ModifierKey.controlModifier) {
               expect(data.getModifierSide(key), equals(modifierTests[modifier].side));
             } else {
-              expect(data.getModifierSide(key), equals(KeyboardSide.any));
+              expect(data.getModifierSide(key), equals(KeyboardSide.all));
             }
           } else {
             expect(
@@ -1302,10 +1327,10 @@ void main() {
 
   group('RawKeyEventDataLinux-GTK', () {
     const Map<int, _ModifierCheck> modifierTests = <int, _ModifierCheck>{
-      GtkKeyHelper.modifierMod1: _ModifierCheck(ModifierKey.altModifier, KeyboardSide.any),
-      GtkKeyHelper.modifierShift: _ModifierCheck(ModifierKey.shiftModifier, KeyboardSide.any),
-      GtkKeyHelper.modifierControl: _ModifierCheck(ModifierKey.controlModifier, KeyboardSide.any),
-      GtkKeyHelper.modifierMeta: _ModifierCheck(ModifierKey.metaModifier, KeyboardSide.any),
+      GtkKeyHelper.modifierMod1: _ModifierCheck(ModifierKey.altModifier, KeyboardSide.all),
+      GtkKeyHelper.modifierShift: _ModifierCheck(ModifierKey.shiftModifier, KeyboardSide.all),
+      GtkKeyHelper.modifierControl: _ModifierCheck(ModifierKey.controlModifier, KeyboardSide.all),
+      GtkKeyHelper.modifierMeta: _ModifierCheck(ModifierKey.metaModifier, KeyboardSide.all),
       GtkKeyHelper.modifierMod2: _ModifierCheck(ModifierKey.numLockModifier, KeyboardSide.all),
       GtkKeyHelper.modifierCapsLock: _ModifierCheck(ModifierKey.capsLockModifier, KeyboardSide.all),
     };
@@ -1392,7 +1417,7 @@ void main() {
             if (key != ModifierKey.controlModifier) {
               expect(data.getModifierSide(key), equals(modifierTests[modifier].side));
             } else {
-              expect(data.getModifierSide(key), equals(KeyboardSide.any));
+              expect(data.getModifierSide(key), equals(KeyboardSide.all));
             }
           } else {
             expect(
