@@ -20,7 +20,7 @@ class SkiaFontCollection {
       <Future<_RegisteredFont>>[];
 
   /// Fonts which have been registered and loaded.
-  final List<_RegisteredFont?> _registeredFonts = <_RegisteredFont?>[];
+  final List<_RegisteredFont> _registeredFonts = <_RegisteredFont>[];
 
   final Set<String?> registeredFamilies = <String?>{};
 
@@ -30,7 +30,7 @@ class SkiaFontCollection {
     fontProvider = canvasKit.TypefaceFontProvider.Make();
 
     for (var font in _registeredFonts) {
-      fontProvider!.registerFont(font!.bytes, font!.flutterFamily);
+      fontProvider!.registerFont(font.bytes, font.flutterFamily);
     }
   }
 
@@ -40,10 +40,13 @@ class SkiaFontCollection {
     if (_unloadedFonts.isEmpty) {
       return;
     }
-
     final List<_RegisteredFont?> loadedFonts =
         await Future.wait(_unloadedFonts);
-    _registeredFonts.addAll(loadedFonts.where((x) => x != null));
+    for (_RegisteredFont? font in loadedFonts) {
+      if (font != null) {
+        _registeredFonts.add(font);
+      }
+    }
     _unloadedFonts.clear();
   }
 
@@ -136,7 +139,7 @@ class SkiaFontCollection {
       actualFamily = family;
     }
 
-    return _RegisteredFont(bytes, family, actualFamily!);
+    return _RegisteredFont(bytes, family, actualFamily);
   }
 
   String? _readActualFamilyName(Uint8List bytes) {
