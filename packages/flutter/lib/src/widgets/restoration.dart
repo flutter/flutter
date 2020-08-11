@@ -664,6 +664,12 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
 ///   }
 ///
 ///   @override
+///   void dispose() {
+///     _counter.dispose();
+///     super.dispose();
+///   }
+///
+///   @override
 ///   Widget build(BuildContext context) {
 ///     return Scaffold(
 ///       appBar: AppBar(
