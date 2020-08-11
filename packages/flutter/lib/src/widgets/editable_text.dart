@@ -40,6 +40,9 @@ export 'package:flutter/services.dart' show TextEditingValue, TextSelection, Tex
 /// (including the cursor location).
 typedef SelectionChangedCallback = void Function(TextSelection selection, SelectionChangedCause cause);
 
+/// Signature for the callback that reports the app private command results.
+typedef AppPrivateCommandCallback = void Function(String, Map<String, dynamic>);
+
 // The time it takes for the cursor to fade from fully opaque to fully
 // transparent and vice versa. A full cursor blink, from transparent to opaque
 // to transparent, is twice this duration.
@@ -413,6 +416,7 @@ class EditableText extends StatefulWidget {
     this.onChanged,
     this.onEditingComplete,
     this.onSubmitted,
+    this.onAppPrivateCommand,
     this.onSelectionChanged,
     this.onSelectionHandleTapped,
     List<TextInputFormatter> inputFormatters,
@@ -1030,6 +1034,11 @@ class EditableText extends StatefulWidget {
   /// {@end-tool}
   final ValueChanged<String> onSubmitted;
 
+  /// {@template flutter.widgets.editableText.onAppPrivateCommand}
+  /// Called when the result of an app private command is received.
+  /// {@endtemplate}
+  final AppPrivateCommandCallback onAppPrivateCommand;
+
   /// Called when the user changes the selection of text (including the cursor
   /// location).
   final SelectionChangedCallback onSelectionChanged;
@@ -1614,6 +1623,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         _finalizeEditing(false);
         break;
     }
+  }
+
+  @override
+  void performPrivateCommand(String action, Map<String, dynamic> data) {
+    widget.onAppPrivateCommand(action, data);
   }
 
   // The original position of the caret on FloatingCursorDragState.start.
