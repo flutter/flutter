@@ -39,11 +39,17 @@ void skiaInstantiateWebImageCodec(String src, Callback<ui.Codec> callback,
 class CkAnimatedImage implements ui.Image {
   final SkAnimatedImage _skAnimatedImage;
 
-  CkAnimatedImage(this._skAnimatedImage);
+  // Use a box because `SkImage` may be deleted either due to this object
+  // being garbage-collected, or by an explicit call to [delete].
+  late final SkiaObjectBox box;
+
+  CkAnimatedImage(this._skAnimatedImage) {
+    box = SkiaObjectBox(this, _skAnimatedImage as SkDeletable);
+  }
 
   @override
   void dispose() {
-    _skAnimatedImage.delete();
+    box.delete();
   }
 
   int get frameCount => _skAnimatedImage.getFrameCount();
@@ -77,11 +83,17 @@ class CkAnimatedImage implements ui.Image {
 class CkImage implements ui.Image {
   final SkImage skImage;
 
-  CkImage(this.skImage);
+  // Use a box because `SkImage` may be deleted either due to this object
+  // being garbage-collected, or by an explicit call to [delete].
+  late final SkiaObjectBox box;
+
+  CkImage(this.skImage) {
+    box = SkiaObjectBox(this, skImage as SkDeletable);
+  }
 
   @override
   void dispose() {
-    skImage.delete();
+    box.delete();
   }
 
   @override
@@ -99,26 +111,25 @@ class CkImage implements ui.Image {
 
 /// A [Codec] that wraps an `SkAnimatedImage`.
 class CkAnimatedImageCodec implements ui.Codec {
-  CkAnimatedImage? animatedImage;
+  CkAnimatedImage animatedImage;
 
   CkAnimatedImageCodec(this.animatedImage);
 
   @override
   void dispose() {
-    animatedImage!.dispose();
-    animatedImage = null;
+    animatedImage.dispose();
   }
 
   @override
-  int get frameCount => animatedImage!.frameCount;
+  int get frameCount => animatedImage.frameCount;
 
   @override
-  int get repetitionCount => animatedImage!.repetitionCount;
+  int get repetitionCount => animatedImage.repetitionCount;
 
   @override
   Future<ui.FrameInfo> getNextFrame() {
-    final Duration duration = animatedImage!.decodeNextFrame();
-    final CkImage image = animatedImage!.currentFrameAsImage;
+    final Duration duration = animatedImage.decodeNextFrame();
+    final CkImage image = animatedImage.currentFrameAsImage;
     return Future<ui.FrameInfo>.value(AnimatedImageFrameInfo(duration, image));
   }
 }

@@ -643,7 +643,11 @@ class SkImage {
   external void delete();
   external int width();
   external int height();
-  external SkShader makeShader(SkTileMode tileModeX, SkTileMode tileModeY);
+  external SkShader makeShader(
+    SkTileMode tileModeX,
+    SkTileMode tileModeY,
+    Float32List? matrix, // 3x3 matrix
+  );
 }
 
 @JS()
@@ -677,10 +681,24 @@ class SkShaderNamespace {
     Float32List? matrix, // 3x3 matrix
     int flags,
   );
+
+  external SkShader MakeSweepGradient(
+    double cx,
+    double cy,
+    List<Float32List> colors,
+    Float32List colorStops,
+    SkTileMode tileMode,
+    Float32List? matrix, // 3x3 matrix
+    int flags,
+    double startAngle,
+    double endAngle,
+  );
 }
 
 @JS()
-class SkShader {}
+class SkShader {
+  external void delete();
+}
 
 // This needs to be bound to top-level because SkPaint is initialized
 // with `new`. Also in Dart you can't write this:
@@ -1556,7 +1574,7 @@ class TypefaceFontProviderNamespace {
 Timer? _skObjectCollector;
 List<SkDeletable> _skObjectDeleteQueue = <SkDeletable>[];
 
-final SkObjectFinalizationRegistry skObjectFinalizationRegistry = SkObjectFinalizationRegistry(js.allowInterop((SkDeletable deletable) {
+final SkObjectFinalizationRegistry<SkDeletable> skObjectFinalizationRegistry = SkObjectFinalizationRegistry<SkDeletable>(js.allowInterop((SkDeletable deletable) {
   _skObjectDeleteQueue.add(deletable);
   _skObjectCollector ??= _scheduleSkObjectCollection();
 }));
@@ -1589,7 +1607,7 @@ Timer _scheduleSkObjectCollection() => Timer(Duration.zero, () {
   html.window.performance.measure('SkObject collection', 'SkObject collection-start', 'SkObject collection-end');
 });
 
-typedef SkObjectFinalizer = void Function(SkDeletable deletable);
+typedef SkObjectFinalizer<T> = void Function(T key);
 
 /// Any Skia object that has a `delete` method.
 @JS()
@@ -1613,8 +1631,8 @@ class SkDeletable {
 /// 5. The finalizer function is called with the SkPaint as the sole argument.
 /// 6. We call `delete` on SkPaint.
 @JS('window.FinalizationRegistry')
-class SkObjectFinalizationRegistry {
-  external SkObjectFinalizationRegistry(SkObjectFinalizer finalizer);
+class SkObjectFinalizationRegistry<T> {
+  external SkObjectFinalizationRegistry(SkObjectFinalizer<T> finalizer);
   external void register(Object ckObject, Object skObject);
 }
 
