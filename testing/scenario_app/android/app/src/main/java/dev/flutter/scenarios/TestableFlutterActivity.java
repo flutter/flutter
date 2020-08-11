@@ -4,27 +4,34 @@
 
 package dev.flutter.scenarios;
 
-import android.os.Bundle;
 import io.flutter.embedding.android.FlutterActivity;
+import io.flutter.embedding.engine.FlutterEngine;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TestableFlutterActivity extends FlutterActivity {
-  private Object flutterUiRenderedLock;
+  private Object flutterUiRenderedLock = new Object();
+  private AtomicBoolean isScenarioReady = new AtomicBoolean(false);
 
   @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    // Reset the lock.
-    flutterUiRenderedLock = new Object();
+  public void configureFlutterEngine(FlutterEngine flutterEngine) {
+    super.configureFlutterEngine(flutterEngine);
+    flutterEngine
+        .getDartExecutor()
+        .setMessageHandler("take_screenshot", (byteBuffer, binaryReply) -> notifyFlutterRendered());
   }
 
   protected void notifyFlutterRendered() {
     synchronized (flutterUiRenderedLock) {
+      isScenarioReady.set(true);
       flutterUiRenderedLock.notifyAll();
     }
   }
 
   public void waitUntilFlutterRendered() {
     try {
+      if (isScenarioReady.get()) {
+        return;
+      }
       synchronized (flutterUiRenderedLock) {
         flutterUiRenderedLock.wait();
       }

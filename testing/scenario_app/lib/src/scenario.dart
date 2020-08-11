@@ -9,10 +9,13 @@ import 'dart:ui';
 /// A scenario to run for testing.
 abstract class Scenario {
   /// Creates a new scenario using a specific Window instance.
-  const Scenario(this.window);
+  Scenario(this.window);
 
   /// The window used by this scenario. May be mocked.
   final Window window;
+
+  /// [true] if a screenshot is taken in the next frame.
+  bool _didScheduleScreenshot = false;
 
   /// Called by the program when a frame is ready to be drawn.
   ///
@@ -23,7 +26,22 @@ abstract class Scenario {
   /// flushed.
   ///
   /// See [Window.onDrawFrame] for more details.
-  void onDrawFrame() {}
+  void onDrawFrame() {
+    Future<void>.delayed(const Duration(seconds: 1), () {
+      if (_didScheduleScreenshot) {
+        window.sendPlatformMessage('take_screenshot', null, null);
+      } else {
+        _didScheduleScreenshot = true;
+        window.scheduleFrame();
+      }
+    });
+  }
+
+  /// Called when the current scenario has been unmount due to a
+  /// new scenario being mount.
+  void unmount() {
+    _didScheduleScreenshot = false;
+  }
 
   /// Called by the program when the window metrics have changed.
   ///
