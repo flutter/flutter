@@ -1,4 +1,4 @@
-Signature: 3ad075b5ecfd74d67d69ad69d905b48a
+Signature: c732998af886e8999c8b59fdef4c6652
 
 UNUSED LICENSES:
 
@@ -65,6 +65,33 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+ORIGIN: ../../../third_party/harfbuzz/src/ms-use/COPYING
+TYPE: LicenseType.mit
+----------------------------------------------------------------------------------------------------
+MIT License
+
+Copyright (c) Microsoft Corporation.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE
 ====================================================================================================
 
 ====================================================================================================
@@ -12056,20 +12083,21 @@ LIBRARY: harfbuzz
 ORIGIN: ../../../third_party/harfbuzz/COPYING
 TYPE: LicenseType.unknown
 FILE: ../../../third_party/harfbuzz/.circleci/config.yml
+FILE: ../../../third_party/harfbuzz/.codecov.yml
 FILE: ../../../third_party/harfbuzz/.editorconfig
 FILE: ../../../third_party/harfbuzz/THANKS
 FILE: ../../../third_party/harfbuzz/TODO
-FILE: ../../../third_party/harfbuzz/appveyor.yml
-FILE: ../../../third_party/harfbuzz/azure-pipelines.yml
 FILE: ../../../third_party/harfbuzz/docs/HarfBuzz.png
 FILE: ../../../third_party/harfbuzz/docs/HarfBuzz.svg
 FILE: ../../../third_party/harfbuzz/docs/harfbuzz-docs.xml
+FILE: ../../../third_party/harfbuzz/docs/meson.build
 FILE: ../../../third_party/harfbuzz/docs/usermanual-buffers-language-script-and-direction.xml
 FILE: ../../../third_party/harfbuzz/docs/usermanual-clusters.xml
 FILE: ../../../third_party/harfbuzz/docs/usermanual-fonts-and-faces.xml
 FILE: ../../../third_party/harfbuzz/docs/usermanual-getting-started.xml
 FILE: ../../../third_party/harfbuzz/docs/usermanual-glyph-information.xml
 FILE: ../../../third_party/harfbuzz/docs/usermanual-install-harfbuzz.xml
+FILE: ../../../third_party/harfbuzz/docs/usermanual-integration.xml
 FILE: ../../../third_party/harfbuzz/docs/usermanual-object-model.xml
 FILE: ../../../third_party/harfbuzz/docs/usermanual-opentype-features.xml
 FILE: ../../../third_party/harfbuzz/docs/usermanual-shaping-concepts.xml
@@ -12077,6 +12105,18 @@ FILE: ../../../third_party/harfbuzz/docs/usermanual-utilities.xml
 FILE: ../../../third_party/harfbuzz/docs/usermanual-what-is-harfbuzz.xml
 FILE: ../../../third_party/harfbuzz/docs/version.xml.in
 FILE: ../../../third_party/harfbuzz/harfbuzz.doap
+FILE: ../../../third_party/harfbuzz/meson-cc-tests/intel-atomic-primitives-test.c
+FILE: ../../../third_party/harfbuzz/meson-cc-tests/solaris-atomic-operations.c
+FILE: ../../../third_party/harfbuzz/meson.build
+FILE: ../../../third_party/harfbuzz/perf/fonts/Amiri-Regular.ttf
+FILE: ../../../third_party/harfbuzz/perf/fonts/NotoNastaliqUrdu-Regular.ttf
+FILE: ../../../third_party/harfbuzz/perf/fonts/NotoSansDevanagari-Regular.ttf
+FILE: ../../../third_party/harfbuzz/perf/fonts/Roboto-Regular.ttf
+FILE: ../../../third_party/harfbuzz/perf/meson.build
+FILE: ../../../third_party/harfbuzz/perf/perf-draw.hh
+FILE: ../../../third_party/harfbuzz/perf/perf-extents.hh
+FILE: ../../../third_party/harfbuzz/perf/perf-shaping.hh
+FILE: ../../../third_party/harfbuzz/perf/perf.cc
 FILE: ../../../third_party/harfbuzz/src/Makefile.sources
 FILE: ../../../third_party/harfbuzz/src/harfbuzz-config.cmake.in
 FILE: ../../../third_party/harfbuzz/src/harfbuzz-gobject.pc.in
@@ -12091,13 +12131,27 @@ FILE: ../../../third_party/harfbuzz/src/hb-ot-shape-complex-vowel-constraints.cc
 FILE: ../../../third_party/harfbuzz/src/hb-ot-tag-table.hh
 FILE: ../../../third_party/harfbuzz/src/hb-ucd-table.hh
 FILE: ../../../third_party/harfbuzz/src/hb-unicode-emoji-table.hh
+FILE: ../../../third_party/harfbuzz/src/meson.build
+FILE: ../../../third_party/harfbuzz/src/update-unicode-tables.make
+FILE: ../../../third_party/harfbuzz/subprojects/cairo.wrap
+FILE: ../../../third_party/harfbuzz/subprojects/expat.wrap
+FILE: ../../../third_party/harfbuzz/subprojects/fontconfig.wrap
+FILE: ../../../third_party/harfbuzz/subprojects/freetype2.wrap
+FILE: ../../../third_party/harfbuzz/subprojects/glib.wrap
+FILE: ../../../third_party/harfbuzz/subprojects/google-benchmark.wrap
+FILE: ../../../third_party/harfbuzz/subprojects/libffi.wrap
+FILE: ../../../third_party/harfbuzz/subprojects/libpng.wrap
+FILE: ../../../third_party/harfbuzz/subprojects/pixman.wrap
+FILE: ../../../third_party/harfbuzz/subprojects/proxy-libintl.wrap
+FILE: ../../../third_party/harfbuzz/subprojects/zlib.wrap
 ----------------------------------------------------------------------------------------------------
 HarfBuzz is licensed under the so-called "Old MIT" license.  Details follow.
 For parts of HarfBuzz that are licensed under different licenses see individual
 files names COPYING in subdirectories where applicable.
 
-Copyright © 2010,2011,2012,2013,2014,2015,2016,2017,2018,2019  Google, Inc.
-Copyright © 2019  Facebook, Inc.
+Copyright © 2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020  Google, Inc.
+Copyright © 2018,2019,2020  Ebrahim Byagowi
+Copyright © 2019,2020  Facebook, Inc.
 Copyright © 2012  Mozilla Foundation
 Copyright © 2011  Codethink Limited
 Copyright © 2008,2010  Nokia Corporation and/or its subsidiary(-ies)
@@ -12192,19 +12246,15 @@ PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 
 ====================================================================================================
 LIBRARY: harfbuzz
-ORIGIN: ../../../third_party/harfbuzz/src/hb-aat-fdsc-table.hh
+ORIGIN: ../../../third_party/harfbuzz/src/hb-aat-layout-ankr-table.hh
 TYPE: LicenseType.unknown
-FILE: ../../../third_party/harfbuzz/src/hb-aat-fdsc-table.hh
 FILE: ../../../third_party/harfbuzz/src/hb-aat-layout-ankr-table.hh
 FILE: ../../../third_party/harfbuzz/src/hb-aat-layout-bsln-table.hh
 FILE: ../../../third_party/harfbuzz/src/hb-aat-layout-feat-table.hh
 FILE: ../../../third_party/harfbuzz/src/hb-aat-layout-just-table.hh
-FILE: ../../../third_party/harfbuzz/src/hb-aat-layout-lcar-table.hh
 FILE: ../../../third_party/harfbuzz/src/hb-aat-layout.h
 FILE: ../../../third_party/harfbuzz/src/hb-aat-ltag-table.hh
 FILE: ../../../third_party/harfbuzz/src/hb-aat.h
-FILE: ../../../third_party/harfbuzz/src/hb-ot-color-colr-table.hh
-FILE: ../../../third_party/harfbuzz/src/hb-ot-color-sbix-table.hh
 FILE: ../../../third_party/harfbuzz/src/hb-ot-color-svg-table.hh
 FILE: ../../../third_party/harfbuzz/src/hb-ot-gasp-table.hh
 FILE: ../../../third_party/harfbuzz/src/hb-ot-metrics.h
@@ -12321,6 +12371,8 @@ FILE: ../../../third_party/harfbuzz/src/hb-number.hh
 FILE: ../../../third_party/harfbuzz/src/hb-ot-meta-table.hh
 FILE: ../../../third_party/harfbuzz/src/hb-ot-meta.cc
 FILE: ../../../third_party/harfbuzz/src/hb-ot-meta.h
+FILE: ../../../third_party/harfbuzz/src/hb-style.cc
+FILE: ../../../third_party/harfbuzz/src/hb-style.h
 FILE: ../../../third_party/harfbuzz/src/test-number.cc
 FILE: ../../../third_party/harfbuzz/src/test-ot-meta.cc
 ----------------------------------------------------------------------------------------------------
@@ -12602,7 +12654,6 @@ FILE: ../../../third_party/harfbuzz/src/hb-buffer-deserialize-json.rl
 FILE: ../../../third_party/harfbuzz/src/hb-buffer-deserialize-text.hh
 FILE: ../../../third_party/harfbuzz/src/hb-buffer-deserialize-text.rl
 FILE: ../../../third_party/harfbuzz/src/hb-deprecated.h
-FILE: ../../../third_party/harfbuzz/src/hb-gobject-enums.h.tmpl
 FILE: ../../../third_party/harfbuzz/src/hb-ot-layout-jstf-table.hh
 FILE: ../../../third_party/harfbuzz/src/hb-ot-shape-complex-hangul.cc
 ----------------------------------------------------------------------------------------------------
@@ -12739,7 +12790,6 @@ FILE: ../../../third_party/harfbuzz/src/hb-shaper-impl.hh
 FILE: ../../../third_party/harfbuzz/src/hb-shaper-list.hh
 FILE: ../../../third_party/harfbuzz/src/hb-shaper.cc
 FILE: ../../../third_party/harfbuzz/src/hb-shaper.hh
-FILE: ../../../third_party/harfbuzz/src/hb-warning.cc
 ----------------------------------------------------------------------------------------------------
 Copyright © 2012  Google, Inc.
 
@@ -13025,6 +13075,65 @@ PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 
 ====================================================================================================
 LIBRARY: harfbuzz
+ORIGIN: ../../../third_party/harfbuzz/src/hb-draw.cc
+TYPE: LicenseType.unknown
+FILE: ../../../third_party/harfbuzz/src/hb-draw.cc
+FILE: ../../../third_party/harfbuzz/src/hb-draw.h
+----------------------------------------------------------------------------------------------------
+Copyright © 2019-2020  Ebrahim Byagowi
+
+ This is part of HarfBuzz, a text shaping library.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in
+all copies of this software.
+
+IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE TO ANY PARTY FOR
+DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN
+IF THE COPYRIGHT HOLDER HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH
+DAMAGE.
+
+THE COPYRIGHT HOLDER SPECIFICALLY DISCLAIMS ANY WARRANTIES, INCLUDING,
+BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ON AN "AS IS" BASIS, AND THE COPYRIGHT HOLDER HAS NO OBLIGATION TO
+PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: harfbuzz
+ORIGIN: ../../../third_party/harfbuzz/src/hb-draw.hh
+TYPE: LicenseType.unknown
+FILE: ../../../third_party/harfbuzz/src/hb-draw.hh
+----------------------------------------------------------------------------------------------------
+Copyright © 2020  Ebrahim Byagowi
+
+ This is part of HarfBuzz, a text shaping library.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in
+all copies of this software.
+
+IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE TO ANY PARTY FOR
+DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN
+IF THE COPYRIGHT HOLDER HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH
+DAMAGE.
+
+THE COPYRIGHT HOLDER SPECIFICALLY DISCLAIMS ANY WARRANTIES, INCLUDING,
+BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ON AN "AS IS" BASIS, AND THE COPYRIGHT HOLDER HAS NO OBLIGATION TO
+PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: harfbuzz
 ORIGIN: ../../../third_party/harfbuzz/src/hb-face.cc
 TYPE: LicenseType.unknown
 FILE: ../../../third_party/harfbuzz/src/hb-face.cc
@@ -13096,10 +13205,7 @@ LIBRARY: harfbuzz
 ORIGIN: ../../../third_party/harfbuzz/src/hb-fallback-shape.cc
 TYPE: LicenseType.unknown
 FILE: ../../../third_party/harfbuzz/src/hb-fallback-shape.cc
-FILE: ../../../third_party/harfbuzz/src/hb-gobject-enums.cc.tmpl
 FILE: ../../../third_party/harfbuzz/src/hb-gobject-structs.cc
-FILE: ../../../third_party/harfbuzz/src/hb-gobject-structs.h
-FILE: ../../../third_party/harfbuzz/src/hb-gobject.h
 FILE: ../../../third_party/harfbuzz/src/hb-uniscribe.h
 FILE: ../../../third_party/harfbuzz/src/hb-version.h
 FILE: ../../../third_party/harfbuzz/src/hb-version.h.in
@@ -13166,6 +13272,66 @@ FILE: ../../../third_party/harfbuzz/src/hb-ft.h
 ----------------------------------------------------------------------------------------------------
 Copyright © 2009  Red Hat, Inc.
 Copyright © 2015  Google, Inc.
+
+ This is part of HarfBuzz, a text shaping library.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in
+all copies of this software.
+
+IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE TO ANY PARTY FOR
+DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN
+IF THE COPYRIGHT HOLDER HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH
+DAMAGE.
+
+THE COPYRIGHT HOLDER SPECIFICALLY DISCLAIMS ANY WARRANTIES, INCLUDING,
+BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ON AN "AS IS" BASIS, AND THE COPYRIGHT HOLDER HAS NO OBLIGATION TO
+PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: harfbuzz
+ORIGIN: ../../../third_party/harfbuzz/src/hb-gobject-enums.cc.tmpl
+TYPE: LicenseType.unknown
+FILE: ../../../third_party/harfbuzz/src/hb-gobject-enums.cc.tmpl
+FILE: ../../../third_party/harfbuzz/src/hb-gobject-structs.h
+FILE: ../../../third_party/harfbuzz/src/hb-gobject.h
+----------------------------------------------------------------------------------------------------
+Copyright (C) 2011  Google, Inc.
+
+ This is part of HarfBuzz, a text shaping library.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in
+all copies of this software.
+
+IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE TO ANY PARTY FOR
+DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN
+IF THE COPYRIGHT HOLDER HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH
+DAMAGE.
+
+THE COPYRIGHT HOLDER SPECIFICALLY DISCLAIMS ANY WARRANTIES, INCLUDING,
+BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ON AN "AS IS" BASIS, AND THE COPYRIGHT HOLDER HAS NO OBLIGATION TO
+PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: harfbuzz
+ORIGIN: ../../../third_party/harfbuzz/src/hb-gobject-enums.h.tmpl
+TYPE: LicenseType.unknown
+FILE: ../../../third_party/harfbuzz/src/hb-gobject-enums.h.tmpl
+----------------------------------------------------------------------------------------------------
+Copyright (C) 2013  Google, Inc.
 
  This is part of HarfBuzz, a text shaping library.
 
@@ -13372,6 +13538,37 @@ PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 
 ====================================================================================================
 LIBRARY: harfbuzz
+ORIGIN: ../../../third_party/harfbuzz/src/hb-ot-cff1-std-str.hh
+TYPE: LicenseType.unknown
+FILE: ../../../third_party/harfbuzz/src/hb-ot-cff1-std-str.hh
+FILE: ../../../third_party/harfbuzz/src/test-bimap.cc
+FILE: ../../../third_party/harfbuzz/src/test-ot-glyphname.cc
+----------------------------------------------------------------------------------------------------
+Copyright © 2019  Adobe, Inc.
+
+ This is part of HarfBuzz, a text shaping library.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in
+all copies of this software.
+
+IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE TO ANY PARTY FOR
+DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN
+IF THE COPYRIGHT HOLDER HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH
+DAMAGE.
+
+THE COPYRIGHT HOLDER SPECIFICALLY DISCLAIMS ANY WARRANTIES, INCLUDING,
+BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ON AN "AS IS" BASIS, AND THE COPYRIGHT HOLDER HAS NO OBLIGATION TO
+PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: harfbuzz
 ORIGIN: ../../../third_party/harfbuzz/src/hb-ot-cmap-table.hh
 TYPE: LicenseType.unknown
 FILE: ../../../third_party/harfbuzz/src/hb-ot-cmap-table.hh
@@ -13409,6 +13606,37 @@ FILE: ../../../third_party/harfbuzz/src/hb-ot-color-cbdt-table.hh
 FILE: ../../../third_party/harfbuzz/src/hb-ot-post-table.hh
 ----------------------------------------------------------------------------------------------------
 Copyright © 2016  Google, Inc.
+
+ This is part of HarfBuzz, a text shaping library.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in
+all copies of this software.
+
+IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE TO ANY PARTY FOR
+DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN
+IF THE COPYRIGHT HOLDER HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH
+DAMAGE.
+
+THE COPYRIGHT HOLDER SPECIFICALLY DISCLAIMS ANY WARRANTIES, INCLUDING,
+BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ON AN "AS IS" BASIS, AND THE COPYRIGHT HOLDER HAS NO OBLIGATION TO
+PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: harfbuzz
+ORIGIN: ../../../third_party/harfbuzz/src/hb-ot-color-colr-table.hh
+TYPE: LicenseType.unknown
+FILE: ../../../third_party/harfbuzz/src/hb-ot-color-colr-table.hh
+FILE: ../../../third_party/harfbuzz/src/hb-ot-color-sbix-table.hh
+----------------------------------------------------------------------------------------------------
+Copyright © 2018  Ebrahim Byagowi
+Copyright © 2020  Google, Inc.
 
  This is part of HarfBuzz, a text shaping library.
 
@@ -13876,7 +14104,6 @@ LIBRARY: harfbuzz
 ORIGIN: ../../../third_party/harfbuzz/src/hb-ot-layout.h
 TYPE: LicenseType.unknown
 FILE: ../../../third_party/harfbuzz/src/hb-ot-layout.h
-FILE: ../../../third_party/harfbuzz/src/main.cc
 ----------------------------------------------------------------------------------------------------
 Copyright © 2007,2008,2009  Red Hat, Inc.
 
@@ -14526,11 +14753,42 @@ PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 
 ====================================================================================================
 LIBRARY: harfbuzz
-ORIGIN: ../../../third_party/harfbuzz/src/test-bimap.cc
+ORIGIN: ../../../third_party/harfbuzz/src/main.cc
 TYPE: LicenseType.unknown
-FILE: ../../../third_party/harfbuzz/src/test-bimap.cc
+FILE: ../../../third_party/harfbuzz/src/main.cc
 ----------------------------------------------------------------------------------------------------
-Copyright © 2019  Adobe, Inc.
+Copyright © 2007,2008,2009  Red Hat, Inc.
+Copyright © 2018,2019,2020  Ebrahim Byagowi
+Copyright © 2018  Khaled Hosny
+
+ This is part of HarfBuzz, a text shaping library.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in
+all copies of this software.
+
+IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE TO ANY PARTY FOR
+DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN
+IF THE COPYRIGHT HOLDER HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH
+DAMAGE.
+
+THE COPYRIGHT HOLDER SPECIFICALLY DISCLAIMS ANY WARRANTIES, INCLUDING,
+BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ON AN "AS IS" BASIS, AND THE COPYRIGHT HOLDER HAS NO OBLIGATION TO
+PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: harfbuzz
+ORIGIN: ../../../third_party/harfbuzz/src/test-array.cc
+TYPE: LicenseType.unknown
+FILE: ../../../third_party/harfbuzz/src/test-array.cc
+----------------------------------------------------------------------------------------------------
+Copyright © 2020  Google, Inc.
 
  This is part of HarfBuzz, a text shaping library.
 
@@ -14591,36 +14849,6 @@ FILE: ../../../third_party/harfbuzz/src/test-gsub-would-substitute.cc
 FILE: ../../../third_party/harfbuzz/src/test.cc
 ----------------------------------------------------------------------------------------------------
 Copyright © 2010,2011  Google, Inc.
-
- This is part of HarfBuzz, a text shaping library.
-
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in
-all copies of this software.
-
-IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE TO ANY PARTY FOR
-DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN
-IF THE COPYRIGHT HOLDER HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH
-DAMAGE.
-
-THE COPYRIGHT HOLDER SPECIFICALLY DISCLAIMS ANY WARRANTIES, INCLUDING,
-BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
-ON AN "AS IS" BASIS, AND THE COPYRIGHT HOLDER HAS NO OBLIGATION TO
-PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: harfbuzz
-ORIGIN: ../../../third_party/harfbuzz/src/test-ot-color.cc
-TYPE: LicenseType.unknown
-FILE: ../../../third_party/harfbuzz/src/test-ot-color.cc
-----------------------------------------------------------------------------------------------------
-Copyright © 2018  Ebrahim Byagowi
-Copyright © 2018  Khaled Hosny
 
  This is part of HarfBuzz, a text shaping library.
 
@@ -22853,4 +23081,4 @@ freely, subject to the following restrictions:
    misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 ====================================================================================================
-Total license count: 360
+Total license count: 367
