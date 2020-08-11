@@ -602,8 +602,8 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag(
       FlutterOptions.kAnalyzeSize,
       defaultsTo: false,
-      help: 'Whether to produce additonal profile information for artifact output size. '
-        'This flag is only support on release builds on macOS/Linux hosts.'
+      help: 'Whether to produce additional profile information for artifact output size. '
+        'This flag is only supported on release builds on macOS/Linux hosts.'
     );
   }
 
