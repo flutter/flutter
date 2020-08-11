@@ -503,8 +503,8 @@ abstract class FlutterCommand extends Command<void> {
     );
     argParser.addFlag(FlutterOptions.kNullAssertions,
       help:
-        'Whether to perform additional null checks on the boundaries of null safe and '
-        'non-null safe migrated code. This setting is not currently supported on desktop '
+        'Perform additional null assertions on the boundaries of migrated and '
+        'unmigrated code. This setting is not currently supported on desktop '
         'devices.'
     );
   }
