@@ -313,6 +313,8 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
         "This state can occur if the key event being sent doesn't properly "
         'set its modifier flags. This was the event: $event and its data: '
         '${event.data}');
+      // Avoid the crash in release mode, since it's easy to miss a particular
+      // bad key sequence in testing, and so shouldn't crash the app in release.
       if (RawKeyboard.instance.keysPressed.isNotEmpty) {
         keySet = LogicalKeySet.fromSet(RawKeyboard.instance.keysPressed);
       } else {
