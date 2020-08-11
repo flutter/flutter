@@ -66,10 +66,12 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     Object? debugOwner,
     PointerDeviceKind? kind,
     this.dragStartBehavior = DragStartBehavior.start,
-    this.velocityTrackerBuilder,
+    this.velocityTrackerBuilder = _defaultBuilder,
   }) : assert(dragStartBehavior != null),
+       //this.velocityTrackerBuilder = velocityTrackerBuilder
        super(debugOwner: debugOwner, kind: kind);
 
+  static VelocityTracker _defaultBuilder(PointerEvent ev) => VelocityTracker();
   /// Configure the behavior of offsets sent to [onStart].
   ///
   /// If set to [DragStartBehavior.start], the [onStart] callback will be called
@@ -179,12 +181,12 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// To estimate the velocity of a gesture, [DragGestureRecognizer] calls
   /// [velocityTrackerBuilder] when it starts to track a new pointer in
   /// [addAllowedPointer], and add subsequent updates on the pointer to the
-  /// resulting velocity tracker, until the gesture recognizer stops tracking the
-  /// pointer. This allows you to specify a different velocity estimation strategy
-  /// for each allowed pointer added, by changing the type of velocity tracker
-  /// this builder returns.
+  /// resulting velocity tracker, until the gesture recognizer stops tracking
+  /// the pointer. This allows you to specify a different velocity estimation
+  /// strategy for each allowed pointer added, by changing the type of velocity
+  /// tracker this [GestureVelocityTrackerBuilder] returns.
   ///
-  /// The default value is null, in which case [addAllowedPointer] creates a new
+  /// If left unspecified the default [velocityTrackerBuilder] creates a new
   /// [VelocityTracker] for every pointer added.
   ///
   /// See also:
@@ -195,7 +197,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///  * [IOSScrollViewFlingVelocityTracker], a specialized velocity tracker for
   ///    determining the initial fling velocity for a [Scrollable] on iOS, to
   ///    match the native behavior on that platform.
-  GestureVelocityTrackerBuilder? velocityTrackerBuilder;
+  GestureVelocityTrackerBuilder velocityTrackerBuilder;
 
   _DragState _state = _DragState.ready;
   late OffsetPair _initialPosition;
@@ -252,7 +254,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   @override
   void addAllowedPointer(PointerEvent event) {
     startTrackingPointer(event.pointer, event.transform);
-    _velocityTrackers[event.pointer] = velocityTrackerBuilder?.call(event) ?? VelocityTracker();
+    _velocityTrackers[event.pointer] = velocityTrackerBuilder(event);
     if (_state == _DragState.ready) {
       _state = _DragState.possible;
       _initialPosition = OffsetPair(global: event.position, local: event.localPosition);
