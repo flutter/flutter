@@ -128,7 +128,7 @@ void main() {
     }
   });
 
-  test('Makes consistent velocity estimation with consistent velocity', () {
+  test('Makes consistent velocity estimates with consistent velocity', () {
     final IOSScrollViewFlingVelocityTracker tracker = IOSScrollViewFlingVelocityTracker();
     Offset position = Offset.zero;
     Duration time = Duration.zero;
