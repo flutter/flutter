@@ -483,6 +483,7 @@ void main() {
       <FakeCommand>[
         const FakeCommand(
           command: <String>['git', 'tag', '--points-at', 'HEAD'],
+          // This tests the unlikely edge case where a dev release made it to stable without any cherry picks
           stdout: '1.2.3-6.0.pre\n$stableTag',
         ),
       ],
