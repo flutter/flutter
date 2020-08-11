@@ -3951,6 +3951,11 @@ class Flex extends MultiChildRenderObjectWidget {
   ///
   /// Defaults to the ambient [Directionality].
   ///
+  /// If [textDirection] is [TextDirection.rtl], then the direction in which
+  /// text flows starts from right to left. Otherwise, if [textDirection] is
+  /// [TextDirection.ltr], then the direction in which text flows starts from
+  /// left to right.
+  ///
   /// If the [direction] is [Axis.horizontal], this controls the order in which
   /// the children are positioned (left-to-right or right-to-left), and the
   /// meaning of the [mainAxisAlignment] property's [MainAxisAlignment.start] and
@@ -4183,6 +4188,28 @@ class Flex extends MultiChildRenderObjectWidget {
 /// that width, and you end up with a paragraph split over several lines.
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/widgets/row_fixed.png)
+///
+/// The [textDirection] property controls the direction that children are rendered in.
+/// [TextDirection.ltr] is the default [textDirection] of [Row] children, so the first
+/// child is rendered at the `start` of the [Row], to the left, with subsequent children
+/// following to the right. If you want to order children in the opposite
+/// direction (right to left), then [textDirection] can be set to
+/// [TextDirection.rtl]. This is shown in the example below
+///
+/// ```dart
+/// Row(
+///   textDirection: TextDirection.rtl,
+///   children: <Widget>[
+///     const FlutterLogo(),
+///     const Expanded(
+///       child: Text("Flutter's hot reload helps you quickly and easily experiment, build UIs, add features, and fix bug faster. Experience sub-second reload times, without losing state, on emulators, simulators, and hardware for iOS and Android."),
+///     ),
+///     const Icon(Icons.sentiment_very_satisfied),
+///   ],
+/// )
+/// ```
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/widgets/row_textDirection.png)
 ///
 /// ## Layout algorithm
 ///
