@@ -1529,7 +1529,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
     final Offset paintOffset = _paintOffset;
 
-
     final List<ui.TextBox> boxes = selection.isCollapsed ?
         <ui.TextBox>[] : _textPainter.getBoxesForSelection(selection);
     if (boxes.isEmpty) {
