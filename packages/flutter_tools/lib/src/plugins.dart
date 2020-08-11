@@ -311,7 +311,13 @@ Plugin _pluginFromPackage(String name, Uri packageRoot) {
   if (!globals.fs.isFileSync(pubspecPath)) {
     return null;
   }
-  final dynamic pubspec = loadYaml(globals.fs.file(pubspecPath).readAsStringSync());
+  dynamic pubspec;
+
+  try {
+    pubspec = loadYaml(globals.fs.file(pubspecPath).readAsStringSync());
+  } on YamlException {
+    // Do nothing, potentially not a plugin.
+  }
   if (pubspec == null) {
     return null;
   }
