@@ -103,7 +103,7 @@ void main() {
     expect(find.text('Suggestions'), findsOneWidget);
 
     // Simulate system back button
-    final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
+    final ByteData message = const StandardMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
     await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
 
