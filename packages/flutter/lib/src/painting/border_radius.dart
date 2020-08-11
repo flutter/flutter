@@ -147,7 +147,7 @@ abstract class BorderRadiusGeometry {
   ///  * [BorderRadius], for which this is a no-op (returns itself).
   ///  * [BorderRadiusDirectional], which flips the horizontal direction
   ///    based on the `direction` argument.
-  BorderRadius resolve(TextDirection direction);
+  BorderRadius resolve(TextDirection? direction);
 
   @override
   String toString() {
@@ -490,7 +490,7 @@ class BorderRadius extends BorderRadiusGeometry {
   }
 
   @override
-  BorderRadius resolve(TextDirection direction) => this;
+  BorderRadius resolve(TextDirection? direction) => this;
 }
 
 /// An immutable set of radii for each corner of a rectangle, but with the
@@ -707,9 +707,9 @@ class BorderRadiusDirectional extends BorderRadiusGeometry {
   }
 
   @override
-  BorderRadius resolve(TextDirection direction) {
+  BorderRadius resolve(TextDirection? direction) {
     assert(direction != null);
-    switch (direction) {
+    switch (direction!) {
       case TextDirection.rtl:
         return BorderRadius.only(
           topLeft: topEnd,
@@ -836,9 +836,9 @@ class _MixedBorderRadius extends BorderRadiusGeometry {
   }
 
   @override
-  BorderRadius resolve(TextDirection direction) {
+  BorderRadius resolve(TextDirection? direction) {
     assert(direction != null);
-    switch (direction) {
+    switch (direction!) {
       case TextDirection.rtl:
         return BorderRadius.only(
           topLeft: _topLeft + _topEnd,
