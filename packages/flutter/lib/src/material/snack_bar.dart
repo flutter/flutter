@@ -551,6 +551,6 @@ class _SnackBarState extends State<SnackBar> {
       );
     }
 
-    return ClipRect(child: snackBarTransition);
+    return Hero(child: ClipRect(child: snackBarTransition), tag: widget.content);
   }
 }
