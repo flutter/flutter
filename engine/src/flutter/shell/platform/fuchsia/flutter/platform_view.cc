@@ -96,6 +96,7 @@ PlatformView::PlatformView(
     OnCreateView on_create_view_callback,
     OnDestroyView on_destroy_view_callback,
     OnGetViewEmbedder on_get_view_embedder_callback,
+    OnGetGrContext on_get_gr_context_callback,
     zx_handle_t vsync_event_handle,
     FlutterRunnerProductConfiguration product_config)
     : flutter::PlatformView(delegate, std::move(task_runners)),
@@ -111,6 +112,7 @@ PlatformView::PlatformView(
       on_create_view_callback_(std::move(on_create_view_callback)),
       on_destroy_view_callback_(std::move(on_destroy_view_callback)),
       on_get_view_embedder_callback_(std::move(on_get_view_embedder_callback)),
+      on_get_gr_context_callback_(std::move(on_get_gr_context_callback)),
       ime_client_(this),
       vsync_event_handle_(vsync_event_handle),
       product_config_(product_config) {
@@ -581,7 +583,8 @@ std::unique_ptr<flutter::Surface> PlatformView::CreateRenderingSurface() {
   // surface is setup once during platform view setup and returned to the
   // shell on the initial (and only) |NotifyCreated| call.
   auto view_embedder = on_get_view_embedder_callback_();
-  return std::make_unique<Surface>(debug_label_, view_embedder);
+  auto gr_context = on_get_gr_context_callback_();
+  return std::make_unique<Surface>(debug_label_, view_embedder, gr_context);
 }
 
 // |flutter::PlatformView|

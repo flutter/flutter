@@ -83,6 +83,8 @@ class Engine final {
 
   flutter::ExternalViewEmbedder* GetViewEmbedder();
 
+  GrDirectContext* GetGrContext();
+
   FML_DISALLOW_COPY_AND_ASSIGN(Engine);
 };
 

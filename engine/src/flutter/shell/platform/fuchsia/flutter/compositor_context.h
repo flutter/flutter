@@ -42,6 +42,10 @@ class CompositorContext final : public flutter::CompositorContext {
     return &session_connection_.scene_update_context();
   }
 
+  GrDirectContext* GetGrContext() {
+    return session_connection_.vulkan_surface_producer()->gr_context();
+  }
+
  private:
   const std::string debug_label_;
   scenic::ViewRefPair view_ref_pair_;
