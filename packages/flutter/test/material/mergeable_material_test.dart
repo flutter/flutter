@@ -1203,7 +1203,7 @@ void main() {
     // Since we are getting the last DecoratedBox, it will have a Border.top.
     expect(decoration.border.top.color, dividerColor);
   });
-  
+
   testWidgets('MergeableMaterial respects MaterialSlice.color', (WidgetTester tester) async {
     const Color themeCardColor = Colors.red;
     const Color materialSliceColor = Colors.green;
