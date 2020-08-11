@@ -10,11 +10,12 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:e2e/e2e.dart';
-import 'package:e2e/e2e_perf.dart';
 
 import 'package:flutter_gallery/gallery/app.dart' show GalleryApp;
 import 'package:flutter_gallery/gallery/demos.dart';
 import 'package:flutter_gallery/demo_lists.dart';
+
+import 'e2e_utils.dart';
 
 const List<String> kSkippedDemos = <String>[];
 
