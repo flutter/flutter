@@ -315,7 +315,8 @@ Plugin _pluginFromPackage(String name, Uri packageRoot) {
 
   try {
     pubspec = loadYaml(globals.fs.file(pubspecPath).readAsStringSync());
-  } on YamlException {
+  } on YamlException catch (err) {
+    globals.printTrace('Failed to parse plugin manifest for $name: $err');
     // Do nothing, potentially not a plugin.
   }
   if (pubspec == null) {
