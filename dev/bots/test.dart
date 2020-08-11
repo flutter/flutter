@@ -1223,7 +1223,8 @@ Future<void> _runHostOnlyDeviceLabTests() async {
     () => _runDevicelabTest('module_test', environment: gradleEnvironment, testEmbeddingV2: true),
     () => _runDevicelabTest('plugin_dependencies_test', environment: gradleEnvironment),
 
-    if (Platform.isMacOS) () => _runDevicelabTest('module_test_ios'),
+    // TODO(magder): https://github.com/flutter/flutter/issues/63447
+//    if (Platform.isMacOS) () => _runDevicelabTest('module_test_ios'),
     if (Platform.isMacOS) () => _runDevicelabTest('build_ios_framework_module_test'),
     if (Platform.isMacOS) () => _runDevicelabTest('plugin_lint_mac'),
     () => _runDevicelabTest('plugin_test', environment: gradleEnvironment),
