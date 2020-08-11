@@ -173,26 +173,28 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// If null then [kMaxFlingVelocity] is used.
   double? maxFlingVelocity;
 
-  /// Determines the type of velocity estimation method should be used for a
-  /// potential drag gesture, when a new pointer is added to this gesture
-  /// recognizer.
+  /// Determines the type of velocity estimation method to use for a potential
+  /// drag gesture, when a new pointer is added.
   ///
-  /// To provide a velocity estimate of the gesture, [DragGestureRecognizer]
-  /// creates a [VelocityTracker] (or a subclass of it) using the builder
-  /// specified by [velocityTrackerBuilder], when it starts to track a pointer
-  /// in [addAllowedPointer]. Subsequent updates on the pointer will be sent to
-  /// that velocity tracker, until the gesture recognizer stops tracking the
-  /// pointer. Common velocity tracker classes includes:
-  ///
-  /// * [VelocityTracker], a least squares estimation that uses the 20 most
-  ///   recent pointer data to estimate the velocity of the drag gesture. It's a
-  ///   well-rounded velocity tracker and is used by default.
-  /// * [IOSScrollViewFlingVelocityTracker], a specialized velocity tracker for
-  ///   determining the initial fling velocity of a [Scrollable] on iOS, to
-  ///   match the native behavior on that platform.
+  /// To estimate the velocity of a gesture, [DragGestureRecognizer] calls
+  /// [velocityTrackerBuilder] when it starts to track a new pointer in
+  /// [addAllowedPointer], and add subsequent updates on the pointer to the
+  /// resulting velocity tracker, until the gesture recognizer stops tracking the
+  /// pointer. This allows you to specify a different velocity estimation strategy
+  /// for each allowed pointer added, by changing the type of velocity tracker
+  /// this builder returns.
   ///
   /// The default value is null, in which case [addAllowedPointer] creates a new
-  /// instance of [VelocityTracker] for every pointer added.
+  /// [VelocityTracker] for every pointer added.
+  ///
+  /// See also:
+  ///
+  ///  * [VelocityTracker], a velocity tracker that uses least squares estimation
+  ///    on the 20 most recent pointer data samples. It's a well-rounded velocity
+  ///    tracker and is used by default.
+  ///  * [IOSScrollViewFlingVelocityTracker], a specialized velocity tracker for
+  ///    determining the initial fling velocity for a [Scrollable] on iOS, to
+  ///    match the native behavior on that platform.
   GestureVelocityTrackerBuilder? velocityTrackerBuilder;
 
   _DragState _state = _DragState.ready;
