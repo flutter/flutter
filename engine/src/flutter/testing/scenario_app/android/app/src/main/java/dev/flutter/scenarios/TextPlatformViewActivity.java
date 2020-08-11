@@ -12,7 +12,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.view.Choreographer;
 import androidx.annotation.NonNull;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterEngine;
@@ -71,6 +70,7 @@ public class TextPlatformViewActivity extends TestableFlutterActivity {
 
   @Override
   public void configureFlutterEngine(FlutterEngine flutterEngine) {
+    super.configureFlutterEngine(flutterEngine);
     flutterEngine
         .getPlatformViewsController()
         .getRegistry()
@@ -89,22 +89,6 @@ public class TextPlatformViewActivity extends TestableFlutterActivity {
     test.put("name", launchIntent.getStringExtra("scenario"));
     test.put("use_android_view", launchIntent.getBooleanExtra("use_android_view", false));
     channel.invokeMethod("set_scenario", test);
-
-    notifyFlutterRenderedAfterVsync();
-  }
-
-  private void notifyFlutterRenderedAfterVsync() {
-    // Wait 1s after the next frame, so the Android texture are rendered.
-    Choreographer.getInstance()
-        .postFrameCallbackDelayed(
-            new Choreographer.FrameCallback() {
-              @Override
-              public void doFrame(long frameTimeNanos) {
-                reportFullyDrawn();
-                notifyFlutterRendered();
-              }
-            },
-            1000L);
   }
 
   private void writeTimelineData(Uri logFile) {
