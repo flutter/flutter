@@ -1043,7 +1043,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(nodes[3].runtimeType, StringProperty);
       expect(nodes[3].name, 'dummy2');
       expect(nodes[4].runtimeType, DiagnosticsStackTrace);
-    }, skip: WidgetInspectorService.instance.isWidgetCreationTracked());
+    }, skip: WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --no-track-widget-creation flag.
 
     testWidgets('WidgetInspectorService setPubRootDirectories', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -1708,10 +1708,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
       service.setSelection(clockDemoElement, 'my-group');
       final Map<String, Object> jsonObject = await service.testExtension(
-          'getSelectedWidget',
-          <String, String>{'arg': null, 'objectGroup': 'my-group'}) as Map<String, Object>;
-      final Map<String, Object> creationLocation =
-          jsonObject['creationLocation'] as Map<String, Object>;
+        'getSelectedWidget',
+        <String, String>{'arg': null, 'objectGroup': 'my-group'},
+      ) as Map<String, Object>;
+      final Map<String, Object> creationLocation = jsonObject['creationLocation'] as Map<String, Object>;
       expect(creationLocation, isNotNull);
       final String file = creationLocation['file'] as String;
       expect(file, endsWith('widget_inspector_test.dart'));
@@ -1729,9 +1729,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
       expect(service.rebuildCount, equals(0));
       expect(
-          await service.testBoolExtension(
-              'trackRebuildDirtyWidgets', <String, String>{'enabled': 'true'}),
-          equals('true'));
+        await service.testBoolExtension('trackRebuildDirtyWidgets', <String, String>{'enabled': 'true'}),
+        equals('true'),
+      );
       expect(service.rebuildCount, equals(1));
       await tester.pump();
 
@@ -1750,8 +1750,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final int numLocationEntries = locationsForFile.length ~/ 3;
       expect(numLocationEntries, equals(numDataEntries));
 
-      final Map<int, _CreationLocation> knownLocations =
-          <int, _CreationLocation>{};
+      final Map<int, _CreationLocation> knownLocations = <int, _CreationLocation>{};
       addToKnownLocationsMap(
         knownLocations: knownLocations,
         newLocations: newLocations,
@@ -1886,17 +1885,15 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
       // Turn off rebuild counts.
       expect(
-          await service.testBoolExtension(
-              'trackRebuildDirtyWidgets', <String, String>{'enabled': 'false'}),
-          equals('false'));
+        await service.testBoolExtension('trackRebuildDirtyWidgets', <String, String>{'enabled': 'false'}),
+        equals('false'),
+      );
 
       state.updateTime(); // Triggers a rebuild.
       await tester.pump();
       // Verify that rebuild events are not fired once the extension is disabled.
       expect(rebuildEvents, isEmpty);
-    },
-        skip: !WidgetInspectorService.instance
-            .isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
 
     testWidgets('ext.flutter.inspector.trackRepaintWidgets', (WidgetTester tester) async {
       service.rebuildCount = 0;
@@ -2695,7 +2692,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
               ),
             ),
           ),
-        )
+        ),
       );
       final Finder columnWidgetFinder = find.byType(Column);
       expect(columnWidgetFinder, findsOneWidget);
