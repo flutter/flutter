@@ -477,6 +477,24 @@ void main() {
     expect(gitTagVersion.frameworkVersionFor('abcd1234'), stableTag);
   });
 
+  testUsingContext('determine favors stable tag over dev tag if both idenitfy HEAD', () {
+    const String stableTag = '1.2.3';
+    final FakeProcessManager fakeProcessManager = FakeProcessManager.list(
+      <FakeCommand>[
+        const FakeCommand(
+          command: <String>['git', 'tag', '--points-at', 'HEAD'],
+          stdout: '1.2.3-6.0.pre\n$stableTag',
+        ),
+      ],
+    );
+    final ProcessUtils processUtils = ProcessUtils(
+      processManager: fakeProcessManager,
+      logger: BufferLogger.test(),
+    );
+    final GitTagVersion gitTagVersion = GitTagVersion.determine(processUtils, workingDirectory: '.');
+    expect(gitTagVersion.frameworkVersionFor('abcd1234'), stableTag);
+  });
+
   testUsingContext('determine reports correct git describe version if HEAD is not at a tag', () {
     const String devTag = '1.2.3-2.0.pre';
     const String headRevision = 'abcd1234';
