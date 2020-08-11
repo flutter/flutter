@@ -33,11 +33,7 @@ class PreparePackageException implements Exception {
   final String message;
 
   @override
-  String toString() {
-    String output = runtimeType.toString();
-    output += ': $message';
-    return output;
-  }
+  String toString() => '$runtimeType: $message';
 }
 
 enum Branch { dev, beta, stable }
