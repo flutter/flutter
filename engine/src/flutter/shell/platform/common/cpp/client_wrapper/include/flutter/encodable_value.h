@@ -14,6 +14,23 @@
 #include <variant>
 #include <vector>
 
+// Unless overridden, attempt to detect the RTTI state from the compiler.
+#ifndef FLUTTER_ENABLE_RTTI
+#if defined(_MSC_VER)
+#ifdef _CPPRTTI
+#define FLUTTER_ENABLE_RTTI 1
+#endif
+#elif defined(__clang__)
+#if __has_feature(cxx_rtti)
+#define FLUTTER_ENABLE_RTTI 1
+#endif
+#elif defined(__GNUC__)
+#ifdef __GXX_RTTI
+#define FLUTTER_ENABLE_RTTI 1
+#endif
+#endif
+#endif  // #ifndef FLUTTER_ENABLE_RTTI
+
 namespace flutter {
 
 static_assert(sizeof(double) == 8, "EncodableValue requires a 64-bit double");
@@ -56,7 +73,7 @@ class CustomEncodableValue {
   operator std::any &() { return value_; }
   operator const std::any &() const { return value_; }
 
-#if __has_feature(cxx_rtti)
+#if defined(FLUTTER_ENABLE_RTTI) && FLUTTER_ENABLE_RTTI
   // Passthrough to std::any's type().
   const std::type_info& type() const noexcept { return value_.type(); }
 #endif
