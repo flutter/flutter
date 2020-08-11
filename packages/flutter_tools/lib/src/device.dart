@@ -998,11 +998,13 @@ class NoOpDevicePortForwarder implements DevicePortForwarder {
   Future<void> dispose() async { }
 }
 
+/// Append --null_assertions to any existing Dart VM flags if
+/// [debuggingOptions.nullAssertions] is true.
 String computeDartVmFlags(DebuggingOptions debuggingOptions) {
-  String flags = debuggingOptions.dartFlags ?? '';
-  if (debuggingOptions.nullAssertions) {
-    final String separator = flags.isEmpty ? '' : ',';
-    flags += '$separator--null_assertions';
-  }
-  return flags;
+  return <String>[
+    if (debuggingOptions.dartFlags?.isNotEmpty ?? false)
+      debuggingOptions.dartFlags,
+    if (debuggingOptions.nullAssertions)
+      '--null_assertions',
+  ].join(',');
 }
