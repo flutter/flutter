@@ -24,10 +24,6 @@ void macroPerfTestE2E(
   ControlCallback body,
   ControlCallback setup,
 }) {
-  assert(() {
-    debugPrint(kDebugWarning);
-    return true;
-  }());
   final WidgetsBinding _binding = E2EWidgetsFlutterBinding.ensureInitialized();
   assert(_binding is E2EWidgetsFlutterBinding);
   final E2EWidgetsFlutterBinding binding = _binding as E2EWidgetsFlutterBinding;
@@ -75,16 +71,28 @@ void macroPerfTestE2E(
   }, semanticsEnabled: false, timeout: Timeout(timeout));
 }
 
+bool _firstRun = true;
+
+// TODO(CareF): move this to e2e after FrameTimingSummarizer goes into stable
+// branch (#63537)
+/// watches the [FrameTiming] of `action` and report it to the e2e binding.
 Future<void> watchPerformance(
   E2EWidgetsFlutterBinding binding,
-  Future<void> action(),
-) async {
+  Future<void> action(), {
+  String reportKey = 'performance',
+}) async {
+  assert(() {
+    if (_firstRun) {
+      debugPrint(kDebugWarning);
+      _firstRun = false;
+    }
+    return true;
+  }());
   final List<FrameTiming> frameTimings = <FrameTiming>[];
   final TimingsCallback watcher = frameTimings.addAll;
   binding.addTimingsCallback(watcher);
   await action();
   binding.removeTimingsCallback(watcher);
-  // TODO(CareF): determine if it's running on firebase and report metric online
   final FrameTimingSummarizer frameTimes = FrameTimingSummarizer(frameTimings);
-  binding.reportData = <String, dynamic>{'performance': frameTimes.summary};
+  binding.reportData = <String, dynamic>{reportKey: frameTimes.summary};
 }
