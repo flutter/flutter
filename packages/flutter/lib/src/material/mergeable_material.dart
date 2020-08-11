@@ -43,6 +43,7 @@ class MaterialSlice extends MergeableMaterialItem {
   const MaterialSlice({
     @required LocalKey key,
     @required this.child,
+    this.color,
   }) : assert(key != null),
        super(key);
 
@@ -51,9 +52,14 @@ class MaterialSlice extends MergeableMaterialItem {
   /// {@macro flutter.widgets.child}
   final Widget child;
 
+  /// Defines the color for the slice.
+  ///
+  /// By default, the value of `color` is [ThemeData.cardColor].
+  final Color color;
+
   @override
   String toString() {
-    return 'MergeableSlice(key: $key, child: $child)';
+    return 'MergeableSlice(key: $key, child: $child, color: $color)';
   }
 }
 
@@ -539,7 +545,6 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
         widgets.add(
           Container(
             decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
               borderRadius: _borderRadius(i - 1, widgets.isEmpty, false),
               shape: BoxShape.rectangle,
             ),
@@ -601,7 +606,10 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
         slices.add(
           Material(
             type: MaterialType.transparency,
-            child: child,
+            child: ColoredBox(
+              color: (_children[i] as MaterialSlice).color ?? Theme.of(context).cardColor,
+              child: child,
+            ),
           ),
         );
       }
@@ -611,7 +619,6 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
       widgets.add(
         Container(
           decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
             borderRadius: _borderRadius(i - 1, widgets.isEmpty, true),
             shape: BoxShape.rectangle,
           ),
