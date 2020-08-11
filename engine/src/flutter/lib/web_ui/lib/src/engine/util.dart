@@ -527,3 +527,28 @@ double convertSigmaToRadius(double sigma) {
 bool isUnsoundNull(dynamic object) {
   return object == null;
 }
+
+bool _offsetIsValid(ui.Offset offset) {
+  assert(offset != null, 'Offset argument was null.'); // ignore: unnecessary_null_comparison
+  assert(!offset.dx.isNaN && !offset.dy.isNaN,
+      'Offset argument contained a NaN value.');
+  return true;
+}
+
+bool _matrix4IsValid(Float32List matrix4) {
+  assert(matrix4 != null, 'Matrix4 argument was null.'); // ignore: unnecessary_null_comparison
+  assert(matrix4.length == 16, 'Matrix4 must have 16 entries.');
+  return true;
+}
+
+void _validateColorStops(List<ui.Color> colors, List<double>? colorStops) {
+  if (colorStops == null) {
+    if (colors.length != 2)
+      throw ArgumentError(
+          '"colors" must have length 2 if "colorStops" is omitted.');
+  } else {
+    if (colors.length != colorStops.length)
+      throw ArgumentError(
+          '"colors" and "colorStops" arguments must have equal length.');
+  }
+}

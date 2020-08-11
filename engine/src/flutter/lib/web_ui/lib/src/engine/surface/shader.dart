@@ -5,25 +5,7 @@
 // @dart = 2.10
 part of engine;
 
-bool _offsetIsValid(ui.Offset offset) {
-  assert(offset != null, 'Offset argument was null.'); // ignore: unnecessary_null_comparison
-  assert(!offset.dx.isNaN && !offset.dy.isNaN,
-      'Offset argument contained a NaN value.');
-  return true;
-}
-
-bool _matrix4IsValid(Float32List matrix4) {
-  assert(matrix4 != null, 'Matrix4 argument was null.'); // ignore: unnecessary_null_comparison
-  assert(matrix4.length == 16, 'Matrix4 must have 16 entries.');
-  return true;
-}
-
-abstract class EngineShader {
-  /// Create a shader for use in the Skia backend.
-  SkShader createSkiaShader();
-}
-
-abstract class EngineGradient implements ui.Gradient, EngineShader {
+abstract class EngineGradient implements ui.Gradient {
   /// Hidden constructor to prevent subclassing.
   EngineGradient._();
 
@@ -61,23 +43,6 @@ class GradientSweep extends EngineGradient {
   final double startAngle;
   final double endAngle;
   final Float32List? matrix4;
-
-  @override
-  SkShader createSkiaShader() {
-    throw UnimplementedError();
-  }
-}
-
-void _validateColorStops(List<ui.Color> colors, List<double>? colorStops) {
-  if (colorStops == null) {
-    if (colors.length != 2)
-      throw ArgumentError(
-          '"colors" must have length 2 if "colorStops" is omitted.');
-  } else {
-    if (colors.length != colorStops.length)
-      throw ArgumentError(
-          '"colors" and "colorStops" arguments must have equal length.');
-  }
 }
 
 class GradientLinear extends EngineGradient {
@@ -153,19 +118,6 @@ class GradientLinear extends EngineGradient {
       tileMode.index
     ];
   }
-
-  @override
-  SkShader createSkiaShader() {
-    assert(experimentalUseSkia);
-
-    return canvasKit.SkShader.MakeLinearGradient(
-      toSkPoint(from),
-      toSkPoint(to),
-      toSkFloatColorList(colors),
-      toSkColorStops(colorStops),
-      toSkTileMode(tileMode),
-    );
-  }
 }
 
 // TODO(flutter_web): For transforms and tile modes implement as webgl
@@ -207,21 +159,6 @@ class GradientRadial extends EngineGradient {
     }
     return gradient;
   }
-
-  @override
-  SkShader createSkiaShader() {
-    assert(experimentalUseSkia);
-
-    return canvasKit.SkShader.MakeRadialGradient(
-      toSkPoint(center),
-      radius,
-      toSkFloatColorList(colors),
-      toSkColorStops(colorStops),
-      toSkTileMode(tileMode),
-      matrix4 != null ? toSkMatrixFromFloat32(matrix4!) : null,
-      0,
-    );
-  }
 }
 
 class GradientConical extends EngineGradient {
@@ -241,22 +178,6 @@ class GradientConical extends EngineGradient {
   @override
   Object createPaintStyle(html.CanvasRenderingContext2D? ctx) {
     throw UnimplementedError();
-  }
-
-  @override
-  SkShader createSkiaShader() {
-    assert(experimentalUseSkia);
-    return canvasKit.SkShader.MakeTwoPointConicalGradient(
-      toSkPoint(focal),
-      focalRadius,
-      toSkPoint(center),
-      radius,
-      toSkFloatColorList(colors),
-      toSkColorStops(colorStops),
-      toSkTileMode(tileMode),
-      matrix4 != null ? toSkMatrixFromFloat32(matrix4!) : null,
-      0,
-    );
   }
 }
 
@@ -283,21 +204,4 @@ class EngineImageFilter implements ui.ImageFilter {
   String toString() {
     return 'ImageFilter.blur($sigmaX, $sigmaY)';
   }
-}
-
-/// Backend implementation of [ui.ImageShader].
-class EngineImageShader implements ui.ImageShader, EngineShader {
-  EngineImageShader(
-      ui.Image image, this.tileModeX, this.tileModeY, this.matrix4)
-      : _skImage = image as CkImage;
-
-  final ui.TileMode tileModeX;
-  final ui.TileMode tileModeY;
-  final Float64List matrix4;
-  final CkImage _skImage;
-
-  SkShader createSkiaShader() => _skImage.skImage.makeShader(
-    toSkTileMode(tileModeX),
-    toSkTileMode(tileModeY),
-  );
 }

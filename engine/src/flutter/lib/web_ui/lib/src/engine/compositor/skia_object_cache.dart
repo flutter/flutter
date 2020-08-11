@@ -239,6 +239,50 @@ abstract class OneShotSkiaObject<T extends Object> extends SkiaObject<T> {
   }
 }
 
+/// Manages the lifecycle of a Skia object owned by a wrapper object.
+///
+/// When the wrapper is garbage collected, deletes the corresponding
+/// [skObject] (only in browsers that support weak references).
+///
+/// The [delete] method can be used to eagerly delete the [skObject]
+/// before the wrapper is garbage collected.
+///
+/// The [delete] method may be called any number of times. The box
+/// will only delete the object once.
+class SkiaObjectBox {
+  SkiaObjectBox(Object wrapper, this.skObject) {
+    if (browserSupportsFinalizationRegistry) {
+      boxRegistry.register(wrapper, this);
+    }
+  }
+
+  /// The Skia object whose lifecycle is being managed.
+  final SkDeletable skObject;
+
+  /// Whether this object has been deleted.
+  bool get isDeleted => _isDeleted;
+  bool _isDeleted = false;
+
+  /// Deletes Skia objects when their wrappers are garbage collected.
+  static final SkObjectFinalizationRegistry<SkiaObjectBox> boxRegistry =
+      SkObjectFinalizationRegistry<SkiaObjectBox>(
+          js.allowInterop((SkiaObjectBox box) {
+    box.delete();
+  }));
+
+  /// Deletes the [skObject].
+  ///
+  /// Does nothing if the object has already been deleted.
+  void delete() {
+    if (_isDeleted) {
+      return;
+    }
+    _isDeleted = true;
+    _skObjectDeleteQueue.add(skObject);
+    _skObjectCollector ??= _scheduleSkObjectCollection();
+  }
+}
+
 /// Singleton that manages the lifecycles of [SkiaObject] instances.
 class SkiaObjects {
   @visibleForTesting
