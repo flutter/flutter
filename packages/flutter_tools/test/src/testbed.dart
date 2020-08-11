@@ -781,9 +781,6 @@ class TestFeatureFlags implements FeatureFlags {
     }
     return false;
   }
-
-  @override
-  bool get areNullAssertionsEnabled => true;
 }
 
 class DelegateLogger implements Logger {
