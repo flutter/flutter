@@ -7,6 +7,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -196,6 +197,42 @@ void main() {
         rootBucket = bucket;
       });
       expect(rootBucket, isNull);
+    });
+
+    testWidgets('flushData', (WidgetTester tester) async {
+      final List<MethodCall> callsToEngine = <MethodCall>[];
+      final Completer<Map<dynamic, dynamic>> result = Completer<Map<dynamic, dynamic>>();
+      SystemChannels.restoration.setMockMethodCallHandler((MethodCall call) {
+        callsToEngine.add(call);
+        return result.future;
+      });
+
+      final RestorationManager manager = RestorationManager();
+      final Future<RestorationBucket> rootBucketFuture = manager.rootBucket;
+      RestorationBucket rootBucket;
+      rootBucketFuture.then((RestorationBucket bucket) {
+        rootBucket = bucket;
+      });
+      result.complete(_createEncodedRestorationData1());
+      await tester.pump();
+      expect(rootBucket, isNotNull);
+      callsToEngine.clear();
+
+      // Schedule a frame.
+      SchedulerBinding.instance.ensureVisualUpdate();
+      rootBucket.write('foo', 1);
+      // flushData is no-op because frame is scheduled.
+      manager.flushData();
+      expect(callsToEngine, isEmpty);
+      // Data is flushed at the end of the frame.
+      await tester.pump();
+      expect(callsToEngine, hasLength(1));
+      callsToEngine.clear();
+
+      // flushData without frame sends data directly.
+      rootBucket.write('foo', 2);
+      manager.flushData();
+      expect(callsToEngine, hasLength(1));
     });
   });
 

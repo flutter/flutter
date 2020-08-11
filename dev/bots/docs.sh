@@ -19,9 +19,7 @@ function deploy {
   [[ "$remaining_tries" == 0 ]] && {
     echo "Command still failed after $total_tries tries: '$@'"
     cat firebase-debug.log || echo "Unable to show contents of firebase-debug.log."
-    # TODO(jackson): Return an error here when the Firebase service is more reliable.
-    # https://github.com/flutter/flutter/issues/44452
-    return 0
+    return 1
   }
   return 0
 }
@@ -39,7 +37,7 @@ function script_location() {
 
 function generate_docs() {
     # Install and activate dartdoc.
-    "$PUB" global activate dartdoc 0.32.1
+    "$PUB" global activate dartdoc 0.32.3
 
     # This script generates a unified doc set, and creates
     # a custom index.html, placing everything into dev/docs/doc.

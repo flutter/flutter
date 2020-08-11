@@ -568,7 +568,21 @@ class TextPainter {
     _previousCaretPrototype = null;
     _paragraph.layout(ui.ParagraphConstraints(width: maxWidth));
     if (minWidth != maxWidth) {
-      final double newWidth = maxIntrinsicWidth.clamp(minWidth, maxWidth) as double;
+      double newWidth;
+      switch (textWidthBasis) {
+        case TextWidthBasis.longestLine:
+          // The parent widget expects the paragraph to be exactly
+          // `TextPainter.width` wide, if that value satisfies the constraints
+          // it gave to the TextPainter. So when `textWidthBasis` is longestLine,
+          // the paragraph's width needs to be as close to the width of its
+          // longest line as possible.
+          newWidth = _applyFloatingPointHack(_paragraph.longestLine);
+          break;
+        case TextWidthBasis.parent:
+          newWidth = maxIntrinsicWidth;
+          break;
+      }
+      newWidth = newWidth.clamp(minWidth, maxWidth) as double;
       if (newWidth != _applyFloatingPointHack(_paragraph.width)) {
         _paragraph.layout(ui.ParagraphConstraints(width: newWidth));
       }

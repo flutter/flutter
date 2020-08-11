@@ -40,6 +40,16 @@ class PushRouteObserver with WidgetsBindingObserver {
   }
 }
 
+class PushRouteInformationObserver with WidgetsBindingObserver {
+  RouteInformation pushedRouteInformation;
+
+  @override
+  Future<bool> didPushRouteInformation(RouteInformation routeInformation) async {
+    pushedRouteInformation = routeInformation;
+    return true;
+  }
+}
+
 void main() {
   setUp(() {
     WidgetsFlutterBinding.ensureInitialized();
@@ -87,6 +97,38 @@ void main() {
     await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     expect(observer.pushedRoute, testRouteName);
 
+    WidgetsBinding.instance.removeObserver(observer);
+  });
+
+  testWidgets('didPushRouteInformation calls didPushRoute by default', (WidgetTester tester) async {
+    final PushRouteObserver observer = PushRouteObserver();
+    WidgetsBinding.instance.addObserver(observer);
+
+    const Map<String, dynamic> testRouteInformation = <String, dynamic>{
+      'location': 'testRouteName',
+      'state': 'state',
+      'restorationData': <dynamic, dynamic>{'test': 'config'}
+    };
+    final ByteData message = const JSONMethodCodec().encodeMethodCall(
+      const MethodCall('pushRouteInformation', testRouteInformation));
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    expect(observer.pushedRoute, 'testRouteName');
+    WidgetsBinding.instance.removeObserver(observer);
+  });
+
+  testWidgets('didPushRouteInformation callback', (WidgetTester tester) async {
+    final PushRouteInformationObserver observer = PushRouteInformationObserver();
+    WidgetsBinding.instance.addObserver(observer);
+
+    const Map<String, dynamic> testRouteInformation = <String, dynamic>{
+      'location': 'testRouteName',
+      'state': 'state',
+    };
+    final ByteData message = const JSONMethodCodec().encodeMethodCall(
+      const MethodCall('pushRouteInformation', testRouteInformation));
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    expect(observer.pushedRouteInformation.location, 'testRouteName');
+    expect(observer.pushedRouteInformation.state, 'state');
     WidgetsBinding.instance.removeObserver(observer);
   });
 

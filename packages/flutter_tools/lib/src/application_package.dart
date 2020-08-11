@@ -262,7 +262,7 @@ class AndroidApk extends ApplicationPackage {
   String get name => file.basename;
 }
 
-/// Tests whether a [Directory] is an iOS bundle directory
+/// Tests whether a [Directory] is an iOS bundle directory.
 bool _isBundleDirectory(Directory dir) => dir.path.endsWith('.app');
 
 abstract class IOSApp extends ApplicationPackage {

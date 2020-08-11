@@ -99,7 +99,7 @@ abstract class StackFilter {
   /// Filters the list of [StackFrame]s by updating corresponding indices in
   /// `reasons`.
   ///
-  /// To elide a frame or number of frames, set the string
+  /// To elide a frame or number of frames, set the string.
   void filter(List<StackFrame> stackFrames, List<String?> reasons);
 }
 
@@ -679,7 +679,7 @@ class FlutterErrorDetails with Diagnosticable {
         }
       }
       properties.add(ErrorSpacer());
-      properties.add(DiagnosticsStackTrace('When the exception was thrown, this was the stack', stack!, stackFilter: stackFilter));
+      properties.add(DiagnosticsStackTrace('When the exception was thrown, this was the stack', stack, stackFilter: stackFilter));
     }
     if (informationCollector != null) {
       properties.add(ErrorSpacer());

@@ -104,7 +104,7 @@ void main() {
       home: Material(
         child: Builder(
           builder: (BuildContext context) {
-            return FlatButton(
+            return TextButton(
               onPressed: () async {
                 await showDatePicker(
                   context: context,
@@ -147,7 +147,7 @@ void main() {
       home: Material(
         child: Builder(
           builder: (BuildContext context) {
-            return FlatButton(
+            return TextButton(
               onPressed: () async {
                 await showDatePicker(
                   context: context,
@@ -187,7 +187,7 @@ void main() {
       home: Material(
         child: Builder(
           builder: (BuildContext context) {
-            return FlatButton(
+            return TextButton(
               onPressed: () async {
                 await showDatePicker(
                   context: context,
@@ -242,7 +242,7 @@ void main() {
               return Localizations(
                 locale: locale,
                 delegates: GlobalMaterialLocalizations.delegates,
-                child: RaisedButton(
+                child: TextButton(
                   child: const Text('X'),
                   onPressed: () {
                     showDatePicker(

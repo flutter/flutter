@@ -560,7 +560,7 @@ void applyMocksToCommand(FlutterCommand command) {
   command.applicationPackages = MockApplicationPackageStore();
 }
 
-/// Common functionality for tracking mock interaction
+/// Common functionality for tracking mock interaction.
 class BasicMock {
   final List<String> messages = <String>[];
 

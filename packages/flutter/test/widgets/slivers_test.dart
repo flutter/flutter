@@ -814,6 +814,31 @@ void main() {
       expect(events, equals(<String>['tap']));
     });
   });
+
+  testWidgets('SliverList handles 0 scrollOffsetCorrection', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/62198
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: CustomScrollView(
+          physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+          slivers: <Widget>[
+            SliverList(
+              delegate: SliverChildListDelegate(
+                const <Widget>[
+                  SizedBox.shrink(),
+                  Text('index 1'),
+                  Text('index 2'),
+                ]
+              ),
+            ),
+          ],
+        )
+      ),
+    ));
+    await tester.fling(find.byType(Scrollable), const Offset(0.0, -500.0), 10000.0);
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
 }
 
 bool isRight(Offset a, Offset b) => b.dx > a.dx;

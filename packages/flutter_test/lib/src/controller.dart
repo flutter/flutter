@@ -304,13 +304,26 @@ abstract class WidgetController {
   /// If the middle of the widget is not exposed, this might send
   /// events to another object.
   ///
-  /// This can pump frames. See [flingFrom] for a discussion of how the
-  /// `offset`, `velocity` and `frameInterval` arguments affect this.
+  /// {@template flutter.flutter_test.fling}
+  /// This can pump frames.
+  ///
+  /// Exactly 50 pointer events are synthesized.
   ///
   /// The `speed` is in pixels per second in the direction given by `offset`.
   ///
-  /// A fling is essentially a drag that ends at a particular speed. If you
-  /// just want to drag and end without a fling, use [drag].
+  /// The `offset` and `speed` control the interval between each pointer event.
+  /// For example, if the `offset` is 200 pixels down, and the `speed` is 800
+  /// pixels per second, the pointer events will be sent for each increment
+  /// of 4 pixels (200/50), over 250ms (200/800), meaning events will be sent
+  /// every 1.25ms (250/200).
+  ///
+  /// To make tests more realistic, frames may be pumped during this time (using
+  /// calls to [pump]). If the total duration is longer than `frameInterval`,
+  /// then one frame is pumped each time that amount of time elapses while
+  /// sending events, or each time an event is synthesized, whichever is rarer.
+  ///
+  /// See [LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive] if the method
+  /// is used in a live environment and accurate time control is important.
   ///
   /// The `initialOffset` argument, if non-zero, causes the pointer to first
   /// apply that offset, then pump a delay of `initialOffsetDelay`. This can be
@@ -318,6 +331,10 @@ abstract class WidgetController {
   /// opposite direction of the fling (e.g. dragging 200 pixels to the right,
   /// then fling to the left over 200 pixels, ending at the exact point that the
   /// drag started).
+  /// {@endtemplate}
+  ///
+  /// A fling is essentially a drag that ends at a particular speed. If you
+  /// just want to drag and end without a fling, use [drag].
   Future<void> fling(
     Finder finder,
     Offset offset,
@@ -343,28 +360,10 @@ abstract class WidgetController {
   /// Attempts a fling gesture starting from the given location, moving the
   /// given distance, reaching the given speed.
   ///
-  /// Exactly 50 pointer events are synthesized.
-  ///
-  /// The offset and speed control the interval between each pointer event. For
-  /// example, if the offset is 200 pixels down, and the speed is 800 pixels per
-  /// second, the pointer events will be sent for each increment of 4 pixels
-  /// (200/50), over 250ms (200/800), meaning events will be sent every 1.25ms
-  /// (250/200).
-  ///
-  /// To make tests more realistic, frames may be pumped during this time (using
-  /// calls to [pump]). If the total duration is longer than `frameInterval`,
-  /// then one frame is pumped each time that amount of time elapses while
-  /// sending events, or each time an event is synthesized, whichever is rarer.
+  /// {@macro flutter.flutter_test.fling}
   ///
   /// A fling is essentially a drag that ends at a particular speed. If you
   /// just want to drag and end without a fling, use [dragFrom].
-  ///
-  /// The `initialOffset` argument, if non-zero, causes the pointer to first
-  /// apply that offset, then pump a delay of `initialOffsetDelay`. This can be
-  /// used to simulate a drag followed by a fling, including dragging in the
-  /// opposite direction of the fling (e.g. dragging 200 pixels to the right,
-  /// then fling to the left over 200 pixels, ending at the exact point that the
-  /// drag started).
   Future<void> flingFrom(
     Offset startLocation,
     Offset offset,
@@ -478,20 +477,20 @@ abstract class WidgetController {
   /// system identifies the gesture as a fling, consider using [fling] instead.
   ///
   /// {@template flutter.flutter_test.drag}
-  /// By default, if the x or y component of offset is greater than [kTouchSlop], the
-  /// gesture is broken up into two separate moves calls. Changing 'touchSlopX' or
-  /// `touchSlopY` will change the minimum amount of movement in the respective axis
-  /// before the drag will be broken into multiple calls. To always send the
-  /// drag with just a single call to [TestGesture.moveBy], `touchSlopX` and `touchSlopY`
-  /// should be set to 0.
+  /// By default, if the x or y component of offset is greater than
+  /// [kDragSlopDefault], the gesture is broken up into two separate moves
+  /// calls. Changing `touchSlopX` or `touchSlopY` will change the minimum
+  /// amount of movement in the respective axis before the drag will be broken
+  /// into multiple calls. To always send the drag with just a single call to
+  /// [TestGesture.moveBy], `touchSlopX` and `touchSlopY` should be set to 0.
   ///
   /// Breaking the drag into multiple moves is necessary for accurate execution
   /// of drag update calls with a [DragStartBehavior] variable set to
   /// [DragStartBehavior.start]. Without such a change, the dragUpdate callback
   /// from a drag recognizer will never be invoked.
   ///
-  /// To force this function to a send a single move event, the 'touchSlopX' and
-  /// 'touchSlopY' variables should be set to 0. However, generally, these values
+  /// To force this function to a send a single move event, the `touchSlopX` and
+  /// `touchSlopY` variables should be set to 0. However, generally, these values
   /// should be left to their default values.
   /// {@endtemplate}
   Future<void> drag(

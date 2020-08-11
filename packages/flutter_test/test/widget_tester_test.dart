@@ -375,7 +375,7 @@ void main() {
           home: Center(
             child: Builder(
               builder: (BuildContext context) {
-                return RaisedButton(
+                return ElevatedButton(
                   child: const Text('Next'),
                   onPressed: () {
                     Navigator.push<void>(context, MaterialPageRoute<void>(
@@ -465,10 +465,20 @@ void main() {
 
   testWidgets('pumpAndSettle control test', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(
-      duration: const Duration(seconds: 1),
+      duration: const Duration(minutes: 525600),
       vsync: const TestVSync(),
     );
     expect(await tester.pumpAndSettle(), 1);
+    controller.forward();
+    try {
+      await tester.pumpAndSettle();
+      expect(true, isFalse);
+    } catch (e) {
+      expect(e, isFlutterError);
+    }
+    controller.stop();
+    expect(await tester.pumpAndSettle(), 1);
+    controller.duration = const Duration(seconds: 1);
     controller.forward();
     expect(await tester.pumpAndSettle(const Duration(milliseconds: 300)), 5); // 0, 300, 600, 900, 1200ms
   });
