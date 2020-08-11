@@ -477,6 +477,14 @@ abstract class WidgetController {
   /// system identifies the gesture as a fling, consider using [fling] instead.
   ///
   /// {@template flutter.flutter_test.drag}
+  /// If `duration` is not `null`, this is a convenience wrap of
+  /// [handlePointerEventRecord], with the input lasts for `duration` at the
+  /// given `frequency` (Hz).
+  /// See [LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive] for more
+  /// accurate time control.
+  /// Otherwise the input events are assumed to happen at once, and `frequency`
+  /// is ignored.
+  ///
   /// By default, if the x or y component of offset is greater than
   /// [kDragSlopDefault], the gesture is broken up into two separate moves
   /// calls. Changing `touchSlopX` or `touchSlopY` will change the minimum
