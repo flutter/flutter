@@ -1045,16 +1045,16 @@ void ParagraphTxt::Layout(double width) {
                     return a.code_units.start < b.code_units.start;
                   });
 
+        double blob_x_pos_start = glyph_positions.front().x_pos.start;
+        double blob_x_pos_end = run.is_placeholder_run()
+                                    ? glyph_positions.back().x_pos.start +
+                                          run.placeholder_run()->width
+                                    : glyph_positions.back().x_pos.end;
         line_code_unit_runs.emplace_back(
             std::move(code_unit_positions),
             Range<size_t>(run.start(), run.end()),
-            Range<double>(glyph_positions.front().x_pos.start,
-                          run.is_placeholder_run()
-                              ? glyph_positions.back().x_pos.start +
-                                    run.placeholder_run()->width
-                              : glyph_positions.back().x_pos.end),
-            line_number, *metrics, run.style(), run.direction(),
-            run.placeholder_run());
+            Range<double>(blob_x_pos_start, blob_x_pos_end), line_number,
+            *metrics, run.style(), run.direction(), run.placeholder_run());
 
         if (run.is_placeholder_run()) {
           line_inline_placeholder_code_unit_runs.push_back(
@@ -1062,8 +1062,8 @@ void ParagraphTxt::Layout(double width) {
         }
 
         if (!run.is_ghost()) {
-          min_left_ = std::min(min_left_, glyph_positions.front().x_pos.start);
-          max_right_ = std::max(max_right_, glyph_positions.back().x_pos.end);
+          min_left_ = std::min(min_left_, blob_x_pos_start);
+          max_right_ = std::max(max_right_, blob_x_pos_end);
         }
       }  // for each in glyph_blobs
 
