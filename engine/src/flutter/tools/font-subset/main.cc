@@ -63,14 +63,18 @@ int main(int argc, char** argv) {
       hb_blob_create_from_file(input_file_path.c_str()));
   if (!hb_blob_get_length(font_blob.get())) {
     std::cerr << "Failed to load input font " << input_file_path
-              << "; aborting." << std::endl;
+              << "; aborting. This error indicates that the font is invalid or "
+                 "the current version of Harfbuzz is unable to process it."
+              << std::endl;
     return -1;
   }
 
   HarfbuzzWrappers::HbFacePtr font_face(hb_face_create(font_blob.get(), 0));
   if (font_face.get() == hb_face_get_empty()) {
     std::cerr << "Failed to load input font face " << input_file_path
-              << "; aborting." << std::endl;
+              << "; aborting. This error indicates that the font is invalid or "
+                 "the current version of Harfbuzz is unable to process it."
+              << std::endl;
     return -1;
   }
 
@@ -103,13 +107,18 @@ int main(int argc, char** argv) {
   HarfbuzzWrappers::HbFacePtr new_face(hb_subset(font_face.get(), input.get()));
 
   if (new_face.get() == hb_face_get_empty()) {
-    std::cerr << "Failed to subset font; aborting." << std::endl;
+    std::cerr
+        << "Failed to subset font; aborting. This error normally indicates "
+           "the current version of Harfbuzz is unable to process it."
+        << std::endl;
     return -1;
   }
 
   HarfbuzzWrappers::HbBlobPtr result(hb_face_reference_blob(new_face.get()));
   if (!hb_blob_get_length(result.get())) {
-    std::cerr << "Failed get new font bytes; aborting" << std::endl;
+    std::cerr << "Failed get new font bytes; aborting. This error may indicate "
+                 "low availability of memory or a bug in Harfbuzz."
+              << std::endl;
     return -1;
   }
 
