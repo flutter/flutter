@@ -116,6 +116,9 @@ Engine::Engine(Delegate& delegate,
   OnGetViewEmbedder on_get_view_embedder_callback =
       std::bind(&Engine::GetViewEmbedder, this);
 
+  OnGetGrContext on_get_gr_context_callback =
+      std::bind(&Engine::GetGrContext, this);
+
   // SessionListener has a OnScenicError method; invoke this callback on the
   // platform thread when that happens. The Session itself should also be
   // disconnected when this happens, and it will also attempt to terminate.
@@ -154,6 +157,7 @@ Engine::Engine(Delegate& delegate,
            on_destroy_view_callback = std::move(on_destroy_view_callback),
            on_get_view_embedder_callback =
                std::move(on_get_view_embedder_callback),
+           on_get_gr_context_callback = std::move(on_get_gr_context_callback),
            vsync_handle = vsync_event_.get(),
            product_config = product_config](flutter::Shell& shell) mutable {
             return std::make_unique<flutter_runner::PlatformView>(
@@ -172,6 +176,7 @@ Engine::Engine(Delegate& delegate,
                 std::move(on_create_view_callback),
                 std::move(on_destroy_view_callback),
                 std::move(on_get_view_embedder_callback),
+                std::move(on_get_gr_context_callback),
                 vsync_handle,  // vsync handle
                 product_config);
           });
@@ -588,6 +593,19 @@ void Engine::OnSessionSizeChangeHint(float width_change_factor,
                                                       height_change_factor);
         }
       });
+}
+
+GrDirectContext* Engine::GetGrContext() {
+  // GetGrContext should be called only after rasterizer is created.
+  FML_DCHECK(shell_);
+  FML_DCHECK(shell_->GetRasterizer());
+
+  auto rasterizer = shell_->GetRasterizer();
+  auto compositor_context =
+      reinterpret_cast<flutter_runner::CompositorContext*>(
+          rasterizer->compositor_context());
+  GrDirectContext* gr_context = compositor_context->GetGrContext();
+  return gr_context;
 }
 
 #if !defined(DART_PRODUCT)
