@@ -99,15 +99,17 @@ void Rasterizer::Teardown() {
 
 void Rasterizer::NotifyLowMemoryWarning() const {
   if (!surface_) {
-    FML_DLOG(INFO) << "Rasterizer::PurgeCaches called with no surface.";
+    FML_DLOG(INFO)
+        << "Rasterizer::NotifyLowMemoryWarning called with no surface.";
     return;
   }
   auto context = surface_->GetContext();
   if (!context) {
-    FML_DLOG(INFO) << "Rasterizer::PurgeCaches called with no GrContext.";
+    FML_DLOG(INFO)
+        << "Rasterizer::NotifyLowMemoryWarning called with no GrContext.";
     return;
   }
-  context->freeGpuResources();
+  context->performDeferredCleanup(std::chrono::milliseconds(0));
 }
 
 flutter::TextureRegistry* Rasterizer::GetTextureRegistry() {
