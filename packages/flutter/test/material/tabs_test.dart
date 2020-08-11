@@ -2734,8 +2734,6 @@ void main() {
     gesture = await tester.startGesture(tester.getCenter(find.byKey(secondTabKey)));
     await gesture.up();
     expect(tabController.index, targetIndex);
-
-    await tester.pumpAndSettle();
   });
 
   testWidgets('TabBar and TabBarView should follow TabController\'s animation duration and curve', (WidgetTester tester) async {
@@ -2871,8 +2869,6 @@ void main() {
     await tester.startGesture(tester.getCenter(find.byType(PageView)));
     await tester.pump();
     expect(tabController.animation.value, pageController.page);
-
-    await tester.pumpAndSettle();
   });
 }
 
