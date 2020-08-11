@@ -36,14 +36,13 @@ Future<void> generateLocalizations({
     'bin',
     'gen_l10n.dart',
   );
-  final String projectDirPath = projectDir.path.replaceAll("'", '');
 
   final ProcessResult result = await processManager.run(<String>[
     dartBinaryPath,
     '--disable-dart-dev',
     genL10nPath,
     '--gen-inputs-and-outputs-list=${dependenciesDir.path}',
-    '--project-dir=$projectDirPath',
+    '--project-dir=${projectDir.path}',
     if (options.arbDirectory != null)
       '--arb-dir=${options.arbDirectory.toFilePath()}',
     if (options.templateArbFile != null)
