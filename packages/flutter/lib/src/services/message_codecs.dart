@@ -146,7 +146,7 @@ class JSONMethodCodec implements MethodCodec {
       return decoded[0];
     if (decoded.length == 4
         && decoded[0] is String
-        && (decoded[1] == null || decoded[1] is String) 
+        && (decoded[1] == null || decoded[1] is String)
         && (decoded[3] == null || decoded[3] is String))
       throw PlatformException(
         code: decoded[0] as String,
