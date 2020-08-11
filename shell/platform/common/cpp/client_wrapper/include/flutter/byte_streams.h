@@ -12,6 +12,9 @@ namespace flutter {
 // An interface for a class that reads from a byte stream.
 class ByteStreamReader {
  public:
+  explicit ByteStreamReader() = default;
+  virtual ~ByteStreamReader() = default;
+
   // Reads and returns the next byte from the stream.
   virtual uint8_t ReadByte() = 0;
 
@@ -48,6 +51,9 @@ class ByteStreamReader {
 // An interface for a class that writes to a byte stream.
 class ByteStreamWriter {
  public:
+  explicit ByteStreamWriter() = default;
+  virtual ~ByteStreamWriter() = default;
+
   // Writes |byte| to the stream.
   virtual void WriteByte(uint8_t byte) = 0;
 
