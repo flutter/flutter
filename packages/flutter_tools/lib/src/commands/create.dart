@@ -9,7 +9,6 @@ import 'package:uuid/uuid.dart';
 import 'package:yaml/yaml.dart';
 
 import '../android/android.dart' as android_common;
-import '../android/android_sdk.dart' as android_sdk;
 import '../android/android_workflow.dart';
 import '../android/gradle_utils.dart' as gradle;
 import '../base/common.dart';
