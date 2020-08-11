@@ -175,7 +175,7 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 ///  * Cookbook: [Place a floating app bar above a list](https://flutter.dev/docs/cookbook/lists/floating-app-bar)
 ///  * See our
 ///    [AppBar Basics sample](https://flutter.dev/docs/catalog/samples/basic-app-bar)
-///    and our advanced samples with app bars with 
+///    and our advanced samples with app bars with
 ///    [tabs](https://flutter.dev/docs/catalog/samples/tabbed-app-bar) or
 ///    [custom bottom widgets](https://flutter.dev/docs/catalog/samples/app-bar-bottom).
 class AppBar extends StatefulWidget implements PreferredSizeWidget {

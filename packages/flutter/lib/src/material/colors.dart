@@ -193,7 +193,7 @@ class MaterialAccentColor extends ColorSwatch<int> {
 ///
 /// The [Colors.transparent] color isn't shown here because it is entirely
 /// invisible!
-/// 
+///
 /// See also:
 ///
 ///  * Cookbook: [Use themes to share colors and font styles](https://flutter.dev/docs/cookbook/design/themes)
