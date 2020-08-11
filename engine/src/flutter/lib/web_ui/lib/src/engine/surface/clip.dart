@@ -325,6 +325,8 @@ class PersistedPhysicalShape extends PersistedContainerSurface
     }
     if (oldSurface.path != path) {
       oldSurface._clipElement?.remove();
+      // Reset style on prior element since we may have switched between
+      // rect/rrect and arbitrary path.
       domRenderer.setElementStyle(rootElement!, 'clip-path', '');
       domRenderer.setElementStyle(rootElement!, '-webkit-clip-path', '');
       _applyShape();
