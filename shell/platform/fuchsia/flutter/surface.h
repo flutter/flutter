@@ -16,7 +16,8 @@ namespace flutter_runner {
 class Surface final : public flutter::Surface {
  public:
   Surface(std::string debug_label,
-          flutter::ExternalViewEmbedder* view_embedder);
+          flutter::ExternalViewEmbedder* view_embedder,
+          GrDirectContext* gr_context);
 
   ~Surface() override;
 
@@ -24,6 +25,7 @@ class Surface final : public flutter::Surface {
   const bool valid_ = CanConnectToDisplay();
   const std::string debug_label_;
   flutter::ExternalViewEmbedder* view_embedder_;
+  GrDirectContext* gr_context_;
 
   // |flutter::Surface|
   bool IsValid() override;
