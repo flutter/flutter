@@ -163,9 +163,17 @@ Future<void> main() async {
       await inDirectory(projectDir, () async {
         await flutter(
           'build',
-          options: <String>['ios', '--no-codesign'],
+          options: <String>['ios', '--no-codesign', '-v'],
+          canFail: true,
         );
       });
+
+      final File podfileLockFile = File(path.join(projectDir.path, '.ios', 'Podfile.lock'));
+      final String podfileLockOutput = podfileLockFile.readAsStringSync();
+      print(podfileLockOutput);
+
+      final File pubspecLock = File(path.join(projectDir.path, 'pubspec.lock'));
+      print(pubspecLock.readAsStringSync());
 
       final bool ephemeralHostAppWithCocoaPodsBuilt = exists(ephemeralIOSHostApp);
 
@@ -173,8 +181,8 @@ Future<void> main() async {
         return TaskResult.failure('Failed to build ephemeral host .app with CocoaPods');
       }
 
-      final File podfileLockFile = File(path.join(projectDir.path, '.ios', 'Podfile.lock'));
-      final String podfileLockOutput = podfileLockFile.readAsStringSync();
+//      final File podfileLockFile = File(path.join(projectDir.path, '.ios', 'Podfile.lock'));
+//      final String podfileLockOutput = podfileLockFile.readAsStringSync();
       if (!podfileLockOutput.contains(':path: Flutter/engine')
         || !podfileLockOutput.contains(':path: Flutter/FlutterPluginRegistrant')
         || !podfileLockOutput.contains(':path: Flutter/.symlinks/device_info/ios')
