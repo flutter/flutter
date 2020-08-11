@@ -4,6 +4,7 @@
 
 // @dart = 2.8
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -276,6 +277,36 @@ void main() {
           <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.keyA},
         ),
       );
+    });
+
+    testWidgets('RawKeyboard asserts if no keys are in keysPressed after receiving a key down event', (WidgetTester tester) async {
+      FlutterErrorDetails errorDetails;
+      final FlutterExceptionHandler oldHandler = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) {
+        errorDetails = details;
+      };
+      try {
+        await ServicesBinding.instance.defaultBinaryMessenger
+            .handlePlatformMessage(
+          SystemChannels.keyEvent.name,
+          SystemChannels.keyEvent.codec.encodeMessage(const <String, dynamic>{
+            'type': 'keydown',
+            'keymap': 'android',
+            'keyCode': 0x3b, // Left shift key keyCode
+            'scanCode': 0x2a,
+            'metaState': 0x0, // No shift key metaState set!
+            'source': 0x101,
+            'deviceId': 1,
+          }),
+              (ByteData data) {},
+        );
+      } finally {
+        FlutterError.onError = oldHandler;
+      }
+      expect(errorDetails, isNotNull);
+      expect(errorDetails.stack, isNotNull);
+      final String fullErrorMessage = errorDetails.toString().replaceAll('\n', ' ');
+      expect(fullErrorMessage, contains('Attempted to send a key down event when no keys are in keysPressed'));
     });
   });
 

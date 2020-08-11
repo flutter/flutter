@@ -113,6 +113,7 @@ class FlutterOptions {
   static const String kNullSafety = 'sound-null-safety';
   static const String kDeviceUser = 'device-user';
   static const String kAnalyzeSize = 'analyze-size';
+  static const String kNullAssertions = 'null-assertions';
 }
 
 abstract class FlutterCommand extends Command<void> {
@@ -396,14 +397,6 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void usesIsolateFilterOption({ @required bool hide }) {
-    argParser.addOption('isolate-filter',
-      defaultsTo: null,
-      hide: hide,
-      help: 'Restricts commands to a subset of the available isolates (running instances of Flutter).\n'
-            "Normally there's only one, but when adding Flutter to a pre-existing app it's possible to create multiple.");
-  }
-
   void usesDeviceUserOption() {
     argParser.addOption(FlutterOptions.kDeviceUser,
       help: 'Identifier number for a user or work profile on Android only. Run "adb shell pm list users" for available identifiers.',
@@ -508,6 +501,12 @@ abstract class FlutterCommand extends Command<void> {
       defaultsTo: null,
       hide: hide,
     );
+    argParser.addFlag(FlutterOptions.kNullAssertions,
+      help:
+        'Perform additional null assertions on the boundaries of migrated and '
+        'unmigrated code. This setting is not currently supported on desktop '
+        'devices.'
+    );
   }
 
   void usesExtraFrontendOptions() {
@@ -610,8 +609,8 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag(
       FlutterOptions.kAnalyzeSize,
       defaultsTo: false,
-      help: 'Whether to produce additonal profile information for artifact output size. '
-        'This flag is only support on release builds on macOS/Linux hosts.'
+      help: 'Whether to produce additional profile information for artifact output size. '
+        'This flag is only supported on release builds on macOS/Linux hosts.'
     );
   }
 

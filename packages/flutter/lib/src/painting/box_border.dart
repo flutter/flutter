@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'package:flutter/foundation.dart';
 
@@ -85,7 +84,7 @@ abstract class BoxBorder extends ShapeBorder {
   // We override this to tighten the return value, so that callers can assume
   // that we'll return a [BoxBorder].
   @override
-  BoxBorder add(ShapeBorder other, { bool reversed = false }) => null;
+  BoxBorder? add(ShapeBorder other, { bool reversed = false }) => null;
 
   /// Linearly interpolate between two borders.
   ///
@@ -104,12 +103,12 @@ abstract class BoxBorder extends ShapeBorder {
   /// instead [add] the two sets of sides and interpolate them simultaneously.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static BoxBorder lerp(BoxBorder a, BoxBorder b, double t) {
+  static BoxBorder? lerp(BoxBorder? a, BoxBorder? b, double t) {
     assert(t != null);
-    if ((a is Border || a == null) && (b is Border || b == null))
-      return Border.lerp(a as Border, b as Border, t);
-    if ((a is BorderDirectional || a == null) && (b is BorderDirectional || b == null))
-      return BorderDirectional.lerp(a as BorderDirectional, b as BorderDirectional, t);
+    if ((a is Border?) && (b is Border?))
+      return Border.lerp(a, b, t);
+    if ((a is BorderDirectional?) && (b is BorderDirectional?))
+      return BorderDirectional.lerp(a, b, t);
     if (b is Border && a is BorderDirectional) {
       final BoxBorder c = b;
       b = a;
@@ -167,14 +166,14 @@ abstract class BoxBorder extends ShapeBorder {
   }
 
   @override
-  Path getInnerPath(Rect rect, { @required TextDirection textDirection }) {
+  Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
     assert(textDirection != null, 'The textDirection argument to $runtimeType.getInnerPath must not be null.');
     return Path()
       ..addRect(dimensions.resolve(textDirection).deflateRect(rect));
   }
 
   @override
-  Path getOuterPath(Rect rect, { @required TextDirection textDirection }) {
+  Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
     assert(textDirection != null, 'The textDirection argument to $runtimeType.getOuterPath must not be null.');
     return Path()
       ..addRect(rect);
@@ -203,9 +202,9 @@ abstract class BoxBorder extends ShapeBorder {
   void paint(
     Canvas canvas,
     Rect rect, {
-    TextDirection textDirection,
+    TextDirection? textDirection,
     BoxShape shape = BoxShape.rectangle,
-    BorderRadius borderRadius,
+    BorderRadius? borderRadius,
   });
 
   static void _paintUniformBorderWithRadius(Canvas canvas, Rect rect, BorderSide side, BorderRadius borderRadius) {
@@ -414,7 +413,7 @@ class Border extends BoxBorder {
   }
 
   @override
-  Border add(ShapeBorder other, { bool reversed = false }) {
+  Border? add(ShapeBorder other, { bool reversed = false }) {
     if (other is Border &&
         BorderSide.canMerge(top, other.top) &&
         BorderSide.canMerge(right, other.right) &&
@@ -436,14 +435,14 @@ class Border extends BoxBorder {
   }
 
   @override
-  ShapeBorder lerpFrom(ShapeBorder a, double t) {
+  ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
     if (a is Border)
       return Border.lerp(a, this, t);
     return super.lerpFrom(a, t);
   }
 
   @override
-  ShapeBorder lerpTo(ShapeBorder b, double t) {
+  ShapeBorder? lerpTo(ShapeBorder? b, double t) {
     if (b is Border)
       return Border.lerp(this, b, t);
     return super.lerpTo(b, t);
@@ -455,12 +454,12 @@ class Border extends BoxBorder {
   /// borders.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static Border lerp(Border a, Border b, double t) {
+  static Border? lerp(Border? a, Border? b, double t) {
     assert(t != null);
     if (a == null && b == null)
       return null;
     if (a == null)
-      return b.scale(t);
+      return b!.scale(t);
     if (b == null)
       return a.scale(1.0 - t);
     return Border(
@@ -494,9 +493,9 @@ class Border extends BoxBorder {
   void paint(
     Canvas canvas,
     Rect rect, {
-    TextDirection textDirection,
+    TextDirection? textDirection,
     BoxShape shape = BoxShape.rectangle,
-    BorderRadius borderRadius,
+    BorderRadius? borderRadius,
   }) {
     if (isUniform) {
       switch (top.style) {
@@ -694,7 +693,7 @@ class BorderDirectional extends BoxBorder {
   }
 
   @override
-  BoxBorder add(ShapeBorder other, { bool reversed = false }) {
+  BoxBorder? add(ShapeBorder other, { bool reversed = false }) {
     if (other is BorderDirectional) {
       final BorderDirectional typedOther = other;
       if (BorderSide.canMerge(top, typedOther.top) &&
@@ -747,14 +746,14 @@ class BorderDirectional extends BoxBorder {
   }
 
   @override
-  ShapeBorder lerpFrom(ShapeBorder a, double t) {
+  ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
     if (a is BorderDirectional)
       return BorderDirectional.lerp(a, this, t);
     return super.lerpFrom(a, t);
   }
 
   @override
-  ShapeBorder lerpTo(ShapeBorder b, double t) {
+  ShapeBorder? lerpTo(ShapeBorder? b, double t) {
     if (b is BorderDirectional)
       return BorderDirectional.lerp(this, b, t);
     return super.lerpTo(b, t);
@@ -766,12 +765,12 @@ class BorderDirectional extends BoxBorder {
   /// borders.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static BorderDirectional lerp(BorderDirectional a, BorderDirectional b, double t) {
+  static BorderDirectional? lerp(BorderDirectional? a, BorderDirectional? b, double t) {
     assert(t != null);
     if (a == null && b == null)
       return null;
     if (a == null)
-      return b.scale(t);
+      return b!.scale(t);
     if (b == null)
       return a.scale(1.0 - t);
     return BorderDirectional(
@@ -808,9 +807,9 @@ class BorderDirectional extends BoxBorder {
   void paint(
     Canvas canvas,
     Rect rect, {
-    TextDirection textDirection,
+    TextDirection? textDirection,
     BoxShape shape = BoxShape.rectangle,
-    BorderRadius borderRadius,
+    BorderRadius? borderRadius,
   }) {
     if (isUniform) {
       switch (top.style) {
@@ -839,7 +838,7 @@ class BorderDirectional extends BoxBorder {
 
     BorderSide left, right;
     assert(textDirection != null, 'Non-uniform BorderDirectional objects require a TextDirection when painting.');
-    switch (textDirection) {
+    switch (textDirection!) {
       case TextDirection.rtl:
         left = end;
         right = start;

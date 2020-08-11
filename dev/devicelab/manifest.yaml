@@ -177,7 +177,6 @@ tasks:
       Measures the runtime performance of constructing and destructing widgets on Android.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   frame_policy_delay_test_android:
     description: >
@@ -421,12 +420,6 @@ tasks:
   #   required_agent_capabilities: ["linux/android"]
   #   flaky: true
 
-  named_isolates_test:
-    description: >
-      Tests naming and attaching to specific isolates.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
-
   linux_chrome_dev_mode:
     description: >
       Run flutter web on the devicelab and hot restart.
@@ -647,11 +640,12 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
-  # simple_animation_perf_iphonexs:
-  #   description: >
-  #     Measure CPU/GPU usage percentages of a simple animation.
-  #   stage: devicelab_ios
-  #   required_agent_capabilities: ["mac/iphonexs"]
+  simple_animation_perf_ios:
+    description: >
+      Measure CPU/GPU usage percentages of a simple animation.
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios"]
+    flaky: true
 
   smoke_catalina_start_up_ios:
     description: >
@@ -818,7 +812,6 @@ tasks:
       Measures the performance of the Crane page in the new Flutter Gallery on Android.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   fast_scroll_large_images__memory:
     description: >

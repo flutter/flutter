@@ -71,14 +71,14 @@
   "dateRangePickerHelpText": "选择范围",
   "calendarModeButtonLabel": "切换到日历模式",
   "inputDateModeButtonLabel": "切换到输入模式",
-  "timePickerDialHelpText": "SELECT TIME",
-  "timePickerInputHelpText": "ENTER TIME",
-  "timePickerHourLabel": "Hour",
-  "timePickerMinuteLabel": "Minute",
-  "invalidTimeLabel": "Enter a valid time",
-  "dialModeButtonLabel": "Switch to dial picker mode",
-  "inputTimeModeButtonLabel": "Switch to text input mode",
+  "timePickerDialHelpText": "选择时间",
+  "timePickerInputHelpText": "输入时间",
+  "timePickerHourLabel": "小时",
+  "timePickerMinuteLabel": "分钟",
+  "invalidTimeLabel": "请输入有效的时间",
+  "dialModeButtonLabel": "切换到表盘选择器模式",
+  "inputTimeModeButtonLabel": "切换到文本输入模式",
   "licensesPackageDetailTextZero": "No licenses",
-  "licensesPackageDetailTextOne": "1 license",
-  "licensesPackageDetailTextOther": "$licenseCount licenses"
+  "licensesPackageDetailTextOne": "1 份许可",
+  "licensesPackageDetailTextOther": "$licenseCount 份许可"
 }
