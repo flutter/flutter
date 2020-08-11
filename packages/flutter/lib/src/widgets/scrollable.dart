@@ -692,7 +692,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
         key: _scrollSemanticsKey,
         child: result,
         position: position,
-        allowImplicitScrolling: widget?.physics?.allowImplicitScrolling ?? _physics.allowImplicitScrolling,
+        allowImplicitScrolling: _physics.allowImplicitScrolling,
         semanticChildCount: widget.semanticChildCount,
       );
     }
@@ -704,6 +704,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ScrollPosition>('position', position));
+    properties.add(DiagnosticsProperty<ScrollPhysics>('effective physics', _physics));
   }
 
   @override
@@ -971,7 +972,7 @@ class ScrollAction extends Action<ScrollIntent> {
     assert(state.position.viewportDimension != null);
     assert(state.position.maxScrollExtent != null);
     assert(state.position.minScrollExtent != null);
-    assert(state.widget.physics == null || state.widget.physics.shouldAcceptUserOffset(state.position));
+    assert(state._physics == null || state._physics.shouldAcceptUserOffset(state.position));
     if (state.widget.incrementCalculator != null) {
       return state.widget.incrementCalculator(
         ScrollIncrementDetails(
@@ -1060,7 +1061,7 @@ class ScrollAction extends Action<ScrollIntent> {
     assert(state.position.minScrollExtent != null);
 
     // Don't do anything if the user isn't allowed to scroll.
-    if (state.widget.physics != null && !state.widget.physics.shouldAcceptUserOffset(state.position)) {
+    if (state._physics != null && !state._physics.shouldAcceptUserOffset(state.position)) {
       return;
     }
     final double increment = _getIncrement(state, intent);
