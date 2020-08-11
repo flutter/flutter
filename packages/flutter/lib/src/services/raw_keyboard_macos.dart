@@ -62,7 +62,7 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
   final int modifiers;
 
   @override
-  String? get keyLabel => charactersIgnoringModifiers.isEmpty ? null : charactersIgnoringModifiers;
+  String get keyLabel => charactersIgnoringModifiers.isEmpty ? '' : charactersIgnoringModifiers;
 
   @override
   PhysicalKeyboardKey get physicalKey => kMacOsToPhysicalKey[keyCode] ?? PhysicalKeyboardKey.none;
@@ -79,9 +79,9 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
     // If this key is printable, generate the LogicalKeyboardKey from its Unicode value.
     // Control keys such as ESC, CRTL, and SHIFT are not printable. HOME, DEL, arrow keys, and function
     // keys are considered modifier function keys, which generate invalid Unicode scalar values.
-    if (keyLabel != null &&
-        !LogicalKeyboardKey.isControlCharacter(keyLabel!) &&
-        !_isUnprintableKey(keyLabel!)) {
+    if (keyLabel.isNotEmpty &&
+        !LogicalKeyboardKey.isControlCharacter(keyLabel) &&
+        !_isUnprintableKey(keyLabel)) {
       // Given that charactersIgnoringModifiers can contain a String of arbitrary length,
       // limit to a maximum of two Unicode scalar values. It is unlikely that a keyboard would produce a code point
       // bigger than 32 bits, but it is still worth defending against this case.
@@ -96,7 +96,7 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
       return LogicalKeyboardKey.findKeyByKeyId(keyId) ?? LogicalKeyboardKey(
         keyId,
         keyLabel: keyLabel,
-        debugName: kReleaseMode ? null : 'Key ${keyLabel!.toUpperCase()}',
+        debugName: kReleaseMode ? null : 'Key ${keyLabel.toUpperCase()}',
       );
     }
 
@@ -109,7 +109,7 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
       final int keyId = physicalKey.usbHidUsage | LogicalKeyboardKey.hidPlane;
       return LogicalKeyboardKey.findKeyByKeyId(keyId) ?? LogicalKeyboardKey(
         keyId,
-        keyLabel: physicalKey.debugName,
+        keyLabel: physicalKey.debugName ?? '',
         debugName: physicalKey.debugName,
       );
     }
@@ -229,7 +229,7 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
   ///
   /// Used by [RawKeyEvent] subclasses to help construct IDs.
   static bool _isUnprintableKey(String label) {
-    if (label.length > 1) {
+    if (label.length != 1) {
       return false;
     }
     final int codeUnit = label.codeUnitAt(0);
