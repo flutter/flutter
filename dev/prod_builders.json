@@ -28,7 +28,7 @@
          "name": "Linux web_tests",
          "repo": "flutter",
          "taskName": "web_tests",
-         "flaky": false
+         "flaky": true
       },
       {
          "name": "Mac",
@@ -40,7 +40,7 @@
          "name": "Windows",
          "repo": "flutter",
          "taskName": "windows_bot",
-         "flaky": true
+         "flaky": false
       }
    ]
 }
