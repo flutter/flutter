@@ -18,6 +18,7 @@ import 'app.dart';
 import 'debug.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
+import 'router.dart';
 import 'widget_inspector.dart';
 
 export 'dart:ui' show AppLifecycleState, Locale;
@@ -95,7 +96,7 @@ abstract class WidgetsBindingObserver {
   /// [SystemChannels.navigation].
   Future<bool> didPopRoute() => Future<bool>.value(false);
 
-  /// Called when the host tells the app to push a new route onto the
+  /// Called when the host tells the application to push a new route onto the
   /// navigator.
   ///
   /// Observers are expected to return true if they were able to
@@ -105,6 +106,22 @@ abstract class WidgetsBindingObserver {
   /// This method exposes the `pushRoute` notification from
   /// [SystemChannels.navigation].
   Future<bool> didPushRoute(String route) => Future<bool>.value(false);
+
+  /// Called when the host tells the application to push a new
+  /// [RouteInformation] and a restoration state onto the router.
+  ///
+  /// Observers are expected to return true if they were able to
+  /// handle the notification. Observers are notified in registration
+  /// order until one returns true.
+  ///
+  /// This method exposes the `pushRouteInformation` notification from
+  /// [SystemChannels.navigation].
+  ///
+  /// The default implementation is to call the [didPushRoute] directly with the
+  /// [RouteInformation.location].
+  Future<bool> didPushRouteInformation(RouteInformation routeInformation) {
+    return didPushRoute(routeInformation.location);
+  }
 
   /// Called when the application's dimensions change. For example,
   /// when a phone is rotated.
@@ -654,12 +671,28 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     }
   }
 
+  Future<void> _handlePushRouteInformation(Map<dynamic, dynamic> routeArguments) async {
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.from(_observers)) {
+      if (
+        await observer.didPushRouteInformation(
+          RouteInformation(
+            location: routeArguments['location'] as String,
+            state: routeArguments['state'] as Object,
+          )
+        )
+      )
+      return;
+    }
+  }
+
   Future<dynamic> _handleNavigationInvocation(MethodCall methodCall) {
     switch (methodCall.method) {
       case 'popRoute':
         return handlePopRoute();
       case 'pushRoute':
         return handlePushRoute(methodCall.arguments as String);
+      case 'pushRouteInformation':
+        return _handlePushRouteInformation(methodCall.arguments as Map<dynamic, dynamic>);
     }
     return Future<dynamic>.value();
   }
