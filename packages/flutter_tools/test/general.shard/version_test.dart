@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'package:collection/collection.dart' show ListEquality;
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/time.dart';
@@ -456,6 +457,49 @@ void main() {
       'Could not interpret results of "git describe": beta-1-gabcdef\n'
       'Could not interpret results of "git describe": 1.2.3-4-gxabcdef\n',
     );
+  });
+
+  testUsingContext('determine reports correct stable version if HEAD is at a tag', () {
+    const String stableTag = '1.2.3';
+    final FakeProcessManager fakeProcessManager = FakeProcessManager.list(
+      <FakeCommand>[
+        const FakeCommand(
+          command: <String>['git', 'tag', '--points-at', 'HEAD'],
+          stdout: stableTag,
+        ),
+      ],
+    );
+    final ProcessUtils processUtils = ProcessUtils(
+      processManager: fakeProcessManager,
+      logger: BufferLogger.test(),
+    );
+    final GitTagVersion gitTagVersion = GitTagVersion.determine(processUtils, workingDirectory: '.');
+    expect(gitTagVersion.frameworkVersionFor('abcd1234'), stableTag);
+  });
+
+  testUsingContext('determine reports correct git describe version if HEAD is not at a tag', () {
+    const String devTag = '1.2.3-2.0.pre';
+    const String headRevision = 'abcd1234';
+    const String commitsAhead = '12';
+    final FakeProcessManager fakeProcessManager = FakeProcessManager.list(
+      <FakeCommand>[
+        const FakeCommand(
+          command: <String>['git', 'tag', '--points-at', 'HEAD'],
+          stdout: '', // no tag
+        ),
+        const FakeCommand(
+          command: <String>['git', 'describe', '--match', '*.*.*', '--first-parent', '--long', '--tags'],
+          stdout: '$devTag-$commitsAhead-g$headRevision',
+        ),
+      ],
+    );
+    final ProcessUtils processUtils = ProcessUtils(
+      processManager: fakeProcessManager,
+      logger: BufferLogger.test(),
+    );
+    final GitTagVersion gitTagVersion = GitTagVersion.determine(processUtils, workingDirectory: '.');
+    // reported version should increment the number after the dash
+    expect(gitTagVersion.frameworkVersionFor(headRevision), '1.2.3-3.0.pre.12');
   });
 
   testUsingContext('determine does not call fetch --tags', () {
