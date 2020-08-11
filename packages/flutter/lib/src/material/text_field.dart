@@ -351,6 +351,7 @@ class TextField extends StatefulWidget {
     this.onChanged,
     this.onEditingComplete,
     this.onSubmitted,
+    this.onAppPrivateCommand,
     this.inputFormatters,
     this.enabled,
     this.cursorWidth = 2.0,
@@ -631,6 +632,9 @@ class TextField extends StatefulWidget {
   ///    the next/previous field when using [TextInputAction.next] and
   ///    [TextInputAction.previous] for [textInputAction].
   final ValueChanged<String> onSubmitted;
+
+  /// {@macro flutter.widgets.editableText.onAppPrivateCommand}
+  final AppPrivateCommandCallback onAppPrivateCommand;
 
   /// {@macro flutter.widgets.editableText.inputFormatters}
   final List<TextInputFormatter> inputFormatters;
@@ -1147,6 +1151,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
         onSelectionChanged: _handleSelectionChanged,
         onEditingComplete: widget.onEditingComplete,
         onSubmitted: widget.onSubmitted,
+        onAppPrivateCommand: widget.onAppPrivateCommand,
         onSelectionHandleTapped: _handleSelectionHandleTapped,
         inputFormatters: formatters,
         rendererIgnoresPointer: true,
