@@ -165,11 +165,26 @@ abstract class RawKeyEventData {
 
   /// Returns a map of modifier keys that were pressed at the time of this
   /// event, and the keyboard side or sides that the key was on.
-  Map<ModifierKey, KeyboardSide?> get modifiersPressed {
-    final Map<ModifierKey, KeyboardSide?> result = <ModifierKey, KeyboardSide?>{};
+  Map<ModifierKey, KeyboardSide> get modifiersPressed {
+    final Map<ModifierKey, KeyboardSide> result = <ModifierKey, KeyboardSide>{};
     for (final ModifierKey key in ModifierKey.values) {
       if (isModifierPressed(key)) {
-        result[key] = getModifierSide(key);
+        final KeyboardSide? side = getModifierSide(key);
+        if (side != null) {
+          result[key] = side;
+        }
+        assert((){
+          if (side == null) {
+            debugPrint('Raw key data is returning inconsistent information for '
+                'pressed modifiers. isModifierPressed returns true for $key '
+                'being pressed, but when getModifierSide is called, it says '
+                'that no modifiers are pressed.');
+            if (this is RawKeyEventDataAndroid) {
+              debugPrint('Android raw key metaState: ${(this as RawKeyEventDataAndroid).metaState}');
+            }
+          }
+          return true;
+        }());
       }
     }
     return result;
@@ -660,10 +675,21 @@ class RawKeyboard {
     final Map<ModifierKey, KeyboardSide?> modifiersPressed = event.data.modifiersPressed;
     final Map<PhysicalKeyboardKey, LogicalKeyboardKey> modifierKeys = <PhysicalKeyboardKey, LogicalKeyboardKey>{};
     for (final ModifierKey key in modifiersPressed.keys) {
-      final Set<PhysicalKeyboardKey> mappedKeys = _modifierKeyMap[_ModifierSidePair(key, modifiersPressed[key])]!;
-      assert(mappedKeys != null,
-        'Platform key support for ${Platform.operatingSystem} is '
-        'producing unsupported modifier combinations.');
+      final Set<PhysicalKeyboardKey>? mappedKeys = _modifierKeyMap[_ModifierSidePair(key, modifiersPressed[key])];
+      assert((){
+        if (mappedKeys == null) {
+          debugPrint('Platform key support for ${Platform.operatingSystem} is '
+              'producing unsupported modifier combinations for '
+              'modifier $key on side ${modifiersPressed[key]}.');
+          if (event.data is RawKeyEventDataAndroid) {
+            debugPrint('Android raw key metaState: ${(event.data as RawKeyEventDataAndroid).metaState}');
+          }
+        }
+        return true;
+      }());
+      if (mappedKeys == null) {
+        continue;
+      }
       for (final PhysicalKeyboardKey physicalModifier in mappedKeys) {
         modifierKeys[physicalModifier] = _allModifiers[physicalModifier]!;
       }
