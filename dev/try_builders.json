@@ -1,0 +1,29 @@
+{
+   "builders":[
+      {
+         "name":"Linux build_tests",
+         "repo":"flutter",
+         "taskName":"build_tests"
+      },
+      {
+         "name":"Linux framework_tests",
+         "repo":"flutter",
+         "taskName":"linux_framework_tests"
+      },
+      {
+         "name":"Linux hostonly_devicelab_tests",
+         "repo":"flutter",
+         "taskName":"hostonly_devicelab_tests"
+      },
+      {
+         "name":"Linux tool_tests",
+         "repo":"flutter",
+         "taskName":"tool_tests"
+      },
+      {
+         "name":"Linux web_tests",
+         "repo":"flutter",
+         "taskName":"web_tests"
+      }
+   ]
+}

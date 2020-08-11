@@ -148,7 +148,7 @@ Future<void> main() async {
       content = content.replaceFirst(
         '\ndependencies:\n',
         // One dynamic framework, one static framework, and one that does not support iOS.
-        '\ndependencies:\n  device_info:\n  google_maps_flutter:\n  android_alarm_manager:\n',
+        '\ndependencies:\n  device_info: 0.4.2+4\n  google_sign_in: 4.5.1\n  android_alarm_manager: 0.4.5+11\n',
       );
       await pubspec.writeAsString(content, flush: true);
       await inDirectory(projectDir, () async {
@@ -163,7 +163,7 @@ Future<void> main() async {
       await inDirectory(projectDir, () async {
         await flutter(
           'build',
-          options: <String>['ios', '--no-codesign'],
+          options: <String>['ios', '--no-codesign', '-v'],
         );
       });
 
@@ -178,7 +178,7 @@ Future<void> main() async {
       if (!podfileLockOutput.contains(':path: Flutter/engine')
         || !podfileLockOutput.contains(':path: Flutter/FlutterPluginRegistrant')
         || !podfileLockOutput.contains(':path: Flutter/.symlinks/device_info/ios')
-        || !podfileLockOutput.contains(':path: Flutter/.symlinks/google_maps_flutter/ios')
+        || !podfileLockOutput.contains(':path: Flutter/.symlinks/google_sign_in/ios')
         || podfileLockOutput.contains('android_alarm_manager')) {
         return TaskResult.failure('Building ephemeral host app Podfile.lock does not contain expected pods');
       }
@@ -186,7 +186,7 @@ Future<void> main() async {
       checkFileExists(path.join(ephemeralIOSHostApp.path, 'Frameworks', 'device_info.framework', 'device_info'));
 
       // Static, no embedded framework.
-      checkDirectoryNotExists(path.join(ephemeralIOSHostApp.path, 'Frameworks', 'google_maps_flutter.framework'));
+      checkDirectoryNotExists(path.join(ephemeralIOSHostApp.path, 'Frameworks', 'google_sign_in.framework'));
 
       // Android-only, no embedded framework.
       checkDirectoryNotExists(path.join(ephemeralIOSHostApp.path, 'Frameworks', 'android_alarm_manager.framework'));

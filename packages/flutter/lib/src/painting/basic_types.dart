@@ -169,27 +169,27 @@ enum VerticalDirection {
 
 /// A direction along either the horizontal or vertical [Axis].
 enum AxisDirection {
-  /// Zero is at the bottom and positive values are above it: ⇈
+  /// Zero is at the bottom and positive values are above it: `⇈`
   ///
   /// Alphabetical content with a [GrowthDirection.forward] would have the A at
   /// the bottom and the Z at the top. This is an unusual configuration.
   up,
 
-  /// Zero is on the left and positive values are to the right of it: ⇉
+  /// Zero is on the left and positive values are to the right of it: `⇉`
   ///
   /// Alphabetical content with a [GrowthDirection.forward] would have the A on
   /// the left and the Z on the right. This is the ordinary reading order for a
   /// horizontal set of tabs in an English application, for example.
   right,
 
-  /// Zero is at the top and positive values are below it: ⇊
+  /// Zero is at the top and positive values are below it: `⇊`
   ///
   /// Alphabetical content with a [GrowthDirection.forward] would have the A at
   /// the top and the Z at the bottom. This is the ordinary reading order for a
   /// vertical list.
   down,
 
-  /// Zero is to the right and positive values are to the left of it: ⇇
+  /// Zero is to the right and positive values are to the left of it: `⇇`
   ///
   /// Alphabetical content with a [GrowthDirection.forward] would have the A at
   /// the right and the Z at the left. This is the ordinary reading order for a
