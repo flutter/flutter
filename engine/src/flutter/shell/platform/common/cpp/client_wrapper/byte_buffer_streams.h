@@ -23,6 +23,8 @@ class ByteBufferStreamReader : public ByteStreamReader {
   explicit ByteBufferStreamReader(const uint8_t* bytes, size_t size)
       : bytes_(bytes), size_(size) {}
 
+  virtual ~ByteBufferStreamReader() = default;
+
   // |ByteStreamReader|
   uint8_t ReadByte() override {
     if (location_ >= size_) {
@@ -68,6 +70,8 @@ class ByteBufferStreamWriter : public ByteStreamWriter {
       : bytes_(buffer) {
     assert(buffer);
   }
+
+  virtual ~ByteBufferStreamWriter() = default;
 
   // |ByteStreamWriter|
   void WriteByte(uint8_t byte) { bytes_->push_back(byte); }
