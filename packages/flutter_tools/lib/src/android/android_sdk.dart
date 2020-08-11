@@ -49,8 +49,7 @@ class AndroidSdk {
     @required OperatingSystemUtils operatingSystemUtils,
     @required AndroidStudio androidStudio,
     @required Logger logger,
-  }) : assert(directory != null),
-       _fileSystem = fileSystem,
+  }) : _fileSystem = fileSystem,
        _platform = platform,
        _processManager = processManager,
        _operatingSystemUtils = operatingSystemUtils,
@@ -181,7 +180,7 @@ class AndroidSdk {
     }
 
     return AndroidSdk(
-      androidHomeDir ?? '',
+      androidHomeDir,
       androidStudio: androidStudio,
       fileSystem: fileSystem,
       platform: platform,
@@ -276,7 +275,7 @@ class AndroidSdk {
       return <String>['Android SDK file not found: ${adbPath ?? 'adb'}.'];
     }
 
-    if (sdkVersions.isEmpty || latestVersion == null) {
+    if (latestVersion == null || sdkVersions.isEmpty) {
       final StringBuffer msg = StringBuffer('No valid Android SDK platforms found in ${_platformsDir.path}.');
       if (_platforms.isEmpty) {
         msg.write(' Directory was empty.');

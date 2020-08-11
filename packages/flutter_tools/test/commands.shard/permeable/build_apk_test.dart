@@ -174,6 +174,7 @@ void main() {
       });
 
       mockAndroidSdk = MockAndroidSdk();
+      when(mockAndroidSdk.validateSdkWellFormed()).thenReturn(<String>[]);
       when(mockAndroidSdk.directory).thenReturn('irrelevant');
       when(mockAndroidSdk.latestVersion).thenReturn(AndroidSdkVersion(
         mockAndroidSdk,
@@ -200,7 +201,6 @@ void main() {
           throwsToolExit(message: 'Gradle task assembleRelease failed with exit code 1'),
         );
 
-        verifyNever(mockAndroidSdk.validateSdkWellFormed());
         verify(mockAndroidSdk.reinitialize()).called(1);
       },
       overrides: <Type, Generator>{
@@ -210,6 +210,7 @@ void main() {
       });
 
       testUsingContext('throws throwsToolExit if AndroidSdk is null', () async {
+        when(mockAndroidSdk.latestVersion).thenReturn(null);
         final String projectPath = await createProject(tempDir,
             arguments: <String>['--no-pub', '--template=app']);
 
@@ -223,7 +224,7 @@ void main() {
         ));
       },
       overrides: <Type, Generator>{
-        AndroidSdk: () => null,
+        AndroidSdk: () => mockAndroidSdk,
         FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
         ProcessManager: () => mockProcessManager,
       });
