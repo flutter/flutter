@@ -33,10 +33,6 @@
          "repo":"engine"
       },
       {
-         "name":"Mac Host Engine",
-         "repo":"engine"
-      },
-      {
          "name":"Mac iOS Engine",
          "repo":"engine"
       },
