@@ -80,7 +80,8 @@ class ScrollBehavior {
       case TargetPlatform.windows:
         return (PointerEvent ev) => VelocityTracker();
     }
-    return null;
+    assert(false);
+    return (PointerEvent ev) => VelocityTracker();
   }
 
   static const ScrollPhysics _bouncingPhysics = BouncingScrollPhysics(parent: RangeMaintainingScrollPhysics());
