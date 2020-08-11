@@ -14,4 +14,3 @@ public class MainActivityTest {
   @Rule
   public ActivityTestRule<MainActivity> rule = new ActivityTestRule<>(MainActivity.class, true, false);
 }
-
