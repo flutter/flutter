@@ -210,9 +210,10 @@ void main() {
 
       // Run localizations generator in specified absolute path.
       final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      final String flutterProjectPath = path.join('absolute', 'path', 'to', 'flutter_project');
       try {
         generator.initialize(
-          projectPathString: 'absolute/path/to/flutter_project',
+          projectPathString: flutterProjectPath,
           inputPathString: defaultL10nPathString,
           outputPathString: defaultL10nPathString,
           templateArbFileName: defaultTemplateArbFileName,
@@ -227,7 +228,6 @@ void main() {
         throw TestFailure('Unexpected failure during test setup: $e');
       }
 
-      final String flutterProjectPath = path.join('absolute', 'path', 'to', 'flutter_project');
       // Output files should be generated in the provided absolute path.
       expect(
         fs.isFileSync(path.join(
