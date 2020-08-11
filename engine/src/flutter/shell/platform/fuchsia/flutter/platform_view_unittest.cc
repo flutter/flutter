@@ -555,6 +555,7 @@ TEST_F(PlatformViewTests, GetGrContextTest) {
       services_provider.service_directory(),  // runner_services
       nullptr,               // parent_environment_service_provider_handle
       nullptr,               // session_listener_request
+      nullptr,               // focuser
       nullptr,               // on_session_listener_error_callback
       nullptr,               // session_metrics_did_change_callback
       nullptr,               // session_size_change_hint_callback

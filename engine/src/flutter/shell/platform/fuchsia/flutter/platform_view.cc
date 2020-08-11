@@ -582,8 +582,11 @@ std::unique_ptr<flutter::Surface> PlatformView::CreateRenderingSurface() {
   // This platform does not repeatly lose and gain a surface connection. So the
   // surface is setup once during platform view setup and returned to the
   // shell on the initial (and only) |NotifyCreated| call.
-  auto view_embedder = on_get_view_embedder_callback_();
-  auto gr_context = on_get_gr_context_callback_();
+  auto view_embedder = on_get_view_embedder_callback_
+                           ? on_get_view_embedder_callback_()
+                           : nullptr;
+  auto gr_context =
+      on_get_gr_context_callback_ ? on_get_gr_context_callback_() : nullptr;
   return std::make_unique<Surface>(debug_label_, view_embedder, gr_context);
 }
 
