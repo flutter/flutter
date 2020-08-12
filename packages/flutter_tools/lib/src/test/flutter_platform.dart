@@ -22,7 +22,6 @@ import '../compile.dart';
 import '../convert.dart';
 import '../dart/language_version.dart';
 import '../dart/package_map.dart';
-import '../features.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../test/test_wrapper.dart';
