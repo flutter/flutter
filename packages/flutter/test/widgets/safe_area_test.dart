@@ -90,10 +90,11 @@ void main() {
     });
 
     testWidgets('SafeArea - properties', (WidgetTester tester) async {
-      const SafeArea child = SafeArea(
+      final SafeArea child = SafeArea(
         left: true,
         right: false,
         bottom: false,
+        child: Container()
       );
       final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
       child.debugFillProperties(properties);
