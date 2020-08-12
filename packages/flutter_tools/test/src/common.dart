@@ -389,3 +389,24 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
     );
   }
 }
+
+/// A file system that allows preconfiguring certain entities.
+///
+/// This is useful for inserting mocks/entities which throw errors or
+/// have other behavior that is not easily configured through the
+/// filesystem interface.
+class ConfiguredFileSystem extends ForwardingFileSystem {
+  ConfiguredFileSystem(FileSystem delegate, {@required this.entities}) : super(delegate);
+
+  final Map<String, FileSystemEntity> entities;
+
+  @override
+  File file(dynamic path) {
+    return (entities[path] as File) ?? super.file(path);
+  }
+
+  @override
+  Directory directory(dynamic path) {
+    return (entities[path] as Directory) ?? super.directory(path);
+  }
+}
