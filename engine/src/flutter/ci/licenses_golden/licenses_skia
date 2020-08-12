@@ -1,4 +1,4 @@
-Signature: 612aefcff28db0f918d7d75c0aa3d36e
+Signature: 65e1c2403cc8680a44796bf8982df88d
 
 UNUSED LICENSES:
 
@@ -970,6 +970,11 @@ FILE: ../../../third_party/skia/bench/skpbench.json
 FILE: ../../../third_party/skia/build/fuchsia/skqp/skqp.cmx
 FILE: ../../../third_party/skia/build/fuchsia/skqp/test_manifest.json
 FILE: ../../../third_party/skia/demos.skia.org/demos/hello_world/index.html
+FILE: ../../../third_party/skia/demos.skia.org/demos/path_performance/garbage.svg
+FILE: ../../../third_party/skia/demos.skia.org/demos/path_performance/index.html
+FILE: ../../../third_party/skia/demos.skia.org/demos/path_performance/main.js
+FILE: ../../../third_party/skia/demos.skia.org/demos/path_performance/shared.js
+FILE: ../../../third_party/skia/demos.skia.org/demos/path_performance/worker.js
 FILE: ../../../third_party/skia/demos.skia.org/demos/web_worker/index.html
 FILE: ../../../third_party/skia/demos.skia.org/demos/web_worker/main.js
 FILE: ../../../third_party/skia/demos.skia.org/demos/web_worker/shared.js
@@ -5237,6 +5242,7 @@ FILE: ../../../third_party/skia/gm/bc1_transparency.cpp
 FILE: ../../../third_party/skia/gm/bicubic.cpp
 FILE: ../../../third_party/skia/gm/compressed_textures.cpp
 FILE: ../../../third_party/skia/gm/crbug_1073670.cpp
+FILE: ../../../third_party/skia/gm/crbug_1086705.cpp
 FILE: ../../../third_party/skia/gm/exoticformats.cpp
 FILE: ../../../third_party/skia/gm/skbug_9819.cpp
 FILE: ../../../third_party/skia/gm/strokerect_anisotropic.cpp
@@ -5668,6 +5674,7 @@ LIBRARY: skia
 ORIGIN: ../../../third_party/skia/fuzz/oss_fuzz/FuzzAPICreateDDL.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/fuzz/FuzzCreateDDL.cpp
+FILE: ../../../third_party/skia/fuzz/FuzzRRect.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzAPICreateDDL.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzAPISVGCanvas.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzSKP.cpp
