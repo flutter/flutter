@@ -476,17 +476,10 @@ abstract class WidgetController {
   /// If you want the drag to end with a speed so that the gesture recognition
   /// system identifies the gesture as a fling, consider using [fling] instead.
   ///
+  /// The operation happens at once. If you want the drag to last for a period
+  /// of time, consider using [slowDrag].
+  ///
   /// {@template flutter.flutter_test.drag}
-  /// [duration] specifies the length of the action. The move events are
-  /// sent at a given [frequency] in Hz (or events per second). It defaults to
-  /// 60Hz.
-  ///
-  /// See also [LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive] for
-  /// more accurate time control.
-  ///
-  /// If [duration] is null, input events are assumed to happen at once, and
-  /// [frequency] is ignored.
-  ///
   /// By default, if the x or y component of offset is greater than
   /// [kDragSlopDefault], the gesture is broken up into two separate moves
   /// calls. Changing `touchSlopX` or `touchSlopY` will change the minimum
@@ -510,8 +503,6 @@ abstract class WidgetController {
     int buttons = kPrimaryButton,
     double touchSlopX = kDragSlopDefault,
     double touchSlopY = kDragSlopDefault,
-    Duration duration,
-    double frequency = 60.0,
   }) {
     return dragFrom(
       getCenter(finder),
@@ -530,6 +521,9 @@ abstract class WidgetController {
   /// system identifies the gesture as a fling, consider using [flingFrom]
   /// instead.
   ///
+  /// The operation happens at once. If you want the drag to last for a period
+  /// of time, consider using [slowDragFrom].
+  ///
   /// {@macro flutter.flutter_test.drag}
   Future<void> dragFrom(
     Offset startLocation,
@@ -538,84 +532,19 @@ abstract class WidgetController {
     int buttons = kPrimaryButton,
     double touchSlopX = kDragSlopDefault,
     double touchSlopY = kDragSlopDefault,
-    Duration duration,
-    double frequency = 60.0,
   }) {
     assert(kDragSlopDefault > kTouchSlop);
-    if (duration == null) {
-      return TestAsyncUtils.guard<void>(() async {
-        final TestGesture gesture = await startGesture(
-          startLocation,
-          pointer: pointer,
-          buttons: buttons,
-        );
-        assert(gesture != null);
-        for (final Offset dragOffset in _separateDragOffset(offset, touchSlopX, touchSlopY)) {
-          await gesture.moveBy(dragOffset);
-        }
-        await gesture.up();
-      });
-    }
-    assert(frequency > 0);
-    final int intervals = duration.inMicroseconds * frequency ~/ 1E6;
-    assert(intervals > 0);
-    final List<Duration> timeStamps = <Duration>[
-      for (int t = 0; t <= intervals; t += 1)
-        duration * t ~/ intervals,
-    ];
-    final List<Offset> offsets = <Offset>[
-      startLocation,
-      for (int t = 0; t <= intervals; t += 1)
-        startLocation + offset * (t / intervals),
-    ];
-    Iterable<PointerEvent> offsetToMoveEvents(
-      Duration timeStamp,
-      Offset start,
-      Offset end,
-    ) sync* {
-      for (final Offset delta in _separateDragOffset(end - start, touchSlopX, touchSlopY)) {
-        yield PointerMoveEvent(
-          timeStamp: timeStamp,
-          position: start,
-          delta: delta,
-          pointer: pointer,
-          buttons: buttons,
-        );
-        start += delta;
-      }
-    }
-    final List<PointerEventRecord> records = <PointerEventRecord>[
-      PointerEventRecord(Duration.zero, <PointerEvent>[
-          PointerAddedEvent(
-            timeStamp: Duration.zero,
-            position: startLocation,
-          ),
-          PointerDownEvent(
-            timeStamp: Duration.zero,
-            position: startLocation,
-            pointer: pointer,
-            buttons: buttons,
-          ),
-        ]),
-      ...<PointerEventRecord>[
-        for(int t = 0; t <= intervals; t += 1)
-          PointerEventRecord(timeStamps[t], offsetToMoveEvents(
-            timeStamps[t],
-            offsets[t],
-            offsets[t+1],
-          ).toList()),
-      ],
-      PointerEventRecord(duration, <PointerEvent>[
-        PointerUpEvent(
-          timeStamp: duration,
-          position: offsets.last,
-          pointer: pointer,
-          buttons: buttons,
-        )
-      ]),
-    ];
     return TestAsyncUtils.guard<void>(() async {
-      return handlePointerEventRecord(records);
+      final TestGesture gesture = await startGesture(
+        startLocation,
+        pointer: pointer,
+        buttons: buttons,
+      );
+      assert(gesture != null);
+      for (final Offset dragOffset in _separateDragOffset(offset, touchSlopX, touchSlopY)) {
+        await gesture.moveBy(dragOffset);
+      }
+      await gesture.up();
     });
   }
 
@@ -689,6 +618,113 @@ abstract class WidgetController {
       } else { // The drag ends inside the box.
         yield offset;
       }
+  }
+
+  /// Attempts to drag the given widget by the given offset in the `duration`
+  /// time, starting in the middle of the widget.
+  ///
+  /// If the middle of the widget is not exposed, this might send
+  /// events to another object.
+  ///
+  /// This is the timed version of [drag].
+  ///
+  /// The move events are sent at a given `frequency` in Hz (or events per
+  /// second). It defaults to 60Hz.
+  ///
+  /// The movement is linear in time.
+  ///
+  /// See also [LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive] for
+  /// more accurate time control.
+  Future<void> slowDrag(
+    Finder finder,
+    Offset offset,
+    Duration duration, {
+    int pointer,
+    int buttons = kPrimaryButton,
+    double frequency = 60.0,
+  }) {
+    return slowDragFrom(
+      getCenter(finder),
+      offset,
+      duration,
+      pointer: pointer,
+      buttons: buttons,
+      frequency: frequency,
+    );
+  }
+
+  /// Attempts a series of [PointerEvent]s to simulate a drag operation in the
+  /// `duration` time.
+  ///
+  /// If the middle of the widget is not exposed, this might send
+  /// events to another object.
+  ///
+  /// This is the timed version of [drag].
+  ///
+  /// The move events are sent at a given `frequency` in Hz (or events per
+  /// second). It defaults to 60Hz.
+  ///
+  /// The movement is linear in time.
+  ///
+  /// See also [LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive] for
+  /// more accurate time control.
+  Future<void> slowDragFrom(
+    Offset startLocation,
+    Offset offset,
+    Duration duration, {
+    int pointer,
+    int buttons = kPrimaryButton,
+    double frequency = 60.0,
+  }) {
+    assert(frequency > 0);
+    final int intervals = duration.inMicroseconds * frequency ~/ 1E6;
+    assert(intervals > 1);
+    final List<Duration> timeStamps = <Duration>[
+      for (int t = 0; t <= intervals; t += 1)
+        duration * t ~/ intervals,
+    ];
+    final List<Offset> offsets = <Offset>[
+      startLocation,
+      for (int t = 0; t <= intervals; t += 1)
+        startLocation + offset * (t / intervals),
+    ];
+    final List<PointerEventRecord> records = <PointerEventRecord>[
+      PointerEventRecord(Duration.zero, <PointerEvent>[
+          PointerAddedEvent(
+            timeStamp: Duration.zero,
+            position: startLocation,
+          ),
+          PointerDownEvent(
+            timeStamp: Duration.zero,
+            position: startLocation,
+            pointer: pointer,
+            buttons: buttons,
+          ),
+        ]),
+      ...<PointerEventRecord>[
+        for(int t = 0; t <= intervals; t += 1)
+          PointerEventRecord(timeStamps[t], <PointerEvent>[
+            PointerMoveEvent(
+              timeStamp: timeStamps[t],
+              position: offsets[t+1],
+              delta: offsets[t+1] - offsets[t],
+              pointer: pointer,
+              buttons: buttons,
+            )
+          ]),
+      ],
+      PointerEventRecord(duration, <PointerEvent>[
+        PointerUpEvent(
+          timeStamp: duration,
+          position: offsets.last,
+          pointer: pointer,
+          buttons: buttons,
+        )
+      ]),
+    ];
+    return TestAsyncUtils.guard<void>(() async {
+      return handlePointerEventRecord(records);
+    });
   }
 
   /// The next available pointer identifier.
