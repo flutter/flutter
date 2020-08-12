@@ -411,15 +411,6 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
-  # flutter_gallery_instrumentation_test:
-  #   description: >
-  #     Same as flutter_gallery__transition_perf but uses Android instrumentation
-  #     framework, and therefore does not require a host computer to run. This
-  #     test can run on off-the-shelf infrastructures, such as Firebase Test Lab.
-  #   stage: devicelab
-  #   required_agent_capabilities: ["linux/android"]
-  #   flaky: true
-
   linux_chrome_dev_mode:
     description: >
       Run flutter web on the devicelab and hot restart.
@@ -762,6 +753,14 @@ tasks:
       Android.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+
+  flutter_gallery__transition_perf_e2e:
+    description: >
+      Measures the performance of screen transitions in Flutter Gallery on
+      Android with e2e.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
 
   flutter_gallery_sksl_warmup__transition_perf:
     description: >
