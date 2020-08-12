@@ -1246,6 +1246,11 @@ class SkPictureRecorder {
   external void delete();
 }
 
+/// We do not use the `delete` method (which may be removed in the future anyway).
+///
+/// By Skia coding convention raw pointers should always be treated as
+/// "borrowed", i.e. their memory is managed by other objects. In the case of
+/// [SkCanvas] it is managed by [SkPictureRecorder].
 @JS()
 class SkCanvas {
   external void clear(Float32List color);
@@ -1547,7 +1552,9 @@ class SkTextRange {
 }
 
 @JS()
-class SkVertices {}
+class SkVertices {
+  external void delete();
+}
 
 @JS()
 @anonymous

@@ -5,7 +5,10 @@
 // @dart = 2.10
 part of engine;
 
-/// A Dart wrapper around Skia's SKCanvas.
+/// A Dart wrapper around Skia's [SkCanvas].
+///
+/// This is intentionally not memory-managing the underlying [SkCanvas]. See
+/// the docs on [SkCanvas], which explain the reason.
 class CkCanvas {
   final SkCanvas skCanvas;
 
@@ -203,7 +206,7 @@ class CkCanvas {
       ui.Vertices vertices, ui.BlendMode blendMode, CkPaint paint) {
     CkVertices skVertices = vertices as CkVertices;
     skCanvas.drawVertices(
-      skVertices.skVertices,
+      skVertices.skiaObject,
       toSkBlendMode(blendMode),
       paint.skiaObject,
     );
