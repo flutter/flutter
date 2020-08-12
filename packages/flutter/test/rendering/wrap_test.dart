@@ -71,13 +71,13 @@ void main() {
   });
 
   test('Compute intrinsic height test for width-in-height-out children', () {
-    const double lineSize = 15.0;
+    const double lineHeight = 15.0;
     final RenderWrap renderWrap = RenderWrap();
     renderWrap.add(
       RenderParagraph(
         const TextSpan(
           text: 'A very very very very very very very very long text',
-          style: TextStyle(fontSize: lineSize),
+          style: TextStyle(fontSize: lineHeight),
         ),
         textDirection: TextDirection.ltr,
       ),
@@ -87,13 +87,13 @@ void main() {
     renderWrap.runSpacing = 0;
     renderWrap.direction = Axis.horizontal;
 
-    expect(renderWrap.computeMaxIntrinsicHeight(double.infinity), lineSize);
-    expect(renderWrap.computeMaxIntrinsicHeight(600), 2 * lineSize);
-    expect(renderWrap.computeMaxIntrinsicHeight(300), 3 * lineSize);
+    expect(renderWrap.computeMaxIntrinsicHeight(double.infinity), lineHeight);
+    expect(renderWrap.computeMaxIntrinsicHeight(600), 2 * lineHeight);
+    expect(renderWrap.computeMaxIntrinsicHeight(300), 3 * lineHeight);
   });
 
   test('Compute intrinsic width test for height-in-width-out children', () {
-    const double lineSize = 15.0;
+    const double lineHeight = 15.0;
     final RenderWrap renderWrap = RenderWrap();
     renderWrap.add(
       // Rotates a width-in-height-out render object to make it height-in-width-out.
@@ -102,7 +102,7 @@ void main() {
         child: RenderParagraph(
           const TextSpan(
             text: 'A very very very very very very very very long text',
-            style: TextStyle(fontSize: lineSize),
+            style: TextStyle(fontSize: lineHeight),
           ),
           textDirection: TextDirection.ltr,
         )
@@ -113,9 +113,9 @@ void main() {
     renderWrap.runSpacing = 0;
     renderWrap.direction = Axis.vertical;
 
-    expect(renderWrap.computeMaxIntrinsicWidth(double.infinity), lineSize);
-    expect(renderWrap.computeMaxIntrinsicWidth(600), 2 * lineSize);
-    expect(renderWrap.computeMaxIntrinsicWidth(300), 3 * lineSize);
+    expect(renderWrap.computeMaxIntrinsicWidth(double.infinity), lineHeight);
+    expect(renderWrap.computeMaxIntrinsicWidth(600), 2 * lineHeight);
+    expect(renderWrap.computeMaxIntrinsicWidth(300), 3 * lineHeight);
   });
 
   test('Compute intrinsic width test', () {
