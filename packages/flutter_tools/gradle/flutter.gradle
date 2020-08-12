@@ -867,7 +867,7 @@ abstract class BaseFlutterTask extends DefaultTask {
     String dartDefines
     @Optional @Input
     String bundleSkSLPath
-    @Optional @input
+    @Optional @Input
     String codeSizeDirectory;
     String performanceMeasurementFile;
 
