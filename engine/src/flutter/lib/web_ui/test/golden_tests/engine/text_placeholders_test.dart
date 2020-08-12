@@ -30,7 +30,7 @@ void main() async {
     recordingCanvas.endRecording();
     recordingCanvas.apply(canvas, screenRect);
     return scuba.diffCanvasScreenshot(canvas, 'text_with_placeholders');
-  }, bSkipHoudini: true);
+  });
 }
 
 const Color black = Color(0xFF000000);

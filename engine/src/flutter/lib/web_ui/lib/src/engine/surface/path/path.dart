@@ -1542,12 +1542,6 @@ class SurfacePath implements ui.Path {
   ui.Rect? get webOnlyPathAsCircle =>
       pathRef.isOval == -1 ? null : pathRef.getBounds();
 
-  /// Serializes this path to a value that's sent to a CSS custom painter for
-  /// painting.
-  List<dynamic> webOnlySerializeToCssPaint() {
-    throw UnimplementedError();
-  }
-
   /// Returns if Path is empty.
   /// Empty Path may have FillType but has no points, verbs or weights.
   /// Constructor, reset and rewind makes SkPath empty.

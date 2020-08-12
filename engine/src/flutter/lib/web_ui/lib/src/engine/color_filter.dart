@@ -169,8 +169,4 @@ class EngineColorFilter implements ui.ColorFilter {
         return 'Unknown ColorFilter type. This is an error. If you\'re seeing this, please file an issue at https://github.com/flutter/flutter/issues/new.';
     }
   }
-
-  List<dynamic> webOnlySerializeToCssPaint() {
-    throw UnsupportedError('ColorFilter for CSS paint not yet supported');
-  }
 }

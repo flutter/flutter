@@ -133,7 +133,7 @@ void _testCullRectComputation() {
     });
     builder.build();
 
-    final PersistedStandardPicture picture = enumeratePictures().single;
+    final PersistedPicture picture = enumeratePictures().single;
     expect(picture.optimalLocalCullRect, const Rect.fromLTRB(0, 0, 500, 100));
   }, skip: '''TODO(https://github.com/flutter/flutter/issues/40395)
   Needs ability to set iframe to 500,100 size. Current screen seems to be 500,500''');
@@ -147,7 +147,7 @@ void _testCullRectComputation() {
     });
     builder.build();
 
-    final PersistedStandardPicture picture = enumeratePictures().single;
+    final PersistedPicture picture = enumeratePictures().single;
     expect(picture.optimalLocalCullRect, const Rect.fromLTRB(0, 0, 20, 20));
   });
 
@@ -161,7 +161,7 @@ void _testCullRectComputation() {
     });
     builder.build();
 
-    final PersistedStandardPicture picture = enumeratePictures().single;
+    final PersistedPicture picture = enumeratePictures().single;
     expect(picture.optimalLocalCullRect, Rect.zero);
     expect(picture.debugExactGlobalCullRect, Rect.zero);
   });
@@ -176,7 +176,7 @@ void _testCullRectComputation() {
     });
     builder.build();
 
-    final PersistedStandardPicture picture = enumeratePictures().single;
+    final PersistedPicture picture = enumeratePictures().single;
     expect(picture.optimalLocalCullRect, const Rect.fromLTRB(40, 40, 60, 60));
   });
 
@@ -195,7 +195,7 @@ void _testCullRectComputation() {
 
     builder.build();
 
-    final PersistedStandardPicture picture = enumeratePictures().single;
+    final PersistedPicture picture = enumeratePictures().single;
     expect(picture.optimalLocalCullRect, const Rect.fromLTRB(40, 40, 60, 60));
   });
 
@@ -213,7 +213,7 @@ void _testCullRectComputation() {
 
     builder.build();
 
-    final PersistedStandardPicture picture = enumeratePictures().single;
+    final PersistedPicture picture = enumeratePictures().single;
     expect(
         picture.debugExactGlobalCullRect, const Rect.fromLTRB(0, 70, 20, 100));
     expect(picture.optimalLocalCullRect, const Rect.fromLTRB(0, -20, 20, 10));
@@ -244,7 +244,7 @@ void _testCullRectComputation() {
     await matchGoldenFile('compositing_cull_rect_fills_layer_clip.png',
         region: region);
 
-    final PersistedStandardPicture picture = enumeratePictures().single;
+    final PersistedPicture picture = enumeratePictures().single;
     expect(picture.optimalLocalCullRect, const Rect.fromLTRB(40, 40, 70, 70));
   });
 
@@ -274,7 +274,7 @@ void _testCullRectComputation() {
         'compositing_cull_rect_intersects_clip_and_paint_bounds.png',
         region: region);
 
-    final PersistedStandardPicture picture = enumeratePictures().single;
+    final PersistedPicture picture = enumeratePictures().single;
     expect(picture.optimalLocalCullRect, const Rect.fromLTRB(50, 40, 70, 70));
   });
 
@@ -305,7 +305,7 @@ void _testCullRectComputation() {
     await matchGoldenFile('compositing_cull_rect_offset_inside_layer_clip.png',
         region: region);
 
-    final PersistedStandardPicture picture = enumeratePictures().single;
+    final PersistedPicture picture = enumeratePictures().single;
     expect(picture.optimalLocalCullRect,
         const Rect.fromLTRB(-15.0, -20.0, 15.0, 0.0));
   });
@@ -335,7 +335,7 @@ void _testCullRectComputation() {
 
     builder.build();
 
-    final PersistedStandardPicture picture = enumeratePictures().single;
+    final PersistedPicture picture = enumeratePictures().single;
     expect(picture.optimalLocalCullRect, Rect.zero);
     expect(picture.debugExactGlobalCullRect, Rect.zero);
   });
@@ -378,7 +378,7 @@ void _testCullRectComputation() {
 
     await matchGoldenFile('compositing_cull_rect_rotated.png', region: region);
 
-    final PersistedStandardPicture picture = enumeratePictures().single;
+    final PersistedPicture picture = enumeratePictures().single;
     expect(
       picture.optimalLocalCullRect,
       within(
@@ -510,7 +510,7 @@ void _testCullRectComputation() {
     await matchGoldenFile('compositing_3d_rotate1.png', region: region);
 
     // ignore: unused_local_variable
-    final PersistedStandardPicture picture = enumeratePictures().single;
+    final PersistedPicture picture = enumeratePictures().single;
     // TODO(https://github.com/flutter/flutter/issues/40395):
     //   Needs ability to set iframe to 500,100 size. Current screen seems to be 500,500.
     // expect(

@@ -1323,10 +1323,6 @@ abstract class ColorFilter {
   /// to the RGB channels.
   const factory ColorFilter.srgbToLinearGamma() =
       engine.EngineColorFilter.srgbToLinearGamma;
-
-  List<dynamic> webOnlySerializeToCssPaint() {
-    throw UnsupportedError('ColorFilter for CSS paint not yet supported');
-  }
 }
 
 /// Styles to use for blurs in [MaskFilter] objects.
@@ -1401,10 +1397,6 @@ class MaskFilter {
 
   @override
   int get hashCode => hashValues(_style, _sigma);
-
-  List<dynamic> webOnlySerializeToCssPaint() {
-    return <dynamic>[_style.index, _sigma];
-  }
 
   @override
   String toString() => 'MaskFilter.blur($_style, ${_sigma.toStringAsFixed(1)})';

@@ -11,10 +11,6 @@ abstract class EngineGradient implements ui.Gradient {
 
   /// Creates a fill style to be used in painting.
   Object createPaintStyle(html.CanvasRenderingContext2D? ctx);
-
-  List<dynamic> webOnlySerializeToCssPaint() {
-    throw UnsupportedError('CSS paint not implemented for this shader type');
-  }
 }
 
 class GradientSweep extends EngineGradient {
@@ -99,24 +95,6 @@ class GradientLinear extends EngineGradient {
       gradient.addColorStop(colorStops[i], colorToCssString(colors[i])!);
     }
     return gradient;
-  }
-
-  @override
-  List<dynamic> webOnlySerializeToCssPaint() {
-    final List<dynamic> serializedColors = <dynamic>[];
-    for (int i = 0; i < colors.length; i++) {
-      serializedColors.add(colorToCssString(colors[i]));
-    }
-    return <dynamic>[
-      1,
-      from.dx,
-      from.dy,
-      to.dx,
-      to.dy,
-      serializedColors,
-      colorStops,
-      tileMode.index
-    ];
   }
 }
 
