@@ -722,7 +722,10 @@ abstract class WidgetController {
           timeStamp: duration,
           position: offsets.last,
           pointer: pointer,
-          buttons: buttons,
+          // The PointerData recieved from the engine with
+          // chagne = PointerChnage.up, which translates to PointerUpEvent,
+          // doesn't provide the button field.
+          // buttons: buttons,
         )
       ]),
     ];
