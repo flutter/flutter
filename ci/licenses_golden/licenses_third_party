@@ -1,4 +1,4 @@
-Signature: c732998af886e8999c8b59fdef4c6652
+Signature: b3e221eeb8d536862d5470f615d09603
 
 UNUSED LICENSES:
 
@@ -22044,7 +22044,7 @@ FILE: ../../../third_party/dart/third_party/wasmer/wasmer.rs
 ----------------------------------------------------------------------------------------------------
 MIT License
 
-Copyright (c) 2019 Wasmer, Inc. and its affiliates.
+Copyright (c) 2019-present Wasmer, Inc. and its affiliates.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
