@@ -5,8 +5,7 @@
 #import <OCMock/OCMock.h>
 #import <XCTest/XCTest.h>
 #include "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterBinaryMessengerRelay.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Test.h"
+#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngine.h"
 
 FLUTTER_ASSERT_ARC
 
@@ -78,25 +77,6 @@ FLUTTER_ASSERT_ARC
     engine = nil;
   }
   OCMVerify([plugin detachFromEngineForRegistrar:[OCMArg any]]);
-}
-
-- (void)testRunningInitialRouteSendsNavigationMessage {
-  id mockBinaryMessenger = OCMClassMock([FlutterBinaryMessengerRelay class]);
-
-  FlutterEngine* engine = [[FlutterEngine alloc] init];
-  [engine setBinaryMessenger:mockBinaryMessenger];
-
-  // Run with an initial route.
-  [engine runWithEntrypoint:FlutterDefaultDartEntrypoint initialRoute:@"test"];
-
-  // Now check that an encoded method call has been made on the binary messenger to set the
-  // initial route to "test".
-  FlutterMethodCall* setInitialRouteMethodCall =
-      [FlutterMethodCall methodCallWithMethodName:@"setInitialRoute" arguments:@"test"];
-  NSData* encodedSetInitialRouteMethod =
-      [[FlutterJSONMethodCodec sharedInstance] encodeMethodCall:setInitialRouteMethodCall];
-  OCMVerify([mockBinaryMessenger sendOnChannel:@"flutter/navigation"
-                                       message:encodedSetInitialRouteMethod]);
 }
 
 @end
