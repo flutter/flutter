@@ -146,6 +146,9 @@ template("flutter_runner") {
   if (defined(invoker.extra_defines)) {
     extra_defines += invoker.extra_defines
   }
+  if (is_debug) {
+    extra_defines += [ "DEBUG" ]  # Needed due to direct dart dependencies.
+  }
 
   executable(target_name) {
     output_name = invoker_output_name

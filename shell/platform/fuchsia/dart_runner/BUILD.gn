@@ -18,6 +18,9 @@ template("runner") {
   invoker_output_name = invoker.output_name
   extra_defines = invoker.extra_defines
   extra_deps = invoker.extra_deps
+  if (is_debug) {
+    extra_defines += [ "DEBUG" ]  # Needed due to direct dart dependencies.
+  }
 
   executable(target_name) {
     output_name = invoker_output_name
