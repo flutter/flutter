@@ -216,8 +216,8 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   /// To use a different [RestorationManager] subclasses can override
   /// [createRestorationManager], which is called to create the instance
   /// returned by this getter.
-  RestorationManager get restorationManager => _restorationManager;
-  late RestorationManager _restorationManager;
+  RestorationManager get restorationManager => _restorationManager!;
+  RestorationManager? _restorationManager;
 
   /// Creates the [RestorationManager] instance available via
   /// [restorationManager].
@@ -319,7 +319,7 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
   }
 
   @override
-  bool checkMessageHandler(String channel, MessageHandler handler) => _handlers[channel] == handler;
+  bool checkMessageHandler(String channel, MessageHandler? handler) => _handlers[channel] == handler;
 
   @override
   void setMockMessageHandler(String channel, MessageHandler? handler) {
@@ -330,5 +330,5 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
   }
 
   @override
-  bool checkMockMessageHandler(String channel, MessageHandler handler) => _mockHandlers[channel] == handler;
+  bool checkMockMessageHandler(String channel, MessageHandler? handler) => _mockHandlers[channel] == handler;
 }
