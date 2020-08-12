@@ -25,6 +25,11 @@ NS_ASSUME_NONNULL_BEGIN
 extern NSString* const FlutterDefaultDartEntrypoint;
 
 /**
+ * The default Flutter initial route ("/").
+ */
+extern NSString* const FlutterDefaultInitialRoute;
+
+/**
  * The FlutterEngine class coordinates a single instance of execution for a
  * `FlutterDartProject`.  It may have zero or one `FlutterViewController` at a
  * time, which can be specified via `-setViewController:`.
@@ -52,6 +57,24 @@ extern NSString* const FlutterDefaultDartEntrypoint;
  */
 FLUTTER_EXPORT
 @interface FlutterEngine : NSObject <FlutterTextureRegistry, FlutterPluginRegistry>
+
+/**
+ * Default initializer for a FlutterEngine.
+ *
+ * Threads created by this FlutterEngine will appear as "FlutterEngine #" in
+ * Instruments. The prefix can be customized using `initWithName`.
+ *
+ * The engine will execute the project located in the bundle with the identifier
+ * "io.flutter.flutter.app" (the default for Flutter projects).
+ *
+ * A newly initialized engine will not run until either `-runWithEntrypoint:` or
+ * `-runWithEntrypoint:libraryURI:` is called.
+ *
+ * FlutterEngine created with this method will have allowHeadlessExecution set to `YES`.
+ * This means that the engine will continue to run regardless of whether a `FlutterViewController`
+ * is attached to it or not, until `-destroyContext:` is called or the process finishes.
+ */
+- (instancetype)init;
 
 /**
  * Initialize this FlutterEngine.
@@ -114,17 +137,12 @@ FLUTTER_EXPORT
                      project:(nullable FlutterDartProject*)project
       allowHeadlessExecution:(BOOL)allowHeadlessExecution NS_DESIGNATED_INITIALIZER;
 
-/**
- * The default initializer is not available for this object.
- * Callers must use `-[FlutterEngine initWithName:project:]`.
- */
-- (instancetype)init NS_UNAVAILABLE;
-
 + (instancetype)new NS_UNAVAILABLE;
 
 /**
  * Runs a Dart program on an Isolate from the main Dart library (i.e. the library that
- * contains `main()`), using `main()` as the entrypoint (the default for Flutter projects).
+ * contains `main()`), using `main()` as the entrypoint (the default for Flutter projects),
+ * and using "/" (the default route) as the initial route.
  *
  * The first call to this method will create a new Isolate. Subsequent calls will return
  * immediately and have no effect.
@@ -135,7 +153,7 @@ FLUTTER_EXPORT
 
 /**
  * Runs a Dart program on an Isolate from the main Dart library (i.e. the library that
- * contains `main()`).
+ * contains `main()`), using "/" (the default route) as the initial route.
  *
  * The first call to this method will create a new Isolate. Subsequent calls will return
  * immediately and have no effect.
@@ -148,6 +166,25 @@ FLUTTER_EXPORT
  * @return YES if the call succeeds in creating and running a Flutter Engine instance; NO otherwise.
  */
 - (BOOL)runWithEntrypoint:(nullable NSString*)entrypoint;
+
+/**
+ * Runs a Dart program on an Isolate from the main Dart library (i.e. the library that
+ * contains `main()`).
+ *
+ * The first call to this method will create a new Isolate. Subsequent calls will return
+ * immediately and have no effect.
+ *
+ * @param entrypoint The name of a top-level function from the same Dart
+ *   library that contains the app's main() function.  If this is FlutterDefaultDartEntrypoint (or
+ *   nil), it will default to `main()`.  If it is not the app's main() function, that function must
+ *   be decorated with `@pragma(vm:entry-point)` to ensure the method is not tree-shaken by the Dart
+ *   compiler.
+ * @param initialRoute The name of the initial Flutter `Navigator` `Route` to load. If this is
+ *   FlutterDefaultInitialRoute (or nil), it will default to the "/" route.
+ * @return YES if the call succeeds in creating and running a Flutter Engine instance; NO otherwise.
+ */
+- (BOOL)runWithEntrypoint:(nullable NSString*)entrypoint
+             initialRoute:(nullable NSString*)initialRoute;
 
 /**
  * Runs a Dart program on an Isolate using the specified entrypoint and Dart library,
