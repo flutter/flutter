@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import '../artifacts.dart';
+import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -20,6 +21,7 @@ Future<void> buildLinux(
   LinuxProject linuxProject,
   BuildInfo buildInfo, {
     String target = 'lib/main.dart',
+    SizeAnalyzer sizeAnalyzer,
   }) async {
   if (!linuxProject.cmakeFile.existsSync()) {
     throwToolExit('No Linux desktop project configured. See '
@@ -52,6 +54,15 @@ Future<void> buildLinux(
     await _runBuild(buildDirectory);
   } finally {
     status.cancel();
+  }
+  if (buildInfo.codeSizeDirectory != null && sizeAnalyzer != null) {
+    final File codeSizeFile = globals.fs.directory(buildInfo.codeSizeDirectory)
+      .listSync().whereType<File>().first;
+    await sizeAnalyzer.analyzeAotSnapshot(
+      aotSnapshot: codeSizeFile,
+      // This analysis is only supported for release builds.
+      outputDirectory: globals.fs.directory(globals.fs.path.join(getLinuxBuildDirectory(), 'runner', 'Release')),
+    );
   }
 }
 

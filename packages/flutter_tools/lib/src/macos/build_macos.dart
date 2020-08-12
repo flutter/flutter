@@ -4,6 +4,7 @@
 
 import 'package:meta/meta.dart';
 
+import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -21,6 +22,7 @@ Future<void> buildMacOS({
   BuildInfo buildInfo,
   String targetOverride,
   @required bool verboseLogging,
+  SizeAnalyzer sizeAnalyzer,
 }) async {
   if (!flutterProject.macos.xcodeWorkspace.existsSync()) {
     throwToolExit('No macOS desktop project configured. '
@@ -96,6 +98,15 @@ Future<void> buildMacOS({
   }
   if (result != 0) {
     throwToolExit('Build process failed');
+  }
+  if (buildInfo.codeSizeDirectory != null && sizeAnalyzer != null) {
+    final File codeSizeFile = globals.fs.directory(buildInfo.codeSizeDirectory)
+      .listSync().whereType<File>().first;
+    await sizeAnalyzer.analyzeAotSnapshot(
+      aotSnapshot: codeSizeFile,
+      // This analysis is only supported for release builds.
+      outputDirectory: globals.fs.directory(globals.fs.path.join(getMacOSBuildDirectory(), 'runner', 'Release')),
+    );
   }
   globals.flutterUsage.sendTiming('build', 'xcode-macos', Duration(milliseconds: sw.elapsedMilliseconds));
 }

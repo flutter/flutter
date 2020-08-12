@@ -30,6 +30,49 @@ class SizeAnalyzer {
 
   static const int tableWidth = 80;
 
+  /// Analyze the [aotSnapshot] in an uncompressed output directory.
+  Future<Map<String, dynamic>> analyzeAotSnapshot({
+    @required Directory outputDirectory,
+    @required File aotSnapshot
+  }) async {
+    logger.printStatus('▒' * tableWidth);
+    logger.printStatus('━' * tableWidth);
+    final _SymbolNode apkAnalysisRoot = _parseDirectory(outputDirectory);
+
+    // Convert an AOT snapshot file into a map.
+    final Map<String, dynamic> processedAotSnapshotJson = treemapFromJson(
+      json.decode(aotSnapshot.readAsStringSync()),
+    );
+    final _SymbolNode aotSnapshotJsonRoot = _parseAotSnapshot(processedAotSnapshotJson);
+
+    for (final _SymbolNode firstLevelPath in apkAnalysisRoot.children) {
+      _printEntitySize(
+        firstLevelPath.name,
+        byteSize: firstLevelPath.byteSize,
+        level: 1,
+      );
+      // Print the expansion of lib directory to show more info for `appFilename`.
+      if (firstLevelPath.name == 'lib') {
+        _printLibChildrenPaths(firstLevelPath, '', aotSnapshotJsonRoot);
+      }
+    }
+
+    logger.printStatus('▒' * tableWidth);
+
+    Map<String, dynamic> apkAnalysisJson = apkAnalysisRoot.toJson();
+
+    apkAnalysisJson['type'] = 'snapshot';
+
+    assert(_appFilename != null);
+    apkAnalysisJson = _addAotSnapshotDataToApkAnalysis(
+      apkAnalysisJson: apkAnalysisJson,
+      path: 'lib/arm64-v8a/$_appFilename (Dart AOT)'.split('/'), // Pass in a list of paths by splitting with '/'.
+      aotSnapshotJson: processedAotSnapshotJson,
+    );
+
+    return apkAnalysisJson;
+  }
+
   /// Analyzes [apk] and [aotSnapshot] to output a [Map] object that includes
   /// the breakdown of the both files, where the breakdown of [aotSnapshot] is placed
   /// under 'lib/arm64-v8a/$_appFilename'.
@@ -93,7 +136,6 @@ class SizeAnalyzer {
 
     apkAnalysisJson['type'] = 'apk';
 
-    // TODO(peterdjlee): Add aot snapshot for all platforms.
     assert(_appFilename != null);
     apkAnalysisJson = _addAotSnapshotDataToApkAnalysis(
       apkAnalysisJson: apkAnalysisJson,
@@ -103,7 +145,6 @@ class SizeAnalyzer {
 
     return apkAnalysisJson;
   }
-
 
   // Expression to match 'Size' column to group 1 and 'Name' column to group 2.
   final RegExp _parseUnzipOutput = RegExp(r'^\s*\d+\s+[\w|:]+\s+(\d+)\s+.*  (.+)$');
@@ -131,10 +172,22 @@ class SizeAnalyzer {
       const int nameGroupIndex = 2;
       pathsToSize[match.group(nameGroupIndex).split('/')] = int.parse(match.group(sizeGroupIndex));
     }
+    return _buildSymbolTree(pathsToSize);
+  }
 
-    final _SymbolNode rootNode = _SymbolNode('Root');
+  _SymbolNode _parseDirectory(Directory directory) {
+    final Map<List<String>, int> pathsToSize = <List<String>, int>{};
+    for (final File file in directory.listSync(recursive: true).whereType<File>()) {
+      final List<String> path = fileSystem.path.split(file.path);
+      pathsToSize[path] = file.lengthSync();
+    }
+    return _buildSymbolTree(pathsToSize);
+  }
 
+  _SymbolNode _buildSymbolTree(Map<List<String>, int> pathsToSize) {
+     final _SymbolNode rootNode = _SymbolNode('Root');
     _SymbolNode currentNode = rootNode;
+
     for (final List<String> paths in pathsToSize.keys) {
       for (final String path in paths) {
         _SymbolNode childWithPathAsName = currentNode.childByName(path);
@@ -154,7 +207,6 @@ class SizeAnalyzer {
       }
       currentNode = rootNode;
     }
-
     return rootNode;
   }
 

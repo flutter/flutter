@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import '../artifacts.dart';
+import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -25,6 +26,7 @@ const String _cmakeVisualStudioGeneratorIdentifier = 'Visual Studio 16 2019';
 Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   String target,
   VisualStudio visualStudioOverride,
+  SizeAnalyzer sizeAnalyzer,
 }) async {
   if (!windowsProject.cmakeFile.existsSync()) {
     throwToolExit(
@@ -74,6 +76,15 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
     await _runBuild(cmakePath, buildDirectory, buildModeName);
   } finally {
     status.cancel();
+  }
+  if (buildInfo.codeSizeDirectory != null && sizeAnalyzer != null) {
+    final File codeSizeFile = globals.fs.directory(buildInfo.codeSizeDirectory)
+      .listSync().whereType<File>().first;
+    await sizeAnalyzer.analyzeAotSnapshot(
+      aotSnapshot: codeSizeFile,
+      // This analysis is only supported for release builds.
+      outputDirectory: globals.fs.directory(globals.fs.path.join(getWindowsBuildDirectory(), 'runner', 'Release')),
+    );
   }
 }
 

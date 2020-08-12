@@ -4,7 +4,9 @@
 
 import 'dart:async';
 
+import '../base/analyze_size.dart';
 import '../base/common.dart';
+import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../features.dart';
@@ -30,6 +32,7 @@ class BuildLinuxCommand extends BuildSubCommand {
     addBuildPerformanceFile(hide: !verboseHelp);
     addBundleSkSLPathOption(hide: !verboseHelp);
     addNullSafetyModeOptions(hide: !verboseHelp);
+    usesAnalyzeSizeFlag();
   }
 
   @override
@@ -56,7 +59,16 @@ class BuildLinuxCommand extends BuildSubCommand {
     if (!globals.platform.isLinux) {
       throwToolExit('"build linux" only supported on Linux hosts.');
     }
-    await buildLinux(flutterProject.linux, buildInfo, target: targetFile);
+    await buildLinux(
+      flutterProject.linux,
+      buildInfo,
+      target: targetFile,
+      sizeAnalyzer: SizeAnalyzer(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processUtils: processUtils,
+      ),
+    );
     return FlutterCommandResult.success();
   }
 }

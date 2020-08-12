@@ -46,7 +46,7 @@ class DepfileService {
     final List<String> colonSeparated = contents.split(': ');
     if (colonSeparated.length != 2) {
       _logger.printError('Invalid depfile: ${file.path}');
-      return const Depfile(<File>[], <File>[]);
+      return Depfile(<File>[], <File>[]);
     }
     final List<File> inputs = _processList(colonSeparated[1].trim());
     final List<File> outputs = _processList(colonSeparated[0].trim());
@@ -112,7 +112,7 @@ class DepfileService {
 /// A class for representing depfile formats.
 class Depfile {
   /// Create a [Depfile] from a list of [input] files and [output] files.
-  const Depfile(this.inputs, this.outputs);
+  Depfile(this.inputs, this.outputs);
 
   /// The input files for this depfile.
   final List<File> inputs;

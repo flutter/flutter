@@ -30,14 +30,19 @@ abstract class AotAssemblyBase extends Target {
   String get analyticsName => 'ios_aot';
 
   @override
+  List<String> get depfiles => <String>[
+    'aot_assembly.d',
+  ];
+
+  @override
   Future<void> build(Environment environment) async {
     final AOTSnapshotter snapshotter = AOTSnapshotter(
       reportTimings: false,
-      fileSystem: globals.fs,
-      logger: globals.logger,
+      fileSystem: environment.fileSystem,
+      logger: environment.logger,
       xcode: globals.xcode,
-      artifacts: globals.artifacts,
-      processManager: globals.processManager,
+      artifacts: environment.artifacts,
+      processManager: environment.processManager,
     );
     final String buildOutputPath = environment.buildDir.path;
     if (environment.defines[kBuildMode] == null) {
@@ -52,7 +57,7 @@ abstract class AotAssemblyBase extends Target {
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
     final String splitDebugInfo = environment.defines[kSplitDebugInfo];
     final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
-    final List<DarwinArch> iosArchs = environment.defines[kIosArchs]
+    final List<DarwinArch> darwinArchs = environment.defines[kIosArchs]
       ?.split(' ')
       ?.map(getIOSArchForName)
       ?.toList()
@@ -60,41 +65,50 @@ abstract class AotAssemblyBase extends Target {
     if (targetPlatform != TargetPlatform.ios) {
       throw Exception('aot_assembly is only supported for iOS applications.');
     }
-    if (iosArchs.contains(DarwinArch.x86_64)) {
+    if (darwinArchs.contains(DarwinArch.x86_64)) {
       throw Exception(
         'release/profile builds are only supported for physical devices. '
-        'attempted to build for $iosArchs.'
+        'attempted to build for $darwinArchs.'
       );
     }
+    final String codeSizeDirectory = environment.inputs[kCodeSizeDirectory];
+    final DepfileService service = DepfileService(fileSystem: environment.fileSystem, logger: environment.logger);
+    final Depfile depfile = Depfile(<File>[], <File>[]);
 
     // If we're building multiple iOS archs the binaries need to be lipo'd
     // together.
     final List<Future<int>> pending = <Future<int>>[];
-    for (final DarwinArch iosArch in iosArchs) {
+    for (final DarwinArch darwinArch in darwinArchs) {
+      final List<String> archExtraGenSnapshotOptions = List<String>.of(extraGenSnapshotOptions);
+      if (codeSizeDirectory != null) {
+        final String codeSizeFile = 'snapshot.${getNameForDarwinArch(darwinArch)}.json';
+        archExtraGenSnapshotOptions.add('--write-v8-snapshot-profile-to=$codeSizeFile');
+        depfile.outputs.add(environment.fileSystem.file(codeSizeFile));
+      }
       pending.add(snapshotter.build(
         platform: targetPlatform,
         buildMode: buildMode,
         mainPath: environment.buildDir.childFile('app.dill').path,
         packagesPath: environment.projectDir.childFile('.packages').path,
-        outputPath: globals.fs.path.join(buildOutputPath, getNameForDarwinArch(iosArch)),
-        darwinArch: iosArch,
+        outputPath: environment.fileSystem.path.join(buildOutputPath, getNameForDarwinArch(darwinArch)),
+        darwinArch: darwinArch,
         bitcode: bitcode,
         quiet: true,
         splitDebugInfo: splitDebugInfo,
         dartObfuscation: dartObfuscation,
-        extraGenSnapshotOptions: extraGenSnapshotOptions,
+        extraGenSnapshotOptions: archExtraGenSnapshotOptions,
       ));
     }
     final List<int> results = await Future.wait(pending);
     if (results.any((int result) => result != 0)) {
       throw Exception('AOT snapshotter exited with code ${results.join()}');
     }
-    final String resultPath = globals.fs.path.join(environment.buildDir.path, 'App.framework', 'App');
-    globals.fs.directory(resultPath).parent.createSync(recursive: true);
-    final ProcessResult result = await globals.processManager.run(<String>[
+    final String resultPath = environment.fileSystem.path.join(environment.buildDir.path, 'App.framework', 'App');
+    environment.fileSystem.directory(resultPath).parent.createSync(recursive: true);
+    final ProcessResult result = await environment.processManager.run(<String>[
       'lipo',
-      ...iosArchs.map((DarwinArch iosArch) =>
-          globals.fs.path.join(buildOutputPath, getNameForDarwinArch(iosArch), 'App.framework', 'App')),
+      ...darwinArchs.map((DarwinArch iosArch) =>
+          environment.fileSystem.path.join(buildOutputPath, getNameForDarwinArch(iosArch), 'App.framework', 'App')),
       '-create',
       '-output',
       resultPath,
@@ -102,6 +116,7 @@ abstract class AotAssemblyBase extends Target {
     if (result.exitCode != 0) {
       throw Exception('lipo exited with code ${result.exitCode}.\n${result.stderr}');
     }
+    service.writeToFile(depfile, environment.buildDir.childFile('aot_assembly.d'));
   }
 }
 

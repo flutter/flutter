@@ -648,13 +648,11 @@ abstract class FlutterCommand extends Command<void> {
       }
     }
 
-    String analyzeSize;
-    if (argParser.options.containsKey(FlutterOptions.kAnalyzeSize)
-      && boolArg(FlutterOptions.kAnalyzeSize)
-      && !globals.platform.isWindows) {
-      final File file = globals.fsUtils.getUniqueFile(globals.fs.currentDirectory, 'flutter_size', 'json');
-      extraGenSnapshotOptions.add('--write-v8-snapshot-profile-to=${file.path}');
-      analyzeSize = file.path;
+    String codeSizeDirectory;
+    if (argParser.options.containsKey(FlutterOptions.kAnalyzeSize) && boolArg(FlutterOptions.kAnalyzeSize)) {
+      final Directory directory = globals.fsUtils.getUniqueDirectory(globals.fs.currentDirectory, 'flutter_size');
+      directory.createSync(recursive: true);
+      codeSizeDirectory = directory.path;
     }
 
     NullSafetyMode nullSafetyMode = NullSafetyMode.unsound;
@@ -688,7 +686,7 @@ abstract class FlutterCommand extends Command<void> {
       );
     }
     final BuildMode buildMode = forcedBuildMode ?? getBuildMode();
-    if (buildMode != BuildMode.release && analyzeSize != null) {
+    if (buildMode != BuildMode.release && codeSizeDirectory != null) {
       throwToolExit('--analyze-size can only be used on release builds.');
     }
 
@@ -736,7 +734,7 @@ abstract class FlutterCommand extends Command<void> {
       performanceMeasurementFile: performanceMeasurementFile,
       packagesPath: globalResults['packages'] as String ?? '.packages',
       nullSafetyMode: nullSafetyMode,
-      analyzeSize: analyzeSize,
+      codeSizeDirectory: codeSizeDirectory,
     );
   }
 

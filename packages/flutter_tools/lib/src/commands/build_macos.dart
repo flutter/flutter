@@ -6,7 +6,9 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
+import '../base/analyze_size.dart';
 import '../base/common.dart';
+import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../features.dart';
@@ -31,6 +33,7 @@ class BuildMacosCommand extends BuildSubCommand {
     addBuildPerformanceFile(hide: !verboseHelp);
     addBundleSkSLPathOption(hide: !verboseHelp);
     addNullSafetyModeOptions(hide: !verboseHelp);
+    usesAnalyzeSizeFlag();
   }
 
   @override
@@ -62,6 +65,11 @@ class BuildMacosCommand extends BuildSubCommand {
       buildInfo: buildInfo,
       targetOverride: targetFile,
       verboseLogging: globals.logger.isVerbose,
+      sizeAnalyzer: SizeAnalyzer(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processUtils: processUtils,
+      ),
     );
     return FlutterCommandResult.success();
   }

@@ -4,10 +4,13 @@
 
 import 'dart:async';
 
+import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 
 import '../application_package.dart';
+import '../base/analyze_size.dart';
 import '../base/common.dart';
+import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../globals.dart' as globals;
@@ -35,6 +38,7 @@ class BuildIOSCommand extends BuildSubCommand {
     addBuildPerformanceFile(hide: !verboseHelp);
     addBundleSkSLPathOption(hide: !verboseHelp);
     addNullSafetyModeOptions(hide: !verboseHelp);
+    usesAnalyzeSizeFlag();
     argParser
       ..addFlag('simulator',
         help: 'Build for the iOS simulator instead of the device. This changes '
@@ -101,6 +105,19 @@ class BuildIOSCommand extends BuildSubCommand {
     if (!result.success) {
       await diagnoseXcodeBuildFailure(result, globals.flutterUsage, globals.logger);
       throwToolExit('Encountered error while building for $logTarget.');
+    }
+
+    if (buildInfo.codeSizeDirectory != null) {
+      final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(fileSystem: globals.fs, logger: globals.logger, processUtils: processUtils);
+      final Iterable<File> codeSizeFiles = globals.fs.directory(buildInfo.codeSizeDirectory)
+        .listSync().whereType<File>();
+      for (final File file in codeSizeFiles) {
+        await sizeAnalyzer.analyzeAotSnapshot(
+          aotSnapshot: file,
+          // This analysis is only supported for release builds.
+          outputDirectory: globals.fs.directory(globals.fs.path.join(getIosBuildDirectory(), 'runner', 'Release')),
+        );
+      }
     }
 
     if (result.output != null) {
