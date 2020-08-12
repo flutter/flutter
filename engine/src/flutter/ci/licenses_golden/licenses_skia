@@ -1,4 +1,4 @@
-Signature: 66158512f8093c1334fc175ddeac5179
+Signature: 0c8ab73389711b42d9377a38b00b3ead
 
 UNUSED LICENSES:
 
@@ -3908,6 +3908,7 @@ FILE: ../../../third_party/skia/modules/canvaskit/wasm_tools/SIMD/simd_float_cap
 FILE: ../../../third_party/skia/modules/canvaskit/wasm_tools/SIMD/simd_int_capabilities.cpp
 FILE: ../../../third_party/skia/src/core/SkIDChangeListener.cpp
 FILE: ../../../third_party/skia/src/core/SkMatrixProvider.h
+FILE: ../../../third_party/skia/src/core/SkRuntimeEffectPriv.h
 FILE: ../../../third_party/skia/src/core/SkVM_fwd.h
 FILE: ../../../third_party/skia/src/gpu/GrBackendSemaphore.cpp
 FILE: ../../../third_party/skia/src/gpu/GrBackendSurfaceMutableStateImpl.h
@@ -5676,6 +5677,7 @@ LIBRARY: skia
 ORIGIN: ../../../third_party/skia/fuzz/oss_fuzz/FuzzAPICreateDDL.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/fuzz/FuzzCreateDDL.cpp
+FILE: ../../../third_party/skia/fuzz/FuzzPath.cpp
 FILE: ../../../third_party/skia/fuzz/FuzzRRect.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzAPICreateDDL.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzAPISVGCanvas.cpp
