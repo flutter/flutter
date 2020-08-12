@@ -4,7 +4,6 @@
 
 import 'package:crypto/crypto.dart' show md5;
 import 'package:meta/meta.dart';
-import 'package:quiver/core.dart' show hash2;
 
 import '../convert.dart' show json;
 import '../globals.dart' as globals;
@@ -168,8 +167,9 @@ class Fingerprint {
 
   @override
   // Ignore map entries here to avoid becoming inconsistent with equals
-  // due to differences in map entry order.
-  int get hashCode => hash2(_properties.length, _checksums.length);
+  // due to differences in map entry order. This is a really bad hash
+  // function and should eventually be deprecated and removed.
+  int get hashCode => _properties.length + _checksums.length;
 
   @override
   String toString() => '{checksums: $_checksums, properties: $_properties}';
