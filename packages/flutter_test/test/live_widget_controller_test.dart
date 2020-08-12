@@ -81,7 +81,7 @@ void main() {
     runApp(MaterialApp(home: Center(child: AnimateSample())));
     await SchedulerBinding.instance.endOfFrame;
     final WidgetController controller =
-        LiveWidgetController(WidgetsBinding.instance);
+        LiveWidgetController(WidgetsBinding.instance, doPrint: true);
     expect(find.text('Value: 1.0'), findsNothing);
     await controller.pumpAndSettle();
     expect(find.text('Value: 1.0'), findsOneWidget);

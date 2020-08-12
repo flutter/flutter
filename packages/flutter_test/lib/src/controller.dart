@@ -925,7 +925,10 @@ abstract class WidgetController {
 /// This is used, for instance, by [FlutterDriver].
 class LiveWidgetController extends WidgetController {
   /// Creates a widget controller that uses the given binding.
-  LiveWidgetController(WidgetsBinding binding) : super(binding);
+  LiveWidgetController(WidgetsBinding binding, {this.doPrint = false}) : super(binding);
+
+  ///
+  final bool doPrint;
 
   @override
   Future<void> pump([Duration duration]) async {
@@ -944,6 +947,9 @@ class LiveWidgetController extends WidgetController {
     return TestAsyncUtils.guard<int>(() async {
       int count = 0;
       do {
+        if (doPrint) {
+          print('>>>>> $count - ${DateTime.now()}');
+        }
         await pump(duration);
         count += 1;
       } while (binding.hasScheduledFrame);
