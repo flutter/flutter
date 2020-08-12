@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'transitions_perf.dart' as transitions_perf;
+import 'transitions_perf_hybrid_test.dart' as transitions_perf_test;
 
 void main() {
-  transitions_perf.main();
+  transitions_perf_test.main(<String>['--with_semantics']);
 }
