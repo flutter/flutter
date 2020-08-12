@@ -68,7 +68,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     this.dragStartBehavior = DragStartBehavior.start,
     this.velocityTrackerBuilder = _defaultBuilder,
   }) : assert(dragStartBehavior != null),
-       //this.velocityTrackerBuilder = velocityTrackerBuilder
        super(debugOwner: debugOwner, kind: kind);
 
   static VelocityTracker _defaultBuilder(PointerEvent ev) => VelocityTracker();
