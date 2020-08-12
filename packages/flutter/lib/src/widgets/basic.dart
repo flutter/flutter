@@ -7160,13 +7160,88 @@ class KeyedSubtree extends StatelessWidget {
   Widget build(BuildContext context) => child;
 }
 
-/// A platonic widget that calls a closure to obtain its child widget.
+/// A simple widget that provides a specific [BuildContext] object to its child
+/// widget.
+///
+/// This [BuildContext] object is unique and is not the same object as
+/// the one provided by the framework in the `Widget build` method.
+///
+/// Why is this important? Take the following example, where we would like to
+/// show a [SnackBar] widget to a user when they tap a button:
+///
+/// {@tool sample --template=stateless_widget_material}
+/// Example of Scaffold.of With No Builder
+/// ```dart
+///  Widget build(BuildContext context) {
+///    return Scaffold(
+///      appBar: AppBar(
+///        title: Text('Scaffold.of Example'),
+///      ),
+///      body: Center(
+///        child: RaisedButton(
+///          child: Text('Show a SnackBar'),
+///          onPressed: () {
+///            Scaffold.of(context).showSnackBar(
+///              SnackBar(
+///                content: Text('Have a snack!'),
+///              ),
+///            );
+///          },
+///        ),
+///      ),
+///    );
+///  }
+/// ```
+/// {@end-tool}
+///
+/// At first glance this code might look fine, but would in fact not actually
+/// show the [SnackBar]. Since the [RaisedButton] is created in the same build
+/// method as the [Scaffold], the context object called in `Scaffold.of()` would
+/// not be able to find the [Scaffold], since the [Scaffold] is being created
+/// above the RaisedButton.
+///
+/// To resolve this problem, we use the [Builder] to return the [RaisedButton],
+/// and when we call `Scaffold.of(context)` in the RaisedButton's `onPressed`
+/// function, we are now using the context provided by the [Builder] and can
+/// successfully show the [SnackBar]:
+///
+/// {@tool sample --template=stateless_widget_material}
+/// Example of Scaffold.of With Builder
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: Text('Example'),
+///     ),
+///     body: Center(
+///       child: Builder(
+///         builder: (BuildContext context) {
+///           return RaisedButton(
+///             child: Text('Show a SnackBar'),
+///             onPressed: () {
+///               Scaffold.of(context).showSnackBar(
+///                 SnackBar(
+///                   content: Text('Have a snack!'),
+///                 ),
+///               );
+///             },
+///           );
+///         },
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=xXNOkIuSYuA}
 ///
 /// See also:
 ///
 ///  * [StatefulBuilder], a platonic widget which also has state.
+///
+/// Legacy explanation:
+/// A platonic widget that calls a closure to obtain its child widget.
 class Builder extends StatelessWidget {
   /// Creates a widget that delegates its build to a callback.
   ///
