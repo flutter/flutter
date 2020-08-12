@@ -477,7 +477,7 @@ abstract class WidgetController {
   /// system identifies the gesture as a fling, consider using [fling] instead.
   ///
   /// The operation happens at once. If you want the drag to last for a period
-  /// of time, consider using [slowDrag].
+  /// of time, consider using [timedDrag].
   ///
   /// {@template flutter.flutter_test.drag}
   /// By default, if the x or y component of offset is greater than
@@ -522,7 +522,7 @@ abstract class WidgetController {
   /// instead.
   ///
   /// The operation happens at once. If you want the drag to last for a period
-  /// of time, consider using [slowDragFrom].
+  /// of time, consider using [timedDragFrom].
   ///
   /// {@macro flutter.flutter_test.drag}
   Future<void> dragFrom(
@@ -626,7 +626,9 @@ abstract class WidgetController {
   /// If the middle of the widget is not exposed, this might send
   /// events to another object.
   ///
-  /// This is the timed version of [drag].
+  /// This is the timed version of [drag]. This may or may not result in a
+  /// [fling] or ballistic animation, depending on the speed from
+  /// `offset/duration`.
   ///
   /// The move events are sent at a given `frequency` in Hz (or events per
   /// second). It defaults to 60Hz.
@@ -635,7 +637,7 @@ abstract class WidgetController {
   ///
   /// See also [LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive] for
   /// more accurate time control.
-  Future<void> slowDrag(
+  Future<void> timedDrag(
     Finder finder,
     Offset offset,
     Duration duration, {
@@ -643,7 +645,7 @@ abstract class WidgetController {
     int buttons = kPrimaryButton,
     double frequency = 60.0,
   }) {
-    return slowDragFrom(
+    return timedDragFrom(
       getCenter(finder),
       offset,
       duration,
@@ -659,7 +661,9 @@ abstract class WidgetController {
   /// If the middle of the widget is not exposed, this might send
   /// events to another object.
   ///
-  /// This is the timed version of [drag].
+  /// This is the timed version of [drag]. This may or may not result in a
+  /// [fling] or ballistic animation, depending on the speed from
+  /// `offset/duration`.
   ///
   /// The move events are sent at a given `frequency` in Hz (or events per
   /// second). It defaults to 60Hz.
@@ -668,7 +672,7 @@ abstract class WidgetController {
   ///
   /// See also [LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive] for
   /// more accurate time control.
-  Future<void> slowDragFrom(
+  Future<void> timedDragFrom(
     Offset startLocation,
     Offset offset,
     Duration duration, {

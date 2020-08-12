@@ -19,7 +19,7 @@ void main() {
       final Finder nestedScroll = find.byKey(const ValueKey<String>('tabbar_view'));
       expect(nestedScroll, findsOneWidget);
       Future<void> _scrollOnce(double offset) async {
-        await controller.slowDrag(
+        await controller.timedDrag(
           nestedScroll,
           Offset(-offset, 0.0),
           const Duration(milliseconds: 300),
