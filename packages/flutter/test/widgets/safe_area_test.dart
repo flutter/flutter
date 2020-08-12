@@ -316,17 +316,17 @@ void main() {
   });
 
   testWidgets('SliverSafeArea - properties', (WidgetTester tester) async {
-      const SliverSafeArea child = SliverSafeArea(
-        left: true,
-        right: false,
-        bottom: false,
-        sliver: SliverToBoxAdapter(child: SizedBox(width: 800.0, height: 100.0, child: Text('padded'))),
-      );
-      final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
-      child.debugFillProperties(properties);
+    const SliverSafeArea child = SliverSafeArea(
+      left: true,
+      right: false,
+      bottom: false,
+      sliver: SliverToBoxAdapter(child: SizedBox(width: 800.0, height: 100.0, child: Text('padded'))),
+    );
+    final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
+    child.debugFillProperties(properties);
 
-      expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid left padding'), true);
-      expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid top padding'), true);
-      expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid bottom padding'), false);
-    });
+    expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid left padding'), true);
+    expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid top padding'), true);
+    expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid bottom padding'), false);
+  });
 }
