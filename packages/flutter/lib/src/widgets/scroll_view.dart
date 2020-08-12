@@ -1008,6 +1008,7 @@ class ListView extends BoxScrollView {
   /// child that could possibly be displayed in the list view instead of just
   /// those children that are actually visible.
   ///
+  /// Note that this constructor does not dynamically change the [List] once generated.
   /// It is usually more efficient to create children on demand using
   /// [ListView.builder].
   ///
