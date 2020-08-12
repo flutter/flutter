@@ -741,10 +741,10 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     );
 
     if (_gestureType == _GestureType.pan) {
-      // When a gesture first starts, it sometimes has zero scale and rotation
-      // despite being a two-finger gesture. Here the gesture is allowed to be
-      // reinterpreted as its correct type after originally being marked as a
-      // pan.
+      // When a gesture first starts, it sometimes has no change in scale and
+      // rotation despite being a two-finger gesture. Here the gesture is
+      // allowed to be reinterpreted as its correct type after originally
+      // being marked as a pan.
       final _GestureType currentGestureType = _getGestureType(details);
       if (currentGestureType != _GestureType.pan) {
         _gestureType = currentGestureType;
