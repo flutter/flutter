@@ -220,7 +220,7 @@ void main() async {
   testEachCanvas('draws text with a shadow', (EngineCanvas canvas) {
     drawTextWithShadow(canvas);
     return scuba.diffCanvasScreenshot(canvas, 'text_shadow', maxDiffRatePercent: 0.2);
-  }, bSkipHoudini: true);
+  });
 
   testEachCanvas('Handles disabled strut style', (EngineCanvas canvas) {
     // Flutter uses [StrutStyle.disabled] for the [SelectableText] widget. This

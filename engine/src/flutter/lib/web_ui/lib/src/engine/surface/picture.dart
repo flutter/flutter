@@ -71,292 +71,9 @@ void _recycleCanvas(EngineCanvas? canvas) {
   }
 }
 
-
-/// Signature of a function that instantiates a [PersistedPicture].
-typedef PersistedPictureFactory = PersistedPicture Function(
-  double dx,
-  double dy,
-  ui.Picture picture,
-  int hints,
-);
-
-/// Function used by the [SceneBuilder] to instantiate a picture layer.
-PersistedPictureFactory persistedPictureFactory = standardPictureFactory;
-
-/// Instantiates an implementation of a picture layer that uses DOM, CSS, and
-/// 2D canvas for painting.
-PersistedStandardPicture standardPictureFactory(
-    double dx, double dy, ui.Picture picture, int hints) {
-  return PersistedStandardPicture(dx, dy, picture, hints);
-}
-
-/// Instantiates an implementation of a picture layer that uses CSS Paint API
-/// (part of Houdini) for painting.
-PersistedHoudiniPicture houdiniPictureFactory(
-    double dx, double dy, ui.Picture picture, int hints) {
-  return PersistedHoudiniPicture(dx, dy, picture, hints);
-}
-
-class PersistedHoudiniPicture extends PersistedPicture {
-  PersistedHoudiniPicture(double dx, double dy, ui.Picture picture, int hints)
-      : super(dx, dy, picture as EnginePicture, hints) {
-    if (!_cssPainterRegistered) {
-      _registerCssPainter();
-    }
-  }
-
-  static bool _cssPainterRegistered = false;
-
-  @override
-  double matchForUpdate(PersistedPicture existingSurface) {
-    // Houdini is display list-based so all pictures are cheap to repaint.
-    // However, if the picture hasn't changed at all then it's completely
-    // free.
-    return existingSurface.picture == picture ? 0.0 : 1.0;
-  }
-
-  static void _registerCssPainter() {
-    _cssPainterRegistered = true;
-    final dynamic css = js_util.getProperty(html.window, 'CSS');
-    final dynamic paintWorklet = js_util.getProperty(css, 'paintWorklet');
-    if (paintWorklet == null) {
-      html.window.console.warn(
-          'WARNING: CSS.paintWorklet not available. Paint worklets are only '
-          'supported on sites served from https:// or http://localhost.');
-      return;
-    }
-    js_util.callMethod(
-      paintWorklet,
-      'addModule',
-      <dynamic>[
-        '/packages/flutter_web_ui/assets/houdini_painter.js',
-      ],
-    );
-  }
-
-  /// Houdini does not paint to bitmap.
-  @override
-  int get bitmapPixelCount => 0;
-
-  @override
-  void applyPaint(EngineCanvas? oldCanvas) {
-    _recycleCanvas(oldCanvas);
-    final HoudiniCanvas canvas = HoudiniCanvas(_optimalLocalCullRect);
-    _canvas = canvas;
-    domRenderer.clearDom(rootElement!);
-    rootElement!.append(_canvas!.rootElement);
-    picture.recordingCanvas!.apply(_canvas, _optimalLocalCullRect);
-    canvas.commit();
-  }
-}
-
-class PersistedStandardPicture extends PersistedPicture {
-  PersistedStandardPicture(double dx, double dy, ui.Picture picture, int hints)
-      : super(dx, dy, picture as EnginePicture, hints);
-
-  @override
-  double matchForUpdate(PersistedStandardPicture existingSurface) {
-    if (existingSurface.picture == picture) {
-      // Picture is the same, return perfect score.
-      return 0.0;
-    }
-
-    if (!existingSurface.picture.recordingCanvas!.didDraw) {
-      // The previous surface didn't draw anything and therefore has no
-      // resources to reuse.
-      return 1.0;
-    }
-
-    final bool didRequireBitmap =
-        existingSurface.picture.recordingCanvas!.hasArbitraryPaint;
-    final bool requiresBitmap = picture.recordingCanvas!.hasArbitraryPaint;
-    if (didRequireBitmap != requiresBitmap) {
-      // Switching canvas types is always expensive.
-      return 1.0;
-    } else if (!requiresBitmap) {
-      // Currently DomCanvas is always expensive to repaint, as we always throw
-      // out all the DOM we rendered before. This may change in the future, at
-      // which point we may return other values here.
-      return 1.0;
-    } else {
-      final BitmapCanvas? oldCanvas = existingSurface._canvas as BitmapCanvas?;
-      if (oldCanvas == null) {
-        // We did not allocate a canvas last time. This can happen when the
-        // picture is completely clipped out of the view.
-        return 1.0;
-      } else if (!oldCanvas.doesFitBounds(_exactLocalCullRect!)) {
-        // The canvas needs to be resized before painting.
-        return 1.0;
-      } else {
-        final int newPixelCount = BitmapCanvas._widthToPhysical(_exactLocalCullRect!.width)
-             * BitmapCanvas._heightToPhysical(_exactLocalCullRect!.height);
-        final int oldPixelCount =
-            oldCanvas._widthInBitmapPixels * oldCanvas._heightInBitmapPixels;
-
-        if (oldPixelCount == 0) {
-          return 1.0;
-        }
-
-        final double pixelCountRatio = newPixelCount / oldPixelCount;
-        assert(0 <= pixelCountRatio && pixelCountRatio <= 1.0,
-            'Invalid pixel count ratio $pixelCountRatio');
-        return 1.0 - pixelCountRatio;
-      }
-    }
-  }
-
-  @override
-  Matrix4? get localTransformInverse => null;
-
-  @override
-  int get bitmapPixelCount {
-    if (_canvas is! BitmapCanvas) {
-      return 0;
-    }
-
-    final BitmapCanvas bitmapCanvas = _canvas as BitmapCanvas;
-    return bitmapCanvas.bitmapPixelCount;
-  }
-
-  @override
-  void applyPaint(EngineCanvas? oldCanvas) {
-    if (picture.recordingCanvas!.hasArbitraryPaint) {
-      _applyBitmapPaint(oldCanvas);
-    } else {
-      _applyDomPaint(oldCanvas);
-    }
-  }
-
-  void _applyDomPaint(EngineCanvas? oldCanvas) {
-    _recycleCanvas(oldCanvas);
-    _canvas = DomCanvas();
-    domRenderer.clearDom(rootElement!);
-    rootElement!.append(_canvas!.rootElement);
-    picture.recordingCanvas!.apply(_canvas, _optimalLocalCullRect);
-  }
-
-  void _applyBitmapPaint(EngineCanvas? oldCanvas) {
-    if (oldCanvas is BitmapCanvas &&
-        oldCanvas.doesFitBounds(_optimalLocalCullRect!) &&
-        oldCanvas.isReusable()) {
-      if (_debugShowCanvasReuseStats) {
-        DebugCanvasReuseOverlay.instance.keptCount++;
-      }
-      oldCanvas.bounds = _optimalLocalCullRect!;
-      _canvas = oldCanvas;
-      oldCanvas.setElementCache(_elementCache);
-      _canvas!.clear();
-      picture.recordingCanvas!.apply(_canvas, _optimalLocalCullRect);
-    } else {
-      // We can't use the old canvas because the size has changed, so we put
-      // it in a cache for later reuse.
-      _recycleCanvas(oldCanvas);
-      // We cannot paint immediately because not all canvases that we may be
-      // able to reuse have been released yet. So instead we enqueue this
-      // picture to be painted after the update cycle is done syncing the layer
-      // tree then reuse canvases that were freed up.
-      _paintQueue.add(_PaintRequest(
-        canvasSize: _optimalLocalCullRect!.size,
-        paintCallback: () {
-          _canvas = _findOrCreateCanvas(_optimalLocalCullRect!);
-          assert(_canvas is BitmapCanvas
-              && (_canvas as BitmapCanvas?)!._elementCache == _elementCache);
-          if (_debugExplainSurfaceStats) {
-            final BitmapCanvas bitmapCanvas = _canvas as BitmapCanvas;
-            _surfaceStatsFor(this).paintPixelCount +=
-                bitmapCanvas.bitmapPixelCount;
-          }
-          domRenderer.clearDom(rootElement!);
-          rootElement!.append(_canvas!.rootElement);
-          _canvas!.clear();
-          picture.recordingCanvas!.apply(_canvas, _optimalLocalCullRect);
-        },
-      ));
-    }
-  }
-
-  /// Attempts to reuse a canvas from the [_recycledCanvases]. Allocates a new
-  /// one if unable to reuse.
-  ///
-  /// The best recycled canvas is one that:
-  ///
-  /// - Fits the requested [canvasSize]. This is a hard requirement. Otherwise
-  ///   we risk clipping the picture.
-  /// - Is the smallest among all possible reusable canvases. This makes canvas
-  ///   reuse more efficient.
-  /// - Contains no more than twice the number of requested pixels. This makes
-  ///   sure we do not use too much memory for small canvases.
-  BitmapCanvas _findOrCreateCanvas(ui.Rect bounds) {
-    final ui.Size canvasSize = bounds.size;
-    BitmapCanvas? bestRecycledCanvas;
-    double lastPixelCount = double.infinity;
-    for (int i = 0; i < _recycledCanvases.length; i++) {
-      final BitmapCanvas candidate = _recycledCanvases[i];
-      if (!candidate.isReusable()) {
-        continue;
-      }
-
-      final ui.Size candidateSize = candidate.size;
-      final double candidatePixelCount =
-          candidateSize.width * candidateSize.height;
-
-      final bool fits = candidate.doesFitBounds(bounds);
-      final bool isSmaller = candidatePixelCount < lastPixelCount;
-      if (fits && isSmaller) {
-        // [isTooSmall] is used to make sure that a small picture doesn't
-        // reuse and hold onto memory of a large canvas.
-        final double requestedPixelCount = bounds.width * bounds.height;
-        final bool isTooSmall = isSmaller &&
-            requestedPixelCount > 1 &&
-            (candidatePixelCount / requestedPixelCount) > 4;
-        if (!isTooSmall) {
-          bestRecycledCanvas = candidate;
-          lastPixelCount = candidatePixelCount;
-          final bool fitsExactly = candidateSize.width == canvasSize.width &&
-              candidateSize.height == canvasSize.height;
-          if (fitsExactly) {
-            // No need to keep looking any more.
-            break;
-          }
-        }
-      }
-    }
-
-    if (bestRecycledCanvas != null) {
-      if (_debugExplainSurfaceStats) {
-        _surfaceStatsFor(this).reuseCanvasCount++;
-      }
-      _recycledCanvases.remove(bestRecycledCanvas);
-      if (_debugShowCanvasReuseStats) {
-        DebugCanvasReuseOverlay.instance.inRecycleCount =
-            _recycledCanvases.length;
-      }
-      if (_debugShowCanvasReuseStats) {
-        DebugCanvasReuseOverlay.instance.reusedCount++;
-      }
-      bestRecycledCanvas.bounds = bounds;
-      bestRecycledCanvas.setElementCache(_elementCache);
-      return bestRecycledCanvas;
-    }
-
-    if (_debugShowCanvasReuseStats) {
-      DebugCanvasReuseOverlay.instance.createdCount++;
-    }
-    final BitmapCanvas canvas = BitmapCanvas(bounds);
-    canvas.setElementCache(_elementCache);
-    if (_debugExplainSurfaceStats) {
-      _surfaceStatsFor(this)
-        ..allocateBitmapCanvasCount += 1
-        ..allocatedBitmapSizeInPixels =
-            canvas._widthInBitmapPixels * canvas._heightInBitmapPixels;
-    }
-    return canvas;
-  }
-}
-
 /// A surface that uses a combination of `<canvas>`, `<div>` and `<p>` elements
 /// to draw shapes and text.
-abstract class PersistedPicture extends PersistedLeafSurface {
+class PersistedPicture extends PersistedLeafSurface {
   PersistedPicture(this.dx, this.dy, this.picture, this.hints)
       : localPaintBounds = picture.recordingCanvas!.pictureBounds;
 
@@ -553,7 +270,14 @@ abstract class PersistedPicture extends PersistedLeafSurface {
   ///
   /// If the implementation does not paint onto a bitmap canvas, it should
   /// return zero.
-  int get bitmapPixelCount;
+  int get bitmapPixelCount {
+    if (_canvas is! BitmapCanvas) {
+      return 0;
+    }
+
+    final BitmapCanvas bitmapCanvas = _canvas as BitmapCanvas;
+    return bitmapCanvas.bitmapPixelCount;
+  }
 
   void _applyPaint(PersistedPicture? oldSurface) {
     final EngineCanvas? oldCanvas = oldSurface?._canvas;
@@ -575,8 +299,193 @@ abstract class PersistedPicture extends PersistedLeafSurface {
     applyPaint(oldCanvas);
   }
 
-  /// Concrete implementations implement this method to do actual painting.
-  void applyPaint(EngineCanvas? oldCanvas);
+  @override
+  double matchForUpdate(PersistedPicture existingSurface) {
+    if (existingSurface.picture == picture) {
+      // Picture is the same, return perfect score.
+      return 0.0;
+    }
+
+    if (!existingSurface.picture.recordingCanvas!.didDraw) {
+      // The previous surface didn't draw anything and therefore has no
+      // resources to reuse.
+      return 1.0;
+    }
+
+    final bool didRequireBitmap =
+        existingSurface.picture.recordingCanvas!.hasArbitraryPaint;
+    final bool requiresBitmap = picture.recordingCanvas!.hasArbitraryPaint;
+    if (didRequireBitmap != requiresBitmap) {
+      // Switching canvas types is always expensive.
+      return 1.0;
+    } else if (!requiresBitmap) {
+      // Currently DomCanvas is always expensive to repaint, as we always throw
+      // out all the DOM we rendered before. This may change in the future, at
+      // which point we may return other values here.
+      return 1.0;
+    } else {
+      final BitmapCanvas? oldCanvas = existingSurface._canvas as BitmapCanvas?;
+      if (oldCanvas == null) {
+        // We did not allocate a canvas last time. This can happen when the
+        // picture is completely clipped out of the view.
+        return 1.0;
+      } else if (!oldCanvas.doesFitBounds(_exactLocalCullRect!)) {
+        // The canvas needs to be resized before painting.
+        return 1.0;
+      } else {
+        final int newPixelCount = BitmapCanvas._widthToPhysical(_exactLocalCullRect!.width)
+             * BitmapCanvas._heightToPhysical(_exactLocalCullRect!.height);
+        final int oldPixelCount =
+            oldCanvas._widthInBitmapPixels * oldCanvas._heightInBitmapPixels;
+
+        if (oldPixelCount == 0) {
+          return 1.0;
+        }
+
+        final double pixelCountRatio = newPixelCount / oldPixelCount;
+        assert(0 <= pixelCountRatio && pixelCountRatio <= 1.0,
+            'Invalid pixel count ratio $pixelCountRatio');
+        return 1.0 - pixelCountRatio;
+      }
+    }
+  }
+
+  @override
+  Matrix4? get localTransformInverse => null;
+
+  void applyPaint(EngineCanvas? oldCanvas) {
+    if (picture.recordingCanvas!.hasArbitraryPaint) {
+      _applyBitmapPaint(oldCanvas);
+    } else {
+      _applyDomPaint(oldCanvas);
+    }
+  }
+
+  void _applyDomPaint(EngineCanvas? oldCanvas) {
+    _recycleCanvas(oldCanvas);
+    _canvas = DomCanvas();
+    domRenderer.clearDom(rootElement!);
+    rootElement!.append(_canvas!.rootElement);
+    picture.recordingCanvas!.apply(_canvas, _optimalLocalCullRect);
+  }
+
+  void _applyBitmapPaint(EngineCanvas? oldCanvas) {
+    if (oldCanvas is BitmapCanvas &&
+        oldCanvas.doesFitBounds(_optimalLocalCullRect!) &&
+        oldCanvas.isReusable()) {
+      if (_debugShowCanvasReuseStats) {
+        DebugCanvasReuseOverlay.instance.keptCount++;
+      }
+      oldCanvas.bounds = _optimalLocalCullRect!;
+      _canvas = oldCanvas;
+      oldCanvas.setElementCache(_elementCache);
+      _canvas!.clear();
+      picture.recordingCanvas!.apply(_canvas, _optimalLocalCullRect);
+    } else {
+      // We can't use the old canvas because the size has changed, so we put
+      // it in a cache for later reuse.
+      _recycleCanvas(oldCanvas);
+      // We cannot paint immediately because not all canvases that we may be
+      // able to reuse have been released yet. So instead we enqueue this
+      // picture to be painted after the update cycle is done syncing the layer
+      // tree then reuse canvases that were freed up.
+      _paintQueue.add(_PaintRequest(
+        canvasSize: _optimalLocalCullRect!.size,
+        paintCallback: () {
+          _canvas = _findOrCreateCanvas(_optimalLocalCullRect!);
+          assert(_canvas is BitmapCanvas
+              && (_canvas as BitmapCanvas?)!._elementCache == _elementCache);
+          if (_debugExplainSurfaceStats) {
+            final BitmapCanvas bitmapCanvas = _canvas as BitmapCanvas;
+            _surfaceStatsFor(this).paintPixelCount +=
+                bitmapCanvas.bitmapPixelCount;
+          }
+          domRenderer.clearDom(rootElement!);
+          rootElement!.append(_canvas!.rootElement);
+          _canvas!.clear();
+          picture.recordingCanvas!.apply(_canvas, _optimalLocalCullRect);
+        },
+      ));
+    }
+  }
+
+  /// Attempts to reuse a canvas from the [_recycledCanvases]. Allocates a new
+  /// one if unable to reuse.
+  ///
+  /// The best recycled canvas is one that:
+  ///
+  /// - Fits the requested [canvasSize]. This is a hard requirement. Otherwise
+  ///   we risk clipping the picture.
+  /// - Is the smallest among all possible reusable canvases. This makes canvas
+  ///   reuse more efficient.
+  /// - Contains no more than twice the number of requested pixels. This makes
+  ///   sure we do not use too much memory for small canvases.
+  BitmapCanvas _findOrCreateCanvas(ui.Rect bounds) {
+    final ui.Size canvasSize = bounds.size;
+    BitmapCanvas? bestRecycledCanvas;
+    double lastPixelCount = double.infinity;
+    for (int i = 0; i < _recycledCanvases.length; i++) {
+      final BitmapCanvas candidate = _recycledCanvases[i];
+      if (!candidate.isReusable()) {
+        continue;
+      }
+
+      final ui.Size candidateSize = candidate.size;
+      final double candidatePixelCount =
+          candidateSize.width * candidateSize.height;
+
+      final bool fits = candidate.doesFitBounds(bounds);
+      final bool isSmaller = candidatePixelCount < lastPixelCount;
+      if (fits && isSmaller) {
+        // [isTooSmall] is used to make sure that a small picture doesn't
+        // reuse and hold onto memory of a large canvas.
+        final double requestedPixelCount = bounds.width * bounds.height;
+        final bool isTooSmall = isSmaller &&
+            requestedPixelCount > 1 &&
+            (candidatePixelCount / requestedPixelCount) > 4;
+        if (!isTooSmall) {
+          bestRecycledCanvas = candidate;
+          lastPixelCount = candidatePixelCount;
+          final bool fitsExactly = candidateSize.width == canvasSize.width &&
+              candidateSize.height == canvasSize.height;
+          if (fitsExactly) {
+            // No need to keep looking any more.
+            break;
+          }
+        }
+      }
+    }
+
+    if (bestRecycledCanvas != null) {
+      if (_debugExplainSurfaceStats) {
+        _surfaceStatsFor(this).reuseCanvasCount++;
+      }
+      _recycledCanvases.remove(bestRecycledCanvas);
+      if (_debugShowCanvasReuseStats) {
+        DebugCanvasReuseOverlay.instance.inRecycleCount =
+            _recycledCanvases.length;
+      }
+      if (_debugShowCanvasReuseStats) {
+        DebugCanvasReuseOverlay.instance.reusedCount++;
+      }
+      bestRecycledCanvas.bounds = bounds;
+      bestRecycledCanvas.setElementCache(_elementCache);
+      return bestRecycledCanvas;
+    }
+
+    if (_debugShowCanvasReuseStats) {
+      DebugCanvasReuseOverlay.instance.createdCount++;
+    }
+    final BitmapCanvas canvas = BitmapCanvas(bounds);
+    canvas.setElementCache(_elementCache);
+    if (_debugExplainSurfaceStats) {
+      _surfaceStatsFor(this)
+        ..allocateBitmapCanvasCount += 1
+        ..allocatedBitmapSizeInPixels =
+            canvas._widthInBitmapPixels * canvas._heightInBitmapPixels;
+    }
+    return canvas;
+  }
 
   void _applyTranslate() {
     rootElement!.style.transform = 'translate(${dx}px, ${dy}px)';

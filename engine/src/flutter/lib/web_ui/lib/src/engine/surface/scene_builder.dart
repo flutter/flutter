@@ -363,7 +363,7 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
     if (willChangeHint) {
       hints |= 2;
     }
-    _addSurface(persistedPictureFactory(offset.dx, offset.dy, picture, hints));
+    _addSurface(PersistedPicture(offset.dx, offset.dy, picture as EnginePicture, hints));
   }
 
   /// Adds a backend texture to the scene.

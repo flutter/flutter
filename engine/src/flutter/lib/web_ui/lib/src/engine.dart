@@ -64,7 +64,6 @@ part 'engine/dom_renderer.dart';
 part 'engine/engine_canvas.dart';
 part 'engine/frame_reference.dart';
 part 'engine/history.dart';
-part 'engine/houdini_canvas.dart';
 part 'engine/html_image_codec.dart';
 part 'engine/keyboard.dart';
 part 'engine/mouse_cursor.dart';

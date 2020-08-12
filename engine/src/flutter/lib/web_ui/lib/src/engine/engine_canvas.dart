@@ -282,3 +282,127 @@ html.Element _drawParagraphElement(
   }
   return paragraphElement;
 }
+
+class _SaveElementStackEntry {
+  _SaveElementStackEntry({
+    required this.savedElement,
+    required this.transform,
+  });
+
+  final html.Element savedElement;
+  final Matrix4 transform;
+}
+
+/// Provides save stack tracking functionality to implementations of
+/// [EngineCanvas].
+mixin SaveElementStackTracking on EngineCanvas {
+  static final Vector3 _unitZ = Vector3(0.0, 0.0, 1.0);
+
+  final List<_SaveElementStackEntry> _saveStack = <_SaveElementStackEntry>[];
+
+  /// The element at the top of the element stack, or [rootElement] if the stack
+  /// is empty.
+  html.Element get currentElement =>
+      _elementStack.isEmpty ? rootElement : _elementStack.last;
+
+  /// The stack that maintains the DOM elements used to express certain paint
+  /// operations, such as clips.
+  final List<html.Element> _elementStack = <html.Element>[];
+
+  /// Pushes the [element] onto the element stack for the purposes of applying
+  /// a paint effect using a DOM element, e.g. for clipping.
+  ///
+  /// The [restore] method automatically pops the element off the stack.
+  void pushElement(html.Element element) {
+    _elementStack.add(element);
+  }
+
+  /// Empties the save stack and the element stack, and resets the transform
+  /// and clip parameters.
+  ///
+  /// Classes that override this method must call `super.clear()`.
+  @override
+  void clear() {
+    _saveStack.clear();
+    _elementStack.clear();
+    _currentTransform = Matrix4.identity();
+  }
+
+  /// The current transformation matrix.
+  Matrix4 get currentTransform => _currentTransform;
+  Matrix4 _currentTransform = Matrix4.identity();
+
+  /// Saves current clip and transform on the save stack.
+  ///
+  /// Classes that override this method must call `super.save()`.
+  @override
+  void save() {
+    _saveStack.add(_SaveElementStackEntry(
+      savedElement: currentElement,
+      transform: _currentTransform.clone(),
+    ));
+  }
+
+  /// Restores current clip and transform from the save stack.
+  ///
+  /// Classes that override this method must call `super.restore()`.
+  @override
+  void restore() {
+    if (_saveStack.isEmpty) {
+      return;
+    }
+    final _SaveElementStackEntry entry = _saveStack.removeLast();
+    _currentTransform = entry.transform;
+
+    // Pop out of any clips.
+    while (currentElement != entry.savedElement) {
+      _elementStack.removeLast();
+    }
+  }
+
+  /// Multiplies the [currentTransform] matrix by a translation.
+  ///
+  /// Classes that override this method must call `super.translate()`.
+  @override
+  void translate(double dx, double dy) {
+    _currentTransform.translate(dx, dy);
+  }
+
+  /// Scales the [currentTransform] matrix.
+  ///
+  /// Classes that override this method must call `super.scale()`.
+  @override
+  void scale(double sx, double sy) {
+    _currentTransform.scale(sx, sy);
+  }
+
+  /// Rotates the [currentTransform] matrix.
+  ///
+  /// Classes that override this method must call `super.rotate()`.
+  @override
+  void rotate(double radians) {
+    _currentTransform.rotate(_unitZ, radians);
+  }
+
+  /// Skews the [currentTransform] matrix.
+  ///
+  /// Classes that override this method must call `super.skew()`.
+  @override
+  void skew(double sx, double sy) {
+    // DO NOT USE Matrix4.skew(sx, sy)! It treats sx and sy values as radians,
+    // but in our case they are transform matrix values.
+    final Matrix4 skewMatrix = Matrix4.identity();
+    final Float32List storage = skewMatrix.storage;
+    storage[1] = sy;
+    storage[4] = sx;
+    _currentTransform.multiply(skewMatrix);
+  }
+
+  /// Multiplies the [currentTransform] matrix by another matrix.
+  ///
+  /// Classes that override this method must call `super.transform()`.
+  @override
+  void transform(Float32List matrix4) {
+    _currentTransform.multiply(Matrix4.fromFloat32List(matrix4));
+  }
+}
