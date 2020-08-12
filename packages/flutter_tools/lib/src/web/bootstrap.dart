@@ -48,12 +48,18 @@ document.head.appendChild(requireEl);
 /// the file `foo/bar/baz.dart` will generate a property named approximately
 /// `foo__bar__baz`. Rather than attempt to guess, we assume the first property of
 /// this object is the module.
-String generateMainModule({@required String entrypoint}) {
+String generateMainModule({
+  @required String entrypoint,
+  @required bool nullSafety,
+}) {
   return '''/* ENTRYPOINT_EXTENTION_MARKER */
 // Create the main module loaded below.
 define("main_module.bootstrap", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) {
   dart_sdk.dart.setStartAsyncSynchronously(true);
   dart_sdk._debugger.registerDevtoolsFormatter();
+  if ($nullSafety) {
+    dart_sdk.dart.nonNullAsserts(true);
+  }
 
   // See the generateMainModule doc comment.
   var child = {};

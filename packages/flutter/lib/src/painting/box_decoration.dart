@@ -321,7 +321,7 @@ class BoxDecoration extends Decoration {
         && other.image == image
         && other.border == border
         && other.borderRadius == borderRadius
-        && other.boxShadow == boxShadow
+        && listEquals<BoxShadow>(other.boxShadow, boxShadow)
         && other.gradient == gradient
         && other.shape == shape;
   }
@@ -333,7 +333,7 @@ class BoxDecoration extends Decoration {
       image,
       border,
       borderRadius,
-      boxShadow,
+      hashList(boxShadow),
       gradient,
       shape,
     );
@@ -471,7 +471,7 @@ class _BoxDecorationPainter extends BoxPainter {
     super.dispose();
   }
 
-  /// Paint the box decoration into the given location on the given canvas
+  /// Paint the box decoration into the given location on the given canvas.
   @override
   void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
     assert(configuration != null);

@@ -297,8 +297,8 @@ class MouseTrackerUpdateDetails with Diagnosticable {
 ///
 ///   * [MouseTracker], which is a subclass of [BaseMouseTracker] with definition
 ///     of how to process mouse event callbacks and mouse cursors.
-///   * [MouseCursorMixin], which is a mixin for [BaseMouseTracker] that defines
-///     how to process mouse cursors.
+///   * [MouseTrackerCursorMixin], which is a mixin for [BaseMouseTracker] that
+///     defines how to process mouse cursors.
 class BaseMouseTracker extends ChangeNotifier {
   /// Creates a [BaseMouseTracker] to keep track of mouse locations.
   ///
@@ -440,7 +440,7 @@ class BaseMouseTracker extends ChangeNotifier {
   /// Override this method to receive updates when the relationship between a
   /// device and annotations have changed. Subclasses should override this method
   /// to first call to their inherited [handleDeviceUpdate] method, and then
-  /// process the update as desired,
+  /// process the update as desired.
   ///
   /// The update can be caused by two kinds of triggers:
   ///

@@ -15,11 +15,9 @@ import 'src/base/template.dart';
 // avoid introducing the dependency into google3. Not all build* packages
 // are synced internally.
 import 'src/base/terminal.dart';
-import 'src/build_runner/build_runner.dart';
 import 'src/build_runner/mustache_template.dart';
 import 'src/build_runner/resident_web_runner.dart';
 import 'src/build_runner/web_compilation_delegate.dart';
-import 'src/codegen.dart';
 import 'src/commands/analyze.dart';
 import 'src/commands/assemble.dart';
 import 'src/commands/attach.dart';
@@ -130,9 +128,6 @@ Future<void> main(List<String> args) async {
      muteCommandLogging: muteCommandLogging,
      verboseHelp: verboseHelp,
      overrides: <Type, Generator>{
-       // The build runner instance is not supported in google3 because
-       // the build runner packages are not synced internally.
-       CodeGenerator: () => const BuildRunner(),
        WebCompilationProxy: () => BuildRunnerWebCompilationProxy(),
        // The web runner is not supported in google3 because it depends
        // on dwds.

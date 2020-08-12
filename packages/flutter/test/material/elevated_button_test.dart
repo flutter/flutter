@@ -50,8 +50,11 @@ void main() {
     expect(material.type, MaterialType.button);
 
     final Offset center = tester.getCenter(find.byType(ElevatedButton));
-    await tester.startGesture(center);
-    await tester.pumpAndSettle();
+    final TestGesture gesture = await tester.startGesture(center);
+    await tester.pump(); // start the splash animation
+    await tester.pump(const Duration(milliseconds: 100)); // splash is underway
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paints..circle(color: colorScheme.onPrimary.withAlpha(0x3d))); // splash color is onPrimary(0.24)
 
     // Only elevation changes when enabled and pressed.
     material = tester.widget<Material>(rawButtonMaterial);
@@ -68,6 +71,9 @@ void main() {
     expect(material.textStyle.fontSize, 14);
     expect(material.textStyle.fontWeight, FontWeight.w500);
     expect(material.type, MaterialType.button);
+
+    await gesture.up();
+    await tester.pumpAndSettle();
 
     // Disabled ElevatedButton
     await tester.pumpWidget(

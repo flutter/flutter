@@ -628,15 +628,13 @@ extension FlutterVmService on vm_service.VmService {
     );
   }
 
-  Future<Map<String, dynamic>> flutterFastReassemble(String classId, {
+  Future<Map<String, dynamic>> flutterFastReassemble({
    @required String isolateId,
   }) {
     return invokeFlutterExtensionRpcRaw(
       'ext.flutter.fastReassemble',
       isolateId: isolateId,
-      args: <String, Object>{
-        'class': classId,
-      },
+      args: <String, Object>{},
     );
   }
 
@@ -813,7 +811,7 @@ extension FlutterVmService on vm_service.VmService {
     return callServiceExtension(kScreenshotSkpMethod);
   }
 
-  /// Set the VM timeline flags
+  /// Set the VM timeline flags.
   Future<vm_service.Response> setVMTimelineFlags(List<String> recordedStreams) {
     assert(recordedStreams != null);
     return callServiceExtension(

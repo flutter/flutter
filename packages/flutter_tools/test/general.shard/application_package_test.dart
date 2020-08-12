@@ -295,7 +295,7 @@ void main() {
       when(os.unzip(any, any)).thenAnswer((Invocation invocation) {
         final File zipFile = invocation.positionalArguments[0] as File;
         if (zipFile.path != 'app.ipa') {
-          return null;
+          return;
         }
         final Directory targetDirectory = invocation.positionalArguments[1] as Directory;
         final String bundlePath1 =
@@ -316,7 +316,7 @@ void main() {
       when(os.unzip(any, any)).thenAnswer((Invocation invocation) {
         final File zipFile = invocation.positionalArguments[0] as File;
         if (zipFile.path != 'app.ipa') {
-          return null;
+          return;
         }
         final Directory targetDirectory = invocation.positionalArguments[1] as Directory;
         final Directory bundleAppDir = globals.fs.directory(

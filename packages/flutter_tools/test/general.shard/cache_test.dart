@@ -261,15 +261,6 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  test('Unstable artifacts', () {
-    expect(DevelopmentArtifact.web.unstable, false);
-    expect(DevelopmentArtifact.linux.unstable, false);
-    expect(DevelopmentArtifact.macOS.unstable, false);
-    expect(DevelopmentArtifact.windows.unstable, false);
-    expect(DevelopmentArtifact.fuchsia.unstable, true);
-    expect(DevelopmentArtifact.flutterRunner.unstable, true);
-  });
-
   group('EngineCachedArtifact', () {
     FakeHttpClient fakeHttpClient;
     FakePlatform fakePlatform;

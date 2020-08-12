@@ -60,9 +60,9 @@ const String _kDefaultIndex = '''
 </html>
 ''';
 
-/// An expression compiler connecting to FrontendServer
+/// An expression compiler connecting to FrontendServer.
 ///
-/// This is only used in development mode
+/// This is only used in development mode.
 class WebExpressionCompiler implements ExpressionCompiler {
   WebExpressionCompiler(this._generator);
 
@@ -791,6 +791,8 @@ class WebDevFS implements DevFS {
         'main_module.bootstrap.js',
         generateMainModule(
           entrypoint: entrypoint,
+          nullSafety: buildInfo.extraFrontEndOptions
+            ?.contains('--enable-experiment=non-nullable') ?? false,
         ),
       );
       // TODO(jonahwilliams): refactor the asset code in this and the regular devfs to
@@ -849,7 +851,7 @@ class WebDevFS implements DevFS {
       success: true,
       syncedBytes: codeFile.lengthSync(),
       invalidatedSourcesCount: invalidatedFiles.length,
-    )..invalidatedModules = modules;
+    );
   }
 
   @visibleForTesting

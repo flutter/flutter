@@ -16,7 +16,6 @@ import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
 import 'build_info.dart';
-import 'codegen.dart';
 import 'convert.dart';
 import 'globals.dart' as globals;
 import 'project.dart';
@@ -40,15 +39,7 @@ class KernelCompilerFactory {
   final FileSystem _fileSystem;
 
   Future<KernelCompiler> create(FlutterProject flutterProject) async {
-    if (flutterProject == null || !flutterProject.hasBuilders) {
-      return KernelCompiler(
-        logger: _logger,
-        artifacts: _artifacts,
-        fileSystem: _fileSystem,
-        processManager: _processManager,
-      );
-    }
-    return CodeGeneratingKernelCompiler(
+    return KernelCompiler(
       logger: _logger,
       artifacts: _artifacts,
       fileSystem: _fileSystem,
@@ -81,13 +72,13 @@ class TargetModel {
 
   const TargetModel._(this._value);
 
-  /// The flutter patched dart SDK
+  /// The Flutter patched Dart SDK.
   static const TargetModel flutter = TargetModel._('flutter');
 
-  /// The fuchsia patched SDK.
+  /// The Fuchsia patched SDK.
   static const TargetModel flutterRunner = TargetModel._('flutter_runner');
 
-  /// The Dart vm.
+  /// The Dart VM.
   static const TargetModel vm = TargetModel._('vm');
 
   /// The development compiler for JavaScript.
@@ -497,7 +488,7 @@ abstract class ResidentCompiler {
   /// module object, for example:
   /// { 'dart':'dart_sdk', 'main': '/packages/hello_world_main.dart' }
   /// Returns a [CompilerOutput] including the name of the file containing the
-  /// compilation result and a number of errors
+  /// compilation result and a number of errors.
   Future<CompilerOutput> compileExpressionToJs(
     String libraryUri,
     int line,

@@ -194,7 +194,7 @@ class FlutterProject {
   /// True if this project is a Flutter module project.
   bool get isModule => manifest.isModule;
 
-  /// True if the Flutter project is using the AndroidX support library
+  /// True if the Flutter project is using the AndroidX support library.
   bool get usesAndroidX => manifest.usesAndroidX;
 
   /// True if this project has an example application.
@@ -261,25 +261,6 @@ class FlutterProject {
       await web.ensureReadyForPlatformSpecificTooling();
     }
     await injectPlugins(this, checkProjects: checkProjects);
-  }
-
-  /// Return the set of builders used by this package.
-  YamlMap get builders {
-    if (!pubspecFile.existsSync()) {
-      return null;
-    }
-    final YamlMap pubspec = loadYaml(pubspecFile.readAsStringSync()) as YamlMap;
-    // If the pubspec file is empty, this will be null.
-    if (pubspec == null) {
-      return null;
-    }
-    return pubspec['builders'] as YamlMap;
-  }
-
-  /// Whether there are any builders used by this package.
-  bool get hasBuilders {
-    final YamlMap result = builders;
-    return result != null && result.isNotEmpty;
   }
 }
 
@@ -540,7 +521,7 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   Map<String, Map<String, String>> _buildSettingsByScheme;
 
   Future<XcodeProjectInfo> projectInfo() async {
-    if (!existsSync() || !globals.xcodeProjectInterpreter.isInstalled) {
+    if (!xcodeProject.existsSync() || !globals.xcodeProjectInterpreter.isInstalled) {
       return null;
     }
     return _projectInfo ??= await globals.xcodeProjectInterpreter.getInfo(hostAppRoot.path);
@@ -728,7 +709,7 @@ class AndroidProject extends FlutterProjectPlatform {
   /// True if the parent Flutter project is a module.
   bool get isModule => parent.isModule;
 
-  /// True if the Flutter project is using the AndroidX support library
+  /// True if the Flutter project is using the AndroidX support library.
   bool get usesAndroidX => parent.usesAndroidX;
 
   /// True, if the app project is using Kotlin.
@@ -1008,7 +989,7 @@ class MacOSProject extends FlutterProjectPlatform implements XcodeBasedProject {
   }
 }
 
-/// The Windows sub project
+/// The Windows sub project.
 class WindowsProject extends FlutterProjectPlatform implements CmakeBasedProject {
   WindowsProject._(this.parent);
 
@@ -1058,6 +1039,8 @@ class LinuxProject extends FlutterProjectPlatform implements CmakeBasedProject {
   @override
   String get pluginConfigKey => LinuxPlugin.kConfigKey;
 
+  static final RegExp _applicationIdPattern = RegExp(r'''^\s*set\s*\(\s*APPLICATION_ID\s*"(.*)"\s*\)\s*$''');
+
   Directory get _editableDirectory => parent.directory.childDirectory('linux');
 
   /// The directory in the project that is managed by Flutter. As much as
@@ -1086,9 +1069,13 @@ class LinuxProject extends FlutterProjectPlatform implements CmakeBasedProject {
   Directory get pluginSymlinkDirectory => ephemeralDirectory.childDirectory('.plugin_symlinks');
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {}
+
+  String get applicationId {
+    return _firstMatchInFile(cmakeFile, _applicationIdPattern)?.group(1);
+  }
 }
 
-/// The Fuchsia sub project
+/// The Fuchsia sub project.
 class FuchsiaProject {
   FuchsiaProject._(this.project);
 

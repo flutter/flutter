@@ -56,12 +56,12 @@ class DialogTheme with Diagnosticable {
 
   /// Used to configure the [DefaultTextStyle] for the [AlertDialog.title] widget.
   ///
-  /// If null, defaults to [ThemeData.textTheme.headline6].
+  /// If null, defaults to [TextTheme.headline6] of [ThemeData.textTheme].
   final TextStyle titleTextStyle;
 
   /// Used to configure the [DefaultTextStyle] for the [AlertDialog.content] widget.
   ///
-  /// If null, defaults to [ThemeData.textTheme.subtitle1].
+  /// If null, defaults to [TextTheme.subtitle1] of [ThemeData.textTheme].
   final TextStyle contentTextStyle;
 
   /// Creates a copy of this object but with the given fields replaced with the

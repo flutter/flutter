@@ -35,7 +35,7 @@ enum FlexFit {
 
 /// Parent data for use with [RenderFlex].
 class FlexParentData extends ContainerBoxParentData<RenderBox> {
-  /// The flex factor to use for this child
+  /// The flex factor to use for this child.
   ///
   /// If null or zero, the child is inflexible and determines its own size. If
   /// non-zero, the amount of space the child's can occupy in the main axis is
@@ -854,7 +854,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
               child.size.height - distance,
               maxSizeBelowBaseline,
             );
-            crossSize = maxSizeAboveBaseline + maxSizeBelowBaseline;
+            crossSize = math.max(maxSizeAboveBaseline + maxSizeBelowBaseline, crossSize);
           }
         }
         final FlexParentData childParentData = child.parentData as FlexParentData;

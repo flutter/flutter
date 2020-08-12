@@ -110,7 +110,7 @@ class Tooltip extends StatefulWidget {
   /// Whether the tooltip's [message] should be excluded from the semantics
   /// tree.
   ///
-  /// Defaults to false. A tooltip will add a [Semantics.label] that is set to
+  /// Defaults to false. A tooltip will add a [Semantics] label that is set to
   /// [Tooltip.message]. Set this property to true if the app is going to
   /// provide its own custom semantics label.
   final bool excludeFromSemantics;
@@ -132,9 +132,10 @@ class Tooltip extends StatefulWidget {
   ///
   /// If null, the message's [TextStyle] will be determined based on
   /// [ThemeData]. If [ThemeData.brightness] is set to [Brightness.dark],
-  /// [ThemeData.textTheme.bodyText2] will be used with [Colors.white]. Otherwise,
-  /// if [ThemeData.brightness] is set to [Brightness.light],
-  /// [ThemeData.textTheme.bodyText2] will be used with [Colors.black].
+  /// [TextTheme.bodyText2] of [ThemeData.textTheme] will be used with
+  /// [Colors.white]. Otherwise, if [ThemeData.brightness] is set to
+  /// [Brightness.light], [TextTheme.bodyText2] of [ThemeData.textTheme] will be
+  /// used with [Colors.black].
   final TextStyle textStyle;
 
   /// The length of time that a pointer must hover over a tooltip's widget

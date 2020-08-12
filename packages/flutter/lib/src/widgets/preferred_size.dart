@@ -26,7 +26,7 @@ abstract class PreferredSizeWidget implements Widget {
   /// In many cases it's only necessary to define one preferred dimension.
   /// For example the [Scaffold] only depends on its app bar's preferred
   /// height. In that case implementations of this method can just return
-  /// `new Size.fromHeight(myAppBarHeight)`;
+  /// `new Size.fromHeight(myAppBarHeight)`.
   Size get preferredSize;
 }
 

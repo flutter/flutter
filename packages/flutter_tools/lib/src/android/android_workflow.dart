@@ -20,6 +20,7 @@ import '../base/utils.dart';
 import '../base/version.dart';
 import '../convert.dart';
 import '../doctor.dart';
+import '../features.dart';
 import '../globals.dart' as globals;
 import 'android_sdk.dart';
 import 'android_studio.dart';
@@ -46,12 +47,15 @@ final RegExp licenseAccepted = RegExp(r'All SDK package licenses accepted.');
 class AndroidWorkflow implements Workflow {
   AndroidWorkflow({
     @required AndroidSdk androidSdk,
-  }) : _androidSdk = androidSdk;
+    @required FeatureFlags featureFlags,
+  }) : _androidSdk = androidSdk,
+       _featureFlags = featureFlags;
 
   final AndroidSdk _androidSdk;
+  final FeatureFlags _featureFlags;
 
   @override
-  bool get appliesToHostPlatform => true;
+  bool get appliesToHostPlatform => _featureFlags.isAndroidEnabled;
 
   @override
   bool get canListDevices => getAdbPath(_androidSdk) != null;
