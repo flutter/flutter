@@ -193,9 +193,9 @@ class BitmapCanvas extends EngineCanvas {
   ///
   /// See also:
   ///
-  /// * [PersistedStandardPicture._applyBitmapPaint] which uses this method to
+  /// * [PersistedPicture._applyBitmapPaint] which uses this method to
   ///   decide whether to reuse this canvas or not.
-  /// * [PersistedStandardPicture._recycleCanvas] which also uses this method
+  /// * [PersistedPicture._recycleCanvas] which also uses this method
   ///   for the same reason.
   bool isReusable() {
     return _devicePixelRatio == EngineWindow.browserDevicePixelRatio;

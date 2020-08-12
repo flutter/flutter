@@ -26,7 +26,6 @@ void main() {
       test(description, () {
         testFn(BitmapCanvas(canvasSize));
         testFn(DomCanvas());
-        testFn(HoudiniCanvas(canvasSize));
         testFn(mockCanvas = MockEngineCanvas());
         if (whenDone != null) {
           whenDone();

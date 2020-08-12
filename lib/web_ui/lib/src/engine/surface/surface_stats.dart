@@ -237,7 +237,7 @@ void _debugPrintSurfaceStats(PersistedScene scene, int frameNumber) {
     elementReuseCount += stats.reuseElementCount;
     totalAllocatedDomNodeCount += stats.allocatedDomNodeCount;
 
-    if (surface is PersistedStandardPicture) {
+    if (surface is PersistedPicture) {
       pictureCount += 1;
       paintCount += stats.paintCount;
 
