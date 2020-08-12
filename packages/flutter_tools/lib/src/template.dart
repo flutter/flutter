@@ -47,13 +47,7 @@ class Template {
     }
 
     final List<FileSystemEntity> templateFiles = templateSource.listSync(recursive: true);
-    print(templateFiles);
-
-    for (final FileSystemEntity entity in templateFiles) {
-      if (entity is! File) {
-        // We are only interesting in template *file* URIs.
-        continue;
-      }
+    for (final FileSystemEntity entity in templateFiles.whereType<File>()) {
       if (_templateManifest != null && !_templateManifest.contains(Uri.file(entity.absolute.path))) {
         _logger.printTrace('Skipping ${entity.absolute.path}, missing from the template manifest.');
         // Skip stale files in the flutter_tools directory.
@@ -62,7 +56,6 @@ class Template {
 
       final String relativePath = fileSystem.path.relative(entity.path,
           from: baseDir.absolute.path);
-      print('adding $relativePath');
       if (relativePath.contains(templateExtension)) {
         // If '.tmpl' appears anywhere within the path of this entity, it is
         // is a candidate for rendering. This catches cases where the folder
@@ -231,7 +224,6 @@ class Template {
       fileCount += 1;
 
       finalDestinationFile.createSync(recursive: true);
-      print(absoluteSourcePath);
       final File sourceFile = _fileSystem.file(absoluteSourcePath);
 
       // Step 2: If the absolute paths ends with a '.copy.tmpl', this file does
@@ -278,17 +270,11 @@ class Template {
   }
 
   /// Attempt to read a byte from the file to ensure that read permissions are correct.
+  ///
+  /// If this fails with a certain error code, the [ErrorHandlingFileSystem] will
+  /// trigger a tool exit with a better message.
   void _validateReadPermissions(File file) {
-    try {
-      file.openSync().readByteSync();
-    } on FileSystemException catch (err) {
-      throwToolExit(
-        '$err\n\n'
-        'The flutter tool cannot read the template file "${file.path}".\n'
-        'Please ensure that the SDK is installed in a location that has '
-        'read/write permissions for the current user.'
-      );
-    }
+    file.openSync().readByteSync();
   }
 }
 

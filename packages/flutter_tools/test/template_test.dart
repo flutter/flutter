@@ -4,8 +4,10 @@
 
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/base/error_handling_file_system.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
@@ -32,7 +34,7 @@ void main() {
         throwsToolExit());
   });
 
-  testWithoutContext('Template.render throws ToolExit when reading template file fails', () {
+  testWithoutContext('Template.render attempts to read byte from template file before copying', () {
     final MemoryFileSystem baseFileSystem = MemoryFileSystem.test();
     baseFileSystem.file('templates/foo.copy.tmpl').createSync(recursive: true);
     final ConfiguredFileSystem fileSystem = ConfiguredFileSystem(
@@ -53,7 +55,7 @@ void main() {
     );
 
     expect(() => template.render(fileSystem.directory('out'), <String, Object>{}),
-      throwsToolExit(message: 'The flutter tool cannot read the template file "/templates/foo.copy.tmpl".'));
+      throwsA(isA<FileSystemException>()));
   });
 
   testWithoutContext('Template.render replaces .img.tmpl files with files from the image source', () {
