@@ -1,4 +1,4 @@
-Signature: 65e1c2403cc8680a44796bf8982df88d
+Signature: 66158512f8093c1334fc175ddeac5179
 
 UNUSED LICENSES:
 
@@ -5243,6 +5243,7 @@ FILE: ../../../third_party/skia/gm/bicubic.cpp
 FILE: ../../../third_party/skia/gm/compressed_textures.cpp
 FILE: ../../../third_party/skia/gm/crbug_1073670.cpp
 FILE: ../../../third_party/skia/gm/crbug_1086705.cpp
+FILE: ../../../third_party/skia/gm/crbug_1113794.cpp
 FILE: ../../../third_party/skia/gm/exoticformats.cpp
 FILE: ../../../third_party/skia/gm/skbug_9819.cpp
 FILE: ../../../third_party/skia/gm/strokerect_anisotropic.cpp
@@ -5274,6 +5275,7 @@ FILE: ../../../third_party/skia/modules/skottie/src/effects/BrightnessContrastEf
 FILE: ../../../third_party/skia/modules/skottie/src/effects/CornerPinEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/GlowStyles.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/ShadowStyles.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/layers/AudioLayer.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/Ellipse.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/FillStroke.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/Gradient.cpp
