@@ -8,7 +8,7 @@ $path = "C:\Windows\Temp\depot_tools"
 $gclient = "C:\Windows\Temp\depot_tools\gclient.bat"
 $cipd = "C:\Windows\Temp\depot_tools\cipd.bat"
 $ensureFile = "C:\Windows\Temp\depot_tools\ensure.txt"
-$text = "# Ensure File`n`$ServiceURL https://chrome-infra-packages.appspot.com`n`n# Skia Gold Client goldctl`nskia/tools/goldctl/`${platform} bf0f1c34842dd8542f5072f4c4d5e1d2e53156379fc492af49ea9bf7f73c0be2"
+$text = "# Ensure File`n`$ServiceURL https://chrome-infra-packages.appspot.com`n`n# Skia Gold Client goldctl`nskia/tools/goldctl/`${platform} vw8cNIQt2FQvUHL0xNXh0uUxVjefxJKvSeqb9_c8C-IC"
 
 (New-Object System.Net.WebClient).DownloadFile($url, $zipPath)
 Expand-Archive -LiteralPath $zipPath -DestinationPath $path
