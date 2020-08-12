@@ -274,7 +274,9 @@ class Template {
   /// If this fails with a certain error code, the [ErrorHandlingFileSystem] will
   /// trigger a tool exit with a better message.
   void _validateReadPermissions(File file) {
-    file.openSync().readByteSync();
+    final RandomAccessFile randomAccessFile = file.openSync();
+    randomAccessFile.readByteSync();
+    randomAccessFile.closeSync();
   }
 }
 
