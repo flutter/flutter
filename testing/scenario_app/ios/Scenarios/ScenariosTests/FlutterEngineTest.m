@@ -34,7 +34,7 @@
   XCTAssertNil(engine.platformChannel);
   XCTAssertNil(engine.lifecycleChannel);
 
-  XCTAssertTrue([engine run]);
+  XCTAssertTrue([engine runWithEntrypoint:nil]);
 
   XCTAssertNotNil(engine.navigationChannel);
   XCTAssertNotNil(engine.platformChannel);
