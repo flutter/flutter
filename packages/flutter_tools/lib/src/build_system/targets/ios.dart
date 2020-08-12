@@ -81,8 +81,10 @@ abstract class AotAssemblyBase extends Target {
     for (final DarwinArch darwinArch in darwinArchs) {
       final List<String> archExtraGenSnapshotOptions = List<String>.of(extraGenSnapshotOptions);
       if (codeSizeDirectory != null) {
-        final String codeSizeFile = 'snapshot.${getNameForDarwinArch(darwinArch)}.json';
-        archExtraGenSnapshotOptions.add('--write-v8-snapshot-profile-to=$codeSizeFile');
+        final File codeSizeFile = environment.fileSystem
+          .directory(codeSizeDirectory)
+          .childFile('snapshot.${getNameForDarwinArch(darwinArch)}.json');
+        archExtraGenSnapshotOptions.add('--write-v8-snapshot-profile-to=${codeSizeFile.path}');
         depfile.outputs.add(environment.fileSystem.file(codeSizeFile));
       }
       pending.add(snapshotter.build(

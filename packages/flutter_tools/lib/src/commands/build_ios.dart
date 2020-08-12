@@ -108,15 +108,32 @@ class BuildIOSCommand extends BuildSubCommand {
     }
 
     if (buildInfo.codeSizeDirectory != null) {
-      final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(fileSystem: globals.fs, logger: globals.logger, processUtils: processUtils);
+      final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processUtils: processUtils,
+        appFilenamePattern: 'App'
+      );
       final Iterable<File> codeSizeFiles = globals.fs.directory(buildInfo.codeSizeDirectory)
         .listSync().whereType<File>();
+      bool silent = false;
+      // This analysis is only supported for release builds, which also excludes the simulator.
+      // Attempt to guess the correct .app by picking the first one.
+      final Directory candidateDirectory = globals.fs.directory(
+        globals.fs.path.join(getIosBuildDirectory(), 'Release-iphoneos'),
+      );
+      final Directory appDirectory = candidateDirectory.listSync()
+        .whereType<Directory>()
+        .firstWhere((Directory directory) {
+        return globals.fs.path.extension(directory.path) == '.app';
+      });
       for (final File file in codeSizeFiles) {
         await sizeAnalyzer.analyzeAotSnapshot(
           aotSnapshot: file,
-          // This analysis is only supported for release builds.
-          outputDirectory: globals.fs.directory(globals.fs.path.join(getIosBuildDirectory(), 'runner', 'Release')),
+          outputDirectory: appDirectory,
+          silent: silent,
         );
+        silent = true;
       }
     }
 

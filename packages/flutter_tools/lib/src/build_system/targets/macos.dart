@@ -209,8 +209,10 @@ class CompileMacOSFramework extends Target {
     final Depfile depfile = Depfile(<File>[], <File>[]);
 
     if (codeSizeDirectory != null) {
-      final String codeSizeFile = 'snapshot.${getNameForDarwinArch(DarwinArch.x86_64)}.json';
-      extraGenSnapshotOptions.add('--write-v8-snapshot-profile-to=$codeSizeFile');
+      final File codeSizeFile = environment.fileSystem
+        .directory(codeSizeDirectory)
+        .childFile('snapshot.${getNameForDarwinArch(DarwinArch.x86_64)}.json');
+      extraGenSnapshotOptions.add('--write-v8-snapshot-profile-to=${codeSizeFile.path}');
       depfile.outputs.add(environment.fileSystem.file(codeSizeFile));
     }
 

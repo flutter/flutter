@@ -101,11 +101,25 @@ Future<void> buildMacOS({
   }
   if (buildInfo.codeSizeDirectory != null && sizeAnalyzer != null) {
     final File codeSizeFile = globals.fs.directory(buildInfo.codeSizeDirectory)
-      .listSync().whereType<File>().first;
+      .listSync()
+      .whereType<File>()
+      .first;
+
+    // This analysis is only supported for release builds.
+    // Attempt to guess the correct .app by picking the first one.
+    final Directory candidateDirectory = globals.fs.directory(
+      globals.fs.path.join(getMacOSBuildDirectory(), 'Build', 'Products', 'Release'),
+    );
+    final Directory appDirectory = candidateDirectory.listSync()
+      .whereType<Directory>()
+      .firstWhere((Directory directory) {
+      return globals.fs.path.extension(directory.path) == '.app';
+    });
     await sizeAnalyzer.analyzeAotSnapshot(
       aotSnapshot: codeSizeFile,
-      // This analysis is only supported for release builds.
-      outputDirectory: globals.fs.directory(globals.fs.path.join(getMacOSBuildDirectory(), 'runner', 'Release')),
+      outputDirectory: appDirectory,
+      excludePath: 'Versions', // Avoid double counting caused by symlinks
+      silent: false,
     );
   }
   globals.flutterUsage.sendTiming('build', 'xcode-macos', Duration(milliseconds: sw.elapsedMilliseconds));

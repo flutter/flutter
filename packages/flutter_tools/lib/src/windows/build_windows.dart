@@ -83,7 +83,10 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
     await sizeAnalyzer.analyzeAotSnapshot(
       aotSnapshot: codeSizeFile,
       // This analysis is only supported for release builds.
-      outputDirectory: globals.fs.directory(globals.fs.path.join(getWindowsBuildDirectory(), 'runner', 'Release')),
+      outputDirectory: globals.fs.directory(
+        globals.fs.path.join(getWindowsBuildDirectory(), 'runner', 'Release'),
+      ),
+      silent: false,
     );
   }
 }
