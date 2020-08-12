@@ -551,6 +551,33 @@ void main() {
   );
 
   testWidgets(
+    'WidgetTester.fling produces strictly monotonically increasing timestamps, '
+    'when given a large velocity',
+    (WidgetTester tester) async {
+      // Velocity trackers may misbehave if the `PointerMoveEvent`s' have the
+      // same timestamp. This is more likely to happen when the velocity tracker
+      // has a small sample size.
+      final List<Duration> logs = <Duration>[];
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Listener(
+            onPointerMove: (PointerMoveEvent event) => logs.add(event.timeStamp),
+            child: const Text('test'),
+          ),
+        ),
+      );
+
+      await tester.fling(find.text('test'), const Offset(0.0, -50.0), 10000.0);
+      await tester.pumpAndSettle();
+
+      for (int i = 0; i + 1 < logs.length; i += 1) {
+        expect(logs[i + 1],  greaterThan(logs[i]));
+      }
+  });
+
+  testWidgets(
     'ensureVisible: scrolls to make widget visible',
     (WidgetTester tester) async {
       await tester.pumpWidget(
