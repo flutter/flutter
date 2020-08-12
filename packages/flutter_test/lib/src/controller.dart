@@ -380,25 +380,25 @@ abstract class WidgetController {
       final TestPointer testPointer = TestPointer(pointer ?? _getNextPointer(), PointerDeviceKind.touch, null, buttons);
       final HitTestResult result = hitTestOnBinding(startLocation);
       const int kMoveCount = 50; // Needs to be >= kHistorySize, see _LeastSquaresVelocityTrackerStrategy
-      final double timeStampDelta = 1000.0 * offset.distance / (kMoveCount * speed);
+      final double timeStampDelta = 1000000.0 * offset.distance / (kMoveCount * speed);
       double timeStamp = 0.0;
       double lastTimeStamp = timeStamp;
-      await sendEventToBinding(testPointer.down(startLocation, timeStamp: Duration(milliseconds: timeStamp.round())), result);
+      await sendEventToBinding(testPointer.down(startLocation, timeStamp: Duration(microseconds: timeStamp.round())), result);
       if (initialOffset.distance > 0.0) {
-        await sendEventToBinding(testPointer.move(startLocation + initialOffset, timeStamp: Duration(milliseconds: timeStamp.round())), result);
-        timeStamp += initialOffsetDelay.inMilliseconds;
+        await sendEventToBinding(testPointer.move(startLocation + initialOffset, timeStamp: Duration(microseconds: timeStamp.round())), result);
+        timeStamp += initialOffsetDelay.inMicroseconds;
         await pump(initialOffsetDelay);
       }
       for (int i = 0; i <= kMoveCount; i += 1) {
         final Offset location = startLocation + initialOffset + Offset.lerp(Offset.zero, offset, i / kMoveCount);
-        await sendEventToBinding(testPointer.move(location, timeStamp: Duration(milliseconds: timeStamp.round())), result);
+        await sendEventToBinding(testPointer.move(location, timeStamp: Duration(microseconds: timeStamp.round())), result);
         timeStamp += timeStampDelta;
-        if (timeStamp - lastTimeStamp > frameInterval.inMilliseconds) {
-          await pump(Duration(milliseconds: (timeStamp - lastTimeStamp).truncate()));
+        if (timeStamp - lastTimeStamp > frameInterval.inMicroseconds) {
+          await pump(Duration(microseconds: (timeStamp - lastTimeStamp).truncate()));
           lastTimeStamp = timeStamp;
         }
       }
-      await sendEventToBinding(testPointer.up(timeStamp: Duration(milliseconds: timeStamp.round())), result);
+      await sendEventToBinding(testPointer.up(timeStamp: Duration(microseconds: timeStamp.round())), result);
     });
   }
 
