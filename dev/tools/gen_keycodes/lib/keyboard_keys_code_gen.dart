@@ -10,23 +10,8 @@ import 'utils.dart';
 
 /// Given an [input] string, wraps the text at 80 characters and prepends each
 /// line with the [prefix] string. Use for generated comments.
-String _wrapString(String input, {String prefix = '  /// '}) {
-  final int wrapWidth = 80 - prefix.length;
-  final StringBuffer result = StringBuffer();
-  final List<String> words = input.split(RegExp(r'\s+'));
-  String currentLine = words.removeAt(0);
-  for (final String word in words) {
-    if ((currentLine.length + word.length) < wrapWidth) {
-      currentLine += ' $word';
-    } else {
-      result.writeln('$prefix$currentLine');
-      currentLine = word;
-    }
-  }
-  if (currentLine.isNotEmpty) {
-    result.writeln('$prefix$currentLine');
-  }
-  return result.toString();
+String _wrapString(String input) {
+  return wrapString(input, prefix: '  /// ');
 }
 
 /// Generates the keyboard_keys.dart based on the information in the key data

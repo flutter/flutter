@@ -22,6 +22,7 @@ import 'package:gen_keycodes/keyboard_keys_code_gen.dart';
 import 'package:gen_keycodes/keyboard_maps_code_gen.dart';
 import 'package:gen_keycodes/key_data.dart';
 import 'package:gen_keycodes/utils.dart';
+import 'package:gen_keycodes/mask_constants.dart';
 
 /// Get contents of the file that contains the key code mapping in Chromium
 /// source.
@@ -133,6 +134,11 @@ Future<void> main(List<String> rawArguments) async {
     help: 'The path to where the GTK keycode to DomKey mapping is.',
   );
   argParser.addOption(
+    'mask-constants',
+    defaultsTo: path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'mask_constants.json'),
+    help: 'The path to where the mask constants are.',
+  );
+  argParser.addOption(
     'data',
     defaultsTo: path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'key_data.json'),
     help: 'The path to where the key code data file should be written when '
@@ -239,6 +245,8 @@ Future<void> main(List<String> rawArguments) async {
     data = KeyData.fromJson(json.decode(await File(parsedArguments['data'] as String).readAsString()) as Map<String, dynamic>);
   }
 
+  List<MaskConstant> maskConstants = parseMaskConstants(json.decode(await File(parsedArguments['mask-constants'] as String).readAsString()));
+
   final File codeFile = File(parsedArguments['code'] as String);
   if (!codeFile.existsSync()) {
     codeFile.createSync(recursive: true);
@@ -266,7 +274,7 @@ Future<void> main(List<String> rawArguments) async {
         codeGenerator = AndroidCodeGenerator(data);
         break;
       case 'darwin':
-        codeGenerator = MacOsCodeGenerator(data);
+        codeGenerator = MacOsCodeGenerator(data, maskConstants);
         break;
       case 'windows':
         codeGenerator = WindowsCodeGenerator(data);

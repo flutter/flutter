@@ -7,12 +7,18 @@ import 'package:path/path.dart' as path;
 import 'base_code_gen.dart';
 import 'key_data.dart';
 import 'utils.dart';
+import 'mask_constants.dart';
 
+String _toConstantVariableName(String variableName) {
+  return 'k${variableName[0].toUpperCase()}${variableName.substring(1)}';
+}
 
 /// Generates the key mapping of macOS, based on the information in the key
 /// data structure given to it.
 class MacOsCodeGenerator extends PlatformCodeGenerator {
-  MacOsCodeGenerator(KeyData keyData) : super(keyData);
+  MacOsCodeGenerator(KeyData keyData, this.maskConstants) : super(keyData);
+
+  final List<MaskConstant> maskConstants;
 
   /// This generates the map of macOS key codes to physical keys.
   String get _macOsScanCodeMap {
@@ -46,6 +52,20 @@ class MacOsCodeGenerator extends PlatformCodeGenerator {
     return macOsFunctionKeyMap.toString().trimRight();
   }
 
+  String get _maskConstants {
+    final StringBuffer buffer = StringBuffer();
+    for (final MaskConstant constant in maskConstants) {
+      buffer.writeln('/**');
+      buffer.write(constant.description
+        .map((String line) => wrapString(line, prefix: ' * '))
+        .join(' *\n'));
+      buffer.writeln(' */');
+      buffer.writeln('const uint64_t ${_toConstantVariableName(constant.name)} = ${constant.value};');
+      buffer.writeln('');
+    }
+    return buffer.toString().trimRight();
+  }
+
   @override
   String get templatePath => path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'keyboard_map_darwin_cc.tmpl');
 
@@ -61,6 +81,7 @@ class MacOsCodeGenerator extends PlatformCodeGenerator {
       'MACOS_SCAN_CODE_MAP': _macOsScanCodeMap,
       'MACOS_NUMPAD_MAP': _macOsNumpadMap,
       'MACOS_FUNCTION_KEY_MAP': _macOsFunctionKeyMap,
+      'MASK_CONSTANTS': _maskConstants,
     };
   }
 }
