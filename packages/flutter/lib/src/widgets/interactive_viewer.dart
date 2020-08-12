@@ -745,19 +745,12 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       // rotation despite being a two-finger gesture. Here the gesture is
       // allowed to be reinterpreted as its correct type after originally
       // being marked as a pan.
-      final _GestureType currentGestureType = _getGestureType(details);
-      if (currentGestureType != _GestureType.pan) {
-        _gestureType = currentGestureType;
-      }
+      _gestureType = _getGestureType(details);
     } else {
       _gestureType ??= _getGestureType(details);
     }
     if (!_gestureIsSupported(_gestureType)) {
       return;
-    }
-
-    if (_gestureType == _GestureType.pan) {
-      _panAxis ??= _getPanAxis(_referenceFocalPoint, focalPointScene);
     }
 
     switch (_gestureType) {
@@ -813,9 +806,13 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
       case _GestureType.pan:
         assert(_referenceFocalPoint != null);
+        // details may have a change in scale here when scaleEnabled is false.
+        // In an effort to keep the behavior similar whether or not scaleEnabled
+        // is true, these gestures are thrown away.
         if (details.scale != 1.0) {
           return;
         }
+        _panAxis ??= _getPanAxis(_referenceFocalPoint, focalPointScene);
         // Translate so that the same point in the scene is underneath the
         // focal point before and after the movement.
         final Offset translationChange = focalPointScene - _referenceFocalPoint;
