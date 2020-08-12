@@ -96,7 +96,8 @@ end
 #                                          Optional, defaults to two levels up from the directory of this script.
 #                                          MyApp/my_flutter/.ios/Flutter/../..
 def install_flutter_application_pod(flutter_application_path)
-  app_framework_dir = File.expand_path('App.framework', File.join('..', __FILE__))
+  current_directory_pathname = Pathname.new File.expand_path('..', __FILE__)
+  app_framework_dir = File.expand_path('App.framework', current_directory_pathname.to_path)
   app_framework_dylib = File.join(app_framework_dir, 'App')
   if !File.exist?(app_framework_dylib)
     # Fake an App.framework to have something to link against if the xcode backend script has not run yet.
@@ -108,7 +109,7 @@ def install_flutter_application_pod(flutter_application_path)
 
   # Keep pod and script phase paths relative so they can be checked into source control.
   # Process will be run from project directory.
-  current_directory_pathname = Pathname.new File.expand_path('..', __FILE__)
+
   # defined_in_file is set by CocoaPods and is a Pathname to the Podfile.
   project_directory_pathname = defined_in_file.dirname
   relative = current_directory_pathname.relative_path_from project_directory_pathname
