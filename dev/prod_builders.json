@@ -1,23 +1,46 @@
 {
-   "builders":[
+   "builders": [
       {
-         "name":"Linux",
-         "repo":"flutter",
-         "taskName":"linux_bot"
+         "name": "Linux build_tests",
+         "repo": "flutter",
+         "task_name": "build_tests",
+         "flaky": false
       },
       {
-         "name":"Mac",
-         "repo":"flutter",
-         "taskName":"mac_bot"
+         "name": "Linux framework_tests",
+         "repo": "flutter",
+         "task_name": "linux_framework_tests",
+         "flaky": false
       },
       {
-         "name":"Windows",
-         "repo":"flutter",
-         "taskName":"windows_bot"
+         "name": "Linux hostonly_devicelab_tests",
+         "repo": "flutter",
+         "task_name": "hostonly_devicelab_tests",
+         "flaky": false
       },
       {
-         "name":"Linux Coverage",
-         "repo":"flutter"
+         "name": "Linux tool_tests",
+         "repo": "flutter",
+         "task_name": "tool_tests",
+         "flaky": false
+      },
+      {
+         "name": "Linux web_tests",
+         "repo": "flutter",
+         "task_name": "web_tests",
+         "flaky": true
+      },
+      {
+         "name": "Mac",
+         "repo": "flutter",
+         "task_name": "mac_bot",
+         "flaky": false
+      },
+      {
+         "name": "Windows",
+         "repo": "flutter",
+         "task_name": "windows_bot",
+         "flaky": false
       }
    ]
 }

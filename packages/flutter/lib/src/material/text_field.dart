@@ -261,7 +261,6 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 ///
 /// See also:
 ///
-///  * <https://material.io/design/components/text-fields.html>
 ///  * [TextFormField], which integrates with the [Form] widget.
 ///  * [InputDecorator], which shows the labels and other visual elements that
 ///    surround the actual text editing widget.
@@ -269,8 +268,11 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 ///    [TextField]. The [EditableText] widget is rarely used directly unless
 ///    you are implementing an entirely different design language, such as
 ///    Cupertino.
-///  * Learn how to use a [TextEditingController] in one of our
-///    [cookbook recipe](https://flutter.dev/docs/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller)s.
+///  * <https://material.io/design/components/text-fields.html>
+///  * Cookbook: [Create and style a text field](https://flutter.dev/docs/cookbook/forms/text-input)
+///  * Cookbook: [Handle changes to a text field](https://flutter.dev/docs/cookbook/forms/text-field-changes)
+///  * Cookbook: [Retrieve the value of a text field](https://flutter.dev/docs/cookbook/forms/retrieve-input)
+///  * Cookbook: [Focus and text fields](https://flutter.dev/docs/cookbook/forms/focus)
 class TextField extends StatefulWidget {
   /// Creates a Material Design text field.
   ///

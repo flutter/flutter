@@ -9,6 +9,7 @@ import 'dart:typed_data';
 
 import 'package:mockito/mockito.dart';
 import 'package:path/path.dart' as path;
+import 'package:process_runner/process_runner.dart';
 import 'package:platform/platform.dart' show FakePlatform;
 
 import '../prepare_package.dart';
@@ -20,15 +21,15 @@ void main() {
   test('Throws on missing executable', () async {
     // Uses a *real* process manager, since we want to know what happens if
     // it can't find an executable.
-    final ProcessRunner processRunner = ProcessRunner(subprocessOutput: false);
+    final ProcessRunner processRunner = ProcessRunner(printOutputDefault: false);
     expect(
         expectAsync1((List<String> commandLine) async {
           return processRunner.runProcess(commandLine);
         })(<String>['this_executable_better_not_exist_2857632534321']),
-        throwsA(isA<PreparePackageException>()));
+        throwsA(isA<ProcessRunnerException>()));
     try {
       await processRunner.runProcess(<String>['this_executable_better_not_exist_2857632534321']);
-    } on PreparePackageException catch (e) {
+    } on ProcessRunnerException catch (e) {
       expect(
         e.message,
         contains('Invalid argument(s): Cannot find executable for this_executable_better_not_exist_2857632534321.'),
@@ -49,8 +50,8 @@ void main() {
           'echo test': <ProcessResult>[ProcessResult(0, 0, 'output', 'error')],
         };
         final ProcessRunner processRunner = ProcessRunner(
-            subprocessOutput: false, platform: platform, processManager: fakeProcessManager);
-        final String output = await processRunner.runProcess(<String>['echo', 'test']);
+            printOutputDefault: false, processManager: fakeProcessManager);
+        final String output = (await processRunner.runProcess(<String>['echo', 'test'])).stdout;
         expect(output, equals('output'));
       });
       test('Throws on process failure', () async {
@@ -59,12 +60,12 @@ void main() {
           'echo test': <ProcessResult>[ProcessResult(0, -1, 'output', 'error')],
         };
         final ProcessRunner processRunner = ProcessRunner(
-            subprocessOutput: false, platform: platform, processManager: fakeProcessManager);
+            printOutputDefault: false, processManager: fakeProcessManager);
         expect(
             expectAsync1((List<String> commandLine) async {
               return processRunner.runProcess(commandLine);
             })(<String>['echo', 'test']),
-            throwsA(isA<PreparePackageException>()));
+            throwsA(isA<ProcessRunnerException>()));
       });
     });
     group('ArchiveCreator for $platformName', () {
@@ -187,7 +188,7 @@ void main() {
           'git reset --hard $testRef': <ProcessResult>[ProcessResult(0, -1, 'output2', '')],
         };
         processManager.fakeResults = calls;
-        expect(expectAsync0(creator.initializeRepo), throwsA(isA<PreparePackageException>()));
+        expect(expectAsync0(creator.initializeRepo), throwsA(isA<ProcessRunnerException>()));
       });
 
       test('non-strict mode calls the right commands', () async {

@@ -8,7 +8,6 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
-import 'package:quiver/strings.dart';
 
 import '../application_package.dart';
 import '../base/common.dart';
@@ -841,7 +840,7 @@ abstract class FlutterCommand extends Command<void> {
     ];
 
     final String label = labels
-        .where((String label) => !isBlank(label))
+        .where((String label) => !_isBlank(label))
         .join('-');
     globals.flutterUsage.sendTiming(
       'flutter',
@@ -1136,3 +1135,6 @@ DevelopmentArtifact _artifactFromTargetPlatform(TargetPlatform targetPlatform) {
   }
   return null;
 }
+
+/// Returns true if s is either null, empty or is solely made of whitespace characters (as defined by String.trim).
+bool _isBlank(String s) => s == null || s.trim().isEmpty;
