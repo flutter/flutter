@@ -67,6 +67,7 @@ TEST(MethodChannelTest, Registration) {
         // result.
         EXPECT_EQ(call.method_name(), method_name);
         EXPECT_NE(result, nullptr);
+        result->Success();
       });
   EXPECT_EQ(messenger.last_message_handler_channel(), channel_name);
   EXPECT_NE(messenger.last_message_handler(), nullptr);
