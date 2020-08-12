@@ -470,7 +470,6 @@ class AppDomain extends Domain {
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
       flutterProject: flutterProject,
-      viewFilter: isolateFilter,
       target: target,
       buildInfo: options.buildInfo,
       widgetCache: WidgetCache(featureFlags: featureFlags),

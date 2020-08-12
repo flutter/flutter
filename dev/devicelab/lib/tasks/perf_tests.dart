@@ -12,15 +12,15 @@ import 'package:path/path.dart' as path;
 
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
-import 'package:flutter_devicelab/framework/ios.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:flutter_devicelab/tasks/track_widget_creation_enabled_task.dart';
 
-TaskFunction createComplexLayoutScrollPerfTest() {
+TaskFunction createComplexLayoutScrollPerfTest({bool needsMeasureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
     'test_driver/scroll_perf.dart',
     'complex_layout_scroll_perf',
+    needsMeasureCpuGpu: needsMeasureCpuGpu,
   ).run;
 }
 
@@ -398,8 +398,8 @@ class PerfTest {
   ///   'average_vsync_transitions_missed',
   ///   '90th_percentile_vsync_transitions_missed',
   ///   '99th_percentile_vsync_transitions_missed',
-  ///   if (needsMeasureCpuGpu) 'cpu_percentage',
-  ///   if (needsMeasureCpuGpu) 'gpu_percentage',
+  ///   if (needsMeasureCpuGpu) 'average_cpu_usage',
+  ///   if (needsMeasureCpuGpu) 'average_gpu_usage',
   /// ]
   /// ```
   final List<String> benchmarkScoreKeys;
@@ -455,12 +455,6 @@ class PerfTest {
         );
       }
 
-      if (needsMeasureCpuGpu) {
-        await inDirectory<void>('$testDirectory/build', () async {
-          data.addAll(await measureIosCpuGpu(deviceId: deviceId));
-        });
-      }
-
       return TaskResult.success(
         data,
         benchmarkScoreKeys: benchmarkScoreKeys ?? <String>[
@@ -475,8 +469,8 @@ class PerfTest {
           'average_vsync_transitions_missed',
           '90th_percentile_vsync_transitions_missed',
           '99th_percentile_vsync_transitions_missed',
-          if (needsMeasureCpuGpu) 'cpu_percentage',
-          if (needsMeasureCpuGpu) 'gpu_percentage',
+          if (needsMeasureCpuGpu) 'average_cpu_usage',
+          if (needsMeasureCpuGpu) 'average_gpu_usage',
         ],
       );
     });

@@ -207,20 +207,6 @@ void main() {
     });
   });
 
-  testUsingContext('FlutterDevice can list views with a filter', () => testbed.run(() async {
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      listViews,
-    ]);
-    final MockDevice mockDevice = MockDevice();
-    final FlutterDevice flutterDevice = FlutterDevice(
-      mockDevice,
-      buildInfo: BuildInfo.debug,
-      viewFilter: 'b', // Does not match name of `fakeFlutterView`.
-    );
-
-    flutterDevice.vmService = fakeVmServiceHost.vmService;
-  }));
-
   testUsingContext('ResidentRunner can attach to device successfully', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
@@ -1639,17 +1625,6 @@ void main() {
     await expectLater(exitFuture, completes);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }));
-
-  testUsingContext('listViews handles a null VM service', () => testbed.run(() async {
-    final FlutterDevice device = FlutterDevice(mockDevice, buildInfo: BuildInfo.debug);
-    final ResidentRunner residentRunner = HotRunner(
-      <FlutterDevice>[device],
-      debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug)
-    );
-
-    expect(await residentRunner.listFlutterViews(), isEmpty);
-  }));
-
 
   testUsingContext('ResidentRunner debugDumpApp calls flutter device', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
