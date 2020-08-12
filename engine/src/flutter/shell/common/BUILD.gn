@@ -158,6 +158,14 @@ if (enable_unittests) {
     test_enable_metal = false
   }
 
+  config("test_enable_gl_config") {
+    defines = [ "SHELL_ENABLE_GL" ]
+  }
+
+  config("test_enable_vulkan_config") {
+    defines = [ "SHELL_ENABLE_VULKAN" ]
+  }
+
   shell_gpu_configuration("shell_unittests_gpu_configuration") {
     enable_software = test_enable_software
     enable_vulkan = test_enable_vulkan
@@ -208,7 +216,7 @@ if (enable_unittests) {
       "//third_party/skia",
     ]
 
-    defines = []
+    public_configs = []
 
     # SwiftShader only supports x86/x64_64
     if (target_cpu == "x86" || target_cpu == "x64") {
@@ -218,9 +226,9 @@ if (enable_unittests) {
           "shell_test_platform_view_gl.h",
         ]
 
-        public_deps += [ "//flutter/testing:opengl" ]
+        public_configs += [ ":test_enable_gl_config" ]
 
-        defines += [ "SHELL_ENABLE_GL" ]
+        public_deps += [ "//flutter/testing:opengl" ]
       }
     }
 
@@ -230,12 +238,12 @@ if (enable_unittests) {
         "shell_test_platform_view_vulkan.h",
       ]
 
+      public_configs += [ ":test_enable_vulkan_config" ]
+
       public_deps += [
         "//flutter/testing:vulkan",
         "//flutter/vulkan",
       ]
-
-      defines += [ "SHELL_ENABLE_VULKAN" ]
     }
 
     public_deps_legacy_and_next = [
