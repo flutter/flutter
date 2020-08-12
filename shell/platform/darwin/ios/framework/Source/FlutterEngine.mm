@@ -33,6 +33,7 @@
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 
 NSString* const FlutterDefaultDartEntrypoint = nil;
+NSString* const FlutterDefaultInitialRoute = nil;
 static constexpr int kNumProfilerSamplesPerSec = 5;
 
 @interface FlutterEngineRegistrar : NSObject <FlutterPluginRegistrar>
@@ -47,6 +48,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 @property(nonatomic, readonly) NSMutableDictionary<NSString*, FlutterEngineRegistrar*>* registrars;
 
 @property(nonatomic, readwrite, copy) NSString* isolateId;
+@property(nonatomic, copy) NSString* initialRoute;
 @property(nonatomic, retain) id<NSObject> flutterViewControllerWillDeallocObserver;
 @end
 
@@ -81,6 +83,10 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   BOOL _allowHeadlessExecution;
   FlutterBinaryMessengerRelay* _binaryMessenger;
   std::unique_ptr<flutter::ConnectionCollection> _connections;
+}
+
+- (instancetype)init {
+  return [self initWithName:@"FlutterEngine" project:nil allowHeadlessExecution:YES];
 }
 
 - (instancetype)initWithName:(NSString*)labelPrefix {
@@ -161,6 +167,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
       }];
 
   [_labelPrefix release];
+  [_initialRoute release];
   [_pluginPublications release];
   [_registrars release];
   _binaryMessenger.parent = nil;
@@ -368,6 +375,13 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
       binaryMessenger:self.binaryMessenger
                 codec:[FlutterJSONMethodCodec sharedInstance]]);
 
+  if ([_initialRoute length] > 0) {
+    // Flutter isn't ready to receive this method call yet but the channel buffer will cache this.
+    [_navigationChannel invokeMethod:@"setInitialRoute" arguments:_initialRoute];
+    [_initialRoute release];
+    _initialRoute = nil;
+  }
+
   _platformChannel.reset([[FlutterMethodChannel alloc]
          initWithName:@"flutter/platform"
       binaryMessenger:self.binaryMessenger
@@ -437,13 +451,16 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
                                                             libraryOrNil:libraryOrNil]);
 }
 
-- (BOOL)createShell:(NSString*)entrypoint libraryURI:(NSString*)libraryURI {
+- (BOOL)createShell:(NSString*)entrypoint
+         libraryURI:(NSString*)libraryURI
+       initialRoute:(NSString*)initialRoute {
   if (_shell != nullptr) {
     FML_LOG(WARNING) << "This FlutterEngine was already invoked.";
     return NO;
   }
 
   static size_t shellCount = 1;
+  self.initialRoute = initialRoute;
 
   auto settings = [_dartProject.get() settings];
   auto platformData = [_dartProject.get() defaultPlatformData];
@@ -553,19 +570,33 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 }
 
 - (BOOL)run {
-  return [self runWithEntrypoint:FlutterDefaultDartEntrypoint libraryURI:nil];
+  return [self runWithEntrypoint:FlutterDefaultDartEntrypoint
+                      libraryURI:nil
+                    initialRoute:FlutterDefaultInitialRoute];
 }
 
 - (BOOL)runWithEntrypoint:(NSString*)entrypoint libraryURI:(NSString*)libraryURI {
-  if ([self createShell:entrypoint libraryURI:libraryURI]) {
+  return [self runWithEntrypoint:entrypoint
+                      libraryURI:libraryURI
+                    initialRoute:FlutterDefaultInitialRoute];
+}
+
+- (BOOL)runWithEntrypoint:(NSString*)entrypoint {
+  return [self runWithEntrypoint:entrypoint libraryURI:nil initialRoute:FlutterDefaultInitialRoute];
+}
+
+- (BOOL)runWithEntrypoint:(NSString*)entrypoint initialRoute:(NSString*)initialRoute {
+  return [self runWithEntrypoint:entrypoint libraryURI:nil initialRoute:initialRoute];
+}
+
+- (BOOL)runWithEntrypoint:(NSString*)entrypoint
+               libraryURI:(NSString*)libraryURI
+             initialRoute:(NSString*)initialRoute {
+  if ([self createShell:entrypoint libraryURI:libraryURI initialRoute:initialRoute]) {
     [self launchEngine:entrypoint libraryURI:libraryURI];
   }
 
   return _shell != nullptr;
-}
-
-- (BOOL)runWithEntrypoint:(NSString*)entrypoint {
-  return [self runWithEntrypoint:entrypoint libraryURI:nil];
 }
 
 - (void)notifyLowMemory {
@@ -668,6 +699,15 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 
 - (NSObject<FlutterBinaryMessenger>*)binaryMessenger {
   return _binaryMessenger;
+}
+
+// For test only. Ideally we should create a dependency injector for all dependencies and
+// remove this.
+- (void)setBinaryMessenger:(FlutterBinaryMessengerRelay*)binaryMessenger {
+  // Discard the previous messenger and keep the new one.
+  _binaryMessenger.parent = nil;
+  [_binaryMessenger release];
+  _binaryMessenger = [binaryMessenger retain];
 }
 
 #pragma mark - FlutterBinaryMessenger

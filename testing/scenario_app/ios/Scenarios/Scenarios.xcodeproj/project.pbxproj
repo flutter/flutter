@@ -11,6 +11,7 @@
 		0A57B3BD2323C4BD00DD9521 /* ScreenBeforeFlutter.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A57B3BC2323C4BD00DD9521 /* ScreenBeforeFlutter.m */; };
 		0A57B3BF2323C74200DD9521 /* FlutterEngine+ScenariosTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A57B3BE2323C74200DD9521 /* FlutterEngine+ScenariosTest.m */; };
 		0A57B3C22323D2D700DD9521 /* AppLifecycleTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A57B3C12323D2D700DD9521 /* AppLifecycleTests.m */; };
+		0A97D7C024BA937000050525 /* FlutterViewControllerInitialRouteTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A97D7BF24BA937000050525 /* FlutterViewControllerInitialRouteTest.m */; };
 		0D14A3FE239743190013D873 /* golden_platform_view_rotate_iPhone SE_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = 0D14A3FD239743190013D873 /* golden_platform_view_rotate_iPhone SE_simulator.png */; };
 		0D8470A4240F0B1F0030B565 /* StatusBarTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D8470A3240F0B1F0030B565 /* StatusBarTest.m */; };
 		0DB781EF22E931BE00E9B371 /* Flutter.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 246B4E4522E3B61000073EBF /* Flutter.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -119,6 +120,7 @@
 		0A57B3BE2323C74200DD9521 /* FlutterEngine+ScenariosTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "FlutterEngine+ScenariosTest.m"; sourceTree = "<group>"; };
 		0A57B3C02323C74D00DD9521 /* FlutterEngine+ScenariosTest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "FlutterEngine+ScenariosTest.h"; sourceTree = "<group>"; };
 		0A57B3C12323D2D700DD9521 /* AppLifecycleTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppLifecycleTests.m; sourceTree = "<group>"; };
+		0A97D7BF24BA937000050525 /* FlutterViewControllerInitialRouteTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FlutterViewControllerInitialRouteTest.m; sourceTree = "<group>"; };
 		0D14A3FD239743190013D873 /* golden_platform_view_rotate_iPhone SE_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_platform_view_rotate_iPhone SE_simulator.png"; sourceTree = "<group>"; };
 		0D8470A2240F0B1F0030B565 /* StatusBarTest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StatusBarTest.h; sourceTree = "<group>"; };
 		0D8470A3240F0B1F0030B565 /* StatusBarTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StatusBarTest.m; sourceTree = "<group>"; };
@@ -243,6 +245,7 @@
 			children = (
 				248FDFC322FE7CD0009CC7CD /* FlutterEngineTest.m */,
 				0DB781FC22EA2C0300E9B371 /* FlutterViewControllerTest.m */,
+				0A97D7BF24BA937000050525 /* FlutterViewControllerInitialRouteTest.m */,
 				248D76E522E388380012F0C1 /* Info.plist */,
 				0A57B3C12323D2D700DD9521 /* AppLifecycleTests.m */,
 			);
@@ -469,6 +472,7 @@
 			files = (
 				0DB7820222EA493B00E9B371 /* FlutterViewControllerTest.m in Sources */,
 				0A57B3C22323D2D700DD9521 /* AppLifecycleTests.m in Sources */,
+				0A97D7C024BA937000050525 /* FlutterViewControllerInitialRouteTest.m in Sources */,
 				248FDFC422FE7CD0009CC7CD /* FlutterEngineTest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
