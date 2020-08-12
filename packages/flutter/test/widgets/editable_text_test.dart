@@ -1336,18 +1336,27 @@ void main() {
     expect(changedValue, clipboardContent);
   });
 
-  testWidgets('Does not lose focus by default when "next" action is pressed', (WidgetTester tester) async {
+  testWidgets('Moves focus to the next field by default when "next" action is pressed', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    final GlobalKey previousKey = GlobalKey();
+    final GlobalKey nextKey = GlobalKey();
 
     final Widget widget = MaterialApp(
-      home: EditableText(
-        backgroundCursorColor: Colors.grey,
-        controller: TextEditingController(),
-        focusNode: focusNode,
-        style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
-        cursorColor: Colors.blue,
-        selectionControls: materialTextSelectionControls,
-        keyboardType: TextInputType.text,
+      home: Column(
+        children: <Widget>[
+          TextButton(child: Text('Previous Widget', key: previousKey), onPressed: (){}),
+          EditableText(
+            backgroundCursorColor: Colors.grey,
+            controller: TextEditingController(),
+            focusNode: focusNode,
+            style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
+            cursorColor: Colors.blue,
+            selectionControls: materialTextSelectionControls,
+            keyboardType: TextInputType.text,
+            autofocus: true,
+          ),
+          TextButton(child: Text('Next Widget', key: nextKey), onPressed: (){}),
+        ],
       ),
     );
     await tester.pumpWidget(widget);
@@ -1362,8 +1371,51 @@ void main() {
     await tester.testTextInput.receiveAction(TextInputAction.next);
     await tester.pump();
 
-    // Still has focus after pressing "next".
-    expect(focusNode.hasFocus, true);
+    // Next node has focus after pressing 'next' button.
+    expect(focusNode.hasFocus, isFalse);
+    expect(Focus.of(previousKey.currentContext).hasFocus, isFalse);
+    expect(Focus.of(nextKey.currentContext).hasFocus, isTrue);
+  });
+
+  testWidgets('Moves focus to the previous field by default when "previous" action is pressed', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    final GlobalKey previousKey = GlobalKey();
+    final GlobalKey nextKey = GlobalKey();
+
+    final Widget widget = MaterialApp(
+      home: Column(
+        children: <Widget>[
+          TextButton(child: Text('Previous Widget', key: previousKey), onPressed: (){}),
+          EditableText(
+            backgroundCursorColor: Colors.grey,
+            controller: TextEditingController(),
+            focusNode: focusNode,
+            style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
+            cursorColor: Colors.blue,
+            selectionControls: materialTextSelectionControls,
+            keyboardType: TextInputType.text,
+            autofocus: true,
+          ),
+          TextButton(child: Text('Next Widget', key: nextKey), onPressed: (){}),
+        ],
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    // Select EditableText to give it focus.
+    final Finder textFinder = find.byType(EditableText);
+    await tester.tap(textFinder);
+    await tester.pump();
+
+    assert(focusNode.hasFocus);
+
+    await tester.testTextInput.receiveAction(TextInputAction.previous);
+    await tester.pump();
+
+    // Next node has focus after pressing 'previous' button.
+    expect(focusNode.hasFocus, isFalse);
+    expect(Focus.of(nextKey.currentContext).hasFocus, isFalse);
+    expect(Focus.of(previousKey.currentContext).hasFocus, isTrue);
   });
 
   testWidgets('Does not lose focus by default when "done" action is pressed and onEditingComplete is provided', (WidgetTester tester) async {
