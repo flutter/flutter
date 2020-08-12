@@ -52,7 +52,7 @@ class GalleryTransitionTest {
   final String testFile;
   final String timelineSummaryFile;
   final String transitionDurationFile;
-  String driverFile;
+  final String driverFile;
 
   Future<TaskResult> call() async {
     final Device device = await devices.workingDevice;
@@ -63,9 +63,9 @@ class GalleryTransitionTest {
     await inDirectory<void>(galleryDirectory, () async {
       await flutter('packages', options: <String>['get']);
 
-      driverFile ??= semanticsEnabled
+      final String testDriver = driverFile ?? (semanticsEnabled
           ? '${testFile}_test'
-          : '${testFile}_with_semantics_test';
+          : '${testFile}_with_semantics_test');
 
       await flutter('drive', options: <String>[
         '--profile',
@@ -74,7 +74,7 @@ class GalleryTransitionTest {
         '-t',
         'test_driver/$testFile.dart',
         '--driver',
-        'test_driver/$driverFile.dart',
+        'test_driver/$testDriver.dart',
         '-d',
         deviceId,
       ]);

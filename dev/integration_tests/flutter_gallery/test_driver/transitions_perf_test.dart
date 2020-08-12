@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:convert' show JsonEncoder, json;
 
-import 'package:analyzer/dart/element/element.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:flutter_driver/flutter_driver.dart';
@@ -189,9 +188,9 @@ void main([List<String> args = const <String>[]]) {
       final Timeline timeline = await driver.traceAction(
         () async {
           if (hybrid) {
-            await runDemos(kProfiledDemos, driver);
-          } else {
             await driver.requestData('profileDemos');
+          } else {
+            await runDemos(kProfiledDemos, driver);
           }
         },
         streams: const <TimelineStream>[
@@ -212,10 +211,10 @@ void main([List<String> args = const <String>[]]) {
 
       // Execute the remaining tests.
       if (hybrid) {
+        await driver.requestData('profileDemos');
+      } else {
         final Set<String> unprofiledDemos = Set<String>.from(_allDemos)..removeAll(kProfiledDemos);
         await runDemos(unprofiledDemos.toList(), driver);
-      } else {
-        await driver.requestData('profileDemos');
       }
 
     }, timeout: const Timeout(Duration(minutes: 5)));

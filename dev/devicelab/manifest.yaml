@@ -765,7 +765,9 @@ tasks:
   flutter_gallery__transition_perf_hybrid:
     description: >
       Measures the performance of screen transitions in Flutter Gallery on
-      Android with hybrid of host-driven and self-driven.
+      Android where the page transitions are self-driven on device without host
+      interventions, but the timeline events are still sent to host to be
+      processed.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
     flaky: true
