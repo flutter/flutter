@@ -570,8 +570,6 @@ class StandardMethodCodec implements MethodCodec {
     final dynamic errorCode = messageCodec.readValue(buffer);
     final dynamic errorMessage = messageCodec.readValue(buffer);
     final dynamic errorDetails = messageCodec.readValue(buffer);
-    // TODO(libe): Mute the readValue check for stacktrace for now, b/158148913
-    /// Remove this once flutter engine is ready with the stacktrace fields.
     final String? errorStacktrace = (buffer.hasRemaining) ? messageCodec.readValue(buffer) as String : null;
     if (errorCode is String && (errorMessage == null || errorMessage is String) && !buffer.hasRemaining)
       throw PlatformException(code: errorCode, message: errorMessage as String, details: errorDetails, stacktrace: errorStacktrace);
