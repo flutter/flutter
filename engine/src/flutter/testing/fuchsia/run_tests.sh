@@ -50,11 +50,11 @@ reboot() {
        --timeout-seconds $ssh_timeout_seconds \
        --identity-file $pkey
 
-  echo "$(date) START:REBOOT ------------------------------------------"
+  echo "$(date) START:REBOOT ----------------------------------------"
   # note: this will set an exit code of 255, which we can ignore.
   ./fuchsia_ctl -d $device_name ssh -c "dm reboot-recovery" \
       --identity-file $pkey || true
-  echo "$(date) END:REBOOT --------------------------------------------"
+  echo "$(date) END:REBOOT ------------------------------------------"
 }
 
 trap reboot EXIT
@@ -103,7 +103,7 @@ echo "$(date) DONE:txt_tests ----------------------------------------"
 # once it passes on Fuchsia.
 # TODO(https://github.com/flutter/flutter/issues/58211): Re-enable MessageLoop
 # test once it passes on Fuchsia.
-echo "$(date) START:fml_tests ----------------------------------------"
+echo "$(date) START:fml_tests ---------------------------------------"
 ./fuchsia_ctl -d $device_name test \
     -f fml_tests-0.far  \
     -t fml_tests \
@@ -163,14 +163,10 @@ echo "$(date) START:ui_tests ----------------------------------------"
    --packages-directory packages
 echo "$(date) DONE:ui_tests -----------------------------------------"
 
-# TODO(https://github.com/flutter/flutter/issues/53399): Re-enable
-# OnServiceProtocolGetSkSLsWorks, CanLoadSkSLsFromAsset, and
-# CanRemoveOldPersistentCache once they pass on Fuchsia.
 echo "$(date) START:shell_tests -------------------------------------"
 ./fuchsia_ctl -d $device_name test \
     -f shell_tests-0.far  \
     -t shell_tests \
-    -a "--gtest_filter=-ShellTest.CacheSkSLWorks:ShellTest.SetResourceCacheSize*:ShellTest.OnServiceProtocolGetSkSLsWorks:ShellTest.CanLoadSkSLsFromAsset:ShellTest.CanRemoveOldPersistentCache" \
     --identity-file $pkey \
     --timeout-seconds $test_timeout_seconds \
     --packages-directory packages
@@ -178,7 +174,6 @@ echo "$(date) START:shell_tests -------------------------------------"
 ./fuchsia_ctl -d $device_name test \
     -f shell_tests_next-0.far  \
     -t shell_tests_next \
-    -a "--gtest_filter=-ShellTest.CacheSkSLWorks:ShellTest.SetResourceCacheSize*:ShellTest.OnServiceProtocolGetSkSLsWorks:ShellTest.CanLoadSkSLsFromAsset:ShellTest.CanRemoveOldPersistentCache" \
     --identity-file $pkey \
     --timeout-seconds $test_timeout_seconds \
     --packages-directory packages
