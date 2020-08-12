@@ -535,25 +535,9 @@ abstract class WidgetController {
   }) {
     assert(kDragSlopDefault > kTouchSlop);
     return TestAsyncUtils.guard<void>(() async {
-      final TestGesture gesture = await startGesture(
-        startLocation,
-        pointer: pointer,
-        buttons: buttons,
-      );
+      final TestGesture gesture = await startGesture(startLocation, pointer: pointer, buttons: buttons);
       assert(gesture != null);
-      for (final Offset dragOffset in _separateDragOffset(offset, touchSlopX, touchSlopY)) {
-        await gesture.moveBy(dragOffset);
-      }
-      await gesture.up();
-    });
-  }
 
-  // Separates the `offset` according to `touchSlopX` and `touchSlopY`.
-  Iterable<Offset> _separateDragOffset(
-    Offset offset,
-    double touchSlopX,
-    double touchSlopY,
-  ) sync* {
       final double xSign = offset.dx.sign;
       final double ySign = offset.dy.sign;
 
@@ -579,17 +563,17 @@ abstract class WidgetController {
             final double diffY = offsetSlope.abs() * touchSlopX * ySign;
 
             // The vector from the origin to the vertical edge.
-            yield Offset(signedSlopX, diffY);
+            await gesture.moveBy(Offset(signedSlopX, diffY));
             if (offsetY.abs() <= touchSlopY) {
               // The drag ends on or before getting to the horizontal extension of the horizontal edge.
-              yield Offset(offsetX - signedSlopX, offsetY - diffY);
+              await gesture.moveBy(Offset(offsetX - signedSlopX, offsetY - diffY));
             } else {
               final double diffY2 = signedSlopY - diffY;
               final double diffX2 = inverseOffsetSlope * diffY2;
 
               // The vector from the edge of the box to the horizontal extension of the horizontal edge.
-              yield Offset(diffX2, diffY2);
-              yield Offset(offsetX - diffX2 - signedSlopX, offsetY - signedSlopY);
+              await gesture.moveBy(Offset(diffX2, diffY2));
+              await gesture.moveBy(Offset(offsetX - diffX2 - signedSlopX, offsetY - signedSlopY));
             }
           } else {
             assert(offsetY.abs() > touchSlopY);
@@ -598,26 +582,28 @@ abstract class WidgetController {
             final double diffX = inverseOffsetSlope.abs() * touchSlopY * xSign;
 
             // The vector from the origin to the vertical edge.
-            yield Offset(diffX, signedSlopY);
+            await gesture.moveBy(Offset(diffX, signedSlopY));
             if (offsetX.abs() <= touchSlopX) {
               // The drag ends on or before getting to the vertical extension of the vertical edge.
-              yield Offset(offsetX - diffX, offsetY - signedSlopY);
+              await gesture.moveBy(Offset(offsetX - diffX, offsetY - signedSlopY));
             } else {
               final double diffX2 = signedSlopX - diffX;
               final double diffY2 = offsetSlope * diffX2;
 
               // The vector from the edge of the box to the vertical extension of the vertical edge.
-              yield Offset(diffX2, diffY2);
-              yield Offset(offsetX - signedSlopX, offsetY - diffY2 - signedSlopY);
+              await gesture.moveBy(Offset(diffX2, diffY2));
+              await gesture.moveBy(Offset(offsetX - signedSlopX, offsetY - diffY2 - signedSlopY));
             }
           }
         } else { // The drag goes through the corner of the box.
-          yield Offset(signedSlopX, signedSlopY);
-          yield Offset(offsetX - signedSlopX, offsetY - signedSlopY);
+          await gesture.moveBy(Offset(signedSlopX, signedSlopY));
+          await gesture.moveBy(Offset(offsetX - signedSlopX, offsetY - signedSlopY));
         }
       } else { // The drag ends inside the box.
-        yield offset;
+        await gesture.moveBy(offset);
       }
+      await gesture.up();
+    });
   }
 
   /// Attempts to drag the given widget by the given offset in the `duration`
@@ -630,6 +616,7 @@ abstract class WidgetController {
   /// [fling] or ballistic animation, depending on the speed from
   /// `offset/duration`.
   ///
+  /// {@template flutter.flutter_test.timeddrag}
   /// The move events are sent at a given `frequency` in Hz (or events per
   /// second). It defaults to 60Hz.
   ///
@@ -637,6 +624,7 @@ abstract class WidgetController {
   ///
   /// See also [LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive] for
   /// more accurate time control.
+  /// {@endtemplate}
   Future<void> timedDrag(
     Finder finder,
     Offset offset,
@@ -658,20 +646,11 @@ abstract class WidgetController {
   /// Attempts a series of [PointerEvent]s to simulate a drag operation in the
   /// `duration` time.
   ///
-  /// If the middle of the widget is not exposed, this might send
-  /// events to another object.
-  ///
-  /// This is the timed version of [drag]. This may or may not result in a
-  /// [fling] or ballistic animation, depending on the speed from
+  /// This is the timed version of [dragFrom]. This may or may not result in a
+  /// [flingFrom] or ballistic animation, depending on the speed from
   /// `offset/duration`.
   ///
-  /// The move events are sent at a given `frequency` in Hz (or events per
-  /// second). It defaults to 60Hz.
-  ///
-  /// The movement is linear in time.
-  ///
-  /// See also [LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive] for
-  /// more accurate time control.
+  /// {@macro flutter.flutter_test.timeddrag}
   Future<void> timedDragFrom(
     Offset startLocation,
     Offset offset,
