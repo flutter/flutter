@@ -541,8 +541,7 @@ abstract class WidgetController {
     Duration duration,
     double frequency = 60.0,
   }) {
-    assert(touchSlopX > kTouchSlop);
-    assert(touchSlopY > kTouchSlop);
+    assert(kDragSlopDefault > kTouchSlop);
     if (duration == null) {
       return TestAsyncUtils.guard<void>(() async {
         final TestGesture gesture = await startGesture(
