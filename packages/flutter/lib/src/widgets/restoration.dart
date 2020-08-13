@@ -804,7 +804,7 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
   @mustCallSuper
   @protected
   void didToggleBucket(RestorationBucket oldBucket) {
-    // When restore is pending, restoreState must be called instead.
+    // When a bucket is replaced, must `restoreState` is called instead.
     assert(_bucket?.isReplacing != true);
   }
 

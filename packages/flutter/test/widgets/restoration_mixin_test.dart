@@ -127,7 +127,6 @@ void main() {
 
     // Rename the existing bucket.
     state.injectId('newnewnew');
-    await tester.pump();
     manager.doSerialization();
 
     expect(state.bucket.restorationId, 'newnewnew');
@@ -678,7 +677,6 @@ class _TestRestorableWidgetState extends State<_TestRestorableWidget> with Resto
 
   @override
   void didToggleBucket(RestorationBucket oldBucket) {
-    print('$oldBucket -> $bucket');
     toogleBucketLog.add(oldBucket);
     super.didToggleBucket(oldBucket);
   }

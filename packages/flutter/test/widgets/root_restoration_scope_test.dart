@@ -362,8 +362,8 @@ void main() {
     expect(state.bucket, isNotNull);
 
     binding.restorationManager.rootBucket = SynchronousFuture<RestorationBucket>(null);
-    root.dispose();
     await tester.pump();
+    root.dispose();
 
     expect(binding.restorationManager.rootBucketAccessed, 2);
     expect(find.text('Hello'), findsOneWidget);

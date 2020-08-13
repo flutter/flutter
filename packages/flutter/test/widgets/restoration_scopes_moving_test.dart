@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('widgets moves scopes during restore', (WidgetTester tester) async {
+  testWidgets('widget moves scopes during restore', (WidgetTester tester) async {
     await tester.pumpWidget(RootRestorationScope(
       restorationId: 'root',
       child: Directionality(

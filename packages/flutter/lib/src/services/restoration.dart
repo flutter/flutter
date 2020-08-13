@@ -525,9 +525,9 @@ class RestorationBucket {
   RestorationBucket? _parent;
 
   /// Returns true when entities processing this bucket should restore their
-  /// state from the information in the bucket (e.g. via [read] and [climChild])
-  /// instead of copying their current state information into the bucket (e.g.
-  /// via [write] and [adoptChild].
+  /// state from the information in the bucket (e.g. via [read] and
+  /// [claimChild]) instead of copying their current state information into the
+  /// bucket (e.g. via [write] and [adoptChild].
   ///
   /// This flag is true for one frame after the [RestorationManager] has been
   /// instructed to restore the application from newly provided restoration
