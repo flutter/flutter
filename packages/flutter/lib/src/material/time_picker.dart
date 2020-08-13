@@ -1419,56 +1419,60 @@ class _TimePickerInputState extends State<_TimePickerInput> {
                   // Hour/minutes should not change positions in RTL locales.
                   textDirection: TextDirection.ltr,
                   children: <Widget>[
-                    Expanded(child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        const SizedBox(height: 8.0),
-                        _HourTextField(
-                          selectedTime: _selectedTime,
-                          style: hourMinuteStyle,
-                          validator: _validateHour,
-                          onSavedSubmitted: _handleHourSavedSubmitted,
-                          onChanged: _handleHourChanged,
-                        ),
-                        const SizedBox(height: 8.0),
-                        if (!hourHasError && !minuteHasError)
-                          ExcludeSemantics(
-                            child: Text(
-                              MaterialLocalizations.of(context).timePickerHourLabel,
-                              style: theme.textTheme.caption,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          const SizedBox(height: 8.0),
+                          _HourTextField(
+                            selectedTime: _selectedTime,
+                            style: hourMinuteStyle,
+                            validator: _validateHour,
+                            onSavedSubmitted: _handleHourSavedSubmitted,
+                            onChanged: _handleHourChanged,
                           ),
-                      ],
-                    )),
+                          const SizedBox(height: 8.0),
+                          if (!hourHasError && !minuteHasError)
+                            ExcludeSemantics(
+                              child: Text(
+                                MaterialLocalizations.of(context).timePickerHourLabel,
+                                style: theme.textTheme.caption,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
                     Container(
                       margin: const EdgeInsets.only(top: 8.0),
                       height: _kTimePickerHeaderControlHeight,
                       child: _StringFragment(timeOfDayFormat: timeOfDayFormat),
                     ),
-                    Expanded(child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        const SizedBox(height: 8.0),
-                        _MinuteTextField(
-                          selectedTime: _selectedTime,
-                          style: hourMinuteStyle,
-                          validator: _validateMinute,
-                          onSavedSubmitted: _handleMinuteSavedSubmitted,
-                        ),
-                        const SizedBox(height: 8.0),
-                        if (!hourHasError && !minuteHasError)
-                          ExcludeSemantics(
-                            child: Text(
-                              MaterialLocalizations.of(context).timePickerMinuteLabel,
-                              style: theme.textTheme.caption,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          const SizedBox(height: 8.0),
+                          _MinuteTextField(
+                            selectedTime: _selectedTime,
+                            style: hourMinuteStyle,
+                            validator: _validateMinute,
+                            onSavedSubmitted: _handleMinuteSavedSubmitted,
                           ),
-                      ],
-                    )),
+                          const SizedBox(height: 8.0),
+                          if (!hourHasError && !minuteHasError)
+                            ExcludeSemantics(
+                              child: Text(
+                                MaterialLocalizations.of(context).timePickerMinuteLabel,
+                                style: theme.textTheme.caption,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
