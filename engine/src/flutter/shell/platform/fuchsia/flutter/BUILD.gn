@@ -21,98 +21,120 @@ shell_gpu_configuration("fuchsia_legacy_gpu_configuration") {
   enable_metal = false
 }
 
-source_set("flutter_runner_sources") {
-  sources = [
-    "accessibility_bridge.cc",
-    "accessibility_bridge.h",
-    "component.cc",
-    "component.h",
-    "compositor_context.cc",
-    "compositor_context.h",
-    "engine.cc",
-    "engine.h",
-    "flutter_runner_product_configuration.cc",
-    "flutter_runner_product_configuration.h",
-    "fuchsia_intl.cc",
-    "fuchsia_intl.h",
-    "isolate_configurator.cc",
-    "isolate_configurator.h",
-    "logging.h",
-    "loop.cc",
-    "loop.h",
-    "platform_view.cc",
-    "platform_view.h",
-    "runner.cc",
-    "runner.h",
-    "session_connection.cc",
-    "session_connection.h",
-    "surface.cc",
-    "surface.h",
-    "task_observers.cc",
-    "task_observers.h",
-    "task_runner_adapter.cc",
-    "task_runner_adapter.h",
-    "thread.cc",
-    "thread.h",
-    "unique_fdio_ns.h",
-    "vsync_recorder.cc",
-    "vsync_recorder.h",
-    "vsync_waiter.cc",
-    "vsync_waiter.h",
-    "vulkan_surface.cc",
-    "vulkan_surface.h",
-    "vulkan_surface_pool.cc",
-    "vulkan_surface_pool.h",
-    "vulkan_surface_producer.cc",
-    "vulkan_surface_producer.h",
-  ]
+template("runner_sources") {
+  assert(defined(invoker.product), "runner_sources must define product")
 
-  # The use of these dependencies is temporary and will be moved behind the
-  # embedder API.
-  flutter_public_deps = [
-    "//flutter/flow:flow_fuchsia_legacy",
-    "//flutter/lib/ui:ui_fuchsia_legacy",
-    "//flutter/runtime:runtime_fuchsia_legacy",
-    "//flutter/shell/common:common_fuchsia_legacy",
-  ]
-  flutter_deps = [
-    ":fuchsia_legacy_gpu_configuration",
-    "//flutter/assets",
-    "//flutter/common",
-    "//flutter/fml",
-    "//flutter/vulkan",
-  ]
+  extra_defines = []
+  if (invoker.product) {
+    extra_defines += [ "DART_PRODUCT" ]
+  }
 
-  public_deps = [
-                  "$fuchsia_sdk_root/pkg:scenic_cpp",
-                  "$fuchsia_sdk_root/pkg:sys_cpp",
-                  "//flutter/shell/platform/fuchsia/runtime/dart/utils",
-                ] + flutter_public_deps
+  source_set(target_name) {
+    sources = [
+      "accessibility_bridge.cc",
+      "accessibility_bridge.h",
+      "component.cc",
+      "component.h",
+      "compositor_context.cc",
+      "compositor_context.h",
+      "engine.cc",
+      "engine.h",
+      "flutter_runner_product_configuration.cc",
+      "flutter_runner_product_configuration.h",
+      "fuchsia_intl.cc",
+      "fuchsia_intl.h",
+      "isolate_configurator.cc",
+      "isolate_configurator.h",
+      "logging.h",
+      "loop.cc",
+      "loop.h",
+      "platform_view.cc",
+      "platform_view.h",
+      "runner.cc",
+      "runner.h",
+      "session_connection.cc",
+      "session_connection.h",
+      "surface.cc",
+      "surface.h",
+      "task_observers.cc",
+      "task_observers.h",
+      "task_runner_adapter.cc",
+      "task_runner_adapter.h",
+      "thread.cc",
+      "thread.h",
+      "unique_fdio_ns.h",
+      "vsync_recorder.cc",
+      "vsync_recorder.h",
+      "vsync_waiter.cc",
+      "vsync_waiter.h",
+      "vulkan_surface.cc",
+      "vulkan_surface.h",
+      "vulkan_surface_pool.cc",
+      "vulkan_surface_pool.h",
+      "vulkan_surface_producer.cc",
+      "vulkan_surface_producer.h",
+    ]
 
-  deps = [
-           "$fuchsia_sdk_root/fidl:fuchsia.accessibility.semantics",
-           "$fuchsia_sdk_root/fidl:fuchsia.fonts",
-           "$fuchsia_sdk_root/fidl:fuchsia.images",
-           "$fuchsia_sdk_root/fidl:fuchsia.intl",
-           "$fuchsia_sdk_root/fidl:fuchsia.io",
-           "$fuchsia_sdk_root/fidl:fuchsia.sys",
-           "$fuchsia_sdk_root/fidl:fuchsia.ui.app",
-           "$fuchsia_sdk_root/fidl:fuchsia.ui.scenic",
-           "$fuchsia_sdk_root/pkg:async-cpp",
-           "$fuchsia_sdk_root/pkg:async-default",
-           "$fuchsia_sdk_root/pkg:async-loop",
-           "$fuchsia_sdk_root/pkg:async-loop-cpp",
-           "$fuchsia_sdk_root/pkg:fdio",
-           "$fuchsia_sdk_root/pkg:fidl_cpp",
-           "$fuchsia_sdk_root/pkg:syslog",
-           "$fuchsia_sdk_root/pkg:trace",
-           "$fuchsia_sdk_root/pkg:trace-engine",
-           "$fuchsia_sdk_root/pkg:trace-provider-so",
-           "$fuchsia_sdk_root/pkg:vfs_cpp",
-           "$fuchsia_sdk_root/pkg:zx",
-           "//flutter/shell/platform/fuchsia/dart-pkg/fuchsia",
-           "//flutter/shell/platform/fuchsia/dart-pkg/zircon",
-         ] + flutter_deps
+    defines = extra_defines
+    if (flutter_runtime_mode == "profile") {
+      defines += [ "FLUTTER_PROFILE" ]
+    }
+
+    # The use of these dependencies is temporary and will be moved behind the
+    # embedder API.
+    flutter_public_deps = [
+      "//flutter/flow:flow_fuchsia_legacy",
+      "//flutter/lib/ui:ui_fuchsia_legacy",
+      "//flutter/runtime:runtime_fuchsia_legacy",
+      "//flutter/shell/common:common_fuchsia_legacy",
+    ]
+    flutter_deps = [
+      ":fuchsia_legacy_gpu_configuration",
+      "//flutter/assets",
+      "//flutter/common",
+      "//flutter/fml",
+      "//flutter/vulkan",
+    ]
+
+    public_deps = [
+                    "$fuchsia_sdk_root/pkg:scenic_cpp",
+                    "$fuchsia_sdk_root/pkg:sys_cpp",
+                    "//flutter/shell/platform/fuchsia/runtime/dart/utils",
+                  ] + flutter_public_deps
+
+    deps = [
+             "$fuchsia_sdk_root/fidl:fuchsia.accessibility.semantics",
+             "$fuchsia_sdk_root/fidl:fuchsia.fonts",
+             "$fuchsia_sdk_root/fidl:fuchsia.images",
+             "$fuchsia_sdk_root/fidl:fuchsia.intl",
+             "$fuchsia_sdk_root/fidl:fuchsia.io",
+             "$fuchsia_sdk_root/fidl:fuchsia.sys",
+             "$fuchsia_sdk_root/fidl:fuchsia.ui.app",
+             "$fuchsia_sdk_root/fidl:fuchsia.ui.scenic",
+             "$fuchsia_sdk_root/pkg:async-cpp",
+             "$fuchsia_sdk_root/pkg:async-default",
+             "$fuchsia_sdk_root/pkg:async-loop",
+             "$fuchsia_sdk_root/pkg:async-loop-cpp",
+             "$fuchsia_sdk_root/pkg:fdio",
+             "$fuchsia_sdk_root/pkg:fidl_cpp",
+             "$fuchsia_sdk_root/pkg:syslog",
+             "$fuchsia_sdk_root/pkg:trace",
+             "$fuchsia_sdk_root/pkg:trace-engine",
+             "$fuchsia_sdk_root/pkg:trace-provider-so",
+             "$fuchsia_sdk_root/pkg:vfs_cpp",
+             "$fuchsia_sdk_root/pkg:zx",
+             "//flutter/shell/platform/fuchsia/dart-pkg/fuchsia",
+             "//flutter/shell/platform/fuchsia/dart-pkg/zircon",
+           ] + flutter_deps
+  }
+}
+
+runner_sources("flutter_runner_sources") {
+  product = false
+}
+
+runner_sources("flutter_runner_sources_product") {
+  product = true
 }
 
 # Things that explicitly being excluded:
@@ -142,9 +164,9 @@ template("flutter_runner") {
   invoker_output_name = invoker.output_name
   extra_deps = invoker.extra_deps
 
-  extra_defines = []
-  if (defined(invoker.extra_defines)) {
-    extra_defines += invoker.extra_defines
+  product_suffix = ""
+  if (invoker.product) {
+    product_suffix = "_product"
   }
   if (is_debug) {
     extra_defines += [ "DEBUG" ]  # Needed due to direct dart dependencies.
@@ -153,12 +175,10 @@ template("flutter_runner") {
   executable(target_name) {
     output_name = invoker_output_name
 
-    defines = extra_defines
-
     sources = [ "main.cc" ]
 
     deps = [
-             ":flutter_runner_sources",
+             ":flutter_runner_sources${product_suffix}",
              "$fuchsia_sdk_root/pkg:async-loop-cpp",
              "$fuchsia_sdk_root/pkg:trace",
              "$fuchsia_sdk_root/pkg:trace-provider-so",
@@ -180,11 +200,6 @@ flutter_runner("jit") {
   output_name = "flutter_jit_runner"
   product = false
 
-  extra_defines = []
-  if (flutter_runtime_mode == "profile") {
-    extra_defines += [ "FLUTTER_PROFILE" ]
-  }
-
   extra_deps = [
     "//third_party/dart/runtime:libdart_jit",
     "//third_party/dart/runtime/platform:libdart_platform_jit",
@@ -194,8 +209,6 @@ flutter_runner("jit") {
 flutter_runner("jit_product") {
   output_name = "flutter_jit_product_runner"
   product = true
-
-  extra_defines = [ "DART_PRODUCT" ]
 
   extra_deps = [
     "//third_party/dart/runtime:libdart_jit_product",
@@ -207,11 +220,6 @@ flutter_runner("aot") {
   output_name = "flutter_aot_runner"
   product = false
 
-  extra_defines = []
-  if (flutter_runtime_mode == "profile") {
-    extra_defines += [ "FLUTTER_PROFILE" ]
-  }
-
   extra_deps = [
     "//third_party/dart/runtime:libdart_precompiled_runtime",
     "//third_party/dart/runtime/platform:libdart_platform_precompiled_runtime",
@@ -221,8 +229,6 @@ flutter_runner("aot") {
 flutter_runner("aot_product") {
   output_name = "flutter_aot_product_runner"
   product = true
-
-  extra_defines = [ "DART_PRODUCT" ]
 
   extra_deps = [
     "//third_party/dart/runtime:libdart_precompiled_runtime_product",
