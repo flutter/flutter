@@ -144,7 +144,7 @@ class RestorationManager extends ChangeNotifier {
   Completer<RestorationBucket>? _pendingRootBucket;
   bool _rootBucketIsValid = false;
 
-  /// Returns true for one frame after [rootBucket] has been replaced with a
+  /// Returns true for the frame after [rootBucket] has been replaced with a
   /// new non-null bucket.
   ///
   /// When true, entities should forget their current state and restore
@@ -529,7 +529,7 @@ class RestorationBucket {
   /// [claimChild]) instead of copying their current state information into the
   /// bucket (e.g. via [write] and [adoptChild].
   ///
-  /// This flag is true for one frame after the [RestorationManager] has been
+  /// This flag is true for the frame after the [RestorationManager] has been
   /// instructed to restore the application from newly provided restoration
   /// data.
   bool get isReplacing => _manager?.isReplacing ?? false;
