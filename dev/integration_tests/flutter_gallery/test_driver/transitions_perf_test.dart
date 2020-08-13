@@ -153,6 +153,7 @@ Future<void> runDemos(List<String> demos, FlutterDriver driver) async {
 
 void main([List<String> args = const <String>[]]) {
   final bool withSemantics = args.contains('--with_semantics');
+  final bool hybrid = args.contains('--hybrid');
   group('flutter gallery transitions', () {
     FlutterDriver driver;
     setUpAll(() async {
@@ -186,7 +187,11 @@ void main([List<String> args = const <String>[]]) {
       // Collect timeline data for just a limited set of demos to avoid OOMs.
       final Timeline timeline = await driver.traceAction(
         () async {
-          await runDemos(kProfiledDemos, driver);
+          if (hybrid) {
+            await driver.requestData('profileDemos');
+          } else {
+            await runDemos(kProfiledDemos, driver);
+          }
         },
         streams: const <TimelineStream>[
           TimelineStream.dart,
@@ -205,8 +210,12 @@ void main([List<String> args = const <String>[]]) {
           histogramPath);
 
       // Execute the remaining tests.
-      final Set<String> unprofiledDemos = Set<String>.from(_allDemos)..removeAll(kProfiledDemos);
-      await runDemos(unprofiledDemos.toList(), driver);
+      if (hybrid) {
+        await driver.requestData('profileDemos');
+      } else {
+        final Set<String> unprofiledDemos = Set<String>.from(_allDemos)..removeAll(kProfiledDemos);
+        await runDemos(unprofiledDemos.toList(), driver);
+      }
 
     }, timeout: const Timeout(Duration(minutes: 5)));
   });
