@@ -190,6 +190,13 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  picture_cache_perf__e2e_summary:
+    description: >
+      Measures the runtime performance of raster caching many pictures on Android.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
+
   cubic_bezier_perf__timeline_summary:
     description: >
       Measures the runtime performance of cubic bezier animations on Android.
@@ -410,15 +417,6 @@ tasks:
       Verifies that `flutter drive --route` still works. No performance numbers.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-
-  # flutter_gallery_instrumentation_test:
-  #   description: >
-  #     Same as flutter_gallery__transition_perf but uses Android instrumentation
-  #     framework, and therefore does not require a host computer to run. This
-  #     test can run on off-the-shelf infrastructures, such as Firebase Test Lab.
-  #   stage: devicelab
-  #   required_agent_capabilities: ["linux/android"]
-  #   flaky: true
 
   linux_chrome_dev_mode:
     description: >
@@ -762,6 +760,14 @@ tasks:
       Android.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+
+  flutter_gallery__transition_perf_e2e:
+    description: >
+      Measures the performance of screen transitions in Flutter Gallery on
+      Android with e2e.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
 
   flutter_gallery_sksl_warmup__transition_perf:
     description: >

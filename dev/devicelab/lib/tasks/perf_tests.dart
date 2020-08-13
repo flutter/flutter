@@ -158,6 +158,13 @@ TaskFunction createPictureCachePerfTest() {
   ).run;
 }
 
+TaskFunction createPictureCachePerfE2ETest() {
+  return E2EPerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/picture_cache_perf_e2e.dart',
+  ).run;
+}
+
 TaskFunction createFlutterGalleryStartupTest() {
   return StartupTest(
     '${flutterDirectory.path}/dev/integration_tests/flutter_gallery',
