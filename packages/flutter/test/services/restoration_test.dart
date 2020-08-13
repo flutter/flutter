@@ -126,26 +126,21 @@ void main() {
       final RestorationBucket child = rootBucket.claimChild('child1', debugOwner: null);
       expect(child.read<int>('another value'), 22);
 
-      bool rootDecommissioned = false;
-      bool childDecommissioned = false;
+      bool rootReplaced = false;
       RestorationBucket newRoot;
-      rootBucket.addListener(() {
-        rootDecommissioned = true;
+      manager.addListener(() {
+        rootReplaced = true;
         manager.rootBucket.then((RestorationBucket bucket) {
           newRoot = bucket;
         });
         // The new bucket is available synchronously.
         expect(newRoot, isNotNull);
       });
-      child.addListener(() {
-        childDecommissioned = true;
-      });
 
       // Send new Data.
       await _pushDataFromEngine(_createEncodedRestorationData2());
 
-      expect(rootDecommissioned, isTrue);
-      expect(childDecommissioned, isTrue);
+      expect(rootReplaced, isTrue);
       expect(newRoot, isNot(same(rootBucket)));
 
       child.dispose();
@@ -234,6 +229,60 @@ void main() {
       manager.flushData();
       expect(callsToEngine, hasLength(1));
     });
+
+    testWidgets('isReplacing', (WidgetTester tester) async {
+      final Completer<Map<dynamic, dynamic>> result = Completer<Map<dynamic, dynamic>>();
+      SystemChannels.restoration.setMockMethodCallHandler((MethodCall call) {
+        return result.future;
+      });
+
+      final TestRestorationManager manager = TestRestorationManager();
+      expect(manager.isReplacing, isFalse);
+
+      RestorationBucket rootBucket;
+      manager.rootBucket.then((RestorationBucket bucket) {
+        rootBucket = bucket;
+      });
+      result.complete(_createEncodedRestorationData1());
+      await tester.idle();
+      expect(rootBucket, isNotNull);
+      expect(rootBucket.isReplacing, isFalse);
+      expect(manager.isReplacing, isFalse);
+      tester.binding.scheduleFrame();
+      await tester.pump();
+      expect(manager.isReplacing, isFalse);
+      expect(rootBucket.isReplacing, isFalse);
+
+      manager.receiveDataFromEngine(enabled: true, data: null);
+      RestorationBucket rootBucket2;
+      manager.rootBucket.then((RestorationBucket bucket) {
+        rootBucket2 = bucket;
+      });
+      expect(rootBucket2, isNotNull);
+      expect(rootBucket2, isNot(same(rootBucket)));
+      expect(manager.isReplacing, isTrue);
+      expect(rootBucket2.isReplacing, isTrue);
+      await tester.idle();
+      expect(manager.isReplacing, isTrue);
+      expect(rootBucket2.isReplacing, isTrue);
+      tester.binding.scheduleFrame();
+      await tester.pump();
+      expect(manager.isReplacing, isFalse);
+      expect(rootBucket2.isReplacing, isFalse);
+
+      manager.receiveDataFromEngine(enabled: false, data: null);
+      RestorationBucket rootBucket3;
+      manager.rootBucket.then((RestorationBucket bucket) {
+        rootBucket3 = bucket;
+      });
+      expect(rootBucket3, isNull);
+      expect(manager.isReplacing, isFalse);
+      await tester.idle();
+      expect(manager.isReplacing, isFalse);
+      tester.binding.scheduleFrame();
+      await tester.pump();
+      expect(manager.isReplacing, isFalse);
+    });
   });
 
   test('debugIsSerializableForRestoration', () {
@@ -304,4 +353,10 @@ Map<dynamic, dynamic> _packageRestorationData({bool enabled = true, Map<dynamic,
     'enabled': enabled,
     'data': encoded == null ? null : encoded.buffer.asUint8List(encoded.offsetInBytes, encoded.lengthInBytes)
   };
+}
+
+class TestRestorationManager extends RestorationManager {
+  void receiveDataFromEngine({@required bool enabled, @required Uint8List data}) {
+    handleRestorationUpdateFromEngine(enabled: enabled, data: data);
+  }
 }
