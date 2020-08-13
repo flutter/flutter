@@ -597,8 +597,8 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
 }
 
 /// A [RenderBox] that applies an arbitary transform to its [constraints], and
-/// sizes its child using the resulting [BoxConstraints], treating any overflow
-/// as error.
+/// sizes its child using the normalized output [BoxConstraints], treating any
+/// overflow as error.
 ///
 /// This [RenderBox] sizes its child using a normalized [BoxConstraints] created
 /// by applying [constraintsTransform] to this [RenderBox]'s own [constraints].
