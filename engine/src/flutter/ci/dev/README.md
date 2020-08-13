@@ -8,9 +8,17 @@ supported luci try/prod builders for engine. It follows format:
 {
     "builders":[
         {
-            "name":"xxx",
-            "repo":"engine"
-        },
+            "name":"yyy",
+            "repo":"engine",
+            "enabled":true
+        }
+    ]
+}
+```
+for `try_builders.json`, and follows format:
+```json
+{
+    "builders":[
         {
             "name":"yyy",
             "repo":"engine"
@@ -18,6 +26,7 @@ supported luci try/prod builders for engine. It follows format:
     ]
 }
 ```
-This file will be mainly used in [`flutter/cocoon`](https://github.com/flutter/cocoon)
-to trigger/update engine luci tasks.
-
+for `prod_builders.json`. `try_builders.json` will be mainly used in 
+[`flutter/cocoon`](https://github.com/flutter/cocoon) to trigger/update pre-submit
+engine luci tasks, whereas `prod_builders.json` will be mainly used in `flutter/cocoon`
+to push luci task statuses to GitHub.
