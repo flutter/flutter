@@ -181,12 +181,15 @@ DEF_SWITCH(DisableDartAsserts,
            "disabled. This flag may be specified if the user wishes to run "
            "with assertions disabled in the debug product mode (i.e. with JIT "
            "or DBC).")
-DEF_SWITCH(DisableHttp,
-           "disable-http",
-           "Dart VM has a master switch that can be set to disable insecure "
-           "HTTP and WebSocket protocols. Localhost or loopback addresses are "
-           "exempted. This flag can be specified if the embedder wants this "
-           "for a particular platform.")
+DEF_SWITCH(DisallowInsecureConnections,
+           "disallow-insecure-connections",
+           "By default, dart:io allows all socket connections. If this switch "
+           "is set, all insecure connections are rejected.")
+DEF_SWITCH(DomainNetworkPolicy,
+           "domain-network-policy",
+           "JSON encoded network policy per domain. This overrides the "
+           "DisallowInsecureConnections switch. Embedder can specify whether "
+           "to allow or disallow insecure connections at a domain level.")
 DEF_SWITCH(
     ForceMultithreading,
     "force-multithreading",
