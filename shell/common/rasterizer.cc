@@ -25,38 +25,18 @@ namespace flutter {
 // used within this interval.
 static constexpr std::chrono::milliseconds kSkiaCleanupExpiration(15000);
 
-// TODO(dnfield): Remove this once internal embedders have caught up.
-static Rasterizer::DummyDelegate dummy_delegate_;
-Rasterizer::Rasterizer(
-    TaskRunners task_runners,
-    std::unique_ptr<flutter::CompositorContext> compositor_context,
-    std::shared_ptr<fml::SyncSwitch> is_gpu_disabled_sync_switch)
-    : Rasterizer(dummy_delegate_,
-                 std::move(task_runners),
-                 std::move(compositor_context),
-                 is_gpu_disabled_sync_switch) {}
-
-Rasterizer::Rasterizer(
-    Delegate& delegate,
-    TaskRunners task_runners,
-    std::shared_ptr<fml::SyncSwitch> is_gpu_disabled_sync_switch)
+Rasterizer::Rasterizer(Delegate& delegate)
     : Rasterizer(delegate,
-                 std::move(task_runners),
                  std::make_unique<flutter::CompositorContext>(
-                     delegate.GetFrameBudget()),
-                 is_gpu_disabled_sync_switch) {}
+                     delegate.GetFrameBudget())) {}
 
 Rasterizer::Rasterizer(
     Delegate& delegate,
-    TaskRunners task_runners,
-    std::unique_ptr<flutter::CompositorContext> compositor_context,
-    std::shared_ptr<fml::SyncSwitch> is_gpu_disabled_sync_switch)
+    std::unique_ptr<flutter::CompositorContext> compositor_context)
     : delegate_(delegate),
-      task_runners_(std::move(task_runners)),
       compositor_context_(std::move(compositor_context)),
       user_override_resource_cache_bytes_(false),
-      weak_factory_(this),
-      is_gpu_disabled_sync_switch_(is_gpu_disabled_sync_switch) {
+      weak_factory_(this) {
   FML_DCHECK(compositor_context_);
 }
 
@@ -83,8 +63,9 @@ void Rasterizer::Setup(std::unique_ptr<Surface> surface) {
   // support for raster thread merger for Fuchsia.
   if (surface_->GetExternalViewEmbedder()) {
     const auto platform_id =
-        task_runners_.GetPlatformTaskRunner()->GetTaskQueueId();
-    const auto gpu_id = task_runners_.GetRasterTaskRunner()->GetTaskQueueId();
+        delegate_.GetTaskRunners().GetPlatformTaskRunner()->GetTaskQueueId();
+    const auto gpu_id =
+        delegate_.GetTaskRunners().GetRasterTaskRunner()->GetTaskQueueId();
     raster_thread_merger_ =
         fml::MakeRefCounted<fml::RasterThreadMerger>(platform_id, gpu_id);
   }
@@ -134,7 +115,9 @@ void Rasterizer::Draw(fml::RefPtr<Pipeline<flutter::LayerTree>> pipeline) {
     // we yield and let this frame be serviced on the right thread.
     return;
   }
-  FML_DCHECK(task_runners_.GetRasterTaskRunner()->RunsTasksOnCurrentThread());
+  FML_DCHECK(delegate_.GetTaskRunners()
+                 .GetRasterTaskRunner()
+                 ->RunsTasksOnCurrentThread());
 
   RasterStatus raster_status = RasterStatus::kFailed;
   Pipeline<flutter::LayerTree>::Consumer consumer =
@@ -168,7 +151,7 @@ void Rasterizer::Draw(fml::RefPtr<Pipeline<flutter::LayerTree>> pipeline) {
   // between successive tries.
   switch (consume_result) {
     case PipelineConsumeResult::MoreAvailable: {
-      task_runners_.GetRasterTaskRunner()->PostTask(
+      delegate_.GetTaskRunners().GetRasterTaskRunner()->PostTask(
           [weak_this = weak_factory_.GetWeakPtr(), pipeline]() {
             if (weak_this) {
               weak_this->Draw(pipeline);
@@ -226,7 +209,7 @@ sk_sp<SkImage> Rasterizer::DoMakeRasterSnapshot(
     sk_sp<SkSurface> surface = SkSurface::MakeRaster(image_info);
     result = DrawSnapshot(surface, draw_callback);
   } else {
-    is_gpu_disabled_sync_switch_->Execute(
+    delegate_.GetIsGpuDisabledSyncSwitch()->Execute(
         fml::SyncSwitch::Handlers()
             .SetIfTrue([&] {
               sk_sp<SkSurface> surface = SkSurface::MakeRaster(image_info);
@@ -282,7 +265,9 @@ sk_sp<SkImage> Rasterizer::ConvertToRasterImage(sk_sp<SkImage> image) {
 
 RasterStatus Rasterizer::DoDraw(
     std::unique_ptr<flutter::LayerTree> layer_tree) {
-  FML_DCHECK(task_runners_.GetRasterTaskRunner()->RunsTasksOnCurrentThread());
+  FML_DCHECK(delegate_.GetTaskRunners()
+                 .GetRasterTaskRunner()
+                 ->RunsTasksOnCurrentThread());
 
   if (!layer_tree || !surface_) {
     return RasterStatus::kFailed;

@@ -140,8 +140,7 @@ int RunTester(const flutter::Settings& settings,
       };
 
   Shell::CreateCallback<Rasterizer> on_create_rasterizer = [](Shell& shell) {
-    return std::make_unique<Rasterizer>(shell, shell.GetTaskRunners(),
-                                        shell.GetIsGpuDisabledSyncSwitch());
+    return std::make_unique<Rasterizer>(shell);
   };
 
   auto shell = Shell::Create(task_runners,             //

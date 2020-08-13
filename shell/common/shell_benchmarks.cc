@@ -58,11 +58,7 @@ static void StartupAndShutdownShell(benchmark::State& state,
         [](Shell& shell) {
           return std::make_unique<PlatformView>(shell, shell.GetTaskRunners());
         },
-        [](Shell& shell) {
-          return std::make_unique<Rasterizer>(
-              shell, shell.GetTaskRunners(),
-              shell.GetIsGpuDisabledSyncSwitch());
-        });
+        [](Shell& shell) { return std::make_unique<Rasterizer>(shell); });
   }
 
   FML_CHECK(shell);

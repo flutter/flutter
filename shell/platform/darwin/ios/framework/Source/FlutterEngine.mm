@@ -506,10 +506,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
       };
 
   flutter::Shell::CreateCallback<flutter::Rasterizer> on_create_rasterizer =
-      [](flutter::Shell& shell) {
-        return std::make_unique<flutter::Rasterizer>(shell, shell.GetTaskRunners(),
-                                                     shell.GetIsGpuDisabledSyncSwitch());
-      };
+      [](flutter::Shell& shell) { return std::make_unique<flutter::Rasterizer>(shell); };
 
   if (flutter::IsIosEmbeddedViewsPreviewEnabled()) {
     // Embedded views requires the gpu and the platform views to be the same.

@@ -991,8 +991,7 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
 
   flutter::Shell::CreateCallback<flutter::Rasterizer> on_create_rasterizer =
       [](flutter::Shell& shell) {
-        return std::make_unique<flutter::Rasterizer>(
-            shell, shell.GetTaskRunners(), shell.GetIsGpuDisabledSyncSwitch());
+        return std::make_unique<flutter::Rasterizer>(shell);
       };
 
   // TODO(chinmaygarde): This is the wrong spot for this. It belongs in the
