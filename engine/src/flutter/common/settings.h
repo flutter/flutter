@@ -109,8 +109,10 @@ struct Settings {
   bool enable_dart_profiling = false;
   bool disable_dart_asserts = false;
 
-  // Used to signal the embedder whether HTTP connections are disabled.
-  bool disable_http = false;
+  // Whether embedder only allows secure connections.
+  bool may_insecurely_connect_to_all_domains = true;
+  // JSON-formatted domain network policy.
+  std::string domain_network_policy;
 
   // Used as the script URI in debug messages. Does not affect how the Dart code
   // is executed.

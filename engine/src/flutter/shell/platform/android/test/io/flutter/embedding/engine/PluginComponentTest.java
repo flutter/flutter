@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import androidx.annotation.NonNull;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterJNI;
+import io.flutter.embedding.engine.loader.FlutterApplicationInfo;
 import io.flutter.embedding.engine.loader.FlutterLoader;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import org.junit.Test;
@@ -26,6 +27,8 @@ public class PluginComponentTest {
     // Setup test.
     FlutterJNI flutterJNI = mock(FlutterJNI.class);
     when(flutterJNI.isAttached()).thenReturn(true);
+    FlutterApplicationInfo emptyInfo =
+        new FlutterApplicationInfo(null, null, null, null, null, null, false, false);
 
     // FlutterLoader is the object to which the PluginRegistry defers for obtaining
     // the path to a Flutter asset. Ideally in this component test we would use a
@@ -44,7 +47,8 @@ public class PluginComponentTest {
               public String answer(InvocationOnMock invocation) throws Throwable {
                 // Defer to a real FlutterLoader to return the asset path.
                 String fileNameOrSubpath = (String) invocation.getArguments()[0];
-                return FlutterLoader.getInstance().getLookupKeyForAsset(fileNameOrSubpath);
+                return FlutterLoader.getInstanceForTest(emptyInfo)
+                    .getLookupKeyForAsset(fileNameOrSubpath);
               }
             });
     when(flutterLoader.getLookupKeyForAsset(any(String.class), any(String.class)))
@@ -55,7 +59,7 @@ public class PluginComponentTest {
                 // Defer to a real FlutterLoader to return the asset path.
                 String fileNameOrSubpath = (String) invocation.getArguments()[0];
                 String packageName = (String) invocation.getArguments()[1];
-                return FlutterLoader.getInstance()
+                return FlutterLoader.getInstanceForTest(emptyInfo)
                     .getLookupKeyForAsset(fileNameOrSubpath, packageName);
               }
             });
