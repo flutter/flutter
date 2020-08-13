@@ -14,8 +14,6 @@ import 'package:flutter/material.dart';
 
 import 'run_demos.dart';
 
-LiveWidgetController controller;
-
 // All of the gallery demos, identified as "title@category".
 //
 // These names are reported by the test app, see _handleMessages()
@@ -26,26 +24,30 @@ List<String> _allDemos = kAllGalleryDemos.map(
 
 Set<String> _unTestedDemos = Set<String>.from(_allDemos);
 
-Future<String> _handleMessages(String message) async {
-  switch(message) {
-    case 'demoNames':
-      return const JsonEncoder.withIndent('  ').convert(_allDemos);
-    case 'profileDemos':
-      await runDemos(kProfiledDemos, controller);
-      _unTestedDemos.removeAll(kProfiledDemos);
-      return const JsonEncoder.withIndent('  ').convert(kProfiledDemos);
-    case 'restDemos':
-      final List<String> restDemos =  _unTestedDemos.toList();
-      await runDemos(restDemos, controller);
-      return const JsonEncoder.withIndent('  ').convert(restDemos);
-    default:
-      throw ArgumentError;
+class _MessageHandler {
+  static LiveWidgetController controller;
+  Future<String> call(String message) async {
+    switch(message) {
+      case 'demoNames':
+        return const JsonEncoder.withIndent('  ').convert(_allDemos);
+      case 'profileDemos':
+        controller ??= LiveWidgetController(WidgetsBinding.instance);
+        await runDemos(kProfiledDemos, controller);
+        _unTestedDemos.removeAll(kProfiledDemos);
+        return const JsonEncoder.withIndent('  ').convert(kProfiledDemos);
+      case 'restDemos':
+        controller ??= LiveWidgetController(WidgetsBinding.instance);
+        final List<String> restDemos =  _unTestedDemos.toList();
+        await runDemos(restDemos, controller);
+        return const JsonEncoder.withIndent('  ').convert(restDemos);
+      default:
+        throw ArgumentError;
+    }
   }
 }
 
 void main() {
-  enableFlutterDriverExtension(handler: _handleMessages);
-  controller = LiveWidgetController(WidgetsBinding.instance);
+  enableFlutterDriverExtension(handler: _MessageHandler());
   // As in lib/main.dart: overriding https://github.com/flutter/flutter/issues/13736
   // for better visual effect at the cost of performance.
   runApp(const GalleryApp(testMode: true));

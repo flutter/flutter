@@ -31,8 +31,8 @@ TaskFunction createGalleryTransitionHybridTest({bool semanticsEnabled = false}) 
   return GalleryTransitionTest(
     semanticsEnabled: semanticsEnabled,
     driverFile: semanticsEnabled
-        ? 'transitions_perf_hybrid_test'
-        : 'transitions_perf_hybrid_with_semantics_test',
+        ? 'transitions_perf_hybrid_with_semantics_test'
+        : 'transitions_perf_hybrid_test',
   );
 }
 
