@@ -248,7 +248,7 @@ class Shell final : public PlatformView::Delegate,
   ///
   /// @return     The task runners current in use by the shell.
   ///
-  const TaskRunners& GetTaskRunners() const;
+  const TaskRunners& GetTaskRunners() const override;
 
   //----------------------------------------------------------------------------
   /// @brief      Rasterizers may only be accessed on the GPU task runner.
@@ -352,7 +352,7 @@ class Shell final : public PlatformView::Delegate,
 
   //----------------------------------------------------------------------------
   /// @brief     Accessor for the disable GPU SyncSwitch
-  std::shared_ptr<fml::SyncSwitch> GetIsGpuDisabledSyncSwitch() const;
+  std::shared_ptr<fml::SyncSwitch> GetIsGpuDisabledSyncSwitch() const override;
 
   //----------------------------------------------------------------------------
   /// @brief      Get a pointer to the Dart VM used by this running shell
