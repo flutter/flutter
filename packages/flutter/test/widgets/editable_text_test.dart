@@ -5243,6 +5243,75 @@ void main() {
     expect(exception, isFlutterError);
     expect(exception.diagnostics.first.level, DiagnosticLevel.summary);
     expect(exception.diagnostics.first.toString(), startsWith('A RenderConstraintsTransformBox overflowed by '));
+
+    // Can be fixed by given enough height;
+    await tester.pumpWidget(MediaQuery(
+      data: const MediaQueryData(devicePixelRatio: 1.0),
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            height: 10,
+            child: EditableText(
+              maxLines: 1,
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('No overflow indicator for multiline line text or no clipping', (WidgetTester tester) async {
+    await tester.pumpWidget(MediaQuery(
+      data: const MediaQueryData(devicePixelRatio: 1.0),
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            height: 10,
+            child: EditableText(
+              maxLines: 1,
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+              clipBehavior: Clip.none,
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(MediaQuery(
+      data: const MediaQueryData(devicePixelRatio: 1.0),
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            height: 50,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('RenderEditable can stretch vertically', (WidgetTester tester) async {
