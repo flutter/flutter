@@ -10,7 +10,6 @@
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
-import 'package:matcher/matcher.dart';
 import '../flutter_test_alternative.dart';
 import 'message_codecs_testing.dart';
 
@@ -37,70 +36,12 @@ void main() {
       final ByteData helloByteData = string.encodeMessage('hello');
 
       final ByteData offsetByteData = ByteData.view(
-        helloWorldByteData.buffer,
-        helloByteData.lengthInBytes,
-        helloWorldByteData.lengthInBytes - helloByteData.lengthInBytes,
+          helloWorldByteData.buffer,
+          helloByteData.lengthInBytes,
+          helloWorldByteData.lengthInBytes - helloByteData.lengthInBytes,
       );
 
       expect(string.decodeMessage(offsetByteData), ' world');
-    });
-  });
-  group('Standard method codec', () {
-    const MethodCodec method = StandardMethodCodec();
-    test('should decode error envelope without native stacktrace', () {
-      final ByteData errorData = method.encodeErrorEnvelope(
-        code: 'errorCode',
-        message: 'errorMessage',
-        details: 'errorDetails',
-      );
-      expect(
-          () => method.decodeEnvelope(errorData),
-          throwsA(predicate((PlatformException e) =>
-              e is PlatformException &&
-              e.code == 'errorCode' &&
-              e.message == 'errorMessage' &&
-              e.details == 'errorDetails')));
-    });
-    test('should decode error envelope with native stacktrace.', () {
-      final ByteData errorData = method.encodeErrorEnvelope(
-        code: 'errorCode',
-        message: 'errorMessage',
-        details: 'errorDetails',
-        stacktrace: 'errorStacktrace',
-      );
-      expect(
-          () => method.decodeEnvelope(errorData),
-          throwsA(predicate((PlatformException e) =>
-              e is PlatformException && e.stacktrace == 'errorStacktrace')));
-    });
-  });
-  group('Json method codec', () {
-    const JSONMethodCodec json = JSONMethodCodec();
-    test('should decode error envelope without native stacktrace', () {
-      final ByteData errorData = json.encodeErrorEnvelope(
-        code: 'errorCode',
-        message: 'errorMessage',
-        details: 'errorDetails',
-      );
-      expect(
-          () => json.decodeEnvelope(errorData),
-          throwsA(predicate((PlatformException e) =>
-              e is PlatformException &&
-              e.code == 'errorCode' &&
-              e.message == 'errorMessage' &&
-              e.details == 'errorDetails')));
-    });
-    test('should decode error envelope with native stacktrace.', () {
-      final ByteData errorData = json.encodeErrorEnvelope(
-        code: 'errorCode',
-        message: 'errorMessage',
-        details: 'errorDetails',
-        stacktrace: 'errorStacktrace',
-      );
-      expect(
-          () => json.decodeEnvelope(errorData),
-          throwsA(predicate((PlatformException e) =>
-              e is PlatformException && e.stacktrace == 'errorStacktrace')));
     });
   });
   group('JSON message codec', () {
@@ -210,22 +151,8 @@ void main() {
         standard,
         1.0,
         <int>[
-          6,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0xf0,
-          0x3f,
+          6, 0, 0, 0, 0, 0, 0, 0,
+          0, 0, 0, 0, 0, 0, 0xf0, 0x3f,
         ],
       );
     });
