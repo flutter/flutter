@@ -24,6 +24,11 @@
          "name":"Linux web_tests",
          "repo":"flutter",
          "taskName":"web_tests"
+      },
+      {
+         "name":"Windows",
+         "repo":"flutter",
+         "taskName":"windows_bot"
       }
    ]
 }
