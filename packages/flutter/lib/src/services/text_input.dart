@@ -594,7 +594,7 @@ class TextInputConfiguration {
   }
 }
 
-TextAffinity? _toTextAffinity(String affinity) {
+TextAffinity? _toTextAffinity(String? affinity) {
   switch (affinity) {
     case 'TextAffinity.downstream':
       return TextAffinity.downstream;
@@ -662,7 +662,7 @@ class TextEditingValue {
       selection: TextSelection(
         baseOffset: encoded['selectionBase'] as int? ?? -1,
         extentOffset: encoded['selectionExtent'] as int? ?? -1,
-        affinity: _toTextAffinity(encoded['selectionAffinity'] as String) ?? TextAffinity.downstream,
+        affinity: _toTextAffinity(encoded['selectionAffinity'] as String?) ?? TextAffinity.downstream,
         isDirectional: encoded['selectionIsDirectional'] as bool? ?? false,
       ),
       composing: TextRange(
@@ -801,6 +801,9 @@ abstract class TextInputClient {
 
   /// Requests that this client perform the given action.
   void performAction(TextInputAction action);
+
+  /// Requests that this client perform the private command.
+  void performPrivateCommand(String action, Map<String, dynamic> data);
 
   /// Updates the floating cursor position and state.
   void updateFloatingCursor(RawFloatingCursorPoint point);
@@ -1156,6 +1159,10 @@ class TextInput {
         break;
       case 'TextInputClient.performAction':
         _currentConnection!._client.performAction(_toTextInputAction(args[1] as String));
+        break;
+      case 'TextInputClient.performPrivateCommand':
+        _currentConnection!._client.performPrivateCommand(
+          args[1]['action'] as String, args[1]['data'] as Map<String, dynamic>);
         break;
       case 'TextInputClient.updateFloatingCursor':
         _currentConnection!._client.updateFloatingCursor(_toTextPoint(

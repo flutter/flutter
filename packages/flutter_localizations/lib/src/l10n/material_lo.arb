@@ -70,14 +70,14 @@
   "dateRangePickerHelpText": "ເລືອກໄລຍະ",
   "calendarModeButtonLabel": "ສະຫຼັບໄປປະຕິທິນ",
   "inputDateModeButtonLabel": "ສະຫຼັບໄປການປ້ອນຂໍ້ມູນ",
-  "timePickerDialHelpText": "SELECT TIME",
-  "timePickerInputHelpText": "ENTER TIME",
-  "timePickerHourLabel": "Hour",
-  "timePickerMinuteLabel": "Minute",
-  "invalidTimeLabel": "Enter a valid time",
-  "dialModeButtonLabel": "Switch to dial picker mode",
-  "inputTimeModeButtonLabel": "Switch to text input mode",
+  "timePickerDialHelpText": "ເລືອກເວລາ",
+  "timePickerInputHelpText": "ລະບຸເວລາ",
+  "timePickerHourLabel": "ຊົ່ວໂມງ",
+  "timePickerMinuteLabel": "ນາທີ",
+  "invalidTimeLabel": "ລະບຸເວລາທີ່ຖືກຕ້ອງ",
+  "dialModeButtonLabel": "ສະຫຼັບໄປໃຊ້ໂໝດເລືອກຕົວເລກ",
+  "inputTimeModeButtonLabel": "ສະຫຼັບໄປໃຊ້ໂໝດປ້ອນຂໍ້ຄວາມ",
   "licensesPackageDetailTextZero": "No licenses",
-  "licensesPackageDetailTextOne": "1 license",
-  "licensesPackageDetailTextOther": "$licenseCount licenses"
+  "licensesPackageDetailTextOne": "1 ໃບອະນຸຍາດ",
+  "licensesPackageDetailTextOther": "$licenseCount ໃບອະນຸຍາດ"
 }

@@ -40,6 +40,9 @@ export 'package:flutter/services.dart' show TextEditingValue, TextSelection, Tex
 /// (including the cursor location).
 typedef SelectionChangedCallback = void Function(TextSelection selection, SelectionChangedCause cause);
 
+/// Signature for the callback that reports the app private command results.
+typedef AppPrivateCommandCallback = void Function(String, Map<String, dynamic>);
+
 // The time it takes for the cursor to fade from fully opaque to fully
 // transparent and vice versa. A full cursor blink, from transparent to opaque
 // to transparent, is twice this duration.
@@ -413,6 +416,7 @@ class EditableText extends StatefulWidget {
     this.onChanged,
     this.onEditingComplete,
     this.onSubmitted,
+    this.onAppPrivateCommand,
     this.onSelectionChanged,
     this.onSelectionHandleTapped,
     List<TextInputFormatter> inputFormatters,
@@ -515,7 +519,7 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   final bool obscureText;
 
-  /// {@macro flutter.dart:ui.textHeightBehavior},
+  /// {@macro flutter.dart:ui.textHeightBehavior}
   final TextHeightBehavior textHeightBehavior;
 
   /// {@macro flutter.painting.textPainter.textWidthBasis}
@@ -814,7 +818,7 @@ class EditableText extends StatefulWidget {
   /// See the examples in [maxLines] for the complete picture of how [maxLines],
   /// [minLines], and [expands] interact to produce various behaviors.
   ///
-  /// Input that matches the height of its parent
+  /// Input that matches the height of its parent:
   /// ```dart
   /// Expanded(
   ///   child: TextField(maxLines: null, expands: true),
@@ -1030,6 +1034,11 @@ class EditableText extends StatefulWidget {
   /// {@end-tool}
   final ValueChanged<String> onSubmitted;
 
+  /// {@template flutter.widgets.editableText.onAppPrivateCommand}
+  /// Called when the result of an app private command is received.
+  /// {@endtemplate}
+  final AppPrivateCommandCallback onAppPrivateCommand;
+
   /// Called when the user changes the selection of text (including the cursor
   /// location).
   final SelectionChangedCallback onSelectionChanged;
@@ -1064,7 +1073,7 @@ class EditableText extends StatefulWidget {
   /// {@template flutter.widgets.editableText.cursorWidth}
   /// How thick the cursor will be.
   ///
-  /// Defaults to 2.0
+  /// Defaults to 2.0.
   ///
   /// The cursor will draw under the text. The cursor width will extend
   /// to the right of the boundary between characters for left-to-right text
@@ -1616,6 +1625,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
+  @override
+  void performPrivateCommand(String action, Map<String, dynamic> data) {
+    widget.onAppPrivateCommand(action, data);
+  }
+
   // The original position of the caret on FloatingCursorDragState.start.
   Rect _startCaretRect;
 
@@ -1623,7 +1637,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // cursor.
   TextPosition _lastTextPosition;
 
-  // The offset of the floating cursor as determined from the first update call.
+  // The offset of the floating cursor as determined from the start call.
   Offset _pointOffsetOrigin;
 
   // The most recent position of the floating cursor.
@@ -1642,22 +1656,24 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           _floatingCursorResetController.stop();
           _onFloatingCursorResetTick();
         }
+        // We want to send in points that are centered around a (0,0) origin, so
+        // we cache the position.
+        _pointOffsetOrigin = point.offset;
+
         final TextPosition currentTextPosition = TextPosition(offset: renderEditable.selection.baseOffset);
         _startCaretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
-        renderEditable.setFloatingCursor(point.state, _startCaretRect.center - _floatingCursorOffset, currentTextPosition);
+
+        _lastBoundedOffset = _startCaretRect.center - _floatingCursorOffset;
+        _lastTextPosition = currentTextPosition;
+        renderEditable.setFloatingCursor(point.state, _lastBoundedOffset, _lastTextPosition);
         break;
       case FloatingCursorDragState.Update:
-        // We want to send in points that are centered around a (0,0) origin, so we cache the
-        // position on the first update call.
-        if (_pointOffsetOrigin != null) {
-          final Offset centeredPoint = point.offset - _pointOffsetOrigin;
-          final Offset rawCursorOffset = _startCaretRect.center + centeredPoint - _floatingCursorOffset;
-          _lastBoundedOffset = renderEditable.calculateBoundedFloatingCursorOffset(rawCursorOffset);
-          _lastTextPosition = renderEditable.getPositionForPoint(renderEditable.localToGlobal(_lastBoundedOffset + _floatingCursorOffset));
-          renderEditable.setFloatingCursor(point.state, _lastBoundedOffset, _lastTextPosition);
-        } else {
-          _pointOffsetOrigin = point.offset;
-        }
+        final Offset centeredPoint = point.offset - _pointOffsetOrigin;
+        final Offset rawCursorOffset = _startCaretRect.center + centeredPoint - _floatingCursorOffset;
+
+        _lastBoundedOffset = renderEditable.calculateBoundedFloatingCursorOffset(rawCursorOffset);
+        _lastTextPosition = renderEditable.getPositionForPoint(renderEditable.localToGlobal(_lastBoundedOffset + _floatingCursorOffset));
+        renderEditable.setFloatingCursor(point.state, _lastBoundedOffset, _lastTextPosition);
         break;
       case FloatingCursorDragState.End:
         // We skip animation if no update has happened.

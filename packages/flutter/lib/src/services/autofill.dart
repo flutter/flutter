@@ -712,7 +712,7 @@ class AutofillConfiguration {
 abstract class AutofillClient {
   /// The unique identifier of this [AutofillClient].
   ///
-  /// Must not be null;
+  /// Must not be null.
   String get autofillId;
 
   /// The [TextInputConfiguration] that describes this [AutofillClient].

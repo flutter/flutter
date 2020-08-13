@@ -870,7 +870,7 @@ class MediaQuery extends InheritedWidget {
   }
 }
 
-/// Describes the navigation mode to be set by a [MediaQuery] widget
+/// Describes the navigation mode to be set by a [MediaQuery] widget.
 ///
 /// The different modes indicate the type of navigation to be used in a widget
 /// subtree for those widgets sensitive to it.
