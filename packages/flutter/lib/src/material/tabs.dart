@@ -393,7 +393,6 @@ class _IndicatorPainter extends CustomPainter {
       tabRight -= delta;
     }
 
-    //Applying indicatorPadding
     final EdgeInsets insets = indicatorPadding.resolve(_currentTextDirection);
     final Rect rect = Rect.fromLTWH(tabLeft, 0.0, tabRight - tabLeft, tabBarSize.height);
 
@@ -820,10 +819,6 @@ class _TabBarState extends State<TabBar> {
       color = Colors.white;
 
     return UnderlineTabIndicator(
-      // Bad: Commenting the line below. Since we already provided
-      //      indicatorPadding to the _indicatorPainter, we should not provide
-      //      insets to this widget.
-
 //      insets: widget.indicatorPadding,
       borderSide: BorderSide(
         width: widget.indicatorWeight,
