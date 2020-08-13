@@ -715,4 +715,3 @@ class NeverScrollableScrollPhysics extends ScrollPhysics {
   @override
   bool get allowImplicitScrolling => false;
 }
-
