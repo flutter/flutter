@@ -550,7 +550,6 @@ void main() {
 
   testWidgets('Switching to and from BoxFit.scaleDown causes relayout', (WidgetTester tester) async {
     final Key outside = UniqueKey();
-    final Key inside = UniqueKey();
 
     final Widget scaleDownWidget = Center(
       child: Container(
@@ -559,7 +558,6 @@ void main() {
           key: outside,
           fit: BoxFit.scaleDown,
           child: Container(
-            key: inside,
             width: 100.0,
             height: 50.0,
           ),
@@ -573,7 +571,6 @@ void main() {
         child: FittedBox(
           key: outside,
           child: Container(
-            key: inside,
             width: 100.0,
             height: 50.0,
           ),
