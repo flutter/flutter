@@ -330,22 +330,23 @@ abstract class Gradient {
 /// Typically this class is used with [BoxDecoration], which does the painting.
 /// To use a [LinearGradient] to paint on a canvas directly, see [createShader].
 ///
-/// {@tool snippet}
-///
+/// {@tool dartpad --template=stateless_widget_material}
 /// This sample draws a picture that looks like vertical window shades by having
 /// a [Container] display a [BoxDecoration] with a [LinearGradient].
 ///
 /// ```dart
-/// Container(
-///   decoration: BoxDecoration(
-///     gradient: LinearGradient(
-///       begin: Alignment.topLeft,
-///       end: Alignment(0.8, 0.0), // 10% of the width, so there are ten blinds.
-///       colors: [const Color(0xFFFFFFEE), const Color(0xFF999999)], // whitish to gray
-///       tileMode: TileMode.repeated, // repeats the gradient over the canvas
-///     ),
-///   ),
-/// )
+///  Widget build(BuildContext context) {
+///    return Container(
+///      decoration: BoxDecoration(
+///        gradient: LinearGradient(
+///          begin: Alignment.topLeft,
+///          end: Alignment(0.8, 0.0), // 10% of the width, so there are ten blinds.
+///          colors: [const Color(0xffee0000), const Color(0xffeeee00)], // red to yellow
+///          tileMode: TileMode.repeated, // repeats the gradient over the canvas
+///        ),
+///      ),
+///    );
+///  }
 /// ```
 /// {@end-tool}
 ///
