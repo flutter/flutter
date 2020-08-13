@@ -678,8 +678,9 @@ class RenderConstraintsTransformBox extends RenderAligningShiftedBox with DebugO
     final BoxConstraints constraints = this.constraints;
     if (child != null) {
       assert(constraintsTransform != null);
-      final BoxConstraints childConstraints = constraintsTransform(constraints).normalize();
-      child.layout(childConstraints, parentUsesSize: true);
+      final BoxConstraints childConstraints = constraintsTransform(constraints);
+      assert(childConstraints != null);
+      child.layout(childConstraints.normalize(), parentUsesSize: true);
       size = constraints.constrain(child.size);
       alignChild();
       final BoxParentData childParentData = child.parentData as BoxParentData;

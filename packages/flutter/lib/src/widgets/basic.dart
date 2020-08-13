@@ -2264,9 +2264,9 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 ///    the child to overflow the parent.
 ///  * [UnconstrainedBox] which allows its children to render themselves
 ///    unconstrained, expands to fit them, and considers overflow to be an error.
-class ConstraintsTransformedBox extends SingleChildRenderObjectWidget {
+class ConstraintsTransformBox extends SingleChildRenderObjectWidget {
   /// Creates a widget that applies a
-  const ConstraintsTransformedBox({
+  const ConstraintsTransformBox({
     Key key,
     Widget child,
     this.textDirection,
@@ -2419,7 +2419,7 @@ class UnconstrainedBox extends StatelessWidget {
     }
     constraintsTransform ??= _unconstrained;
 
-    return ConstraintsTransformedBox(
+    return ConstraintsTransformBox(
       child: child,
       textDirection: textDirection ?? Directionality.of(context),
       alignment: alignment,

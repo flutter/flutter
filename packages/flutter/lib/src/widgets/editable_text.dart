@@ -2306,7 +2306,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final TextSelectionControls controls = widget.selectionControls;
     final bool ignoreOverflow = _isMultiline || widget.clipBehavior == Clip.none;
 
-    return ConstraintsTransformedBox(
+    return ConstraintsTransformBox(
       constraintsTransform: ignoreOverflow ? _unmodified : _removeMaxHeightConstraint,
       clipBehavior: widget.clipBehavior,
       child: MouseRegion(
