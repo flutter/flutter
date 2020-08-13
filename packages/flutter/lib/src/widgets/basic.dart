@@ -2228,7 +2228,8 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 /// will then attempt to adopt the same size, within the limits of its own
 /// constraints. If it ends up with a different size, it will align the child
 /// based on [alignment]. If the container cannot expand enough to accommodate
-/// the entire child, the child will be clipped.
+/// the entire child, the child will be clipped if [clipBehavior] is not
+/// [Clip.none].
 ///
 /// In debug mode, if the child overflows the container, a warning will be
 /// printed on the console, and black and yellow striped areas will appear where
@@ -2246,8 +2247,8 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 /// sufficient height, in debug mode a warning will be given.
 ///
 /// ```dart
-/// ConstraintsTransformedBox(
-///   constraintsTransform: (BoxConstraints constraints) => constriants.copyWith(maxHeight: double.infinity),
+/// ConstraintsTransformBox(
+///   constraintsTransform: (BoxConstraints constraints) => constraints.copyWith(maxHeight: double.infinity),
 ///   child: const Card(child: Text('Hello World!')),
 /// )
 /// ```
@@ -2259,13 +2260,15 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 ///    used to manipulate.
 ///  * [ConstrainedBox], which renders a box which imposes constraints
 ///    on its child.
-///  * [ConstrainedOverflowBox], which renders a box that imposes different
-///    constraints on its child than it gets from its parent, possibly allowing
-///    the child to overflow the parent.
+///  * [OverflowBox], which renders a box that imposes different constraints on
+///    its child than it gets from its parent, possibly allowing the child to
+///    overflow the parent.
 ///  * [UnconstrainedBox] which allows its children to render themselves
 ///    unconstrained, expands to fit them, and considers overflow to be an error.
 class ConstraintsTransformBox extends SingleChildRenderObjectWidget {
-  /// Creates a widget that applies a
+  /// Creates a widget that uses a function to transform the constraints it
+  /// passes to its child. If the child overflows the parents constraints, a
+  /// warning will be given in debug mode.
   const ConstraintsTransformBox({
     Key key,
     Widget child,
@@ -2294,11 +2297,10 @@ class ConstraintsTransformBox extends SingleChildRenderObjectWidget {
   final AlignmentGeometry alignment;
 
   /// @{template flutter.widgets.constraintsTransform}
-  /// The function used to transform [constraints] before using it to size
-  /// [child].
+  /// The function used to transform the [BoxConstraints] imposed on [child].
   ///
   /// Must not be null. The function must not return null. The result will be
-  /// normalized if necessary.
+  /// normalized.
   /// @{endtemplate}
   final BoxConstraintsTransform constraintsTransform;
 

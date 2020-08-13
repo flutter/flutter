@@ -600,13 +600,13 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
 /// sizes its child using the resulting [BoxConstraints], treating any overflow
 /// as error.
 ///
-/// This [RenderBox] sizes its child using a normalized "hypothetical"
-/// [BoxConstraints] created by applying [constraintsTransform] to this
-/// [RenderBox]'s own [constraints]. This box will then attempt to adopt the
-/// same size, within the limits of its own constraints. If it ends up with a
-/// different size, it will align the child based on [alignment]. If the box
-/// cannot expand enough to accommodate the entire child, the child will be
-/// clipped.
+/// This [RenderBox] sizes its child using a normalized [BoxConstraints] created
+/// by applying [constraintsTransform] to this [RenderBox]'s own [constraints].
+/// This box will then attempt to adopt the same size, within the limits of its
+/// own constraints. If it ends up with a different size, it will align the
+/// child based on [alignment]. If the box cannot expand enough to accommodate
+/// the entire child, the child will be clipped if [clipBehavior] is not
+/// [Clip.none].
 ///
 /// In debug mode, if the child overflows the box, a warning will be printed on
 /// the console, and black and yellow striped areas will appear where the
@@ -619,7 +619,7 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
 ///
 /// See also:
 ///
-///  * [ConstraintsTransformedBox], the widget that makes use of this
+///  * [ConstraintsTransformBox], the widget that makes use of this
 ///    [RenderObject] and exposes the same functionality.
 ///  * [RenderConstrainedBox], which renders a box which imposes constraints
 ///    on its child.
