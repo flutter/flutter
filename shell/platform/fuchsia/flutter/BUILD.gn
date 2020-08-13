@@ -21,12 +21,30 @@ shell_gpu_configuration("fuchsia_legacy_gpu_configuration") {
   enable_metal = false
 }
 
+config("runner_debug_config") {
+  defines = [ "DEBUG" ]  # Needed due to direct dart dependencies.
+}
+
+config("runner_flutter_profile_config") {
+  defines = [ "FLUTTER_PROFILE" ]
+}
+
+config("runner_product_config") {
+  defines = [ "DART_PRODUCT" ]
+}
+
 template("runner_sources") {
   assert(defined(invoker.product), "runner_sources must define product")
 
-  extra_defines = []
+  runner_configs = []
+  if (is_debug) {
+    runner_configs += [ ":runner_debug_config" ]
+  }
+  if (flutter_runtime_mode == "profile") {
+    runner_configs += [ ":runner_flutter_profile_config" ]
+  }
   if (invoker.product) {
-    extra_defines += [ "DART_PRODUCT" ]
+    runner_configs += [ ":runner_product_config" ]
   }
 
   source_set(target_name) {
@@ -75,10 +93,7 @@ template("runner_sources") {
       "vulkan_surface_producer.h",
     ]
 
-    defines = extra_defines
-    if (flutter_runtime_mode == "profile") {
-      defines += [ "FLUTTER_PROFILE" ]
-    }
+    public_configs = runner_configs
 
     # The use of these dependencies is temporary and will be moved behind the
     # embedder API.
@@ -167,9 +182,6 @@ template("flutter_runner") {
   product_suffix = ""
   if (invoker.product) {
     product_suffix = "_product"
-  }
-  if (is_debug) {
-    extra_defines += [ "DEBUG" ]  # Needed due to direct dart dependencies.
   }
 
   executable(target_name) {
