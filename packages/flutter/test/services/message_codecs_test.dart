@@ -45,11 +45,26 @@ void main() {
       expect(string.decodeMessage(offsetByteData), ' world');
     });
   });
-  group('Decode envelope', () {
+  group('Standard method codec', () {
     const MethodCodec method = StandardMethodCodec();
-    test('should decode native stacktrace.', () {
+    test('should decode error envelope without native stacktrace', () {
+      final ByteData errorData = method.encodeErrorEnvelope(code: 'errorCode', message: 'errorMessage', details: 'errorDetails',);
+      expect(() => method.decodeEnvelope(errorData), throwsA(predicate((PlatformException e) => e is PlatformException && e.code == 'errorCode' && e.message == 'errorMessage' && e.details == 'errorDetails')));
+    });
+    test('should decode error envelope with native stacktrace.', () {
       final ByteData errorData = method.encodeErrorEnvelope(code: 'errorCode', message: 'errorMessage', details: 'errorDetails', stacktrace: 'errorStacktrace',);
       expect(() => method.decodeEnvelope(errorData), throwsA(predicate((PlatformException e) => e is PlatformException && e.stacktrace == 'errorStacktrace')));
+    });
+  });
+  group('Json method codec', () {
+    const JSONMethodCodec json = JSONMethodCodec();
+    test('should decode error envelope without native stacktrace', () {
+      final ByteData errorData = json.encodeErrorEnvelope(code: 'errorCode', message: 'errorMessage', details: 'errorDetails',);
+      expect(() => json.decodeEnvelope(errorData), throwsA(predicate((PlatformException e) => e is PlatformException && e.code == 'errorCode' && e.message == 'errorMessage' && e.details == 'errorDetails')));
+    });
+    test('should decode error envelope with native stacktrace.', () {
+      final ByteData errorData = json.encodeErrorEnvelope(code: 'errorCode', message: 'errorMessage', details: 'errorDetails', stacktrace: 'errorStacktrace',);
+      expect(() => json.decodeEnvelope(errorData), throwsA(predicate((PlatformException e) => e is PlatformException && e.stacktrace == 'errorStacktrace')));
     });
   });
   group('JSON message codec', () {
