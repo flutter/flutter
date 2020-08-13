@@ -370,6 +370,11 @@ class DataCell {
 /// ```
 /// {@end-tool}
 ///
+/// [DataTable] can be sorted on the basis of any column in [columns] in
+/// ascending or descending order. If [sortColumnIndex] is non-null, then the
+/// table will be sorted by the values in the specified column. The boolean
+/// [sortAscending] flag controls the sort order.
+///
 /// See also:
 ///
 ///  * [DataColumn], which describes a column in the data table.

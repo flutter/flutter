@@ -83,8 +83,6 @@ Future<void> main(List<String> args) async {
     'attach',
     '--module',
     name,
-    '--isolate-filter',
-    name,
     '--target',
     targetFile,
     '--target-model',

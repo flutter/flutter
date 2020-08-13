@@ -35,4 +35,37 @@ class SystemNavigator {
   static Future<void> pop({bool? animated}) async {
     await SystemChannels.platform.invokeMethod<void>('SystemNavigator.pop', animated);
   }
+
+  /// Notifies the platform for a route information change.
+  ///
+  /// On Web, creates a new browser history entry and update URL with the route
+  /// information.
+  static void routeInformationUpdated({
+    required String location,
+    Object? state
+  }) {
+    SystemChannels.navigation.invokeMethod<void>(
+      'routeInformationUpdated',
+      <String, dynamic>{
+        'location': location,
+        'state': state,
+      },
+    );
+  }
+
+  /// Notifies the platform of a route change.
+  ///
+  /// On Web, updates the URL bar with the [routeName].
+  static void routeUpdated({
+    String? routeName,
+    String? previousRouteName
+  }) {
+    SystemChannels.navigation.invokeMethod<void>(
+      'routeUpdated',
+      <String, dynamic>{
+        'previousRouteName': previousRouteName,
+        'routeName': routeName,
+      },
+    );
+  }
 }

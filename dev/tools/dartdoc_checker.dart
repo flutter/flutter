@@ -85,13 +85,8 @@ void checkForUnresolvedDirectives(String htmlOutputPath) {
 
 int _scanFile(File file) {
   assert(path.extension(file.path) == 'html');
-  Iterable<String> matches = _pattern.allMatches(file.readAsStringSync())
+  final Iterable<String> matches = _pattern.allMatches(file.readAsStringSync())
       .map((RegExpMatch m ) => m.group(0));
-
-  // TODO(goderbauer): Remove this exception when https://github.com/dart-lang/dartdoc/issues/1945 is fixed.
-  matches = matches
-      .where((String m) => m != '{@inject-html}')
-      .where((String m) => m != '{@end-inject-html}');
 
   if (matches.isNotEmpty) {
     stderr.writeln('Found unresolved dartdoc directives in ${file.path}:');

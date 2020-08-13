@@ -66,7 +66,7 @@ class IconTreeShaker {
     }
   }
 
-  /// The MIME type for ttf fonts.
+  /// The MIME types for supported font sets.
   static const Set<String> kTtfMimeTypes = <String>{
     'font/ttf', // based on internet search
     'font/opentype',
@@ -383,5 +383,7 @@ class IconTreeShakerException implements Exception {
   final String message;
 
   @override
-  String toString() => 'FontSubset error: $message';
+  String toString() => 'IconTreeShakerException: $message\n\n'
+    'To disable icon tree shaking, pass --no-tree-shake-icons to the requested '
+    'flutter build command';
 }

@@ -17,11 +17,14 @@ class SizeAnalyzer {
     @required this.fileSystem,
     @required this.logger,
     @required this.processUtils,
+    this.appFilenamePattern = 'libapp.so',
   });
 
   final FileSystem fileSystem;
   final Logger logger;
   final ProcessUtils processUtils;
+  final Pattern appFilenamePattern;
+  String _appFilename;
 
   static const String aotSnapshotFileName = 'aot-snapshot.json';
 
@@ -29,7 +32,7 @@ class SizeAnalyzer {
 
   /// Analyzes [apk] and [aotSnapshot] to output a [Map] object that includes
   /// the breakdown of the both files, where the breakdown of [aotSnapshot] is placed
-  /// under 'lib/arm64-v8a/libapp.so'.
+  /// under 'lib/arm64-v8a/$_appFilename'.
   ///
   /// The [aotSnapshot] can be either instruction sizes snapshot or v8 snapshot.
   Future<Map<String, dynamic>> analyzeApkSizeAndAotSnapshot({
@@ -78,7 +81,7 @@ class SizeAnalyzer {
         byteSize: firstLevelPath.byteSize,
         level: 1,
       );
-      // Print the expansion of lib directory to show more info for libapp.so.
+      // Print the expansion of lib directory to show more info for `appFilename`.
       if (firstLevelPath.name == 'lib') {
         _printLibChildrenPaths(firstLevelPath, '', aotSnapshotJsonRoot);
       }
@@ -91,9 +94,10 @@ class SizeAnalyzer {
     apkAnalysisJson['type'] = 'apk';
 
     // TODO(peterdjlee): Add aot snapshot for all platforms.
+    assert(_appFilename != null);
     apkAnalysisJson = _addAotSnapshotDataToApkAnalysis(
       apkAnalysisJson: apkAnalysisJson,
-      path: 'lib/arm64-v8a/libapp.so (Dart AOT)'.split('/'), // Pass in a list of paths by splitting with '/'.
+      path: 'lib/arm64-v8a/$_appFilename (Dart AOT)'.split('/'), // Pass in a list of paths by splitting with '/'.
       aotSnapshotJson: processedAotSnapshotJson,
     );
 
@@ -137,9 +141,10 @@ class SizeAnalyzer {
 
         if (childWithPathAsName == null) {
           childWithPathAsName = _SymbolNode(path);
-          if (path.endsWith('libapp.so')) {
+          if (matchesPattern(path, pattern: appFilenamePattern) != null) {
+            _appFilename = path;
             childWithPathAsName.name += ' (Dart AOT)';
-          } else if (path.endsWith('libflutter.so')) {
+          } else if (path == 'libflutter.so') {
             childWithPathAsName.name += ' (Flutter Engine)';
           }
           currentNode.addChild(childWithPathAsName);
@@ -155,7 +160,7 @@ class SizeAnalyzer {
 
   /// Prints all children paths for the lib/ directory in an APK.
   ///
-  /// A brief summary of aot snapshot is printed under 'lib/arm64-v8a/libapp.so'.
+  /// A brief summary of aot snapshot is printed under 'lib/arm64-v8a/$_appFilename'.
   void _printLibChildrenPaths(
     _SymbolNode currentNode,
     String totalPath,
@@ -163,7 +168,9 @@ class SizeAnalyzer {
   ) {
     totalPath += currentNode.name;
 
-    if (currentNode.children.isNotEmpty && !currentNode.name.contains('libapp.so')) {
+    assert(_appFilename != null);
+    if (currentNode.children.isNotEmpty
+      && currentNode.name != '$_appFilename (Dart AOT)') {
       for (final _SymbolNode child in currentNode.children) {
         _printLibChildrenPaths(child, '$totalPath/', aotSnapshotJsonRoot);
       }
@@ -172,8 +179,8 @@ class SizeAnalyzer {
       _printEntitySize(totalPath, byteSize: currentNode.byteSize, level: 2);
 
       // We picked this file because arm64-v8a is likely the most popular
-      // architecture. ther architecture sizes should be similar.
-      const String libappPath = 'lib/arm64-v8a/libapp.so';
+      // architecture. Other architecture sizes should be similar.
+      final String libappPath = 'lib/arm64-v8a/$_appFilename';
       // TODO(peterdjlee): Analyze aot size for all platforms.
       if (totalPath.contains(libappPath)) {
         _printAotSnapshotSummary(aotSnapshotJsonRoot);
@@ -367,4 +374,11 @@ class _SymbolNode {
     }
     return json;
   }
+}
+
+/// Matches `pattern` against the entirety of `string`.
+@visibleForTesting
+Match matchesPattern(String string, {@required Pattern pattern}) {
+  final Match match = pattern.matchAsPrefix(string);
+  return (match != null && match.end == string.length) ? match : null;
 }
