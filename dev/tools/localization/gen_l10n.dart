@@ -614,12 +614,12 @@ class LocalizationsGenerator {
       outputDirectory = _fs.directory(
         projectDirectory != null
           ? _getAbsoluteProjectPath(defaultSyntheticPackagePath)
-          : outputPathString
-        );
+          : defaultSyntheticPackagePath
+      );
     } else {
       if (outputPathString == null)
         throw L10nException(
-          'outputPathString argument cannot be null if not using'
+          'outputPathString argument cannot be null if not using '
           'synthetic package option.'
         );
 

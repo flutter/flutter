@@ -240,8 +240,9 @@ void main() {
       expect(
         fs.isFileSync(path.join(
           flutterProjectPath,
-          'lib',
-          'l10n',
+          '.dart_tool',
+          'flutter_gen',
+          'gen_l10n',
           'output-localization-file_en.dart',
         )),
         true,
@@ -249,8 +250,9 @@ void main() {
       expect(
         fs.isFileSync(path.join(
           flutterProjectPath,
-          'lib',
-          'l10n',
+          '.dart_tool',
+          'flutter_gen',
+          'gen_l10n',
           'output-localization-file_es.dart',
         )),
         true,
