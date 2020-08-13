@@ -56,8 +56,8 @@ Dart_Handle Picture::toImage(uint32_t width,
 }
 
 void Picture::dispose() {
-  ClearDartWrapper();
   picture_.reset();
+  ClearDartWrapper();
 }
 
 size_t Picture::GetAllocationSize() const {
