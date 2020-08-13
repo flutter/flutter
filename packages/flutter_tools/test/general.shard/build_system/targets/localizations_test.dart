@@ -17,13 +17,15 @@ void main() {
   testUsingContext('generateLocalizations forwards arguments correctly', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Logger logger = BufferLogger.test();
+    final String projectDir = fileSystem.path.join('path', 'to', 'flutter_project');
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      const FakeCommand(
+      FakeCommand(
         command: <String>[
           'dart',
           '--disable-dart-dev',
           'dev/tools/localization/bin/gen_l10n.dart',
           '--gen-inputs-and-outputs-list=/',
+          '--project-dir=$projectDir',
           '--arb-dir=arb',
           '--template-arb-file=example.arb',
           '--output-localization-file=bar',
@@ -37,7 +39,11 @@ void main() {
         ],
       ),
     ]);
-    final Directory arbDirectory = fileSystem.directory('arb')
+    final Directory flutterProjectDirectory = fileSystem
+      .directory(fileSystem.path.join('path', 'to', 'flutter_project'))
+      ..createSync(recursive: true);
+    final Directory arbDirectory = flutterProjectDirectory
+      .childDirectory('arb')
       ..createSync();
     arbDirectory.childFile('foo.arb').createSync();
     arbDirectory.childFile('bar.arb').createSync();
@@ -59,7 +65,7 @@ void main() {
       logger: logger,
       fileSystem: fileSystem,
       processManager: processManager,
-      projectDir: fileSystem.currentDirectory,
+      projectDir: flutterProjectDirectory,
       dartBinaryPath: 'dart',
       flutterRoot: '',
       dependenciesDir: fileSystem.currentDirectory,
