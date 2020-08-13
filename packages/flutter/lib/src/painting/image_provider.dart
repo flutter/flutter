@@ -672,8 +672,8 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
       PaintingBinding.instance!.imageCache!.evict(key);
       rethrow;
     }
-    // Note: `key.bundle.load` has a non-nullable return type, but might be null
-    // when running with weak checking, so we need to null check it anyway (and
+    // `key.bundle.load` has a non-nullable return type, but might be null when
+    // running with weak checking, so we need to null check it anyway (and
     // ignore the warning that the null-handling logic is dead code).
     if (data == null) { // ignore: dead_code
       PaintingBinding.instance!.imageCache!.evict(key);
