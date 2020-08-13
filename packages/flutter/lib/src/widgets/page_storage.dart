@@ -130,8 +130,12 @@ class PageStorageBucket {
 /// Usually you don't need to explicitly use a [PageStorage], since it's already
 /// included in routes.
 ///
-/// [PageStorageKey] is used by [Scrollable] if
-/// `keepScrollOffset` is enabled to save their [ScrollPosition]s.
+/// [PageStorageKey] is used by [Scrollable] if [ScrollController.keepScrollOffset]
+/// is enabled to save their [ScrollPosition]s. When more than one
+/// scrollable ([ListView], [SingleChildScrollView], [TextField], etc.) appears
+/// in the same route, if you want to save all of their positions,
+/// you should give each of them a [PageStorageKey], or set some of their
+/// `keepScrollOffset` false to prevent saving.
 ///
 /// {@tool dartpad --template=freeform}
 ///
