@@ -925,6 +925,7 @@ FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine.
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterEnginePlatformViewTest.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterEngineTest.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Test.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterHeadlessDartRunner.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterObservatoryPublisher.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterObservatoryPublisher.mm
