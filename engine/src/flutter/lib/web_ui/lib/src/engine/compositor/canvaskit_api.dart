@@ -76,8 +76,8 @@ class CanvasKit {
   external SkGrContext MakeGrContext(int glContext);
   external SkSurface MakeOnScreenGLSurface(
     SkGrContext grContext,
-    double width,
-    double height,
+    int width,
+    int height,
     SkColorSpace colorSpace,
   );
   external SkSurface MakeSWCanvasSurface(html.CanvasElement canvas);
