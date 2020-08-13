@@ -1523,6 +1523,7 @@ class _HourTextField extends StatelessWidget {
       style: style,
       validator: validator,
       onSavedSubmitted: onSavedSubmitted,
+      onChanged: onChanged,
     );
   }
 }
