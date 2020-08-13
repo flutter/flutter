@@ -1,4 +1,4 @@
-Signature: 75b3eb7137bdae8000330a6745e8e2d6
+Signature: 6ad55976a3ed1bbe32c889d130683011
 
 UNUSED LICENSES:
 
@@ -3153,6 +3153,7 @@ FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/feedback_data_provider.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/power.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/repository_manager.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/tiles.dart
+FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/time.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics/gpu_metrics.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics/total_trace_wall_time.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/update.dart
