@@ -100,6 +100,7 @@ void main() {
       child.debugFillProperties(properties);
 
       expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid left padding'), true);
+      expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid right padding'), false);
       expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid top padding'), true);
       expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid bottom padding'), false);
     });
@@ -327,6 +328,7 @@ void main() {
     child.debugFillProperties(properties);
 
     expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid left padding'), true);
+    expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid right padding'), false);
     expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid top padding'), true);
     expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid bottom padding'), false);
   });
