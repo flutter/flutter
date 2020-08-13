@@ -47,18 +47,6 @@
          "repo": "flutter",
          "task_name": "win_framework_tests",
          "flaky": false
-      },
-      {
-         "name": "Windows hostonly_devicelab_tests",
-         "repo": "flutter",
-         "task_name": "win_hostonly_devicelab_tests",
-         "flaky": false
-      },
-      {
-         "name": "Windows tool_tests",
-         "repo": "flutter",
-         "task_name": "win_tool_tests",
-         "flaky": false
       }
    ]
 }
