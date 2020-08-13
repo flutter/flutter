@@ -14,9 +14,28 @@
 #import "flutter/shell/platform/embedder/embedder.h"
 
 /**
+ * Constructs and returns a FlutterLocale struct corresponding to |locale|, which must outlive
+ * the returned struct.
+ */
+static FlutterLocale FlutterLocaleFromNSLocale(NSLocale* locale) {
+  FlutterLocale flutterLocale = {};
+  flutterLocale.struct_size = sizeof(FlutterLocale);
+  flutterLocale.language_code = [[locale objectForKey:NSLocaleLanguageCode] UTF8String];
+  flutterLocale.country_code = [[locale objectForKey:NSLocaleCountryCode] UTF8String];
+  flutterLocale.script_code = [[locale objectForKey:NSLocaleScriptCode] UTF8String];
+  flutterLocale.variant_code = [[locale objectForKey:NSLocaleVariantCode] UTF8String];
+  return flutterLocale;
+}
+
+/**
  * Private interface declaration for FlutterEngine.
  */
 @interface FlutterEngine () <FlutterBinaryMessenger>
+
+/**
+ * Sends the list of user-preferred locales to the Flutter engine.
+ */
+- (void)sendUserLocales;
 
 /**
  * Called by the engine to make the context the engine should draw into current.
@@ -181,6 +200,12 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
   _textures = [[NSMutableDictionary alloc] init];
   _allowHeadlessExecution = allowHeadlessExecution;
 
+  NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
+  [notificationCenter addObserver:self
+                         selector:@selector(sendUserLocales)
+                             name:NSCurrentLocaleDidChangeNotification
+                           object:nil];
+
   return self;
 }
 
@@ -254,6 +279,7 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
     return NO;
   }
 
+  [self sendUserLocales];
   [self updateWindowMetrics];
   return YES;
 }
@@ -313,6 +339,29 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
 }
 
 #pragma mark - Private methods
+
+- (void)sendUserLocales {
+  if (!self.running) {
+    return;
+  }
+
+  // Create a list of FlutterLocales corresponding to the preferred languages.
+  NSMutableArray<NSLocale*>* locales = [NSMutableArray array];
+  std::vector<FlutterLocale> flutterLocales;
+  flutterLocales.reserve(locales.count);
+  for (NSString* localeID in [NSLocale preferredLanguages]) {
+    NSLocale* locale = [[NSLocale alloc] initWithLocaleIdentifier:localeID];
+    [locales addObject:locale];
+    flutterLocales.push_back(FlutterLocaleFromNSLocale(locale));
+  }
+  // Convert to a list of pointers, and send to the engine.
+  std::vector<const FlutterLocale*> flutterLocaleList;
+  flutterLocaleList.reserve(flutterLocales.size());
+  std::transform(
+      flutterLocales.begin(), flutterLocales.end(), std::back_inserter(flutterLocaleList),
+      [](const auto& arg) -> const auto* { return &arg; });
+  FlutterEngineUpdateLocales(_engine, flutterLocaleList.data(), flutterLocaleList.size());
+}
 
 - (bool)engineCallbackOnMakeCurrent {
   if (!_mainOpenGLContext) {
