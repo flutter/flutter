@@ -1,4 +1,4 @@
-Signature: 81d886b3f785a769019bd82dfeecf6ed
+Signature: 3a26ee20860b902934c898a4fd6b838c
 
 UNUSED LICENSES:
 
@@ -3980,7 +3980,10 @@ FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLUniformHandler.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkManagedResource.h
 FILE: ../../../third_party/skia/src/image/SkRescaleAndReadPixels.cpp
 FILE: ../../../third_party/skia/src/image/SkRescaleAndReadPixels.h
+FILE: ../../../third_party/skia/src/ports/SkImageEncoder_NDK.cpp
 FILE: ../../../third_party/skia/src/ports/SkImageGeneratorNDK.cpp
+FILE: ../../../third_party/skia/src/ports/SkNDKConversions.cpp
+FILE: ../../../third_party/skia/src/ports/SkNDKConversions.h
 FILE: ../../../third_party/skia/src/sksl/SkSLAnalysis.h
 FILE: ../../../third_party/skia/src/sksl/SkSLDehydrator.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLDehydrator.h
@@ -5254,6 +5257,7 @@ FILE: ../../../third_party/skia/gm/widebuttcaps.cpp
 FILE: ../../../third_party/skia/include/core/SkM44.h
 FILE: ../../../third_party/skia/include/effects/SkStrokeAndFillPathEffect.h
 FILE: ../../../third_party/skia/include/gpu/GrDirectContext.h
+FILE: ../../../third_party/skia/include/ports/SkAudioPlayer.h
 FILE: ../../../third_party/skia/include/private/SkOpts_spi.h
 FILE: ../../../third_party/skia/modules/skottie/include/ExternalLayer.h
 FILE: ../../../third_party/skia/modules/skottie/src/Adapter.h
@@ -5296,6 +5300,7 @@ FILE: ../../../third_party/skia/modules/skshaper/src/SkShaper_coretext.cpp
 FILE: ../../../third_party/skia/modules/skshaper/src/SkUnicode.h
 FILE: ../../../third_party/skia/modules/skshaper/src/SkUnicode_icu.cpp
 FILE: ../../../third_party/skia/samplecode/Sample3D.cpp
+FILE: ../../../third_party/skia/samplecode/SampleAudio.cpp
 FILE: ../../../third_party/skia/samplecode/SampleFitCubicToCircle.cpp
 FILE: ../../../third_party/skia/samplecode/SampleSimpleStroker.cpp
 FILE: ../../../third_party/skia/src/core/SkColorFilterPriv.h
@@ -5338,6 +5343,9 @@ FILE: ../../../third_party/skia/src/gpu/tessellate/GrWangsFormula.h
 FILE: ../../../third_party/skia/src/gpu/text/GrSDFTOptions.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrSDFTOptions.h
 FILE: ../../../third_party/skia/src/opts/SkOpts_skx.cpp
+FILE: ../../../third_party/skia/src/ports/SkAudioPlayer.cpp
+FILE: ../../../third_party/skia/src/ports/SkAudioPlayer_mac.mm
+FILE: ../../../third_party/skia/src/ports/SkAudioPlayer_none.cpp
 FILE: ../../../third_party/skia/src/ports/SkScalerContext_mac_ct.h
 FILE: ../../../third_party/skia/src/ports/SkTypeface_mac_ct.h
 FILE: ../../../third_party/skia/src/utils/mac/SkCGBase.h
