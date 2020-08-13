@@ -486,10 +486,10 @@ void Canvas::drawShadow(const CanvasPath* path,
 }
 
 void Canvas::Invalidate() {
+  canvas_ = nullptr;
   if (dart_wrapper()) {
     ClearDartWrapper();
   }
-  canvas_ = nullptr;
 }
 
 }  // namespace flutter
