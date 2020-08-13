@@ -103,15 +103,34 @@ class CustomSemanticsAction {
       hint = null,
       action = null;
 
-  /// Creates a new [CustomSemanticsAction] that overrides a standard semantics
-  /// action.
+  /// Creates a new [CustomSemanticsAction] that overrides the hint of a
+  /// standard semantics action.
   ///
   /// The [hint] must not be null or the empty string.
-  const CustomSemanticsAction.overridingAction({required String this.hint, required SemanticsAction this.action})
-    : assert(hint != null),
-      assert(hint != ''),
+  const CustomSemanticsAction.overridingAction({
+    required this.hint,
+    required SemanticsAction this.action,
+  }) : assert(hint != null && hint != ''),
+       assert(action != null),
+       label = null;
+
+  /// Creates a new [CustomSemanticsAction] that overrides the label a standard
+  /// semantics label.
+  ///
+  /// On iOS, the overidden actions will appear as avaliable actions for the
+  /// children of the this semantics node with new labels. This is used
+  /// for making standard semantics actions to show up in switch control.
+  ///
+  /// The [label] must not be null or the empty string.
+  ///
+  /// See also:
+  ///
+  /// * [RenderSemanticsGestureHandler]: which adds label overrides for
+  ///   semantics scrolling actions when the iOS switch control is on.
+  const CustomSemanticsAction.overridingActionLabel({required this.label, required SemanticsAction this.action})
+    : assert(label != null && label != ''),
       assert(action != null),
-      label = null;
+      hint = null;
 
   /// The user readable name of this custom semantics action.
   final String? label;

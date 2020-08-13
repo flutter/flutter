@@ -3554,6 +3554,28 @@ class RenderSemanticsGestureHandler extends RenderProxyBoxWithHitTestBehavior {
     markNeedsSemanticsUpdate();
   }
 
+  /// If non-null, the look up table of the actions to their localized labels.
+  ///
+  /// Set by the [RawGestureDetectorState] to provide appropriate labels for
+  /// smeantics actions.
+  ///
+  /// This is used to generate action label overrides for scrolling semantics
+  /// actions if switch control on iOS is enabled. These overrides will create
+  /// custom actions that delegate their handlers to the actions they overides
+  /// with the new labels
+  /// 
+  /// The created custom actions will be added to each of its semantics children
+  /// to imitate how iOS adds the native accesibility actions of a UIView to its
+  /// child views during the switch control mode.  
+  Map<SemanticsAction, String> get semanticsActionLabelOverrides => _semanticsActionLabelOverrides;
+  Map<SemanticsAction, String> _semanticsActionLabelOverrides;
+  set semanticsActionLabelOverrides(Map<SemanticsAction, String> value) {
+    if (mapEquals<SemanticsAction, String>(value, _semanticsActionLabelOverrides))
+      return;
+    _semanticsActionLabelOverrides = value;
+    markNeedsSemanticsUpdate();
+  }
+
   /// Called when the user taps on the render object.
   GestureTapCallback? get onTap => _onTap;
   GestureTapCallback? _onTap;
@@ -3612,23 +3634,56 @@ class RenderSemanticsGestureHandler extends RenderProxyBoxWithHitTestBehavior {
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
-
+    final bool switchControlEnabled = RendererBinding.instance.window.accessibilityFeatures.switchControl;
+    final Map<CustomSemanticsAction, VoidCallback> overrides = <CustomSemanticsAction, VoidCallback>{};
     if (onTap != null && _isValidAction(SemanticsAction.tap))
       config.onTap = onTap;
     if (onLongPress != null && _isValidAction(SemanticsAction.longPress))
       config.onLongPress = onLongPress;
     if (onHorizontalDragUpdate != null) {
-      if (_isValidAction(SemanticsAction.scrollRight))
+      if (_isValidAction(SemanticsAction.scrollRight)) {
         config.onScrollRight = _performSemanticScrollRight;
-      if (_isValidAction(SemanticsAction.scrollLeft))
+        if (switchControlEnabled && _hasLabelOverride(SemanticsAction.scrollRight))
+          _insertSemanticsActionLabelOverride(SemanticsAction.scrollRight, overrides);
+      }
+      if (_isValidAction(SemanticsAction.scrollLeft)) {
         config.onScrollLeft = _performSemanticScrollLeft;
+        if (switchControlEnabled && _hasLabelOverride(SemanticsAction.scrollLeft))
+          _insertSemanticsActionLabelOverride(SemanticsAction.scrollLeft, overrides);
+      }
     }
     if (onVerticalDragUpdate != null) {
-      if (_isValidAction(SemanticsAction.scrollUp))
+      if (_isValidAction(SemanticsAction.scrollUp)) {
         config.onScrollUp = _performSemanticScrollUp;
-      if (_isValidAction(SemanticsAction.scrollDown))
+        if (switchControlEnabled && _hasLabelOverride(SemanticsAction.scrollUp))
+          _insertSemanticsActionLabelOverride(SemanticsAction.scrollUp, overrides);
+      }
+      if (_isValidAction(SemanticsAction.scrollDown)) {
         config.onScrollDown = _performSemanticScrollDown;
+        if (switchControlEnabled && _hasLabelOverride(SemanticsAction.scrollDown))
+          _insertSemanticsActionLabelOverride(SemanticsAction.scrollDown, overrides);
+      }
     }
+    if (overrides.isNotEmpty) {
+      config.customSemanticsActions = overrides;
+    }
+  }
+
+  void _insertSemanticsActionLabelOverride(
+    SemanticsAction action,
+    Map<CustomSemanticsAction, VoidCallback> overrides
+  ) {
+    final CustomSemanticsAction override = CustomSemanticsAction.overridingActionLabel(
+      action: action,
+      label: _semanticsActionLabelOverrides[action],
+    );
+    // Overrides do not need a handler.
+    overrides[override] = null;
+  }
+
+  bool _hasLabelOverride(SemanticsAction action) {
+    return _semanticsActionLabelOverrides == null ||
+           _semanticsActionLabelOverrides.containsKey(action);
   }
 
   bool _isValidAction(SemanticsAction action) {

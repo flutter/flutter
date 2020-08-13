@@ -7,6 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
+import 'binding.dart';
 import 'framework.dart';
 
 export 'package:flutter/gestures.dart' show
@@ -1088,15 +1089,29 @@ class RawGestureDetector extends StatefulWidget {
 }
 
 /// State for a [RawGestureDetector].
-class RawGestureDetectorState extends State<RawGestureDetector> {
+class RawGestureDetectorState extends State<RawGestureDetector> with WidgetsBindingObserver {
   Map<Type, GestureRecognizer>? _recognizers = const <Type, GestureRecognizer>{};
   SemanticsGestureDelegate? _semantics;
+
+  RenderSemanticsGestureHandler? _getSemanticsGestureHandler() {
+    return context.findRenderObject() as RenderSemanticsGestureHandler;
+  }
+
+  late Map<SemanticsAction, String> _semanticsActionLabelOverrides;
 
   @override
   void initState() {
     super.initState();
     _semantics = widget.semantics ?? _DefaultSemanticsGestureDelegate(this);
     _syncAll(widget.gestures);
+    _semanticsActionLabelOverrides = <SemanticsAction, String>{
+      SemanticsAction.scrollUp: 'Scroll Down',
+      SemanticsAction.scrollDown: 'Scroll Up',
+      SemanticsAction.scrollLeft: 'Scroll Right',
+      SemanticsAction.scrollRight: 'Scroll Left',
+    };
+    if (!widget.excludeFromSemantics)
+      WidgetsBinding.instance!.addObserver(this);
   }
 
   @override
@@ -1105,7 +1120,18 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     if (!(oldWidget.semantics == null && widget.semantics == null)) {
       _semantics = widget.semantics ?? _DefaultSemanticsGestureDelegate(this);
     }
+    if (widget.excludeFromSemantics != oldWidget.excludeFromSemantics) {
+      if (widget.excludeFromSemantics)
+        WidgetsBinding.instance!.removeObserver(this);
+      else
+        WidgetsBinding.instance!.addObserver(this);
+    }
     _syncAll(widget.gestures);
+  }
+
+  @override
+  void didChangeAccessibilityFeatures() {
+    _getSemanticsGestureHandler()?.markNeedsSemanticsUpdate();
   }
 
   /// This method can be called after the build phase, during the
@@ -1138,8 +1164,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     }());
     _syncAll(gestures);
     if (!widget.excludeFromSemantics) {
-      final RenderSemanticsGestureHandler semanticsGestureHandler = context.findRenderObject()! as RenderSemanticsGestureHandler;
-      _updateSemanticsForRenderObject(semanticsGestureHandler);
+      _updateSemanticsForRenderObject(_getSemanticsGestureHandler()!);
     }
   }
 
@@ -1158,7 +1183,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     if (widget.excludeFromSemantics)
       return;
 
-    final RenderSemanticsGestureHandler? semanticsGestureHandler = context.findRenderObject() as RenderSemanticsGestureHandler?;
+    final RenderSemanticsGestureHandler? semanticsGestureHandler = _getSemanticsGestureHandler();
     assert(() {
       if (semanticsGestureHandler == null) {
         throw FlutterError(
@@ -1177,6 +1202,8 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     for (final GestureRecognizer recognizer in _recognizers!.values)
       recognizer.dispose();
     _recognizers = null;
+    if (!widget.excludeFromSemantics)
+      WidgetsBinding.instance!.removeObserver(this);
     super.dispose();
   }
 
@@ -1226,6 +1253,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
         behavior: widget.behavior ?? _defaultBehavior,
         assignSemantics: _updateSemanticsForRenderObject,
         child: result,
+        semanticsActionLabelOverrides: _semanticsActionLabelOverrides,
       );
     }
     return result;
@@ -1256,17 +1284,19 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
     Key? key,
     Widget? child,
     required this.behavior,
+    required this.semanticsActionLabelOverrides,
     required this.assignSemantics,
-  }) : assert(assignSemantics != null),
-       super(key: key, child: child);
+  }) : super(key: key, child: child);
 
   final HitTestBehavior behavior;
   final _AssignSemantics assignSemantics;
+  final Map<SemanticsAction, String> semanticsActionLabelOverrides;
 
   @override
   RenderSemanticsGestureHandler createRenderObject(BuildContext context) {
     final RenderSemanticsGestureHandler renderObject = RenderSemanticsGestureHandler()
-      ..behavior = behavior;
+      ..behavior = behavior
+      ..semanticsActionLabelOverrides = semanticsActionLabelOverrides;
     assignSemantics(renderObject);
     return renderObject;
   }
@@ -1274,6 +1304,7 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, RenderSemanticsGestureHandler renderObject) {
     renderObject.behavior = behavior;
+    renderObject.semanticsActionLabelOverrides = semanticsActionLabelOverrides;
     assignSemantics(renderObject);
   }
 }

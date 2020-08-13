@@ -12,6 +12,8 @@ import 'package:flutter/services.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 
+import 'semantics_tester.dart';
+
 Future<void> pumpTest(
   WidgetTester tester,
   TargetPlatform? platform, {
@@ -1247,6 +1249,51 @@ void main() {
 
     expect(tester.takeException(), null);
   });
+
+  testWidgets('should show custom action override if switch control is turned on', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    tester.binding.window.accessibilityFeaturesTestValue = MockAccessibilityFeature();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: CustomScrollView(
+          slivers: List<Widget>.generate(
+            20,
+            (int index) {
+              return SliverToBoxAdapter(
+                child: Focus(
+                  autofocus: index == 0,
+                  child: SizedBox(key: ValueKey<String>('Box $index'), height: 50.0),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+    SemanticsNode firstChild;
+    bool getFirstSemanticsChild(SemanticsNode child) {
+      firstChild = child;
+      return false;
+    }
+
+    final SemanticsNode customScrollView = tester.getSemantics(find.byType(CustomScrollView));
+    // The gesture semantics is two level down of the custom scroll view.
+    customScrollView.visitChildren(getFirstSemanticsChild);
+    firstChild.visitChildren(getFirstSemanticsChild);
+    final SemanticsNode gestureSemantics = firstChild;
+
+    expect(gestureSemantics, matchesSemantics(
+      hasImplicitScrolling: true,
+      hasScrollUpAction: true,
+      customActions: const <CustomSemanticsAction>[
+        CustomSemanticsAction.overridingActionLabel(
+          label: 'Scroll Down',
+          action: SemanticsAction.scrollUp,
+        ),
+      ],
+    ));
+    semantics.dispose();
+  });
 }
 
 // ignore: must_be_immutable
@@ -1286,4 +1333,27 @@ class TestTickerProvider extends TickerProvider {
   Ticker createTicker(TickerCallback onTick) {
     return Ticker(onTick);
   }
+}
+
+class MockAccessibilityFeature implements AccessibilityFeatures {
+  @override
+  bool get switchControl => true;
+
+  @override
+  bool get accessibleNavigation => true;
+
+  @override
+  bool get boldText => false;
+
+  @override
+  bool get disableAnimations => false;
+
+  @override
+  bool get highContrast => false;
+
+  @override
+  bool get invertColors => false;
+
+  @override
+  bool get reduceMotion => false;
 }
