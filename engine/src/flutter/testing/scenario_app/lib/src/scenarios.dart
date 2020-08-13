@@ -6,6 +6,7 @@
 import 'dart:ui';
 
 import 'animated_color_square.dart';
+import 'initial_route_reply.dart';
 import 'locale_initialization.dart';
 import 'platform_view.dart';
 import 'poppable_screen.dart';
@@ -41,6 +42,7 @@ Map<String, ScenarioFactory> _scenarios = <String, ScenarioFactory>{
   'platform_view_gesture_reject_after_touches_ended': () => PlatformViewForTouchIOSScenario(window, 'platform view touch', id: _viewId++, accept: false, rejectUntilTouchesEnded: true),
   'tap_status_bar': () => TouchesScenario(window),
   'text_semantics_focus': () => SendTextFocusScemantics(window),
+  'initial_route_reply': () => InitialRouteReply(window),
 };
 
 Map<String, dynamic> _currentScenarioParams = <String, dynamic>{};

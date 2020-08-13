@@ -11,7 +11,7 @@
   NSAssert([scenario length] != 0, @"You need to provide a scenario");
   self = [self initWithName:[NSString stringWithFormat:@"Test engine for %@", scenario]
                     project:nil];
-  [self runWithEntrypoint:nil];
+  [self run];
 
   [self.binaryMessenger setMessageHandlerOnChannel:@"waiting_for_status"
                               binaryMessageHandler:^(NSData* message, FlutterBinaryReply reply) {

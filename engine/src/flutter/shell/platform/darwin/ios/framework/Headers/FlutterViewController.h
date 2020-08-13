@@ -55,7 +55,7 @@ FLUTTER_EXPORT
  *
  * The initialized viewcontroller will attach itself to the engine as part of this process.
  *
- * @param engine The `FlutterEngine` instance to attach to.
+ * @param engine The `FlutterEngine` instance to attach to. Cannot be nil.
  * @param nibName The NIB name to initialize this UIViewController with.
  * @param nibBundle The NIB bundle.
  */
@@ -75,6 +75,23 @@ FLUTTER_EXPORT
  * @param nibBundle The NIB bundle.
  */
 - (instancetype)initWithProject:(nullable FlutterDartProject*)project
+                        nibName:(nullable NSString*)nibName
+                         bundle:(nullable NSBundle*)nibBundle NS_DESIGNATED_INITIALIZER;
+
+/**
+ * Initializes a new FlutterViewController and `FlutterEngine` with the specified
+ * `FlutterDartProject` and `initialRoute`.
+ *
+ * This will implicitly create a new `FlutterEngine` which is retrievable via the `engine` property
+ * after initialization.
+ *
+ * @param project The `FlutterDartProject` to initialize the `FlutterEngine` with.
+ * @param initialRoute The initial `Navigator` route to load.
+ * @param nibName The NIB name to initialize this UIViewController with.
+ * @param nibBundle The NIB bundle.
+ */
+- (instancetype)initWithProject:(nullable FlutterDartProject*)project
+                   initialRoute:(nullable NSString*)initialRoute
                         nibName:(nullable NSString*)nibName
                          bundle:(nullable NSBundle*)nibBundle NS_DESIGNATED_INITIALIZER;
 
@@ -117,6 +134,8 @@ FLUTTER_EXPORT
 - (NSString*)lookupKeyForAsset:(NSString*)asset fromPackage:(NSString*)package;
 
 /**
+ * Deprecated API to set initial route.
+ *
  * Attempts to set the first route that the Flutter app shows if the Flutter
  * runtime hasn't yet started. The default is "/".
  *
@@ -127,9 +146,15 @@ FLUTTER_EXPORT
  * Setting this after the Flutter started running has no effect. See `pushRoute`
  * and `popRoute` to change the route after Flutter started running.
  *
+ * This is deprecated because it needs to be called at the time of initialization
+ * and thus should just be in the `initWithProject` initializer. If using
+ * `initWithEngine`, the initial route should be set on the engine's
+ * initializer.
+ *
  * @param route The name of the first route to show.
  */
-- (void)setInitialRoute:(NSString*)route;
+- (void)setInitialRoute:(NSString*)route
+    FLUTTER_DEPRECATED("Use FlutterViewController initializer to specify initial route");
 
 /**
  * Instructs the Flutter Navigator (if any) to go back.
@@ -138,8 +163,7 @@ FLUTTER_EXPORT
 
 /**
  * Instructs the Flutter Navigator (if any) to push a route on to the navigation
- * stack.  The setInitialRoute method should be preferred if this is called before the
- * FlutterViewController has come into view.
+ * stack.
  *
  * @param route The name of the route to push to the navigation stack.
  */

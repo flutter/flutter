@@ -13,7 +13,9 @@
 FLUTTER_ASSERT_ARC
 
 @interface FlutterEngine ()
-- (BOOL)createShell:(NSString*)entrypoint libraryURI:(NSString*)libraryURI;
+- (BOOL)createShell:(NSString*)entrypoint
+         libraryURI:(NSString*)libraryURI
+       initialRoute:(NSString*)initialRoute;
 @end
 
 @interface FlutterEngine (TestLowMemory)
@@ -513,7 +515,7 @@ typedef enum UIAccessibilityContrast : NSInteger {
 - (void)testDoesntLoadViewInInit {
   FlutterDartProject* project = [[FlutterDartProject alloc] init];
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
-  [engine createShell:@"" libraryURI:@""];
+  [engine createShell:@"" libraryURI:@"" initialRoute:nil];
   FlutterViewController* realVC = [[FlutterViewController alloc] initWithEngine:engine
                                                                         nibName:nil
                                                                          bundle:nil];
@@ -523,7 +525,7 @@ typedef enum UIAccessibilityContrast : NSInteger {
 - (void)testHideOverlay {
   FlutterDartProject* project = [[FlutterDartProject alloc] init];
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
-  [engine createShell:@"" libraryURI:@""];
+  [engine createShell:@"" libraryURI:@"" initialRoute:nil];
   FlutterViewController* realVC = [[FlutterViewController alloc] initWithEngine:engine
                                                                         nibName:nil
                                                                          bundle:nil];

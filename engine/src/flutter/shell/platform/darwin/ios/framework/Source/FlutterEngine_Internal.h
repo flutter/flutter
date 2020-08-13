@@ -43,7 +43,9 @@
 - (flutter::FlutterPlatformViewsController*)platformViewsController;
 - (FlutterTextInputPlugin*)textInputPlugin;
 - (void)launchEngine:(NSString*)entrypoint libraryURI:(NSString*)libraryOrNil;
-- (BOOL)createShell:(NSString*)entrypoint libraryURI:(NSString*)libraryOrNil;
+- (BOOL)createShell:(NSString*)entrypoint
+         libraryURI:(NSString*)libraryOrNil
+       initialRoute:(NSString*)initialRoute;
 - (void)attachView;
 - (void)notifyLowMemory;
 - (flutter::PlatformViewIOS*)iosPlatformView;
