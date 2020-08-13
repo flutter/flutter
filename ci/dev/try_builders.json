@@ -2,55 +2,68 @@
    "builders":[
       {
          "name":"Linux Host Engine",
-         "repo":"engine"
+         "repo":"engine",
+         "enabled": true
       },
       {
          "name":"Linux Fuchsia",
-         "repo":"engine"
+         "repo":"engine",
+         "enabled": true
       },
       {
          "name":"Linux Android AOT Engine",
-         "repo":"engine"
+         "repo":"engine",
+         "enabled": true
       },
       {
          "name":"Linux Android Debug Engine",
-         "repo":"engine"
+         "repo":"engine",
+         "enabled": true
       },
       {
          "name":"Linux Web Engine",
-         "repo":"engine"
+         "repo":"engine",
+         "enabled": true
       },
       {
          "name":"Mac Host Engine",
-         "repo":"engine"
+         "repo":"engine",
+         "enabled": true
       },
       {
          "name":"Mac Android AOT Engine",
-         "repo":"engine"
+         "repo":"engine",
+         "enabled": true
       },
       {
          "name":"Mac Android Debug Engine",
-         "repo":"engine"
+         "repo":"engine",
+         "enabled": true
       },
       {
          "name":"Mac iOS Engine",
-         "repo":"engine"
+         "repo":"engine",
+         "enabled": true
       },
       {
          "name":"Windows Host Engine",
-         "repo":"engine"
+         "repo":"engine",
+         "enabled": true
       },
       {
          "name":"Windows Android AOT Engine",
-         "repo":"engine"
+         "repo":"engine",
+         "enabled": true
       },
       {
          "name":"Windows Web Engine",
-         "repo":"engine"
+         "repo":"engine",
+         "enabled": true
       },
       {
          "name":"Mac Web Engine",
-         "repo":"engine"
+         "repo":"engine",
+         "enabled": true
       }
    ]
 }
