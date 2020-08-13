@@ -11,7 +11,7 @@ class LayerTree {
   Layer? rootLayer;
 
   /// The size (in physical pixels) of the frame to paint this layer tree into.
-  final ui.Size frameSize = _computeFrameSize();
+  final ui.Size frameSize = ui.window.physicalSize;
 
   /// The devicePixelRatio of the frame to paint this layer tree into.
   double? devicePixelRatio;
@@ -52,14 +52,6 @@ class LayerTree {
       rootLayer!.paint(context);
     }
   }
-}
-
-ui.Size _computeFrameSize() {
-  final ui.Size physicalSize = ui.window.physicalSize;
-  return ui.Size(
-    physicalSize.width.truncate().toDouble(),
-    physicalSize.height.truncate().toDouble(),
-  );
 }
 
 /// A single frame to be rendered.
