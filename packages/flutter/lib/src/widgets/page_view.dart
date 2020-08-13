@@ -587,7 +587,9 @@ class PageView extends StatefulWidget {
     this.dragStartBehavior = DragStartBehavior.start,
     this.allowImplicitScrolling = false,
     this.restorationId,
+    this.clipBehavior = Clip.hardEdge,
   }) : assert(allowImplicitScrolling != null),
+       assert(clipBehavior != null),
        controller = controller ?? _defaultPageController,
        childrenDelegate = SliverChildListDelegate(children),
        super(key: key);
@@ -623,7 +625,9 @@ class PageView extends StatefulWidget {
     this.dragStartBehavior = DragStartBehavior.start,
     this.allowImplicitScrolling = false,
     this.restorationId,
+    this.clipBehavior = Clip.hardEdge,
   }) : assert(allowImplicitScrolling != null),
+       assert(clipBehavior != null),
        controller = controller ?? _defaultPageController,
        childrenDelegate = SliverChildBuilderDelegate(itemBuilder, childCount: itemCount),
        super(key: key);
@@ -722,8 +726,10 @@ class PageView extends StatefulWidget {
     this.dragStartBehavior = DragStartBehavior.start,
     this.allowImplicitScrolling = false,
     this.restorationId,
+    this.clipBehavior = Clip.hardEdge,
   }) : assert(childrenDelegate != null),
        assert(allowImplicitScrolling != null),
+       assert(clipBehavior != null),
        controller = controller ?? _defaultPageController,
        super(key: key);
 
@@ -794,6 +800,11 @@ class PageView extends StatefulWidget {
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.hardEdge].
+  final Clip clipBehavior;
+
   @override
   _PageViewState createState() => _PageViewState();
 }
@@ -856,6 +867,7 @@ class _PageViewState extends State<PageView> {
             cacheExtentStyle: CacheExtentStyle.viewport,
             axisDirection: axisDirection,
             offset: position,
+            clipBehavior: widget.clipBehavior,
             slivers: <Widget>[
               SliverFillViewport(
                 viewportFraction: widget.controller.viewportFraction,

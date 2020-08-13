@@ -769,6 +769,16 @@ tasks:
     required_agent_capabilities: ["linux/android"]
     flaky: true
 
+  flutter_gallery__transition_perf_hybrid:
+    description: >
+      Measures the performance of screen transitions in Flutter Gallery on
+      Android where the page transitions are self-driven on device without host
+      interventions, but the timeline events are still sent to host to be
+      processed.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
+
   flutter_gallery_sksl_warmup__transition_perf:
     description: >
       Measures the runtime performance of Flutter gallery transitions on Android
