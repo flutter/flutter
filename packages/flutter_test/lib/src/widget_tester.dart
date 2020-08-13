@@ -296,13 +296,13 @@ class TargetPlatformVariant extends TestVariant<TargetPlatform> {
 ///   value3,
 /// }
 ///
-/// final ValueVariant<TestScenario> testVariants = ValueVariant<TestScenario>(
+/// final ValueVariant<TestScenario> variants = ValueVariant<TestScenario>(
 ///   <TestScenario>{value1, value2},
 /// );
 ///
 /// testWidgets('Test handling of TestScenario', (WidgetTester tester) {
-///   expect(testVariants.currentValue, equals(value1));
-/// });
+///   expect(variants.currentValue, equals(value1));
+/// }, variant: variants);
 /// ```
 /// {@end-tool}
 class ValueVariant<T> extends TestVariant<T> {

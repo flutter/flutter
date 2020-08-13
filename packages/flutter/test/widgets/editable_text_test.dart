@@ -1336,16 +1336,15 @@ void main() {
     expect(changedValue, clipboardContent);
   });
 
-  // The variants to test in the next test.
-  final ValueVariant<TextInputAction> focusVariants = ValueVariant<TextInputAction>(
+  // The variants to test in the focus handling test.
+  final ValueVariant<TextInputAction> focusVariants = ValueVariant<
+      TextInputAction>(
     TextInputAction.values.toSet(),
   );
 
-  testWidgets('Handles focus correctly when action is invoked',
-      (WidgetTester tester) async {
+  testWidgets('Handles focus correctly when action is invoked', (WidgetTester tester) async {
     // The expectations for each of the types of TextInputAction.
-    const Map<TextInputAction, bool> actionShouldLoseFocus =
-    <TextInputAction, bool>{
+    const Map<TextInputAction, bool> actionShouldLoseFocus = <TextInputAction, bool>{
       TextInputAction.none: false,
       TextInputAction.unspecified: false,
       TextInputAction.done: true,
@@ -1384,9 +1383,7 @@ void main() {
               backgroundCursorColor: Colors.grey,
               controller: TextEditingController(),
               focusNode: focusNode,
-              style: Typography.material2018(platform: TargetPlatform.android)
-                  .black
-                  .subtitle1,
+              style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
               cursorColor: Colors.blue,
               selectionControls: materialTextSelectionControls,
               keyboardType: TextInputType.text,
