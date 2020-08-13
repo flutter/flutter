@@ -342,7 +342,7 @@ abstract class Gradient {
 ///        gradient: LinearGradient(
 ///          begin: Alignment.topLeft,
 ///          end: Alignment(0.8, 0.0), // 10% of the width, so there are ten blinds.
-///          colors: [const Color(0xffee0000), const Color(0xffeeee00)],
+///          colors: [const Color(0xffee0000), const Color(0xffeeee00)], // red to yellow
 ///          tileMode: TileMode.repeated, // repeats the gradient over the canvas
 ///        ),
 ///      ),
