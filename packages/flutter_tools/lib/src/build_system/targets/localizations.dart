@@ -193,7 +193,7 @@ class LocalizationOptions {
   final String outputClass;
 
   /// The `--preferred-supported-locales` argument.
-  final String preferredSupportedLocales;
+  final List<String> preferredSupportedLocales;
 
   /// The `--header-file` argument.
   ///
@@ -240,7 +240,7 @@ LocalizationOptions parseLocalizationsOptions({
     untranslatedMessagesFile: _tryReadUri(yamlMap, 'untranslated-messages-file', logger),
     header: _tryReadString(yamlMap, 'header', logger),
     outputClass: _tryReadString(yamlMap, 'output-class', logger),
-    preferredSupportedLocales: _tryReadString(yamlMap, 'preferred-supported-locales', logger),
+    preferredSupportedLocales: _tryReadStringList(yamlMap, 'preferred-supported-locales', logger),
     headerFile: _tryReadUri(yamlMap, 'header-file', logger),
     deferredLoading: _tryReadBool(yamlMap, 'use-deferred-loading', logger),
     useSyntheticPackage: _tryReadBool(yamlMap, 'synthetic-package', logger) ?? true,
@@ -271,6 +271,21 @@ String _tryReadString(YamlMap yamlMap, String key, Logger logger) {
     throw Exception();
   }
   return value as String;
+}
+
+List<String> _tryReadStringList(YamlMap yamlMap, String key, Logger logger) {
+  final Object value = yamlMap[key];
+  if (value == null) {
+    return null;
+  }
+  if (value is String) {
+    return <String>[value];
+  }
+  if (value is Iterable) {
+    return value.map((dynamic e) => e.toString()).toList();
+  }
+  logger.printError('"$value" must be String or List.');
+  throw Exception();
 }
 
 // Try to read a valid `Uri` or null from `yamlMap`, otherwise throw.

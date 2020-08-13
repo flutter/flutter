@@ -35,7 +35,7 @@ void main() {
       deferredLoading: true,
       outputClass: 'Foo',
       outputLocalizationsFile: Uri.file('bar'),
-      preferredSupportedLocales: 'en_US',
+      preferredSupportedLocales: <String>['en_US'],
       templateArbFile: Uri.file('example.arb'),
       untranslatedMessagesFile: Uri.file('untranslated'),
       useSyntheticPackage: false,
@@ -161,13 +161,28 @@ preferred-supported-locales: en_US
     expect(options.headerFile, Uri.parse('header'));
     expect(options.header, 'HEADER');
     expect(options.deferredLoading, true);
-    expect(options.preferredSupportedLocales, 'en_US');
+    expect(options.preferredSupportedLocales, <String>['en_US']);
   });
 
-  testWithoutContext('parseLocalizationsOptions throws exception on invalid yaml configuration', () async {
+  testWithoutContext('parseLocalizationsOptions handles preferredSupportedLocales as list', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final File configFile = fileSystem.file('l10n.yaml')
-      ..writeAsStringSync('''
+    final File configFile = fileSystem.file('l10n.yaml')..writeAsStringSync('''
+preferred-supported-locales: ['en_US', 'de']
+''');
+
+    final LocalizationOptions options = parseLocalizationsOptions(
+      file: configFile,
+      logger: BufferLogger.test(),
+    );
+
+    expect(options.preferredSupportedLocales, <String>['en_US', 'de']);
+  });
+
+  testWithoutContext(
+      'parseLocalizationsOptions throws exception on invalid yaml configuration',
+      () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final File configFile = fileSystem.file('l10n.yaml')..writeAsStringSync('''
 use-deferred-loading: string
 ''');
 
