@@ -38,7 +38,6 @@ Future<void> generateLocalizations({
     'gen_l10n.dart',
   );
 
-<<<<<<< HEAD
   // If generating a synthetic package, generate a warning if
   // flutter: generate is not set.
   final FlutterProject flutterProject = FlutterProject.fromDirectory(projectDir);
@@ -54,8 +53,6 @@ Future<void> generateLocalizations({
     throw Exception();
   }
 
-=======
->>>>>>> 4aa2869636f3bb2f008c5cdd175c9ca19068ecef
   final ProcessResult result = await processManager.run(<String>[
     dartBinaryPath,
     '--disable-dart-dev',
