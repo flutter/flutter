@@ -60,11 +60,6 @@ void main() {
     fileSystem
       .file(artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug))
       .createSync(recursive: true);
-    // finalsz Directory hostDirectory = fileSystem.currentDirectory
-    //   .childDirectory(getNameForHostPlatform(getCurrentHostPlatform()))
-    //   ..createSync(recursive: true);
-    // hostDirectory.childFile('vm_isolate_snapshot.bin').createSync();
-    // hostDirectory.childFile('isolate_snapshot.bin').createSync();
 
     await const DebugAndroidApplication().build(environment);
 
