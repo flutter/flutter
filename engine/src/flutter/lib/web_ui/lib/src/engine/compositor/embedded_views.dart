@@ -49,7 +49,7 @@ class HtmlViewEmbedder {
   Map<int, int> _clipCount = <int, int>{};
 
   /// The size of the frame, in physical pixels.
-  ui.Size _frameSize = _computeFrameSize();
+  ui.Size _frameSize = ui.window.physicalSize;
 
   void set frameSize(ui.Size size) {
     if (_frameSize == size) {

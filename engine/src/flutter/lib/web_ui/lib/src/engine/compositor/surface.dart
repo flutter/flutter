@@ -89,22 +89,20 @@ class Surface {
     _addedToScene = true;
   }
 
+  ui.Size? _currentSize;
+
   void _createOrUpdateSurfaces(ui.Size size) {
     if (size.isEmpty) {
       throw CanvasKitError('Cannot create surfaces of empty size.');
     }
 
-    final CkSurface? currentSurface = _surface;
-    if (currentSurface != null) {
-      final bool isSameSize = size.width == currentSurface.width() &&
-          size.height == currentSurface.height();
-      if (isSameSize) {
-        // The existing surface is still reusable.
-        return;
-      }
+    if (size == _currentSize) {
+      // The existing surface is still reusable.
+      return;
     }
 
-    currentSurface?.dispose();
+    _currentSize = size;
+    _surface?.dispose();
     _surface = null;
     htmlElement?.remove();
     htmlElement = null;
@@ -113,14 +111,28 @@ class Surface {
     _surface = _wrapHtmlCanvas(size);
   }
 
-  CkSurface _wrapHtmlCanvas(ui.Size size) {
-    final ui.Size logicalSize = size / ui.window.devicePixelRatio;
+  CkSurface _wrapHtmlCanvas(ui.Size physicalSize) {
+    // If `physicalSize` is not precise, use a slightly bigger canvas. This way
+    // we ensure that the rendred picture covers the entire browser window.
+    final int pixelWidth = physicalSize.width.ceil();
+    final int pixelHeight = physicalSize.height.ceil();
     final html.CanvasElement htmlCanvas = html.CanvasElement(
-        width: size.width.ceil(), height: size.height.ceil());
+      width: pixelWidth,
+      height: pixelHeight,
+    );
+
+    // The logical size of the canvas is not based on the size of the window
+    // but on the size of the canvas, which, due to `ceil()` above, may not be
+    // the same as the window. We do not round/floor/ceil the logical size as
+    // CSS pixels can contain more than one physical pixel and therefore to
+    // match the size of the window precisely we use the most precise floating
+    // point value we can get.
+    final double logicalWidth = pixelWidth / ui.window.devicePixelRatio;
+    final double logicalHeight = pixelHeight / ui.window.devicePixelRatio;
     htmlCanvas.style
       ..position = 'absolute'
-      ..width = '${logicalSize.width.ceil()}px'
-      ..height = '${logicalSize.height.ceil()}px';
+      ..width = '${logicalWidth}px'
+      ..height = '${logicalHeight}px';
 
     htmlElement = htmlCanvas;
     if (webGLVersion == -1 || canvasKitForceCpuOnly) {
@@ -153,8 +165,8 @@ class Surface {
 
       SkSurface? skSurface = canvasKit.MakeOnScreenGLSurface(
         _grContext!,
-        size.width,
-        size.height,
+        pixelWidth,
+        pixelHeight,
         SkColorSpaceSRGB,
       );
 
