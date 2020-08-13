@@ -205,8 +205,10 @@ void main() {
     });
 
     testUsingContext('get generates synthetic packages when generate:true', () async {
-      final String projectPath = await createProject(tempDir,
-        arguments: <String>['--no-pub', '--template=module']);
+      final String projectPath = await createProject(
+        tempDir,
+        arguments: <String>['--no-pub', '--template=module'],
+      );
       removeGeneratedFiles(projectPath);
 
       // Add generate:true to pubspec.yaml
@@ -233,14 +235,8 @@ void main() {
     "@helloWorld": {}
 }
 ''');
-      // print(l10nDirectory.path);
-      // print(l10nDirectory.listSync());
 
-      // TODO(shihaohong): fix implementation of gen_l10n or fix this test.
-      // when running the test, the "local directory" is {FLUTTER}/packages/flutter_tools
-      // this causes the gen_l10n tool to fail because it attempts to look for
-      // all its files (ie lib/l10n/*.arb) relative to flutter_tools instead
-      // of the Flutter project
+      // Running pub/packages get should generate gen_l10n synthetic package.
       await runCommandIn(projectPath, 'get');
 
       final Directory syntheticGenL10nPackage = globals.fs.directory(
@@ -252,20 +248,10 @@ void main() {
         ),
       );
 
-      final Directory dartToolDir = globals.fs.directory(
-        globals.fs.path.join(
-          projectPath,
-          '.dart_tool',
-        )
-      );
-
-      print('----check validity----');
-      print(dartToolDir.existsSync());
-      print(dartToolDir.listSync());
-      print(dartToolDir.childDirectory('flutter_gen').existsSync());
-      print(syntheticGenL10nPackage.existsSync());
-
-      // expect that synthetic package is built
+      // Synthetic package should exist, as well as generated Dart files.
+      expect(syntheticGenL10nPackage.existsSync(), true);
+      expect(syntheticGenL10nPackage.childFile('app_localizations.dart').existsSync(), true);
+      expect(syntheticGenL10nPackage.childFile('app_localizations_en.dart').existsSync(), true);
     }, overrides: <Type, Generator>{
       Pub: () => Pub(
         fileSystem: globals.fs,
