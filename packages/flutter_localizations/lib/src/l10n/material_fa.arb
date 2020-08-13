@@ -71,14 +71,14 @@
   "dateRangePickerHelpText": "انتخاب محدوده",
   "calendarModeButtonLabel": "رفتن به تقویم",
   "inputDateModeButtonLabel": "رفتن به ورودی",
-  "timePickerDialHelpText": "SELECT TIME",
-  "timePickerInputHelpText": "ENTER TIME",
-  "timePickerHourLabel": "Hour",
-  "timePickerMinuteLabel": "Minute",
-  "invalidTimeLabel": "Enter a valid time",
-  "dialModeButtonLabel": "Switch to dial picker mode",
-  "inputTimeModeButtonLabel": "Switch to text input mode",
+  "timePickerDialHelpText": "انتخاب زمان",
+  "timePickerInputHelpText": "زمان را وارد کنید",
+  "timePickerHourLabel": "ساعت",
+  "timePickerMinuteLabel": "دقیقه",
+  "invalidTimeLabel": "زمان معتبری وارد کنید",
+  "dialModeButtonLabel": "رفتن به حالت انتخابگر صفحه ساعت",
+  "inputTimeModeButtonLabel": "رفتن به حالت ورودی نوشتاری",
   "licensesPackageDetailTextZero": "No licenses",
-  "licensesPackageDetailTextOne": "1 license",
-  "licensesPackageDetailTextOther": "$licenseCount licenses"
+  "licensesPackageDetailTextOne": "۱ پروانه",
+  "licensesPackageDetailTextOther": "$licenseCount پروانه"
 }
