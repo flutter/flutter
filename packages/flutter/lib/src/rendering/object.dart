@@ -1674,6 +1674,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// implemented here) to return early if the child does not need to do any
   /// work to update its layout information.
   void layout(Constraints constraints, { bool parentUsesSize = false }) {
+    if (!kReleaseMode && debugProfileLayoutsEnabled)
+      Timeline.startSync('$runtimeType',  arguments: timelineArgumentsIndicatingLandmarkEvent);
+
     assert(constraints != null);
     assert(constraints.debugAssertIsValid(
       isAppliedConstraint: true,
@@ -1727,6 +1730,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         _debugDoingThisResize = false;
         return true;
       }());
+
+      if (!kReleaseMode && debugProfileLayoutsEnabled)
+        Timeline.finishSync();
       return;
     }
     _constraints = constraints;
@@ -1789,6 +1795,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     }());
     _needsLayout = false;
     markNeedsPaint();
+
+    if (!kReleaseMode && debugProfileLayoutsEnabled)
+      Timeline.finishSync();
   }
 
   /// If a subclass has a "size" (the state controlled by `parentUsesSize`,
