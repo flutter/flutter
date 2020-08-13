@@ -911,8 +911,9 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
 
     final RestorationBucket oldBucket = _bucket;
     assert(!restorePending);
-    _updateBucketIfNecessary(parent: _currentParent, restorePending: false);
-    if (oldBucket != _bucket) {
+    final bool didReplaceBucket = _updateBucketIfNecessary(parent: _currentParent, restorePending: false);
+    if (didReplaceBucket) {
+      assert(oldBucket != _bucket);
       assert(_bucket == null || oldBucket == null);
       oldBucket?.dispose();
     }
@@ -961,12 +962,13 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
     final bool needsRestore = restorePending;
     _currentParent = RestorationScope.of(context);
 
-    _updateBucketIfNecessary(parent: _currentParent, restorePending: needsRestore);
+    final bool didReplaceBucket = _updateBucketIfNecessary(parent: _currentParent, restorePending: needsRestore);
 
     if (needsRestore) {
       _doRestore(oldBucket);
     }
-    if (oldBucket != _bucket) {
+    if (didReplaceBucket) {
+      assert(oldBucket != _bucket);
       oldBucket?.dispose();
     }
   }
@@ -1000,34 +1002,39 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
     }());
   }
 
-  void _updateBucketIfNecessary({
+  // Returns true if `bucket` has been replaced with a new bucket. It's the
+  // responsibility of the caller to dispose the old bucket when this returns true.
+  bool _updateBucketIfNecessary({
     @required RestorationBucket parent,
     @required bool restorePending,
   }) {
     if (restorationId == null || parent == null) {
-      _setNewBucketIfNecessary(newBucket: null, restorePending: restorePending);
+      final bool didReplace = _setNewBucketIfNecessary(newBucket: null, restorePending: restorePending);
       assert(_bucket == null);
-      return;
+      return didReplace;
     }
     assert(restorationId != null);
     assert(parent != null);
     if (restorePending || _bucket == null) {
       final RestorationBucket newBucket = parent.claimChild(restorationId, debugOwner: this);
       assert(newBucket != null);
-      _setNewBucketIfNecessary(newBucket: newBucket, restorePending: restorePending);
+      final bool didReplace = _setNewBucketIfNecessary(newBucket: newBucket, restorePending: restorePending);
       assert(_bucket == newBucket);
-      return;
+      return didReplace;
     }
     // We have an existing bucket, make sure it has the right parent and id.
     assert(_bucket != null);
     assert(!restorePending);
     _bucket.rename(restorationId);
     parent.adoptChild(_bucket);
+    return false;
   }
 
-  void _setNewBucketIfNecessary({@required RestorationBucket newBucket, @required bool restorePending}) {
+  // Returns true if `bucket` has been replaced with a new bucket. It's the
+  // responsibility of the caller to dispose the old bucket when this returns true.
+  bool _setNewBucketIfNecessary({@required RestorationBucket newBucket, @required bool restorePending}) {
     if (newBucket == _bucket) {
-      return;
+      return false;
     }
     final RestorationBucket oldBucket = _bucket;
     _bucket = newBucket;
@@ -1038,6 +1045,7 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
       }
       didToggleBucket(oldBucket);
     }
+    return true;
   }
 
   void _updateProperty(RestorableProperty<Object> property) {
