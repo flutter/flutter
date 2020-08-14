@@ -195,11 +195,11 @@ class PageStorageBucket {
 ///         items: <BottomNavigationBarItem>[
 ///           BottomNavigationBarItem(
 ///             icon: Icon(Icons.home),
-///             title: Text('page 1'),
+///             label: 'page 1',
 ///           ),
 ///           BottomNavigationBarItem(
 ///             icon: Icon(Icons.settings),
-///             title: Text('page2'),
+///             label: 'page2',
 ///           ),
 ///         ],
 ///       ),

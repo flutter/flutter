@@ -577,6 +577,43 @@ void main() {
       }
   });
 
+   testWidgets(
+    'WidgetTester.timedDrag must respect buttons',
+    (WidgetTester tester) async {
+      final List<String> logs = <String>[];
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Listener(
+            onPointerDown: (PointerDownEvent event) => logs.add('down ${event.buttons}'),
+            onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
+            onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
+            child: const Text('test'),
+          ),
+        ),
+      );
+
+      await tester.timedDrag(
+        find.text('test'),
+        const Offset(-200.0, 0.0),
+        const Duration(seconds: 1),
+        buttons: kSecondaryMouseButton,
+      );
+      await tester.pumpAndSettle();
+
+      const String b = '$kSecondaryMouseButton';
+      for(int i = 0; i < logs.length; i++) {
+        if (i == 0)
+          expect(logs[i], 'down $b');
+        else if (i != logs.length - 1)
+          expect(logs[i], 'move $b');
+        else
+          expect(logs[i], 'up 0');
+      }
+    },
+  );
+
   testWidgets(
     'ensureVisible: scrolls to make widget visible',
     (WidgetTester tester) async {

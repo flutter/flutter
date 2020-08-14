@@ -190,6 +190,13 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  picture_cache_perf__e2e_summary:
+    description: >
+      Measures the runtime performance of raster caching many pictures on Android.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
+
   cubic_bezier_perf__timeline_summary:
     description: >
       Measures the runtime performance of cubic bezier animations on Android.
@@ -758,6 +765,16 @@ tasks:
     description: >
       Measures the performance of screen transitions in Flutter Gallery on
       Android with e2e.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
+
+  flutter_gallery__transition_perf_hybrid:
+    description: >
+      Measures the performance of screen transitions in Flutter Gallery on
+      Android where the page transitions are self-driven on device without host
+      interventions, but the timeline events are still sent to host to be
+      processed.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
     flaky: true

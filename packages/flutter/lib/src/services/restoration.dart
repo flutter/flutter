@@ -55,13 +55,10 @@ typedef _BucketVisitor = void Function(RestorationBucket bucket);
 /// In addition to providing restoration data when the app is launched,
 /// restoration data may also be provided to a running app to restore it to a
 /// previous state (e.g. when the user hits the back/forward button in the web
-/// browser). When this happens, the current bucket hierarchy is decommissioned
-/// and replaced with the hierarchy deserialized from the newly provided
-/// restoration data. Buckets in the old hierarchy notify their listeners when
-/// they get decommissioned. In response to the notification, listeners must
-/// stop using the old buckets. Owners of those buckets must dispose of them and
-/// claim a new child as a replacement from a parent in the new bucket hierarchy
-/// (that parent may be the updated [rootBucket]).
+/// browser). When this happens, the [RestorationManager] notifies its listeners
+/// (added via [addListener]) that a new [rootBucket] is available. In response
+/// to the notification, listeners must stop using the old bucket and restore
+/// their state from the information in the new [rootBucket].
 ///
 /// Same platforms restrict the size of the restoration data. Therefore, the
 /// data stored in the buckets should be as small as possible while still
@@ -147,6 +144,17 @@ class RestorationManager extends ChangeNotifier {
   Completer<RestorationBucket>? _pendingRootBucket;
   bool _rootBucketIsValid = false;
 
+  /// Returns true for the frame after [rootBucket] has been replaced with a
+  /// new non-null bucket.
+  ///
+  /// When true, entities should forget their current state and restore
+  /// their state according to the information in the new [rootBucket].
+  ///
+  /// The [RestorationManager] informs its listeners (added via [addListener])
+  /// when this flag changes from false to true.
+  bool get isReplacing => _isReplacing;
+  bool _isReplacing = false;
+
   Future<void> _getRootBucketFromEngine() async {
     final Map<dynamic, dynamic>? config = await SystemChannels.restoration.invokeMethod<Map<dynamic, dynamic>>('get');
     if (_pendingRootBucket == null) {
@@ -172,10 +180,8 @@ class RestorationManager extends ChangeNotifier {
   /// The `enabled` parameter indicates whether the engine wants to receive
   /// restoration data. When `enabled` is false, state restoration is turned
   /// off and the [rootBucket] is set to null. When `enabled` is true, the
-  /// provided restoration `data` will be parsed into the [rootBucket]. If
+  /// provided restoration `data` will be parsed into a new [rootBucket]. If
   /// `data` is null, an empty [rootBucket] will be instantiated.
-  ///
-  /// When this method is called, the old [rootBucket] is decommissioned.
   ///
   /// Subclasses in test frameworks may call this method at any time to inject
   /// restoration data (obtained e.g. by overriding [sendToEngine]) into the
@@ -185,9 +191,16 @@ class RestorationManager extends ChangeNotifier {
   @protected
   void handleRestorationUpdateFromEngine({required bool enabled, required Uint8List? data}) {
     assert(enabled != null);
+    assert(enabled || data == null);
+
+    _isReplacing = _rootBucketIsValid && enabled;
+    if (_isReplacing) {
+      SchedulerBinding.instance!.addPostFrameCallback((Duration _) {
+        _isReplacing = false;
+      });
+    }
 
     final RestorationBucket? oldRoot = _rootBucket;
-
     _rootBucket = enabled
         ? RestorationBucket.root(manager: this, rawData: _decodeRestorationData(data))
         : null;
@@ -198,11 +211,7 @@ class RestorationManager extends ChangeNotifier {
 
     if (_rootBucket != oldRoot) {
       notifyListeners();
-    }
-    if (oldRoot != null) {
-      oldRoot
-        ..decommission()
-        ..dispose();
+      oldRoot?.dispose();
     }
   }
 
@@ -404,27 +413,13 @@ class RestorationManager extends ChangeNotifier {
 /// stored in the bucket. If the bucket is empty, it may initialize itself to
 /// default values.
 ///
-/// During the lifetime of a bucket, it may notify its listeners that the bucket
-/// has been [decommission]ed. This happens when new restoration data has been
-/// provided to, for example, the [RestorationManager] to restore the
-/// application to a different state (e.g. when the user hits the back/forward
-/// button in the web browser). In response to the notification, owners must
-/// dispose their current bucket and replace it with a new bucket claimed from a
-/// new parent (which will have been initialized with the new restoration data).
-/// For example, if the owner previously claimed its bucket from
-/// [RestorationManager.rootBucket], it must claim its new bucket from there
-/// again. The root bucket will have been replaced with the new root bucket just
-/// before the bucket listeners are informed about the decommission. Once the
-/// new bucket is obtained, owners should restore their internal state according
-/// to the information in the new bucket.
-///
 /// When the data stored in a bucket is no longer needed to restore the
 /// application to its current state (e.g. because the owner of the bucket is no
 /// longer shown on screen), the bucket must be [dispose]d. This will remove all
 /// information stored in the bucket from the app's restoration data and that
 /// information will not be available again when the application is restored to
 /// this state in the future.
-class RestorationBucket extends ChangeNotifier {
+class RestorationBucket {
   /// Creates an empty [RestorationBucket] to be provided to [adoptChild] to add
   /// it to the bucket hierarchy.
   ///
@@ -529,6 +524,16 @@ class RestorationBucket extends ChangeNotifier {
   RestorationManager? _manager;
   RestorationBucket? _parent;
 
+  /// Returns true when entities processing this bucket should restore their
+  /// state from the information in the bucket (e.g. via [read] and
+  /// [claimChild]) instead of copying their current state information into the
+  /// bucket (e.g. via [write] and [adoptChild].
+  ///
+  /// This flag is true for the frame after the [RestorationManager] has been
+  /// instructed to restore the application from newly provided restoration
+  /// data.
+  bool get isReplacing => _manager?.isReplacing ?? false;
+
   /// The restoration ID under which the bucket is currently stored in the
   /// parent of this bucket (or wants to be stored if it is currently
   /// parent-less).
@@ -544,49 +549,6 @@ class RestorationBucket extends ChangeNotifier {
   Map<dynamic, dynamic> get _rawChildren => _rawData.putIfAbsent(_childrenMapKey, () => <dynamic, dynamic>{}) as Map<dynamic, dynamic>;
   // Maps a restoration ID to a value that is stored in this bucket.
   Map<dynamic, dynamic> get _rawValues => _rawData.putIfAbsent(_valuesMapKey, () => <dynamic, dynamic>{}) as Map<dynamic, dynamic>;
-
-  /// Called to signal that this bucket and all its descendants are no longer
-  /// part of the current restoration data and must not be used anymore.
-  ///
-  /// Calling this method will drop this bucket from its parent and notify all
-  /// its listeners as well as all listeners of its descendants. Once a bucket
-  /// has notified its listeners, it must not be used anymore. During the next
-  /// frame following the notification, the bucket must be disposed and replaced
-  /// with a new bucket.
-  ///
-  /// As an example, the [RestorationManager] calls this method on its root
-  /// bucket when it has been asked to restore a running application to a
-  /// different state. At that point, the data stored in the current bucket
-  /// hierarchy is invalid and will be replaced with a new hierarchy generated
-  /// from the restoration data describing the new state. To replace the current
-  /// bucket hierarchy, [decommission] is called on the root bucket to signal to
-  /// all owners of buckets in the hierarchy that their bucket has become
-  /// invalid. In response to the notification, bucket owners must [dispose]
-  /// their buckets and claim a new bucket from the newly created hierarchy. For
-  /// example, the owner of a bucket that was originally claimed from the
-  /// [RestorationManager.rootBucket] must dispose that bucket and claim a new
-  /// bucket from the new [RestorationManager.rootBucket]. Once the new bucket
-  /// is claimed, owners should restore their state according to the data stored
-  /// in the new bucket.
-  void decommission() {
-    assert(_debugAssertNotDisposed());
-    if (_parent != null) {
-      _parent!._dropChild(this);
-      _parent = null;
-    }
-    _performDecommission();
-  }
-
-  bool _decommissioned = false;
-
-  void _performDecommission() {
-    _decommissioned = true;
-    _updateManager(null);
-    notifyListeners();
-    _visitChildren((RestorationBucket bucket) {
-      bucket._performDecommission();
-    });
-  }
 
   // Get and store values.
 
@@ -782,7 +744,6 @@ class RestorationBucket extends ChangeNotifier {
 
   bool _needsSerialization = false;
   void _markNeedsSerialization() {
-    assert(_manager != null || _decommissioned);
     if (!_needsSerialization) {
       _needsSerialization = true;
       _manager?.scheduleSerializationFor(this);
@@ -903,8 +864,8 @@ class RestorationBucket extends ChangeNotifier {
 
   // Bucket management
 
-  /// Changes the restoration ID under which the bucket is stored in its parent
-  /// to `newRestorationId`.
+  /// Changes the restoration ID under which the bucket is (or will be) stored
+  /// in its parent to `newRestorationId`.
   ///
   /// No-op if the bucket is already stored under the provided id.
   ///
@@ -915,13 +876,12 @@ class RestorationBucket extends ChangeNotifier {
   void rename(String newRestorationId) {
     assert(_debugAssertNotDisposed());
     assert(newRestorationId != null);
-    assert(_parent != null);
     if (newRestorationId == restorationId) {
       return;
     }
-    _parent!._removeChildData(this);
+    _parent?._removeChildData(this);
     _restorationId = newRestorationId;
-    _parent!._addChildData(this);
+    _parent?._addChildData(this);
   }
 
   /// Deletes the bucket and all the data stored in it from the bucket
@@ -936,7 +896,6 @@ class RestorationBucket extends ChangeNotifier {
   /// as well.
   ///
   /// This method must only be called by the object's owner.
-  @override
   void dispose() {
     assert(_debugAssertNotDisposed());
     _visitChildren(_dropChild, concurrentModification: true);
@@ -945,7 +904,6 @@ class RestorationBucket extends ChangeNotifier {
     _parent?._removeChildData(this);
     _parent = null;
     _updateManager(null);
-    super.dispose();
     _debugDisposed = true;
   }
 
