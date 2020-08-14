@@ -52,11 +52,10 @@ class LinuxDoctorValidator extends DoctorValidator {
     kPkgConfigBinary: Version(0, 29, 0),
   };
 
-  final List<String> _requiredLibraries = <String>[
+  final List<String> _requiredGtkLibraries = <String>[
     'gtk+-3.0',
     'glib-2.0',
     'gio-2.0',
-    'blkid',
   ];
 
   @override
@@ -136,10 +135,10 @@ class LinuxDoctorValidator extends DoctorValidator {
       }
     }
 
-    // Message for libraries.
+    // Messages for libraries.
     {
       bool libraryMissing = false;
-      for (final String library in _requiredLibraries) {
+      for (final String library in _requiredGtkLibraries) {
         if (!await _libraryIsPresent(library)) {
           libraryMissing = true;
           break;
@@ -149,6 +148,10 @@ class LinuxDoctorValidator extends DoctorValidator {
         validationType = ValidationType.missing;
         messages.add(ValidationMessage.error(_userMessages.gtkLibrariesMissing));
       }
+    }
+    if (!await _libraryIsPresent('blkid')) {
+      validationType = ValidationType.missing;
+      messages.add(ValidationMessage.error(_userMessages.blkidLibraryMissing));
     }
 
     return ValidationResult(validationType, messages);
