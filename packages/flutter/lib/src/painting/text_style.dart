@@ -821,7 +821,6 @@ class TextStyle with Diagnosticable {
     assert(wordSpacing != null || (wordSpacingFactor == 1.0 && wordSpacingDelta == 0.0));
     assert(heightFactor != null);
     assert(heightDelta != null);
-    assert(heightFactor != null || (heightFactor == 1.0 && heightDelta == 0.0));
     assert(decorationThicknessFactor != null);
     assert(decorationThicknessDelta != null);
     assert(decorationThickness != null || (decorationThicknessFactor == 1.0 && decorationThicknessDelta == 0.0));
