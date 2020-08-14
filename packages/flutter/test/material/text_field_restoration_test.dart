@@ -89,7 +89,7 @@ class TestWidgetState extends State<TestWidget> with RestorationMixin {
   String get restorationId => 'widget';
 
   @override
-  void restoreState(RestorationBucket oldBucket) {
+  void restoreState(RestorationBucket oldBucket, bool initialRestore) {
     registerForRestoration(controller, 'controller');
   }
 
