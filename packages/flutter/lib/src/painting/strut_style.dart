@@ -347,7 +347,7 @@ class StrutStyle with Diagnosticable {
   }) : assert(textStyle != null),
        assert(fontSize == null || fontSize > 0),
        assert(leading == null || leading >= 0),
-       assert(package == null || (package != null && (fontFamily != null || fontFamilyFallback != null))),
+       assert(package == null || fontFamily != null || fontFamilyFallback != null),
        fontFamily = fontFamily != null ? (package == null ? fontFamily : 'packages/$package/$fontFamily') : textStyle.fontFamily,
        _fontFamilyFallback = fontFamilyFallback ?? textStyle.fontFamilyFallback,
        height = height ?? textStyle.height,
