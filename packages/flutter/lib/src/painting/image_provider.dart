@@ -401,14 +401,12 @@ abstract class ImageProvider<T extends Object> {
             };
             return true;
           }());
-          if (FlutterError.onError != null) {
-            FlutterError.onError!(FlutterErrorDetails(
-              context: ErrorDescription('while checking the cache location of an image'),
-              informationCollector: collector,
-              exception: exception,
-              stack: stack,
-            ));
-          }
+          FlutterError.reportError(FlutterErrorDetails(
+            context: ErrorDescription('while checking the cache location of an image'),
+            informationCollector: collector,
+            exception: exception,
+            stack: stack,
+          ));
           completer.complete(null);
         }
       },
