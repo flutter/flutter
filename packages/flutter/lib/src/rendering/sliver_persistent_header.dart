@@ -513,7 +513,7 @@ class FloatingHeaderSnapConfiguration {
       'Specify SliverPersistentHeaderDelegate.vsync instead. '
       'This feature was deprecated after v1.19.0.'
     )
-    this.vsync,  // ignore: deprecated_member_use_from_same_package
+    this.vsync,
     this.curve = Curves.ease,
     this.duration = const Duration(milliseconds: 300),
   }) : assert(curve != null),
