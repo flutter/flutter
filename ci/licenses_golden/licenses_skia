@@ -1,4 +1,4 @@
-Signature: 7b1bfab5ba5dbd2285595563ecc50474
+Signature: 5d9decb2e1f684907c8c6c892c32e3df
 
 UNUSED LICENSES:
 
@@ -5257,8 +5257,11 @@ FILE: ../../../third_party/skia/gm/widebuttcaps.cpp
 FILE: ../../../third_party/skia/include/core/SkM44.h
 FILE: ../../../third_party/skia/include/effects/SkStrokeAndFillPathEffect.h
 FILE: ../../../third_party/skia/include/gpu/GrDirectContext.h
-FILE: ../../../third_party/skia/include/ports/SkAudioPlayer.h
 FILE: ../../../third_party/skia/include/private/SkOpts_spi.h
+FILE: ../../../third_party/skia/modules/audioplayer/SkAudioPlayer.cpp
+FILE: ../../../third_party/skia/modules/audioplayer/SkAudioPlayer.h
+FILE: ../../../third_party/skia/modules/audioplayer/SkAudioPlayer_mac.mm
+FILE: ../../../third_party/skia/modules/audioplayer/SkAudioPlayer_none.cpp
 FILE: ../../../third_party/skia/modules/skottie/include/ExternalLayer.h
 FILE: ../../../third_party/skia/modules/skottie/src/Adapter.h
 FILE: ../../../third_party/skia/modules/skottie/src/Camera.cpp
@@ -5343,9 +5346,6 @@ FILE: ../../../third_party/skia/src/gpu/tessellate/GrWangsFormula.h
 FILE: ../../../third_party/skia/src/gpu/text/GrSDFTOptions.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrSDFTOptions.h
 FILE: ../../../third_party/skia/src/opts/SkOpts_skx.cpp
-FILE: ../../../third_party/skia/src/ports/SkAudioPlayer.cpp
-FILE: ../../../third_party/skia/src/ports/SkAudioPlayer_mac.mm
-FILE: ../../../third_party/skia/src/ports/SkAudioPlayer_none.cpp
 FILE: ../../../third_party/skia/src/ports/SkScalerContext_mac_ct.h
 FILE: ../../../third_party/skia/src/ports/SkTypeface_mac_ct.h
 FILE: ../../../third_party/skia/src/utils/mac/SkCGBase.h
