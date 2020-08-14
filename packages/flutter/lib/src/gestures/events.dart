@@ -241,9 +241,7 @@ abstract class PointerEvent with Diagnosticable {
     this.kind = PointerDeviceKind.touch,
     this.device = 0,
     this.position = Offset.zero,
-    Offset? localPosition,
     this.delta = Offset.zero,
-    Offset? localDelta,
     this.buttons = 0,
     this.down = false,
     this.obscured = false,
@@ -263,8 +261,7 @@ abstract class PointerEvent with Diagnosticable {
     this.synthesized = false,
     this.transform,
     this.original,
-  }) : localPosition = localPosition ?? position,
-       localDelta = localDelta ?? delta;
+  });
 
   /// Unique identifier that ties the [PointerEvent] to the embedder event that created it.
   ///
@@ -305,7 +302,7 @@ abstract class PointerEvent with Diagnosticable {
   ///
   ///  * [position], which is the position in the global coordinate system of
   ///    the screen.
-  final Offset localPosition;
+  Offset get localPosition => position;
 
   /// Distance in logical pixels that the pointer moved since the last
   /// [PointerMoveEvent] or [PointerHoverEvent].
@@ -327,7 +324,7 @@ abstract class PointerEvent with Diagnosticable {
   ///
   ///  * [delta], which is the distance the pointer moved in the global
   ///    coordinate system of the screen.
-  final Offset localDelta;
+  Offset get localDelta => delta;
 
   /// Bit field using the *Button constants such as [kPrimaryMouseButton],
   /// [kSecondaryStylusButton], etc.
@@ -517,43 +514,6 @@ abstract class PointerEvent with Diagnosticable {
   /// overridden by the provided `transform`.
   PointerEvent transformed(Matrix4? transform);
 
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Offset>('position', position));
-    properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition, defaultValue: position, level: DiagnosticLevel.debug));
-    properties.add(DiagnosticsProperty<Offset>('delta', delta, defaultValue: Offset.zero, level: DiagnosticLevel.debug));
-    properties.add(DiagnosticsProperty<Offset>('localDelta', localDelta, defaultValue: delta, level: DiagnosticLevel.debug));
-    properties.add(DiagnosticsProperty<Duration>('timeStamp', timeStamp, defaultValue: Duration.zero, level: DiagnosticLevel.debug));
-    properties.add(IntProperty('pointer', pointer, level: DiagnosticLevel.debug));
-    properties.add(EnumProperty<PointerDeviceKind>('kind', kind, level: DiagnosticLevel.debug));
-    properties.add(IntProperty('device', device, defaultValue: 0, level: DiagnosticLevel.debug));
-    properties.add(IntProperty('buttons', buttons, defaultValue: 0, level: DiagnosticLevel.debug));
-    properties.add(DiagnosticsProperty<bool>('down', down, level: DiagnosticLevel.debug));
-    properties.add(DoubleProperty('pressure', pressure, defaultValue: 1.0, level: DiagnosticLevel.debug));
-    properties.add(DoubleProperty('pressureMin', pressureMin, defaultValue: 1.0, level: DiagnosticLevel.debug));
-    properties.add(DoubleProperty('pressureMax', pressureMax, defaultValue: 1.0, level: DiagnosticLevel.debug));
-    properties.add(DoubleProperty('distance', distance, defaultValue: 0.0, level: DiagnosticLevel.debug));
-    properties.add(DoubleProperty('distanceMin', distanceMin, defaultValue: 0.0, level: DiagnosticLevel.debug));
-    properties.add(DoubleProperty('distanceMax', distanceMax, defaultValue: 0.0, level: DiagnosticLevel.debug));
-    properties.add(DoubleProperty('size', size, defaultValue: 0.0, level: DiagnosticLevel.debug));
-    properties.add(DoubleProperty('radiusMajor', radiusMajor, defaultValue: 0.0, level: DiagnosticLevel.debug));
-    properties.add(DoubleProperty('radiusMinor', radiusMinor, defaultValue: 0.0, level: DiagnosticLevel.debug));
-    properties.add(DoubleProperty('radiusMin', radiusMin, defaultValue: 0.0, level: DiagnosticLevel.debug));
-    properties.add(DoubleProperty('radiusMax', radiusMax, defaultValue: 0.0, level: DiagnosticLevel.debug));
-    properties.add(DoubleProperty('orientation', orientation, defaultValue: 0.0, level: DiagnosticLevel.debug));
-    properties.add(DoubleProperty('tilt', tilt, defaultValue: 0.0, level: DiagnosticLevel.debug));
-    properties.add(IntProperty('platformData', platformData, defaultValue: 0, level: DiagnosticLevel.debug));
-    properties.add(FlagProperty('obscured', value: obscured, ifTrue: 'obscured', level: DiagnosticLevel.debug));
-    properties.add(FlagProperty('synthesized', value: synthesized, ifTrue: 'synthesized', level: DiagnosticLevel.debug));
-    properties.add(IntProperty('embedderId', embedderId, defaultValue: 0, level: DiagnosticLevel.debug));
-  }
-
-  /// Returns a complete textual description of this event.
-  String toStringFull() {
-    return toString(minLevel: DiagnosticLevel.fine);
-  }
-
   /// Returns the transformation of `position` into the coordinate system
   /// described by `transform`.
   ///
@@ -610,11 +570,165 @@ abstract class PointerEvent with Diagnosticable {
   }
 }
 
+mixin PointerEventDescription on PointerEvent {
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('position', position));
+    properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition, defaultValue: position, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<Offset>('delta', delta, defaultValue: Offset.zero, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<Offset>('localDelta', localDelta, defaultValue: delta, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<Duration>('timeStamp', timeStamp, defaultValue: Duration.zero, level: DiagnosticLevel.debug));
+    properties.add(IntProperty('pointer', pointer, level: DiagnosticLevel.debug));
+    properties.add(EnumProperty<PointerDeviceKind>('kind', kind, level: DiagnosticLevel.debug));
+    properties.add(IntProperty('device', device, defaultValue: 0, level: DiagnosticLevel.debug));
+    properties.add(IntProperty('buttons', buttons, defaultValue: 0, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<bool>('down', down, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('pressure', pressure, defaultValue: 1.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('pressureMin', pressureMin, defaultValue: 1.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('pressureMax', pressureMax, defaultValue: 1.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('distance', distance, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('distanceMin', distanceMin, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('distanceMax', distanceMax, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('size', size, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('radiusMajor', radiusMajor, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('radiusMinor', radiusMinor, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('radiusMin', radiusMin, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('radiusMax', radiusMax, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('orientation', orientation, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('tilt', tilt, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(IntProperty('platformData', platformData, defaultValue: 0, level: DiagnosticLevel.debug));
+    properties.add(FlagProperty('obscured', value: obscured, ifTrue: 'obscured', level: DiagnosticLevel.debug));
+    properties.add(FlagProperty('synthesized', value: synthesized, ifTrue: 'synthesized', level: DiagnosticLevel.debug));
+    properties.add(IntProperty('embedderId', embedderId, defaultValue: 0, level: DiagnosticLevel.debug));
+  }
+
+  /// Returns a complete textual description of this event.
+  String toStringFull() {
+    return toString(minLevel: DiagnosticLevel.fine);
+  }
+}
+
+abstract class _AbstractPointerEvent implements PointerEvent {}
+
+abstract class ProxyPointerEvent extends _AbstractPointerEvent with Diagnosticable, PointerEventDescription {
+
+  @override
+  PointerEvent get original;
+
+  @override
+  Matrix4 get transform;
+
+  @override
+  int get embedderId => original.embedderId;
+
+  @override
+  Duration get timeStamp => original.timeStamp;
+
+  @override
+  int get pointer => original.pointer;
+
+  @override
+  PointerDeviceKind get kind => original.kind;
+
+  @override
+  int get device => original.device;
+
+  @override
+  Offset get position => original.position;
+
+  @override
+  Offset get delta => original.delta;
+
+  @override
+  int get buttons => original.buttons;
+
+  @override
+  bool get down => original.down;
+
+  @override
+  bool get obscured => original.obscured;
+
+  @override
+  double get pressure => original.pressure;
+
+  @override
+  double get pressureMin => original.pressureMin;
+
+  @override
+  double get pressureMax => original.pressureMax;
+
+  @override
+  double get distance => original.distance;
+
+  @override
+  double get distanceMin => 0.0;
+
+  @override
+  double get distanceMax => original.distanceMax;
+
+  @override
+  double get size => original.size;
+
+  @override
+  double get radiusMajor => original.radiusMajor;
+
+  @override
+  double get radiusMinor => original.radiusMinor;
+
+  @override
+  double get radiusMin => original.radiusMin;
+
+  @override
+  double get radiusMax => original.radiusMax;
+
+  @override
+  double get orientation => original.orientation;
+
+  @override
+  double get tilt => original.tilt;
+
+  @override
+  int get platformData => original.platformData;
+
+  @override
+  bool get synthesized => original.synthesized;
+
+  /// The [position] transformed into the event receiver's local coordinate
+  /// system according to [transform].
+  ///
+  /// If this event has not been transformed, [position] is returned as-is.
+  /// See also:
+  ///
+  ///  * [position], which is the position in the global coordinate system of
+  ///    the screen.
+  @override
+  late final Offset localPosition = PointerEvent.transformPosition(transform, position);
+
+  /// The [delta] transformed into the event receiver's local coordinate
+  /// system according to [transform].
+  ///
+  /// If this event has not been transformed, [delta] is returned as-is.
+  ///
+  /// See also:
+  ///
+  ///  * [delta], which is the distance the pointer moved in the global
+  ///    coordinate system of the screen.
+  @override
+  late final Offset localDelta = PointerEvent.transformDeltaViaPositions(
+    transform: transform,
+    untransformedDelta: delta,
+    untransformedEndPosition: position,
+    transformedEndPosition: localPosition,
+  );
+}
+
 /// The device has started tracking the pointer.
 ///
 /// For example, the pointer might be hovering above the device, having not yet
 /// made contact with the surface of the device.
-class PointerAddedEvent extends PointerEvent {
+class PointerAddedEvent extends PointerEvent with PointerEventDescription {
   /// Creates a pointer added event.
   ///
   /// All of the arguments must be non-null.
@@ -623,7 +737,6 @@ class PointerAddedEvent extends PointerEvent {
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int device = 0,
     Offset position = Offset.zero,
-    Offset? localPosition,
     bool obscured = false,
     double pressureMin = 1.0,
     double pressureMax = 1.0,
@@ -633,15 +746,12 @@ class PointerAddedEvent extends PointerEvent {
     double radiusMax = 0.0,
     double orientation = 0.0,
     double tilt = 0.0,
-    Matrix4? transform,
-    PointerAddedEvent? original,
     int embedderId = 0,
   }) : super(
          timeStamp: timeStamp,
          kind: kind,
          device: device,
          position: position,
-         localPosition: localPosition,
          obscured: obscured,
          pressure: 0.0,
          pressureMin: pressureMin,
@@ -652,8 +762,6 @@ class PointerAddedEvent extends PointerEvent {
          radiusMax: radiusMax,
          orientation: orientation,
          tilt: tilt,
-         transform: transform,
-         original: original,
          embedderId: embedderId,
        );
 
@@ -662,33 +770,31 @@ class PointerAddedEvent extends PointerEvent {
     if (transform == null || transform == this.transform) {
       return this;
     }
-    return PointerAddedEvent(
-      timeStamp: timeStamp,
-      kind: kind,
-      device: device,
-      position: position,
-      localPosition: PointerEvent.transformPosition(transform, position),
-      obscured: obscured,
-      pressureMin: pressureMin,
-      pressureMax: pressureMax,
-      distance: distance,
-      distanceMax: distanceMax,
-      radiusMin: radiusMin,
-      radiusMax: radiusMax,
-      orientation: orientation,
-      tilt: tilt,
+    return _TransformedPointerAddedEvent(
       transform: transform,
       original: original as PointerAddedEvent? ?? this,
-      embedderId: embedderId,
     );
   }
+}
+
+class _TransformedPointerAddedEvent extends ProxyPointerEvent implements PointerAddedEvent {
+  _TransformedPointerAddedEvent({required this.original, required this.transform});
+
+  @override
+  final PointerAddedEvent original;
+
+  @override
+  final Matrix4 transform;
+
+  @override
+  PointerAddedEvent transformed(Matrix4? transform) => original.transformed(transform);
 }
 
 /// The device is no longer tracking the pointer.
 ///
 /// For example, the pointer might have drifted out of the device's hover
 /// detection range or might have been disconnected from the system entirely.
-class PointerRemovedEvent extends PointerEvent {
+class PointerRemovedEvent extends PointerEvent with PointerEventDescription {
   /// Creates a pointer removed event.
   ///
   /// All of the arguments must be non-null.
@@ -697,14 +803,12 @@ class PointerRemovedEvent extends PointerEvent {
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int device = 0,
     Offset position = Offset.zero,
-    Offset? localPosition,
     bool obscured = false,
     double pressureMin = 1.0,
     double pressureMax = 1.0,
     double distanceMax = 0.0,
     double radiusMin = 0.0,
     double radiusMax = 0.0,
-    Matrix4? transform,
     PointerRemovedEvent? original,
     int embedderId = 0,
   }) : super(
@@ -712,7 +816,6 @@ class PointerRemovedEvent extends PointerEvent {
          kind: kind,
          device: device,
          position: position,
-         localPosition: localPosition,
          obscured: obscured,
          pressure: 0.0,
          pressureMin: pressureMin,
@@ -720,7 +823,6 @@ class PointerRemovedEvent extends PointerEvent {
          distanceMax: distanceMax,
          radiusMin: radiusMin,
          radiusMax: radiusMax,
-         transform: transform,
          original: original,
          embedderId: embedderId,
        );
@@ -730,23 +832,24 @@ class PointerRemovedEvent extends PointerEvent {
     if (transform == null || transform == this.transform) {
       return this;
     }
-    return PointerRemovedEvent(
-      timeStamp: timeStamp,
-      kind: kind,
-      device: device,
-      position: position,
-      localPosition: PointerEvent.transformPosition(transform, position),
-      obscured: obscured,
-      pressureMin: pressureMin,
-      pressureMax: pressureMax,
-      distanceMax: distanceMax,
-      radiusMin: radiusMin,
-      radiusMax: radiusMax,
+    return _TransformedPointerRemovedEvent(
       transform: transform,
       original: original as PointerRemovedEvent? ?? this,
-      embedderId: embedderId,
     );
   }
+}
+
+class _TransformedPointerRemovedEvent extends ProxyPointerEvent implements PointerRemovedEvent {
+  _TransformedPointerRemovedEvent({required this.original, required this.transform});
+
+  @override
+  final PointerRemovedEvent original;
+
+  @override
+  final Matrix4 transform;
+
+  @override
+  PointerRemovedEvent transformed(Matrix4? transform) => original.transformed(transform);
 }
 
 /// The pointer has moved with respect to the device while the pointer is not
@@ -761,7 +864,7 @@ class PointerRemovedEvent extends PointerEvent {
 ///    contact with the device.
 ///  * [Listener.onPointerHover], which allows callers to be notified of these
 ///    events in a widget tree.
-class PointerHoverEvent extends PointerEvent {
+class PointerHoverEvent extends PointerEvent with PointerEventDescription {
   /// Creates a pointer hover event.
   ///
   /// All of the arguments must be non-null.
@@ -770,9 +873,7 @@ class PointerHoverEvent extends PointerEvent {
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int device = 0,
     Offset position = Offset.zero,
-    Offset? localPosition,
     Offset delta = Offset.zero,
-    Offset? localDelta,
     int buttons = 0,
     bool obscured = false,
     double pressureMin = 1.0,
@@ -787,7 +888,6 @@ class PointerHoverEvent extends PointerEvent {
     double orientation = 0.0,
     double tilt = 0.0,
     bool synthesized = false,
-    Matrix4? transform,
     PointerHoverEvent? original,
     int embedderId = 0,
   }) : super(
@@ -795,9 +895,7 @@ class PointerHoverEvent extends PointerEvent {
          kind: kind,
          device: device,
          position: position,
-         localPosition: localPosition,
          delta: delta,
-         localDelta: localDelta,
          buttons: buttons,
          down: false,
          obscured: obscured,
@@ -814,7 +912,6 @@ class PointerHoverEvent extends PointerEvent {
          orientation: orientation,
          tilt: tilt,
          synthesized: synthesized,
-         transform: transform,
          original: original,
          embedderId: embedderId,
        );
@@ -824,39 +921,24 @@ class PointerHoverEvent extends PointerEvent {
     if (transform == null || transform == this.transform) {
       return this;
     }
-    final Offset transformedPosition = PointerEvent.transformPosition(transform, position);
-    return PointerHoverEvent(
-      timeStamp: timeStamp,
-      kind: kind,
-      device: device,
-      position: position,
-      localPosition: transformedPosition,
-      delta: delta,
-      localDelta: PointerEvent.transformDeltaViaPositions(
-        transform: transform,
-        untransformedDelta: delta,
-        untransformedEndPosition: position,
-        transformedEndPosition: transformedPosition,
-      ),
-      buttons: buttons,
-      obscured: obscured,
-      pressureMin: pressureMin,
-      pressureMax: pressureMax,
-      distance: distance,
-      distanceMax: distanceMax,
-      size: size,
-      radiusMajor: radiusMajor,
-      radiusMinor: radiusMinor,
-      radiusMin: radiusMin,
-      radiusMax: radiusMax,
-      orientation: orientation,
-      tilt: tilt,
-      synthesized: synthesized,
+    return _TransformedPointerHoverEvent(
       transform: transform,
       original: original as PointerHoverEvent? ?? this,
-      embedderId: embedderId,
     );
   }
+}
+
+class _TransformedPointerHoverEvent extends ProxyPointerEvent implements PointerHoverEvent {
+  _TransformedPointerHoverEvent({required this.original, required this.transform});
+
+  @override
+  final PointerHoverEvent original;
+
+  @override
+  final Matrix4 transform;
+
+  @override
+  PointerHoverEvent transformed(Matrix4? transform) => original.transformed(transform);
 }
 
 /// The pointer has moved with respect to the device while the pointer is or is
@@ -871,7 +953,7 @@ class PointerHoverEvent extends PointerEvent {
 ///    contact with the device.
 ///  * [Listener.onPointerEnter], which allows callers to be notified of these
 ///    events in a widget tree.
-class PointerEnterEvent extends PointerEvent {
+class PointerEnterEvent extends PointerEvent with PointerEventDescription {
   /// Creates a pointer enter event.
   ///
   /// All of the arguments must be non-null.
@@ -880,9 +962,7 @@ class PointerEnterEvent extends PointerEvent {
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int device = 0,
     Offset position = Offset.zero,
-    Offset? localPosition,
     Offset delta = Offset.zero,
-    Offset? localDelta,
     int buttons = 0,
     bool obscured = false,
     double pressureMin = 1.0,
@@ -898,17 +978,13 @@ class PointerEnterEvent extends PointerEvent {
     double tilt = 0.0,
     bool down = false,
     bool synthesized = false,
-    Matrix4? transform,
-    PointerEnterEvent? original,
     int embedderId = 0,
   }) : super(
          timeStamp: timeStamp,
          kind: kind,
          device: device,
          position: position,
-         localPosition: localPosition,
          delta: delta,
-         localDelta: localDelta,
          buttons: buttons,
          down: down,
          obscured: obscured,
@@ -925,31 +1001,18 @@ class PointerEnterEvent extends PointerEvent {
          orientation: orientation,
          tilt: tilt,
          synthesized: synthesized,
-         transform: transform,
-         original: original,
          embedderId: embedderId,
        );
-
-  /// Creates an enter event from a [PointerHoverEvent].
-  ///
-  /// Deprecated. Please use [PointerEnterEvent.fromMouseEvent] instead.
-  @Deprecated(
-    'Use PointerEnterEvent.fromMouseEvent instead. '
-    'This feature was deprecated after v1.4.3.'
-  )
-  PointerEnterEvent.fromHoverEvent(PointerHoverEvent event) : this.fromMouseEvent(event);
 
   /// Creates an enter event from a [PointerEvent].
   ///
   /// This is used by the [MouseTracker] to synthesize enter events.
-  PointerEnterEvent.fromMouseEvent(PointerEvent event) : this(
+  factory PointerEnterEvent.fromMouseEvent(PointerEvent event) => PointerEnterEvent(
     timeStamp: event.timeStamp,
     kind: event.kind,
     device: event.device,
     position: event.position,
-    localPosition: event.localPosition,
     delta: event.delta,
-    localDelta: event.localDelta,
     buttons: event.buttons,
     obscured: event.obscured,
     pressureMin: event.pressureMin,
@@ -965,49 +1028,31 @@ class PointerEnterEvent extends PointerEvent {
     tilt: event.tilt,
     down: event.down,
     synthesized: event.synthesized,
-    transform: event.transform,
-    original: null,
-  );
+  ).transformed(event.transform);
 
   @override
   PointerEnterEvent transformed(Matrix4? transform) {
     if (transform == null || transform == this.transform) {
       return this;
     }
-    final Offset transformedPosition = PointerEvent.transformPosition(transform, position);
-    return PointerEnterEvent(
-      timeStamp: timeStamp,
-      kind: kind,
-      device: device,
-      position: position,
-      localPosition: transformedPosition,
-      delta: delta,
-      localDelta: PointerEvent.transformDeltaViaPositions(
-        transform: transform,
-        untransformedDelta: delta,
-        untransformedEndPosition: position,
-        transformedEndPosition: transformedPosition,
-      ),
-      buttons: buttons,
-      obscured: obscured,
-      pressureMin: pressureMin,
-      pressureMax: pressureMax,
-      distance: distance,
-      distanceMax: distanceMax,
-      size: size,
-      radiusMajor: radiusMajor,
-      radiusMinor: radiusMinor,
-      radiusMin: radiusMin,
-      radiusMax: radiusMax,
-      orientation: orientation,
-      tilt: tilt,
-      down: down,
-      synthesized: synthesized,
+    return _TransformedPointerEnterEvent(
       transform: transform,
       original: original as PointerEnterEvent? ?? this,
-      embedderId: embedderId,
     );
   }
+}
+
+class _TransformedPointerEnterEvent extends ProxyPointerEvent implements PointerEnterEvent {
+  _TransformedPointerEnterEvent({required this.original, required this.transform});
+
+  @override
+  final PointerEnterEvent original;
+
+  @override
+  final Matrix4 transform;
+
+  @override
+  PointerEnterEvent transformed(Matrix4? transform) => original.transformed(transform);
 }
 
 /// The pointer has moved with respect to the device while the pointer is or is
@@ -1022,7 +1067,7 @@ class PointerEnterEvent extends PointerEvent {
 ///    contact with the device.
 ///  * [Listener.onPointerExit], which allows callers to be notified of these
 ///    events in a widget tree.
-class PointerExitEvent extends PointerEvent {
+class PointerExitEvent extends PointerEvent with PointerEventDescription {
   /// Creates a pointer exit event.
   ///
   /// All of the arguments must be non-null.
@@ -1031,9 +1076,7 @@ class PointerExitEvent extends PointerEvent {
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int device = 0,
     Offset position = Offset.zero,
-    Offset? localPosition,
     Offset delta = Offset.zero,
-    Offset? localDelta,
     int buttons = 0,
     bool obscured = false,
     double pressureMin = 1.0,
@@ -1049,17 +1092,13 @@ class PointerExitEvent extends PointerEvent {
     double tilt = 0.0,
     bool down = false,
     bool synthesized = false,
-    Matrix4? transform,
-    PointerExitEvent? original,
     int embedderId = 0,
   }) : super(
          timeStamp: timeStamp,
          kind: kind,
          device: device,
          position: position,
-         localPosition: localPosition,
          delta: delta,
-         localDelta: localDelta,
          buttons: buttons,
          down: down,
          obscured: obscured,
@@ -1076,31 +1115,18 @@ class PointerExitEvent extends PointerEvent {
          orientation: orientation,
          tilt: tilt,
          synthesized: synthesized,
-         transform: transform,
-         original: original,
          embedderId: embedderId,
        );
-
-  /// Creates an exit event from a [PointerHoverEvent].
-  ///
-  /// Deprecated. Please use [PointerExitEvent.fromMouseEvent] instead.
-  @Deprecated(
-    'Use PointerExitEvent.fromMouseEvent instead. '
-    'This feature was deprecated after v1.4.3.'
-  )
-  PointerExitEvent.fromHoverEvent(PointerHoverEvent event) : this.fromMouseEvent(event);
 
   /// Creates an exit event from a [PointerEvent].
   ///
   /// This is used by the [MouseTracker] to synthesize exit events.
-  PointerExitEvent.fromMouseEvent(PointerEvent event) : this(
+  factory PointerExitEvent.fromMouseEvent(PointerEvent event) => PointerExitEvent(
     timeStamp: event.timeStamp,
     kind: event.kind,
     device: event.device,
     position: event.position,
-    localPosition: event.localPosition,
     delta: event.delta,
-    localDelta: event.localDelta,
     buttons: event.buttons,
     obscured: event.obscured,
     pressureMin: event.pressureMin,
@@ -1116,49 +1142,31 @@ class PointerExitEvent extends PointerEvent {
     tilt: event.tilt,
     down: event.down,
     synthesized: event.synthesized,
-    transform: event.transform,
-    original: null,
-  );
+  ).transformed(event.transform);
 
   @override
   PointerExitEvent transformed(Matrix4? transform) {
     if (transform == null || transform == this.transform) {
       return this;
     }
-    final Offset transformedPosition = PointerEvent.transformPosition(transform, position);
-    return PointerExitEvent(
-      timeStamp: timeStamp,
-      kind: kind,
-      device: device,
-      position: position,
-      localPosition: transformedPosition,
-      delta: delta,
-      localDelta: PointerEvent.transformDeltaViaPositions(
-        transform: transform,
-        untransformedDelta: delta,
-        untransformedEndPosition: position,
-        transformedEndPosition: transformedPosition,
-      ),
-      buttons: buttons,
-      obscured: obscured,
-      pressureMin: pressureMin,
-      pressureMax: pressureMax,
-      distance: distance,
-      distanceMax: distanceMax,
-      size: size,
-      radiusMajor: radiusMajor,
-      radiusMinor: radiusMinor,
-      radiusMin: radiusMin,
-      radiusMax: radiusMax,
-      orientation: orientation,
-      tilt: tilt,
-      down: down,
-      synthesized: synthesized,
+    return _TransformedPointerExitEvent(
       transform: transform,
       original: original as PointerExitEvent? ?? this,
-      embedderId: embedderId,
     );
   }
+}
+
+class _TransformedPointerExitEvent extends ProxyPointerEvent implements PointerExitEvent {
+  _TransformedPointerExitEvent({required this.original, required this.transform});
+
+  @override
+  final PointerExitEvent original;
+
+  @override
+  final Matrix4 transform;
+
+  @override
+  PointerExitEvent transformed(Matrix4? transform) => original.transformed(transform);
 }
 
 /// The pointer has made contact with the device.
@@ -1167,7 +1175,7 @@ class PointerExitEvent extends PointerEvent {
 ///
 ///  * [Listener.onPointerDown], which allows callers to be notified of these
 ///    events in a widget tree.
-class PointerDownEvent extends PointerEvent {
+class PointerDownEvent extends PointerEvent with PointerEventDescription {
   /// Creates a pointer down event.
   ///
   /// All of the arguments must be non-null.
@@ -1177,7 +1185,6 @@ class PointerDownEvent extends PointerEvent {
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int device = 0,
     Offset position = Offset.zero,
-    Offset? localPosition,
     int buttons = kPrimaryButton,
     bool obscured = false,
     double pressure = 1.0,
@@ -1191,8 +1198,6 @@ class PointerDownEvent extends PointerEvent {
     double radiusMax = 0.0,
     double orientation = 0.0,
     double tilt = 0.0,
-    Matrix4? transform,
-    PointerDownEvent? original,
     int embedderId = 0,
   }) : super(
          timeStamp: timeStamp,
@@ -1200,7 +1205,6 @@ class PointerDownEvent extends PointerEvent {
          kind: kind,
          device: device,
          position: position,
-         localPosition: localPosition,
          buttons: buttons,
          down: true,
          obscured: obscured,
@@ -1216,8 +1220,6 @@ class PointerDownEvent extends PointerEvent {
          radiusMax: radiusMax,
          orientation: orientation,
          tilt: tilt,
-         transform: transform,
-         original: original,
          embedderId: embedderId,
        );
 
@@ -1226,31 +1228,24 @@ class PointerDownEvent extends PointerEvent {
     if (transform == null || transform == this.transform) {
       return this;
     }
-    return PointerDownEvent(
-      timeStamp: timeStamp,
-      pointer: pointer,
-      kind: kind,
-      device: device,
-      position: position,
-      localPosition: PointerEvent.transformPosition(transform, position),
-      buttons: buttons,
-      obscured: obscured,
-      pressure: pressure,
-      pressureMin: pressureMin,
-      pressureMax: pressureMax,
-      distanceMax: distanceMax,
-      size: size,
-      radiusMajor: radiusMajor,
-      radiusMinor: radiusMinor,
-      radiusMin: radiusMin,
-      radiusMax: radiusMax,
-      orientation: orientation,
-      tilt: tilt,
+    return _TransformedPointerDownEvent(
       transform: transform,
       original: original as PointerDownEvent? ?? this,
-      embedderId: embedderId,
     );
   }
+}
+
+class _TransformedPointerDownEvent extends ProxyPointerEvent implements PointerDownEvent {
+  _TransformedPointerDownEvent({required this.original, required this.transform});
+
+  @override
+  final PointerDownEvent original;
+
+  @override
+  final Matrix4 transform;
+
+  @override
+  PointerDownEvent transformed(Matrix4? transform) => original.transformed(transform);
 }
 
 /// The pointer has moved with respect to the device while the pointer is in
@@ -1262,7 +1257,7 @@ class PointerDownEvent extends PointerEvent {
 ///    contact with the device.
 ///  * [Listener.onPointerMove], which allows callers to be notified of these
 ///    events in a widget tree.
-class PointerMoveEvent extends PointerEvent {
+class PointerMoveEvent extends PointerEvent with PointerEventDescription {
   /// Creates a pointer move event.
   ///
   /// All of the arguments must be non-null.
@@ -1272,9 +1267,7 @@ class PointerMoveEvent extends PointerEvent {
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int device = 0,
     Offset position = Offset.zero,
-    Offset? localPosition,
     Offset delta = Offset.zero,
-    Offset? localDelta,
     int buttons = kPrimaryButton,
     bool obscured = false,
     double pressure = 1.0,
@@ -1290,8 +1283,6 @@ class PointerMoveEvent extends PointerEvent {
     double tilt = 0.0,
     int platformData = 0,
     bool synthesized = false,
-    Matrix4? transform,
-    PointerMoveEvent? original,
     int embedderId = 0,
   }) : super(
          timeStamp: timeStamp,
@@ -1299,9 +1290,7 @@ class PointerMoveEvent extends PointerEvent {
          kind: kind,
          device: device,
          position: position,
-         localPosition: localPosition,
          delta: delta,
-         localDelta: localDelta,
          buttons: buttons,
          down: true,
          obscured: obscured,
@@ -1319,8 +1308,6 @@ class PointerMoveEvent extends PointerEvent {
          tilt: tilt,
          platformData: platformData,
          synthesized: synthesized,
-         transform: transform,
-         original: original,
          embedderId: embedderId,
        );
 
@@ -1329,42 +1316,25 @@ class PointerMoveEvent extends PointerEvent {
     if (transform == null || transform == this.transform) {
       return this;
     }
-    final Offset transformedPosition = PointerEvent.transformPosition(transform, position);
 
-    return PointerMoveEvent(
-      timeStamp: timeStamp,
-      pointer: pointer,
-      kind: kind,
-      device: device,
-      position: position,
-      localPosition: transformedPosition,
-      delta: delta,
-      localDelta: PointerEvent.transformDeltaViaPositions(
-        transform: transform,
-        untransformedDelta: delta,
-        untransformedEndPosition: position,
-        transformedEndPosition: transformedPosition,
-      ),
-      buttons: buttons,
-      obscured: obscured,
-      pressure: pressure,
-      pressureMin: pressureMin,
-      pressureMax: pressureMax,
-      distanceMax: distanceMax,
-      size: size,
-      radiusMajor: radiusMajor,
-      radiusMinor: radiusMinor,
-      radiusMin: radiusMin,
-      radiusMax: radiusMax,
-      orientation: orientation,
-      tilt: tilt,
-      platformData: platformData,
-      synthesized: synthesized,
+    return _TransformedPointerMoveEvent(
       transform: transform,
       original: original as PointerMoveEvent? ?? this,
-      embedderId: embedderId,
     );
   }
+}
+
+class _TransformedPointerMoveEvent extends ProxyPointerEvent implements PointerMoveEvent {
+  _TransformedPointerMoveEvent({required this.original, required this.transform});
+
+  @override
+  final PointerMoveEvent original;
+
+  @override
+  final Matrix4 transform;
+
+  @override
+  PointerMoveEvent transformed(Matrix4? transform) => original.transformed(transform);
 }
 
 /// The pointer has stopped making contact with the device.
@@ -1373,7 +1343,7 @@ class PointerMoveEvent extends PointerEvent {
 ///
 ///  * [Listener.onPointerUp], which allows callers to be notified of these
 ///    events in a widget tree.
-class PointerUpEvent extends PointerEvent {
+class PointerUpEvent extends PointerEvent with PointerEventDescription {
   /// Creates a pointer up event.
   ///
   /// All of the arguments must be non-null.
@@ -1383,7 +1353,6 @@ class PointerUpEvent extends PointerEvent {
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int device = 0,
     Offset position = Offset.zero,
-    Offset? localPosition,
     int buttons = 0,
     bool obscured = false,
     // Allow pressure customization here because PointerUpEvent can contain
@@ -1400,8 +1369,6 @@ class PointerUpEvent extends PointerEvent {
     double radiusMax = 0.0,
     double orientation = 0.0,
     double tilt = 0.0,
-    Matrix4? transform,
-    PointerUpEvent? original,
     int embedderId = 0,
   }) : super(
          timeStamp: timeStamp,
@@ -1409,7 +1376,6 @@ class PointerUpEvent extends PointerEvent {
          kind: kind,
          device: device,
          position: position,
-         localPosition: localPosition,
          buttons: buttons,
          down: false,
          obscured: obscured,
@@ -1425,8 +1391,6 @@ class PointerUpEvent extends PointerEvent {
          radiusMax: radiusMax,
          orientation: orientation,
          tilt: tilt,
-         transform: transform,
-         original: original,
          embedderId: embedderId,
        );
 
@@ -1435,32 +1399,24 @@ class PointerUpEvent extends PointerEvent {
     if (transform == null || transform == this.transform) {
       return this;
     }
-    return PointerUpEvent(
-      timeStamp: timeStamp,
-      pointer: pointer,
-      kind: kind,
-      device: device,
-      position: position,
-      localPosition: PointerEvent.transformPosition(transform, position),
-      buttons: buttons,
-      obscured: obscured,
-      pressure: pressure,
-      pressureMin: pressureMin,
-      pressureMax: pressureMax,
-      distance: distance,
-      distanceMax: distanceMax,
-      size: size,
-      radiusMajor: radiusMajor,
-      radiusMinor: radiusMinor,
-      radiusMin: radiusMin,
-      radiusMax: radiusMax,
-      orientation: orientation,
-      tilt: tilt,
+    return _TransformedPointerUpEvent(
       transform: transform,
       original: original as PointerUpEvent? ?? this,
-      embedderId: embedderId,
     );
   }
+}
+
+class _TransformedPointerUpEvent extends ProxyPointerEvent implements PointerUpEvent {
+  _TransformedPointerUpEvent({required this.original, required this.transform});
+
+  @override
+  final PointerUpEvent original;
+
+  @override
+  final Matrix4 transform;
+
+  @override
+  PointerUpEvent transformed(Matrix4? transform) => original.transformed(transform);
 }
 
 /// An event that corresponds to a discrete pointer signal.
@@ -1482,9 +1438,6 @@ abstract class PointerSignalEvent extends PointerEvent {
     PointerDeviceKind kind = PointerDeviceKind.mouse,
     int device = 0,
     Offset position = Offset.zero,
-    Offset? localPosition,
-    Matrix4? transform,
-    PointerSignalEvent? original,
     int embedderId = 0,
   }) : super(
          timeStamp: timeStamp,
@@ -1492,9 +1445,6 @@ abstract class PointerSignalEvent extends PointerEvent {
          kind: kind,
          device: device,
          position: position,
-         localPosition: localPosition,
-         transform: transform,
-         original: original,
          embedderId: embedderId,
        );
 }
@@ -1508,7 +1458,7 @@ abstract class PointerSignalEvent extends PointerEvent {
 ///
 ///  * [Listener.onPointerSignal], which allows callers to be notified of these
 ///    events in a widget tree.
-class PointerScrollEvent extends PointerSignalEvent {
+class PointerScrollEvent extends PointerSignalEvent with PointerEventDescription {
   /// Creates a pointer scroll event.
   ///
   /// All of the arguments must be non-null.
@@ -1517,10 +1467,7 @@ class PointerScrollEvent extends PointerSignalEvent {
     PointerDeviceKind kind = PointerDeviceKind.mouse,
     int device = 0,
     Offset position = Offset.zero,
-    Offset? localPosition,
     this.scrollDelta = Offset.zero,
-    Matrix4? transform,
-    PointerScrollEvent? original,
     int embedderId = 0,
   }) : assert(timeStamp != null),
        assert(kind != null),
@@ -1532,9 +1479,6 @@ class PointerScrollEvent extends PointerSignalEvent {
          kind: kind,
          device: device,
          position: position,
-         localPosition: localPosition,
-         transform: transform,
-         original: original,
          embedderId: embedderId,
        );
 
@@ -1546,18 +1490,33 @@ class PointerScrollEvent extends PointerSignalEvent {
     if (transform == null || transform == this.transform) {
       return this;
     }
-    return PointerScrollEvent(
-      timeStamp: timeStamp,
-      kind: kind,
-      device: device,
-      position: position,
-      localPosition: PointerEvent.transformPosition(transform, position),
-      scrollDelta: scrollDelta,
+    return _TransformedPointerScrollEvent(
       transform: transform,
       original: original as PointerScrollEvent? ?? this,
-      embedderId: embedderId,
     );
   }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('scrollDelta', scrollDelta));
+  }
+}
+
+class _TransformedPointerScrollEvent extends ProxyPointerEvent implements PointerScrollEvent {
+  _TransformedPointerScrollEvent({required this.original, required this.transform});
+
+  @override
+  final PointerScrollEvent original;
+
+  @override
+  final Matrix4 transform;
+
+  @override
+  Offset get scrollDelta => original.scrollDelta;
+
+  @override
+  PointerScrollEvent transformed(Matrix4? transform) => original.transformed(transform);
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1572,7 +1531,7 @@ class PointerScrollEvent extends PointerSignalEvent {
 ///
 ///  * [Listener.onPointerCancel], which allows callers to be notified of these
 ///    events in a widget tree.
-class PointerCancelEvent extends PointerEvent {
+class PointerCancelEvent extends PointerEvent with PointerEventDescription {
   /// Creates a pointer cancel event.
   ///
   /// All of the arguments must be non-null.
@@ -1582,7 +1541,6 @@ class PointerCancelEvent extends PointerEvent {
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int device = 0,
     Offset position = Offset.zero,
-    Offset? localPosition,
     int buttons = 0,
     bool obscured = false,
     double pressureMin = 1.0,
@@ -1596,8 +1554,6 @@ class PointerCancelEvent extends PointerEvent {
     double radiusMax = 0.0,
     double orientation = 0.0,
     double tilt = 0.0,
-    Matrix4? transform,
-    PointerCancelEvent? original,
     int embedderId = 0,
   }) : super(
          timeStamp: timeStamp,
@@ -1605,7 +1561,6 @@ class PointerCancelEvent extends PointerEvent {
          kind: kind,
          device: device,
          position: position,
-         localPosition: localPosition,
          buttons: buttons,
          down: false,
          obscured: obscured,
@@ -1621,8 +1576,6 @@ class PointerCancelEvent extends PointerEvent {
          radiusMax: radiusMax,
          orientation: orientation,
          tilt: tilt,
-         transform: transform,
-         original: original,
          embedderId: embedderId,
        );
 
@@ -1631,29 +1584,22 @@ class PointerCancelEvent extends PointerEvent {
     if (transform == null || transform == this.transform) {
       return this;
     }
-    return PointerCancelEvent(
-      timeStamp: timeStamp,
-      pointer: pointer,
-      kind: kind,
-      device: device,
-      position: position,
-      localPosition: PointerEvent.transformPosition(transform, position),
-      buttons: buttons,
-      obscured: obscured,
-      pressureMin: pressureMin,
-      pressureMax: pressureMax,
-      distance: distance,
-      distanceMax: distanceMax,
-      size: size,
-      radiusMajor: radiusMajor,
-      radiusMinor: radiusMinor,
-      radiusMin: radiusMin,
-      radiusMax: radiusMax,
-      orientation: orientation,
-      tilt: tilt,
+    return _TransformedPointerCancelEvent(
       transform: transform,
       original: original as PointerCancelEvent? ?? this,
-      embedderId: embedderId,
     );
   }
+}
+
+class _TransformedPointerCancelEvent extends ProxyPointerEvent implements PointerCancelEvent {
+  _TransformedPointerCancelEvent({required this.original, required this.transform});
+
+  @override
+  final PointerCancelEvent original;
+
+  @override
+  final Matrix4 transform;
+
+  @override
+  PointerCancelEvent transformed(Matrix4? transform) => original.transformed(transform);
 }

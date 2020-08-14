@@ -127,6 +127,8 @@ void main() {
     _binding.postFrameCallbacks.clear();
   });
 
+  final Matrix4 translate10by20 = Matrix4.translationValues(10, 20, 0);
+
   test('MouseTrackerAnnotation has correct toString', () {
     final MouseTrackerAnnotation annotation1 = MouseTrackerAnnotation(
       onEnter: (_) {},
@@ -170,8 +172,8 @@ void main() {
       _pointerData(PointerChange.add, const Offset(0.0, 0.0)),
     ]));
 
-    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-      const PointerEnterEvent(position: Offset(0.0, 0.0)),
+    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+      EventMatcher<PointerEnterEvent>(const PointerEnterEvent(position: Offset(0.0, 0.0))),
     ]));
     expect(listenerLogs, <bool>[true]);
     events.clear();
@@ -181,8 +183,8 @@ void main() {
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.hover, const Offset(1.0, 101.0)),
     ]));
-    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-      const PointerHoverEvent(position: Offset(1.0, 101.0)),
+    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+      EventMatcher<PointerHoverEvent>(const PointerHoverEvent(position: Offset(1.0, 101.0))),
     ]));
     expect(_mouseTracker.mouseIsConnected, isTrue);
     expect(listenerLogs, isEmpty);
@@ -192,8 +194,8 @@ void main() {
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.remove, const Offset(1.0, 101.0)),
     ]));
-    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-      const PointerExitEvent(position: Offset(1.0, 101.0)),
+    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+      EventMatcher<PointerExitEvent>(const PointerExitEvent(position: Offset(1.0, 101.0))),
     ]));
     expect(listenerLogs, <bool>[false]);
     events.clear();
@@ -203,8 +205,8 @@ void main() {
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, const Offset(0.0, 301.0)),
     ]));
-    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-      const PointerEnterEvent(position: Offset(0.0, 301.0)),
+    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+      EventMatcher<PointerEnterEvent>(const PointerEnterEvent(position: Offset(0.0, 301.0))),
     ]));
     expect(listenerLogs, <bool>[true]);
     events.clear();
@@ -222,9 +224,9 @@ void main() {
       _pointerData(PointerChange.add, const Offset(0.0, 0.0)),
       _pointerData(PointerChange.hover, const Offset(0.0, 1.0)),
     ]));
-    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-      const PointerEnterEvent(position: Offset(0.0, 0.0)),
-      const PointerHoverEvent(position: Offset(0.0, 1.0)),
+    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+      EventMatcher<PointerEnterEvent>(const PointerEnterEvent(position: Offset(0.0, 0.0))),
+      EventMatcher<PointerHoverEvent>(const PointerHoverEvent(position: Offset(0.0, 1.0))),
     ]));
     expect(_mouseTracker.mouseIsConnected, isTrue);
     events.clear();
@@ -234,9 +236,9 @@ void main() {
       _pointerData(PointerChange.add, const Offset(0.0, 401.0), device: 1),
       _pointerData(PointerChange.hover, const Offset(1.0, 401.0), device: 1),
     ]));
-    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-      const PointerEnterEvent(position: Offset(0.0, 401.0), device: 1),
-      const PointerHoverEvent(position: Offset(1.0, 401.0), device: 1),
+    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+      EventMatcher<PointerEnterEvent>(const PointerEnterEvent(position: Offset(0.0, 401.0), device: 1)),
+      EventMatcher<PointerHoverEvent>(const PointerHoverEvent(position: Offset(1.0, 401.0), device: 1)),
     ]));
     expect(_mouseTracker.mouseIsConnected, isTrue);
     events.clear();
@@ -245,8 +247,8 @@ void main() {
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.hover, const Offset(0.0, 101.0)),
     ]));
-    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-      const PointerHoverEvent(position: Offset(0.0, 101.0)),
+    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+      EventMatcher<PointerHoverEvent>(const PointerHoverEvent(position: Offset(0.0, 101.0))),
     ]));
     expect(_mouseTracker.mouseIsConnected, isTrue);
     events.clear();
@@ -255,8 +257,8 @@ void main() {
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.hover, const Offset(1.0, 501.0), device: 1),
     ]));
-    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-      const PointerHoverEvent(position: Offset(1.0, 501.0), device: 1),
+    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+      EventMatcher<PointerHoverEvent>(const PointerHoverEvent(position: Offset(1.0, 501.0), device: 1)),
     ]));
     expect(_mouseTracker.mouseIsConnected, isTrue);
     events.clear();
@@ -265,8 +267,8 @@ void main() {
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.remove, const Offset(0.0, 101.0)),
     ]));
-    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-      const PointerExitEvent(position: Offset(0.0, 101.0)),
+    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+      EventMatcher<PointerExitEvent>(const PointerExitEvent(position: Offset(0.0, 101.0))),
     ]));
     expect(_mouseTracker.mouseIsConnected, isTrue);
     events.clear();
@@ -275,8 +277,8 @@ void main() {
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.hover, const Offset(1.0, 601.0), device: 1),
     ]));
-    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-      const PointerHoverEvent(position: Offset(1.0, 601.0), device: 1),
+    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+      EventMatcher<PointerHoverEvent>(const PointerHoverEvent(position: Offset(1.0, 601.0), device: 1)),
     ]));
     expect(_mouseTracker.mouseIsConnected, isTrue);
     events.clear();
@@ -285,8 +287,8 @@ void main() {
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.remove, const Offset(1.0, 601.0), device: 1),
     ]));
-    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-      const PointerExitEvent(position: Offset(1.0, 601.0), device: 1),
+    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+      EventMatcher<PointerExitEvent>(const PointerExitEvent(position: Offset(1.0, 601.0), device: 1)),
     ]));
     expect(_mouseTracker.mouseIsConnected, isFalse);
     events.clear();
@@ -300,24 +302,24 @@ void main() {
       _pointerData(PointerChange.add, const Offset(0.0, 101.0)),
       _pointerData(PointerChange.down, const Offset(0.0, 101.0)),
     ]));
-    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
+    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
       // This Enter event is triggered by the [PointerAddedEvent] The
       // [PointerDownEvent] is ignored by [MouseTracker].
-      const PointerEnterEvent(position: Offset(0.0, 101.0)),
+      EventMatcher<PointerEnterEvent>(const PointerEnterEvent(position: Offset(0.0, 101.0))),
     ]));
     events.clear();
 
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.move, const Offset(0.0, 201.0)),
     ]));
-    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
+    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
     ]));
     events.clear();
 
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.up, const Offset(0.0, 301.0)),
     ]));
-    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
+    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
     ]));
     events.clear();
   });
@@ -342,7 +344,7 @@ void main() {
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, const Offset(0.0, 100.0)),
     ]));
-    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
+    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
     ]));
     expect(_mouseTracker.mouseIsConnected, isTrue);
     events.clear();
@@ -353,8 +355,8 @@ void main() {
     expect(_binding.postFrameCallbacks, hasLength(1));
 
     _binding.flushPostFrameCallbacks(Duration.zero);
-    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-      const PointerEnterEvent(position: Offset(0, 100), localPosition: Offset(10, 120)),
+    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+      EventMatcher<PointerEnterEvent>(const PointerEnterEvent(position: Offset(0, 100)).transformed(translate10by20)),
     ]));
     events.clear();
 
@@ -364,8 +366,8 @@ void main() {
     expect(_binding.postFrameCallbacks, hasLength(1));
 
     _binding.flushPostFrameCallbacks(Duration.zero);
-    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-      const PointerExitEvent(position: Offset(0.0, 100.0), localPosition: Offset(10, 120)),
+    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+      EventMatcher<PointerExitEvent>(const PointerExitEvent(position: Offset(0.0, 100.0)).transformed(translate10by20)),
     ]));
     expect(_binding.postFrameCallbacks, hasLength(0));
   });
@@ -399,8 +401,8 @@ void main() {
     expect(_binding.postFrameCallbacks, hasLength(1));
 
     _binding.flushPostFrameCallbacks(Duration.zero);
-    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-      const PointerEnterEvent(position: Offset(0.0, 100.0), localPosition: Offset(10, 120)),
+    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+      EventMatcher<PointerEnterEvent>(const PointerEnterEvent(position: Offset(0.0, 100.0)).transformed(translate10by20)),
     ]));
     events.clear();
 
@@ -413,8 +415,8 @@ void main() {
     expect(_binding.postFrameCallbacks, hasLength(1));
 
     _binding.flushPostFrameCallbacks(Duration.zero);
-    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-      const PointerExitEvent(position: Offset(0.0, 100.0), localPosition: Offset(10, 120)),
+    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+      EventMatcher<PointerExitEvent>(const PointerExitEvent(position: Offset(0.0, 100.0)).transformed(translate10by20)),
     ]));
     expect(_binding.postFrameCallbacks, hasLength(0));
   });
@@ -442,8 +444,8 @@ void main() {
     ]));
 
     expect(_binding.postFrameCallbacks, hasLength(0));
-    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-      const PointerEnterEvent(position: Offset(0.0, 100.0), localPosition: Offset(10, 120)),
+    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+      EventMatcher<PointerEnterEvent>(const PointerEnterEvent(position: Offset(0.0, 100.0)).transformed(translate10by20)),
     ]));
     events.clear();
 
@@ -452,8 +454,8 @@ void main() {
       _pointerData(PointerChange.remove, const Offset(0.0, 100.0)),
     ]));
     expect(_binding.postFrameCallbacks, hasLength(0));
-    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-      const PointerExitEvent(position: Offset(0.0, 100.0), localPosition: Offset(10, 120)),
+    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+      EventMatcher<PointerExitEvent>(const PointerExitEvent(position: Offset(0.0, 100.0)).transformed(translate10by20)),
     ]));
   });
 
@@ -485,9 +487,9 @@ void main() {
       _pointerData(PointerChange.hover, const Offset(0.0, 100.0)),
     ]));
     expect(_binding.postFrameCallbacks, hasLength(0));
-    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-      const PointerEnterEvent(position: Offset(0.0, 100.0), localPosition: Offset(10, 120)),
-      const PointerHoverEvent(position: Offset(0.0, 100.0), localPosition: Offset(10, 120)),
+    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+      EventMatcher<PointerEnterEvent>(const PointerEnterEvent(position: Offset(0.0, 100.0)).transformed(translate10by20)),
+      EventMatcher<PointerHoverEvent>(const PointerHoverEvent(position: Offset(0.0, 100.0)).transformed(translate10by20)),
     ]));
     events.clear();
 
@@ -497,8 +499,8 @@ void main() {
       _pointerData(PointerChange.hover, const Offset(200.0, 100.0)),
     ]));
     expect(_binding.postFrameCallbacks, hasLength(0));
-    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-      const PointerExitEvent(position: Offset(200.0, 100.0), localPosition: Offset(210, 120)),
+    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+      EventMatcher<PointerExitEvent>(const PointerExitEvent(position: Offset(200.0, 100.0)).transformed(translate10by20)),
     ]));
   });
 
@@ -667,11 +669,11 @@ ui.PointerData _pointerData(
   );
 }
 
-class _EventCriticalFieldsMatcher extends Matcher {
-  _EventCriticalFieldsMatcher(this._expected)
-    : assert(_expected != null);
+class BaseEventMatcher extends Matcher {
+  BaseEventMatcher(this.expected)
+    : assert(expected != null);
 
-  final PointerEvent _expected;
+  final PointerEvent expected;
 
   bool _matchesField(Map<dynamic, dynamic> matchState, String field,
       dynamic actual, dynamic expected) {
@@ -688,16 +690,12 @@ class _EventCriticalFieldsMatcher extends Matcher {
 
   @override
   bool matches(dynamic untypedItem, Map<dynamic, dynamic> matchState) {
-    if (untypedItem.runtimeType != _expected.runtimeType) {
-      return false;
-    }
-
     final PointerEvent actual = untypedItem as PointerEvent;
     if (!(
       _matchesField(matchState, 'kind', actual.kind, PointerDeviceKind.mouse) &&
-      _matchesField(matchState, 'position', actual.position, _expected.position) &&
-      _matchesField(matchState, 'device', actual.device, _expected.device) &&
-      _matchesField(matchState, 'localPosition', actual.localPosition, _expected.localPosition)
+      _matchesField(matchState, 'position', actual.position, expected.position) &&
+      _matchesField(matchState, 'device', actual.device, expected.device) &&
+      _matchesField(matchState, 'localPosition', actual.localPosition, expected.localPosition)
     )) {
       return false;
     }
@@ -708,7 +706,7 @@ class _EventCriticalFieldsMatcher extends Matcher {
   Description describe(Description description) {
     return description
       .add('event (critical fields only) ')
-      .addDescriptionOf(_expected);
+      .addDescriptionOf(expected);
   }
 
   @override
@@ -718,13 +716,6 @@ class _EventCriticalFieldsMatcher extends Matcher {
     Map<dynamic, dynamic> matchState,
     bool verbose,
   ) {
-    if (item.runtimeType != _expected.runtimeType) {
-      return mismatchDescription
-        .add('is ')
-        .addDescriptionOf(item.runtimeType)
-        .add(" and doesn't match ")
-        .addDescriptionOf(_expected.runtimeType);
-    }
     return mismatchDescription
       .add('has ')
       .addDescriptionOf(matchState['actual'])
@@ -733,10 +724,40 @@ class _EventCriticalFieldsMatcher extends Matcher {
   }
 }
 
+class EventMatcher<T extends PointerEvent> extends BaseEventMatcher {
+  EventMatcher(T expected) : super(expected);
+
+  @override
+  bool matches(dynamic untypedItem, Map<dynamic, dynamic> matchState) {
+    if (untypedItem is! T) {
+      return false;
+    }
+
+    return super.matches(untypedItem, matchState);
+  }
+
+  @override
+  Description describeMismatch(
+    dynamic item,
+    Description mismatchDescription,
+    Map<dynamic, dynamic> matchState,
+    bool verbose,
+  ) {
+    if (item is! T) {
+      return mismatchDescription
+        .add('is ')
+        .addDescriptionOf(item.runtimeType)
+        .add(' and is not a subtype of ')
+        .addDescriptionOf(T);
+    }
+    return super.describeMismatch(item, mismatchDescription, matchState, verbose);
+  }
+}
+
 class _EventListCriticalFieldsMatcher extends Matcher {
   _EventListCriticalFieldsMatcher(this._expected);
 
-  final Iterable<PointerEvent> _expected;
+  final Iterable<BaseEventMatcher> _expected;
 
   @override
   bool matches(dynamic untypedItem, Map<dynamic, dynamic> matchState) {
@@ -747,15 +768,14 @@ class _EventListCriticalFieldsMatcher extends Matcher {
     if (item.length != _expected.length)
       return false;
     int i = 0;
-    for (final PointerEvent e in _expected) {
+    for (final BaseEventMatcher matcher in _expected) {
       iterator.moveNext();
-      final Matcher matcher = _EventCriticalFieldsMatcher(e);
       final Map<dynamic, dynamic> subState = <dynamic, dynamic>{};
       final PointerEvent actual = iterator.current;
       if (!matcher.matches(actual, subState)) {
         addStateInfo(matchState, <dynamic, dynamic>{
           'index': i,
-          'expected': e,
+          'expected': matcher.expected,
           'actual': actual,
           'matcher': matcher,
           'state': subState,
@@ -807,6 +827,6 @@ class _EventListCriticalFieldsMatcher extends Matcher {
   }
 }
 
-Matcher _equalToEventsOnCriticalFields(List<PointerEvent> source) {
+Matcher _equalToEventsOnCriticalFields(List<BaseEventMatcher> source) {
   return _EventListCriticalFieldsMatcher(source);
 }
