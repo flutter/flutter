@@ -11,28 +11,18 @@ import '../framework/adb.dart';
 import '../framework/framework.dart';
 import '../framework/utils.dart';
 
-TaskFunction createGalleryTransitionTest({bool semanticsEnabled = false}) {
+TaskFunction createGalleryTransitionTest({ bool semanticsEnabled = false }) {
   return GalleryTransitionTest(semanticsEnabled: semanticsEnabled);
 }
 
-TaskFunction createGalleryTransitionE2ETest({bool semanticsEnabled = false}) {
+TaskFunction createGalleryTransitionE2ETest({ bool semanticsEnabled = false }) {
   return GalleryTransitionTest(
-    testFile: semanticsEnabled
-        ? 'transitions_perf_e2e_with_semantics'
-        : 'transitions_perf_e2e',
+    semanticsEnabled: semanticsEnabled,
+    testFile: 'transitions_perf_e2e',
     needFullTimeline: false,
     timelineSummaryFile: 'e2e_perf_summary',
     transitionDurationFile: null,
     driverFile: 'transitions_perf_e2e_test',
-  );
-}
-
-TaskFunction createGalleryTransitionHybridTest({bool semanticsEnabled = false}) {
-  return GalleryTransitionTest(
-    semanticsEnabled: semanticsEnabled,
-    driverFile: semanticsEnabled
-        ? 'transitions_perf_hybrid_with_semantics_test'
-        : 'transitions_perf_hybrid_test',
   );
 }
 
@@ -63,18 +53,18 @@ class GalleryTransitionTest {
     await inDirectory<void>(galleryDirectory, () async {
       await flutter('packages', options: <String>['get']);
 
-      final String testDriver = driverFile ?? (semanticsEnabled
-          ? '${testFile}_test'
-          : '${testFile}_with_semantics_test');
+      final String testDriver = semanticsEnabled
+          ? '${testFile}_with_semantics.dart'
+          : '$testFile.dart';
 
       await flutter('drive', options: <String>[
         '--profile',
         if (needFullTimeline)
           '--trace-startup',
         '-t',
-        'test_driver/$testFile.dart',
-        '--driver',
-        'test_driver/$testDriver.dart',
+        'test_driver/$testDriver',
+        if (driverFile != null)
+          ...<String>['--driver', 'test_driver/$driverFile.dart'],
         '-d',
         deviceId,
       ]);
