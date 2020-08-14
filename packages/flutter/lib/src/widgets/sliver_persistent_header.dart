@@ -62,8 +62,8 @@ abstract class SliverPersistentHeaderDelegate {
 
   /// A [TickerProvider] to use when animating the header's size changes.
   ///
-  /// Must not be null if the persistent header is a floating header, and [delegate]'s
-  /// `snapConfiguration` or `showOnScreenConfiguration` is not null.
+  /// Must not be null if the persistent header is a floating header, and
+  /// [snapConfiguration] or [showOnScreenConfiguration] is not null.
   TickerProvider get vsync => null;
 
   /// Specifies how floating headers should animate in and out of view.
