@@ -194,6 +194,7 @@ class AndroidBuildInfo {
     this.splitPerAbi = false,
     this.shrink = false,
     this.fastStart = false,
+    this.splitAot = false,
   });
 
   // The build info containing the mode and flavor.
@@ -214,6 +215,8 @@ class AndroidBuildInfo {
 
   /// Whether to bootstrap an empty application.
   final bool fastStart;
+
+  final bool splitAot;
 }
 
 /// A summary of the compilation strategy used for Dart.

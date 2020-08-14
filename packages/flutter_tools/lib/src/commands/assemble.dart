@@ -4,6 +4,7 @@
 
 import 'package:meta/meta.dart';
 
+import '../android/setup_split_aot.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
@@ -107,6 +108,8 @@ class AssembleCommand extends FlutterCommand {
     argParser.addOption(kExtraGenSnapshotOptions);
     argParser.addOption(kExtraFrontEndOptions);
     argParser.addOption(kDartDefines);
+    argParser.addOption(kSplitAot);
+    argParser.addOption(kSetupSplitAot);
     argParser.addOption(
       'resource-pool-size',
       help: 'The maximum number of concurrent tasks the build system will run.',
@@ -155,6 +158,8 @@ class AssembleCommand extends FlutterCommand {
     if (results.isEmpty) {
       throwToolExit('No target named "$name" defined.');
     }
+    print('assemble args.rest: ${argResults.rest}');
+    print(results);
     return results;
   }
 
@@ -205,6 +210,18 @@ class AssembleCommand extends FlutterCommand {
     if (argResults.wasParsed(kExtraGenSnapshotOptions)) {
       results[kExtraGenSnapshotOptions] = argResults[kExtraGenSnapshotOptions] as String;
     }
+    results[kSplitAot] = 'false';
+    if (argResults.wasParsed(kSplitAot)) {
+      if (argResults[kSplitAot] == 'true') {
+        results[kSplitAot] = 'true';
+      }
+    }
+    results[kSetupSplitAot] = 'false';
+    if (argResults.wasParsed(kSetupSplitAot)) {
+      if (argResults[kSetupSplitAot] == 'true') {
+        results[kSetupSplitAot] = 'true';
+      }
+    }
     if (argResults.wasParsed(kDartDefines)) {
       results[kDartDefines] = argResults[kDartDefines] as String;
     }
@@ -218,9 +235,10 @@ class AssembleCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     final List<Target> targets = createTargets();
     final Target target = targets.length == 1 ? targets.single : _CompositeTarget(targets);
+    Environment env = createEnvironment();
     final BuildResult result = await globals.buildSystem.build(
       target,
-      createEnvironment(),
+      env,
       buildSystemConfig: BuildSystemConfig(
         resourcePoolSize: argResults.wasParsed('resource-pool-size')
           ? int.tryParse(stringArg('resource-pool-size'))
@@ -257,9 +275,179 @@ class AssembleCommand extends FlutterCommand {
       );
       depfileService.writeToFile(depfile, globals.fs.file(depfileFile));
     }
+    if (argResults.wasParsed(kSetupSplitAot)) {
+      if (argResults[kSetupSplitAot] == 'true') {
+        setupBundleGradle(env, result);
+      }
+    }
     return FlutterCommandResult.success();
   }
+
+//   void setupBundleGradle(Environment env, String moduleName, BuildResult result) {
+//     print('setup Bundle Gradle');
+//     // outputDir: globals.fs.directory(output),
+//     // buildDir: flutterProject.directory
+//     //     .childDirectory('.dart_tool')
+//     //     .childDirectory('flutter_build'),
+//     // projectDir: flutterProject.directory,
+//     // defines: _parseDefines(stringsArg('define')),
+//     // inputs: _parseDefines(stringsArg('input')),
+//     // cacheDir: globals.cache.getRoot(),
+//     // flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+//     // artifacts: globals.artifacts,
+//     // fileSystem: globals.fs,
+//     // logger: globals.logger,
+//     // processManager: globals.processManager,
+//     // engineVersion: globals.artifacts.isLocalEngine
+//     Directory androidDir = env.projectDir.childDirectory('android');
+//     Directory moduleDir = androidDir.childDirectory(moduleName);
+
+//     createDir(moduleDir);
+//     setupFiles(moduleDir, androidDir, moduleName, false, result, env);
+//   }
+
+//   void createDir(Directory moduleDir) {
+//     print('createDir');
+//     // Directory moduleDir = Directory(path.join(modulePath));
+//     if (moduleDir.existsSync()) {
+//       moduleDir.deleteSync(recursive: true);
+//     }
+//   }
+
+//   void setupFiles(Directory moduleDir, Directory androidDir, String moduleName, bool isBase, BuildResult result, Environment env) {
+//     print('setupFiles');
+//     // File(path.join(rootDir, moduleSoPath)).copySync(path.join(modulePath, 'lib', 'libflutter.so'));
+
+//     File stringRes = androidDir.childDirectory('app').childDirectory('src').childDirectory('main').childDirectory('res').childDirectory('values').childFile('strings.xml');
+//     stringRes.createSync(recursive: true);
+//     stringRes.writeAsStringSync(
+// '''
+// <?xml version="1.0" encoding="utf-8"?>
+// <resources>
+//     <string name="moduleName">$moduleName</string>
+// </resources>
+
+// ''', flush: true);
+
+//     File androidManifest = moduleDir.childDirectory('src').childDirectory('main').childFile('AndroidManifest.xml');
+//     androidManifest.createSync(recursive: true);
+// //    sink.write(
+// // '''
+// // <manifest xmlns:dist="http://schemas.android.com/apk/distribution"
+// //     package="com.example.$moduleName"
+// //     split="$moduleName"
+// //     android:isFeatureSplit="${isBase ? false : true}">
+
+// //     <dist:module dist:instant="false"
+// //         dist:title="@string/$moduleName"
+// //         <dist:fusing dist:include="true" />
+// //     </dist:module>
+// //     <dist:delivery>
+// //         <dist:install-time>
+// //             <dist:removable value="false" />
+// //         </dist:install-time>
+// //         <dist:on-demand/>
+// //     </dist:delivery>
+// //     <application android:hasCode="${isBase ? 'true' : 'false'}"${isBase ? ' tools:replace="android:hasCode"' : ''}>
+// //     </application>
+// // </manifest>
+// // ''');
+//     androidManifest.writeAsStringSync(
+// '''
+// <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+//     xmlns:dist="http://schemas.android.com/apk/distribution"
+//     package="com.example.$moduleName">
+
+//     <dist:$moduleName
+//         dist:instant="false"
+//         dist:title="@string/moduleName">
+//         <dist:delivery>
+//             <dist:on-demand />
+//         </dist:delivery>
+//         <dist:fusing dist:include="true" />
+//     </dist:$moduleName>
+// </manifest>
+// ''', flush: true);
+
+//     File settingsGradle = androidDir.childFile('settings.gradle');
+//     File settingsGradleTemp = androidDir.childFile('settings.gradle.temp');
+//     List<String> lines = settingsGradle.readAsLinesSync();
+//     for (String line in lines) {
+//       if (line.length >= 7 && line.substring(0, 7) == 'include') {
+//         List<String> elements = line.substring(7).split(', ');
+//         bool moduleFound = false;
+//         for (int i = 1; i < elements.length; i++) {
+//           if (elements[i] == '\':$moduleName\'') {
+//             moduleFound = true;
+//             break;
+//           }
+//         }
+//         if (!moduleFound) {
+//           line += ', \':$moduleName\'';
+//         }
+//       }
+//       settingsGradleTemp.writeAsStringSync('$line\n', mode: FileMode.append, flush: true);
+//     }
+//     settingsGradleTemp.copySync(settingsGradle.path);
+//     settingsGradleTemp.deleteSync();
+
+//     File moduleBuildGradle = moduleDir.childFile('build.gradle');
+//     moduleBuildGradle.createSync(recursive: true);
+//     moduleBuildGradle.writeAsStringSync(
+// '''
+// apply plugin: "com.android.dynamic-feature"
+
+// android {
+//     compileSdkVersion 28
+
+//     defaultConfig {
+//         minSdkVersion 16
+//         targetSdkVersion 28
+//         versionCode 1
+//         versionName "1.0"
+
+//         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+//     }
+//     compileOptions {
+//         sourceCompatibility 1.8
+//         targetCompatibility 1.8
+//     }
+// }
+
+// dependencies {
+//     implementation fileTree(dir: "libs", include: ["*.jar"])
+//     implementation project(":app")
+//     testImplementation 'junit:junit:4.12'
+//     androidTestImplementation 'com.android.support.test:runner:1.0.2'
+//     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+//     androidTestImplementation 'com.android.support:support-annotations:28.0.0'
+// }
+
+// ''', flush: true);
+
+//     Directory jniLibsDir = moduleDir.childDirectory('src').childDirectory('main').childDirectory('jniLibs');
+//     jniLibsDir.createSync(recursive: true);
+//     List<FileSystemEntity> files = env.outputDir.listSync(recursive: true);
+//     while (files.length != 0) {
+//       FileSystemEntity file = files.last;
+//       if (file is File) {
+//         String subPath = file.path;
+//         if (!subPath.contains('part.so')) {
+//           files.removeLast();
+//           continue;
+//         }
+//         subPath = subPath.substring(subPath.lastIndexOf('release/') + 8);
+//         print(jniLibsDir.childFile(subPath).path);
+//         jniLibsDir.childFile(subPath).createSync(recursive: true);
+//         (file as File).copySync(jniLibsDir.childFile(subPath).path);
+//       }
+//       print(file.path);
+//       files.removeLast();
+//     }
+
+//   }
 }
+
 
 @visibleForTesting
 void writeListIfChanged(List<File> files, String path) {

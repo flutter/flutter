@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:io' as io show Directory, File, Link;
+import 'dart:io' as io show Directory, File, Link, FileSystemEntity;
 
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';

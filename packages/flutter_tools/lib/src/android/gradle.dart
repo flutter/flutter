@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' as io show Directory;
 
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
@@ -222,6 +223,7 @@ Future<void> buildGradleApp({
   @required bool isBuildingBundle,
   @required List<GradleHandledError> localGradleErrors,
   bool shouldBuildPluginAsAar = false,
+  bool isSetup = false,
   int retries = 1,
 }) async {
   assert(project != null);
@@ -267,8 +269,14 @@ Future<void> buildGradleApp({
 
   final BuildInfo buildInfo = androidBuildInfo.buildInfo;
   final String assembleTask = isBuildingBundle
-    ? getBundleTaskFor(buildInfo)
+    ? (isSetup ? 'buildRelease': getBundleTaskFor(buildInfo))
     : getAssembleTaskFor(buildInfo);
+
+  List<String> extraGenSnapshotOptions = buildInfo.extraGenSnapshotOptions ?? <String>[];
+  if (androidBuildInfo.splitAot) {
+    // TODO: --use-no-bare-instructions should be removed when it is no longer needed
+    extraGenSnapshotOptions.add('--no-use-bare-instructions');
+  }
 
   final Status status = globals.logger.startProgress(
     "Running Gradle task '$assembleTask'...",
@@ -308,14 +316,18 @@ Future<void> buildGradleApp({
   if (target != null) {
     command.add('-Ptarget=$target');
   }
+  if (androidBuildInfo.splitAot != null) {
+    command.add('-Psplit-aot=${androidBuildInfo.splitAot}');
+  }
+  command.add('-Psetup-split-aot=${isSetup}');
   assert(buildInfo.trackWidgetCreation != null);
   command.add('-Ptrack-widget-creation=${buildInfo.trackWidgetCreation}');
 
   if (buildInfo.extraFrontEndOptions != null) {
     command.add('-Pextra-front-end-options=${encodeDartDefines(buildInfo.extraFrontEndOptions)}');
   }
-  if (buildInfo.extraGenSnapshotOptions != null) {
-    command.add('-Pextra-gen-snapshot-options=${encodeDartDefines(buildInfo.extraGenSnapshotOptions)}');
+  if (extraGenSnapshotOptions != null && extraGenSnapshotOptions.isNotEmpty) {
+    command.add('-Pextra-gen-snapshot-options=${encodeDartDefines(extraGenSnapshotOptions)}');
   }
   if (buildInfo.fileSystemRoots != null && buildInfo.fileSystemRoots.isNotEmpty) {
     command.add('-Pfilesystem-roots=${buildInfo.fileSystemRoots.join('|')}');
@@ -358,6 +370,11 @@ Future<void> buildGradleApp({
     command.add('-Pperformance-measurement-file=${androidBuildInfo.buildInfo.performanceMeasurementFile}');
   }
   command.add(assembleTask);
+  // if (!isSetup) command.add(assembleTask);
+  // command.add('--debug');
+  command.add('--stacktrace');
+  command.add('--scan');
+  print(command);
 
   GradleHandledError detectedGradleError;
   String detectedGradleErrorLine;

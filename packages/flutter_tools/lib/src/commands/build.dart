@@ -17,6 +17,8 @@ import 'build_bundle.dart';
 import 'build_fuchsia.dart';
 import 'build_ios.dart';
 import 'build_ios_framework.dart';
+import 'build_split_aot.dart';
+import 'build_setup_split_aot.dart';
 import 'build_web.dart';
 
 class BuildCommand extends FlutterCommand {
@@ -24,6 +26,8 @@ class BuildCommand extends FlutterCommand {
     addSubcommand(BuildAarCommand(verboseHelp: verboseHelp));
     addSubcommand(BuildApkCommand(verboseHelp: verboseHelp));
     addSubcommand(BuildAppBundleCommand(verboseHelp: verboseHelp));
+    addSubcommand(BuildSetupSplitAotCommand(verboseHelp: verboseHelp));
+    addSubcommand(BuildSplitAotCommand(verboseHelp: verboseHelp));
     addSubcommand(BuildAotCommand());
     addSubcommand(BuildIOSCommand(verboseHelp: verboseHelp));
     addSubcommand(BuildIOSFrameworkCommand(

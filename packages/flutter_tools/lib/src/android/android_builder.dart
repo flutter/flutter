@@ -45,6 +45,18 @@ abstract class AndroidBuilder {
     @required AndroidBuildInfo androidBuildInfo,
     @required String target,
   });
+
+  Future<void> buildSplitAab({
+    @required FlutterProject project,
+    @required AndroidBuildInfo androidBuildInfo,
+    @required String target,
+  });
+
+  Future<void> buildSplitSetup({
+    @required FlutterProject project,
+    @required AndroidBuildInfo androidBuildInfo,
+    @required String target,
+  });
 }
 
 /// Default implementation of [AarBuilder].
@@ -109,6 +121,7 @@ class _AndroidBuilderImpl extends AndroidBuilder {
       );
     } finally {
       globals.androidSdk?.reinitialize();
+
     }
   }
 
@@ -129,6 +142,48 @@ class _AndroidBuilderImpl extends AndroidBuilder {
       );
     } finally {
       globals.androidSdk?.reinitialize();
+    }
+  }
+
+  /// Builds the Split App Bundle.
+  @override
+  Future<void> buildSplitAab({
+    @required FlutterProject project,
+    @required AndroidBuildInfo androidBuildInfo,
+    @required String target,
+  }) async {
+    try {
+      await buildGradleApp(
+        project: project,
+        androidBuildInfo: androidBuildInfo,
+        target: target,
+        isBuildingBundle: true,
+        isSetup: false,
+        localGradleErrors: gradleErrors,
+      );
+    } finally {
+      globals.androidSdk?.reinitialize();
+    }
+  }
+
+    /// Builds the Split App Bundle.
+  @override
+  Future<void> buildSplitSetup({
+    @required FlutterProject project,
+    @required AndroidBuildInfo androidBuildInfo,
+    @required String target,
+  }) async {
+    try {
+      await buildGradleApp(
+        project: project,
+        androidBuildInfo: androidBuildInfo,
+        target: target,
+        isBuildingBundle: true,
+        isSetup: true,
+        localGradleErrors: gradleErrors,
+      );
+    } finally {
+      // globals.androidSdk?.reinitialize();d
     }
   }
 }

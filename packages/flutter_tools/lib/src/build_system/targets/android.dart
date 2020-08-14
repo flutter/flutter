@@ -213,6 +213,7 @@ class AndroidAot extends AotElfBase {
 
   @override
   Future<void> build(Environment environment) async {
+    print(name);
     final AOTSnapshotter snapshotter = AOTSnapshotter(
       reportTimings: false,
       fileSystem: environment.fileSystem,
@@ -230,6 +231,9 @@ class AndroidAot extends AotElfBase {
       output.createSync(recursive: true);
     }
     final List<String> extraGenSnapshotOptions = decodeDartDefines(environment.defines, kExtraGenSnapshotOptions);
+    if (environment.defines[kSplitAot] == 'true') {
+      extraGenSnapshotOptions.add('--loading_unit_manifest=${output.path}/manifest.json');
+    }
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
     final int snapshotExitCode = await snapshotter.build(
@@ -294,15 +298,29 @@ class AndroidAotBundle extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    final File outputFile = environment.buildDir
-      .childDirectory(_androidAbiName)
-      .childFile('app.so');
+    print(name);
+    final Directory buildDir = environment.buildDir.childDirectory(_androidAbiName);
+    // final Directory moduleDir = environment.projectDir.cchildDirectory(_androidAbiName);
     final Directory outputDirectory = environment.outputDir
       .childDirectory(_androidAbiName);
     if (!outputDirectory.existsSync()) {
       outputDirectory.createSync(recursive: true);
     }
-    outputFile.copySync(outputDirectory.childFile('app.so').path);
+    for (FileSystemEntity file in buildDir.listSync()) {
+      if (file is File) {
+        (file as File).copySync(outputDirectory.childFile(file.path.split('/').last).path);
+
+      }
+    }
+    // final File outputFile = environment.buildDir
+    //   .childDirectory(_androidAbiName)
+    //   .childFile('app.so');
+    // final Directory outputDirectory = environment.outputDir
+    //   .childDirectory(_androidAbiName);
+    // if (!outputDirectory.existsSync()) {
+    //   outputDirectory.createSync(recursive: true);
+    // }
+    // outputFile.copySync(outputDirectory.childFile('app.so').path);
   }
 }
 

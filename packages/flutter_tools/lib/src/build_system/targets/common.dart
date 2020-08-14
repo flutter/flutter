@@ -43,6 +43,10 @@ const String kExtraFrontEndOptions = 'ExtraFrontEndOptions';
 /// This is expected to be a comma separated list of strings.
 const String kExtraGenSnapshotOptions = 'ExtraGenSnapshotOptions';
 
+const String kSplitAot = 'SplitAot';
+
+const String kSetupSplitAot = 'SetupSplitAot';
+
 /// Whether to strip source code information out of release builds and where to save it.
 const String kSplitDebugInfo = 'SplitDebugInfo';
 

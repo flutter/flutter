@@ -628,6 +628,14 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('performance-measurement-file')) {
             performanceMeasurementFileValue = project.property('performance-measurement-file')
         }
+        Boolean splitAotValue = false
+        if (project.hasProperty('split-aot')) {
+            splitAotValue = project.property('split-aot').toBoolean()
+        }
+        Boolean setupSplitAotValue = false
+        if (project.hasProperty('setup-split-aot')) {
+            setupSplitAotValue = project.property('setup-split-aot').toBoolean()
+        }
         def targetPlatforms = getTargetPlatforms()
         def addFlutterDeps = { variant ->
             if (shouldSplitPerAbi()) {
@@ -644,6 +652,7 @@ class FlutterPlugin implements Plugin<Project> {
                 }
             }
             String variantBuildMode = buildModeFor(variant.buildType)
+            println "VAR BUILD MODE: ${variantBuildMode}"
             String taskName = toCammelCase(["compile", FLUTTER_BUILD_PREFIX, variant.name])
             FlutterTask compileTask = project.tasks.create(name: taskName, type: FlutterTask) {
                 flutterRoot this.flutterRoot
@@ -668,6 +677,8 @@ class FlutterPlugin implements Plugin<Project> {
                 dartDefines dartDefinesValue
                 bundleSkSLPath bundleSkSLPathValue
                 performanceMeasurementFile performanceMeasurementFileValue
+                splitAot splitAotValue
+                setupSplitAot setupSplitAotValue
                 doLast {
                     project.exec {
                         if (Os.isFamily(Os.FAMILY_WINDOWS)) {
@@ -678,7 +689,9 @@ class FlutterPlugin implements Plugin<Project> {
                     }
                 }
             }
+            
             File libJar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/libs.jar")
+            println libJar.path
             Task packFlutterAppAotTask = project.tasks.create(name: "packLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
                 destinationDir libJar.parentFile
                 archiveName libJar.name
@@ -686,7 +699,7 @@ class FlutterPlugin implements Plugin<Project> {
                 targetPlatforms.each { targetPlatform ->
                     String abi = PLATFORM_ARCH_MAP[targetPlatform]
                     from("${compileTask.intermediateDir}/${abi}") {
-                        include "*.so"
+                        include "app.so"
                         // Move `app.so` to `lib/<abi>/libapp.so`
                         rename { String filename ->
                             return "lib/${abi}/lib${filename}"
@@ -694,9 +707,33 @@ class FlutterPlugin implements Plugin<Project> {
                     }
                 }
             }
+            // if (splitAotValue) {
+            //     File libJar2 = project.file("${project.buildDir}/../module/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/libs.jar")
+            //     println libJar2.path
+            //     Task nextTask = project.tasks.create(name: "packLibsModule${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
+            //         destinationDir libJar2.parentFile
+            //         archiveName libJar2.name
+            //         dependsOn compileTask
+            //         targetPlatforms.each { targetPlatform ->
+            //             println "RUNNING CUSTOM COPY LIB JAR TSK ${variant}"
+            //             String abi = PLATFORM_ARCH_MAP[targetPlatform]
+            //             from("${compileTask.intermediateDir}/${abi}") {
+            //                 include "*part.so"
+            //                 // Move `app.so` to `lib/<abi>/libapp.so`
+            //                 rename { String filename ->
+            //                     return "lib/${abi}/lib${filename}"
+            //                 }
+            //             }
+            //         }
+            //     }
+            //     addApiDependencies(project, variant.name, project.files {
+            //         nextTask
+            //     })
+            // }
             addApiDependencies(project, variant.name, project.files {
                 packFlutterAppAotTask
             })
+
             // We build an AAR when this property is defined.
             boolean isBuildingAar = project.hasProperty('is-plugin')
             // In add to app scenarios, a Gradle project contains a `:flutter` and `:app` project.
@@ -768,7 +805,11 @@ class FlutterPlugin implements Plugin<Project> {
                 }
             }
         }
-        if (project.android.hasProperty("applicationVariants")) {
+        if (setupSplitAotValue) {
+            println "DOING SETUP STUFF"
+            addFlutterDeps(project.android.applicationVariants[1]);
+        } else if (project.android.hasProperty("applicationVariants")) {
+            println "DOING NORMAL STUFF"
             project.android.applicationVariants.all { variant ->
                 addFlutterDeps(variant)
                 // Copy the output APKs into a known location, so `flutter run` or `flutter build apk`
@@ -779,6 +820,7 @@ class FlutterPlugin implements Plugin<Project> {
                 //   * `abi` can be `armeabi-v7a|arm64-v8a|x86|x86_64` only if the flag `split-per-abi` is set.
                 //   * `flavor-name` is the flavor used to build the app in lower case if the assemble task is called.
                 //   * `build-mode` can be `release|debug|profile`.
+                println "VARIANT: ${variant.name}"
                 variant.outputs.all { output ->
                     // `assemble` became `assembleProvider` in AGP 3.3.0.
                     def assembleTask = variant.hasProperty("assembleProvider")
@@ -863,6 +905,10 @@ abstract class BaseFlutterTask extends DefaultTask {
     @Optional @Input
     String bundleSkSLPath
     String performanceMeasurementFile;
+    @Optional @Input
+    Boolean splitAot
+    @Optional @Input
+    Boolean setupSplitAot
 
     @OutputFiles
     FileCollection getDependenciesFiles() {
@@ -944,6 +990,12 @@ abstract class BaseFlutterTask extends DefaultTask {
             if (extraFrontEndOptions != null) {
                 args "--ExtraFrontEndOptions=${extraFrontEndOptions}"
             }
+            if (splitAot == true) {
+                args "--SplitAot=true"
+            }
+            if (setupSplitAot == true) {
+                args "--SetupSplitAot=true"
+            }
             args ruleNames
         }
     }
@@ -999,6 +1051,72 @@ class FlutterTask extends BaseFlutterTask {
           sources += readDependencies(depfile, true)
         }
         return sources + project.files('pubspec.yaml')
+    }
+
+    @OutputFiles
+    FileCollection getOutputFiles() {
+        FileCollection sources = project.files()
+        for (File depfile in getDependenciesFiles()) {
+          sources += readDependencies(depfile, false)
+        }
+        return sources
+    }
+
+    @TaskAction
+    void build() {
+        buildBundle()
+    }
+}
+
+class SplitAotTask extends DefaultTask {
+    File flutterRoot
+    // File flutterExecutable
+    // String buildMode
+    // @Optional @Input
+    // String localEngine
+    // @Optional @Input
+    // String localEngineSrcPath
+    // @Input
+    // Boolean fastStart
+    // @Input
+    // String targetPath
+    // @Optional
+    // Boolean verbose
+    // @Optional @Input
+    // String[] fileSystemRoots
+    // @Optional @Input
+    // String fileSystemScheme
+    // @Input
+    // Boolean trackWidgetCreation
+    // @Optional @Input
+    // List<String> targetPlatformValues
+    // File sourceDir
+    // File intermediateDir
+    // @Optional @Input
+    // String extraFrontEndOptions
+    // @Optional @Input
+    // String extraGenSnapshotOptions
+    // @Optional @Input
+    // String splitDebugInfo
+    // @Optional @Input
+    // Boolean treeShakeIcons
+    // @Optional @Input
+    // Boolean dartObfuscation
+    // @Optional @Input
+    // String dartDefines
+    // @Optional @Input
+    // String bundleSkSLPath
+    // String performanceMeasurementFile;
+    // @Optional @Input
+    // Boolean splitAot
+
+    @OutputFiles
+    FileCollection getDependenciesFiles() {
+        FileCollection depfiles = project.files()
+
+        // Includes all sources used in the flutter compilation.
+        depfiles += project.files("${intermediateDir}/flutter_build.d")
+        return depfiles
     }
 
     @OutputFiles
