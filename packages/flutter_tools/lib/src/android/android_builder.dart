@@ -38,5 +38,7 @@ abstract class AndroidBuilder {
     @required FlutterProject project,
     @required AndroidBuildInfo androidBuildInfo,
     @required String target,
+    bool verifyDeferredComponents = true,
+    bool deferredComponentsEnabled = false,
   });
 }

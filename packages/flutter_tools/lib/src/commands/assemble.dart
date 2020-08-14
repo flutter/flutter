@@ -6,6 +6,7 @@
 
 import 'package:meta/meta.dart';
 
+import '../android/deferred_components_setup_validator.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
@@ -14,6 +15,7 @@ import '../build_system/depfile.dart';
 import '../build_system/targets/android.dart';
 import '../build_system/targets/assets.dart';
 import '../build_system/targets/common.dart';
+import '../build_system/targets/deferred_components.dart';
 import '../build_system/targets/ios.dart';
 import '../build_system/targets/linux.dart';
 import '../build_system/targets/macos.dart';
@@ -27,34 +29,34 @@ import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 
 /// All currently implemented targets.
-const List<Target> _kDefaultTargets = <Target>[
+List<Target> _kDefaultTargets = <Target>[
   // Shared targets
-  CopyAssets(),
-  KernelSnapshot(),
-  AotElfProfile(TargetPlatform.android_arm),
-  AotElfRelease(TargetPlatform.android_arm),
-  AotAssemblyProfile(),
-  AotAssemblyRelease(),
+  const CopyAssets(),
+  const KernelSnapshot(),
+  const AotElfProfile(TargetPlatform.android_arm),
+  const AotElfRelease(TargetPlatform.android_arm),
+  const AotAssemblyProfile(),
+  const AotAssemblyRelease(),
   // macOS targets
-  DebugMacOSFramework(),
-  DebugMacOSBundleFlutterAssets(),
-  ProfileMacOSBundleFlutterAssets(),
-  ReleaseMacOSBundleFlutterAssets(),
+  const DebugMacOSFramework(),
+  const DebugMacOSBundleFlutterAssets(),
+  const ProfileMacOSBundleFlutterAssets(),
+  const ReleaseMacOSBundleFlutterAssets(),
   // Linux targets
-  DebugBundleLinuxAssets(TargetPlatform.linux_x64),
-  DebugBundleLinuxAssets(TargetPlatform.linux_arm64),
-  ProfileBundleLinuxAssets(TargetPlatform.linux_x64),
-  ProfileBundleLinuxAssets(TargetPlatform.linux_arm64),
-  ReleaseBundleLinuxAssets(TargetPlatform.linux_x64),
-  ReleaseBundleLinuxAssets(TargetPlatform.linux_arm64),
+  const DebugBundleLinuxAssets(TargetPlatform.linux_x64),
+  const DebugBundleLinuxAssets(TargetPlatform.linux_arm64),
+  const ProfileBundleLinuxAssets(TargetPlatform.linux_x64),
+  const ProfileBundleLinuxAssets(TargetPlatform.linux_arm64),
+  const ReleaseBundleLinuxAssets(TargetPlatform.linux_x64),
+  const ReleaseBundleLinuxAssets(TargetPlatform.linux_arm64),
   // Web targets
-  WebServiceWorker(),
-  ReleaseAndroidApplication(),
+  const WebServiceWorker(),
+  const ReleaseAndroidApplication(),
   // This is a one-off rule for bundle and aot compat.
-  CopyFlutterBundle(),
+  const CopyFlutterBundle(),
   // Android targets,
-  DebugAndroidApplication(),
-  ProfileAndroidApplication(),
+  const DebugAndroidApplication(),
+  const ProfileAndroidApplication(),
   // Android ABI specific AOT rules.
   androidArmProfileBundle,
   androidArm64ProfileBundle,
@@ -62,15 +64,22 @@ const List<Target> _kDefaultTargets = <Target>[
   androidArmReleaseBundle,
   androidArm64ReleaseBundle,
   androidx64ReleaseBundle,
+  // Deferred component enabled AOT rules
+  androidArmProfileDeferredComponentsBundle,
+  androidArm64ProfileDeferredComponentsBundle,
+  androidx64ProfileDeferredComponentsBundle,
+  androidArmReleaseDeferredComponentsBundle,
+  androidArm64ReleaseDeferredComponentsBundle,
+  androidx64ReleaseDeferredComponentsBundle,
   // iOS targets
-  DebugIosApplicationBundle(),
-  ProfileIosApplicationBundle(),
-  ReleaseIosApplicationBundle(),
+  const DebugIosApplicationBundle(),
+  const ProfileIosApplicationBundle(),
+  const ReleaseIosApplicationBundle(),
   // Windows targets
-  UnpackWindows(),
-  DebugBundleWindowsAssets(),
-  ProfileBundleWindowsAssets(),
-  ReleaseBundleWindowsAssets(),
+  const UnpackWindows(),
+  const DebugBundleWindowsAssets(),
+  const ProfileBundleWindowsAssets(),
+  const ReleaseBundleWindowsAssets(),
 ];
 
 // TODO(ianh): https://github.com/dart-lang/args/issues/181 will allow us to remove useLegacyNames
@@ -118,9 +127,21 @@ class AssembleCommand extends FlutterCommand {
     );
     usesExtraDartFlagOptions(verboseHelp: verboseHelp, useLegacyNames: useLegacyNames);
     usesDartDefineOption(useLegacyNames: useLegacyNames);
+    argParser.addOption(kSplitAot);
     argParser.addOption(
       'resource-pool-size',
       help: 'The maximum number of concurrent tasks the build system will run.',
+    );
+    argParser.addFlag('verify-deferred-components',
+      negatable: true,
+      defaultsTo: true,
+      help: 'When enabled, deferred component apps will fail to build if setup problems are '
+            'detected that would prevent deferred components from functioning properly. The '
+            'tooling also provides guidance on how to set up the project files to pass this '
+            'verification. Disabling setup verification will always attempt to fully build '
+            'the app regardless of any problems detected. Builds that are part of CI testing '
+            'and advanced users custom deferred components implementations should disable'
+            'setup verification.',
     );
   }
 
@@ -169,6 +190,24 @@ class AssembleCommand extends FlutterCommand {
       throwToolExit('No target named "$name" defined.');
     }
     return results;
+  }
+
+  bool isDeferredComponentsTargets() {
+    for (final String targetName in argResults.rest) {
+      if (deferredComponentsTargets.contains(targetName)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool isDebug() {
+    for (final String targetName in argResults.rest) {
+      if (targetName.contains('debug')) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /// The environmental configuration for a build invocation.
@@ -221,6 +260,13 @@ class AssembleCommand extends FlutterCommand {
     if (argResults.wasParsed(useLegacyNames ? kDartDefines : FlutterOptions.kDartDefinesOption)) {
       results[kDartDefines] = (argResults[useLegacyNames ? kDartDefines : FlutterOptions.kDartDefinesOption] as List<String>).join(',');
     }
+    results[kSplitAot] = 'false';
+    if (FlutterProject.current().manifest.deferredComponents != null && isDeferredComponentsTargets()) {
+      results[kSplitAot] = 'true';
+    }
+    if (argResults.wasParsed(kDartDefines)) {
+      results[kDartDefines] = argResults[kDartDefines] as String;
+    }
     if (argResults.wasParsed(useLegacyNames ? kExtraFrontEndOptions : FlutterOptions.kExtraFrontEndOptions)) {
       results[kExtraFrontEndOptions] = (argResults[useLegacyNames ? kExtraFrontEndOptions : FlutterOptions.kExtraFrontEndOptions] as List<String>).join(',');
     }
@@ -230,10 +276,29 @@ class AssembleCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final List<Target> targets = createTargets();
-    final Target target = targets.length == 1 ? targets.single : CompositeTarget(targets);
-    final BuildResult result = await _buildSystem.build(
+    Target target = CompositeTarget(targets);
+    final Environment env = createEnvironment();
+    // Do the remaining setup verification not handled in build_appbundle as
+    // now the compilation has completed and the generated loading units are
+    // available. Checks performed here all require loading units.
+    if (FlutterProject.current().manifest.deferredComponents != null
+        && boolArg('verify-deferred-components')
+        && isDeferredComponentsTargets()
+        && !isDebug()) {
+      target = DeferredComponentsSetupValidatorTarget(
+        tasks: <DeferredComponentsSetupValidatorTask>[
+          DeferredComponentsSetupValidatorTask.checkAppAndroidManifestComponentLoadingUnitMapping,
+          DeferredComponentsSetupValidatorTask.checkAgainstLoadingUnitGolden,
+          DeferredComponentsSetupValidatorTask.writeGolden,
+        ],
+        dependency: target as CompositeTarget,
+        title: 'Deferred components setup verification part 2 of 2',
+        name: 'deferred_components_setup_validator_2',
+      );
+    }
+    final BuildResult result = await globals.buildSystem.build(
       target,
-      createEnvironment(),
+      env,
       buildSystemConfig: BuildSystemConfig(
         resourcePoolSize: argResults.wasParsed('resource-pool-size')
           ? int.tryParse(stringArg('resource-pool-size'))
@@ -251,6 +316,7 @@ class AssembleCommand extends FlutterCommand {
       throwToolExit('');
     }
     globals.printTrace('build succeeded.');
+
     if (argResults.wasParsed('build-inputs')) {
       writeListIfChanged(result.inputFiles, stringArg('build-inputs'));
     }
