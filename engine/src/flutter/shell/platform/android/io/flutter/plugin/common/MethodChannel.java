@@ -90,7 +90,7 @@ public class MethodChannel {
    * @param callback a {@link Result} callback for the invocation result, or null.
    */
   @UiThread
-  public void invokeMethod(String method, @Nullable Object arguments, Result callback) {
+  public void invokeMethod(String method, @Nullable Object arguments, @Nullable Result callback) {
     messenger.send(
         name,
         codec.encodeMethodCall(new MethodCall(method, arguments)),
