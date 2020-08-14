@@ -6,8 +6,11 @@
 #include <vector>
 
 #include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/standard_message_codec.h"
-#include "flutter/shell/platform/common/cpp/client_wrapper/testing/test_codec_extensions.h"
 #include "gtest/gtest.h"
+
+#ifndef USE_LEGACY_ENCODABLE_VALUE
+#include "flutter/shell/platform/common/cpp/client_wrapper/testing/test_codec_extensions.h"
+#endif
 
 namespace flutter {
 
@@ -30,11 +33,21 @@ static void CheckEncodeDecode(
   EXPECT_EQ(*encoded, expected_encoding);
 
   auto decoded = codec.DecodeMessage(*encoded);
+#ifdef USE_LEGACY_ENCODABLE_VALUE
+  // Full equality isn't implemented for the legacy path; just do a sanity test
+  // of basic types.
+  if (value.IsNull() || value.IsBool() || value.IsInt() || value.IsLong() ||
+      value.IsDouble() || value.IsString()) {
+    EXPECT_FALSE(value < *decoded);
+    EXPECT_FALSE(*decoded < value);
+  }
+#else
   if (custom_comparator) {
     EXPECT_TRUE(custom_comparator(value, *decoded));
   } else {
     EXPECT_EQ(value, *decoded);
   }
+#endif
 }
 
 // Validates round-trip encoding and decoding of |value|, and checks that the
@@ -46,7 +59,11 @@ static void CheckEncodeDecodeWithEncodePrefix(
     const EncodableValue& value,
     const std::vector<uint8_t>& expected_encoding_prefix,
     size_t expected_encoding_length) {
+#ifdef USE_LEGACY_ENCODABLE_VALUE
+  EXPECT_TRUE(value.IsMap());
+#else
   EXPECT_TRUE(std::holds_alternative<EncodableMap>(value));
+#endif
   const StandardMessageCodec& codec = StandardMessageCodec::GetInstance();
   auto encoded = codec.EncodeMessage(value);
   ASSERT_TRUE(encoded);
@@ -58,7 +75,12 @@ static void CheckEncodeDecodeWithEncodePrefix(
       expected_encoding_prefix.begin(), expected_encoding_prefix.end()));
 
   auto decoded = codec.DecodeMessage(*encoded);
+
+#ifdef USE_LEGACY_ENCODABLE_VALUE
+  EXPECT_NE(decoded, nullptr);
+#else
   EXPECT_EQ(value, *decoded);
+#endif
 }
 
 TEST(StandardMessageCodec, CanEncodeAndDecodeNull) {
@@ -182,6 +204,8 @@ TEST(StandardMessageCodec, CanEncodeAndDecodeFloat64Array) {
   CheckEncodeDecode(value, bytes);
 }
 
+#ifndef USE_LEGACY_ENCODABLE_VALUE
+
 TEST(StandardMessageCodec, CanEncodeAndDecodeSimpleCustomType) {
   std::vector<uint8_t> bytes = {0x80, 0x09, 0x00, 0x00, 0x00,
                                 0x10, 0x00, 0x00, 0x00};
@@ -216,5 +240,7 @@ TEST(StandardMessageCodec, CanEncodeAndDecodeVariableLengthCustomType) {
                     bytes, &SomeDataExtensionSerializer::GetInstance(),
                     some_data_comparator);
 }
+
+#endif  // !USE_LEGACY_ENCODABLE_VALUE
 
 }  // namespace flutter
