@@ -584,6 +584,11 @@ class Shell final : public PlatformView::Delegate,
       const ServiceProtocol::Handler::ServiceProtocolMap& params,
       rapidjson::Document* response);
 
+  // Service protocol handler
+  bool OnServiceProtocolEstimateRasterCacheMemory(
+      const ServiceProtocol::Handler::ServiceProtocolMap& params,
+      rapidjson::Document* response);
+
   fml::WeakPtrFactory<Shell> weak_factory_;
 
   // For accessing the Shell via the raster thread, necessary for various
