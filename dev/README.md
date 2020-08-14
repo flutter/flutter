@@ -7,9 +7,9 @@ The tests in this directory are run in the `framework_tests_misc-*`
 shards.
 
 ## Luci builder file
-`try_builders.json` and `prod_builders.json` contain the 
-supported luci try/prod builders for flutter. 
-### `try_builders.json` 
+`try_builders.json` and `prod_builders.json` contain the supported luci
+try/prod builders for flutter.
+### `try_builders.json`
 It follows format:
 ```json
 {
@@ -24,7 +24,7 @@ It follows format:
 }
 ```
 * enabled(optional): `true` is the default value if unspecified
-### `prod_builders.json` 
+### `prod_builders.json`
 It follows format:
 ```json
 {
@@ -38,7 +38,7 @@ It follows format:
     ]
 }
 ```
-`try_builders.json` will be mainly used in 
+`try_builders.json` will be mainly used in
 [`flutter/cocoon`](https://github.com/flutter/cocoon) to trigger/update pre-submit
 flutter luci tasks, whereas `prod_builders.json` will be mainly used in `flutter/cocoon`
 to refresh luci task statuses to [dashboard](https://flutter-dashboard.appspot.com).
