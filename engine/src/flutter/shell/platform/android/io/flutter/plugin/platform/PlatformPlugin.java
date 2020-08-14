@@ -30,7 +30,8 @@ public class PlatformPlugin {
   private PlatformChannel.SystemChromeStyle currentTheme;
   private int mEnabledOverlays;
 
-  private final PlatformChannel.PlatformMessageHandler mPlatformMessageHandler =
+  @VisibleForTesting
+  final PlatformChannel.PlatformMessageHandler mPlatformMessageHandler =
       new PlatformChannel.PlatformMessageHandler() {
         @Override
         public void playSystemSound(@NonNull PlatformChannel.SoundType soundType) {
@@ -84,6 +85,14 @@ public class PlatformPlugin {
         @Override
         public void setClipboardData(@NonNull String text) {
           PlatformPlugin.this.setClipboardData(text);
+        }
+
+        @Override
+        public boolean clipboardHasStrings() {
+          CharSequence data =
+              PlatformPlugin.this.getClipboardData(
+                  PlatformChannel.ClipboardContentFormat.PLAIN_TEXT);
+          return data != null && data.length() > 0;
         }
       };
 
