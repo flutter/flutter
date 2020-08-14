@@ -56,7 +56,8 @@ void main() {
       testLayerLifeCycle((SceneBuilder sceneBuilder, EngineLayer oldLayer) {
         return sceneBuilder.pushClipRRect(
             RRect.fromLTRBR(10, 20, 30, 40, const Radius.circular(3)),
-            oldLayer: oldLayer);
+            oldLayer: oldLayer,
+            clipBehavior: Clip.none);
       }, () {
         return '''
 <s>

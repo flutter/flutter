@@ -173,7 +173,7 @@ class CkImageShader extends CkShader implements ui.ImageShader {
   SkShader createDefault() => _skImage.skImage.makeShader(
     toSkTileMode(tileModeX),
     toSkTileMode(tileModeY),
-    matrix4 != null ? toSkMatrixFromFloat64(matrix4) : null,
+    toSkMatrixFromFloat64(matrix4),
   );
 
   @override

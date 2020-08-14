@@ -1157,5 +1157,6 @@ EngineLineMetrics line(
     lineNumber: lineNumber,
     left: left,
     endIndexWithoutNewlines: -1,
+    widthWithTrailingSpaces: width,
   );
 }
