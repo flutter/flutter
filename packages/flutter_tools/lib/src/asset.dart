@@ -4,10 +4,13 @@
 
 // @dart = 2.8
 
+import 'dart:io' as io;
+
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
 import 'base/context.dart';
+import 'base/deferred_component.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
@@ -17,6 +20,7 @@ import 'convert.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'flutter_manifest.dart';
+import 'globals.dart' as globals;
 import 'license_collector.dart';
 import 'project.dart';
 
@@ -53,7 +57,8 @@ abstract class AssetBundleFactory {
     @required Logger logger,
     @required FileSystem fileSystem,
     @required Platform platform,
-  }) => _ManifestAssetBundleFactory(logger: logger, fileSystem: fileSystem, platform: platform);
+    BuildMode buildMode,
+  }) => _ManifestAssetBundleFactory(logger: logger, fileSystem: fileSystem, platform: platform, buildMode: buildMode);
 
   /// Creates a new [AssetBundle].
   AssetBundle createBundle();
@@ -61,6 +66,8 @@ abstract class AssetBundleFactory {
 
 abstract class AssetBundle {
   Map<String, DevFSContent> get entries;
+
+  Map<String, Map<String, DevFSContent>> get splitEntries;
 
   /// Additional files that this bundle depends on that are not included in the
   /// output result.
@@ -75,6 +82,7 @@ abstract class AssetBundle {
     String manifestPath = defaultManifestPath,
     String assetDirPath,
     @required String packagesPath,
+    bool deferredComponentsEnabled = false,
   });
 }
 
@@ -83,16 +91,19 @@ class _ManifestAssetBundleFactory implements AssetBundleFactory {
     @required Logger logger,
     @required FileSystem fileSystem,
     @required Platform platform,
+    BuildMode buildMode,
   }) : _logger = logger,
        _fileSystem = fileSystem,
-       _platform = platform;
+       _platform = platform,
+       _buildMode = buildMode;
 
   final Logger _logger;
   final FileSystem _fileSystem;
   final Platform _platform;
+  final BuildMode _buildMode;
 
   @override
-  AssetBundle createBundle() => ManifestAssetBundle(logger: _logger, fileSystem: _fileSystem, platform: _platform);
+  AssetBundle createBundle() => ManifestAssetBundle(logger: _logger, fileSystem: _fileSystem, platform: _platform, buildMode: _buildMode);
 }
 
 /// An asset bundle based on a pubspec.yaml file.
@@ -103,18 +114,24 @@ class ManifestAssetBundle implements AssetBundle {
     @required Logger logger,
     @required FileSystem fileSystem,
     @required Platform platform,
+    BuildMode buildMode,
   }) : _logger = logger,
        _fileSystem = fileSystem,
        _platform = platform,
+       _buildMode = buildMode,
        _licenseCollector = LicenseCollector(fileSystem: fileSystem);
 
   final Logger _logger;
   final FileSystem _fileSystem;
   final LicenseCollector _licenseCollector;
   final Platform _platform;
+  final BuildMode _buildMode;
 
   @override
   final Map<String, DevFSContent> entries = <String, DevFSContent>{};
+
+  @override
+  final Map<String, Map<String, DevFSContent>> splitEntries = <String, Map<String, DevFSContent>>{};
 
   // If an asset corresponds to a wildcard directory, then it may have been
   // updated without changes to the manifest. These are only tracked for
@@ -163,6 +180,7 @@ class ManifestAssetBundle implements AssetBundle {
     String manifestPath = defaultManifestPath,
     String assetDirPath,
     @required String packagesPath,
+    bool deferredComponentsEnabled = false,
   }) async {
     assetDirPath ??= getAssetBuildDirectory();
     FlutterProject flutterProject;
@@ -283,6 +301,49 @@ class ManifestAssetBundle implements AssetBundle {
           packageName: package.name,
           primary: false,
         ));
+      }
+    }
+
+    // Parse assets for  deferred components.
+    final List<DeferredComponent> components = flutterManifest.deferredComponents;
+    if (components != null) {
+      final Map<_Asset, List<_Asset>> deferredComponentsAssetVariants = <_Asset, List<_Asset>>{};
+      for (final DeferredComponent component in components) {
+        splitEntries[component.name] = <String, DevFSContent>{};
+        final _AssetDirectoryCache cache = _AssetDirectoryCache(<String>[], _fileSystem);
+        for (final Uri assetUri in component.assets) {
+          final String assetGlobalPath = globals.fs.path.absolute(flutterProject.directory.path + io.Platform.pathSeparator + assetUri.path);
+          final File assetFile = globals.fs.file(assetGlobalPath);
+          if (_buildMode == BuildMode.debug || _buildMode == BuildMode.jitRelease) {
+            entries[assetUri.path] = DevFSFileContent(assetFile);
+          } else {
+            splitEntries[component.name][assetUri.path] = DevFSFileContent(assetFile);
+          }
+
+          if (assetUri.path.endsWith('/')) {
+            wildcardDirectories.add(assetUri);
+            _parseAssetsFromFolder(
+              packageConfig,
+              flutterManifest,
+              assetBasePath,
+              cache,
+              deferredComponentsAssetVariants,
+              assetUri,
+            );
+          } else {
+            _parseAssetFromFile(
+              packageConfig,
+              flutterManifest,
+              assetBasePath,
+              cache,
+              deferredComponentsAssetVariants,
+              assetUri,
+            );
+          }
+        }
+      }
+      if (_buildMode == BuildMode.debug || !deferredComponentsEnabled) {
+        assetVariants.addAll(deferredComponentsAssetVariants);
       }
     }
 

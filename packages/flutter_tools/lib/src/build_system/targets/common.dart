@@ -131,6 +131,7 @@ class CopyFlutterBundle extends Target {
       environment,
       environment.outputDir,
       targetPlatform: TargetPlatform.android,
+      buildMode: buildMode,
     );
     final DepfileService depfileService = DepfileService(
       fileSystem: environment.fileSystem,
