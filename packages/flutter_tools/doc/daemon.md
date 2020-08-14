@@ -259,8 +259,8 @@ The returned `params` will contain:
 The `serve()` command starts a DevTools server if one isn't already running. The return value will contain:
 
 - `success` - whether the server started.
-- `host` - the address host of the server successfully started.
-- `port` - the port of the server successfully started.
+- `host` - the address host if the server successfully started.
+- `port` - the port if the server successfully started.
 
 ## 'flutter run --machine' and 'flutter attach --machine'
 
