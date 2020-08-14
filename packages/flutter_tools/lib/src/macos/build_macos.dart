@@ -87,10 +87,12 @@ Future<void> buildMacOS({
       'OBJROOT=${globals.fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
       'SYMROOT=${globals.fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
       if (verboseLogging)
-        'VERBOSE_SCRIPT_LOGGING=YES',
+        'VERBOSE_SCRIPT_LOGGING=YES'
+      else
+        '-quiet',
       'COMPILER_INDEX_STORE_ENABLE=NO',
       ...environmentVariablesAsXcodeBuildSettings(globals.platform)
-    ], trace: true);
+    ], trace: false);
   } finally {
     status.cancel();
   }

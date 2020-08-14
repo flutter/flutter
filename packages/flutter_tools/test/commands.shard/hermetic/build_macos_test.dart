@@ -86,7 +86,9 @@ void main() {
         'OBJROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
         'SYMROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
         if (verbose)
-          'VERBOSE_SCRIPT_LOGGING=YES',
+          'VERBOSE_SCRIPT_LOGGING=YES'
+        else
+          '-quiet',
         'COMPILER_INDEX_STORE_ENABLE=NO',
       ],
       stdout: 'STDOUT STUFF',
@@ -129,15 +131,15 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
-  testUsingContext('macOS build does not spew stdout to status logger', () async {
+  testUsingContext('macOS build forwards Stdout to status logger', () async {
     final BuildCommand command = BuildCommand();
     createMinimalMockProjectFiles();
 
     await createTestCommandRunner(command).run(
       const <String>['build', 'macos', '--debug']
     );
-    expect(testLogger.statusText, isNot(contains('STDOUT STUFF')));
-    expect(testLogger.traceText, contains('STDOUT STUFF'));
+    expect(testLogger.statusText, contains('STDOUT STUFF'));
+    expect(testLogger.traceText, isNot(contains('STDOUT STUFF')));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
