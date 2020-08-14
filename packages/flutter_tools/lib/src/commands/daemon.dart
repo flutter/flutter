@@ -897,12 +897,19 @@ class DevToolsDomain extends Domain {
 
   Future<Map<String, dynamic>> serve([ Map<String, dynamic> args ]) async {
     _devtoolsLauncher ??= DevtoolsLauncher.instance;
-    final HttpServer server = await _devtoolsLauncher.serve();
+    final DevToolsServerAddress server = await _devtoolsLauncher.serve();
 
-    return<String, dynamic>{
-      'host': server.address.host,
-      'port': server.port,
-    };
+    if (server != null) {
+      return<String, dynamic>{
+        'host': server.host,
+        'port': server.port,
+        'success': server.success,
+      };
+    } else {
+      return<String, dynamic>{
+        'success': false,
+      };
+    }
   }
 
   @override
