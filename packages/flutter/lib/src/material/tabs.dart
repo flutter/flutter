@@ -453,8 +453,32 @@ class _IndicatorPainter extends CustomPainter {
   }
 }
 
-class _TabChangeAnimation extends Animation<double> with AnimationWithParentMixin<double> {
-  _TabChangeAnimation(this.controller, this.index);
+class _ChangeAnimation extends Animation<double> with AnimationWithParentMixin<double> {
+  _ChangeAnimation(this.controller);
+
+  final TabController controller;
+
+  @override
+  Animation<double> get parent => controller.animation;
+
+  @override
+  void removeStatusListener(AnimationStatusListener listener) {
+    if (parent != null)
+      super.removeStatusListener(listener);
+  }
+
+  @override
+  void removeListener(VoidCallback listener) {
+    if (parent != null)
+      super.removeListener(listener);
+  }
+
+  @override
+  double get value => _indexChangeProgress(controller);
+}
+
+class _DragAnimation extends Animation<double> with AnimationWithParentMixin<double> {
+  _DragAnimation(this.controller, this.index);
 
   final TabController controller;
   final int index;
@@ -476,6 +500,7 @@ class _TabChangeAnimation extends Animation<double> with AnimationWithParentMixi
 
   @override
   double get value {
+    assert(!controller.indexIsChanging);
     return (controller.animation.value - index.toDouble()).abs().clamp(0.0, 1.0) as double;
   }
 }
@@ -835,11 +860,13 @@ class _TabBarState extends State<TabBar> {
 
     if (_controllerIsValid) {
       _controller.animation.removeListener(_handleTabControllerAnimationTick);
+      _controller.removeListener(_handleTabControllerTick);
       _controller.removeIndexChangeStartedListener(_handleTabControllerIndexChangeStarted);
     }
     _controller = newController;
     if (_controller != null) {
       _controller.animation.addListener(_handleTabControllerAnimationTick);
+      _controller.addListener(_handleTabControllerTick);
       _controller.addIndexChangeStartedListener(_handleTabControllerIndexChangeStarted);
       _currentIndex = _controller.index;
     }
@@ -889,6 +916,7 @@ class _TabBarState extends State<TabBar> {
     _indicatorPainter.dispose();
     if (_controllerIsValid) {
       _controller.animation.removeListener(_handleTabControllerAnimationTick);
+      _controller.removeListener(_handleTabControllerTick);
       _controller.removeIndexChangeStartedListener(_handleTabControllerIndexChangeStarted);
     }
     _controller = null;
@@ -957,11 +985,16 @@ class _TabBarState extends State<TabBar> {
     }
   }
 
+  void _handleTabControllerTick() {
+    setState(() {
+      // Rebuild the tabs after a (potentially animated) index change
+      // has completed.
+    });
+  }
+
   void _handleTabControllerIndexChangeStarted(int index, Duration duration, Curve curve) {
     if (index != _currentIndex) {
-      setState(() {
-        _currentIndex = index;
-      });
+      _currentIndex = index;
       if (widget.isScrollable)
         _scrollToCurrentIndex(duration, curve);
     }
@@ -1037,24 +1070,28 @@ class _TabBarState extends State<TabBar> {
     // controller during a Hero transition. See https://github.com/flutter/flutter/issues/213.
     if (_controller != null) {
       final int previousIndex = _controller.previousIndex;
-      // Need to check range because tabs size could have been changed.
-      if (previousIndex >= 0 && previousIndex < widget.tabs.length) {
-        final Animation<double> animation = ReverseAnimation(_TabChangeAnimation(_controller, previousIndex));
-        wrappedTabs[previousIndex] = _buildStyledTab(wrappedTabs[previousIndex], false, animation);
-      }
 
-      final int tabIndex = _currentIndex;
-      final Animation<double> centerAnimation = _TabChangeAnimation(_controller, tabIndex);
-      wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], true, centerAnimation);
-      if (_currentIndex > 0) {
-        final int tabIndex = _currentIndex - 1;
-        final Animation<double> previousAnimation = ReverseAnimation(_TabChangeAnimation(_controller, tabIndex));
-        wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], false, previousAnimation);
-      }
-      if (_currentIndex < widget.tabs.length - 1) {
-        final int tabIndex = _currentIndex + 1;
-        final Animation<double> nextAnimation = ReverseAnimation(_TabChangeAnimation(_controller, tabIndex));
-        wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], false, nextAnimation);
+      if (_controller.indexIsChanging) {
+        // The user tapped on a tab, the tab controller's animation is running.
+        assert(_currentIndex != previousIndex);
+        final Animation<double> animation = _ChangeAnimation(_controller);
+        wrappedTabs[_currentIndex] = _buildStyledTab(wrappedTabs[_currentIndex], true, animation);
+        wrappedTabs[previousIndex] = _buildStyledTab(wrappedTabs[previousIndex], false, animation);
+      } else {
+        // The user is dragging the TabBarView's PageView left or right.
+        final int tabIndex = _currentIndex;
+        final Animation<double> centerAnimation = _DragAnimation(_controller, tabIndex);
+        wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], true, centerAnimation);
+        if (_currentIndex > 0) {
+          final int tabIndex = _currentIndex - 1;
+          final Animation<double> previousAnimation = ReverseAnimation(_DragAnimation(_controller, tabIndex));
+          wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], false, previousAnimation);
+        }
+        if (_currentIndex < widget.tabs.length - 1) {
+          final int tabIndex = _currentIndex + 1;
+          final Animation<double> nextAnimation = ReverseAnimation(_DragAnimation(_controller, tabIndex));
+          wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], false, nextAnimation);
+        }
       }
     }
 
