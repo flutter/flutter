@@ -5,10 +5,13 @@
 // @dart = 2.8
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
+import 'container.dart';
 import 'editable_text.dart';
 import 'framework.dart';
+import 'overlay.dart';
 
 /// A type for autocomplete filter functions.
 ///
@@ -391,11 +394,46 @@ class AutocompleteCore<T> extends StatefulWidget {
 }
 
 class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
+  final GlobalKey _fieldKey = GlobalKey();
   AutocompleteController<T> _autocompleteController;
   T _selection;
 
+  // The OverlayEntry containing the results.
+  OverlayEntry _cachedFloatingResults;
+  OverlayEntry get _floatingResults {
+    if (_cachedFloatingResults != null) {
+      return _cachedFloatingResults;
+    }
+
+    assert(_fieldKey.currentContext != null);
+    final RenderBox renderBox = _fieldKey.currentContext.findRenderObject() as RenderBox;
+    final Offset offset = renderBox.localToGlobal(Offset.zero);
+    _cachedFloatingResults = OverlayEntry(
+      builder: (BuildContext context) {
+        return Positioned(
+          top: offset.dy + renderBox.size.height,
+          left: offset.dx,
+          width: renderBox.size.width,
+          height: 200.0,
+          child: widget.buildResults(
+            context,
+            _onSelected,
+            _autocompleteController.results.value,
+          ),
+        );
+      },
+    );
+    return _cachedFloatingResults;
+  }
+
+  // True iff the state indicates that the results should be visible.
+  bool get _shouldShowResults {
+    final List<T> results = _autocompleteController.results.value;
+    return _selection == null && results != null && results.isNotEmpty;
+  }
+
   void _onChangeResults() {
-    setState(() {});
+    _updateOverlay();
   }
 
   void _onChangeQuery() {
@@ -421,6 +459,18 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
     });
   }
 
+  // Hide or show the results overlay, if needed.
+  void _updateOverlay() {
+    if (_shouldShowResults) {
+      _cachedFloatingResults?.remove();
+      _cachedFloatingResults = null;
+      Overlay.of(context).insert(_floatingResults);
+    } else if (_cachedFloatingResults != null) {
+      _cachedFloatingResults.remove();
+      _cachedFloatingResults = null;
+    }
+  }
+
   void _listenToController(AutocompleteController<T> autocompleteController) {
     autocompleteController.results.addListener(_onChangeResults);
     autocompleteController.textEditingController.addListener(_onChangeQuery);
@@ -437,11 +487,17 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
     _autocompleteController = widget.autocompleteController
         ?? AutocompleteController<T>(options: widget.options);
     _listenToController(_autocompleteController);
+
+    SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+      _updateOverlay();
+    });
   }
 
   @override
   void didUpdateWidget(AutocompleteCore<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
+
+    // Handle changes in the AutocompleteController.
     if (widget.autocompleteController == null && oldWidget.autocompleteController != null) {
       _unlistenToController(oldWidget.autocompleteController);
       _autocompleteController = AutocompleteController<T>(
@@ -458,6 +514,8 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
       _autocompleteController = widget.autocompleteController;
       _listenToController(_autocompleteController);
     }
+
+    _updateOverlay();
   }
 
   @override
@@ -471,18 +529,9 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        widget.buildField(context, _autocompleteController.textEditingController),
-        if (_selection == null)
-          Expanded(
-            child: widget.buildResults(
-              context,
-              _onSelected,
-              _autocompleteController.results.value,
-            ),
-          ),
-      ],
+    return Container(
+      key: _fieldKey,
+      child: widget.buildField(context, _autocompleteController.textEditingController),
     );
   }
 }
