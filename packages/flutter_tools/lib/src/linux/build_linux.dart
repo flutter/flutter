@@ -62,7 +62,7 @@ Future<void> buildLinux(
       aotSnapshot: codeSizeFile,
       // This analysis is only supported for release builds.
       outputDirectory: globals.fs.directory(
-        globals.fs.path.join(getLinuxBuildDirectory(), 'runner', 'Release'),
+        globals.fs.path.join(getLinuxBuildDirectory(), 'release', 'bundle'),
       ),
       silent: false,
     );
