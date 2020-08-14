@@ -29,9 +29,7 @@ class RasterCacheResult {
   };
 
   virtual int64_t image_bytes() const {
-    return image_ ? image_->dimensions().area() *
-                        image_->imageInfo().bytesPerPixel()
-                  : 0;
+    return image_ ? image_->imageInfo().computeMinByteSize() : 0;
   };
 
  private:
@@ -169,6 +167,26 @@ class RasterCache {
   size_t GetLayerCachedEntriesCount() const;
 
   size_t GetPictureCachedEntriesCount() const;
+
+  /**
+   * @brief Estimate how much memory is used by picture raster cache entries in
+   * bytes.
+   *
+   * Only SkImage's memory usage is counted as other objects are often much
+   * smaller compared to SkImage. SkImageInfo::computeMinByteSize is used to
+   * estimate the SkImage memory usage.
+   */
+  size_t EstimatePictureCacheByteSize() const;
+
+  /**
+   * @brief Estimate how much memory is used by layer raster cache entries in
+   * bytes.
+   *
+   * Only SkImage's memory usage is counted as other objects are often much
+   * smaller compared to SkImage. SkImageInfo::computeMinByteSize is used to
+   * estimate the SkImage memory usage.
+   */
+  size_t EstimateLayerCacheByteSize() const;
 
  private:
   struct Entry {
