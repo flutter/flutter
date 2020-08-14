@@ -60,7 +60,7 @@ class TestRestorationManager extends RestorationManager {
   /// To turn restoration back on call [restoreFrom].
   void disableRestoration() {
     _restorationData = null;
-    handleRestorationUpdateFromEngine(enabled: false);
+    handleRestorationUpdateFromEngine(enabled: false, data: null);
   }
 
   @override
