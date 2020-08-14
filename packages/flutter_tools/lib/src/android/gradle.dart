@@ -357,6 +357,9 @@ Future<void> buildGradleApp({
   if (androidBuildInfo.buildInfo.performanceMeasurementFile != null) {
     command.add('-Pperformance-measurement-file=${androidBuildInfo.buildInfo.performanceMeasurementFile}');
   }
+  if (buildInfo.codeSizeDirectory != null) {
+    command.add('-Pcode-size-directory=${buildInfo.codeSizeDirectory}');
+  }
   command.add(assembleTask);
 
   GradleHandledError detectedGradleError;
@@ -509,13 +512,16 @@ Future<void> buildGradleApp({
       logger: globals.logger,
       processUtils: ProcessUtils.instance,
     );
+    bool silent = false;
     for (final File file in globals.fs.directory(buildInfo.codeSizeDirectory)
       .listSync()
       .whereType<File>()) {
       final Map<String, Object> output = await sizeAnalyzer.analyzeApkSizeAndAotSnapshot(
         apk: apkFile,
         aotSnapshot: file,
+        silent: silent,
       );
+      silent = true;
       final File outputFile = globals.fsUtils.getUniqueFile(globals.fs.currentDirectory, 'apk-analysis', 'json')
         ..writeAsStringSync(jsonEncode(output));
       // This message is used as a sentinel in analyze_apk_size_test.dart

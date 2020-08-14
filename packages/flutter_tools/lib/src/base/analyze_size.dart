@@ -87,15 +87,18 @@ class SizeAnalyzer {
   Future<Map<String, dynamic>> analyzeApkSizeAndAotSnapshot({
     @required File apk,
     @required File aotSnapshot,
+    bool silent = false,
   }) async {
-    logger.printStatus('▒' * tableWidth);
-    _printEntitySize(
-      '${apk.basename} (total compressed)',
-      byteSize: apk.lengthSync(),
-      level: 0,
-      showColor: false,
-    );
-    logger.printStatus('━' * tableWidth);
+    if (!silent) {
+      logger.printStatus('▒' * tableWidth);
+      _printEntitySize(
+        '${apk.basename} (total compressed)',
+        byteSize: apk.lengthSync(),
+        level: 0,
+        showColor: false,
+      );
+      logger.printStatus('━' * tableWidth);
+    }
     final Directory tempApkContent = fileSystem.systemTempDirectory.createTempSync('flutter_tools.');
     // TODO(peterdjlee): Implement a way to unzip the APK for Windows. See issue #62603.
     String unzipOut;
@@ -124,19 +127,20 @@ class SizeAnalyzer {
     );
     final _SymbolNode aotSnapshotJsonRoot = _parseAotSnapshot(processedAotSnapshotJson);
 
-    for (final _SymbolNode firstLevelPath in apkAnalysisRoot.children) {
-      _printEntitySize(
-        firstLevelPath.name,
-        byteSize: firstLevelPath.byteSize,
-        level: 1,
-      );
-      // Print the expansion of lib directory to show more info for `appFilename`.
-      if (firstLevelPath.name == 'lib') {
-        _printLibChildrenPaths(firstLevelPath, '', aotSnapshotJsonRoot);
+    if (!silent) {
+      for (final _SymbolNode firstLevelPath in apkAnalysisRoot.children) {
+        _printEntitySize(
+          firstLevelPath.name,
+          byteSize: firstLevelPath.byteSize,
+          level: 1,
+        );
+        // Print the expansion of lib directory to show more info for `appFilename`.
+        if (firstLevelPath.name == 'lib') {
+          _printLibChildrenPaths(firstLevelPath, '', aotSnapshotJsonRoot);
+        }
       }
+      logger.printStatus('▒' * tableWidth);
     }
-
-    logger.printStatus('▒' * tableWidth);
 
     Map<String, dynamic> apkAnalysisJson = apkAnalysisRoot.toJson();
 

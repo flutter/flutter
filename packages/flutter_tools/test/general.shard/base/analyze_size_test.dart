@@ -177,4 +177,63 @@ void main() {
       ]),
     );
   });
+
+  test('can analyze contents of output directory', () async {
+    final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
+      fileSystem: fileSystem,
+      logger: logger,
+      processUtils: ProcessUtils(
+        processManager: processManager,
+        logger: logger,
+      ),
+      appFilenamePattern: RegExp(r'lib.*app\.so'),
+    );
+
+    final Directory outputDirectory = fileSystem.directory('example/out/foo.app')
+      ..createSync(recursive: true);
+    outputDirectory.childFile('a.txt')
+      ..createSync()
+      ..writeAsStringSync('hello');
+    outputDirectory.childFile('libapp.so')
+      ..createSync()
+      ..writeAsStringSync('goodbye');
+    final File aotSizeJson = fileSystem.file('test.json')
+      ..createSync()
+      ..writeAsStringSync(aotSizeOutput);
+    await sizeAnalyzer.analyzeAotSnapshot(
+      outputDirectory: outputDirectory,
+      aotSnapshot: aotSizeJson,
+      silent: false,
+    );
+
+    final List<String> stdout = logger.statusText.split('\n');
+    expect(
+      stdout,
+      containsAll(<String>[
+        '  foo.app                                                                   12 B',
+        '    foo.app/a.txt                                                            5 B',
+        '    foo.app/libapp.so (Dart AOT)                                             7 B',
+      ]),
+    );
+  });
+
+  test('quiet = true silences output', () async {
+    final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
+      fileSystem: fileSystem,
+      logger: logger,
+      processUtils: ProcessUtils(
+        processManager: processManager,
+        logger: logger,
+      ),
+      appFilenamePattern: RegExp(r'lib.*app\.so'),
+    );
+
+    final File apk = fileSystem.file('test.apk')..createSync();
+    final File aotSizeJson = fileSystem.file('test.json')
+      ..createSync()
+      ..writeAsStringSync(aotSizeOutput);
+    await sizeAnalyzer.analyzeApkSizeAndAotSnapshot(apk: apk, aotSnapshot: aotSizeJson, silent: true);
+
+    expect(logger.statusText, isEmpty);
+  });
 }
