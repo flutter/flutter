@@ -48,6 +48,7 @@ The test is run on a x86 emulator. To run the test locally, you must create an e
 hw.lcd.density = 480
 hw.lcd.height = 1920
 hw.lcd.width = 1080
+lcd.depth = 16
 ```
 
 This file is typically located in your `$HOME/.android/avd/<avd>` folder.

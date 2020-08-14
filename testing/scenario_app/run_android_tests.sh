@@ -9,8 +9,10 @@ set -e
 
 cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd
 
+GRADLE_USER_HOME=$(pwd)/android/gradle-home/.cache
+
 pushd android
 
-set -o pipefail && ./gradlew app:verifyDebugAndroidTestScreenshotTest
+set -o pipefail && ./gradlew app:verifyDebugAndroidTestScreenshotTest --gradle-user-home "$GRADLE_USER_HOME"
 
 popd
