@@ -570,7 +570,9 @@ abstract class PointerEvent with Diagnosticable {
   }
 }
 
-mixin PointerEventDescription on PointerEvent {
+// A mixin that adds implementation for [debugFillProperties] and [toStringFull]
+// to [PointerEvent].
+mixin _PointerEventDescription on PointerEvent {
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -612,7 +614,12 @@ mixin PointerEventDescription on PointerEvent {
 
 abstract class _AbstractPointerEvent implements PointerEvent {}
 
-abstract class ProxyPointerEvent extends _AbstractPointerEvent with Diagnosticable, PointerEventDescription {
+// The base class for transformed pointer event classes.
+//
+// A _TransformedPointerEvent stores an [original] event and the [transform]
+// matrix. It defers all field getters to the original event, except for
+// [localPosition] and [localDelta], which are calculated when first used.
+abstract class _TransformedPointerEvent extends _AbstractPointerEvent with Diagnosticable, _PointerEventDescription {
 
   @override
   PointerEvent get original;
@@ -728,7 +735,7 @@ abstract class ProxyPointerEvent extends _AbstractPointerEvent with Diagnosticab
 ///
 /// For example, the pointer might be hovering above the device, having not yet
 /// made contact with the surface of the device.
-class PointerAddedEvent extends PointerEvent with PointerEventDescription {
+class PointerAddedEvent extends PointerEvent with _PointerEventDescription {
   /// Creates a pointer added event.
   ///
   /// All of the arguments must be non-null.
@@ -777,7 +784,7 @@ class PointerAddedEvent extends PointerEvent with PointerEventDescription {
   }
 }
 
-class _TransformedPointerAddedEvent extends ProxyPointerEvent implements PointerAddedEvent {
+class _TransformedPointerAddedEvent extends _TransformedPointerEvent implements PointerAddedEvent {
   _TransformedPointerAddedEvent({required this.original, required this.transform});
 
   @override
@@ -794,7 +801,7 @@ class _TransformedPointerAddedEvent extends ProxyPointerEvent implements Pointer
 ///
 /// For example, the pointer might have drifted out of the device's hover
 /// detection range or might have been disconnected from the system entirely.
-class PointerRemovedEvent extends PointerEvent with PointerEventDescription {
+class PointerRemovedEvent extends PointerEvent with _PointerEventDescription {
   /// Creates a pointer removed event.
   ///
   /// All of the arguments must be non-null.
@@ -839,7 +846,7 @@ class PointerRemovedEvent extends PointerEvent with PointerEventDescription {
   }
 }
 
-class _TransformedPointerRemovedEvent extends ProxyPointerEvent implements PointerRemovedEvent {
+class _TransformedPointerRemovedEvent extends _TransformedPointerEvent implements PointerRemovedEvent {
   _TransformedPointerRemovedEvent({required this.original, required this.transform});
 
   @override
@@ -864,7 +871,7 @@ class _TransformedPointerRemovedEvent extends ProxyPointerEvent implements Point
 ///    contact with the device.
 ///  * [Listener.onPointerHover], which allows callers to be notified of these
 ///    events in a widget tree.
-class PointerHoverEvent extends PointerEvent with PointerEventDescription {
+class PointerHoverEvent extends PointerEvent with _PointerEventDescription {
   /// Creates a pointer hover event.
   ///
   /// All of the arguments must be non-null.
@@ -928,7 +935,7 @@ class PointerHoverEvent extends PointerEvent with PointerEventDescription {
   }
 }
 
-class _TransformedPointerHoverEvent extends ProxyPointerEvent implements PointerHoverEvent {
+class _TransformedPointerHoverEvent extends _TransformedPointerEvent implements PointerHoverEvent {
   _TransformedPointerHoverEvent({required this.original, required this.transform});
 
   @override
@@ -953,7 +960,7 @@ class _TransformedPointerHoverEvent extends ProxyPointerEvent implements Pointer
 ///    contact with the device.
 ///  * [Listener.onPointerEnter], which allows callers to be notified of these
 ///    events in a widget tree.
-class PointerEnterEvent extends PointerEvent with PointerEventDescription {
+class PointerEnterEvent extends PointerEvent with _PointerEventDescription {
   /// Creates a pointer enter event.
   ///
   /// All of the arguments must be non-null.
@@ -1042,7 +1049,7 @@ class PointerEnterEvent extends PointerEvent with PointerEventDescription {
   }
 }
 
-class _TransformedPointerEnterEvent extends ProxyPointerEvent implements PointerEnterEvent {
+class _TransformedPointerEnterEvent extends _TransformedPointerEvent implements PointerEnterEvent {
   _TransformedPointerEnterEvent({required this.original, required this.transform});
 
   @override
@@ -1067,7 +1074,7 @@ class _TransformedPointerEnterEvent extends ProxyPointerEvent implements Pointer
 ///    contact with the device.
 ///  * [Listener.onPointerExit], which allows callers to be notified of these
 ///    events in a widget tree.
-class PointerExitEvent extends PointerEvent with PointerEventDescription {
+class PointerExitEvent extends PointerEvent with _PointerEventDescription {
   /// Creates a pointer exit event.
   ///
   /// All of the arguments must be non-null.
@@ -1156,7 +1163,7 @@ class PointerExitEvent extends PointerEvent with PointerEventDescription {
   }
 }
 
-class _TransformedPointerExitEvent extends ProxyPointerEvent implements PointerExitEvent {
+class _TransformedPointerExitEvent extends _TransformedPointerEvent implements PointerExitEvent {
   _TransformedPointerExitEvent({required this.original, required this.transform});
 
   @override
@@ -1175,7 +1182,7 @@ class _TransformedPointerExitEvent extends ProxyPointerEvent implements PointerE
 ///
 ///  * [Listener.onPointerDown], which allows callers to be notified of these
 ///    events in a widget tree.
-class PointerDownEvent extends PointerEvent with PointerEventDescription {
+class PointerDownEvent extends PointerEvent with _PointerEventDescription {
   /// Creates a pointer down event.
   ///
   /// All of the arguments must be non-null.
@@ -1235,7 +1242,7 @@ class PointerDownEvent extends PointerEvent with PointerEventDescription {
   }
 }
 
-class _TransformedPointerDownEvent extends ProxyPointerEvent implements PointerDownEvent {
+class _TransformedPointerDownEvent extends _TransformedPointerEvent implements PointerDownEvent {
   _TransformedPointerDownEvent({required this.original, required this.transform});
 
   @override
@@ -1257,7 +1264,7 @@ class _TransformedPointerDownEvent extends ProxyPointerEvent implements PointerD
 ///    contact with the device.
 ///  * [Listener.onPointerMove], which allows callers to be notified of these
 ///    events in a widget tree.
-class PointerMoveEvent extends PointerEvent with PointerEventDescription {
+class PointerMoveEvent extends PointerEvent with _PointerEventDescription {
   /// Creates a pointer move event.
   ///
   /// All of the arguments must be non-null.
@@ -1324,7 +1331,7 @@ class PointerMoveEvent extends PointerEvent with PointerEventDescription {
   }
 }
 
-class _TransformedPointerMoveEvent extends ProxyPointerEvent implements PointerMoveEvent {
+class _TransformedPointerMoveEvent extends _TransformedPointerEvent implements PointerMoveEvent {
   _TransformedPointerMoveEvent({required this.original, required this.transform});
 
   @override
@@ -1343,7 +1350,7 @@ class _TransformedPointerMoveEvent extends ProxyPointerEvent implements PointerM
 ///
 ///  * [Listener.onPointerUp], which allows callers to be notified of these
 ///    events in a widget tree.
-class PointerUpEvent extends PointerEvent with PointerEventDescription {
+class PointerUpEvent extends PointerEvent with _PointerEventDescription {
   /// Creates a pointer up event.
   ///
   /// All of the arguments must be non-null.
@@ -1406,7 +1413,7 @@ class PointerUpEvent extends PointerEvent with PointerEventDescription {
   }
 }
 
-class _TransformedPointerUpEvent extends ProxyPointerEvent implements PointerUpEvent {
+class _TransformedPointerUpEvent extends _TransformedPointerEvent implements PointerUpEvent {
   _TransformedPointerUpEvent({required this.original, required this.transform});
 
   @override
@@ -1458,7 +1465,7 @@ abstract class PointerSignalEvent extends PointerEvent {
 ///
 ///  * [Listener.onPointerSignal], which allows callers to be notified of these
 ///    events in a widget tree.
-class PointerScrollEvent extends PointerSignalEvent with PointerEventDescription {
+class PointerScrollEvent extends PointerSignalEvent with _PointerEventDescription {
   /// Creates a pointer scroll event.
   ///
   /// All of the arguments must be non-null.
@@ -1503,7 +1510,7 @@ class PointerScrollEvent extends PointerSignalEvent with PointerEventDescription
   }
 }
 
-class _TransformedPointerScrollEvent extends ProxyPointerEvent implements PointerScrollEvent {
+class _TransformedPointerScrollEvent extends _TransformedPointerEvent implements PointerScrollEvent {
   _TransformedPointerScrollEvent({required this.original, required this.transform});
 
   @override
@@ -1531,7 +1538,7 @@ class _TransformedPointerScrollEvent extends ProxyPointerEvent implements Pointe
 ///
 ///  * [Listener.onPointerCancel], which allows callers to be notified of these
 ///    events in a widget tree.
-class PointerCancelEvent extends PointerEvent with PointerEventDescription {
+class PointerCancelEvent extends PointerEvent with _PointerEventDescription {
   /// Creates a pointer cancel event.
   ///
   /// All of the arguments must be non-null.
@@ -1591,7 +1598,7 @@ class PointerCancelEvent extends PointerEvent with PointerEventDescription {
   }
 }
 
-class _TransformedPointerCancelEvent extends ProxyPointerEvent implements PointerCancelEvent {
+class _TransformedPointerCancelEvent extends _TransformedPointerEvent implements PointerCancelEvent {
   _TransformedPointerCancelEvent({required this.original, required this.transform});
 
   @override
