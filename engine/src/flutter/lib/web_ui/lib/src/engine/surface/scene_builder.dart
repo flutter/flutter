@@ -78,9 +78,6 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
     Float64List matrix4, {
     ui.TransformEngineLayer? oldLayer,
   }) {
-    if (matrix4 == null) { // ignore: unnecessary_null_comparison
-      throw ArgumentError('"matrix4" argument cannot be null');
-    }
     if (matrix4.length != 16) {
       throw ArgumentError('"matrix4" must have 16 entries.');
     }
