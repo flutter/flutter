@@ -5,7 +5,7 @@ window to see the device logs, then, in a different window, run any of
 these:
 
 ```
-flutter run --release lib/gestures/velocity_tracker_data.dart
+flutter run --release lib/gestures/velocity_tracker_bench.dart
 flutter run --release lib/gestures/gesture_detector_bench.dart
 flutter run --release lib/stocks/animation_bench.dart
 flutter run --release lib/stocks/build_bench.dart

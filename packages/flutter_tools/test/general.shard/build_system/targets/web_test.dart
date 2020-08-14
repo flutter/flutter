@@ -225,10 +225,10 @@ void main() {
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
+        '-Ddart.vm.profile=true',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
         '--packages=.packages',
-        '-Ddart.vm.profile=true',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -236,8 +236,8 @@ void main() {
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
-        '-O4',
         '-Ddart.vm.profile=true',
+        '-O4',
         '--no-minify',
         '--csp',
         '-o',
@@ -259,10 +259,10 @@ void main() {
       command: <String>[
         ...kDart2jsLinuxArgs,
         '--enable-experiment=non-nullable',
+        '-Ddart.vm.profile=true',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
         '--packages=.packages',
-        '-Ddart.vm.profile=true',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -271,8 +271,8 @@ void main() {
       command: <String>[
         ...kDart2jsLinuxArgs,
         '--enable-experiment=non-nullable',
-        '-O4',
         '-Ddart.vm.profile=true',
+        '-O4',
         '--no-minify',
         '-o',
         environment.buildDir.childFile('main.dart.js').absolute.path,
@@ -290,10 +290,10 @@ void main() {
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
+        '-Ddart.vm.profile=true',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
         '--packages=.packages',
-        '-Ddart.vm.profile=true',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -301,8 +301,8 @@ void main() {
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
-        '-O4',
         '-Ddart.vm.profile=true',
+        '-O4',
         '--no-minify',
         '-o',
         environment.buildDir.childFile('main.dart.js').absolute.path,
@@ -320,10 +320,10 @@ void main() {
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
+        '-Ddart.vm.product=true',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
         '--packages=.packages',
-        '-Ddart.vm.product=true',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -331,8 +331,8 @@ void main() {
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
-        '-O4',
         '-Ddart.vm.product=true',
+        '-O4',
         '-o',
         environment.buildDir.childFile('main.dart.js').absolute.path,
         environment.buildDir.childFile('app.dill').absolute.path,
@@ -350,10 +350,10 @@ void main() {
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
+        '-Ddart.vm.product=true',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
         '--packages=.packages',
-        '-Ddart.vm.product=true',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -361,8 +361,8 @@ void main() {
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
-        '-O3',
         '-Ddart.vm.product=true',
+        '-O3',
         '-o',
         environment.buildDir.childFile('main.dart.js').absolute.path,
         environment.buildDir.childFile('app.dill').absolute.path,
@@ -399,12 +399,12 @@ void main() {
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
-        '-o',
-        environment.buildDir.childFile('app.dill').absolute.path,
-        '--packages=.packages',
         '-Ddart.vm.product=true',
         '-DFOO=bar',
         '-DBAZ=qux',
+        '-o',
+        environment.buildDir.childFile('app.dill').absolute.path,
+        '--packages=.packages',
        '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -412,10 +412,10 @@ void main() {
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
-        '-O4',
         '-Ddart.vm.product=true',
         '-DFOO=bar',
         '-DBAZ=qux',
+        '-O4',
         '-o',
         environment.buildDir.childFile('main.dart.js').absolute.path,
         environment.buildDir.childFile('app.dill').absolute.path,
@@ -433,12 +433,12 @@ void main() {
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
-        '-o',
-        environment.buildDir.childFile('app.dill').absolute.path,
-        '--packages=.packages',
         '-Ddart.vm.profile=true',
         '-DFOO=bar',
         '-DBAZ=qux',
+        '-o',
+        environment.buildDir.childFile('app.dill').absolute.path,
+        '--packages=.packages',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -446,10 +446,10 @@ void main() {
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
-        '-O4',
         '-Ddart.vm.profile=true',
         '-DFOO=bar',
         '-DBAZ=qux',
+        '-O4',
         '--no-minify',
         '-o',
         environment.buildDir.childFile('main.dart.js').absolute.path,

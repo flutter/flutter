@@ -11,7 +11,6 @@ import '../base/file_system.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../cache.dart';
-import '../codegen.dart';
 import '../dart/pub.dart';
 import '../devfs.dart';
 import '../globals.dart' as globals;
@@ -240,20 +239,6 @@ class TestCommand extends FlutterCommand {
       watcher = collector;
     }
 
-    // Run builders once before all tests.
-    if (flutterProject.hasBuilders) {
-      final CodegenDaemon codegenDaemon = await codeGenerator.daemon(flutterProject);
-      codegenDaemon.startBuild();
-      await for (final CodegenStatus status in codegenDaemon.buildResults) {
-        if (status == CodegenStatus.Succeeded) {
-          break;
-        }
-        if (status == CodegenStatus.Failed) {
-          throwToolExit('Code generation failed.');
-        }
-      }
-    }
-
     final bool disableServiceAuthCodes =
       boolArg('disable-service-auth-codes');
 
@@ -280,6 +265,7 @@ class TestCommand extends FlutterCommand {
       web: stringArg('platform') == 'chrome',
       randomSeed: stringArg('test-randomize-ordering-seed'),
       extraFrontEndOptions: getBuildInfo(forcedBuildMode: BuildMode.debug).extraFrontEndOptions,
+      nullAssertions: boolArg(FlutterOptions.kNullAssertions),
     );
 
     if (collector != null) {

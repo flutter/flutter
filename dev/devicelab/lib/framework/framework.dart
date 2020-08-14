@@ -78,7 +78,7 @@ class _TaskRunner {
   Future<TaskResult> run(Duration taskTimeout) async {
     try {
       _taskStarted = true;
-      print('Running task.');
+      print('Running task with a timeout of $taskTimeout.');
       final String exe = Platform.isWindows ? '.exe' : '';
       section('Checking running Dart$exe processes');
       final Set<RunningProcessInfo> beforeRunningDartInstances = await getRunningProcesses(

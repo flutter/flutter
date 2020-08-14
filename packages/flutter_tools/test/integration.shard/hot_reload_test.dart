@@ -84,12 +84,25 @@ void main() {
   });
 
   test('fastReassemble behavior triggers hot reload behavior with evaluation of expression', () async {
-    final StringBuffer stdout = StringBuffer();
-    final StreamSubscription<String> subscription = flutter.stdout.listen(stdout.writeln);
+    final Completer<void> tick1 = Completer<void>();
+    final Completer<void> tick2 = Completer<void>();
+    final Completer<void> tick3 = Completer<void>();
+    final StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
+      if (line.contains('TICK 1')) {
+        tick1.complete();
+      }
+      if (line.contains('TICK 2')) {
+        tick2.complete();
+      }
+      if (line.contains('TICK 3')) {
+        tick3.complete();
+      }
+    });
     await flutter.run(withDebugger: true);
 
     final int port = flutter.vmServicePort;
     final VmService vmService = await vmServiceConnectUri('ws://localhost:$port/ws');
+    await tick1.future;
     try {
       // Since the single-widget reload feature is not yet implemented, manually
       // evaluate the expression for the reload.
@@ -108,7 +121,7 @@ void main() {
 
       // _extensionType indicates success.
       expect(fastReassemble1.type, '_extensionType');
-      expect(stdout.toString(), contains('(((TICK 2))))'));
+      await tick2.future;
 
       // verify evaluation did not produce invalidat type by checking with dart:core
       // type.
@@ -123,7 +136,9 @@ void main() {
 
       // _extensionType indicates success.
       expect(fastReassemble2.type, '_extensionType');
-      expect(stdout.toString(), isNot(contains('(((TICK 3))))')));
+      unawaited(tick3.future.whenComplete(() {
+        fail('Should not complete');
+      }));
 
       // Invocation without evaluation leads to runtime error.
       expect(vmService

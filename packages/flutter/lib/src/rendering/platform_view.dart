@@ -12,6 +12,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
+import 'binding.dart';
 import 'box.dart';
 import 'layer.dart';
 import 'mouse_cursor.dart';
@@ -68,7 +69,7 @@ Set<Type> _factoriesTypeSet<T>(Set<Factory<T>> factories) {
 /// {@endtemplate}
 ///
 /// {@template flutter.rendering.platformView.gestures}
-/// The render object participates in Flutter's [GestureArena]s, and dispatches touch events to the
+/// The render object participates in Flutter's gesture arenas, and dispatches touch events to the
 /// platform view iff it won the arena. Specific gestures that should be dispatched to the platform
 /// view can be specified with factories in the `gestureRecognizers` constructor parameter or
 /// by calling `updateGestureRecognizers`. If the set of gesture recognizers is empty, the gesture
@@ -401,7 +402,19 @@ class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
     team.captain = this;
     _gestureRecognizers = gestureRecognizerFactories.map(
       (Factory<OneSequenceGestureRecognizer> recognizerFactory) {
-        return recognizerFactory.constructor()..team = team;
+        final OneSequenceGestureRecognizer gestureRecognizer = recognizerFactory.constructor();
+        gestureRecognizer.team = team;
+        // The below gesture recognizers requires at least one non-empty callback to
+        // compete in the gesture arena.
+        // https://github.com/flutter/flutter/issues/35394#issuecomment-562285087
+        if (gestureRecognizer is LongPressGestureRecognizer) {
+          gestureRecognizer.onLongPress ??= (){};
+        } else if (gestureRecognizer is DragGestureRecognizer) {
+          gestureRecognizer.onDown ??= (_){};
+        } else if (gestureRecognizer is TapGestureRecognizer) {
+          gestureRecognizer.onTapDown ??= (_){};
+        }
+        return gestureRecognizer;
       },
     ).toSet();
   }
@@ -467,7 +480,19 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
     team.captain = this;
     _gestureRecognizers = gestureRecognizerFactories.map(
       (Factory<OneSequenceGestureRecognizer> recognizerFactory) {
-        return recognizerFactory.constructor()..team = team;
+        final OneSequenceGestureRecognizer gestureRecognizer = recognizerFactory.constructor();
+        gestureRecognizer.team = team;
+        // The below gesture recognizers requires at least one non-empty callback to
+        // compete in the gesture arena.
+        // https://github.com/flutter/flutter/issues/35394#issuecomment-562285087
+        if (gestureRecognizer is LongPressGestureRecognizer) {
+          gestureRecognizer.onLongPress ??= (){};
+        } else if (gestureRecognizer is DragGestureRecognizer) {
+          gestureRecognizer.onDown ??= (_){};
+        } else if (gestureRecognizer is TapGestureRecognizer) {
+          gestureRecognizer.onTapDown ??= (_){};
+        }
+        return gestureRecognizer;
       },
     ).toSet();
     _handlePointerEvent = handlePointerEvent;
@@ -638,9 +663,15 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
 mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
 
   /// How to behave during hit testing.
-  // The implicit setter is enough here as changing this value will just affect
-  // any newly arriving events there's nothing we need to invalidate.
-  PlatformViewHitTestBehavior hitTestBehavior;
+  // Changing _hitTestBehavior might affect which objects are considered hovered over.
+  set hitTestBehavior(PlatformViewHitTestBehavior value) {
+    if (value != _hitTestBehavior) {
+      _hitTestBehavior = value;
+      if (owner != null)
+        RendererBinding.instance.mouseTracker.schedulePostFrameCheck();
+    }
+  }
+  PlatformViewHitTestBehavior _hitTestBehavior;
 
   _HandlePointerEvent _handlePointerEvent;
 
@@ -666,15 +697,15 @@ mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
 
   @override
   bool hitTest(BoxHitTestResult result, { Offset position }) {
-    if (hitTestBehavior == PlatformViewHitTestBehavior.transparent || !size.contains(position)) {
+    if (_hitTestBehavior == PlatformViewHitTestBehavior.transparent || !size.contains(position)) {
       return false;
     }
     result.add(BoxHitTestEntry(this, position));
-    return hitTestBehavior == PlatformViewHitTestBehavior.opaque;
+    return _hitTestBehavior == PlatformViewHitTestBehavior.opaque;
   }
 
   @override
-  bool hitTestSelf(Offset position) => hitTestBehavior != PlatformViewHitTestBehavior.transparent;
+  bool hitTestSelf(Offset position) => _hitTestBehavior != PlatformViewHitTestBehavior.transparent;
 
   @override
   PointerEnterEventListener get onEnter => null;

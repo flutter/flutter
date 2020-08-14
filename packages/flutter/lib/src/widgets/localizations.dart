@@ -195,7 +195,7 @@ class _WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocaliz
 ///
 ///  * [GlobalWidgetsLocalizations], which provides widgets localizations for
 ///    many languages.
-///  * [WidgetsApp.delegates], which automatically includes
+///  * [WidgetsApp.localizationsDelegates], which automatically includes
 ///    [DefaultWidgetsLocalizations.delegate] by default.
 class DefaultWidgetsLocalizations implements WidgetsLocalizations {
   /// Construct an object that defines the localized values for the widgets
@@ -221,7 +221,7 @@ class DefaultWidgetsLocalizations implements WidgetsLocalizations {
   /// A [LocalizationsDelegate] that uses [DefaultWidgetsLocalizations.load]
   /// to create an instance of this class.
   ///
-  /// [WidgetsApp] automatically adds this value to [WidgetApp.localizationsDelegates].
+  /// [WidgetsApp] automatically adds this value to [WidgetsApp.localizationsDelegates].
   static const LocalizationsDelegate<WidgetsLocalizations> delegate = _WidgetsLocalizationsDelegate();
 }
 

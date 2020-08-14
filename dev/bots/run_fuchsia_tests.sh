@@ -40,7 +40,7 @@ fi
 reboot() {
   # note: this will set an exit code of 255, which we can ignore.
   echo "$(date) START:REBOOT ------------------------------------------"
-  $script_dir/fuchsia_ctl -d $device_name --dev-finder-path $script_dir/dev_finder ssh --identity-file $pkey -c "dm reboot-recovery" || true
+  $script_dir/fuchsia_ctl -d $device_name --device-finder-path $script_dir/device-finder ssh --identity-file $pkey -c "dm reboot-recovery" || true
   echo "$(date) END:REBOOT --------------------------------------------"
 }
 

@@ -736,7 +736,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// If this property is null, then kTabLabelPadding is used.
   final EdgeInsetsGeometry labelPadding;
 
-  /// The text style of the unselected tab labels
+  /// The text style of the unselected tab labels.
   ///
   /// If this property is null, then the [labelStyle] value is used. If [labelStyle]
   /// is null, then the text style of the [ThemeData.primaryTextTheme]'s
@@ -1201,8 +1201,6 @@ class TabBarView extends StatefulWidget {
   _TabBarViewState createState() => _TabBarViewState();
 }
 
-const PageScrollPhysics _kTabBarViewPhysics = PageScrollPhysics();
-
 class _TabBarViewState extends State<TabBarView> {
   TabController _controller;
   PageController _pageController;
@@ -1372,8 +1370,8 @@ class _TabBarViewState extends State<TabBarView> {
         dragStartBehavior: widget.dragStartBehavior,
         controller: _pageController,
         physics: widget.physics == null
-          ? _kTabBarViewPhysics.applyTo(const ClampingScrollPhysics())
-          : _kTabBarViewPhysics.applyTo(widget.physics),
+          ? const PageScrollPhysics().applyTo(const ClampingScrollPhysics())
+          : const PageScrollPhysics().applyTo(widget.physics),
         children: _childrenWithKey,
       ),
     );

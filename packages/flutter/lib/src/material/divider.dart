@@ -107,7 +107,7 @@ class Divider extends StatelessWidget {
   /// A divider with a [thickness] of 0.0 is always drawn as a line with a
   /// height of exactly one device pixel.
   ///
-  /// If this is null, then the [DividerThemeData.dividerThickness] is used. If
+  /// If this is null, then the [DividerThemeData.thickness] is used. If
   /// that is also null, then this defaults to 0.0.
   final double thickness;
 
@@ -138,7 +138,7 @@ class Divider extends StatelessWidget {
   /// {@end-tool}
   final Color color;
 
-  /// Computes the [BorderSide] that represents a divider..
+  /// Computes the [BorderSide] that represents a divider.
   ///
   /// If [color] is null, then [DividerThemeData.color] is used. If that is also
   /// null, then [ThemeData.dividerColor] is used.

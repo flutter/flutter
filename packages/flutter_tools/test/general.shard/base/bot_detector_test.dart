@@ -11,7 +11,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:mockito/mockito.dart';
-import 'package:quiver/testing/async.dart';
+import 'package:fake_async/fake_async.dart';
 
 import '../../src/common.dart';
 import '../../src/mocks.dart';

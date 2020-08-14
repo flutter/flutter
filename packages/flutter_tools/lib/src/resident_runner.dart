@@ -14,6 +14,7 @@ import 'artifacts.dart';
 import 'asset.dart';
 import 'base/command_help.dart';
 import 'base/common.dart';
+import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
@@ -24,7 +25,6 @@ import 'build_system/build_system.dart';
 import 'build_system/targets/localizations.dart';
 import 'bundle.dart';
 import 'cache.dart';
-import 'codegen.dart';
 import 'compile.dart';
 import 'devfs.dart';
 import 'device.dart';
@@ -34,6 +34,7 @@ import 'project.dart';
 import 'run_cold.dart';
 import 'run_hot.dart';
 import 'vmservice.dart';
+import 'widget_cache.dart';
 
 class FlutterDevice {
   FlutterDevice(
@@ -41,11 +42,11 @@ class FlutterDevice {
     @required this.buildInfo,
     this.fileSystemRoots,
     this.fileSystemScheme,
-    this.viewFilter,
     TargetModel targetModel = TargetModel.flutter,
     TargetPlatform targetPlatform,
     ResidentCompiler generator,
     this.userIdentifier,
+    this.widgetCache,
   }) : assert(buildInfo.trackWidgetCreation != null),
        generator = generator ?? ResidentCompiler(
          globals.artifacts.getArtifactPath(
@@ -74,11 +75,11 @@ class FlutterDevice {
     @required BuildInfo buildInfo,
     List<String> fileSystemRoots,
     String fileSystemScheme,
-    String viewFilter,
     TargetModel targetModel = TargetModel.flutter,
     List<String> experimentalFlags,
     ResidentCompiler generator,
     String userIdentifier,
+    WidgetCache widgetCache,
   }) async {
     ResidentCompiler generator;
     final TargetPlatform targetPlatform = await device.targetPlatform;
@@ -158,23 +159,16 @@ class FlutterDevice {
       );
     }
 
-    if (flutterProject.hasBuilders) {
-      generator = await CodeGeneratingResidentCompiler.create(
-        residentCompiler: generator,
-        flutterProject: flutterProject,
-      );
-    }
-
     return FlutterDevice(
       device,
       fileSystemRoots: fileSystemRoots,
       fileSystemScheme:fileSystemScheme,
-      viewFilter: viewFilter,
       targetModel: targetModel,
       targetPlatform: targetPlatform,
       generator: generator,
       buildInfo: buildInfo,
       userIdentifier: userIdentifier,
+      widgetCache: widgetCache,
     );
   }
 
@@ -182,6 +176,7 @@ class FlutterDevice {
   final ResidentCompiler generator;
   final BuildInfo buildInfo;
   final String userIdentifier;
+  final WidgetCache widgetCache;
   Stream<Uri> observatoryUris;
   vm_service.VmService vmService;
   DevFS devFS;
@@ -190,7 +185,6 @@ class FlutterDevice {
   String fileSystemScheme;
   StreamSubscription<String> _loggingSubscription;
   bool _isListeningForObservatoryUri;
-  final String viewFilter;
 
   /// Whether the stream [observatoryUris] is still open.
   bool get isWaitingForObservatory => _isListeningForObservatoryUri ?? false;
@@ -211,6 +205,8 @@ class FlutterDevice {
     ReloadMethod reloadMethod,
     GetSkSLMethod getSkSLMethod,
     PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
+    bool disableDds = false,
+    bool ipv6 = false,
   }) {
     final Completer<void> completer = Completer<void>();
     StreamSubscription<void> subscription;
@@ -221,7 +217,12 @@ class FlutterDevice {
       globals.printTrace('Connecting to service protocol: $observatoryUri');
       isWaitingForVm = true;
       vm_service.VmService service;
-
+      if (!disableDds) {
+        await device.dds.startDartDevelopmentService(
+          observatoryUri,
+          ipv6,
+        );
+      }
       try {
         service = await connectToVmService(
           observatoryUri,
@@ -649,6 +650,44 @@ class FlutterDevice {
     return 0;
   }
 
+  /// Validates whether this hot reload is a candidate for a fast reassemble.
+  Future<bool> _attemptFastReassembleCheck(List<Uri> invalidatedFiles, PackageConfig packageConfig) async {
+    if (invalidatedFiles.length != 1 || widgetCache == null) {
+      return false;
+    }
+    final List<FlutterView> views = await vmService.getFlutterViews();
+    final String widgetName = await widgetCache?.validateLibrary(invalidatedFiles.single);
+    if (widgetName == null) {
+      return false;
+    }
+    final String packageUri = packageConfig.toPackageUri(invalidatedFiles.single)?.toString()
+      ?? invalidatedFiles.single.toString();
+    for (final FlutterView view in views) {
+      final vm_service.Isolate isolate = await vmService.getIsolateOrNull(view.uiIsolate.id);
+      final vm_service.LibraryRef targetLibrary = isolate.libraries
+        .firstWhere(
+          (vm_service.LibraryRef libraryRef) => libraryRef.uri == packageUri,
+          orElse: () => null,
+        );
+      if (targetLibrary == null) {
+        return false;
+      }
+      try {
+        // Evaluate an expression to allow type checking for that invalidated widget
+        // name. For more information, see `debugFastReassembleMethod` in flutter/src/widgets/binding.dart
+        await vmService.evaluate(
+          view.uiIsolate.id,
+          targetLibrary.id,
+          '((){debugFastReassembleMethod=(Object _fastReassembleParam) => _fastReassembleParam is $widgetName})()',
+        );
+      } on Exception catch (err) {
+        globals.printTrace(err.toString());
+        return false;
+      }
+    }
+    return true;
+  }
+
   Future<UpdateFSReport> updateDevFS({
     Uri mainUri,
     String target,
@@ -668,22 +707,34 @@ class FlutterDevice {
       timeout: timeoutConfiguration.fastOperation,
     );
     UpdateFSReport report;
+    bool fastReassemble = false;
     try {
-      report = await devFS.update(
-        mainUri: mainUri,
-        target: target,
-        bundle: bundle,
-        firstBuildTime: firstBuildTime,
-        bundleFirstUpload: bundleFirstUpload,
-        generator: generator,
-        fullRestart: fullRestart,
-        dillOutputPath: dillOutputPath,
-        trackWidgetCreation: buildInfo.trackWidgetCreation,
-        projectRootPath: projectRootPath,
-        pathToReload: pathToReload,
-        invalidatedFiles: invalidatedFiles,
-        packageConfig: packageConfig,
-      );
+      await Future.wait(<Future<void>>[
+        devFS.update(
+          mainUri: mainUri,
+          target: target,
+          bundle: bundle,
+          firstBuildTime: firstBuildTime,
+          bundleFirstUpload: bundleFirstUpload,
+          generator: generator,
+          fullRestart: fullRestart,
+          dillOutputPath: dillOutputPath,
+          trackWidgetCreation: buildInfo.trackWidgetCreation,
+          projectRootPath: projectRootPath,
+          pathToReload: pathToReload,
+          invalidatedFiles: invalidatedFiles,
+          packageConfig: packageConfig,
+        ).then((UpdateFSReport newReport) => report = newReport),
+        if (!fullRestart)
+          _attemptFastReassembleCheck(
+            invalidatedFiles,
+            packageConfig,
+          ).then((bool newFastReassemble) => fastReassemble = newFastReassemble)
+      ]);
+      if (fastReassemble) {
+        globals.logger.printTrace('Attempting fast reassemble.');
+      }
+      report.fastReassemble = fastReassemble;
     } on DevFSException {
       devFSStatus.cancel();
       return UpdateFSReport(success: false);
@@ -713,6 +764,7 @@ abstract class ResidentRunner {
     this.stayResident = true,
     this.hotMode = true,
     String dillOutputPath,
+    this.machine = false,
   }) : mainPath = findMainDartFile(target),
        packagesFilePath = debuggingOptions.buildInfo.packagesPath,
        projectRootPath = projectRootPath ?? globals.fs.currentDirectory.path,
@@ -749,8 +801,9 @@ abstract class ResidentRunner {
   final AssetBundle assetBundle;
 
   final CommandHelp commandHelp;
+  final bool machine;
 
-  io.HttpServer _devtoolsServer;
+  DevtoolsLauncher _devtoolsLauncher;
 
   bool _exited = false;
   Completer<int> _finished = Completer<int>();
@@ -890,18 +943,6 @@ abstract class ResidentRunner {
     throw Exception('Canvaskit not supported by this runner.');
   }
 
-  /// List the attached flutter views.
-  Future<List<FlutterView>> listFlutterViews() async {
-    final List<List<FlutterView>> views = await Future.wait(<Future<List<FlutterView>>>[
-      for (FlutterDevice device in flutterDevices)
-        if (device.vmService != null)
-          device.vmService.getFlutterViews()
-    ]);
-    return views
-      .expand((List<FlutterView> viewList) => viewList)
-      .toList();
-  }
-
   /// Write the SkSL shaders to a zip file in build directory.
   ///
   /// Returns the name of the file, or `null` on failures.
@@ -955,12 +996,14 @@ abstract class ResidentRunner {
     await stopEchoingDeviceLog();
     await preExit();
     await exitApp();
+    await shutdownDartDevelopmentService();
   }
 
   Future<void> detach() async {
     await shutdownDevtools();
     await stopEchoingDeviceLog();
     await preExit();
+    await shutdownDartDevelopmentService();
     appFinished();
   }
 
@@ -1127,6 +1170,14 @@ abstract class ResidentRunner {
     );
   }
 
+  Future<void> shutdownDartDevelopmentService() async {
+    await Future.wait<void>(
+      flutterDevices.map<Future<void>>(
+        (FlutterDevice device) => device.device?.dds?.shutdown()
+      ).where((Future<void> element) => element != null)
+    );
+  }
+
   @protected
   void cacheInitialDillCompilation() {
     if (_dillOutputPath != null) {
@@ -1149,7 +1200,7 @@ abstract class ResidentRunner {
   }
 
   void printStructuredErrorLog(vm_service.Event event) {
-    if (event.extensionKind == 'Flutter.Error') {
+    if (event.extensionKind == 'Flutter.Error' && !machine) {
       final Map<dynamic, dynamic> json = event.extensionData?.data;
       if (json != null && json.containsKey('renderedErrorText')) {
         globals.printStatus('\n${json['renderedErrorText']}');
@@ -1180,9 +1231,11 @@ abstract class ResidentRunner {
         reloadSources: reloadSources,
         restart: restart,
         compileExpression: compileExpression,
+        disableDds: debuggingOptions.disableDds,
         reloadMethod: reloadMethod,
         getSkSLMethod: getSkSLMethod,
         printStructuredErrorLogMethod: printStructuredErrorLog,
+        ipv6: ipv6,
       );
       // This will wait for at least one flutter view before returning.
       final Status status = globals.logger.startProgress(
@@ -1205,28 +1258,14 @@ abstract class ResidentRunner {
   }
 
   Future<void> launchDevTools() async {
-    try {
-      assert(supportsServiceProtocol);
-      _devtoolsServer ??= await devtools_server.serveDevTools(
-        enableStdinCommands: false,
-      );
-      await devtools_server.launchDevTools(
-        <String, dynamic>{
-          'reuseWindows': true,
-        },
-        flutterDevices.first.vmService.httpAddress,
-        'http://${_devtoolsServer.address.host}:${_devtoolsServer.port}',
-        false,  // headless mode,
-        false,  // machine mode
-      );
-    } on Exception catch (e, st) {
-      globals.printTrace('Failed to launch DevTools: $e\n$st');
-    }
+    assert(supportsServiceProtocol);
+    _devtoolsLauncher ??= DevtoolsLauncher.instance;
+    return _devtoolsLauncher.launch(flutterDevices.first.vmService.httpAddress);
   }
 
   Future<void> shutdownDevtools() async {
-    await _devtoolsServer?.close();
-    _devtoolsServer = null;
+    await _devtoolsLauncher?.close();
+    _devtoolsLauncher = null;
   }
 
   Future<void> _serviceProtocolDone(dynamic object) async {
@@ -1477,13 +1516,6 @@ class TerminalHandler {
           return true;
         }
         return false;
-      case 'l':
-        final List<FlutterView> views = await residentRunner.listFlutterViews();
-        globals.printStatus('Connected ${pluralize('view', views.length)}:');
-        for (final FlutterView v in views) {
-          globals.printStatus('${v.uiIsolate.name} (${v.uiIsolate.id})', indent: 2);
-        }
-        return true;
       case 'L':
         if (residentRunner.supportsServiceProtocol) {
           await residentRunner.debugDumpLayerTree();
@@ -1652,7 +1684,7 @@ class DebugConnectionInfo {
 /// Returns the next platform value for the switcher.
 ///
 /// These values must match what is available in
-/// packages/flutter/lib/src/foundation/binding.dart
+/// `packages/flutter/lib/src/foundation/binding.dart`.
 String nextPlatform(String currentPlatform, FeatureFlags featureFlags) {
   switch (currentPlatform) {
     case 'android':
@@ -1670,4 +1702,42 @@ String nextPlatform(String currentPlatform, FeatureFlags featureFlags) {
       assert(false); // Invalid current platform.
       return 'android';
   }
+}
+
+class DevtoolsLauncher {
+  io.HttpServer _devtoolsServer;
+  Future<void> launch(Uri observatoryAddress) async {
+    try {
+      await serve();
+      await devtools_server.launchDevTools(
+        <String, dynamic>{
+          'reuseWindows': true,
+        },
+        observatoryAddress,
+        'http://${_devtoolsServer.address.host}:${_devtoolsServer.port}',
+        false,  // headless mode,
+        false,  // machine mode
+      );
+    } on Exception catch (e, st) {
+      globals.printTrace('Failed to launch DevTools: $e\n$st');
+    }
+  }
+
+  Future<io.HttpServer> serve() async {
+    try {
+      _devtoolsServer ??= await devtools_server.serveDevTools(
+        enableStdinCommands: false,
+      );
+    } on Exception catch (e, st) {
+      globals.printTrace('Failed to serve DevTools: $e\n$st');
+    }
+    return _devtoolsServer;
+  }
+
+  Future<void> close() async {
+    await _devtoolsServer?.close();
+    _devtoolsServer = null;
+  }
+
+  static DevtoolsLauncher get instance => context.get<DevtoolsLauncher>() ?? DevtoolsLauncher();
 }

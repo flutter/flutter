@@ -124,7 +124,7 @@ class Viewport extends MultiChildRenderObjectWidget {
 
   /// {@macro flutter.widgets.Clip}
   ///
-  /// Defaults to [Clip.none].
+  /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
   /// Given a [BuildContext] and an [AxisDirection], determine the correct cross

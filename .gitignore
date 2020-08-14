@@ -28,6 +28,7 @@
 /dev/benchmarks/mega_gallery/
 /dev/bots/.recipe_deps
 /dev/bots/android_tools/
+/dev/devicelab/ABresults*.json
 /dev/docs/doc/
 /dev/docs/flutter.docs.zip
 /dev/docs/lib/
@@ -36,6 +37,7 @@
 /dev/integration_tests/**/Pods
 /packages/flutter/coverage/
 version
+analysis_benchmark.json
 
 # packages file containing multi-root paths
 .packages.generated

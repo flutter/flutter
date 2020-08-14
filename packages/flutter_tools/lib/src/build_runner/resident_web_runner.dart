@@ -53,6 +53,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
     @required bool ipv6,
     @required DebuggingOptions debuggingOptions,
     @required UrlTunneller urlTunneller,
+    bool machine = false,
   }) {
     return _ResidentWebRunner(
       device,
@@ -62,6 +63,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
       ipv6: ipv6,
       stayResident: stayResident,
       urlTunneller: urlTunneller,
+      machine: machine,
     );
   }
 }
@@ -79,12 +81,14 @@ abstract class ResidentWebRunner extends ResidentRunner {
     @required bool ipv6,
     @required DebuggingOptions debuggingOptions,
     bool stayResident = true,
+    bool machine = false,
   }) : super(
           <FlutterDevice>[device],
           target: target ?? globals.fs.path.join('lib', 'main.dart'),
           debuggingOptions: debuggingOptions,
           ipv6: ipv6,
           stayResident: stayResident,
+          machine: machine,
         );
 
   FlutterDevice get device => flutterDevices.first;
@@ -192,11 +196,6 @@ abstract class ResidentWebRunner extends ResidentRunner {
     if (device.device is! WebServerDevice) {
       globals.printStatus('For a more detailed help message, press "h". $quitMessage');
     }
-  }
-
-  @override
-  Future<List<FlutterView>> listFlutterViews() async {
-    return <FlutterView>[];
   }
 
   @override
@@ -390,6 +389,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
     @required DebuggingOptions debuggingOptions,
     bool stayResident = true,
     @required this.urlTunneller,
+    bool machine = false,
   }) : super(
           device,
           flutterProject: flutterProject,
@@ -397,6 +397,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
           debuggingOptions: debuggingOptions,
           ipv6: ipv6,
           stayResident: stayResident,
+          machine: machine,
         );
 
   final UrlTunneller urlTunneller;

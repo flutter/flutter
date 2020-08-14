@@ -23,7 +23,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 // Examples can assume:
 // BuildContext context;
 
-/// An immutable style in which paint text.
+/// An immutable style describing how to format and paint text.
 ///
 /// ### Bold
 ///
@@ -285,7 +285,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// ```
 /// {@end-tool}
 ///
-/// To use a font family defined in a package, the [package] argument must be
+/// To use a font family defined in a package, the `package` argument must be
 /// provided. For instance, suppose the font declaration above is in the
 /// `pubspec.yaml` of a package named `my_package` which the app depends on.
 /// Then creating the TextStyle is done as follows:
@@ -391,7 +391,8 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 ///  * [TextSpan], the class that wraps a [TextStyle] for the purposes of
 ///    passing it to a [RichText].
 ///  * [TextStyle](https://api.flutter.dev/flutter/dart-ui/TextStyle-class.html), the class in the [dart:ui] library.
-///
+///  * Cookbook: [Use a custom font](https://flutter.dev/docs/cookbook/design/fonts)
+///  * Cookbook: [Use themes to share colors and font styles](https://flutter.dev/docs/cookbook/design/themes)
 @immutable
 class TextStyle with Diagnosticable {
   /// Creates a text style.

@@ -89,6 +89,31 @@ void main() {
     });
   });
 
+  testWithoutContext('If unzip fails, include stderr in exception text', () {
+    const String exceptionMessage = 'Something really bad happened.';
+    when(mockProcessManager.runSync(
+      <String>['unzip', '-o', '-q', null, '-d', null],
+    )).thenReturn(ProcessResult(0, 1, '', exceptionMessage));
+    final MockFileSystem fileSystem = MockFileSystem();
+    final MockFile mockFile = MockFile();
+    final MockDirectory mockDirectory = MockDirectory();
+    when(fileSystem.file(any)).thenReturn(mockFile);
+    when(mockFile.readAsBytesSync()).thenThrow(
+      const FileSystemException(exceptionMessage),
+    );
+    final OperatingSystemUtils osUtils = OperatingSystemUtils(
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      platform: FakePlatform(operatingSystem: 'linux'),
+      processManager: mockProcessManager,
+    );
+
+    expect(
+      () => osUtils.unzip(mockFile, mockDirectory),
+      throwsProcessException(message: exceptionMessage),
+    );
+  });
+
   group('gzip on Windows:', () {
     testWithoutContext('verifyGzip returns false on a FileSystemException', () {
       final MockFileSystem fileSystem = MockFileSystem();
@@ -148,5 +173,6 @@ void main() {
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
+class MockDirectory extends Mock implements Directory {}
 class MockFileSystem extends Mock implements FileSystem {}
 class MockFile extends Mock implements File {}

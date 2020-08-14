@@ -231,6 +231,7 @@ abstract class ProcessUtils {
   RunResult runSync(
     List<String> cmd, {
     bool throwOnError = false,
+    bool verboseExceptions = false,
     RunResultChecker allowedFailures,
     bool hideStdout = false,
     String workingDirectory,
@@ -256,6 +257,9 @@ abstract class ProcessUtils {
   /// If [filter] is non-null, all lines that do not match it are removed. If
   /// [mapFunction] is present, all lines that match [filter] are also forwarded
   /// to [mapFunction] for further processing.
+  ///
+  /// If [stdoutErrorMatcher] is non-null, matching lines from stdout will be
+  /// treated as errors, just as if they had been logged to stderr instead.
   Future<int> stream(
     List<String> cmd, {
     String workingDirectory,
@@ -263,6 +267,7 @@ abstract class ProcessUtils {
     String prefix = '',
     bool trace = false,
     RegExp filter,
+    RegExp stdoutErrorMatcher,
     StringConverter mapFunction,
     Map<String, String> environment,
   });
@@ -408,6 +413,7 @@ class _DefaultProcessUtils implements ProcessUtils {
   RunResult runSync(
     List<String> cmd, {
     bool throwOnError = false,
+    bool verboseExceptions = false,
     RunResultChecker allowedFailures,
     bool hideStdout = false,
     String workingDirectory,
@@ -449,7 +455,12 @@ class _DefaultProcessUtils implements ProcessUtils {
     }
 
     if (failedExitCode && throwOnError) {
-      runResult.throwException('The command failed');
+      String message = 'The command failed';
+      if (verboseExceptions) {
+        message = 'The command failed\nStdout:\n${runResult.stdout}\n'
+            'Stderr:\n${runResult.stderr}';
+      }
+      runResult.throwException(message);
     }
 
     return runResult;
@@ -478,6 +489,7 @@ class _DefaultProcessUtils implements ProcessUtils {
     String prefix = '',
     bool trace = false,
     RegExp filter,
+    RegExp stdoutErrorMatcher,
     StringConverter mapFunction,
     Map<String, String> environment,
   }) async {
@@ -497,7 +509,9 @@ class _DefaultProcessUtils implements ProcessUtils {
         }
         if (line != null) {
           final String message = '$prefix$line';
-          if (trace) {
+          if (stdoutErrorMatcher?.hasMatch(line) == true) {
+            _logger.printError(message, wrap: false);
+          } else if (trace) {
             _logger.printTrace(message);
           } else {
             _logger.printStatus(message, wrap: false);

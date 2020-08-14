@@ -26,7 +26,7 @@ void main() {
       when(mockPlatform.environment).thenReturn(const <String, String>{});
       testbed = Testbed(overrides: <Type, Generator>{
         FlutterVersion: () => mockFlutterVerion,
-        FeatureFlags: () => const FeatureFlags(),
+        FeatureFlags: () => const FlutterFeatureFlags(),
         Config: () => mockFlutterConfig,
         Platform: () => mockPlatform,
       });

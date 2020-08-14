@@ -58,7 +58,7 @@ final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
 ///
 /// Example:
 ///
-/// Testing that a filesystem operation works as expected
+/// Testing that a filesystem operation works as expected:
 ///
 ///     void main() {
 ///       group('Example', () {
@@ -730,6 +730,9 @@ class TestFeatureFlags implements FeatureFlags {
     this.isWebEnabled = false,
     this.isWindowsEnabled = false,
     this.isSingleWidgetReloadEnabled = false,
+    this.isAndroidEnabled = true,
+    this.isIOSEnabled = true,
+    this.isFuchsiaEnabled = false,
 });
 
   @override
@@ -748,6 +751,15 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isSingleWidgetReloadEnabled;
 
   @override
+  final bool isAndroidEnabled;
+
+  @override
+  final bool isIOSEnabled;
+
+  @override
+  final bool isFuchsiaEnabled;
+
+  @override
   bool isEnabled(Feature feature) {
     switch (feature) {
       case flutterWebFeature:
@@ -758,6 +770,14 @@ class TestFeatureFlags implements FeatureFlags {
         return isMacOSEnabled;
       case flutterWindowsDesktopFeature:
         return isWindowsEnabled;
+      case singleWidgetReload:
+        return isSingleWidgetReloadEnabled;
+      case flutterAndroidFeature:
+        return isAndroidEnabled;
+      case flutterIOSFeature:
+        return isIOSEnabled;
+      case flutterFuchsiaFeature:
+        return isFuchsiaEnabled;
     }
     return false;
   }

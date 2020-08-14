@@ -332,6 +332,7 @@ apply plugin: 'kotlin-android'
 
       testWithMocks('from build settings, if no plist', () async {
         final FlutterProject project = await someProject();
+        project.ios.xcodeProject.createSync();
         when(mockXcodeProjectInterpreter.getBuildSettings(any, scheme: anyNamed('scheme'))).thenAnswer(
                 (_) {
               return Future<Map<String,String>>.value(<String, String>{
@@ -362,6 +363,7 @@ apply plugin: 'kotlin-android'
 
       testWithMocks('from build settings and plist, if default variable', () async {
         final FlutterProject project = await someProject();
+        project.ios.xcodeProject.createSync();
         when(mockXcodeProjectInterpreter.getBuildSettings(any, scheme: anyNamed('scheme'))).thenAnswer(
                 (_) {
               return Future<Map<String,String>>.value(<String, String>{
@@ -379,6 +381,7 @@ apply plugin: 'kotlin-android'
 
       testWithMocks('from build settings and plist, by substitution', () async {
         final FlutterProject project = await someProject();
+        project.ios.xcodeProject.createSync();
         project.ios.defaultHostInfoPlist.createSync(recursive: true);
         when(mockXcodeProjectInterpreter.getBuildSettings(any, scheme: anyNamed('scheme'))).thenAnswer(
           (_) {
@@ -398,6 +401,7 @@ apply plugin: 'kotlin-android'
 
       testWithMocks('fails with no flavor and defined schemes', () async {
         final FlutterProject project = await someProject();
+        project.ios.xcodeProject.createSync();
         when(mockXcodeProjectInterpreter.getInfo(any, projectFilename: anyNamed('projectFilename'))).thenAnswer( (_) {
           return Future<XcodeProjectInfo>.value(XcodeProjectInfo(<String>[], <String>[], <String>['free', 'paid'], logger));
         });
@@ -409,6 +413,7 @@ apply plugin: 'kotlin-android'
 
       testWithMocks('handles case insensitive flavor', () async {
         final FlutterProject project = await someProject();
+        project.ios.xcodeProject.createSync();
         when(mockXcodeProjectInterpreter.getBuildSettings(any, scheme: anyNamed('scheme'))).thenAnswer(
                 (_) {
               return Future<Map<String,String>>.value(<String, String>{
@@ -426,6 +431,7 @@ apply plugin: 'kotlin-android'
 
       testWithMocks('fails with flavor and default schemes', () async {
         final FlutterProject project = await someProject();
+        project.ios.xcodeProject.createSync();
         when(mockXcodeProjectInterpreter.getInfo(any, projectFilename: anyNamed('projectFilename'))).thenAnswer( (_) {
           return Future<XcodeProjectInfo>.value(XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger));
         });
@@ -479,6 +485,7 @@ apply plugin: 'kotlin-android'
 
       testUsingContext('app product name xcodebuild settings', () async {
         final FlutterProject project = await someProject();
+        project.ios.xcodeProject.createSync();
         when(mockXcodeProjectInterpreter.getBuildSettings(any, scheme: anyNamed('scheme'))).thenAnswer((_) {
           return Future<Map<String,String>>.value(<String, String>{
             'FULL_PRODUCT_NAME': 'My App.app'
@@ -568,48 +575,6 @@ apply plugin: 'kotlin-android'
       });
     });
   });
-
-  group('Regression test for invalid pubspec', () {
-    Testbed testbed;
-    FlutterProjectFactory flutterProjectFactory;
-
-    setUp(() {
-      testbed = Testbed(setup: () {
-        flutterProjectFactory = FlutterProjectFactory(
-          fileSystem: globals.fs,
-          logger: globals.logger,
-        );
-      });
-    });
-
-    test('Handles asking for builders from an invalid pubspec', () => testbed.run(() {
-      globals.fs.file('pubspec.yaml')
-        ..createSync()
-        ..writeAsStringSync(r'''
-# Hello, World
-''');
-      final FlutterProject flutterProject = FlutterProject.current();
-
-      expect(flutterProject.builders, null);
-    }, overrides: <Type, Generator>{
-      FlutterProjectFactory: () => flutterProjectFactory,
-    }));
-
-    test('Handles asking for builders from a trivial pubspec', () => testbed.run(() {
-      globals.fs.file('pubspec.yaml')
-        ..createSync()
-        ..writeAsStringSync(r'''
-# Hello, World
-name: foo_bar
-''');
-      final FlutterProject flutterProject = FlutterProject.current();
-
-      expect(flutterProject.builders, null);
-    }, overrides: <Type, Generator>{
-      FlutterProjectFactory: () => flutterProjectFactory,
-    }));
-  });
-
   group('watch companion', () {
     MemoryFileSystem fs;
     MockPlistUtils mockPlistUtils;
@@ -690,6 +655,7 @@ name: foo_bar
 
       testUsingContext('has watch companion', () async {
         final FlutterProject project = await someProject();
+        project.ios.xcodeProject.createSync();
         project.ios.hostAppRoot.childDirectory('WatchTarget').childFile('Info.plist').createSync(recursive: true);
         when(mockPlistUtils.getValueFromFile(any, 'WKCompanionAppBundleIdentifier')).thenReturn('io.flutter.someProject');
 
@@ -899,7 +865,7 @@ String gradleFileWithApplicationId(String id) {
   return '''
 apply plugin: 'com.android.application'
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
 
     defaultConfig {
         applicationId '$id'
@@ -916,7 +882,7 @@ version '1.0-SNAPSHOT'
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
 }
 ''';
 }

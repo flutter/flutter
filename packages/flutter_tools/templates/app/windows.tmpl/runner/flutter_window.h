@@ -20,7 +20,7 @@ class FlutterWindow : public Win32Window {
 
  protected:
   // Win32Window:
-  void OnCreate() override;
+  bool OnCreate() override;
   void OnDestroy() override;
 
  private:
