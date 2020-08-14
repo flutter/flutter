@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# This script is added to the PATH on LUCI when executing the junit tests.
+# The Python scripts used to compare the screenshots are contained in a jar file.
+# As a result, vpython cannot find the .vpython spec file because it's outside
+# of the jar file.
+
+set -e
+
+SCRIPT_DIR="$( dirname "${BASH_SOURCE[0]}" )"
+
+echo "Running from $SCRIPT_DIR/bin/python"
+
+vpython -vpython-spec "$SCRIPT_DIR/../.vpython" "$@"

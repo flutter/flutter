@@ -1,0 +1,11 @@
+#
+# "vpython" specification file for build
+#
+# Pillow is required by com.facebook.testing.screenshot.
+
+python_version: "2.7"
+
+wheel: <
+  name: "infra/python/wheels/pillow/${vpython_platform}"
+  version: "version:6.0.0"
+>

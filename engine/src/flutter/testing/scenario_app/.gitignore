@@ -5,3 +5,6 @@ build/
 ios/Scenarios/*.framework/
 android/app/libs/flutter.jar
 android/app/src/main/jniLibs/arm64-v8a/libapp.so
+android/gradle-home/.cache
+
+!.vpython
