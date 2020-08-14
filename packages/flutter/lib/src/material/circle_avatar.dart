@@ -150,10 +150,15 @@ class CircleAvatar extends StatelessWidget {
   /// the size will snap to 40 pixels instantly.
   final double maxRadius;
 
-  ///The stroke/border around the avatar, the value to define the border
+  /// The stroke around the avatar, expressed as the border.
+  ///
+  /// If [stroke] is not specified, then the [_defaultStroke] is used
   final double stroke;
 
   ///The color for the border around the avatar
+  /// If a [strokeColor] is not specified, the theme's
+  //  /// [ThemeData.primaryColorLight] is used with light foreground colors, and
+  //  /// [ThemeData.primaryColorDark] with dark foreground colors.
   final Color strokeColor;
 
   // The default radius if nothing is specified.
