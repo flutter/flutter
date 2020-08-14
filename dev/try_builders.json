@@ -26,9 +26,16 @@
          "taskName":"web_tests"
       },
       {
-         "name":"Windows",
-         "repo":"flutter",
-         "taskName":"windows_bot"
+         "name": "Windows build_tests",
+         "repo": "flutter",
+         "task_name": "win_build_tests",
+         "flaky": false
+      },
+      {
+         "name": "Windows framework_tests",
+         "repo": "flutter",
+         "task_name": "win_framework_tests",
+         "flaky": false
       }
    ]
 }
