@@ -4,9 +4,12 @@
 
 // @dart = 2.8
 
-import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
+import 'colors.dart';
+import 'constants.dart';
+import 'theme.dart';
+import 'theme_data.dart';
 
 // Examples can assume:
 // String userAvatarUrl;
