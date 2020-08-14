@@ -1,0 +1,46 @@
+{
+   "builders":[
+      {
+         "name":"Linux build_tests",
+         "repo":"flutter",
+         "taskName":"build_tests",
+         "enabled":true
+      },
+      {
+         "name":"Linux framework_tests",
+         "repo":"flutter",
+         "taskName":"linux_framework_tests",
+         "enabled":true
+      },
+      {
+         "name":"Linux hostonly_devicelab_tests",
+         "repo":"flutter",
+         "taskName":"hostonly_devicelab_tests",
+         "enabled":true
+      },
+      {
+         "name":"Linux tool_tests",
+         "repo":"flutter",
+         "taskName":"tool_tests",
+         "enabled":true
+      },
+      {
+         "name":"Linux web_tests",
+         "repo":"flutter",
+         "taskName":"web_tests",
+         "enabled":true
+      },
+      {
+         "name": "Windows build_tests",
+         "repo": "flutter",
+         "task_name": "win_build_tests",
+         "enabled":true
+      },
+      {
+         "name": "Windows framework_tests",
+         "repo": "flutter",
+         "task_name": "win_framework_tests",
+         "enabled":true
+      }
+   ]
+}

@@ -136,7 +136,9 @@ void main() {
     final File file = fs.file('/empty.png')..createSync(recursive: true);
     final FileImage provider = FileImage(file);
 
-    expect(provider.load(provider, null), isA<MultiFrameImageStreamCompleter>());
+    expect(provider.load(provider, (Uint8List bytes, {int cacheWidth, int cacheHeight, bool allowUpscaling}) async {
+      return Future<Codec>.value(FakeCodec());
+    }), isA<MultiFrameImageStreamCompleter>());
 
     expect(await error.future, isStateError);
   });

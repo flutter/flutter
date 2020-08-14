@@ -172,6 +172,12 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 ///  * [FlexibleSpaceBar], which is used with [flexibleSpace] when the app bar
 ///    can expand and collapse.
 ///  * <https://material.io/design/components/app-bars-top.html>
+///  * Cookbook: [Place a floating app bar above a list](https://flutter.dev/docs/cookbook/lists/floating-app-bar)
+///  * See our
+///    [AppBar Basics sample](https://flutter.dev/docs/catalog/samples/basic-app-bar)
+///    and our advanced samples with app bars with
+///    [tabs](https://flutter.dev/docs/catalog/samples/tabbed-app-bar) or
+///    [custom bottom widgets](https://flutter.dev/docs/catalog/samples/app-bar-bottom).
 class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// Creates a material design app bar.
   ///
@@ -1243,14 +1249,14 @@ class SliverAppBar extends StatefulWidget {
 
   /// Defines the height of the app bar when it is collapsed.
   ///
-  /// By default, the collapsed height is [toolbarHeight]. If [bottom] widget
-  /// is specified, then its [PreferredSizeWidget.height] is added to the
-  /// height. If [primary] is true, then the [MediaQuery] top padding,
-  /// [EdgeInsets.top] of [MediaQueryData.padding], is added as well.
+  /// By default, the collapsed height is [toolbarHeight]. If [bottom] widget is
+  /// specified, then its height from [PreferredSizeWidget.preferredSize] is
+  /// added to the height. If [primary] is true, then the [MediaQuery] top
+  /// padding, [EdgeInsets.top] of [MediaQueryData.padding], is added as well.
   ///
   /// If [pinned] and [floating] are true, with [bottom] set, the default
-  /// collapsed height is only [bottom.preferredSize.height] with the
-  /// [MediaQuery] top padding.
+  /// collapsed height is only the height of [PreferredSizeWidget.preferredSize]
+  /// with the [MediaQuery] top padding.
   final double collapsedHeight;
 
   /// The size of the app bar when it is fully expanded.

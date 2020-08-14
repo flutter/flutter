@@ -120,6 +120,14 @@ void main(List<String> arguments) {
       '\n\n'
       'When null, the JSON file will not be generated.'
   );
+  parser.addOption(
+    'project-dir',
+    valueHelp: 'absolute/path/to/flutter/project',
+    help: 'When specified, the tool uses the path passed into this option '
+      'as the directory of the root Flutter project.'
+      '\n\n'
+      'When null, the relative path to the present working directory will be used.'
+  );
 
   final argslib.ArgResults results = parser.parse(arguments);
   if (results['help'] == true) {
@@ -140,6 +148,7 @@ void main(List<String> arguments) {
   final String headerFile = results['header-file'] as String;
   final bool useDeferredLoading = results['use-deferred-loading'] as bool;
   final String inputsAndOutputsListPath = results['gen-inputs-and-outputs-list'] as String;
+  final String projectPathString = results['project-dir'] as String;
 
   const local.LocalFileSystem fs = local.LocalFileSystem();
   final LocalizationsGenerator localizationsGenerator = LocalizationsGenerator(fs);
@@ -157,6 +166,7 @@ void main(List<String> arguments) {
         headerFile: headerFile,
         useDeferredLoading: useDeferredLoading,
         inputsAndOutputsListPath: inputsAndOutputsListPath,
+        projectPathString: projectPathString,
       )
       ..loadResources()
       ..writeOutputFiles()

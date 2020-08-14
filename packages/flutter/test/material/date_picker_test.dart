@@ -362,6 +362,80 @@ void main() {
       expect(themeDialogMaterial.elevation, customDialogTheme.elevation);
     });
 
+    testWidgets('OK Cancel button layout', (WidgetTester tester) async {
+       Widget buildFrame(TextDirection textDirection) {
+         return MaterialApp(
+           home: Material(
+             child: Center(
+               child: Builder(
+                 builder: (BuildContext context) {
+                   return ElevatedButton(
+                     child: const Text('X'),
+                     onPressed: () {
+                       showDatePicker(
+                         context: context,
+                         initialDate: DateTime(2016, DateTime.january, 15),
+                         firstDate:DateTime(2001, DateTime.january, 1),
+                         lastDate: DateTime(2031, DateTime.december, 31),
+                         builder: (BuildContext context, Widget child) {
+                           return Directionality(
+                             textDirection: textDirection,
+                             child: child,
+                           );
+                         },
+                       );
+                     },
+                   );
+                 },
+               ),
+             ),
+           ),
+         );
+       }
+
+      // Default landscape layout.
+
+      await tester.pumpWidget(buildFrame(TextDirection.ltr));
+      await tester.tap(find.text('X'));
+      await tester.pumpAndSettle();
+      expect(tester.getBottomRight(find.text('OK')).dx, 622);
+      expect(tester.getBottomLeft(find.text('OK')).dx, 594);
+      expect(tester.getBottomRight(find.text('CANCEL')).dx, 560);
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+
+      await tester.pumpWidget(buildFrame(TextDirection.rtl));
+      await tester.tap(find.text('X'));
+      await tester.pumpAndSettle();
+      expect(tester.getBottomRight(find.text('OK')).dx, 206);
+      expect(tester.getBottomLeft(find.text('OK')).dx, 178);
+      expect(tester.getBottomRight(find.text('CANCEL')).dx, 324);
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+
+      // Portrait layout.
+
+      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+      tester.binding.window.physicalSizeTestValue = const Size(900, 1200);
+
+      await tester.pumpWidget(buildFrame(TextDirection.ltr));
+      await tester.tap(find.text('X'));
+      await tester.pumpAndSettle();
+      expect(tester.getBottomRight(find.text('OK')).dx, 258);
+      expect(tester.getBottomLeft(find.text('OK')).dx, 230);
+      expect(tester.getBottomRight(find.text('CANCEL')).dx, 196);
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+
+      await tester.pumpWidget(buildFrame(TextDirection.rtl));
+      await tester.tap(find.text('X'));
+      await tester.pumpAndSettle();
+      expect(tester.getBottomRight(find.text('OK')).dx, 70);
+      expect(tester.getBottomLeft(find.text('OK')).dx, 42);
+      expect(tester.getBottomRight(find.text('CANCEL')).dx, 188);
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+    });
   });
 
   group('Calendar mode', () {
@@ -667,7 +741,8 @@ void main() {
         field.controller.clear();
 
         await tester.pumpAndSettle();
-        await tester.enterText(find.byType(TextField), '20202014');
+        await tester.enterText(find.byType(TextField), '20 days, 3 months, 2003');
+        expect(find.text('20 days, 3 months, 2003'), findsOneWidget);
         expect(find.text(errorFormatText), findsNothing);
 
         await tester.tap(find.text('OK'));
@@ -810,6 +885,7 @@ void main() {
   group('Semantics', () {
     testWidgets('calendar day mode', (WidgetTester tester) async {
       final SemanticsHandle semantics = tester.ensureSemantics();
+      addTearDown(semantics.dispose);
 
       await prepareDatePicker(tester, (Future<DateTime> date) async {
         // Header
@@ -1022,12 +1098,11 @@ void main() {
           isFocusable: true,
         ));
       });
-
-      semantics.dispose();
     });
 
     testWidgets('calendar year mode', (WidgetTester tester) async {
       final SemanticsHandle semantics = tester.ensureSemantics();
+      addTearDown(semantics.dispose);
 
       initialCalendarMode = DatePickerMode.year;
       await prepareDatePicker(tester, (Future<DateTime> date) async {
@@ -1079,14 +1154,12 @@ void main() {
           hasEnabledState: true,
           isFocusable: true,
         ));
-
       });
-
-      semantics.dispose();
     });
 
     testWidgets('input mode', (WidgetTester tester) async {
       final SemanticsHandle semantics = tester.ensureSemantics();
+      addTearDown(semantics.dispose);
 
       initialEntryMode = DatePickerEntryMode.input;
       await prepareDatePicker(tester, (Future<DateTime> date) async {
@@ -1137,10 +1210,7 @@ void main() {
           hasEnabledState: true,
           isFocusable: true,
         ));
-
       });
-
-      semantics.dispose();
     });
   });
 
@@ -1342,9 +1412,9 @@ void main() {
 
     Future<void> _showPicker(WidgetTester tester, Size size, [double textScaleFactor = 1.0]) async {
       tester.binding.window.physicalSizeTestValue = size;
+      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
       tester.binding.window.devicePixelRatioTestValue = 1.0;
-      tester.binding.window.clearPhysicalSizeTestValue();
-      tester.binding.window.clearDevicePixelRatioTestValue();
+      addTearDown(tester.binding.window.clearDevicePixelRatioTestValue);
       await prepareDatePicker(tester, (Future<DateTime> date) async {
         await tester.tap(find.text('OK'));
       });

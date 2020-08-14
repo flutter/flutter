@@ -87,8 +87,9 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// intended for use with determinate progress indicators to announce
   /// how far along they are.
   ///
-  /// For determinate progress indicators, this will be defaulted to [value]
-  /// expressed as a percentage, i.e. `0.1` will become '10%'.
+  /// For determinate progress indicators, this will be defaulted to
+  /// [ProgressIndicator.value] expressed as a percentage, i.e. `0.1` will
+  /// become '10%'.
   /// {@endtemplate}
   final String semanticsValue;
 

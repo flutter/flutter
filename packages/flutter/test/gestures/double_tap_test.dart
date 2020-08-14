@@ -5,7 +5,7 @@
 // @dart = 2.8
 
 import 'package:flutter/gestures.dart';
-import 'package:quiver/testing/async.dart';
+import 'package:fake_async/fake_async.dart';
 
 import '../flutter_test_alternative.dart';
 import 'gesture_tester.dart';

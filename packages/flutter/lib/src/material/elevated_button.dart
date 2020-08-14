@@ -129,7 +129,7 @@ class ElevatedButton extends ButtonStyleButton {
   ///
   /// ```dart
   /// ElevatedButton(
-  ///   style: TextButton.styleFrom(primary: Colors.green),
+  ///   style: ElevatedButton.styleFrom(primary: Colors.green),
   /// )
   /// ```
   static ButtonStyle styleFrom({

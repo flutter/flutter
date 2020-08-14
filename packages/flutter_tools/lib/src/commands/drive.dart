@@ -188,17 +188,6 @@ class DriveCommand extends RunCommandBase {
         );
       }
 
-      if (isWebPlatform && buildInfo.isDebug) {
-        // TODO(angjieli): remove this once running against
-        // target under test_driver in debug mode is supported
-        throwToolExit(
-          'Flutter Driver web does not support running in debug mode.\n'
-          '\n'
-          'Use --profile mode for testing application performance.\n'
-          'Use --release mode for testing correctness (with assertions).'
-        );
-      }
-
       Uri webUri;
 
       if (isWebPlatform) {
@@ -552,7 +541,7 @@ Future<bool> _stopApp(DriveCommand command) async {
   return stopped;
 }
 
-/// A list of supported browsers
+/// A list of supported browsers.
 @visibleForTesting
 enum Browser {
   /// Chrome on Android: https://developer.chrome.com/multidevice/android/overview
