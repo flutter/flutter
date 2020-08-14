@@ -19,14 +19,15 @@ import 'material_state.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
+/// Define some default values for convenient external use.
 class ListTileDefaultValue {
-  // The default horizontal gap between the titles and the leading/trailing widgets.
+  /// The default horizontal gap between the titles and the leading/trailing widgets.
   static const double horizontalTitleGap = 16.0;
 
-  // The default minimum padding on the top and bottom of the title and subtitle widgets.
+  /// The default minimum padding on the top and bottom of the title and subtitle widgets.
   static const double minVerticalPadding = 4.0;
 
-  // The default minimum leading width.
+  /// The default minimum leading width.
   static const double minLeadingWidth = 40.0;
 }
 
@@ -1114,9 +1115,9 @@ class ListTile extends StatelessWidget {
               textDirection: textDirection,
               titleBaselineType: titleStyle.textBaseline,
               subtitleBaselineType: subtitleStyle?.textBaseline,
-              horizontalTitleGap: widget.horizontalTitleGap,
-              minVerticalPadding: widget.minVerticalPadding,
-              minLeadingWidth: widget.minLeadingWidth,
+              horizontalTitleGap: horizontalTitleGap,
+              minVerticalPadding: minVerticalPadding,
+              minLeadingWidth: minLeadingWidth,
             ),
           ),
         ),
@@ -1347,8 +1348,7 @@ class _RenderListTile extends RenderBox {
        _subtitleBaselineType = subtitleBaselineType,
        _horizontalTitleGap = horizontalTitleGap + visualDensity.horizontal * 2.0,
        _minVerticalPadding = minVerticalPadding,
-       _minLeadingWidth = minLeadingWidth,
-       _subtitleBaselineType = subtitleBaselineType;
+       _minLeadingWidth = minLeadingWidth;
 
   final Map<_ListTileSlot, RenderBox> slotToChild = <_ListTileSlot, RenderBox>{};
   final Map<RenderBox, _ListTileSlot> childToSlot = <RenderBox, _ListTileSlot>{};
@@ -1467,7 +1467,8 @@ class _RenderListTile extends RenderBox {
 
   set horizontalTitleGap(double value) {
     assert(value != null);
-    if (_horizontalTitleGap == value) return;
+    if (_horizontalTitleGap == value)
+      return;
     _horizontalTitleGap = value;
     markNeedsLayout();
   }
@@ -1477,7 +1478,8 @@ class _RenderListTile extends RenderBox {
 
   set minVerticalPadding(double value) {
     assert(value != null);
-    if (_minVerticalPadding == value) return;
+    if (_minVerticalPadding == value)
+      return;
     _minVerticalPadding = value;
     markNeedsLayout();
   }
@@ -1487,7 +1489,8 @@ class _RenderListTile extends RenderBox {
 
   set minLeadingWidth(double value) {
     assert(value != null);
-    if (_minLeadingWidth == value) return;
+    if (_minLeadingWidth == value)
+      return;
     _minLeadingWidth = value;
     markNeedsLayout();
   }
