@@ -7,6 +7,7 @@ import static org.mockito.Mockito.*;
 
 import android.content.Context;
 import android.content.res.AssetManager;
+import android.util.SparseArray;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
@@ -28,7 +29,9 @@ import io.flutter.embedding.engine.systemchannels.KeyEventChannel;
 import io.flutter.embedding.engine.systemchannels.MouseCursorChannel;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
+import io.flutter.plugin.common.FlutterException;
 import io.flutter.plugin.common.MethodCall;
+import io.flutter.plugin.common.StandardMessageCodec;
 import io.flutter.plugin.common.StandardMethodCodec;
 import io.flutter.plugin.localization.LocalizationPlugin;
 import java.nio.ByteBuffer;
@@ -242,7 +245,29 @@ public class PlatformViewsControllerTest {
 
   @Test
   @Config(shadows = {ShadowFlutterJNI.class})
-  public void initializePlatformViewIfNeeded__throwsIfViewIsNull() {
+  public void createPlatformViewMessage__initializesAndroidView() {
+    PlatformViewsController platformViewsController = new PlatformViewsController();
+
+    int platformViewId = 0;
+    assertNull(platformViewsController.getPlatformViewById(platformViewId));
+
+    PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
+    PlatformView platformView = mock(PlatformView.class);
+    when(platformView.getView()).thenReturn(mock(View.class));
+    when(viewFactory.create(any(), eq(platformViewId), any())).thenReturn(platformView);
+    platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
+
+    FlutterJNI jni = new FlutterJNI();
+    attach(jni, platformViewsController);
+
+    // Simulate create call from the framework.
+    createPlatformView(jni, platformViewsController, platformViewId, "testType");
+    verify(platformView, times(1)).getView();
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class})
+  public void createPlatformViewMessage__throwsIfViewIsNull() {
     PlatformViewsController platformViewsController = new PlatformViewsController();
 
     int platformViewId = 0;
@@ -259,22 +284,28 @@ public class PlatformViewsControllerTest {
 
     // Simulate create call from the framework.
     createPlatformView(jni, platformViewsController, platformViewId, "testType");
+    assertEquals(ShadowFlutterJNI.getResponses().size(), 1);
 
+    final ByteBuffer responseBuffer = ShadowFlutterJNI.getResponses().get(0);
+    responseBuffer.rewind();
+
+    StandardMethodCodec methodCodec = new StandardMethodCodec(new StandardMessageCodec());
     try {
-      platformViewsController.initializePlatformViewIfNeeded(platformViewId);
-    } catch (Exception exception) {
-      assertTrue(exception instanceof IllegalStateException);
-      assertEquals(
-          exception.getMessage(),
-          "PlatformView#getView() returned null, but an Android view reference was expected.");
+      methodCodec.decodeEnvelope(responseBuffer);
+    } catch (FlutterException exception) {
+      assertTrue(
+          exception
+              .getMessage()
+              .contains(
+                  "PlatformView#getView() returned null, but an Android view reference was expected."));
       return;
     }
-    assertTrue(false);
+    assertFalse(true);
   }
 
   @Test
   @Config(shadows = {ShadowFlutterJNI.class})
-  public void initializePlatformViewIfNeeded__throwsIfViewHasParent() {
+  public void createPlatformViewMessage__throwsIfViewHasParent() {
     PlatformViewsController platformViewsController = new PlatformViewsController();
 
     int platformViewId = 0;
@@ -293,16 +324,23 @@ public class PlatformViewsControllerTest {
 
     // Simulate create call from the framework.
     createPlatformView(jni, platformViewsController, platformViewId, "testType");
+    assertEquals(ShadowFlutterJNI.getResponses().size(), 1);
+
+    final ByteBuffer responseBuffer = ShadowFlutterJNI.getResponses().get(0);
+    responseBuffer.rewind();
+
+    StandardMethodCodec methodCodec = new StandardMethodCodec(new StandardMessageCodec());
     try {
-      platformViewsController.initializePlatformViewIfNeeded(platformViewId);
-    } catch (Exception exception) {
-      assertTrue(exception instanceof IllegalStateException);
-      assertEquals(
-          exception.getMessage(),
-          "The Android view returned from PlatformView#getView() was already added to a parent view.");
+      methodCodec.decodeEnvelope(responseBuffer);
+    } catch (FlutterException exception) {
+      assertTrue(
+          exception
+              .getMessage()
+              .contains(
+                  "The Android view returned from PlatformView#getView() was already added to a parent view."));
       return;
     }
-    assertTrue(false);
+    assertFalse(true);
   }
 
   @Test
@@ -481,6 +519,7 @@ public class PlatformViewsControllerTest {
 
   @Implements(FlutterJNI.class)
   public static class ShadowFlutterJNI {
+    private static SparseArray<ByteBuffer> replies = new SparseArray<>();
 
     public ShadowFlutterJNI() {}
 
@@ -527,7 +566,13 @@ public class PlatformViewsControllerTest {
 
     @Implementation
     public void invokePlatformMessageResponseCallback(
-        int responseId, ByteBuffer message, int position) {}
+        int responseId, ByteBuffer message, int position) {
+      replies.put(responseId, message);
+    }
+
+    public static SparseArray<ByteBuffer> getResponses() {
+      return replies;
+    }
   }
 
   @Implements(SurfaceView.class)
