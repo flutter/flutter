@@ -1,8 +1,9 @@
 ---
-name: I want to file a bug or feature request to the infrastructure
+name: I want to file a bug or feature request about Flutter's CI infrastructure
 about: As a Flutter contributor, you have run into problems with the build/test/release
-  infrastructure, including the build and performance dashboards, devicelab, LUCI etc. Or you have
-  new ideas around those systems.
+  infrastructure, including the build and performance dashboards
+  (http://flutter-dashboard.appspot.com), devicelab, LUCI (https://ci.chromium.org/p/flutter) etc.
+  Or you have new ideas around those systems.
 title: ''
 labels: 'team: infra'
 assignees: ''
