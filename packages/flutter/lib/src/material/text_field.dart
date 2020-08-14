@@ -999,7 +999,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   }
 
   @override
-  void restoreState(RestorationBucket oldBucket) {
+  void restoreState(RestorationBucket oldBucket, bool initialRestore) {
     if (_controller != null) {
       _registerController();
     }

@@ -696,7 +696,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
   }
 
   @override
-  void restoreState(RestorationBucket oldBucket) {
+  void restoreState(RestorationBucket oldBucket, bool initialRestore) {
     if (_controller != null) {
       _registerController();
     }
