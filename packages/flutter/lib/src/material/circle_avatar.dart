@@ -4,11 +4,9 @@
 
 // @dart = 2.8
 
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-import 'constants.dart';
-import 'theme.dart';
-import 'theme_data.dart';
 
 // Examples can assume:
 // String userAvatarUrl;
@@ -67,9 +65,11 @@ class CircleAvatar extends StatelessWidget {
     this.radius,
     this.minRadius,
     this.maxRadius,
+    this.strokeColor,
+    this.stroke
   }) : assert(radius == null || (minRadius == null && maxRadius == null)),
-       assert(backgroundImage != null || onBackgroundImageError == null),
-       super(key: key);
+        assert(backgroundImage != null || onBackgroundImageError == null),
+        super(key: key);
 
   /// The widget below this widget in the tree.
   ///
@@ -150,8 +150,17 @@ class CircleAvatar extends StatelessWidget {
   /// the size will snap to 40 pixels instantly.
   final double maxRadius;
 
+  ///The stroke/border around the avatar, the value to define the border
+  final double stroke;
+
+  ///The color for the border around the avatar
+  final Color strokeColor;
+
   // The default radius if nothing is specified.
   static const double _defaultRadius = 20.0;
+
+  // The default stroke if not specified.
+  static const double _defaultStroke = 0;
 
   // The default min if only the max is specified.
   static const double _defaultMinRadius = 0.0;
@@ -171,6 +180,10 @@ class CircleAvatar extends StatelessWidget {
       return _defaultRadius * 2.0;
     }
     return 2.0 * (radius ?? maxRadius ?? _defaultMaxRadius);
+  }
+
+  double get _stroke {
+    return stroke ?? _defaultStroke;
   }
 
   @override
@@ -198,6 +211,19 @@ class CircleAvatar extends StatelessWidget {
           break;
       }
     }
+    Color effectiveStrokeColor = strokeColor;
+    if(effectiveStrokeColor == null && stroke != null){
+      switch (ThemeData.estimateBrightnessForColor(textStyle.color)) {
+        case Brightness.dark:
+          effectiveStrokeColor = theme.primaryColorDark;
+          break;
+        case Brightness.light:
+          effectiveStrokeColor = theme.primaryColorLight;
+          break;
+      }
+    }else if(effectiveStrokeColor == null && stroke == null){
+      effectiveStrokeColor = Colors.transparent;
+    }
     final double minDiameter = _minDiameter;
     final double maxDiameter = _maxDiameter;
     return AnimatedContainer(
@@ -211,30 +237,32 @@ class CircleAvatar extends StatelessWidget {
       decoration: BoxDecoration(
         color: effectiveBackgroundColor,
         image: backgroundImage != null
-          ? DecorationImage(
-              image: backgroundImage,
-              onError: onBackgroundImageError,
-              fit: BoxFit.cover,
-            )
-          : null,
+            ? DecorationImage(
+          image: backgroundImage,
+          onError: onBackgroundImageError,
+          fit: BoxFit.cover,
+        )
+            : null,
+        border: Border.all(width: _stroke,color: effectiveStrokeColor),
+
         shape: BoxShape.circle,
       ),
       child: child == null
           ? null
           : Center(
-              child: MediaQuery(
-                // Need to ignore the ambient textScaleFactor here so that the
-                // text doesn't escape the avatar when the textScaleFactor is large.
-                data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
-                child: IconTheme(
-                  data: theme.iconTheme.copyWith(color: textStyle.color),
-                  child: DefaultTextStyle(
-                    style: textStyle,
-                    child: child,
-                  ),
-                ),
-              ),
+        child: MediaQuery(
+          // Need to ignore the ambient textScaleFactor here so that the
+          // text doesn't escape the avatar when the textScaleFactor is large.
+          data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+          child: IconTheme(
+            data: theme.iconTheme.copyWith(color: textStyle.color),
+            child: DefaultTextStyle(
+              style: textStyle,
+              child: child,
             ),
+          ),
+        ),
+      ),
     );
   }
 }
