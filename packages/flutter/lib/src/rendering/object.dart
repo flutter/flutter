@@ -2421,6 +2421,11 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// semantics tree to implement implicit accessibility scrolling on iOS where
   /// the viewport scrolls implicitly when moving the accessibility focus from
   /// a the last visible node in the viewport to the first hidden one.
+  ///
+  /// See also:
+  ///
+  /// * [RenderViewportBase.cacheExtent], used by viewports to extend their
+  ///   semantics clip beyond their approximate paint clip.
   Rect describeSemanticsClip(covariant RenderObject child) => null;
 
   // SEMANTICS
@@ -2906,6 +2911,11 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///
   /// The `duration` parameter can be set to a non-zero value to bring the
   /// target object on screen in an animation defined by `curve`.
+  ///
+  /// See also:
+  ///
+  /// * [RenderViewportBase.showInViewport], which [RenderViewportBase] and
+  ///   [SingleChildScrollView] delegate this method to.
   void showOnScreen({
     RenderObject descendant,
     Rect rect,
@@ -3805,6 +3815,12 @@ class _SemanticsGeometry {
   /// Value for [SemanticsNode.rect].
   Rect get rect => _rect;
 
+  /// Computes values, ensuring `rect` is properly bounded by ancestor clipping rects.
+  ///
+  /// See also:
+  ///
+  /// * [RenderObject.describeSemanticsClip], typically used to determine `parentSemanticsClipRect`.
+  /// * [RenderObject.describeApproximatePaintClip], typically used to determine `parentPaintClipRect`.
   void _computeValues(Rect parentSemanticsClipRect, Rect parentPaintClipRect, List<RenderObject> ancestors) {
     assert(ancestors.length > 1);
 
