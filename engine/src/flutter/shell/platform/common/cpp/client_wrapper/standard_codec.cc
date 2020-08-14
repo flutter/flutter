@@ -132,14 +132,14 @@ void StandardCodecSerializer::WriteValue(const EncodableValue& value,
       // Null and bool are encoded directly in the type.
       break;
     case EncodableValue::Type::kInt:
-      stream->WriteInt32(std::get<int32_t>(value));
+      stream->WriteInt32(value.IntValue());
       break;
-    case case EncodableValue::Type::kLong:
-      stream->WriteInt64(std::get<int64_t>(value));
+    case EncodableValue::Type::kLong:
+      stream->WriteInt64(value.LongValue());
       break;
     case EncodableValue::Type::kDouble:
       stream->WriteAlignment(8);
-      stream->WriteDouble(std::get<double>(value));
+      stream->WriteDouble(value.DoubleValue());
       break;
     case EncodableValue::Type::kString: {
       const auto& string_value = value.StringValue();
