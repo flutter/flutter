@@ -434,12 +434,14 @@ class _FixedExtentScrollable extends Scrollable {
     ScrollPhysics physics,
     @required this.itemExtent,
     @required ViewportBuilder viewportBuilder,
+    String restorationId,
   }) : super (
     key: key,
     axisDirection: axisDirection,
     controller: controller,
     physics: physics,
     viewportBuilder: viewportBuilder,
+    restorationId: restorationId,
   );
 
   final double itemExtent;
@@ -585,6 +587,7 @@ class ListWheelScrollView extends StatefulWidget {
     this.onSelectedItemChanged,
     this.renderChildrenOutsideViewport = false,
     this.clipBehavior = Clip.hardEdge,
+    this.restorationId,
     @required List<Widget> children,
   }) : assert(children != null),
        assert(diameterRatio != null),
@@ -625,6 +628,7 @@ class ListWheelScrollView extends StatefulWidget {
     this.onSelectedItemChanged,
     this.renderChildrenOutsideViewport = false,
     this.clipBehavior = Clip.hardEdge,
+    this.restorationId,
     @required this.childDelegate,
   }) : assert(childDelegate != null),
        assert(diameterRatio != null),
@@ -713,6 +717,9 @@ class ListWheelScrollView extends StatefulWidget {
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
+  /// {@macro flutter.widgets.scrollable.restorationId}
+  final String restorationId;
+
   @override
   _ListWheelScrollViewState createState() => _ListWheelScrollViewState();
 }
@@ -765,6 +772,7 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
         controller: scrollController,
         physics: widget.physics,
         itemExtent: widget.itemExtent,
+        restorationId: widget.restorationId,
         viewportBuilder: (BuildContext context, ViewportOffset offset) {
           return ListWheelViewport(
             diameterRatio: widget.diameterRatio,

@@ -260,7 +260,7 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
 
   @override
   KeyboardSide? getModifierSide(ModifierKey key) {
-    KeyboardSide? findSide(int leftMask, int rightMask) {
+    KeyboardSide? findSide(int anyMask, int leftMask, int rightMask) {
       final int combinedMask = leftMask | rightMask;
       final int combined = metaState & combinedMask;
       if (combined == leftMask) {
@@ -270,18 +270,24 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
       } else if (combined == combinedMask) {
         return KeyboardSide.all;
       }
+      // If the platform code sets the "any" modifier, but not a specific side,
+      // then we return "all", assuming that there is only one of that modifier
+      // key on the keyboard.
+      if (metaState & anyMask != 0) {
+        return KeyboardSide.all;
+      }
       return null;
     }
 
     switch (key) {
       case ModifierKey.controlModifier:
-        return findSide(modifierLeftControl, modifierRightControl);
+        return findSide(modifierControl, modifierLeftControl, modifierRightControl);
       case ModifierKey.shiftModifier:
-        return findSide(modifierLeftShift, modifierRightShift);
+        return findSide(modifierShift, modifierLeftShift, modifierRightShift);
       case ModifierKey.altModifier:
-        return findSide(modifierLeftAlt, modifierRightAlt);
+        return findSide(modifierAlt, modifierLeftAlt, modifierRightAlt);
       case ModifierKey.metaModifier:
-        return findSide(modifierLeftMeta, modifierRightMeta);
+        return findSide(modifierMeta, modifierLeftMeta, modifierRightMeta);
       case ModifierKey.capsLockModifier:
       case ModifierKey.numLockModifier:
       case ModifierKey.scrollLockModifier:

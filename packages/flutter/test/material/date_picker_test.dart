@@ -741,7 +741,8 @@ void main() {
         field.controller.clear();
 
         await tester.pumpAndSettle();
-        await tester.enterText(find.byType(TextField), '20202014');
+        await tester.enterText(find.byType(TextField), '20 days, 3 months, 2003');
+        expect(find.text('20 days, 3 months, 2003'), findsOneWidget);
         expect(find.text(errorFormatText), findsNothing);
 
         await tester.tap(find.text('OK'));
