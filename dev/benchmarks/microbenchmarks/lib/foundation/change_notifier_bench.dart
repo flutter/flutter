@@ -65,7 +65,7 @@ void main() {
       removeListenerWatch.start();
 
       // Remove listeners in reverse order to evaluate the worse-case scenario:
-      // the listener remove is the last listener
+      // the listener removed is the last listener
       if (listenersCount > 4)
         notifier.removeListener(listener5);
       if (listenersCount > 3)
@@ -75,7 +75,7 @@ void main() {
       if (listenersCount > 1)
         notifier.removeListener(listener2);
       notifier.removeListener(listener);
-  
+
       removeListenerWatch.stop();
     }
 
