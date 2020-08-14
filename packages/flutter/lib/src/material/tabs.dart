@@ -860,13 +860,13 @@ class _TabBarState extends State<TabBar> {
 
     if (_controllerIsValid) {
       _controller.animation.removeListener(_handleTabControllerAnimationTick);
-      _controller.removeListener(_handleTabControllerTick);
+      _controller.animation.removeStatusListener(_handleTabControllerAnimationStatusChanged);
       _controller.removeIndexChangeStartedListener(_handleTabControllerIndexChangeStarted);
     }
     _controller = newController;
     if (_controller != null) {
       _controller.animation.addListener(_handleTabControllerAnimationTick);
-      _controller.addListener(_handleTabControllerTick);
+      _controller.animation.addStatusListener(_handleTabControllerAnimationStatusChanged);
       _controller.addIndexChangeStartedListener(_handleTabControllerIndexChangeStarted);
       _currentIndex = _controller.index;
     }
@@ -916,7 +916,7 @@ class _TabBarState extends State<TabBar> {
     _indicatorPainter.dispose();
     if (_controllerIsValid) {
       _controller.animation.removeListener(_handleTabControllerAnimationTick);
-      _controller.removeListener(_handleTabControllerTick);
+      _controller.animation.removeStatusListener(_handleTabControllerAnimationStatusChanged);
       _controller.removeIndexChangeStartedListener(_handleTabControllerIndexChangeStarted);
     }
     _controller = null;
@@ -985,7 +985,7 @@ class _TabBarState extends State<TabBar> {
     }
   }
 
-  void _handleTabControllerTick() {
+  void _handleTabControllerAnimationStatusChanged(AnimationStatus status) {
     setState(() {
       // Rebuild the tabs after a (potentially animated) index change
       // has completed.
