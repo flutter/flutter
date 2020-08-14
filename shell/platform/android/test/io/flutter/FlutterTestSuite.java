@@ -17,6 +17,7 @@ import io.flutter.embedding.engine.LocalizationPluginTest;
 import io.flutter.embedding.engine.RenderingComponentTest;
 import io.flutter.embedding.engine.plugins.shim.ShimPluginRegistryTest;
 import io.flutter.embedding.engine.renderer.FlutterRendererTest;
+import io.flutter.embedding.engine.systemchannels.PlatformChannelTest;
 import io.flutter.embedding.engine.systemchannels.RestorationChannelTest;
 import io.flutter.external.FlutterLaunchTests;
 import io.flutter.plugin.common.StandardMessageCodecTest;
@@ -68,6 +69,7 @@ import test.io.flutter.embedding.engine.dart.DartExecutorTest;
   TextInputPluginTest.class,
   MouseCursorPluginTest.class,
   AccessibilityBridgeTest.class,
+  PlatformChannelTest.class,
   RestorationChannelTest.class,
 })
 /** Runs all of the unit tests listed in the {@code @SuiteClasses} annotation. */
