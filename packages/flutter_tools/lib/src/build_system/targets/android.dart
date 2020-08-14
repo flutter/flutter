@@ -212,11 +212,6 @@ class AndroidAot extends AotElfBase {
   ];
 
   @override
-  List<String> get depfiles => <String>[
-    'android_aot_elf_$_androidAbiName.d'
-  ];
-
-  @override
   Future<void> build(Environment environment) async {
     final AOTSnapshotter snapshotter = AOTSnapshotter(
       reportTimings: false,
