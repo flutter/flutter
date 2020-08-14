@@ -74,7 +74,7 @@ fi
 
 code_size_directory=""
 if [[ -n "$CODE_SIZE_DIRECTORY" ]]; then
-  code_size_directory="-iCodeSizeDirectory=${CODE_SIZE_DIRECTORY}"
+  code_size_directory="-dCodeSizeDirectory=${CODE_SIZE_DIRECTORY}"
 fi
 
 RunCommand "${FLUTTER_ROOT}/bin/flutter"                                    \

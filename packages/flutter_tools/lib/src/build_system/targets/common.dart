@@ -277,11 +277,6 @@ abstract class AotElfBase extends Target {
   String get analyticsName => 'android_aot';
 
   @override
-  List<String> get depfiles => <String>[
-    'aot_elf.d',
-  ];
-
-  @override
   Future<void> build(Environment environment) async {
     final AOTSnapshotter snapshotter = AOTSnapshotter(
       reportTimings: false,
@@ -303,16 +298,13 @@ abstract class AotElfBase extends Target {
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
     final String splitDebugInfo = environment.defines[kSplitDebugInfo];
     final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
-    final String codeSizeDirectory = environment.inputs[kCodeSizeDirectory];
+    final String codeSizeDirectory = environment.defines[kCodeSizeDirectory];
 
-    final DepfileService service = DepfileService(fileSystem: environment.fileSystem, logger: environment.logger);
-    final Depfile depfile = Depfile(<File>[], <File>[]);
     if (codeSizeDirectory != null) {
       final File codeSizeFile = environment.fileSystem
         .directory(codeSizeDirectory)
         .childFile('snapshot.${environment.defines[kTargetPlatform]}.json');
       extraGenSnapshotOptions.add('--write-v8-snapshot-profile-to=${codeSizeFile.path}');
-      depfile.outputs.add(codeSizeFile);
     }
 
     final int snapshotExitCode = await snapshotter.build(
@@ -329,7 +321,6 @@ abstract class AotElfBase extends Target {
     if (snapshotExitCode != 0) {
       throw Exception('AOT snapshotter exited with code $snapshotExitCode');
     }
-    service.writeToFile(depfile, environment.buildDir.childFile('aot_elf.d'));
   }
 }
 

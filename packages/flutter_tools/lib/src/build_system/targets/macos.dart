@@ -187,11 +187,6 @@ class CompileMacOSFramework extends Target {
   String get name => 'compile_macos_framework';
 
   @override
-  List<String> get depfiles => <String>[
-    'aot_macos.d'
-  ];
-
-  @override
   Future<void> build(Environment environment) async {
     if (environment.defines[kBuildMode] == null) {
       throw MissingDefineException(kBuildMode, 'compile_macos_framework');
@@ -200,20 +195,16 @@ class CompileMacOSFramework extends Target {
     if (buildMode == BuildMode.debug) {
       throw Exception('precompiled macOS framework only supported in release/profile builds.');
     }
-    final String codeSizeDirectory = environment.inputs[kCodeSizeDirectory];
+    final String codeSizeDirectory = environment.defines[kCodeSizeDirectory];
     final String splitDebugInfo = environment.defines[kSplitDebugInfo];
     final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
     final List<String> extraGenSnapshotOptions = decodeDartDefines(environment.defines, kExtraGenSnapshotOptions);
-
-    final DepfileService service = DepfileService(fileSystem: environment.fileSystem, logger: environment.logger);
-    final Depfile depfile = Depfile(<File>[], <File>[]);
 
     if (codeSizeDirectory != null) {
       final File codeSizeFile = environment.fileSystem
         .directory(codeSizeDirectory)
         .childFile('snapshot.${getNameForDarwinArch(DarwinArch.x86_64)}.json');
       extraGenSnapshotOptions.add('--write-v8-snapshot-profile-to=${codeSizeFile.path}');
-      depfile.outputs.add(environment.fileSystem.file(codeSizeFile));
     }
 
     final AOTSnapshotter snapshotter = AOTSnapshotter(
@@ -239,8 +230,6 @@ class CompileMacOSFramework extends Target {
     if (result != 0) {
       throw Exception('gen shapshot failed.');
     }
-
-    service.writeToFile(depfile, environment.buildDir.childFile('aot_macos.d'));
   }
 
   @override

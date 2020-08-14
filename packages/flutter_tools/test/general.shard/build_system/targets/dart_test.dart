@@ -360,7 +360,7 @@ void main() {
   });
 
   testUsingContext('AotElfRelease configures gen_snapshot with code size directory', () async {
-    androidEnvironment.inputs[kCodeSizeDirectory] = 'code_size_1';
+    androidEnvironment.defines[kCodeSizeDirectory] = 'code_size_1';
     final String build = androidEnvironment.buildDir.path;
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
@@ -643,7 +643,7 @@ void main() {
   });
 
   testUsingContext('AotAssemblyRelease configures gen_snapshot with code size directory', () async {
-    iosEnvironment.inputs[kCodeSizeDirectory] = 'code_size_1';
+    iosEnvironment.defines[kCodeSizeDirectory] = 'code_size_1';
     iosEnvironment.defines[kIosArchs] = 'arm64';
     iosEnvironment.defines[kBitcodeFlag] = 'true';
     final String build = iosEnvironment.buildDir.path;

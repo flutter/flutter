@@ -216,8 +216,6 @@ void main() {
       outputDir: fileSystem.directory('out')..createSync(),
       defines: <String, String>{
         kBuildMode: 'release',
-      },
-      inputs: <String, String>{
         kCodeSizeDirectory: 'code_size_1',
       },
       artifacts: artifacts,

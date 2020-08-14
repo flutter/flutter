@@ -72,7 +72,7 @@ or
       if (bundleSkSLPath != null)
         '-iBundleSkSLPath=$bundleSkSLPath',
       if (codeSizeDirectory != null)
-        '-iCodeSizeDirectory=$codeSizeDirectory',
+        '-dCodeSizeDirectory=$codeSizeDirectory',
       if (splitDebugInfo != null)
         '-dSplitDebugInfo=$splitDebugInfo',
       if (dartDefines != null)

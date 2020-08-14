@@ -30,11 +30,6 @@ abstract class AotAssemblyBase extends Target {
   String get analyticsName => 'ios_aot';
 
   @override
-  List<String> get depfiles => <String>[
-    'aot_assembly.d',
-  ];
-
-  @override
   Future<void> build(Environment environment) async {
     final AOTSnapshotter snapshotter = AOTSnapshotter(
       reportTimings: false,
@@ -71,9 +66,7 @@ abstract class AotAssemblyBase extends Target {
         'attempted to build for $darwinArchs.'
       );
     }
-    final String codeSizeDirectory = environment.inputs[kCodeSizeDirectory];
-    final DepfileService service = DepfileService(fileSystem: environment.fileSystem, logger: environment.logger);
-    final Depfile depfile = Depfile(<File>[], <File>[]);
+    final String codeSizeDirectory = environment.defines[kCodeSizeDirectory];
 
     // If we're building multiple iOS archs the binaries need to be lipo'd
     // together.
@@ -85,7 +78,6 @@ abstract class AotAssemblyBase extends Target {
           .directory(codeSizeDirectory)
           .childFile('snapshot.${getNameForDarwinArch(darwinArch)}.json');
         archExtraGenSnapshotOptions.add('--write-v8-snapshot-profile-to=${codeSizeFile.path}');
-        depfile.outputs.add(environment.fileSystem.file(codeSizeFile));
       }
       pending.add(snapshotter.build(
         platform: targetPlatform,
@@ -118,7 +110,6 @@ abstract class AotAssemblyBase extends Target {
     if (result.exitCode != 0) {
       throw Exception('lipo exited with code ${result.exitCode}.\n${result.stderr}');
     }
-    service.writeToFile(depfile, environment.buildDir.childFile('aot_assembly.d'));
   }
 }
 
