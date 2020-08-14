@@ -573,7 +573,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     Map<int, HitTestResult> _hitTests
   ) {
     HitTestResult hitTestResult;
-    if (event is PointerDownEvent || event is PointerSignalEvent) {
+    if (event is PointerDownEvent || event is PointerSignalEvent || event is PointerHoverEvent) {
       assert(!_hitTests.containsKey(event.pointer));
       hitTestResult = HitTestResult();
       binding.hitTest(hitTestResult, event.position);
@@ -601,7 +601,6 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       return true;
     }());
     if (hitTestResult != null ||
-        event is PointerHoverEvent ||
         event is PointerAddedEvent ||
         event is PointerRemovedEvent) {
       binding.dispatchEvent(event, hitTestResult, source: TestBindingEventSource.test);

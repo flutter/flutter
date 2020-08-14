@@ -5775,7 +5775,7 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
 /// }
 /// ```
 /// {@end-tool}
-class Listener extends StatelessWidget {
+class Listener extends SingleChildRenderObjectWidget {
   /// Creates a widget that forwards point events to callbacks.
   ///
   /// The [behavior] argument defaults to [HitTestBehavior.deferToChild].
@@ -5783,34 +5783,14 @@ class Listener extends StatelessWidget {
     Key key,
     this.onPointerDown,
     this.onPointerMove,
-    // We have to ignore the lint rule here in order to use deprecated
-    // parameters and keep backward compatibility.
-    // TODO(tongmu): After it goes stable, remove these 3 parameters from Listener
-    // and Listener should no longer need an intermediate class _PointerListener.
-    // https://github.com/flutter/flutter/issues/36085
-    @Deprecated(
-      'Use MouseRegion.onEnter instead. See MouseRegion.opaque for behavioral difference. '
-      'This feature was deprecated after v1.10.14.'
-    )
-    this.onPointerEnter,
-    @Deprecated(
-      'Use MouseRegion.onExit instead. See MouseRegion.opaque for behavioral difference. '
-      'This feature was deprecated after v1.10.14.'
-    )
-    this.onPointerExit,
-    @Deprecated(
-      'Use MouseRegion.onHover instead. See MouseRegion.opaque for behavioral difference. '
-      'This feature was deprecated after v1.10.14.'
-    )
-    this.onPointerHover,
     this.onPointerUp,
+    this.onPointerHover,
     this.onPointerCancel,
     this.onPointerSignal,
     this.behavior = HitTestBehavior.deferToChild,
     Widget child,
   }) : assert(behavior != null),
-       _child = child,
-       super(key: key);
+       super(key: key, child: child);
 
   /// Called when a pointer comes into contact with the screen (for touch
   /// pointers), or has its button pressed (for mouse pointers) at this widget's
@@ -5820,32 +5800,23 @@ class Listener extends StatelessWidget {
   /// Called when a pointer that triggered an [onPointerDown] changes position.
   final PointerMoveEventListener onPointerMove;
 
-  /// Called when a pointer enters the region for this widget.
+  /// Called when a pointer changes into a position within this widget without
+  /// buttons pressed.
   ///
-  /// This is only fired for pointers which report their location when not down
-  /// (e.g. mouse pointers, but not most touch pointers).
+  /// Usually this is only fired for pointers which report their location when
+  /// not down (e.g. mouse pointers). Certain devices also fires this event on
+  /// single taps in accessibility mode.
   ///
-  /// If this is a mouse pointer, this will fire when the mouse pointer enters
-  /// the region defined by this widget, or when the widget appears under the
-  /// pointer.
-  final PointerEnterEventListener onPointerEnter;
-
-  /// Called when a pointer that has not triggered an [onPointerDown] changes
-  /// position.
+  /// This callback is not triggered by the movement of the widget.
   ///
-  /// This is only fired for pointers which report their location when not down
-  /// (e.g. mouse pointers, but not most touch pointers).
+  /// The time that this callback is triggered is during the callback of a
+  /// pointer event, which is always between frames.
+  ///
+  /// See also:
+  ///
+  ///  * [MouseRegion.onHover], which does the same job. The [Listener] one is
+  ///    preferred, since hover events are similar to other regular events.
   final PointerHoverEventListener onPointerHover;
-
-  /// Called when a pointer leaves the region for this widget.
-  ///
-  /// This is only fired for pointers which report their location when not down
-  /// (e.g. mouse pointers, but not most touch pointers).
-  ///
-  /// If this is a mouse pointer, this will fire when the mouse pointer leaves
-  /// the region defined by this widget, or when the widget disappears from
-  /// under the pointer.
-  final PointerExitEventListener onPointerExit;
 
   /// Called when a pointer that triggered an [onPointerDown] is no longer in
   /// contact with the screen.
@@ -5866,66 +5837,13 @@ class Listener extends StatelessWidget {
   /// How to behave during hit testing.
   final HitTestBehavior behavior;
 
-  // The widget listened to by the listener.
-  //
-  // The reason why we don't expose it is that once the deprecated methods are
-  // removed, Listener will no longer need to store the child, but will pass
-  // the child to `super` instead.
-  final Widget _child;
-
-  @override
-  Widget build(BuildContext context) {
-    Widget result = _child;
-    if (onPointerEnter != null ||
-        onPointerExit != null ||
-        onPointerHover != null) {
-      result = MouseRegion(
-        onEnter: onPointerEnter,
-        onExit: onPointerExit,
-        onHover: onPointerHover,
-        opaque: false,
-        child: result,
-      );
-    }
-    result = _PointerListener(
-      onPointerDown: onPointerDown,
-      onPointerUp: onPointerUp,
-      onPointerMove: onPointerMove,
-      onPointerCancel: onPointerCancel,
-      onPointerSignal: onPointerSignal,
-      behavior: behavior,
-      child: result,
-    );
-    return result;
-  }
-}
-
-class _PointerListener extends SingleChildRenderObjectWidget {
-  const _PointerListener({
-    Key key,
-    this.onPointerDown,
-    this.onPointerMove,
-    this.onPointerUp,
-    this.onPointerCancel,
-    this.onPointerSignal,
-    this.behavior = HitTestBehavior.deferToChild,
-    Widget child,
-  }) : assert(behavior != null),
-       super(key: key, child: child);
-
-  final PointerDownEventListener onPointerDown;
-  final PointerMoveEventListener onPointerMove;
-  final PointerUpEventListener onPointerUp;
-  final PointerCancelEventListener onPointerCancel;
-  final PointerSignalEventListener onPointerSignal;
-  final HitTestBehavior behavior;
-
   @override
   RenderPointerListener createRenderObject(BuildContext context) {
     return RenderPointerListener(
       onPointerDown: onPointerDown,
       onPointerMove: onPointerMove,
       onPointerUp: onPointerUp,
+      onPointerHover: onPointerHover,
       onPointerCancel: onPointerCancel,
       onPointerSignal: onPointerSignal,
       behavior: behavior,
@@ -5938,6 +5856,7 @@ class _PointerListener extends SingleChildRenderObjectWidget {
       ..onPointerDown = onPointerDown
       ..onPointerMove = onPointerMove
       ..onPointerUp = onPointerUp
+      ..onPointerHover = onPointerHover
       ..onPointerCancel = onPointerCancel
       ..onPointerSignal = onPointerSignal
       ..behavior = behavior;
@@ -5950,6 +5869,7 @@ class _PointerListener extends SingleChildRenderObjectWidget {
       if (onPointerDown != null) 'down',
       if (onPointerMove != null) 'move',
       if (onPointerUp != null) 'up',
+      if (onPointerHover != null) 'hover',
       if (onPointerCancel != null) 'cancel',
       if (onPointerSignal != null) 'signal',
     ];
@@ -5958,11 +5878,15 @@ class _PointerListener extends SingleChildRenderObjectWidget {
   }
 }
 
-/// A widget that tracks the movement of mice, even when no button is pressed.
+/// A widget that tracks the movement of mice.
 ///
-/// It does not listen to events that can construct gestures, such as when the
-/// pointer is pressed, moved, then released or canceled. For these events,
-/// use [Listener], or more preferably, [GestureDetector].
+/// [MouseRegion] is used
+/// when it is needed to compare the list of objects that a mouse pointer is
+/// hovering over betweeen this frame and the last frame. This means entering
+/// events, exiting events, and mouse cursors.
+///
+/// To listen to general pointer events, use [Listener], or more preferably,
+/// [GestureDetector].
 ///
 /// ## Layout behavior
 ///
@@ -6081,13 +6005,22 @@ class MouseRegion extends StatefulWidget {
   ///    internally implemented.
   final PointerEnterEventListener onEnter;
 
-  /// Triggered when a mouse pointer has moved onto or within the widget without
+  /// Triggered when a pointer changes into a position within this widget without
   /// buttons pressed.
   ///
-  /// This callback is not triggered by the movement of an annotation.
+  /// Usually this is only fired for pointers which report their location when
+  /// not down (e.g. mouse pointers). Certain devices also fires this event on
+  /// single taps in accessibility mode.
+  ///
+  /// This callback is not triggered by the movement of the widget.
   ///
   /// The time that this callback is triggered is during the callback of a
   /// pointer event, which is always between frames.
+  ///
+  /// See also:
+  ///
+  ///  * [Listener.onPointerHover], which does the same job. The [Listener]
+  ///    one is preferred, since hover events are similar to other regular events.
   final PointerHoverEventListener onHover;
 
   /// Triggered when a mouse pointer has exited this widget when the widget is

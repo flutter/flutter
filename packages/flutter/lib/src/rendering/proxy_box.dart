@@ -2658,10 +2658,10 @@ typedef PointerSignalEventListener = void Function(PointerSignalEvent event);
 /// Calls callbacks in response to common pointer events.
 ///
 /// It responds to events that can construct gestures, such as when the
-/// pointer is pressed, moved, then released or canceled.
+/// pointer is pressed, moved, released or canceled.
 ///
 /// It does not respond to events that are exclusive to mouse, such as when the
-/// mouse enters, exits or hovers a region without pressing any buttons. For
+/// mouse enters and exits a region without pressing any buttons. For
 /// these events, use [RenderMouseRegion].
 ///
 /// If it has a child, defers to the child for sizing behavior.
@@ -2675,6 +2675,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
     this.onPointerDown,
     this.onPointerMove,
     this.onPointerUp,
+    this.onPointerHover,
     this.onPointerCancel,
     this.onPointerSignal,
     HitTestBehavior behavior = HitTestBehavior.deferToChild,
@@ -2692,6 +2693,9 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   /// Called when a pointer that triggered an [onPointerDown] is no longer in
   /// contact with the screen.
   PointerUpEventListener onPointerUp;
+
+  /// Called when a pointer that has not an [onPointerDown] changes position.
+  PointerHoverEventListener onPointerHover;
 
   /// Called when the input from a pointer that triggered an [onPointerDown] is
   /// no longer directed towards this receiver.
@@ -2714,6 +2718,8 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
       return onPointerMove(event);
     if (onPointerUp != null && event is PointerUpEvent)
       return onPointerUp(event);
+    if (onPointerHover != null && event is PointerHoverEvent)
+      return onPointerHover(event);
     if (onPointerCancel != null && event is PointerCancelEvent)
       return onPointerCancel(event);
     if (onPointerSignal != null && event is PointerSignalEvent)
@@ -2729,6 +2735,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
         'down': onPointerDown,
         'move': onPointerMove,
         'up': onPointerUp,
+        'hover': onPointerHover,
         'cancel': onPointerCancel,
         'signal': onPointerSignal,
       },
@@ -2762,20 +2769,16 @@ class RenderMouseRegion extends RenderProxyBox implements MouseTrackerAnnotation
   /// mouse region with no callbacks and cursor being [MouseCursor.defer]. The
   /// [cursor] must not be null.
   RenderMouseRegion({
-    PointerEnterEventListener onEnter,
-    PointerHoverEventListener onHover,
-    PointerExitEventListener onExit,
+    this.onEnter,
+    this.onHover,
+    this.onExit,
     MouseCursor cursor = MouseCursor.defer,
     bool opaque = true,
     RenderBox child,
   }) : assert(opaque != null),
        assert(cursor != null),
-       _onEnter = onEnter,
-       _onHover = onHover,
-       _onExit = onExit,
        _cursor = cursor,
        _opaque = opaque,
-       _annotationIsActive = false,
        super(child);
 
   @protected
@@ -2785,6 +2788,13 @@ class RenderMouseRegion extends RenderProxyBox implements MouseTrackerAnnotation
   @override
   bool hitTest(BoxHitTestResult result, { @required Offset position }) {
     return super.hitTest(result, position: position) && _opaque;
+  }
+
+  @override
+  void handleEvent(PointerEvent event, HitTestEntry entry) {
+    assert(debugHandleEvent(event, entry));
+    if (onHover != null && event is PointerHoverEvent)
+      return onHover(event);
   }
 
   /// Whether this object should prevent [RenderMouseRegion]s visually behind it
@@ -2806,41 +2816,22 @@ class RenderMouseRegion extends RenderProxyBox implements MouseTrackerAnnotation
   set opaque(bool value) {
     if (_opaque != value) {
       _opaque = value;
-      // A repaint is needed in order to propagate the new value to
-      // AnnotatedRegionLayer via [paint].
-      _markPropertyUpdated(mustRepaint: true);
+      // Trigger [MouseTracker]'s device update to recalculate mouse states.
+      markNeedsPaint();
     }
   }
 
   @override
-  PointerEnterEventListener get onEnter => _onEnter;
-  PointerEnterEventListener _onEnter;
-  set onEnter(PointerEnterEventListener value) {
-    if (_onEnter != value) {
-      _onEnter = value;
-      _markPropertyUpdated(mustRepaint: false);
-    }
-  }
+  PointerEnterEventListener onEnter;
+
+  /// Triggered when a pointer has moved onto or within the region without
+  /// buttons pressed.
+  ///
+  /// This callback is not triggered by the movement of the object.
+  PointerHoverEventListener onHover;
 
   @override
-  PointerHoverEventListener get onHover => _onHover;
-  PointerHoverEventListener _onHover;
-  set onHover(PointerHoverEventListener value) {
-    if (_onHover != value) {
-      _onHover = value;
-      _markPropertyUpdated(mustRepaint: false);
-    }
-  }
-
-  @override
-  PointerExitEventListener get onExit => _onExit;
-  PointerExitEventListener _onExit;
-  set onExit(PointerExitEventListener value) {
-    if (_onExit != value) {
-      _onExit = value;
-      _markPropertyUpdated(mustRepaint: false);
-    }
-  }
+  PointerExitEventListener onExit;
 
   @override
   MouseCursor get cursor => _cursor;
@@ -2850,59 +2841,8 @@ class RenderMouseRegion extends RenderProxyBox implements MouseTrackerAnnotation
       _cursor = value;
       // A repaint is needed in order to trigger a device update of
       // [MouseTracker] so that this new value can be found.
-      _markPropertyUpdated(mustRepaint: true);
-    }
-  }
-
-  // Call this method when a property has changed and might affect the
-  // `_annotationIsActive` bit.
-  //
-  // If `mustRepaint` is false, this method does NOT call `markNeedsPaint`
-  // unless the `_annotationIsActive` bit is changed. If there is a property
-  // that needs updating while `_annotationIsActive` stays true, make
-  // `mustRepaint` true.
-  //
-  // This method must not be called during `paint`.
-  void _markPropertyUpdated({@required bool mustRepaint}) {
-    assert(owner == null || !owner.debugDoingPaint);
-    final bool newAnnotationIsActive = (
-        _onEnter != null ||
-        _onHover != null ||
-        _onExit != null ||
-        _cursor != MouseCursor.defer ||
-        opaque
-      ) && RendererBinding.instance.mouseTracker.mouseIsConnected;
-    _setAnnotationIsActive(newAnnotationIsActive);
-    if (mustRepaint)
       markNeedsPaint();
-  }
-
-  bool _annotationIsActive = false;
-  void _setAnnotationIsActive(bool value) {
-    final bool annotationWasActive = _annotationIsActive;
-    _annotationIsActive = value;
-    if (annotationWasActive != value) {
-      markNeedsPaint();
-      markNeedsCompositingBitsUpdate();
     }
-  }
-
-  void _handleUpdatedMouseIsConnected() {
-    _markPropertyUpdated(mustRepaint: false);
-  }
-
-  @override
-  void attach(PipelineOwner owner) {
-    super.attach(owner);
-    // Add a listener to listen for changes in mouseIsConnected.
-    RendererBinding.instance.mouseTracker.addListener(_handleUpdatedMouseIsConnected);
-    _markPropertyUpdated(mustRepaint: false);
-  }
-
-  @override
-  void detach() {
-    RendererBinding.instance.mouseTracker.removeListener(_handleUpdatedMouseIsConnected);
-    super.detach();
   }
 
   @override

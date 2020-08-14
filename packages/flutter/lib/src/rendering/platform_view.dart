@@ -12,7 +12,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
-import 'binding.dart';
 import 'box.dart';
 import 'layer.dart';
 import 'mouse_cursor.dart';
@@ -668,7 +667,7 @@ mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
     if (value != _hitTestBehavior) {
       _hitTestBehavior = value;
       if (owner != null)
-        RendererBinding.instance.mouseTracker.schedulePostFrameCheck();
+        markNeedsPaint();
     }
   }
   PlatformViewHitTestBehavior _hitTestBehavior;
@@ -711,13 +710,6 @@ mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
   PointerEnterEventListener get onEnter => null;
 
   @override
-  PointerHoverEventListener get onHover => _handleHover;
-  void _handleHover(PointerHoverEvent event) {
-    if (_handlePointerEvent != null)
-      _handlePointerEvent(event);
-  }
-
-  @override
   PointerExitEventListener get onExit => null;
 
   @override
@@ -727,6 +719,10 @@ mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     if (event is PointerDownEvent) {
       _gestureRecognizer.addPointer(event);
+    }
+    if (event is PointerHoverEvent) {
+      if (_handlePointerEvent != null)
+        _handlePointerEvent(event);
     }
   }
 

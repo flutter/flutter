@@ -123,7 +123,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   void _handlePointerEvent(PointerEvent event) {
     assert(!locked);
     HitTestResult? hitTestResult;
-    if (event is PointerDownEvent || event is PointerSignalEvent) {
+    if (event is PointerDownEvent || event is PointerSignalEvent || event is PointerHoverEvent) {
       assert(!_hitTests.containsKey(event.pointer));
       hitTestResult = HitTestResult();
       hitTest(hitTestResult, event.position);
@@ -151,7 +151,6 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
       return true;
     }());
     if (hitTestResult != null ||
-        event is PointerHoverEvent ||
         event is PointerAddedEvent ||
         event is PointerRemovedEvent) {
       dispatchEvent(event, hitTestResult);
@@ -169,14 +168,15 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   /// This sends the given event to every [HitTestTarget] in the entries of the
   /// given [HitTestResult], and catches exceptions that any of the handlers
   /// might throw. The [hitTestResult] argument may only be null for
-  /// [PointerHoverEvent], [PointerAddedEvent], or [PointerRemovedEvent] events.
+  /// [PointerAddedEvent] or [PointerRemovedEvent] events.
   @override // from HitTestDispatcher
   void dispatchEvent(PointerEvent event, HitTestResult? hitTestResult) {
     assert(!locked);
-    // No hit test information implies that this is a hover or pointer
-    // add/remove event.
+    // No hit test information implies that this is a pointer add/remove event.
+    // These events are specially routed here; other events will be routed
+    // through the `handleEvent` below.
     if (hitTestResult == null) {
-      assert(event is PointerHoverEvent || event is PointerAddedEvent || event is PointerRemovedEvent);
+      assert(event is PointerAddedEvent || event is PointerRemovedEvent);
       try {
         pointerRouter.route(event);
       } catch (exception, stack) {

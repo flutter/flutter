@@ -259,7 +259,6 @@ class TestPointer {
         !isDown,
         'Hover events can only be generated when the pointer is up. To '
         'simulate movement when the pointer is down, use move() instead.');
-    assert(kind != PointerDeviceKind.touch, "Touch pointers can't generate hover events");
     final Offset delta = location != null ? newLocation - location : Offset.zero;
     _location = newLocation;
     return PointerHoverEvent(
@@ -403,14 +402,12 @@ class TestGesture {
   Future<void> moveTo(Offset location, { Duration timeStamp = Duration.zero }) {
     return TestAsyncUtils.guard<void>(() {
       if (_pointer._isDown) {
-        assert(_result != null,
-            'Move events with the pointer down must be preceded by a down '
-            'event that captures a hit test result.');
+        assert(_result != null);
         return _dispatcher(_pointer.move(location, timeStamp: timeStamp), _result);
       } else {
-        assert(_pointer.kind != PointerDeviceKind.touch,
-            'Touch device move events can only be sent if the pointer is down.');
-        return _dispatcher(_pointer.hover(location, timeStamp: timeStamp), null);
+        assert(_result == null);
+        final HitTestResult result = _hitTester(location);
+        return _dispatcher(_pointer.hover(location, timeStamp: timeStamp), result);
       }
     });
   }

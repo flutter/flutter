@@ -89,7 +89,10 @@ void main() {
     _binding.callback = events.add;
 
     ui.window.onPointerDataPacket(packet);
-    expect(events.length, 0);
+    expect(events.length, 3);
+    expect(events[0].runtimeType, equals(PointerHoverEvent));
+    expect(events[1].runtimeType, equals(PointerHoverEvent));
+    expect(events[2].runtimeType, equals(PointerHoverEvent));
     expect(pointerRouterEvents.length, 6,
         reason: 'pointerRouterEvents contains: $pointerRouterEvents');
     expect(pointerRouterEvents[0].runtimeType, equals(PointerAddedEvent));

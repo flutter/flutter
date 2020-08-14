@@ -153,7 +153,6 @@ void main() {
       '     Semantics\n'
       '     FocusScope\n'
       '     AbsorbPointer\n'
-      '     _PointerListener\n'
       '     Listener\n'
       '     HeroControllerScope\n'
       '     Navigator-[GlobalObjectKey<NavigatorState> _WidgetsAppState#00000]\n'
