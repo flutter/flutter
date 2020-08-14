@@ -299,35 +299,34 @@ void RasterCache::SetCheckboardCacheImages(bool checkerboard) {
 
 void RasterCache::TraceStatsToTimeline() const {
 #if !FLUTTER_RELEASE
+  constexpr double kMegaBytes = (1 << 20);
+  FML_TRACE_COUNTER("flutter", "RasterCache", reinterpret_cast<int64_t>(this),
+                    "LayerCount", layer_cache_.size(), "LayerMBytes",
+                    EstimateLayerCacheByteSize() / kMegaBytes, "PictureCount",
+                    picture_cache_.size(), "PictureMBytes",
+                    EstimatePictureCacheByteSize() / kMegaBytes);
 
-  size_t layer_cache_count = 0;
+#endif  // !FLUTTER_RELEASE
+}
+
+size_t RasterCache::EstimateLayerCacheByteSize() const {
   size_t layer_cache_bytes = 0;
-  size_t picture_cache_count = 0;
-  size_t picture_cache_bytes = 0;
-
   for (const auto& item : layer_cache_) {
-    layer_cache_count++;
     if (item.second.image) {
       layer_cache_bytes += item.second.image->image_bytes();
     }
   }
+  return layer_cache_bytes;
+}
 
+size_t RasterCache::EstimatePictureCacheByteSize() const {
+  size_t picture_cache_bytes = 0;
   for (const auto& item : picture_cache_) {
-    picture_cache_count++;
     if (item.second.image) {
       picture_cache_bytes += item.second.image->image_bytes();
     }
   }
-
-  FML_TRACE_COUNTER("flutter", "RasterCache",
-                    reinterpret_cast<int64_t>(this),             //
-                    "LayerCount", layer_cache_count,             //
-                    "LayerMBytes", layer_cache_bytes * 1e-6,     //
-                    "PictureCount", picture_cache_count,         //
-                    "PictureMBytes", picture_cache_bytes * 1e-6  //
-  );
-
-#endif  // !FLUTTER_RELEASE
+  return picture_cache_bytes;
 }
 
 }  // namespace flutter
