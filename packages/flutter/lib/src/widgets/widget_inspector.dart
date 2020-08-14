@@ -954,6 +954,10 @@ mixin WidgetInspectorService {
     _errorsSinceReload = 0;
   }
 
+  /// Whether structured errors are enabled.
+  ///
+  /// Structured errors provide semantic information that can be used by IDEs
+  /// to enhance the display of errors with rich formatting.
   bool isStructuredErrorsEnabled() {
     return const bool.fromEnvironment('flutter.inspector.structuredErrors');
   }
@@ -1216,8 +1220,7 @@ mixin WidgetInspectorService {
   }
 
   /// Returns a unique id for [object] that will remain live at least until
-  /// [disposeGroup] is called on [groupName] or [dispose] is called on the id
-  /// returned by this method.
+  /// [disposeGroup] is called on [groupName].
   @protected
   String toId(Object object, String groupName) {
     if (object == null)
@@ -1894,7 +1897,7 @@ mixin WidgetInspectorService {
     }
   }
 
-  /// This method is called by [WidgetBinding.performReassemble] to flush caches
+  /// This method is called by [WidgetsBinding.performReassemble] to flush caches
   /// of obsolete values after a hot reload.
   ///
   /// Do not call this method directly. Instead, use
@@ -2861,7 +2864,7 @@ Iterable<DiagnosticsNode> _describeRelevantUserCode(Element element) {
   bool processElement(Element target) {
     // TODO(chunhtai): should print out all the widgets that are about to cross
     // package boundaries.
-    if (_isLocalCreationLocation(target)) {
+    if (debugIsLocalCreationLocation(target)) {
       nodes.add(
         DiagnosticsBlock(
           name: 'The relevant error-causing widget was',
@@ -2882,15 +2885,22 @@ Iterable<DiagnosticsNode> _describeRelevantUserCode(Element element) {
 
 /// Returns if an object is user created.
 ///
+/// This always returns false if it is not called in debug mode.
+///
 /// {@macro widgets.inspector.trackCreation}
 ///
 /// Currently is local creation locations are only available for
 /// [Widget] and [Element].
-bool _isLocalCreationLocation(Object object) {
-  final _Location location = _getCreationLocation(object);
-  if (location == null)
-    return false;
-  return WidgetInspectorService.instance._isLocalCreationLocation(location);
+bool debugIsLocalCreationLocation(Object object) {
+  bool isLocal = false;
+  assert(() {
+    final _Location location = _getCreationLocation(object);
+    if (location == null)
+      isLocal =  false;
+    isLocal = WidgetInspectorService.instance._isLocalCreationLocation(location);
+    return true;
+  }());
+  return isLocal;
 }
 
 /// Returns the creation location of an object in String format if one is available.

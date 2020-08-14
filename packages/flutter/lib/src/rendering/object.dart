@@ -676,7 +676,7 @@ abstract class Constraints {
   /// const constructors so that they can be used in const expressions.
   const Constraints();
 
-  /// Whether there is exactly one size possible given these constraints
+  /// Whether there is exactly one size possible given these constraints.
   bool get isTight;
 
   /// Whether the constraint is expressed in a consistent manner.
@@ -2742,10 +2742,11 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 
   /// Assemble the [SemanticsNode] for this [RenderObject].
   ///
-  /// If [isSemanticBoundary] is true, this method is called with the `node`
-  /// created for this [RenderObject], the `config` to be applied to that node
-  /// and the `children` [SemanticsNode]s that descendants of this RenderObject
-  /// have generated.
+  /// If [describeSemanticsConfiguration] sets
+  /// [SemanticsConfiguration.isSemanticBoundary] to true, this method is called
+  /// with the `node` created for this [RenderObject], the `config` to be
+  /// applied to that node and the `children` [SemanticsNode]s that descendants
+  /// of this RenderObject have generated.
   ///
   /// By default, the method will annotate `node` with `config` and add the
   /// `children` to it.
@@ -2986,7 +2987,7 @@ mixin RenderObjectWithChildMixin<ChildType extends RenderObject> on RenderObject
   }
 
   ChildType _child;
-  /// The render object's unique child
+  /// The render object's unique child.
   ChildType get child => _child;
   set child(ChildType value) {
     if (_child != null)

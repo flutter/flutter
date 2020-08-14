@@ -57,7 +57,6 @@ import '../widget_cache.dart';
 class AttachCommand extends FlutterCommand {
   AttachCommand({bool verboseHelp = false, this.hotRunnerFactory}) {
     addBuildModeFlags(defaultToRelease: false);
-    usesIsolateFilterOption(hide: !verboseHelp);
     usesTargetOption();
     usesPortOptions();
     usesIpv6Flag();
@@ -102,6 +101,7 @@ class AttachCommand extends FlutterCommand {
               'and progress in machine friendly format.',
       );
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
+    addDdsOptions(verboseHelp: verboseHelp);
     hotRunnerFactory ??= HotRunnerFactory();
   }
 
@@ -379,7 +379,6 @@ class AttachCommand extends FlutterCommand {
       flutterProject: flutterProject,
       fileSystemRoots: stringsArg('filesystem-root'),
       fileSystemScheme: stringArg('filesystem-scheme'),
-      viewFilter: stringArg('isolate-filter'),
       target: stringArg('target'),
       targetModel: TargetModel(stringArg('target-model')),
       buildInfo: getBuildInfo(),
@@ -388,7 +387,7 @@ class AttachCommand extends FlutterCommand {
     );
     flutterDevice.observatoryUris = observatoryUris;
     final List<FlutterDevice> flutterDevices =  <FlutterDevice>[flutterDevice];
-    final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(getBuildInfo());
+    final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(getBuildInfo(), disableDds: boolArg('disable-dds'));
 
     return getBuildInfo().isDebug
       ? hotRunnerFactory.build(

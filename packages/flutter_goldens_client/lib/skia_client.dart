@@ -438,20 +438,30 @@ class SkiaGoldClient {
       final Uri requestForExpectations = Uri.parse(
         'https://flutter-gold.skia.org/json/expectations/commit/HEAD'
       );
+      const String mainKey = 'master';
+      const String temporaryKey = 'master_str';
       String rawResponse;
       try {
         final io.HttpClientRequest request = await httpClient.getUrl(requestForExpectations);
         final io.HttpClientResponse response = await request.close();
         rawResponse = await utf8.decodeStream(response);
-        final Map<String, dynamic> skiaJson = json.decode(rawResponse)['master'] as Map<String, dynamic>;
-
+        final dynamic jsonResponse = json.decode(rawResponse);
+        if (jsonResponse is! Map<String, dynamic>)
+          throw const FormatException('Skia gold expectations do not match expected format.');
+        final Map<String, dynamic> skiaJson = (jsonResponse[mainKey] ?? jsonResponse[temporaryKey]) as Map<String, dynamic>;
+        if (skiaJson == null)
+          throw FormatException('Skia gold expectations are missing the "$mainKey" key (and also doesn\'t have "$temporaryKey")! Available keys: ${jsonResponse.keys.join(", ")}');
         skiaJson.forEach((String key, dynamic value) {
           final Map<String, dynamic> hashesMap = value as Map<String, dynamic>;
           _expectations[key] = hashesMap.keys.toList();
         });
-      } on FormatException catch(_) {
-        print('Formatting error detected requesting expectations from Flutter Gold.\n'
-          'rawResponse: $rawResponse');
+      } on FormatException catch (error) {
+        print(
+          'Formatting error detected requesting expectations from Flutter Gold.\n'
+          'error: $error\n'
+          'url: $requestForExpectations\n'
+          'response: $rawResponse'
+        );
         rethrow;
       }
     },

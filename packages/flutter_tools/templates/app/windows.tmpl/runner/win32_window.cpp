@@ -122,9 +122,11 @@ bool Win32Window::CreateAndShow(const std::wstring& title,
       Scale(size.width, scale_factor), Scale(size.height, scale_factor),
       nullptr, nullptr, GetModuleHandle(nullptr), this);
 
-  OnCreate();
+  if (!window) {
+    return false;
+  }
 
-  return window != nullptr;
+  return OnCreate();
 }
 
 // static
@@ -240,8 +242,9 @@ void Win32Window::SetQuitOnClose(bool quit_on_close) {
   quit_on_close_ = quit_on_close;
 }
 
-void Win32Window::OnCreate() {
+bool Win32Window::OnCreate() {
   // No-op; provided for subclasses.
+  return true;
 }
 
 void Win32Window::OnDestroy() {

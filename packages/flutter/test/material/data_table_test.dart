@@ -4,9 +4,12 @@
 
 // @dart = 2.8
 
+import 'dart:math' as math;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:vector_math/vector_math_64.dart' show Matrix3;
 
 import '../rendering/mock_canvas.dart';
 import 'data_table_test_utils.dart';
@@ -307,6 +310,54 @@ void main() {
     await tester.tap(find.text('Dessert'));
     await tester.pump();
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('DataTable sort indicator orientation', (WidgetTester tester) async {
+    Widget buildTable({ bool sortAscending = true }) {
+      return DataTable(
+        sortColumnIndex: 0,
+        sortAscending: sortAscending,
+        columns: <DataColumn>[
+          DataColumn(
+            label: const Text('Name'),
+            tooltip: 'Name',
+            onSort: (int columnIndex, bool ascending) {},
+          ),
+        ],
+        rows: kDesserts.map<DataRow>((Dessert dessert) {
+          return DataRow(
+            cells: <DataCell>[
+              DataCell(
+                Text(dessert.name),
+              ),
+            ],
+          );
+        }).toList(),
+      );
+    }
+
+    // Check for ascending list
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable(sortAscending: true)),
+    ));
+    // The `tester.widget` ensures that there is exactly one upward arrow.
+    Transform transformOfArrow = tester.widget<Transform>(find.widgetWithIcon(Transform, Icons.arrow_upward));
+    expect(
+      transformOfArrow.transform.getRotation(),
+      equals(Matrix3.identity())
+    );
+
+    // Check for descending list.
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable(sortAscending: false)),
+    ));
+    await tester.pumpAndSettle();
+    // The `tester.widget` ensures that there is exactly one upward arrow.
+    transformOfArrow = tester.widget<Transform>(find.widgetWithIcon(Transform, Icons.arrow_upward));
+    expect(
+      transformOfArrow.transform.getRotation(),
+      equals(Matrix3.rotationZ(math.pi))
+    );
   });
 
   testWidgets('DataTable row onSelectChanged test', (WidgetTester tester) async {

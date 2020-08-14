@@ -92,6 +92,7 @@ FlutterPlatform installHook({
   List<String> extraFrontEndOptions,
   // Deprecated, use extraFrontEndOptions.
   List<String> dartExperiments,
+  bool nullAssertions = false,
 }) {
   assert(testWrapper != null);
   assert(enableObservatory || (!startPaused && observatoryPort == null));
@@ -125,6 +126,7 @@ FlutterPlatform installHook({
     flutterProject: flutterProject,
     icudtlPath: icudtlPath,
     extraFrontEndOptions: extraFrontEndOptions,
+    nullAssertions: nullAssertions,
   );
   platformPluginRegistration(platform);
   return platform;
@@ -268,6 +270,7 @@ class FlutterPlatform extends PlatformPlugin {
     this.projectRootDirectory,
     this.flutterProject,
     this.icudtlPath,
+    this.nullAssertions = false,
     @required this.extraFrontEndOptions,
   }) : assert(shellPath != null);
 
@@ -290,6 +293,7 @@ class FlutterPlatform extends PlatformPlugin {
   final FlutterProject flutterProject;
   final String icudtlPath;
   final List<String> extraFrontEndOptions;
+  final bool nullAssertions;
 
   Directory fontsDirectory;
 
@@ -514,7 +518,7 @@ class FlutterPlatform extends PlatformPlugin {
       Uri processObservatoryUri;
       _pipeStandardStreamsToConsole(
         process,
-        reportObservatoryUri: (Uri detectedUri) {
+        reportObservatoryUri: (Uri detectedUri) async {
           assert(processObservatoryUri == null);
           assert(explicitObservatoryPort == null ||
               explicitObservatoryPort == detectedUri.port);
@@ -531,9 +535,9 @@ class FlutterPlatform extends PlatformPlugin {
             globals.printTrace('Connecting to service protocol: $processObservatoryUri');
             final Future<vm_service.VmService> localVmService = connectToVmService(processObservatoryUri,
               compileExpression: _compileExpressionService);
-            localVmService.then((vm_service.VmService vmservice) {
+            unawaited(localVmService.then((vm_service.VmService vmservice) {
               globals.printTrace('Successfully connected to service protocol: $processObservatoryUri');
-            });
+            }));
           }
           gotProcessObservatoryUri.complete();
           watcher?.handleStartedProcess(
@@ -844,6 +848,8 @@ class FlutterPlatform extends PlatformPlugin {
       '--non-interactive',
       '--use-test-fonts',
       '--packages=$packages',
+      if (nullAssertions)
+        '--dart-flags=--null_assertions',
       testPath,
     ];
 
@@ -870,8 +876,9 @@ class FlutterPlatform extends PlatformPlugin {
   void _pipeStandardStreamsToConsole(
     Process process, {
     void startTimeoutTimer(),
-    void reportObservatoryUri(Uri uri),
+    Future<void> reportObservatoryUri(Uri uri),
   }) {
+
     const String observatoryString = 'Observatory listening on ';
     for (final Stream<List<int>> stream in <Stream<List<int>>>[
       process.stderr,
@@ -881,7 +888,7 @@ class FlutterPlatform extends PlatformPlugin {
           .transform<String>(utf8.decoder)
           .transform<String>(const LineSplitter())
           .listen(
-        (String line) {
+        (String line) async {
           if (line == _kStartTimeoutTimerMessage) {
             if (startTimeoutTimer != null) {
               startTimeoutTimer();
@@ -894,7 +901,7 @@ class FlutterPlatform extends PlatformPlugin {
             try {
               final Uri uri = Uri.parse(line.substring(observatoryString.length));
               if (reportObservatoryUri != null) {
-                reportObservatoryUri(uri);
+                await reportObservatoryUri(uri);
               }
             } on Exception catch (error) {
               globals.printError('Could not parse shell observatory port message: $error');

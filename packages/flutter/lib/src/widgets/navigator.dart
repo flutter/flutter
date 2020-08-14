@@ -21,7 +21,6 @@ import 'focus_scope.dart';
 import 'framework.dart';
 import 'heroes.dart';
 import 'overlay.dart';
-import 'route_notification_messages.dart';
 import 'routes.dart';
 import 'ticker_provider.dart';
 
@@ -109,7 +108,7 @@ enum RoutePopDisposition {
 /// platform-adaptive transition.
 ///
 /// A route can belong to a page if the [settings] are a subclass of [Page]. A
-/// page-based route, as opposite to pageless route, is created from
+/// page-based route, as opposed to a pageless route, is created from
 /// [Page.createRoute] during [Navigator.pages] updates. The page associated
 /// with this route may change during the lifetime of the route. If the
 /// [Navigator] updates the page of this route, it calls [changedInternalState]
@@ -239,8 +238,8 @@ abstract class Route<T> {
   /// Returns whether calling [Navigator.maybePop] when this [Route] is current
   /// ([isCurrent]) should do anything.
   ///
-  /// [Navigator.maybePop] is usually used instead of [pop] to handle the system
-  /// back button.
+  /// [Navigator.maybePop] is usually used instead of [Navigator.pop] to handle
+  /// the system back button.
   ///
   /// By default, if a [Route] is the first route in the history (i.e., if
   /// [isFirst]), it reports that pops should be bubbled
@@ -312,7 +311,7 @@ abstract class Route<T> {
   ///
   /// This is called by [didPop] and in response to
   /// [NavigatorState.pushReplacement]. If [didPop] was not called, then the
-  /// [Navigator.finalizeRoute] method must be called immediately, and no exit
+  /// [NavigatorState.finalizeRoute] method must be called immediately, and no exit
   /// animation will run.
   ///
   /// The [popped] future is completed by this method. The `result` argument
@@ -322,7 +321,7 @@ abstract class Route<T> {
   /// This should be called before the pop animation, if any, takes place,
   /// though in some cases the animation may be driven by the user before the
   /// route is committed to being popped; this can in particular happen with the
-  /// iOS-style back gesture. See [Navigator.didStartUserGesture].
+  /// iOS-style back gesture. See [NavigatorState.didStartUserGesture].
   @protected
   @mustCallSuper
   void didComplete(T result) {
@@ -367,9 +366,9 @@ abstract class Route<T> {
   /// Called whenever the internal state of the route has changed.
   ///
   /// This should be called whenever [willHandlePopInternally], [didPop],
-  /// [offstage], or other internal state of the route changes value. It is used
-  /// by [ModalRoute], for example, to report the new information via its
-  /// inherited widget to any children of the route.
+  /// [ModalRoute.offstage], or other internal state of the route changes value.
+  /// It is used by [ModalRoute], for example, to report the new information via
+  /// its inherited widget to any children of the route.
   ///
   /// See also:
   ///
@@ -382,7 +381,7 @@ abstract class Route<T> {
   /// the route may wish to rebuild as well.
   ///
   /// This is called by the [Navigator] whenever the [NavigatorState]'s
-  /// [widget] changes, for example because the [MaterialApp] has been rebuilt.
+  /// [State.widget] changes, for example because the [MaterialApp] has been rebuilt.
   /// This ensures that routes that directly refer to the state of the widget
   /// that built the [MaterialApp] will be notified when that widget rebuilds,
   /// since it would otherwise be difficult to notify the routes that state they
@@ -1061,7 +1060,7 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
 /// ### Displaying a full-screen route
 ///
 /// Although you can create a navigator directly, it's most common to use the
-/// navigator created by the [Router] which itself is created and configured by
+/// navigator created by the `Router` which itself is created and configured by
 /// a [WidgetsApp] or a [MaterialApp] widget. You can refer to that navigator
 /// with [Navigator.of].
 ///
@@ -1255,7 +1254,7 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
 /// root [Navigator].
 ///
 /// In practice, the nested [Navigator]s for tabbed navigation sit in the
-/// [WidgetApp] and [CupertinoTabView] widgets and do not need to be explicitly
+/// [WidgetsApp] and [CupertinoTabView] widgets and do not need to be explicitly
 /// created or managed.
 ///
 /// {@tool sample --template=freeform}
@@ -1393,7 +1392,7 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
 ///
 /// [Navigator.of] operates on the nearest ancestor [Navigator] from the given
 /// [BuildContext]. Be sure to provide a [BuildContext] below the intended
-/// [Navigator], especially in large [build] methods where nested [Navigator]s
+/// [Navigator], especially in large `build` methods where nested [Navigator]s
 /// are created. The [Builder] widget can be used to access a [BuildContext] at
 /// a desired location in the widget subtree.
 class Navigator extends StatefulWidget {
@@ -1534,7 +1533,7 @@ class Navigator extends StatefulWidget {
   /// context.
   ///
   /// {@template flutter.widgets.navigator.pushNamed}
-  /// The route name will be passed to that navigator's [onGenerateRoute]
+  /// The route name will be passed to the [Navigator.onGenerateRoute]
   /// callback. The returned route will be pushed into the navigator.
   ///
   /// The new route and the previous route (if any) are notified (see
@@ -1550,7 +1549,8 @@ class Navigator extends StatefulWidget {
   ///
   /// The `T` type argument is the type of the return value of the route.
   ///
-  /// To use [pushNamed], an [onGenerateRoute] callback must be provided,
+  /// To use [pushNamed], an [Navigator.onGenerateRoute] callback must be
+  /// provided,
   /// {@endtemplate}
   ///
   /// {@template flutter.widgets.navigator.pushNamed.arguments}
@@ -1638,7 +1638,7 @@ class Navigator extends StatefulWidget {
   /// the widget that created their route. The type of `result`, if provided,
   /// must match the type argument of the class of the old route (`TO`).
   ///
-  /// The route name will be passed to the navigator's [onGenerateRoute]
+  /// The route name will be passed to the [Navigator.onGenerateRoute]
   /// callback. The returned route will be pushed into the navigator.
   ///
   /// The new route and the route below the removed route are notified (see
@@ -1658,8 +1658,8 @@ class Navigator extends StatefulWidget {
   /// The `T` type argument is the type of the return value of the new route,
   /// and `TO` is the type of the return value of the old route.
   ///
-  /// To use [pushReplacementNamed], an [onGenerateRoute] callback must be
-  /// provided.
+  /// To use [pushReplacementNamed], a [Navigator.onGenerateRoute] callback must
+  /// be provided.
   /// {@endtemplate}
   ///
   /// {@macro flutter.widgets.navigator.pushNamed.arguments}
@@ -1690,14 +1690,14 @@ class Navigator extends StatefulWidget {
   /// {@template flutter.widgets.navigator.popAndPushNamed}
   /// The popping of the previous route is handled as per [pop].
   ///
-  /// The new route's name will be passed to the navigator's [onGenerateRoute]
+  /// The new route's name will be passed to the [Navigator.onGenerateRoute]
   /// callback. The returned route will be pushed into the navigator.
   ///
   /// The new route, the old route, and the route below the old route (if any)
   /// are all notified (see [Route.didPop], [Route.didComplete],
   /// [Route.didPopNext], [Route.didPush], and [Route.didChangeNext]). If the
   /// [Navigator] has any [Navigator.observers], they will be notified as well
-  /// (see [NavigatorObserver.didPop] and [NavigatorObservers.didPush]). The
+  /// (see [NavigatorObserver.didPop] and [NavigatorObserver.didPush]). The
   /// animations for the pop and the push are performed simultaneously, so the
   /// route below may be briefly visible even if both the old route and the new
   /// route are opaque (see [TransitionRoute.opaque]).
@@ -1711,7 +1711,7 @@ class Navigator extends StatefulWidget {
   /// The `T` type argument is the type of the return value of the new route,
   /// and `TO` is the return value type of the old route.
   ///
-  /// To use [popAndPushNamed], an [onGenerateRoute] callback must be provided.
+  /// To use [popAndPushNamed], a [Navigator.onGenerateRoute] callback must be provided.
   ///
   /// {@endtemplate}
   ///
@@ -1754,15 +1754,15 @@ class Navigator extends StatefulWidget {
   /// The removed routes are removed without being completed, so this method
   /// does not take a return value argument.
   ///
-  /// The new route's name (`routeName`) will be passed to the navigator's
-  /// [onGenerateRoute] callback. The returned route will be pushed into the
-  /// navigator.
+  /// The new route's name (`routeName`) will be passed to the
+  /// [Navigator.onGenerateRoute] callback. The returned route will be pushed
+  /// into the navigator.
   ///
   /// The new route and the route below the bottommost removed route (which
   /// becomes the route below the new route) are notified (see [Route.didPush]
   /// and [Route.didChangeNext]). If the [Navigator] has any
   /// [Navigator.observers], they will be notified as well (see
-  /// [NavigatorObservers.didPush] and [NavigatorObservers.didRemove]). The
+  /// [NavigatorObserver.didPush] and [NavigatorObserver.didRemove]). The
   /// removed routes are disposed, without being notified, once the new route
   /// has finished animating. The futures that had been returned from pushing
   /// those routes will not complete.
@@ -1775,8 +1775,8 @@ class Navigator extends StatefulWidget {
   ///
   /// The `T` type argument is the type of the return value of the new route.
   ///
-  /// To use [pushNamedAndRemoveUntil], an [onGenerateRoute] callback must be
-  /// provided.
+  /// To use [pushNamedAndRemoveUntil], an [Navigator.onGenerateRoute] callback
+  /// must be provided.
   /// {@endtemplate}
   ///
   /// {@macro flutter.widgets.navigator.pushNamed.arguments}
@@ -1899,8 +1899,8 @@ class Navigator extends StatefulWidget {
   /// [Route.didPush]. After removal, the new route and its new preceding route,
   /// (the route below the bottommost removed route) are notified through
   /// [Route.didChangeNext]). If the [Navigator] has any [Navigator.observers],
-  /// they will be notified as well (see [NavigatorObservers.didPush] and
-  /// [NavigatorObservers.didRemove]). The removed routes are disposed of and
+  /// they will be notified as well (see [NavigatorObserver.didPush] and
+  /// [NavigatorObserver.didRemove]). The removed routes are disposed of and
   /// notified, once the new route has finished animating. The futures that had
   /// been returned from pushing those routes will not complete.
   ///
@@ -1949,7 +1949,7 @@ class Navigator extends StatefulWidget {
   /// the new route, are all notified (see [Route.didReplace],
   /// [Route.didChangeNext], and [Route.didChangePrevious]). If the [Navigator]
   /// has any [Navigator.observers], they will be notified as well (see
-  /// [NavigatorObservers.didReplace]). The removed route is disposed without
+  /// [NavigatorObserver.didReplace]). The removed route is disposed without
   /// being notified. The future that had been returned from pushing that routes
   /// will not complete.
   ///
@@ -1986,7 +1986,7 @@ class Navigator extends StatefulWidget {
   /// the new route, are all notified (see [Route.didReplace],
   /// [Route.didChangeNext], and [Route.didChangePrevious]). If the [Navigator]
   /// has any [Navigator.observers], they will be notified as well (see
-  /// [NavigatorObservers.didReplace]). The removed route is disposed without
+  /// [NavigatorObserver.didReplace]). The removed route is disposed without
   /// being notified. The future that had been returned from pushing that routes
   /// will not complete.
   ///
@@ -2732,6 +2732,8 @@ class _NavigatorReplaceObservation extends _NavigatorObservation {
 }
 
 /// The state for a [Navigator] widget.
+///
+/// A reference to this class can be obtained by calling [Navigator.of].
 class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   final GlobalKey<OverlayState> _overlayKey = GlobalKey<OverlayState>();
   List<_RouteEntry> _history = <_RouteEntry>[];
@@ -3305,8 +3307,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         _RouteEntry.isPresentPredicate, orElse: () => null);
       final String routeName = lastEntry?.route?.settings?.name;
       if (routeName != _lastAnnouncedRouteName) {
-        RouteNotificationMessages.maybeNotifyRouteChange(
-          routeName, _lastAnnouncedRouteName);
+        SystemNavigator.routeUpdated(
+          routeName: routeName,
+          previousRouteName: _lastAnnouncedRouteName
+        );
         _lastAnnouncedRouteName = routeName;
       }
     }

@@ -79,13 +79,6 @@ class RenderParagraph extends RenderBox
     StrutStyle strutStyle,
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
     ui.TextHeightBehavior textHeightBehavior,
-    @Deprecated(
-      'This parameter is a temporary flag to migrate the internal tests and '
-      'should not be used in other contexts. For more details, please check '
-      'https://github.com/flutter/flutter/issues/59316. '
-      'This feature was deprecated after v1.19.0.'
-    )
-    bool applyTextScaleFactorToWidgetSpan = false,
     List<RenderBox> children,
   }) : assert(text != null),
        assert(text.debugAssertIsValid()),
@@ -98,7 +91,6 @@ class RenderParagraph extends RenderBox
        assert(textWidthBasis != null),
        _softWrap = softWrap,
        _overflow = overflow,
-       _applyTextScaleFactorToWidgetSpan = applyTextScaleFactorToWidgetSpan,
        _textPainter = TextPainter(
          text: text,
          textAlign: textAlign,
@@ -298,8 +290,6 @@ class RenderParagraph extends RenderBox
     markNeedsLayout();
   }
 
-  final bool _applyTextScaleFactorToWidgetSpan;
-
   @override
   double computeMinIntrinsicWidth(double height) {
     if (!_canComputeIntrinsics()) {
@@ -382,6 +372,9 @@ class RenderParagraph extends RenderBox
     RenderBox child = firstChild;
     final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>(childCount);
     int childIndex = 0;
+    // Takes textScaleFactor into account because the content of the placeholder
+    // span will be scale up when it paints.
+    height = height / textScaleFactor;
     while (child != null) {
       // Height and baseline is irrelevant as all text will be laid
       // out in a single line.
@@ -400,6 +393,9 @@ class RenderParagraph extends RenderBox
     RenderBox child = firstChild;
     final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>(childCount);
     int childIndex = 0;
+    // Takes textScaleFactor into account because the content of the placeholder
+    // span will be scale up when it paints.
+    height = height / textScaleFactor;
     while (child != null) {
       final double intrinsicWidth = child.getMinIntrinsicWidth(height);
       final double intrinsicHeight = child.getMinIntrinsicHeight(intrinsicWidth);
@@ -418,6 +414,9 @@ class RenderParagraph extends RenderBox
     RenderBox child = firstChild;
     final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>(childCount);
     int childIndex = 0;
+    // Takes textScaleFactor into account because the content of the placeholder
+    // span will be scale up when it paints.
+    width = width / textScaleFactor;
     while (child != null) {
       final double intrinsicHeight = child.getMinIntrinsicHeight(width);
       final double intrinsicWidth = child.getMinIntrinsicWidth(intrinsicHeight);
@@ -540,8 +539,7 @@ class RenderParagraph extends RenderBox
     // The content will be enlarged by textScaleFactor during painting phase.
     // We reduce constraint by textScaleFactor so that the content will fit
     // into the box once it is enlarged.
-    if (_applyTextScaleFactorToWidgetSpan)
-      boxConstraints = boxConstraints / textScaleFactor;
+    boxConstraints = boxConstraints / textScaleFactor;
     while (child != null) {
       // Only constrain the width to the maximum width of the paragraph.
       // Leave height unconstrained, which will overflow if expanded past.

@@ -194,8 +194,8 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
     assert(() {
       final Map<GlobalKey, Element> keyToParent = <GlobalKey, Element>{};
       _debugReservations.forEach((Element parent, Map<Element, GlobalKey> childToKey) {
-        // We ignore parent that are detached.
-        if (parent.renderObject?.attached == false)
+        // We ignore parent that are unmounted or detached.
+        if (parent._debugLifecycleState == _ElementLifecycle.defunct || parent.renderObject?.attached == false)
           return;
         childToKey.forEach((Element child, GlobalKey key) {
           // If parent = null, the node is deactivated by its parent and is
@@ -2171,7 +2171,7 @@ abstract class BuildContext {
   )
   InheritedWidget inheritFromWidgetOfExactType(Type targetType, { Object aspect });
 
-  /// Obtains the nearest widget of the given type [T], which must be the type of a
+  /// Obtains the nearest widget of the given type `T`, which must be the type of a
   /// concrete [InheritedWidget] subclass, and registers this build context with
   /// that widget such that when that widget changes (or a new widget of that
   /// type is introduced, or the widget goes away), this build context is
@@ -2206,7 +2206,7 @@ abstract class BuildContext {
   /// the widget or one of its ancestors is moved (for example, because an
   /// ancestor is added or removed).
   ///
-  /// The [aspect] parameter is only used when [T] is an
+  /// The [aspect] parameter is only used when `T` is an
   /// [InheritedWidget] subclasses that supports partial updates, like
   /// [InheritedModel]. It specifies what "aspect" of the inherited
   /// widget this context depends on.
@@ -2223,7 +2223,7 @@ abstract class BuildContext {
   )
   InheritedElement ancestorInheritedElementForWidgetOfExactType(Type targetType);
 
-  /// Obtains the element corresponding to the nearest widget of the given type [T],
+  /// Obtains the element corresponding to the nearest widget of the given type `T`,
   /// which must be the type of a concrete [InheritedWidget] subclass.
   ///
   /// Returns null if no such element is found.
@@ -2252,7 +2252,7 @@ abstract class BuildContext {
   )
   Widget ancestorWidgetOfExactType(Type targetType);
 
-  /// Returns the nearest ancestor widget of the given type [T], which must be the
+  /// Returns the nearest ancestor widget of the given type `T`, which must be the
   /// type of a concrete [Widget] subclass.
   ///
   /// In general, [dependOnInheritedWidgetOfExactType] is more useful, since
@@ -2290,7 +2290,7 @@ abstract class BuildContext {
   State ancestorStateOfType(TypeMatcher matcher);
 
   /// Returns the [State] object of the nearest ancestor [StatefulWidget] widget
-  /// that is an instance of the given type [T].
+  /// that is an instance of the given type `T`.
   ///
   /// This should not be used from build methods, because the build context will
   /// not be rebuilt if the value that would be returned by this method changes.
@@ -2334,10 +2334,10 @@ abstract class BuildContext {
   State rootAncestorStateOfType(TypeMatcher matcher);
 
   /// Returns the [State] object of the furthest ancestor [StatefulWidget] widget
-  /// that is an instance of the given type [T].
+  /// that is an instance of the given type `T`.
   ///
   /// Functions the same way as [findAncestorStateOfType] but keeps visiting subsequent
-  /// ancestors until there are none of the type instance of [T] remaining.
+  /// ancestors until there are none of the type instance of `T` remaining.
   /// Then returns the last one found.
   ///
   /// This operation is O(N) as well though N is the entire widget tree rather than
@@ -2356,7 +2356,7 @@ abstract class BuildContext {
   RenderObject ancestorRenderObjectOfType(TypeMatcher matcher);
 
   /// Returns the [RenderObject] object of the nearest ancestor [RenderObjectWidget] widget
-  /// that is an instance of the given type [T].
+  /// that is an instance of the given type `T`.
   ///
   /// This should not be used from build methods, because the build context will
   /// not be rebuilt if the value that would be returned by this method changes.
@@ -3290,8 +3290,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// the "active" lifecycle state.
   ///
   /// Subclasses that override this method are likely to want to also override
-  /// [update], [visitChildren], [insertChildRenderObject], [moveChildRenderObject],
-  /// and [removeChildRenderObject].
+  /// [update], [visitChildren], [RenderObjectElement.insertChildRenderObject],
+  /// [RenderObjectElement.moveChildRenderObject], and
+  /// [RenderObjectElement.removeChildRenderObject].
   @mustCallSuper
   void mount(Element parent, dynamic newSlot) {
     assert(_debugLifecycleState == _ElementLifecycle.initial);
@@ -4506,7 +4507,7 @@ typedef TransitionBuilder = Widget Function(BuildContext context, Widget child);
 /// A builder that creates a widget given the two callbacks `onStepContinue` and
 /// `onStepCancel`.
 ///
-/// Used by [Stepper.builder].
+/// Used by [Stepper.controlsBuilder].
 ///
 /// See also:
 ///

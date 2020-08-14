@@ -218,7 +218,7 @@ class Material extends StatefulWidget {
   /// widget conceptually defines an independent printed piece of material.
   ///
   /// Defaults to 0. Changing this value will cause the shadow and the elevation
-  /// overlay to animate over [animationDuration].
+  /// overlay to animate over [Material.animationDuration].
   ///
   /// The value is non-negative.
   ///
@@ -226,7 +226,7 @@ class Material extends StatefulWidget {
   ///
   ///  * [ThemeData.applyElevationOverlayColor] which controls the whether
   ///    an overlay color will be applied to indicate elevation.
-  ///  * [color] which may have an elevation overlay applied.
+  ///  * [Material.color] which may have an elevation overlay applied.
   ///
   /// {@endtemplate}
   final double elevation;

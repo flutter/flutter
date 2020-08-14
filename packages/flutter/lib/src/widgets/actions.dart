@@ -32,7 +32,7 @@ BuildContext _getParent(BuildContext context) {
 
 /// A class representing a particular configuration of an [Action].
 ///
-/// This class is what a key map in a [ShortcutMap] has as values, and is used
+/// This class is what the [Shortcuts.shortcuts] map has as values, and is used
 /// by an [ActionDispatcher] to look up an action and invoke it, giving it this
 /// object to extract configuration information from.
 ///
@@ -101,7 +101,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// [ActionDispatcher.invokeAction] directly.
   ///
   /// This method is only meant to be invoked by an [ActionDispatcher], or by
-  /// its subclasses, and only when [enabled] is true.
+  /// its subclasses, and only when [isEnabled] is true.
   ///
   /// When overriding this method, the returned value can be any Object, but
   /// changing the return type of the override to match the type of the returned
@@ -300,10 +300,10 @@ abstract class ContextAction<T extends Intent> extends Action<T> {
   /// [ActionDispatcher.invokeAction] directly.
   ///
   /// This method is only meant to be invoked by an [ActionDispatcher], or by
-  /// its subclasses, and only when [enabled] is true.
+  /// its subclasses, and only when [isEnabled] is true.
   ///
   /// The optional `context` parameter is the context of the invocation of the
-  /// action, and in the case of an action invoked by a [ShortcutsManager], via
+  /// action, and in the case of an action invoked by a [ShortcutManager], via
   /// a [Shortcuts] widget, will be the context of the [Shortcuts] widget.
   ///
   /// When overriding this method, the returned value can be any Object, but
@@ -943,7 +943,7 @@ class FocusableActionDetector extends StatefulWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
-  /// The [cursor] defaults to [MouseCursor.defer], deferring the choice of
+  /// The [mouseCursor] defaults to [MouseCursor.defer], deferring the choice of
   /// cursor to the next region behind it in hit-test order.
   final MouseCursor mouseCursor;
 

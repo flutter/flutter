@@ -390,19 +390,14 @@ void main() {
             constraints: const BoxConstraints.tightFor(height: 48.0),
             child: Row(
               children: <Widget>[
-                FlatButton(
+                TextButton(
                   onPressed: onStepContinue,
-                  color: Colors.blue,
-                  textColor: Colors.white,
-                  textTheme: ButtonTextTheme.normal,
                   child: const Text('Let us continue!'),
                 ),
                 Container(
                   margin: const EdgeInsetsDirectional.only(start: 8.0),
-                  child: FlatButton(
+                  child: TextButton(
                     onPressed: onStepCancel,
-                    textColor: Colors.red,
-                    textTheme: ButtonTextTheme.normal,
                     child: const Text('Cancel This!'),
                   ),
                 ),
@@ -715,5 +710,111 @@ void main() {
     );
 
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Stepper enabled button styles', (WidgetTester tester) async {
+    Widget buildFrame(ThemeData theme) {
+      return MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Stepper(
+            type: StepperType.horizontal,
+            onStepCancel: () { },
+            onStepContinue: () { },
+            steps: const <Step>[
+              Step(
+                title: Text('step1'),
+                content: SizedBox(width: 100, height: 100),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    Material buttonMaterial(String label) {
+      return tester.widget<Material>(
+        find.descendant(of: find.widgetWithText(TextButton, label), matching: find.byType(Material))
+      );
+    }
+
+    // The checks that follow verify that the layout and appearance of
+    // the default enabled Stepper buttons have not changed even
+    // though the FlatButtons have been replaced by TextButtons.
+
+    const OutlinedBorder buttonShape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2)));
+    const Rect continueButtonRect = Rect.fromLTRB(24.0, 212.0, 168.0, 260.0);
+    const Rect cancelButtonRect = Rect.fromLTRB(176.0, 212.0, 292.0, 260.0);
+
+    await tester.pumpWidget(buildFrame(ThemeData.light()));
+
+    expect(buttonMaterial('CONTINUE').color.value, 0xff2196f3);
+    expect(buttonMaterial('CONTINUE').textStyle.color.value, 0xffffffff);
+    expect(buttonMaterial('CONTINUE').shape, buttonShape);
+    expect(tester.getRect(find.widgetWithText(TextButton, 'CONTINUE')), continueButtonRect);
+
+    expect(buttonMaterial('CANCEL').color.value, 0);
+    expect(buttonMaterial('CANCEL').textStyle.color.value, 0x8a000000);
+    expect(buttonMaterial('CANCEL').shape, buttonShape);
+    expect(tester.getRect(find.widgetWithText(TextButton, 'CANCEL')), cancelButtonRect);
+
+    await tester.pumpWidget(buildFrame(ThemeData.dark()));
+    await tester.pumpAndSettle(); // Complete the theme animation.
+
+    expect(buttonMaterial('CONTINUE').color.value, 0);
+    expect(buttonMaterial('CONTINUE').textStyle.color.value,  0xffffffff);
+    expect(buttonMaterial('CONTINUE').shape, buttonShape);
+    expect(tester.getRect(find.widgetWithText(TextButton, 'CONTINUE')), continueButtonRect);
+
+    expect(buttonMaterial('CANCEL').color.value, 0);
+    expect(buttonMaterial('CANCEL').textStyle.color.value, 0xb3ffffff);
+    expect(buttonMaterial('CANCEL').shape, buttonShape);
+    expect(tester.getRect(find.widgetWithText(TextButton, 'CANCEL')), cancelButtonRect);
+  });
+
+  testWidgets('Stepper disabled button styles', (WidgetTester tester) async {
+    Widget buildFrame(ThemeData theme) {
+      return MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Stepper(
+            type: StepperType.horizontal,
+            steps: const <Step>[
+              Step(
+                title: Text('step1'),
+                content: SizedBox(width: 100, height: 100),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    Material buttonMaterial(String label) {
+      return tester.widget<Material>(
+        find.descendant(of: find.widgetWithText(TextButton, label), matching: find.byType(Material))
+      );
+    }
+
+    // The checks that follow verify that the appearance of the
+    // default disabled Stepper buttons have not changed even though
+    // the FlatButtons have been replaced by TextButtons.
+
+    await tester.pumpWidget(buildFrame(ThemeData.light()));
+
+    expect(buttonMaterial('CONTINUE').color.value, 0);
+    expect(buttonMaterial('CONTINUE').textStyle.color.value, 0x61000000);
+
+    expect(buttonMaterial('CANCEL').color.value, 0);
+    expect(buttonMaterial('CANCEL').textStyle.color.value, 0x61000000);
+
+    await tester.pumpWidget(buildFrame(ThemeData.dark()));
+    await tester.pumpAndSettle(); // Complete the theme animation.
+
+    expect(buttonMaterial('CONTINUE').color.value, 0);
+    expect(buttonMaterial('CONTINUE').textStyle.color.value, 0x61ffffff);
+
+    expect(buttonMaterial('CANCEL').color.value, 0);
+    expect(buttonMaterial('CANCEL').textStyle.color.value, 0x61ffffff);
   });
 }

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:ui' as ui show PointerData, PointerChange, PointerSignalKind;
 
@@ -214,7 +213,7 @@ class PointerEventConverter {
             break;
         }
       } else {
-        switch (datum.signalKind) {
+        switch (datum.signalKind!) {
           case ui.PointerSignalKind.scroll:
             final Offset scrollDelta =
                 Offset(datum.scrollDeltaX, datum.scrollDeltaY) / devicePixelRatio;
@@ -238,6 +237,5 @@ class PointerEventConverter {
     }
   }
 
-  static double _toLogicalPixels(double physicalPixels, double devicePixelRatio) =>
-      physicalPixels == null ? null : physicalPixels / devicePixelRatio;
+  static double _toLogicalPixels(double physicalPixels, double devicePixelRatio) => physicalPixels / devicePixelRatio;
 }

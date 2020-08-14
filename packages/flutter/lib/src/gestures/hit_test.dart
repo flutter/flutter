@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart';
@@ -13,8 +12,7 @@ import 'events.dart';
 abstract class HitTestable {
   // This class is intended to be used as an interface, and should not be
   // extended directly; this constructor prevents instantiation and extension.
-  // ignore: unused_element
-  factory HitTestable._() => null;
+  HitTestable._();
 
   /// Check whether the given position hits this object.
   ///
@@ -27,8 +25,7 @@ abstract class HitTestable {
 abstract class HitTestDispatcher {
   // This class is intended to be used as an interface, and should not be
   // extended directly; this constructor prevents instantiation and extension.
-  // ignore: unused_element
-  factory HitTestDispatcher._() => null;
+  HitTestDispatcher._();
 
   /// Override this method to dispatch events.
   void dispatchEvent(PointerEvent event, HitTestResult result);
@@ -38,8 +35,7 @@ abstract class HitTestDispatcher {
 abstract class HitTestTarget {
   // This class is intended to be used as an interface, and should not be
   // extended directly; this constructor prevents instantiation and extension.
-  // ignore: unused_element
-  factory HitTestTarget._() => null;
+  HitTestTarget._();
 
   /// Override this method to receive events.
   void handleEvent(PointerEvent event, HitTestEntry entry);
@@ -67,8 +63,8 @@ class HitTestEntry {
   ///
   ///  * [BoxHitTestResult.addWithPaintTransform], which is used during hit testing
   ///    to build up this transform.
-  Matrix4 get transform => _transform;
-  Matrix4 _transform;
+  Matrix4? get transform => _transform;
+  Matrix4? _transform;
 }
 
 // A type of data that can be applied to a matrix by left-multiplication.
