@@ -30,7 +30,7 @@ public class PlatformChannel {
   @Nullable private PlatformMessageHandler platformMessageHandler;
 
   @NonNull @VisibleForTesting
-  protected final MethodChannel.MethodCallHandler parsingMethodCallHandler =
+  final MethodChannel.MethodCallHandler parsingMethodCallHandler =
       new MethodChannel.MethodCallHandler() {
         @Override
         public void onMethodCall(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
@@ -153,6 +153,14 @@ public class PlatformChannel {
                   String clipboardContent = ((JSONObject) arguments).getString("text");
                   platformMessageHandler.setClipboardData(clipboardContent);
                   result.success(null);
+                  break;
+                }
+              case "Clipboard.hasStrings":
+                {
+                  boolean hasStrings = platformMessageHandler.clipboardHasStrings();
+                  JSONObject response = new JSONObject();
+                  response.put("value", hasStrings);
+                  result.success(response);
                   break;
                 }
               default:
@@ -426,6 +434,12 @@ public class PlatformChannel {
      * {@code text}.
      */
     void setClipboardData(@NonNull String text);
+
+    /**
+     * The Flutter application would like to know if the clipboard currently contains a string that
+     * can be pasted.
+     */
+    boolean clipboardHasStrings();
   }
 
   /** Types of sounds the Android OS can play on behalf of an application. */
