@@ -760,6 +760,7 @@ void main() {
       0,  
       null, 
       true, 
+      true,
       const BuildInfo(
         BuildMode.debug,
         '',

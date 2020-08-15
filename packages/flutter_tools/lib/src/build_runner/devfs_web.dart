@@ -287,6 +287,9 @@ class WebAssetServer implements AssetReader {
   Directory entrypointCacheDirectory;
 
   @visibleForTesting
+  HttpHeaders get defaultResponseHeaders => _httpServer.defaultResponseHeaders;
+
+  @visibleForTesting
   Uint8List getFile(String path) => _files[path];
 
   @visibleForTesting
