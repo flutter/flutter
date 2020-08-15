@@ -6,7 +6,6 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/process.dart';
-import '../base/utils.dart';
 import '../base/version.dart';
 import '../globals.dart' as globals;
 import '../ios/plist_parser.dart';
@@ -33,7 +32,6 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     Version version,
     this.configured,
     this.studioAppName = 'AndroidStudio',
-    this.presetPluginsPath,
   }) : version = version ?? Version.unknown {
     _init();
   }
@@ -57,24 +55,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     if (versionString != null) {
       version = Version.parse(versionString);
     }
-
-    String pathsSelectorValue;
-    final Map<String, dynamic> jvmOptions = castStringKeyedMap(plistValues['JVMOptions']);
-    if (jvmOptions != null) {
-      final Map<String, dynamic> jvmProperties = castStringKeyedMap(jvmOptions['Properties']);
-      if (jvmProperties != null) {
-        pathsSelectorValue = jvmProperties['idea.paths.selector'] as String;
-      }
-    }
-    final String presetPluginsPath = pathsSelectorValue == null
-      ? null
-      : globals.fs.path.join(
-        globals.fsUtils.homeDirPath,
-        'Library',
-        'Application Support',
-        pathsSelectorValue,
-      );
-    return AndroidStudio(studioPath, version: version, presetPluginsPath: presetPluginsPath);
+    return AndroidStudio(studioPath, version: version);
   }
 
   factory AndroidStudio.fromHomeDot(Directory homeDotDir) {
@@ -110,7 +91,6 @@ class AndroidStudio implements Comparable<AndroidStudio> {
   final String studioAppName;
   final Version version;
   final String configured;
-  final String presetPluginsPath;
 
   String _javaPath;
   bool _isValid = false;
@@ -120,28 +100,6 @@ class AndroidStudio implements Comparable<AndroidStudio> {
 
   bool get isValid => _isValid;
 
-  String get pluginsPath {
-    if (presetPluginsPath != null) {
-      return presetPluginsPath;
-    }
-    final int major = version?.major;
-    final int minor = version?.minor;
-    if (globals.platform.isMacOS) {
-      return globals.fs.path.join(
-        globals.fsUtils.homeDirPath,
-        'Library',
-        'Application Support',
-        'AndroidStudio$major.$minor',
-      );
-    } else {
-      return globals.fs.path.join(
-        globals.fsUtils.homeDirPath,
-        '.$studioAppName$major.$minor',
-        'config',
-        'plugins',
-      );
-    }
-  }
 
   List<String> get validationMessages => _validationMessages;
 

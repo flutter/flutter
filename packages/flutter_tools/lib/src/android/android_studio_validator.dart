@@ -8,7 +8,6 @@ import '../base/user_messages.dart';
 import '../base/version.dart';
 import '../doctor.dart';
 import '../globals.dart' as globals;
-import '../intellij/intellij.dart';
 import 'android_studio.dart';
 
 class AndroidStudioValidator extends DoctorValidator {
@@ -39,15 +38,6 @@ class AndroidStudioValidator extends DoctorValidator {
     messages.add(ValidationMessage(
       userMessages.androidStudioLocation(_studio.directory),
     ));
-
-    final IntelliJPlugins plugins = IntelliJPlugins(_studio.pluginsPath);
-    plugins.validatePackage(
-      messages,
-      <String>['flutter-intellij', 'flutter-intellij.jar'],
-      'Flutter',
-      minVersion: IntelliJPlugins.kMinFlutterPluginVersion,
-    );
-    plugins.validatePackage(messages, <String>['Dart'], 'Dart');
 
     if (_studio.isValid) {
       type = _hasIssues(messages)

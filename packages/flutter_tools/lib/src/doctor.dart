@@ -23,7 +23,6 @@ import 'device.dart';
 import 'features.dart';
 import 'fuchsia/fuchsia_workflow.dart';
 import 'globals.dart' as globals;
-import 'intellij/intellij.dart';
 import 'ios/plist_parser.dart';
 import 'linux/linux_doctor.dart';
 import 'linux/linux_workflow.dart';
@@ -744,12 +743,6 @@ abstract class IntelliJValidator extends DoctorValidator {
       messages.add(const ValidationMessage.error('Invalid IntelliJ version number.'));
     } else {
       messages.add(ValidationMessage(userMessages.intellijLocation(installPath)));
-
-      final IntelliJPlugins plugins = IntelliJPlugins(pluginsPath);
-      plugins.validatePackage(messages, <String>['flutter-intellij', 'flutter-intellij.jar'],
-          'Flutter', minVersion: IntelliJPlugins.kMinFlutterPluginVersion);
-      plugins.validatePackage(messages, <String>['Dart'], 'Dart');
-
       if (_hasIssues(messages)) {
         messages.add(ValidationMessage(userMessages.intellijPluginInfo));
       }
