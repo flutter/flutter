@@ -2653,8 +2653,64 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 /// painting anything, without making the child available for hit testing, and
 /// without taking any room in the parent.
 ///
+/// Difference in painting can be easily compared by the following sections of with and without Offstage.
+///
+/// ### Without Offstage
+///
+/// ```dart
+/// import 'package:flutter/material.dart';
+///
+/// void main() {
+///   runApp(MyApp());
+/// }
+///
+/// class MyApp extends StatelessWidget {
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return MaterialApp(
+///       home: Scaffold(
+///         body: Container(
+///           color: Colors.red,
+///           height: 120.0,
+///           width: 120.0,
+///         ),
+///       ),
+///     );
+///   }
+/// }
+/// ```
+///
+/// ### With Offstage
+///
+/// ```dart
+/// import 'package:flutter/material.dart';
+///
+/// void main() {
+///   runApp(MyApp());
+/// }
+///
+/// class MyApp extends StatelessWidget {
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return MaterialApp(
+///       home: Scaffold(
+///         body: Offstage(
+///           child: Container(
+///             color: Colors.red,
+///             height: 120.0,
+///             width: 120.0,
+///           ),
+///         ),
+///       ),
+///     );
+///   }
+/// }
+/// ```
+///
 /// Offstage children are still active: they can receive focus and have keyboard
-/// input directed to them.
+/// input directed to them, you can also find them in the widget tree.
 ///
 /// Animations continue to run in offstage children, and therefore use battery
 /// and CPU time, regardless of whether the animations end up being visible.
