@@ -82,8 +82,7 @@ class FlutterVersion {
 
   /// Whether we are currently on the master branch.
   bool get isMaster {
-    final String branchName = getBranchName();
-    return !<String>['dev', 'beta', 'stable'].contains(branchName);
+    return getBranchName() == 'master';
   }
 
   // Beware: Keep order in accordance with stability
@@ -125,7 +124,7 @@ class FlutterVersion {
         );
         _channel = channel.substring(slash + 1);
       } else if (channel.isEmpty) {
-        _channel = 'unknown';
+        _channel = 'local';
       } else {
         _channel = channel;
       }
@@ -752,9 +751,9 @@ class GitTagVersion {
 
   static GitTagVersion determine(ProcessUtils processUtils, {String workingDirectory, bool fetchTags = false}) {
     if (fetchTags) {
-      final String channel = _runGit('git rev-parse --abbrev-ref HEAD', processUtils, workingDirectory);
-      if (channel == 'dev' || channel == 'beta' || channel == 'stable') {
-        globals.printTrace('Skipping request to fetchTags - on well known channel $channel.');
+      final String branch = _runGit('git rev-parse --abbrev-ref HEAD', processUtils, workingDirectory);
+      if (branch == 'dev' || branch == 'beta' || branch == 'stable') {
+        globals.printTrace('Skipping request to fetchTags - on well known channel $branch.');
       } else {
         _runGit('git fetch $_flutterGit --tags -f', processUtils, workingDirectory);
       }
