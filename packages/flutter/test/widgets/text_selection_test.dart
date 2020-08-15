@@ -198,13 +198,13 @@ void main() {
   testWidgets('a force press initiates a force press', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
 
-    const int pointerValue = 1;
+    final int pointerValue = tester.nextPointer;
 
     final TestGesture gesture = await tester.createGesture();
 
     await gesture.downWithCustomEvent(
       forcePressOffset,
-      const PointerDownEvent(
+      PointerDownEvent(
         pointer: pointerValue,
         position: forcePressOffset,
         pressure: 0.0,
@@ -213,13 +213,19 @@ void main() {
       ),
     );
 
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: const Offset(0.0, 0.0),
+      pressure: 0.5,
+      pressureMin: 0,
+      pressureMax: 1,
+    ));
     await gesture.up();
     await tester.pumpAndSettle();
 
     await gesture.downWithCustomEvent(
       forcePressOffset,
-      const PointerDownEvent(
+      PointerDownEvent(
         pointer: pointerValue,
         position: forcePressOffset,
         pressure: 0.0,
@@ -227,13 +233,19 @@ void main() {
         pressureMin: 0.0,
       ),
     );
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: const Offset(0.0, 0.0),
+      pressure: 0.5,
+      pressureMin: 0,
+      pressureMax: 1,
+    ));
     await gesture.up();
     await tester.pump(const Duration(milliseconds: 20));
 
     await gesture.downWithCustomEvent(
       forcePressOffset,
-      const PointerDownEvent(
+      PointerDownEvent(
         pointer: pointerValue,
         position: forcePressOffset,
         pressure: 0.0,
@@ -241,13 +253,19 @@ void main() {
         pressureMin: 0.0,
       ),
     );
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: const Offset(0.0, 0.0),
+      pressure: 0.5,
+      pressureMin: 0,
+      pressureMax: 1,
+    ));
     await gesture.up();
     await tester.pump(const Duration(milliseconds: 20));
 
     await gesture.downWithCustomEvent(
       forcePressOffset,
-      const PointerDownEvent(
+      PointerDownEvent(
         pointer: pointerValue,
         position: forcePressOffset,
         pressure: 0.0,
@@ -255,7 +273,13 @@ void main() {
         pressureMin: 0.0,
       ),
     );
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: const Offset(0.0, 0.0),
+      pressure: 0.5,
+      pressureMin: 0,
+      pressureMax: 1,
+    ));
     await gesture.up();
 
     expect(forcePressStartCount, 4);
@@ -264,11 +288,11 @@ void main() {
   testWidgets('a tap and then force press initiates a force press and not a double tap', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
 
-    const int pointerValue = 1;
+    final int pointerValue = tester.nextPointer;
     final TestGesture gesture = await tester.createGesture();
     await gesture.downWithCustomEvent(
       forcePressOffset,
-      const PointerDownEvent(
+      PointerDownEvent(
           pointer: pointerValue,
           position: forcePressOffset,
           pressure: 0.0,
@@ -279,9 +303,9 @@ void main() {
     );
     // Initiate a quick tap.
     await gesture.updateWithCustomEvent(
-      const PointerMoveEvent(
+      PointerMoveEvent(
         pointer: pointerValue,
-        position: Offset(0.0, 0.0),
+        position: const Offset(0.0, 0.0),
         pressure: 0.0,
         pressureMin: 0,
         pressureMax: 1,
@@ -293,7 +317,7 @@ void main() {
     // Initiate a force tap.
     await gesture.downWithCustomEvent(
       forcePressOffset,
-      const PointerDownEvent(
+      PointerDownEvent(
         pointer: pointerValue,
         position: forcePressOffset,
         pressure: 0.0,
@@ -301,9 +325,9 @@ void main() {
         pressureMin: 0.0,
       ),
     );
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
       pointer: pointerValue,
-      position: Offset(0.0, 0.0),
+      position: const Offset(0.0, 0.0),
       pressure: 0.5,
       pressureMin: 0,
       pressureMax: 1,
@@ -321,7 +345,7 @@ void main() {
   testWidgets('a long press from a touch device is recognized as a long single tap', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
 
-    const int pointerValue = 1;
+    final int pointerValue = tester.nextPointer;
     final TestGesture gesture = await tester.startGesture(
       const Offset(200.0, 200.0),
       pointer: pointerValue,
@@ -340,7 +364,7 @@ void main() {
   testWidgets('a long press from a mouse is just a tap', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
 
-    const int pointerValue = 1;
+    final int pointerValue = tester.nextPointer;
     final TestGesture gesture = await tester.startGesture(
       const Offset(200.0, 200.0),
       pointer: pointerValue,
@@ -359,7 +383,7 @@ void main() {
   testWidgets('a touch drag is not recognized for text selection', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
 
-    const int pointerValue = 1;
+    final int pointerValue = tester.nextPointer;
     final TestGesture gesture = await tester.startGesture(
       const Offset(200.0, 200.0),
       pointer: pointerValue,
@@ -382,7 +406,7 @@ void main() {
   testWidgets('a mouse drag is recognized for text selection', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
 
-    const int pointerValue = 1;
+    final int pointerValue = tester.nextPointer;
     final TestGesture gesture = await tester.startGesture(
       const Offset(200.0, 200.0),
       pointer: pointerValue,
@@ -405,7 +429,7 @@ void main() {
   testWidgets('a slow mouse drag is still recognized for text selection', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
 
-    const int pointerValue = 1;
+    final int pointerValue = tester.nextPointer;
     final TestGesture gesture = await tester.startGesture(
       const Offset(200.0, 200.0),
       pointer: pointerValue,

@@ -662,6 +662,7 @@ abstract class WidgetController {
     assert(frequency > 0);
     final int intervals = duration.inMicroseconds * frequency ~/ 1E6;
     assert(intervals > 1);
+    pointer ??= _getNextPointer();
     final List<Duration> timeStamps = <Duration>[
       for (int t = 0; t <= intervals; t += 1)
         duration * t ~/ intervals,
@@ -701,8 +702,8 @@ abstract class WidgetController {
           timeStamp: duration,
           position: offsets.last,
           pointer: pointer,
-          // The PointerData recieved from the engine with
-          // chagne = PointerChnage.up, which translates to PointerUpEvent,
+          // The PointerData received from the engine with
+          // change = PointerChange.up, which translates to PointerUpEvent,
           // doesn't provide the button field.
           // buttons: buttons,
         )
@@ -717,11 +718,13 @@ abstract class WidgetController {
   ///
   /// This is the default pointer identifier that will be used the next time the
   /// [startGesture] method is called without an explicit pointer identifier.
-  int nextPointer = 1;
+  int get nextPointer => _nextPointer;
 
-  int _getNextPointer() {
-    final int result = nextPointer;
-    nextPointer += 1;
+  static int _nextPointer = 1;
+
+  static int _getNextPointer() {
+    final int result = _nextPointer;
+    _nextPointer += 1;
     return result;
   }
 
