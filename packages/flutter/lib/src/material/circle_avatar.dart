@@ -4,12 +4,9 @@
 
 // @dart = 2.8
 
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-import 'colors.dart';
-import 'constants.dart';
-import 'theme.dart';
-import 'theme_data.dart';
 
 // Examples can assume:
 // String userAvatarUrl;
@@ -68,8 +65,8 @@ class CircleAvatar extends StatelessWidget {
     this.radius,
     this.minRadius,
     this.maxRadius,
-    this.strokeColor,
-    this.stroke
+    this.borderColor,
+    this.border
   }) : assert(radius == null || (minRadius == null && maxRadius == null)),
         assert(backgroundImage != null || onBackgroundImageError == null),
         super(key: key);
@@ -154,21 +151,16 @@ class CircleAvatar extends StatelessWidget {
   final double maxRadius;
 
   /// The stroke around the avatar, expressed as the border.
-  ///
-  /// If [stroke] is not specified, then the [_defaultStroke] is used
-  final double stroke;
+  final double border;
 
   ///The color for the border around the avatar
-  /// If a [strokeColor] is not specified, the theme's
+  /// If a [borderColor] is not specified, the theme's
   //  /// [ThemeData.primaryColorLight] is used with light foreground colors, and
   //  /// [ThemeData.primaryColorDark] with dark foreground colors.
-  final Color strokeColor;
+  final Color borderColor;
 
   // The default radius if nothing is specified.
   static const double _defaultRadius = 20.0;
-
-  // The default stroke if not specified.
-  static const double _defaultStroke = 0;
 
   // The default min if only the max is specified.
   static const double _defaultMinRadius = 0.0;
@@ -188,10 +180,6 @@ class CircleAvatar extends StatelessWidget {
       return _defaultRadius * 2.0;
     }
     return 2.0 * (radius ?? maxRadius ?? _defaultMaxRadius);
-  }
-
-  double get _stroke {
-    return stroke ?? _defaultStroke;
   }
 
   @override
@@ -219,8 +207,8 @@ class CircleAvatar extends StatelessWidget {
           break;
       }
     }
-    Color effectiveStrokeColor = strokeColor;
-    if(effectiveStrokeColor == null && stroke != null){
+    Color effectiveStrokeColor = borderColor;
+    if(effectiveStrokeColor == null && border != null){
       switch (ThemeData.estimateBrightnessForColor(textStyle.color)) {
         case Brightness.dark:
           effectiveStrokeColor = theme.primaryColorDark;
@@ -229,8 +217,6 @@ class CircleAvatar extends StatelessWidget {
           effectiveStrokeColor = theme.primaryColorLight;
           break;
       }
-    }else if(effectiveStrokeColor == null && stroke == null){
-      effectiveStrokeColor = Colors.transparent;
     }
     final double minDiameter = _minDiameter;
     final double maxDiameter = _maxDiameter;
@@ -251,7 +237,7 @@ class CircleAvatar extends StatelessWidget {
           fit: BoxFit.cover,
         )
             : null,
-        border: Border.all(width: _stroke,color: effectiveStrokeColor),
+        border: border != null ? Border.all(width: border,color: effectiveStrokeColor) : null,
 
         shape: BoxShape.circle,
       ),
