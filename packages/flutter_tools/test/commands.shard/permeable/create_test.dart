@@ -23,6 +23,7 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
+import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
 
 import '../../src/common.dart';
@@ -1120,7 +1121,7 @@ void main() {
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
     final String metadata = globals.fs.file(globals.fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
-    expect(metadata, contains('project_type: app\n'));
+    expect(LineSplitter.split(metadata), contains('project_type: app'));
   });
 
   testUsingContext('can re-gen default template over existing app project with no metadta and detect the type', () async {
@@ -1137,7 +1138,7 @@ void main() {
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
     final String metadata = globals.fs.file(globals.fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
-    expect(metadata, contains('project_type: app\n'));
+    expect(LineSplitter.split(metadata), contains('project_type: app'));
   });
 
   testUsingContext('can re-gen app template over existing app project and detect the type', () async {
@@ -1151,7 +1152,7 @@ void main() {
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
     final String metadata = globals.fs.file(globals.fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
-    expect(metadata, contains('project_type: app\n'));
+    expect(LineSplitter.split(metadata), contains('project_type: app'));
   });
 
   testUsingContext('can re-gen template over existing module project and detect the type', () async {
@@ -1165,7 +1166,7 @@ void main() {
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
     final String metadata = globals.fs.file(globals.fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
-    expect(metadata, contains('project_type: module\n'));
+    expect(LineSplitter.split(metadata), contains('project_type: module'));
   });
 
   testUsingContext('can re-gen default template over existing plugin project and detect the type', () async {
@@ -1179,7 +1180,7 @@ void main() {
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
     final String metadata = globals.fs.file(globals.fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
-    expect(metadata, contains('project_type: plugin'));
+    expect(LineSplitter.split(metadata), contains('project_type: plugin'));
   });
 
   testUsingContext('can re-gen default template over existing package project and detect the type', () async {
@@ -1193,7 +1194,7 @@ void main() {
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
     final String metadata = globals.fs.file(globals.fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
-    expect(metadata, contains('project_type: package'));
+    expect(LineSplitter.split(metadata), contains('project_type: package'));
   });
 
   testUsingContext('can re-gen module .android/ folder, reusing custom org', () async {
@@ -1964,6 +1965,21 @@ void main() {
     expect(logger.statusText, contains('The `pubspec.yaml` under the project directory must be updated to support'));
   }, overrides: <Type, Generator> {
     Logger: () => logger,
+  });
+
+  testUsingContext('newly created plugin has min flutter sdk version as 1.20.0', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+    final String rawPubspec = await projectDir.childFile('pubspec.yaml').readAsString();
+    final Pubspec pubspec = Pubspec.parse(rawPubspec);
+    final Map<String, VersionConstraint> env = pubspec.environment;
+    expect(env['flutter'].allows(Version(1, 20, 0)), true);
+    expect(env['flutter'].allows(Version(1, 19, 0)), false);
   });
 
 }

@@ -28,7 +28,7 @@ class _VersionInfo {
   Version number;
 }
 
-/// A validator that checks for Clang and Make build dependencies
+/// A validator that checks for Clang and Make build dependencies.
 class LinuxDoctorValidator extends DoctorValidator {
   LinuxDoctorValidator({
     @required ProcessManager processManager,
@@ -56,6 +56,7 @@ class LinuxDoctorValidator extends DoctorValidator {
     'gtk+-3.0',
     'glib-2.0',
     'gio-2.0',
+    'blkid',
   ];
 
   @override

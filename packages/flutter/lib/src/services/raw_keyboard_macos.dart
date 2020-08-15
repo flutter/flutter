@@ -184,7 +184,7 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
 
   @override
   KeyboardSide? getModifierSide(ModifierKey key) {
-    KeyboardSide? findSide(int leftMask, int rightMask, int anyMask) {
+    KeyboardSide? findSide(int anyMask, int leftMask, int rightMask) {
       final int combinedMask = leftMask | rightMask;
       final int combined = modifiers & combinedMask;
       if (combined == leftMask) {
@@ -194,7 +194,8 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
       } else if (combined == combinedMask || modifiers & (combinedMask | anyMask) == anyMask) {
         // Handles the case where macOS supplies just the "either" modifier
         // flag, but not the left/right flag. (e.g. modifierShift but not
-        // modifierLeftShift).
+        // modifierLeftShift), or if left and right flags are provided, but not
+        // the "either" modifier flag.
         return KeyboardSide.all;
       }
       return null;
@@ -202,13 +203,13 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
 
     switch (key) {
       case ModifierKey.controlModifier:
-        return findSide(modifierLeftControl, modifierRightControl, modifierControl);
+        return findSide(modifierControl, modifierLeftControl, modifierRightControl);
       case ModifierKey.shiftModifier:
-        return findSide(modifierLeftShift, modifierRightShift, modifierShift);
+        return findSide(modifierShift, modifierLeftShift, modifierRightShift);
       case ModifierKey.altModifier:
-        return findSide(modifierLeftOption, modifierRightOption, modifierOption);
+        return findSide(modifierOption, modifierLeftOption, modifierRightOption);
       case ModifierKey.metaModifier:
-        return findSide(modifierLeftCommand, modifierRightCommand, modifierCommand);
+        return findSide(modifierCommand, modifierLeftCommand, modifierRightCommand);
       case ModifierKey.capsLockModifier:
       case ModifierKey.numLockModifier:
       case ModifierKey.scrollLockModifier:

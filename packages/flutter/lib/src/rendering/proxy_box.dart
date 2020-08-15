@@ -207,7 +207,7 @@ class RenderConstrainedBox extends RenderProxyBox {
        _additionalConstraints = additionalConstraints,
        super(child);
 
-  /// Additional constraints to apply to [child] during layout
+  /// Additional constraints to apply to [child] during layout.
   BoxConstraints get additionalConstraints => _additionalConstraints;
   BoxConstraints _additionalConstraints;
   set additionalConstraints(BoxConstraints value) {
@@ -3403,7 +3403,7 @@ class RenderMetaData extends RenderProxyBoxWithHitTestBehavior {
     RenderBox child,
   }) : super(behavior: behavior, child: child);
 
-  /// Opaque meta data ignored by the render tree
+  /// Opaque meta data ignored by the render tree.
   dynamic metaData;
 
   @override

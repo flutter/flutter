@@ -61,6 +61,7 @@ List<FakeCommand> _librariesPresentCommands() {
     FakeCommand(command: <String>['pkg-config', '--exists', 'gtk+-3.0']),
     FakeCommand(command: <String>['pkg-config', '--exists', 'glib-2.0']),
     FakeCommand(command: <String>['pkg-config', '--exists', 'gio-2.0']),
+    FakeCommand(command: <String>['pkg-config', '--exists', 'blkid']),
   ];
 }
 
@@ -73,6 +74,7 @@ List<FakeCommand> _librariesMissingCommands() {
       exitCode: 1,
     ),
     FakeCommand(command: <String>['pkg-config', '--exists', 'gio-2.0']),
+    FakeCommand(command: <String>['pkg-config', '--exists', 'blkid']),
   ];
 }
 

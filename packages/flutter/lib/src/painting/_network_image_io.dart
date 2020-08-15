@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:async';
 import 'dart:io';
@@ -33,7 +32,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   final double scale;
 
   @override
-  final Map<String, String> headers;
+  final Map<String, String>? headers;
 
   @override
   Future<NetworkImage> obtainKey(image_provider.ImageConfiguration configuration) {
@@ -71,7 +70,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     HttpClient client = _sharedHttpClient;
     assert(() {
       if (debugNetworkImageHttpClientProvider != null)
-        client = debugNetworkImageHttpClientProvider();
+        client = debugNetworkImageHttpClientProvider!();
       return true;
     }());
     return client;
@@ -102,7 +101,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
 
       final Uint8List bytes = await consolidateHttpClientResponseBytes(
         response,
-        onBytesReceived: (int cumulative, int total) {
+        onBytesReceived: (int cumulative, int? total) {
           chunkEvents.add(ImageChunkEvent(
             cumulativeBytesLoaded: cumulative,
             expectedTotalBytes: total,
@@ -118,7 +117,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       // have had a chance to track the key in the cache at all.
       // Schedule a microtask to give the cache a chance to add the key.
       scheduleMicrotask(() {
-        PaintingBinding.instance.imageCache.evict(key);
+        PaintingBinding.instance!.imageCache!.evict(key);
       });
       rethrow;
     } finally {

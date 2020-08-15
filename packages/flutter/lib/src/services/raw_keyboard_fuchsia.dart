@@ -135,13 +135,13 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
 
   @override
   KeyboardSide? getModifierSide(ModifierKey key) {
-    KeyboardSide? findSide(int leftMask, int rightMask, int combinedMask) {
-      final int combined = modifiers & combinedMask;
+    KeyboardSide? findSide(int anyMask, int leftMask, int rightMask) {
+      final int combined = modifiers & anyMask;
       if (combined == leftMask) {
         return KeyboardSide.left;
       } else if (combined == rightMask) {
         return KeyboardSide.right;
-      } else if (combined == combinedMask) {
+      } else if (combined == anyMask) {
         return KeyboardSide.all;
       }
       return null;
@@ -149,13 +149,13 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
 
     switch (key) {
       case ModifierKey.controlModifier:
-        return findSide(modifierLeftControl, modifierRightControl, modifierControl);
+        return findSide(modifierControl, modifierLeftControl, modifierRightControl, );
       case ModifierKey.shiftModifier:
-        return findSide(modifierLeftShift, modifierRightShift, modifierShift);
+        return findSide(modifierShift, modifierLeftShift, modifierRightShift);
       case ModifierKey.altModifier:
-        return findSide(modifierLeftAlt, modifierRightAlt, modifierAlt);
+        return findSide(modifierAlt, modifierLeftAlt, modifierRightAlt);
       case ModifierKey.metaModifier:
-        return findSide(modifierLeftMeta, modifierRightMeta, modifierMeta);
+        return findSide(modifierMeta, modifierLeftMeta, modifierRightMeta);
       case ModifierKey.capsLockModifier:
         return (modifiers & modifierCapsLock == 0) ? null : KeyboardSide.all;
       case ModifierKey.numLockModifier:

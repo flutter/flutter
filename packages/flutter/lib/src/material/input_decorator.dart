@@ -468,7 +468,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
   }
 }
 
-/// Defines the behavior of the floating label
+/// Defines the behavior of the floating label.
 enum FloatingLabelBehavior {
   /// The label will always be positioned within the content, or hidden.
   never,

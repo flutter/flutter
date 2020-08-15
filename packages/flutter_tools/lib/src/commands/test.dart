@@ -265,6 +265,7 @@ class TestCommand extends FlutterCommand {
       web: stringArg('platform') == 'chrome',
       randomSeed: stringArg('test-randomize-ordering-seed'),
       extraFrontEndOptions: getBuildInfo(forcedBuildMode: BuildMode.debug).extraFrontEndOptions,
+      nullAssertions: boolArg(FlutterOptions.kNullAssertions),
     );
 
     if (collector != null) {

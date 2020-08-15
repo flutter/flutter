@@ -26,7 +26,7 @@ Length   Method    Size  Cmpr    Date    Time   CRC-32   Name
 11708  Defl:N     2592  78% 00-00-1980 00:00 07733eef  AndroidManifest.xml
 1399  Defl:N     1092  22% 00-00-1980 00:00 f53d952a  META-INF/CERT.RSA
 46298  Defl:N    14530  69% 00-00-1980 00:00 17df02b8  META-INF/CERT.SF
-46298  Defl:N    14530  69% 00-00-1980 00:00 17df02b8  lib/arm64-v8a/libapp.so
+46298  Defl:N    14530  69% 00-00-1980 00:00 17df02b8  lib/arm64-v8a/libxyzzyapp.so
 46298  Defl:N    14530  69% 00-00-1980 00:00 17df02b8  lib/arm64-v8a/libflutter.so
 ''',
 );
@@ -70,6 +70,17 @@ void main() {
     processManager = FakeProcessManager.list(<FakeCommand>[unzipCommmand]);
   });
 
+  test('matchesPattern matches only entire strings', () {
+    expect(matchesPattern('', pattern: ''), isNotNull);
+    expect(matchesPattern('', pattern: 'foo'), null);
+    expect(matchesPattern('foo', pattern: ''), null);
+    expect(matchesPattern('foo', pattern: 'foo'), isNotNull);
+    expect(matchesPattern('foo', pattern: 'foobar'), null);
+    expect(matchesPattern('foobar', pattern: 'foo'), null);
+    expect(matchesPattern('foobar', pattern: RegExp(r'.*b.*')), isNotNull);
+    expect(matchesPattern('foobar', pattern: RegExp(r'.*b')), null);
+  });
+
   test('builds APK analysis correctly', () async {
     final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
       fileSystem: fileSystem,
@@ -78,6 +89,7 @@ void main() {
         processManager: processManager,
         logger: logger,
       ),
+      appFilenamePattern: RegExp(r'lib.*app\.so'),
     );
 
     final File apk = fileSystem.file('test.apk')..createSync();
@@ -109,7 +121,7 @@ void main() {
     expect(arm64Map['n'], equals('arm64-v8a'));
     expect(arm64Map['value'], equals(29060));
     final Map<String, dynamic> libAppMap = arm64Map['children'][0] as Map<String, dynamic>;
-    expect(libAppMap['n'], equals('libapp.so (Dart AOT)'));
+    expect(libAppMap['n'], equals('libxyzzyapp.so (Dart AOT)'));
     expect(libAppMap['value'], equals(14530));
     expect(libAppMap['children'].length, equals(3));
     final Map<String, dynamic> internalMap = libAppMap['children'][0] as Map<String, dynamic>;
@@ -140,6 +152,7 @@ void main() {
         processManager: processManager,
         logger: logger,
       ),
+      appFilenamePattern: RegExp(r'lib.*app\.so'),
     );
 
     final File apk = fileSystem.file('test.apk')..createSync();
@@ -155,7 +168,7 @@ void main() {
         '  AndroidManifest.xml                                                       3 KB',
         '  META-INF                                                                 15 KB',
         '  lib                                                                      28 KB',
-        '    lib/arm64-v8a/libapp.so (Dart AOT)                                     14 KB',
+        '    lib/arm64-v8a/libxyzzyapp.so (Dart AOT)                                14 KB',
         '      Dart AOT symbols accounted decompressed size                         14 KB',
         '        dart:_internal/SubListIterable                                      6 KB',
         '        @stubs/allocation-stubs/dart:core/ArgumentError                     5 KB',

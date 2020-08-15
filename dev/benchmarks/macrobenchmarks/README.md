@@ -45,6 +45,8 @@ The key `[test_name]` can be:
 
 - `animated_placeholder_perf`
 - `backdrop_filter_perf`
+- `color_filter_and_fade_perf`
+- `cubic_bezier_perf`
 - `cull_opacity_perf`
 - `fading_child_animation_perf`
 - `imagefiltered_transform_animation_perf`
@@ -53,7 +55,6 @@ The key `[test_name]` can be:
 - `post_backdrop_filter_perf`
 - `simple_animation_perf`
 - `textfield_perf`
-- `cubic_bezier_perf`
 
 ### E2E benchmarks
 
@@ -63,6 +64,7 @@ The key `[test_name]` can be:
 host machine. The following tests are E2E:
 
 - `cull_opacity_perf.dart`
+- `multi_widget_construction_perf`
 
 These tests should be run by:
 
