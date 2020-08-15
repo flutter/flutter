@@ -58,6 +58,9 @@ Layer::AutoPrerollSaveLayerState::~AutoPrerollSaveLayerState() {
 #if defined(LEGACY_FUCHSIA_EMBEDDER)
 
 void Layer::CheckForChildLayerBelow(PrerollContext* context) {
+  // If there is embedded Fuchsia content in the scene (a ChildSceneLayer),
+  // PhysicalShapeLayers that appear above the embedded content will be turned
+  // into their own Scenic layers.
   child_layer_exists_below_ = context->child_scene_layer_exists_below;
   if (child_layer_exists_below_) {
     set_needs_system_composite(true);
@@ -65,42 +68,14 @@ void Layer::CheckForChildLayerBelow(PrerollContext* context) {
 }
 
 void Layer::UpdateScene(SceneUpdateContext& context) {
-  // If there is embedded Fuchsia content in the scene (a ChildSceneLayer),
-  // PhysicalShapeLayers that appear above the embedded content will be turned
-  // into their own Scenic layers.
-  if (child_layer_exists_below_) {
-    float global_scenic_elevation =
-        context.GetGlobalElevationForNextScenicLayer();
-    float local_scenic_elevation =
-        global_scenic_elevation - context.scenic_elevation();
-    float z_translation = -local_scenic_elevation;
+  FML_DCHECK(needs_system_composite());
+  FML_DCHECK(child_layer_exists_below_);
 
-    // Retained rendering: speedup by reusing a retained entity node if
-    // possible. When an entity node is reused, no paint layer is added to the
-    // frame so we won't call PhysicalShapeLayer::Paint.
-    LayerRasterCacheKey key(unique_id(), context.Matrix());
-    if (context.HasRetainedNode(key)) {
-      TRACE_EVENT_INSTANT0("flutter", "retained layer cache hit");
-      scenic::EntityNode* retained_node = context.GetRetainedNode(key);
-      FML_DCHECK(context.top_entity());
-      FML_DCHECK(retained_node->session() == context.session());
+  SceneUpdateContext::Frame frame(
+      context, SkRRect::MakeRect(paint_bounds()), SK_ColorTRANSPARENT,
+      SkScalarRoundToInt(context.alphaf() * 255), "flutter::Layer");
 
-      // Re-adjust the elevation.
-      retained_node->SetTranslation(0.f, 0.f, z_translation);
-
-      context.top_entity()->entity_node().AddChild(*retained_node);
-      return;
-    }
-
-    TRACE_EVENT_INSTANT0("flutter", "cache miss, creating");
-    // If we can't find an existing retained surface, create one.
-    SceneUpdateContext::Frame frame(
-        context, SkRRect::MakeRect(paint_bounds()), SK_ColorTRANSPARENT,
-        SkScalarRoundToInt(context.alphaf() * 255),
-        "flutter::PhysicalShapeLayer", z_translation, this);
-
-    frame.AddPaintLayer(this);
-  }
+  frame.AddPaintLayer(this);
 }
 
 #endif
