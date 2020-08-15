@@ -16,10 +16,14 @@ void main() {
       for (int i = 1; i <= 100; i += 1) 1000 * i + 1000,
     ];
     rasterTimes = rasterTimes.reversed.toList();
+    List<int> vsyncStarts = <int>[
+      for (int i = 1; i <= 100; i += 1) -100 * i,
+    ];
+    vsyncStarts = vsyncStarts.reversed.toList();
     final List<FrameTiming> inputData = <FrameTiming>[
       for (int i = 0; i < 100; i += 1)
         FrameTiming(
-          vsyncStart: 0,
+          vsyncStart: vsyncStarts[i],
           buildStart: 0,
           buildFinish: buildTimes[i],
           rasterStart: 500,
@@ -39,5 +43,10 @@ void main() {
     expect(summary.worstFrameRasterizerTime.inMicroseconds, 100500);
     expect(summary.missedFrameRasterizerBudget, 85);
     expect(summary.frameBuildTime.length, 100);
+
+    expect(summary.averageVsyncOverhead.inMicroseconds, 5050);
+    expect(summary.p90VsyncOverhead.inMicroseconds, 9000);
+    expect(summary.p99VsyncOverhead.inMicroseconds, 9900);
+    expect(summary.worstVsyncOverhead.inMicroseconds, 10000);
   });
 }
