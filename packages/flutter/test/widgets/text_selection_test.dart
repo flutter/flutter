@@ -305,7 +305,7 @@ void main() {
     await gesture.updateWithCustomEvent(
       PointerMoveEvent(
         pointer: pointerValue,
-        position: Offset(0.0, 0.0),
+        position: const Offset(0.0, 0.0),
         pressure: 0.0,
         pressureMin: 0,
         pressureMax: 1,
