@@ -2024,16 +2024,21 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final bool textChanged = _value?.text != value?.text;
     final bool isRepeat = value == _lastFormattedUnmodifiedTextEditingValue;
     final bool isRepeatText = value?.text == _lastFormattedUnmodifiedTextEditingValue?.text;
-    final bool isRepeatComposing = value?.composing == _lastFormattedUnmodifiedTextEditingValue?.composing;
 
-    if (((!isRepeatText && textChanged) || !isRepeatComposing) &&
+    // There's no need to format when the value start to composing and repeat composing.
+    final bool isValueComposing = value != null && value.composing != const TextRange(start: -1, end: -1);
+    final bool isLastUnmodifiedValueComposing = _lastFormattedUnmodifiedTextEditingValue != null &&
+      _lastFormattedUnmodifiedTextEditingValue.composing != const TextRange(start: -1, end: -1);
+    final bool isRepeatComposing = isValueComposing == isLastUnmodifiedValueComposing;
+
+    if (((!isRepeatText && textChanged) || (!isRepeatComposing && !isValueComposing)) &&
         widget.inputFormatters != null &&
         widget.inputFormatters.isNotEmpty) {
       // Only format when the text has changed and there are available formatters.
       // Pass through the formatter regardless of repeat status if the input value is
       // different than the stored value.
       for (final TextInputFormatter formatter in widget.inputFormatters) {
-        // Skip format update while the editing value is composing.
+        // Skip format update while the editing value is composing with fixed length.
         if ((formatter is LengthLimitingTextInputFormatter) &&
             value != null &&
             value.composing != null &&
