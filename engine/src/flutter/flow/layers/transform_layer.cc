@@ -4,6 +4,8 @@
 
 #include "flutter/flow/layers/transform_layer.h"
 
+#include <optional>
+
 namespace flutter {
 
 TransformLayer::TransformLayer(const SkMatrix& transform)
@@ -56,12 +58,12 @@ void TransformLayer::UpdateScene(SceneUpdateContext& context) {
   TRACE_EVENT0("flutter", "TransformLayer::UpdateScene");
   FML_DCHECK(needs_system_composite());
 
+  std::optional<SceneUpdateContext::Transform> transform;
   if (!transform_.isIdentity()) {
-    SceneUpdateContext::Transform transform(context, transform_);
-    UpdateSceneChildren(context);
-  } else {
-    UpdateSceneChildren(context);
+    transform.emplace(context, transform_);
   }
+
+  UpdateSceneChildren(context);
 }
 
 #endif

@@ -22,7 +22,6 @@ void MockLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   parent_mutators_ = context->mutators_stack;
   parent_matrix_ = matrix;
   parent_cull_rect_ = context->cull_rect;
-  parent_elevation_ = context->total_elevation;
   parent_has_platform_view_ = context->has_platform_view;
 
   context->has_platform_view = fake_has_platform_view_;

@@ -56,14 +56,10 @@ struct PrerollContext {
   const Stopwatch& ui_time;
   TextureRegistry& texture_registry;
   const bool checkerboard_offscreen_layers;
-
-  // These allow us to make use of the scene metrics during Preroll.
-  float frame_physical_depth;
-  float frame_device_pixel_ratio;
+  const float frame_device_pixel_ratio;
 
   // These allow us to track properties like elevation, opacity, and the
   // prescence of a platform view during Preroll.
-  float total_elevation = 0.0f;
   bool has_platform_view = false;
   bool is_opaque = true;
 #if defined(LEGACY_FUCHSIA_EMBEDDER)
@@ -128,10 +124,7 @@ class Layer {
     TextureRegistry& texture_registry;
     const RasterCache* raster_cache;
     const bool checkerboard_offscreen_layers;
-
-    // These allow us to make use of the scene metrics during Paint.
-    float frame_physical_depth;
-    float frame_device_pixel_ratio;
+    const float frame_device_pixel_ratio;
   };
 
   // Calls SkCanvas::saveLayer and restores the layer upon destruction. Also

@@ -1403,11 +1403,9 @@ TEST_F(ShellTest, OnServiceProtocolEstimateRasterCacheMemoryWorks) {
             kGiantRect,              /* cull_rect */
             false,                   /* layer reads from surface */
             raster_time,    ui_time, texture_registry,
-            false,  /* checkerboard_offscreen_layers */
-            100.0f, /* frame_physical_depth */
-            1.0f,   /* frame_device_pixel_ratio */
-            0.0f,   /* total_elevation */
-            false,  /* has_platform_view */
+            false, /* checkerboard_offscreen_layers */
+            1.0f,  /* frame_device_pixel_ratio */
+            false, /* has_platform_view */
         };
         raster_cache.Prepare(&preroll_context, picture_layer.get(),
                              SkMatrix::I());
