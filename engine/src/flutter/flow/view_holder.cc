@@ -4,6 +4,8 @@
 
 #include "flutter/flow/view_holder.h"
 
+#include <unordered_map>
+
 #include "flutter/fml/thread_local.h"
 
 namespace {
@@ -98,18 +100,17 @@ ViewHolder::ViewHolder(fml::RefPtr<fml::TaskRunner> ui_task_runner,
   FML_DCHECK(pending_view_holder_token_.value);
 }
 
-void ViewHolder::UpdateScene(SceneUpdateContext& context,
+void ViewHolder::UpdateScene(scenic::Session* session,
+                             scenic::ContainerNode& container_node,
                              const SkPoint& offset,
                              const SkSize& size,
                              SkAlpha opacity,
                              bool hit_testable) {
   if (pending_view_holder_token_.value) {
-    entity_node_ = std::make_unique<scenic::EntityNode>(context.session());
-    opacity_node_ =
-        std::make_unique<scenic::OpacityNodeHACK>(context.session());
+    entity_node_ = std::make_unique<scenic::EntityNode>(session);
+    opacity_node_ = std::make_unique<scenic::OpacityNodeHACK>(session);
     view_holder_ = std::make_unique<scenic::ViewHolder>(
-        context.session(), std::move(pending_view_holder_token_),
-        "Flutter SceneHost");
+        session, std::move(pending_view_holder_token_), "Flutter SceneHost");
     opacity_node_->AddChild(*entity_node_);
     opacity_node_->SetLabel("flutter::ViewHolder");
     entity_node_->Attach(*view_holder_);
@@ -125,7 +126,7 @@ void ViewHolder::UpdateScene(SceneUpdateContext& context,
   FML_DCHECK(opacity_node_);
   FML_DCHECK(view_holder_);
 
-  context.top_entity()->embedder_node().AddChild(*opacity_node_);
+  container_node.AddChild(*opacity_node_);
   opacity_node_->SetOpacity(opacity / 255.0f);
   entity_node_->SetTranslation(offset.x(), offset.y(), -0.1f);
   entity_node_->SetHitTestBehavior(
