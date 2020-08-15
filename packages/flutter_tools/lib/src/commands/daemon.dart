@@ -899,17 +899,10 @@ class DevToolsDomain extends Domain {
     _devtoolsLauncher ??= DevtoolsLauncher.instance;
     final DevToolsServerAddress server = await _devtoolsLauncher.serve();
 
-    if (server != null) {
-      return<String, dynamic>{
-        'host': server.host,
-        'port': server.port,
-        'success': server.success,
-      };
-    } else {
-      return<String, dynamic>{
-        'success': false,
-      };
-    }
+    return<String, dynamic>{
+      'host': server?.host,
+      'port': server?.port,
+    };
   }
 
   @override

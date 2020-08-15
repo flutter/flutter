@@ -1728,10 +1728,10 @@ class DevtoolsLauncher {
       _devtoolsServer ??= await devtools_server.serveDevTools(
         enableStdinCommands: false,
       );
-      return DevToolsServerAddress.succeeded(_devtoolsServer.address.host, _devtoolsServer.port);
+      return DevToolsServerAddress(_devtoolsServer.address.host, _devtoolsServer.port);
     } on Exception catch (e, st) {
       globals.printTrace('Failed to serve DevTools: $e\n$st');
-      return DevToolsServerAddress.failed();
+      return null;
     }
   }
 
@@ -1744,11 +1744,8 @@ class DevtoolsLauncher {
 }
 
 class DevToolsServerAddress {
-  DevToolsServerAddress._(this.host, this.port, this.success);
-  DevToolsServerAddress.succeeded(String host, int port): this._(host, port, true);
-  DevToolsServerAddress.failed(): this._(null, null, false);
+  DevToolsServerAddress(this.host, this.port);
 
   final String host;
   final int port;
-  final bool success;
 }

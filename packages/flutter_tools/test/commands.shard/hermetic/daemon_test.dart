@@ -311,43 +311,20 @@ void main() {
         responses.add,
         notifyingLogger: notifyingLogger,
       );
-      when(mockDevToolsLauncher.serve()).thenAnswer((_) async => DevToolsServerAddress.succeeded('127.0.0.1', 1234));
+      when(mockDevToolsLauncher.serve()).thenAnswer((_) async => DevToolsServerAddress('127.0.0.1', 1234));
 
       commands.add(<String, dynamic>{'id': 0, 'method': 'devtools.serve'});
       final Map<String, dynamic> response = await responses.stream.firstWhere((Map<String, dynamic> response) => response['id'] == 0);
       expect(response['result'], isNotEmpty);
-      expect(response['result']['host'], equals('127.0.0.1'));
-      expect(response['result']['port'], equals(1234));
-      expect(response['result']['success'], equals(true));
+      expect(response['result']['host'], '127.0.0.1');
+      expect(response['result']['port'], 1234);
       await responses.close();
       await commands.close();
     }, overrides: <Type, Generator>{
       DevtoolsLauncher: () => mockDevToolsLauncher,
     });
 
-    testUsingContext('devtools.serve command should return false for success on failure', () async {
-      final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
-      final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
-      daemon = Daemon(
-        commands.stream,
-        responses.add,
-        notifyingLogger: notifyingLogger,
-      );
-      when(mockDevToolsLauncher.serve()).thenAnswer((_) async => DevToolsServerAddress.failed());
-
-      commands.add(<String, dynamic>{'id': 0, 'method': 'devtools.serve'});
-      final Map<String, dynamic> response = await responses.stream.firstWhere((Map<String, dynamic> response) => response['id'] == 0);
-      expect(response['result'], isNotEmpty);
-      expect(response['result']['host'], equals(null));
-      expect(response['result']['port'], equals(null));
-      expect(response['result']['success'], equals(false));
-      await responses.close();
-      await commands.close();
-    }, overrides: <Type, Generator>{
-      DevtoolsLauncher: () => mockDevToolsLauncher,
-    });
-
-    testUsingContext('devtools.serve command should return false for success if null returned', () async {
+    testUsingContext('devtools.serve command should return null fields if null returned', () async {
       final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
       final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
       daemon = Daemon(
@@ -360,9 +337,8 @@ void main() {
       commands.add(<String, dynamic>{'id': 0, 'method': 'devtools.serve'});
       final Map<String, dynamic> response = await responses.stream.firstWhere((Map<String, dynamic> response) => response['id'] == 0);
       expect(response['result'], isNotEmpty);
-      expect(response['result']['host'], equals(null));
-      expect(response['result']['port'], equals(null));
-      expect(response['result']['success'], equals(false));
+      expect(response['result']['host'], null);
+      expect(response['result']['port'], null);
       await responses.close();
       await commands.close();
     }, overrides: <Type, Generator>{
