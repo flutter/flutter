@@ -3,29 +3,6 @@
 
 # YAML anchors used to share fields between tasks.
 # See https://confluence.atlassian.com/bitbucket/yaml-anchors-960154027.html
-web_shard_template: &WEB_SHARD_TEMPLATE
-  only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_goldens_client/**', 'packages/flutter_goldens/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'packages/flutter_web_plugins/**', 'bin/**') || $CIRRUS_PR == ''"
-  environment:
-    # As of March 2020, the Web shards needed 16G of RAM and 4 CPUs to run all framework tests with goldens without flaking.
-    # The tests are encountering a flake in Chrome. Increasing the number of shards to decrease race conditions.
-    # https://github.com/flutter/flutter/issues/62510
-    WEB_SHARD_COUNT: 12
-    CPU: 4
-    MEMORY: 16G
-    CHROME_NO_SANDBOX: true
-    GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
-  script:
-    - dart --enable-asserts ./dev/bots/test.dart
-
-linux_shard_template: &LINUX_SHARD_TEMPLATE
-  environment:
-    # Some of the host-only devicelab tests are pretty involved and need a lot of RAM.
-    # In June 2020, the CPU and memory were increased so that
-    # web benchmarks (including gallery benchmarks) can be run successfully on Linux.
-    CPU: 4
-    MEMORY: 16G
-  script:
-    - dart --enable-asserts ./dev/bots/test.dart
 
 windows_shard_template: &WINDOWS_SHARD_TEMPLATE
   only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
@@ -133,6 +110,37 @@ task:
         - flutter precache --fuchsia --no-android --no-ios
         - flutter precache --flutter_runner --no-android --no-ios
 
+    - name: framework_tests-widgets-linux
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/**') || $CIRRUS_PR == ''"
+      environment:
+        # We use 3 CPUs because that's the minimum required to get framework_tests-widgets-linux
+        # running fast enough that it is not the long pole, as of October 2019.
+        CPU: 3
+        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
+      script:
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    - name: framework_tests-libraries-linux
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/**') || $CIRRUS_PR == ''"
+      environment:
+        # We use 3 CPUs because that's the minimum required to get the
+        # framework_tests-libraries-linux shard running fast enough that it is not the long pole, as
+        # of October 2019.
+        CPU: 3
+        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
+      script:
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    - name: framework_tests-misc-linux
+      # this includes the tests for directories in dev/
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_goldens/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/**') || $CIRRUS_PR == ''"
+      environment:
+        # We use 3 CPUs because that's the minimum required to get framework_tests-misc-linux
+        # running fast enough that it is not the long pole, as of October 2019.
+        CPU: 3
+      script:
+        - dart --enable-asserts ./dev/bots/test.dart
+
     - name: tool_tests-general-linux
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/**') || $CIRRUS_PR == ''"
       environment:
@@ -189,42 +197,6 @@ task:
       script:
         - dart --enable-asserts ./dev/bots/test.dart
 
-    - name: web_tests-0-linux
-      << : *WEB_SHARD_TEMPLATE
-
-    - name: web_tests-1-linux
-      << : *WEB_SHARD_TEMPLATE
-
-    - name: web_tests-2-linux
-      << : *WEB_SHARD_TEMPLATE
-
-    - name: web_tests-3-linux
-      << : *WEB_SHARD_TEMPLATE
-
-    - name: web_tests-4-linux
-      << : *WEB_SHARD_TEMPLATE
-
-    - name: web_tests-5-linux
-      << : *WEB_SHARD_TEMPLATE
-
-    - name: web_tests-6-linux
-      << : *WEB_SHARD_TEMPLATE
-
-    - name: web_tests-7-linux
-      << : *WEB_SHARD_TEMPLATE
-
-    - name: web_tests-8-linux
-      << : *WEB_SHARD_TEMPLATE
-
-    - name: web_tests-9-linux
-      << : *WEB_SHARD_TEMPLATE
-
-    - name: web_tests-10-linux
-      << : *WEB_SHARD_TEMPLATE
-
-    - name: web_tests-11_last-linux # last Web shard must end with _last
-      << : *WEB_SHARD_TEMPLATE
-
     - name: build_tests-0-linux
       environment:
         # With 1 CPU and 4G of RAM, as of October 2019, build_tests-linux would get OOM-killed.
@@ -244,18 +216,6 @@ task:
         MEMORY: 6G
       script:
         - dart --enable-asserts ./dev/bots/test.dart
-
-    - name: hostonly_devicelab_tests-0-linux
-      << : *LINUX_SHARD_TEMPLATE
-
-    - name: hostonly_devicelab_tests-1-linux
-      << : *LINUX_SHARD_TEMPLATE
-
-    - name: hostonly_devicelab_tests-2-linux
-      << : *LINUX_SHARD_TEMPLATE
-
-    - name: hostonly_devicelab_tests-3_last-linux
-      << : *LINUX_SHARD_TEMPLATE
 
     - name: docs-linux # linux-only
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_drive/**', 'packages/flutter_localizations/**', 'bin/**') || $CIRRUS_PR == ''"
@@ -390,28 +350,6 @@ task:
         - dart --enable-asserts ./dev/bots/test.dart
 
     # TODO(ianh): Enable Web tests on Windows
-
-    - name: build_tests-0-windows
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
-      environment:
-        # As of December 2019, the build_tests-windows shard requires 6 GB RAM to pass.
-        # Emperically, using 6 CPUs and 10 GB RAM yielded optimal results (~33 minutes);
-        # bumping beyond these limits yielded no extra gain.
-        CPU: 6
-        MEMORY: 10G
-      script:
-        - dart --enable-asserts dev\bots\test.dart
-
-    - name: build_tests-1_last-windows
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
-      environment:
-        # As of December 2019, the build_tests-windows shard requires 6 GB RAM to pass.
-        # Emperically, using 6 CPUs and 10 GB RAM yielded optimal results (~33 minutes);
-        # bumping beyond these limits yielded no extra gain.
-        CPU: 6
-        MEMORY: 10G
-      script:
-        - dart --enable-asserts dev\bots\test.dart
 
     - name: hostonly_devicelab_tests-0-windows
       << : *WINDOWS_SHARD_TEMPLATE
