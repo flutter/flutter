@@ -131,7 +131,7 @@ void main() {
       )
     );
 
-    final Rect paddingRect = tester.getRect(find.byType(Padding));
+    final Rect paddingRect = tester.getRect(find.descendant(of: find.byType(SafeArea), matching: find.byType(Padding)));
     final Rect checkboxRect = tester.getRect(find.byType(Checkbox));
     final Rect titleRect = tester.getRect(find.text('Title'));
 
