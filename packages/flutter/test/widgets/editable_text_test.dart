@@ -5245,6 +5245,11 @@ void main() {
     state.updateEditingValue(const TextEditingValue(text: '123456', composing: TextRange(start: 2, end: 5)));
     expect(state.currentTextEditingValue.text, '123456');
     expect(state.currentTextEditingValue.composing, const TextRange(start: 2, end: 5));
+
+    // After composing ends, formatter will update.
+    state.updateEditingValue(const TextEditingValue(text: '123456'));
+    expect(state.currentTextEditingValue.text, '12345');
+    expect(state.currentTextEditingValue.composing, TextRange.empty);
   });
 }
 
