@@ -468,11 +468,37 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
   }
 }
 
-// TODO: Add Documentation
-/// Defines the different IconColor states that the InputDecoration provides.
+/// Defines the different IconColor states that the InputDecoration can be in.
+///
+/// {@tool dartpad --template=stateless_widget_scaffold}
+///
+/// This sample shows how to give an Icon different colors with DecorationIconColors
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return TextFormField(
+///     decoration: const InputDecoration(
+///         icon: Icon(Icons.category),
+///         decorationIconColors: DecorationIconColors(
+///             iconColor: Colors.green,
+///             active: Colors.orange,
+///             disabled: Colors.red,
+///             hover: Colors.amber
+///         )
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+/// 
+/// See also:
+///
+/// * [InputDecoration] where it is used
 class DecorationIconColors {
-  // TODO: Add more documentation
-  /// Builds ...
+  /// Creates a bundle of different colors used to decorate the Icon of the InputDecoration
+  ///
+  /// The default colors are coming from the current active Theme. This means
+  /// if no color is specified it will fallback to the themes default colors.
   const DecorationIconColors({
         this.iconColor,
         this.hover,
