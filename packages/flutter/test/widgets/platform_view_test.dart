@@ -2433,4 +2433,144 @@ void main() {
       expect(controller.focusCleared, true);
     });
   });
+
+  testWidgets('Platform views respect hitTestBehavior', (WidgetTester tester) async {
+    final FakePlatformViewController controller = FakePlatformViewController(0);
+
+    final List<String> logs = <String>[];
+
+    // -------------------------
+    // | MouseRegion1          |       MouseRegion1
+    // |  |-----------------|  |        |
+    // |  | MouseRegion2    |  |        |- Stack
+    // |  |   |---------|   |  |            |
+    // |  |   |Platform |   |  |            |- MouseRegion2
+    // |  |   |View     |   |  |            |- PlatformView
+    // |  |   |---------|   |  |
+    // |  |                 |  |
+    // |  |-----------------|  |
+    // |                       |
+    // -------------------------
+    Widget scaffold(Widget target) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            width: 600,
+            height: 600,
+            child: MouseRegion(
+              onEnter: (_) { logs.add('enter1'); },
+              onExit: (_) { logs.add('exit1'); },
+              cursor: SystemMouseCursors.forbidden,
+              child: Stack(
+                children: <Widget>[
+                  Center(
+                    child: SizedBox(
+                      width: 400,
+                      height: 400,
+                      child: MouseRegion(
+                        onEnter: (_) { logs.add('enter2'); },
+                        onExit: (_) { logs.add('exit2'); },
+                        cursor: SystemMouseCursors.text,
+                      ),
+                    ),
+                  ),
+                  Center(
+                    child: SizedBox(
+                      width: 200,
+                      height: 200,
+                      child: target,
+                    ),
+                  ),
+                ],
+              )
+            ),
+          ),
+        ),
+      );
+    }
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 0);
+    addTearDown(gesture.removePointer);
+
+    // Test: Opaque
+    await tester.pumpWidget(
+      scaffold(PlatformViewSurface(
+        controller: controller,
+        hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+        gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{}
+      ))
+    );
+    logs.clear();
+
+    await gesture.moveTo(const Offset(400, 300));
+    expect(logs, <String>['enter1']);
+    expect(controller.dispatchedPointerEvents, hasLength(1));
+    expect(controller.dispatchedPointerEvents[0].runtimeType, PointerHoverEvent);
+    logs.clear();
+    controller.dispatchedPointerEvents.clear();
+
+    // Test: changing no option does not trigger events
+    await tester.pumpWidget(
+      scaffold(PlatformViewSurface(
+        controller: controller,
+        hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+        gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{}
+      ))
+    );
+    expect(logs, isEmpty);
+    expect(controller.dispatchedPointerEvents, isEmpty);
+
+    // Test: Transluscent
+    await tester.pumpWidget(
+      scaffold(PlatformViewSurface(
+        controller: controller,
+        hitTestBehavior: PlatformViewHitTestBehavior.translucent,
+        gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{}
+      ))
+    );
+    expect(logs, <String>['enter2']);
+    expect(controller.dispatchedPointerEvents, isEmpty);
+    logs.clear();
+
+    await gesture.moveBy(const Offset(1, 1));
+    expect(logs, isEmpty);
+    expect(controller.dispatchedPointerEvents, hasLength(1));
+    expect(controller.dispatchedPointerEvents[0].runtimeType, PointerHoverEvent);
+    expect(controller.dispatchedPointerEvents[0].position, const Offset(401, 301));
+    expect(controller.dispatchedPointerEvents[0].localPosition, const Offset(101, 101));
+    controller.dispatchedPointerEvents.clear();
+
+    // Test: Transparent
+    await tester.pumpWidget(
+      scaffold(PlatformViewSurface(
+        controller: controller,
+        hitTestBehavior: PlatformViewHitTestBehavior.transparent,
+        gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{}
+      ))
+    );
+    expect(logs, isEmpty);
+    expect(controller.dispatchedPointerEvents, isEmpty);
+
+    await gesture.moveBy(const Offset(1, 1));
+    expect(logs, isEmpty);
+    expect(controller.dispatchedPointerEvents, isEmpty);
+
+    // Test: Back to opaque
+    await tester.pumpWidget(
+      scaffold(PlatformViewSurface(
+        controller: controller,
+        hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+        gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{}
+      ))
+    );
+    expect(logs, <String>['exit2']);
+    expect(controller.dispatchedPointerEvents, isEmpty);
+    logs.clear();
+
+    await gesture.moveBy(const Offset(1, 1));
+    expect(logs, isEmpty);
+    expect(controller.dispatchedPointerEvents, hasLength(1));
+    expect(controller.dispatchedPointerEvents[0].runtimeType, PointerHoverEvent);
+  });
 }

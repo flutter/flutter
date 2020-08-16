@@ -77,6 +77,7 @@ class FlutterPlugin implements Plugin<Project> {
     private static final List DEFAULT_PLATFORMS = [
         PLATFORM_ARM32,
         PLATFORM_ARM64,
+        PLATFORM_X86_64,
     ]
 
     // The name prefix for flutter builds.  This is used to identify gradle tasks

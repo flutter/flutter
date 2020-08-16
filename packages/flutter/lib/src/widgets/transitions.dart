@@ -949,7 +949,9 @@ class DecoratedBoxTransition extends AnimatedWidget {
 /// Animated version of an [Align] that animates its [Align.alignment] property.
 ///
 /// Here's an illustration of the [DecoratedBoxTransition] widget, with it's
-/// [decoration] animated by a [CurvedAnimation] set to [Curves.decelerate]:
+/// [DecoratedBoxTransition.decoration] animated by a [CurvedAnimation] set to
+/// [Curves.decelerate]:
+///
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/align_transition.mp4}
 ///
 /// See also:

@@ -535,25 +535,27 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       _ControlTile(
-        label: _model.rtl ? 'زر مسطح' : 'Flat Button',
-        child: FlatButton(
-          color: m2Swatch[200],
+        label: _model.rtl ? 'زر مسطح' : 'Text Button',
+        child: TextButton(
+          style: TextButton.styleFrom(
+            primary: Colors.white,
+            backgroundColor: m2Swatch[200]
+          ),
           onPressed: _model.enable ? () {} : null,
           child: label,
         ),
       ),
       _ControlTile(
-        label: _model.rtl ? 'أثارت زر' : 'Raised Button',
-        child: RaisedButton(
-          color: m2Swatch[200],
+        label: _model.rtl ? 'أثارت زر' : 'Elevated Button',
+        child: ElevatedButton(
+          style: TextButton.styleFrom(backgroundColor: m2Swatch[200]),
           onPressed: _model.enable ? () {} : null,
           child: label,
         ),
       ),
       _ControlTile(
-        label: _model.rtl ? 'زر المخطط التفصيلي' : 'Outline Button',
-        child: OutlineButton(
-          color: m2Swatch[500],
+        label: _model.rtl ? 'زر المخطط التفصيلي' : 'Outlined Button',
+        child: OutlinedButton(
           onPressed: _model.enable ? () {} : null,
           child: label,
         ),

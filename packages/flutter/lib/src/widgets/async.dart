@@ -163,6 +163,14 @@ class _StreamBuilderBaseState<T, S> extends State<StreamBuilderBase<T, S>> {
 
 /// The state of connection to an asynchronous computation.
 ///
+/// The usual flow of state is as follows:
+///
+/// 1. [none], maybe with some initial data.
+/// 2. [waiting], indicating that the asynchronous operation has begun,
+///    typically with the data being null.
+/// 3. [active], with data being non-null, and possible changing over time.
+/// 4. [done], with data being non-null.
+///
 /// See also:
 ///
 ///  * [AsyncSnapshot], which augments a connection state with information
@@ -205,6 +213,9 @@ class AsyncSnapshot<T> {
 
   /// Creates an [AsyncSnapshot] in [ConnectionState.none] with null data and error.
   const AsyncSnapshot.nothing() : this._(ConnectionState.none, null, null);
+
+  /// Creates an [AsyncSnapshot] in [ConnectionState.waiting] with null data and error.
+  const AsyncSnapshot.waiting() : this._(ConnectionState.waiting, null, null);
 
   /// Creates an [AsyncSnapshot] in the specified [state] and with the specified [data].
   const AsyncSnapshot.withData(ConnectionState state, T data) : this._(state, data, null);
@@ -518,7 +529,7 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 /// a [Future].
 ///
 /// The [future] must have been obtained earlier, e.g. during [State.initState],
-/// [State.didUpdateConfig], or [State.didChangeDependencies]. It must not be
+/// [State.didUpdateWidget], or [State.didChangeDependencies]. It must not be
 /// created during the [State.build] or [StatelessWidget.build] method call when
 /// constructing the [FutureBuilder]. If the [future] is created at the same
 /// time as the [FutureBuilder], then every time the [FutureBuilder]'s parent is

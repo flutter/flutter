@@ -57,7 +57,6 @@ import '../widget_cache.dart';
 class AttachCommand extends FlutterCommand {
   AttachCommand({bool verboseHelp = false, this.hotRunnerFactory}) {
     addBuildModeFlags(defaultToRelease: false);
-    usesIsolateFilterOption(hide: !verboseHelp);
     usesTargetOption();
     usesPortOptions();
     usesIpv6Flag();
@@ -102,6 +101,7 @@ class AttachCommand extends FlutterCommand {
               'and progress in machine friendly format.',
       );
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
+    addDdsOptions(verboseHelp: verboseHelp);
     hotRunnerFactory ??= HotRunnerFactory();
   }
 
@@ -111,7 +111,20 @@ class AttachCommand extends FlutterCommand {
   final String name = 'attach';
 
   @override
-  final String description = 'Attach to a running application.';
+  final String description = '''Attach to a running application.
+
+  For attaching to Android or iOS devices, simply using `flutter attach` is
+  usually sufficient. The tool will search for a running Flutter app or module,
+  if available. Otherwise, the tool will wait for the next Flutter app or module
+  to launch before attaching.
+
+  For Fuchsia, the module name must be provided, e.g. `\$flutter attach
+  --module=mod_name`. This can be called either before or after the application
+  is started.
+
+  If the app or module is already running and the specific observatory port is
+  known, it can be explicitly provided to attach via the command-line, e.g.
+  `\$ flutter attach --debug-port 12345`''';
 
   int get debugPort {
     if (argResults['debug-port'] == null) {
@@ -366,7 +379,6 @@ class AttachCommand extends FlutterCommand {
       flutterProject: flutterProject,
       fileSystemRoots: stringsArg('filesystem-root'),
       fileSystemScheme: stringArg('filesystem-scheme'),
-      viewFilter: stringArg('isolate-filter'),
       target: stringArg('target'),
       targetModel: TargetModel(stringArg('target-model')),
       buildInfo: getBuildInfo(),
@@ -378,7 +390,7 @@ class AttachCommand extends FlutterCommand {
     );
     flutterDevice.observatoryUris = observatoryUris;
     final List<FlutterDevice> flutterDevices =  <FlutterDevice>[flutterDevice];
-    final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(getBuildInfo());
+    final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(getBuildInfo(), disableDds: boolArg('disable-dds'));
 
     return getBuildInfo().isDebug
       ? hotRunnerFactory.build(

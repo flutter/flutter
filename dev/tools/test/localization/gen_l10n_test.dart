@@ -193,6 +193,95 @@ void main() {
       );
     });
 
+    test('sets absolute path of the target Flutter project', () {
+      // Set up project directory.
+      final Directory l10nDirectory = fs.currentDirectory
+        .childDirectory('absolute')
+        .childDirectory('path')
+        .childDirectory('to')
+        .childDirectory('flutter_project')
+        .childDirectory('lib')
+        .childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(singleMessageArbFileString);
+      l10nDirectory.childFile(esArbFileName)
+        .writeAsStringSync(singleEsMessageArbFileString);
+
+      // Run localizations generator in specified absolute path.
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      final String flutterProjectPath = path.join('absolute', 'path', 'to', 'flutter_project');
+      try {
+        generator.initialize(
+          projectPathString: flutterProjectPath,
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.loadResources();
+        generator.writeOutputFiles();
+      } on L10nException catch (e) {
+        throw TestFailure('Unexpected failure during test setup: ${e.message}');
+      } on Exception catch (e) {
+        throw TestFailure('Unexpected failure during test setup: $e');
+      }
+
+      // Output files should be generated in the provided absolute path.
+      expect(
+        fs.isFileSync(path.join(
+          flutterProjectPath,
+          'lib',
+          'l10n',
+          'output-localization-file_en.dart',
+        )),
+        true,
+      );
+      expect(
+        fs.isFileSync(path.join(
+          flutterProjectPath,
+          'lib',
+          'l10n',
+          'output-localization-file_es.dart',
+        )),
+        true,
+      );
+    });
+
+    test('throws error when directory at absolute path does not exist', () {
+      // Set up project directory.
+      final Directory l10nDirectory = fs.currentDirectory
+        .childDirectory('lib')
+        .childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(singleMessageArbFileString);
+      l10nDirectory.childFile(esArbFileName)
+        .writeAsStringSync(singleEsMessageArbFileString);
+
+      // Project path should be intentionally a directory that does not exist.
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          projectPathString: 'absolute/path/to/flutter_project',
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+      } on L10nException catch (e) {
+        expect(e.message, contains('Directory does not exist'));
+        return;
+      }
+
+      fail(
+        'An exception should be thrown when the directory '
+        'specified in projectPathString does not exist.'
+      );
+    });
+
     group('className should only take valid Dart class names', () {
       LocalizationsGenerator generator;
       setUp(() {

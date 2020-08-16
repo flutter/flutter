@@ -188,6 +188,21 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
        _cacheExtentStyle = cacheExtentStyle,
        _clipBehavior = clipBehavior;
 
+  /// Report the semantics of this node, for example for accessibility purposes.
+  ///
+  /// [RenderViewportBase] adds [RenderViewport.useTwoPaneSemantics] to the
+  /// provided [SemanticsConfiguration] to support children using
+  /// [RenderViewport.excludeFromScrolling].
+  ///
+  /// This method should be overridden by subclasses that have interesting
+  /// semantic information. Overriding subclasses should call
+  /// `super.describeSemanticsConfiguration(config)` to ensure
+  /// [RenderViewport.useTwoPaneSemantics] is still added to `config`.
+  ///
+  /// See also:
+  ///
+  /// * [RenderObject.describeSemanticsConfiguration], for important
+  ///   details about not mutating a [SemanticsConfiguration] out of context.
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
@@ -301,7 +316,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   /// {@template flutter.rendering.viewport.cacheExtentStyle}
   /// Controls how the [cacheExtent] is interpreted.
   ///
-  /// If set to [CacheExtentStyle.pixels], the [cacheExtent] will be treated as
+  /// If set to [CacheExtentStyle.pixel], the [cacheExtent] will be treated as
   /// a logical pixels.
   ///
   /// If set to [CacheExtentStyle.viewport], the [cacheExtent] will be treated
@@ -712,58 +727,26 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       final Matrix4 transform = target.getTransformTo(pivot);
       final Rect bounds = MatrixUtils.transformRect(transform, rect);
 
+      // Convert `rect`'s leading edge from `pivot`'s RenderBox coordinate
+      // system to the scrollOffset within `pivot.parent`. For `up` and `left`
+      // AxisDirections here, the leading edge of the render box is the
+      // bottom/right edge.
       final GrowthDirection growthDirection = pivotParent.constraints.growthDirection;
       switch (applyGrowthDirectionToAxisDirection(axisDirection, growthDirection)) {
         case AxisDirection.up:
-          double offset;
-          switch (growthDirection) {
-            case GrowthDirection.forward:
-              offset = bounds.bottom;
-              break;
-            case GrowthDirection.reverse:
-              offset = bounds.top;
-              break;
-          }
-          leadingScrollOffset += pivot.size.height - offset;
+          leadingScrollOffset += pivot.size.height - bounds.bottom;
           targetMainAxisExtent = bounds.height;
           break;
         case AxisDirection.right:
-          double offset;
-          switch (growthDirection) {
-            case GrowthDirection.forward:
-              offset = bounds.left;
-              break;
-            case GrowthDirection.reverse:
-              offset = bounds.right;
-              break;
-          }
-          leadingScrollOffset += offset;
+          leadingScrollOffset += bounds.left;
           targetMainAxisExtent = bounds.width;
           break;
         case AxisDirection.down:
-          double offset;
-          switch (growthDirection) {
-            case GrowthDirection.forward:
-              offset = bounds.top;
-              break;
-            case GrowthDirection.reverse:
-              offset = bounds.bottom;
-              break;
-          }
-          leadingScrollOffset += offset;
+          leadingScrollOffset += bounds.top;
           targetMainAxisExtent = bounds.height;
           break;
         case AxisDirection.left:
-          double offset;
-          switch (growthDirection) {
-            case GrowthDirection.forward:
-              offset = bounds.right;
-              break;
-            case GrowthDirection.reverse:
-              offset = bounds.left;
-              break;
-          }
-          leadingScrollOffset += pivot.size.width - offset;
+          leadingScrollOffset += pivot.size.width - bounds.right;
           targetMainAxisExtent = bounds.width;
           break;
       }
@@ -777,14 +760,44 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     assert(child.parent == this);
     assert(child is RenderSliver);
     final RenderSliver sliver = child as RenderSliver;
+
+    // This step assumes the viewport's layout is up-to-date, i.e., if
+    // offset.pixels is changed after the last performLayout, the new scroll
+    // position will not be accounted for.
+    final Matrix4 transform = target.getTransformTo(this);
+    Rect targetRect = MatrixUtils.transformRect(transform, rect);
+
+    // So far leadingScrollOffset is the scroll offset of `rect` in the `child`
+    // sliver's sliver coordinate system. The sign of this value indicates
+    // whether the `rect` protrudes the leading edge of the `child` sliver. When
+    // this value is non-negative and `child`'s `maxScrollObstructionExtent` is
+    // greater than 0, we assume `rect` can't be obstructed by the leading edge
+    // of the viewport (i.e. its pinned to the leading edge).
+    final bool isPinned = sliver.geometry.maxScrollObstructionExtent > 0
+                      && leadingScrollOffset >= 0;
+
     final double extentOfPinnedSlivers = maxScrollObstructionExtentBefore(sliver);
+    // The additional scroll offset needed to move the leading edge of the
+    // `target` to align with the leading edge of the viewport.
     leadingScrollOffset = scrollOffsetOf(sliver, leadingScrollOffset);
+
     switch (sliver.constraints.growthDirection) {
       case GrowthDirection.forward:
+        if (isPinned && alignment <= 0)
+          return RevealedOffset(offset: double.infinity, rect: targetRect);
         leadingScrollOffset -= extentOfPinnedSlivers;
         break;
       case GrowthDirection.reverse:
-        // Nothing to do.
+        if (isPinned && alignment >= 1)
+          return RevealedOffset(offset: double.negativeInfinity, rect: targetRect);
+        switch (axis) {
+          case Axis.vertical:
+            leadingScrollOffset -= targetRect.height;
+            break;
+          case Axis.horizontal:
+            leadingScrollOffset -= targetRect.width;
+            break;
+        }
         break;
     }
 
@@ -800,9 +813,6 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
 
     final double targetOffset = leadingScrollOffset - (mainAxisExtent - targetMainAxisExtent) * alignment;
     final double offsetDifference = offset.pixels - targetOffset;
-
-    final Matrix4 transform = target.getTransformTo(this);
-    Rect targetRect = MatrixUtils.transformRect(transform, rect);
 
     switch (axisDirection) {
       case AxisDirection.down:
@@ -1040,6 +1050,11 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   ///
   /// The `duration` parameter can be set to a non-zero value to animate the
   /// target object into the viewport with an animation defined by `curve`.
+  ///
+  /// See also:
+  ///
+  /// * [RenderObject.showOnScreen], overridden by [RenderViewportBase] and the
+  ///   renderer for [SingleChildScrollView] to delegate to this method.
   static Rect showInViewport({
     RenderObject descendant,
     Rect rect,
@@ -1188,6 +1203,11 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
   /// The semantic scrolling actions and the [SemanticsNode]s of scrollable
   /// children will be attached to the inner node, which itself is a child of
   /// the outer node.
+  ///
+  /// See also:
+  ///
+  /// * [RenderViewportBase.describeSemanticsConfiguration], which adds this
+  ///   tag to its [SemanticsConfiguration].
   static const SemanticsTag useTwoPaneSemantics = SemanticsTag('RenderViewport.twoPane');
 
   /// When a top-level [SemanticsNode] below a [RenderAbstractViewport] is
@@ -1232,7 +1252,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
   /// The first child in the [GrowthDirection.forward] growth direction.
   ///
   /// This child that will be at the position defined by [anchor] when the
-  /// [offset.pixels] is `0`.
+  /// [ViewportOffset.pixels] of [offset] is `0`.
   ///
   /// Children after [center] will be placed in the [axisDirection] relative to
   /// the [center]. Children before [center] will be placed in the opposite of
@@ -1321,16 +1341,6 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
       return true;
     }());
     size = constraints.biggest;
-    // We ignore the return value of applyViewportDimension below because we are
-    // going to go through performLayout next regardless.
-    switch (axis) {
-      case Axis.vertical:
-        offset.applyViewportDimension(size.height);
-        break;
-      case Axis.horizontal:
-        offset.applyViewportDimension(size.width);
-        break;
-    }
   }
 
   static const int _maxLayoutCycles = 10;
@@ -1342,6 +1352,17 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
 
   @override
   void performLayout() {
+    // Ignore the return value of applyViewportDimension because we are
+    // doing a layout regardless.
+    switch (axis) {
+      case Axis.vertical:
+        offset.applyViewportDimension(size.height);
+        break;
+      case Axis.horizontal:
+        offset.applyViewportDimension(size.width);
+        break;
+    }
+
     if (center == null) {
       assert(firstChild == null);
       _minScrollExtent = 0.0;

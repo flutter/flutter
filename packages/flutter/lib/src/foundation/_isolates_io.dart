@@ -50,7 +50,7 @@ Future<R> compute<Q, R>(isolates.ComputeCallback<Q, R> callback, Q message, { St
     }
   });
   resultPort.listen((dynamic resultData) {
-    assert(resultData is R);
+    assert(resultData == null || resultData is R);
     if (!result.isCompleted)
       result.complete(resultData as R);
   });

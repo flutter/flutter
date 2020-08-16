@@ -142,6 +142,10 @@ Future<T> runInContext<T>(
         config: globals.config,
         fuchsiaWorkflow: fuchsiaWorkflow,
         xcDevice: globals.xcdevice,
+        macOSWorkflow: MacOSWorkflow(
+          platform: globals.platform,
+          featureFlags: featureFlags,
+        ),
       ),
       Doctor: () => Doctor(logger: globals.logger),
       DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
@@ -193,7 +197,10 @@ Future<T> runInContext<T>(
             outputPreferences: globals.outputPreferences,
             timeoutConfiguration: timeoutConfiguration,
           ),
-      MacOSWorkflow: () => const MacOSWorkflow(),
+      MacOSWorkflow: () => MacOSWorkflow(
+        featureFlags: featureFlags,
+        platform: globals.platform,
+      ),
       MDnsObservatoryDiscovery: () => MDnsObservatoryDiscovery(),
       OperatingSystemUtils: () => OperatingSystemUtils(
         fileSystem: globals.fs,

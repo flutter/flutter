@@ -16,7 +16,7 @@ assignees: ''
       * https://stackoverflow.com/questions/tagged/flutter?sort=frequent
 
      If you have found a bug or if our documentation doesn't have an answer
-     to what you're looking for, then fill our the template below. Please read
+     to what you're looking for, then fill out the template below. Please read
      our guide to filing a bug first: https://flutter.dev/docs/resources/bug-reports
 -->
 
@@ -29,7 +29,7 @@ assignees: ''
      Is your feature request related to a problem? Please give a clear and
      concise description of what the problem is.
 
-     Describe alternative solutions you've considered. Is there a package
+     Describe the alternative solutions you've considered. Is there a package
      on pub.dev/flutter that already solves this?
 -->
 

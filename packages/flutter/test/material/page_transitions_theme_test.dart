@@ -26,7 +26,7 @@ void main() {
   testWidgets('Default PageTransitionsTheme builds a CupertionPageTransition', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => Material(
-        child: FlatButton(
+        child: TextButton(
           child: const Text('push'),
           onPressed: () { Navigator.of(context).pushNamed('/b'); },
         ),
@@ -52,7 +52,7 @@ void main() {
   testWidgets('Default PageTransitionsTheme builds a _FadeUpwardsPageTransition for android', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => Material(
-        child: FlatButton(
+        child: TextButton(
           child: const Text('push'),
           onPressed: () { Navigator.of(context).pushNamed('/b'); },
         ),
@@ -85,7 +85,7 @@ void main() {
   testWidgets('PageTransitionsTheme override builds a _OpenUpwardsPageTransition', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => Material(
-        child: FlatButton(
+        child: TextButton(
           child: const Text('push'),
           onPressed: () { Navigator.of(context).pushNamed('/b'); },
         ),
@@ -125,7 +125,7 @@ void main() {
   testWidgets('PageTransitionsTheme override builds a _ZoomPageTransition', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => Material(
-        child: FlatButton(
+        child: TextButton(
           child: const Text('push'),
           onPressed: () { Navigator.of(context).pushNamed('/b'); },
         ),
@@ -169,7 +169,7 @@ void main() {
 
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => Material(
-        child: FlatButton(
+        child: TextButton(
           child: const Text('push'),
           onPressed: () { Navigator.of(context).pushNamed('/b'); },
         ),
@@ -177,7 +177,7 @@ void main() {
       '/b': (BuildContext context) => StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           builtCount++; // Increase [builtCount] each time the widget build
-          return FlatButton(
+          return TextButton(
             child: const Text('pop'),
             onPressed: () { Navigator.pop(context); },
           );

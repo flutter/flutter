@@ -58,7 +58,7 @@ final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
 ///
 /// Example:
 ///
-/// Testing that a filesystem operation works as expected
+/// Testing that a filesystem operation works as expected:
 ///
 ///     void main() {
 ///       group('Example', () {
@@ -732,7 +732,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isSingleWidgetReloadEnabled = false,
     this.isAndroidEnabled = true,
     this.isIOSEnabled = true,
-    this.isFuchsiaEnabled = true,
+    this.isFuchsiaEnabled = false,
 });
 
   @override

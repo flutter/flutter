@@ -31,16 +31,15 @@ import 'iproxy.dart';
 import 'mac.dart';
 
 class IOSDevices extends PollingDeviceDiscovery {
-  // TODO(fujino): make these required and remove fallbacks once internal invocations migrated
   IOSDevices({
-    Platform platform,
-    XCDevice xcdevice,
-    IOSWorkflow iosWorkflow,
-    Logger logger,
-  }) : _platform = platform ?? globals.platform,
-       _xcdevice = xcdevice ?? globals.xcdevice,
-       _iosWorkflow = iosWorkflow ?? globals.iosWorkflow,
-       _logger = logger ?? globals.logger,
+    @required Platform platform,
+    @required XCDevice xcdevice,
+    @required IOSWorkflow iosWorkflow,
+    @required Logger logger,
+  }) : _platform = platform,
+       _xcdevice = xcdevice,
+       _iosWorkflow = iosWorkflow,
+       _logger = logger,
        super('iOS devices');
 
   final Platform _platform;
@@ -356,6 +355,7 @@ class IOSDevice extends Device {
       ?? math.Random(packageId.hashCode).nextInt(16383) + 49152;
 
     // Step 3: Attempt to install the application on the device.
+    final String dartVmFlags = computeDartVmFlags(debuggingOptions);
     final List<String> launchArguments = <String>[
       '--enable-dart-profiling',
       // These arguments are required to support the fallback connection strategy
@@ -364,7 +364,7 @@ class IOSDevice extends Device {
       '--disable-service-auth-codes',
       '--observatory-port=$assumedObservatoryPort',
       if (debuggingOptions.startPaused) '--start-paused',
-      if (debuggingOptions.dartFlags.isNotEmpty) '--dart-flags="${debuggingOptions.dartFlags}"',
+      if (dartVmFlags.isNotEmpty) '--dart-flags="$dartVmFlags"',
       if (debuggingOptions.useTestFonts) '--use-test-fonts',
       // "--enable-checked-mode" and "--verify-entry-points" should always be
       // passed when we launch debug build via "ios-deploy". However, we don't
@@ -384,6 +384,7 @@ class IOSDevice extends Device {
       if (debuggingOptions.dumpSkpOnShaderCompilation) '--dump-skp-on-shader-compilation',
       if (debuggingOptions.verboseSystemLogs) '--verbose-logging',
       if (debuggingOptions.cacheSkSL) '--cache-sksl',
+      if (debuggingOptions.purgePersistentCache) '--purge-persistent-cache',
       if (platformArgs['trace-startup'] as bool ?? false) '--trace-startup',
     ];
 
@@ -432,7 +433,7 @@ class IOSDevice extends Device {
       );
       final Uri localUri = await fallbackDiscovery.discover(
         assumedDevicePort: assumedObservatoryPort,
-        deivce: this,
+        device: this,
         usesIpv6: ipv6,
         hostVmservicePort: debuggingOptions.hostVmServicePort,
         packageId: packageId,
