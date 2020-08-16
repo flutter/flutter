@@ -556,5 +556,13 @@ TEST(AndroidExternalViewEmbedder, DestroyOverlayLayersOnSizeChange) {
                        raster_thread_merger);
 }
 
+TEST(AndroidExternalViewEmbedder, SupportsDynamicThreadMerging) {
+  auto jni_mock = std::make_shared<JNIMock>();
+
+  auto embedder =
+      std::make_unique<AndroidExternalViewEmbedder>(nullptr, jni_mock, nullptr);
+  ASSERT_TRUE(embedder->SupportsDynamicThreadMerging());
+}
+
 }  // namespace testing
 }  // namespace flutter

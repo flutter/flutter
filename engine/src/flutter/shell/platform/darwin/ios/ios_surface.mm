@@ -155,4 +155,9 @@ void IOSSurface::EndFrame(bool should_resubmit_frame,
   return platform_views_controller_->EndFrame(should_resubmit_frame, raster_thread_merger);
 }
 
+// |ExternalViewEmbedder|
+bool IOSSurface::SupportsDynamicThreadMerging() {
+  return true;
+}
+
 }  // namespace flutter
