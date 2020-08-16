@@ -2696,10 +2696,11 @@ class InputDecoration {
   /// See [Icon], [ImageIcon].
   final Widget icon;
 
-  /// Color of the icon
+  /// This is the bundle that contains multiple possible states to change the
+  /// color of the icon.
   ///
-  /// When the input field is unfocused the icon of the Textfield receives this color.
-  /// This does not apply to if the TextField is active, inactive or hovered.
+  /// When the DecorationIconColors is not provided it falls back to the
+  /// default colors
   final DecorationIconColors decorationIconColors;
 
   /// Text that describes the input field.
