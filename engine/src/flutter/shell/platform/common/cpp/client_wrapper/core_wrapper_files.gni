@@ -27,13 +27,26 @@ core_cpp_client_wrapper_includes =
                   ],
                   "abspath")
 
+# Headers that aren't public for clients of the wrapper, but are considered
+# public for the purpose of BUILD dependencies (e.g., to allow
+# windows/client_wrapper implementation files to include them).
+core_cpp_client_wrapper_internal_headers =
+    get_path_info([
+                    "binary_messenger_impl.h",
+                    "byte_buffer_streams.h",
+                  ],
+                  "abspath")
+
 # TODO: Once the wrapper API is more stable, consolidate to as few files as is
 # reasonable (without forcing different kinds of clients to take unnecessary
 # code) to simplify use.
 core_cpp_client_wrapper_sources = get_path_info([
-                                                  "byte_buffer_streams.h",
-                                                  "engine_method_result.cc",
+                                                  "core_implementations.cc",
                                                   "plugin_registrar.cc",
                                                   "standard_codec.cc",
                                                 ],
                                                 "abspath")
+
+# Temporary shim, published for backwards compatibility.
+# See comment in the file for more detail.
+temporary_shim_files = get_path_info([ "engine_method_result.cc" ], "abspath")
