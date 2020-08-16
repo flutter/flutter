@@ -12,7 +12,6 @@
 #include <memory>
 #include <string>
 
-#include "binary_messenger.h"
 #include "dart_project.h"
 #include "plugin_registrar.h"
 #include "plugin_registry.h"
@@ -58,12 +57,6 @@ class FlutterEngine : public PluginRegistry {
   FlutterDesktopPluginRegistrarRef GetRegistrarForPlugin(
       const std::string& plugin_name) override;
 
-  // Returns the messenger to use for creating channels to communicate with the
-  // Flutter engine.
-  //
-  // This pointer will remain valid for the lifetime of this instance.
-  BinaryMessenger* messenger() { return messenger_.get(); }
-
  private:
   // For access to RelinquishEngine.
   friend class FlutterViewController;
@@ -76,9 +69,6 @@ class FlutterEngine : public PluginRegistry {
 
   // Handle for interacting with the C API's engine reference.
   FlutterDesktopEngineRef engine_ = nullptr;
-
-  // Messenger for communicating with the engine.
-  std::unique_ptr<BinaryMessenger> messenger_;
 
   // Whether or not this wrapper owns |engine_|.
   bool owns_engine_ = true;
