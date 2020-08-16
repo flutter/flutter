@@ -295,4 +295,9 @@ void AndroidExternalViewEmbedder::EndFrame(
   }
 }
 
+// |ExternalViewEmbedder|
+bool AndroidExternalViewEmbedder::SupportsDynamicThreadMerging() {
+  return true;
+}
+
 }  // namespace flutter
