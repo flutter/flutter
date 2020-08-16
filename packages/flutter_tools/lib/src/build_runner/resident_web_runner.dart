@@ -596,6 +596,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
         reason: reason,
         overallTimeInMs: timer.elapsed.inMilliseconds,
         nullSafety: usageNullSafety,
+        fastReassemble: false,
       ).send();
     }
     return OperationResult.ok;

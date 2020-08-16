@@ -2,14 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
-
 import 'package:meta/meta.dart';
-
-import 'package:_fe_analyzer_shared/src/parser/parser.dart'; // ignore: implementation_imports
-import 'package:_fe_analyzer_shared/src/scanner/token.dart'; // ignore: implementation_imports
-import 'package:_fe_analyzer_shared/src/parser/listener.dart'; // ignore: implementation_imports
-import 'package:_fe_analyzer_shared/src/scanner/utf8_bytes_scanner.dart'; // ignore: implementation_imports
 
 import 'base/file_system.dart';
 import 'features.dart';
@@ -27,7 +20,7 @@ class WidgetCache {
 
   final FeatureFlags _featureFlags;
   final FileSystem _fileSystem;
-  final Map<Uri, _TokenCache> _cache = <Uri, _TokenCache>{};
+  final Map<Uri, List<String>> _cache = <Uri, List<String>>{};
 
   /// If the build method of a single widget was modified, return the widget name.
   ///
@@ -38,192 +31,175 @@ class WidgetCache {
       return null;
     }
     final File file = _fileSystem.file(uri);
-    final Uint8List bytes = Uint8List(file.lengthSync() + 1);
-    file.openSync().readIntoSync(bytes);
-    final Utf8BytesScanner scanner = Utf8BytesScanner(
-      bytes,
-      includeComments: true,
-    );
-    final Token firstToken = scanner.tokenize();
-    final WidgetBuildCollector collector = WidgetBuildCollector();
-    final Token endToken = Parser(collector).parseUnit(firstToken);
+    final List<String> lines = file.readAsLinesSync();
 
-    final _TokenCache tokenCache = _cache.remove(uri);
-    if (tokenCache == null) {
+
+    final List<String> oldLines = _cache.remove(uri);
+    if (oldLines == null) {
        // Ensure that the cache does not grow beyond `_kCacheSize`.
       while (_cache.length + 1 > _kCacheSize) {
         final Uri keyToRemove = _cache.keys.first;
         _cache.remove(keyToRemove);
       }
-      _cache[uri] = _TokenCache(firstToken, endToken);
+      _cache[uri] = lines;
       return null;
     } else {
       // preserve LRU behavior.
-      _cache[uri] = tokenCache;
+      _cache[uri] = oldLines;
     }
-
-    Token current = firstToken;
-    Token currentPrev = tokenCache.startToken;
-
-    // Walk forward through the token stream until the first difference is found.
-    while (current != null && currentPrev != null && !current.isEof && !currentPrev.isEof) {
-      if (current.type == TokenType.BAD_INPUT || currentPrev.type == TokenType.BAD_INPUT) {
-        break;
-      }
-      if (current.lexeme != currentPrev.lexeme) {
-        break;
-      }
-      current = current.next;
-      currentPrev = currentPrev.next;
-    }
-
-    Token currentEnd = endToken;
-    Token currentPrevEnd = tokenCache.endToken;
-
-    // Walk background through the token stream until the first difference is found.
-    while (currentEnd != current && currentPrevEnd != currentPrev) {
-      if (current.type == TokenType.BAD_INPUT || currentPrev.type == TokenType.BAD_INPUT) {
-        break;
-      }
-      if (currentEnd.lexeme != currentPrevEnd.lexeme) {
-        break;
-      }
-      currentEnd = currentEnd.previous;
-      currentPrevEnd = currentPrevEnd.previous;
-    }
-
-    // If either the beginning or end tokens are invalid, ensure that a full
-    // reload is performed.
-    if (current.type == TokenType.BAD_INPUT ||
-        currentPrev.type == TokenType.BAD_INPUT ||
-        currentEnd.type == TokenType.BAD_INPUT ||
-        currentPrevEnd.type == TokenType.BAD_INPUT) {
+    String className;
+    try {
+      className = scan(lines, oldLines);
+      _cache[uri] = lines;
+    } on Exception {
       _cache.remove(uri);
-      return null;
     }
+    return className;
+  }
+}
 
-    // If the beginning and end tokens are the same, there is no difference in
-    // the token streams.
-    if (currentEnd.lexeme == currentPrevEnd.lexeme
-      && current.lexeme == currentPrev.lexeme) {
-      // TODO(jonahwilliams): Technically this could skip the reassemble altogether.
-      // to be safe, keep the old behavior for now.
-      return null;
+String scan(List<String> newSource, List<String> oldSource) {
+  final List<_ClassOutline> newOutlines = _scanClasses(newSource);
+  final List<_ClassOutline> oldOutlines = _scanClasses(oldSource);
+  int i = 0;
+  int j = 0;
+  while (i < newSource.length && j < oldSource.length) {
+    if (newSource[i] != oldSource[j]) {
+      break;
     }
-
-    // Determine whether the delta lies entirely within the class body of a
-    // Widget or State class declaration.
-    final Map<Token, _ClassDeclaration> fenceStart = <Token, _ClassDeclaration>{};
-    final Map<Token, _ClassDeclaration> fenceEnd = <Token, _ClassDeclaration>{};
-    for (final _ClassDeclaration declaration in collector.declarations) {
-      fenceStart[declaration.startToken] = declaration;
-      fenceEnd[declaration.endToken] = declaration;
+    i += 1;
+    j += 1;
+  }
+  int x = newSource.length - 1;
+  int y = oldSource.length - 1;
+  while (x >= i && y >= j) {
+    if (newSource[x] != oldSource[y]) {
+      break;
     }
-
-    // Look backwards from the current token until the beginning of a class
-    // declaration is hit. If the end of a class declaration or the beginning
-    // of the file is hit, the diff is not valid.
-    bool validRange = false;
-    _ClassDeclaration containingClassBackwards;
-    _ClassDeclaration containingClassForwards;
-    while (current != null) {
-      if (fenceStart.containsKey(current)) {
-        containingClassBackwards = fenceStart[current];
-        validRange = true;
-        break;
-      }
-      if (fenceEnd.containsKey(current)) {
-        validRange = false;
-        break;
-      }
-      if (current == firstToken) {
-        validRange = false;
-        break;
-      }
-      current = current.previous;
+    x -= 1;
+    y -= 1;
+  }
+  _ClassOutline newOutline;
+  _ClassOutline oldOutline;
+  for (final _ClassOutline outline in newOutlines) {
+    if (i > outline.start && x < outline.end) {
+      newOutline = outline;
     }
-
-    // Look forward from the current end token until the end of a class
-    // declaration is hit. If the beginning of a class declaration or EOF
-    // is hit, the diff is not valid.
-    while (currentEnd != null) {
-      if (fenceEnd.containsKey(currentEnd)) {
-        containingClassForwards = fenceEnd[currentEnd];
-        break;
-      }
-      if (fenceStart.containsKey(currentEnd)) {
-        validRange = false;
-        break;
-      }
-      if (currentEnd.isEof) {
-        validRange = false;
-        break;
-      }
-      currentEnd = currentEnd.next;
+  }
+  for (final _ClassOutline outline in oldOutlines) {
+    if (j > outline.start && y < outline.end) {
+      oldOutline = outline;
     }
+  }
+  if (newOutline == null ||
+    oldOutline == null ||
+    newOutline.declaration != oldOutline.declaration) {
+    return null;
+  }
+  return newOutline.getWidgetName();
+}
 
-    // If the class start and end correspond the same declaration, return the name
-    // of the widget.
-    _cache[uri] = _TokenCache(firstToken, endToken);
-    if (validRange && containingClassForwards == containingClassBackwards) {
-      return containingClassForwards.widgetName;
+List<_ClassOutline> _scanClasses(List<String> source) {
+  final List<_ClassOutline> outlines = <_ClassOutline>[];
+  _ClassOutline classOutline;
+
+  int braces = 0;
+  for (int i = 0; i < source.length; i++) {
+    final String line = source[i].trim();
+    if (line.startsWith('class')) {
+      if (classOutline != null) {
+        throw Exception('Error parsing class outline');
+      }
+      classOutline = _ClassOutline()
+        ..start = i
+        ..declaration = line;
+      braces = _countBraceDelta(line);
+      continue;
+    }
+    if (classOutline != null) {
+      braces += _countBraceDelta(line);
+      if (braces == 0) {
+        classOutline.end = i;
+        outlines.add(classOutline);
+        classOutline = null;
+        braces = 0;
+      }
+    }
+  }
+
+  return outlines;
+}
+
+// `{`
+const int _openBrace = 0x7B;
+
+// `}`
+const int _closeBrace = 0x7D;
+
+// `'`
+const int _singleQuote = 0x27;
+
+// `"`
+const int _doubleQuote = 0x22;
+
+int _countBraceDelta(String line) {
+  bool inQuote = false;
+  int quoteChar;
+  int total = 0;
+  for (final int char in line.codeUnits) {
+    if (inQuote) {
+      if (char == quoteChar) {
+        inQuote = false;
+        quoteChar = null;
+      }
+      continue;
+    }
+    if (char == _singleQuote || char == _doubleQuote) {
+      inQuote = true;
+      quoteChar = char;
+      continue;
+    }
+    if (char == _closeBrace) {
+      total -= 1;
+    } else if (char == _openBrace) {
+      total += 1;
+    }
+  }
+  return total;
+}
+
+class _ClassOutline {
+  String declaration;
+  int start;
+  int end;
+
+  static final RegExp _whitespace = RegExp(r'\s+');
+
+  String getWidgetName() {
+    if (declaration.contains('State<')) {
+      List<String> segments = declaration.split('State<');
+      if (segments.length != 2) {
+        return null;
+      }
+      final String genericName = segments[1];
+      segments = genericName.split('>');
+      if (segments.length != 2) {
+        return null;
+      }
+      return segments[0].trim();
+    }
+    if (declaration.contains('StatelessWidget')) {
+      List<String> segments = declaration.split('class');
+      if (segments.length != 2) {
+        return null;
+      }
+      final String className = segments[1].trim();
+      segments = className.trim().split(_whitespace);
+      if (segments.length < 2) {
+        return null;
+      }
+      return segments[0].trim();
     }
     return null;
   }
-}
-
-class _TokenCache {
-  _TokenCache(this.startToken, this.endToken);
-
-  final Token startToken;
-  final Token endToken;
-}
-
-class WidgetBuildCollector extends Listener {
-  final List<_ClassDeclaration> declarations = <_ClassDeclaration>[];
-  _ClassDeclaration currentDeclaration;
-
-  @override
-  void beginClassDeclaration(Token begin, Token abstractToken, Token name) {
-    currentDeclaration = _ClassDeclaration()
-      ..name = name.lexeme
-      ..startToken = begin;
-  }
-
-  @override
-  void handleClassExtends(Token extendsKeyword) {
-    if (extendsKeyword != null) {
-      if (extendsKeyword?.next?.lexeme == 'StatelessWidget') {
-        currentDeclaration.isStatelessWidget = true;
-        currentDeclaration.widgetName = currentDeclaration.name;
-      } else if (extendsKeyword?.next?.lexeme == 'State') {
-        // If next token is `<`, then token following is the widget name.
-        // Otherwise the State class is for a dynamic widget and it might
-        // not be safe to perform a fast reassemble.
-        if (extendsKeyword?.next?.next?.lexeme != '<') {
-          return;
-        }
-        currentDeclaration.isStatefulWidget = true;
-        currentDeclaration.widgetName = extendsKeyword?.next?.next?.next?.lexeme;
-      }
-    }
-  }
-
-  @override
-  void endClassDeclaration(Token beginToken, Token endToken) {
-    currentDeclaration.endToken = endToken;
-    if (currentDeclaration.isStatelessWidget || currentDeclaration.isStatefulWidget) {
-      declarations.add(currentDeclaration);
-    }
-    currentDeclaration = null;
-  }
-}
-
-class _ClassDeclaration {
-  String name;
-  String widgetName;
-  bool isStatelessWidget = false;
-  bool isStatefulWidget = false;
-  Token endToken;
-  Token startToken;
 }

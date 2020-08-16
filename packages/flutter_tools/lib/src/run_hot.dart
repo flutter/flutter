@@ -727,7 +727,9 @@ class HotRunner extends ResidentRunner {
         emulator: emulator,
         fullRestart: true,
         nullSafety: usageNullSafety,
-        reason: reason).send();
+        fastReassemble: false,
+        reason: reason,
+      ).send();
       status?.cancel();
     }
     return result;
@@ -770,6 +772,7 @@ class HotRunner extends ResidentRunner {
         fullRestart: false,
         nullSafety: usageNullSafety,
         reason: reason,
+        fastReassemble: false,
       ).send();
       return OperationResult(1, 'hot reload failed to complete', fatal: true);
     } finally {
@@ -849,6 +852,7 @@ class HotRunner extends ResidentRunner {
             fullRestart: false,
             reason: reason,
             nullSafety: usageNullSafety,
+            fastReassemble: false,
           ).send();
           return OperationResult(1, 'Reload rejected');
         }
@@ -877,6 +881,7 @@ class HotRunner extends ResidentRunner {
           fullRestart: false,
           reason: reason,
           nullSafety: usageNullSafety,
+          fastReassemble: false,
         ).send();
         return OperationResult(errorCode, errorMessage);
       }
@@ -897,6 +902,7 @@ class HotRunner extends ResidentRunner {
     String serviceEventKind;
     int pausedIsolatesFound = 0;
     bool failedReassemble = false;
+    bool fastReassemble = false;
     for (final FlutterDevice device in flutterDevices) {
       final List<FlutterView> views = await device.vmService.getFlutterViews();
       for (final FlutterView view in views) {
@@ -923,6 +929,7 @@ class HotRunner extends ResidentRunner {
             reassembleWork = device.vmService.flutterFastReassemble(
               isolateId: view.uiIsolate.id,
             );
+            fastReassemble = true;
           } else {
             reassembleWork = device.vmService.flutterReassemble(
               isolateId: view.uiIsolate.id,
@@ -1013,6 +1020,7 @@ class HotRunner extends ResidentRunner {
       invalidatedSourcesCount: updatedDevFS.invalidatedSourcesCount,
       transferTimeInMs: devFSTimer.elapsed.inMilliseconds,
       nullSafety: usageNullSafety,
+      fastReassemble: fastReassemble,
     ).send();
 
     if (shouldReportReloadTime) {
