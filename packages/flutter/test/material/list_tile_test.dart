@@ -1563,16 +1563,18 @@ void main() {
     );
 
     // Initially, when isSelected is false, the ListTile should respect tileColor.
-    ColoredBox coloredBox = tester.widget(find.byType(ColoredBox));
-    expect(coloredBox.color, tileColor);
+    Ink ink = tester.widget(find.descendant(of: find.byType(ListTile), matching: find.byType(Ink)));
+    ShapeDecoration shapeDecoration = ink.decoration as ShapeDecoration;
+    expect(shapeDecoration.color, tileColor);
 
     // Tap on tile to change isSelected.
     await tester.tap(find.byType(ListTile));
     await tester.pumpAndSettle();
 
     // When isSelected is true, the ListTile should respect selectedTileColor.
-    coloredBox = tester.widget(find.byType(ColoredBox));
-    expect(coloredBox.color, selectedTileColor);
+    ink = tester.widget(find.descendant(of: find.byType(ListTile), matching: find.byType(Ink)));
+    shapeDecoration = ink.decoration as ShapeDecoration;
+    expect(shapeDecoration.color, selectedTileColor);
   });
 
   testWidgets('ListTile default tile color', (WidgetTester tester) async {
@@ -1599,16 +1601,17 @@ void main() {
       ),
     );
 
-    ColoredBox coloredBox = tester.widget(find.byType(ColoredBox));
-    expect(coloredBox.color, defaultColor);
+    Ink ink = tester.widget(find.descendant(of: find.byType(ListTile), matching: find.byType(Ink)));
+    ShapeDecoration shapeDecoration = ink.decoration as ShapeDecoration;
+    expect(shapeDecoration.color, defaultColor);
 
     // Tap on tile to change isSelected.
     await tester.tap(find.byType(ListTile));
     await tester.pumpAndSettle();
 
-    coloredBox = tester.widget(find.byType(ColoredBox));
-    expect(isSelected, isTrue);
-    expect(coloredBox.color, defaultColor);
+    ink = tester.widget(find.descendant(of: find.byType(ListTile), matching: find.byType(Ink)));
+    shapeDecoration = ink.decoration as ShapeDecoration;
+    expect(shapeDecoration.color, defaultColor);
   });
 
   testWidgets('ListTile respects ListTileTheme\'s tileColor & selectedTileColor', (WidgetTester tester) async {
@@ -1640,15 +1643,17 @@ void main() {
       ),
     );
 
-    ColoredBox coloredBox = tester.widget(find.byType(ColoredBox));
-    expect(coloredBox.color, theme.tileColor);
+    Ink ink = tester.widget(find.descendant(of: find.byType(ListTile), matching: find.byType(Ink)));
+    ShapeDecoration shapeDecoration = ink.decoration as ShapeDecoration;
+    expect(shapeDecoration.color, theme.tileColor);
 
     // Tap on tile to change isSelected.
     await tester.tap(find.byType(ListTile));
     await tester.pumpAndSettle();
 
-    coloredBox = tester.widget(find.byType(ColoredBox));
-    expect(coloredBox.color, theme.selectedTileColor);
+    ink = tester.widget(find.descendant(of: find.byType(ListTile), matching: find.byType(Ink)));
+    shapeDecoration = ink.decoration as ShapeDecoration;
+    expect(shapeDecoration.color, theme.selectedTileColor);
   });
 
   testWidgets('ListTileTheme\'s tileColor & selectedTileColor are overridden by ListTile properties', (WidgetTester tester) async {
@@ -1682,14 +1687,40 @@ void main() {
       ),
     );
 
-    ColoredBox coloredBox = tester.widget(find.byType(ColoredBox));
-    expect(coloredBox.color, tileColor);
+    Ink ink = tester.widget(find.descendant(of: find.byType(ListTile), matching: find.byType(Ink)));
+    ShapeDecoration shapeDecoration = ink.decoration as ShapeDecoration;
+    expect(shapeDecoration.color, tileColor);
 
     // Tap on tile to change isSelected.
     await tester.tap(find.byType(ListTile));
     await tester.pumpAndSettle();
 
-    coloredBox = tester.widget(find.byType(ColoredBox));
-    expect(coloredBox.color, selectedTileColor);
+    ink = tester.widget(find.descendant(of: find.byType(ListTile), matching: find.byType(Ink)));
+    shapeDecoration = ink.decoration as ShapeDecoration;
+    expect(shapeDecoration.color, selectedTileColor);
+  });
+
+  testWidgets('ListTile.shape is properly propagated to Ink widget', (WidgetTester tester) async {
+    const RoundedRectangleBorder border = RoundedRectangleBorder(
+      borderRadius: BorderRadius.horizontal(right: Radius.circular(30)),
+    );
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Center(
+            child: ListTile(
+              shape: border,
+              title: Text('Hello'),
+            ),
+          ),
+        )
+      ),
+    );
+
+    final Ink ink = tester.widget(find.descendant(of: find.byType(ListTile), matching: find.byType(Ink)));
+    final ShapeDecoration decoration = ink.decoration as ShapeDecoration;
+
+    expect(decoration.shape, border);
   });
 }

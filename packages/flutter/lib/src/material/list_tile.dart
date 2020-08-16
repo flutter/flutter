@@ -14,6 +14,7 @@ import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'divider.dart';
+import 'ink_decoration.dart';
 import 'ink_well.dart';
 import 'material_state.dart';
 import 'theme.dart';
@@ -1056,21 +1057,24 @@ class ListTile extends StatelessWidget {
       },
     );
 
-    return InkWell(
-      customBorder: shape ?? tileTheme.shape,
-      onTap: enabled ? onTap : null,
-      onLongPress: enabled ? onLongPress : null,
-      mouseCursor: effectiveMouseCursor,
-      canRequestFocus: enabled,
-      focusNode: focusNode,
-      focusColor: focusColor,
-      hoverColor: hoverColor,
-      autofocus: autofocus,
-      child: Semantics(
-        selected: selected,
-        enabled: enabled,
-        child: ColoredBox(
-          color: _tileBackgroundColor(tileTheme),
+    return Ink(
+      decoration: ShapeDecoration(
+        shape: shape ?? tileTheme.shape ?? const Border(),
+        color: _tileBackgroundColor(tileTheme),
+      ),
+      child: InkWell(
+        customBorder: shape ?? tileTheme.shape,
+        onTap: enabled ? onTap : null,
+        onLongPress: enabled ? onLongPress : null,
+        mouseCursor: effectiveMouseCursor,
+        canRequestFocus: enabled,
+        focusNode: focusNode,
+        focusColor: focusColor,
+        hoverColor: hoverColor,
+        autofocus: autofocus,
+        child: Semantics(
+          selected: selected,
+          enabled: enabled,
           child: SafeArea(
             top: false,
             bottom: false,
