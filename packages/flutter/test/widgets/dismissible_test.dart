@@ -735,6 +735,38 @@ void main() {
     expect(confirmDismissDirection, DismissDirection.endToStart);
   });
 
+  testWidgets('HitTestBehaviour defaults to opaque but also respects the specified behavior', (WidgetTester tester) async {
+    const ValueKey<int> first = ValueKey<int>(0);
+    const ValueKey<int> second = ValueKey<int>(1);
+    const ValueKey<int> third = ValueKey<int>(2);
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: ListView(
+        children: const <Widget>[
+          Dismissible(
+            key: first,
+            child: Text('text'),
+          ),
+          Dismissible(
+            hitTestBehavior: HitTestBehavior.translucent,
+            key: second,
+            child: Text('text'),
+          ),
+          Dismissible(
+            hitTestBehavior: HitTestBehavior.deferToChild,
+            key: third,
+            child: Text('text'),
+          ),
+        ],
+      ),
+    ));
+    
+    expect((tester.firstWidget(find.byKey(first)) as Dismissible).hitTestBehavior, HitTestBehavior.opaque);
+    expect((tester.firstWidget(find.byKey(second)) as Dismissible).hitTestBehavior, HitTestBehavior.translucent);
+    expect((tester.firstWidget(find.byKey(third)) as Dismissible).hitTestBehavior, HitTestBehavior.deferToChild);
+  });
+
   testWidgets('setState that does not remove the Dismissible from tree should throws Error', (WidgetTester tester) async {
     scrollDirection = Axis.vertical;
     dismissDirection = DismissDirection.horizontal;

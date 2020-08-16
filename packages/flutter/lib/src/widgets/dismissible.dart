@@ -190,6 +190,8 @@ class Dismissible extends StatefulWidget {
   final DragStartBehavior dragStartBehavior;
 
   /// How to behave during hit tests.
+  ///
+  /// This defaults to [HitTestBehavior.opaque].
   final HitTestBehavior hitTestBehavior;
 
   @override
