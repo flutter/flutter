@@ -20,10 +20,12 @@ _wrapper_sources = [
 
 # This code will be merged into .../common/cpp/client_wrapper for client use,
 # so uses header paths that assume the merged state. Include the header
-# header directory of the core wrapper files so these includes will work.
+# directories of the core wrapper files so these includes will work.
 config("relative_core_wrapper_headers") {
-  include_dirs =
-      [ "//flutter/shell/platform/common/cpp/client_wrapper/include/flutter" ]
+  include_dirs = [
+    "//flutter/shell/platform/common/cpp/client_wrapper",
+    "//flutter/shell/platform/common/cpp/client_wrapper/include/flutter",
+  ]
 }
 
 # Windows client wrapper build for internal use by the shell implementation.
