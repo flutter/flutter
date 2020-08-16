@@ -836,9 +836,7 @@ FILE: ../../../flutter/shell/platform/android/surface/android_surface_mock.h
 FILE: ../../../flutter/shell/platform/android/vsync_waiter_android.cc
 FILE: ../../../flutter/shell/platform/android/vsync_waiter_android.h
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/basic_message_channel_unittests.cc
-FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/binary_messenger_impl.h
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/byte_buffer_streams.h
-FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/core_implementations.cc
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/encodable_value_unittests.cc
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/engine_method_result.cc
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/event_channel_unittests.cc
