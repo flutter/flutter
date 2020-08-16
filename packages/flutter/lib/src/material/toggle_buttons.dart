@@ -19,7 +19,7 @@ import 'toggle_buttons_theme.dart';
 
 /// A set of toggle buttons.
 ///
-/// The list of [children] are laid out in a Flex along [direction]. The state of each button
+/// The list of [children] are laid out in a Wrap along [direction]. The state of each button
 /// is controlled by [isSelected], which is a list of bools that determine
 /// if a button is in an unselected or selected state. They are both
 /// correlated by their index in the list. The length of [isSelected] has to
@@ -154,7 +154,7 @@ import 'toggle_buttons_theme.dart';
 class ToggleButtons extends StatelessWidget {
   /// Creates a set of toggle buttons.
   ///
-  /// It displays its widgets provided in a [List] of [children] in a Flex along [direction].
+  /// It displays its widgets provided in a [List] of [children] in a Wrap along [direction].
   /// The state of each button is controlled by [isSelected], which is a list
   /// of bools that determine if a button is in an active, disabled, or
   /// selected state. They are both correlated by their index in the list.
